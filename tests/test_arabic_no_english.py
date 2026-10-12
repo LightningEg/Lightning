@@ -189,3 +189,34 @@ def test_arabic_pages_use_the_mirrored_stylesheets_and_they_match_their_source(s
     english = english_client.get("/").text
     assert "/static/style.css" in english and ".rtl.css" not in english
     english_client.post("/settings/locale", data={"locale": "ar"}, follow_redirects=False)  # the sample is shared
+
+
+@pytest.mark.parametrize("phone", [False, True], ids=["pc", "phone"])
+@pytest.mark.parametrize("line, action, shown", [
+    ("Borrowed from Mohab phone", "hand-back", "مستعار من Mohab phone"),
+    ("Lent to Office PC · read only", "", "معار لـ Office PC · للقراءة فقط"),
+    ("Read only on this PC: the ledger is going home or needs repair.", "", "للقراءة فقط على الكمبيوتر ده"),
+    ("Office PC handed the ledger back. Checking it…", "take-back", "Office PC رجّع السجل"),
+    ("This profile's lending record is missing or damaged, so it opens read only: a PC may hold the ledger. See Devices.",
+     "take-back", "سجل إعارة الملف ده"),
+], ids=["borrowed", "lent", "going-home", "returning", "record-missing"])
+def test_arabic_lending_banner_is_translated_and_keeps_typed_device_names(sample, phone, line, action, shown):
+    """The status line under the header while a ledger is borrowed or lent (set by the profile gate, so no
+    encrypted profile is needed here); the device names are what the person typed and stay as typed."""
+    c, _ = sample
+    inner = create_app(c)
+
+    async def lending_app(scope, receive, send):
+        if scope["type"] == "http":
+            scope.setdefault("state", {}).update(phone=phone, device_line=line, device_action=action,
+                                                 session_token="t")
+        await inner(scope, receive, send)
+
+    client = TestClient(lending_app)
+    assert client.post("/settings/locale", data={"locale": "ar"}, follow_redirects=False).status_code == 303
+    page = client.get("/").text
+    banner = re.search(r'<div class="flash device-line".*?</div>', page, re.S).group(0)
+    assert shown in banner
+    assert not [w for w in LATIN.findall(re.sub(r"<[^>]+>", " ", banner)) if w not in ("Mohab", "phone", "Office", "PC")]
+    assert ("رجّع للهاتف" in banner) == (action == "hand-back")
+    assert ("الأجهزة" in banner) == (action == "take-back")

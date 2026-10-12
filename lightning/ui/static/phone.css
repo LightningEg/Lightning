@@ -92,6 +92,9 @@ html.phone.keyboard-open .phone-tabbar, html.phone.sheet-open .phone-tabbar { di
 .phone .overview-split { display: grid; gap: 16px; }
 .phone .flash { margin: 12px 0; }
 .phone .flash.device-line { flex-direction: column; align-items: stretch; }
+.phone .main .flash.device-line { margin: 12px 0; padding: 14px 16px; overflow-wrap: anywhere; }
+.phone .flash.device-line form { display: block; }
+.phone .flash.device-line .btn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 48px; }
 
 /* C12: nothing scrolls sideways. Tables become rows (C07.2, "Any table of figures"); charts fit the card. */
 .phone svg { max-width: 100%; }
@@ -387,8 +390,8 @@ main.phone-content { counter-reset: picked; }
 
 /* Arabic phone (C03, C04): the four period choices carry longer words, so the month stepper keeps its arrows and its
    date instead of being squeezed to nothing. The rest of the mirroring is phone.rtl.css, built from this file. */
-html.phone[dir="rtl"] .period-buttons:has(.period-month-seg) { display: flex; }
-html.phone[dir="rtl"] .period-buttons:has(.period-month-seg) > * { flex: 1 1 auto; justify-content: center; }
-html.phone[dir="rtl"] .period-buttons:has(.period-month-seg) .period-button:not(.period-month-seg):not(#_) { padding: 0 6px; font-size: 13px; }
+html.phone[dir="rtl"] .period-buttons { display: flex; }
+html.phone[dir="rtl"] .period-buttons > * { flex: 1 1 auto; justify-content: center; }
+html.phone[dir="rtl"] .period-buttons .period-button:not(.period-month-seg):not(#_) { padding: 0 6px; font-size: 13px; }
 html.phone[dir="rtl"] .period-buttons:has(.period-month-seg) .period-month-seg { min-width: max-content; }
 html.phone[dir="rtl"] .period-month-seg .period-step:not(#_):not(.x_) { flex: none; width: 22px; }
