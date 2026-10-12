@@ -6,6 +6,7 @@ from fastapi import APIRouter, Request
 
 from lightning.categories.domain import Movement
 from lightning.core.errors import LightningError
+from lightning.rules.engine import TEXT_OPS
 from lightning.rules.service import MAX_PARTS
 
 from ..web import container, redirect, render
@@ -33,7 +34,8 @@ async def rules_page(request: Request):
     c = container(request)
     token = str(request.query_params.get("undo", ""))
     rows = [{"rule": rule, **c.rules.describe(rule)} for rule in c.rules.list()]
-    return render(request, "rules/index.html", rows=rows, undo=token if c.rules.can_undo(token) else "")
+    return render(request, "rules/index.html", rows=rows, undo=token if c.rules.can_undo(token) else "",
+                  suggestions=c.rules.suggestions())
 
 
 @router.get("/new")
@@ -42,7 +44,17 @@ async def new_rule(request: Request):
     values = c.rules.form_values()
     for key in ("counterparty", "category_id"):
         values[key] = str(request.query_params.get(key, "") or values[key])
+    if request.query_params.get("counterparty_op") in TEXT_OPS:  # a suggestion names the counterparty exactly
+        values["counterparty_op"] = request.query_params["counterparty_op"]
     return _form(request, c, values)
+
+
+@router.post("/suggestions/dismiss")
+async def dismiss_suggestion(request: Request):
+    c = container(request)
+    form = await request.form()
+    c.rules.dismiss_suggestion(str(form.get("name", "")))
+    return redirect("/rules", "Suggestion dismissed. It will not come back.")
 
 
 @router.post("")

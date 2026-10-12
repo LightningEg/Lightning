@@ -304,7 +304,7 @@ The reference apps are YNAB, Monarch, Copilot, Simplifi, Rocket Money, Lunch Mon
 |---|---|---|---|
 | 1 | Capture on the phone in seconds | Say (voice, SMS), Copilot, Monarch mobile | Cash and Vodafone Cash spending is forgotten unless logged on the spot. Say's users love exactly this; it is where Lightning loses today. Planned: [Multiple devices](proposals/multiple_devices.md) |
 | 2 | Automatic transaction feed | Bank sync in Monarch, YNAB; bank SMS in Say, Qershnat | Import is the heaviest step. There is no Egyptian aggregator, so parsing bank SMS or e-statement PDFs and Excel files (Upcoming projects #17) is the cheaper route. Their users' complaint to avoid: SMS entries that miss or invent a spend, so every parsed message is reviewed before it posts |
-| 3 | Learned categorization rules | Monarch, Copilot, Lunch Money, Actual Budget | Rules with conditions are built (Upcoming projects #5); still missing: suggesting a rule from what you file, so a first import needs one decision per distinct name |
+| 3 | Learned categorization rules | Monarch, Copilot, Lunch Money, Actual Budget | Rules with conditions are built (Upcoming projects #5), and Settings › Rules and Needs you suggest a rule from what you file (built 2026-10-12) |
 | 4 | ~~One review inbox~~ Done 2026-10-05 | Monarch, Copilot "to review" | Needs you now lists every waiting statement and uncategorized activity; recurring suggestions wait for the owner's answer |
 | 5 | Reminders | Monarch, Rocket Money, Simplifi | A user who doesn't open the app never sees a due bill |
 | 6 | Multi-currency | Lunch Money, YNAB, Wallet | Many Egyptians keep USD savings or earn USD. Upcoming projects #15 (FX revaluation) and #16 (US stocks) |
@@ -386,7 +386,7 @@ Features worth building, each with the app it came from (added 2026-10-05). Unle
 | # | Project | Idea from | What it would do |
 |---|---|---|---|
 | 4 | **Undo and redo** | **Actual Budget** (20 steps over every change); Say and Masarifi users ask to edit and delete | Undo the last edit, delete or import, not only bulk rules and a skipped payment |
-| 5 | **Rules with conditions** | **Actual Budget** (rules engine) | **Built 2026-10-06:** Settings › Rules (Glossary › Rule; Architecture › Default category for a counterparty). Still open: suggesting a rule from what you file, and a rule that renames the counterparty |
+| 5 | **Rules with conditions** | **Actual Budget** (rules engine) | **Built 2026-10-06:** Settings › Rules (Glossary › Rule; Architecture › Default category for a counterparty). **Suggested rules built 2026-10-12** (Architecture › Default category for a counterparty). Still open: a rule that renames the counterparty |
 | 6 | **Layered import match and a locked checked month** | **Actual Budget** | Match by bank reference first, then by amount and nearest date; a month checked against the bank is never overwritten by an import; merge two transactions. The same match serves SMS against CSV |
 | 7 | **Weekend-aware schedules** | **Actual Budget** ("skip weekend", amount ranges) | **Built 2026-10-06:** a Friday or Saturday due date moves to Thursday or Sunday (Architecture › Cash planning contract); payments already match within an amount range. Still open: public holidays, from a dated list in the market data pack |
 | 8 | **Fill this month** | **Actual Budget** (budget templates) | **Built 2026-10-05:** review base-limit proposals from last month or scheduled Bills and Subscriptions, or view reserve-goal needs separately; edit and apply selected amounts for this month only |

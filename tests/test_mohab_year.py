@@ -822,7 +822,8 @@ def test_paying_from_the_overview_moves_net_worth_only_by_the_salary(mohab):
     before = mohab.answers["needs_you"].figure("Net worth Excludes money held for others")
     after = mohab.answers["paid_from_overview"].figure("Net worth Excludes money held for others")
     assert after - before == D("45000")  # rent and the loan were already owed
-    assert mohab.answers["paid_from_overview"].shows("Nothing needs you today")
+    paid = mohab.answers["paid_from_overview"]   # no payment waits any more; only the rules his filing suggests
+    assert not paid.shows("Bill due:") and not paid.shows("Loan payment due:") and paid.shows("rules suggested from what you filed")
 
 
 def test_a_mistake_is_fixed_in_place_and_a_double_entry_deleted(mohab):

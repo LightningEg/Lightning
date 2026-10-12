@@ -80,3 +80,21 @@ class RuleRepository:
             "WHERE t.status='POSTED' AND t.type IN ('IN','OUT') AND l.category_id IS NOT NULL AND l.owner_id IS NULL "
             "GROUP BY t.id HAVING categories=1 ORDER BY t.date DESC, t.id DESC")
         return [dict(row) | {"amount": from_e6(row["amount_e6"])} for row in rows]
+
+    def filed_by_name(self) -> list[dict]:
+        """How often each counterparty name was filed under each category: posted, owned money-in and money-out
+        transactions with one non-system category. One aggregate query, names compared without case; each row
+        also carries the category set on the counterparty of that name (``default_category_id``)."""
+        rows = self.db.all(
+            "SELECT f.name, f.category_id, f.n, (SELECT d.default_category_id FROM counterparties d"
+            " WHERE d.name=f.name COLLATE NOCASE LIMIT 1) default_category_id FROM ("
+            " SELECT MAX(name) name, category_id, COUNT(*) n FROM ("
+            "  SELECT t.id, COALESCE(c.name, NULLIF(TRIM(t.counterparty), '')) name, MIN(l.category_id) category_id"
+            "  FROM transactions t JOIN ledger_entries l ON l.transaction_id=t.id"
+            "  JOIN categories k ON k.id=l.category_id AND k.is_system=0"
+            "  LEFT JOIN counterparties c ON c.id=t.counterparty_id"
+            "  WHERE t.status='POSTED' AND t.type IN ('IN','OUT') AND l.category_id IS NOT NULL"
+            "  AND NOT EXISTS (SELECT 1 FROM ledger_entries o WHERE o.transaction_id=t.id AND o.owner_id IS NOT NULL)"
+            "  GROUP BY t.id HAVING COUNT(DISTINCT l.category_id)=1)"
+            " WHERE name IS NOT NULL GROUP BY name COLLATE NOCASE, category_id) f")
+        return [dict(row) for row in rows]
