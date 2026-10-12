@@ -315,6 +315,28 @@ async def adjust_to_bank(request: Request, account_id: int):
     return redirect(f"/accounts/{account_id}", f"Balance adjustment {txn.ref} posted. The account now matches your bank.")
 
 
+@router.post("/{account_id:int}/reconcile/lock")
+async def lock_checked_month(request: Request, account_id: int):
+    """The balance matched and the user confirms: nothing on or before that date can change until unlocked."""
+    c = container(request)
+    form = await request.form()
+    raw_date, raw_balance = str(form.get("date", "")), str(form.get("balance", ""))
+    try:
+        through = c.reconciliation.validate_date(raw_date)
+        c.reconciliation.confirm(account_id, through, c.reconciliation.parse_bank_balance(raw_balance))
+    except LightningError as exc:
+        return _bank_check_page(request, c, account_id, raw_date, raw_balance, exc.message, status_code=400)
+    return redirect(f"/accounts/{account_id}", f"Checked against the bank through {through}.")
+
+
+@router.post("/{account_id:int}/unlock")
+async def unlock_checked_month(request: Request, account_id: int):
+    c = container(request)
+    c.accounts.get(account_id)
+    c.reconciliation.unlock(account_id)
+    return redirect(f"/accounts/{account_id}", "Unlocked. The account can be edited again.")
+
+
 @router.post("/{account_id:int}/investment-entry")
 async def investment_entry(request: Request, account_id: int):
     """Add a stock/fund trade or dividend inline from this account's register."""

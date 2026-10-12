@@ -14,7 +14,7 @@ from lightning.core.dates import now_iso
 from .connection import Database
 
 _BUNDLED_MIGRATIONS_DIR = Path(__file__).parent / "migrations"
-BUNDLED_LATEST_VERSION = 52
+BUNDLED_LATEST_VERSION = 53
 MIGRATIONS_DIR = _BUNDLED_MIGRATIONS_DIR
 _FILE_RE = re.compile(r"^(\d{4})_([a-z0-9_]+)\.sql$")
 _TRANSACTION_RE = re.compile(r"^(?:BEGIN|COMMIT|END|ROLLBACK|SAVEPOINT|RELEASE)\b", re.I)

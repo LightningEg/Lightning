@@ -29,6 +29,7 @@ from .repository import TransactionRepository
 from .tags import normalize as normal_tag, tags_in
 
 EDITABLE_TYPES = {DocType.IN, DocType.OUT, DocType.TRF}
+MONTH_LOCKED = "This month was checked against the bank. Unlock it first."
 
 
 class TransactionService:
@@ -612,6 +613,7 @@ class TransactionService:
             return self.get(txn_id)
         if t.is_void:
             return t
+        self._check_not_locked(t.lines, t.date)
         with self.db.transaction():
             self.repo.set_status(t.id, TxnStatus.VOID)
             custody_keys = (self._ownership_cash_keys(t.lines) if self._is_ownership_transaction(t)
@@ -633,6 +635,8 @@ class TransactionService:
         if not pending:
             return 0
         lines = [line for txn in pending for line in txn.lines]
+        for txn in pending:
+            self._check_not_locked(txn.lines, txn.date)
         with self.db.transaction():
             for txn in pending:
                 if txn.type == DocType.VAL and txn.source == TxnSource.SYSTEM:
@@ -664,6 +668,7 @@ class TransactionService:
                 asset = self.assets.get_asset(line.asset_id)
                 if self.repo.opening_txn_id(line.account_id, None if asset.is_cash else asset.id, exclude_id=t.id):
                     raise ValidationError("This account already has another opening balance for that.")
+        self._check_not_locked(new_lines=t.lines, new_date=t.date)
         with self.db.transaction():
             if t.type == DocType.VAL and t.source == TxnSource.SYSTEM:
                 post = self.db.one("SELECT period_id,account_id FROM reevaluation_account_posts WHERE transaction_id=?",
@@ -844,6 +849,7 @@ class TransactionService:
     def _create(self, doc_type: DocType, day, lines: list[PostingLine], description: str, counterparty: str,
                 notes: str, source: TxnSource, validate_all_cash: bool = False) -> Transaction:
         with self.db.transaction():
+            self._check_not_locked(new_lines=lines, new_date=fmt_date(day))
             self._validate_owner_balances(lines, day, force_brokerage_cash=doc_type == DocType.BUY,
                                           validate_all_cash=validate_all_cash,
                                           ignore_before_day=validate_all_cash)
@@ -870,6 +876,7 @@ class TransactionService:
     def _update(self, current: Transaction, day, lines: list[PostingLine], description: str, counterparty: str,
                 notes: str, validate_all_cash: bool = False) -> Transaction:
         with self.db.transaction():
+            self._check_not_locked(current.lines, current.date, lines, fmt_date(day))
             self._validate_owner_balances(lines, day, exclude_txn_id=current.id,
                                          force_brokerage_cash=current.type == DocType.BUY,
                                          validate_all_cash=validate_all_cash,
@@ -909,6 +916,28 @@ class TransactionService:
             self.audit.record("transaction", current.id, "edit", f"Edited {current.ref}",
                               before=self._snapshot(current), after=self._snapshot(after))
         return self.get(current.id)
+
+    # ======================================================================
+    # Month lock: a month checked against the bank cannot change
+    # ======================================================================
+    def _check_not_locked(self, old_lines=(), old_date: str = "", new_lines=(), new_date: str = "") -> None:
+        """Refuse when a cash line of a checked account is on or before its lock date, before or after the change.
+
+        Only cash lines count: the check compares cash with the bank. A change that leaves every posting and the
+        date as they were (notes, counterparty) is not a change to the checked figures.
+        """
+        def signature(lines):
+            return [(l.account_id, l.asset_id, l.quantity, l.effect, l.category_id) for l in lines]
+        if old_lines and new_lines and old_date == new_date and signature(old_lines) == signature(new_lines):
+            return
+        locks = self.repo.locked_through({l.account_id for l in (*old_lines, *new_lines)})
+        if not locks:
+            return
+        for lines, day in ((old_lines, old_date), (new_lines, new_date)):
+            for line in lines:
+                if line.account_id in locks and day and str(day) <= locks[line.account_id] \
+                        and self.assets.get_asset(line.asset_id).is_cash:
+                    raise ValidationError(MONTH_LOCKED)
 
     def _editable(self, txn_id: int, allowed: set[DocType]) -> Transaction:
         t = self.get(txn_id)

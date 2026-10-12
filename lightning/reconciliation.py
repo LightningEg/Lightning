@@ -3,7 +3,7 @@
 The user types the ending balance from the bank (or wallet app) on a date. Lightning compares it with the
 account's own cash balance on that date. A small difference is settled with one balance adjustment, posted as
 ordinary Money out (Other Personal) or Money in (Other Income), so it counts in spending and income like any
-other row. A big difference is never adjusted: the user reviews the register or reimports the statement.
+other row. A confirmed match (or a settled difference) locks the account through that date. A big difference is never adjusted: the user reviews the register or reimports the statement.
 """
 
 from __future__ import annotations
@@ -59,6 +59,30 @@ class ReconciliationService:
         limit = max(SMALL_FLOOR, (abs(bank_balance) * SMALL_SHARE).quantize(Decimal("0.01")))
         return BalanceCheck(through, bank_balance, mine, bank_balance - mine, limit)
 
+    def locked_through(self, account_id: int) -> str:
+        """The date this account was last confirmed against the bank ("" when never). Nothing on or before it can change."""
+        return self.db.scalar("SELECT date FROM reconciled_through WHERE account_id=?", (account_id,)) or ""
+
+    def lock(self, account_id: int, through: str) -> str:
+        """Remember the account is checked through ``through``. The lock only moves forward; unlock clears it."""
+        through = self.validate_date(through)
+        if through > self.locked_through(account_id):
+            with self.db.transaction():
+                self.db.execute(
+                    "INSERT INTO reconciled_through(account_id, date) VALUES(?, ?) "
+                    "ON CONFLICT(account_id) DO UPDATE SET date=excluded.date", (account_id, through))
+        return self.locked_through(account_id)
+
+    def confirm(self, account_id: int, through: str, bank_balance: Decimal) -> str:
+        """The user confirms the account matches the bank on ``through``: lock it through that day."""
+        if not self.check(account_id, through, bank_balance).matches:
+            raise ValidationError("The account does not match your bank on that date yet.", "balance")
+        return self.lock(account_id, through)
+
+    def unlock(self, account_id: int) -> None:
+        with self.db.transaction():
+            self.db.execute("DELETE FROM reconciled_through WHERE account_id=?", (account_id,))
+
     def adjust(self, account_id: int, through: str, bank_balance: Decimal):
         """Post the small difference so the account matches the bank on ``through``."""
         result = self.check(account_id, through, bank_balance)
@@ -70,11 +94,14 @@ class ReconciliationService:
         notes = f"Bank showed {bank_balance:,.2f} on {through}"
         if result.difference > ZERO:
             category = self.categories.get_by_code(EXCESS_CATEGORY)
-            return self.transactions.record_inflow(through, account_id, result.difference, category.id,
+            txn = self.transactions.record_inflow(through, account_id, result.difference, category.id,
+                                                  counterparty=ADJUSTMENT, notes=notes)
+        else:
+            category = self.categories.get_by_code(SHORTFALL_CATEGORY)
+            txn = self.transactions.record_outflow(through, account_id, -result.difference, category.id,
                                                    counterparty=ADJUSTMENT, notes=notes)
-        category = self.categories.get_by_code(SHORTFALL_CATEGORY)
-        return self.transactions.record_outflow(through, account_id, -result.difference, category.id,
-                                                counterparty=ADJUSTMENT, notes=notes)
+        self.lock(account_id, through)   # the adjustment settles the difference: a confirmed match
+        return txn
 
     @staticmethod
     def parse_bank_balance(value: str) -> Decimal:

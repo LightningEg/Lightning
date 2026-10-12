@@ -264,6 +264,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         request, "register.html", status_code=status_code,
         account=account,
         today=fmt_date(today()),
+        locked_through=c.reconciliation.locked_through(account.id) if account else "",
         account_balance=c.reporting.account_balance(account.id, today()) if account else None,
         manual_asset_value=OtherAssetValuationRepository(c.db).latest(account.id, fmt_date(today())) if account and account.account_type == AccountType.OTHER_ASSET else None,
         group=c.accounts.reporting_group(account) if account else "",

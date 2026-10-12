@@ -119,6 +119,15 @@ class TransactionRepository:
             (t.date, t.description, t.counterparty, t.status.value, t.notes, now_iso(), counterparty_id, t.id),
         )
 
+    def locked_through(self, account_ids) -> dict[int, str]:
+        """The date each of these accounts was checked against the bank through (accounts never checked are left out)."""
+        ids = sorted({int(a) for a in account_ids})
+        if not ids:
+            return {}
+        marks = ",".join("?" * len(ids))
+        return {int(r["account_id"]): r["date"] for r in self.db.all(
+            f"SELECT account_id, date FROM reconciled_through WHERE account_id IN ({marks})", tuple(ids))}
+
     def replace_lines(self, txn_id: int, date: str, lines: list[PostingLine]) -> None:
         self.db.execute("DELETE FROM ledger_entries WHERE transaction_id = ?", (txn_id,))
         self._insert_lines(txn_id, date, lines)
