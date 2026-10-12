@@ -923,12 +923,18 @@ class TransactionService:
     def _check_not_locked(self, old_lines=(), old_date: str = "", new_lines=(), new_date: str = "") -> None:
         """Refuse when a cash line of a checked account is on or before its lock date, before or after the change.
 
-        Only cash lines count: the check compares cash with the bank. A change that leaves every posting and the
-        date as they were (notes, counterparty) is not a change to the checked figures.
+        Only cash lines count: the check compares cash with the bank. A change that leaves the date and each
+        account's cash per effect as they were (category, notes, counterparty, split allocation, non-cash lines)
+        is not a change to the checked figures.
         """
-        def signature(lines):
-            return [(l.account_id, l.asset_id, l.quantity, l.effect, l.category_id) for l in lines]
-        if old_lines and new_lines and old_date == new_date and signature(old_lines) == signature(new_lines):
+        def cash_totals(lines):
+            totals: dict = {}
+            for l in lines:
+                if self.assets.get_asset(l.asset_id).is_cash:
+                    key = (l.account_id, l.asset_id, l.effect)
+                    totals[key] = totals.get(key, ZERO) + l.quantity
+            return {k: v for k, v in totals.items() if v != ZERO}
+        if old_lines and new_lines and old_date == new_date and cash_totals(old_lines) == cash_totals(new_lines):
             return
         locks = self.repo.locked_through({l.account_id for l in (*old_lines, *new_lines)})
         if not locks:

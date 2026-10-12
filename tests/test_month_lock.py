@@ -43,8 +43,6 @@ def test_edit_void_delete_create_are_refused_on_or_before_the_date(locked):
     with pytest.raises(ValidationError, match=REFUSED):
         c.transactions.delete_many([early.id])
     with pytest.raises(ValidationError, match=REFUSED):
-        c.transactions.set_category([early.id], c.categories.get_by_code("EXP.PERSONAL.OTHER").id)
-    with pytest.raises(ValidationError, match=REFUSED):
         c.transactions.record_outflow("2026-09-30", cib, D("5"), food)
     assert not c.transactions.get(early.id).is_void and c.reconciliation.balance(cib, "2026-09-30") == D("49900")
 
@@ -118,3 +116,26 @@ def test_the_check_page_offers_the_lock_when_it_matches(c, setup):
     assert c.reconciliation.locked_through(cib) == "2026-09-30"
     wrong = client.post(f"/accounts/{cib}/reconcile/lock", data={"date": "2026-10-30", "balance": "1"})
     assert wrong.status_code == 400
+
+
+def test_filing_and_splitting_a_checked_row_is_allowed_but_not_changing_its_cash(locked):
+    c, cib, food, early, _ = locked
+    other = c.categories.get_by_code("EXP.PERSONAL.OTHER").id
+    c.transactions.set_category([early.id], other)
+    assert c.transactions.get(early.id).lines[0].category_id == other
+    c.transactions.update_expense_split(early.id, [(food, D("60")), (other, D("40"))])
+    assert len(c.transactions.get(early.id).lines) == 2
+    with pytest.raises(ValidationError, match=REFUSED):
+        c.transactions.update_money(early.id, "2026-09-10", cib, D("90"), food)
+
+
+def test_a_rule_applied_to_the_past_refiles_checked_rows(locked):
+    c, cib, food, early, _ = locked
+    util = c.categories.get_by_code("EXP.PERSONAL.UTILITIES").id
+    c.transactions.update_metadata(early.id, "2026-09-10", "Vodafone", "")
+    c.reconciliation.unlock(cib)
+    c.reconciliation.confirm(cib, "2026-09-30", c.reconciliation.balance(cib, "2026-09-30"))
+    c.rules.save({"counterparty": "Vodafone", "category_id": str(util)})
+    rule_id = c.rules.list()[0].id
+    count, _ = c.rules.apply_past(rule_id)
+    assert count == 1 and c.transactions.get(early.id).lines[0].category_id == util
