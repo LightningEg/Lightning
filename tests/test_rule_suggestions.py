@@ -1,13 +1,10 @@
 """Rules suggested from what the user files: a counterparty filed the same way at least 3 times (and 90% of
-its filings) with no rule or default category saying so yet. Dismissed names never return; Needs you and
-Settings › Rules show them; Create rule opens the rule form filled."""
+its filings) with no rule or default category saying so yet. Dismissed names never return; Settings › Rules shows them; Create rule opens the rule form filled."""
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
-from lightning.core.dates import today
 from lightning.ui.web import create_app
-from lightning.workflows.review import ReviewInbox
 
 
 def _cats(c):
@@ -22,10 +19,6 @@ def _file(c, account, category, name, times, start=1):
 
 def _names(c):
     return [s.name for s in c.rules.suggestions()]
-
-
-def _rows(c):
-    return [i for i in ReviewInbox(c).items(today()) if "suggested" in i["label"]]
 
 
 def test_three_filings_make_a_suggestion_and_two_do_not(c, setup):
@@ -81,16 +74,18 @@ def test_voided_transfer_and_held_for_others_lines_are_not_counted(c, setup):
     assert _names(c) == []
 
 
-def test_needs_you_counts_the_suggestions_and_the_page_creates_the_rule(c, setup):
+def test_a_rule_with_a_different_category_also_hides_the_suggestion(c, setup):
     cib, cats = setup[0]["cib"].id, _cats(c)
-    assert not _rows(c)
-    _file(c, cib, cats["EXP.PERSONAL.FOOD"], "Talabat", 3)
-    [row] = _rows(c)
-    assert row["label"] == "1 rule suggested from what you filed" and row["href"] == "/rules"
-    _file(c, cib, cats["EXP.PERSONAL.UTILITIES"], "Vodafone", 4)
-    [row] = _rows(c)
-    assert row["label"] == "2 rules suggested from what you filed"
+    _file(c, cib, cats["EXP.PERSONAL.FOOD"], "Vodafone", 3)
+    assert _names(c) == ["Vodafone"]
+    c.rules.save({"counterparty": "vodafone", "category_id": str(cats["EXP.PERSONAL.UTILITIES"])})
+    assert _names(c) == []
 
+
+def test_the_rules_page_lists_creates_and_dismisses(c, setup):
+    cib, cats = setup[0]["cib"].id, _cats(c)
+    _file(c, cib, cats["EXP.PERSONAL.FOOD"], "Talabat", 3)
+    _file(c, cib, cats["EXP.PERSONAL.UTILITIES"], "Vodafone", 4)
     client = TestClient(create_app(c), base_url="http://127.0.0.1")
     page = client.get("/rules").text
     assert "Suggested rules" in page and "Vodafone" in page and "Create rule" in page
@@ -100,5 +95,5 @@ def test_needs_you_counts_the_suggestions_and_the_page_creates_the_rule(c, setup
                                         "category_id": str(cats["EXP.PERSONAL.UTILITIES"])}, follow_redirects=False)
     assert saved.status_code == 303 and _names(c) == ["Talabat"]
     gone = client.post("/rules/suggestions/dismiss", data={"name": "Talabat"}, follow_redirects=False)
-    assert gone.status_code == 303 and _names(c) == [] and not _rows(c)
+    assert gone.status_code == 303 and _names(c) == []
     assert "Suggested rules" not in client.get("/rules").text

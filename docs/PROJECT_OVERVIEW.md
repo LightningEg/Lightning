@@ -304,7 +304,7 @@ The reference apps are YNAB, Monarch, Copilot, Simplifi, Rocket Money, Lunch Mon
 |---|---|---|---|
 | 1 | Capture on the phone in seconds | Say (voice, SMS), Copilot, Monarch mobile | Cash and Vodafone Cash spending is forgotten unless logged on the spot. Say's users love exactly this; it is where Lightning loses today. Planned: [Multiple devices](proposals/multiple_devices.md) |
 | 2 | Automatic transaction feed | Bank sync in Monarch, YNAB; bank SMS in Say, Qershnat | Import is the heaviest step. There is no Egyptian aggregator, so parsing bank SMS or e-statement PDFs and Excel files (Upcoming projects #17) is the cheaper route. Their users' complaint to avoid: SMS entries that miss or invent a spend, so every parsed message is reviewed before it posts |
-| 3 | Learned categorization rules | Monarch, Copilot, Lunch Money, Actual Budget | Rules with conditions are built (Upcoming projects #5), and Settings › Rules and Needs you suggest a rule from what you file (built 2026-10-12) |
+| 3 | Learned categorization rules | Monarch, Copilot, Lunch Money, Actual Budget | Rules with conditions are built (Upcoming projects #5), and Settings › Rules suggests a rule from what you file (built 2026-10-12) |
 | 4 | ~~One review inbox~~ Done 2026-10-05 | Monarch, Copilot "to review" | Needs you now lists every waiting statement and uncategorized activity; recurring suggestions wait for the owner's answer |
 | 5 | Reminders | Monarch, Rocket Money, Simplifi | A user who doesn't open the app never sees a due bill |
 | 6 | Multi-currency | Lunch Money, YNAB, Wallet | Many Egyptians keep USD savings or earn USD. Upcoming projects #15 (FX revaluation) and #16 (US stocks) |

@@ -197,7 +197,7 @@ def _years_of_history(c, years):
 # in one read; reserve suggestions check the amount first): the pages then ran 80 to 550, and each
 # budget is about 1.3 times that.
 PAGE_READ_BUDGET = {
-    "/": 645,  # 645: Needs you reads the rule suggestions (2026-10-12; 640 before: the sample plan gained a yearly course and bonus, was 605 after the SMS check)
+    "/": 640,  # 640: the sample plan gained a yearly course and bonus (2026-10-07; was 605 after the SMS check)
     "/accounts/1": 120, "/transactions": 110, "/budget?period=month": 175,
     "/budget?period=all": 710, "/plan": 340, "/investments": 235, "/birdview/expenses?period=all": 230,
 }

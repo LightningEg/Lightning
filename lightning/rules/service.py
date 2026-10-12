@@ -158,6 +158,8 @@ class RuleService:
         for row in self.repo.filed_by_name():
             by_name.setdefault(row["name"].casefold(), []).append(row)
         dismissed, found = self._dismissed(), []
+        name_rules = [r for r in self.repo.rules() if all(c.field == "counterparty" for c in r.conditions)]
+        categories = {cat.id: cat for cat in self.categories.tree()}
         for key, rows in by_name.items():
             total = sum(r["n"] for r in rows)
             top = max(rows, key=lambda r: (r["n"], -r["category_id"]))
@@ -165,13 +167,10 @@ class RuleService:
                 continue
             if key in dismissed or top["default_category_id"] == top["category_id"]:
                 continue
-            if self.category_for_name(top["name"]) == top["category_id"]:
-                continue
-            try:
-                category = self.categories.get(top["category_id"])
-            except NotFoundError:
-                continue
-            if not category.active or category.is_system or category.depth < 2:
+            if engine.run(name_rules, {"counterparty": [top["name"]]}).category_id is not None:
+                continue  # a rule already files this name: a second one would conflict with it
+            category = categories.get(top["category_id"])
+            if category is None or not category.active or category.is_system or category.depth < 2:
                 continue
             found.append(Suggestion(top["name"], category.id, category.name, top["n"], Decimal(top["n"]) / total))
         return sorted(found, key=lambda s: (-s.count, s.name.casefold()))

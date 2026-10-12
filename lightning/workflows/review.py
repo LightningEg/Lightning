@@ -41,7 +41,6 @@ class ReviewInbox:
         items.extend(self._statements())
         items.extend(self._sms())
         items.extend(self._uncategorized())
-        items.extend(self._rule_suggestions())
         for reserve in c.reserves.list_active():
             if reserve.get("due_date") and reserve["due_date"] < fmt_date(on) and reserve["effective_allocated"] > ZERO:
                 items.append({"label": f"{reserve['name']} is past its date",
@@ -183,15 +182,6 @@ class ReviewInbox:
                                   f"#import-row-{batch['first_row_id']}",
                           "action": "Finish the import", "priority": 1})
         return found
-
-    def _rule_suggestions(self) -> list[dict]:
-        """Counterparties the user always files the same way, with no rule or default category saying so yet."""
-        count = len(self.c.rules.suggestions())
-        if not count:
-            return []
-        return [{"label": _plural(count, "rule suggested from what you filed", "rules suggested from what you filed"),
-                 "detail": "Make them rules, and imports and entries file themselves.",
-                 "href": "/rules", "action": "See suggestions", "priority": 2}]
 
     def _uncategorized(self) -> list[dict]:
         """Posted activity filed as Unaccounted: an import posted it before anyone chose a category."""
