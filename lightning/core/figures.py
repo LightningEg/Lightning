@@ -112,8 +112,8 @@ _TABLE = [
     ("investing_rate", "Investing rate", "The share of money in that you moved into investments, out of what you saved, so it is never more than the savings rate.",
      "Money added ÷ Money in"),
     ("average_monthly_income", "Average monthly income",
-     "Income in your chosen income categories, averaged over the last 3 or 6 completed months that had any "
-     "(Settings › Budget). Until a completed month has income, the income set up in Recurring stands in. "
+     "Income in your chosen income categories, averaged over the last 3 or 6 completed months (Settings › Budget). A month with no pay "
+     "counts as 0 once pay has started; months before the first pay are skipped. Until a completed month has income, the income set up in Recurring stands in. "
      "The budget, reserves and the cash forecast all use it."),
     ("average_monthly_spending", "Average monthly spending",
      "Money out in your budget categories, leaving out investments and one-off categories, averaged over the same "

@@ -262,3 +262,42 @@ def test_12_the_money_flow_chart_balances_when_a_refund_outweighs_spending(c, se
     left = sum(s["value"] for s in seen["s"] if s["value"] > 0)
     right = sum(t["value"] for t in seen["t"] if t["value"] > 0)
     assert left == right and any(s["label"] == "Refunds" for s in seen["s"])
+
+
+def test_a_payment_on_the_31st_returns_to_the_31st_after_a_short_month(c, setup, monkeypatch):
+    """Left open by the audit: already-paid used to restart the schedule on the clamped 28th, so the
+    bill stayed on the 28th for good. The intended day of the month survives the short month."""
+    from datetime import date
+    from lightning.planning.domain import PaymentStatus
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-02-10")
+    item = c.planning.create(kind="BILL", name="Rent", amount="1000", frequency="MONTHLY", start_date="2026-01-31")
+    assert c.planning.start_after_paid(item, date(2026, 2, 10)) == "2026-02-28"
+    left = [p.due_date for p in c.planning.payments(c.planning.get(item), "2026-05-31", date(2026, 2, 10))
+            if p.status != PaymentStatus.SKIPPED]
+    assert c.planning.get(item).start_date == "2026-01-31"
+    assert left == ["2026-02-28", "2026-03-31", "2026-04-30", "2026-05-31"]
+
+
+def test_already_paid_keeps_the_day_when_a_weekend_moves_the_payment(c, setup, monkeypatch):
+    """A Friday payment moved to Thursday by the weekend rule must not move the schedule's day."""
+    from datetime import date
+    from lightning.planning.schedule import payment_dates
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-10")
+    item = c.planning.create(kind="BILL", name="Gym", amount="500", frequency="MONTHLY",
+                             start_date="2026-09-16", weekend_move="BEFORE")
+    c.planning.start_after_paid(item, date(2026, 10, 10))
+    start = c.planning.get(item).start_date
+    assert start.endswith("-16"), start
+    assert payment_dates(c.planning.get(item), "2026-12-31")[-1][1] <= "2026-12-17"
+
+
+def test_a_month_without_pay_counts_as_zero_once_pay_has_started(c, setup):
+    """Between jobs: the empty month lowers Average monthly income; empty months before the first pay do not."""
+    accounts, cats = setup
+    salary, cib = cats["EXP.WORK.SALARY"], accounts["cib"]
+    for day in ("2026-07-01", "2026-08-01"):  # June (empty, before the first pay) is skipped
+        c.transactions.record_inflow(day, cib.id, "30000", salary.id, description="Salary")
+    average = c.budgets.income_average("2026-10")  # Jul, Aug, Sep: Sep has no pay
+    assert (average.amount, average.months_counted, average.first_month, average.last_month) == (
+        D("20000.00"), 3, "2026-07", "2026-09")
+    assert c.budgets.income_average("2026-09").months_counted == 2  # June before the first pay is not a zero

@@ -146,9 +146,10 @@ def test_observed_month_average_and_percentage_income_basis(b):
     c.transactions.record_inflow("2026-06-25", wallet, "10000", salary)
     c.settings.set("budget_income_categories", f"[{salary}]")
     c.settings.set("budget_income_months", "6")
-    assert c.budgets.budgeting_income("2026-09") == Decimal("10000")
+    # Pay in March and June only: the unpaid months after the first pay count as 0 (20,000 over six months).
+    assert c.budgets.budgeting_income("2026-09") == Decimal("3333.33")
     c.budgets.set_income_percentage(food, "2026-09", "10")
-    assert line(c.budgets.month_view("2026-09"), "EXP.PERSONAL.FOOD").budget == Decimal("1000")
+    assert line(c.budgets.month_view("2026-09"), "EXP.PERSONAL.FOOD").budget == Decimal("333.33")
 
 
 def test_owned_refunds_reduce_spending_but_custody_is_excluded(b):

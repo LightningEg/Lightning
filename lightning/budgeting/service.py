@@ -243,7 +243,8 @@ class BudgetService:
 
     def income_average(self, month: str) -> IncomeAverage:
         """Average monthly income: owned income in the chosen income categories, averaged over
-        the last 3 (or 6) completed months before `month` that had any. A manual amount in
+        the last 3 (or 6) completed months before `month`. A month with no pay counts as 0 once pay
+        has started (between jobs); months before the first pay are skipped. A manual amount in
         Settings replaces the average. Before any completed month has income, the income set up in
         Cash planning › Recurring stands in, so a new plan is checked from day one. The budget, reserves
         and the cash forecast all use this."""
@@ -260,40 +261,46 @@ class BudgetService:
                 return IncomeAverage(scheduled, 0, lookback, "", "", False, scheduled=True)
         end = parse_month(month)[0] - timedelta(days=1)
         last_month = month_of(end)
-        observed = []
+        window = []  # the completed months in the window, newest first
         for _ in range(lookback):
-            start, _ = parse_month(month_of(end))
-            if chosen:
-                marks = ",".join("?" for _ in chosen)
-                rows = self.db.all(
-                    "SELECT le.category_id,SUM(le.amount_base_e6) AS total_e6 "
-                    "FROM ledger_entries le JOIN transactions t ON t.id=le.transaction_id "
-                    "LEFT JOIN planned_payments pp ON pp.transaction_id=t.id AND pp.status='PAID' "
-                    "LEFT JOIN planned_items pi ON pi.id=pp.planned_item_id AND pi.kind='INCOME' "
-                    "WHERE t.status='POSTED' AND le.effect='INFLOW' AND le.owner_id IS NULL "
-                    "AND le.category_id NOT IN (SELECT id FROM categories WHERE code='EXP.SYSTEM.CUSTODY') "
-                    f"AND le.category_id IN ({marks}) "
-                    "AND CASE WHEN pi.id IS NOT NULL THEN substr(pp.due_date,1,7) "
-                    "ELSE substr(le.date,1,7) END=? GROUP BY le.category_id",
-                    (*chosen, month_of(end)),
-                )
-            else:
-                rows = []
-            included = [row for row in rows if by_id.get(row["category_id"]) and
-                        by_id[row["category_id"]].income_class is not None and
-                        by_id[row["category_id"]].code != "EXP.INVEST" and
-                        not any(word in by_id[row["category_id"]].code.casefold()
-                                for word in ("sale", "opening", "valuation"))]
-            if included:
-                observed.append(sum((from_e6(row["total_e6"]) for row in included), ZERO))
-            end = start - timedelta(days=1)
+            window.append(month_of(end))
+            end = parse_month(month_of(end))[0] - timedelta(days=1)
+        first_window = window[-1]
+        totals: dict[str, Decimal] = {}
+        if chosen:
+            marks = ",".join("?" for _ in chosen)
+            month_expr = ("CASE WHEN pi.id IS NOT NULL THEN substr(pp.due_date,1,7) "
+                          "ELSE substr(le.date,1,7) END")
+            rows = self.db.all(
+                f"SELECT {month_expr} AS m,le.category_id,SUM(le.amount_base_e6) AS total_e6 "
+                "FROM ledger_entries le JOIN transactions t ON t.id=le.transaction_id "
+                "LEFT JOIN planned_payments pp ON pp.transaction_id=t.id AND pp.status='PAID' "
+                "LEFT JOIN planned_items pi ON pi.id=pp.planned_item_id AND pi.kind='INCOME' "
+                "WHERE t.status='POSTED' AND le.effect='INFLOW' AND le.owner_id IS NULL "
+                "AND le.category_id NOT IN (SELECT id FROM categories WHERE code='EXP.SYSTEM.CUSTODY') "
+                f"AND le.category_id IN ({marks}) AND {month_expr}<=? GROUP BY m,le.category_id",
+                (*chosen, last_month),
+            )
+            for row in rows:
+                category = by_id.get(row["category_id"])
+                if (category and category.income_class is not None and category.code != "EXP.INVEST"
+                        and not any(word in category.code.casefold() for word in ("sale", "opening", "valuation"))):
+                    totals[row["m"]] = totals.get(row["m"], ZERO) + from_e6(row["total_e6"])
+        first_income = min(totals) if totals else None  # the first month that ever had chosen income
+        observed = []
+        for name in window:  # a month with no pay counts as 0 once pay has started (between jobs)
+            if name in totals:
+                observed.append(totals[name])
+            elif first_income is not None and name > first_income:
+                observed.append(ZERO)
+        start_month = first_window
         if not observed:
             scheduled = self.scheduled_income()
             if scheduled is not None:
                 return IncomeAverage(scheduled, 0, lookback, "", "", False, scheduled=True)
-            return IncomeAverage(None, 0, lookback, month_of(end + timedelta(days=1)), last_month, False)
+            return IncomeAverage(None, 0, lookback, start_month, last_month, False)
         amount = (sum(observed, ZERO) / len(observed)).quantize(Decimal("0.01"))
-        return IncomeAverage(amount, len(observed), lookback, month_of(end + timedelta(days=1)), last_month, False)
+        return IncomeAverage(amount, len(observed), lookback, start_month, last_month, False)
 
     def _average_months(self) -> int:
         """3 or 6 completed months, from Settings › Budget; both averages use it."""
