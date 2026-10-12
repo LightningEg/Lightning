@@ -5,7 +5,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 **How to log a change**
 
 - Add one entry at the top of `## [Unreleased]
-- 2026-10-12 · Claude: A month checked against the bank is locked (migration 0053 `reconciled_through`): confirming a match or adjusting locks the account; edit, void, delete, create, restore and import rows on or before it are refused or skipped until the account page's Unlock. Roundtrip fixture rebuilt for schema 53 (`7415034f564bb966`).
+- 2026-10-12 · Claude: A month checked against the bank is locked (`0053_reconciled_through.sql`): confirming a match or adjusting locks the account; edit, void, delete, create, restore and import rows on or before it are refused or skipped until the account page's Unlock. Roundtrip fixture rebuilt for schema 53 (`7415034f564bb966`).
 - 2026-10-12 · Claude: Average monthly income counts a completed month with no pay as 0 once pay has started (between jobs, Mohab step 27); months before the first pay stay skipped. One grouped query reads the window.
 - 2026-10-12 · Claude: Already paid keeps a payment on its day: a 31st bill returns to the 31st after a short month, and a weekend move no longer shifts the schedule's day (`start_after_paid`).
 - 2026-10-12 · Claude: `docs/proposals/temp-better-features.md` split into one file per design (undo, import matching, month lock, merge, investment events/lots/splits/checks/returns, price source order); built sections were already in Architecture.
