@@ -170,3 +170,47 @@ def test_restore_manifest_create_and_update_use_write_through_moves(tmp_path, mo
     assert RestoreManifest.from_bytes(path.read_bytes()).state == "COMPLETE"
     assert len(moves) >= 2
     assert all(flags & MOVEFILE_WRITE_THROUGH for flags in moves)
+
+
+@windows_only
+@pytest.mark.parametrize("replace_existing", [False, True])
+def test_restore_manifest_publication_failure_preserves_authoritative_marker(
+    tmp_path, monkeypatch, replace_existing,
+):
+    from dataclasses import replace
+    from lightning.runtime.restore import EncryptedBackupRestorer, RestoreManifest
+
+    manifest = RestoreManifest(
+        state="PENDING", operation_id="1" * 32, profile_id="profile-1",
+        live_name="profile.db", old_checkpoint_id="restore-base-" + "a" * 32,
+        old_sha256="a" * 64, candidate_name="candidate.partial",
+        new_checkpoint_id="restore-" + "2" * 32, candidate_sha256="b" * 64,
+        previous_name=f".lightning-restore-{'1' * 32}.previous.db",
+        source_backup_name="profile_backup_2030-01-01_001_1234abcd.db",
+        source_sha256="c" * 64,
+        source_copy_name=f".lightning-restore-source-{'1' * 32}.db",
+        source_copy_sha256="c" * 64,
+        pre_restore_name="profile_upgrade_2030-01-01_001_1234abcd.db",
+        pre_restore_sha256="d" * 64,
+    )
+    marker = tmp_path / f".lightning-restore-{'1' * 32}.state"
+    if replace_existing:
+        EncryptedBackupRestorer._write_restore_manifest(marker, manifest)
+    old_bytes = marker.read_bytes() if replace_existing else None
+
+    def fail_publication(*args, **kwargs):
+        raise OSError("injected marker publication failure")
+
+    method = "atomic_replace" if replace_existing else "copy_exclusive"
+    monkeypatch.setattr(WindowsPromotionFileOps, method, fail_publication)
+    candidate = replace(manifest, state="COMPLETE") if replace_existing else manifest
+    with pytest.raises(OSError, match="marker publication"):
+        EncryptedBackupRestorer._write_restore_manifest(
+            marker, candidate, replace_existing=replace_existing,
+        )
+
+    if replace_existing:
+        assert marker.read_bytes() == old_bytes
+    else:
+        assert not marker.exists()
+    assert list(tmp_path.glob(f".{marker.name}-*.partial")) == []

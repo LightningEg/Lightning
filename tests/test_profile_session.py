@@ -180,6 +180,31 @@ def test_restore_backup_keeps_source_and_pre_restore_copy_and_reopens(tmp_path):
     fresh.close()
 
 
+def test_restore_manifest_publication_falls_back_when_hard_links_are_forbidden(tmp_path, monkeypatch):
+    import errno
+    from lightning.runtime import restore as restore_module
+    from lightning.runtime.restore import RestoreManifest
+
+    session, _ = created(tmp_path)
+    live, paths = session.paths.db_path, session.paths
+    session.container.settings.set("restore_marker", "current")
+    selected = session.container.backup_now()
+    session.close()
+
+    def deny_hard_links(*args, **kwargs):
+        raise OSError(errno.EPERM, "hard links are unavailable")
+
+    monkeypatch.setattr(restore_module.os, "link", deny_hard_links)
+    session.restore_backup(str(live), str(selected), PASSWORD)
+
+    (marker,) = paths.data_dir.glob(".lightning-restore-*.state")
+    assert RestoreManifest.from_bytes(marker.read_bytes()).state == "COMPLETE"
+    assert not list(paths.data_dir.glob("*.partial"))
+    session.unlock(str(live), PASSWORD)
+    assert session.container.settings.get("restore_marker") == "current"
+    session.close()
+
+
 def test_completed_restore_blocks_if_previous_checkpoint_is_missing(tmp_path):
     session, _ = created(tmp_path)
     live, data_dir = session.paths.db_path, session.paths.data_dir
@@ -414,6 +439,82 @@ def test_interrupted_restore_marker_blocks_fresh_unlock(tmp_path, monkeypatch):
     with pytest.raises(ProfileError, match="interrupted restore"):
         fresh.unlock(str(live), PASSWORD)
     assert not fresh.container
+
+
+def test_abandoned_restore_intent_is_retired_with_evidence_preserved(tmp_path, monkeypatch):
+    """A crash after PENDING but before journal creation leaves an untouched live DB."""
+    from lightning.runtime.restore import EncryptedBackupRestorer, RestoreManifest
+
+    session, _ = created(tmp_path)
+    live, paths = session.paths.db_path, session.paths
+    session.container.settings.set("restore_marker", "current")
+    selected = session.container.backup_now()
+    session.close()
+    live_before = live.read_bytes()
+
+    publish = EncryptedBackupRestorer._write_restore_manifest
+
+    def publish_then_crash(path, manifest, *, replace_existing=False):
+        publish(path, manifest, replace_existing=replace_existing)
+        if manifest.state == "PENDING":
+            raise OSError("injected crash after durable intent")
+
+    monkeypatch.setattr(EncryptedBackupRestorer, "_write_restore_manifest",
+                        staticmethod(publish_then_crash))
+    with pytest.raises(ProfileError):
+        session.restore_backup(str(live), str(selected), PASSWORD)
+    (marker,) = paths.data_dir.glob(".lightning-restore-*.state")
+    manifest = RestoreManifest.from_bytes(marker.read_bytes())
+    assert manifest.state == "PENDING"
+    assert not (paths.data_dir / f".lightning-restore-{manifest.operation_id}.sqlite").exists()
+    source_copy = paths.backups_dir / manifest.source_copy_name
+    source_before = source_copy.read_bytes()
+
+    # Recovery classifies the operation as abandoned without discarding its audit copies.
+    session.retry_at = 0.0
+    session.resume_interrupted_restore(str(live), PASSWORD)
+    repaired = RestoreManifest.from_bytes(marker.read_bytes())
+    assert repaired.state == "ABANDONED"
+    assert live.read_bytes() == live_before
+    assert source_copy.read_bytes() == source_before
+    assert selected.exists()
+
+    session.unlock(str(live), PASSWORD)
+    assert session.container.settings.get("restore_marker") == "current"
+    session.close()
+
+
+def test_abandoned_restore_intent_with_changed_live_database_stays_locked(tmp_path, monkeypatch):
+    from lightning.runtime.restore import EncryptedBackupRestorer, RestoreManifest
+
+    session, _ = created(tmp_path)
+    live, paths = session.paths.db_path, session.paths
+    selected = session.container.backup_now()
+    session.close()
+
+    publish = EncryptedBackupRestorer._write_restore_manifest
+
+    def publish_then_crash(path, manifest, *, replace_existing=False):
+        publish(path, manifest, replace_existing=replace_existing)
+        if manifest.state == "PENDING":
+            raise OSError("injected crash after durable intent")
+
+    monkeypatch.setattr(EncryptedBackupRestorer, "_write_restore_manifest",
+                        staticmethod(publish_then_crash))
+    with pytest.raises(ProfileError):
+        session.restore_backup(str(live), str(selected), PASSWORD)
+    (marker,) = paths.data_dir.glob(".lightning-restore-*.state")
+    manifest = RestoreManifest.from_bytes(marker.read_bytes())
+    source_copy = paths.backups_dir / manifest.source_copy_name
+    source_before = source_copy.read_bytes()
+    live.write_bytes(live.read_bytes() + b"changed")
+
+    session.retry_at = 0.0
+    with pytest.raises(ProfileError, match="live database changed"):
+        session.resume_interrupted_restore(str(live), PASSWORD)
+    assert RestoreManifest.from_bytes(marker.read_bytes()).state == "PENDING"
+    assert source_copy.read_bytes() == source_before
+    assert selected.exists()
 
 
 @pytest.mark.parametrize("boundary", ["P1", "P2", "P3", "P4"])

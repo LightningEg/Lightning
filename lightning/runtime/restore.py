@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import errno
 import os
 import re
 import secrets
@@ -74,7 +75,7 @@ class RestoreManifest:
     schema_version: int = 1
 
     def __post_init__(self) -> None:
-        if self.schema_version != 1 or self.state not in {"PENDING", "COMPLETE"}:
+        if self.schema_version != 1 or self.state not in {"PENDING", "COMPLETE", "ABANDONED"}:
             raise ValueError("Unsupported restore manifest version or state")
         if not re.fullmatch(r"[0-9a-f]{32}", self.operation_id):
             raise ValueError("Invalid restore operation ID")
@@ -218,8 +219,19 @@ class EncryptedBackupRestorer:
                         raise OSError("Restore manifest path must not be a symlink")
                     os.replace(temporary, path)
                 elif not exists and not replace_existing:
-                    os.link(temporary, path)
-                    temporary.unlink()
+                    try:
+                        os.link(temporary, path)
+                    except OSError as exc:
+                        # Some Android/private-storage filesystems refuse hard
+                        # links. The profile directory is private and held by
+                        # the profile lock, so a same-directory rename keeps
+                        # publication atomic there without exposing partial JSON.
+                        unsupported = {errno.EPERM, errno.EOPNOTSUPP, errno.ENOTSUP, errno.EXDEV}
+                        if exc.errno not in unsupported or path.exists() or path.is_symlink():
+                            raise
+                        os.rename(temporary, path)
+                    else:
+                        temporary.unlink()
                 else:
                     raise FileExistsError(path) if exists else FileNotFoundError(path)
                 directory_fd = os.open(path.parent, os.O_RDONLY)
@@ -268,6 +280,7 @@ class EncryptedBackupRestorer:
         if any(path.exists() or path.is_symlink() for path in reserved):
             raise ProfileError("Restore is unavailable while sync authority state exists or cannot be verified.")
         manifests: dict[str, RestoreManifest] = {}
+        abandoned: set[str] = set()
         for marker in cls._restore_marker_paths(paths):
             try:
                 info = marker.stat(follow_symlinks=False)
@@ -284,6 +297,27 @@ class EncryptedBackupRestorer:
                     manifest.profile_id != paths.profile.profile_id or
                     manifest.live_name != paths.db_path.name):
                 raise ProfileError("Restore operation manifest belongs to another operation or profile.")
+            if manifest.state == "ABANDONED":
+                journal_path = paths.data_dir / (marker.name.removesuffix(".state") + ".sqlite")
+                if journal_path.exists() or journal_path.is_symlink():
+                    raise ProfileError("An abandoned restore has a journal and needs repair before unlock.")
+                try:
+                    cls._require_clean_database_file(paths.db_path)
+                    if cls._digest(paths.db_path) != manifest.old_sha256:
+                        raise ProfileError("An abandoned restore no longer matches the live database.")
+                    for name, expected in ((manifest.source_copy_name, manifest.source_copy_sha256),
+                                           (manifest.pre_restore_name, manifest.pre_restore_sha256)):
+                        evidence = paths.backups_dir / name
+                        cls._require_clean_database_file(evidence)
+                        if cls._digest(evidence) != expected:
+                            raise ProfileError("Abandoned restore evidence does not match its manifest.")
+                        if key is not None:
+                            cls._verify_file(evidence, key)
+                except Exception as exc:
+                    raise ProfileError("Abandoned restore evidence is missing, unsafe, or corrupt.") from exc
+                manifests[marker.name.removesuffix(".state")] = manifest
+                abandoned.add(marker.name.removesuffix(".state"))
+                continue
             if manifest.state != "COMPLETE":
                 raise ProfileError("An interrupted restore needs repair before this profile can be unlocked.")
             manifests[marker.name.removesuffix(".state")] = manifest
@@ -354,7 +388,7 @@ class EncryptedBackupRestorer:
                 except Exception as exc:
                     raise ProfileError("The retained pre-restore checkpoint cannot be verified.") from exc
             journals[marker_id] = journal
-        if set(journals) != set(manifests):
+        if set(journals) != (set(manifests) - abandoned):
             raise ProfileError("A restore operation manifest has no complete matching journal; this profile is locked for repair.")
         expected_source_copies = {manifest.source_copy_name for manifest in manifests.values()}
         actual_source_copies = {path.name for path in paths.backups_dir.glob(".lightning-restore-source-*.db")}
@@ -593,6 +627,31 @@ class EncryptedBackupRestorer:
                 if control_id not in manifest_ids:
                     raise ProfileError("An unclaimed restore journal blocks recovery; this profile remains locked.")
             journal_path = paths.data_dir / f".lightning-restore-{manifest.operation_id}.sqlite"
+            if not journal_path.exists() and not journal_path.is_symlink():
+                # PENDING is durable before P1. If initialization never made a
+                # journal and the live bytes still match the recorded old
+                # checkpoint, no promotion phase could have changed authority.
+                # Retire this abandoned intent so a crash in that narrow gap
+                # does not permanently lock an otherwise untouched profile.
+                try:
+                    self._require_clean_database_file(paths.db_path)
+                    if self._digest(paths.db_path) != manifest.old_sha256:
+                        raise ProfileError("The live database changed after restore intent; this profile remains locked.")
+                    for name, expected in ((manifest.source_copy_name, manifest.source_copy_sha256),
+                                           (manifest.pre_restore_name, manifest.pre_restore_sha256)):
+                        evidence = paths.backups_dir / name
+                        self._require_clean_database_file(evidence)
+                        if self._digest(evidence) != expected:
+                            raise ProfileError("Protected restore evidence changed; this profile remains locked.")
+                        self._verify_file(evidence, key)
+                    self._write_restore_manifest(marker, replace(manifest, state="ABANDONED"),
+                                                 replace_existing=True)
+                    self.session.retry_at = 0.0
+                    return
+                except ProfileError:
+                    raise
+                except OSError as exc:
+                    raise ProfileError("The abandoned restore intent could not be safely retired; this profile remains locked.") from exc
             try:
                 info = journal_path.stat(follow_symlinks=False)
                 if journal_path.is_symlink() or not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:

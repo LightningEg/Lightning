@@ -22,6 +22,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-12 · Codex and Luna: interrupted restore can retire a PENDING intent before journal creation when the live encrypted database and retained copies verify; Windows marker publication failure tests preserve the last durable marker. `tools/windows_restore_reboot_drill.py` prepares dummy encrypted profiles at P0–P5 for an ordinary Windows reboot check.
+
 - 2026-10-12 · Claude: bank SMS reads are one transaction (staging, seen, cursor); inbox messages are known by text plus time, with a 10-minute overlap; phone hides Add transaction while lent, loads `session.js?v=4`, and the second PC's refusal names the PC.
 - 2026-10-12 · Claude: workflow tooling: UI reads currencies through the container (import contract passes again); `tools/claims.py` warns on files claimed in `NOW.md`; older releases moved to `CHANGELOG-archive.md`; NOW.md tests reject expired messages to all.
   Logs migrations `0050_cash_at_hand.sql`, `0051_adjustment_category.sql`, `0052_system_categories.sql`, missing here.
