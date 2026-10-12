@@ -14,6 +14,7 @@ from decimal import Decimal
 
 from lightning.categories.domain import Direction, Movement
 from lightning.core.errors import NotFoundError, ValidationError
+from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, fmt, to_decimal
 from lightning.transactions.tags import normalize as normalize_tag
 
@@ -23,6 +24,9 @@ from .repository import RuleRepository
 
 MAX_PARTS = 3
 UNDO_KEY = "rules_apply_undo"
+DISMISSED_KEY = "rule_suggestions_dismissed"
+SUGGEST_MIN = 3          # filings under one name before a rule is suggested
+SUGGEST_SHARE = Decimal("0.9")  # and the share of them that agree
 AMOUNT_WORDS = {"is": "is", "about": "about", "between": "between", "more": "more than", "less": "less than"}
 TEXT_WORDS = {"is": "is", "contains": "contains", "one_of": "is one of"}
 
@@ -34,6 +38,15 @@ class PastChange:
     counterparty: str
     amount: Decimal
     category_from: str
+
+
+@dataclass(frozen=True)
+class Suggestion:
+    name: str
+    category_id: int
+    category: str
+    count: int
+    share: Decimal
 
 
 class RuleService:
@@ -135,6 +148,46 @@ class RuleService:
             values[f"part_category_{i}"] = str(part.category_id)
             values[f"part_value_{i}"] = f"{part.value.normalize():f}" + ("%" if part.method == "percent" else "")
         return values
+
+    @request_cached
+    def suggestions(self) -> list[Suggestion]:
+        """Rules worth making from what the user filed: a counterparty with at least 3 filings where at least 90%
+        share one category and neither a rule nor the counterparty's own default already gives it. Dismissed
+        names never return. Most filings first."""
+        by_name: dict[str, list[dict]] = {}
+        for row in self.repo.filed_by_name():
+            by_name.setdefault(row["name"].casefold(), []).append(row)
+        dismissed, found = self._dismissed(), []
+        name_rules = [r for r in self.repo.rules() if all(c.field == "counterparty" for c in r.conditions)]
+        categories = {cat.id: cat for cat in self.categories.tree()}
+        for key, rows in by_name.items():
+            total = sum(r["n"] for r in rows)
+            top = max(rows, key=lambda r: (r["n"], -r["category_id"]))
+            if total < SUGGEST_MIN or top["n"] < SUGGEST_MIN or Decimal(top["n"]) / total < SUGGEST_SHARE:
+                continue
+            if key in dismissed or top["default_category_id"] == top["category_id"]:
+                continue
+            if engine.run(name_rules, {"counterparty": [top["name"]]}).category_id is not None:
+                continue  # a rule already files this name: a second one would conflict with it
+            category = categories.get(top["category_id"])
+            if category is None or not category.active or category.is_system or category.depth < 2:
+                continue
+            found.append(Suggestion(top["name"], category.id, category.name, top["n"], Decimal(top["n"]) / total))
+        return sorted(found, key=lambda s: (-s.count, s.name.casefold()))
+
+    def dismiss_suggestion(self, name: str) -> None:
+        """Never suggest a rule for this counterparty again."""
+        key = name.strip().casefold()
+        if not key:
+            return
+        with self.db.transaction():
+            self.settings.set(DISMISSED_KEY, json.dumps(sorted(self._dismissed() | {key})))
+
+    def _dismissed(self) -> set[str]:
+        try:
+            return {str(n) for n in json.loads(self.settings.get(DISMISSED_KEY) or "[]")}
+        except ValueError:
+            return set()
 
     # ------------------------------------------------------------------ writing
     def save(self, values: dict, rule_id: int | None = None) -> int:

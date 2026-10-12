@@ -7,6 +7,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - Add one entry at the top of `## [Unreleased]
 - 2026-10-12 · Claude: Average monthly income counts a completed month with no pay as 0 once pay has started (between jobs, Mohab step 27); months before the first pay stay skipped. One grouped query reads the window.
 - 2026-10-12 · Claude: Already paid keeps a payment on its day: a 31st bill returns to the 31st after a short month, and a weekend move no longer shifts the schedule's day (`start_after_paid`).
+- 2026-10-12 · Claude: Rules are suggested from what you file: a name filed the same way at least 3 times (90%) with no rule or default yet shows under Settings › Rules (Create rule, Dismiss; dismissed ones stay gone). Arabic added.
 - 2026-10-12 · Claude: `docs/proposals/temp-better-features.md` split into one file per design (undo, import matching, month lock, merge, investment events/lots/splits/checks/returns, price source order); built sections were already in Architecture.
 - 2026-10-12 · Claude: Migrations 0051–0052 no longer collide on `EXP.SYSTEM.ADJUSTMENT` when a newer seed has it; screen tests name an icon button by its tooltip (the register Add button); roundtrip fixture rebuilt for schema 52 (`508597be…`). Suite: 145 failing → 13 (register/overview redesign tests, left for their author).
 - 2026-10-12 · Claude: `AGENTS.md` points to `tools/claims.py` before pushing and to `CHANGELOG-archive.md` in the skip list.

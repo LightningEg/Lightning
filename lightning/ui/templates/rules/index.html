@@ -4,6 +4,19 @@
 {% block top_actions %}<a class="btn primary" data-popup-open href="/rules/new">{{ "Add rule"|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% if undo %}<form method="post" action="/rules/undo" class="card rule-undo"><span>{{ "Refiled the wrong ones?"|tr(locale) }}</span><input type="hidden" name="token" value="{{ undo }}"><button class="btn">{{ 'Undo'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
+{% if suggestions %}<section class="plan-section" aria-labelledby="rules-suggested">
+  <header class="overview-section-head"><h2 id="rules-suggested">{{ 'Suggested rules'|tr(locale) }}</h2><span>{{ "From what you filed"|tr(locale) }}</span></header>
+  <article class="card">
+    <div class="compact-list">{% for s in suggestions %}
+      <div class="compact-row rule-row">
+        <span><b>{{ s.name }}</b><small class="muted">{{ '{category} in {n} of your filings'|tr(locale, category=s.category, n=s.count) }}</small></span>
+        <span class="actions">
+          <a class="btn small" data-popup-open href="/rules/new?counterparty_op=is&counterparty={{ s.name|urlencode }}&category_id={{ s.category_id }}">{{ 'Create rule'|tr(locale) }}</a>
+          <form method="post" action="/rules/suggestions/dismiss"><input type="hidden" name="name" value="{{ s.name }}"><button class="btn small">{{ 'Dismiss'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+        </span>
+      </div>{% endfor %}</div>
+  </article>
+</section>{% endif %}
 <section class="plan-section" aria-labelledby="rules-list">
   <header class="overview-section-head"><h2 id="rules-list">{{ 'Rules'|tr(locale) }}</h2><span>{{ rows|length }} saved · most specific first</span></header>
   <article class="card">
