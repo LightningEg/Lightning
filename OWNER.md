@@ -4,6 +4,8 @@ What only the owner can do or decide. Any AI adds an item here, and removes it o
 
 ## To do
 
+- **Windows restore acceptance (02d/03a), deferred 2026-10-12:** engineering work is complete; run the [dummy-data P0–P5 drill](tools/windows_restore_reboot_drill.md) on an ordinary Windows PC before accepting restore for real profile data. Keep its `drill.json` as device/filesystem/reboot evidence. Abrupt power-loss behavior remains unverified; the release-risk decision is below.
+
 - **Before the edit-journal mailbox ships:** create its dedicated Cloudflare account, arrange a card that pays in dollars, and update the website privacy note. Building remains for later; [revised proposal](docs/proposals/edit_journal.md).
 
 - **Before the first tagged release (one-time):** turn on release immutability in `Lightning-downloads` › Settings. The `LIGHTNING_DOWNLOADS_TOKEN` secret is configured. Codex handles the `v1.0.0-beta.1` tag after the paired PC and phone checks pass.

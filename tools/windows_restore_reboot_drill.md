@@ -7,8 +7,9 @@ lets the script check all six profiles against their retained recovery copies.
 This checks reboot recovery; it does not simulate an abrupt power cut.
 
 1. Install Python 3.12 from [python.org](https://www.python.org/downloads/windows/)
-   if `py -3.12 --version` does not work. Copy and extract the source ZIP supplied
-   with this task to the Windows PC. Open PowerShell in its `Lightning` folder.
+   if `py -3.12 --version` does not work. Download and extract the
+   [source ZIP](https://github.com/elfekimuhammed/Lightning/archive/refs/heads/main.zip).
+   Open PowerShell in its `Lightning-main` folder.
 2. Run these commands in PowerShell:
 
    ```powershell

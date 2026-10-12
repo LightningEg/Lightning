@@ -20,7 +20,7 @@ from lightning.database.backup import backup, list_backups
 from lightning.database.connection import Database
 from lightning.database.migrator import inspect_schema, migrate
 from lightning.database.promotion import (
-    CandidatePromotionService, PromotionBlocked, PromotionPhase,
+    CandidatePromotionService, PromotionBlocked, PromotionControlState, PromotionPhase,
     SqlitePromotionJournalStore,
 )
 from lightning.database.seed import seed
@@ -193,6 +193,15 @@ class EncryptedBackupRestorer:
         return tuple(paths.data_dir.glob(".lightning-restore-*.state"))
 
     @staticmethod
+    def _matches_unprepared_restore(state: PromotionControlState, manifest: RestoreManifest) -> bool:
+        return state.journal is None and (
+            state.accepted is None or (
+                state.accepted.checkpoint_id == manifest.old_checkpoint_id and
+                state.accepted.sha256 == manifest.old_sha256
+            )
+        )
+
+    @staticmethod
     def _write_restore_manifest(path: Path, manifest: RestoreManifest, *, replace_existing: bool = False) -> None:
         temporary = path.with_name(f".{path.name}-{secrets.token_hex(12)}.partial")
         fd = os.open(temporary, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
@@ -298,13 +307,10 @@ class EncryptedBackupRestorer:
                     manifest.live_name != paths.db_path.name):
                 raise ProfileError("Restore operation manifest belongs to another operation or profile.")
             if manifest.state == "ABANDONED":
-                journal_path = paths.data_dir / (marker.name.removesuffix(".state") + ".sqlite")
-                if journal_path.exists() or journal_path.is_symlink():
-                    raise ProfileError("An abandoned restore has a journal and needs repair before unlock.")
                 try:
-                    cls._require_clean_database_file(paths.db_path)
-                    if cls._digest(paths.db_path) != manifest.old_sha256:
-                        raise ProfileError("An abandoned restore no longer matches the live database.")
+                    # Retirement already proved that live was unchanged. Its
+                    # durable receipt must allow later ordinary edits and
+                    # restores, while retained recovery evidence stays checked.
                     for name, expected in ((manifest.source_copy_name, manifest.source_copy_sha256),
                                            (manifest.pre_restore_name, manifest.pre_restore_sha256)):
                         evidence = paths.backups_dir / name
@@ -342,6 +348,10 @@ class EncryptedBackupRestorer:
                     connection.close()
             except Exception as exc:
                 raise ProfileError("Restore control state is damaged. This profile is locked for repair.") from exc
+            if marker_id in abandoned:
+                if not cls._matches_unprepared_restore(state, manifest):
+                    raise ProfileError("An abandoned restore has conflicting control state and needs repair before unlock.")
+                continue
             journal = state.journal
             if (journal is None or state.accepted is None or
                     journal.phase is not PromotionPhase.ACTIVATED or
@@ -577,11 +587,11 @@ class EncryptedBackupRestorer:
             lock.close()
 
     def resume_interrupted_restore(self, selected: str, password: str) -> None:
-        """Forward-resume the single durable pending restore for a locked profile.
+        """Resume a pending restore, or retire its verified untouched intent.
 
-        This deliberately has no cancel or rollback path. Any uncertainty in the
-        manifest, journal, retained source, or pre-restore snapshot leaves the
-        profile locked with its recovery evidence intact.
+        A prepared promotion only moves forward; there is no rollback path.
+        Uncertainty in the manifest, control state, retained source or snapshot
+        leaves the profile locked with its recovery evidence intact.
         """
         self.session._attempt()
         self.session._locked()
@@ -627,10 +637,25 @@ class EncryptedBackupRestorer:
                 if control_id not in manifest_ids:
                     raise ProfileError("An unclaimed restore journal blocks recovery; this profile remains locked.")
             journal_path = paths.data_dir / f".lightning-restore-{manifest.operation_id}.sqlite"
-            if not journal_path.exists() and not journal_path.is_symlink():
-                # PENDING is durable before P1. If initialization never made a
-                # journal and the live bytes still match the recorded old
-                # checkpoint, no promotion phase could have changed authority.
+            store = None
+            observed = None
+            if journal_path.exists() or journal_path.is_symlink():
+                try:
+                    info = journal_path.stat(follow_symlinks=False)
+                    if journal_path.is_symlink() or not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+                        raise OSError("unsafe restore journal")
+                    # Read-write under the held profile lock: a crash inside a
+                    # control transaction can leave a hot journal to roll back.
+                    store = SqlitePromotionJournalStore(journal_path)
+                    observed = store.read_state()
+                except Exception as exc:
+                    raise ProfileError("The pending restore has no readable matching journal; this profile remains locked.") from exc
+            if observed is None or observed.journal is None:
+                if observed is not None and not self._matches_unprepared_restore(observed, manifest):
+                    raise ProfileError("Pending restore manifest and unprepared control state disagree; this profile remains locked.")
+                # PENDING precedes both control-store initialization and P1.
+                # With no prepared journal and live still at the old hash, an
+                # absent or empty matching control store can be safely retired.
                 # Retire this abandoned intent so a crash in that narrow gap
                 # does not permanently lock an otherwise untouched profile.
                 try:
@@ -652,16 +677,6 @@ class EncryptedBackupRestorer:
                     raise
                 except OSError as exc:
                     raise ProfileError("The abandoned restore intent could not be safely retired; this profile remains locked.") from exc
-            try:
-                info = journal_path.stat(follow_symlinks=False)
-                if journal_path.is_symlink() or not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
-                    raise OSError("unsafe restore journal")
-                # Read-write under the held profile lock: a crash inside a control
-                # transaction leaves a hot journal that only a writer can roll back.
-                store = SqlitePromotionJournalStore(journal_path)
-                observed = store.read_state()
-            except Exception as exc:
-                raise ProfileError("The pending restore has no readable matching journal; this profile remains locked.") from exc
             journal = observed.journal
             if (journal is None or journal.operation_id != manifest.operation_id or
                     journal.phase not in (PromotionPhase.PREPARED, PromotionPhase.PREVIOUS_PROTECTED,

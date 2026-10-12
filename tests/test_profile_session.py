@@ -205,6 +205,87 @@ def test_restore_manifest_publication_falls_back_when_hard_links_are_forbidden(t
     session.close()
 
 
+@pytest.mark.parametrize("failure_point", [
+    "before_initialize", "after_initialize", "mismatched_accepted",
+])
+def test_abandoned_restore_with_unprepared_control_store_is_retired(
+    tmp_path, monkeypatch, failure_point
+):
+    from lightning.database.promotion import SqlitePromotionJournalStore
+    from lightning.runtime.restore import RestoreManifest
+
+    session, _ = created(tmp_path)
+    live, paths = session.paths.db_path, session.paths
+    session.container.settings.set("restore_marker", "current")
+    selected = session.container.backup_now()
+    session.close()
+    live_before = live.read_bytes()
+
+    initialize = SqlitePromotionJournalStore.initialize_accepted
+
+    def fail_during_initialization(store, *args, **kwargs):
+        if failure_point == "before_initialize":
+            raise OSError("injected failure before accepted checkpoint initialization")
+        result = initialize(store, *args, **kwargs)
+        if failure_point == "mismatched_accepted":
+            with sqlite3.connect(store.path) as connection:
+                connection.execute(
+                    "UPDATE promotion_control SET accepted_checkpoint_id=?, accepted_sha256=? "
+                    "WHERE singleton=1",
+                    ("other-valid-checkpoint", "e" * 64),
+                )
+            raise OSError("injected mismatched accepted checkpoint")
+        raise OSError("injected failure after accepted checkpoint initialization")
+
+    monkeypatch.setattr(SqlitePromotionJournalStore, "initialize_accepted", fail_during_initialization)
+    with pytest.raises(ProfileError):
+        session.restore_backup(str(live), str(selected), PASSWORD)
+    monkeypatch.setattr(SqlitePromotionJournalStore, "initialize_accepted", initialize)
+
+    (marker,) = paths.data_dir.glob(".lightning-restore-*.state")
+    manifest = RestoreManifest.from_bytes(marker.read_bytes())
+    control = paths.data_dir / f".lightning-restore-{manifest.operation_id}.sqlite"
+    assert control.is_file()
+    assert manifest.state == "PENDING"
+    if failure_point == "before_initialize":
+        store = SqlitePromotionJournalStore(control)
+        state = store.read_state()
+        assert state.accepted is None and state.journal is None
+    else:
+        store = SqlitePromotionJournalStore(control)
+        state = store.read_state()
+        assert state.journal is None
+        if failure_point == "mismatched_accepted":
+            assert state.accepted.checkpoint_id == "other-valid-checkpoint"
+            session.retry_at = 0.0
+            with pytest.raises(ProfileError, match="unprepared control state disagree"):
+                session.resume_interrupted_restore(str(live), PASSWORD)
+            assert RestoreManifest.from_bytes(marker.read_bytes()).state == "PENDING"
+            assert live.read_bytes() == live_before
+            return
+        assert state.accepted is not None
+
+    session.retry_at = 0.0
+    session.resume_interrupted_restore(str(live), PASSWORD)
+    assert RestoreManifest.from_bytes(marker.read_bytes()).state == "ABANDONED"
+    assert live.read_bytes() == live_before
+    session.unlock(str(live), PASSWORD)
+    assert session.container.settings.get("restore_marker") == "current"
+    if failure_point == "after_initialize":
+        session.close()
+        with sqlite3.connect(control) as connection:
+            connection.execute(
+                "UPDATE promotion_control SET accepted_checkpoint_id=?, accepted_sha256=? "
+                "WHERE singleton=1",
+                ("other-valid-checkpoint", "e" * 64),
+            )
+        fresh = ProfileSession(session.root)
+        with pytest.raises(ProfileError, match="control state|repair"):
+            fresh.unlock(str(live), PASSWORD)
+        return
+    session.close()
+
+
 def test_completed_restore_blocks_if_previous_checkpoint_is_missing(tmp_path):
     session, _ = created(tmp_path)
     live, data_dir = session.paths.db_path, session.paths.data_dir
@@ -473,6 +554,7 @@ def test_abandoned_restore_intent_is_retired_with_evidence_preserved(tmp_path, m
     # Recovery classifies the operation as abandoned without discarding its audit copies.
     session.retry_at = 0.0
     session.resume_interrupted_restore(str(live), PASSWORD)
+    monkeypatch.setattr(EncryptedBackupRestorer, "_write_restore_manifest", staticmethod(publish))
     repaired = RestoreManifest.from_bytes(marker.read_bytes())
     assert repaired.state == "ABANDONED"
     assert live.read_bytes() == live_before
@@ -481,7 +563,17 @@ def test_abandoned_restore_intent_is_retired_with_evidence_preserved(tmp_path, m
 
     session.unlock(str(live), PASSWORD)
     assert session.container.settings.get("restore_marker") == "current"
+    session.container.settings.set("restore_marker", "edited after repair")
     session.close()
+    fresh = ProfileSession(session.root)
+    fresh.unlock(str(live), PASSWORD)
+    assert fresh.container.settings.get("restore_marker") == "edited after repair"
+    later_backup = fresh.container.backup_now()
+    fresh.close()
+    fresh.restore_backup(str(live), str(later_backup), PASSWORD)
+    fresh.unlock(str(live), PASSWORD)
+    assert fresh.container.settings.get("restore_marker") == "edited after repair"
+    fresh.close()
 
 
 def test_abandoned_restore_intent_with_changed_live_database_stays_locked(tmp_path, monkeypatch):
