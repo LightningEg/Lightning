@@ -555,6 +555,7 @@ def _live_the_year(o: Mohab) -> None:
     o.on("2027-09-30")
     o.month("2027-09", salary=None, rent="13,200")
     o.ask("next_pay", "I'm between jobs. When is my next pay?", "Cash planning")
+    o.notes["october_average"] = o.c.budgets.income_average("2027-10")  # the unpaid September counts as 0
     o.ask("last", "How long could my emergency fund carry me?", "Cash planning", "Reserves")
     # He would rather count it in months of what he spends; Reserves links to the setting.
     b.go("Cash planning", "Reserves", "Change in Settings")
@@ -1020,6 +1021,13 @@ def test_end_of_service_is_not_monthly_pay(mohab):
 def test_between_jobs_the_next_pay_is_the_new_employer(mohab):
     answer = mohab.answers["next_pay"]
     assert answer.shows("Safe to spend until 2027-10-01", "Valeo 2027-10-01 · Income +55,000")
+
+
+def test_a_month_between_jobs_counts_as_zero_in_the_income_average(mohab):
+    """July and August paid 50,000 and September nothing: the average for October is 100,000 / 3."""
+    average = mohab.notes["october_average"]
+    assert (average.amount, average.months_counted, average.first_month, average.last_month) == (
+        D("33333.33"), 3, "2027-07", "2027-09")
 
 
 def test_looks_recurring_leaves_spending_and_interest_to_the_budget_and_forecast(mohab):

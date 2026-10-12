@@ -75,17 +75,31 @@ class PlanningService:
         if any(p.status == PaymentStatus.PAID for p in payments) or not any(
                 p.status == PaymentStatus.DUE for p in payments):
             return None
-        later = [d for _, d in payment_dates(item, fmt_date(day + timedelta(days=400))) if d > fmt_date(day)]
+        # The next date is read from the calendar date, not the due date: a weekend move must not
+        # change the day the schedule keeps (the start is the anchor every later date counts from).
+        later = [(cal, d) for _, cal, d in scheduled_dates(item, fmt_date(day + timedelta(days=400)))
+                 if d > fmt_date(day)]
         if not later:
             return None
+        next_calendar, next_due = later[0]
+        anchor_day = date.fromisoformat(item.start_date).day
+        clamped = (item.frequency in (Frequency.MONTHLY, Frequency.QUARTERLY, Frequency.YEARLY)
+                   and date.fromisoformat(next_calendar).day != anchor_day)
         with self.db.transaction():
-            self.repo.set_start(item_id, later[0])
+            if clamped:
+                # A short month (the 31st on the 28th) cannot be an anchor: starting there would keep
+                # the payment on the 28th for good. Keep the start and set the earlier dates aside.
+                for payment in payments:
+                    if payment.status == PaymentStatus.DUE:
+                        self.repo.settle(item.id, payment.due_date, "SKIPPED", None, ZERO)
+                return next_due
+            self.repo.set_start(item_id, next_calendar)
             if item.payment_count:
                 # The payments before the new start are behind you: they still count toward a fixed
                 # number of payments, so the plan does not grow (audit 2026-10-05 #10: 6 became 8).
-                passed = sum(1 for _, d in payment_dates(item, later[0]) if d < later[0])
+                passed = sum(1 for _, d in payment_dates(item, next_calendar) if d < next_calendar)
                 self.repo.set_payment_count(item_id, item.payment_count - passed)
-        return later[0]
+        return next_due
 
     def set_amount(self, item_id: int, amount) -> None:
         """Plan every later payment at a new amount (for example after paying a higher rent)."""

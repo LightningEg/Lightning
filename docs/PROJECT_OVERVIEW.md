@@ -220,7 +220,7 @@ User feedback becomes steps Mohab takes: fixed points are checked as answers, an
 |---|---|---|
 | Where did my bonus go? | Money in › Bonus; Expense analysis for the same period | Answered |
 | Does a bonus change my budget? | `BudgetService.income_average` excludes `EXP.WORK.BONUS` by default; a bonus does not lift Average monthly income | Answered; Mohab step 17's average is instead affected by January salary booked in December (step 18) |
-| I changed jobs: what happens to my income figures? | Stop the old salary (its history stays) and add the new one | End-of-service pay is irregular and excluded by default; the no-pay-month average still skips zero-income months (Mohab step 27) |
+| I changed jobs: what happens to my income figures? | Stop the old salary (its history stays) and add the new one | End-of-service pay is irregular and excluded by default; a month with no pay counts as 0 in the average (Mohab step 27) |
 | Was I paid my raise? | The account register shows the new amount; Cash planning › Recurring keeps the scheduled payment Due until he links it by hand | Partial |
 
 Money held for others is left out of every owned, budget and performance view. Transfers are never income or spending. Refunds reduce spending in their original category.
@@ -266,7 +266,7 @@ Drive it in a browser through the screens only, and re-run it after any workflow
 | 24 | 3 Jun | Rent rises 10% to 13,200 | June settles; July onwards is planned at 13,200 after Mohab accepts the prompt; reserve target is reviewed separately | Answered with confirmation; neither future plan nor reserve changes silently; Needs you names Housing & Rent planned at 12,000, below the 13,200 rent, and he changes it |
 | 25 | Jul–Aug | Sets aside 15,000 for a Sahel trip; spends 14,200 | 800 left in the goal | Answered |
 | 26 | 31 Aug | Leaves ACME with 30,000 end of service; adds Valeo at 55,000 from 1 October | The old salary stops with its history; Average monthly income stays 50,000 | Right since Categories marks Bonus irregular |
-| 27 | Sep | Between jobs, no pay | Next income is Valeo on 1 October; the average does not rise | Known gap: zero-income months are skipped by the average; the test checks non-increase, not zero-month inclusion |
+| 27 | Sep | Between jobs, no pay | Next income is Valeo on 1 October; October's average counts September as 0 (100,000 ÷ 3 = 33,333) | Answered |
 | 28 | 30 Sep | Reads the year | Money in 651,300 and Money out 295,186; Change in what you own 357,364; loans still to pay 34,500; Checks pass; nothing is due | Answered, except *why* net worth changed (M3.2) |
 | 29 | 30 Apr | Reads Safe to spend after raising his target | It keeps back the emergency top-up (11,521) and the rest of the 28% target (2,013) | Answered |
 | 30 | May–Jul | Wants a 60,000 laptop by 30 June | Needs you: the plan leaves 23,302 a month, so July at the earliest, or set it aside from free cash; he sets it aside, and in July, past its date, completes it | Answered |
@@ -315,10 +315,8 @@ The reference apps are YNAB, Monarch, Copilot, Simplifi, Rocket Money, Lunch Mon
 | 11 | Guided first setup | Monarch, YNAB onboarding | Mohab's first run needed six account forms before seeing anything. The first run is also where Say loses users, to a paywall: Lightning's is 7 days free, never a lock (*Product decisions*) |
 | 12 | Receipts and attachments | Monarch, Lunch Money | Warranty and gold purchase receipts |
 
-**Known finance gaps** (the early-pay, raise and rent paths now require explicit confirmation; no-pay-month averaging in step 27 only has a non-increase assertion):
+**Known finance gaps** (the early-pay, raise and rent paths now require explicit confirmation):
 
-
-- **Left open by the 2026-10-05 audit** (its other wrong numbers are fixed, `tests/test_audit_numbers.py`): a payment scheduled on the 31st moves to the 30th after a shorter month and stays there.
 - **Unconfirmed early salary** remains in the bank-posting month of the income average and may leave a future salary payment due. The Recurring tab suggests the plausible match; Mohab must confirm the specific transaction before the scheduled-month average and forecast adjust.
 - **A changed recurring amount** prompts a future-plan update and a reserve review, but the user must choose them. A reserve is named only when the payment is explicitly linked to it; a name or category match does not silently change cash assignments.
 - **CD projections** use an actual/365 day-count estimate, not a bank guarantee. Interest is never posted automatically. Existing account-level `cd_terms` stay visible as legacy and are not automatically converted. Cash in old `DEPOSIT` accounts must be moved out; these legacy terms remain pending a safe conversion workflow. Interest recorded from the certificate's bank counts as the certificate's return (Architecture › Investment return); it is not yet reconciled against the projection.

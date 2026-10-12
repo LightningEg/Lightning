@@ -155,7 +155,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Usual month** | The average money out of the last six whole months before the period. | Read directly from the ledger | `reporting.spending._against_history` |
 | **Usual range** | The lowest, middle and highest monthly money out of the twelve whole months before the period. It needs three of them. | Read directly from the ledger | `reporting.spending._against_history` |
 | **Investing rate** | The share of money in that you moved into investments, out of what you saved, so it is never more than the savings rate. | Money added ÷ Money in | `investments.report.investing_rate` |
-| **Average monthly income** | Income in your chosen income categories, averaged over the last 3 or 6 completed months that had any (Settings › Budget). Until a completed month has income, the income set up in Recurring stands in. The budget, reserves and the cash forecast all use it. | Read directly from the ledger | `budgeting.service.BudgetService.income_average` |
+| **Average monthly income** | Income in your chosen income categories, averaged over the last 3 or 6 completed months (Settings › Budget). A month with no pay counts as 0 once pay has started; months before the first pay are skipped. Until a completed month has income, the income set up in Recurring stands in. The budget, reserves and the cash forecast all use it. | Read directly from the ledger | `budgeting.service.BudgetService.income_average` |
 | **Average monthly spending** | Money out in your budget categories, leaving out investments and one-off categories, averaged over the same 3 or 6 completed months as Average monthly income. The emergency fund can be counted in it (Settings › Budget). | Read directly from the ledger | `budgeting.service.BudgetService.spending_average` |
 | **Spent** | Money out in the category this month. | Read directly from the ledger | `budgeting.domain.BudgetLine.actual` |
 | **Cost** | What you paid for the units you still hold. | Read directly from the ledger | `investments.report.build_investment_report` |
@@ -532,7 +532,7 @@ An investment overview is a filtered/calculated view, not a separate place for b
 | Usual month | الشهر المعتاد | متوسط الإنفاق في آخر ستة شهور كاملة قبل الفترة. |
 | Usual range | النطاق المعتاد | أقل ووسط وأعلى إنفاق شهري في الاثني عشر شهراً الكاملين قبل الفترة؛ يحتاج ثلاثة أشهر على الأقل. |
 | Investing rate | نسبة الاستثمار | الأموال المضافة للاستثمار ÷ الفلوس الداخلة؛ لا تزيد عن نسبة الادخار. |
-| Average monthly income | متوسط الدخل الشهري | متوسط دخل الفئات المختارة خلال آخر 3 أو 6 شهور مكتملة فيها دخل. قبل أول شهر مكتمل، يستخدم الدخل المسجل في المتكرر. |
+| Average monthly income | متوسط الدخل الشهري | متوسط دخل الفئات المختارة خلال آخر 3 أو 6 شهور مكتملة. الشهر بلا راتب يُحسب صفرًا بعد بدء الدخل، وتُتجاوز الشهور السابقة لأول راتب. قبل أول شهر مكتمل، يستخدم الدخل المسجل في المتكرر. |
 | Average monthly spending | متوسط المصروفات الشهرية | متوسط الإنفاق في فئات الميزانية خلال نفس 3 أو 6 شهور المكتملة؛ الاستثمارات والفئات لمرة واحدة خارج الحساب. يمكن إدخال صندوق الطوارئ. |
 | Base budget | الميزانية الأساسية | المبلغ الناتج عن قاعدة الميزانية: مبلغ ثابت أو نسبة من الدخل أو متوسط إنفاق. |
 | Carryover | المبلغ المرحّل | المتبقي في خطة الشهر الماضي، إذا كان الترحيل مفعلاً. |
