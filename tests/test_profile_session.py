@@ -286,6 +286,43 @@ def test_abandoned_restore_with_unprepared_control_store_is_retired(
     session.close()
 
 
+def test_resume_does_not_recreate_missing_control_singleton(tmp_path, monkeypatch):
+    from lightning.database.promotion import SqlitePromotionJournalStore
+    from lightning.runtime.restore import RestoreManifest
+
+    session, _ = created(tmp_path)
+    live, paths = session.paths.db_path, session.paths
+    selected = session.container.backup_now()
+    session.close()
+    live_before = live.read_bytes()
+
+    initialize = SqlitePromotionJournalStore.initialize_accepted
+
+    def fail_after_initialize(store, *args, **kwargs):
+        initialize(store, *args, **kwargs)
+        raise OSError("injected interruption after accepted checkpoint initialization")
+
+    monkeypatch.setattr(SqlitePromotionJournalStore, "initialize_accepted", fail_after_initialize)
+    with pytest.raises(ProfileError):
+        session.restore_backup(str(live), str(selected), PASSWORD)
+    monkeypatch.setattr(SqlitePromotionJournalStore, "initialize_accepted", initialize)
+
+    (marker,) = paths.data_dir.glob(".lightning-restore-*.state")
+    manifest = RestoreManifest.from_bytes(marker.read_bytes())
+    control = paths.data_dir / f".lightning-restore-{manifest.operation_id}.sqlite"
+    with sqlite3.connect(control) as connection:
+        connection.execute("DELETE FROM promotion_control WHERE singleton=1")
+        assert connection.execute("SELECT COUNT(*) FROM promotion_control").fetchone()[0] == 0
+
+    session.retry_at = 0.0
+    with pytest.raises(ProfileError, match="readable matching journal|locked"):
+        session.resume_interrupted_restore(str(live), PASSWORD)
+    assert RestoreManifest.from_bytes(marker.read_bytes()).state == "PENDING"
+    assert live.read_bytes() == live_before
+    with sqlite3.connect(control) as connection:
+        assert connection.execute("SELECT COUNT(*) FROM promotion_control").fetchone()[0] == 0
+
+
 def test_completed_restore_blocks_if_previous_checkpoint_is_missing(tmp_path):
     session, _ = created(tmp_path)
     live, data_dir = session.paths.db_path, session.paths.data_dir

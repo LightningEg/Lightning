@@ -646,8 +646,18 @@ class EncryptedBackupRestorer:
                         raise OSError("unsafe restore journal")
                     # Read-write under the held profile lock: a crash inside a
                     # control transaction can leave a hot journal to roll back.
-                    store = SqlitePromotionJournalStore(journal_path)
-                    observed = store.read_state()
+                    # Validate the existing record before using the store's
+                    # constructor, which initializes a new schema/singleton.
+                    # Missing control records must stay ambiguous, not become
+                    # empty stores that appear safe to retire.
+                    connection = sqlite3.connect(journal_path, timeout=5, isolation_level=None)
+                    try:
+                        connection.execute("PRAGMA synchronous=FULL")
+                        observed = SqlitePromotionJournalStore._read_from(connection)
+                    finally:
+                        connection.close()
+                    if observed.journal is not None:
+                        store = SqlitePromotionJournalStore(journal_path)
                 except Exception as exc:
                     raise ProfileError("The pending restore has no readable matching journal; this profile remains locked.") from exc
             if observed is None or observed.journal is None:
