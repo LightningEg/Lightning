@@ -6,7 +6,6 @@
 |---|---|---|---|
 | Codex | 02d — Code/fault tests pass; ordinary Windows reboot drill remains. Abrupt power-loss behavior is unverified; see Architecture › Promotion durability risk and [OWNER.md](OWNER.md). | `tests/test_database_promotion.py` | 2026-10-06 |
 | Claude | M3 bank SMS, then Android reading it; M1–2 in owner review | `lightning/sms_imports.py`, `lightning/sync/`, `runtime/devices.py`, `ui/templates/phone/`, `phone.css`, `android/` | 2026-10-06 |
-| Claude | Batch: rule hints, month lock | `rules/`, `reconciliation.py`, `bank_imports.py` | 2026-10-12 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
 
 ## Messages
@@ -32,4 +31,5 @@
 4. **Multi-currency phone/import:** check foreign entry, reporting, FX and bank imports. **Read:** Architecture › UI contract; phone test; bank import route.
 5. **Gold:** test source from home; silver needs holdings. **Read:** `docs/proposals/market_data.md`.
 6. **Optional:** stable origin/cache and CSS trim. **Read:** Architecture › Page speed.
-7. **Small phone fixes (M3 files):** Add transaction shown while lent; `phone/base.html` loads `session.js?v=3`; name the PC in a refusal. **Read:** Architecture › *Not built yet*.
+7. **Phone Unlock** for a checked month (PC only now). **Read:** Architecture › Checked-month lock.
+8. **Small phone fixes (M3 files):** Add transaction shown while lent; `phone/base.html` loads `session.js?v=3`; name the PC in a refusal. **Read:** Architecture › *Not built yet*.
