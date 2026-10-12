@@ -280,6 +280,8 @@ class BankImportService:
                 pending_elsewhere.setdefault((staged["Date"], staged["Amount"]), other["file_name"])
             except (TypeError, ValueError, KeyError):
                 continue
+        locked_through = self.db.scalar("SELECT date FROM reconciled_through WHERE account_id=?",
+                                        (batch["account_id"],)) or ""
         seen_refs = set()
         for row in rows:
             record = json.loads(row["raw_json"])
@@ -327,7 +329,12 @@ class BankImportService:
             parsed["_whom"] = cp["name"] if cp and cp["active"] else ""
             parsed["_possible_duplicate"] = bool(ref_duplicate or parsed["_similarity_warning"]
                                                  or parsed["_voided_earlier"] or parsed["_link_candidates"])
+            # A day already checked against the bank cannot take new rows: skipped by default, never ready.
+            parsed["_locked"] = bool(locked_through and not parsed.get("_errors")
+                                     and str(parsed.get("Date", "")) <= locked_through)
+            parsed["_locked_through"] = locked_through if parsed["_locked"] else ""
             parsed["_ready"] = bool(not parsed.get("_errors") and not parsed["_possible_duplicate"]
+                                    and not parsed["_locked"]
                                     and not parsed["_suggestions"] and not parsed["_needs_account"]
                                     and (parsed["_category_id"] or parsed["_transfer_target"]))
             parsed["_import_row_id"] = row["id"]
@@ -338,7 +345,9 @@ class BankImportService:
         claimed = set()
         for parsed in result:
             free = [c for c in parsed["_link_candidates"] if c["id"] not in claimed]
-            if free:
+            if parsed["_locked"]:
+                parsed["_default_match"] = "skip"
+            elif free:
                 parsed["_default_match"] = f"link:{free[0]['id']}"
                 claimed.add(free[0]["id"])
             else:

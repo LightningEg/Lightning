@@ -98,7 +98,7 @@ Linux and Windows (fingerprint `a00fc4f576edb7c9`). Phone timings: unlock with p
 write 0.06 s, unlock with recovery key 1.79 s, reopen 0.65 s. Lesson: name every Chaquopy source folder; CI now
 checks the APK carries the probe, the round-trip and the fixture. Since migration 0044 the rebuilt fixture's
 fingerprint is `5c89115a01678f85` (only its schema lines changed). Migration 0049 adds the
-currency registry; its refreshed fixture fingerprint is `15bc54a5bd7bae12`; after 0050–0052 it is `508597be08ffe695`.
+currency registry; its refreshed fixture fingerprint is `15bc54a5bd7bae12`; after 0050–0052 it was `508597be08ffe695`, and `7415034f564bb966` after 0053.
 
 **04c: one shared page (2026-10-06, Claude).** At launch the probe also renders every finance page of the dummy
 profile on the owning thread, with no server (`runtime/selfcheck.finance_page_checks`). **Open Lightning (04c)**

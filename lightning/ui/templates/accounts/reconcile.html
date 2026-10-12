@@ -19,7 +19,12 @@
 {% if check %}<section class="card reconcile-result">
   {% if check.matches %}
   <h2>{{ "It matches"|tr(locale) }}</h2>
-  <p>{{ account.name }} matches your bank on {{ check.through }}. Nothing to do.</p>
+  <p>{{ account.name }} matches your bank on {{ check.through }}.</p>
+  <p class="muted small">{{ "Lock it and nothing on or before this day can be changed by accident, not even by an import. You can unlock it later."|tr(locale) }}</p>
+  <form method="post" action="/accounts/{{ account.id }}/reconcile/lock" class="actions">
+    <input type="hidden" name="date" value="{{ check.through }}"><input type="hidden" name="balance" value="{{ balance_input }}">
+    <button class="btn primary">{{ "Lock through this day"|tr(locale) }}</button>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
   {% elif check.small %}
   <h2>{{ "A small difference"|tr(locale) }}</h2>
   <p>Lightning is {{ check.difference|abs|money }} {{ account.currency }} {{ 'below' if check.difference > 0 else 'above' }} your bank, within the {{ check.limit|money }} that counts as small (1% of the balance, at least 100).</p>

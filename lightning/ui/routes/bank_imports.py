@@ -256,7 +256,7 @@ def _review_groups(rows: list[dict], form=None) -> list[dict]:
             "total": sum((_amount(r) for r in members), ZERO),
             "errors": [r for r in members if r.get("_row_error") or r.get("_errors")],
             "duplicates": len(duplicates),
-            "needs": any(not r.get("_ready") for r in members if r not in duplicates),
+            "needs": any(not r.get("_ready") for r in members if r not in duplicates and not r.get("_locked")),
             "category": value("category", str(lead.get("_category_id") or "") if len(categories) == 1 else ""),
             "counterparty": value("counterparty", lead.get("Counterparty") or ""),
             "counterparty_choice": value("counterparty_choice", lead.get("_counterparty_choice") or ""),

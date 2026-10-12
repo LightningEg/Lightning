@@ -44,6 +44,7 @@
   {% if account_held_value %}<div><span class="muted small">{{ 'In this account'|tr(locale) }}</span><b>{{ account_value|money(False, 0) }}</b></div><div><span class="muted small">{{ fig.what_you_own.label }}</span><b>{{ account_owned_value|money(False, 0) }}</b></div><div><span class="muted small">{{ fig.held_for_others.label }}</span><b>{{ account_held_value|money(False, 0) }}</b></div>{% else %}<div><span class="muted small">{{ 'Balance'|tr(locale) }}</span><b>{{ account_value|money(False, 0) }}</b></div>{% endif %}
   <span class="muted small">{{ account.currency }} · {{ account.type_label }}{% if account.institution %} · {{ account.institution }}{% endif %}</span>
 </div>
+{% if locked_through %}<form method="post" action="/accounts/{{ account.id }}/unlock" class="muted small">{{ 'Checked against the bank through'|tr(locale) }} {{ locked_through }} <button class="btn small">{{ 'Unlock'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
 {% else %}
 <div class="acct-title"><h1>{{ 'Transactions'|tr(locale) }}</h1><p class="muted small">Every account · {{ base }}</p></div>
 <div class="acct-figures">
