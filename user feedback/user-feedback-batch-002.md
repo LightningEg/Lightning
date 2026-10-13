@@ -3,7 +3,7 @@
 - **Source:** Google Drive → `Lightning Data` → `App Feedback`
 - **Feedback dates:** 3–9 October 2026
 - **Processed:** 13 October 2026
-- **Builds represented:** 0.4.0-beta.1, 0.5.0-beta.1, 1.0.0-beta.1-windows, 1.0.0-beta.1-android
+- **Builds represented:** 0.4.0-beta.1, 0.5.0-beta.1, 1.0.0-beta.1-android
 - **Coverage:** 42 genuine submissions; excludes two test rows and one diagnostic row
 - **Traceability:** Source worksheet row numbers are used below because the Ticket # field repeats across sessions/builds.
 - **Privacy:** Submitter names, email addresses, session IDs, and attachment URLs are omitted.
@@ -93,14 +93,14 @@ Users report slow navigation, lost context after actions, and slow multi-image f
 
 ### 6. Interface clarity, setup, and visual defects
 
-**Source rows:** 33, 44, 47, 68, 71–75
+**Source rows:** 33, 43–44, 47, 71–75
 
 - **Rows 33, 43 — password policy:** Remove the fixed 12-character limit and show optional strong-password guidance instead. (Two submissions.)
   - **Investigate:** Current validation and security policy; preserve secure hashing and avoid weakening other protections.
 - **Row 44 — stale demo label:** A screen still says “Omar’s test” although the profile is now Mohab.
   - **Investigate:** Whether the label is seeded demo copy or stale profile-derived state; remove hard-coded personal test content.
 - **Row 47 — small settings icon:** Increase the icon’s usable hit target/readability.
-- **Row 68 — mobile date bar:** Android date bar differs from the other bar and is clipped.
+- **Row 71 — mobile date bar:** Android date bar differs from the other bar and is clipped.
 - **Row 72 — setup guide:** Add a completion/done action so the guide does not appear every time.
 - **Row 73 — review queue expiry:** Give “needs review” items an expiry (suggested two days) so stale items do not accumulate indefinitely.
   - **Investigate:** Whether expiry means hide, archive, or delete; preserve user data and explain the behavior.
@@ -117,7 +117,7 @@ Users report slow navigation, lost context after actions, and slow multi-image f
 1. **Correctness and data integrity:** XIRR (row 61), dated cash forecasts (rows 34–35), transfer fee/principal separation (row 32), and reserve state refresh (row 67).
 2. **Workflow blockers:** unusable selectors (row 39), settlement account availability (row 37), sluggish navigation/context loss (rows 36, 57), and multi-image feedback latency (row 76).
 3. **Clarity and trust:** target allocation validation (rows 46, 48), current versus forecast semantics (rows 34–35), goal projections (row 65), and “fall from highest” (row 63).
-4. **Visual and interaction refinements:** Overview cards/charts, clipped controls, setup completion, and alignment (rows 38, 45, 49–56, 68, 71–75).
+4. **Visual and interaction refinements:** Overview cards/charts, clipped controls, setup completion, and alignment (rows 38, 45, 49–56, 71–75).
 
 These are investigation signals, not committed priorities. Confirm reproduction and implementation context before selecting work.
 
