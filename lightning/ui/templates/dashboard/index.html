@@ -9,6 +9,7 @@
 <section class="card setup-card" aria-labelledby="setup-heading">
   <div class="card-head"><div><h2 id="setup-heading">{{ 'Get set up'|tr(locale) }}</h2><p>{{ done }} of {{ setup|length }} done · each step makes the Overview more useful</p></div></div>
   <div class="overview-inline-list">{% for step in setup %}{% if step.done %}<div class="overview-action-row setup-step is-done"><span><b>{{ step.label }}</b><small>{{ step.detail }}</small></span><span class="status-word"><i class="dot dot-in"></i>{{ "Done"|tr(locale) }}</span></div>{% else %}<a class="overview-action-row setup-step" href="{{ step.href }}"><span><b>{{ step.label }}</b><small>{{ step.detail }}</small></span><span>{{ step.action }}</span></a>{% endif %}{% endfor %}</div>
+<form method="post" action="/setup/guide"><input type="hidden" name="action" value="dismiss"><button class="btn small">{{ "Done with setup"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 </section>
 {% endif %}
 {% if attention %}
@@ -69,8 +70,9 @@
           <div class="overview-headline">{% if pos.if_you_sold_today is not none %}{{ pos.if_you_sold_today|money }} <small>{{ base }}</small>{% else %}Unavailable{% endif %}</div>
           <div class="overview-inline-list">
             <div class="overview-static-row"><span>{{ fig.free_cash.label }}</span><b>{{ pos.free_cash|money if pos.free_cash is not none else 'Unavailable' }}</b></div>
+            <details class="overview-disclosure"><summary><span>{{ fig.holdings_after_sale.label }}</span><b>{{ pos.holdings_after_sale|money }}</b></summary><div class="overview-disclosure-body">
             {% for cls in pos.classes if cls.value %}<a class="overview-static-row" data-popup-open href="/birdview/class/{{ cls.id }}?as_of={{ as_of }}"><span>{{ cls.name }} <small>{{ cls.value|money }}{% if cls.locked_until %} · locked until {{ cls.locked_until }}{% else %} × {{ '%g'|format(cls.factor) }}%{% endif %}</small></span><b>{{ cls.after_sale|money }}</b></a>{% endfor %}
-            <div class="overview-static-row overview-subtotal"><span>{{ fig.holdings_after_sale.label }}</span><b>{{ pos.holdings_after_sale|money }}</b></div>
+            </div></details>
           </div>
           {% if pos.if_you_sold_today is none %}<p class="muted small">{{ pos.unavailable_reason }}</p>{% endif %}
         </section>

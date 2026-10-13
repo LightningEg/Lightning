@@ -117,7 +117,7 @@ async def save_emergency_fund(request: Request):
             return Response(exc.message, status_code=400, media_type="text/plain")
         return render(request, "reserves.html", status_code=400, **_context(request, exc.message))
     if request.headers.get("X-Requested-With") == "fetch":
-        return Response("Saved", status_code=204)
+        return render(request, "reserves.html", **_context(request))
     return redirect("/reserves", _with_plan(c, f"Saved Emergency Fund: {reserve['allocated']} reserved."))
 
 
@@ -137,7 +137,7 @@ async def edit_reserve(request: Request, reserve_id: int):
             return Response(exc.message, status_code=400, media_type="text/plain")
         return redirect("/reserves", exc.message)
     if request.headers.get("X-Requested-With") == "fetch":
-        return Response("Saved", status_code=204)
+        return render(request, "reserves.html", **_context(request))
     return redirect("/reserves", _with_plan(c, f"Saved {reserve['name']}."))
 
 
@@ -152,7 +152,7 @@ async def allocate_reserve(request: Request, reserve_id: int):
             return Response(exc.message, status_code=400, media_type="text/plain")
         return redirect("/reserves", exc.message)
     if request.headers.get("X-Requested-With") == "fetch":
-        return Response("Saved", status_code=204)
+        return render(request, "reserves.html", **_context(request))
     return redirect("/reserves", _with_plan(c, f"Updated cash assigned to {reserve['name']}."))
 
 

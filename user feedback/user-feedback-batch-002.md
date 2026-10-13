@@ -7,11 +7,11 @@
 - **Coverage:** 42 genuine submissions; excludes two test rows and one diagnostic row
 - **Traceability:** Source worksheet row numbers are used below because the Ticket # field repeats across sessions/builds.
 - **Privacy:** Submitter names, email addresses, session IDs, and attachment URLs are omitted.
-- **Interpretation:** Polished summaries preserve user intent; they are not requirements or product decisions. Investigate current behavior before proposing a fix.
+- **Interpretation:** The grouped feedback records historical submissions. Current outcomes are in the audit below; reviewed batch markers do not mean every requested feature is implemented.
 
 ## Executive summary
 
-Feedback clusters around cash planning semantics, investment accuracy and discoverability, Overview/report clarity, and stateful workflows that feel slow or lose context. The most consequential reported defects are incorrect XIRR behavior, missing/incorrect investment analysis, stale cash cards after saving, confusing or unusable form controls, clipped mobile/help UI, and navigation or save actions that reset context. Feature requests include date-aware cash forecasts, user-defined goals, automated investment price data, bulk edits, and richer charts.
+Feedback clusters around cash planning semantics, investment accuracy and discoverability, Overview/report clarity, and stateful workflows that feel slow or lose context. The most consequential reported defects are incorrect XIRR visibility, incomplete allocation handling, stale cash cards after saving, confusing or unusable form controls, clipped mobile/help UI, and navigation or save actions that reset context. Feature requests include date-aware cash forecasts, user-defined goals, automated investment price data and richer charts.
 
 ## Investigation instructions for an AI
 
@@ -86,7 +86,7 @@ Users report slow navigation, lost context after actions, and slow multi-image f
 
 **Source rows:** 32, 37
 
-- **Row 32 — transfer fees:** Allow a transaction to be split into the investment transfer amount and a separate fee. Example: EGP 1,000 invested with 1% fees appears as EGP 1,001 leaving the bank, which obscures the actual investment amount.
+- **Row 32 — transfer fees:** Allow a transaction to be split into the investment transfer amount and a separate fee. The original example mixes EGP 1,000, a 1% fee and an EGP 1,001 debit. These numbers conflict: 1% implies EGP 10 and an EGP 1,010 debit; an EGP 1 fee implies 0.1%. Confirm the actual fee before building a reproduction.
   - **Investigate:** Import reconciliation, transfer pairing, fee accounting, and whether the split preserves the bank statement total without overstating invested principal.
 - **Row 37 — payment settlement accounts:** Settlement only offers the payroll account; user expects other configured accounts such as Vodafone Cash, cash, and savings.
   - **Investigate:** Account eligibility/filtering for settlement and whether all profile accounts should be available.
@@ -124,3 +124,65 @@ These are investigation signals, not committed priorities. Confirm reproduction 
 ## Traceability and batch status
 
 The 42 included submissions are source rows 32–67 and 71–76 in the `App Feedback` tab. Rows 68 and 70 are test entries; row 69 is a diagnostic entry. Rows are cited rather than Ticket # values because those ticket numbers repeat across sessions/builds. The corresponding blank batch markers have been assigned `002 · reviewed`. Three attachment URLs that had landed in the Batch # column were moved to a dedicated source-sheet column, preserving two excluded test/diagnostic attachments and one mobile date-bar attachment. No URLs or personal identifiers are copied into this report.
+
+
+## Current-code audit — 13 October 2026
+
+Baseline: app main `98873c7`. Each included source row appears once below. “Existing” means the current implementation addresses the reported behavior; “Request” means an enhancement or product choice remains, rather than a reproduced defect. This audit changes no ledger history or private profile data.
+
+| Source row | Topic | Outcome and evidence |
+| --- | --- | --- |
+| 32 | Split transfer principal and fee | **Request.** `TransactionService.update_expense_split` supports ordinary expenses only. Transfer/fee splitting during import remains unbuilt; correct the inconsistent fee example first. |
+| 33 | Password limits | **Existing.** `security.keys._password_bytes` accepts any nonempty password within a resource bound; profile UI suggests strong passwords without a 12-character minimum. |
+| 34 | Show only selected reserve matching field | **Existing.** `templates/reserves.html` enables only the chosen account/category/counterparty field; Ask remains a deliberate default. |
+| 35 | Forecast date-aware cash availability | **Partly existing.** `CashForecaster.forecast/_safe_to_spend` combine scheduled income, budget, reserves and dated payments before the next income. A daily balance path pinpointing the first shortfall date is still a request. |
+| 36 | Slow navigation | **Existing mitigations.** Request-scoped report/query caches and local fonts are documented under Architecture › Page speed; `test_reporting_performance.py` enforces query ceilings. The original latency is not a new measured current-build defect. |
+| 37 | Settlement account choices | **Existing.** `planning._paying_accounts` offers active bank, cash/mobile-wallet and brokerage accounts. Locked certificate portfolios are intentionally excluded. |
+| 38 | Pie chart and positive numeric-label feedback | **Design request.** Current Spending uses a treemap with exact values; switching to a pie is a preference requiring a chart decision. Retain the positive numeric-label signal. |
+| 39 | Reserve picker requires clearing text/options hidden | **Existing.** Own-data pickers use empty placeholders, select current text on focus, and allow search across saved options. Initial five suggestions follow guideline A10.7; typing reaches the other options. |
+| 40 | Feedback screenshots | **Existing, website.** `Lightning_website/app-feedback.html` and `js/current-status.js` allow up to five images per ticket. |
+| 41 | Income categories and payment wording | **Existing.** Planning handles INCOME, inflow and both-direction categories; income settlement wording differs from money out. See `test_planning.py` and the 12 October income-category fix. |
+| 42 | Remove redundant field definitions | **Existing redesign.** Current reserve form uses concise field labels and one selected matching control. No disabled-control defect reproduced. |
+| 43 | Password 12-character limit | **Duplicate of row 33; existing.** No current 12-character minimum. |
+| 44 | Stale demo name | **Existing redesign.** No hard-coded “Omar’s test” label remains in app source. User-entered profile names are not rewritten. |
+| 45 | KPI number hierarchy | **Existing redesign.** Current PC/phone cards follow the separate guideline layouts and larger tabular values. Universal centering is a visual preference. |
+| 46 | Empty/partial/over-100% target allocation | **Fixed.** Helper explains missing targets even before the first holding, accepts a positive total below 100%, displays the normalized targets used for suggestions, warns and preserves saved targets. Zero/negative/over-100% targets produce no split. `suggest_contributions`, planner route/template and regression tests. |
+| 47 | Small settings icon | **Obsolete screen layout.** Old investment header settings buttons were removed in the 7 October audit; current actions use the guideline’s button geometry. |
+| 48 | Allocation navigation | **Existing.** Planner links to `/settings?section=targets`; target controls live in that settings section. |
+| 49 | Settings help clipping | **Fixed.** `info-tips.js` places a shared body tooltip inside viewport bounds, with keyboard/touch handling. Browser checks cover a button at the lower-right edge. |
+| 50 | Trend change from prior point | **Request.** Shared trend dots currently report date and value, with plan status where applicable. Previous-point amount/percentage change remains unbuilt. |
+| 51 | Duplicate free-cash content | **Existing redesign.** Free cash now has its component breakdown and due-payment details; upcoming obligations have their own actions. |
+| 52 | Parent before children in sale estimate | **Fixed.** PC and phone lead with Holdings after sale, then expandable class details. Phone class rows now use `after_sale` rather than gross `value`, so they reconcile with sale factors. Regression checks use a 50% factor. |
+| 53 | Sankey praise | **Positive signal.** No corrective change required; preserve the visualization. |
+| 54 | Uniform card click destination | **Design request.** Current cards lead to transactions, plans or valuation details according to their figure. Routing every card to transactions would misrepresent plan/valuation figures; a universal interaction contract needs a product choice. |
+| 55 | Investment overview is uninformative | **Existing redesign.** Current Overview contains investment gain/loss and class detail linked to the investment report. The original broad preference supplies no reproducible defect. |
+| 56 | Select-all placement | **Layout request.** Category selection is supported; moving its label beside tracking controls remains a visual refinement. |
+| 57 | Page refresh loses position | **Existing, strengthened for reserves.** Normal posts/popup saves preserve scroll in `app.js`. Reserve autosaves now refresh only read-only summaries and retain focus, edits and expanded forms. Browser-tested. |
+| 58 | XIRR help clipped | **Fixed with row 49.** Shared viewport tooltip also applies to holding/XIRR help. |
+| 59 | Repeated holding detail/account text | **Existing redesign.** Current holdings table removes repeated detail lines; account appears only when multiple accounts need disambiguation. |
+| 60 | L/M/S colored horizon tags | **Request.** Current table supports full horizon names and horizon filtering; compact abbreviated tags remain a visual enhancement. |
+| 61 | XIRR full-year prerequisite | **Fixed.** Removed screen-only 365-day gates. Solver remains ACT/365 and supports shorter dated flows; same-day flows and offsetting daily totals stay unavailable even with a later report date. Portfolio and holding screens now show valid short-period results. |
+| 62 | Automatic prices/volume and shared cache | **Partly existing; later decisions govern.** Live sources, typed-price precedence, month-end backfill and shared price files exist. The 5 October source/licensing and month-end policy supersedes unrestricted shared scraping. Daily timing preferences and full trading-volume analysis remain requests. |
+| 63 | “Fall from highest” unclear | **Defined metric, preference remains.** Holding view now says “Fall from its high” and explicitly measures below the highest month-end price, with worst drawdown. Replacing that measure is a product choice, not evidence of an incorrect number. |
+| 64 | Expense heatmap should show outflows | **Existing.** Spending’s primary calendar is Total expenses (`day_calendar(..., 'spend')`); net cash flow is a separate secondary view. |
+| 65 | Configurable emergency goal/progress | **Later owner decision.** The 5 October plan contract uses a six-month emergency target, with selectable income/spending basis and shared top-up calculations. Project goals already allow fixed amounts, progress and reach-date estimates. An independently configurable emergency target would revise that contract. |
+| 66 | Grey fields | **Guideline treatment.** Grey/soft field wells are intentional; editability comes from enabled controls, not white backgrounds. No current disabled-field failure established from the submission alone. |
+| 67 | Enter-save leaves free-cash figures stale | **Fixed.** Reserve fetch saves return fresh rendered summaries and `reserve-autosave.js` applies them without replacing inputs. Serial saves keep later edits. Service/screen regression and functional browser checks. |
+| 71 | Mobile date bar clipped | **Existing 12 October fix.** Phone period controls and RTL dates were corrected in `phone.css`/RTL styles. Native Android/device appearance remains a device acceptance check. |
+| 72 | Setup guide cannot be completed/dismissed | **Fixed.** Done with setup persists a profile preference; Settings › Show setup guide reopens it. PC and phone use the same action; account/ledger data is untouched. |
+| 73 | Review queue should expire after two days | **Needs product decision.** Unposted imports and uncategorized transactions remain actionable until resolved/discarded. Automatic expiry could conceal unfinished financial work. Define whether only stale suggestions may be dismissed; do not delete ledger/import data by timeout. |
+| 74 | Disclosure arrows disturb number alignment | **Fixed.** Phone Overview arrows sit beside the item label; numeric values keep their own aligned column, including the sale-estimate parent. |
+| 75 | Mobile top bar is too white | **Device/design check.** Current phone chrome follows Part C; the submission does not distinguish native Android status bar from web app bar. Verify on the reported device before changing the theme. |
+| 76 | Five-image feedback submission slow | **External website request.** `current-status.js` prepares/compresses selected images before submit, two at a time, then submits attachments together. Background Drive staging, cancellation cleanup and a new upload protocol are not built. The reported ten seconds is not a current measured benchmark. |
+
+### Remaining requests for the next investigation
+
+Highest-impact remaining implementation work is transfer principal/fee splitting (row 32) and a dated balance path that identifies the first cash shortfall (row 35). Smaller requests are trend deltas, selection placement and horizon tags (rows 50, 56, 60). Chart type, universal card behavior, emergency-target policy and review expiry need product choices (rows 38, 54, 65, 73). Extra price schedules/volume analytics and pre-submission image staging are separate data/website work (rows 62, 76).
+
+The original feedback came from older builds. Do not reopen items marked Fixed or Existing solely because their historical text remains above; reproduce a regression first. Review the remaining device concerns on an ordinary Windows PC/Android phone before declaring release acceptance.
+
+### Validation
+
+Regression coverage exercises short and irregular XIRR cash flows, invalid/partial allocation targets, unchanged stored weights, fresh reserve summaries, setup dismissal/reopening, and phone sale-factor reconciliation. A Chromium browser exercise checks reserve totals after Enter, preserved focus/scroll, rapid consecutive saves, an edge-positioned help tooltip, and setup dismissal/reopening with no JavaScript errors. Full regression run: **1,381 passed, 9 skipped**. Final investment/XIRR/performance/Mohab follow-up: **158 passed**; final empty/partial-allocation and XIRR edge checks: **7 passed**. All four import contracts pass. Phone browser geometry also passes at **320, 360 and 390 pixels in English and Arabic**, including period controls, label-side arrows and bounded help tips.
+
+Integration check: after merging the concurrent v1.1 changes, 208 regression checks passed. The only failure was the upstream Overview contents table; the subsequent documentation cleanup was incorporated and documentation checks rerun before publication.

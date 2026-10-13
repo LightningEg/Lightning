@@ -392,3 +392,5 @@ html.phone[dir="rtl"] .period-buttons:has(.period-month-seg) > * { flex: 1 1 aut
 html.phone[dir="rtl"] .period-buttons:has(.period-month-seg) .period-button:not(.period-month-seg):not(#_) { padding: 0 6px; font-size: 13px; }
 html.phone[dir="rtl"] .period-buttons:has(.period-month-seg) .period-month-seg { min-width: max-content; }
 html.phone[dir="rtl"] .period-month-seg .period-step:not(#_):not(.x_) { flex: none; width: 22px; }
+
+.info-tooltip { position:fixed; z-index:10000; width:260px; max-width:calc(100vw - 24px); max-height:calc(100vh - 24px); overflow:auto; box-sizing:border-box; padding:10px 12px; border-radius:12px; background:var(--action); color:#fff; font:500 13px/1.45 var(--body); text-align:start; box-shadow:var(--shadow-float); white-space:normal; overflow-wrap:anywhere; }

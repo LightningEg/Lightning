@@ -99,7 +99,7 @@ The period picker (All time · YTD · Monthly · Custom) drives most visuals. A 
 |---|---|
 | Overview: stat cards, Cash flow, Investments section | Overview: Net worth over time (12 month ends); position cards (today) |
 | Budget: waffle, plan bar, Spent of plan | Budget: plans are monthly; longer periods add months |
-| Investments: waffle, Net gain or loss, allocation and biggest holdings (as of period end), money and value by class | Portfolio value sparkline (last 6 months); Dividends (year to date); XIRR (since first investment, after a year); horizon bar (today) |
+| Investments: waffle, Net gain or loss, allocation and biggest holdings (as of period end), money and value by class | Portfolio value sparkline (last 6 months); Dividends (year to date); XIRR (annualized since first investment, including periods shorter than a year); horizon bar (today) |
 | Expense analysis: KPI cards, treemap, now against usual, daily calendar or monthly summaries | "Usual" is the 6 whole months before the period; usual range, small multiples, heatmap use the 12 before it |
 | — | Holding page: whole history up to 24 month ends; sparklines last 6 |
 
@@ -199,7 +199,7 @@ Evidence, and what users of the Egyptian apps love and hate, are in [Competition
 | 5 | Spending history ("am I improving?") | Answered by Monarch. |
 | 6 | Give every pound a job | YNAB's "Ready to assign". |
 | 7 | Watchlists, shared household, receipts | Simplifi, Monarch, Lunch Money. |
-| 8 | Guided first setup | Done 2026-10-03 for the Overview ("Get set up"); import from other apps is project #11. |
+| 8 | Guided first setup | Done 2026-10-03 for the Overview ("Get set up", dismissible with Done with setup and reopenable from Settings); import from other apps is project #11. |
 
 Bank sync and bill negotiation are not adopted: local CSV stays the foundation. "Safe to spend" must always say which obligations and income it includes. Certificate projections use an actual/365 estimate, are never posted, and interest from the bank is not yet reconciled against them.
 

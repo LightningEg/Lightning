@@ -21,3 +21,20 @@ def test_the_box_shows_the_fund_after_payments_and_saving_it_changes_nothing(c, 
     c.reserves.set_emergency_fund("15,000")                 # topping it up adds to what it holds now
     emergency = next(r for r in c.reserves.list_active() if r["kind"] == "EMERGENCY")
     assert emergency["effective_allocated"] == Decimal("15000")
+
+
+def test_reserve_autosave_returns_fresh_server_calculated_summaries(c, setup):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    from lightning.core.money import fmt
+    from lightning.core.dates import today
+    reserve = c.reserves.create("Car insurance", "10000")
+    before = c.position.at(today()).free_cash
+    client = TestClient(create_app(c))
+    response = client.post(f"/reserves/{reserve['id']}/allocate", data={"allocated": "2000"},
+                           headers={"X-Requested-With": "fetch"})
+    assert response.status_code == 200
+    assert c.position.at(today()).free_cash == before - Decimal("2000")
+    assert 'data-reserve-refresh="overview"' in response.text
+    assert fmt(before - Decimal("2000"), places=0) in response.text
+    assert 'src="/static/reserve-autosave.js?v=1"' in response.text

@@ -19,7 +19,7 @@ from ..web import container, redirect, render
 from ...assets.catalog import instruments
 from ..periods import parse_period
 from ...investments.report import (PLANNER_MODES, build_investment_report, investing_rate, investment_period, saved_and_invested,
-                                    period_growth, results_by_asset, suggest_contributions)
+                                    period_growth, results_by_asset, suggest_contributions, normalized_target_weights)
 from .. import charts
 from lightning.core.figures import label
 from lightning.market.packs import chosen, read_zip
@@ -66,12 +66,6 @@ FIELDS = ("date", "account_id", "asset_id", "quantity", "price", "fees", "fees_i
 def _int(value) -> int | None:
     text = str(value or "").strip()
     return int(text) if text.isdigit() else None
-
-
-def _year_of_history(c, as_of) -> bool:
-    """An annualised return is shown only after a full year of holdings."""
-    first = c.investments.first_holding_date()
-    return bool(first) and (as_of - date.fromisoformat(first)).days >= 365
 
 
 @router.get("")
@@ -209,7 +203,7 @@ async def portfolio(request: Request):
                   has_assets=bool(c.assets.investments(active_only=True)), owned_value=owned_value,
                   owned_cost=owned_cost, owned_unrealized=owned_unrealized, custody_units=custody,
                   own_by_holding=own_by_holding, period=period, period_realized=p.realized-prior.realized,
-                  period_dividends=period_distributions, since_xirr=(p.xirr if not any(custody.values()) and _year_of_history(c, period.end) else None),
+                  period_dividends=period_distributions, since_xirr=(p.xirr if not any(custody.values()) else None),
                   owned_rows=owned_rows, period_activity=period_activity, period_error=period_error,
                   buckets=buckets, targets=targets, target_total=target_total,
                   owned_positions=owned_positions, max_class_result=max_class_result,
@@ -226,16 +220,6 @@ def _owned_split(split, units, quantity, gain) -> dict:
     share = units / quantity
     price_part = (split[0] * share).quantize(Decimal("0.01"))
     return {"price_part": price_part, "fx_part": gain - price_part}
-
-
-def _first_trade_dates(c, day: str) -> dict[tuple[int, int], str]:
-    first: dict[tuple[int, int], str] = {}
-    for line in c.reporting.investment_lines(day):
-        if line.get("asset_id") is None or line["type"] == "DIV":
-            continue
-        key = (line["account_id"], line["asset_id"])
-        first.setdefault(key, line["date"])
-    return first
 
 
 def _portfolio_value_spark(c, end: date) -> dict:
@@ -287,8 +271,6 @@ def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, rep
         horizons[horizon] += yours or ZERO
     for _, item in balances:
         horizons["Unassigned"] += item.value
-    first_dates = _first_trade_dates(c, day)
-    end_day = parse_date(day)
     # A holding in another currency: its gain from the price and from the exchange rate (Overview #16).
     splits = {(r["account_id"], r["asset_id"]): (r["price_part"], r["fx_part"]) for r in report.get("holdings", [])
               if r.get("price_part") is not None and "account_id" in r}
@@ -298,12 +280,10 @@ def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, rep
         g = groups.setdefault(name, {"name": name, "value": ZERO, "cost": ZERO, "rows": []})
         g["value"] += yours or ZERO
         g["cost"] += capital
-        first = first_dates.get((h.account_id, h.asset_id))
-        held_a_year = bool(first) and (end_day - parse_date(first)).days >= 365
         g["rows"].append({"h": h, "units": units, "average_cost": capital / units if units else None, "cost": capital,
                           "price": h.price, "value": yours, "gain": unrealized,
                           "gain_pct": unrealized / capital * 100 if unrealized is not None and capital else None,
-                          "xirr": h.xirr * 100 if h.xirr is not None and held_a_year and units == h.quantity else None,
+                          "xirr": h.xirr * 100 if h.xirr is not None and units == h.quantity else None,
                           "horizon": horizon, "weight": (yours or ZERO) / holdings_total * 100 if holdings_total else ZERO,
                           **_owned_split(splits.get((h.account_id, h.asset_id)), units, h.quantity, unrealized)})
     for name, item in balances:
@@ -400,6 +380,7 @@ async def _render_planner(request: Request, raw_amount: str="10000"):
         bucket=(meta["allocation_bucket"] if meta else None) or position.asset_class.split(" › ")[-1]
         values[bucket]+=value; total+=value
     targets = c.investments.target_weights()
+    planning_targets = normalized_target_weights(targets)
     target_total=sum(targets.values(),ZERO)
     suggestions=suggest_contributions(dict(values),targets,amount,mode)
     tones={cls.name:charts.class_tone(cls.code) for cls in c.assets.list_classes()}  # each class in its own colour
@@ -407,11 +388,11 @@ async def _render_planner(request: Request, raw_amount: str="10000"):
     for bucket in sorted(set(values)|set(targets),key=lambda b:(-values.get(b,ZERO),b.casefold())):
         value=values.get(bucket,ZERO); suggested=suggestions.get(bucket,ZERO)
         rows.append({"bucket":bucket,"value":value,"weight":value/total*100 if total else ZERO,
-                     "target":targets.get(bucket),"suggested":suggested,"tone":tones.get(bucket,"other"),
+                     "target":planning_targets.get(bucket),"suggested":suggested,"tone":tones.get(bucket,"other"),
                      "after":(value+suggested)/(total+amount)*100 if total+amount else ZERO})
     return render(request,"investments/planner.html",amount=amount,mode=mode,rows=rows,target_total=target_total,
                   monthly_goal=c.settings.get("investment_monthly_goal") or "",
-                  planner_ready=target_total==100,allocation_sum=sum((r["suggested"] for r in rows),ZERO))
+                  planner_ready=bool(planning_targets),allocation_sum=sum((r["suggested"] for r in rows),ZERO))
 
 
 @router.get("/holding/{asset_id:int}")
@@ -436,8 +417,6 @@ async def holding_detail(request: Request, asset_id: int):
     previous=next((x for x in before.positions if x.asset_id==asset_id and x.account_id==h.account_id),None)
     journey = visuals.holding_journey(c, h.account_id, asset_id, parse_date(day))
     period_realized = h.realized-(previous.realized if previous else ZERO)
-    first = journey.get("first")
-    held_a_year = bool(first) and (parse_date(day) - parse_date(first)).days >= 365
     gain_pct = h.unrealized / h.cost_basis * 100 if h.unrealized is not None and h.cost_basis else None
     total_return = h.total_return
     breakdown = charts.waterfall(("What you paid", h.cost_basis),
@@ -447,7 +426,7 @@ async def holding_detail(request: Request, asset_id: int):
     stale_price=any(row["asset_id"]==asset_id for row in c.reporting.stale_prices(day))
     return render(request,"investments/holding.html",h=h,asset=asset,bucket=bucket,horizon=horizon,day=day,stale_price=stale_price,
                   journey=journey, gain_pct=gain_pct, total_return=total_return, breakdown=breakdown,
-                  xirr_pct=h.xirr * 100 if h.xirr is not None and held_a_year else None,
+                  xirr_pct=h.xirr * 100 if h.xirr is not None else None,
                   start=start,period_realized=h.realized-(previous.realized if previous else ZERO),
                   period_dividends=h.dividends-(previous.dividends if previous else ZERO),
                   allocation_classes=_allocation_classes(c),
