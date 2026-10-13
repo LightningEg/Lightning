@@ -110,7 +110,7 @@ Users report slow navigation, lost context after actions, and slow multi-image f
 
 ### 7. Low-information submissions excluded from investigation
 
-- **Rows 68–70 are not all valid feedback:** row 68 is a “test” submission; row 69 is explicitly marked diagnostic with a request to delete it after checking; row 70 is another “test” submission. They are excluded from the 42-item batch. Preserve any diagnostic evidence only under the project’s data-retention rules; do not treat these as user feature requests.
+- **Excluded rows 68–70:** rows 68 and 70 are marked “test”; row 69 is explicitly marked diagnostic with a request to delete it after checking. Exclude all three from product investigation. Preserve diagnostic evidence only under the project’s data-retention rules.
 
 ## Prioritization signals
 
@@ -123,4 +123,4 @@ These are investigation signals, not committed priorities. Confirm reproduction 
 
 ## Traceability and batch status
 
-The 42 included submissions are source rows 32–67 and 71–76 in the `App Feedback` tab. Rows 68 and 70 are test entries; row 69 is a diagnostic entry. Rows are cited rather than Ticket # values because those ticket numbers repeat across sessions/builds. The corresponding blank batch markers have been assigned `002 · reviewed`. Attachment URLs from the three excluded/misaligned rows are preserved in a dedicated source-sheet column; no URLs or personal identifiers are copied into this report.
+The 42 included submissions are source rows 32–67 and 71–76 in the `App Feedback` tab. Rows 68 and 70 are test entries; row 69 is a diagnostic entry. Rows are cited rather than Ticket # values because those ticket numbers repeat across sessions/builds. The corresponding blank batch markers have been assigned `002 · reviewed`. Three attachment URLs that had landed in the Batch # column were moved to a dedicated source-sheet column, preserving two excluded test/diagnostic attachments and one mobile date-bar attachment. No URLs or personal identifiers are copied into this report.
