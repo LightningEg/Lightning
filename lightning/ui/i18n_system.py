@@ -589,6 +589,17 @@ MARKETS = {
     "اللي تملكه {a} · مملوك لـ others {b}": "اللي تملكه {a} · مملوك لغيرك {b}",
 }
 TEMPLATES = {
+    "locked until {date}": "مقفول لحد {date}",
+    "Done with setup": "خلصت الإعداد",
+    "Show setup guide": "عرض دليل الإعداد",
+    "Choose whether to show or dismiss the setup guide.": "اختار عرض دليل الإعداد أو إخفاءه.",
+    "Not enough dated cash flows to calculate a return": "مفيش تدفقات نقدية مؤرخة كفاية لحساب العائد",
+    "Set positive target weights totaling at most 100% before using the helper.": "حدد نسب مستهدفة موجبة مجموعها ما يزيدش عن 100٪ قبل استخدام المساعد.",
+    "Targets total {total}%. Suggestions scale them to 100%; your saved targets stay unchanged.": "مجموع النسب المستهدفة {total}٪. الاقتراحات بتكبرها لـ100٪ من غير تغيير النسب المحفوظة.",
+    "XIRR is your average yearly return since your first investment. It counts when you added or took out money, so a late deposit doesn't look like growth. It is annualized even when the holding period is shorter than a year.": "العائد السنوي الداخلي هو عائدك السنوي من أول استثمار. بيحسب توقيت إضافة وسحب الفلوس، حتى لو فترة الاحتفاظ أقل من سنة.",
+    "Annualized return, counting when money went in and out": "عائد سنوي بيحسب توقيت دخول وخروج الفلوس",
+    "Average yearly return, counting when you bought, sold and were paid. Annualized even for a holding period shorter than a year.": "عائد سنوي بيحسب توقيت الشراء والبيع والعوائد، حتى لو فترة الاحتفاظ أقل من سنة.",
+
     "part of it": "جزء منه",
     "XIRR is your average yearly return since your first investment. It counts when you added or took out money, so a late deposit doesn't look like growth. It shows once you have held for a full year.": "العائد السنوي الداخلي هو متوسط عائدك السنوي من أول استثمار. بيحسب وقت ما أضفت فلوس أو سحبت، فالإيداع المتأخر مش بيبان كأنه نمو. بيظهر بعد ما تحتفظ بالاستثمار سنة كاملة.",
     "Discard this import? Nothing from {name} is posted. You can import the file again later.": "تلغي الاستيراد ده؟ ولا حاجة من {name} هتتسجل. تقدر تستورد الملف تاني بعدين.",

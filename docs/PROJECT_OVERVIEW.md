@@ -114,7 +114,7 @@ The period picker (All time · YTD · Monthly · Custom) changes what most visua
 |---|---|
 | **Overview:** the four stat cards; Cash flow (net flow, column waterfall, Sankey); the Investments section | **Overview:** Net worth over time (the last 12 month ends); the position cards (as of today) |
 | **Budget:** the savings waffle, the plan bar and Spent of plan | **Budget:** plans are monthly, so a longer period adds up its months |
-| **Investments:** the saved-and-invested waffle; Net gain or loss with Growth; the allocation donut and biggest holdings (as of the period's end); money and value by class | **Investments:** the Portfolio value sparkline (always the last six months); Dividends collected (year to date); XIRR (since the first investment, shown after a full year); the horizon bar (today) |
+| **Investments:** the saved-and-invested waffle; Net gain or loss with Growth; the allocation donut and biggest holdings (as of the period's end); money and value by class | **Investments:** the Portfolio value sparkline (always the last six months); Dividends collected (year to date); XIRR (annualized since the first investment, including periods shorter than a year); the horizon bar (today) |
 | **Expense analysis:** the four KPI cards; the treemap; now against usual; daily calendar for short periods and monthly summaries for longer periods | **Expense analysis:** "usual" is the six whole months before the period; the usual range, small multiples and heatmap history use the 12 whole months before it |
 | — | **Holding page:** the holding's whole history, up to 24 month ends; sparklines for the last six |
 
@@ -357,7 +357,7 @@ From a full UX review on 2026-10-03: Mohab's year at a 1,366 × 768 window (the 
 
 **Next, by impact:**
 
-1. ~~**First run.**~~ Done 2026-10-03: a "Get set up" card on the Overview until five steps are done; the welcome lists certificates and uses real icons; a new bank account leads with Import a statement; Plan shows an empty state instead of a forecast from no income.
+1. ~~**First run.**~~ Done 2026-10-03: a "Get set up" card on the Overview until five steps are done or the user chooses Done with setup (Settings can show it again); the welcome lists certificates and uses real icons; a new bank account leads with Import a statement; Plan shows an empty state instead of a forecast from no income.
 2. ~~**Import review, one decision per name.**~~ Done 2026-10-03: one choice per imported name with its rows collapsed under it (Mohab answers 17 names instead of 43 rows; the 300-row statement is 287 KB instead of 2.2 MB); "Discard this import"; Import CSV offers to continue or discard a waiting review. Still open: the button says "Post ready rows" while undecided rows post as Unaccounted.
 3. ~~**The category picker.**~~ Done 2026-10-03: focus lists every choice under its L1 header and selects the current text; the import starts on an empty "Choose a category".
 4. ~~**Bulk edit.**~~ Done 2026-10-03: Set category for selected rows; transfers, investments and splits are skipped and counted. Still open: bulk counterparty.

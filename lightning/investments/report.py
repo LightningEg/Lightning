@@ -331,6 +331,14 @@ def results_by_asset(investments, money_from_others, reporting, opening_day: str
 PLANNER_MODES = ("prorata", "fill_gaps")
 
 
+def normalized_target_weights(targets: dict[str, Decimal]) -> dict[str, Decimal]:
+    """Planning-only weights; never change the user's saved target allocation."""
+    total = sum(targets.values(), ZERO)
+    if total <= ZERO or total > 100 or any(weight < ZERO for weight in targets.values()):
+        return {}
+    return {bucket: weight * 100 / total for bucket, weight in targets.items()}
+
+
 def suggest_contributions(values: dict[str, Decimal], targets: dict[str, Decimal], amount: Decimal,
                           mode: str = "prorata") -> dict[str, Decimal]:
     """Split new money across allocation classes to move toward their targets; nothing is ever sold.
@@ -340,10 +348,12 @@ def suggest_contributions(values: dict[str, Decimal], targets: dict[str, Decimal
     so both modes work on shortfalls. ``prorata`` gives every under-target class the same fraction of
     its gap. ``fill_gaps`` levels from the top: the furthest-behind class is filled until it matches
     the next, then both together, and so on. When the money covers every gap the two agree.
-    Returns {} until the targets total 100%."""
+    Partial positive targets are normalized for this suggestion only; saved targets stay unchanged.
+    Returns {} for missing, negative or over-100% targets."""
     if mode not in PLANNER_MODES:
         raise ValueError(f"Unknown planner mode: {mode}")
-    if amount <= ZERO or sum(targets.values(), ZERO) != 100:
+    targets = normalized_target_weights(targets)
+    if amount <= ZERO or not targets:
         return {}
     total = sum(values.values(), ZERO) + amount
     shortfalls = {b: s for b, t in targets.items() if (s := t * total / 100 - values.get(b, ZERO)) > ZERO}

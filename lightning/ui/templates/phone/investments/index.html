@@ -25,7 +25,7 @@
    "sub": (growth|signed_pct ~ '% ' ~ fig.period_growth.label|lower) if growth is not none else ''},
   {"surface": 'hold', "label": fig.portfolio_value.label, "value": value_spark.latest, "empty": 'Unavailable', "href": '#holdings-heading',
    "badge": {"tone": 'flat', "text": 'Today'},
-   "sub": ('XIRR ' ~ (since_xirr * 100)|signed_pct ~ '% a year') if since_xirr is not none else ''},
+   "sub": (('XIRR'|tr(locale)) ~ ' ' ~ (since_xirr * 100)|signed_pct ~ ('% a year'|tr(locale))) if since_xirr is not none else ''},
 ] %}
 {{ kpi_tiles(tiles, base) }}
 {% if investment_report.missing %}<p class="flash">Prices missing: {% for issue in investment_report.missing %}{{ issue.asset }}{% if not loop.last %}, {% endif %}{% endfor %}. Their value may be out of date.</p>{% endif %}

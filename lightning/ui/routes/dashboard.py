@@ -243,9 +243,21 @@ async def set_welcome_currency(request: Request):
     return redirect("/", f"Profile currency set to {code}.")
 
 
+@router.post("/setup/guide")
+async def setup_guide(request: Request):
+    form = await request.form()
+    action = str(form.get("action", ""))
+    if action not in ("dismiss", "show"):
+        raise LightningError("Choose whether to show or dismiss the setup guide.")
+    container(request).settings.set("setup_guide_dismissed", "1" if action == "dismiss" else "0")
+    return redirect("/")
+
+
 def _setup_steps(c, accounts) -> list[dict] | None:
     """Get set up: the five things that make the Overview useful, in the order a new user meets them.
-    Shown until every step is done; each step is read from the data, so it ticks itself."""
+    Shown until every step is done or the user dismisses it; completed steps tick themselves."""
+    if c.settings.get("setup_guide_dismissed") == "1":
+        return None
     from lightning.planning.domain import PlanKind
     bank = next((a for a in accounts if a.account_type.value == "BANK" and a.active), None)
     waiting = c.bank_imports.first_pending_review()

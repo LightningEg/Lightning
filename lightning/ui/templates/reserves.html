@@ -15,16 +15,16 @@
 
 
 {% from "partials/charts.html" import key_notes, meter %}
-{{ key_notes(notes) }}
+<div data-reserve-refresh="notes">{{ key_notes(notes) }}</div>
 {% if error %}<p class="flash error">{{ error|tr(locale) }}</p>{% endif %}
-<p class="reserve-overview muted">{{ pos.reserves|money }} {{ base }} set aside in reserves; {{ fig.free_cash.label|lower }} is {{ pos.free_cash|money }} {{ base }} after them and bills due. <a href="/plan">{{ "How free cash is built"|tr(locale) }}</a></p>
+<p class="reserve-overview muted" data-reserve-refresh="overview">{{ pos.reserves|money }} {{ base }} set aside in reserves; {{ fig.free_cash.label|lower }} is {{ pos.free_cash|money }} {{ base }} after them and bills due. <a href="/plan">{{ "How free cash is built"|tr(locale) }}</a></p>
 
 <section class="card emergency-fund">
   <div class="section-head"><div><h2>{{ 'Emergency fund'|tr(locale) }}</h2></div></div>
   {% set avg = fund.average %}{% set what = 'income' if fund.basis == 'income' else 'spending' %}
-  {% if emergency_meter %}<div class="emergency-meter">{{ meter('Towards six months of ' ~ what, emergency_set_aside, fund.target, emergency_meter, '', '', 'target') }}</div>{% endif %}
+  <div data-reserve-refresh="emergency-progress">{% if emergency_meter %}<div class="emergency-meter">{{ meter('Towards six months of ' ~ what, emergency_set_aside, fund.target, emergency_meter, '', '', 'target') }}</div>{% endif %}
   {% if fund.target and fund.target > pos.cash_you_own %}<p class="notice">{{ "Your emergency target is more than the cash you own."|tr(locale) }}</p>{% endif %}
-  <div class="emergency-stats">
+  </div><div class="emergency-stats" data-reserve-refresh="emergency-stats">
     {% if fund.top_up %}<div><span class="muted small">{{ fig.emergency_top_up.label }}</span><b>{{ fund.top_up|money(False, 0) }}</b><small class="muted">{{ "a month to reach six months within two years; the budget leaves room for it"|tr(locale) }}</small></div>{% endif %}
     <div><span class="muted small">{{ fig[fund.figure].label }}</span><b>{{ (avg.amount or 0)|money }}</b><small class="muted">{% if avg.manual %}Set by hand in Settings{% elif avg.scheduled %}From your recurring income{% else %}{{ avg.window }} · {{ avg.months_counted }} month{{ '' if avg.months_counted == 1 else 's' }} with {{ what }}{% endif %}</small></div>
   </div>
@@ -43,19 +43,19 @@
   <ul class="reserve-rows">
     {% for reserve in reserves %}{% set status = 'Spent in full' if reserve.spent >= reserve.target else ('Partly spent' if reserve.spent > 0 else 'Not spent yet') %}<li class="reserve-row">
       <div class="reserve-line">
-        <div class="reserve-what"><b>{{ reserve.name }}</b><small class="muted">{{ ('Upcoming payment' if reserve.due_date else 'Savings goal') if reserve.kind == 'PROJECT' else 'Reserve' }}{% if reserve.due_date %} · due {{ reserve.due_date }}{% endif %}{% if reserve.recurrence != 'NONE' %} · {{ reserve.recurrence|lower }}{% endif %}</small></div>
-        <div class="reserve-set"><span class="muted small">Set aside of {{ reserve.target|money(False, 0) }}</span><form method="post" action="/reserves/{{ reserve.id }}/allocate" class="reserve-allocate" data-autosave-form>
+        <div class="reserve-what" data-reserve-refresh="name-{{ reserve.id }}"><b>{{ reserve.name }}</b><small class="muted">{{ ('Upcoming payment' if reserve.due_date else 'Savings goal') if reserve.kind == 'PROJECT' else 'Reserve' }}{% if reserve.due_date %} · due {{ reserve.due_date }}{% endif %}{% if reserve.recurrence != 'NONE' %} · {{ reserve.recurrence|lower }}{% endif %}</small></div>
+        <div class="reserve-set"><span class="muted small" data-reserve-refresh="target-{{ reserve.id }}">Set aside of {{ reserve.target|money(False, 0) }}</span><form method="post" action="/reserves/{{ reserve.id }}/allocate" class="reserve-allocate" data-autosave-form>
         <input class="money-input" type="text" name="allocated" value="{{ reserve.allocated|money(False, 2) }}" inputmode="decimal" aria-label="Amount set aside for {{ reserve.name }}" required>
         <span class="inline-save-status" aria-live="polite"></span>
       <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>
       </div>
       <div class="reserve-line">
-        <div class="reserve-meter"><div class="bartrack"><div class="bar" style="width:{{ reserve.progress }}%"></div></div>
+        <div class="reserve-meter" data-reserve-refresh="progress-{{ reserve.id }}"><div class="bartrack"><div class="bar" style="width:{{ reserve.progress }}%"></div></div>
           <small>{% if reserve.allocated >= reserve.target %}Fully funded{% else %}{{ (reserve.target - reserve.allocated)|money(False, 0) }} to fund{% endif %} · <span class="status-dot{{ ' is-done' if reserve.spent >= reserve.target }}">{{ status }}</span>{% if reserve.spent %} · {{ reserve.spent|money(False, 0) }} spent · {{ reserve.effective_allocated|money(False, 0) }} still set aside{% endif %}</small></div>
         <div class="reserve-actions">
       <form method="post" action="/reserves/{{ reserve.id }}/complete" class="reserve-complete"><button class="cat-icon" title="Complete" aria-label="Complete {{ reserve.name }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>
       </div>
-      {% if reserve.a_month or reserve.late %}<p class="muted small">{% if reserve.a_month %}About {{ reserve.a_month|money(False, 0) }} {{ base }} a month. {% endif %}{% if reserve.late %}{% if reserve.late.reached %}Your plan leaves {{ reserve.late.can|money(False, 0) }} a month for it: set that aside each month and it is ready in {{ reserve.late.reached }}.{% else %}Your plan leaves nothing for it yet.{% endif %}{% endif %}</p>{% endif %}
+      <p class="muted small" data-reserve-refresh="goal-{{ reserve.id }}"{% if not reserve.a_month and not reserve.late %} hidden{% endif %}>{% if reserve.a_month %}About {{ reserve.a_month|money(False, 0) }} {{ base }} a month. {% endif %}{% if reserve.late %}{% if reserve.late.reached %}Your plan leaves {{ reserve.late.can|money(False, 0) }} a month for it: set that aside each month and it is ready in {{ reserve.late.reached }}.{% else %}Your plan leaves nothing for it yet.{% endif %}{% endif %}</p>
       <div class="reserve-foot small">{% for payment in reserve.payments %}<a href="/transactions/{{ payment.id }}">{{ payment.ref }} · {{ payment.date }} · {{ payment.amount|money }}</a> {% endfor %}<a href="/reserves/{{ reserve.id }}/payments" data-popup-open>{{ "Link or review a payment"|tr(locale) }}</a><details class="reserve-edit"><summary>{{ "Edit"|tr(locale) }}</summary>
         <form method="post" action="/reserves/{{ reserve.id }}/edit" class="stack" data-reserve-autosave>
           <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" value="{{ reserve.name }}" required></label>
@@ -92,8 +92,6 @@
 </details>
 <script nonce="{{ request.state.csp_nonce|default('') }}">document.querySelectorAll('[data-reserve-match]').forEach(group=>{const form=group.closest('form');const update=()=>{const kind=form.querySelector('input[name=match_by]:checked')?.value||'none';form.querySelectorAll('[data-match-picker]').forEach(label=>{const active=kind===label.dataset.matchPicker;label.hidden=!active;label.querySelectorAll('select,input').forEach(field=>field.disabled=!active)})};group.addEventListener('change',update);update()});
 const createDetails=document.getElementById('add-reserve');document.querySelector('.reserve-add-link')?.addEventListener('click',()=>{if(createDetails)createDetails.open=true});if(location.hash==='#add-reserve'&&createDetails){createDetails.open=true;createDetails.scrollIntoView({block:'start'})}
-const post=(form,status)=>fetch(form.action,{method:'POST',body:new URLSearchParams(new FormData(form)),headers:{'X-Requested-With':'fetch'}}).then(async r=>{if(!r.ok)throw Error(await r.text());status.textContent='Saved'}).catch(e=>{status.textContent=e.message||window.lightningT('Could not save. Retry by pressing Enter or leaving the field.')});
-document.querySelectorAll('[data-autosave-form]').forEach(form=>{const input=form.querySelector('input');let prior=input.value,busy=false;const status=form.querySelector('.inline-save-status');const save=()=>{if(input.value===prior||busy)return;busy=true;status.textContent='Saving…';post(form,status).then(()=>{if(status.textContent==='Saved')prior=input.value}).finally(()=>busy=false)};input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();save()}if(e.key==='Escape'){input.value=prior;input.blur()}});input.addEventListener('blur',save)});
-document.querySelectorAll('[data-reserve-autosave]').forEach(form=>{const status=form.querySelector('.inline-save-status');let values=new URLSearchParams(new FormData(form)).toString(),busy=false;const save=()=>{if(busy)return;const next=new URLSearchParams(new FormData(form)).toString();if(next===values)return;busy=true;status.textContent='Saving…';post(form,status).then(()=>{if(status.textContent==='Saved')values=next}).finally(()=>busy=false)};form.querySelectorAll('input:not([type=search]),select').forEach(field=>{field.addEventListener('blur',save);field.addEventListener('change',save);field.addEventListener('keydown',e=>{if(e.key==='Enter'&&field.tagName!=='SELECT'){e.preventDefault();save()}})})});
 </script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/reserve-autosave.js?v=1"></script>
 {% endblock %}

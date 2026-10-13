@@ -372,3 +372,16 @@ def test_the_overview_ends_with_a_calendar_of_months(demo, monkeypatch):
     assert cal["count"] == 4 and sum(x["net"] for x in year["cells"][6:9]) == c.reporting.cash_flow("2026-07-01", "2026-09-30").net
     page = TestClient(create_app(c), base_url="http://127.0.0.1").get("/").text
     assert "Month by month" in page and page.index("Month by month") > page.index("investments-heading")
+
+
+def test_setup_guide_can_be_dismissed_and_shown_again_without_changing_accounts(c, setup):
+    client = TestClient(create_app(c))
+    account_ids = [a.id for a in c.accounts.list()]
+    assert "Get set up" in client.get("/").text
+    saved = client.post("/setup/guide", data={"action": "dismiss"})
+    assert saved.status_code == 200 and "Get set up" not in saved.text
+    assert c.settings.get("setup_guide_dismissed") == "1"
+    assert "Show setup guide" in client.get("/settings").text
+    shown = client.post("/setup/guide", data={"action": "show"})
+    assert shown.status_code == 200 and "Get set up" in shown.text
+    assert [a.id for a in c.accounts.list()] == account_ids

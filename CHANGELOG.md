@@ -7,6 +7,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - Add one entry at the top of `## [Unreleased]
 - 2026-10-13 · Codex: Project Overview sections and nested screen questions now use tiered numbers for clear handoffs; contents table matches.
 - 2026-10-13 · Claude: website analytics in two tiers (website repo): a consent bar (Keep essential only / Allow all), a Privacy Notice in EN and AR, release-tagged GoatCounter events (`events.csv`) and opt-in linked visits through Apps Script (`journeys.csv`, 90-day purge). Setup in `OWNER.md`.
+
 - 2026-10-12 · Claude: `docs/COMPETITION.md` tests the owner's eight selling points against the evidence and the code (verdict, safe wording, top three); the Lightning row of the field table is current; owner questions in `OWNER.md` 13.
 - 2026-10-12 · Claude: website pages made concise (website repo): Home has one phone-and-PC section, four helpers and four FAQs; Features puts phone and PC second and drops group intros; Current Status merges first run and feedback; every changed page has a new release ID and archive.
 - 2026-10-12 · Claude: guideline 3.30: B06 gains Buttons (vivid, primary, secondary; heights 48/40/36) and "the signup band is the only gradient call-out"; its specimen now matches the live band. Website: one top bar and footer, one Arabic band wording, survey on the landing system (see the website repo).
@@ -28,6 +29,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - When a version is tagged, rename `Unreleased` to that version and start a new `Unreleased` above it.
 
 ## [Unreleased]
+
+- 2026-10-13 · Codex: Batch 002 audit (42 rows): short-period XIRR, partial-allocation warnings, fresh reserve summaries, bounded help tips, setup dismissal, correct sale-estimate hierarchy/phone values, and aligned phone arrows.
+  Remaining requests and evidence: `user feedback/user-feedback-batch-002.md`. Full suite: 1,381 passed, 9 skipped; final investment/Mohab/performance checks: 158 passed.
 
 - 2026-10-13 · Claude: v1.1 merged (brand, US stocks, FX, Arabic); Investments shows a foreign holding's gain with its Price part and FX part under it.
 - 2026-10-13 · Claude: Arabic in the app: Settings › Language also sets the profile pages' language; month grid keeps time left to right with month numbers, not J F M; YTD reads `2026-01-01 to today` (A06.1); list keynotes and the phone category count translated; RTL CSS regenerated.

@@ -17,9 +17,9 @@
   <div class="stat-tile surface-in"><span class="stat-tile-head">{{ tone_icon('in') }}<span class="stat-tile-label">{{ "Total return"|tr(locale) }}</span></span>
     <span class="stat-tile-value{{ ' is-negative' if total_return < 0 }}">{{ total_return|money(True) }}<small>{{ base }}</small></span>
     <span class="stat-tile-sub">{{ "Price change, sales and payouts since you bought it"|tr(locale) }}</span></div>
-  <div class="stat-tile surface-in"><span class="stat-tile-head">{{ tone_icon('in') }}<span class="stat-tile-label">{{ 'XIRR'|tr(locale) }}</span><button type="button" class="info-tip" aria-label="What is XIRR?" data-tip="Average yearly return, counting when you bought, sold and were paid. Shown once you have held it for a full year.">?</button></span>
+  <div class="stat-tile surface-in"><span class="stat-tile-head">{{ tone_icon('in') }}<span class="stat-tile-label">{{ 'XIRR'|tr(locale) }}</span><button type="button" class="info-tip" aria-label="What is XIRR?" data-tip="Average yearly return, counting when you bought, sold and were paid. Annualized even for a holding period shorter than a year.">?</button></span>
     <span class="stat-tile-value{{ ' is-negative' if xirr_pct is not none and xirr_pct < 0 }}">{% if xirr_pct is not none %}{{ (xirr_pct)|signed_pct }}<small>% a year</small>{% else %}—{% endif %}</span>
-    <span class="stat-tile-sub">{{ 'Since ' ~ j.first if xirr_pct is not none else 'After a full year of holding' }}</span></div>
+    <span class="stat-tile-sub">{{ 'Since ' ~ j.first if xirr_pct is not none else 'Not enough dated cash flows to calculate a return' }}</span></div>
 </section>
 
 <header class="overview-section-head inv-head"><h2>{{ "Is it making money?"|tr(locale) }}</h2><span>Month ends · {{ j.labels[0] if j.labels }} to {{ j.labels[-1] if j.labels }}</span></header>

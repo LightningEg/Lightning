@@ -514,8 +514,15 @@ class TestPlanner:
             split = self.split({"A": 1, "B": 2, "C": 0}, targets, "0.01", mode)
             assert sum(split.values()) == D("0.01") and all(x > 0 for x in split.values())
 
-    def test_no_split_until_targets_total_100(self):
-        assert self.split({"Gold": 100}, {"Gold": 60}, 1000, "fill_gaps") == {}
+    def test_partial_targets_are_scaled_without_changing_them(self):
+        targets = {"Stocks": D("42"), "Gold": D("28")}
+        for mode in ("prorata", "fill_gaps"):
+            assert self.split({}, targets, 1000, mode) == {"Stocks": 600, "Gold": 400}
+        assert targets == {"Stocks": D("42"), "Gold": D("28")}
+
+    def test_invalid_targets_or_amount_produce_no_split(self):
+        for targets in ({}, {"Gold": 0}, {"Gold": 101}, {"Gold": -10, "Stocks": 80}):
+            assert self.split({"Gold": 100}, targets, 1000, "fill_gaps") == {}
         assert self.split({"Gold": 100}, {"Gold": 100}, 0, "prorata") == {}
         with pytest.raises(ValueError):
             self.split({"Gold": 100}, {"Gold": 100}, 1000, "largest")
@@ -541,3 +548,62 @@ def test_investment_page_renders_without_investment_accounts(c):
     response = TestClient(create_app(c)).get("/investments")
     assert response.status_code == 200
     assert "Add a brokerage account" in response.text
+
+
+def test_short_period_xirr_is_visible_in_portfolio_and_holding_screens(inv, monkeypatch):
+    c, accounts, _, comi, _ = inv
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-25")
+    account = accounts["thndr"].id
+    c.investments.buy_total("2026-09-10", account, comi.id, "10", "1000")
+    c.assets.set_price(comi.id, "2026-09-25", "110")
+    client = TestClient(create_app(c))
+    portfolio = client.get("/investments?period=month&month=2026-09")
+    holding = client.get(f"/investments/holding/{comi.id}?account={account}&date=2026-09-25")
+    assert portfolio.status_code == holding.status_code == 200
+    assert "after a year" not in portfolio.text and "After a full year" not in holding.text
+    assert "% a year" in holding.text
+    assert "Not enough dated cash flows" not in holding.text
+
+
+def test_planner_warns_about_partial_targets_and_preserves_saved_weights(inv):
+    c, _, _, _, _ = inv
+    cls = c.assets.get_class_by_code("STOCK")
+    c.investments.set_target_weight("Stocks", D("70"), cls.id)
+    client = TestClient(create_app(c))
+    response = client.get("/investments/planner?amount=1000")
+    assert response.status_code == 200
+    assert "Suggestions scale them to 100%" in response.text
+    assert "Suggested allocation" in response.text
+    assert "Target 100" in response.text
+    assert c.investments.target_weights() == {"Stocks": D("70")}
+
+
+def test_phone_sale_breakdown_uses_sale_factors_and_leads_with_parent_total(inv, monkeypatch):
+    c, accounts, _, comi, _ = inv
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-25")
+    stock = c.assets.get_class_by_code("STOCK")
+    c.investments.buy_total("2026-09-10", accounts["thndr"].id, comi.id, "10", "1000")
+    c.assets.set_price(comi.id, "2026-09-25", "100")
+    c.investments.set_liquidation_factor(stock.id, "50")
+    app = create_app(c)
+
+    @app.middleware("http")
+    async def phone_frame(request, call_next):
+        request.state.phone = True
+        return await call_next(request)
+
+    page = TestClient(app).get("/")
+    assert page.status_code == 200
+    child = re.search(r'<a class="phone-row"[^>]+href="/birdview/class/' + str(stock.id) +
+                      r'\?[^\"]+"[^>]*>(.*?)</a>', page.text, re.S)
+    assert child is not None
+    text = re.sub(r"<[^>]+>", " ", child.group(1))
+    assert "500" in text and "1,000" not in text
+    assert page.text.index("Holdings after sale") < child.start()
+
+
+def test_planner_without_any_targets_explains_the_missing_allocation(c):
+    response = TestClient(create_app(c)).get("/investments/planner?amount=1000")
+    assert response.status_code == 200
+    assert "Set target allocation first" in response.text
+    assert 'href="/settings?section=targets"' in response.text

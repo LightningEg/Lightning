@@ -7,10 +7,19 @@ from decimal import Decimal
 
 
 def xirr(cashflows: list[tuple[str, Decimal]], as_of: str | None = None) -> Decimal | None:
-    """Return annualized XIRR, or None when flows do not define a unique bracketed root."""
-    flows = [(date.fromisoformat(day), float(amount)) for day, amount in cashflows if amount]
-    if as_of:
-        flows.append((date.fromisoformat(as_of), 0.0))
+    """Return annualized XIRR, or None when nonzero dated flows cannot bracket a root.
+
+    A reporting date is not a cash flow: a later as_of must not make same-day flows solvable.
+    """
+    # XIRR discounts by day, so offsetting same-day entries carry no time-weighted capital.
+    # Remove zero daily totals before checking signs/duration to avoid an arbitrary root.
+    daily: dict[date, Decimal] = {}
+    for day, amount in cashflows:
+        if not amount:
+            continue
+        parsed = date.fromisoformat(day)
+        daily[parsed] = daily.get(parsed, Decimal(0)) + amount
+    flows = [(day, float(amount)) for day, amount in daily.items() if amount]
     if not any(amount < 0 for _, amount in flows) or not any(amount > 0 for _, amount in flows):
         return None
     origin = min(day for day, _ in flows)

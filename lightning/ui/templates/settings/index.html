@@ -5,6 +5,7 @@
 {% block top_actions %}{% if not phone_mode() %}<button class="cat-icon fullscreen-toggle" type="button" data-fullscreen-toggle aria-label="{{ 'Full screen'|tr(locale) }}" title="{{ 'Full screen'|tr(locale) }}"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5M3 8l6-6M21 8l-6-6M3 16l6 6M21 16l-6 6"/></svg><span class="sr-only" data-fullscreen-label>{{ 'Full screen'|tr(locale) }}</span></button>{% endif %}{% endblock %}
 
 {% block content %}
+{% if section in ('', 'general') %}<form method="post" action="/setup/guide"><input type="hidden" name="action" value="show"><button class="btn small">{{ "Show setup guide"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
 {% set settings_section = 'valuations' if section in ('valuations', 'assets-valuations') else section %}
 {% if phone_mode() and section in ('', 'general') %}{# the phone's way to Devices, SMS and the profile: its app bar has only Settings #}
 <section class="card phone-card" aria-labelledby="this-phone-heading">
