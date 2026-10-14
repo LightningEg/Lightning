@@ -443,10 +443,11 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
 .pf-chips{display:flex;gap:8px}
 .pf-chips>span{height:40px;padding:0 14px;border-radius:999px;display:flex;align-items:center;gap:4px;background:var(--white);border:1px solid var(--line-ctl);font-weight:700;font-size:13px;color:var(--ink2);white-space:nowrap}
 .pf-chips>span.on{background:var(--nile);color:var(--on-nile);border-color:var(--nile)}
-.pf-list{border-radius:20px;background:var(--white);border:1px solid var(--line);padding:0 14px}
-.pf-day{font:800 12px/1 var(--body);color:var(--muted);padding:14px 0 6px;font-variant-numeric:tabular-nums}
-.pf-tx{display:flex;justify-content:space-between;gap:12px;min-height:60px;align-items:center;border-top:1px solid var(--line)}
-.pf-day+.pf-tx{border-top:0}
+.pf-list{padding:0}
+.pf-day{display:flex;justify-content:space-between;font:700 12.5px/1 var(--body);color:var(--muted);padding:20px 0 6px;font-variant-numeric:tabular-nums}
+.pf-who{display:flex;align-items:center;gap:12px;min-width:0}.pf-av{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--t-azure);color:var(--azure);font:700 15px/1 var(--display);font-style:normal}.pf-av.in{background:var(--t-green);color:var(--green-text)}
+.pf-tx{display:flex;justify-content:space-between;gap:12px;min-height:64px;align-items:center;border-top:1px solid var(--line)}
+.pf-day+.pf-tx{border-top:0}.pf-hero{padding:4px 0 0}.pf-hero .big{font-size:36px;line-height:1.05;margin:6px 0 2px}.pf-hero .big small{font:600 13px/1 var(--body);color:var(--muted);margin-left:5px;letter-spacing:0}.pf-hero p{margin:0;font-size:13px;color:var(--ink2)}
 .pf-tx b{display:block;font-size:15px}.pf-tx small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
 .pf-tx .a{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}.pf-tx .a b.in{color:var(--green-text)}
 /* frame diagram */
@@ -583,6 +584,14 @@ html[dir=rtl] svg{direction:ltr}
     <div class="rt"><div class="vis"><span class="chip up">اضغط</span><span class="chip" style="text-decoration:line-through">مرّر المؤشر</span></div><b>من غير تحويم</b><span>معلومة التلميح تكون ظاهرة على الشاشة أو على بُعد ضغطة واحدة.</span></div>
     <div class="rt"><div class="vis"><svg class="ic" style="width:24px;height:24px;color:var(--ink)"><use href="#i-cash"/></svg><span class="chip">الكاش</span></div><b>كلمة بجانب كل أيقونة</b><span>الأيقونة تظهر لوحدها بس لو معناها معروف للجميع: البحث والرجوع والإضافة والمزيد والإعدادات وإخفاء المبالغ.</span></div>
   </div>
+  <ul class="short">
+    <li><b>C01.1 الاتجاه: الموبايل مش كمبيوتر صغير.</b> تطبيقات الفلوس اللي الناس بتفتحها كل يوم (Monzo وRevolut وWise وCopilot) بتفتح على الفلوس اللي لسه اتحركت، مش على التحليل. كل شاشة بتجاوب سؤال واحد برقم رئيسي واحد، والباقي هادي.</li>
+    <li><b>الفلوس الأول.</b> كل صفحة فيها سجل تبدأ بآخر المعاملات، والتحليل بعدها وعلى بعد لمسة.</li>
+    <li><b>مسطّح مش في صناديق.</b> الصفوف على الصفحة بخط رفيع بينها. البطاقة للرقم الرئيسي بس، والقائمة عمرها ما تبقى جوه بطاقة.</li>
+    <li><b>رقم واحد في الصف.</b> الاسم والفئة على ناحية والمبلغ على التانية. أي حاجة زيادة (الرصيد بعد المعاملة أو الحساب أو الملاحظات) تبقى في لوحة الصف.</li>
+    <li><b>واجهة هادية.</b> مؤشر فترة واحد ومجموعة تبويبات واحدة، من غير صناديق أيقونات أو حواف ملونة. اللون يظهر بس لما يشيل معنى (A03).</li>
+    <li><b>المعاينة، ٢٠٢٦-١٠-١٤:</b> الأدلة على الويب من منتديات ونقد تصميم، يعني القواعد دي مبنية على نمط بيتكرر في التطبيقات دي مش على دراسات مقاسة. أوضح فشل: شاشة Revolut المزدحمة اللي فيها معاملة واحدة ظاهرة؛ اعرض خمس على الأقل.</li>
+  </ul>
 </section>
 
 <section class="g" id="c-frame" data-part="c">
@@ -700,14 +709,14 @@ html[dir=rtl] svg{direction:ltr}
   <div class="g-head"><div><h2><span class="secnum">C06</span>البطاقات والمؤشرات</h2><p>كل بطاقة تفضل بنفس وظيفتها، لكن بارتفاع أقل. بطاقات المؤشرات تتشارك الصف.</p></div></div>
   <h3 class="sub"><span class="subnum">C06.1</span>بطاقات المؤشرات: ٢×٢</h3>
   <div style="max-width:360px" class="kt-grid">
-    <div class="kt"><div class="top"><span class="ico"><svg class="ic"><use href="#i-trend"/></svg></span><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">التغير في صافي الثروة</div><div class="fig num">⁦+٣٧٬٨٨٤⁩</div><div class="foot">صافي الثروة <b>١٥٦٬٠٨٤</b></div></div>
-    <div class="kt"><div class="top"><span class="ico"><svg class="ic"><use href="#i-pie"/></svg></span><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">نسبة الادخار</div><div class="fig num">٤٩٫١<small>٪</small></div><div class="foot">متبقي <b>٦٩٬٠١٣</b></div></div>
-    <div class="kt azure"><div class="top"><span class="ico"><svg class="ic"><use href="#i-chart"/></svg></span><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">نسبة الاستثمار</div><div class="fig num">٤٩٫١<small>٪</small></div><div class="meter"><i style="width:49%"></i></div></div>
-    <div class="kt rose"><div class="top"><span class="ico"><svg class="ic"><use href="#i-wallet"/></svg></span><span class="chip">⁦‭٢٠٢٦-١٠‬⁩</span></div><div class="lbl">المتبقي في الخطة</div><div class="fig num">٢٤٬٦٩٨</div><div class="meter"><i style="width:2%"></i></div></div>
+    <div class="kt"><div class="top"><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">التغير في صافي الثروة</div><div class="fig num">⁦+٣٧٬٨٨٤⁩</div><div class="foot">صافي الثروة <b>١٥٦٬٠٨٤</b></div></div>
+    <div class="kt"><div class="top"><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">نسبة الادخار</div><div class="fig num">٤٩٫١<small>٪</small></div><div class="foot">متبقي <b>٦٩٬٠١٣</b></div></div>
+    <div class="kt azure"><div class="top"><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">نسبة الاستثمار</div><div class="fig num">٤٩٫١<small>٪</small></div><div class="meter"><i style="width:49%"></i></div></div>
+    <div class="kt rose"><div class="top"><span class="chip">⁦‭٢٠٢٦-١٠‬⁩</span></div><div class="lbl">المتبقي في الخطة</div><div class="fig num">٢٤٬٦٩٨</div><div class="meter"><i style="width:2%"></i></div></div>
   </div>
   <ul class="short">
-    <li><b>لحد أربع بطاقات في شبكة ٢×٢،</b> في أعلى الصفحة. نفس الألوان والشارات في A08؛ الشارة تعرض الفترة باختصار: من بداية السنة أو النهارده أو ⁦‭٢٠٢٦-١٠‬⁩ أو تاريخ أو «٣ شهور». لو الشارة هتتقَص، شيلها.</li>
-    <li><b>داخل البطاقة:</b> أيقونة وشارة، ثم تسمية مسموح لها تلف لسطرين، والرقم بحجم 26px (22px لو طويل)، وبعده سطر واحد أو مقياس. من غير رسم اتجاه صغير؛ الاتجاه في بطاقة مستقلة تحت.</li>
+    <li><b>لحد أربع بطاقات في شبكة ٢×٢،</b> تحت آخر معاملات الصفحة (C11.1)، وفي صفحة من غير سجل في أعلاها. نفس الألوان والشارات في A08؛ الشارة تعرض الفترة باختصار: من بداية السنة أو النهارده أو ⁦‭٢٠٢٦-١٠‬⁩ أو تاريخ أو «٣ شهور». لو الشارة هتتقَص، شيلها.</li>
+    <li><b>داخل البطاقة:</b> التسمية (مسموح لها تلف لسطرين) والشارة جنبها، من غير صندوق أيقونة، والرقم بحجم 26px (22px لو طويل)، وبعده سطر واحد أو مقياس. من غير رسم اتجاه صغير؛ الاتجاه في بطاقة مستقلة تحت.</li>
     <li><b>اضغط على البطاقة</b> لفتح الصفحة اللي بتلخصها. البطاقة نفسها مش زر.</li>
   </ul>
 
@@ -719,7 +728,8 @@ html[dir=rtl] svg{direction:ltr}
       <li>حشو داخلي 16px وزوايا 20px ومسافة 12px. الرقم 40px أو 34px لو طويل.</li>
       <li>ارتفاع الصفوف 48px. الصف اللي فيه › بيفتح التفاصيل في مكانها.</li>
       <li>«عرض الأرقام» يفتح لوحة فيها صفوف، مش جدول داخل البطاقة.</li>
-    </ul>
+        <li><b>C06.3 الأرقام الرئيسية في صفحة فيها مقارنات</b> (تحليل المصروفات): الرقم الأول كبير على الصفحة من غير بطاقة؛ مقارناته تحته في صفوف (النزول في المصروف أخضر والطلوع وردي)؛ وكل رقم تاني صف بارتفاع 48 وملاحظته تحته. من غير أيقونة ولا حافة ملونة ولا بطاقة لكل رقم.</li>
+  </ul>
   </div>
 </section>
 
@@ -817,17 +827,17 @@ html[dir=rtl] svg{direction:ltr}
       <div class="pf-chips"><span class="on">‹ ⁦‭٢٠٢٦-٠٦‬⁩ ›</span><span>الفئة<svg class="ic" style="width:16px;height:16px"><use href="#i-down"/></svg></span></div>
       <div class="pf-list">
         <div class="pf-day">⁦‭٢٠٢٦-٠٦-١٦‬⁩</div>
-        <div class="pf-tx"><div><b>Kiosk</b><small>بقالة</small></div><div class="a"><b>⁦−١٦٥٫٠٠⁩</b><small>١٠٬٢٢٠٫٠٠</small></div></div>
+        <div class="pf-tx"><div class="pf-who"><i class="pf-av">K</i><div><b>Kiosk</b><small>بقالة</small></div></div><div class="a"><b>⁦−١٦٥٫٠٠⁩</b></div></div>
         <div class="pf-day">⁦‭٢٠٢٦-٠٦-١٢‬⁩</div>
-        <div class="pf-tx"><div><b>أوبر</b><small>مواصلات</small></div><div class="a"><b>⁦−٩٠٫٠٠⁩</b><small>١٠٬٣٨٥٫٠٠</small></div></div>
+        <div class="pf-tx"><div class="pf-who"><i class="pf-av">أ</i><div><b>أوبر</b><small>مواصلات</small></div></div><div class="a"><b>⁦−٩٠٫٠٠⁩</b></div></div>
         <div class="pf-day">⁦‭٢٠٢٦-٠٦-٠٥‬⁩</div>
-        <div class="pf-tx"><div><b>من حساب CIB الجاري</b><small>تحويل</small></div><div class="a"><b>٣٬٠٠٠٫٠٠</b><small>١٠٬٤٧٥٫٠٠</small></div></div>
-        <div class="pf-tx"><div><b>استرداد</b><small>شخصي</small></div><div class="a"><b class="in">⁦+٢٠٠٫٠٠⁩</b><small>٧٬٤٧٥٫٠٠</small></div></div>
+        <div class="pf-tx"><div class="pf-who"><i class="pf-av">C</i><div><b>من حساب CIB الجاري</b><small>تحويل</small></div></div><div class="a"><b>٣٬٠٠٠٫٠٠</b></div></div>
+        <div class="pf-tx"><div class="pf-who"><i class="pf-av in">ا</i><div><b>استرداد</b><small>شخصي</small></div></div><div class="a"><b class="in">⁦+٢٠٠٫٠٠⁩</b></div></div>
       </div>
     </div>
     <ul class="short" style="margin:0">
-      <li><b>C08.1 عناوين الأيام:</b> التاريخ مرة واحدة بلون خافت فوق صفوف اليوم؛ ما يتكررش في كل صف.</li>
-      <li><b>C08.2 الصف:</b> الطرف المقابل والفئة يمين، والمبلغ والرصيد شمال. الارتفاع 60px. الداخل أخضر بعلامة +، والخارج بلون الحبر مع −، والتحويل من غير علامة (A11).</li>
+      <li><b>C08.1 عناوين الأيام:</b> «النهارده» و«امبارح» وبعدين التاريخ (A06.1)، مرة واحدة بلون خافت 12.5px فوق صفوف اليوم؛ ما يتكررش في كل صف.</li>
+      <li><b>C08.2 الصف:</b> مسطّح على الصفحة بخط رفيع بين الصفوف، ومن غير بطاقة حوالين القائمة. حرف أول دايري 40px (أخضر فاتح للداخل وخلفية محايدة لغير كده) والطرف المقابل وفئته، والمبلغ على الناحية التانية. الارتفاع 64. الداخل أخضر بعلامة +، والخارج بلون الحبر مع −، والتحويل من غير علامة (A11). الرصيد بعد الصف بيظهر بس في قائمة الحساب نفسه، بلون خافت تحت المبلغ؛ مش في النظرة العامة ولا في قائمة كل الحسابات. النظرة العامة ما بتسميش الحساب (الفئة بس)؛ قائمة كل الحسابات بتضيفه بعد الفئة.</li>
       <li><b>C08.3 المرشحات:</b> البحث بعرض كامل ويقبل الوسم #، وبعده الشرائح. الشهر شريحة بأسهم تفتح اختيار الشهر؛ ما تكتبش yyyy-mm بإيدك.</li>
       <li><b>C08.4 الإضافة:</b> زر الإضافة (C05.2) يفتح لوحة الإدخال. ما تحطش صف «جديد» فوق القائمة.</li>
       <li><b>C08.5 التحديد:</b> اضغط مطولاً على الصف أو استخدم شريحة «تحديد» بعد الشهر. الصفوف المحددة تبقى خضراء فاتحة بإطار أخضر. شريط يحل محل التبويبات ويعرض العدد والفئة الجديدة وخياري تغيير الفئة والحذف؛ «تم» ينهي التحديد.</li>
@@ -888,18 +898,28 @@ html[dir=rtl] svg{direction:ltr}
         <div class="pf-status"><span>٤:٣٢</span><span>٤٧٪</span></div>
         <div class="pf-bar"><img class="pf-mark" alt="Lightning"><span class="pf-icon"><svg class="ic"><use href="#i-search"/></svg></span><span class="pf-icon"><svg class="ic"><use href="#i-eye"/></svg></span><span class="pf-icon"><svg class="ic"><use href="#i-gear"/></svg></span></div>
         <div class="pf-body">
-          <div class="pf-title"><h3>نظرة عامة</h3><p>⁦‭٢٠٢٦-٠١-٠١‬⁩ لحد ⁦‭٢٠٢٦-١٠-٠٦‬⁩ <span>من بداية السنة</span></p></div>
-          <div class="pf-period"><span>الكل</span><span class="on">من بداية السنة</span><span class="step"><i>‹</i>⁦‭٢٠٢٦-١٠‬⁩<i>›</i></span><span>مخصص</span></div>
+          <div class="pf-title"><h3>نظرة عامة</h3></div>
           <div class="pf-seg"><span class="on">الملخص</span><span>الإنفاق</span><span>الصحة</span></div>
+          <div class="pf-hero"><p>صافي الثروة <span class="muted">كما في ⁦‭٢٠٢٦-١٠-٠٦‬⁩</span></p><div class="big num">١٥٦٬٠٨٤<small>EGP</small></div></div>
+          <div class="pf-sec"><h4>الأحدث</h4><span>شوف كل المعاملات</span></div>
+          <div class="pf-list">
+            <div class="pf-day"><span>النهارده</span></div>
+            <div class="pf-tx"><div class="pf-who"><i class="pf-av">C</i><div><b>Carrefour</b><small>بقالة</small></div></div><div class="a"><b>−٣٬٤١٠٫٠٠</b></div></div>
+            <div class="pf-day"><span>امبارح</span></div>
+            <div class="pf-tx"><div class="pf-who"><i class="pf-av in">A</i><div><b>ACME Egypt</b><small>مرتب</small></div></div><div class="a"><b class="in">+٥٠٬٠٠٠٫٠٠</b></div></div>
+            <div class="pf-tx"><div class="pf-who"><i class="pf-av">أ</i><div><b>أوبر</b><small>مواصلات</small></div></div><div class="a"><b>−٥٢٤٫٠٠</b></div></div>
+          </div>
           <div class="pf-need">محتاج تدخل <em>١٨</em><svg class="ic"><use href="#i-down"/></svg></div>
+          <div class="pf-sec"><h4>الفترة دي</h4><span>⁦‭٢٠٢٦-٠١-٠١‬⁩ لحد ⁦‭٢٠٢٦-١٠-٠٦‬⁩</span></div>
+          <div class="pf-period"><span>الكل</span><span class="on">من بداية السنة</span><span class="step"><i>‹</i>⁦‭٢٠٢٦-١٠‬⁩<i>›</i></span><span>مخصص</span></div>
           <div class="kt-grid">
-            <div class="kt"><div class="top"><span class="ico"><svg class="ic"><use href="#i-trend"/></svg></span><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">التغير في صافي الثروة</div><div class="fig num">⁦+٣٧٬٨٨٤⁩</div><div class="foot">صافي الثروة <b>١٥٦٬٠٨٤</b></div></div>
-            <div class="kt"><div class="top"><span class="ico"><svg class="ic"><use href="#i-pie"/></svg></span><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">نسبة الادخار</div><div class="fig num">٤٩٫١<small>٪</small></div><div class="foot">متبقي <b>٦٩٬٠١٣</b></div></div>
-            <div class="kt azure"><div class="top"><span class="ico"><svg class="ic"><use href="#i-chart"/></svg></span><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">نسبة الاستثمار</div><div class="fig num">٤٩٫١<small>٪</small></div><div class="meter"><i style="width:49%"></i></div></div>
-            <div class="kt rose"><div class="top"><span class="ico"><svg class="ic"><use href="#i-wallet"/></svg></span><span class="chip">⁦‭٢٠٢٦-١٠‬⁩</span></div><div class="lbl">المتبقي في الخطة</div><div class="fig num">٢٤٬٦٩٨</div><div class="meter"><i style="width:2%"></i></div></div>
+            <div class="kt"><div class="top"><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">التغير في صافي الثروة</div><div class="fig num">⁦+٣٧٬٨٨٤⁩</div><div class="foot">صافي الثروة <b>١٥٦٬٠٨٤</b></div></div>
+            <div class="kt"><div class="top"><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">نسبة الادخار</div><div class="fig num">٤٩٫١<small>٪</small></div><div class="foot">متبقي <b>٦٩٬٠١٣</b></div></div>
+            <div class="kt azure"><div class="top"><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">نسبة الاستثمار</div><div class="fig num">٤٩٫١<small>٪</small></div><div class="meter"><i style="width:49%"></i></div></div>
+            <div class="kt rose"><div class="top"><span class="chip">⁦‭٢٠٢٦-١٠‬⁩</span></div><div class="lbl">المتبقي في الخطة</div><div class="fig num">٢٤٬٦٩٨</div><div class="meter"><i style="width:2%"></i></div></div>
           </div>
           <div class="pf-sec"><h4>مركزك المالي</h4><span>كما في ⁦‭٢٠٢٦-١٠-٠٦‬⁩</span></div>
-          <div class="pf-card lead"><h4>صافي الثروة</h4><div class="big num">١٥٦٬٠٨٤<small>EGP</small></div><div class="pf-rows"><div><span>اللي تملكه</span><b>٢٦١٬٠٢٤</b></div><div><span>اللي عليك</span><b>⁦−١٠٤٬٩٤٠⁩</b></div></div></div>
+          <div class="pf-card lead"><div class="pf-rows"><div><span>اللي تملكه</span><b>٢٦١٬٠٢٤</b></div><div><span>اللي عليك</span><b>⁦−١٠٤٬٩٤٠⁩</b></div></div></div>
         </div>
         <div class="pf-nav"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>نظرة عامة</span><span><i><svg class="ic"><use href="#i-wallet"/></svg></i>الميزانية</span><span><i><svg class="ic"><use href="#i-cash"/></svg></i>الكاش</span><span><i><svg class="ic"><use href="#i-chart"/></svg></i>الاستثمارات</span><span><i><svg class="ic"><use href="#i-bank"/></svg></i>الحسابات</span></div>
         <div class="pf-gest"></div>
@@ -915,13 +935,13 @@ html[dir=rtl] svg{direction:ltr}
           <div class="pf-chips"><span class="on">‹ ⁦‭٢٠٢٦-٠٦‬⁩ ›</span><span>الفئة<svg class="ic" style="width:16px;height:16px"><use href="#i-down"/></svg></span></div>
           <div class="pf-list">
             <div class="pf-day">⁦‭٢٠٢٦-٠٦-١٦‬⁩</div>
-            <div class="pf-tx"><div><b>Kiosk</b><small>بقالة</small></div><div class="a"><b>⁦−١٦٥٫٠٠⁩</b><small>١٠٬٢٢٠٫٠٠</small></div></div>
+            <div class="pf-tx"><div class="pf-who"><i class="pf-av">K</i><div><b>Kiosk</b><small>بقالة</small></div></div><div class="a"><b>⁦−١٦٥٫٠٠⁩</b></div></div>
             <div class="pf-day">⁦‭٢٠٢٦-٠٦-١٢‬⁩</div>
-            <div class="pf-tx"><div><b>أوبر</b><small>مواصلات</small></div><div class="a"><b>⁦−٩٠٫٠٠⁩</b><small>١٠٬٣٨٥٫٠٠</small></div></div>
+            <div class="pf-tx"><div class="pf-who"><i class="pf-av">أ</i><div><b>أوبر</b><small>مواصلات</small></div></div><div class="a"><b>⁦−٩٠٫٠٠⁩</b></div></div>
             <div class="pf-day">⁦‭٢٠٢٦-٠٦-٠٥‬⁩</div>
-            <div class="pf-tx"><div><b>من حساب CIB الجاري</b><small>تحويل</small></div><div class="a"><b>٣٬٠٠٠٫٠٠</b><small>١٠٬٤٧٥٫٠٠</small></div></div>
+            <div class="pf-tx"><div class="pf-who"><i class="pf-av">C</i><div><b>من حساب CIB الجاري</b><small>تحويل</small></div></div><div class="a"><b>٣٬٠٠٠٫٠٠</b></div></div>
             <div class="pf-day">⁦‭٢٠٢٦-٠٥-١٦‬⁩</div>
-            <div class="pf-tx"><div><b>Kiosk</b><small>بقالة</small></div><div class="a"><b>⁦−٢١٠٫٠٠⁩</b><small>٧٬٤٧٥٫٠٠</small></div></div>
+            <div class="pf-tx"><div class="pf-who"><i class="pf-av">K</i><div><b>Kiosk</b><small>بقالة</small></div></div><div class="a"><b>⁦−٢١٠٫٠٠⁩</b><small>⁦٧٬٤٧٥٫٠٠⁩</small></div></div>
           </div>
         </div>
         <span class="pf-fab" title="Add transaction"><svg class="ic"><use href="#i-plus"/></svg></span>
@@ -931,7 +951,7 @@ html[dir=rtl] svg{direction:ltr}
     </figure>
   </div>
   <ul class="short">
-    <li><b>C11.1 هي صفحة النظرة العامة كاملة:</b> اعرض «جهّز حسابك» لحد ما يكتمل، و«محتاج تدخل»، والمربعات الأربعة ومركزك المالي. تحتهم صف لكل تفصيلة: بمرور الوقت، النقدية المتاحة، مكونات القيمة، ولو بعت النهارده؛ وبعدها صافي التدفق ووجهة الفلوس الداخلة والاستثمارات ورسوم كل شهر، مع الرقم الخاص بكل صف. الضغط على الصف يفتح بطاقته مكانه (C06.2). النظرة العامة تجاوب في شاشة واحدة والتفاصيل بضغطة. الفواتير المستحقة تفضل ظاهرة في صف مستقل.</li>
+    <li><b>C11.1 هي صفحة النظرة العامة كاملة، والفلوس الأول:</b> «جهّز حسابك» لحد ما يكتمل؛ رقم صافي الثروة على الصفحة (الرئيسي من غير بطاقة)؛ «الأحدث»: آخر ست معاملات من كل الحسابات مع «شوف كل المعاملات»؛ «محتاج تدخل»؛ وبعدين «الفترة دي» بمؤشر الفترة والمربعات الأربعة؛ وبعدها مركزك المالي. تحتهم صف لكل تفصيلة: بمرور الوقت، النقدية المتاحة، مكونات القيمة، ولو بعت النهارده؛ وبعدها صافي التدفق ووجهة الفلوس الداخلة والاستثمارات ورسوم كل شهر، مع الرقم الخاص بكل صف. الضغط على الصف يفتح بطاقته مكانه (C06.2). التحليل بضغطة، عمره ما يبقى الأول. الفواتير المستحقة تفضل ظاهرة في صف مستقل.</li>
     <li><b>C11.2:</b> الزر الثانوي الوحيد للحساب و⋯ يظهروا تحت الرقم. في حساب الوساطة، افتح «تسجيل معاملة استثمار» فوق القائمة للشراء والبيع والتوزيعات.</li>
   </ul>
 </section>
@@ -954,6 +974,8 @@ html[dir=rtl] svg{direction:ltr}
     <div><b>زران جنب بعض</b>زر ثانوي واحد وبعده ⋯.</div>
     <div><b>كسور عشرية في رقم كبير</b>الجنيه عدد صحيح، حتى إجمالي الحسابات.</div>
     <div><b>أيقونة وحدها مش مفهومة للجميع</b>اكتب اسمها بجانبها (C03.3).</div>
+    <div><b>بطاقة حوالين قائمة صفوف</b>الصفوف مسطّحة على الصفحة وبينها خط رفيع.</div>
+    <div><b>التحليل قبل الفلوس</b>آخر المعاملات الأول في صفحة فيها سجل.</div>
     <div><b>زر فوق المحتوى</b>زر الإضافة ما يغطيش آخر صف.</div>
     <div><b>صفحة من غير رجوع</b>‹ واسم الصفحة اللي بيرجع لها.</div>
     <div><b>نهاية من غير خطوة تالية</b>كل إجراء في السجل متاح على الموبايل كمان، أو وضّح مكانه.</div>

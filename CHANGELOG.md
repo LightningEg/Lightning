@@ -5,6 +5,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 **How to log a change**
 
 - Add one entry at the top of `## [Unreleased]
+- 2026-10-14 · Claude: phone: Accounts shows the five latest transactions; tile chips sit above their label; zakat day field is a soft well; Arabic Part C updated (guideline 3.31). `tools/phone_check.py` also turns zakat on and adds a gam'eya.
 - 2026-10-14 · Claude: phone key notes (Budget's "Categories over plan", Health, Cash) are white rows with a tone dot, not tinted cards with a big numeral (C01.1).
 - 2026-10-14 · Claude: zakat is off by default; Settings › Your data › Zakat › *Show zakat* turns on its tab, page, search entry, Cash planning line and the worn box on gold pieces.
 - 2026-10-14 · Claude: zakat: Accounts › Zakat estimates 2.5% above 85 g of 24K gold from your position (zakat day, Paid in the new Zakat category, Still to pay), a dated line in Cash planning, a worn flag on gold pieces; migration `0054_zakat.sql`; gam'eya counted in (paid in; instalments due now taken off with debts). Round-trip fixture rebuilt for schema 54.

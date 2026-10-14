@@ -15,6 +15,11 @@
   {% else %}<p class="empty">{{ "No accounts yet. Add your first one."|tr(locale) }}</p>{% endfor %}
   </div>
 </section>
+{% from "phone/partials/txn.html" import txn_list with context %}
+{% if recent_rows %}<section class="phone-section phone-latest" aria-labelledby="latest-heading">
+  <header class="phone-section-head"><h2 id="latest-heading">{{ 'Latest'|tr(locale) }}</h2><a class="phone-quiet" href="/transactions">{{ 'See all transactions'|tr(locale) }}</a></header>
+  {{ txn_list(recent_rows, True, False, False, '', '/transactions', '', 5, False) }}
+</section>{% endif %}
 {% set closed = rows|rejectattr('0.active')|list %}
 {% if closed %}<details class="card phone-card"><summary class="phone-row"><span>{{ "Inactive accounts"|tr(locale) }}</span><b>{{ closed|length }}</b></summary>
   <div class="phone-rows">{% for acc, balance, owned, count in closed %}<a class="phone-row" href="/accounts/{{ acc.id }}"><span>{{ acc.name }}</span><b>{{ balance|money(False, 0) }}</b></a>{% endfor %}</div></details>{% endif %}

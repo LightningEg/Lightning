@@ -65,7 +65,17 @@ def run(shots: Path | None = None) -> list[str]:
                     await fetch('/sms/paste', {method: 'POST', body: new URLSearchParams({__session: t, messages: sms})});
                     const r = await fetch('/sms/assign', {method: 'POST', body: new URLSearchParams({__session: t, ending: '2093', account_id: '1'})});
                     return new URL(r.url).pathname; }""", SMS)
-                pages = (*PAGES, review)  # the bank import's review, as an SMS reaches it
+                circle = page.evaluate("""async () => { const t = document.querySelector('meta[name=lightning-session]').content;
+                    await fetch('/zakat/enabled', {method: 'POST', body: new URLSearchParams({__session: t, on: '1'})});
+                    const r = await fetch('/accounts/new', {method: 'POST', body: new URLSearchParams({__session: t,
+                        name: "Office gam'eya", account_type: 'GAMEYA', currency: 'EGP'})});
+                    const found = new URL(r.url).pathname.match(/gameya\\/(\\d+)/);
+                    if (!found) return '';
+                    await fetch('/gameya/' + found[1] + '/terms', {method: 'POST', body: new URLSearchParams({__session: t,
+                        organiser: 'Um Ali', members: '10', installment: '2000', first_date: '2026-08-05', my_turn: '3',
+                        funding_account_id: '1', payout_account_id: '1', payout: '', interest: 'none', annual_rate: '0'})});
+                    return '/gameya/' + found[1]; }""")
+                pages = (*PAGES, review, *([circle] if circle else []))  # the bank import's review, as an SMS reaches it; a gam'eya circle
                 for width in (360, 320):
                     page.set_viewport_size({"width": width, "height": 800})
                     for path in pages:

@@ -55,7 +55,9 @@ async def list_accounts(request: Request):
     net_worth = c.reporting.net_worth(today())
     gross_total = (None if has_unavailable else
                    sum((row[1] for row in rows if row[0].active), start=0))
-    return render(request, "accounts/list.html", rows=rows, net_worth=net_worth, gross_total=gross_total)
+    recent_rows = c.reporting.register_page(None, "1900-01-01", "9999-12-31", 1, 10)[0]  # the phone shows the latest few
+    return render(request, "accounts/list.html", rows=rows, net_worth=net_worth, gross_total=gross_total,
+                  recent_rows=recent_rows)
 
 
 @router.get("/currencies")

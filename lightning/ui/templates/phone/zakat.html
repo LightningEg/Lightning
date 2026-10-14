@@ -8,7 +8,7 @@
 {% if not a.zakat_day %}
 <section class="phone-section" aria-labelledby="zakat-day-head">
   <header class="phone-section-head"><h2 id="zakat-day-head">{{ 'Your zakat day'|tr(locale) }}</h2></header>
-  <form class="card phone-card" method="post" action="/zakat/settings">
+  <form class="card phone-card phone-form" method="post" action="/zakat/settings">
     <p class="phone-note">{{ 'Pick the day each year that you count zakat from. The next ones follow the lunar year, 354 days apart.'|tr(locale) }}</p>
     <input type="hidden" name="only_day" value="1"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
     <div class="field"><label for="zakat-day">{{ 'Zakat day'|tr(locale) }}</label><input id="zakat-day" name="zakat_day" type="date" data-native-date required></div>
