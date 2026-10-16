@@ -10,6 +10,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - When a version is tagged, rename `Unreleased` to that version and start a new `Unreleased` above it.
 
 ## [Unreleased]
+- 2026-10-16 · Codex: recorded edit-journal progress and remaining J6 work in NOW.md; released this session’s claim for handoff.
 - 2026-10-16 · Codex: expanded experimental journal forms across 13 tested financial areas, with atomic create-then-use commands and same-window pending/confirmation navigation.
   Encrypted bounded form baselines preserve originally displayed values across incoming commits; unadapted writes and caught partial failures refuse safely. Native session/cutover and Windows/Android acceptance remain open.
 - 2026-10-16 · Codex: added encrypted ordinary-register form capture with full-row replay checks, durable retry tokens and stale-form fencing; unsupported native writes remain blocked before dispatch.

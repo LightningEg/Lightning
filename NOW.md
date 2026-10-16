@@ -4,7 +4,6 @@
 
 | Who | Work | Files | Since |
 |---|---|---|---|
-| Codex | J6 cutover. | `lightning/runtime/journal*`, `lightning/runtime/session.py`, `lightning/runtime/app.py`, `lightning/bootstrap.py`, `lightning/database/connection.py`, `lightning/sync/journal/`, `lightning/ui/journal*`, `lightning/ui/static/journal.js`, `tests/test_journal*`, `journal_hooks.py`, `loan_actions.py`, `salary_setup.py` | 2026-10-16 |
 | Codex | 02d — Code/fault tests pass; ordinary Windows reboot drill remains. Abrupt power-loss behavior is unverified; see Architecture › Promotion durability risk. | `tests/test_database_promotion.py` | 2026-10-06 |
 | Claude | Pockets | `accounts`, `investments` | 2026-10-16 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
@@ -21,7 +20,7 @@
 
 - **Website guideline copies:** fix on website `codex/sync-app-guidelines`; main push needs owner approval after auto-review rejection. **Read:** report › website guideline copies.
 
-- **Edit journal J6:** Native form coverage built; cutover/lifecycle remain open. **Read:** `docs/proposals/edit_journal.md` §10; Architecture › Experimental edit journal.
+- **Journal handoff:** `codex/edit-journal` pushed `89832c0`; J6 incomplete, main unmerged, claim released. Built: commands/upgrades/retention, restore fences/candidates, 13 form areas, original-value baselines/pending UI. Suite: 2055 pass/9 skip/1 fixture failure; fixed, 6 basis tests pass. Next: native session/cutover, remaining writes/imports/undo, Android lifecycle, device/security acceptance. LAN first/pair once; free cloud/no R2. **Read:** proposal §10; Architecture › Experimental edit journal; report index (journal).
 
 - **Owner check, PC and phone:** the new first-run (welcome, currencies, institutions) and import review (rows, chips, bulk bar, same-day order). **Read:** Architecture › CSV import and export contract.
 - **Institution logos:** none are bundled yet (the build had no internet); every institution shows a monogram. Run `python tools/fetch_institution_logos.py` from a PC and commit `lightning/ui/static/institutions/` and the CSV. **Read:** Architecture › Modules (accounts).
