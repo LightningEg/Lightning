@@ -29,11 +29,18 @@ def setting(container, key, value):
     container.settings.set(key, value)
 
 
+def composition(container, steps, bindings):
+    # This signature is inspected by the fixed command validator. Execution
+    # also needs the typed identity graph, supplied only by commands.execute.
+    raise JournalError('A composed workflow requires its journal dispatcher')
+
+
 OPERATIONS = {
     'loans.create_purchase': create_purchase,
     'loans.record_early_payment': early_payment,
     'salary.setup': salary,
     'profile.set_financial_setting': setting,
+    'workflow.compose': composition,
 }
 
 

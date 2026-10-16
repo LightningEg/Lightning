@@ -5,6 +5,7 @@ from decimal import Decimal, ROUND_UP
 from lightning.core.dates import fmt_date, parse_date, today
 from lightning.core.errors import ValidationError
 from lightning.core.money import ZERO, from_e6, to_decimal
+from lightning.core.journal_hooks import named_action
 from .domain import Frequency, PaymentStatus, PlanKind, PlannedItem
 from .schedule import scheduled_dates
 
@@ -62,6 +63,7 @@ def purchase_quote(price, fee, months, first_date):
             "last_date": scheduled_dates(item, "2999-12-31")[-1][2]}
 
 
+@named_action('loans.create_purchase')
 def create_purchase(planning, *, name, price, fee, months, first_date, account_id=None, counterparty_id=None):
     quote = purchase_quote(price, fee, months, first_date)
     value, charge, count, monthly = (quote[key] for key in ("price", "fee", "months", "monthly"))
@@ -97,6 +99,7 @@ def preview_early_payment(planning, item_id, principal, fee="0", on=None):
             "next_amount": unpaid[0].still_owed if unpaid else ZERO, "date_paid": fmt_date(day)}
 
 
+@named_action('loans.record_early_payment')
 def record_early_payment(planning, item_id, principal, fee, date_paid, account_id, expected_remaining, due_date=None):
     with planning.db.transaction():
         return _record_early_payment(planning, item_id, principal, fee, date_paid, account_id, expected_remaining, due_date)

@@ -12,22 +12,22 @@
         {% if pairing.request_name %}
           <p>{{ pairing.request_name }} wants to connect. Check that both screens show:</p>
           <p class="num"><strong>{{ pairing.digits }}</strong></p>
-          <form method="post" action="/devices/confirm"><input type="hidden" name="__session" value="{{ session }}"><input type="hidden" name="digits" value="{{ pairing.digits }}"><button class="btn primary">The numbers match</button></form>
+          <form method="post" action="{{ prefix }}/devices/confirm"><input type="hidden" name="__session" value="{{ session }}"><input type="hidden" name="digits" value="{{ pairing.digits }}"><button class="btn primary">The numbers match</button></form>
         {% else %}<p class="muted">Waiting for your other device.</p>{% endif %}
-        <form method="post" action="/devices/stop"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Stop pairing</button></form>
+        <form method="post" action="{{ prefix }}/devices/stop"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Stop pairing</button></form>
       {% else %}
-        <form method="post" action="/devices/open"><input type="hidden" name="__session" value="{{ session }}"><div class="field"><label for="pair-password">Profile password</label><input id="pair-password" name="password" type="password" autocomplete="current-password" required></div><button class="btn primary">Pair a device</button></form>
+        <form method="post" action="{{ prefix }}/devices/open"><input type="hidden" name="__session" value="{{ session }}"><div class="field"><label for="pair-password">Profile password</label><input id="pair-password" name="password" type="password" autocomplete="current-password" required></div><button class="btn primary">Pair a device</button></form>
       {% endif %}
     {% elif pairing.pending %}
       <div data-pairing-pending><p>Check that the home shows this same number:</p><p class="num"><strong>{{ pairing.pending }}</strong></p><p>Confirm on the home. This screen will continue automatically.</p></div>
-      <form method="post" action="/devices/check"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Check connection</button></form>
+      <form method="post" action="{{ prefix }}/devices/check"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Check connection</button></form>
     {% elif pairing.paired %}
       <p>This device is paired. It reconnects automatically when the home is available.</p>
     {% else %}
       <h3>Nearby devices</h3><p>Open “Pair a device” on the home, with both devices on the same local network.</p>
-      <form method="post" action="/devices/find"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Find nearby devices</button></form>
+      <form method="post" action="{{ prefix }}/devices/find"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Find nearby devices</button></form>
       {% for item in pairing.nearby %}
-        <form method="post" action="/devices/join"><h3>{{ item.name }}</h3><input type="hidden" name="__session" value="{{ session }}"><input type="hidden" name="candidate" value="{{ item.id }}">
+        <form method="post" action="{{ prefix }}/devices/join"><h3>{{ item.name }}</h3><input type="hidden" name="__session" value="{{ session }}"><input type="hidden" name="candidate" value="{{ item.id }}">
           <div class="form-grid"><div class="field"><label for="pair-code-{{ loop.index }}">Number shown on the home</label><input id="pair-code-{{ loop.index }}" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="32" required></div>
           <div class="field"><label for="join-password-{{ loop.index }}">Profile password</label><input id="join-password-{{ loop.index }}" name="password" type="password" autocomplete="current-password" required></div></div><button class="btn primary">Pair with {{ item.name }}</button>
         </form>

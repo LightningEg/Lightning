@@ -25,11 +25,13 @@ _LABELS = dict(account_id='Account', cash_account_id='Cash account', other_accou
 _HIDDEN = frozenset(('fingerprint', 'fetch_price', 'allow_legacy_deposit_cash'))
 
 
-def _name(graph, value, entity=None):
+def _name(graph, value, entity=None, names=None):
     try:
         uuid(value)
     except (JournalError, TypeError):
         return None
+    if names and value in names:
+        return names[value]
     rows = graph.db.all('SELECT entity,local_id FROM journal_ids WHERE uuid=? ORDER BY entity', (value,))
     for row in rows:
         if entity and row['entity'] != entity:
@@ -45,21 +47,21 @@ def _name(graph, value, entity=None):
     return 'Removed record'
 
 
-def _value(graph, value, *, entity=None):
+def _value(graph, value, *, entity=None, names=None):
     if value is None or value == '':
         return 'None'
     if type(value) is bool:
         return 'Yes' if value else 'No'
     if type(value) is str:
-        return (_name(graph, value, entity) or value) if entity else value
+        return (_name(graph, value, entity, names) or value) if entity else value
     if type(value) is list:
-        return ', '.join(_value(graph, child, entity=entity) for child in value) or 'None'
+        return ', '.join(_value(graph, child, entity=entity, names=names) for child in value) or 'None'
     if type(value) is dict:
         result = []
         for key, child in value.items():
-            label = (_name(graph, key, entity) if entity else None) or _LABELS.get(key, key.replace('_', ' ').capitalize())
+            label = (_name(graph, key, entity, names) if entity else None) or _LABELS.get(key, key.replace('_', ' ').capitalize())
             child_entity = 'accounts' if key == 'value' and value.get('field') == 'account' else REFS.get(key) or LIST_REFS.get(key)
-            result.append(f'{label}: {_value(graph, child, entity=child_entity)}')
+            result.append(f'{label}: {_value(graph, child, entity=child_entity, names=names)}')
         return '; '.join(result) or 'None'
     return str(value)
 
@@ -68,7 +70,18 @@ def describe(graph, action):
     if action is None:
         return [('History', 'Detailed changes have expired')]
     result = []
+    calls = []
     for call in action['calls']:
+        if call['command'] == 'workflow.compose':
+            arguments = call['arguments']
+            names = {}
+            for handle, binding in arguments['bindings'].items():
+                producer = arguments['steps'][binding['step']]
+                names[handle] = producer['arguments'].get('name') or 'Created in this change'
+            calls.extend((step, names) for step in arguments['steps'])
+        else:
+            calls.append((call, {}))
+    for call, names in calls:
         name, arguments = call['command'], call['arguments']
         title = _TITLES.get(name, name.split('.', 1)[1].replace('_', ' ').capitalize())
         result.append(('Change', title))
@@ -79,9 +92,9 @@ def describe(graph, action):
             if name == 'profile.set_financial_setting' and key == 'key':
                 result.append(('Preference', _LABELS.get(value, value.replace('_', ' ').capitalize())))
             elif name == 'profile.set_financial_setting' and key == 'value' and arguments['key'] in ID_SETTINGS | {'budget_suppressed_categories'}:
-                result.append((label, _value(graph, json.loads(value), entity='categories')))
+                result.append((label, _value(graph, json.loads(value), entity='categories', names=names)))
             else:
-                result.append((label, _value(graph, value, entity=REFS.get(key) or LIST_REFS.get(key) or MAP_REFS.get(name, {}).get(key))))
+                result.append((label, _value(graph, value, entity=REFS.get(key) or LIST_REFS.get(key) or MAP_REFS.get(name, {}).get(key), names=names)))
     return result
 
 

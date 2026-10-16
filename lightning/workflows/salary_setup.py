@@ -4,9 +4,11 @@ import calendar
 
 from lightning.core.dates import fmt_date, today
 from lightning.core.errors import ValidationError
+from lightning.core.journal_hooks import named_action
 from lightning.planning.domain import PlanKind
 
 
+@named_action('salary.setup')
 def set_up_salary(c, account_id, amount, payday) -> int:
     try:
         selected_account = int(str(account_id))

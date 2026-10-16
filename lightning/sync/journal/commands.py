@@ -281,6 +281,9 @@ def validate(container, graph, action):
             translate(container, References(), call['command'], call['arguments'], encode=False)
         except (ValueError, TypeError, ArithmeticError) as error:
             raise JournalError('Invalid financial command arguments') from error
+        if call['command'] == 'workflow.compose':
+            from .composition import validate as validate_composition
+            validate_composition(container, call['arguments'])
     if type(action['preconditions']) is not list or len(action['preconditions']) > 256:
         raise JournalError('Invalid financial preconditions')
     from .domain import TABLES, _value
@@ -354,6 +357,10 @@ def _condition_hash(snapshot, table, key):
 def execute(container, graph, action):
     validate(container, graph, action)
     for call in action['calls']:
+        if call['command'] == 'workflow.compose':
+            from .composition import execute as execute_composition
+            execute_composition(container, graph, call['arguments'])
+            continue
         arguments = translate(container, graph, call['command'], call['arguments'], encode=False)
         if call['command'] == 'transactions.restore':
             record = graph.uid('transactions', arguments['txn_id'])

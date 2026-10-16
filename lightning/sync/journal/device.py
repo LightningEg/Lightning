@@ -270,7 +270,7 @@ class JournalDevice:
         return groups
 
     def balances(self):
-        return [dict(uuid=self.adapter.uid("accounts", account.id), name=account.name,
+        return [dict(uuid=self.adapter.uid("accounts", account.id), name=account.name, currency=account.currency,
                      balance=self.c.reporting.account_balance(account.id))
                 for account in self.c.accounts.list() if account.account_type.value in {"BANK", "CASH"}]
 

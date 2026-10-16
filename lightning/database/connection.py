@@ -11,6 +11,7 @@ import sqlite3
 import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
+from contextvars import ContextVar
 from pathlib import Path
 
 
@@ -22,7 +23,8 @@ class Database:
         self.path = str(path)
         self._local = threading.local()
         self.encrypted = key is not None
-        self.read_only = read_only
+        self._read_only = read_only
+        self._view_hint = ContextVar('database_nonmutating_view', default=False)
         self._key = bytearray(key) if key is not None else None
         self._owner = threading.current_thread() if self.encrypted else None
         self._closed = False
@@ -53,7 +55,7 @@ class Database:
         if conn is None:
             if self.encrypted:
                 self._owner = threading.current_thread()
-            if self.read_only:
+            if self._read_only:
                 if self.path == ":memory:":
                     raise ValueError("Read-only databases need a file")
                 target = Path(self.path).resolve().as_uri() + "?mode=ro"
@@ -61,7 +63,7 @@ class Database:
                 target = self.path
                 if self.path != ":memory:":
                     Path(self.path).parent.mkdir(parents=True, exist_ok=True)
-            conn = self.driver.connect(target, uri=self.read_only, isolation_level=None)
+            conn = self.driver.connect(target, uri=self._read_only, isolation_level=None)
             try:
                 if self.encrypted:
                     conn.execute("PRAGMA cipher_log_level = NONE")
@@ -96,6 +98,28 @@ class Database:
     @property
     def closed(self) -> bool:
         return self._closed
+
+    @property
+    def read_only(self) -> bool:
+        return self._read_only or self._view_hint.get()
+
+    @read_only.setter
+    def read_only(self, value: bool) -> None:
+        self._read_only = value
+
+    @contextmanager
+    def nonmutating_view(self):
+        """Tell services to suppress read-triggered work in this task only.
+
+        This hint grants no SQL permissions and changes no connection mode;
+        journal authorizers and genuinely read-only connections remain the
+        security barriers. A concurrent sync task retains its own context.
+        """
+        token = self._view_hint.set(True)
+        try:
+            yield
+        finally:
+            self._view_hint.reset(token)
 
     def close(self) -> None:
         if self.encrypted and self._closed:

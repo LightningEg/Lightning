@@ -278,4 +278,6 @@ class Retention:
                         self.db.execute('DELETE FROM journal_local WHERE name=?', (marker['name'],))
                 next_marker = markers[-1]['name'] if len(markers) == limit else ''
                 self.db.execute("INSERT INTO journal_local VALUES('retention_rpc_scan',?) ON CONFLICT(name) DO UPDATE SET value=excluded.value", (next_marker,))
+        from .form_basis import prune
+        prune(self.store)
         return count

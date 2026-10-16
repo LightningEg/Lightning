@@ -54,9 +54,14 @@ class BoundedJournalBody:
         await self.app(scope, buffered, send)
 
 
-def create_journal_app(device, *, session_token, channel=None, synchronize=None, sms_source=None, pairing=None):
+def create_journal_app(device, *, session_token, channel=None, synchronize=None, sms_source=None, pairing=None,
+                       prefix='', finance_url=None):
     if not isinstance(session_token, str) or len(session_token) < 32:
         raise ValueError("A per-unlock session token is required")
+    if prefix and (not prefix.startswith('/') or '/' in prefix[1:] or prefix.endswith('/') or any(character not in '/abcdefghijklmnopqrstuvwxyz-' for character in prefix)):
+        raise ValueError('Choose a fixed local journal prefix')
+    if finance_url is not None and (not finance_url.startswith('/') or finance_url.startswith('//')):
+        raise ValueError('The finance link must stay in this app')
     sync_task = None
     sync_requested = False
     @asynccontextmanager
@@ -97,6 +102,11 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
             if request.method == "POST" and request.headers.get("origin") != str(request.base_url).rstrip("/"):
                 return PlainTextResponse("Open the form again before saving.", status_code=403)
         response = await call_next(request)
+        location = response.headers.get('location', '')
+        if prefix and location.startswith('/') and not location.startswith('//') and not location.startswith(prefix+'/'):
+            response.headers['location'] = prefix+location
+        if prefix and request.method == 'GET' and request.url.path == '/' and response.status_code == 200:
+            response.headers['X-Lightning-Journal'] = 'page'
         response.headers.update({"Cache-Control": "no-store", "Referrer-Policy": "same-origin",
             "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; frame-ancestors 'none'; form-action 'self'"})
         return response
@@ -139,8 +149,8 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
             values = device.form_values(initial)
         if candidate:
             values = device.form_values(capture.get(candidate))
-        draft = device.draft(editing, initial=initial) if not candidate else ""
-        balances = [row | dict(shown=fmt(row["balance"], 0)) for row in device.balances()]
+        draft = device.draft(editing, initial=initial) if not candidate and (not prefix or page == 'entry') else ""
+        balances = [row | dict(shown=fmt(row["balance"], 0 if row['currency'] == 'EGP' else 2)) for row in device.balances()]
         try:
             sms_permission = sms_source.permission() if sms_source is not None else "unavailable"
         except Exception:
@@ -152,7 +162,7 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
                 split_count=max(4, sum(key.startswith("split_category_") for key in values)),
                 currency=device.c.base_currency, sms_available=sms_source is not None, sms_permission=sms_permission, phone=phone, page=page,
                 pairing=pairing.screen() if pairing is not None else dict(enabled=False),
-                version=version(), sync=device.sync_status()), status_code=400 if error else 200)
+                version=version(), sync=device.sync_status(), prefix=prefix, finance_url=finance_url), status_code=400 if error else 200)
 
     def version():
         from lightning.sync.journal.codec import digest

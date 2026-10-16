@@ -12,6 +12,8 @@ def changes(container, action):
     db = Database(':memory:', key=os.urandom(32))
     try:
         container.db.conn.backup(db.conn)
+        from .form_basis import workspace
+        workspace(db)
         copy = _wire_services(db, Path('.'))
         store = attach(copy)
         before = store.adapter.graph.snapshot()
