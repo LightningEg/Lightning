@@ -177,6 +177,11 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
     except BaseException:
         db.close()
         raise
+    return _wire_services(db, data_dir, backup_dir, undo_enabled=not read_only and not is_journal)
+
+
+def _wire_services(db, data_dir, backup_dir=None, *, undo_enabled=False):
+    """Wire a verified connection without migration, seed or automatic work."""
     settings = SettingsStore(db)
     base = settings.base_currency
     fx = CurrencyRates(db, base)
@@ -247,7 +252,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
         funding=CashFundingService(db, budgets, reporting, reserves, planning, categories, settings),
         deposit_receipts=deposit_receipts,
     )
-    if not read_only and not is_journal:
+    if undo_enabled:
         result.undo = UndoService(db, audit)
         db.undo = result.undo
         def validate_history(records):

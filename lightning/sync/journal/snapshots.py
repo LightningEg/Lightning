@@ -13,7 +13,7 @@ from lightning.database.connection import Database
 from lightning.database.snapshot import snapshot, verify_connection
 
 from .codec import JournalError, ZERO_HASH, authenticate, canonical, cursor as validate_cursor, fields, hash_value, number, seal, unpack
-from .finance import CashAdapter, PARTY
+from .finance import inspect_adapter, PARTY
 from .store import JournalStore
 
 
@@ -53,6 +53,14 @@ def _stage(source, folder, expected_hash, expected_size):
 
 
 def catalog(adapter):
+    if getattr(adapter, 'full_domain', False):
+        # Full-domain commits include catalog edits. Compatibility describes the
+        # contract, rather than requiring equal data before fetching those edits.
+        from .domain_schema import SCHEMA_VERSION, TABLES, UNIQUE_KEYS
+        from .commands import COMMANDS
+        from .codec import digest
+        return digest(dict(schema=SCHEMA_VERSION, tables=TABLES,
+                           lookups={table: [list(key) for key in keys] for table, keys in UNIQUE_KEYS.items()}, commands=sorted(COMMANDS)))
     result = hashlib.sha256(b"lightning-journal-catalog-v1\n")
     for entity, columns in (("accounts", ("code", "name", "currency", "account_type")),
                             ("categories", ("code", "name", "movement", "is_system")),
@@ -75,8 +83,7 @@ def export(store, target, signer):
     candidate = Database(target, key=store.db.copy_key())
     try:
         saved = JournalStore(candidate)
-        adapter = CashAdapter.__new__(CashAdapter)
-        adapter.db, adapter.store = candidate, saved
+        adapter = inspect_adapter(candidate, saved.config)
         fingerprint, cursor = adapter.fingerprint(), saved.cursor()
         baseline = catalog(adapter)
         schema = candidate.scalar("SELECT MAX(version) FROM schema_migrations")
@@ -123,14 +130,16 @@ def repair(store, source, manifest, *, source_key, fault=lambda phase: None):
             raise JournalError("Snapshot identity mismatch")
         if db.scalar("SELECT COUNT(*) FROM journal_outbox") or db.scalar("SELECT COUNT(*) FROM journal_candidates"):
             raise JournalError("A checkpoint must not include another device's local queues")
-        adapter = CashAdapter.__new__(CashAdapter)
-        adapter.db, adapter.store = db, SimpleNamespace(config=config, resolve=lambda value: value)
+        adapter = inspect_adapter(db, config)
         if adapter.fingerprint() != body["fingerprint"]:
             raise JournalError("Snapshot fingerprint mismatch")
         cursor = db.one("SELECT revision,hash FROM journal_commits ORDER BY revision DESC LIMIT 1")
         if (dict(cursor) if cursor else dict(revision=0, hash=ZERO_HASH)) != body["cursor"]:
             raise JournalError("Snapshot cursor mismatch")
-        transactions = [adapter.transaction(row[0]) for row in db.all("SELECT id FROM transactions")]
+        full = getattr(adapter, 'full_domain', False)
+        if full != getattr(store.adapter, 'full_domain', False):
+            raise JournalError('Snapshot financial contract mismatch')
+        transactions = [] if full else [adapter.transaction(row[0]) for row in db.all("SELECT id FROM transactions")]
         # Keep the prior encrypted copy as comparison evidence before changing any
         # domain data. Queue/counter preservation below is a single DB transaction.
         evidence = Path(store.db.path).parent / f".before-journal-repair-{uuid4().hex}.db"
@@ -141,12 +150,15 @@ def repair(store, source, manifest, *, source_key, fault=lambda phase: None):
             store.db.conn.set_authorizer(store.adapter._authorize)
         with store.db.transaction():
             with store.adapter.writing():
-                keep = {transaction["uuid"] for transaction in transactions}
-                for row in store.db.all("SELECT uuid,local_id FROM journal_ids WHERE entity='transactions'"):
-                    if row["uuid"] not in keep:
-                        store.db.execute("DELETE FROM ledger_entries WHERE transaction_id=?", (row["local_id"],))
-                        store.db.execute("DELETE FROM transactions WHERE id=?", (row["local_id"],))
-                        store.db.execute("DELETE FROM journal_ids WHERE entity='transactions' AND uuid=?", (row["uuid"],))
+                if full:
+                    store.adapter.graph.replace_verified(adapter.graph.snapshot())
+                else:
+                    keep = {transaction["uuid"] for transaction in transactions}
+                    for row in store.db.all("SELECT uuid,local_id FROM journal_ids WHERE entity='transactions'"):
+                        if row["uuid"] not in keep:
+                            store.db.execute("DELETE FROM ledger_entries WHERE transaction_id=?", (row["local_id"],))
+                            store.db.execute("DELETE FROM transactions WHERE id=?", (row["local_id"],))
+                            store.db.execute("DELETE FROM journal_ids WHERE entity='transactions' AND uuid=?", (row["uuid"],))
             for transaction in transactions:
                 party_uuid = transaction["header"]["counterparty_id"]
                 parties = []
@@ -156,7 +168,13 @@ def repair(store, source, manifest, *, source_key, fault=lambda phase: None):
                     parties.append(dict(uuid=party_uuid, values=adapter._encode(row, PARTY)))
                 store.adapter.apply(dict(schema=1, transactions=[transaction], counterparties=parties))
             fault("snapshot_domain")
-            for table in ("journal_records", "journal_aliases", "journal_commits", "journal_sources"):
+            tables = ["journal_records", "journal_aliases", "journal_commits", "journal_sources"]
+            for table in ('journal_commit_times', 'journal_compacted'):
+                if db.has_table(table):
+                    from .retention import initialize
+                    initialize(store)
+                    tables.append(table)
+            for table in tables:
                 store.db.execute(f"DELETE FROM {table}")
                 for row in db.all(f"SELECT * FROM {table}"):
                     columns = list(row.keys())
@@ -168,8 +186,8 @@ def repair(store, source, manifest, *, source_key, fault=lambda phase: None):
                 commit = unpack(bytes(row[0]))["body"]
                 own = store.db.one("SELECT wire FROM journal_outbox WHERE proposal_id=?", (commit["proposal_id"],))
                 if own:
-                    from .codec import digest
-                    if digest(unpack(bytes(own[0]))["body"]) != commit["proposal_hash"]:
+                    from .retention import proposal_hash
+                    if proposal_hash(own[0]) != commit["proposal_hash"]:
                         raise JournalError("Snapshot decision does not match saved proposal")
                     store.db.execute("UPDATE journal_outbox SET decision=? WHERE proposal_id=?", (row[0], commit["proposal_id"]))
             fault("snapshot_cursor")

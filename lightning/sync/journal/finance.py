@@ -29,6 +29,9 @@ REFS = {"account_id": "accounts", "asset_id": "financial_assets", "category_id":
 
 
 def validate_domain(value):
+    if type(value) is dict and type(value.get('schema')) is int and value['schema'] == 2:
+        from .domain import validate_effect
+        return validate_effect(value)
     fields(value, ("schema", "transactions", "counterparties"))
     if type(value["schema"]) is not int or value["schema"] != 1:
         raise JournalError("Unsupported transaction effect schema")
@@ -103,8 +106,29 @@ def initialize(container, *, profile, generation, device, incarnation, home_key,
 def attach(container):
     store = JournalStore(container.db)
     store.db.conn.execute("PRAGMA synchronous=FULL")
-    store.adapter = CashAdapter(container, store)
+    if store.db.has_table('journal_domain_contract'):
+        from .full import FullAdapter
+        store.adapter = FullAdapter(container, store)
+    else:
+        store.adapter = CashAdapter(container, store)
     return store
+
+
+def inspect_adapter(db, config):
+    """Inspect a checkpoint without installing guards or changing its contents."""
+    from types import SimpleNamespace
+    cls = CashAdapter
+    if db.has_table('journal_domain_contract'):
+        from .full import FullAdapter
+        from .domain import DomainGraph
+        if db.scalar('SELECT schema FROM journal_domain_contract WHERE id=1') != 2:
+            raise JournalError('Unsupported financial domain contract')
+        cls = FullAdapter
+    adapter = cls.__new__(cls)
+    adapter.db, adapter.store = db, SimpleNamespace(config=config, resolve=lambda value: value)
+    if cls is not CashAdapter:
+        adapter.graph = DomainGraph(db, config['profile'])
+    return adapter
 
 
 class CashAdapter:

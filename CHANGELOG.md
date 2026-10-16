@@ -10,6 +10,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - When a version is tagged, rename `Unreleased` to that version and start a new `Unreleased` above it.
 
 ## [Unreleased]
+- 2026-10-16 · Codex: added experimental full-domain journal commands, typed replication/checkpoint repair and acknowledged receipt compaction; stale forms, pending queues and origin counters remain protected.
+  Disposable encrypted previews freeze affected records; normal home services validate financial actions. Reserve IDs no longer reuse deleted history. Native journal cutover remains open.
 - 2026-10-16 · Codex: added verified, resumable first-replica enrollment, owner-wrapper/authority-chain transfer and crash-safe publication; sender-local keys and queues stay out of checkpoints.
   Home transitions resume after interruption, verify the pinned retirement signer and rotate transport keys atomically; offline peers verify consecutive authority certificates. Native cutover and full write coverage remain gated.
   Prepared the companion website guideline-copy fix on `codex/sync-app-guidelines`; its public main push awaits separate owner approval.

@@ -4,7 +4,7 @@
 
 | Who | Work | Files | Since |
 |---|---|---|---|
-| Codex | J6: full financial coverage and native cutover. | `lightning/runtime/journal*`, `lightning/runtime/session.py`, `lightning/runtime/app.py`, `lightning/bootstrap.py`, `lightning/sync/journal/`, `lightning/ui/journal.py`, `lightning/ui/journal_views/`, `lightning/ui/static/journal.js`, `tests/test_journal*`, `cloudflare/` | 2026-10-16 |
+| Codex | J6 financial coverage and cutover. | `lightning/runtime/journal*`, `lightning/runtime/session.py`, `lightning/runtime/app.py`, `lightning/bootstrap.py`, `lightning/reserves.py`, `lightning/sync/journal/`, `lightning/ui/journal.py`, `lightning/ui/journal_views/`, `lightning/ui/static/journal.js`, `tests/test_journal*`, `cloudflare/` | 2026-10-16 |
 | Codex | 02d — Code/fault tests pass; ordinary Windows reboot drill remains. Abrupt power-loss behavior is unverified; see Architecture › Promotion durability risk. | `tests/test_database_promotion.py` | 2026-10-06 |
 | Claude | Pockets | `accounts`, `investments` | 2026-10-16 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
@@ -21,7 +21,7 @@
 
 - **Website guideline copies:** fix on website `codex/sync-app-guidelines`; main push needs owner approval after auto-review rejection. **Read:** report › website guideline copies.
 
-- **Edit journal J6:** full-domain coverage, retention and native cutover in progress. **Read:** `docs/proposals/edit_journal.md` §10; Architecture › Experimental edit journal.
+- **Edit journal J6:** financial commands/retention built; native cutover remains open. **Read:** `docs/proposals/edit_journal.md` §10; Architecture › Experimental edit journal.
 
 - **Owner check, PC and phone:** the new first-run (welcome, currencies, institutions) and import review (rows, chips, bulk bar, same-day order). **Read:** Architecture › CSV import and export contract.
 - **Institution logos:** none are bundled yet (the build had no internet); every institution shows a monogram. Run `python tools/fetch_institution_logos.py` from a PC and commit `lightning/ui/static/institutions/` and the CSV. **Read:** Architecture › Modules (accounts).

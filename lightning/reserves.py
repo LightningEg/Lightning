@@ -154,8 +154,11 @@ class CashReserveService:
         now = now_iso()
         try:
             cur = self.db.execute(
-                "INSERT INTO cash_reserves(name,kind,target_e6,due_date,created_at,updated_at,recurrence,recurrence_day,counterparty_id,category_id,account_id) "
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                # Allocation history intentionally survives reserve deletion.
+                # Reusing its ID would join a new goal to the old goal's dates.
+                "INSERT INTO cash_reserves(id,name,kind,target_e6,due_date,created_at,updated_at,recurrence,recurrence_day,counterparty_id,category_id,account_id) "
+                "SELECT (SELECT COALESCE(MAX(id),0)+1 FROM (SELECT id FROM cash_reserves UNION ALL "
+                "SELECT reserve_id AS id FROM reserve_allocation_history)),?,?,?,?,?,?,?,?,?,?,?",
                 (name, kind, to_e6(target_value), day, now, now, recurrence,
                  date.fromisoformat(day).day if day and recurrence != "NONE" else None, counterparty_id, category_id, account_id),
             )

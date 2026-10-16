@@ -124,6 +124,30 @@ class LocalChannel:
         elif payload["operation"] == "capabilities":
             from .compatibility import capabilities
             result = capabilities(home.store)
+        elif payload['operation'] == 'ack':
+            fields(payload['value'], ('incarnation', 'cursor'))
+            incarnation = payload['value']['incarnation']
+            if not home.store.db.scalar('SELECT 1 FROM journal_origins WHERE device=? AND incarnation=? AND public_key=? AND revoked=0',
+                                       (sender, incarnation, self.peers[sender])):
+                raise JournalError('Acknowledgement incarnation is not approved')
+            from .retention import Retention
+            result = dict(acknowledged=Retention(home.store).acknowledge(sender, incarnation, payload['value']['cursor']))
+        elif payload['operation'] == 'receipts':
+            revisions = payload['value']
+            if type(revisions) is not list or len(revisions) > 8 or any(type(n) is not int or n < 1 for n in revisions):
+                raise JournalError('Invalid receipt request')
+            from .retention import Retention, is_receipt
+            keeper = Retention(home.store, signer=home.signer)
+            keeper.compact(limit=100)
+            keeper.prune_local()
+            result = {}
+            for revision in revisions:
+                saved = home.store.db.scalar('SELECT wire FROM journal_commits WHERE revision=?', (revision,))
+                if saved and is_receipt(unpack(bytes(saved))['body']):
+                    # An inherited prefix may carry the retired home's old
+                    # signature. The current authorized home attests the same
+                    # compact body under the key pinned for this generation.
+                    result[str(revision)] = encode(seal(unpack(bytes(saved))['body'], home.signer))
         else:
             raise JournalError("Unsupported local operation")
         return self.protect(dict(request_nonce=unpack(wire)["body"]["nonce"], result=result), sender)
@@ -151,7 +175,8 @@ class LocalChannel:
         pending = self.device.store.pending()
         from .compatibility import capabilities, check
         local = capabilities(self.device.store)
-        check(local, await exchange("capabilities", local), pending)
+        remote = await exchange('capabilities', local)
+        check(local, remote, pending)
         for proposal in pending:
             await exchange("proposal", encode(proposal))
         for offset in range(0, len(pending), 50):
@@ -167,6 +192,19 @@ class LocalChannel:
             if not response["commits"]:
                 if response["cursor"] != self.device.store.cursor():
                     raise JournalError("Verified checkpoint required")
+                if remote['entry_kinds'].get('control.ack') == 1:
+                    await exchange('ack', dict(incarnation=self.device.store.config['incarnation'], cursor=self.device.store.cursor()))
+                if remote['entry_kinds'].get('control.receipts') == 1:
+                    from .retention import Retention
+                    retention = Retention(self.device.store)
+                    revisions = retention.expired_revisions()
+                    if revisions:
+                        receipts = await exchange('receipts', revisions)
+                        if type(receipts) is not dict or set(receipts) - {str(n) for n in revisions}:
+                            raise JournalError('Unrequested receipt response')
+                        for receipt in receipts.values():
+                            retention.accept_receipt(decode(receipt))
+                    retention.prune_local()
                 with self.device.store.db.transaction():
                     self.device.store.db.execute("INSERT OR REPLACE INTO journal_local VALUES('last_sync',?)", (datetime.now(timezone.utc).isoformat(),))
                 return

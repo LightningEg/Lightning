@@ -18,7 +18,7 @@ from lightning.database.snapshot import verify_connection
 
 from .cloud import CHUNK_SIZE, CheckpointTransfer
 from .codec import JournalError, ZERO_HASH, authenticate, canonical, digest, fields, number, seal, unpack, uuid
-from .finance import CashAdapter
+from .finance import inspect_adapter
 from .local import encode
 from .membership import Membership
 from .snapshots import _stage, catalog, export
@@ -126,8 +126,7 @@ def install_replica(source, manifest, *, key, identity, incarnation, membership,
             store = JournalStore(saved)
             expected = dict(version=2,profile=profile,generation=generation,device=identity.device_id,
                             incarnation=incarnation,home_key=home_key,origin_key=identity.public_key,role="replica")
-            adapter = CashAdapter.__new__(CashAdapter)
-            adapter.db,adapter.store = saved,store
+            adapter = inspect_adapter(saved,store.config)
             if (store.config != expected or store.cursor() != metadata["cursor"] or adapter.fingerprint() != metadata["fingerprint"]
                     or saved.scalar("SELECT next_seq FROM journal_meta") != 1 or saved.scalar("SELECT COUNT(*) FROM journal_outbox")):
                 raise JournalError("Existing file differs from the pending enrollment")
@@ -155,8 +154,7 @@ def install_replica(source, manifest, *, key, identity, incarnation, membership,
                       "journal_mail_in","journal_mail_out","journal_rpc","journal_backup_material"):
             if db.has_table(table) and db.scalar(f"SELECT COUNT(*) FROM {table}"):
                 raise JournalError("Enrollment checkpoint contains sender-local material")
-        adapter = CashAdapter.__new__(CashAdapter)
-        adapter.db,adapter.store = db,SimpleNamespace(config=config,resolve=lambda value:value)
+        adapter = inspect_adapter(db,config)
         if adapter.fingerprint() != metadata["fingerprint"] or catalog(adapter) != metadata["catalog"]:
             raise JournalError("Enrollment financial fingerprint mismatch")
         latest = db.one("SELECT revision,hash FROM journal_commits ORDER BY revision DESC LIMIT 1")

@@ -139,6 +139,8 @@ class JournalDevice:
                     continue
                 wire = self.store.db.scalar("SELECT wire FROM journal_outbox WHERE proposal_id=?", (decision["proposal_id"],))
                 proposal = unpack(bytes(wire))["body"]
+                if proposal.get('type') != 'proposal':
+                    continue  # Its displayed payload expired; the outcome proof remains.
                 current = self.store.record(proposal["record"])
                 shown = (current["groups"] if current else {}) if proposal["kind"].endswith(".delete") else proposal["groups"]
                 confirmed[decision["proposal_id"]] = dict(record=proposal["record"], groups=shown,
@@ -156,7 +158,10 @@ class JournalDevice:
         row = self.store.db.one("SELECT wire,decision FROM journal_outbox WHERE proposal_id=?", (proposal_id,))
         if row is None or row["decision"] is None or unpack(bytes(row["decision"]))["body"]["outcome"] != "rejected":
             raise JournalError("Only a refused edit can be added again")
-        return unpack(bytes(row["wire"]))["body"]
+        original = unpack(bytes(row['wire']))['body']
+        if original.get('type') != 'proposal':
+            raise JournalError('This edit has expired. Create a new edit')
+        return original
 
     def displayed(self, proposal_ids):
         if len(proposal_ids) > 25:
@@ -167,11 +172,14 @@ class JournalDevice:
     def undo(self, proposal_id):
         history = [unpack(bytes(row[0]))["body"] for row in self.store.db.all("SELECT wire FROM journal_commits ORDER BY revision")]
         target = next((item for item in history if item["proposal_id"] == proposal_id), None)
-        if target is None or target["outcome"] != "accepted":
+        if target is None or target.get('type') != 'commit' or target["outcome"] != "accepted":
             raise JournalError("Only a retained accepted action can be undone")
         effect = target["effects"][0]
-        prior = next((item["effects"][0] for item in reversed(history) if item["revision"] < target["revision"]
+        prior_commit = next((item for item in reversed(history) if item["revision"] < target["revision"]
                       and item["effects"] and item["effects"][0]["record"] == effect["record"]), None)
+        if prior_commit is not None and prior_commit.get('type') != 'commit':
+            raise JournalError('The earlier value has expired; undo is unavailable')
+        prior = prior_commit['effects'][0] if prior_commit else None
         if prior is None:
             return self.save({}, record=effect["record"], delete=True)
         return self.save(prior["groups"], record=None if effect["deleted"] else effect["record"])

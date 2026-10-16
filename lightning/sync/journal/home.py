@@ -66,10 +66,16 @@ class JournalHome:
                 raise JournalError("Origin is not currently trusted")
             authenticate(envelope, member["public_key"])
             proposal(body)
-            if body["kind"].startswith("transaction.") and self.store.adapter is None:
+            if (body['kind'].startswith('transaction.') or body['kind'] == 'action.add') and self.store.adapter is None:
                 raise JournalError("Unsupported financial adapter")
-            if self.store.adapter is not None and not body["kind"].startswith("transaction."):
+            if self.store.adapter is not None and not (body["kind"].startswith("transaction.") or
+                    body["kind"] == 'action.add' and getattr(self.store.adapter, 'full_domain', False)):
                 raise JournalError("Unsupported financial entry kind")
+            if body['kind'] == 'action.add':
+                from .codec import fields
+                fields(body['groups'], ('action',))
+            elif 'action' in body['groups']:
+                raise JournalError('A transaction cannot contain a service command')
             if self.store.adapter is not None and not body["kind"].endswith(".delete"):
                 self.store.adapter.validate_groups(body["groups"], complete=body["kind"].endswith(".add"))
             retired = (body["generation"] != self.store.config["generation"] and self.store.authority is not None
@@ -141,6 +147,10 @@ class JournalHome:
             for effect in unpack(commit)["body"]["effects"]:
                 dependencies.append(effect | {"record": effect["alias"]} if "alias" in effect else effect)
         current = self.store.record(body["record"])
+        if body['kind'] == 'action.add' and not force:
+            from .commands import conflicts
+            if conflicts(self.store.adapter.graph, body['groups']['action']):
+                return 'review', 'conflict', []
         if current and current["deleted"]:
             return "rejected", "deleted", []
         if body["kind"].endswith(".add"):
@@ -214,13 +224,16 @@ class JournalHome:
         wire = seal(body, self.signer)
         authenticate(unpack(wire), self.store.config["home_key"])
         self.db.execute("INSERT INTO journal_commits VALUES(?,?,?,?)", (body["revision"], digest(body), body["proposal_id"], wire))
+        from .retention import committed
+        committed(self.db, body['revision'])
         self.db.execute("UPDATE journal_inbox SET status=?,reason=?,review_token=NULL WHERE proposal_id=?",
                         (outcome, reason, row["proposal_id"]))
         self.db.execute("UPDATE journal_origins SET progress=? WHERE device=? AND incarnation=?",
                         (row["seq"], row["device"], row["incarnation"]))
         own = self.db.one("SELECT wire FROM journal_outbox WHERE proposal_id=?", (row["proposal_id"],))
         if own:
-            if digest(unpack(bytes(own[0]))["body"]) != row["hash"]:
+            from .retention import proposal_hash
+            if proposal_hash(own[0]) != row["hash"]:
                 raise JournalError("Decision does not match local proposal")
             self.db.execute("UPDATE journal_outbox SET decision=? WHERE proposal_id=?", (wire, row["proposal_id"]))
         self.fault("home_receipt")
@@ -247,7 +260,10 @@ class JournalHome:
     def _review_token(self, row):
         body = unpack(bytes(row["wire"]))["body"]
         matches = self.store.adapter.matches(body) if self.store.adapter is not None else []
-        return digest(dict(proposal=row["hash"], current=self.store.record(body["record"]), matches=matches))
+        state = dict(proposal=row["hash"], current=self.store.record(body["record"]), matches=matches)
+        if body['kind'] == 'action.add':
+            state['financial_checkpoint'] = self.store.fingerprint()
+        return digest(state)
 
     def review_state(self, proposal_id):
         with self.db.transaction():

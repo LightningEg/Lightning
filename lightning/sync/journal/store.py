@@ -222,6 +222,8 @@ class JournalStore:
                 raise JournalError("Unsupported financial effect adapter")
             if self.config["role"] == "replica":
                 self.adapter.apply(effect["domain"])
+            if self.config['role'] == 'replica' and getattr(self.adapter, 'full_domain', False):
+                self.adapter.refresh_records(effect['domain'])
         self.db.execute("INSERT INTO journal_records VALUES(?,?,?,?) ON CONFLICT(record_id) DO UPDATE SET groups_json=excluded.groups_json,tokens_json=excluded.tokens_json,deleted=excluded.deleted",
                         (effect["record"], canonical(effect["groups"]).decode(),
                          canonical(effect["tokens"]).decode(), int(effect["deleted"])))
@@ -231,8 +233,12 @@ class JournalStore:
         if not 1 <= limit <= 50:
             raise JournalError("Invalid batch size")
         self._check_cursor(confirmed_cursor)
-        return [bytes(row[0]) for row in self.db.all("SELECT wire FROM journal_commits WHERE revision>? ORDER BY revision LIMIT ?",
-                                                   (confirmed_cursor["revision"], limit))]
+        result = [bytes(row[0]) for row in self.db.all("SELECT wire FROM journal_commits WHERE revision>? ORDER BY revision LIMIT ?",
+                                                     (confirmed_cursor["revision"], limit))]
+        from .retention import is_receipt, SnapshotRequired
+        if any(is_receipt(unpack(wire)['body']) for wire in result):
+            raise SnapshotRequired()
+        return result
 
     def _check_cursor(self, value):
         if value["revision"]:
@@ -264,9 +270,12 @@ class JournalStore:
             if self.fingerprint() != body["fingerprint"]:
                 raise JournalError("Ledger fingerprint mismatch; verified snapshot required")
             self.db.execute("INSERT INTO journal_commits VALUES(?,?,?,?)", (body["revision"], digest(body), body["proposal_id"], wire))
+            from .retention import committed
+            committed(self.db, body['revision'])
             own = self.db.one("SELECT wire FROM journal_outbox WHERE proposal_id=?", (body["proposal_id"],))
             if own:
-                if digest(unpack(bytes(own[0]))["body"]) != body["proposal_hash"]:
+                from .retention import proposal_hash
+                if proposal_hash(own[0]) != body["proposal_hash"]:
                     raise JournalError("Decision does not match local proposal")
                 self.db.execute("UPDATE journal_outbox SET decision=? WHERE proposal_id=?", (wire, body["proposal_id"]))
             fault("replica_cursor")

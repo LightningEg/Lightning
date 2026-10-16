@@ -193,6 +193,17 @@ class MailboxExchange:
 
     def prepare(self, payload, recipient):
         identifier = digest(dict(payload=payload, recipient=recipient, generation=self.peer.store.config["generation"],epoch=self.peer.channel.epoch))
+        # These device-local pointers let retention remove duplicate encrypted
+        # RPC payloads once the original proposal/detail has safely expired.
+        marker = None
+        if payload['operation'] == 'proposal':
+            from .local import decode
+            from .codec import origin_id
+            marker = ('rpc_proposal:' + identifier, origin_id(unpack(decode(payload['value']))['body']['origin']))
+        elif payload['operation'] == 'changes':
+            marker = ('rpc_changes:' + identifier, str(payload['value']['revision'] + 1))
+        if marker:
+            self.db.execute('INSERT OR IGNORE INTO journal_local VALUES(?,?)', marker)
         row = self.db.one("SELECT wire,consumed FROM journal_rpc WHERE id=?", (identifier,))
         # Capabilities and immutable proposal delivery are stable for this
         # payload/key epoch. Reuse them across interrupted rounds, otherwise

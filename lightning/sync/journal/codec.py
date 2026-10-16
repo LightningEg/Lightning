@@ -100,7 +100,7 @@ def proposal(value):
     uuid(value["generation"])
     uuid(value["record"])
     origin(value["origin"])
-    if type(value["kind"]) is not str or value["kind"] not in {"dummy.add", "dummy.edit", "dummy.delete", "transaction.add", "transaction.edit", "transaction.delete"}:
+    if type(value["kind"]) is not str or value["kind"] not in {"dummy.add", "dummy.edit", "dummy.delete", "transaction.add", "transaction.edit", "transaction.delete", "action.add"}:
         raise JournalError("Unsupported entry kind; update the device or home")
     if type(value["kind_version"]) is not int or value["kind_version"] != 1:
         raise JournalError("Unsupported entry version; update the device or home")

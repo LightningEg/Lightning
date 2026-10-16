@@ -14,8 +14,15 @@ class UpdateRequired(JournalError):
 def capabilities(store):
     from lightning import __version__
     from .snapshots import catalog
+    full = getattr(store.adapter, 'full_domain', False)
+    kinds = {"transaction.add":1,"transaction.edit":1,"transaction.delete":1}
+    if full:
+        kinds['action.add'] = 1
+    if store.db.has_table('journal_acks'):
+        kinds['control.ack'] = 1
+        kinds['control.receipts'] = 1
     return dict(protocol=2, app=__version__, ledger_schema=store.db.scalar("SELECT MAX(version) FROM schema_migrations"),
-                effects=[1], entry_kinds={"transaction.add":1,"transaction.edit":1,"transaction.delete":1},
+                effects=[2] if full else [1], entry_kinds=kinds,
                 catalog=catalog(store.adapter))
 
 

@@ -91,22 +91,48 @@ def recover_queue(device, source, wire, *, backup_key, fault=lambda phase: None)
             for row in incoming:
                 original = bytes(row["wire"])
                 proposal = unpack(original)
-                authenticate(proposal, device.identity.public_key)
+                from .retention import is_receipt, validate_receipt, proposal_hash
+                compact = proposal['body'].get('type') != 'proposal'
+                if not compact:
+                    authenticate(proposal, device.identity.public_key)
                 from .codec import origin_id, proposal as validate_proposal
-                validate_proposal(proposal["body"])
                 expected = dict(device=config["device"], incarnation=config["incarnation"], seq=row["seq"])
-                if proposal["body"]["origin"] != expected or origin_id(expected) != row["proposal_id"]:
+                if compact:
+                    if is_receipt(proposal['body']):
+                        validate_receipt(proposal['body'])
+                    else:
+                        from .store import _commit
+                        _commit(proposal['body'])
+                    if (proposal['body']['profile'] != config['profile'] or proposal['body']['proposal_id'] != row['proposal_id']):
+                        raise JournalError('Backup compact receipt identity mismatch')
+                    # Never restore a claimed compact outcome from the backup.
+                    # Only the currently verified stream can supply it; this
+                    # also handles inherited receipts signed by a retired home.
+                    current = db.scalar('SELECT wire FROM journal_commits WHERE proposal_id=?', (row['proposal_id'],))
+                    if current is None:
+                        raise JournalError('Pruned backup history needs a verified current checkpoint')
+                    known = unpack(bytes(current))['body']
+                    if any(proposal['body'][key] != known[key] for key in ('generation', 'proposal_hash', 'outcome', 'reason')):
+                        raise JournalError('Backup compact receipt differs from the current decision')
+                    original, proposal = bytes(current), unpack(bytes(current))
+                else:
+                    validate_proposal(proposal['body'])
+                    if proposal['body']['origin'] != expected:
+                        raise JournalError('Backup proposal origin mismatch')
+                if origin_id(expected) != row["proposal_id"]:
                     raise JournalError("Backup proposal identity mismatch")
                 existing = db.one("SELECT wire,proposal_id FROM journal_outbox WHERE seq=?", (row["seq"],))
                 if existing:
-                    if bytes(existing["wire"]) != original or existing["proposal_id"] != row["proposal_id"]:
+                    if proposal_hash(existing['wire']) != proposal_hash(original) or existing["proposal_id"] != row["proposal_id"]:
                         raise JournalError("Origin identity collision; preserve both copies for review")
                     continue
                 if row["seq"] > next_seq:
                     raise JournalError("Backup has an uncertain origin gap; explicit repair required")
                 # Never import an old branch's decision over the current stream.
                 decision = db.scalar("SELECT wire FROM journal_commits WHERE proposal_id=?", (row["proposal_id"],))
-                if decision is not None and unpack(bytes(decision))["body"]["proposal_hash"] != digest(proposal["body"]):
+                if compact and decision is None:
+                    raise JournalError('Pruned backup history needs a verified current checkpoint')
+                if decision is not None and unpack(bytes(decision))["body"]["proposal_hash"] != proposal_hash(original):
                     raise JournalError("Backup proposal disagrees with the current receipt")
                 db.execute("INSERT INTO journal_outbox(seq,proposal_id,wire,decision) VALUES(?,?,?,?)",
                            (row["seq"], row["proposal_id"], original, decision))
