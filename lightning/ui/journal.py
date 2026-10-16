@@ -128,8 +128,8 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
             for review in reviews:
                 review["command"] = str(uuid4())
                 review["proposed_shown"] = device.describe(review["proposed"]["groups"])
-                review["current_shown"] = device.describe(review["current"]["groups"]) if review["current"] else []
-                review["base_shown"] = device.describe(review["base"]) if review["base"] else []
+                review["current_shown"] = review.get('current_action_shown') or (device.describe(review["current"]["groups"]) if review["current"] else [])
+                review["base_shown"] = review.get('base_action_shown') or (device.describe(review["base"]) if review["base"] else [])
         values = {"date": today().isoformat()}
         if editing:
             selected = next((row for row in rows if row["record"] == editing and row["state"] != "Not taken"), None)

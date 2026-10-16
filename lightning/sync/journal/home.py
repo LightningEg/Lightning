@@ -74,6 +74,10 @@ class JournalHome:
             if body['kind'] == 'action.add':
                 from .codec import fields
                 fields(body['groups'], ('action',))
+                if type(body['groups']['action']) is not dict:
+                    raise JournalError('A financial action must contain reviewed commands')
+                if ('baseline' in body['groups']['action']) != (body['kind_version'] == 2):
+                    raise JournalError('Financial command version does not match its original-value schema')
             elif 'action' in body['groups']:
                 raise JournalError('A transaction cannot contain a service command')
             if self.store.adapter is not None and not body["kind"].endswith(".delete"):

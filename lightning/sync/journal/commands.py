@@ -192,6 +192,9 @@ def prepare(container, graph, calls):
     for call in calls:
         fields(call, ('command', 'arguments'))
         arguments = dict(call['arguments'])
+        if call['command'] == 'profile.set_financial_setting':
+            from .settings import validate as validate_setting
+            validate_setting(arguments.get('key'), arguments.get('value'))
         if call['command'] in PREVIEW_COMMANDS:
             token = _preview(container, call['command'], arguments)
             if arguments.get('fingerprint') != token:
@@ -248,11 +251,16 @@ def prepare(container, graph, calls):
     preconditions = list(selected.values())
     if len(preconditions) > 256:
         raise JournalError('This action needs a smaller selection')
-    return action | dict(preconditions=preconditions)
+    baseline = []
+    for (table, _), row in sorted(snapshot.items()):
+        if any(condition['table'] == table and all(row[key] == value for key, value in condition['key'].items())
+               for condition in preconditions):
+            baseline.append(dict(table=table, values=row))
+    return action | dict(preconditions=preconditions, baseline=baseline)
 
 
 def validate(container, graph, action):
-    fields(action, ('calls', 'preconditions', 'checkpoint'))
+    fields(action, ('calls', 'preconditions', 'checkpoint', *(['baseline'] if 'baseline' in action else [])))
     from .codec import hash_value
     if action['checkpoint'] is not None:
         hash_value(action['checkpoint'])
@@ -289,7 +297,36 @@ def validate(container, graph, action):
         for key, value in condition['key'].items():
             _value(table, key, value)
         hash_value(condition['hash'])
+    if 'baseline' in action:
+        _validate_baseline(action)
     canonical(action)
+
+
+def _validate_baseline(action):
+    from .domain import TABLES, _embedded, _key, _value, financial_setting
+    baseline = action['baseline']
+    if type(baseline) is not list or len(baseline) > 256:
+        raise JournalError('Invalid original financial values')
+    snapshot = {}
+    for entry in baseline:
+        fields(entry, ('table', 'values'))
+        table, row = entry['table'], entry['values']
+        if type(table) is not str or table not in TABLES:
+            raise JournalError('Unknown original financial table')
+        fields(row, TABLES[table]['columns'])
+        for column, value in row.items():
+            _value(table, column, value)
+        _embedded(table, row)
+        if table == 'settings' and not financial_setting(row['key']):
+            raise JournalError('Device-local values cannot enter a financial baseline')
+        identity = (table, canonical(_key(table, row)))
+        if identity in snapshot or not any(condition['table'] == table and all(row[key] == value for key, value in condition['key'].items())
+                                           for condition in action['preconditions']):
+            raise JournalError('Unexpected original financial row')
+        snapshot[identity] = row
+    for condition in action['preconditions']:
+        if _condition_hash(snapshot, condition['table'], condition['key']) != condition['hash']:
+            raise JournalError('Original values do not match their financial preconditions')
 
 
 def conflicts(graph, action):

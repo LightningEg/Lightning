@@ -123,6 +123,12 @@ class JournalStore:
         if enrolled and (self.authority is None or not self.authority.can_confirm(self)):
             raise JournalError("Confirmation is frozen or authority repair is required")
 
+    def require_origin_checkpoint(self):
+        if self.db.scalar("SELECT value FROM journal_local WHERE name='authority_enrolled'") and (
+                self.authority is None or self.authority._closed or self.db.transaction_observer is None):
+            raise JournalError('Private origin checkpoint is required before saving')
+        return self.db.transaction_observer
+
     @contextmanager
     def confirming(self):
         enrolled = self.db.scalar("SELECT value FROM journal_local WHERE name='authority_enrolled'")
@@ -172,15 +178,14 @@ class JournalStore:
     def save(self, *, kind, record, groups, bases, signer, dependencies=(), display_zone="Africa/Cairo",
              fault=lambda phase: None):
         """Persist immutable signed bytes and allocate the sequence atomically."""
-        if self.db.scalar("SELECT value FROM journal_local WHERE name='authority_enrolled'") and (
-                self.authority is None or self.authority._closed or self.db.transaction_observer is None):
-            raise JournalError('Private origin checkpoint is required before saving')
+        self.require_origin_checkpoint()
         with self.db.transaction():
             seq = self.db.scalar("SELECT next_seq FROM journal_meta WHERE id=1")
             body = dict(version=2, type="proposal", profile=self.config["profile"],
                         generation=self.config["generation"],
                         origin=dict(device=self.config["device"], incarnation=self.config["incarnation"], seq=seq),
-                        kind=kind, kind_version=1, record=record, groups=groups, bases=bases,
+                        kind=kind, kind_version=2 if kind == 'action.add' and isinstance(groups.get('action'), dict) and 'baseline' in groups['action'] else 1,
+                        record=record, groups=groups, bases=bases,
                         dependencies=list(dependencies), cursor=self.cursor(),
                         created_at=datetime.now(timezone.utc).isoformat(), display_zone=display_zone)
             canonical(body)  # Reject unsupported types before semantic validation.

@@ -151,7 +151,7 @@ def install_replica(source, manifest, *, key, identity, incarnation, membership,
             raise JournalError("Enrollment checkpoint scope mismatch")
         for table in ("journal_local","journal_outbox","journal_candidates","journal_seen","journal_remote_states",
                       "journal_capture_cursor","journal_batch_undo","journal_drafts","journal_candidate_inputs",
-                      "journal_mail_in","journal_mail_out","journal_rpc","journal_backup_material"):
+                      "journal_mail_in","journal_mail_out","journal_rpc","journal_backup_material","journal_forms"):
             if db.has_table(table) and db.scalar(f"SELECT COUNT(*) FROM {table}"):
                 raise JournalError("Enrollment checkpoint contains sender-local material")
         adapter = inspect_adapter(db,config)

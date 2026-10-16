@@ -24,6 +24,8 @@ def salary(container, account_id, amount, payday):
 def setting(container, key, value):
     if not financial_setting(key) or key == 'base_currency':
         raise JournalError('This setting is local or requires first-run setup')
+    from .settings import validate
+    validate(key, value)
     container.settings.set(key, value)
 
 

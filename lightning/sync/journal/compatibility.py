@@ -17,7 +17,7 @@ def capabilities(store):
     full = getattr(store.adapter, 'full_domain', False)
     kinds = {"transaction.add":1,"transaction.edit":1,"transaction.delete":1}
     if full:
-        kinds['action.add'] = 1
+        kinds['action.add'] = 2  # Highest supported version; original v1 queues remain valid.
     if store.db.has_table('journal_acks'):
         kinds['control.ack'] = 1
         kinds['control.receipts'] = 1
@@ -37,5 +37,6 @@ def check(local, home, pending):
     from .codec import unpack
     for wire in pending:
         body = unpack(wire)["body"]
-        if home["entry_kinds"].get(body["kind"]) != body["kind_version"]:
+        supported = home["entry_kinds"].get(body["kind"])
+        if type(supported) is not int or supported < body['kind_version']:
             raise UpdateRequired("home")

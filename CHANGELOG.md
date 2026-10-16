@@ -10,6 +10,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - When a version is tagged, rename `Unreleased` to that version and start a new `Unreleased` above it.
 
 ## [Unreleased]
+- 2026-10-16 · Codex: added encrypted ordinary-register form capture with full-row replay checks, durable retry tokens and stale-form fencing; unsupported native writes remain blocked before dispatch.
+  Experimental PC/phone views now compare original/proposed/current financial values, retain old command queues and acknowledge displayed accepted outcomes for safe pruning.
+  Generic financial preferences now enforce typed bounds; malformed older intents get one terminal refusal. Complete native routing/cutover remains open.
 - 2026-10-16 · Codex: added explicit experimental journal upgrades that preserve pending bytes, counters and receipts; replicas install a verified full-domain checkpoint atomically and interrupted upgrades resume safely.
   Full-domain profiles now require storage format 3, so older cash-only runtimes refuse them; wire protocol stays v2. Native cutover remains open.
   Added dual-signed retirement/candidate preflight and private origin checkpoints: stale restores, copied identities and retired v1 lending remain blocked; nested saves checkpoint only after the outer commit.

@@ -1,0 +1,6 @@
+<article {% if item.state == 'Not taken' or item.displayable %}data-seen-proposal="{{ item.proposal_id }}"{% endif %}>
+  <div class="phone-row"><span><b>Financial changes</b><small>{{ item.state }}</small></span></div>
+  {% if item.reason %}<p class="muted">{{ item.reason }}</p>{% endif %}
+  <details><summary>Changes</summary>{% for label,value in item.action_shown %}<p>{{ label }}: {{ value }}</p>{% endfor %}</details>
+  {% if item.state == 'Not taken' %}<p>Open the original screen to review and save these changes again.</p>{% endif %}
+</article>

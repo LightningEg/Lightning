@@ -133,6 +133,14 @@ class JournalDevice:
             item["proposal_id"] = origin_id(proposal["origin"])
         for decision in self.store.decisions():
             content = unpack(bytes(decision["decision"]))["body"]
+            if content['outcome'] == 'accepted':
+                for effect in content['effects']:
+                    target = self.store.resolve(effect['record'])
+                    current = self.store.record(target)
+                    shown = confirmed.get(target)
+                    if shown and shown['state'] == 'Confirmed' and current and current['tokens'] == effect['tokens']:
+                        shown['proposal_id'] = decision['proposal_id']
+                        shown['displayable'] = True
             if content["outcome"] == "rejected":
                 seen = self.store.db.scalar("SELECT first_display_at FROM journal_seen WHERE proposal_id=?", (decision["proposal_id"],))
                 if seen and datetime.now(timezone.utc) - datetime.fromisoformat(seen) >= timedelta(days=7):
@@ -146,10 +154,15 @@ class JournalDevice:
                 confirmed[decision["proposal_id"]] = dict(record=proposal["record"], groups=shown,
                     state="Not taken", reason={"cancelled": "Kept the confirmed value", "dependency-rejected": "An earlier edit was not taken",
                     "financial-validation": "The home could not apply this action. Review the transaction."}.get(content["reason"], "This edit could not be applied"), confirmed=None, proposal_id=decision["proposal_id"])
-        return list(confirmed.values())
+        result = list(confirmed.values())
+        for item in result:
+            item['action_shown'] = self.describe(item['groups']) if 'action' in item['groups'] else None
+        return result
 
     def add_again(self, proposal_id):
         original = self.refused(proposal_id)
+        if 'action' in original['groups']:
+            raise JournalError('Open the original screen to review and save these changes again')
         return self.save(original["groups"] if not original["kind"].endswith(".delete") else {},
                          record=None if original["kind"].endswith(".add") else original["record"],
                          delete=original["kind"].endswith(".delete"))
@@ -199,6 +212,11 @@ class JournalDevice:
             return []
         result = [self.home.review_state(row[0]) for row in self.store.db.all("SELECT proposal_id FROM journal_inbox WHERE status='review'")]
         for review in result:
+            action = review['proposed']['groups'].get('action')
+            if action is not None:
+                from .presentation import before, current
+                review['current_action_shown'] = current(self.adapter.graph, action)
+                review['base_action_shown'] = before(self.adapter.graph, action)
             for match in review["matches"]:
                 record = self.store.record(match["record"])
                 match["shown"] = self.describe(record["groups"])
@@ -206,6 +224,8 @@ class JournalDevice:
         return result
 
     def form_values(self, groups):
+        if 'action' in groups:
+            raise JournalError('Open the original screen to edit these financial changes')
         choices = self.choices()
         reverse_accounts = {value: label for label, value in choices["accounts"].items()}
         reverse_categories = {value: label for label, value in choices["categories"].items()}
@@ -223,6 +243,9 @@ class JournalDevice:
         return self.store.resolve(record)
 
     def describe(self, groups):
+        if 'action' in groups:
+            from .presentation import describe
+            return describe(self.adapter.graph, groups['action'])
         values = self.form_values(groups)
         labels = dict(account="Account", other_account="Transfer to", date="Date", amount="Amount",
                       category="Category", counterparty="Counterparty", notes="Notes")

@@ -235,6 +235,33 @@ def test_cash_only_device_cannot_accept_full_domain_effects(full_devices):
         check(cash, full, [])
 
 
+def test_original_values_are_bound_to_preconditions_and_old_command_queues_remain_valid(full_devices):
+    from copy import deepcopy
+    from lightning.sync.journal.commands import validate
+    from lightning.sync.journal.compatibility import capabilities, check, UpdateRequired
+    home, peer, identities = full_devices
+    category = peer.adapter.c.categories.get_by_code('EXP.PERSONAL.FOOD')
+    action = prepare(peer.adapter.c, peer.adapter.graph, [dict(command='categories.update',
+        arguments=dict(category_id=category.id, name='Coffee'))])
+    original = deepcopy(action)
+    assert any(row['table'] == 'categories' and row['values']['name'] == category.name for row in action['baseline'])
+    next(row for row in action['baseline'] if row['table'] == 'categories')['values']['name'] = 'Forged baseline'
+    with pytest.raises(JournalError, match='Original values'):
+        validate(peer.adapter.c, peer.adapter.graph, action)
+    legacy = {key: value for key, value in original.items() if key != 'baseline'}
+    wire = peer.save(kind='action.add', record=str(uuid4()), groups=dict(action=legacy), bases=dict(action=None), signer=identities[1].sign)
+    assert unpack(wire)['body']['kind_version'] == 1
+    check(capabilities(peer), capabilities(home.store), [wire])
+    home.receive(wire)
+    assert home.process()
+    modern = peer.adapter.save_action([dict(command='categories.update', arguments=dict(category_id=category.id, name='Dinner'))], identities[1].sign)
+    assert unpack(modern)['body']['kind_version'] == 2
+    old_home = capabilities(home.store)
+    old_home['entry_kinds'] = old_home['entry_kinds'] | {'action.add': 1}
+    with pytest.raises(UpdateRequired, match='Update the home'):
+        check(capabilities(peer), old_home, [modern])
+
+
 def test_cash_form_tokens_refresh_after_general_financial_command(full_devices):
     from lightning.sync.journal.device import JournalDevice
     home, peer, identities = full_devices

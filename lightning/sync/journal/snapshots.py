@@ -89,7 +89,7 @@ def export(store, target, signer):
         schema = candidate.scalar("SELECT MAX(version) FROM schema_migrations")
         candidate.conn.execute("PRAGMA secure_delete=ON")
         with candidate.transaction():
-            for table in ("journal_outbox", "journal_candidates", "journal_seen", "journal_remote_states", "journal_local", "journal_capture_cursor", "journal_batch_undo", "journal_drafts", "journal_candidate_inputs", "journal_mail_in", "journal_mail_out", "journal_rpc", "journal_backup_material"):
+            for table in ("journal_outbox", "journal_candidates", "journal_seen", "journal_remote_states", "journal_local", "journal_capture_cursor", "journal_batch_undo", "journal_drafts", "journal_candidate_inputs", "journal_mail_in", "journal_mail_out", "journal_rpc", "journal_backup_material", "journal_forms"):
                 if candidate.has_table(table):
                     candidate.execute(f"DELETE FROM {table}")
             config = dict(store.config) | {"role": "snapshot"}

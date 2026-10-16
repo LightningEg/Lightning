@@ -102,7 +102,7 @@ def proposal(value):
     origin(value["origin"])
     if type(value["kind"]) is not str or value["kind"] not in {"dummy.add", "dummy.edit", "dummy.delete", "transaction.add", "transaction.edit", "transaction.delete", "action.add"}:
         raise JournalError("Unsupported entry kind; update the device or home")
-    if type(value["kind_version"]) is not int or value["kind_version"] != 1:
+    if type(value["kind_version"]) is not int or value["kind_version"] not in ((1, 2) if value['kind'] == 'action.add' else (1,)):
         raise JournalError("Unsupported entry version; update the device or home")
     try:
         if type(value["created_at"]) is not str or len(value["created_at"]) > 40:
