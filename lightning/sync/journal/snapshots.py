@@ -102,7 +102,7 @@ def export(store, target, signer):
                      size=target.stat().st_size, sha256=_hash(target)), signer)
 
 
-def repair(store, source, manifest, *, source_key, fault=lambda phase: None):
+def repair(store, source, manifest, *, source_key, fault=lambda phase: None, upgrade=False):
     if store.config["role"] != "replica" or store.adapter is None:
         raise JournalError("Only a financial replica can install a checkpoint")
     envelope = unpack(manifest)
@@ -115,12 +115,13 @@ def repair(store, source, manifest, *, source_key, fault=lambda phase: None):
         hash_value(body[field])
     number(body["size"], minimum=1)
     number(body["schema"], minimum=1)
-    if body["version"] != 2 or body["type"] != "snapshot" or body["catalog"] != catalog(store.adapter):
+    if body["version"] != 2 or body["type"] != "snapshot" or (not upgrade and body["catalog"] != catalog(store.adapter)):
         raise JournalError("Incompatible snapshot or baseline catalog")
     if body["cursor"]["revision"] < store.cursor()["revision"]:
         raise JournalError("A snapshot cannot rewind confirmed authority progress")
     path = _stage(Path(source), Path(store.db.path).parent, body["sha256"], body["size"])
     db = Database(path, key=source_key, read_only=True)
+    old_adapter, old_config, upgrading = store.adapter, dict(store.config), False
     try:
         verify_connection(db.conn, encrypted=True)
         if db.scalar("SELECT MAX(version) FROM schema_migrations") != body["schema"] or body["schema"] != store.db.scalar("SELECT MAX(version) FROM schema_migrations"):
@@ -131,13 +132,16 @@ def repair(store, source, manifest, *, source_key, fault=lambda phase: None):
         if db.scalar("SELECT COUNT(*) FROM journal_outbox") or db.scalar("SELECT COUNT(*) FROM journal_candidates"):
             raise JournalError("A checkpoint must not include another device's local queues")
         adapter = inspect_adapter(db, config)
-        if adapter.fingerprint() != body["fingerprint"]:
+        if adapter.fingerprint() != body["fingerprint"] or catalog(adapter) != body['catalog']:
             raise JournalError("Snapshot fingerprint mismatch")
         cursor = db.one("SELECT revision,hash FROM journal_commits ORDER BY revision DESC LIMIT 1")
         if (dict(cursor) if cursor else dict(revision=0, hash=ZERO_HASH)) != body["cursor"]:
             raise JournalError("Snapshot cursor mismatch")
         full = getattr(adapter, 'full_domain', False)
-        if full != getattr(store.adapter, 'full_domain', False):
+        upgrading = upgrade and full and not getattr(store.adapter, 'full_domain', False)
+        if upgrade and not full:
+            raise JournalError('A domain upgrade requires a full-domain checkpoint')
+        if full != getattr(store.adapter, 'full_domain', False) and not upgrading:
             raise JournalError('Snapshot financial contract mismatch')
         transactions = [] if full else [adapter.transaction(row[0]) for row in db.all("SELECT id FROM transactions")]
         # Keep the prior encrypted copy as comparison evidence before changing any
@@ -149,8 +153,20 @@ def repair(store, source, manifest, *, source_key, fault=lambda phase: None):
         finally:
             store.db.conn.set_authorizer(store.adapter._authorize)
         with store.db.transaction():
+            if upgrading:
+                from .full import enable
+                enable(store, _upgrade=True)
+                fault('replica_domain_prepared')
             with store.adapter.writing():
                 if full:
+                    if upgrading:
+                        # Legacy replay had no stable posting-line UUIDs and
+                        # replaced their local row IDs independently. Rebuild
+                        # those lines from the verified source in this same
+                        # transaction; account/transaction UUIDs and local
+                        # queues remain bound to their existing identities.
+                        store.db.execute('PRAGMA defer_foreign_keys=ON')
+                        store.db.execute('DELETE FROM ledger_entries')
                     store.adapter.graph.replace_verified(adapter.graph.snapshot())
                 else:
                     keep = {transaction["uuid"] for transaction in transactions}
@@ -192,6 +208,14 @@ def repair(store, source, manifest, *, source_key, fault=lambda phase: None):
                     store.db.execute("UPDATE journal_outbox SET decision=? WHERE proposal_id=?", (row[0], commit["proposal_id"]))
             fault("snapshot_cursor")
         fault("snapshot_committed")
+    except BaseException:
+        if upgrading:
+            actual = json.loads(store.db.scalar('SELECT config FROM journal_meta WHERE id=1'))
+            if actual['version'] == old_config['version']:
+                store.adapter, store.config = old_adapter, old_config
+                store.db.conn.set_authorizer(old_adapter._authorize)
+                store.db.journal_guard = old_adapter._authorize
+        raise
     finally:
         db.close()
         path.unlink(missing_ok=True)

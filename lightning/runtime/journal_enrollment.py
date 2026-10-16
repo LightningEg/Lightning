@@ -146,14 +146,15 @@ class NewJournalReplica:
                         home_key=state["home_key"],profile=state["profile"],generation=state["generation"],target=target,resume=resume)
         complete = dict(profile=state["profile"],generation=state["generation"],device=self.identity.device_id)
         if authority is not None:
-            from lightning.database.connection import Database
-            from lightning.sync.journal.store import JournalStore
+            from lightning.bootstrap import build
+            from lightning.sync.journal.finance import attach
             from lightning.sync.journal.authority import AuthorityMemory
             memory = AuthorityMemory(authority,profile=state["profile"])
             db = None
             try:
-                db = Database(target,key=key)
-                memory.bind(JournalStore(db))
+                container = build(target,key=key,experimental_journal=True)
+                db = container.db
+                memory.bind(attach(container))
             finally:
                 if db is not None:
                     db.close()

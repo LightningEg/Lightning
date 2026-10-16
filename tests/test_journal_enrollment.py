@@ -110,6 +110,7 @@ def test_first_device_pairs_once_resumes_ciphertext_download_and_joins_exact_led
         assert await restarted.finish("Pairing password")
         key = unwrap_key(read_slot(root/'keys.json'),"Pairing password")
         container = build(root/'ledger.db',key=key,experimental_journal=True)
+        memory = None
         try:
             replica = JournalDevice(attach(container),restarted.identity)
             assert replica.store.fingerprint() == home.store.fingerprint()
@@ -124,12 +125,8 @@ def test_first_device_pairs_once_resumes_ciphertext_download_and_joins_exact_led
                 marker = read_slot(root/'complete.json')
                 assert Path(marker["authority"]).parent != root
                 memory = AuthorityMemory(marker["authority"],profile=replica.store.config["profile"])
-                try:
-                    assert memory.state()["generation"] == home.store.config["generation"]
-                    memory.bind(replica.store)
-                finally:
-                    memory.close()
-                    replica.store.authority = None
+                assert memory.state()["generation"] == home.store.config["generation"]
+                memory.bind(replica.store)
                 assert replica.c.db.scalar("SELECT value FROM journal_local WHERE name='authority_enrolled'") == '1'
             assert replica.store.config["device"] != home.store.config["device"]
             assert replica.c.db.scalar("SELECT next_seq FROM journal_meta") == 1
@@ -145,6 +142,8 @@ def test_first_device_pairs_once_resumes_ciphertext_download_and_joins_exact_led
             assert not replica.store.pending()
             assert replica.store.fingerprint() == home.store.fingerprint()
         finally:
+            if memory:
+                memory.close()
             container.db.close()
     try:
         asyncio.run(run())

@@ -364,12 +364,13 @@ def test_successor_rotates_transport_in_same_profile_commit_and_retry_keeps_the_
         body = unpack(update)["body"]
         assert body["generation"] == pc.store.config["generation"] and body["previous"] == 0
         assert controls[1].can_confirm(pc.store)
-        # A newly enrolled peer can consume this generation's initial wrap.
-        with home.c.db.transaction():
-            home.c.db.execute("DELETE FROM journal_local WHERE name='membership'")
-            home.store.config = dict(home.store.config,generation=pc.store.config["generation"],home_key=pc.store.config["home_key"])
-            Membership(home).accept(update,initial=True)
-        assert home.c.db.scalar("SELECT value FROM journal_local WHERE name='transport'") == current
+        # An old enrolled origin cannot impersonate a newly enrolled peer by
+        # replacing its in-memory generation. Its private watermark fences it.
+        with pytest.raises(JournalError, match='verified activation'):
+            with home.c.db.transaction():
+                home.c.db.execute("DELETE FROM journal_local WHERE name='membership'")
+                home.store.config = dict(home.store.config,generation=pc.store.config["generation"],home_key=pc.store.config["home_key"])
+                Membership(home).accept(update,initial=True)
     finally:
         for control in controls:
             control.close()

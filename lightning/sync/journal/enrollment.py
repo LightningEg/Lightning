@@ -124,7 +124,7 @@ def install_replica(source, manifest, *, key, identity, incarnation, membership,
         try:
             verify_connection(saved.conn,encrypted=True)
             store = JournalStore(saved)
-            expected = dict(version=2,profile=profile,generation=generation,device=identity.device_id,
+            expected = dict(version=3 if saved.has_table('journal_domain_contract') else 2,profile=profile,generation=generation,device=identity.device_id,
                             incarnation=incarnation,home_key=home_key,origin_key=identity.public_key,role="replica")
             adapter = inspect_adapter(saved,store.config)
             if (store.config != expected or store.cursor() != metadata["cursor"] or adapter.fingerprint() != metadata["fingerprint"]
@@ -161,7 +161,7 @@ def install_replica(source, manifest, *, key, identity, incarnation, membership,
         if (dict(latest) if latest else dict(revision=0,hash=ZERO_HASH)) != metadata["cursor"]:
             raise JournalError("Enrollment cursor mismatch")
         with db.transaction():
-            config = dict(version=2,profile=profile,generation=generation,device=identity.device_id,
+            config = dict(version=3 if db.has_table('journal_domain_contract') else 2,profile=profile,generation=generation,device=identity.device_id,
                           incarnation=incarnation,home_key=home_key,origin_key=identity.public_key,role="replica")
             db.execute("UPDATE journal_meta SET config=?,next_seq=1 WHERE id=1",(canonical(config).decode(),))
             store = JournalStore(db)

@@ -89,6 +89,15 @@ def initialize(container, *, profile, generation, device, incarnation, home_key,
         raise JournalError("Only a fresh baseline with opening balances can enroll")
     if db.scalar("SELECT COUNT(*) FROM ledger_entries WHERE ABS(quantity_e6)>=9007199254740992 OR ABS(amount_base_e6)>=9007199254740992"):
         raise JournalError("This baseline exceeds the experimental wire amount limit")
+    return _initialize_metadata(container, profile=profile, generation=generation, device=device,
+        incarnation=incarnation, home_key=home_key, origin_key=origin_key, role=role)
+
+
+def _initialize_metadata(container, *, profile, generation, device, incarnation, home_key, origin_key, role):
+    """Used only by explicit dummy enrollment or verified isolated cutover staging."""
+    db = container.db
+    if not db.encrypted or db.scalar("SELECT 1 FROM sqlite_master WHERE type='table' AND name GLOB 'journal_*' LIMIT 1"):
+        raise JournalError('An encrypted baseline without journal state is required')
     for value in (profile, generation, device, incarnation):
         uuid(value)
     if role not in ("home", "replica"):
@@ -105,12 +114,22 @@ def initialize(container, *, profile, generation, device, incarnation, home_key,
 
 def attach(container):
     store = JournalStore(container.db)
-    store.db.conn.execute("PRAGMA synchronous=FULL")
-    if store.db.has_table('journal_domain_contract'):
-        from .full import FullAdapter
-        store.adapter = FullAdapter(container, store)
+    if store.db.conn.in_transaction:
+        if store.db.scalar('PRAGMA synchronous') not in (2, 3):
+            raise JournalError('Enable full durability before staging journal metadata')
     else:
-        store.adapter = CashAdapter(container, store)
+        store.db.conn.execute("PRAGMA synchronous=FULL")
+    previous = getattr(container.db, 'journal_guard', None)
+    container.db.conn.set_authorizer(None)
+    try:
+        if store.db.has_table('journal_domain_contract'):
+            from .full import FullAdapter
+            store.adapter = FullAdapter(container, store)
+        else:
+            store.adapter = CashAdapter(container, store)
+    except BaseException:
+        container.db.conn.set_authorizer(previous)
+        raise
     return store
 
 
@@ -121,7 +140,7 @@ def inspect_adapter(db, config):
     if db.has_table('journal_domain_contract'):
         from .full import FullAdapter
         from .domain import DomainGraph
-        if db.scalar('SELECT schema FROM journal_domain_contract WHERE id=1') != 2:
+        if config['version'] != 3 or db.scalar('SELECT schema FROM journal_domain_contract WHERE id=1') != 2:
             raise JournalError('Unsupported financial domain contract')
         cls = FullAdapter
     adapter = cls.__new__(cls)
@@ -145,6 +164,7 @@ class CashAdapter:
                 for row in self.db.all(f"SELECT * FROM {entity}"):
                     self.uid(entity, row["id"])
         self.db.conn.set_authorizer(self._authorize)
+        self.db.journal_guard = self._authorize
 
     def _authorize(self, action, table, column, database, trigger):
         if action in (sqlite3.SQLITE_INSERT, sqlite3.SQLITE_UPDATE, sqlite3.SQLITE_DELETE):
@@ -357,6 +377,9 @@ class CashAdapter:
 
     def apply(self, domain):
         """Typed exact replay on replicas, with no normal save/rule/automation call."""
+        if domain.get('schema') != 1:
+            from .compatibility import UpdateRequired
+            raise UpdateRequired('device')
         validate_domain(domain)
         with self.writing():
             for party in domain["counterparties"]:

@@ -12,16 +12,21 @@ from .domain import DomainGraph, TABLES
 from .finance import CashAdapter
 
 
-def enable(store):
+def enable(store, *, _upgrade=False):
     """Upgrade an unused experimental baseline, before admitting any proposals."""
-    if store.db.scalar('SELECT COUNT(*) FROM journal_outbox') or store.db.scalar('SELECT COUNT(*) FROM journal_inbox'):
+    if not _upgrade and (store.db.scalar('SELECT COUNT(*) FROM journal_outbox') or store.db.scalar('SELECT COUNT(*) FROM journal_inbox')):
         raise JournalError('Full-domain enrollment requires a verified unused baseline')
     store.db.conn.set_authorizer(None)
     old = store.adapter
+    old_config = dict(store.config)
     try:
         with store.db.transaction():
-            store.db.execute('CREATE TABLE journal_domain_contract(id INTEGER PRIMARY KEY CHECK(id=1),schema INTEGER NOT NULL CHECK(schema=2))')
-            store.db.execute('INSERT INTO journal_domain_contract VALUES(1,2)')
+            if not store.db.has_table('journal_domain_contract'):
+                store.db.execute('CREATE TABLE journal_domain_contract(id INTEGER PRIMARY KEY CHECK(id=1),schema INTEGER NOT NULL CHECK(schema=2))')
+                store.db.execute('INSERT INTO journal_domain_contract VALUES(1,2)')
+            config = store.config | dict(version=3)
+            store.db.execute('UPDATE journal_meta SET config=? WHERE id=1', (canonical(config).decode(),))
+            store.config = config
             adapter = FullAdapter(old.c, store)
             store.adapter = adapter
             from .retention import initialize
@@ -29,7 +34,9 @@ def enable(store):
         return adapter
     except BaseException:
         store.adapter = old
+        store.config = old_config
         store.db.conn.set_authorizer(old._authorize)
+        store.db.journal_guard = old._authorize
         raise
 
 
@@ -37,7 +44,7 @@ class FullAdapter(CashAdapter):
     full_domain = True
 
     def __init__(self, container, store):
-        if container.db.scalar('SELECT schema FROM journal_domain_contract WHERE id=1') != 2:
+        if store.config['version'] != 3 or container.db.scalar('SELECT schema FROM journal_domain_contract WHERE id=1') != 2:
             raise JournalError('Unsupported financial domain contract')
         self.graph = DomainGraph(container.db, store.config['profile'])
         self.graph.initialize()

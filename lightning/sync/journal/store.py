@@ -96,8 +96,11 @@ class JournalStore:
                 raise JournalError("Missing journal identity")
             config = json.loads(row["config"])
             fields(config, ("version", "profile", "generation", "device", "incarnation", "home_key", "origin_key", "role"))
-            if config["version"] != 2 or config["role"] not in {"home", "replica"}:
+            if type(config['version']) is not int or config['version'] not in (2, 3) or config["role"] not in {"home", "replica"}:
                 raise JournalError("Unsupported journal store")
+            if config['version'] == 3 and (not db.has_table('journal_domain_contract') or
+                    db.scalar('SELECT schema FROM journal_domain_contract WHERE id=1') != 2):
+                raise JournalError('Full-domain storage contract is missing')
             for field in ("profile", "generation", "device", "incarnation"):
                 uuid(config[field])
             from cryptography.hazmat.primitives.asymmetric import ec
@@ -169,6 +172,9 @@ class JournalStore:
     def save(self, *, kind, record, groups, bases, signer, dependencies=(), display_zone="Africa/Cairo",
              fault=lambda phase: None):
         """Persist immutable signed bytes and allocate the sequence atomically."""
+        if self.db.scalar("SELECT value FROM journal_local WHERE name='authority_enrolled'") and (
+                self.authority is None or self.authority._closed or self.db.transaction_observer is None):
+            raise JournalError('Private origin checkpoint is required before saving')
         with self.db.transaction():
             seq = self.db.scalar("SELECT next_seq FROM journal_meta WHERE id=1")
             body = dict(version=2, type="proposal", profile=self.config["profile"],

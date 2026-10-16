@@ -47,6 +47,8 @@ class AuthorityMemory:
             raise JournalError("Authority memory is missing; explicit repair required")
         self.db = sqlite3.connect(self.path, isolation_level=None)
         self._confirm_depth = 0
+        self._closed = False
+        self._activating = False
         self.db.execute("PRAGMA synchronous=FULL")
         try:
             self.state()
@@ -74,6 +76,8 @@ class AuthorityMemory:
             db.execute("BEGIN IMMEDIATE")
             db.execute("CREATE TABLE authority(id INTEGER PRIMARY KEY CHECK(id=1),document TEXT NOT NULL)")
             db.execute("CREATE TABLE certificates(version INTEGER PRIMARY KEY,wire BLOB NOT NULL)")
+            db.execute("CREATE TABLE origin_checkpoint(id INTEGER PRIMARY KEY CHECK(id=1),document TEXT)")
+            db.execute("INSERT INTO origin_checkpoint VALUES(1,NULL)")
             state = body | dict(phase="active", cutoff=dict(revision=0, hash="0" * 64), predecessor=None)
             db.execute("INSERT INTO authority VALUES(1,?)", (canonical(state).decode(),))
             db.execute("INSERT INTO certificates VALUES(1,?)", (wire,))
@@ -87,6 +91,7 @@ class AuthorityMemory:
         return cls(path, profile=body["profile"])
 
     def close(self):
+        self._closed = True
         self.db.close()
 
     def state(self):
@@ -117,14 +122,24 @@ class AuthorityMemory:
             raise
 
     def bind(self, store):
+        from .watermark import Watermark
         state = self.state()
         if state["profile"] != store.config["profile"]:
             raise JournalError("Authority memory belongs to another profile")
+        if store.adapter is None and store.db.has_table('schema_migrations'):
+            raise JournalError('Attach the financial adapter before binding authority memory')
+        watermark = Watermark(self, store)
+        watermark.reconcile()
+        # Binding is explicit. Do not bypass a previous live device's observer.
+        store.db.transaction_observer = watermark
         store.authority = self
-        with store.db.transaction():
-            store.db.execute("INSERT OR REPLACE INTO journal_local VALUES('authority_enrolled','1')")
+        if not store.db.scalar("SELECT value FROM journal_local WHERE name='authority_enrolled'"):
+            with store.db.transaction():
+                store.db.execute("INSERT INTO journal_local VALUES('authority_enrolled','1')")
 
     def can_confirm(self, store):
+        if self._closed:
+            return False
         state = self.state()
         return (state["phase"] == "active" and state["generation"] == store.config["generation"]
                 and state["home"] == store.config["device"] and state["home_key"] == store.config["home_key"])
@@ -278,6 +293,7 @@ class AuthorityMemory:
             raise JournalError("Active authority and profile disagree; explicit repair required")
         config = dict(store.config, generation=body["generation"], home_key=body["home_key"], role="home")
         previous_config = store.config
+        self._activating = True
         try:
             with store.db.transaction():
                 store.db.execute("UPDATE journal_meta SET config=? WHERE id=1", (canonical(config).decode(),))
@@ -293,6 +309,8 @@ class AuthorityMemory:
         except BaseException:
             store.config = previous_config
             raise
+        finally:
+            self._activating = False
         fault("authority_profile_committed")
         store.config = config
         # Crash before this last control commit leaves a blocked candidate.

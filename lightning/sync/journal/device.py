@@ -266,6 +266,8 @@ class JournalDevice:
         """Local delta exchange; transport adapters deliver these same signed bytes."""
         if self.store.config["generation"] != home.store.config["generation"]:
             raise JournalError("Authority generation changed; explicit recovery required")
+        from .compatibility import capabilities, check
+        check(capabilities(self.store), capabilities(home.store), self.store.pending())
         for wire in self.store.pending():
             home.receive(wire)
         home.process()

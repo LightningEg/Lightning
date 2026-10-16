@@ -27,6 +27,9 @@ class Database:
         self._owner = threading.current_thread() if self.encrypted else None
         self._closed = False
         self.undo = None  # attached after startup migrations/seed; never active on read-only copies
+        # Optional private journal fencing. Runs only around the outer durable
+        # transaction; a savepoint must never advance an independent watermark.
+        self.transaction_observer = None
         self.driver = sqlite3
         if self.encrypted:
             # A missing cipher driver is an error, never a plaintext fallback.
@@ -112,6 +115,9 @@ class Database:
     def transaction(self, undo_label: str | None = None) -> Iterator[sqlite3.Connection]:
         conn = self.conn
         depth = self._local.depth
+        observer = self.transaction_observer if depth == 0 else None
+        if observer is not None:
+            observer.before_transaction()
         savepoint = f"sp_{depth}"
         conn.execute("BEGIN IMMEDIATE" if depth == 0 else f"SAVEPOINT {savepoint}")
         self._local.depth = depth + 1
@@ -149,6 +155,10 @@ class Database:
                         conn.execute(f"ROLLBACK TO {savepoint}")
                         conn.execute(f"RELEASE {savepoint}")
                 raise
+            if observer is not None:
+                # COMMIT is already durable. An observer failure must propagate
+                # before Saved/transport, without pretending it rolled back.
+                observer.after_commit()
 
     @contextmanager
     def read_snapshot(self) -> Iterator[sqlite3.Connection]:
