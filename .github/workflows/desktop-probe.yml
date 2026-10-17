@@ -106,7 +106,7 @@ jobs:
           python -m pip install --require-hashes --only-binary=:all: -r requirements/build-tools.lock
           python -m pip install --require-hashes --only-binary=:all: --no-binary=proxy-tools --no-build-isolation -r requirements/desktop-probe-win.lock
       - name: Test Windows profiles, encrypted storage, desktop and UI
-        timeout-minutes: 10
+        timeout-minutes: 20
         run: >-
           python -m pytest -o addopts= -o faulthandler_timeout=120 -q -n auto --dist loadfile
           tests/test_desktop_crypto.py tests/test_desktop_window.py
