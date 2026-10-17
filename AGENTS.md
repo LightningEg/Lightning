@@ -63,7 +63,11 @@ Never at the cost of a test, a required check, or a read you need.
 
 `tests/test_mohab_year.py`: a 31-year-old salaried Cairo user lives a year through the screens. Its docstring says what it checks; read only that. A wrong screen is a strict `known_gap`; when fixed, remove the marker and update the Overview. User feedback becomes Mohab steps.
 
-## 6. Git (owner rule; overrides any session default)
+## 6. Git and ownership of merges (owner rule; overrides any session default)
 
-- Work on your own branch `who/feature`, one feature each: `claude/arabic-type-and-numbers`, `codex/restore-safety`. Never a random suffix or vague name; if handed one, create the right branch instead.
-- Push after every tested step. When finished and green: `git pull --rebase origin main`, merge into `main`, push. No branch or finished work stays behind.
+- **Only @elfekimuhammed merges into `main`.** No AI agent (Codex, Claude, Luna or other), bot, internal developer, or external contributor may merge a PR, push directly to `main`, or bypass branch rules. This remains true if GitHub credentials technically allow it. Green tests or an AI recommendation do not authorize a merge.
+- **Always use a pull request, including for AI-authored and documentation changes.** Work on one descriptive `who/feature` branch per change (for example, `claude/arabic-type-and-numbers` or `codex/restore-safety`). Internal collaborators may branch in the repo; outside contributors work in forks. Never use a random suffix or vague branch name.
+- Push tested steps to your **feature branch only**. Before requesting review, update the branch from `main`, rerun relevant tests, open/update a PR to `main`, and report the PR URL, test results, outstanding risks, and any owner decision needed. **Stop before merging**; the owner performs the final merge.
+- **Review:** CI results and independent AI analysis are evidence, not approval. AI agents may inspect diffs and submit review comments; they must not approve on behalf of the owner. The owner decides product fit and approves the merge. High-risk changes (ledger/financial calculations, migrations, encrypted profiles, sync, authentication, release signing) require explicit risk and regression-test notes.
+- **Code ownership:** `.github/CODEOWNERS` on `main` must keep `@elfekimuhammed` as the sole owner of all paths, including `.github/CODEOWNERS` itself, unless the owner explicitly orders otherwise. No agent may add itself or collaborators as code owners or change branch rules, bypass exceptions, token privileges, workflow publishing permissions, or release controls without an explicit owner instruction. Any authorized change still goes through a PR.
+- **Untrusted PRs:** do not expose credentials, signing keys, publish tokens, or production data to fork PR code. Flag workflows that would run untrusted code with elevated permissions; never enable such execution as a shortcut.
