@@ -24,7 +24,7 @@ separate bot account (Claude, Codex, Luna), add them to `ai-reviewers`, and neve
 
 ## Switch on once
 
-**Fast path:** run `bash .github/apply-settings.sh` as the owner (needs `gh auth login`). It does steps 1-5 below. Step 6 and
+**Fast path:** run `bash .github/apply-settings.sh` (Git Bash on Windows) as the owner (needs `gh auth login`). It does steps 1-5 below. Step 6 and
 the bot accounts stay manual. The script is untested against GitHub; read its errors if a call fails.
 
 **By hand:**

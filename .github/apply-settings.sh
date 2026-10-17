@@ -13,15 +13,13 @@ for t in "ai-reviewers:push" "internal:triage"; do
 done
 
 echo "== Rulesets (update by name, else create)"
-apply() { # file
-  name=$(python3 -c "import json,sys;print(json.load(open('$1'))['name'])")
-  target=$(python3 -c "import json;print(json.load(open('$1'))['target'])")
-  id=$(gh api $R/rulesets --jq ".[]|select(.target==\"$target\")|.id" | head -1 || true)
+apply() { # file target
+  id=$(gh api $R/rulesets --jq ".[]|select(.target==\"$2\")|.id" | head -1 || true)
   if [ -n "$id" ]; then gh api -X PUT $R/rulesets/$id --input "$1" --jq '"updated "+.name'
   else gh api -X POST $R/rulesets --input "$1" --jq '"created "+.name'; fi
 }
-apply rulesets/main.json
-apply rulesets/tags.json
+apply rulesets/main.json branch
+apply rulesets/tags.json tag
 
 echo "== Merge settings"
 gh api -X PATCH $R -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=false \
