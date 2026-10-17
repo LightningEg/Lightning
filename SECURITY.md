@@ -13,6 +13,6 @@ If you committed one by mistake, tell us at once so it can be revoked.
 
 ## How changes reach `main`
 
-Nobody pushes to `main`. Every change comes as a pull request, passes the automatic checks, is reviewed by the
-owner, and is merged by the owner only. Pull requests from first-time contributors do not run CI until the owner
+Nobody pushes to `main`. Every change comes as a pull request, passes the automatic checks, is approved by the owner or by a
+second (AI) reviewer outside owner-only paths, and is merged by the owner or an AI under those rules. Pull requests from first-time contributors do not run CI until the owner
 approves the run. See [.github/MAINTAINERS.md](.github/MAINTAINERS.md).

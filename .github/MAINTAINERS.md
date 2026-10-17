@@ -9,18 +9,24 @@ are the part only a repository admin can switch on (they cannot be committed).
 |---|---|---|
 | Owner (`@elfekimuhammed`) | Reviews and merges everything | **Admin**: the only Admin |
 | Internal team (trusted) | Push branches `who/feature`, open PRs | **Write**, through one team `internal` |
+| AI agents (Claude, Codex, Luna) | Push their own branch, open a PR, may merge when the rules below are met | **Write**, through team `ai-reviewers`, each AI on its **own bot GitHub account** |
 | Open contributors (unknown) | Fork, branch, open PR from the fork | **None**. They never get Write until you decide |
 
-Merging to `main` is the owner's alone. Write access lets someone push a *branch*, never `main`.
-AIs (Claude, Codex, Luna) work like the internal team: they push their branch and open a PR; the owner merges.
+Nobody pushes to `main`; every change is a PR. You (Admin) can merge anything. An AI may merge a PR only when **all** hold:
+green `tests`, `dependency-review` and `analyze`; every conversation resolved; one approval from the owner or from a
+*different* AI account than the author (GitHub blocks self-approval); no path owned only by the owner touched
+(`.github/`, `packaging/`, `android/`, `cloudflare/`, `tools/`, AGENTS, LICENSE, SECURITY); and the PR author is the owner,
+the `internal` team or an AI, never an outside contributor. Outside PRs are merged by you only.
+
+**Do not give the AIs your own login.** An AI running as `@elfekimuhammed` is Admin and bypasses every rule. Give each AI a
+separate bot account (Claude, Codex, Luna), add them to `ai-reviewers`, and never to Admin.
 
 ## Switch on once (Settings of the repository)
 
 1. **Rules › Rulesets › New › Import a ruleset:** import [rulesets/main.json](rulesets/main.json), then
    [rulesets/tags.json](rulesets/tags.json). Result: `main` accepts changes only through a squash-merged PR that is
-   approved by the code owner, has green `tests`, `dependency-review` and `analyze`, and has resolved conversations. The
-   `update` rule blocks every merge except by the Admin bypass, so a collaborator with Write cannot merge even after
-   approval. No force-push, no deletion. Only Admin creates `v*` release tags.
+   approved by a code owner (you, or `ai-reviewers` outside owner-only paths), has green `tests`, `dependency-review` and
+   `analyze`, and has resolved conversations. These rules apply to AIs too; only Admin can bypass. No force-push, no deletion. Only Admin creates `v*` release tags.
    Check afterwards: open a test PR as a non-admin and confirm the Merge button is disabled.
 2. **Actions › General:**
    - Fork pull request workflows: **Require approval for all external contributors** (nothing from a stranger runs until you click Approve).
@@ -29,7 +35,7 @@ AIs (Claude, Codex, Luna) work like the internal team: they push their branch an
 3. **Advanced Security (Code security):** enable *Private vulnerability reporting*, *Dependency graph*, *Dependabot alerts and
    security updates*, *Secret scanning* with **Push protection**, and *Code scanning* (CodeQL runs from `codeql.yml`).
 4. **General › Pull Requests:** allow **squash merging** only; tick *Automatically delete head branches*; untick *Allow auto-merge*.
-5. **Collaborators and teams:** create team `internal`, give it **Write**, add trusted people. Keep Admin to yourself.
+5. **Collaborators and teams:** create team `ai-reviewers` (**Write**, bot accounts only) *before* merging CODEOWNERS, and team `internal` (**Write**, trusted people). Keep Admin to yourself.
    Under the organisation: *Authentication security* › require 2FA for all members; base permission **No permission**.
 6. **Environments › New `release`:** *Required reviewers* = you. Move `LIGHTNING_DOWNLOADS_TOKEN` and the
    `ANDROID_KEYSTORE_*` secrets into it, and give the jobs that publish `environment: release`. Then no workflow can
