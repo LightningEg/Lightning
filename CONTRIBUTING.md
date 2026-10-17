@@ -13,6 +13,6 @@ Before you start, read [AGENTS.md](AGENTS.md) (branch names, tests, changelog) a
 
 - **Outside contributors:** fork the repository, branch, and open a pull request from your fork to `main`. Your first
   pull request waits for the owner to approve the automatic checks.
-- **Internal team:** push a branch named `who/feature` (see AGENTS.md) and open a pull request.
+- **Internal team:** also work from a fork, on a branch named `who/feature` (see AGENTS.md), and open a pull request. Humans have Triage access, not Write.
 - Nobody pushes to `main`. Pull requests are merged by the owner, or by an AI maintainer once the checks are green and a second reviewer approves. Outside contributions are merged by the owner only.
 - Found a security problem? Do not open an issue; follow [SECURITY.md](SECURITY.md).
