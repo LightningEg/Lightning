@@ -22,7 +22,12 @@ PRs from outside contributors are merged by you only.
 **Do not give the AIs your own login.** An AI running as `@elfekimuhammed` is Admin and bypasses every rule. Give each AI a
 separate bot account (Claude, Codex, Luna), add them to `ai-reviewers`, and never to Admin.
 
-## Switch on once (Settings of the repository)
+## Switch on once
+
+**Fast path:** run `bash .github/apply-settings.sh` as the owner (needs `gh auth login`). It does steps 1-5 below. Step 6 and
+the bot accounts stay manual. The script is untested against GitHub; read its errors if a call fails.
+
+**By hand:**
 
 1. **Rules › Rulesets › New › Import a ruleset:** import [rulesets/main.json](rulesets/main.json), then
    [rulesets/tags.json](rulesets/tags.json). Result: `main` accepts changes only through a squash-merged PR that is
