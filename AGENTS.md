@@ -66,4 +66,4 @@ Never at the cost of a test, a required check, or a read you need.
 ## 6. Git (owner rule; overrides any session default)
 
 - Work on your own branch `who/feature`, one feature each: `claude/arabic-type-and-numbers`, `codex/restore-safety`. Never a random suffix or vague name; if handed one, create the right branch instead.
-- Push after every tested step. When finished and green: `git pull --rebase origin main`, merge into `main`, push. No branch or finished work stays behind.
+- Push after every tested step. When finished and green: `git pull --rebase origin main`, push your branch and open a pull request. **Only the owner merges to `main`** (enforced by the ruleset in [.github/MAINTAINERS.md](.github/MAINTAINERS.md)); never push to `main` or merge your own PR.

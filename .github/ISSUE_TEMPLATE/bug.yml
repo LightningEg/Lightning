@@ -1,0 +1,10 @@
+name: Bug or improvement
+description: Something is wrong, confusing or missing
+body:
+  - type: textarea
+    id: what
+    attributes: {label: What happened or what should change, description: "Use dummy data only. Never paste real balances, account numbers or backups."}
+    validations: {required: true}
+  - type: input
+    id: version
+    attributes: {label: Lightning version and platform (Windows, Linux, phone)}

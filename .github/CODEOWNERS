@@ -1,3 +1,12 @@
-# Only the repository owner is designated as code owner.
-* @elfekimuhammed
-/.github/CODEOWNERS @elfekimuhammed
+# The repository owner reviews everything. Branch protection requires this review (code owner review),
+# so nothing reaches main without the owner. See .github/MAINTAINERS.md.
+*                   @elfekimuhammed
+/.github/           @elfekimuhammed
+/AGENTS.md          @elfekimuhammed
+/CLAUDE.md          @elfekimuhammed
+/LICENSE            @elfekimuhammed
+/SECURITY.md        @elfekimuhammed
+/packaging/         @elfekimuhammed
+/android/           @elfekimuhammed
+/cloudflare/        @elfekimuhammed
+/tools/             @elfekimuhammed
