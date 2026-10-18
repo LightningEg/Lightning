@@ -235,7 +235,11 @@ def test_the_workflows_offer_a_pair_only_from_one_run_and_never_sign_with_anothe
     sign = android[android.index("- name: Sign with the test key"):android.index("- name: Check the signed app")]
     assert 'if [ "$BUNDLE" = "true" ]; then' in sign and "exit 1" in sign  # no key, no APK for the bundle
     for secret in ("ANDROID_KEYSTORE_BASE64", "ANDROID_KEYSTORE_PASSWORD", "ANDROID_KEY_ALIAS", "ANDROID_KEY_PASSWORD"):
-        assert f"secrets.{secret}" in sign and f"secrets.{secret}" in phone_job
+        assert f"secrets.{secret}" in sign
+        assert f"secrets.{secret}" not in phone_job and f"secrets.{secret}" not in app
+    sign_job = android[android.index("\n  sign:"):]
+    assert "environment: android-signing" in sign_job.split("steps:")[0]
+    assert "github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')" in sign_job.split("steps:")[0]
     assert "--ks-pass env:STORE_PASS --key-pass env:KEY_PASS --ks-key-alias \"$KEY_ALIAS\"" in sign
     assert "Public Android signing certificate SHA-256" in sign
     assert "--certificate packaging/android-test-certificate.sha256" in android
