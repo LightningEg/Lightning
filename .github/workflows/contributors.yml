@@ -55,7 +55,7 @@ jobs:
           say "It's yours, @$WHO. Next:
           1. Open it in Codespaces (nothing to install): https://codespaces.new/$GH_REPO?quickstart=1, or locally: \`pip install -r requirements-dev.txt && python -m lightning --demo\`
           2. Make the change and send a pull request with \`Closes #$NUMBER\` in it.
-          Stuck? Ask here or in #help on Discord. No activity for 14 days frees the issue; \`/drop\` gives it back any time."
+          Stuck? Ask here. No activity for 14 days frees the issue; \`/drop\` gives it back any time."
 
   stale:
     if: github.event_name == 'schedule'

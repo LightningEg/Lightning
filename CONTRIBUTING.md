@@ -5,24 +5,27 @@ part is for contributors, the second for the owner and the AIs.
 
 ## Help in four steps
 
-1. **Pick a task.** Open the [good first issues](https://github.com/LightningEg/Lightning/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22+no%3Aassignee)
-   (Discord's `#find-a-task` links to the same ones). Each says what's wrong, when it's done and which file to look at.
+Everything happens on GitHub; you need only a free GitHub account.
+
+1. **Pick a task.** Open the [good first issues](https://github.com/LightningEg/Lightning/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22+no%3Aassignee).
+   Each says what's wrong, when it's done and which file to look at.
 2. **Comment `/take` on it.** A bot assigns it to you at once. One issue at a time; `/drop` gives it back; 14 days with no
    activity frees it for someone else.
-3. **Make the change.** [Open Lightning in Codespaces](https://codespaces.new/LightningEg/Lightning?quickstart=1): nothing to
-   install, and Mohab's demo household (fictional data) opens in a preview tab. When you push, Codespaces offers to create
-   your fork; say yes. On your own computer instead (Python 3.11+ and Git, from your fork):
+3. **Make the change in a Codespace** (a full editor in your browser, nothing to install):
+   - Click [Open in Codespaces](https://codespaces.new/LightningEg/Lightning?quickstart=1), then **Create codespace**. Or, on
+     the repository page: green **Code** button › **Codespaces** › **Create codespace on main**.
+   - Wait a minute while it installs. Mohab's demo household (fictional data) opens in a preview tab; it reloads as you edit.
+   - Edit the file the issue names. Run the tests in the terminal: `python -m pytest -q`.
+   - In **Source Control** (left bar), write a short message, **Commit**, then **Sync** / **Publish Branch**. GitHub offers to
+     create your fork: say yes. Codespaces are free within GitHub's monthly allowance; stop yours when you're done.
 
-   ```
-   pip install -r requirements-dev.txt
-   python -m lightning --demo          # opens at http://127.0.0.1:8766
-   python -m pytest -q                 # the tests
-   ```
+   Prefer your own computer? Fork, clone, then `pip install -r requirements-dev.txt` and `python -m lightning --demo`
+   (Python 3.11+, opens at http://127.0.0.1:8766).
+4. **Open a pull request.** GitHub shows a **Compare & pull request** button after you push. Write `Closes #123` (your
+   issue's number) and one line on how you checked it. On your first one, the tests start once the owner approves the run.
+   We review, handle the changelog, docs and brand-guideline details, and merge; the issue closes itself.
 
-4. **Open a pull request** with `Closes #123` and one line on how you checked it. On your first one, the tests start once
-   the owner approves the run. We review, handle the changelog, docs and brand-guideline details, and merge.
-
-**Stuck or curious?** Ask on the issue, or in `#help` on [Discord](https://discord.gg/fukkUs263W).
+**Stuck or curious?** Ask on the issue.
 
 **Ground rules.** Never put real financial data, passwords or keys in a commit or issue. Security problems go to
 [SECURITY.md](SECURITY.md), never a public issue. Nobody pushes to `main`. Going deeper: [Project overview](docs/PROJECT_OVERVIEW.md),
@@ -65,23 +68,8 @@ something conflicts. Committing it changes nothing on GitHub; only `--apply` doe
 
 Approve a first-time contributor's test run (one click on the PR). Everything else is optional: the AIs review and merge.
 
-### Discord
-
-Discord welcomes people and links to GitHub issues; GitHub records the claim, the change and the review. A Discord
-conversation alone is not an assignment; copy decisions onto the issue. Channels: `#start-here` (read-only), `#find-a-task`
-(each listing shows the issue number, a plain title, useful skills and its link) and `#help`. Pinned welcome:
-
-> Welcome to Lightning. Open #find-a-task and choose something small. Follow its GitHub link, comment `/take`, and wait
-> until it is assigned to you. Make the change on your own branch and send a pull request. Ask in #help whenever you get stuck.
-
-**Discord claim button:** proposed, not built (the owner has not chosen between one role per issue and one Contributor
-role with a thread per task). If built, it verifies the member's GitHub account, reserves the issue on GitHub first, never
-lets two claims both succeed, and its roles grant no repository or server access. Until then, claim with `/take`.
-
 ### Not done yet
 
 - [ ] Run the one-time setup above (the no-bypass PR rule is not confirmed active).
-- [ ] Create the three Discord channels and pin the welcome.
-- [ ] Point the website Roadmap's main button at Discord, keeping a link to the good first issues.
-- [ ] One harmless trial contribution from the website to merge, including `/drop` and a competing `/take`.
+- [ ] One harmless trial contribution from the website's Contribute section to merge, including `/drop` and a competing `/take`.
 - [ ] Android signing key: forgotten; investigate the existing signing setup before replacing anything.
