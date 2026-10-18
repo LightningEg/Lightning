@@ -1,0 +1,4 @@
+name = "lightning-discord-bot"
+main = "src/index.mjs"
+compatibility_date = "2026-10-18"
+# All configuration is set using Worker secrets. No Discord IDs or credentials in Git.

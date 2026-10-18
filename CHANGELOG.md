@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-18 · ChatGPT: add a Cloudflare Workers Free Discord command variant, signed interaction verification, server/operator restrictions and setup instructions in `community/discord-worker/`.
+
 - 2026-10-18 · ChatGPT: add a standalone, operator-restricted Discord community bot with channels, threads, feedback, and Docker deployment under `community/discord-bot/`.
 
 - 2026-10-18 · Claude: contributor onboarding in three steps: good first issues, `/take` bot (`.github/workflows/contributors.yml`), Codespaces demo (`.devcontainer/`); one-screen CONTRIBUTING.md, short PR template, Discord set-up in Collaboration §9.

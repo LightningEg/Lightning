@@ -1,0 +1,11 @@
+{
+  "name": "lightning-discord-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "register": "node register.mjs",
+    "test": "node --test"
+  },
+  "devDependencies": { "wrangler": "^4.0.0" }
+}
