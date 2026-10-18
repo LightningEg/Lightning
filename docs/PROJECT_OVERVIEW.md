@@ -1,6 +1,6 @@
 # Lightning — Project Overview
 
-**Last reviewed 2026-10-13 · app 1.1.0-beta.1** ([published Windows and Android beta](https://github.com/elfekimuhammed/Lightning-downloads/releases/tag/v1.1.0-beta.1)).
+**Last reviewed 2026-10-18 · source 1.3.0 · latest published beta 1.1.0-beta.1** ([published Windows and Android beta](https://github.com/elfekimuhammed/Lightning-downloads/releases/tag/v1.1.0-beta.1)).
 
 What Lightning is, who it is for, what it answers and where it goes. Technical contracts: [Architecture](ARCHITECTURE.md). Look: [guideline](../guideline/). Terms and figures: [Glossary](GLOSSARY.md). Shipped changes: `CHANGELOG.md`. Hand-off between AIs: [NOW.md](../NOW.md). Unbuilt designs: [docs/proposals](proposals/).
 
@@ -271,7 +271,7 @@ Reviewed 2026-10-13. Detail of each build is in the CHANGELOG; claims and next s
 | Search | Partial | Built: pages, actions, records, tags, Ctrl-K. Next: scoped pickers, alias history, ranking |
 | Multiple devices | M1 and M2 built, in owner review; M3 (CIB and NBE SMS) built | Owner: more bank samples, Google Play SMS declaration. Open: discovery instead of typing the address, prefetch while typing the password, periodic recovery copies, two-PC fault gate, power-loss evidence. [Plan](proposals/multiple_devices.md#15-implementation-work-packages) |
 | Paired apps 1.0.0-beta.1 | Tester beta published | Ordinary-PC recovery/fault acceptance, legacy import, native file pickers, unresolved-evidence repair |
-| v1.1 | Merged, not released | Owner bumps to 1.1.0 and builds ([v1_1_presentable.md](proposals/v1_1_presentable.md) §5–6) |
+| v1.1–v1.3 | In source (tagged v1.3.0); only 1.1.0-beta.1 is published | Owner builds and publishes the current version ([v1_1_presentable.md](proposals/v1_1_presentable.md) §5–6) |
 | In-app updates (Windows) | Planned for later | **Update** button: check `Lightning-downloads`, verify signature, helper swaps folders, keeps the old for rollback; profiles untouched; refuse during an unfinished lend. Android updates come from Google Play. |
 
 **Owner-approved smarter workflows (2026-10-15):** all five roadmap stages are implemented, including dated cash warnings, undo/review/provenance/protection, reserve/bill/CD/reimbursement links, optional cash funding, saved views and reminders/weekly completion. Service, HTTP, PC/phone browser, Arabic, currency, performance and encrypted-sync regression checks now cover the workflows, alongside the annual PC/phone scenario. Native Windows/Android notification delivery and ordinary-device acceptance remain outstanding. **Read:** Architecture › Action history and checked accounts, › Optional funded payday allocation, › UI contract.

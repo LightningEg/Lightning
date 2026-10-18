@@ -1,6 +1,6 @@
 # Architecture
 
-Last reviewed 2026-10-14 · app 1.1.0b1 · schema 0053
+Last reviewed 2026-10-14 · app 1.3.0 · schema 0067
 
 How Lightning is built and calculated: stack, module boundaries, data model and every calculation contract. History lives in [CHANGELOG.md](../CHANGELOG.md), the product story in [Project Overview](PROJECT_OVERVIEW.md), term definitions in the [Glossary](GLOSSARY.md), the visual system in the [Brand guideline](../guideline/), unbuilt designs in [proposals/](proposals/). Where the code or a test states a rule better, this file names it instead of copying it.
 
