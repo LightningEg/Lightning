@@ -10,7 +10,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - When a version is tagged, rename `Unreleased` to that version and start a new `Unreleased` above it.
 
 ## [Unreleased]
+- 2026-10-18 · Codex: resolve PR #19 conflicts, retaining the owner-requested AI review and merge permissions.
 - 2026-10-17 · Claude: collaboration and security setup: PR checks (tests, dependency review, CodeQL), SECURITY.md, PR/issue templates, Dependabot, importable owner-only-merge rulesets, `.github/MAINTAINERS.md` (settings only an admin can switch on); AGENTS §6: the owner, or an AI with a second approval on non-sensitive paths, merges to main.
+- 2026-10-17 · ChatGPT: require PRs for internal, external, and AI-authored changes; only the owner may merge to main. Document AI review limits and CODEOWNERS safeguards.
 - 2026-10-17 · Codex: give the Windows profile and UI test suite 20 minutes; the previous 10-minute cap expired before the suite finished.
 - 2026-10-17 · Codex: regenerate the Arabic stylesheet mirror and update stale investment and overview acceptance checks.
 
