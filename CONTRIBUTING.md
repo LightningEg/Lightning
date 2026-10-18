@@ -25,8 +25,8 @@ python -m lightning --demo          # opens at http://127.0.0.1:8766
 python -m pytest -q                 # the tests
 ```
 
-Then open a pull request with `Closes #123` in the description, and one line on how you checked it. We take care of the
-changelog, docs and brand-guideline details before merging.
+Then open a pull request with `Closes #123` in the description, and one line on how you checked it. You don't need to touch the
+changelog; a maintainer adds that entry, and the docs and brand-guideline details, before merging.
 
 **Stuck or curious?** Ask on the issue, or in `#help` on [Discord](https://discord.gg/fukkUs263W).
 
