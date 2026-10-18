@@ -14,15 +14,6 @@ on:
         description: Called for the matched test builds, so the APK must carry the test key
         type: boolean
         default: false
-    secrets:
-      ANDROID_KEYSTORE_BASE64:
-        required: false
-      ANDROID_KEYSTORE_PASSWORD:
-        required: false
-      ANDROID_KEY_ALIAS:
-        required: false
-      ANDROID_KEY_PASSWORD:
-        required: false
 
 permissions:
   contents: read

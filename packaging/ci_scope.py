@@ -274,7 +274,7 @@ def check_release_tag(tag: str, sha: str) -> list[str]:
 
 
 # ---------------------------------------------------------------- what the run's page says
-def manual_run_notes(ref: str, sha: str, values: dict[str, str], reason: str, has_key: bool,
+def manual_run_notes(ref: str, sha: str, values: dict[str, str], reason: str, has_key: bool | None,
                      has_fingerprint: bool) -> list[tuple[str, str]]:
     """What a manual run will make, as (level, text) lines for the run's page, said in its first minute."""
     if values["phone"] != "true":
@@ -283,7 +283,9 @@ def manual_run_notes(ref: str, sha: str, values: dict[str, str], reason: str, ha
     windows = reason if values["reuse_run"] else "built and tested in this run"
     notes = [("notice", f"Matched test builds of {sha[:8]}. Windows: {windows}. Linux suite: "
                         + ("already passed on this commit, not run again." if values["suite"] == "skip" else "runs now."))]
-    if not has_key:
+    if has_key is None:
+        notes.append(("notice", "Android signing key availability is checked only in the protected android-signing job."))
+    elif not has_key:
         notes.append(("warning", "No Android signing key yet: both apps are built and checked, "
                                  "the Windows ZIP is uploaded, but the phone build stops at signing and no matched "
                                  "pair is offered."))
@@ -337,7 +339,7 @@ def main(argv: list[str]) -> int:
         values["phone"] = "true"
     print(f"Build the Windows app: {'yes' if build else 'no'} ({reason})")
     if event == "workflow_dispatch":
-        tell(manual_run_notes(ref, sha, values, reason, os.environ.get("HAS_TEST_KEY") == "true",
+        tell(manual_run_notes(ref, sha, values, reason, None,
                               (ROOT / "packaging" / "android-test-certificate.sha256").exists()))
     values["build_windows"] = "true" if build else "false"
     output = os.environ.get("GITHUB_OUTPUT")

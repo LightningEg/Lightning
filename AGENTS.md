@@ -10,6 +10,7 @@ Each fact lives in one file; link to it, never copy it. No other files under `do
 |---|---|---|
 | [NOW.md](NOW.md) | Hand-off: claims, messages, next steps (each with a **Read:** line) | You claim/finish long work, message another AI, or change what's next |
 | [Project Overview](docs/PROJECT_OVERVIEW.md) | Product, owner decisions, screen questions, Mohab, UX plan, gaps, roadmap | The owner decides, or the product/plan changes |
+| [Collaboration](docs/COLLABORATION.md) | Team access, review/merge policy, security setup and deployment scripts | Collaboration or security setup changes |
 | [Architecture](docs/ARCHITECTURE.md) | Modules, financial rules, data model, UI contract, desktop app, encrypted profiles | How something is built or calculated changes |
 | [Glossary](docs/GLOSSARY.md) | One name and meaning per term and figure | You add or rename one |
 | [Competition](docs/COMPETITION.md) | Competitors, what users love/hate, where we win/lose | You learn something, or choose between designs |

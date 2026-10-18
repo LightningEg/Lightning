@@ -50,7 +50,7 @@ def test_every_next_step_says_what_to_read():
 
 
 def test_docs_holds_only_the_carrying_files_and_proposals():
-    allowed = {"PROJECT_OVERVIEW.md", "ARCHITECTURE.md", "GLOSSARY.md", "COMPETITION.md", "proposals"}
+    allowed = {"PROJECT_OVERVIEW.md", "ARCHITECTURE.md", "GLOSSARY.md", "COMPETITION.md", "COLLABORATION.md", "proposals"}
     extra = {path.name for path in DOCS.iterdir()} - allowed
     assert not extra, f"new files under docs/ (AGENTS.md section 1): {sorted(extra)}"
     assert all(path.suffix == ".md" for path in (DOCS / "proposals").iterdir())
