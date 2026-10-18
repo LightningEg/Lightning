@@ -54,7 +54,7 @@ jobs:
       reuse_run: ${{ steps.scope.outputs.reuse_run }}
       reuse_artifact: ${{ steps.scope.outputs.reuse_artifact }}
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           fetch-depth: 0  # the docs-only check and the release-tag check read history
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
@@ -95,7 +95,7 @@ jobs:
       artifact: ${{ steps.package.outputs.artifact }}
       zip: ${{ steps.package.outputs.zip }}
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
         with:
           python-version: '3.13'
@@ -200,7 +200,7 @@ jobs:
       contents: read
       actions: read  # to download a reused Windows ZIP from the earlier run
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7
         if: needs.tests.outputs.reuse_run == ''
         with:
@@ -258,7 +258,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7
         with:
           name: ${{ needs.windows.outputs.artifact }}
