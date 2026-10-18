@@ -45,4 +45,4 @@ gh api -X PATCH orgs/$ORG -f default_repository_permission=none -F two_factor_re
 
 echo
 echo "Done. Left for you (cannot be scripted): create the bot GitHub accounts for Claude, Codex, Luna and add them to team ai-reviewers;"
-echo "create environment 'release' (Settings > Environments) with you as required reviewer and move the signing secrets into it."
+echo "create environments android-signing and production-release (you as required reviewer) and market-publishing, and move the secrets into them (MAINTAINERS.md step 6)."

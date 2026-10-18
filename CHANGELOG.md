@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-18 · Claude: MAINTAINERS.md step 6 and apply-settings.sh name the environments the workflows use (android-signing, production-release, market-publishing), not `release`.
+
 - 2026-10-18 · Claude: contributor onboarding in three steps: good first issues, `/take` bot (`.github/workflows/contributors.yml`), Codespaces demo (`.devcontainer/`); one-screen CONTRIBUTING.md, short PR template, Discord set-up in Collaboration §9.
 - 2026-10-18 · Codex: require the phone workflow test to keep signing keys in the protected signing job and out of its caller.
 - 2026-10-18 · Codex: document collaboration in docs/COLLABORATION.md; add a previewable admin setup script, environment-only signing inputs, and journal dependency CI.

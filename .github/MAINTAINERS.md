@@ -43,9 +43,10 @@ the bot accounts stay manual. The script is untested against GitHub; read its er
 4. **General › Pull Requests:** allow **squash merging** only; tick *Automatically delete head branches*; untick *Allow auto-merge*.
 5. **Collaborators and teams:** create team `ai-reviewers` (**Write**, bot accounts only) *before* merging CODEOWNERS, and team `internal` (**Triage**, trusted humans: they can label, assign and comment, but not push or merge). Keep Admin to yourself.
    Under the organisation: *Authentication security* › require 2FA for all members; base permission **No permission**.
-6. **Environments › New `release`:** *Required reviewers* = you. Move `LIGHTNING_DOWNLOADS_TOKEN` and the
-   `ANDROID_KEYSTORE_*` secrets into it, and give the jobs that publish `environment: release`. Then no workflow can
-   read a signing key or push a release without your click.
+6. **Environments** (the names the workflows already use): `android-signing` (the four `ANDROID_*` signing secrets) and
+   `production-release` (`LIGHTNING_DOWNLOADS_TOKEN`): *Required reviewers* = you, deployments from `main` and `v*` tags only.
+   `market-publishing` (`LIGHTNING_MARKET_TOKEN`): `main` only, no reviewer, since it runs on a schedule. Add each secret to its
+   environment, then delete the repository-level copy. Then no workflow can read a signing key or push a release without your click.
 7. **Your account:** 2FA with a passkey or hardware key.
 
 ## Rules of the repo files
