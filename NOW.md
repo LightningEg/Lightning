@@ -18,6 +18,8 @@
 
 ## Next
 
+- **Security rollout:** deploy the website receiver before its dashboard; verify team/release access. **Read:** report › public repository security audit.
+
 - **Brokers:** next, phase 4 import. **Read:** its report *Fix*.
 
 - **Website guideline copies:** fix on website `codex/sync-app-guidelines`; main push needs owner approval after auto-review rejection. **Read:** report › website guideline copies.

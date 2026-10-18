@@ -2,7 +2,7 @@
 title: Audit public repositories for personal data and security exposure
 category: technical-improvement
 area: tools
-status: reported
+status: open
 created: 2026-10-16
 reporter: GPT-6
 skills: none
@@ -10,6 +10,18 @@ app_version: 1.1.0b1
 commit: a853d5d
 repo: both
 ---
+
+## Remediation status — 2026-10-18
+
+App PR #19 is merged, preserving the owner-requested AI review/merge model. Live main and v* tag rulesets were inspected: PR/check/review requirements and admin bypass are active. Organization/team grants and environment reviewers remain unverified because this connection cannot inspect their administration endpoints. Website, downloads and market-data main branches currently have no protection.
+
+Website source fixes are prepared in [website PR #19](https://github.com/elfekimuhammed/Lightning_website/pull/19): literal feedback cells, field/request/row/image quotas, no logged or persisted dashboard key, authenticated reads in POST bodies with legacy GET refusal, and safe workflow input handling. They are not deployed. Deploy the Apps Script source and doPost router first, rotate the analytics key, then publish the dashboard. Survey/signup receiver source is absent and needs the same ingestion protections. The existing feedback report remains open for its other UX and deployment work.
+
+Journal development tooling was audited separately: npm initially reported three high-severity vulnerable packages (Miniflare via Sharp, Sharp, Undici). Wrangler 4.151.1 plus explicit Sharp 0.35.5 and Undici 7.29.1 overrides now produce zero npm audit findings; all 11 carrier tests pass. This changes development dependencies, not the deployed worker implementation. Revisit the overrides when upstream Miniflare adopts patched versions. All four pinned Python requirement sets returned no known PyPI advisories. GitHub's default-branch banner reported 13 dependency alerts before these fixes; this is not a claim that every GitHub alert has been closed.
+
+Validation of website source: 11 new feedback security regressions, 98 receiver assertions, 75 dashboard browser assertions including POST-only key transport and locking during a pending load, 6 analytics-client privacy assertions, analytics rule checks, and site validation (62 pages, no errors; 12 existing warnings). Browser tests mock the remote receiver. The application PR's full Linux suite, import contracts, dependency review and CodeQL passed on GitHub.
+
+Remaining: deploy/verify the live Apps Script receiver and harden its unavailable survey/signup fallback; verify team permissions, environment reviewers and absence of duplicate repository signing secrets; protect supporting repositories; triage remaining GitHub alerts; audit full history and binary releases. Public email metadata and historical analytics exports were not rewritten. No production credential value was printed or committed by this review. The older assessment below is the original 2026-10-16 evidence, not a statement that the prepared source fixes have reached production.
 
 ## Report
 
