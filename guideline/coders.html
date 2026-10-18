@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex,follow">
+<meta name="description" content="Lightning brand guideline, Coders document: the For Geeks pages (forgeeks.html and forgeeks-roadmap.html). The four documents are app.html, website.html (Normal), phone.html and coders.html (Coders) in the same folder.">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<title>Lightning guideline 3.30 · Coders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ===== Tokens: Mono, the Coders default. Paper when the reader's system is light. ===== */
+:root{color-scheme:dark;--bg:#0a0a0a;--panel:#111;--well:#0d0d0d;--ink:#f2f2f2;--dim:#b8b8b8;--faint:#4a4a4a;--line:rgba(255,255,255,.12);--line-strong:rgba(255,255,255,.28);--accent:#fff;--accent2:#9aa0a6;--btn:#fff;--btn-ink:#0a0a0a;--glow:255,255,255;--no:#ff6f6f;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){color-scheme:light;--bg:#f4f1ea;--panel:#fbf9f4;--well:#ece8de;--ink:#161616;--dim:#45413a;--faint:#cbc5b8;--line:rgba(22,22,22,.13);--line-strong:rgba(22,22,22,.32);--accent:#a8401c;--accent2:#2f6f62;--btn:#161616;--btn-ink:#f4f1ea;--glow:168,64,28;--no:#b3261e}}
+:root[data-theme="light"]{color-scheme:light;--bg:#f4f1ea;--panel:#fbf9f4;--well:#ece8de;--ink:#161616;--dim:#45413a;--faint:#cbc5b8;--line:rgba(22,22,22,.13);--line-strong:rgba(22,22,22,.32);--accent:#a8401c;--accent2:#2f6f62;--btn:#161616;--btn-ink:#f4f1ea;--glow:168,64,28;--no:#b3261e}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15.5px/1.65 var(--sans);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:radial-gradient(rgba(var(--glow),.08) 1px,transparent 1.2px);background-size:24px 24px;mask-image:radial-gradient(ellipse at 50% 30%,#000 15%,transparent 70%);-webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 15%,transparent 70%)}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+code{font:400 .9em var(--mono);color:var(--ink);background:var(--well);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.wrap{display:grid;grid-template-columns:250px minmax(0,1fr);gap:48px;width:min(1240px,100% - 32px);margin-inline:auto}
+.side{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:28px 0;font:400 12.5px var(--mono)}
+.side .brand{display:flex;align-items:center;gap:10px;font:500 14px var(--mono);margin-bottom:4px}
+.side .brand img{width:15px;height:21px}
+.mark-light{display:none}
+@media (prefers-color-scheme:light){.mark-dark{display:none}.mark-light{display:inline}}
+.side small{display:block;color:var(--dim);margin-bottom:22px}
+.side .grp{margin:18px 0 6px;font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.side a{display:flex;gap:10px;padding:4px 0;color:var(--dim);text-decoration:none}
+.side a:hover{color:var(--ink)}
+.navnum{color:var(--accent);min-width:28px}
+main{min-width:0;padding:28px 0 96px}
+.hero{padding:56px 0 40px;border-bottom:1px solid var(--line)}
+.hero h1{font:400 clamp(30px,4.4vw,52px)/1.1 var(--mono);letter-spacing:-.035em;margin:0;color:var(--dim)}
+.hero h1 b{color:var(--ink);font-weight:500}
+.hero p{max-width:64ch;color:var(--dim)}
+.hero p b{color:var(--ink);font-weight:500}
+.parts{display:flex;flex-wrap:wrap;gap:6px;margin:22px 0 0}
+.parts a{display:inline-flex;align-items:center;height:34px;padding:0 12px;border:1px solid var(--line);border-radius:6px;font:400 12.5px var(--mono);color:var(--dim);text-decoration:none}
+.parts a:hover{border-color:var(--line-strong);color:var(--ink)}
+.parts a.on{color:var(--ink);border-color:var(--accent)}
+.parts a.on::before{content:"› ";color:var(--accent)}
+.pickdoc{margin-top:18px;padding:14px 16px;border:1px dashed var(--line-strong);border-radius:8px;font-size:14px}
+.meta{font:400 12px var(--mono)}
+section.g{padding:64px 0 16px;border-bottom:1px solid var(--line)}
+.g-head{display:grid;grid-template-columns:1fr;margin-bottom:28px}
+h2{font:400 clamp(24px,3vw,34px)/1.15 var(--mono);letter-spacing:-.03em;margin:0;color:var(--ink)}
+.secnum{display:block;font:400 12.5px var(--mono);letter-spacing:0;color:var(--accent);margin-bottom:10px}
+.g-head p{margin:10px 0 0;color:var(--dim);max-width:64ch}
+h3.sub{font:500 14px var(--mono);margin:36px 0 12px;color:var(--ink)}
+.subnum{color:var(--accent);margin-right:10px;font-weight:400}
+ul.short{margin:18px 0 0;padding-left:18px;color:var(--dim);max-width:76ch}
+ul.short li{margin:0 0 8px}
+ul.short b{color:var(--ink);font-weight:500}
+.scroll{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font:400 13px/1.5 var(--mono)}
+table.t th{text-align:start;font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:8px 12px 8px 0;border-bottom:1px solid var(--line-strong)}
+table.t td{padding:10px 12px 10px 0;border-bottom:1px solid var(--line);vertical-align:top;color:var(--dim)}
+table.t td b{color:var(--ink);font-weight:500}
+.pagemap,.dd,.blocks{display:grid;gap:1px;background:var(--line);border:1px solid var(--line)}
+.pagemap{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.pm,.blk{padding:18px;background:var(--bg)}
+.pm b,.blk b{display:block;font:500 13px var(--mono);color:var(--ink)}
+.pm span,.blk span{display:block;margin-top:4px;font-size:13.5px;color:var(--dim)}
+.pm .q{margin-top:12px;font:400 12px var(--mono);color:var(--accent)}
+.dd{grid-template-columns:1fr 1fr;margin-top:24px}
+.dd>div{padding:18px;background:var(--bg)}
+.dd small{display:block;margin-top:10px;font:400 12px var(--mono);color:var(--dim)}
+.dd .y small::before{content:"✓ ";color:var(--accent)}
+.dd .n small::before{content:"✗ ";color:var(--no)}
+.blocks{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.th{border:1px solid var(--line);border-radius:8px;padding:8px}
+.th .pv{height:62px;border-radius:5px;padding:10px;position:relative;box-shadow:inset 0 0 0 1px rgba(128,128,128,.25)}
+.th .pv i{display:block;height:5px;border-radius:3px;margin-bottom:7px}
+.th .pv u{position:absolute;right:10px;bottom:10px;width:30px;height:12px;border-radius:2px}
+.th b{display:block;margin:8px 2px 0;font:500 13px var(--mono)}
+.th span{display:block;margin:0 2px;font:400 11.5px var(--mono);color:var(--dim)}
+.tokens{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.tk{display:flex;gap:12px;align-items:center;padding:12px;background:var(--bg)}
+.tk i{flex:none;width:30px;height:30px;border-radius:6px;background:var(--c);box-shadow:inset 0 0 0 1px var(--line-strong)}
+.tk b{display:block;font:500 12.5px var(--mono)}
+.tk span{display:block;font-size:12.5px;color:var(--dim)}
+.demo{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:20px;border:1px solid var(--line);border-radius:8px;background:var(--well)}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;background:var(--btn);color:var(--btn-ink);border:0;border-radius:2px;font:500 14px var(--sans);text-decoration:none}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line-strong);font:400 13px var(--mono)}
+.btn .k{color:var(--accent)}
+.chip{display:inline-flex;align-items:center;height:34px;padding:0 12px;border:1px solid var(--line);border-radius:6px;font:400 12.5px var(--mono)}
+.label{font:500 11px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.term{width:100%;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;background:var(--well)}
+.term-top{display:flex;gap:8px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);font:400 12px var(--mono);color:var(--dim)}
+.term-top i{width:11px;height:11px;border-radius:50%;background:var(--faint)}
+.term pre{margin:0;padding:14px 16px;font:400 13px/1.7 var(--mono);white-space:pre-wrap;color:var(--ink)}
+.p{color:var(--accent)}.d{color:var(--dim)}.a2{color:var(--accent2)}
+.check{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.check div{padding:14px 16px;background:var(--bg);font-size:14px;color:var(--dim)}
+.check b{display:block;font:500 13px var(--mono);color:var(--ink);margin-bottom:2px}
+@media (max-width:900px){.wrap{grid-template-columns:1fr;gap:0}.side{position:static;height:auto;border-bottom:1px solid var(--line)}.dd{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<!-- AI AGENTS: this is ONE of FOUR guideline documents, all in this folder: app.html (Part A, the app on a PC, A01-A16), website.html (Part B, Normal: lightningeg.com except For Geeks, B01-B12), phone.html (Part C, the app on a phone, C01-C12), coders.html (Part D, Coders: the For Geeks pages, D01-D12). This file is coders.html. For anything about another surface, open that file; do not guess. Do not read a file whole: run `python tools/guideline.py` in the app repo to list sections and `python tools/guideline.py D03` to print one. -->
+<body data-part="d">
+<div class="wrap">
+<nav class="side" aria-label="Sections">
+  <div class="brand"><img class="mark-dark" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii00IC00IDIwOCAyODgiID48ZGVmcz48L2RlZnM+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTMgMCkiPjxwYXRoIGQ9Ik0xMDAgMTAgQzEwMCAzIDk0IC0xIDg4IDIuNSBMNTAgMjIgQzE5IDM3LjUgMCA2NiAwIDEwNSBMMCAxOTYgQzAgMjIxIDIwIDIzMSA0MSAyMTkgTDEwMCAxOTAgWiIgZmlsbD0iI0ZGRkZGRiIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzIDApIHJvdGF0ZSgxODAgMTAwIDE0MCkiPjxwYXRoIGQ9Ik0xMDAgMTAgQzEwMCAzIDk0IC0xIDg4IDIuNSBMNTAgMjIgQzE5IDM3LjUgMCA2NiAwIDEwNSBMMCAxOTYgQzAgMjIxIDIwIDIzMSA0MSAyMTkgTDEwMCAxOTAgWiIgZmlsbD0iI0ZGRkZGRiIvPjwvZz48L3N2Zz4=" alt="" width="15" height="21"><img class="mark-light" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii00IC00IDIwOCAyODgiID48ZGVmcz48L2RlZnM+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTMgMCkiPjxwYXRoIGQ9Ik0xMDAgMTAgQzEwMCAzIDk0IC0xIDg4IDIuNSBMNTAgMjIgQzE5IDM3LjUgMCA2NiAwIDEwNSBMMCAxOTYgQzAgMjIxIDIwIDIzMSA0MSAyMTkgTDEwMCAxOTAgWiIgZmlsbD0iIzBBMjQ0MiIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzIDApIHJvdGF0ZSgxODAgMTAwIDE0MCkiPjxwYXRoIGQ9Ik0xMDAgMTAgQzEwMCAzIDk0IC0xIDg4IDIuNSBMNTAgMjIgQzE5IDM3LjUgMCA2NiAwIDEwNSBMMCAxOTYgQzAgMjIxIDIwIDIzMSA0MSAyMTkgTDEwMCAxOTAgWiIgZmlsbD0iIzBBMjQ0MiIvPjwvZz48L3N2Zz4=" alt="" width="15" height="21">lightning</div>
+  <small>Guideline 3.30 · 2026-10-18</small>
+  <div class="grp">D · Coders</div>
+  <a href="#d-pages"><span class="navnum">D01</span>Pages</a>
+  <a href="#d-normal"><span class="navnum">D02</span>Coders and Normal</a>
+  <a href="#d-colour"><span class="navnum">D03</span>Colour and themes</a>
+  <a href="#d-type"><span class="navnum">D04</span>Type</a>
+  <a href="#d-headers"><span class="navnum">D05</span>Headers</a>
+  <a href="#d-layout"><span class="navnum">D06</span>Layout</a>
+  <a href="#d-blocks"><span class="navnum">D07</span>Building blocks</a>
+  <a href="#d-field"><span class="navnum">D08</span>The field and motion</a>
+  <a href="#d-nav"><span class="navnum">D09</span>Navigation</a>
+  <a href="#d-words"><span class="navnum">D10</span>Words</a>
+  <a href="#d-access"><span class="navnum">D11</span>Access and phones</a>
+  <a href="#d-ship"><span class="navnum">D12</span>Before it ships</a>
+  <div class="grp">Other documents</div>
+  <a href="app.html">A · App</a>
+  <a href="website.html">B · Normal</a>
+  <a href="phone.html">C · Phone</a>
+</nav>
+<main>
+
+<header class="hero">
+  <h1>Lightning guideline · <b>Coders</b></h1>
+  <p>Part D is <b>Coders</b>: the For Geeks section of lightningeg.com, the pages for developers who read, run and build Lightning. The rest of the site is <b>Normal</b>, Part B. Coders has its own look: a terminal on a dark field, monospace type and twelve themes. This document is what that look is made of, so a new Coders page matches the two that exist.</p>
+  <div class="parts"><a href="app.html">A · App</a><a href="website.html">B · Normal</a><a href="phone.html">C · Phone</a><a href="coders.html" class="on">D · Coders</a></div>
+  <p class="pickdoc"><b>Four documents, one folder.</b> This is the Coders document (the For Geeks pages). For the app on a PC open <a href="app.html">app.html</a>, for the Normal website <a href="website.html">website.html</a>, for the phone <a href="phone.html">phone.html</a>. Coders shares the logo, the facts and the voice (<code>brand-voice.md</code>) with the others; its colours, type and blocks are its own and never cross into Normal pages.</p>
+  <p class="meta">Version 3.30 · 2026-10-18 · Source of truth: <code>css/forgeeks.css</code> and <code>js/forgeeks.js</code> in the website repository</p>
+</header>
+
+<!-- ================= PART D · CODERS ================= -->
+
+<section class="g" id="d-pages" data-part="d">
+  <div class="g-head"><div><h2><span class="secnum">D01</span>Pages</h2><p>Coders is a section of its own, with its own top bar. Each page answers one developer's question.</p></div></div>
+  <div class="pagemap">
+    <div class="pm"><b>home</b><span>What Lightning is, why the code is open, and how to run it · forgeeks.html</span><div class="q">→ Run the demo</div></div>
+    <div class="pm"><b>roadmap</b><span>M1 core and workflow, M2 Google Play, M3 App Store · forgeeks-roadmap.html</span><div class="q">→ Pick an issue</div></div>
+  </div>
+  <ul class="short">
+    <li><b>Two live pages.</b> for-geeks.html only redirects to forgeeks.html. for-geeks-2.html, for-geeks-4.html and for-geeks-test.html keep earlier concepts: never copy from them.</li>
+    <li>A new Coders page loads <code>css/forgeeks.css</code> and <code>js/forgeeks.js</code> and nothing from Normal (no landing.css, footer.py footer, signup band or testing panel). Its own styles go in forgeeks.css under a commented heading.</li>
+    <li>Every Coders page is indexed, has a canonical URL and social tags, and is listed in sitemap.xml and llms.txt. Normal pages link to Coders from the footer (More).</li>
+    <li>The roadmap stays in step with the app repository's NOW.md and Project Overview › Roadmap.</li>
+  </ul>
+</section>
+
+<section class="g" id="d-normal" data-part="d">
+  <div class="g-head"><div><h2><span class="secnum">D02</span>Coders and Normal</h2><p>Two looks on one site. Use the one for the page you are on, never a mix.</p></div></div>
+  <div class="scroll"><table class="t">
+    <tr><th>Part</th><th>Normal (B)</th><th>Coders (D)</th></tr>
+    <tr><td><b>Who</b></td><td>Salaried people in Egypt choosing a money app</td><td>Developers who read, run and build it</td></tr>
+    <tr><td><b>Pages</b></td><td>Home, Features, guides, Downloads and the rest</td><td>forgeeks.html, forgeeks-roadmap.html</td></tr>
+    <tr><td><b>Ground</b></td><td>Light canvas, white panels; dark mode by B09</td><td>A dark field with particles, Mono by default; Paper the one light theme</td></tr>
+    <tr><td><b>Type</b></td><td>Bricolage Grotesque and Manrope</td><td>JetBrains Mono and Inter</td></tr>
+    <tr><td><b>Headings</b></td><td>Title Case in Ink</td><td>Sentence case, a dim lead then an Ink punch</td></tr>
+    <tr><td><b>Colour meaning</b></td><td>Green in, Azure held, Rose out</td><td>Accent is live, current or done; no money colours</td></tr>
+    <tr><td><b>Language</b></td><td>English and Egyptian Arabic</td><td>English only, for now</td></tr>
+    <tr><td><b>Shared</b></td><td colspan="2">The two-leaf logo (white mark, Nile mark on Paper), the facts and figures, the voice in <code>brand-voice.md</code>, and whole numbers with thousands separators.</td></tr>
+  </table></div>
+  <ul class="short">
+    <li><b>Never cross.</b> No mono headings, themes or particle field on a Normal page; no gradient punch lines, money colours or signup band on a Coders page.</li>
+    <li>A link from Coders to a Normal page opens in a new tab, so the reader keeps their place (D09).</li>
+  </ul>
+</section>
+
+<section class="g" id="d-colour" data-part="d">
+  <div class="g-head"><div><h2><span class="secnum">D03</span>Colour and themes</h2><p>Fourteen tokens. Every theme sets all of them; nothing else is a colour.</p></div></div>
+  <div class="tokens">
+    <div class="tk" style="--c:var(--bg)"><i></i><div><b>--bg</b><span>The page and the field</span></div></div>
+    <div class="tk" style="--c:var(--panel)"><i></i><div><b>--panel</b><span>Windows: the theme picker, the toast</span></div></div>
+    <div class="tk" style="--c:var(--well)"><i></i><div><b>--well</b><span>Terminal, code and clone line</span></div></div>
+    <div class="tk" style="--c:var(--ink)"><i></i><div><b>--ink</b><span>Headline punch, bold words, values</span></div></div>
+    <div class="tk" style="--c:var(--dim)"><i></i><div><b>--dim</b><span>Body, leads, labels</span></div></div>
+    <div class="tk" style="--c:var(--faint)"><i></i><div><b>--faint</b><span>Bars not yet filled, window dots; never text</span></div></div>
+    <div class="tk" style="--c:var(--line)"><i></i><div><b>--line</b><span>Hairlines and grid gaps</span></div></div>
+    <div class="tk" style="--c:var(--line-strong)"><i></i><div><b>--line-strong</b><span>Boxes you act on, dashed proof rules</span></div></div>
+    <div class="tk" style="--c:var(--accent)"><i></i><div><b>--accent</b><span>Prompt, caret, current, done, section numbers</span></div></div>
+    <div class="tk" style="--c:var(--accent2)"><i></i><div><b>--accent2</b><span>Second voice: strings, "now", gap tags</span></div></div>
+    <div class="tk" style="--c:var(--btn)"><i></i><div><b>--btn / --btn-ink</b><span>The primary button and its words</span></div></div>
+    <div class="tk" style="--c:rgb(var(--glow))"><i></i><div><b>--particle / --glow</b><span>RGB triples for the field and halos</span></div></div>
+  </div>
+  <h3 class="sub"><span class="subnum">D03.1</span>The twelve themes</h3>
+  <div class="themes">
+    <div class="th"><div class="pv" style="background:#0a0a0a"><i style="background:#f2f2f2;width:70%"></i><i style="background:#b8b8b8;width:50%"></i><u style="background:#fff"></u></div><b>Mono</b><span>white on black, the default</span></div>
+    <div class="th"><div class="pv" style="background:#f4f1ea"><i style="background:#161616;width:70%"></i><i style="background:#45413a;width:50%"></i><u style="background:#a8401c"></u></div><b>Paper</b><span>the one light theme</span></div>
+    <div class="th"><div class="pv" style="background:#08192A"><i style="background:#EAF4F1;width:70%"></i><i style="background:#B8CAD2;width:50%"></i><u style="background:#3FCB93"></u></div><b>Meadow</b><span>Lightning's own colours</span></div>
+    <div class="th"><div class="pv" style="background:#070b16"><i style="background:#e9edf7;width:70%"></i><i style="background:#b7c0d8;width:50%"></i><u style="background:#e6b450"></u></div><b>Nile</b><span>night blue and gold</span></div>
+    <div class="th"><div class="pv" style="background:#04121a"><i style="background:#dff6ff;width:70%"></i><i style="background:#9fc9d9;width:50%"></i><u style="background:#38c9f0"></u></div><b>Ocean</b><span>cyan and mint</span></div>
+    <div class="th"><div class="pv" style="background:#13141c"><i style="background:#c0caf5;width:70%"></i><i style="background:#aab2d8;width:50%"></i><u style="background:#7aa2f7"></u></div><b>Tokyo</b><span>cool blue and violet</span></div>
+    <div class="th"><div class="pv" style="background:#191a21"><i style="background:#f8f8f2;width:70%"></i><i style="background:#c6cae4;width:50%"></i><u style="background:#bd93f9"></u></div><b>Dracula</b><span>purple and pink</span></div>
+    <div class="th"><div class="pv" style="background:#140a10"><i style="background:#ffe4ee;width:70%"></i><i style="background:#dcaabe;width:50%"></i><u style="background:#ff6fa0"></u></div><b>Rose</b><span>dusk pink and peach</span></div>
+    <div class="th"><div class="pv" style="background:#12061f"><i style="background:#f6e9ff;width:70%"></i><i style="background:#c6a9df;width:50%"></i><u style="background:#ff3ea5"></u></div><b>Synthwave</b><span>magenta and cyan</span></div>
+    <div class="th"><div class="pv" style="background:#040a06"><i style="background:#d8ffe4;width:70%"></i><i style="background:#a8d6b6;width:50%"></i><u style="background:#39ff88"></u></div><b>Phosphor</b><span>green CRT</span></div>
+    <div class="th"><div class="pv" style="background:#0c0803"><i style="background:#ffe7c2;width:70%"></i><i style="background:#dcb98a;width:50%"></i><u style="background:#ffb000"></u></div><b>Amber</b><span>old terminal, warm</span></div>
+    <div class="th"><div class="pv" style="background:#002b36"><i style="background:#eee8d5;width:70%"></i><i style="background:#aab9b8;width:50%"></i><u style="background:#d4a017"></u></div><b>Solarized</b><span>gold and teal</span></div>
+  </div>
+  <ul class="short">
+    <li><b>Contrast:</b> in every theme, ink and dim measure 4.5:1 or more on bg, panel and well, and btn-ink on btn. A new theme passes that before it ships.</li>
+    <li><b>Mono</b> is the default and the fallback for an unknown saved theme. <b>Paper</b> keeps <code>color-scheme: light dark</code> so a phone that darkens websites leaves it light. <b>Meadow</b> uses Lightning's Nile night, green and azure.</li>
+    <li>A theme changes colours only, never sizes, spacing or words. The browser's <code>theme-color</code> follows the theme's bg.</li>
+    <li><b>Not in Coders:</b> the vivid gradient, Green/Azure/Rose money meanings, raw hex values in a page's own styles (use a token), a colour that differs between pages.</li>
+  </ul>
+</section>
+
+<section class="g" id="d-type" data-part="d">
+  <div class="g-head"><div><h2><span class="secnum">D04</span>Type</h2><p>Mono for anything a developer would type or scan; Inter for sentences.</p></div></div>
+  <div class="scroll"><table class="t">
+    <tr><th>Role</th><th>Desktop · phone</th><th>Font</th><th>Sample</th></tr>
+    <tr><td><b>H1</b></td><td>70 · 34</td><td>Mono 400, punch 500, −0.035em</td><td style="font:400 26px/1.1 var(--mono);letter-spacing:-.035em;color:var(--dim)">Don't trust us. <span style="color:var(--ink);font-weight:500">Run it.</span></td></tr>
+    <tr><td><b>H2</b></td><td>54 · 30</td><td>Mono 400, punch 500, −0.03em</td><td style="font:400 22px/1.12 var(--mono);letter-spacing:-.03em;color:var(--dim)">One process. <span style="color:var(--ink);font-weight:500">One file.</span></td></tr>
+    <tr><td><b>H3</b></td><td>13–15</td><td>Mono 500, Ink</td><td style="font:500 14px var(--mono)">local-first</td></tr>
+    <tr><td><b>Big figure</b></td><td>76 · 48</td><td>Mono 400, −0.04em</td><td style="font:400 32px/1 var(--mono);letter-spacing:-.04em">142<small style="font-size:.4em;color:var(--dim);margin-left:6px">ms</small></td></tr>
+    <tr><td><b>Lede</b></td><td>17</td><td>Inter 400, Dim</td><td style="font-size:16px;color:var(--dim)">A free, local-first money app.</td></tr>
+    <tr><td><b>Body</b></td><td>14.5–18</td><td>Inter 400, Dim; bold 500 Ink</td><td style="font-size:15px;color:var(--dim)">Runs on <b style="color:var(--ink);font-weight:500">your PC</b>.</td></tr>
+    <tr><td><b>UI, code</b></td><td>12–14</td><td>Mono 400</td><td style="font:400 13px var(--mono)">git clone …</td></tr>
+    <tr><td><b>Label</b></td><td>11</td><td>Mono 500, +0.14em, uppercase</td><td><span class="label">on this page</span></td></tr>
+  </table></div>
+  <ul class="short">
+    <li>Two weights only: 400 and 500. No bold 700, no italics.</li>
+    <li><b>Uppercase</b> only for 11px mono labels: section labels, footer column heads, the legal line and the scroll hint. Never a heading or a sentence.</li>
+    <li>Figures: whole numbers with thousands separators; the unit small and Dim after the number.</li>
+  </ul>
+</section>
+
+<section class="g" id="d-headers" data-part="d">
+  <div class="g-head"><div><h2><span class="secnum">D05</span>Headers</h2><p>A number, then a two-beat heading: dim lead, Ink punch.</p></div></div>
+  <div class="dd">
+    <div class="y"><span style="font:400 12.5px var(--mono);color:var(--dim)"><b style="color:var(--accent);font-weight:500">03</b> // proof</span><br><b style="font:400 24px/1.15 var(--mono);letter-spacing:-.03em;color:var(--dim)">Don't trust us. <span style="color:var(--ink);font-weight:500">Run it.</span></b><small>Section number in Accent, then the heading; the punch is the last beat</small></div>
+    <div class="n"><b style="font:500 24px/1.15 var(--mono);color:var(--accent);text-transform:uppercase">DON'T TRUST US. RUN IT.</b><small>Accent or uppercase headings, all one weight</small></div>
+  </div>
+  <ul class="short">
+    <li><b>Section head:</b> a 220px column with the number (<code>01</code>…, <code>M1</code>… on the roadmap, <code>→</code> for a closing aside), the heading beside it and one Dim line under it. On a phone they stack.</li>
+    <li>Headings are sentence case and end with a full stop. Only the punch (<code>.hi</code>) is Ink; never colour a heading with Accent.</li>
+    <li>The hero H1 sits at the bottom of a full screen; the closing H2 stands alone after a long quiet stretch of field.</li>
+  </ul>
+</section>
+
+<section class="g" id="d-layout" data-part="d">
+  <div class="g-head"><div><h2><span class="secnum">D06</span>Layout</h2><p>A wide, quiet column over the field. One idea per section.</p></div></div>
+  <div class="scroll"><table class="t">
+    <tr><th>Part</th><th>Rule</th></tr>
+    <tr><td><b>Column</b></td><td>min(1180px, 100% − 32px), centred: a 16px gutter on a phone</td></tr>
+    <tr><td><b>Top bar</b></td><td>60px, fixed; turns solid (bg at 94%, a hairline) once you scroll</td></tr>
+    <tr><td><b>Hero</b></td><td>At least one screen tall, text at the bottom, 120px top padding; a soft floor of bg behind the words</td></tr>
+    <tr><td><b>Section</b></td><td>140px top and bottom; 96px under 820px</td></tr>
+    <tr><td><b>Grids</b></td><td>Two columns (1.1fr / .9fr and similar) or 3–4 equal cells joined by 1px hairlines; one column under 820–900px</td></tr>
+    <tr><td><b>Closing</b></td><td>52vh of open field above it (40vh on a phone), then the footer's four columns</td></tr>
+  </table></div>
+  <ul class="short">
+    <li>Cells in a grid are joined by 1px gaps on <code>--line</code>, not separate boxes with gaps. A box never sits inside another box.</li>
+    <li>Panels over the field use bg at 80–92% so the field shows faintly through; text keeps a soft bg halo so a dot never cuts a letter.</li>
+    <li>Grid children set <code>min-width:0</code>: a long code line scrolls inside its box, never the page.</li>
+  </ul>
+</section>
+
+<section class="g" id="d-blocks" data-part="d">
+  <div class="g-head"><div><h2><span class="secnum">D07</span>Building blocks</h2><p>Build a page from these. A new block is added here first.</p></div></div>
+  <div class="demo">
+    <a class="btn" href="#d-blocks">Run the demo <span aria-hidden="true">→</span></a>
+    <a class="btn ghost" href="#d-blocks"><span class="k">$</span> git clone</a>
+    <span class="chip">theme · mono</span>
+    <span class="label">label</span>
+  </div>
+  <div class="term" style="margin-top:12px">
+    <div class="term-top"><i></i><i></i><i></i><span>lightning — demo</span></div>
+<pre><span class="p">$</span> python -m lightning --demo
+<span class="d">loading Mohab's year …</span>
+<span class="a2">ready</span> on 127.0.0.1:8765</pre>
+  </div>
+  <div class="blocks" style="margin-top:12px">
+    <div class="blk"><b>.btn</b><span>Primary: btn on btn-ink, 46px, radius 2, Inter 500. One per view; the hero and the closing.</span></div>
+    <div class="blk"><b>.btn.ghost</b><span>Secondary: hairline, mono, a <code>$</code> or <code>›</code> in Accent.</span></div>
+    <div class="blk"><b>.chip</b><span>34px, radius 6, mono 12.5: theme, source ↗.</span></div>
+    <div class="blk"><b>.cards</b><span>Three cells with a big figure, a Dim line and a dashed proof line linking the source.</span></div>
+    <div class="blk"><b>.term</b><span>The live terminal: window dots, a real command set, a reset button. Answers are true.</span></div>
+    <div class="blk"><b>.code · .clone</b><span>A code block in a well; a one-line command with a copy button and a toast.</span></div>
+    <div class="blk"><b>.layers</b><span>The stack, top to bottom, with a pulse running down its line.</span></div>
+    <div class="blk"><b>.gaps · .items</b><span>Ruled lists: a mono tag column, then the line. Done items struck through.</span></div>
+    <div class="blk"><b>.steps</b><span>Four numbered steps in hairline cells.</span></div>
+    <div class="blk"><b>.track · .ms-meter</b><span>Roadmap milestones on one line; the current one glows. A meter for progress.</span></div>
+    <div class="blk"><b>.stats</b><span>Two-by-two figures, then a note on how they were measured.</span></div>
+    <div class="blk"><b>footer .cols</b><span>System, Docs, Community, Get started; then the legal line with the mark.</span></div>
+  </div>
+  <ul class="short">
+    <li>Radii: 2 buttons, 4 small controls, 6 chips and rows, 8 code, 10 terminal, 12 windows.</li>
+    <li>Every figure on a card links its proof: the file, the test or the command that shows it.</li>
+  </ul>
+</section>
+
+<section class="g" id="d-field" data-part="d">
+  <div class="g-head"><div><h2><span class="secnum">D08</span>The field and motion</h2><p>The page sits on a field of light. Motion is the weather, never the content.</p></div></div>
+  <ul class="short">
+    <li><b>The field:</b> a fixed particle terrain on one canvas, a 24px pixel grid fading at the edges, and faint scanlines (15% on Paper). Full under the hero and the closing, faint between them. It is built once and never rebuilds while you scroll.</li>
+    <li><b>Lightning:</b> a strike every 6–12 seconds on the terrain, and one where you click empty space; the hero's words flash with it. A faint current runs through the pixel grid now and then.</li>
+    <li><b>Small motion:</b> sections rise 18px into place (0.8s), bars fill when seen (1.4s), the caret blinks, the stack's pulse runs, the scroll hint nudges. Easing <code>cubic-bezier(.2,.8,.2,1)</code>.</li>
+    <li><b>Reduced motion:</b> one still frame of the field, no strikes, no reveal, caret steady, bars drawn full. The page must read the same.</li>
+    <li>Motion never moves text the reader is reading, never loops faster than once a second, and never needs to finish before a button works.</li>
+  </ul>
+</section>
+
+<section class="g" id="d-nav" data-part="d">
+  <div class="g-head"><div><h2><span class="secnum">D09</span>Navigation</h2><p>The top bar holds the pages; the rail holds this page's sections.</p></div></div>
+  <ul class="short">
+    <li><b>Top bar:</b> the white mark and <code>lightning</code> (home), the crumb <code>~/root/for-geeks</code> with a blinking caret, then the pages in lower case (home, roadmap, app), the theme chip and source ↗. The current page is Ink with a <code>›</code> in Accent; a 1px Accent line under the bar shows reading progress.</li>
+    <li><b>Rail:</b> at 1300px and wider, the sections down the left edge under <code>// on this page</code>; the current one is a 28px Accent line. Hidden over the hero.</li>
+    <li><b>Same tab inside Coders</b>; a new tab for Normal pages, GitHub and anything outside (<code>target="_blank" rel="noopener"</code>).</li>
+    <li><b>Theme picker:</b> a window in the middle of the screen, opened by the chip or <code>T</code>; arrows preview, Enter keeps, Esc restores. The choice is saved as <code>lightning-geeks-theme</code> and applied before first paint.</li>
+  </ul>
+</section>
+
+<section class="g" id="d-words" data-part="d">
+  <div class="g-head"><div><h2><span class="secnum">D10</span>Words</h2><p>The Lightning voice, said to a developer: short, exact, checkable.</p></div></div>
+  <div class="dd">
+    <div class="y"><b style="font:400 18px var(--mono)">Don't trust us. Run it.</b><small>A claim the reader can test, with the command next to it</small></div>
+    <div class="n"><b style="font:400 18px var(--mono)">Blazing-fast, military-grade security!</b><small>Adjectives with nothing to run</small></div>
+  </div>
+  <ul class="short">
+    <li><code>brand-voice.md</code> applies. On Coders, name the file, the test or the number: "one process, one SQLite file", not "simple architecture".</li>
+    <li>Say what isn't done yet, plainly, in its own section. Never promise a date the roadmap doesn't hold.</li>
+    <li>UI words are lower case and mono, like commands: <code>home</code>, <code>roadmap</code>, <code>copied to clipboard</code>. Sentences are sentence case.</li>
+    <li>Every command shown runs as written on a fresh clone; every terminal answer is true of the current build.</li>
+  </ul>
+</section>
+
+<section class="g" id="d-access" data-part="d">
+  <div class="g-head"><div><h2><span class="secnum">D11</span>Access and phones</h2><p>Dark and clever is no excuse for hard to use.</p></div></div>
+  <ul class="short">
+    <li>A skip link first; focus is a 2px Accent outline, offset 3px. Every control works with the keyboard.</li>
+    <li>The canvas, grid and scanlines are <code>aria-hidden</code> and ignore the pointer; the terminal has a real input with a label.</li>
+    <li>Breakpoints: 1300 (rail), 900, 820, 760 (crumb and theme name go), 640, 420. At 360px wide nothing scrolls sideways.</li>
+    <li>On a phone the terrain is lighter and steady; touch targets are at least 34px, buttons 46px.</li>
+  </ul>
+</section>
+
+<section class="g" id="d-ship" data-part="d">
+  <div class="g-head"><div><h2><span class="secnum">D12</span>Before it ships</h2><p>A Coders page with any of these is not done.</p></div></div>
+  <div class="check">
+    <div><b>A Normal style</b>Bricolage, Manrope, gradients, money colours.</div>
+    <div><b>A colour outside the tokens</b>Use a token from D03.</div>
+    <div><b>A theme that fails 4.5:1</b>Check all twelve.</div>
+    <div><b>Accent headings</b>Dim lead, Ink punch.</div>
+    <div><b>Uppercase beyond labels</b>11px mono labels only.</div>
+    <div><b>A box in a box</b>Hairline cells instead.</div>
+    <div><b>A claim with no proof</b>Link the file, test or command.</div>
+    <div><b>A command that fails</b>Run it on a fresh clone.</div>
+    <div><b>Motion with reduced motion on</b>One still frame.</div>
+    <div><b>Sideways scroll on a phone</b>min-width:0 on grid cells.</div>
+    <div><b>Outside link in the same tab</b>New tab, rel="noopener".</div>
+    <div><b>Not in the sitemap</b>Sitemap, llms.txt, canonical.</div>
+  </div>
+</section>
+
+</main>
+</div>
+</body>
+</html>

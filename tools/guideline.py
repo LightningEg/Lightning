@@ -1,13 +1,13 @@
 """Print one brand guideline section as plain text, so an AI never has to read the whole HTML file.
 
     python tools/guideline.py            # list the sections: number, title, size as text
-    python tools/guideline.py A16        # one section (A01-A16 the PC app, B01-B12 the website, C01-C12 the phone)
+    python tools/guideline.py A16        # one section (A01-A16 the PC app, B01-B12 Normal, the website, C01-C12 the phone, D01-D12 Coders, For Geeks)
     python tools/guideline.py A03 A12    # several sections
     python tools/guideline.py --dir ../Lightning_website/guideline B05
     python tools/guideline.py --ar A06    # the Egyptian Arabic copy (app-ar.html, website-ar.html, phone-ar.html)
 
-The guideline is three documents in guideline/: app.html (A01-A16), website.html (B01-B12), phone.html (C01-C12).
-Together they are about 540 KB (roughly 95,000 tokens), mostly inline drawings; the words are about a tenth of that.
+The guideline is four documents in guideline/: app.html (A01-A16), website.html (B01-B12, Normal), phone.html (C01-C12)
+and coders.html (D01-D12, Coders: the website's For Geeks pages, English only). Together they are about 570 KB (roughly 95,000 tokens), mostly inline drawings; the words are about a tenth of that.
 A section printed here is a few hundred tokens. The letter picks the file. Standard library only.
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 GUIDELINE_DIR = Path(__file__).resolve().parent.parent / "guideline"
-DOCUMENTS = {"A": "app.html", "B": "website.html", "C": "phone.html"}
+DOCUMENTS = {"A": "app.html", "B": "website.html", "C": "phone.html", "D": "coders.html"}
 _SKIP = {"svg", "style", "script", "head"}
 _BREAK = {"p", "div", "li", "tr", "h1", "h2", "h3", "h4", "section", "br", "table", "ul", "ol", "pre"}
 
@@ -76,9 +76,10 @@ def sections(html: str) -> list[tuple[str, str, str]]:
 
 
 def all_sections(folder: Path, arabic: bool = False) -> list[tuple[str, str, str]]:
-    """Sections of the three documents, A then B then C; with arabic, of their Arabic copies."""
+    """Sections of the four documents, A to D; with arabic, of the Arabic copies that exist (Coders has none)."""
     names = (name.replace(".html", "-ar.html") if arabic else name for name in DOCUMENTS.values())
-    return [item for name in names for item in sections((folder / name).read_text(encoding="utf-8"))]
+    paths = (folder / name for name in names)
+    return [item for path in paths if path.exists() for item in sections(path.read_text(encoding="utf-8"))]
 
 
 def as_text(section_html: str) -> str:
@@ -90,7 +91,7 @@ def as_text(section_html: str) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("numbers", nargs="*", help="section numbers such as A16 or B05; none lists them")
-    parser.add_argument("--dir", type=Path, default=GUIDELINE_DIR, help="the folder holding the three documents")
+    parser.add_argument("--dir", type=Path, default=GUIDELINE_DIR, help="the folder holding the four documents")
     parser.add_argument("--ar", action="store_true", help="read the Egyptian Arabic copies instead")
     args = parser.parse_args(argv)
     found = all_sections(args.dir, args.ar)

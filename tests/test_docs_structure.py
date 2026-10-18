@@ -10,7 +10,7 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 GUIDELINE = ROOT / "guideline"
-DOCUMENTS = {"A": "app.html", "B": "website.html", "C": "phone.html"}
+DOCUMENTS = {"A": "app.html", "B": "website.html", "C": "phone.html", "D": "coders.html"}
 
 
 def _guideline_tool():
@@ -89,6 +89,7 @@ def test_the_guideline_tool_prints_one_section_as_text():
     found = tool.all_sections(GUIDELINE)
     assert [n for n, _, _ in found if n.startswith("A")][-1] == "A16"
     assert [n for n, _, _ in found if n.startswith("B")][-1] == "B12" and [n for n, _, _ in found if n.startswith("C")][-1] == "C12"
+    assert [n for n, _, _ in found if n.startswith("D")][-1] == "D12"
     a16 = tool.as_text(next(block for number, _, block in found if number == "A16"))
     assert "Before it ships" in a16 and "<" not in a16 and len(a16) < 2000
 
@@ -102,14 +103,14 @@ def test_each_guideline_document_holds_only_its_part_and_names_the_others():
         html = (GUIDELINE / name).read_text(encoding="utf-8")
         numbers = [n for n, _, _ in _guideline_tool().sections(html)]
         assert numbers and all(n.startswith(letter) for n in numbers), f"{name} holds sections of another part: {numbers}"
-        assert "AI AGENTS: this is ONE of THREE guideline documents" in html, f"{name} lost its hint to the other documents"
+        assert "AI AGENTS: this is ONE of FOUR guideline documents" in html, f"{name} lost its hint to the other documents"
         for other in set(DOCUMENTS.values()) - {name}:
             assert f'href="{other}"' in html, f"{name} does not link to {other}"
     versions = {_title(GUIDELINE / name).split(" · ")[0] for name in DOCUMENTS.values()}
-    assert len(versions) == 1, f"the three documents carry different versions: {versions}"
+    assert len(versions) == 1, f"the four documents carry different versions: {versions}"
 
 
-def test_the_app_and_website_guidelines_are_the_same_three_files():
+def test_the_app_and_website_guidelines_are_the_same_four_files():
     """AGENTS.md section 1: change both copies together. Checked when the website repo sits beside this one."""
     beside = [ROOT.parent / name / "guideline" for name in ("Lightning_website", "lightning_website")]
     website = next((path for path in beside if path.is_dir()), None)

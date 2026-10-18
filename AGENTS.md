@@ -14,7 +14,7 @@ Each fact lives in one file; link to it, never copy it. No other files under `do
 | [Architecture](docs/ARCHITECTURE.md) | Modules, financial rules, data model, UI contract, desktop app, encrypted profiles | How something is built or calculated changes |
 | [Glossary](docs/GLOSSARY.md) | One name and meaning per term and figure | You add or rename one |
 | [Competition](docs/COMPETITION.md) | Competitors, what users love/hate, where we win/lose | You learn something, or choose between designs |
-| [guideline/](guideline/) | Brand: [app.html](guideline/app.html) (A, PC), [website.html](guideline/website.html) (B), [phone.html](guideline/phone.html) (C), [brand-voice.md](guideline/brand-voice.md) (voice) | The owner gives a new version; change the website repo's copy too |
+| [guideline/](guideline/) | Brand: [app.html](guideline/app.html) (A, PC), [website.html](guideline/website.html) (B, Normal website), [phone.html](guideline/phone.html) (C), [coders.html](guideline/coders.html) (D, website's For Geeks), [brand-voice.md](guideline/brand-voice.md) (voice) | The owner gives a new version; change the website repo's copy too |
 | [report/](report/README.md) | Findings not yet fixed: bugs and improvements, visual or technical; read `report/INDEX.md` only | You find something (add one); you fix it (delete it in the same commit) |
 | [CHANGELOG.md](CHANGELOG.md) | Every change, newest first under `Unreleased` | Every push |
 | `docs/proposals/` | Unbuilt designs, one file each | Once built, move what holds into Architecture and delete it |
