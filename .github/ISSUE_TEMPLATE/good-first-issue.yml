@@ -1,0 +1,21 @@
+name: Good first issue
+description: A small, self-contained task someone new can finish in an evening (maintainers and AIs write these)
+labels: ["good first issue"]
+body:
+  - type: textarea
+    id: what
+    attributes: {label: What's wrong, description: "One or two sentences. Dummy data only (Mohab's demo)."}
+    validations: {required: true}
+  - type: textarea
+    id: done
+    attributes: {label: Done when, description: "What you see in the demo, or the test that passes, once it's fixed."}
+    validations: {required: true}
+  - type: input
+    id: files
+    attributes: {label: Where to look, description: "The file (and function) most likely to change."}
+    validations: {required: true}
+  - type: textarea
+    id: read
+    attributes: {label: Read first (optional), description: "At most two links, e.g. a section of docs/ARCHITECTURE.md."}
+  - type: markdown
+    attributes: {value: "To work on it: comment `/take`. Setup and the rest: [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md)."}

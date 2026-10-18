@@ -1,0 +1,11 @@
+{
+  // Open in Codespaces (or VS Code Dev Containers): installs everything, then Mohab's demo runs on port 8766.
+  // The demo uses its own database, rebuilt on every start: nothing real is touched. CONTRIBUTING.md explains the rest.
+  "name": "Lightning",
+  "image": "mcr.microsoft.com/devcontainers/python:3.13",
+  "postCreateCommand": "pip install --user -r requirements-dev.txt",
+  "postAttachCommand": "python -m lightning --demo --no-browser",
+  "forwardPorts": [8766],
+  "portsAttributes": {"8766": {"label": "Lightning demo", "onAutoForward": "openPreview"}},
+  "customizations": {"vscode": {"extensions": ["ms-python.python"]}}
+}

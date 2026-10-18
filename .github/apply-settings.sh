@@ -36,6 +36,10 @@ echo "== Actions: fork PRs need approval, read-only token, no PR approval by Act
 gh api -X PUT $R/actions/permissions/workflow -f default_workflow_permissions=read -F can_approve_pull_request_reviews=false --silent
 gh api -X PUT $R/actions/permissions/fork-pr-contributor-approval -f approval_policy=all_external_contributors --silent
 
+echo "== Labels for contributors (CONTRIBUTING.md; the Contributors workflow uses them)"
+gh label create "good first issue" -R "$REPO" --color 7057FF --description "Small, self-contained, ready to /take" --force
+gh label create taken -R "$REPO" --color FBCA04 --description "Someone is working on it (/take)" --force
+
 echo "== Organisation: no default access, 2FA required (2FA fails if a member has none; read the error)"
 gh api -X PATCH orgs/$ORG -f default_repository_permission=none -F two_factor_requirement_enabled=true --silent || echo "org patch failed: set it under Org Settings > Authentication security"
 

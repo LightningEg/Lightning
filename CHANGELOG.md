@@ -10,6 +10,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - When a version is tagged, rename `Unreleased` to that version and start a new `Unreleased` above it.
 
 ## [Unreleased]
+
+- 2026-10-18 · Claude: contributor onboarding in three steps: good first issues, `/take` bot (`.github/workflows/contributors.yml`), Codespaces demo (`.devcontainer/`); one-screen CONTRIBUTING.md, short PR template, Discord set-up in Collaboration §9.
 - 2026-10-18 · Codex: require the phone workflow test to keep signing keys in the protected signing job and out of its caller.
 - 2026-10-18 · Codex: document collaboration in docs/COLLABORATION.md; add a previewable admin setup script, environment-only signing inputs, and journal dependency CI.
 - 2026-10-18 · Codex: patch journal development dependencies (Wrangler, Undici and Sharp); record the repository/website security review and pending deployment.

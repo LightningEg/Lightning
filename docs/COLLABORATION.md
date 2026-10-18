@@ -160,3 +160,24 @@ Weekly: triage Dependabot/CodeQL alerts, pending reviews, failed checks and rece
 Use GitHub's private email setting and a GitHub noreply commit address for future commits. Existing history already contains personal email metadata and old analytics exports; this review did not rewrite history. A history rewrite needs its own coordinated migration.
 
 The review is a targeted source/configuration audit with tests, not a penetration-test certificate. Production Apps Script, DNS/TLS/HTTP response headers, complete Git history and every binary release remain outside the completed validation. The existing redacted public-repository security report records evidence and outstanding items; no claim is made that every GitHub dependency alert is already closed.
+
+## 9. Contributors and Discord
+
+Outside contributors follow [CONTRIBUTING.md](../CONTRIBUTING.md): pick a `good first issue`, comment `/take` (the
+[Contributors workflow](../.github/workflows/contributors.yml) assigns it, one per newcomer, and frees it after 14 quiet
+days), build in Codespaces ([.devcontainer/](../.devcontainer/devcontainer.json); each person's Codespaces hours are
+their own, not the owner's) and open a PR with `Closes #n`. Maintainers and AIs write good first issues with the
+*Good first issue* template; AIs skip anything assigned or labelled `taken` (AGENTS.md §3).
+
+**Discord is for talking; GitHub is the record.** The AIs cannot read Discord, so a decision made there is pasted onto its
+issue in one line. Four channels to start: `#start-here` (read-only: the three steps), `#chat`, `#help`, `#github-feed`.
+
+**Connect GitHub to `#github-feed` (once, about two minutes):**
+
+1. Discord: `#github-feed` › Edit channel › Integrations › Webhooks › New webhook › Copy webhook URL.
+2. GitHub: LightningEg/Lightning › Settings › Webhooks › Add webhook. Payload URL: the copied URL with `/github` added
+   at the end. Content type `application/json`. Choose *Let me select individual events*: Issues, Issue comments,
+   Pull requests, Releases. Save.
+3. Comment on any issue; the message appears in `#github-feed`. Repeat step 2 for Lightning_website if wanted.
+
+The webhook URL is a secret: anyone holding it can post to that channel. If it leaks, delete it in Discord and make a new one.

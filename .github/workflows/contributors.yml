@@ -1,0 +1,78 @@
+# Lets anyone claim an issue in one comment, and frees claims nobody is working on (CONTRIBUTING.md).
+#   /take  assigns the issue to you and labels it "taken"     /drop  gives it back
+# Runs on comments and on a schedule, never on pull request code. Comment text reaches the shell only through
+# environment variables, never through ${{ }} inside a script.
+name: Contributors
+
+on:
+  issue_comment:
+    types: [created]
+  schedule:
+    - cron: '17 6 * * *'
+
+permissions:
+  issues: write
+
+jobs:
+  claim:
+    if: >-
+      github.event_name == 'issue_comment' && !github.event.issue.pull_request &&
+      github.event.comment.user.type != 'Bot' &&
+      (startsWith(github.event.comment.body, '/take') || startsWith(github.event.comment.body, '/drop'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      NUMBER: ${{ github.event.issue.number }}
+      WHO: ${{ github.event.comment.user.login }}
+      ROLE: ${{ github.event.comment.author_association }}
+      BODY: ${{ github.event.comment.body }}
+      STATE: ${{ github.event.issue.state }}
+      ASSIGNEES: ${{ join(github.event.issue.assignees.*.login, ' ') }}
+    steps:
+      - run: |
+          set -euo pipefail
+          gh label create taken --color FBCA04 --description "Someone is working on it (/take)" 2>/dev/null || true
+          say() { gh issue comment "$NUMBER" --body "$1"; }
+          if [[ "$BODY" == /drop* ]]; then
+            if [[ " $ASSIGNEES " == *" $WHO "* ]]; then
+              gh issue edit "$NUMBER" --remove-assignee "$WHO" --remove-label taken
+              say "Thanks @$WHO, this is free again for anyone to \`/take\`."
+            fi
+            exit 0
+          fi
+          if [[ "$STATE" != open ]]; then say "@$WHO this issue is closed. Pick an open one: label \`good first issue\`."; exit 0; fi
+          if [[ -n "$ASSIGNEES" ]]; then
+            [[ " $ASSIGNEES " == *" $WHO "* ]] || say "@$WHO this one is already taken by @${ASSIGNEES// /, @}. Have a look at the other \`good first issue\`s."
+            exit 0
+          fi
+          if [[ "$ROLE" != OWNER && "$ROLE" != MEMBER && "$ROLE" != COLLABORATOR ]]; then
+            open=$(gh issue list --assignee "$WHO" --label taken --state open --json number --jq '.[0].number // empty')
+            if [[ -n "$open" ]]; then say "@$WHO you already have #$open. Finish it or \`/drop\` it, then take this one."; exit 0; fi
+          fi
+          gh issue edit "$NUMBER" --add-assignee "$WHO" --add-label taken
+          say "It's yours, @$WHO. Next:
+          1. Open it in Codespaces (nothing to install): https://codespaces.new/$GH_REPO?quickstart=1, or locally: \`pip install -r requirements-dev.txt && python -m lightning --demo\`
+          2. Make the change and send a pull request with \`Closes #$NUMBER\` in it.
+          Stuck? Ask here or in #help on Discord. No activity for 14 days frees the issue; \`/drop\` gives it back any time."
+
+  stale:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - run: |
+          set -euo pipefail
+          cutoff=$(date -u -d '14 days ago' +%Y-%m-%dT%H:%M:%SZ)
+          gh issue list --label taken --state open --limit 200 --json number,updatedAt,assignees \
+            --jq ".[] | select(.updatedAt < \"$cutoff\") | \"\(.number) \([.assignees[].login] | join(\",\"))\"" |
+          while read -r number people; do
+            gh issue comment "$number" --body "No activity for 14 days, so this is free again for anyone to \`/take\`. Thanks for looking at it!"
+            args=(--remove-label taken)
+            [[ -n "$people" ]] && args+=(--remove-assignee "$people")
+            gh issue edit "$number" "${args[@]}"
+          done

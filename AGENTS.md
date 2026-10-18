@@ -49,7 +49,8 @@ Never at the cost of a test, a required check, or a read you need.
 
 - **Claims and messages belong to their author.** Never edit another AI's, except deleting a message to you once handled (to all: keep seven days). Make each claim's *Work* distinguish parallel sessions. A helper (Codex's Luna) gets its own rows, written by its AI.
 - **Push rejected?** `git pull --rebase`, keep both sides in changelog and `NOW.md`, retest, push.
-- **Findings:** every bug or improvement found goes in `report/` (one file each, front matter says who, which skills, which version); fixing it deletes the file. Read `report/INDEX.md` before anything else there.
+- **Findings:** every bug or improvement found goes in `report/` (one file each, front matter says who, which skills, which version); fixing it deletes the file. Read `report/INDEX.md` before anything else there. A small, self-contained one also gets a *Good first issue* (its template) linking the file, for people to `/take`.
+- **People first:** never start on a GitHub issue that has an assignee or the `taken` label; a person has it ([CONTRIBUTING.md](CONTRIBUTING.md)). Fixing a report with an open issue closes the issue (`Closes #n`).
 - **Skills:** `skills/README.md` lists them: feedback-review, bug-hunt, number-audit, guideline-audit, arabic-check, perf-check, stale-check, release-check, website-sync. Read the one that fits and follow it.
 - **Never undo another AI's work** without the owner; disagree in a GitHub issue for the owner.
 
