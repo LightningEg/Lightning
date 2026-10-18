@@ -61,6 +61,8 @@ def test_guard_has_no_bypass_and_preserves_existing_bound_check(monkeypatch):
     assert rules['pull_request']['required_approving_review_count'] == 0
     assert rules['pull_request']['require_code_owner_review'] is False
     assert rules['pull_request']['require_last_push_approval'] is False
+    assert rules['pull_request']['require_extra_approval_for_unattributed_changes'] is False
+    assert rules['pull_request']['required_reviewers'] == []
     assert rules['pull_request']['required_review_thread_resolution'] is True
     assert rules['pull_request']['allowed_merge_methods'] == ['squash']
     assert {'type': 'non_fast_forward'} in desired['rules']

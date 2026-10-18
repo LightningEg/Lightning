@@ -59,6 +59,8 @@ def desired_rules(checks):
                 'dismiss_stale_reviews_on_push': True,
                 'require_code_owner_review': False,
                 'require_last_push_approval': False,
+                'require_extra_approval_for_unattributed_changes': False,
+                'required_reviewers': [],
                 'required_review_thread_resolution': True,
                 'allowed_merge_methods': ['squash'],
             }},
@@ -109,7 +111,8 @@ def prepare(repo, default_checks):
             if rule['type'] == 'pull_request' and not admin_bypass:
                 if (params.get('required_approving_review_count', 0) or
                         params.get('require_code_owner_review') or
-                        params.get('require_last_push_approval')):
+                        params.get('require_last_push_approval') or params.get('required_reviewers') or
+                        params.get('require_extra_approval_for_unattributed_changes')):
                     raise RuntimeError(f'{repo}: ruleset "{ruleset["name"]}" still requires another '
                                        'identity. Review that rule before applying this setup.')
     if matching:
