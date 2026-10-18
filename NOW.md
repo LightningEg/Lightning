@@ -18,7 +18,7 @@
 
 ## Next
 
-- **Security rollout:** deploy the website receiver before its dashboard; verify team/release access. **Read:** report › public repository security audit.
+- **Security rollout:** owner runs `python tools/security_setup.py --apply`; deploy the website receiver before its dashboard. **Read:** CONTRIBUTING.md › Owner: once; report › public repository security audit.
 
 - **Brokers:** next, phase 4 import. **Read:** its report *Fix*.
 

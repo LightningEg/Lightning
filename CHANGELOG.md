@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-18 · Claude: one collaboration guide, `CONTRIBUTING.md` (MAINTAINERS.md and docs/COLLABORATION.md merged in); `tools/security_setup.py` is the one owner command and
+  runs the no-bypass PR rule; old team/approval ruleset and `apply-settings.sh` removed; forks wait for approval on a first PR only.
 - 2026-10-18 · Codex: record completed collaboration work, the website-to-Discord contributor journey, and proposed numbered task roles/claim automation with pending decisions clearly marked.
 
 - 2026-10-18 · Codex: document owner-account AI PR merges; add a previewable app/website ruleset setup that blocks direct main pushes and bypassing checks.

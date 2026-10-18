@@ -13,6 +13,6 @@ If you committed one by mistake, tell us at once so it can be revoked.
 
 ## How changes reach `main`
 
-Nobody pushes to `main`. Every change comes as a pull request, passes the automatic checks, is approved by the owner or by a
-second (AI) reviewer outside owner-only paths, and is merged by the owner or an AI under those rules. Pull requests from first-time contributors do not run CI until the owner
-approves the run. See [.github/MAINTAINERS.md](.github/MAINTAINERS.md).
+Nobody pushes to `main`. Every change comes as a pull request, passes the automatic checks with every conversation resolved,
+and is squash merged by the owner or an owner-authorized AI. A first-time contributor's pull request runs no CI until the
+owner approves the run. See [CONTRIBUTING.md](CONTRIBUTING.md) › For the owner and the AIs.

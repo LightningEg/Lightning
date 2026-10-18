@@ -15,9 +15,9 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 OWNER, ORG = 'elfekimuhammed', 'LightningEg'
 APP = f'{ORG}/Lightning'
-WEBSITE = f'{OWNER}/Lightning_website'
-DOWNLOADS = f'{OWNER}/Lightning-downloads'
-MARKET = f'{OWNER}/Lightning_Market_Data'
+WEBSITE = f'{ORG}/Lightning_website'
+DOWNLOADS = f'{ORG}/Lightning-downloads'
+MARKET = f'{ORG}/Lightning_Market_Data'
 
 class GitHub:
     def __init__(self, apply=False):
@@ -164,17 +164,10 @@ def main(argv=None):
         disabled += gh.collection(f'orgs/{ORG}/outside_collaborators?filter=2fa_disabled')
         if disabled:
             raise RuntimeError('Enroll these accounts in 2FA before enforcing it: ' + ', '.join(sorted({u['login'] for u in disabled})))
-    for team, perm in [('ai-reviewers', 'push'), ('internal', 'triage')]:
-        if gh.api('GET', f'orgs/{ORG}/teams/{team}', optional=True) is None:
-            gh.api('POST', f'orgs/{ORG}/teams', {'name': team, 'privacy': 'closed'})
-        gh.api('PUT', f'orgs/{ORG}/teams/{team}/repos/{APP}', {'permission': perm})
     if args.org_controls:
         gh.api('PATCH', f'orgs/{ORG}', {'default_repository_permission': 'none', 'two_factor_requirement_enabled': True})
-    for file in ['main.json', 'tags.json']:
-        upsert_ruleset(gh, APP, json.loads((ROOT / '.github/rulesets' / file).read_text()))
-    web_rules = branch_rules('security: website main', ['website-security'])
-    next(r for r in web_rules['rules'] if r['type'] == 'pull_request')['parameters']['require_code_owner_review'] = True
-    upsert_ruleset(gh, WEBSITE, web_rules)
+    # The app's and website's main rule comes from configure_pr_workflow.py, run last (CONTRIBUTING.md › Owner: once).
+    upsert_ruleset(gh, APP, json.loads((ROOT / '.github/rulesets/tags.json').read_text()))
     upsert_ruleset(gh, DOWNLOADS, branch_rules('security: downloads main'))
     market = branch_rules('security: price publication', updates_only=True)
     if args.market_publisher_app_id:
@@ -192,7 +185,7 @@ def main(argv=None):
             'github_owned_allowed': True, 'verified_allowed': False, 'patterns_allowed': patterns})
         gh.api('PUT', f'repos/{repo}/actions/permissions/workflow', {
             'default_workflow_permissions': 'read', 'can_approve_pull_request_reviews': False})
-        gh.api('PUT', f'repos/{repo}/actions/permissions/fork-pr-contributor-approval', {'approval_policy': 'all_external_contributors'})
+        gh.api('PUT', f'repos/{repo}/actions/permissions/fork-pr-contributor-approval', {'approval_policy': 'first_time_contributors'})
         gh.api('PUT', f'repos/{repo}/vulnerability-alerts')
         gh.api('PUT', f'repos/{repo}/automated-security-fixes')
         gh.api('PUT', f'repos/{repo}/private-vulnerability-reporting')
@@ -212,8 +205,11 @@ def main(argv=None):
             raise RuntimeError('No key supplied')
         gh.secret(WEBSITE, 'ANALYTICS_READ_KEY', key, 'website-analytics')
         gh.api('DELETE', f'repos/{WEBSITE}/actions/secrets/ANALYTICS_READ_KEY')
+    pr_rule = subprocess.run([sys.executable, str(ROOT / 'tools/configure_pr_workflow.py')] + (['--apply'] if args.apply else []))
+    if pr_rule.returncode and args.apply:
+        raise RuntimeError('The main-branch PR rule was not activated; read the message above.')
     print('Applied.' if args.apply else 'Preview only; add --apply to perform these writes.')
-    print('Verify independent AI account membership, direct grants and a non-admin test PR. No accounts were added or removed.')
+    print('No accounts were added or removed. Check with one harmless contributor PR from a fork.')
     print('Market publishing now requires an owner-admin identity or the explicitly supplied publisher App; verify the scheduled collector.')
     print('Secret migration requires known secret values; GitHub cannot return stored values. Deployment and bot identity setup remain separate.')
     return 0

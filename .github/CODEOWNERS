@@ -1,15 +1,2 @@
-# Owner-only paths: build, release, CI, rules and legal text. An approval from the owner is required.
-# Everything else: the owner or the AI reviewers team (@LightningEg/ai-reviewers, Write access, bot accounts only).
-# GitHub never lets an author approve their own PR, so an AI-written PR needs the owner or a different AI identity.
-# Create the team before merging this file, or GitHub flags the lines as errors. See .github/MAINTAINERS.md.
-*                   @elfekimuhammed @LightningEg/ai-reviewers
-/.github/           @elfekimuhammed
-/AGENTS.md          @elfekimuhammed
-/CLAUDE.md          @elfekimuhammed
-/LICENSE            @elfekimuhammed
-/SECURITY.md        @elfekimuhammed
-/packaging/         @elfekimuhammed
-/android/           @elfekimuhammed
-/cloudflare/        @elfekimuhammed
-/tools/             @elfekimuhammed
-/tests/conftest.py  @elfekimuhammed
+# Every PR asks the owner to look; nothing waits on it (CONTRIBUTING.md › Who does what).
+* @elfekimuhammed
