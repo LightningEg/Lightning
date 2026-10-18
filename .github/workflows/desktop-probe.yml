@@ -156,7 +156,7 @@ jobs:
       - name: Shipped app window check (profile chooser in WebView2)
         shell: pwsh
         run: ./packaging/run_check.ps1 -Exe '${{ steps.shipped.outputs.exe }}' -Report reports/app-window.json -Arguments '--smoke' -TimeoutSeconds 120
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: ${{ steps.package.outputs.artifact }}
           path: |
@@ -168,7 +168,7 @@ jobs:
           retention-days: ${{ startsWith(github.ref, 'refs/tags/') && 90 || 7 }}
       - name: Keep the check reports
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: windows-check-reports-r${{ github.run_number }}-a${{ github.run_attempt }}
           path: reports/
@@ -224,14 +224,14 @@ jobs:
         run: >-
           python packaging/phone_build.py bundle --windows windows --apk phone/Lightning-Test-*.apk
           --info phone/apk.json --out bundle --reused-from "$REUSED"
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: ${{ steps.bundle.outputs.pc }}
           path: bundle/PC/
           if-no-files-found: error
           overwrite: true  # a re-run replaces its own downloads
           retention-days: 7
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: ${{ steps.bundle.outputs.phone }}
           path: bundle/Phone/

@@ -77,7 +77,7 @@ jobs:
           [ "$signer" = "$expected" ] || { echo "::error::signed by $signer, not the script's certificate $expected"; exit 1; }
           rm -rf "$RUNNER_TEMP/throwaway" "$RUNNER_TEMP/throwaway.p12" "$RUNNER_TEMP/throwaway.apk"
           echo "A key from tools/android_test_key.py signs and verifies with apksigner."
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: phone-unsigned  # to the sign job only; one day
           path: android/app/build/outputs/apk/debug/app-debug.apk
@@ -169,7 +169,7 @@ jobs:
           python packaging/phone_build.py check "$RUNNER_TEMP/$APK"
           --build-tools "$ANDROID_HOME/build-tools/35.0.0" --code "$CODE" --name "$NAME"
           --certificate packaging/android-test-certificate.sha256 --info "$RUNNER_TEMP/apk.json"
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         if: inputs.bundle && steps.sign.outputs.signed == 'true'
         with:
           name: phone-apk
