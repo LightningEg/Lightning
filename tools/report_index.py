@@ -70,7 +70,7 @@ def load() -> tuple[list[dict[str, str]], list[str]]:
             except ValueError:
                 age = 0
                 problems.append(f"{rel}: 'created' must be yyyy-mm-dd")
-            if age > MAX_AGE_DAYS:
+            if age > MAX_AGE_DAYS and not meta.get("issue"):  # a good first issue waits for a person, not a deadline
                 problems.append(f"{rel}: unprocessed for {age} days (limit {MAX_AGE_DAYS}): fix it, decide it, or delete it")
     if len(rows) > MAX_REPORTS:
         problems.append(f"{len(rows)} reports is over the limit of {MAX_REPORTS}: process some before filing more")
@@ -87,7 +87,7 @@ def render(rows: list[dict[str, str]]) -> str:
         "",
         f"{len(rows)} reports, all unprocessed. Status: reported (found, not looked at) · investigating · "
         "open (a real request, not built). A fixed report is deleted, so it is not listed. "
-        f"Limits: {MAX_REPORTS} reports, {MAX_AGE_DAYS} days each; past either, the check fails until some are processed.",
+        f"Limits: {MAX_REPORTS} reports, {MAX_AGE_DAYS} days each (none for one with an `issue:`, a good first issue); past either, the check fails until some are processed.",
         "",
         "| Status | Category | Area | Title | Created | By | Report |",
         "|---|---|---|---|---|---|---|",

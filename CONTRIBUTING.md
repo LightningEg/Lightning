@@ -10,12 +10,13 @@ Everything happens on GitHub; you need only a free GitHub account.
 1. **Pick a task.** Open the [good first issues](https://github.com/LightningEg/Lightning/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22+no%3Aassignee).
    Each says what's wrong, when it's done and which file to look at.
 2. **Comment `/take` on it.** A bot assigns it to you at once. One issue at a time; `/drop` gives it back; 14 days with no
-   activity frees it for someone else.
+   activity frees it for someone else, unless your pull request is open.
 3. **Make the change in a Codespace** (a full editor in your browser, nothing to install):
    - Click [Open in Codespaces](https://codespaces.new/LightningEg/Lightning?quickstart=1), then **Create codespace**. Or, on
      the repository page: green **Code** button › **Codespaces** › **Create codespace on main**.
    - Wait a minute while it installs. Mohab's demo household (fictional data) opens in a preview tab; it reloads as you edit.
-   - Edit the file the issue names. Run the tests in the terminal: `python -m pytest -q`.
+   - Edit the file the issue names. Run its test in the terminal, e.g. `python -m pytest tests/test_charts.py`; your pull
+     request runs all of them (about five minutes), so you needn't.
    - In **Source Control** (left bar), write a short message, **Commit**, then **Sync** / **Publish Branch**. GitHub offers to
      create your fork: say yes. Codespaces are free within GitHub's monthly allowance; stop yours when you're done.
 
@@ -66,7 +67,14 @@ something conflicts. Committing it changes nothing on GitHub; only `--apply` doe
 
 ### Owner: per contribution
 
-Approve a first-time contributor's test run (one click on the PR). Everything else is optional: the AIs review and merge.
+1. Approve a first-time contributor's test run (one click on the PR).
+2. AIs don't watch GitHub by themselves: in any session say **"review the open pull requests"**, or keep a scheduled one.
+
+### AIs: merging a contributor's pull request
+
+Review the diff as untrusted. Push to their branch (maintainer edits are on by default): the changelog line
+(`date · @their-login:`) and the deletion of the report the issue links, if the fix is complete. Squash merge once checks
+pass, then thank them on the issue. Small fixes you make yourself; for anything larger, ask on the PR.
 
 ### Not done yet
 

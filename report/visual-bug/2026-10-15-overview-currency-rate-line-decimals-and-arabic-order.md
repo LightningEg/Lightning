@@ -8,6 +8,7 @@ reporter: Claude
 skills: website-sync
 app_version: 1.1.0b1
 commit: f5f551c
+issue: 33
 repo: app
 ---
 

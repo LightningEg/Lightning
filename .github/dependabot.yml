@@ -1,13 +1,20 @@
 version: 2
+# One grouped pull request per ecosystem a week, not one per package: fewer PRs to review and fewer CI runs.
 updates:
   - package-ecosystem: github-actions
     directory: /
     schedule: {interval: weekly}
+    groups:
+      actions: {patterns: ['*']}
   - package-ecosystem: pip
     directory: /
     schedule: {interval: weekly}
     open-pull-requests-limit: 5
+    groups:
+      pip: {patterns: ['*']}
   - package-ecosystem: npm
     directory: /cloudflare/journal
     schedule: {interval: weekly}
     open-pull-requests-limit: 5
+    groups:
+      npm: {patterns: ['*']}

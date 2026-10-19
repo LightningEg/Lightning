@@ -68,9 +68,13 @@ jobs:
       - run: |
           set -euo pipefail
           cutoff=$(date -u -d '14 days ago' +%Y-%m-%dT%H:%M:%SZ)
+          # An open pull request that says "Closes #n" keeps the claim: it is waiting on us, not on them.
+          linked=" $(gh pr list --state open --limit 200 --json closingIssuesReferences \
+            --jq '[.[].closingIssuesReferences[].number] | join(" ")') "
           gh issue list --label taken --state open --limit 200 --json number,updatedAt,assignees \
             --jq ".[] | select(.updatedAt < \"$cutoff\") | \"\(.number) \([.assignees[].login] | join(\",\"))\"" |
           while read -r number people; do
+            [[ "$linked" == *" $number "* ]] && continue
             gh issue comment "$number" --body "No activity for 14 days, so this is free again for anyone to \`/take\`. Thanks for looking at it!"
             args=(--remove-label taken)
             [[ -n "$people" ]] && args+=(--remove-assignee "$people")
