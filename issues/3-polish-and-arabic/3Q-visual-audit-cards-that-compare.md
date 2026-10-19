@@ -84,7 +84,7 @@ balance), Loan balance and Principal and interest (Loans), Histogram (Spending),
 | Accounts | 596,179 and 602,179 unexplained; Transactions count column; alphabetical; account page has no chart | Row: What you own (6,000 more is Mom's), Cash you own 243,692 (41%), Invested 352,486 (59%), Held for others 6,000. Table grouped like the sidebar with share bars. Account page: A12.1.5 step line and This month in/out/net; no "EGP" on every balance row |
 | Phone | Closest to target | Budget Spent in Ink, not Azure; tiles gain the comparison line; over-plan becomes the lead card's last row |
 
-### 4. Guideline changes needed (not made; both repos, one session)
+### 4. Guideline changes (made in guideline 3.32, 2026-10-19, both repos)
 
 - **A07:** a card is sized by the row and never left alone in it; a lone answer is Lead plus Support.
 - **A08:** the five fixed slots; comparison compulsory; no icon tile; shared baseline. **A08.3:** replace the Budget example
@@ -109,8 +109,8 @@ balance), Loan balance and Principal and interest (Loans), Histogram (Spending),
 
 ### 6. Order
 
-1. Owner answers the questions below and picks from the mock-ups; then the guideline change in both repos.
-2. KPI component, Budget and Cash planning (number-audit for the everyday day rate).
+1. ~~Owner answers; guideline change in both repos~~ done 2026-10-19 (guideline 3.32, app and website PRs).
+2. **Next:** KPI component, Budget and Cash planning (number-audit for the everyday day rate).
 3. Overview, Spending thin-data forms, Recurring, Loans, Reserves.
 4. Investments, holding page, Currencies, Accounts, account page.
 5. Phone, arabic-check, Mohab, site-recapture.
@@ -118,10 +118,13 @@ balance), Loan balance and Principal and interest (Loans), Histogram (Spending),
 Small fixes that need no decision may go first: phone Budget Spent in Ink; Lowest point's dot on the low; Reserves "−0";
 Average payment line soft rose; loan progress in Azure; Currencies card in a card.
 
-### 7. Questions for the owner
+### 7. Owner's answers (2026-10-19: "yes to all five, update the guideline now")
 
-1. Approve the five-slot card, including dropping the icon tile on PC?
-2. Budget's day rate: count only everyday money, leaving out bills still to pay (819 instead of 2,078 here)?
-3. Price and net-worth charts: keep "one axis, from zero" plus a change line, or allow an axis near the data with a marked break?
-4. Savings waffle: only behind the Overview's Savings rate, gone from Budget and Investments?
-5. Guideline change now, or after choosing from the mock-ups?
+1. The five-slot card, without the icon tile on PC: yes (A08.1).
+2. Budget's day rate counts only everyday money, leaving out bills still to pay in the plan: yes. A figure change: number-audit
+   before it ships, and the Glossary names the new figure.
+3. Price and net-worth charts keep "one axis, from zero"; a trend that moves little names its change and adds monthly change
+   columns (A12). Read as the first option; ask the owner if a zoomed axis is wanted after all.
+4. The savings waffle lives only behind the Overview's Savings rate: yes (leaves Budget and Investments).
+5. Guideline first: done in 3.32. Also asked the same day: Arabic body text is Noto Sans Arabic instead of IBM Plex Sans Arabic
+   (app fonts, website `css/arabic.css`, A06.2, B04, C10).

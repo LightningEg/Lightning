@@ -43,6 +43,8 @@ One screenshot per page and width, no re-takes. Report findings, not the guideli
    | Dropdown for your data: type and pick | a `<select>` listing the user's own accounts, categories or names |
    | Card in a card: never | a card element inside another card |
    | A line that repeats its label: cut it | a sentence that restates the heading above it |
+   | A figure alone: compare it | a KPI card with no comparison line (last month, same days, usual, plan, target or today) |
+   | A card alone in its row: pair it | one card in a KPI row, or a key note stretched across the page on its own |
 4. **Section by section.** For the screen type, read only its sections: headers A05 / B02, type and numbers A06 / B04, cards A07, KPI A08, controls A10, lists A11, charts A12, words A14 / B10,
    spacing A15; phone C01–C12; website B01–B12. Compare spacing, hierarchy, chart style and wording by eye against the text.
 5. **Arabic and dark mode.** Repeat the pages in Arabic (`arabic-check`) and, on the website, dark mode (B09): the `*.rtl.css` files must mirror, not just flip text.

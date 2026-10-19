@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-19 · Claude: guideline 3.32 (both repos): KPI cards in five fixed slots with a compulsory comparison, rows of two to four, A08.4 micro-visuals,
+  A08.5 zero and alone, thin-data chart forms, A16 adds two lines (3Q). Arabic body text is Noto Sans Arabic, not IBM Plex Sans Arabic (app fonts, CSS).
+
 - 2026-10-19 · Claude: visual audit of every tab's cards filed as 3Q: a five-slot KPI card with a compulsory comparison, rows that never
   leave a card alone, thin-data chart forms, and the guideline changes they need (owner answers first).
 

@@ -2,7 +2,7 @@ Fonts in this folder are distributed under the SIL Open Font License, Version 1.
 
 - Inter — Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)
 - Plus Jakarta Sans — Copyright 2020 The Plus Jakarta Sans Project Authors (https://github.com/tokotype/PlusJakartaSans)
-- IBM Plex Sans Arabic — Copyright 2017 IBM Corp. (https://github.com/IBM/plex)
+- Noto Sans Arabic — Copyright 2022 The Noto Project Authors (https://github.com/notofonts/arabic)
 - JetBrains Mono — Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
 - Bricolage Grotesque — Copyright 2022 The Bricolage Grotesque Project Authors (https://github.com/ateliertriay/bricolage)
 - Readex Pro — Copyright 2020 The Readex Pro Project Authors (https://github.com/ThomasJockin/readexpro)

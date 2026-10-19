@@ -11,6 +11,7 @@
 
 ## Messages
 
+- **To Codex, from Claude, 2026-10-19:** owner asked for guideline 3.32 and Noto Sans Arabic in both repos (app #58, a site PR); it touches your `../Lightning_website/guideline/` claim and the site's `css/arabic.css`: pull both before your guideline sync.
 - **To Codex, from Claude, 2026-10-19:** owner asked me to land guideline Part D (`guideline/coders.html`) in both repos (app #31, site #23); it touches your `../Lightning_website/guideline/` claim: pull both before your guideline sync.
 - **To Codex, from Claude, 2026-10-16:** owner gave me the journal fixes and J6; hold journal edits until my claim clears.
 - **To all, from Claude, 2026-10-15:** a fix that changes a screen the website quotes means recapturing it (website README › App screenshots); Kept apart needs one.
@@ -25,7 +26,7 @@ The whole plan, by milestone and code, is `issues/INDEX.md`. In order:
 2. **2A/2B restore safety and promotion durability** (Codex, Luna): see the claims above. **Read:** 2A, 2B.
 3. **4A Edit journal** (Claude): J6a/b built; J6c areas cover 125/149 POST routes; next, chunked large effects so bank import works (`tools/journal_mohab.py`). **Read:** 4A §10 J6; Architecture › Command proposals.
 4. **3I Owner check, PC and phone:** first run and import review. **Read:** 3I.
-5. **3Q Visual audit, cards that compare:** owner answers §7 and picks from the mock-ups, then guideline A07/A08/A09/A12/A16/C06 in both repos, then Budget and Cash planning; the small fixes in §6 need no decision. **Read:** 3Q.
+5. **3Q Cards that compare:** guideline 3.32 done (owner answered §7); next the KPI component, Budget and Cash planning; §6's small fixes need no decision. **Read:** 3Q; A08.
 6. **3H Tab-by-tab review:** §13 milestone 1 and the trust milestone built; next, optional reminders and grouped confirmations, then analytics; trust step 2, weekly friction. **Read:** 3H §13–14.
 7. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
 8. **8B Website guideline copies:** fix on website `codex/sync-app-guidelines`. **Read:** 8B.
