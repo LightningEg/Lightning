@@ -10,6 +10,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - When a version is tagged, rename `Unreleased` to that version and start a new `Unreleased` above it.
 
 ## [Unreleased]
+- 2026-10-19 · Claude: three backend good first issues for contributors who aren't on Arabic or screens: 7H CSV amount forms (#49), 7I public
+  holidays in payment schedules (#50, was 7F1), 7J Arabic spelling variants in search (#51); each with the file, the test and a check command.
 
 - 2026-10-19 · Claude: guideline Part D, **Coders** (`guideline/coders.html`, D01–D12) for the website's For Geeks pages; Part B is now **Normal**;
   `tools/guideline.py` reads D and the docs test checks four files. It matches the site after 1F (site PR #34): one contribute path in the
