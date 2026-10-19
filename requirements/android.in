@@ -8,6 +8,6 @@ tzdata==2026.2
 # Native: no index has these for CPython 3.13 on arm64 Android. Built by android-native-wheels.yml and
 # published as the release android-wheels-r<run>; the lock takes them from that release.
 cryptography==50.0.2
-sqlcipher3==0.6.2
+sqlcipher3==0.6.4
 cffi==2.0.0
 pydantic-core==2.46.5
