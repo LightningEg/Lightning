@@ -996,7 +996,7 @@ input:is([type=checkbox], [type=radio]):not(#_) {
   --tint-growth:#EAF8F0; --tint-held:#EAF3FD;
   --guide-start:#E0F5E9; --guide-end:#D7ECF7; --edge:rgba(255,255,255,.94);
   --line:#DDE9E6; --line-control:#7E96A0; --track:#E6EFEC; --hover:#F0F7F4;
-  --field:#EAF3EE; --field-focus:#E2EFE9;
+  --field:#EAF3EE; --field-focus:#F5EFCF;
   --ink:#0D2233; --ink-2:#304A5C; --muted:#566E7E;
   --meadow:#14A874; --meadow-dark:#0B8A5F; --positive:#097852; --azure:#0B6DD6;
   --rose:#C93D72; --rose-soft:#FCEEF3;
@@ -1942,7 +1942,7 @@ a.chart-meter:hover { background:var(--hover); }
 .main .ledger tr.add-row:not(.editing) :is(input,select):not(#_):not(.x_):focus { background:#E8F3EE!important; border-color:var(--meadow-dark)!important; box-shadow:0 0 0 3px rgba(11,138,95,.12)!important; }
 .main .ledger tr.editing :is(input,select):not(#_):not(.x_) { background:#F3F8FE!important; border-color:#D9E6F6!important; }
 .main .ledger tr.editing :is(input,select):not(#_):not(.x_):hover { border-color:#BFD3EE!important; }
-.main .ledger tr.editing :is(input,select):not(#_):not(.x_):focus { background:#E2EFE9!important; border-color:var(--meadow-dark)!important; box-shadow:0 0 0 3px rgba(11,138,95,.12)!important; }
+.main .ledger tr.editing :is(input,select):not(#_):not(.x_):focus { background:#F5EFCF!important; border-color:var(--meadow-dark)!important; box-shadow:0 0 0 3px rgba(11,138,95,.12)!important; }
 .main .ledger :is(tr.add-row,tr.editing) .date-picker-button:not(#_) { background:transparent!important; }
 /* Row actions live in the right-click menu. */
 .context-menu { min-width:200px; padding:6px; border:0; border-radius:12px; background:var(--surface); box-shadow:var(--shadow-float); }
