@@ -6,8 +6,8 @@
   <meta name="color-scheme" content="light">
   {% if mode == 'checking' %}<meta http-equiv="refresh" content="1">{% endif %}
   <title>{% if mode == 'choose' %}{{ 'Choose a profile'|tr(locale) }}{% elif mode == 'setup' %}{{ 'Create a profile'|tr(locale) }}{% elif mode == 'recovery-key' %}{{ 'Save your recovery key'|tr(locale) }}{% elif mode == 'unlock' %}{{ 'Unlock your profile'|tr(locale) }}{% elif mode == 'recover' %}{{ 'Reset your password'|tr(locale) }}{% elif mode == 'restore' %}{{ 'Restore a backup'|tr(locale) }}{% elif mode == 'resume-restore' %}{{ 'Resume a restore'|tr(locale) }}{% elif mode == 'manage' %}{{ 'Profile settings'|tr(locale) }}{% elif mode == 'devices' %}{{ 'Devices'|tr(locale) }}{% elif mode in ['connect', 'connected'] %}{{ 'Connect to your phone'|tr(locale) }}{% elif mode == 'borrowed' %}{{ 'Open from your phone'|tr(locale) }}{% elif mode == 'receive' %}{{ 'Bring a profile from your PC'|tr(locale) }}{% elif mode == 'checking' %}{{ 'One moment'|tr(locale) }}{% else %}{{ 'Profiles'|tr(locale) }}{% endif %} · Lightning</title>
-  <link rel="stylesheet" href="/static/fonts/fonts.css">
-  <link rel="stylesheet" href="/static/profiles{{ '.rtl' if locale == 'ar' else '' }}.css?v=5">
+  <link rel="stylesheet" href="/static/fonts/fonts.css?v=2">
+  <link rel="stylesheet" href="/static/profiles{{ '.rtl' if locale == 'ar' else '' }}.css?v=6">
 </head>
 <body>
   <main class="profile-page" id="profile-ready">

@@ -6,9 +6,9 @@
   {% if request.state.secure_profiles|default(false) %}<meta name="lightning-session" content="{{ request.state.session_token|default('') }}">{% endif %}
   <title>{% block title %}Lightning{% endblock %} · Lightning</title>
   <link rel="icon" type="image/svg+xml" href="/static/lightning-mark.svg">
-  <link rel="stylesheet" href="/static/fonts/fonts.css">
+  <link rel="stylesheet" href="/static/fonts/fonts.css?v=2">
   {# Bricolage Grotesque and Manrope (guideline A06) are bundled in fonts.css: no outside request, in every mode. #}
-  <link rel="stylesheet" href="/static/style{{ '.rtl' if locale == 'ar' else '' }}.css?v=90">
+  <link rel="stylesheet" href="/static/style{{ '.rtl' if locale == 'ar' else '' }}.css?v=91">
 <script nonce="{{ request.state.csp_nonce|default('') }}">window.LIGHTNING_UI={{ arabic_translations|tojson }};window.lightningT=(text,values)=>{const raw=String(text);let out=window.LIGHTNING_UI[raw];if(!out){for(const [pattern,translated] of Object.entries(window.LIGHTNING_UI)){if(!pattern.includes('{'))continue;const names=[...pattern.matchAll(/\{([a-z_]+)\}/g)].map(m=>m[1]);const parts=pattern.split(/\{[a-z_]+\}/g).map(part=>part.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));const match=new RegExp('^'+parts.join('(.+?)')+'$').exec(raw);if(match){out=translated;names.forEach((name,i)=>out=out.replaceAll(`{${name}}`,match[i+1]));break;}}}out=out||raw;for(const [key,value] of Object.entries(values||{}))out=out.replaceAll(`{${key}}`,String(value));return out;};</script>
 </head>
 <body data-base-currency="{{ base }}">
