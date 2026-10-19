@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-19 · Claude: visual audit of every tab's cards filed as 3Q: a five-slot KPI card with a compulsory comparison, rows that never
+  leave a card alone, thin-data chart forms, and the guideline changes they need (owner answers first).
+
 - 2026-10-19 · Codex: register selections stay visible and responsive during editing (3M); Savings shows saved or overspent with darker excess squares (3N).
   Forecast bars share a baseline (3O); reserve matching combines account, counterparty and category beside their controls, requiring all selected criteria (3P).
 

@@ -25,7 +25,8 @@ The whole plan, by milestone and code, is `issues/INDEX.md`. In order:
 2. **2A/2B restore safety and promotion durability** (Codex, Luna): see the claims above. **Read:** 2A, 2B.
 3. **4A Edit journal** (Claude): J6a/b built; J6c areas cover 125/149 POST routes; next, chunked large effects so bank import works (`tools/journal_mohab.py`). **Read:** 4A §10 J6; Architecture › Command proposals.
 4. **3I Owner check, PC and phone:** first run and import review. **Read:** 3I.
-5. **3H Tab-by-tab review:** §13 milestone 1 and the trust milestone built; next, optional reminders and grouped confirmations, then analytics; trust step 2, weekly friction. **Read:** 3H §13–14.
-6. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
-7. **8B Website guideline copies:** fix on website `codex/sync-app-guidelines`. **Read:** 8B.
-8. **6B Europe/GCC shares**, **6D gold**, **6E institution logos**, **5I gam'eya and zakat follow-ups:** waiting as their items say. **Read:** each item.
+5. **3Q Visual audit, cards that compare:** owner answers §7 and picks from the mock-ups, then guideline A07/A08/A09/A12/A16/C06 in both repos, then Budget and Cash planning; the small fixes in §6 need no decision. **Read:** 3Q.
+6. **3H Tab-by-tab review:** §13 milestone 1 and the trust milestone built; next, optional reminders and grouped confirmations, then analytics; trust step 2, weekly friction. **Read:** 3H §13–14.
+7. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
+8. **8B Website guideline copies:** fix on website `codex/sync-app-guidelines`. **Read:** 8B.
+9. **6B Europe/GCC shares**, **6D gold**, **6E institution logos**, **5I gam'eya and zakat follow-ups:** waiting as their items say. **Read:** each item.
