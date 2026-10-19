@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-19 · Claude: Budget "left" per category and group reads as the rounded figures beside it (671 − 634 = 37, not 38), matching the meters (3L).
+
 - 2026-10-19 · Claude: Editable fields are green wells, calm yellow on focus, not blue (A10.3) (`style.css`, `style.rtl.css`).
 - 2026-10-19 · Claude: guideline Part D D06: cells over the field fade from 94% to 30% at their edges (`--soft`), hairlines drawn by
   each cell; terminal and code stay solid wells. Matches the For Geeks site.

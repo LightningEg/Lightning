@@ -184,3 +184,13 @@ def test_current_month_uses_full_month_limit_before_month_end(c, b, monkeypatch)
     page = TestClient(create_app(c)).get("/budget?period=month&month=2026-09")
     assert page.status_code == 200
     assert page.text.count("6,000") >= 2  # headline and matching group limit
+
+
+def test_a_budget_row_left_reads_as_the_rounded_figures_beside_it(c, b, monkeypatch):
+    c, accounts, ids = b
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-15")
+    c.budgets.set_budget(ids["EXP.PERSONAL.FOOD"], "2026-09", "671")
+    c.transactions.record_outflow("2026-09-10", accounts["cib"].id, "633.50", ids["EXP.PERSONAL.FOOD"])
+    page = TestClient(create_app(c)).get("/budget?period=month&month=2026-09").text
+    assert "+37" in page.replace("&#43;", "+") or ">37<" in page  # 671 − 634, not 37.50 rounded up to 38
+    assert "+38" not in page.replace("&#43;", "+")

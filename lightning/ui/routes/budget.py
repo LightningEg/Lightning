@@ -11,7 +11,7 @@ from fastapi import APIRouter, Request, Response
 from lightning.core.dates import fmt_date, month_of, parse_month, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.categories.domain import Movement, Scope
-from lightning.core.money import ZERO, to_decimal
+from lightning.core.money import ZERO, quantize, to_decimal
 
 from lightning.investments.report import build_investment_report, saved_and_invested
 from lightning.budgeting.domain import INCOME_FROM_RECURRING
@@ -96,7 +96,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                 if row:
                     row["budgeted"] = group.available or ZERO
                     row["carryover"] = group.opening_carryover
-                    row["left"] = row["budgeted"] - row["spent"]
+                    row["left"] = quantize(row["budgeted"], 0) - quantize(row["spent"], 0)
         # Keep the headline aligned with the L1 group rows, including carryover.
         period_budgeted = sum((row["budgeted"] for row in group_totals.values()), ZERO)
     prev_month, next_month = _neighbours(month)
@@ -269,12 +269,12 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         row["current_budget"] = row["base_budget"] + row["carryover"]
         row["budgeted"] = row["current_budget"]
         row["spent"] = sum((period_spending.get(cid, ZERO) for cid in category_tree_ids(category_id)), ZERO)
-        row["left"] = row["current_budget"] - row["spent"]
+        row["left"] = quantize(row["current_budget"], 0) - quantize(row["spent"], 0)  # as the figures beside it read
     for group_id, child_ids in by_group.items():
         row = group_totals.get(group_id)
         if row:
             row["spent"] = sum((period_spending.get(cid, ZERO) for cid in child_ids), ZERO)
-            row["left"] = row["budgeted"] - row["spent"]
+            row["left"] = quantize(row["budgeted"], 0) - quantize(row["spent"], 0)
     period_income = ZERO
     for key, _ in month_views:
         basis = c.budgets.budgeting_income(key) or ZERO
