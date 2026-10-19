@@ -1,4 +1,4 @@
-"""Each copy of Lightning fetches its own prices from the sources (owner, 2026-10-05; docs/proposals/market_data.md
+"""Each copy of Lightning fetches its own prices from the sources (owner, 2026-10-05; issues/6-market-data/6A-price-packs.md
 › How the app gets prices).
 
 When: never daily by itself. Month-end closes matter most, because the monthly revaluation is posted from them,

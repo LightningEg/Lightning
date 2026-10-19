@@ -19,3 +19,6 @@ ANDROID_TEST_KEYSTORE*.txt
 # Gradle state of the phone build
 .gradle/
 android/local.properties
+
+# Local settings snapshots from the owner-run setup tools.
+.security-backups/

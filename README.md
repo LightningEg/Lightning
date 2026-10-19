@@ -92,6 +92,8 @@ Global search finds accounts, investments, categories, and counterparties. Searc
 
 ## For developers
 
+Want to help? [CONTRIBUTING.md](CONTRIBUTING.md): pick a good first issue, comment `/take`, open it in Codespaces.
+
 ```
 pip install -r requirements-dev.txt
 python -m pytest          # 100+ tests incl. randomized net-worth reconciliation

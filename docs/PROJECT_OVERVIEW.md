@@ -2,7 +2,7 @@
 
 **Last reviewed 2026-10-13 · app 1.1.0-beta.1** ([published Windows and Android beta](https://github.com/elfekimuhammed/Lightning-downloads/releases/tag/v1.1.0-beta.1)).
 
-What Lightning is, who it is for, what it answers and where it goes. Technical contracts: [Architecture](ARCHITECTURE.md). Look: [guideline](../guideline/). Terms and figures: [Glossary](GLOSSARY.md). Shipped changes: `CHANGELOG.md`. Hand-off between AIs: [NOW.md](../NOW.md). Unbuilt designs: [docs/proposals](proposals/).
+What Lightning is, who it is for, what it answers and where it goes. Technical contracts: [Architecture](ARCHITECTURE.md). Look: [guideline](../guideline/). Terms and figures: [Glossary](GLOSSARY.md). Shipped changes: `CHANGELOG.md`. Hand-off between AIs: [NOW.md](../NOW.md). The plan and open items: [issues/](../issues/INDEX.md).
 
 ## Contents
 
@@ -18,8 +18,7 @@ Read one section: `grep -n '^## ' docs/PROJECT_OVERVIEW.md`, then read from that
 | 6. Reference workflow: a month with Mohab | You change Mohab's test or a screen he uses |
 | 7. Compared with the best budgeting apps | You plan a feature |
 | 8. UX plan (guideline 3.6) | You take a UX item |
-| 9. Upcoming projects | You pick the next feature |
-| 10. Roadmap | You plan or finish a milestone |
+| 9. Plan and roadmap | You pick the next work or finish a milestone |
 
 <a id="what-lightning-is"></a>
 ## 1. What Lightning is
@@ -70,7 +69,7 @@ Dates are when the owner decided. Undated rows are founding rules.
 | **Fingerprint, gam'eya and zakat** (2026-10-14) | Android offers fingerprint unlock as an option; the password and recovery key always still work. Gam'eya is built on the CD backbone with the interest rate optional (none by default). Zakat is an estimate by the common rule, off until turned on in Settings. |
 | **Order to Google Play** (2026-10-06) | M1 phone and PC connected; M2 daily recording on the phone; M3 bank SMS into the ledger; then beta and Google Play. The owner reviews at each milestone. |
 
-**Multiple devices (phone as home), planned and partly built.** One codebase on PC and Android; the phone holds the accepted encrypted ledger and one paired PC borrows it. Build status is in the Roadmap. Design, lend safety, hand-back, bank SMS: [multiple_devices.md](proposals/multiple_devices.md). **Edit anywhere, one home confirms** (owner-requested revision 2026-10-07, supersedes automatic lending only after cutover, unscheduled): [edit_journal.md](proposals/edit_journal.md). A server or cloud copy is outside version 1.
+**Multiple devices (phone as home), planned and partly built.** One codebase on PC and Android; the phone holds the accepted encrypted ledger and one paired PC borrows it. Build status is in the Roadmap. Design, lend safety, hand-back, bank SMS: [multiple_devices.md](../issues/4-edit-journal-and-devices/4B-multiple-devices.md). **Edit anywhere, one home confirms** (owner-requested revision 2026-10-07, supersedes automatic lending only after cutover, unscheduled): [edit_journal.md](../issues/4-edit-journal-and-devices/4A-edit-journal.md). A server or cloud copy is outside version 1.
 
 Section 13 milestone 1 (owner approved 2026-10-14) stays inside existing workflows: optional salary/payday setup, learned bank CSV presets, Export all data under Your data, and instalment purchases/early payoff under Loans. No new default tabs or dashboard cards. The owner also approved recognising historical loan repayments from their cash dates; Mohab’s annual growth becomes 383,284 EGP (42,000 more), with cash unchanged. Later milestones cover optional reminders/confirmations, then deeper analytics.
 
@@ -225,53 +224,21 @@ From the full UX review of 2026-10-03 (Mohab's year at 1,366 × 768) and the tab
 **Still open:** import button says "Post ready rows" while undecided rows post as Unaccounted; bulk counterparty edit.
 
 <a id="upcoming-projects"></a>
-## 9. Upcoming projects
-
-Ideas added 2026-10-05 unless dated; each names its source app (evidence: [Competition](COMPETITION.md)). The owner picks what enters *Next* in `NOW.md`. A built project moves to section 3 and gets a Glossary name.
-
-| # | Project | Idea from | Status |
-|---|---|---|---|
-| 18 | **High priority (owner, 2026-10-10): listed shares across US, Europe and GCC.** Keep exchange, identifier and trading currency explicit; value in base currency; check source coverage and licensing first | Owner | US stocks built (v1.1). Europe (LSE, Euronext, Xetra, SIX and Nasdaq Nordic) and all six GCC countries have adapters and fixture coverage. Live source verification and a source allowing redistribution remain required before publishing. [market_data.md](proposals/market_data.md) |
-| 1 | Return against the risk-free rate (certificate or T-bill over the same dates); needs a dated rate history and time-weighted return | Quicken, Monarch | Not started |
-| 17 | Read PDF and Excel statements through the CSV review (size caps, no macros, no formulas run) | Say, Quicken, Monarch | Not started |
-| 15 | Multi-currency and FX | Wallet, Lunch Money, YNAB | Built (v1.1). Open: bank-imported pairs across currencies |
-| 16 | US stocks | Monarch, Copilot | Built (v1.1), see 18 |
-| 2 | Arabic version | Say, Masarifi | Built in the app, PC and phone (CHANGELOG 2026-10-12/13); Hijri dates not built |
-| 3 | Financial health | NetTrack, WalletHub | Built 2026-10-05, no score by design |
-| 4 | Undo and redo | Actual Budget | Built locally: 20 session undo/redo groups; Architecture › Action history and checked accounts |
-| 5 | Rules with conditions | Actual Budget | Built; repeated correction offers and selected past-row preview added locally. Open: rename rule |
-| 6 | Layered import match, locked checked month, merge | Actual Budget | Built locally: multi-source provenance, checked-history protection and fingerprinted cash merge; import window remains 3 days |
-| 7 | Weekend-aware schedules | Actual Budget | Built 2026-10-06. Open: public holidays |
-| 8 | Fill this month | Actual Budget | Built 2026-10-05 |
-| 9 | Entry helpers (sums, Ctrl-K, privacy mode, #tags) | Actual Budget | Built 2026-10-05 |
-| 10 | Age of Money, spending calendar, one saved filter | Actual Budget | Saved views/report/export built locally; other analytics not started |
-| 11 | Move in from Wallet, Money Manager, Masareef exports | Say reviews | Not started |
-| 12 | Deeper investments (splits, lots, reinvested dividends, time-weighted return) | Quicken, GnuCash | Proposals: [investment_*](proposals/), [bonus_shares_and_splits](proposals/bonus_shares_and_splits.md) |
-| 13 | Silver, property, vehicles | Qershnat | Not started |
-| 14 | Gam'eya and zakat | Qershnat, Masroofy | Built 2026-10-14: gam'eya ([Architecture](ARCHITECTURE.md#certificates-and-time-deposits)) and zakat (Architecture › Zakat). Open: silver nisab, Hijri dates |
-
-For the code (Actual Budget): one change note per change, joined at release; visual snapshots of key screens; a warning on pushes that touch a migration.
-
 <a id="roadmap"></a>
-## 10. Roadmap
+## 9. Plan and roadmap
 
-Reviewed 2026-10-13. Detail of each build is in the CHANGELOG; claims and next steps in `NOW.md`.
+The plan is [issues/](../issues/INDEX.md): numbered milestones in the order they are worked on, each with its action plan
+of coded items (**3C**, and **3C1** one step down). The owner picks the order; [issues/README.md](../issues/README.md) has
+the rules. In short:
 
-| Milestone | State | Next |
-|---|---|---|
-| M0–M1 Foundation, cash accounts | Shipped | — |
-| B Budget | Shipped | Change one category without the full grid |
-| M2 Reports and corrections | Partial | Checked-history close/undo/merge built and covered by workflow regression tests; ordinary-PC acceptance remains |
-| M3 Manual investments | Shipped | — |
-| M3.1 Instrument catalogue | Partial | Coverage and identifier quality |
-| M3.2 Wealth history | Partial | Wealth-change bridge; owned-only XIRR |
-| M4 Market data and FX | v1.1 built: price files, foreign cash, Convert, FX positions, US stocks | **High priority:** live verification/licensed source for Europe and GCC shares (#18); matching bank-imported pairs across currencies |
-| M6 Deposits and gold | Partial | CD portfolios built; next: ordinary-PC acceptance, legacy conversion, local gold costs and buyback; interest receipt links built locally |
-| M7 Planning and imports | Partial | CSV import, Cash planning, linking statement rows built. Optional reminders and weekly review built locally; PDF and Excel (#17) remain |
-| Search | Partial | Built: pages, actions, records, tags, Ctrl-K. Next: scoped pickers, alias history, ranking |
-| Multiple devices | M1 and M2 built, in owner review; M3 (CIB and NBE SMS) built | Owner: more bank samples, Google Play SMS declaration. Open: discovery instead of typing the address, prefetch while typing the password, periodic recovery copies, two-PC fault gate, power-loss evidence. [Plan](proposals/multiple_devices.md#15-implementation-work-packages) |
-| Paired apps 1.0.0-beta.1 | Tester beta published | Ordinary-PC recovery/fault acceptance, legacy import, native file pickers, unresolved-evidence repair |
-| v1.1 | Merged, not released | Owner bumps to 1.1.0 and builds ([v1_1_presentable.md](proposals/v1_1_presentable.md) §5–6) |
-| In-app updates (Windows) | Planned for later | **Update** button: check `Lightning-downloads`, verify signature, helper swaps folders, keeps the old for rollback; profiles untouched; refuse during an unfinished lend. Android updates come from Google Play. |
+1. Easy to contribute · 2. Safe for real money · 3. Polish and Arabic · 4. Edit journal and devices · 5. Investments ·
+6. Market data · 7. Planning, import and search · 8. Website · 9. Later.
 
-**Owner-approved smarter workflows (2026-10-15):** all five roadmap stages are implemented, including dated cash warnings, undo/review/provenance/protection, reserve/bill/CD/reimbursement links, optional cash funding, saved views and reminders/weekly completion. Service, HTTP, PC/phone browser, Arabic, currency, performance and encrypted-sync regression checks now cover the workflows, alongside the annual PC/phone scenario. Native Windows/Android notification delivery and ordinary-device acceptance remain outstanding. **Read:** Architecture › Action history and checked accounts, › Optional funded payday allocation, › UI contract.
+**Shipped so far:** foundation and cash accounts; Budget; reports and corrections (checked history); manual investments
+and the instrument catalogue; price packs, foreign cash, Convert, FX positions and US stocks (v1.1); certificates and
+deposits; CSV import and Cash planning; search and Ctrl-K; multiple devices M1–M3 (lend, hand back, bank SMS); the paired
+apps beta; Arabic on PC and phone; financial health; undo and redo; rules with conditions; layered import match; weekend-aware
+schedules; Fill this month; entry helpers; gam'eya and zakat; and the five owner-approved smarter workflows (2026-10-15:
+dated cash warnings, undo/review/provenance, reserve/bill/CD/reimbursement links, optional cash funding, saved views and
+weekly review). Detail: [CHANGELOG](../CHANGELOG.md) and [Architecture](ARCHITECTURE.md). Where each idea came from:
+[Competition](COMPETITION.md).

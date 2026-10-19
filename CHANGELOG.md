@@ -11,7 +11,25 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-- 2026-10-18 · Claude: guideline Part D, **Coders** (`guideline/coders.html`, D01–D12): the For Geeks pages' own brand guideline; Part B is now called **Normal**. `tools/guideline.py` reads D; docs test checks four files.
+- 2026-10-19 · Claude: guideline Part D, **Coders** (`guideline/coders.html`, D01–D12) for the website's For Geeks pages; Part B is now **Normal**;
+  `tools/guideline.py` reads D and the docs test checks four files. It matches the site after 1F (site PR #34): one contribute path in the
+  top bar, the three steps said once, a section strip on phones, the shell from `tools/geeks_shell.py`.
+- 2026-10-19 · Claude: `report/` and `docs/proposals/` merged into `issues/`: nine numbered milestones (1 Easy to contribute first), items coded `3C`
+  (steps `3C1`), types bug/polish/feature/tech/owner; `tools/issues.py` builds `issues/INDEX.md` and gives the next free code. Overview's roadmap,
+  `NOW.md` *Next*, AGENTS.md, skills and links now point at codes. Done: 1A (website contribute path, site PR #32), 1D (codes on GitHub).
+- 2026-10-19 · Claude: collaboration audit: `requirements-dev.txt` adds the encrypted extras (the contributor setup failed 361 tests); reports
+  older than 30 days are a stale-check warning, not a failing test; `/take` claims with an open PR stay; Dependabot groups; main no
+  longer needs branches up to date, auto-merge is allowed (owner setup); CONTRIBUTING: one-file test, AI steps to merge a contributor PR.
+- 2026-10-18 · Claude: one collaboration guide, `CONTRIBUTING.md` (MAINTAINERS.md and docs/COLLABORATION.md merged in); `tools/security_setup.py` is the one owner command and
+  runs the no-bypass PR rule; old team/approval ruleset and `apply-settings.sh` removed; forks wait for approval on a first PR only. Contributing is GitHub-only (`/take`), with
+  Codespace steps; the Discord route and claim-button proposal are dropped.
+- 2026-10-18 · Codex: record completed collaboration work, the website-to-Discord contributor journey, and proposed numbered task roles/claim automation with pending decisions clearly marked.
+
+- 2026-10-18 · Codex: document owner-account AI PR merges; add a previewable app/website ruleset setup that blocks direct main pushes and bypassing checks.
+
+- 2026-10-18 · Claude: MAINTAINERS.md step 6 and apply-settings.sh name the environments the workflows use (android-signing, production-release, market-publishing), not `release`.
+
+- 2026-10-18 · Claude: contributor onboarding in three steps: good first issues, `/take` bot (`.github/workflows/contributors.yml`), Codespaces demo (`.devcontainer/`); one-screen CONTRIBUTING.md, short PR template, Discord set-up in Collaboration §9.
 - 2026-10-18 · Codex: require the phone workflow test to keep signing keys in the protected signing job and out of its caller.
 - 2026-10-18 · Codex: document collaboration in docs/COLLABORATION.md; add a previewable admin setup script, environment-only signing inputs, and journal dependency CI.
 - 2026-10-18 · Codex: patch journal development dependencies (Wrangler, Undici and Sharp); record the repository/website security review and pending deployment.

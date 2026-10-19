@@ -1,5 +1,5 @@
 # Price packs: collect each market's closing prices after it closes, check them, and publish the packs
-# to the open data repository (docs/proposals/market_data.md; packs and schedules: lightning/market/packs.py).
+# to the open data repository (issues/6-market-data/6A-price-packs.md; packs and schedules: lightning/market/packs.py).
 #
 # - Each schedule runs the packs whose market has just closed; the collector itself skips a pack on a day
 #   its market does not trade, so one schedule can serve markets with different weeks.
@@ -159,7 +159,7 @@ jobs:
           }
           jq -c '.failing[]' "$RUNNER_TEMP/alarm.json" | while read -r source; do
             title="Price source failing: $(jq -r .name <<<"$source")"
-            body="$(jq -r '"Failed \(.failures) runs in a row. Last good run: \(.last_ok).\n\nError: \(.error)\n\nFix the adapter in lightning/market/sources (docs/proposals/market_data.md › Keeping it alive)."' <<<"$source")"
+            body="$(jq -r '"Failed \(.failures) runs in a row. Last good run: \(.last_ok).\n\nError: \(.error)\n\nFix the adapter in lightning/market/sources (issues/6-market-data/6A-price-packs.md › Keeping it alive)."' <<<"$source")"
             number="$(issue_for "$title")"
             if [ -n "$number" ]; then gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body "$body"
             else gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"; fi

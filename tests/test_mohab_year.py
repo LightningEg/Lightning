@@ -27,7 +27,7 @@ he would see there.
 - Clarity: plain words and numbers a person can read (no "System", no −1,351.7%), the date or period
   every figure belongs to, and a warning when something cannot work as planned.
 - UI: compact rows, readable messages, and layouts that work in the app window and on a phone.
-User feedback (open items: report/) is added here as steps Mohab takes and checked by screen
+User feedback (open items: issues/) is added here as steps Mohab takes and checked by screen
 assertions. Speed and look are judged on a real PC and in a browser; this file covers what screens show.
 """
 from __future__ import annotations

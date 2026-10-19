@@ -110,7 +110,7 @@ Review-site summaries, not users' own words (2026-10-04), unless marked.
 - **Quicken Classic Premier:** IRR/ROI, allocation, dividends, tax-aware lots (FIFO, LIFO, max or min gain, average cost for funds), retirement and tax reporting. Deeper for listed securities and US tax.
 - **Banktivity:** closest product-level match (budgeting, local data, real investments). Cost basis per lot, chosen lots on sale, short/long-term gains, ROI and IRR with dividends, multi-currency (Gold), device sync. Stronger conventional engine.
 - **Moneydance:** stocks, bonds, CDs, funds, automatic prices, splits, cost basis; an engineering benchmark for bookkeeping longevity.
-- **GnuCash:** Investment Lots report (basis, realized and unrealized gains, ROI, CAGR, lot validation). Copy the correctness discipline, not the interface. Not worth copying: stored lots with scrubbers (derive them, [investment_lots.md](proposals/investment_lots.md)), short selling, debit/credit words, report option pages.
+- **GnuCash:** Investment Lots report (basis, realized and unrealized gains, ROI, CAGR, lot validation). Copy the correctness discipline, not the interface. Not worth copying: stored lots with scrubbers (derive them, [investment_lots.md](../issues/5-investments/5B-cost-per-purchase-lots.md)), short selling, debit/credit words, report option pages.
 - **Lightning's opening against all four:** Egyptian assets and institutions, physical-gold detail, certificates, held-for-others cash, plain language, the ledger/plan/report split.
 
 ## Phone flow, words and icons

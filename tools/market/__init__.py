@@ -1,5 +1,5 @@
 """The price collector: runs daily in GitHub Actions as the backup behind each app's own fetching
-(docs/proposals/market_data.md).
+(issues/6-market-data/6A-price-packs.md).
 
     python -m tools.market collect --root market --packs egx,fx   # today's prices, one folder per pack
     python -m tools.market backfill --root market EG:COMI         # whole history for some instruments

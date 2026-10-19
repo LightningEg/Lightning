@@ -2,7 +2,7 @@
 
 Step-by-step procedures for any AI tool working here (Claude, Codex, others). One folder per skill, each with a `SKILL.md`.
 Tool-specific folders only point here: `.claude/skills/<name>/SKILL.md` is a one-line stub so Claude Code finds the skill.
-Every skill files its findings in `report/` (see `report/README.md`) and deletes a report when it is fixed; the folder is capped at 20 reports and 30 days each.
+Every skill files its findings as items in `issues/` (see `issues/README.md`), each with a code like `3C`, and deletes an item when it is finished.
 A new skill is written once, here, in plain words with no tool-only commands.
 
 | Skill | Use it when |

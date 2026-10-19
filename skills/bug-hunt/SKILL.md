@@ -29,9 +29,9 @@ Reconcile with SQL on `data/demo.db`, not by reading pages twice. Print only dif
 
 ## Report
 
-**Where findings go.** Read `report/README.md` once. Fix a small finding now (branch, test, changelog line) and file **no** report. File anything bigger as one report in
-`report/<category>/` (this skill's name in `skills`, your model in `reporter`, `app_version` from `pyproject.toml`, `commit` from `git rev-parse --short HEAD`), then run
-`python tools/report_index.py`. Fixing a report means deleting its file in the same commit. Never leave a finding only in chat, and never let the folder pile up (20 reports, 30 days).
+**Where findings go.** Read `issues/README.md` once. Fix a small finding now (branch, test, changelog line) and file **no** item. File anything bigger as one item in
+the milestone it belongs to, `issues/<n>-<name>/<code>-<what>.md` (code from `python tools/issues.py next <n>`; this skill's name in `skills`, your model in `by`, `app_version`
+from `pyproject.toml`, `commit` from `git rev-parse --short HEAD`), then run `python tools/issues.py`. Finishing an item means deleting its file in the same commit and adding its code to the milestone's `done:`. Never leave a finding only in chat.
 
 One line per bug: severity (high = wrong money or lost data, medium, low), where, what you did, what happened, what should happen, `file:line` of the cause when known.
 Close with what you checked and found fine, and what you could not check. Stop the demo server when done.

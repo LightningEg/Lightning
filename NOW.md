@@ -11,6 +11,7 @@
 
 ## Messages
 
+- **To Codex, from Claude, 2026-10-19:** owner asked me to land guideline Part D (`guideline/coders.html`) in both repos (app #31, site #23); it touches your `../Lightning_website/guideline/` claim: pull both before your guideline sync.
 - **To Codex, from Claude, 2026-10-16:** owner gave me the journal fixes and J6; hold journal edits until my claim clears.
 - **To all, from Claude, 2026-10-15:** a fix that changes a screen the website quotes means recapturing it (website README › App screenshots); Kept apart needs one.
 - **To all, from Claude, 2026-10-14:** Overview follows feedback batch 003 (period-end position, grouped Needs you via `review.grouped`, net-only Month by month); read its *Outcome* before Overview work.
@@ -18,20 +19,13 @@
 
 ## Next
 
-- **Security rollout:** deploy the website receiver before its dashboard; verify team/release access. **Read:** report › public repository security audit.
+The whole plan, by milestone and code, is `issues/INDEX.md`. In order:
 
-- **Brokers:** next, phase 4 import. **Read:** its report *Fix*.
-
-- **Website guideline copies:** fix on website `codex/sync-app-guidelines`; main push needs owner approval after auto-review rejection. **Read:** report › website guideline copies.
-
-- **Edit journal (Claude):** J6a/b built; J6c areas cover 125/149 POST routes; lab `--app` runs real screens. Next: chunked large effects so bank import works (`tools/journal_mohab.py`). **Read:** proposal §10 J6; Architecture › Command proposals.
-
-- **Owner check, PC and phone:** the new first-run (welcome, currencies, institutions) and import review (rows, chips, bulk bar, same-day order). **Read:** Architecture › CSV import and export contract.
-- **Institution logos:** none are bundled yet (the build had no internet); every institution shows a monogram. Run `python tools/fetch_institution_logos.py` from a PC and commit `lightning/ui/static/institutions/` and the CSV. **Read:** Architecture › Modules (accounts).
-- **Section 13 milestone 1 built:** salary/payday setup, bank CSV presets, full exports, instalment purchases and early payoff use existing screens. Next: optional reminders/grouped confirmations, then analytics. Approved dated loan balances also built (Mohab annual growth +42,000 EGP, cash unchanged). **Read:** `docs/proposals/tab_by_tab_review.md` §13; Architecture › Cash planning, › CSV import and export.
-- **Trust milestone built:** same-day comparisons, total returns including income, signed register cents, late gam’eya catch-up, Overview preview/KPI row and emergency liquidity context. Next: step 2 weekly friction. **Read:** `docs/proposals/tab_by_tab_review.md` §14; Architecture › UI contract.
-- **Gam'eya and zakat follow-ups:** demo/sample profiles have no circle; the phone Overview's What you owe has no gam'eya breakdown; Investments shows an early-turn circle below zero while Position moves it to What you owe. **Read:** Architecture › Gam'eya, › Zakat.
-
-1. **Europe/GCC adapters built, release blocked:** Oman and Nasdaq Nordic complete the declared coverage; verify live boards with permitted access and obtain a redistributable source. Current sources keep `publish=False`. Read: Project Overview › #18 and Roadmap M4; `docs/proposals/market_data.md`.
-2. **Gold:** test source from home; silver needs holdings. **Read:** `docs/proposals/market_data.md`.
-3. **Optional:** stable origin/cache and CSS trim. **Read:** Architecture › Page speed.
+1. **1B Owner runs the security setup**, then **1C** a trial contribution. **Read:** 1B.
+2. **2A/2B restore safety and promotion durability** (Codex, Luna): see the claims above. **Read:** 2A, 2B.
+3. **4A Edit journal** (Claude): J6a/b built; J6c areas cover 125/149 POST routes; next, chunked large effects so bank import works (`tools/journal_mohab.py`). **Read:** 4A §10 J6; Architecture › Command proposals.
+4. **3I Owner check, PC and phone:** first run and import review. **Read:** 3I.
+5. **3H Tab-by-tab review:** §13 milestone 1 and the trust milestone built; next, optional reminders and grouped confirmations, then analytics; trust step 2, weekly friction. **Read:** 3H §13–14.
+6. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
+7. **8B Website guideline copies:** fix on website `codex/sync-app-guidelines`. **Read:** 8B.
+8. **6B Europe/GCC shares**, **6D gold**, **6E institution logos**, **5I gam'eya and zakat follow-ups:** waiting as their items say. **Read:** each item.
