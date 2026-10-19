@@ -3,7 +3,7 @@ title: One harmless trial contribution from the website to a merged pull request
 type: owner
 area: github
 status: blocked
-blocked_by: 1A, 1B
+blocked_by: 1B
 created: 2026-10-19
 by: Claude
 ---

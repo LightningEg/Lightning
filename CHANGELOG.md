@@ -13,7 +13,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 - 2026-10-19 · Claude: `report/` and `docs/proposals/` merged into `issues/`: nine numbered milestones (1 Easy to contribute first), items coded `3C`
   (steps `3C1`), types bug/polish/feature/tech/owner; `tools/issues.py` builds `issues/INDEX.md` and gives the next free code. Overview's roadmap,
-  `NOW.md` *Next*, AGENTS.md, skills and links now point at codes.
+  `NOW.md` *Next*, AGENTS.md, skills and links now point at codes. Done: 1A (website contribute path, site PR #32), 1D (codes on GitHub).
 - 2026-10-19 · Claude: collaboration audit: `requirements-dev.txt` adds the encrypted extras (the contributor setup failed 361 tests); reports
   older than 30 days are a stale-check warning, not a failing test; `/take` claims with an open PR stay; Dependabot groups; main no
   longer needs branches up to date, auto-merge is allowed (owner setup); CONTRIBUTING: one-file test, AI steps to merge a contributor PR.

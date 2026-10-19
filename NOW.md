@@ -20,12 +20,11 @@
 
 The whole plan, by milestone and code, is `issues/INDEX.md`. In order:
 
-1. **1A Website contribute path** (Claude): website PR `claude/contribute-path` (1A1–1A4); then **1D** codes and labels on GitHub. **Read:** its item.
-2. **1B Owner runs the security setup**, then **1C** a trial contribution. **Read:** 1B.
-3. **2A/2B restore safety and promotion durability** (Codex, Luna): see the claims above. **Read:** 2A, 2B.
-4. **4A Edit journal** (Claude): J6a/b built; J6c areas cover 125/149 POST routes; next, chunked large effects so bank import works (`tools/journal_mohab.py`). **Read:** 4A §10 J6; Architecture › Command proposals.
-5. **3I Owner check, PC and phone:** first run and import review. **Read:** 3I.
-6. **3H Tab-by-tab review:** §13 milestone 1 and the trust milestone built; next, optional reminders and grouped confirmations, then analytics; trust step 2, weekly friction. **Read:** 3H §13–14.
-7. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
-8. **8B Website guideline copies:** fix on website `codex/sync-app-guidelines`. **Read:** 8B.
-9. **6B Europe/GCC shares**, **6D gold**, **6E institution logos**, **5I gam'eya and zakat follow-ups:** waiting as their items say. **Read:** each item.
+1. **1B Owner runs the security setup**, then **1C** a trial contribution. **Read:** 1B.
+2. **2A/2B restore safety and promotion durability** (Codex, Luna): see the claims above. **Read:** 2A, 2B.
+3. **4A Edit journal** (Claude): J6a/b built; J6c areas cover 125/149 POST routes; next, chunked large effects so bank import works (`tools/journal_mohab.py`). **Read:** 4A §10 J6; Architecture › Command proposals.
+4. **3I Owner check, PC and phone:** first run and import review. **Read:** 3I.
+5. **3H Tab-by-tab review:** §13 milestone 1 and the trust milestone built; next, optional reminders and grouped confirmations, then analytics; trust step 2, weekly friction. **Read:** 3H §13–14.
+6. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
+7. **8B Website guideline copies:** fix on website `codex/sync-app-guidelines`. **Read:** 8B.
+8. **6B Europe/GCC shares**, **6D gold**, **6E institution logos**, **5I gam'eya and zakat follow-ups:** waiting as their items say. **Read:** each item.
