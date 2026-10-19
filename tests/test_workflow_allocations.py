@@ -153,7 +153,9 @@ def test_activity_combined_category_bill_and_partial_reserve_is_atomic_and_undoa
     item_id = c.planning.create(kind="BILL", name="Transit pass", amount="600", frequency="ONCE",
                                 start_date="2026-12-31", account_id=account.id,
                                 category_id=transport.id)
-    reserve = c.reserves.create("Transit", "1000", category_id=transport.id, account_id=account.id)
+    # This rule matches the account before and after the combined category change.
+    # A category-restricted rule now requires that category to match as well.
+    reserve = c.reserves.create("Transit", "1000", account_id=account.id)
     c.reserves.allocate(reserve["id"], "1000")
     review = ActivityReview(c)
     initial = review.summary(expense.id)

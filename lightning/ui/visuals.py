@@ -109,7 +109,7 @@ def money_sankey(c, first: date, last: date, cash_flow, sources_shown: int = 3, 
                  money_added: Decimal = ZERO, xs: tuple[float, float, float] = (22.0, 49.0, 76.0)) -> dict:
     """Where money in went: income by category into money in, and money in out to spending
     categories and what you kept. When money out is larger, the gap comes from what you had.
-    What you kept splits into the part you invested (blue, as in Saved and invested) and the rest
+    What you kept splits into the part you invested (blue) and the rest
     (feedback ticket 82); money added beyond what you kept came from earlier savings, so it is not shown."""
     incomes = money_in_groups(c, first, last)
     sources = [{**r, "tone": "in"} for r in incomes[:sources_shown]]

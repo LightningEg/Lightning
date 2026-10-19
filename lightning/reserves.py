@@ -367,12 +367,14 @@ class CashReserveService:
         for reserve, available in eligible:
             if reserve["id"] in transaction["linked_reserves_set"]:
                 continue
-            matched = ((transaction["counterparty_id"] is not None and
-                        reserve["counterparty_id"] == transaction["counterparty_id"]) or
-                       (reserve["category_id"] is not None and
-                        reserve["category_id"] in transaction["categories_set"]))
-            matched = matched or (reserve.get("account_id") is not None and
-                                  reserve["account_id"] in transaction["cash_accounts_set"])
+            checks = []
+            if reserve["counterparty_id"] is not None:
+                checks.append(reserve["counterparty_id"] == transaction["counterparty_id"])
+            if reserve["category_id"] is not None:
+                checks.append(reserve["category_id"] in transaction["categories_set"])
+            if reserve.get("account_id") is not None:
+                checks.append(reserve["account_id"] in transaction["cash_accounts_set"])
+            matched = checks and all(checks)
             amount_e6 = min(remaining, to_e6(available))
             if matched and amount_e6 > 0:
                 amount = from_e6(amount_e6)

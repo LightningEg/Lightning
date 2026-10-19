@@ -719,7 +719,7 @@ document.addEventListener("click", (e) => {
 // behaves just like leaving a normal field.
 document.addEventListener("pointerdown", (event) => {
   const row = document.querySelector("tr.editing[data-txn]");
-  if (!row || row.contains(event.target) || event.target.closest(".date-popup, .counterparty-results, .category-results")) return;
+  if (!row || row.contains(event.target) || event.target.closest(".date-popup, .counterparty-results, .category-results, .transaction-select, #select-visible-header, #selection-tools, .own-record-results")) return;
   // A question open over the row ("Change 2 selected rows?") is answered, not treated as leaving the row (ticket 96).
   if (event.target.closest("dialog") || document.querySelector("dialog[open]")) return;
   const form = document.getElementById("f-edit");
@@ -759,32 +759,31 @@ if (ledger) {
   const tools = document.getElementById("selection-tools");
   const count = document.getElementById("selection-count");
   const selectAll = document.getElementById("select-visible");
-  const visibleChecks = () => [...ledger.querySelectorAll(".transaction-select:not(:disabled)")];
-  // U2: the ticked rows survive the page load that opens a row for editing (sessionStorage, keyed by the page).
+  const boxes = [...ledger.querySelectorAll(".transaction-select:not(:disabled)")];
+  const byId = new Map();
+  boxes.forEach((box) => { if (!byId.has(box.value)) byId.set(box.value, []); byId.get(box.value).push(box); });
   const editRow = document.querySelector("tr.editing[data-txn]");
-  const selKey = (() => { const q = new URLSearchParams(location.search); ["edit", "acct", "pick"].forEach((k) => q.delete(k)); return `lightning-selection:${location.pathname}?${q}`; })();
-  const readSel = () => { try { return JSON.parse(sessionStorage.getItem(selKey) || "[]"); } catch (e) { return []; } };
+  const selKey = (() => { const q = new URLSearchParams(location.search); ["edit", "acct", "pick"].forEach((k) => q.delete(k)); q.sort(); return `lightning-selection:${location.pathname}?${q}`; })();
+  const readSel = () => { try { const ids = JSON.parse(sessionStorage.getItem(selKey) || "[]"); return Array.isArray(ids) ? ids.filter((id) => typeof id === "string" && byId.has(id)) : []; } catch (e) { return []; } };
   const writeSel = (ids) => { try { ids.length ? sessionStorage.setItem(selKey, JSON.stringify(ids)) : sessionStorage.removeItem(selKey); } catch (e) {} };
-  const kept = editRow ? readSel() : [];
-  if (!editRow) writeSel([]);
-  const selectedIds = () => {
-    const ticked = visibleChecks().filter((box) => box.checked).map((box) => box.value);
-    const all = new Set(visibleChecks().map((box) => box.value));
-    return [...new Set([...ticked, ...kept.filter((id) => !all.has(id))])];
-  };
+  const selected = new Set(editRow ? readSel() : []);
+  boxes.forEach((box) => { if (box.checked) selected.add(box.value); });
+  const selectedIds = () => [...selected];
+  editRow?.querySelector("[data-cancel]")?.addEventListener("click", () => writeSel([]));
   const syncSelection = () => {
-    const selected = selectedIds();
-    writeSel(selected);
-    if (tools) tools.hidden = selected.length === 0;
+    const ids = selectedIds();
+    boxes.forEach((box) => { box.checked = selected.has(box.value); });
+    writeSel(ids);
+    if (tools) tools.hidden = ids.length === 0;
     const merge = document.getElementById("merge-selected");
-    if (merge) merge.hidden = selected.length !== 2;
-    if (count) count.textContent = t("{count} selected", {count: selected.length});
+    if (merge) merge.hidden = ids.length !== 2;
+    if (count) count.textContent = t("{count} selected", {count: ids.length});
     if (selectAll) {
-      selectAll.checked = visibleChecks().length > 0 && visibleChecks().every((box) => box.checked);
-      selectAll.indeterminate = selected.length > 0 && !selectAll.checked;
+      selectAll.checked = byId.size > 0 && selected.size === byId.size;
+      selectAll.indeterminate = ids.length > 0 && !selectAll.checked;
     }
     if (menu && !menu.hidden && !menu.dataset.editing) menu.querySelector("[data-context-delete]").textContent =
-      selected.length > 1 ? t("Delete {count} selected", {count: selected.length}) : t("Delete");
+      ids.length > 1 ? t("Delete {count} selected", {count: ids.length}) : t("Delete");
   };
   const deleteTransactions = (ids, backTo) => {
     if (!ids.length) return;
@@ -804,8 +803,12 @@ if (ledger) {
     ids.forEach((id) => { const input = document.createElement("input"); input.type = "hidden"; input.name = "txn_ids"; input.value = id; form.append(input); });
     document.body.append(form); form.submit();
   };
-  visibleChecks().forEach((box) => { box.checked = kept.includes(box.value) || box.checked; box.addEventListener("change", syncSelection); });
-  if (kept.length) syncSelection();
+  ledger.addEventListener("change", (event) => {
+    const box = event.target;
+    if (!box.matches(".transaction-select:not(:disabled)")) return;
+    box.checked ? selected.add(box.value) : selected.delete(box.value);
+    syncSelection();
+  });
   // Saving an edited row while others are ticked: ask whether the change is for this row or all of them.
   const editForm = document.getElementById("f-edit");
   if (editForm && editRow) {
@@ -814,12 +817,12 @@ if (ledger) {
       if (decided) { writeSel([]); return; }
       const ticked = selectedIds();
       const ids = [...new Set([...ticked, editRow.dataset.txn])];
-      if (!ticked.length || ids.length < 2) return;
+      if (!ticked.length || ids.length < 2) { writeSel([]); return; }
       let original = {};
       try { original = JSON.parse(editRow.dataset.original || "{}"); } catch (e) {}
       const value = (name) => (editForm.elements[name]?.value ?? "").trim();
       const changed = ["date", "counterparty", "category", "notes", "whom"].filter((name) => value(name) !== String(original[name] ?? "").trim());
-      if (!changed.length) return;
+      if (!changed.length) { writeSel([]); return; }
       event.preventDefault(); event.stopImmediatePropagation();
       const submitter = event.submitter;
       const amountChanged = value("amount") !== String(original.amount ?? "").trim();
@@ -844,12 +847,12 @@ if (ledger) {
       });
     }, true);
   }
-  selectAll?.addEventListener("change", () => { visibleChecks().forEach((box) => { box.checked = selectAll.checked; }); syncSelection(); });
+  selectAll?.addEventListener("change", () => { selected.clear(); if (selectAll.checked) byId.forEach((_, id) => selected.add(id)); syncSelection(); });
   document.getElementById("select-visible-header")?.addEventListener("click", (event) => {
     if (event.target.closest("input")) return;
     event.preventDefault();
     selectAll.checked = !selectAll.checked;
-    visibleChecks().forEach((box) => { box.checked = selectAll.checked; });
+    selected.clear(); if (selectAll.checked) byId.forEach((_, id) => selected.add(id));
     syncSelection();
   });
   document.getElementById("delete-selected")?.addEventListener("click", () => deleteTransactions(selectedIds()));
@@ -897,7 +900,7 @@ if (ledger) {
       const checkbox = row.querySelector(".transaction-select");
       if (!checkbox || checkbox.disabled) return;
       event.preventDefault();
-      if (!checkbox.checked) { visibleChecks().forEach((box) => { box.checked = false; }); checkbox.checked = true; }
+      if (!checkbox.checked) { selected.clear(); selected.add(checkbox.value); }
       delete menu.dataset.editing;
       menu.dataset.href = row.dataset.href;
       menu.dataset.txn = checkbox.value;
@@ -912,7 +915,7 @@ if (ledger) {
   menu?.querySelector("[data-context-edit]").addEventListener("click", () => { if (menu.dataset.href) location.href = menu.dataset.href; });
   menu?.querySelector("[data-context-details]").addEventListener("click", () => { if (menu.dataset.txn) location.href = `/transactions/${menu.dataset.txn}`; });
   menu?.querySelector("[data-context-save]").addEventListener("click", () => { menu.hidden = true; document.getElementById("f-edit")?.requestSubmit(); });
-  menu?.querySelector("[data-context-cancel]").addEventListener("click", () => { if (menu.dataset.cancel) location.href = menu.dataset.cancel; });
+  menu?.querySelector("[data-context-cancel]").addEventListener("click", () => { if (menu.dataset.cancel) { writeSel([]); location.href = menu.dataset.cancel; } });
   menu?.querySelector("[data-context-delete]").addEventListener("click", () => {
     menu.hidden = true;
     if (menu.dataset.editing) deleteTransactions([menu.dataset.txn], menu.dataset.cancel);

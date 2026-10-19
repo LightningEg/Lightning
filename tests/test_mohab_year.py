@@ -1463,10 +1463,10 @@ def test_a_figure_reads_the_same_on_every_tab(mohab, period):
                  "Budget": _figure(flat(budget), r"Spent ([\d,]+) ") if "period=month" in period else None}
     assert len({money(v).copy_abs() for v in money_out.values() if v}) == 1, money_out
     money_in = {"Overview": _figure(overview, r"<summary><span>Money in</span><b>([^<]+)</b>"),
-                "Investments": _figure(flat(investments), r"Of ([\d,]+) money in")}
+                "Investments": _figure(flat(investments), r"Money in ([\d,]+)")}
     assert len({money(v) for v in money_in.values() if v}) == 1, money_in
     savings = {"Overview": _figure(overview, r'aria-label="Savings rate".*?stat-tile-value[^>]*>(.*?)</span>'),
-               "Investments": _figure(flat(investments), r"Saved and invested.*? ([\d.,−—-]+ ?%?) Savings rate")}
+               "Investments": _figure(flat(investments), r"Savings.*? ([\d.,−—-]+ ?%?) Savings rate")}
     assert len({v.replace(" ", "").rstrip("%") for v in savings.values() if v}) == 1, savings
     gain = {"Overview": _figure(overview, r"<span>Net gain or loss</span><b[^>]*>([^<]+)</b>"),
             "Investments": _figure(investments, r'inv-result-tile.*?stat-tile-value[^>]*>([^<]+)<')}

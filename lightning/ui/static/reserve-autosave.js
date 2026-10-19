@@ -8,6 +8,7 @@
     let saved = body();
     let busy = false;
     const save = async () => {
+      if (!form.checkValidity()) return;
       const sent = body();
       if (busy || sent === saved) return;
       busy = true;

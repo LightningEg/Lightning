@@ -52,7 +52,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **3I** | [Check on your PC and phone: the new first run and the import review](3-polish-and-arabic/3I-owner-check-first-run-and-import.md) | owner | product | ready |
 | **3J** | [Version 1.1 is shipped: move what holds of its review into Architecture, then delete this file](3-polish-and-arabic/3J-fold-v1-1-review-into-architecture.md) | tech | docs | ready |
 
-Done: 3L. Next free code: 3M.
+Done: 3L, 3M, 3N, 3O, 3P. Next free code: 3Q.
 
 ## 4 Edit journal and devices
 

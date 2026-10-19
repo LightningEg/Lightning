@@ -45,6 +45,7 @@ Dates are when the owner decided. Undated rows are founding rules.
 | **Branches** (2026-10-12) | Work on `who/feature`, merge finished work into `main`. [AGENTS.md](../AGENTS.md) section 6. |
 | **Arabic is for Egypt** | English and Egyptian Arabic for the same profile; the website links matching pages. Arabic reads right to left; money, dates, codes and identifiers keep their natural order. Names: [Glossary](GLOSSARY.md#العربية--المسرد-العربي). |
 | **Feedback screenshots stay private** | Up to five images per ticket, stored in the Apps Script owner's private Drive folder, linked in the feedback Sheet. The website repo owns it. |
+| **Savings and reserve matching** (2026-10-19) | The waffle shows savings only, including savings allocated to investments, with positive Overspent figures and darker spending squares when spending exceeds income. Reserve matching can combine account, counterparty and category; all selected criteria must match. |
 | **One ledger** | Registers, budget actuals, investments, Overview and reports are views of one transaction ledger. |
 | **Other people's money** | *Held for others* stays in the account balance, is left out of *What you own*, and is not income, spending or money owed to you. |
 | **Obligations count, forecasts never do** | Bills due and loans still to pay make *What you owe*: bills due come off Free cash, What you owe off Net worth. Loans are schedules, not debt accounts; a payment is spending when paid. Credit cards, loan-interest accounting and money owed to you are out of scope; CD interest is an estimate. |

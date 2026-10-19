@@ -11,7 +11,26 @@
 {% block heading %}<div><h1>{{ 'Cash planning'|tr(locale) }}</h1></div>{% endblock %}
 {% block content %}
 {% macro repeat_seg(current) %}<div class="planner-mode" role="radiogroup" aria-label="Repeat"><span class="planner-mode-label">{{ "Repeat"|tr(locale) }}</span><span class="planner-mode-seg">{% for value, text in [('NONE', 'Once'), ('WEEKLY', 'Weekly'), ('MONTHLY', 'Monthly'), ('YEARLY', 'Yearly')] %}<label{% if value == 'NONE' %} title="Does not repeat"{% endif %}><input type="radio" name="recurrence" value="{{ value }}"{% if value == current %} checked{% endif %}><span>{{ text }}</span></label>{% endfor %}</span></div>{% endmacro %}
-{% macro match_by(kind, label) %}<div class="planner-mode reserve-match" role="radiogroup" aria-label="{{ label }}" data-reserve-match><span class="planner-mode-label">{{ "Match by"|tr(locale) }}</span><span class="planner-mode-seg">{% for value, text in [('none', 'Ask'), ('account', 'Account'), ('counterparty', 'Counterparty'), ('category', 'Category')] %}<label{% if value == 'none' %} title="Ask every time"{% endif %}><input type="radio" name="match_by" value="{{ value }}"{% if value == kind %} checked{% endif %}><span>{{ text }}</span></label>{% endfor %}</span></div>{% endmacro %}
+{% macro match_by(reserve, label) %}
+<div class="reserve-match" role="group" aria-label="{{ label }}" data-reserve-match>
+  <span class="planner-mode-label">{{ 'Match by'|tr(locale) }}</span>
+  <label class="reserve-criterion-toggle"><input type="checkbox" name="match_by" value="none"{% if not reserve or not (reserve.account_id or reserve.counterparty_id or reserve.category_id) %} checked{% endif %}><span>{{ 'Ask'|tr(locale) }}</span></label>
+  {% for value, text in [('account', 'Account'), ('counterparty', 'Counterparty'), ('category', 'Category')] %}
+  {% set active = reserve and reserve[value ~ '_id'] %}
+  <div class="reserve-criterion">
+    <label class="reserve-criterion-toggle"><input type="checkbox" name="match_by" value="{{ value }}"{% if active %} checked{% endif %}><span>{{ text|tr(locale) }}</span></label>
+    <label data-match-picker="{{ value }}"{% if not active %} hidden{% endif %}>
+      <span class="sr-only">{{ text|tr(locale) }}</span>
+      <select name="{{ value }}_id" data-own-picker aria-label="{{ text|tr(locale) }}"{% if active %} required{% else %} disabled{% endif %}>
+        <option value="">{{ ('Choose an account' if value == 'account' else 'Choose a saved counterparty' if value == 'counterparty' else 'Choose a spending category')|tr(locale) }}</option>
+        {% if value == 'category' %}{% from 'partials/macros.html' import category_options %}{{ category_options(category_groups(categories), reserve.category_id if reserve else '') }}
+        {% else %}{% for item in (accounts if value == 'account' else counterparties) %}<option value="{{ item.id }}"{% if active == item.id %} selected{% endif %}>{{ item.name }}</option>{% endfor %}{% endif %}
+      </select>
+    </label>
+  </div>
+  {% endfor %}
+</div>
+{% endmacro %}
 
 
 {% from "partials/charts.html" import key_notes, meter %}
@@ -63,10 +82,7 @@
           <label>{{ "Target amount"|tr(locale) }}<input class="money-input" type="text" name="target" value="{{ reserve.target|money(False, 2) }}" inputmode="decimal" required></label>
           <label>Due date{{ date_control('due_date', reserve.due_date, 'reserve-due-' ~ reserve.id) }}</label>
           {{ repeat_seg(reserve.recurrence or 'NONE') }}
-          {% set kind = 'account' if reserve.account_id else 'counterparty' if reserve.counterparty_id else 'category' if reserve.category_id else 'none' %}{{ match_by(kind, 'Match payments for ' ~ reserve.name) }}
-          <label data-match-picker="account">{{ 'Account'|tr(locale) }}<select name="account_id" data-own-picker><option value="">{{ 'Choose an account'|tr(locale) }}</option>{% for account in accounts %}<option value="{{ account.id }}" {{ 'selected' if reserve.account_id == account.id }}>{{ account.name }}</option>{% endfor %}</select></label>
-          <label data-match-picker="counterparty">{{ 'Counterparty'|tr(locale) }}<select name="counterparty_id" data-own-picker><option value="">{{ "Choose a saved counterparty"|tr(locale) }}</option>{% for party in counterparties %}<option value="{{ party.id }}" {{ 'selected' if reserve.counterparty_id == party.id }}>{{ party.name }}</option>{% endfor %}</select></label>
-          <label data-match-picker="category">{{ 'Category'|tr(locale) }}<select name="category_id" data-own-picker><option value="">{{ 'Choose a spending category'|tr(locale) }}</option>{% from "partials/macros.html" import category_options %}{{ category_options(category_groups(categories), reserve.category_id or '') }}</select></label>
+          {{ match_by(reserve, 'Match payments for ' ~ reserve.name) }}
           <span class="inline-save-status" role="status" aria-live="polite"></span>
         <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
       </details></div>
@@ -83,16 +99,29 @@
     <label>{{ "Target amount"|tr(locale) }}<input class="money-input" type="text" name="target" inputmode="decimal" placeholder="e.g. 20,000" required></label>
     <label>Due date{{ date_control('due_date', '', 'reserve-due-new') }}</label>
     {{ repeat_seg('NONE') }}
-    {{ match_by('none', 'Match payments') }}
-    <label data-match-picker="account">{{ 'Account'|tr(locale) }}<select name="account_id" data-own-picker><option value="">{{ 'Choose an account'|tr(locale) }}</option>{% for account in accounts %}<option value="{{ account.id }}">{{ account.name }}</option>{% endfor %}</select></label>
-    <label data-match-picker="counterparty">{{ 'Counterparty'|tr(locale) }}<select name="counterparty_id" data-own-picker><option value="">{{ "Choose a saved counterparty"|tr(locale) }}</option>{% for party in counterparties %}<option value="{{ party.id }}">{{ party.name }}</option>{% endfor %}</select></label>
-    <label data-match-picker="category">{{ 'Category'|tr(locale) }}<select name="category_id" data-own-picker><option value="">{{ 'Choose a spending category'|tr(locale) }}</option>{% from "partials/macros.html" import category_options %}{{ category_options(category_groups(categories)) }}</select></label>
+    {{ match_by(none, 'Match payments') }}
     <label>{{ "Amount set aside"|tr(locale) }}<input class="money-input" type="text" name="allocated" inputmode="decimal" value="0.00"></label>
     <button class="btn primary">{{ "Add reserve"|tr(locale) }}</button>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 </details>
-<script nonce="{{ request.state.csp_nonce|default('') }}">document.querySelectorAll('[data-reserve-match]').forEach(group=>{const form=group.closest('form');const update=()=>{const kind=form.querySelector('input[name=match_by]:checked')?.value||'none';form.querySelectorAll('[data-match-picker]').forEach(label=>{const active=kind===label.dataset.matchPicker;label.hidden=!active;label.querySelectorAll('select,input').forEach(field=>field.disabled=!active)})};group.addEventListener('change',update);update()});
+<script nonce="{{ request.state.csp_nonce|default('') }}">document.querySelectorAll('[data-reserve-match]').forEach(group=>{
+  const ask=group.querySelector('[value=none]');
+  const criteria=[...group.querySelectorAll('input[name=match_by]')].filter(box=>box!==ask);
+  const update=()=>{
+    ask.checked=!criteria.some(box=>box.checked);
+    criteria.forEach(box=>{
+      const label=box.closest('.reserve-criterion').querySelector('[data-match-picker]');
+      label.hidden=!box.checked;
+      label.querySelectorAll('select,input').forEach(field=>{field.disabled=!box.checked;field.required=box.checked});
+    });
+  };
+  group.addEventListener('change',event=>{
+    if(event.target===ask && ask.checked) criteria.forEach(box=>{box.checked=false});
+    update();
+  });
+  update();
+});
 const createDetails=document.getElementById('add-reserve');document.querySelector('.reserve-add-link')?.addEventListener('click',()=>{if(createDetails)createDetails.open=true});if(location.hash==='#add-reserve'&&createDetails){createDetails.open=true;createDetails.scrollIntoView({block:'start'})}
 </script>
-<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/reserve-autosave.js?v=1"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/reserve-autosave.js?v=2"></script>
 {% endblock %}

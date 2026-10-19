@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-19 · Codex: register selections stay visible and responsive during editing (3M); Savings shows saved or overspent with darker excess squares (3N).
+  Forecast bars share a baseline (3O); reserve matching combines account, counterparty and category beside their controls, requiring all selected criteria (3P).
+
 - 2026-10-19 · Claude: AGENTS.md: any guideline change lands in both repos; website copies of the field-well colours synced (website PR).
 
 - 2026-10-19 · Claude: Budget "left" per category and group reads as the rounded figures beside it (671 − 634 = 37, not 38), matching the meters (3L).

@@ -68,9 +68,9 @@ def test_the_stylesheet_has_no_stray_declarations():
     assert ";" not in "".join(outside), "a declaration outside any rule"
 
 
-def test_one_choice_one_field_on_reserves(c):
-    # Match by is a segment of four; only the field of the chosen kind shows (the rest are hidden and disabled).
+def test_each_reserve_matching_criterion_has_its_own_field(c):
+    # Matching criteria are independent; each reveals its own adjacent picker.
     page = TestClient(create_app(c)).get("/plan/reserves").text
     form = page.split('id="add-reserve"', 1)[1].split("</form>", 1)[0]
-    assert re.findall(r'type="radio" name="match_by" value="(\w+)"', form) == ["none", "account", "counterparty", "category"]
+    assert re.findall(r'type="checkbox" name="match_by" value="(\w+)"', form) == ["none", "account", "counterparty", "category"]
     assert len(re.findall(r"data-match-picker=", form)) == 3 and "<select name=\"match_by\"" not in form

@@ -13,7 +13,8 @@ from lightning.categories.domain import Movement
 from lightning.planning.emergency_context import emergency_liquidity_context
 
 from .. import charts, keynotes
-from ..web import container, redirect, render
+from ..web import container, redirect, render, ui_locale
+from ..i18n import translate
 
 router = APIRouter(prefix="/reserves")
 
@@ -78,6 +79,21 @@ async def list_reserves(request: Request):
     return redirect("/plan/reserves" + (f"?{query}" if query else ""))
 
 
+def _match_criteria(form):
+    selected = set(form.getlist("match_by"))
+    if not selected or selected == {"none"}:
+        return (None, None, None)
+    if not selected <= {"account", "counterparty", "category"}:
+        raise LightningError("Choose valid matching criteria.")
+    ids = []
+    for kind in ("counterparty", "category", "account"):
+        value = str(form.get(kind + "_id", ""))
+        if kind in selected and (not value.isdigit() or int(value) <= 0):
+            raise LightningError("Choose a value for every selected matching criterion.")
+        ids.append(int(value) if kind in selected else None)
+    return tuple(ids)
+
+
 @router.post("")
 async def create_reserve(request: Request):
     c = container(request)
@@ -87,15 +103,13 @@ async def create_reserve(request: Request):
             reserve = c.reserves.create(str(form.get("name", "")), str(form.get("target", "")),
                                         "PROJECT", str(form.get("due_date", "")) or None,
                                         str(form.get("recurrence", "NONE")),
-                                        int(str(form.get("counterparty_id", ""))) if form.get("match_by") == "counterparty" and str(form.get("counterparty_id", "")).isdigit() else None,
-                                        int(str(form.get("category_id", ""))) if form.get("match_by") == "category" and str(form.get("category_id", "")).isdigit() else None,
-                                        int(str(form.get("account_id", ""))) if form.get("match_by") == "account" and str(form.get("account_id", "")).isdigit() else None)
+                                        *_match_criteria(form))
             allocated = str(form.get("allocated", "")).strip()
             if allocated:
                 _allocate(c, reserve["id"], allocated)
     except LightningError as exc:
         if request.headers.get("X-Requested-With") == "fetch":
-            return Response(exc.message, status_code=400, media_type="text/plain")
+            return Response(translate(exc.message, ui_locale()), status_code=400, media_type="text/plain")
         return render(request, "reserves.html", status_code=400, **_context(request, exc.message))
     return redirect("/reserves", _with_plan(c, f"Created {reserve['name']}."))
 
@@ -116,7 +130,7 @@ async def save_emergency_fund(request: Request):
         reserve = c.reserves.set_emergency_fund(amount, salary_target)
     except LightningError as exc:
         if request.headers.get("X-Requested-With") == "fetch":
-            return Response(exc.message, status_code=400, media_type="text/plain")
+            return Response(translate(exc.message, ui_locale()), status_code=400, media_type="text/plain")
         return render(request, "reserves.html", status_code=400, **_context(request, exc.message))
     if request.headers.get("X-Requested-With") == "fetch":
         return render(request, "reserves.html", **_context(request))
@@ -131,12 +145,10 @@ async def edit_reserve(request: Request, reserve_id: int):
         reserve = c.reserves.update(reserve_id, str(form.get("name", "")), str(form.get("target", "")),
                                     str(form.get("due_date", "")) or None,
                                     str(form.get("recurrence", "NONE")),
-                                    int(str(form.get("counterparty_id", ""))) if form.get("match_by") == "counterparty" and str(form.get("counterparty_id", "")).isdigit() else None,
-                                    int(str(form.get("category_id", ""))) if form.get("match_by") == "category" and str(form.get("category_id", "")).isdigit() else None,
-                                    int(str(form.get("account_id", ""))) if form.get("match_by") == "account" and str(form.get("account_id", "")).isdigit() else None)
+                                    *_match_criteria(form))
     except LightningError as exc:
         if request.headers.get("X-Requested-With") == "fetch":
-            return Response(exc.message, status_code=400, media_type="text/plain")
+            return Response(translate(exc.message, ui_locale()), status_code=400, media_type="text/plain")
         return redirect("/reserves", exc.message)
     if request.headers.get("X-Requested-With") == "fetch":
         return render(request, "reserves.html", **_context(request))
@@ -151,7 +163,7 @@ async def allocate_reserve(request: Request, reserve_id: int):
         reserve = _allocate(c, reserve_id, str(form.get("allocated", "")))
     except LightningError as exc:
         if request.headers.get("X-Requested-With") == "fetch":
-            return Response(exc.message, status_code=400, media_type="text/plain")
+            return Response(translate(exc.message, ui_locale()), status_code=400, media_type="text/plain")
         return redirect("/reserves", exc.message)
     if request.headers.get("X-Requested-With") == "fetch":
         return render(request, "reserves.html", **_context(request))

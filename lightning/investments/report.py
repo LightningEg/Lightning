@@ -46,25 +46,22 @@ def investing_rate(money_added: Decimal, net_flow: Decimal) -> Decimal | None:
 
 
 def saved_and_invested(flow, money_added: Decimal) -> dict:
-    """Money in split three ways for one period: invested (inside saved), the rest of saved, spent.
-
-    Savings rate = Net flow ÷ Money in; Investing rate = Money added ÷ Net flow, at most all of it.
-    Returns the rates, the amounts, and 100 squares read row by row (invested, kept, spent)."""
+    """Signed financial rates with a bounded, nonnegative savings/overspending picture."""
     inflow = flow.inflows
-    kept = max(flow.net, ZERO)
-    put_in = min(max(money_added, ZERO), kept)
-    share = (lambda v: float(v / inflow * 100)) if inflow > 0 else (lambda v: 0.0)
-    bar = {"invested": share(put_in), "saved": share(kept - put_in), "spent": share(min(flow.outflows, inflow)),
-           "invested_amount": put_in, "kept": kept, "spent_amount": flow.outflows,
-           "earlier": max(money_added - kept, ZERO)}
-    invest_cells = round(bar["invested"]) if inflow > 0 else 0
-    saved_cells = min(round(bar["invested"] + bar["saved"]), 100) if inflow > 0 else 0
-    spent_cells = min(saved_cells + round(bar["spent"]), 100)
-    bar["cells"] = (["invested"] * invest_cells + ["kept"] * (saved_cells - invest_cells)
-                    + ["spent"] * (spent_cells - saved_cells) + [""] * (100 - spent_cells))
+    saved = max(flow.net, ZERO)
+    excess = max(-flow.net, ZERO)
+    state = "overspent" if excess else "saved" if inflow > ZERO else "empty"
+    displayed_rate = (excess if excess else saved) / inflow * 100 if inflow > ZERO else None
+    saved_cells = min(100, max(0, round(saved / inflow * 100))) if inflow > ZERO else 0
+    excess_cells = min(100, max(0, round(excess / inflow * 100))) if inflow > ZERO else (100 if excess else 0)
+    cells = (["overspent"] * excess_cells + ["spent"] * (100 - excess_cells) if excess else
+             ["kept"] * saved_cells + ["spent"] * (100 - saved_cells) if inflow > ZERO else [""] * 100)
+    bar = {"cells": cells, "kept": saved, "saved_amount": saved, "spent_amount": flow.outflows,
+           "overspent_amount": excess, "state": state, "displayed_rate": displayed_rate,
+           "excess_rate": excess / inflow * 100 if inflow > ZERO else None}
     return {"saved": flow.savings_rate, "invested": investing_rate(money_added, flow.net),
-            "saved_cells": saved_cells, "invest_cells": invest_cells, "bar": bar,
-            "money_in": inflow, "net": flow.net, "money_added": money_added}
+            "saved_cells": saved_cells, "bar": bar, "money_in": inflow,
+            "net": flow.net, "money_added": money_added}
 
 
 @request_cached(deep=True)

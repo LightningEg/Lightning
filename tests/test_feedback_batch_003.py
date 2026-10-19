@@ -91,4 +91,4 @@ def test_the_investing_rate_is_the_share_of_what_you_kept(c, setup):
     assert investing_rate(Decimal("15000"), Decimal("10000")) == Decimal("100")
     assert investing_rate(Decimal("2500"), Decimal("0")) is None
     page = TestClient(create_app(c)).get("/investments").text
-    assert "part of it" not in page  # Saved and invested shows the savings rate only
+    assert "part of it" not in page  # The Savings card has no second investing percentage

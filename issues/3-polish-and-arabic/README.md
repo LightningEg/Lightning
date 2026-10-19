@@ -1,6 +1,6 @@
 ---
 title: Polish and Arabic
-done: 3L
+done: 3L, 3M, 3N, 3O, 3P
 ---
 
 **Goal.** Every screen reads right in English and Arabic, on PC and phone, and says only what helps.

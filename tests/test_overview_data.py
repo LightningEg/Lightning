@@ -76,7 +76,7 @@ def test_reserve_historical_breakdown_matches_total_and_rejects_unknown_past(c, 
 
 
 def test_where_money_in_went_splits_kept_into_invested_and_the_rest(c, setup, monkeypatch):
-    """Feedback ticket 82: Kept shows the part moved into investments in blue, as Saved and invested does."""
+    """Feedback ticket 82: Kept shows the part moved into investments in blue."""
     from lightning.ui.routes import dashboard as dashboard_module
 
     accounts, cats = setup

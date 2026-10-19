@@ -227,16 +227,16 @@
   </figure>{% endfor %}</div>
 {% endmacro %}
 
-{# Saved and invested: money in as 100 squares (invested, kept, spent) with the two rates. w = saved_and_invested(). #}
+{# Savings picture shared by budget and investments; all financial amounts come from Python. #}
 {% macro saved_split(w, tag='') %}{% set bar = w.bar %}
-{% if w.saved is not none %}
-<span class="inv-saved-body">
-  <span class="waffle inv-waffle" role="img" aria-label="Of {{ w.money_in|money }} money in: {{ bar.invested_amount|money }} invested, {{ (bar.kept - bar.invested_amount)|money }} kept, {{ bar.spent_amount|money }} spent; each square is 1%">{% for cell in bar.cells %}<i class="{{ cell }}"></i>{% endfor %}</span>
+{% if bar.state != 'empty' %}
+<span class="inv-saved-body{{ ' is-overspent' if bar.state == 'overspent' }}">
+  <span class="waffle inv-waffle" role="img" aria-label="{{ ('Overspent' if bar.state == 'overspent' else 'Savings')|tr(locale) }} {{ (bar.overspent_amount if bar.state == 'overspent' else bar.saved_amount)|money }} · {{ 'Spent'|tr(locale) }} {{ bar.spent_amount|money }}">{% for cell in bar.cells %}<i class="{{ cell }}"></i>{% endfor %}</span>
   <span class="inv-saved-side">
-    <span class="inv-saved-figures"><span><b>{% if w.saved < -100 %}—{% else %}{{ rate(w.saved) }}<small>%</small>{% endif %}</b><em>{{ fig.savings_rate.label }}{% if tag %} · {{ tag|tr(locale) }}{% endif %}</em></span></span>{# feedback ticket 89: the savings rate only; the blue squares still show what was invested #}
-    <span class="saved-key"><span><i class="k invested"></i>Invested {{ bar.invested_amount|money }}</span><span><i class="k kept"></i>Kept {{ (bar.kept - bar.invested_amount)|money }}</span><span><i class="k spent"></i>Spent {{ bar.spent_amount|money }}</span></span>
+    <span class="inv-saved-figures"><span><b>{% if bar.displayed_rate is not none %}{{ rate(bar.displayed_rate) }}<small>%</small>{% else %}{{ bar.overspent_amount|money }}{% endif %}</b><em>{{ ('Overspent' if bar.state == 'overspent' else 'Savings rate')|tr(locale) }}{% if tag %} · {{ tag|tr(locale) }}{% endif %}</em></span></span>
+    <span class="saved-key">{% if bar.state == 'overspent' %}<span><i class="k overspent"></i>{{ 'Overspent'|tr(locale) }} {{ bar.overspent_amount|money }}</span>{% else %}<span><i class="k kept"></i>{{ 'Savings'|tr(locale) }} {{ bar.saved_amount|money }}</span>{% endif %}<span><i class="k spent"></i>{{ 'Spent'|tr(locale) }} {{ bar.spent_amount|money }}</span></span>
   </span>
 </span>
-<small class="muted inv-saved-note">Of {{ w.money_in|money }} {{ fig.money_in.label|lower }} · one square is 1%{% if bar.earlier > 0 %} · {{ bar.earlier|money }} more went in from earlier savings{% endif %}</small>
+<small class="muted inv-saved-note">{% if w.money_in > 0 %}{{ 'Money in'|tr(locale) }} {{ w.money_in|money }} · {{ 'One square is 1% of income'|tr(locale) }}{% endif %}{% if bar.state == 'overspent' %} · {{ 'Darker squares show spending beyond income'|tr(locale) }}{% endif %}</small>
 {% else %}<span class="stat-tile-value">—</span><span class="stat-tile-sub">{{ "No money in this period"|tr(locale) }}</span>{% endif %}
 {% endmacro %}

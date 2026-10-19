@@ -37,4 +37,4 @@ def test_reserve_autosave_returns_fresh_server_calculated_summaries(c, setup):
     assert c.position.at(today()).free_cash == before - Decimal("2000")
     assert 'data-reserve-refresh="overview"' in response.text
     assert fmt(before - Decimal("2000"), places=0) in response.text
-    assert 'src="/static/reserve-autosave.js?v=1"' in response.text
+    assert 'src="/static/reserve-autosave.js?v=2"' in response.text

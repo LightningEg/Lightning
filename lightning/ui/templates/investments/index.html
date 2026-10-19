@@ -15,8 +15,8 @@
 {% set result = investment_report.result %}
 <section class="stat-tiles inv-top" aria-label="This period">
   {% if not phone_mode() %}{# on a phone the Overview's tiles carry these rates; never twice #}
-  <div class="stat-tile surface-in inv-saved-tile">{% set w = waffle %}{% set bar = w.bar %}
-    <span class="stat-tile-head">{{ tone_icon('in') }}<span class="stat-tile-label">{{ 'Saved and invested'|tr(locale) }}</span><span class="stat-chip">{{ chip }}</span></span>
+  <div class="stat-tile surface-{{ 'over' if waffle.bar.state == 'overspent' else 'in' }} inv-saved-tile">{% set w = waffle %}{% set bar = w.bar %}
+    <span class="stat-tile-head">{{ tone_icon('over' if waffle.bar.state == 'overspent' else 'in') }}<span class="stat-tile-label">{{ 'Savings'|tr(locale) }}</span><span class="stat-chip">{{ chip }}</span></span>
     {{ saved_split(w, period.tag) }}
   </div>{% endif %}
   <div class="stat-tile surface-{{ 'over' if result is not none and result < 0 else 'in' }} inv-result-tile">

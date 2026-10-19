@@ -16,7 +16,8 @@ def test_a_long_period_counts_spending_only_from_the_first_planned_month(c, setu
         c.transactions.record_outflow(f"2026-{month}-10", accounts["cib"].id, "1000", food.id)
     c.budgets.set_budget(food.id, "2026-03", "1200")      # the plan starts in March
     page = TestClient(create_app(c)).get("/budget?period=ytd&month=2026-03").text
-    text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", page))
+    plan = page.split('<div class="budget-plan">', 1)[1]
+    text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", plan))
     assert "Planned and spent from 2026-03-01, the first month with a plan." in text
     spent = re.search(r"Spent ([\d,]+) ", text).group(1)
     assert Decimal(spent.replace(",", "")) == Decimal("1000")   # March only, not 3,000

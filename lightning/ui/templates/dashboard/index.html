@@ -84,7 +84,7 @@
           <div class="overview-block-head"><div><h3 id="flow-heading">{{ fig.net_flow.label }}</h3><p>{{ date_from }} to {{ date_to }} · {{ fig.net_flow.formula }}</p></div><a class="quiet-link" href="/transactions?date_from={{ date_from }}&amp;date_to={{ date_to }}">{{ 'Transactions'|tr(locale) }}</a></div>
           <div class="overview-headline overview-flow-net{{ ' is-negative' if cash_flow.net < 0 }}">{{ cash_flow.net|money(True) }} <small>{{ base }}</small></div>
           {# Feedback ticket 99: money in against money out as two bars, so the gap reads without arithmetic. #}
-          {% set flow_max = [cash_flow.inflows, cash_flow.outflows]|max %}{% if flow_max > 0 %}<div class="flow-bars" role="img" aria-label="{{ fig.money_in.label }} {{ cash_flow.inflows|money }}, {{ fig.money_out.label }} {{ cash_flow.outflows|money }}">
+          {% set flow_max = [cash_flow.inflows, cash_flow.outflows]|max %}{% if flow_max > 0 %}<div class="net-flow-bars" role="img" aria-label="{{ fig.money_in.label }} {{ cash_flow.inflows|money }}, {{ fig.money_out.label }} {{ cash_flow.outflows|money }}">
             <span class="flow-bar is-in"><i style="width:{{ '%.1f'|format(cash_flow.inflows / flow_max * 100) }}%"></i></span>
             <span class="flow-bar is-out"><i style="width:{{ '%.1f'|format(cash_flow.outflows / flow_max * 100) }}%"></i></span>
           </div>{% endif %}

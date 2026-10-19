@@ -21,7 +21,7 @@ def test_all_time_money_in_is_the_same_on_investments_and_the_overview(c, setup,
     flat = lambda html: re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))
     investments = flat(client.get("/investments?period=all").text)
     overview = flat(client.get("/?period=all").text)
-    assert re.search(r"Of ([\d,]+) money in", investments).group(1) == "120,000"
+    assert re.search(r"Money in ([\d,]+)", investments).group(1) == "120,000"
     assert re.search(r"Money in ([\d,]+)", overview).group(1) == "120,000"
 
 
@@ -39,4 +39,4 @@ def test_all_time_money_in_is_the_same_on_budget_and_the_overview(c, setup, monk
     budget = flat(client.get("/budget?period=all").text)
     overview = flat(client.get("/?period=all").text)
     assert re.search(r"Money in ([\d,]+)", overview).group(1) == "60,000"
-    assert re.search(r"Of ([\d,]+) money in", budget).group(1) == "60,000"
+    assert re.search(r"Money in ([\d,]+)", budget).group(1) == "60,000"
