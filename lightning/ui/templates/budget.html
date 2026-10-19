@@ -3,9 +3,9 @@
 {% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/budget", period.key, month, this_month, period.start_text, period.end_text) }} <a class="btn small" href="/budget/fill?month={{ month }}">{{ "Fill this month"|tr(locale) }}</a>{% endblock %}
 {% block heading %}<div class="budget-heading"><div><h1>{{ 'Budget'|tr(locale) }}</h1><div class="muted">{{ 'Your spending plan'|tr(locale) }}</div></div></div>{% endblock %}
 {% block content %}
-{% from "partials/charts.html" import key_notes, meter, bullet_row, saved_split %}
-{{ key_notes(notes) }}
-{% if raise_offer %}<p class="notice raise-prompt" role="status"><span><b>{{ 'Your income went up'|tr(locale) }}</b> · {{ 'Recurring expects {recurring}, {raise} more than your average.'|tr(locale, recurring=raise_offer.recurring|money(False, 0) ~ ' ' ~ base, raise=raise_offer.raise|money(False, 0)) }}</span> <a class="btn small primary" data-popup-open href="/budget/raise?month={{ raise_offer.month }}">{{ 'Raise the plan'|tr(locale) }}</a> <a class="btn small" href="/plan/reserves">{{ 'Save the difference'|tr(locale) }}</a></p>{% endif %}
+{% from "partials/charts.html" import key_notes, meter, bullet_row, kpi_row, pace_chart %}
+{% if kpi_cards %}{{ kpi_row(kpi_cards, base, 'Budget at a glance') }}{% else %}{{ key_notes(notes) }}{% endif %}
+{% if raise_offer and not raise_in_card %}<p class="notice raise-prompt" role="status"><span><b>{{ 'Your income went up'|tr(locale) }}</b> · {{ 'Recurring expects {recurring}, {raise} more than your average.'|tr(locale, recurring=raise_offer.recurring|money(False, 0) ~ ' ' ~ base, raise=raise_offer.raise|money(False, 0)) }}</span> <a class="btn small primary" data-popup-open href="/budget/raise?month={{ raise_offer.month }}">{{ 'Raise the plan'|tr(locale) }}</a> <a class="btn small" href="/plan/reserves">{{ 'Save the difference'|tr(locale) }}</a></p>{% endif %}
 
 {% if error %}<p class="notice error" role="alert">{{ error|tr(locale) }}</p>{% endif %}
 {% if bulk_undo %}<form method="post" action="/budget/bulk/undo" class="notice"><input type="hidden" name="token" value="{{ bulk_undo }}">{{ "Bulk rules applied."|tr(locale) }}<button class="btn small">{{ 'Undo'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
@@ -16,26 +16,22 @@
   {% else %}<p class="empty">{{ "Add a spending category before creating a plan."|tr(locale) }}<a href="/categories">{{ 'Open categories'|tr(locale) }}</a></p>{% endif %}
 </section>
 {% endif %}
-{% if has_plan or period_budgeted or period_actual %}
-<section class="card wide-card budget-top" aria-label="Budget summary">
-  <div class="budget-top-grid">
-    <div class="budget-savings">
-      <div class="budget-top-head"><h2>{{ 'Savings'|tr(locale) }}</h2><span>{{ period.start_text }} to {{ period.end_text }}</span></div>
-      {{ saved_split(saved_split_data, period.tag) }}
-    </div>
-    <div class="budget-plan">
-      {% if plan_from %}<p class="muted small">Planned and spent from {{ plan_from }}, the first month with a plan.</p>{% endif %}<div class="budget-top-head"><h2>{{ fig.planned.label }}</h2><span>{{ period_budgeted|money }} {{ base }}{% if low_confidence %} {% from "partials/charts.html" import warn_tip %}{{ warn_tip(low_confidence) }}{% endif %}</span></div>
-      <div class="plan-bar{{ ' is-over' if plan_bar.is_over }}" role="img" aria-label="Spent {{ period_actual|money }} of {{ period_budgeted|money }} planned">
-        <i class="spent" style="width:{{ '%.2f'|format(plan_bar.spent) }}%"></i><i class="left" style="width:{{ '%.2f'|format(plan_bar.left) }}%"></i>{% if plan_bar.over %}<i class="over" style="width:{{ '%.2f'|format(plan_bar.over) }}%"></i>{% endif %}
-      </div>
-      <div class="plan-figures">
-        <div><span><i class="k spent"></i>{{ fig.spent.label }}</span><b>{{ period_actual|money }}</b><small>{% if period_income %}{{ (period_actual/period_income*100)|round(1) }}% of {{ fig.average_monthly_income.label|lower }}{% endif %}</small></div>
-        <div><span><i class="k {{ 'over' if period_left < 0 else 'left' }}"></i>{{ fig.left_in_plan.label if period_left >= 0 else 'Over plan by' }}</span><b class="{{ 'neg' if period_left < 0 else 'pos' }}">{{ period_left|abs|money }}</b><small>{{ left_note or '' }}</small></div>
-        <div><span><i class="k plan"></i>{{ fig.planned.label }}</span><b>{{ period_budgeted|money }}</b><small>{% if period_carryover %}Includes {{ period_carryover|money(True) }} carryover. {% endif %}{% if loan_planned %}Includes {{ loan_planned|money }} of loan payments scheduled this month. {% endif %}{% if bill_planned %}Includes {{ bill_planned|money }} of bills and subscriptions scheduled this month. {% endif %}{% if check and check.plan_saves is not none and check.planned_savings_rate is not none %}{{ fig.plan_leaves_to_save.label }} {{ check.plan_saves|money }} ({{ '%.0f'|format(check.planned_savings_rate) }}%); your target is {{ '%.0f'|format(check.target_percent) }}%.{% endif %}</small></div>
-      </div>
-    </div>
-  </div>
-</section>
+{% if plan_from %}<p class="muted small">{{ 'Planned and spent from {date}, the first month with a plan.'|tr(locale, date=plan_from) }}</p>{% endif %}
+{% if pace or plan_bills %}
+<div class="pair lead-pair">
+  {% if pace %}<section class="card" id="budget-pace" aria-labelledby="pace-heading"><div class="card-heading"><div><h2 id="pace-heading">{{ 'Is everyday spending on pace?'|tr(locale) }}</h2>
+    <p class="muted small">{{ 'Day by day against the plan, bills and loan payments left out.'|tr(locale) }}</p></div></div>
+    {{ pace_chart(pace, base, previous_month) }}
+  </section>{% endif %}
+  {% if plan_bills %}<section class="card" id="budget-bills" aria-labelledby="bills-heading"><div class="card-heading"><div><h2 id="bills-heading">{{ "Bills in this month's plan"|tr(locale) }}</h2></div><a href="/plan/recurring">{{ 'Recurring'|tr(locale) }}</a></div>
+    <div class="plan-bills">{% for b in plan_bills %}<div class="plan-bill">
+      <span class="plan-bill-name"><b>{{ b.name }}</b><small>{{ b.due }} · {{ b.kind|tr(locale) }}</small></span>
+      {% if b.state == 'late' %}<span class="plan-status plan-status-late">{{ 'Late · {n} days'|tr(locale, n=b.late) }}</span>{% elif b.state == 'paid' %}<span class="plan-status plan-status-paid">{{ 'Paid'|tr(locale) }}</span>{% else %}<span class="plan-status">{{ 'Due'|tr(locale) }}</span>{% endif %}
+      <span class="plan-bill-amount">{{ b.amount|money }}{% if b.pay %} <a class="btn small" data-popup-open href="{{ b.pay }}">{{ 'Mark paid'|tr(locale) }}</a>{% endif %}</span>
+    </div>{% endfor %}</div>
+    {% if everyday and everyday.bills_to_pay %}<div class="plan-bill-total"><span>{{ 'Bills to pay'|tr(locale) }}</span><b class="num">{{ everyday.bills_to_pay|money }}</b></div>{% endif %}
+  </section>{% endif %}
+</div>
 {% endif %}
 {% if not period_income %}<p class="muted small">Set your income categories to calculate {{ fig.average_monthly_income.label|lower }} and compare your plan with it. <a href="/settings?section=budget">{{ 'Budget settings'|tr(locale) }}</a></p>{% endif %}
 {% if ceiling_warning %}<p class="notice">{{ ceiling_warning }}</p>{% endif %}

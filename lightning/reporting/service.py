@@ -633,6 +633,11 @@ class ReportingService:
             group.value += money_out
         return sorted((g for g in groups.values() if g.value != ZERO), key=lambda g: g.value, reverse=True)
 
+    def spending_lines(self, date_from, date_to) -> list[dict]:
+        """Each spending line with its transaction and date (positive = spent, a refund negative): the lines
+        behind spending_by_category, for figures that leave some transactions out."""
+        return self._spending(date_from, date_to)
+
     def _spending(self, date_from, date_to) -> list[dict]:
         """Spending lines (positive = spent; a refund in an expense category is negative), the same
         lines that make up spending_by_category."""

@@ -11,6 +11,10 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-19 · Claude: Budget and Cash planning open with KPI cards that compare (3Q step 2, `ui/kpis.py`). Budget's day rate counts
+  everyday money only, with a pace chart and the month's bills in place of the waffle; Cash planning compares with last month-end,
+  payday and today. "Bills and loan payments before next income" is now "Due before payday"; Glossary adds Everyday spending.
+
 - 2026-10-19 · Claude: guideline 3.32 (both repos): KPI cards in five fixed slots with a compulsory comparison, rows of two to four, A08.4 micro-visuals,
   A08.5 zero and alone, thin-data chart forms, A16 adds two lines (3Q). Arabic body text is Noto Sans Arabic, not IBM Plex Sans Arabic (app fonts, CSS).
   Style, profile and font CSS carry new cache versions so installed apps load the new face.

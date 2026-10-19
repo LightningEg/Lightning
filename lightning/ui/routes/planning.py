@@ -8,7 +8,7 @@ from urllib.parse import urlencode
 from fastapi import APIRouter, Request
 
 from lightning.categories.domain import Direction, Movement
-from lightning.core.dates import fmt_date, parse_date, today
+from lightning.core.dates import fmt_date, month_of, parse_date, parse_month, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.figures import label
 from lightning.core.money import ZERO, fmt, to_decimal
@@ -17,7 +17,7 @@ from lightning.planning.domain import (FREQUENCY_LABELS, KIND_LABELS, RECURRING_
 from lightning.planning.schedule import describe
 from lightning.planning.service import LOAN_CATEGORY
 
-from .. import charts, keynotes, visuals
+from .. import charts, keynotes, kpis, visuals
 from ..web import container, redirect, render
 from . import reserves as reserve_routes
 
@@ -110,9 +110,18 @@ async def plan_page(request: Request):
     # Honest numbers (A01): with no income planned there is nothing to forecast from.
     has_income = bool(c.planning.items((PlanKind.INCOME,)))
     stats = _plan_stats(forecast, plan, day, has_income)
+    # KPI cards (guideline 3.32 A08): each figure against something. Free cash against the last month end it
+    # was at, payments before payday with the late ones, the lowest point against today.
+    past = [(key, value) for key, value in plan["past_free"] if value is not None]
+    late = [p for p in next_payments if p.days_late(day) and not p.item.is_income]
+    kpi_cards = kpis.cash_plan(forecast, day=day, before=plan["before_income"], late=late,
+                               free_then=past[-1][1] if past else None,
+                               then=fmt_date(parse_month(past[-1][0])[1]) if past else "",
+                               past_free=[value for _, value in past], position=c.position.at(day),
+                               monthly_spending=c.budgets.spending_average(month_of(day)).amount, has_income=has_income)
     return render(request, "planning/plan.html", tabs=TABS, plan_tab="plan", forecast=forecast, owe=owe, has_income=has_income,
                   gameya_owed=c.position.at(day).gameya_still_to_pay,
-                  notes=[], plan=plan, stats=stats, forecast_chart=visuals.forecast_trend(forecast),
+                  notes=[], plan=plan, stats=stats, kpi_cards=kpi_cards, forecast_chart=visuals.forecast_trend(forecast),
                   next_payments=next_payments, late_days=late_days, as_of=fmt_date(day), window_end=fmt_date(window_end),
                   has_items=bool(c.planning.items()), labels=_labels(c), zakat=c.zakat.forecast(day))
 

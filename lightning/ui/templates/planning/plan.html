@@ -4,9 +4,9 @@
 {% block heading %}<div><h1>{{ 'Cash planning'|tr(locale) }}</h1></div>{% endblock %}
 
 {% block content %}
-{% from "partials/charts.html" import stat_tiles, trend, waterfall, bars %}
+{% from "partials/charts.html" import stat_tiles, kpi_row, trend, waterfall, bars %}
 {% set f = forecast %}{% set p = plan %}
-{{ stat_tiles(stats, base, 'Your cash') }}
+{% if kpi_cards %}{{ kpi_row(kpi_cards, base, 'Your cash') }}{% else %}{{ stat_tiles(stats, base, 'Your cash') }}{% endif %}
 
 <header class="overview-section-head inv-head" id="plan-build"><h2>{{ 'How is safe to spend worked out?'|tr(locale) }}</h2><span>Today to {{ f.next_income_date or 'three months from now' }}</span></header>
 <section class="card wide-card"><div class="overview-split">

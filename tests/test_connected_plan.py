@@ -61,9 +61,9 @@ def test_screens_share_the_one_check(c):
     c.reserves.create("New laptop", "1200", due_date="2027-11-30")  # 100 a month over 12 months
     browser = _ScreenClient(create_app(c), "http://testserver")
     budget = visible_text(browser.get(f"/budget?period=month&month={MONTH}").text)
-    assert "Below your savings target 10%" in budget
-    assert "Plan 1,000 less to keep 2,000 a month." in budget
-    assert "Plan leaves to save 1,000 (10%); your target is 20%." in budget
+    # The Plan leaves to save card (guideline 3.32 A08): the figure, its comparison with the target, Watch, the way out.
+    assert "Plan leaves to save Watch 1,000 EGP 10% of income, target 20%" in budget
+    assert "Plan 1,000 less to keep 2,000 a month" in budget
     inbox = {item["label"]: item for item in ReviewInbox(c).items(today())}
     item = inbox["This month's plan is below your savings target"]
     assert item["href"] == f"/budget?month={MONTH}" and "Plan 1,000 EGP less" in item["detail"]
@@ -270,7 +270,8 @@ def test_a_raise_in_recurring_is_offered_to_the_plan(c, setup):
     browser = _ScreenClient(create_app(c), "http://testserver")
     assert "Save the difference" in visible_text(browser.get(f"/budget/raise?month={MONTH}").text)
     budget = visible_text(browser.get(f"/budget?month={MONTH}").text)
-    assert "Your income went up" in budget and "Raise the plan" in budget and "Save the difference" in budget
+    # On the Plan leaves to save card (guideline 3.32 A08.5: no key note in a row of its own); its popup offers both choices.
+    assert "Income up 6,000 Raise the plan" in budget
     page = visible_text(browser.post("/budget/raise", data={"month": MONTH, "choice": "save"}).text)
     assert "Savings target raised to 33.3%" in page and c.health.limit_values()["savings_rate"] == Decimal("33.3")
     assert c.health.take_raise("plan").startswith("The plan now counts your recurring income, 36,000")

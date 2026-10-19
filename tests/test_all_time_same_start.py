@@ -35,8 +35,9 @@ def test_all_time_money_in_is_the_same_on_budget_and_the_overview(c, setup, monk
     c.transactions.record_inflow("2026-10-01", accounts["cib"].id, "30000", cats["EXP.WORK.SALARY"].id)
     c.transactions.record_outflow("2026-10-10", accounts["cib"].id, "500", cats["EXP.PERSONAL.FOOD"].id)
     client = TestClient(create_app(c))
-    flat = lambda html: re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))
-    budget = flat(client.get("/budget?period=all").text)
-    overview = flat(client.get("/?period=all").text)
-    assert re.search(r"Money in ([\d,]+)", overview).group(1) == "60,000"
-    assert re.search(r"Money in ([\d,]+)", budget).group(1) == "60,000"
+    # Budget's savings waffle moved to the Overview (owner 2026-10-19), so the two All times are compared by their start.
+    start = lambda html: re.search(r'name="date_from" value="([\d-]+)"', html).group(1)
+    budget = client.get("/budget?period=all").text
+    overview = client.get("/?period=all").text
+    assert re.search(r"Money in ([\d,]+)", re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", overview))).group(1) == "60,000"
+    assert start(budget) == start(overview) == "2026-09-02"

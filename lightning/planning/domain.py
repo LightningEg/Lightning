@@ -182,6 +182,48 @@ class ForecastMonth:
 
 
 @dataclass(frozen=True)
+class EverydayBudget:
+    """A month's plan split into the bills it holds and the everyday money around them (guideline 3.32 A08.3,
+    owner 2026-10-19: Budget's day rate counts everyday money only). Plan only: it moves no money."""
+    month: str
+    planned: Decimal                 # Planned: the Budget screen's plan (BudgetService.plan_summary)
+    spent: Decimal                   # Spent of the plan, bills included
+    left: Decimal                    # Left in plan
+    bills_to_pay: Decimal            # bills and loan payments in planned categories not paid yet
+    everyday_left: Decimal           # Left in plan less bills to pay: Budget until payday's own figure this month
+    everyday_plan: Decimal           # Planned less the bills and loan payments scheduled in planned categories
+    everyday_spent: Decimal          # Spent less payments marked paid against a bill or loan
+    day: int                         # days of the month counted so far (all of a past month, 0 for a future one)
+    days_in_month: int
+    current: bool                    # the month holds today
+    by_day: list[Decimal]            # everyday spending so far, added up day by day (index 0 is day 1)
+    last_month_by_day: list[Decimal]  # the same for the month before, every day of it
+    room: dict[int, Decimal] = field(default_factory=dict)  # each planned category's left less its bills to pay
+    payments: list = field(default_factory=list)  # bill and loan payments in planned categories: the month's, and earlier unpaid ones
+
+    @property
+    def days_left(self) -> int:
+        return self.days_in_month - self.day + 1 if self.current else 0
+
+    @property
+    def per_day(self) -> Decimal | None:
+        """Everyday money left for each day still to come, today included."""
+        return (self.everyday_left / self.days_left).quantize(Decimal("0.01")) if self.days_left > 0 else None
+
+    @property
+    def pace(self) -> Decimal:
+        """What the everyday plan allows by today, spread evenly over the month."""
+        return (self.everyday_plan * self.day / self.days_in_month).quantize(Decimal("0.01")) if self.days_in_month else ZERO
+
+    @property
+    def last_month_same_day(self) -> Decimal | None:
+        """The month before's everyday spending by the same day of the month (its last day when shorter)."""
+        if not self.last_month_by_day or not self.day:
+            return None
+        return self.last_month_by_day[min(self.day, len(self.last_month_by_day)) - 1]
+
+
+@dataclass(frozen=True)
 class CashForecast:
     as_of: str
     free_cash: Decimal

@@ -167,9 +167,11 @@ def test_every_tab_of_the_demo_opens_with_its_key_notes(demo):
             assert page.text.count('class="stat-tile surface-') == 4, url  # four stat cards, no key notes
         elif url == "/birdview/expenses":  # four KPI cards give the gist of the period
             assert page.text.count('class="stat-tile surface-') == 4, url
-        elif url == "/plan":  # safe to spend, free cash, what's due and the lowest point ahead
-            assert page.text.count('class="stat-tile surface-') == 4 and "chart-waterfall" in page.text, url
+        elif url == "/plan":  # safe to spend, free cash, what's due and the lowest point ahead, each compared (3.32)
+            assert page.text.count('<article class="kpi-card') == 4 and "chart-waterfall" in page.text, url
             assert "timeline" in page.text and "section-tabs" in page.text, url
+        elif url == "/budget":  # left in plan, everyday spending against pace, and what needs you (3.32)
+            assert 2 <= page.text.count('<article class="kpi-card') <= 4 and 'class="key-note' not in page.text, url
         elif url == "/plan/recurring":  # its Fixed costs card says the share of income, once (UX plan 10)
             assert page.text.count('class="stat-tile surface-') == 1 and 'class="key-note' not in page.text, url
         elif url == "/investments":  # the period's waffle, result and six-month value line

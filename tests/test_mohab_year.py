@@ -875,7 +875,7 @@ def test_safe_to_spend_until_payday(mohab):
     # 10,417) is kept back too, as Saving for goals is (owner request 2026-10-05: one plan).
     # Audit 2026-10-15: the 400 of cash in THNDR is kept apart from spendable cash (40,937 before).
     assert answer.figure("Safe to spend until 2026-10-01") == D("40537")
-    assert answer.shows("On top of your plan until 2026-10-01")
+    assert answer.shows("On top of your plan")  # the date is the card's chip, not repeated in its line (A16)
     assert answer.shows("Budget until payday −1,309 Emergency fund top-up −10,417 Safe to spend 40,537")
 
 
@@ -896,7 +896,9 @@ def test_september_spending_by_category(mohab):
 def test_the_budget_says_what_is_over(mohab):
     answer = mohab.answers["plan"]
     assert route(mohab, "plan") == ["/", "/budget"]
-    assert answer.shows("Categories over plan 2 Transportation, Food & Groceries")
+    # The Over plan card (guideline 3.32 A08): the total, how many categories, which ones, and a way to cover it.
+    assert answer.shows("Over plan Needs you", "2 categories over their plan")
+    assert answer.shows("Transportation") and answer.shows("Food & Groceries")
     # Each "80 of 67 · 13 over" adds up as he reads it: plans built from his spending are whole EGP.
     for spent, planned, gap, word in re.findall(r"([\d,]+) of ([\d,]+) ([\d,]+) (over|left)", answer.screen.text):
         spent, planned, gap = (money(x) for x in (spent, planned, gap))

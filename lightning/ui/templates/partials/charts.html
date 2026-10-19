@@ -179,6 +179,55 @@
 </{{ tag }}>
 {% endmacro %}
 
+{# KPI card · guideline 3.32 A08: five fixed slots in this order, every one always drawn so a row's figures line up:
+   label and chip · figure · comparison · one micro-visual · one line or one action. Built in lightning/ui/kpis.py. #}
+{% macro kpi_visual(v) -%}
+{% if not v %}<span class="kc-novisual"></span>
+{%- elif v.kind == 'spark' %}<svg class="kc-spark" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="{{ v.area }}"/><polyline points="{{ v.points }}" vector-effect="non-scaling-stroke"/></svg><span class="kc-dot" style="left:{{ '%.2f'|format(v.dot[0]) }}%;top:{{ '%.2f'|format(v.dot[1]) }}%"></span>
+{%- elif v.kind == 'meter' %}<span class="kc-meter{{ ' is-over' if v.over }}"><i style="width:{{ '%.1f'|format(v.width) }}%"></i>{% if v.tick is not none %}<b style="inset-inline-start:{{ '%.1f'|format(v.tick) }}%" title="{{ v.tick_label }}"></b>{% endif %}</span>
+{%- elif v.kind == 'segments' %}<span class="kc-segments" role="img" aria-label="{% for p in v.parts %}{{ p.name }} {{ p.value|money }}{{ ', ' if not loop.last }}{% endfor %}">{% for p in v.parts %}<i class="seg-{{ p.tone }}" style="width:{{ '%.2f'|format(p.share) }}%"></i>{% endfor %}</span><span class="kc-key">{% for p in v.parts %}<span class="seg-{{ p.tone }}">{{ p.name }}</span>{% endfor %}</span>
+{%- elif v.kind == 'timeline' %}<span class="kc-timeline">{% for _ in range(v.late) %}<i class="is-late" style="left:{{ 2 + loop.index0 * 5 }}%"></i>{% endfor %}<b class="kc-today"></b>{% for d in v.dots %}<i style="left:{{ '%.1f'|format(d.x) }}%" title="{{ d.title }}"></i>{% endfor %}{% if v.payday %}<i class="is-payday" style="left:98%"></i>{% endif %}</span>
+{%- elif v.kind == 'columns' %}<span class="kc-columns">{% for c in v.bars %}<i class="{{ 'is-negative' if c.negative }}{{ ' is-running' if c.running }}" style="height:{{ '%.1f'|format([c.height, 6]|max) }}%"></i>{% endfor %}</span>
+{%- endif %}
+{%- endmacro %}
+
+{% macro kpi_card(k, base) %}
+<article class="kpi-card tone-{{ k.tone }}{{ ' is-needs' if k.needs }}">
+  {% if k.href %}<a class="kc-open" href="{{ k.href }}" aria-label="{{ k.label }}"></a>{% endif %}
+  <span class="kc-head"><span class="kc-label">{{ k.label }}</span>{% if k.chip %}<span class="kc-chip is-{{ k.chip.tone }}">{% if k.chip.arrow %}<svg viewBox="0 0 24 24" aria-hidden="true">{% if k.chip.arrow == 'up' %}<path d="M12 19V5M5 12l7-7 7 7"/>{% else %}<path d="M12 5v14M5 12l7 7 7-7"/>{% endif %}</svg>{% endif %}{{ k.chip.text }}</span>{% endif %}</span>
+  <span class="kc-figure{{ ' is-empty' if k.value is none }}">{% if k.value is none %}—{% elif k.kind == 'rate' %}{{ rate(k.value) }}<small>%</small>{% elif k.kind == 'count' %}{{ k.value }}{% else %}{{ k.value|money(k.signed) }}<small>{{ base }}</small>{% endif %}</span>
+  <span class="kc-compare">{% if k.compare.figure %}<b class="is-{{ k.compare.tone }}">{{ k.compare.figure }}</b> {% endif %}{{ k.compare.text }}</span>
+  <span class="kc-visual">{{ kpi_visual(k.visual) }}</span>
+  <span class="kc-line">{% if k.line.text %}<span>{{ k.line.text }}</span>{% endif %}{% if k.line.action %}<a href="{{ k.line.href }}"{% if k.line.popup %} data-popup-open{% endif %}>{{ k.line.action }}</a>{% endif %}</span>
+</article>
+{% endmacro %}
+
+{% macro kpi_row(cards, base, label='At a glance') %}
+{% if cards %}<section class="kpi-row kpi-row-{{ cards|length }}" aria-label="{{ label }}">{% for k in cards %}{{ kpi_card(k, base) }}{% endfor %}</section>{% endif %}
+{% endmacro %}
+
+{# Pace (burn-up, A12.1.9): everyday spending added up day by day, the plan's straight line dashed in Meadow,
+   the month before in Neutral. Values sit on the marks; the table under it has the same numbers. #}
+{% macro pace_chart(p, base, previous_label) %}
+<div class="chart pace-chart" role="img" aria-label="Everyday spending {{ p.today.value|money if p.today else '' }} by day {{ p.today.day if p.today else '' }}; the plan {{ p.plan.value|money }}">
+  <div class="pace-plot">
+    {% for g in p.grid %}<span class="pace-grid" style="top:{{ '%.2f'|format(g.y) }}%"><small>{{ g.value|money }}</small></span>{% endfor %}
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      {% if p.before %}<polyline class="pace-before" points="{{ p.before }}" vector-effect="non-scaling-stroke"/>{% endif %}
+      <line class="pace-plan" x1="0" y1="100" x2="{{ p.plan.x }}" y2="{{ '%.2f'|format(p.plan.y) }}" vector-effect="non-scaling-stroke"/>
+      {% if p.actual %}<polyline class="pace-actual" points="{{ p.actual }}" vector-effect="non-scaling-stroke"/>{% endif %}
+      {% if p.today %}<line class="pace-today" x1="{{ '%.2f'|format(p.today.x) }}" y1="0" x2="{{ '%.2f'|format(p.today.x) }}" y2="100" vector-effect="non-scaling-stroke"/>{% endif %}
+    </svg>
+    {% if p.today %}<span class="pace-mark is-actual" style="left:{{ '%.2f'|format(p.today.x) }}%;top:{{ '%.2f'|format(p.today.y) }}%"><b>{{ p.today.value|money }}</b></span>
+    <span class="pace-mark is-plan" style="left:{{ '%.2f'|format(p.today.x) }}%;top:{{ '%.2f'|format(p.today.pace_y) }}%"><small>{{ "Plan's pace"|tr(locale) }} {{ p.today.pace|money }}</small></span>{% endif %}
+    <span class="pace-end is-plan" style="top:{{ '%.2f'|format(p.plan.y) }}%"><small>{{ "Plan"|tr(locale) }} {{ p.plan.value|money }}</small></span>
+    {% if p.before_total is not none %}<span class="pace-end is-before" style="top:{{ '%.2f'|format(p.before_end_y) }}%"><small>{{ previous_label }} {{ p.before_total|money }}</small></span>{% endif %}
+  </div>
+  <div class="pace-x"><span>1</span>{% if p.today %}<span class="pace-x-today" style="left:{{ '%.2f'|format(p.today.x) }}%">{{ "Today"|tr(locale) }}</span>{% endif %}<span>{{ p.days }}</span></div>
+  <p class="chart-legend"><span class="key-actual">{{ "Everyday spending"|tr(locale) }}</span><span class="key-plan">{{ "Plan"|tr(locale) }}</span>{% if p.before %}<span class="key-before">{{ previous_label }}</span>{% endif %}</p>
+</div>
+{% endmacro %}
+
 {% macro stat_tiles(stats, base, label='This period') %}
 <section class="stat-tiles" aria-label="{{ label }}">{% for s in stats %}{{ stat_tile(s, base) }}{% endfor %}</section>
 {% endmacro %}

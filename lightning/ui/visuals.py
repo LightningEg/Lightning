@@ -534,4 +534,4 @@ def cash_plan(c, forecast, day: date) -> dict:
     return {"build": build, "marks": marks, "upcoming": upcoming, "before_income": before_income,
             "before_total": sum((p.amount for p in before_income), ZERO), "heading": heading, "flows": rows,
             "loan_bars": charts.bars(loans, 6), "loan_rows": loans, "forecast_spark": charts.sparkline([m.closing for m in f.months]),
-            "parts": parts}
+            "parts": parts, "past_free": [(key, value) for key, value in zip(past_keys, past)]}

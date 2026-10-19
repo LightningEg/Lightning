@@ -10,7 +10,7 @@ const postcss = require("postcss");
 const rtlcss = require("rtlcss");
 
 const STATIC = path.join(__dirname, "..", "lightning", "ui", "static");
-const AS_DRAWN = /chart|spark|sankey|bullet|heat|donut|capital-marker|diverging|horizon-|plan-bar|flow-bar|stat-tile-visual|calendar|meter|zero-line|allocation-(track|fill)|compare-(track|current)|bridge-value|progress|treemap/;
+const AS_DRAWN = /chart|spark|sankey|bullet|heat|donut|capital-marker|diverging|horizon-|plan-bar|flow-bar|stat-tile-visual|calendar|meter|zero-line|allocation-(track|fill)|compare-(track|current)|bridge-value|progress|treemap|pace-|kc-timeline|kc-columns|kc-dot/;
 const KEEP_PROPS = new Set(["transform", "transform-origin", "cursor", "animation", "animation-name"]);
 
 function rulesOf(root) {

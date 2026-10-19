@@ -27,7 +27,7 @@ COLLECT = """() => {
   const TEXT = %TEXT%;
   const hex = c => { const m = c.match(/[\\d.]+/g); if (!m) return null; if (m.length > 3 && +m[3] === 0) return null;
     return '#' + m.slice(0, 3).map(x => (+x).toString(16).padStart(2, '0')).join('').toUpperCase(); };
-  const out = {upper: [], colors: [], links: [], heads: [], fields: [], rose: [], overflow: [], jump: []};
+  const out = {upper: [], colors: [], links: [], heads: [], fields: [], rose: [], overflow: [], jump: [], kpi: []};
   const name = el => el.tagName + '.' + String(el.className && el.className.baseVal === undefined ? el.className : '').trim().split(/\\s+/).slice(0, 2).join('.');
   for (const el of document.querySelectorAll('body *')) {
     const s = getComputedStyle(el), r = el.getBoundingClientRect();
@@ -53,6 +53,20 @@ COLLECT = """() => {
   }
   for (const c of document.querySelectorAll('.main .card')) {
     if (c.scrollWidth > c.clientWidth + 1 || [...c.querySelectorAll('*')].some(w => w.clientWidth && w.scrollWidth > w.clientWidth + 1 && ['auto', 'scroll'].includes(getComputedStyle(w).overflowX))) out.overflow.push(name(c));
+  }
+  // A08 and A09 (guideline 3.32): two to four KPI cards fill a row, every card compares, the figures share a line.
+  for (const row of document.querySelectorAll('.main .kpi-row')) {
+    const cards = [...row.querySelectorAll(':scope > .kpi-card')];
+    if (cards.length < 2 || cards.length > 4) out.kpi.push('a KPI row of ' + cards.length);
+    const bottoms = [];
+    for (const card of cards) {
+      const label = (card.querySelector('.kc-label') || {}).textContent || '?';
+      const compare = card.querySelector('.kc-compare');
+      if (!compare || !compare.textContent.trim()) out.kpi.push(label + ' has no comparison');
+      const figure = card.querySelector('.kc-figure');
+      if (figure && card.getBoundingClientRect().top === row.getBoundingClientRect().top) bottoms.push(figure.getBoundingClientRect().bottom);
+    }
+    if (bottoms.length > 1 && Math.max(...bottoms) - Math.min(...bottoms) > 2) out.kpi.push('figures of a row sit on different lines');
   }
   const jump = document.querySelector('#page-jump');
   if (jump && innerWidth > 760) {
@@ -146,6 +160,10 @@ def test_register_amounts_are_not_strong_rose(audit):
 
 def test_pages_fit_their_cards(audit):
     assert not _fails(audit, "overflow")
+
+
+def test_kpi_rows_compare_and_line_up(audit):
+    assert not _fails(audit, "kpi")
 
 
 def test_page_jump_stays_outside_the_figures(audit):

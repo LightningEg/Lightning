@@ -107,7 +107,7 @@ The period picker (All time · YTD · Monthly · Custom) drives most visuals. A 
 | Follows the period | Fixed horizon |
 |---|---|
 | Overview: stat cards, position cards (as of the period end, never after today), Cash flow, Investments section | Overview: Net worth over time (12 month ends up to the period end); Where money in went's last six months; Month by month |
-| Budget: waffle, plan bar, Spent of plan | Budget: plans are monthly; longer periods add months |
+| Budget: KPI cards (a month: everyday pace and its bills), Spent of plan | Budget: plans are monthly; longer periods add months, each month's left in plan |
 | Investments: waffle, Net gain or loss, allocation and biggest holdings (as of period end), money and value by class | Portfolio value sparkline (last 6 months); Dividends (year to date); Return since first investment (plain before 365 days, annualized XIRR afterward, with days held); horizon bar (today) |
 | Expense analysis: KPI cards, treemap, now against usual, daily calendar or monthly summaries | "Usual" is the 6 whole months before the period; usual range, small multiples, heatmap use the 12 before it |
 | — | Holding page: whole history up to 24 month ends; sparklines last 6 |
@@ -123,7 +123,7 @@ Each tab answers one main question, then its follow-ups. Reviewed 2026-10-13; `t
 |---|---|---|
 | Overview | Where do I stand, and what needs me? | Needs you, Net worth, Free cash, what it is made of, cash flow |
 | Expense analysis | Where did my money go? | Money out, ranked categories, change from last period |
-| Budget | Am I on plan? | Left in plan, categories over plan |
+| Budget | Am I on plan? | Left in plan, everyday spending against pace, categories over plan |
 | Investments | What do I hold, and how did it do? | Net gain or loss, holdings, allocation |
 | Cash planning | How much can I actually spend? | Safe to spend, What you owe, forecast |
 | Reserves | Am I safe if something goes wrong? | Emergency fund in months |

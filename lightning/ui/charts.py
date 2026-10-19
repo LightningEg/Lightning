@@ -382,8 +382,9 @@ def share(parts: list[dict]) -> dict:
             "total": total}
 
 
-def sparkline(values: list[Decimal | None]) -> dict:
-    """A small trend with no axes; only with two known points or more."""
+def sparkline(values: list[Decimal | None], mark: str = "last") -> dict:
+    """A small trend with no axes; only with two known points or more. ``dot`` is the point the card's label
+    names (A12.1.15): the last one, or the lowest with ``mark="low"``."""
     known = [v for v in values if v is not None]
     if len(known) < 2:
         return {"points": ""}
@@ -391,8 +392,38 @@ def sparkline(values: list[Decimal | None]) -> dict:
     span = (high - low) or Decimal(1)
     pts = [(4 + 92 * i / (len(values) - 1), 90 - float((v - low) / span) * 80)
            for i, v in enumerate(values) if v is not None]
-    return {"points": " ".join(f"{x:.2f},{y:.2f}" for x, y in pts), "last": pts[-1],
+    dot = pts[known.index(low)] if mark == "low" else pts[-1]
+    return {"points": " ".join(f"{x:.2f},{y:.2f}" for x, y in pts), "last": pts[-1], "dot": dot,
             "area": f"M{pts[0][0]:.2f},100 " + " ".join(f"L{x:.2f},{y:.2f}" for x, y in pts) + f" L{pts[-1][0]:.2f},100 Z"}
+
+
+def pace(by_day: list[Decimal], plan: Decimal, days: int, last_month: list[Decimal] | None = None) -> dict:
+    """Pace (burn-up, A12.1.9): spending added up day by day against a straight line from zero to the plan,
+    with the month before by the same day of the month. Positions in percent of the plot (0,0 top left)."""
+    last_month = last_month or []
+    top = max([plan, *by_day, *last_month, Decimal(1)]) * Decimal("1.08")
+
+    def x(day: int) -> float:
+        return min(day, days) / days * 100 if days else 0.0
+
+    def y(value: Decimal) -> float:
+        return 100 - float(value / top * 100)
+
+    def line(values: list[Decimal]) -> str:
+        return " ".join([f"0,100"] + [f"{x(i + 1):.2f},{y(v):.2f}" for i, v in enumerate(values[:days])])
+
+    now = len(by_day)
+    allowed = plan * now / days if days else ZERO
+    return {"actual": line(by_day) if by_day else "", "before": line(last_month) if last_month else "",
+            "plan": {"x": 100.0, "y": y(plan), "value": plan},
+            "today": {"x": x(now), "value": by_day[-1] if by_day else ZERO, "y": y(by_day[-1]) if by_day else 100.0,
+                      "day": now, "pace": allowed, "pace_y": y(allowed),
+                      "before": last_month[min(now, len(last_month)) - 1] if last_month and now else None,
+                      "before_y": y(last_month[min(now, len(last_month)) - 1]) if last_month and now else None} if now else None,
+            "before_total": last_month[-1] if last_month else None,
+            "before_end_y": y(last_month[-1]) if last_month else None,
+            "grid": [{"y": y(v), "value": v} for v in (top / Decimal("1.08") / 2, top / Decimal("1.08"))],
+            "days": days}
 
 
 def line_chart(values: list[Decimal | None]) -> dict[str, list]:

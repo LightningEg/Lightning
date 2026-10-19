@@ -4,7 +4,7 @@ An estimate. It reads the plan, the budget and reserves and never changes net wo
 """
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 from lightning.core.dates import fmt_date, month_of, parse_date, parse_month, today
@@ -12,7 +12,7 @@ from lightning.core.figures import label
 from lightning.core.money import ZERO, from_e6
 from lightning.deposits.domain import DepositEvent
 
-from .domain import CashForecast, ForecastMonth, Payment, PaymentStatus, PlanKind
+from .domain import CashForecast, EverydayBudget, ForecastMonth, Payment, PaymentStatus, PlanKind
 from .dated_cash import dated_cash_forecast
 
 HORIZON_MONTHS = 3
@@ -150,6 +150,61 @@ class CashForecaster:
                 result.append({"id": reserve["id"], "name": reserve["name"], "amount": amount,
                                "due_date": reserve["due_date"], "missing": missing})
         return result
+
+    # -------------------------------------------------------------- everyday
+    def everyday(self, month: str, as_of: date | None = None) -> EverydayBudget:
+        """The month's plan as bills and everyday money (owner 2026-10-19). Bills to pay are the bills and loan
+        payments in planned categories not paid yet, counted as the forecast counts them for this month, so
+        Everyday left here is Budget until payday's own figure; a month already over has none left to pay."""
+        day = as_of or today()
+        first, last = parse_month(month)
+        current = first <= day <= last
+        counted = day if current else last if day > last else None
+        summary = self.budgets.plan_summary(month)
+        _, covered = self._budget(month, current)
+        payments = [p for p in self.planning.all_payments(last, day)
+                    if not p.item.is_income and p.item.category_id in covered and p.status != PaymentStatus.SKIPPED
+                    and (p.due_date[:7] == month or (current and p.outstanding and p.due_date < fmt_date(first)))]
+        unpaid: dict[int, Decimal] = {}
+        if current:
+            for p in payments:
+                if p.outstanding:
+                    unpaid[p.item.category_id] = unpaid.get(p.item.category_id, ZERO) + self.planning.amount_in_base(p, p.still_owed, day)
+        bills_to_pay = sum(unpaid.values(), ZERO)
+        everyday_left = max(summary["left"] - bills_to_pay, ZERO) if current else summary["left"]
+        scheduled = sum((amount for cid, amount in self.budgets.scheduled_payments(month).items() if cid in covered), ZERO)
+        by_day = self._everyday_by_day(first, counted) if counted else []
+        before_last = first - timedelta(days=1)
+        last_month = self._everyday_by_day(before_last.replace(day=1), before_last)
+        view = self.budgets.month_view(month)
+        room = {line.category_id: line.remaining - unpaid.get(line.category_id, ZERO)
+                for section in view.sections for line in section.lines
+                if line.depth > 1 and line.remaining is not None}
+        return EverydayBudget(month, summary["planned"], summary["spent"], summary["left"], bills_to_pay, everyday_left,
+                              summary["planned"] - scheduled, by_day[-1] if by_day else ZERO,
+                              counted.day if counted else 0, last.day, current, by_day, last_month, room, payments)
+
+    def _everyday_by_day(self, start: date, end: date) -> list[Decimal]:
+        """Everyday spending added up day by day from ``start`` to ``end``: the budget's spending (one-off and
+        investment categories left out) less bill and loan payments. A payment is a bill's when it is marked paid
+        against one, or when it pays a bill's payee in that bill's category (a bill paid before it was scheduled,
+        or never marked paid)."""
+        linked = self.planning.linked_transaction_ids()
+        payees = {(item.counterparty_id, item.category_id) for item in self.planning.items()
+                  if not item.is_income and item.counterparty_id and item.category_id}
+        left_out = self.budgets.one_off_ids() | self.budgets._investment_ids()
+        daily: dict[str, Decimal] = {}
+        for line in self.reporting.spending_lines(start, end):
+            if (line["transaction_id"] in linked or line["category_id"] in left_out
+                    or (line.get("counterparty_id"), line["category_id"]) in payees):
+                continue
+            daily[line["date"]] = daily.get(line["date"], ZERO) + line["value"]
+        out, total, cursor = [], ZERO, start
+        while cursor <= end:
+            total += daily.get(fmt_date(cursor), ZERO)
+            out.append(total)
+            cursor += timedelta(days=1)
+        return out
 
     # -------------------------------------------------------------- forecast
     def forecast(self, as_of: date | None = None, months: int = HORIZON_MONTHS) -> CashForecast:

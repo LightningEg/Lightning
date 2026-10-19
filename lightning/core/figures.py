@@ -211,13 +211,17 @@ _TABLE = [
      "Unrealized gain − Price part"),
     # ------------------------------------------------------------ cash planning
     ("safe_to_spend", "Safe to spend", "Free cash after what is promised before your next income. An estimate. Budget until payday, Saving for goals, Emergency fund top-up and Rest of savings target count for every month until that income (only the days before it in the month it lands), so a long gap between pays is covered.",
-     "Free cash − Bills and loan payments before next income − Budget until payday − Saving for goals − Emergency fund top-up − Rest of savings target"),
+     "Free cash − Due before payday − Budget until payday − Saving for goals − Emergency fund top-up − Rest of savings target"),
     ("bills_inside_the_plan", "Bills inside the plan",
      "This month's scheduled bills, due or upcoming, in a category that has a budget. They are part of that budget."),
     ("left_in_plan_after_bills", "Budget until payday",
      "This month's left in plan less the scheduled bills it already covers, so a bill is never counted twice.",
      "Left in plan − Bills inside the plan"),
-    ("payments_before_next_income", "Bills and loan payments before next income",
+    ("everyday_spending", "Everyday spending",
+     "This month's Spent less the plan's bills and loan payments already paid (or paid to that bill's payee in its "
+     "category): what Budget's day rate is about. Budget compares it with the plan's straight-line pace and with "
+     "last month by the same day."),
+    ("payments_before_next_income", "Due before payday",
      "Scheduled bills, subscriptions and loan payments that are not due yet, up to your next income."),
     ("saving_for_goals", "Saving for goals", "What dated reserve goals still need this month, spread over the months left."),
     ("savings_target_rest", "Rest of savings target", "What the Savings target asks a month beyond Saving for goals and "
@@ -314,6 +318,7 @@ _SOURCES = {
     "safe_to_spend": (BOTH, f"{FC}._safe_to_spend"),
     "bills_inside_the_plan": (PLAN, f"{FC}.forecast"),
     "left_in_plan_after_bills": (BOTH, "lightning.planning.domain.ForecastMonth.budget_spending"),
+    "everyday_spending": (BOTH, "lightning.planning.domain.EverydayBudget.everyday_spent"),
     "payments_before_next_income": (PLAN, f"{FC}._safe_to_spend"),
     "saving_for_goals": (PLAN, f"{FC}._goal_need"),
     "savings_target_rest": (PLAN, f"{FC}.forecast"),
@@ -323,6 +328,7 @@ FIGURES: dict[str, Figure] = {
 
 # Names that used to appear on screens, each mapped to the figure that replaced it.
 RETIRED_NAMES = {
+    "Bills and loan payments before next income": "payments_before_next_income",
     "All accounts": "in_your_accounts", "Gross balances": "in_your_accounts",
     "Money from others": "held_for_others", "Cash held for others": "held_for_others",
     "Owned value": "what_you_own", "Owned net worth": "what_you_own", "What I own": "what_you_own",

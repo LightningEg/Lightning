@@ -378,12 +378,12 @@ def test_the_plan_card_and_safe_to_spend_count_the_same_payments(c, setup, monke
     c.planning.create(kind="BILL", name="Gym", amount="700", frequency="MONTHLY", start_date="2026-10-20")   # overdue
     c.planning.create(kind="BILL", name="Insurance", amount="3000", frequency="ONCE", start_date="2026-12-10")
     f = c.forecaster.forecast(date(2026, 10, 31))
-    part = -dict(f.safe_to_spend_parts)["Bills and loan payments before next income"]
+    part = -dict(f.safe_to_spend_parts)["Due before payday"]
     assert part == sum(p.amount for p in f.payments_before_income)
     assert "Insurance" in {p.item.name for p in f.payments_before_income}            # 40 days ahead
     assert all(p.status.value == "UPCOMING" for p in f.payments_before_income)       # the overdue Gym is in Bills due
     page = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", TestClient(create_app(c)).get("/plan").text))
-    card = re.search(r"Bills and loan payments before next income \d+ payments? ([\d,]+) EGP", page)
+    card = re.search(r"Due before payday \d+ (?:late|payments?) ([\d,]+) EGP", page)
     assert card and card.group(1) == f"{part:,.0f}"
 
 

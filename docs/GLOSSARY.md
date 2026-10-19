@@ -195,7 +195,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Saving needed** | What this month's plan must leave: the Savings target, or Saving for goals plus Emergency fund top-up when they need more. | Read directly from the plan | `planning.health.PlanCheck.to_save` |
 | **Most you can plan** | The largest plan that still leaves what you need to save. It replaced the budget's separate spending ceiling (2026-10-05). | Average monthly income − Saving needed | `planning.health.PlanCheck.spending_room` |
 | **Bills inside the plan** | This month's scheduled bills, due or upcoming, in a category that has a budget. They are part of that budget. | Read directly from the plan | `planning.forecast.CashForecaster.forecast` |
-| **Bills and loan payments before next income** | Scheduled bills, subscriptions and loan payments that are not due yet, up to your next income. | Read directly from the plan | `planning.forecast.CashForecaster._safe_to_spend` |
+| **Due before payday** | Scheduled bills, subscriptions and loan payments that are not due yet, up to your next income. | Read directly from the plan | `planning.forecast.CashForecaster._safe_to_spend` |
 | **Saving for goals** | What dated reserve goals still need this month, spread over the months left. | Read directly from the plan | `planning.forecast.CashForecaster._goal_need` |
 | **Rest of savings target** | What the Savings target asks a month beyond Saving for goals and Emergency fund top-up (never below zero), so Safe to spend never counts what you mean to save (owner decision 2026-10-05). | Savings target − Saving for goals − Emergency fund top-up | `planning.forecast.CashForecaster.forecast` |
 
@@ -222,8 +222,9 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Carryover** | Unused plan from last month, added to this month when carryover is on. | Left in plan last month | `budgeting.domain.BudgetLine.opening_carryover` |
 | **Planned** | What you plan to spend this month. The month's total also counts background estimates for untracked categories; one from a single month of spending is low confidence and shows a "!" that says why. | Base budget + Carryover | `budgeting.domain.BudgetLine.available` |
 | **Left in plan** | What is left of the plan; the Overview and Budget show the same month figure, and a negative one reads "Over plan". One-off categories are left out of Spent. | Planned − Spent | `budgeting.domain.BudgetLine.remaining` |
-| **Safe to spend** | Free cash after what is promised before your next income. An estimate. Budget until payday, Saving for goals, Emergency fund top-up and Rest of savings target count for every month until that income (only the days before it in the month it lands), so a long gap between pays is covered. | Free cash − Bills and loan payments before next income − Budget until payday − Saving for goals − Emergency fund top-up − Rest of savings target | `planning.forecast.CashForecaster._safe_to_spend` |
+| **Safe to spend** | Free cash after what is promised before your next income. An estimate. Budget until payday, Saving for goals, Emergency fund top-up and Rest of savings target count for every month until that income (only the days before it in the month it lands), so a long gap between pays is covered. | Free cash − Due before payday − Budget until payday − Saving for goals − Emergency fund top-up − Rest of savings target | `planning.forecast.CashForecaster._safe_to_spend` |
 | **Budget until payday** | This month's left in plan less the scheduled bills it already covers, so a bill is never counted twice. | Left in plan − Bills inside the plan | `planning.domain.ForecastMonth.budget_spending` |
+| **Everyday spending** | This month's Spent less the plan's bills and loan payments already paid (or paid to that bill's payee in its category): what Budget's day rate is about. Budget compares it with the plan's straight-line pace and with last month by the same day. | Read directly from the plan | `planning.domain.EverydayBudget.everyday_spent` |
 
 ### Entry-form fields
 
@@ -260,6 +261,7 @@ These names no longer appear on screens. Each is now called:
 
 | Old name | Now |
 |---|---|
+| Bills and loan payments before next income | Due before payday |
 | All accounts | In your accounts |
 | Gross balances | In your accounts |
 | Money from others | Held for others |
@@ -531,7 +533,8 @@ Asset class and exposure are separate. Account kinds describe the container: cas
 | Safe to spend | المتاح الآمن للصرف |
 | Bills inside the plan | الفواتير ضمن الخطة |
 | Budget until payday | الميزانية لحد الراتب |
-| Bills and loan payments before next income | الفواتير والأقساط قبل الدخل القادم |
+| Everyday spending | المصاريف اليومية |
+| Due before payday | المستحق قبل القبض |
 | Saving for goals | الادخار للأهداف |
 | Rest of savings target | باقي هدف الادخار |
 | Activity | النشاط |

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import timedelta
 from datetime import date
-from decimal import Decimal
+from decimal import ROUND_CEILING, Decimal
 import json
 import uuid
 
@@ -13,11 +13,11 @@ from lightning.core.errors import LightningError, ValidationError
 from lightning.categories.domain import Movement, Scope
 from lightning.core.money import ZERO, quantize, to_decimal
 
-from lightning.investments.report import build_investment_report, saved_and_invested
 from lightning.budgeting.domain import INCOME_FROM_RECURRING
+from lightning.planning.domain import KIND_LABELS, PaymentStatus
 from lightning.planning.health import PlanCheck
 
-from .. import charts, keynotes
+from .. import charts, keynotes, kpis
 from ..web import container, redirect, render
 from ..periods import parse_period
 
@@ -327,7 +327,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     for section in view.sections:
         for line in section.lines:
             if line.depth > 1 and line.available is not None and (line.available or line.planned_actual):
-                meter_lines.append({"label": line.name, "used": line.planned_actual, "total": line.available,
+                meter_lines.append({"label": line.name, "used": line.planned_actual, "total": line.available, "category_id": line.category_id,
                                     "m": charts.meter(line.planned_actual, line.available),
                                     "b": charts.bullet(line.planned_actual, line.available),
                                     "href": f"/transactions?category_id={line.category_id}&date_from={month}-01"})
@@ -341,13 +341,29 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     if check is not None and check.planned is not None:
         notes = keynotes.plan_check(check) + notes
     left_note = keynotes.per_day(month_left, days_left) if c.budgets.has_plan(month) else ""
-    flow = c.reporting.cash_flow(period.start, period.end)
-    return render(request, "budget.html", notes=notes,
-                  raise_offer=c.health.raise_offer(month) if period.key == "month" else None, meter_lines=meter_lines, left_note=left_note, check=check,
-                  savings=flow, saved_split_data=saved_and_invested(flow, build_investment_report(
-                      c.db, c.accounts, c.assets, c.reporting, period.start_text, period.end_text)["net_money"]),
+    # KPI cards (guideline 3.32 A08): every figure against something, two to four in the row. The figures come
+    # from the forecaster's EverydayBudget, the same Budget until payday Cash planning shows.
+    raise_offer = c.health.raise_offer(month) if period.key == "month" else None
+    kpi_cards, pace, plan_bills, everyday = [], None, [], None
+    if period.key == "month" and has_plan:
+        everyday = c.forecaster.everyday(month, today())
+        over = sorted(({"name": r["label"], "over": r["b"]["over_by"], "category_id": r["category_id"]}
+                       for r in meter_lines if r["b"]["is_over"]), key=lambda r: -r["over"])
+        kpi_cards = kpis.budget_month(everyday, over=over, check=check, raise_offer=raise_offer,
+                                      move=_cover_from(c, month, over[0], everyday.room) if over else None, month=month)
+        if everyday.day and everyday.everyday_plan > 0:
+            pace = charts.pace(everyday.by_day, everyday.everyday_plan, everyday.days_in_month, everyday.last_month_by_day)
+        plan_bills = _plan_bills(c, everyday)
+    elif period.key != "month":
+        kpi_cards = kpis.budget_period(period_actual, period_budgeted,
+                                       [(key, c.budgets.plan_summary(key)["left"], parse_month(key)[1] < today())
+                                        for key, _ in month_views if c.budgets.has_plan(key)],
+                                       period.label)
+    return render(request, "budget.html", notes=notes, kpi_cards=kpi_cards, pace=pace, plan_bills=plan_bills, everyday=everyday,
+                  raise_in_card=any(k["key"] == "saves" for k in kpi_cards),
+                  raise_offer=raise_offer, meter_lines=meter_lines, left_note=left_note, check=check,
                   plan_bar=charts.plan_bar(period_budgeted, period_actual),
-                  loan_planned=sum(c.budgets.loan_lines(month).values(), ZERO), bill_planned=sum(c.budgets.bill_lines(month).values(), ZERO), status_code=status_code, view=view, month=month,
+                  status_code=status_code, view=view, month=month,
                   prev_month=prev_month, next_month=next_month, values=values or {}, error=error,
                   has_plan=has_plan, suggestions=suggestions_view, suggestion_groups=suggestion_groups,
                   tracked=tracked, averages=averages,
@@ -373,6 +389,35 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                   bulk_undo=bulk_undo,
                   effective_month=month, previous_month=_neighbours(month)[0],
                   previous_bridge=c.budgets.month_view(_neighbours(month)[0]))
+
+
+def _cover_from(c, month: str, target: dict, room: dict[int, Decimal]) -> dict | None:
+    """The category with the most room left (its bills still to pay set aside) that can cover the largest
+    overspend; both need a plan of their own, as Move room asks (budget_move.html)."""
+    plans = c.budgets.amounts_for(month, loans=False)
+    if target["category_id"] not in plans:
+        return None
+    amount = Decimal(target["over"]).to_integral_value(rounding=ROUND_CEILING)
+    best = max(((left, cid) for cid, left in room.items()
+                if cid != target["category_id"] and cid in plans and left >= amount), default=None)
+    if best is None:
+        return None
+    return {"name": c.categories.get(best[1]).name, "amount": amount,
+            "href": f"/budget/move?month={month}&to={target['category_id']}&from={best[1]}&amount={amount}"}
+
+
+def _plan_bills(c, everyday) -> list[dict]:
+    """The bills and loan payments in the month's plan, late first, then due, then paid: each once, with Mark paid."""
+    day = today()
+    rows = []
+    for p in everyday.payments:
+        late = p.days_late(day) if p.outstanding else 0
+        rows.append({"name": p.item.name, "due": p.due_date, "kind": KIND_LABELS.get(p.item.kind, ""),
+                     "amount": c.planning.amount_in_base(p, p.still_owed if p.outstanding else p.amount, day),
+                     "state": "paid" if p.status == PaymentStatus.PAID else "late" if late else "due", "late": late,
+                     "pay": f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2Fbudget" if p.outstanding else ""})
+    rows.sort(key=lambda r: ({"late": 0, "due": 1, "paid": 2}[r["state"]], r["due"]))
+    return rows
 
 
 @router.post("/tracking")

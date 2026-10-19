@@ -81,7 +81,7 @@ class ReportQueries:
         same lines as category_totals, one row per line."""
         rows = self.db.all(
             f"SELECT le.transaction_id, le.date, le.account_id, le.category_id, le.effect, le.amount_base_e6 AS amount,"
-            f" t.ref, t.counterparty, t.description"
+            f" t.ref, t.counterparty, t.counterparty_id, t.description"
             f" FROM ledger_entries le {POSTED}"
             f" WHERE le.date BETWEEN ? AND ? AND le.category_id IS NOT NULL"
             f" AND le.effect IN ('INFLOW','OUTFLOW')"
