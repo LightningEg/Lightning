@@ -1,6 +1,6 @@
 # What the phone app (android/) installs. tools/android_lock.py turns this into requirements/android.lock,
 # where every package is one exact file; edit this, then rerun that tool.
-fastapi==0.141.1
+fastapi==0.143.2
 uvicorn==0.54.0
 jinja2==3.1.6
 python-multipart==0.0.32
