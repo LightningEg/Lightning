@@ -2,7 +2,7 @@
    style.css; on a phone Part C wins over Part A. Nothing here applies on the PC. */
 :root {
   --c-nile: #0A2442; --c-ink: #0D2233; --c-ink-2: #304A5C; --c-muted: #566E7E;
-  --c-track: #E6EFEC; --c-well: var(--field, #E8F1FA); --c-surface: #FFFFFF; --c-line: #E3ECE9;
+  --c-track: #E6EFEC; --c-well: var(--field, #EAF3EE); --c-surface: #FFFFFF; --c-line: #E3ECE9;
   --c-appbar: 56px; --c-tabbar: 64px; --c-side: 16px;
 }
 html.phone { -webkit-text-size-adjust: 100%; }
