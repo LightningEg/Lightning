@@ -10,6 +10,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - When a version is tagged, rename `Unreleased` to that version and start a new `Unreleased` above it.
 
 ## [Unreleased]
+
+- 2026-10-19 · Claude: Editable fields are green, not blue: resting and focus wells and the ledger edit row follow A10.3 (`style.css`, `style.rtl.css`).
 - 2026-10-19 · Claude: guideline Part D D06: cells over the field fade from 94% to 30% at their edges (`--soft`), hairlines drawn by
   each cell; terminal and code stay solid wells. Matches the For Geeks site.
 - 2026-10-19 · Claude: guideline Part D: panels over the field use `--veil` (94%), and a strike on a phone is two strokes with no
