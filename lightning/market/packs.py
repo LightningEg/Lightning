@@ -1,6 +1,6 @@
 """Price packs: the market file is published as one folder per pack (Egyptian stocks, Gulf stocks, ...),
 each with its own sources, schedule and manifest, so you download only the exchanges you follow and each
-pack is refreshed when its own market closes. docs/proposals/market_data.md › Packs.
+pack is refreshed when its own market closes. issues/6-market-data/6A-price-packs.md › Packs.
 
 Published layout (the open data repository, `market/`):
 

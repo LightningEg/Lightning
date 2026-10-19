@@ -8,7 +8,7 @@ A folder (or the same folder zipped) holding:
     daily/YYYY-MM.csv    date,key,close: every daily close
 
 The collector writes it (tools/market); the app only reads it. Reading checks every file against the
-manifest, so a damaged or tampered file is refused rather than half-read. docs/proposals/market_data.md.
+manifest, so a damaged or tampered file is refused rather than half-read. issues/6-market-data/6A-price-packs.md.
 """
 from __future__ import annotations
 

@@ -2,8 +2,8 @@
 
     python tools/stale_check.py [--days 7]
 
-Checks: NOW.md messages and claims older than --days; Markdown links to files that no longer exist; proposals
-that say they are built; branches already merged into main (to delete) or ahead of it (unmerged work);
+Checks: NOW.md messages and claims older than --days; Markdown links to files that no longer exist; designs in
+issues/ that say they are built; new bugs untouched for 30 days; branches already merged into main (to delete) or ahead of it (unmerged work);
 the README version against pyproject; and the guideline copies against a sibling Lightning_website checkout.
 """
 from __future__ import annotations
@@ -53,9 +53,9 @@ def dead_links() -> list[str]:
 
 def built_proposals() -> list[str]:
     out = []
-    for path in (ROOT / "docs" / "proposals").glob("*.md"):
-        head = "\n".join(path.read_text(encoding="utf-8").splitlines()[:6])
-        status = re.search(r"Status:\*\*([^.;\n]*)", head, re.I)  # the first clause only, not later prose
+    for path in (ROOT / "issues").glob("*/*.md"):
+        head = "\n".join(path.read_text(encoding="utf-8").splitlines()[:16])
+        status = re.search(r"Status:\*\*([^.;\n]*)", head, re.I)  # a design's own status line, first clause only
         clause = status.group(1).lower() if status else ""
         if re.search(r"\b(built|done|shipped)\b", clause) and not re.search(r"\b(not|started|partly|remaining)\b", clause):
             out.append(f"{path.relative_to(ROOT)} says it is built: move what holds into Architecture and delete it")
@@ -63,12 +63,14 @@ def built_proposals() -> list[str]:
 
 
 def old_reports(days: int = 30) -> list[str]:
+    """New bugs nobody has looked at for a month; one waiting for a person on GitHub (github:) is left alone."""
     out = []
-    for path in (ROOT / "report").glob("*/*.md"):
+    for path in (ROOT / "issues").glob("*/*.md"):
         text = path.read_text(encoding="utf-8")
         match = re.search(r"^created:\s*(\d{4}-\d{2}-\d{2})", text, re.M)
-        if match and old(match.group(1), days) and not re.search(r"^issue:", text, re.M):  # a good first issue waits for a person
-            out.append(f"report/{path.parent.name}/{path.name} is unprocessed since {match.group(1)}")
+        fresh = re.search(r"^status:\s*new\s*$", text, re.M) and re.search(r"^type:\s*bug\s*$", text, re.M)
+        if match and fresh and old(match.group(1), days) and not re.search(r"^github:", text, re.M):
+            out.append(f"{path.relative_to(ROOT).as_posix()} is a new bug nobody has looked at since {match.group(1)}")
     return out
 
 

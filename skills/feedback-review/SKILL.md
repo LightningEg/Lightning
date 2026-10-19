@@ -1,6 +1,6 @@
 ---
 name: feedback-review
-description: Turn new user feedback into one report, investigate each ticket, have Opus design the fixes and Sonnet build them (two agents at most), then delete the reviewed files. Use when new feedback, survey rows or screenshots arrive, or when old feedback files should be retired.
+description: Turn new user feedback into items in issues/, investigate each ticket, have Opus design the fixes and Sonnet build them (two agents at most), then delete the reviewed files. Use when new feedback, survey rows or screenshots arrive, or when old feedback files should be retired.
 ---
 
 # Feedback review: compile, investigate, design, build, delete
@@ -8,8 +8,8 @@ description: Turn new user feedback into one report, investigate each ticket, ha
 Written for any AI tool (Claude, Codex, others). Where it names a model, use the closest you have: the strongest for design, a fast
 capable one for everything else. In Claude Code that is `model: "opus"` and `model: "sonnet"` on the Agent tool.
 
-Each feedback ticket becomes one report in `report/` (read `report/README.md` once; category by type: `visual-bug`, `technical-bug`, `visual-improvement`,
-`technical-improvement`). A processed ticket's report is deleted with its fix; only a test, a changelog line and, for what stays open, its report survive.
+Each feedback ticket becomes one item in `issues/` (read `issues/README.md` once; type `bug`, `polish`, `feature` or `tech`, in the milestone it belongs to).
+A processed ticket's item is deleted with its fix; only a test, a changelog line and, for what stays open, its item survive.
 No separate batch files and no screenshots folder pile up: git history keeps the rest.
 The repo is public: nothing personal goes into it.
 
@@ -28,9 +28,9 @@ Only stage 3 (one design agent) and stage 4 (one build agent) are agents. Hand e
 
 1. Input is whatever the owner gives: pasted rows, a CSV, files with screenshots. There is no Drive access here; ask for the files if they are missing.
 2. Strip what must not be public: names, emails, phone numbers, account numbers, device ids, private links. Say "a user". Keep a screenshot only if it shows dummy or sample data; otherwise describe it in words.
-3. Write one report per ticket in `report/<category>/` (front matter per `report/README.md`; `reporter` is the AI, `skills: feedback-review`). The body: what the person saw, what they want, the screen, and the screenshot if it is kept, as a relative link to `report/screenshots/<report-name>-<n>.png` (small, dummy data only; deleted with the report). Merge tickets that are the same finding into one report.
-4. Merge duplicates, mark overlaps with existing reports (read `report/INDEX.md`), drop test and diagnostic rows and say how many.
-5. Tell the owner: counts by category, the three biggest themes, anything that looks like a wrong number. Check the report limit (20) first; if it would be exceeded, process older reports before adding.
+3. Write one item per ticket in `issues/<n>-<name>/` (code from `python tools/issues.py next <n>`; front matter per `issues/README.md`; `by` is the AI, `skills: feedback-review`). The body: what the person saw, what they want, the screen, and the screenshot if it is kept, as a relative link to `screenshots/<code>-<n>.png` in the item's milestone folder (small, dummy data only; deleted with the item). Merge tickets that are the same finding into one item.
+4. Merge duplicates, mark overlaps with existing items (read `issues/INDEX.md`), drop test and diagnostic rows and say how many.
+5. Tell the owner: counts by category, the three biggest themes, anything that looks like a wrong number.
 
 ## 2. Investigate (you)
 
@@ -45,7 +45,7 @@ For every ticket, in this order, and write the verdict beside it:
 
 ## 3. Design (agent 1: strongest model, one call)
 
-Launch one agent on the strongest model available. Its prompt names only: the reports, the list of chosen tickets, `AGENTS.md`, and the rule to read code by grep, not whole files. It writes `report/designs-NNN.md` (deleted with the batch):
+Launch one agent on the strongest model available. Its prompt names only: the items, the list of chosen tickets, `AGENTS.md`, and the rule to read code by grep, not whole files. It writes `user feedback/designs-NNN.md` (deleted with the batch):
 
 - per ticket: files to change, the approach in a few lines, the test, risks;
 - one section listing tickets that touch the same file, with the order to build them;
@@ -63,15 +63,15 @@ You review the diffs, merge the branches into `main` one at a time and push.
 
 Only when every ticket has a verdict and every built ticket has a test and a changelog line:
 
-1. A ticket left Open or Request keeps its report (status `open`, with why); a Fixed, Built, Existing or Declined ticket's report is deleted. Run `python tools/report_index.py`.
+1. A ticket left Open or Request keeps its item (status `ready` or `blocked`, with why); a Fixed, Built, Existing or Declined ticket's item is deleted and its code added to `done:`. Run `python tools/issues.py`.
 2. One changelog entry for the batch, three lines at most.
-3. `git rm` the processed reports, their screenshots and the designs file.
+3. `git rm` the processed items, their screenshots and the designs file.
 4. `grep -rn "user-feedback-batch-NNN"` and repoint leftovers to the test or changelog.
 5. Commit, push, merge to `main`, push.
 
 ## Rules
 
 - Never more than two agents. If the work seems to need more, build fewer tickets per batch.
-- Never delete a batch with an unverified ticket, or a left-over ticket without a report.
+- Never delete a batch with an unverified ticket, or a left-over ticket without an item.
 - Never put a respondent's identity, a private link or real financial data in the repo.
 - Tell the owner only: counts, what was built, what is open and needs a decision.

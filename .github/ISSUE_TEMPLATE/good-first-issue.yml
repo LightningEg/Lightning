@@ -2,6 +2,10 @@ name: Good first issue
 description: A small, self-contained task someone new can finish in an evening (maintainers and AIs write these)
 labels: ["good first issue"]
 body:
+  - type: input
+    id: code
+    attributes: {label: Code, description: "The item's code in issues/ (e.g. 3C); also put it at the start of the title: [3C] …"}
+    validations: {required: true}
   - type: textarea
     id: what
     attributes: {label: What's wrong, description: "One or two sentences. Dummy data only (Mohab's demo)."}

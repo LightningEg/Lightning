@@ -1,4 +1,4 @@
-"""Fill a profile's investment prices from the price packs it follows (docs/proposals/market_data.md).
+"""Fill a profile's investment prices from the price packs it follows (issues/6-market-data/6A-price-packs.md).
 
 Each pack comes with the app (lightning/market/market.zip, the default packs) or is downloaded or imported
 into the profile's market folder, one folder per pack; for each pack the newer one is used. Each holding is

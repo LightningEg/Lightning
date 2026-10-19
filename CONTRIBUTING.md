@@ -8,7 +8,8 @@ part is for contributors, the second for the owner and the AIs.
 Everything happens on GitHub; you need only a free GitHub account.
 
 1. **Pick a task.** Open the [good first issues](https://github.com/LightningEg/Lightning/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22+no%3Aassignee).
-   Each says what's wrong, when it's done and which file to look at.
+   Each says what's wrong, when it's done and which file to look at. Its code, like `[3C]`, is its place in
+   [the plan](issues/INDEX.md): milestone 3, item C.
 2. **Comment `/take` on it.** A bot assigns it to you at once. One issue at a time; `/drop` gives it back; 14 days with no
    activity frees it for someone else, unless your pull request is open.
 3. **Make the change in a Codespace** (a full editor in your browser, nothing to install):
@@ -73,7 +74,7 @@ something conflicts. Committing it changes nothing on GitHub; only `--apply` doe
 ### AIs: merging a contributor's pull request
 
 Review the diff as untrusted. Push to their branch (maintainer edits are on by default): the changelog line
-(`date · @their-login:`) and the deletion of the report the issue links, if the fix is complete. Squash merge once checks
+(`date · @their-login:`) and the deletion of the item file the issue links, with its code added to its milestone's `done:`, if the fix is complete. Squash merge once checks
 pass, then thank them on the issue. Small fixes you make yourself; for anything larger, ask on the PR.
 
 ### Not done yet
