@@ -68,7 +68,7 @@ something conflicts. Committing it changes nothing on GitHub; only `--apply` doe
 ### Owner: per contribution
 
 1. Approve a first-time contributor's test run (one click on the PR).
-2. AIs don't watch GitHub by themselves: in any session say **"review the open pull requests"**, or keep a scheduled one.
+2. AIs don't watch GitHub by themselves: in any session say **"review the open pull requests"**.
 
 ### AIs: merging a contributor's pull request
 

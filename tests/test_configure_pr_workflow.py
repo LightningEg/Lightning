@@ -66,7 +66,7 @@ def test_guard_has_no_bypass_and_preserves_existing_bound_check(monkeypatch):
     assert rules['pull_request']['required_review_thread_resolution'] is True
     assert rules['pull_request']['allowed_merge_methods'] == ['squash']
     assert {'type': 'non_fast_forward'} in desired['rules']
-    assert rules['required_status_checks']['strict_required_status_checks_policy'] is True
+    assert rules['required_status_checks']['strict_required_status_checks_policy'] is False
     assert {'context': 'extra-check', 'integration_id': 42} in rules[
         'required_status_checks']['required_status_checks']
 

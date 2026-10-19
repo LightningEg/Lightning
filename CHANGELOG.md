@@ -12,8 +12,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 ## [Unreleased]
 
 - 2026-10-19 · Claude: collaboration audit: `requirements-dev.txt` adds the encrypted extras (the contributor setup failed 361 tests); reports
-  with an `issue:` skip the 30-day limit; `/take` claims with an open PR stay; Dependabot groups updates weekly; CONTRIBUTING gives
-  a one-file test and the AI steps for merging a contributor's PR.
+  older than 30 days are a stale-check warning, not a failing test; `/take` claims with an open PR stay; Dependabot groups; main no
+  longer needs branches up to date, auto-merge is allowed (owner setup); CONTRIBUTING: one-file test, AI steps to merge a contributor PR.
 - 2026-10-18 · Claude: one collaboration guide, `CONTRIBUTING.md` (MAINTAINERS.md and docs/COLLABORATION.md merged in); `tools/security_setup.py` is the one owner command and
   runs the no-bypass PR rule; old team/approval ruleset and `apply-settings.sh` removed; forks wait for approval on a first PR only. Contributing is GitHub-only (`/take`), with
   Codespace steps; the Discord route and claim-button proposal are dropped.

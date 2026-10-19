@@ -177,7 +177,7 @@ def main(argv=None):
     upsert_ruleset(gh, DOWNLOADS, tags)
     for repo in [APP, WEBSITE, DOWNLOADS, MARKET]:
         gh.api('PATCH', f'repos/{repo}', {'allow_squash_merge': True, 'allow_merge_commit': False,
-            'allow_rebase_merge': False, 'allow_auto_merge': False, 'delete_branch_on_merge': True})
+            'allow_rebase_merge': False, 'allow_auto_merge': True, 'delete_branch_on_merge': True})
         gh.api('PUT', f'repos/{repo}/actions/permissions', {'enabled': True, 'allowed_actions': 'selected'})
         patterns = ['android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd',
                     'gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c'] if repo == APP else []

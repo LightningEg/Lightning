@@ -20,7 +20,6 @@ STATUSES = ("reported", "investigating", "open")
 DONE = ("fixed", "declined", "not-reproduced")  # a processed report is deleted with its fix, never kept
 REQUIRED = ("title", "category", "area", "status", "created", "reporter", "skills", "app_version", "commit", "repo")
 MAX_REPORTS = 20  # more than this and nothing new is filed until some are processed
-MAX_AGE_DAYS = 30  # an unprocessed report older than this fails the check: fix it, decide it, or delete it
 NAME = re.compile(r"^\d{4}-\d{2}-\d{2}-[a-z0-9]+(-[a-z0-9]+)+\.md$")
 
 
@@ -66,12 +65,9 @@ def load() -> tuple[list[dict[str, str]], list[str]]:
                 problems.append(f"{rel}: no '## Report' section")
             rows.append({**meta, "file": rel})
             try:
-                age = (date.today() - date.fromisoformat(meta.get("created", ""))).days
+                date.fromisoformat(meta.get("created", ""))
             except ValueError:
-                age = 0
                 problems.append(f"{rel}: 'created' must be yyyy-mm-dd")
-            if age > MAX_AGE_DAYS and not meta.get("issue"):  # a good first issue waits for a person, not a deadline
-                problems.append(f"{rel}: unprocessed for {age} days (limit {MAX_AGE_DAYS}): fix it, decide it, or delete it")
     if len(rows) > MAX_REPORTS:
         problems.append(f"{len(rows)} reports is over the limit of {MAX_REPORTS}: process some before filing more")
     return rows, problems
@@ -87,7 +83,7 @@ def render(rows: list[dict[str, str]]) -> str:
         "",
         f"{len(rows)} reports, all unprocessed. Status: reported (found, not looked at) · investigating · "
         "open (a real request, not built). A fixed report is deleted, so it is not listed. "
-        f"Limits: {MAX_REPORTS} reports, {MAX_AGE_DAYS} days each (none for one with an `issue:`, a good first issue); past either, the check fails until some are processed.",
+        f"Limits: {MAX_REPORTS} reports, past which the check fails; `tools/stale_check.py` lists any older than 30 days without an `issue:`.",
         "",
         "| Status | Category | Area | Title | Created | By | Report |",
         "|---|---|---|---|---|---|---|",

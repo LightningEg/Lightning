@@ -67,7 +67,7 @@ Keep it short: facts, not narration. Do not paste code, only name `file:line`.
 The folder is a short to-do list, kept short by three rules that `python tools/report_index.py --check` (and a test) enforce:
 
 1. **At most 20 reports.** Over that, nothing new is filed until some are processed.
-2. **At most 30 days each.** An unprocessed report older than that fails the check: fix it, decide it (`declined` means delete it), or ask the owner.
+2. **At most 30 days each.** `python tools/stale_check.py` lists older ones (not those with an `issue:`, which wait for a person): fix it, decide it (`declined` means delete it), or ask the owner. A date never fails the tests, so it never blocks someone else's PR.
 3. **Fix small things instead of filing them.** If the fix is one small change you can test now (a wording, a one-line guard), do it on a branch with its test and changelog line and write **no** report.
    File a report only for what you cannot fix in the same sitting: a decision is needed, it is bigger than one change, or you are only hunting and not fixing.
 

@@ -65,8 +65,9 @@ def built_proposals() -> list[str]:
 def old_reports(days: int = 30) -> list[str]:
     out = []
     for path in (ROOT / "report").glob("*/*.md"):
-        match = re.search(r"^created:\s*(\d{4}-\d{2}-\d{2})", path.read_text(encoding="utf-8"), re.M)
-        if match and old(match.group(1), days):
+        text = path.read_text(encoding="utf-8")
+        match = re.search(r"^created:\s*(\d{4}-\d{2}-\d{2})", text, re.M)
+        if match and old(match.group(1), days) and not re.search(r"^issue:", text, re.M):  # a good first issue waits for a person
             out.append(f"report/{path.parent.name}/{path.name} is unprocessed since {match.group(1)}")
     return out
 
