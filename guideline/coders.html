@@ -261,8 +261,8 @@ table.t td b{color:var(--ink);font-weight:500}
     <tr><td><b>Closing</b></td><td>52vh of open field above it (40vh under 820px, 30vh under 640px), then the footer's four columns</td></tr>
   </table></div>
   <ul class="short">
-    <li>Cells in a grid are joined by 1px gaps on <code>--line</code>, not separate boxes with gaps. A box never sits inside another box.</li>
-    <li>Panels over the field (cards, steps, stats, the terminal, code) use <code>--veil</code>, bg or well at 94%: solid enough that the current and the dots never cut through a cell, open enough that the field still shows faintly. Text keeps a soft bg halo so a dot never cuts a letter.</li>
+    <li>Cells in a grid are joined by 1px hairlines on <code>--line</code>, drawn by each cell (a shadow to its right and below) inside the grid's border, never by a grid background showing through. A box never sits inside another box.</li>
+    <li>Cells over the field (cards, steps, stats, the stack's rows) use <code>--soft</code>: bg at 94% (<code>--veil</code>) in the middle, fading to 30% (<code>--veil-edge</code>) at the edges, so a box melts into the field instead of sitting on it like a slab. The terminal and code blocks stay a solid well at 94%, for reading. Text keeps a soft bg halo so a dot never cuts a letter.</li>
     <li>Grid children, lanes included, set <code>min-width:0</code>: a long code line scrolls inside its box, never the page.</li>
   </ul>
 </section>
