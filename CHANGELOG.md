@@ -10,6 +10,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - When a version is tagged, rename `Unreleased` to that version and start a new `Unreleased` above it.
 
 ## [Unreleased]
+- 2026-10-19 · Claude: guideline Part D: panels over the field use `--veil` (94%), and a strike on a phone is two strokes with no
+  full-screen glow or flash (D06, D08), matching the For Geeks site (site PR: smooth strikes on phones).
 - 2026-10-19 · Claude: three backend good first issues for contributors who aren't on Arabic or screens: 7H CSV amount forms (#49), 7I public
   holidays in payment schedules (#50, was 7F1), 7J Arabic spelling variants in search (#51); each with the file, the test and a check command.
 

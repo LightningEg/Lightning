@@ -262,7 +262,7 @@ table.t td b{color:var(--ink);font-weight:500}
   </table></div>
   <ul class="short">
     <li>Cells in a grid are joined by 1px gaps on <code>--line</code>, not separate boxes with gaps. A box never sits inside another box.</li>
-    <li>Panels over the field use bg at 80–92% so the field shows faintly through; text keeps a soft bg halo so a dot never cuts a letter.</li>
+    <li>Panels over the field (cards, steps, stats, the terminal, code) use <code>--veil</code>, bg or well at 94%: solid enough that the current and the dots never cut through a cell, open enough that the field still shows faintly. Text keeps a soft bg halo so a dot never cuts a letter.</li>
     <li>Grid children, lanes included, set <code>min-width:0</code>: a long code line scrolls inside its box, never the page.</li>
   </ul>
 </section>
@@ -306,7 +306,7 @@ table.t td b{color:var(--ink);font-weight:500}
   <div class="g-head"><div><h2><span class="secnum">D08</span>The field and motion</h2><p>The page sits on a field of light. Motion is the weather, never the content.</p></div></div>
   <ul class="short">
     <li><b>The field:</b> a fixed particle terrain on one canvas, a 24px pixel grid fading at the edges, and faint scanlines (15% on Paper). Full under the hero and the closing, faint between them. It is built once and never rebuilds while you scroll.</li>
-    <li><b>Lightning:</b> a strike every 6–12 seconds on the terrain, full over the hero and the closing and about half as bright between them, where people read; one at full strength where you click empty space. The hero's words flash with it. A faint current runs through the pixel grid now and then.</li>
+    <li><b>Lightning:</b> a strike every 6–12 seconds on the terrain, full over the hero and the closing and about half as bright between them, where people read; one at full strength where you click empty space. On a PC the hero's words flash with it. On a phone (under 760px) a strike is two strokes, with no full-screen glow and no flash, and the field draws at 1.5× pixels: a strike never stalls scrolling. A faint current runs through the pixel grid now and then.</li>
     <li><b>Small motion:</b> sections rise 18px into place (0.8s) as soon as their top enters the view, however tall they are; a grid of cells rises as one. Bars fill when seen (1.4s), the caret blinks, the stack's pulse runs its whole line (CSS, nothing measured), the scroll hint nudges, the hero word decodes only while the hero is in view. Easing <code>cubic-bezier(.2,.8,.2,1)</code>.</li>
     <li><b>Reduced motion:</b> one still frame of the field, no strikes, no reveal, caret steady, bars drawn full. The page must read the same.</li>
     <li>Motion never moves text the reader is reading, never loops faster than once a second, and never needs to finish before a button works.</li>
