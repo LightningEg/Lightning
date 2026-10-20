@@ -142,6 +142,10 @@ Checked against the code, Overview and changelog 2026-10-15 (v1.1: Arabic and ri
 - No community or ratings yet: Say has 2,128, Qershnat 592 in four months.
 - Gam'eya and zakat are built; silver and specialised property/vehicle workflows remain open. Other asset accounts can already track a flat or car by value.
 
+## How AI search finds us (2026-10-20)
+
+AI answers named Lightning for "net worth tracker" but not for "net worth, budget and expense app": the site had a guide for each part and no page for the three together. The fix is one page that answers the whole question in plain facts (`net-worth-budget-expense-tracker.html`, English and Arabic, listed in `llms.txt` and the sitemap) with its own FAQ. The site still never names other apps (Overview › decisions); the page claims only what the app does. Whether it is cited is tracked in issue 8C.
+
 ## Selling points, stress-tested (2026-10-12)
 
 The owner's eight candidate points, tested against this file, the product docs and the code. "Mine only" and "no one else" claims fail often, because Qershnat, Moneydance, Banktivity and the local expense apps each cover part of the ground. The website never names other apps (B10), so a claim has to be true and provable on its own, never "only".

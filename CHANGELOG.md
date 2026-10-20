@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-20 · Claude: website page "Net worth, budget and expense tracker" in English and Arabic (site PR #41) so AI search finds Lightning for all three together;
+  Overview decision, Competition section *How AI search finds us*, owner tasks in 8C (sitemap resubmit, Reddit post).
+
 - 2026-10-19 · Claude: Budget and Cash planning open with KPI cards that compare (3Q step 2, `ui/kpis.py`). Budget's day rate counts
   everyday money only, with a pace chart and the month's bills in place of the waffle; Cash planning compares with last month-end,
   payday and today. "Bills and loan payments before next income" is now "Due before payday"; Glossary adds Everyday spending.
