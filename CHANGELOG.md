@@ -11,7 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-- 2026-10-21 · Claude: website recaptured from this app (3W site-recapture): net worth 910,304, safe to spend 112,288, nine accounts, new Overview rate crops; Budget screens kept old for 3Y; also filed 3Z, 3AA.
+- 2026-10-21 · Claude: website recaptured from this app (3W site-recapture): net worth 910,304, safe to spend 112,288, nine accounts, new Overview rate crops; Budget screens kept old for 3AB; also filed 3Z, 3AA.
+- 2026-10-21 · Codex: 3Y register selection survives edits, cancellation and message redirects; adds Edit selected, Clear selection and Shift-click ranges, plus phone Select all.
+  Mass edits affect only selected rows and changed fields; amount/account edits stay on one row with an explicit choice. Browser checks cover both layouts, dialog closure and retries.
 - 2026-10-21 · Claude: 4C Audit 3 of the edit journal, fixed: stale command and bulk edits wait for review, replicas verify their rows after
   catch-up, register cannot revert a command, a refused mailbox request is answered. Worker: wire stored apart, monthly allowance per profile.
 - 2026-10-21 · Claude: [8H] Site Guides become a map of four topics, each with a pillar page (Budget your salary, See where it goes,
