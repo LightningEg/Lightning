@@ -1,5 +1,5 @@
 ---
-title: In Arabic the "·" beside a number reads as a zero (Late 17 days shows as 170), decimals mix "." and ",", and a few strings stay English
+title: Arabic leftovers - the budget move preview arrow, two overlaps and a wrapped number
 type: bug
 area: arabic
 status: ready
@@ -12,37 +12,17 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 1](../../reports/audit-1.md) (§5 Arabic) on Mohab's sample and the demo, PC 1366 px and phone 390 px. The Arabic tests pass.
+Found by [Audit 1](../../reports/audit-1.md) (§5 Arabic) on Mohab's sample and the demo, PC 1366 px and phone 390 px.
+Fixed: the "·" beside a number (now "،"), one decimal mark and one percent sign, the undo button and the English strings of the
+Plan this transaction page, the phone Settings labels, "1 entry", the placeholder, the budget move subtitle and "MONTH_END".
 
-**High: a figure reads wrong.**
-1. The middle dot "·" between a word and Arabic-Indic digits looks like the Arabic zero "٠", so the number reads ten times bigger.
-   - Cash planning: "Late · 17 days" (`i18n_system.py:729`: "متأخر · {n} يوم") reads "متأخر ١٧٠ يوم" (170 days).
-   - On a holding, "Months up · down 5 · 1 of 6" reads "١٠٥" (105).
-   - Every row subtitle "date · Bill" reads as one long number ("٢٠٢٦-١٠-٠٣ · فاتورة").
-   - Shots: [ar-dot-reads-as-zero-plan.png](../../reports/audit-1/ar-dot-reads-as-zero-plan.png), [ar-dot-reads-as-zero-holding.png](../../reports/audit-1/ar-dot-reads-as-zero-holding.png).
+1. The budget move preview "Transportation 68 ← 90" reads backwards in RTL (`budget_move.html`, the arrow between the old and new plan).
+2. **Overlaps:** the Plan timeline's "اليوم" (Today) is drawn on top of "Landlord +٥". Chart axes use a Latin "k" ("١٠٢k").
+3. Low: "قرض · الدفعة ١٠ من ٢٤" wraps so "٢٤" sits alone on the next line.
 
-**Medium.**
-2. **Decimals and percent signs mix.**
-   - One holding card shows "±١.٦%" with a point and "+٣,٨%" with a comma.
-   - The zakat strings use "٢٫٥٪", while the screens use "%".
-   - Use one Arabic decimal separator "٫" and one percent sign everywhere.
-3. **Left in English on every page:** the undo button's title and aria-label, "تراجع · Saved changes (Ctrl+Z)".
-4. **Left in English elsewhere:**
-   - The "Plan this transaction" page: its title, heading and text (`/plan/from-transaction/{id}`).
-   - The phone Settings stacked labels "Setting" and "Where".
-   - "1 entry" on Held for others.
-   - The placeholder "e.g. 100 shares, 12.5 grams".
-   - The budget move preview: "the total plan stays the same", and "Transportation 68 ← 90", which reads backwards in RTL.
-   - The raw code "MONTH_END" after "مُنشأ تلقائيًا ·".
-5. **Overlaps:** the Plan timeline's "اليوم" (Today) is drawn on top of "Landlord +٥". Chart axes use a Latin "k" ("١٠٢k").
-
-**Low.**
-6. "قرض · الدفعة ١٠ من ٢٤" wraps so "٢٤" sits alone on the next line.
-
-Not rechecked: 3A, 3B, 3E and the voice review. The audit agent stopped on a spend limit after the crawl and screenshots.
+Not rechecked: 3A, 3B, 3E and the voice review.
 
 ## Fix
-- In Arabic, use the Arabic comma "،" or a spaced bullet in place of "·" next to digits: in `localize_html`, or one separator token in the templates.
-- Format decimals and percents through one Arabic formatter.
-- Add the missing strings to `ui/i18n.py`.
-- Add a test that fails when an Arabic page has "·" next to an Arabic-Indic digit.
+- Check the arrow with a native reader and fix it in the template.
+- Move the "اليوم" label off the payment label; write chart axes as "ألف" or the Arabic compact form.
+- Keep a number and its unit on one line (a no-break space).

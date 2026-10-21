@@ -50,7 +50,7 @@ def build_demo(c, as_of: date | None = None) -> dict:
     cat = {code: c.categories.get_by_code(code).id for code in (
         "EXP.WORK.SALARY", "EXP.PERSONAL.HOUSING", "EXP.PERSONAL.FOOD", "EXP.PERSONAL.DINING",
         "EXP.PERSONAL.TRANSPORT", "EXP.PERSONAL.UTILITIES", "EXP.PERSONAL.GIFTS", "EXP.INVEST.INTEREST",
-        "EXP.PERSONAL.FEES", "EXP.SYSTEM.CUSTODY", "EXP.PERSONAL.SHOPPING")}
+        "EXP.PERSONAL.FEES", "EXP.PERSONAL.HEALTH", "EXP.SYSTEM.CUSTODY", "EXP.PERSONAL.SHOPPING")}
     flows, tx = c.account_flows, c.transactions
     loan_category = c.categories.get_by_code("EXP.SYSTEM.LOANS").id
 
@@ -67,7 +67,7 @@ def build_demo(c, as_of: date | None = None) -> dict:
             cd.id, "NBE 3-year certificate", opened,
             date(purchase_date.year + 1, purchase_date.month, purchase_date.day),
             date(purchase_date.year + 3, purchase_date.month, purchase_date.day),
-            "100,000", "18", "SIMPLE", "MONTHLY", "MONTHLY", cib.id, cib.id, term_years="3",
+            "100,000", "22", "SIMPLE", "MONTHLY", "MONTHLY", cib.id, cib.id, term_years="3",
         )
 
         # ------------------------------------------------------------ ledger: three months of activity
@@ -86,11 +86,14 @@ def build_demo(c, as_of: date | None = None) -> dict:
             for name, when, amounts in eating_out:
                 account = wallet.id if name.startswith("Koshary") else cib.id
                 post(when, tx.record_outflow, account, amounts[index], cat["EXP.PERSONAL.DINING"], counterparty=name)
+            # Untracked on purpose: three months of it make "Looks recurring" offer it from the first day of the demo.
+            post(4, tx.record_outflow, cib.id, "900", cat["EXP.PERSONAL.HEALTH"], counterparty="Fitness Time Gym")
             post(5, tx.record_transfer, cib.id, wallet.id, "3,000")
             post(7, tx.record_transfer, cib.id, vodafone.id, "1,000")
             post(9, tx.record_outflow, vodafone.id, "350", cat["EXP.PERSONAL.UTILITIES"], counterparty="Vodafone")
             post(12, tx.record_outflow, wallet.id, ["60", "75", "90"][index], cat["EXP.PERSONAL.TRANSPORT"], counterparty="Microbus")
-            post(15, tx.record_inflow, cib.id, "1,833.33", cat["EXP.INVEST.INTEREST"], counterparty="NBE")
+            if index:  # 22% a year, paid monthly on its payout day (the 1st), first a month after the purchase
+                post(1, tx.record_inflow, cib.id, "1,833.33", cat["EXP.INVEST.INTEREST"], counterparty="NBE")
             post(20, tx.record_outflow, cib.id, "650", cat["EXP.PERSONAL.UTILITIES"], counterparty="WE Internet")
             post(24, tx.record_outflow, cib.id, "480", cat["EXP.PERSONAL.UTILITIES"], counterparty="North Cairo Electricity")
             post(25, tx.record_outflow, cib.id, "2,000", cat["EXP.PERSONAL.GIFTS"], counterparty="Mom")

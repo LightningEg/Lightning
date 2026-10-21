@@ -63,7 +63,7 @@
   </div>
 </dialog>
 <div id="busy-toast" class="busy-toast" role="status" aria-live="polite" hidden{% if prices_running %} data-watch="/investments/prices/online/status" data-watch-label="Fetching month-end prices…"{% endif %}><span class="busy-square" aria-hidden="true"></span><span class="busy-text"></span><a class="busy-link" href="/investments/prices" hidden>{{ 'Show'|tr(locale) }}</a></div>
-<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/arabic-numbers.js?v=5"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/arabic-numbers.js?v=6"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/info-tips.js?v=1"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/app.js?v=42"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/phone-fields.js?v=6"></script>

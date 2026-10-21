@@ -115,3 +115,24 @@ def test_the_welcome_page_loads_the_sample_and_the_files_stay_downloadable(c, on
     done = b.submit({}, action="/sample/mohab-2026")
     assert done.shows("Mohab's 2026 added")
     assert len(c.accounts.list()) == 7
+
+
+def test_sample_opens_on_a_day_inside_its_data_with_no_late_bill(c, monkeypatch):
+    """`--sample` pins today inside the data (3V2): opened months later it would show every bill late."""
+    from lightning.core.dates import fmt_date, today
+    from lightning.samples import SAMPLE_TODAY, pin_sample_today
+
+    monkeypatch.delenv("LIGHTNING_TODAY", raising=False)
+    assert pin_sample_today() == fmt_date(min(date.today(), SAMPLE_TODAY))
+    assert today() <= SAMPLE_TODAY
+    load_mohab_2026(c)
+    assert not [p for p in c.planning.all_payments(today(), today()) if p.status.name == "DUE"]
+    assert c.planning.what_you_owe(today()).bills_due == 0
+    # A date the caller chose is kept: site_shots.py and the tests pin their own.
+    assert pin_sample_today({"LIGHTNING_TODAY": "2026-10-02"}) == "2026-10-02"
+
+
+def test_sample_loaded_on_a_later_day_shows_late_bills_which_is_why_it_is_pinned(c, monkeypatch):
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-21")
+    load_mohab_2026(c)
+    assert c.planning.what_you_owe(date(2026, 10, 21)).bills_due > 0

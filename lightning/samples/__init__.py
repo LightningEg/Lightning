@@ -29,7 +29,18 @@ MOHAB_2026 = Path(__file__).parent / "mohab_2026"
 BANK_FILES = ("cib-payroll.csv", "cash-wallet.csv", "vodafone-cash.csv")   # in this order
 FILES = ("accounts.csv", "nbe-3-year-certificate.csv", *BANK_FILES, "thndr.csv", "usd-brokerage.csv", "gold-at-home.csv",
          "prices.csv", "fx.csv")
+SAMPLE_TODAY = date(2026, 10, 2)  # the sample's last row: its bills are paid up to here, none is late
 GOLD_PRICES = {"GOLD21": "REF:GLD-21K", "GOLD24": "REF:GLD-24K"}
+
+
+def pin_sample_today(environ=None) -> str:
+    """Make "today" a day inside Mohab's 2026 when ``--sample`` opens, so it never shows bills late for months
+    that have no rows. A ``LIGHTNING_TODAY`` the caller already set is kept. Returns the date in use."""
+    import os
+    environ = os.environ if environ is None else environ
+    if not environ.get("LIGHTNING_TODAY"):
+        environ["LIGHTNING_TODAY"] = fmt_date(min(date.today(), SAMPLE_TODAY))
+    return environ["LIGHTNING_TODAY"]
 
 
 def rows(name: str) -> list[dict[str, str]]:
