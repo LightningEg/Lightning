@@ -275,11 +275,6 @@ def validate_key_file(document: dict[str, Any]) -> None:
         raise ValueError("The key file's locks belong to different keys.")
 
 
-def question_of(document: dict[str, Any]) -> str:
-    validate_key_file(document)
-    return document["question"]
-
-
 def unwrap_key(document: dict[str, Any], password: str) -> bytes:
     """Open lock 1: a key file (or a lone password lock) and its password give the data key."""
     passphrase = _password_bytes(password)

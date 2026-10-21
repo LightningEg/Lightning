@@ -179,10 +179,40 @@ def spread_cost(svc, d: Described, day: str) -> Decimal | None:
 def rebuild_trade_rates(svc) -> None:
     """The executed rates of posted conversions, one per day and currency (the latest wins): a conversion that
     is edited, deleted or restored changes them, and nothing else writes source TRADE."""
-    svc.db.execute("DELETE FROM fx_rates WHERE source='TRADE'")
-    rows = svc.db.all("SELECT id,date FROM transactions WHERE type=? AND status='POSTED' ORDER BY date,id",
-                      (DocType.CNV.value,))
-    for row in rows:
-        d = describe(svc, svc.get(row["id"]))
+    with svc.db.transaction():
+        svc.db.execute("DELETE FROM fx_rates WHERE source='TRADE'")
+        rows = svc.db.all("SELECT id,date FROM transactions WHERE type=? AND status='POSTED' ORDER BY date,id",
+                          (DocType.CNV.value,))
+        for row in rows:
+            d = describe(svc, svc.get(row["id"]))
+            if d and svc.base_currency in (d.quote_base, d.quote_quote) and d.quote_base != d.quote_quote:
+                save_rate(svc.db, row["date"], d.quote_base, d.quote_quote, d.rate, "TRADE")
+
+
+def refresh_trade_rates(svc, transactions) -> None:
+    """Refresh affected date/pair keys only, including the old keys of edited conversions.
+
+    The highest posted transaction id wins on each date, as in the full repair rebuild.
+    Only that winner needs its posting lines loaded, even with many same-day conversions.
+    """
+    keys = set()
+    for txn in transactions:
+        if txn.type != DocType.CNV:
+            continue
+        d = describe(svc, txn)
         if d and svc.base_currency in (d.quote_base, d.quote_quote) and d.quote_base != d.quote_quote:
-            save_rate(svc.db, row["date"], d.quote_base, d.quote_quote, d.rate, "TRADE")
+            keys.add((txn.date, d.quote_base, d.quote_quote))
+    with svc.db.transaction():
+        for day, base, quote_ccy in sorted(keys):
+            winner = svc.db.one(
+                "SELECT t.id FROM transactions t WHERE t.type='CNV' AND t.status='POSTED' AND t.date=? "
+                "AND EXISTS (SELECT 1 FROM ledger_entries le JOIN financial_assets a ON a.id=le.asset_id "
+                "WHERE le.transaction_id=t.id AND le.effect='INTERNAL' AND a.currency=?) "
+                "AND EXISTS (SELECT 1 FROM ledger_entries le JOIN financial_assets a ON a.id=le.asset_id "
+                "WHERE le.transaction_id=t.id AND le.effect='INTERNAL' AND a.currency=?) "
+                "ORDER BY t.id DESC LIMIT 1", (day, base, quote_ccy))
+            svc.db.execute("DELETE FROM fx_rates WHERE date=? AND base=? AND quote=? AND source='TRADE'",
+                           (day, base, quote_ccy))
+            if winner:
+                d = describe(svc, svc.get(winner["id"]))
+                save_rate(svc.db, day, base, quote_ccy, d.rate, "TRADE")

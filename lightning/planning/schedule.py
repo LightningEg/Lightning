@@ -76,16 +76,6 @@ def previous_due(item: PlannedItem, due: str) -> str | None:
     return _add_months(day, -_MONTH_STEP[item.frequency] * item.interval_count).isoformat()
 
 
-def last_payment_date(item: PlannedItem) -> str | None:
-    """The final payment date when the schedule has a fixed end, else None."""
-    if item.payment_count is None and not item.end_date:
-        return None
-    if item.frequency == Frequency.ONCE:
-        return item.start_date
-    dates = payment_dates(item, "2999-12-31")  # the item's own end date or count stops the schedule
-    return dates[-1][1] if dates else None
-
-
 def describe(item: PlannedItem) -> str:
     """Plain wording such as "Monthly on day 20" or "Every 2 weeks from 2026-09-03"."""
     start = date.fromisoformat(item.start_date)

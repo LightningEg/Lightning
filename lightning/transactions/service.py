@@ -684,16 +684,19 @@ class TransactionService:
         """Your own money changing currency: `sent` leaves one account, `received` arrives in another, and an
         optional `fee` (in the sending currency) is an expense. The executed rate is kept as a dated rate."""
         day, lines = self._conversion_lines(date, from_account_id, to_account_id, sent, received, fee)
-        created = self.post(DocType.CNV, day, lines, description, "", notes, source)
-        conversion.rebuild_trade_rates(self)
+        with self.db.transaction():
+            created = self.post(DocType.CNV, day, lines, description, "", notes, source)
+            conversion.refresh_trade_rates(self, [created])
         return created
 
     def update_conversion(self, txn_id: int, date: str, from_account_id: int, to_account_id: int, sent, received,
                           fee=None, description: str = "", notes: str = "") -> Transaction:
         current = self._editable(txn_id, {DocType.CNV})
         day, lines = self._conversion_lines(date, from_account_id, to_account_id, sent, received, fee)
-        updated = self.repost(txn_id, day, lines, description, "", notes)
-        conversion.rebuild_trade_rates(self)
+        with self.db.transaction():
+            previous = self.get(txn_id)
+            updated = self.repost(txn_id, day, lines, description, "", notes)
+            conversion.refresh_trade_rates(self, [previous, updated])
         return updated
 
     def conversion_of(self, t: Transaction):
@@ -736,7 +739,7 @@ class TransactionService:
             self._check_holdings(t.lines)
             self.audit.record("transaction", t.id, "void", reason or f"Voided {t.ref}")
             if t.type == DocType.CNV:
-                conversion.rebuild_trade_rates(self)
+                conversion.refresh_trade_rates(self, [t])
         return self.get(txn_id)
 
     def delete_many(self, txn_ids: list[int]) -> int:
@@ -770,7 +773,7 @@ class TransactionService:
                                               ignore_before_day=True)
             self._check_holdings(lines)
             if any(txn.type == DocType.CNV for txn in pending):
-                conversion.rebuild_trade_rates(self)
+                conversion.refresh_trade_rates(self, pending)
         return len(pending)
 
     def restore(self, txn_id: int) -> Transaction:
@@ -808,7 +811,7 @@ class TransactionService:
             self._check_holdings(t.lines)
             self.audit.record("transaction", t.id, "restore", f"Restored {t.ref}")
             if t.type == DocType.CNV:
-                conversion.rebuild_trade_rates(self)
+                conversion.refresh_trade_rates(self, [t])
         return self.get(txn_id)
 
     # ======================================================================

@@ -118,23 +118,6 @@ class MoneyFromOthersService:
         asset = self.accounts.assets.cash_asset(account.currency)
         self._tag_exact_line(transaction_id, owner, account_id, asset.id, to_e6(amount))
 
-    def cash_owners_for_account(self, account_id: int, as_of: str) -> list[dict]:
-        day = parse_date(as_of).isoformat()
-        totals = {}
-        rows = self.db.all("""SELECT p.name AS owner,SUM(le.quantity_e6) AS amount_e6
-                             FROM ledger_entries le JOIN counterparties p ON p.id=le.owner_id
-                             JOIN transactions t ON t.id=le.transaction_id
-                             JOIN financial_assets f ON f.id=le.asset_id AND f.is_cash=1
-                             WHERE le.account_id=? AND le.date<=? AND t.status='POSTED'
-                             GROUP BY p.id HAVING SUM(le.quantity_e6)<>0""", (account_id, day))
-        totals.update({row["owner"]: int(row["amount_e6"]) for row in rows})
-        for row in self.db.all("""SELECT owner,SUM(amount_e6) amount_e6 FROM money_from_others
-                                 WHERE account_id=? AND date<=? AND transaction_id IS NULL GROUP BY owner""",
-                               (account_id, day)):
-            totals[row["owner"]] = totals.get(row["owner"], 0) + int(row["amount_e6"])
-        return [{"owner": name, "amount_e6": amount, "amount": from_e6(amount)}
-                for name, amount in sorted(totals.items()) if amount > 0]
-
     def sync_transfer(self, transaction_id: int, day: str, owner: str | None, source_id: int, target_id: int,
                       amount: Decimal, notes: str = "") -> None:
         """Move custody cash alongside an internal account transfer, without changing its total."""

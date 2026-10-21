@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Codex: 9G conversion rate updates refresh only affected dates/pairs, atomically with the posting; at 50 conversions, transaction reads fall from 51 to 2 (4.26 to 0.85 ms locally).
+  9H removes eight unused backend helpers. Audit 2 and eight regression tests cover rate winners, edits, void/restore, bulk deletion, rollback and existing 2E validation fixes.
+
 - 2026-10-21 · Claude: guideline 3.33, answer first (3W): A09 Page order (header, Lead, Needs you, KPIs, details; one home per figure),
   status sentence and seam (A05, A02.3), the page's Lead spans its row (A07); phone C04, C06, C11; A16 gains two checks. Both repos.
 - 2026-10-21 · Codex: Added 21 Lightning branding assets from Drive under `assets/logos/`; original filenames kept and active asset references unchanged.

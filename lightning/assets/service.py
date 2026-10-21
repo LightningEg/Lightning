@@ -91,12 +91,6 @@ class AssetService:
             current = self.get_class(current.parent_id)
         return " › ".join(reversed(names))
 
-    def root_of(self, class_id: int) -> AssetClass:
-        current = self.get_class(class_id)
-        while current.parent_id is not None:
-            current = self.get_class(current.parent_id)
-        return current
-
     # -- financial assets --------------------------------------------------
     @request_cached
     def _classes_by_id(self) -> dict[int, AssetClass]:
@@ -152,9 +146,6 @@ class AssetService:
         if not found:
             raise ValidationError(f"Currency {currency} is not set up.", "currency")
         return found
-
-    def cash_currencies(self) -> list[str]:
-        return [a.currency for a in self.repo.list_assets() if a.is_cash and a.active]
 
     def investments(self, active_only: bool = False) -> list[FinancialAsset]:
         return [a for a in self.repo.list_assets() if not a.is_cash and (a.active or not active_only)]

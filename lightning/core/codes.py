@@ -70,7 +70,3 @@ def path_segment(text: str) -> str:
             "Could not build a code from this name — please type a code (latin letters).", "code"
         )
     return seg
-
-
-def parent_path(code: str) -> str | None:
-    return code.rsplit(".", 1)[0] if "." in code else None

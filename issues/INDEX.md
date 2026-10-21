@@ -154,4 +154,4 @@ Good ideas that wait until the milestones above are done.
 | **9E** | [Return against the risk-free rate](9-later/9E-return-against-risk-free-rate.md) | feature | investments | new |
 | **9F** | [Page speed: a stable origin and cache, and a CSS trim](9-later/9F-page-speed-origin-and-css.md) | tech | performance | new |
 
-Done: nothing yet. Next free code: 9G.
+Done: 9G, 9H. Next free code: 9I.
