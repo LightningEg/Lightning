@@ -140,6 +140,7 @@ def test_browser_bulk_notes_save_and_cancel_dialog(register_browser, rows):
     page.locator("#f-edit").evaluate("f => f.requestSubmit()")
     page.wait_for_selector("dialog[open]")
     page.keyboard.press("Escape")
+    page.wait_for_selector("dialog.ask-dialog", state="detached")
     assert page.locator("tr.editing").count() == 1
     assert page.locator('[form="f-edit"][name="notes"]').input_value() == "shared note"
     assert page.locator(".transaction-select:checked").count() == 3
