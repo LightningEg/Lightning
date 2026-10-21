@@ -273,7 +273,12 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
     if rate is None or flow.inflows <= 0:
         cards.append(card(figure_label("savings_rate"), None, compare("No money in this period"), tone="in", key="savings",
                           chip_=chip(period_chip), href=savings_href))
-    elif flow.rate_says_nothing or flow.net < 0:
+    elif flow.rate_says_nothing:  # honest numbers (A01): a rate like −1,177% says nothing, the sentence does
+        cards.append(card(figure_label("savings_rate"), None,
+                          compare(f"{fmt(-flow.net)} more went out than the {fmt(flow.inflows)} that came in"),
+                          tone="over", key="savings", chip_=chip(period_chip, "bad"), href=savings_href,
+                          line_=line(f"Money out {fmt(flow.outflows)}")))
+    elif flow.net < 0:
         cards.append(card("Spent over money in", -flow.net,
                           compare(f"{fmt(-flow.net)} more went out than the {fmt(flow.inflows)} that came in"),
                           tone="over", key="savings", chip_=chip(period_chip, "bad"), href=savings_href,
