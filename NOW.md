@@ -32,5 +32,5 @@ The whole plan, by milestone and code, is `issues/INDEX.md`. In order:
 5. **3W Answer first** (Claude): guideline 3.33 and all six tabs built (PC and phone); left: Overview KPIs to A08, flows to Spending, holdings in five columns, site-recapture. **Read:** 3W *Steps*; A09.
 6. **3H Tab-by-tab review:** §13 milestone 1 and the trust milestone built; next, optional reminders and grouped confirmations, then analytics; trust step 2, weekly friction. **Read:** 3H §13–14.
 7. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
-8. **8B Website guideline copies:** fix on website `codex/sync-app-guidelines`. **Read:** 8B.
+8. **Website:** 8B on `codex/sync-app-guidelines`; recapture (`claude/site-recapture`), then 8F; 8I owner. **Read:** 8B, 8F.
 9. **6B Europe/GCC shares**, **6D gold**, **6E institution logos**, **5I gam'eya and zakat follow-ups:** waiting as their items say. **Read:** each item.
