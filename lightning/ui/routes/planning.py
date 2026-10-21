@@ -17,7 +17,7 @@ from lightning.planning.domain import (FREQUENCY_LABELS, KIND_LABELS, RECURRING_
 from lightning.planning.schedule import describe
 from lightning.planning.service import LOAN_CATEGORY
 
-from .. import charts, keynotes, kpis, visuals
+from .. import charts, keynotes, kpis, visuals, status as page_status
 from ..web import container, redirect, render
 from . import reserves as reserve_routes
 
@@ -119,7 +119,16 @@ async def plan_page(request: Request):
                                then=fmt_date(parse_month(past[-1][0])[1]) if past else "",
                                past_free=[value for _, value in past], position=c.position.at(day),
                                monthly_spending=c.budgets.spending_average(month_of(day)).amount, has_income=has_income)
+    # Answer first (guideline 3.33, A09): Safe to spend is the page's Lead with its working beside it; late payments are
+    # Needs you rows under it, each with Mark paid.
+    lead = next((k for k in kpi_cards if k["key"] == "safe"), None)
+    kpi_cards = [k for k in kpi_cards if k["key"] != "safe"]
+    needs = [{"label": f"{p.item.name} is late", "detail": f"Due {p.due_date} · {fmt(p.still_owed, 0)} · {p.days_late(day)} days late",
+              "href": f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2Fplan", "popup": True, "action": "Mark paid"}
+             for p in late]
+    status = page_status.cash_plan(forecast.safe_to_spend, forecast.next_income_date, has_income)
     return render(request, "planning/plan.html", tabs=TABS, plan_tab="plan", forecast=forecast, owe=owe, has_income=has_income,
+                  lead=lead, needs=needs, status=status,
                   gameya_owed=c.position.at(day).gameya_still_to_pay,
                   notes=[], plan=plan, stats=stats, kpi_cards=kpi_cards, forecast_chart=visuals.forecast_trend(forecast),
                   next_payments=next_payments, late_days=late_days, as_of=fmt_date(day), window_end=fmt_date(window_end),

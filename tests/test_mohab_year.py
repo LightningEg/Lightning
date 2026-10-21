@@ -1189,7 +1189,9 @@ def test_the_emergency_fund_in_months_of_spending(mohab):
 def test_the_year_on_the_overview(mohab):
     answer = mohab.answers["year"]
     assert answer.figure("Savings rate 2026-10-01 to 2027-09-30") == D("50.5")
-    assert answer.figure("Change in net worth 2026-10-01 to 2027-09-30") == D("383284")  # dated receipts: 42,000 debt paydown belongs to this year
+    # Answer first (guideline 3.33): the change is the Net worth Lead's comparison, "+383,284 in these dates".
+    assert answer.shows("2026-10-01 to 2027-09-30")
+    assert money(re.search(r'class="lead-compare"><b[^>]*>([^<]+)</b>', answer.screen.html).group(1)) == D("383284")  # dated receipts: 42,000 debt paydown belongs to this year
     assert answer.figure("Loans still to pay") == D("34500")
 
 
@@ -1547,9 +1549,8 @@ def test_a_gameya_third_instalment_waits_under_needs_you_once(mohab):
     assert answer.shows("Gam'eya instalment due: Office gam'eya")
     decision = mohab.notes.get("gameya_group", answer.screen)
     assert decision.shows("1 instalment · 2,000 EGP · first due 2027-09-05")
-    needs_you = answer.screen.html.split('aria-labelledby="needs-heading"', 1)[1].split("</details>", 1)[0]
-    grouped_rows = needs_you.split('<div class="overview-inline-list">', 1)[1]
-    assert html.unescape(grouped_rows).count("Gam'eya instalment due") == 1  # the preview also names it; one decision row
+    needs_you = answer.screen.html.split('aria-labelledby="needs-heading"', 1)[1].split("</section>", 1)[0]
+    assert html.unescape(needs_you).count("Gam'eya instalment due") == 1  # one decision row (guideline 3.33, A09)
     assert mohab.notes["gameya_terms"].shows("Gam'eya terms saved", "Nothing was posted")
     assert mohab.notes["gameya_page"].shows("Instalment 3 of 10", "2 of 10")
 

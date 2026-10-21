@@ -1,14 +1,23 @@
 {% extends "base.html" %}
 {% from "planning/_macros.html" import payment_row %}
 {% block title %}Cash planning{% endblock %}
-{% block heading %}<div><h1>{{ 'Cash planning'|tr(locale) }}</h1></div>{% endblock %}
+{% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Cash planning'|tr(locale), status, as_of ~ ' to ' ~ (forecast.next_income_date or window_end), 'until payday' if forecast.next_income_date else 'the next 3 months') }}{% endblock %}
 
 {% block content %}
-{% from "partials/charts.html" import stat_tiles, kpi_row, trend, waterfall, bars %}
+{% from "partials/charts.html" import stat_tiles, kpi_row, trend, waterfall, bars, lead_card %}{% from "partials/macros.html" import needs_rows %}
 {% set f = forecast %}{% set p = plan %}
-{% if kpi_cards %}{{ kpi_row(kpi_cards, base, 'Your cash') }}{% else %}{{ stat_tiles(stats, base, 'Your cash') }}{% endif %}
+{% if lead %}{% call lead_card(lead, base) %}<div class="lead-side-head" id="plan-build"><div><h3>{{ 'How safe to spend is worked out'|tr(locale) }}</h3><p>{{ "From free cash to safe to spend"|tr(locale) }}</p></div></div>
+    {{ waterfall(p.build) }}
+    {# Feedback ticket 102: when only what is left in the budget pushes safe to spend below zero, the way out is the budget. #}
+    {% set budget_part = f.safe_to_spend_parts|selectattr(0, 'equalto', fig.left_in_plan_after_bills.label)|map(attribute=1)|first|default(0) %}
+    {% if f.safe_to_spend < 0 and budget_part < 0 and f.safe_to_spend - budget_part >= 0 %}<p class="notice">{{ "What is still planned to spend in your budget is more than your cash allows."|tr(locale) }} <a class="btn small" href="/budget">{{ 'Adjust your budget'|tr(locale) }}</a></p>
+    {% elif f.safe_to_spend < 0 %}<p class="notice">{{ "Promised payments are larger than your free cash."|tr(locale) }}</p>{% endif %}
+    <details class="chart-table"><summary>{{ 'Show the numbers'|tr(locale) }}</summary><table><tbody>{% for name, value in f.safe_to_spend_parts %}<tr><td>{{ name }}</td><td class="num">{{ value|money(not loop.first) }}</td></tr>{% endfor %}<tr><th>{{ fig.safe_to_spend.label }}</th><th class="num">{{ f.safe_to_spend|money }}</th></tr></tbody></table></details>{% endcall %}
+{{ needs_rows(needs) }}
+{{ kpi_row(kpi_cards, base, 'Your cash') }}
+{% else %}{{ stat_tiles(stats, base, 'Your cash') }}{% endif %}
 
-<header class="overview-section-head inv-head" id="plan-build"><h2>{{ 'How is safe to spend worked out?'|tr(locale) }}</h2><span>Today to {{ f.next_income_date or 'three months from now' }}</span></header>
+{% if not lead %}<header class="overview-section-head inv-head" id="plan-build"><h2>{{ 'How is safe to spend worked out?'|tr(locale) }}</h2><span>Today to {{ f.next_income_date or 'three months from now' }}</span></header>
 <section class="card wide-card"><div class="overview-split">
   <section><div class="overview-block-head"><div><h3>{{ "From free cash to safe to spend"|tr(locale) }}</h3></div></div>
     {{ waterfall(p.build) }}
@@ -17,8 +26,9 @@
     {% if f.safe_to_spend < 0 and budget_part < 0 and f.safe_to_spend - budget_part >= 0 %}<p class="notice">{{ "What is still planned to spend in your budget is more than your cash allows."|tr(locale) }} <a class="btn small" href="/budget">{{ 'Adjust your budget'|tr(locale) }}</a></p>
     {% elif f.safe_to_spend < 0 %}<p class="notice">{{ "Promised payments are larger than your free cash."|tr(locale) }}</p>{% endif %}
     <details class="chart-table"><summary>{{ 'Show the numbers'|tr(locale) }}</summary><table><tbody>{% for name, value in f.safe_to_spend_parts %}<tr><td>{{ name }}</td><td class="num">{{ value|money(not loop.first) }}</td></tr>{% endfor %}<tr><th>{{ fig.safe_to_spend.label }}</th><th class="num">{{ f.safe_to_spend|money }}</th></tr></tbody></table></details></section>
-  <section id="plan-next"><div class="overview-block-head"><div><h3>{{ "The next 30 days"|tr(locale) }}</h3><p>{{ as_of }} to {{ window_end }} · money in above the line, payments below</p></div><a class="quiet-link" href="/plan/recurring">{{ 'Recurring'|tr(locale) }}</a></div>
-    {% if p.marks %}<div class="timeline{{ ' has-in' if p.marks|selectattr('income')|list }}" role="img" aria-label="Payments in the next 30 days">
+{% else %}<section class="card wide-card"><div class="overview-split is-single">
+{% endif %}  <section id="plan-next"><div class="overview-block-head"><div><h3>{{ "The next 30 days"|tr(locale) }}</h3><p>{{ as_of }} to {{ window_end }} · money in above the line, payments below</p></div><a class="quiet-link" href="/plan/recurring">{{ 'Recurring'|tr(locale) }}</a></div>
+    {% if p.marks and not lead %}<div class="timeline{{ ' has-in' if p.marks|selectattr('income')|list }}" role="img" aria-label="Payments in the next 30 days">
       <i class="tl-axis"></i><span class="tl-today" style="left:3%">{{ 'Today'|tr(locale) }}</span><span class="tl-end">{{ "+30 days"|tr(locale) }}</span>
       {% for m in p.marks %}<span class="tl-mark {{ 'is-in' if m.income else 'is-out' }}{{ ' is-late' if m.late }} row-{{ m.row }}" style="left:{{ '%.2f'|format(m.x) }}%" title="{{ m.title }}"><i></i><b>{{ m.name }}{% if m.count > 1 %} +{{ m.count - 1 }}{% endif %}</b><small>{{ '+' if m.income else '−' }}{{ m.amount|money }}</small></span>{% endfor %}
     </div>{% endif %}

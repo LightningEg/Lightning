@@ -25,7 +25,7 @@ from lightning.workflows.review import GROUP_LABELS, ReviewInbox, group_of, grou
 from ..web import container, render
 from ..web import redirect
 from ..periods import Period, parse_period
-from .. import keynotes, visuals
+from .. import keynotes, status as page_status, visuals
 from .sms import read_phone_sms
 
 router = APIRouter()
@@ -230,6 +230,16 @@ async def dashboard(request: Request):
                                                     money_added=six_added, xs=PAIR_XS)
     stats = _period_stats(c, period, first, as_of, period_position, cash_flow, change, change_reason,
                           closing_report["net_money"], networth_trend, urlencode(request.query_params))
+    # Answer first (guideline 3.33, A09): the change in net worth is the Lead's comparison, not a card of its own;
+    # Safe to spend takes its place in the row while the position is today's.
+    change_tile = stats.pop(0)
+    current = as_of >= today()
+    lead_change = page_status.change(change_tile["value"], period.key, current)
+    if position_is_today := position_day == today():
+        stats.insert(len(stats) - 1, _safe_tile(c))
+    status = page_status.overview(cash_flow.inflows, cash_flow.outflows, cash_flow.net, cash_flow.savings_rate,
+                                  cash_flow.rate_says_nothing, period.key, current, bool(accounts))
+    dates_note = ("so far" if current and period.key in ("month", "ytd") else "year to date" if period.key == "ytd" else "")
     recent_rows = c.reporting.register_page(None, "1900-01-01", "9999-12-31", 1, 10)[0]  # the phone leads with these (C11.1)
     return render(
         request,
@@ -245,7 +255,7 @@ async def dashboard(request: Request):
         networth_trend=networth_trend, free_cash_steps=visuals.free_cash_steps(position),
         month_calendar=visuals.month_calendar(c, today()),
         month=month, this_month=month_of(today()), period=period, period_error=period_error,
-        date_from=fmt_date(first), date_to=fmt_date(as_of), as_of=fmt_date(as_of), position_as_of=fmt_date(position_day), position_is_today=position_day == today(),
+        date_from=fmt_date(first), date_to=fmt_date(as_of), as_of=fmt_date(as_of), position_as_of=fmt_date(position_day), position_is_today=position_is_today, status=status, dates_note=dates_note, lead_change=lead_change,
         range_label=(f"No recorded activity · Position as of {fmt_date(position_day)}"
                      if period.key == "all" and not first_activity else f"{fmt_date(first)} to {fmt_date(as_of)} · Position as of {fmt_date(position_day)}"),
         pos=position, cash_accounts=cash_accounts, owe=owe,
@@ -435,6 +445,17 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
                       "kind": "money", "empty": "No plan yet", "sub": f"Set a plan for {month}",
                       "href": f"/budget?month={month}"})
     return stats
+
+
+def _safe_tile(c) -> dict:
+    """Safe to spend on the Overview: the Cash planning figure (its home), as a card that opens it."""
+    f = c.forecaster.forecast(today())
+    until = f.next_income_date
+    share = f"{f.safe_to_spend / f.free_cash * 100:.0f}% of your {fmt(f.free_cash)} free cash" if f.free_cash > 0 else "No free cash today"
+    return {"key": "safe", "surface": "over" if f.safe_to_spend < 0 else "hold", "label": label("safe_to_spend"),
+            "value": f.safe_to_spend, "kind": "money",
+            "badge": {"tone": "over" if f.safe_to_spend < 0 else "flat", "text": f"until {until}" if until else "3 months"},
+            "sub": share, "href": "/plan"}
 
 
 @router.post("/demo")
