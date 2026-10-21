@@ -282,6 +282,7 @@ table.t td b{color:var(--ink);font-weight:500}
 <span class="a2">ready</span> on 127.0.0.1:8766</pre>
   </div>
   <div class="blocks" style="margin-top:12px">
+    <div class="blk"><b>.hello</b><span>Home only: one mono line above the hero H1, <code>$</code> in Accent, then <code>welcome to lightning</code> in Dim, lower case, with the caret. It types itself once on load; without script or with reduced motion it is simply there.</span></div>
     <div class="blk"><b>.btn</b><span>Primary: btn on btn-ink, 46px, radius 2, Inter 500. One per view: the hero, the closing, and a section's own call to act.</span></div>
     <div class="blk"><b>.btn.ghost</b><span>Secondary: hairline, mono, a <code>$</code> or <code>›</code> in Accent.</span></div>
     <div class="blk"><b>.chip</b><span>34px, radius 6, mono 12.5: theme, source ↗.</span></div>
@@ -307,7 +308,7 @@ table.t td b{color:var(--ink);font-weight:500}
   <ul class="short">
     <li><b>The field:</b> a fixed particle terrain on one canvas, a 24px pixel grid fading at the edges, and faint scanlines (15% on Paper). Full under the hero and the closing, faint between them. It is built once and never rebuilds while you scroll.</li>
     <li><b>Lightning:</b> a strike every 6–12 seconds on the terrain, full over the hero and the closing and about half as bright between them, where people read; one at full strength where you click empty space. On a PC the hero's words flash with it. On a phone (under 760px) a strike is two strokes, with no full-screen glow and no flash, and the field draws at 1.5× pixels: a strike never stalls scrolling. A faint current runs through the pixel grid now and then.</li>
-    <li><b>Small motion:</b> sections rise 18px into place (0.8s) as soon as their top enters the view, however tall they are; a grid of cells rises as one. Bars fill when seen (1.4s), the caret blinks, the stack's pulse runs its whole line (CSS, nothing measured), the scroll hint nudges, the hero word decodes only while the hero is in view. Easing <code>cubic-bezier(.2,.8,.2,1)</code>.</li>
+    <li><b>Small motion:</b> sections rise 18px into place (0.8s) as soon as their top enters the view, however tall they are; a grid of cells rises as one. Bars fill when seen (1.4s), the caret blinks, the stack's pulse runs its whole line (CSS, nothing measured), the scroll hint nudges, the hero word decodes only while the hero is in view. On Home the hero arrives once: the greeting types, then the H1, the lede and the meta fade up 12px a beat apart (0.8s each, within 1.2s); buttons work from the first frame. Easing <code>cubic-bezier(.2,.8,.2,1)</code>.</li>
     <li><b>Reduced motion:</b> one still frame of the field, no strikes, no reveal, caret steady, bars drawn full. The page must read the same.</li>
     <li>Motion never moves text the reader is reading, never loops faster than once a second, and never needs to finish before a button works.</li>
   </ul>

@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Claude: For Geeks home greets with `$ welcome to lightning`, typed once with the caret, while the hero fades up;
+  guideline D07 `.hello` and D08 (both repos). Reduced motion shows it still.
 - 2026-10-21 · Claude: 8D For Geeks audit: recounted stats (`tools/geeks_stats.py`), keys.py proof, steady Ink hero word, quiet terminal replay, balanced
   mission, roadmap glow runs once, Arabic footer labels For Geeks English; D07 demo port 8766 (both repos). Ideas left for the owner: 8D.
   Contribute links the glossary and AGENTS.md instead of copying them (phone 16,795 → 14,466px).
