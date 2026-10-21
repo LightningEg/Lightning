@@ -57,7 +57,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **3R** | [Phone sheets copy the page's undo pill and tabs, Save does nothing without a category, and the raise prompt covers the top bar](3-polish-and-arabic/3R-sheets-silent-save-and-prompt-over-top-bar.md) | bug | phone | ready |
 | **3S** | [PC screens break the guideline in 20 places not yet filed - a page that scrolls sideways, misleading charts, colours off meaning](3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) | polish | product | ready |
 | **3T** | [Phone screens break Part C - cut words, overlapping text, no way back on five pages, small targets, five Settings tabs](3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | polish | phone | ready |
-| **3U** | [In Arabic the "·" beside a number reads as a zero (Late 17 days shows as 170), decimals mix "." and ",", and a few strings stay English](3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) | bug | arabic | ready |
+| **3U** | [Arabic leftovers - the budget move preview arrow, two overlaps and a wrapped number](3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) | bug | arabic | ready |
 | **3V** | [The demo and the sample hide the smart features and show false alarms - fix the data before any demo](3-polish-and-arabic/3V-demo-data-shows-the-smart-features.md) | tech | product | ready |
 
 Done: 3L, 3M, 3N, 3O, 3P. Next free code: 3W.

@@ -84,7 +84,7 @@
 </dialog>
 <div id="busy-toast" class="busy-toast" role="status" aria-live="polite" hidden{% if prices_running %} data-watch="/investments/prices/online/status" data-watch-label="Fetching month-end prices…"{% endif %}><span class="busy-square" aria-hidden="true"></span><span class="busy-text"></span><a class="busy-link" href="/investments/prices" hidden>{{ 'Show'|tr(locale) }}</a></div>
 <button id="page-jump" class="page-jump" type="button" hidden aria-label="Go to end of page" title="Go to end of page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6M6 4l6 6 6-6M5 20h14"/></svg></button>
-<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/arabic-numbers.js?v=5"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/arabic-numbers.js?v=6"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/info-tips.js?v=1"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/app.js?v=42"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/ai-handoff.js?v=2" defer></script>
