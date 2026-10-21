@@ -29,6 +29,7 @@ Read a site page only around the line you change.
 4. **Links.** In `Lightning_website`, `python tools/site_check.py` checks every relative `href`, `src` and `data-zoom`, that each JSON-LD block parses, that every `archive/` snapshot carries noindex and `<base href="../">`,
    that each row on `versions.html` says what `version-registry.json` says, and English titles (60) and descriptions (160). Then check by hand that anchors exist, `sitemap.xml` and `llms.txt`
    list the real pages and `CNAME` and `robots.txt` are intact. Report broken ones with page and link. Do not fetch third-party links.
+   `python tools/geeks_stats.py ../Lightning --check` says whether For Geeks' code counts still match the app's main; without `--check` it rewrites them (D10).
 5. **Version IDs.** Every testable web experience carries one immutable ID, `UX-YYYY.MM.DD.NN`, shown in the Testing panel and on the Version Archive. A change to a live page means a new ID and an archived copy first
    (the README's *Version identity and archive* section gives the exact rule). `python tools/release.py <spec.json>` in the site does it before you edit: snapshot, registry, new ID, version list.
    Check that the `data-ux-version` on the pages you changed matches `version-registry.json` and the archive folder has the previous copy.

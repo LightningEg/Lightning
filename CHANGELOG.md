@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Claude: 8D For Geeks audit: recounted stats (`tools/geeks_stats.py`), keys.py proof, steady Ink hero word, quiet terminal replay, balanced
+  mission, roadmap glow runs once, Arabic footer labels For Geeks English; D07 demo port 8766 (both repos). Ideas left for the owner: 8D.
 - 2026-10-21 · Codex: 9G conversion rate updates refresh only affected dates/pairs, atomically with the posting; at 50 conversions, transaction reads fall from 51 to 2 (4.26 to 0.85 ms locally).
   9H removes eight unused backend helpers. Audit 2 and eight regression tests cover rate winners, edits, void/restore, bulk deletion, rollback and existing 2E validation fixes.
 
