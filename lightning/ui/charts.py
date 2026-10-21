@@ -102,6 +102,54 @@ def trend(labels: list[str], series: list[dict], plan: Decimal | None = None,
             "zero_y": y(ZERO) if bottom < 0 else None}
 
 
+LABEL_HEIGHT = 16  # px: one end label (12px type), also the least space between two labels at one end
+LABEL_NEAR_X = 30  # % of the plot width: end labels closer than this sideways compete for the same space
+
+
+def end_labels(t: dict, height: float = 180) -> list[dict]:
+    """Where each series writes its last value, so two labels never sit on each other (A12: labels never touch).
+
+    A label stands above its point, right-aligned to it. Points are taken top down; when a label would touch one
+    already placed it goes under its point instead, and when that is taken too it is left out (the dots still
+    tell the value on hover). ``height`` is the plot's height in px. -> [{"x", "y", "value", "side"}], side
+    "above" or "below"; positions are in percent of the plot like the dots."""
+    ends = sorted((s["last"] for s in t.get("series", []) if s.get("last")), key=lambda d: d["y"])
+    placed: list[tuple[float, float, float]] = []  # x, top, bottom (px)
+    out = []
+    for end in ends:
+        at = end["y"] / 100 * height
+        for side, top in (("above", at - 1.5 * LABEL_HEIGHT), ("below", at + LABEL_HEIGHT / 2)):
+            box = (end["x"], top, top + LABEL_HEIGHT)
+            if all(abs(x - box[0]) >= LABEL_NEAR_X or bottom <= box[1] or box[2] <= start for x, start, bottom in placed):
+                placed.append(box)
+                out.append({"x": end["x"], "y": end["y"], "value": end["value"], "side": side})
+                break
+    return out
+
+
+def spread_labels(ys: list[float | None], height: float, gap: float = LABEL_HEIGHT) -> list[float | None]:
+    """Move labels that stand at one end of a chart apart until each has ``gap`` px of its own, keeping their
+    order and splitting the move between them. ``ys`` and the result are percent of ``height`` px (None stays)."""
+    slots = sorted((i for i, y in enumerate(ys) if y is not None), key=lambda i: ys[i])
+    px = [ys[i] / 100 * height for i in slots]
+    low, high = gap / 2, height - gap / 2
+    for _ in range(len(px) * 4):
+        moved = False
+        for k in range(len(px) - 1):
+            short = gap - (px[k + 1] - px[k])
+            if short > 0.01:
+                px[k] -= short / 2
+                px[k + 1] += short / 2
+                moved = True
+        px = [min(max(v, low), high) for v in px]
+        if not moved:
+            break
+    out = list(ys)
+    for i, v in zip(slots, px):
+        out[i] = v / height * 100
+    return out
+
+
 def bars(rows: list[dict], limit: int = 4) -> dict:
     """Horizontal bars, largest first, from zero. rows: [{"label", "value", "href"?}]."""
     ordered = sorted((r for r in rows if r["value"]), key=lambda r: -abs(r["value"]))
@@ -397,6 +445,10 @@ def sparkline(values: list[Decimal | None], mark: str = "last") -> dict:
             "area": f"M{pts[0][0]:.2f},100 " + " ".join(f"L{x:.2f},{y:.2f}" for x, y in pts) + f" L{pts[-1][0]:.2f},100 Z"}
 
 
+PACE_PLOT_PX = 220  # the pace chart's plot height in style.css (.pace-plot)
+PACE_LABEL_GAP = 18  # px between the centres of its two end labels: 12px type, 15 tall, and air
+
+
 def pace(by_day: list[Decimal], plan: Decimal, days: int, last_month: list[Decimal] | None = None) -> dict:
     """Pace (burn-up, A12.1.9): spending added up day by day against a straight line from zero to the plan,
     with the month before by the same day of the month. Positions in percent of the plot (0,0 top left)."""
@@ -414,14 +466,17 @@ def pace(by_day: list[Decimal], plan: Decimal, days: int, last_month: list[Decim
 
     now = len(by_day)
     allowed = plan * now / days if days else ZERO
+    # The plan's and last month's end labels stand at the right edge: when the two totals are close, they part.
+    plan_label, before_label = spread_labels([y(plan), y(last_month[-1]) if last_month else None], PACE_PLOT_PX,
+                                             gap=PACE_LABEL_GAP)
     return {"actual": line(by_day) if by_day else "", "before": line(last_month) if last_month else "",
-            "plan": {"x": 100.0, "y": y(plan), "value": plan},
+            "plan": {"x": 100.0, "y": y(plan), "value": plan, "label_y": plan_label},
             "today": {"x": x(now), "value": by_day[-1] if by_day else ZERO, "y": y(by_day[-1]) if by_day else 100.0,
                       "day": now, "pace": allowed, "pace_y": y(allowed),
                       "before": last_month[min(now, len(last_month)) - 1] if last_month and now else None,
                       "before_y": y(last_month[min(now, len(last_month)) - 1]) if last_month and now else None} if now else None,
             "before_total": last_month[-1] if last_month else None,
-            "before_end_y": y(last_month[-1]) if last_month else None,
+            "before_end_y": y(last_month[-1]) if last_month else None, "before_label_y": before_label,
             "grid": [{"y": y(v), "value": v} for v in (top / Decimal("1.08") / 2, top / Decimal("1.08"))],
             "days": days}
 

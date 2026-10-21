@@ -29,7 +29,7 @@ from lightning.core.figures import FIGURES
 from lightning.core.memo import request_cache
 from lightning.core.money import ZERO, fmt, quantize, to_decimal
 from lightning.workflows import live_prices
-from lightning.ui import sections
+from lightning.ui import charts, sections
 from lightning.ui.i18n import BROWSER_UI, localize_html, localized_figures, translate
 
 UI_DIR = Path(__file__).parent
@@ -75,6 +75,16 @@ def _amount_role(value, role: str, signed: bool = False) -> str:
     raise ValueError(f"Unknown amount role: {role}")
 
 
+def _rate(value) -> str:
+    """A currency rate as it is quoted: two decimals (A06), four when it is under 1 (1 JPY = 0.3412 EGP), so a
+    small rate never rounds to nothing. Display only; the rate itself is stored and used as entered."""
+    try:
+        number = Decimal(str(value))
+    except InvalidOperation:
+        return str(value)
+    return fmt(number, 2 if abs(number) >= 1 else 4)
+
+
 def _tone(value) -> str:
     if value is None:
         return ""
@@ -88,6 +98,7 @@ def _keep_dates(text) -> Markup:
 
 templates.env.filters["money"] = _money
 templates.env.filters["amount_role"] = _amount_role
+templates.env.filters["rate"] = _rate
 templates.env.filters["whole"] = lambda value: fmt(Decimal(value), 0)  # half-up like money, never banker's
 templates.env.filters["tr"] = translate
 
@@ -285,6 +296,7 @@ def phone_mode() -> bool:
 
 
 templates.env.globals["phone_mode"] = phone_mode
+templates.env.globals["trend_end_labels"] = charts.end_labels
 
 
 @pass_context

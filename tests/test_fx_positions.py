@@ -119,8 +119,8 @@ def test_the_currencies_tab_shows_the_figures_with_their_names(c, dollars):
     c.fx.save("USD", "2026-12-29", "51")
     page = client.get("/accounts/currencies")
     assert page.status_code == 200
-    for text in ("Unrealized FX gain", "Realized FX gain", "Average rate", "Spread paid", "48.3333", "33,150", "1,733",
-                 "1 USD = 51.000000 EGP", "Dollar savings", "Value against cost"):
+    for text in ("Unrealized FX gain", "Realized FX gain", "Average rate", "Spread paid", "48.33", "33,150", "1,733",
+                 "<bdi dir=\"ltr\">1 USD = 51.00 EGP</bdi>", "Dollar savings", "Value against cost"):
         assert text in page.text, text
     assert "+1,733" in page.text and "Unavailable" not in page.text
     month = client.get("/accounts/currencies", params={"period": "month", "month": "2026-09"})
@@ -128,8 +128,19 @@ def test_the_currencies_tab_shows_the_figures_with_their_names(c, dollars):
     c.settings.set("locale", "ar")
     arabic = client.get("/accounts/currencies").text
     assert "ربح فروق العملة غير المحقق" in arabic and "متوسط السعر" in arabic and "Unrealized FX gain" not in arabic.split("<script")[0]
+    # The rate line is one left-to-right run inside the right-to-left page, so it never reads backwards (3A); the
+    # browser turns its digits Arabic-Indic. Two decimals, not six or four.
+    assert '<bdi dir="ltr">1 USD = 51.00 EGP</bdi>' in arabic and '<bdi dir="ltr">48.33</bdi>' in arabic
+    assert "51.000000" not in page.text and "48.3333" not in page.text
     c.settings.set("locale", "en")
     assert client.get("/accounts/currencies", params={"period": "custom", "date_from": "x"}).status_code == 200
+
+
+def test_a_rate_shows_two_decimals_and_four_when_it_is_under_one():
+    from lightning.ui.web import _rate
+    assert (_rate(D("51.600000")), _rate(D("48.3333333")), _rate(D("1234.5"))) == ("51.60", "48.33", "1,234.50")
+    assert (_rate("0.341234"), _rate(D("0.5"))) == ("0.3412", "0.5000")  # 1 JPY = 0.3412 EGP must not become 0.34
+    assert _rate("n/a") == "n/a"
 
 
 def test_the_phone_shows_the_same_figures_as_rows(c, dollars):

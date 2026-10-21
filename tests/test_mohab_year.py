@@ -1527,9 +1527,9 @@ def test_dollars_he_bought_show_their_cost_value_and_spread(mohab):
     assert mohab.notes["converted"].shows("Saved CNV")
     assert route(mohab, "dollars") == ["/", "/accounts/currencies"]
     answer = mohab.answers["dollars"]
-    assert answer.shows("USD", "Held", "1,000.00 USD", "Average rate", "50.0000",
+    assert answer.shows("USD", "Held", "1,000.00 USD", "Average rate", "50.00",
                         "Value", "49,400 EGP", "Unrealized FX gain", "−600", "Spread paid", "750",
-                        "1 USD = 49.400000 EGP", "Dollar savings")
+                        "1 USD = 49.40 EGP", "Dollar savings")
     register = mohab.b.go("Dollar savings")
     assert register.shows("1,000.00", "USD", "50,000")
     detail = mohab.b.click("Details")
