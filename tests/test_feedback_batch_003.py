@@ -38,10 +38,10 @@ def test_a_month_shows_where_money_went_beside_the_last_six_months(c, setup):
         c.transactions.record_inflow(f"2026-{month}-01", accounts["cib"].id, "10000", cats["EXP.WORK.SALARY"].id)
         c.transactions.record_outflow(f"2026-{month}-05", accounts["cib"].id, "3000", cats["EXP.PERSONAL.FOOD"].id)
     client = TestClient(create_app(c))
-    month = client.get("/?period=month&month=2026-10").text
+    month = client.get("/birdview/expenses?period=month&month=2026-10").text  # Spending since 2026-10-21 (owner)
     assert "overview-sankey-card is-pair" in month and "The last six months" in month
     assert "2026-08 to 2026-10" in month
-    year = client.get("/?period=custom&date_from=2026-08-01&date_to=2026-10-31").text
+    year = client.get("/birdview/expenses?period=custom&date_from=2026-08-01&date_to=2026-10-31").text
     assert "is-pair" not in year
 
 
@@ -50,7 +50,7 @@ def test_the_overview_keeps_net_cash_flow_by_month_as_a_calendar(c, setup):
     daily net cash flow are not on the Overview."""
     accounts, cats = setup
     c.transactions.record_outflow("2026-10-05", accounts["cib"].id, "300", cats["EXP.PERSONAL.FOOD"].id)
-    page = TestClient(create_app(c)).get("/?period=month&month=2026-10").text
+    page = TestClient(create_app(c)).get("/birdview/expenses?period=month&month=2026-10").text  # moved off the Overview (owner, 2026-10-21)
     months = page[page.index('id="months-heading"'):]
     assert "mcal-months" in months and 'class="cal-grid mcal-grid"' in months
     assert "Total expenses" not in months and "less to more spent" not in months
@@ -61,7 +61,7 @@ def test_free_cash_no_longer_repeats_itself(c, setup):
     page = TestClient(create_app(c)).get("/").text
     cash = page[page.index("overview-cash-card"):page.index("overview-owned-card")]
     assert "How it is built" not in cash and 'id="madeof-heading"' in cash
-    owned = page[page.index("overview-owned-card"):page.index('id="cashflow-analysis-heading"')]
+    owned = page[page.index("overview-owned-card"):]
     assert 'id="sold-heading"' in owned and 'id="flow-heading"' in owned
 
 

@@ -106,6 +106,7 @@ ARABIC_UI = {
     'Overview': 'نظرة عامة',
     'Done': 'تم',
     'Needs you': 'محتاج تدخّلك',
+    'From what you had': 'من اللي كان معاك',
     'now': 'دلوقتي',
     'Spent over money in': 'المصروف فوق اللي دخل',
     'on your usual {n}%': 'عن معدلك المعتاد {n}%',

@@ -1292,7 +1292,7 @@ def test_the_savings_rate_for_all_time(mohab):
 
 def test_the_overview_says_which_parts_follow_the_period(mohab):
     answer = mohab.answers["past_month"]
-    assert answer.shows("Cash flow 2026-10-01 to 2026-10-31", "Month by month 2026-07 to today")
+    assert answer.shows("Your position", "As of 2026-10-31")  # the flows and Month by month moved to Spending (owner, 2026-10-21)
 
 
 def test_your_position_follows_the_period_end(mohab):
@@ -1301,7 +1301,7 @@ def test_your_position_follows_the_period_end(mohab):
 
 
 def test_where_money_went_folds_small_categories_into_other(mohab):
-    assert mohab.answers["year"].shows("Other")
+    assert mohab.answers["year_spending"].shows("Where money in went", "Other")  # on Spending (owner, 2026-10-21)
 
 
 def test_a_month_of_spending_is_shown_day_by_day(mohab):

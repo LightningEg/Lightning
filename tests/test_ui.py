@@ -84,7 +84,7 @@ def test_full_flow(client, c):
 
     r = client.get("/?month=2026-09")
     assert "What you own" in r.text and "Free cash" in r.text
-    assert "Cash flow" in r.text and "Where money in went" in r.text
+    assert "Where money in went" in client.get("/birdview/expenses?month=2026-09").text  # on Spending since 2026-10-21
 
     r = client.post(f"/accounts/{wallet.id}/deactivate")
     assert "Move the balance" in r.text
@@ -144,7 +144,7 @@ def test_overview_horizons_keep_the_same_status_layout_and_popup_range(client, c
                   "period=custom&date_from=2026-09-10&date_to=2026-09-20"):
         response = client.get(f"/?{query}")
         assert response.status_code == 200
-        labels = ("What you own", "Free cash", "Cash flow", "Where money in went", "Month by month")
+        labels = ("What you own", "Free cash", "Net flow")
         assert [response.text.index(label) for label in labels] == sorted(response.text.index(label) for label in labels)
         assert 'class="overview-disclosure"' in response.text
         assert 'name="period" value="custom"' in response.text

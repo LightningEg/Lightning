@@ -29,7 +29,6 @@ from .. import keynotes, kpis, status as page_status, visuals
 from .sms import read_phone_sms
 
 router = APIRouter()
-PAIR_XS = (24.0, 45.0, 64.0)  # two Sankeys side by side: target names get a third of each (style.css .is-pair)
 
 _ACCOUNT_TYPE_LABELS = {
     AccountType.CASH: "Cash",
@@ -219,16 +218,6 @@ async def dashboard(request: Request):
                         if cash_flow.inflows > ZERO else None)
     savings_rate = cash_flow.savings_rate
     networth_trend = visuals.net_worth_trend(c, as_of)
-    # Feedback ticket 78: a month's Where money in went sits beside the last six months' (ending with it).
-    money_sankey_six, six_from = None, None
-    if period.key == "month":
-        six_keys = months_back(as_of, 6, first_activity)
-        if len(six_keys) > 1:
-            six_from = parse_month(six_keys[0])[0]
-            six_added = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(six_from),
-                                          fmt_date(as_of))["net_money"]
-            money_sankey_six = visuals.money_sankey(c, six_from, as_of, c.reporting.cash_flow(six_from, as_of),
-                                                    money_added=six_added, xs=PAIR_XS)
     stats = _period_stats(c, period, first, as_of, period_position, cash_flow, change, change_reason,
                           closing_report["net_money"], networth_trend, urlencode(request.query_params))
     # Answer first (guideline 3.33, A09): the change in net worth is the Lead's comparison, not a card of its own;
@@ -260,19 +249,18 @@ async def dashboard(request: Request):
                                   cash_flow.rate_says_nothing, period.key, current, bool(accounts))
     dates_note = ("so far" if current and period.key in ("month", "ytd") else "year to date" if period.key == "ytd" else "")
     recent_rows = c.reporting.register_page(None, "1900-01-01", "9999-12-31", 1, 10)[0]  # the phone leads with these (C11.1)
+    # The PC shows the flows on Spending (owner, 2026-10-21); the phone keeps them as folded rows (guideline C11.1).
+    phone_flows = (visuals.cash_flow_charts(c, first, as_of, period.key == "month", today())
+                   if getattr(request.state, "phone", False) else {})
     return render(
         request,
-        "dashboard/index.html",
+        "dashboard/index.html", **phone_flows,
         stats=stats, recent_rows=recent_rows,
         flow_columns=visuals.cash_flow_columns(c, first, as_of, cash_flow),
         money_in_rows=visuals.money_in_groups(c, first, as_of),
         money_out_rows=visuals.money_out_groups(c, first, as_of),
-        money_sankey=visuals.money_sankey(c, first, as_of, cash_flow, money_added=closing_report["net_money"],
-                                          xs=PAIR_XS if money_sankey_six else (22.0, 49.0, 76.0)),
-        money_sankey_six=money_sankey_six, six_from=month_of(six_from) if six_from else "",
         wealth_donut=visuals.holdings_donut(position, include_cash=True),
         networth_trend=networth_trend, free_cash_steps=visuals.free_cash_steps(position),
-        month_calendar=visuals.month_calendar(c, today()),
         month=month, this_month=month_of(today()), period=period, period_error=period_error,
         date_from=fmt_date(first), date_to=fmt_date(as_of), as_of=fmt_date(as_of), position_as_of=fmt_date(position_day), position_is_today=position_is_today, status=status, kpi_cards=kpi_cards,
         waffle=saved_and_invested(cash_flow, closing_report["net_money"]), dates_note=dates_note, lead_change=lead_change,

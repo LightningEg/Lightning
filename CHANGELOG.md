@@ -12,7 +12,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 ## [Unreleased]
 
 - 2026-10-21 · Claude: 3W done: the Overview's row is A08 cards (Savings rate on your usual, new figure `usual_savings_rate`; Investing rate on
-  the period before; Safe to spend; Left in plan); the holdings table has five columns, units, average, price and account under the name.
+  the period before; Safe to spend; Left in plan); the holdings table has five columns, units, average, price and account under the name. Where money in went and
+  Month by month moved to Spending (owner).
 - 2026-10-21 · Claude: 3W8 phone: each section's title carries its status sentence and the seam (C04.1); Needs you bullets are the mark;
   Accounts leads with What you own ("Total balance" retired); Investments drops Biggest holdings; no Needs you row when nothing waits.
 - 2026-10-21 · Claude: 3W5-3W7 answer first: Investments leads with Portfolio value (the waffle and Biggest holdings left; By currency only

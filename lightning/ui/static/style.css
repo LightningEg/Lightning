@@ -3649,3 +3649,4 @@ a.period-button { display:inline-flex; align-items:center; justify-content:cente
 /* Holdings in five columns (guideline 3.33, A11): units, average and price, and the account under the name. */
 .main .holdings-wide tr[data-search] td:first-child { min-width:280px; }
 .main .holdings-wide td:first-child .hold-sub { white-space:normal; }
+.main .spending-flows { margin-top:var(--gap-block); }
