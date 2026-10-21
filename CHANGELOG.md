@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Claude: website recaptured from this app (3W site-recapture): net worth 910,304, safe to spend 112,288, nine accounts, new Overview rate crops; Budget screens kept old for 3Y; also filed 3Z, 3AA.
 - 2026-10-21 · Claude: For Geeks home greets with `$ welcome to lightning`, typed once with the caret, while the hero fades up;
   guideline D07 `.hello` and D08 (both repos). Reduced motion shows it still.
 - 2026-10-21 · Claude: 8D For Geeks audit: recounted stats (`tools/geeks_stats.py`), keys.py proof, steady Ink hero word, quiet terminal replay, balanced
