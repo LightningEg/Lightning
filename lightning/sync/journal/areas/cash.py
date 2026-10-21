@@ -9,6 +9,7 @@ REGISTER = dict(account_id=ref("accounts"), date=DATE, amount=AMOUNT, category_i
                 other_account_id=optional(ref("accounts")), counterparty=TEXT, notes=LONG,
                 owner_id=optional(ref("counterparties")))
 TXN = ("transactions", "txn_id")
+SELECTED = ("transactions", "txn_ids")
 CHECKED = ("reconciled_through", ("account_id",))  # One row per account, named by its key.
 # The account form's record: category and counterparty are optional (a transfer has neither).
 ENTRY = dict(date=DATE, account_id=ref("accounts"), amount=AMOUNT, notes=LONG, owner_id=optional(ref("counterparties")))
@@ -26,10 +27,10 @@ COMMANDS = {
         adapt=lambda values: values | dict(allocations=[(line["category_id"], line["amount"]) for line in values["allocations"]])),
     "transactions.void": Command("transactions.void", dict(txn_id=ref("transactions"), reason=TEXT), target=TXN),
     "transactions.restore": Command("transactions.restore", dict(txn_id=ref("transactions")), target=TXN),
-    # Bulk actions on a selection carry no single-row precondition.
-    "transactions.delete_many": Command("transactions.delete_many", dict(txn_ids=listof(ref("transactions")))),
+    # Bulk actions on a selection: every selected row together is the precondition.
+    "transactions.delete_many": Command("transactions.delete_many", dict(txn_ids=listof(ref("transactions"))), targets=SELECTED),
     "transactions.set_category": Command("transactions.set_category", dict(
-        txn_ids=listof(ref("transactions")), category_id=ref("categories"))),
+        txn_ids=listof(ref("transactions")), category_id=ref("categories")), targets=SELECTED),
     "transactions.record_inflow": Command("transactions.record_inflow", ENTRY | dict(
         category_id=ref("categories"), counterparty=TEXT), creates="transactions"),
     "transactions.record_outflow": Command("transactions.record_outflow", ENTRY | dict(
@@ -42,11 +43,11 @@ COMMANDS = {
         target=TXN, creates="transactions"),
     "transactions.record_expense_paid_by_person": Command("transactions.record_expense_paid_by_person", OWNERSHIP | dict(
         owner_id=ref("counterparties"), category_id=ref("categories")), target=TXN, creates="transactions"),
-    # `changes` holds only what the person changed; the rows are not preconditioned one by one.
+    # `changes` holds only what the person changed.
     "transactions.bulk_update": Command("transactions.bulk_update", dict(
         txn_ids=listof(ref("transactions")), changes=mapping(
             date=DATE, counterparty=TEXT, notes=LONG, category_id=optional(ref("categories")),
-            owner_id=optional(ref("counterparties"))))),
+            owner_id=optional(ref("counterparties")))), targets=SELECTED),
     # The preview's fingerprint is made of the device's own row ids, so the home takes its own preview instead; the
     # kept transaction's row hash is the precondition. The merge also moves import-row links, so it needs the
     # bank-import tables to be synchronized.

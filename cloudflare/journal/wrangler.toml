@@ -5,6 +5,9 @@ workers_dev = false
 
 [vars]
 DEPLOYMENT_POLICY = "free-only"
+# Per profile, per UTC month: sync calls and checkpoint-chunk calls. Over them the mailbox waits; the local link still works.
+MONTHLY_REQUESTS = "1500"
+MONTHLY_SNAPSHOT_REQUESTS = "4000"
 
 [[durable_objects.bindings]]
 name = "PROFILES"

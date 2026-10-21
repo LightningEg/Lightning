@@ -60,7 +60,10 @@ class Table:
         self.key = [row["name"] for row in sorted(info, key=lambda row: row["pk"]) if row["pk"]]
         self.rowid = self.key == ["id"] and self.types["id"] == "INTEGER"
         self.columns = [row["name"] for row in info if not (self.rowid and row["name"] == "id")]
-        self.refs = {row["from"]: row["table"] for row in db.all(f"PRAGMA foreign_key_list({name})")} | EXTRA_REFS.get(name, {})
+        keys = db.all(f"PRAGMA foreign_key_list({name})")
+        self.refs = {row["from"]: row["table"] for row in keys} | EXTRA_REFS.get(name, {})
+        # A child row deleted with its parent belongs to it: a transaction's lines, a rule's conditions.
+        self.owners = {row["from"]: row["table"] for row in keys if row["on_delete"].upper() == "CASCADE"}
         if set(self.types.values()) - {"INTEGER", "TEXT", "REAL"}:
             raise JournalError(f"{name} has a column type the journal cannot carry yet")
 
@@ -85,6 +88,41 @@ class Replicator:
         for name in sorted(self.tables):
             visit(name)
         self.order = order
+        self.owned = {}
+        for table in self.tables.values():
+            for column, parent in table.owners.items():
+                if parent in self.tables and parent != table.name:
+                    self.owned.setdefault(parent, []).append((table.name, column))
+
+    def record_hashes(self, name, local_id, depth=0):
+        """Fingerprint hashes of the rows a record owns, recursively; an unmapped row counts as changed."""
+        result = []
+        for child, column in self.owned.get(name, ()):
+            table = self.tables[child]
+            for row in self.db.all(f"SELECT * FROM {child} WHERE {column}=? ORDER BY rowid", (local_id,)):
+                if table.rowid:
+                    identity = self.db.scalar("SELECT uuid FROM journal_ids WHERE entity=? AND local_id=?", (child, row["id"]))
+                else:
+                    try:
+                        identity = [self._mapped(table.refs[key], row[key]) if key in table.refs else row[key] for key in table.key]
+                    except LookupError:
+                        identity = None
+                if identity is None:
+                    result.append(child + ":unmapped")
+                    continue
+                slot = child + ":" + canonical(identity).decode()
+                result.append(slot + "=" + str(self.db.scalar("SELECT hash FROM journal_fp WHERE uuid=?", (slot,))))
+                if table.rowid and depth < 4:
+                    result.extend(self.record_hashes(child, row["id"], depth + 1))
+        return result
+
+    def _mapped(self, entity, local_id):
+        if local_id is None:
+            return None
+        value = self.db.scalar("SELECT uuid FROM journal_ids WHERE entity=? AND local_id=?", (entity, local_id))
+        if value is None:
+            raise LookupError(entity)
+        return value
 
     # -- identity -----------------------------------------------------------
     def uid(self, entity, local_id):
@@ -288,6 +326,17 @@ class Replicator:
                                 f"ON CONFLICT({','.join(table.key)}) DO UPDATE SET "
                                 + ",".join(f"{column}=excluded.{column}" for column in updates),
                                 tuple(values[column] for column in columns))
+
+    def read(self, item):
+        """The stored values of one effect row, encoded as an effect would carry them."""
+        table = self.tables[item["table"]]
+        if table.rowid:
+            local_id = self.db.scalar("SELECT local_id FROM journal_ids WHERE entity=? AND uuid=?", (table.name, item["key"]))
+            row = self.db.one(f"SELECT * FROM {table.name} WHERE id=?", (local_id,)) if local_id is not None else None
+        else:
+            row = self.db.one(f"SELECT * FROM {table.name} WHERE " + " AND ".join(f"{column} IS ?" for column in table.key),
+                              self._local_key(table, item["key"]))
+        return None if row is None else self.encode(table, row)
 
     def _local_key(self, table, key):
         return tuple(self.local(table.refs[column], value) if column in table.refs else value

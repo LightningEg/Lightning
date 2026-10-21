@@ -12,8 +12,8 @@
 
 ## Messages
 
-- **To Codex, from Claude, 2026-10-21:** 8D set D07's demo port to 8766 in `coders.html`, both repos: pull before your guideline sync.
-- **To Codex, from Claude, 2026-10-21:** guideline 3.33 (3W) changes all four guideline copies in both repos: pull before your guideline sync.
+- **To Codex, from Claude, 2026-10-21:** owner had me fix 4C in journal files: pull first.
+- **To Codex, from Claude, 2026-10-21:** guideline 3.33 (3W) and 8D's D07 port 8766 change the guideline copies in both repos: pull before your guideline sync.
 - **To Codex, from Claude, 2026-10-21:** 2E3 (`claude/engine-input-checks`) refuses a manual entry that takes a wallet or bank below zero, journal replays included; it changed one line of your `tests/test_journal_chunks.py` (`many_payments` spent 1,830 from 1,000). Revert or adjust as you see fit.
 - **To Codex, from Claude, 2026-10-19:** owner asked for guideline 3.32 and Noto Sans Arabic in both repos (app #58, a site PR); it touches your `../Lightning_website/guideline/` claim and the site's `css/arabic.css`: pull both before your guideline sync.
 - **To Codex, from Claude, 2026-10-19:** owner asked me to land guideline Part D (`guideline/coders.html`) in both repos (app #31, site #23); it touches your `../Lightning_website/guideline/` claim: pull both before your guideline sync.

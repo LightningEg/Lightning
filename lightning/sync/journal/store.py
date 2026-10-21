@@ -222,6 +222,12 @@ class JournalStore:
                 raise JournalError("Unsupported financial effect adapter")
             if self.config["role"] == "replica":
                 self.adapter.apply(effect["domain"])
+            if not effect["groups"] and not effect["deleted"]:
+                # A command changed these transactions: the register's field groups for them are
+                # stale, so they leave the register rather than revert the change on a later edit.
+                for row in self.adapter.assemble(effect["domain"])["rows"]:
+                    if row["table"] == "transactions":
+                        self.db.execute("DELETE FROM journal_records WHERE record_id=? AND deleted=0", (row["key"],))
         if not effect["groups"] and not effect["deleted"]:
             return  # A command's rows (if any) are its record; it has no register field groups.
         self.db.execute("INSERT INTO journal_records VALUES(?,?,?,?) ON CONFLICT(record_id) DO UPDATE SET groups_json=excluded.groups_json,tokens_json=excluded.tokens_json,deleted=excluded.deleted",
@@ -289,6 +295,11 @@ class JournalStore:
             fault("replica_cursor")
         fault("replica_committed")
         return True
+
+    def verify(self):
+        """After a catch-up: the whole confirmed copy still matches its fingerprint."""
+        if self.adapter is not None:
+            self.adapter.verify()
 
     def _scope(self, body):
         if body["profile"] != self.config["profile"] or body["generation"] != self.config["generation"]:
