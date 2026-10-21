@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Claude: [8H] Site Guides become a map of four topics, each with a pillar page (Budget your salary, See where it goes,
+  Know what you own, Your data and devices); track-expenses merged into the expense tracker; one home per FAQ (site PR).
 - 2026-10-21 · Claude: [8E, 8G] Site: one download wording, version 1.3.0 in structured data, PC shown behind the sync veil,
   slim consent bar, Testing tab for testers only (`?testing`), Sample Profiles download (site PR #46). No comparisons.
 - 2026-10-21 · Claude: [8E–8H] The owner's website audit becomes plan items: quick fixes (8E), Home and Features show the app (8F), three owner calls (8G), and the Guides redesign brief (8H).

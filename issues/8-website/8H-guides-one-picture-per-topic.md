@@ -2,7 +2,7 @@
 title: Guides as four topics with one big picture each, instead of 16 scattered questions
 type: feature
 area: website
-status: ready
+status: building
 created: 2026-10-21
 by: Claude
 skills: guideline-audit, website-sync, arabic-check
@@ -36,7 +36,7 @@ Written by Claude, 2026-10-21 (8H1). The owner said "build now", so 8H2 and 8H3 
 | Your data and devices / بياناتك وأجهزتك | `your-data-and-devices.html` | offline-personal-finance-app, sync-phone-and-pc-without-cloud |
 
 `net-worth-budget-expense-tracker.html` (the all-in-one answer) belongs to no one topic: it is the "Start here" card at
-the top of Guides and is linked from every pillar's closing. Arabic mirrors use the same file names under `ar/`.
+the top of Guides, and the Budget, See and Know pillars end by pointing to it through their topic cards only; it links to those three pillars. Arabic mirrors use the same file names under `ar/`.
 
 ### Why new pillar pages (not a grown page)
 
@@ -72,7 +72,7 @@ Figures on a pillar are signposts: each is the same figure and screen as its dee
 | blog-irregular-income-budget | keep | owns "irregular income budget" |
 | cash-flow-planner | keep | owns "safe to spend before payday" |
 | blog-emergency-fund | keep | owns "emergency fund in EGP"; takes the budget page's emergency question |
-| expense-tracker-egypt | **grown** | survivor for "where does my money go": has the screen, Mohab's month and the head term; takes the three best questions of the merged page |
+| expense-tracker-egypt | **grown** | survivor for "where does my money go": has the screen, Mohab's month and the head term; takes two questions of the merged page (the cash one folds into its existing cash answer) |
 | blog-track-expenses | **merged** into expense-tracker-egypt | same query ("where does my money go each month"); address kept as a redirect with canonical to the survivor, out of the sitemap |
 | bank-statement-budgeting | keep | owns "budget from a bank statement without a login" |
 | net-worth-tracker | keep | owns "calculate net worth" |
@@ -89,14 +89,13 @@ the other "what does a 20,000 EGP split look like", and both are in the brief's 
 ### FAQ: one home per question (85 before)
 
 Removed because another page is the home (the answer is linked, not repeated): budget "save for a goal or emergency
-fund" (home: blog-emergency-fund) and "log every purchase" (expense); expense "which banks" (bank-statement);
+fund" (home: blog-emergency-fund) and "log every purchase" (expense); expense "is it a free expense tracker" (home page FAQ owns it; index.html is not ours to edit) and "which banks" (bank-statement) and, in Arabic, "will it read all my messages" (offline);
 bank-statement "category for every row" (expense); net-worth "money held for someone else" (hold-for-others);
 investment "US shares and dollars" (dollar); dollar "broker or bank login" and "tell me to buy dollars" (investment,
-all-in-one); all-in-one "investments in net worth" (investment), "pounds and dollars" (dollar) and "really free" (home
-page FAQ); offline "phone app" (sync, "which phone and PC") and, in Arabic, the same; sync "account to sync" (offline);
-blog-track-expenses' four questions: "moving money between accounts" (already on expense), the other three moved to
-expense-tracker-egypt. Result: 70 questions on the 16 pages, plus 9 pillar questions that only a whole topic answers
-(Budget 3, See where 2, Know what 2; Data 0). FAQPage JSON-LD on every page lists exactly the visible questions.
+all-in-one); all-in-one "investments in net worth" (investment), "pounds and dollars" (dollar) and "really free" (home page); offline "phone app" (sync, "which phone and PC") and, in Arabic, the same; sync "account to sync" (offline);
+blog-track-expenses' four questions: "moving money between accounts" and cash (already on expense) are dropped, the other two moved to
+expense-tracker-egypt. Result: 69 questions on the 15 live guides, plus 6 pillar questions that only a whole topic answers
+(Budget 3, See where 2, Know what 1; Data 0). Still duplicated with the home page FAQ (not touched here): bank login, SMS, dollars. FAQPage JSON-LD on every page lists exactly the visible questions.
 
 ### Structure around the pages
 
@@ -127,7 +126,7 @@ never mention other apps; Arabic mirrors every change (`ar/`, hreflang, its own 
 ## Steps
 
 - **8H1** Design: write it in this file (topic map, each pillar's sections, every page's fate: keep, grow, merge), with a
-  phone and PC sketch of Guides. Owner approves.
+  phone and PC sketch of Guides. Owner said build now (2026-10-21).
 - **8H2** Build Guides and the pillars, English then Arabic.
 - **8H3** Links, merges, FAQ de-duplication, structured data, sitemap, `llms.txt`; guideline audit on PC and phone.
 

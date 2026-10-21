@@ -142,7 +142,7 @@ The site is honest, quick and in step with the app.
 | **8D** | [For Geeks audit ideas left for the owner to choose](8-website/8D-for-geeks-audit-ideas-to-choose.md) | owner | website | ready |
 | **8E** | [Website audit quick fixes (one download wording, version in structured data, blank sync frame)](8-website/8E-website-audit-quick-fixes.md) | bug | website | building |
 | **8F** | [Home and Features show the app, not only words](8-website/8F-home-and-features-show-the-app.md) | polish | website | ready |
-| **8H** | [Guides as four topics with one big picture each, instead of 16 scattered questions](8-website/8H-guides-one-picture-per-topic.md) | feature | website | ready |
+| **8H** | [Guides as four topics with one big picture each, instead of 16 scattered questions](8-website/8H-guides-one-picture-per-topic.md) | feature | website | building |
 
 Done: 8G. Next free code: 8I.
 
