@@ -245,6 +245,7 @@ class BudgetService:
         """Average monthly income for a month's budget (see income_average)."""
         return self.income_average(month).amount
 
+    @request_cached(deep=True)
     def income_average(self, month: str) -> IncomeAverage:
         """Average monthly income: owned income in the chosen income categories, averaged over
         the last 3 (or 6) completed months before `month` that had any. A manual amount in
@@ -340,6 +341,7 @@ class BudgetService:
     def has_plan(self, month: str) -> bool:
         return bool(self.amounts_for(month, loans=False))
 
+    @request_cached(deep=True)
     def month_view(self, month: str) -> BudgetMonth:
         first, last = parse_month(month)
         direct = self.amounts_for(month)
@@ -788,6 +790,7 @@ class BudgetService:
                                   "estimate": estimate, "observed": observed, "low_confidence": observed <= 1})
         return estimates
 
+    @request_cached(deep=True)
     def plan_summary(self, month: str) -> dict:
         """The month's plan as every screen shows it: Planned (limits plus background estimates),
         Spent (owned spending, one-off categories left out) and Left in plan."""

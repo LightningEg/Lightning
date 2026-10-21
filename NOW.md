@@ -25,7 +25,7 @@
 The whole plan, by milestone and code, is `issues/INDEX.md`. In order:
 
 0. **Demo cut list from Audit 1** (owner, 10-20): left: 3U 5–6, 2F (phone backup and import), then 7L2–7L4, 5K, 3S 3–20, 3T. Recapture the website once these merge: the sample now has ten accounts, goals, a gam'eya and more (it shows the sample on 10-04, with a late rent). **Read:** `reports/audit-1.md` › Demo cut list.
-1. **Audit 3 backend fixes:** 2G, 2H, 3Y, 3X, 7N first. **Read:** `reports/audit-3.md` › Order to fix.
+1. **Audit 3 backend fixes:** 2G, 2H, 3X, 7N first (3Y done). **Read:** `reports/audit-3.md` › Order to fix.
 2. **1B Owner runs the security setup**, then **1C** a trial contribution. **Read:** 1B.
 3. **2A/2B restore safety and promotion durability** (Codex, Luna): see the claims above. **Read:** 2A, 2B.
 4. **4A Edit journal** (Claude): J6a/b built; J6c areas cover 125/149 POST routes; next, chunked large effects so bank import works (`tools/journal_mohab.py`). **Read:** 4A §10 J6; Architecture › Command proposals.

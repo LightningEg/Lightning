@@ -525,6 +525,7 @@ class ReportingService:
         return total
 
     # -- cash flow & spending ----------------------------------------------
+    @request_cached(deep=True)
     def cash_flow(self, date_from: date | str, date_to: date | str) -> CashFlow:
         start, end = self._day(date_from), self._day(date_to)
         inflow = household = investment = outflow = personal = work = investment_out = ZERO

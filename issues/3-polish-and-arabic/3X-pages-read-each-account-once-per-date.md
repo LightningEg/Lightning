@@ -32,4 +32,4 @@ Claude, [Audit 3](../../reports/audit-3.md) §1, perf-check.
 
 **Batching.** `MoneyFromOthersService.totals_by_account(day)` already exists. Request-cache it, and add `ReportingService.owned_cash_by_account(day)`: one cash `GROUP BY account_id` plus those totals. Point all six callers at it. A `free_cash_at(day)` (like `portfolio_value_at`) also saves the holdings-by-class reads in `cash_plan`.
 
-**Measured.** A monkeypatched prototype, on top of 3Y's fix, with identical HTML: Overview 445 → 353, Cash planning 263 → 199, Financial health 233 → 176. Do 3Y first.
+**Measured.** A monkeypatched prototype, on top of 3Y's fix, with identical HTML: Overview 445 → 353, Cash planning 263 → 199, Financial health 233 → 176. 3Y is done (test page budgets lowered); lower them again after this.

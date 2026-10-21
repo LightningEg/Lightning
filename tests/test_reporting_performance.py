@@ -201,9 +201,11 @@ PAGE_READ_BUDGET = {
     # with a Nasdaq ETF, and each account and holding is read once per figure (a foreign one also reads its rate).
     # "/" 790 -> 900 (2026-10-21): the sample gained a gam'eya, a flat and a dollar account; every account is read once
     # per figure and date, so the page grows with the account count, not with repeats.
-    "/": 900,  # 640: the sample plan gained a yearly course and bonus (2026-10-07; was 605 after the SMS check)
-    "/accounts/1": 120, "/transactions": 110, "/budget?period=month": 175,
-    "/budget?period=all": 710, "/plan": 560, "/investments": 356, "/birdview/expenses?period=all": 230,
+    # 3Y (2026-10-21): a read no longer opens an empty write transaction (which emptied this cache) and the budget's
+    # month view, plan summary, income average and cash flow are cached: "/" 817 -> 507, "/plan" 536 -> 274,
+    # "/investments" 310 -> 177. Budgets reset to about 1.3 times the new counts.
+    "/": 660, "/accounts/1": 140, "/transactions": 130, "/budget?period=month": 140,
+    "/budget?period=all": 430, "/plan": 360, "/investments": 230, "/birdview/expenses?period=all": 190,
 }
 
 
@@ -266,3 +268,43 @@ def test_a_register_page_reads_only_its_rows_and_matches_the_full_register(c, mo
                         lambda *args, **kwargs: lines.append(original(*args, **kwargs)) or lines[-1])
     c.reporting.register_page(1, "1900-01-01", "9999-12-31", 3)
     assert len(lines) == 1 and len(lines[0]) == 50  # read one page, not the whole history
+
+
+def test_a_page_view_with_nothing_to_settle_writes_nothing(c, monkeypatch):
+    """3Y: matching payments on a read used to open an empty write transaction, which emptied the request cache."""
+    from fastapi.testclient import TestClient
+    import lightning.ui.web as web
+    from lightning.samples import load_mohab_2026
+
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-02")
+    load_mohab_2026(c)
+    statements = []
+    original_conn = type(c.db).conn.fget
+
+    def traced(db):
+        conn = original_conn(db)  # the page runs on the test client's thread, with its own connection
+        conn.set_trace_callback(statements.append)
+        return conn
+
+    with TestClient(web.create_app(c)) as browser:
+        for path in ("/", "/plan", "/plan/recurring", "/plan/loans"):
+            browser.get(path)  # the first visit may settle a matched payment
+            statements.clear()
+            monkeypatch.setattr(type(c.db), "conn", property(traced))
+            assert browser.get(path).status_code == 200
+            monkeypatch.setattr(type(c.db), "conn", property(original_conn))
+            writes = [sql for sql in statements if sql.lstrip().split(None, 1)[0].upper()
+                      in {"BEGIN", "SAVEPOINT", "INSERT", "UPDATE", "DELETE", "REPLACE"}]
+            assert writes == [], f"{path} wrote {writes[:3]}"
+
+
+def test_arabic_pages_load_the_translation_table_as_one_cached_script(c):
+    from fastapi.testclient import TestClient
+    import lightning.ui.web as web
+
+    c.settings.set("locale", "ar")
+    with TestClient(web.create_app(c)) as browser:
+        page = browser.get("/")
+        script = browser.get(web.ARABIC_UI_SRC)
+    assert web.ARABIC_UI_SRC in page.text and '"% a year"' not in page.text
+    assert script.status_code == 200 and script.text.startswith("window.LIGHTNING_UI={")
