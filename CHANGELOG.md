@@ -11,7 +11,12 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-- 2026-10-21 · Codex: Prepare v1.4.1 as the matched Windows and Android release, followed by the website download and archive refresh.
+- 2026-10-21 · Codex: Prepare v1.4.2 as the matched Windows and Android release, followed by the website download and archive refresh.
+
+## [1.4.2] — 2026-10-21
+
+- 2026-10-21 · Codex: 2D declares the four signing-secret names at the reusable workflow boundary, enabling the signing job to resolve its android-signing environment values.
+  The caller passes only those names; key values remain environment-only, Gradle never reads secrets, and the signed APK must match the pinned certificate. Earlier failed tags stay unchanged.
 
 ## [1.4.1] — 2026-10-21
 
