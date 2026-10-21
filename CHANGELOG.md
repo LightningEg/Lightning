@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Claude: Mohab comprehensive: the sample gains goals, a gam'eya, zakat, a rule, a claim, Mom's money, a dollar account, a flat, a laptop on
+  instalments, targets, a saved report and a waiting statement; the year test gains steps 33–36. Arabic gaps it exposed fixed. `samples/`, `test_mohab_sample.py`.
 - 2026-10-21 · Claude: 3W1-3W4 answer first: Overview, Budget and Cash planning open on their Lead (Net worth, Left in plan, Safe to spend)
   with its working beside it, a status sentence under the title, Needs you rows with the mark, then KPIs. `ui/status.py`, `lead_card`, `needs_rows`.
 - 2026-10-21 · Claude: guideline 3.33, answer first (3W): A09 Page order (header, Lead, Needs you, KPIs, details; one home per figure),

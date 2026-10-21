@@ -71,7 +71,7 @@
       </div>
       <div class="reserve-line">
         <div class="reserve-meter" data-reserve-refresh="progress-{{ reserve.id }}"><div class="bartrack"><div class="bar" style="width:{{ reserve.progress }}%"></div></div>
-          <small>{% if reserve.allocated >= reserve.target %}Fully funded{% else %}{{ (reserve.target - reserve.allocated)|money(False, 0) }} to fund{% endif %} · <span class="status-dot{{ ' is-done' if reserve.spent >= reserve.target }}">{{ status }}</span>{% if reserve.spent %} · {{ reserve.spent|money(False, 0) }} spent · {{ reserve.effective_allocated|money(False, 0) }} still set aside{% endif %}</small></div>
+          <small>{% if reserve.allocated >= reserve.target %}<span>Fully funded</span>{% else %}<span>{{ (reserve.target - reserve.allocated)|money(False, 0) }} to fund</span>{% endif %} · <span class="status-dot{{ ' is-done' if reserve.spent >= reserve.target }}">{{ status }}</span>{% if reserve.spent %} · {{ reserve.spent|money(False, 0) }} spent · {{ reserve.effective_allocated|money(False, 0) }} still set aside{% endif %}</small></div>
         <div class="reserve-actions">
       <form method="post" action="/reserves/{{ reserve.id }}/complete" class="reserve-complete"><button class="cat-icon" title="Complete" aria-label="Complete {{ reserve.name }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>
       </div>

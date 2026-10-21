@@ -9,7 +9,7 @@
   <article class="card">
     {% if rows %}<div class="compact-list">{% for r in rows %}
       <div class="compact-row rule-row">
-        <span><a href="/rules/{{ r.rule.id }}/edit" data-popup-open><b>{{ r.when }}</b></a><small class="muted">{{ r.then }}</small></span>
+        <span><a href="/rules/{{ r.rule.id }}/edit" data-popup-open><b>{% if locale == 'ar' %}{% for part in r.when_parts %}{% if not loop.first %}<span> {{ '·' if r.rule.match_all else 'or' }} </span>{% endif %}<span>{{ part }}</span>{% endfor %}{% else %}{{ r.when }}{% endif %}</b></a><small class="muted">{{ r.then }}</small></span>
       </div>{% endfor %}</div>
     {% else %}<p class="muted">{{ "No rules yet. A rule files a transaction by its counterparty, notes or amount, like Vodafone above 300 as Internet, before you review it."|tr(locale) }}</p>{% endif %}
   </article>

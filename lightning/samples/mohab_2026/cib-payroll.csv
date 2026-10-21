@@ -48,7 +48,7 @@ Date,Amount,Counterparty,Category,Notes
 2026-03-10,-528.00,Talabat,Personal › Eating Out,
 2026-03-12,-240.00,Netflix,Personal › Entertainment,
 2026-03-15,1833.33,NBE,Investment › Interest,Certificate interest
-2026-03-17,-3200.00,Zara,Personal › Shopping,Eid clothes
+2026-03-17,-3200.00,Zara,Personal › Shopping,Eid clothes #eid
 2026-03-18,-500.00,Talabat,Personal › Eating Out,
 2026-03-20,-650.00,WE Internet,Personal › Utilities & Bills,
 2026-03-22,-1382.00,Seoudi,Personal › Food & Groceries,
@@ -106,6 +106,7 @@ Date,Amount,Counterparty,Category,Notes
 2026-06-08,-900.00,Gold's Gym,Personal › Health,Membership
 2026-06-10,-569.00,Talabat,Personal › Eating Out,
 2026-06-12,-240.00,Netflix,Personal › Entertainment,
+2026-06-15,-12000.00,Vodafone,,New phone
 2026-06-15,1833.33,NBE,Investment › Interest,Certificate interest
 2026-06-18,-370.00,Talabat,Personal › Eating Out,
 2026-06-20,-650.00,WE Internet,Personal › Utilities & Bills,
@@ -133,10 +134,12 @@ Date,Amount,Counterparty,Category,Notes
 2026-07-25,-2000.00,Mom,Personal › Gifts & Donations,Monthly help
 2026-07-27,-556.00,Uber,Personal › Transportation,
 2026-07-28,-15.00,CIB,Personal › Fees & Charges,Monthly account fee
+2026-07-28,-2000.00,valU,System Categories › Loan payments,Laptop instalments · payment 1 of 12
 2026-08-01,50000.00,ACME Egypt,Work › Salary,Salary
 2026-08-02,-3511.75,Carrefour,Personal › Food & Groceries,
 2026-08-03,-12000.00,Landlord,Personal › Housing & Rent,Rent
 2026-08-05,-10000.00,THNDR,Internal transfer,Transfer to THNDR
+2026-08-05,-25.00,CIB,Personal › Fees & Charges,ATM fee
 2026-08-05,-2500.00,Toyota Finance,System Categories › Loan payments,Car loan · payment 8 of 24
 2026-08-05,-3000.00,Cash wallet,Internal transfer,ATM withdrawal
 2026-08-06,-1000.00,Vodafone Cash,Internal transfer,Top-up
@@ -153,6 +156,7 @@ Date,Amount,Counterparty,Category,Notes
 2026-08-25,-2000.00,Mom,Personal › Gifts & Donations,Monthly help
 2026-08-27,-484.00,Uber,Personal › Transportation,
 2026-08-28,-15.00,CIB,Personal › Fees & Charges,Monthly account fee
+2026-08-28,-2000.00,valU,System Categories › Loan payments,Laptop instalments · payment 2 of 12
 2026-09-01,50000.00,ACME Egypt,Work › Salary,Salary
 2026-09-02,-2934.50,Carrefour,Personal › Food & Groceries,
 2026-09-03,-12000.00,Landlord,Personal › Housing & Rent,Rent
@@ -165,11 +169,13 @@ Date,Amount,Counterparty,Category,Notes
 2026-09-12,-240.00,Netflix,Personal › Entertainment,
 2026-09-15,1833.33,NBE,Investment › Interest,Certificate interest
 2026-09-18,-367.00,Talabat,Personal › Eating Out,
+2026-09-20,-1000.00,Charity,System Categories › Zakat,Zakat on gold
 2026-09-20,-650.00,WE Internet,Personal › Utilities & Bills,
 2026-09-22,-1250.00,Seoudi,Personal › Food & Groceries,
 2026-09-24,-720.00,North Cairo Electricity,Personal › Utilities & Bills,
 2026-09-25,-2000.00,Mom,Personal › Gifts & Donations,Monthly help
 2026-09-27,-524.00,Uber,Personal › Transportation,
 2026-09-28,-15.00,CIB,Personal › Fees & Charges,Monthly account fee
+2026-09-28,-2000.00,valU,System Categories › Loan payments,Laptop instalments · payment 3 of 12
 2026-10-01,50000.00,ACME Egypt,Work › Salary,Salary
 2026-10-02,-3410.00,Carrefour,Personal › Food & Groceries,

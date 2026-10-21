@@ -176,7 +176,7 @@ class ReportQueries:
             f"SELECT le.date, le.account_id, SUM(le.quantity_e6) AS quantity_e6, SUM(le.amount_e6) AS amount_e6,"
             f" SUM(le.amount_base_e6) AS amount_base_e6,"
             f" MAX(le.effect) AS effect, CASE WHEN COUNT(*)=1 THEN MAX(le.category_id) END AS category_id,"
-            f" CASE WHEN COUNT(*)=1 THEN MAX(le.memo) ELSE 'Split · ' || COUNT(DISTINCT le.category_id) || ' categories' END AS memo,"
+            f" CASE WHEN COUNT(DISTINCT le.category_id)>1 THEN 'Split · ' || COUNT(DISTINCT le.category_id) || ' categories' ELSE MAX(le.memo) END AS memo,"
             f" t.id AS txn_id, t.ref, t.type, t.description, t.counterparty, t.notes,"
             f" (SELECT o.account_id FROM ledger_entries o WHERE o.transaction_id = t.id"
             f"  AND o.account_id != le.account_id LIMIT 1) AS other_account_id"

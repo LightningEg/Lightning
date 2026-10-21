@@ -107,7 +107,7 @@ class RuleService:
             share = f"{fmt(part.value, 0)}%" if part.method == "percent" else fmt(part.value, 0)
             then.append(f"{share} to {self._category_name(part.category_id)}")
         then += [f"#{t}" for t in rule.tags]
-        return {"when": (" · " if rule.match_all else " or ").join(when), "then": " · ".join(then)}
+        return {"when": (" · " if rule.match_all else " or ").join(when), "then": " · ".join(then), "when_parts": when}
 
     def form_values(self, rule: Rule | None = None) -> dict:
         """The rule as the form's fields."""

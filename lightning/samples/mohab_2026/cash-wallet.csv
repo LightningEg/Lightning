@@ -28,9 +28,9 @@ Date,Amount,Counterparty,Category,Notes
 2026-03-14,-159.00,Koshary El Tahrir,Personal › Eating Out,
 2026-03-16,-74.00,Microbus,Personal › Transportation,
 2026-03-19,-118.00,Kiosk,Personal › Food & Groceries,
-2026-03-20,-2000.00,Eidiya,Personal › Gifts & Donations,Eid al-Fitr
+2026-03-20,-2000.00,Eidiya,Personal › Gifts & Donations,Eid al-Fitr #eid
 2026-03-21,-150.00,Barber,Personal › Other Personal,
-2026-03-21,1000.00,Uncle Hassan,Personal › Gifts Received,Eidiya
+2026-03-21,1000.00,Uncle Hassan,Personal › Gifts Received,Eidiya #eid
 2026-03-24,-193.00,Koshary El Tahrir,Personal › Eating Out,
 2026-03-26,-58.00,Microbus,Personal › Transportation,
 2026-03-28,-200.00,Bawab,Personal › Gifts & Donations,Building doorman
@@ -55,7 +55,7 @@ Date,Amount,Counterparty,Category,Notes
 2026-05-21,-150.00,Barber,Personal › Other Personal,
 2026-05-24,-215.00,Koshary El Tahrir,Personal › Eating Out,
 2026-05-26,-54.00,Microbus,Personal › Transportation,
-2026-05-27,-1500.00,Eidiya,Personal › Gifts & Donations,Eid al-Adha
+2026-05-27,-1500.00,Eidiya,Personal › Gifts & Donations,Eid al-Adha #eid
 2026-05-28,-200.00,Bawab,Personal › Gifts & Donations,Building doorman
 2026-06-05,-179.00,Koshary El Tahrir,Personal › Eating Out,
 2026-06-07,-83.00,Microbus,Personal › Transportation,
