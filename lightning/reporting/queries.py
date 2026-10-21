@@ -121,15 +121,23 @@ class ReportQueries:
         return int(row["transactions"] or 0), int(row["lines"] or 0), category_ids
 
     def account_quantity(self, account_id: int, as_of: str | None = None, before: str | None = None) -> int:
-        sql = f"SELECT SUM(le.quantity_e6) FROM ledger_entries le {POSTED} WHERE le.account_id = ? AND {CASH_ONLY}"
-        params: list = [account_id]
+        quantities = self.account_quantities(as_of, before)
+        return quantities.get(account_id, 0)
+
+    @request_cached(deep=True)
+    def account_quantities(self, as_of: str | None = None, before: str | None = None) -> dict[int, int]:
+        """Cash positions for every account at a date, read in one grouped ledger query."""
+        sql = f"SELECT le.account_id, SUM(le.quantity_e6) AS quantity_e6 FROM ledger_entries le {POSTED} WHERE {CASH_ONLY}"
+        params: list = []
         if as_of:
             sql += " AND le.date <= ?"
             params.append(as_of)
         if before:
             sql += " AND le.date < ?"
             params.append(before)
-        return int(self.db.scalar(sql, tuple(params)) or 0)
+        sql += " GROUP BY le.account_id"
+        return {int(row["account_id"]): int(row["quantity_e6"] or 0)
+                for row in self.db.all(sql, tuple(params))}
 
     def category_totals_for(self, txn_ids: list[int]) -> list[dict]:
         """The same totals as category_totals, for the given transactions instead of a date range."""
@@ -234,12 +242,16 @@ class ReportQueries:
         row = next((price for price in self._trade_prices_of(asset_id) if price["date"] <= as_of), None)
         return dict(row) if row else None
 
-    @request_cached
+    @request_cached(deep=True)
+    def physical_items(self) -> dict[int, dict]:
+        """All gold item metadata in one read for reports that value several items."""
+        return {int(row["asset_id"]): dict(row) for row in self.db.all(
+            "SELECT asset_id,net_gold_grams_e6,reference_asset_id,account_id,karat FROM physical_items")}
+
     def physical_item(self, asset_id: int) -> dict | None:
         """The gold item behind an asset, if it is one."""
-        row = self.db.one("SELECT net_gold_grams_e6,reference_asset_id,account_id,karat FROM physical_items WHERE asset_id=?",
-                          (asset_id,))
-        return dict(row) if row else None
+        row = self.physical_items().get(asset_id)
+        return {key: value for key, value in row.items() if key != "asset_id"} if row else None
 
     @request_cached(deep=True)
     def _item_values_of(self, asset_id: int) -> list[dict]:

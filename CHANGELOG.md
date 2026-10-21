@@ -11,9 +11,12 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-- 2026-10-21 · Codex: Prepare v1.4.0 as the tested Windows app and matching signed Android APK.
+- 2026-10-21 · Codex: Prepare v1.4.0 as the tested Windows app and matching signed Android APK, with the website download and archive refresh.
 
 ## [1.4.0] — 2026-10-21
+
+- 2026-10-21 · Codex: 3X batches account cash, custody and gold metadata; bill matching writes only when a payment can settle, preserving the request cache.
+  Sample Overview: 766 → 364 queries (109 → 119 ms); Cash planning: 541 → 207 (71 → 62 ms). Financial outputs remain identical; tab query budgets tightened.
 
 - 2026-10-21 · Claude: website recaptured from this app (3W site-recapture): net worth 910,304, safe to spend 112,288, nine accounts, new Overview rate crops; Budget screens kept old for 3AB; also filed 3Z, 3AA.
 - 2026-10-21 · Codex: 3Y register selection survives edits, cancellation and message redirects; adds Edit selected, Clear selection and Shift-click ranges, plus phone Select all.

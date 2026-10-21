@@ -187,6 +187,8 @@ Uses posted, non-void main-ledger entries by transaction date, scoped to `owner_
 
 **Request cache** (`lightning/core/memo.py`). `ui/web.py` wraps each request in `request_cache(container.db)`; a read decorated `@request_cached` runs once per distinct call per request. It lives one request, any write empties it, it is bypassed inside a transaction, and callers get copies. `tests/test_reporting_performance.py` caps SELECTs per tab and checks pages are byte-identical with and without it.
 
+Cash positions and custody totals are grouped across accounts for each date, and gold metadata is read across assets. Bill matching opens a write transaction only when a payment can settle: an empty transaction's undo bookkeeping would otherwise discard the report cache, including its existing per-asset price histories and FX lookups.
+
 **Page speed** (2026-10-03, 2,239 transactions: Overview 507 to 163 ms, Budget › All time 4.6 s to 0.33 s). Fixes: the request cache; `cipher_memory_security` off (see Encryption); registers read one page of 50 (`ReportingService.register_page`; a search or category filter shows no running balance); bundled fonts. Open: routes are `async def` with synchronous database work.
 
 ### Zakat
