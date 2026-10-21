@@ -37,6 +37,8 @@ def _open_accounts(b: Browser) -> None:
 
 
 def test_every_bank_csv_imports_every_row_with_nothing_to_review(c, on_2_october):
+    from lightning.samples import _rules
+    _rules(c)   # the phone row has no category on purpose: the sample's rule files it
     b = Browser(create_app(c))
     _open_accounts(b)
     for name in BANK_FILES:   # CIB Payroll first: its transfers fill the others
@@ -82,12 +84,12 @@ def test_an_internal_row_whose_account_is_unknown_asks_which_account(c, on_2_oct
 
 def test_the_whole_sample_loads_and_adds_up(c, on_2_october):
     summary = load_mohab_2026(c)
-    assert summary == {"accounts": 7, "rows": sum(_lines(n) for n in BANK_FILES), "from": "2026-01-01",
+    assert summary == {"accounts": 7 + 3, "rows": sum(_lines(n) for n in BANK_FILES), "from": "2026-01-01",
                        "to": "2026-10-02"}
     day = date(2026, 10, 2)
     position = c.position.at(day)
-    assert position.held_for_others == D("6000")          # Mom's 10,000, less the 4,000 she took back
-    assert position.loans_still_to_pay == D("37500")      # 15 car-loan payments left
+    assert position.held_for_others == D("6900")          # Mom's 10,000, less the 4,000 she took back, plus 500 assigned and 400 she paid
+    assert position.loans_still_to_pay == D("52500")      # 15 car-loan payments left (37,500) and the laptop: 24,000 less 6,000 paid and 3,000 early
     assert position.net_worth == position.what_you_own - position.what_you_owe
     assert {check.status for check in c.integrity.checks(day)} == {"PASS"}
     assert not [p for p in c.planning.all_payments(day, day) if p.status.name == "DUE"]
@@ -114,7 +116,7 @@ def test_the_welcome_page_loads_the_sample_and_the_files_stay_downloadable(c, on
         assert b.client.get(f"/samples/mohab-2026/{name}").status_code == 200
     done = b.submit({}, action="/sample/mohab-2026")
     assert done.shows("Mohab's 2026 added")
-    assert len(c.accounts.list()) == 7
+    assert len(c.accounts.list()) == 10
 
 
 def test_sample_opens_on_a_day_inside_its_data_with_no_late_bill(c, monkeypatch):

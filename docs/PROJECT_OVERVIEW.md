@@ -99,7 +99,7 @@ Specs live in [Architecture](ARCHITECTURE.md); terms in the [Glossary](GLOSSARY.
 - **Search and type faster:** Ctrl-K, #tags, sums in amount fields, privacy mode (the eye).
 - **Arabic and phone:** the whole app in English or Egyptian Arabic, PC and phone; the phone records daily, reads CIB and NBE bank SMS with permission and hands the ledger to a PC over local Wi-Fi.
 - **Profiles and release:** encrypted named profiles with recovery key; Windows ZIP (`Lightning.exe`, no Python) and signed Android APK published together from one tested commit (beta, 1.0.0-beta.1). Still open: ordinary-Windows recovery/fault acceptance, legacy import. Use an independent backup.
-- **Samples:** `python -m lightning --demo` (Mohab's last three months); an empty profile can load Mohab's year or the stories of Amr, Abdelrahman, Menna or Fatma.
+- **Samples:** `python -m lightning --demo` (Mohab's last three months); an empty profile can load Mohab's year (1 January to 2 October 2026) or the stories of Amr, Abdelrahman, Menna or Fatma. Mohab's year holds one of every part of Lightning: ten accounts of every kind (a dollar account bought with pounds, a flat valued by hand), goals (one paid, two saving), a gam'eya, zakat, a rule, a reimbursement claim, Mom's money and a grocery bill she paid, a laptop on instalments with an early payment, investing targets and a monthly goal, a saved #eid report and a statement still waiting for decisions. `tests/test_mohab_sample.py` keeps it that way: a new feature gets sample data there.
 
 <a id="period-and-fixed-horizon-visuals"></a>
 ## 4. Period and fixed-horizon visuals
@@ -162,11 +162,11 @@ Early pay, raise and rent changes need explicit confirmation by design: Lightnin
 
 **Mohab**, 31, salaried, Cairo: 45,000 EGP a month from ACME Egypt into CIB; a cash wallet and Vodafone Cash; an NBE 3-year certificate; a THNDR account with COMI, Fawry and a money market fund; an L'Azurde ring and a gold pound; 10,000 EGP of his mother's money in CIB; rent, internet, phone, electricity, and a 24-month car loan.
 
-`tests/test_mohab_year.py` (read its docstring) runs steps 1–32 through the screens, one test per step. It judges answers, route from the Overview, effort, speed, simplicity, clarity and UI. When a gap is fixed, change its assertion and the Today column together.
+`tests/test_mohab_year.py` (read its docstring) runs steps 1–36 through the screens, one test per step. It judges answers, route from the Overview, effort, speed, simplicity, clarity and UI. When a gap is fixed, change its assertion and the Today column together.
 
 **Steps 1–10, one ordinary month (July–September 2026):** open six accounts (dates as `1/7`); import 40 CIB rows (39 posted, 1 skipped, Mom's 10,000 is Held for others); move money to THNDR and buy COMI, Fawry and a fund; record the ring and the gold pound; cash and Vodafone Cash spending; month-end prices; a 20,000 emergency fund and the budget (Free cash = Cash you own − Reserves − Bills due); track recurring items and the car loan (What you owe 60,000); on 2026-10-06 mark salary, rent and a loan payment paid (Net worth moves only by +45,000; loans still to pay 57,500); read every tab, Checks pass.
 
-**Steps 11–32, October 2026 to September 2027:**
+**Steps 11–36, October 2026 to September 2027:**
 
 | # | When | Step | Today |
 |---|---|---|---|
@@ -192,6 +192,10 @@ Early pay, raise and rent changes need explicit confirmation by design: Lightnin
 | 30 | May–Jul | 60,000 laptop by 30 June | Answered |
 | 31 | 30 Sep | Moves Talabat to Food | Answered |
 | 32 | 30 Sep | Joins a 10-member, 2,000 EGP gam'eya and takes the third pot | Answered: the missed instalment shows once under Needs you; Net worth unchanged; 14,000 under What you owe |
+| 33 | 30 Sep | Claims the work Uber ride back from ACME and links the receipt | Answered |
+| 34 | 30 Sep | Saves a register view of everything tagged #eid | Answered |
+| 35 | 30 Sep | Sets the investing mix he aims for (50% stocks, 30% gold) | Answered |
+| 36 | 30 Sep | Pays 5,000 early against the phone | Answered |
 
 The dollar steps are not yet inside the year (NOW.md, Next 3). User feedback batch 001 is checked by nine named screen assertions; loading speed, scroll position, compact review rows, chart colours and register balance are judged on a real PC.
 

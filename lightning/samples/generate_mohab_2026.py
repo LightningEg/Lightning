@@ -34,6 +34,7 @@ TRAVEL = FUN  # the Sahel weekend is entertainment (no Travel category by defaul
 FEES = "Personal › Fees & Charges"
 LOAN = "System Categories › Loan payments"
 HELD = "System Categories › Money Held for Others"
+ZAKAT = "System Categories › Zakat"
 INTERNAL = "Internal transfer"   # money moving between Mohab's own accounts
 
 
@@ -115,7 +116,7 @@ def build() -> None:
     cib.add(date(2026, 2, 10), -20000, "THNDR", INTERNAL, "Transfer to THNDR")
     for day, amount in ((19, -780), (24, -1150), (3, -960)):   # Ramadan iftars out
         cib.add(date(2026, 2 if day > 15 else 3, day), amount, "Abou El Sid", OUT, "Iftar")
-    cib.add(date(2026, 3, 17), -3200, "Zara", SHOP, "Eid clothes")
+    cib.add(date(2026, 3, 17), -3200, "Zara", SHOP, "Eid clothes #eid")
     cib.add(date(2026, 3, 26), 90000, "ACME Egypt", "Work › Bonus", "Annual bonus")
     cib.add(date(2026, 4, 9), 10000, "Mom", HELD, "Mom's savings, kept for her")
     cib.add(date(2026, 4, 15), -1299, "Amazon", SHOP, "Headphones")
@@ -131,9 +132,15 @@ def build() -> None:
     cib.add(date(2026, 9, 10), -1800, "Smile Dental", HEALTH, "Dentist")
     cib.add(date(2026, 10, 1), 50000, "ACME Egypt", "Work › Salary", "Salary")
     cib.add(date(2026, 10, 2), -rnd.randint(2900, 3600), "Carrefour", FOOD)
-    wallet.add(date(2026, 3, 20), -2000, "Eidiya", GIFTS, "Eid al-Fitr")
-    wallet.add(date(2026, 3, 21), 1000, "Uncle Hassan", "Personal › Gifts Received", "Eidiya")
-    wallet.add(date(2026, 5, 27), -1500, "Eidiya", GIFTS, "Eid al-Adha")
+    wallet.add(date(2026, 3, 20), -2000, "Eidiya", GIFTS, "Eid al-Fitr #eid")
+    wallet.add(date(2026, 3, 21), 1000, "Uncle Hassan", "Personal › Gifts Received", "Eidiya #eid")
+    wallet.add(date(2026, 5, 27), -1500, "Eidiya", GIFTS, "Eid al-Adha #eid")
+    # Features beyond the monthly routine. The phone has no category: the rule the loader saves files it.
+    cib.add(date(2026, 6, 15), -12000, "Vodafone", "", "New phone")
+    cib.add(date(2026, 8, 5), -25, "CIB", FEES, "ATM fee")
+    cib.add(date(2026, 9, 20), -1000, "Charity", ZAKAT, "Zakat on gold")
+    for n, month in enumerate((7, 8, 9), start=1):   # a laptop on 12 instalments of 2,000 from valU
+        cib.add(date(2026, month, 28), -2000, "valU", LOAN, f"Laptop instalments · payment {n} of 12")
 
     cib.write("cib-payroll.csv")
     wallet.write("cash-wallet.csv")

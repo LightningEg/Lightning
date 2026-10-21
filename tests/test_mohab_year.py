@@ -585,6 +585,36 @@ def _live_the_year(o: Mohab) -> None:
     _a_rule_for_vodafone(o)
     _a_dollar_account_and_a_nasdaq_etf(o)
     _a_gameya(o)
+    _the_rest_of_lightning(o)
+
+
+def _the_rest_of_lightning(o: Mohab) -> None:
+    """The parts of Lightning the year's story had no need for, each used once through its screen (the sample, which
+    holds one of each, is checked in test_mohab_sample.py): a reimbursement claim for the work Uber ride, a saved
+    view of everything tagged #eid, the investing mix he aims for, and 5,000 paid early against the phone."""
+    o.on("2027-09-30")
+    b = o.b
+    claims = b.open("/reimbursements")
+    o.notes["claim_made"] = b.submit({"transaction_id": Choose("2026-12-10 · Uber"), "expected": "1,200",
+                                      "payer_id": Choose("ACME Egypt")}, button="Create claim")
+    o.notes["claim_linked"] = b.submit({"receipt_id": Choose("2026-12-22 · ACME Egypt"), "amount": "1,200"},
+                                       button="Link receipt")
+    o.notes["claims_page"] = claims
+
+    b.go("Cash wallet")
+    found = b.open(f"{b.page.path.split('?')[0]}?tag=eid")
+    o.notes["view_saved"] = b.submit({"name": "Eid"}, button="Save view")
+    o.notes["view_report"] = b.click("Summary and export")
+
+    b.open("/investments/targets")
+    for bucket, weight in (("Stocks", "50"), ("Gold", "30")):
+        o.notes[f"target_{bucket}"] = b.submit({"bucket": bucket, "target_weight": weight}, action="/investments/targets")
+
+    loans = b.go("Cash planning", "Loans")
+    b.open(re.search(r'(?s)Phone installments.*?href="(/plan/items/\d+/early-payment)"', loans.html).group(1))
+    o.notes["early_preview"] = b.submit({"principal": "5,000", "date_paid": "2027-09-30",
+                                         "account_id": Choose("CIB Payroll")}, button="Preview")
+    o.notes["early_paid"] = b.submit(button="Record payment")
 
 
 def _a_rule_for_vodafone(o: Mohab) -> None:
@@ -1597,3 +1627,23 @@ def test_zakat_is_an_estimate_from_his_position_and_what_he_gave_lowers_what_is_
     assert then.still_to_pay == then.zakat_due - 1000 and after.shows(f"{then.still_to_pay:,.0f}")
     plan = mohab.answers["zakat_plan"]
     assert plan.shows("Zakat", "2027-12-01", "An estimate at today’s figures")
+
+
+def test_a_reimbursement_claim_is_made_and_its_receipt_linked(mohab):
+    assert mohab.notes["claim_made"].shows("Created reimbursement claim")
+    assert mohab.notes["claim_linked"].shows("Linked the receipt")
+    assert not mohab.notes["claim_linked"].shows("No receipts linked")
+
+
+def test_a_register_view_is_saved_and_summarised(mohab):
+    assert mohab.notes["view_saved"].shows("Eid")
+    assert mohab.notes["view_report"].shows("Eid", "Money out")
+
+
+def test_investing_targets_are_kept(mohab):
+    assert mohab.notes["target_Stocks"].shows("Target saved") and mohab.notes["target_Gold"].shows("Target saved")
+
+
+def test_paying_the_phone_early_shortens_it(mohab):
+    assert mohab.notes["early_preview"].shows("Still to pay afterwards")
+    assert mohab.notes["early_paid"].shows("Loan payment recorded")

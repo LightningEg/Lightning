@@ -95,13 +95,16 @@ def _typed_names(c) -> set[str]:
     own = {"financial_assets": "is_cash = 0 AND code NOT LIKE 'GLD:%' AND code NOT LIKE 'REF:%'"}
     for table in ("financial_assets", "accounts", "transactions", "counterparties", "counterparty_aliases",
                   "money_from_others", "cash_reserves", "planned_items", "cd_certificates",
-                  "physical_item_valuations", "physical_item_trade_details", "other_asset_valuations", "physical_items"):
+                  "physical_item_valuations", "physical_item_trade_details", "other_asset_valuations", "physical_items",
+                  "saved_views"):
         columns = [row[1] for row in con.execute(f"PRAGMA table_info({table})")]
         for column in ("name", "notes", "description", "institution", "counterparty", "alias", "item_kind", "memo"):
             if column in columns:
                 where = own.get(table, "1")
                 names.update(r[0] for r in con.execute(f"SELECT {column} FROM {table} WHERE {where}")
                              if isinstance(r[0], str))
+    for note in [n for n in names if "#" in n]:   # a tag is shown as its own chip beside the rest of the note
+        names |= set(re.findall(r"#\w+", note)) | {re.sub(r"\s*#\w+", "", note).strip()}
     names |= {translate(n, "ar") for n in names}  # a typed note that begins with a system word is half-translated
     return {n for n in names if len(n) > 2}
 
