@@ -13,7 +13,7 @@ SCRIPT = ROOT / "lightning/ui/static/arabic-numbers.js"
 def test_arabic_number_display_script_is_loaded_in_both_shared_shells():
     for template in ("base.html", "phone/base.html"):
         source = (ROOT / "lightning/ui/templates" / template).read_text(encoding="utf-8")
-        assert "/static/arabic-numbers.js?v=5" in source
+        assert "/static/arabic-numbers.js?v=6" in source
 
 
 def test_arabic_display_localizes_numeric_tokens_but_keeps_identifiers():
@@ -27,7 +27,7 @@ def test_arabic_display_localizes_numeric_tokens_but_keeps_identifiers():
         capture_output=True,
         text=True,
     ).stdout
-    assert result == "المتاح \u2066١٢٬٣٤٥٫٦٧\u2069 ج.م · \u2066\u202d٢٠٢٦-١٠-٠٩\u202c\u2069 · \u2066٢٥%\u2069 · TXN-2026-001 · V1.0.0-beta.1 · \u2066٩٫٧k\u2069"
+    assert result == "المتاح \u2066١٢٬٣٤٥٫٦٧\u2069 ج.م، \u2066\u202d٢٠٢٦-١٠-٠٩\u202c\u2069، \u2066٢٥%\u2069، TXN-2026-001، V1.0.0-beta.1، \u2066٩٫٧k\u2069"
 
 
 def test_arabic_display_keeps_the_minus_on_the_left_of_its_digits():

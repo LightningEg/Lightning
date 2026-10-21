@@ -27,6 +27,39 @@ def investment_period(db, accounts, assets, reporting, start: str, end: str):
     return closing
 
 
+def reconcile_portfolio(investments, accounts, reporting, report: dict, start: str, end: str) -> dict:
+    """The portfolio reconciliation for a period: closing value (holdings + investment cash) against opening value
+    + Money added + Result + opening balances entered in the period - certificate interest paid to the bank
+    - the exchange-rate revaluation of investment cash.
+
+    Cash held in another currency (a dollar brokerage) moves in profile currency with the rate while no posting
+    touches it. That move is not an investment result, so it is its own line: `recon_cash_revaluation` = the
+    change in the cash's value less what the period's postings moved in. Every figure is None when a price or
+    rate is missing."""
+    opening = report["opening"]
+
+    def known(key):
+        return opening[key] is not None and report[key] is not None
+
+    out = {"recon_opening": opening["investment_cash"] + opening["value"] if known("investment_cash") and known("value") else None,
+           "recon_closing": report["investment_cash"] + report["value"] if known("investment_cash") and known("value") else None}
+    invest_ids = [a.id for a in investments.investment_accounts()] + [
+        a.id for a in accounts.list(active_only=True) if a.account_type in (AccountType.DEPOSIT, AccountType.GAMEYA)]
+    out["opening_adjustments"] = investments.opening_adjustments(invest_ids, start, end)
+    out["recon_result"] = report["result"]
+    # A certificate's interest is its return (inside Result) but lands on the bank, outside the portfolio.
+    paid_out = sum((paid["amount"] for paid in reporting.certificate_interest(end) if paid["date"] >= start), ZERO)
+    out["recon_cash_revaluation"] = (
+        report["investment_cash"] - opening["investment_cash"] - report["cash_flow_base"]
+        if known("investment_cash") else None)
+    out["recon_difference"] = (
+        out["recon_closing"] - out["recon_opening"] - report["net_money"] - out["recon_result"]
+        - out["opening_adjustments"] + paid_out - out["recon_cash_revaluation"]
+        if None not in (out["recon_opening"], out["recon_closing"], out["recon_result"],
+                        out["recon_cash_revaluation"]) else None)
+    return out
+
+
 def period_growth(result: Decimal | None, opening_value: Decimal | None, money_added: Decimal) -> Decimal | None:
     """Growth = Net gain or loss ÷ (Portfolio value at the start + Money added), as a percentage.
     None when the result is unavailable or nothing was invested."""
@@ -96,7 +129,7 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
         return {"new_money": ZERO, "withdrawn": ZERO, "net_money": ZERO,
                 "dividends": ZERO, "tax": ZERO, "fees": ZERO, "realized": ZERO, "unresolved_dividends": 0,
                 "holdings": [], "investment_cash": ZERO, "missing": [], "at_cost": [], "cost": ZERO,
-                "value": ZERO, "unrealized": ZERO}
+                "value": ZERO, "unrealized": ZERO, "cash_flow_base": ZERO}
     rows = db.all(
         f"SELECT le.*,t.type,t.ref,t.status,c.code AS category_code, "
         f"da.asset_id AS dividend_asset_id "
@@ -114,6 +147,7 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
     movements = defaultdict(Decimal)
     dividends = tax = fees = ZERO
     cash_quantities = defaultdict(Decimal)
+    cash_flow_base = ZERO   # what the period's postings moved into brokerage cash, at the rate of each day
     asset_balances = defaultdict(Decimal)   # (account, cash asset) -> balance held as an asset's value
     # Use asset metadata by id; account boundaries are determined by account type.
     for row in rows:
@@ -123,6 +157,8 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
         if asset.is_cash:
             if row["account_id"] in brokerage_ids:
                 cash_quantities[row["asset_id"]] += q
+                if row["date"] >= start:
+                    cash_flow_base += amount
             elif row["account_id"] in balance_ids:
                 asset_balances[(row["account_id"], row["asset_id"])] += q
             if row["account_id"] in investment_account_ids and row["date"] >= start:
@@ -241,7 +277,7 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
     return {"new_money": new_money, "withdrawn": withdrawn, "net_money": new_money-withdrawn,
             "dividends": dividends, "tax": tax, "fees": fees, "realized": period_realized, "holdings": holdings,
             "investment_cash": None if cash_unavailable else cash, "cost": total_cost,
-            "investment_cash_by_currency": cash_by_currency,
+            "investment_cash_by_currency": cash_by_currency, "cash_flow_base": cash_flow_base,
             "value": None if holdings_unavailable else total_value,
             "unrealized": None if holdings_unavailable else unrealized,
             "missing": missing, "at_cost": at_cost, "unresolved_dividends": unresolved}

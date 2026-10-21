@@ -236,13 +236,15 @@ async def update_other_asset_value(request: Request, account_id: int):
 
 def _transaction_popup_context(request, account, values, action, error=None, txn_id=None, split_categories=None):
     c = container(request)
+    counterparties = c.counterparties.list_active()
     return dict(account=account, values=values, action=action, txn_id=txn_id,
                 title="Edit transaction" if txn_id else "Add transaction",
                 accounts=c.accounts.list(active_only=True),
                 categories=[cat for cat in c.categories.pickable()],
                 category_names={cat.id: c.categories.display_name(cat.id) for cat in c.categories.pickable()},
                 category_parent_names={cat.id: cat.name for cat in c.categories.tree() if cat.depth == 1},
-                counterparties=c.counterparties.list_active(),
+                counterparties=counterparties,
+                counterparty_categories=register.counterparty_category_map(c, [row["name"] for row in counterparties]),
                 owners=c.counterparties.list_owners(),
                 split_categories=split_categories or [],
                 return_to=str(values.get("return_to") or f"/accounts/{account.id}"),
@@ -289,7 +291,7 @@ async def save_transaction_popup(request: Request, account_id: int):
         owner_id = int(values["owner_id"]) if values["owner_id"].isdigit() else None
         if owner_id is not None:
             party = c.counterparties.get(owner_id)
-            if not party["active"]:
+            if not party or not party["active"]:
                 raise ValidationError("Choose an active owner.", "owner_id")
         if kind == "transfer":
             to_account = int(values["to_account_id"]) if values["to_account_id"].isdigit() else None

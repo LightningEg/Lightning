@@ -7,7 +7,12 @@
 {% block heading %}<h1>{{ 'Budget'|tr(locale) }}</h1><p>{{ period.start_text }} to {{ period.end_text }}</p>{% endblock %}
 {% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/budget", period.key, month, this_month, period.start_text, period.end_text) }}{% endblock %}
 {% block content %}
-{% if raise_offer %}<p class="flash raise-prompt" role="status"><span><b>{{ 'Your income went up'|tr(locale) }}</b> · {{ 'Recurring expects {recurring}, {raise} more than your average.'|tr(locale, recurring=raise_offer.recurring|money(False, 0) ~ ' ' ~ base, raise=raise_offer.raise|money(False, 0)) }}</span> <a class="btn primary" data-popup-open href="/budget/raise?month={{ raise_offer.month }}">{{ 'Raise the plan'|tr(locale) }}</a> <a class="btn" href="/plan/reserves">{{ 'Save the difference'|tr(locale) }}</a></p>{% endif %}
+{% if raise_offer %}<section class="card phone-card raise-prompt" aria-labelledby="raise-heading">
+  <h2 id="raise-heading" class="phone-card-title">{{ 'Your income went up'|tr(locale) }}</h2>
+  <p class="phone-note">{{ 'Recurring expects {recurring}, {raise} more than your average.'|tr(locale, recurring=raise_offer.recurring|money(False, 0) ~ ' ' ~ base, raise=raise_offer.raise|money(False, 0)) }}</p>
+  <a class="btn primary phone-save" data-popup-open href="/budget/raise?month={{ raise_offer.month }}">{{ 'Raise the plan'|tr(locale) }}</a>
+  <a class="phone-quiet" href="/plan/reserves">{{ 'Save the difference'|tr(locale) }}</a>
+</section>{% endif %}
 {% if error %}<p class="flash error" role="alert">{{ error|tr(locale) }}</p>{% endif %}
 {% if bulk_undo %}<form method="post" action="/budget/bulk/undo" class="flash"><input type="hidden" name="token" value="{{ bulk_undo }}">{{ "Bulk rules applied."|tr(locale) }}<button class="btn">{{ 'Undo'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
 

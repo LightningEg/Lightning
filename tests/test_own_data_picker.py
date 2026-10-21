@@ -51,7 +51,10 @@ def test_external_form_picker_input_keeps_form_validation_association():
 
     assert 'select form="{{ form_id }}" name="account_id" required' in register
     assert 'if (select.hasAttribute("form")) input.setAttribute("form", select.getAttribute("form"));' in app
-    assert 'input.setCustomValidity(select.value ? "" : "Choose an option from the list."); select.required = false;' in app
+    # A required select hands `required` to the visible field, which shows the message (the hidden select cannot).
+    assert 'select.setPickerRequired = (on) => { select.required = false; input.required = on; checkChoice(); };' in app
+    assert "if (wasRequired) select.setPickerRequired(true);" in app
+    assert 'category.required = kind !== "transfer"' in app and "category.setPickerRequired(kind" in app  # only a plain select
 
 
 def template(name):

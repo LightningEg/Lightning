@@ -67,6 +67,25 @@ def _cash_account_id(value: str) -> int | None:
     return int(text)
 
 
+def counterparty_category_map(c, names) -> dict:
+    """{name: {"id", "name"} or None}: the category a Counterparty fills in when picked. A rule on the name alone
+    wins (one that also needs the amount decides when the row is saved), then the category set on the
+    Counterparty, else the one it is usually filed under. Every saved Counterparty stays in the map."""
+    usual = c.transactions.usual_categories()
+    pickable = {item.id for item in c.categories.pickable()}
+    found = {}
+    for name in names:
+        party = c.counterparties.resolve(name)
+        found[name] = None
+        category_id = c.rules.category_for_name(name)
+        if category_id not in pickable:
+            category_id = None if c.rules.depends_on_more_than_name(name) else _category_for_party(party, usual, pickable)
+        if category_id:
+            category = c.categories.get(category_id)
+            found[name] = {"id": category.id, "name": category.name}
+    return found
+
+
 def _lists(request: Request) -> dict:
     """Data for register typeahead pickers."""
     c = container(request)
@@ -80,23 +99,10 @@ def _lists(request: Request) -> dict:
                            "level": min(cat.depth, 3), "order": f"{l2.name.casefold()}\u0000{cat.name.casefold() if cat.depth >= 3 else ''}",
                            "label": c.categories.display_name(cat.id)})
     categories.sort(key=lambda row: (row["parent"].casefold(), row["order"], row["id"]))
-    accounts = c.accounts.list(active_only=True)
+    # A gold account holds things, not cash: money in or out is refused there, so the pickers do not offer it.
+    accounts = [a for a in c.accounts.list(active_only=True) if a.account_type != AccountType.PHYSICAL_ASSET]
     counterparty_options = c.counterparties.search_names()
-    counterparty_categories = {}
-    usual = c.transactions.usual_categories()
-    pickable = {item.id for item in c.categories.pickable()}
-    for name in counterparty_options:
-        party = c.counterparties.resolve(name)
-        # Keep every saved Counterparty available to the register picker. Autofill uses the
-        # category set on the counterparty, else the one it is usually filed under.
-        counterparty_categories[name] = None
-        # A rule on the name alone fills it too; one that also needs the amount decides when the row is saved.
-        category_id = c.rules.category_for_name(name)
-        if category_id not in pickable:
-            category_id = None if c.rules.depends_on_more_than_name(name) else _category_for_party(party, usual, pickable)
-        if category_id:
-            category = c.categories.get(category_id)
-            counterparty_categories[name] = {"id": category.id, "name": category.name}
+    counterparty_categories = counterparty_category_map(c, counterparty_options)
     return {
         "category_choices": categories,
         "account_options": [a.name for a in accounts],
