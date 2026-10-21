@@ -34,7 +34,8 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | **2D** | [The Android signing key is forgotten: investigate the existing signing setup before replacing anything](2-safe-for-real-money/2D-android-signing-key.md) | owner | android | new |
 | **2E** | [The engine accepts some bad input - dates before an account opened, crafted ids, rounding of plan amounts](2-safe-for-real-money/2E-engine-input-checks.md) | bug | transactions | ready |
 | **2F** | [On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone](2-safe-for-real-money/2F-android-downloads-files-links.md) | bug | android | ready |
-| **2G** | [Marking money as held for someone writes ledger lines itself - six-decimal base amounts block undo, and a voided sale still counts](2-safe-for-real-money/2G-held-for-others-writes-ledger-lines.md) | bug | transactions | ready |
+| **2G** | [Who owns what is recorded twice - the ledger's owner and investment_custody_events - and tagging writes ledger lines itself](2-safe-for-real-money/2G-held-for-others-writes-ledger-lines.md) | tech | transactions | ready |
+| 2G3 | ↳ One record of who owns what | | | |
 | **2I** | [Changing the profile currency leaves the Currencies tab on the old one until the app restarts](2-safe-for-real-money/2I-profile-currency-copied-six-times.md) | bug | currencies | ready |
 | **2J** | [Every unlock takes a full backup and checks the database three times; 30 unlocks push out every older backup](2-safe-for-real-money/2J-backup-on-every-unlock.md) | tech | backup | ready |
 | **2K** | [Four Integrity checks compare a figure with itself, so they can never fail](2-safe-for-real-money/2K-integrity-checks-that-cannot-fail.md) | tech | integrity | ready |

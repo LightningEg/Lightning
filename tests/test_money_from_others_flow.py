@@ -173,3 +173,67 @@ def test_someone_else_cannot_buy_investments_without_cash_in_the_funding_account
         c.money_from_others.sync_transaction(trade.id, trade.date, "Dad", brokerage.id, Decimal("-1000"))
     assert c.investments.holding(brokerage.id, stock.id) == Decimal("10")
     assert c.money_from_others.cash_balance("Dad", brokerage.id, "2026-09-30") == 0
+
+
+def test_marking_part_of_a_dollar_line_for_someone_keeps_whole_cents_and_undo_works(c):
+    """2G: the split used to store base amounts with six decimals, and every later undo was refused."""
+    from decimal import Decimal as D
+    from lightning.core.ledger import PostingLine, validate_posting
+    from lightning.undo import user_action
+    c.currencies.register("USD")
+    c.fx.save("USD", "2026-01-01", "50.123457")
+    usd = c.account_flows.open_account("Dollar savings", "BANK", "2026-01-01", "0", currency="USD")
+    txn = c.transactions.record_inflow("2026-01-02", usd.id, "100.01", c.categories.get_by_code("EXP.WORK.SALARY").id)
+    c.counterparties.create("Dad", kind="PERSON")
+    with c.db.transaction():
+        c.money_from_others.sync_transaction(txn.id, "2026-01-02", "Dad", usd.id, D("33.33"))
+    lines = c.transactions.get(txn.id).lines
+    usd_lines = [line for line in lines if line.account_id == usd.id]
+    assert sorted(line.quantity for line in usd_lines) == [D("33.33"), D("66.68")]
+    # 100.01 at 50.123457 posted 5,012.85; each part is now its own amount x rate, as two entries would be
+    assert abs(sum(line.amount_base for line in usd_lines) - D("5012.85")) <= D("0.01")
+    assert all(line.amount_base == line.amount_base.quantize(D("0.01")) for line in lines)
+    validate_posting([PostingLine(account_id=l.account_id, asset_id=l.asset_id, quantity=l.quantity, effect=l.effect,
+                                  unit_price=l.unit_price, fx_rate=l.fx_rate, category_id=l.category_id, memo=l.memo,
+                                  amount=l.amount, amount_base=l.amount_base, is_cash=True, owner_id=l.owner_id)
+                      for l in lines])
+    with user_action("Edit note"):
+        c.transactions.update_metadata(txn.id, "2026-01-02", "", "second note")
+    c.undo.replay()
+    assert c.transactions.get(txn.id).notes != "second note"
+
+
+def test_a_voided_sale_for_someone_no_longer_counts_against_their_next_sale(c):
+    """2G: the custody check summed a voided sale, so Dad's real 10 units looked like 0."""
+    from decimal import Decimal as D
+    flows = c.account_flows
+    broker = flows.open_account("THNDR", "BROKERAGE", "2026-01-01", "0", institution="THNDR")
+    bank = flows.open_account("CIB", "BANK", "2026-01-01", "100000", institution="CIB")
+    dad = c.counterparties.create("Dad")
+    asset = c.assets.create_investment("Commercial International Bank", "STOCK", "COMI")
+    c.transactions.record_transfer("2026-02-01", bank.id, broker.id, "5000")
+    c.transactions.change_cash_ownership("2026-02-01", broker.id, "5000", None, dad)
+
+    def trade(record, day, units, total, signed):
+        with c.db.transaction():
+            txn = record(day, broker.id, asset.id, units, total, owner_id=dad)
+            held = next(line.account_id for line in txn.lines if line.asset_id == asset.id)
+            c.money_from_others.sync_investment(txn.id, txn.date, "Dad", held, asset.id, D(signed))
+        return txn
+
+    trade(c.investments.buy_total, "2026-02-02", "10", "1000", "10")
+    sale = trade(c.investments.sell_total, "2026-02-03", "10", "1000", "-10")
+    c.transactions.void(sale.id, "mistake")
+    assert c.investments.holding_for_owner(broker.id, asset.id, "2026-02-05", dad) == 10
+    trade(c.investments.sell_total, "2026-02-05", "5", "500", "-5")
+    assert c.investments.holding_for_owner(broker.id, asset.id, "2026-02-06", dad) == 5
+
+
+def test_a_split_line_keeps_whole_cents_its_sign_and_its_own_rate():
+    from lightning.core.ledger import split_line_e6
+    e6 = 1_000_000
+    part, part_base, rest, rest_base = split_line_e6(-100_010_000, 50_123_457, 33_330_000, 100_010_000)
+    assert (part, rest) == (-33_330_000, -66_680_000)
+    assert (part_base, rest_base) == (-1_670_610_000, -3_342_230_000)
+    assert split_line_e6(1_000 * e6, e6, 1, 3)[0] == 333_330_000  # 1,000 x 1/3 rounds to 333.33
+    assert split_line_e6(1_000 * e6, e6, 1, 3)[2] == 666_670_000

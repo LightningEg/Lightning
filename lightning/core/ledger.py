@@ -119,6 +119,20 @@ def _round2(value: Decimal) -> Decimal:
     return value.quantize(Decimal("0.01"))
 
 
+def split_line_e6(amount_e6: int, rate_e6: int, take: int, total: int) -> tuple[int, int, int, int]:
+    """Split a stored line (micro-units) into the part ``take/total`` and the rest, as ``validate_posting`` accepts
+    them: each amount at whole cents (half up) and each base amount its own amount x rate. The two base amounts can
+    differ by a cent from the line's, as two separate entries would (2G)."""
+    cents, rest = divmod(abs(amount_e6) * take, total * 10_000)
+    part = (-1 if amount_e6 < 0 else 1) * (cents + (rest * 2 >= total * 10_000)) * 10_000
+    rate = Decimal(rate_e6) / Decimal(1_000_000)
+
+    def base(value_e6: int) -> int:
+        return int(_round2(Decimal(value_e6) / Decimal(1_000_000) * rate) * 1_000_000)
+
+    return part, base(part), amount_e6 - part, base(amount_e6 - part)
+
+
 def validate_posting(lines: list[PostingLine]) -> None:
     """Raise ValidationError unless the lines form a valid posting."""
     if not lines:

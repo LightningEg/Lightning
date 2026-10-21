@@ -1,32 +1,27 @@
 ---
-title: Marking money as held for someone writes ledger lines itself - six-decimal base amounts block undo, and a voided sale still counts
-type: bug
+title: Who owns what is recorded twice - the ledger's owner and investment_custody_events - and tagging writes ledger lines itself
+type: tech
 area: transactions
 status: ready
 created: 2026-10-21
 by: Claude
-skills: number-audit
 app_version: 1.3.0
 commit: 6e1c043
 repo: app
 ---
 
 ## Report
-Found by [Audit 3](../../reports/audit-3.md) §2. Severity: high (stored money breaks a posting rule, and undo is refused).
+Found by [Audit 3](../../reports/audit-3.md) §2. Its two money bugs are fixed: 2G1 (a part-tag stored six-decimal
+base amounts, so every later undo was refused) and 2G2 (a voided sale still counted against the owner's next sale). They are
+covered by `tests/test_money_from_others_flow.py`. What is left is the structure behind them.
 
-1. `money_from_others.py:20-57` (`_tag_exact_line`) and `ownership_migration.py:60-80` UPDATE and INSERT `ledger_entries`
-   directly, outside `TransactionService`: no `validate_posting`, no audit. A part-tag splits the base amount by integer division
-   in micro-units. Reproduced on a temporary profile: 100.01 USD in at 50.123457, then 33.33 marked as Dad's. The stored base
-   amounts are 3342.234157 and 1670.615843. Any later undo on that transaction is refused: "Line 1: amount_base has more than
-   2 decimal places" (from `bootstrap.validate_history`).
-2. `money_from_others.py:206-210` sums `investment_custody_events` without `t.status='POSTED'` (the next check, line 213, has
-   it). Reproduced: buy 10 units for Dad, sell 10, void the sale. The ledger says Dad holds 10.00, but selling 5 is refused:
-   "There are not enough units owned by Dad".
-3. Behind both: who owns what is kept twice, in the ledger's `owner_id` and in `investment_custody_events`.
-   `_validate_owner_partition` (line 58) is a second copy of `TransactionService._validate_owner_balances`.
+## 2G3 One record of who owns what
+- `money_from_others.py` (`_tag_exact_line`) and `ownership_migration.py` still UPDATE and INSERT `ledger_entries` directly, outside `TransactionService`. That means no audit and no `validate_posting` at write time. The split itself now passes it (`core/ledger.split_line_e6`).
+- `investment_custody_events` repeats the ledger's `owner_id`. The ledger check (`TransactionService._validate_owner_balances`) already refuses a sale of units someone does not hold. `_validate_owner_partition` is a second copy of it.
+- Nothing writes `money_from_others` rows without a transaction any more. `cash_balance`, `cash_total_for_account`, `totals_by_account`, `by_owner` and `history` still read them (see 9L).
 
 ## Fix
-- Move tagging into `TransactionService` as a repost. Round each base amount to 2 places and give the remainder to the other line.
-- Check custody against the ledger's `owner_id` only.
-- Stop writing `investment_custody_events`, and drop the legacy `transaction_id IS NULL` reads (nothing writes those rows now).
-- Tests: the two reproductions above.
+- Move tagging into `TransactionService` as a repost.
+- Read investment custody history from the ledger's `owner_id`, then stop writing `investment_custody_events`.
+- Drop the legacy reads.
+- Tests: the existing custody, zakat and investment tests stay green, and the investment history shows the same rows.

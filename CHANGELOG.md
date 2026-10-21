@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Claude: 2G1–2 marking part of a line as held for someone keeps whole cents (`core/ledger.split_line_e6`), so undo
+  works again; a voided sale no longer counts against the owner's next sale (`money_from_others.py`). 2G3 is left.
 - 2026-10-21 · Claude: 2H every successful write is its own undo action (except Undo, demo, sample and exports); money held for
   others and the old Settings page were missing, so Undo reversed the action before them (`ui/web.py`).
 - 2026-10-21 · Claude: 3Y pages keep their request cache: matching payments no longer opens an empty write, and four budget and

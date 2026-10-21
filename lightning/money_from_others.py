@@ -8,6 +8,7 @@ from lightning.accounts.service import AccountService
 from lightning.core.dates import now_iso, parse_date
 from lightning.core.errors import ValidationError
 from lightning.core.memo import request_cached
+from lightning.core.ledger import split_line_e6
 from lightning.core.money import ZERO, check_places, from_e6, to_decimal, to_e6
 from lightning.counterparties import CounterpartyService
 from lightning.database.connection import Database
@@ -37,15 +38,15 @@ class MoneyFromOthersService:
             self.db.execute("UPDATE ledger_entries SET owner_id=? WHERE id=?", (party["id"], line["id"]))
             self._validate_owner_partition(account_id, asset_id, party["id"])
             return
-        total = abs(line["quantity_e6"])
-        def proportional(value):
-            sign = -1 if value < 0 else 1
-            return sign * (abs(value) * take // total)
-        owned_amount, owned_base = proportional(line["amount_e6"]), proportional(line["amount_base_e6"])
+        # Both parts pass validate_posting (2G): a six-decimal base amount refused every later undo.
+        owned_amount, owned_base, rest_amount, rest_base = split_line_e6(
+            line["amount_e6"], line["fx_rate_e6"], take, abs(line["quantity_e6"]))
+        if line["effect"] == "INTERNAL" and owned_base + rest_base != line["amount_base_e6"]:
+            raise ValidationError("At this exchange rate that part leaves the transfer a cent out in "
+                                  "your currency; mark a slightly different amount.", "amount")
         sign = -1 if line["quantity_e6"] < 0 else 1
         self.db.execute("UPDATE ledger_entries SET quantity_e6=?,amount_e6=?,amount_base_e6=? WHERE id=?",
-                        (line["quantity_e6"]-sign*take, line["amount_e6"]-owned_amount,
-                         line["amount_base_e6"]-owned_base, line["id"]))
+                        (line["quantity_e6"]-sign*take, rest_amount, rest_base, line["id"]))
         self.db.execute("""INSERT INTO ledger_entries(transaction_id,line_no,date,account_id,asset_id,
                      quantity_e6,unit_price_e6,amount_e6,fx_rate_e6,amount_base_e6,effect,category_id,memo,
                      cleared,owner_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
@@ -203,9 +204,10 @@ class MoneyFromOthersService:
         units_e6 = to_e6(units)
         existing = self.db.one("SELECT owner,account_id,asset_id,units_e6 FROM investment_custody_events WHERE transaction_id=?",
                                (transaction_id,))
-        current = self.db.scalar(
-            "SELECT COALESCE(SUM(units_e6),0) FROM investment_custody_events "
-            "WHERE owner=? AND account_id=? AND asset_id=? AND date<=? AND transaction_id<>?",
+        current = self.db.scalar(  # a voided buy or sale no longer counts (2G)
+            "SELECT COALESCE(SUM(e.units_e6),0) FROM investment_custody_events e "
+            "JOIN transactions t ON t.id=e.transaction_id WHERE e.owner=? AND e.account_id=? AND e.asset_id=? "
+            "AND e.date<=? AND t.status='POSTED' AND e.transaction_id<>?",
             (owner.strip(), account_id, asset_id, parse_date(day).isoformat(), transaction_id))
         if int(current or 0) + units_e6 < 0:
             raise ValidationError(f"There are not enough units owned by {owner} to record this sale.", "units")
