@@ -80,7 +80,8 @@ def _lists(request: Request) -> dict:
                            "level": min(cat.depth, 3), "order": f"{l2.name.casefold()}\u0000{cat.name.casefold() if cat.depth >= 3 else ''}",
                            "label": c.categories.display_name(cat.id)})
     categories.sort(key=lambda row: (row["parent"].casefold(), row["order"], row["id"]))
-    accounts = c.accounts.list(active_only=True)
+    # A gold account holds things, not cash: money in or out is refused there, so the pickers do not offer it.
+    accounts = [a for a in c.accounts.list(active_only=True) if a.account_type != AccountType.PHYSICAL_ASSET]
     counterparty_options = c.counterparties.search_names()
     counterparty_categories = {}
     usual = c.transactions.usual_categories()

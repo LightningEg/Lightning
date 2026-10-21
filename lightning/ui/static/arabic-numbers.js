@@ -12,25 +12,44 @@
   // left-to-right override keeps the digits in the order they are written (the guideline's bdo dir="ltr").
   const isolateDate = (value) => "\u2066\u202D" + value + "\u202C\u2069";
 
+  // One token of text (no spaces): the figure itself, without the bracket or the sentence punctuation around it,
+  // so "(+3.8%)" and "3,410," read as numbers too and every decimal point is the Arabic "٫".
+  function localizeToken(token) {
+    // Keep ISO date separators, while using Arabic grouping/decimal marks for values.
+    if (/^\d{4}-\d{2}(?:-\d{2})?$/.test(token)) {
+      return isolateDate(token.replace(/[0-9]/g, (digit) => digitMap[digit]));
+    }
+    // Compact financial values use the app's k/M suffixes (for example 9.7k).
+    const compact = token.match(/^([+\-−±]?\d+(?:[,.]\d+)?)([kM])$/);
+    if (compact) return isolate(compact[1].replace(",", "٬").replace(".", "٫").replace(/[0-9]/g, (digit) => digitMap[digit]) + compact[2]);
+    const number = token.match(/^([+\-−±]?)(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?(%?)$/);
+    if (number) {
+      const localized = number[1] + number[2].replaceAll(",", "٬") + (number[3] || "").replace(".", "٫") + number[4];
+      return isolate(localized.replace(/[0-9]/g, (digit) => digitMap[digit]));
+    }
+    // Alphanumeric tokens are often tickers, version strings, filenames or transaction references.
+    if (asciiLetter.test(token)) return token;
+    return token.replace(/[0-9]/g, (digit) => digitMap[digit]);
+  }
+
+  // A middle dot beside a number reads as the Arabic zero "٠" (Late · 17 days reads as 170): there it is the Arabic
+  // comma. The server does the same for the page it sends (lightning/ui/i18n.py arabic_dots); this covers text
+  // the browser builds. A dot between two words is left alone.
+  const figureEdge = "[0-9٠-٩%]";
+  const bidiMarks = "[⁦-⁩‪-‮]*";
+  const dotAfterFigure = new RegExp("(" + figureEdge + bidiMarks + ")\\s*·\\s*", "g");
+  const dotBeforeFigure = new RegExp("\\s*·\\s*(?=" + bidiMarks + "[0-9٠-٩])", "g");
+  function arabicDots(text) {
+    return text.replace(dotAfterFigure, "$1، ").replace(dotBeforeFigure, "، ");
+  }
+
   function localizeNumericText(text) {
-    return String(text).split(/(\s+)/).map((token) => {
+    return arabicDots(String(text).split(/(\s+)/).map((token) => {
       if (!token) return token;
-      // Keep ISO date separators, while using Arabic grouping/decimal marks for values.
-      if (/^\d{4}-\d{2}(?:-\d{2})?$/.test(token)) {
-        return isolateDate(token.replace(/[0-9]/g, (digit) => digitMap[digit]));
-      }
-      // Compact financial values use the app's k/M suffixes (for example 9.7k).
-      const compact = token.match(/^([+\-−]?\d+(?:[,.]\d+)?)([kM])$/);
-      if (compact) return isolate(compact[1].replace(",", "٬").replace(".", "٫").replace(/[0-9]/g, (digit) => digitMap[digit]) + compact[2]);
-      const number = token.match(/^([+\-−]?)(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?(%?)$/);
-      if (number) {
-        const localized = number[1] + number[2].replaceAll(",", "٬") + (number[3] || "").replace(".", "٫") + number[4];
-        return isolate(localized.replace(/[0-9]/g, (digit) => digitMap[digit]));
-      }
-      // Alphanumeric tokens are often tickers, version strings, filenames or transaction references.
-      if (asciiLetter.test(token)) return token;
-      return token.replace(/[0-9]/g, (digit) => digitMap[digit]);
-    }).join("");
+      const parts = token.match(/^([(\[«“"'،]*)([\s\S]*?)([)\]»”"'،,.;:!?؟]*)$/);
+      if (!parts || !parts[2]) return token;
+      return parts[1] + localizeToken(parts[2]) + parts[3];
+    }).join(""));
   }
 
   function excludedTextNode(node) {

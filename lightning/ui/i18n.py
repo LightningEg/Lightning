@@ -207,7 +207,7 @@ ARABIC_UI = {
     'After sale (estimate)': 'بعد البيع (تقديري)',
     'No investment classes are configured.': 'مفيش فئات استثمار مُعدّة.',
     'View configured classes and assets': 'اعرض فئات وأصول الاستثمار المُعدّة',
-    'Leave a kind empty to use its class’s factor. Clear a class to use the 95% default.': 'سيب النوع فاضي عشان يستخدم معامل فئته. امسح قيمة الفئة عشان تستخدم القيمة الافتراضية ٩٥٪.',
+    'Leave a kind empty to use its class’s factor. Clear a class to use the 95% default.': 'سيب النوع فاضي عشان يستخدم معامل فئته. امسح قيمة الفئة عشان تستخدم القيمة الافتراضية 95%.',
     'Recent backups': 'النسخ الاحتياطية الأخيرة',
     'Export for AI': 'تصدير لتحليل الذكاء الاصطناعي',
     'Lightning does not upload your data.': 'Lightning مش بيرفع بياناتك لأي مكان.',
@@ -578,7 +578,7 @@ ARABIC_UI = {
     'Choose a value for every selected matching criterion.': 'اختر قيمة لكل شرط مطابقة محدد.',
     'Savings': 'المدخرات',
     'Overspent': 'إنفاق يتجاوز الدخل',
-    'One square is 1% of income': 'كل مربع يمثل ١٪ من الدخل',
+    'One square is 1% of income': 'كل مربع يمثل 1% من الدخل',
     'Darker squares show spending beyond income': 'المربعات الداكنة توضح الإنفاق الذي يتجاوز الدخل',
     'Saved and invested': 'المدخر والمستثمر',
     'Spent of plan': 'المنفق من الخطة',
@@ -662,6 +662,32 @@ ARABIC_UI = {
     'Monthly limit': 'الحد الشهري',
     'Open categories': 'افتح الفئات',
     'Undo': 'تراجع',
+    'Plan this transaction': 'خطّط للمعاملة دي',
+    'Start an ordinary monthly plan from this cash transaction. The transaction stays unchanged.': 'ابدأ خطة شهرية عادية من المعاملة النقدية دي. المعاملة نفسها ما بتتغيرش.',
+    'Transaction {a} · {b} · {c} {d}. Adding this plan does not post or edit a transaction.': 'المعاملة {a} · {b} · {c} {d}. إضافة الخطة دي ما بتسجّل ولا بتعدّل أي معاملة.',
+    '1 entry': 'قيد واحد',
+    'e.g. 100 shares, 12.5 grams': 'مثلًا 100 سهم، 12.5 جرام',
+    'Setting': 'الإعداد',
+    'Where': 'فين',
+    'From {a} on · the total plan stays the same': 'من {a} وطالع · إجمالي الخطة زي ما هو',
+    'MONTH_END': 'نهاية الشهر',
+    'SALE': 'يوم البيع',
+    'Saved changes': 'تغييرات اتحفظت',
+    'Account changes': 'تغييرات الحسابات',
+    'Transaction changes': 'تغييرات المعاملات',
+    'Payment plan changes': 'تغييرات خطة الدفع',
+    'Reserve changes': 'تغييرات المبالغ المحجوزة',
+    'Budget changes': 'تغييرات الميزانية',
+    'Statement import': 'استيراد كشف حساب',
+    'SMS review': 'مراجعة الرسائل',
+    'Rule changes': 'تغييرات القواعد',
+    'Reminder preference': 'تفضيل التذكير',
+    'Cash funding preference': 'تفضيل تمويل النقدية',
+    'Fund the payday plan': 'تمويل خطة القبض',
+    'Create reimbursement claim': 'عمل مطالبة استرداد',
+    'Link reimbursement receipt': 'ربط إيصال الاسترداد',
+    'Unlink reimbursement receipt': 'فك ربط إيصال الاسترداد',
+    'Delete reimbursement claim': 'مسح مطالبة الاسترداد',
     'Redo': 'إعادة',
     'Select all': 'اختار الكل',
     'Track': 'تابع',
@@ -1876,12 +1902,12 @@ ARABIC_UI = {
     'Your zakat': 'زكاتك',
     '85 g of 24K gold at the price of {date}': '٨٥ جرام دهب عيار ٢٤ بسعر {date}',
     'The nisab you typed on {date}': 'النصاب اللي كتبته يوم {date}',
-    '2.5% of your zakatable wealth': '٢٫٥٪ من المال اللي بتتحسب عليه الزكاة',
+    '2.5% of your zakatable wealth': '2.5% من المال اللي بتتحسب عليه الزكاة',
     'Below the nisab, so nothing is due': 'أقل من النصاب، فمفيش زكاة مستحقة',
     'A price is missing, so Lightning cannot estimate your zakat yet.': 'في سعر ناقص، Lightning مش قادر يقدّر زكاتك دلوقتي.',
     'There is no gold price yet. Type the nisab behind the gear, or add a gold price.': 'لسه مفيش سعر للدهب. اكتب النصاب من الترس، أو أضف سعر الدهب.',
     'Your zakat day is {date}. The next is 354 days later: it follows the lunar year, so it comes about 11 days earlier each year.': 'يوم زكاتك {date}. اللي بعده بعد ٣٥٤ يوم: بيمشي على السنة الهجرية، فبييجي قبلها بحوالي ١١ يوم كل سنة.',
-    'This is an estimate by the common rule: 2.5% of your zakatable wealth when it reaches the nisab on your zakat day; a scholar answers your own case. Lightning counts cash, deposits, gam’eya, shares and funds, and gold. Other assets are not in it.': 'ده تقدير بالقاعدة المعروفة: ٢٫٥٪ من المال اللي بتتحسب عليه الزكاة لما يوصل النصاب في يوم زكاتك؛ وحالتك إنت بالذات يجاوب عليها عالم. Lightning بيحسب النقدية والودائع والجمعيات والأسهم والصناديق والدهب. الأصول التانية مش داخلة.',
+    'This is an estimate by the common rule: 2.5% of your zakatable wealth when it reaches the nisab on your zakat day; a scholar answers your own case. Lightning counts cash, deposits, gam’eya, shares and funds, and gold. Other assets are not in it.': 'ده تقدير بالقاعدة المعروفة: 2.5% من المال اللي بتتحسب عليه الزكاة لما يوصل النصاب في يوم زكاتك؛ وحالتك إنت بالذات يجاوب عليها عالم. Lightning بيحسب النقدية والودائع والجمعيات والأسهم والصناديق والدهب. الأصول التانية مش داخلة.',
     'An estimate at today’s figures. It changes no balance and is not in the forecast above.': 'تقدير بأرقام النهارده. مبيغيّرش أي رصيد ومش داخل في التوقع اللي فوق.',
     'Nothing due': 'مفيش مستحق',
     'Zakat settings': 'إعدادات الزكاة',
@@ -1917,12 +1943,12 @@ ARABIC_UI = {
     'What you must pay today or earlier: your bills due. Zakat takes it off unless you turn that off.': 'اللي لازم تدفعه النهارده أو قبل كده: فواتيرك المستحقة. الزكاة بتخصمه إلا لو طفّيت ده.',
     'What zakat is worked out on: what you hold, less the debts due now.': 'اللي بتتحسب عليه الزكاة: اللي معاك ناقص الديون المستحقة دلوقتي.',
     'The least wealth zakat applies to: 85 g of 24K gold at the gold price of the day, or the amount you typed when there is no gold price.': 'أقل مال تجب فيه الزكاة: ٨٥ جرام دهب عيار ٢٤ بسعر الدهب في اليوم، أو المبلغ اللي كتبته لو مفيش سعر للدهب.',
-    'The share of zakatable wealth that is due: 2.5% by the common rule.': 'نسبة الزكاة من المال اللي بتتحسب عليه: ٢٫٥٪ بالقاعدة المعروفة.',
+    'The share of zakatable wealth that is due: 2.5% by the common rule.': 'نسبة الزكاة من المال اللي بتتحسب عليه: 2.5% بالقاعدة المعروفة.',
     'An estimate by the common rule, for a scholar to confirm: the zakat rate of Zakatable wealth when it is at or above the Nisab, else nothing.': 'تقدير بالقاعدة المعروفة، وعالم هو اللي يأكده: نسبة الزكاة من المال اللي بتتحسب عليه لما يكون وصل النصاب أو أكتر، غير كده مفيش.',
     'What you spent in the Zakat category since your last zakat day, up to the next.': 'اللي صرفته في تصنيف الزكاة من آخر يوم زكاة لحد اللي بعده.',
     'What is left of Zakat due after what you paid this zakat year; never below zero.': 'اللي فاضل من الزكاة المستحقة بعد اللي دفعته السنة دي؛ ومش بينزل عن صفر.',
     'Choose a matching window from 0 to 31 days.': 'اختار فترة مطابقة من صفر لـ ٣١ يوم.',
-    'Choose an amount tolerance from 0 to 25 percent.': 'اختار نسبة فرق للمبلغ من صفر لـ ٢٥٪.',
+    'Choose an amount tolerance from 0 to 25 percent.': 'اختار نسبة فرق للمبلغ من صفر لـ 25%.',
     'This purchase\'s payment amount and count come from its price and fee.': 'مبلغ وعدد دفعات الشراء بيتحددوا من السعر والرسوم.',
     'Only a posted cash income or expense can be turned into a plan.': 'ينفع تحول بس دخل أو مصروف نقدي مسجل لخطة.',
     'Choose a single-account, single-category cash transaction to make a plan.': 'اختار معاملة نقدية من حساب واحد وفئة واحدة عشان تعمل منها خطة.',
@@ -2411,20 +2437,61 @@ def _translate_piece(raw: str) -> str:
     return html.escape(lead + translated + tail, quote=True)
 
 
+_DIGIT = "0-9\u0660-\u0669"
+_DOT_AFTER_DIGIT = re.compile(rf"([{_DIGIT}%])\s*\u00b7\s*")
+_DOT_BEFORE_DIGIT = re.compile(rf"\s*\u00b7\s*(?=[{_DIGIT}])")
+_ENDS_WITH_DIGIT = re.compile(rf"[{_DIGIT}%]\s*$")
+_STARTS_WITH_DIGIT = re.compile(rf"^\s*[{_DIGIT}]")
+_LEADING_DOT = re.compile(r"^\s*\u00b7\s*")
+_TRAILING_DOT = re.compile(r"\s*\u00b7\s*$")
+_ARABIC_COMMA = "\u060c "
+
+
+def arabic_dots(text: str) -> str:
+    """A middle dot beside a number reads as the Arabic zero "\u0660" (Late \u00b7 17 days reads as 170): in Arabic the
+    separator next to a digit is the Arabic comma. A dot between two words is left alone."""
+    return _DOT_BEFORE_DIGIT.sub(_ARABIC_COMMA, _DOT_AFTER_DIGIT.sub(lambda m: m.group(1) + _ARABIC_COMMA, text))
+
+
+def _dots_across_tags(out: list[str], kinds: list[str]) -> None:
+    """The same rule when a tag sits between the dot and the number (`<time>2026-10-03</time> \u00b7 <span>Bill`)."""
+    last = None
+    for i, kind in enumerate(kinds):
+        if kind == "barrier":  # a script, style, textarea or comment ends the run of visible text
+            last = None
+        elif kind == "text" and out[i].strip():
+            if last is not None:
+                if _ENDS_WITH_DIGIT.search(out[last]) and _LEADING_DOT.match(out[i]):
+                    out[i] = _LEADING_DOT.sub(_ARABIC_COMMA, out[i], 1)
+                elif _TRAILING_DOT.search(out[last]) and _STARTS_WITH_DIGIT.match(out[i]):
+                    out[last] = _TRAILING_DOT.sub(_ARABIC_COMMA, out[last], 1)
+            last = i
+
+
 def localize_html(page: str) -> str:
     """The Arabic page's last pass: any visible text, title, aria-label or placeholder that a template or a Python
-    sentence left in English is translated here from the same table. Data (names, refs, codes) has no entry, so it stays."""
-    out = []
+    sentence left in English is translated here from the same table. Data (names, refs, codes) has no entry, so it stays.
+    A middle dot next to a number becomes the Arabic comma (`arabic_dots`)."""
+    out, kinds = [], []
+
+    def attribute(m):
+        return m.group(1) + m.group(2) + arabic_dots(_translate_piece(m.group(3))) + m.group(2)
+
     for token in _TAG.findall(page):
         if token[:9].lower() == "<textarea":  # its typed text stays as typed; its placeholder is ours
             head, sep, rest = token.partition(">")
-            out.append(_ATTRIBUTE.sub(lambda m: m.group(1) + m.group(2) + _translate_piece(m.group(3)) + m.group(2), head) + sep + rest)
+            out.append(_ATTRIBUTE.sub(attribute, head) + sep + rest)
+            kinds.append("barrier")
         elif token.startswith("<"):
-            if token[:2] not in ("<!", "</") and token.lower()[:7] not in ("<script", "<style>", "<textar"):
-                token = _ATTRIBUTE.sub(lambda m: m.group(1) + m.group(2) + _translate_piece(m.group(3)) + m.group(2), token)
+            plain_tag = token[:2] not in ("<!", "</") and token.lower()[:7] not in ("<script", "<style>", "<textar")
+            if plain_tag:
+                token = _ATTRIBUTE.sub(attribute, token)
             out.append(token)
+            kinds.append("tag" if plain_tag or token[:2] == "</" else "barrier")
         else:
-            out.append(_translate_piece(token))
+            out.append(arabic_dots(_translate_piece(token)))
+            kinds.append("text")
+    _dots_across_tags(out, kinds)
     return "".join(out)
 
 

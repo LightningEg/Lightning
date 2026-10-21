@@ -16,6 +16,7 @@ def _broker_with_cash(c, accounts, egp="60000"):
     c.fx.save("USD", "2026-09-01", "50")
     c.fx.save("USD", "2026-11-30", "50")
     c.fx.save("USD", "2026-12-31", "50")
+    c.transactions.record_inflow("2026-09-01", accounts["cib"].id, "20000", c.categories.get_by_code("EXP.WORK.SALARY").id)
     c.transactions.record_transfer("2026-09-02", accounts["cib"].id, accounts["thndr"].id, egp)
     etf = c.assets.create_investment("US index ETF", "FUND.EQUITY", "VTIX", mic="XNAS")
     c.assets.set_price(etf.id, "2026-12-31", "110")

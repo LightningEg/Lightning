@@ -28,6 +28,7 @@ class TestRecording:
             ("2026-09-20", "USD", "EGP", 50000000, "MANUAL", "2026-09-20T00:00:00Z"),
         )
 
+        c.transactions.record_inflow("2026-09-05", usd.id, "100", cats["EXP.WORK.SALARY"].id)
         txn = c.transactions.record_outflow("2026-09-10", usd.id, "2",
                                             cats["EXP.PERSONAL.FOOD"].id)
 
