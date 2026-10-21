@@ -11,6 +11,15 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Codex: Prepare v1.4.0 as the tested Windows app and matching signed Android APK, with the website download and archive refresh.
+
+## [1.4.0] — 2026-10-21`.
+- Keep it to three lines at most: what changed for the user or the code, and where. The reasons and details belong in the doc that owns them (`AGENTS.md` lists which).
+- To catch up, read only the first entries here, or `git log --oneline -20`. Entries further down are history, not the current specification.
+- When a version is tagged, rename `Unreleased` to that version and start a new `Unreleased` above it.
+
+## [Unreleased]
+
 - 2026-10-21 · Codex: Release validation translates bundled price-file origins and source-cited help explicitly in Arabic, with a regression check that includes a bundled price file.
   The purchase browser check waits for the saved loan row, since closing a phone sheet can leave its URL unchanged while saving.
 
