@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Claude: [8E, 8G] Site: one download wording, version 1.3.0 in structured data, PC shown behind the sync veil,
+  slim consent bar, Testing tab for testers only (`?testing`), Sample Profiles download (site PR #46). No comparisons.
 - 2026-10-21 · Claude: [8E–8H] The owner's website audit becomes plan items: quick fixes (8E), Home and Features show the app (8F), three owner calls (8G), and the Guides redesign brief (8H).
 - 2026-10-21 · Claude: For Geeks home greets with `$ welcome to lightning`, typed once with the caret, while the hero fades up;
   guideline D07 `.hello` and D08 (both repos). Reduced motion shows it still.

@@ -2,7 +2,7 @@
 title: Website audit quick fixes (one download wording, version in structured data, blank sync frame)
 type: bug
 area: website
-status: ready
+status: building
 created: 2026-10-21
 by: Claude
 skills: website-sync
@@ -29,6 +29,12 @@ Each is small and needs no owner decision.
 
 Not taken: the audit's "replace `blog.html`'s meta refresh with a 301" (GitHub Pages cannot send one; the refresh plus
 canonical is already the README rule).
+
+## Built
+
+Site PR #46 (`claude/website-audit-fixes`): everything above except the guide pages' wording, which 8H carries.
+Not taken: logo alt (`alt=""` is right beside the visible word), How It Works images (already lazy), `#downloads`
+(the Downloads hero holds the files; `#downloads` skips them).
 
 ## Done when
 

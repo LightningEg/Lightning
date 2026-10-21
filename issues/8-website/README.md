@@ -1,6 +1,6 @@
 ---
 title: Website
-done:
+done: 8G
 ---
 
 **Goal.** The site is honest, quick and in step with the app.
