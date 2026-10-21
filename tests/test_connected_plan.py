@@ -280,6 +280,24 @@ def test_a_raise_in_recurring_is_offered_to_the_plan(c, setup):
     assert "income_from_recurring\" value=\"1\" checked" in browser.get("/settings?section=budget").text
 
 
+def test_a_yearly_bonus_is_not_read_as_a_raise(c, setup):
+    """7L1: 30,000 a month plus a yearly 30,000 bonus spreads to 35,500 over twelve months, with a 9,000 quarterly share: not a raise."""
+    _salaried(c, setup)
+    cats = setup[1]
+    c.planning.create(kind="INCOME", name="Salary", amount="30000", frequency="MONTHLY", start_date="2027-01-01",
+                      category_id=cats["EXP.WORK.SALARY"].id)
+    c.planning.create(kind="INCOME", name="Annual bonus", amount="30000", frequency="YEARLY", start_date="2027-03-01",
+                      category_id=c.categories.get_by_code("EXP.WORK.BONUS").id)
+    c.planning.create(kind="INCOME", name="Profit share", amount="9000", frequency="QUARTERLY",
+                      start_date="2027-03-01")
+    assert c.planning.income_a_month() == Decimal("35500.00")  # the plan's own total still spreads the lumps
+    assert c.health.raise_offer() is None
+    assert "Your income went up" not in {item["label"] for item in ReviewInbox(c).items(today())}
+    # A real raise in the monthly pay is still offered, at the monthly figure only.
+    c.planning.create(kind="INCOME", name="Second job", amount="6000", frequency="MONTHLY", start_date="2027-01-01")
+    assert c.health.raise_offer()["recurring"] == Decimal("36000.00")
+
+
 def test_a_declined_raise_is_not_offered_again_until_the_amount_changes(c, setup):
     _salaried(c, setup)
     c.planning.create(kind="INCOME", name="Salary", amount="36000", frequency="MONTHLY", start_date="2027-01-01")

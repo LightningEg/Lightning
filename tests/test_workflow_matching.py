@@ -23,6 +23,7 @@ def _usd_account(c):
     account = c.account_flows.open_account("Dollar bank", "BANK", "2026-09-01", "0", currency="USD")
     c.db.execute("INSERT INTO fx_rates(date,base,quote,rate_e6,source,created_at) VALUES(?,?,?,?,?,?)",
                  ("2026-09-01", "USD", "EGP", 50000000, "MANUAL", "2026-09-01T00:00:00Z"))
+    c.transactions.record_inflow("2026-09-02", account.id, "1000", c.categories.get_by_code("EXP.WORK.SALARY").id)
     return account
 
 

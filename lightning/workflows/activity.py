@@ -131,7 +131,7 @@ class ActivityReview:
                 if abs((date.fromisoformat(payment.due_date) - date.fromisoformat(txn.date)).days) > item.match_window_days:
                     continue
                 if any(candidate["id"] == txn.id for candidate in
-                       self.c.planning.candidates(payment, as_of, loose=True)):
+                       self.c.planning.candidates(payment, as_of, loose=True, any_account=True)):
                     choices.append({"item_id": item.id, "due_date": payment.due_date,
                                     "label": f"{item.name} · {payment.due_date}", "kind": item.kind.value})
         return sorted(choices, key=lambda row: (row["due_date"], row["label"].casefold()))

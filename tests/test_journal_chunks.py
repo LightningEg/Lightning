@@ -16,7 +16,7 @@ def many_payments(hd, count):
     bank = next(a.id for a in hd.c.accounts.list() if a.name == "Bank")
     food = hd.c.categories.get_by_code("EXP.PERSONAL.FOOD").id
     health = hd.c.categories.get_by_code("EXP.PERSONAL.HEALTH").id
-    ids = [services.transactions.record_in_account(bank, "2026-09-01", f"-{n + 1}", category_id=food).id for n in range(count)]
+    ids = [services.transactions.record_in_account(bank, "2026-09-01", f"-{n % 9 + 1}", category_id=food).id for n in range(count)]
     services.transactions.set_category(ids, health)
     last = unpack(hd.store.db.scalar("SELECT wire FROM journal_commits ORDER BY revision DESC LIMIT 1"))["body"]
     return last["effects"][0]["domain"]

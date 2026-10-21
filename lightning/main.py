@@ -76,6 +76,9 @@ def main(argv: list[str] | None = None) -> None:
         from pathlib import Path
         for suffix in ("", "-wal", "-shm"):
             Path(args.db + suffix).unlink(missing_ok=True)
+    if sample == "sample":
+        from lightning.samples import pin_sample_today
+        pin_sample_today()  # inside the sample's data, unless LIGHTNING_TODAY says otherwise
     container = build(args.db, backup_on_start=not args.demo)
     if sample == "demo":
         from lightning.demo import build_demo

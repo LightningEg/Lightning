@@ -219,8 +219,11 @@ class CashForecaster:
             all_events = receipts.adjust_events(all_events, day)
         deposit_events = [e for e in all_events if getattr(e, "source", "CD") != "GAMEYA"]
         circle_events = [e for e in all_events if getattr(e, "source", "CD") == "GAMEYA"]
+        # A payment whose money already moved early (salary 12 days before payday) is in free cash: counting
+        # it as upcoming too would add it twice (7K).
+        early = {(e["item"].id, e["payment"].due_date) for e in self.planning.early_payments(day)}
         upcoming = [p for p in self.planning.all_payments(horizon_end, day)
-                    if p.outstanding and p.due_date > fmt_date(day)]
+                    if p.outstanding and p.due_date > fmt_date(day) and (p.item.id, p.due_date) not in early]
         # Payments already due: bills are in free cash already (Bills due); income not yet received
         # is still expected this month.
         due = [p for p in self.planning.all_payments(day, day) if p.outstanding and p.due_date <= fmt_date(day)]

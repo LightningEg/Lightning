@@ -1,6 +1,6 @@
 ---
 title: Planning, import and search
-done:
+done: 7K
 ---
 
 **Goal.** Getting a month in takes minutes: any bank file, any old app, one search box.

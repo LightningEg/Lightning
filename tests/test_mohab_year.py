@@ -458,6 +458,7 @@ def _live_the_year(o: Mohab) -> None:
     o.enter("CIB Payroll", "2026-12-24", "ACME Egypt", "Salary", "45,000", notes="January salary, paid early")
     o.ask("work", "Did ACME pay back my work Uber?", "Spending")
     o.ask("bonus", "Where did my bonus go?")
+    o.ask("early_salary", "January's salary came on the 24th. Does Needs you notice and offer to link it?")
 
     # ============================================================== January: no pay arrives; a yearly bill
     o.on("2027-01-31")
@@ -914,7 +915,7 @@ def test_investments_lead_with_the_periods_result(mohab):
 
 def test_data_checks_pass_after_setup(mohab):
     assert route(mohab, "checks") == ["/", "/settings", "/checks"]
-    assert mohab.answers["checks"].shows("Passed 8 Needs attention 0")
+    assert mohab.answers["checks"].shows("Passed 9 Needs attention 0")
 
 
 def test_adding_an_investment_confirms_it_by_name(mohab):
@@ -1006,6 +1007,10 @@ def test_average_monthly_income_ignores_the_bonus_and_counts_early_pay_when_due(
 def test_an_early_payday_is_suggested_and_settles_once_confirmed(mohab):
     assert re.search(r"ACME Egypt Income [^+]* 1 due", mohab.answers["january_pay"].screen.text)
     assert not re.search(r"ACME Egypt Income [^+]* \d+ due", mohab.answers["january_pay_after"].screen.text)
+
+
+def test_salary_paid_early_is_offered_for_linking_not_counted_twice(mohab):  # 7K
+    assert mohab.answers["early_salary"].shows("ACME Egypt arrived early")
 
 
 def test_a_yearly_bill_is_spread_over_the_months_left(mohab):
@@ -1200,7 +1205,7 @@ def test_the_years_investments(mohab):
 
 
 def test_data_checks_pass_after_a_year(mohab):
-    assert mohab.answers["year_checks"].shows("Passed 8 Needs attention 0")
+    assert mohab.answers["year_checks"].shows("Passed 9 Needs attention 0")
 
 
 def test_cash_ownership_and_external_expense_keep_the_account_total(mohab):

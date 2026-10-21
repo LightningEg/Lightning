@@ -481,7 +481,7 @@ async def pay_form(request: Request, item_id: int, error: str = ""):
     payment = next((p for p in c.planning.payments(item, due or fmt_date(today()), today()) if p.due_date == due), None)
     if not payment:
         return redirect("/plan", "That payment is not on the schedule.")
-    exact = c.planning.candidates(payment)
+    exact = c.planning.candidates(payment, any_account=True)  # a person reviews: any cash account counts
     others = c.planning.plausible_candidates(payment)
     linked = c.planning.linked_transaction_ids()
     currency = c.accounts.get(item.account_id).currency if item.account_id else c.transactions.base_currency

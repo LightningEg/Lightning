@@ -13,6 +13,17 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 - 2026-10-21 · Claude: 3R: phone sheets show only their form (no undo pill or section tabs); Save without a category says so on the visible field
   and a counterparty fills its learned category; the raise offer is a Budget card that stays; the tab bar hides for the keyboard and sheets.
+- 2026-10-21 · Claude: bill matching you can trust (7K). Review of a payment searches every cash account, not only the item's; last month's payment is no longer
+  offered for this month; salary or a bill paid early is not counted twice in the forecast and Needs you offers Link (`PlanningService.early_payments`).
+
+- 2026-10-21 · Claude: demo and sample stop showing false alarms (3V, 7L1). The demo certificate pays what its 22% says, on its payout day, so Match all clears
+  its item; the demo adds an untracked gym for Looks recurring; `--sample` opens on 2026-10-02 (no late bill); "Your income went up" ignores yearly, quarterly and Bonus income.
+
+- 2026-10-21 · Claude: 3U1–3U4: in Arabic a "·" beside a number becomes "،" (it read as a zero); one decimal "٫" and "%" everywhere, including
+  figures in brackets or before a comma; the undo button and six more strings are translated. Test: `tests/test_arabic_separators.py`.
+- 2026-10-21 · Claude: 5H: the Investments reconciliation moves into `investments/report.py::reconcile_portfolio` and counts the exchange-rate revaluation
+  of dollar brokerage cash on its own, so Mohab's sample (YTD) no longer shows an unresolved +1,394.
+- 2026-10-21 · Claude: 2E1–2E5: a split respects the account's decimals; money in or out is refused on a gold account (and not offered); an entry that takes a wallet or bank below zero is refused, with a data check; an unknown owner and a zero planner amount say so instead of a 500.
 - 2026-10-21 · Claude: Audit 1, demo readiness (`reports/audit-1.md`): engine, smart logic, PC guideline, phone and Arabic. The math holds; found
   input-check gaps, bill-matching trust bugs, hidden suggestions, phone sheet bugs and an Arabic "·" that reads as zero. Filed 2E, 2F, 3R–3V, 5J, 5K,
   7K–7M; 5H's cause found; demo cut list first in `NOW.md`.

@@ -1,6 +1,6 @@
 ---
 title: Investments
-done:
+done: 5H
 ---
 
 **Goal.** Every investment figure can be explained per purchase, and agrees with the ledger.

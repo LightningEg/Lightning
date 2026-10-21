@@ -64,6 +64,18 @@ def payment_dates(item: PlannedItem, until: str | date) -> list[tuple[int, str]]
     return [(number, due) for number, _, due in scheduled_dates(item, until)]
 
 
+def previous_due(item: PlannedItem, due: str) -> str | None:
+    """The date one period before ``due``, even before the item's first payment (None for a one-off).
+
+    A payment dated nearer this than ``due`` belongs to the earlier period (7K)."""
+    day = date.fromisoformat(due)
+    if item.frequency == Frequency.ONCE:
+        return None
+    if item.frequency == Frequency.WEEKLY:
+        return (day - timedelta(weeks=item.interval_count)).isoformat()
+    return _add_months(day, -_MONTH_STEP[item.frequency] * item.interval_count).isoformat()
+
+
 def last_payment_date(item: PlannedItem) -> str | None:
     """The final payment date when the schedule has a fixed end, else None."""
     if item.payment_count is None and not item.end_date:
