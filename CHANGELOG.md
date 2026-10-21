@@ -11,6 +11,12 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Codex: Release validation translates bundled price-file origins and source-cited help explicitly in Arabic, with a regression check that includes a bundled price file.
+  The purchase browser check waits for the saved loan row, since closing a phone sheet can leave its URL unchanged while saving.
+
+- 2026-10-21 · Codex: 3AB Budget YTD and All time count full saved monthly plans, excluding months before the plan; headlines and group rows agree, while Custom keeps prorated comparisons.
+  Mohab's October plan is 38,428, spent 3,410, left 35,018. The pace label clears its line and actual marker; English and Arabic Budget screens recaptured for the website.
+
 - 2026-10-21 · Codex: 3X batches account cash, custody and gold metadata; bill matching writes only when a payment can settle, preserving the request cache.
   Sample Overview: 766 → 364 queries (109 → 119 ms); Cash planning: 541 → 207 (71 → 62 ms). Financial outputs remain identical; tab query budgets tightened.
 

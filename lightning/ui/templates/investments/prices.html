@@ -14,10 +14,10 @@
   {% if market %}
   <table class="budget">
     <thead><tr><th>{{ 'Market'|tr(locale) }}</th><th class="num">{{ 'Prices'|tr(locale) }}</th><th>{{ 'Up to'|tr(locale) }}</th><th>{{ 'File'|tr(locale) }}</th></tr></thead>
-    {% for m in market %}<tr><td data-label="{{ 'Market'|tr(locale) }}">{{ m.name }}</td>{% if m.have %}<td class="num" data-label="{{ 'Prices'|tr(locale) }}">{{ m.have.instruments }}</td><td data-label="{{ 'Up to'|tr(locale) }}">{{ m.have.last_date }}</td><td class="muted small" data-label="{{ 'File'|tr(locale) }}">{{ m.have.created_at }}, {{ m.have.origin }}</td>{% else %}<td class="num muted" data-label="{{ 'Prices'|tr(locale) }}">—</td><td colspan="2" class="muted" data-label="{{ 'Up to'|tr(locale) }}">{{ 'Not downloaded yet'|tr(locale) }}</td>{% endif %}</tr>{% endfor %}
+    {% for m in market %}<tr><td data-label="{{ 'Market'|tr(locale) }}">{{ m.name }}</td>{% if m.have %}<td class="num" data-label="{{ 'Prices'|tr(locale) }}">{{ m.have.instruments }}</td><td data-label="{{ 'Up to'|tr(locale) }}">{{ m.have.last_date }}</td><td class="muted small" data-label="{{ 'File'|tr(locale) }}">{{ m.have.created_at }}, {{ m.have.origin|tr(locale) }}</td>{% else %}<td class="num muted" data-label="{{ 'Prices'|tr(locale) }}">—</td><td colspan="2" class="muted" data-label="{{ 'Up to'|tr(locale) }}">{{ 'Not downloaded yet'|tr(locale) }}</td>{% endif %}</tr>{% endfor %}
   </table>
   {% set cited = market | selectattr('have') | selectattr('source') | map(attribute='source') | unique | list %}
-  <p class="muted small">Lightning collects prices every day as a backup. If a source fails for you, download them and fill each investment's month-end and latest prices from them.{% if cited %} Source: {{ cited | join('; ') }}.{% endif %} <a href="/investments/prices/markets">{{ 'Choose markets'|tr(locale) }}</a></p>
+  <p class="muted small">{{ "Lightning collects prices every day as a backup. If a source fails for you, download them and fill each investment's month-end and latest prices from them."|tr(locale) }}{% if cited %} {{ 'Source'|tr(locale) }}: {{ cited | map('tr', locale) | join('; ') }}.{% endif %} <a href="/investments/prices/markets">{{ 'Choose markets'|tr(locale) }}</a></p>
   {% else %}
   <p class="muted">{{ 'You follow no markets.'|tr(locale) }} <a href="/investments/prices/markets">{{ 'Choose markets'|tr(locale) }}</a> {{ 'to use the shared price files.'|tr(locale) }}</p>
   {% endif %}

@@ -469,10 +469,15 @@ def pace(by_day: list[Decimal], plan: Decimal, days: int, last_month: list[Decim
     # The plan's and last month's end labels stand at the right edge: when the two totals are close, they part.
     plan_label, before_label = spread_labels([y(plan), y(last_month[-1]) if last_month else None], PACE_PLOT_PX,
                                              gap=PACE_LABEL_GAP)
+    pace_y = y(allowed)
+    pace_label_y = pace_y - PACE_LABEL_GAP / PACE_PLOT_PX * 100
+    if by_day and abs(pace_label_y - y(by_day[-1])) < PACE_LABEL_GAP / PACE_PLOT_PX * 100:
+        pace_label_y = y(by_day[-1]) - PACE_LABEL_GAP / PACE_PLOT_PX * 100
     return {"actual": line(by_day) if by_day else "", "before": line(last_month) if last_month else "",
             "plan": {"x": 100.0, "y": y(plan), "value": plan, "label_y": plan_label},
             "today": {"x": x(now), "value": by_day[-1] if by_day else ZERO, "y": y(by_day[-1]) if by_day else 100.0,
-                      "day": now, "pace": allowed, "pace_y": y(allowed),
+                      "day": now, "pace": allowed, "pace_y": pace_y,
+                      "pace_label_offset": (pace_label_y - pace_y) / 100 * PACE_PLOT_PX,
                       "before": last_month[min(now, len(last_month)) - 1] if last_month and now else None,
                       "before_y": y(last_month[min(now, len(last_month)) - 1]) if last_month and now else None} if now else None,
             "before_total": last_month[-1] if last_month else None,

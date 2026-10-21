@@ -1,5 +1,18 @@
 
 
+def test_pace_label_clears_its_line_and_actual_mark_without_moving_the_mark():
+    from decimal import Decimal as D
+    from lightning.ui.charts import PACE_LABEL_GAP, PACE_PLOT_PX, pace
+
+    chart = pace([D(1000), D(2200), D(3410), D(3410)], D(19971), 31)
+    today = chart["today"]
+    assert today["value"] == D(3410)
+    assert today["pace"] == D(19971) * 4 / 31
+    label_y = today["pace_y"] + today["pace_label_offset"] / PACE_PLOT_PX * 100
+    assert today["pace_label_offset"] <= -PACE_LABEL_GAP
+    assert abs(label_y - today["y"]) / 100 * PACE_PLOT_PX >= PACE_LABEL_GAP - 0.01
+
+
 def test_each_trend_dot_knows_its_change_from_the_previous_point():
     from decimal import Decimal as D
     from lightning.ui.charts import trend

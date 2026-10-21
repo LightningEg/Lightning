@@ -12,7 +12,7 @@
         <td><b>{{ r.name }}</b>{% if r.held %} <span class="stat-chip">{{ "You hold something here"|tr(locale) }}</span>{% endif %}<div class="muted small">{{ r.covers }}{% if r.source %} · Source: {{ r.source }}{% endif %}</div></td>
         <td class="small">{{ r.venues or '—' }}</td>
         <td class="num small">{% if r.bytes and r.bytes >= 1000000 %}{{ (r.bytes / 1000000) | round(1) }} MB{% elif r.bytes %}{{ (r.bytes / 1000) | round(0, 'ceil') | int }} KB{% else %}<span class="muted">—</span>{% endif %}</td>
-        <td class="small">{% if r.have %}{{ r.have.instruments }} price{{ '' if r.have.instruments == 1 else 's' }} to {{ r.have.last_date }}<div class="muted">File of {{ r.have.created_at }}, {{ r.have.origin }}</div>{% else %}<span class="muted">{{ "Not downloaded"|tr(locale) }}</span>{% endif %}</td>
+        <td class="small">{% if r.have %}{{ r.have.instruments }} price{{ '' if r.have.instruments == 1 else 's' }} to {{ r.have.last_date }}<div class="muted">File of {{ r.have.created_at }}, {{ r.have.origin|tr(locale) }}</div>{% else %}<span class="muted">{{ "Not downloaded"|tr(locale) }}</span>{% endif %}</td>
       </tr>{% endfor %}</tbody>
   </table>
   <p class="muted small">{{ "Each market is its own file, refreshed after that market closes. After the first download, an update brings only what changed, about 1 MB a month for each. Unfollowing a market removes its file from this computer; prices already filled stay."|tr(locale) }}</p>

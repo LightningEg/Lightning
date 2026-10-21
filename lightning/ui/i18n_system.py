@@ -512,6 +512,7 @@ SENTENCES = {
     "Keep today's plan and raise your savings target to {x}": "خلّي خطة النهارده وارفع هدف ادخارك لـ {x}",
     "Leave fees at 0 when there were none.": "سيب الرسوم 0 لو ما كانش فيه رسوم.",
     "Lightning collects prices every day as a backup. If a source fails for you, download them and fill each investment's month-end and latest prices from them.": "Lightning بيجمع الأسعار كل يوم كنسخة احتياطية. لو مصدر وقف معاك، نزّلها واملا أسعار آخر الشهر وآخر سعر لكل استثمار منها.",
+    "came with Lightning": "جت مع لايتنينج",
     "Lowest point ahead": "أقل نقطة جاية",
     "Money and units in your accounts that belong to other people. It is left out of {label}.": "فلوس ووحدات في حساباتك بتخص ناس تانية. مش بتتحسب في {label}.",
     "Money held for others is taken out of what you own.": "الفلوس المحفوظة لغيرك بتتشال من اللي تملكه.",

@@ -250,7 +250,7 @@ Budget limits are monthly spending constraints. Reserves assign already-owned ca
 - **Actuals** come from posted owned ledger expenses; expense-category refunds reduce their original category. Custody, transfers, investment purchases and revaluations are excluded.
 - **Base rules:** fixed EGP, a percentage of budgeting income, or a 3/6-completed-month spending average (divided by distinct months with qualifying activity; none = unavailable, never zero, never beyond the window). The income basis is the selected owned income categories or a manual monthly amount.
 - **A parent limit is a ceiling** for its branch; child amounts are allocations, never added to the cap.
-- **Over a longer period** Planned and Spent cover the same months (spending counts from the first month with a plan). YTD, All time and Custom aggregate monthly base plans and actuals and include range-opening carryover once; partial-month comparisons are prorated estimates.
+- **Over a longer period** Planned includes only months with a saved plan, and Spent starts at the first planned month. YTD and All time use each saved month's full limit, matching Monthly; Custom retains prorated estimates for a partial current month. Each view includes range-opening carryover once, and its headline and group rows use the same plans and estimates.
 - **Carryover** is opt-in, default off, effective from a selected month. It is derived spending room, never cash or a liability:
 
 ```text
