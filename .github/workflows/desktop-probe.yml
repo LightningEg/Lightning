@@ -9,7 +9,7 @@
 # - The ZIP that is uploaded is the ZIP that was tested: it is extracted to a fresh folder and its
 #   own Lightning.exe must pass the self-check and the real WebView2 window check.
 # - A tag vX.Y.Z[-beta.N] that matches the source version and sits on main publishes the tested ZIP
-#   and matching signed APK as a new, never-replaced release in elfekimuhammed/Lightning-downloads.
+#   and matching signed APK as a new, never-replaced release in LightningEg/Lightning-downloads.
 #   How to release: docs/ARCHITECTURE.md › Desktop app and encrypted profiles › Build and release.
 # - The daily run also builds and checks the phone app (no key, nothing offered) when its files changed.
 # - A manual run on main makes the matched test builds: the Windows ZIP and the phone APK (Lightning Test)
@@ -37,7 +37,7 @@ concurrency:
 
 env:
   PYTHONUTF8: '1'
-  DOWNLOADS_REPO: elfekimuhammed/Lightning-downloads
+  DOWNLOADS_REPO: LightningEg/Lightning-downloads
 
 jobs:
   tests:

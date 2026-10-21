@@ -17,3 +17,8 @@ The v1.4.0 tag passed Linux, Windows and unsigned Android build checks, but its 
 `codex/android-signing-reset` pinned the owner's new public fingerprint in `packaging/android-test-certificate.sha256`. `codex/android-environment-secret-mapping` prepares v1.4.2 with four explicit caller mappings and required called-workflow declarations. The Gradle job still does not reference secrets; no broad inheritance is used. v1.4.0 and v1.4.1 tags stay unchanged. The key and password stay with the owner; the four values must be installed in the `android-signing` environment. Publishing needs `LIGHTNING_DOWNLOADS_TOKEN` in `production-release`.
 
 Finish only after signing verifies the new pin and both matched files are published. Existing Lightning Test installations need an independent backup before uninstalling and reinstalling; they cannot update in place across certificates. See Architecture › Build and release.
+
+## Publishing recovery
+All v1.4.2 builds, signing and paired checksum checks passed. The owner fixed the publishing token; the next attempt created unpublished draft 420035084, then upload failed with HTTP 307 because the workflow still addressed the transferred repository as elfekimuhammed/Lightning-downloads.
+
+`codex/publish-existing-release-artifacts` adds a publishing-only recovery using source run 39669412565 and the fixed Windows/signed phone artifact IDs and digests. It uses LightningEg/Lightning-downloads, retains v1.4.2, and requests only the production-release approval. No application build or signing is repeated.

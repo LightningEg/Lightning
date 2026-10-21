@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Codex: 2D adds a publishing-only recovery for the verified v1.4.2 artifacts and uses LightningEg/Lightning-downloads after the repository transfer.
+  Fixed artifact IDs, digests, successful jobs and the pinned source/certificate are checked before the protected publisher uploads and reads back the same files; no rebuild or re-signing.
+
 - 2026-10-21 · Codex: Prepare v1.4.2 as the matched Windows and Android release, followed by the website download and archive refresh.
 
 ## [1.4.2] — 2026-10-21
