@@ -20,3 +20,16 @@ of 400, Holdings 310 instead of 290. Not repeats (the request cache holds): each
 ## Fix
 Read those figures for all accounts in one query per date (or per range), as the register already does for owners. Keep every
 output identical (the test compares the cached and uncached pages), then lower the budgets again.
+
+## Investigation
+Claude, [Audit 3](../../reports/audit-3.md) §1, perf-check.
+
+**Call chains.**
+- `dashboard` → `visuals.net_worth_trend` (10–12 month ends) → `PositionService._at` → `class_values`/`owned_holdings` → `cash_total_for_account`: 2 SQL per cash holding (`planning/position.py:218`).
+- `_at` → `reporting.owned_brokerage_cash` → `_owned_brokerage_cash_by_account`: 3 SQL per brokerage per date (`reporting/service.py:340`).
+- Cash planning comes the same way through `visuals.cash_plan` (5 month ends, only for `free_cash`), `forecast.free_cash` and `zakat.assess`.
+- The per-account loop is copied in `dated_cash.py:99`, `funding.py:64`, `foreign_currency_accounts` and `_balance_and_owned`.
+
+**Batching.** `MoneyFromOthersService.totals_by_account(day)` already exists. Request-cache it, and add `ReportingService.owned_cash_by_account(day)`: one cash `GROUP BY account_id` plus those totals. Point all six callers at it. A `free_cash_at(day)` (like `portfolio_value_at`) also saves the holdings-by-class reads in `cash_plan`.
+
+**Measured.** A monkeypatched prototype, on top of 3Y's fix, with identical HTML: Overview 445 → 353, Cash planning 263 → 199, Financial health 233 → 176. Do 3Y first.

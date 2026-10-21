@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Claude: Audit 3 backend engine (`reports/audit-3.md`): one empty write per page read costs 37–47% of reads; custody
+  lines, undo grouping and two formulas for one figure are wrong. Filed 2G–2K, 3Y, 7N, 7O, 9I–9L; 3X gained its call chains.
 - 2026-10-21 · Claude: For Geeks home greets with `$ welcome to lightning`, typed once with the caret, while the hero fades up;
   guideline D07 `.hello` and D08 (both repos). Reduced motion shows it still.
 - 2026-10-21 · Claude: 8D For Geeks audit: recounted stats (`tools/geeks_stats.py`), keys.py proof, steady Ink hero word, quiet terminal replay, balanced
