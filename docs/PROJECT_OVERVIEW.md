@@ -61,7 +61,8 @@ Dates are when the owner decided. Undated rows are founding rules.
 | **Holdings value = Portfolio value** (2026-10-04) | Everything owned that is not cash, deposits included, on every tab and chart. |
 | **Every release stays downloadable** (2026-10-03) | Keep at least the three latest, each with its own immutable download and site entry. Never replace or remove an older one without the owner. |
 | **Free 7 days, then a reminder, never a lock** (2026-10-04) | Full app from minute one, no card or account. After 7 days it asks for a licence and never blocks or hides data. Price not set. |
-| **The website never mentions other apps** (2026-10-05) | No comparison or "vs" pages (guideline B10, B11). |
+| **The website never mentions other apps** (2026-10-05; again 2026-10-21) | No comparison or "vs" pages or tables, not even against a spreadsheet (guideline B10, B11). |
+| **Testing tab for testers only** (2026-10-21, left to Claude) | On lightningeg.com the Testing tab shows after `?testing`; the consent bar is a slim bottom strip. |
 | **Found as the all-in-one tracker** (2026-10-20) | The website answers "net worth, budget and expense tracker" with one page, English and Arabic, where every figure is Mohab's and no other app is named. Evidence and follow-up: [Competition](COMPETITION.md), issue 8C. |
 | **Each app fetches its own prices** (2026-10-05) | At least at each month-end, plus Update prices any time. The daily collector keeps shared price files as a backup; a typed price always wins. |
 | **Prices published only where allowed, always cited** (2026-10-05; FX source 2026-10-07) | FX pack: Banque Misr's dated transfer midpoint, labelled a bank rate, not CBE (CBE rejects the collector). Stock and fund prices from TradingView, Yahoo or Mubasher are for source checks only, never published or shipped, until a licence or permission covers them. |
