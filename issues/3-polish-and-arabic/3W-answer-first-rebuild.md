@@ -35,6 +35,15 @@ so the name is right).
 
 ## Steps
 
+Built 2026-10-21: 3W1, 3W2 (order, Lead, Needs you, status; Safe to spend replaces the change card, which became the Lead's
+comparison), 3W3 (Spending by group stays: it is where the plan is edited; Plan leaves to save stays a KPI beside Everyday
+spending), 3W4 (the dot timeline went). Left in 3W2: the Overview's KPI row is still the older stat tiles (A08 five slots
+needs a usual savings rate from a service), and the flow diagrams and Month by month still sit on Overview.
+Built 2026-10-21 (second step): 3W5 (Lead, allocation beside it, waffle and Biggest holdings gone, By currency only when
+something is not in EGP; left: the holdings table to five columns), 3W6, 3W7. 3W8 built the same day for the phone's five sections (status sentence, seam, mark bullet, Accounts Lead, no Biggest holdings).
+Left: the Overview's KPI row to A08 cards, the flow diagrams and Month by month to Spending, the holdings table to five
+columns, an owner check on PC and phone, and site-recapture once merged.
+
 ### 3W1 Shared parts
 
 `page_header` gains the status sentence and the seam; a `lead_card` macro (figure, comparison, working rows or chart, the

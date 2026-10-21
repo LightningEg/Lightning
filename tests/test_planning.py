@@ -196,10 +196,10 @@ def test_overview_lists_due_bills_under_needs_you(c, setup, monkeypatch):
     c.planning.create(kind="LOAN", name="Car loan", amount="2500", frequency="MONTHLY", start_date="2026-09-05",
                       payment_count="3")
     page = TestClient(create_app(c), base_url="http://127.0.0.1").get("/").text
-    start = page.index('<details class="card needs-you"')
-    attention = page[start:page.index("</details>", start)]  # a closed list at the very top
-    assert page.index("needs-you") < page.index('class="stat-tiles"')
-    assert "+1 more" in attention  # the closed summary previews the first item and counts the rest
+    start = page.index('<section class="needs"')
+    attention = page[start:page.index("</section>", start)]  # rows under the Lead (guideline 3.33, A09)
+    assert page.index("lead-card") < start < page.index('class="stat-tiles"')
+    assert "Needs you" in attention and "<span>· 2</span>" in attention  # the count is every item
     # Feedback ticket 84: both are payments, so they are one row that opens their own page.
     assert "Bills and payments · 2" in attention and "Loan payment due: Car loan, Bill due: Electricity" in attention
     group = TestClient(create_app(c), base_url="http://127.0.0.1").get("/needs-you/payments").text

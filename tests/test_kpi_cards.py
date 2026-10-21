@@ -55,6 +55,11 @@ def _text(html: str) -> str:
     return unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html)))
 
 
+def _lead(html: str) -> str:
+    """The page's Lead (guideline 3.33, A07): the card that answers it, first on the page."""
+    return _text(html.split('class="card lead-card lead-hero"', 1)[1].split('>', 1)[1].split('<div class="lead-side">', 1)[0])
+
+
 def _cards(html: str) -> list[str]:
     row = html.split('class="kpi-row', 1)[1].split("</section>", 1)[0]
     return [_text(card) for card in re.split(r'<article class="kpi-card[^"]*">', row)[1:]]
@@ -79,8 +84,9 @@ def test_the_budget_opens_with_cards_that_compare(mohab, monkeypatch):
     cards = _cards(html)
     assert 2 <= len(cards) <= 4
     e = c.forecaster.everyday("2026-10", date(2026, 10, 19))
-    left, everyday = cards[0], cards[1]
-    assert left.startswith(" Left in plan 13 days left") and f"{e.everyday_left:,.0f} for everyday, about {e.per_day:,.0f} a day" in left
+    left, everyday = _lead(html), cards[0]
+    assert html.index("lead-hero") < html.index('class="kpi-row')  # the answer first (A09)
+    assert left.strip().startswith("Left in plan 13 days left") and f"{e.everyday_left:,.0f} for everyday, about {e.per_day:,.0f} a day" in left
     assert f"Spent {e.spent:,.0f} of {e.planned:,.0f} planned" in left
     assert "Everyday spending by day 19" in everyday and "the plan's pace" in everyday
     assert "Is everyday spending on pace?" in _text(html) and "Bills in this month's plan" in _text(html)
@@ -90,8 +96,10 @@ def test_the_budget_opens_with_cards_that_compare(mohab, monkeypatch):
 def test_cash_plannings_free_cash_compares_with_the_last_month_end(mohab, monkeypatch):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-19")
     c, client = mohab
-    cards = _cards(client.get("/plan").text)
-    assert [card.split(" ")[1] for card in cards] == ["Safe", "Free", "Due", "Lowest"]
+    html = client.get("/plan").text
+    assert _lead(html).strip().startswith("Safe to spend")  # the page's Lead (guideline 3.33, A09)
+    cards = [""] + _cards(html)
+    assert [card.split(" ")[1] for card in cards[1:]] == ["Free", "Due", "Lowest"]
     then = c.position.at(date(2026, 9, 30)).free_cash
     now = c.forecaster.forecast(date(2026, 10, 19)).free_cash
     assert f"+{now - then:,.0f} since 2026-09-30" in cards[1]

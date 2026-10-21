@@ -9,7 +9,7 @@ from lightning.core.figures import FIGURES
 from lightning.core.errors import ValidationError
 from lightning.planning.emergency_context import emergency_liquidity_context
 
-from .. import charts
+from .. import charts, kpis, status as page_status
 from ..web import container, render
 
 router = APIRouter()
@@ -122,12 +122,24 @@ async def financial_health(request: Request):
     judged = [item for item in overview["figures"] if item.status in ("within your limit", "outside your limit")]
     savings_values = [month.savings_rate for month in trends]
     worth_values = [month.net_worth for month in trends]
-    return render(request, "financial_health.html", **overview,
+    # Answer first (guideline 3.33): the count within your limits is the Lead, the savings rate over time beside it;
+    # each figure outside its limit is a Needs you row; the list below is the one home of every figure.
+    within = sum(1 for item in judged if item.status == "within your limit")
+    outside = [item for item in judged if item.band == "alert"]  # Watch stays quiet (A08)
+    lead = (kpis.card("Within your limits", Decimal(within), kpis.compare(f"of the {len(judged)} figures you set a limit for"),
+                      tone="in" if not outside else "over", kind="count", key="within",
+                      line_=kpis.line(f"{len(outside)} need{'s' if len(outside) == 1 else ''} you" if outside else "All of them are good"))
+            if judged else None)
+    needs = [{"label": f"{labels.get(item.key, item.key)} is outside your limit",
+              "detail": " · ".join(x for x in (_limit_words(item), item.period) if x), "href": item.href,
+              "action": "See details"} for item in outside]
+    status = page_status.health(within, len(judged), [labels.get(item.key, item.key) for item in outside])
+    return render(request, "financial_health.html", **overview, lead=lead, needs=needs, status=status,
                   liquidity_context=liquidity_context,
                   limits=c.health.limit_settings(),
                   kpis=[_kpi(by_key[k], labels[k]) for k in KPI_KEYS if k in by_key],
                   groups=rows, labels=labels,
-                  within=sum(1 for item in judged if item.status == "within your limit"), judged=len(judged),
+                  within=within, judged=len(judged),
                   savings_summary=_trend_summary(trends, "savings_rate"),
                   worth_summary=_trend_summary(trends, "net_worth"),
                   as_of_iso=as_of.isoformat(),

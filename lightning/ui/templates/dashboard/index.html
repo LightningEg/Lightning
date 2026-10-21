@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Overview{% endblock %}
-{% block heading %}<div><h1>{{ 'Overview'|tr(locale) }}</h1></div>{% endblock %}
+{% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Overview'|tr(locale), status, date_from ~ ' to ' ~ date_to, dates_note) }}{% endblock %}
 {% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/", period.key, month, this_month, request.query_params.get("date_from", "") if period_error and period.key == "custom" else period.start_text, request.query_params.get("date_to", "") if period_error and period.key == "custom" else period.end_text) }}{% endblock %}
 {% block content %}
-{% from "partials/charts.html" import stat_tiles, donut, trend, waterfall, column_waterfall, sankey, day_calendar, month_calendar as month_cal %}
+{% from "partials/charts.html" import stat_tiles, donut, trend, waterfall, column_waterfall, sankey, day_calendar, saved_split, month_calendar as month_cal %}
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
 {% if setup %}{% set done = setup|selectattr("done")|list|length %}
 <section class="card setup-card" aria-labelledby="setup-heading">
@@ -12,26 +12,18 @@
 <form method="post" action="/setup/guide"><input type="hidden" name="action" value="dismiss"><button class="btn small">{{ "Done with setup"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 </section>
 {% endif %}
-{% if attention %}
-<details class="card needs-you" aria-labelledby="needs-heading">
-  {% set first_attention = attention_groups[0]["items"][0] %}
-  <summary><span class="needs-you-dot" aria-hidden="true"></span><b id="needs-heading">{{ "Needs you"|tr(locale) }}</b><span class="needs-you-count">{{ attention|length }}</span><span class="needs-you-preview"><b>{{ first_attention.label }}</b><small>{{ first_attention.detail }}</small></span>{% if attention|length > 1 %}<span class="needs-you-more">+{{ attention|length - 1 }} more</span>{% endif %}</summary>
-  {# Feedback ticket 84: one row per kind of decision; a kind with several opens its own page. #}
-  <div class="overview-inline-list">{% for g in attention_groups %}<a class="overview-action-row" href="{{ g.href }}"{% if g.popup %} data-popup-open{% endif %}><span><b>{% if g.count > 1 %}{{ g.label|tr(locale) }} · {{ g.count }}{% else %}{{ g.label }}{% endif %}</b><small>{{ g.detail }}</small></span><span>{% if g.late_days %}<span class="plan-status plan-status-late">{{ ("Late · 1 day" if g.late_days == 1 else "Late · {n} days")|tr(locale, n=g.late_days) }}</span> {% endif %}{{ g.action }}</span></a>{% endfor %}</div>
-</details>
-{% else %}<div class="card needs-you is-empty"><span class="needs-you-dot" aria-hidden="true"></span><b>{{ "Nothing needs you today"|tr(locale) }}</b></div>{% endif %}
-<p class="actions"><a class="quiet-link" href="/review">{{ 'Weekly review'|tr(locale) }}</a></p>
-{{ stat_tiles(stats, base) }}
 {% set period_query = request.url.query %}
+{% from "partials/macros.html" import needs_rows %}
 <div class="overview-stack">
-  <section class="overview-section" aria-labelledby="position-heading">
-    <header class="overview-section-head"><h2 id="position-heading">{{ 'Your position'|tr(locale) }}</h2><span>As of {{ position_as_of }}</span></header>
-    <article class="overview-block wide-card overview-wealth-card" aria-labelledby="owned-heading">
+  <div class="overview-answer">
+  <section class="overview-section overview-lead" aria-label="{{ 'Your position'|tr(locale) }}">
+    <article class="overview-block wide-card overview-wealth-card lead-card" aria-labelledby="owned-heading">
       {% set owes = pos.what_you_owe > 0 %}{% set lead = 'net_worth' if owes else 'what_you_own' %}
       <div class="overview-split">
         <section>
           <div class="overview-block-head"><div><h3 id="owned-heading">{{ fig[lead].label }}</h3><p>{{ "Excludes money held for others"|tr(locale) }}</p></div></div>
           <div class="overview-headline">{{ (pos.net_worth if owes else pos.what_you_own)|money }} <small>{{ base }}</small>{% if pos.unvalued %}<span>{{ "Known subtotal"|tr(locale) }}</span>{% endif %}</div>
+          {% if lead_change %}<p class="lead-compare"><b class="is-{{ lead_change.tone }}">{{ lead_change.figure }}</b> {{ lead_change.text|tr(locale) }}</p>{% endif %}
           {% if pos.unvalued %}<p class="notice">{{ pos.unvalued|length }} asset valuation(s) are missing from this total.</p>{% endif %}
           <div class="overview-inline-list" aria-label="{{ fig.what_you_own.label }}">
             {% if owes %}<div class="overview-static-row overview-subtotal"><span>{{ fig.what_you_own.label }}</span><b>{{ pos.what_you_own|money }}</b></div>{% endif %}
@@ -48,6 +40,12 @@
         </section>
       </div>
     </article>
+  </section>
+  {{ needs_rows(attention_groups, attention|length, more=('Weekly review'|tr(locale), '/review')) }}
+  {{ stat_tiles(stats, base) }}
+  </div>
+  <section class="overview-section" aria-labelledby="position-heading">
+    <header class="overview-section-head"><h2 id="position-heading">{{ 'Your position'|tr(locale) }}</h2><span>As of {{ position_as_of }}</span></header>
     <article class="overview-block wide-card overview-cash-card" aria-labelledby="cash-heading">
       <div class="overview-split">
         <section>
@@ -88,6 +86,7 @@
             <span class="flow-bar is-in"><i style="width:{{ '%.1f'|format(cash_flow.inflows / flow_max * 100) }}%"></i></span>
             <span class="flow-bar is-out"><i style="width:{{ '%.1f'|format(cash_flow.outflows / flow_max * 100) }}%"></i></span>
           </div>{% endif %}
+          {% if waffle.bar.state != 'empty' %}<details class="overview-disclosure savings-squares" id="savings-squares"><summary><span>{{ "Savings, square by square"|tr(locale) }}</span><b></b></summary><div class="overview-disclosure-body">{{ saved_split(waffle, period.tag) }}</div></details>{% endif %}
           <div class="overview-inline-list">
             <details class="overview-disclosure"><summary><span>{{ fig.money_in.label }}</span><b>{{ cash_flow.inflows|money }}</b></summary><div class="overview-disclosure-body">{% for r in money_in_rows %}<a href="{{ r.href }}"><span>{{ r.label }}</span><b>{{ r.value|money }}</b></a>{% else %}<p class="muted small">{{ "No money in was recorded in this period."|tr(locale) }}</p>{% endfor %}</div></details>
             <details class="overview-disclosure"><summary><span>{{ fig.money_out.label }}</span><b>{{ ('−' ~ (cash_flow.outflows|money)) if cash_flow.outflows > 0 else cash_flow.outflows|money }}</b></summary><div class="overview-disclosure-body">{% for r in money_out_rows %}<a href="{{ r.href }}"><span>{{ r.label }}</span><b>{{ r.value|money }}</b></a>{% else %}<p class="muted small">{{ "No money out was recorded in this period."|tr(locale) }}</p>{% endfor %}</div></details>

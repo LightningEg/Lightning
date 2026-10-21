@@ -505,7 +505,7 @@ def _live_the_year(o: Mohab) -> None:
     o.prices("2027-04-20", {"Commercial International": "95"})
     o.trade("sell", "2027-04-20", "COMI", units="75", total="7,100", fees="25")
     o.enter("THNDR", "2027-04-21", "CIB Payroll", "", "-7,100")
-    o.ask("sale", "What did I make on the COMI I sold?", "Investments", "Commercial International Bank")
+    o.ask("sale", "What did I make on the COMI I sold?", "Investments", "COMI")
     # The phone installments started this month, on top of the car: the plan still says 2,500 for loans.
     o.ask_needs("loans_planned", "Does my plan cover both loans?", "Budget and saving")
     b.click("Change the plan")
@@ -825,7 +825,7 @@ def test_an_empty_lightning_says_where_to_start(mohab):
 def test_six_accounts_with_their_balances(mohab):
     answer = mohab.answers["accounts"]
     assert route(mohab, "accounts") == ["/", "/accounts"]
-    assert answer.figure("Total balance") == D("141700")
+    assert answer.figure("In your accounts") == D("141700")  # the retired "Total balance" (guideline 3.33 Accounts Lead)
     for name in ("CIB Payroll", "Cash wallet", "Vodafone Cash", "THNDR", "NBE 3-year certificate", "Gold at home"):
         assert answer.shows(name)
 
@@ -897,9 +897,9 @@ def test_september_spending_by_category(mohab):
 def test_the_budget_says_what_is_over(mohab):
     answer = mohab.answers["plan"]
     assert route(mohab, "plan") == ["/", "/budget"]
-    # The Over plan card (guideline 3.32 A08): the total, how many categories, which ones, and a way to cover it.
-    assert answer.shows("Over plan Needs you", "2 categories over their plan")
-    assert answer.shows("Transportation") and answer.shows("Food & Groceries")
+    # Each category over plan is a Needs you row under the Lead (guideline 3.33, A09), the largest with a way to cover it.
+    assert answer.shows("Needs you · 2")
+    assert answer.shows("Transportation is") and answer.shows("Food & Groceries is")
     # Each "80 of 67 · 13 over" adds up as he reads it: plans built from his spending are whole EGP.
     for spent, planned, gap, word in re.findall(r"([\d,]+) of ([\d,]+) ([\d,]+) (over|left)", answer.screen.text):
         spent, planned, gap = (money(x) for x in (spent, planned, gap))
@@ -910,7 +910,7 @@ def test_investments_lead_with_the_periods_result(mohab):
     answer = mohab.answers["investing"]
     assert route(mohab, "investing") == ["/", "/investments"]
     # 5,673 from prices and the dividend, plus the certificate's 1,833 interest paid into CIB
-    assert answer.shows("Net gain or loss 2026-09 +7,506")
+    assert answer.shows("Portfolio value 2026-09") and answer.shows("+7,506 Net gain or loss")  # the Lead's comparison (3.33)
 
 
 def test_data_checks_pass_after_setup(mohab):
@@ -1189,7 +1189,9 @@ def test_the_emergency_fund_in_months_of_spending(mohab):
 def test_the_year_on_the_overview(mohab):
     answer = mohab.answers["year"]
     assert answer.figure("Savings rate 2026-10-01 to 2027-09-30") == D("50.5")
-    assert answer.figure("Change in net worth 2026-10-01 to 2027-09-30") == D("383284")  # dated receipts: 42,000 debt paydown belongs to this year
+    # Answer first (guideline 3.33): the change is the Net worth Lead's comparison, "+383,284 in these dates".
+    assert answer.shows("2026-10-01 to 2027-09-30")
+    assert money(re.search(r'class="lead-compare"><b[^>]*>([^<]+)</b>', answer.screen.html).group(1)) == D("383284")  # dated receipts: 42,000 debt paydown belongs to this year
     assert answer.figure("Loans still to pay") == D("34500")
 
 
@@ -1199,7 +1201,7 @@ def test_the_years_spending(mohab):
 
 def test_the_years_investments(mohab):
     # 1,025 from the sale + 225 price change + 300 dividends + 12 × 1,833.33 of certificate interest
-    assert mohab.answers["year_investing"].shows("Net gain or loss 2026-10-01 to 2027-09-30 +23,550")
+    assert mohab.answers["year_investing"].shows("2026-10-01 to 2027-09-30", "+23,550 Net gain or loss")  # the Lead (3.33)
     # The interest lands on CIB Payroll from NBE, the certificate's bank, and is still the certificate's return.
     assert mohab.answers["flat"].shows("1 certificate Set", "100,000 100,000 100,000 100,000 17.5% +27,500 +27.5% +24.6%")
 
@@ -1476,7 +1478,7 @@ def test_a_figure_reads_the_same_on_every_tab(mohab, period):
                "Investments": _figure(flat(investments), r"Savings.*? ([\d.,−—-]+ ?%?) Savings rate")}
     assert len({v.replace(" ", "").rstrip("%") for v in savings.values() if v}) == 1, savings
     gain = {"Overview": _figure(overview, r"<span>Net gain or loss</span><b[^>]*>([^<]+)</b>"),
-            "Investments": _figure(investments, r'inv-result-tile.*?stat-tile-value[^>]*>([^<]+)<')}
+            "Investments": _figure(investments, r'class="lead-compare"><b[^>]*>([^<]+)</b>')}  # the Lead's comparison (3.33)
     assert len({v.strip() for v in gain.values() if v}) == 1, gain
     # Overview lists each brokerage's cash and Investments totals it, both at the selected period end
     # (Your position follows the period since feedback ticket 80). Sum all of the Overview's account rows.
@@ -1547,9 +1549,8 @@ def test_a_gameya_third_instalment_waits_under_needs_you_once(mohab):
     assert answer.shows("Gam'eya instalment due: Office gam'eya")
     decision = mohab.notes.get("gameya_group", answer.screen)
     assert decision.shows("1 instalment · 2,000 EGP · first due 2027-09-05")
-    needs_you = answer.screen.html.split('aria-labelledby="needs-heading"', 1)[1].split("</details>", 1)[0]
-    grouped_rows = needs_you.split('<div class="overview-inline-list">', 1)[1]
-    assert html.unescape(grouped_rows).count("Gam'eya instalment due") == 1  # the preview also names it; one decision row
+    needs_you = answer.screen.html.split('aria-labelledby="needs-heading"', 1)[1].split("</section>", 1)[0]
+    assert html.unescape(needs_you).count("Gam'eya instalment due") == 1  # one decision row (guideline 3.33, A09)
     assert mohab.notes["gameya_terms"].shows("Gam'eya terms saved", "Nothing was posted")
     assert mohab.notes["gameya_page"].shows("Instalment 3 of 10", "2 of 10")
 

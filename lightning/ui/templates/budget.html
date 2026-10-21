@@ -1,10 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Budget{% endblock %}
 {% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/budget", period.key, month, this_month, period.start_text, period.end_text) }} <a class="btn small" href="/budget/fill?month={{ month }}">{{ "Fill this month"|tr(locale) }}</a>{% endblock %}
-{% block heading %}<div class="budget-heading"><div><h1>{{ 'Budget'|tr(locale) }}</h1><div class="muted">{{ 'Your spending plan'|tr(locale) }}</div></div></div>{% endblock %}
+{% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Budget'|tr(locale), status, period.start_text ~ ' to ' ~ period.end_text, 'so far' if everyday and everyday.current else '') }}{% endblock %}
 {% block content %}
-{% from "partials/charts.html" import key_notes, meter, bullet_row, kpi_row, pace_chart %}
-{% if kpi_cards %}{{ kpi_row(kpi_cards, base, 'Budget at a glance') }}{% else %}{{ key_notes(notes) }}{% endif %}
+{% from "partials/charts.html" import key_notes, meter, bullet_row, kpi_row, pace_chart, lead_card %}{% from "partials/macros.html" import needs_rows %}
+{% if lead %}{% call lead_card(lead, base) %}{% if pace %}<div class="lead-side-head" id="budget-pace"><div><h3>{{ 'Is everyday spending on pace?'|tr(locale) }}</h3><p>{{ 'Day by day against the plan, bills and loan payments left out.'|tr(locale) }}</p></div></div>
+    {{ pace_chart(pace, base, previous_month) }}{% endif %}{% endcall %}
+{{ needs_rows(needs) }}
+{{ kpi_row(kpi_cards, base, 'Budget at a glance') }}
+{% elif kpi_cards %}{{ kpi_row(kpi_cards, base, 'Budget at a glance') }}{% else %}{{ key_notes(notes) }}{% endif %}
 {% if raise_offer and not raise_in_card %}<p class="notice raise-prompt" role="status"><span><b>{{ 'Your income went up'|tr(locale) }}</b> · {{ 'Recurring expects {recurring}, {raise} more than your average.'|tr(locale, recurring=raise_offer.recurring|money(False, 0) ~ ' ' ~ base, raise=raise_offer.raise|money(False, 0)) }}</span> <a class="btn small primary" data-popup-open href="/budget/raise?month={{ raise_offer.month }}">{{ 'Raise the plan'|tr(locale) }}</a> <a class="btn small" href="/plan/reserves">{{ 'Save the difference'|tr(locale) }}</a></p>{% endif %}
 
 {% if error %}<p class="notice error" role="alert">{{ error|tr(locale) }}</p>{% endif %}
@@ -17,9 +21,13 @@
 </section>
 {% endif %}
 {% if plan_from %}<p class="muted small">{{ 'Planned and spent from {date}, the first month with a plan.'|tr(locale, date=plan_from) }}</p>{% endif %}
-{% if pace or plan_bills %}
+{% if pace or plan_bills or (lead and meter_lines) %}
 <div class="pair lead-pair">
-  {% if pace %}<section class="card" id="budget-pace" aria-labelledby="pace-heading"><div class="card-heading"><div><h2 id="pace-heading">{{ 'Is everyday spending on pace?'|tr(locale) }}</h2>
+  {% if lead %}{% if meter_lines %}<section class="card" id="budget-meters" aria-labelledby="meters-heading"><div class="section-head"><div><h2 id="meters-heading">{{ 'Spent of plan'|tr(locale) }}</h2></div>
+  <span class="bullet-key"><span><i class="k spent"></i>{{ 'Spent'|tr(locale) }}</span><span><i class="k plan"></i>{{ 'Plan'|tr(locale) }}</span><span><i class="k over"></i>{{ "Over plan"|tr(locale) }}</span></span></div>
+  <div class="bullets is-one-column">{% for r in meter_lines %}{{ bullet_row(r.label, r.used, r.total, r.b, r.href) }}{% endfor %}</div>
+</section>{% endif %}{% endif %}
+  {% if pace and not lead %}<section class="card" id="budget-pace" aria-labelledby="pace-heading"><div class="card-heading"><div><h2 id="pace-heading">{{ 'Is everyday spending on pace?'|tr(locale) }}</h2>
     <p class="muted small">{{ 'Day by day against the plan, bills and loan payments left out.'|tr(locale) }}</p></div></div>
     {{ pace_chart(pace, base, previous_month) }}
   </section>{% endif %}
@@ -39,10 +47,10 @@
 {% for warning in view.warnings %}<p class="notice">{{ warning }}</p>{% endfor %}
 {% if period.key == 'custom' %}<p class="muted small">{{ "Custom partial-month plan amounts are prorated reporting estimates; stored monthly rules are unchanged."|tr(locale) }}</p>{% endif %}
 {% if carryover %}<p class="muted small"><a href="/budget/carryover-bridge?month={{ month }}">{{ "How carryover changed this plan"|tr(locale) }}</a></p>{% endif %}
-{% if meter_lines %}<section class="card wide-card" id="budget-meters" aria-labelledby="meters-heading"><div class="section-head"><div><h2 id="meters-heading">{{ 'Spent of plan'|tr(locale) }}</h2></div>
+{% if not lead %}{% if meter_lines %}<section class="card wide-card" id="budget-meters" aria-labelledby="meters-heading"><div class="section-head"><div><h2 id="meters-heading">{{ 'Spent of plan'|tr(locale) }}</h2></div>
   <span class="bullet-key"><span><i class="k spent"></i>{{ 'Spent'|tr(locale) }}</span><span><i class="k plan"></i>{{ 'Plan'|tr(locale) }}</span><span><i class="k over"></i>{{ "Over plan"|tr(locale) }}</span></span></div>
   <div class="bullets">{% for r in meter_lines %}{{ bullet_row(r.label, r.used, r.total, r.b, r.href) }}{% endfor %}</div>
-</section>{% endif %}
+</section>{% endif %}{% endif %}
 <section class="card budget-rollup"><div class="card-heading"><div><h2>{{ 'Spending by group'|tr(locale) }}</h2></div></div>
 {% for category_id,row in group_rows if row.budgeted or row.spent %}<details class="budget-l1" id="budget-detail-{{ category_id }}" {{ 'open' if request.query_params.get('open_group')==category_id|string else '' }}><summary class="budget-l1-trigger"><span><b>{{ row.name }}</b>{% if row.note %}<small>{{ row.note }}</small>{% elif row.section != row.name %}<small>{{ row.section }}</small>{% endif %}</span><span class="budget-l1-amounts"><span>{{ row.budgeted|money }}<small>{{ fig.planned.label }}{% if row.carryover %} · includes {{ row.carryover|money(True) }} carryover{% endif %}</small></span><span>{{ row.spent|money }}<small>{{ 'Spent'|tr(locale) }}</small></span><span class="{{ row.left|tone }}">{{ row.left|money(True) }}<small>{{ fig.left_in_plan.label }}</small></span></span></summary><div class="budget-progress"><i style="width:{{ [100, (row.spent/row.budgeted*100 if row.budgeted>0 else 0)]|min }}%"></i></div><div class="budget-group-detail"><h2>{{ row.name }} budget detail</h2><form id="bulk-{{ category_id }}" method="post" action="/budget/bulk" class="budget-bulk" data-income="{{ monthly_income_basis or 0 }}"><input type="hidden" name="month" value="{{ effective_month }}"><label>Income % <input name="percentage" type="number" min="0" max="10000" step="0.01" placeholder="e.g. 10"></label><button class="btn small" name="action" value="percentage">% of Income</button><button class="btn small" name="action" value="average3">{{ "3m Average"|tr(locale) }}</button><button class="btn small" name="action" value="average6">{{ "6m Average"|tr(locale) }}</button><span class="muted small" data-bulk-count>{{ "Choose categories to apply their own rules."|tr(locale) }}</span><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 {% set tracked_lines = [] %}{% for section in view.sections %}{% for line in section.lines if line.depth>1 and line.category_id in tracked and line.category_id in (by_group.get(category_id, [])) %}{% set _ = tracked_lines.append(line) %}{% endfor %}{% endfor %}

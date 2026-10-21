@@ -129,7 +129,8 @@ class Device:
     def owns(self) -> str:
         """The Overview's What you own: the figure he glances at on both devices."""
         text = self.b.open("/").after("What you own", 60)
-        return re.sub(r"As of \d{4}-\d{2}-\d{2}", "", text).split()[0]  # the phone's hero puts its date first
+        text = re.sub(r"As of \d{4}-\d{2}-\d{2}|Excludes money held for others", "", text)  # the phone's hero puts its date first;
+        return text.split()[0]  # the PC's Lead names what it leaves out (guideline 3.33)
 
 
 def typed_address(shown: screens.Screen) -> str:

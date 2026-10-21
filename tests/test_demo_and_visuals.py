@@ -167,15 +167,15 @@ def test_every_tab_of_the_demo_opens_with_its_key_notes(demo):
             assert page.text.count('class="stat-tile surface-') == 4, url  # four stat cards, no key notes
         elif url == "/birdview/expenses":  # four KPI cards give the gist of the period
             assert page.text.count('class="stat-tile surface-') == 4, url
-        elif url == "/plan":  # safe to spend, free cash, what's due and the lowest point ahead, each compared (3.32)
-            assert page.text.count('<article class="kpi-card') == 4 and "chart-waterfall" in page.text, url
-            assert "timeline" in page.text and "section-tabs" in page.text, url
+        elif url == "/plan":  # safe to spend leads with its working (3.33); free cash, what's due and the lowest point ahead
+            assert "lead-hero" in page.text and page.text.count('<article class="kpi-card') == 3, url
+            assert "chart-waterfall" in page.text and "section-tabs" in page.text, url
         elif url == "/budget":  # left in plan, everyday spending against pace, and what needs you (3.32)
             assert 2 <= page.text.count('<article class="kpi-card') <= 4 and 'class="key-note' not in page.text, url
         elif url == "/plan/recurring":  # its Fixed costs card says the share of income, once (UX plan 10)
             assert page.text.count('class="stat-tile surface-') == 1 and 'class="key-note' not in page.text, url
-        elif url == "/investments":  # the period's waffle, result and six-month value line
-            assert page.text.count('class="stat-tile surface-') == 3 and 'class="key-note' not in page.text, url
+        elif url == "/investments":  # Portfolio value leads with the period's result and the allocation (3.33)
+            assert "lead-hero" in page.text and 'class="waffle' not in page.text and 'class="key-note' not in page.text, url
         elif url in with_notes:
             assert 'class="key-note' in page.text or 'class="stat-card key-note' in page.text, url
     overview = client.get("/").text

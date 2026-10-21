@@ -290,3 +290,18 @@
 <small class="muted inv-saved-note">{% if w.money_in > 0 %}{{ 'Money in'|tr(locale) }} {{ w.money_in|money }} · {{ 'One square is 1% of income'|tr(locale) }}{% endif %}{% if bar.state == 'overspent' %} · {{ 'Darker squares show spending beyond income'|tr(locale) }}{% endif %}</small>
 {% else %}<span class="stat-tile-value">—</span><span class="stat-tile-sub">{{ "No money in this period"|tr(locale) }}</span>{% endif %}
 {% endmacro %}
+
+{# The page's Lead (guideline 3.33, A07 and A09): the KPI card that answers the page, drawn large on the left of one card
+   that spans the row; the caller draws its working or its trend on the right. The watermark sits in the corner. #}
+{% macro lead_card(k, base, aria='') %}
+<section class="card lead-card lead-hero" aria-label="{{ aria or k.label }}">
+  <div class="lead-main">
+    <div class="lead-head"><h2 class="lead-label">{{ k.label }}</h2>{% if k.chip %}<span class="kc-chip is-{{ k.chip.tone }}">{{ k.chip.text }}</span>{% endif %}</div>
+    <div class="lead-figure{{ ' is-negative' if k.value is not none and k.value < 0 }}">{% if k.value is none %}—{% elif k.kind == 'rate' %}{{ rate(k.value) }}<small>%</small>{% elif k.kind == 'count' %}{{ k.value }}{% else %}{{ k.value|money(k.signed) }}<small>{{ base }}</small>{% endif %}</div>
+    <p class="lead-compare">{% if k.compare.figure %}<b class="is-{{ k.compare.tone }}">{{ k.compare.figure }}</b> {% endif %}{{ k.compare.text }}</p>
+    {% if k.visual %}<div class="lead-visual kc-visual tone-{{ k.tone }}">{{ kpi_visual(k.visual) }}</div>{% endif %}
+    {% if k.line.text or k.line.action %}<p class="lead-line">{% if k.line.text %}<span>{{ k.line.text }}</span>{% endif %}{% if k.line.action %} <a href="{{ k.line.href }}"{% if k.line.popup %} data-popup-open{% endif %}>{{ k.line.action }}</a>{% endif %}</p>{% endif %}
+  </div>
+  {% if caller %}<div class="lead-side">{{ caller() }}</div>{% endif %}
+</section>
+{% endmacro %}

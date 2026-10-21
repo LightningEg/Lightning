@@ -59,7 +59,8 @@ def test_close_plan_payments_join_one_timeline_label(c, monkeypatch):
     assert (rent["name"], rent["count"], rent["amount"]) == ("Rent", 3, 300)
     assert "Gym" in rent["title"] and [m["name"] for m in marks[1:]] == ["Internet"]
     page = TestClient(create_app(c)).get("/plan")
-    assert "Rent +2" in page.text
+    # Guideline 3.33 (A09.2): the next 30 days are one list on the PC; the dot timeline repeated it and is gone.
+    assert 'class="timeline' not in page.text and "Rent" in page.text and "Internet" in page.text
 
 
 def test_budget_settings_inline_links_keep_readable_spaces(c):

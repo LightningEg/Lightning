@@ -56,7 +56,7 @@ def test_a_voided_uncategorized_payment_needs_nothing(c, setup):
 def test_the_overview_lists_the_whole_inbox_in_needs_you(c, setup):
     accounts, _ = setup
     client = TestClient(create_app(c))
-    assert "Nothing needs you today" in client.get("/").text
+    assert '<section class="needs"' not in client.get("/").text  # nothing to show: no row at all (A09)
 
     spent = c.categories.get_by_code("EXP.UNACCOUNTED")
     c.transactions.record_outflow("2026-10-02", accounts["cib"].id, "40", spent.id, allow_system_category=True)

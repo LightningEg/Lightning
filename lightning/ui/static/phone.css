@@ -520,3 +520,8 @@ html.phone :is(.phone-tab-name, .section-tabs .tab-name) { position: absolute; w
 html.phone .phone-tab-icon { height: 36px; }
 .locked-row b { font-weight:400; opacity:.75; }
 .plan-status-late { background:var(--rose-soft, #FCEEF3); color:var(--rose-strong, #C93D72); display:inline-flex; padding:0 8px; border-radius:999px; font-size:12px; font-weight:700; }
+/* Answer first (guideline 3.33, C04.1): the status sentence under the title, then the seam; Needs you bullets are the mark. */
+.phone-header p.phone-status { margin: 4px 0 0; color: var(--c-ink-2, #304A5C); font-size: 14px; font-weight: 600; line-height: 1.4; }
+.phone-header::after { content: ""; display: block; width: 32px; height: 3px; margin-top: 8px; border-radius: 2px; background: linear-gradient(90deg, #0B6DD6 50%, #14A874 50%); }
+.phone-needs .needs-you-dot { width: 12px; height: 17px; border-radius: 0; background: url(/static/lightning-mark-flat.svg) no-repeat center / contain; }
+.phone-needs.is-empty .needs-you-dot { background: var(--meadow); width: 10px; height: 10px; border-radius: 50%; }

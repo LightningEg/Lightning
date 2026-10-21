@@ -87,3 +87,28 @@
   {% if figure %}<div class="page-figures">{{ figure }}</div>{% endif %}
 </div>
 {%- endmacro %}
+
+{# The page header's words (guideline 3.33, A05): the title, the answer in one sentence (lightning/ui/status.py), then
+   the exact dates the figures use and their Muted note. The seam under it is CSS (.topbar::after). #}
+{% macro page_title(title, status=none, dates='', note='') -%}
+<div class="page-title"><h1>{{ title }}</h1>{% if status %}<p class="page-status">{{ status.text|tr(ui_locale(), **status['values']) }}</p>{% endif %}{% if dates %}<p class="page-dates"><b dir="ltr">{{ dates }}</b>{% if note %} <span>· {{ note|tr(ui_locale()) }}</span>{% endif %}</p>{% endif %}</div>
+{%- endmacro %}
+
+{# Needs you (A09): the page's own items under its Lead, one row each with the mark as the bullet, most urgent first.
+   Three show; the rest open under "Show all". Nothing to show: no row at all. `rows` are review.grouped() groups or
+   inbox items; both carry label, detail, href, action. #}
+{% macro needs_rows(rows, total=none, heading_id='needs-heading', more=none) -%}
+{% if rows %}{% set count = total if total is not none else rows|length %}
+<section class="needs" aria-labelledby="{{ heading_id }}">
+  <div class="needs-top"><h2 class="needs-head" id="{{ heading_id }}">{{ "Needs you"|tr(ui_locale()) }} <span>· {{ count }}</span></h2>{% if more %}<a class="quiet-link" href="{{ more[1] }}">{{ more[0] }}</a>{% endif %}</div>
+  {% for r in rows[:3] %}{{ _needs_row(r) }}{% endfor %}
+  {% if rows|length > 3 %}<details class="needs-more"><summary>{{ "Show all {n}"|tr(ui_locale(), n=rows|length) }}</summary>{% for r in rows[3:] %}{{ _needs_row(r) }}{% endfor %}</details>{% endif %}
+</section>
+{% endif %}
+{%- endmacro %}
+
+{% macro _needs_row(r) -%}
+<a class="needs-row" href="{{ r.href }}"{% if r.popup %} data-popup-open{% endif %}><img class="needs-mark" src="/static/lightning-mark-flat.svg" alt="" width="12" height="17"><span class="needs-text"><b>{% if r.count is defined and r.count > 1 %}{{ r.label|tr(ui_locale()) }} · {{ r.count }}{% else %}{{ r.label }}{% endif %}</b><small>{{ r.detail }}</small></span>{% if r.late_days %}<span class="plan-status plan-status-late">{{ ("Late · 1 day" if r.late_days == 1 else "Late · {n} days")|tr(ui_locale(), n=r.late_days) }}</span>{% endif %}<span class="needs-act">{{ (r.action or "Review")|tr(ui_locale()) }}</span></a>
+{%- endmacro %}
+
+{# The watermark (A02.3) is CSS: .lead-card::after, the mark in the corner of the page's Lead card. #}

@@ -13,7 +13,7 @@ from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, parse_date, parse_month, today
 from lightning.core.errors import LightningError, NotFoundError, ValidationError
 from lightning.core.refs import DocType
-from lightning.core.money import ZERO, from_e6, to_decimal
+from lightning.core.money import ZERO, fmt, from_e6, to_decimal
 
 from urllib.parse import urlencode
 
@@ -26,7 +26,7 @@ from ...investments.report import (PLANNER_MODES, build_investment_report, inves
                                     saved_and_invested,
                                     period_growth, results_by_asset, suggest_contributions, suggest_by_current_mix,
                                     normalized_target_weights)
-from .. import charts
+from .. import charts, kpis, status as page_status
 from lightning.core.figures import label
 from lightning.market.packs import chosen, read_zip
 from lightning.market.update import DEFAULT_URL, update_packs
@@ -190,7 +190,24 @@ async def portfolio(request: Request):
     extras.update(_view_extras(c, request, extras, investment_report, day))
     # Everything sold in the period: nothing is held, but the period still has a gain or loss to show.
     period_activity = bool(investment_report.get("result") or p.realized - prior.realized or period_distributions)
-    return render(request, "investments/index.html", p=p, asset_class_rows=asset_class_rows, **extras,
+    # Answer first (guideline 3.33): Portfolio value is the Lead and the period's net gain or loss its comparison;
+    # the allocation sits beside it. The waffle and Biggest holdings left (A09.2: one home per figure).
+    result, value, current = extras["hero_result"], extras["hero_value"], period.end >= today_date
+    chip_text = {"month": period.start_text[:7], "ytd": "Year to date", "all": "All time"}.get(
+        period.key, f"{period.start_text} to {period.end_text}")
+    lead = None
+    if value is not None and (owned_rows or period_activity):
+        compare = (kpis.compare(label("result"), fmt(result, 0, True), "good" if result >= 0 else "bad") if result is not None
+                   else kpis.compare("A dated price is missing, so the result is unavailable"))
+        ret = p.display_return if not any(custody.values()) else None
+        spark, change = extras["value_spark"], extras["hero_change"]
+        six = (f"{fmt(change, 0, True)} since six months ago" + (f", not counting {fmt(spark['added'], 0)} of opening balances"
+                                                                  if spark.get("added") else "")) if change is not None else ""
+        since = f"Return since purchase {ret.percent:+.1f}%" if ret and ret.percent is not None else ""
+        lead = kpis.card(label("portfolio_value"), value, compare, tone="hold", key="value", chip_=kpis.chip(chip_text),
+                         line_=kpis.line(six or since))  # the return since purchase is also the table's All holdings row
+    status = page_status.investments(investment_report.get("result"), bool(owned_rows), period.key, current)
+    return render(request, "investments/index.html", p=p, asset_class_rows=asset_class_rows, **extras, lead=lead, status=status,
                   pos=position, notes=notes, investment_donut=visuals.holdings_donut(position),
                   accounts=c.investments.investment_accounts(),
                   has_assets=bool(c.assets.investments(active_only=True)), owned_value=owned_value,

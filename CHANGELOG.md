@@ -14,6 +14,12 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - 2026-10-21 · Codex: 9G conversion rate updates refresh only affected dates/pairs, atomically with the posting; at 50 conversions, transaction reads fall from 51 to 2 (4.26 to 0.85 ms locally).
   9H removes eight unused backend helpers. Audit 2 and eight regression tests cover rate winners, edits, void/restore, bulk deletion, rollback and existing 2E validation fixes.
 
+- 2026-10-21 · Claude: 3W8 phone: each section's title carries its status sentence and the seam (C04.1); Needs you bullets are the mark;
+  Accounts leads with What you own ("Total balance" retired); Investments drops Biggest holdings; no Needs you row when nothing waits.
+- 2026-10-21 · Claude: 3W5-3W7 answer first: Investments leads with Portfolio value (the waffle and Biggest holdings left; By currency only
+  when needed), Accounts with What you own and four groups ("Total balance" retired), Financial health with Within your limits.
+- 2026-10-21 · Claude: 3W1-3W4 answer first: Overview, Budget and Cash planning open on their Lead (Net worth, Left in plan, Safe to spend)
+  with its working beside it, a status sentence under the title, Needs you rows with the mark, then KPIs. `ui/status.py`, `lead_card`, `needs_rows`.
 - 2026-10-21 · Claude: guideline 3.33, answer first (3W): A09 Page order (header, Lead, Needs you, KPIs, details; one home per figure),
   status sentence and seam (A05, A02.3), the page's Lead spans its row (A07); phone C04, C06, C11; A16 gains two checks. Both repos.
 - 2026-10-21 · Codex: Added 21 Lightning branding assets from Drive under `assets/logos/`; original filenames kept and active asset references unchanged.
