@@ -3,6 +3,7 @@
 ## Claimed
 
 | Who | Work | Files | Since |
+| Codex | 3X batch per-account values to get Overview and Cash planning under their query limits; release gate. | `lightning/reporting/`, `lightning/money_from_others.py`, `lightning/physical_items.py`, `tests/test_reporting_performance.py`, `CHANGELOG.md`, `issues/3-polish-and-arabic/3X-pages-read-each-account-once-per-date.md` | 2026-10-21 |
 |---|---|---|---|
 | Claude | 3W answer first: guideline 3.33 (both repos), then the six tabs. | `guideline/`, `lightning/ui/templates/{dashboard,budget,planning,investments,accounts,financial_health}*`, `lightning/ui/status.py`, `lightning/ui/static/style.css` | 2026-10-21 |
 | Claude | Journal: 7 review fixes, then J6 (owner asked 10-16). | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
