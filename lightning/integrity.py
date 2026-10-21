@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
+from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, month_of, parse_date, parse_month
 from lightning.core.money import ZERO
 from lightning.reporting.service import ReportingService
@@ -64,6 +65,12 @@ class IntegrityService:
         checks.append(self._check("Ownership split by account", account_difference, ZERO,
                                   "For each account: gross value = owned value + money held for others. "
                                   + ("; ".join(account_failure_labels) if account_failure_labels else ""), complete))
+
+        below_zero = [(account, value) for account, value in nw.by_account
+                      if account.account_type in {AccountType.CASH, AccountType.BANK} and value < ZERO]
+        checks.append(self._check("No cash account is below zero", sum((-value for _, value in below_zero), ZERO), ZERO,
+                                  "Wallets and bank accounts hold money you have."
+                                  + "".join(f" {account.label}: {value}." for account, value in below_zero)))
 
         month = month_of(parse_date(day))
         first, last = parse_month(month)

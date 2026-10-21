@@ -289,7 +289,7 @@ async def save_transaction_popup(request: Request, account_id: int):
         owner_id = int(values["owner_id"]) if values["owner_id"].isdigit() else None
         if owner_id is not None:
             party = c.counterparties.get(owner_id)
-            if not party["active"]:
+            if not party or not party["active"]:
                 raise ValidationError("Choose an active owner.", "owner_id")
         if kind == "transfer":
             to_account = int(values["to_account_id"]) if values["to_account_id"].isdigit() else None
