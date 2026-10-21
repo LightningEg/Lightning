@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Claude: 5H: the Investments reconciliation moves into `investments/report.py::reconcile_portfolio` and counts the exchange-rate revaluation
+  of dollar brokerage cash on its own, so Mohab's sample (YTD) no longer shows an unresolved +1,394.
 - 2026-10-21 · Claude: Audit 1, demo readiness (`reports/audit-1.md`): engine, smart logic, PC guideline, phone and Arabic. The math holds; found
   input-check gaps, bill-matching trust bugs, hidden suggestions, phone sheet bugs and an Arabic "·" that reads as zero. Filed 2E, 2F, 3R–3V, 5J, 5K,
   7K–7M; 5H's cause found; demo cut list first in `NOW.md`.

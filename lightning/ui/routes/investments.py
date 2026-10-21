@@ -22,7 +22,8 @@ from ..i18n import translate
 from ...investments import views as holding_views
 from ...assets.catalog import instruments
 from ..periods import parse_period
-from ...investments.report import (PLANNER_MODES, build_investment_report, investing_rate, investment_period, saved_and_invested,
+from ...investments.report import (PLANNER_MODES, build_investment_report, investing_rate, investment_period, reconcile_portfolio,
+                                    saved_and_invested,
                                     period_growth, results_by_asset, suggest_contributions, suggest_by_current_mix,
                                     normalized_target_weights)
 from .. import charts
@@ -88,29 +89,10 @@ async def portfolio(request: Request):
     day = period.end_text
     investment_report = investment_period(c.db, c.accounts, c.assets, c.reporting,
                                           period.start_text, period.end_text)
-    opening_report = investment_report["opening"]
     p = c.investments.portfolio(day)
     before_day = fmt_date(period.start.fromordinal(period.start.toordinal()-1))
-    invest_ids = [a.id for a in c.investments.investment_accounts()] + [
-        a.id for a in c.accounts.list(active_only=True)
-        if a.account_type in (AccountType.DEPOSIT, AccountType.GAMEYA)]
-    opening_adjustments = c.investments.opening_adjustments(invest_ids, period.start_text, period.end_text)
-    investment_report["recon_opening"] = (opening_report["investment_cash"] + opening_report["value"]
-                                           if opening_report["value"] is not None and
-                                           opening_report["investment_cash"] is not None else None)
-    investment_report["recon_closing"] = (investment_report["investment_cash"] + investment_report["value"]
-                                            if investment_report["value"] is not None and
-                                            investment_report["investment_cash"] is not None else None)
-    investment_report["opening_adjustments"] = opening_adjustments
-    investment_report["recon_result"] = investment_report["result"]
-    # A certificate's interest is its return (inside Result) but lands on the bank, outside the portfolio.
-    paid_out = sum((paid["amount"] for paid in c.reporting.certificate_interest(period.end_text)
-                    if paid["date"] >= period.start_text), Decimal(0))
-    investment_report["recon_difference"] = (
-        investment_report["recon_closing"] - investment_report["recon_opening"] -
-        investment_report["net_money"] - investment_report["recon_result"] - opening_adjustments + paid_out
-        if investment_report["recon_opening"] is not None and investment_report["recon_closing"] is not None and
-        investment_report["recon_result"] is not None else None)
+    investment_report.update(reconcile_portfolio(c.investments, c.accounts, c.reporting, investment_report,
+                                                 period.start_text, period.end_text))
     prior = c.investments.portfolio(before_day)
     prior_by_key={(x.account_id,x.asset_id):x for x in prior.positions}
     custody = defaultdict(lambda: ZERO)
