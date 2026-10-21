@@ -89,7 +89,7 @@ def test_the_whole_sample_loads_and_adds_up(c, on_2_october):
     day = date(2026, 10, 2)
     position = c.position.at(day)
     assert position.held_for_others == D("6900")          # Mom's 10,000, less the 4,000 she took back, plus 500 assigned and 400 she paid
-    assert position.loans_still_to_pay == D("37500")      # 15 car-loan payments left
+    assert position.loans_still_to_pay == D("52500")      # 15 car-loan payments left (37,500) and the laptop: 24,000 less 6,000 paid and 3,000 early
     assert position.net_worth == position.what_you_own - position.what_you_owe
     assert {check.status for check in c.integrity.checks(day)} == {"PASS"}
     assert not [p for p in c.planning.all_payments(day, day) if p.status.name == "DUE"]
