@@ -54,10 +54,10 @@ jobs:
       reuse_run: ${{ steps.scope.outputs.reuse_run }}
       reuse_artifact: ${{ steps.scope.outputs.reuse_artifact }}
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           fetch-depth: 0  # the docs-only check and the release-tag check read history
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: '3.13'
       - name: Decide whether the Windows app must be built
@@ -95,8 +95,8 @@ jobs:
       artifact: ${{ steps.package.outputs.artifact }}
       zip: ${{ steps.package.outputs.zip }}
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: '3.13'
       - name: Install locked dependencies
@@ -156,7 +156,7 @@ jobs:
       - name: Shipped app window check (profile chooser in WebView2)
         shell: pwsh
         run: ./packaging/run_check.ps1 -Exe '${{ steps.shipped.outputs.exe }}' -Report reports/app-window.json -Arguments '--smoke' -TimeoutSeconds 120
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: ${{ steps.package.outputs.artifact }}
           path: |
@@ -168,7 +168,7 @@ jobs:
           retention-days: ${{ startsWith(github.ref, 'refs/tags/') && 90 || 7 }}
       - name: Keep the check reports
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: windows-check-reports-r${{ github.run_number }}-a${{ github.run_attempt }}
           path: reports/
@@ -207,20 +207,20 @@ jobs:
       contents: read
       actions: read  # to download a reused Windows ZIP from the earlier run
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         if: needs.tests.outputs.reuse_run == ''
         with:
           name: ${{ needs.windows.outputs.artifact }}
           path: windows
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         if: needs.tests.outputs.reuse_run != ''
         with:
           run-id: ${{ needs.tests.outputs.reuse_run }}
           github-token: ${{ github.token }}
           name: ${{ needs.tests.outputs.reuse_artifact }}
           path: windows
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
           name: phone-apk
           path: phone
@@ -231,14 +231,14 @@ jobs:
         run: >-
           python packaging/phone_build.py bundle --windows windows --apk phone/Lightning-Test-*.apk
           --info phone/apk.json --out bundle --reused-from "$REUSED"
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: ${{ steps.bundle.outputs.pc }}
           path: bundle/PC/
           if-no-files-found: error
           overwrite: true  # a re-run replaces its own downloads
           retention-days: 7
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: ${{ steps.bundle.outputs.phone }}
           path: bundle/Phone/
@@ -265,12 +265,12 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
           name: ${{ needs.windows.outputs.artifact }}
           path: release
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
           name: phone-apk
           path: phone
