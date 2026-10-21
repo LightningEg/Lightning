@@ -16,7 +16,7 @@ What it found that the guideline already asks for is built (website `claude/forg
 `tools/geeks_stats.py`, the secure card linking `lightning/security/keys.py`, a hero word in Ink that no longer moves the
 line, a ringed theme chip, a quiet terminal during the replay, [secret] at 4.5:1, two font weights, the mission's columns
 balanced, the stack rows on one line, the current kept off headings, the roadmap glow running once, the M1 count's source,
-the contribute page linking Home's stack instead of repeating it, the Arabic footer's For Geeks link labelled English, and
+the contribute page linking Home's stack, `docs/GLOSSARY.md` and AGENTS.md instead of copying them (16,795 → 14,466px on a phone, owner 2026-10-21), the Arabic footer's For Geeks link labelled English, and
 D07's demo port (8766).
 
 ## Left for the owner
@@ -27,8 +27,7 @@ D07's demo port (8766).
    fetches market prices and rates (`lightning/market/http.py`).
 2. **Stats in CI.** `python tools/geeks_stats.py ../Lightning --check` fails when the page drifts; a website job that
    clones the app would make it automatic, but would also turn unrelated site PRs red after any app merge.
-3. **Contribute page length** (16,800px on a phone): fold *Lightning's own words* into a link to `docs/GLOSSARY.md`?
-4. **Arabic links to English pages.** No guideline rule; the footer now says «(بالإنجليزي)» and opens a new tab. Make it
+3. **Arabic links to English pages.** No guideline rule; the footer now says «(بالإنجليزي)» and opens a new tab. Make it
    a B09 rule?
 
 ## Fix
