@@ -156,7 +156,7 @@ def load_mohab_2026(c, as_of: date | None = None) -> dict:
         c.reevaluations.process_due()
     except Exception:  # valuation checkpoints are detail; the sample stands without them
         pass
-    return {"accounts": len(accounts), "rows": posted, "from": "2026-01-01", "to": fmt_date(day)}
+    return {"accounts": len(c.accounts.list()), "rows": posted, "from": "2026-01-01", "to": fmt_date(day)}
 
 
 def _plan(c, accounts: dict[str, int], day: date) -> None:
