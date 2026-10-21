@@ -16,6 +16,7 @@ Each fact lives in one file; link to it, never copy it. No other files under `do
 | [Competition](docs/COMPETITION.md) | Competitors, what users love/hate, where we win/lose | You learn something, or choose between designs |
 | [guideline/](guideline/) | Brand: [app.html](guideline/app.html) (A, PC), [website.html](guideline/website.html) (B, Normal website), [phone.html](guideline/phone.html) (C), [coders.html](guideline/coders.html) (D, website's For Geeks), [brand-voice.md](guideline/brand-voice.md) (voice) | The owner gives a new version, or **any** guideline change: make it in both repos in the same session (branch and PR each); never leave one copy behind |
 | [issues/](issues/README.md) | The plan: numbered milestones, each with coded items (`3C`, `3C1`): bugs, polish, features and designs, tech, owner tasks; read `issues/INDEX.md` only | You find or plan something (add an item); you finish one (delete it, add its code to `done:`) |
+| [reports/](reports/) | Audits the owner asks for, one file each (`audit-1.md`) with its screenshots; every finding is also an item in `issues/` | You run an audit the owner asked for |
 | [CHANGELOG.md](CHANGELOG.md) | Every change, newest first under `Unreleased` | Every push |
 
 **Any guideline change lands in both repos.** Edit the app's `guideline/`, copy the changed files to the website repo's `guideline/` (`cmp` must pass), and open a PR in each; a CSS change that follows a guideline change ships in the same PR. `tests/test_docs_structure.py` checks the copies.

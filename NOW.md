@@ -21,6 +21,7 @@
 
 The whole plan, by milestone and code, is `issues/INDEX.md`. In order:
 
+0. **Demo cut list from Audit 1** (owner, 10-20: a tight app to demo before more features): 3V, 7L1, 3R, 7K, 2E 1–5, 3S 1–2 with 3C, 3A, 5H, 3U 1–3. **Read:** `reports/audit-1.md` › Demo cut list, then each item.
 1. **1B Owner runs the security setup**, then **1C** a trial contribution. **Read:** 1B.
 2. **2A/2B restore safety and promotion durability** (Codex, Luna): see the claims above. **Read:** 2A, 2B.
 3. **4A Edit journal** (Claude): J6a/b built; J6c areas cover 125/149 POST routes; next, chunked large effects so bank import works (`tools/journal_mohab.py`). **Read:** 4A §10 J6; Architecture › Command proposals.
