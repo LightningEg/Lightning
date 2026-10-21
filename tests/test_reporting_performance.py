@@ -197,13 +197,10 @@ def _years_of_history(c, years):
 # in one read; reserve suggestions check the amount first): the pages then ran 80 to 550, and each
 # budget is about 1.3 times that.
 PAGE_READ_BUDGET = {
-    # "/" 640 -> 750, "/plan" 340 -> 370, "/investments" 235 -> 260 (2026-10-13): the sample gained a dollar brokerage
-    # with a Nasdaq ETF, and each account and holding is read once per figure (a foreign one also reads its rate).
-    # "/" 790 -> 900 (2026-10-21): the sample gained a gam'eya, a flat and a dollar account; every account is read once
-    # per figure and date, so the page grows with the account count, not with repeats.
-    "/": 900,  # 640: the sample plan gained a yearly course and bonus (2026-10-07; was 605 after the SMS check)
+    # 3X (2026-10-21): batch account positions and valuation inputs; no-op bill matching preserves the request cache.
+    "/": 450,  # three years of history; tools/perf_check.py keeps the sample's 400-query limit
     "/accounts/1": 120, "/transactions": 110, "/budget?period=month": 175,
-    "/budget?period=all": 710, "/plan": 560, "/investments": 356, "/birdview/expenses?period=all": 230,
+    "/budget?period=all": 710, "/plan": 250, "/investments": 175, "/birdview/expenses?period=all": 230,
 }
 
 

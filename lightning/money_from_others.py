@@ -155,14 +155,8 @@ class MoneyFromOthersService:
     @request_cached(deep=True)
     def cash_total_for_account(self, account_id: int, as_of: str) -> Decimal:
         day = parse_date(as_of).isoformat()
-        ledger = self.db.scalar("""SELECT COALESCE(SUM(le.quantity_e6),0) FROM ledger_entries le
-                                JOIN transactions t ON t.id=le.transaction_id
-                                JOIN financial_assets f ON f.id=le.asset_id AND f.is_cash=1
-                                WHERE le.account_id=? AND le.owner_id IS NOT NULL AND le.date<=? AND t.status='POSTED'""",
-                                (account_id, day)) or 0
-        legacy = self.db.scalar("SELECT COALESCE(SUM(amount_e6),0) FROM money_from_others WHERE account_id=? AND date<=? AND transaction_id IS NULL",
-                                (account_id, day)) or 0
-        return from_e6(int(ledger) + int(legacy))
+        totals = {row["account_id"]: row["amount_e6"] for row in self.totals_by_account(day)}
+        return from_e6(int(totals.get(account_id, 0)))
 
     def transaction_owner(self, transaction_id: int) -> str:
         row = self.db.one("SELECT p.name owner FROM ledger_entries le JOIN counterparties p ON p.id=le.owner_id WHERE le.transaction_id=? AND le.owner_id IS NOT NULL LIMIT 1", (transaction_id,))

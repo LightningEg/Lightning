@@ -241,6 +241,8 @@ class PlanningService:
         settled = [(key, item, payment, next(iter(found.values())))
                    for key, (item, payment, found) in possible.items()
                    if len(found) == 1 and len(transaction_to_payments.get(next(iter(found)), ())) == 1]
+        if not settled:
+            return 0
         count = 0
         with self.db.transaction():
             for _, item, payment, candidate in settled:
