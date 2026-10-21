@@ -734,6 +734,7 @@ ARABIC_UI = {
     'Transfer to': 'تحويل إلى',
     'Choose an account': 'اختار حساب',
     'Choose a category': 'اختار فئة',
+    'Choose an option from the list.': 'اختار حاجة من القايمة.',
     'Counterparty': 'الطرف الآخر',
     'optional': 'اختياري',
     'Type a person or business': 'اكتب اسم شخص أو شركة',

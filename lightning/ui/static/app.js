@@ -182,7 +182,11 @@ const initOwnDataPickers = (root = document) => {
   };
   input.value = shown();
   input.disabled = select.disabled;
-  input.addEventListener("input", () => { select.value = ""; input.setCustomValidity(wasRequired ? "Choose an option from the list." : ""); render(); });
+  // A required own-picker is validated on its visible field: the hidden <select> cannot show a message or take focus,
+  // so the browser would block Save with nothing on screen. A form script turns this on and off (setPickerRequired).
+  const checkChoice = () => input.setCustomValidity(input.required && !select.value ? t("Choose an option from the list.") : "");
+  select.setPickerRequired = (on) => { select.required = false; input.required = on; checkChoice(); };
+  input.addEventListener("input", () => { select.value = ""; checkChoice(); render(); });
   // Focus shows every choice and selects the current text, so typing replaces it instead of filtering by it.
   input.addEventListener("focus", () => { render(true); input.select(); });
   input.addEventListener("click", () => { if (list.hidden) { render(true); input.select(); } });
@@ -201,10 +205,10 @@ const initOwnDataPickers = (root = document) => {
       if (target) { event.preventDefault(); choose(Array.from(select.options).find((option) => option.value === target.dataset.value)); }
     } else if (event.key === "Escape") close();
   });
-  select.addEventListener("change", () => { input.value = shown(); });
+  select.addEventListener("change", () => { input.value = shown(); checkChoice(); });
   const disabledObserver = new MutationObserver(() => { input.disabled = select.disabled; });
   disabledObserver.observe(select, { attributes: true, attributeFilter: ["disabled"] });
-  if (wasRequired) { input.setCustomValidity(select.value ? "" : "Choose an option from the list."); select.required = false; }
+  if (wasRequired) select.setPickerRequired(true);
   select.form?.addEventListener("reset", () => requestAnimationFrame(() => { input.value = shown(); close(); }));
   document.addEventListener("click", (event) => { if (!wrapper.contains(event.target)) close(); });
   });
@@ -1760,6 +1764,7 @@ document.querySelectorAll("[data-currency-search]").forEach((search) => {
     dirty = false;
     keepAfterError = false;
     dialog.close();
+    document.documentElement.classList.remove("sheet-open");
     document.body.classList.remove("popup-open");
     content.replaceChildren();
     if (goBack && history.state?.lightningPopup) history.back();
@@ -1767,8 +1772,12 @@ document.querySelectorAll("[data-currency-search]").forEach((search) => {
     window.scrollTo({ top: baseScroll, behavior: "instant" });
     return true;
   };
+  // A sheet or popup shows the form's own content. The page's chrome around it (the undo and redo pills, the
+  // phone's action row, the section tabs, the device line) belongs to the page, not to the form.
+  const PAGE_CHROME = ".phone-page-actions, .section-bar, .history-form, .flash.device-line";
   const extract = (doc) => {
     const main = doc.querySelector("main.main") || doc.querySelector("main");
+    main?.querySelectorAll(PAGE_CHROME).forEach((chrome) => chrome.remove());
     return main?.innerHTML || doc.body.innerHTML;
   };
   const show = (html, title = t("Dialog")) => {
@@ -1782,6 +1791,7 @@ document.querySelectorAll("[data-currency-search]").forEach((search) => {
     keepAfterError = false;
     document.body.classList.add("popup-open");
     if (!dialog.open) dialog.showModal();
+    document.documentElement.classList.add("sheet-open");  // the phone's tab bar steps aside (guideline C02.4)
     initPopupFields();
     initTransactionForm();
     snapshot = formState();
@@ -1873,12 +1883,22 @@ document.querySelectorAll("[data-currency-search]").forEach((search) => {
       const kind = kinds.find((input) => input.checked)?.value || "out";
       form.querySelectorAll(".transfer-only").forEach((field) => field.hidden = kind !== "transfer");
       form.querySelectorAll(".money-only").forEach((field) => field.hidden = kind === "transfer");
-      if (category) [...category.options].forEach((option) => {
-        option.hidden = kind === "out" && option.value !== "" && option.dataset.movement !== "OUTFLOW";  // in: income, or a refund
-        if (option.hidden && option.selected) category.value = "";
-      });
-      if (category) { category.disabled = kind === "transfer"; category.required = kind !== "transfer"; }
-      if (destination) destination.required = kind === "transfer";
+      if (category) {
+        let cleared = false;
+        [...category.options].forEach((option) => {
+          option.hidden = kind === "out" && option.value !== "" && option.dataset.movement !== "OUTFLOW";  // in: income, or a refund
+          if (option.hidden && option.selected) { category.value = ""; cleared = true; }
+        });
+        category.disabled = kind === "transfer";
+        // The own-picker shows the message on its visible field; a plain select carries `required` itself.
+        if (category.setPickerRequired) category.setPickerRequired(kind !== "transfer");
+        else category.required = kind !== "transfer";
+        if (cleared) category.dispatchEvent(new Event("change", { bubbles: true }));  // the picker's text follows
+      }
+      if (destination) {
+        if (destination.setPickerRequired) destination.setPickerRequired(kind === "transfer");
+        else destination.required = kind === "transfer";
+      }
       const value = Number((amount.value || "").replaceAll(",", ""));
       const shown = Number.isFinite(value) && value > 0 ? new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value) : "…";
       const account = root.dataset.accountName, currency = root.dataset.currency;
@@ -1891,6 +1911,22 @@ document.querySelectorAll("[data-currency-search]").forEach((search) => {
       }
     };
     form.addEventListener("input", update); form.addEventListener("change", update); update();
+    // A counterparty with a learned category (its own, a rule's, or the one it is usually filed under; each
+    // datalist option carries it as data-category) fills an empty Category. A choice you made stays.
+    const counterparty = form.querySelector('[name="counterparty"]');
+    const known = form.querySelector("datalist");
+    let filled = "";
+    counterparty?.addEventListener("change", () => {
+      if (!category || category.disabled || !known || (category.value && category.value !== filled)) return;
+      const typed = counterparty.value.trim().toLocaleLowerCase();
+      const match = [...known.options].find((option) => option.value.toLocaleLowerCase() === typed);
+      const wanted = match?.dataset.category || "";
+      const option = wanted && [...category.options].find((item) => item.value === wanted && !item.hidden);
+      if (!option) return;
+      filled = wanted;
+      category.value = wanted;
+      category.dispatchEvent(new Event("change", { bubbles: true }));
+    });
   };
   const openUrl = async (url, trigger, push = true) => {
     const replacing = dialog.open;
@@ -1938,6 +1974,7 @@ document.querySelectorAll("[data-currency-search]").forEach((search) => {
     event.preventDefault();
     openUrl(link.href, link).catch(() => { location.href = link.href; });
   });
+  dialog.addEventListener("close", () => document.documentElement.classList.remove("sheet-open"));
   dialog.addEventListener("cancel", (event) => { event.preventDefault(); close(); });
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) close();
@@ -2693,3 +2730,27 @@ document.addEventListener('change', (event) => {
   const field = event.target.closest('[data-submit-on-change]');
   if (field?.form) field.form.requestSubmit();
 });
+
+// The phone's tab bar steps aside while the keyboard is up (guideline C02.4; phone.css hides it under
+// html.keyboard-open). The keyboard is up when a field takes text and the visible viewport is clearly shorter
+// than the tallest one seen at this width, which holds whether the shell resizes the page or only the viewport.
+(() => {
+  const root = document.documentElement, viewport = window.visualViewport;
+  if (!root.classList.contains("phone") || !viewport) return;
+  let tallest = 0, width = 0;
+  const typing = () => {
+    const field = document.activeElement;
+    if (!field || field === document.body) return false;
+    if (field.tagName === "TEXTAREA" || field.isContentEditable) return true;
+    return field.tagName === "INPUT" && !/^(checkbox|radio|button|submit|reset|range|file|color|image|hidden)$/i.test(field.type);
+  };
+  const sync = () => {
+    if (viewport.width !== width) { width = viewport.width; tallest = 0; }  // turning the phone starts again
+    if (!typing()) tallest = Math.max(tallest, viewport.height);
+    root.classList.toggle("keyboard-open", typing() && tallest - viewport.height > 120);
+  };
+  viewport.addEventListener("resize", sync);
+  document.addEventListener("focusin", () => { tallest = Math.max(tallest, viewport.height); sync(); });
+  document.addEventListener("focusout", () => setTimeout(sync, 0));
+  sync();
+})();
