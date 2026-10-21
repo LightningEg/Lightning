@@ -11,7 +11,7 @@ from starlette.concurrency import run_in_threadpool
 
 from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, parse_date, parse_month, today
-from lightning.core.errors import LightningError, NotFoundError
+from lightning.core.errors import LightningError, NotFoundError, ValidationError
 from lightning.core.refs import DocType
 from lightning.core.money import ZERO, from_e6, to_decimal
 
@@ -439,7 +439,7 @@ async def calculate_planner(request: Request):
 
 async def _render_planner(request: Request, raw_amount: str="10000"):
     c=container(request); amount=to_decimal(raw_amount,"amount")
-    if amount<=ZERO: raise LightningError("Enter an amount greater than zero.","amount")
+    if amount<=ZERO: raise ValidationError("Enter an amount greater than zero.","amount")
     mode=c.settings.get("investment_planner_mode")
     if mode not in PLANNER_MODES: mode="prorata"
     day=fmt_date(today()); portfolio=c.investments.portfolio(day)

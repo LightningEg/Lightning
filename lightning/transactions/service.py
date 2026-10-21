@@ -31,6 +31,7 @@ from .repository import TransactionRepository
 from .tags import normalize as normal_tag, tags_in
 
 EDITABLE_TYPES = {DocType.IN, DocType.OUT, DocType.TRF}
+CASH_CHECKED_TYPES = {DocType.IN, DocType.OUT, DocType.TRF}  # whose cash may not go below zero (2E3)
 
 
 class TransactionService:
@@ -91,6 +92,7 @@ class TransactionService:
                       owner_id: int | None = None) -> Transaction:
         """Money returned for a purchase; record it against the original expense category."""
         account = self.accounts.require_usable(account_id)
+        self._refuse_physical_asset(account)
         day = self._check_date(date)
         asset = self.assets.cash_asset(account.currency)
         value = self._positive_amount(amount, asset.quantity_decimals)
@@ -284,6 +286,7 @@ class TransactionService:
                       owner_id: int | None = None) -> Transaction:
         current = self._editable(txn_id, {DocType.IN})
         account = self.accounts.require_usable(account_id)
+        self._refuse_physical_asset(account)
         day = self._check_date(date)
         asset = self.assets.cash_asset(account.currency)
         value = self._positive_amount(amount, asset.quantity_decimals)
@@ -466,6 +469,53 @@ class TransactionService:
                         f"{fmt(before, 2)} {account.currency}. {context}",
                         "owner")
 
+    def _refuse_cash_below_zero(self, lines, day, current: Transaction | None = None) -> None:
+        """Your own entry may not take a wallet or bank account below zero (Audit 1, 2E3).
+
+        The account's whole cash, whoever it belongs to, is tracked by day from the first day the entry touches.
+        An entry that leaves the lowest balance where it already was (a note, a category, a balance that was
+        negative before) is never refused; imports and system postings are not checked here.
+        """
+        keys = {(ln.account_id, ln.asset_id) for ln in lines
+                if ln.quantity != ZERO and self.assets.get_asset(ln.asset_id).is_cash}
+        for account_id, asset_id in keys:
+            account = self.accounts.get(account_id)
+            if account.account_type not in {AccountType.CASH, AccountType.BANK}:
+                continue
+            # Balances mean something from the day the account opened; a history entered before it is not judged.
+            start = max(min(str(day), current.date) if current else str(day), account.opening_date)
+            proposed = [(str(day), int(ln.quantity * 1_000_000)) for ln in lines
+                        if (ln.account_id, ln.asset_id) == (account_id, asset_id)]
+            rows = self.db.all(
+                "SELECT le.date, le.transaction_id tid, SUM(le.quantity_e6) q FROM ledger_entries le "
+                "JOIN transactions t ON t.id=le.transaction_id "
+                "WHERE t.status='POSTED' AND le.account_id=? AND le.asset_id=? GROUP BY le.date, le.transaction_id",
+                (account_id, asset_id))
+            before, after = {}, {}
+            for row in rows:
+                before[row["date"]] = before.get(row["date"], 0) + int(row["q"])
+                if not current or row["tid"] != current.id:
+                    after[row["date"]] = after.get(row["date"], 0) + int(row["q"])
+            if not current:
+                before = dict(after)
+            for on, quantity in proposed:
+                after[on] = after.get(on, 0) + quantity
+
+            def lowest(by_day):
+                running, low = 0, None
+                for on in sorted(by_day):
+                    running += by_day[on]
+                    if on >= start:
+                        low = running if low is None else min(low, running)
+                return low
+
+            low_after, low_before = lowest(after), lowest(before)
+            if low_after is not None and low_after < 0 and (low_before is None or low_after < low_before):
+                account = self.accounts.get(account_id)
+                raise ValidationError(
+                    f"This would leave {account.label} at {fmt(Decimal(low_after).scaleb(-6), 2, True)} "
+                    f"{account.currency}. Move money in first, or record the smaller amount.", "amount")
+
     def _validate_deposit_lines(self, lines, doc_type: DocType, source: TxnSource) -> None:
         """CD portfolios hold certificate assets only; cash stays in bank and wallet accounts."""
         for line in lines:
@@ -597,9 +647,12 @@ class TransactionService:
         if any(self.categories.get(line.category_id).code == "EXP.SYSTEM.CUSTODY"
                for line in cash_lines if line.category_id):
             raise ValidationError("Money held for others cannot be split as a personal expense.")
+        account_id = next(iter(account_ids))
+        account = self.accounts.require_usable(account_id)
+        asset = self.assets.cash_asset(account.currency)
         parsed: list[tuple[int, Decimal]] = []
         for category_id, raw_amount in allocations:
-            amount = to_decimal(raw_amount, "split_amount")
+            amount = check_places(to_decimal(raw_amount, "split_amount"), asset.quantity_decimals, "split_amount")
             if amount <= ZERO:
                 raise ValidationError("Each split amount must be greater than zero.", "split_amount")
             category = self.categories.require(category_id, Movement.OUTFLOW)
@@ -612,9 +665,6 @@ class TransactionService:
             raise ValidationError("Add at least one category and amount.")
         if sum((amount for _, amount in parsed), ZERO) != total:
             raise ValidationError(f"Split amounts must add up to the transaction total ({fmt(total)}).", "split_amount")
-        account_id = next(iter(account_ids))
-        account = self.accounts.require_usable(account_id)
-        asset = self.assets.cash_asset(account.currency)
         fx_rate = self._fx(account, parse_date(current.date))
         lines = [PostingLine.cash(account_id, asset.id, -amount, Effect.OUTFLOW, category_id,
                                  fx_rate=fx_rate) for category_id, amount in parsed]
@@ -882,6 +932,7 @@ class TransactionService:
         account = self.accounts.require_usable(account_id)
         if account.account_type == AccountType.DEPOSIT:
             raise ValidationError("A CD portfolio cannot hold cash.")
+        self._refuse_physical_asset(account)
         day = self._check_date(date)
         asset = self.assets.cash_asset(account.currency)
         value = self._positive_amount(amount, asset.quantity_decimals)
@@ -893,6 +944,12 @@ class TransactionService:
                                   fx_rate=self._fx(account, day))]
         validate_posting(lines)
         return day, lines
+
+    @staticmethod
+    def _refuse_physical_asset(account: Account) -> None:
+        if account.account_type == AccountType.PHYSICAL_ASSET:
+            raise ValidationError("A physical asset account holds things, not cash. Use a bank or cash account for the money.",
+                                  "account")
 
     def _transfer_lines(self, date: str, from_id: int, to_id: int, amount,
                         allow_legacy_deposit_cash: bool = False):
@@ -925,6 +982,8 @@ class TransactionService:
             self._validate_owner_balances(lines, day, force_brokerage_cash=doc_type == DocType.BUY,
                                           validate_all_cash=validate_all_cash,
                                           ignore_before_day=validate_all_cash)
+            if source == TxnSource.MANUAL and doc_type in CASH_CHECKED_TYPES:
+                self._refuse_cash_below_zero(lines, day)
             ref = format_ref(doc_type, day, self.repo.next_seq(ref_prefix(doc_type, day)))
             header = Transaction(
                 id=0, ref=ref, type=doc_type, date=fmt_date(day),
@@ -952,6 +1011,8 @@ class TransactionService:
                                          force_brokerage_cash=current.type == DocType.BUY,
                                          validate_all_cash=validate_all_cash,
                                          ignore_before_day=validate_all_cash)
+            if current.source == TxnSource.MANUAL and current.type in CASH_CHECKED_TYPES:
+                self._refuse_cash_below_zero(lines, day, current)
             updated = replace(
                 current, date=fmt_date(day), description=(description or "").strip(),
                 counterparty=(counterparty or "").strip(), notes=(notes or "").strip(),

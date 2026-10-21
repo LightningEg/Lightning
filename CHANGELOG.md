@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Claude: 2E1–2E5: a split respects the account's decimals; money in or out is refused on a gold account (and not offered); an entry that takes a wallet or bank below zero is refused, with a data check; an unknown owner and a zero planner amount say so instead of a 500.
 - 2026-10-21 · Claude: Audit 1, demo readiness (`reports/audit-1.md`): engine, smart logic, PC guideline, phone and Arabic. The math holds; found
   input-check gaps, bill-matching trust bugs, hidden suggestions, phone sheet bugs and an Arabic "·" that reads as zero. Filed 2E, 2F, 3R–3V, 5J, 5K,
   7K–7M; 5H's cause found; demo cut list first in `NOW.md`.
