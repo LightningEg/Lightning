@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Claude: guideline 3.33, answer first (3W): A09 Page order (header, Lead, Needs you, KPIs, details; one home per figure),
+  status sentence and seam (A05, A02.3), the page's Lead spans its row (A07); phone C04, C06, C11; A16 gains two checks. Both repos.
 - 2026-10-21 · Codex: Added 21 Lightning branding assets from Drive under `assets/logos/`; original filenames kept and active asset references unchanged.
 
 - 2026-10-21 · Claude: 3S 1–2, 3C, 3A: Sale factors wraps its locked-holding note (no sideways scroll); trend and Budget pace end labels part instead of
