@@ -343,6 +343,7 @@ def test_expense_analysis_compares_big_categories_with_their_usual_month(c, setu
     cib = accounts["cib"].id
     housing = c.categories.get_by_code("EXP.PERSONAL.HOUSING").id
     fees = c.categories.get_by_code("EXP.PERSONAL.FEES").id
+    c.transactions.record_inflow("2026-09-02", cib, "40000", cats["EXP.WORK.SALARY"].id)
     for month, rent in (("2026-09", "10000"), ("2026-10", "10000"), ("2026-11", "11000"), ("2026-12", "15000")):
         c.transactions.record_outflow(f"{month}-05", cib, rent, housing)
         c.transactions.record_outflow(f"{month}-06", cib, "1000", cats["EXP.PERSONAL.FOOD"].id)
