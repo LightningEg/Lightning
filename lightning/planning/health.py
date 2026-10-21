@@ -376,12 +376,12 @@ class HealthService:
         return late
 
     def raise_offer(self, month: str | None = None) -> dict | None:
-        """Recurring income above Average monthly income (a raise not in the average yet): what planning with
-        it would give, and the savings target that keeps today's plan and saves the difference. None when the
+        """Monthly recurring income (not the yearly or bonus lumps) above Average monthly income (a raise not in
+        the average yet): what planning with it would give, and the savings target that keeps today's plan and saves the difference. None when the
         average is set by hand, already is the recurring income, or the offer was declined at this amount."""
         month = month or month_of(today())
         average = self.budgets.income_average(month)
-        recurring = self.planning.income_a_month()
+        recurring = self.planning.income_a_month(regular_only=True)  # a yearly bonus is not a raise
         if average.manual or average.scheduled or not average.amount or recurring is None:
             return None
         if recurring < average.amount * RAISE_SHARE or self.settings.get(RAISE_DECLINED) == format(recurring, "f"):

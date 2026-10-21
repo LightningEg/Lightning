@@ -39,7 +39,7 @@ Read only the section your task needs (`grep -n '^## ' docs/ARCHITECTURE.md`, th
 | Quality | pytest and `import-linter` (`[tool.importlinter]` in `pyproject.toml`, run by `tests/test_architecture.py`) |
 | Network | Local server on `127.0.0.1` only |
 
-Legacy mode: `./run.sh` or `python -m lightning` opens `http://127.0.0.1:8765` (plaintext `data/lightning.db`). Startup takes a backup, runs migrations and processes due valuation checkpoints. `python -m lightning --demo` opens the sample household (`lightning/demo.py`) in `data/demo.db` on port 8766, rebuilt on every start. The main product runs as encrypted profiles (see Desktop app).
+Legacy mode: `./run.sh` or `python -m lightning` opens `http://127.0.0.1:8765` (plaintext `data/lightning.db`). Startup takes a backup, runs migrations and processes due valuation checkpoints. `python -m lightning --demo` opens the sample household (`lightning/demo.py`) in `data/demo.db` on port 8766, rebuilt on every start; `--sample` does the same with Mohab's 2026 and pins today to its last row (2026-10-02, `lightning/samples/__init__.py`) unless `LIGHTNING_TODAY` is set. The main product runs as encrypted profiles (see Desktop app).
 
 ## Three layers: ledger, plan, report
 

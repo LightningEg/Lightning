@@ -186,6 +186,35 @@ def test_every_tab_of_the_demo_opens_with_its_key_notes(demo):
     assert "chart-trend" in client.get("/birdview").text  # month by month lives on Birdview
 
 
+def test_the_demo_certificate_pays_what_its_rate_says_and_match_all_clears_it(demo):
+    """3V1: the bought rate, the posted payouts and the payout day agree, so the one Needs-you item can be cleared."""
+    from lightning.workflows.review import ReviewInbox
+    c, _ = demo
+    cd = next(a for a in c.accounts.list() if a.name == "NBE CDs")
+    terms = c.deposits.list_certificates(cd.id)[0].terms
+    monthly = (terms.principal * terms.annual_rate / 100 / 12).quantize(D("0.01"))
+    payouts = [r for r in c.planning.repo.history("2026-07-01", "2026-09-30") if r["counterparty"] == "NBE"]
+    assert len(payouts) == 2 and {r["amount"] for r in payouts} == {monthly}   # 22% of 100,000 over twelve
+    assert {r["date"][8:] for r in payouts} == {terms.start_date[8:]}          # on the purchase's payout day
+    day = date(2026, 9, 30)
+    items = [i for i in ReviewInbox(c).items(day) if "interest payment" in i["label"]]
+    assert len(items) == 1 and items[0]["post"]["label"] == "Match all suggested"
+    result = c.deposit_receipts.confirm_suggested(cd.id, terms.id, "2026-09-30")
+    assert result["matched"] == len(payouts)
+    assert not [i for i in ReviewInbox(c).items(day) if "interest payment" in i["label"]]
+
+
+def test_the_demo_has_an_untracked_subscription_for_looks_recurring(demo):
+    """3V3: an early-month payment, three months running and not planned, always shows under Looks recurring."""
+    c, _ = demo
+    found = {s["name"]: s for s in c.planning.suggestions(date(2026, 9, 30))}
+    assert "Fitness Time Gym" in found and found["Fitness Time Gym"]["amount"] == D("900.00")
+    assert found["Fitness Time Gym"]["day"] == 4 and found["Fitness Time Gym"]["months"] == 3
+    assert "Mom" in found  # a bill left untracked as well
+    for early in ("2026-09-04", "2026-09-10"):  # from the 4th on, not only after the 25th
+        assert any(s["name"] == "Fitness Time Gym" for s in c.planning.suggestions(date.fromisoformat(early)))
+
+
 def test_the_welcome_button_adds_the_demo_only_once(c, monkeypatch):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-30")
     client = TestClient(create_app(c), base_url="http://127.0.0.1")

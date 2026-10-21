@@ -456,12 +456,24 @@ class PlanningService:
                           bills_due_items=due, loans_due_in_base=loans_due)
 
     @request_cached  # read by every budget line since bills plan their category too (2026-10-05)
-    def income_a_month(self) -> Decimal | None:
-        """Recurring income a month: what Cash planning › Recurring expects to come in. None without any."""
+    def income_a_month(self, regular_only: bool = False) -> Decimal | None:
+        """Recurring income a month: what Cash planning › Recurring expects to come in. None without any.
+
+        ``regular_only`` leaves out the lumps (quarterly and yearly items, and anything in the Bonus
+        category): the pay that arrives every month, which is what a raise changes (7L1)."""
         day = today()
-        monthly = ((item, per_year(item) / 12) for item in self.items((PlanKind.INCOME,)))
+        items = self.items((PlanKind.INCOME,))
+        if regular_only:
+            items = [i for i in items if i.frequency in (Frequency.MONTHLY, Frequency.WEEKLY) and not self._is_bonus(i)]
+        monthly = ((item, per_year(item) / 12) for item in items)
         total = sum((self.amount_in_base(item, amount, day) for item, amount in monthly if amount), ZERO)
         return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if total > 0 else None
+
+    def _is_bonus(self, item) -> bool:
+        if item.category_id is None:
+            return False
+        code = self.categories.get(item.category_id).code
+        return code == "EXP.WORK.BONUS" or code.startswith("EXP.WORK.BONUS.")
 
     def loan_payments_by_category(self, month: str) -> dict[int, Decimal]:
         """Loan payments scheduled in a month (paid, due or upcoming; not skipped), by category."""
