@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Claude: 4C Audit 3 of the edit journal (`reports/audit-3.md`): a stale command edit overwrites a newer amount, replay cannot see
+  drift, register and commands disagree, a refused mailbox request stalls sync. Four strict known gaps in `tests/test_journal_audit3.py`.
 - 2026-10-21 · Claude: For Geeks home greets with `$ welcome to lightning`, typed once with the caret, while the hero fades up;
   guideline D07 `.hello` and D08 (both repos). Reduced motion shows it still.
 - 2026-10-21 · Claude: 8D For Geeks audit: recounted stats (`tools/geeks_stats.py`), keys.py proof, steady Ink hero word, quiet terminal replay, balanced
