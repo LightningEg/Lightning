@@ -26,7 +26,10 @@ figures from Mohab's year) is strong; the breadth is described, not shown.
   each of the five highlight cards a 16:10 thumbnail of its real screen (zoom images exist). On phones (14,600 px) show
   each group's title and three lines with a "Show all" toggle.
 
-Check A16/B rules before each change; figures stay those of the screens beside them.
+- **Home FAQ repeats three guide questions** (bank login, SMS, dollars) that now live on the Guides pages (8H): keep
+  a one-line answer and link to the guide, or drop them.
+
+Do it after the site recapture (`claude/site-recapture`), which changes the home figures. Check A16/B rules before each change; figures stay those of the screens beside them.
 
 ## Done when
 
