@@ -19,7 +19,7 @@ from lightning.core.money import ZERO, fmt as _fmt, to_decimal
 def fmt(value, places: int = 0, signed: bool = False) -> str:
     """Reporting text rounds to the nearest unit (stored values keep their decimals)."""
     return _fmt(value, places, signed)
-from lightning.investments.report import investing_rate, investment_period
+from lightning.investments.report import investing_rate, investment_period, saved_and_invested
 from lightning.workflows.review import GROUP_LABELS, ReviewInbox, group_of, grouped
 
 from ..web import container, render
@@ -256,7 +256,8 @@ async def dashboard(request: Request):
         networth_trend=networth_trend, free_cash_steps=visuals.free_cash_steps(position),
         month_calendar=visuals.month_calendar(c, today()),
         month=month, this_month=month_of(today()), period=period, period_error=period_error,
-        date_from=fmt_date(first), date_to=fmt_date(as_of), as_of=fmt_date(as_of), position_as_of=fmt_date(position_day), position_is_today=position_is_today, status=status, dates_note=dates_note, lead_change=lead_change,
+        date_from=fmt_date(first), date_to=fmt_date(as_of), as_of=fmt_date(as_of), position_as_of=fmt_date(position_day), position_is_today=position_is_today, status=status,
+        waffle=saved_and_invested(cash_flow, closing_report["net_money"]), dates_note=dates_note, lead_change=lead_change,
         range_label=(f"No recorded activity · Position as of {fmt_date(position_day)}"
                      if period.key == "all" and not first_activity else f"{fmt_date(first)} to {fmt_date(as_of)} · Position as of {fmt_date(position_day)}"),
         pos=position, cash_accounts=cash_accounts, owe=owe,
@@ -415,7 +416,7 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
         "badge": {"tone": sign(cash_flow.net), "text": period_name + (" so far" if as_of.day < calendar.monthrange(as_of.year, as_of.month)[1] else "")},
         "figure": cash_flow.net, "sub": savings_sub,
         "spark": visuals.savings_rate_spark(c, as_of), "spark_tone": "in",
-        "href": f"/transactions?date_from={fmt_date(first)}&date_to={fmt_date(as_of)}",
+        "href": "#savings-squares",  # the waffle lives behind the Savings rate (owner, 2026-10-19)
     })
     invest = investing_rate(money_added, cash_flow.net)
     stats.append({

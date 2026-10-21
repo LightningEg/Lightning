@@ -174,8 +174,8 @@ def test_every_tab_of_the_demo_opens_with_its_key_notes(demo):
             assert 2 <= page.text.count('<article class="kpi-card') <= 4 and 'class="key-note' not in page.text, url
         elif url == "/plan/recurring":  # its Fixed costs card says the share of income, once (UX plan 10)
             assert page.text.count('class="stat-tile surface-') == 1 and 'class="key-note' not in page.text, url
-        elif url == "/investments":  # the period's waffle, result and six-month value line
-            assert page.text.count('class="stat-tile surface-') == 3 and 'class="key-note' not in page.text, url
+        elif url == "/investments":  # Portfolio value leads with the period's result and the allocation (3.33)
+            assert "lead-hero" in page.text and 'class="waffle' not in page.text and 'class="key-note' not in page.text, url
         elif url in with_notes:
             assert 'class="key-note' in page.text or 'class="stat-card key-note' in page.text, url
     overview = client.get("/").text

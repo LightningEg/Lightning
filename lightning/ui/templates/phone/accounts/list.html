@@ -2,10 +2,10 @@
    button asks which account first (C05.2). #}
 {% extends "base.html" %}
 {% block title %}Accounts{% endblock %}
-{% block heading %}<h1>{{ 'Accounts'|tr(locale) }}</h1>
-<p>{{ "Total balance"|tr(locale) }}</p>
-<div class="phone-lead">{{ gross_total|money(False, 0) }} <small>{{ base }}</small></div>
-<p class="phone-note">{{ fig.what_you_own.label }} {{ net_worth.what_you_own|money(False, 0) }}</p>{% endblock %}
+{% block heading %}<h1>{{ 'Accounts'|tr(locale) }}</h1>{% if status %}<p class="phone-status">{{ status.text|tr(locale, **status['values']) }}</p>{% endif %}
+<p>{{ fig.what_you_own.label }}</p>
+<div class="phone-lead">{{ net_worth.what_you_own|money(False, 0) }} <small>{{ base }}</small></div>
+<p class="phone-note">{{ fig.in_your_accounts.label }} {{ gross_total|money(False, 0) }}{% if held_total %} · {{ fig.held_for_others.label }} {{ held_total|money(False, 0) }}{% endif %}</p>{% endblock %}
 {% block top_actions %}{# C04.5: the everyday action as one Secondary, the rest behind ⋯ #}<a class="btn" href="/sms">{{ "From SMS"|tr(locale) }}</a><details class="action-menu phone-more-menu"><summary aria-label="More actions">⋯</summary><div><a href="/accounts/new">{{ 'Add account'|tr(locale) }}</a><a href="/transactions/deleted">{{ "Deleted transactions"|tr(locale) }}</a></div></details>{% endblock %}
 {% block content %}
 <section class="card phone-card phone-flat-rows" aria-label="Your accounts">

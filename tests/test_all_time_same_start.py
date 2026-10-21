@@ -19,10 +19,11 @@ def test_all_time_money_in_is_the_same_on_investments_and_the_overview(c, setup,
     comi = next(a for a in c.assets.investments(active_only=True) if a.code.endswith("COMI"))
     c.assets.set_price(comi.id, "2026-12-15", "75")
     flat = lambda html: re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))
-    investments = flat(client.get("/investments?period=all").text)
-    overview = flat(client.get("/?period=all").text)
-    assert re.search(r"Money in ([\d,]+)", investments).group(1) == "120,000"
-    assert re.search(r"Money in ([\d,]+)", overview).group(1) == "120,000"
+    # Money in has one home, the Overview (guideline 3.33); Investments shows the same All time dates.
+    start = lambda html: re.search(r'name="date_from" value="([\d-]+)"', html).group(1)
+    investments, overview = client.get("/investments?period=all").text, client.get("/?period=all").text
+    assert re.search(r"Money in ([\d,]+)", flat(overview)).group(1) == "120,000"
+    assert start(investments) == start(overview) == "2026-09-01"
 
 
 def test_all_time_money_in_is_the_same_on_budget_and_the_overview(c, setup, monkeypatch):

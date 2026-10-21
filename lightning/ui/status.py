@@ -79,3 +79,37 @@ def cash_plan(safe: Decimal, until: str | None, has_income: bool) -> dict:
     if until:
         return sentence("You can spend {amt} before payday and stay on plan.", amt=fmt(safe))
     return sentence("You can spend {amt} in the next 3 months and stay on plan.", amt=fmt(safe))
+
+
+def accounts(count: int, held: Decimal) -> dict:
+    """Where is my money?"""
+    if not count:
+        return sentence("Add an account to see where your money is.")
+    if held > ZERO:
+        return sentence("{n} accounts. {amt} of it is held for others.", n=count, amt=fmt(held))
+    return sentence("{n} accounts, and all of it is yours.", n=count)
+
+
+def health(within: int, judged: int, outside: list[str]) -> dict:
+    """How do my figures compare with my limits?"""
+    if not judged:
+        return sentence("Add your income and spending to compare them with your limits.")
+    if not outside:
+        return sentence("All {n} figures are within your limits.", n=judged)
+    if len(outside) == 1:
+        return sentence("One thing needs you: {name}. Everything else is within your limits.", name=outside[0])
+    return sentence("{n} of {m} figures are within your limits.", n=within, m=judged)
+
+
+def investments(result: Decimal | None, has_holdings: bool, period_key: str, current: bool) -> dict:
+    """What do I hold, and how is it doing?"""
+    if not has_holdings:
+        return sentence("Record a holding to see how your investments are doing.")
+    when = _when(period_key, current)
+    if result is None:
+        return sentence("A price is missing, so the result " + when + " is unavailable.")
+    if result == ZERO:
+        return sentence("Your holdings' value did not move " + when + ".")
+    if result > ZERO:
+        return sentence("Your holdings grew {amt} " + when + ".", amt=fmt(result))
+    return sentence("Your holdings lost {amt} " + when + ".", amt=fmt(-result))
