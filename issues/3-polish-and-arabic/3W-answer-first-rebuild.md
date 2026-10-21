@@ -39,6 +39,8 @@ Built 2026-10-21: 3W1, 3W2 (order, Lead, Needs you, status; Safe to spend replac
 comparison), 3W3 (Spending by group stays: it is where the plan is edited; Plan leaves to save stays a KPI beside Everyday
 spending), 3W4 (the dot timeline went). Left in 3W2: the Overview's KPI row is still the older stat tiles (A08 five slots
 needs a usual savings rate from a service), and the flow diagrams and Month by month still sit on Overview.
+Built 2026-10-21 (second step): 3W5 (Lead, allocation beside it, waffle and Biggest holdings gone, By currency only when
+something is not in EGP; left: the holdings table to five columns), 3W6, 3W7. Next: 3W8, and the 3W2 and 3W5 leftovers.
 
 ### 3W1 Shared parts
 

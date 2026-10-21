@@ -3,7 +3,7 @@
 {% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Overview'|tr(locale), status, date_from ~ ' to ' ~ date_to, dates_note) }}{% endblock %}
 {% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/", period.key, month, this_month, request.query_params.get("date_from", "") if period_error and period.key == "custom" else period.start_text, request.query_params.get("date_to", "") if period_error and period.key == "custom" else period.end_text) }}{% endblock %}
 {% block content %}
-{% from "partials/charts.html" import stat_tiles, donut, trend, waterfall, column_waterfall, sankey, day_calendar, month_calendar as month_cal %}
+{% from "partials/charts.html" import stat_tiles, donut, trend, waterfall, column_waterfall, sankey, day_calendar, saved_split, month_calendar as month_cal %}
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
 {% if setup %}{% set done = setup|selectattr("done")|list|length %}
 <section class="card setup-card" aria-labelledby="setup-heading">
@@ -86,6 +86,7 @@
             <span class="flow-bar is-in"><i style="width:{{ '%.1f'|format(cash_flow.inflows / flow_max * 100) }}%"></i></span>
             <span class="flow-bar is-out"><i style="width:{{ '%.1f'|format(cash_flow.outflows / flow_max * 100) }}%"></i></span>
           </div>{% endif %}
+          {% if waffle.bar.state != 'empty' %}<details class="overview-disclosure savings-squares" id="savings-squares"><summary><span>{{ "Savings, square by square"|tr(locale) }}</span><b></b></summary><div class="overview-disclosure-body">{{ saved_split(waffle, period.tag) }}</div></details>{% endif %}
           <div class="overview-inline-list">
             <details class="overview-disclosure"><summary><span>{{ fig.money_in.label }}</span><b>{{ cash_flow.inflows|money }}</b></summary><div class="overview-disclosure-body">{% for r in money_in_rows %}<a href="{{ r.href }}"><span>{{ r.label }}</span><b>{{ r.value|money }}</b></a>{% else %}<p class="muted small">{{ "No money in was recorded in this period."|tr(locale) }}</p>{% endfor %}</div></details>
             <details class="overview-disclosure"><summary><span>{{ fig.money_out.label }}</span><b>{{ ('−' ~ (cash_flow.outflows|money)) if cash_flow.outflows > 0 else cash_flow.outflows|money }}</b></summary><div class="overview-disclosure-body">{% for r in money_out_rows %}<a href="{{ r.href }}"><span>{{ r.label }}</span><b>{{ r.value|money }}</b></a>{% else %}<p class="muted small">{{ "No money out was recorded in this period."|tr(locale) }}</p>{% endfor %}</div></details>

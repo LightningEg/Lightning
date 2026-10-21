@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Claude: 3W5-3W7 answer first: Investments leads with Portfolio value (the waffle and Biggest holdings left; By currency only
+  when needed), Accounts with What you own and four groups ("Total balance" retired), Financial health with Within your limits.
 - 2026-10-21 · Claude: 3W1-3W4 answer first: Overview, Budget and Cash planning open on their Lead (Net worth, Left in plan, Safe to spend)
   with its working beside it, a status sentence under the title, Needs you rows with the mark, then KPIs. `ui/status.py`, `lead_card`, `needs_rows`.
 - 2026-10-21 · Claude: guideline 3.33, answer first (3W): A09 Page order (header, Lead, Needs you, KPIs, details; one home per figure),

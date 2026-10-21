@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import amount, held, inst_tile, page_header with context %}
 {% block title %}Accounts{% endblock %}
-{% block heading %}{{ page_header('Accounts'|tr(locale)) }}{% endblock %}
+{% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Accounts'|tr(locale), status) }}{% endblock %}
 {% block top_actions %}<a class="btn primary" href="/accounts/new">{{ 'Add account'|tr(locale) }}</a> <a class="btn" href="/accounts/currencies">{{ 'Other currencies'|tr(locale) }}</a> <a class="btn" href="/sms">{{ "From SMS"|tr(locale) }}</a>{% endblock %}
 {% block content %}
-{% if rows %}<section class="card account-list-summary"><div class="budget-summary-grid"><div><span>{{ "Total balance"|tr(locale) }}</span><b>{% if gross_total is none %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% else %}{{ held(gross_total, base, 0) }}{% endif %}</b></div><div><span>{{ fig.what_you_own.label }}</span><b>{% if net_worth.unvalued %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% else %}{{ held(net_worth.what_you_own, base, 0) }}{% endif %}</b></div></div></section>{% endif %}
-<div class="card">
-  <table>
-    <thead><tr><th>{{ 'Account'|tr(locale) }}</th><th>{{ 'Type'|tr(locale) }}</th><th class="num">{{ 'Transactions'|tr(locale) }}</th><th class="num">{{ "Total balance"|tr(locale) }}</th><th class="num">{{ "You own"|tr(locale) }}</th></tr></thead>
-    <tbody>
-    {% for acc, balance, owned, count in rows %}
-      <tr class="{{ 'void' if not acc.active }}">
-        <td>{{ inst_tile(acc.institution or acc.name) }} <a href="/accounts/{{ acc.id }}">{{ acc.name }}</a>{% if not acc.active %} <span class="pill">{{ "inactive"|tr(locale) }}</span>{% endif %}</td>
-        <td class="small">{{ acc.type_label }}{% if acc.account_type.value == 'DEPOSIT' %}<br><a href="/deposits/{{ acc.id }}">{{ "View CDs"|tr(locale) }}</a>{% elif acc.account_type.value == 'GAMEYA' %}<br><a href="/gameya/{{ acc.id }}">{{ "Open gam’eya"|tr(locale) }}</a>{% endif %}</td>
-        <td class="num small">{{ count }}</td>
-        <td class="num">{% if balance is none %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% else %}{{ held(balance, base) }}{% endif %}</td>
-        <td class="num">{% if owned is none %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% else %}{{ held(owned, base) }}{% endif %}</td>
-      </tr>
-    {% else %}
-      <tr><td colspan="5" class="empty">{{ "No accounts yet."|tr(locale) }}</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  {% if not rows %}<div style="margin-top:12px"><a class="btn primary" href="/accounts/new">{{ "Add your first account"|tr(locale) }}</a></div>{% endif %}
+{% from "partials/charts.html" import lead_card %}
+{% if lead %}{% call lead_card(lead, base) %}<div class="lead-side-head"><div><h3>{{ 'How it adds up'|tr(locale) }}</h3><p>{{ 'Today'|tr(locale) }}</p></div></div>
+  <div class="lead-rows">
+    <div class="lead-row"><span>{{ fig.in_your_accounts.label }}</span><b>{% if gross_total is none %}{{ 'Unavailable'|tr(locale) }}{% else %}{{ gross_total|money }}{% endif %}</b></div>
+    <a class="lead-row" href="/money-from-others"><span>{{ fig.held_for_others.label }}</span><b>{{ ("−" ~ (held_total|money)) if held_total else "0" }}</b></a>
+    <div class="lead-row is-result"><span>{{ fig.what_you_own.label }}</span><b>{{ net_worth.what_you_own|money }}</b></div>
+  </div>{% endcall %}{% endif %}
+{% if rows %}<div class="account-groups">
+{% for name, g in groups %}<section class="card account-group" aria-labelledby="group-{{ loop.index }}">
+  <div class="account-group-head"><h2 id="group-{{ loop.index }}">{{ name|tr(locale) }}</h2><b>{% if g.owned is none %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% else %}{{ g.owned|money }} <small>{{ base }}</small>{% endif %}</b></div>
+  <div class="account-group-cols"><span></span><span>{{ fig.in_your_accounts.label }}</span><span>{{ fig.what_you_own.label }}</span></div>
+  {% for acc, balance, owned, count in g.rows %}
+  <a class="account-row{{ ' is-void' if not acc.active }}" href="{{ '/deposits/' ~ acc.id if acc.account_type.value == 'DEPOSIT' else ('/gameya/' ~ acc.id if acc.account_type.value == 'GAMEYA' else '/accounts/' ~ acc.id) }}">
+    <span class="account-row-name">{{ inst_tile(acc.institution or acc.name) }}<span><b>{{ acc.name }}</b><small>{{ acc.type_label }}{% if not acc.active %} · {{ "inactive"|tr(locale) }}{% endif %}</small></span></span>
+    <span class="num">{% if balance is none %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% else %}{{ balance|money }}{% endif %}</span>
+    <span class="num">{% if owned is none %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% else %}{{ owned|money }}{% endif %}</span>
+  </a>{% endfor %}
+</section>{% endfor %}
 </div>
+{% else %}<div class="card"><p class="empty">{{ "No accounts yet."|tr(locale) }}</p><a class="btn primary" href="/accounts/new">{{ "Add your first account"|tr(locale) }}</a></div>{% endif %}
 {% endblock %}

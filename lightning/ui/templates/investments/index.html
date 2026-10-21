@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/charts.html" import tone_icon %}
 {% block title %}Investments{% endblock %}
-{% block heading %}<div class="birdview-title"><div><h1>{{ 'Investments'|tr(locale) }}</h1><div class="muted">Valued as of {{ period.end_display }}</div></div>{# the Planner tab is the way in #}</div>{% endblock %}
+{% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Investments'|tr(locale), status, period.start_text ~ ' to ' ~ period.end_text, 'valued as of {date}'|tr(locale, date=period.end_display)) }}{% endblock %}
 {% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}{% if lens.available %}<div class="period-buttons" role="group" aria-label="{{ 'Show figures in'|tr(locale) }}"><a class="period-button{{ '' if lens.usd else ' selected' }}" href="{{ lens.egp_link }}">{{ base }}</a><a class="period-button{{ ' selected' if lens.usd }}" href="{{ lens.usd_link }}">USD</a></div>{% endif %}{% endblock %}
 {% block content %}
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
@@ -13,7 +13,12 @@
 {% if not owned_rows and not period_activity %}<section class="card empty"><h2>{{ 'No holdings yet'|tr(locale) }}</h2><p>{% if investment_report.investment_cash %}{{ investment_report.investment_cash|money }} {{ base if base is defined else '' }} of brokerage cash is ready in your investment accounts. {% endif %}Record a holding to see portfolio value, performance, and allocation.</p><p class="muted small">{{ "Holdings are recorded from their account."|tr(locale) }}<a href="/accounts">{{ 'Open accounts'|tr(locale) }}</a></p></section>
 {% else %}
 {% set result = investment_report.result %}
-<section class="stat-tiles inv-top" aria-label="This period">
+{% from "partials/charts.html" import lead_card %}
+{% if lead %}{% call lead_card(lead, lens.code) %}<div class="lead-side-head"><div><h3>{{ "Allocation"|tr(locale) }}</h3><p>{{ fig.holdings_value.label }} by asset class · {{ period.end_text }}</p></div></div>
+      {{ donut(investment_donut, fig.holdings_value.label, base, (fig.what_you_own.label, pos.what_you_own)) }}
+      {% for item in pos.locked_holdings %}<div class="overview-static-row locked-row"><span>{{ "Locked certificate"|tr(locale) }} · {{ item.asset }} <small>{{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small></span><b class="muted">{{ item.value|money }}</b></div>{% endfor %}
+      <div class="overview-inline-list inv-after-sale"><div class="overview-static-row"><span>{{ fig.brokerage_cash.label }}</span><b>{{ investment_report.investment_cash|money if investment_report.investment_cash is not none else 'Unavailable' }}</b></div><a class="overview-static-row" href="/settings?section=assets-valuations"><span>{{ fig.holdings_after_sale.label }}</span><b>{{ pos.holdings_after_sale|money if investment_report.value is not none else 'Unavailable' }}</b></a></div>{% endcall %}
+{% else %}<section class="stat-tiles inv-top" aria-label="This period">
   {% if not phone_mode() %}{# on a phone the Overview's tiles carry these rates; never twice #}
   <div class="stat-tile surface-{{ 'over' if waffle.bar.state == 'overspent' else 'in' }} inv-saved-tile">{% set w = waffle %}{% set bar = w.bar %}
     <span class="stat-tile-head">{{ tone_icon('over' if waffle.bar.state == 'overspent' else 'in') }}<span class="stat-tile-label">{{ 'Savings'|tr(locale) }}</span><span class="stat-chip">{{ chip }}</span></span>
@@ -34,7 +39,6 @@
     <span class="stat-tile-sub">{% if value_spark.change is not none %}<b class="{{ value_spark.change|tone }}">{{ hero_change|money(True) }}</b> since six months ago{% if value_spark.added %}, not counting {{ value_spark.added|money }} of opening balances{% endif %} · today{% else %}Holdings · today{% endif %}</span>
   </a>
 </section>
-
 <section class="card wide-card inv-alloc" aria-label="Allocation">
   <div class="overview-split">
     <section><div class="overview-block-head"><div><h3>{{ "Allocation"|tr(locale) }}</h3><p>{{ fig.holdings_value.label }} by asset class · {{ period.end_text }}</p></div></div>
@@ -45,14 +49,15 @@
       {{ bars(biggest, 'hold', 'No holdings to show.') }}</section>
   </div>
 </section>
-<section class="card wide-card inv-currency" aria-label="{{ 'By currency'|tr(locale) }}">
+{% endif %}
+{% if not lead or currency_card.abroad_share %}<section class="card wide-card inv-currency" aria-label="{{ 'By currency'|tr(locale) }}">
   <div class="overview-block-head"><div><h3>{{ "By currency"|tr(locale) }}</h3><p>{{ "Holdings and brokerage cash, by the currency they are in"|tr(locale) }} · {{ period.end_text }}</p></div></div>
   {% set cc = currency_card %}{% if cc.rows %}
   {% for r in cc.rows %}<div class="overview-static-row"><span>{{ r.label }}{% if r.note %} <small>{{ r.note }}</small>{% endif %}</span><b>{{ r.value|money }} <small>{{ lens.code }} · {{ '%.1f'|format(r.share) }}%</small></b></div>{% endfor %}
   <p class="muted small">{{ "Not in {currency}: {share}% of your investments"|tr(locale, currency=base, share='%.0f'|format(cc.abroad_share)) }}</p>
   {% if fx_gain %}<p class="muted small">{{ "Of your total gain {gain}, {fx} came from exchange rates"|tr(locale, gain=total_gain|money(True), fx=fx_gain|money(True)) }}</p>{% endif %}
   {% else %}<p class="chart-empty">{{ "No holdings to show."|tr(locale) }}</p>{% endif %}
-</section>
+</section>{% else %}<p class="muted small inv-all-base">{{ "All in {currency}"|tr(locale, currency=base) }}</p>{% endif %}
 {% if investment_report.missing %}<p class="notice">Price quality: {% for issue in investment_report.missing %}{{ issue.asset }} — {{ issue.reason|tr(locale) }}{% if not loop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 {% if investment_report.unrealized_change is none %}<p class="notice">{{ "A dated market price is missing at a period boundary, so the result is unavailable."|tr(locale) }}</p>{% endif %}
 {% if investment_report.unresolved_dividends %}<p class="notice">{{ investment_report.unresolved_dividends }} dividend(s) have unresolved asset attribution; the amount remains in cash.</p>{% endif %}

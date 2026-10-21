@@ -5,13 +5,14 @@ from dataclasses import replace
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
-from lightning.accounts.domain import DEFAULT_CASH_CLASS, OFFERED_TYPES, TYPE_LABELS
+from lightning.accounts.domain import DEFAULT_CASH_CLASS, OFFERED_TYPES, SIDEBAR_GROUPS, TYPE_LABELS
 from lightning.core.dates import fmt_date, parse_date, today
 from lightning.core.errors import LightningError, ValidationError
-from lightning.core.money import to_decimal
+from lightning.core.figures import label
+from lightning.core.money import ZERO, fmt, to_decimal
 
 from . import register
-from .. import charts
+from .. import charts, kpis, status as page_status
 from ..periods import parse_period
 from ..web import container, redirect, render
 
@@ -76,8 +77,28 @@ async def list_accounts(request: Request):
     gross_total = (None if has_unavailable else
                    sum((row[1] for row in rows if row[0].active), start=0))
     recent_rows = c.reporting.register_page(None, "1900-01-01", "9999-12-31", 1, 10)[0]  # the phone shows the latest few
+    # Answer first (guideline 3.33): What you own is the Lead, In your accounts and Held for others beside it; the
+    # accounts follow in the groups the sidebar uses, each with its total.
+    held = c.reporting.money_from_others_total(fmt_date(today()))
+    active = [row for row in rows if row[0].active]
+    lead = None
+    if rows and not net_worth.unvalued:
+        lead = kpis.card(label("what_you_own"), net_worth.what_you_own,
+                         kpis.compare("is held for others, not yours", fmt(held, 0), "hold") if held
+                         else kpis.compare("All of it is yours"), tone="hold", key="own",
+                         line_=kpis.line(f"Across {len(active)} account{'s' if len(active) != 1 else ''}"))
+    groups: dict[str, dict] = {}
+    for row in rows:
+        group = groups.setdefault(SIDEBAR_GROUPS[row[0].account_type], {"rows": [], "balance": ZERO, "owned": ZERO})
+        group["rows"].append(row)
+        if row[0].active:
+            group["balance"] = None if group["balance"] is None or row[1] is None else group["balance"] + row[1]
+            group["owned"] = None if group["owned"] is None or row[2] is None else group["owned"] + row[2]
+    order = list(dict.fromkeys(SIDEBAR_GROUPS.values()))
     return render(request, "accounts/list.html", rows=rows, net_worth=net_worth, gross_total=gross_total,
-                  recent_rows=recent_rows)
+                  recent_rows=recent_rows, lead=lead, held_total=held,
+                  groups=sorted(groups.items(), key=lambda item: order.index(item[0])),
+                  status=page_status.accounts(len(active), held))
 
 
 @router.get("/currencies")

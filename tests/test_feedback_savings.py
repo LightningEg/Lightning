@@ -32,8 +32,8 @@ def test_savings_picture(income, spend, added, state, saved, excess):
 
 
 @pytest.mark.parametrize('income,spend', [('100','60'), ('100','125'), ('100','350'), ('100','100'), ('0','25'), ('0','0')])
-# The waffle left Budget (owner 2026-10-19, guideline 3.32): it stays on Investments until 3Q moves it to the Overview.
-@pytest.mark.parametrize('path', ['/investments'])
+# The waffle lives behind the Overview's Savings rate (owner 2026-10-19; moved off Investments with guideline 3.33).
+@pytest.mark.parametrize('path', ['/'])
 def test_shared_savings_view(c, income, spend, path):
     import re
     account = c.account_flows.open_account('Daily', 'BANK', '2026-09-01', '1000')
