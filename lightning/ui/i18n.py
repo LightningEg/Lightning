@@ -106,6 +106,7 @@ ARABIC_UI = {
     'Overview': 'نظرة عامة',
     'Done': 'تم',
     'Needs you': 'محتاج تدخّلك',
+    '{n} of your {amt} free cash': '{n} من نقديتك المتاحة {amt}',
     'Due {sa}': 'مستحق {sa}',
     '{name} is late': '{name} متأخر',
     '{name} is {amt} over its plan': '{name} زاد {amt} عن خطته',

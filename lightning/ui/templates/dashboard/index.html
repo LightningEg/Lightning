@@ -13,7 +13,7 @@
 </section>
 {% endif %}
 {% set period_query = request.url.query %}
-{% from "partials/macros.html" import needs_rows, watermark %}
+{% from "partials/macros.html" import needs_rows %}
 <div class="overview-stack">
   <div class="overview-answer">
   <section class="overview-section overview-lead" aria-label="{{ 'Your position'|tr(locale) }}">
@@ -39,7 +39,6 @@
           {% for month, amount in networth_trend.openings %}<p class="muted small">{{ month }} includes {{ amount|money }} of opening balances: yours before, so not a change.</p>{% endfor %}
         </section>
       </div>
-      {{ watermark() }}
     </article>
   </section>
   {{ needs_rows(attention_groups, attention|length, more=('Weekly review'|tr(locale), '/review')) }}

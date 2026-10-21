@@ -4,9 +4,10 @@
 {% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Budget'|tr(locale), status, period.start_text ~ ' to ' ~ period.end_text, 'so far' if everyday and everyday.current else '') }}{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import key_notes, meter, bullet_row, kpi_row, pace_chart, lead_card %}{% from "partials/macros.html" import needs_rows %}
-{% if lead %}{% call lead_card(lead, base) %}{% if pace %}<div class="lead-side-head" id="budget-pace"><div><h3>{{ 'Is everyday spending on pace?'|tr(locale) }}</h3><p>{% if pace_card %}<b class="is-{{ pace_card.compare.tone }}">{{ pace_card.compare.figure }}</b> {{ pace_card.compare.text }} · {% endif %}{{ 'bills and loan payments left out'|tr(locale) }}</p></div></div>
+{% if lead %}{% call lead_card(lead, base) %}{% if pace %}<div class="lead-side-head" id="budget-pace"><div><h3>{{ 'Is everyday spending on pace?'|tr(locale) }}</h3><p>{{ 'Day by day against the plan, bills and loan payments left out.'|tr(locale) }}</p></div></div>
     {{ pace_chart(pace, base, previous_month) }}{% endif %}{% endcall %}
 {{ needs_rows(needs) }}
+{{ kpi_row(kpi_cards, base, 'Budget at a glance') }}
 {% elif kpi_cards %}{{ kpi_row(kpi_cards, base, 'Budget at a glance') }}{% else %}{{ key_notes(notes) }}{% endif %}
 {% if raise_offer and not raise_in_card %}<p class="notice raise-prompt" role="status"><span><b>{{ 'Your income went up'|tr(locale) }}</b> · {{ 'Recurring expects {recurring}, {raise} more than your average.'|tr(locale, recurring=raise_offer.recurring|money(False, 0) ~ ' ' ~ base, raise=raise_offer.raise|money(False, 0)) }}</span> <a class="btn small primary" data-popup-open href="/budget/raise?month={{ raise_offer.month }}">{{ 'Raise the plan'|tr(locale) }}</a> <a class="btn small" href="/plan/reserves">{{ 'Save the difference'|tr(locale) }}</a></p>{% endif %}
 

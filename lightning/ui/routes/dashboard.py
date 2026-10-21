@@ -139,7 +139,8 @@ async def dashboard(request: Request):
     owe = position.owe
     read_phone_sms(request, c)  # new bank messages join the review before Needs you is counted
     # One review inbox: every decision waiting on the user (lightning/workflows/review.py).
-    attention = ReviewInbox(c).items(today())
+    inbox = ReviewInbox(c)
+    attention = inbox.items(today())
     attention_groups = grouped(attention)
     setup = _setup_steps(c, accounts)
     change, change_reason = c.position.change_in_what_you_own(first, as_of, since_first_record=period.key == "all")
@@ -236,7 +237,7 @@ async def dashboard(request: Request):
     current = as_of >= today()
     lead_change = page_status.change(change_tile["value"], period.key, current)
     if position_is_today := position_day == today():
-        stats.insert(len(stats) - 1, _safe_tile(c))
+        stats.insert(len(stats) - 1, _safe_tile(inbox.forecast))
     status = page_status.overview(cash_flow.inflows, cash_flow.outflows, cash_flow.net, cash_flow.savings_rate,
                                   cash_flow.rate_says_nothing, period.key, current, bool(accounts))
     dates_note = ("so far" if current and period.key in ("month", "ytd") else "year to date" if period.key == "ytd" else "")
@@ -447,9 +448,9 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
     return stats
 
 
-def _safe_tile(c) -> dict:
-    """Safe to spend on the Overview: the Cash planning figure (its home), as a card that opens it."""
-    f = c.forecaster.forecast(today())
+def _safe_tile(f) -> dict:
+    """Safe to spend on the Overview: the Cash planning figure (its home), as a card that opens it. ``f`` is today's
+    forecast, the one Needs you already worked out."""
     until = f.next_income_date
     share = f"{f.safe_to_spend / f.free_cash * 100:.0f}% of your {fmt(f.free_cash)} free cash" if f.free_cash > 0 else "No free cash today"
     return {"key": "safe", "surface": "over" if f.safe_to_spend < 0 else "hold", "label": label("safe_to_spend"),

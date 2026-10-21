@@ -303,6 +303,5 @@
     {% if k.line.text or k.line.action %}<p class="lead-line">{% if k.line.text %}<span>{{ k.line.text }}</span>{% endif %}{% if k.line.action %} <a href="{{ k.line.href }}"{% if k.line.popup %} data-popup-open{% endif %}>{{ k.line.action }}</a>{% endif %}</p>{% endif %}
   </div>
   {% if caller %}<div class="lead-side">{{ caller() }}</div>{% endif %}
-  <img class="lead-wm" src="/static/lightning-mark-flat.svg" alt="" aria-hidden="true">
 </section>
 {% endmacro %}

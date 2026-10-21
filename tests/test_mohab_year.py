@@ -897,9 +897,9 @@ def test_september_spending_by_category(mohab):
 def test_the_budget_says_what_is_over(mohab):
     answer = mohab.answers["plan"]
     assert route(mohab, "plan") == ["/", "/budget"]
-    # The Over plan card (guideline 3.32 A08): the total, how many categories, which ones, and a way to cover it.
-    assert answer.shows("Over plan Needs you", "2 categories over their plan")
-    assert answer.shows("Transportation") and answer.shows("Food & Groceries")
+    # Each category over plan is a Needs you row under the Lead (guideline 3.33, A09), the largest with a way to cover it.
+    assert answer.shows("Needs you · 2")
+    assert answer.shows("Transportation is") and answer.shows("Food & Groceries is")
     # Each "80 of 67 · 13 over" adds up as he reads it: plans built from his spending are whole EGP.
     for spent, planned, gap, word in re.findall(r"([\d,]+) of ([\d,]+) ([\d,]+) (over|left)", answer.screen.text):
         spent, planned, gap = (money(x) for x in (spent, planned, gap))

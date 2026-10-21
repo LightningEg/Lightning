@@ -3588,7 +3588,8 @@ a.period-button { display:inline-flex; align-items:center; justify-content:cente
 .topbar .page-title .page-dates b { color:var(--ink); font-weight:700; }
 .topbar .page-title .page-dates span { color:var(--muted); }
 .main .lead-card { position:relative; overflow:hidden; isolation:isolate; }
-.main .lead-wm { position:absolute; inset-inline-end:-28px; bottom:-56px; width:150px; height:auto; opacity:.07; pointer-events:none; z-index:-1; }
+.main .lead-card::after { content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; opacity:.07;
+  background:url(/static/lightning-mark-flat.svg) no-repeat right -28px bottom -56px / 150px auto; }
 .main .lead-compare { margin:-6px 0 12px; font:500 var(--fs-body)/1.45 var(--body); color:var(--ink-2); }
 .main .lead-compare b.is-good { color:var(--positive); } .main .lead-compare b.is-bad { color:var(--rose); }
 .main .needs { margin:0 0 var(--gap-block); }

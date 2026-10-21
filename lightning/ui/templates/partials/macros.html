@@ -111,5 +111,4 @@
 <a class="needs-row" href="{{ r.href }}"{% if r.popup %} data-popup-open{% endif %}><img class="needs-mark" src="/static/lightning-mark-flat.svg" alt="" width="12" height="17"><span class="needs-text"><b>{% if r.count is defined and r.count > 1 %}{{ r.label|tr(ui_locale()) }} · {{ r.count }}{% else %}{{ r.label }}{% endif %}</b><small>{{ r.detail }}</small></span>{% if r.late_days %}<span class="plan-status plan-status-late">{{ ("Late · 1 day" if r.late_days == 1 else "Late · {n} days")|tr(ui_locale(), n=r.late_days) }}</span>{% endif %}<span class="needs-act">{{ (r.action or "Review")|tr(ui_locale()) }}</span></a>
 {%- endmacro %}
 
-{# The watermark (A02.3): the mark in the corner of the page's Lead card, once per page. #}
-{% macro watermark() -%}<img class="lead-wm" src="/static/lightning-mark-flat.svg" alt="" aria-hidden="true">{%- endmacro %}
+{# The watermark (A02.3) is CSS: .lead-card::after, the mark in the corner of the page's Lead card. #}

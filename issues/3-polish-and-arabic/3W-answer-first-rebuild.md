@@ -35,6 +35,11 @@ so the name is right).
 
 ## Steps
 
+Built 2026-10-21: 3W1, 3W2 (order, Lead, Needs you, status; Safe to spend replaces the change card, which became the Lead's
+comparison), 3W3 (Spending by group stays: it is where the plan is edited; Plan leaves to save stays a KPI beside Everyday
+spending), 3W4 (the dot timeline went). Left in 3W2: the Overview's KPI row is still the older stat tiles (A08 five slots
+needs a usual savings rate from a service), and the flow diagrams and Month by month still sit on Overview.
+
 ### 3W1 Shared parts
 
 `page_header` gains the status sentence and the seam; a `lead_card` macro (figure, comparison, working rows or chart, the

@@ -360,12 +360,12 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                                         for key, _ in month_views if c.budgets.has_plan(key)],
                                        period.label)
     # Answer first (guideline 3.33, A09): Left in plan is the page's Lead with the pace chart beside it; what is over
-    # plan and a raise are Needs you rows under it. Plan leaves to save lives on Financial health (Planned savings rate).
+    # plan is a Needs you row under it; Everyday spending and Plan leaves to save stay as the KPI row.
     lead, pace_card, needs = None, None, []
     if period.key == "month" and has_plan:
         by_key = {k["key"]: k for k in kpi_cards}
         lead, pace_card = by_key.get("left"), by_key.get("everyday")
-        kpi_cards = []
+        kpi_cards = kpis.row([by_key.get("everyday"), by_key.get("saves")])
         rows = {r["category_id"]: r for r in meter_lines}
         for i, o in enumerate(over):
             move = _cover_from(c, month, o, everyday.room) if i == 0 else None
@@ -374,14 +374,14 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                           "detail": f"{keynotes.fmt(r['used'])} spent of {keynotes.fmt(r['total'])}",
                           "href": move["href"] if move else r["href"], "popup": bool(move),
                           "action": f"Move {keynotes.fmt(move['amount'])} from {move['name']}" if move else "See it"})
-        if raise_offer:
+        if raise_offer and not by_key.get("saves"):
             needs.append({"label": "Your income went up",
                           "detail": f"Recurring expects {keynotes.fmt(raise_offer['raise'])} more than your average.",
                           "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose"})
     status = page_status.budget(everyday, has_plan, period.key, period_actual, period_budgeted)
     return render(request, "budget.html", notes=notes, kpi_cards=kpi_cards, pace=pace, plan_bills=plan_bills, everyday=everyday,
                   lead=lead, pace_card=pace_card, needs=needs, status=status,
-                  raise_in_card=bool(lead) or any(k["key"] == "saves" for k in kpi_cards),
+                  raise_in_card=bool(needs and needs[-1]["href"].startswith("/budget/raise")) or any(k["key"] == "saves" for k in kpi_cards),
                   raise_offer=raise_offer, meter_lines=meter_lines, left_note=left_note, check=check,
                   plan_bar=charts.plan_bar(period_budgeted, period_actual),
                   status_code=status_code, view=view, month=month,

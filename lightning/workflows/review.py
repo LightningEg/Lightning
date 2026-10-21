@@ -166,7 +166,7 @@ class ReviewInbox:
                     items.append({"label": "Reimbursement needs review",
                                   "detail": f"{fmt(claim['outstanding'])} {c.base_currency} outstanding.",
                                   "href": "/reimbursements", "priority": 1})
-        forecast = c.forecaster.forecast(on)
+        forecast = self.forecast = c.forecaster.forecast(on)  # the Overview's Safe to spend card reads it too
         # A dated daily forecast takes precedence over its monthly summary: the summary can hide which
         # day or account runs short, and would duplicate a more useful warning.
         dated = getattr(forecast, "dated", None)  # older forecast doubles may not expose this yet
