@@ -113,7 +113,8 @@ balance), Loan balance and Principal and interest (Loans), Histogram (Spending),
 2. ~~KPI component, Budget and Cash planning~~ done 2026-10-19 on PC (`ui/kpis.py`, `CashForecaster.everyday`; number
    audit: 44 checks and two move-it tests agree). Late bills are already out of Free cash, so the Due card counts them
    "already late" and the bridge leaves them out. With no plan in the period, Budget shows no KPI row (A08.5 thin form: open).
-3. **Next:** Overview, Spending thin-data forms, Recurring, Loans, Reserves.
+3. **Next:** Overview, Spending thin-data forms, Recurring, Loans, Reserves. From 2026-10-21 the six main tabs are rebuilt under
+   3W (answer first), which does this item's §3 row for each tab it touches.
 4. Investments, holding page, Currencies, Accounts, account page.
 5. Phone, arabic-check, Mohab, site-recapture.
 
