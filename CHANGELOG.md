@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Codex: 2D completed: v1.4.2 Windows ZIP and signed Android APK are published from the verified original artifacts, with SHA256SUMS and BUILD.json.
+  The owner-generated certificate passed signing checks; publishing-only recovery used the current downloads repository address and verified every uploaded file by read-back.
+
 - 2026-10-21 · Codex: 2D adds a publishing-only recovery for the verified v1.4.2 artifacts and uses LightningEg/Lightning-downloads after the repository transfer.
   Fixed artifact IDs, digests, successful jobs and the pinned source/certificate are checked before the protected publisher uploads and reads back the same files; no rebuild or re-signing.
 
