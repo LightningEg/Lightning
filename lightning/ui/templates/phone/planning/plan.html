@@ -5,7 +5,7 @@
 {% from "phone/partials/charts.html" import kpi_tiles, bar_rows %}
 {% from "partials/charts.html" import trend %}
 {% block title %}Cash planning{% endblock %}
-{% block heading %}<h1>{{ 'Cash planning'|tr(locale) }}</h1><p>As of {{ as_of }}</p>{% endblock %}
+{% block heading %}<h1>{{ 'Cash planning'|tr(locale) }}</h1>{% if status %}<p class="phone-status">{{ status.text|tr(locale, **status['values']) }}</p>{% endif %}<p>As of {{ as_of }}</p>{% endblock %}
 {% block content %}
 {% set f = forecast %}{% set p = plan %}
 

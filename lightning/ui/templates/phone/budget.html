@@ -4,7 +4,7 @@
 {% extends "base.html" %}
 {% from "partials/charts.html" import key_notes %}
 {% block title %}Budget{% endblock %}
-{% block heading %}<h1>{{ 'Budget'|tr(locale) }}</h1><p>{{ period.start_text }} to {{ period.end_text }}</p>{% endblock %}
+{% block heading %}<h1>{{ 'Budget'|tr(locale) }}</h1>{% if status %}<p class="phone-status">{{ status.text|tr(locale, **status['values']) }}</p>{% endif %}<p>{{ period.start_text }} to {{ period.end_text }}</p>{% endblock %}
 {% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/budget", period.key, month, this_month, period.start_text, period.end_text) }}{% endblock %}
 {% block content %}
 {% if raise_offer %}<section class="card phone-card raise-prompt" aria-labelledby="raise-heading">

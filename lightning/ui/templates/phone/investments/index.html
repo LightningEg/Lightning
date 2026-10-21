@@ -5,7 +5,7 @@
 {% from "phone/partials/charts.html" import kpi_tiles %}
 {% from "partials/charts.html" import donut %}
 {% block title %}Investments{% endblock %}
-{% block heading %}<h1>{{ 'Investments'|tr(locale) }}</h1><p>Valued as of {{ period.end_display }}</p>{% endblock %}
+{% block heading %}<h1>{{ 'Investments'|tr(locale) }}</h1>{% if status %}<p class="phone-status">{{ status.text|tr(locale, **status['values']) }}</p>{% endif %}<p>Valued as of {{ period.end_display }}</p>{% endblock %}
 {% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}{% endblock %}
 {% macro phone_bars(rows, caption) %}<div class="phone-bars" role="list" aria-label="{{ caption }}">{% for r in rows if not r.header %}
   {% set tag = 'a' if r.href else 'div' %}<{{ tag }} class="phone-bar-row" role="listitem"{% if r.href %} href="{{ r.href }}"{% endif %}><span class="phone-bar-name">{{ r.label }}</span><b class="phone-bar-value">{{ r.value|money }}</b><span class="phone-bar-track"><i style="width:{{ '%.1f'|format([r.width or 0, 1]|max) }}%"></i></span></{{ tag }}>
@@ -41,10 +41,7 @@
       <div class="phone-row"><span>{{ fig.holdings_after_sale.label }}</span><b>{{ pos.holdings_after_sale|money if pos.holdings_after_sale is not none else 'Unavailable' }}</b></div>
     </div>
   </article>
-  {% if biggest and biggest.rows %}<article class="card phone-card" aria-label="Biggest holdings">
-    <h3 class="phone-card-title">{{ "Biggest holdings"|tr(locale) }}</h3><p class="phone-note">Share of {{ fig.holdings_value.label|lower }}</p>
-    {{ phone_bars(biggest.rows, 'Biggest holdings') }}
-  </article>{% endif %}
+  {# Biggest holdings left: the holdings rows below are its one home (guideline 3.33, A09.2). #}
 </section>
 
 {% for item in pos.locked_holdings %}<div class="phone-row locked-row"><span>{{ "Locked certificate"|tr(locale) }} · {{ item.asset }} <small>{{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small></span><b class="muted">{{ item.value|money }}</b></div>{% endfor %}

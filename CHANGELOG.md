@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Claude: 3W8 phone: each section's title carries its status sentence and the seam (C04.1); Needs you bullets are the mark;
+  Accounts leads with What you own ("Total balance" retired); Investments drops Biggest holdings; no Needs you row when nothing waits.
 - 2026-10-21 · Claude: 3W5-3W7 answer first: Investments leads with Portfolio value (the waffle and Biggest holdings left; By currency only
   when needed), Accounts with What you own and four groups ("Total balance" retired), Financial health with Within your limits.
 - 2026-10-21 · Claude: 3W1-3W4 answer first: Overview, Budget and Cash planning open on their Lead (Net worth, Left in plan, Safe to spend)

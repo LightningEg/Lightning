@@ -5,7 +5,7 @@
 {% from "phone/partials/charts.html" import kpi_tiles, bar_rows, flow_bars, month_tiles %}
 {% from "partials/charts.html" import trend, donut %}
 {% block title %}Overview{% endblock %}
-{% block heading %}<h1>{{ 'Overview'|tr(locale) }}</h1>{% endblock %}
+{% block heading %}<h1>{{ 'Overview'|tr(locale) }}</h1>{% if status %}<p class="phone-status">{{ status.text|tr(locale, **status['values']) }}</p>{% endif %}{% endblock %}
 {% block content %}
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
 {% if setup %}{% set done = setup|selectattr("done")|list|length %}
@@ -26,7 +26,7 @@
   <summary><span class="needs-you-dot" aria-hidden="true"></span><b id="needs-heading">{{ "Needs you"|tr(locale) }}</b><span class="needs-you-count">{{ attention|length }}</span></summary>
   <div class="phone-rows">{% for item in attention %}<a class="phone-row" href="{{ item.href }}"{% if item.popup %} data-popup-open{% endif %}><span>{{ item.label }}<small>{{ item.detail }}</small></span>{% if item.late_days %}<span class="plan-status plan-status-late">{{ ("Late · 1 day" if item.late_days == 1 else "Late · {n} days")|tr(locale, n=item.late_days) }}</span> {% endif %}<b class="phone-row-action">{{ item.action or '›' }}</b></a>{% endfor %}</div>
 </details>
-{% else %}<div class="card phone-needs is-empty"><span class="needs-you-dot" aria-hidden="true"></span><b>{{ "Nothing needs you today"|tr(locale) }}</b></div>{% endif %}
+{% endif %}{# nothing waiting: no row at all (A09) #}
 
 <p class="actions"><a class="quiet-link" href="/review">{{ 'Weekly review'|tr(locale) }}</a></p>
 {% from "phone/partials/txn.html" import txn_list with context %}
