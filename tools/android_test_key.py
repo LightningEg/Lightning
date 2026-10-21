@@ -62,15 +62,12 @@ def write(folder: Path) -> str:
     """Write the three files into a new or empty folder; never overwrite a key."""
     if folder.exists() and any(folder.iterdir()):
         raise SystemExit(f"{folder} is not empty. A test key may already be there: keep it, or choose another folder.")
-    folder.mkdir(parents=True, exist_ok=True, mode=0o700)
+    folder.mkdir(parents=True, exist_ok=True)
     password = secrets.token_urlsafe(32)
     store, fingerprint = make_keystore(password)
     contents = (base64.b64encode(store).decode() + "\n", password + "\n", fingerprint + "\n")
     for name, text in zip(FILES, contents, strict=True):
-        target = folder / name
-        with target.open("x", encoding="ascii") as output:
-            target.chmod(0o600)
-            output.write(text)
+        (folder / name).write_text(text, encoding="ascii")
     return fingerprint
 
 
