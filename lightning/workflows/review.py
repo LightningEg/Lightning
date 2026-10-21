@@ -97,6 +97,19 @@ class ReviewInbox:
                           "href": f"/plan/items/{payment.item.id}/pay?due={payment.due_date}&back=%2F",
                           "popup": True, "action": "Mark paid", "priority": 1,
                           "late_days": payment.days_late(on)})
+        # Money that moved before the payment was due (salary 12 days early): the forecast no longer counts it
+        # twice, and one press links it (7K).
+        for early in c.planning.early_payments(on):
+            item, payment, txn = early["item"], early["payment"], early["transaction"]
+            currency = c.accounts.get(item.account_id).currency if item.account_id else c.base_currency
+            items.append({"label": f"{item.name} arrived early" if item.is_income else f"{item.name} was paid early",
+                          "detail": f"{fmt(txn['amount'])} {currency} on {txn['date']}, for the payment due {payment.due_date}. "
+                                    "Link it so the plan does not count it again.",
+                          "href": f"/plan/items/{item.id}/pay?due={payment.due_date}&back=%2F", "popup": True,
+                          "action": "Link", "priority": 1,
+                          "post": {"href": f"/plan/items/{item.id}/pay", "label": "Link this payment",
+                                   "fields": {"outcome": "link", "due": payment.due_date,
+                                              "transaction_id": str(txn["id"])}}})
         items.extend(c.gameya.attention(on))  # an instalment or payout past its date and not recorded
         for changed in c.db.all(
                 "SELECT i.id,i.name,i.amount_e6,i.account_id,p.amount_e6 AS paid_e6,p.due_date "

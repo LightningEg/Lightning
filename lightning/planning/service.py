@@ -16,7 +16,7 @@ from lightning.fx import rate_for
 
 from .domain import (Frequency, Payment, PaymentStatus, PlanKind, PlannedItem, WeekendMove, WhatYouOwe, per_year)
 from .repository import PlanningRepository
-from .schedule import payment_dates, scheduled_dates
+from .schedule import payment_dates, previous_due, scheduled_dates
 
 # New planned items start with the existing matching policy.
 MATCH_WINDOW_DAYS = 7
@@ -249,8 +249,12 @@ class PlanningService:
                 count += 1
         return count
 
-    def candidates(self, payment: Payment, as_of: date | None = None, loose: bool = False) -> list[dict]:
-        """Candidates inside the planned item's saved date, amount, account, and currency policy."""
+    def candidates(self, payment: Payment, as_of: date | None = None, loose: bool = False,
+                   any_account: bool = False) -> list[dict]:
+        """Candidates inside the planned item's saved date, amount, account, and currency policy.
+
+        ``any_account`` is for a person's review (the pay popup, a transaction's page): money moved through
+        another cash account in the item's currency counts. Automatic matching never sets it (7K)."""
         item, day = payment.item, as_of or today()
         if not (item.category_id or item.counterparty_id):
             return []
@@ -258,7 +262,7 @@ class PlanningService:
         due = date.fromisoformat(payment.due_date)
         window = item.match_window_days
         currency = self.accounts.get(item.account_id).currency if item.account_id else self.transactions.base_currency
-        rows = self.repo.candidates(item.is_income, item.account_id,
+        rows = self.repo.candidates(item.is_income, None if any_account else item.account_id,
                                     None if loose else item.category_id,
                                     None if loose else item.counterparty_id,
                                     fmt_date(due - timedelta(days=window)),
@@ -268,7 +272,10 @@ class PlanningService:
         return [r for r in rows if abs(r["amount"] - expected) <= expected * tolerance]
 
     def plausible_candidates(self, payment: Payment, as_of: date | None = None) -> list[dict]:
-        """Read-only wider suggestions; a user must explicitly choose one to link it."""
+        """Read-only wider suggestions; a user must explicitly choose one to link it.
+
+        From any of the owner's cash accounts in the item's currency. Leaves out a transaction that already
+        settles a payment, and one nearer the previous due date than this one: that is last period's (7K)."""
         item, day = payment.item, as_of or today()
         expected = payment.still_owed if payment.outstanding else payment.amount
         if not (item.counterparty_id or item.category_id):
@@ -277,13 +284,56 @@ class PlanningService:
         window = max(item.match_window_days, 45)
         currency = self.accounts.get(item.account_id).currency if item.account_id else self.transactions.base_currency
         rows = self.repo.candidates(
-            item.is_income, item.account_id, item.category_id, item.counterparty_id,
+            item.is_income, None, item.category_id, item.counterparty_id,
             fmt_date(due - timedelta(days=window)),
             fmt_date(min(due + timedelta(days=window), day)), currency)
-        strict = {row["id"] for row in self.candidates(payment, day)}
+        strict = {row["id"] for row in self.candidates(payment, day, any_account=True)}
+        linked = self.repo.linked_transaction_ids()
+        previous = previous_due(item, payment.due_date)
+        before = date.fromisoformat(previous) if previous else None
         tolerance = Decimal(max(item.match_tolerance_pct, 50)) / Decimal(100)
-        return [row for row in rows if row["id"] not in strict
+        return [row for row in rows if row["id"] not in strict and row["id"] not in linked
+                and not (before and abs((date.fromisoformat(row["date"]) - before).days)
+                         < abs((date.fromisoformat(row["date"]) - due).days))
                 and abs(row["amount"] - expected) <= expected * tolerance]
+
+    @request_cached
+    def early_payments(self, as_of: date | None = None) -> list[dict]:
+        """Next payments whose money has already moved: pay that arrived (or a bill that went out) before its due date.
+
+        An unlinked, posted transaction from the same counterparty and category, within the item's amount
+        tolerance, dated after the middle of the period before the due date (so nearer this payment than the
+        last one). Only when it is the one candidate and no payment is already late. Nothing is linked: the
+        forecast stops counting that payment a second time, and Needs you offers the link (7K)."""
+        day = as_of or today()
+        linked = self.repo.linked_transaction_ids()
+        found: list[dict] = []
+        for item in self.items((PlanKind.INCOME, PlanKind.BILL, PlanKind.SUBSCRIPTION)):
+            if not (item.counterparty_id and item.category_id) or item.frequency == Frequency.ONCE:
+                continue
+            reach = 7 * item.interval_count + 7 if item.frequency == Frequency.WEEKLY else 31 * item.interval_count * (
+                {Frequency.MONTHLY: 1, Frequency.QUARTERLY: 3, Frequency.YEARLY: 12}[item.frequency]) + 7
+            open_ = [p for p in self.payments(item, day + timedelta(days=reach), day) if p.outstanding]
+            if not open_ or open_[0].status != PaymentStatus.UPCOMING:
+                continue  # nothing is open, or an earlier payment is late and the normal matching comes first
+            payment = open_[0]
+            due = date.fromisoformat(payment.due_date)
+            previous = date.fromisoformat(previous_due(item, payment.due_date))
+            first = previous + (due - previous) / 2 + timedelta(days=1)
+            if first > day:
+                continue
+            currency = self.accounts.get(item.account_id).currency if item.account_id else self.transactions.base_currency
+            tolerance = Decimal(item.match_tolerance_pct) / Decimal(100)
+            rows = [r for r in self.repo.candidates(item.is_income, None, item.category_id, item.counterparty_id,
+                                                    fmt_date(first), fmt_date(day), currency, require_all_identity=True)
+                    if r["id"] not in linked and abs(r["amount"] - payment.still_owed) <= payment.still_owed * tolerance]
+            if len(rows) == 1:
+                found.append({"item": item, "payment": payment, "transaction": rows[0]})
+        taken: dict[int, int] = {}
+        for row in found:
+            taken[row["transaction"]["id"]] = taken.get(row["transaction"]["id"], 0) + 1
+        return sorted((r for r in found if taken[r["transaction"]["id"]] == 1),
+                      key=lambda r: (r["payment"].due_date, r["item"].name.casefold()))
 
     def linked_transaction_ids(self) -> set[int]:
         return self.repo.linked_transaction_ids()
@@ -300,7 +350,7 @@ class PlanningService:
         if transaction_id in self.repo.linked_transaction_ids():
             raise ValidationError("That transaction already settles another payment.")
         currency = self.accounts.get(item.account_id).currency if item.account_id else self.transactions.base_currency
-        txn = self.repo.payment_transaction(transaction_id, item.is_income, item.account_id,
+        txn = self.repo.payment_transaction(transaction_id, item.is_income, None,  # a person may pick any cash account
                                            item.category_id, item.counterparty_id, currency)
         if not txn:
             raise ValidationError("Choose a posted, owned transaction for this account and payment.")
