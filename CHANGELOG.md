@@ -11,6 +11,10 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-21 · Codex: Prepare v1.4.0 as the tested Windows app and matching signed Android APK.
+
+## [1.4.0] — 2026-10-21
+
 - 2026-10-21 · Claude: website recaptured from this app (3W site-recapture): net worth 910,304, safe to spend 112,288, nine accounts, new Overview rate crops; Budget screens kept old for 3AB; also filed 3Z, 3AA.
 - 2026-10-21 · Codex: 3Y register selection survives edits, cancellation and message redirects; adds Edit selected, Clear selection and Shift-click ranges, plus phone Select all.
   Mass edits affect only selected rows and changed fields; amount/account edits stay on one row with an explicit choice. Browser checks cover both layouts, dialog closure and retries.
