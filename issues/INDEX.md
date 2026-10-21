@@ -31,7 +31,7 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | 2C3 | ↳ Native file pickers | | | |
 | 2C4 | ↳ Unresolved-evidence repair | | | |
 | 2C5 | ↳ Native notification delivery, Windows and Android | | | |
-| **2D** | [The Android signing key is forgotten: investigate the existing signing setup before replacing anything](2-safe-for-real-money/2D-android-signing-key.md) | owner | android | new |
+| **2D** | [Verify and publish the replacement Android signing key](2-safe-for-real-money/2D-android-signing-key.md) | owner | android | building |
 | **2E** | [The engine accepts some bad input - dates before an account opened, crafted ids, rounding of plan amounts](2-safe-for-real-money/2E-engine-input-checks.md) | bug | transactions | ready |
 | **2F** | [On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone](2-safe-for-real-money/2F-android-downloads-files-links.md) | bug | android | ready |
 

@@ -11,7 +11,12 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-- 2026-10-21 · Codex: Prepare v1.4.0 as the tested Windows app and matching signed Android APK, with the website download and archive refresh.
+- 2026-10-21 · Codex: Prepare v1.4.1 as the matched Windows and Android release, followed by the website download and archive refresh.
+
+## [1.4.1] — 2026-10-21
+
+- 2026-10-21 · Codex: 2D pins the new Android signing certificate generated and retained by the owner after the old key was lost.
+  Existing Lightning Test installations need an independent backup and reinstall; v1.4.0 was tagged but never published because signing secrets were unavailable.
 
 ## [1.4.0] — 2026-10-21
 
