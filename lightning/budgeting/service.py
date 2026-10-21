@@ -11,7 +11,7 @@ import json
 from lightning.categories.domain import Category, CategoryFamily, Movement, Scope
 from lightning.categories.service import CategoryService
 from lightning.core.dates import month_of, parse_month
-from lightning.core.errors import ValidationError
+from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, check_places, fmt, from_e6, to_decimal
 from lightning.database.connection import Database
@@ -232,7 +232,7 @@ class BudgetService:
             for category_id in list(ids):
                 try:
                     ids |= {child.id for child in self.categories.descendants(category_id)}
-                except Exception:
+                except NotFoundError:  # a deleted category; any other error must not change the budget unseen (9K)
                     continue
         return ids
 

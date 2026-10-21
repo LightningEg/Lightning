@@ -10,6 +10,7 @@ from lightning.core.dates import now_iso, today
 from lightning.core.errors import ConflictError, NotFoundError, ValidationError
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, from_e6, to_decimal, to_e6
+from lightning.core.refs import parse_row_id
 from lightning.database.connection import Database
 
 
@@ -19,17 +20,7 @@ class CashReserveService:
 
     @staticmethod
     def _id(value, field: str) -> int:
-        if (isinstance(value, bool) or
-                not isinstance(value, int) and
-                not (isinstance(value, str) and value.strip().isascii() and value.strip().isdigit())):
-            raise ValidationError("Choose a valid saved item.", field)
-        try:
-            parsed = int(value)
-        except (TypeError, ValueError, OverflowError):
-            raise ValidationError("Choose a valid saved item.", field) from None
-        if parsed <= 0 or parsed > 9_223_372_036_854_775_807:
-            raise ValidationError("Choose a valid saved item.", field)
-        return parsed
+        return parse_row_id(value, field)
 
     @request_cached(deep=True)
     def list_active(self):
