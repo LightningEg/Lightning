@@ -126,6 +126,16 @@ def target_slot(kind, groups):
     return table + ":" + canonical(identity).decode()
 
 
+def selection_token(adapter, kind, groups):
+    """A bulk command's precondition: the selected rows' tokens together (None if it has no selection)."""
+    entry = command(kind)
+    if entry.targets is None:
+        return None
+    from .codec import digest
+    table, name = entry.targets
+    return digest([adapter.row_token(table + ":" + canonical(value).decode()) for value in groups["args"][name]])
+
+
 def _local(adapter, spec, value):
     if type(spec) is tuple and spec[0] == "list":
         return [_local(adapter, spec[1], item) for item in value]

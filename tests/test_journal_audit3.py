@@ -1,7 +1,4 @@
-"""Audit 3 (4C): edit-journal gaps, each a strict known gap until fixed.
-
-Remove a marker when its step is fixed; the test then guards it.
-"""
+"""Audit 3 (4C): the edit-journal gaps it found stay fixed."""
 import asyncio
 from uuid import uuid4
 
@@ -9,6 +6,7 @@ import pytest
 
 from test_journal_finance import devices, groups  # noqa: F401  (fixture)
 from test_journal_cloud import Carrier, peers
+from lightning.core.errors import ValidationError
 from lightning.sync.journal.cloud import CloudUnavailable, MailboxExchange
 from lightning.sync.journal.codec import JournalError, origin_id, unpack
 
@@ -38,7 +36,7 @@ def bank_line(device, record):
                               (device.adapter.local("transactions", record),))
 
 
-@pytest.mark.xfail(strict=True, reason="4C1: the precondition hashes the transactions row, not its ledger lines")
+
 def test_4c1_stale_amount_edit_waits_for_review(devices):
     hd, pc = devices
     record, args = spend(hd, pc)
@@ -49,7 +47,7 @@ def test_4c1_stale_amount_edit_waits_for_review(devices):
     assert bank_line(hd, record) == -30_000_000
 
 
-@pytest.mark.xfail(strict=True, reason="4C2: replay compares a cache built from the effect, not the replica's rows")
+
 def test_4c2_replay_detects_a_diverged_replica(devices):
     hd, pc = devices
     spend(hd, pc)
@@ -61,7 +59,6 @@ def test_4c2_replay_detects_a_diverged_replica(devices):
         spend(hd, pc, "-5")
 
 
-@pytest.mark.xfail(strict=True, reason="4C3: register field groups go stale when a command changes the same transaction")
 def test_4c3_register_edit_keeps_a_command_change(devices):
     hd, pc = devices
     payment = groups(pc, "-10.00")
@@ -73,12 +70,11 @@ def test_4c3_register_edit_keeps_a_command_change(devices):
                category_id=payment["category"]["category"], other_account_id=None, counterparty="", notes="",
                owner_id=None)
     pc.sync_with(hd.home)
-    pc.save(dict(details=dict(counterparty="", notes="lunch", description="")), record=record)
-    pc.sync_with(hd.home)
-    assert bank_line(hd, record) == -99_000_000
+    with pytest.raises(ValidationError, match="another screen"):
+        pc.save(dict(details=dict(counterparty="", notes="lunch", description="")), record=record)
+    assert bank_line(hd, record) == bank_line(pc, record) == -99_000_000
 
 
-@pytest.mark.xfail(strict=True, reason="4C4: a refused mailbox request is deduplicated and never answered")
 def test_4c4_mailbox_recovers_after_one_transient_home_refusal(devices, monkeypatch):
     home, pc = devices
     hp, pp = peers(devices, Carrier())
@@ -100,3 +96,16 @@ def test_4c4_mailbox_recovers_after_one_transient_home_refusal(devices, monkeypa
                 continue
         return False
     assert asyncio.run(run()) and not pc.store.pending()
+
+
+def test_4c5_stale_bulk_action_waits_for_review(devices):
+    hd, pc = devices
+    record, args = spend(hd, pc)
+    other = pc.adapter.uid("categories", pc.c.categories.get_by_code("EXP.PERSONAL.FOOD").parent_id)
+    hd.command("transactions.update_in_account", txn_id=record, **(args | dict(amount="-30")))
+    late = pc.command("transactions.set_category", txn_ids=[record], category_id=other)  # Saw -20.
+    pc.sync_with(hd.home)
+    assert status(hd, late) == dict(status="review", reason="conflict")
+    fresh = pc.command("transactions.set_category", txn_ids=[record], category_id=args["category_id"])
+    pc.sync_with(hd.home)  # Strict order: it waits behind the review, then is checked against what it saw.
+    assert status(hd, fresh)["status"] == "staged"

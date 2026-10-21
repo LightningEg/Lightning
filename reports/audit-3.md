@@ -4,14 +4,13 @@
 
 The owner asked whether the new multi-device sync holds up. This covers the edit journal ([4A](../issues/4-edit-journal-and-devices/4A-edit-journal.md)):
 `lightning/sync/journal/`, the device runtime and `cloudflare/journal/worker.mjs`. The design was read against its guarantees G1–G8, the code was read
-on the money path, and each suspected gap was run against real encrypted journals. Every finding is in [4C](../issues/4-edit-journal-and-devices/4C-journal-audit-3-fixes.md).
-The four that were reproduced are strict known gaps in `tests/test_journal_audit3.py`.
+on the money path, and each suspected gap was run against real encrypted journals. Every finding was item 4C; all are fixed (see *Fixed* below), each with a test in `tests/test_journal_audit3.py`.
 
 ## Verdict
 
 **The skeleton is solid. Conflict detection on the screens' path is not.** Receipts, ordering, signatures, the hash chain, durable outboxes and crash
 recovery hold. All 371 journal and sync tests pass. But a stale edit from a second device can silently overwrite a payment's amount. Replay cannot
-tell when a replica has drifted. **Not ready for real money.** Fix 4C1–4C4 before the J6 cutover.
+tell when a replica has drifted. **Not ready for real money** until 4C1–4C4 were fixed; they now are.
 
 ## Findings
 
@@ -26,6 +25,16 @@ tell when a replica has drifted. **Not ready for real money.** Fix 4C1–4C4 bef
 
 Also by reading, low: if recording a `home-error` review itself fails (`_review_token` → `matches`), the exception leaves `process` and blocks every
 origin, not just the one with the bad proposal (`home.py`, `process`).
+
+## Fixed (2026-10-21, owner asked)
+
+- **4C1:** a command's precondition hashes the record and every row it owns (`ON DELETE CASCADE` children), so the stale −40 now waits for review.
+- **4C2:** a replica reads each applied row back, and after every catch-up recomputes the whole copy (`store.verify`); drift asks for a snapshot.
+- **4C3:** a command that changes a transaction removes it from the register's field groups; the register refuses to edit it ("changed on another screen").
+- **4C4:** the home answers a request it cannot take with `refused`; the device retries with a fresh request.
+- **4C5:** bulk commands carry one hash over the selected rows.
+- **4C6:** the worker stores each wire apart and lists 64 small entries; each profile also gets a monthly allowance (see Architecture › encrypted profiles).
+- The `home-error` review no longer stops other origins when its comparison fails.
 
 ## What holds
 

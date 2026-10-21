@@ -155,9 +155,15 @@ class JournalHome:
                     if result[0] == "wait":
                         continue
                     if result[0] == "review":
-                        # Only this origin waits; others keep confirming.
+                        # Only this origin waits; others keep confirming, even when the comparison itself fails.
+                        try:
+                            token = self._review_token(row)
+                        except Exception as error:
+                            if isinstance(error, self.db.OperationalError):
+                                raise
+                            token = None
                         self.db.execute("UPDATE journal_inbox SET status='review',reason=?,review_token=? WHERE proposal_id=?",
-                                        (result[1], self._review_token(row), row["proposal_id"]))
+                                        (result[1], token, row["proposal_id"]))
                         continue
                 # Nothing escapes the transaction before it is durably committed.
                 self.fault("decision_committed")
@@ -230,7 +236,7 @@ class JournalHome:
     def _consider_command(self, body, *, force=False):
         """A command waits for review when its target row changed since the
         device saw it; an earlier pending command of its own is its base."""
-        from .commands import command, target_slot
+        from .commands import command, selection_token, target_slot
         for dependency in body["dependencies"]:
             state = self.status(origin_id(dependency))
             if state is not None and state["status"] == "rejected":
@@ -246,6 +252,9 @@ class JournalHome:
         elif slot is not None and not force and not (base is None and body["dependencies"]) and self.store.adapter.row_token(slot) != base:
             # No base and no pending predecessor means the device saw no such row.
             return "review", "conflict", []
+        elif (command(body["kind"]).targets and not force and not (base is None and body["dependencies"])
+              and selection_token(self.store.adapter, body["kind"], body["groups"]) != base):
+            return "review", "conflict", []  # A selected row changed since the device saw it.
         return "accepted", "accepted", [dict(record=body["record"], groups={}, tokens={}, deleted=False)]
 
     def _finish(self, row, outcome, reason, effects):

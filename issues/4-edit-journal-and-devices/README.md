@@ -1,6 +1,6 @@
 ---
 title: Edit journal and devices
-done:
+done: 4C
 ---
 
 **Goal.** Edit on the phone or the PC; one home confirms every change and nothing is lost.

@@ -81,6 +81,9 @@ class JournalDevice:
         record = record or str(uuid4())
         record = self.store.resolve(record)
         current = self.store.record(record)
+        if current is None and self.store.db.scalar("SELECT 1 FROM journal_ids WHERE entity='transactions' AND uuid=?", (record,)):
+            from lightning.core.errors import ValidationError
+            raise ValidationError("This payment was changed on another screen; edit it there")
         pending_parent = None
         pending_groups = {}
         for wire in self.store.pending():
@@ -112,7 +115,7 @@ class JournalDevice:
 
     def command(self, action, /, *, record=None, **args):
         """Save a covered service action as a proposal; the home runs it."""
-        from .commands import command, target_slot
+        from .commands import command, selection_token, target_slot
         kind, groups = "command." + action, dict(args=args)
         self.adapter.check(kind, groups)
         entry = command(kind)
@@ -123,11 +126,12 @@ class JournalDevice:
             keyed = type(entry.target[1]) is tuple
             record = str(uuid5(UUID(self.store.config["profile"]), slot)) if keyed else args[entry.target[1]]
         record = record or str(uuid4())
-        base = self.adapter.row_token(slot) if slot else None
+        base = self.adapter.row_token(slot) if slot else selection_token(self.adapter, kind, groups)
+        selected = set(args[entry.targets[1]]) if entry.targets else set()
         dependencies = []
         for wire in self.store.pending():
             item = unpack(wire)["body"]
-            if item["record"] == record:
+            if item["record"] == record or item["record"] in selected:
                 dependencies, base = [item["origin"]], None  # Based on our own pending change.
         wire = self.store.save(kind=kind, record=record, groups=groups, bases={"args": base},
                                dependencies=dependencies, signer=self.identity.sign)
@@ -347,6 +351,8 @@ class JournalDevice:
                         self.store.put_chunk(home.store.chunk(item), error.missing)
                     self.store.apply(wire)
                 count += 1
+        if count:
+            self.store.verify()
         with self.store.db.transaction():
             self.store.db.execute("INSERT OR REPLACE INTO journal_local VALUES('last_sync',?)", (datetime.now(timezone.utc).isoformat(),))
         return count

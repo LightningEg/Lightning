@@ -3,6 +3,14 @@ const DAY = 86400000;
 const ENVELOPE = 65536;
 const CHUNK = 32768;
 const SNAPSHOT = 200 * 1024 * 1024;
+// Each profile gets this many sync requests a month (UTC). Over it, sync waits for next month and the local link
+// still works. Registry and membership calls have their own small allowance, so recovery is never locked out.
+// Checkpoint chunks (first pairing or repair over the internet) count apart, so one copy cannot use up a month of sync.
+const MONTHLY = {sync:['MONTHLY_REQUESTS', 1500], snapshot:['MONTHLY_SNAPSHOT_REQUESTS', 4000], control:[null, 200]};
+function monthly(env, bucket) {
+  const [name, fallback] = MONTHLY[bucket], value = name ? Number(env[name] ?? fallback) : fallback;
+  return Number.isSafeInteger(value) && value >= 0 ? value : fallback;
+}
 const encoder = new TextEncoder();
 export function canonical(value) {
   if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
@@ -134,6 +142,11 @@ export class ProfileMailbox {
       require(current.requests < (control ? 30 : 180) && current.bytes + bytes.length <= 8 * 1024 * 1024, 429);
       current.requests++; current.bytes += bytes.length;
       await tx.put(rateKey, current);
+      const bucket = control ? 'control' : route.startsWith('/snapshot') ? 'snapshot' : 'sync';
+      const month = `month:${bucket}:${new Date().toISOString().slice(0, 7)}`;
+      const used = await tx.get(month) || 0;
+      require(used < monthly(this.env, bucket), 429);
+      await tx.put(month, used + 1);
       await tx.put(nonce, Date.now() + 300000);
     });
     const due = Date.now() + 300000, alarm = await this.storage.getAlarm();
@@ -164,7 +177,9 @@ export class ProfileMailbox {
       const total = await tx.get('mail-bytes') || 0;
       require(quota.count < 512 && quota.bytes + wire.length <= 8 * 1024 * 1024, 429);
       require(total + wire.length <= 128 * 1024 * 1024, 429);
-      await tx.put(key, {id:data.id, sender:auth.device, wire:data.wire, size:wire.length, expires:Date.now() + 30 * DAY});
+      // The wire has its own key, so listing a mailbox reads only small entries.
+      await tx.put(key, {id:data.id, sender:auth.device, size:wire.length, expires:Date.now() + 30 * DAY});
+      await tx.put('wire:' + key.slice(5), data.wire);
       await tx.put(quotaKey, {count:quota.count + 1, bytes:quota.bytes + wire.length});
       await tx.put('mail-bytes', total + wire.length);
     });
@@ -225,13 +240,15 @@ export class ProfileMailbox {
     } catch (_) { /* Push cannot acknowledge, confirm or discard an edit. */ }
   }
   async receive(auth) {
-    const entries = await this.storage.list({prefix:`mail:${auth.device}:`, limit:512 * 16});
+    const entries = await this.storage.list({prefix:`mail:${auth.device}:`, limit:64});
     const messages = []; let bytes = 0;
-    for (const value of entries.values()) {
+    for (const [key, value] of entries) {
       if (!auth.registry.members[value.sender]) continue;
       if (value.expires < Date.now()) continue;
       if (messages.length && bytes + value.size > ENVELOPE) break;
-      messages.push({id:value.id, sender:value.sender, wire:value.wire}); bytes += value.size;
+      const wire = await this.storage.get('wire:' + key.slice(5));
+      if (typeof wire !== 'string') continue;
+      messages.push({id:value.id, sender:value.sender, wire}); bytes += value.size;
       if (messages.length >= 20) break;
     }
     return json({messages});
@@ -245,6 +262,7 @@ export class ProfileMailbox {
     require(Number.isSafeInteger(total) && total >= value.size, 409);
     await tx.put('mail-bytes', total - value.size);
     await tx.delete(key);
+    await tx.delete('wire:' + key.slice(5));
   }
   async ack(auth, data) {
     require(Array.isArray(data.messages) && data.messages.length <= 20 && Object.keys(data).join() === 'messages');
