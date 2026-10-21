@@ -92,7 +92,7 @@ def build_demo(c, as_of: date | None = None) -> dict:
             post(7, tx.record_transfer, cib.id, vodafone.id, "1,000")
             post(9, tx.record_outflow, vodafone.id, "350", cat["EXP.PERSONAL.UTILITIES"], counterparty="Vodafone")
             post(12, tx.record_outflow, wallet.id, ["60", "75", "90"][index], cat["EXP.PERSONAL.TRANSPORT"], counterparty="Microbus")
-            if index:  # the certificate pays 22% a month on its payout day (the 1st), first a month after the purchase
+            if index:  # 22% a year, paid monthly on its payout day (the 1st), first a month after the purchase
                 post(1, tx.record_inflow, cib.id, "1,833.33", cat["EXP.INVEST.INTEREST"], counterparty="NBE")
             post(20, tx.record_outflow, cib.id, "650", cat["EXP.PERSONAL.UTILITIES"], counterparty="WE Internet")
             post(24, tx.record_outflow, cib.id, "480", cat["EXP.PERSONAL.UTILITIES"], counterparty="North Cairo Electricity")
