@@ -198,7 +198,7 @@ def test_overview_lists_due_bills_under_needs_you(c, setup, monkeypatch):
     page = TestClient(create_app(c), base_url="http://127.0.0.1").get("/").text
     start = page.index('<section class="needs"')
     attention = page[start:page.index("</section>", start)]  # rows under the Lead (guideline 3.33, A09)
-    assert page.index("lead-card") < start < page.index('class="stat-tiles"')
+    assert page.index("lead-card") < start < page.index('class="kpi-row')
     assert "Needs you" in attention and "<span>· 2</span>" in attention  # the count is every item
     # Feedback ticket 84: both are payments, so they are one row that opens their own page.
     assert "Bills and payments · 2" in attention and "Loan payment due: Car loan, Bill due: Electricity" in attention

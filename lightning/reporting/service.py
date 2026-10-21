@@ -547,6 +547,20 @@ class ReportingService:
                     personal += signed_outflow
         return CashFlow(start, end, inflow, household, investment, outflow, personal, work, investment_out)
 
+    def usual_savings_rate(self, before: date | str, months: int = 6) -> Decimal | None:
+        """Usual savings rate: the average savings rate of up to ``months`` whole months before the month of
+        ``before``, counting only months that had money in and a rate that says something (CashFlow.savings_rate).
+        None when no such month exists yet."""
+        first = parse_date(before).replace(day=1)
+        rates = []
+        for _ in range(months):
+            end = first - timedelta(days=1)
+            first = end.replace(day=1)
+            flow = self.cash_flow(first, end)
+            if flow.inflows > ZERO and not flow.rate_says_nothing and flow.savings_rate is not None:
+                rates.append(flow.savings_rate)
+        return sum(rates, ZERO) / len(rates) if rates else None
+
     def flows_by_date(self, date_from: date | str, date_to: date | str, by: str = "day",
                       code_prefix: str = "") -> dict[str, dict]:
         """Money in, money out and net flow per day (``by="day"``) or month (``"month"``), counted the

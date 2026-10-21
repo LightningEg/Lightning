@@ -339,12 +339,12 @@ class TestInvestmentPages:
         rows = re.findall(r"<tr\b[^>]*>.*?</tr>", table, re.S)
 
         assert [re.sub(r"<[^>]+>", "", h) for h in re.findall(r"<th\b[^>]*>(.*?)</th>", table.split("</thead>", 1)[0])] == [
-            "Investment", "Average cost", "Price", "Cost", "Value Share", "Total gain", "Total return", "Since purchase"]
-        assert len(headers) == 8 and rows
-        assert all(len(re.findall(r"<(?:th|td)\b", row)) == 8 for row in rows)
+            "Investment", "Cost", "Value Share", "Total gain", "Total return Since purchase"]  # five columns (3.33, A11)
+        assert len(headers) == 5 and rows
+        assert all(len(re.findall(r"<(?:th|td)\b", row)) == 5 for row in rows)
         assert "Holding details" not in table and 'class="small muted"' not in table
         row = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", rows[-1]))
-        assert "10 shares" in row and "95 100 950 1,000" in row and "+5.3%" in row
+        assert "10 shares · average 95 · now 100" in row and "950 1,000" in row and "+5.3%" in row
 
     def test_full_investing_flow(self, c, setup):
         from fastapi.testclient import TestClient

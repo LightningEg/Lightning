@@ -164,7 +164,7 @@ def test_every_tab_of_the_demo_opens_with_its_key_notes(demo):
         page = client.get(url)
         assert page.status_code == 200, url
         if url in ("/", "/birdview"):  # Birdview redirects to the Overview
-            assert page.text.count('class="stat-tile surface-') == 4, url  # four stat cards, no key notes
+            assert page.text.count('<article class="kpi-card') == 4, url  # four A08 cards, no key notes (3.33)
         elif url == "/birdview/expenses":  # four KPI cards give the gist of the period
             assert page.text.count('class="stat-tile surface-') == 4, url
         elif url == "/plan":  # safe to spend leads with its working (3.33); free cash, what's due and the lowest point ahead

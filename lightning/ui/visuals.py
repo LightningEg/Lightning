@@ -145,12 +145,15 @@ def money_sankey(c, first: date, last: date, cash_flow, sources_shown: int = 3, 
     return charts.sankey(sources, targets, "Money in", xs=xs)
 
 
+def savings_rates(c, end: date, count: int = 6) -> list:
+    """Savings rate for each recent month, the service's own figure (None for a month with no money in)."""
+    return [c.reporting.cash_flow(parse_month(key)[0], day).savings_rate
+            for key, day in month_ends(end, count, c.reporting.first_activity_date())]
+
+
 def savings_rate_spark(c, end: date, count: int = 6) -> dict:
-    """Savings rate for each recent month (the service's own figure), as a sparkline."""
-    values = []
-    for key, day in month_ends(end, count, c.reporting.first_activity_date()):
-        values.append(c.reporting.cash_flow(parse_month(key)[0], day).savings_rate)
-    return charts.sparkline(values)
+    """Savings rate for each recent month, as a sparkline."""
+    return charts.sparkline(savings_rates(c, end, count))
 
 
 def holdings_donut(position, include_cash: bool = False) -> dict:

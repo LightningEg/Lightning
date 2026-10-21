@@ -25,7 +25,7 @@ from lightning.workflows.review import GROUP_LABELS, ReviewInbox, group_of, grou
 from ..web import container, render
 from ..web import redirect
 from ..periods import Period, parse_period
-from .. import keynotes, status as page_status, visuals
+from .. import keynotes, kpis, status as page_status, visuals
 from .sms import read_phone_sms
 
 router = APIRouter()
@@ -237,7 +237,25 @@ async def dashboard(request: Request):
     current = as_of >= today()
     lead_change = page_status.change(change_tile["value"], period.key, current)
     if position_is_today := position_day == today():
-        stats.insert(len(stats) - 1, _safe_tile(inbox.forecast))
+        stats.insert(len(stats) - 1, _safe_tile(inbox.forecast))  # the phone's tiles (C06.1)
+    # The PC's row is A08 cards, each against something: the savings rate against your usual one, the investing
+    # rate against the period before, Safe to spend against free cash, Left in plan against the plan.
+    if period.key == "month":
+        before_to = first - timedelta(days=1)
+        before_from, before_label = before_to.replace(day=1), month_of(before_to)
+    else:
+        before_to = first - timedelta(days=1)
+        before_from, before_label = before_to - (as_of - first), "the period before"
+    flow_before = c.reporting.cash_flow(before_from, before_to)
+    added_before = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(before_from), fmt_date(before_to))["net_money"]
+    plan_month = month_of(as_of)
+    kpi_cards = kpis.overview(
+        cash_flow, period_chip=_period_chip(period, first, as_of), rates=visuals.savings_rates(c, as_of),
+        usual=c.reporting.usual_savings_rate(as_of), invest=investing_rate(closing_report["net_money"], cash_flow.net),
+        invest_before=investing_rate(added_before, flow_before.net), before_label=before_label,
+        money_added=closing_report["net_money"], forecast=inbox.forecast if position_is_today else None,
+        plan=c.budgets.plan_summary(plan_month) if c.budgets.has_plan(plan_month) else None, month=plan_month,
+        savings_href="#savings-squares", invest_href=f"/investments?{urlencode(request.query_params)}")
     status = page_status.overview(cash_flow.inflows, cash_flow.outflows, cash_flow.net, cash_flow.savings_rate,
                                   cash_flow.rate_says_nothing, period.key, current, bool(accounts))
     dates_note = ("so far" if current and period.key in ("month", "ytd") else "year to date" if period.key == "ytd" else "")
@@ -256,7 +274,7 @@ async def dashboard(request: Request):
         networth_trend=networth_trend, free_cash_steps=visuals.free_cash_steps(position),
         month_calendar=visuals.month_calendar(c, today()),
         month=month, this_month=month_of(today()), period=period, period_error=period_error,
-        date_from=fmt_date(first), date_to=fmt_date(as_of), as_of=fmt_date(as_of), position_as_of=fmt_date(position_day), position_is_today=position_is_today, status=status,
+        date_from=fmt_date(first), date_to=fmt_date(as_of), as_of=fmt_date(as_of), position_as_of=fmt_date(position_day), position_is_today=position_is_today, status=status, kpi_cards=kpi_cards,
         waffle=saved_and_invested(cash_flow, closing_report["net_money"]), dates_note=dates_note, lead_change=lead_change,
         range_label=(f"No recorded activity · Position as of {fmt_date(position_day)}"
                      if period.key == "all" and not first_activity else f"{fmt_date(first)} to {fmt_date(as_of)} · Position as of {fmt_date(position_day)}"),
@@ -447,6 +465,13 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
                       "kind": "money", "empty": "No plan yet", "sub": f"Set a plan for {month}",
                       "href": f"/budget?month={month}"})
     return stats
+
+
+def _period_chip(period, first, as_of) -> str:
+    """The period, short, as every card's chip names it."""
+    partial = as_of.day < calendar.monthrange(as_of.year, as_of.month)[1]
+    return {"month": month_of(first) + (" so far" if partial else ""), "ytd": "Year to date",
+            "all": "All time"}.get(period.key, f"{fmt_date(first)} to {fmt_date(as_of)}")
 
 
 def _safe_tile(f) -> dict:
