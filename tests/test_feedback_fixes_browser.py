@@ -69,7 +69,6 @@ def test_register_selection_survives_edit_without_submitting(c, setup, browser_p
     page.locator('tr.editing .category-input').fill('Soft')
     page.locator('#f-edit-category-results .category-option').filter(has_text=software.name).first.click()
     page.locator('tr.editing input[name=notes]').fill('Browser selected change')
-    page.locator('tr.editing input[name=amount]').fill('-99')
     page.locator('button[form=f-edit].register-submit').click()
     page.get_by_role('button',name='All 2 rows',exact=True).click()
     page.wait_for_url(lambda url: 'edit=' not in str(url))
@@ -182,7 +181,8 @@ def test_savings_picture_browser(c,browser_page,spend):
     account=c.account_flows.open_account('Daily','BANK','2026-09-01','1000')
     c.transactions.record_inflow('2026-09-02',account.id,'100',c.categories.get_by_code('EXP.WORK.SALARY').id)
     c.transactions.record_outflow('2026-09-03',account.id,spend,c.categories.get_by_code('EXP.PERSONAL.FOOD').id)
-    page.goto(origin+'/budget?period=month&month=2026-09')
+    page.goto(origin+'/?period=month&month=2026-09')
+    page.locator('#savings-squares > summary').click()
     assert page.locator('.inv-waffle i').count()==100
     assert page.locator('.inv-waffle i.invested').count()==0
     page.screenshot(path='/tmp/feedback-savings-'+('overspent' if spend=='125' else 'saved')+'.png',full_page=True)

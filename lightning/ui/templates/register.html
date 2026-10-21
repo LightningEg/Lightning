@@ -153,7 +153,9 @@
 {% if val_count %}<p class="muted small register-val-toggle"><a href="{{ val_toggle_url }}">{{ ('Hide value updates'|tr(locale)) if show_val else ('Show value updates ({n})'|tr(locale, n=val_count)) }}</a></p>{% endif %}
 <div class="card ledger" data-counterparties='{{ counterparty_categories|tojson }}' data-accounts='{{ account_options|tojson }}'>
   <div class="selection-tools" id="selection-tools" hidden>
-    <span id="selection-count" class="muted small">{{ "0 selected"|tr(locale) }}</span>
+    <span id="selection-count" class="muted small" role="status" aria-live="polite">{{ "0 selected"|tr(locale) }}</span>
+    <button type="button" class="btn small" id="edit-selected">{{ 'Edit selected'|tr(locale) }}</button>
+    <button type="button" class="btn small" id="clear-selected">{{ 'Clear selection'|tr(locale) }}</button>
     {# Bulk edit (user feedback, ticket 20): one category for every selected row. #}
     <form method="post" action="/transactions/bulk-category" class="bulk-category" id="bulk-category-form">
       {% from "partials/macros.html" import category_options %}<select name="category_id" aria-label="Category for the selected rows" data-own-picker><option value="">{{ 'Set a category…'|tr(locale) }}</option>{{ category_options(category_groups()) }}</select>

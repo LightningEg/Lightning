@@ -58,7 +58,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **3W** | [Answer first - rebuild every tab in the guideline 3.33 order (header, Lead, Needs you, KPIs, details)](3-polish-and-arabic/3W-answer-first-rebuild.md) | polish | product | building |
 | **3X** | [Pages run one query per account and date, so they slow as accounts are added](3-polish-and-arabic/3X-pages-read-each-account-once-per-date.md) | tech | performance | ready |
 
-Done: 3A, 3C, 3L, 3M, 3N, 3O, 3P, 3R, 3V. Next free code: 3Y.
+Done: 3A, 3C, 3L, 3M, 3N, 3O, 3P, 3R, 3V, 3Y. Next free code: 3Z.
 
 ## 4 Edit journal and devices
 
