@@ -115,12 +115,16 @@ class Container:
     def set_profile_currency(self, code: str) -> None:
         """Change an unused profile's base and refresh the live service graph."""
         CurrencyRegistry(self.db).set_base_currency(code)
+        self.refresh_profile_currency()
+
+    def refresh_profile_currency(self) -> None:
+        """Point every service that keeps a copy of the profile currency at the stored one.
+
+        The one place that lists those copies: anything that changes `settings.base_currency` (this container,
+        a replica applying settings rows) calls it. Reporting's setter also moves its valuer and FX positions."""
         base = self.settings.base_currency
-        self.assets.base_currency = base
-        self.accounts.base_currency = base
-        self.transactions.base_currency = base
-        self.reporting.base_currency = base
-        self.reporting.valuer.base = base
+        for service in (self.assets, self.accounts, self.transactions, self.reporting):
+            service.base_currency = base
         self.fx.profile_currency = base
 
     def backup_now(self) -> Path | None:
