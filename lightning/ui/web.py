@@ -403,6 +403,13 @@ PERIOD_KEYS = ("period", "month", "date_from", "date_to")
 PERIOD_COOKIE = "lightning_period"
 
 
+NOT_USER_ACTIONS = frozenset({"history", "demo", "sample", "exports"})
+ACTION_LABELS = {"accounts": "Account changes", "transactions": "Transaction changes", "plan": "Payment plan changes",
+                 "reserves": "Reserve changes", "budget": "Budget changes", "imports": "Statement import",
+                 "bank-imports": "Statement import", "sms": "SMS review", "rules": "Rule changes",
+                 "money-from-others": "Money held for others"}
+
+
 class RequestCache:
     """Each request computes a repeated figure once (``lightning.core.memo``); a write empties it."""
 
@@ -414,17 +421,12 @@ class RequestCache:
         if current is None:
             return await self.app(scope, receive, send)
         with request_cache(current.db):
-            path = scope.get("path", "")
-            roots = {"accounts", "transactions", "plan", "loans", "reserves", "budget", "rules", "categories",
-                     "counterparties", "imports", "bank-imports", "sms", "investments", "deposits", "gameya",
-                     "zakat", "activity", "payday", "views", "review", "reminders", "reimbursements",
-                     "setup", "physical-items", "settings", "people"}
-            if scope.get("method") == "POST" and path.strip("/").split("/")[0] in roots:
+            root = scope.get("path", "").strip("/").split("/")[0]
+            # Every write is one undoable action (2H), except Undo/Redo themselves, the demo and sample loaders
+            # (they fill an empty profile) and exports (they only read).
+            if scope.get("method") not in ("GET", "HEAD") and root not in NOT_USER_ACTIONS:
                 from lightning.undo import user_action
-                labels = {"accounts": "Account changes", "transactions": "Transaction changes", "plan": "Payment plan changes",
-                          "reserves": "Reserve changes", "budget": "Budget changes", "imports": "Statement import",
-                          "bank-imports": "Statement import", "sms": "SMS review", "rules": "Rule changes"}
-                with user_action(labels.get(path.strip("/").split("/")[0], "Saved changes")):
+                with user_action(ACTION_LABELS.get(root, "Saved changes")):
                     status = 500
                     async def action_send(message):
                         nonlocal status
