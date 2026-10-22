@@ -292,7 +292,7 @@ def restore_copy(source, wire, *, backup_key, target, new_device, new_incarnatio
             except BaseException:
                 target_handle.close()
                 raise
-            with source_handle, target_handle as target_file:
+            with source_handle as source_file, target_handle as target_file:
                 shutil.copyfileobj(source_file, target_file, 1024 * 1024)
                 target_file.flush()
                 os.fsync(target_file.fileno())

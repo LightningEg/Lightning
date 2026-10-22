@@ -3,6 +3,8 @@ from __future__ import annotations
 
 
 _ACTION_LABELS = {
+    "transactions.record_inflow_described": "Record income",
+    "transactions.record_outflow_described": "Record expense",
     "accounts.open": "Open account", "transactions.record_in_account": "Record transaction",
     "transactions.record_outflow": "Record expense", "transactions.record_inflow": "Record income",
     "transactions.record_transfer": "Record transfer", "transactions.record_conversion": "Exchange currency",

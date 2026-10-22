@@ -69,6 +69,17 @@ class JournalServices:
                 arguments.update(value)
             else:
                 arguments[name] = value
+        if call in {"budgets.save_month", "budgets.apply_fill"} and "amounts" in arguments:
+            # The app's budget workflow takes id-keyed dictionaries; the portable
+            # command carries category UUIDs in explicit rows.
+            amounts = arguments.pop("amounts") or {}
+            averages = arguments.pop("average_months", None) or {}
+            arguments["lines"] = [dict(category=category_id, amount=amount,
+                                        average_months=averages.get(category_id))
+                                  for category_id, amount in amounts.items()]
+        if call == "budgets.set_carryover" and "settings" in arguments:
+            arguments["lines"] = [dict(category=category_id, enabled=enabled)
+                                  for category_id, enabled in arguments.pop("settings").items()]
         for name, value in arguments.items():
             parameter = signature.parameters.get(name)
             if name not in entry.args and (parameter is None or value is not parameter.default):

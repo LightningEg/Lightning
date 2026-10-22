@@ -146,17 +146,17 @@ class JournalAutomation:
         finally:
             self.db.conn.set_authorizer(self.store.adapter._authorize)
 
-    def dispatch_once(self, job_key: str, action: str, **args) -> dict:
+    def dispatch_once(self, job_id: str, action: str, **args) -> dict:
         """Issue one immutable home command per key; retries resume its receipt."""
-        if (type(job_key) is not str or not 1 <= len(job_key) <= 160
-                or any(ord(char) < 32 for char in job_key)):
+        if (type(job_id) is not str or not 1 <= len(job_id) <= 160
+                or any(ord(char) < 32 for char in job_id)):
             raise JournalError("Invalid automation job key")
         if action not in _ACTIONS:
             raise JournalError("This automated action is not enabled")
         args_json = canonical(args).decode("utf-8")
-        record = str(uuid5(UUID(self.store.config["profile"]), "journal-automation:" + job_key))
+        record = str(uuid5(UUID(self.store.config["profile"]), "journal-automation:" + job_id))
         with self.db.transaction():
-            row = self.db.one("SELECT * FROM journal_automation_jobs WHERE job_key=?", (job_key,))
+            row = self.db.one("SELECT * FROM journal_automation_jobs WHERE job_key=?", (job_id,))
             if row is not None:
                 if row["action"] != action or row["args_json"] != args_json:
                     raise JournalError("Automation job key was reused with different work")
@@ -173,12 +173,12 @@ class JournalAutomation:
                 status = state["status"] if state else "pending"
                 reason = state["reason"] if state else "queued"
                 self.db.execute("UPDATE journal_automation_jobs SET state=?,reason=? WHERE job_key=?",
-                                (status, reason, job_key))
-                return dict(job_key=job_key, proposal_id=proposal_id, state=status, reason=reason)
+                                (status, reason, job_id))
+                return dict(job_key=job_id, proposal_id=proposal_id, state=status, reason=reason)
 
             self.db.execute(
                 "INSERT INTO journal_automation_jobs(job_key,action,args_json,state) VALUES(?,?,?,'pending')",
-                (job_key, action, args_json),
+                (job_id, action, args_json),
             )
             wire = self.device.command(action, record=record, **args)
             proposal_id = origin_id(unpack(wire)["body"]["origin"])
@@ -186,8 +186,8 @@ class JournalAutomation:
             status = state["status"] if state else "pending"
             reason = state["reason"] if state else "queued"
             self.db.execute("UPDATE journal_automation_jobs SET proposal_id=?,state=?,reason=? WHERE job_key=?",
-                            (proposal_id, status, reason, job_key))
-            return dict(job_key=job_key, proposal_id=proposal_id, state=status, reason=reason)
+                            (proposal_id, status, reason, job_id))
+            return dict(job_key=job_id, proposal_id=proposal_id, state=status, reason=reason)
 
     def tick(self, as_of: date | None = None) -> list[dict]:
         """Run one bounded daily pass: local market prices, revaluation, bill links.

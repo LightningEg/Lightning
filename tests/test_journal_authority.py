@@ -134,6 +134,9 @@ def test_signed_lan_move_transfers_checkpoint_and_retires_before_target_activati
                                    decisions={str(index): {"notes": "x" * 150} for index in range(200)})
         assert len(large_command) > 20 * 1024
         assert home.home.receive(large_command) == "staged"
+        pc.sync_with(home.home)  # Drain the replica outbox before the move safety gate.
+        assert not pc.store.pending()
+        assert home.store.db.scalar("SELECT status FROM journal_inbox") == "rejected"
         home_path, pc_path = tmp_path / "home-profile", tmp_path / "replica-profile"
         home_path.mkdir(); pc_path.mkdir()
         home_runtime = SimpleNamespace(device=home, identity=home.identity, paths=SimpleNamespace(data_dir=home_path))

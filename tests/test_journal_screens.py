@@ -100,6 +100,16 @@ def test_composite_settings_routes_stage_one_proposal(screens, path, data, actio
     assert pending[0]["name"] == action
 
 
+def test_create_plan_stages_one_portable_budget_command(screens):
+    (_, pc), (_, replica) = screens
+    category = next(item for item in pc.c.categories.pickable() if item.movement.value == "OUTFLOW")
+    response = replica.post("/budget/setup?month=2026-09", data={f"suggest_{category.id}": "250"})
+    assert response.status_code == 303
+    pending = pc.pending_commands()
+    assert len(pending) == 1 and pending[0]["name"] == "budgets.save_month"
+    assert not pc.c.db.scalar("SELECT COUNT(*) FROM budgets WHERE category_id=?", (category.id,))
+
+
 def test_pending_currency_setup_restores_replica_service_caches(screens, monkeypatch):
     (_, pc), (_, replica) = screens
     original_scalar = pc.c.db.scalar
