@@ -4,7 +4,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 **How to log a change**
 
-- Add one entry at the top of `## [Unreleased]`.
+- Add one entry at the top of `## [Unreleased]
+
+- 2026-10-22 · Claude: guideline B09 copy: website theme is light by default, dark only when chosen (matches the website repo).`.
 - Keep it to three lines at most: what changed for the user or the code, and where. The reasons and details belong in the doc that owns them (`AGENTS.md` lists which).
 - To catch up, read only the first entries here, or `git log --oneline -20`. Entries further down are history, not the current specification.
 - When a version is tagged, rename `Unreleased` to that version and start a new `Unreleased` above it.
