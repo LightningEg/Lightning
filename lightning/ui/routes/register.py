@@ -24,12 +24,25 @@ from lightning.market.iso import venue_name
 from lightning.core.refs import DocType
 from lightning.transactions.tags import normalize as normal_tag
 
-from ..web import container, render
+from ..web import container, render, _shift_month as shift_month
 from ..charts import class_tone
 from ..i18n import translate
 
 ENTRY_FIELDS = ("date", "account_id", "counterparty", "counterparty_choice", "counterparty_typed", "category", "category_choice", "whom", "notes", "amount")
 FAR_PAST, FAR_FUTURE = "1900-01-01", "9999-12-31"
+# The phone's chips narrow the list by what a row did (?kind=): money in, money out, a move between accounts, or money
+# in or out nobody has sorted into a category yet. Without ?kind= the register is exactly what it was.
+REGISTER_KINDS = ("in", "out", "transfer", "unsorted")
+
+
+def _row_kind(row) -> str:
+    """What a register row did, split the way its arrow chip splits it: in, out, transfer (moves and currency
+    conversions); investment trades, opening balances, adjustments and value updates are none of these."""
+    if row.type in ("TRF", "CNV"):
+        return "transfer"
+    if row.type in ("BUY", "SEL", "VAL", "OPN", "ADJ"):
+        return ""
+    return "in" if row.amount > 0 else "out"
 
 
 
@@ -244,6 +257,57 @@ def base_url_for(account_id: int | None) -> str:
     return f"/accounts/{account_id}" if account_id else "/transactions"
 
 
+def _phone_register(c, account_id, base_url, keep, kind, month, preset, from_query, to_query,
+                    matched_flows, unsorted_ids, date_from, date_to) -> dict:
+    """What the phone's register shows above its list (phone overhaul 2026-10-22): the filter chips, the month
+    stepper with its sheet, and the two tiles. Money in and Money out are the period's own (cash_flow for every
+    account), or those of the rows a search, tag or category found. Every link keeps the other choices."""
+    keep = {k: v for k, v in keep.items() if k != "page"}
+    if month or preset not in ("", "custom"):   # a month or a preset says its own days: they need not ride along
+        keep = {k: v for k, v in keep.items() if k not in ("date_from", "date_to")}
+    if preset == "all_time":
+        keep.pop("preset", None)
+
+    def href(changes: dict) -> str:
+        params = {k: v for k, v in {**keep, **changes}.items() if v not in ("", None)}
+        return base_url + ("?" + urlencode(params) if params else "")
+
+    now = fmt_date(today())[:7]
+    last = shift_month(now, -1)
+    ranged = {"month": "", "preset": "", "date_from": "", "date_to": ""}
+    chosen = month or (now if preset == "this_month" else last if preset == "last_month" else "")
+    if chosen:
+        shown = "month"
+    elif preset == "year_to_date":
+        shown = "ytd"
+    elif preset == "custom" and from_query and to_query:
+        shown = "custom"
+    else:
+        shown = "all"
+    # An account's page leads with its balance and its list: the two tiles come once a period or a search narrows it.
+    tiles = account_id is None or shown != "all" or matched_flows is not None
+    money_in, money_out = (matched_flows if matched_flows is not None else
+                           c.reporting.register_flows(account_id, date_from, date_to)) if tiles else (ZERO, ZERO)
+    return {
+        "chips": [{"key": key, "label": label, "href": href({"kind": "" if key == "all" else key}),
+                   "chosen": kind == ("" if key == "all" else key), "count": len(unsorted_ids) if key == "unsorted" else 0}
+                  for key, label in (("all", "All"), ("in", "In"), ("out", "Out"), ("transfer", "Transfers"), ("unsorted", "To sort"))],
+        "period": shown, "month": chosen, "this": now, "last": last,
+        "prev": href({**ranged, "month": shift_month(chosen, -1)}) if chosen else "",
+        "next": href({**ranged, "month": shift_month(chosen, 1)}) if chosen and chosen < now else "",
+        "this_href": href({**ranged, "month": now}), "last_href": href({**ranged, "month": last}),
+        "ytd_href": href({**ranged, "preset": "year_to_date"}), "all_href": href(ranged),
+        "ytd_from": f"{now[:4]}-01",
+        # taking a tag or a category off again
+        "clear_tag": href({"tag": "", **({"q": ""} if keep.get("q", "").startswith("#") else {})}),
+        "clear_category": href({"category_id": ""}),
+        "tiles": tiles, "money_in": money_in, "money_out": -money_out,
+        # what a form that adds one choice must send along: every other choice already made
+        "keep_for_search": [(k, v) for k, v in keep.items() if k != "q"],
+        "keep_for_dates": [(k, v) for k, v in keep.items() if k not in ranged],
+    }
+
+
 def page(request: Request, account_id: int | None, entry: dict | None = None, edit_values: dict | None = None,
          error: str = "", error_field: str = "", status_code: int = 200,
          edit_id: int | None = None, edit_acct: int | None = None,
@@ -298,6 +362,9 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
             error, month = error or exc.message, ""
     # A tag (#eid, from a note's link or typed in the search) matches exactly: never #eid2026.
     filter_tag = normal_tag(active_view["tag"] if active_view else qp.get("tag", "")) or (normal_tag(q) if q.startswith("#") and " " not in q else "")
+    phone = bool(getattr(request.state, "phone", False))
+    kind = qp.get("kind", "").strip()
+    kind = kind if kind in REGISTER_KINDS else ""
     matched_ids = c.transactions.search_ids(q) if q and q.casefold() != ("#" + filter_tag).casefold() else None
     if filter_tag:
         tagged = c.transactions.tag_transaction_ids(filter_tag)
@@ -322,19 +389,28 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
     page_size = 50
     show_val = qp.get("val") == "1"
     val_count = c.reporting.register_value_updates(account_id, date_from, date_to)
-    if matched_ids is None and not (val_count and not show_val):
+    # Money in and Money out of what a search, tag or category found (a tag's note and the phone's two tiles).
+    matched_flows = None
+    unsorted_ids = c.reporting.register_unsorted(account_id, date_from, date_to) if phone or kind == "unsorted" else set()
+    if matched_ids is None and not kind and not (val_count and not show_val):
         # read only the page shown; its running balance comes from SQL
         rows, total_rows, page_number = c.reporting.register_page(
             account_id, date_from, date_to, _int(qp.get("page")) or 1, page_size)
-    else:  # a search or category filter, or value updates folded: filter in Python; balances stay per row
+    else:  # a search, category or kind filter, or value updates folded: filter in Python; balances stay per row
         all_rows = c.reporting.register(account_id, date_from, date_to, matched_ids)
+        if matched_ids is not None and (phone or filter_tag):
+            matched_flows = c.reporting.money_in_out({row.txn_id for row in all_rows})
         if val_count and not show_val:
             all_rows = [row for row in all_rows if row.type != DocType.VAL]
+        if kind == "unsorted":
+            all_rows = [row for row in all_rows if row.txn_id in unsorted_ids]
+        elif kind:
+            all_rows = [row for row in all_rows if _row_kind(row) == kind]
         total_rows = len(all_rows)
         page_number = min(max(_int(qp.get("page")) or 1, 1), max(1, -(-total_rows // page_size)))
         rows = all_rows[(page_number - 1) * page_size:page_number * page_size]
     total_pages = max(1, -(-total_rows // page_size))
-    tag_flows = c.reporting.money_in_out({row.txn_id for row in all_rows}) if filter_tag else None
+    tag_flows = matched_flows if filter_tag else None
     custody_owners = c.money_from_others.transaction_owners(row.txn_id for row in rows)
     conversions = {row.txn_id: c.transactions.conversion_of(c.transactions.get(row.txn_id))
                    for row in rows if row.type == DocType.CNV}
@@ -381,13 +457,15 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
     keep = {k: v for k, v in (("q", q), ("tag", "" if q.startswith("#") else filter_tag), ("month", month),
                               ("preset", preset), ("date_from", from_query), ("date_to", to_query),
                               ("category_id", str(raw_category_id) if raw_category_id else ""),
-                              ("val", "1" if show_val else "")) if v}
+                              ("kind", kind), ("val", "1" if show_val else "")) if v}
     page_base_qs = urlencode(keep)
     val_toggle_url = base_url_for(account_id) + "?" + urlencode({**{k: v for k, v in keep.items() if k != "val"},
                                                                  **({} if show_val else {"val": "1"})})
     if page_number > 1:
         keep["page"] = page_number
     base_url = base_url_for(account_id)
+    phone_register = _phone_register(c, account_id, base_url, keep, kind, month, preset, from_query, to_query,
+                                     matched_flows, unsorted_ids, date_from, date_to) if phone else None
     reserve_rows = [row.txn_id for row in rows if row.type == DocType.OUT]
     reserve_suggestions = c.reserves.suggested_reserves_for_transactions(reserve_rows)
     return render(
@@ -419,6 +497,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         custody_present=any(custody_owners.values()),
         entry=entry or {"date": qp.get("date") or fmt_date(today()), "account_id": qp.get("new_acct", "")},
         edit_id=edit_id if edit_values is not None else None, edit_acct=edit_acct, edit=edit_values or {}, edit_original=edit_original,
+        reg=phone_register, chosen_kind=kind,
         q=q, month=month, preset=preset, active_view=active_view, show_val=show_val, val_count=val_count, val_toggle_url=val_toggle_url,
         saved_views=c.saved_views.list(account_id), view_account_id=account_id or "",
         filter_category=filter_category, filter_tag=filter_tag, tag_flows=tag_flows,
