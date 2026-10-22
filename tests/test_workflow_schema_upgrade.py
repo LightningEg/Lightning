@@ -18,7 +18,7 @@ def test_encrypted_roundtrip_fixture_is_current_and_keeps_its_transactions_out_o
     db = Database(FIXTURE / "profile.db", key=unwrap_key(keys, PASSWORD), read_only=True)
     try:
         inspection = inspect_schema(db)
-        assert inspection.current_version == BUNDLED_LATEST_VERSION == 67
+        assert inspection.current_version == BUNDLED_LATEST_VERSION == 68
         assert inspection.pending == ()
         assert db.scalar("SELECT count(*) FROM transactions") == 68
         assert db.scalar("SELECT count(*) FROM ledger_entries") > 0
