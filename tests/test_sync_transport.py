@@ -8,6 +8,7 @@ import uuid
 
 import pytest
 
+from lightning.runtime.paths import borrowed_profile
 from lightning.security.keys import unwrap_key
 from lightning.sync.domain import Accepted, Hello, Status
 from lightning.sync.identity import load_or_create, normalize_code, show_code
@@ -42,7 +43,8 @@ def join(phone, tmp_path, name="Office PC"):
     pc_id = load_or_create(tmp_path / f"pc-id-{name}", name)
     paired = pair(phone.endpoint, show_code(pending.code), pc_id)
     assert paired.digits == pending.digits and pending.paired_name == name  # both screens show the same digits
-    node = join_home(paired, endpoint=phone.endpoint, identity=pc_id, root=tmp_path / f"pc-data-{name}")
+    node = join_home(paired, endpoint=phone.endpoint, identity=pc_id, borrowed_profile=borrowed_profile,
+                     root=tmp_path / f"pc-data-{name}")
     return node, pc_id
 
 

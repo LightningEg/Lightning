@@ -11,6 +11,7 @@ from datetime import date
 from lightning.core.dates import now_iso
 from lightning.core.errors import ConflictError, NotFoundError, ValidationError
 from lightning.core.money import from_e6, to_decimal, to_e6
+from lightning.core.refs import parse_row_id
 from lightning.database.connection import Database
 
 
@@ -20,17 +21,7 @@ class ReimbursementService:
 
     @staticmethod
     def _id(value, field: str) -> int:
-        if (isinstance(value, bool) or
-                not isinstance(value, int) and
-                not (isinstance(value, str) and value.strip().isascii() and value.strip().isdigit())):
-            raise ValidationError("Choose a valid saved item.", field)
-        try:
-            parsed = int(value)
-        except (TypeError, ValueError, OverflowError):
-            raise ValidationError("Choose a valid saved item.", field) from None
-        if parsed <= 0 or parsed > 9_223_372_036_854_775_807:
-            raise ValidationError("Choose a valid saved item.", field)
-        return parsed
+        return parse_row_id(value, field)
 
     def _require_writable(self) -> None:
         if self.db.read_only:

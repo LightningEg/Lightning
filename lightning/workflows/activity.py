@@ -15,6 +15,7 @@ from lightning.categories.domain import Movement
 from lightning.core.dates import fmt_date, today
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.money import ZERO, to_decimal
+from lightning.core.refs import parse_row_id
 
 
 class ActivityReview:
@@ -24,9 +25,7 @@ class ActivityReview:
 
     @staticmethod
     def _id(value, field: str = "transaction_id") -> int:
-        if isinstance(value, bool) or not isinstance(value, int) or value <= 0 or value > 9_223_372_036_854_775_807:
-            raise ValidationError("Choose a valid activity or review option.", field)
-        return value
+        return parse_row_id(value, field, "Choose a valid activity or review option.", digits=False)
 
     def recent(self, limit: int = 100) -> list[dict]:
         """Recent posted, owned IN/OUT cash rows. Ambiguous ownership is left out."""

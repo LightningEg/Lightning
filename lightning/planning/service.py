@@ -10,6 +10,7 @@ from lightning.core.dates import fmt_date, parse_date, parse_month, today
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, check_places, from_e6, to_decimal
+from lightning.core.refs import parse_row_id
 from lightning.database.connection import Database
 from lightning.database.currencies import minor_units
 from lightning.database.settings import SettingsStore
@@ -695,13 +696,4 @@ class PlanningService:
 
     @staticmethod
     def _id(value, field: str = "id") -> int | None:
-        text = "" if value is None else str(value).strip()
-        if not text:
-            return None
-        try:
-            value_id = int(text)
-        except (TypeError, ValueError, OverflowError):
-            raise ValidationError("Choose a valid option.", field) from None
-        if value_id <= 0 or value_id > 9_223_372_036_854_775_807:
-            raise ValidationError("Choose a valid option.", field)
-        return value_id
+        return parse_row_id(value, field, "Choose a valid option.", blank=True)

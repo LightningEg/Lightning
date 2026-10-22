@@ -62,3 +62,24 @@ def parse_ref(ref: str) -> tuple[DocType, date, int]:
 
 def line_ref(ref: str, line_no: int) -> str:
     return f"{ref}/{line_no}"
+
+
+MAX_ROW_ID = 9_223_372_036_854_775_807  # SQLite's largest integer key
+
+
+def parse_row_id(value, field: str, message: str = "Choose a valid saved item.", *,
+                 digits: bool = True, blank: bool = False) -> int | None:
+    """A saved row's id from a form or a caller: a positive integer SQLite can hold, else ``message``.
+    ``digits`` also takes a string of ASCII digits; ``blank`` turns an empty value into None (9K)."""
+    if blank and (value is None or str(value).strip() == ""):
+        return None
+    if isinstance(value, bool):
+        raise ValidationError(message, field)
+    if isinstance(value, str) and digits:
+        text = value.strip()
+        if not (text.isascii() and text.isdigit()):
+            raise ValidationError(message, field)
+        value = int(text)
+    if not isinstance(value, int) or not 0 < value <= MAX_ROW_ID:
+        raise ValidationError(message, field)
+    return value
