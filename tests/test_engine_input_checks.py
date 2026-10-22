@@ -103,3 +103,21 @@ def test_the_integrity_page_flags_a_cash_account_below_zero(c, setup):
                  "(SELECT id FROM transactions WHERE ref LIKE 'OPN%')", (accounts["cib"].id,))
     names = {check.name: check for check in c.integrity.checks("2026-09-30")}
     assert names["No cash account is below zero"].status == "ISSUE"
+
+
+# -- 2E6: crafted input is refused, not a 500 ----------------------------------------------------------------
+def test_a_crafted_category_direction_is_refused(c, setup):
+    food = _food(c)
+    with pytest.raises(ValidationError):
+        c.categories.set_direction(food.id, "SIDEWAYS")
+    row = _client(c).post(f"/categories/{food.id}/row", data={"direction": "SIDEWAYS"}, follow_redirects=False)
+    assert row.status_code < 500
+    assert c.categories.get(food.id).direction.value != "SIDEWAYS"
+
+
+@pytest.mark.parametrize("value", [2**63, 2**64, 0, -1])
+def test_a_transaction_id_outside_the_database_range_is_not_found(c, setup, value):
+    from lightning.core.errors import NotFoundError
+    with pytest.raises(NotFoundError):
+        c.transactions.get(value)
+    assert _client(c).get(f"/transactions/{value}").status_code == 404

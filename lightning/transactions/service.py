@@ -824,7 +824,7 @@ class TransactionService:
             "AND NOT EXISTS (SELECT 1 FROM reevaluation_account_posts p WHERE p.transaction_id=t.id)")}
 
     def get(self, txn_id: int) -> Transaction:
-        found = self.repo.get(txn_id)
+        found = self.repo.get(txn_id) if 0 < txn_id <= 9_223_372_036_854_775_807 else None  # SQLite's largest id (2E6)
         if not found:
             raise NotFoundError("Transaction not found.")
         return found
