@@ -403,7 +403,9 @@ class ProfileSession:
         EncryptedBackupRestorer._check_restore_control(paths, key)
         self._verify(paths, key)
         if role.writable:
-            container = build(paths.db_path, key=key, backup_dir=paths.backups_dir, backup_on_start=True)
+            # _verify just checked this file: the start backup (at most one a day) checks only its copy (2J).
+            container = build(paths.db_path, key=key, backup_dir=paths.backups_dir, backup_on_start=True,
+                              source_verified=True)
         else:
             try:
                 container = build(paths.db_path, key=key, read_only=True)
