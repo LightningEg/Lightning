@@ -18,7 +18,7 @@ Found by [Audit 3](../../reports/audit-3.md) §4.
      - `database/connection.py:169` imports `lightning.undo`, and line 137 matches a trigger's message text.
    - `bootstrap.validate_history` (`bootstrap.py:253-304`) is ledger checking that calls private `TransactionService` methods.
 2. **Copies of one fact.**
-   - Four checks that a balance never goes below zero: `_validate_owner_balances`, `_refuse_cash_below_zero`, `_validate_owner_partition` (see 2G), `lowest_running_quantity`.
+   - Three checks that a balance never goes below zero: `_validate_owner_balances`, `_refuse_cash_below_zero`, `lowest_running_quantity`.
    - Two kinds of money rounding: `core/ledger._round2` rounds half to even and `core/money.quantize` rounds half up, so 10.01 × 50.5 posts 505.50 but quantizes to 505.51.
    - Four copies of the id check: `reserves._id`, `reimbursements._id`, `planning/service._id`, `workflows/activity._id`.
    - `MoneyFromOthersService` builds `CounterpartyService(self.db)` itself instead of getting it from `bootstrap`.

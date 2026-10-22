@@ -18,8 +18,8 @@ from lightning.categories.service import CategoryService
 from lightning.counterparties import CounterpartyService
 from lightning.core.dates import fmt_date, parse_date, today
 from lightning.core.errors import NotFoundError, ValidationError
-from lightning.core.ledger import Effect, PostingLine, validate_posting
-from lightning.core.money import ONE, ZERO, check_places, fmt, to_decimal
+from lightning.core.ledger import Effect, PostingLine, split_line_e6, validate_posting
+from lightning.core.money import ONE, ZERO, check_places, fmt, from_e6, to_decimal, to_e6
 from lightning.core.refs import DOC_LABELS, DocType, format_ref, ref_prefix
 from lightning.database.audit import AuditLog
 from lightning.database.connection import Database
@@ -280,6 +280,60 @@ class TransactionService:
             self.audit.record("transaction", txn_id, "edit", f"Changed owner on {txn.ref}",
                               before=self._snapshot(txn), after=self._snapshot(updated))
         return self.get(txn_id)
+
+    def mark_line_owner(self, txn_id: int, account_id: int, asset_id: int, quantity_e6: int,
+                        owner_id: int) -> bool:
+        """Mark ``quantity_e6`` (signed micro-units) of the transaction's first unowned line on this account and asset,
+        with the same sign, as held for ``owner_id``. A part splits the line in two (2G3); returns False when no
+        such line is left. Validated and audited like any other edit."""
+        current = self.get(txn_id)
+        if current.is_void:
+            raise ValidationError("Restore this transaction before editing it.")
+        index = next((i for i, line in enumerate(current.lines)
+                      if line.account_id == account_id and line.asset_id == asset_id and line.owner_id is None
+                      and to_e6(line.quantity) * quantity_e6 > 0), None)
+        if index is None:
+            return False
+        cleared = {row["id"]: row["cleared"] for row in self.db.all(
+            "SELECT id,cleared FROM ledger_entries WHERE transaction_id=?", (txn_id,))}
+        lines = [PostingLine(account_id=ln.account_id, asset_id=ln.asset_id, quantity=ln.quantity, effect=ln.effect,
+                             unit_price=ln.unit_price, fx_rate=ln.fx_rate, category_id=ln.category_id, memo=ln.memo,
+                             amount=ln.amount, amount_base=ln.amount_base, owner_id=ln.owner_id,
+                             is_cash=self.assets.get_asset(ln.asset_id).is_cash) for ln in current.lines]
+        flags = [cleared.get(ln.id, 0) for ln in current.lines]
+        line, stored = lines[index], current.lines[index]
+        total = abs(to_e6(line.quantity))
+        take = min(abs(quantity_e6), total)
+        if take == total:
+            lines[index] = replace(line, owner_id=owner_id)
+        else:
+            # Both parts keep whole cents and their own base amount (core/ledger.split_line_e6, 2G).
+            owned_amount, owned_base, rest_amount, rest_base = split_line_e6(
+                to_e6(line.amount), to_e6(line.fx_rate), take, total)
+            if line.effect == Effect.INTERNAL and owned_base + rest_base != to_e6(line.amount_base):
+                raise ValidationError("At this exchange rate that part leaves the transfer a cent out in "
+                                      "your currency; mark a slightly different amount.", "amount")
+            sign = -1 if line.quantity < ZERO else 1
+            lines[index] = replace(line, quantity=from_e6(sign * (total - take)), amount=from_e6(rest_amount),
+                                   amount_base=from_e6(rest_base))
+            lines.append(replace(line, quantity=from_e6(sign * take), amount=from_e6(owned_amount),
+                                 amount_base=from_e6(owned_base), owner_id=owner_id))
+            flags.append(flags[index])
+        validate_posting(lines)
+        day = parse_date(current.date)
+        # Both owners of the account and asset are checked: the person's part and what is left as yours.
+        self._validate_owner_balances(lines, day, exclude_txn_id=txn_id,
+                                      force_brokerage_cash=current.type == DocType.BUY,
+                                      extra_keys={(account_id, asset_id, owner_id), (account_id, asset_id, None)})
+        with self.db.transaction():
+            self.repo.replace_lines(txn_id, current.date, lines)
+            for line_no, flag in enumerate(flags, start=1):
+                if flag:
+                    self.db.execute("UPDATE ledger_entries SET cleared=? WHERE transaction_id=? AND line_no=?",
+                                    (flag, txn_id, line_no))
+            self.audit.record("transaction", txn_id, "edit", f"Changed owner on {current.ref}",
+                              before=self._snapshot(current), after=self._snapshot(self.get(txn_id)))
+        return True
 
     def update_refund(self, txn_id: int, date: str, account_id: int, amount, category_id: int,
                       description: str = "", counterparty: str = "", notes: str = "",
