@@ -282,7 +282,7 @@ incoming_carryover(M+1) = left(M) when enabled; 0 when disabled or reset at M+1
 
 - SQLite with ordered, append-only migrations; never edit an applied migration. Dates are ISO `yyyy-mm-dd`; entry accepts ISO, `dd/mm/yyyy`, `dd/m` (current year); CSV uses the same parser. An account's legacy opening date is not a transaction-date boundary; balances are chronological sums of dated lines.
 - Money, prices and quantities are `Decimal` / integer `_e6`; new money inputs take two decimals. Summaries round to whole units; entry controls keep cents.
-- Indexed paths: ledger account/date, asset/date, category/date, transaction id, transaction date/type/status, price history asset/date.
+- Indexed paths: ledger account/date, asset/date, category/date, transaction id, transaction date/type/status, price history asset/date. A unique constraint that leads with an index's columns replaces that index (migration 0068). An account's balance check sums the days before the edit in SQL on the account index and walks only the later days.
 - Corrections are audited. Transactions are voided or deleted through recoverable flows; used categories are archived, never removed.
 - **Start fresh** (Settings › Your data, `POST /settings/fresh`) never deletes data: in profile mode it locks the profile and opens new-profile setup; in browser mode it backs up, renames the database to `<name>_before-fresh_<timestamp>.db` and builds an empty one (a failed rename reopens the original).
 - Data and backups live under Documents/Lightning (profiles) or `data/` (legacy), never in Git.

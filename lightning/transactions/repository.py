@@ -86,7 +86,10 @@ class TransactionRepository:
 
     # -- refs --------------------------------------------------------------
     def next_seq(self, prefix: str) -> int:
-        rows = self.db.all("SELECT ref FROM transactions WHERE ref LIKE ?", (prefix + "%",))
+        # Refs starting with the prefix ("OUT-2026-09-25-") sort between it and the prefix with its
+        # last character raised by one, so the ref index answers a range instead of a LIKE scan (9I).
+        rows = self.db.all("SELECT ref FROM transactions WHERE ref>=? AND ref<?",
+                           (prefix, prefix[:-1] + chr(ord(prefix[-1]) + 1)))
         return max((parse_ref(r["ref"])[2] for r in rows), default=0) + 1
 
     # -- writing -----------------------------------------------------------
@@ -179,6 +182,29 @@ class TransactionRepository:
         return result
 
     def list(self, f: TxnFilter) -> tuple[list[Transaction], int]:
+        clause, params = self._where(f)
+        total = self.db.scalar(f"SELECT COUNT(*) FROM transactions t WHERE {clause}", tuple(params)) or 0
+        rows = self.db.all(
+            f"SELECT t.* FROM transactions t WHERE {clause} ORDER BY t.date DESC, t.id DESC LIMIT ? OFFSET ?",
+            (*params, f.limit, f.offset),
+        )
+        txns = [_header(r) for r in rows]
+        lines = self.lines_for([t.id for t in txns])
+        for t in txns:
+            t.lines = lines[t.id]
+        return txns, int(total)
+
+    def ids(self, f: TxnFilter) -> list[int]:
+        """The ids `list` would return for the same filter, without building the transactions."""
+        clause, params = self._where(f)
+        rows = self.db.all(
+            f"SELECT t.id FROM transactions t WHERE {clause} ORDER BY t.date DESC, t.id DESC LIMIT ? OFFSET ?",
+            (*params, f.limit, f.offset),
+        )
+        return [int(row["id"]) for row in rows]
+
+    @staticmethod
+    def _where(f: TxnFilter) -> tuple[str, list]:
         where, params = ["1=1"], []
         if not f.include_void:
             where.append("t.status != 'VOID'")
@@ -204,17 +230,7 @@ class TransactionRepository:
             where.append(_TERM_SQL)
             params.extend([_like(term)] * 10)
             params.append(int(term) if term.isdigit() else None)  # 3251 finds 3,250.75, shown as 3,251
-        clause = " AND ".join(where)
-        total = self.db.scalar(f"SELECT COUNT(*) FROM transactions t WHERE {clause}", tuple(params)) or 0
-        rows = self.db.all(
-            f"SELECT t.* FROM transactions t WHERE {clause} ORDER BY t.date DESC, t.id DESC LIMIT ? OFFSET ?",
-            (*params, f.limit, f.offset),
-        )
-        txns = [_header(r) for r in rows]
-        lines = self.lines_for([t.id for t in txns])
-        for t in txns:
-            t.lines = lines[t.id]
-        return txns, int(total)
+        return " AND ".join(where), params
 
     def opening_txn_id(self, account_id: int, asset_id: int | None = None, exclude_id: int | None = None) -> int | None:
         """The live opening balance of an account's cash (asset_id None) or of one holding."""
