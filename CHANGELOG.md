@@ -12,6 +12,86 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 ## [Unreleased]
 
 - 2026-10-22 · Claude: guideline B09 copy: website theme is light by default, dark only when chosen (matches the website repo).
+- 2026-10-22 · Claude: 3AA: `tools/site_shots.py` dismisses Get set up, parks the pointer, lifts the phone screens off the + button, adds the a-kpis and a-sankey crops, shows Budget for the
+  month in progress and Expense analysis for August (a 14,200 holiday payment, spending up 21%); a plain run reproduces the live site screens pixel for pixel, English and Arabic (checked).
+- 2026-10-22 · Claude: 2E6 (rest): a plan or reserve amount with more decimals than its currency allows (350.555 EGP, 12.345) is refused, not rounded or kept.
+- 2026-10-22 · Claude: 2E6 (part): a crafted category direction says "Choose +, − or ±" instead of a 500, and a transaction id above 2^63 is "not found"
+  instead of an OverflowError 500. Dates before an account opened stay open: history before opening is allowed on purpose.
+- 2026-10-21 · Codex: 2D adds a publishing-only recovery for the verified v1.4.2 artifacts and uses LightningEg/Lightning-downloads after the repository transfer.
+  Fixed artifact IDs, digests, successful jobs and the pinned source/certificate are checked before the protected publisher uploads and reads back the same files; no rebuild or re-signing.
+
+- 2026-10-21 · Codex: Prepare v1.4.2 as the matched Windows and Android release, followed by the website download and archive refresh.
+
+## [1.4.2] — 2026-10-21
+
+- 2026-10-21 · Codex: 2D declares the four signing-secret names at the reusable workflow boundary, enabling the signing job to resolve its android-signing environment values.
+  The caller passes only those names; key values remain environment-only, Gradle never reads secrets, and the signed APK must match the pinned certificate. Earlier failed tags stay unchanged.
+
+## [1.4.1] — 2026-10-21
+
+- 2026-10-21 · Codex: 2D pins the new Android signing certificate generated and retained by the owner after the old key was lost.
+  Existing Lightning Test installations need an independent backup and reinstall; v1.4.0 was tagged but never published because signing secrets were unavailable.
+
+## [1.4.0] — 2026-10-21
+
+- 2026-10-21 · Codex: Release validation translates bundled price-file origins and source-cited help explicitly in Arabic, with a regression check that includes a bundled price file.
+  The purchase browser check waits for the saved loan row, since closing a phone sheet can leave its URL unchanged while saving.
+
+- 2026-10-21 · Codex: 3AB Budget YTD and All time count full saved monthly plans, excluding months before the plan; headlines and group rows agree, while Custom keeps prorated comparisons.
+  Mohab's October plan is 38,428, spent 3,410, left 35,018. The pace label clears its line and actual marker; English and Arabic Budget screens recaptured for the website.
+
+- 2026-10-21 · Codex: 3X batches account cash, custody and gold metadata; bill matching writes only when a payment can settle, preserving the request cache.
+  Sample Overview: 766 → 364 queries (109 → 119 ms); Cash planning: 541 → 207 (71 → 62 ms). Financial outputs remain identical; tab query budgets tightened.
+
+- 2026-10-21 · Claude: website recaptured from this app (3W site-recapture): net worth 910,304, safe to spend 112,288, nine accounts, new Overview rate crops; Budget screens kept old for 3AB; also filed 3Z, 3AA.
+- 2026-10-21 · Codex: 3Y register selection survives edits, cancellation and message redirects; adds Edit selected, Clear selection and Shift-click ranges, plus phone Select all.
+  Mass edits affect only selected rows and changed fields; amount/account edits stay on one row with an explicit choice. Browser checks cover both layouts, dialog closure and retries.
+- 2026-10-21 · Claude: 4C Audit 3 of the edit journal, fixed: stale command and bulk edits wait for review, replicas verify their rows after
+  catch-up, register cannot revert a command, a refused mailbox request is answered. Worker: wire stored apart, monthly allowance per profile.
+- 2026-10-21 · Claude: [8H] Site Guides become a map of four topics, each with a pillar page (Budget your salary, See where it goes,
+  Know what you own, Your data and devices); track-expenses merged into the expense tracker; one home per FAQ (site PR #47). 8E and 8H done; 8I asks the owner two checks.
+- 2026-10-21 · Claude: [8E, 8G] Site: one download wording, version 1.3.0 in structured data, PC shown behind the sync veil,
+  slim consent bar, Testing tab for testers only (`?testing`), Sample Profiles download (site PR #46). No comparisons.
+- 2026-10-21 · Claude: [8E–8H] The owner's website audit becomes plan items: quick fixes (8E), Home and Features show the app (8F), three owner calls (8G), and the Guides redesign brief (8H).
+- 2026-10-21 · Claude: For Geeks home greets with `$ welcome to lightning`, typed once with the caret, while the hero fades up;
+  guideline D07 `.hello` and D08 (both repos). Reduced motion shows it still.
+- 2026-10-21 · Claude: 8D For Geeks audit: recounted stats (`tools/geeks_stats.py`), keys.py proof, steady Ink hero word, quiet terminal replay, balanced
+  mission, roadmap glow runs once, Arabic footer labels For Geeks English; D07 demo port 8766 (both repos). Ideas left for the owner: 8D.
+  Contribute links the glossary and AGENTS.md instead of copying them (phone 16,795 → 14,466px).
+- 2026-10-21 · Codex: 9G conversion rate updates refresh only affected dates/pairs, atomically with the posting; at 50 conversions, transaction reads fall from 51 to 2 (4.26 to 0.85 ms locally).
+  9H removes eight unused backend helpers. Audit 2 and eight regression tests cover rate winners, edits, void/restore, bulk deletion, rollback and existing 2E validation fixes.
+
+- 2026-10-21 · Claude: Mohab comprehensive: the sample gains goals, a gam'eya, zakat, a rule, a claim, Mom's money, a dollar account, a flat, a laptop on
+  instalments, targets, a saved report and a waiting statement; the year test gains steps 33–36. Arabic gaps it exposed fixed. `samples/`, `test_mohab_sample.py`.
+- 2026-10-21 · Claude: 3W8 phone: each section's title carries its status sentence and the seam (C04.1); Needs you bullets are the mark;
+  Accounts leads with What you own ("Total balance" retired); Investments drops Biggest holdings; no Needs you row when nothing waits.
+- 2026-10-21 · Claude: 3W5-3W7 answer first: Investments leads with Portfolio value (the waffle and Biggest holdings left; By currency only
+  when needed), Accounts with What you own and four groups ("Total balance" retired), Financial health with Within your limits.
+- 2026-10-21 · Claude: 3W1-3W4 answer first: Overview, Budget and Cash planning open on their Lead (Net worth, Left in plan, Safe to spend)
+  with its working beside it, a status sentence under the title, Needs you rows with the mark, then KPIs. `ui/status.py`, `lead_card`, `needs_rows`.
+- 2026-10-21 · Claude: guideline 3.33, answer first (3W): A09 Page order (header, Lead, Needs you, KPIs, details; one home per figure),
+  status sentence and seam (A05, A02.3), the page's Lead spans its row (A07); phone C04, C06, C11; A16 gains two checks. Both repos.
+- 2026-10-21 · Codex: Added 21 Lightning branding assets from Drive under `assets/logos/`; original filenames kept and active asset references unchanged.
+
+- 2026-10-21 · Claude: 3S 1–2, 3C, 3A: Sale factors wraps its locked-holding note (no sideways scroll); trend and Budget pace end labels part instead of
+  overlapping (`charts.end_labels`, `spread_labels`); Currencies rates show two decimals in one left-to-right run (Arabic-safe).
+- 2026-10-21 · Claude: 3R: phone sheets show only their form (no undo pill or section tabs); Save without a category says so on the visible field
+  and a counterparty fills its learned category; the raise offer is a Budget card that stays; the tab bar hides for the keyboard and sheets.
+- 2026-10-21 · Claude: bill matching you can trust (7K). Review of a payment searches every cash account, not only the item's; last month's payment is no longer
+  offered for this month; salary or a bill paid early is not counted twice in the forecast and Needs you offers Link (`PlanningService.early_payments`).
+
+- 2026-10-21 · Claude: demo and sample stop showing false alarms (3V, 7L1). The demo certificate pays what its 22% says, on its payout day, so Match all clears
+  its item; the demo adds an untracked gym for Looks recurring; `--sample` opens on 2026-10-02 (no late bill); "Your income went up" ignores yearly, quarterly and Bonus income.
+
+- 2026-10-21 · Claude: 3U1–3U4: in Arabic a "·" beside a number becomes "،" (it read as a zero); one decimal "٫" and "%" everywhere, including
+  figures in brackets or before a comma; the undo button and six more strings are translated. Test: `tests/test_arabic_separators.py`.
+- 2026-10-21 · Claude: 5H: the Investments reconciliation moves into `investments/report.py::reconcile_portfolio` and counts the exchange-rate revaluation
+  of dollar brokerage cash on its own, so Mohab's sample (YTD) no longer shows an unresolved +1,394.
+- 2026-10-21 · Claude: 2E1–2E5: a split respects the account's decimals; money in or out is refused on a gold account (and not offered); an entry that takes a wallet or bank below zero is refused, with a data check; an unknown owner and a zero planner amount say so instead of a 500.
+- 2026-10-21 · Claude: Audit 1, demo readiness (`reports/audit-1.md`): engine, smart logic, PC guideline, phone and Arabic. The math holds; found
+  input-check gaps, bill-matching trust bugs, hidden suggestions, phone sheet bugs and an Arabic "·" that reads as zero. Filed 2E, 2F, 3R–3V, 5J, 5K,
+  7K–7M; 5H's cause found; demo cut list first in `NOW.md`.
+
 - 2026-10-20 · Claude: website page "Net worth, budget and expense tracker" in English and Arabic (site PR #41) so AI search finds Lightning for all three together;
   Overview decision, Competition section *How AI search finds us*, owner tasks in 8C (sitemap resubmit, Reddit post). The website home hero line now reads as the comprehensive planning app (site PR #42).
 
