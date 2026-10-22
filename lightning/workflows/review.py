@@ -53,11 +53,6 @@ def page_of(item: dict) -> str:
     return next((key for key, prefixes in PAGES if item["href"].startswith(prefixes)), "overview")
 
 
-def for_page(items: list[dict], page: str) -> list[dict]:
-    """The items a page shows under its Lead, most urgent first, as the inbox orders them."""
-    return [item for item in items if page_of(item) == page]
-
-
 def grouped(items: list[dict]) -> list[dict]:
     """The inbox as groups, most urgent first: key, label, its items, and where the row leads. A group of one
     leads straight to its item, so a single decision is still one click away."""

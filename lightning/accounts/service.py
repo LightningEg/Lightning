@@ -20,12 +20,11 @@ from .repository import AccountRepository
 
 
 class AccountService:
-    def __init__(self, db: Database, assets: AssetService, base_currency: str, allow_foreign: bool = False):
+    def __init__(self, db: Database, assets: AssetService, base_currency: str):
         self.db = db
         self.repo = AccountRepository(db)
         self.assets = assets
         self.base_currency = base_currency
-        self.allow_foreign = allow_foreign  # other currencies need FX rates (M4)
 
     # -- reading -----------------------------------------------------------
     @request_cached
@@ -40,12 +39,6 @@ class AccountService:
         found = self._by_id().get(account_id) if in_request() else self.repo.get(account_id)
         if not found:
             raise NotFoundError("Account not found.")
-        return found
-
-    def get_by_code(self, code: str) -> Account:
-        found = self.repo.get_by_code(code)
-        if not found:
-            raise NotFoundError(f"Account {code} not found.")
         return found
 
     def find_by_text(self, text: str) -> Account | None:
@@ -102,11 +95,6 @@ class AccountService:
         if not self.db.scalar("SELECT 1 FROM registered_currencies WHERE code=?", (currency,)):
             raise ValidationError(f"Currency {currency} is not registered. Add it in Settings first.", "currency")
         self.assets.cash_asset(currency)  # currency must exist
-        if currency != self.base_currency and not self.allow_foreign:
-            raise ValidationError(
-                f"For now accounts must be in {self.base_currency}. Other currencies need exchange rates, which are not built yet.",
-                "currency",
-            )
         institution = (institution or "").strip()
         code = validate_account_code(code) if code and code.strip() else self.unique_code(
             institution, name, account_type, currency

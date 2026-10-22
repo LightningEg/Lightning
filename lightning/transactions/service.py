@@ -403,10 +403,6 @@ class TransactionService:
             ids.update(int(row["id"]) for row in rows)
         return ids
 
-    def counterparty_suggestions(self) -> dict[str, int]:
-        """Previously used counterparties and their most recent category."""
-        return self.repo.counterparty_categories()
-
     # A counterparty's usual category is a habit, not one odd filing (as in Actual Budget): the same
     # category in at least 3 of its last 5 transactions, or in every one while it has 2 to 4. Only the
     # 180 days before its newest transaction count, so an old habit fades.

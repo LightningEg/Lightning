@@ -90,7 +90,6 @@ def test_weekly_completion_records_progress_without_dismissing_inbox(c, setup):
     assert pending
     review.complete(snapshot["token"])
     assert c.settings.get("weekly_review_at")
-    assert c.settings.get("weekly_review_remaining") == str(len(snapshot["items"]))
     assert [item["label"] for item in ReviewInbox(c).items(date(2026, 12, 31)) if "no category" in item["label"]]
     with pytest.raises(ValidationError, match="review changed"):
         review.complete("stale")

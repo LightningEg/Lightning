@@ -115,15 +115,8 @@ class MoneyFromOthersService:
         totals = {row["account_id"]: row["amount_e6"] for row in self.totals_by_account(day)}
         return from_e6(int(totals.get(account_id, 0)))
 
-    def transaction_owner(self, transaction_id: int) -> str:
-        row = self.db.one("SELECT p.name owner FROM ledger_entries le JOIN counterparties p ON p.id=le.owner_id WHERE le.transaction_id=? AND le.owner_id IS NOT NULL LIMIT 1", (transaction_id,))
-        if row:
-            return row["owner"]
-        row = self.db.one("SELECT owner FROM money_from_others WHERE transaction_id=?", (transaction_id,))
-        return row["owner"] if row else ""
-
     def transaction_owners(self, transaction_ids) -> dict[int, str]:
-        """transaction_owner for many transactions in two reads (a register page), "" when it is yours."""
+        """Who holds each transaction's money, in two reads (a register page); "" when it is yours."""
         ids = sorted(set(transaction_ids))
         owners = {txn_id: "" for txn_id in ids}
         if not ids:
@@ -131,7 +124,7 @@ class MoneyFromOthersService:
         marks = ",".join("?" * len(ids))
         for row in self.db.all(f"SELECT transaction_id, owner FROM money_from_others WHERE transaction_id IN ({marks})", ids):
             owners[row["transaction_id"]] = row["owner"]
-        # The ledger's owner wins over the legacy table, as in transaction_owner.
+        # The ledger's owner wins over the legacy table.
         for row in self.db.all("SELECT le.transaction_id, MIN(p.name) owner FROM ledger_entries le "
                                "JOIN counterparties p ON p.id=le.owner_id "
                                f"WHERE le.transaction_id IN ({marks}) AND le.owner_id IS NOT NULL "

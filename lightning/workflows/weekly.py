@@ -27,7 +27,6 @@ class WeeklyReview:
             if token != state["token"]:
                 raise ValidationError("The review changed. Read the updated decisions before recording completion.")
             self.c.settings.set("weekly_review_at", now_iso())
-            self.c.settings.set("weekly_review_remaining", str(len(state["items"])))
 
     def rule_offers(self):
         c = self.c

@@ -194,7 +194,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
     audit = AuditLog(db)
     assets = AssetService(db, base)
     categories = CategoryService(db)
-    accounts = AccountService(db, assets, base, allow_foreign=True)
+    accounts = AccountService(db, assets, base)
     transactions = TransactionService(db, accounts, assets, categories, audit, base)
     counterparties = CounterpartyService(db)
     reserves = CashReserveService(db)

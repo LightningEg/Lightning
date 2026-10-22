@@ -30,7 +30,7 @@ def _line(row: sqlite3.Row) -> LedgerLine:
         effect=Effect(row["effect"]),
         category_id=row["category_id"],
         memo=row["memo"],
-        owner_id=row["owner_id"] if "owner_id" in row.keys() else None,
+        owner_id=row["owner_id"],
     )
 
 
@@ -253,15 +253,6 @@ class TransactionRepository:
             (account_id, asset_id),
         )
         return (int(row["q"]), row["date"]) if row else (0, None)
-
-    def counterparty_categories(self) -> dict[str, int]:
-        rows = self.db.all(
-            "SELECT t.counterparty AS counterparty, le.category_id, MAX(t.date || printf('%010d', t.id)) AS latest"
-            " FROM transactions t JOIN ledger_entries le ON le.transaction_id = t.id"
-            " WHERE t.status = 'POSTED' AND t.counterparty != '' AND le.category_id IS NOT NULL"
-            " GROUP BY t.counterparty ORDER BY latest DESC LIMIT 500"
-        )
-        return {r["counterparty"]: r["category_id"] for r in rows}
 
     def recent_categories(self, window: int) -> list:
         """Each counterparty's last ``window`` categorised transactions, newest first, under its saved

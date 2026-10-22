@@ -17,7 +17,6 @@ from .errors import ValidationError
 ACCOUNT_CODE_RE = re.compile(r"^[A-Z0-9]+(-[A-Z0-9]+)*$")
 ASSET_CODE_RE = re.compile(r"^[A-Z]+:[A-Z0-9]+([-_.][A-Z0-9]+)*$")
 PATH_CODE_RE = re.compile(r"^[A-Z0-9_]+(\.[A-Z0-9_]+)*$")
-SEGMENT_RE = re.compile(r"^[A-Z0-9_]+$")
 
 
 def slug(text: str, max_len: int = 16, sep: str = "-") -> str:
