@@ -80,6 +80,8 @@ class JournalServices:
         if call == "budgets.set_carryover" and "settings" in arguments:
             arguments["lines"] = [dict(category=category_id, enabled=enabled)
                                   for category_id, enabled in arguments.pop("settings").items()]
+        if call in {"account_flows.open_account", "account_flows.update_account"}:
+            arguments["opening_balance"] = self._device.c.account_flows.parse_opening(arguments["opening_balance"])
         for name, value in arguments.items():
             parameter = signature.parameters.get(name)
             if name not in entry.args and (parameter is None or value is not parameter.default):
