@@ -14,6 +14,7 @@ from contextlib import contextmanager
 from decimal import Decimal
 from datetime import date
 
+from lightning.core.dates import today
 from lightning.core.errors import ValidationError
 from lightning.core.ledger import Effect, PostingLine, validate_posting
 from lightning.core.money import from_e6
@@ -334,6 +335,9 @@ class CashAdapter:
                 history_label = action_label(command_name)
             with self.writing(history_label=history_label):
                 result = commands.run(self, proposal["kind"], proposal["record"], proposal["groups"])
+                if history_label is not None:
+                    # Keep post-save settlement in the same accepted effects and undo scope.
+                    self.c.planning.match_payments(today())
             effect_rows = self._result() if self.captured else None
             self._keep(self.results, proposal, result)
             return effect_rows
@@ -386,6 +390,7 @@ class CashAdapter:
                         line.category_id, line.memo, line.fx_rate, line.owner_id) for line in txn.lines]
                     self.c.transactions.repost(txn.id, money["date"], lines, details["description"],
                                                details["counterparty"], details["notes"])
+            self.c.planning.match_payments(today())
         return self._result()
 
     def _result(self):

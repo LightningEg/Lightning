@@ -428,7 +428,8 @@ class RequestCache:
                     # Settlement links belong to the action that recorded or
                     # changed the cash, rather than a later read-only page visit.
                     if (status < 400 and getattr(self.state, "container", None) is current
-                            and not current.db.closed and not current.db.read_only):
+                            and not current.db.closed and not current.db.read_only
+                            and not getattr(current, "is_journal", False)):
                         current.planning.match_payments(today())
             else:
                 await self.app(scope, receive, send)

@@ -68,8 +68,11 @@ def test_other_database_errors_are_not_hidden(screens, monkeypatch):
     (hd, pc), (home, replica) = screens
     import sqlite3
 
+    from functools import wraps
+
+    @wraps(hd.c.sms_imports.assign)
     def broken(*args, **kwargs):
         raise sqlite3.DatabaseError("disk image is malformed")
     monkeypatch.setattr(hd.c.sms_imports, "assign", broken)
-    response = home.post("/sms/assign", data={"ending": "1234", "account_id": str(next(a.id for a in hd.c.accounts.list() if a.name == "Bank"))})
-    assert response.status_code == 500 and "malformed" not in response.text
+    with pytest.raises(sqlite3.DatabaseError, match="malformed"):
+        home.post("/sms/assign", data={"ending": "1234", "account_id": str(next(a.id for a in hd.c.accounts.list() if a.name == "Bank"))})
