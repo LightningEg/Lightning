@@ -621,3 +621,23 @@ html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !import
 .phone-needs > summary::after { display: none !important; }
 .phone-tab[href="/more"] svg { stroke-width: 3.2; }
 .phone-tab.is-chosen[href="/more"] svg { stroke-width: 3.6; }
+
+/* == 3AC Budget tab == (phone overhaul; rules for phone/budget.html go between these two lines) */
+
+/* == end 3AC Budget tab == */
+
+/* == 3AC Cash planning tab == (rules for phone/planning/plan.html) */
+
+/* == end 3AC Cash planning tab == */
+
+/* == 3AC Investments tab == (rules for phone/investments/index.html) */
+
+/* == end 3AC Investments tab == */
+
+/* == 3AC Accounts tab == (rules for phone/accounts/list.html) */
+
+/* == end 3AC Accounts tab == */
+
+/* == 3AC Transactions tab == (rules for phone/register.html) */
+
+/* == end 3AC Transactions tab == */
