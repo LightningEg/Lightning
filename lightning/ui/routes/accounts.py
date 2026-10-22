@@ -47,6 +47,37 @@ def _form_context(request: Request, values: dict, account=None, error: Lightning
     )
 
 
+def _phone_groups(groups, base: str) -> list[dict]:
+    """The phone's Accounts tab (phone overhaul 2026-10-22): the active accounts under each sidebar group, the group's
+    total beside its name, and under each account its type, its bank and, for foreign money, its currency."""
+    out = []
+    for name, group in groups:
+        shown = []
+        for account, balance, _owned, _count in group["rows"]:
+            if not account.active:
+                continue
+            kind = account.type_short if account.type_short.casefold() not in account.name.casefold() else ""
+            extra = [text for text in (account.institution.strip() if account.institution else "",
+                                       account.currency if account.currency != base else "")
+                     if text and text.casefold() not in account.name.casefold()]
+            shown.append({"id": account.id, "name": account.name, "balance": balance, "kind": kind,
+                          "extra": " · ".join(extra)})
+        if shown:
+            out.append({"name": name, "total": group["balance"], "rows": shown})
+    return out
+
+
+def _hero_line(count: int, held, own) -> dict:
+    """The one sentence under In your accounts: what part of it is held for others, and so what you own."""
+    if not count:
+        return page_status.sentence("Add an account to see where your money is.")
+    if held > ZERO and own is not None:
+        return page_status.sentence("Includes {amt} held for others, so you own {own}.", amt=fmt(held, 0), own=fmt(own, 0))
+    if held > ZERO:
+        return page_status.sentence("{n} accounts. {amt} of it is held for others.", n=count, amt=fmt(held, 0))
+    return page_status.sentence("{n} accounts, and all of it is yours.", n=count)
+
+
 @router.get("")
 async def list_accounts(request: Request):
     c = container(request)
@@ -76,7 +107,6 @@ async def list_accounts(request: Request):
     net_worth = c.reporting.net_worth(today())
     gross_total = (None if has_unavailable else
                    sum((row[1] for row in rows if row[0].active), start=0))
-    recent_rows = c.reporting.register_page(None, "1900-01-01", "9999-12-31", 1, 10)[0]  # the phone shows the latest few
     # Answer first (guideline 3.33): What you own is the Lead, In your accounts and Held for others beside it; the
     # accounts follow in the groups the sidebar uses, each with its total.
     held = c.reporting.money_from_others_total(fmt_date(today()))
@@ -95,10 +125,13 @@ async def list_accounts(request: Request):
             group["balance"] = None if group["balance"] is None or row[1] is None else group["balance"] + row[1]
             group["owned"] = None if group["owned"] is None or row[2] is None else group["owned"] + row[2]
     order = list(dict.fromkeys(SIDEBAR_GROUPS.values()))
+    groups = sorted(groups.items(), key=lambda item: order.index(item[0]))
     return render(request, "accounts/list.html", rows=rows, net_worth=net_worth, gross_total=gross_total,
-                  recent_rows=recent_rows, lead=lead, held_total=held,
-                  groups=sorted(groups.items(), key=lambda item: order.index(item[0])),
-                  status=page_status.accounts(len(active), held))
+                  lead=lead, held_total=held, groups=groups,
+                  status=page_status.accounts(len(active), held),
+                  phone_groups=_phone_groups(groups, c.base_currency),
+                  hero_line=_hero_line(len(active), held, None if net_worth.unvalued or gross_total is None
+                                       else net_worth.what_you_own))
 
 
 @router.get("/currencies")

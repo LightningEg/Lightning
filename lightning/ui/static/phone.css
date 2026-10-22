@@ -749,7 +749,20 @@ html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !import
 /* == end 3AC Investments tab == */
 
 /* == 3AC Accounts tab == (rules for phone/accounts/list.html) */
-
+/* The hero leads and the actions row sits under it: the header carries the hero's own seam, not a second one. */
+.phone-header:has(> .phone-accounts-head)::after { display: none; }
+.phone-accounts-head .phone-hero { margin: 0; }
+.phone-accounts-head .phone-hero-line { margin: 4px 0 0; color: var(--c-ink-2); font-size: 14px; }
+/* Groups: the name on the left, its total on the right in Ink 2 (Azure text is too light here, A03). */
+.phone-accounts-group { margin-top: 24px; }
+.phone-accounts-group .phone-section-head { align-items: center; margin-bottom: 0; flex-wrap: nowrap; }
+.phone-accounts-group .phone-section-head h2 { min-width: 0; overflow-wrap: anywhere; }
+.phone-accounts-group .phone-accounts-total { flex: none; font-size: 15px; font-weight: 700; color: var(--c-ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.phone-accounts-group .phone-rows { margin-top: 4px; }
+.phone-accounts-closed .phone-row-more > summary.phone-row { border-top: 1px solid var(--c-line); }
+.phone-accounts-closed .phone-row-more > summary.phone-row > span { flex-direction: row; align-items: center; }
+.phone-accounts-empty { margin: 24px 0 0; }
+.phone-accounts-more { margin: 16px 0 0; }
 /* == end 3AC Accounts tab == */
 
 /* == 3AC Transactions tab == (rules for phone/register.html) */
