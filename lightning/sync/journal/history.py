@@ -89,6 +89,7 @@ def attach_home_history(container, adapter):
     from lightning.undo import UndoService
 
     service = UndoService(container.db, container.audit)
+    service.journal_fingerprint = adapter.fingerprint
     service.validate = lambda records: _validate_financial_history(container, records)
     adapter.attach_history(service)
     return service

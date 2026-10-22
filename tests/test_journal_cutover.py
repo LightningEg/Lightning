@@ -4,6 +4,7 @@ import pytest
 
 from lightning.sync.journal.codec import JournalError
 from lightning.sync.journal.cutover import _normalize_legacy_references, begin
+from test_journal_finance import devices
 
 
 class LegacyDatabase:

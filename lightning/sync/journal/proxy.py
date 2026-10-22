@@ -32,6 +32,11 @@ class PendingOnHome(Exception):
 class JournalServices:
     is_journal = True
 
+    @property
+    def history_is_home(self):
+        """Whether home-local history may be replayed in this session."""
+        return self._device.store.config.get("role") == "home"
+
     def __init__(self, device, *, backup=None):
         self._device = device
         self._backup = backup

@@ -120,19 +120,19 @@ def command_status_rows(device):
                          reason="Waiting for the home" if item["state"] == "Pending" else "The home needs to review this action",
                          summary=_command_summary(device, "command." + item["name"], item.get("args", {}))))
         seen.add(item["proposal_id"])
-    for decision in device.store.decisions():
-        identifier = decision["proposal_id"]
+    for decision in device.command_decisions():
+        proposal = unpack(decision["proposal"])["body"]
+        receipt = unpack(decision["decision"])["body"]
+        identifier = proposal["origin"]
+        # The receipt's stable id is the index used by the outbox and display marker.
+        from lightning.sync.journal.codec import origin_id
+        identifier = origin_id(identifier)
         if identifier in seen:
             continue
-        wire = device.store.db.scalar("SELECT wire FROM journal_outbox WHERE proposal_id=?", (identifier,))
-        if wire is None:
-            continue
-        proposal = unpack(bytes(wire))["body"]
         if not proposal["kind"].startswith("command."):
             continue
-        receipt = unpack(bytes(decision["decision"]))["body"]
         if receipt["outcome"] == "rejected":
-            if device.store.db.scalar("SELECT first_display_at FROM journal_seen WHERE proposal_id=?", (identifier,)):
+            if decision["first_display_at"]:
                 continue
             state = "Not taken"
             reason = {"cancelled": "The home kept the confirmed value",

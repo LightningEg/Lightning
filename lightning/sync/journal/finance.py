@@ -74,6 +74,7 @@ def initialize(container, *, profile, generation, device, incarnation, home_key,
     with db.transaction():
         for statement in STORE_SCHEMA:
             db.execute(statement)
+        db.execute("CREATE TABLE journal_baseline_attestation(snapshot_sha256 TEXT, row_fingerprint TEXT NOT NULL)")
         config = dict(version=2, profile=profile, generation=generation, device=device,
                       incarnation=incarnation, home_key=home_key, origin_key=origin_key, role=role)
         db.execute("INSERT INTO journal_meta VALUES(1,?,1)", (canonical(config).decode(),))
@@ -85,7 +86,6 @@ def initialize(container, *, profile, generation, device, incarnation, home_key,
     if rows:
         store.adapter.rows.validate(dict(schema=SCHEMA, rows=rows), bounded=False)
     with db.transaction():
-        db.execute("CREATE TABLE journal_baseline_attestation(snapshot_sha256 TEXT, row_fingerprint TEXT NOT NULL)")
         db.execute("INSERT INTO journal_baseline_attestation VALUES(?,?)", (
             verified_baseline, store.adapter.fingerprint(full=True),
         ))

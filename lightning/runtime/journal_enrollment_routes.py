@@ -95,7 +95,7 @@ def journal_enrollment_router(session) -> APIRouter:
                        error=error_text(error, locale) if error else "", notice=notice,
                        stage=stage, state=state or {}, candidates=found, name=name,
                        on_phone=bool(getattr(request.state, "phone", False)))
-        response = _views.TemplateResponse(request=request, name="profiles/journal_enrollment.html",
+        response = _views.TemplateResponse(request=request, name="journal/journal_enrollment.html",
                                            context=context, status_code=status)
         return response
 

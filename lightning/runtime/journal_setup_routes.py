@@ -16,7 +16,7 @@ def journal_setup_router(session, devices):
 
     def render(request, *, error="", selected=""):
         locale = request.cookies.get("lightning_ui_locale", "en")
-        return _views.TemplateResponse(request=request, name="profiles/journal_setup.html", context=dict(
+        return _views.TemplateResponse(request=request, name="journal/journal_setup.html", context=dict(
             locale=locale if locale in ("en", "ar") else "en", csrf=session.csrf,
             selected=selected, error=error, name=session.name))
 

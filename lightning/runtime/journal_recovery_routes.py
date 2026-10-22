@@ -27,7 +27,7 @@ def journal_recovery_router(session):
 
     def render(request, message="", error=""):
         locale = request.cookies.get("lightning_ui_locale", "en")
-        return _views.TemplateResponse(request=request, name="profiles/journal_recovery.html", context=dict(
+        return _views.TemplateResponse(request=request, name="journal/journal_recovery.html", context=dict(
             locale=locale if locale in ("en", "ar") else "en", token=session.token,
             options=[dict(id=key, label=key) for key, value in choices().items()],
             available=session.journal is not None and session.journal.device.home is None,

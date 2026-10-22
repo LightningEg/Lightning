@@ -519,7 +519,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
                               "first (Devices), then restore.")
         if form.get("confirm") != "yes":
             return page(request, "restore", status=400, selected=selected, backup=backup_path,
-                        error="Confirm the selected backup restore.")
+                        error="Confirm that this backup restore should proceed.")
         try:
             restored_copy = session.restore_backup(selected, backup_path, str(form.get("password", "")))
         except ProfileError as exc:

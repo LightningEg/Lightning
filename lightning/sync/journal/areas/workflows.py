@@ -69,9 +69,19 @@ class JournalWorkflowService:
         rows = [dict(row) for row in c.db.all("SELECT category_id,month,one_off,amount_e6,average_months,income_percent_e6 "
                                                "FROM budgets ORDER BY category_id,month")]
         categories = {item.id: item.code for item in c.categories.tree()}
-        stable_rows = [{**row, "category": categories.get(row.pop("category_id"), "")} for row in rows]
+        stable_rows = []
+        for row in rows:
+            code = categories.get(row.pop("category_id"), "")
+            row["category"] = code
+            stable_rows.append(row)
+        stable_rows.sort(key=lambda row: (row["category"], row["month"], row["one_off"]))
         carry = [dict(row) for row in c.db.all("SELECT category_id,month,enabled FROM budget_carryover ORDER BY category_id,month")]
-        stable_carry = [{**row, "category": categories.get(row.pop("category_id"), "")} for row in carry]
+        stable_carry = []
+        for row in carry:
+            code = categories.get(row.pop("category_id"), "")
+            row["category"] = code
+            stable_carry.append(row)
+        stable_carry.sort(key=lambda row: (row["category"], row["month"]))
         body = json.dumps([preferences, stable_rows, stable_carry], sort_keys=True, separators=(",", ":"), default=str)
         return hashlib.sha256(body.encode()).hexdigest()
 

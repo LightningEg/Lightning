@@ -115,10 +115,8 @@ class UndoService:
 
     def current_fingerprint(self):
         """The synchronized ledger fingerprint, or None outside a journal profile."""
-        if not self.db.has_table("journal_meta"):
-            return None
-        from lightning.sync.journal.effects import Replicator
-        return Replicator.combine(item[0] for item in self.db.all("SELECT hash FROM journal_fp"))
+        fingerprint = getattr(self, "journal_fingerprint", None)
+        return fingerprint() if fingerprint is not None else None
 
     def replay(self, *, redo=False, expected_id=None, expected_fingerprint=None):
         # Pick the top group and its records only after BEGIN IMMEDIATE. Otherwise a second

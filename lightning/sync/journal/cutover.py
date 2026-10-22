@@ -54,12 +54,12 @@ def _category_code(db, reference) -> str:
     return category["code"]
 
 
-def _budget_rows_fingerprint(db, category_codes) -> str:
-    if not category_codes:
+def _budget_rows_fingerprint(db, category_ids) -> str:
+    if not category_ids:
         return hashlib.sha256(b"[]").hexdigest()
-    marks = ",".join("?" for _ in category_codes)
+    marks = ",".join("?" for _ in category_ids)
     rows = [dict(row) for row in db.all(f"SELECT * FROM budgets WHERE category_id IN ({marks}) "
-                                         "ORDER BY category_id,month,one_off", tuple(category_codes))]
+                                         "ORDER BY category_id,month,one_off", tuple(category_ids))]
     codes = {row["id"]: row["code"] for row in db.all("SELECT id,code FROM categories")}
     for row in rows:
         row.pop("id", None)
@@ -159,8 +159,8 @@ def _normalize_legacy_references(db) -> bool:
                 snapshot.pop("category_ids", None)
                 snapshot["category_codes"] = sorted(set(codes))
                 snapshot["rows"] = portable_rows
-                snapshot["after_fingerprint"] = _budget_rows_fingerprint(db, [code_by_id[db.scalar(
-                    "SELECT id FROM categories WHERE code=?", (code,))] for code in snapshot["category_codes"]])
+                snapshot["after_fingerprint"] = _budget_rows_fingerprint(db, [db.scalar(
+                    "SELECT id FROM categories WHERE code=?", (code,)) for code in snapshot["category_codes"]])
                 encoded = json.dumps(snapshot, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
             except (KeyError, TypeError, ValueError, JournalError):
                 # This is an optional, short-lived undo affordance; do not let a local-ID token replay
@@ -258,8 +258,13 @@ def begin(container, paths, identity, *, generation=None, legacy_state="AT_HOME"
 
     baseline_path, snapshot_hash = _verified_baseline(container, paths, retain_stranded=legacy_state == "LENT")
     try:
-        from lightning.sync.copies import profile_id_of
-        profile = profile_id_of(db) or (paths.profile.profile_id if paths.profile is not None else str(uuid4()))
+        # The picker folder suffix is only an eight-hex-character discovery ID,
+        # not the journal authority UUID. Persist the ledger's stable profile ID
+        # and reuse it when an interrupted cutover resumes.
+        from lightning.sync.copies import ensure_profile_id
+        from .codec import uuid
+        profile = ensure_profile_id(db)
+        uuid(profile)
         generation = generation or str(uuid4())
         store = initialize(container, profile=profile, generation=generation,
             device=identity.device_id, incarnation=str(uuid4()), home_key=identity.public_key,

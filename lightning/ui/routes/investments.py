@@ -799,7 +799,6 @@ def _fill_from(c, done: str = "", back: str = "/investments/prices", request: Re
         if runtime.device.home is None or runtime.automation is None:
             return redirect(back, "Download and apply shared prices on the journal home.")
         from uuid import uuid4
-        from lightning.core.dates import today
         result = runtime.automation.dispatch_once(
             f"manual-market-fill:{today().isoformat()}:{uuid4().hex}",
             "automation.fill_prices_now", as_of=today().isoformat())

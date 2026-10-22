@@ -275,10 +275,16 @@ class RuleService:
             conditions.append(Condition("amount", op, format(low, "f"), format(top, "f") if top is not None else None))
         account = str(values.get("account_id") or "").strip()
         if account:
-            if not account.isdigit():
+            # Rules persist a stable account code so they remain correct across
+            # journal devices whose local integer ids differ.
+            try:
+                stable_code = (self.accounts.get(int(account)).code if account.isdigit()
+                               else self.db.scalar("SELECT code FROM accounts WHERE code=?", (account,)))
+            except (NotFoundError, ValueError):
+                stable_code = None
+            if not stable_code:
                 raise ValidationError("Choose one of your accounts.", "account_id")
-            self.accounts.get(int(account))
-            conditions.append(Condition("account", "is", account))
+            conditions.append(Condition("account", "is", stable_code))
         direction = str(values.get("direction") or "")
         if direction in ("in", "out"):
             conditions.append(Condition("direction", "is", direction))

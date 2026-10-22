@@ -32,7 +32,7 @@ jobs:
       - run: python -m tools.market release
       - run: pyinstaller --clean --noconfirm packaging/desktop-app.spec
       - run: python packaging/package_app.py --strict
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
         with:
           name: journal-windows-review-build
           path: |
@@ -72,8 +72,11 @@ jobs:
         run: >-
           python packaging/phone_build.py check android/app/build/outputs/apk/debug/app-debug.apk
           --build-tools "$ANDROID_HOME/build-tools/35.0.0" --code "$CODE" --name "$NAME"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+          --info android/app/build/outputs/apk/debug/build-info.json
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
         with:
           name: journal-android-review-build
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/apk/debug/build-info.json
           retention-days: 7

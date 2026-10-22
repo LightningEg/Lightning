@@ -1,5 +1,6 @@
 """Composite app workflows are one command and retain references across device-local ids."""
 from datetime import date
+from types import SimpleNamespace
 
 from test_journal_finance import devices  # noqa: F401
 from test_journal_screens import screens  # noqa: F401
@@ -7,6 +8,36 @@ from lightning.sync.journal.proxy import JournalServices
 from lightning.workflows.activity import ActivityReview
 from lightning.planning.loan_actions import preview_early_payment
 from lightning.sync.journal.history import attach_home_history
+from lightning.sync.journal.areas.workflows import JournalWorkflowService
+
+
+def test_budget_settings_fingerprint_uses_category_codes_not_local_ids():
+    def service(first_id, second_id, reverse=False):
+        rows = [
+            {"category_id": first_id, "month": "2026-10", "one_off": 0, "amount_e6": 100,
+             "average_months": None, "income_percent_e6": None},
+            {"category_id": second_id, "month": "2026-10", "one_off": 0, "amount_e6": 200,
+             "average_months": None, "income_percent_e6": None},
+        ]
+        carry = [{"category_id": first_id, "month": "2026-10", "enabled": 1},
+                 {"category_id": second_id, "month": "2026-10", "enabled": 0}]
+        if reverse:
+            rows.reverse()
+            carry.reverse()
+
+        class Database:
+            def all(self, sql):
+                return rows if "FROM budgets" in sql else carry
+
+        class Settings:
+            def get(self, key):
+                return None
+
+        categories = SimpleNamespace(tree=lambda: [SimpleNamespace(id=first_id, code="EXP.A"),
+                                                    SimpleNamespace(id=second_id, code="EXP.B")])
+        return JournalWorkflowService(SimpleNamespace(db=Database(), settings=Settings(), categories=categories))
+
+    assert service(7, 8).budget_settings_fingerprint() == service(107, 108, reverse=True).budget_settings_fingerprint()
 
 
 def _sync(home, replica):

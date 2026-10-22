@@ -509,11 +509,21 @@ def apply_finished(c) -> str:
     what it did, once. "" while it runs, or when there is nothing to save."""
     global _job
     job = _job
-    if c.db.has_table("journal_meta"):
-        if job is not None and job.container is c:
-            _job = None
+    if job is None:
         return ""
-    if job is None or not job.done.is_set():
+    # A caller for a newly opened profile proves the old container has been
+    # closed. Drop its completed result without touching either connection.
+    if job.container is not c:
+        _job = None
+        return ""
+    db = getattr(c, "db", None)
+    if db is None:
+        _job = None
+        return ""
+    if db.has_table("journal_meta"):
+        _job = None
+        return ""
+    if not job.done.is_set():
         return ""
     _job = None
     if job.container is not c or c.db.read_only:

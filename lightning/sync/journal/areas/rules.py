@@ -4,10 +4,10 @@ A rule's account condition stores the account's local id as text inside the rule
 back, so a rule that names an account is refused on a synchronized profile. The preview token of "apply to the
 past" is computed from local ids: the home refuses it if the rows are not as the device saw them.
 """
-from lightning.rules.service import MAX_PARTS
-
 from .spec import TEXT, Command, listof, mapping, optional, ref
 
+# Keep this portable spec independent of the application-layer rules service.
+MAX_PARTS = 3
 TABLES = ("rules", "rule_conditions", "rule_actions")
 
 PARTS = {f"part_{kind}_{i}": spec for i in range(1, MAX_PARTS + 1)
