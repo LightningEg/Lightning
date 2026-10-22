@@ -12,20 +12,20 @@
 
 ## Messages
 
-- **To Codex, from Claude, 2026-10-21:** 8D set D07's demo port to 8766 in `coders.html`, both repos: pull before your guideline sync.
-- **To Codex, from Claude, 2026-10-21:** guideline 3.33 (3W) changes all four guideline copies in both repos: pull before your guideline sync.
+- **To Codex, from Claude, 2026-10-21:** owner had me fix 4C in journal files: pull first.
+- **To Codex, from Claude, 2026-10-21:** guideline 3.33 (3W) and 8D's D07 port 8766 change the guideline copies in both repos: pull before your guideline sync.
 - **To Codex, from Claude, 2026-10-21:** 2E3 (`claude/engine-input-checks`) refuses a manual entry that takes a wallet or bank below zero, journal replays included; it changed one line of your `tests/test_journal_chunks.py` (`many_payments` spent 1,830 from 1,000). Revert or adjust as you see fit.
 - **To Codex, from Claude, 2026-10-19:** owner asked for guideline 3.32 and Noto Sans Arabic in both repos (app #58, a site PR); it touches your `../Lightning_website/guideline/` claim and the site's `css/arabic.css`: pull both before your guideline sync.
 - **To Codex, from Claude, 2026-10-19:** owner asked me to land guideline Part D (`guideline/coders.html`) in both repos (app #31, site #23); it touches your `../Lightning_website/guideline/` claim: pull both before your guideline sync.
 - **To Codex, from Claude, 2026-10-16:** owner gave me the journal fixes and J6; hold journal edits until my claim clears.
-- **To all, from Claude, 2026-10-15:** a fix that changes a screen the website quotes means recapturing it (website README › App screenshots); Kept apart needs one.
+- **To all, from Claude, 2026-10-22:** a change to a screen the site quotes needs a recapture: `tools/site_shots.py`, then the site's `shots.json` and `tools/shots.py apply`.
 
 ## Next
 
 The whole plan, by milestone and code, is `issues/INDEX.md`. In order:
 
 0. **Demo cut list from Audit 1** (owner, 10-20): left: 3U 5–6, 2F (phone backup and import), then 7L2–7L4, 5K, 3S 3–20, 3T. Recapture the website once these merge: the sample now has ten accounts, goals, a gam'eya and more (it shows the sample on 10-04, with a late rent). **Read:** `reports/audit-1.md` › Demo cut list.
-1. **Audit 3 backend fixes:** 2G, 2H, 3Y, 3X, 7N first. **Read:** `reports/audit-3.md` › Order to fix.
+1. **Audit 4 fixes:** 2G–2K, 3AC, 7N, 7O, 9I–9L. **Read:** `reports/audit-4.md`.
 2. **1B Owner runs the security setup**, then **1C** a trial contribution. **Read:** 1B.
 3. **2A/2B restore safety and promotion durability** (Codex, Luna): see the claims above. **Read:** 2A, 2B.
 4. **4A Edit journal** (Claude): J6a/b built; J6c areas cover 125/149 POST routes; next, chunked large effects so bank import works (`tools/journal_mohab.py`). **Read:** 4A §10 J6; Architecture › Command proposals.
@@ -33,5 +33,5 @@ The whole plan, by milestone and code, is `issues/INDEX.md`. In order:
 6. **3W Answer first** (Claude): guideline 3.33 and all six tabs built (PC and phone); left: Overview KPIs to A08, flows to Spending, holdings in five columns, site-recapture. **Read:** 3W *Steps*; A09.
 7. **3H Tab-by-tab review:** §13 milestone 1 and the trust milestone built; next, optional reminders and grouped confirmations, then analytics; trust step 2, weekly friction. **Read:** 3H §13–14.
 8. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
-9. **8B Website guideline copies:** fix on website `codex/sync-app-guidelines`. **Read:** 8B.
+9. **Website:** 8B on `codex/sync-app-guidelines`; 8F next (recaptured 10-21; 3AB blocks Budget); 8I owner. **Read:** 8B, 8F.
 10. **6B Europe/GCC shares**, **6D gold**, **6E institution logos**, **5I gam'eya and zakat follow-ups:** waiting as their items say. **Read:** each item.

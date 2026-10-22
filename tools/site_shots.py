@@ -1,14 +1,17 @@
 """Capture the website's app screens from Mohab's sample year (skill: site-recapture). Needs Playwright,
 Chromium and sqlcipher3 (the paired phone and PC run real encrypted profiles).
 
-    python tools/site_shots.py OUT [--lang en|ar] [--today 2026-10-04] [--only pc|pair]
+    python tools/site_shots.py OUT [--lang en|ar] [--today 2026-10-04] [--only pc|pair] [--expenses-month 2026-08]
 
 pc   starts `python -m lightning --sample` on 8767 (prices offline, the date pinned), then saves the PC set:
      full windows 2000 x 1250 (1440 x 900 at 1.389x), b-* (the window less the sidebar, 1624 x 1250),
      a-* content crops 1800 x 1125 (sidebar hidden), section crops (a section header and its card, 13 px
-     around), the register with its picker open, and last the import review (it leaves a pending import).
+     around), the rate crops a-kpis and a-sankey, the register with its picker open, and last the import review
+     (it leaves a pending import). The Get set up card is dismissed first and the pointer parked, so no screen
+     shows the card or a hover ring.
 pair two real profiles in this process, a phone (360 x 760 at 2x) holding Mohab's year and a PC borrowing it:
-     phone-overview, phone-plan, phone-account, then sync-pc and sync-phone. Arabic: both profiles in Arabic.
+     phone-overview, phone-plan, phone-account (scrolled so the + button sits between rows), then sync-pc and
+     sync-phone. Arabic: both profiles in Arabic.
 Files are WebP at quality 78, named as the website uses them; compare a new set with the old by eye first.
 """
 from __future__ import annotations
@@ -30,6 +33,9 @@ OUT = Path(ARGS[0]) if ARGS and not ARGS[0].startswith("--") else None
 LANG = ARGS[ARGS.index("--lang") + 1] if "--lang" in ARGS else "en"
 TODAY = ARGS[ARGS.index("--today") + 1] if "--today" in ARGS else "2026-10-04"
 ONLY = ARGS[ARGS.index("--only") + 1] if "--only" in ARGS else ""
+# Expense analysis shows the month that lights up its features in Mohab's year: August, with a 14,200 holiday payment
+# (9.5 times the average), Entertainment far above its range and spending up 21%; September is flat.
+EXPENSES_MONTH = ARGS[ARGS.index("--expenses-month") + 1] if "--expenses-month" in ARGS else "2026-08"
 os.environ.update(LIGHTNING_TODAY=TODAY, LIGHTNING_PRICES_OFFLINE="1")  # before lightning reads them
 
 BASE, SCALE = "http://127.0.0.1:8767", 2000 / 1440
@@ -38,19 +44,17 @@ NOSIDE = HIDE + ".side{display:none!important}.shell{grid-template-columns:1fr!i
 CHROMIUM = "/opt/pw-browsers/chromium"
 
 
-def month_before(day: str) -> str:
-    y, m = int(day[:4]), int(day[5:7])
-    return f"{y - (m == 1)}-{(m - 2) % 12 + 1:02d}"
-
-
-EXPENSES = f"/birdview/expenses?period=month&month={month_before(TODAY)}"  # the last whole month
-FULL = {"overview": "/?period=ytd", "budget": "/budget", "investments": "/investments?period=ytd", "expenses": EXPENSES,
+EXPENSES = f"/birdview/expenses?period=month&month={EXPENSES_MONTH}"
+BUDGET = f"/budget?period=month&month={TODAY[:7]}"  # the month in progress: the pace chart tells the story, a year to date does not
+FULL = {"overview": "/?period=ytd", "budget": BUDGET, "investments": "/investments?period=ytd", "expenses": EXPENSES,
         "plan": "/plan", "currencies": "/accounts/currencies?period=ytd", "import-upload": "/accounts/1/import",
         "account-usd": "/accounts/7"}  # the dollar brokerage: its balance by asset class
 SIDELESS = ("overview", "budget", "investments", "expenses", "plan", "currencies")  # also saved as b-*
-CROPS = {"a-overview": "/?period=ytd", "a-budget": "/budget", "a-investments": "/investments?period=ytd",
+CROPS = {"a-overview": "/?period=ytd", "a-budget": BUDGET, "a-investments": "/investments?period=ytd",
          "a-expenses": EXPENSES, "a-plan": "/plan", "a-currencies": "/accounts/currencies?period=ytd"}
-SECTIONS = {"a-forecast-ahead": ("/plan", "#plan-forecast"), "a-suggested": ("/plan/recurring", "#recurring-suggest"),
+SECTIONS = {"a-kpis": ("/?period=ytd", "section.stat-tiles"),  # the rates are below the fold since 3W
+            "a-sankey": ("/?period=ytd", "article.overview-sankey-card"),
+            "a-forecast-ahead": ("/plan", "#plan-forecast"), "a-suggested": ("/plan/recurring", "#recurring-suggest"),
             "a-usd": ("/accounts/currencies?period=ytd", "#currency-USD")}
 STATEMENT = "Date,Counterparty,Amount,Notes\n2026-10-02,Talabat Egypt,-385,Friday dinner\n2026-10-03,Uber,-142,\n" \
             "2026-10-03,Carrefour,-1860,\n2026-10-04,Vodafone,-350,\n2026-10-04,Seoudi,-640,\n"
@@ -114,6 +118,12 @@ def pc_set() -> None:
         with sync_playwright() as p:
             b = browser(p)
             full = page(b, 1440, 900, SCALE)
+            full.goto(BASE + "/?period=ytd")  # the sample opens with Get set up above Net worth: dismiss it once
+            dismiss = full.locator('form[action="/setup/guide"] button')
+            if dismiss.count():
+                dismiss.first.click()
+                full.wait_for_load_state("networkidle")
+            full.mouse.move(0, 0)  # a parked pointer leaves a hover ring on the next screen
             for name, url in FULL.items():
                 show(full, BASE + url)
                 png = full.screenshot()
@@ -193,13 +203,16 @@ def pair_set() -> None:
                 create_profile(ph, phone.origin, password)
                 ph.goto(phone.origin + "/")
                 post(ph, "/sample/mohab-2026")
+                ph.goto(phone.origin + "/")
+                post(ph, "/setup/guide", action="dismiss")
                 if LANG == "ar":
                     ph.goto(phone.origin + "/")
                     post(ph, "/settings/locale", locale="ar")
                 for name, path in (("phone-overview", "/?period=ytd"), ("phone-plan", "/plan"), ("phone-account", "/accounts/1")):
                     show(ph, phone.origin + path, wait=700)
-                    if name == "phone-plan":  # the + button would cover the last row of safe to spend
-                        ph.evaluate("() => window.scrollBy(0, 200)")
+                    lift = {"phone-plan": 200, "phone-account": 88 if LANG == "ar" else 60}.get(name)
+                    if lift:  # the + button would cover a figure (3Z)
+                        ph.evaluate("(y) => window.scrollBy(0, y)", lift)
                         ph.wait_for_timeout(400)
                     save(ph.screenshot(), name)
                 ph.goto(phone.origin + "/profiles/devices")

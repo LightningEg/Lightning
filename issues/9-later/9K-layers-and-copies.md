@@ -8,7 +8,7 @@ by: Claude
 ---
 
 ## Report
-Found by [Audit 3](../../reports/audit-3.md) §4.
+Found by [Audit 4](../../reports/audit-4.md) §4.
 
 1. **Layers the linter cannot see.**
    - These are in no `[tool.importlinter]` layer: `bank_imports`, `counterparties`, `demo`, `fx`, `integrity`, `money_from_others`, `ownership_migration`, `physical_items`, `reconciliation`, `reevaluations`, `reimbursements`, `reserves`, `samples`, `saved_views`, `sms_imports`, `undo`, `zakat`, and `lightning.sync`.

@@ -12,7 +12,7 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 3](../../reports/audit-3.md) §2. Severity: high (stored money breaks a posting rule, and undo is refused).
+Found by [Audit 4](../../reports/audit-4.md) §2. Severity: high (stored money breaks a posting rule, and undo is refused).
 
 1. `money_from_others.py:20-57` (`_tag_exact_line`) and `ownership_migration.py:60-80` UPDATE and INSERT `ledger_entries`
    directly, outside `TransactionService`: no `validate_posting`, no audit. A part-tag splits the base amount by integer division

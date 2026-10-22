@@ -206,7 +206,10 @@ class CategoryService:
     def set_direction(self, category_id: int, direction: Direction | str) -> None:
         """Choose + income, − expense or ± both. Income and expense also set how reports read it
         (income kind, or personal / work spending); sub-categories without their own choice follow."""
-        direction = Direction(direction)
+        try:
+            direction = Direction(direction)
+        except ValueError:
+            raise ValidationError("Choose +, − or ±.", "direction") from None
         cat = self.get(category_id)
         if cat.is_root or cat.depth < 2:
             raise ValidationError("Choose + or − on a category, not on a top-level group.", "direction")

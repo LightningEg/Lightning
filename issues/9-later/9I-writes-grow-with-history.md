@@ -9,7 +9,7 @@ skills: perf-check
 ---
 
 ## Report
-Found by [Audit 3](../../reports/audit-3.md) §1. All of these are fast on today's profiles. Each grows with history, so fix it when the code is next touched.
+Found by [Audit 4](../../reports/audit-4.md) §1. All of these are fast on today's profiles. Each grows with history, so fix it when the code is next touched.
 
 1. **`_refuse_cash_below_zero`** (`transactions/service.py:472-517`) loads every cash line of the account and walks them in Python.
    - Its plan uses `ix_ledger_asset_date`, so it also scans other accounts' lines in the same currency.

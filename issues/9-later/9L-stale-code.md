@@ -8,7 +8,7 @@ by: Claude
 ---
 
 ## Report
-Found by [Audit 3](../../reports/audit-3.md) §3. Each name was searched in `lightning/`, `tests/`, `tools/`, `android/`, the
+Found by [Audit 4](../../reports/audit-4.md) §3. Each name was searched in `lightning/`, `tests/`, `tools/`, `android/`, the
 templates and the journal's command strings. Recheck each one before deleting it.
 
 - **Unused:**

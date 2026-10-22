@@ -153,6 +153,12 @@ class LocalChannel:
             raise JournalError("Unsupported local operation")
         return self.protect(dict(request_nonce=unpack(wire)["body"]["nonce"], result=result), sender)
 
+    def refusal(self, wire, error):
+        """An authenticated request the home could not take now gets an answer, so
+        the device retries it with a fresh request instead of waiting forever."""
+        sender, _ = self.open(wire)
+        return self.protect(dict(request_nonce=unpack(wire)["body"]["nonce"], result=dict(refused=str(error)[:200])), sender)
+
     def _round(self, home, sender, value):
         """Receive what fits, process, report statuses and as many commits as one reply holds."""
         from .compatibility import capabilities, check
@@ -229,10 +235,13 @@ class LocalChannel:
             fields(result, ("request_nonce", "result"))
             if result["request_nonce"] != unpack(outgoing)["body"]["nonce"]:
                 raise JournalError("Response belongs to an earlier request")
+            if type(result["result"]) is dict and set(result["result"]) == {"refused"}:
+                from .cloud import HomeRefused
+                raise HomeRefused(str(result["result"]["refused"])[:200])
             return result["result"]
         from .compatibility import capabilities, check
         store = self.device.store
-        local, held, wanted = capabilities(store), None, []
+        local, held, wanted, applied = capabilities(store), None, [], False
         while True:
             pending = store.pending()
             known = {row[0] for row in store.db.all("SELECT proposal_id FROM journal_remote_states")}
@@ -268,7 +277,7 @@ class LocalChannel:
             wanted = []
             for commit in result["commits"]:
                 try:
-                    store.apply(decode(commit))
+                    applied = store.apply(decode(commit)) or applied
                 except ChunksMissing as error:  # A large effect: fetch its chunks next round.
                     wanted = error.missing[:4]
                     break
@@ -279,6 +288,8 @@ class LocalChannel:
                 continue
             if len(batch) < len(unsent) and not held:
                 continue
+            if applied:
+                store.verify()
             with store.db.transaction():
                 store.db.execute("INSERT OR REPLACE INTO journal_local VALUES('last_sync',?)", (datetime.now(timezone.utc).isoformat(),))
             if held:

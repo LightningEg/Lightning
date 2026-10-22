@@ -11,7 +11,7 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 3](../../reports/audit-3.md) §2. Severity: medium (a wrong list on a new profile).
+Found by [Audit 4](../../reports/audit-4.md) §2. Severity: medium (a wrong list on a new profile).
 
 The profile currency is copied into six service attributes. Two functions refresh them, and both miss
 `reporting.fx_positions.base`:

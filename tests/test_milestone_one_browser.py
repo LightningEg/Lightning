@@ -45,7 +45,8 @@ def test_purchase_preview_edit_save_and_export_download(c, setup, phone, tmp_pat
             page.locator('#app-popup-content input[name=intent][value=save]').wait_for(state='attached')
             page.locator('#app-popup-content button.btn.primary').click()
             page.wait_for_url('**/plan/loans*')
-            assert 'Phone' in page.locator('body').inner_text()
+            # The sheet leaves the URL on /plan/loans while saving, so the URL alone does not wait for the new row.
+            page.locator('.plan-loan').get_by_role('link', name='Phone', exact=True).wait_for()
             page.locator('a[href$="/early-payment"]').click()
             page.locator('#app-popup-content input[name=principal]').fill('1000')
             page.locator('#app-popup-content input[role=combobox]').fill('CIB')

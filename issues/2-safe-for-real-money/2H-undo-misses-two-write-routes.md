@@ -11,7 +11,7 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 3](../../reports/audit-3.md) §2. Severity: medium (Undo reverses the wrong action).
+Found by [Audit 4](../../reports/audit-4.md) §2. Severity: medium (Undo reverses the wrong action).
 
 The undo middleware groups a POST into one user action only when its first path segment is on a hand-kept list
 (`ui/web.py:411`):

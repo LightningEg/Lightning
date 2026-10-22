@@ -12,7 +12,7 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 3](../../reports/audit-3.md) §1. Nothing a person sees changes; pages get faster and stop taking the write lock.
+Found by [Audit 4](../../reports/audit-4.md) §1. Nothing a person sees changes; pages get faster and stop taking the write lock.
 
 1. **An empty write transaction on every read of today.**
    - `PositionService._at` (`planning/position.py:348`) calls `planning.match_payments(today)`.

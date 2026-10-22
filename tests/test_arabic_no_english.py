@@ -14,6 +14,23 @@ from lightning.samples import load_mohab_2026
 from lightning.ui.i18n import localize_html, translate
 from lightning.ui.web import create_app
 
+def test_bundled_price_file_labels_stay_arabic_when_source_citations_are_present(sample, monkeypatch):
+    from lightning.ui.routes import investments
+    from lightning.workflows import market_prices
+
+    c, names = sample
+    facts = {"fx": {"created_at": "2026-10-11", "origin": "came with Lightning",
+                    "last_date": "2026-10-11", "instruments": 1}}
+    monkeypatch.setattr(market_prices, "pack_files", lambda data_dir: facts)
+    monkeypatch.setattr(investments, "pack_files", lambda data_dir: facts)
+    client = _client(c, False)
+    for path in ("/investments/prices", "/investments/prices/markets"):
+        response = client.get(path)
+        assert response.status_code == 200
+        assert "جت مع لايتنينج" in response.text
+        assert not _english(response.text, names), path
+
+
 PC_PAGES = ("/exports/all", "/plan/purchases/new", "/", "/budget", "/plan", "/plan/recurring", "/plan/loans", "/plan/reserves", "/investments",
             "/investments/prices", "/accounts", "/settings", "/search", "/rules", "/categories", "/counterparties",
             "/checks", "/financial-health", "/birdview/expenses", "/transactions", "/money-from-others", "/zakat")

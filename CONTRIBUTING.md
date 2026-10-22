@@ -81,4 +81,4 @@ pass, then thank them on the issue. Small fixes you make yourself; for anything 
 
 - [ ] Run the one-time setup above (the no-bypass PR rule is not confirmed active).
 - [ ] One harmless trial contribution from the website's Contribute section to merge, including `/drop` and a competing `/take`.
-- [ ] Android signing key: forgotten; investigate the existing signing setup before replacing anything.
+- [ ] Verify and publish the owner-generated replacement Android signing key (2D); keep its private backup locally.

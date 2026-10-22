@@ -55,7 +55,9 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     month_views = []
     while cursor <= period.end:
         key = cursor.strftime("%Y-%m")
-        month_views.append((key, c.budgets.month_view(key)))
+        # A longer period includes only months with a saved plan, matching its spending window.
+        if period.key == "month" or c.budgets.has_plan(key):
+            month_views.append((key, c.budgets.month_view(key)))
         cursor = (cursor.replace(day=28) + timedelta(days=4)).replace(day=1)
     period_base = ZERO
     period_opening = ZERO
@@ -74,8 +76,8 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     for _, month_view in month_views:
         m_first, m_last = parse_month(month_view.month)
         overlap_start, overlap_end = max(m_first, period.start), min(m_last, period.end)
-        # A monthly plan is a full-month limit even when today's activity ends mid-month.
-        factor = (Decimal(1) if period.key == "month" else
+        # Saved monthly limits stay whole in month, YTD and all-time views; only custom dates prorate them.
+        factor = (Decimal(1) if period.key != "custom" else
                   Decimal((overlap_end-overlap_start).days+1) / Decimal((m_last-m_first).days+1)
                   if overlap_end >= overlap_start else ZERO)
         period_base += month_view.budget * factor
@@ -216,8 +218,8 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     for _, month_view in month_views:
         m_first, m_last = parse_month(month_view.month)
         overlap_start, overlap_end = max(m_first, period.start), min(m_last, period.end)
-        # A monthly plan is a full-month limit even when today's activity ends mid-month.
-        factor = (Decimal(1) if period.key == "month" else
+        # Saved monthly limits stay whole in month, YTD and all-time views; only custom dates prorate them.
+        factor = (Decimal(1) if period.key != "custom" else
                   Decimal((overlap_end-overlap_start).days+1) / Decimal((m_last-m_first).days+1)
                   if overlap_end >= overlap_start else ZERO)
         for section in month_view.sections:
@@ -250,8 +252,8 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     for _, month_view in month_views:
         m_first, m_last = parse_month(month_view.month)
         overlap_start, overlap_end = max(m_first, period.start), min(m_last, period.end)
-        # A monthly plan is a full-month limit even when today's activity ends mid-month.
-        factor = (Decimal(1) if period.key == "month" else
+        # Saved monthly limits stay whole in month, YTD and all-time views; only custom dates prorate them.
+        factor = (Decimal(1) if period.key != "custom" else
                   Decimal((overlap_end-overlap_start).days+1) / Decimal((m_last-m_first).days+1)
                   if overlap_end >= overlap_start else ZERO)
         for section in month_view.sections:
@@ -280,8 +282,8 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         basis = c.budgets.budgeting_income(key) or ZERO
         m_first, m_last = parse_month(key)
         overlap_start, overlap_end = max(m_first, period.start), min(m_last, period.end)
-        # A monthly plan is a full-month limit even when today's activity ends mid-month.
-        factor = (Decimal(1) if period.key == "month" else
+        # Saved monthly limits stay whole in month, YTD and all-time views; only custom dates prorate them.
+        factor = (Decimal(1) if period.key != "custom" else
                   Decimal((overlap_end-overlap_start).days+1) / Decimal((m_last-m_first).days+1)
                   if overlap_end >= overlap_start else ZERO)
         period_income += basis * factor

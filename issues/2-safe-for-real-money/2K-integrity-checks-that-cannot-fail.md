@@ -8,7 +8,7 @@ by: Claude
 ---
 
 ## Report
-Found by [Audit 3](../../reports/audit-3.md) §2. Each check rebuilds its total from the same parts it then compares against:
+Found by [Audit 4](../../reports/audit-4.md) §2. Each check rebuilds its total from the same parts it then compares against:
 - **"Free cash plus reserves and bills due equals spendable cash"** (`integrity.py:89-92`) builds free cash with `reserves.cash_summary` (cash − allocated − bills), then adds the parts back. It never reads `Position.free_cash`.
 - **"Ownership split by account"** compares account value with (account value − custody) + custody.
 - **"What I own plus held for others"** and **"Account balances equal asset classes"** read the same in-memory holdings on both sides.

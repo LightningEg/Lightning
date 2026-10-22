@@ -1,0 +1,116 @@
+# One-time recovery: publish the already-tested v1.4.2 pair after the downloads repository moved.
+# No build or signing commands run. Fixed artifact IDs, digests, source SHA and certificate below
+# must agree before the production-release token is used. Published releases are never replaced.
+name: Publish existing v1.4.2 artifacts
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publish-v1.4.2-artifacts.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: publish-existing-v1.4.2
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    environment: production-release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      DOWNLOADS_REPO: LightningEg/Lightning-downloads
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: 641d9f27aa9285ebf0c8c6f406633ff235300545
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13'
+      - name: Verify the original run, successful checks and immutable artifact identities
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/39669412565" > "$RUNNER_TEMP/source-run.json"
+          gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs/39669412565/jobs?filter=all&per_page=100" \
+            --jq '.jobs[] | {name, conclusion}' | jq -s . > "$RUNNER_TEMP/source-jobs.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/12379657123" > "$RUNNER_TEMP/windows-artifact.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/12379901060" > "$RUNNER_TEMP/phone-artifact.json"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          commit = '641d9f27aa9285ebf0c8c6f406633ff235300545'
+          run = json.loads((root / 'source-run.json').read_text())
+          assert run['head_sha'] == commit and run['head_branch'] == 'v1.4.2' and run['event'] == 'push'
+          assert run['path'] == '.github/workflows/desktop-probe.yml'
+          jobs = json.loads((root / 'source-jobs.json').read_text())
+          for name in ('Full test suite (Linux)', 'Build and test the Windows app',
+                       'Phone app / Build and check the phone app', 'Phone app / Sign and check the phone app'):
+              assert any(j['name'] == name and j['conclusion'] == 'success' for j in jobs), name
+          expected = (
+              ('windows-artifact.json', 12379657123, 'Lightning-v1.4.2-Windows-x64',
+               'sha256:0dbf0428f4d2e49282ed8b5df20176de59d7e86e048d988d5834a53d58ef65bb'),
+              ('phone-artifact.json', 12379901060, 'phone-apk',
+               'sha256:5c2f02219ce3939a25d5936b347782da9d1c175299bc8361a2a6d6b3b585ba9a'),
+          )
+          for file, identity, name, digest in expected:
+              artifact = json.loads((root / file).read_text())
+              assert artifact['id'] == identity and artifact['name'] == name
+              assert not artifact['expired'] and artifact['digest'] == digest
+              assert artifact['workflow_run']['id'] == 39669412565
+              assert artifact['workflow_run']['head_sha'] == commit
+          print('The exact v1.4.2 artifacts passed their original Linux, Windows, Android and signing checks.')
+          PY
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+        with:
+          artifact-ids: '12379657123'
+          path: release
+          merge-multiple: true
+          github-token: ${{ github.token }}
+          run-id: 39669412565
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+        with:
+          artifact-ids: '12379901060'
+          path: phone
+          merge-multiple: true
+          github-token: ${{ github.token }}
+          run-id: 39669412565
+      - name: Verify the binaries and assemble the matched checksums and build record
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import importlib.util, json
+          from pathlib import Path
+          commit = '641d9f27aa9285ebf0c8c6f406633ff235300545'
+          spec = importlib.util.spec_from_file_location('phone_build', 'packaging/phone_build.py')
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          info = json.loads(Path('phone/apk.json').read_text())
+          assert info['commit'] == commit
+          assert info['certificate_sha256'] == Path('packaging/android-test-certificate.sha256').read_text().strip()
+          assert info['certificate_sha256'] == '373d6ae1ccf484f2b3400ada865c54037f2b79059445abd4d9cd9d424636c6fb'
+          apk = Path('phone/Lightning-Test-1.4.2-834-641d9f27.apk')
+          module.bundle(Path('release'), apk, info, Path('verified'), commit, '39669412565', '1', None)
+          record = json.loads(Path('verified/PC/BUILD.json').read_text())
+          assert record['windows']['file'] == 'Lightning-v1.4.2-Windows-x64.zip'
+          assert record['android']['file'] == apk.name
+          print('Both binaries match the original source, build record, checksums and signing certificate.')
+          PY
+          cp verified/PC/SHA256SUMS verified/PC/BUILD.json release/
+          cp phone/Lightning-Test-1.4.2-834-641d9f27.apk release/
+      - name: Publish the existing pair using the current downloads repository address
+        working-directory: release
+        env:
+          GH_TOKEN: ${{ secrets.LIGHTNING_DOWNLOADS_TOKEN }}
+          TAG: v1.4.2
+          ZIP: Lightning-v1.4.2-Windows-x64.zip
+          APK: Lightning-Test-1.4.2-834-641d9f27.apk
+        run: bash "$GITHUB_WORKSPACE/packaging/publish_release.sh"

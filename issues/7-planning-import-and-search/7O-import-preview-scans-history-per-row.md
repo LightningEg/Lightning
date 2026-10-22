@@ -9,7 +9,7 @@ skills: perf-check
 ---
 
 ## Report
-Found by [Audit 3](../../reports/audit-3.md) §1.
+Found by [Audit 4](../../reports/audit-4.md) §1.
 - `BankImportService._category_for` (`bank_imports.py:510`) calls `transactions.usual_categories()` for every row.
 - That call is not cached and runs a window query over all posted transactions (`transactions/service.py:364`).
 - In a profile with 400 rows, it took 1.78 s of the 2.94 s preview. Overall the preview averages about 8.5 queries per row (800 rows: 3.4 s).

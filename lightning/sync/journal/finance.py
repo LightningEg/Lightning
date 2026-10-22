@@ -157,6 +157,11 @@ class CashAdapter:
             return self.rows.fingerprint(cached=not full)
         return Replicator(self.db, self.store.config["profile"]).fingerprint(cached=False)
 
+    def verify(self):
+        """The whole copy against its cached row hashes, after a catch-up (proposal §4)."""
+        if self.fingerprint(full=True) != self.fingerprint():
+            raise JournalError("Ledger fingerprint mismatch; verified snapshot required")
+
     def supports(self, kind):
         return kind.startswith("transaction.") or kind in commands.KINDS
 
@@ -356,7 +361,16 @@ class CashAdapter:
         self._keep(self.errors, proposal, getattr(error, "message", str(error)))
 
     def row_token(self, slot):
-        return self.db.scalar("SELECT hash FROM journal_fp WHERE uuid=?", (slot,))
+        """A command's precondition: the record's row and every row it owns (a
+        transaction's money is in its ledger lines, not its own row)."""
+        own = self.db.scalar("SELECT hash FROM journal_fp WHERE uuid=?", (slot,))
+        table, _, key = slot.partition(":")
+        if own is None or table not in self.rows.owned:
+            return own
+        local_id = self.db.scalar("SELECT local_id FROM journal_ids WHERE entity=? AND uuid=?", (table, json.loads(key)))
+        if local_id is None:
+            return own
+        return digest(dict(row=own, owned=self.rows.record_hashes(table, local_id)))
 
     def apply(self, domain):
         """Typed exact replay on replicas, with no normal save/rule/automation call."""
@@ -364,6 +378,10 @@ class CashAdapter:
         with self.writing():
             self.rows.apply(domain, bounded=len(domain["rows"]) <= MAX_ROWS)
             self.rows.reset()  # The effect names every touched row, deletes included; triggers could not name those.
+            # Read back what was written: the fingerprint must describe this copy, not the effect.
+            for item in domain["rows"]:
+                if item["values"] is not None and self.rows.read(item) != item["values"]:
+                    raise JournalError("Ledger fingerprint mismatch; verified snapshot required")
             self.rows.remember(domain["rows"])
             if any(row["table"] == "settings" for row in domain["rows"]):
                 from .areas.settings import refresh

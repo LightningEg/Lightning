@@ -64,7 +64,8 @@
 {% from "partials/macros.html" import category_options %}
 <form id="phone-bulk" class="phone-select-bar" method="post" action="/transactions/bulk-category">
   <input type="hidden" name="back" value="{{ base_url }}{{ '?' ~ keep_qs if keep_qs }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
-  <span class="phone-select-count" aria-live="polite"> {{ 'selected'|tr(locale) }}</span>
+  <div class="phone-select-actions"><span class="phone-select-count" aria-live="polite"> {{ 'selected'|tr(locale) }}</span>
+  <label><input id="phone-select-visible" type="checkbox" aria-label="{{ 'Select all visible transactions'|tr(locale) }}"> {{ 'Select all'|tr(locale) }}</label></div>
   <select name="category_id" aria-label="Category for the selected rows" data-own-picker><option value="">{{ "Change category to…"|tr(locale) }}</option>{{ category_options(category_groups()) }}</select>
   <div class="phone-select-actions"><button class="btn primary">{{ "Change category"|tr(locale) }}</button><button class="btn danger" formaction="/transactions/bulk-delete" data-confirm-delete>{{ 'Delete'|tr(locale) }}</button></div>
 </form>{% endif %}
