@@ -107,11 +107,12 @@ class CashForecaster:
         return average.amount, average.months_counted
 
     def free_cash(self, as_of: date) -> Decimal:
-        """Free cash from the position: Cash you own − Reserves − Bills due."""
-        position = self.position.at(as_of)
-        if position.free_cash is not None:
-            return position.free_cash
-        return position.cash_you_own - self.reserves.cash_summary(ZERO)["allocated"] - position.bills_due
+        """Free cash from the position (Position.free_cash, its one formula). Forecasts run on today, whose
+        reserves are always known, so it is never None here; an older date without reserve history is refused."""
+        free = self.position.at(as_of).free_cash
+        if free is None:
+            raise ValueError(f"Free cash on {as_of} is unknown: reserve history is incomplete for that date.")
+        return free
 
     def _budget(self, month: str, current: bool) -> tuple[Decimal, set[int]]:
         """Budget still to spend in the month, and the categories the plan covers.
@@ -280,21 +281,23 @@ class CashForecaster:
         before = [p for p in upcoming if not p.item.is_income and (next_date is None or p.due_date < next_date)]
         instalments = -sum((e.amount for e in circle_events if e.kind == "INSTALLMENT"
                             and (next_date is None or e.date < next_date)), ZERO)
-        safe, parts = self._safe_to_spend(free, before, next_date, day, rows, instalments)
+        safe, parts, before_total = self._safe_to_spend(free, before, next_date, day, rows, instalments)
         return CashForecast(fmt_date(day), free, average, average_months, next_date, next_estimated,
                             safe, parts, rows, [p for p in upcoming if p.due_date <= next_date] if next_date else upcoming[:10],
                             before, dated_cash_forecast(self.reporting, due + upcoming,
                                                       all_events + _due_circle_events(self.deposits, day),
-                                                      day, horizon_end))
+                                                      day, horizon_end),
+                            before_total)
 
     def _safe_to_spend(self, free: Decimal, before: list[Payment], until: str | None, day: date,
-                       rows: list[ForecastMonth], instalments: Decimal = ZERO) -> tuple[Decimal, list[tuple[str, Decimal]]]:
+                       rows: list[ForecastMonth], instalments: Decimal = ZERO
+                       ) -> tuple[Decimal, list[tuple[str, Decimal]], Decimal]:
         """Free cash less what is already promised before the next income.
 
         Budget, goal and savings needs count for every month until the next income, not just this one: between
         jobs, next month's spending still comes out of today's cash. The month the income lands in
         counts for the days before it."""
-        bills = sum((self.planning.amount_in_base(p, p.still_owed, day) for p in before), ZERO)
+        bills = self.planning.still_owed_in_base(before, day)  # Due before payday, also on its card (7N)
         spending = goals = emergency = rest = ZERO
         for index, row in enumerate(rows):
             share = Decimal(1)
@@ -319,4 +322,4 @@ class CashForecaster:
                  (label("left_in_plan_after_bills"), -spending), (label("saving_for_goals"), -goals),
                  (label("emergency_top_up"), -emergency), (label("savings_target_rest"), -rest)]
         return (free - bills - instalments - spending - goals - emergency - rest,
-                [(name, value) for name, value in parts if value or name == label("free_cash")])
+                [(name, value) for name, value in parts if value or name == label("free_cash")], bills)

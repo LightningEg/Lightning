@@ -397,7 +397,6 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                   overall_ceiling=c.settings.get("budget_overall_ceiling"), this_month=month_of(today()),
                   personal_group=next((cat.id for cat in c.categories.tree(Movement.OUTFLOW)
                                        if cat.depth == 1 and cat.scope == Scope.PERSONAL), None),
-                  free_cash=c.reserves.cash_summary(c.reporting.owned_spendable_cash(today()), c.planning.what_you_owe().bills_due)["free_cash"],
                   low_confidence=keynotes.low_confidence_note(c.budgets.plan_summary(month)["low_confidence"]) if period.key == "month" else "",
                   plan_from=fmt_date(spending_start) if spending_start != period.start else "",
                   period=period, period_actual=period_actual, period_budgeted=period_budgeted,
