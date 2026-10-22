@@ -46,12 +46,12 @@ class CashReserveService:
         )]
 
     def cash_summary(self, owned_liquid_cash: Decimal, bills_due: Decimal = ZERO):
-        """Free cash = owned liquid cash − assigned reserves − bills due (unpaid and already due)."""
+        """Cash assigned to reserves, beside the owned liquid cash and bills due it was asked for. Free cash itself
+        has one formula, ``Position.free_cash`` (7N)."""
         allocated = ZERO
         for row in self.list_active():
             allocated += row["effective_allocated"]
-        return {"owned_liquid_cash": owned_liquid_cash, "allocated": allocated, "bills_due": bills_due,
-                "free_cash": owned_liquid_cash - allocated - bills_due}
+        return {"owned_liquid_cash": owned_liquid_cash, "allocated": allocated, "bills_due": bills_due}
 
     def allocation_at(self, as_of: str):
         """Return active effective assignments at a date, or None if history is incomplete."""
