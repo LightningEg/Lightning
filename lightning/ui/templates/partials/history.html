@@ -6,7 +6,7 @@
   <input type="hidden" name="back" value="{{ path }}">
   {% set words = ('Undo' if operation == 'undo' else 'Redo')|tr(locale) %}
   {% set keys = 'Ctrl+Z' if operation == 'undo' else 'Ctrl+Shift+Z' %}
-  <button class="btn {{ 'quiet-btn' if phone_mode() else 'icon-btn' }} history-btn" type="submit" data-history="{{ operation }}" title="{{ words }} · {{ step.label|tr(locale) }}{% if not phone_mode() %} ({{ keys }}){% endif %}" aria-label="{{ words }} · {{ step.label|tr(locale) }}">{% if phone_mode() %}{{ words }}{% else %}<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">{% if operation == 'undo' %}<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>{% else %}<path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/>{% endif %}</svg>{% endif %}</button>
+  <button class="btn icon-btn history-btn{{ ' is-words' if phone_mode() }}" type="submit" data-history="{{ operation }}" title="{{ words }} · {{ step.label|tr(locale) }}{% if not phone_mode() %} ({{ keys }}){% endif %}" aria-label="{{ words }} · {{ step.label|tr(locale) }}">{% if phone_mode() %}{{ words }}{% else %}<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">{% if operation == 'undo' %}<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>{% else %}<path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/>{% endif %}</svg>{% endif %}</button>
 </form>
 {% endif %}{% endfor %}
 {% endif %}
