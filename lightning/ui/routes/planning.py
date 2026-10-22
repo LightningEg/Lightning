@@ -264,7 +264,7 @@ async def add_purchase(request: Request):
             raise ValidationError("Name the purchase.", "name")
         quote = purchase_quote(values["price"], values["fee"], values["months"], values["first_date"])
         if form.get("intent") == "save":
-            container(request).planning.create_purchase(**values)
+            container(request).planning.create_purchase(**(values | {"fee": quote["fee"]}))
             return redirect("/plan/loans", "Instalment plan added. Record each payment when it leaves your account.")
         return _purchase_form(request, values, quote)
     except (LightningError, ValueError) as exc:
@@ -299,7 +299,8 @@ async def early_payment(request: Request, item_id: int):
     try:
         preview = preview_early_payment(c.planning, item_id, values["principal"], values["fee"], values["date_paid"])
         if form.get("intent") == "record":
-            c.planning.record_early_payment(item_id, **values, expected_remaining=form.get("expected_remaining", ""))
+            c.planning.record_early_payment(item_id, **(values | {"fee": preview["fee"]}),
+                                              expected_remaining=form.get("expected_remaining", ""))
             return redirect("/plan/loans", "Loan payment recorded. The remaining schedule is updated.")
         return _early_form(request, item_id, values, preview)
     except (LightningError, ValueError) as exc:
