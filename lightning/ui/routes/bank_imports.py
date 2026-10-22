@@ -17,6 +17,10 @@ from ..web import container, redirect, render
 
 router = APIRouter(prefix="/accounts")
 
+# Journal proposals have a 64 KiB signed-message ceiling and carry CSV bytes as
+# base64. Keep the decoded attachment below the command protocol's 40 KiB cap.
+MAX_JOURNAL_CSV_COMMAND_BYTES = 40 * 1024
+
 
 def _budget_import_feedback(c, batch_id: int) -> str:
     _, rows = c.bank_imports.preview(batch_id)
@@ -138,6 +142,10 @@ async def upload(request: Request, account_id: int):
         needs_mapping = None
         for upload_file in upload_files:
             data = await upload_file.read()
+            if getattr(c, "is_journal", False) and len(data) > MAX_JOURNAL_CSV_COMMAND_BYTES:
+                return _render_upload(request, c, account_id,
+                                      error="This file is too large to synchronize; split it into smaller files.",
+                                      status_code=400)
             headers, _ = decode_csv(data)
             mapping = c.bank_imports.suggested_mapping(account_id, headers)
             saved_mapping = c.bank_imports.saved_mapping(account_id, headers)

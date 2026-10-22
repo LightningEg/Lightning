@@ -1,9 +1,7 @@
 """Plans and budgets: bills, income, loans, instalment purchases, monthly budgets and carryover.
 
-The recurring-income and one-off category flags and the "not recurring" list are settings holding local row ids,
-copied as they are: they read right on a device whose category and counterparty ids match the home's (a replica
-made from a checkpoint). Payday funding carries the preview's token; ids that differ make the home refuse it.
-Automatic plan matching is not a user action.
+Budget category preferences use stable category codes. Payday funding carries the preview’s token; a changed
+preview is refused. Automatic plan matching runs only through home automation.
 """
 from .spec import AMOUNT, DATE, FLAG, INT, LONG, MONTH, TEXT, Command, choice, items, listof, optional, ref
 
@@ -101,3 +99,18 @@ COMMANDS = {
         reserve_additions=items(reserve=ref("cash_reserves"), amount=TEXT)), adapt=_funding),
     "planning.not_recurring": Command("planning.not_recurring", dict(counterparty_id=ref("counterparties"))),
 }
+
+
+# Retain previously queued wire actions while native routes use the service methods.
+def _purchase(c, **values):
+    return c.planning.create_purchase(**values)
+
+
+def _early(c, **values):
+    return c.planning.record_early_payment(**values)
+
+
+COMMANDS["plans.buy_in_instalments"] = Command(_purchase, **{
+    key: value for key, value in vars(COMMANDS["planning.create_purchase"]).items() if key != "call"})
+COMMANDS["plans.pay_loan_early"] = Command(_early, **{
+    key: value for key, value in vars(COMMANDS["planning.record_early_payment"]).items() if key != "call"})

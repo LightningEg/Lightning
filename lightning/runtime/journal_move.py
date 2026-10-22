@@ -15,7 +15,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from lightning.sync.journal.codec import JournalError, authenticate, canonical, digest, fields, hash_value, number, seal, unpack, uuid
-from lightning.sync.journal.local import decode, encode
+from lightning.sync.journal.local import PinnedLocalClient, decode, encode
 from lightning.sync.journal.membership import Membership
 from lightning.runtime.session import read_slot, write_slot
 
@@ -222,8 +222,6 @@ class JournalMoveRuntime:
         endpoints = self._home_endpoints()
         if not endpoints:
             raise JournalError("Reconnect to the paired home on the local network before moving")
-        from lightning.sync.journal.local import PinnedLocalClient
-        from lightning.sync.journal.codec import ZERO_HASH
         home_key = config["home_key"]
         client = PinnedLocalClient(endpoints[0], self._home_certificate(), timeout=10)
         client_state_path = self.directory / "client.state"

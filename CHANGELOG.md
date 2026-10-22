@@ -12,7 +12,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 ## [Unreleased]
 
 - 2026-10-22 · Codex: 4A connects edit synchronization to normal profiles: explicit conversion, enrollment, local handoff, command review and Arabic, home automation, upgrades and signed recovery.
-  Android schedules catch-up while unlocked; financial routes use journal commands. Cloud delivery remains an explicit unconfigured placeholder; Windows/Android review builds are requested.
+  Android schedules catch-up while unlocked; financial routes use journal commands. Cloud delivery remains an explicit unconfigured placeholder; Windows/Android review packages build and verify in #97.
 
 - 2026-10-22 · Codex: 4A verifies a recovered journal backup against its signed cursor and ledger fingerprint; transaction merge joins the coverage gate.
   2B adds a dummy Windows phase-interruption/reboot drill; physical reboot and abrupt power-loss acceptance remain unverified.

@@ -116,6 +116,7 @@ class CashAdapter:
         # The home's own screens get back what the service returned, or its refusal.
         self.results, self.errors = {}, {}
         self.c.db.undo = None  # Journal undo is a new proposal; legacy row restoration is disabled.
+        self.c.undo = None  # Remove the legacy service as well as its transaction hook.
         self.rows = Replicator(self.db, store.config["profile"], resolve=store.resolve)
         self.db.conn.set_authorizer(None)  # Fixed local DDL below; protection returns at the end.
         for row in self.db.all("SELECT name FROM sqlite_temp_master WHERE type='trigger' AND name LIKE 'undo_%'"):

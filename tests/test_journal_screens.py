@@ -87,7 +87,12 @@ def test_new_custom_institution_and_account_are_one_replica_command(screens):
       "journal_workflows.save_fx_rate"),
 ])
 def test_composite_settings_routes_stage_one_proposal(screens, path, data, action):
-    (_, pc), (_, replica) = screens
+    (hd, pc), (_, replica) = screens
+    if action == "journal_workflows.save_fx_rate":
+        # FX rates can only be entered for registered currencies. Register USD
+        # on the home first, then verify the rate itself remains one command.
+        JournalServices(hd).currencies.register("USD")
+        pc.sync_with(hd.home)
     response = replica.post(path, data=data)
     assert response.status_code == 303
     pending = pc.pending_commands()

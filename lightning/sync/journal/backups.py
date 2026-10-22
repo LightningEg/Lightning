@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
@@ -16,6 +17,36 @@ from lightning.database.connection import Database
 from lightning.database.snapshot import snapshot, verify_connection
 from .codec import JournalError, authenticate, canonical, cursor as validate_cursor, digest, fields, hash_value, number, seal, unpack
 from .snapshots import _hash, _stage
+
+_RECOVERED_MAP_DDL = ("CREATE TABLE journal_recovered_originals("
+                      "original_id TEXT PRIMARY KEY, original_hash TEXT NOT NULL, new_proposal_id TEXT, "
+                      "status TEXT NOT NULL, reason TEXT NOT NULL, decision BLOB)")
+
+
+def _ensure_recovered_map(store):
+    """Install one fixed local recovery table without relaxing financial writes."""
+    db = store.db
+    obj = db.one("SELECT type FROM sqlite_master WHERE name='journal_recovered_originals'")
+    if obj is not None and obj["type"] != "table":
+        raise JournalError("The recovered-work map is damaged; preserve this profile for repair")
+    if obj is None:
+        if db.conn.in_transaction:
+            raise JournalError("Finish the current save before recovering a backup")
+        # The only operation performed while the financial authorizer is absent
+        # is this literal schema statement; all map data and proposals remain
+        # behind the normal journal authorizer and database transaction.
+        db.conn.set_authorizer(None)
+        try:
+            with db.transaction():
+                db.execute(_RECOVERED_MAP_DDL)
+        finally:
+            db.conn.set_authorizer(store.adapter._authorize)
+    columns = db.all("PRAGMA table_info(journal_recovered_originals)")
+    names = {row["name"] for row in columns}
+    if (names != {"original_id", "original_hash", "new_proposal_id", "status", "reason", "decision"}
+            or sum(row["pk"] == 1 for row in columns) != 1
+            or next((row["pk"] for row in columns if row["name"] == "original_id"), 0) != 1):
+        raise JournalError("The recovered-work map is damaged; preserve this profile for repair")
 
 
 def _fsync_directory(folder):
@@ -394,12 +425,7 @@ def repropose_copy(device, source, manifest, *, backup_key):
                 originals.append((row["proposal_id"], original["body"], original_wire))
 
         # A current verified checkpoint is required before identifying old receipts.
-        db.execute("CREATE TABLE IF NOT EXISTS journal_recovered_originals("
-                   "original_id TEXT PRIMARY KEY, original_hash TEXT NOT NULL, new_proposal_id TEXT, "
-                   "status TEXT NOT NULL, reason TEXT NOT NULL, decision BLOB)")
-        columns = {row["name"] for row in db.all("PRAGMA table_info(journal_recovered_originals)")}
-        if columns != {"original_id", "original_hash", "new_proposal_id", "status", "reason", "decision"}:
-            raise JournalError("The recovered-work map is damaged; preserve this profile for repair")
+        _ensure_recovered_map(store)
         counts = {"reproposed": 0, "already_decided": 0, "held": 0}
         with db.transaction():
             for original_id, original, _wire in originals:

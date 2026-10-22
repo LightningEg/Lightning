@@ -128,7 +128,7 @@ class RuleService:
             elif c.field == "amount":
                 values["amount_op"], values["amount"], values["amount_to"] = c.op, c.value, c.value_to or ""
             elif c.field == "account":
-                values["account_id"] = self._account_id(c.value) or c.value
+                values["account_id"] = str(self._account_id(c.value) or c.value)
             elif c.field == "direction":
                 values["direction"] = c.value
         values["category_id"] = str(rule.category_id or "")

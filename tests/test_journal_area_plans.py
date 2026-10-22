@@ -202,7 +202,7 @@ def test_service_refusal_is_rejected_without_writing(devices):
     assert hd.c.db.scalar("SELECT COUNT(*) FROM budgets") == 0
     same(hd, pc)
     with pytest.raises(Exception, match="not covered"):
-        pc.command("sms_imports.assign", ending="1234", account_id=uid(pc, "accounts", account(pc, "Bank").id))
+        pc.command("sms_imports.unknown_action", ending="1234", account_id=uid(pc, "accounts", account(pc, "Bank").id))
 
 
 def test_delete_an_unpaid_instalment_plan_and_link_an_existing_payment(devices):

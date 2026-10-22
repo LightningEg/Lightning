@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Request
 import sqlite3
+from urllib.parse import urlencode
+from fastapi.responses import RedirectResponse
 
 from lightning.core.errors import LightningError
 from ..web import container, redirect
@@ -14,13 +16,15 @@ async def replay(request: Request, operation: str):
     back = str(form.get("back", "/"))
     if not back.startswith("/") or back.startswith("//") or "\\" in back or any(ord(char) < 32 for char in back):
         back = "/"
+    if getattr(c, "is_journal", False) and not c.history_is_home:
+        target = back + ("&" if "?" in back else "?") + urlencode(
+            {"msg": "Undo and redo are available on the journal home."})
+        return RedirectResponse(target, status_code=303)
     if operation not in {"undo", "redo"} or c.undo is None:
         return redirect(back, "History is unavailable in this session.")
     try:
         group_id = int(str(form.get("group_id", "0")))
         if getattr(c, "is_journal", False):
-            if not c.history_is_home:
-                return redirect(back, "Undo and redo are available on the journal home.")
             fingerprint = c.undo.current_fingerprint()
             c.undo.replay(redo=operation == "redo", expected_id=group_id,
                           expected_fingerprint=fingerprint)

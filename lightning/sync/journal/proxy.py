@@ -47,6 +47,8 @@ class JournalServices:
         if name == "backup_now" and self._backup is not None:
             return self._backup
         service = getattr(self._device.c, name)
+        if service is None:
+            return None
         if name in self._calls:  # A container-level action, e.g. set_profile_currency.
             return lambda *args, **kwargs: self._run(name, service, args, kwargs)
         if name == "db":

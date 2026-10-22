@@ -61,7 +61,8 @@ def test_replica_history_action_stays_on_the_home(screens):
     response = clients[1].post("/history/undo", data={"group_id": "1"},
                                headers={"referer": "http://testserver/history"})
     assert response.status_code == 303
-    assert "journal+home" in response.headers["location"]
+    from urllib.parse import unquote_plus
+    assert "journal home" in unquote_plus(response.headers["location"])
     assert not pc.store.pending()
 
 
@@ -73,4 +74,4 @@ def test_other_database_errors_are_not_hidden(screens, monkeypatch):
         raise sqlite3.DatabaseError("disk image is malformed")
     monkeypatch.setattr(hd.c.sms_imports, "assign", broken)
     with pytest.raises(sqlite3.DatabaseError, match="malformed"):
-        home.post("/sms/assign", data={"ending": "1234", "account_id": "1"})
+        home.post("/sms/assign", data={"ending": "1234", "account_id": str(next(a.id for a in hd.c.accounts.list() if a.name == "Bank"))})

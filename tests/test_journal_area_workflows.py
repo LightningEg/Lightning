@@ -51,6 +51,7 @@ def test_activity_review_applies_as_one_journal_command(screens):
     food_h = home.c.categories.get_by_code("EXP.PERSONAL.FOOD").id
     txn_id = JournalServices(home).transactions.record_outflow(date.today().isoformat(), bank_h.id, "40", food_h,
                                                                 counterparty="Cafe", notes="lunch")
+    txn_id = txn_id.id
     _sync(home, replica)
     txn_uuid = home.adapter.uid("transactions", txn_id)
     local_txn = replica.adapter.local("transactions", txn_uuid)
