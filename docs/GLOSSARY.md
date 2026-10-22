@@ -102,6 +102,8 @@ Layer: **Ledger** (real money moved), **Plan** (what-if, moves nothing) or **Rep
 | **Reimbursement claim** | Plan | An explicit amount expected back for an existing owned expense. Outstanding = the eligible claimed amount minus valid explicitly linked receipts; not cash before receipt. |
 | **Saved view** | Report | Named account/category/search/tag filters with live date presets or a custom range; reused by register, summary report and CSV export. |
 | **Weekly review** | Plan | A completion flow over existing Needs you decisions. Recording a review keeps unresolved items visible; optional reminders require an unlocked session. |
+| **Day's net** | Report | On a phone list, a day's money in less its money out, beside the day's header; transfers and value updates are left out. |
+| **Investments moved** | Report | One phone row for a day's value updates (revaluations): their count and their sum. The rows themselves stay in the ledger. |
 
 **Overspent** in the Savings waffle means spending beyond income, shown as a positive amount and percentage. See the [display rules](ARCHITECTURE.md#budget-and-reserve-contract).
 
@@ -531,6 +533,8 @@ Asset class and exposure are separate. Account kinds describe the container: cas
 | Price part | جزء السعر |
 | FX part | جزء العملة |
 | Safe to spend | المتاح الآمن للصرف |
+| Day's net | صافي اليوم |
+| Investments moved | حركة الاستثمارات |
 | Bills inside the plan | الفواتير ضمن الخطة |
 | Budget until payday | الميزانية لحد الراتب |
 | Everyday spending | المصاريف اليومية |

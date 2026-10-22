@@ -2410,6 +2410,7 @@ ARABIC_UI = {
     'This month': 'الشهر ده',
     'Custom range': 'فترة مخصصة',
     'Investments moved': 'حركة الاستثمارات',
+    "Day's net": 'صافي اليوم',
     '1 value update': 'تحديث قيمة واحد',
     '{n} value updates': '{n} تحديثات قيمة',
     '1 item needs you': 'حاجة واحدة محتاجة تدخّلك',

@@ -56,9 +56,9 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **3T** | [Phone screens break Part C - cut words, overlapping text, no way back on five pages, small targets, five Settings tabs](3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | polish | phone | ready |
 | **3U** | [Arabic leftovers - the budget move preview arrow, two overlaps and a wrapped number](3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) | bug | arabic | ready |
 | **3W** | [Answer first - rebuild every tab in the guideline 3.33 order (header, Lead, Needs you, KPIs, details)](3-polish-and-arabic/3W-answer-first-rebuild.md) | polish | product | building |
-| **3Z** | [The phone's + button sits over amounts in lists](3-polish-and-arabic/3Z-phone-add-button-covers-amounts.md) | polish | phone | new |
+| **3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | feature | phone | new |
 
-Done: 3A, 3C, 3L, 3M, 3N, 3O, 3P, 3R, 3V, 3X, 3Y, 3AA, 3AB. Next free code: 3AC.
+Done: 3A, 3C, 3L, 3M, 3N, 3O, 3P, 3R, 3V, 3X, 3Y, 3Z, 3AA, 3AB, 3AC. Next free code: 3AE.
 
 ## 4 Edit journal and devices
 
