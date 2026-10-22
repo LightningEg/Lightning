@@ -5,7 +5,7 @@ import pytest
 
 from test_journal_finance import devices, groups
 from lightning.sync.journal.backups import create, recover_queue
-from lightning.sync.journal.codec import JournalError, unpack
+from lightning.sync.journal.codec import JournalError, seal, unpack
 
 
 def backup(pc, path):
@@ -69,6 +69,17 @@ def test_changed_backup_bytes_or_another_device_cannot_restore_an_origin(devices
         handle.write(b"bad")
     with pytest.raises(JournalError, match="hash"):
         recover_queue(pc, source, manifest, backup_key=pc.c.db.copy_key())
+
+
+def test_signed_manifest_must_describe_the_saved_checkpoint(devices, tmp_path):
+    _, pc = devices
+    pc.save(groups(pc))
+    source = tmp_path / "backup.db"
+    manifest = backup(pc, source)
+    body = unpack(manifest)["body"] | {"fingerprint": "0" * 64}
+    forged = seal(body, pc.identity.sign)
+    with pytest.raises(JournalError, match="manifest"):
+        recover_queue(pc, source, forged, backup_key=pc.c.db.copy_key())
 
 
 def test_saved_candidate_is_restored_without_posting_money(devices, tmp_path):

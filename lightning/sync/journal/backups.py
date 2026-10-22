@@ -13,7 +13,7 @@ from uuid import uuid4
 
 from lightning.database.connection import Database
 from lightning.database.snapshot import snapshot, verify_connection
-from .codec import JournalError, authenticate, canonical, digest, fields, seal, unpack
+from .codec import JournalError, authenticate, canonical, cursor as validate_cursor, digest, fields, hash_value, number, seal, unpack
 from .snapshots import _hash, _stage
 
 
@@ -62,6 +62,11 @@ def recover_queue(device, source, wire, *, backup_key, fault=lambda phase: None)
     fields(body, ("version", "type", "profile", "generation", "device", "incarnation", "next_seq", "cursor", "fingerprint", "created_at", "size", "sha256"))
     if body["version"] != 2 or body["type"] != "journal-device-backup":
         raise JournalError("Unsupported device backup")
+    number(body["next_seq"], minimum=1)
+    number(body["size"], minimum=1)
+    validate_cursor(body["cursor"])
+    hash_value(body["fingerprint"])
+    hash_value(body["sha256"])
     if any(body[key] != store.config[key] for key in ("profile", "generation", "device", "incarnation")):
         raise JournalError("Use explicit recovery/re-pairing for another authority or device incarnation")
     source = _stage(Path(source), Path(db.path).parent, body["sha256"], body["size"])
@@ -72,7 +77,11 @@ def recover_queue(device, source, wire, *, backup_key, fault=lambda phase: None)
         if config != store.config or candidate.scalar("SELECT next_seq FROM journal_meta WHERE id=1") != body["next_seq"]:
             raise JournalError("Backup identity or counter mismatch")
         from .store import JournalStore
-        JournalStore(candidate)  # Enforces contiguous original identity slots.
+        saved_store = JournalStore(candidate)  # Enforces contiguous original identity slots.
+        from .effects import Replicator
+        fingerprint = Replicator(candidate, config["profile"]).fingerprint(cached=False)
+        if saved_store.cursor() != body["cursor"] or fingerprint != body["fingerprint"]:
+            raise JournalError("Backup manifest does not match its saved ledger state")
         material = json.loads(candidate.scalar("SELECT document FROM journal_backup_material WHERE id=1") or "{}")
         if material.get("public_key") != device.identity.public_key or material.get("incarnation") != config["incarnation"]:
             raise JournalError("Backup identity material mismatch")

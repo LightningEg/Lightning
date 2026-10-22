@@ -1,5 +1,4 @@
 # Routes that must stay covered by the edit journal (tools/journal_coverage.py --check). One `POST path` per line.
-# POST /transactions/merge is covered by a command but also moves bank-import links: add it back once the import tables are synchronized.
 POST /accounts/new
 POST /accounts/{account_id:int}/convert
 POST /accounts/{account_id:int}/deactivate
@@ -106,6 +105,7 @@ POST /sms/dismiss
 POST /transactions/bulk-category
 POST /transactions/bulk-delete
 POST /transactions/bulk-edit
+POST /transactions/merge
 POST /transactions/register
 POST /transactions/register/{txn_id:int}
 POST /transactions/views

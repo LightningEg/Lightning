@@ -259,8 +259,7 @@ def test_a_rule_naming_an_account_is_refused_not_stored_wrongly(devices):
 
 def test_a_merge_waits_for_the_import_tables(devices):
     from lightning.sync.journal.effects import SYNCED
-    if "bank_import_rows" not in SYNCED:
-        pytest.skip("merging also moves bank-import links; it works once those tables are synchronized")
+    assert "bank_import_rows" in SYNCED
     hd, pc = devices
     bank = account(pc, "Bank").id
     food = category(pc).id
