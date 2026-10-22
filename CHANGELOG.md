@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-22 · Claude: 3AA: `tools/site_shots.py` dismisses Get set up, parks the pointer, lifts the phone screens off the + button and adds the a-kpis and a-sankey crops;
+  a plain run now reproduces the live 2026-10-21 site screens pixel for pixel, English and Arabic (checked), so no recapture is due.
 - 2026-10-22 · Claude: 2E6 (rest): a plan or reserve amount with more decimals than its currency allows (350.555 EGP, 12.345) is refused, not rounded or kept.
 - 2026-10-22 · Claude: 2E6 (part): a crafted category direction says "Choose +, − or ±" instead of a 500, and a transaction id above 2^63 is "not found"
   instead of an OverflowError 500. Dates before an account opened stay open: history before opening is allowed on purpose.

@@ -6,9 +6,12 @@ Chromium and sqlcipher3 (the paired phone and PC run real encrypted profiles).
 pc   starts `python -m lightning --sample` on 8767 (prices offline, the date pinned), then saves the PC set:
      full windows 2000 x 1250 (1440 x 900 at 1.389x), b-* (the window less the sidebar, 1624 x 1250),
      a-* content crops 1800 x 1125 (sidebar hidden), section crops (a section header and its card, 13 px
-     around), the register with its picker open, and last the import review (it leaves a pending import).
+     around), the rate crops a-kpis and a-sankey, the register with its picker open, and last the import review
+     (it leaves a pending import). The Get set up card is dismissed first and the pointer parked, so no screen
+     shows the card or a hover ring.
 pair two real profiles in this process, a phone (360 x 760 at 2x) holding Mohab's year and a PC borrowing it:
-     phone-overview, phone-plan, phone-account, then sync-pc and sync-phone. Arabic: both profiles in Arabic.
+     phone-overview, phone-plan, phone-account (scrolled so the + button sits between rows), then sync-pc and
+     sync-phone. Arabic: both profiles in Arabic.
 Files are WebP at quality 78, named as the website uses them; compare a new set with the old by eye first.
 """
 from __future__ import annotations
@@ -50,7 +53,9 @@ FULL = {"overview": "/?period=ytd", "budget": "/budget", "investments": "/invest
 SIDELESS = ("overview", "budget", "investments", "expenses", "plan", "currencies")  # also saved as b-*
 CROPS = {"a-overview": "/?period=ytd", "a-budget": "/budget", "a-investments": "/investments?period=ytd",
          "a-expenses": EXPENSES, "a-plan": "/plan", "a-currencies": "/accounts/currencies?period=ytd"}
-SECTIONS = {"a-forecast-ahead": ("/plan", "#plan-forecast"), "a-suggested": ("/plan/recurring", "#recurring-suggest"),
+SECTIONS = {"a-kpis": ("/?period=ytd", "section.stat-tiles"),  # the rates are below the fold since 3W
+            "a-sankey": ("/?period=ytd", "article.overview-sankey-card"),
+            "a-forecast-ahead": ("/plan", "#plan-forecast"), "a-suggested": ("/plan/recurring", "#recurring-suggest"),
             "a-usd": ("/accounts/currencies?period=ytd", "#currency-USD")}
 STATEMENT = "Date,Counterparty,Amount,Notes\n2026-10-02,Talabat Egypt,-385,Friday dinner\n2026-10-03,Uber,-142,\n" \
             "2026-10-03,Carrefour,-1860,\n2026-10-04,Vodafone,-350,\n2026-10-04,Seoudi,-640,\n"
@@ -114,6 +119,12 @@ def pc_set() -> None:
         with sync_playwright() as p:
             b = browser(p)
             full = page(b, 1440, 900, SCALE)
+            full.goto(BASE + "/?period=ytd")  # the sample opens with Get set up above Net worth: dismiss it once
+            dismiss = full.locator('form[action="/setup/guide"] button')
+            if dismiss.count():
+                dismiss.first.click()
+                full.wait_for_load_state("networkidle")
+            full.mouse.move(0, 0)  # a parked pointer leaves a hover ring on the next screen
             for name, url in FULL.items():
                 show(full, BASE + url)
                 png = full.screenshot()
@@ -193,13 +204,16 @@ def pair_set() -> None:
                 create_profile(ph, phone.origin, password)
                 ph.goto(phone.origin + "/")
                 post(ph, "/sample/mohab-2026")
+                ph.goto(phone.origin + "/")
+                post(ph, "/setup/guide", action="dismiss")
                 if LANG == "ar":
                     ph.goto(phone.origin + "/")
                     post(ph, "/settings/locale", locale="ar")
                 for name, path in (("phone-overview", "/?period=ytd"), ("phone-plan", "/plan"), ("phone-account", "/accounts/1")):
                     show(ph, phone.origin + path, wait=700)
-                    if name == "phone-plan":  # the + button would cover the last row of safe to spend
-                        ph.evaluate("() => window.scrollBy(0, 200)")
+                    lift = {"phone-plan": 200, "phone-account": 88 if LANG == "ar" else 60}.get(name)
+                    if lift:  # the + button would cover a figure (3Z)
+                        ph.evaluate("(y) => window.scrollBy(0, y)", lift)
                         ph.wait_for_timeout(400)
                     save(ph.screenshot(), name)
                 ph.goto(phone.origin + "/profiles/devices")
