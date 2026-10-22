@@ -1,11 +1,11 @@
-{# The Overview on a phone (guideline C11.1): header rows, Get set up, Needs you, four KPI tiles and Your
-   position; everything else is one row that opens its card in place (C06.2), so the page is one screen and
-   no answer is lost. Every chart in its phone form (C07). Same figures as the PC's Overview. #}
+{# The Overview on a phone (guideline C11.1, phone overhaul 2026-10-22): Get set up, the Safe to spend hero, the month
+   stepper, the Needs you card, four KPI tiles, Latest, then Your position; everything else is one row that opens its
+   card in place (C06.2). Every chart in its phone form (C07). Same figures as the PC's Overview. #}
 {% extends "base.html" %}
 {% from "phone/partials/charts.html" import kpi_tiles, bar_rows, flow_bars, month_tiles %}
 {% from "partials/charts.html" import trend, donut %}
 {% block title %}Overview{% endblock %}
-{% block heading %}<h1>{{ 'Overview'|tr(locale) }}</h1>{% if status %}<p class="phone-status">{{ status.text|tr(locale, **status['values']) }}</p>{% endif %}{% endblock %}
+{% block heading %}<h1>{{ 'Overview'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
 {% if setup %}{% set done = setup|selectattr("done")|list|length %}
@@ -16,29 +16,29 @@
 </section>
 {% endif %}
 {% set owes = pos.what_you_owe > 0 %}{% set lead = 'net_worth' if owes else 'what_you_own' %}
-<section class="phone-hero" aria-labelledby="lead-heading">
-  <div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ fig[lead].label }} <span>{{ "As of {date}"|tr(locale, date=position_as_of) }}</span></div>
-  <div class="phone-lead">{{ (pos.net_worth if owes else pos.what_you_own)|money }} <small>{{ base }}</small></div>
-  {% if pos.unvalued %}<p class="notice">{{ pos.unvalued|length }} asset valuation(s) are missing from this total.</p>{% endif %}
-</section>
+{% from "phone/partials/hero.html" import hero with context %}
+{# Phone overhaul (owner, 2026-10-22): "can I spend today?" in one glance. Safe to spend leads while the position is
+   today's; its home stays Cash planning, so the hero is a link there. Net worth is the first tile. #}
+{% if phone and phone.safe %}{% set s = phone.safe %}
+{{ hero(fig.safe_to_spend.label, s.value, s.line.text|tr(locale, **s.line['values']), href='/plan') }}
+{% else %}
+{{ hero(fig[lead].label, pos.net_worth if owes else pos.what_you_own, note="As of {date}"|tr(locale, date=position_as_of)) }}
+{% endif %}
+{% if pos.unvalued %}<p class="notice">{{ pos.unvalued|length }} asset valuation(s) are missing from this total.</p>{% endif %}
+{% from "partials/macros.html" import period_control with context %}{{ period_control("/", period.key, month, this_month, request.query_params.get("date_from", "") if period_error and period.key == "custom" else period.start_text, request.query_params.get("date_to", "") if period_error and period.key == "custom" else period.end_text) }}
 {% if attention %}
 <details class="card phone-needs" aria-labelledby="needs-heading">
-  <summary><span class="needs-you-dot" aria-hidden="true"></span><b id="needs-heading">{{ "Needs you"|tr(locale) }}</b><span class="needs-you-count">{{ attention|length }}</span></summary>
+  <summary><span class="needs-you-dot" aria-hidden="true"></span><span class="phone-needs-text"><b id="needs-heading">{{ ('1 item needs you' if attention|length == 1 else '{n} items need you')|tr(locale, n=attention|length) }}</b>{% if phone and phone.needs_line %}<small>{{ phone.needs_line|tr(locale) }}</small>{% endif %}</span><span class="needs-you-count">{{ attention|length }}</span><span class="phone-needs-open">{{ 'Open'|tr(locale) }}</span></summary>
   <div class="phone-rows">{% for item in attention %}<a class="phone-row" href="{{ item.href }}"{% if item.popup %} data-popup-open{% endif %}><span>{{ item.label }}<small>{{ item.detail }}</small></span>{% if item.late_days %}<span class="plan-status plan-status-late">{{ ("Late · 1 day" if item.late_days == 1 else "Late · {n} days")|tr(locale, n=item.late_days) }}</span> {% endif %}<b class="phone-row-action">{{ item.action or '›' }}</b></a>{% endfor %}</div>
 </details>
 {% endif %}{# nothing waiting: no row at all (A09) #}
+{% set tiles = ([phone.worth] if phone else []) + (stats|selectattr('key', 'equalto', 'plan')|list) + (stats|rejectattr('key', 'in', ['plan', 'safe'] if phone else ['plan'])|list) %}
+{{ kpi_tiles(tiles, base) }}
 
-<p class="actions"><a class="quiet-link" href="/review">{{ 'Weekly review'|tr(locale) }}</a></p>
 {% from "phone/partials/txn.html" import txn_list with context %}
 <section class="phone-section phone-latest" aria-labelledby="latest-heading">
-  <header class="phone-section-head"><h2 id="latest-heading">{{ 'Latest'|tr(locale) }}</h2><a class="phone-quiet" href="/transactions">{{ 'See all transactions'|tr(locale) }}</a></header>
-  {% if recent_rows %}{{ txn_list(recent_rows, True, False, False, '', '/transactions', '', 6, False) }}{% else %}<p class="phone-note">{{ 'No transactions yet.'|tr(locale) }}</p>{% endif %}
-</section>
-
-<section class="phone-section" aria-labelledby="analysis-heading">
-  <header class="phone-section-head"><h2 id="analysis-heading">{{ 'This period'|tr(locale) }}</h2><span>{{ date_from }} to {{ date_to }}</span></header>
-  {% from "partials/macros.html" import period_control with context %}{{ period_control("/", period.key, month, this_month, request.query_params.get("date_from", "") if period_error and period.key == "custom" else period.start_text, request.query_params.get("date_to", "") if period_error and period.key == "custom" else period.end_text) }}
-  {{ kpi_tiles(stats, base) }}
+  <header class="phone-section-head"><h2 id="latest-heading">{{ 'Latest'|tr(locale) }}</h2><a class="phone-quiet" href="/transactions">{{ 'See all'|tr(locale) }}</a></header>
+  {% if recent_rows %}{{ txn_list(recent_rows, True, False, False, '', '/transactions', '', 5, False) }}{% else %}<p class="phone-note">{{ 'No transactions yet.'|tr(locale) }}</p>{% endif %}
 </section>
 
 <section class="phone-section" aria-labelledby="position-heading">

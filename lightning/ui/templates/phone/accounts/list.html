@@ -24,4 +24,3 @@
 {% if closed %}<details class="card phone-card"><summary class="phone-row"><span>{{ "Inactive accounts"|tr(locale) }}</span><b>{{ closed|length }}</b></summary>
   <div class="phone-rows">{% for acc, balance, owned, count in closed %}<a class="phone-row" href="/accounts/{{ acc.id }}"><span>{{ acc.name }}</span><b>{{ balance|money(False, 0) }}</b></a>{% endfor %}</div></details>{% endif %}
 {% endblock %}
-{% block phone_add %}{% if rows and not request.state.read_only|default(false) %}<a class="phone-add" href="/accounts/add-transaction" data-popup-open aria-label="Add transaction"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a>{% endif %}{% endblock %}

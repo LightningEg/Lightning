@@ -1,7 +1,11 @@
 {# Two levels (lightning/ui/sections.py): the section's tabs, then the tab's settings behind its gear. #}
 {% set here = sections_for(request) %}{% set section, tab = here.section, here.tab %}
 {% set individual_account = request.url.path.startswith('/accounts/') and request.url.path.split('/')|length == 3 and request.url.path.split('/')[2].isdigit() %}
-{% if section and not individual_account and (section.tabs|length > 1 or tab.gear) %}<div class="section-bar">
-  {% if section.tabs|length > 1 %}<nav class="plan-tabs-bar section-tabs" aria-label="{{ section.label|tr(locale) }}">{% for t in section.tabs %}<a class="plan-tab" title="{{ t.label|tr(locale) }}" href="{{ t.href }}"{% if t.key == tab.key %} aria-current="page"{% endif %}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{ t.icon }}"/></svg><span class="tab-name">{{ t.label|tr(locale) }}</span></a>{% endfor %}</nav>{% endif %}
+{# Phone overhaul (2026-10-22): the tabs are words; the Overview opens on its answer with no tab row, and
+   Transactions has its own slot in the tab bar, so it leaves the Accounts row and shows no row of its own. #}
+{% set phone = phone_mode() %}{% set tabs = (section.tabs|rejectattr('key', 'equalto', 'transactions')|list if phone else section.tabs) if section else [] %}
+{% set phone_off = phone and (request.url.path == '/' or (tab and tab.key == 'transactions')) %}
+{% if section and not individual_account and not phone_off and (tabs|length > 1 or tab.gear) %}<div class="section-bar">
+  {% if tabs|length > 1 %}<nav class="plan-tabs-bar section-tabs" aria-label="{{ section.label|tr(locale) }}">{% for t in tabs %}<a class="plan-tab" title="{{ t.label|tr(locale) }}" href="{{ t.href }}"{% if t.key == tab.key %} aria-current="page"{% endif %}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{ t.icon }}"/></svg><span class="tab-name">{{ t.label|tr(locale) }}</span></a>{% endfor %}</nav>{% endif %}
   {% if tab.gear %}<a class="section-gear" href="{{ tab.gear }}" data-popup-open aria-label="{{ tab.gear_label|tr(locale) }}" title="{{ tab.gear_label|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></a>{% endif %}
 </div>{% endif %}

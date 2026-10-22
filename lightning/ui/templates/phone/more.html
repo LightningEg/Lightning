@@ -1,0 +1,34 @@
+{# The phone's More tab (phone overhaul 2026-10-22): each section without a tab-bar slot, with its live figure; the
+   weekly review as a card you start; then settings as one grouped list. #}
+{% extends "base.html" %}
+{% block title %}More{% endblock %}
+{% block heading %}<h1>{{ 'More'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+<nav class="phone-rows phone-more-list" aria-label="{{ 'Sections'|tr(locale) }}">
+  <a class="phone-row" href="/plan"><span>{{ 'Cash planning'|tr(locale) }}</span><b>{{ '{amt} due before payday'|tr(locale, amt=due|amount_role('total')) if until else '{amt} due in 3 months'|tr(locale, amt=due|amount_role('total')) }}</b></a>
+  <a class="phone-row" href="/investments"><span>{{ 'Investments'|tr(locale) }}</span><b>{{ portfolio|amount_role('total') }}</b></a>
+  <a class="phone-row" href="/accounts"><span>{{ 'Accounts'|tr(locale) }}</span><b>{{ in_accounts|amount_role('total') }}</b></a>
+  <a class="phone-row" href="/financial-health"><span>{{ 'Financial health'|tr(locale) }}</span><b>{{ '{n} of {m} within limits'|tr(locale, n=within, m=judged) if judged else 'No limits yet'|tr(locale) }}</b></a>
+  <a class="phone-row" href="/birdview/expenses"><span>{{ 'Spending'|tr(locale) }}</span><b>{{ '{amt} in {month}'|tr(locale, amt=spent|amount_role('total'), month=month) }}</b></a>
+  {% if zakat %}<a class="phone-row" href="/zakat"><span>{{ 'Zakat'|tr(locale) }}</span><b>›</b></a>{% endif %}
+</nav>
+
+<a class="phone-review-card" href="/review">
+  <span class="phone-review-mark" aria-hidden="true"></span>
+  <span class="phone-review-text"><b>{{ 'Weekly review is ready'|tr(locale) if waiting else 'Weekly review'|tr(locale) }}</b><small>{% if waiting %}{{ ('1 decision, one at a time' if waiting == 1 else '{n} decisions, one at a time')|tr(locale, n=waiting) }}{% elif last_review %}{{ 'Last done {date}; nothing waiting'|tr(locale, date=last_review) }}{% else %}{{ 'Nothing waiting'|tr(locale) }}{% endif %}</small></span>
+  <span class="phone-review-go">{{ 'Start'|tr(locale) if waiting else 'Open'|tr(locale) }}</span>
+</a>
+
+<section class="phone-section" aria-labelledby="settings-heading">
+  <header class="phone-section-head"><h2 id="settings-heading">{{ 'Settings'|tr(locale) }}</h2></header>
+  <nav class="phone-rows phone-more-list" aria-labelledby="settings-heading">
+    <a class="phone-row" href="/settings"><span>{{ 'All settings'|tr(locale) }}<small>{{ "Backups, language, currencies and each tab's settings"|tr(locale) }}</small></span><b>›</b></a>
+    <a class="phone-row" href="/categories"><span>{{ 'Categories'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/counterparties"><span>{{ 'Counterparties'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/rules"><span>{{ 'Rules'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/checks"><span>{{ 'Data checks'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/sms"><span>{{ 'From SMS'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/profiles/devices"><span>{{ 'Devices'|tr(locale) }}<small>{{ 'Pair a PC'|tr(locale) }}</small></span><b>›</b></a>
+  </nav>
+</section>
+{% endblock %}

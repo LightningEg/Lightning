@@ -43,14 +43,17 @@ def test_every_page_renders_in_the_phone_frame(phone, path):
     assert "viewport-fit=cover" in html and "/static/phone.css" in html
     assert "/static/phone-fields.js" in html  # a tapped field opens empty, its old text back if left empty
     names = re.findall(r'class="phone-tab-name">([^<]+)<', html)
-    assert names == ["Overview", "Budget", "Cash", "Investments", "Accounts"]
+    assert names == ["Overview", "Budget", "Add", "Transactions", "More"]  # phone overhaul 2026-10-22: words, Add in the middle
 
 
 def test_the_chosen_section_and_the_period_words(phone):
     html = phone.get("/budget").text
     assert re.search(r'class="phone-tab is-chosen" href="/budget" aria-current="page"', html)
     overview = phone.get("/").text
-    assert ">Monthly<" not in overview and ">All time<" not in overview  # C04.2
+    assert ">Monthly<" not in overview and 'class="period-buttons"' not in overview  # one month stepper, no sideways chips
+    assert 'class="phone-period-sheet"' in overview and ">Last month<" in overview  # the month opens Choose period
+    assert re.search(r'class="phone-tab is-chosen" href="/more"', phone.get("/plan").text)  # Cash planning lives on More
+    assert re.search(r'class="phone-tab is-chosen" href="/transactions"', phone.get("/transactions").text)
 
 
 def test_the_pc_keeps_its_own_frame(tmp_path):
@@ -84,7 +87,7 @@ def test_budget_cash_and_investments_have_phone_designs(phone, path, marker):
 
 def test_an_account_is_a_day_list_and_the_sheet_saves(phone):
     page = phone.get("/accounts/1").text
-    assert "<table" not in page and 'class="phone-day"' in page and 'class="phone-add"' in page  # C08, C05.2
+    assert "<table" not in page and 'class="phone-day"' in page and 'class="phone-tab phone-add" href="/accounts/1/transaction/new' in page  # C08, C05.2
     assert 'type="checkbox"' not in page  # no checkbox column
     sheet = phone.get("/accounts/1/transaction/new").text
     assert 'inputmode="decimal"' in sheet and 'type="date"' in sheet and 'class="btn primary phone-save"' in sheet

@@ -1,4 +1,4 @@
-{# The phone frame (guideline Part C, C02–C05): app bar on top, content, five-section tab bar at the bottom.
+{# The phone frame (guideline Part C, C02–C05): app bar on top, content, the five-slot tab bar at the bottom.
    base.html hands over to this when the request comes from the phone app; pages keep their blocks. #}
 <!doctype html>
 <html lang="{{ 'ar-EG' if locale == 'ar' else 'en' }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}" class="phone{% if privacy_on(request) %} privacy{% endif %}">
@@ -10,44 +10,44 @@
   <link rel="icon" type="image/svg+xml" href="/static/lightning-mark.svg">
   <link rel="stylesheet" href="/static/fonts/fonts.css?v=2">
   <link rel="stylesheet" href="/static/style{{ '.rtl' if locale == 'ar' else '' }}.css?v=94">
-  <link rel="stylesheet" href="/static/phone{{ '.rtl' if locale == 'ar' else '' }}.css?v=29">
+  <link rel="stylesheet" href="/static/phone{{ '.rtl' if locale == 'ar' else '' }}.css?v=30">
 <script nonce="{{ request.state.csp_nonce|default('') }}">window.LIGHTNING_UI={{ arabic_translations|tojson }};window.lightningT=(text,values)=>{const raw=String(text);let out=window.LIGHTNING_UI[raw];if(!out){for(const [pattern,translated] of Object.entries(window.LIGHTNING_UI)){if(!pattern.includes('{'))continue;const names=[...pattern.matchAll(/\{([a-z_]+)\}/g)].map(m=>m[1]);const parts=pattern.split(/\{[a-z_]+\}/g).map(part=>part.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));const match=new RegExp('^'+parts.join('(.+?)')+'$').exec(raw);if(match){out=translated;names.forEach((name,i)=>out=out.replaceAll(`{${name}}`,match[i+1]));break;}}}out=out||raw;for(const [key,value] of Object.entries(values||{}))out=out.replaceAll(`{${key}}`,String(value));return out;};</script>
 </head>
-<body data-base-currency="{{ base }}" class="phone-body">
 {% set here = sections_for(request) %}{% set back = back_url(request) %}
+<body data-base-currency="{{ base }}" class="phone-body">
 <header class="phone-appbar">
-  {# C03.2: the mark alone, or on an inner page ‹ and the page it returns to. A page sets phone_back. #}
+  {# Slim top bar (phone overhaul 2026-10-22, C03.2): the mark and the page's name, then Search and Hide amounts;
+     the tab's gear only where the tab has settings. On an inner page, ‹ and the page it returns to. A page sets phone_back. #}
   {% block phone_back %}{% if back %}<a class="phone-back" href="{{ back }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ (here.section.label if here.section else 'Back')|tr(locale) }}</span></a>
-  {% else %}<a class="phone-mark" href="/" aria-label="Overview"><img src="/static/lightning-mark.svg" alt="" width="20" height="28"></a>{% endif %}{% endblock %}
-  <span class="phone-appbar-title" aria-hidden="true"></span>
+  {% else %}<a class="phone-mark" href="/" aria-label="Overview"><img src="/static/lightning-mark.svg" alt="" width="20" height="28"></a><span class="phone-appbar-title" aria-hidden="true">{% block phone_title %}{{ self.title()|trim|tr(locale) }}{% endblock %}</span>{% endif %}{% endblock %}
   <nav class="phone-appbar-icons" aria-label="{{ 'Tools'|tr(locale) }}">
     <a class="phone-icon" href="/search" aria-label="{{ 'Search'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></a>
     {% set hidden = privacy_on(request) %}<button type="button" class="phone-icon" data-privacy-toggle aria-pressed="{{ 'true' if hidden else 'false' }}" aria-label="{{ 'Show amounts' if hidden else 'Hide amounts' }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="side-privacy-off" d="M4 4l16 16"/></svg></button>
-    <a class="phone-icon" href="{{ here.tab.gear if here.tab and here.tab.gear else '/settings' }}" aria-label="{{ 'Settings'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg></a>
+    {% if here.tab and here.tab.gear and request.url.path != '/' %}<a class="phone-icon" href="{{ here.tab.gear }}" aria-label="{{ here.tab.gear_label|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></a>{% endif %}
   </nav>
 </header>
 <main class="main phone-content">
   {% if request.state.device_line|default('') %}<div class="flash device-line" role="status"><span>{{ request.state.device_line|tr(locale) }}</span>{% if request.state.device_action == 'hand-back' %}<form method="post" action="/sync/hand-back"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn primary" type="submit">{{ 'Hand back'|tr(locale) }}</button></form>{% elif request.state.device_action == 'take-back' %}<a class="btn" href="/profiles/devices">{{ 'Devices'|tr(locale) }}</a>{% endif %}</div>{% endif %}
   <div class="phone-header">{% block heading %}{% endblock %}</div>
-  <div class="phone-page-actions">{% include "partials/history.html" %}{% block top_actions %}{% endblock %}</div>
+  <div class="phone-page-actions">{% block top_actions %}{% endblock %}</div>
   {% include "partials/section_tabs.html" %}
-  {% if msg %}<div class="flash" role="status" aria-live="polite" aria-atomic="true">{{ msg|tr(locale) }}</div>{% endif %}
+  {# Undo and Redo ride on the message an action leaves (phone overhaul: no lone icon button at the top). #}
+  {% if msg %}<div class="flash phone-flash" role="status" aria-live="polite" aria-atomic="true"><span>{{ msg|tr(locale) }}</span>{% include "partials/history.html" %}</div>{% endif %}
   {% if error %}<div class="flash error" role="alert" aria-live="assertive" aria-atomic="true">{{ error|tr(locale) }}</div>{% endif %}
   {% include "partials/checked_history.html" %}
   {% block content %}{% endblock %}
-  {# C05.2 (3.27): adding is one tap from every section's first page; it asks which account, then opens the sheet. #}
-  {% block phone_add %}{% if request.url.path in ('/', '/budget', '/plan', '/investments') and not request.state.read_only|default(false) %}<a class="phone-add" href="/accounts/add-transaction" data-popup-open aria-label="Add transaction"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a>{% endif %}{% endblock %}
 </main>
 <nav class="phone-tabbar" aria-label="{{ 'Sections'|tr(locale) }}">
-  {% set chosen = here.section.key if here.section else '' %}
-  {% for key, label, href, path in [
-    ('overview', 'Overview', '/', 'm3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM9 21v-7h6v7'),
-    ('budget', 'Budget', '/budget', 'M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 9h18M16 14h3'),
-    ('plan', 'Cash', '/plan', 'M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM14 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM6 12h.01M18 12h.01'),
-    ('investments', 'Investments', '/investments', 'M3 20V4M3 20h18M6 16l5-5 4 3 5-8M16 6h4v4'),
-    ('accounts', 'Accounts', '/accounts', 'M3 10h18M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18M12 3l9 5H3z')] %}
-  <a class="phone-tab{{ ' is-chosen' if chosen == key }}" href="{{ href }}"{% if chosen == key %} aria-current="page"{% endif %} title="{{ label|tr(locale) }}"><span class="phone-tab-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{ path }}"/></svg></span><span class="phone-tab-name">{{ label|tr(locale) }}</span></a>
-  {% endfor %}
+  {# Phone overhaul (owner, 2026-10-22): five slots with their words, Add in the middle. Transactions is a slot;
+     Cash planning, Investments, Accounts, Financial health and Settings live on More with their figures. #}
+  {% set skey = here.section.key if here.section else '' %}
+  {% set chosen = 'transactions' if here.tab and here.tab.key == 'transactions' else skey if skey in ('overview', 'budget') else 'more' if skey or request.url.path == '/more' else '' %}
+  {% macro slot(chosen, key, label, href, path) %}<a class="phone-tab{{ ' is-chosen' if chosen == key }}" href="{{ href }}"{% if chosen == key %} aria-current="page"{% endif %}><span class="phone-tab-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{ path }}"/></svg></span><span class="phone-tab-name">{{ label|tr(locale) }}</span></a>{% endmacro %}
+  {{ slot(chosen, 'overview', 'Overview', '/', 'm3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM9 21v-7h6v7') }}
+  {{ slot(chosen, 'budget', 'Budget', '/budget', 'M12 3a9 9 0 1 0 9 9h-9zM15 3.5A9 9 0 0 1 20.5 9H15z') }}
+  {% block phone_add %}{% from "phone/partials/add.html" import add_slot with context %}{{ add_slot(off=request.state.read_only|default(false)) }}{% endblock %}
+  {{ slot(chosen, 'transactions', 'Transactions', '/transactions', 'M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4') }}
+  {{ slot(chosen, 'more', 'More', '/more', 'M4.5 12h1M11.5 12h1M18.5 12h1') }}
 </nav>
 <dialog id="app-popup" class="app-popup phone-sheet" aria-modal="true" aria-labelledby="app-popup-title">
   <div class="app-popup-frame">

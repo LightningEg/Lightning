@@ -242,6 +242,7 @@ async def dashboard(request: Request):
                                   cash_flow.rate_says_nothing, period.key, current, bool(accounts))
     dates_note = ("so far" if current and period.key in ("month", "ytd") else "year to date" if period.key == "ytd" else "")
     recent_rows = c.reporting.register_page(None, "1900-01-01", "9999-12-31", 1, 10)[0]  # the phone leads with these (C11.1)
+    phone = _phone_overview(position, inbox.forecast, attention_groups, lead_change) if getattr(request.state, "phone", False) and position_is_today else None
     return render(
         request,
         "dashboard/index.html",
@@ -269,7 +270,7 @@ async def dashboard(request: Request):
         categorized_spending=categorized_spending,
         investment_report=investment_report, investment_holdings=investment_holdings,
         cash_flow=cash_flow, investment_flow=investment_flow,
-        investment_share=investment_share, savings_rate=savings_rate,
+        investment_share=investment_share, savings_rate=savings_rate, phone=phone,
     )
 
 
@@ -447,6 +448,65 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
                       "kind": "money", "empty": "No plan yet", "sub": f"Set a plan for {month}",
                       "href": f"/budget?month={month}"})
     return stats
+
+
+# Needs you on the phone says what is inside in a few words (phone overhaul 2026-10-22): "2 bills · 4 to sort out".
+_NEEDS_SHORT = {"payments": ("bill", "bills"), "activity": ("to sort out", "to sort out"), "budget": ("budget", "budget"),
+                "cash": ("cash", "cash"), "prices": ("price", "prices"), "other": ("other", "other")}
+
+
+def _safe_hero(f) -> dict:
+    """Safe to spend as the phone's hero (phone overhaul 2026-10-22: "can I spend today?"), with its one sentence:
+    about how much a day until payday. ``f`` is today's forecast; the figure's home stays Cash planning."""
+    value, until = f.safe_to_spend, f.next_income_date
+    days = (parse_date(until) - today()).days if until else 0
+    if value < 0:
+        line = page_status.sentence("{amt} more is promised than your free cash.", amt=fmt(-value))
+    elif until and days > 0:
+        line = page_status.sentence("About {amt} a day until payday on {date}.", amt=fmt(value / days), date=until)
+    else:
+        line = page_status.sentence("From free cash, after what is promised over the next 3 months.")
+    return {"value": value, "line": line, "until": until or ""}
+
+
+def _phone_overview(position, forecast, groups, lead_change) -> dict:
+    """What the phone's Overview adds to the PC's figures: the Safe to spend hero, a Net worth tile, and the words
+    on the Needs you card."""
+    owes = position.what_you_owe > 0
+    worth = {"key": "networth", "surface": "hold", "label": label("net_worth" if owes else "what_you_own"),
+             "value": position.net_worth if owes else position.what_you_own, "kind": "money",
+             "badge": {"tone": "flat", "text": "Today"},
+             "sub": f"{lead_change['figure']} {lead_change['text']}" if lead_change else "",
+             "href": "/accounts"}
+    parts = []
+    for group in groups[:3]:
+        one, many = _NEEDS_SHORT.get(group["key"], ("other", "other"))
+        parts.append(f"{group['count']} {one if group['count'] == 1 else many}")
+    return {"safe": _safe_hero(forecast), "worth": worth, "needs_line": " · ".join(parts)}
+
+
+@router.get("/more")
+async def more(request: Request):
+    """The phone's More tab (phone overhaul 2026-10-22): every section without a slot of its own, each with its live
+    figure, the weekly review as a card, then settings as a grouped list. The PC has its sidebar instead."""
+    if not getattr(request.state, "phone", False):
+        return redirect("/")
+    c = container(request)
+    day = today()
+    position = c.position.at(day)
+    inbox = ReviewInbox(c)
+    items = inbox.items(day)
+    parts = dict(inbox.forecast.safe_to_spend_parts)
+    due = -parts.get(label("payments_before_next_income"), ZERO)
+    health = c.health.overview(day)
+    judged = [item for item in health["figures"] if item.status in ("within your limit", "outside your limit")]
+    within = sum(1 for item in judged if item.status == "within your limit")
+    first = day.replace(day=1)
+    spent = c.reporting.cash_flow(first, day).outflows
+    return render(request, "more.html", due=due, until=inbox.forecast.next_income_date or "",
+                  portfolio=position.portfolio_value, in_accounts=position.in_your_accounts,
+                  within=within, judged=len(judged), spent=spent, month=month_of(day), waiting=len(items),
+                  last_review=(c.settings.get("weekly_review_at") or "")[:10], zakat=c.zakat.enabled())
 
 
 def _safe_tile(f) -> dict:

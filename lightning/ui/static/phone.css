@@ -71,7 +71,7 @@ html.phone.keyboard-open .phone-tabbar, html.phone.sheet-open .phone-tabbar { di
 .phone .site-period-control .month-stepper > .period-month-value:not(#_):not(.x_) { height: 48px; min-height: 48px; line-height: 48px; }
 .phone .period-month-picker, .phone .period-date-range { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; }
 
-/* C03.3 tabs in a section: full width, equal, never scrolling; the gear lives in the app bar. */
+/* C03.3 tabs in a section: words in one segmented track that wraps, never scrolls; the gear lives in the app bar. */
 .phone .section-bar { display: block; margin: 12px 0 0; }
 .phone .section-gear { display: none; }
 .phone .section-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; width: 100%; overflow: hidden; }
@@ -275,13 +275,6 @@ html.phone .main .cluster-name, html.phone .main .cluster span { white-space: no
 .phone-latest .phone-section-head { margin-bottom: 0; align-items: center; }
 .phone-latest .phone-quiet { font-size: 13px; }
 .phone-more-link { width: 100%; margin: 16px 0 0; justify-content: center; }
-
-/* C05.2: the add button, 56 Nile, 16 from the edge, 16 above the tab bar; the page ends above it so it never covers a row. */
-.phone-content:has(> .phone-add) { padding-bottom: calc(var(--c-tabbar) + env(safe-area-inset-bottom) + 96px); }
-.phone-add { position: fixed; inset-inline-end: 16px; bottom: calc(var(--c-tabbar) + env(safe-area-inset-bottom) + 16px); z-index: 19;
-  display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 18px;
-  background: var(--c-nile); color: #fff; box-shadow: 0 6px 18px rgba(10, 36, 66, .3); }
-.phone-add svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
 
 /* C09: the entry sheet. */
 .phone-sheet-title { margin: 0; font-size: 18px; }
@@ -518,9 +511,6 @@ html.phone .date-popup-head .date-popup-title:not(#_) { width: auto; }
 html.phone .iso-date-control:not(#_) { grid-template-columns: minmax(0, 1fr) 48px; }
 
 
-/* Owner decision 2026-10-15: every phone tab is an icon; the name stays for screen readers and as the long-press title. */
-html.phone :is(.phone-tab-name, .section-tabs .tab-name) { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-html.phone .phone-tab-icon { height: 36px; }
 .locked-row b { font-weight:400; opacity:.75; }
 .plan-status-late { background:var(--rose-soft, #FCEEF3); color:var(--rose-strong, #C93D72); display:inline-flex; padding:0 8px; border-radius:999px; font-size:12px; font-weight:700; }
 /* Answer first (guideline 3.33, C04.1): the status sentence under the title, then the seam; Needs you bullets are the mark. */
@@ -528,3 +518,106 @@ html.phone .phone-tab-icon { height: 36px; }
 .phone-header::after { content: ""; display: block; width: 32px; height: 3px; margin-top: 8px; border-radius: 2px; background: linear-gradient(90deg, #0B6DD6 50%, #14A874 50%); }
 .phone-needs .needs-you-dot { width: 12px; height: 17px; border-radius: 0; background: url(/static/lightning-mark-flat.svg) no-repeat center / contain; }
 .phone-needs.is-empty .needs-you-dot { background: var(--meadow); width: 10px; height: 10px; border-radius: 50%; }
+
+/* Phone overhaul (owner PDF, 2026-10-22). One frame for every tab: a slim top bar with the page's name, a hero figure
+   with one calm sentence and the seam, worded tabs, and a tab bar of five words with Add in its middle. */
+.phone-appbar-title { font: 700 17px/1.15 var(--display); color: var(--c-ink); overflow-wrap: break-word; margin-left: 2px; }
+.phone-appbar-icons { margin-left: auto; }
+.phone-body:has(.phone-appbar-title) .phone-header h1 { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.phone-body:has(.phone-appbar-title) .phone-header:not(:has(> :not(h1))) { margin: 0; }
+.phone-body:has(.phone-appbar-title) .phone-header:not(:has(> :not(h1)))::after { display: none; }
+.main.phone-content { padding-bottom: calc(var(--c-tabbar) + env(safe-area-inset-bottom) + 40px); }
+
+/* The tab bar: Overview, Budget, Add, Transactions, More. Every slot carries its word; the chosen one is Ink with a
+   short Nile bar on top. A word never wraps or cuts: each column is at least its word's width. */
+.phone-tabbar { grid-template-columns: minmax(max-content, 1fr) minmax(max-content, 1fr) 64px minmax(max-content, 1fr) minmax(max-content, 1fr); }
+.phone-tab { position: relative; gap: 2px; padding: 0 2px; }
+.phone-tab-icon, html.phone .phone-tab-icon { width: auto; height: 26px; background: none; }
+.phone-tab.is-chosen .phone-tab-icon { background: none; color: var(--c-ink); }
+.phone-tab.is-chosen svg { stroke-width: 2.2; }
+.phone-tab-name { font-size: 12px; font-weight: 600; letter-spacing: 0; }
+.phone-tab.is-chosen .phone-tab-name { font-weight: 700; }
+.phone-tab.is-chosen::before { content: ""; position: absolute; top: 0; left: 50%; width: 20px; height: 3px; margin-left: -10px; border-radius: 0 0 3px 3px; background: var(--c-nile); }
+.phone-tabbar a.phone-add, .phone-tabbar a.phone-add:visited { color: var(--c-ink); }
+.phone-add-disc { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; margin-top: -22px; border-radius: 50%;
+  background: var(--c-nile); color: #fff; box-shadow: 0 6px 16px rgba(10, 36, 66, .28); }
+.phone-add-disc svg { width: 24px; height: 24px; stroke-width: 2.4; }
+.phone-add.is-off { pointer-events: none; }
+
+/* Worded tabs inside a section: one track, the chosen segment white; long rows wrap to a second line. */
+.phone .section-tabs:not(#_) { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 14px; background: var(--c-track); overflow: visible; }
+.phone .section-tabs .plan-tab:not(#_) { flex: 1 1 auto; justify-content: center; min-height: 40px; height: auto; padding: 4px 10px; border-radius: 11px;
+  background: none; box-shadow: none; color: var(--c-ink-2); font: 600 13.5px/1.2 var(--body); white-space: nowrap; }
+.phone .section-tabs .plan-tab[aria-current="page"]:not(#_) { background: var(--c-surface); color: var(--c-ink); font-weight: 700; box-shadow: 0 1px 3px rgba(10, 36, 66, .14); }
+.phone .section-tabs .plan-tab svg:not(#_) { display: none; }
+.phone .section-bar:not(:has(.section-tabs)) { display: none; }
+
+/* An action's message carries its Undo, in words. */
+.phone-flash:not(#_) { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.phone-flash .history-form { margin: 0; flex: none; }
+.phone-flash .history-btn:not(#_) { min-height: 40px; padding: 0 12px; border: 0; background: none; box-shadow: none; color: var(--c-ink); font-weight: 700; text-decoration: underline; }
+
+/* The hero: label, the figure with EGP once, one calm sentence, then the seam (A02.3). */
+.phone-hero-line { margin: 4px 0 0; color: var(--c-ink-2); font-size: 14px; line-height: 1.4; }
+.phone-hero.has-seam::after { content: ""; display: block; width: 32px; height: 3px; margin-top: 10px; border-radius: 2px; background: linear-gradient(90deg, #0B6DD6 50%, #14A874 50%); }
+a.phone-hero { display: block; color: inherit; text-decoration: none; }
+
+/* Arrow chips: what the money did, by its colour's meaning (A03). The sign or the word beside it always speaks too. */
+.phone-txn-av svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.phone-txn-av.is-in { background: #DDF3E8; color: #097852; }
+.phone-txn-av.is-out { background: #FBE4EC; color: #A8325F; }
+.phone-txn-av.is-move, .phone-txn-av.is-flat { background: var(--c-track); color: var(--c-ink-2); }
+.phone-txn-av.is-invest { background: #E1EEFB; color: #0B6DD6; }
+.phone-content .phone-day-net { color: var(--c-ink-2); font-weight: 700; }
+
+/* The month stepper: ‹ 2026-10 ›, compact; the month opens the Choose period sheet from the bottom. */
+.phone-period { margin: 12px 0 0; }
+.phone-period-row { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border-radius: 999px; background: var(--c-surface); box-shadow: 0 0 0 1px var(--c-line) inset; }
+.phone-period-row .period-step:not(#_) { width: 40px; height: 40px; min-width: 0; min-height: 40px; padding: 0; border: 0; border-radius: 50%; background: none; box-shadow: none; color: var(--c-ink); }
+.phone-period-row .period-step svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.phone-period-row .period-step:disabled { opacity: .3; }
+.phone-period-now { display: inline-flex; align-items: center; min-height: 40px; padding: 0 12px; border-radius: 999px; list-style: none; cursor: pointer;
+  font: 700 14px/1 var(--body); color: var(--c-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.phone-period-now::-webkit-details-marker { display: none; }
+.phone-period-sheet[open] > .phone-period-now::before { content: ""; position: fixed; inset: 0; z-index: 40; background: rgba(13, 34, 51, .35); }
+.phone-period-panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; max-height: 85vh; overflow-y: auto; box-sizing: border-box;
+  padding: 8px var(--c-side) calc(16px + env(safe-area-inset-bottom)); border-radius: 20px 20px 0 0; background: var(--c-surface); box-shadow: 0 -8px 24px rgba(10, 36, 66, .18); }
+.phone-period-panel .phone-grabber { display: block; width: 36px; height: 4px; margin: 0 auto 12px; border-radius: 2px; background: var(--c-line); }
+.phone-period-panel .phone-row:not(#_) { width: 100%; min-height: 52px; border: 0; border-top: 1px solid var(--c-line); border-radius: 0; background: none; box-shadow: none;
+  color: var(--c-ink); font: 600 15px/1.3 var(--body); text-align: start; text-decoration: none; }
+.phone-period-panel .phone-row b { color: var(--c-muted); font-weight: 600; font-size: 13px; }
+.phone-period-panel .phone-row.is-chosen b, .phone-period-panel .phone-row.is-chosen > span:first-child { color: var(--c-ink); font-weight: 700; }
+.phone-period-panel .phone-row.is-chosen > b::before { content: "✓ "; color: #097852; }
+.phone-period-custom:not(#_) { flex-wrap: wrap; padding: 10px 0; }
+.phone-period-range { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; margin-top: 8px; }
+.phone-period-range label { display: flex; flex-direction: column; gap: 4px; color: var(--c-muted); font-size: 12.5px; font-weight: 600; }
+html.phone:has(.phone-period-sheet[open]) .phone-tabbar { display: none; }
+/* A month box on a phone opens its picker as a sheet from the bottom, above everything (C09). */
+html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !important; right: 16px; top: auto !important; bottom: calc(16px + env(safe-area-inset-bottom)); width: auto; z-index: 70; }
+
+/* Needs you as one tappable card: the mark, how many and what is inside, the count, Open. Its rows open under it. */
+.phone-needs > summary .phone-needs-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.phone-needs > summary .phone-needs-text b { font-size: 15px; color: var(--c-ink); }
+.phone-needs > summary .phone-needs-text small { color: var(--c-ink-2); font-size: 12.5px; line-height: 1.35; }
+.phone-needs > summary { padding: 8px 0; }
+.phone-needs-open { flex: none; color: var(--c-ink); font-weight: 700; text-decoration: underline; }
+.phone-needs[open] .phone-needs-open { visibility: hidden; }
+.phone-needs .needs-you-count { flex: none; }
+
+/* More: each section with its live figure; the weekly review as a card you start. */
+.phone-more-list { margin: 4px 0 0; }
+.phone-more-list .phone-row { min-height: 52px; color: var(--c-ink); text-decoration: none; }
+.phone-more-list .phone-row > span { font-weight: 600; }
+.phone-more-list .phone-row > b { color: var(--c-muted); font-size: 13px; font-weight: 600; text-align: end; }
+.phone-more-list > .phone-row:first-child { border-top: 0; }
+.phone-review-card { display: flex; align-items: center; gap: 12px; min-height: 64px; margin: 20px 0 8px; padding: 12px 16px; border-radius: 20px;
+  background: var(--c-surface); box-shadow: 0 0 0 1px var(--c-line) inset; color: var(--c-ink); text-decoration: none; }
+.phone-review-card:hover { text-decoration: none; }
+.phone-review-mark { flex: none; width: 12px; height: 17px; background: url(/static/lightning-mark-flat.svg) no-repeat center / contain; }
+.phone-review-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.phone-review-text b { font-size: 15px; }
+.phone-review-text small { color: var(--c-ink-2); font-size: 12.5px; }
+.phone-review-go { flex: none; font-weight: 700; text-decoration: underline; }
+.phone-needs > summary::after { display: none !important; }
+.phone-tab[href="/more"] svg { stroke-width: 3.2; }
+.phone-tab.is-chosen[href="/more"] svg { stroke-width: 3.6; }

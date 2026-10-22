@@ -72,7 +72,15 @@ def _amount_role(value, role: str, signed: bool = False) -> str:
     if role == "total":
         return _money(value, signed, 0)
     if role == "row":
-        return _money(value, signed, 2)
+        # The phone drops ".00" from a whole amount (phone overhaul 2026-10-22); piastres still show when there are any.
+        whole = False
+        if phone_mode() and value is not None:
+            try:
+                number = Decimal(str(value).replace(",", "").replace("\u2212", "-"))
+                whole = number == number.to_integral_value()
+            except InvalidOperation:
+                pass
+        return _money(value, signed, 0 if whole else 2)
     raise ValueError(f"Unknown amount role: {role}")
 
 
@@ -157,6 +165,47 @@ def _day_label(date_text, locale: str = "en") -> str:
 
 
 templates.env.filters["day_label"] = _day_label
+
+
+def _day_nets(rows) -> dict[str, Decimal]:
+    """Each day's net on a phone list (phone overhaul 2026-10-22): money in less money out, in the base currency.
+    Transfers, investment rows and value updates move nothing in or out, so they are left out."""
+    nets: dict[str, Decimal] = {}
+    for r in rows:
+        if getattr(r, "type", "") in ("IN", "OUT"):
+            nets[r.date] = nets.get(r.date, ZERO) + (r.amount_base or r.amount)
+    return nets
+
+
+def _group_value_updates(rows) -> list:
+    """A day's value updates (revaluations) become one "Investments moved" row on a phone list, so a month-end
+    re-pricing never crowds out the money that moved. Other rows pass through unchanged."""
+    from types import SimpleNamespace
+    out: list = []
+    for r in rows:
+        if r.type != "VAL":
+            out.append(r)
+            continue
+        last = out[-1] if out else None
+        if last is not None and last.type == "VALS" and last.date == r.date:
+            last.count += 1
+            last.amount += r.amount_base or r.amount
+        else:
+            out.append(SimpleNamespace(type="VALS", date=r.date, txn_id=r.txn_id, count=1, amount=r.amount_base or r.amount,
+                                       balance=None))
+    return out
+
+
+def _shift_month(month: str, months: int) -> str:
+    """yyyy-mm moved by a number of months: the phone's period sheet names last month."""
+    year, number = (int(part) for part in str(month)[:7].split("-"))
+    index = year * 12 + number - 1 + months
+    return f"{index // 12:04d}-{index % 12 + 1:02d}"
+
+
+templates.env.globals["day_nets"] = _day_nets
+templates.env.filters["group_value_updates"] = _group_value_updates
+templates.env.globals["shift_month"] = _shift_month
 templates.env.filters["keep_dates"] = _keep_dates
 
 

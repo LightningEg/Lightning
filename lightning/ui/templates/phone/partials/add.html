@@ -1,0 +1,6 @@
+{# The Add slot in the middle of the tab bar (phone overhaul 2026-10-22, C03.1): a Nile disc with its word under it.
+   Its sheet asks which account first; an account page passes its own entry sheet. off keeps the slot empty. #}
+{% macro add_slot(href='/accounts/add-transaction', off=False) -%}
+{% if off %}<span class="phone-tab phone-add is-off" aria-hidden="true"></span>
+{% else %}<a class="phone-tab phone-add" href="{{ href }}" data-popup-open aria-label="{{ 'Add transaction'|tr(locale) }}"><span class="phone-add-disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span class="phone-tab-name">{{ 'Add'|tr(locale) }}</span></a>{% endif %}
+{%- endmacro %}

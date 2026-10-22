@@ -25,8 +25,17 @@ from test_mohab_year import Mohab, _live_the_year
 # The PC's link or button -> the phone's taps. A step starting with "/" opens that page; with "?" it is
 # typed into the page's search box; anything else is tapped on the page.
 DETOURS = {
-    "+ Add account": ("Accounts", "Add account"),                 # the PC's sidebar; the phone's Accounts ⋯
-    "Manage accounts": ("Accounts",),
+    "+ Add account": ("More", "Accounts", "Add account"),         # the PC's sidebar; the phone's Accounts ⋯
+    "Manage accounts": ("More", "Accounts"),
+    "Accounts": ("More", "Accounts"),                             # sections without a tab-bar slot live on More
+    "Cash planning": ("More", "Cash planning"),
+    "Investments": ("More", "Investments"),
+    "Financial health": ("More", "Financial health"),
+    "Add transaction": ("Add",),
+    "Settings": ("More", "All settings"),
+    "Health": ("More", "Financial health"),                       # the Overview opens on its answer, no tab row
+    "Spending": ("More", "Spending"),
+    "Currencies": ("More", "Financial health", "Currencies"),                         # the app bar's gear is a tab's own settings only                                  # the tab bar's Add, its word under the disc
     "NBE 3-year certificate": ("/accounts", "NBE 3-year certificate"),  # the PC lists accounts in its sidebar
     "Gold at home": ("/accounts", "Gold at home"),
     "Family flat (my share)": ("/accounts", "Family flat (my share)"),
@@ -38,7 +47,10 @@ DETOURS = {
     "#Eid": ("?q=%23eid",),                                       # a note's tag: typed into the search
     "Investment planner": ("Planner",),
 }
-BUTTONS = {"All time": "All"}   # the period control on a phone says All (C04.2)
+# Sections without a tab-bar slot (phone overhaul 2026-10-22): their taps go through More.
+MOVED = {"Accounts", "Cash planning", "Investments", "Financial health", "Health", "Spending", "Currencies", "Settings"}
+# The phone's Choose period sheet (phone overhaul 2026-10-22) names the PC's period buttons in words.
+BUTTONS = {"Custom": "Apply", "YTD": "Year to date", "Monthly": "This month"}
 
 
 def _phone(app):
@@ -68,11 +80,15 @@ class PhoneBrowser(screens.Browser):
         return self._framed(super().open(path))
 
     def click(self, text: str):
-        try:
-            return self._framed(super().click(text))
-        except AssertionError:
-            if text not in DETOURS:
-                raise
+        wanted = " ".join(text.split()).casefold()
+        moved = text in MOVED and self.page is not None and not any(
+            " ".join(link.text.split()).casefold() == wanted for link in self.page.links)
+        if not moved:  # a section moved to More is reached by its taps there, never by a look-alike link
+            try:
+                return self._framed(super().click(text))
+            except AssertionError:
+                if text not in DETOURS:
+                    raise
         self.detours[text] += 1
         for step in DETOURS[text]:
             if step.startswith("/"):
