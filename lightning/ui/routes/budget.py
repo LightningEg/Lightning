@@ -455,7 +455,6 @@ async def save_budget_settings(request: Request):
         c.settings.set("budget_manual_monthly_income", manual)
         c.settings.set("budget_one_off_exclusions", json.dumps(sorted(set(exclusions))))
         c.settings.set("budget_carryover_global", "1" if enabled else "0")
-        c.settings.set("budget_carryover_month", carry_month)
         tracked = set(c.budgets.amounts_for(carry_month))
         c.budgets.set_carryover(carry_month, {category_id: enabled for category_id in tracked})
         if request.headers.get("X-Requested-With") == "fetch":
