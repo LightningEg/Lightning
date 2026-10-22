@@ -11,6 +11,14 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-22 · Claude: Audit 4 rest. 2G3 held-for-others tagging posts through TransactionService; the ledger's owner is the one record
+  of custody. 7N "Due before payday" shows one total (still owed, in EGP) on card, stat and Safe to spend; free cash has one formula.
+- 2026-10-22 · Claude: 2I a new profile currency reaches the Currencies tab at once; 2K Integrity checks free cash against the ledger,
+  four checks that could not fail removed; 7O import review reads past categories once per statement; 2J one unlock backup a day.
+- 2026-10-22 · Claude: 9I writes and the reimbursements page stop growing with history (1,980 → 11 reads); migration
+  `0068_drop_duplicate_indexes.sql` drops five duplicate indexes. 9J the Overview, Budget and investment entry stop computing figures.
+- 2026-10-22 · Claude: 9K every module has an import layer, one row-id parser, one profile-open task list (month-end checkpoints on
+  unlock); 9L 17 unused functions, an always-on flag and two unread settings removed.
 - 2026-10-22 · Claude: 2G1–2 marking part of a line as held for someone keeps whole cents (`core/ledger.split_line_e6`), so undo
   works again; a voided sale no longer counts against the owner's next sale (`money_from_others.py`). 2G3 is left.
 - 2026-10-22 · Claude: 2H every successful write is its own undo action (except Undo, demo, sample and exports); money held for

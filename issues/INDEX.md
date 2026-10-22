@@ -35,7 +35,7 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | **2E** | [The engine accepts some bad input - dates before an account opened, crafted ids, rounding of plan amounts](2-safe-for-real-money/2E-engine-input-checks.md) | bug | transactions | ready |
 | **2F** | [On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone](2-safe-for-real-money/2F-android-downloads-files-links.md) | bug | android | ready |
 
-Done: 2H. Next free code: 2I.
+Done: 2G, 2H, 2I, 2J, 2K. Next free code: 2L.
 
 ## 3 Polish and Arabic
 
@@ -128,7 +128,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | 7L4 | ↳ Pair what belongs together | | | |
 | **7M** | [Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as overspending](7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) | owner | planning | new |
 
-Done: 7K. Next free code: 7N.
+Done: 7K, 7N, 7O. Next free code: 7P.
 
 ## 8 Website
 
@@ -161,4 +161,4 @@ Good ideas that wait until the milestones above are done.
 | **9K** | [Structure left - a 746-line profile_app, budgeting calls planning through bootstrap, three balance-floor checks](9-later/9K-layers-and-copies.md) | tech | architecture | ready |
 | **9L** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](9-later/9L-stale-code.md) | owner | architecture | ready |
 
-Done: 9G, 9H. Next free code: 9M.
+Done: 9G, 9H, 9I. Next free code: 9M.
