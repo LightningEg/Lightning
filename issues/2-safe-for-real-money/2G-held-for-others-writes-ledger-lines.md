@@ -11,7 +11,7 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 3](../../reports/audit-3.md) §2. Its two money bugs are fixed: 2G1 (a part-tag stored six-decimal
+Found by [Audit 4](../../reports/audit-4.md) §2. Its two money bugs are fixed: 2G1 (a part-tag stored six-decimal
 base amounts, so every later undo was refused) and 2G2 (a voided sale still counted against the owner's next sale). They are
 covered by `tests/test_money_from_others_flow.py`. What is left is the structure behind them.
 

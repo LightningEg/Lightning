@@ -8,7 +8,7 @@ by: Claude
 ---
 
 ## Report
-Found by [Audit 3](../../reports/audit-3.md) §4. This breaks the rule "Routes never compute figures" (Architecture › Three layers), and [7N](../7-planning-import-and-search/7N-bills-before-payday-two-formulas.md) is the wrong figure it has already caused.
+Found by [Audit 4](../../reports/audit-4.md) §4. This breaks the rule "Routes never compute figures" (Architecture › Three layers), and [7N](../7-planning-import-and-search/7N-bills-before-payday-two-formulas.md) is the wrong figure it has already caused.
 
 - **`dashboard`** (`ui/routes/dashboard.py:93`) builds eight figures no PC or phone template reads: `account_contributions`, `expense_groups` (about 40 lines), `investment_holdings`, `investment_flow`, `investment_share`, `range_label`, `change_label`, `change_reason`.
   - `investment_share` divides money added by money in; the registry's investing rate divides by net flow.

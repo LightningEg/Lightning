@@ -33,3 +33,31 @@ def test_every_tab_says_why_a_backwards_custom_range_shows_this_month(c, monkeyp
     for page in ("/", "/birdview/expenses", "/budget", "/investments"):
         html = client.get(f"{page}?period=custom&date_from=2026-08-01&date_to=2026-03-01").text
         assert "The end month must be the same as or after the start month." in html, page
+
+
+def test_sample_period_plan_matches_its_saved_month_and_group_rows(c, monkeypatch):
+    from lightning.samples import load_mohab_2026
+    from lightning.ui.routes import budget
+
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-04")
+    load_mohab_2026(c)
+    expected = c.budgets.plan_summary("2026-10")["planned"]
+    assert expected > Decimal("30000")
+    contexts = []
+    original = budget.render
+
+    def capture(request, template, **context):
+        contexts.append(context)
+        return original(request, template, **context)
+
+    monkeypatch.setattr(budget, "render", capture)
+    with TestClient(create_app(c)) as client:
+        for period in ("month", "ytd", "all"):
+            assert client.get(f"/budget?period={period}&month=2026-10").status_code == 200
+            shown = contexts[-1]
+            assert shown["period_budgeted"] == expected, period
+            assert sum(row["budgeted"] for row in shown["group_totals"].values()) == expected, period
+            assert shown["period_actual"] == Decimal("3410"), period
+            assert shown["period_left"] == expected - Decimal("3410"), period
+        assert client.get("/budget?period=custom&date_from=2026-10&date_to=2026-10").status_code == 200
+        assert abs(contexts[-1]["period_budgeted"] - expected * Decimal(4) / Decimal(31)) < Decimal("0.01")

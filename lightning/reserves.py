@@ -9,13 +9,19 @@ from decimal import Decimal
 from lightning.core.dates import now_iso, today
 from lightning.core.errors import ConflictError, NotFoundError, ValidationError
 from lightning.core.memo import request_cached
-from lightning.core.money import ZERO, from_e6, to_decimal, to_e6
+from lightning.core.money import ZERO, check_places, from_e6, to_decimal, to_e6
 from lightning.database.connection import Database
+from lightning.database.currencies import minor_units
+from lightning.database.settings import SettingsStore
 
 
 class CashReserveService:
     def __init__(self, db: Database):
         self.db = db
+
+    def _money(self, value, field: str) -> Decimal:
+        """A reserve is in the profile currency: refuse the extra decimals instead of keeping them (2E6)."""
+        return check_places(to_decimal(value, field), minor_units(SettingsStore(self.db).base_currency), field)
 
     @staticmethod
     def _id(value, field: str) -> int:
@@ -114,10 +120,10 @@ class CashReserveService:
     def set_emergency_fund(self, amount, salary_target=ZERO):
         """Set what the Emergency Fund holds now. Payments already taken from the fund are added back,
         so typing the figure every screen shows (set aside less what was used) changes nothing."""
-        value = to_decimal(amount, "allocated")
+        value = self._money(amount, "allocated")
         if value < ZERO:
             raise ValidationError("Reserved cash cannot be negative.", "allocated")
-        target = max(to_decimal(salary_target, "target"), value, Decimal("0.01"))
+        target = max(self._money(salary_target, "target"), value, Decimal("0.01"))
         active = self.db.one("SELECT id FROM cash_reserves WHERE kind='EMERGENCY' AND status='ACTIVE'")
         if not active and value == ZERO:
             raise ValidationError("Enter the amount you have reserved for emergencies.", "allocated")
@@ -144,7 +150,7 @@ class CashReserveService:
         if kind == "EMERGENCY":
             name = "Emergency Fund"
         recurrence = self._recurrence(recurrence, kind, due_date)
-        target_value = to_decimal(target, "target")
+        target_value = self._money(target, "target")
         if target_value <= ZERO:
             raise ValidationError("Enter a target greater than zero.", "target")
         day = self._date(due_date) if due_date else None
@@ -177,7 +183,7 @@ class CashReserveService:
         name = " ".join((name or "").split())
         if not name:
             raise ValidationError("Enter a name for this reserve.", "name")
-        target_value = to_decimal(target, "target")
+        target_value = self._money(target, "target")
         if target_value <= ZERO:
             raise ValidationError("Enter a target greater than zero.", "target")
         day = self._date(due_date) if due_date else None
@@ -198,7 +204,7 @@ class CashReserveService:
         reserve = self.get(reserve_id)
         if reserve["status"] != "ACTIVE":
             raise ValidationError("Reopen this reserve before changing its assigned cash.")
-        value = to_decimal(amount, "allocated")
+        value = self._money(amount, "allocated")
         if value < ZERO:
             raise ValidationError("Assigned cash cannot be negative.", "allocated")
         linked = int(self.db.scalar(
@@ -225,7 +231,7 @@ class CashReserveService:
         reserve = self.get(reserve_id)
         if reserve["status"] != "ACTIVE":
             raise ValidationError("Choose an active reserve.")
-        value = to_decimal(amount, "amount")
+        value = self._money(amount, "amount")
         if value <= ZERO:
             raise ValidationError("Enter an amount greater than zero.", "amount")
         txn = self.db.one("SELECT id,status,type,description FROM transactions WHERE id=?", (transaction_id,))

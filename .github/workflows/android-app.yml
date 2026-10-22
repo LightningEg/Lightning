@@ -14,6 +14,16 @@ on:
         description: Called for the matched test builds, so the APK must carry the test key
         type: boolean
         default: false
+    # GitHub requires caller mappings even when values exist only in the signing environment.
+    secrets:
+      ANDROID_KEYSTORE_BASE64:
+        required: true
+      ANDROID_KEYSTORE_PASSWORD:
+        required: true
+      ANDROID_KEY_ALIAS:
+        required: true
+      ANDROID_KEY_PASSWORD:
+        required: true
 
 permissions:
   contents: read
@@ -90,7 +100,7 @@ jobs:
     name: Sign and check the phone app
     environment: android-signing
     # Defense in depth: only sign from main or owner-controlled release tags.
-    # Repository secrets remain accessible to other workflows until moved out.
+    # Values exist only in this environment; the caller declares the four names for resolution.
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     needs: apk
     runs-on: ubuntu-24.04

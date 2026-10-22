@@ -197,15 +197,12 @@ def _years_of_history(c, years):
 # in one read; reserve suggestions check the amount first): the pages then ran 80 to 550, and each
 # budget is about 1.3 times that.
 PAGE_READ_BUDGET = {
-    # "/" 640 -> 750, "/plan" 340 -> 370, "/investments" 235 -> 260 (2026-10-13): the sample gained a dollar brokerage
-    # with a Nasdaq ETF, and each account and holding is read once per figure (a foreign one also reads its rate).
-    # "/" 790 -> 900 (2026-10-21): the sample gained a gam'eya, a flat and a dollar account; every account is read once
-    # per figure and date, so the page grows with the account count, not with repeats.
-    # 3Y (2026-10-21): a read no longer opens an empty write transaction (which emptied this cache) and the budget's
-    # month view, plan summary, income average and cash flow are cached: "/" 817 -> 507, "/plan" 536 -> 274,
-    # "/investments" 310 -> 177. Budgets reset to about 1.3 times the new counts.
-    "/": 660, "/accounts/1": 140, "/transactions": 130, "/budget?period=month": 140,
-    "/budget?period=all": 430, "/plan": 360, "/investments": 230, "/birdview/expenses?period=all": 190,
+    # 3X (2026-10-21): batch account positions and valuation inputs; no-op bill matching preserves the request cache.
+    "/": 450,  # three years of history; tools/perf_check.py keeps the sample's 400-query limit
+    # 3AC (2026-10-22): the budget's month view, plan summary, income average and cash flow are cached; Budget for
+    # the month 92 reads, for all months 119 (was 334), Expense analysis 139.
+    "/accounts/1": 120, "/transactions": 110, "/budget?period=month": 120,
+    "/budget?period=all": 160, "/plan": 250, "/investments": 175, "/birdview/expenses?period=all": 180,
 }
 
 
@@ -271,7 +268,7 @@ def test_a_register_page_reads_only_its_rows_and_matches_the_full_register(c, mo
 
 
 def test_a_page_view_with_nothing_to_settle_writes_nothing(c, monkeypatch):
-    """3Y: matching payments on a read used to open an empty write transaction, which emptied the request cache."""
+    """3AC: matching payments on a read used to open an empty write transaction, which emptied the request cache."""
     from fastapi.testclient import TestClient
     import lightning.ui.web as web
     from lightning.samples import load_mohab_2026

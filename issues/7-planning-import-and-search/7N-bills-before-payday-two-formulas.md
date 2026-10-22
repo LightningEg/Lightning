@@ -12,7 +12,7 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 3](../../reports/audit-3.md) §4. Severity: medium (a wrong figure on screen).
+Found by [Audit 4](../../reports/audit-4.md) §4. Severity: medium (a wrong figure on screen).
 
 1. **Payments before next income.**
    - The card and its stat (`ui/kpis.py:229`, `ui/visuals.py:535`) add up `p.amount`: the full amount, in the bill's own currency.

@@ -2,7 +2,7 @@
 
 
 class Command:
-    def __init__(self, call, args, *, target=None, creates=None, adapt=None, encode=None, decode=None, prepare=None):
+    def __init__(self, call, args, *, target=None, targets=None, creates=None, adapt=None, encode=None, decode=None, prepare=None):
         # call: "service.method" or a function(container, **args); args: name -> spec; target: (table, arg) of the
         # row an existing-record command changes; creates: table of a new row;
         # adapt: optional function reshaping mapped arguments for the service.
@@ -12,6 +12,8 @@ class Command:
         # recompute (a preview token made of that device's local ids).
         self.call, self.args, self.target, self.creates, self.adapt, self.encode, self.decode = call, args, target, creates, adapt, encode, decode
         self.prepare = prepare
+        # targets: (table, arg) of a selection (a list of UUIDs) a bulk command changes; the rows together are its base.
+        self.targets = targets
 
 
 TEXT, LONG, DATE, MONTH, AMOUNT, RATE, INT, FLAG = "text", "long", "date", "month", "amount", "rate", "int", "flag"

@@ -209,3 +209,18 @@ test('a successor publishes a fresh initial transport wrap for its new generatio
   assert.equal(response.status,200);
   assert.equal((await response.json()).update,key_update);
 });
+test('each profile has a monthly sync allowance; registry calls keep their own', async () => {
+  const shared = mf;
+  mf = new Miniflare({modules:true, scriptPath:new URL('./worker.mjs', import.meta.url).pathname,
+    compatibilityDate:'2026-07-30', durableObjects:{PROFILES:{className:'ProfileMailbox', useSQLite:true}},
+    bindings:{PROVISIONING_TOKEN:token, DEPLOYMENT_POLICY:'free-only', MONTHLY_REQUESTS:'3'}});
+  try {
+    const lab = await profile();
+    for (let i = 0; i < 3; i++) assert.equal((await request(lab,lab.pc,'/receive')).status,200);
+    assert.equal((await request(lab,lab.pc,'/receive')).status,429);
+    assert.equal((await request(lab,lab.home,'/receive')).status,429); // Per profile, not per device.
+    assert.equal((await request(lab,lab.pc,'/authority')).status,200);
+    const other = await profile();
+    assert.equal((await request(other,other.pc,'/receive')).status,200);
+  } finally { await mf.dispose(); mf = shared; }
+});

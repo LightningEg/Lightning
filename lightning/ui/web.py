@@ -353,7 +353,7 @@ def _render_page(request, name, status_code, c, total, owned_total, groups, cont
     return response
 
 
-# The browser half of the Arabic table, served once as a cached script instead of inside every Arabic page (3Y).
+# The browser half of the Arabic table, served once as a cached script instead of inside every Arabic page (3AC).
 _ARABIC_UI_JS = ("window.LIGHTNING_UI=" + json.dumps(BROWSER_UI, ensure_ascii=False, sort_keys=True) + ";").encode("utf-8")
 ARABIC_UI_SRC = "/static/ui-ar.js?v=" + hashlib.sha256(_ARABIC_UI_JS).hexdigest()[:12]
 

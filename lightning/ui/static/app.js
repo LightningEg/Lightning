@@ -747,14 +747,30 @@ document.addEventListener("submit", (event) => {
 
 // Select rows, use the right-click menu, and soft-delete one or many transactions.
 const phoneMerge = document.getElementById("phone-merge-selected");
-if (phoneMerge) {
-  const boxes = [...document.querySelectorAll('.transaction-select[form="phone-bulk"]')];
+const phoneBulk = document.getElementById("phone-bulk");
+if (phoneBulk) {
+  const boxes = [...document.querySelectorAll('.transaction-select[form="phone-bulk"]:not(:disabled)')];
+  const all = document.getElementById("phone-select-visible");
   const updateMerge = () => {
     const ids = [...new Set(boxes.filter((box) => box.checked && !box.disabled).map((box) => box.value))];
-    phoneMerge.hidden = ids.length !== 2;
-    if (ids.length === 2) phoneMerge.href = `/transactions/merge?keep=${encodeURIComponent(ids[0])}&drop=${encodeURIComponent(ids[1])}`;
+    if (phoneMerge) {
+      phoneMerge.hidden = ids.length !== 2;
+      if (ids.length === 2) phoneMerge.href = `/transactions/merge?keep=${encodeURIComponent(ids[0])}&drop=${encodeURIComponent(ids[1])}`;
+    }
+    phoneBulk.querySelectorAll("button").forEach((button) => { button.disabled = ids.length === 0; });
+    if (all) {
+      all.checked = boxes.length > 0 && boxes.every((box) => box.checked);
+      all.indeterminate = ids.length > 0 && !all.checked;
+    }
   };
-  boxes.forEach((box) => box.addEventListener("change", updateMerge));
+  boxes.forEach((box) => box.addEventListener("change", () => {
+    boxes.filter((item) => item.value === box.value).forEach((item) => { item.checked = box.checked; });
+    updateMerge();
+  }));
+  all?.addEventListener("change", () => { boxes.forEach((box) => { box.checked = all.checked; }); updateMerge(); });
+  phoneBulk.addEventListener("submit", (event) => {
+    if (!boxes.some((box) => box.checked)) event.preventDefault();
+  });
   updateMerge();
 }
 const ledger = document.querySelector(".ledger");
@@ -767,21 +783,23 @@ if (ledger) {
   const byId = new Map();
   boxes.forEach((box) => { if (!byId.has(box.value)) byId.set(box.value, []); byId.get(box.value).push(box); });
   const editRow = document.querySelector("tr.editing[data-txn]");
-  const selKey = (() => { const q = new URLSearchParams(location.search); ["edit", "acct", "pick"].forEach((k) => q.delete(k)); q.sort(); return `lightning-selection:${location.pathname}?${q}`; })();
+  const selKey = (() => { const q = new URLSearchParams(location.search); ["edit", "acct", "pick", "msg"].forEach((k) => q.delete(k)); q.sort(); return `lightning-selection:${location.pathname}?${q}`; })();
   const readSel = () => { try { const ids = JSON.parse(sessionStorage.getItem(selKey) || "[]"); return Array.isArray(ids) ? ids.filter((id) => typeof id === "string" && byId.has(id)) : []; } catch (e) { return []; } };
   const writeSel = (ids) => { try { ids.length ? sessionStorage.setItem(selKey, JSON.stringify(ids)) : sessionStorage.removeItem(selKey); } catch (e) {} };
-  const selected = new Set(editRow ? readSel() : []);
+  const selected = new Set(readSel());
   boxes.forEach((box) => { if (box.checked) selected.add(box.value); });
   const selectedIds = () => [...selected];
-  editRow?.querySelector("[data-cancel]")?.addEventListener("click", () => writeSel([]));
   const syncSelection = () => {
     const ids = selectedIds();
     boxes.forEach((box) => { box.checked = selected.has(box.value); });
+    boxes.forEach((box) => box.closest("tr")?.setAttribute("aria-selected", String(box.checked)));
     writeSel(ids);
     if (tools) tools.hidden = ids.length === 0;
     const merge = document.getElementById("merge-selected");
     if (merge) merge.hidden = ids.length !== 2;
     if (count) count.textContent = t("{count} selected", {count: ids.length});
+    const editSelected = document.getElementById("edit-selected");
+    if (editSelected) editSelected.disabled = !boxes.some((box) => selected.has(box.value) && ["IN", "OUT"].includes(box.dataset.type));
     if (selectAll) {
       selectAll.checked = byId.size > 0 && selected.size === byId.size;
       selectAll.indeterminate = ids.length > 0 && !selectAll.checked;
@@ -807,6 +825,18 @@ if (ledger) {
     ids.forEach((id) => { const input = document.createElement("input"); input.type = "hidden"; input.name = "txn_ids"; input.value = id; form.append(input); });
     document.body.append(form); form.submit();
   };
+  let anchor = null;
+  ledger.addEventListener("click", (event) => {
+    const box = event.target;
+    if (!box.matches(".transaction-select:not(:disabled)")) return;
+    if (event.shiftKey && anchor && boxes.includes(anchor)) {
+      const first = boxes.indexOf(anchor), last = boxes.indexOf(box);
+      boxes.slice(Math.min(first, last), Math.max(first, last) + 1).forEach((item) => {
+        box.checked ? selected.add(item.value) : selected.delete(item.value);
+      });
+    }
+    anchor = box;
+  });
   ledger.addEventListener("change", (event) => {
     const box = event.target;
     if (!box.matches(".transaction-select:not(:disabled)")) return;
@@ -817,25 +847,32 @@ if (ledger) {
   const editForm = document.getElementById("f-edit");
   if (editForm && editRow) {
     let decided = false;
+    let asking = false;
     editForm.addEventListener("submit", (event) => {
-      if (decided) { writeSel([]); return; }
+      if (decided) return;
       const ticked = selectedIds();
-      const ids = [...new Set([...ticked, editRow.dataset.txn])];
-      if (!ticked.length || ids.length < 2) { writeSel([]); return; }
+      const ids = ticked;
+      const sourceBox = editRow.querySelector(".transaction-select");
+      if (!selected.has(editRow.dataset.txn) || ids.length < 2 || !["IN", "OUT"].includes(sourceBox?.dataset.type)) return;
       let original = {};
       try { original = JSON.parse(editRow.dataset.original || "{}"); } catch (e) {}
       const value = (name) => (editForm.elements[name]?.value ?? "").trim();
       const changed = ["date", "counterparty", "category", "notes", "whom"].filter((name) => value(name) !== String(original[name] ?? "").trim());
-      if (!changed.length) { writeSel([]); return; }
+      if (value("category_choice") && value("category_choice") !== String(original.category_choice ?? "") && !changed.includes("category")) changed.push("category");
+      if (!changed.length) return;
       event.preventDefault(); event.stopImmediatePropagation();
+      if (asking) return;
+      asking = true;
       const submitter = event.submitter;
-      const amountChanged = value("amount") !== String(original.amount ?? "").trim();
+      const singleRowChanged = value("amount") !== String(original.amount ?? "").trim()
+        || (editForm.elements.account_id && value("account_id") !== String(original.account_id ?? ""));
       window.askChoice({
         title: t("Change {count} selected rows?", {count: ids.length}),
-        message: amountChanged ? t("The amount changes on this row only.") : "",
-        choices: [{ label: t("Only this row"), value: "one" }, { label: t("All {count} rows", {count: ids.length}), value: "all", primary: true }],
+        message: singleRowChanged ? t("Save amount or account changes on this row first. These cannot be changed in bulk.") : "",
+        choices: [{ label: t("Only this row"), value: "one", primary: Boolean(singleRowChanged) }, ...(!singleRowChanged ? [{ label: t("All {count} rows", {count: ids.length}), value: "all", primary: true }] : []), { label: t("Cancel"), value: "cancel" }],
       }).then((choice) => {
-        if (choice === "one") { decided = true; writeSel([]); editForm.requestSubmit(submitter); return; }
+        asking = false;
+        if (choice === "one") { decided = true; editForm.requestSubmit(submitter || undefined); return; }
         if (choice !== "all") return;
         const form = document.createElement("form"); form.method = "post"; form.action = "/transactions/bulk-edit";
         const add = (name, val) => { const input = document.createElement("input"); input.type = "hidden"; input.name = name; input.value = val; form.append(input); };
@@ -860,6 +897,13 @@ if (ledger) {
     syncSelection();
   });
   document.getElementById("delete-selected")?.addEventListener("click", () => deleteTransactions(selectedIds()));
+  document.getElementById("clear-selected")?.addEventListener("click", () => { selected.clear(); syncSelection(); });
+  document.getElementById("edit-selected")?.addEventListener("click", () => {
+    const box = boxes.find((item) => selected.has(item.value) && ["IN", "OUT"].includes(item.dataset.type));
+    const row = box?.closest("tr");
+    if (row?.dataset.href) location.href = row.dataset.href;
+    else if (row === editRow) editForm?.elements.notes?.focus();
+  });
   document.getElementById("merge-selected")?.addEventListener("click", () => {
     const ids = selectedIds();
     if (ids.length === 2) location.href = `/transactions/merge?keep=${encodeURIComponent(ids[0])}&drop=${encodeURIComponent(ids[1])}`;
@@ -919,7 +963,7 @@ if (ledger) {
   menu?.querySelector("[data-context-edit]").addEventListener("click", () => { if (menu.dataset.href) location.href = menu.dataset.href; });
   menu?.querySelector("[data-context-details]").addEventListener("click", () => { if (menu.dataset.txn) location.href = `/transactions/${menu.dataset.txn}`; });
   menu?.querySelector("[data-context-save]").addEventListener("click", () => { menu.hidden = true; document.getElementById("f-edit")?.requestSubmit(); });
-  menu?.querySelector("[data-context-cancel]").addEventListener("click", () => { if (menu.dataset.cancel) { writeSel([]); location.href = menu.dataset.cancel; } });
+  menu?.querySelector("[data-context-cancel]").addEventListener("click", () => { if (menu.dataset.cancel) location.href = menu.dataset.cancel; });
   menu?.querySelector("[data-context-delete]").addEventListener("click", () => {
     menu.hidden = true;
     if (menu.dataset.editing) deleteTransactions([menu.dataset.txn], menu.dataset.cancel);
@@ -1025,7 +1069,6 @@ document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
   const cancel = document.querySelector("[data-cancel]");
   if (cancel && e.target.closest("tr.editing")) {
-    try { const q = new URLSearchParams(location.search); ["edit", "acct", "pick"].forEach((k) => q.delete(k)); sessionStorage.removeItem(`lightning-selection:${location.pathname}?${q}`); } catch (err) {}
     location.href = cancel.href;
   }
 });

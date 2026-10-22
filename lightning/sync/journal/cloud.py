@@ -40,6 +40,10 @@ class ReplyPending(CloudUnavailable):
     """The carrier works; the home has not answered yet. This is waiting, not failure."""
 
 
+class HomeRefused(CloudUnavailable):
+    """The home answered that it cannot take this request now (frozen, full); retry later."""
+
+
 class MailboxClient:
     def __init__(self, base_url, device):
         parsed = urlsplit(base_url)
@@ -177,6 +181,8 @@ class MailboxPeer:
                         except MembershipUpdateRequired:
                             self.db.execute("UPDATE journal_mail_in SET processed=1 WHERE id=?",(row["id"],))
                             continue
+                        except JournalError as error:
+                            answer = self.channel.refusal(wire, error)
                         self.enqueue(answer)
                     else:
                         try:

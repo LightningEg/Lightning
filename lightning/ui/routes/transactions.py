@@ -489,7 +489,7 @@ async def bulk_edit_transactions(request: Request):
                 changes[key] = str(form.get(key, "")).strip()
         if "counterparty" in form:
             name = str(form.get("counterparty", "")).strip()
-            if name.casefold() in {a.label.casefold() for a in c.accounts.list(active_only=True)}:
+            if c.accounts.find_by_text(name) is not None:
                 raise ValidationError("Turn a row into a transfer one row at a time.", "counterparty")
             changes["counterparty"] = name
         if "category" in form or "category_choice" in form:

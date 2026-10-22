@@ -1,145 +1,50 @@
-# Audit 3: is the backend engine efficient and streamlined?
+# Audit 3: is the edit journal (multi-device sync) solid?
 
-2026-10-21 · Claude · app 1.3.0, commit `6e1c043` (main) · temporary databases only (Mohab's 2026 sample, plus synthetic history), prices offline.
+2026-10-21 · Claude · main `6e1c043` · encrypted dummy profiles, in-process carrier, no live Cloudflare.
 
-The owner asked four things: is the backend efficient, are there loose ends, is any function stale or any structure causing
-problems, and is the architecture streamlined. Three reviews ran in parallel: the ledger engine, the read and plan side, and
-runtime, workflows and imports. Every finding below was reproduced or traced in the code before filing; the high ones were rerun
-a second time. It builds on [Audit 2](audit-2.md) (conversion rates and eight dead helpers, both fixed) and does not repeat it.
-Each finding is now an item in [the plan](../issues/INDEX.md); this report is the summary and the evidence.
+The owner asked whether the new multi-device sync holds up. This covers the edit journal ([4A](../issues/4-edit-journal-and-devices/4A-edit-journal.md)):
+`lightning/sync/journal/`, the device runtime and `cloudflare/journal/worker.mjs`. The design was read against its guarantees G1–G8, the code was read
+on the money path, and each suspected gap was run against real encrypted journals. Every finding was item 4C; all are fixed (see *Fixed* below), each with a test in `tests/test_journal_audit3.py`.
 
 ## Verdict
 
-**The foundation is right; the waste and the risk are in copies.** The layers hold (all four import contracts pass), only
-`TransactionService` posts through `validate_posting`, money is stored as integers, every rate goes through `fx.rate_for`,
-the request cache is safe, the service graph is built once per profile open, and the full suite passes (about 2,190 tests,
-none failing). What is not streamlined:
+**The skeleton is solid. Conflict detection on the screens' path is not.** Receipts, ordering, signatures, the hash chain, durable outboxes and crash
+recovery hold. All 371 journal and sync tests pass. But a stale edit from a second device can silently overwrite a payment's amount. Replay cannot
+tell when a replica has drifted. **Not ready for real money** until 4C1–4C4 were fixed; they now are.
 
-| Question | Answer | Items |
-|---|---|---|
-| Efficient? | **No, mainly because of one small bug.** Reading today's position opens an empty write transaction. That empties the request cache, so the main pages run 37–47% more queries than they need. | 3Y, 3X, 7O, 9I |
-| Loose ends? | **Yes: two money bugs in held-for-others, and Undo can reverse the wrong action.** | 2G, 2H, 2I |
-| Stale functions? | **About 25 unused or test-only functions, and two settings written but never read.** | 9L |
-| Structures that cause problems? | **The same fact kept in two to six places.** One of these copies already shows a wrong figure on screen (7N). Routes still compute figures, and 18 modules are outside the layer contract. | 7N, 2K, 9J, 9K |
+## Findings
 
-## 1 Efficiency
+| Step | Severity | What happens | Evidence |
+|---|---|---|---|
+| 4C1 | High | **A stale amount edit overwrites the newer one, with no review.** A command's precondition is the hash of the `transactions` row only. Amount, account and category live in `ledger_entries`, and `updated_at` is left out of the hash. The home changes −20 to −30. The PC, which saw −20, saves −40. It is accepted and the −30 is lost. This breaks G4, on the path every app screen uses. | `test_4c1_…` |
+| 4C2 | High | **Replay cannot detect drift.** Home and replica both update `journal_fp` from the effect's rows. The replica never rehashes what it actually wrote, so the fingerprint check after each commit always passes. A replica changed outside replay keeps accepting commits; only a snapshot repair runs the full check (`fingerprint(full=True)`). §4 promises a check "at checkpoints and after catch-up". | `test_4c2_…` |
+| 4C3 | Medium | **Two conflict models on one transaction.** The journal register keeps field groups in `journal_records`. Commands change the ledger without updating them. A later register edit, even to notes only, merges the stale groups and puts the old amount back (−99 becomes −10 again). | `test_4c3_…` |
+| 4C4 | Medium | **One refused mailbox request stalls sync.** If the home refuses a request (frozen during a move, staging full, a storage error), `pump` marks it refused and sends no reply. The device resends the same bytes under the same ID. The home's `INSERT OR IGNORE` drops them. In the test, the edit was still pending after 30 rounds; it only clears once the device's payload changes. | `test_4c4_…` |
+| 4C5 | Medium | **Bulk actions carry no precondition.** `delete_many`, `set_category` and `bulk_update` run without a base, so the last selection wins over a concurrent edit. The code comment says so, but it breaks G4. Shown by hand; no test yet. | Probe |
+| 4C6 | Low | **The worker reads too much per call.** `receive` lists up to 8,192 full mail values to return 20. The alarm, every 5 minutes while devices are active, lists every mail value. A full mailbox (128 MiB) can go over the Worker's memory and the free plan's row reads. Found by reading, not run on Cloudflare. | Reading |
 
-**Page reads.** `SELECT` statements per page on Mohab's sample, with identical HTML in every column:
+Also by reading, low: if recording a `home-error` review itself fails (`_review_token` → `matches`), the exception leaves `process` and blocks every
+origin, not just the one with the bad proposal (`home.py`, `process`).
 
-| Page | Now | Without the empty write transaction (3Y) | Plus one read per date for all accounts (3X prototype) |
-|---|---:|---:|---:|
-| Overview `/` | 705 | 445 (−37%) | 353 (−50%) |
-| Cash planning `/plan` | 480 | 263 (−45%) | 199 (−59%) |
-| Investments `/investments` | 290 | 155 (−47%) | — |
-| Financial health | 233 | 233 | 176 (−24%) |
-| Budget | 128 | 128 | — |
+## Fixed (2026-10-21, owner asked)
 
-- **The empty write transaction, 3Y.** `PositionService._at` (`planning/position.py:348`) calls `match_payments` on every read of today. It always opens `BEGIN IMMEDIATE` (`planning/service.py:245`), even with nothing to settle. `undo.finish` then runs its `UPDATE`/`DELETE` housekeeping, `total_changes` moves, and `core/memo.py:37` empties the cache. The Overview does this four times, and every page view takes the write lock. The middleware already matches payments after each write (`ui/web.py:429`), so the page-time calls add nothing.
-- **Per account, per date, 3X.** The call chain is `visuals.net_worth_trend` (10–12 month ends) → `PositionService._at` → `class_values`/`owned_holdings` → `cash_total_for_account`, at 2 SQL per cash holding. On top of that, `reporting.owned_brokerage_cash` costs 3 SQL per brokerage. The same loop is copied in `dated_cash.py:99`, `funding.py:64`, `foreign_currency_accounts` and `_balance_and_owned`. A bulk read already exists (`MoneyFromOthersService.totals_by_account`).
-- **Repeated reads with no cache, 3Y.** Calls per Overview against distinct arguments: `BudgetService.month_view` 19/5, `cash_flow` 28/10, `CategoryService.get_by_code` 41/20, `PlanningService.items` 86/6. `own_liquidation_factors` and `certificate_for_asset` run once per date, though neither depends on it.
-- **Arabic page weight, 3Y.** Every Arabic page embeds the whole 2,694-entry browser translation table (`ui/web.py:362`): the Overview is 48 KB in English and 500 KB in Arabic.
-- **The test budget is rising, not falling.** The Overview's `PAGE_READ_BUDGET` went 640 → 750 → 900 in three weeks (`tests/test_reporting_performance.py:199`). Each rise was the account-count growth above.
+- **4C1:** a command's precondition hashes the record and every row it owns (`ON DELETE CASCADE` children), so the stale −40 now waits for review.
+- **4C2:** a replica reads each applied row back, and after every catch-up recomputes the whole copy (`store.verify`); drift asks for a snapshot.
+- **4C3:** a command that changes a transaction removes it from the register's field groups; the register refuses to edit it ("changed on another screen").
+- **4C4:** the home answers a request it cannot take with `refused`; the device retries with a fresh request.
+- **4C5:** bulk commands carry one hash over the selected rows.
+- **4C6:** the worker stores each wire apart and lists 64 small entries; each profile also gets a monthly allowance (see Architecture › encrypted profiles).
+- The `home-error` review no longer stops other origins when its comparison fails.
 
-**Writes and imports.**
+## What holds
 
-| Path | Cost | Item |
-|---|---|---|
-| Bank-import preview, 400 rows | 2.94 s, of which 1.78 s is `usual_categories()`: a full-history window query, run once per row (`bank_imports.py:510`) | 7O |
-| Reimbursements page | 7 queries per posted expense in history: 1,846 statements for 265 expenses (`reimbursements.py:116`) | 9I |
-| One manual expense on an account with 5,000 earlier lines | 20 ms against 2.7 ms on the sample. `_refuse_cash_below_zero` (`transactions/service.py:472`) walks the account's whole cash history in Python | 9I |
-| Adding a counterparty with 5,000 unlinked trades | 32.6 ms against 5.9 ms. `_link_historical` rescans buys and sells that are never linked by design | 9I |
-| Unlocking a profile | 0.14 s at 1 MB, 1.2 s at 4.4 MB, 6.2 s at 19 MB (Argon2 not counted). Each unlock takes a full backup and runs the integrity check three times | 2J |
+- **At most once (G2):** a receipt is checked by hash. A reused identity with different content is refused, inherited receipts included.
+- **Order and review (G6):** strict per-origin order with a staging window. A review blocks only its own origin. The review lane is idempotent and checks a token.
+- **Chain (G3, G7):** commits are signed and hash-chained, the predecessor is checked before apply, and the scope is generation-bound. A proposal is authenticated before it is parsed.
+- **Durability (G1):** the outbox and counter commit in one FULL-sync transaction. A store whose counter disagrees with its outbox refuses to open. Crash tests cover every boundary.
+- **Mailbox:** requests are signed, with nonce and clock checks. Delivery is acknowledged only after a durable local receipt. Generation changes are compare-and-swap. Retirement records are never expired. Quotas are per sender and control capacity is reserved.
 
-## 2 Loose ends that touch money
+## Not built yet (so not audited)
 
-- **2G Held-for-others writes ledger lines itself.** `money_from_others.py:20-57` and `ownership_migration.py:60-80` update and insert into `ledger_entries` directly, outside `TransactionService`. Reproduced: marking 33.33 of a 100.01 USD line (rate 50.123457) as Dad's stores base amounts of 3342.234157 and 1670.615843. Undo on that transaction is then refused with "Line 1: amount_base has more than 2 decimal places".
-- **2G A voided sale still counts.** The custody check at `money_from_others.py:206` sums `investment_custody_events` without checking that the transaction is still posted. The next check, at line 213, does check. Reproduced: buy 10 for Dad, sell 10, void the sale. The ledger says Dad holds 10, but selling 5 is refused.
-- **2H Undo groups writes by a hand-kept list of URL roots** (`ui/web.py:411`). `POST /money-from-others` and `POST /birdview/settings` are missing from it. Undo after recording money for someone reverses the action before it. Automatic payment matching is also skipped after that write. Six roots on the list have no write route.
-- **2I The profile currency is copied into six services.** Both refresh functions (`bootstrap.py:115`, `sync/journal/areas/settings.py:21`) miss `reporting.fx_positions.base`. Reproduced: a new USD profile lists USD as a foreign currency until the app restarts.
-- **2K Four Integrity checks can never fail.** Each one rebuilds the figure from the very parts it then compares against (`integrity.py:89-92` and three more). Tests only check that the checks appear.
-
-## 3 Stale code
-
-Each name below was checked by searching `lightning/`, `tests/`, `tools/`, `android/`, the templates and the journal's
-command strings (`assets.remove_price`, for example, is live through the journal, so it is not listed).
-
-- **Unused:**
-  - `keynotes.lowest_point`, `next_payment`, `largest_part`, `sale_cost`, `cash_share`
-  - `visuals.flow_trend`, `spending_bars`, `portfolio_trend`
-  - `review.for_page`
-  - `MoneyFromOthersService.transaction_owner`
-  - `AccountService.get_by_code` and its repository method
-  - `budgeting/domain.used_pct`
-  - `investments/domain.unrealized_pct` and `variance_per_unit`
-  - `core/codes.SEGMENT_RE`
-- **Only tests call them:**
-  - `ReportingService.monthly_trend`, `bridge_for_month`, `foreign_currency_accounts`
-  - `TransactionService.set_transaction_owner`, `counterparty_suggestions`
-  - `reserves.allocation_at`, `Position.deposits_after_sale`
-  - `dashboard._owned_wealth_rows`, `migrator.pending_migrations`
-  - `conversion.rebuild_trade_rates`. Architecture calls it the repair path, but no screen or tool reaches it.
-- **Settings and flags:**
-  - `budget_carryover_month` is written (`ui/routes/budget.py:540`) and never read.
-  - `weekly_review_remaining` is read only by a test.
-  - `market_url` is set only by tests.
-  - `allow_foreign` is always on, but its message still says other currencies are "not built yet".
-- **Dead rows:** nothing writes `money_from_others` rows without a transaction any more. Five reads still look for them.
-- **Duplicate indexes:** five indexes repeat another (`ix_ledger_transaction`, `ix_price_asset_date` and three more). Each ledger line written updates seven indexes.
-
-## 4 Structure
-
-- **The same fact in several places, 7N, 2K, 9K.** A copy that drifts gives a wrong figure, and one already does:
-  - **Payments before next income, two formulas.** The Cash planning card (`ui/kpis.py:229`, `ui/visuals.py:535`) adds up each bill's full amount in its own currency. Safe to spend (`planning/forecast.py:297`) adds up what is still owed, in EGP. Adding one 20 USD subscription to Mohab gives 18,480 on the card and 19,492 in the breakdown.
-  - **Free cash, three formulas:** `Position.free_cash`, `reserves.cash_summary` and a fallback in `forecast.free_cash`.
-  - **Four checks that a balance never goes below zero:** `_validate_owner_balances`, `_refuse_cash_below_zero`, `_validate_owner_partition`, `lowest_running_quantity`.
-  - **Two kinds of money rounding:** half-even in `core/ledger._round2` and half-up in `core/money.quantize`. 10.01 × 50.5 posts 505.50 but quantizes to 505.51.
-  - **Four copies of the id check:** `reserves`, `reimbursements`, `planning/service`, `workflows/activity`.
-  - **Custody kept in two places:** the ledger's `owner_id` and `investment_custody_events`.
-- **Routes still compute figures, 9J.**
-  - The `dashboard` route builds eight figures that no PC or phone template reads. One of them, `investment_share`, is a second formula for the investing rate.
-  - Budget `_page` is 369 lines. It recomputes the category averages `BudgetService` already has, overwrites its own first loop, and calls the private `_owned_spending`.
-  - `register.create_investment_entry` is 171 lines and opens its own database transaction.
-  - Radon rates `register.page` at complexity 119, the highest in the code.
-- **Layers the linter cannot see, 9K.**
-  - 18 top-level modules and `lightning.sync` are in no layer: `bank_imports`, `money_from_others`, `reserves`, `zakat`, `integrity`, `fx` and others. A contract that places them all breaks only once (`sync/transport.py:550 → runtime.paths`), so adopting it is cheap.
-  - `bootstrap.py:193-207` wires callbacks so that budgeting calls planning, which is a higher layer.
-  - `bootstrap.validate_history` is 52 lines of ledger checking that call private `TransactionService` methods.
-  - `database/connection.py:169` imports `lightning.undo`.
-  - `runtime/app.py:profile_app` is a single 746-line function of nested routes.
-- **Two startup paths, 9K.** Legacy `main.py:100` always posts month-end checkpoints. A profile open posts them only when a price file fills. With no `market.zip`, a profile opened on 2026-12-05 posted 0 checkpoints where `process_due` posted 10.
-
-## Keep
-
-- The three layers and the single posting writer.
-- Integer money with `validate_posting` as the one gate.
-- `fx.rate_for` as the one rate lookup.
-- The figures registry and its tests.
-- The request cache: it switches off inside transactions, clears on writes and hands out copies.
-- Careful savepoint rollback.
-- Append-only migrations, with a backup before an upgrade.
-- The price thread only fetches; saving happens on the database's own thread.
-- A linear import confirm, at about 40 statements a row.
-
-Two parts are not defects: the older lend-and-hand-back sync runs in production while the edit journal runs in the lab, and
-[4A](../issues/4-edit-journal-and-devices/4A-edit-journal.md) already retires the old sync at the J6 cutover.
-
-## Order to fix
-
-1. **2G, 2H** (money and undo): small to medium, each with a test that reproduces it.
-2. **3Y**: small, and the largest speed gain. Then **3X**, after which the page budgets can come down.
-3. **7N, 2I, 2K**: small. The figure a person sees must have one formula.
-4. **7O, 2J**: small and medium, felt when importing and unlocking.
-5. **9I–9L**: cleanup, done when the code around them is next touched.
-
-## Owner decisions
-
-- **Legacy mode.** `python -m lightning` still opens a plaintext `data/lightning.db` with real-data paths: `fetch_if_due`, a browser-only settings branch and a legacy filename rule. Should it shrink to `--demo` and `--sample` only? Most tests use that plaintext path, which never checks that the database is used from its own thread (9K).
-- **Backups on unlock.** Should an automatic backup be taken at most once a day, keeping daily, weekly and monthly copies, instead of the newest 30 unlocks (2J)?
-
-## How this was run
-
-- **Reviews:** three read-only reviews (ledger; read and plan; runtime and imports).
-- **Scans:** an AST and identifier scan for unused definitions, `vulture`, `radon cc`, `pylint` duplicate-code, and `lint-imports`.
-- **Measurements:** SQL counted with SQLite's trace callback. Pages were fetched through FastAPI's `TestClient` on Mohab's sample (`LIGHTNING_TODAY=2026-10-02`). Every "without" figure monkeypatched only the named call and compared the HTML byte for byte.
-- **Limits:** timings are single runs on Linux with plaintext SQLite. Windows and SQLCipher will be slower, though the query counts carry over.
-- **Changes:** no code was changed.
+As 4A §10 says: J6d home automation, J6e upgrades and backups, receipt pruning, the J6f cutover, live free-plan deployment, Android Doze
+evidence and review of the two-of-three owner credential. The journal covers 125 of 149 POST routes.

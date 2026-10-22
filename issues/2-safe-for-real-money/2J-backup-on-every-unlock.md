@@ -8,7 +8,7 @@ by: Claude
 ---
 
 ## Report
-Found by [Audit 3](../../reports/audit-3.md) §1.
+Found by [Audit 4](../../reports/audit-4.md) §1.
 - `runtime/session.py:406` builds the profile with `backup_on_start=True`.
 - `_verify` (`session.py:477`) runs `integrity_check` and `cipher_integrity_check`. `export_snapshot` (`database/snapshot.py:98`) runs them again on the source, then on the copy.
 - Unlock cost, Argon2 excluded: 0.14 s at 1 MB, 1.2 s at 4.4 MB, 6.2 s at 19 MB.

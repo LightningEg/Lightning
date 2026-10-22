@@ -220,7 +220,7 @@
       {% if p.today %}<line class="pace-today" x1="{{ '%.2f'|format(p.today.x) }}" y1="0" x2="{{ '%.2f'|format(p.today.x) }}" y2="100" vector-effect="non-scaling-stroke"/>{% endif %}
     </svg>
     {% if p.today %}<span class="pace-mark is-actual" style="left:{{ '%.2f'|format(p.today.x) }}%;top:{{ '%.2f'|format(p.today.y) }}%"><b>{{ p.today.value|money }}</b></span>
-    <span class="pace-mark is-plan" style="left:{{ '%.2f'|format(p.today.x) }}%;top:{{ '%.2f'|format(p.today.pace_y) }}%"><small>{{ "Plan's pace"|tr(locale) }} {{ p.today.pace|money }}</small></span>{% endif %}
+    <span class="pace-mark is-plan" style="left:{{ '%.2f'|format(p.today.x) }}%;top:{{ '%.2f'|format(p.today.pace_y) }}%"><small style="display:inline-block;transform:translateY({{ '%.2f'|format(p.today.pace_label_offset) }}px)">{{ "Plan's pace"|tr(locale) }} {{ p.today.pace|money }}</small></span>{% endif %}
     <span class="pace-end is-plan" style="top:{{ '%.2f'|format(p.plan.label_y) }}%"><small>{{ "Plan"|tr(locale) }} {{ p.plan.value|money }}</small></span>
     {% if p.before_total is not none %}<span class="pace-end is-before" style="top:{{ '%.2f'|format(p.before_label_y) }}%"><small>{{ previous_label }} {{ p.before_total|money }}</small></span>{% endif %}
   </div>

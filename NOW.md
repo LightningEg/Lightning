@@ -4,7 +4,7 @@
 
 | Who | Work | Files | Since |
 |---|---|---|---|
-| Claude | Audit 3 rest: 2G3, 3X, 7N, 2I, 2K, 7O, 2J, 9I–9L. | engine, reports, routes | 2026-10-21 |
+| Claude | Audit 4 rest: 2G3, 7N, 2I, 2K, 7O, 2J, 9I–9L. | engine, reports, routes | 2026-10-21 |
 | Claude | 3W answer first: guideline 3.33 (both repos), then the six tabs. | `guideline/`, `lightning/ui/templates/{dashboard,budget,planning,investments,accounts,financial_health}*`, `lightning/ui/status.py`, `lightning/ui/static/style.css` | 2026-10-21 |
 | Claude | Journal: 7 review fixes, then J6 (owner asked 10-16). | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 | Codex | Journal J4–J6; guideline sync. | `lightning/runtime/journal*`, `lightning/sync/journal/`, `lightning/ui/journal.py`, `lightning/ui/journal_views/`, `lightning/ui/static/journal.js`, `tests/test_journal*`, `cloudflare/`, `../Lightning_website/guideline/` | 2026-10-16 |
@@ -13,13 +13,13 @@
 
 ## Messages
 
-- **To Codex, from Claude, 2026-10-21:** 8D set D07's demo port to 8766 in `coders.html`, both repos: pull before your guideline sync.
-- **To Codex, from Claude, 2026-10-21:** guideline 3.33 (3W) changes all four guideline copies in both repos: pull before your guideline sync.
+- **To Codex, from Claude, 2026-10-21:** owner had me fix 4C in journal files: pull first.
+- **To Codex, from Claude, 2026-10-21:** guideline 3.33 (3W) and 8D's D07 port 8766 change the guideline copies in both repos: pull before your guideline sync.
 - **To Codex, from Claude, 2026-10-21:** 2E3 (`claude/engine-input-checks`) refuses a manual entry that takes a wallet or bank below zero, journal replays included; it changed one line of your `tests/test_journal_chunks.py` (`many_payments` spent 1,830 from 1,000). Revert or adjust as you see fit.
 - **To Codex, from Claude, 2026-10-19:** owner asked for guideline 3.32 and Noto Sans Arabic in both repos (app #58, a site PR); it touches your `../Lightning_website/guideline/` claim and the site's `css/arabic.css`: pull both before your guideline sync.
 - **To Codex, from Claude, 2026-10-19:** owner asked me to land guideline Part D (`guideline/coders.html`) in both repos (app #31, site #23); it touches your `../Lightning_website/guideline/` claim: pull both before your guideline sync.
 - **To Codex, from Claude, 2026-10-16:** owner gave me the journal fixes and J6; hold journal edits until my claim clears.
-- **To all, from Claude, 2026-10-15:** a fix that changes a screen the website quotes means recapturing it (website README › App screenshots); Kept apart needs one.
+- **To all, from Claude, 2026-10-22:** a change to a screen the site quotes needs a recapture: `tools/site_shots.py`, then the site's `shots.json` and `tools/shots.py apply`.
 
 ## Next
 
@@ -33,5 +33,5 @@ The whole plan, by milestone and code, is `issues/INDEX.md`. In order:
 5. **3W Answer first** (Claude): guideline 3.33 and all six tabs built (PC and phone); left: Overview KPIs to A08, flows to Spending, holdings in five columns, site-recapture. **Read:** 3W *Steps*; A09.
 6. **3H Tab-by-tab review:** §13 milestone 1 and the trust milestone built; next, optional reminders and grouped confirmations, then analytics; trust step 2, weekly friction. **Read:** 3H §13–14.
 7. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
-8. **8B Website guideline copies:** fix on website `codex/sync-app-guidelines`. **Read:** 8B.
+8. **Website:** 8B on `codex/sync-app-guidelines`; 8F next (recaptured 10-21; 3AB blocks Budget); 8I owner. **Read:** 8B, 8F.
 9. **6B Europe/GCC shares**, **6D gold**, **6E institution logos**, **5I gam'eya and zakat follow-ups:** waiting as their items say. **Read:** each item.

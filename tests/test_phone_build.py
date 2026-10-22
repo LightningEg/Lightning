@@ -236,7 +236,10 @@ def test_the_workflows_offer_a_pair_only_from_one_run_and_never_sign_with_anothe
     assert 'if [ "$BUNDLE" = "true" ]; then' in sign and "exit 1" in sign  # no key, no APK for the bundle
     for secret in ("ANDROID_KEYSTORE_BASE64", "ANDROID_KEYSTORE_PASSWORD", "ANDROID_KEY_ALIAS", "ANDROID_KEY_PASSWORD"):
         assert f"secrets.{secret}" in sign
-        assert f"secrets.{secret}" not in phone_job and f"secrets.{secret}" not in app
+        assert f"{secret}: ${{{{ secrets.{secret} }}}}" in phone_job
+        assert app.count(f"secrets.{secret}") == 1  # only the explicit reusable-workflow mapping
+        assert f"{secret}:\n        required: true" in android.split("jobs:")[0]
+    assert "secrets: inherit" not in app  # unrelated repository secrets must not be passed
     sign_job = android[android.index("\n  sign:"):]
     assert "environment: android-signing" in sign_job.split("steps:")[0]
     assert "github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')" in sign_job.split("steps:")[0]

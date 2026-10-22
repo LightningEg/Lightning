@@ -4,7 +4,7 @@
     python android_test_key.py <empty folder>
 
 Needs Python 3 and the `cryptography` package (`pip install cryptography`); nothing else. The key never
-leaves this PC except as the two GitHub secrets you paste. The script writes three files into a new
+leaves this PC except as the GitHub environment secrets you paste. The script writes three files into a new
 folder and prints what to do with them:
 
 - ANDROID_TEST_KEYSTORE.txt           the key and its certificate (PKCS#12, base64): a secret
@@ -76,9 +76,11 @@ def main(argv: list[str]) -> int:
     fingerprint = write(folder)
     print(f"""Made the Lightning Test key in: {folder}
 
-1. On GitHub, open the Lightning repository: Settings > Secrets and variables > Actions > New repository secret.
-   Name ANDROID_TEST_KEYSTORE, value: everything in ANDROID_TEST_KEYSTORE.txt.
-   Name ANDROID_TEST_KEYSTORE_PASSWORD, value: everything in ANDROID_TEST_KEYSTORE_PASSWORD.txt.
+1. On GitHub, open LightningEg/Lightning: Settings > Environments > android-signing.
+   Add ANDROID_KEYSTORE_BASE64: everything in ANDROID_TEST_KEYSTORE.txt.
+   Add ANDROID_KEYSTORE_PASSWORD: everything in ANDROID_TEST_KEYSTORE_PASSWORD.txt.
+   Add ANDROID_KEY_ALIAS: {ALIAS}.
+   Add ANDROID_KEY_PASSWORD: the same password from ANDROID_TEST_KEYSTORE_PASSWORD.txt.
 2. Send this fingerprint to Claude or Codex to commit (it is public, not a secret):
    {fingerprint}
 3. Keep the folder safe. Never put it in the repository or send the two secret files to anyone.""")

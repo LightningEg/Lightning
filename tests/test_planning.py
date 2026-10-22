@@ -96,6 +96,22 @@ def test_loan_needs_payments_left_or_a_last_date(c):
 
 
 # ---------------------------------------------------------------- matching
+def test_checking_an_unpaid_bill_does_not_write_or_invalidate_report_cache(c, setup, monkeypatch):
+    from lightning.core.memo import request_cache
+
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-30")
+    accounts, cats = setup
+    c.planning.create(kind="BILL", name="Unpaid box", amount="400", frequency="MONTHLY",
+                      start_date="2026-09-12", account_id=str(accounts["cib"].id),
+                      category_id=str(cats["EXP.PERSONAL.FOOD"].id))
+    with request_cache(c.db):
+        before = c.reporting.net_worth("2026-09-30")
+        changes = c.db.conn.total_changes
+        assert c.planning.match_payments(date(2026, 9, 30)) == 0
+        assert c.db.conn.total_changes == changes
+        assert c.reporting.net_worth("2026-09-30") == before
+
+
 def test_a_posted_payment_settles_the_bill_and_voiding_it_reopens(c, setup, monkeypatch):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-30")
     accounts, cats = setup

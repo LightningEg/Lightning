@@ -11,14 +11,56 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-- 2026-10-21 · Claude: 2G1–2 marking part of a line as held for someone keeps whole cents (`core/ledger.split_line_e6`), so undo
+- 2026-10-22 · Claude: 2G1–2 marking part of a line as held for someone keeps whole cents (`core/ledger.split_line_e6`), so undo
   works again; a voided sale no longer counts against the owner's next sale (`money_from_others.py`). 2G3 is left.
-- 2026-10-21 · Claude: 2H every successful write is its own undo action (except Undo, demo, sample and exports); money held for
+- 2026-10-22 · Claude: 2H every successful write is its own undo action (except Undo, demo, sample and exports); money held for
   others and the old Settings page were missing, so Undo reversed the action before them (`ui/web.py`).
-- 2026-10-21 · Claude: 3Y pages keep their request cache: matching payments no longer opens an empty write, and four budget and
+- 2026-10-22 · Claude: 3AC pages keep their request cache: matching payments no longer opens an empty write, and four budget and
   cash-flow reads are cached (Overview 817 → 507 reads, Cash planning 536 → 274); the Arabic table loads once as `/static/ui-ar.js` (503 → 50 KB).
-- 2026-10-21 · Claude: Audit 3 backend engine (`reports/audit-3.md`): one empty write per page read costs 37–47% of reads; custody
-  lines, undo grouping and two formulas for one figure are wrong. Filed 2G–2K, 3Y, 7N, 7O, 9I–9L; 3X gained its call chains.
+- 2026-10-22 · Claude: Audit 4 backend engine (`reports/audit-4.md`, written as Audit 3): custody lines, undo grouping and two
+  formulas for one figure are wrong; pages redo work. Filed 2G–2K, 3AC, 7N, 7O, 9I–9L.
+- 2026-10-22 · Claude: guideline B09 copy: website theme is light by default, dark only when chosen (matches the website repo).
+- 2026-10-22 · Claude: 3AA: `tools/site_shots.py` dismisses Get set up, parks the pointer, lifts the phone screens off the + button, adds the a-kpis and a-sankey crops, shows Budget for the
+  month in progress and Expense analysis for August (a 14,200 holiday payment, spending up 21%); a plain run reproduces the live site screens pixel for pixel, English and Arabic (checked).
+- 2026-10-22 · Claude: 2E6 (rest): a plan or reserve amount with more decimals than its currency allows (350.555 EGP, 12.345) is refused, not rounded or kept.
+- 2026-10-22 · Claude: 2E6 (part): a crafted category direction says "Choose +, − or ±" instead of a 500, and a transaction id above 2^63 is "not found"
+  instead of an OverflowError 500. Dates before an account opened stay open: history before opening is allowed on purpose.
+- 2026-10-21 · Codex: 2D adds a publishing-only recovery for the verified v1.4.2 artifacts and uses LightningEg/Lightning-downloads after the repository transfer.
+  Fixed artifact IDs, digests, successful jobs and the pinned source/certificate are checked before the protected publisher uploads and reads back the same files; no rebuild or re-signing.
+
+- 2026-10-21 · Codex: Prepare v1.4.2 as the matched Windows and Android release, followed by the website download and archive refresh.
+
+## [1.4.2] — 2026-10-21
+
+- 2026-10-21 · Codex: 2D declares the four signing-secret names at the reusable workflow boundary, enabling the signing job to resolve its android-signing environment values.
+  The caller passes only those names; key values remain environment-only, Gradle never reads secrets, and the signed APK must match the pinned certificate. Earlier failed tags stay unchanged.
+
+## [1.4.1] — 2026-10-21
+
+- 2026-10-21 · Codex: 2D pins the new Android signing certificate generated and retained by the owner after the old key was lost.
+  Existing Lightning Test installations need an independent backup and reinstall; v1.4.0 was tagged but never published because signing secrets were unavailable.
+
+## [1.4.0] — 2026-10-21
+
+- 2026-10-21 · Codex: Release validation translates bundled price-file origins and source-cited help explicitly in Arabic, with a regression check that includes a bundled price file.
+  The purchase browser check waits for the saved loan row, since closing a phone sheet can leave its URL unchanged while saving.
+
+- 2026-10-21 · Codex: 3AB Budget YTD and All time count full saved monthly plans, excluding months before the plan; headlines and group rows agree, while Custom keeps prorated comparisons.
+  Mohab's October plan is 38,428, spent 3,410, left 35,018. The pace label clears its line and actual marker; English and Arabic Budget screens recaptured for the website.
+
+- 2026-10-21 · Codex: 3X batches account cash, custody and gold metadata; bill matching writes only when a payment can settle, preserving the request cache.
+  Sample Overview: 766 → 364 queries (109 → 119 ms); Cash planning: 541 → 207 (71 → 62 ms). Financial outputs remain identical; tab query budgets tightened.
+
+- 2026-10-21 · Claude: website recaptured from this app (3W site-recapture): net worth 910,304, safe to spend 112,288, nine accounts, new Overview rate crops; Budget screens kept old for 3AB; also filed 3Z, 3AA.
+- 2026-10-21 · Codex: 3Y register selection survives edits, cancellation and message redirects; adds Edit selected, Clear selection and Shift-click ranges, plus phone Select all.
+  Mass edits affect only selected rows and changed fields; amount/account edits stay on one row with an explicit choice. Browser checks cover both layouts, dialog closure and retries.
+- 2026-10-21 · Claude: 4C Audit 3 of the edit journal, fixed: stale command and bulk edits wait for review, replicas verify their rows after
+  catch-up, register cannot revert a command, a refused mailbox request is answered. Worker: wire stored apart, monthly allowance per profile.
+- 2026-10-21 · Claude: [8H] Site Guides become a map of four topics, each with a pillar page (Budget your salary, See where it goes,
+  Know what you own, Your data and devices); track-expenses merged into the expense tracker; one home per FAQ (site PR #47). 8E and 8H done; 8I asks the owner two checks.
+- 2026-10-21 · Claude: [8E, 8G] Site: one download wording, version 1.3.0 in structured data, PC shown behind the sync veil,
+  slim consent bar, Testing tab for testers only (`?testing`), Sample Profiles download (site PR #46). No comparisons.
+- 2026-10-21 · Claude: [8E–8H] The owner's website audit becomes plan items: quick fixes (8E), Home and Features show the app (8F), three owner calls (8G), and the Guides redesign brief (8H).
 - 2026-10-21 · Claude: For Geeks home greets with `$ welcome to lightning`, typed once with the caret, while the hero fades up;
   guideline D07 `.hello` and D08 (both repos). Reduced motion shows it still.
 - 2026-10-21 · Claude: 8D For Geeks audit: recounted stats (`tools/geeks_stats.py`), keys.py proof, steady Ink hero word, quiet terminal replay, balanced

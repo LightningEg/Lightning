@@ -242,7 +242,7 @@ class PlanningService:
                    for key, (item, payment, found) in possible.items()
                    if len(found) == 1 and len(transaction_to_payments.get(next(iter(found)), ())) == 1]
         if not settled:
-            return 0  # no write: an empty transaction would still empty the request cache (3Y)
+            return 0  # no write: an empty transaction would still empty the request cache (3X)
         count = 0
         with self.db.transaction():
             for _, item, payment, candidate in settled:
