@@ -1,5 +1,5 @@
 ---
-title: Promotion durability: ordinary Windows reboot drill and power-loss evidence remain
+title: Promotion durability: code and fault tests pass; the ordinary Windows reboot drill remains
 type: tech
 area: restore
 status: building
