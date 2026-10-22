@@ -4,6 +4,7 @@
 
 | Who | Work | Files | Since |
 |---|---|---|---|
+| Claude | Phone overhaul (owner PDF 10-22): frame, rows, period sheet, More, six tabs; guideline Part C both repos. | `lightning/ui/templates/phone/`, `lightning/ui/static/phone*.css`, `lightning/ui/templates/partials/{section_tabs,macros}.html`, `guideline/phone.html` | 2026-10-22 |
 | Claude | 3W answer first: guideline 3.33 (both repos), then the six tabs. | `guideline/`, `lightning/ui/templates/{dashboard,budget,planning,investments,accounts,financial_health}*`, `lightning/ui/status.py`, `lightning/ui/static/style.css` | 2026-10-21 |
 | Claude | Journal: 7 review fixes, then J6 (owner asked 10-16). | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 | Codex | Journal J4–J6; guideline sync. | `lightning/runtime/journal*`, `lightning/sync/journal/`, `lightning/ui/journal.py`, `lightning/ui/journal_views/`, `lightning/ui/static/journal.js`, `tests/test_journal*`, `cloudflare/`, `../Lightning_website/guideline/` | 2026-10-16 |
