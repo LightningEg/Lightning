@@ -30,13 +30,25 @@ class PendingOnHome(Exception):
 
 
 class JournalServices:
-    def __init__(self, device):
+    is_journal = True
+
+    @property
+    def history_is_home(self):
+        """Whether home-local history may be replayed in this session."""
+        return self._device.store.config.get("role") == "home"
+
+    def __init__(self, device, *, backup=None):
         self._device = device
+        self._backup = backup
         # Module-level workflow commands (a function `call`) are reached by their own screens, not through here.
         self._calls = {entry.call: name for name, entry in COMMANDS.items() if type(entry.call) is str}
 
     def __getattr__(self, name):
+        if name == "backup_now" and self._backup is not None:
+            return self._backup
         service = getattr(self._device.c, name)
+        if service is None:
+            return None
         if name in self._calls:  # A container-level action, e.g. set_profile_currency.
             return lambda *args, **kwargs: self._run(name, service, args, kwargs)
         if name == "db":
@@ -57,6 +69,19 @@ class JournalServices:
                 arguments.update(value)
             else:
                 arguments[name] = value
+        if call in {"budgets.save_month", "budgets.apply_fill"} and "amounts" in arguments:
+            # The app's budget workflow takes id-keyed dictionaries; the portable
+            # command carries category UUIDs in explicit rows.
+            amounts = arguments.pop("amounts") or {}
+            averages = arguments.pop("average_months", None) or {}
+            arguments["lines"] = [dict(category=category_id, amount=amount,
+                                        average_months=averages.get(category_id))
+                                  for category_id, amount in amounts.items()]
+        if call == "budgets.set_carryover" and "settings" in arguments:
+            arguments["lines"] = [dict(category=category_id, enabled=enabled)
+                                  for category_id, enabled in arguments.pop("settings").items()]
+        if call in {"account_flows.open_account", "account_flows.update_account"}:
+            arguments["opening_balance"] = self._device.c.account_flows.parse_opening(arguments["opening_balance"])
         for name, value in arguments.items():
             parameter = signature.parameters.get(name)
             if name not in entry.args and (parameter is None or value is not parameter.default):
@@ -90,6 +115,11 @@ class JournalServices:
                 raise _Rehearsed(result)
         except _Rehearsed as rehearsed:
             return rehearsed.args[0]
+        finally:
+            # A rehearsed profile-currency change rolls its SQL back, but it also
+            # refreshes the live service graph. Restore those caches from settings.
+            from .areas.settings import refresh
+            refresh(self._device.c)
 
 
 class _Rehearsed(Exception):
@@ -126,6 +156,8 @@ class _Service:
         target = getattr(self._service, method)
         call = f"{self._name}.{method}"
         if call not in self._outer._calls:
+            if any(name.startswith(call + ".") for name in self._outer._calls):
+                return _Service(self._outer, call, target)
             return target
         def journaled(*args, **kwargs):
             return self._outer._run(call, target, args, kwargs)
@@ -155,10 +187,12 @@ def _wire(adapter, spec, value):
     bare = spec.lstrip("?")
     if value is None:
         return None
+    if spec.startswith("?") and value == "" and bare not in ("text", "long"):
+        return None
     if isinstance(value, Enum):
         value = value.value
     if bare.startswith("ref:"):
-        return adapter.uid(bare[len("ref:"):], int(value))
+        return adapter.uid(bare[len("ref:"):], int(getattr(value, "id", value)))
     if bare == "bytes":
         import base64
         return base64.b64encode(value).decode("ascii")

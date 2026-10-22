@@ -38,6 +38,17 @@ class PlanningService:
         self.counterparties = counterparties
         self.transactions = transactions
 
+    def create_purchase(self, *, name, price, fee, months, first_date, account_id=None, counterparty_id=None):
+        """Create an instalment purchase as one journalable service action."""
+        from .loan_actions import create_purchase
+        return create_purchase(self, name=name, price=price, fee=fee, months=months, first_date=first_date,
+                               account_id=account_id, counterparty_id=counterparty_id)
+
+    def record_early_payment(self, item_id, principal, fee, date_paid, account_id, expected_remaining, due_date=None):
+        """Record an early payment and revise its schedule as one journalable action."""
+        from .loan_actions import record_early_payment
+        return record_early_payment(self, item_id, principal, fee, date_paid, account_id, expected_remaining, due_date)
+
     def _currency_of(self, account_id: int | None) -> str:
         return self.accounts.get(account_id).currency if account_id else self.transactions.base_currency
 

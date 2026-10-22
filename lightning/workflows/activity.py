@@ -138,13 +138,20 @@ class ActivityReview:
 
     def fingerprint(self, transaction_id: int) -> str:
         transaction_id = self._id(transaction_id)
-        header = self.db.one("SELECT id,ref,type,date,description,counterparty,counterparty_id,status,source,notes,updated_at "
-                             "FROM transactions WHERE id=?", (transaction_id,))
+        header = self.db.one("SELECT t.ref,t.type,t.date,t.description,t.counterparty,"
+                             "COALESCE(cp.normalized_name,'' ) AS counterparty_identity,t.status,t.source,t.notes,t.updated_at "
+                             "FROM transactions t LEFT JOIN counterparties cp ON cp.id=t.counterparty_id WHERE t.id=?",
+                             (transaction_id,))
         if not header:
             raise NotFoundError("Transaction not found.")
-        lines = self.db.all("SELECT id,line_no,date,account_id,asset_id,quantity_e6,unit_price_e6,amount_e6,fx_rate_e6,"
-                            "amount_base_e6,effect,category_id,memo,owner_id FROM ledger_entries "
-                            "WHERE transaction_id=? ORDER BY line_no", (transaction_id,))
+        lines = self.db.all("SELECT le.line_no,le.date,a.code AS account,fa.code AS asset,le.quantity_e6,"
+                            "le.unit_price_e6,le.amount_e6,le.fx_rate_e6,le.amount_base_e6,le.effect,"
+                            "cat.code AS category,le.memo,COALESCE(owner.normalized_name,'') AS owner "
+                            "FROM ledger_entries le JOIN accounts a ON a.id=le.account_id "
+                            "JOIN financial_assets fa ON fa.id=le.asset_id "
+                            "LEFT JOIN categories cat ON cat.id=le.category_id "
+                            "LEFT JOIN counterparties owner ON owner.id=le.owner_id "
+                            "WHERE le.transaction_id=? ORDER BY le.line_no", (transaction_id,))
         payload = {"header": list(header), "lines": [list(row) for row in lines]}
         return hashlib.sha256(json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest()
 

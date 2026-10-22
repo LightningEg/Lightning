@@ -202,7 +202,7 @@ def test_service_refusal_is_rejected_without_writing(devices):
     assert hd.c.db.scalar("SELECT COUNT(*) FROM budgets") == 0
     same(hd, pc)
     with pytest.raises(Exception, match="not covered"):
-        pc.command("sms_imports.assign", ending="1234", account_id=uid(pc, "accounts", account(pc, "Bank").id))
+        pc.command("sms_imports.unknown_action", ending="1234", account_id=uid(pc, "accounts", account(pc, "Bank").id))
 
 
 def test_delete_an_unpaid_instalment_plan_and_link_an_existing_payment(devices):
@@ -217,8 +217,8 @@ def test_delete_an_unpaid_instalment_plan_and_link_an_existing_payment(devices):
     assert not any(item.name == "Phone" for item in hd.c.planning.items(active_only=False))
     assert not hd.c.db.scalar("SELECT COUNT(*) FROM installment_purchases") and not pc.c.db.scalar("SELECT COUNT(*) FROM installment_purchases")
     same(hd, pc)
-    # Link a transaction the home already confirmed to a due date of the plan, then start the schedule after it.
-    spent = groups(pc, "-300.00")
+    # The amount needs a person’s review: outside automatic tolerance, within manual linking policy.
+    spent = groups(pc, "-250.00")
     spent["money"]["date"] = "2026-09-05"
     pc.save(spent)
     pc.sync_with(hd.home)

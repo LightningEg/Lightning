@@ -26,6 +26,14 @@ class JournalHome:
         self.store, self.db, self.signer, self.fault = store, store.db, signer, fault
         self._inherit()
 
+    def _require_upgrade_complete(self):
+        if self.db.has_table("journal_local"):
+            pending = self.db.scalar(
+                "SELECT name FROM journal_local WHERE name IN ('upgrade_barrier','cutover_normalization') LIMIT 1",
+            )
+            if pending is not None:
+                raise JournalError("Journal cutover or schema upgrade is incomplete; confirmation stays locked")
+
     def _inherit(self):
         """Signed commits are receipts too: a home that took over from a lost or
         moved predecessor answers a resent prefix proposal with its original
@@ -75,6 +83,7 @@ class JournalHome:
 
     @_confirmation
     def receive(self, wire):
+        self._require_upgrade_complete()
         self.store.require_confirmation_authority()
         envelope = unpack(wire)
         body = envelope["body"]
@@ -127,6 +136,7 @@ class JournalHome:
     @_confirmation
     def process(self, *, limit=None):
         """Drain eligible work; a review blocks its origin, never other origins."""
+        self._require_upgrade_complete()
         self.store.require_confirmation_authority()
         if limit is not None and (type(limit) is not int or not 1 <= limit <= MAX_STAGED):
             raise JournalError("Invalid confirmation work budget")
@@ -149,7 +159,9 @@ class JournalHome:
                             else:
                                 wire = self._finish(row, *result)
                     except Exception as error:
-                        if isinstance(error, self.db.OperationalError) or not self.db.conn.in_transaction:
+                        if ((isinstance(error, self.db.driver.DatabaseError)
+                             and not isinstance(error, self.db.driver.IntegrityError))
+                                or not self.db.conn.in_transaction):
                             raise  # Storage failure: stop, keep everything for retry.
                         result = ("review", "home-error")
                     if result[0] == "wait":
@@ -159,7 +171,8 @@ class JournalHome:
                         try:
                             token = self._review_token(row)
                         except Exception as error:
-                            if isinstance(error, self.db.OperationalError):
+                            if (isinstance(error, self.db.driver.DatabaseError)
+                                    and not isinstance(error, self.db.driver.IntegrityError)):
                                 raise
                             token = None
                         self.db.execute("UPDATE journal_inbox SET status='review',reason=?,review_token=? WHERE proposal_id=?",
@@ -237,6 +250,10 @@ class JournalHome:
         """A command waits for review when its target row changed since the
         device saw it; an earlier pending command of its own is its base."""
         from .commands import command, selection_token, target_slot
+        if ((body["kind"].startswith("command.automation.") or body["kind"] == "command.undo.replay")
+                and (body["origin"]["device"] != self.store.config["device"]
+                     or body["origin"]["incarnation"] != self.store.config["incarnation"])):
+            return "rejected", "home-only", []
         for dependency in body["dependencies"]:
             state = self.status(origin_id(dependency))
             if state is not None and state["status"] == "rejected":
@@ -325,6 +342,11 @@ class JournalHome:
 
     def _review_token(self, row):
         body = unpack(bytes(row["wire"]))["body"]
+        if body["kind"].startswith("command.") and self.store.adapter is not None:
+            # Commands may change keyed rows or a selection rather than a cash
+            # register record. Bind approval to the confirmed ledger actually
+            # displayed; a later write must force a fresh review.
+            return digest(dict(proposal=row["hash"], fingerprint=self.store.fingerprint()))
         matches = self.store.adapter.matches(body) if self.store.adapter is not None else []
         return digest(dict(proposal=row["hash"], current=self.store.record(body["record"]), matches=matches))
 

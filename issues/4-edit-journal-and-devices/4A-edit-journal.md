@@ -214,7 +214,7 @@ Compaction tests must cover a returned device after more than 30 days, removed d
 
 No production protocol switch before complete write coverage. Early stages use isolated dummy profiles; they are end-to-end engineering milestones, not claims that the full product is ready. Claims belong in [NOW.md](../../NOW.md). The owner authorized J1–J6; stages proceed in order without treating a prototype as production acceptance.
 
-**Current boundary:** J1–J3 cash workflows and experimental J4/J5 delivery/trust primitives are implemented; see Architecture for executable details and evidence. Development uses encrypted dummy profiles, a local Cloudflare runtime and injected carriers. Live free-plan deployment, Android push/scheduling and native/Arabic acceptance, complete fault/security evidence, native transition/enrollment UI, receipt pruning and full financial write coverage remain open. Interrupted-transition resumption, paged authority-chain verification and verified first-replica enrollment services now have fault/restart tests. J6 product integration/cutover is unbuilt. Other financial areas and automation stay disabled in journal profiles; the laboratory wire format is provisional. The owner authorized merging after completion, not bypassing these gates.
+**Current boundary (2026-10-22; validation and review builds: [PR #97](https://github.com/LightningEg/Lightning/pull/97)):** the local implementation now includes normal profile conversion/unlock, resumable enrollment, all financial POST command coverage, home automation, command review, owner rotation, LAN home handoff, upgrade barriers, signed backups and fresh-incarnation queue recovery. See Architecture for executable boundaries. Consolidated tests and Windows/Android development builds are pending on the integration branch. Cloudflare deployment is deliberately replaced by an unconfigured carrier. Live provider quotas, real Android sleep/background behavior, ordinary-PC reboot/power-loss evidence and final native acceptance remain open; dummy-data use continues until acceptance.
 
 | Stage | Deliverable and exit gate |
 |---|---|
@@ -231,10 +231,10 @@ No production protocol switch before complete write coverage. Early stages use i
 |---|---|
 | J6a — Generic exact effects (built) | One replicator for every synchronized table: UUID row identity (integer ids via `journal_ids`, other keys as key columns with references mapped), touched-row triggers, typed row upserts/deletes in reference order, per-row fingerprint. Cash becomes the first area on it. |
 | J6b — Checkpoint baselines (built) | Every replica, including the lab and tests, starts from the home's verified checkpoint; independent baselines are retired. |
-| J6c — Areas (in progress: cash, master data, currency and reserves, plans and budgets) | Command families with field groups and service preconditions: master data (accounts, categories, counterparties, rules), foreign currency and conversions, plans/bills/loans/reserves/budgets, investments, shared settings. |
-| J6d — Home automation | Rules, price fills, bill matching and revaluation run only on the home and commit as effects. |
-| J6e — Upgrades and backups | Migration barrier, per-release compatibility table, journal-profile backup and restore. |
-| J6f — Cutover (started: the app's screens run on a journal profile through `proxy.JournalServices`) | Convert a v1 profile (freeze lends, receive returns, verified baseline), pair peers, Mohab's year on a journal profile, Windows/Android acceptance, security/durability review. |
+| J6c — Areas (local implementation built; validation pending) | Command families with field groups and service preconditions: master data (accounts, categories, counterparties, rules), foreign currency and conversions, plans/bills/loans/reserves/budgets, investments, shared settings. |
+| J6d — Home automation (built; validation pending) | Rules, price fills, bill matching and revaluation run only on the home and commit as effects. |
+| J6e — Upgrades and backups (built; validation pending) | Migration barrier, per-release compatibility table, journal-profile backup and restore. |
+| J6f — Cutover (native local implementation built; device acceptance pending) | Convert a v1 profile (freeze lends, receive returns, verified baseline), pair peers, Mohab's year on a journal profile, Windows/Android acceptance, security/durability review. |
 
 No borrowing fallback inside a journal profile. An area still awaiting coverage remains disabled there; the ordinary v1 profile stays on its existing implementation until cutover. A stranded pre-journal copy is preserved for explicit comparison/import, never guessed into an operation history.
 

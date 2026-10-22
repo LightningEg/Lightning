@@ -103,6 +103,13 @@ def holds(condition: Condition, txn: dict) -> bool:
             return amount < value
         return False
     if field_name == "account":
+        code = txn.get("account_code")
+        if code is not None:
+            # Older local profiles stored integer ids in account conditions.
+            # Keep those rules working while all newly saved rules use codes.
+            if condition.value.isdigit() and txn.get("account_id") is not None:
+                return str(txn["account_id"]) == condition.value
+            return str(code) == condition.value
         return txn.get("account_id") is not None and str(txn.get("account_id")) == condition.value
     if field_name == "direction":
         amount = txn.get("amount")

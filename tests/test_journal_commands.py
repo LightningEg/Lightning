@@ -78,3 +78,16 @@ def test_service_refusal_and_uncovered_areas_are_refused_not_written(devices):
     with pytest.raises(Exception, match="not covered"):
         pc.command("rules.create", name="x")
     assert hd.store.fingerprint() == pc.store.fingerprint()
+
+
+def test_original_inflow_wire_without_description_remains_accepted(devices):
+    home, replica = devices
+    bank = account(replica, "Bank")
+    category = replica.c.categories.get_by_code("EXP.WORK.SALARY")
+    wire = replica.command("transactions.record_inflow",
+        date="2026-09-02", account_id=replica.adapter.uid("accounts", bank.id),
+        amount="125", notes="queued before the update", owner_id=None,
+        category_id=replica.adapter.uid("categories", category.id), counterparty="Employer")
+    replica.sync_with(home.home)
+    assert status(home, wire)["status"] == "accepted"
+    assert home.store.fingerprint() == replica.store.fingerprint()

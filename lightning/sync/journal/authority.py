@@ -304,14 +304,46 @@ class AuthorityMemory:
         fault("authority_activated")
 
     def admits_original(self, body):
-        """Allow signed original proposals from an explicitly retired branch."""
-        if body["profile"] != self.profile:
+        """Allow signed original proposals only from a generation in pinned transition history."""
+        if type(body) is not dict or body.get("profile") != self.profile:
             return False
-        for (wire,) in self.db.execute("SELECT wire FROM certificates WHERE version>1"):
-            certificate = unpack(bytes(wire))["body"]
-            if certificate["previous"] == body["generation"]:
-                return True
-        return False
+        try:
+            return body.get("generation") in self.generation_home_keys()
+        except JournalError:
+            return False
+
+    def generation_home_keys(self):
+        """Verify the owner-signed certificate chain and return its generation keys.
+
+        This control database is the independently pinned authority root. A saved
+        ledger alone cannot authorize a historical generation or home signer.
+        """
+        rows = self.db.execute("SELECT version,wire FROM certificates ORDER BY version").fetchall()
+        if not rows or [row[0] for row in rows] != list(range(1, len(rows) + 1)):
+            raise JournalError("Pinned authority certificate history is incomplete")
+        enrollment = unpack(bytes(rows[0][1]))
+        first = enrollment["body"]
+        fields(first, ("type", "version", "profile", "generation", "home", "home_key", "owner_key"))
+        if first["type"] != "authority-enrollment" or first["version"] != 1 or first["profile"] != self.profile:
+            raise JournalError("Pinned authority enrollment is invalid")
+        authenticate(enrollment, first["owner_key"])
+        generations = {first["generation"]: first["home_key"]}
+        prior_generation, prior_owner, prior_version = first["generation"], first["owner_key"], 1
+        for row in rows[1:]:
+            certificate = unpack(bytes(row[1]))
+            value = certificate["body"]
+            transition(value)
+            authenticate(certificate, prior_owner)
+            if (value["profile"] != self.profile or value["previous"] != prior_generation
+                    or value["version"] != prior_version + 1 or value["generation"] in generations):
+                raise JournalError("Pinned authority transition chain is invalid")
+            generations[value["generation"]] = value["home_key"]
+            prior_generation, prior_owner, prior_version = value["generation"], value["owner_key"], value["version"]
+        state = self.state()
+        if (state["generation"] != prior_generation or state["version"] != prior_version
+                or state["owner_key"] != prior_owner or state["home_key"] != generations[prior_generation]):
+            raise JournalError("Pinned authority state does not match its certificates")
+        return generations
 
 
 def transfer_home_state(source, target):

@@ -8,11 +8,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sqlite3
 from contextlib import contextmanager
 from decimal import Decimal
 from datetime import date
 
+from lightning.core.dates import today
 from lightning.core.errors import ValidationError
 from lightning.core.ledger import Effect, PostingLine, validate_posting
 from lightning.core.money import from_e6
@@ -45,12 +47,24 @@ def validate_domain(value):
 
 
 def initialize(container, *, profile, generation, device, incarnation, home_key, origin_key, role,
-               dummy_profile=False):
-    """Explicit opt-in; never converts a user's existing profile implicitly."""
+               dummy_profile=False, verified_baseline: str | None = None):
+    """Explicit opt-in; existing ledgers need a verified encrypted checkpoint hash.
+
+    The lifecycle cutover owns proof that the retained encrypted snapshot matches
+    the quiesced live profile. This function binds that attestation to a complete
+    synchronized-row baseline; ordinary attach never takes this path.
+    """
     db = container.db
-    if not dummy_profile or not db.encrypted or db.has_table("journal_meta"):
+    if (not db.encrypted or db.has_table("journal_meta")
+            or (not dummy_profile and verified_baseline is None)):
         raise JournalError("Create a fresh encrypted dummy journal profile")
-    if db.scalar("SELECT COUNT(*) FROM transactions WHERE type!='OPN'"):
+    if verified_baseline is not None and (
+            type(verified_baseline) is not str
+            or re.fullmatch(r"[0-9a-f]{64}", verified_baseline) is None):
+        raise JournalError("A verified encrypted snapshot hash is required for an existing ledger")
+    if not db.encrypted:
+        raise JournalError("Journal profiles require an encrypted database")
+    if verified_baseline is None and db.scalar("SELECT COUNT(*) FROM transactions WHERE type!='OPN'"):
         raise JournalError("Only a fresh baseline with opening balances can enroll")
     if db.scalar("SELECT COUNT(*) FROM ledger_entries WHERE ABS(quantity_e6)>=9007199254740992 OR ABS(amount_base_e6)>=9007199254740992"):
         raise JournalError("This baseline exceeds the experimental wire amount limit")
@@ -61,11 +75,22 @@ def initialize(container, *, profile, generation, device, incarnation, home_key,
     with db.transaction():
         for statement in STORE_SCHEMA:
             db.execute(statement)
+        db.execute("CREATE TABLE journal_baseline_attestation(snapshot_sha256 TEXT, row_fingerprint TEXT NOT NULL)")
         config = dict(version=2, profile=profile, generation=generation, device=device,
                       incarnation=incarnation, home_key=home_key, origin_key=origin_key, role=role)
         db.execute("INSERT INTO journal_meta VALUES(1,?,1)", (canonical(config).decode(),))
         db.execute("CREATE TABLE journal_ids(entity TEXT,uuid TEXT,local_id INTEGER,PRIMARY KEY(entity,uuid),UNIQUE(entity,local_id))")
-    return attach(container)
+        if verified_baseline is not None:
+            db.execute("INSERT INTO journal_local(name,value) VALUES('cutover_normalization','pending')")
+    store = attach(container)
+    rows = list(store.adapter.rows.all_rows())
+    if rows:
+        store.adapter.rows.validate(dict(schema=SCHEMA, rows=rows), bounded=False)
+    with db.transaction():
+        db.execute("INSERT INTO journal_baseline_attestation VALUES(?,?)", (
+            verified_baseline, store.adapter.fingerprint(full=True),
+        ))
+    return store
 
 
 def attach(container):
@@ -88,13 +113,17 @@ class CashAdapter:
         self.allowed = False
         self.denied = None
         self.captured = []
+        self.history = None
         # The home's own screens get back what the service returned, or its refusal.
         self.results, self.errors = {}, {}
         self.c.db.undo = None  # Journal undo is a new proposal; legacy row restoration is disabled.
+        self.c.undo = None  # Remove the legacy service as well as its transaction hook.
         self.rows = Replicator(self.db, store.config["profile"], resolve=store.resolve)
         self.db.conn.set_authorizer(None)  # Fixed local DDL below; protection returns at the end.
         for row in self.db.all("SELECT name FROM sqlite_temp_master WHERE type='trigger' AND name LIKE 'undo_%'"):
             self.db.execute('DROP TRIGGER "' + row[0].replace('"', '""') + '"')
+        for row in self.db.all("SELECT name FROM sqlite_temp_master WHERE type='table' AND name LIKE 'undo_%'"):
+            self.db.execute('DROP TABLE "' + row[0].replace('"', '""') + '"')
         # Every write records the rows it touched, so a confirmation publishes and
         # fingerprints only those, never the whole ledger.
         self.rows.install()
@@ -113,27 +142,70 @@ class CashAdapter:
         if action in (sqlite3.SQLITE_INSERT, sqlite3.SQLITE_UPDATE, sqlite3.SQLITE_DELETE):
             if table.startswith("journal_"):
                 return sqlite3.SQLITE_OK
+            if self.allowed and table.startswith("undo_"):
+                return sqlite3.SQLITE_OK
             if self.allowed and (table in self.rows.tables or table in GUARDED or table == "audit_log" or table.startswith("transactions_fts")):
                 return sqlite3.SQLITE_OK
             self.denied = table
             return sqlite3.SQLITE_DENY
         return sqlite3.SQLITE_OK
 
+    def attach_history(self, service):
+        """Enable temporary user-action history for accepted home commands only."""
+        if self.store.config.get("role") != "home":
+            raise JournalError("Command history is available only on the journal home")
+        if self.history is not None:
+            return self.history
+        self.db.conn.set_authorizer(None)
+        try:
+            service.prepare_for_tables(self.db.conn, self.rows.tables)
+        finally:
+            self.db.conn.set_authorizer(self._authorize)
+        self.history = service
+        self.c.undo = service
+        return service
+
+    def detach_history(self):
+        """Remove home-local undo records when this runtime loses home authority."""
+        self.db.conn.set_authorizer(None)
+        try:
+            for row in self.db.all("SELECT name FROM sqlite_temp_master WHERE type='trigger' AND name LIKE 'undo_%'"):
+                self.db.execute('DROP TRIGGER "' + row[0].replace('"', '""') + '"')
+            for row in self.db.all("SELECT name FROM sqlite_temp_master WHERE type='table' AND name LIKE 'undo_%'"):
+                self.db.execute('DROP TABLE "' + row[0].replace('"', '""') + '"')
+        finally:
+            self.db.conn.set_authorizer(self._authorize)
+        self.history = None
+        self.c.undo = None
+
     @contextmanager
-    def writing(self):
+    def writing(self, history_label=None):
         self.denied = None
         self.allowed = True
         self.captured = []
+        history_started = False
         self.db.conn.set_authorizer(self._authorize)
         try:
             self.rows.reset()
+            if self.history is not None and history_label:
+                self.history.begin(self.db.conn, history_label)
+                history_started = True
             yield
             self.captured = self.rows.capture()
             self.rows.remember(self.captured)
             self.rows.reset()
+            if history_started:
+                self.history.finish(self.db.conn)
+                history_started = False
         except self.db.driver.DatabaseError as error:
+            if history_started:
+                self.history.cancel(self.db.conn)
             if self.denied or "journal: area not covered" in str(error):
                 raise ValidationError("This action writes an area not covered by the experimental journal") from error
+            raise
+        except BaseException:
+            if history_started:
+                self.history.cancel(self.db.conn)
             raise
         finally:
             self.allowed = False
@@ -166,6 +238,9 @@ class CashAdapter:
         return kind.startswith("transaction.") or kind in commands.KINDS
 
     def check(self, kind, groups, *, complete=False):
+        if ((kind.startswith("command.automation.") or kind == "command.undo.replay")
+                and self.store.config.get("role") != "home"):
+            raise JournalError("Scheduled financial work runs only on the home")
         if kind.startswith("command."):
             commands.validate(kind, groups)
         else:
@@ -253,8 +328,16 @@ class CashAdapter:
     def confirm(self, proposal, effect):
         if proposal["kind"].startswith("command."):
             commands.validate(proposal["kind"], proposal["groups"])
-            with self.writing():
+            command_name = proposal["kind"][len("command."):]
+            history_label = None
+            if not command_name.startswith(("automation.", "undo.replay")):
+                from lightning.sync.journal.history import action_label
+                history_label = action_label(command_name)
+            with self.writing(history_label=history_label):
                 result = commands.run(self, proposal["kind"], proposal["record"], proposal["groups"])
+                if history_label is not None:
+                    # Keep post-save settlement in the same accepted effects and undo scope.
+                    self.c.planning.match_payments(today())
             effect_rows = self._result() if self.captured else None
             self._keep(self.results, proposal, result)
             return effect_rows
@@ -268,7 +351,8 @@ class CashAdapter:
             local_id = self.local("transactions", effect["record"])
             if self.db.scalar("SELECT COUNT(*) FROM reserve_transaction_links WHERE transaction_id=?", (local_id,)):
                 raise ValidationError("Linked reserve actions are not enabled in this experiment")
-        with self.writing():
+        history_label = "Record transaction" if proposal["kind"].endswith(".add") else "Edit transaction"
+        with self.writing(history_label=history_label):
             if effect["deleted"]:
                 self.c.transactions.void(self.local("transactions", effect["record"]))
             else:
@@ -306,6 +390,7 @@ class CashAdapter:
                         line.category_id, line.memo, line.fx_rate, line.owner_id) for line in txn.lines]
                     self.c.transactions.repost(txn.id, money["date"], lines, details["description"],
                                                details["counterparty"], details["notes"])
+            self.c.planning.match_payments(today())
         return self._result()
 
     def _result(self):
@@ -370,7 +455,12 @@ class CashAdapter:
         local_id = self.db.scalar("SELECT local_id FROM journal_ids WHERE entity=? AND uuid=?", (table, json.loads(key)))
         if local_id is None:
             return own
-        return digest(dict(row=own, owned=self.rows.record_hashes(table, local_id)))
+        # Only the resulting token travels over the wire. A local ownership list
+        # may contain more rows than a protocol message can carry (e.g. a statement).
+        # Keep the same canonical JSON bytes so existing small-record tokens stay valid.
+        body = dict(row=own, owned=self.rows.record_hashes(table, local_id))
+        encoded = json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode("utf-8")
+        return hashlib.sha256(encoded).hexdigest()
 
     def apply(self, domain):
         """Typed exact replay on replicas, with no normal save/rule/automation call."""

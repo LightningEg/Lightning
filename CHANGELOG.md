@@ -14,6 +14,12 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - 2026-10-22 · Claude: phone overhaul (3AC, owner PDF; guideline 3.34 Part C): tab bar Overview, Budget, Add, Transactions, More with words;
   every tab opens on one hero figure; month stepper with a Choose period sheet; worded tabs; arrow chips, day nets, no ".00";
   More with live figures; Budget ring, Cash planning due before payday, Investments, Accounts by type, Transactions filters. 3Z done.
+- 2026-10-22 · Codex: 4A connects edit synchronization to normal profiles: explicit conversion, enrollment, local handoff, command review and Arabic, home automation, upgrades and signed recovery.
+  Android schedules catch-up while unlocked; financial routes use journal commands. Cloud delivery remains an explicit unconfigured placeholder; Windows/Android review packages build and verify in #97.
+
+- 2026-10-22 · Codex: 4A verifies a recovered journal backup against its signed cursor and ledger fingerprint; transaction merge joins the coverage gate.
+  2B adds a dummy Windows phase-interruption/reboot drill; physical reboot and abrupt power-loss acceptance remain unverified.
+
 - 2026-10-22 · Claude: guideline B09 copy: website theme is light by default, dark only when chosen (matches the website repo).
 - 2026-10-22 · Claude: 3AA: `tools/site_shots.py` dismisses Get set up, parks the pointer, lifts the phone screens off the + button, adds the a-kpis and a-sankey crops, shows Budget for the
   month in progress and Expense analysis for August (a 14,200 holiday payment, spending up 21%); a plain run reproduces the live site screens pixel for pixel, English and Arabic (checked).

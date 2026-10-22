@@ -150,6 +150,19 @@ class JournalDevice:
                                    state="Needs review" if state and state["status"] == "review" else "Pending"))
         return result
 
+    def command_decisions(self):
+        """Terminal command proposals and display state, read from journal storage."""
+        result = []
+        for decision in self.store.decisions():
+            identifier = decision["proposal_id"]
+            wire = self.store.db.scalar("SELECT wire FROM journal_outbox WHERE proposal_id=?", (identifier,))
+            if wire is None:
+                continue
+            seen = self.store.db.scalar("SELECT first_display_at FROM journal_seen WHERE proposal_id=?", (identifier,))
+            result.append(dict(proposal=bytes(wire), decision=bytes(decision["decision"]),
+                               first_display_at=seen))
+        return result
+
     def _offer(self, wire):
         """On the home, confirm at once when possible. The edit is already durably
         saved, so a held upload (staging limit, frozen authority) means waiting."""

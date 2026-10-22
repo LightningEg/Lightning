@@ -199,7 +199,8 @@ def test_capability_mismatch_keeps_origin_queue_and_does_not_advance_home(device
     hp, pp = peers(devices, carrier)
     original = pc.save(groups(pc))
     real = compatibility.capabilities
-    monkeypatch.setattr(compatibility, "capabilities", lambda store: real(store) | (dict(entry_kinds={}) if store is home.store else {}))
+    monkeypatch.setattr(compatibility, "capabilities", lambda store: real(store) | (
+        dict(entry_kinds={"commands": []}) if store is home.store else {}))
     async def request(wire):
         return hp.channel.handle(wire)
     with pytest.raises(UpdateRequired) as error:
@@ -218,7 +219,7 @@ def test_forged_reply_capabilities_are_checked_before_any_commit_is_applied(devi
     original = pc.save(groups(pc))
     async def request(wire):
         _, payload = pp.channel.open(hp.channel.handle(wire))
-        payload["result"]["capabilities"]["entry_kinds"] = {}
+        payload["result"]["capabilities"]["entry_kinds"]["transaction.add"] = 2
         return hp.channel.protect(payload, pc.identity.device_id)
     with pytest.raises(UpdateRequired) as error:
         asyncio.run(pp.channel.synchronize(request, home_id=home.identity.device_id))

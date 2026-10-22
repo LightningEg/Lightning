@@ -240,7 +240,14 @@ class SmsImportService:
         return value if isinstance(value, type(empty)) else empty
 
     def endings(self) -> dict[str, int]:
-        return {str(k): int(v) for k, v in self._json(ENDINGS_KEY, {}).items()}
+        """Resolve saved account codes and legacy local ids to this database's ids."""
+        result = {}
+        for ending, value in self._json(ENDINGS_KEY, {}).items():
+            text = str(value)
+            account_id = int(text) if text.isdigit() else self.db.scalar("SELECT id FROM accounts WHERE code=?", (text,))
+            if account_id is not None:
+                result[str(ending)] = int(account_id)
+        return result
 
     def waiting(self) -> list[dict]:
         """Messages read whose account is not known yet, grouped by ending: [{"ending", "count", "total"}]."""
@@ -363,7 +370,18 @@ class SmsImportService:
         account = self.accounts.require_usable(account_id)
         if account.currency != "EGP":
             raise ValidationError("Bank SMS are in EGP. Choose an EGP account.", "account_id")
-        endings = self.endings() | {ending: int(account.id)}
+        # Account codes are unique and survive checkpoint replication, unlike SQLite row ids.
+        # Accept old id-valued settings and normalize every mapping as soon as it is edited.
+        saved = self._json(ENDINGS_KEY, {})
+        endings = {}
+        for old_ending, old_value in saved.items():
+            old_text = str(old_value)
+            old_id = int(old_text) if old_text.isdigit() else self.db.scalar(
+                "SELECT id FROM accounts WHERE code=?", (old_text,))
+            code = self.db.scalar("SELECT code FROM accounts WHERE id=?", (old_id,)) if old_id is not None else None
+            if code:
+                endings[str(old_ending)] = code
+        endings[ending] = account.code
         waiting = self._json(WAITING_KEY, [])
         mine = [_from_json(item) for item in waiting if item["ending"] == ending]
         rest = [item for item in waiting if item["ending"] != ending]

@@ -1,6 +1,7 @@
 # Every permission the phone app may ask for. packaging/phone_build.py fails a build whose APK asks for any
 # other, or lacks one of these: adding a permission is a deliberate change here and in AndroidManifest.xml.
 android.permission.INTERNET                      # pages on 127.0.0.1; the PC reaches the phone on the local network
+android.permission.ACCESS_NETWORK_STATE           # schedule bounded journal catch-up when a network is available
 android.permission.FOREGROUND_SERVICE            # while lent, wait for the PC's hand-back
 android.permission.FOREGROUND_SERVICE_DATA_SYNC
 android.permission.POST_NOTIFICATIONS            # the visible notification of that wait

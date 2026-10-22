@@ -123,6 +123,23 @@ class Container:
         self.reporting.valuer.base = base
         self.fx.profile_currency = base
 
+    @property
+    def activity_review(self):
+        from lightning.workflows.activity import ActivityReview
+        return ActivityReview(self)
+
+    @property
+    def salary_setup(self):
+        from functools import partial
+        from types import SimpleNamespace
+        from lightning.workflows.salary_setup import set_up_salary
+        return SimpleNamespace(set_up_salary=partial(set_up_salary, self))
+
+    @property
+    def journal_workflows(self):
+        from lightning.sync.journal.areas.workflows import JournalWorkflowService
+        return JournalWorkflowService(self)
+
     def backup_now(self) -> Path | None:
         return backup(self.db, self.backup_dir or self.data_dir / "backups")
 

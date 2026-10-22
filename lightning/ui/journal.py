@@ -25,6 +25,132 @@ from lightning.sync.journal.capture import JournalCapture
 from lightning.sync.journal.codec import JournalError
 
 
+def _command_label(name):
+    from lightning.ui.journal_i18n import action_name
+    return action_name(name)
+
+
+def _looks_like_uuid(value):
+    if not isinstance(value, str):
+        return False
+    try:
+        from uuid import UUID
+        UUID(value)
+        return True
+    except ValueError:
+        return False
+
+
+def _reference_name(device, entity, value):
+    if device is None or not isinstance(value, str):
+        return None
+    try:
+        local_id = device.adapter.local(entity, value)
+        service_name, getter_name = {
+            "accounts": ("accounts", "get"), "categories": ("categories", "get"),
+            "financial_assets": ("assets", "get_asset"), "transactions": ("transactions", "get"),
+            "counterparties": ("counterparties", "get"), "cash_reserves": ("reserves", "get"),
+            "planned_items": ("planning", "get"), "cd_certificates": ("deposits", "get_certificate"),
+        }.get(entity, (None, None))
+        if service_name is None:
+            return None
+        obj = getattr(getattr(device.c, service_name), getter_name)(local_id)
+        for attr in ("name", "counterparty", "description"):
+            shown = obj.get(attr) if isinstance(obj, dict) else getattr(obj, attr, None)
+            if shown:
+                return str(shown)
+    except Exception:
+        return None
+    return None
+
+
+def _command_summary(device, kind, args):
+    from lightning.ui.journal_i18n import FIELD_NAMES
+    from lightning.sync.journal.commands import COMMANDS
+
+    entry = COMMANDS.get(kind)
+    specs = entry.args if entry is not None else {}
+    hidden = {"password", "secret", "token", "recovery", "answer", "fingerprint", "job_key",
+              "messages", "data", "mapping", "decisions", "selected_ids", "txn_ids", "notes",
+              "expected_remaining", "ending", "cursor_ms"}
+    rows = []
+    for key, value in args.items():
+        if key.lower() in hidden or value is None:
+            continue
+        spec = specs.get(key, "")
+        entity = spec.lstrip("?")[len("ref:"):] if isinstance(spec, str) and spec.lstrip("?").startswith("ref:") else None
+        label = FIELD_NAMES.get(key)
+        if entity:
+            shown = _reference_name(device, entity, value)
+            label = label or {"accounts": "Account", "categories": "Category", "financial_assets": "Investment",
+                              "transactions": "Transaction", "counterparties": "Payee"}.get(entity)
+            if not shown:
+                shown = {"accounts": "Selected account", "categories": "Selected category",
+                         "financial_assets": "Selected investment", "transactions": "Selected transaction"}.get(entity, "Details provided")
+        elif isinstance(value, list):
+            shown = f"{len(value)} selected"
+        elif isinstance(value, dict):
+            shown = "Details provided"
+        elif isinstance(value, bool):
+            shown = "Yes" if value else "No"
+        elif _looks_like_uuid(value) or (key.endswith("_id") and not key.endswith("account_id")):
+            continue
+        elif key in {"account_type", "class_code", "kind", "direction", "frequency", "interest_method",
+                     "payout_frequency", "compounding_frequency", "bucket", "choice", "action"}:
+            if key in {"class_code"}:
+                continue
+            shown = value.replace("_", " ").title() if isinstance(value, str) else str(value)
+        else:
+            shown = str(value)
+        label = label or key.replace("_", " ").capitalize()
+        rows.append((label, shown))
+        if len(rows) == 5:
+            break
+    return rows
+
+
+def command_status_rows(device):
+    """Return terminal and pending command outcomes using the service's durable receipts."""
+    from lightning.sync.journal.codec import unpack
+
+    rows, seen = [], set()
+    for item in device.pending_commands():
+        rows.append(dict(proposal_id=item["proposal_id"],
+                         name=_command_label(item["name"]), state=item["state"],
+                         reason="Waiting for the home" if item["state"] == "Pending" else "The home needs to review this action",
+                         summary=_command_summary(device, "command." + item["name"], item.get("args", {}))))
+        seen.add(item["proposal_id"])
+    for decision in device.command_decisions():
+        proposal = unpack(decision["proposal"])["body"]
+        receipt = unpack(decision["decision"])["body"]
+        identifier = proposal["origin"]
+        # The receipt's stable id is the index used by the outbox and display marker.
+        from lightning.sync.journal.codec import origin_id
+        identifier = origin_id(identifier)
+        if identifier in seen:
+            continue
+        if not proposal["kind"].startswith("command."):
+            continue
+        if receipt["outcome"] == "rejected":
+            if decision["first_display_at"]:
+                continue
+            state = "Not taken"
+            reason = {"cancelled": "The home kept the confirmed value",
+                      "dependency-rejected": "An earlier action was not taken",
+                      "financial-validation": "The home could not apply this action"}.get(receipt["reason"], "The home could not apply this action")
+        else:
+            state, reason = "Confirmed", "Applied on the home"
+        rows.append(dict(proposal_id=identifier,
+                         name=_command_label(proposal["kind"][len("command."):]),
+                         state=state, reason=reason,
+                         summary=_command_summary(device, proposal["kind"], proposal["groups"].get("args", {}))))
+    return rows
+
+
+def command_values(kind, args, device=None):
+    return [("Action", _command_label(kind[len("command."):]))] + _command_summary(device, kind, args)
+
+
 class BoundedJournalBody:
     def __init__(self, app):
         self.app = app
@@ -33,7 +159,7 @@ class BoundedJournalBody:
         if scope["type"] != "http" or scope["method"] != "POST":
             return await self.app(scope, receive, send)
         chunks, total = [], 0
-        limit = 4096 if scope["path"] in ("/pairing/exchange", "/membership/exchange") else 64 * 1024 if scope["path"] in ("/exchange","/enrollment/exchange") else 6 * 1024 * 1024
+        limit = 4096 if scope["path"] in ("/pairing/exchange", "/membership/exchange", "/authority/exchange") else 64 * 1024 if scope["path"] in ("/exchange","/enrollment/exchange") else 6 * 1024 * 1024
         while True:
             event = await receive()
             if event["type"] == "http.disconnect":
@@ -54,7 +180,7 @@ class BoundedJournalBody:
         await self.app(scope, buffered, send)
 
 
-def create_journal_app(device, *, session_token, channel=None, synchronize=None, sms_source=None, pairing=None):
+def create_journal_app(device, *, session_token, channel=None, synchronize=None, sms_source=None, pairing=None, move=None):
     if not isinstance(session_token, str) or len(session_token) < 32:
         raise ValueError("A per-unlock session token is required")
     sync_task = None
@@ -90,7 +216,7 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
 
     @app.middleware("http")
     async def guard(request, call_next):
-        if not request.url.path.startswith("/static/") and request.url.path not in ("/exchange", "/pairing/exchange", "/membership/exchange", "/enrollment/exchange"):
+        if not request.url.path.startswith("/static/") and request.url.path not in ("/exchange", "/pairing/exchange", "/membership/exchange", "/enrollment/exchange", "/authority/exchange"):
             token = request.cookies.get("journal_session", "")
             if not hmac.compare_digest(token.encode("utf-8"), session_token.encode("utf-8")):
                 return PlainTextResponse("Unlock this experimental profile first.", status_code=401)
@@ -122,14 +248,22 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
         path = request.url.path
         page = "devices" if path.startswith("/devices") else "entry" if editing or candidate or initial or path == "/add" else "capture" if path.startswith("/capture") else "review" if path.startswith("/review") else "balances" if path == "/balances" else "register"
         rows = device.view()
+        command_rows = command_status_rows(device)
         reviews = []
         if device.home:
             reviews = device.review_items()
             for review in reviews:
                 review["command"] = str(uuid4())
-                review["proposed_shown"] = device.describe(review["proposed"]["groups"])
-                review["current_shown"] = device.describe(review["current"]["groups"]) if review["current"] else []
-                review["base_shown"] = device.describe(review["base"]) if review["base"] else []
+                proposed = review["proposed"]
+                review["is_command"] = proposed["kind"].startswith("command.")
+                if review["is_command"]:
+                    review["proposed_shown"] = command_values(proposed["kind"], proposed["groups"].get("args", {}), device)
+                    review["current_shown"] = device.describe(review["current"]["groups"]) if review["current"] and review["current"].get("groups") else []
+                    review["base_shown"] = []
+                else:
+                    review["proposed_shown"] = device.describe(proposed["groups"])
+                    review["current_shown"] = device.describe(review["current"]["groups"]) if review["current"] else []
+                    review["base_shown"] = device.describe(review["base"]) if review["base"] else []
         values = {"date": today().isoformat()}
         if editing:
             selected = next((row for row in rows if row["record"] == editing and row["state"] != "Not taken"), None)
@@ -146,7 +280,7 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
         except Exception:
             sms_permission = "unavailable"
         return templates.TemplateResponse(request=request, name="phone.html" if phone else "pc.html",
-            context=dict(rows=rows, reviews=reviews, balances=balances, choices=device.choices(),
+            context=dict(rows=rows, command_rows=command_rows, reviews=reviews, balances=balances, choices=device.choices(),
                 waiting=[item | {"shown": device.form_values(item["groups"])} for item in capture.waiting()], batches=capture.batches(), home=device.home is not None, values=values,
                 editing=editing, candidate=candidate, draft=draft, session=session_token, error=error, message=message,
                 split_count=max(4, sum(key.startswith("split_category_") for key in values)),
@@ -161,7 +295,7 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
     @app.exception_handler(JournalError)
     @app.exception_handler(LightningError)
     async def failure(request, error):
-        if request.url.path in ("/exchange", "/pairing/exchange", "/membership/exchange", "/enrollment/exchange"):
+        if request.url.path in ("/exchange", "/pairing/exchange", "/membership/exchange", "/enrollment/exchange", "/authority/exchange"):
             from lightning.sync.journal.local import MembershipUpdateRequired
             if isinstance(error,MembershipUpdateRequired):
                 return PlainTextResponse("Membership update required.",status_code=409,headers={"X-Journal-Action":"membership"})
@@ -202,6 +336,15 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
         if pairing is None:
             return PlainTextResponse("Membership unavailable.",status_code=403)
         return Response(pairing.membership.control(await request.body()),media_type="application/octet-stream")
+
+    @app.post("/authority/exchange")
+    async def authority_exchange(request: Request):
+        if move is None:
+            return PlainTextResponse("Authority handoff unavailable.", status_code=403)
+        body = await request.body()
+        if len(body) > 4096:
+            return PlainTextResponse("Authority request refused.", status_code=413)
+        return Response(move.exchange(body), media_type="application/octet-stream")
 
     @app.post("/devices/{action}")
     async def device_action(request: Request, action: str):

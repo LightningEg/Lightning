@@ -33,6 +33,7 @@ class UndoService:
     def __init__(self, db, audit=None):
         self.db, self.audit = db, audit
         self.validate = None
+        self._tables = None
 
     def prepare(self, conn):
         if conn.execute("SELECT 1 FROM sqlite_temp_master WHERE name='undo_control'").fetchone():
@@ -44,6 +45,8 @@ class UndoService:
         tables = conn.execute("SELECT name,sql FROM sqlite_master WHERE type='table'").fetchall()
         for table in tables:
             name, sql = table["name"], table["sql"] or ""
+            if self._tables is not None and name not in self._tables:
+                continue
             if (name in _EXCLUDED or name.startswith(("sqlite_", "transactions_fts", "undo_"))
                     or "VIRTUAL TABLE" in sql.upper()):
                 continue
@@ -64,6 +67,13 @@ class UndoService:
                              "WHEN (SELECT group_id FROM undo_control) IS NOT NULL BEGIN "
                              "INSERT INTO undo_records(group_id,table_name,before_json,after_json) "
                              f"VALUES((SELECT group_id FROM undo_control),'{name}',{before},{after}); END")
+
+    def prepare_for_tables(self, conn, tables):
+        """Install temporary capture triggers for a caller's explicit table allowlist."""
+        if conn.execute("SELECT 1 FROM sqlite_temp_master WHERE name='undo_control'").fetchone():
+            return
+        self._tables = frozenset(tables)
+        self.prepare(conn)
 
     def begin(self, conn, label=None):
         action = _ACTION.get()
@@ -92,16 +102,36 @@ class UndoService:
         conn.execute("DELETE FROM undo_groups WHERE id NOT IN (SELECT id FROM undo_groups ORDER BY id DESC LIMIT 20)")
         conn.execute("DELETE FROM undo_records WHERE group_id NOT IN (SELECT id FROM undo_groups)")
 
+    def cancel(self, conn):
+        """Leave no active capture group when a command fails."""
+        if conn.execute("SELECT 1 FROM sqlite_temp_master WHERE name='undo_control'").fetchone():
+            conn.execute("UPDATE undo_control SET group_id=NULL")
+
     def available(self):
         self.prepare(self.db.conn)
         undo = self.db.one("SELECT id,label FROM undo_groups WHERE undone=0 ORDER BY id DESC LIMIT 1")
         redo = self.db.one("SELECT id,label FROM undo_groups WHERE undone=1 ORDER BY id ASC LIMIT 1")
         return {"undo": dict(undo) if undo else None, "redo": dict(redo) if redo else None}
 
-    def replay(self, *, redo=False, expected_id=None):
+    def current_fingerprint(self):
+        """The synchronized ledger fingerprint, or None outside a journal profile."""
+        fingerprint = getattr(self, "journal_fingerprint", None)
+        return fingerprint() if fingerprint is not None else None
+
+    def replay(self, *, redo=False, expected_id=None, expected_fingerprint=None):
         # Pick the top group and its records only after BEGIN IMMEDIATE. Otherwise a second
         # request can commit a newer group between the stale-form check and the replay.
         with self.db.transaction():
+            if expected_fingerprint is not None:
+                # A journal history command is tied to the exact synchronized ledger the
+                # user saw. Local undo ids are meaningful only on the home, so never let a
+                # stale command overwrite rows changed since it was submitted.
+                row = self.db.one("SELECT config FROM journal_meta WHERE id=1")
+                if row is None:
+                    raise ValidationError("This history action is only available on the journal home.")
+                fingerprint = self.current_fingerprint()
+                if fingerprint != expected_fingerprint:
+                    raise ValidationError("The ledger changed. Open history again before undoing this action.")
             choice = self.available()["redo" if redo else "undo"]
             if choice is None or (expected_id is not None and int(expected_id) != choice["id"]):
                 raise ValidationError("History changed. Open the page again before undoing this action.")

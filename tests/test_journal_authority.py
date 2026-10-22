@@ -109,6 +109,164 @@ def test_cooperative_move_retires_old_home_before_activation_and_keeps_original_
             control.close()
 
 
+def test_signed_lan_move_transfers_checkpoint_and_retires_before_target_activation(devices, tmp_path, monkeypatch):
+    """Exercise the bounded exchange protocol end to end without opening a socket."""
+    import json
+    from types import SimpleNamespace
+    import lightning.runtime.journal_move as move_module
+    from lightning.runtime.journal_move import JournalMoveRuntime
+    from lightning.sync.journal.codec import JournalError
+    from lightning.sync.journal.membership import Membership
+
+    home, pc = devices
+    owner, controls = memories(devices, tmp_path)
+    try:
+        members = {
+            item.identity.device_id: dict(key=item.identity.public_key, incarnation=item.store.config["incarnation"])
+            for item in devices
+        }
+        shared = os.urandom(32)
+        for item in devices:
+            Membership(item)._save(dict(version=1, epoch=1, members=members, retired=[]), shared)
+        for identifier, member in members.items():
+            home.home.approve_origin(identifier, member["incarnation"], member["key"])
+        large_command = pc.command("bank_imports.confirm", batch_id=str(uuid4()),
+                                   decisions={str(index): {"notes": "x" * 150} for index in range(200)})
+        assert len(large_command) > 20 * 1024
+        assert home.home.receive(large_command) == "staged"
+        pc.sync_with(home.home)  # Drain the replica outbox before the move safety gate.
+        assert not pc.store.pending()
+        assert home.store.db.scalar("SELECT status FROM journal_inbox") == "rejected"
+        home_path, pc_path = tmp_path / "home-profile", tmp_path / "replica-profile"
+        home_path.mkdir(); pc_path.mkdir()
+        home_runtime = SimpleNamespace(device=home, identity=home.identity, paths=SimpleNamespace(data_dir=home_path))
+        pc_runtime = SimpleNamespace(device=pc, identity=pc.identity, paths=SimpleNamespace(data_dir=pc_path))
+        source = JournalMoveRuntime(home_runtime)
+        pc.store.db.execute("INSERT OR REPLACE INTO journal_local VALUES('local_endpoints',?)",
+                            (json.dumps(["https://127.0.0.1:47513/exchange"]),))
+        pc.store.db.execute("INSERT OR REPLACE INTO journal_local VALUES('home_certificate',?)",
+                            (home.identity.cert_path.read_text(),))
+        pc_runtime.trust = SimpleNamespace(_owner_credential=lambda proofs: owner)
+
+        class LocalRequest:
+            def __init__(self, endpoint, certificate, timeout):
+                assert endpoint == "https://127.0.0.1:47513/authority/exchange"
+                assert certificate == home.identity.cert_path.read_text()
+
+            async def __call__(self, wire):
+                return source.exchange(wire)
+
+        monkeypatch.setattr(move_module, "PinnedLocalClient", LocalRequest)
+        target = JournalMoveRuntime(pc_runtime)
+        result = asyncio.run(target.move_home(password="owner password", answer="owner answer"))
+        assert "old home retired" in result
+        assert home.store.authority.state()["phase"] == "retired"
+        assert pc.store.authority.state()["phase"] == "active"
+        assert pc.home is not None and pc.store.config["role"] == "home"
+        assert home.store.fingerprint() == pc.store.fingerprint()
+        assert pc.store.cursor() == home.store.cursor()
+        assert pc.store.db.scalar("SELECT wire FROM journal_inbox") == large_command
+    finally:
+        for control in controls:
+            control.close()
+
+
+def test_home_recovery_reuses_saved_transition_after_registry_reply_loss(devices, tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    from lightning.runtime.journal_trust import JournalTrustRuntime
+    from lightning.runtime.session import read_slot, write_slot
+    from lightning.sync.journal.cloud import CloudUnavailable
+    from lightning.sync.journal.owner import OwnerCredential
+
+    import lightning.sync.journal.owner as owner_module
+    monkeypatch.setattr(owner_module, "RECOVERY_MEMORY_KIB", 32768)
+    monkeypatch.setattr(owner_module, "RECOVERY_ITERATIONS", 2)
+    home, pc = devices
+    profile = pc.store.config["profile"]
+    owner, document = OwnerCredential.create(profile, password="password", answer="school", recovery="1234-5678-9012")
+    from lightning.sync.journal.codec import seal
+    config = home.store.config
+    enrollment = seal(dict(type="authority-enrollment", version=1, profile=profile, generation=config["generation"],
+                          home=home.identity.device_id, home_key=home.identity.public_key, owner_key=owner.public_key), owner.sign)
+    memory = AuthorityMemory.enroll(tmp_path / "recovery-control.db", enrollment)
+    memory.bind(pc.store)
+    members = {item.identity.device_id: dict(key=item.identity.public_key, incarnation=item.store.config["incarnation"])
+               for item in devices}
+    Membership(pc).initialize(members, os.urandom(32))
+    owner_path = tmp_path / "owner.json"
+    write_slot(owner_path, document)
+
+    class RegistryClient:
+        def __init__(self):
+            self.certificate = None
+            self.lose_reply = True
+            self.lose_read = False
+            self.wires = []
+
+        async def call(self, route, data=None):
+            if route == "/authority/transition":
+                if self.certificate is None:
+                    self.certificate = data
+                elif self.certificate != data:
+                    raise AssertionError("retry published a competing transition")
+                self.wires.append(data)
+                if self.lose_reply:
+                    self.lose_reply = False
+                    self.lose_read = True
+                    raise CloudUnavailable("registry accepted transition but its read reply was lost")
+                return dict(updated=True)
+            if route == "/authority":
+                if self.certificate is None:
+                    raise AssertionError("registry has no accepted transition")
+                if self.lose_read:
+                    self.lose_read = False
+                    raise CloudUnavailable("registry read was lost")
+                return dict(generation=self.certificate["body"]["generation"],
+                            version=self.certificate["body"]["version"], certificate=self.certificate)
+            raise AssertionError(route)
+
+    client = RegistryClient()
+    internet = SimpleNamespace(configured=True, peer=SimpleNamespace(client=client))
+    trust = JournalTrustRuntime(pc, None, SimpleNamespace(data_dir=tmp_path), document,
+                                owner_path=owner_path, internet=internet)
+    intent_path = tmp_path / f".journal-home-recovery-{profile}.json"
+
+    async def recover_twice():
+        with pytest.raises(CloudUnavailable):
+            await trust.recover_home(password="password", answer="school")
+        saved = read_slot(intent_path)["wire"]
+        assert memory.state()["generation"] == config["generation"]
+        await trust.recover_home(password="password", answer="school")
+        assert len(client.wires) == 2 and client.wires[0] == client.wires[1]
+        assert not intent_path.exists()
+        assert pc.home is not None and memory.state()["phase"] == "active"
+        assert memory.state()["generation"] != config["generation"]
+        assert read_slot(owner_path) == document
+        assert unpack(saved.encode())["body"]["generation"] == client.wires[0]["body"]["generation"]
+
+    try:
+        asyncio.run(recover_twice())
+    finally:
+        memory.close()
+
+
+def test_unconfigured_cloud_recovery_fails_with_clear_unavailable_error(devices, tmp_path):
+    from types import SimpleNamespace
+    from lightning.runtime.journal_profile import CloudPlaceholder
+    from lightning.runtime.journal_trust import JournalTrustRuntime
+    from lightning.sync.journal.cloud import CloudUnavailable
+
+    home, pc = devices
+    owner, controls = memories(devices, tmp_path)
+    try:
+        trust = JournalTrustRuntime(pc, None, SimpleNamespace(data_dir=tmp_path), {}, internet=CloudPlaceholder())
+        with pytest.raises(CloudUnavailable, match="Reconnect to the authority registry"):
+            asyncio.run(trust.recover_home(password="ignored", answer="ignored"))
+    finally:
+        for control in controls:
+            control.close()
+
+
 def test_recovery_requires_live_registry_publication_and_preserves_old_branch(devices, tmp_path):
     home, pc = devices
     owner, controls = memories(devices, tmp_path)

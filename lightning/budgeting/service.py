@@ -201,7 +201,16 @@ class BudgetService:
         if raw is None:
             return None
         try:
-            return {int(value) for value in json.loads(raw)}
+            values = json.loads(raw)
+            ids = set()
+            by_code = {category.code: category.id for category in self.categories.tree()}
+            for value in values:
+                try:
+                    ids.add(int(value))
+                except (ValueError, TypeError):
+                    if str(value) in by_code:
+                        ids.add(by_code[str(value)])
+            return ids
         except (ValueError, TypeError):
             return set()
 

@@ -130,3 +130,14 @@ def background_note():
         if line:
             return line
     return ""
+
+
+def sync_journal(files_dir):
+    """Android background entry point. Only an unlocked, registered phone session can synchronize."""
+    import asyncio
+    from lightning.runtime.journal_android import sync_once
+
+    try:
+        return asyncio.run(sync_once(files_dir))
+    except Exception:  # noqa: BLE001 - leave the journal pending for a later scheduler opportunity
+        return "offline"

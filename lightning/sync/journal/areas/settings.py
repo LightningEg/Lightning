@@ -6,8 +6,7 @@ COMMANDS = {
     "settings.set": Command("settings.set", dict(key=TEXT, value=LONG), target=("settings", ("key",))),
     "set_profile_currency": Command("set_profile_currency", dict(code=TEXT)),
     # Services whose whole write is a few settings keys: the financial-health limits, the raise offer, zakat's switch
-    # and dismissing an unread bank message. Assigning a bank-message ending is not covered (it stores local account
-    # ids and stages an import).
+    # and dismissing an unread bank message.
     "health.set_limit": Command("health.set_limit", dict(key=TEXT, raw=TEXT, no_limit=FLAG, alert_raw=optional(TEXT))),
     "health.restore_limit": Command("health.restore_limit", dict(key=TEXT)),
     "health.take_raise": Command("health.take_raise", dict(choice=choice("plan", "save", "keep"), month=optional(MONTH))),

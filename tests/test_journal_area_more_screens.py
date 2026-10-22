@@ -33,9 +33,13 @@ def test_saving_a_rule_on_the_screens(screens):
     pc.sync_with(hd.home)
     assert pc.c.db.scalar("SELECT COUNT(*) FROM rules") == 1
     same(hd, pc)
-    # A rule that names an account cannot be carried yet; the form says so and nothing is saved.
-    response = replica.post("/rules", data=rule_form(food, account_id=str(account(pc, "Bank").id)))
-    assert response.status_code == 400 and "not available" in response.text and not pc.store.pending()
+    # An account condition travels by account code, not the replica's local id.
+    bank = account(pc, "Bank")
+    response = replica.post("/rules", data=rule_form(food, account_id=str(bank.id)))
+    assert response.status_code == 303 and "Saved+on+this+device" in response.headers["location"]
+    pc.sync_with(hd.home)
+    rule = next(rule for rule in pc.c.rules.list() if any(condition.field == "account" for condition in rule.conditions))
+    assert next(condition.value for condition in rule.conditions if condition.field == "account") == bank.code
 
 
 def test_a_transaction_from_the_account_form_and_a_saved_view_on_the_screens(screens):

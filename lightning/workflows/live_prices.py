@@ -1,4 +1,5 @@
-"""Each copy of Lightning fetches its own prices from the sources (owner, 2026-10-05; issues/6-market-data/6A-price-packs.md
+"""Ordinary profiles fetch their own prices from the sources. Experimental journal profiles fetch on the home
+and receive exact journaled price rows (owner, 2026-10-05; issues/6-market-data/6A-price-packs.md
 › How the app gets prices).
 
 When: never daily by itself. Month-end closes matter most, because the monthly revaluation is posted from them,
@@ -472,6 +473,10 @@ def start_if_due(c, on: date, session=None, now: datetime | None = None) -> bool
     """fetch_if_due without the wait: the sources are asked on another thread while the profile opens;
     apply_finished() saves the answer on the next page. False when nothing was due (no request is made)."""
     global _job
+    # Journal profiles use JournalAutomation: its worker returns only data, and
+    # the owning loop publishes every save through the home confirmation path.
+    if c.db.has_table("journal_meta"):
+        return False
     if c.db.read_only or not enabled() or c.settings.get(TRIED_SETTING) == fmt_date(on):
         return False
     work = plan(c, on, now)
@@ -504,7 +509,21 @@ def apply_finished(c) -> str:
     what it did, once. "" while it runs, or when there is nothing to save."""
     global _job
     job = _job
-    if job is None or not job.done.is_set():
+    if job is None:
+        return ""
+    # A caller for a newly opened profile proves the old container has been
+    # closed. Drop its completed result without touching either connection.
+    if job.container is not c:
+        _job = None
+        return ""
+    db = getattr(c, "db", None)
+    if db is None:
+        _job = None
+        return ""
+    if db.has_table("journal_meta"):
+        _job = None
+        return ""
+    if not job.done.is_set():
         return ""
     _job = None
     if job.container is not c or c.db.read_only:

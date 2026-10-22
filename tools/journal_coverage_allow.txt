@@ -1,10 +1,14 @@
 # Routes that must stay covered by the edit journal (tools/journal_coverage.py --check). One `POST path` per line.
-# POST /transactions/merge is covered by a command but also moves bank-import links: add it back once the import tables are synchronized.
 POST /accounts/new
 POST /accounts/{account_id:int}/convert
 POST /accounts/{account_id:int}/deactivate
 POST /accounts/{account_id:int}/edit
+POST /accounts/{account_id:int}/value
 POST /accounts/{account_id:int}/investment-entry
+POST /accounts/{account_id:int}/import
+POST /accounts/{account_id:int}/import/map
+POST /accounts/{account_id:int}/import/{batch_id:int}/confirm
+POST /accounts/{account_id:int}/import/{batch_id:int}/discard
 POST /accounts/{account_id:int}/items/new
 POST /accounts/{account_id:int}/items/{asset_id:int}/edit
 POST /accounts/{account_id:int}/items/{asset_id:int}/trade
@@ -19,6 +23,7 @@ POST /accounts/{account_id:int}/register
 POST /accounts/{account_id:int}/register/{txn_id:int}
 POST /accounts/{account_id:int}/spendable
 POST /accounts/{account_id:int}/transaction/new
+POST /activity/{transaction_id:int}/apply
 POST /birdview/settings
 POST /budget
 POST /budget/bulk
@@ -58,13 +63,18 @@ POST /gameya/{account_id:int}/instalment
 POST /gameya/{account_id:int}/past-instalments
 POST /gameya/{account_id:int}/payout
 POST /gameya/{account_id:int}/terms
+POST /history/{operation}
 POST /investments/asset-plan/{asset_id:int}
 POST /investments/assets/new
 POST /investments/assets/{asset_id:int}/edit
 POST /investments/new
 POST /investments/planner
 POST /investments/prices
+POST /investments/prices/market/fill
+POST /investments/prices/market/update
 POST /investments/prices/market/import
+POST /investments/prices/markets
+POST /investments/prices/online
 POST /investments/prices/markets
 POST /investments/targets
 POST /investments/{txn_id:int}/edit
@@ -73,10 +83,12 @@ POST /payday/apply
 POST /payday/enable
 POST /plan/from-transaction/{txn_id:int}
 POST /plan/items
+POST /plan/items/{item_id:int}/early-payment
 POST /plan/items/{item_id:int}/amount
 POST /plan/items/{item_id:int}/delete
 POST /plan/items/{item_id:int}/edit
 POST /plan/items/{item_id:int}/pay
+POST /plan/purchases/new
 POST /plan/suggestions/{counterparty_id:int}/not-recurring
 POST /reimbursements
 POST /reimbursements/{claim_id:int}/delete
@@ -102,10 +114,14 @@ POST /settings/locale
 POST /settings/privacy
 POST /setup/currency
 POST /setup/guide
+POST /setup/salary
 POST /sms/dismiss
+POST /sms/paste
+POST /sms/assign
 POST /transactions/bulk-category
 POST /transactions/bulk-delete
 POST /transactions/bulk-edit
+POST /transactions/merge
 POST /transactions/register
 POST /transactions/register/{txn_id:int}
 POST /transactions/views

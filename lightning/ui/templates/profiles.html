@@ -61,12 +61,14 @@
       </section>
 
       {% if error %}<div class="alert alert-error" role="alert" aria-live="assertive">{{ error|tr(locale) }}</div>{% endif %}
+      {% if error and selected and mode == 'unlock' %}<p><a class="text-link" href="/profiles/journal/setup?db={{ selected|urlencode }}">{{ 'استكمال إعداد التعديل من الأجهزة' if locale == 'ar' else 'Finish device editing setup' }}</a></p>{% endif %}
       {% if error and selected and mode in ['unlock', 'restore'] and 'restore' in error|lower %}<p><a class="text-link" href="/profiles/restore/resume?db={{ selected|urlencode }}">{{ 'Check interrupted restore →'|tr(locale) }}</a></p>{% endif %}
       {% if notice %}<div class="alert alert-notice" role="status">{{ notice|tr(locale) }}</div>{% endif %}
       {% if mode == 'devices' %}<p><a class="text-link" href="/profiles">{{ '← Back to profile settings'|tr(locale) }}</a></p>{% elif mode not in ['choose', 'manage', 'checking'] %}<p><a class="text-link" href="/profiles">{{ '← Back to profiles'|tr(locale) }}</a></p>{% endif %}
       {% if selected and not on_phone %}<p class="selected-database">{{ 'Selected database:'|tr(locale) }} <code>{{ selected }}</code></p>{% endif %}
 
       {% if mode == 'choose' %}
+        <p><a class="button button-secondary" href="/profiles/journal/join">{{ 'انضم لجهازك الأساسي' if locale == 'ar' else 'Join your existing home' }}</a></p>
         <section class="panel" aria-labelledby="profiles-heading">
           <div class="panel-heading"><div><h2 id="profiles-heading">{{ 'Available profiles'|tr(locale) }}</h2><p>{{ 'Choose one to continue.'|tr(locale) }}</p></div></div>
           {% if profiles %}
@@ -191,14 +193,14 @@
       {% elif mode == 'restore' %}
         <section class="panel form-panel" aria-labelledby="restore-heading">
           <h2 id="restore-heading">{{ 'Check the saved copy'|tr(locale) }}</h2>
-          <p>{{ 'Lightning checks the backup before replacing the profile. The selected backup and a copy of your current database are kept.'|tr(locale) }}</p>
+          <p>{% if journal_restore %}{{ 'This signed journal backup opens as a separate review copy. Pair a fresh device to recover saved edits.'|tr(locale) }}{% else %}{{ 'Lightning checks the backup before replacing the profile. The selected backup and a copy of your current database are kept.'|tr(locale) }}{% endif %}</p>
           <p class="selected-database">{{ 'Backup:'|tr(locale) }} <code>{{ backup }}</code></p>
           <form method="post" action="/profiles/restore" class="form-stack">
             <input type="hidden" name="csrf" value="{{ csrf }}">
             <input type="hidden" name="db" value="{{ selected }}">
             <input type="hidden" name="backup" value="{{ backup }}">
             <div class="field"><label for="restore-password">{{ 'Profile password'|tr(locale) }}</label><input id="restore-password" name="password" type="password" required autocomplete="current-password"></div>
-            <label class="check-row"><input type="checkbox" name="confirm" value="yes" required><span>{{ 'Replace this profile with the selected backup.'|tr(locale) }}</span></label>
+            <label class="check-row"><input type="checkbox" name="confirm" value="yes" required><span>{% if journal_restore %}{{ 'Create a separate review copy from this backup.'|tr(locale) }}{% else %}{{ 'Replace this profile with the selected backup.'|tr(locale) }}{% endif %}</span></label>
             <div class="form-actions"><button class="button button-primary" type="submit">{{ 'Restore backup'|tr(locale) }}</button><a class="text-link" href="/profiles">{{ 'Cancel'|tr(locale) }}</a></div>
           </form>
         </section>
@@ -348,7 +350,8 @@
           <div class="account-actions"><a class="button button-secondary" href="/">{{ "Open finance"|tr(locale) }}</a>{% if is_borrowed %}<form method="post" action="/profiles/hand-back"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="button button-primary" type="submit">{{ 'Hand back' if writable else 'Close this copy' }}</button></form>{% else %}<a class="button button-secondary" href="/profiles/devices">{{ 'Devices'|tr(locale) }}</a><form method="post" action="/profiles/lock"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="button button-secondary" type="submit">{{ "Lock profile"|tr(locale) }}</button></form>{% endif %}</div>
         </section>
         {% if not is_borrowed %}
-        {% if not on_phone %}<section class="panel form-panel" aria-labelledby="move-heading">
+        {% if not journal_enabled %}<p><a class="button button-secondary" href="/profiles/journal/setup">{{ 'التعديل من أجهزتك' if locale == 'ar' else 'Edit from your devices' }}</a></p>{% endif %}
+        {% if not on_phone and not journal_enabled %}<section class="panel form-panel" aria-labelledby="move-heading">
           <h2 id="move-heading">{{ "Move to your phone"|tr(locale) }}</h2>
           <p>{{ "The phone becomes this profile's home and this PC borrows it from there. On the phone, open Lightning and choose Bring a profile from your PC."|tr(locale) }}</p>
           <form method="post" action="/profiles/move" class="form-stack">

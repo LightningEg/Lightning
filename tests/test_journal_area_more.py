@@ -248,19 +248,28 @@ def test_rules_save_apply_to_the_past_undo_and_delete(devices):
     assert not pc.c.db.scalar("SELECT COUNT(*) FROM rules") and not pc.c.db.scalar("SELECT COUNT(*) FROM rule_actions")
 
 
-def test_a_rule_naming_an_account_is_refused_not_stored_wrongly(devices):
+def test_a_rule_naming_an_account_uses_the_shared_account_code(devices):
     hd, pc = devices
     food = category(pc).id
-    values = {"match": "all", "counterparty": "x", "category_id": str(food), "account_id": str(account(pc, "Bank").id)}
-    with pytest.raises(Exception, match="not available"):
-        JournalServices(pc).rules.save(values)
-    assert not pc.store.pending()
+    bank = account(pc, "Bank")
+    values = {"match": "all", "counterparty": "x", "category_id": str(food), "account_id": str(bank.id)}
+    act(hd, pc, lambda s: s.rules.save(values))
+    rule = pc.c.rules.list()[0]
+    condition = next(c for c in rule.conditions if c.field == "account")
+    assert condition.value == bank.code
+    assert pc.c.rules.form_values(rule)["account_id"] == str(bank.id)
+    assert pc.c.rules.outcome("x", account_id=bank.id).category_id == food
+
+
+def test_custom_institution_is_synchronized(devices):
+    hd, pc = devices
+    act(hd, pc, lambda s: s.institutions.add("Example Bank"))
+    assert any(i.name == "Example Bank" for i in pc.c.institutions.custom())
 
 
 def test_a_merge_waits_for_the_import_tables(devices):
     from lightning.sync.journal.effects import SYNCED
-    if "bank_import_rows" not in SYNCED:
-        pytest.skip("merging also moves bank-import links; it works once those tables are synchronized")
+    assert "bank_import_rows" in SYNCED
     hd, pc = devices
     bank = account(pc, "Bank").id
     food = category(pc).id

@@ -23,7 +23,9 @@ FIELDS = ("name", "account_type", "institution", "last4", "notes", "opening_bala
 
 def _remember_institution(c, text: str) -> None:
     """An institution typed on the form that the list lacks joins the profile's own institutions."""
-    if text.strip():
+    # Journal account commands stage the account and institution together. On a
+    # replica, a separate command here would stop the route before the account.
+    if text.strip() and not getattr(c, "is_journal", False):
         c.institutions.add(text)
 
 

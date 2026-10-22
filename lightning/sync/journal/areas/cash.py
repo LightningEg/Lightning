@@ -31,10 +31,10 @@ COMMANDS = {
     "transactions.delete_many": Command("transactions.delete_many", dict(txn_ids=listof(ref("transactions"))), targets=SELECTED),
     "transactions.set_category": Command("transactions.set_category", dict(
         txn_ids=listof(ref("transactions")), category_id=ref("categories")), targets=SELECTED),
-    "transactions.record_inflow": Command("transactions.record_inflow", ENTRY | dict(
-        category_id=ref("categories"), counterparty=TEXT), creates="transactions"),
-    "transactions.record_outflow": Command("transactions.record_outflow", ENTRY | dict(
-        category_id=ref("categories"), counterparty=TEXT), creates="transactions"),
+    "transactions.record_inflow_described": Command("transactions.record_inflow", ENTRY | dict(
+        category_id=ref("categories"), description=TEXT, counterparty=TEXT), creates="transactions"),
+    "transactions.record_outflow_described": Command("transactions.record_outflow", ENTRY | dict(
+        category_id=ref("categories"), description=TEXT, counterparty=TEXT), creates="transactions"),
     "transactions.record_transfer": Command("transactions.record_transfer", dict(
         date=DATE, from_account_id=ref("accounts"), to_account_id=ref("accounts"), amount=AMOUNT, notes=LONG,
         owner_id=optional(ref("counterparties"))), creates="transactions"),
@@ -63,3 +63,18 @@ COMMANDS = {
         account_id=ref("accounts"), through=DATE, bank_balance=AMOUNT), target=CHECKED),
     "reconciliation.unlock": Command("reconciliation.unlock", dict(account_id=ref("accounts")), target=CHECKED),
 }
+
+
+# Keep the original wire shape readable for edits queued before descriptions were supported.
+def _legacy_inflow(c, **values):
+    return c.transactions.record_inflow(**values)
+
+
+def _legacy_outflow(c, **values):
+    return c.transactions.record_outflow(**values)
+
+
+COMMANDS["transactions.record_inflow"] = Command(_legacy_inflow, ENTRY | dict(
+    category_id=ref("categories"), counterparty=TEXT), creates="transactions")
+COMMANDS["transactions.record_outflow"] = Command(_legacy_outflow, ENTRY | dict(
+    category_id=ref("categories"), counterparty=TEXT), creates="transactions")

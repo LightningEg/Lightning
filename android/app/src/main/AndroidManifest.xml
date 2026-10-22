@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- The pages are served on 127.0.0.1 and the PC reaches the phone on the local network. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- While the ledger is lent, keep listening for the PC's hand-back with a visible notification. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
@@ -36,5 +37,7 @@
         <activity android:name=".ProbeActivity" android:exported="false"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|keyboard|uiMode" />
         <service android:name=".SyncService" android:exported="false" android:foregroundServiceType="dataSync" />
+        <service android:name=".JournalSyncJobService" android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 </manifest>

@@ -78,6 +78,10 @@ class SessionGate:
     def device_line(self) -> tuple[str, str]:
         """The status line under the header while a ledger is borrowed or lent, and its action."""
         devices, session = getattr(self, "devices", None), self.session
+        if session.journal is not None:
+            runtime = session.journal
+            pending = len(runtime.store.pending())
+            return (f"{pending} edits waiting for the home" if pending else "Synchronized profile", "")
         if devices is None or session.paths is None:
             return "", ""
         if session.borrowed is not None:
@@ -153,6 +157,8 @@ class SessionGate:
                                                   read_only=not self.session.role.writable,
                                                   device_line=line, device_action=device_action)
             self.app.state.container = self.session.container
+            if self.session.journal is not None and self.session.journal.task is None:
+                self.session.journal.start(self, files_dir=self.session.root.parent if getattr(self, "phone", False) else None)
             if self.session.container is not None and request.url.path != "/profiles/health" and not request.url.path.startswith("/static/"):
                 self.session.last_activity = time.monotonic()
             await self.app(scope, receive, send)
@@ -168,9 +174,17 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     session.borrowed_home = ""
     app = create_app(None)
     app.state.profile_session = session
+    from .journal_ui_routes import journal_ui_router
+    from .journal_enrollment_routes import journal_enrollment_router
+    from .journal_setup_routes import journal_setup_router
+    from .journal_recovery_routes import journal_recovery_router
+    app.include_router(journal_ui_router(session))
+    app.include_router(journal_enrollment_router(session))
+    app.include_router(journal_recovery_router(session))
     app.state.sms_source = sms
     gate = SessionGate(app, session)
     devices = devices if devices is not None else Devices()
+    app.include_router(journal_setup_router(session, devices))
     gate.devices = devices
     gate.phone = phone
     fingerprint = biometric if phone else None
@@ -260,6 +274,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
         locale = request.cookies.get("lightning_ui_locale", "en")
         locale = locale if locale in ("en", "ar") else "en"
         values = dict(mode=mode, csrf=session.csrf, error=error, root=str(session.root), borrowed=[],
+                      journal_enabled=session.journal is not None,
                       is_borrowed=session.borrowed is not None, writable=session.role.writable,
                       profiles=[], backups=[], selected="", backup="", name="", recovery="",
                       active_name=session.name, notice="", suggestion="", chosen_password="",
@@ -273,6 +288,8 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
         if mode == "unlock":
             values["fingerprint"] = fingerprint_offered(str(context.get("selected", "")))
         values.update(context)
+        values["journal_restore"] = (mode == "restore" and bool(values["backup"])
+            and Path(values["backup"]).with_suffix(".journal-manifest.json").is_file())
         response = templates.TemplateResponse(request, "profiles.html", values, status_code=status)
         if locale == "ar":
             response.body = localize_html(response.body.decode("utf-8")).encode("utf-8")
@@ -379,7 +396,8 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
 
         def operation():
             session.unlock(selected, str(form.get("password", "")), role=role)
-            devices.after_unlock(session.paths)
+            if session.journal is None:
+                devices.after_unlock(session.paths)
         return await action(request, "unlock", operation, selected=selected)
 
     def fingerprint_offered(selected: str) -> bool:
@@ -412,7 +430,8 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
         if result.outcome is Outcome.OK:
             def operation():
                 session.unlock_with_key(selected, result.key, role=role)
-                devices.after_unlock(session.paths)
+                if session.journal is None:
+                    devices.after_unlock(session.paths)
             return await action(request, "unlock", operation, selected=selected)
         if result.outcome is Outcome.CANCELLED:
             return page(request, "unlock", selected=selected)
@@ -500,9 +519,9 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
                               "first (Devices), then restore.")
         if form.get("confirm") != "yes":
             return page(request, "restore", status=400, selected=selected, backup=backup_path,
-                        error="Confirm that this backup will replace the current profile.")
+                        error="Confirm that this backup restore should proceed.")
         try:
-            session.restore_backup(selected, backup_path, str(form.get("password", "")))
+            restored_copy = session.restore_backup(selected, backup_path, str(form.get("password", "")))
         except ProfileError as exc:
             return page(request, "restore", status=400, selected=selected,
                         backup=backup_path, error=str(exc))
@@ -511,6 +530,9 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
             # error. Never promise the old live path is still unchanged.
             return page(request, "restore", status=400, selected=selected,
                         backup=backup_path, error="Restore needs checking. Keep this profile locked and inspect the selected backup and retained copies before trying again.")
+        if restored_copy:
+            return page(request, "unlock", selected=restored_copy,
+                        notice="Backup restored as a separate review copy. Pair a fresh device to recover saved edits.")
         return page(request, "unlock", selected=selected,
                     notice="Backup restored. The previous database was kept for recovery. Unlock this profile to review it.")
 
@@ -582,6 +604,8 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
 
     # ------------------------------------------------------------ multiple devices: the phone's side
     def device_page(request, **context):
+        if session.journal is not None:
+            return RedirectResponse("/journal/devices", 303)
         if gate.phone and session.container is not None and session.borrowed is None:
             return phone_device_page(request, **context)
         return pc_device_page(request, **context)
@@ -614,6 +638,8 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
                     if devices.has_identity() else "", **context)
 
     def home_only():
+        if session.journal is not None:
+            return RedirectResponse("/journal/devices", 303)
         if session.container is None:
             return RedirectResponse("/profiles", 303)
         if devices.lending_state(session.paths) in ("missing", "damaged"):

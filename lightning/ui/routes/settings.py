@@ -62,9 +62,22 @@ async def settings_page(request: Request):
                               "estimate": sum((r["estimate"] for r in rows), ZERO)})
     income_categories = [x for x in c.categories.tree(Movement.INFLOW) if not x.is_root and x.income_class is not None]
     expense_categories = [x for x in c.categories.tree(Movement.OUTFLOW) if not x.is_root]
+    category_ids_by_code = {item.code: item.id for item in c.categories.tree()}
+
+    def stored_category_ids(key):
+        values = __import__("json").loads(c.settings.get(key) or "[]")
+        result = set()
+        for value in values:
+            try:
+                result.add(int(value))
+            except (ValueError, TypeError):
+                if str(value) in category_ids_by_code:
+                    result.add(category_ids_by_code[str(value)])
+        return result
+
     try:
-        selected_income = {int(x) for x in __import__('json').loads(c.settings.get("budget_income_categories"))} if c.settings.get("budget_income_categories") else {x.id for x in income_categories if x.family == CategoryFamily.WORK or any(w in x.name.casefold() for w in ("salary", "pay", "wage"))}
-        excluded_categories = {int(x) for x in __import__('json').loads(c.settings.get("budget_one_off_exclusions") or "[]")}
+        selected_income = stored_category_ids("budget_income_categories") if c.settings.get("budget_income_categories") else {x.id for x in income_categories if x.family == CategoryFamily.WORK or any(w in x.name.casefold() for w in ("salary", "pay", "wage"))}
+        excluded_categories = stored_category_ids("budget_one_off_exclusions")
     except (ValueError, TypeError):
         selected_income, excluded_categories = set(), set()
     section = request.query_params.get("section", "general")
@@ -145,6 +158,11 @@ async def save_fx_rate(request: Request):
     c = container(request)
     form = await request.form()
     try:
+        if getattr(c, "is_journal", False):
+            c.journal_workflows.save_fx_rate(currency=str(form.get("currency", "")),
+                                             day=str(form.get("date", "")),
+                                             rate=str(form.get("rate", "")))
+            return redirect("/settings?section=currencies&tab=rates", "Exchange rate saved.")
         c.fx.save(str(form.get("currency", "")), str(form.get("date", "")), str(form.get("rate", "")))
         c.reevaluations.process_due()
     except (ValueError, LightningError) as exc:

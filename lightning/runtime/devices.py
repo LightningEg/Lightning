@@ -127,6 +127,8 @@ class Devices:
         for meta in sorted((self.root / "home").glob(f"*/{HOME_META}")):
             try:
                 live = Path(json.loads(meta.read_text(encoding="utf-8"))["live_path"])
+                if (live.parent / "journal-native.json").exists():
+                    continue
                 if (live.exists() or arriving_path(live).exists()) and (meta.parent / "control.db").exists():
                     nodes.append(self._node(meta.parent, live))
             except (OSError, ValueError, KeyError):
@@ -134,6 +136,8 @@ class Devices:
         return nodes
 
     def enable_home(self, session, phone_name: str) -> HomeNode:
+        if getattr(session, "journal", None) is not None:
+            raise ProtocolError("BAD_REQUEST", "This profile uses edit synchronization. Open its Devices page.")
         """On the owning thread, profile unlocked and writable: make this device the ledger's home."""
         paths = session.paths
         folder = self.home_folder(paths)
@@ -164,6 +168,8 @@ class Devices:
             return "damaged"
 
     def role_for(self, selected: str) -> str:
+        if (Path(selected).parent / "journal-native.json").exists() or (Path(selected).parent / "complete.json").exists():
+            return "home"  # The journal runtime checks authority independently of v1 lending.
         """How a profile kept here may open: "home" (writable) or "reader" (lent away, a hand-back to finish,
         or a lending record missing or damaged). Decided before any connection opens."""
         try:
@@ -181,6 +187,8 @@ class Devices:
             return "reader"
 
     def keep_as_home(self, session, phone_name: str) -> HomeNode:
+        if getattr(session, "journal", None) is not None:
+            raise ProtocolError("BAD_REQUEST", "Use the synchronized profile's Devices page.")
         """The owner's repair when the lending record is missing or damaged: this copy becomes the ledger under a
         new lineage, so no PC copy from before can come back. PCs pair again. On the owning thread."""
         paths = session.paths

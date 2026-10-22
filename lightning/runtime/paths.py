@@ -214,6 +214,10 @@ def _profile_info(path: Path) -> ProfileInfo | None:
         return None
     stem = path.name
     database = path / f"{stem}.db"
+    # First enrollment publishes a verified ledger.db with its durable completion
+    # marker. An interrupted enrollment is never offered as an ordinary profile.
+    if not database.exists() and (path / "complete.json").is_file():
+        database = path / "ledger.db"
     if database.is_symlink() or not database.is_file():
         return None
     return ProfileInfo(
