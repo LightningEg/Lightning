@@ -159,7 +159,9 @@ class JournalHome:
                             else:
                                 wire = self._finish(row, *result)
                     except Exception as error:
-                        if isinstance(error, self.db.OperationalError) or not self.db.conn.in_transaction:
+                        if ((isinstance(error, self.db.driver.DatabaseError)
+                             and not isinstance(error, self.db.driver.IntegrityError))
+                                or not self.db.conn.in_transaction):
                             raise  # Storage failure: stop, keep everything for retry.
                         result = ("review", "home-error")
                     if result[0] == "wait":
@@ -169,7 +171,8 @@ class JournalHome:
                         try:
                             token = self._review_token(row)
                         except Exception as error:
-                            if isinstance(error, self.db.OperationalError):
+                            if (isinstance(error, self.db.driver.DatabaseError)
+                                    and not isinstance(error, self.db.driver.IntegrityError)):
                                 raise
                             token = None
                         self.db.execute("UPDATE journal_inbox SET status='review',reason=?,review_token=? WHERE proposal_id=?",

@@ -3,6 +3,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 from test_journal_finance import devices  # noqa: F401
 from test_journal_screens import screens  # noqa: F401
 
@@ -66,13 +68,13 @@ def test_replica_history_action_stays_on_the_home(screens):
 
 def test_other_database_errors_are_not_hidden(screens, monkeypatch):
     (hd, pc), (home, replica) = screens
-    import sqlite3
+    storage_error = hd.c.db.driver.DatabaseError
 
     from functools import wraps
 
     @wraps(hd.c.sms_imports.assign)
     def broken(*args, **kwargs):
-        raise sqlite3.DatabaseError("disk image is malformed")
+        raise storage_error("disk image is malformed")
     monkeypatch.setattr(hd.c.sms_imports, "assign", broken)
-    with pytest.raises(sqlite3.DatabaseError, match="malformed"):
+    with pytest.raises(storage_error, match="malformed"):
         home.post("/sms/assign", data={"ending": "1234", "account_id": str(next(a.id for a in hd.c.accounts.list() if a.name == "Bank"))})

@@ -126,6 +126,7 @@ COMMAND_NAMES = {
     "budgets.set_budget": "Save budget", "budgets.move_room": "Move budget",
     "reconciliation.close": "Record account reconciliation",
     "bank_imports.stage": "Import bank statement", "bank_imports.confirm": "Confirm bank import",
+    "bank_imports.stage_chunked": "Import bank statement", "bank_imports.confirm_packed": "Confirm bank import",
     "sms_imports.assign": "Assign bank account",
     "activity_review.apply": "Apply activity review", "salary_setup.set_up_salary": "Set up salary",
     "categories.create": "Add category", "categories.update": "Edit category",

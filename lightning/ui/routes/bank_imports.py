@@ -12,6 +12,7 @@ from lightning.bank_imports import OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS, d
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.limits import MAX_CSV_MAPPING_REQUEST_BYTES, MAX_IMPORT_REVIEW_REQUEST_BYTES
 from lightning.core.money import ZERO, fmt
+from lightning.sync.journal.proxy import PendingOnHome
 
 from ..web import container, redirect, render
 
@@ -179,11 +180,18 @@ async def upload(request: Request, account_id: int):
                           suggested_amount_model=mapping.get("amount_model", "SINGLE"), mapping=mapping,
                           invert_amount=mapping.get("amount_sign") == "invert")
         batches = []
+        waiting = None
         for filename, data, saved_mapping, _, _ in prepared:
             mapping = saved_mapping
-            batch_id, repeated = c.bank_imports.stage(account_id, filename, data, mapping,
-                                                       invert_amount=mapping.get("amount_sign") == "invert")
+            try:
+                batch_id, repeated = c.bank_imports.stage(account_id, filename, data, mapping,
+                                                           invert_amount=mapping.get("amount_sign") == "invert")
+            except PendingOnHome as pending:
+                waiting = pending
+                continue
             batches.append((batch_id, repeated))
+        if waiting is not None:
+            raise waiting
         batch_id, repeated = batches[0]
         message = ("Imported files are ready for review." if len(batches) > 1 else "")
         if repeated and len(batches) == 1:
@@ -215,14 +223,21 @@ async def map_columns(request: Request, account_id: int):
         if not bundle:
             bundle = [{"filename": filename, "payload": str(form.get("payload", ""))}]
         batches = []
+        waiting = None
         for item in bundle:
             file_data = base64.b64decode(item["payload"], validate=True)
             file_headers, _ = decode_csv(file_data)
             if file_headers != headers:
                 raise ValidationError("All selected files must use the same columns.", "mapping")
-            batch_id, repeated = c.bank_imports.stage(account_id, str(item["filename"]), file_data, mapping,
-                                                       invert_amount=form.get("amount_sign") == "invert")
+            try:
+                batch_id, repeated = c.bank_imports.stage(account_id, str(item["filename"]), file_data, mapping,
+                                                           invert_amount=form.get("amount_sign") == "invert")
+            except PendingOnHome as pending:
+                waiting = pending
+                continue
             batches.append((batch_id, repeated))
+        if waiting is not None:
+            raise waiting
     except (ValueError, LightningError) as exc:
         if isinstance(exc, ValidationError) and exc.field == "mapping":
             return render(request, "bank_import_map.html", account=c.accounts.get(account_id), headers=headers,

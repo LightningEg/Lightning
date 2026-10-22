@@ -97,6 +97,31 @@ def test_a_forty_row_statement_is_one_confirmation(devices):
     same(hd, pc)
 
 
+def test_a_three_hundred_row_statement_uses_bounded_chunked_commands(devices):
+    hd, pc = devices
+    data = statement(300)
+    assert len(data) < 40 * 1024
+    response = upload(Screen(pc), pc, data)
+    assert response.status_code == 303
+    settle(hd, pc)
+    assert hd.c.db.scalar("SELECT COUNT(*) FROM bank_import_rows") == 300
+
+    food = hd.c.categories.get_by_code("EXP.PERSONAL.FOOD").id
+    chosen = decisions(hd, food)
+    for decision in chosen.values():
+        decision["skip"] = True
+    first_row = min(chosen, key=int)
+    chosen[first_row]["skip"] = False
+    chosen[first_row]["date"] = "not-a-date"
+    result = JournalServices(hd).bank_imports.confirm(batch(hd)["id"], chosen)
+    # The bad row holds the entire confirmation for review; the 299 skip changes roll back with it.
+    assert result["posted"] == result["skipped"] == 0
+    assert first_row in result["errors"] or int(first_row) in result["errors"]
+    assert hd.c.db.scalar("SELECT COUNT(*) FROM transactions WHERE source='IMPORT'") == 0
+    settle(hd, pc)
+    same(hd, pc)
+
+
 def test_discard_removes_the_staged_statement_everywhere(devices):
     hd, pc = devices
     upload(Screen(pc), pc, statement())
@@ -118,3 +143,17 @@ def test_a_file_over_forty_kib_is_refused_with_a_clear_message(devices):
         assert response.status_code == 400 and "too large to synchronize" in response.text
         assert not device.store.pending()
 
+
+
+def test_replica_saves_every_selected_file_before_returning_pending(devices):
+    home, replica = devices
+    bank = next(a.id for a in replica.c.accounts.list() if a.name == "Bank")
+    files = [("file", (f"part-{index}.csv",
+              f"Date,Amount,Counterparty\n2026-09-02,-10,Shop {index}\n".encode(), "text/csv"))
+             for index in (1, 2)]
+    response = Screen(replica).post(f"/accounts/{bank}/import", files=files)
+    assert response.status_code == 303
+    assert len(replica.store.pending()) == 2
+    settle(home, replica)
+    assert home.c.db.scalar("SELECT COUNT(*) FROM bank_import_batches") == 2
+    same(home, replica)
