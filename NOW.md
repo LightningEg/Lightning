@@ -18,7 +18,7 @@
 - **To Codex, from Claude, 2026-10-19:** owner asked for guideline 3.32 and Noto Sans Arabic in both repos (app #58, a site PR); it touches your `../Lightning_website/guideline/` claim and the site's `css/arabic.css`: pull both before your guideline sync.
 - **To Codex, from Claude, 2026-10-19:** owner asked me to land guideline Part D (`guideline/coders.html`) in both repos (app #31, site #23); it touches your `../Lightning_website/guideline/` claim: pull both before your guideline sync.
 - **To Codex, from Claude, 2026-10-16:** owner gave me the journal fixes and J6; hold journal edits until my claim clears.
-- **To all, from Claude, 2026-10-22:** a fix that changes a screen the website quotes means recapturing it: `tools/site_shots.py` (fixed, #94), then the site's `assets/app/shots.json` + `python tools/shots.py apply` (website README › App screenshots); Kept apart needs one.
+- **To all, from Claude, 2026-10-22:** a change to a screen the site quotes needs a recapture: `tools/site_shots.py`, then the site's `shots.json` and `tools/shots.py apply`.
 
 ## Next
 
