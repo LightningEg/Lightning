@@ -73,7 +73,7 @@ def test_every_path_gives_the_same_money_in_and_money_out(c, setup):
         assert len(set(outs.values())) == 1, (month, outs)
         assert len(set(ins.values())) == 1, (month, ins)
         # Budget leaves investment fees out by design, and nothing else.
-        budget = sum(c.budgets._owned_spending(first, last).values(), D(0))
+        budget = sum(c.budgets.owned_spending(first, last).values(), D(0))
         invest_out = sum((v for k, v in r.money_out_by_category(first, last).items() if k in investment), D(0))
         assert budget == card.outflows - invest_out, month
     october = r.cash_flow("2026-10-01", "2026-10-31")

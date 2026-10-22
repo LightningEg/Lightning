@@ -93,7 +93,7 @@ core/                 dates, money, identifiers, posting rules; no app dependenc
 | `lightning/budgeting`, `reserves.py` | Spending plans and cash reserves (separate concepts) |
 | `lightning/planning` | Recurring items, loans, payments, forecast; `position.py` computes every position figure once; `health.py` ratios, Financial health, plan check |
 | `lightning/reporting`, `integrity.py` | Read-only queries, derived reporting, data checks |
-| `lightning/workflows` | Atomic cross-module use-cases, review inbox, AI-analysis workbook |
+| `lightning/workflows` | Atomic cross-module use-cases (`investment_entry.py`: a register row's buy, sell, dividend or move), review inbox, AI-analysis workbook |
 | `lightning/runtime`, `desktop`, `security`, `sync` | Profiles, sessions, window, encryption, devices (see Desktop app) |
 | `lightning/ui` | Routes, templates, static assets. `charts.py`, `visuals.py`, `keynotes.py`, `kpis.py` only draw and phrase; they never compute a figure |
 

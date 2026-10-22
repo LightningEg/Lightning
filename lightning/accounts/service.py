@@ -17,6 +17,7 @@ from lightning.database.connection import Database
 
 from .domain import DEFAULT_CASH_CLASS, OFFERED_TYPES, TYPE_LABELS, Account, AccountType, suggest_code
 from .repository import AccountRepository
+from .valuations import OtherAssetValuationRepository
 
 
 class AccountService:
@@ -40,6 +41,10 @@ class AccountService:
         if not found:
             raise NotFoundError("Account not found.")
         return found
+
+    def manual_value(self, account_id: int, as_of: str) -> dict | None:
+        """An Other asset account's latest value you entered on or before `as_of`: date, value and notes."""
+        return OtherAssetValuationRepository(self.db).latest(account_id, as_of)
 
     def find_by_text(self, text: str) -> Account | None:
         """An active account matching what was typed: its label ('CIB-CUR-EGP · CIB Current'), code or name."""
