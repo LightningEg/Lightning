@@ -9,8 +9,9 @@ from decimal import Decimal, ROUND_HALF_UP
 from lightning.core.dates import fmt_date, parse_date, parse_month, today
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.memo import request_cached
-from lightning.core.money import ZERO, from_e6, to_decimal
+from lightning.core.money import ZERO, check_places, from_e6, to_decimal
 from lightning.database.connection import Database
+from lightning.database.currencies import minor_units
 from lightning.database.settings import SettingsStore
 from lightning.fx import rate_for
 
@@ -36,6 +37,9 @@ class PlanningService:
         self.categories = categories
         self.counterparties = counterparties
         self.transactions = transactions
+
+    def _currency_of(self, account_id: int | None) -> str:
+        return self.accounts.get(account_id).currency if account_id else self.transactions.base_currency
 
     def amount_in_base(self, payment_or_item: Payment | PlannedItem, amount: Decimal,
                        day: date | str) -> Decimal:
@@ -161,7 +165,8 @@ class PlanningService:
         value = to_decimal(amount, "amount")
         if value <= ZERO:
             raise ValidationError("Enter an amount above zero.", "amount")
-        self.get(item_id)
+        item = self.get(item_id)
+        check_places(value, minor_units(self._currency_of(item.account_id)))  # never rounded silently (2E6)
         with self.db.transaction():
             self.repo.set_amount(item_id, value)
 
@@ -631,6 +636,7 @@ class PlanningService:
                 raise ValidationError("Choose a valid funding account.", "account_id") from None
             if kind == PlanKind.LOAN and account.currency != self.transactions.base_currency:
                 raise ValidationError("Choose a cash account in your profile currency for a loan.", "account_id")
+        check_places(amount, minor_units(self._currency_of(account_id)))  # never rounded silently (2E6)
         category_id = self._id(values.get("category_id"), "category_id")
         if category_id:
             try:

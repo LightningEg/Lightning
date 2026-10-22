@@ -121,3 +121,30 @@ def test_a_transaction_id_outside_the_database_range_is_not_found(c, setup, valu
     with pytest.raises(NotFoundError):
         c.transactions.get(value)
     assert _client(c).get(f"/transactions/{value}").status_code == 404
+
+
+@pytest.mark.parametrize("amount", ["350.555", "0.001"])
+def test_a_plan_amount_with_too_many_decimals_is_refused_not_rounded(c, setup, amount):
+    accounts, _ = setup
+    utilities = c.categories.get_by_code("EXP.PERSONAL.UTILITIES").id
+    with pytest.raises(ValidationError):
+        c.planning.create(kind="BILL", name="Rent", amount=amount, frequency="MONTHLY", start_date="2026-09-09",
+                          account_id=accounts["wallet"].id, category_id=utilities)
+    item = c.planning.create(kind="BILL", name="Rent", amount="350.55", frequency="MONTHLY", start_date="2026-09-09",
+                             account_id=accounts["wallet"].id, category_id=utilities)
+    with pytest.raises(ValidationError):
+        c.planning.set_amount(item, amount)
+    c.planning.set_amount(item, "360.5")
+    assert c.planning.get(item).amount == Decimal("360.5")
+
+
+def test_a_reserve_with_too_many_decimals_is_refused(c, setup):
+    with pytest.raises(ValidationError):
+        c.reserves.create("Holiday", "1000.555")
+    reserve = c.reserves.create("Holiday", "1000.50")
+    for amount in ("12.345", "0.001"):
+        with pytest.raises(ValidationError):
+            c.reserves.allocate(reserve["id"], amount)
+    c.reserves.allocate(reserve["id"], "12.34")
+    with pytest.raises(ValidationError):
+        c.reserves.set_emergency_fund("12.345")
