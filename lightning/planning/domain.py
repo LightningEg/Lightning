@@ -238,6 +238,8 @@ class CashForecast:
     # The payments Safe to spend takes off: scheduled, not yet due, before the next income.
     payments_before_income: list[Payment] = field(default_factory=list)
     dated: DatedCashForecast | None = None
+    # Due before payday: what is still owed on those payments, in the profile currency (the part Safe to spend takes off).
+    payments_before_income_total: Decimal = Decimal(0)
 
     @property
     def first_short_month(self) -> ForecastMonth | None:

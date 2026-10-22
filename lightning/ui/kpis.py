@@ -195,7 +195,7 @@ def budget_period(spent: Decimal, planned: Decimal, months: list[tuple[str, Deci
 
 
 # ── Cash planning ──────────────────────────────────────────────────────────────────────────────────────────
-def cash_plan(f, *, day: date, before: list, late: list, free_then: Decimal | None, then: str, past_free: list[Decimal],
+def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, free_then: Decimal | None, then: str, past_free: list[Decimal],
               position, monthly_spending: Decimal | None, has_income: bool) -> list[dict]:
     """Safe to spend, Free cash, Due before payday and the lowest point ahead, each against something."""
     parts = dict(f.safe_to_spend_parts)
@@ -226,8 +226,7 @@ def cash_plan(f, *, day: date, before: list, late: list, free_then: Decimal | No
                       visual=spark([*past_free, f.free_cash]),
                       line_=line(f"Cash you own {fmt(position.cash_you_own)}, less {fmt(held)} set aside or due"), href="/"))
 
-    before_total = sum((p.amount for p in before), ZERO)
-    late_total = sum((p.still_owed for p in late), ZERO)
+    before_total = f.payments_before_income_total  # the same total Safe to spend takes off (7N)
     if late:
         due_compare = compare("already late", fmt(late_total), "bad")
         due_chip = chip(f"{len(late)} late", "bad")

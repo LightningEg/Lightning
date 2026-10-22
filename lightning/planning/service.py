@@ -61,6 +61,11 @@ class PlanningService:
             )
         return (to_decimal(amount) * rate.rate).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
+    def still_owed_in_base(self, payments, day: date | str) -> Decimal:
+        """What is still owed on these payments, in the profile currency: the one total behind Bills due, Due
+        before payday and the late payments (7N), never full amounts or a sum across currencies."""
+        return sum((self.amount_in_base(p, p.still_owed, day) for p in payments), ZERO)
+
     # ------------------------------------------------------------------ items
     def items(self, kinds: tuple[PlanKind, ...] | None = None, active_only: bool = True) -> list[PlannedItem]:
         items = self.repo.items(active_only)
@@ -508,8 +513,7 @@ class PlanningService:
                                for p in self.payments(item, "2999-12-31", day)), ZERO)
         loans_due = sum((self.amount_in_base(p, p.still_owed, day)
                          for p in due if p.item.kind == PlanKind.LOAN), ZERO)
-        return WhatYouOwe(bills_due=sum((self.amount_in_base(p, p.still_owed, day)
-                                         for p in due), ZERO), loans_still_to_pay=loans_left,
+        return WhatYouOwe(bills_due=self.still_owed_in_base(due, day), loans_still_to_pay=loans_left,
                           bills_due_items=due, loans_due_in_base=loans_due)
 
     @request_cached  # read by every budget line since bills plan their category too (2026-10-05)
