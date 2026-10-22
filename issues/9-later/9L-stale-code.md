@@ -31,7 +31,6 @@ templates and the journal's command strings. Recheck each one before deleting it
   - `weekly_review_remaining` (`workflows/weekly.py:30`) is read only by a test.
   - `market_url` is set only by tests.
   - `allow_foreign` is always on (`accounts/service.py:105`), and its message still says other currencies are "not built yet".
-- **Legacy rows:** nothing writes `money_from_others` rows without a transaction any more. `cash_balance`, `cash_total_for_account`, `totals_by_account`, `by_owner` and `history` still read them. Remove with 2G.
 - **Leftovers:** imports repeated inside functions (`assets/service.py:214,235`), the `"owner_id" in row.keys()` check (`transactions/repository.py:33`), and the `transactions_fts` exclusion in `undo.py`.
 - **Legacy mode (owner decision):** `python -m lightning` still opens a plaintext `data/lightning.db`. Code that exists only for it:
   - `live_prices.fetch_if_due`
