@@ -5,7 +5,7 @@
 <meta name="description" content="قواعد تصميم تطبيق لايتنينج على الموبايل بالعربي المصري، مع أمثلة الدليل الأصلي ورسومه.">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>دليل لايتنينج 3.33 · الموبايل</title>
+<title>دليل لايتنينج 3.34 · الموبايل</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -453,6 +453,33 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
 .pf-day+.pf-tx{border-top:0}.pf-hero{padding:4px 0 0}.pf-hero .big{font-size:36px;line-height:1.05;margin:6px 0 2px}.pf-hero .big small{font:600 13px/1 var(--body);color:var(--muted);margin-left:5px;letter-spacing:0}.pf-hero p{margin:0;font-size:13px;color:var(--ink2)}
 .pf-tx b{display:block;font-size:15px}.pf-tx small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
 .pf-tx .a{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}.pf-tx .a b.in{color:var(--green-text)}
+/* 3.34: the phone overhaul (owner, 2026-10-22) */
+.pf-nav.words{grid-template-columns:repeat(2,minmax(max-content,1fr)) 64px repeat(2,minmax(max-content,1fr))}
+.pf-nav.words>span{position:relative;font-size:12px;font-weight:600}
+.pf-nav.words>span i{width:auto;height:26px;background:none !important;color:inherit}
+.pf-nav.words>span.on{font-weight:800}
+.pf-nav.words>span.on::before{content:"";position:absolute;top:0;inset-inline-start:50%;width:20px;height:3px;margin-inline-start:-10px;border-radius:0 0 3px 3px;background:var(--nile)}
+.pf-nav.words>span.add{color:var(--ink)}
+.pf-nav.words>span.add i{width:48px;height:48px;margin-top:-22px;border-radius:50%;background:var(--nile) !important;color:var(--on-nile);box-shadow:0 6px 16px rgba(10,36,66,.28)}
+.pf-bar .pf-name{font:700 17px/1.15 var(--display);margin:0;margin-inline-start:8px;margin-inline-end:auto;color:var(--ink)}
+.pf-bar.named .pf-mark{margin-inline-end:0}
+.pf-words{display:flex;flex-wrap:wrap;gap:2px;padding:3px;border-radius:14px;background:var(--track)}
+.pf-words>span{flex:1 1 auto;height:40px;padding:0 8px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13.5px;color:var(--ink2);white-space:nowrap}
+.pf-words>span.on{background:var(--white);color:var(--ink);font-weight:800;box-shadow:0 1px 3px rgba(10,36,66,.14)}
+.pf-stepper{display:inline-flex;align-self:flex-start;align-items:center;gap:2px;padding:2px;border-radius:999px;background:var(--white);border:1px solid var(--line)}
+.pf-stepper i{width:40px;height:40px;display:grid;place-items:center;font-style:normal;font-size:16px;color:var(--ink)}
+.pf-stepper b{padding:0 10px;font-size:14px;font-variant-numeric:tabular-nums}
+.pf-lead p{margin:0;font-size:13px;font-weight:600;color:var(--ink2)}
+.pf-lead .big{font:800 40px/1.05 var(--display);margin:6px 0 4px;font-variant-numeric:tabular-nums}
+.pf-lead .big small{font:600 13px/1 var(--body);color:var(--muted);margin-inline-start:5px}
+.pf-lead .st{font-size:14px;font-weight:500}
+.pf-lead::after{content:"";display:block;width:32px;height:3px;margin-top:10px;border-radius:2px;background:linear-gradient(90deg,var(--azure) 50%,var(--green) 50%)}
+.pf-needcard{display:flex;align-items:center;gap:10px;min-height:56px;padding:8px 16px;border-radius:16px;background:var(--white);border:1px solid var(--line)}
+.pf-needcard::before{content:"";flex:none;width:12px;height:17px;background:linear-gradient(90deg,var(--azure) 50%,var(--green) 50%);clip-path:polygon(50% 0,100% 18%,100% 100%,50% 82%,0 100%,0 18%)}
+.pf-needcard div{flex:1;min-width:0}.pf-needcard b{display:block;font-size:15px}.pf-needcard small{display:block;font-size:12.5px;color:var(--ink2)}
+.pf-needcard em{font-style:normal;height:24px;min-width:24px;padding:0 7px;border-radius:999px;background:var(--t-rose);color:var(--rose-strong);display:grid;place-items:center;font-size:12px;font-weight:800}
+.pf-needcard u{font-weight:800}
+.pf-av.ar{font-size:17px}.pf-av.ar.out{background:var(--t-rose);color:var(--rose-strong)}.pf-av.ar.mv{background:var(--track);color:var(--ink2)}.pf-av.ar.inv{background:var(--t-azure);color:var(--azure)}
 /* frame diagram */
 .zones{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:28px;align-items:start}
 .zf{border-radius:30px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:var(--canvas);font-size:12px;font-weight:700}
@@ -522,7 +549,7 @@ html[dir=rtl] svg{direction:ltr}
 <div class="wrap">
 <nav class="side" aria-label="Sections">
   <div class="brand"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii00IC00IDIwOCAyODgiID48ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJhekIiIHgxPSIwIiB5MT0iMCIgeDI9IjAuMzUiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMzNkI0RjIiLz48c3RvcCBvZmZzZXQ9Ii41IiBzdG9wLWNvbG9yPSIjMEI2REQ2Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMEEzRDhGIi8+PC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJhelQiIHgxPSIwIiB5MT0iMSIgeDI9IjEiIHkyPSIwIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiM1Q0M4RjciLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxQTdGRTAiLz48L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9Im1kQiIgeDE9IjAiIHkxPSIwIiB4Mj0iMC4zNSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzJGRDY5QSIvPjxzdG9wIG9mZnNldD0iLjUiIHN0b3AtY29sb3I9IiMxNEE4NzQiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwQTVFNDciLz48L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9Im1kVCIgeDE9IjAiIHkxPSIxIiB4Mj0iMSIgeTI9IjAiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzhCRTZCNiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzFGQjU3RSIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgMCkiPjxwYXRoIGQ9Ik0xMDAgMTAgQzEwMCAzIDk0IC0xIDg4IDIuNSBMNTAgMjIgQzE5IDM3LjUgMCA2NiAwIDEwNSBMMCAxOTYgQzAgMjIxIDIwIDIzMSA0MSAyMTkgTDEwMCAxOTAgWiIgZmlsbD0idXJsKCNhekIpIi8+PHBhdGggZD0iTTAgMTM4LjUgTDEwMCA5MCBMMTAwIDE5MCBMNDEgMjE5IEMyMCAyMzEgMCAyMjEgMCAxOTYgWiIgZmlsbD0idXJsKCNhelQpIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgMCkgcm90YXRlKDE4MCAxMDAgMTQwKSI+PHBhdGggZD0iTTEwMCAxMCBDMTAwIDMgOTQgLTEgODggMi41IEw1MCAyMiBDMTkgMzcuNSAwIDY2IDAgMTA1IEwwIDE5NiBDMCAyMjEgMjAgMjMxIDQxIDIxOSBMMTAwIDE5MCBaIiBmaWxsPSJ1cmwoI21kQikiLz48cGF0aCBkPSJNMCAxMzguNSBMMTAwIDkwIEwxMDAgMTkwIEw0MSAyMTkgQzIwIDIzMSAwIDIyMSAwIDE5NiBaIiBmaWxsPSJ1cmwoI21kVCkiLz48L2c+PC9zdmc+" alt="">Lightning</div>
-  <small>الدليل 3.33 · <bdo dir="ltr">٢٠٢٦-١٠-٢١</bdo></small>
+  <small>الدليل 3.34 · <bdo dir="ltr">٢٠٢٦-١٠-٢٢</bdo></small>
   <div class="grp">C · الموبايل</div>
   <a href="#c-rules"><span class="navnum">C01</span>القواعد</a>
   <a href="#c-frame"><span class="navnum">C02</span>إطار الشاشة ومناطق الأمان</a>
@@ -549,7 +576,7 @@ html[dir=rtl] svg{direction:ltr}
     <p>الجزء C خاص بتطبيق الموبايل: إطار الشاشة ومناطق الأمان والتنقل والعناوين وأهداف اللمس والبطاقات والرسوم والقوائم والنماذج والخط والشاشات. على الموبايل، قواعد C هي المعتمدة عند اختلافها عن A.</p>
     <div class="parts"><a href="app-ar.html">A · التطبيق</a><a href="website-ar.html">B · العادي</a><a href="phone-ar.html" class="on">C · الموبايل</a><a href="coders.html" lang="en">D · Coders</a></div>
     <p class="pickdoc"><b>تلات وثائق في مجلد واحد.</b> ده دليل التطبيق على الموبايل. للكمبيوتر افتح <a href="app-ar.html">app-ar.html</a>، وللموقع <a href="website-ar.html">website-ar.html</a>، وللموبايل <a href="phone-ar.html">phone-ar.html</a>. التلاتة بيشاركوا الشعار والألوان والخطوط والأرقام؛ ولو فيه اختلاف، امشي على وثيقة الواجهة اللي بتشتغل عليها. كل وثيقة نسخة عربي من الإنجليزي بنفس الأقسام والرسوم؛ <a href="phone.html" lang="en">phone.html</a> هو الأصل.</p>
-    <p class="meta">الإصدار 3.33 · <bdo dir="ltr">٢٠٢٦-١٠-٢١</bdo> · النسخة العربي اتراجعت <bdo dir="ltr">٢٠٢٦-١٠-١٢</bdo> · أرقام الأمثلة للتوضيح ومش لازم تتطابق مع بعضها</p>
+    <p class="meta">الإصدار 3.34 · <bdo dir="ltr">٢٠٢٦-١٠-٢٢</bdo> · النسخة العربي اتراجعت <bdo dir="ltr">٢٠٢٦-١٠-٢٢</bdo> · أرقام الأمثلة للتوضيح ومش لازم تتطابق مع بعضها</p>
   </div>
   <figure class="logo-tile on-canvas lock" style="min-height:200px"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NjUgMTQwIj48ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJhekIiIHgxPSIwIiB5MT0iMCIgeDI9IjAuMzUiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMzNkI0RjIiLz48c3RvcCBvZmZzZXQ9Ii41IiBzdG9wLWNvbG9yPSIjMEI2REQ2Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMEEzRDhGIi8+PC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJhelQiIHgxPSIwIiB5MT0iMSIgeDI9IjEiIHkyPSIwIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiM1Q0M4RjciLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxQTdGRTAiLz48L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9Im1kQiIgeDE9IjAiIHkxPSIwIiB4Mj0iMC4zNSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzJGRDY5QSIvPjxzdG9wIG9mZnNldD0iLjUiIHN0b3AtY29sb3I9IiMxNEE4NzQiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwQTVFNDciLz48L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9Im1kVCIgeDE9IjAiIHkxPSIxIiB4Mj0iMSIgeTI9IjAiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzhCRTZCNiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzFGQjU3RSIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxnIHRyYW5zZm9ybT0ic2NhbGUoMC40ODYxMTExMTExMTExMTExKSB0cmFuc2xhdGUoNCA0KSI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAwKSI+PHBhdGggZD0iTTEwMCAxMCBDMTAwIDMgOTQgLTEgODggMi41IEw1MCAyMiBDMTkgMzcuNSAwIDY2IDAgMTA1IEwwIDE5NiBDMCAyMjEgMjAgMjMxIDQxIDIxOSBMMTAwIDE5MCBaIiBmaWxsPSJ1cmwoI2F6QikiLz48cGF0aCBkPSJNMCAxMzguNSBMMTAwIDkwIEwxMDAgMTkwIEw0MSAyMTkgQzIwIDIzMSAwIDIyMSAwIDE5NiBaIiBmaWxsPSJ1cmwoI2F6VCkiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAwKSByb3RhdGUoMTgwIDEwMCAxNDApIj48cGF0aCBkPSJNMTAwIDEwIEMxMDAgMyA5NCAtMSA4OCAyLjUgTDUwIDIyIEMxOSAzNy41IDAgNjYgMCAxMDUgTDAgMTk2IEMwIDIyMSAyMCAyMzEgNDEgMjE5IEwxMDAgMTkwIFoiIGZpbGw9InVybCgjbWRCKSIvPjxwYXRoIGQ9Ik0wIDEzOC41IEwxMDAgOTAgTDEwMCAxOTAgTDQxIDIxOSBDMjAgMjMxIDAgMjIxIDAgMTk2IFoiIGZpbGw9InVybCgjbWRUKSIvPjwvZz48L2c+PHBhdGggdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTM1LjExMTExMTExMTExMTExIDEwNCkiIGQ9Ik01LjcxNDIzMzM5ODQzNzUgMC4wVi02Ni4wSDIxLjg1NzA5MjI4NTE1NjI1MlYwLjBaTTguNTcxMzc0NTExNzE4NzUgMC4wVi0xMy42Mjg1NzY2NjAxNTYyNUg0Ny45ODU2MzIzMjQyMTg3NTZWMC4wWk01Mi4wNDI4MTAwNTg1OTM3NiAwLjBWLTUyLjgwMDAwMDAwMDAwMDAwNEg2OC4xODU2Njg5NDUzMTI1VjAuMFpNNjAuMDk5OTUxMTcxODc1MDA2IC01OC43MTQyMjExOTE0MDYyNVE1NS40OTk5NTExNzE4NzUwMDQgLTU4LjcxNDIyMTE5MTQwNjI1IDUzLjA0OTk1MTE3MTg3NTAxIC02MC42NTQ0NDcwNTM2MDgxNDVRNTAuNTk5OTUxMTcxODc1MDA2IC02Mi41OTQ2NzI5MTU4MTAwNCA1MC41OTk5NTExNzE4NzUwMDYgLTY2LjI3NjEyNzExNTg4NTQyUTUwLjU5OTk1MTE3MTg3NTAwNiAtNzAuMDU3MDgwMDc4MTI1IDUzLjA0OTk1MTE3MTg3NTAxIC03Mi4wMDcwODAwNzgxMjVRNTUuNDk5OTUxMTcxODc1MDA0IC03My45NTcwODAwNzgxMjUgNjAuMDk5OTUxMTcxODc1MDA2IC03My45NTcwODAwNzgxMjVRNjQuNzk5OTUxMTcxODc1MDEgLTczLjk1NzA4MDA3ODEyNSA2Ny4yNDk5NTExNzE4NzUwMSAtNzEuOTg1NjUwNjM0NzY1NjJRNjkuNjk5OTUxMTcxODc1IC03MC4wMTQyMjExOTE0MDYyNSA2OS42OTk5NTExNzE4NzUgLTY2LjI4NTI1OTI1NzI3NzRRNjkuNjk5OTUxMTcxODc1IC02Mi42NTcwODAwNzgxMjUwMDYgNjcuMjQ5OTUxMTcxODc1MDEgLTYwLjY4NTY1MDYzNDc2NTYzUTY0Ljc5OTk1MTE3MTg3NTAxIC01OC43MTQyMjExOTE0MDYyNSA2MC4wOTk5NTExNzE4NzUwMDYgLTU4LjcxNDIyMTE5MTQwNjI1Wk05Ny41NzEzNzQ1MTE3MTg3NiAxNy4zOTk5NTExNzE4NzVRODguNzI4NTE1NjI1MDAwMDEgMTcuMzk5OTUxMTcxODc1IDgzLjI3MTM4MDYxNTIzNDM5IDE2LjAyODUyMTcyODUxNTYyNFE3Ny44MTQyNDU2MDU0Njg3NiAxNC42NTcwOTIyODUxNTYyNTEgNzUuMzU3MTEwNTk1NzAzMTMgMTIuMDkyODEwMDU4NTkzNzVRNzIuODk5OTc1NTg1OTM3NTEgOS41Mjg1Mjc4MzIwMzEyNSA3Mi44OTk5NzU1ODU5Mzc1MSA1LjkyODU0MDAzOTA2MjUwMVE3Mi44OTk5NzU1ODU5Mzc1MSAxLjQxNDI1NzgxMjUgNzYuNDg1Njg3MjU1ODU5MzkgLTEuMzc4NTk0OTcwNzAzMTI1UTgwLjA3MTM5ODkyNTc4MTI3IC00LjE3MTQ0Nzc1MzkwNjI1IDg2Ljk5OTk2MzM3ODkwNjI2IC00LjgyODYwMTA3NDIxODc1Vi02LjI0Mjg1ODg4NjcxODc1UTgxLjY3MTM5ODkyNTc4MTI2IC02LjI0Mjg1ODg4NjcxODc1IDc4Ljc0MjgyODM2OTE0MDY0IC03LjYyMTQ0MTY1MDM5MDYyNVE3NS44MTQyNTc4MTI1MDAwMiAtOS4wMDAwMjQ0MTQwNjI1IDc1LjgxNDI1NzgxMjUwMDAyIC0xMi4wNDI4ODMzMDA3ODEyNVE3NS44MTQyNTc4MTI1MDAwMiAtMTQuODg1NzQyMTg3NSA3OC42MDcxMTA1OTU3MDMxNSAtMTcuMTg1NzQyMTg3NVE4MS4zOTk5NjMzNzg5MDYyNiAtMTkuNDg1NzQyMTg3NSA4Ny44NTcwOTIyODUxNTYyNiAtMjAuMjI4NTc2NjYwMTU2MjVWLTIxLjcyODU1MjI0NjA5Mzc1MlE4MS45OTk5NjMzNzg5MDYyNiAtMjIuNTcxNDIzMzM5ODQzNzUgNzguNTcxMzk4OTI1NzgxMjcgLTI2LjE4NTcxMTY2OTkyMTg3NlE3NS4xNDI4MzQ0NzI2NTYyNiAtMjkuOCA3NS4xNDI4MzQ0NzI2NTYyNiAtMzUuNjQyODU4ODg2NzE4NzVRNzUuMTQyODM0NDcyNjU2MjYgLTQwLjY3MTQzNTU0Njg3NSA3Ny44Nzg1NDYxNDI1NzgxMyAtNDQuNjE0Mjg4MzMwMDc4MTI1UTgwLjYxNDI1NzgxMjUwMDAxIC00OC41NTcxNDExMTMyODEyNTQgODYuMDI4NTMzOTM1NTQ2ODkgLTUwLjg3ODU2NDQ1MzEyNTAxUTkxLjQ0MjgxMDA1ODU5Mzc2IC01My4xOTk5ODc3OTI5Njg3NTYgOTkuMzcxMzYyMzA0Njg3NTEgLTUzLjE5OTk4Nzc5Mjk2ODc1NkgxMjYuMjk5OTE0NTUwNzgxMjdWLTQwLjk3MTQxMTEzMjgxMjUwNkwxMDguOTk5ODkwMTM2NzE4NzYgLTQzLjIxNDI3MDAxOTUzMTI1NlYtNDEuNTAwMDEyMjA3MDMxMjU0UTExNi4yNzEzNTAwOTc2NTYyNyAtNDAuNTE0Mjk0NDMzNTkzNzU0IDExOS4xMzU2Mzg0Mjc3MzQzOSAtMzguMTc4NTcwNTU2NjQwNjNRMTIxLjk5OTkyNjc1NzgxMjUyIC0zNS44NDI4NDY2Nzk2ODc1MDQgMTIxLjk5OTkyNjc1NzgxMjUyIC0zMi4wODU3MDU1NjY0MDYyNTRRMTIxLjk5OTkyNjc1NzgxMjUyIC0yOC4yMTQyODIyMjY1NjI1MDMgMTE5LjQ2NDIyMTE5MTQwNjI3IC0yNS4yMDAwMDAwMDAwMDAwMDNRMTE2LjkyODUxNTYyNTAwMDAyIC0yMi4xODU3MTc3NzM0Mzc1MDMgMTEyLjA1NzA5MjI4NTE1NjI3IC0yMC40Nzg1NzY2NjAxNTYyNVExMDcuMTg1NjY4OTQ1MzEyNTEgLTE4Ljc3MTQzNTU0Njg3NSAxMDAuMTU3MDkyMjg1MTU2MjcgLTE4Ljc3MTQzNTU0Njg3NVE5OC41Mjg1MDM0MTc5Njg3NiAtMTguNzcxNDM1NTQ2ODc1IDk2LjczNTYzMjMyNDIxODc2IC0xOC45MTQyOTQ0MzM1OTM3NTNROTQuOTQyNzYxMjMwNDY4NzYgLTE5LjA1NzE1MzMyMDMxMjUgOTIuMDI4NTE1NjI1MDAwMDEgLTE5LjQ1NzE1MzMyMDMxMjVROTAuMzg1NjU2NzM4MjgxMjYgLTE4LjM1NzE2NTUyNzM0Mzc1IDg5LjQ2NDIyNzI5NDkyMTg4IC0xNy40OTI4ODMzMDA3ODEyNVE4OC41NDI3OTc4NTE1NjI1MSAtMTYuNjI4NjAxMDc0MjE4NzUgODguNTQyNzk3ODUxNTYyNTEgLTE1LjgyODYwMTA3NDIxODc1MVE4OC41NDI3OTc4NTE1NjI1MSAtMTUuMjcxNDU5OTYwOTM3NSA4OC45OTk5Mzg5NjQ4NDM3NiAtMTQuOTM1NzQ4MjkxMDE1NjI0UTg5LjQ1NzA4MDA3ODEyNTAyIC0xNC42MDAwMzY2MjEwOTM3NSA5MC4zMjEzNjIzMDQ2ODc1MSAtMTQuNDQyODk1NTA3ODEyNTAxUTkxLjE4NTY0NDUzMTI1IC0xNC4yODU3NTQzOTQ1MzEyNTEgOTIuMjQyNzg1NjQ0NTMxMjcgLTE0LjI4NTc1NDM5NDUzMTI1MUgxMDguMjk5OTI2NzU3ODEyNTFRMTEwLjM0Mjc4NTY0NDUzMTI2IC0xNC4yODU3NTQzOTQ1MzEyNTEgMTEzLjU0OTkyNjc1NzgxMjUxIC0xNC4wMzU3NTQzOTQ1MzEyNTFRMTE2Ljc1NzA2Nzg3MTA5Mzc3IC0xMy43ODU3NTQzOTQ1MzEyNTEgMTE5Ljk2NDIwODk4NDM3NTAyIC0xMi41MDcxODM4Mzc4OTA2MjZRMTIzLjE3MTM1MDA5NzY1NjI3IC0xMS4yMjg2MTMyODEyNSAxMjUuMzU3MDYxNzY3NTc4MTQgLTguMzI4NjEzMjgxMjVRMTI3LjU0Mjc3MzQzNzUwMDAyIC01LjQyODYxMzI4MTI1MDAwMDUgMTI3LjU0Mjc3MzQzNzUwMDAyIC0wLjA3MTQ3MjE2Nzk2ODc1UTEyNy41NDI3NzM0Mzc1MDAwMiA1Ljg3MTM4NjcxODc1IDEyNC4zMDcwNjE3Njc1NzgxNSA5Ljc1NzA5ODM4ODY3MTg3NlExMjEuMDcxMzUwMDk3NjU2MjYgMTMuNjQyODEwMDU4NTkzNzUxIDExNC40NDI3ODU2NDQ1MzEyNiAxNS41MjEzODA2MTUyMzQzNzRRMTA3LjgxNDIyMTE5MTQwNjI2IDE3LjM5OTk1MTE3MTg3NSA5Ny41NzEzNzQ1MTE3MTg3NiAxNy4zOTk5NTExNzE4NzVaTTk4Ljc3MTMzNzg5MDYyNSAzLjk5OTkyNjc1NzgxMjVRMTA0Ljk1NzA2Nzg3MTA5Mzc2IDMuOTk5OTI2NzU3ODEyNSAxMDguMTU3MDY3ODcxMDkzNzYgMy40NjQyMTUwODc4OTA2MjUzUTExMS4zNTcwNjc4NzEwOTM3NiAyLjkyODUwMzQxNzk2ODc1MDQgMTEyLjQ5OTkyMDY1NDI5Njg5IDEuODQyNzk3ODUxNTYyNVExMTMuNjQyNzczNDM3NTAwMDEgMC43NTcwOTIyODUxNTYyNSAxMTMuNjQyNzczNDM3NTAwMDEgLTAuODE0MzE4ODQ3NjU2MjUwMVExMTMuNjQyNzczNDM3NTAwMDEgLTIuNDQyODgzMzAwNzgxMjUwMyAxMTIuODk5OTE0NTUwNzgxMjYgLTMuMzg1NzM2MDgzOTg0Mzc1NVExMTIuMTU3MDU1NjY0MDYyNTEgLTQuMzI4NTg4ODY3MTg3NSAxMTEuMDE0MTk2Nzc3MzQzNzYgLTQuNzA3MTU5NDIzODI4MTI1UTEwOS44NzEzMzc4OTA2MjUwMSAtNS4wODU3Mjk5ODA0Njg3NSAxMDguNzIxMzM3ODkwNjI1MDIgLTUuMTY0MzAwNTM3MTA5Mzc1NVExMDcuNTcxMzM3ODkwNjI1MDIgLTUuMjQyODcxMDkzNzUwMDAxIDEwNi44MTQxOTY3NzczNDM3NyAtNS4yNDI4NzEwOTM3NTAwMDFIOTMuNjU3MDQzNDU3MDMxMjZROTAuMTcxMzM3ODkwNjI1MDEgLTQuNzcxNDIzMzM5ODQzNzUgODguNjc4NDkxMjEwOTM3NTEgLTMuMzY0Mjk0NDMzNTkzNzVRODcuMTg1NjQ0NTMxMjUgLTEuOTU3MTY1NTI3MzQzNzUgODcuMTg1NjQ0NTMxMjUgLTAuMDcxNDcyMTY3OTY4NzVRODcuMTg1NjQ0NTMxMjUgMS42MTQyMzMzOTg0Mzc1MDAxIDg4LjQ0OTkzMjg2MTMyODE0IDIuNDkyNzk3ODUxNTYyNVE4OS43MTQyMjExOTE0MDYyNyAzLjM3MTM2MjMwNDY4NzUgOTIuMjc4NTAzNDE3OTY4NzYgMy42ODU2NDQ1MzEyNTAwMDA0UTk0Ljg0Mjc4NTY0NDUzMTI2IDMuOTk5OTI2NzU3ODEyNSA5OC43NzEzMzc4OTA2MjUgMy45OTk5MjY3NTc4MTI1Wk05OS4wOTk5NTExNzE4NzUgLTI3LjExNDMwNjY0MDYyNTAwM1ExMDIuOTI4NTAzNDE3OTY4NzYgLTI3LjExNDMwNjY0MDYyNTAwMyAxMDQuOTA3MDY3ODcxMDkzNzYgLTI5LjI4NTcyOTk4MDQ2ODc1UTEwNi44ODU2MzIzMjQyMTg3NiAtMzEuNDU3MTUzMzIwMzEyNSAxMDYuODg1NjMyMzI0MjE4NzYgLTM0Ljk1NzE1MzMyMDMxMjVRMTA2Ljg4NTYzMjMyNDIxODc2IC0zOC42Mjg1NzY2NjAxNTYyNTYgMTA0Ljg1NzA2Nzg3MTA5Mzc2IC00MC45NVExMDIuODI4NTAzNDE3OTY4NzYgLTQzLjI3MTQyMzMzOTg0Mzc1IDk5LjExNDIzMzM5ODQzNzUgLTQzLjI3MTQyMzMzOTg0Mzc1UTk1LjM4NTY4MTE1MjM0Mzc2IC00My4yNzE0MjMzMzk4NDM3NSA5My4yNzg1NDYxNDI1NzgxNCAtNDAuOTVROTEuMTcxNDExMTMyODEyNTEgLTM4LjYyODU3NjY2MDE1NjI1NiA5MS4xNzE0MTExMzI4MTI1MSAtMzQuOTU3MTUzMzIwMzEyNVE5MS4xNzE0MTExMzI4MTI1MSAtMzIuNjU3MTUzMzIwMzEyNSA5Mi4wODU2OTMzNTkzNzUgLTMwLjg3MTQ0MTY1MDM5MDYzUTkyLjk5OTk3NTU4NTkzNzUgLTI5LjA4NTcyOTk4MDQ2ODc1MiA5NC43Nzg1NDAwMzkwNjI1IC0yOC4xMDAwMTgzMTA1NDY4OFE5Ni41NTcxMDQ0OTIxODc1IC0yNy4xMTQzMDY2NDA2MjUwMDMgOTkuMDk5OTUxMTcxODc1IC0yNy4xMTQzMDY2NDA2MjUwMDNaTTEzMi43NDI4MTAwNTg1OTM3NiAwLjBWLTMxLjIxNDE4NDU3MDMxMjVWLTcxLjE0MjgyMjI2NTYyNUgxNDguODg1NjY4OTQ1MzEyNTJWLTU2LjA1NzE2NTUyNzM0Mzc1NlExNDguODg1NjY4OTQ1MzEyNTIgLTU0LjAxNDMwNjY0MDYyNSAxNDguNjkyODEwMDU4NTkzNzUgLTUxLjMwNzE0MTExMzI4MTI1UTE0OC40OTk5NTExNzE4NzUgLTQ4LjU5OTk3NTU4NTkzNzUgMTQ4LjEwNzA5MjI4NTE1NjI4IC00NS42NzEzNzQ1MTE3MTg3NVExNDcuNzE0MjMzMzk4NDM3NTMgLTQyLjc0Mjc3MzQzNzUwMDAwNiAxNDcuMzIxMzc0NTExNzE4NzcgLTM5LjkzNTYwNzkxMDE1NjI1UTE0Ni45Mjg1MTU2MjUwMDAwMiAtMzcuMTI4NDQyMzgyODEyNSAxNDYuNTE0MjMzMzk4NDM3NSAtMzQuODQyNzI0NjA5Mzc1MDA0SDE0OC4yNzEzNTAwOTc2NTYyN1ExNDkuNDU3MDU1NjY0MDYyNTIgLTQxLjE0Mjc4NTY0NDUzMTI1IDE1MS41OTk5MTQ1NTA3ODEyOCAtNDUuNDQ5OTU3Mjc1MzkwNjNRMTUzLjc0Mjc3MzQzNzUwMDAzIC00OS43NTcxMjg5MDYyNSAxNTcuMzE0MjA4OTg0Mzc1MDMgLTUxLjk3ODU2NDQ1MzEyNVExNjAuODg1NjQ0NTMxMjUwMDIgLTU0LjIgMTY2LjIyODUwMzQxNzk2ODc3IC01NC4yUTE3NS4yNDI3NzM0Mzc1MDAwMyAtNTQuMiAxNzkuNjU3MDQ5NTYwNTQ2OSAtNDcuODY0Mjk0NDMzNTkzNzU2UTE4NC4wNzEzMjU2ODM1OTM3OCAtNDEuNTI4NTg4ODY3MTg3NSAxODQuMDcxMzI1NjgzNTkzNzggLTI4LjQ3MTQ3MjE2Nzk2ODc1MlYwLjBIMTY3Ljg3MTMyNTY4MzU5Mzc3Vi0yNi42Mjg2NDk5MDIzNDM3NTNRMTY3Ljg3MTMyNTY4MzU5Mzc3IC0zMy43MTQzMTg4NDc2NTYyNSAxNjUuODg1NjI2MjIwNzAzMTYgLTM3LjE0Mjg2NDk5MDIzNDM3UTE2My44OTk5MjY3NTc4MTI1MiAtNDAuNTcxNDExMTMyODEyNSAxNTkuNjk5OTUxMTcxODc1MDMgLTQwLjU3MTQxMTEzMjgxMjVRMTU2LjI0MjgyMjI2NTYyNTAyIC00MC41NzE0MTExMzI4MTI1IDE1My44NDI4MjIyNjU2MjUwMiAtMzguMjkyODQwNTc2MTcxODc2UTE1MS40NDI4MjIyNjU2MjUgLTM2LjAxNDI3MDAxOTUzMTI1IDE1MC4xNjQyNDU2MDU0Njg3NSAtMzEuNzQyODIyMjY1NjI1UTE0OC44ODU2Njg5NDUzMTI1MiAtMjcuNDcxMzc0NTExNzE4NzUgMTQ4Ljg4NTY2ODk0NTMxMjUyIC0yMS40NDI3NDkwMjM0Mzc1VjAuMFpNMjEyLjQ1NzEwNDQ5MjE4NzU0IDEuMjU3MTQxMTEzMjgxMjVRMjAzLjA5OTk2MzM3ODkwNjI3IDEuMjU3MTQxMTEzMjgxMjUgMTk4LjY2NDI0NTYwNTQ2ODc4IC0zLjYwNzE0MTExMzI4MTI1MDVRMTk0LjIyODUyNzgzMjAzMTMgLTguNDcxNDIzMzM5ODQzNzUxIDE5NC4yMjg1Mjc4MzIwMzEzIC0xOC45ODU2OTMzNTkzNzUwMDJWLTQwLjJIMTg3LjM5OTk4Nzc5Mjk2ODc3TDE4Ny41NzE0MTExMzI4MTI1MyAtNTEuNzcxMzg2NzE4NzVIMTkwLjg0Mjc0OTAyMzQzNzUzUTE5NS4zMjg1MTU2MjUwMDAwMiAtNTIuMTE0MjU3ODEyNSAxOTcuMzU3MTA0NDkyMTg3NTUgLTU0LjAzNTcyOTk4MDQ2ODc1UTE5OS4zODU2OTMzNTkzNzUwNCAtNTUuOTU3MjAyMTQ4NDM3NSAxOTkuODcxNDExMTMyODEyNTQgLTYwLjI0Mjk5MzE2NDA2MjUwNEwyMDAuNjcxMzg2NzE4NzUwMDMgLTY0LjY3MTQzNTU0Njg3NUgyMDkuODg1NjgxMTUyMzQzNzhWLTUyLjgwMDAwMDAwMDAwMDAwNEgyMjIuMzg1NjY4OTQ1MzEyNTVWLTM5Ljc0Mjg1ODg4NjcxODc1SDIwOS44ODU2ODExNTIzNDM3OFYtMjAuMDI4NTY0NDUzMTI1UTIwOS44ODU2ODExNTIzNDM3OCAtMTYuNDU3MTI4OTA2MjUwMDAyIDIxMS42MjEzOTg5MjU3ODEyOCAtMTQuODU3MTI4OTA2MjVRMjEzLjM1NzExNjY5OTIxODc4IC0xMy4yNTcxMjg5MDYyNTAwMDEgMjE2LjUxNDI0NTYwNTQ2ODc3IC0xMy4yNTcxMjg5MDYyNTAwMDFRMjE4LjE5OTk1MTE3MTg3NTAzIC0xMy4yNTcxMjg5MDYyNTAwMDEgMjE5LjgxNDIzMzM5ODQzNzUyIC0xMy42NTcxMjg5MDYyNTAwMDFRMjIxLjQyODUxNTYyNTAwMDA1IC0xNC4wNTcxMjg5MDYyNSAyMjIuNjE0MjMzMzk4NDM3NTMgLTE0Ljc1NzEyODkwNjI1MDAwMVYtMC4yUTIxOS40NTcwOTIyODUxNTYyOCAwLjc1NzE0MTExMzI4MTI1IDIxNi45MTQyMzk1MDE5NTMxNSAxLjAwNzE0MTExMzI4MTI1UTIxNC4zNzEzODY3MTg3NTAwNSAxLjI1NzE0MTExMzI4MTI1IDIxMi40NTcxMDQ0OTIxODc1NCAxLjI1NzE0MTExMzI4MTI1Wk0yMjguNjQyODEwMDU4NTkzNzcgMC4wVi0zMC45ODU2ODExNTIzNDM3NVYtNTIuODAwMDAwMDAwMDAwMDA0SDI0MS44ODU2ODExNTIzNDM3OEwyNDEuOTk5OTYzMzc4OTA2MjcgLTM0Ljc4NTYwNzkxMDE1NjI1SDI0My41NDI3OTc4NTE1NjI1NFEyNDQuNTQyNzg1NjQ0NTMxMjggLTQxLjMyODUwMzQxNzk2ODc1NCAyNDYuNzcxMzUwMDk3NjU2MyAtNDUuNjM1NjY4OTQ1MzEyNVEyNDguOTk5OTE0NTUwNzgxMjggLTQ5Ljk0MjgzNDQ3MjY1NjI1IDI1Mi42OTk5MTQ1NTA3ODEyNyAtNTIuMDcxNDE3MjM2MzI4MTNRMjU2LjM5OTkxNDU1MDc4MTI2IC01NC4yIDI2MS42OTk5MjY3NTc4MTI1MyAtNTQuMlEyNzAuNjk5OTE0NTUwNzgxMyAtNTQuMiAyNzUuMzM1NjIwMTE3MTg3NTUgLTQ4LjA0Mjg3MTA5Mzc1UTI3OS45NzEzMjU2ODM1OTM3NiAtNDEuODg1NzQyMTg3NSAyNzkuOTcxMzI1NjgzNTkzNzYgLTI4Ljg3MTUwODc4OTA2MjUwM1YwLjBIMjYzLjc3MTMyNTY4MzU5MzhWLTI2Ljk0MjkzMjEyODkwNjI1UTI2My43NzEzMjU2ODM1OTM4IC0zNC4wMDAwMjQ0MTQwNjI1IDI2MS43MjEzMzc4OTA2MjUgLTM3LjMwMDAwNjEwMzUxNTYzUTI1OS42NzEzNTAwOTc2NTYzIC00MC41OTk5ODc3OTI5Njg3NTQgMjU1LjQ5OTkzODk2NDg0Mzc4IC00MC41OTk5ODc3OTI5Njg3NTRRMjUyLjA0MjgxMDA1ODU5Mzc3IC00MC41OTk5ODc3OTI5Njg3NTQgMjQ5LjY1NzA5ODM4ODY3MTkgLTM4LjM4NTcwNTU2NjQwNjI1UTI0Ny4yNzEzODY3MTg3NTAwMiAtMzYuMTcxNDIzMzM5ODQzNzUgMjQ2LjAyODUyNzgzMjAzMTI3IC0zMS45ODU2OTMzNTkzNzVRMjQ0Ljc4NTY2ODk0NTMxMjUyIC0yNy43OTk5NjMzNzg5MDYyNTIgMjQ0Ljc4NTY2ODk0NTMxMjUyIC0yMS43ODU2MjAxMTcxODc1MDJWMC4wWk0yODcuNTQyODEwMDU4NTkzOCAwLjBWLTUyLjgwMDAwMDAwMDAwMDAwNEgzMDMuNjg1NjY4OTQ1MzEyNTZWMC4wWk0yOTUuNTk5OTUxMTcxODc1MDMgLTU4LjcxNDIyMTE5MTQwNjI1UTI5MC45OTk5NTExNzE4NzUgLTU4LjcxNDIyMTE5MTQwNjI1IDI4OC41NDk5NTExNzE4NzUgLTYwLjY1NDQ0NzA1MzYwODE0NVEyODYuMDk5OTUxMTcxODc1MDMgLTYyLjU5NDY3MjkxNTgxMDA0IDI4Ni4wOTk5NTExNzE4NzUwMyAtNjYuMjc2MTI3MTE1ODg1NDJRMjg2LjA5OTk1MTE3MTg3NTAzIC03MC4wNTcwODAwNzgxMjUgMjg4LjU0OTk1MTE3MTg3NSAtNzIuMDA3MDgwMDc4MTI1UTI5MC45OTk5NTExNzE4NzUgLTczLjk1NzA4MDA3ODEyNSAyOTUuNTk5OTUxMTcxODc1MDMgLTczLjk1NzA4MDA3ODEyNVEzMDAuMjk5OTUxMTcxODc1IC03My45NTcwODAwNzgxMjUgMzAyLjc0OTk1MTE3MTg3NTA3IC03MS45ODU2NTA2MzQ3NjU2MlEzMDUuMTk5OTUxMTcxODc1MDYgLTcwLjAxNDIyMTE5MTQwNjI1IDMwNS4xOTk5NTExNzE4NzUwNiAtNjYuMjg1MjU5MjU3Mjc3NFEzMDUuMTk5OTUxMTcxODc1MDYgLTYyLjY1NzA4MDA3ODEyNTAwNiAzMDIuNzQ5OTUxMTcxODc1MDcgLTYwLjY4NTY1MDYzNDc2NTYzUTMwMC4yOTk5NTExNzE4NzUgLTU4LjcxNDIyMTE5MTQwNjI1IDI5NS41OTk5NTExNzE4NzUwMyAtNTguNzE0MjIxMTkxNDA2MjVaTTMxMS45NDI4MTAwNTg1OTM3NSAwLjBWLTMwLjk4NTY4MTE1MjM0Mzc1Vi01Mi44MDAwMDAwMDAwMDAwMDRIMzI1LjE4NTY4MTE1MjM0Mzc2TDMyNS4yOTk5NjMzNzg5MDYzIC0zNC43ODU2MDc5MTAxNTYyNUgzMjYuODQyNzk3ODUxNTYyNVEzMjcuODQyNzg1NjQ0NTMxMjYgLTQxLjMyODUwMzQxNzk2ODc1NCAzMzAuMDcxMzUwMDk3NjU2MjUgLTQ1LjYzNTY2ODk0NTMxMjVRMzMyLjI5OTkxNDU1MDc4MTI0IC00OS45NDI4MzQ0NzI2NTYyNSAzMzUuOTk5OTE0NTUwNzgxMiAtNTIuMDcxNDE3MjM2MzI4MTNRMzM5LjY5OTkxNDU1MDc4MTMgLTU0LjIgMzQ0Ljk5OTkyNjc1NzgxMjUgLTU0LjJRMzUzLjk5OTkxNDU1MDc4MTMgLTU0LjIgMzU4LjYzNTYyMDExNzE4NzUgLTQ4LjA0Mjg3MTA5Mzc1UTM2My4yNzEzMjU2ODM1OTM4IC00MS44ODU3NDIxODc1IDM2My4yNzEzMjU2ODM1OTM4IC0yOC44NzE1MDg3ODkwNjI1MDNWMC4wSDM0Ny4wNzEzMjU2ODM1OTM4Vi0yNi45NDI5MzIxMjg5MDYyNVEzNDcuMDcxMzI1NjgzNTkzOCAtMzQuMDAwMDI0NDE0MDYyNSAzNDUuMDIxMzM3ODkwNjI1MDMgLTM3LjMwMDAwNjEwMzUxNTYzUTM0Mi45NzEzNTAwOTc2NTYzIC00MC41OTk5ODc3OTI5Njg3NTQgMzM4Ljc5OTkzODk2NDg0Mzc2IC00MC41OTk5ODc3OTI5Njg3NTRRMzM1LjM0MjgxMDA1ODU5MzggLTQwLjU5OTk4Nzc5Mjk2ODc1NCAzMzIuOTU3MDk4Mzg4NjcxOSAtMzguMzg1NzA1NTY2NDA2MjVRMzMwLjU3MTM4NjcxODc1MDAzIC0zNi4xNzE0MjMzMzk4NDM3NSAzMjkuMzI4NTI3ODMyMDMxMyAtMzEuOTg1NjkzMzU5Mzc1UTMyOC4wODU2Njg5NDUzMTI1MyAtMjcuNzk5OTYzMzc4OTA2MjUyIDMyOC4wODU2Njg5NDUzMTI1MyAtMjEuNzg1NjIwMTE3MTg3NTAyVjAuMFpNMzkxLjk3MTM3NDUxMTcxODggMTcuMzk5OTUxMTcxODc1UTM4My4xMjg1MTU2MjUwMDAwMyAxNy4zOTk5NTExNzE4NzUgMzc3LjY3MTM4MDYxNTIzNDQgMTYuMDI4NTIxNzI4NTE1NjI0UTM3Mi4yMTQyNDU2MDU0Njg4IDE0LjY1NzA5MjI4NTE1NjI1MSAzNjkuNzU3MTEwNTk1NzAzMiAxMi4wOTI4MTAwNTg1OTM3NVEzNjcuMjk5OTc1NTg1OTM3NTUgOS41Mjg1Mjc4MzIwMzEyNSAzNjcuMjk5OTc1NTg1OTM3NTUgNS45Mjg1NDAwMzkwNjI1MDFRMzY3LjI5OTk3NTU4NTkzNzU1IDEuNDE0MjU3ODEyNSAzNzAuODg1Njg3MjU1ODU5NCAtMS4zNzg1OTQ5NzA3MDMxMjVRMzc0LjQ3MTM5ODkyNTc4MTMgLTQuMTcxNDQ3NzUzOTA2MjUgMzgxLjM5OTk2MzM3ODkwNjMgLTQuODI4NjAxMDc0MjE4NzVWLTYuMjQyODU4ODg2NzE4NzVRMzc2LjA3MTM5ODkyNTc4MTMgLTYuMjQyODU4ODg2NzE4NzUgMzczLjE0MjgyODM2OTE0MDY2IC03LjYyMTQ0MTY1MDM5MDYyNVEzNzAuMjE0MjU3ODEyNSAtOS4wMDAwMjQ0MTQwNjI1IDM3MC4yMTQyNTc4MTI1IC0xMi4wNDI4ODMzMDA3ODEyNVEzNzAuMjE0MjU3ODEyNSAtMTQuODg1NzQyMTg3NSAzNzMuMDA3MTEwNTk1NzAzMSAtMTcuMTg1NzQyMTg3NVEzNzUuNzk5OTYzMzc4OTA2MyAtMTkuNDg1NzQyMTg3NSAzODIuMjU3MDkyMjg1MTU2MyAtMjAuMjI4NTc2NjYwMTU2MjVWLTIxLjcyODU1MjI0NjA5Mzc1MlEzNzYuMzk5OTYzMzc4OTA2MyAtMjIuNTcxNDIzMzM5ODQzNzUgMzcyLjk3MTM5ODkyNTc4MTMgLTI2LjE4NTcxMTY2OTkyMTg3NlEzNjkuNTQyODM0NDcyNjU2MyAtMjkuOCAzNjkuNTQyODM0NDcyNjU2MyAtMzUuNjQyODU4ODg2NzE4NzVRMzY5LjU0MjgzNDQ3MjY1NjMgLTQwLjY3MTQzNTU0Njg3NSAzNzIuMjc4NTQ2MTQyNTc4MiAtNDQuNjE0Mjg4MzMwMDc4MTI1UTM3NS4wMTQyNTc4MTI1MDAwMyAtNDguNTU3MTQxMTEzMjgxMjU0IDM4MC40Mjg1MzM5MzU1NDY5IC01MC44Nzg1NjQ0NTMxMjUwMVEzODUuODQyODEwMDU4NTkzOCAtNTMuMTk5OTg3NzkyOTY4NzU2IDM5My43NzEzNjIzMDQ2ODc1NiAtNTMuMTk5OTg3NzkyOTY4NzU2SDQyMC42OTk5MTQ1NTA3ODEzVi00MC45NzE0MTExMzI4MTI1MDZMNDAzLjM5OTg5MDEzNjcxODggLTQzLjIxNDI3MDAxOTUzMTI1NlYtNDEuNTAwMDEyMjA3MDMxMjU0UTQxMC42NzEzNTAwOTc2NTYzIC00MC41MTQyOTQ0MzM1OTM3NTQgNDEzLjUzNTYzODQyNzczNDQgLTM4LjE3ODU3MDU1NjY0MDYzUTQxNi4zOTk5MjY3NTc4MTI1IC0zNS44NDI4NDY2Nzk2ODc1MDQgNDE2LjM5OTkyNjc1NzgxMjUgLTMyLjA4NTcwNTU2NjQwNjI1NFE0MTYuMzk5OTI2NzU3ODEyNSAtMjguMjE0MjgyMjI2NTYyNTAzIDQxMy44NjQyMjExOTE0MDYzIC0yNS4yMDAwMDAwMDAwMDAwMDNRNDExLjMyODUxNTYyNSAtMjIuMTg1NzE3NzczNDM3NTAzIDQwNi40NTcwOTIyODUxNTYyNSAtMjAuNDc4NTc2NjYwMTU2MjVRNDAxLjU4NTY2ODk0NTMxMjUzIC0xOC43NzE0MzU1NDY4NzUgMzk0LjU1NzA5MjI4NTE1NjMgLTE4Ljc3MTQzNTU0Njg3NVEzOTIuOTI4NTAzNDE3OTY4OCAtMTguNzcxNDM1NTQ2ODc1IDM5MS4xMzU2MzIzMjQyMTg4IC0xOC45MTQyOTQ0MzM1OTM3NTNRMzg5LjM0Mjc2MTIzMDQ2ODggLTE5LjA1NzE1MzMyMDMxMjUgMzg2LjQyODUxNTYyNTAwMDA1IC0xOS40NTcxNTMzMjAzMTI1UTM4NC43ODU2NTY3MzgyODEzIC0xOC4zNTcxNjU1MjczNDM3NSAzODMuODY0MjI3Mjk0OTIxOTMgLTE3LjQ5Mjg4MzMwMDc4MTI1UTM4Mi45NDI3OTc4NTE1NjI1NSAtMTYuNjI4NjAxMDc0MjE4NzUgMzgyLjk0Mjc5Nzg1MTU2MjU1IC0xNS44Mjg2MDEwNzQyMTg3NTFRMzgyLjk0Mjc5Nzg1MTU2MjU1IC0xNS4yNzE0NTk5NjA5Mzc1IDM4My4zOTk5Mzg5NjQ4NDM4IC0xNC45MzU3NDgyOTEwMTU2MjRRMzgzLjg1NzA4MDA3ODEyNSAtMTQuNjAwMDM2NjIxMDkzNzUgMzg0LjcyMTM2MjMwNDY4NzU1IC0xNC40NDI4OTU1MDc4MTI1MDFRMzg1LjU4NTY0NDUzMTI1MDA3IC0xNC4yODU3NTQzOTQ1MzEyNTEgMzg2LjY0Mjc4NTY0NDUzMTMgLTE0LjI4NTc1NDM5NDUzMTI1MUg0MDIuNjk5OTI2NzU3ODEyNTNRNDA0Ljc0Mjc4NTY0NDUzMTMgLTE0LjI4NTc1NDM5NDUzMTI1MSA0MDcuOTQ5OTI2NzU3ODEyNTMgLTE0LjAzNTc1NDM5NDUzMTI1MVE0MTEuMTU3MDY3ODcxMDkzOCAtMTMuNzg1NzU0Mzk0NTMxMjUxIDQxNC4zNjQyMDg5ODQzNzUwNyAtMTIuNTA3MTgzODM3ODkwNjI2UTQxNy41NzEzNTAwOTc2NTYzIC0xMS4yMjg2MTMyODEyNSA0MTkuNzU3MDYxNzY3NTc4MiAtOC4zMjg2MTMyODEyNVE0MjEuOTQyNzczNDM3NSAtNS40Mjg2MTMyODEyNTAwMDA1IDQyMS45NDI3NzM0Mzc1IC0wLjA3MTQ3MjE2Nzk2ODc1UTQyMS45NDI3NzM0Mzc1IDUuODcxMzg2NzE4NzUgNDE4LjcwNzA2MTc2NzU3ODEgOS43NTcwOTgzODg2NzE4NzZRNDE1LjQ3MTM1MDA5NzY1NjMgMTMuNjQyODEwMDU4NTkzNzUxIDQwOC44NDI3ODU2NDQ1MzEzIDE1LjUyMTM4MDYxNTIzNDM3NFE0MDIuMjE0MjIxMTkxNDA2MyAxNy4zOTk5NTExNzE4NzUgMzkxLjk3MTM3NDUxMTcxODggMTcuMzk5OTUxMTcxODc1Wk0zOTMuMTcxMzM3ODkwNjI1MDcgMy45OTk5MjY3NTc4MTI1UTM5OS4zNTcwNjc4NzEwOTM4IDMuOTk5OTI2NzU3ODEyNSA0MDIuNTU3MDY3ODcxMDkzOCAzLjQ2NDIxNTA4Nzg5MDYyNTNRNDA1Ljc1NzA2Nzg3MTA5MzggMi45Mjg1MDM0MTc5Njg3NTA0IDQwNi44OTk5MjA2NTQyOTY5IDEuODQyNzk3ODUxNTYyNVE0MDguMDQyNzczNDM3NTAwMDUgMC43NTcwOTIyODUxNTYyNSA0MDguMDQyNzczNDM3NTAwMDUgLTAuODE0MzE4ODQ3NjU2MjUwMVE0MDguMDQyNzczNDM3NTAwMDUgLTIuNDQyODgzMzAwNzgxMjUwMyA0MDcuMjk5OTE0NTUwNzgxMyAtMy4zODU3MzYwODM5ODQzNzU1UTQwNi41NTcwNTU2NjQwNjI1NSAtNC4zMjg1ODg4NjcxODc1IDQwNS40MTQxOTY3NzczNDM4IC00LjcwNzE1OTQyMzgyODEyNVE0MDQuMjcxMzM3ODkwNjI1MDMgLTUuMDg1NzI5OTgwNDY4NzUgNDAzLjEyMTMzNzg5MDYyNSAtNS4xNjQzMDA1MzcxMDkzNzU1UTQwMS45NzEzMzc4OTA2MjUgLTUuMjQyODcxMDkzNzUwMDAxIDQwMS4yMTQxOTY3NzczNDM4IC01LjI0Mjg3MTA5Mzc1MDAwMUgzODguMDU3MDQzNDU3MDMxM1EzODQuNTcxMzM3ODkwNjI1MDUgLTQuNzcxNDIzMzM5ODQzNzUgMzgzLjA3ODQ5MTIxMDkzNzU2IC0zLjM2NDI5NDQzMzU5Mzc1UTM4MS41ODU2NDQ1MzEyNTAwNyAtMS45NTcxNjU1MjczNDM3NSAzODEuNTg1NjQ0NTMxMjUwMDcgLTAuMDcxNDcyMTY3OTY4NzVRMzgxLjU4NTY0NDUzMTI1MDA3IDEuNjE0MjMzMzk4NDM3NTAwMSAzODIuODQ5OTMyODYxMzI4MTcgMi40OTI3OTc4NTE1NjI1UTM4NC4xMTQyMjExOTE0MDYzIDMuMzcxMzYyMzA0Njg3NSAzODYuNjc4NTAzNDE3OTY4OCAzLjY4NTY0NDUzMTI1MDAwMDRRMzg5LjI0Mjc4NTY0NDUzMTMgMy45OTk5MjY3NTc4MTI1IDM5My4xNzEzMzc4OTA2MjUwNyAzLjk5OTkyNjc1NzgxMjVaTTM5My40OTk5NTExNzE4NzUwNyAtMjcuMTE0MzA2NjQwNjI1MDAzUTM5Ny4zMjg1MDM0MTc5Njg4IC0yNy4xMTQzMDY2NDA2MjUwMDMgMzk5LjMwNzA2Nzg3MTA5MzggLTI5LjI4NTcyOTk4MDQ2ODc1UTQwMS4yODU2MzIzMjQyMTg4IC0zMS40NTcxNTMzMjAzMTI1IDQwMS4yODU2MzIzMjQyMTg4IC0zNC45NTcxNTMzMjAzMTI1UTQwMS4yODU2MzIzMjQyMTg4IC0zOC42Mjg1NzY2NjAxNTYyNTYgMzk5LjI1NzA2Nzg3MTA5MzggLTQwLjk1UTM5Ny4yMjg1MDM0MTc5Njg4IC00My4yNzE0MjMzMzk4NDM3NSAzOTMuNTE0MjMzMzk4NDM3NTcgLTQzLjI3MTQyMzMzOTg0Mzc1UTM4OS43ODU2ODExNTIzNDM4IC00My4yNzE0MjMzMzk4NDM3NSAzODcuNjc4NTQ2MTQyNTc4MTcgLTQwLjk1UTM4NS41NzE0MTExMzI4MTI1NiAtMzguNjI4NTc2NjYwMTU2MjU2IDM4NS41NzE0MTExMzI4MTI1NiAtMzQuOTU3MTUzMzIwMzEyNVEzODUuNTcxNDExMTMyODEyNTYgLTMyLjY1NzE1MzMyMDMxMjUgMzg2LjQ4NTY5MzM1OTM3NTEgLTMwLjg3MTQ0MTY1MDM5MDYzUTM4Ny4zOTk5NzU1ODU5Mzc1NyAtMjkuMDg1NzI5OTgwNDY4NzUyIDM4OS4xNzg1NDAwMzkwNjI1NyAtMjguMTAwMDE4MzEwNTQ2ODhRMzkwLjk1NzEwNDQ5MjE4NzU3IC0yNy4xMTQzMDY2NDA2MjUwMDMgMzkzLjQ5OTk1MTE3MTg3NTA3IC0yNy4xMTQzMDY2NDA2MjUwMDNaIiBmaWxsPSIjMEQyMjMzIi8+PC9zdmc+" alt="Lightning logo"></figure>
 </header>
@@ -565,6 +592,7 @@ html[dir=rtl] svg{direction:ltr}
   <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></symbol>
   <symbol id="i-cash" viewBox="0 0 24 24"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></symbol>
   <symbol id="i-gear" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-updown" viewBox="0 0 24 24"><path d="M7 4v16"/><path d="m3 8 4-4 4 4"/><path d="M17 20V4"/><path d="m13 16 4 4 4-4"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
   <symbol id="i-list" viewBox="0 0 24 24"><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/></symbol>
   <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>
@@ -580,19 +608,20 @@ html[dir=rtl] svg{direction:ltr}
   <div class="rtiles">
     <div class="rt"><div class="vis"><span class="num" style="font-size:22px">٣٦٠ × ٨٠٠</span></div><b>صمّم على عرض ٣٦٠</b><span>عمود واحد. راجع كمان عرض ٣٢٠ وتأكد إن مفيش حاجة بتبوظ.</span></div>
     <div class="rt"><div class="vis" style="justify-content:flex-start"><span class="chip">الملخص</span><span class="chip">الإنفاق</span><span class="chip" style="opacity:.4">…</span></div><b>مفيش تمرير بالعرض</b><span>لا في التبويبات ولا الجداول ولا الرسوم. ومفيش كلمة تتقص.</span></div>
-    <div class="rt"><div class="vis"><svg class="ic" style="width:26px;height:26px;color:var(--nile)"><use href="#i-home"/></svg><svg class="ic" style="width:26px;height:26px;color:var(--muted)"><use href="#i-wallet"/></svg><svg class="ic" style="width:26px;height:26px;color:var(--muted)"><use href="#i-shield"/></svg></div><b>الإبهام يوصل بسهولة</b><span>الأقسام في شريط التبويبات، والإجراء الرئيسي قريب من الإبهام.</span></div>
+    <div class="rt"><div class="vis"><svg class="ic" style="width:26px;height:26px;color:var(--ink)"><use href="#i-home"/></svg><span style="width:34px;height:34px;border-radius:50%;background:var(--nile);color:var(--on-nile);display:grid;place-items:center"><svg class="ic" style="width:20px;height:20px"><use href="#i-plus"/></svg></span><svg class="ic" style="width:26px;height:26px;color:var(--muted)"><use href="#i-more"/></svg></div><b>الإبهام يوصل بسهولة</b><span>الأماكن اللي بتفتحها كل يوم في شريط التبويبات، و«أضف» في نصه.</span></div>
     <div class="rt"><div class="vis"><span class="num" style="font-size:26px">٤٨</span><span class="unit">× ٤٨</span></div><b>مساحة لمس 48px</b><span>كل هدف لمس، حتى الأيقونة الصغيرة أو الصف، لازم يكون واسع كفاية.</span></div>
     <div class="rt"><div class="vis" style="flex-direction:column;gap:4px;justify-content:center"><i style="display:block;width:100%;height:10px;border-radius:4px;background:repeating-linear-gradient(135deg,var(--t-rose) 0 5px,transparent 5px 10px)"></i><i style="display:block;width:100%;height:22px;border-radius:6px;background:var(--white);border:1px solid var(--line)"></i></div><b>بعيد عن أشرطة النظام</b><span>مفيش حاجة تحت الساعة أو النوتش أو شريط الإيماءات.</span></div>
     <div class="rt"><div class="vis"><svg viewBox="0 0 120 40" width="120" height="40"><path d="M4 34 L40 18 L64 10 L116 22" fill="none" stroke="var(--azure)" stroke-width="2.5"/><circle cx="116" cy="22" r="4" fill="var(--azure)"/></svg></div><b>أعد رسمه، ما تصغروش</b><span>أعد تصميم رسم الكمبيوتر للموبايل؛ ما تصغروش وخلاص.</span></div>
     <div class="rt"><div class="vis"><span class="chip up">اضغط</span><span class="chip" style="text-decoration:line-through">مرّر المؤشر</span></div><b>من غير تحويم</b><span>معلومة التلميح تكون ظاهرة على الشاشة أو على بُعد ضغطة واحدة.</span></div>
-    <div class="rt"><div class="vis"><svg class="ic" style="width:24px;height:24px;color:var(--ink)"><use href="#i-cash"/></svg><span class="chip">الكاش</span></div><b>كلمة بجانب كل أيقونة</b><span>الأيقونة تظهر لوحدها بس لو معناها معروف للجميع: البحث والرجوع والإضافة والمزيد والإعدادات وإخفاء المبالغ.</span></div>
+    <div class="rt"><div class="vis" style="flex-direction:column;gap:2px"><svg class="ic" style="width:24px;height:24px;color:var(--ink)"><use href="#i-pie"/></svg><span style="font:700 12px/1 var(--body);color:var(--ink)">ميزانيتك</span></div><b>التبويبات ليها كلمات</b><span>شريط التبويبات وتبويبات القسم بيعرضوا أسماءهم (قرار صاحب المشروع، ⁦‭٢٠٢٦-١٠-٢٢‬⁩). الأيقونة بتظهر لوحدها بس لو معناها معروف للجميع: البحث والرجوع والإضافة والمزيد والإعدادات وإخفاء المبالغ.</span></div>
   </div>
   <ul class="short">
     <li><b>C01.1 الاتجاه: الموبايل مش كمبيوتر صغير.</b> تطبيقات الفلوس اللي الناس بتفتحها كل يوم (Monzo وRevolut وWise وCopilot) بتفتح على الفلوس اللي لسه اتحركت، مش على التحليل. كل شاشة بتجاوب سؤال واحد برقم رئيسي واحد، والباقي هادي.</li>
-    <li><b>الفلوس الأول.</b> كل صفحة فيها سجل تبدأ بآخر المعاملات، والتحليل بعدها وعلى بعد لمسة.</li>
+    <li><b>الإجابة الأول، وبعدها الفلوس.</b> كل تبويب بيفتح على رقمه الرئيسي وجملة هادية (الرقم الرئيسي، C04.1)؛ وفي الصفحة اللي فيها سجل، آخر المعاملات بتيجي بعد المربعات على طول؛ والتحليل على بعد ضغطة.</li>
     <li><b>مسطّح مش في صناديق.</b> الصفوف على الصفحة بخط رفيع بينها. البطاقة للرقم الرئيسي بس، والقائمة عمرها ما تبقى جوه بطاقة.</li>
     <li><b>رقم واحد في الصف.</b> الاسم والفئة على ناحية والمبلغ على التانية. أي حاجة زيادة (الرصيد بعد المعاملة أو الحساب أو الملاحظات) تبقى في لوحة الصف.</li>
     <li><b>واجهة هادية.</b> مؤشر فترة واحد ومجموعة تبويبات واحدة، من غير صناديق أيقونات أو حواف ملونة. اللون يظهر بس لما يشيل معنى (A03).</li>
+    <li><b>منظومة واحدة (قرار صاحب المشروع، ⁦‭٢٠٢٦-١٠-٢٢‬⁩):</b> الموبايل والكمبيوتر بيعرضوا نفس الأسهم وبطاقة «محتاج تدخّلك» والوصلة وأسماء الأرقام. الموبايل بيبدأ بالرقم اليومي (المتاح الآمن للصرف)؛ والكمبيوتر بالصورة الكبيرة.</li>
     <li><b>المعاينة، ٢٠٢٦-١٠-١٤:</b> الأدلة على الويب من منتديات ونقد تصميم، يعني القواعد دي مبنية على نمط بيتكرر في التطبيقات دي مش على دراسات مقاسة. أوضح فشل: شاشة Revolut المزدحمة اللي فيها معاملة واحدة ظاهرة؛ اعرض خمس على الأقل.</li>
   </ul>
 </section>
@@ -610,9 +639,9 @@ html[dir=rtl] svg{direction:ltr}
     <div>
       <ol class="anat" style="display:block;margin:0;padding-inline-start:20px;color:var(--ink2)">
         <li style="margin:8px 0"><b>شريط الحالة:</b> تابع للموبايل. الصفحة تبدأ تحته: <code>padding-top: env(safe-area-inset-top)</code>. الشعار ما يظهرش تحت الساعة.</li>
-        <li style="margin:8px 0"><b>شريط التطبيق، 56px:</b> الشعار على اليمين ولحد تلات أيقونات على الشمال (C03.2). يفضل فوق؛ ولما عنوان الصفحة يختفي بالتمرير، يظهر مكانه بحجم 17px.</li>
+        <li style="margin:8px 0"><b>شريط التطبيق، 56px:</b> الشعار واسم الصفحة على اليمين، وبحث وإخفاء المبالغ على الشمال (C03.2). يفضل فوق.</li>
         <li style="margin:8px 0"><b>المحتوى:</b> حشو جانبي 16px، و12px بين البطاقات، و32px بين الأقسام. عمود واحد. آخر بطاقة تقف فوق شريط التبويبات وما تدخلش تحته.</li>
-        <li style="margin:8px 0"><b>شريط التبويبات، 64px:</b> الأقسام الخمسة (C03.1). يختفي وقت ظهور لوحة المفاتيح أو لوحة الإدخال.</li>
+        <li style="margin:8px 0"><b>شريط التبويبات، 64px:</b> خمس خانات بكلماتها و«أضف» في النص (C03.1). يختفي وقت ظهور لوحة المفاتيح أو لوحة الإدخال.</li>
         <li style="margin:8px 0"><b>شريط الإيماءات:</b> جزء من الموبايل. شريط التبويبات يضيف <code>padding-bottom: env(safe-area-inset-bottom)</code> عشان ما يبقاش فوقه أي عنصر.</li>
       </ol>
       <div class="dd">
@@ -625,34 +654,36 @@ html[dir=rtl] svg{direction:ltr}
 
 <section class="g" id="c-nav" data-part="c">
   <div class="g-head"><div><h2><span class="secnum">C03</span>التنقل</h2><p>القائمة الجانبية تتحول لشريط تبويبات تحت. يفضل مستويين: قسم وبعده تبويب.</p></div></div>
-  <h3 class="sub"><span class="subnum">C03.1</span>شريط التبويبات: الأقسام الخمسة</h3>
+  <h3 class="sub"><span class="subnum">C03.1</span>شريط التبويبات: خمس خانات بكلماتها</h3>
   <div style="max-width:360px;border-radius:20px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow)">
-    <div class="pf-nav"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>نظرة عامة</span><span><i><svg class="ic"><use href="#i-wallet"/></svg></i>الميزانية</span><span><i><svg class="ic"><use href="#i-cash"/></svg></i>الكاش</span><span><i><svg class="ic"><use href="#i-chart"/></svg></i>الاستثمارات</span><span><i><svg class="ic"><use href="#i-bank"/></svg></i>الحسابات</span></div>
+    <div class="pf-nav words"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>نظرة عامة</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>ميزانيتك</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>أضف</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>المعاملات</span><span><i><svg class="ic"><use href="#i-more"/></svg></i>أكتر</span></div>
     <div class="pf-gest"></div>
   </div>
   <ul class="short">
-    <li><b>خمس خانات:</b> النظرة العامة والميزانية والكاش (تخطيط النقدية) والاستثمارات والحسابات. القسم السادس ما ياخدش خانة؛ افتحه من الإعدادات.</li>
-    <li><b>كل خانة:</b> أيقونة Lucide بحجم 24px وفوقها اسم 11px؛ الاتنين دايماً ظاهرين. المختار خلفيته شريحة بلون النيل واسمه بلون الحبر؛ الباقي خافت.</li>
-    <li><b>الأيقونات بتوضح القسم:</b> بيت ومحفظة وورقة نقدية للكاش ورسم بياني وبنك. الدرع للاحتياطيات وصندوق الطوارئ، مش لقسم تنقل.</li>
-    <li><b>الحسابات قسم مستقل:</b> شريط الحسابات اللي تحت قائمة الكمبيوتر يفضل أعلى كل صفحة. الضغط على الإجمالي يفتح تبويب الحسابات، والجنيه عدد صحيح.</li>
+    <li><b>خمس خانات</b> (قرار صاحب المشروع، ⁦‭٢٠٢٦-١٠-٢٢‬⁩): نظرة عامة، ميزانيتك، أضف، المعاملات، أكتر. اللي بتفتحه كل يوم ليه خانة؛ وتخطيط النقدية والاستثمارات وحساباتك وصحتك المالية والإعدادات في «أكتر».</li>
+    <li><b>كل خانة:</b> أيقونة Lucide بحجم 24px واسمها تحتها 12px. الكلمة ما بتلفش ولا بتتقص: كل عمود عرضه على الأقل عرض كلمته. المختار: بلون الحبر وأتخن، وفوقه شريط قصير بلون النيل. الباقي: خافت.</li>
+    <li><b>«أضف»</b> في النص: قرص 48px بلون النيل مرفوع فوق الشريط، وكلمته تحته (C05.2).</li>
+    <li><b>الأيقونات بتقول المكان:</b> بيت، وقطاع دائري للميزانية، وعلامة زائد، وأسهم لفوق ولتحت للمعاملات، وتلات نقط لـ«أكتر». الدرع للاحتياطيات وصندوق الطوارئ، عمره ما يبقى لخانة.</li>
+    <li><b>«أكتر»</b> بتعرض كل قسم تاني ومعاه رقمه الحي: تخطيط النقدية (المستحق قبل القبض)، والاستثمارات (قيمة المحفظة)، وحساباتك (في حساباتك)، وصحتك المالية (ضمن حدودك)، والإنفاق (الشهر ده)، والزكاة لو متفعّلة. وبعدها المراجعة الأسبوعية كبطاقة تبدأها، وبعدها الإعدادات كقائمة واحدة مجمّعة. القسم اللي بتوصله من «أكتر» يفضل «أكتر» هو المختار.</li>
   </ul>
 
   <h3 class="sub"><span class="subnum">C03.2</span>شريط التطبيق</h3>
-  <div style="max-width:360px" class="pf"><div class="pf-bar"><img class="pf-mark" alt="Lightning"><span class="pf-icon" title="Search"><svg class="ic"><use href="#i-search"/></svg></span><span class="pf-icon" title="Hide amounts"><svg class="ic"><use href="#i-eye"/></svg></span><span class="pf-icon" title="Settings"><svg class="ic"><use href="#i-gear"/></svg></span></div></div>
+  <div style="max-width:360px" class="pf"><div class="pf-bar named"><img class="pf-mark" alt="Lightning"><span class="pf-name">ميزانيتك</span><span class="pf-icon" title="بحث"><svg class="ic"><use href="#i-search"/></svg></span><span class="pf-icon" title="إخفاء المبالغ"><svg class="ic"><use href="#i-eye"/></svg></span><span class="pf-icon" title="إعدادات الميزانية"><svg class="ic"><use href="#i-gear"/></svg></span></div></div>
   <ul class="short">
-    <li><b>اليمين:</b> الرمز وحده بحجم 28px من غير اسم العلامة. في الصفحة الداخلية يظهر ‹ واسم الصفحة اللي بيرجع لها، زي «‹ الحسابات».</li>
-    <li><b>الشمال بالترتيب ده:</b> بحث وإخفاء المبالغ والإعدادات. أهداف 44px وأيقونات 22px. البحث يفتح بملء الشاشة؛ مفيش اختصار Ctrl K على الموبايل.</li>
-    <li><b>ترس التبويب</b> ينتقل الترس من آخر شريط التبويبات (A10.4) إلى هنا. الإعدادات تفتح إعدادات التبويب الحالي أولاً.</li>
+    <li><b>اليمين:</b> الرمز بحجم 28px، وبعده اسم الصفحة بحجم 17px (بيلف لسطرين قبل ما يتقص). في الصفحة الداخلية يظهر مكانهم ‹ واسم الصفحة اللي بيرجع لها، زي «‹ حساباتك».</li>
+    <li><b>الشمال بالترتيب ده:</b> بحث وإخفاء المبالغ. أهداف 44px وأيقونات 22px. البحث يفتح بملء الشاشة؛ مفيش اختصار Ctrl K على الموبايل.</li>
+    <li><b>ترس التبويب</b> (A10.4) تالت أيقونة، ويظهر بس في التبويب اللي ليه إعدادات، وبيفتحها. كل الإعدادات في «أكتر».</li>
   </ul>
 
   <h3 class="sub"><span class="subnum">C03.3</span>تبويبات داخل القسم</h3>
   <div class="grid2" style="max-width:740px">
-    <div><div class="pf-seg"><span class="on">الملخص</span><span>الإنفاق</span><span>الصحة</span></div><p class="cap">لحد ٣ تبويبات: صف واحد من الكلمات بعرض متساوي.</p></div>
-    <div><div class="pf-seg two"><span class="on">الخطة</span><span>المتكرر</span><span>القروض</span><span>المبالغ المحجوزة</span></div><p class="cap">أربع تبويبات: صفين، في كل صف اتنين، وبالكلمات برضه.</p></div>
+    <div><div class="pf-words"><span>المقتنيات</span><span class="on">المخطط</span><span>الأسعار</span></div><p class="cap">كلمات في شريط واحد؛ التبويب المختار أبيض</p></div>
+    <div><div class="pf-words"><span class="on">الخطة</span><span>المتكرر</span><span>القروض</span><span>المبالغ المحجوزة</span></div><p class="cap">أربع تبويبات: صف واحد؛ وعلى عرض 320 ممكن الشريط يلف لصف تاني</p></div>
   </div>
   <ul class="short">
-    <li><b>استخدم الكلمات، مش الأيقونات لوحدها:</b> أيقونات القسم (بنك للقروض ودرع للاحتياطيات) مش مفهومة للجميع، لذلك اسم التبويب لازم يظهر. ممكن الاسم يلف لسطرين، لكن ما يتقصش.</li>
-    <li>بعرض كامل تحت اختيار الفترة، وارتفاع كل تبويب 48px. الشريط ما يتحركش بالتمرير. لو فيه خمس تبويبات، اقسم القسم.</li>
+    <li><b>كلمات، مش أيقونات لوحدها</b> (قرار صاحب المشروع، ⁦‭٢٠٢٦-١٠-٢٢‬⁩، بدل تبويبات الأيقونات بتاعة ⁦‭٢٠٢٦-١٠-١٥‬⁩): صف من مقاطع بلون المسار، ارتفاع كل تبويب 40px، بخط 13.5px؛ والمختار أبيض ونصه بلون الحبر.</li>
+    <li>بعرض كامل تحت الرقم الرئيسي والفترة. الشريط ما يتحركش بالتمرير؛ ولما الكلمات ما تكفيش بيلف لصف تاني.</li>
+    <li>أول صفحة في النظرة العامة ملهاش صف تبويبات: بتفتح على إجابتها. المعاملات ليها خانتها الخاصة، فبتسيب صف الحسابات.</li>
     <li>سحب المحتوى يمين أو شمال ما يغيرش التبويب؛ الرسوم والصفوف محتاجة السحب.</li>
   </ul>
 
@@ -664,20 +695,20 @@ html[dir=rtl] svg{direction:ltr}
 </section>
 
 <section class="g" id="c-header" data-part="c">
-  <div class="g-head"><div><h2><span class="secnum">C04</span>رأس الصفحة</h2><p>تطبيق قاعدة A05 على الموبايل: العنوان، وجملة حالته وتواريخه، واختيار الفترة، وبعدهم التبويبات. كل واحد في صف لوحده ومن غير عناصر جنبه.</p></div></div>
+  <div class="g-head"><div><h2><span class="secnum">C04</span>رأس الصفحة</h2><p>تطبيق قاعدة A05 على الموبايل: اسم الصفحة في شريط التطبيق، وبعده الرقم الرئيسي (رقمه وجملة هادية واحدة)، وعدّاد الشهر، والتبويبات، و«محتاج تدخّلك». كل واحد في صف لوحده ومن غير عناصر جنبه.</p></div></div>
   <div class="grid2" style="max-width:760px;align-items:start">
     <div class="pf" style="padding:16px;gap:12px">
-      <div class="pf-title"><h3>نظرة عامة</h3><p class="st">فضل معاك ٤٩٪ من اللي دخل السنة دي.</p><p>⁦‭٢٠٢٦-٠١-٠١‬⁩ لحد ⁦‭٢٠٢٦-١٠-٠٦‬⁩ <span>من بداية السنة</span></p></div>
-      <div class="pf-period"><span>الكل</span><span class="on">من بداية السنة</span><span class="step"><i>‹</i>⁦‭٢٠٢٦-١٠‬⁩<i>›</i></span><span>مخصص</span></div>
-      <div class="pf-seg"><span class="on">الملخص</span><span>الإنفاق</span><span>الصحة</span></div>
-      <div class="pf-need">محتاج تدخل <em>١٨</em><svg class="ic"><use href="#i-down"/></svg></div>
+      <div class="pf-lead"><p>المتبقي في الخطة</p><div class="big num">٦٬٢٤٠<small>EGP</small></div><p class="st">إنت أقل من وتيرة خطتك بـ ٥٣٢.</p></div>
+      <div class="pf-stepper"><i>‹</i><b>⁦‭٢٠٢٦-١٠‬⁩</b><i>›</i></div>
+      <div class="pf-words"><span class="on">الخطة</span><span>المتكرر</span><span>القروض</span><span>المبالغ المحجوزة</span></div>
+      <div class="pf-needcard"><div><b>٩ حاجات محتاجة تدخّلك</b><small>٤ محتاجة ترتيب · ٣ فواتير · ٢ أسعار</small></div><em>٩</em><u>افتح</u></div>
     </div>
     <ol style="margin:0;padding-inline-start:20px;color:var(--ink2)">
-      <li style="margin:6px 0"><b style="color:var(--ink)">C04.1 العنوان،</b> 24px؛ وتحته جملة الحالة (A05)، 14px بلون حبر ٢، سطرين بالكتير؛ وبعدها التواريخ الدقيقة وملاحظة بلون خافت؛ وبعدها الوصلة (A02.3).</li>
-      <li style="margin:6px 0"><b style="color:var(--ink)">C04.2 اختيار الفترة،</b> بعرض كامل: الكل، من بداية السنة، الشهر بأسهم، ومخصص. ما تكتبش «شهري» وما تقصش كلمة عند الحافة. المخصص يفتح لوحة فيها اختيار تاريخ البداية والنهاية.</li>
+      <li style="margin:6px 0"><b style="color:var(--ink)">C04.1 الرقم الرئيسي.</b> اسم الصفحة موجود في شريط التطبيق (C03.2)، فالصفحة بتفتح على رقمها الرئيسي: التسمية 13px، والرقم 40px بالجنيه من غير كسور مع كتابة EGP مرة واحدة، وجملة هادية واحدة 14px بلون حبر ٢ (هي جملة حالة الصفحة، A05)، وبعدها الوصلة (A02.3). رقم كل تبويب: النظرة العامة، المتاح الآمن للصرف؛ الميزانية، المتبقي في الخطة مع حلقة للخطة المصروفة؛ تخطيط النقدية، المستحق قبل القبض؛ الاستثمارات، قيمة المحفظة؛ حساباتك، في حساباتك. الصفحة اللي ملهاش رقم بتحتفظ بجملة حالتها وتواريخها.</li>
+      <li style="margin:6px 0"><b style="color:var(--ink)">C04.2 الفترة،</b> عدّاد شهر واحد مدمج ‹ ⁦‭٢٠٢٦-١٠‬⁩ ›. الضغط على الشهر يفتح «اختار الفترة»، وهي لوحة فيها: الشهر ده، الشهر اللي فات، من بداية السنة لحد النهارده، كل الوقت، فترة مخصصة (اختيار شهرين). عمره ما يبقى صف شرائح بيتحرك أفقياً، وما تكتبش «شهري».</li>
       <li style="margin:6px 0"><b style="color:var(--ink)">C04.3 التبويبات</b> (راجع C03.3).</li>
-      <li style="margin:6px 0"><b style="color:var(--ink)">C04.4 محتاج تدخل،</b> تحت رئيسية الصفحة (A09): صف واحد 56px: الرمز (A02.3) واسم وعدد. يفتح لوحة بالعناصر، الأكتر استعجالاً الأول، وكل عنصر فيه إجراؤه الوحيد. نص أول عنصر لازم يفضل مقروء ومش مضغوط. في نظرة عامة العدد هو عناصر كل الصفحات مع بعض.</li>
-      <li style="margin:6px 0"><b style="color:var(--ink)">C04.5 إجراء واحد للصفحة</b> يظهر تحت التواريخ كزر ثانوي 40px، وبجانبه ⋯ لباقي الإجراءات، أو يكون زر الإضافة (C05.2). الإجراء اليومي هو الزر الثانوي، أما النادر مثل إضافة حساب فيكون داخل ⋯.</li>
+      <li style="margin:6px 0"><b style="color:var(--ink)">C04.4 محتاج تدخّلك،</b> تحت رئيسية الصفحة (A09): بطاقة واحدة بتتضغط: الرمز (A02.3)، و«٩ حاجات محتاجة تدخّلك»، وفي سطر صغير اللي جواها («٤ محتاجة ترتيب · ٣ فواتير»)، والعدد، و«افتح». بتفتح مكانها بالعناصر، الأكتر استعجالاً الأول، وكل عنصر فيه إجراؤه الوحيد. مفيش بطاقة لو مفيش حاجة مستنية. في النظرة العامة العدد هو عناصر كل الصفحات مع بعض.</li>
+      <li style="margin:6px 0"><b style="color:var(--ink)">C04.5 إجراء واحد للصفحة</b> يظهر تحت التواريخ كزر ثانوي 40px، وبجانبه ⋯ لباقي الإجراءات؛ والإضافة هي «أضف» في شريط التبويبات (C05.2). الإجراء اليومي هو الزر الثانوي، أما النادر مثل إضافة حساب فيكون داخل ⋯.</li>
       <li style="margin:6px 0"><b style="color:var(--ink)">C04.7 عنوان الحساب.</b> مربع 32px (شعار البنك، وإلا حروفه الأولى) قبل العنوان؛ وتحته النوع والبنك والعملة؛ والرصيد تحت العنوان، و"اللي بتملكه" بس لو بيختلف.</li>
       <li style="margin:6px 0"><b style="color:var(--ink)">C04.6 كما في تاريخ</b> (الصحة المالية وفحوصات البيانات والأسعار): شريحة واحدة «كما في ⁦‭٢٠٢٦-١٠-٠٦‬⁩» تفتح اختيار التاريخ بدل اختيار الفترة. ما تكتبش التاريخ بإيدك وتضغط عرض.</li>
     </ol>
@@ -697,8 +728,8 @@ html[dir=rtl] svg{direction:ltr}
     <tr><td><b>حقل</b></td><td class="r">٤٤</td><td class="r">٤٨</td><td>المبلغ 56px والنص 16px عشان الموبايل ما يعملش تكبير</td></tr>
   </table></div>
 
-  <h3 class="sub"><span class="subnum">C05.2</span>زر الإضافة</h3>
-  <div class="demo-row"><span style="width:56px;height:56px;border-radius:18px;background:var(--nile);color:var(--on-nile);display:grid;place-items:center;box-shadow:0 14px 26px -12px rgba(10,36,66,.6)"><svg class="ic" style="width:24px;height:24px"><use href="#i-plus"/></svg></span><span class="note">زر 56px بلون النيل، يبعد 16px عن الشمال (آخر السطر) و16px فوق شريط التبويبات. يظهر في أول صفحة لكل قسم وفي صفحة الحساب، عشان الإضافة بضغطة واحدة من أي مكان. داخل الحساب يفتح لوحة إدخال الحساب (C09)؛ وفي غيره يسأل الأول عن الحساب. ما يظهرش في نموذج أو لوحة أو الإعدادات أو وقت تحديد الصفوف. الصفحة تنتهي قبل الشريط بـ96px عشان الزر ما يغطيش آخر صف. اسمه «إضافة معاملة» وهو وصف الوصول.</span></div>
+  <h3 class="sub"><span class="subnum">C05.2</span>«أضف» في شريط التبويبات</h3>
+  <div class="demo-row"><span style="display:flex;flex-direction:column;align-items:center;gap:4px;font:700 12px/1 var(--body)"><span style="width:48px;height:48px;border-radius:50%;background:var(--nile);color:var(--on-nile);display:grid;place-items:center;box-shadow:0 6px 16px rgba(10,36,66,.28)"><svg class="ic" style="width:24px;height:24px"><use href="#i-plus"/></svg></span>أضف</span><span class="note">قرص 48px بلون النيل في نص شريط التبويبات، مرفوع فوقه، وكلمة «أضف» تحته (قرار صاحب المشروع، ⁦‭٢٠٢٦-١٠-٢٢‬⁩). موجود في كل صفحة، فالإضافة بضغطة واحدة من أي مكان (الالتقاط الأول، راجع المنافسة: «البوصلة»)، وعمره ما يغطي محتوى. داخل الحساب يفتح لوحة إدخال الحساب (C09)؛ وفي غيره يسأل الأول عن الحساب وبعدين يفتح اللوحة. في وضع القراءة بس الخانة بتفضل فاضية. بيتنحّى مع شريط التبويبات وقت ما لوحة أو لوحة المفاتيح أو تحديد صفوف يكونوا مفتوحين. اسمه لقارئ الشاشة «أضف معاملة».</span></div>
 
   <h3 class="sub"><span class="subnum">C05.3</span>الأزواج والصفوف والأيقونات</h3>
   <div class="ddrows" style="max-width:760px">
@@ -719,7 +750,7 @@ html[dir=rtl] svg{direction:ltr}
     <div class="kt rose"><div class="top"><span class="chip">⁦‭٢٠٢٦-١٠‬⁩</span></div><div class="lbl">المتبقي في الخطة</div><div class="fig num">٢٤٬٦٩٨</div><div class="cmp"><b class="g">ماشي على الوتيرة</b>، ٩٥٠ في اليوم</div><div class="meter"><i style="width:2%"></i></div></div>
   </div>
   <ul class="short">
-    <li><b>لحد أربع بطاقات في شبكة ٢×٢،</b> تحت آخر معاملات الصفحة (C11.1)، وفي صفحة من غير سجل تحت الرئيسية و«محتاج تدخل» (A09). ولو الرئيسية بتجاوب الصفحة فعلاً، مربعين في صف واحد كفاية. عمرها ما تبقى شريط بيتحرك أفقياً. نفس الألوان والشارات في A08؛ الشارة تعرض الفترة باختصار: من بداية السنة أو النهارده أو ⁦‭٢٠٢٦-١٠‬⁩ أو تاريخ أو «٣ شهور». لو الشارة هتتقَص، شيلها.</li>
+    <li><b>لحد أربع بطاقات في شبكة ٢×٢،</b> تحت الرقم الرئيسي و«محتاج تدخّلك» (A09)؛ وفي النظرة العامة بتيجي بعدهم آخر المعاملات (C11.1). ولو الرئيسية بتجاوب الصفحة فعلاً، مربعين في صف واحد كفاية. عمرها ما تبقى شريط بيتحرك أفقياً. نفس الألوان والشارات في A08؛ الشارة تعرض الفترة باختصار: من بداية السنة أو النهارده أو ⁦‭٢٠٢٦-١٠‬⁩ أو تاريخ أو «٣ شهور». لو الشارة هتتقَص، شيلها.</li>
     <li><b>داخل البطاقة:</b> التسمية (مسموح لها تلف لسطرين) والشارة جنبها، من غير صندوق أيقونة، والرقم بحجم 26px (22px لو طويل)، وبعده المقارنة في سطر واحد (A08.1)، وبعدها مقياس أو شريط مقسّم لو بيفيد (A08.4). من غير رسم اتجاه صغير؛ الاتجاه في بطاقة مستقلة تحت.</li>
     <li><b>اضغط على البطاقة</b> لفتح الصفحة اللي بتلخصها. البطاقة نفسها مش زر.</li>
   </ul>
@@ -830,20 +861,21 @@ html[dir=rtl] svg{direction:ltr}
       <div class="pf-search"><svg class="ic"><use href="#i-search"/></svg>البحث في المعاملات</div>
       <div class="pf-chips"><span class="on">‹ ⁦‭٢٠٢٦-٠٦‬⁩ ›</span><span>الفئة<svg class="ic" style="width:16px;height:16px"><use href="#i-down"/></svg></span></div>
       <div class="pf-list">
-        <div class="pf-day">⁦‭٢٠٢٦-٠٦-١٦‬⁩</div>
-        <div class="pf-tx"><div class="pf-who"><i class="pf-av">K</i><div><b>Kiosk</b><small>بقالة</small></div></div><div class="a"><b>⁦−١٦٥٫٠٠⁩</b></div></div>
-        <div class="pf-day">⁦‭٢٠٢٦-٠٦-١٢‬⁩</div>
-        <div class="pf-tx"><div class="pf-who"><i class="pf-av">أ</i><div><b>أوبر</b><small>مواصلات</small></div></div><div class="a"><b>⁦−٩٠٫٠٠⁩</b></div></div>
-        <div class="pf-day">⁦‭٢٠٢٦-٠٦-٠٥‬⁩</div>
-        <div class="pf-tx"><div class="pf-who"><i class="pf-av">C</i><div><b>من حساب CIB الجاري</b><small>تحويل</small></div></div><div class="a"><b>٣٬٠٠٠٫٠٠</b></div></div>
-        <div class="pf-tx"><div class="pf-who"><i class="pf-av in">ا</i><div><b>استرداد</b><small>شخصي</small></div></div><div class="a"><b class="in">⁦+٢٠٠٫٠٠⁩</b></div></div>
+        <div class="pf-day"><span>⁦‭٢٠٢٦-٠٦-١٦‬⁩</span><span>⁦−١٦٥⁩</span></div>
+        <div class="pf-tx"><div class="pf-who"><i class="pf-av ar out">↓</i><div><b>Kiosk</b><small>بقالة</small></div></div><div class="a"><b>⁦−١٦٥⁩</b></div></div>
+        <div class="pf-day"><span>⁦‭٢٠٢٦-٠٦-١٢‬⁩</span><span>⁦−٩٠٫٥٠⁩</span></div>
+        <div class="pf-tx"><div class="pf-who"><i class="pf-av ar out">↓</i><div><b>أوبر</b><small>مواصلات</small></div></div><div class="a"><b>⁦−٩٠٫٥٠⁩</b></div></div>
+        <div class="pf-day"><span>⁦‭٢٠٢٦-٠٦-٠٥‬⁩</span><span>⁦+٢٠٠⁩</span></div>
+        <div class="pf-tx"><div class="pf-who"><i class="pf-av ar mv">⇄</i><div><b>من حساب CIB الجاري</b><small>تحويل</small></div></div><div class="a"><b>٣٬٠٠٠</b></div></div>
+        <div class="pf-tx"><div class="pf-who"><i class="pf-av ar in">↑</i><div><b>استرداد</b><small>شخصي</small></div></div><div class="a"><b class="in">⁦+٢٠٠⁩</b></div></div>
+        <div class="pf-tx"><div class="pf-who"><i class="pf-av ar inv">↗</i><div><b>حركة الاستثمارات</b><small>٤ تحديثات قيمة</small></div></div><div class="a"><b class="in">⁦+٧٬٩٥٦⁩</b></div></div>
       </div>
     </div>
     <ul class="short" style="margin:0">
-      <li><b>C08.1 عناوين الأيام:</b> «النهارده» و«امبارح» وبعدين التاريخ (A06.1)، مرة واحدة بلون خافت 12.5px فوق صفوف اليوم؛ ما يتكررش في كل صف.</li>
-      <li><b>C08.2 الصف:</b> مسطّح على الصفحة بخط رفيع بين الصفوف، ومن غير بطاقة حوالين القائمة. حرف أول دايري 40px (أخضر فاتح للداخل وخلفية محايدة لغير كده) والطرف المقابل وفئته، والمبلغ على الناحية التانية. الارتفاع 64. الداخل أخضر بعلامة +، والخارج بلون الحبر مع −، والتحويل من غير علامة (A11). الرصيد بعد الصف بيظهر بس في قائمة الحساب نفسه، بلون خافت تحت المبلغ؛ مش في النظرة العامة ولا في قائمة كل الحسابات. النظرة العامة ما بتسميش الحساب (الفئة بس)؛ قائمة كل الحسابات بتضيفه بعد الفئة.</li>
+      <li><b>C08.1 عناوين الأيام:</b> «النهارده» و«امبارح» وبعدين التاريخ (A06.1)، مرة واحدة بلون خافت 12.5px فوق صفوف اليوم، ومعاها صافي اليوم على الناحية التانية (الداخل ناقص الخارج؛ التحويلات وتحديثات القيمة ما بتحركش حاجة داخل أو خارج) في تبويب المعاملات وقائمة الحساب. ما يتكررش في كل صف.</li>
+      <li><b>C08.2 الصف:</b> مسطّح على الصفحة بخط رفيع بين الصفوف، ومن غير بطاقة حوالين القائمة. دايرة سهم 40px بتقول الفلوس عملت إيه، بمعنى لونها (A03): ↑ فلوس داخلة على أخضر فاتح، ↓ فلوس خارجة على وردي فاتح، ⇄ بين حساباتك على المسار، ↗ استثمارات (شراء وبيع وقيمة) على أزرق فاتح؛ عمره ما يبقى حرف. وبعدها الطرف المقابل وفئته، والمبلغ على الناحية التانية. الارتفاع 64. الداخل أخضر بعلامة +، والخارج بلون الحبر مع −، والتحويل من غير علامة (A11). تحديثات قيمة اليوم الواحد صف واحد، «حركة الاستثمارات»، ومعاه عددها. الرصيد بعد الصف بيظهر بس في قائمة الحساب نفسه، بلون خافت تحت المبلغ؛ مش في النظرة العامة ولا في قائمة كل الحسابات. النظرة العامة ما بتسميش الحساب (الفئة بس)؛ قائمة كل الحسابات بتضيفه بعد الفئة.</li>
       <li><b>C08.3 المرشحات:</b> البحث بعرض كامل ويقبل الوسم #، وبعده الشرائح. الشهر شريحة بأسهم تفتح اختيار الشهر؛ ما تكتبش yyyy-mm بإيدك.</li>
-      <li><b>C08.4 الإضافة:</b> زر الإضافة (C05.2) يفتح لوحة الإدخال. ما تحطش صف «جديد» فوق القائمة.</li>
+      <li><b>C08.4 الإضافة:</b> «أضف» في شريط التبويبات (C05.2) يفتح لوحة الإدخال. ما تحطش صف «جديد» فوق القائمة.</li>
       <li><b>C08.5 التحديد:</b> اضغط مطولاً على الصف أو استخدم شريحة «تحديد» بعد الشهر. الصفوف المحددة تبقى خضراء فاتحة بإطار أخضر. شريط يحل محل التبويبات ويعرض العدد والفئة الجديدة وخياري تغيير الفئة والحذف؛ «تم» ينهي التحديد.</li>
       <li><b>C08.6 الفئات:</b> المستوى الأول عنوان ومعاه الإجمالي، وتحته المستوى الثاني؛ أربع فئات ثم «أخرى» (A11). ما تعرضش «L1 › L2».</li>
     </ul>
@@ -878,17 +910,17 @@ html[dir=rtl] svg{direction:ltr}
   <div class="g-head"><div><h2><span class="secnum">C10</span>الخط والأرقام</h2><p>نفس الخطين اللي في A06: Readex Pro للأرقام والعناوين، وNoto Sans Arabic للكلام. الأحجام أصغر، لكن قواعد الأرقام والتاريخ والاتجاه (A06.2) زي ما هي.</p></div></div>
   <div class="scroll"><table class="t ty" style="max-width:760px">
     <tr><th>الدور</th><th>الكمبيوتر (A)</th><th>الموبايل (C)</th><th>مثال</th></tr>
-    <tr><td><b>عنوان الصفحة</b></td><td class="r">٢٨</td><td class="r">٢٤</td><td><span style="font:700 24px/1.15 var(--display);letter-spacing:-.03em">نظرة عامة</span></td></tr>
+    <tr><td><b>عنوان الصفحة</b></td><td class="r">٢٨</td><td class="r">17px · في شريط التطبيق</td><td><span style="font:700 17px/1.15 var(--display)">نظرة عامة</span></td></tr>
     <tr><td><b>عنوان القسم</b></td><td class="r">٢٠</td><td class="r">١٨</td><td><span style="font:700 18px/1.3 var(--display)">مركزك المالي</span></td></tr>
     <tr><td><b>عنوان البطاقة</b></td><td class="r">١٧</td><td class="r">١٦</td><td><span style="font:700 16px/1.3 var(--display)">النقدية المتاحة</span></td></tr>
     <tr><td><b>الرقم الرئيسي</b></td><td class="r">٥٢</td><td class="r">40px · و34px للأرقام الطويلة</td><td><span class="num" style="font-size:40px;line-height:1">١٥٦٬٠٨٤</span></td></tr>
     <tr><td><b>رقم المؤشر</b></td><td class="r">٣٨</td><td class="r">26px · و22px للأرقام الطويلة</td><td><span class="num" style="font-size:26px">⁦+٣٧٬٨٨٤⁩</span></td></tr>
-    <tr><td><b>مبلغ الصف</b></td><td class="r">١٤</td><td class="r">١٥</td><td><b style="font-variant-numeric:tabular-nums">⁦−١٬٢٥٠٫٠٠⁩</b></td></tr>
+    <tr><td><b>مبلغ الصف</b></td><td class="r">١٤</td><td class="r">١٥</td><td><b style="font-variant-numeric:tabular-nums">⁦−١٬٢٥٠⁩ · ⁦−١٬٤٢٠٫٤٠⁩</b></td></tr>
     <tr><td><b>النص والحقول</b></td><td class="r">١٤</td><td class="r">15px · الحقول 16px</td><td>النقدية اللي تملكها</td></tr>
     <tr><td><b>صغير</b></td><td class="r">١٢</td><td class="r">12.5px · ما ينزلش عن ١٢</td><td><span class="muted" style="font-size:12.5px">بقالة</span></td></tr>
   </table></div>
   <ul class="short">
-    <li><b>الأرقام الكبيرة بالجنيه من غير كسور،</b> حتى إجمالي الحسابات (٢٧١٬٠٢٤ مش ٢٧١٬٠٢٤٫٢٩). الكسور تظهر في الصفوف بس.</li>
+    <li><b>الأرقام الكبيرة بالجنيه من غير كسور،</b> حتى إجمالي الحسابات (٢٧١٬٠٢٤ مش ٢٧١٬٠٢٤٫٢٩). الصفوف بتشيل «٫٠٠»: المبلغ الصحيح ما بيظهرش بكسور (⁦−١٬٢٥٠⁩)؛ والقروش بتظهر لو فيه (⁦−١٬٤٢٠٫٤٠⁩)، وعمرها ما بتتقرّب وتختفي.</li>
     <li><b>الرقم الطويل يصغر درجة،</b> ما يلفش لسطر تاني أو ينتهي بعلامة «…».</li>
     <li><b>اكتب الجنيه مرة واحدة،</b> جنب الرقم الكبير. الصفوف تعرض أرقاماً فقط.</li>
   </ul>
@@ -900,62 +932,59 @@ html[dir=rtl] svg{direction:ltr}
     <figure><figcaption>C11.1 النظرة العامة</figcaption>
       <div class="pf">
         <div class="pf-status"><span>٤:٣٢</span><span>٤٧٪</span></div>
-        <div class="pf-bar"><img class="pf-mark" alt="Lightning"><span class="pf-icon"><svg class="ic"><use href="#i-search"/></svg></span><span class="pf-icon"><svg class="ic"><use href="#i-eye"/></svg></span><span class="pf-icon"><svg class="ic"><use href="#i-gear"/></svg></span></div>
+        <div class="pf-bar named"><img class="pf-mark" alt="Lightning"><span class="pf-name">نظرة عامة</span><span class="pf-icon"><svg class="ic"><use href="#i-search"/></svg></span><span class="pf-icon"><svg class="ic"><use href="#i-eye"/></svg></span></div>
         <div class="pf-body">
-          <div class="pf-title"><h3>نظرة عامة</h3><p class="st">فضل معاك ٤٩٪ من اللي دخل السنة دي.</p></div>
-          <div class="pf-seg"><span class="on">الملخص</span><span>الإنفاق</span><span>الصحة</span></div>
-          <div class="pf-hero"><p>صافي الثروة <span class="muted">كما في ⁦‭٢٠٢٦-١٠-٠٦‬⁩</span></p><div class="big num">١٥٦٬٠٨٤<small>EGP</small></div></div>
-          <div class="pf-need">محتاج تدخل <em>١٨</em><svg class="ic"><use href="#i-down"/></svg></div>
-          <div class="pf-sec"><h4>الأحدث</h4><span>شوف كل المعاملات</span></div>
+          <div class="pf-lead"><p>المتاح الآمن للصرف</p><div class="big num">١٤٬٨٢٠<small>EGP</small></div><p class="st">حوالي ١٬٦٥٠ في اليوم لحد القبض يوم ⁦‭٢٠٢٦-١١-٠١‬⁩.</p></div>
+          <div class="pf-stepper"><i>‹</i><b>⁦‭٢٠٢٦-١٠‬⁩</b><i>›</i></div>
+          <div class="pf-needcard"><div><b>٩ حاجات محتاجة تدخّلك</b><small>٤ محتاجة ترتيب · ٣ فواتير · ٢ أسعار</small></div><em>٩</em><u>افتح</u></div>
+          <div class="kt-grid">
+            <div class="kt"><div class="top"><span class="chip">النهارده</span></div><div class="lbl">صافي ثروتك</div><div class="fig num">١٥٦٬٠٨٤</div><div class="foot"><b>⁦+٢٬١٢٠⁩</b> الشهر ده</div></div>
+            <div class="kt rose"><div class="top"><span class="chip">⁦‭٢٠٢٦-١٠‬⁩</span></div><div class="lbl">المتبقي في الخطة</div><div class="fig num">٦٬٢٤٠</div><div class="meter"><i style="width:72%"></i></div></div>
+            <div class="kt"><div class="top"><span class="chip up">لحد دلوقتي</span></div><div class="lbl">نسبة الادخار</div><div class="fig num">٤٩٫١<small>٪</small></div><div class="foot">متبقي <b>٢٤٬٥٥٣</b></div></div>
+            <div class="kt azure"><div class="top"><span class="chip up">لحد دلوقتي</span></div><div class="lbl">نسبة الاستثمار</div><div class="fig num">٢٤٫٠<small>٪</small></div><div class="meter"><i style="width:24%"></i></div></div>
+          </div>
+          <div class="pf-sec"><h4>الأحدث</h4><span>شوف الكل</span></div>
           <div class="pf-list">
             <div class="pf-day"><span>النهارده</span></div>
-            <div class="pf-tx"><div class="pf-who"><i class="pf-av">C</i><div><b>Carrefour</b><small>بقالة</small></div></div><div class="a"><b>−٣٬٤١٠٫٠٠</b></div></div>
+            <div class="pf-tx"><div class="pf-who"><i class="pf-av ar out">↓</i><div><b>Carrefour</b><small>بقالة</small></div></div><div class="a"><b>⁦−٣٬٤١٠⁩</b></div></div>
             <div class="pf-day"><span>امبارح</span></div>
-            <div class="pf-tx"><div class="pf-who"><i class="pf-av in">A</i><div><b>ACME Egypt</b><small>مرتب</small></div></div><div class="a"><b class="in">+٥٠٬٠٠٠٫٠٠</b></div></div>
-            <div class="pf-tx"><div class="pf-who"><i class="pf-av">أ</i><div><b>أوبر</b><small>مواصلات</small></div></div><div class="a"><b>−٥٢٤٫٠٠</b></div></div>
-          </div>
-          <div class="pf-sec"><h4>الفترة دي</h4><span>⁦‭٢٠٢٦-٠١-٠١‬⁩ لحد ⁦‭٢٠٢٦-١٠-٠٦‬⁩</span></div>
-          <div class="pf-period"><span>الكل</span><span class="on">من بداية السنة</span><span class="step"><i>‹</i>⁦‭٢٠٢٦-١٠‬⁩<i>›</i></span><span>مخصص</span></div>
-          <div class="kt-grid">
-            <div class="kt"><div class="top"><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">التغير في صافي الثروة</div><div class="fig num">⁦+٣٧٬٨٨٤⁩</div><div class="foot">صافي الثروة <b>١٥٦٬٠٨٤</b></div></div>
-            <div class="kt"><div class="top"><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">نسبة الادخار</div><div class="fig num">٤٩٫١<small>٪</small></div><div class="foot">متبقي <b>٦٩٬٠١٣</b></div></div>
-            <div class="kt azure"><div class="top"><span class="chip up">↑ من بداية السنة</span></div><div class="lbl">نسبة الاستثمار</div><div class="fig num">٤٩٫١<small>٪</small></div><div class="meter"><i style="width:49%"></i></div></div>
-            <div class="kt rose"><div class="top"><span class="chip">⁦‭٢٠٢٦-١٠‬⁩</span></div><div class="lbl">المتبقي في الخطة</div><div class="fig num">٢٤٬٦٩٨</div><div class="meter"><i style="width:2%"></i></div></div>
+            <div class="pf-tx"><div class="pf-who"><i class="pf-av ar in">↑</i><div><b>ACME Egypt</b><small>الراتب</small></div></div><div class="a"><b class="in">⁦+٥٠٬٠٠٠⁩</b></div></div>
+            <div class="pf-tx"><div class="pf-who"><i class="pf-av ar inv">↗</i><div><b>حركة الاستثمارات</b><small>٤ تحديثات قيمة</small></div></div><div class="a"><b class="in">⁦+٧٬٩٥٦⁩</b></div></div>
           </div>
           <div class="pf-sec"><h4>مركزك المالي</h4><span>كما في ⁦‭٢٠٢٦-١٠-٠٦‬⁩</span></div>
           <div class="pf-card lead"><div class="pf-rows"><div><span>اللي تملكه</span><b>٢٦١٬٠٢٤</b></div><div><span>اللي عليك</span><b>⁦−١٠٤٬٩٤٠⁩</b></div></div></div>
         </div>
-        <div class="pf-nav"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>نظرة عامة</span><span><i><svg class="ic"><use href="#i-wallet"/></svg></i>الميزانية</span><span><i><svg class="ic"><use href="#i-cash"/></svg></i>الكاش</span><span><i><svg class="ic"><use href="#i-chart"/></svg></i>الاستثمارات</span><span><i><svg class="ic"><use href="#i-bank"/></svg></i>الحسابات</span></div>
+        <div class="pf-nav words"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>نظرة عامة</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>ميزانيتك</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>أضف</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>المعاملات</span><span><i><svg class="ic"><use href="#i-more"/></svg></i>أكتر</span></div>
         <div class="pf-gest"></div>
       </div>
     </figure>
     <figure><figcaption>C11.2 الحساب</figcaption>
       <div class="pf">
         <div class="pf-status"><span>٤:٣٢</span><span>٤٧٪</span></div>
-        <div class="pf-bar"><span class="back"><svg class="ic"><use href="#i-left"/></svg>الحسابات</span><span class="pf-icon"><svg class="ic"><use href="#i-search"/></svg></span><span class="pf-icon"><svg class="ic"><use href="#i-eye"/></svg></span><span class="pf-icon"><svg class="ic"><use href="#i-gear"/></svg></span></div>
+        <div class="pf-bar"><span class="back"><svg class="ic"><use href="#i-left"/></svg>حساباتك</span><span class="pf-icon"><svg class="ic"><use href="#i-search"/></svg></span><span class="pf-icon"><svg class="ic"><use href="#i-eye"/></svg></span><span class="pf-icon"><svg class="ic"><use href="#i-gear"/></svg></span></div>
         <div class="pf-body">
           <div class="pf-card lead"><h4>محفظة نقدية</h4><p class="sub">الكاش</p><div class="big num">١٠٬٢٢٠<small>EGP</small></div><div class="pf-acts"><span class="btn secondary">تغيير الملكية</span><span class="more"><svg class="ic" style="width:20px;height:20px"><use href="#i-more"/></svg></span></div></div>
           <div class="pf-search"><svg class="ic"><use href="#i-search"/></svg>البحث في المعاملات</div>
           <div class="pf-chips"><span class="on">‹ ⁦‭٢٠٢٦-٠٦‬⁩ ›</span><span>الفئة<svg class="ic" style="width:16px;height:16px"><use href="#i-down"/></svg></span></div>
           <div class="pf-list">
-            <div class="pf-day">⁦‭٢٠٢٦-٠٦-١٦‬⁩</div>
-            <div class="pf-tx"><div class="pf-who"><i class="pf-av">K</i><div><b>Kiosk</b><small>بقالة</small></div></div><div class="a"><b>⁦−١٦٥٫٠٠⁩</b></div></div>
-            <div class="pf-day">⁦‭٢٠٢٦-٠٦-١٢‬⁩</div>
-            <div class="pf-tx"><div class="pf-who"><i class="pf-av">أ</i><div><b>أوبر</b><small>مواصلات</small></div></div><div class="a"><b>⁦−٩٠٫٠٠⁩</b></div></div>
-            <div class="pf-day">⁦‭٢٠٢٦-٠٦-٠٥‬⁩</div>
-            <div class="pf-tx"><div class="pf-who"><i class="pf-av">C</i><div><b>من حساب CIB الجاري</b><small>تحويل</small></div></div><div class="a"><b>٣٬٠٠٠٫٠٠</b></div></div>
-            <div class="pf-day">⁦‭٢٠٢٦-٠٥-١٦‬⁩</div>
-            <div class="pf-tx"><div class="pf-who"><i class="pf-av">K</i><div><b>Kiosk</b><small>بقالة</small></div></div><div class="a"><b>⁦−٢١٠٫٠٠⁩</b><small>⁦٧٬٤٧٥٫٠٠⁩</small></div></div>
+            <div class="pf-day"><span>⁦‭٢٠٢٦-٠٦-١٦‬⁩</span><span>⁦−١٦٥⁩</span></div>
+            <div class="pf-tx"><div class="pf-who"><i class="pf-av ar out">↓</i><div><b>Kiosk</b><small>بقالة</small></div></div><div class="a"><b>⁦−١٦٥⁩</b></div></div>
+            <div class="pf-day"><span>⁦‭٢٠٢٦-٠٦-١٢‬⁩</span><span>⁦−٩٠⁩</span></div>
+            <div class="pf-tx"><div class="pf-who"><i class="pf-av ar out">↓</i><div><b>أوبر</b><small>مواصلات</small></div></div><div class="a"><b>⁦−٩٠⁩</b></div></div>
+            <div class="pf-day"><span>⁦‭٢٠٢٦-٠٦-٠٥‬⁩</span></div>
+            <div class="pf-tx"><div class="pf-who"><i class="pf-av ar mv">⇄</i><div><b>من حساب CIB الجاري</b><small>تحويل</small></div></div><div class="a"><b>٣٬٠٠٠</b></div></div>
+            <div class="pf-day"><span>⁦‭٢٠٢٦-٠٥-١٦‬⁩</span><span>⁦−٢١٠⁩</span></div>
+            <div class="pf-tx"><div class="pf-who"><i class="pf-av ar out">↓</i><div><b>Kiosk</b><small>بقالة</small></div></div><div class="a"><b>⁦−٢١٠⁩</b><small>⁦٧٬٤٧٥⁩</small></div></div>
           </div>
         </div>
-        <span class="pf-fab" title="Add transaction"><svg class="ic"><use href="#i-plus"/></svg></span>
-        <div class="pf-nav"><span><i><svg class="ic"><use href="#i-home"/></svg></i>نظرة عامة</span><span><i><svg class="ic"><use href="#i-wallet"/></svg></i>الميزانية</span><span><i><svg class="ic"><use href="#i-cash"/></svg></i>الكاش</span><span><i><svg class="ic"><use href="#i-chart"/></svg></i>الاستثمارات</span><span class="on"><i><svg class="ic"><use href="#i-bank"/></svg></i>الحسابات</span></div>
+        <div class="pf-nav words"><span><i><svg class="ic"><use href="#i-home"/></svg></i>نظرة عامة</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>ميزانيتك</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>أضف</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>المعاملات</span><span class="on"><i><svg class="ic"><use href="#i-more"/></svg></i>أكتر</span></div>
         <div class="pf-gest"></div>
       </div>
     </figure>
   </div>
   <ul class="short">
-    <li><b>C11.1 هي صفحة النظرة العامة كاملة، والفلوس الأول</b>، بترتيب A09: «جهّز حسابك» لحد ما يكتمل؛ رقم صافي الثروة على الصفحة (الرئيسي من غير بطاقة)؛ «محتاج تدخل»؛ «الأحدث»: آخر ست معاملات من كل الحسابات مع «شوف كل المعاملات»؛ وبعدين «الفترة دي» بمؤشر الفترة والمربعات الأربعة؛ وبعدها مركزك المالي. تحتهم صف لكل تفصيلة: بمرور الوقت، النقدية المتاحة، مكونات القيمة، ولو بعت النهارده؛ وبعدها صافي التدفق ووجهة الفلوس الداخلة والاستثمارات ورسوم كل شهر، مع الرقم الخاص بكل صف. الضغط على الصف يفتح بطاقته مكانه (C06.2). التحليل بضغطة، عمره ما يبقى الأول. الفواتير المستحقة تفضل ظاهرة في صف مستقل.</li>
+    <li><b>C11.1 هي صفحة النظرة العامة كاملة: «أقدر أصرف النهارده؟» في نظرة واحدة</b> (قرار صاحب المشروع، ⁦‭٢٠٢٦-١٠-٢٢‬⁩)، بترتيب A09: «ظبّط حسابك» لحد ما يكتمل؛ «المتاح الآمن للصرف» كالرقم الرئيسي ومعاه حوالي كام في اليوم لحد القبض (بيته تخطيط النقدية، فالرقم الرئيسي بيفتحه)؛ عدّاد الشهر؛ بطاقة «محتاج تدخّلك»؛ أربع بطاقات (صافي ثروتك، المتبقي في الخطة، نسبة الادخار، نسبة الاستثمار)؛ «الأحدث»: آخر خمس معاملات من كل الحسابات مع «شوف الكل»؛ وبعدين مركزك المالي. تحتهم صف لكل تفصيلة: بمرور الوقت، النقدية المتاحة، مكونات القيمة، ولو بعت النهارده؛ وبعدها صافي التدفق ووجهة الفلوس الداخلة والاستثمارات ورسوم كل شهر، مع الرقم الخاص بكل صف. الضغط على الصف يفتح بطاقته مكانه (C06.2). التحليل بضغطة، عمره ما يبقى الأول. الفواتير المستحقة تفضل ظاهرة في صف مستقل.</li>
+    <li><b>C11.3 أكتر</b> (C03.1): كل قسم ومعاه رقمه، وبطاقة المراجعة الأسبوعية، وبعدها الإعدادات.</li>
     <li><b>C11.2:</b> الزر الثانوي الوحيد للحساب و⋯ يظهروا تحت الرقم. في حساب الوساطة، افتح «تسجيل معاملة استثمار» فوق القائمة للشراء والبيع والتوزيعات.</li>
   </ul>
 </section>
@@ -973,14 +1002,15 @@ html[dir=rtl] svg{direction:ltr}
     <div><b>شهر أو تاريخ أو مسار مكتوب بإيدك</b>استخدم أدوات الاختيار بس.</div>
     <div><b>تلميحات لوحة المفاتيح</b>ما تعرضش «Ctrl K» على الموبايل.</div>
     <div><b>رسمين في بطاقة واحدة</b>رسم واحد في كل بطاقة.</div>
+    <div><b>حرف كعلامة للصف</b>سهم بيقول الفلوس عملت إيه (C08.2).</div>
     <div><b>جملة طويلة لمفتاح الرسم</b>الصفوف تشرح الألوان.</div>
     <div><b>كلمات خاصة بالكمبيوتر</b>«كمبيوتر» و«انقر» و«زر الفأرة اليمين».</div>
     <div><b>زران جنب بعض</b>زر ثانوي واحد وبعده ⋯.</div>
-    <div><b>كسور عشرية في رقم كبير</b>الجنيه عدد صحيح، حتى إجمالي الحسابات.</div>
-    <div><b>أيقونة وحدها مش مفهومة للجميع</b>اكتب اسمها بجانبها (C03.3).</div>
+    <div><b>كسور عشرية في رقم كبير</b>الجنيه عدد صحيح، حتى إجمالي الحسابات؛ والصفوف بتشيل «٫٠٠».</div>
+    <div><b>تبويب من غير كلمته</b>كل تبويب بيعرض اسمه (C03).</div>
     <div><b>بطاقة حوالين قائمة صفوف</b>الصفوف مسطّحة على الصفحة وبينها خط رفيع.</div>
-    <div><b>التحليل قبل الفلوس</b>آخر المعاملات الأول في صفحة فيها سجل.</div>
-    <div><b>زر فوق المحتوى</b>زر الإضافة ما يغطيش آخر صف.</div>
+    <div><b>التحليل قبل الإجابة</b>الرقم الرئيسي الأول؛ وآخر المعاملات بعد المربعات على طول.</div>
+    <div><b>زر فوق المحتوى</b>«أضف» في شريط التبويبات، عمره ما يطفو فوق الصفوف.</div>
     <div><b>صفحة من غير رجوع</b>‹ واسم الصفحة اللي بيرجع لها.</div>
     <div><b>نهاية من غير خطوة تالية</b>كل إجراء في السجل متاح على الموبايل كمان، أو وضّح مكانه.</div>
   </div>
