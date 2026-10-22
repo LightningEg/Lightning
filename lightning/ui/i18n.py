@@ -2406,6 +2406,8 @@ ARABIC_UI = {
     '{x} months of spending at its lowest': '{x} شهور مصاريف في أقل نقطة',
     'Everyday spending {amt} by day {n}; the plan {x}': 'المصاريف اليومية {amt} لحد يوم {n}؛ والخطة {x}',
     # Phone overhaul tabs (2026-10-22): Budget, Cash planning, Investments, Accounts.
+    'Search payee, category or amount': 'دوّر بالطرف أو الفئة أو المبلغ',
+    'To sort': 'محتاجة ترتيب',
     'spent': 'اتصرف',
     '{pct}% of the plan spent': '{pct}% من الخطة اتصرف',
     '{name} is over plan': '{name} زيادة عن الخطة',
