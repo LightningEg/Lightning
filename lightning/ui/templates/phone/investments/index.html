@@ -8,7 +8,9 @@
 {% from "partials/charts.html" import donut, trend %}
 {% from "partials/macros.html" import period_control with context %}
 {% block title %}Investments{% endblock %}
-{% block heading %}<h1>{{ 'Investments'|tr(locale) }}</h1>{% endblock %}
+{# The hero sits in the header so the section's tabs follow it (C03.3), as on Cash planning. #}
+{% block heading %}<h1>{{ 'Investments'|tr(locale) }}</h1>{% if accounts and invest_phone and (owned_rows or period_activity) %}{% set ph = invest_phone %}
+{{ hero(fig.portfolio_value.label, ph.value, ph.line.text|tr(locale, **ph.line['values']), note=("As of {date}"|tr(locale, date=period.end_text)) if period.end_text != today else '', unit=lens.code) }}{% endif %}{% endblock %}
 {% macro phone_bars(rows, caption) %}<div class="phone-bars" role="list" aria-label="{{ caption }}">{% for r in rows if not r.header %}
   {% set tag = 'a' if r.href else 'div' %}<{{ tag }} class="phone-bar-row" role="listitem"{% if r.href %} href="{{ r.href }}"{% endif %}><span class="phone-bar-name">{{ r.label }}</span><b class="phone-bar-value">{{ r.value|money }}</b><span class="phone-bar-track"><i style="width:{{ '%.1f'|format([r.width or 0, 1]|max) }}%"></i></span></{{ tag }}>
 {% endfor %}</div>{% endmacro %}
@@ -38,7 +40,6 @@
 <section class="card phone-card"><h2 class="phone-card-title">{{ 'No holdings yet'|tr(locale) }}</h2><p class="phone-note">{% if investment_report.investment_cash %}{{ investment_report.investment_cash|money }} {{ base }} of brokerage cash is ready. {% endif %}Record a holding to see its value, result and allocation.</p><a class="phone-quiet" href="/accounts">{{ 'Open accounts'|tr(locale) }}</a></section>
 {% else %}
 {% set ph = invest_phone %}
-{{ hero(fig.portfolio_value.label, ph.value, ph.line.text|tr(locale, **ph.line['values']), note=("As of {date}"|tr(locale, date=period.end_text)) if period.end_text != today else '', unit=lens.code) }}
 {{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}
 {% if investment_report.missing %}<p class="flash">Prices missing: {% for issue in investment_report.missing %}{{ issue.asset }}{% if not loop.last %}, {% endif %}{% endfor %}. Their value may be out of date.</p>{% endif %}
 

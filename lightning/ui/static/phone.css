@@ -595,6 +595,11 @@ html.phone:has(.phone-period-sheet[open]) .phone-tabbar { display: none; }
 /* A month box on a phone opens its picker as a sheet from the bottom, above everything (C09). */
 html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !important; right: 16px; top: auto !important; bottom: calc(16px + env(safe-area-inset-bottom)); width: auto; z-index: 70; }
 
+/* A hero in the header carries the seam itself; the header adds none (the tabs follow the hero, C03.3). */
+.phone-header:has(.phone-hero)::after { display: none; }
+.phone-header .phone-hero { margin-top: 0; }
+.phone-header p.phone-hero-line { margin: 4px 0 0; color: var(--c-ink-2); font-size: 14px; }
+
 /* A row that opens in place: its chevron follows the name on the same line. */
 .phone-row-more > summary.phone-row > span:first-child { display: block; }
 .phone-row-more > summary.phone-row > span:first-child > small { display: block; }
