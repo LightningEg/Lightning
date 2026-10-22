@@ -14,8 +14,10 @@ from lightning.database.connection import Database
 
 
 class MoneyFromOthersService:
-    def __init__(self, db: Database, accounts: AccountService, transactions=None):
+    def __init__(self, db: Database, accounts: AccountService, transactions=None,
+                 counterparties: CounterpartyService | None = None):
         self.db, self.accounts, self.transactions = db, accounts, transactions
+        self.counterparties = counterparties or CounterpartyService(db)
 
     def _tag_exact_line(self, transaction_id: int, owner: str | None, account_id: int, asset_id: int,
                         quantity_e6: int) -> None:
@@ -24,7 +26,7 @@ class MoneyFromOthersService:
             return
         if self.transactions is None:
             raise ValidationError("Ownership changes must be posted through the transaction service.")
-        parties = CounterpartyService(self.db)
+        parties = self.counterparties
         party = parties.resolve(owner.strip())
         party_id = party["id"] if party else parties.create(owner.strip())
         self.transactions.mark_line_owner(transaction_id, account_id, asset_id, quantity_e6, party_id)
@@ -44,7 +46,7 @@ class MoneyFromOthersService:
             return
         if self.transactions is None:
             raise ValidationError("Ownership changes must be posted through the transaction service.")
-        parties = CounterpartyService(self.db)
+        parties = self.counterparties
         party = parties.resolve(owner.strip())
         if party and not party["active"]:
             raise ValidationError("Choose an active saved person.", "owner")
