@@ -22,7 +22,7 @@ from lightning.rules.service import RuleService
 from lightning.categories.service import CategoryService
 from lightning.counterparties import CounterpartyService
 from lightning.database.audit import AuditLog
-from lightning.database.backup import backup, list_backups
+from lightning.database.backup import backed_up_today, backup, list_backups
 from lightning.database.connection import Database
 from lightning.database.currencies import CurrencyRegistry
 from lightning.database.seed import CASH_ASSETS
@@ -148,8 +148,12 @@ class ReadOnlyCopyError(RuntimeError):
 
 def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
           key: bytes | None = None, backup_dir: Path | None = None, read_only: bool = False,
-          experimental_journal: bool = False) -> Container:
+          experimental_journal: bool = False, source_verified: bool = False) -> Container:
     """Open a ledger and wire its services.
+
+    `backup_on_start` takes an automatic backup at most once a day: none when this ledger already has a
+    (non-upgrade) backup dated today (2J). A pending upgrade always takes its own. `source_verified` says the
+    caller has just run the integrity checks on this file, so the backup checks only its copy.
 
     `read_only` opens an actual SQLite read-only connection and skips every startup write: no backup,
     migration, seed or ownership repair. A copy that needs any of them is refused, never upgraded
@@ -169,9 +173,10 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
             if inspection.pending:
                 raise ReadOnlyCopyError("This saved copy was made by an older Lightning and needs an upgrade "
                                         "that a read-only copy cannot make.")
-        elif existed and (inspection.needs_backup or backup_on_start):
+        elif existed and (inspection.needs_backup or (
+                backup_on_start and not backed_up_today(backup_dir or data_dir / "backups", db_path))):
             saved = backup(db, backup_dir or data_dir / "backups",
-                           pre_upgrade=inspection.needs_backup)
+                           pre_upgrade=inspection.needs_backup, verify_source=not source_verified)
             if saved is None:
                 raise RuntimeError("A verified backup is required before upgrading")
         if not read_only and not is_journal:

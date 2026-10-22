@@ -71,11 +71,12 @@ def _remove_partial(target: Path) -> None:
 
 
 def export_snapshot(conn, target: Path, *, key: bytes | None = None,
-                    source_encrypted: bool = False) -> Path:
+                    source_encrypted: bool = False, verify_source: bool = True) -> Path:
     """Export with SQLCipher when keyed, otherwise use SQLite's backup API.
 
     Supply a SQLCipher connection when key is provided. Source may be encrypted
     or a read-only legacy database. Reopen output to verify persisted contents.
+    `verify_source=False` skips the source integrity check for a caller that has just run it on the same file.
     """
     if key is not None and (not isinstance(key, bytes) or len(key) != 32):
         raise ValueError("The database key must be exactly 32 bytes")
@@ -96,7 +97,8 @@ def export_snapshot(conn, target: Path, *, key: bytes | None = None,
         try:
             # Pins a consistent source snapshot including committed WAL data.
             expected = _inventory(conn)
-            verify_connection(conn, encrypted=source_encrypted)
+            if verify_source:
+                verify_connection(conn, encrypted=source_encrypted)
             if key is not None:
                 conn.execute("SELECT sqlcipher_export('lightning_copy')").fetchone()
                 conn.execute(f"PRAGMA lightning_copy.user_version = {int(expected[3])}")
@@ -134,7 +136,7 @@ def export_snapshot(conn, target: Path, *, key: bytes | None = None,
         raise
 
 
-def snapshot(db: Database, target: Path) -> Path:
+def snapshot(db: Database, target: Path, *, verify_source: bool = True) -> Path:
     db._check_owner()
     return export_snapshot(db.conn, target, key=bytes(db._key) if db.encrypted else None,
-                           source_encrypted=db.encrypted)
+                           source_encrypted=db.encrypted, verify_source=verify_source)
