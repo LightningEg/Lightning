@@ -455,7 +455,12 @@ class CashAdapter:
         local_id = self.db.scalar("SELECT local_id FROM journal_ids WHERE entity=? AND uuid=?", (table, json.loads(key)))
         if local_id is None:
             return own
-        return digest(dict(row=own, owned=self.rows.record_hashes(table, local_id)))
+        # Only the resulting token travels over the wire. A local ownership list
+        # may contain more rows than a protocol message can carry (e.g. a statement).
+        # Keep the same canonical JSON bytes so existing small-record tokens stay valid.
+        body = dict(row=own, owned=self.rows.record_hashes(table, local_id))
+        encoded = json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode("utf-8")
+        return hashlib.sha256(encoded).hexdigest()
 
     def apply(self, domain):
         """Typed exact replay on replicas, with no normal save/rule/automation call."""
