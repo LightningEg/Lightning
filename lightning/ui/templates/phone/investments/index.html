@@ -1,62 +1,80 @@
-{# Investments on a phone (guideline Part C): two KPI tiles, then allocation as a donut with rows, the biggest
-   holdings as bars with the name above (C07.3.5), and holdings as rows by asset class: name left, value
-   right, the rest of the PC's columns on the holding's own page (C07.2 "any table of figures"). #}
+{# Investments on a phone (phone overhaul 2026-10-22, "How is my money growing?"): the hero is Portfolio value with one
+   sentence on how it did, the month stepper under it, one chart card (the value line, with Month / YTD / All under it),
+   then Holdings as flat rows with an arrow chip: the biggest five, "See all" for every one grouped. Allocation, income
+   and horizon follow. No table (C07.2). The PC's figures; the sentence, the line and the list are built in the route. #}
 {% extends "base.html" %}
-{% from "phone/partials/charts.html" import kpi_tiles %}
-{% from "partials/charts.html" import donut %}
+{% from "phone/partials/hero.html" import hero with context %}
+{% from "phone/partials/txn.html" import arrow with context %}
+{% from "partials/charts.html" import donut, trend %}
+{% from "partials/macros.html" import period_control with context %}
 {% block title %}Investments{% endblock %}
-{% block heading %}<h1>{{ 'Investments'|tr(locale) }}</h1>{% if status %}<p class="phone-status">{{ status.text|tr(locale, **status['values']) }}</p>{% endif %}<p>Valued as of {{ period.end_display }}</p>{% endblock %}
-{% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}{% endblock %}
+{% block heading %}<h1>{{ 'Investments'|tr(locale) }}</h1>{% endblock %}
 {% macro phone_bars(rows, caption) %}<div class="phone-bars" role="list" aria-label="{{ caption }}">{% for r in rows if not r.header %}
   {% set tag = 'a' if r.href else 'div' %}<{{ tag }} class="phone-bar-row" role="listitem"{% if r.href %} href="{{ r.href }}"{% endif %}><span class="phone-bar-name">{{ r.label }}</span><b class="phone-bar-value">{{ r.value|money }}</b><span class="phone-bar-track"><i style="width:{{ '%.1f'|format([r.width or 0, 1]|max) }}%"></i></span></{{ tag }}>
 {% endfor %}</div>{% endmacro %}
+{# One holding: arrow chip, its name, "type · change" (the type is left out when it only repeats the name; the change is
+   the return since purchase, else the quantity), its value on the right. A balance-only asset opens its account. #}
+{% macro holding_row(r, start, end, with_kind=True) %}{% set h = r.h %}
+  {% set name = r.name if r.balance else h.short_name %}
+  {% set same = r.kind|lower == name|lower or (h and r.kind|lower == h.asset_name|lower) %}
+  {% set show_kind = with_kind and not same %}
+  {% set parts = [] %}
+  {% if r.balance %}{% set _ = parts.append((r.kind|tr(locale)) if show_kind else ('Cash in the account'|tr(locale))) %}
+  {% else %}
+    {% if show_kind %}{% set _ = parts.append(r.kind|tr(locale)) %}{% endif %}
+    {% if not show_kind and r.gain_pct is not none %}{% set _ = parts.append(r.units|units_of(h.unit)) %}{% endif %}
+    {% set _ = parts.append(((r.gain_pct|signed_pct) ~ '%') if r.gain_pct is not none else (r.units|units_of(h.unit))) %}
+  {% endif %}
+  <a class="phone-txn phone-invest-row" href="{{ ('/accounts/' ~ r.account_id) if r.balance else ('/investments/holding/' ~ h.asset_id ~ '?account=' ~ h.account_id ~ '&date=' ~ end ~ '&start=' ~ start) }}">{{ arrow('invest') }}
+    <span class="phone-txn-who"><b>{{ name }}</b><small>{{ parts|join(' · ') }}</small></span>
+    <span class="phone-txn-amount"><b>{{ r.value|money if r.value is not none else 'Unavailable'|tr(locale) }}</b></span></a>
+{% endmacro %}
 {% block content %}
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
-{% set chip = {"month": period.start_text[:7], "ytd": "YTD", "all": "All"}.get(period.key, "Range") %}
 {% if not accounts %}
 <section class="card phone-card"><p class="phone-note">{{ "Investments live in a brokerage account or a physical asset account."|tr(locale) }}</p><a class="btn primary phone-save" href="/accounts/new?type=BROKERAGE">{{ "Add a brokerage account"|tr(locale) }}</a></section>
 {% elif not owned_rows and not period_activity %}
-<section class="card phone-card"><h2 class="phone-card-title">{{ 'No holdings yet'|tr(locale) }}</h2><p class="phone-note">{% if investment_report.investment_cash %}{{ investment_report.investment_cash|money }} {{ base }} of brokerage cash is ready. {% endif %}Record a holding to see its value, result and allocation.</p></section>
+{{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}
+<section class="card phone-card"><h2 class="phone-card-title">{{ 'No holdings yet'|tr(locale) }}</h2><p class="phone-note">{% if investment_report.investment_cash %}{{ investment_report.investment_cash|money }} {{ base }} of brokerage cash is ready. {% endif %}Record a holding to see its value, result and allocation.</p><a class="phone-quiet" href="/accounts">{{ 'Open accounts'|tr(locale) }}</a></section>
 {% else %}
-{% set result = investment_report.result %}
-{% set tiles = [
-  {"surface": 'over' if result is not none and result < 0 else 'in', "label": fig.result.label, "value": hero_result, "signed": true, "empty": 'Unavailable',
-   "badge": {"tone": 'up' if result and result > 0 else ('down' if result and result < 0 else 'flat'), "text": chip},
-   "sub": (growth|signed_pct ~ '% ' ~ fig.period_growth.label|lower) if growth is not none else ''},
-  {"surface": 'hold', "label": fig.portfolio_value.label, "value": hero_value, "empty": 'Unavailable', "href": '#holdings-heading',
-   "badge": {"tone": 'flat', "text": 'Today'},
-   "sub": ((('XIRR' if since_return.annualized else 'Return')|tr(locale)) ~ ' ' ~ since_return.percent|signed_pct ~ (('% a year' if since_return.annualized else '%')|tr(locale)) ~ ' · ' ~ ((('Held {n} day' if since_return.days_held==1 else 'Held {n} days')|tr(locale, n=since_return.days_held)))) if since_return and since_return.percent is not none else ''},
-] %}
-{{ kpi_tiles(tiles, lens.code) }}
+{% set ph = invest_phone %}
+{{ hero(fig.portfolio_value.label, ph.value, ph.line.text|tr(locale, **ph.line['values']), note=("As of {date}"|tr(locale, date=period.end_text)) if period.end_text != today else '', unit=lens.code) }}
+{{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}
 {% if investment_report.missing %}<p class="flash">Prices missing: {% for issue in investment_report.missing %}{{ issue.asset }}{% if not loop.last %}, {% endif %}{% endfor %}. Their value may be out of date.</p>{% endif %}
-{% if investment_report.unrealized_change is none %}<p class="flash">{{ "A dated market price is missing at a period boundary, so the result is unavailable."|tr(locale) }}</p>{% endif %}
+
+<article class="card phone-card phone-invest-card has-{{ ph.chart.count }}" aria-label="{{ 'Portfolio value over time'|tr(locale) }}">
+  {{ trend(ph.chart, 'Portfolio value over time'|tr(locale), '', 160) }}
+  <div class="phone-invest-seg" role="group" aria-label="{{ 'Choose period'|tr(locale) }}">{% for r in ph.ranges %}<a href="{{ r.href }}"{% if r.selected %} class="is-chosen" aria-current="true"{% endif %}>{{ r.text|tr(locale) }}</a>{% endfor %}</div>
+</article>
+{% if since_return and since_return.percent is not none %}<div class="phone-rows phone-invest-return"><div class="phone-row"><span>{{ ('XIRR' if since_return.annualized else 'Return')|tr(locale) }}<small>{{ ('Held {n} day' if since_return.days_held == 1 else 'Held {n} days')|tr(locale, n=since_return.days_held) }}</small></span><b>{{ since_return.percent|signed_pct }}{{ ('% a year' if since_return.annualized else '%')|tr(locale) }}</b></div></div>{% endif %}
+
+<section class="phone-section" aria-labelledby="holdings-heading">
+  <header class="phone-section-head"><h2 id="holdings-heading">{{ 'Holdings'|tr(locale) }}</h2>{% if ph.more %}<a class="phone-quiet" href="{{ ph.fewer_link if ph.expanded else ph.all_link }}">{{ ('Show fewer' if ph.expanded else 'See all')|tr(locale) }}</a>{% endif %}</header>
+  {% if ph.expanded %}
+  <div class="phone-invest-views" role="group" aria-label="{{ 'Group holdings'|tr(locale) }}">{% for key, text in views.items() %}<a class="phone-invest-chip{{ ' is-chosen' if key == view }}" href="{{ view_links[key] }}#holdings-heading">{{ text|tr(locale) }}</a>{% endfor %}</div>
+  {% for g in holding_groups %}
+  <div class="phone-invest-group" role="group" aria-label="{{ g.name }}">
+    <div class="phone-group-head"><span class="phone-group-name"><b>{{ g.name }}</b><small>{{ '%.0f'|format(g.weight) }}% of holdings · gain {{ g.gain|money(True) }}</small></span><b class="phone-group-left">{{ g.value|money }}</b></div>
+    <div class="phone-day-rows">{% for r in g.rows %}{{ holding_row(r, period.start_text, period.end_text, view != 'class') }}{% endfor %}</div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="phone-day-rows">{% for r in ph.rows %}{{ holding_row(r, period.start_text, period.end_text) }}{% else %}<p class="empty">{{ "No owned holdings to show."|tr(locale) }}</p>{% endfor %}</div>
+  {% endif %}
+</section>
 
 <section class="phone-section" aria-labelledby="alloc-heading">
   <header class="phone-section-head"><h2 id="alloc-heading">{{ "Allocation"|tr(locale) }}</h2><span>{{ period.end_text }}</span></header>
   <article class="card phone-card" aria-label="By asset class">
     <h3 class="phone-card-title">{{ fig.holdings_value.label }} by asset class</h3>
     {{ donut(investment_donut, fig.holdings_value.label, base) }}
-    <div class="phone-rows">
-      <div class="phone-row"><span>{{ fig.brokerage_cash.label }}</span><b>{{ investment_report.investment_cash|money if investment_report.investment_cash is not none else 'Unavailable' }}</b></div>
-      <div class="phone-row"><span>{{ fig.holdings_after_sale.label }}</span><b>{{ pos.holdings_after_sale|money if pos.holdings_after_sale is not none else 'Unavailable' }}</b></div>
-    </div>
   </article>
-  {# Biggest holdings left: the holdings rows below are its one home (guideline 3.33, A09.2). #}
-</section>
-
-{% for item in pos.locked_holdings %}<div class="phone-row locked-row"><span>{{ "Locked certificate"|tr(locale) }} · {{ item.asset }} <small>{{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small></span><b class="muted">{{ item.value|money }}</b></div>{% endfor %}
-<section class="phone-section" aria-labelledby="holdings-heading">
-  <header class="phone-section-head"><h2 id="holdings-heading">{{ 'Holdings'|tr(locale) }}</h2><span>As of {{ period.end_text }}</span></header>
-  <div class="period-buttons holdings-views" role="group" aria-label="{{ 'Group holdings'|tr(locale) }}">{% for key, text in views.items() %}<a class="period-button{{ ' selected' if key == view }}" href="{{ view_links[key] }}">{{ text|tr(locale) }}</a>{% endfor %}</div>
-  {% for g in holding_groups %}
-  <article class="card phone-card phone-flat-rows" aria-label="{{ g.name }}">
-    <div class="phone-group-head"><span class="phone-group-name"><b>{{ g.name }}</b><small>{{ '%.0f'|format(g.weight) }}% of holdings · gain {{ g.gain|money(True) }}</small></span><b class="phone-group-left">{{ g.value|money }}</b></div>
-    <div class="phone-rows">{% for r in g.rows %}
-      {% if r.balance %}<a class="phone-row" href="/accounts/{{ r.account_id }}"><span>{{ r.name }}<small>{{ "Cash in the account"|tr(locale) }}</small></span><b>{{ r.value|money }}</b></a>
-      {% else %}{% set h = r.h %}<a class="phone-row" href="/investments/holding/{{ h.asset_id }}?account={{ h.account_id }}&amp;date={{ period.end_text }}&amp;start={{ period.start_text }}"><span>{{ h.short_name }}<small>{{ r.units|units_of(h.unit) }}{% if r.gain_pct is not none %} · {{ r.gain_pct|signed_pct }}%{% endif %}{% if r.horizon != 'Unassigned' %} · {{ r.horizon }}{% endif %}</small></span><b>{{ r.value|money if r.value is not none else 'Unavailable' }}</b></a>{% endif %}
-    {% endfor %}</div>
-  </article>
-  {% else %}<p class="empty">{{ "No owned holdings to show."|tr(locale) }}</p>{% endfor %}
+  <div class="phone-rows">
+    {% for item in pos.locked_holdings %}<div class="phone-row locked-row"><span>{{ "Locked certificate"|tr(locale) }} · {{ item.asset }} <small>{{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small></span><b class="muted">{{ item.value|money }}</b></div>{% endfor %}
+    <div class="phone-row"><span>{{ fig.brokerage_cash.label }}</span><b>{{ investment_report.investment_cash|money if investment_report.investment_cash is not none else 'Unavailable' }}</b></div>
+    <div class="phone-row"><span>{{ fig.holdings_after_sale.label }}</span><b>{{ pos.holdings_after_sale|money if pos.holdings_after_sale is not none else 'Unavailable' }}</b></div>
+  </div>
+  {# Biggest holdings left: the holdings rows above are its one home (guideline 3.33, A09.2). #}
 </section>
 
 <section class="phone-section" aria-labelledby="income-heading">
