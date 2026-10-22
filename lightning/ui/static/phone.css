@@ -659,7 +659,37 @@ html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !import
 /* == end 3AC Cash planning tab == */
 
 /* == 3AC Investments tab == (rules for phone/investments/index.html) */
-
+/* The value line: one card, 160 tall, no y-axis labels (phone frame), the first, middle and last date only (C07.1). */
+.phone .phone-invest-card { margin-top: 12px; padding: 16px 16px 12px; }
+.phone-invest-card .chart-trend { margin: 0; }
+.phone-invest-card .chart-plot, .phone-invest-card .chart-x { margin-left: 0; margin-right: 0; }
+.phone-invest-card .chart-x { height: 20px; }
+/* Seven dates (or five, or three) are drawn; the ones between the first, the middle and the last stay unnamed. The
+   first date starts at the card's left edge and the last ends at its right edge, so neither is cut. */
+.phone-invest-card .chart-x span:not(:first-child):not(:last-child) { display: none; }
+.phone-invest-card.has-7 .chart-x span:nth-child(4), .phone-invest-card.has-5 .chart-x span:nth-child(3), .phone-invest-card.has-3 .chart-x span:nth-child(2) { display: block; }
+.phone-invest-card .chart-x span:first-child:not(:last-child) { left: 0 !important; transform: none; }
+.phone-invest-card .chart-x span:last-child:not(:first-child) { left: auto !important; right: 0; transform: none; }
+.phone-invest-card .chart-x span { font-size: 12px; }
+/* The Month / YTD / All row sits right under the dates; "Show the numbers" comes last. */
+.phone-invest-card { display: flex; flex-direction: column; }
+.phone-invest-card > .chart-trend { display: contents; }
+.phone-invest-card .phone-invest-seg { order: 1; }
+.phone-invest-card .chart-table { order: 2; }
+/* Month / YTD / All: links that set the page's period, in one segmented track. */
+.phone-invest-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; margin: 4px 0 0; border-radius: 999px; background: var(--c-track); }
+.phone-invest-seg a { display: flex; align-items: center; justify-content: center; min-height: 40px; border-radius: 999px; color: var(--c-ink-2); font-size: 14px; font-weight: 700; text-decoration: none; }
+.phone-invest-seg a.is-chosen { background: var(--c-nile); color: #fff; }
+.phone-invest-return { margin: 12px 0 0; }
+.phone-invest-return .phone-row { border-top: 0; }
+/* Holdings: flat rows with the arrow chip; every holding grouped when asked. */
+.phone-invest-row { min-height: 64px; }
+.phone-invest-views { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }
+.phone-invest-chip { display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: 999px; background: var(--c-track); color: var(--c-ink-2); font-size: 14px; font-weight: 700; text-decoration: none; }
+.phone-invest-chip.is-chosen { background: var(--c-nile); color: #fff; }
+.phone-invest-group { margin: 12px 0 0; }
+.phone-invest-group .phone-group-head { padding: 8px 0 4px; }
+.phone-invest-group .phone-group-name b { font-size: 15px; }
 /* == end 3AC Investments tab == */
 
 /* == 3AC Accounts tab == (rules for phone/accounts/list.html) */
