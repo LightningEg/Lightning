@@ -1,26 +1,27 @@
-{# Accounts on a phone (guideline C03.1, C08): the total in whole EGP, then one row per account. Its add
-   button asks which account first (C05.2). #}
+{# Accounts on a phone (phone overhaul 2026-10-22, C03.1, C08): "Where is my money right now?" leads with In your accounts
+   and one sentence, then the accounts in the sidebar's groups, each group's total on its right; one row per account
+   (type and bank under its name, the balance in whole EGP). Transactions has its own tab, so this page only links to it.
+   Its add button asks which account first (C05.2). #}
 {% extends "base.html" %}
+{% from "phone/partials/hero.html" import hero with context %}
 {% block title %}Accounts{% endblock %}
-{% block heading %}<h1>{{ 'Accounts'|tr(locale) }}</h1>{% if status %}<p class="phone-status">{{ status.text|tr(locale, **status['values']) }}</p>{% endif %}
-<p>{{ fig.what_you_own.label }}</p>
-<div class="phone-lead">{{ net_worth.what_you_own|money(False, 0) }} <small>{{ base }}</small></div>
-<p class="phone-note">{{ fig.in_your_accounts.label }} {{ gross_total|money(False, 0) }}{% if held_total %} · {{ fig.held_for_others.label }} {{ held_total|money(False, 0) }}{% endif %}</p>{% endblock %}
+{# The hero sits in the header so the page's actions (From SMS, ⋯) come under it. #}
+{% block heading %}<h1>{{ 'Accounts'|tr(locale) }}</h1><div class="phone-accounts-head">{{ hero(fig.in_your_accounts.label, gross_total, hero_line.text|tr(locale, **hero_line['values'])) }}</div>{% endblock %}
 {% block top_actions %}{# C04.5: the everyday action as one Secondary, the rest behind ⋯ #}<a class="btn" href="/sms">{{ "From SMS"|tr(locale) }}</a><details class="action-menu phone-more-menu"><summary aria-label="More actions">⋯</summary><div><a href="/accounts/new">{{ 'Add account'|tr(locale) }}</a><a href="/transactions/deleted">{{ "Deleted transactions"|tr(locale) }}</a></div></details>{% endblock %}
 {% block content %}
-<section class="card phone-card phone-flat-rows" aria-label="Your accounts">
+{% for g in phone_groups %}<section class="phone-section phone-accounts-group" aria-labelledby="group-{{ loop.index }}">
+  <header class="phone-section-head"><h2 id="group-{{ loop.index }}">{{ g.name|tr(locale) }}</h2><span class="phone-accounts-total">{{ g.total|money if g.total is not none else 'Unavailable'|tr(locale) }}</span></header>
   <div class="phone-rows is-list">
-  {% for acc, balance, owned, count in rows if acc.active %}
-    <a class="phone-row" href="/accounts/{{ acc.id }}"><span>{{ acc.name }}{% if acc.type_short|lower not in acc.name|lower %}<small>{{ acc.type_short }}</small>{% endif %}</span><b>{{ balance|money(False, 0) }}</b></a>
-  {% else %}<p class="empty">{{ "No accounts yet. Add your first one."|tr(locale) }}</p>{% endfor %}
+  {% for r in g.rows %}
+    <a class="phone-row" href="/accounts/{{ r.id }}"><span>{{ r.name }}{% if r.kind or r.extra %}<small>{{ r.kind|tr(locale) if r.kind }}{% if r.kind and r.extra %} · {% endif %}{{ r.extra }}</small>{% endif %}</span><b>{{ r.balance|money if r.balance is not none else 'Unavailable'|tr(locale) }}</b></a>
+  {% endfor %}
   </div>
 </section>
-{% from "phone/partials/txn.html" import txn_list with context %}
-{% if recent_rows %}<section class="phone-section phone-latest" aria-labelledby="latest-heading">
-  <header class="phone-section-head"><h2 id="latest-heading">{{ 'Latest'|tr(locale) }}</h2><a class="phone-quiet" href="/transactions">{{ 'See all transactions'|tr(locale) }}</a></header>
-  {{ txn_list(recent_rows, True, False, False, '', '/transactions', '', 5, False) }}
-</section>{% endif %}
+{% else %}{% if not rows %}<div class="phone-accounts-empty"><a class="btn primary" href="/accounts/new">{{ "Add your first account"|tr(locale) }}</a></div>{% endif %}{% endfor %}
 {% set closed = rows|rejectattr('0.active')|list %}
-{% if closed %}<details class="card phone-card"><summary class="phone-row"><span>{{ "Inactive accounts"|tr(locale) }}</span><b>{{ closed|length }}</b></summary>
-  <div class="phone-rows">{% for acc, balance, owned, count in closed %}<a class="phone-row" href="/accounts/{{ acc.id }}"><span>{{ acc.name }}</span><b>{{ balance|money(False, 0) }}</b></a>{% endfor %}</div></details>{% endif %}
+{% if closed %}<section class="phone-section phone-accounts-group phone-accounts-closed">
+<details class="phone-row-more"><summary class="phone-row"><span>{{ "Inactive accounts"|tr(locale) }} <span class="phone-chevron" aria-hidden="true">›</span></span><b>{{ closed|length }}</b></summary>
+  <div class="phone-rows">{% for acc, balance, owned, count in closed %}<a class="phone-row" href="/accounts/{{ acc.id }}"><span>{{ acc.name }}</span><b>{{ balance|money if balance is not none else 'Unavailable'|tr(locale) }}</b></a>{% endfor %}</div></details>
+</section>{% endif %}
+{% if rows %}<p class="phone-accounts-more"><a class="phone-quiet" href="/transactions">{{ 'See all transactions'|tr(locale) }}</a></p>{% endif %}
 {% endblock %}
