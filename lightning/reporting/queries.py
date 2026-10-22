@@ -154,6 +154,31 @@ class ReportQueries:
                 " GROUP BY le.category_id, le.effect", tuple(chunk))]
         return rows
 
+    def category_totals_of_account(self, account_id: int, date_from: str, date_to: str) -> list[dict]:
+        """The same totals as category_totals, for one account's lines (the phone's account page)."""
+        return [dict(r) for r in self.db.all(
+            f"SELECT le.category_id, le.effect, SUM(le.amount_base_e6) AS total"
+            f" FROM ledger_entries le {POSTED}"
+            f" WHERE le.account_id = ? AND le.date BETWEEN ? AND ? AND le.category_id IS NOT NULL"
+            f" AND le.effect IN ('INFLOW','OUTFLOW')"
+            " AND COALESCE(le.category_id,0) NOT IN (SELECT id FROM categories WHERE code='EXP.SYSTEM.CUSTODY')"
+            " AND le.owner_id IS NULL"
+            " GROUP BY le.category_id, le.effect",
+            (account_id, date_from, date_to))]
+
+    def statement_unsorted_txn_ids(self, account_id: int | None, date_from: str, date_to: str,
+                                   category_ids: list[int]) -> set[int]:
+        """Transactions of money in or out whose one register row has no category, or one of ``category_ids``."""
+        where, params = self._statement_filter(account_id, date_from, date_to)
+        marks = ",".join("?" * len(category_ids))
+        rows = self.db.all(
+            f"SELECT t.id AS txn_id FROM ledger_entries le {POSTED} WHERE {where} AND t.type IN ('IN','OUT')"
+            f" GROUP BY le.date,le.account_id,t.id"
+            f" HAVING COUNT(*) = 1 AND (MAX(le.category_id) IS NULL"
+            f"{f' OR MAX(le.category_id) IN ({marks})' if category_ids else ''})",
+            (*params, *category_ids))
+        return {int(row["txn_id"]) for row in rows}
+
     def category_transaction_ids(self, category_ids: set[int]) -> set[int]:
         if not category_ids:
             return set()

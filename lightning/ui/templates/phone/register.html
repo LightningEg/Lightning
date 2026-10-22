@@ -1,64 +1,103 @@
-{# An account, or every transaction, on a phone (guideline C08, C11.2): the balance, search and a month chip,
-   then the list grouped by day. No table, no checkbox column, no typing row; the add button opens the sheet. #}
+{# Every transaction, or one account, on a phone (guideline C08, C11.2; phone overhaul 2026-10-22): "find, check and
+   sort a payment with one thumb". Search full width, one row of filter chips (All, In, Out, Transfers, To sort), the
+   month stepper with Select beside it, the period's Money in and Money out, then the list by day with each day's
+   net. Saved views and the date period live in two quiet sheets. An account's page is the same page with its
+   balance on top. The route builds the chips, the period links and the two figures (_phone_register). #}
 {% extends "base.html" %}
 {% from "partials/macros.html" import inst_tile with context %}
 {% block title %}{{ account.name if account else 'Transactions' }}{% endblock %}
-{% block phone_back %}<a class="phone-back" href="/accounts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Accounts'|tr(locale) }}</span></a>{% endblock %}
+{% block phone_back %}{% if account %}<a class="phone-back" href="/accounts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Accounts'|tr(locale) }}</span></a>{% else %}{{ super() }}{% endif %}{% endblock %}
 {% block heading %}
 {% if account %}<div class="page-head">{{ inst_tile(account.institution or account.name) }}<div class="page-head-text"><h1>{{ account.name }}</h1>{% if account.type_short|lower not in account.name|lower %}<p>{{ account.type_short }}{% if account.institution %} · {{ account.institution }}{% endif %}</p>{% endif %}</div></div>
 {% if account_held_value %}<p class="phone-note">{{ "In this account"|tr(locale) }}</p>{% endif %}
 <div class="phone-lead">{{ (account_value if account_value is not none else account_balance)|money(False, 0) }} <small>{{ account.currency }}</small></div>
 {% if account_held_value %}<p class="phone-note">{{ fig.what_you_own.label }} {{ account_owned_value|money(False, 0) }} · Held for others {{ account_held_value|money(False, 0) }}</p>{% endif %}
-{% else %}<h1>{{ 'Transactions'|tr(locale) }}</h1><p>{{ "Every account"|tr(locale) }}</p>{% endif %}
+{% else %}<h1>{{ 'Transactions'|tr(locale) }}</h1>{% endif %}
 {% endblock %}
-{% block top_actions %}{% if account %}{# C04.5: one Secondary, the rest behind ⋯ #}
+{% block top_actions %}{# C04.5: one Secondary, the rest behind ⋯ #}
+{% if account %}
 {% set kind = account.account_type.value %}{% set cashy = account.active and kind in ('CASH','BANK') %}
 {% if kind == 'DEPOSIT' %}<a class="btn" href="/deposits/{{ account.id }}">{{ "View CDs"|tr(locale) }}</a>{% elif kind == 'GAMEYA' %}<a class="btn" href="/gameya/{{ account.id }}">{{ "Open gam’eya"|tr(locale) }}</a>{% elif cashy %}<details class="action-menu money-actions"><summary class="btn">{{ "Money actions"|tr(locale) }}</summary><div><a href="/accounts/{{ account.id }}/convert">{{ "Convert currency"|tr(locale) }}</a><a data-popup-open href="/accounts/{{ account.id }}/ownership/new">{{ "Change ownership"|tr(locale) }}</a><a href="/plan/purchases/new" data-popup-open>{{ 'Bought in instalments'|tr(locale) }}</a></div></details>{% elif kind == 'BROKERAGE' %}<a class="btn" href="/accounts/{{ account.id }}/import">{{ "Import a statement"|tr(locale) }}</a>{% endif %}
-<details class="action-menu phone-more-menu"><summary aria-label="More actions">⋯</summary><div>{% if cashy %}<a href="/accounts/{{ account.id }}/import">{{ "Import a statement"|tr(locale) }}</a>{% endif %}{% if account.active and kind == 'BROKERAGE' %}<a data-popup-open href="/accounts/{{ account.id }}/ownership/new">{{ "Change ownership"|tr(locale) }}</a>{% endif %}{% if kind in ('CASH','BANK','BROKERAGE','GAMEYA') %}<a href="/accounts/{{ account.id }}/reconcile">{{ "Adjust balance"|tr(locale) }}</a>{% elif kind == 'DEPOSIT' %}<a href="/deposits/{{ account.id }}">{{ "Update value"|tr(locale) }}</a>{% endif %}<a data-popup-open href="/accounts/{{ account.id }}/edit">{{ 'Edit account'|tr(locale) }}</a><a href="/transactions/deleted">{{ "Deleted transactions"|tr(locale) }}</a>{% if account.active %}<form method="post" action="/accounts/{{ account.id }}/deactivate"><button class="danger-text">{{ "Deactivate"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% else %}<form method="post" action="/accounts/{{ account.id }}/reactivate"><button>{{ "Reactivate"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}</div></details>
-{% endif %}{% endblock %}
+<details class="action-menu phone-more-menu"><summary aria-label="More actions">⋯</summary><div><a href="/activity">{{ 'Review activity'|tr(locale) }}</a>{% if cashy %}<a href="/accounts/{{ account.id }}/import">{{ "Import a statement"|tr(locale) }}</a>{% endif %}{% if account.active and kind == 'BROKERAGE' %}<a data-popup-open href="/accounts/{{ account.id }}/ownership/new">{{ "Change ownership"|tr(locale) }}</a>{% endif %}{% if kind in ('CASH','BANK','BROKERAGE','GAMEYA') %}<a href="/accounts/{{ account.id }}/reconcile">{{ "Adjust balance"|tr(locale) }}</a>{% elif kind == 'DEPOSIT' %}<a href="/deposits/{{ account.id }}">{{ "Update value"|tr(locale) }}</a>{% endif %}<a data-popup-open href="/accounts/{{ account.id }}/edit">{{ 'Edit account'|tr(locale) }}</a><a href="/transactions/deleted">{{ "Deleted transactions"|tr(locale) }}</a>{% if account.active %}<form method="post" action="/accounts/{{ account.id }}/deactivate"><button class="danger-text">{{ "Deactivate"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% else %}<form method="post" action="/accounts/{{ account.id }}/reactivate"><button>{{ "Reactivate"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}</div></details>
+{% endif %}
+{% endblock %}
 {% block content %}
-<p class="actions"><a class="quiet-link" href="/activity">{{ 'Review activity'|tr(locale) }}</a></p>
 {% set selecting = request.query_params.get('select') %}{% set picked = request.query_params.get('pick', '') %}
 {% if account and account.account_type.value == 'OTHER_ASSET' %}<section class="card phone-card" aria-labelledby="value-heading"><h2 id="value-heading" class="phone-card-title">{{ "Estimated value"|tr(locale) }}</h2>
 <form method="post" action="/accounts/{{ account.id }}/value" class="phone-form"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
 <div class="field"><label for="value-date">{{ 'As of'|tr(locale) }}</label><input id="value-date" name="date" value="{{ today }}" type="date" required></div>
 <div class="field"><label for="value-amount">Value ({{ account.currency }})</label><input id="value-amount" name="value" inputmode="decimal" value="{{ manual_asset_value.value|money(False, 2) if manual_asset_value else account_balance|money(False, 2) }}" required></div>
 <button class="btn phone-save">{{ "Update value"|tr(locale) }}</button></form></section>{% endif %}
-{% set this = month or today[:7] %}{% set y, m = this[:4]|int, this[5:7]|int %}
-{% set prev = ('%04d-%02d'|format(y - 1, 12)) if m == 1 else ('%04d-%02d'|format(y, m - 1)) %}
-{% set next = ('%04d-%02d'|format(y + 1, 1)) if m == 12 else ('%04d-%02d'|format(y, m + 1)) %}
 {% include "partials/account_composition.html" %}
 {% if account %}{% include "partials/investment_entry.html" %}{% endif %}
-<form class="phone-search" method="get" action="{{ base_url }}" role="search">
-  <input type="search" name="q" value="{{ q }}" placeholder="Search, or #tag" aria-label="Search transactions" autocomplete="off">
-  {% if month %}<input type="hidden" name="month" value="{{ month }}">{% endif %}
+
+{# Find: search full width, then one row of chips that wrap and never scroll sideways. #}
+<form class="phone-search phone-reg-search{{ ' is-first' if not account }}" method="get" action="{{ base_url }}" role="search">
+  <input type="search" name="q" value="{{ q }}" placeholder="{{ 'Search payee, category or amount'|tr(locale) }}" aria-label="{{ 'Search transactions'|tr(locale) }}" autocomplete="off">
+  {% for name, value in reg.keep_for_search %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
 </form>
-<section class="card phone-card saved-register-views" aria-label="{{ 'Saved register views'|tr(locale) }}">
-  <label class="field">Date period<select name="preset" form="phone-period" data-submit-on-change><option value="">All time</option><option value="this_month"{{ ' selected' if preset == 'this_month' }}>This month</option><option value="last_month"{{ ' selected' if preset == 'last_month' }}>Last month</option><option value="year_to_date"{{ ' selected' if preset == 'year_to_date' }}>Year to date</option><option value="custom"{{ ' selected' if preset == 'custom' }}>Custom dates</option></select></label>
-  <form id="phone-period" method="get" action="{{ base_url }}"><input type="hidden" name="q" value="{{ q }}">{% if filter_tag %}<input type="hidden" name="tag" value="{{ filter_tag }}">{% endif %}{% if request.query_params.get('category_id') %}<input type="hidden" name="category_id" value="{{ request.query_params.get('category_id') }}">{% endif %}</form>
-  {% if preset == 'custom' %}<form method="get" action="{{ base_url }}" class="phone-form"><input type="hidden" name="preset" value="custom"><input type="hidden" name="q" value="{{ q }}"><div class="field"><label for="view-date-from">From</label><input id="view-date-from" type="date" name="date_from" value="{{ date_from }}" required></div><div class="field"><label for="view-date-to">To</label><input id="view-date-to" type="date" name="date_to" value="{{ date_to }}" required></div><button class="btn">Apply dates</button></form>{% endif %}
-  <details class="phone-views-menu"><summary>{{ 'Views'|tr(locale) }}{% if active_view %}: {{ active_view.name }}{% endif %}</summary>
-  {% for view in saved_views %}<a class="phone-quiet" href="{{ base_url }}?saved_view={{ view.id }}"{{ ' aria-current=true' if active_view and active_view.id == view.id }}>{{ view.name }}</a>{% endfor %}
-  <form method="post" action="/transactions/views" class="phone-form"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><input type="hidden" name="account_id" value="{{ view_account_id }}"><input type="hidden" name="preset" value="{{ preset or ('custom' if month else 'all_time') }}"><input type="hidden" name="date_from" value="{{ date_from if preset == 'custom' or month else '' }}"><input type="hidden" name="date_to" value="{{ date_to if preset == 'custom' or month else '' }}"><input type="hidden" name="q" value="{{ q }}"><input type="hidden" name="tag" value="{{ filter_tag }}"><input type="hidden" name="category_id" value="{{ active_view.category_id or '' if active_view else request.query_params.get('category_id', '') }}"><div class="field"><label for="phone-view-name">{{ 'Save this view'|tr(locale) }}</label><input id="phone-view-name" name="name" maxlength="64" required aria-label="{{ 'View name'|tr(locale) }}" placeholder="{{ 'Name this view'|tr(locale) }}"></div><button class="btn phone-save">{{ 'Save view'|tr(locale) }}</button></form>
-  {% if active_view %}<a class="btn" href="/transactions/views/{{ active_view.id }}/report?account_id={{ view_account_id }}">{{ 'Summary and export'|tr(locale) }}</a><form method="post" action="/transactions/views/{{ active_view.id }}/delete"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><input type="hidden" name="account_id" value="{{ view_account_id }}"><button class="btn danger">{{ 'Delete view'|tr(locale) }}</button></form>{% endif %}
-  </details>
-</section>
-<nav class="phone-chips" aria-label="Filter">
-  {% if selecting %}<a class="phone-chip" id="phone-merge-selected" hidden href="/transactions/merge">{{ 'Merge selected'|tr(locale) }}</a>{% endif %}
-  <a class="phone-chip{{ ' is-chosen' if not month }}" href="{{ base_url }}{{ '?q=' ~ q|urlencode if q }}">{{ 'All'|tr(locale) }}</a>
-  <span class="phone-chip phone-month-chip{{ ' is-chosen' if month }}">
-    <a href="{{ base_url }}?month={{ prev }}{{ '&q=' ~ q|urlencode if q }}" aria-label="Previous month">‹</a>
-    <a href="{{ base_url }}?month={{ this }}{{ '&q=' ~ q|urlencode if q }}">{{ this }}</a>
-    <a href="{{ base_url }}?month={{ next }}{{ '&q=' ~ q|urlencode if q }}" aria-label="Next month">›</a>
-  </span>
-  {% if selecting %}<a class="phone-chip is-chosen" href="{{ base_url }}{{ '?' ~ keep_qs if keep_qs }}">{{ "Done"|tr(locale) }}</a>{% else %}<a class="phone-chip" href="{{ base_url }}?{{ keep_qs ~ '&' if keep_qs }}select=1">{{ "Select"|tr(locale) }}</a>{% endif %}
+<nav class="phone-chips phone-reg-chips" aria-label="{{ 'Filter'|tr(locale) }}">
+  {% for chip in reg.chips %}<a class="phone-chip{{ ' is-chosen' if chip.chosen }}" href="{{ chip.href }}"{% if chip.chosen %} aria-current="true"{% endif %}>{{ chip.label|tr(locale) }}{% if chip.count %}<span class="phone-chip-n">{{ chip.count }}</span>{% endif %}</a>{% endfor %}
 </nav>
-{% if filter_category %}<p class="phone-note">Category: {{ filter_category }}</p>{% endif %}
-{% if filter_tag %}<p class="phone-note">Tagged #{{ filter_tag }} · {{ total_rows }} transaction{{ 's' if total_rows != 1 }} · {{ fig.money_in.label }} {{ tag_flows[0]|money }} · {{ fig.money_out.label }} {{ tag_flows[1]|money }}</p>{% endif %}
-{% if val_count %}<p class="phone-note"><a href="{{ val_toggle_url }}">{{ ('Hide value updates'|tr(locale)) if show_val else ('Show value updates ({n})'|tr(locale, n=val_count)) }}</a></p>{% endif %}
-<section class="phone-list" aria-label="Transactions">
+
+{# When: one month stepper; its month opens the Choose period sheet. Select starts picking rows (C08.5). #}
+<div class="phone-reg-bar">
+  <div class="phone-period-row phone-reg-period">
+    {% if reg.month %}<a class="phone-reg-step" href="{{ reg.prev }}" aria-label="{{ 'Previous month'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a>{% endif %}
+    <details class="phone-period-sheet">
+      <summary class="phone-period-now" aria-label="{{ 'Choose period'|tr(locale) }}">{% if reg.period == 'month' %}{{ reg.month }}{% elif reg.period == 'ytd' %}{{ 'Year to date'|tr(locale) }}{% elif reg.period == 'custom' %}{{ 'Custom range'|tr(locale) }}{% else %}{{ 'All time'|tr(locale) }}{% endif %}</summary>
+      <div class="phone-period-panel" role="dialog" aria-label="{{ 'Choose period'|tr(locale) }}">
+        <span class="phone-grabber" aria-hidden="true"></span>
+        <h2 class="phone-sheet-title">{{ 'Choose period'|tr(locale) }}</h2>
+        <div class="phone-rows">
+          <a class="phone-row{{ ' is-chosen' if reg.month == reg.this }}" href="{{ reg.this_href }}"><span>{{ 'This month'|tr(locale) }}</span><b>{{ reg.this }}</b></a>
+          <a class="phone-row{{ ' is-chosen' if reg.month == reg.last }}" href="{{ reg.last_href }}"><span>{{ 'Last month'|tr(locale) }}</span><b>{{ reg.last }}</b></a>
+          <a class="phone-row{{ ' is-chosen' if reg.period == 'ytd' }}" href="{{ reg.ytd_href }}"><span>{{ 'Year to date'|tr(locale) }}</span><b>{{ reg.ytd_from }} {{ 'to'|tr(locale) }} {{ reg.this }}</b></a>
+          <a class="phone-row{{ ' is-chosen' if reg.period == 'all' }}" href="{{ reg.all_href }}"><span>{{ 'All time'|tr(locale) }}</span><b></b></a>
+          <form class="phone-row phone-period-custom{{ ' is-chosen' if reg.period == 'custom' }}" method="get" action="{{ base_url }}"><input type="hidden" name="preset" value="custom">{% for name, value in reg.keep_for_dates %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+            <span>{{ 'Custom range'|tr(locale) }}</span>
+            <span class="phone-period-range"><label>{{ 'From'|tr(locale) }}<input id="view-date-from" type="date" name="date_from" value="{{ date_from if reg.period == 'custom' }}" required></label><label>{{ 'To'|tr(locale) }}<input id="view-date-to" type="date" name="date_to" value="{{ date_to if reg.period == 'custom' }}" required></label></span>
+            <button class="btn phone-save">{{ 'Apply'|tr(locale) }}</button></form>
+        </div>
+      </div>
+    </details>
+    {% if reg.month %}{% if reg.next %}<a class="phone-reg-step" href="{{ reg.next }}" aria-label="{{ 'Next month'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>{% else %}<span class="phone-reg-step is-off" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span>{% endif %}{% endif %}
+  </div>
+  <div class="phone-reg-bar-end">
+    {% if selecting %}<a class="phone-chip" id="phone-merge-selected" hidden href="/transactions/merge">{{ 'Merge selected'|tr(locale) }}</a>
+    <a class="phone-chip is-chosen" href="{{ base_url }}{{ '?' ~ keep_qs if keep_qs }}">{{ "Done"|tr(locale) }}</a>{% else %}<a class="phone-chip" href="{{ base_url }}?{{ keep_qs ~ '&' if keep_qs }}select=1">{{ "Select"|tr(locale) }}</a>{% endif %}
+    {% if not account and not selecting %}<details class="action-menu phone-more-menu"><summary aria-label="More actions">⋯</summary><div><a href="/activity">{{ 'Review activity'|tr(locale) }}</a><a href="/transactions/deleted">{{ "Deleted transactions"|tr(locale) }}</a></div></details>{% endif %}
+  </div>
+</div>
+{% if reg.period == 'custom' %}<p class="phone-note phone-reg-dates">{{ date_from }} {{ 'to'|tr(locale) }} {{ date_to }}</p>{% endif %}
+
+{# This period: the money that came in and went out, by the one cash-flow rule (the rows' own when a search, tag or category narrows them). #}
+{% if reg.tiles %}<section class="phone-kpis phone-reg-kpis" aria-label="{{ 'This period'|tr(locale) }}">
+  <div class="phone-kpi"><span class="phone-kpi-label">{{ fig.money_in.label }}</span><span class="phone-kpi-value{{ ' is-in' if reg.money_in }}{{ ' is-long' if reg.money_in|amount_role('total', True)|length > 8 }}">{{ reg.money_in|amount_role('total', reg.money_in != 0) }}</span></div>
+  <div class="phone-kpi"><span class="phone-kpi-label">{{ fig.money_out.label }}</span><span class="phone-kpi-value{{ ' is-long' if reg.money_out|amount_role('total', True)|length > 8 }}">{{ reg.money_out|amount_role('total', reg.money_out != 0) }}</span></div>
+</section>{% endif %}
+
+{% if filter_category %}<div class="phone-reg-filter"><p class="phone-note">Category: {{ filter_category.split(' › ')[-1] }}</p><a class="phone-quiet" href="{{ reg.clear_category }}">{{ 'Clear'|tr(locale) }}</a></div>{% endif %}
+{% if filter_tag %}<div class="phone-reg-filter"><p class="phone-note">Tagged #{{ filter_tag }} · {{ total_rows }} transaction{{ 's' if total_rows != 1 }}</p><a class="phone-quiet" href="{{ reg.clear_tag }}">{{ 'Clear'|tr(locale) }}</a></div>{% endif %}
+
+{# Quiet: the saved views and the value updates. #}
+<div class="phone-reg-quiet">
+  <details class="phone-period-sheet phone-reg-views">
+    <summary class="phone-period-now">{{ 'Views'|tr(locale) }}{% if active_view %}: {{ active_view.name }}{% endif %}</summary>
+    <div class="phone-period-panel" role="dialog" aria-label="{{ 'Saved register views'|tr(locale) }}">
+      <span class="phone-grabber" aria-hidden="true"></span>
+      <h2 class="phone-sheet-title">{{ 'Views'|tr(locale) }}</h2>
+      {% if saved_views %}<div class="phone-rows">{% for view in saved_views %}<a class="phone-row{{ ' is-chosen' if active_view and active_view.id == view.id }}" href="{{ base_url }}?saved_view={{ view.id }}"{{ ' aria-current=true' if active_view and active_view.id == view.id }}><span>{{ view.name }}</span><b></b></a>{% endfor %}</div>{% endif %}
+      <form method="post" action="/transactions/views" class="phone-form"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><input type="hidden" name="account_id" value="{{ view_account_id }}"><input type="hidden" name="preset" value="{{ preset or ('custom' if month else 'all_time') }}"><input type="hidden" name="date_from" value="{{ date_from if preset == 'custom' or month else '' }}"><input type="hidden" name="date_to" value="{{ date_to if preset == 'custom' or month else '' }}"><input type="hidden" name="q" value="{{ q }}"><input type="hidden" name="tag" value="{{ filter_tag }}"><input type="hidden" name="category_id" value="{{ active_view.category_id or '' if active_view else request.query_params.get('category_id', '') }}"><div class="field"><label for="phone-view-name">{{ 'Save this view'|tr(locale) }}</label><input id="phone-view-name" name="name" maxlength="64" required aria-label="{{ 'View name'|tr(locale) }}" placeholder="{{ 'Name this view'|tr(locale) }}"></div><button class="btn phone-save">{{ 'Save view'|tr(locale) }}</button></form>
+      {% if active_view %}<div class="phone-reg-view-actions"><a class="btn" href="/transactions/views/{{ active_view.id }}/report?account_id={{ view_account_id }}">{{ 'Summary and export'|tr(locale) }}</a><form method="post" action="/transactions/views/{{ active_view.id }}/delete"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><input type="hidden" name="account_id" value="{{ view_account_id }}"><button class="btn danger">{{ 'Delete view'|tr(locale) }}</button></form></div>{% endif %}
+    </div>
+  </details>
+  {% if val_count and not chosen_kind %}<a class="phone-quiet" href="{{ val_toggle_url }}">{{ ('Hide value updates'|tr(locale)) if show_val else ('Show value updates ({n})'|tr(locale, n=val_count)) }}</a>{% endif %}
+</div>
+
+<section class="phone-list phone-reg-list" aria-label="{{ 'Transactions'|tr(locale) }}">
 {% from "phone/partials/txn.html" import txn_list with context %}
-{% if rows %}{{ txn_list(rows, show_account, not show_account, selecting, picked, base_url, keep_qs, reserve_suggestions=reserve_suggestions) }}{% else %}<p class="empty">{{ 'Nothing matches.' if q or month else 'No transactions yet.' }}</p>{% endif %}
+{% if rows %}{{ txn_list(rows, show_account, not show_account, selecting, picked, base_url, keep_qs, reserve_suggestions=reserve_suggestions, day_net=True) }}{% else %}<p class="empty">{{ 'Nothing matches.' if q or month or chosen_kind or preset or date_from or filter_tag or filter_category else 'No transactions yet.' }}</p>{% endif %}
 </section>
 {% if selecting %}{# C08.5: the bar replaces the tab bar with the count, Change category and Delete. #}
 {% from "partials/macros.html" import category_options %}

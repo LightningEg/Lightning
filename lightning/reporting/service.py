@@ -748,6 +748,24 @@ class ReportingService:
             money_in, money_out = money_in + got_in, money_out + got_out
         return money_in, money_out
 
+    def register_flows(self, account_id: int | None, date_from: date | str, date_to: date | str) -> tuple[Decimal, Decimal]:
+        """Money in and Money out of a register's period: every account's by cash_flow, one account's by the same rule."""
+        if account_id is None:
+            flow = self.cash_flow(date_from, date_to)
+            return flow.inflows, flow.outflows
+        money_in = money_out = ZERO
+        for row in self.q.category_totals_of_account(account_id, self._day(date_from), self._day(date_to)):
+            got_in, got_out = flow_of(row["effect"], from_e6(row["total"]), self.categories.get(row["category_id"]))
+            money_in, money_out = money_in + got_in, money_out + got_out
+        return money_in, money_out
+
+    def register_unsorted(self, account_id: int | None, date_from: date | str, date_to: date | str) -> set[int]:
+        """The money in or out of a register's period nobody has sorted: filed as Unaccounted (an import posted it
+        before a category was chosen) or with no category. Transaction ids; a split is sorted already."""
+        found = (self.categories.repo.get_by_code(code) for code in ("EXP.UNACCOUNTED", "INC.UNACCOUNTED"))
+        category_ids = [category.id for category in found if category]   # a profile without them has nothing filed there
+        return self.q.statement_unsorted_txn_ids(account_id, self._day(date_from), self._day(date_to), category_ids)
+
     def register(self, account_id: int | None, date_from: date | str, date_to: date | str,
                  txn_ids: set[int] | None = None) -> list[StatementRow]:
         """Rows for the register view, newest first.
