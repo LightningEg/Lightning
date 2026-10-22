@@ -451,8 +451,9 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
 
 
 # Needs you on the phone says what is inside in a few words (phone overhaul 2026-10-22): "2 bills · 4 to sort out".
-_NEEDS_SHORT = {"payments": ("bill", "bills"), "activity": ("to sort out", "to sort out"), "budget": ("budget", "budget"),
-                "cash": ("cash", "cash"), "prices": ("price", "prices"), "other": ("other", "other")}
+_NEEDS_SHORT = {"payments": ("1 bill", "{n} bills"), "activity": ("1 to sort out", "{n} to sort out"),
+                "budget": ("1 on the budget", "{n} on the budget"), "cash": ("1 on cash", "{n} on cash"),
+                "prices": ("1 price", "{n} prices"), "other": ("1 other", "{n} others")}
 
 
 def _safe_hero(f) -> dict:
@@ -463,7 +464,7 @@ def _safe_hero(f) -> dict:
     if value < 0:
         line = page_status.sentence("{amt} more is promised than your free cash.", amt=fmt(-value))
     elif until and days > 0:
-        line = page_status.sentence("About {amt} a day until payday on {date}.", amt=fmt(value / days), date=until)
+        line = page_status.sentence("About {amt} a day until payday on {sa}.", amt=fmt(value / days), sa=until)
     else:
         line = page_status.sentence("From free cash, after what is promised over the next 3 months.")
     return {"value": value, "line": line, "until": until or ""}
@@ -480,9 +481,9 @@ def _phone_overview(position, forecast, groups, lead_change) -> dict:
              "href": "/accounts"}
     parts = []
     for group in groups[:3]:
-        one, many = _NEEDS_SHORT.get(group["key"], ("other", "other"))
-        parts.append(f"{group['count']} {one if group['count'] == 1 else many}")
-    return {"safe": _safe_hero(forecast), "worth": worth, "needs_line": " · ".join(parts)}
+        one, many = _NEEDS_SHORT.get(group["key"], _NEEDS_SHORT["other"])
+        parts.append(page_status.sentence(one if group["count"] == 1 else many, n=group["count"]))
+    return {"safe": _safe_hero(forecast), "worth": worth, "needs": parts}
 
 
 @router.get("/more")

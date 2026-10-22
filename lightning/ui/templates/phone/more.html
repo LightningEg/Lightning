@@ -9,14 +9,14 @@
   <a class="phone-row" href="/investments"><span>{{ 'Investments'|tr(locale) }}</span><b>{{ portfolio|amount_role('total') }}</b></a>
   <a class="phone-row" href="/accounts"><span>{{ 'Accounts'|tr(locale) }}</span><b>{{ in_accounts|amount_role('total') }}</b></a>
   <a class="phone-row" href="/financial-health"><span>{{ 'Financial health'|tr(locale) }}</span><b>{{ '{n} of {m} within limits'|tr(locale, n=within, m=judged) if judged else 'No limits yet'|tr(locale) }}</b></a>
-  <a class="phone-row" href="/birdview/expenses"><span>{{ 'Spending'|tr(locale) }}</span><b>{{ '{amt} in {month}'|tr(locale, amt=spent|amount_role('total'), month=month) }}</b></a>
+  <a class="phone-row" href="/birdview/expenses"><span>{{ 'Spending'|tr(locale) }}</span><b>{{ '{amt} in {sa}'|tr(locale, amt=spent|amount_role('total'), sa=month) }}</b></a>
   {% if zakat %}<a class="phone-row" href="/zakat"><span>{{ 'Zakat'|tr(locale) }}</span><b>›</b></a>{% endif %}
 </nav>
 
 <a class="phone-review-card" href="/review">
   <span class="phone-review-mark" aria-hidden="true"></span>
-  <span class="phone-review-text"><b>{{ 'Weekly review is ready'|tr(locale) if waiting else 'Weekly review'|tr(locale) }}</b><small>{% if waiting %}{{ ('1 decision, one at a time' if waiting == 1 else '{n} decisions, one at a time')|tr(locale, n=waiting) }}{% elif last_review %}{{ 'Last done {date}; nothing waiting'|tr(locale, date=last_review) }}{% else %}{{ 'Nothing waiting'|tr(locale) }}{% endif %}</small></span>
-  <span class="phone-review-go">{{ 'Start'|tr(locale) if waiting else 'Open'|tr(locale) }}</span>
+  <span class="phone-review-text"><b>{{ 'Weekly review is ready'|tr(locale) if waiting else 'Weekly review'|tr(locale) }}</b><small>{% if waiting %}{{ ('1 decision, one at a time' if waiting == 1 else '{n} decisions, one at a time')|tr(locale, n=waiting) }}{% elif last_review %}{{ 'Last done {sa}; nothing waiting'|tr(locale, sa=last_review) }}{% else %}{{ 'Nothing waiting'|tr(locale) }}{% endif %}</small></span>
+  <span class="phone-review-go">{{ 'Start now'|tr(locale) if waiting else 'Open'|tr(locale) }}</span>
 </a>
 
 <section class="phone-section" aria-labelledby="settings-heading">

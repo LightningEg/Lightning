@@ -20,7 +20,7 @@
 {# Phone overhaul (owner, 2026-10-22): "can I spend today?" in one glance. Safe to spend leads while the position is
    today's; its home stays Cash planning, so the hero is a link there. Net worth is the first tile. #}
 {% if phone and phone.safe %}{% set s = phone.safe %}
-{{ hero(fig.safe_to_spend.label, s.value, s.line.text|tr(locale, **s.line['values']), href='/plan') }}
+{{ hero(fig.safe_to_spend.label, s.value, s.line.text|tr(locale, **s.line['values']), note='Cash planning ›'|tr(locale), href='/plan') }}
 {% else %}
 {{ hero(fig[lead].label, pos.net_worth if owes else pos.what_you_own, note="As of {date}"|tr(locale, date=position_as_of)) }}
 {% endif %}
@@ -28,7 +28,7 @@
 {% from "partials/macros.html" import period_control with context %}{{ period_control("/", period.key, month, this_month, request.query_params.get("date_from", "") if period_error and period.key == "custom" else period.start_text, request.query_params.get("date_to", "") if period_error and period.key == "custom" else period.end_text) }}
 {% if attention %}
 <details class="card phone-needs" aria-labelledby="needs-heading">
-  <summary><span class="needs-you-dot" aria-hidden="true"></span><span class="phone-needs-text"><b id="needs-heading">{{ ('1 item needs you' if attention|length == 1 else '{n} items need you')|tr(locale, n=attention|length) }}</b>{% if phone and phone.needs_line %}<small>{{ phone.needs_line|tr(locale) }}</small>{% endif %}</span><span class="needs-you-count">{{ attention|length }}</span><span class="phone-needs-open">{{ 'Open'|tr(locale) }}</span></summary>
+  <summary><span class="needs-you-dot" aria-hidden="true"></span><span class="phone-needs-text"><b id="needs-heading">{{ ('1 item needs you' if attention|length == 1 else '{n} items need you')|tr(locale, n=attention|length) }}</b>{% if phone and phone.needs %}<small>{% for s in phone.needs %}{{ s.text|tr(locale, **s['values']) }}{{ ' · ' if not loop.last }}{% endfor %}</small>{% endif %}</span><span class="needs-you-count">{{ attention|length }}</span><span class="phone-needs-open">{{ 'Open'|tr(locale) }}</span></summary>
   <div class="phone-rows">{% for item in attention %}<a class="phone-row" href="{{ item.href }}"{% if item.popup %} data-popup-open{% endif %}><span>{{ item.label }}<small>{{ item.detail }}</small></span>{% if item.late_days %}<span class="plan-status plan-status-late">{{ ("Late · 1 day" if item.late_days == 1 else "Late · {n} days")|tr(locale, n=item.late_days) }}</span> {% endif %}<b class="phone-row-action">{{ item.action or '›' }}</b></a>{% endfor %}</div>
 </details>
 {% endif %}{# nothing waiting: no row at all (A09) #}

@@ -595,6 +595,11 @@ html.phone:has(.phone-period-sheet[open]) .phone-tabbar { display: none; }
 /* A month box on a phone opens its picker as a sheet from the bottom, above everything (C09). */
 html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !important; right: 16px; top: auto !important; bottom: calc(16px + env(safe-area-inset-bottom)); width: auto; z-index: 70; }
 
+/* A row that opens in place: its chevron follows the name on the same line. */
+.phone-row-more > summary.phone-row > span:first-child { display: block; }
+.phone-row-more > summary.phone-row > span:first-child > small { display: block; }
+.phone .section-tabs .plan-tab:not(#_) { padding: 4px 8px; }
+
 /* Needs you as one tappable card: the mark, how many and what is inside, the count, Open. Its rows open under it. */
 .phone-needs > summary .phone-needs-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .phone-needs > summary .phone-needs-text b { font-size: 15px; color: var(--c-ink); }
