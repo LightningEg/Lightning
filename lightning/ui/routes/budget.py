@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from datetime import timedelta
 from datetime import date
-from decimal import ROUND_CEILING, Decimal
+from decimal import ROUND_CEILING, ROUND_HALF_UP, Decimal
+from math import pi
 import json
 import uuid
 
@@ -381,7 +382,16 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                           "detail": f"Recurring expects {keynotes.fmt(raise_offer['raise'])} more than your average.",
                           "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose"})
     status = page_status.budget(everyday, has_plan, period.key, period_actual, period_budgeted)
-    return render(request, "budget.html", notes=notes, kpi_cards=kpi_cards, pace=pace, plan_bills=plan_bills, everyday=everyday,
+    phone_plan: dict = {}
+    if getattr(request.state, "phone", False):  # the phone's Budget (templates/phone/budget.html); the PC reads none of this
+        phone_cats = _phone_categories(view, tracked, category_periods, by_group, period)
+        phone_plan = {"ring": _plan_ring(period_budgeted, period_actual, period_left) if has_plan else None,
+                      "cats": phone_cats,
+                      "over": _phone_over(phone_cats, month, days_left if period.key == "month" else 0,
+                                          c, everyday),
+                      "edit_href": f"/budget?month={month}&open_group=all#groups-heading",
+                      "notes": [n for n in notes if n.get("label") not in OVER_NOTE_LABELS]}
+    return render(request, "budget.html", notes=notes, phone_plan=phone_plan, kpi_cards=kpi_cards, pace=pace, plan_bills=plan_bills, everyday=everyday,
                   lead=lead, pace_card=pace_card, needs=needs, status=status,
                   raise_in_card=bool(needs and needs[-1]["href"].startswith("/budget/raise")) or any(k["key"] == "saves" for k in kpi_cards),
                   raise_offer=raise_offer, meter_lines=meter_lines, left_note=left_note, check=check,
@@ -412,6 +422,69 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                   bulk_undo=bulk_undo,
                   effective_month=month, previous_month=_neighbours(month)[0],
                   previous_bridge=c.budgets.month_view(_neighbours(month)[0]))
+
+
+# The key notes the phone's over-plan row and hero already say (keynotes.budget_left).
+OVER_NOTE_LABELS = {"Categories over plan", "Over plan this month"}
+RING_RADIUS = 40
+
+
+def _plan_ring(budgeted: Decimal, spent: Decimal, left: Decimal) -> dict | None:
+    """The phone's ring: how much of the plan is spent, whole percent, and the arc for it (a full turn at 100%).
+    None when nothing is planned, so there is no share to draw."""
+    if budgeted <= ZERO:
+        return None
+    pct = max(int((spent / budgeted * 100).quantize(Decimal(1), rounding=ROUND_HALF_UP)), 0)
+    circumference = 2 * pi * RING_RADIUS
+    return {"pct": min(pct, 999), "wide": pct >= 100, "over": quantize(left, 0) < 0, "amount": abs(left),
+            "arc": round(circumference * min(pct, 100) / 100, 2), "circumference": round(circumference, 2)}
+
+
+def _phone_categories(view, tracked: set[int], category_periods: dict, by_group: dict, period) -> list[dict]:
+    """One row per category that has a limit: over plan first (largest overspend first), then the ones closest to
+    their limit. The same figures as the group rows below: what was spent, the limit and what is left."""
+    group_of = {category_id: group_id for group_id, ids in by_group.items() for category_id in ids}
+    rows, seen = [], set()
+    for section in view.sections:
+        for line in section.lines:
+            cid = line.category_id
+            if line.depth <= 1 or cid in seen or cid not in tracked or cid not in category_periods:
+                continue
+            seen.add(cid)
+            figures = category_periods[cid]
+            planned, spent, left = figures["current_budget"], figures["spent"], figures["left"]
+            if not planned and not spent:
+                continue
+            share = (spent / planned * 100) if planned > ZERO else Decimal(100 if spent > ZERO else 0)
+            rows.append({"category_id": cid, "group_id": group_of.get(cid), "name": line.name, "spent": spent,
+                         "planned": planned, "over": left < ZERO, "amount": abs(left), "share": share,
+                         "width": round(float(min(max(share, ZERO), Decimal(100))), 1),
+                         "href": f"/transactions?category_id={cid}&date_from={period.start_text}&date_to={period.end_text}"})
+    rows.sort(key=lambda r: (0, -r["amount"], r["name"].casefold()) if r["over"] else (1, -r["share"], r["name"].casefold()))
+    return rows
+
+
+def _phone_over(rows: list[dict], month: str, days_left: int, c, everyday) -> dict | None:
+    """The phone's over-plan row: what is over, by how much, and the one action that fixes the largest: move room
+    to it when another category has room (Move room), else type its limit (its group opens at the field)."""
+    over = [r for r in rows if r["over"]]
+    if not over:
+        return None
+    total = sum((r["amount"] for r in over), ZERO)
+    title = (page_status.sentence("{name} is over plan", name=over[0]["name"]) if len(over) == 1
+             else page_status.sentence("{n} categories are over plan", n=len(over)))
+    if days_left > 1:
+        line = page_status.sentence("{amt} over · {n} days left", amt=keynotes.fmt(total), n=days_left)
+    elif days_left == 1:
+        line = page_status.sentence("{amt} over · 1 day left", amt=keynotes.fmt(total))
+    else:
+        line = page_status.sentence("{amt} over", amt=keynotes.fmt(total))
+    largest = over[0]
+    move = (_cover_from(c, month, {"category_id": largest["category_id"], "over": largest["amount"]}, everyday.room)
+            if everyday is not None else None)
+    href = move["href"] if move else (f"/budget?month={month}&open_group={largest['group_id'] or 'all'}"
+                                      f"#limit-{largest['category_id']}")
+    return {"title": title, "line": line, "count": len(over), "href": href, "popup": bool(move)}
 
 
 def _cover_from(c, month: str, target: dict, room: dict[int, Decimal]) -> dict | None:
