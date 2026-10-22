@@ -60,7 +60,9 @@ class RuleService:
         """What the rules say about one transaction. ``counterparty`` may hold several spellings (the bank's
         text and the saved name); a condition holds when any of them fits."""
         names = [counterparty] if isinstance(counterparty, str) else list(counterparty or [])
-        txn = {"counterparty": [n for n in names if n], "notes": notes or "", "amount": amount, "account_id": account_id}
+        account_code = self.db.scalar("SELECT code FROM accounts WHERE id=?", (account_id,)) if account_id is not None else None
+        txn = {"counterparty": [n for n in names if n], "notes": notes or "", "amount": amount,
+               "account_id": account_id, "account_code": account_code}
         return engine.run(self.repo.rules(), txn)
 
     def category_for_name(self, name: str) -> int | None:
@@ -126,7 +128,7 @@ class RuleService:
             elif c.field == "amount":
                 values["amount_op"], values["amount"], values["amount_to"] = c.op, c.value, c.value_to or ""
             elif c.field == "account":
-                values["account_id"] = c.value
+                values["account_id"] = self._account_id(c.value) or c.value
             elif c.field == "direction":
                 values["direction"] = c.value
         values["category_id"] = str(rule.category_id or "")
@@ -184,8 +186,9 @@ class RuleService:
             current = self.categories.get(row["category_id"])
             if current.is_system:
                 continue  # held for others and loan payments are filed by the app, not by rules
+            account_code = self.db.scalar("SELECT code FROM accounts WHERE id=?", (row["account_id"],))
             txn = {"counterparty": [row["counterparty"], row["canonical"]], "notes": row["notes"],
-                   "amount": row["amount"], "account_id": row["account_id"]}
+                   "amount": row["amount"], "account_id": row["account_id"], "account_code": account_code}
             if engine.run(rules, txn).rule_id != rule.id:
                 continue
             out.append(PastChange(row["id"], row["date"], row["canonical"] or row["counterparty"] or "",
@@ -333,6 +336,13 @@ class RuleService:
 
     def _account_name(self, account_id: str) -> str:
         try:
-            return self.accounts.get(int(account_id)).name
+            account = self._account_id(account_id)
+            return self.accounts.get(account).name if account is not None else "a removed account"
         except (NotFoundError, ValueError):
             return "a removed account"
+
+    def _account_id(self, value: str) -> int | None:
+        text = str(value)
+        if text.isdigit():
+            return int(text)
+        return self.db.scalar("SELECT id FROM accounts WHERE code=?", (text,))

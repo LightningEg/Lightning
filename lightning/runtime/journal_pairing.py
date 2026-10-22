@@ -46,6 +46,9 @@ class NearbyPairing:
                     confirmed=bool(state.get("confirmed")),
                     members=[names.get(identifier,"Paired device") for identifier in self.membership.state()["members"]
                              if identifier != self.device.identity.device_id],
+                    member_details=[dict(id=identifier, name=names.get(identifier, "Paired device"))
+                                    for identifier in self.membership.state()["members"]
+                                    if identifier != self.device.identity.device_id],
                     nearby=[dict(id=identifier,name=value["name"]) for identifier,value in self._value("nearby",{}).items()],
                     pending=client.get("digits"), stage=client.get("stage"))
 
@@ -128,6 +131,16 @@ class NearbyPairing:
 
     def cancel(self):
         self.db.execute("DELETE FROM journal_local WHERE name='pairing_client'")
+
+    def revoke(self, identifier):
+        if self.device.home is None:
+            raise JournalError("Remove paired devices on the current home")
+        members = dict(self.membership.state()["members"])
+        if identifier == self.device.identity.device_id or identifier not in members:
+            raise JournalError("Choose a paired device other than this home")
+        del members[identifier]
+        with self.device.store.confirming():
+            self.membership.rotate(members)
 
     def _admitted(self, wire, membership):
         request = unpack(wire.encode())["body"]

@@ -4,6 +4,30 @@ from __future__ import annotations
 from .codec import JournalError, fields
 
 
+def _capabilities(value):
+    fields(value, ("protocol", "app", "ledger_schema", "effects", "entry_kinds", "catalog"))
+    if type(value["protocol"]) is not int or type(value["app"]) is not str or not value["app"]:
+        raise JournalError("Invalid peer capabilities")
+    if type(value["ledger_schema"]) is not int or value["ledger_schema"] < 1:
+        raise JournalError("Invalid peer capabilities")
+    if type(value["effects"]) is not list or any(type(item) is not int or item < 1 for item in value["effects"]):
+        raise JournalError("Invalid peer capabilities")
+    if type(value["entry_kinds"]) is not dict or type(value["entry_kinds"].get("commands")) is not list:
+        raise JournalError("Invalid peer capabilities")
+    if any(type(kind) is not str or len(kind) != 6 or any(char not in "0123456789abcdef" for char in kind)
+           for kind in value["entry_kinds"]["commands"]):
+        raise JournalError("Invalid peer capabilities")
+    for kind, version in value["entry_kinds"].items():
+        if kind == "commands":
+            continue
+        if type(kind) is not str or type(version) is not int or version < 1:
+            raise JournalError("Invalid peer capabilities")
+    if type(value["entry_kinds"].get("commands")) is not list or len(set(value["entry_kinds"]["commands"])) != len(value["entry_kinds"]["commands"]):
+        raise JournalError("Invalid peer capabilities")
+    from .codec import hash_value
+    hash_value(value["catalog"])
+
+
 class UpdateRequired(JournalError):
     def __init__(self, target):
         self.target = target
@@ -28,7 +52,10 @@ def capabilities(store):
 
 
 def check(local, home, pending):
-    fields(home, ("protocol", "app", "ledger_schema", "effects", "entry_kinds", "catalog"))
+    _capabilities(local)
+    _capabilities(home)
+    if local["protocol"] != 2:
+        raise UpdateRequired("device")
     if home["protocol"] != 2 or home["ledger_schema"] > local["ledger_schema"] or any(value not in local["effects"] for value in home["effects"]):
         raise UpdateRequired("device")
     if home["ledger_schema"] < local["ledger_schema"]:

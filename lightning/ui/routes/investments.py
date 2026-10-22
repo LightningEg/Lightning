@@ -791,8 +791,23 @@ def _followed(c) -> list[dict]:
              "have": have.get(p)} for p in followed_packs(c)]
 
 
-def _fill_from(c, done: str = "", back: str = "/investments/prices"):
+def _fill_from(c, done: str = "", back: str = "/investments/prices", request: Request | None = None):
     """Fill every held investment's prices from the followed packs, then post the month-end returns they allow."""
+    runtime = getattr(getattr(getattr(request, "app", None), "state", None), "profile_session", None)
+    runtime = getattr(runtime, "journal", None)
+    if runtime is not None:
+        if runtime.device.home is None or runtime.automation is None:
+            return redirect(back, "Download and apply shared prices on the journal home.")
+        from uuid import uuid4
+        from lightning.core.dates import today
+        result = runtime.automation.dispatch_once(
+            f"manual-market-fill:{today().isoformat()}:{uuid4().hex}",
+            "automation.fill_prices_now", as_of=today().isoformat())
+        if result["state"] == "rejected":
+            return redirect(back, f"Price update was refused: {result['reason']}")
+        if result["state"] not in {"accepted", "accepted-as-existing"}:
+            return redirect(back, "Price update saved on this device and is waiting for the journal home.")
+        return redirect(back, f"{done} Price update applied on the journal home.".strip())
     try:
         report = fill_followed(c, today())
         if report is None:
@@ -802,7 +817,7 @@ def _fill_from(c, done: str = "", back: str = "/investments/prices"):
     return redirect(back, f"{done} {report.summary()}".strip())
 
 
-async def _update(c, back: str):
+async def _update(c, back: str, request: Request | None = None):
     """Download what changed in the followed packs (about 1 MB a month each after the first time), then fill."""
     followed = followed_packs(c)
     try:
@@ -815,7 +830,7 @@ async def _update(c, back: str):
             if any(changed.values()) else "The price files were already up to date.")
     if missing:
         done += f" Not published yet: {', '.join(names.get(p, p) for p in missing)}."
-    return _fill_from(c, done, back)
+    return _fill_from(c, done, back, request)
 
 
 @router.post("/prices/online")
@@ -823,6 +838,16 @@ async def online_update(request: Request):
     """Update prices: fetch each held investment's latest close and missing month-ends from the sources.
     The network runs off the request thread; reading and saving stay on it."""
     c = container(request)
+    runtime = getattr(getattr(request.app.state, "profile_session", None), "journal", None)
+    if runtime is not None:
+        if runtime.device.home is None or runtime.automation is None:
+            return redirect("/investments/prices", "Fetch online prices from the journal home.")
+        on = today()
+        if not runtime.automation.start_live_price_fetch(on):
+            completed = runtime.automation.poll_live_prices()
+            if completed is None:
+                return redirect("/investments/prices", "Online price fetching is unavailable or already running on the journal home.")
+        return redirect("/investments/prices", "Online price fetch started on the journal home. Results will be applied through the journal.")
     if c.db.read_only:
         return redirect("/investments/prices", "This is a read-only copy; prices cannot be saved here.")
     if not live_prices.enabled():
@@ -837,12 +862,12 @@ async def online_update(request: Request):
 
 @router.post("/prices/market/fill")
 async def market_fill(request: Request):
-    return _fill_from(container(request))
+    return _fill_from(container(request), request=request)
 
 
 @router.post("/prices/market/update")
 async def market_update(request: Request):
-    return await _update(container(request), "/investments/prices")
+    return await _update(container(request), "/investments/prices", request)
 
 
 @router.post("/prices/market/import")
@@ -872,7 +897,7 @@ async def market_import(request: Request):
     done = f"Imported {', '.join(names.get(p, p) for p in saved)}." if saved else "Nothing was imported."
     if older:
         done += f" Kept your newer {', '.join(names.get(p, p) for p in older)}."
-    return _fill_from(c, done)
+    return _fill_from(c, done, request=request)
 
 
 @router.get("/prices/markets")
@@ -912,7 +937,7 @@ async def save_price_files(request: Request):
     c.settings.set("market_packs", ",".join(picked) or "none")
     forget(c.data_dir, dropped)
     if form.get("update"):
-        return await _update(c, "/investments/prices/markets")
+        return await _update(c, "/investments/prices/markets", request)
     return redirect("/investments/prices/markets", "Saved. Download shared prices on Investment prices brings the markets you added.")
 
 

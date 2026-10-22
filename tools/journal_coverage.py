@@ -32,17 +32,39 @@ WRITE_VERBS = (
 
 # Calls the verbs mistake for writes. `auto_link_transaction` only reports ambiguous reserve suggestions and
 # `from_transaction` only prefills a plan form; `forget` deletes shared-price files downloaded to this device.
-NOT_WRITES = {"reserves.auto_link_transaction", "planning.from_transaction", "workflow.forget"}
+NOT_WRITES = {"reserves.auto_link_transaction", "planning.from_transaction", "workflow.forget",
+              "journal_workflows.budget_settings_fingerprint", "journal_workflows.bulk_budget_fingerprint"}
 
 
 # Writes that run only for new free text: the route works without them, and with them the app's guard answers
 # "not available yet". They are listed in the Notes column and do not change a route's state.
-CONDITIONAL = {"institutions.add": "a new institution name"}
+CONDITIONAL = {}
+
+# These operations intentionally stay outside the replicated command log. Undo history is
+# connection-local and contains arbitrary row snapshots; backup and fresh-profile operations
+# manage the database file itself. Reporting them separately keeps them visible without
+# implying that a replay on another device has equivalent data.
+LOCAL_ONLY = {
+    "undo.replay": "connection-local history cannot be replayed on another device",
+    "backup_now": "local backup operation",
+    "db.close": "local database lifecycle operation",
+}
+
+# Work that a screen deliberately dispatches through a runtime object rather than
+# calling a service through the route's container. Keep these explicit so static
+# inventory still checks the commands that own their financial effects.
+ROUTE_COMMANDS = {
+    ("investments", "/investments/prices/market/fill"): ("automation.fill_prices_now",),
+    ("investments", "/investments/prices/market/update"): ("automation.fill_prices_now",),
+    ("investments", "/investments/prices/markets"): ("automation.fill_prices_now",),
+    ("investments", "/investments/prices/online"): ("automation.mark_live_fetch", "automation.apply_live_prices"),
+}
 
 
 def covered_calls() -> set[str]:
     from lightning.sync.journal.commands import COMMANDS
-    return {entry.call for entry in COMMANDS.values() if type(entry.call) is str}
+    return ({entry.call for entry in COMMANDS.values() if type(entry.call) is str}
+            | set(COMMANDS))
 
 
 def is_write(call: str, covered=()) -> bool:
@@ -118,7 +140,7 @@ def calls_of(function, modules, seen=None):
             found.add(".".join([services[root.id], names[0]]))
             continue
         if _is_container(root, aliases) and names:
-            found.add(".".join(names[:2]))
+            found.add(".".join(names))
             continue
         target = _helper(item.func, function)
         if target is not None:
@@ -149,13 +171,20 @@ def inventory():
     for route in _routes(create_app(None).routes):
         if "POST" not in getattr(route, "methods", ()):
             continue
-        every = sorted(call for call in calls_of(route.endpoint, modules) if is_write(call, covered))
+        calls = calls_of(route.endpoint, modules)
+        calls.update(ROUTE_COMMANDS.get((route.endpoint.__module__.rsplit(".", 1)[-1], route.path), ()))
+        every = sorted(call for call in calls if is_write(call, covered))
         writes = [call for call in every if call not in CONDITIONAL]
         done = [call for call in writes if call in covered]
-        state = "read-only" if not every else "uncovered" if not writes else "covered" if len(done) == len(writes) else "partial" if done else "uncovered"
+        local = [call for call in writes if call in LOCAL_ONLY]
+        state = ("read-only" if not every else "uncovered" if not writes else
+                 "covered" if len(done) == len(writes) else
+                 "local-only" if len(local) == len(writes) else
+                 "partial" if done or local else "uncovered")
         rows.append(dict(module=route.endpoint.__module__.rsplit(".", 1)[-1], path=route.path, state=state, writes=writes,
                          missing=[call for call in writes if call not in covered],
-                         notes=[CONDITIONAL[call] for call in every if call in CONDITIONAL]))
+                         notes=([CONDITIONAL[call] for call in every if call in CONDITIONAL] +
+                                [LOCAL_ONLY[call] for call in writes if call in LOCAL_ONLY])))
     return sorted(rows, key=lambda row: (row["module"], row["path"]))
 
 
@@ -170,9 +199,9 @@ def report(rows) -> str:
                 f"{'not for ' + ', '.join(row['notes']) if row['notes'] else ''} |" for row in items]
         out.append("")
     count = Counter(row["state"] for row in rows)
-    out.append("Summary: " + ", ".join(f"{count[state]} {state}" for state in ("covered", "partial", "uncovered", "read-only"))
+    out.append("Summary: " + ", ".join(f"{count[state]} {state}" for state in ("covered", "partial", "uncovered", "local-only", "read-only"))
                + f" ({len(rows)} POST routes)")
-    top = Counter(call for row in rows for call in row["missing"]).most_common(10)
+    top = Counter(call for row in rows for call in row["missing"] if call not in LOCAL_ONLY).most_common(10)
     out += ["", "Most used uncovered writes: " + ", ".join(f"{call} ({n})" for call, n in top)]
     return "\n".join(out)
 

@@ -20,16 +20,6 @@ CATEGORY = ("categories", "category_id")  # A budget cell may not exist yet, so 
 CELLS = items(category=ref("categories"), amount=optional(AMOUNT), average_months=optional(INT))
 
 
-def _purchase(c, **values):
-    from lightning.planning.loan_actions import create_purchase
-    return create_purchase(c.planning, **values)
-
-
-def _early(c, **values):
-    from lightning.planning.loan_actions import record_early_payment
-    return record_early_payment(c.planning, **values)
-
-
 def _cell(values):
     return values | dict(amount="" if values["amount"] is None else values["amount"])
 
@@ -81,10 +71,10 @@ COMMANDS = {
         item_id=ref("planned_items"), due_date=DATE, transaction_id=ref("transactions")), target=ITEM),
     "plans.skip": Command("planning.skip", dict(item_id=ref("planned_items"), due_date=DATE), target=ITEM),
     "plans.reopen": Command("planning.reopen", dict(item_id=ref("planned_items"), due_date=DATE), target=ITEM),
-    "plans.buy_in_instalments": Command(_purchase, dict(
+    "planning.create_purchase": Command("planning.create_purchase", dict(
         name=TEXT, price=AMOUNT, fee=AMOUNT, months=INT, first_date=DATE, account_id=optional(ref("accounts")),
         counterparty_id=optional(ref("counterparties"))), creates="planned_items"),
-    "plans.pay_loan_early": Command(_early, dict(
+    "planning.record_early_payment": Command("planning.record_early_payment", dict(
         item_id=ref("planned_items"), principal=AMOUNT, fee=AMOUNT, date_paid=DATE,
         account_id=optional(ref("accounts")), expected_remaining=AMOUNT), target=ITEM),
     "budgets.set": Command("budgets.set_budget", dict(

@@ -25,6 +25,24 @@ router = APIRouter(prefix="/budget")
 TRACK_SUGGESTION_PERCENT = Decimal(20)
 
 
+def _category_setting_ids(c, key: str) -> set[int]:
+    values = json.loads(c.settings.get(key) or "[]")
+    by_code = {category.code: category.id for category in c.categories.tree()}
+    result = set()
+    for value in values:
+        try:
+            result.add(int(value))
+        except (ValueError, TypeError):
+            if str(value) in by_code:
+                result.add(by_code[str(value)])
+    return result
+
+
+def _save_category_setting(c, key: str, ids: set[int] | list[int]) -> None:
+    values = sorted({c.categories.get(item).code for item in ids}) if getattr(c, "is_journal", False) else sorted(set(ids))
+    c.settings.set(key, json.dumps(values))
+
+
 def _month(request: Request) -> str:
     month = request.query_params.get("month") or month_of(today())
     parse_month(month)
@@ -113,7 +131,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     tracked = {line.category_id for section in view.sections for line in section.lines
                if line.direct is not None or line.average_months or line.income_percent is not None}
     try:
-        tracked |= set(json.loads(c.settings.get("budget_tracked_categories") or "[]"))
+        tracked |= _category_setting_ids(c, "budget_tracked_categories")
     except (ValueError, TypeError):
         pass
     tracked = {int(item) for item in tracked}
@@ -172,7 +190,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     threshold, fixed_threshold = TRACK_SUGGESTION_PERCENT, ZERO
     try:
         raw_exclusions = c.settings.get("budget_one_off_exclusions") or "[]"
-        exclusions = {int(x) for x in json.loads(raw_exclusions)} if raw_exclusions.strip().startswith("[") else set()
+        exclusions = _category_setting_ids(c, "budget_one_off_exclusions") if raw_exclusions.strip().startswith("[") else set()
     except (ValueError, TypeError):
         exclusions = set()
     background_counts, background_totals = {}, {}
@@ -185,6 +203,10 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     suppressed = json.loads(c.settings.get("budget_suppressed_categories") or "{}")
     if isinstance(suppressed, list):
         suppressed = {str(category_id): "never" for category_id in suppressed}
+    else:
+        for category in by_id.values():
+            if str(category.id) not in suppressed and category.code in suppressed:
+                suppressed[str(category.id)] = suppressed[category.code]
     tracking_suggestions = []
     for line in (line for section in view.sections for line in section.lines
                  if line.depth > 1 and line.category_id not in tracked):
@@ -448,7 +470,7 @@ async def update_tracking(request: Request):
     c = container(request)
     form = await request.form()
     selected = sorted(int(key[8:]) for key in form if key.startswith("trackon_") and key[8:].isdigit())
-    c.settings.set("budget_tracked_categories", json.dumps(selected))
+    _save_category_setting(c, "budget_tracked_categories", set(selected))
     if request.headers.get("X-Requested-With") == "fetch":
         return Response("Saved", status_code=204)
     return redirect("/budget", "Tracked categories updated.")
@@ -464,15 +486,20 @@ async def budget_suggestions(request: Request):
         month = str(form.get("month", month_of(today())))
         parse_month(month)
         if action == "track":
-            selected = set(json.loads(c.settings.get("budget_tracked_categories") or "[]"))
+            if getattr(c, "is_journal", False):
+                c.journal_workflows.save_category_rule(category_id=category_id, month=month, mode="average3", value="",
+                    fingerprint=c.journal_workflows.bulk_budget_fingerprint([category_id]))
+                return redirect(f"/budget?month={month}", "Preference saved.")
+            selected = _category_setting_ids(c, "budget_tracked_categories")
             selected.add(category_id)
-            c.settings.set("budget_tracked_categories", json.dumps(sorted(selected)))
+            _save_category_setting(c, "budget_tracked_categories", selected)
             c.budgets.set_budget(category_id, month, "", average_months=3)
         elif action in {"later", "never"}:
             suppressed = json.loads(c.settings.get("budget_suppressed_categories") or "{}")
             if isinstance(suppressed, list):
                 suppressed = {str(item): "never" for item in suppressed}
-            suppressed[str(category_id)] = "never" if action == "never" else month
+            key = c.categories.get(category_id).code if getattr(c, "is_journal", False) else str(category_id)
+            suppressed[key] = "never" if action == "never" else month
             c.settings.set("budget_suppressed_categories", json.dumps(suppressed))
     except (ValueError, TypeError):
         return redirect("/budget", "Choose a valid category.")
@@ -486,9 +513,13 @@ async def mark_budget_one_off(request: Request):
         category_id = int(str(form.get("category_id", "")))
         month = str(form.get("month", month_of(today()))); parse_month(month)
         c.budgets._budgetable(category_id)
-        excluded = {int(x) for x in json.loads(c.settings.get("budget_one_off_exclusions") or "[]")}
+        excluded = _category_setting_ids(c, "budget_one_off_exclusions")
         excluded.add(category_id)
-        c.settings.set("budget_one_off_exclusions", json.dumps(sorted(excluded)))
+        if getattr(c, "is_journal", False):
+            codes = {c.categories.get(item).code for item in excluded}
+            c.settings.set("budget_one_off_exclusions", json.dumps(sorted(codes)))
+        else:
+            _save_category_setting(c, "budget_one_off_exclusions", excluded)
     except (ValueError, TypeError, LightningError) as exc:
         return redirect("/budget", exc.message if isinstance(exc, LightningError) else "Choose a valid category.")
     return redirect(f"/budget?period=month&month={month}", "Category excluded from background estimates.")
@@ -530,6 +561,17 @@ async def save_budget_settings(request: Request):
         carry_month = month_of(today())  # turning carryover on or off takes effect this month (owner, 2026-10-06)
         categories = [int(x) for x in form.getlist("income_category") if str(x).isdigit()]
         exclusions = [int(x) for x in form.getlist("exclusion_category") if str(x).isdigit()]
+        if getattr(c, "is_journal", False):
+            c.journal_workflows.save_budget_settings(
+                income_categories=sorted(set(categories)), income_months=income_months, manual_income=manual,
+                exclusions=sorted(set(exclusions)), carryover=enabled, carry_month=carry_month,
+                recurring_shown="income_from_recurring_shown" in form,
+                income_from_recurring=form.get("income_from_recurring") == "1",
+                emergency_basis=str(form.get("emergency_basis", "")) or None,
+                fingerprint=c.journal_workflows.budget_settings_fingerprint())
+            if request.headers.get("X-Requested-With") == "fetch":
+                return Response(status_code=204)
+            return redirect(return_to, "Budget settings updated.")
         if "income_from_recurring_shown" in form:  # nor this one (it is offered after a raise)
             c.settings.set(INCOME_FROM_RECURRING, "1" if form.get("income_from_recurring") == "1" else "0")
         if "emergency_basis" in form:  # a form without the choice leaves it alone
@@ -607,10 +649,15 @@ async def inline_limit(request: Request, category_id: int):
     form = await request.form()
     month = str(form.get("month", month_of(today())))
     try:
+        if getattr(c, "is_journal", False):
+            c.journal_workflows.save_category_rule(category_id=category_id, month=month, mode="fixed",
+                value=str(form.get("amount", "")), fingerprint=c.journal_workflows.bulk_budget_fingerprint([category_id]))
+            return Response("Saved", status_code=204) if request.headers.get("X-Requested-With") == "fetch" else redirect(
+                f"/budget?month={month}", "Limit saved.")
         c.budgets.set_budget(category_id, month, str(form.get("amount", "")))
-        current = set(json.loads(c.settings.get("budget_tracked_categories") or "[]"))
+        current = _category_setting_ids(c, "budget_tracked_categories")
         current.add(category_id)
-        c.settings.set("budget_tracked_categories", json.dumps(sorted(current)))
+        _save_category_setting(c, "budget_tracked_categories", current)
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Enter a valid monthly limit."
         if request.headers.get("X-Requested-With") == "fetch":
@@ -629,12 +676,19 @@ async def inline_rule(request: Request, category_id: int):
     month = str(form.get("month", month_of(today())))
     raw = str(form.get("rule", "")).strip().replace("٪", "%")
     try:
+        if getattr(c, "is_journal", False):
+            mode, value = ("percentage", raw[:-1].strip()) if raw.endswith("%") else ("fixed", raw)
+            c.journal_workflows.save_category_rule(category_id=category_id, month=month, mode=mode, value=value,
+                fingerprint=c.journal_workflows.bulk_budget_fingerprint([category_id]))
+            if request.headers.get("X-Requested-With") == "fetch":
+                return Response(status_code=204)
+            return redirect(f"/budget?month={month}", "Budget saved." if raw else "Budget cleared: this category has no limit now.")
         if raw.endswith("%"):
             c.budgets.set_income_percentage(category_id, month, raw[:-1].strip())
         else:
             c.budgets.set_budget(category_id, month, raw)
-        current = set(json.loads(c.settings.get("budget_tracked_categories") or "[]")); current.add(category_id)
-        c.settings.set("budget_tracked_categories", json.dumps(sorted(current)))
+        current = _category_setting_ids(c, "budget_tracked_categories"); current.add(category_id)
+        _save_category_setting(c, "budget_tracked_categories", current)
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Enter an amount like 1,500 or a percentage like 12%."
         if request.headers.get("X-Requested-With") == "fetch":
@@ -653,12 +707,18 @@ async def inline_percentage(request: Request, category_id: int):
     month = str(form.get("month", month_of(today())))
     try:
         raw = str(form.get("percentage", "")).strip()
+        if getattr(c, "is_journal", False):
+            c.journal_workflows.save_category_rule(category_id=category_id, month=month,
+                mode="percentage" if raw else "fixed", value=raw,
+                fingerprint=c.journal_workflows.bulk_budget_fingerprint([category_id]))
+            return Response(status_code=204) if request.headers.get("X-Requested-With") == "fetch" else redirect(
+                f"/budget?month={month}", "Income percentage saved.")
         if raw:
             c.budgets.set_income_percentage(category_id, month, raw)
         else:
             c.budgets.set_budget(category_id, month, "")
-        current = set(json.loads(c.settings.get("budget_tracked_categories") or "[]")); current.add(category_id)
-        c.settings.set("budget_tracked_categories", json.dumps(sorted(current)))
+        current = _category_setting_ids(c, "budget_tracked_categories"); current.add(category_id)
+        _save_category_setting(c, "budget_tracked_categories", current)
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Enter a valid percentage."
         return Response(message, status_code=400, media_type="text/plain") if request.headers.get("X-Requested-With")=="fetch" else redirect(f"/budget?month={month}", message)
@@ -677,9 +737,17 @@ async def bulk_budget_rule(request: Request):
         return redirect(f"/budget?period=month&month={month}", "Select at least one category.")
     if action not in {"percentage", "average3", "average6"}:
         return redirect(f"/budget?period=month&month={month}", "Choose a bulk rule.")
+    token = uuid.uuid4().hex
+    if getattr(c, "is_journal", False):
+        try:
+            c.journal_workflows.apply_bulk_budget(month=month, category_ids=selected, action=action,
+                percentage=str(form.get("percentage", "")), token=token,
+                fingerprint=c.journal_workflows.bulk_budget_fingerprint(selected))
+        except LightningError as exc:
+            return redirect(f"/budget?period=month&month={month}", exc.message)
+        return redirect(f"/budget?period=month&month={month}&undo={token}", f"Updated {len(selected)} categories.")
     # Store the exact affected rows so the immediate result can be undone.
     before = c.budgets.snapshot_rows(selected)
-    token = uuid.uuid4().hex
     try:
         with c.db.transaction():
             if action == "percentage":
@@ -701,6 +769,12 @@ async def bulk_budget_rule(request: Request):
 async def undo_bulk_budget_rule(request: Request):
     c = container(request); form = await request.form(); token = str(form.get("token", ""))
     try:
+        if getattr(c, "is_journal", False):
+            snapshot = json.loads(c.settings.get("budget_bulk_undo") or "{}")
+            if not token or token != snapshot.get("token"):
+                raise ValidationError("This bulk change can no longer be undone.")
+            c.journal_workflows.undo_bulk_budget(key="budget_bulk_undo", token=token)
+            return redirect(f"/budget?period=month&month={snapshot['month']}", "Bulk change undone.")
         snapshot = json.loads(c.settings.get("budget_bulk_undo") or "{}")
         if not token or token != snapshot.get("token"):
             raise ValidationError("This bulk change can no longer be undone.")

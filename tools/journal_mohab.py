@@ -1,7 +1,7 @@
 """Gauge for J6: live Mohab's year on an encrypted journal home through `proxy.JournalServices`.
 
 Run `python tools/journal_mohab.py`. Prints the first failing step and every write the journal guard
-denied (table and Mohab step line): the next areas to cover. Not a test: it is expected to fail until J6 is done.
+denied (table and Mohab step line). The consolidated suite covers the same journey; this is a diagnostic runner.
 """
 import os, sys, tempfile, traceback
 from datetime import datetime, time, timezone
@@ -50,6 +50,7 @@ with pytest.MonkeyPatch.context() as patch:
         step = next((f for f in reversed(tb) if f.filename.endswith("test_mohab_year.py")), None)
         print("FAILED at", step.lineno if step else "?", step.line if step else "", "|", type(error).__name__, str(error)[:400])
         print("commits so far:", store.cursor()["revision"], "| last page:", person.b.page.path if person.b.page else None)
+        raise
     finally:
         os.environ["LIGHTNING_TODAY"] = pinned or ""
         seen = {}

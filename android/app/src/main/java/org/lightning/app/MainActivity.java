@@ -23,17 +23,27 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import com.chaquo.python.Python;
 import java.io.ByteArrayInputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Lightning on the phone: the shared pages in a WebView locked to this phone's own server (task 04c rules). */
 public final class MainActivity extends Activity {
     static volatile Uri reminderOrigin;
     static volatile String reminderCookie;
     static volatile boolean reminderEnabled;
+    private static final AtomicBoolean journalSyncRunning = new AtomicBoolean();
     private WebView web;
     private Uri origin;
+    private volatile boolean serverReady;
     private boolean openSms;  // a message was shared in before the pages were ready
     private String pendingReminderHref;
     private final Handler reminderHandler = new Handler(Looper.getMainLooper());
+    private final Handler journalSyncHandler = new Handler(Looper.getMainLooper());
+    private final Runnable foregroundJournalSync = new Runnable() {
+        @Override public void run() {
+            if (serverReady) requestJournalSync();
+            journalSyncHandler.postDelayed(this, 15 * 60 * 1000L);
+        }
+    };
     private final Runnable reminderPoll = new Runnable() {
         @Override public void run() {
             checkReminders();
@@ -62,6 +72,7 @@ public final class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
+        JournalSyncScheduler.schedule(this);
         SmsBridge.activity = this;
         BiometricBridge.activity = this;
         takeShare(getIntent());
@@ -103,6 +114,7 @@ public final class MainActivity extends Activity {
     }
 
     private void show(FrameLayout frame, String url) {
+        serverReady = true;
         Uri launch = Uri.parse(url);
         origin = launch.buildUpon().encodedPath("/").clearQuery().fragment(null).build();
         reminderOrigin = origin;
@@ -137,6 +149,7 @@ public final class MainActivity extends Activity {
         frame.removeAllViews();
         frame.addView(web);
         web.loadUrl(url);
+        requestJournalSync();
         if (pendingReminderHref != null) {
             String href = pendingReminderHref;
             pendingReminderHref = null;
@@ -185,13 +198,34 @@ public final class MainActivity extends Activity {
     protected void onStart() {
         super.onStart();
         stopService(new Intent(this, SyncService.class));
+        if (serverReady) requestJournalSync();
+        journalSyncHandler.removeCallbacks(foregroundJournalSync);
+        journalSyncHandler.postDelayed(foregroundJournalSync, 15 * 60 * 1000L);
         reminderHandler.removeCallbacks(reminderPoll);
         reminderHandler.postDelayed(reminderPoll, 5_000);
+    }
+
+    /** Let an already-unlocked phone catch up when it returns to the foreground. */
+    private void requestJournalSync() {
+        if (!journalSyncRunning.compareAndSet(false, true)) return;
+        String files = getFilesDir().getAbsolutePath();
+        new Thread(() -> {
+            try {
+                String result = Python.getInstance().getModule("lightning_android")
+                        .callAttr("sync_journal", files).toString();
+                Log.i("LightningJournalSync", "Foreground catch-up: " + result);
+            } catch (Throwable error) {
+                Log.w("LightningJournalSync", "Foreground catch-up deferred", error);
+            } finally {
+                journalSyncRunning.set(false);
+            }
+        }, "lightning-journal-foreground").start();
     }
 
     @Override
     protected void onStop() {
         reminderHandler.removeCallbacks(reminderPoll);
+        journalSyncHandler.removeCallbacks(foregroundJournalSync);
         super.onStop();
         new Thread(() -> {
             try {

@@ -292,6 +292,9 @@ async def set_welcome_currency(request: Request):
     if code not in known or any(extra not in known for extra in extras):
         return redirect("/", "Choose the profile currency before adding an account.")
     try:
+        if getattr(c, "is_journal", False):
+            c.journal_workflows.setup_currencies(code=code, extras=extras, was_empty=not bool(c.accounts.list()))
+            return redirect("/", f"Currencies saved: {' · '.join([c.base_currency] + extras)}.")
         if not c.accounts.list():
             c.currencies.register(code)
             c.set_profile_currency(code)
@@ -338,7 +341,7 @@ async def save_salary_setup(request: Request):
     form = await request.form()
     values = {key: str(form.get(key, "")) for key in ("account_id", "amount", "payday")}
     try:
-        set_up_salary(container(request), **values)
+        container(request).salary_setup.set_up_salary(**values)
     except LightningError as exc:
         return _salary_form(request, values, exc.message, 400, exc.field or "")
     return redirect("/plan/recurring", "Salary added. Add your bills when you are ready.")

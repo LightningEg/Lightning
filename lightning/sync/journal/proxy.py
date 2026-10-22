@@ -30,12 +30,17 @@ class PendingOnHome(Exception):
 
 
 class JournalServices:
-    def __init__(self, device):
+    is_journal = True
+
+    def __init__(self, device, *, backup=None):
         self._device = device
+        self._backup = backup
         # Module-level workflow commands (a function `call`) are reached by their own screens, not through here.
         self._calls = {entry.call: name for name, entry in COMMANDS.items() if type(entry.call) is str}
 
     def __getattr__(self, name):
+        if name == "backup_now" and self._backup is not None:
+            return self._backup
         service = getattr(self._device.c, name)
         if name in self._calls:  # A container-level action, e.g. set_profile_currency.
             return lambda *args, **kwargs: self._run(name, service, args, kwargs)
@@ -90,6 +95,11 @@ class JournalServices:
                 raise _Rehearsed(result)
         except _Rehearsed as rehearsed:
             return rehearsed.args[0]
+        finally:
+            # A rehearsed profile-currency change rolls its SQL back, but it also
+            # refreshes the live service graph. Restore those caches from settings.
+            from .areas.settings import refresh
+            refresh(self._device.c)
 
 
 class _Rehearsed(Exception):
@@ -126,6 +136,8 @@ class _Service:
         target = getattr(self._service, method)
         call = f"{self._name}.{method}"
         if call not in self._outer._calls:
+            if any(name.startswith(call + ".") for name in self._outer._calls):
+                return _Service(self._outer, call, target)
             return target
         def journaled(*args, **kwargs):
             return self._outer._run(call, target, args, kwargs)
@@ -155,10 +167,12 @@ def _wire(adapter, spec, value):
     bare = spec.lstrip("?")
     if value is None:
         return None
+    if spec.startswith("?") and value == "" and bare not in ("text", "long"):
+        return None
     if isinstance(value, Enum):
         value = value.value
     if bare.startswith("ref:"):
-        return adapter.uid(bare[len("ref:"):], int(value))
+        return adapter.uid(bare[len("ref:"):], int(getattr(value, "id", value)))
     if bare == "bytes":
         import base64
         return base64.b64encode(value).decode("ascii")

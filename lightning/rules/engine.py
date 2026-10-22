@@ -103,6 +103,9 @@ def holds(condition: Condition, txn: dict) -> bool:
             return amount < value
         return False
     if field_name == "account":
+        code = txn.get("account_code")
+        if code is not None:
+            return str(code) == condition.value
         return txn.get("account_id") is not None and str(txn.get("account_id")) == condition.value
     if field_name == "direction":
         amount = txn.get("amount")

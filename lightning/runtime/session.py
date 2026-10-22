@@ -225,6 +225,8 @@ class ProfileSession:
         self.sync_key: bytes | None = None   # for the sync thread while unlocked (multiple devices); wiped on close
         self.label = ""                       # a borrowed profile's name (its working file has none)
         self.borrowed = None                  # the BorrowerNode of an open borrowed profile, else None
+        self.journal = None
+        self.enrollment = None
 
     @property
     def name(self) -> str:
@@ -307,12 +309,13 @@ class ProfileSession:
             self.pending = None
 
     def _activate(self, paths: ProfilePaths, lock: InstanceLock, container: Container,
-                  role: SessionRole = SessionRole.HOME) -> None:
+                  role: SessionRole = SessionRole.HOME, *, journal=None) -> None:
         if container.db.read_only == role.writable:
             raise ProfileError("The profile opened with the wrong kind of connection for its role.")
         self.paths, self.lock, self.container, self.role = paths, lock, container, role
+        self.journal = journal
         self.sync_key = container.db.copy_key() if container.db.encrypted else None
-        if role.writable:
+        if role.writable and journal is None:
             _fill_prices(container)
         self.token = secrets.token_urlsafe(32)
         self.csrf = secrets.token_urlsafe(32)
@@ -402,11 +405,37 @@ class ProfileSession:
         from lightning.runtime.restore import EncryptedBackupRestorer
         EncryptedBackupRestorer._check_restore_control(paths, key)
         self._verify(paths, key)
+        probe = Database(paths.db_path, key=key, read_only=True)
+        try:
+            is_journal = probe.has_table("journal_meta")
+        finally:
+            probe.close()
+        restore_descriptor = paths.db_path.with_name(paths.db_path.name + ".journal-restore.json")
+        if restore_descriptor.exists():
+            restored = read_slot(restore_descriptor)
+            if restored.get("status") != "requires-enrollment":
+                raise ProfileError("The restored comparison copy is incomplete. Preserve it for repair.")
+            role = SessionRole.READER
+        if is_journal and role is not SessionRole.READER:
+            from .journal_profile import JournalRuntime
+            from lightning.sync.journal.upgrades import upgrade_profile
+            upgrade_profile(paths, key)
+            container = build(paths.db_path, key=key, backup_dir=paths.backups_dir, experimental_journal=True)
+            runtime = None
+            try:
+                runtime = JournalRuntime(container, paths, document)
+                self._activate(paths, lock, runtime.services, SessionRole.HOME, journal=runtime)
+            except BaseException:
+                if runtime is not None:
+                    runtime.close()
+                container.db.close()
+                raise
+            return
         if role.writable:
             container = build(paths.db_path, key=key, backup_dir=paths.backups_dir, backup_on_start=True)
         else:
             try:
-                container = build(paths.db_path, key=key, read_only=True)
+                container = build(paths.db_path, key=key, read_only=True, experimental_journal=is_journal)
             except ReadOnlyCopyError as exc:
                 raise ProfileError(str(exc)) from exc
         self._activate(paths, lock, container, role)
@@ -421,6 +450,66 @@ class ProfileSession:
             return paths.profile.profile_id, read_keys(paths)["key_id"]
         except ProfileError:
             return "", ""
+
+    def enable_journal(self, password: str, recovery: str, answer: str, *, selected: str = "",
+                       legacy_state: str = "AT_HOME", retain_stranded: bool = False) -> None:
+        """Explicitly convert or finish an interrupted conversion under the profile lock."""
+        from lightning.security.keys import open_with_recovery
+        from lightning.sync.identity import load_or_create
+        from lightning.sync.journal.cutover import begin
+        from .journal_profile import JournalRuntime, provision
+        if self.journal is not None:
+            return
+        if self.borrowed is not None:
+            raise ProfileError("Return this borrowed copy before changing its synchronization.")
+        paths = self.paths if self.container is not None else self._select(selected)
+        lock = self.lock if self.container is not None else self._acquire(paths)
+        original = self.container
+        container = original
+        runtime = None
+        try:
+            attempts = self.attempts(paths)
+            attempts.check()
+            document = read_keys(paths)
+            try:
+                key = unwrap_key(document, password)
+                recovered = open_with_recovery(document, recovery, answer)
+                if not secrets.compare_digest(key, recovered):
+                    raise ValueError("key mismatch")
+            except ValueError as error:
+                attempts.failed()
+                raise ProfileError("Check your password, recovery key and security answer.") from error
+            attempts.succeeded()
+            if container is None or container.db.read_only:
+                if container is not None:
+                    container.db.close()
+                    self.container = None
+                probe = Database(paths.db_path, key=key, read_only=True)
+                try:
+                    is_journal = probe.has_table("journal_meta")
+                finally:
+                    probe.close()
+                container = build(paths.db_path, key=key, backup_dir=paths.backups_dir,
+                                  experimental_journal=is_journal)
+            identity = load_or_create(paths.data_dir / "identity", "This device")
+            store, _ = begin(container, paths, identity, legacy_state=legacy_state,
+                             retain_stranded=retain_stranded)
+            provision(store, identity, paths, password=password, recovery=recovery, answer=answer)
+            runtime = JournalRuntime(container, paths, document)
+            self._activate(paths, lock, runtime.services, journal=runtime)
+        except BaseException:
+            # Once journal metadata exists, the ordinary service graph must never
+            # remain available to legacy writers, including on setup failure.
+            if runtime is not None:
+                runtime.close()
+            if container is not None:
+                container.db.close()
+            self.container = None
+            if self.lock is lock:
+                self.close()
+            else:
+                lock.close()
+            raise
 
     def unlock_with_key(self, selected: str, key: bytes, *, role: SessionRole = SessionRole.HOME) -> None:
         """Open a profile with its data key, already released by the phone's fingerprint. It takes the same road
@@ -446,6 +535,8 @@ class ProfileSession:
         means no form rendered under the old role can save. If the reopen fails, the profile is locked."""
         if self.container is None or self.paths is None:
             raise ProfileError("Unlock a profile first.")
+        if self.journal is not None:
+            raise ProfileError("Synchronized profiles use journal authority. Legacy lending cannot change their role.")
         if role is self.role:
             return
         key = self.container.db.copy_key()
@@ -458,9 +549,38 @@ class ProfileSession:
             raise
         self._activate(self.paths, self.lock, container, role)
 
-    def restore_backup(self, selected: str, backup_path: str, password: str) -> None:
+    def restore_backup(self, selected: str, backup_path: str, password: str) -> str | None:
         from lightning.runtime.restore import EncryptedBackupRestorer
-
+        candidate = Path(backup_path)
+        manifest = candidate.with_suffix(".journal-manifest.json")
+        if manifest.exists():
+            from lightning.sync.journal.backups import restore_copy
+            from uuid import uuid4
+            paths = self._select(selected)
+            if candidate.is_symlink() or candidate.resolve().parent != paths.backups_dir.resolve():
+                raise ProfileError("Choose a backup belonging to this profile.")
+            document = read_keys(paths)
+            attempts = self.attempts(paths)
+            attempts.check()
+            try:
+                key = unwrap_key(document, password)
+            except ValueError as error:
+                attempts.failed()
+                raise ProfileError("The password is incorrect.") from error
+            attempts.succeeded()
+            restored = create_profile((paths.profile.name if paths.profile else "Profile") + " restored", root=self.root)
+            restored.prepare()
+            with InstanceLock(restored.lock_path):
+                restore_copy(candidate, manifest.read_bytes(), backup_key=key, target=restored.db_path,
+                             new_device=str(uuid4()), new_incarnation=str(uuid4()))
+                publish_keys(restored, document, replace=False)
+            return str(restored.db_path)
+        # A journal snapshot must never enter legacy promotion: it could rewind
+        # authority or reuse an origin counter. Only signed package recovery above
+        # can create a quarantined comparison copy.
+        paths = self._select(selected)
+        if (paths.data_dir / "journal-native.json").exists() or (paths.data_dir / "complete.json").exists():
+            raise ProfileError("Choose a signed journal backup. Upgrade checkpoints are retained for explicit repair.")
         EncryptedBackupRestorer(self).restore_backup(selected, backup_path, password)
 
     def resume_interrupted_restore(self, selected: str, password: str) -> None:
@@ -625,6 +745,9 @@ class ProfileSession:
 
     def close(self) -> None:
         # Do not release the OS lock if closing the database fails.
+        if self.journal is not None:
+            self.journal.close()
+            self.journal = None
         if self.container is not None:
             self.container.db.close()
         self.container = None

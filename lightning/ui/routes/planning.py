@@ -256,7 +256,7 @@ async def purchase_form(request: Request):
 
 @router.post("/purchases/new")
 async def add_purchase(request: Request):
-    from lightning.planning.loan_actions import create_purchase, purchase_quote
+    from lightning.planning.loan_actions import purchase_quote
     form = await request.form()
     values = {key: str(form.get(key, "")) for key in ("name", "price", "fee", "months", "first_date", "account_id")}
     try:
@@ -264,7 +264,7 @@ async def add_purchase(request: Request):
             raise ValidationError("Name the purchase.", "name")
         quote = purchase_quote(values["price"], values["fee"], values["months"], values["first_date"])
         if form.get("intent") == "save":
-            create_purchase(container(request).planning, **values)
+            container(request).planning.create_purchase(**values)
             return redirect("/plan/loans", "Instalment plan added. Record each payment when it leaves your account.")
         return _purchase_form(request, values, quote)
     except (LightningError, ValueError) as exc:
@@ -292,14 +292,14 @@ async def early_payment_form(request: Request, item_id: int):
 
 @router.post("/items/{item_id:int}/early-payment")
 async def early_payment(request: Request, item_id: int):
-    from lightning.planning.loan_actions import preview_early_payment, record_early_payment
+    from lightning.planning.loan_actions import preview_early_payment
     c = container(request)
     form = await request.form()
     values = {key: str(form.get(key, "")) for key in ("principal", "fee", "date_paid", "account_id")}
     try:
         preview = preview_early_payment(c.planning, item_id, values["principal"], values["fee"], values["date_paid"])
         if form.get("intent") == "record":
-            record_early_payment(c.planning, item_id, **values, expected_remaining=form.get("expected_remaining", ""))
+            c.planning.record_early_payment(item_id, **values, expected_remaining=form.get("expected_remaining", ""))
             return redirect("/plan/loans", "Loan payment recorded. The remaining schedule is updated.")
         return _early_form(request, item_id, values, preview)
     except (LightningError, ValueError) as exc:
