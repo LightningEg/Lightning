@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-23 · Codex: record 2U, the phone's website APK download failure, for investigation after the v1.4.4 release at the owner's request.
+
 ## [1.4.4] — 2026-10-23
 
 - 2026-10-23 · Claude: package version 1.4.4 (`pyproject.toml`, `lightning/__init__.py`, README, doc headers).
