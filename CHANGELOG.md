@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 17683)
-Total output lines: 435
-
 # Changelog
 
 Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-dd`.
@@ -226,8 +223,71 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - 2026-10-15 · Claude: welcome page: the sample offer is four equal boxes (Mohab's year, Amr, Menna, Fatma) under one section header; the three-month button, long paragraphs and CSV links are gone; `welcome.html`, `style.css`.
 - 2026-10-15 · Claude: page header: one `.topbar` CSS block and a `page_header` macro (tile, title, line, figure strip); the account page shows its bank's tile, a Balance strip, one Secondary (Import statement) and ⋯; guideline A05/C04.7.
 - 2026-10-15 · Claude: date picker: the month title opens a 12-month grid and its year opens a 12-year grid (‹ › page by 12), Escape goes up a level; `app.js`, `style.css`, `phone.css`, guideline A10.3.
+Warning: truncated output (original token count: 10250)
+Total output lines: 210
+
 - 2026-10-15 · Claude: short fields sit side by side (`.form-grid`, A10.3): the account form, the CSV column-mapping page (amount model is now a two-choice segment) and the instalment and early-payment forms; starting balance is a soft section, not a card in a card.
-…2683 tokens truncated…d guideline drift); two dead OWNER.md links in proposals fixed.
+- 2026-10-15 · Claude: field wells are a blue-tinted `#E8F1FA` (focus `#E3EEF9`), defined once as `--field` and `--field-focus`; guideline A10 tokens updated in the app and phone files. Contrast: Ink 14.22/13.81, Ink 2 8.14/7.91, Muted 4.68/4.55.
+- 2026-10-15 · Claude: institutions: the account form's Institution is type-and-pick over 46 Egyptian banks, brokers and wallets (plus your own), with logo-or-monogram tiles in the picker, accounts list and sidebar; migration `0063_institutions.sql`.
+  Logos could not be downloaded here (no network): run `tools/fetch_institution_logos.py` from a PC.
+- 2026-10-15 · Claude: account form: the cash type reads Cash, More details and Last 4 digits are gone (a stored last 4 is kept), no Travel in new profiles' categories; the Mohab sample's Sahel weekend is Entertainment.
+- 2026-10-15 · Claude: setup starts with your currencies (profile base plus others held, as chips); the account form's currency is a pick list of registered currencies only; welcome Add links wait for the save; `welcome.html`, `routes/dashboard.py`, `accounts/form.html`.
+- 2026-10-15 · Codex: tested and repaired smarter workflows: redo validation, duplicate merge, linked reserve spending, goal review, month-end promotion and selected-account currency labels; regression coverage and browser checks added.
+  Also fixed exact matching limits, wrong-currency payments, early-payment review, numeric CSV exports, Arabic text, profile-scoped reminder dedupe and batched reserve lookup performance.
+  Migrations: `0056_checked_history.sql`, `0057_import_provenance.sql`, `0058_saved_views.sql`, `0059_reimbursements.sql`, `0060_plan_matching.sql`, `0061_deposit_receipts.sql`, `0062_cash_funding.sql`.
+
+- 2026-10-15 · Claude: `tools/site_shots.py` adds the dollar brokerage (`account-usd`) and the holdings row with its price/FX split (`a-holdings-usd`) for the website's new dollar savings guide; one Arabic finding filed.
+- 2026-10-15 · Codex: added session undo/redo, checked bank-history protection, multi-source import provenance, safe duplicate merge and combined activity review on PC/phone.
+- 2026-10-15 · Codex: connected partial reserves, configurable bill matching and transaction-to-plan setup, certificate receipt reconciliation and explicit partial reimbursement claims.
+- 2026-10-15 · Codex: added optional funded payday assignments, reusable saved views/report/export, rule correction offers, selected bulk preview, weekly review and opt-in native reminders. Local implementation; automated/native behavioural acceptance outstanding.
+
+- 2026-10-15 · Codex: Cash planning and Needs you now flag dated scheduled-cash shortages, including an underfunded payment account when total cash is sufficient. PC and phone show account links and explicit FX/unassigned-account limits; monthly free-cash estimates remain separate.
+
+- 2026-10-15 · Codex: refreshed Actual Budget comparison from current code/docs; recorded cash-timing, multi-source import and partial-reserve workflow findings. Measured 18 sample-data pages; runtime behaviour unchanged.
+
+- 2026-10-15 · Claude: new skill site-recapture with `tools/site_shots.py` (the site's PC, phone and paired screens in English or Arabic, sizes as the site uses them); website-sync points at the site's new `tools/release.py` and `tools/site_check.py`.
+- 2026-10-15 · Claude: website recaptured from main (Mohab to 2026-10-04): seven places with the dollar brokerage, a Pounds and dollars section, Download as the header button and the home page's main action, search titles under 60.
+  Six findings from the capture filed in `report/` (device line, Currencies screen, the sample's reconciliation gap).
+- 2026-10-15 · Claude: account page header: the type and bank line sits under the title, and the three figures (in this account, what you own, held for others) share one strip, the first largest; `register.html`, `style.css`.
+- 2026-10-15 · Codex: Spending compares the same days across months; running comparisons stay neutral. Holdings gains include income and sales; PC/phone register rows keep signs and cents, account totals stay whole.
+  Gam’eya shows every due instalment and payout, with atomic dated catch-up. Overview previews Needs you and shows portfolio KPIs together; Reserves and Health show separate emergency liquidity context. Phone list shells, alias action and comparison spacing now follow Part C; Arabic text and RTL mirrors updated.
+- 2026-10-15 · Codex: Europe/GCC adapters now include Oman and Nasdaq Nordic, venue currencies and underscore tickers, with collector fixtures. Live requests are blocked here; public redistribution remains disabled pending source permission.
+
+- 2026-10-15 · Claude: phone tabs are icons only, the tab bar and each section's tabs; the name stays as screen-reader label and long-press title. Guideline C01, C03, C12 text updated in both repos.
+  The C03 drawings still show words; redraw them.
+- 2026-10-15 · Claude: phone date fields open the calendar on tap with no keyboard, show the calendar button, and the calendar draws as a 7-column grid; `phone.css`, `phone-fields.js`.
+- 2026-10-15 · Claude: phone tables show as stacked rows with each column's heading above its value (prices, counterparties, held-for-others, settings); `phone.css`, `phone-fields.js`.
+- 2026-10-15 · Claude: phone type is 12px at least, Birdview's category treemap is full-width rows and its usual-month chart two a row, fields 48 and icons 44; `phone.css`, `profiles.css`.
+  Tables on seven phone pages stay open in report `phone-c12-type-tables-and-cut-words`.
+- 2026-10-15 · Claude: Investments no longer warns "reconciliation differs" when a certificate paid interest: the interest lands on the bank, so the check now subtracts it: `ui/routes/investments.py`; test 16 in `tests/test_audit_numbers.py`. Screen changed: Investments.
+- 2026-10-15 · Claude: `tools/stale_check.py` reads only the first clause of a proposal's Status line, so "implementation started … when an item is built" no longer counts as built.
+- 2026-10-15 · Claude: phone buttons and fields now follow C05 (48 page, 40 in a card); `phone.css` sets the control-height variables because `.phone .btn` lost to `style.css`'s `:not(#_)` rules.
+  The rest of the phone audit is in report `phone-c12-type-tables-and-cut-words`.
+- 2026-10-15 · Claude: feedback rows 32 to 76 settled by the owner: built 35 and 50; declined 38 (pie), 54 (one card destination), 60 (S/M/L tags), 62 (price volume), 63 (fall from high), 65 (free emergency target), 73 (review timeout), recorded in Architecture › UI contract; 76 was already built (ticket 88); 32 and 75 stay as reports. The combined request report is deleted.
+
+- 2026-10-15 · Claude: feedback rows 32 to 76 settled by the owner: built 35 and 50; declined 38 (pie), 54 (one card destination), 60 (S/M/L tags), 62 (price volume), 63 (fall from high), 65 (free emergency target), 73 (review timeout), recorded in Architecture › UI contract; 76 was already built (ticket 88); 32 and 75 stay as reports. The combined request report is deleted.
+
+- 2026-10-15 · Claude: trend dots say how much a line moved since its previous point ("+27,560 (+20%) since the last point"), in the tooltip and the screen-reader label: `charts.trend`, `partials/charts.html`; test in `tests/test_charts.py`. Feedback row 50 built.
+
+- 2026-10-15 · Claude: Cash planning's Lowest point card names the first month that ends below your reserves ("Runs short in 2026-12"); the forecast is monthly, so a daily path stays unbuilt: `CashForecast.first_short_month`, `_plan_stats`; test `tests/test_first_shortfall.py`. Feedback row 35 built.
+
+- 2026-10-15 · Claude: Overview 444 to 349 queries, no page over 150 ms or 400 queries: category and effect totals, money held for others, and typed item values read once per request or per item: `reporting/queries.py`, `money_from_others.py`; test in `tests/test_repeated_lookups.py`. Regenerated `style.rtl.css` (the register fix had left it stale). Report `overview-remaining-query-loops` closed; the per-row counterparty match (34 queries on a register) stays as it is.
+
+- 2026-10-15 · Claude: searching a whole number finds the row whose amount the pages show rounded to it (3251 finds 3,250.75); exact cents already worked: `_TERM_SQL` in `lightning/transactions/repository.py`; test in `tests/test_transactions.py`. Report `transactions-search-ignores-amounts` closed (it was partly wrong).
+
+- 2026-10-15 · Claude: the account register and Transactions no longer scroll sideways in a narrow window: the table's scroll box now clips the screen-reader-only links that widened the page (498 px at a 390 px window): `style.css`; test `tests/test_register_fits_narrow_window.py`. Report `accounts-register-overflows-sideways-at-390px` closed.
+
+- 2026-10-15 · Claude: the CSV import review marks a future-dated row to fix at once, as typing it does, instead of failing at Post: `_date` in `lightning/bank_imports.py`; test in `tests/test_bank_imports.py`. Report `import-preview-does-not-flag-future-dates` closed.
+
+- 2026-10-15 · Claude: a budget above 100,000,000 is refused; a blank budget field now says it cleared the limit (it never saved 0; the report was wrong): `MAX_BUDGET` in `budgeting/service.py`, `inline_rule`; test `tests/test_budget_rule_limits.py`. Reports `budget-blank-rule-saves-zero` and `huge-budget-amounts-accepted` closed (150% of income stays allowed: percent rules go to 10,000%).
+
+- 2026-10-15 · Claude: `report/` folder: one file per unprocessed finding in `technical-bug`, `visual-bug`, `technical-improvement`, `visual-improvement`, with who/skills/version in front matter; a generated `INDEX.md`; a fixed report is deleted with its fix; capped at 20 reports and 30 days each (`tools/report_index.py`, `tests/test_reports.py`). All skills now file there; `docs/proposals/open_feedback.md` became one report.
+
+- 2026-10-15 · Claude: fewer repeated reads per page: exchange rates, categories, counterparties and assets are read once per request, and each asset's prices once, not once per month end (Overview 642 to 444 queries, Investments 291 to 181; every page identical): `fx.py`, `reporting/queries.py`, `assets/repository.py`; test `tests/test_repeated_lookups.py`.
+
+- 2026-10-15 · Claude: skills `release-check`, `guideline-audit`, `number-audit`, `perf-check`, `arabic-check`, `website-sync` (all in `skills/`), with `tools/release_check.py` and `tools/perf_check.py`; `AGENTS.md` points to `skills/README.md`.
+
+- 2026-10-15 · Claude: skills `bug-hunt` and `stale-check` with `tools/bug_crawl.py` (crawls every page) and `tools/stale_check.py` (old messages, dead links, built proposals, merged branches, version and guideline drift); two dead OWNER.md links in proposals fixed.
 
 - 2026-10-15 · Claude: skills live in a tool-neutral `skills/` folder (`feedback-review` moved there, neutral model wording); `.claude/skills/` holds one-line stubs so Claude Code finds them.
 
@@ -252,61 +312,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - 2026-10-14 · Codex: Section 13 milestone 1: optional salary/payday setup, bank CSV presets, full financial Excel/CSV exports, instalment purchase plans and previewed early loan payments in existing screens.
   Migration `0055_loan_actions.sql` preserves short-month paydays, exact instalment totals and linked extra payments/fees; voids restore schedules. Dummy round-trip fixture rebuilt; owner-approved historical loan balances now follow cash receipt dates.
   Validation: financial regression, browser preview/edit/download flows, English/Arabic screens, Mohab, PC brand and phone checks; full suite 1,548 passed, 10 skipped after incorporating latest main.
-- 2026-10-14 · Claude: a gold price reference (18K/21K/24K) can no longer be bought or added as a holding; it only supplies a price: `InvestmentService._validate_asset_account`; test in `tests/test_physical_items.py`.
-- 2026-10-14 · Claude: a bill or income due date already paid or skipped cannot be recorded again (a second press made a second real payment): `PlanningService.record_payment`, `PlanningRepository.is_settled`; test in `tests/test_planning.py`.
-- 2026-10-14 · Codex: tab-by-tab trust batch: plain returns before 365 days, annual XIRR afterward; separate locked-certificate values/dates and matching Sale factors; emergency coverage defaults to spending (income optional).
-  Phone Needs you before Latest (C11.1 in both guideline copies); sidebar page-jump; Safe to spend says “on top of your plan”; recurring rows by due date; holding tones by sign; settings spacing and search category labels. English/Arabic checks and regression coverage updated.
-  Validation: full suite passed; PC brand audit at 1366 × 768 and phone overflow check at 360/320 passed.
-- 2026-10-14 · Claude: batch 003 finished (18 of 18): Investing rate = Money added ÷ Net flow (Saved and invested shows the savings rate only); Financial health leads with Over time, each limit one line that opens; the System group names its categories; the website's feedback form sends in the background.
-- 2026-10-14 · Claude: feedback batch 003 built (15 of 18): Your position follows the period end; Free cash beside what it is made of, If you sold today beside Net flow; Sankey splits Invested from Kept and pairs a month with its six; Needs you grouped by kind; month calendar for net cash flow, daily expenses on Spending only.
-- 2026-10-14 · Claude: batch 003 fixes: Plan to invest placement, lone key note on one line, styled file field, one row hover, Budget sub-lists (one chevron, Select all in the header), a one-row 30-day timeline, What you owe rows open. Outcome table in the batch file; open questions in `OWNER.md` › 19.
-- 2026-10-14 · Claude: user feedback batch 003 (rows 79–96, 18 tickets) compiled for AI investigation in `user feedback/`; its 8 screenshots are copied to `user feedback/screenshots/batch-003/` and linked per ticket.
-- 2026-10-14 · Claude: website analytics receiver 2026-10-14.4 rebuilds past Allow-all page views from Events, sets itself up on its first request (Cairo time, formats, key in a *Dashboard key* tab, remembered spreadsheet id) and answers failures in JSON; dashboard compares only with a fully covered earlier period, uses whole Cairo days, and drops guessed section order.
-- 2026-10-14 · Claude: phone Categories open as one row per group (12,000px to about one screen; searching opens all); an odd last tile spans the row; Cash planning leads with Safe to spend and drops the two tiles it repeats. Settings' five tabs are an `OWNER.md` question (18).
-- 2026-10-14 · Claude: website decision dashboard built (Lightning_website): verdict cards with confidence, key numbers against the previous period, path to a download per device, trends with release markers, channels, fix list, release effect; receiver script 2026-10-14.1 adds `From` and the per-day, per-page fields; Privacy Notice UX-2026.10.14.03. Owner: paste the receiver (OWNER.md).
-- 2026-10-14 · Claude: phone fields open empty when tapped (`phone-fields.js`): the old text returns if the field is left empty, a sheet that focuses itself clears nothing. A lone tile spans the row; Data checks and Currencies figures are rows in one surface.
-- 2026-10-14 · Claude: phone: Accounts shows the five latest transactions; tile chips sit above their label; zakat day field is a soft well; Arabic Part C updated (guideline 3.31). `tools/phone_check.py` also turns zakat on and adds a gam'eya.
-- 2026-10-14 · Claude: phone key notes (Budget's "Categories over plan", Health, Cash) are white rows with a tone dot, not tinted cards with a big numeral (C01.1).
-- 2026-10-14 · Claude: zakat is off by default; Settings › Your data › Zakat › *Show zakat* turns on its tab, page, search entry, Cash planning line and the worn box on gold pieces.
-- 2026-10-14 · Claude: zakat: Accounts › Zakat estimates 2.5% above 85 g of 24K gold from your position (zakat day, Paid in the new Zakat category, Still to pay), a dated line in Cash planning, a worn flag on gold pieces; migration `0054_zakat.sql`; gam'eya counted in (paid in; instalments due now taken off with debts). Round-trip fixture rebuilt for schema 54.
-- 2026-10-14 · Claude: gam'eya (savings circle) on the CD backbone: account type `GAMEYA`, terms and forecast (instalments, payout, optional interest) in `deposits/gameya.py`, figures **Gam'eya paid in** and **Gam'eya still to pay**, circle page on PC and phone. Net worth never moves with an instalment or the payout.
-  Migration `0053_gameya.sql` adds `gameya_terms` and rebuilds `accounts` for the new type; roundtrip fixture rebuilt for schema 53.
-- 2026-10-14 · Claude: phone tiles on Health, Cash planning and Investments lose their coloured edge, icon box and gradient (C01.1, quiet chrome).
-- 2026-10-14 · Claude: phone redesign, money first (guideline 3.31): flat transaction list with a round initial and no balance except on an account; Overview leads with net worth and the latest transactions, analysis after; Expense analysis headline figures as a lead and rows; one Secondary on an account. Arabic copy of Part C still to follow.
-- 2026-10-14 · Claude: owner chose fingerprint unlock (Android, optional), gam'eya (CD backbone, interest optional) and zakat; designs in `docs/proposals/gameya.md`, `zakat.md` and `multiple_devices.md` 18d.
-- 2026-10-14 · Claude: proposal `docs/proposals/website_decision_dashboard.md`: a decision dashboard for the website (verdicts with confidence, trends, the path to a download, fix list, release effect); hand-off in `NOW.md`. Website repo: analytics tests committed.
-- 2026-10-14 · Claude: website dashboard (website repo): page-view records are the single main source (GoatCounter only cross-checks); the Downloads page name is one constant in the receiver script, noted in the README.
-- 2026-10-14 · Claude: website analytics, full structure (website repo): every page view sends an anonymous record (what was on screen or pressed, scroll, errors) even if GoatCounter is blocked; live findability, hesitation, error and speed views; GitHub download counts beside button clicks; Privacy Notice Version 2. Setup order in `OWNER.md`.
-- 2026-10-14 · Claude: website footer (website repo): a Contact Us section (two emails, Reddit, Discord), then brand and links, on every page in English and Arabic; generated from `tools/footer.py`.
-- 2026-10-14 · Claude: website analytics: every number is behind the dashboard key (website repo): GoatCounter totals go from the GitHub job to the private receiver, no analytics files are committed. Setup order in `OWNER.md`.
-- 2026-10-14 · Claude: website analytics hardening (website repo): linked visits are no longer published (dashboard loads them privately with a key); Apps Script abuse caps and small-group merging; notice says storage works like a cookie. Owner steps in `OWNER.md`.
-- 2026-10-14 · Claude: website Events sheet (Apps Script, website repo): "Received at" shows date and time; each visitor ID gets a sequential Visitor no. (Visitors tab, backfilled, purged after 90 days).
-- 2026-10-14 · Claude: proposal `docs/proposals/tab_by_tab_review.md`: every section and tab walked on PC and phone with the sample household; 15 ranked fixes, about 150 items by tab, nine owner choices (OWNER 19), suggested order and Mohab steps.
-- 2026-10-14 · Claude: optional fingerprint unlock on the phone (task 18d): an opt-in Keystore-bound key slot outside the profile (`keys.json` and the PC unchanged), unlocked through BiometricPrompt then the password's own open path; Settings › This phone and a Use fingerprint button on the unlock screen.
-  Cancel counts nothing; changed fingerprints or a key that is not the profile's remove the slot and say to use the password. Java compiled against API 30 stubs only; on-device check in `OWNER.md`.
-- 2026-10-13 · Codex: Project Overview sections and nested screen questions now use tiered numbers for clear handoffs; contents table matches.
-- 2026-10-13 · Claude: website analytics in two tiers (website repo): a consent bar (Keep essential only / Allow all), a Privacy Notice in EN and AR, release-tagged GoatCounter events (`events.csv`) and opt-in linked visits through Apps Script (`journeys.csv`, 90-day purge). Setup in `OWNER.md`.
-- 2026-10-13 · Codex: v1.1.0-beta.1 published as a matched Windows ZIP and signed Android APK; public checksums match the tested pair.
-  Website downloads, release notes, archives and feedback choices updated in English and Arabic; v1.1 acceptance items cleared from NOW.md, larger features deferred.
-- 2026-10-12 · Claude: `docs/COMPETITION.md` tests the owner's eight selling points against the evidence and the code (verdict, safe wording, top three); the Lightning row of the field table is current; owner questions in `OWNER.md` 13.
-- 2026-10-12 · Claude: website pages made concise (website repo): Home has one phone-and-PC section, four helpers and four FAQs; Features puts phone and PC second and drops group intros; Current Status merges first run and feedback; every changed page has a new release ID and archive.
-- 2026-10-12 · Claude: guideline 3.30: B06 gains Buttons (vivid, primary, secondary; heights 48/40/36) and "the signup band is the only gradient call-out"; its specimen now matches the live band. Website: one top bar and footer, one Arabic band wording, survey on the landing system (see the website repo).
-- 2026-10-12 · Claude: guideline 3.29: Muted is `#566E7E` (4.5:1 on the canvas and tints) in the guideline and the six app stylesheets; B01 CTA, radius and rounding notes; website audit fixes live in the website repo.
-- 2026-10-12 · Claude: guideline 3.28 after an audit: A02.2 files, A03.3 measured contrast and the link rule, A06.2 Arabic in English, B11 social and brand surfaces (Before it ships is now B12), `guideline/brand-voice.md`; A09 no longer shows "Monthly"; A05's phone paragraph points to C04. Copies kept identical in both repos.
-- 2026-10-12 · Claude: `docs/proposals/temp-better-features.md` split into one file per design (undo, import matching, month lock, merge, investment events/lots/splits/checks/returns, price source order); built sections were already in Architecture.
-- 2026-10-12 · Claude: Migrations 0051–0052 no longer collide on `EXP.SYSTEM.ADJUSTMENT` when a newer seed has it; screen tests name an icon button by its tooltip (the register Add button); roundtrip fixture rebuilt for schema 52 (`508597be…`). Suite: 145 failing → 13 (register/overview redesign tests, left for their author).
-- 2026-10-12 · Claude: `AGENTS.md` points to `tools/claims.py` before pushing and to `CHANGELOG-archive.md` in the skip list.
-- 2026-10-12 · Claude: workflow tooling: UI reads currencies through the container (import contract passes again); `tools/claims.py` warns on files claimed in `NOW.md`; older releases moved to `CHANGELOG-archive.md`; NOW.md tests reject expired messages to all.
-  Logs migrations `0050_cash_at_hand.sql`, `0051_adjustment_category.sql`, `0052_system_categories.sql`, missing here.
-- 2026-10-12 · Claude: `AGENTS.md` keeps every rule in 6.3 KB instead of 10.2 KB (cheaper start for every session); `CLAUDE.md` now only imports it.
-- 2026-10-12 · Claude: Arabic layout now mirrors on every PC and phone screen: `style.rtl.css`, `phone.rtl.css` and `profiles.rtl.css` (built by `tools/build_rtl_css.js`, charts left as drawn) replace the English files in Arabic only; chevrons and written arrows point the way the eye moves, dates read `٢٠٢٦-١٠-١٢` left to right (they were flipping to `١٢-١٠-٢٠٢٦`), the phone period bar fits, paths and the AI prompt stay left to right, the timeline keeps its axis.
-  Arabic text: periods say «لحد», `As of`/`x of y`/asset-class names in Settings/low-confidence and compare lines/forms and titles are Arabic, period words follow C04 (من بداية السنة، مخصص); `tests/test_arabic_no_english.py` now also covers period variants, settings sections, forms and detail pages, and two-letter English words.
-- 2026-10-12 · Claude: the Arabic UI has no English system text on any PC or phone screen: an Arabic last pass over each page (`localize_html`) and ~1,500 new entries (system categories, asset kinds, currencies, months, sentences, errors) in `ui/i18n_system.py`, the glossary's Egyptian terms.
-  Test: `tests/test_arabic_no_english.py`.
-
-## [1.1.0b1] — 2026-10-13 — Windows and Android beta
-
-- 2026-10-13 · Codex: v1.1 beta acceptance: conversion previews use the posting parser (invalid amounts stay blank; Arabic digits work), foreign-stock requirements are translated and use the dated FX lookup, Mohab’s dollar brokerage participates in cross-tab reconciliation, and EGP bank SMS cannot be assigned to foreign accounts.
+- 2026-10-14 · Claude: a gold price reference (18K/21K/24K) can no longer be bought or added as a holdi…3250 tokens truncated…ounts.
   Validation: 1,447 passed, 10 skipped; four import contracts, encrypted profile self-check, PC brand and 320/360px phone layout checks passed.
 
 - 2026-10-13 · Codex: Batch 002 audit (42 rows): short-period XIRR, partial-allocation warnings, fresh reserve summaries, bounded help tips, setup dismissal, correct sale-estimate hierarchy/phone values, and aligned phone arrows.
