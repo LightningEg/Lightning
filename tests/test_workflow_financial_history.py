@@ -89,3 +89,31 @@ def test_register_payment_and_automatic_bill_link_undo_as_one_http_action(c, set
         assert redone.status_code == 200 and 'Action redone.' in redone.text
         assert c.reporting.account_balance(bank) == 49915
         assert c.db.scalar('SELECT count(*) FROM planned_payments WHERE planned_item_id=?', (item,)) == 1
+
+
+def test_every_write_route_is_its_own_undo_action(c, setup):
+    """2H: money held for others was missing from the hand-kept list, so Undo reversed the action before it."""
+    import re
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    accounts, cats = setup
+    bank = accounts['cib'].id
+    c.counterparties.create('Dad', kind='PERSON')
+    def undo_id(page):
+        body = re.search(r'<form[^>]+action="/history/undo"[^>]*>(.*?)</form>', page, re.S)
+        return re.search(r'name="group_id" value="(\d+)"', body.group(1)).group(1) if body else None
+    with TestClient(create_app(c)) as client:
+        expense = client.post(f'/accounts/{bank}/register', data={
+            'date': '2026-09-10', 'amount': '-40', 'category': cats['EXP.PERSONAL.FOOD'].name})
+        before = undo_id(expense.text)
+        assert before and c.reporting.account_balance(bank) == 49960
+        held = c.reporting.money_from_others_history()
+        saved = client.post('/money-from-others', data={'owner': 'Dad', 'account_id': str(bank), 'amount': '500',
+                                                        'date': '2026-09-12'})
+        assert saved.status_code == 200 and c.reporting.money_from_others_history() != held
+        latest = undo_id(saved.text)
+        assert latest and latest != before
+        undone = client.post('/history/undo', data={'group_id': latest})
+        assert undone.status_code == 200 and 'Action undone.' in undone.text
+    assert c.reporting.money_from_others_history() == held
+    assert c.reporting.account_balance(bank) == 49960  # the earlier expense stays

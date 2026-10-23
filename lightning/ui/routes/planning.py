@@ -117,6 +117,7 @@ async def plan_page(request: Request):
     late = [p for p in next_payments if p.days_late(day) and not p.item.is_income]
     position = c.position.at(day)
     kpi_cards = kpis.cash_plan(forecast, day=day, before=plan["before_income"], late=late,
+                               late_total=c.planning.still_owed_in_base(late, day),
                                free_then=past[-1][1] if past else None,
                                then=fmt_date(parse_month(past[-1][0])[1]) if past else "",
                                past_free=[value for _, value in past], position=position,

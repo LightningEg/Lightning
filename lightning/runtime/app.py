@@ -749,6 +749,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     async def connect(request: Request):
         from lightning.sync.identity import normalize_code
         from lightning.sync.service import LinkDown
+        from lightning.runtime.paths import borrowed_profile
         from lightning.sync.transport import join_home, pair
         if session.container:
             return RedirectResponse("/profiles", 303)
@@ -762,7 +763,8 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
                 raise ValueError("Name this PC, so the phone can show it.")
             identity = devices.identity(pc_name)
             paired = await asyncio.to_thread(pair, address, code, identity)
-            node = await asyncio.to_thread(join_home, paired, endpoint=address, identity=identity, root=devices.root)
+            node = await asyncio.to_thread(join_home, paired, endpoint=address, identity=identity,
+                                          borrowed_profile=borrowed_profile, root=devices.root)
         except (ProfileError, ValueError) as exc:
             return page(request, "connect", error=str(exc), status=400, **values)
         except (LinkDown, ProtocolError) as exc:

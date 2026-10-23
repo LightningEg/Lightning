@@ -81,16 +81,6 @@ class Position:
         return None if self.value is None else self.value - self.cost_basis
 
     @property
-    def unrealized_pct(self) -> Decimal | None:
-        if self.unrealized is None or not self.cost_basis:
-            return None
-        return self.unrealized / self.cost_basis * 100
-
-    @property
-    def variance_per_unit(self) -> Decimal | None:
-        return None if self.price is None or self.average_cost is None else self.price - self.average_cost
-
-    @property
     def total_return(self) -> Decimal:
         return (self.unrealized or ZERO) + self.realized + self.net_dividends
 

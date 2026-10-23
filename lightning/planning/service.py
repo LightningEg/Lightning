@@ -10,6 +10,7 @@ from lightning.core.dates import fmt_date, parse_date, parse_month, today
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, check_places, from_e6, to_decimal
+from lightning.core.refs import parse_row_id
 from lightning.database.connection import Database
 from lightning.database.currencies import minor_units
 from lightning.database.settings import SettingsStore
@@ -71,6 +72,11 @@ class PlanningService:
                 "Add a rate before using this scheduled amount."
             )
         return (to_decimal(amount) * rate.rate).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    def still_owed_in_base(self, payments, day: date | str) -> Decimal:
+        """What is still owed on these payments, in the profile currency: the one total behind Bills due, Due
+        before payday and the late payments (7N), never full amounts or a sum across currencies."""
+        return sum((self.amount_in_base(p, p.still_owed, day) for p in payments), ZERO)
 
     # ------------------------------------------------------------------ items
     def items(self, kinds: tuple[PlanKind, ...] | None = None, active_only: bool = True) -> list[PlannedItem]:
@@ -519,8 +525,7 @@ class PlanningService:
                                for p in self.payments(item, "2999-12-31", day)), ZERO)
         loans_due = sum((self.amount_in_base(p, p.still_owed, day)
                          for p in due if p.item.kind == PlanKind.LOAN), ZERO)
-        return WhatYouOwe(bills_due=sum((self.amount_in_base(p, p.still_owed, day)
-                                         for p in due), ZERO), loans_still_to_pay=loans_left,
+        return WhatYouOwe(bills_due=self.still_owed_in_base(due, day), loans_still_to_pay=loans_left,
                           bills_due_items=due, loans_due_in_base=loans_due)
 
     @request_cached  # read by every budget line since bills plan their category too (2026-10-05)
@@ -706,13 +711,4 @@ class PlanningService:
 
     @staticmethod
     def _id(value, field: str = "id") -> int | None:
-        text = "" if value is None else str(value).strip()
-        if not text:
-            return None
-        try:
-            value_id = int(text)
-        except (TypeError, ValueError, OverflowError):
-            raise ValidationError("Choose a valid option.", field) from None
-        if value_id <= 0 or value_id > 9_223_372_036_854_775_807:
-            raise ValidationError("Choose a valid option.", field)
-        return value_id
+        return parse_row_id(value, field, "Choose a valid option.", blank=True)

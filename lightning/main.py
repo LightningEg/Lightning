@@ -88,19 +88,9 @@ def main(argv: list[str] | None = None) -> None:
         from lightning.samples import load_mohab_2026
         summary = load_mohab_2026(container)
         print(f"Mohab's 2026 ready: {summary['rows']} imported rows, {summary['from']} to {summary['to']}.")
-    from lightning.core.dates import today
-    from lightning.workflows.live_prices import fetch_if_due
-    from lightning.workflows.market_prices import fill_if_due
-
-    try:  # prices from the files the app has, then month-end closes still missing, fetched online
-        for step in (fill_if_due, fetch_if_due):
-            report = step(container, today())
-            if report is not None:
-                print(report.summary())
-        completed = container.reevaluations.process_due()
-        print(f"Investment reevaluations: {completed} monthly checkpoint(s) posted.")
-    except Exception as exc:
-        print(f"Investment price fill deferred: {exc}", file=sys.stderr)
+    from lightning.workflows.profile_open import open_profile_tasks
+    for report in open_profile_tasks(container, wait=True):  # prices, missing closes, month-end checkpoints
+        print(report if isinstance(report, str) else report.summary())
     app = create_app(container)
     print(f"Lightning is running at {url}  (data: {container.db.path})  — press Ctrl+C to stop.")
     if not args.no_browser:

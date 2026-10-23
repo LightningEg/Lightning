@@ -174,7 +174,7 @@ def test_screens_show_bills_due_and_net_worth(c, setup, monkeypatch):
     assert "Net worth" in overview and "What you owe" in overview and "Bills due" in overview
     assert "−5,480" in overview  # 480 due + 5,000 of loan payments still to pay
     checks = client.get("/checks").text
-    assert "Free cash plus reserves and bills due equals spendable cash" in checks
+    assert "Free cash matches the ledger" in checks
     assert client.get("/reserves", follow_redirects=False).headers["location"] == "/plan/reserves"
     for page in ("/plan", "/plan/recurring", "/plan/loans", "/plan/reserves"):
         assert client.get(page).status_code == 200

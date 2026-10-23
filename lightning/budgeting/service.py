@@ -11,7 +11,7 @@ import json
 from lightning.categories.domain import Category, CategoryFamily, Movement, Scope
 from lightning.categories.service import CategoryService
 from lightning.core.dates import month_of, parse_month
-from lightning.core.errors import ValidationError
+from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, check_places, fmt, from_e6, to_decimal
 from lightning.database.connection import Database
@@ -241,7 +241,7 @@ class BudgetService:
             for category_id in list(ids):
                 try:
                     ids |= {child.id for child in self.categories.descendants(category_id)}
-                except Exception:
+                except NotFoundError:  # a deleted category; any other error must not change the budget unseen (9K)
                     continue
         return ids
 
@@ -254,6 +254,7 @@ class BudgetService:
         """Average monthly income for a month's budget (see income_average)."""
         return self.income_average(month).amount
 
+    @request_cached(deep=True)
     def income_average(self, month: str) -> IncomeAverage:
         """Average monthly income: owned income in the chosen income categories, averaged over
         the last 3 (or 6) completed months before `month` that had any. A manual amount in
@@ -322,7 +323,7 @@ class BudgetService:
         observed = []
         for _ in range(lookback):
             start, finish = parse_month(month_of(end))
-            spent = [value for cid, value in self._owned_spending(start, finish).items() if cid not in one_off]
+            spent = [value for cid, value in self.owned_spending(start, finish).items() if cid not in one_off]
             if spent:
                 observed.append(sum(spent, ZERO))
             end = start - timedelta(days=1)
@@ -349,12 +350,13 @@ class BudgetService:
     def has_plan(self, month: str) -> bool:
         return bool(self.amounts_for(month, loans=False))
 
+    @request_cached(deep=True)
     def month_view(self, month: str) -> BudgetMonth:
         first, last = parse_month(month)
         direct = self.amounts_for(month)
         from_loans = self.loan_lines(month)
         from_bills = self.bill_lines(month)
-        spent = self._owned_spending(first, last)
+        spent = self.owned_spending(first, last)
         cats = [c for c in self.categories.tree(Movement.OUTFLOW) if not c.is_root
                 and c.family != CategoryFamily.INVESTMENT]  # investments are never budget spending
         by_id = {c.id: c for c in cats}
@@ -573,7 +575,7 @@ class BudgetService:
             pending.extend(children.get(child, []))
         return descendants
 
-    def _owned_spending(self, start, end) -> dict[int, Decimal]:
+    def owned_spending(self, start, end) -> dict[int, Decimal]:
         # Report queries already filter to posted, user-owned categorized ledger
         # effects; investment buys, transfers, and revaluations have no outflow
         # expense effect and therefore do not appear as spending here.
@@ -653,7 +655,7 @@ class BudgetService:
                         if amount is not None:
                             amount = amount * percent / Decimal(100)
                     start, end = parse_month(current_month)
-                    spent = self._owned_spending(start, end)
+                    spent = self.owned_spending(start, end)
                     actual = sum((spent.get(cid, ZERO) for cid in descendants), ZERO)
                     balance = (amount or ZERO) + balance - actual
                 else:
@@ -726,29 +728,93 @@ class BudgetService:
         key = (category_id, months)
         if key in cache:
             return cache[key]
-        total = ZERO
-        cursor = parse_month(month)[0]
-        descendants = {category_id}
-        pending = [category_id]
-        while pending:
-            child_ids = children.get(pending.pop(), [])
-            descendants.update(child_ids)
-            pending.extend(child_ids)
-        for _ in range(months):
-            start, end = parse_month((cursor - timedelta(days=1)).strftime("%Y-%m"))
-            actual = self._owned_spending(start, end)
-            total += sum((actual.get(cid, ZERO) for cid in descendants), ZERO)
-            cursor = start
-        observed = 0
-        cursor = parse_month(month)[0]
-        for _ in range(months):
-            start, end = parse_month((cursor - timedelta(days=1)).strftime("%Y-%m"))
-            amounts = self._owned_spending(start, end)
-            if any(cid in amounts for cid in descendants):
-                observed += 1
-            cursor = start
-        cache[key] = (total / observed).quantize(Decimal("0.01")) if observed else None
+        tree = {category_id} | self._descendant_ids(category_id, children)
+        cache[key] = self._tree_average(tree, self._completed_months(month, months))[0]
         return cache[key]
+
+    def _completed_months(self, month: str, months: int) -> list[dict[int, Decimal]]:
+        """Owned spending by category in each of the completed months before `month`, newest first."""
+        spending, cursor = [], parse_month(month)[0]
+        for _ in range(months):
+            start, end = parse_month((cursor - timedelta(days=1)).strftime("%Y-%m"))
+            spending.append(self.owned_spending(start, end))
+            cursor = start
+        return spending
+
+    @staticmethod
+    def _tree_average(tree: set[int], spending: list[dict[int, Decimal]]) -> tuple[Decimal | None, int]:
+        """A category tree's average over the months that had spending in it, and how many months that was."""
+        observed = [sum((amounts.get(cid, ZERO) for cid in tree), ZERO)
+                    for amounts in spending if any(cid in amounts for cid in tree)]
+        return ((sum(observed, ZERO) / len(observed)).quantize(Decimal("0.01")) if observed else None), len(observed)
+
+    def _outflow_children(self) -> tuple[dict[int, Category], dict[int, list[int]]]:
+        categories = self.categories.tree(Movement.OUTFLOW)
+        children: dict[int, list[int]] = {}
+        for category in categories:
+            if category.parent_id:
+                children.setdefault(category.parent_id, []).append(category.id)
+        return {category.id: category for category in categories}, children
+
+    def tracked_ids(self, month: str) -> set[int]:
+        """Categories you track in a month: those with a rule of their own, and those you chose to track."""
+        view = self.month_view(month)
+        tracked = {line.category_id for section in view.sections for line in section.lines
+                   if line.direct is not None or line.average_months or line.income_percent is not None}
+        return tracked | (self._id_list("budget_tracked_categories") or set())
+
+    def category_averages(self, month: str) -> dict[int, dict]:
+        """Each budget line's spending (its subcategories included) averaged over the three and the six
+        completed months before `month` that had spending in it, and how many months each saw."""
+        view = self.month_view(month)
+        _, children = self._outflow_children()
+        six = self._completed_months(month, 6)
+        averages = {}
+        for section in view.sections:
+            for line in section.lines:
+                tree = {line.category_id} | self._descendant_ids(line.category_id, children)
+                average3, observed3 = self._tree_average(tree, six[:3])
+                average6, observed6 = self._tree_average(tree, six)
+                averages[line.category_id] = {"average3": average3, "observed3": observed3,
+                                              "average6": average6, "observed6": observed6,
+                                              "spent6": sum((amounts.get(cid, ZERO) for amounts in six for cid in tree), ZERO)}
+        return averages
+
+    def tracking_suggestions(self, month: str, percent: Decimal) -> list[dict]:
+        """Untracked categories whose six-month average is at least `percent` of the month's budgeting
+        income, unless one-off or dismissed (for good or for this month)."""
+        income = self.budgeting_income(month)
+        if not income:
+            return []
+        view = self.month_view(month)
+        tracked, exclusions = self.tracked_ids(month), self.one_off_ids(with_children=False)
+        by_id, _ = self._outflow_children()
+        try:
+            suppressed = json.loads(raw_setting(self.db, "budget_suppressed_categories") or "{}")
+        except (ValueError, TypeError):
+            suppressed = {}
+        if isinstance(suppressed, list):
+            suppressed = {str(category_id): "never" for category_id in suppressed}
+        averages = self.category_averages(month)
+        suggestions = []
+        for line in (line for section in view.sections for line in section.lines
+                     if line.depth > 1 and line.category_id not in tracked):
+            category = by_id.get(line.category_id)
+            if (not category or suppressed.get(str(line.category_id)) in {"never", month}
+                    or category.id in exclusions):
+                continue
+            average = averages[line.category_id]
+            if average["average6"] is None or average["spent6"] <= ZERO:
+                continue
+            share = average["average6"] / income * 100
+            if share < percent:
+                continue
+            parent = category
+            while parent.depth > 1 and parent.parent_id and by_id.get(parent.parent_id):
+                parent = by_id[parent.parent_id]
+            suggestions.append({"id": category.id, "name": line.name, "share": share, "group_id": parent.id,
+                                "spent": average["spent6"]})
+        return suggestions
 
     def background_estimates(self, month: str) -> list[dict]:
         """Monthly expectations for untracked spending categories: the average of the last three
@@ -756,47 +822,34 @@ class BudgetService:
         2026-10-03); an estimate from one observed month is low confidence and the screens say so.
         Categories that are tracked, one-off, have children, or sit under a parent's own limit
         (covered) are left out, so nothing is counted twice."""
+        return [line for line in self.background(month) if line["estimate"] is not None]
+
+    def background(self, month: str, tracked: set[int] | None = None) -> list[dict]:
+        """Every untracked category background_estimates considers, with `estimate` None when it had no
+        spending in the three completed months. `tracked` replaces the month's own tracked categories."""
         view = self.month_view(month)
-        tracked = {line.category_id for section in view.sections for line in section.lines
-                   if line.direct is not None or line.average_months or line.income_percent is not None}
-        tracked |= self._id_list("budget_tracked_categories") or set()
+        tracked = self.tracked_ids(month) if tracked is None else tracked
         exclusions = self.one_off_ids(with_children=False)
-        categories = self.categories.tree(Movement.OUTFLOW)
-        by_id = {category.id: category for category in categories}
-        children: dict[int, list[int]] = {}
-        for category in categories:
-            if category.parent_id:
-                children.setdefault(category.parent_id, []).append(category.id)
+        by_id, children = self._outflow_children()
         groups = {group.category_id for section in view.sections for group in section.groups}
-        months, cursor = [], parse_month(month)[0]
-        for _ in range(3):  # the three completed months before this one, newest first
-            start, end = parse_month((cursor - timedelta(days=1)).strftime("%Y-%m"))
-            months.append(self._owned_spending(start, end))
-            cursor = start
-        estimates, cache = [], {}
+        months = self._completed_months(month, 3)  # the three completed months before this one, newest first
+        lines = []
         for section in view.sections:
             for line in section.lines:
                 if (line.depth <= 1 or line.category_id in tracked or line.covered
                         or children.get(line.category_id) or line.category_id in exclusions):
-                    continue
-                estimate = self._rolling_average(line.category_id, month, 3, children, cache)
-                if estimate is None:
                     continue
                 parent = by_id.get(line.category_id)
                 while parent and parent.depth > 1 and parent.parent_id:
                     parent = by_id.get(parent.parent_id)
                 if not parent or parent.id not in groups:
                     continue
-                tree, pending = {line.category_id}, [line.category_id]
-                while pending:
-                    kids = children.get(pending.pop(), [])
-                    tree.update(kids)
-                    pending.extend(kids)
-                observed = sum(1 for amounts in months if any(cid in amounts for cid in tree))
-                estimates.append({"category_id": line.category_id, "name": line.name, "group_id": parent.id,
-                                  "estimate": estimate, "observed": observed, "low_confidence": observed <= 1})
-        return estimates
+                estimate, observed = self._tree_average({line.category_id}, months)
+                lines.append({"category_id": line.category_id, "name": line.name, "group_id": parent.id,
+                              "estimate": estimate, "observed": observed, "low_confidence": observed <= 1})
+        return lines
 
+    @request_cached(deep=True)
     def plan_summary(self, month: str) -> dict:
         """The month's plan as every screen shows it: Planned (limits plus background estimates),
         Spent (owned spending, one-off categories left out) and Left in plan."""
@@ -805,7 +858,7 @@ class BudgetService:
         planned = view.available + sum((e["estimate"] for e in estimates), ZERO)
         first, last = parse_month(month)
         one_offs = self.one_off_ids()
-        spent = sum((v for cid, v in self._owned_spending(first, last).items() if cid not in one_offs), ZERO)
+        spent = sum((v for cid, v in self.owned_spending(first, last).items() if cid not in one_offs), ZERO)
         return {"planned": planned, "spent": spent, "left": planned - spent, "estimates": estimates,
                 "low_confidence": [e for e in estimates if e["low_confidence"]]}
 

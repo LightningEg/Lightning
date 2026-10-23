@@ -184,11 +184,20 @@ class ReportingService:
         self.accounts = accounts
         self.assets = assets
         self.categories = categories
-        self.base_currency = base_currency
         self.money_from_others = money_from_others
         self.valuer = Valuer(self.q, base_currency)
         self.other_asset_values = OtherAssetValuationRepository(db)
         self.fx_positions = FxPositions(db, accounts, assets, base_currency, self._balance_and_owned)
+        self.base_currency = base_currency
+
+    @property
+    def base_currency(self) -> str:
+        return self._base_currency
+
+    @base_currency.setter
+    def base_currency(self, code: str) -> None:
+        # The valuer and the FX-positions page keep their own copy; setting the base here moves all three (2I).
+        self._base_currency = self.valuer.base = self.fx_positions.base = code
 
     def _balance_and_owned(self, account_id: int, day: str) -> tuple[Decimal, Decimal]:
         balance = self.account_balance(account_id, day)
@@ -525,6 +534,7 @@ class ReportingService:
         return total
 
     # -- cash flow & spending ----------------------------------------------
+    @request_cached(deep=True)
     def cash_flow(self, date_from: date | str, date_to: date | str) -> CashFlow:
         start, end = self._day(date_from), self._day(date_to)
         inflow = household = investment = outflow = personal = work = investment_out = ZERO

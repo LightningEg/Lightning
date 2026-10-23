@@ -129,27 +129,8 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     for category_id, (name, amount) in suggestions_view.items():
         parts = name.split(" › ")
         suggestion_groups.setdefault(parts[0], []).append((category_id, " › ".join(parts[1:]) or parts[0], amount))
-    tracked = {line.category_id for section in view.sections for line in section.lines
-               if line.direct is not None or line.average_months or line.income_percent is not None}
-    try:
-        tracked |= _category_setting_ids(c, "budget_tracked_categories")
-    except (ValueError, TypeError):
-        pass
-    tracked = {int(item) for item in tracked}
-    first, _ = parse_month(month)
-    completed_last = first - timedelta(days=1)
-    completed_first = completed_last.replace(day=1)
-    for _ in range(5):
-        completed_first = (completed_first - timedelta(days=1)).replace(day=1)
-    category_amounts = c.budgets._owned_spending(completed_first, completed_last)
-    six_months = []
-    month_end = completed_last
-    for _ in range(6):
-        month_first, _ = parse_month(month_of(month_end))
-        six_months.append(c.budgets._owned_spending(month_first, month_end))
-        month_end = month_first - timedelta(days=1)
+    tracked = c.budgets.tracked_ids(month)
     categories = c.categories.tree(Movement.OUTFLOW)
-    by_id = {category.id: category for category in categories}
     children: dict[int, list[int]] = {}
     for category in categories:
         if category.parent_id:
@@ -163,77 +144,22 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
             pending.extend(kids)
         return descendants
 
-    averages = {}; averages6 = {}; average_observations = {}; average_observations6 = {}
-    for section in view.sections:
-        for line in section.lines:
-            descendants = category_tree_ids(line.category_id)
-            observed3 = [sum((amounts.get(category_id, ZERO) for category_id in descendants), ZERO)
-                         for amounts in six_months[:3] if any(category_id in amounts for category_id in descendants)]
-            observed6 = [sum((amounts.get(category_id, ZERO) for category_id in descendants), ZERO)
-                         for amounts in six_months if any(category_id in amounts for category_id in descendants)]
-            observed = observed3
-            averages[line.category_id] = (sum(observed, ZERO) / len(observed)).quantize(Decimal("0.01")) if observed else None
-            averages6[line.category_id] = (sum(observed6, ZERO) / len(observed6)).quantize(Decimal("0.01")) if observed6 else None
-            average_observations[line.category_id] = len(observed3)
-            average_observations6[line.category_id] = len(observed6)
+    category_averages = c.budgets.category_averages(month)
+    averages = {cid: row["average3"] for cid, row in category_averages.items()}
+    averages6 = {cid: row["average6"] for cid, row in category_averages.items()}
+    average_observations = {cid: row["observed3"] for cid, row in category_averages.items()}
     by_group = {}
     for section in view.sections:
         for group in section.groups:
             by_group[group.category_id] = sorted(category_tree_ids(group.category_id) - {group.category_id})
-    background_counts, background_totals = {}, {}
-    for group_id, child_ids in by_group.items():
-        untracked_lines = [line for section in view.sections for line in section.lines
-                           if line.category_id in child_ids and line.category_id not in tracked]
-        background_counts[group_id] = len(untracked_lines)
-        background_totals[group_id] = sum((averages.get(line.category_id) or ZERO for line in untracked_lines), ZERO)
     income_basis = c.budgets.budgeting_income(month)
-    # A default, not a setting (owner, 2026-10-06): suggest tracking a category that averages a fifth of income.
-    threshold, fixed_threshold = TRACK_SUGGESTION_PERCENT, ZERO
-    try:
-        raw_exclusions = c.settings.get("budget_one_off_exclusions") or "[]"
-        exclusions = _category_setting_ids(c, "budget_one_off_exclusions") if raw_exclusions.strip().startswith("[") else set()
-    except (ValueError, TypeError):
-        exclusions = set()
     background_counts, background_totals = {}, {}
-    for group_id, child_ids in by_group.items():
-        background = [line for section in view.sections for line in section.lines
-                      if line.category_id in child_ids and line.category_id not in tracked and not line.covered
-                      and not children.get(line.category_id) and line.category_id not in exclusions]
-        background_counts[group_id] = len(background)
-        background_totals[group_id] = sum((averages.get(line.category_id) or ZERO for line in background), ZERO)
-    suppressed = json.loads(c.settings.get("budget_suppressed_categories") or "{}")
-    if isinstance(suppressed, list):
-        suppressed = {str(category_id): "never" for category_id in suppressed}
-    else:
-        for category in by_id.values():
-            if str(category.id) not in suppressed and category.code in suppressed:
-                suppressed[str(category.id)] = suppressed[category.code]
-    tracking_suggestions = []
-    for line in (line for section in view.sections for line in section.lines
-                 if line.depth > 1 and line.category_id not in tracked):
-        category = by_id.get(line.category_id)
-        dismissal = suppressed.get(str(line.category_id))
-        if not category or dismissal in {"never", month}:
-            continue
-        descendants = category_tree_ids(category.id)
-        spent_six = sum((amounts.get(category_id, ZERO) for amounts in six_months
-                         for category_id in descendants), ZERO)
-        if category.id in exclusions:
-            continue
-        observed_count = sum(1 for amounts in six_months if any(cid in amounts for cid in descendants))
-        monthly_average = (spent_six / observed_count).quantize(Decimal("0.01")) if observed_count else None
-        share = (monthly_average / income_basis * 100) if income_basis and monthly_average is not None else ZERO
-        crossed_percent = threshold is not None and income_basis is not None and monthly_average is not None and share >= threshold
-        crossed_fixed = fixed_threshold > ZERO and monthly_average is not None and monthly_average >= fixed_threshold
-        if (crossed_percent or crossed_fixed) and spent_six > ZERO:
-            parent = category
-            while parent.depth > 1 and parent.parent_id and by_id.get(parent.parent_id):
-                parent = by_id[parent.parent_id]
-            group_id = parent.id
-            tracking_suggestions.append({"id": category.id, "name": line.name, "share": share,
-                                         "group_id": group_id, "spent": spent_six,
-                                         "reason": (f"{share:.1f}% of average monthly income" if crossed_percent else
-                                                    f"Average {monthly_average:,.0f} EGP crossed fixed threshold")})
+    for line in c.budgets.background(month):
+        background_counts[line["group_id"]] = background_counts.get(line["group_id"], 0) + 1
+        background_totals[line["group_id"]] = background_totals.get(line["group_id"], ZERO) + (line["estimate"] or ZERO)
+    # A default, not a setting (owner, 2026-10-06): suggest tracking a category that averages a fifth of income.
+    tracking_suggestions = [{**row, "reason": f"{row['share']:.1f}% of average monthly income"}
+                            for row in c.budgets.tracking_suggestions(month, TRACK_SUGGESTION_PERCENT)]
 
     # Background estimates are monthly expectations for untracked leaf
     # categories. Parent direct plans already cap these expenses, so children
@@ -245,21 +171,10 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         factor = (Decimal(1) if period.key != "custom" else
                   Decimal((overlap_end-overlap_start).days+1) / Decimal((m_last-m_first).days+1)
                   if overlap_end >= overlap_start else ZERO)
-        for section in month_view.sections:
-            for line in section.lines:
-                if (line.depth <= 1 or line.category_id in tracked or line.covered or children.get(line.category_id)
-                        or line.category_id in exclusions):
-                    continue
-                estimate = c.budgets._rolling_average(line.category_id, month_view.month, 3, children, {})
-                if estimate is None:
-                    continue
-                parent = by_id.get(line.category_id)
-                while parent and parent.depth > 1 and parent.parent_id:
-                    parent = by_id.get(parent.parent_id)
-                group_id = parent.id if parent else None
-                if group_id in group_totals:
-                    group_totals[group_id]["budgeted"] += estimate * factor
-                    period_base += estimate * factor
+        for line in c.budgets.background(month_view.month, tracked=tracked):
+            if line["estimate"] is not None and line["group_id"] in group_totals:
+                group_totals[line["group_id"]]["budgeted"] += line["estimate"] * factor
+                period_base += line["estimate"] * factor
     period_budgeted = period_base + period_opening
     one_offs = c.budgets.one_off_ids()
     # Planned and Spent cover the same months: a long period (YTD, All time, custom) counts spending
@@ -268,7 +183,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     spending_start = period.start
     if period.key != "month" and plan_months:
         spending_start = max(period.start, parse_month(plan_months[0])[0])
-    period_spending = {cid: v for cid, v in c.budgets._owned_spending(spending_start, period.end).items()
+    period_spending = {cid: v for cid, v in c.budgets.owned_spending(spending_start, period.end).items()
                        if cid not in one_offs}  # one-off spending stays in cash flow, out of the budget
     period_actual = sum(period_spending.values(), ZERO)
     category_periods = {}
@@ -423,13 +338,11 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                   has_plan=has_plan, suggestions=suggestions_view, suggestion_groups=suggestion_groups,
                   tracked=tracked, averages=averages,
                   averages6=averages6, average_observations=average_observations,
-                  average_observations6=average_observations6,
-                  tracking_suggestions=tracking_suggestions, suggestion_threshold=threshold,
+                  tracking_suggestions=tracking_suggestions,
                   carryover=c.settings.get("budget_carryover_global") == "1",
                   overall_ceiling=c.settings.get("budget_overall_ceiling"), this_month=month_of(today()),
                   personal_group=next((cat.id for cat in c.categories.tree(Movement.OUTFLOW)
                                        if cat.depth == 1 and cat.scope == Scope.PERSONAL), None),
-                  free_cash=c.reserves.cash_summary(c.reporting.owned_spendable_cash(today()), c.planning.what_you_owe().bills_due)["free_cash"],
                   low_confidence=keynotes.low_confidence_note(c.budgets.plan_summary(month)["low_confidence"]) if period.key == "month" else "",
                   plan_from=fmt_date(spending_start) if spending_start != period.start else "",
                   period=period, period_actual=period_actual, period_budgeted=period_budgeted,
@@ -654,7 +567,6 @@ async def save_budget_settings(request: Request):
         c.settings.set("budget_manual_monthly_income", manual)
         c.settings.set("budget_one_off_exclusions", json.dumps(sorted(set(exclusions))))
         c.settings.set("budget_carryover_global", "1" if enabled else "0")
-        c.settings.set("budget_carryover_month", carry_month)
         tracked = set(c.budgets.amounts_for(carry_month))
         c.budgets.set_carryover(carry_month, {category_id: enabled for category_id in tracked})
         if request.headers.get("X-Requested-With") == "fetch":

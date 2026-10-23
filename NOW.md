@@ -18,6 +18,8 @@
 
 ## Next
 
+- **Audit 5 left:** 9J, 9K, 9L. Older audit codes 2G–2K and 3AC are now 2P–2T and 3AF to avoid collisions. **Read:** `reports/audit-5.md`.
+
 The whole plan, by milestone and code, is `issues/INDEX.md`. In order:
 
 0. **Demo cut list from Audit 1** (owner, 10-20): built on seven `claude/` PRs (2E1–5, 5H, 3U1–4, 3V, 7L1, 7K, 3R, 3S1–2, 3C, 3A). Left: 3U 5–6, 2F (phone backup and import), then 7L2–7L4, 5K, 3S 3–20, 3T. Recapture the website once these merge: the sample now has ten accounts, goals, a gam'eya and more (it shows the sample on 10-04, with a late rent). **Read:** `reports/audit-1.md` › Demo cut list.

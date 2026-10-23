@@ -211,7 +211,6 @@ class AssetService:
 
     def create_physical_item_asset(self, name: str) -> FinancialAsset:
         """Create the non-tickered, piece-count ledger asset behind one named physical item."""
-        from lightning.assets.domain import Exposure, Liquidity, PriceSource
 
         base = slug(name, 14) or "ITEM"
         suffix = 1
@@ -232,7 +231,6 @@ class AssetService:
 
     def create_certificate_asset(self, name: str) -> FinancialAsset:
         """Create a separate non-cash ledger asset for one bank certificate."""
-        from lightning.assets.domain import Exposure, Liquidity, PriceSource
 
         name = (name or "").strip()
         if not name:

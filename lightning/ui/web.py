@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import contextvars
+import hashlib
+import json
 import logging
 from datetime import timedelta
 
@@ -12,7 +14,7 @@ from pathlib import Path
 from urllib.parse import parse_qsl, quote, urlencode, urlsplit
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from jinja2 import pass_context
@@ -412,6 +414,11 @@ def _render_page(request, name, status_code, c, total, owned_total, groups, cont
     return response
 
 
+# The browser half of the Arabic table, served once as a cached script instead of inside every Arabic page (3AC).
+_ARABIC_UI_JS = ("window.LIGHTNING_UI=" + json.dumps(BROWSER_UI, ensure_ascii=False, sort_keys=True) + ";").encode("utf-8")
+ARABIC_UI_SRC = "/static/ui-ar.js?v=" + hashlib.sha256(_ARABIC_UI_JS).hexdigest()[:12]
+
+
 def _template_response(request, name, status_code, c, locale, total, owned_total, groups, context):
     response = templates.TemplateResponse(
         request,
@@ -420,7 +427,7 @@ def _template_response(request, name, status_code, c, locale, total, owned_total
             "base": c.base_currency,
             "locale": locale,
             "fig": localized_figures(locale),
-            "arabic_translations": BROWSER_UI if locale == "ar" else {},
+            "arabic_ui_src": ARABIC_UI_SRC if locale == "ar" else "",
             "today": fmt_date(today()),
             "this_month": month_of(today()),
             "path": request.url.path,
@@ -457,6 +464,13 @@ PERIOD_KEYS = ("period", "month", "date_from", "date_to")
 PERIOD_COOKIE = "lightning_period"
 
 
+NOT_USER_ACTIONS = frozenset({"history", "demo", "sample", "exports"})
+ACTION_LABELS = {"accounts": "Account changes", "transactions": "Transaction changes", "plan": "Payment plan changes",
+                 "reserves": "Reserve changes", "budget": "Budget changes", "imports": "Statement import",
+                 "bank-imports": "Statement import", "sms": "SMS review", "rules": "Rule changes",
+                 "money-from-others": "Money held for others"}
+
+
 class RequestCache:
     """Each request computes a repeated figure once (``lightning.core.memo``); a write empties it."""
 
@@ -468,17 +482,12 @@ class RequestCache:
         if current is None:
             return await self.app(scope, receive, send)
         with request_cache(current.db):
-            path = scope.get("path", "")
-            roots = {"accounts", "transactions", "plan", "loans", "reserves", "budget", "rules", "categories",
-                     "counterparties", "imports", "bank-imports", "sms", "investments", "deposits", "gameya",
-                     "zakat", "activity", "payday", "views", "review", "reminders", "reimbursements",
-                     "setup", "physical-items", "settings", "people"}
-            if scope.get("method") == "POST" and path.strip("/").split("/")[0] in roots:
+            root = scope.get("path", "").strip("/").split("/")[0]
+            # Every write is one undoable action (2H), except Undo/Redo themselves, the demo and sample loaders
+            # (they fill an empty profile) and exports (they only read).
+            if scope.get("method") not in ("GET", "HEAD") and root not in NOT_USER_ACTIONS:
                 from lightning.undo import user_action
-                labels = {"accounts": "Account changes", "transactions": "Transaction changes", "plan": "Payment plan changes",
-                          "reserves": "Reserve changes", "budget": "Budget changes", "imports": "Statement import",
-                          "bank-imports": "Statement import", "sms": "SMS review", "rules": "Rule changes"}
-                with user_action(labels.get(path.strip("/").split("/")[0], "Saved changes")):
+                with user_action(ACTION_LABELS.get(root, "Saved changes")):
                     status = 500
                     async def action_send(message):
                         nonlocal status
@@ -547,6 +556,10 @@ def create_app(c: Container | None = None) -> FastAPI:
         except ValidationError as error:
             return JSONResponse({"error": error.message})
         return JSONResponse({"value": format(value.normalize(), "f")})
+
+    @app.get("/static/ui-ar.js", include_in_schema=False)
+    async def arabic_ui_script():
+        return Response(_ARABIC_UI_JS, media_type="text/javascript; charset=utf-8")
 
     app.mount("/static", StaticFiles(directory=str(UI_DIR / "static")), name="static")
     for module in (dashboard, financial_health, accounts, deposits, gameya, bank_imports, birdview, transactions, budget, investments, physical_items, planning, payday, reimbursements, reserves, history, activity, merge, weekly, integrity, counterparties, categories, rules, settings, search, exports, sms, zakat):

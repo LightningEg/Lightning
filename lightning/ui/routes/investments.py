@@ -392,10 +392,10 @@ def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, rep
     # Assets known only by their balance (a share of a flat, cash left in an older deposit account) are
     # holdings too (owner decision 2026-10-04): the table lists every part of Holdings value.
     traded = {(h.account_id, h.asset_id) for h, *_ in owned_rows}
-    balances = [(cls.name, item) for cls in c.position.at(day).classes for item in cls.items
+    position = c.position.at(day)
+    balances = [(cls.name, item) for cls in position.classes for item in cls.items
                 if (item.account_id, item.asset_id) not in traded and item.value]
-    holdings_total = (sum((yours or ZERO for _, yours, *_ in owned_rows), ZERO)
-                      + sum((item.value for _, item in balances), ZERO))
+    holdings_total = position.holdings_value  # the weights' base: Holdings value, as the Overview shows it
     # A balance-only asset has no horizon of its own yet: it is Unassigned, so the horizon split adds up
     # to Holdings value (audit 2026-10-05 #13: the flat was left out).
     horizons = defaultdict(lambda: ZERO)

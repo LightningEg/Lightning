@@ -1,6 +1,6 @@
 ---
 title: Safe for real money
-done: 2D, 2K, 2O
+done: 2D, 2K, 2O, 2P, 2Q, 2R, 2S, 2T
 ---
 
 **Goal.** The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC.

@@ -24,8 +24,9 @@ def test_overview_cash_reserves_spending_and_investments_reconcile(c, setup, mon
     monkeypatch.setattr(dashboard_module, "render", capture)
     response = TestClient(create_app(c)).get("/?period=custom&date_from=2026-12-01&date_to=2026-12-31")
     assert response.status_code == 200
-    assert captured["net_worth"].total == sum((group["value"] for group in captured["account_contributions"]), Decimal(0))
     pos = captured["pos"]
+    assert c.reporting.net_worth(pos.as_of).total == sum(
+        (c.reporting.owned_account_value(account.id, pos.as_of) for account in c.accounts.list()), Decimal(0))
     assert pos.cash_you_own == sum((row["value"] for row in captured["cash_accounts"]), Decimal(0))
     assert pos.brokerage_cash == Decimal("1000")
     assert pos.reserves == sum((row["effective_allocated"] for row in pos.reserve_rows), Decimal(0))
