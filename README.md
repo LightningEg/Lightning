@@ -17,7 +17,7 @@ desktop build instructions (`packaging/` and `.github/workflows/`),
 and the desktop design and status in [Architecture](docs/ARCHITECTURE.md#desktop-app-and-encrypted-profiles). It does not contain
 anyone's financial databases, passwords, recovery keys or installed app.
 
-The source version is **v1.4.2**. The [PC and phone app workflow](https://github.com/elfekimuhammed/Lightning/actions/workflows/desktop-probe.yml)
+The source version is **v1.4.3**. The [PC and phone app workflow](https://github.com/elfekimuhammed/Lightning/actions/workflows/desktop-probe.yml)
 builds the tested Windows ZIP and matching signed Android APK from one commit (Architecture › Build
 and release). A manual run offers both as seven-day artifacts (GitHub sign-in required). A successful
 tag publishes both in [Lightning-downloads](https://github.com/elfekimuhammed/Lightning-downloads/releases). The tested [Version 1.1 beta 1 release](https://github.com/elfekimuhammed/Lightning-downloads/releases/tag/v1.1.0-beta.1)

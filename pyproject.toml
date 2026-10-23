@@ -1,6 +1,6 @@
 [project]
 name = "lightning"
-version = "1.4.2"
+version = "1.4.3"
 description = "Personal finance: accounts, cash flow, investments and net worth in one place."
 license = "PolyForm-Noncommercial-1.0.0"
 license-files = ["LICENSE"]
