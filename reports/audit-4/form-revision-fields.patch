@@ -1,0 +1,30 @@
+--- a/lightning/ui/templates/accounts/convert.html
++++ b/lightning/ui/templates/accounts/convert.html
+@@ -7,6 +7,7 @@
+   {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
+   <form method="post" action="{{ action }}">
+     <input type="hidden" name="return_to" value="{{ values.return_to }}">
++    {% if values.revision is defined %}<input type="hidden" name="revision" value="{{ values.revision }}">{% endif %}
+     <div class="row">
+       <div class="field {{ 'has-error' if error_field == 'date' }}">
+         <label for="convert-date">{{ 'Date'|tr(locale) }}</label>
+--- a/lightning/ui/templates/accounts/ownership.html
++++ b/lightning/ui/templates/accounts/ownership.html
+@@ -7,6 +7,7 @@
+   <h2>{{ "What happened?"|tr(locale) }}</h2>
+   {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
+   <form method="post" action="{{ action }}" data-ownership-form>
++    {% if txn_id %}<input type="hidden" name="revision" value="{{ values.revision }}">{% endif %}
+     <div class="field"><label for="ownership-mode">{{ "Activity"|tr(locale) }}</label><select id="ownership-mode" name="mode" data-own-picker>
+       <option value="assign" {{ 'selected' if values.mode != 'expense' }}>{{ "Change who owns this money"|tr(locale) }}</option>
+       <option value="expense" {{ 'selected' if values.mode == 'expense' }}>{{ "Someone paid an expense for you"|tr(locale) }}</option>
+--- a/lightning/ui/templates/investments/form.html
++++ b/lightning/ui/templates/investments/form.html
+@@ -11,6 +11,7 @@
+ </div>
+ {% endif %}
+ <form method="post" class="card investment-ownership-form" data-trade-kind="{{ kind }}" {% if txn %}data-autosave-existing{% endif %} style="max-width:780px" autocomplete="off">
++  {% if txn %}<input type="hidden" name="revision" value="{{ values.revision }}">{% endif %}
+   <div class="row">
+     <div class="field {{ 'has-error' if error_field == 'account' }}">
+       <label for="account_id">{{ 'Account'|tr(locale) }}</label>

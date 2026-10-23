@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from dataclasses import asdict, replace
 from decimal import Decimal
+import hashlib
+import json
 
 from lightning.accounts.domain import Account, AccountType
 from lightning.accounts.service import AccountService
@@ -844,6 +846,17 @@ class TransactionService:
         if not found:
             raise NotFoundError("Transaction not found.")
         return found
+
+    def revision(self, txn_id: int) -> str:
+        """Opaque form version, covering the header and every posting line."""
+        payload = json.dumps(self._snapshot(self.get(txn_id)), sort_keys=True, default=str)
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+    def require_revision(self, txn_id: int, expected: str | None) -> None:
+        """Call inside the write transaction. None retains legacy client behavior."""
+        if expected is not None and expected != self.revision(txn_id):
+            raise ValidationError(
+                "This transaction changed since you opened it. Reopen it before saving.", "revision")
 
     def get_by_ref(self, ref: str) -> Transaction:
         found = self.repo.get_by_ref((ref or "").strip().upper())

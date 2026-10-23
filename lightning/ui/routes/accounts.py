@@ -295,6 +295,7 @@ def _transaction_popup_context(request, account, values, action, error=None, txn
     counterparties = c.counterparties.list_active()
     return dict(account=account, values=values, action=action, txn_id=txn_id,
                 title="Edit transaction" if txn_id else "Add transaction",
+                revision=values.get("revision", c.transactions.revision(txn_id)) if txn_id else "",
                 accounts=c.accounts.list(active_only=True),
                 categories=[cat for cat in c.categories.pickable()],
                 category_names={cat.id: c.categories.display_name(cat.id) for cat in c.categories.pickable()},

@@ -2,7 +2,7 @@
 title: A stale transaction edit form can silently reverse a newer amount
 type: bug
 area: transactions
-status: ready
+status: building
 created: 2026-10-23
 by: Codex
 skills: bug-hunt, number-audit
@@ -18,3 +18,7 @@ Severity: high. [Audit 4](../../reports/audit-4.md) owns the button sequence, ob
 ## Fix
 
 Include a revision/hash in each financial edit form, check it atomically when saving and preserve stale inputs for conflict review. Test note-only stale saves after amount, account and owner changes; include inline edit and journal form timing in the fix review.
+
+## Repair progress
+
+Popup, phone popup, inline register and split forms now check a header-and-ledger revision inside the write transaction. Tests cover newer amount/account/owner changes, retained conflict inputs, valid fresh saves and a durable replica proposal. Legacy programmatic requests without a revision retain their prior contract. Ownership, conversion and investment route guards are ready; their three hidden template fields are pending explicit owner approval because NOW.md reserves the template directories for Claude. The reviewable patch is `reports/audit-4/form-revision-fields.patch`. Keep this item open until those forms emit the token and pass their workflow tests.

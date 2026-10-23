@@ -213,14 +213,15 @@ def test_bulk_delete_retry_is_harmless_and_restore_is_harmless(w):
     assert financial_rows(w) == before
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason='2M: stale form silently overwrites a newer amount')
 def test_stale_popup_notes_save_must_not_undo_a_newer_amount(w):
     reply = request(w, f'/accounts/{w.bank.id}/transaction/new', expense_form(w))
     txn = w.c.db.scalar("SELECT MAX(id) FROM transactions WHERE type='OUT'")
     assert reply.status_code == 303
-    assert request(w, f'/transactions/{txn}/edit-popup').status_code == 200
+    old_form = request(w, f'/transactions/{txn}/edit-popup')
+    import re
+    revision = re.search(r'name="revision" value="([a-f0-9]{64})"', old_form.text).group(1)
     request(w, f'/transactions/{txn}/edit-popup', expense_form(w, amount='20', notes='newer amount'))
-    reply = request(w, f'/transactions/{txn}/edit-popup', expense_form(w, notes='note from older form'))
+    reply = request(w, f'/transactions/{txn}/edit-popup', expense_form(w, notes='note from older form', revision=revision))
     assert reply.status_code in (400, 409, 412) or w.c.transactions.get(txn).lines[0].quantity == -20
 
 
@@ -231,7 +232,6 @@ def foreign_bill_without_fx(w):
                        start_date='2026-09-05', account_id=str(usd.id), category_id=str(w.food))
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason='2N: report failure returns 400 after the payment committed')
 def test_failed_popup_save_must_not_commit_and_invite_duplicate_retry(w):
     foreign_bill_without_fx(w)
     before = financial_rows(w)

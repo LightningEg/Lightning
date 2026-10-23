@@ -14,6 +14,8 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    'This transaction changed since you opened it. Reopen it before saving.': 'العملية دي اتغيرت من وقت ما فتحتها. افتحها من جديد قبل الحفظ.',
+    'Budget details are unavailable. Open Budget to check them.': 'تفاصيل الميزانية مش متاحة دلوقتي. افتح الميزانية عشان تراجعها.',
     'Saved register views': 'طرق عرض العمليات المحفوظة',
     '{name} summary': '{name} ملخص',
     '{name}: {count} interest payments to match': '{name}: {count} دفعة عائد محتاجة مطابقة',

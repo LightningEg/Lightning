@@ -350,6 +350,8 @@ Return display (owner, 2026-10-14): before 365 days, show the net gain from purc
 
 **Optional reminders.** Off until enabled in Weekly review. `/reminders/due.json` serves existing urgent decisions, tomorrow's bills/gam'eya/CD interest, enabled zakat dates, stale backups and weekly review. No missed-salary reminder was added. A closed/locked/read-only session returns no alerts. Windows uses native in-process balloons while the window is open; Android uses its permission/channel plus the existing local foreground service. IDs are deduped per day; clicks stay within the app origin. Closed desktop, force-stop/process death or Android service limits prevent delivery. No unattended unlock or cloud delivery is implied.
 
+Transaction edit forms can submit an opaque revision of the full header and posting lines. Popup, inline register and split forms emit it; the route checks it inside the same database transaction before any side effect, retains conflict input, and requires reopening to refresh. Legacy clients without a revision retain their prior contract. Optional budget feedback after Save is best-effort: failures are warnings, never a false write refusal.
+
 ## CSV import and export contract
 
 **SMS currency:** the current CIB/NBE patterns read EGP only. Assignment and saved mappings accept EGP accounts; foreign or inactive mappings leave messages waiting for reassignment, and withdrawal suggestions use an EGP wallet (`sms_imports.py`). CSV statements use the target account’s native currency and dated FX rates.
