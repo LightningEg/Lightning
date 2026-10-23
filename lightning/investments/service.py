@@ -215,15 +215,17 @@ class InvestmentService:
         """Convert, then buy (owner decision 2026-10-16): ``paid`` leaves the broker's own cash (or another account)
         and becomes ``total`` in the listing's currency pocket, then the buy spends it. Two linked documents in one
         step: a conversion with its executed rate and spread, and an ordinary buy. No margin: nothing is borrowed."""
-        holding_id, _ = self.route(account_id, asset_id)
-        pocket = self.accounts.get(int(holding_id))
-        source = self.accounts.require_usable(int(from_account_id) if from_account_id not in (None, "") else
-                                              self.accounts.broker_of(pocket).id, "cash_account")
-        if source.currency == pocket.currency:
-            raise ValidationError(f"{source.label} is already in {pocket.currency}; record an ordinary buy.",
-                                  "cash_account")
-        asset = self.assets.get_asset(int(asset_id))
         with self.db.transaction():
+            # route() may create a currency pocket; keep it in the same transaction so a
+            # refused buy leaves no empty pocket behind (2K).
+            holding_id, _ = self.route(account_id, asset_id)
+            pocket = self.accounts.get(int(holding_id))
+            source = self.accounts.require_usable(int(from_account_id) if from_account_id not in (None, "") else
+                                                  self.accounts.broker_of(pocket).id, "cash_account")
+            if source.currency == pocket.currency:
+                raise ValidationError(f"{source.label} is already in {pocket.currency}; record an ordinary buy.",
+                                      "cash_account")
+            asset = self.assets.get_asset(int(asset_id))
             self.transactions.record_conversion(date, source.id, pocket.id, paid, total,
                                                 notes=f"For {asset.name}")
             return self.buy_total(date, pocket.id, asset_id, quantity, total, None, notes, fees, fees_included,
