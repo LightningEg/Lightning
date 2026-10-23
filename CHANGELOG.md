@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-23 · Claude: the portfolio table keeps only name, cost, value, gain and return; the small lines under each row (units, average, price, price/FX split, held days) now show only inside a holding. Room left for XIRR.
 - 2026-10-23 · Codex: record 2U, the phone's website APK download failure, for investigation after the v1.4.4 release at the owner's request.
 
 ## [1.4.4] — 2026-10-23

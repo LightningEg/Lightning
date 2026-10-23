@@ -339,12 +339,12 @@ class TestInvestmentPages:
         rows = re.findall(r"<tr\b[^>]*>.*?</tr>", table, re.S)
 
         assert [re.sub(r"<[^>]+>", "", h) for h in re.findall(r"<th\b[^>]*>(.*?)</th>", table.split("</thead>", 1)[0])] == [
-            "Investment", "Cost", "Value Share", "Total gain", "Total return Since purchase"]  # five columns (3.33, A11)
+            "Investment", "Cost", "Value Share", "Total gain", "Total return"]  # five columns (3.33, A11)
         assert len(headers) == 5 and rows
         assert all(len(re.findall(r"<(?:th|td)\b", row)) == 5 for row in rows)
         assert "Holding details" not in table and 'class="small muted"' not in table
         row = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", rows[-1]))
-        assert "10 shares · average 95 · now 100" in row and "950 1,000" in row and "+5.3%" in row
+        assert "average" not in row and "now 100" not in row and "950 1,000" in row and "+5.3%" in row
 
     def test_full_investing_flow(self, c, setup):
         from fastapi.testclient import TestClient
@@ -562,7 +562,7 @@ def test_short_period_return_is_plain_in_portfolio_and_holding_screens(inv, monk
     assert portfolio.status_code == holding.status_code == 200
     assert "after a year" not in portfolio.text and "After a full year" not in holding.text
     assert "% a year" not in holding.text
-    assert "Held 15 days" in holding.text and "Held 15 days" in portfolio.text
+    assert "Held 15 days" in holding.text and "Held 15 days" not in portfolio.text
     assert "+10.0" in holding.text
     assert "Not enough dated cash flows" not in holding.text
 
@@ -642,7 +642,7 @@ def test_a_one_day_hold_says_day_not_days(inv, monkeypatch):
     client = TestClient(create_app(c))
     holding = client.get(f"/investments/holding/{comi.id}?account={account}&date=2026-09-11").text
     portfolio = client.get("/investments?period=month&month=2026-09").text
-    assert "Held 1 day" in holding and "Held 1 day" in portfolio
+    assert "Held 1 day" in holding and "Held 1 day" not in portfolio
     assert "Held 1 days" not in holding + portfolio
 
 
