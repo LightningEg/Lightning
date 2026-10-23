@@ -4,7 +4,6 @@
 
 | Who | Work | Files | Since |
 |---|---|---|---|
-| Codex | Review and integrate Yusuf's PRs 105/108–110; security and browser audit. | device banners, broker conversion, phone Delete, related tests; `reports/contributor-review.md` | 2026-10-23 |
 | Claude | 3W answer first: guideline 3.33 (both repos), then the six tabs. | `guideline/`, `lightning/ui/templates/{dashboard,budget,planning,investments,accounts,financial_health}*`, `lightning/ui/status.py`, `lightning/ui/static/style.css` | 2026-10-21 |
 | Claude | Journal: 7 review fixes, then J6 (owner asked 10-16). | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
@@ -30,6 +29,6 @@ The whole plan, by milestone and code, is `issues/INDEX.md`. In order:
 5. **3W Answer first** (Claude): guideline 3.33 and all six tabs built (PC and phone); left: Overview KPIs to A08, flows to Spending, holdings in five columns, site-recapture. **Read:** 3W *Steps*; A09.
 6. **3H Tab-by-tab review:** §13 milestone 1 and the trust milestone built; next, optional reminders and grouped confirmations, then analytics; trust step 2, weekly friction. **Read:** 3H §13–14.
 7. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
-8. **Website:** 8B on `codex/sync-app-guidelines`; 8F next (recaptured 10-21; 3AB blocks Budget); 8I owner. **Read:** 8B, 8F.
+8. **Website:** 8B on `codex/sync-app-guidelines`; 8F next (device captures ready: `reports/contributor-review.md`; 3AB blocks Budget); 8I owner. **Read:** 8B, 8F.
 9. **6B Europe/GCC shares**, **6D gold**, **6E institution logos**, **5I gam'eya and zakat follow-ups:** waiting as their items say. **Read:** each item.
 10. **3AD Phone overhaul, step 2** (3AC built the rest, guideline 3.34): quick add with the amount first, a transaction sheet with Plan left; ask the owner about swipe to sort and a health score. **Read:** 3AD.

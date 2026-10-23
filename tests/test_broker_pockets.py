@@ -122,3 +122,28 @@ def test_a_refused_converting_buy_after_conversion_failure_keeps_cash(c, setup):
         c.investments.buy_converting("2026-09-03", thndr.id, etf.id, "10", "1000", "0")
     assert c.accounts.pocket_for(thndr, "USD") is None
     assert c.reporting.account_balance(thndr.id, "2026-09-03") == D("60000")
+
+
+@pytest.mark.parametrize("existing_pocket", [False, True])
+def test_failed_purchase_rolls_back_a_successful_conversion_and_all_rows(c, setup, existing_pocket, monkeypatch):
+    accounts, _ = setup
+    thndr, etf = _broker_with_cash(c, accounts)
+    if existing_pocket:
+        c.accounts.add_pocket(thndr.id, "USD")
+    # Snapshot every persisted table, including audit, undo and executed FX rates.
+    before = list(c.db.conn.iterdump())
+    converted = []
+    record = c.transactions.record_conversion
+
+    def observe(*args, **kwargs):
+        txn = record(*args, **kwargs)
+        converted.append(txn)
+        pocket = c.accounts.pocket_for(thndr, "USD")
+        assert c.reporting.account_balance(pocket.id, "2026-09-03") == D("1000")
+        return txn
+
+    monkeypatch.setattr(c.transactions, "record_conversion", observe)
+    with pytest.raises(LightningError):
+        c.investments.buy_converting("2026-09-03", thndr.id, etf.id, "0", "1000", "51000")
+    assert len(converted) == 1  # The conversion succeeded; the purchase then failed.
+    assert list(c.db.conn.iterdump()) == before

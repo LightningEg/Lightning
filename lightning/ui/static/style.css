@@ -3065,6 +3065,7 @@ input[type=file]:not(#_):not(.x_):hover::file-selector-button { border-color:var
 
 /* Multiple devices: where the ledger is, with the one action that changes it. */
 .flash.device-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.flash.device-line > span { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .flash.device-line form { margin: 0; }
 
 /* Settings › Rules: the form's segments hug their choices (A10.2), two amount wells side by side; the undo
@@ -3096,7 +3097,7 @@ html[dir="rtl"] .code, html[dir="rtl"] code, html[dir="rtl"] [data-ref], html[di
 .main .register-row-action .amount.neg, .main .register-row-action .amount.negative { color:var(--ink)!important; }
 .main .register-row-action { white-space:nowrap; }
 .main .register-row-action .register-balance { display:inline-block; margin-left:7px; }
-.main .flash:not(.error) { position:fixed; z-index:100; top:16px; left:50%; transform:translateX(-50%); width:max-content; max-width:min(640px,calc(100vw - 32px)); margin:0; color:var(--ink)!important; background:var(--surface)!important; border:1px solid var(--edge); box-shadow:var(--shadow-card); }
+.main .flash:not(.error):not(.device-line) { position:fixed; z-index:100; top:16px; inset-inline:16px; width:max-content; max-width:min(640px,calc(100vw - 32px)); box-sizing:border-box; margin:0 auto; color:var(--ink)!important; background:var(--surface)!important; border:1px solid var(--edge); box-shadow:var(--shadow-card); }
 @media (max-width:760px) {
   .main .factor-table { table-layout:auto; }
   .main .factor-table col.c-num { width:auto; }

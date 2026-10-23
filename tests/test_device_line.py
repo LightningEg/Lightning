@@ -1,18 +1,134 @@
-"""The borrowed/lent device line stays on screen; other flashes still auto-dismiss."""
+"""Rendered device banners retain their action, translate and escape peer names."""
+from types import SimpleNamespace
+import shutil
 
-from pathlib import Path
+import pytest
+from fastapi.testclient import TestClient
 
-ROOT = Path(__file__).resolve().parents[1]
-
-
-def test_device_line_is_not_auto_dismissed() -> None:
-    js = (ROOT / "lightning/ui/static/app.js").read_text(encoding="utf-8")
-    assert 'classList.contains("device-line")' in js
-    # The skip sits on the same early-return as empty and error flashes.
-    assert 'flash.classList.contains("device-line")' in js
+from lightning.runtime.app import SessionGate
+from lightning.runtime.http import Credentials, Guard, Host
+from lightning.runtime.roles import SessionRole
+from lightning.sync.state import HomeState
+from lightning.ui.web import create_app
 
 
-def test_device_line_markup_still_present() -> None:
-    for name in ("lightning/ui/templates/base.html", "lightning/ui/templates/phone/base.html"):
-        html = (ROOT / name).read_text(encoding="utf-8")
-        assert "device-line" in html
+def banner_app(c, *, phone=False, lent=False, name="Office PC"):
+    session = SimpleNamespace(container=c, paths=SimpleNamespace(profile=None), journal=None,
+                              borrowed=None if lent else object(), borrowed_home=name,
+                              role=SessionRole.READER if lent else SessionRole.BORROWER,
+                              token="test-banner-session", csrf="test-banner-csrf")
+    node = SimpleNamespace(model=SimpleNamespace(state=HomeState.LENT,
+                            active=SimpleNamespace(grant=SimpleNamespace(borrower_id="pc"))),
+                           store=SimpleNamespace(peer=lambda _: SimpleNamespace(name=name)))
+    app = create_app(c)
+
+    @app.get("/profiles/health")
+    async def health():
+        return {"locked": False, "session": session.token}
+
+    gate = SessionGate(app, session)
+    gate.phone = phone
+    gate.devices = SimpleNamespace(lending_state=lambda _: "ok", home_node=lambda _: node)
+    return gate
+
+
+@pytest.fixture
+def browser():
+    pytest.importorskip("playwright")
+    from playwright.sync_api import sync_playwright
+    if not shutil.which("chromium"):
+        pytest.skip("Chromium is not installed")
+    with sync_playwright() as p:
+        with p.chromium.launch(executable_path=shutil.which("chromium"), args=["--no-sandbox"]) as browser:
+            yield browser
+
+
+@pytest.mark.parametrize("phone", [False, True])
+@pytest.mark.parametrize("lent", [False, True])
+def test_arabic_banner_stays_in_flow_after_notices_expire(c, browser, phone, lent):
+    c.settings.set("locale", "ar")
+    gate = banner_app(c, phone=phone, lent=lent, name="Office-PC-" * 20)
+    host = Host(lambda cfg: Guard(gate, cfg)).start()
+    try:
+        page = browser.new_page(viewport={"width": 320 if phone else 1280, "height": 900})
+        page.clock.install(time=1000)
+        page.clock.pause_at(2000)
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(host.launch_url)
+        page.goto(f"{host.origin}/accounts")
+        page.evaluate('sessionStorage.setItem("lightning-popup-success", "Saved")')
+        response = page.reload()
+        assert response.status == 200, response.text()
+        assert page.locator(".flash:not(.device-line)").count() == 1
+        page.clock.fast_forward(6000)
+        banner = page.locator(".device-line")
+        assert banner.is_visible()
+        assert banner.evaluate("el => getComputedStyle(el).position") == "static"
+        assert page.locator(".flash:not(.device-line)").count() == 0
+        text = banner.inner_text()
+        assert "Office-PC-" in text
+        assert "Lent to" not in text and "Borrowed from" not in text and "read only" not in text
+        action = banner.locator('a[href="/profiles/devices"]') if lent else banner.locator('form[action="/sync/hand-back"]')
+        assert action.is_visible()
+        if not lent:
+            assert action.locator('input[name="__session"]').input_value() == gate.session.token
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+        assert not errors
+        page.close()
+    finally:
+        host.stop()
+
+
+@pytest.mark.parametrize("phone", [False, True])
+@pytest.mark.parametrize("locale", ["en", "ar"])
+def test_custom_device_name_cannot_inject_markup_or_format_fields(c, phone, locale):
+    c.settings.set("locale", locale)
+    name = '<img src=x onerror="alert(1)"> {name}'
+    gate = banner_app(c, phone=phone, name=name)
+    with TestClient(gate, base_url="http://127.0.0.1") as client:
+        html = client.get("/accounts").text
+    from markupsafe import escape
+    assert str(escape(name)) in html
+    assert name not in html
+    assert f'name="__session" value="{gate.session.token}"' in html
+
+
+def test_hand_back_still_requires_the_current_profile_token(c):
+    gate = banner_app(c)
+    cfg = Credentials("http://127.0.0.1:9876")
+    with TestClient(Guard(gate, cfg), base_url=cfg.origin, headers={"Origin": cfg.origin}) as client:
+        client.get("/__launch", params={"code": cfg.launch_code})
+        for values in ({}, {"__session": "stale-profile"}):
+            response = client.post("/sync/hand-back", data=values)
+            assert response.status_code == 403
+            assert "form expired" in response.text
+
+
+def test_popup_success_preserves_phone_undo_as_well_as_device_action(c, setup, browser):
+    bank = setup[0]['cib']
+    txn = c.transactions.record_outflow('2026-09-03', bank.id, '10', setup[1]['EXP.PERSONAL.FOOD'].id,
+                                        notes='original')
+    gate = banner_app(c, phone=True)
+    host = Host(lambda cfg: Guard(gate, cfg)).start()
+    try:
+        page = browser.new_page(viewport={"width": 390, "height": 844})
+        page.goto(host.launch_url)
+        response = page.request.post(f'{host.origin}/transactions/bulk-edit', headers={'Origin': host.origin}, form={
+            '__session': gate.session.token, 'txn_ids': str(txn.id), 'notes': 'changed',
+            'back': f'/accounts/{bank.id}'})
+        assert response.ok, response.text()
+        assert c.transactions.get(txn.id).notes == 'changed'
+        page.goto(f'{host.origin}/accounts/{bank.id}?msg=Saved')
+        page.evaluate('sessionStorage.setItem("lightning-popup-success", "Saved from popup")')
+        page.reload()
+        assert page.locator('.device-line form[action="/sync/hand-back"]').is_visible()
+        undo = page.locator('form[action="/history/undo"] button')
+        assert undo.is_visible()
+        undo.click()
+        page.wait_for_url('**/?msg=*')
+        assert c.transactions.get(txn.id).notes == 'original'
+        assert c.reporting.account_balance(bank.id) == 49990
+        page.close()
+    finally:
+        host.stop()
