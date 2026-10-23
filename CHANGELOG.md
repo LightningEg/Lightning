@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-23 · Codex: Audit 4 reproduces six backend defect groups (2G–2L) and files dependency/wiring improvements (1G).
+  Report and disposable probes cover cash lifecycle, ownership, currency consistency, retry safety, instalment precision and rollback; no production fixes.
+
 - 2026-10-22 · Claude: phone overhaul (3AC, owner PDF; guideline 3.34 Part C): tab bar Overview, Budget, Add, Transactions, More with words;
   every tab opens on one hero figure; month stepper with a Choose period sheet; worded tabs; arrow chips, day nets, no ".00";
   More with live figures; Budget ring, Cash planning due before payday, Investments, Accounts by type, Transactions filters. 3Z done.
