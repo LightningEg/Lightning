@@ -57,6 +57,7 @@
   <h2>{{ "Expense categories"|tr(locale) }}</h2>
   <p class="muted small">Split the total across categories. The amounts must add up to {{ abs(summary.amount)|money }} {{ summary.currency }}. Refunds should be entered as money in under the original expense category.</p>
   <form method="post" action="/transactions/{{ txn.id }}/split" id="expense-split-form">
+    <input type="hidden" name="revision" value="{{ revision }}">
     <div id="expense-split-rows">
       {% for row in split_lines %}<div class="split-row">
         <select name="split_category_id" aria-label="Expense category" data-own-picker>

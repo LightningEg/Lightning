@@ -38,7 +38,9 @@ def _foreign(c, accounts, code, mic, rate, name):
 @pytest.fixture
 def book(c, setup):
     """Pounds at two brokers (one stock in both), a gold fund, a dollar ETF and a riyal stock."""
-    accounts, _ = setup
+    accounts, cats = setup
+    c.transactions.record_inflow("2026-09-01", accounts["cib"].id, "100000",
+                                 cats["EXP.WORK.SALARY"].id, description="Funding for view fixtures")
     second = c.account_flows.open_account("Second broker", "BROKERAGE", "2026-09-01", "0", institution="Second")
     c.transactions.record_transfer("2026-09-02", accounts["cib"].id, accounts["thndr"].id, "30000")
     c.transactions.record_transfer("2026-09-02", accounts["cib"].id, second.id, "20000")

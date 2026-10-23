@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse
 
 from lightning.transactions.domain import TxnFilter, TxnStatus
 
@@ -11,6 +12,7 @@ from lightning.core.errors import ValidationError
 
 from . import register
 from ..web import container, redirect, render
+from ..i18n import translate
 
 router = APIRouter()
 
@@ -54,43 +56,46 @@ async def save_transaction_popup(request: Request, txn_id: int):
     form = await request.form()
     values = {key: str(form.get(key, "")) for key in
               ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes", "account_id")}
+    values["revision"] = form.get("revision")
     from .accounts import _safe_return, _transaction_popup_context
     txn = c.transactions.get(txn_id)
     account_id = int(values["account_id"]) if values["account_id"].isdigit() else txn.lines[0].account_id
     account = c.accounts.get(account_id)
     values["return_to"] = _safe_return(form.get("return_to"), f"/accounts/{account_id}")
+    cash_lines = [line for line in txn.lines if c.assets.get_asset(line.asset_id).is_cash]
+    split_categories = {line.category_id for line in cash_lines if line.category_id}
     try:
-        cash_lines = [line for line in txn.lines if c.assets.get_asset(line.asset_id).is_cash]
-        split_categories = {line.category_id for line in cash_lines if line.category_id}
-        if txn.type.value == "OUT" and len(cash_lines) > 1:
+        with c.db.transaction():
+            c.transactions.require_revision(txn_id, values["revision"])
+            if txn.type.value == "OUT" and len(cash_lines) > 1:
+                from .accounts import _popup_counterparty
+                cp = _popup_counterparty(c, values["counterparty"])
+                updated = c.transactions.update_metadata(txn_id, values["date"], cp, values["notes"])
+                return redirect(values["return_to"], f"Saved {updated.ref}; split amounts are unchanged.")
+            if values["kind"] not in {"out", "in", "transfer"}:
+                raise ValidationError("Choose a transaction type.", "kind")
+            day = fmt_date(parse_date(values["date"], "date"))
+            amount = to_decimal(values["amount"], "amount")
+            if amount <= 0: raise ValidationError("Enter an amount greater than zero.", "amount")
+            owner_id = int(values["owner_id"]) if values["owner_id"].isdigit() else None
+            if values["kind"] == "transfer":
+                other = int(values["to_account_id"]) if values["to_account_id"].isdigit() else None
+                if not other or other == account_id: raise ValidationError("Choose a different destination account.", "to_account_id")
+                signed = -amount
+                category_id = None
+            else:
+                category_id = int(values["category_id"]) if values["category_id"].isdigit() else None
+                if not category_id: raise ValidationError("Choose a category.", "category")
+                if values["kind"] == "out" and c.categories.get(category_id).movement.value != "OUTFLOW":  # in: a refund
+                    raise ValidationError("Choose a category that matches this transaction type.", "category")
+                other = None
+                signed = -amount if values["kind"] == "out" else amount
             from .accounts import _popup_counterparty
             cp = _popup_counterparty(c, values["counterparty"])
-            updated = c.transactions.update_metadata(txn_id, values["date"], cp, values["notes"])
-            return redirect(values["return_to"], f"Saved {updated.ref}; split amounts are unchanged.")
-        if values["kind"] not in {"out", "in", "transfer"}:
-            raise ValidationError("Choose a transaction type.", "kind")
-        day = fmt_date(parse_date(values["date"], "date"))
-        amount = to_decimal(values["amount"], "amount")
-        if amount <= 0: raise ValidationError("Enter an amount greater than zero.", "amount")
-        owner_id = int(values["owner_id"]) if values["owner_id"].isdigit() else None
-        if values["kind"] == "transfer":
-            other = int(values["to_account_id"]) if values["to_account_id"].isdigit() else None
-            if not other or other == account_id: raise ValidationError("Choose a different destination account.", "to_account_id")
-            signed = -amount
-            category_id = None
-        else:
-            category_id = int(values["category_id"]) if values["category_id"].isdigit() else None
-            if not category_id: raise ValidationError("Choose a category.", "category")
-            if values["kind"] == "out" and c.categories.get(category_id).movement.value != "OUTFLOW":  # in: a refund
-                raise ValidationError("Choose a category that matches this transaction type.", "category")
-            other = None
-            signed = -amount if values["kind"] == "out" else amount
-        from .accounts import _popup_counterparty
-        cp = _popup_counterparty(c, values["counterparty"])
-        updated = c.transactions.update_in_account(txn_id, account_id, day, signed, category_id, other,
-                                                   counterparty=cp, notes=values["notes"], owner_id=owner_id)
-        c.reserves.auto_link_transaction(updated.id)
-        return redirect(values["return_to"], f"Saved {updated.ref}. {register._budget_feedback(c, updated)}".strip())
+            updated = c.transactions.update_in_account(txn_id, account_id, day, signed, category_id, other,
+                                                       counterparty=cp, notes=values["notes"], owner_id=owner_id)
+            c.reserves.auto_link_transaction(updated.id)
+            return redirect(values["return_to"], f"Saved {updated.ref}. {register._budget_feedback(c, updated)}".strip())
     except (LightningError, ValueError) as exc:
         error = exc if isinstance(exc, LightningError) else ValidationError("Choose valid values for this transaction.")
         return render(request, "transactions/form_popup.html", status_code=400,
@@ -111,7 +116,8 @@ async def edit_conversion(request: Request, txn_id: int):
     values = {"date": txn.date, "from_account_id": str(described.src_account_id),
               "to_account_id": str(described.dst_account_id), "sent": str(described.sent),
               "received": str(described.received), "fee": str(described.fee) if described.fee else "",
-              "notes": txn.notes, "return_to": f"/transactions/{txn_id}"}
+              "notes": txn.notes, "return_to": f"/transactions/{txn_id}",
+              "revision": c.transactions.revision(txn_id)}
     return render(request, "accounts/convert.html",
                   **convert_context(request, values, f"/transactions/{txn_id}/convert/edit", "Edit conversion"))
 
@@ -121,12 +127,14 @@ async def save_edited_conversion(request: Request, txn_id: int):
     from .accounts import _account_id, convert_context, convert_values
     c = container(request)
     form = await request.form()
-    values = convert_values(form) | {"return_to": f"/transactions/{txn_id}"}
+    values = convert_values(form) | {"return_to": f"/transactions/{txn_id}", "revision": form.get("revision")}
     try:
-        txn = c.transactions.update_conversion(
-            txn_id, values["date"], _account_id(values["from_account_id"], "from_account"),
-            _account_id(values["to_account_id"], "to_account"), values["sent"], values["received"],
-            values["fee"] or None, notes=values["notes"])
+        with c.db.transaction():
+            c.transactions.require_revision(txn_id, values["revision"])
+            txn = c.transactions.update_conversion(
+                txn_id, values["date"], _account_id(values["from_account_id"], "from_account"),
+                _account_id(values["to_account_id"], "to_account"), values["sent"], values["received"],
+                values["fee"] or None, notes=values["notes"])
     except LightningError as exc:
         return render(request, "accounts/convert.html", status_code=400,
                       **convert_context(request, values, f"/transactions/{txn_id}/convert/edit", "Edit conversion", exc))
@@ -156,7 +164,8 @@ async def edit_ownership_change(request: Request, txn_id: int):
     account = c.accounts.get(cash[0].account_id)
     values = {"mode": mode, "date": txn.date, "amount": str(amount),
               "from_owner_id": str(from_owner), "to_owner_id": str(to_owner),
-              "category_id": str(category_id), "notes": txn.notes}
+              "category_id": str(category_id), "notes": txn.notes,
+              "revision": c.transactions.revision(txn_id)}
     return render(request, "accounts/ownership.html", account=account, values=values,
                   owners=c.counterparties.list_people(),
                   categories=[cat for cat in c.categories.pickable() if cat.movement.value == "OUTFLOW"],
@@ -174,29 +183,32 @@ async def save_ownership_change(request: Request, txn_id: int):
     form = await request.form()
     values = {key: str(form.get(key, "")).strip() for key in
               ("mode", "date", "amount", "from_owner_id", "to_owner_id", "category_id", "notes")}
+    values["revision"] = form.get("revision")
     action = f"/transactions/{txn_id}/ownership/edit"
     try:
-        if values["mode"] == "expense":
-            if values["from_owner_id"]:
-                raise ValidationError("For an expense someone paid, set From to You.", "from_owner_id")
-            owner_id = int(values["to_owner_id"]) if values["to_owner_id"].isdigit() else None
-            category_id = int(values["category_id"]) if values["category_id"].isdigit() else None
-            if owner_id is None:
-                raise ValidationError("Choose the person who paid.", "to_owner_id")
-            if category_id is None:
-                raise ValidationError("Choose the expense category.", "category_id")
-            txn = c.transactions.record_expense_paid_by_person(values["date"], account.id, values["amount"],
-                                                               owner_id, category_id, values["notes"], txn_id)
-        elif values["mode"] == "assign":
-            from_owner_id = int(values["from_owner_id"]) if values["from_owner_id"].isdigit() else None
-            to_owner_id = int(values["to_owner_id"]) if values["to_owner_id"].isdigit() else None
-            if from_owner_id is None and to_owner_id is None:
-                raise ValidationError("Choose a person to change ownership with.", "to_owner_id")
-            txn = c.transactions.change_cash_ownership(values["date"], account.id, values["amount"],
-                                                       from_owner_id, to_owner_id, values["notes"], txn_id)
-        else:
-            raise ValidationError("Choose what happened.", "mode")
-        return redirect(f"/accounts/{account.id}", f"Saved {txn.ref}. Ownership is updated.")
+        with c.db.transaction():
+            c.transactions.require_revision(txn_id, values["revision"])
+            if values["mode"] == "expense":
+                if values["from_owner_id"]:
+                    raise ValidationError("For an expense someone paid, set From to You.", "from_owner_id")
+                owner_id = int(values["to_owner_id"]) if values["to_owner_id"].isdigit() else None
+                category_id = int(values["category_id"]) if values["category_id"].isdigit() else None
+                if owner_id is None:
+                    raise ValidationError("Choose the person who paid.", "to_owner_id")
+                if category_id is None:
+                    raise ValidationError("Choose the expense category.", "category_id")
+                txn = c.transactions.record_expense_paid_by_person(values["date"], account.id, values["amount"],
+                                                                   owner_id, category_id, values["notes"], txn_id)
+            elif values["mode"] == "assign":
+                from_owner_id = int(values["from_owner_id"]) if values["from_owner_id"].isdigit() else None
+                to_owner_id = int(values["to_owner_id"]) if values["to_owner_id"].isdigit() else None
+                if from_owner_id is None and to_owner_id is None:
+                    raise ValidationError("Choose a person to change ownership with.", "to_owner_id")
+                txn = c.transactions.change_cash_ownership(values["date"], account.id, values["amount"],
+                                                           from_owner_id, to_owner_id, values["notes"], txn_id)
+            else:
+                raise ValidationError("Choose what happened.", "mode")
+            return redirect(f"/accounts/{account.id}", f"Saved {txn.ref}. Ownership is updated.")
     except (LightningError, ValueError) as exc:
         error = exc if isinstance(exc, LightningError) else ValidationError("Check the date, amount, and choices.")
         return render(request, "accounts/ownership.html", status_code=400, account=account, values=values,
@@ -360,7 +372,7 @@ async def transaction_detail(request: Request, txn_id: int):
                   is_ownership=c.transactions._is_ownership_transaction(txn),
                   conversion=c.transactions.conversion_of(txn), conversion_spread=c.transactions.conversion_spread(txn),
                   replaced_revaluation=txn.id in c.transactions.replaced_revaluation_ids(),
-                  lines=lines, history=c.transactions.history(txn_id), can_split=can_split,
+                  lines=lines, history=c.transactions.history(txn_id), can_split=can_split, revision=c.transactions.revision(txn_id),
                   cash_effects=cash_effects,
                   expense_categories=expense_categories, split_lines=split_lines,
                   budget_impacts=budget_impacts,
@@ -380,7 +392,9 @@ async def update_transaction_split(request: Request, txn_id: int):
             if not str(category_id).strip() or not str(amount).strip():
                 raise LightningError("Choose a category and amount for every split row.")
             allocations.append((int(category_id), str(amount)))
-        txn = c.transactions.update_expense_split(txn_id, allocations)
+        with c.db.transaction():
+            c.transactions.require_revision(txn_id, form.get("revision"))
+            txn = c.transactions.update_expense_split(txn_id, allocations)
     except (ValueError, LightningError) as exc:
         msg = exc.message if isinstance(exc, LightningError) else "Choose a valid category for each split row."
         return redirect(f"/transactions/{txn_id}", msg)
@@ -480,8 +494,15 @@ async def bulk_edit_transactions(request: Request):
     ids = [int(value) for value in form.getlist("txn_ids") if str(value).isdigit()]
     back = str(form.get("back", ""))
     destination = back if back.startswith("/") and not back.startswith("//") else "/transactions"
+    def respond(message, *, error=False):
+        response = redirect(destination, message)
+        if request.headers.get("X-Requested-With") == "fetch":
+            if error:
+                return JSONResponse({"error": translate(message, c.settings.get("locale"))}, status_code=400)
+            return JSONResponse({"location": response.headers["location"]})
+        return response
     if not ids:
-        return redirect(destination, "Choose at least one transaction.")
+        return respond("Choose at least one transaction.", error=True)
     changes: dict = {}
     try:
         for key in ("date", "notes"):
@@ -502,7 +523,7 @@ async def bulk_edit_transactions(request: Request):
                 raise ValidationError("Choose a saved Counterparty in Held for.", "whom")
             changes["owner_id"] = party["id"]
         if not changes:
-            return redirect(destination, "Nothing changed on the selected rows.")
+            return respond("Nothing changed on the selected rows.", error=True)
         with c.db.transaction():
             changed, skipped = c.transactions.bulk_update(ids, changes)
             if "owner_id" in changes:
@@ -513,12 +534,12 @@ async def bulk_edit_transactions(request: Request):
                         c.money_from_others.sync_transaction(txn.id, txn.date, str(form.get("whom")).strip(),
                                                              cash.account_id, cash.quantity, txn.notes)
     except LightningError as exc:
-        return redirect(destination, exc.message)
+        return respond(exc.message, error=True)
     message = f"Changed {len(changed)} row{'s' if len(changed) != 1 else ''}."
     if skipped:
         message += (f" {len(skipped)} left as {'they were' if len(skipped) != 1 else 'it was'}: transfers, investment rows, "
                     "split expenses and rows going the other way keep their own values.")
-    return redirect(destination, message)
+    return respond(message)
 
 
 @router.post("/transactions/{txn_id:int}/restore")

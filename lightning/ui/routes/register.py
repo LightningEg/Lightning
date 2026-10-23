@@ -7,6 +7,8 @@ Used by one account (/accounts/{id}) and by all accounts (/transactions). Only c
 
 from __future__ import annotations
 
+import logging
+
 from decimal import Decimal, ROUND_HALF_UP
 from urllib.parse import urlencode
 
@@ -131,6 +133,17 @@ def _category_matches(c, value: str):
 
 
 def _budget_feedback(c, txn) -> str:
+    """A saved posting stays successful when optional report feedback is unavailable (2N)."""
+    try:
+        return _budget_feedback_text(c, txn)
+    except LightningError as exc:
+        return f"Budget · {exc.message}"
+    except Exception:
+        logging.getLogger("lightning").exception("Budget feedback failed after saving transaction %s", txn.id)
+        return "Budget details are unavailable. Open Budget to check them."
+
+
+def _budget_feedback_text(c, txn) -> str:
     if txn.status.value != "POSTED":
         return ""
     budget_effect_lines = [line for line in txn.lines if line.category_id and line.effect.value == "OUTFLOW"]
@@ -406,6 +419,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
                 "category_choice": str(row.category_id) if row.category_id else "",
                 "amount": str(row.amount),
                 "whom": custody_owners.get(row.txn_id, ""),
+                "revision": c.transactions.revision(edit_id),
             }
             if edit_values is None:
                 edit_values = dict(edit_original)
@@ -643,9 +657,11 @@ async def update(request: Request, account_id: int | None, txn_id: int):
     c = container(request)
     form = await request.form()
     values = {k: str(form.get(k, "")) for k in ENTRY_FIELDS}
+    values["revision"] = form.get("revision")
     row_account = account_id or _int(values["account_id"])
     try:
         with c.db.transaction():
+            c.transactions.require_revision(txn_id, values["revision"])
             existing = c.transactions.get(txn_id)
             cash_lines = [line for line in existing.lines if c.assets.get_asset(line.asset_id).is_cash]
             is_split = existing.type.value == "OUT" and len(cash_lines) > 1

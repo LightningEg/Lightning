@@ -14,6 +14,12 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    'This would leave {account} at {amount} {currency} on {date}. Move money in first, or record the smaller amount.': 'ده هيخلّي رصيد {account} على {amount} {currency} يوم {date}. حوّل فلوس الأول، أو سجّل مبلغ أصغر.',
+    'This transaction changed since you opened it. Reopen it before saving.': 'العملية دي اتغيرت من وقت ما فتحتها. افتحها من جديد قبل الحفظ.',
+    'Budget details are unavailable. Open Budget to check them.': 'تفاصيل الميزانية مش متاحة دلوقتي. افتح الميزانية عشان تراجعها.',
+    'This month was checked against the bank. Unlock it first.': 'الشهر ده اتراجع مع البنك. افتح السجل الأول.',
+    'You can restore them from transaction history.': 'تقدر ترجعهم من سجل العمليات.',
+    'Could not confirm this change. Check the register before trying again.': 'مش قادرين نأكد التغيير ده. راجع سجل العمليات قبل ما تحاول تاني.',
     'Saved register views': 'طرق عرض العمليات المحفوظة',
     '{name} summary': '{name} ملخص',
     '{name}: {count} interest payments to match': '{name}: {count} دفعة عائد محتاجة مطابقة',

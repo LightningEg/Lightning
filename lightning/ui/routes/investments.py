@@ -737,6 +737,7 @@ async def edit_trade(request: Request, txn_id: int):
     owner = c.money_from_others.investment_transaction_owner(txn_id)
     party = c.counterparties.resolve(owner) if owner else None
     values["owner_id"] = str(party["id"]) if party else ""
+    values["revision"] = c.transactions.revision(txn_id)
     return _form(request, found["kind"], values, txn=txn)
 
 
@@ -747,8 +748,10 @@ async def update_trade(request: Request, txn_id: int):
     kind = c.investments.values_of(txn_id).get("kind", "buy")
     form = await request.form()
     values = {k: str(form.get(k, "")) for k in FIELDS}
+    values["revision"] = form.get("revision")
     try:
         with c.db.transaction():
+            c.transactions.require_revision(txn_id, values["revision"])
             txn = _save(request, kind, values, txn_id=txn_id)
     except LightningError as exc:
         return _form(request, kind, values, txn=txn, error=exc, status=400)

@@ -1,0 +1,16 @@
+move funding income to another account {'old_account': '-50.00', 'new_account': '100.00'}
+delete funding income {'balance': '-50.00'}
+restore expense after spending released cash {'balance': '-50.00'}
+restore brokerage purchase without funding {'broker_cash': '-50.00', 'units': '2.00'}
+generic posting USD cash into EGP bank {'account_currency': 'EGP', 'asset_currency': 'USD', 'balance': '110.00', 'value': '100.000000'}
+repeat identical expense {'balance': '80.00', 'expense_count': 2}
+generic posting bad EGP base rate {'native': '0.01', 'base': '0.00', 'fx': '0.50'}
+reassign a purchase that funds another owners sale {'other_owner_units': '-1.00', 'my_units': '2.00'}
+convert unfunded brokerage cash {'broker_cash': '-500.00', 'received': '10.00'}
+failed converting buy leaves an empty pocket {'failure': 'ValidationError', 'accounts_before': 3, 'accounts_after': 4}
+purchase loan accepts sub-cent price {'principal': '100.001', 'terms': [{'planned_item_id': 1, 'price_e6': 100001000, 'fee_e6': 0, 'payment_count': 2}]}
+reduce opening balance below later spending {'balance': '-70.00'}
+same HTTP register form twice {'http_statuses': [303, 303], 'balance': '80.00', 'expense_count': 2}
+loan generates a final instalment it refuses to post {'instalments': ['50.01', '49.991'], 'payment_error': 'Use at most 2 decimal places.'}
+healthy demo {'integrity_checks_passed': 9, 'posted_transactions': 64, 'unbalanced_internal_movements': 0, 'sqlite_integrity': 'ok'}
+healthy write controls {'bad_inputs_refused': 6, 'transfer_conserves_cash': True, 'ordinary_void_restore': True, 'nested_workflow_rollback': True}

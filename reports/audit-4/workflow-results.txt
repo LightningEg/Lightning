@@ -1,0 +1,18 @@
+Audit 4 workflow extension — 2026-10-23
+Production source: a19c844 (no production fixes)
+Dummy ledgers only; Chromium at 1280x900 and 390x844.
+
+Existing focused ownership/bulk/history set: 32 passed, including six browser cases.
+Full existing suite: 2,349 passed, 9 skipped, exit 0 (2,358 collected).
+Import contracts: 4 kept, 0 broken.
+
+Added workflow probes:
+..............xx.........xx.xx......                                     [100%]
+=========================== short test summary info ============================
+XFAIL reports/audit-4/workflow_probes.py::test_ownership_edit_cannot_strand_the_previous_owners_spending - 2H: ownership edit does not check removed owner
+XFAIL reports/audit-4/workflow_probes.py::test_bulk_held_for_cannot_remove_the_old_owners_funding - 2H: bulk Held for changes do not check removed owner
+XFAIL reports/audit-4/workflow_probes.py::test_stale_popup_notes_save_must_not_undo_a_newer_amount - 2M: stale form silently overwrites a newer amount
+XFAIL reports/audit-4/workflow_probes.py::test_failed_popup_save_must_not_commit_and_invite_duplicate_retry - 2N: report failure returns 400 after the payment committed
+XFAIL reports/audit-4/workflow_probes.py::test_browser_failed_bulk_save_keeps_scope_and_typed_changes - 3AE: rejected bulk save discards selection and entered changes
+XFAIL reports/audit-4/workflow_probes.py::test_browser_phone_delete_waits_for_confirmation - 2O: phone bulk Delete bypasses confirmation
+30 passed, 6 xfailed in 18.78s

@@ -768,6 +768,8 @@ if (phoneBulk) {
   const phoneCount = phoneBulk.querySelector(".phone-select-count");
   const updateMerge = () => {
     const ids = [...new Set(boxes.filter((box) => box.checked && !box.disabled).map((box) => box.value))];
+    const count = phoneBulk.querySelector(".phone-select-count");
+    if (count) count.textContent = t("{count} selected", {count: ids.length.toLocaleString(document.documentElement.lang)});
     if (phoneMerge) {
       phoneMerge.hidden = ids.length !== 2;
       if (ids.length === 2) phoneMerge.href = `/transactions/merge?keep=${encodeURIComponent(ids[0])}&drop=${encodeURIComponent(ids[1])}`;
@@ -864,7 +866,9 @@ if (ledger) {
   if (editForm && editRow) {
     let decided = false;
     let asking = false;
+    let bulkSaving = false;
     editForm.addEventListener("submit", (event) => {
+      if (bulkSaving) { event.preventDefault(); event.stopImmediatePropagation(); return; }
       if (decided) return;
       const ticked = selectedIds();
       const ids = ticked;
@@ -899,8 +903,26 @@ if (ledger) {
         ids.forEach((id) => add("txn_ids", id));
         changed.forEach((name) => add(name, value(name)));
         if (changed.includes("category")) add("category_choice", value("category_choice"));
-        writeSel([]);
-        document.body.append(form); form.submit();
+        // Keep the editor and selection in place until the server confirms the whole batch.
+        bulkSaving = true;
+        editForm.dataset.submitting = "true";
+        const notice = document.getElementById("bulk-edit-error") || document.createElement("div");
+        notice.id = "bulk-edit-error"; notice.className = "flash error"; notice.setAttribute("role", "alert");
+        notice.remove();
+        fetch(form.action, { method: "POST", body: new FormData(form),
+          headers: { "Accept": "application/json", "X-Requested-With": "fetch" } }).then(async (response) => {
+          // Session/journal middleware may redirect to its own explanation.
+          if (response.redirected) { location.assign(response.url); return; }
+          const result = await response.json();
+          if (!response.ok || result.error) throw new Error(result.error || t("Could not save"));
+          writeSel([]);
+          location.assign(result.location);
+        }).catch((error) => {
+          notice.textContent = error.message === "Failed to fetch" || error instanceof SyntaxError
+            ? t("Could not confirm this change. Check the register before trying again.") : t(error.message);
+          document.querySelector(".ledger").before(notice);
+          notice.scrollIntoView({block: "nearest"});
+        }).finally(() => { bulkSaving = false; delete editForm.dataset.submitting; });
       });
     }, true);
   }

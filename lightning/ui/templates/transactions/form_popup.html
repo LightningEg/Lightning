@@ -9,6 +9,7 @@
   {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
   <form method="post" action="{{ action }}" {% if txn_id %}data-popup-autosave{% endif %}>
     <input type="hidden" name="return_to" value="{{ return_to }}">
+    {% if txn_id %}<input type="hidden" name="revision" value="{{ revision }}">{% endif %}
     {% if txn_id %}<input type="hidden" name="account_id" value="{{ values.account_id }}">{% endif %}
     {% if split_categories %}<input type="hidden" name="kind" value="{{ values.kind }}"><p class="muted">This expense is split across {{ split_categories|join(', ') }}. Editing here preserves its full amount and category split.</p>
     {% else %}<div class="transaction-choice-grid" role="group" aria-label="{{ 'Transaction type'|tr(locale) }}">

@@ -30,6 +30,30 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
   cash-flow reads are cached (Overview 817 → 507 reads, Cash planning 536 → 274); the Arabic table loads once as `/static/ui-ar.js` (503 → 50 KB).
 - 2026-10-22 · Claude: Audit 4 backend engine (`reports/audit-4.md`, written as Audit 3): custody lines, undo grouping and two
   formulas for one figure are wrong; pages redo work. Filed 2G–2K, 3AC, 7N, 7O, 9I–9L.
+- 2026-10-23 · Codex: fix 2O/3AE: phone Delete asks with the selected count; Cancel keeps the selection.
+  A refused mass edit names the blocking transaction and keeps the editor, inputs and selection; successful batches clear them. Add browser and rollback regressions.
+  Keep Arabic counts/messages readable and show popup validation once on a full page.
+- 2026-10-23 · Codex: fix 2N: optional budget warnings preserve a successful Save. Financial refusals still roll back.
+  Protect popup, inline and split edits from stale overwrites (2M); retain unsaved input on conflict. Three other form fields await claim approval.
+
+- 2026-10-23 · Codex: fix 2G/2H: all cash transitions and Undo/Redo refuse new or worse deficits; edits/removals validate previous owners too.
+  Imports retain harmless history corrections; multi-delete checks its final state. Add 19 regression cases and promote the ownership workflow probes.
+
+- 2026-10-23 · Codex: extend Audit 4 to button workflows: ownership, mass editing, cancellation, delete/restore, merge, split, bill payment and history.
+  File 2M–2O and 3AE, extend 2H; add browser/route probes and screenshots. Full existing suite: 2,349 pass, 9 skip; no production fixes.
+
+- 2026-10-23 · Codex: Audit 4 reproduces six backend defect groups (2G–2L) and files dependency/wiring improvements (1G).
+  Report and disposable probes cover cash lifecycle, ownership, currency consistency, retry safety, instalment precision and rollback; no production fixes.
+
+- 2026-10-22 · Claude: phone overhaul (3AC, owner PDF; guideline 3.34 Part C): tab bar Overview, Budget, Add, Transactions, More with words;
+  every tab opens on one hero figure; month stepper with a Choose period sheet; worded tabs; arrow chips, day nets, no ".00";
+  More with live figures; Budget ring, Cash planning due before payday, Investments, Accounts by type, Transactions filters. 3Z done.
+- 2026-10-22 · Codex: 4A connects edit synchronization to normal profiles: explicit conversion, enrollment, local handoff, command review and Arabic, home automation, upgrades and signed recovery.
+  Android schedules catch-up while unlocked; financial routes use journal commands. Cloud delivery remains an explicit unconfigured placeholder; Windows/Android review packages build and verify in #97.
+
+- 2026-10-22 · Codex: 4A verifies a recovered journal backup against its signed cursor and ledger fingerprint; transaction merge joins the coverage gate.
+  2B adds a dummy Windows phase-interruption/reboot drill; physical reboot and abrupt power-loss acceptance remain unverified.
+
 - 2026-10-22 · Claude: guideline B09 copy: website theme is light by default, dark only when chosen (matches the website repo).
 - 2026-10-22 · Claude: 3AA: `tools/site_shots.py` dismisses Get set up, parks the pointer, lifts the phone screens off the + button, adds the a-kpis and a-sankey crops, shows Budget for the
   month in progress and Expense analysis for August (a 14,200 holiday payment, spending up 21%); a plain run reproduces the live site screens pixel for pixel, English and Arabic (checked).

@@ -12,6 +12,7 @@
   {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
   <form method="post" action="{{ action }}" class="phone-form" {% if txn_id %}data-popup-autosave{% endif %}>
     <input type="hidden" name="return_to" value="{{ return_to }}">
+    {% if txn_id %}<input type="hidden" name="revision" value="{{ revision }}">{% endif %}
     {% if txn_id %}<input type="hidden" name="account_id" value="{{ values.account_id }}">{% endif %}
     {% if split_categories %}<input type="hidden" name="kind" value="{{ values.kind }}"><p class="phone-note">Split across {{ split_categories|join(', ') }}; the full amount and its split are kept.</p>
     {% else %}<div class="phone-segment" role="group" aria-label="Transaction type">
