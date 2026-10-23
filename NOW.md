@@ -4,7 +4,7 @@
 
 | Who | Work | Files | Since |
 |---|---|---|---|
-| Codex | 2M: finish stale-form fields after owner approval. | three forms in `reports/audit-4/form-revision-fields.patch` | 2026-10-23 |
+| Codex | 2M: template approval pending (`codex/save-workflows`). | three forms in `reports/audit-4/form-revision-fields.patch` | 2026-10-23 |
 | Claude | 3W answer first: guideline 3.33 (both repos), then the six tabs. | `guideline/`, `lightning/ui/templates/{dashboard,budget,planning,investments,accounts,financial_health}*`, `lightning/ui/status.py`, `lightning/ui/static/style.css` | 2026-10-21 |
 | Claude | Journal: 7 review fixes, then J6 (owner asked 10-16). | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |

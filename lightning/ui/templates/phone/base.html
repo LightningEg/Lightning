@@ -33,7 +33,7 @@
   {% include "partials/section_tabs.html" %}
   {# Undo and Redo ride on the message an action leaves (phone overhaul: no lone icon button at the top). #}
   {% if msg %}<div class="flash phone-flash" role="status" aria-live="polite" aria-atomic="true"><span>{{ msg|tr(locale) }}</span>{% include "partials/history.html" %}</div>{% endif %}
-  {% if error %}<div class="flash error" role="alert" aria-live="assertive" aria-atomic="true">{{ error|tr(locale) }}</div>{% endif %}
+  {% if error and not hide_global_error|default(false) %}<div class="flash error" role="alert" aria-live="assertive" aria-atomic="true">{{ error|tr(locale) }}</div>{% endif %}
   {% include "partials/checked_history.html" %}
   {% block content %}{% endblock %}
 </main>

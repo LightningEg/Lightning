@@ -39,6 +39,8 @@ def test_old_form_keeps_newer_amount_and_preserves_unsaved_note(c, setup, screen
         response = client.post(post_path, data=values)
         assert response.status_code == 400
         assert 'changed since you opened' in response.text
+        if screen == 'popup':
+            assert response.text.count('class="flash error"') == 1
         assert 'my unsaved note' in response.text
         assert revision in response.text
         # A retry cannot silently acquire a fresh token and overwrite the amount.

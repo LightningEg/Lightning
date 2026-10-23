@@ -293,7 +293,7 @@ async def update_other_asset_value(request: Request, account_id: int):
 def _transaction_popup_context(request, account, values, action, error=None, txn_id=None, split_categories=None):
     c = container(request)
     counterparties = c.counterparties.list_active()
-    return dict(account=account, values=values, action=action, txn_id=txn_id,
+    return dict(account=account, values=values, action=action, txn_id=txn_id, hide_global_error=True,
                 title="Edit transaction" if txn_id else "Add transaction",
                 revision=values.get("revision", c.transactions.revision(txn_id)) if txn_id else "",
                 accounts=c.accounts.list(active_only=True),
