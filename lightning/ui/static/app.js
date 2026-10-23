@@ -18,7 +18,7 @@ const initFlashMessages = (root = document, refresh = false) => {
     const prior = flashTimers.get(flash);
     if (prior) clearTimeout(prior);
     flashTimers.delete(flash);
-    if (isError || !flash.textContent.trim()) return;
+    if (isError || !flash.textContent.trim() || flash.classList.contains("device-line")) return;
     // Only newly inserted or explicitly refreshed messages get a fresh timer.
     if (!refresh && flash.dataset.flashReady) return;
     flash.dataset.flashReady = "1";
