@@ -11,7 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-- 2026-10-23 · Codex: claim the 2G/2H cash and ownership invariant fixes from Audit 4; production behavior is unchanged in this claim.
+- 2026-10-23 · Codex: fix 2G/2H: all cash transitions and Undo/Redo refuse new or worse deficits; edits/removals validate previous owners too.
+  Imports retain harmless history corrections; multi-delete checks its final state. Add 19 regression cases and promote the ownership workflow probes.
 
 - 2026-10-23 · Codex: extend Audit 4 to button workflows: ownership, mass editing, cancellation, delete/restore, merge, split, bill payment and history.
   File 2M–2O and 3AE, extend 2H; add browser/route probes and screenshots. Full existing suite: 2,349 pass, 9 skip; no production fixes.

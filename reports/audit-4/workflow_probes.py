@@ -116,7 +116,6 @@ def test_invalid_ownership_save_changes_nothing(w, changes):
     assert financial_rows(w) == before
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason='2H: ownership edit does not check removed owner')
 def test_ownership_edit_cannot_strand_the_previous_owners_spending(w):
     reply = request(w, f'/accounts/{w.bank.id}/ownership/new', assign(w))
     ident = int(urlsplit(reply.headers['location']).path.split('/')[-1])
@@ -125,7 +124,6 @@ def test_ownership_edit_cannot_strand_the_previous_owners_spending(w):
     assert owner_cash(w, 'Alice') >= 0, f"Alice now owns {owner_cash(w, 'Alice')}"
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason='2H: bulk Held for changes do not check removed owner')
 def test_bulk_held_for_cannot_remove_the_old_owners_funding(w):
     txn = w.c.transactions.record_inflow('2026-09-02', w.bank.id, '100', w.custody,
                                         owner_id=w.alice, allow_system_category=True)

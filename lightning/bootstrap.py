@@ -320,4 +320,23 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
                 if result.reconciliation.balance(checked["account_id"], checked["date"]) != from_e6(checked["bank_balance_e6"]):
                     raise ValidationError("The balance changed. Check it against the bank again before closing.")
         result.undo.validate = validate_history
+        def prepare_history_validation(records):
+            import json
+            ids = set()
+            for record in records:
+                if record['table_name'] not in {'transactions', 'ledger_entries'}:
+                    continue
+                for key in ('before_json', 'after_json'):
+                    row = json.loads(record[key]) if record[key] else {}
+                    value = row.get('transaction_id') if record['table_name'] == 'ledger_entries' else row.get('id')
+                    if value is not None:
+                        ids.add(value)
+            before = [txn for txn_id in ids if (txn := transactions.repo.get(txn_id)) is not None]
+            def check_cash():
+                after = [txn for txn_id in ids if (txn := transactions.repo.get(txn_id)) is not None]
+                dates = [txn.date for txn in before + after]
+                if dates:
+                    transactions._refuse_cash_below_zero([], min(dates), removed=before, added=after)
+            return check_cash
+        result.undo.prepare_validation = prepare_history_validation
     return result
