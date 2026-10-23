@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-23 · Codex: reconcile open PRs against current main; record published v1.4.2 (2D) and current source documentation.
+
 - 2026-10-23 · @yoreva-01: fix 2K/2O/3D/3E: roll back a refused converting buy, confirm phone Delete,
   keep the device banner visible, and translate its borrowed status into Arabic (PRs #105, #108–110).
 - 2026-10-23 · Codex: review those fixes: count/Cancel/Undo/category browser checks, complete rollback snapshots,
