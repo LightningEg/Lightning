@@ -15,6 +15,8 @@ repo: app
 
 Severity: high. [Audit 4](../../reports/audit-4.md) owns the reproduction, expected behavior, source locations and scope for 2H. [Disposable probes](../../reports/audit-4/reproduce.py) and [captured results](../../reports/audit-4/results.txt) provide execution evidence.
 
+The workflow extension also reproduces this through Change ownership and bulk Held for; see the button coverage table in the audit.
+
 ## Fix
 
 Validate the union of removed and proposed account/asset/owner keys over their dated history. Test moving funding income, changing a transfer destination and reassigning a purchase that funded another owner’s sale.

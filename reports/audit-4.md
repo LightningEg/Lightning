@@ -4,7 +4,7 @@
 
 ## Assessment
 
-The ledger/plan/report split is useful, and the ordinary financial arithmetic reconciles. The largest risk is inconsistent enforcement of financial rules across create, edit, void, restore, conversion and ownership changes. These paths share a database but do not share one complete invariant check. Six reproducible defect groups and one architecture improvement are filed below. No production fixes are included.
+The ledger/plan/report split is useful, and the ordinary financial arithmetic reconciles. The largest risk is inconsistent enforcement of financial rules across create, edit, void, restore, conversion and ownership changes. These paths share a database but do not share one complete invariant check. Ten reproducible defect groups and one architecture improvement are filed below, including the button-workflow extension requested after the backend pass. No production fixes are included.
 
 All reproductions use temporary dummy databases, offline prices and a fixed date of 2026-10-23. [Run the probes](audit-4/reproduce.py) with `python reports/audit-4/reproduce.py`; [captured output](audit-4/results.txt). HTTP probes use an in-process ASGI client; no network listener or real profiles are involved. GitHub's connected API confirmed that remote main matches the audited commit after shell Git could not reach its proxy.
 
@@ -12,12 +12,16 @@ All reproductions use temporary dummy databases, offline prices and a fixed date
 
 | Item | Severity | Confirmed behavior | Expected behavior |
 |---|---|---|---|
+| [2M](../issues/2-safe-for-real-money/2M-stale-edit-form-overwrites.md) | High | A stale popup saved for notes overwrites a newer amount, 20 → 10. | Refuse stale revisions or merge only explicitly changed fields. |
+| [2N](../issues/2-safe-for-real-money/2N-save-error-after-commit.md) | High | Save reports HTTP 400 for missing bill FX after posting the expense. | Make failure/success accurately describe whether money committed. |
 | [2G](../issues/2-safe-for-real-money/2G-cash-rules-across-lifecycle.md) | High | Delete funding income, restore a spent expense or buy, reduce an opening balance, or convert unfunded cash: balances go negative. | Apply the cash/funding policy to every state transition; refuse an invalid resulting ledger. |
 | [2H](../issues/2-safe-for-real-money/2H-validate-old-account-and-owner.md) | High | Moving an income strands its old account at −50; reassigning a purchase strands its old owner at −1 shares. | Validate both the old and proposed account/asset/owner sets. |
 | [2I](../issues/2-safe-for-real-money/2I-posting-currency-contract.md) | Medium | Public `post()` accepts USD cash in an EGP account and a non-1 base-currency rate. Reports disagree. | Resolve assets/accounts in the posting boundary and enforce their currency/type relationship. |
 | [2J](../issues/2-safe-for-real-money/2J-register-submit-idempotency.md) | Medium | Two identical register POSTs return 303 twice and create two expenses. | A retry of one submitted action returns its original result. |
 | [2L](../issues/2-safe-for-real-money/2L-instalment-input-precision.md) | Medium | A price of 100.001 over two instalments produces 50.01 and 49.991; the last payment cannot post. | Refuse sub-cent price/fee inputs before saving a loan. |
 | [2K](../issues/2-safe-for-real-money/2K-converting-buy-atomicity.md) | Low | A rejected currency-converting buy leaves a new empty currency pocket. | Route selection, pocket creation, conversion and purchase roll back together. |
+| [2O](../issues/2-safe-for-real-money/2O-phone-delete-confirmation.md) | Medium | Phone bulk Delete voids selected rows without a confirmation question. | Confirm the selected scope and preserve the button’s delete action. |
+| [3AE](../issues/3-polish-and-arabic/3AE-failed-bulk-save-loses-work.md) | Medium | A refused PC bulk edit loses both selection and typed changes. | Keep the correction and selection available after a rejected save. |
 | [1G](../issues/1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | Tech | Major financial modules and `sync` are outside the layered import contract. | Give every production module an explicit dependency policy. |
 
 ### 2G: the cash rule depends on which operation was used
@@ -68,6 +72,81 @@ Two identical `POST /accounts/{id}/register` requests with date 2026-09-02, amou
 
 Move routing and pocket creation inside the transaction, as `_trade()` already does. Inject failures at conversion and purchase as well as invalid quantities and ensure both account rows and financial rows are unchanged.
 
+## Button workflows: actual route and browser audit
+
+The owner asked to audit how buttons act, including changing ownership and mass editing. This extension exercises the actual POST routes with ASGI and real Chromium at 1280 × 900 and 390 × 844. It uses fresh temporary ledgers and invented people, not real profiles. The production source remains at the audited main commit; the report branch already contains the initial audit.
+
+[Workflow probes](audit-4/workflow_probes.py) contain passing controls and strict expected failures against the desired behavior. Run `pytest -q -rx -o addopts='' reports/audit-4/workflow_probes.py` with the development dependencies installed. [Results](audit-4/workflow-results.txt) record the run. A known defect becoming an unexpected pass requires reviewing its marker; a setup exception does not count as reproducing the defect.
+
+### What each tested button does
+
+| Button / sequence | State that should change | Verified outcome |
+|---|---|---|
+| PC Change ownership → Save | One ADJ posting; ownership shifts, gross cash stays fixed | Pass for a valid assignment; the real type-and-pick and Save create one document. |
+| Change ownership → edit amount | Update the same ADJ; gross stays fixed | Pass for a simple amount correction. |
+| Ownership → Escape → Keep editing / Discard | Preserve fields / close without posting | Pass in Chromium; neither path posts money. |
+| Someone paid an expense for you → Save | One expense and equal custody credit; gross unchanged | Pass: expense 70, held cash 70, gross 1,000. |
+| Invalid ownership Save | Error with no financial mutation | Pass for zero, negative, sub-cent, NaN, letters, insufficient balance, future/bad date, missing/unknown/same owners and unknown mode. |
+| Edit ownership after old owner spent its cash | Refuse an impossible old-owner balance | **Fails, 2H:** changing Alice to Bob leaves Alice at −90. |
+| Bulk Held for on funding receipt | Reassign only if both owners’ histories remain valid | **Fails, 2H:** a receipt moved to Bob leaves Alice at −50 after her withdrawal. |
+| Select range / all / clear / filter | Select explicit transactions; do not post or leak selection into another scope | Existing Chromium checks pass, including duplicate-leg synchronization and filtered-view isolation. |
+| Edit selected → Cancel / Escape | Keep selection and entered values; no write | Existing Chromium checks pass. |
+| Edit selected → Only this row | Save only that row | Existing Chromium check passes; unselected edit also leaves selected rows alone. |
+| Edit selected with amount/account change | Do not silently apply or discard a single-row-only change | Existing Chromium check passes: the bulk option is not offered for the incompatible change. |
+| Bulk notes / category with mixed row types | Change supported selected rows; report skipped rows; keep amounts/dates | Pass: notes update two expenses and skip a transfer; category updates two expenses and skips income, transfer and split. |
+| Bulk save with bad or checked later row | Roll back all earlier updates in that batch | Pass: the ledger is unchanged after either refusal. |
+| Refused bulk save → retry correction | Keep the selected scope and entered correction | **Fails, 3AE:** the ledger rolls back, but the editor and selection disappear. |
+| Duplicate IDs / empty bulk selection | Apply once per document / no write | Pass for bulk edit/category/delete. |
+| PC Delete selected → Cancel / Delete | No write on Cancel; soft-delete precisely the selection on confirmation | Pass in Chromium; Undo restores the deleted rows. |
+| Phone Change category | Update only selected eligible rows; preserve cash | Pass in Chromium; two rows change, bank remains 980. |
+| Phone Delete selected | Ask before posting the delete | **Fails, 2O:** both selected rows are already VOID before any answer. |
+| Repeat bulk delete / repeat Restore | Harmless second request | Pass: second delete changes zero documents; repeated restore leaves the ledger alone. |
+| Ownership / bulk notes → Undo → Redo | Reverse/reapply the complete grouped action | Pass, including gross-cash conservation. |
+| Stale Undo ID after another action | Refuse the outdated action without partial replay | Pass: history reports that it changed. |
+| Duplicate Merge → preview / confirm / retry / Undo | Preview is read-only; stale preview refuses; one merge; retry harmless | Pass through actual routes; Undo restores the duplicate. |
+| Split expense → invalid sum / valid sum / Undo | Refuse invalid totals; keep total cash; reverse the entire split | Pass through actual routes. |
+| Record a bill payment → retry → Undo | One expense plus paid link; no duplicate; Undo removes both | Pass: repeated payment is refused as already settled. |
+| Older transaction form → change notes → Save | Preserve a newer amount or report a conflict | **Fails, 2M:** the old amount is silently posted again. |
+| Expense Save with unrelated missing bill FX | Distinguish committed save from failed reporting | **Fails, 2N:** HTTP 400, but an expense exists and cash has fallen. |
+
+### 2M: an older form silently reverses a newer amount
+
+Open an expense edit popup when its amount is 10. Another save changes it to 20. In the older form, change only its note and press Save. `POST /transactions/{id}/edit-popup` returns 303 and puts the amount back to 10. This is one document being overwritten, not a duplicate.
+
+`ui/routes/transactions.py:52` accepts all the original fields without a revision token; `TransactionService.update_in_account` rebuilds the current posting from those stale fields. Single-row register edits have the same general missing-precondition risk. The demonstrated failure is the popup route; journal form timing and every other edit screen were not independently tested.
+
+Fix: render a revision/hash with the form and compare it inside the transaction, or explicitly merge only changed fields against their base values. Return a reviewable conflict, preserve the user’s inputs, and never quietly replace an intervening financial change. Merge and Undo already have their own tested preconditions; this item covers edit forms.
+
+### 2N: Save can report failure after posting the expense
+
+Create an empty USD account, then a recurring USD bill for 10 with no saved USD/EGP rate. Separately, save a 10 EGP expense in a funded EGP bank through `POST /accounts/{id}/transaction/new`. The response is HTTP 400 mentioning an exchange rate. Nevertheless, an OUT document exists and the bank is 990 instead of 1,000. The error page retains the expense form, inviting another Save; submitting it again posts another expense before returning 400 again.
+
+No injected fault is needed. `ui/routes/accounts.py:332` commits `record_outflow`, then calls `_budget_feedback` (`ui/routes/register.py:143`). The budget reads the unrelated foreign bill, raises a missing-FX ValidationError, and the route catches it as though the write failed. `RequestCache` groups Undo records but does not put the whole request in one database transaction.
+
+Fix: give the financial workflow one clear commit boundary and success result. Compute required validations before committing; treat optional post-save feedback failures as a successful save with a warning, or roll back the whole action if feedback is required. Keep the per-submission idempotency fix in 2J as a separate safeguard. Test both the first response and a retry with a missing FX rate.
+
+### 2O: the phone’s Delete button does not ask
+
+At 390 px, select two ordinary expenses in the account register and press Delete. The browser navigates immediately, displays “Deleted 2 transaction(s)”, and both rows are VOID. No confirmation dialog is opened or answered. [Screenshot after that click](audit-4/phone-delete-without-confirmation.png).
+
+`ui/templates/phone/register.html:109` sets `data-confirm-delete` on the **button**. The submit listener (`ui/static/app.js:738`) checks that attribute on the **form**, so it never asks for this flow. The phone selection bar also prints only “selected”, without the selected count; the scope is not made explicit there. PC bulk Delete uses a separate handler and its confirmation works.
+
+Fix: handle the actual submitter, name the selected count, and retain its `formaction=/transactions/bulk-delete` when resubmitting after confirmation. Cancel must leave all rows selected and unchanged. Do not accidentally send a confirmed Delete to the form’s default category-change route. The action remains recoverable through history; this is not permanent data deletion.
+
+### 3AE: a rejected bulk edit loses the work needed to retry
+
+Select two expenses; one falls in checked bank history. Choose Edit selected, change notes to “keep this unsaved correction”, and choose All 2 rows. The server safely refuses the batch and leaves the ledger unchanged, but returns to the register with no selection and no editor. The typed correction is gone. [Screenshot of the refusal](audit-4/bulk-save-refused.png).
+
+The “all” branch clears `sessionStorage` selection before the server answers (`ui/static/app.js:886`); `ui/routes/transactions.py:476` redirects on a LightningError instead of retaining the submitted correction and selection. The atomic rollback itself passes.
+
+Fix: retain a pending editor state until the server confirms success; on refusal, restore the selected IDs and changed fields, show which rows blocked the action and let the person adjust the scope or unlock history. Preserve the distinction between All selected and Only this row.
+
+### Workflow validation
+
+The existing focused set (`test_register_bulk_edit`, `test_bulk_category`, `test_ownership_rules`, `test_workflow_history`, `test_workflow_financial_history`) passes all 32 cases, including six real-browser cases. The added probes cover 36 scenarios: 30 pass and six strict expected failures reproduce 2H twice, 2M, 2N, 2O and 3AE. The new browser controls cover ownership picker/Save, Escape/discard, PC delete/Undo and phone category change; the two browser failures have screenshots above. No JavaScript page errors occurred in the passing controls that collect them.
+
+The full existing suite now runs in an isolated environment: **2,349 passed, 9 skipped**, with no failures. It includes the pre-existing edit-journal tests, but this workflow extension does not independently establish native multi-device timing or delivery guarantees. All four import contracts pass. New probe failures are deliberately outside the normal `tests/` discovery and are not silently counted as existing-suite passes.
+
 ## Architecture and operational points of failure
 
 **Keep the modular monolith and SQLite.** The reproduced problems do not justify microservices or a database rewrite. Centralize financial state validation and put complete business actions behind transaction-owning workflows. Routes and the journal should invoke those same workflows. Avoid exposing private service methods as an implicit cross-module API (`InvestmentService._rate` currently calls `TransactionService._fx`).
@@ -93,6 +172,6 @@ Move routing and pocket creation inside the transaction, as `_trade()` already d
 | Invalid manual expense inputs | Refuse zero, negative, sub-cent, unaffordable, NaN and excessive amount | All six refused, no cash change | Pass |
 | Lifecycle, removed-owner/account, posting currency, retry, loan precision, pocket rollback | Refuse invalid final state / avoid duplicate or partial save | Reproductions above | Fail |
 
-No production fix was attempted. These probes cover selected high-risk backend paths, not every form or every combination of currencies and owners. The full pytest suite and import-linter could not run: pytest, pytest-xdist, import-linter, SQLCipher and the required newer cryptography were missing; installation could not reach the environment proxy. The existing cryptography is 43.0.0, whereas the app requires 50.0.2 for encrypted mode. Visual screens, native Windows/Android, real power loss, live Cloudflare, encrypted profile recovery and load/concurrency behavior were not tested.
+No production fix was attempted. These probes cover selected high-risk backend paths, not every form or every combination of currencies and owners. The initial backend pass could not run the full suite because its dependencies were missing and the proxy was unreachable. During this workflow extension, development dependencies were installed in an isolated temporary environment (including cryptography 50.0.2 and SQLCipher 0.6.2); the full-suite and import-contract results above supersede that limitation. Native Windows/Android acceptance, real power loss, live Cloudflare delivery, exhaustive screen/Arabic/layout checks and load/concurrency behavior remain outside this audit. Existing automated encrypted-profile tests ran; this is not a native recovery acceptance run.
 
-Recommended sequence: fix 2G/2H together behind one invariant boundary; then 2I and 2J; then 2L/2K. Add regression tests for every reproduced failure, then complete 1G and rerun the full suite and native recovery acceptance before relying on these changes for real money.
+Recommended sequence: fix 2G/2H behind one invariant boundary, and close the stale-save and false-error paths in 2M/2N; then 2I/2J and the phone confirmation in 2O; then 2L/2K and retry-state preservation in 3AE. Add regression tests for every reproduced failure, then complete 1G and rerun the full suite and native recovery acceptance before relying on these changes for real money.

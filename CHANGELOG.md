@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-23 · Codex: extend Audit 4 to button workflows: ownership, mass editing, cancellation, delete/restore, merge, split, bill payment and history.
+  File 2M–2O and 3AE, extend 2H; add browser/route probes and screenshots. Full existing suite: 2,349 pass, 9 skip; no production fixes.
+
 - 2026-10-23 · Codex: Audit 4 reproduces six backend defect groups (2G–2L) and files dependency/wiring improvements (1G).
   Report and disposable probes cover cash lifecycle, ownership, currency consistency, retry safety, instalment precision and rollback; no production fixes.
 
