@@ -105,11 +105,17 @@ def _keep_dates(text) -> Markup:
     return Markup(re.sub(r"\b(\d{4}-\d{2}(?:-\d{2})?)\b", r'<span class="nowrap">\1</span>', str(escape(text))))
 
 
+def _tr_filter(text, locale="en", values=None, **kwargs):
+    merged = dict(values or {})
+    merged.update(kwargs)
+    return translate(text, locale, **merged)
+
+
 templates.env.filters["money"] = _money
 templates.env.filters["amount_role"] = _amount_role
 templates.env.filters["rate"] = _rate
 templates.env.filters["whole"] = lambda value: fmt(Decimal(value), 0)  # half-up like money, never banker's
-templates.env.filters["tr"] = translate
+templates.env.filters["tr"] = _tr_filter
 
 
 def _tagged(text) -> Markup:

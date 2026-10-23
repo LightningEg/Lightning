@@ -75,25 +75,29 @@ class SessionGate:
             finally:
                 self.app.state.container = self.session.container
 
-    def device_line(self) -> tuple[str, str]:
-        """The status line under the header while a ledger is borrowed or lent, and its action."""
+    def device_line(self) -> tuple[str, str, dict]:
+        """The status line under the header while a ledger is borrowed or lent, and its action.
+
+        The line is an i18n template; ``values`` holds the placeholders (for example ``name``).
+        """
         devices, session = getattr(self, "devices", None), self.session
         if session.journal is not None:
             runtime = session.journal
             pending = len(runtime.store.pending())
-            return (f"{pending} edits waiting for the home" if pending else "Synchronized profile", "")
+            return (f"{pending} edits waiting for the home" if pending else "Synchronized profile", "", {})
         if devices is None or session.paths is None:
-            return "", ""
+            return "", "", {}
         if session.borrowed is not None:
             if session.role.writable:
-                return f"Borrowed from {session.borrowed_home or 'your phone'}", "hand-back"
-            return "Read only on this PC: the ledger is going home or needs repair.", ""
+                name = session.borrowed_home or "your phone"
+                return "Borrowed from {name}", "hand-back", {"name": name}
+            return "Read only on this PC: the ledger is going home or needs repair.", "", {}
         try:
             lending = devices.lending_state(session.paths)
             line = home_state_line(devices.home_node(session.paths) if lending == "ok" else None, lending)
         except Exception:  # noqa: BLE001 - an unreadable record shows as needing the Devices page
             line = "The ledger's lending record needs checking."
-        return line, ("take-back" if line else "")
+        return line, ("take-back" if line else ""), {}
 
     async def change_role(self, role) -> None:
         """Change the open profile's role between requests, never during one (multi-device task 06)."""
@@ -149,13 +153,14 @@ class SessionGate:
                     valid = False
                 if not valid:
                     return await PlainTextResponse("This form expired. Reload the page and try again.", 403)(scope, receive, send)
-            line, device_action = self.device_line()
+            line, device_action, device_values = self.device_line()
             scope.setdefault("state", {}).update(fingerprint_row=self.fingerprint_row(request.url.path),
                                                   secure_profiles=True, csrf=self.session.csrf,
                                                   phone=getattr(self, "phone", False),
                                                   session_token=self.session.token,
                                                   read_only=not self.session.role.writable,
-                                                  device_line=line, device_action=device_action)
+                                                  device_line=line, device_action=device_action,
+                                                  device_line_values=device_values)
             self.app.state.container = self.session.container
             if self.session.journal is not None and self.session.journal.task is None:
                 self.session.journal.start(self, files_dir=self.session.root.parent if getattr(self, "phone", False) else None)
