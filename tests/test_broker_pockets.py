@@ -130,7 +130,7 @@ def test_failed_purchase_rolls_back_a_successful_conversion_and_all_rows(c, setu
     thndr, etf = _broker_with_cash(c, accounts)
     if existing_pocket:
         c.accounts.add_pocket(thndr.id, "USD")
-    # Snapshot every persisted table, including audit, undo and executed FX rates.
+    # Snapshot every persisted table, including audit and executed FX rates.
     before = list(c.db.conn.iterdump())
     converted = []
     record = c.transactions.record_conversion

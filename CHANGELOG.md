@@ -14,7 +14,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - 2026-10-23 · @yoreva-01: fix 2K/2O/3D/3E: roll back a refused converting buy, confirm phone Delete,
   keep the device banner visible, and translate its borrowed status into Arabic (PRs #105, #108–110).
 - 2026-10-23 · Codex: review those fixes: count/Cancel/Undo/category browser checks, complete rollback snapshots,
-  lent-status Arabic and escaped names; keep device banners in flow and preserve their action after popup saves.
+  lent-status Arabic and literal, escaped names; keep device banners in flow and preserve their action after popup saves.
   Centre notices in both directions so Arabic Undo stays reachable; record the security review and validation.
 
 ## [1.4.3] — 2026-10-23

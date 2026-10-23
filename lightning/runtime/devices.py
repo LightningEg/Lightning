@@ -360,21 +360,27 @@ class Devices:
 
 def home_state_line(node: HomeNode | None, lending: str = "ok") -> str:
     """What the phone's banner says while its ledger is away, or "" at home."""
+    text, values = home_state_message(node, lending)
+    return text.format(**values) if values else text
+
+
+def home_state_message(node: HomeNode | None, lending: str = "ok") -> tuple[str, dict]:
+    """A system template plus literal peer data for the translated status banner."""
     if lending in ("missing", "damaged"):
         return ("This profile's lending record is missing or damaged, so it opens read only: a PC may hold the "
-                "ledger. See Devices.")
+                "ledger. See Devices."), {}
     if node is None:
-        return ""
+        return "", {}
     home = node.model
     if home.state is HomeState.AT_HOME:
-        return ""
+        return "", {}
     if home.state is HomeState.NEEDS_REPAIR:
-        return "The copy the PC handed back needs repair. Nothing was changed; it is read-only here."
+        return "The copy the PC handed back needs repair. Nothing was changed; it is read-only here.", {}
     borrower = node.store.peer(home.active.grant.borrower_id) if home.active is not None else None
-    name = borrower.name if borrower else "a PC"
     if home.state is HomeState.RETURN_RECEIVED:
-        return f"{name} handed the ledger back. Checking it…"
-    return f"Lent to {name} · read only"
+        return ("{name} handed the ledger back. Checking it…", {"name": borrower.name}) if borrower else (
+            "a PC handed the ledger back. Checking it…", {})
+    return ("Lent to {name} · read only", {"name": borrower.name}) if borrower else ("Lent to a PC · read only", {})
 
 
 # ==================================================================== moving a profile's home to the phone (task 17)

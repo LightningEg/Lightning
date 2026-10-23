@@ -82,16 +82,20 @@ def test_arabic_banner_stays_in_flow_after_notices_expire(c, browser, phone, len
 
 @pytest.mark.parametrize("phone", [False, True])
 @pytest.mark.parametrize("locale", ["en", "ar"])
-def test_custom_device_name_cannot_inject_markup_or_format_fields(c, phone, locale):
+@pytest.mark.parametrize("lent", [False, True])
+@pytest.mark.parametrize("name", ['<img src=x onerror="alert(1)"> {name}', "Settings"])
+def test_custom_device_name_cannot_inject_markup_or_format_fields(c, phone, locale, lent, name):
     c.settings.set("locale", locale)
-    name = '<img src=x onerror="alert(1)"> {name}'
-    gate = banner_app(c, phone=phone, name=name)
+    gate = banner_app(c, phone=phone, lent=lent, name=name)
     with TestClient(gate, base_url="http://127.0.0.1") as client:
         html = client.get("/accounts").text
     from markupsafe import escape
-    assert str(escape(name)) in html
-    assert name not in html
-    assert f'name="__session" value="{gate.session.token}"' in html
+    import re
+    banner_text = re.search(r'class="flash device-line"[^>]*><span>(.*?)</span>', html, re.S).group(1)
+    assert str(escape(name)) in banner_text
+    assert '<img' not in banner_text
+    if not lent:
+        assert f'name="__session" value="{gate.session.token}"' in html
 
 
 def test_hand_back_still_requires_the_current_profile_token(c):
@@ -132,3 +136,30 @@ def test_popup_success_preserves_phone_undo_as_well_as_device_action(c, setup, b
         page.close()
     finally:
         host.stop()
+
+
+def test_read_only_refusal_formats_the_peer_without_translating_its_name(c):
+    gate = banner_app(c, lent=True, name='Settings')
+    with TestClient(gate, base_url='http://127.0.0.1') as client:
+        response = client.post('/transactions/bulk-delete', headers={'X-Requested-With': 'fetch'})
+    assert response.status_code == 403
+    assert 'Lent to Settings' in response.text
+    assert '{name}' not in response.text
+
+
+@pytest.mark.parametrize('lent', [False, True])
+def test_missing_device_name_keeps_a_translated_system_fallback(c, lent):
+    c.settings.set('locale', 'ar')
+    gate = banner_app(c, lent=lent, name='')
+    if lent:
+        node = gate.devices.home_node(None)
+        node.store.peer = lambda _: None
+        from lightning.runtime.devices import home_state_line
+        assert home_state_line(node) == 'Lent to a PC · read only'
+    with TestClient(gate, base_url='http://127.0.0.1') as client:
+        html = client.get('/accounts').text
+    import re
+    banner_text = re.search(r'class="flash device-line"[^>]*><span>(.*?)</span>', html, re.S).group(1)
+    assert 'Borrowed' not in banner_text and 'Lent' not in banner_text
+    assert 'your phone' not in banner_text and 'a PC' not in banner_text
+    assert ('كمبيوتر' if lent else 'موبايلك') in banner_text

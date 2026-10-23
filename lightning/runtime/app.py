@@ -22,7 +22,7 @@ from lightning.ui.web import create_app, templates
 from .http import (MARKET_IMPORT_PATH, MAX_IMPORT_CONFIRM_BODY, MAX_IMPORT_CONFIRM_FIELDS, MAX_MARKET_IMPORT_BODY,
                    MAX_IMPORT_MAP_BODY, Credentials, Guard,
                    body_receiver, configure_memory_only_import_uploads, equal)
-from .devices import Devices, home_state_line, move_to_phone, open_move
+from .devices import Devices, home_state_line, home_state_message, move_to_phone, open_move
 from .paths import choose_data_root, discover_profiles, resolve_profile
 from .roles import READ_ONLY_REFUSAL, SessionRole
 
@@ -89,15 +89,16 @@ class SessionGate:
             return "", "", {}
         if session.borrowed is not None:
             if session.role.writable:
-                name = session.borrowed_home or "your phone"
-                return "Borrowed from {name}", "hand-back", {"name": name}
+                if session.borrowed_home:
+                    return "Borrowed from {name}", "hand-back", {"name": session.borrowed_home}
+                return "Borrowed from your phone", "hand-back", {}
             return "Read only on this PC: the ledger is going home or needs repair.", "", {}
         try:
             lending = devices.lending_state(session.paths)
-            line = home_state_line(devices.home_node(session.paths) if lending == "ok" else None, lending)
+            line, values = home_state_message(devices.home_node(session.paths) if lending == "ok" else None, lending)
         except Exception:  # noqa: BLE001 - an unreadable record shows as needing the Devices page
-            line = "The ledger's lending record needs checking."
-        return line, ("take-back" if line else ""), {}
+            line, values = "The ledger's lending record needs checking.", {}
+        return line, ("take-back" if line else ""), values
 
     async def change_role(self, role) -> None:
         """Change the open profile's role between requests, never during one (multi-device task 06)."""
@@ -130,7 +131,8 @@ class SessionGate:
                 # Sync closed the ledger for a moment (a returned copy going in): wait, not the chooser.
                 return await RedirectResponse("/profiles/checking", 303)(scope, receive, send)
             if scope["method"] not in ("GET", "HEAD") and not profile_route and not self.session.role.writable:
-                line = self.device_line()[0]
+                line, _, values = self.device_line()
+                line = line.format(**values) if values else line
                 if request.headers.get("x-requested-with") == "fetch":  # an inline save shows this text as is
                     text = f"{line}. Nothing was saved." if line else READ_ONLY_REFUSAL
                     return await PlainTextResponse(text, 403)(scope, receive, send)

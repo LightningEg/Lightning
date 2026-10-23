@@ -106,6 +106,12 @@ def _keep_dates(text) -> Markup:
 
 
 def _tr_filter(text, locale="en", values=None, **kwargs):
+    # Explicit mappings carry user data (device names), which must stay literal.
+    # Existing keyword-only calls retain translation of system labels.
+    if values:
+        merged = dict(values)
+        merged.update(kwargs)
+        return translate(text, locale).format(**merged)
     merged = dict(values or {})
     merged.update(kwargs)
     return translate(text, locale, **merged)
