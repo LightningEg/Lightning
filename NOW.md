@@ -24,7 +24,7 @@
 
 The whole plan, by milestone and code, is `issues/INDEX.md`. In order:
 
-- **Audit 4 repairs:** 2G/2H/2N implemented; 2M needs three claimed-template fields (owner approval pending). 2O/3AE implemented. **Read:** `reports/audit-4.md` › Fix progress.
+- **PR cleanup remaining:** 2M form fields, 9J–9L, and 1H dependency locks. Efficiency audit codes remapped to avoid reuse. **Read:** `reports/audit-6.md`; `reports/audit-5.md`.
 
 
 0. **Demo cut list from Audit 1** (owner, 10-20): built on seven `claude/` PRs (2E1–5, 5H, 3U1–4, 3V, 7L1, 7K, 3R, 3S1–2, 3C, 3A). Left: 3U 5–6, 2F (phone backup and import), then 7L2–7L4, 5K, 3S 3–20, 3T. Recapture the website once these merge: the sample now has ten accounts, goals, a gam'eya and more (it shows the sample on 10-04, with a late rent). **Read:** `reports/audit-1.md` › Demo cut list.

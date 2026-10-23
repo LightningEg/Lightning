@@ -11,9 +11,30 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-- 2026-10-21 · Claude: 3W done: the Overview's row is A08 cards (Savings rate on your usual, new figure `usual_savings_rate`; Investing rate on
-  the period before; Safe to spend; Left in plan); the holdings table has five columns, units, average, price and account under the name. Where money in went and
-  Month by month moved to Spending (owner).
+- 2026-10-23 · Codex: reconcile the open PR backlog against current main; preserve the contributor fixes and phone overhaul.
+  Audit 5 is the older efficiency audit; its reused 2G–2K/3AC codes become 2P–2T/3AF. Dependency lock refresh remains deferred.
+
+- 2026-10-23 · Codex: fix 2O/3AE: phone Delete asks with the selected count; Cancel keeps the selection.
+  A refused mass edit names the blocking transaction and keeps the editor, inputs and selection; successful batches clear them. Add browser and rollback regressions.
+  Keep Arabic counts/messages readable and show popup validation once on a full page.
+- 2026-10-23 · Codex: fix 2N: optional budget warnings preserve a successful Save. Financial refusals still roll back.
+  Protect popup, inline and split edits from stale overwrites (2M); retain unsaved input on conflict. Three other form fields await claim approval.
+
+- 2026-10-23 · Codex: fix 2G/2H: all cash transitions and Undo/Redo refuse new or worse deficits; edits/removals validate previous owners too.
+  Imports retain harmless history corrections; multi-delete checks its final state. Add 19 regression cases and promote the ownership workflow probes.
+
+- 2026-10-23 · Codex: extend Audit 4 to button workflows: ownership, mass editing, cancellation, delete/restore, merge, split, bill payment and history.
+  File 2M–2O and 3AE, extend 2H; add browser/route probes and screenshots. Full existing suite: 2,349 pass, 9 skip; no production fixes.
+
+- 2026-10-23 · Codex: Audit 4 reproduces six backend defect groups (2G–2L) and files dependency/wiring improvements (1G).
+  Report and disposable probes cover cash lifecycle, ownership, currency consistency, retry safety, instalment precision and rollback; no production fixes.
+
+
+- 2026-10-23 · @yoreva-01: fix 2K/2O/3D/3E: roll back a refused converting buy, confirm phone Delete,
+  keep the device banner visible, and translate its borrowed status into Arabic (PRs #105, #108–110).
+- 2026-10-23 · Codex: review those fixes: count/Cancel/Undo/category browser checks, complete rollback snapshots,
+  lent-status Arabic and literal, escaped names; keep device banners in flow and preserve their action after popup saves.
+  Centre notices in both directions so Arabic Undo stays reachable; record the security review and validation.
 - 2026-10-22 · Claude: Audit 4 rest. 2G3 held-for-others tagging posts through TransactionService; the ledger's owner is the one record
   of custody. 7N "Due before payday" shows one total (still owed, in EGP) on card, stat and Safe to spend; free cash has one formula.
 - 2026-10-22 · Claude: 2I a new profile currency reaches the Currencies tab at once; 2K Integrity checks free cash against the ledger,
@@ -30,20 +51,13 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
   cash-flow reads are cached (Overview 817 → 507 reads, Cash planning 536 → 274); the Arabic table loads once as `/static/ui-ar.js` (503 → 50 KB).
 - 2026-10-22 · Claude: Audit 4 backend engine (`reports/audit-4.md`, written as Audit 3): custody lines, undo grouping and two
   formulas for one figure are wrong; pages redo work. Filed 2G–2K, 3AC, 7N, 7O, 9I–9L.
-- 2026-10-23 · Codex: fix 2O/3AE: phone Delete asks with the selected count; Cancel keeps the selection.
-  A refused mass edit names the blocking transaction and keeps the editor, inputs and selection; successful batches clear them. Add browser and rollback regressions.
-  Keep Arabic counts/messages readable and show popup validation once on a full page.
-- 2026-10-23 · Codex: fix 2N: optional budget warnings preserve a successful Save. Financial refusals still roll back.
-  Protect popup, inline and split edits from stale overwrites (2M); retain unsaved input on conflict. Three other form fields await claim approval.
+- 2026-10-21 · Claude: 3W done: the Overview's row is A08 cards (Savings rate on your usual, new figure `usual_savings_rate`; Investing rate on
+  the period before; Safe to spend; Left in plan); the holdings table has five columns, units, average, price and account under the name. Where money in went and
+  Month by month moved to Spending (owner).
+- 2026-10-21 · Codex: 2D completed: v1.4.2 Windows ZIP and signed Android APK are published from the verified original artifacts, with SHA256SUMS and BUILD.json.
+  The owner-generated certificate passed signing checks; publishing-only recovery used the current downloads repository address and verified every uploaded file by read-back.
 
-- 2026-10-23 · Codex: fix 2G/2H: all cash transitions and Undo/Redo refuse new or worse deficits; edits/removals validate previous owners too.
-  Imports retain harmless history corrections; multi-delete checks its final state. Add 19 regression cases and promote the ownership workflow probes.
-
-- 2026-10-23 · Codex: extend Audit 4 to button workflows: ownership, mass editing, cancellation, delete/restore, merge, split, bill payment and history.
-  File 2M–2O and 3AE, extend 2H; add browser/route probes and screenshots. Full existing suite: 2,349 pass, 9 skip; no production fixes.
-
-- 2026-10-23 · Codex: Audit 4 reproduces six backend defect groups (2G–2L) and files dependency/wiring improvements (1G).
-  Report and disposable probes cover cash lifecycle, ownership, currency consistency, retry safety, instalment precision and rollback; no production fixes.
+## [1.4.3] — 2026-10-23
 
 - 2026-10-22 · Claude: phone overhaul (3AC, owner PDF; guideline 3.34 Part C): tab bar Overview, Budget, Add, Transactions, More with words;
   every tab opens on one hero figure; month stepper with a Choose period sheet; worded tabs; arrow chips, day nets, no ".00";

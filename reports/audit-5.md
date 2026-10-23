@@ -6,6 +6,8 @@ The owner asked four things: is the backend efficient, are there loose ends, is 
 problems, and is the architecture streamlined. Three reviews ran in parallel: the ledger engine, the read and plan side, and
 runtime, workflows and imports. Every finding below was reproduced or traced in the code before filing; the high ones were rerun
 a second time. It builds on [Audit 2](audit-2.md) (conversion rates and eight dead helpers, both fixed) and does not repeat it.
+Cleanup note (2026-10-23): this older report is Audit 5. Its original 2G–2K and 3AC codes are 2P–2T and 3AF; Audit 4 retains the later cash/Save findings.
+
 Each finding is now an item in [the plan](../issues/INDEX.md); this report is the summary and the evidence.
 
 ## Verdict

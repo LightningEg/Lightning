@@ -550,14 +550,21 @@ class TransactionService:
             if account.account_type not in {AccountType.CASH, AccountType.BANK, AccountType.BROKERAGE}:
                 continue
             start = max(first, account.opening_date)
-            base = {}
-            for row in self.db.all(
-                "SELECT le.date, le.transaction_id tid, SUM(le.quantity_e6) q FROM ledger_entries le "
+            # Aggregate the opening balance once, then walk affected days on the account index.
+            exclusion = " AND le.transaction_id NOT IN (" + ",".join("?" for _ in excluded) + ")" if excluded else ""
+            opening = self.db.scalar(
+                "SELECT COALESCE(SUM(le.quantity_e6),0) FROM ledger_entries le "
                 "JOIN transactions t ON t.id=le.transaction_id "
-                "WHERE t.status='POSTED' AND le.account_id=? AND le.asset_id=? GROUP BY le.date, le.transaction_id",
-                (account_id, asset_id)):
-                if row["tid"] not in excluded:
-                    base[row["date"]] = base.get(row["date"], 0) + int(row["q"])
+                "WHERE t.status='POSTED' AND le.account_id=? AND le.date<? AND +le.asset_id=?" + exclusion,
+                (account_id, start, asset_id, *excluded))
+            base = {"": int(opening)}
+            for row in self.db.all(
+                "SELECT le.date, SUM(le.quantity_e6) q FROM ledger_entries le "
+                "JOIN transactions t ON t.id=le.transaction_id "
+                "WHERE t.status='POSTED' AND le.account_id=? AND le.date>=? AND +le.asset_id=?" + exclusion +
+                " GROUP BY le.date",
+                (account_id, start, asset_id, *excluded)):
+                base[row["date"]] = int(row["q"])
             before, after = dict(base), dict(base)
             for txn in previous:
                 for line in txn.lines:
