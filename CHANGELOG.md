@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-23 · Codex: fix 2O/3AE: phone Delete asks with the selected count; Cancel keeps the selection.
+  A refused mass edit names the blocking transaction and keeps the editor, inputs and selection; successful batches clear them. Add browser and rollback regressions.
 - 2026-10-23 · Codex: fix 2N: optional budget warnings preserve a successful Save. Financial refusals still roll back.
   Protect popup, inline and split edits from stale overwrites (2M); retain unsaved input on conflict. Three other form fields await claim approval.
 

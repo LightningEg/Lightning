@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse
 
 from lightning.transactions.domain import TxnFilter, TxnStatus
 
@@ -11,6 +12,7 @@ from lightning.core.errors import ValidationError
 
 from . import register
 from ..web import container, redirect, render
+from ..i18n import translate
 
 router = APIRouter()
 
@@ -492,8 +494,15 @@ async def bulk_edit_transactions(request: Request):
     ids = [int(value) for value in form.getlist("txn_ids") if str(value).isdigit()]
     back = str(form.get("back", ""))
     destination = back if back.startswith("/") and not back.startswith("//") else "/transactions"
+    def respond(message, *, error=False):
+        response = redirect(destination, message)
+        if request.headers.get("X-Requested-With") == "fetch":
+            if error:
+                return JSONResponse({"error": translate(message, c.settings.get("locale"))}, status_code=400)
+            return JSONResponse({"location": response.headers["location"]})
+        return response
     if not ids:
-        return redirect(destination, "Choose at least one transaction.")
+        return respond("Choose at least one transaction.", error=True)
     changes: dict = {}
     try:
         for key in ("date", "notes"):
@@ -514,7 +523,7 @@ async def bulk_edit_transactions(request: Request):
                 raise ValidationError("Choose a saved Counterparty in Held for.", "whom")
             changes["owner_id"] = party["id"]
         if not changes:
-            return redirect(destination, "Nothing changed on the selected rows.")
+            return respond("Nothing changed on the selected rows.", error=True)
         with c.db.transaction():
             changed, skipped = c.transactions.bulk_update(ids, changes)
             if "owner_id" in changes:
@@ -525,12 +534,12 @@ async def bulk_edit_transactions(request: Request):
                         c.money_from_others.sync_transaction(txn.id, txn.date, str(form.get("whom")).strip(),
                                                              cash.account_id, cash.quantity, txn.notes)
     except LightningError as exc:
-        return redirect(destination, exc.message)
+        return respond(exc.message, error=True)
     message = f"Changed {len(changed)} row{'s' if len(changed) != 1 else ''}."
     if skipped:
         message += (f" {len(skipped)} left as {'they were' if len(skipped) != 1 else 'it was'}: transfers, investment rows, "
                     "split expenses and rows going the other way keep their own values.")
-    return redirect(destination, message)
+    return respond(message)
 
 
 @router.post("/transactions/{txn_id:int}/restore")

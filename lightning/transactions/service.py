@@ -19,7 +19,7 @@ from lightning.categories.domain import Direction, Movement
 from lightning.categories.service import CategoryService
 from lightning.counterparties import CounterpartyService
 from lightning.core.dates import fmt_date, parse_date, today
-from lightning.core.errors import NotFoundError, ValidationError
+from lightning.core.errors import LightningError, NotFoundError, ValidationError
 from lightning.core.ledger import Effect, PostingLine, validate_posting
 from lightning.core.money import ONE, ZERO, check_places, fmt, to_decimal
 from lightning.core.refs import DOC_LABELS, DocType, format_ref, ref_prefix
@@ -642,9 +642,12 @@ class TransactionService:
                         skipped.append(txn_id)
                         continue
                     lines = [replace(line, owner_id=changes["owner_id"]) for line in lines]
-                self._update(current, day or parse_date(current.date), lines, current.description,
-                             changes["counterparty"] if "counterparty" in changes else current.counterparty,
-                             changes["notes"] if "notes" in changes else current.notes)
+                try:
+                    self._update(current, day or parse_date(current.date), lines, current.description,
+                                 changes["counterparty"] if "counterparty" in changes else current.counterparty,
+                                 changes["notes"] if "notes" in changes else current.notes)
+                except LightningError as exc:
+                    raise ValidationError(f"{current.ref}: {exc.message}", exc.field) from exc
                 changed.append(txn_id)
         return changed, skipped
 

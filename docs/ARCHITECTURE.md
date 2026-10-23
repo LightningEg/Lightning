@@ -351,6 +351,7 @@ Return display (owner, 2026-10-14): before 365 days, show the net gain from purc
 **Optional reminders.** Off until enabled in Weekly review. `/reminders/due.json` serves existing urgent decisions, tomorrow's bills/gam'eya/CD interest, enabled zakat dates, stale backups and weekly review. No missed-salary reminder was added. A closed/locked/read-only session returns no alerts. Windows uses native in-process balloons while the window is open; Android uses its permission/channel plus the existing local foreground service. IDs are deduped per day; clicks stay within the app origin. Closed desktop, force-stop/process death or Android service limits prevent delivery. No unattended unlock or cloud delivery is implied.
 
 Transaction edit forms can submit an opaque revision of the full header and posting lines. Popup, inline register and split forms emit it; the route checks it inside the same database transaction before any side effect, retains conflict input, and requires reopening to refresh. Legacy clients without a revision retain their prior contract. Optional budget feedback after Save is best-effort: failures are warnings, never a false write refusal.
+Bulk register edits use a structured Save result: a refusal keeps the live editor, entered fields and selected IDs; only confirmed success clears selection and navigates. Legacy form callers keep their redirects. Phone Delete confirms the unique selected count and resubmits the same button so its destination is preserved.
 
 ## CSV import and export contract
 

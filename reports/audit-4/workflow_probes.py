@@ -285,7 +285,6 @@ def test_browser_ownership_cancel_and_discard_post_nothing(w, browser):
     assert not errors
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason='3AE: rejected bulk save discards selection and entered changes')
 def test_browser_failed_bulk_save_keeps_scope_and_typed_changes(w, browser):
     made = two_expenses(w)
     w.c.reconciliation.close(w.bank.id, '2026-09-02', D('990'))
@@ -300,14 +299,12 @@ def test_browser_failed_bulk_save_keeps_scope_and_typed_changes(w, browser):
     page.locator('[form="f-edit"][name="notes"]').fill('keep this unsaved correction')
     page.locator('#f-edit').evaluate('(f) => f.requestSubmit()')
     page.get_by_role('button', name='All 2 rows', exact=True).click()
-    page.wait_for_url('**/*msg=*')
+    page.locator('#bulk-edit-error').wait_for()
     assert all(w.c.transactions.get(t.id).notes == f'old {i}' for t,i in zip(made,(2,3)))
-    page.screenshot(path=str(Path(__file__).with_name('bulk-save-refused.png')), full_page=True)
     assert page.locator('.transaction-select:checked').count() == 2
     assert page.locator('[form="f-edit"][name="notes"]').input_value() == 'keep this unsaved correction'
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason='2O: phone bulk Delete bypasses confirmation')
 def test_browser_phone_delete_waits_for_confirmation(w):
     from playwright.sync_api import sync_playwright
     from lightning.runtime.http import Host
@@ -326,7 +323,6 @@ def test_browser_phone_delete_waits_for_confirmation(w):
             page.locator('#phone-select-visible').check()
             page.locator('#phone-bulk').get_by_role('button', name='Delete', exact=True).click()
             state = [w.c.transactions.get(t.id).is_void for t in made]
-            page.screenshot(path=str(Path(__file__).with_name('phone-delete-without-confirmation.png')), full_page=True)
             assert not any(state), f'Before any confirmation answer, selected rows are void: {state}'
             assert page.locator('dialog.ask-dialog[open]').count() == 1
             browser.close()
