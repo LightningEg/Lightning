@@ -1,4 +1,4 @@
-Last reviewed 2026-10-23 · app 1.4.3
+Last reviewed 2026-10-23 · app 1.4.4
 
 # Glossary
 

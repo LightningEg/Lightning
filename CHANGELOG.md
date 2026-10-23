@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+## [1.4.4] · 2026-10-23
+
+- 2026-10-23 · Claude: package version 1.4.4 (`pyproject.toml`, `lightning/__init__.py`, README, doc headers).
 - 2026-10-23 · Codex: reconcile the open PR backlog against current main; preserve the contributor fixes and phone overhaul.
   Audit 5 is the older efficiency audit; its reused 2G–2K/3AC codes become 2P–2T/3AF. Dependency lock refresh remains deferred.
 
