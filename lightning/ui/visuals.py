@@ -145,12 +145,15 @@ def money_sankey(c, first: date, last: date, cash_flow, sources_shown: int = 3, 
     return charts.sankey(sources, targets, "Money in", xs=xs)
 
 
+def savings_rates(c, end: date, count: int = 6) -> list:
+    """Savings rate for each recent month, the service's own figure (None for a month with no money in)."""
+    return [c.reporting.cash_flow(parse_month(key)[0], day).savings_rate
+            for key, day in month_ends(end, count, c.reporting.first_activity_date())]
+
+
 def savings_rate_spark(c, end: date, count: int = 6) -> dict:
-    """Savings rate for each recent month (the service's own figure), as a sparkline."""
-    values = []
-    for key, day in month_ends(end, count, c.reporting.first_activity_date()):
-        values.append(c.reporting.cash_flow(parse_month(key)[0], day).savings_rate)
-    return charts.sparkline(values)
+    """Savings rate for each recent month, as a sparkline."""
+    return charts.sparkline(savings_rates(c, end, count))
 
 
 def holdings_donut(position, include_cash: bool = False) -> dict:
@@ -535,3 +538,24 @@ def cash_plan(c, forecast, day: date) -> dict:
             "before_total": sum((p.amount for p in before_income), ZERO), "heading": heading, "flows": rows,
             "loan_bars": charts.bars(loans, 6), "loan_rows": loans, "forecast_spark": charts.sparkline([m.closing for m in f.months]),
             "parts": parts, "past_free": [(key, value) for key, value in zip(past_keys, past)]}
+
+
+PAIR_XS = (24.0, 45.0, 64.0)  # two Sankeys side by side: target names get a third of each (style.css .is-pair)
+
+
+def cash_flow_charts(c, first: date, last: date, month_period: bool, today_: date) -> dict:
+    """Spending's Cash flow section (moved from the Overview, owner 2026-10-21): where the period's money in went,
+    beside the last six months' when the period is a month (ticket 78), and net cash flow by month (tickets 79, 86)."""
+    from lightning.investments.report import investment_period
+    flow = c.reporting.cash_flow(first, last)
+    added = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(first), fmt_date(last))["net_money"]
+    six, six_from = None, None
+    if month_period:
+        keys = months_back(last, 6, c.reporting.first_activity_date())
+        if len(keys) > 1:
+            six_from = parse_month(keys[0])[0]
+            six_added = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(six_from), fmt_date(last))["net_money"]
+            six = money_sankey(c, six_from, last, c.reporting.cash_flow(six_from, last), money_added=six_added, xs=PAIR_XS)
+    return {"money_sankey": money_sankey(c, first, last, flow, money_added=added, xs=PAIR_XS if six else (22.0, 49.0, 76.0)),
+            "money_sankey_six": six, "six_from": six_from.strftime("%Y-%m") if six_from else "",
+            "month_calendar": month_calendar(c, today_)}

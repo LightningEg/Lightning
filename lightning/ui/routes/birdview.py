@@ -6,6 +6,8 @@ from decimal import Decimal
 
 from lightning.core.figures import label
 from lightning.reporting.spending import comparison_windows, partial_months
+from urllib.parse import urlencode
+
 from fastapi import APIRouter, Request, Response
 
 from lightning.core.dates import fmt_date, month_of, parse_month, today
@@ -131,7 +133,8 @@ async def expense_analysis(request: Request):
     stats = _expense_stats(analysis, spending_total, prior_spending, prior_label, largest, selected, first, last,
                            category_filter, c, prior_from if prior else None, prior_to if prior else None, category_code)
     days = visuals.day_calendars(c, first, last, category_code)
-    return render(request, "birdview/expenses.html", notes=notes, analysis=analysis, calendar=days, stats=stats, category_bars=category_bars, spend_trend=spend_trend,
+    flows = visuals.cash_flow_charts(c, first, last, selected.key == "month", today())
+    return render(request, "birdview/expenses.html", **flows, period_query=urlencode(request.query_params), notes=notes, analysis=analysis, calendar=days, stats=stats, category_bars=category_bars, spend_trend=spend_trend,
                   usual=visuals.usual_rows(usual), who_bars=visuals.counterparty_bars(c, first, last),
                   account_bars=visuals.account_bars(c, first, last), largest=largest,
                   period=selected.key, month=last.strftime("%Y-%m"),

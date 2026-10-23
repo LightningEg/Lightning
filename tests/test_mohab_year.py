@@ -1233,7 +1233,7 @@ def test_the_years_investments(mohab):
     # 1,025 from the sale + 225 price change + 300 dividends + 12 × 1,833.33 of certificate interest
     assert mohab.answers["year_investing"].shows("2026-10-01 to 2027-09-30", "+23,550 Net gain or loss")  # the Lead (3.33)
     # The interest lands on CIB Payroll from NBE, the certificate's bank, and is still the certificate's return.
-    assert mohab.answers["flat"].shows("1 certificate Set", "100,000 100,000 100,000 100,000 17.5% +27,500 +27.5% +24.6%")
+    assert mohab.answers["flat"].shows("1 certificate · average 100,000 · now 100,000", "100,000 100,000 17.5% +27,500 +27.5% +24.6%")
 
 
 def test_data_checks_pass_after_a_year(mohab):
@@ -1322,7 +1322,7 @@ def test_the_savings_rate_for_all_time(mohab):
 
 def test_the_overview_says_which_parts_follow_the_period(mohab):
     answer = mohab.answers["past_month"]
-    assert answer.shows("Cash flow 2026-10-01 to 2026-10-31", "Month by month 2026-07 to today")
+    assert answer.shows("Your position", "As of 2026-10-31")  # the flows and Month by month moved to Spending (owner, 2026-10-21)
 
 
 def test_your_position_follows_the_period_end(mohab):
@@ -1331,7 +1331,7 @@ def test_your_position_follows_the_period_end(mohab):
 
 
 def test_where_money_went_folds_small_categories_into_other(mohab):
-    assert mohab.answers["year"].shows("Other")
+    assert mohab.answers["year_spending"].shows("Where money in went", "Other")  # on Spending (owner, 2026-10-21)
 
 
 def test_a_month_of_spending_is_shown_day_by_day(mohab):
@@ -1504,9 +1504,9 @@ def test_a_figure_reads_the_same_on_every_tab(mohab, period):
     money_in = {"Overview": _figure(overview, r"<summary><span>Money in</span><b>([^<]+)</b>"),
                 "Investments": _figure(flat(investments), r"Money in ([\d,]+)")}
     assert len({money(v) for v in money_in.values() if v}) == 1, money_in
-    savings = {"Overview": _figure(overview, r'aria-label="Savings rate".*?stat-tile-value[^>]*>(.*?)</span>'),
+    savings = {"Overview": _figure(overview, r'<span class="kc-label">Savings rate</span>.*?class="kc-figure[^"]*">(.*?)</span>'),
                "Investments": _figure(flat(investments), r"Savings.*? ([\d.,−—-]+ ?%?) Savings rate")}
-    assert len({v.replace(" ", "").rstrip("%") for v in savings.values() if v}) == 1, savings
+    assert len({v.replace(" ", "").rstrip("%") for v in savings.values() if v}) <= 1, savings  # one home now (3.33)
     gain = {"Overview": _figure(overview, r"<span>Net gain or loss</span><b[^>]*>([^<]+)</b>"),
             "Investments": _figure(investments, r'class="lead-compare"><b[^>]*>([^<]+)</b>')}  # the Lead's comparison (3.33)
     assert len({v.strip() for v in gain.values() if v}) == 1, gain

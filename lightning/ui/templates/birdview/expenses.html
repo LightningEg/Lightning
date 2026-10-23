@@ -55,4 +55,33 @@
 </section>
 
 {% endif %}
+{% if not category_filter %}{# all money in and out: a category filter does not narrow it #}
+{% from "partials/charts.html" import sankey %}
+<div class="overview-stack spending-flows">
+  <section class="overview-section" aria-labelledby="cashflow-analysis-heading">
+    <header class="overview-section-head"><h2 id="cashflow-analysis-heading">{{ 'Cash flow'|tr(locale) }}</h2><span>{{ date_from }} to {{ date_to }}</span></header>
+    {% if money_sankey_six %}<article class="overview-block wide-card overview-sankey-card is-pair" aria-label="{{ 'Where money in went'|tr(locale) }}"><div class="overview-split">
+      <section aria-labelledby="sankey-heading"><div class="overview-block-head"><div><h3 id="sankey-heading">{{ "Where money in went"|tr(locale) }}</h3><p>{{ date_from[:7] }}</p></div></div>
+        {{ sankey(money_sankey, 'Where money in went', base) }}</section>
+      <section aria-labelledby="sankey-six-heading"><div class="overview-block-head"><div><h3 id="sankey-six-heading">{{ "The last six months"|tr(locale) }}</h3><p>{{ six_from }} to {{ date_from[:7] }}</p></div></div>
+        {{ sankey(money_sankey_six, 'Where money in went in the last six months', base) }}</section>
+    </div></article>
+    {% else %}<article class="overview-block wide-card overview-sankey-card" aria-labelledby="sankey-heading">
+      <div class="overview-block-head"><div><h3 id="sankey-heading">{{ "Where money in went"|tr(locale) }}</h3></div></div>
+      {{ sankey(money_sankey, 'Where money in went', base) }}
+    </article>{% endif %}
+  </section>
+
+  {# Feedback tickets 79 and 86: the Overview keeps net cash flow by month, drawn as a calendar; the daily
+     expenses calendar lives on Spending. #}
+  {% from "partials/charts.html" import sankey, month_calendar as month_cal %}{% set mc = month_calendar %}{% if mc.years %}<section class="overview-section" aria-labelledby="months-heading">
+    <header class="overview-section-head"><h2 id="months-heading">{{ 'Month by month'|tr(locale) }}</h2><span>{{ mc.from }} to today</span></header>
+    <article class="overview-block wide-card overview-months-card">
+      <div class="overview-block-head"><div><h3>{{ "Net cash flow"|tr(locale) }}</h3><p>{{ mc.kept }} of {{ mc.count }} month{{ '' if mc.count == 1 else 's' }} kept money{% if mc.best and mc.best.net > 0 %} · best {{ mc.best.key }} · {{ mc.best.net|money(True) }}{% endif %}</p></div></div>
+      {{ month_cal(mc, 'net') }}
+      <p class="muted small heat-key"><span class="flow-in-2"></span><span class="flow-in-4"></span>{{ "kept"|tr(locale) }}<span class="flow-out-2"></span><span class="flow-out-4"></span>{{ "short · darker is more"|tr(locale) }}</p>
+    </article>
+  </section>{% endif %}
+</div>
+{% endif %}
 {% endblock %}

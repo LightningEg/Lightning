@@ -164,7 +164,7 @@ def test_every_tab_of_the_demo_opens_with_its_key_notes(demo):
         page = client.get(url)
         assert page.status_code == 200, url
         if url in ("/", "/birdview"):  # Birdview redirects to the Overview
-            assert page.text.count('class="stat-tile surface-') == 4, url  # four stat cards, no key notes
+            assert page.text.count('<article class="kpi-card') == 4, url  # four A08 cards, no key notes (3.33)
         elif url == "/birdview/expenses":  # four KPI cards give the gist of the period
             assert page.text.count('class="stat-tile surface-') == 4, url
         elif url == "/plan":  # safe to spend leads with its working (3.33); free cash, what's due and the lowest point ahead
@@ -179,7 +179,8 @@ def test_every_tab_of_the_demo_opens_with_its_key_notes(demo):
         elif url in with_notes:
             assert 'class="key-note' in page.text or 'class="stat-card key-note' in page.text, url
     overview = client.get("/").text
-    assert "chart-donut" in overview and "chart-sankey-plot" in overview
+    assert "chart-donut" in overview and "chart-sankey-plot" not in overview  # the Sankeys are on Spending (owner, 2026-10-21)
+    assert "chart-sankey-plot" in client.get("/birdview/expenses").text
     assert "chart-cfall-plot" not in overview  # the Net flow list says it; no column waterfall repeats it (UX plan 5)
     # No chart hides behind a toggle; only the one-row investment figures fold (Codex 2026-10-10), with their summary showing.
     assert "overview-month-toggle" not in overview
@@ -389,7 +390,7 @@ def test_expense_analysis_compares_big_categories_with_their_usual_month(c, setu
     assert [r["name"] for r in a["flow_heat"]] == ["Money in", "Money out", "Net flow"]
     for question in ("Where did it go?", "Is this period unusual?", "How each one moved", "Day by day"):
         assert question in page
-    assert "Net cash flow" not in page  # feedback ticket 85: by month on the Overview, not by day here
+    assert "Net cash flow" in page and page.index("Net cash flow") > page.index("Day by day")  # ticket 85: by month, after the days (moved here 2026-10-21)
     assert page.count('class="stat-tile surface-') == 4
     # Every usual-range bar is the same size: the pill runs 8% to 92%, and above its range sits past it.
     assert (housing_row["range"]["low"], housing_row["range"]["high"]) == (8.0, 92.0) and housing_row["range"]["now"] > 92
@@ -422,8 +423,9 @@ def test_the_overview_ends_with_a_calendar_of_months(demo, monkeypatch):
     assert [r["year"] for r in cal["years"]] == [2026] and len(year["cells"]) == 12
     assert [x["known"] for x in year["cells"]] == [False] * 6 + [True] * 4 + [False] * 2  # July to today
     assert cal["count"] == 4 and sum(x["net"] for x in year["cells"][6:9]) == c.reporting.cash_flow("2026-07-01", "2026-09-30").net
-    page = TestClient(create_app(c), base_url="http://127.0.0.1").get("/").text
+    page = TestClient(create_app(c), base_url="http://127.0.0.1").get("/birdview/expenses").text  # Spending (owner, 2026-10-21)
     assert "Month by month" in page and page.index("Month by month") > page.index("Where money in went")
+    assert "Where money in went" not in TestClient(create_app(c), base_url="http://127.0.0.1").get("/").text
 
 
 def test_setup_guide_can_be_dismissed_and_shown_again_without_changing_accounts(c, setup):

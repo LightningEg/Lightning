@@ -156,6 +156,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Change in what you own** | How much what you own grew or shrank in the period. | What you own at the end − What you own the day before the start − Opening balances in the period | `planning.position.PositionService.change_in_what_you_own` |
 | **Per month** | A period's money out divided by the calendar months it covers, so a year to date compares with a single month. | Read directly from the ledger | `reporting.spending.spending_profile` |
 | **Usual month** | The average money out of the last six earlier months, using matching calendar days for a partial period. | Read directly from the ledger | `reporting.spending._against_history` |
+| **Usual savings rate** | The average savings rate of the last six earlier whole months that had money in; a month whose rate says nothing is left out. | Read directly from the ledger | `reporting.service.ReportingService.usual_savings_rate` |
 | **Usual range** | The lowest, middle and highest money out of the twelve earlier months, using matching calendar days for a partial period. It needs three of them. | Read directly from the ledger | `reporting.spending._against_history` |
 | **Investing rate** | The share of what you kept (net flow) that you moved into investments. Money from earlier savings does not count, so it is never more than 100%. | Money added ÷ Net flow | `investments.report.investing_rate` |
 | **Average monthly income** | Income in your chosen income categories, averaged over the last 3 or 6 completed months that had any (Settings › Budget). Until a completed month has income, the income set up in Recurring stands in. The budget, reserves and the cash forecast all use it. | Read directly from the ledger | `budgeting.service.BudgetService.income_average` |
@@ -501,6 +502,7 @@ Asset class and exposure are separate. Account kinds describe the container: cas
 | Change in net worth | التغير في صافي ثروتك |
 | Per month | شهريًا |
 | Usual month | الشهر المعتاد |
+| Usual savings rate | نسبة الادخار المعتادة |
 | Usual range | النطاق المعتاد |
 | Investing rate | نسبة الاستثمار |
 | Average monthly income | متوسط الدخل الشهري |
