@@ -453,6 +453,9 @@ class InvestmentService:
         state: dict[tuple[int, int], dict] = {}
         dividends: dict[tuple[int, str], Decimal] = {}
         taxes: dict[tuple[int, str], Decimal] = {}
+        owned_dividends: dict[tuple[int, str], Decimal] = {}
+        owned_taxes: dict[tuple[int, str], Decimal] = {}
+        other_income: set[tuple[int, str]] = set()
         cashflows: list[tuple[str, Decimal]] = []
         holding_flows: dict[tuple[int, int], list[tuple[str, Decimal]]] = {}
         for line in self.reporting.investment_lines(day, account_id):
@@ -467,6 +470,11 @@ class InvestmentService:
                     taxes[key] = taxes.get(key, ZERO) - dividend
                 else:
                     dividends[key] = dividends.get(key, ZERO) + dividend
+                if line["owner_id"] is None:
+                    owned = owned_taxes if dividend < ZERO else owned_dividends
+                    owned[key] = owned.get(key, ZERO) + abs(dividend)
+                else:
+                    other_income.add(key)
                 cashflows.append((line["date"], dividend))
                 asset = self.assets.get_asset(asset_id)
                 holding_flows.setdefault((line["account_id"], asset.id), []).append((line["date"], dividend))
@@ -498,6 +506,7 @@ class InvestmentService:
                 continue
             key = (paid["account_id"], self.assets.get_asset(paid["asset_id"]).code)
             dividends[key] = dividends.get(key, ZERO) + paid["amount"]
+            owned_dividends[key] = owned_dividends.get(key, ZERO) + paid["amount"]
             cashflows.append((paid["date"], paid["amount"]))
             holding_flows.setdefault((paid["account_id"], paid["asset_id"]), []).append((paid["date"], paid["amount"]))
         positions = []
@@ -528,6 +537,9 @@ class InvestmentService:
                 invested=sum((-amount for _, amount in holding_flows.get((acc_id, asset_id), []) if amount < ZERO), ZERO),
                 owned_quantity=own["qty"], owned_cost_basis=_money(own["cost"]),
                 owned_realized=_money(own["realized"]), owned_invested=own["invested"],
+                owned_dividends=owned_dividends.pop((acc_id, asset.code), ZERO),
+                owned_dividend_tax=owned_taxes.pop((acc_id, asset.code), ZERO),
+                has_other_owners=any(owner is not None for owner in pools) or (acc_id, asset.code) in other_income,
             ))
         # dividends from something not (or no longer) held in that account still count
         for (acc_id, code), amount in dividends.items():
@@ -535,7 +547,10 @@ class InvestmentService:
             positions.append(Position(acc_id, self.accounts.get(acc_id).label, asset.id, asset.code, asset.name,
                                       self.assets.display_name(asset.asset_class_id), EXPOSURE_LABELS[asset.exposure],
                                       asset.unit, ZERO, ZERO, ZERO, amount, None, None, "", ZERO,
-                                      dividend_tax=taxes.get((acc_id, code), ZERO)))
+                                      dividend_tax=taxes.get((acc_id, code), ZERO),
+                                      owned_dividends=owned_dividends.get((acc_id, code), ZERO),
+                                      owned_dividend_tax=owned_taxes.get((acc_id, code), ZERO),
+                                      has_other_owners=(acc_id, code) in other_income))
         positions.sort(key=lambda p: (-(p.value or ZERO), p.asset_name))
         cashflows.extend((day, position.value)
                          for position in positions if position.is_open and position.value is not None)

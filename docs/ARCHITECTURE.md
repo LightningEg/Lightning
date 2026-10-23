@@ -153,6 +153,8 @@ The reevaluation ledger keeps per-asset, per-account month-end units, price, val
 
 ### Investment report contract
 
+Dividends and withholding retain the actual ledger owner per holding, just as average-cost pools retain owned units and realized gains. Owned lifetime/period results use owned distributions and taxes directly, including after later purchases, owner exits or a complete sale. Gross account/portfolio totals remain available separately. A combined-owner return is not shown as an owned XIRR, including when the other owner has since sold out.
+
 Holdings-table gain includes unrealized gain, realized sales and income; its plain return uses all original purchases, including sold units, as denominator (`Position.owned_result`, owner-specific invested-cost pools). The holding, group and total rows include certificate interest paid into a bank. Price/FX breakdowns remain price gain only. The income section names dividends and interest explicitly.
 
 Uses posted, non-void main-ledger entries by transaction date, scoped to `owner_id IS NULL`, with cost lots keyed by owner, account and asset. An opening (`OPN`) holding is a baseline, never new money.
@@ -206,6 +208,8 @@ An estimate by the common rule, never a ruling: the page says once that a schola
 ## Cash planning contract
 
 `lightning/planning/` owns planned items (`planned_items`) and payments (`planned_payments`). It reads the ledger, budget and reserves through services and never posts; recording a payment goes through `TransactionService`.
+
+Payment-link confirmations read the current settlement and transaction links inside one immediate write transaction. Repeating the same confirmation is harmless; replacing a settled occurrence requires reopening it. Partial loan top-ups remain explicit, and repeating a top-up never counts it twice. Automatic matching rechecks settlement/link availability before saving.
 
 - **Dated scheduled cash check.** `planning/dated_cash.py` adds `CashForecast.dated` alongside the monthly free-cash forecast. It starts with owned cash quantities in wallet, bank and brokerage accounts (no securities or custody cash), applies outstanding scheduled payments and projected CD/gam’eya cash events by date, and reports the first negative day-end total and the first negative day-end balance in each funding account. Overdue bills count today; overdue income is excluded because its receipt date is unknown. Movements on the same date net together; no intraday ordering or automatic transfers are assumed. Account amounts stay in native currency; combined cash uses the as-of FX rate throughout. Missing FX makes the combined forecast unavailable while native account checks still work. Items without a liquid funding account use profile currency in the combined total and are flagged as unassigned, never assigned to an account by guesswork. This check includes reserved cash and excludes flexible budget spending and savings goals: those remain in the monthly free-cash forecast. It posts nothing. Cash planning shows the dated warnings on PC and phone; Needs you links to them, with the monthly warning retained when there is no dated shortfall.
 
@@ -284,6 +288,7 @@ incoming_carryover(M+1) = left(M) when enabled; 0 when disabled or reset at M+1
 
 - SQLite with ordered, append-only migrations; never edit an applied migration. Dates are ISO `yyyy-mm-dd`; entry accepts ISO, `dd/mm/yyyy`, `dd/m` (current year); CSV uses the same parser. An account's legacy opening date is not a transaction-date boundary; balances are chronological sums of dated lines.
 - Money, prices and quantities are `Decimal` / integer `_e6`; new money inputs take two decimals. Summaries round to whole units; entry controls keep cents.
+- Every `to_e6` conversion checks the signed 64-bit storage range, including derived base values after FX multiplication. An oversized value raises a financial validation error and the enclosing write rolls back atomically.
 - Two roundings, on purpose: a posted base amount is its amount × rate rounded half to even (`core/ledger._round2`, which `validate_posting` enforces, so stored lines depend on it); typed and shown amounts round half up (`core/money.quantize`). Changing either changes stored or shown money.
 - Indexed paths: ledger account/date, asset/date, category/date, transaction id, transaction date/type/status, price history asset/date. A unique constraint that leads with an index's columns replaces that index (migration 0068). An account's balance check sums the days before the edit in SQL on the account index and walks only the later days.
 - Corrections are audited. Transactions are voided or deleted through recoverable flows; used categories are archived, never removed.
@@ -304,6 +309,10 @@ incoming_carryover(M+1) = left(M) when enabled; 0 when disabled or reset at M+1
 Locked certificates keep their owned value and unlock date in a separate line beside "If you sold today" and Holdings after sale; their value is excluded from cash available by selling. Settings › Sale factors reads the same `ClassValue.after_sale` as Position, including per-certificate lock-ups and factors, rather than multiplying a class total by a generic factor.
 
 ### Action history and checked accounts
+
+Confirmed loan repayments retain their principal/fee meaning: financial edits require reopening a scheduled payment first; an extra repayment must be voided and recorded again from Loans. Notes may be corrected in place. The transaction service enforces this for ordinary edits, splits and ownership changes; history replay also checks that confirmed principal/fee amounts still agree with the surviving ledger.
+
+Transaction edits that leave the dated posting unchanged update only header metadata. Ledger row identities, cleared flags and confirmed reserve-use links survive these saves. Replacing a financial posting still invalidates its reserve links through the existing trigger.
 
 `undo.py` installs connection-local TEMP row journals/triggers after startup. A UI action context groups its nested service transactions and autocommit metadata writes; explicit `Database.transaction(undo_label=...)` supports other workflows. Twenty undo/redo groups are retained. Replay is one immediate transaction, verifies the current history head and affected row snapshots, handles recorded cascades, defers/checks foreign keys and validates changed ledger postings/holdings and checked balances. Audit records are append-only and not replayed. Startup, background price work and reads have no action context. History is never copied into backups or phone hand-offs, and expires with the connection/profile session; changed dependencies can make replay refuse safely. Successful UI writes settle unambiguous planned-payment links under the same action context. Existing scoped bulk-undo controls remain compatible.
 

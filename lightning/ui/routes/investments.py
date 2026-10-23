@@ -151,10 +151,8 @@ async def portfolio(request: Request):
             old_owned_capital = old.owned_cost_basis
         row["starting_capital"] += old_owned_capital
         row["period_unrealized"] += (yours - owned_capital) - (old_owned_value - old_owned_capital)
-        if total:
-            share = yours/total
-            row["realized"] += (holding.realized-(old.realized if old else ZERO))*share
-            row["dividends"] += (holding.net_dividends-(old.net_dividends if old else ZERO))*share
+        row["realized"] += (holding.owned_realized or ZERO)-((old.owned_realized or ZERO) if old else ZERO)
+        row["dividends"] += holding.owned_net_dividends-(old.owned_net_dividends if old else ZERO)
     asset_class_rows = sorted(((name, row) for name, row in class_totals.items() if row["yours"] > ZERO),
                               key=lambda item: (-item[1]["yours"], item[0].casefold()))
     assets = c.assets.all_investment_preferences()
@@ -181,7 +179,7 @@ async def portfolio(request: Request):
     target_total=sum(targets.values(),ZERO)
     interest_id = next((cat.id for cat in c.categories.tree() if cat.code == "EXP.INVEST.INTEREST"), None)
     period_interest = c.investments.period_interest(interest_id, period.start_text, period.end_text)
-    period_distributions = p.dividends-prior.dividends+period_interest
+    period_distributions = p.owned_dividends-prior.owned_dividends+period_interest
     position = c.position.at(period.end)
     class_results, _ = results_by_asset(c.investments, c.money_from_others, c.reporting, before_day, day)
     notes = [n for n in (keynotes.best_class([{"label": k, "result": v} for k, v in class_results.items()]),
@@ -189,7 +187,7 @@ async def portfolio(request: Request):
     extras = _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, investment_report)
     extras.update(_view_extras(c, request, extras, investment_report, day))
     # Everything sold in the period: nothing is held, but the period still has a gain or loss to show.
-    period_activity = bool(investment_report.get("result") or p.realized - prior.realized or period_distributions)
+    period_activity = bool(investment_report.get("result") or p.owned_realized - prior.owned_realized or period_distributions)
     # Answer first (guideline 3.33): Portfolio value is the Lead and the period's net gain or loss its comparison;
     # the allocation sits beside it. The waffle and Biggest holdings left (A09.2: one home per figure).
     result, value, current = extras["hero_result"], extras["hero_value"], period.end >= today_date
@@ -199,7 +197,7 @@ async def portfolio(request: Request):
     if value is not None and (owned_rows or period_activity):
         compare = (kpis.compare(label("result"), fmt(result, 0, True), "good" if result >= 0 else "bad") if result is not None
                    else kpis.compare("A dated price is missing, so the result is unavailable"))
-        ret = p.display_return if not any(custody.values()) else None
+        ret = p.display_return if not p.has_other_owners else None
         spark, change = extras["value_spark"], extras["hero_change"]
         six = (f"{fmt(change, 0, True)} since six months ago" + (f", not counting {fmt(spark['added'], 0)} of opening balances"
                                                                   if spark.get("added") else "")) if change is not None else ""
@@ -212,9 +210,9 @@ async def portfolio(request: Request):
                   accounts=c.investments.investment_accounts(),
                   has_assets=bool(c.assets.investments(active_only=True)), owned_value=owned_value,
                   owned_cost=owned_cost, owned_unrealized=owned_unrealized, custody_units=custody,
-                  own_by_holding=own_by_holding, period=period, period_realized=p.realized-prior.realized,
-                  period_dividends=period_distributions, since_xirr=(p.xirr if not any(custody.values()) else None),
-                  since_return=p.display_return if not any(custody.values()) else None,
+                  own_by_holding=own_by_holding, period=period, period_realized=p.owned_realized-prior.owned_realized,
+                  period_dividends=period_distributions, since_xirr=(p.xirr if not p.has_other_owners else None),
+                  since_return=p.display_return if not p.has_other_owners else None,
                   owned_rows=owned_rows, period_activity=period_activity, period_error=period_error,
                   buckets=buckets, targets=targets, target_total=target_total,
                   owned_positions=owned_positions, max_class_result=max_class_result,
@@ -448,8 +446,8 @@ def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, rep
     now = today()
     year_start = fmt_date(date(now.year, 1, 1) - timedelta(days=1))
     current, before = c.investments.portfolio(fmt_date(now)), c.investments.portfolio(year_start)
-    paid_before = {(x.account_id, x.asset_id): x.dividends for x in before.positions}
-    dividends = charts.bars([{"label": x.asset_name, "value": x.dividends - paid_before.get((x.account_id, x.asset_id), ZERO)}
+    paid_before = {(x.account_id, x.asset_id): x.owned_dividends for x in before.positions}
+    dividends = charts.bars([{"label": x.asset_name, "value": x.owned_dividends - paid_before.get((x.account_id, x.asset_id), ZERO)}
                              for x in current.positions], 8)
     # The period's flows: money added and taken out, then how each class's value moved.
     start_values: dict[str, Decimal] = defaultdict(lambda: ZERO)
@@ -545,20 +543,21 @@ async def holding_detail(request: Request, asset_id: int):
     portfolio=c.investments.portfolio(day); account_id=_int(request.query_params.get("account"))
     h=next((x for x in portfolio.open if x.asset_id==asset_id and (account_id is None or x.account_id==account_id)),None)
     if h is None: raise NotFoundError("No holding found for that asset and account.")
-    custody=next((x for x in c.money_from_others.investment_positions(day)
-                  if x["account_id"]==h.account_id and x["asset_id"]==asset_id),None)
-    if custody and h.quantity:
-        own_units=max(ZERO,h.quantity-Decimal(str(custody["units"])))
-        factor=own_units/h.quantity
-        h=replace(h,quantity=own_units,cost_basis=h.owned_cost_basis,realized=h.owned_realized,
-                  dividends=h.dividends*factor,dividend_tax=h.dividend_tax*factor,value=(h.value*factor if h.value is not None else None),xirr=None,
-                  display_return=None)
+    factor=(h.owned_quantity or ZERO)/h.quantity if h.quantity else ZERO
+    h=replace(h,quantity=h.owned_quantity or ZERO,cost_basis=h.owned_cost_basis,realized=h.owned_realized,
+              dividends=h.owned_dividends,dividend_tax=h.owned_dividend_tax,
+              value=(h.value*factor if h.value is not None else None),
+              xirr=None if h.has_other_owners else h.xirr,
+              display_return=None if h.has_other_owners else h.display_return)
     asset=c.assets.get_asset(asset_id)
     saved_bucket, saved_horizon = c.assets.investment_preferences(asset_id)
     bucket=saved_bucket or h.asset_class.split(" › ")[-1]
     horizon=saved_horizon or "Unassigned"
     before=c.investments.portfolio(fmt_date(parse_date(start).fromordinal(parse_date(start).toordinal()-1)))
     previous=next((x for x in before.positions if x.asset_id==asset_id and x.account_id==h.account_id),None)
+    if previous:
+        previous=replace(previous,realized=previous.owned_realized,dividends=previous.owned_dividends,
+                         dividend_tax=previous.owned_dividend_tax)
     journey = visuals.holding_journey(c, h.account_id, asset_id, parse_date(day))
     period_realized = h.realized-(previous.realized if previous else ZERO)
     gain_pct = h.unrealized / h.cost_basis * 100 if h.unrealized is not None and h.cost_basis else None

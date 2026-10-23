@@ -11,6 +11,16 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-23 · Codex: 5L attributes investment distributions, withholding and realized gains to their ledger owner, including changed ownership and closed holdings; owned reports no longer prorate another person's income.
+
+- 2026-10-23 · Codex: 2Y validates scaled money against SQLite's signed integer limits; oversized converted values now show a validation error and roll back cleanly.
+
+- 2026-10-23 · Codex: 2X serializes payment linking, preserves settled occurrences against stale confirmations, and makes identical confirmations and partial-loan top-up retries harmless.
+
+- 2026-10-23 · Codex: 2W keeps confirmed reserve use and ledger rows when saving notes, descriptions or unchanged transaction details; financial changes still invalidate reserve links.
+
+- 2026-10-23 · Codex: 2V protects confirmed loan repayments from edits that would leave stale debt; reopen first, or void and replace an extra repayment. Notes remain editable.
+
 - 2026-10-23 · Codex: 4D discovers nearby devices automatically and pairs by selecting the home’s number from three choices.
   The PC still requires the profile password; signed commitment/challenge/reveal protects number matching. Recovery keys are unchanged.
 

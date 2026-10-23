@@ -37,6 +37,7 @@ def validate_replay(records, *, db, transactions, assets, accounts, reconciliati
                 amount_base=line.amount_base, is_cash=assets.get_asset(line.asset_id).is_cash,
                 owner_id=line.owner_id) for line in txn.lines]
             validate_posting(postings)
+            transactions._validate_linked_loan_amount(txn)
             lines.extend(txn.lines)
     if lines:
         transactions._check_holdings(lines)

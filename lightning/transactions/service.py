@@ -274,6 +274,7 @@ class TransactionService:
         txn = self.get(txn_id)
         proposed = [replace(line, owner_id=owner_id) for line in txn.lines]
         with self.db.transaction():
+            self._refuse_linked_loan_edit(txn, txn.date, proposed)
             self._validate_owner_balances(proposed, txn.date, exclude_txn_id=txn_id,
                                          force_brokerage_cash=txn.type == DocType.BUY,
                                          extra_keys=self._affected_owner_keys(txn.lines + proposed,
@@ -324,11 +325,13 @@ class TransactionService:
             flags.append(flags[index])
         validate_posting(lines)
         day = parse_date(current.date)
+        self._refuse_linked_loan_edit(current, current.date, lines)
         # Both owners of the account and asset are checked: the person's part and what is left as yours.
         self._validate_owner_balances(lines, day, exclude_txn_id=txn_id,
                                       force_brokerage_cash=current.type == DocType.BUY,
                                       extra_keys={(account_id, asset_id, owner_id), (account_id, asset_id, None)})
         with self.db.transaction():
+            self._refuse_linked_loan_edit(current, current.date, lines)
             self.repo.replace_lines(txn_id, current.date, lines)
             for line_no, flag in enumerate(flags, start=1):
                 if flag:
@@ -1085,9 +1088,43 @@ class TransactionService:
             self._check_holdings(lines)
         return self.get(txn_id)
 
+    @staticmethod
+    def _same_posting(current: Transaction, day, lines) -> bool:
+        fields = ("account_id", "asset_id", "quantity", "unit_price", "fx_rate", "amount", "amount_base",
+                  "effect", "category_id", "memo", "owner_id")
+        def values(line):
+            return tuple(getattr(line, name) for name in fields)
+        return (current.date == str(day) and
+                [values(line) for line in current.lines] == [values(line) for line in lines])
+
+    def _refuse_linked_loan_edit(self, current, day, lines):
+        """A confirmed repayment's principal/fee allocation cannot be guessed after a ledger edit."""
+        if self._same_posting(current, day, lines):
+            return
+        if self.db.scalar("SELECT 1 FROM loan_extra_payments WHERE transaction_id=?", (current.id,)):
+            raise ValidationError("Void this loan repayment and record a corrected payment from Loans.")
+        if self.db.scalar("SELECT 1 FROM planned_payments p JOIN planned_items i ON i.id=p.planned_item_id "
+                          "WHERE p.transaction_id=? AND i.kind='LOAN'", (current.id,)):
+            raise ValidationError("Reopen this loan payment before changing its amount, date, account or category.")
+
+    def _validate_linked_loan_amount(self, txn):
+        """Undo may restore both the ledger and its settlement, but may not drift an existing link."""
+        expected = self.db.all(
+            "SELECT p.amount_e6 FROM planned_payments p JOIN planned_items i ON i.id=p.planned_item_id "
+            "WHERE p.transaction_id=? AND i.kind='LOAN' AND p.status='PAID' "
+            "UNION ALL SELECT principal_e6+fee_e6 AS amount_e6 FROM loan_extra_payments WHERE transaction_id=?",
+            (txn.id, txn.id))
+        if not expected:
+            return
+        actual = sum((abs(line.quantity) for line in txn.lines if line.owner_id is None and
+                      line.effect == Effect.OUTFLOW and self.assets.get_asset(line.asset_id).is_cash), ZERO)
+        if any(from_e6(row["amount_e6"]) != actual for row in expected):
+            raise ValidationError("Reopen this loan payment before changing its amount, date, account or category.")
+
     def _update(self, current: Transaction, day, lines: list[PostingLine], description: str, counterparty: str,
                 notes: str, validate_all_cash: bool = False) -> Transaction:
         with self.db.transaction():
+            self._refuse_linked_loan_edit(current, day, lines)
             self._validate_owner_balances(lines, day, exclude_txn_id=current.id,
                                          force_brokerage_cash=current.type == DocType.BUY,
                                          validate_all_cash=validate_all_cash,
@@ -1105,22 +1142,22 @@ class TransactionService:
             if canonical:
                 updated.counterparty = canonical["name"]
             self.repo.update_header(updated, canonical["id"] if canonical else None)
-            # Rebuilding an unchanged posting must not silently clear its
-            # reconciliation state. If its date/account/amount/category changed,
-            # leave the replacement uncleared so it can be reconciled again.
-            old_cleared = self.db.all(
-                "SELECT account_id,asset_id,quantity_e6,effect,category_id,memo,cleared "
-                "FROM ledger_entries WHERE transaction_id=? ORDER BY line_no", (current.id,))
-            self.repo.replace_lines(current.id, updated.date, lines)
-            if updated.date == current.date and len(old_cleared) == len(lines):
-                new_rows = self.db.all(
-                    "SELECT id,account_id,asset_id,quantity_e6,effect,category_id,memo "
+            # Metadata-only saves keep the actual rows and confirmed reserve links (2W).
+            # Financial edits still invalidate reserve use through the database trigger.
+            if not self._same_posting(current, day, lines):
+                old_cleared = self.db.all(
+                    "SELECT account_id,asset_id,quantity_e6,effect,category_id,memo,cleared "
                     "FROM ledger_entries WHERE transaction_id=? ORDER BY line_no", (current.id,))
-                for old, new in zip(old_cleared, new_rows):
-                    same_posting = all(old[key] == new[key] for key in
-                                       ("account_id", "asset_id", "quantity_e6", "effect", "category_id", "memo"))
-                    if same_posting and old["cleared"]:
-                        self.db.execute("UPDATE ledger_entries SET cleared=1 WHERE id=?", (new["id"],))
+                self.repo.replace_lines(current.id, updated.date, lines)
+                if updated.date == current.date and len(old_cleared) == len(lines):
+                    new_rows = self.db.all(
+                        "SELECT id,account_id,asset_id,quantity_e6,effect,category_id,memo "
+                        "FROM ledger_entries WHERE transaction_id=? ORDER BY line_no", (current.id,))
+                    for old, new in zip(old_cleared, new_rows):
+                        same_posting = all(old[key] == new[key] for key in
+                                           ("account_id", "asset_id", "quantity_e6", "effect", "category_id", "memo"))
+                        if same_posting and old["cleared"]:
+                            self.db.execute("UPDATE ledger_entries SET cleared=1 WHERE id=?", (new["id"],))
             self._check_holdings(list(current.lines) + list(lines))
             after = self.get(current.id)
             self.audit.record("transaction", current.id, "edit", f"Edited {current.ref}",

@@ -49,6 +49,13 @@ class Position:
     invested: Decimal = ZERO  # all purchases, including the cost of units since sold
     owned_invested: Decimal = ZERO
     dividend_tax: Decimal = ZERO  # tax withheld from the dividends above (they are gross)
+    owned_dividends: Decimal = ZERO
+    owned_dividend_tax: Decimal = ZERO
+    has_other_owners: bool = False
+
+    @property
+    def owned_net_dividends(self) -> Decimal:
+        return self.owned_dividends - self.owned_dividend_tax
 
     @property
     def short_name(self) -> str:
@@ -63,11 +70,9 @@ class Position:
     def owned_result(self, units: Decimal, value: Decimal | None, cost: Decimal) -> dict:
         """Owned lifetime gain and plain return, using the original purchases as denominator.
 
-        Cost pools keep your purchases apart from assets held for somebody else. Income
-        follows the same owned-unit allocation as the Investments report.
+        Cost pools and distributions keep the actual ledger owner, including after a sale.
         """
-        share = units / self.quantity if self.quantity else ZERO
-        gain = None if value is None else value - cost + (self.owned_realized or ZERO) + self.net_dividends * share
+        gain = None if value is None else value - cost + (self.owned_realized or ZERO) + self.owned_net_dividends
         invested = self.owned_invested
         return {"gain": gain, "invested": invested,
                 "gain_pct": gain / invested * 100 if gain is not None and invested else None}
@@ -95,6 +100,18 @@ class Portfolio:
     positions: list[Position] = field(default_factory=list)  # open and closed
     xirr: Decimal | None = None
     display_return: DisplayReturn | None = None
+
+    @property
+    def owned_realized(self) -> Decimal:
+        return sum((p.owned_realized or ZERO for p in self.positions), ZERO)
+
+    @property
+    def owned_dividends(self) -> Decimal:
+        return sum((p.owned_dividends for p in self.positions), ZERO)
+
+    @property
+    def has_other_owners(self) -> bool:
+        return any(p.has_other_owners for p in self.positions)
 
     @property
     def open(self) -> list[Position]:

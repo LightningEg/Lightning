@@ -268,6 +268,9 @@ class PlanningService:
         count = 0
         with self.db.transaction():
             for _, item, payment, candidate in settled:
+                if (self.repo.is_settled(item.id, payment.due_date) or
+                        candidate["id"] in self.repo.linked_transaction_ids()):
+                    continue  # a confirmation committed since the candidate read
                 self.repo.settle(item.id, payment.due_date, "PAID", candidate["id"], candidate["amount"])
                 linked.add(candidate["id"])
                 count += 1
@@ -363,6 +366,11 @@ class PlanningService:
         return self.repo.linked_transaction_ids()
 
     def mark_paid(self, item_id: int, due_date: str, transaction_id: int) -> None:
+        # The current occurrence and source link are read under the same writer lock as the save.
+        with self.db.transaction():
+            self._mark_paid(item_id, due_date, transaction_id)
+
+    def _mark_paid(self, item_id: int, due_date: str, transaction_id: int) -> None:
         item = self.get(item_id)
         try:
             due = date.fromisoformat(due_date)
@@ -371,6 +379,13 @@ class PlanningService:
         scheduled = next((payment for payment in self.payments(item, due) if payment.due_date == due_date), None)
         if not scheduled:
             raise ValidationError("That date is not on this payment schedule.")
+        if (scheduled.status == PaymentStatus.PAID and scheduled.transaction_id == transaction_id or
+                self.db.scalar("SELECT 1 FROM loan_extra_payments WHERE planned_item_id=? "
+                               "AND transaction_id=? AND due_date=?", (item_id, transaction_id, due_date))):
+            return  # retry of this exact confirmation
+        if (self.repo.is_settled(item_id, due_date) and
+                not (item.kind == PlanKind.LOAN and scheduled.status == PaymentStatus.PAID and scheduled.outstanding)):
+            raise ValidationError("This payment is already settled. Reopen it before linking a different transaction.")
         if transaction_id in self.repo.linked_transaction_ids():
             raise ValidationError("That transaction already settles another payment.")
         currency = self.accounts.get(item.account_id).currency if item.account_id else self.transactions.base_currency

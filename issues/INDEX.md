@@ -41,7 +41,7 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | **2M** | [A stale transaction edit form can silently reverse a newer amount](2-safe-for-real-money/2M-stale-edit-form-overwrites.md) | bug | transactions | building |
 | **2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug | android | new |
 
-Done: 2D, 2K, 2O, 2P, 2Q, 2R, 2S, 2T, 2G, 2H, 2N. Next free code: 2V.
+Done: 2D, 2K, 2O, 2P, 2Q, 2R, 2S, 2T, 2G, 2H, 2N, 2V, 2W, 2X, 2Y. Next free code: 2Z.
 
 ## 3 Polish and Arabic
 
@@ -91,7 +91,7 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | **5J** | [Converting EGP to dollars raises net worth - the conversion's own rate revalues every dollar holding](5-investments/5J-conversion-raises-net-worth.md) | bug | investments | new |
 | **5K** | [A certificate's holding page shows price charts, nine empty "Units out" rows, no interest, and saves it as Equity Fund](5-investments/5K-certificate-holding-page.md) | bug | investments | ready |
 
-Done: 5H. Next free code: 5L.
+Done: 5H, 5L. Next free code: 5M.
 
 ## 6 Market data
 
