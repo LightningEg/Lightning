@@ -22,7 +22,7 @@ from lightning.core.errors import LightningError
 from lightning.core.money import fmt
 from lightning.core.dates import today
 from lightning.sync.journal.capture import JournalCapture
-from lightning.sync.journal.codec import JournalError
+from lightning.sync.journal.codec import JournalError, digest
 
 
 def _command_label(name):
@@ -286,6 +286,7 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
                 split_count=max(4, sum(key.startswith("split_category_") for key in values)),
                 currency=device.c.base_currency, sms_available=sms_source is not None, sms_permission=sms_permission, phone=phone, page=page,
                 pairing=pairing.screen() if pairing is not None else dict(enabled=False),
+                pairing_version=digest(pairing.screen()) if pairing is not None else "",
                 version=version(), sync=device.sync_status()), status_code=400 if error else 200)
 
     def version():
@@ -351,6 +352,16 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
         data = await form(request)
         if pairing is None:
             raise JournalError("Nearby pairing is unavailable in this preview")
+        if action == "poll":
+            screen = pairing.screen()
+            if device.home is None and not screen["pending"] and not screen["paired"]:
+                await pairing.find()
+            elif screen.get("stage") == "waiting":
+                try:
+                    await pairing.finish()
+                except (JournalError, OSError, TimeoutError):
+                    pass
+            return JSONResponse(dict(version=digest(pairing.screen())))
         if action == "open":
             pairing.begin(str(data.get("password","")))
         elif action == "stop":

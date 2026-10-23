@@ -1,12 +1,11 @@
-"""Short-lived pairing bound to both keys, code, matching digits and profile password.
+"""Short-lived pairing bound to device identities, number matching and password proof.
 
-Order is a short-authentication-string comparison: (1) the joining device sends
-a signed request proven with the code alone; (2) both screens show the same six
-digits and the joiner's user confirms them; (3) only then the joiner sends a
-password proof over the pinned connection. Nothing derived from the password
-leaves a device before that confirmation. Admission needs the home's own digit
-confirmation and a valid password proof, in either order. The data key and
-password are never part of a pairing message.
+Number-match offers commit the joining secret before the home supplies a fresh
+challenge. The signed reveal binds both contributions to the authentication
+number, preventing either peer from grinding a matching transcript offline.
+The joining user selects the home's number before sending a password proof;
+admission also requires explicit home approval. Legacy offers still require a
+six-digit bootstrap code. Passwords and data keys never enter pairing messages.
 """
 from __future__ import annotations
 
@@ -21,7 +20,7 @@ from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
 
 from lightning.security.keys import unwrap_key, _password_bytes
 from lightning.sync.identity import check_digits
-from .codec import JournalError, authenticate, canonical, digest, fields, seal, unpack, uuid
+from .codec import JournalError, authenticate, canonical, digest, fields, hash_value, seal, unpack, uuid
 
 
 def _password_proof(password, salt):
@@ -38,24 +37,79 @@ def normalize_code(value):
     return code
 
 
+def _request_proof(offer, request, code):
+    # This public binding only reserves a request. Authentication still requires
+    # out-of-band number matching, explicit home approval and the password proof.
+    key = (b"lightning-number-match-v1" if offer.get("method") == "number-match"
+           else normalize_code(code).encode("ascii"))
+    return hmac.new(key, canonical(request), hashlib.sha256).hexdigest()
+
+
+def number_choices(digits):
+    choices = [digits]
+    while len(choices) < 3:
+        candidate = f"{secrets.randbelow(1000000):06d}"
+        if candidate not in choices:
+            choices.append(candidate)
+    secrets.SystemRandom().shuffle(choices)
+    return choices
+
+
+def require_live_offer(candidate):
+    offer = unpack(candidate["offer"].encode())["body"]
+    return _offer(candidate["offer"].encode(), offer["home_key"], time.time)
+
+
 def _offer(offer, home_key, now):
     envelope = unpack(offer)
     authenticate(envelope, home_key)
     body = envelope["body"]
-    fields(body, ("type", "profile", "generation", "home", "home_key", "nonce", "salt", "expires"))
+    fields(body, ("type", "profile", "generation", "home", "home_key", "nonce", "salt", "expires") + (("method",) if "method" in body else ()))
+    if "method" in body and body["method"] != "number-match":
+        raise JournalError("Unsupported pairing method")
     if body["type"] != "journal-pairing" or body["home_key"] != home_key or not now() < body["expires"] <= now() + 600:
         raise JournalError("Pairing offer expired or home identity changed")
     return body
 
 
-def request_pairing(offer, code, identity, incarnation, *, home_key, now=time.time):
-    """Phase 1: no password-derived value; the code only proves who may ask."""
+def request_pairing(offer, code, identity, incarnation, *, home_key, now=time.time, secret=None):
+    """Begin without password-derived values; commit a secret for number matching."""
     body = _offer(offer, home_key, now)
     uuid(incarnation)
     request = dict(type="journal-pairing-request", offer=digest(body), device=identity.device_id, name=identity.name,
                    key=identity.public_key, incarnation=incarnation)
-    request["proof"] = hmac.new(normalize_code(code).encode("ascii"), canonical(request), hashlib.sha256).hexdigest()
-    return seal(request, identity.sign), check_digits(canonical(dict(offer=body, request=request)))
+    if body.get("method") == "number-match":
+        if not isinstance(secret, bytes) or len(secret) != 32:
+            raise JournalError("Number matching requires a fresh secret")
+        request["commitment"] = hashlib.sha256(secret).hexdigest()
+    request["proof"] = _request_proof(body, request, code)
+    return seal(request, identity.sign), (None if secret is not None else check_digits(canonical(dict(offer=body, request=request))))
+
+
+def matching_digits(offer, request, challenge, secret):
+    return check_digits(canonical(dict(offer=offer, request=request, challenge=challenge, secret=secret)))
+
+
+async def complete_number_match(offer_wire, request_wire, answer, secret, identity, exchange):
+    """Commit before the home's unpredictable challenge; reveal only after its signed reply.
+
+    Neither peer can grind a chosen matching number after learning the other's
+    random contribution. No password-derived value is sent by this handshake.
+    """
+    offer = unpack(offer_wire)["body"]
+    request = unpack(request_wire)["body"]
+    authenticate(answer, offer["home_key"])
+    body = answer["body"]
+    fields(body, ("type", "request", "challenge"))
+    hash_value(body["challenge"])
+    if body["type"] != "pairing-wait" or body["request"] != digest(request):
+        raise JournalError("Pairing transcript changed")
+    reveal = dict(type="journal-pairing-reveal", request=digest(request), challenge=body["challenge"], secret=secret.hex())
+    reply = unpack(await exchange(seal(reveal, identity.sign)))
+    authenticate(reply, offer["home_key"])
+    if reply["body"] != dict(type="pairing-matched", request=digest(request), challenge=body["challenge"], reveal=digest(reveal)):
+        raise JournalError("Pairing transcript changed")
+    return matching_digits(offer, request, body["challenge"], secret.hex())
 
 
 def prove_pairing(offer, request, password, identity, *, home_key, now=time.time):
@@ -80,7 +134,9 @@ class PairingDesk:
             raise JournalError("Pair on the home")
         self.device, self.membership, self.db, self.clock, self.on_admit = device, membership, device.store.db, clock, on_admit
 
-    def begin(self, key_file, password):
+    def begin(self, key_file, password, *, method=None):
+        if method not in (None, "number-match"):
+            raise JournalError("Unsupported pairing method")
         self.device.store.require_confirmation_authority()
         if not hmac.compare_digest(unwrap_key(key_file, password), self.db.copy_key()):
             raise JournalError("Password belongs to a different profile")
@@ -89,10 +145,12 @@ class PairingDesk:
         body = dict(type="journal-pairing", profile=config["profile"], generation=config["generation"],
                     home=config["device"], home_key=config["home_key"], nonce=os.urandom(32).hex(),
                     salt=salt.hex(), expires=int(self.clock()) + 600)
+        if method is not None:
+            body["method"] = method
         offer = seal(body, self.device.identity.sign)
         # Temporary proof verifier lives only in the encrypted profile and expires.
         state = dict(offer=offer.decode(), code=code, verifier=_password_proof(password, salt).hex(), attempts=0, proof_attempts=0,
-                     request=None, proof=None, confirmed=False)
+                     request=None, proof=None, confirmed=False, challenge=None, reveal=None)
         with self.db.transaction():
             self.db.execute("INSERT OR REPLACE INTO journal_local VALUES('pairing',?)", (canonical(state).decode(),))
         return offer, code
@@ -116,13 +174,15 @@ class PairingDesk:
         if state["request"]:
             if state["request"] != wire.decode():
                 raise JournalError("Another device is already pairing; stop and open a new code on the home")
-            return check_digits(canonical(dict(offer=offer, request=unpack(wire)["body"])))
+            return self.digits(state, offer)
         # Persist every attempt before interpreting the request, including malformed ones.
         state["attempts"] += 1
         self._save(state)
         envelope = unpack(wire)
         body = envelope["body"]
-        fields(body, ("type", "offer", "device", "name", "key", "incarnation", "proof"))
+        fields(body, ("type", "offer", "device", "name", "key", "incarnation", "proof") + (("commitment",) if offer.get("method") == "number-match" else ()))
+        if offer.get("method") == "number-match":
+            hash_value(body["commitment"])
         if type(body["name"]) is not str or not 1 <= len(body["name"].strip()) <= 60:
             raise JournalError("Invalid nearby device name")
         uuid(body["device"])
@@ -131,12 +191,49 @@ class PairingDesk:
         if body["type"] != "journal-pairing-request" or body["offer"] != digest(offer):
             raise JournalError("Pairing transcript changed")
         unsigned = {key: value for key, value in body.items() if key != "proof"}
-        expected = hmac.new(state["code"].encode("ascii"), canonical(unsigned), hashlib.sha256).hexdigest()
+        expected = _request_proof(offer, unsigned, state["code"])
         if type(body["proof"]) is not str or not hmac.compare_digest(body["proof"], expected):
             raise JournalError("Pairing code is wrong")
         state["request"] = wire.decode()
+        if offer.get("method") == "number-match":
+            state["challenge"] = os.urandom(32).hex()
         self._save(state)
-        return check_digits(canonical(dict(offer=offer, request=body)))
+        return self.digits(state, offer)
+
+    def digits(self, state, offer):
+        request = unpack(state["request"].encode())["body"]
+        if offer.get("method") == "number-match":
+            if not state.get("reveal"):
+                return None
+            return matching_digits(offer, request, state["challenge"], state["reveal"])
+        return check_digits(canonical(dict(offer=offer, request=request)))
+
+    def waiting(self):
+        state, offer = self._state()
+        request = unpack(state["request"].encode())["body"]
+        body = dict(type="pairing-wait", request=digest(request))
+        if offer.get("method") == "number-match":
+            body["challenge"] = state["challenge"]
+        return body
+
+    def reveal(self, wire):
+        state, offer = self._state()
+        if offer.get("method") != "number-match" or not state.get("request") or self.clock() >= offer["expires"]:
+            raise JournalError("Pairing expired; start again")
+        request = unpack(state["request"].encode())["body"]
+        envelope = unpack(wire)
+        authenticate(envelope, request["key"])
+        body = envelope["body"]
+        fields(body, ("type", "request", "challenge", "secret"))
+        hash_value(body["secret"])
+        if (body["type"] != "journal-pairing-reveal" or body["request"] != digest(request)
+                or body["challenge"] != state["challenge"]
+                or not hmac.compare_digest(hashlib.sha256(bytes.fromhex(body["secret"])).hexdigest(), request["commitment"])):
+            raise JournalError("Pairing transcript changed")
+        state["reveal"] = body["secret"]
+        self._save(state)
+        return seal(dict(type="pairing-matched", request=digest(request), challenge=state["challenge"],
+                         reveal=digest(body)), self.device.identity.sign)
 
     def prove(self, wire):
         """Phase 2: the password proof, sent only after the joiner confirmed the digits.
@@ -144,7 +241,7 @@ class PairingDesk:
         Returns the membership update once the home has also confirmed, else None.
         """
         state, offer = self._state()
-        if not state["request"]:
+        if not state["request"] or (offer.get("method") == "number-match" and not state.get("reveal")):
             raise JournalError("No verified pairing request")
         if self.clock() >= offer["expires"] or state["proof_attempts"] >= 3:
             raise JournalError("Pairing expired; open a new code on the home")
@@ -174,8 +271,8 @@ class PairingDesk:
         if not state.get("request"):
             raise JournalError("No verified pairing request")
         body = unpack(state["request"].encode())["body"]
-        expected = check_digits(canonical(dict(offer=offer, request=body)))
-        if self.clock() >= offer["expires"] or type(digits) is not str or not hmac.compare_digest(digits, expected):
+        expected = self.digits(state, offer)
+        if not expected or self.clock() >= offer["expires"] or type(digits) is not str or not hmac.compare_digest(digits, expected):
             raise JournalError("Check that both devices show the same six digits")
         state["confirmed"] = True
         self._save(state)

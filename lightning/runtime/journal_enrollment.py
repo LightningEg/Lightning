@@ -18,7 +18,7 @@ from lightning.sync.journal.codec import JournalError, authenticate, digest, sea
 from lightning.sync.journal.discovery import nearby_devices
 from lightning.sync.journal.enrollment import install_replica
 from lightning.sync.journal.local import PinnedLocalClient
-from lightning.sync.journal.pairing import prove_pairing, request_pairing
+from lightning.sync.journal.pairing import complete_number_match, number_choices, require_live_offer, prove_pairing, request_pairing
 from .session import read_slot, write_slot
 
 
@@ -46,13 +46,17 @@ class NewJournalReplica:
 
     def state(self):
         path = self.root/"enrollment.json"
-        return read_slot(path) if path.exists() else None
+        state = read_slot(path) if path.exists() else None
+        if state is not None and state.get("stage") == "compare" and not state.get("choices"):
+            state["choices"] = number_choices(state["digits"])
+            write_slot(path,state,replace=True)
+        return state
 
     async def find(self):
         self.candidates = {digest(dict(home=item["home"],offer=item["offer"])):item for item in await self.search(self.identity)}
-        return [dict(id=identifier,name=item["name"]) for identifier,item in self.candidates.items()]
+        return [dict(id=identifier,name=item["name"], number_match=unpack(item["offer"].encode())["body"].get("method") == "number-match") for identifier,item in self.candidates.items()]
 
-    async def join(self, candidate_id, code):
+    async def join(self, candidate_id, code=""):
         if self.state() is not None or (self.root/"ledger.db").exists():
             raise JournalError("Resume the existing pairing instead of pairing again")
         candidate = self.candidates.get(candidate_id)
@@ -60,14 +64,17 @@ class NewJournalReplica:
             raise JournalError("Find the nearby device again")
         offer = unpack(candidate["offer"].encode())["body"]
         incarnation = str(uuid4())
-        wire,digits = request_pairing(candidate["offer"].encode(),code,self.identity,incarnation,home_key=offer["home_key"])
+        secret = os.urandom(32) if offer.get("method") == "number-match" else None
+        wire,digits = request_pairing(candidate["offer"].encode(),code,self.identity,incarnation,home_key=offer["home_key"],secret=secret)
         request = self.client_factory(candidate["endpoint"],candidate["certificate"],timeout=5)
         response = unpack(await request(wire))
         authenticate(response,offer["home_key"])
         identifier = digest(unpack(wire)["body"])
-        if response["body"] != dict(type="pairing-wait",request=identifier):
+        if secret is not None:
+            digits = await complete_number_match(candidate["offer"].encode(),wire,response,secret,self.identity,request)
+        elif response["body"] != dict(type="pairing-wait",request=identifier):
             raise JournalError("Pairing response does not match this device")
-        write_slot(self.root/"enrollment.json",dict(candidate=candidate,request=identifier,wire=wire.decode(),digits=digits,incarnation=incarnation,
+        write_slot(self.root/"enrollment.json",dict(candidate=candidate,request=identifier,wire=wire.decode(),digits=digits,choices=number_choices(digits),incarnation=incarnation,
                    profile=offer["profile"],generation=offer["generation"],home_key=offer["home_key"],stage="compare"))
         return digits
 
@@ -76,14 +83,18 @@ class NewJournalReplica:
         state = self.state()
         if state is None or state.get("stage") != "compare":
             raise JournalError("Find a home and enter its number first")
+        require_live_offer(state["candidate"])
+        if state.get("failed"):
+            raise JournalError("Compare the numbers again: cancel and start a new pairing")
         if type(digits) is not str or not hmac.compare_digest(digits,state["digits"]):
+            write_slot(self.root/"enrollment.json",dict(state,failed=True),replace=True)
             raise JournalError("Check that both devices show the same six digits")
         write_slot(self.root/"enrollment.json",dict(state,stage="password"),replace=True)
 
     async def prove(self, password):
         """Send the password proof, only after compare(). The password is never stored."""
         state = self.state()
-        if state is None or state.get("stage") != "password":
+        if state is None or state.get("stage") != "password" or state.get("failed"):
             raise JournalError("Compare the numbers with the home first")
         candidate = state["candidate"]
         wire = prove_pairing(candidate["offer"].encode(),state["wire"].encode(),password,self.identity,home_key=state["home_key"])

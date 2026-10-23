@@ -5,12 +5,12 @@ import secrets
 from pathlib import Path
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from lightning.runtime.journal_enrollment import NewJournalReplica
 from lightning.runtime.paths import create_profile
-from lightning.sync.journal.codec import JournalError
+from lightning.sync.journal.codec import JournalError, digest, unpack
 from lightning.ui.journal_enrollment_i18n import error_text, strings
 
 _BASE = "/profiles/journal/join"
@@ -89,11 +89,11 @@ def journal_enrollment_router(session) -> APIRouter:
             notice = strings(locale).get(notice_key, notice)
         found = []
         if enrollment is not None:
-            found = [dict(id=identifier, name=candidate["name"])
+            found = [dict(id=identifier, name=candidate["name"], number_match=unpack(candidate["offer"].encode())["body"].get("method") == "number-match")
                      for identifier, candidate in enrollment.candidates.items()]
         context = dict(request=request, locale=locale, texts=strings(locale), csrf=session.csrf,
                        error=error_text(error, locale) if error else "", notice=notice,
-                       stage=stage, state=state or {}, candidates=found, name=name,
+                       stage=stage, state=state or {}, candidates=found, name=name, pairing_version=digest(found),
                        on_phone=bool(getattr(request.state, "phone", False)))
         response = _views.TemplateResponse(request=request, name="journal/journal_enrollment.html",
                                            context=context, status_code=status)
@@ -156,6 +156,18 @@ def journal_enrollment_router(session) -> APIRouter:
             if "has not been approved" in message:
                 return render(request, notice_key="home_approval")
             return render(request, error=message, status=400)
+
+    @router.post(_BASE + "/poll")
+    async def poll(request: Request):
+        try:
+            await form(request)
+            enrollment = active()
+            if enrollment is None or enrollment.state() is not None:
+                return JSONResponse(dict(version=digest([])))
+            found = await enrollment.find()
+            return JSONResponse(dict(version=digest(found)))
+        except (JournalError, OSError, ValueError, TimeoutError):
+            return JSONResponse(dict(error=True), status_code=400)
 
     @router.post(_BASE + "/find", response_class=HTMLResponse)
     async def find(request: Request):

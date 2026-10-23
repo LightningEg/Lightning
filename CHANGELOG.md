@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-23 · Codex: 4D discovers nearby devices automatically and pairs by selecting the home’s number from three choices.
+  The PC still requires the profile password; signed commitment/challenge/reveal protects number matching. Recovery keys are unchanged.
+
 - 2026-10-23 · Codex: record 2U, the phone's website APK download failure, for investigation after the v1.4.4 release at the owner's request.
 
 ## [1.4.4] — 2026-10-23

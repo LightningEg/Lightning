@@ -7,13 +7,14 @@ from __future__ import annotations
 
 import hmac
 import json
+import os
 import time
 
 from lightning.sync.journal.codec import JournalError, authenticate, canonical, digest, fields, hash_value, seal, unpack, uuid
 from lightning.sync.journal.discovery import nearby_devices
 from lightning.sync.journal.local import PinnedLocalClient
 from lightning.sync.journal.membership import Membership
-from lightning.sync.journal.pairing import PairingDesk, prove_pairing, request_pairing
+from lightning.sync.journal.pairing import PairingDesk, complete_number_match, number_choices, require_live_offer, prove_pairing, request_pairing
 
 
 class NearbyPairing:
@@ -39,23 +40,28 @@ class NearbyPairing:
         if state and unpack(state["offer"].encode())["body"]["expires"] <= time.time():
             state = {}
         request = unpack(state["request"].encode())["body"] if state.get("request") else None
-        from lightning.sync.identity import check_digits
+        digits = self.desk.digits(state, unpack(state["offer"].encode())["body"]) if request else None
         client = self._value("pairing_client",{})
-        return dict(enabled=True, paired=self.device.identity.device_id in self.membership.state()["members"], code=state.get("code"), request_name=request["name"] if request else None,
-                    digits=check_digits(canonical(dict(offer=unpack(state["offer"].encode())["body"],request=request))) if request else None,
-                    confirmed=bool(state.get("confirmed")),
+        if client.get("stage") == "compare" and not client.get("choices"):
+            client["choices"] = number_choices(client["digits"])
+            with self.db.transaction():
+                self._save("pairing_client",client)
+        return dict(enabled=True, paired=self.device.identity.device_id in self.membership.state()["members"], code=state.get("code"), request_name=request["name"] if digits else None,
+                    digits=digits,
+                    confirmed=bool(state.get("confirmed")), number_match=bool(state and unpack(state["offer"].encode())["body"].get("method") == "number-match"),
+                    choices=client.get("choices", []), failed=client.get("failed", False),
                     members=[names.get(identifier,"Paired device") for identifier in self.membership.state()["members"]
                              if identifier != self.device.identity.device_id],
                     member_details=[dict(id=identifier, name=names.get(identifier, "Paired device"))
                                     for identifier in self.membership.state()["members"]
                                     if identifier != self.device.identity.device_id],
-                    nearby=[dict(id=identifier,name=value["name"]) for identifier,value in self._value("nearby",{}).items()],
+                    nearby=[dict(id=identifier,name=value["name"], number_match=unpack(value["offer"].encode())["body"].get("method") == "number-match") for identifier,value in self._value("nearby",{}).items()],
                     pending=client.get("digits"), stage=client.get("stage"))
 
     def begin(self, password):
         if self.desk is None or self.keys is None:
             raise JournalError("Open pairing on the home")
-        self.desk.begin(self.keys(),password)
+        self.desk.begin(self.keys(),password,method="number-match")
 
     def stop(self):
         self.db.execute("DELETE FROM journal_local WHERE name='pairing'")
@@ -70,14 +76,14 @@ class NearbyPairing:
 
     async def find(self):
         found = await self.search(self.device.identity)
-        # Discovery advertises identity only. Code/password proof and matching
-        # digits are still required before any new device is admitted.
+        # Discovery advertises identity only. Matching digits, home approval and
+        # password proof are required before any new device is admitted.
         candidates = {digest(dict(home=item["home"],offer=item["offer"])):item for item in found}
         with self.db.transaction():
             self._save("nearby",candidates)
         return len(candidates)
 
-    async def join(self, identifier, code):
+    async def join(self, identifier, code=""):
         candidate = self._value("nearby",{}).get(identifier)
         if candidate is None:
             raise JournalError("Search for nearby devices again")
@@ -90,19 +96,25 @@ class NearbyPairing:
             raise JournalError("This preview joins compatible dummy replicas; a new profile requires snapshot enrollment")
         if self.device.store.pending():
             raise JournalError("Sync existing pending work before pairing another connection")
-        wire,digits = request_pairing(candidate["offer"].encode(),code,self.device.identity,config["incarnation"],home_key=offer["home_key"])
+        secret = os.urandom(32) if offer.get("method") == "number-match" else None
+        wire,digits = request_pairing(candidate["offer"].encode(),code,self.device.identity,config["incarnation"],home_key=offer["home_key"],secret=secret)
         request = self.client_factory(candidate["endpoint"],candidate["certificate"],timeout=5)
         answer = unpack(await request(wire))
         authenticate(answer,config["home_key"])
-        if answer["body"] != dict(type="pairing-wait",request=digest(unpack(wire)["body"])):
+        if secret is not None:
+            digits = await complete_number_match(candidate["offer"].encode(),wire,answer,secret,self.device.identity,request)
+        elif answer["body"] != dict(type="pairing-wait",request=digest(unpack(wire)["body"])):
             raise JournalError("Pairing reply changed; reopen pairing on the home")
         with self.db.transaction():
-            self._save("pairing_client",dict(candidate=candidate,request=wire.decode(),digits=digits,stage="compare"))
+            self._save("pairing_client",dict(candidate=candidate,request=wire.decode(),digits=digits,choices=number_choices(digits),stage="compare"))
 
     def _client(self, stage):
         state = self._value("pairing_client",{})
         if not state:
             raise JournalError("Choose a nearby device and enter its number first")
+        if state.get("failed"):
+            raise JournalError("Compare the numbers again: cancel and start a new pairing")
+        require_live_offer(state["candidate"])
         if state["stage"] != stage:
             raise JournalError("Compare the numbers with the home first" if stage == "password" else "This step is already done")
         return state
@@ -111,6 +123,9 @@ class NearbyPairing:
         """The joining user's confirmation that the home shows the same digits. Nothing leaves the device here."""
         state = self._client("compare")
         if type(digits) is not str or not hmac.compare_digest(digits, state["digits"]):
+            state["failed"] = True
+            with self.db.transaction():
+                self._save("pairing_client", state)
             raise JournalError("Check that both devices show the same six digits")
         state["stage"] = "password"
         with self.db.transaction():
@@ -164,7 +179,9 @@ class NearbyPairing:
             raise JournalError("Invalid pairing message")
         if body.get("type") == "journal-pairing-request":
             self.desk.accept(wire)
-            return seal(dict(type="pairing-wait",request=digest(body)),self.device.identity.sign)
+            return seal(self.desk.waiting(),self.device.identity.sign)
+        if body.get("type") == "journal-pairing-reveal":
+            return self.desk.reveal(wire)
         if body.get("type") == "journal-pairing-proof":
             self.desk.prove(wire)
             return seal(dict(type="pairing-wait",request=body["request"]),self.device.identity.sign)

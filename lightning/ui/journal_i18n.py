@@ -56,6 +56,15 @@ EN = {
 }
 
 AR = {
+    "On your other device, select this device from Nearby devices.": "على الجهاز التاني، اختار الجهاز ده من الأجهزة القريبة.",
+    "Select this number on your other device, then approve here.": "اختار الرقم ده على الجهاز التاني، وبعدها وافق هنا.",
+    "Waiting for the other device to enter the profile password.": "مستنيين الجهاز التاني يدخل كلمة سر الملف.",
+    "Approve this device": "وافق على الجهاز ده",
+    "Select the number shown on the other device.": "اختار الرقم اللي ظاهر على الجهاز التاني.",
+    "The number did not match. Stop pairing on the home, then cancel here and start again.": "الرقم مش مطابق. أوقف الربط على الجهاز الأساسي، وبعدها الغيه هنا وابدأ تاني.",
+    "Searching automatically. Open pairing on your other device and use the same Wi-Fi.": "بندوّر تلقائي. افتح الربط على الجهاز التاني واستخدم نفس شبكة الواي فاي.",
+    "Cancel this pairing": "إلغاء الربط ده",
+
     "This signed journal backup opens as a separate review copy. Pair a fresh device to recover saved edits.": "النسخة الاحتياطية الموقّعة دي بتتفتح كنسخة منفصلة للمراجعة. اربط جهاز جديد عشان تسترجع التعديلات المحفوظة.",
     "Create a separate review copy from this backup.": "اعمل نسخة منفصلة للمراجعة من النسخة الاحتياطية دي.",
     "Action": "الإجراء", "Account": "الحساب", "From account": "من حساب",
