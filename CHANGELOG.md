@@ -11,7 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-## [1.4.3] · 2026-10-23
+## [1.4.3] — 2026-10-23
 
 - 2026-10-22 · Claude: phone overhaul (3AC, owner PDF; guideline 3.34 Part C): tab bar Overview, Budget, Add, Transactions, More with words;
   every tab opens on one hero figure; month stepper with a Choose period sheet; worded tabs; arrow chips, day nets, no ".00";
