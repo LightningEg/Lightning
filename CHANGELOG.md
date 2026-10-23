@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-23 · Codex: claim Audit 4 fixes 2M/2N: stale transaction forms and false failures after successful saves.
+
 - 2026-10-23 · Codex: fix 2G/2H: all cash transitions and Undo/Redo refuse new or worse deficits; edits/removals validate previous owners too.
   Imports retain harmless history corrections; multi-delete checks its final state. Add 19 regression cases and promote the ownership workflow probes.
 
