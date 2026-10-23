@@ -11,7 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-## [1.4.4] · 2026-10-23
+## [1.4.4] — 2026-10-23
 
 - 2026-10-23 · Claude: package version 1.4.4 (`pyproject.toml`, `lightning/__init__.py`, README, doc headers).
 - 2026-10-23 · Codex: reconcile the open PR backlog against current main; preserve the contributor fixes and phone overhaul.
