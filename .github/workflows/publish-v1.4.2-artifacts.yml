@@ -26,11 +26,11 @@ jobs:
     env:
       DOWNLOADS_REPO: LightningEg/Lightning-downloads
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: 641d9f27aa9285ebf0c8c6f406633ff235300545
           persist-credentials: false
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: '3.13'
       - name: Verify the original run, successful checks and immutable artifact identities
@@ -69,14 +69,14 @@ jobs:
               assert artifact['workflow_run']['head_sha'] == commit
           print('The exact v1.4.2 artifacts passed their original Linux, Windows, Android and signing checks.')
           PY
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           artifact-ids: '12379657123'
           path: release
           merge-multiple: true
           github-token: ${{ github.token }}
           run-id: 39669412565
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           artifact-ids: '12379901060'
           path: phone
