@@ -735,8 +735,13 @@ document.addEventListener("pointerdown", (event) => {
 // Keep repeated Enter presses from posting the quick-add form twice.
 document.addEventListener("submit", (event) => {
   const form = event.target;
-  if (form.matches("[data-confirm-delete]") && !window.confirmSubmit(event,
-    form.dataset.confirmDelete || "Delete this transaction? You can restore it from its history page.")) return;
+  const confirmHost = form.matches("[data-confirm-delete]")
+    ? form
+    : event.submitter?.matches("[data-confirm-delete]")
+      ? event.submitter
+      : null;
+  if (confirmHost && !window.confirmSubmit(event,
+    confirmHost.dataset.confirmDelete || "Delete this transaction? You can restore it from its history page.")) return;
   if (!(form.matches("#f-new, #f-edit, .investment-entry-form"))) return;
   if (form.dataset.submitting === "true") { event.preventDefault(); return; }
   form.dataset.submitting = "true";
@@ -751,6 +756,8 @@ const phoneBulk = document.getElementById("phone-bulk");
 if (phoneBulk) {
   const boxes = [...document.querySelectorAll('.transaction-select[form="phone-bulk"]:not(:disabled)')];
   const all = document.getElementById("phone-select-visible");
+  const phoneCount = phoneBulk.querySelector(".phone-select-count");
+  const phoneDelete = phoneBulk.querySelector("[data-confirm-delete]");
   const updateMerge = () => {
     const ids = [...new Set(boxes.filter((box) => box.checked && !box.disabled).map((box) => box.value))];
     if (phoneMerge) {
@@ -758,6 +765,12 @@ if (phoneBulk) {
       if (ids.length === 2) phoneMerge.href = `/transactions/merge?keep=${encodeURIComponent(ids[0])}&drop=${encodeURIComponent(ids[1])}`;
     }
     phoneBulk.querySelectorAll("button").forEach((button) => { button.disabled = ids.length === 0; });
+    if (phoneCount) phoneCount.textContent = t("{count} selected", {count: ids.length});
+    if (phoneDelete) {
+      phoneDelete.dataset.confirmDelete = ids.length === 1
+        ? "Delete this transaction? You can restore it from its history page."
+        : `${t("Delete {subject}?", {subject: t("these transactions")})} ${t("They leave the register and can be restored from transaction history.")}`;
+    }
     if (all) {
       all.checked = boxes.length > 0 && boxes.every((box) => box.checked);
       all.indeterminate = ids.length > 0 && !all.checked;
