@@ -1,6 +1,6 @@
 # Competition: our compass
 
-Last reviewed 2026-10-15 (Actual and Lightning workflow audit; other competitor dates unchanged). Who else helps people with their money, what their users love and hate, and what that means for Lightning. When a product decision is unclear, read *The compass* first. Every competitor fact is dated "as of" its reading; most Egyptian-app facts are from 2026-10-04 and are stale after about three months.
+Updated 2026-10-24 for Lightning's pricing policy; competitor facts remain dated as shown. Who else helps people with their money, what their users love and hate, and what that means for Lightning. When a product decision is unclear, read *The compass* first. Every competitor fact is dated "as of" its reading; most Egyptian-app facts are from 2026-10-04 and are stale after about three months.
 
 ## Contents
 
