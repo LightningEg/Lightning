@@ -4,6 +4,7 @@
 
 | Who | Work | Files | Since |
 |---|---|---|---|
+| Codex | 7P readable exports, prompt popup and workbook onboarding | `lightning/workflows/data_export.py`, `lightning/reporting/xlsx.py`, `lightning/workflows/ai_analysis.py`, export/settings UI and new workbook import | 2026-10-24 |
 | Claude | Journal: 7 review fixes, then J6 (owner asked 10-16). | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
 
