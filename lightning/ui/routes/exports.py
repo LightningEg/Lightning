@@ -154,8 +154,8 @@ async def import_workbook_template(request: Request):
     try:
         _unused(c)
         data, _, media = export_all(c, 'xlsx')
-    except ValueError as exc:
-        return Response(str(exc), status_code=400, media_type='text/plain')
+    except ValueError:
+        return Response('Download the template from a new, empty profile.', status_code=400, media_type='text/plain')
     return Response(data, media_type=media, headers={'Content-Disposition': 'attachment; filename="lightning-onboarding-template.xlsx"', 'Cache-Control': 'no-store'})
 
 

@@ -349,6 +349,9 @@ class TestInvestmentPages:
         assert 'data-holdings-group' in page and 'holdings-views' not in page
         picker = page.split('data-holdings-group', 1)[1].split('</select>', 1)[0]
         assert picker.count('<option') == 5
+        assert 'data-submit-on-change' in page and 'action="/investments" method="get"' in page
+        assert 'name="period" value="month"' in page and 'name="month" value="2026-09"' in page
+        assert 'window.location.assign(event.target.value)' not in page
         assert all(label in picker for label in ('By class', 'By account', 'By currency', 'By market', 'By security'))
 
     def test_full_investing_flow(self, c, setup):
