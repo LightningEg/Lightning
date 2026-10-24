@@ -13,6 +13,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 - 2026-10-24 · Codex: [7P, 7Q, 3AG] Make workbooks readable, add validated comprehensive onboarding, group data tools and move AI prompt editing into a popup.
   Clean investment rows and group via dropdown; let Needs you items be reviewed, snoozed or restored, with changed situations resurfacing.
+  Update the existing journal HTTP parser override to undici 7.30.1 for the required security audit.
 
 - 2026-10-23 · Codex: 5L attributes investment distributions, withholding and realized gains to their ledger owner, including changed ownership and closed holdings; owned reports no longer prorate another person's income.
 
