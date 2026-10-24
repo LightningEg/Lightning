@@ -20,7 +20,7 @@
 
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 
-1. **Audit 6 PR cleanup is complete.** GitHub showed no open pull requests in either repository before this documentation PR. The remaining items below are plan or owner acceptance work, not open PRs. **Read:** `reports/audit-6.md`.
+1. **Audit 6 disposition is complete; four other app PRs are open.** As of 2026-10-24, GitHub shows app PRs #117 and #121–#123 open, and no open website PRs. #117 is a CSV amount-format contribution; #121–#123 are Dependabot updates. They are separate from the historical PRs listed in Audit 6 and still need their own review. The remaining items below are plan or owner acceptance work. **Read:** `reports/audit-6.md`.
 2. **2M:** the three form revision fields remain. **Read:** `reports/audit-4.md`; `reports/audit-6.md`.
 3. **9J–9L:** remain open from Audit 5. **Read:** `reports/audit-5.md`.
 4. **1H:** coordinated Android, desktop and build-tool dependency locks remain; this follows deferred PR #103. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
