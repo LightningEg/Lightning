@@ -26,7 +26,7 @@ Updated 2026-10-24 for Lightning's pricing policy; competitor facts remain dated
 3. **Arabic and Egyptian money first.** Vodafone Cash, InstaPay, gold, certificates, CIB and NBE SMS. International apps do not know them; local apps know only the first few.
 4. **Never be the busy one.** YNAB's most common complaint is a busy interface; Actual's is setup. Mohab's test stands: fewest clicks, one name for one thing.
 5. **A wrong number is worse than a missing one.** Every bank-sync review complains of numbers that drift. Lightning shows what each figure includes (Architecture, financial rules).
-6. **Price stays obvious.** Owner decision (2026-10-24): all Lightning financial features are free indefinitely, with no trial, licence fee, subscription or paywall. Optional in-app cosmetic themes may support development; they change appearance only, and the shop is still being completed. Say's most repeated complaint is a paywall before trying. Users also leave over price rises (YNAB), per-person pricing (Copilot) and ads in paid versions (Money Manager).
+6. **Price stays obvious.** Owner decision (2026-10-24): all Lightning features are free indefinitely, with no trial, licence fee, subscription or paywall. Optional in-app cosmetic themes may support development; they change appearance only, and the shop is still being completed. Say's most repeated complaint is a paywall before trying. Users also leave over price rises (YNAB), per-person pricing (Copilot) and ads in paid versions (Money Manager).
 7. **Egyptian life is more than spending.** Qershnat adds gam'eya (rotating savings circle), zakat, family assets and reminders, and users ask for more. Wealth is the right ground; gam'eya and zakat are being built (owner, 2026-10-14).
 
 ## The field in one table
