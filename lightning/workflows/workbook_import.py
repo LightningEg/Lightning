@@ -83,7 +83,7 @@ def read_workbook(data):
                         if kind == 'inlineStr':
                             value = ''.join(cell.find(NS + 'is').itertext())
                         elif kind == 's':
-                            
+
                             try:
                                 value = strings[int(value)]
                             except (ValueError, IndexError):
