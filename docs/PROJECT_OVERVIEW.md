@@ -19,6 +19,7 @@ Read one section: `grep -n '^## ' docs/PROJECT_OVERVIEW.md`, then read from that
 | 7. Compared with the best budgeting apps | You plan a feature |
 | 8. UX plan (guideline 3.6) | You take a UX item |
 | 9. Plan and roadmap | You pick the next work or finish a milestone |
+| Cosmetic marketplace owner revision (2026-10-24) | You change cosmetic parts, purchasing or ownership |
 
 <a id="what-lightning-is"></a>
 ## 1. What Lightning is
@@ -258,3 +259,7 @@ schedules; Fill this month; entry helpers; gam'eya and zakat; and the five owner
 dated cash warnings, undo/review/provenance, reserve/bill/CD/reimbursement links, optional cash funding, saved views and
 weekly review). Detail: [CHANGELOG](../CHANGELOG.md) and [Architecture](ARCHITECTURE.md). Where each idea came from:
 [Competition](COMPETITION.md).
+
+## Cosmetic marketplace owner revision (2026-10-24)
+
+Appearance uses swappable, approved parts with fixed layout and financial semantics. Themes are intended to ship in the app; the website sells account-wide permanent ownership, then a temporary random code delivers a signed offline unlock over an initial online exchange. No device cap or repeat charge. Nile Nocturne and Royal Obsidian & Gold are the first design tests; pricing and release integration remain uncommitted. The site handles InstaPay plus a customer reference/WhatsApp receipt and separate owner settlement confirmation, with a stated final-purchase policy subject to required rights and error correction. Infrastructure status: Architecture › Cosmetic parts and offline ownership; remaining work: 8J.

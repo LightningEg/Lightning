@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "fallback": "lightning-default",
+  "slots": {
+    "palette": {
+      "allowed": [
+        "background",
+        "surface",
+        "raised",
+        "text",
+        "muted",
+        "border",
+        "accent",
+        "onAccent",
+        "income",
+        "expense",
+        "transfer",
+        "warning",
+        "focus",
+        "hero"
+      ],
+      "rule": "Semantic colours only; income/expense/transfer remain distinguishable and labelled."
+    },
+    "brand": {
+      "allowed": [
+        "logoVariant"
+      ],
+      "rule": "Approved light/dark mark only. Preserve identity, aspect ratio, dimensions and accessible name."
+    },
+    "header": {
+      "allowed": [
+        "surface",
+        "seam"
+      ],
+      "rule": "Paint only; preserve header height, controls and navigation order."
+    },
+    "navigation": {
+      "allowed": [
+        "surface",
+        "activeMark"
+      ],
+      "rule": "Preserve routes, labels, order, hit targets and selected/focus states."
+    },
+    "hero": {
+      "allowed": [
+        "surface",
+        "edge",
+        "decoration"
+      ],
+      "rule": "Never alter amounts, formatting, text colour meaning or figure position."
+    },
+    "cards": {
+      "allowed": [
+        "surface",
+        "border"
+      ],
+      "rule": "Keep padding, shape, border width, row heights, reading order and content."
+    },
+    "charts": {
+      "allowed": [
+        "grid",
+        "accent"
+      ],
+      "rule": "Preserve financial series meaning, axes, labels and non-colour distinctions."
+    },
+    "controls": {
+      "allowed": [
+        "fill",
+        "label",
+        "focus"
+      ],
+      "rule": "Keep dimensions, keyboard behaviour, validation and disabled/error states."
+    },
+    "overlays": {
+      "allowed": [
+        "surface",
+        "backdrop"
+      ],
+      "rule": "Keep stacking, modal focus containment, dismiss behaviour and screen-reader labels."
+    },
+    "menus": {
+      "allowed": [
+        "surface",
+        "divider"
+      ],
+      "rule": "Keep menu contents, order, keyboard access and hit targets."
+    },
+    "decoration": {
+      "allowed": [
+        "pattern",
+        "motion"
+      ],
+      "rule": "Approved inert patterns only. Never obscure content. Reduced motion disables all decoration motion."
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "royal-obsidian-gold",
+  "name": "Royal Obsidian & Gold",
+  "version": 1,
+  "status": "test-preview",
+  "priceCoins": null,
+  "bundleTargets": [
+    "windows",
+    "android"
+  ],
+  "minimumAppVersion": null,
+  "parts": {
+    "palette": {
+      "background": "#0B0A08",
+      "surface": "#15130F",
+      "raised": "#1E1B15",
+      "text": "#F3ECDC",
+      "muted": "#ABA18B",
+      "border": "#2F2A20",
+      "accent": "#D9B44A",
+      "onAccent": "#1A1405",
+      "income": "#9ED08A",
+      "expense": "#EE9A86",
+      "transfer": "#B3AA98",
+      "warning": "#EBC05A",
+      "focus": "#F2D983",
+      "hero": "#F6E3A8"
+    },
+    "brand": {
+      "logoVariant": "on-dark"
+    },
+    "header": {
+      "surface": "surface",
+      "seam": "accent"
+    },
+    "navigation": {
+      "surface": "surface",
+      "activeMark": "accent"
+    },
+    "hero": {
+      "surface": "surface",
+      "edge": "accent",
+      "decoration": "none"
+    },
+    "cards": {
+      "surface": "surface",
+      "border": "border"
+    },
+    "charts": {
+      "grid": "border",
+      "accent": "accent"
+    },
+    "controls": {
+      "fill": "accent",
+      "label": "onAccent",
+      "focus": "focus"
+    },
+    "overlays": {
+      "surface": "raised",
+      "backdrop": "background"
+    },
+    "menus": {
+      "surface": "raised",
+      "divider": "border"
+    },
+    "decoration": {
+      "pattern": "none",
+      "motion": "none"
+    }
+  }
+}

@@ -15,6 +15,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - 2026-10-25 · Claude: Tasks can carry Lightning Coins: contributors.yml records claims and the new rewards.yml pays the issues a merged pull request closes, through the website's database.
   Needs the SUPABASE_SERVICE_ROLE_KEY secret (without it both only print a notice); bots and the owner's account never earn. CONTRIBUTING.md says how to link GitHub.
 
+- 2026-10-24 · Codex: 8J bundles two test appearance manifests and validates fixed parts and signed account ownership offline. Native claiming/rendering remains gated on integration and acceptance.
+
 - 2026-10-24 · Codex: [7P, 7Q, 3AG] Make workbooks readable, add validated comprehensive onboarding, group data tools and move AI prompt editing into a popup.
   Clean investment rows and group via dropdown; let Needs you items be reviewed, snoozed or restored, with changed situations resurfacing.
   Update the existing journal HTTP parser override to undici 7.30.1 for the required security audit.
