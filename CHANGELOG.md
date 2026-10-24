@@ -11,8 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-- 2026-10-25 · Claude: Guideline D01, D03, D09, D11 (coders.html, both repos): member pages and their scripts, the account chip and menu in the top bar, the wordmark hiding at 420px, and three paid themes (Moss, Garnet, Frost) beside the twelve free ones.
-- 2026-10-25 · Claude: Tasks can carry Lightning Coins: contributors.yml records claims and the new rewards.yml pays the issues a merged pull request closes, through the website's database.
+- 2026-10-24 · Codex: Docs status refresh: close completed guideline-sync item 8B, clarify Audit 6’s zero-open-PR result, and refresh the handoff.
+- 2026-10-24 · Claude: Guideline D01, D03, D09, D11 (coders.html, both repos): member pages and their scripts, the account chip and menu in the top bar, the wordmark hiding at 420px, and three paid themes (Moss, Garnet, Frost) beside the twelve free ones.
+- 2026-10-24 · Claude: Tasks can carry Lightning Coins: contributors.yml records claims and the new rewards.yml pays the issues a merged pull request closes, through the website's database.
   Needs the SUPABASE_SERVICE_ROLE_KEY secret (without it both only print a notice); bots and the owner's account never earn. CONTRIBUTING.md says how to link GitHub.
 
 - 2026-10-24 · Codex: 8J records the Mono-only free website palette policy, moderated stories and private website receipt uploads; syncs the Coders guideline.
