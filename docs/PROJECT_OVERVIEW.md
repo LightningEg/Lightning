@@ -62,7 +62,7 @@ Dates are when the owner decided. Undated rows are founding rules.
 | **Each visual names its time frame** | The chosen period or a fixed horizon (section 4). |
 | **Holdings value = Portfolio value** (2026-10-04) | Everything owned that is not cash, deposits included, on every tab and chart. |
 | **Every release stays downloadable** (2026-10-03) | Keep at least the three latest, each with its own immutable download and site entry. Never replace or remove an older one without the owner. |
-| **Free 7 days, then a reminder, never a lock** (2026-10-04) | Full app from minute one, no card or account. After 7 days it asks for a licence and never blocks or hides data. Price not set. |
+| **Free to use; optional cosmetic support** (owner, 2026-10-24) | Every app feature stays free indefinitely: no trial, licence fee, subscription or functional paywall. Optional in-app cosmetics, starting with themes, may be bought to support development; they change appearance only. The purchase and claim flow is still being completed. |
 | **The website never mentions other apps** (2026-10-05; again 2026-10-21) | No comparison or "vs" pages or tables, not even against a spreadsheet (guideline B10, B11). |
 | **Testing tab for testers only** (2026-10-21, left to Claude) | On lightningeg.com the Testing tab shows after `?testing`; the consent bar is a slim bottom strip. |
 | **Found as the all-in-one tracker** (2026-10-20) | The website answers "net worth, budget and expense tracker" with one page, English and Arabic, where every figure is Mohab's and no other app is named. Evidence and follow-up: [Competition](COMPETITION.md), issue 8C. |
