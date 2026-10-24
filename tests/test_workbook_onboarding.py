@@ -199,3 +199,24 @@ def test_foreign_currency_import_preserves_fx_and_refreshes_profile_currency(c, 
         assert target.reporting.net_worth('2026-02-01').total == c.reporting.net_worth('2026-02-01').total
     finally:
         target.db.close()
+
+
+@pytest.mark.parametrize('problem', ['default_currency', 'system_category'])
+def test_required_currency_and_system_setup_are_validated(c, tmp_path, problem):
+    tables = _raw_tables(c)
+    changed = []
+    for name, headers, rows, widths in tables:
+        if name == 'settings' and problem == 'default_currency':
+            rows = [tuple('XYZ' if header == 'value' and row[headers.index('key')] == 'base_currency' else value
+                          for header, value in zip(headers, row)) for row in rows]
+        if name == 'categories' and problem == 'system_category':
+            rows = [row for row in rows if row[headers.index('code')] != 'INC.UNACCOUNTED']
+        changed.append((name[:31], headers, rows, widths))
+    target = build(tmp_path / 'required.db')
+    try:
+        with pytest.raises(ValueError, match='default currency|system categories'):
+            confirm_import(target, tabular_workbook_bytes(changed))
+        assert target.categories.get_by_code('INC.UNACCOUNTED')
+        assert target.base_currency == 'EGP'
+    finally:
+        target.db.close()

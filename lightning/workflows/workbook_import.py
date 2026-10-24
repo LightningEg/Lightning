@@ -172,6 +172,7 @@ def _convert(value, field, table):
 
 
 def _load(conn, tables, schema):
+    required_categories = {row[0] for row in conn.execute('SELECT code FROM categories WHERE is_system=1')}
     conn.execute('PRAGMA defer_foreign_keys=ON')
     # Only identifiers supplied by this module/schema are used as SQL. Uploaded cells are parameters.
     for name in reversed((*TABLES, 'settings')):
@@ -190,6 +191,14 @@ def _load(conn, tables, schema):
         if rows:
             sql = f'INSERT INTO "{name}" (' + ','.join(f'"{col}"' for col in columns) + ') VALUES (' + ','.join('?' for _ in columns) + ')'
             conn.executemany(sql, rows)
+    base_row = conn.execute("SELECT value FROM settings WHERE key='base_currency'").fetchone()
+    base = base_row[0] if base_row else None
+    if not base or not conn.execute('SELECT 1 FROM registered_currencies WHERE code=?', (base,)).fetchone() or not conn.execute(
+            'SELECT 1 FROM financial_assets WHERE is_cash=1 AND currency=?', (base,)).fetchone():
+        raise ValueError('The default currency must be registered and have a cash asset. Keep the template currency records.')
+    present_categories = {row[0] for row in conn.execute('SELECT code FROM categories')}
+    if required_categories - present_categories:
+        raise ValueError('Required system categories are missing. Keep the template system category records.')
     if conn.execute('PRAGMA foreign_key_check').fetchone():
         raise ValueError('The workbook contains a missing reference. Keep every referenced account, asset, category and transaction.')
     for table in ('categories', 'asset_classes', 'accounts'):
