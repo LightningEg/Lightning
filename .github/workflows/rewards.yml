@@ -1,0 +1,113 @@
+# Lightning Coins for tasks (CONTRIBUTING.md). This file only reports facts to the database; the database does the
+# counting, one award per issue, and refuses anything it should not pay.
+#   issues assigned / unassigned    someone was given or lost an issue by hand: record or release their claim
+#   pull request merged             pay the issues it closed to its author, or keep it for them until they link GitHub
+# (The /take bot assigns with GITHUB_TOKEN, which starts no other workflow, so contributors.yml records those claims.)
+#
+# Safety: pull_request_target runs with this repository's secrets, so this file NEVER checks out or runs pull request
+# code. It reads only the numbers and names GitHub puts in the event, and passes them to the shell through environment
+# variables, never through ${{ }} inside a script. Without the SUPABASE_SERVICE_ROLE_KEY secret (forks, before setup)
+# it prints a notice and does nothing. Bots and the owner's account (the owner and the AI sessions that push from
+# it) never earn coins; their merged pull requests only close the offers they finish.
+name: Rewards
+
+on:
+  issues:
+    types: [assigned, unassigned]
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  claim:
+    if: github.event_name == 'issues' && github.event.assignee.type != 'Bot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_REPO: ${{ github.repository }}
+      ACTION: ${{ github.event.action }}
+      NUMBER: ${{ github.event.issue.number }}
+      WHO: ${{ github.event.assignee.login }}
+      WHO_ID: ${{ github.event.assignee.id }}
+      SUPABASE_URL: https://etecxblerynmkgppdfac.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - run: |
+          set -euo pipefail
+          # rpc <function> <json>: POST to Supabase with the service key. No key (a fork, or before setup): skip.
+          rpc() {
+            if [[ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]]; then echo "::notice::SUPABASE_SERVICE_ROLE_KEY is not set, so $1 is skipped."; return 0; fi
+            local out code
+            out=$(mktemp)
+            code=$({
+              printf 'header = "apikey: %s"\n' "$SUPABASE_SERVICE_ROLE_KEY"
+              [[ "$SUPABASE_SERVICE_ROLE_KEY" == sb_secret_* ]] || printf 'header = "Authorization: Bearer %s"\n' "$SUPABASE_SERVICE_ROLE_KEY"
+            } | curl -sS --config - --max-time 30 --retry 2 -o "$out" -w '%{http_code}' -X POST \
+                  -H 'Content-Type: application/json' --data "$2" "$SUPABASE_URL/rest/v1/rpc/$1") || { echo "::error::could not reach Supabase ($1)"; return 1; }
+            cat "$out"; echo
+            [[ "$code" == 2* ]] || { echo "::error::Supabase $1 answered HTTP $code"; return 1; }
+          }
+          [[ "$NUMBER" =~ ^[0-9]+$ && "$WHO_ID" =~ ^[0-9]+$ ]] || { echo "::error::unexpected issue or user id"; exit 1; }
+          if [[ "$ACTION" == assigned ]]; then
+            rpc record_claim "$(jq -nc --arg repo "$GH_REPO" --argjson issue "$NUMBER" --argjson id "$WHO_ID" --arg login "$WHO" \
+              '{p_repo:$repo, p_issue:$issue, p_github_id:$id, p_github_login:$login}')"
+          else
+            rpc release_claim "$(jq -nc --arg repo "$GH_REPO" --argjson issue "$NUMBER" --argjson id "$WHO_ID" \
+              '{p_repo:$repo, p_issue:$issue, p_github_id:$id}')"
+          fi
+
+  merged:
+    # Only a merge into the default branch closes issues, so only that can finish a task.
+    if: >-
+      github.event_name == 'pull_request_target' && github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number }}
+      PR_TITLE: ${{ github.event.pull_request.title }}
+      PR_URL: ${{ github.event.pull_request.html_url }}
+      MERGED_AT: ${{ github.event.pull_request.merged_at }}
+      AUTHOR: ${{ github.event.pull_request.user.login }}
+      AUTHOR_ID: ${{ github.event.pull_request.user.id }}
+      AUTHOR_TYPE: ${{ github.event.pull_request.user.type }}
+      ASSOC: ${{ github.event.pull_request.author_association }}
+      SUPABASE_URL: https://etecxblerynmkgppdfac.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - run: |
+          set -euo pipefail
+          # rpc <function> <json>: POST to Supabase with the service key. No key (a fork, or before setup): skip.
+          rpc() {
+            if [[ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]]; then echo "::notice::SUPABASE_SERVICE_ROLE_KEY is not set, so $1 is skipped."; return 0; fi
+            local out code
+            out=$(mktemp)
+            code=$({
+              printf 'header = "apikey: %s"\n' "$SUPABASE_SERVICE_ROLE_KEY"
+              [[ "$SUPABASE_SERVICE_ROLE_KEY" == sb_secret_* ]] || printf 'header = "Authorization: Bearer %s"\n' "$SUPABASE_SERVICE_ROLE_KEY"
+            } | curl -sS --config - --max-time 30 --retry 2 -o "$out" -w '%{http_code}' -X POST \
+                  -H 'Content-Type: application/json' --data "$2" "$SUPABASE_URL/rest/v1/rpc/$1") || { echo "::error::could not reach Supabase ($1)"; return 1; }
+            cat "$out"; echo
+            [[ "$code" == 2* ]] || { echo "::error::Supabase $1 answered HTTP $code"; return 1; }
+          }
+          [[ "$PR" =~ ^[0-9]+$ && "$AUTHOR_ID" =~ ^[0-9]+$ ]] || { echo "::error::unexpected pull request or user id"; exit 1; }
+          # The issues this pull request closes, in this repository only (GitHub reads the "Closes #n" words).
+          issues=$(gh pr view "$PR" --json closingIssuesReferences | jq -c --arg repo "$GH_REPO" \
+            '[.closingIssuesReferences[] | select((.url | ascii_downcase) | startswith(("https://github.com/" + $repo + "/issues/") | ascii_downcase)) | .number]')
+          if [[ "$issues" == "[]" ]]; then echo "Pull request #$PR closes no issue of this repository: nothing to do."; exit 0; fi
+          # Bots and the owner's account earn nothing; they only finish the task. (This repository belongs to an
+          # organization, where its owner's own pull requests read MEMBER, so both words are skipped.)
+          if [[ "$AUTHOR_TYPE" == Bot || "$ASSOC" == OWNER || "$ASSOC" == MEMBER ]]; then
+            rpc close_rewarded_issues "$(jq -nc --arg repo "$GH_REPO" --argjson pr "$PR" --argjson issues "$issues" \
+              '{p_repo:$repo, p_pr:$pr, p_issues:$issues}')"
+          else
+            rpc award_merge "$(jq -nc --arg repo "$GH_REPO" --argjson pr "$PR" --arg title "$PR_TITLE" --arg url "$PR_URL" \
+              --arg at "$MERGED_AT" --argjson id "$AUTHOR_ID" --arg login "$AUTHOR" --argjson issues "$issues" \
+              '{p_repo:$repo, p_pr:$pr, p_title:$title, p_url:$url, p_merged_at:$at, p_author_github_id:$id, p_author_login:$login, p_issues:$issues}')"
+          fi

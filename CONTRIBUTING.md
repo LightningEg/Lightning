@@ -29,6 +29,10 @@ Everything happens on GitHub; you need only a free GitHub account.
 
 **Stuck or curious?** Ask on the issue.
 
+**Lightning Coins.** Some tasks carry Lightning Coins, shown on lightningeg.com › For Geeks once you are signed in. They
+are cosmetic only (themes, banners, badges) and have no cash value. To receive them, link your GitHub account on the
+account page there; coins for a merged pull request wait for you until you do. Tasks without coins are just as welcome.
+
 **Ground rules.** Never put real financial data, passwords or keys in a commit or issue. Security problems go to
 [SECURITY.md](SECURITY.md), never a public issue. Nobody pushes to `main`. Going deeper: [Project overview](docs/PROJECT_OVERVIEW.md),
 [Architecture](docs/ARCHITECTURE.md), and [AGENTS.md](AGENTS.md) for the AIs' rules.
