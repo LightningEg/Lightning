@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from lightning.bank_imports import decode_csv
 from lightning.transactions.domain import TxnSource
 
@@ -403,3 +405,25 @@ def test_the_map_page_and_the_account_form_use_the_form_grid(c, setup):
     form = client.get("/accounts/new").text
     assert 'class="form-grid"' in form and 'class="soft-section"' in form and 'class="card" id="opening-balance-section"' not in form
     assert 'class="field wide"' in form  # Notes takes the whole row
+
+
+def test_decimal_amount_reads_common_bank_money_formats():
+    from decimal import Decimal as D
+
+    from lightning.bank_imports import _decimal_amount
+
+    assert _decimal_amount("(1,250.00)") == D("-1250.00")
+    assert _decimal_amount("1,250.00-") == D("-1250.00")
+    assert _decimal_amount("−1,250.00") == D("-1250.00")
+    assert _decimal_amount("EGP 1,250.00") == D("1250.00")
+    assert _decimal_amount("1,250.00 EGP") == D("1250.00")
+    assert _decimal_amount("1,250.00 ج.م") == D("1250.00")
+    assert _decimal_amount("١٬٢٥٠٫٠٠") == D("1250.00")
+    # Still accepted
+    assert _decimal_amount("-1,250.00") == D("-1250.00")
+    assert _decimal_amount("1.250,00") == D("1250.00")
+    assert _decimal_amount("") == D("0")
+    # Two signs and non-numbers stay rejected
+    for bad in ("-(5)", "(5)-", "abc", "EGP"):
+        with pytest.raises(ValueError):
+            _decimal_amount(bad)
