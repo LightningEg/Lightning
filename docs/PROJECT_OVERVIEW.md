@@ -105,6 +105,10 @@ Specs live in [Architecture](ARCHITECTURE.md); terms in the [Glossary](GLOSSARY.
 - **Samples:** `python -m lightning --demo` (Mohab's last three months); an empty profile can load Mohab's year (1 January to 2 October 2026) or the stories of Amr, Abdelrahman, Menna or Fatma. Mohab's year holds one of every part of Lightning: ten accounts of every kind (a dollar account bought with pounds, a flat valued by hand), goals (one paid, two saving), a gam'eya, zakat, a rule, a reimbursement claim, Mom's money and a grocery bill she paid, a laptop on instalments with an early payment, investing targets and a monthly goal, a saved #eid report and a statement still waiting for decisions. `tests/test_mohab_sample.py` keeps it that way: a new feature gets sample data there.
 
 <a id="period-and-fixed-horizon-visuals"></a>
+Owner decision (2026-10-24, 7Q): Needs you supports Mark as reviewed, Snooze until a chosen date, and Restore from Reviewed and snoozed. Reviewed reminders return when their situation changes; snoozes wake on their chosen date. These preferences change inbox/reminder visibility without recording payments or resolving the financial issue.
+
+Owner decisions (2026-10-24, 7P / 3AG): exports use plain Arial 11 left alignment and readable names before mapping IDs; category levels are separate columns. Settings groups comprehensive export and empty-profile workbook onboarding in Move your data, with a narrower page and compact AI export/copy/edit controls; the prompt editor is a popup. Holdings rows show one clean line without secondary annotations, names turn blue on hover without underlines, and grouping uses one dropdown. Implementation and import boundaries: [Architecture › CSV import and export contract](ARCHITECTURE.md#csv-import-and-export-contract).
+
 ## 4. Period and fixed-horizon visuals
 
 The period picker (All time · YTD · Monthly · Custom) drives most visuals. A few keep a fixed horizon, and each section header says which.

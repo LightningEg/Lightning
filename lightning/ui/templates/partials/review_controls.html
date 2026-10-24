@@ -1,0 +1,9 @@
+<div class="actions review-item-actions">
+{% if item.review_state != 'active' %}
+  <span class="small muted">{{ ('Reviewed' if item.review_state == 'reviewed' else 'Snoozed until {date}')|tr(locale, date=item.snoozed_until|default('')) }}</span>
+  <form method="post" action="/needs-you/state"><input type="hidden" name="identity" value="{{ item.review_id }}"><input type="hidden" name="action" value="restore"><input type="hidden" name="tab" value="handled"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn small">{{ 'Restore'|tr(locale) }}</button></form>
+{% else %}
+  <form method="post" action="/needs-you/state"><input type="hidden" name="identity" value="{{ item.review_id }}"><input type="hidden" name="action" value="reviewed"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn small">{{ 'Mark as reviewed'|tr(locale) }}</button></form>
+  <details><summary>{{ 'Snooze'|tr(locale) }}</summary><form method="post" action="/needs-you/state" class="actions"><input type="hidden" name="identity" value="{{ item.review_id }}"><input type="hidden" name="action" value="snoozed"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><label>{{ 'Remind me on'|tr(locale) }}<input type="date" name="until" value="{{ snooze_default }}" required></label><button class="btn small">{{ 'Snooze'|tr(locale) }}</button></form></details>
+{% endif %}
+</div>

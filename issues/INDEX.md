@@ -61,7 +61,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **3U** | [Arabic leftovers - the budget move preview arrow, two overlaps and a wrapped number](3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) | bug | arabic | ready |
 | **3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | feature | phone | new |
 
-Done: 3W, 3D, 3E, 3A, 3C, 3L, 3M, 3N, 3O, 3P, 3R, 3V, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AF, 3AE. Next free code: 3AG.
+Done: 3AG, 3W, 3D, 3E, 3A, 3C, 3L, 3M, 3N, 3O, 3P, 3R, 3V, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AF, 3AE. Next free code: 3AH.
 
 ## 4 Edit journal and devices
 
@@ -131,7 +131,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | 7L4 | ↳ Pair what belongs together | | | |
 | **7M** | [Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as overspending](7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) | owner | planning | new |
 
-Done: 7K, 7N, 7O. Next free code: 7P.
+Done: 7Q, 7P, 7K, 7N, 7O. Next free code: 7R.
 
 ## 8 Website
 

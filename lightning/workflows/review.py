@@ -1,13 +1,17 @@
 """One review inbox: every decision Lightning is waiting on, in one ordered list.
 
 The Overview's Needs you shows it. Each item names what needs a decision, gives one line of
-detail, and links to the page that settles it, with the action's name. Nothing here changes data.
+detail, and links to the page that settles it, with the action's name. Visibility preferences
+never post money or settle the underlying financial action.
 Reconciliation diagnostics stay in the Integrity checks view; this lists actions a user can take.
 """
 from __future__ import annotations
 
 import json
 from datetime import date
+from hashlib import sha256
+
+from lightning.core.errors import ValidationError
 
 from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, month_of
@@ -83,7 +87,7 @@ class ReviewInbox:
     def __init__(self, container):
         self.c = container
 
-    def items(self, on: date) -> list[dict]:
+    def items(self, on: date, *, include_handled: bool = False) -> list[dict]:
         """Everything waiting on the user on `on`, most urgent first (priority 0, then 1, then 2)."""
         c = self.c
         items = [{"label": "Missing valuation", "detail": item, "priority": 0,
@@ -231,7 +235,49 @@ class ReviewInbox:
                                         f"{fmt(check.target_percent)}%. Plan {fmt(check.over_by)} {c.base_currency} less.",
                               "href": f"/budget?month={check.month}", "priority": 2})
         items.extend(self._smarter_plan(on, forecast.free_cash))
-        return sorted(items, key=lambda item: item["priority"])
+        visible = []
+        for item in sorted(items, key=lambda item: item["priority"]):
+            # Visible facts define the situation, not days-late badges or the current date.
+            # A changed amount, due date, count or recommendation gets a fresh reminder.
+            facts = {key: item.get(key) for key in ("label", "detail", "href", "priority", "post", "source_version")}
+            identity = sha256(json.dumps(facts, sort_keys=True, default=str).encode()).hexdigest()
+            item["review_id"] = identity
+            state = self._state(identity)
+            item["review_state"] = "active"
+            if state.get("status") == "reviewed":
+                item["review_state"] = "reviewed"
+            elif state.get("status") == "snoozed" and state.get("until", "") > on.isoformat():
+                item["review_state"] = "snoozed"
+                item["snoozed_until"] = state["until"]
+            if include_handled or item["review_state"] == "active":
+                visible.append(item)
+        return visible
+
+    def _state(self, identity: str) -> dict:
+        try:
+            value = json.loads(self.c.settings.get("review_item_" + identity) or "{}")
+            return value if isinstance(value, dict) else {}
+        except (TypeError, ValueError):
+            return {}
+
+    def decide(self, identity: str, action: str, on: date, until: str = "") -> None:
+        """Change only this reminder's visibility. Its financial action remains outstanding."""
+        if action not in ("reviewed", "snoozed", "restore"):
+            raise ValidationError("Choose Mark as reviewed, Snooze or Restore.")
+        if identity not in {item["review_id"] for item in self.items(on, include_handled=True)}:
+            raise ValidationError("This item changed or no longer needs you. Review the current list.")
+        state = {"status": action}
+        if action == "snoozed":
+            try:
+                wake = date.fromisoformat(until)
+                if wake.isoformat() != until or wake <= on:
+                    raise ValueError()
+            except (ValueError, TypeError):
+                raise ValidationError("Choose a snooze date after today.") from None
+            state["until"] = until
+        # One setting per situation avoids overwriting decisions on unrelated items.
+        with self.c.db.transaction(undo_label="Needs you preference"):
+            self.c.settings.set("review_item_" + identity, json.dumps(state, sort_keys=True))
 
     def _smarter_plan(self, on: date, free_cash) -> list[dict]:
         """Where the plan's parts disagree: a goal it cannot reach in time, income above the average, a month
@@ -320,5 +366,9 @@ class ReviewInbox:
                 found.append({"label": _plural(total, one, many).capitalize(),
                               "detail": "Choose a category for each, so the budget and reports count it.",
                               "href": f"/transactions?category_id={category.id}",
-                              "action": "Sort them out", "priority": 2})
+                              "action": "Sort them out", "priority": 2,
+                              "source_version": sha256(json.dumps([tuple(row) for row in self.c.db.all(
+                                  "SELECT DISTINCT t.id,t.updated_at FROM transactions t JOIN ledger_entries l "
+                                  "ON l.transaction_id=t.id WHERE l.category_id=? AND t.status='POSTED' ORDER BY t.id",
+                                  (category.id,))]).encode()).hexdigest()})
         return found

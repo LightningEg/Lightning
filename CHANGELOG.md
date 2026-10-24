@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-24 · Codex: [7P, 7Q, 3AG] Make workbooks readable, add validated comprehensive onboarding, group data tools and move AI prompt editing into a popup.
+  Clean investment rows and group via dropdown; let Needs you items be reviewed, snoozed or restored, with changed situations resurfacing.
+
 - 2026-10-23 · Codex: 5L attributes investment distributions, withholding and realized gains to their ledger owner, including changed ownership and closed holdings; owned reports no longer prorate another person's income.
 
 - 2026-10-23 · Codex: 2Y validates scaled money against SQLite's signed integer limits; oversized converted values now show a validation error and roll back cleanly.

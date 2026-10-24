@@ -1,10 +1,14 @@
 {% extends "base.html" %}
 {% block title %}{{ label }}{% endblock %}
-{% block heading %}<div><h1>{{ label|tr(locale) }}</h1><div class="muted">{{ "Needs you"|tr(locale) }}</div></div>{% endblock %}
+{% block heading %}<div><h1>{{ label|tr(locale) }}</h1>{% if label != "Needs you" %}<div class="muted">{{ "Needs you"|tr(locale) }}</div>{% endif %}</div>{% endblock %}
 {% block content %}
+<div class="actions"><a class="btn" href="/needs-you">{{ 'Active items'|tr(locale) }}</a><a class="btn" href="/needs-you?tab=handled">{{ 'Reviewed and snoozed'|tr(locale) }}</a><a class="btn" href="/review">{{ 'Weekly review'|tr(locale) }}</a></div>
+{% if counts is defined %}<p class="muted small">{{ '{active} active · {reviewed} reviewed · {snoozed} snoozed'|tr(locale, **counts) }}</p>{% endif %}
+<p class="muted small">{{ 'Reviewed items stay quiet until the situation changes. Snoozed items return on your chosen date. These actions do not record payments.'|tr(locale) }}</p>
 {% if items %}<section class="card needs-you-page" aria-label="{{ label|tr(locale) }}">
-  <div class="overview-inline-list">{% for item in items %}<a class="overview-action-row" href="{{ item.href }}"{% if item.popup %} data-popup-open{% endif %}><span><b>{{ item.label }}</b><small>{{ item.detail }}</small></span><span>{% if item.late_days %}<span class="plan-status plan-status-late">{{ ("Late · 1 day" if item.late_days == 1 else "Late · {n} days")|tr(locale, n=item.late_days) }}</span> {% endif %}{{ item.action or 'Review' }}</span></a>{% if item.post %}<form class="actions" method="post" action="{{ item.post.href }}"><input type="hidden" name="back" value="{{ request.url.path }}">{% for key, value in (item.post.fields or {}).items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}<button class="btn small">{{ item.post.label|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}{% endfor %}</div>
+  <div class="overview-inline-list">{% for item in items %}<a class="overview-action-row" href="{{ item.href }}"{% if item.popup %} data-popup-open{% endif %}><span><b>{{ item.label }}</b><small>{{ item.detail }}</small></span><span>{% if item.late_days %}<span class="plan-status plan-status-late">{{ ("Late · 1 day" if item.late_days == 1 else "Late · {n} days")|tr(locale, n=item.late_days) }}</span> {% endif %}{{ item.action or 'Review' }}</span></a>{% if item.post %}<form class="actions" method="post" action="{{ item.post.href }}"><input type="hidden" name="back" value="{{ request.url.path }}">{% for key, value in (item.post.fields or {}).items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}<button class="btn small">{{ item.post.label|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}{% include 'partials/review_controls.html' %}{% endfor %}</div>
 </section>
 {% else %}<div class="card needs-you is-empty"><span class="needs-you-dot" aria-hidden="true"></span><b>{{ "Nothing needs you here now."|tr(locale) }}</b></div>
 <div class="actions"><a class="btn" href="/">{{ "Back to the Overview"|tr(locale) }}</a></div>{% endif %}
+{% if items %}<div class="actions"><a class="btn" href="/">{{ 'Back to the Overview'|tr(locale) }}</a></div>{% endif %}
 {% endblock %}

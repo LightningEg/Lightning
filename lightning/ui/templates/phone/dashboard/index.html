@@ -31,7 +31,8 @@
   <summary><span class="needs-you-dot" aria-hidden="true"></span><span class="phone-needs-text"><b id="needs-heading">{{ ('1 item needs you' if attention|length == 1 else '{n} items need you')|tr(locale, n=attention|length) }}</b>{% if phone and phone.needs %}<small>{% for s in phone.needs %}{{ s.text|tr(locale, **s['values']) }}{{ ' · ' if not loop.last }}{% endfor %}</small>{% endif %}</span><span class="needs-you-count">{{ attention|length }}</span><span class="phone-needs-open">{{ 'Open'|tr(locale) }}</span></summary>
   <div class="phone-rows">{% for item in attention %}<a class="phone-row" href="{{ item.href }}"{% if item.popup %} data-popup-open{% endif %}><span>{{ item.label }}<small>{{ item.detail }}</small></span>{% if item.late_days %}<span class="plan-status plan-status-late">{{ ("Late · 1 day" if item.late_days == 1 else "Late · {n} days")|tr(locale, n=item.late_days) }}</span> {% endif %}<b class="phone-row-action">{{ item.action or '›' }}</b></a>{% endfor %}</div>
 </details>
-{% endif %}{# nothing waiting: no row at all (A09) #}
+{% endif %}<a class="quiet-link" href="/needs-you">{{ 'Manage Needs you'|tr(locale) }}</a>
+{# nothing waiting: no row at all (A09) #}
 {% set tiles = ([phone.worth] if phone else []) + (stats|selectattr('key', 'equalto', 'plan')|list) + (stats|rejectattr('key', 'in', ['plan', 'safe'] if phone else ['plan'])|list) %}
 {{ kpi_tiles(tiles, base) }}
 

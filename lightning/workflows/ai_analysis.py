@@ -157,23 +157,21 @@ class AIAnalysisService:
         summary_rows += [(f"Investment result · {name}", value, c.base_currency, "Lightning-calculated period result")
                          for name, value in sorted(class_results.items(), key=lambda item: item[0].casefold())]
 
-        transaction_headers = ["Transaction ID", "Transaction reference", "Line number", "Line reference", "Date",
-            "Transaction type", "Analysis role", "Description", "Counterparty", "Notes", "Account ID", "Account",
-            "Account currency", "Asset ID", "Asset", "Original currency", "Category ID", "Category code",
-            "Category path", "Effect", "Quantity", "Unit price", "Original amount",
-            "EGP amount" if c.base_currency == "EGP" else f"Amount ({c.base_currency})", "Base currency", "FX rate", "Line memo"]
+        transaction_headers = ["Transaction ID", "Transaction reference", "Account", "Date", "Counterparty",
+            "Currency", "Total in currency", "FX rate", "Total in default currency", "Category L1", "Category L2",
+            "Transaction type", "Analysis role", "Description", "Notes", "Asset", "Effect", "Base currency",
+            "Line memo", "Category L3", "Line number", "Line reference", "Account currency", "Account ID", "Asset ID", "Category ID", "Category code"]
         transaction_rows = []
         if include_workbook_rows:
             for row in lines:
                 category_id = row["category_id"]
-                transaction_rows.append((row["transaction_id"], row["ref"], row["line_no"],
-                    line_ref(row["ref"], row["line_no"]), row["date"], row["type"], self._role(row),
-                    row["description"], row["counterparty"], row["notes"], row["account_id"], row["account_name"],
-                    row["account_currency"], row["asset_id"], row["asset_name"], row["currency"], category_id or "",
-                    row["category_code"] or "", category_paths.get(category_id, "") if category_id else "",
-                    row["effect"], from_e6(row["quantity_e6"]), from_e6(row["unit_price_e6"]),
-                    from_e6(row["amount_e6"]), from_e6(row["amount_base_e6"]), c.base_currency,
-                    from_e6(row["fx_rate_e6"]), row["memo"]))
+                levels = (category_paths.get(category_id, "").split(" › ") + ["", "", ""])[:3]
+                transaction_rows.append((row["transaction_id"], row["ref"], row["account_name"], row["date"],
+                    row["counterparty"], row["currency"], from_e6(row["amount_e6"]), from_e6(row["fx_rate_e6"]),
+                    from_e6(row["amount_base_e6"]), levels[0], levels[1], row["type"], self._role(row),
+                    row["description"], row["notes"], row["asset_name"], row["effect"], c.base_currency,
+                    row["memo"], levels[2], row["line_no"], line_ref(row["ref"], row["line_no"]), row["account_currency"],
+                    row["account_id"], row["asset_id"], category_id or "", row["category_code"] or ""))
         investment_headers = ["Checkpoint ID", "Scope", "Date", "Checkpoint reason", "Status", "Asset ID",
             "Asset", "Account ID", "Account", "Units", "Price", "Currency", "EGP value" if c.base_currency == "EGP" else f"Value ({c.base_currency})",
             "EGP return" if c.base_currency == "EGP" else f"Return ({c.base_currency})", "Price source",
@@ -183,12 +181,17 @@ class AIAnalysisService:
             row["currency"], row["value_base_e6"], row["return_base_e6"], row["price_source"] or "",
             "yes" if row["needs_price"] else "no", "", row["journal_transaction_id"] or "", row["ref"] or "")
             for row in preview["investment_rows"]]
-        category_headers = ["Category ID", "Code", "Name", "Parent ID", "Full path", "Level", "Direction",
-                            "Income class", "Family", "Active", "System category", "Default reimbursable"]
-        categories_sheet = [(row["id"], row["code"], row["name"], row["parent_id"] or "", row["path"],
+        investment_order = [0, 1, 2, 3, 4, 6, 8, 9, 10, 11, 12, 13, 14, 15, 18, 5, 7, 16, 17]
+        investment_headers = [investment_headers[i] for i in investment_order]
+        investment_rows = [tuple(row[i] for i in investment_order) for row in investment_rows]
+        category_headers = ["Name", "Category L1", "Category L2", "Category L3", "Level", "Direction",
+                            "Income class", "Family", "Active", "System category", "Default reimbursable",
+                            "Code", "Category ID", "Parent ID"]
+        categories_sheet = [(row["name"], *(row["path"].split(" › ") + ["", "", ""])[:3],
                              row["level"], row["direction"], row["income_class"], row["family"],
                              "yes" if row["active"] else "no", "yes" if row["system"] else "no",
-                             "yes" if row["default_reimbursable"] else "no") for row in category_rows]
+                             "yes" if row["default_reimbursable"] else "no", row["code"], row["id"],
+                             row["parent_id"] or "") for row in category_rows]
         row_counts = [len(summary_rows) + 1, len(transaction_rows) + 1, len(investment_rows) + 1,
                       len(categories_sheet) + 1]
         if any(count > MAX_ROWS for count in row_counts):

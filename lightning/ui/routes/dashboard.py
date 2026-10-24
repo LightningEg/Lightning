@@ -529,12 +529,36 @@ async def explain_overview_figure(request: Request, kind: str):
                   rows=rows, total=total, foot=foot, recent=[], action=action)
 
 
+@router.get("/needs-you")
+async def needs_you_inbox(request: Request):
+    items = ReviewInbox(container(request)).items(today(), include_handled=True)
+    handled = request.query_params.get("tab") == "handled"
+    counts = {state: sum(item["review_state"] == state for item in items)
+              for state in ("active", "reviewed", "snoozed")}
+    selected = [item for item in items if (item["review_state"] != "active") == handled]
+    return render(request, "needs_you.html", label="Needs you", items=selected, counts=counts,
+                  handled=handled, snooze_default=(today() + timedelta(days=7)).isoformat())
+
+
+@router.post("/needs-you/state")
+async def needs_you_state(request: Request):
+    form = await request.form()
+    back = "/needs-you?tab=handled" if form.get("tab") == "handled" else "/needs-you"
+    try:
+        ReviewInbox(container(request)).decide(str(form.get("identity", "")),
+            str(form.get("action", "")), today(), str(form.get("until", "")))
+    except LightningError as exc:
+        return redirect(back, exc.message)
+    return redirect(back)
+
+
 @router.get("/needs-you/{key}")
 async def needs_you_group(request: Request, key: str):
     """One group of Needs you (feedback ticket 84): its decisions, each with the action that settles it."""
     c = container(request)
     items = [item for item in ReviewInbox(c).items(today()) if group_of(item) == key]
-    return render(request, "needs_you.html", label=GROUP_LABELS.get(key, "Other"), items=items)
+    return render(request, "needs_you.html", label=GROUP_LABELS.get(key, "Other"), items=items,
+                  snooze_default=(today() + timedelta(days=7)).isoformat())
 
 
 @router.get("/money-from-others")

@@ -42,6 +42,7 @@
     </article>
   </section>
   {{ needs_rows(attention_groups, attention|length, more=('Weekly review'|tr(locale), '/review')) }}
+  {% if not attention %}<a class="quiet-link" href="/needs-you">{{ 'Reviewed and snoozed'|tr(locale) }}</a>{% endif %}
   {{ kpi_row(kpi_cards, base, 'This period') }}
   </div>
   <section class="overview-section" aria-labelledby="position-heading">

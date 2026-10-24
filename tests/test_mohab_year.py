@@ -1233,7 +1233,9 @@ def test_the_years_investments(mohab):
     # 1,025 from the sale + 225 price change + 300 dividends + 12 × 1,833.33 of certificate interest
     assert mohab.answers["year_investing"].shows("2026-10-01 to 2027-09-30", "+23,550 Net gain or loss")  # the Lead (3.33)
     # The interest lands on CIB Payroll from NBE, the certificate's bank, and is still the certificate's return.
-    assert mohab.answers["flat"].shows("1 certificate · average 100,000 · now 100,000", "100,000 100,000 17.5% +27,500 +27.5% +24.6%")
+    assert mohab.answers["flat"].shows("100,000 100,000 +27,500 +27.5%")
+    holdings = mohab.answers["flat"].screen.html.split('id="holdings-table"', 1)[1].split('</table>', 1)[0]
+    assert '<small' not in holdings and 'data-horizon-edit' not in holdings
 
 
 def test_data_checks_pass_after_a_year(mohab):
@@ -1452,14 +1454,14 @@ def test_settings_prepares_one_owned_ai_analysis_workbook(mohab):
 
     screen = mohab.b.go("Settings")
     assert screen.shows("Your data", "Export for AI", "All time", "YTD", "Monthly", "Custom",
-                        "Prepare AI analysis", "Prompt for your AI tool", "Copy prompt")
+                        "Export for AI analysis", "Copy AI prompt", "Edit AI prompt")
     screen = mohab.b.submit(button="All time", action=r"/settings$")
     assert screen.shows("2026-07-01 to 2027-09-30", "transactions", "investment records")
     prompt = screen.html.split('data-ai-prompt', 1)[1].split('>', 1)[1].split('</textarea>', 1)[0]
     prompt = prompt.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
     assert "lightning-analysis-2026-07-01-to-2027-09-30.xlsx" in prompt
     assert "Categories used in the exported activity" in prompt
-    form = screen.form(button="Prepare AI analysis", action=r"/settings/ai-analysis")
+    form = screen.form(button="Export for AI analysis", action=r"/settings/ai-analysis")
     response = mohab.b.client.post(form.action, data=form.fields)
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
@@ -1470,7 +1472,7 @@ def test_settings_prepares_one_owned_ai_analysis_workbook(mohab):
         assert [sheet.attrib["name"] for sheet in root.findall(f".//{{{xml}}}sheet")] == [
             "Summary", "Transactions", "Investment ledger", "Categories"]
         transaction_sheet = ET.fromstring(workbook.read("xl/worksheets/sheet2.xml"))
-        roles = {row.findall(f"{{{xml}}}c")[6].find(f"{{{xml}}}is/{{{xml}}}t").text
+        roles = {row.findall(f"{{{xml}}}c")[12].find(f"{{{xml}}}is/{{{xml}}}t").text
                  for row in transaction_sheet.findall(f".//{{{xml}}}row")[1:]
                  if len(row.findall(f"{{{xml}}}c")) > 6}
         assert {"transfer", "refund", "investment contribution", "investment sale", "dividend",

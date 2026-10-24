@@ -131,7 +131,7 @@
 {% macro needs_rows(rows, total=none, heading_id='needs-heading', more=none) -%}
 {% if rows %}{% set count = total if total is not none else rows|length %}
 <section class="needs" aria-labelledby="{{ heading_id }}">
-  <div class="needs-top"><h2 class="needs-head" id="{{ heading_id }}">{{ "Needs you"|tr(ui_locale()) }} <span>· {{ count }}</span></h2>{% if more %}<a class="quiet-link" href="{{ more[1] }}">{{ more[0] }}</a>{% endif %}</div>
+  <div class="needs-top"><h2 class="needs-head" id="{{ heading_id }}">{{ "Needs you"|tr(ui_locale()) }} <span>· {{ count }}</span></h2><a class="quiet-link" href="/needs-you">{{ "Manage Needs you"|tr(ui_locale()) }}</a>{% if more %}<a class="quiet-link" href="{{ more[1] }}">{{ more[0] }}</a>{% endif %}</div>
   {% for r in rows[:3] %}{{ _needs_row(r) }}{% endfor %}
   {% if rows|length > 3 %}<details class="needs-more"><summary>{{ "Show all {n}"|tr(ui_locale(), n=rows|length) }}</summary>{% for r in rows[3:] %}{{ _needs_row(r) }}{% endfor %}</details>{% endif %}
 </section>

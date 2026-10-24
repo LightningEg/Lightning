@@ -39,9 +39,8 @@ def test_a_dollar_holding_reports_price_and_fx_apart(c, setup):
     assert (row["currency"], row["cost_native"]) == ("USD", D("500"))
 
 
-def test_the_investments_table_shows_a_dollar_holdings_price_and_fx_parts(c, setup, monkeypatch):
-    """Bought through the investment service at the account's rate, a Nasdaq listing is a USD asset; the holdings
-    table shows its gain with the price part and FX part under it, adding up to the gain."""
+def test_the_investments_table_shows_one_gain_without_secondary_fx_annotations(c, setup, monkeypatch):
+    """The clean holding row retains its correct total gain; the report service keeps the tested price/FX split."""
     from fastapi.testclient import TestClient
     from lightning.ui.web import create_app
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-30")
@@ -61,4 +60,5 @@ def test_the_investments_table_shows_a_dollar_holdings_price_and_fx_parts(c, set
     table = page[page.index('class="holding-group"'):]
     row = table[table.index("Nasdaq 100 ETF"):]
     row = row[:row.index("</tr>")]
-    assert "+6,200" in row and "Price part +5,200" in row and "FX part +1,000" in row
+    assert "25,000" in row and "31,200" in row and "+6,200" in row
+    assert "<small" not in row and "Price part" not in row and "FX part" not in row

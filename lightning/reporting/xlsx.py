@@ -45,6 +45,10 @@ def _cell(value, ref: str, style: int = 0) -> str:
 def _worksheet(headers: list[str], rows: list[tuple], widths: list[int]) -> bytes:
     if len(rows) + 1 > MAX_ROWS:
         raise ValueError("This period has more rows than one Excel sheet can hold. Narrow the period and prepare the export again; no records were truncated.")
+    widths = [min(54, max(12, len(str(header)) + 3,
+                  max((max((len(part) for part in str(row[i] or "").splitlines()), default=0)
+                       for row in rows if i < len(row)), default=0) + 2))
+              for i, header in enumerate(headers)]
     max_col = max(1, len(headers))
     max_row = max(1, len(rows) + 1)
     cols = "".join(f'<col min="{i}" max="{i}" width="{width}" customWidth="1"/>'
@@ -60,7 +64,9 @@ def _worksheet(headers: list[str], rows: list[tuple], widths: list[int]) -> byte
                                            for i, value in enumerate(headers, 1)) + '</row>')
     for row_number, row in enumerate(rows, 2):
         output.append(f'<row r="{row_number}">')
-        output.extend(_cell(value, f"{_column_name(i)}{row_number}") for i, value in enumerate(row, 1))
+        output.extend(_cell(value, f"{_column_name(i)}{row_number}",
+                            2 if isinstance(value, Decimal) else 0)
+                      for i, value in enumerate(row, 1))
         output.append('</row>')
     output.append('</sheetData>')
     if rows:
@@ -119,15 +125,17 @@ def tabular_workbook_bytes(sheets: list[tuple[str, list[str], list[tuple], list[
         archive.writestr("xl/styles.xml", (
             '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-            '<fonts count="2"><font><sz val="11"/><name val="Arial"/></font>'
-            '<font><b/><color rgb="FFFFFFFF"/><sz val="11"/><name val="Arial"/></font></fonts>'
+            '<numFmts count="1"><numFmt numFmtId="164" formatCode="#,##0.00####"/></numFmts>'
+            '<fonts count="1"><font><sz val="11"/><color rgb="FF000000"/><name val="Arial"/></font></fonts>'
             '<fills count="2"><fill><patternFill patternType="none"/></fill>'
-            '<fill><patternFill patternType="solid"><fgColor rgb="FF0B2442"/><bgColor indexed="64"/></patternFill></fill></fills>'
+            '<fill><patternFill patternType="gray125"/></fill></fills>'
             '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
             '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-            '<cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
-            '<xf numFmtId="0" fontId="1" fillId="1" borderId="0" xfId="0" applyFont="1" applyFill="1"/></cellXfs>'
-            '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'))
+            '<cellXfs count="3">'
+            '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="left" vertical="top"/></xf>'
+            '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="left" vertical="top"/></xf>'
+            '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyAlignment="1"><alignment horizontal="left" vertical="top"/></xf>'
+            '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'))
         for i, (_, headers, rows, widths) in enumerate(sheets, 1):
             archive.writestr(f"xl/worksheets/sheet{i}.xml", _worksheet(headers, rows, widths))
     return output.getvalue()
