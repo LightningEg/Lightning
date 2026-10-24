@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-24 · Codex: Free-use policy replaces the seven-day licence model; optional in-app cosmetics support development without unlocking functionality. Update English/Arabic promise and FAQ.
 - 2026-10-24 · Codex: Docs status refresh: close completed guideline-sync item 8B, clarify Audit 6’s zero-open-PR result, and refresh the handoff.
 - 2026-10-24 · Claude: Guideline D01, D03, D09, D11 (coders.html, both repos): member pages and their scripts, the account chip and menu in the top bar, the wordmark hiding at 420px, and three paid themes (Moss, Garnet, Frost) beside the twelve free ones.
 - 2026-10-24 · Claude: Tasks can carry Lightning Coins: contributors.yml records claims and the new rewards.yml pays the issues a merged pull request closes, through the website's database.
