@@ -148,11 +148,11 @@ table.t td b{color:var(--ink);font-weight:500}
     <div class="pm"><b>roadmap</b><span>What comes next? M1 core and workflow with the plan codes, M2 Google Play, M3 App Store · forgeeks-roadmap.html</span><div class="q">→ Pick a task</div></div>
   </div>
   <ul class="short">
-    <li><b>Three live pages.</b> for-geeks.html redirects to forgeeks.html; forgeeks-collaborate.html redirects to contribute with its old sections mapped. for-geeks-2.html, for-geeks-4.html and for-geeks-test.html keep earlier concepts: never copy from them.</li>
+    <li><b>Three open pages, six member pages.</b> Member pages need no hero: account (<code>forgeeks-account.html</code>: sign in, profile, GitHub, activity, your data), tasks, market, leaderboard, profile (<code>?u=</code>) and admin (owner only). They read the signed-in member through <code>js/forgeeks-auth.js</code> (<code>window.FG</code>, one Supabase client) and show nothing private without a session. for-geeks.html redirects to forgeeks.html; forgeeks-collaborate.html redirects to contribute with its old sections mapped. for-geeks-2.html, for-geeks-4.html and for-geeks-test.html keep earlier concepts: never copy from them.</li>
     <li><b>One path, said once.</b> The three steps are written in full on contribute only. Home shows them in three cells and links there; every other page links. Any fact lives on one page, and the others link to it.</li>
     <li><b>No dead ends.</b> Every page closes with its next step: a primary button to the open tasks or to contribute.</li>
-    <li>A new Coders page loads <code>css/forgeeks.css</code> and <code>js/forgeeks.js</code> and nothing from Normal (no landing.css, footer.py footer, signup band or testing panel). Its own styles go in forgeeks.css under a commented heading. Its top bar and footer come from <code>tools/geeks_shell.py</code>: add it to <code>PAGES</code> and run it; <code>tools/site_check.py</code> fails when a page drifts.</li>
-    <li>Every Coders page is indexed, has a canonical URL and social tags, and is listed in sitemap.xml and llms.txt. Normal pages link to Coders from the footer (More).</li>
+    <li>A new Coders page loads <code>css/forgeeks.css</code> and <code>js/forgeeks.js</code> and nothing from Normal (no landing.css, footer.py footer, signup band or testing panel). Its own styles go in forgeeks.css under a commented heading; a member page also loads <code>css/forgeeks-account.css</code> (shared forms) and may have one <code>css/forgeeks-&lt;page&gt;.css</code>. Its top bar, footer and scripts come from <code>tools/geeks_shell.py</code>: add it to <code>PAGES</code> (in the top bar) or <code>EXTRA</code> (member pages) and run it; <code>tools/site_check.py</code> fails when a page drifts.</li>
+    <li>Every open Coders page and the leaderboard is indexed, has a canonical URL and social tags, and is listed in sitemap.xml and llms.txt; the other member pages are <code>noindex</code> and left out. Normal pages link to Coders from the footer (More).</li>
     <li>The roadmap stays in step with the app repository's NOW.md and issues/INDEX.md; its items carry their plan codes (7B, 6B).</li>
   </ul>
 </section>
@@ -193,7 +193,7 @@ table.t td b{color:var(--ink);font-weight:500}
     <div class="tk" style="--c:var(--btn)"><i></i><div><b>--btn / --btn-ink</b><span>The primary button and its words</span></div></div>
     <div class="tk" style="--c:rgb(var(--glow))"><i></i><div><b>--particle / --glow</b><span>RGB triples for the field and halos</span></div></div>
   </div>
-  <h3 class="sub"><span class="subnum">D03.1</span>The twelve themes</h3>
+  <h3 class="sub"><span class="subnum">D03.1</span>The twelve free themes, and three to earn</h3>
   <div class="themes">
     <div class="th"><div class="pv" style="background:#0a0a0a"><i style="background:#f2f2f2;width:70%"></i><i style="background:#b8b8b8;width:50%"></i><u style="background:#fff"></u></div><b>Mono</b><span>white on black, the default</span></div>
     <div class="th"><div class="pv" style="background:#f4f1ea"><i style="background:#161616;width:70%"></i><i style="background:#45413a;width:50%"></i><u style="background:#a8401c"></u></div><b>Paper</b><span>the one light theme</span></div>
@@ -207,9 +207,13 @@ table.t td b{color:var(--ink);font-weight:500}
     <div class="th"><div class="pv" style="background:#040a06"><i style="background:#d8ffe4;width:70%"></i><i style="background:#a8d6b6;width:50%"></i><u style="background:#39ff88"></u></div><b>Phosphor</b><span>green CRT</span></div>
     <div class="th"><div class="pv" style="background:#0c0803"><i style="background:#ffe7c2;width:70%"></i><i style="background:#dcb98a;width:50%"></i><u style="background:#ffb000"></u></div><b>Amber</b><span>old terminal, warm</span></div>
     <div class="th"><div class="pv" style="background:#002b36"><i style="background:#eee8d5;width:70%"></i><i style="background:#aab9b8;width:50%"></i><u style="background:#d4a017"></u></div><b>Solarized</b><span>gold and teal</span></div>
+    <div class="th"><div class="pv" style="background:#0b0e08"><i style="background:#eef3dc;width:70%"></i><i style="background:#bcc7a0;width:50%"></i><u style="background:#b9d94a"></u></div><b>Moss</b><span>dark olive and lime · 150 coins</span></div>
+    <div class="th"><div class="pv" style="background:#1a0608"><i style="background:#fbeee4;width:70%"></i><i style="background:#e0b9ab;width:50%"></i><u style="background:#ff6b57"></u></div><b>Garnet</b><span>wine red and cream · 200 coins</span></div>
+    <div class="th"><div class="pv" style="background:#eef2f7"><i style="background:#0f1722;width:70%"></i><i style="background:#3b475a;width:50%"></i><u style="background:#3340c4"></u></div><b>Frost</b><span>cool light, slate and indigo · 250 coins</span></div>
   </div>
   <ul class="short">
-    <li><b>Contrast:</b> in every theme, ink and dim measure 4.5:1 or more on bg, panel and well, and btn-ink on btn. A new theme passes that before it ships.</li>
+    <li><b>Contrast:</b> in every theme, ink and dim measure 4.5:1 or more on bg, panel and well, and btn-ink on btn. A new theme passes that before it ships; <code>python tools/theme_contrast.py</code> checks every theme.</li>
+    <li><b>Paid themes</b> (Moss, Garnet, Frost) are bought in the market with Lightning Coins. Anyone may preview them in the picker; keeping one needs it owned, and the picker shows a lock and the price. Paper and Frost are the light themes. Accessibility is never paid for: contrast, motion and keyboard rules hold in every theme.</li>
     <li><b>Mono</b> is the default and the fallback for an unknown saved theme. <b>Paper</b> keeps <code>color-scheme: light dark</code> so a phone that darkens websites leaves it light. <b>Meadow</b> uses Lightning's Nile night, green and azure.</li>
     <li>A theme changes colours only, never sizes, spacing or words. The browser's <code>theme-color</code> follows the theme's bg.</li>
     <li><b>Not in Coders:</b> the vivid gradient, Green/Azure/Rose money meanings, raw hex values in a page's own styles (use a token), a colour that differs between pages.</li>
@@ -317,7 +321,7 @@ table.t td b{color:var(--ink);font-weight:500}
 <section class="g" id="d-nav" data-part="d">
   <div class="g-head"><div><h2><span class="secnum">D09</span>Navigation</h2><p>The top bar holds the pages; the rail holds this page's sections. Contribute is one tap from anywhere.</p></div></div>
   <ul class="short">
-    <li><b>Top bar:</b> the white mark and <code>lightning</code> (home), the crumb <code>~/root/for-geeks</code> with a blinking caret, then the pages in lower case: <code>home</code>, <code>contribute</code>, <code>roadmap</code>, and <code>app</code> (a new tab) from 641px up; the theme chip and source ↗. The current page is Ink with a <code>›</code> in Accent; a 1px Accent line under the bar shows reading progress. It is written by <code>tools/geeks_shell.py</code>, never by hand.</li>
+    <li><b>Top bar:</b> the white mark and <code>lightning</code> (home), the crumb <code>~/root/for-geeks</code> with a blinking caret, then the pages in lower case: <code>home</code>, <code>contribute</code>, <code>roadmap</code>, and <code>app</code> (a new tab) from 641px up; the theme chip, source ↗ and the account chip: <code>sign in</code> (a plain link to the account page), or once signed in the avatar and display name, which opens a menu (my profile, tasks, market, leaderboard, profile settings, sign out; ↑ ↓ Home End move, Esc closes). The current page is Ink with a <code>›</code> in Accent; a 1px Accent line under the bar shows reading progress. It is written by <code>tools/geeks_shell.py</code>, never by hand.</li>
     <li><b>Rail:</b> at 1300px and wider, the sections down the left edge under <code>// on this page</code>; the current one is a 28px Accent line. Under 1300px, on phones and laptops, the same links are a strip under the top bar that scrolls sideways; the current section is marked and kept in view. Its words are the section labels (<code>01 / path</code> → <code>path</code>). Hidden over the hero.</li>
     <li><b>Same tab inside Coders</b>; a new tab for Normal pages, GitHub and anything outside (<code>target="_blank" rel="noopener"</code>).</li>
     <li><b>Theme picker:</b> a window in the middle of the screen, opened by the chip or <code>T</code>; arrows preview, Enter keeps, Esc restores. The choice is saved as <code>lightning-geeks-theme</code> and applied before first paint.</li>
@@ -345,7 +349,7 @@ table.t td b{color:var(--ink);font-weight:500}
   <ul class="short">
     <li>A skip link first; focus is a 2px Accent outline, offset 3px. Every control works with the keyboard.</li>
     <li>The canvas, grid and scanlines are <code>aria-hidden</code> and ignore the pointer; the terminal has a real input with a label.</li>
-    <li>Breakpoints: 1300 (rail, or the strip under it), 1100, 900, 820, 760 (crumb and theme name go), 640 (app link and source go, sections 72px), 560, 520, 420. At 360px wide nothing scrolls sideways, and the top bar still holds home, contribute, roadmap and the theme chip.</li>
+    <li>Breakpoints: 1300 (rail, or the strip under it), 1100, 900, 820, 760 (crumb and theme name go), 640 (app link and source go, sections 72px), 560, 520, 420 (the wordmark goes; the mark stays). At 360px wide nothing scrolls sideways, and the top bar still holds home, contribute, roadmap, the theme chip and the account chip.</li>
     <li>On a phone the terrain is lighter and steady; touch targets are at least 34px, buttons 46px.</li>
   </ul>
 </section>
