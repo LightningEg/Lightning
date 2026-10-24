@@ -119,7 +119,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | 7F2 | ↳ Rename a rule | | | |
 | 7F3 | ↳ Change one budget category without the full grid | | | |
 | **7G** | [Age of Money and a spending calendar](7-planning-import-and-search/7G-more-analytics.md) | feature | reporting | new |
-| **7H** | [CSV import rejects amounts like (1,250.00), 1,250.00-, EGP 1,250.00 and Arabic digits](7-planning-import-and-search/7H-csv-amount-formats.md) ([#49](https://github.com/LightningEg/Lightning/issues/49)) | bug | import | ready |
 | **7I** | [A planned payment due on a public holiday doesn't move to a working day](7-planning-import-and-search/7I-public-holidays-in-schedules.md) ([#50](https://github.com/LightningEg/Lightning/issues/50)) | feature | planning | ready |
 | **7J** | [Search doesn't fold Arabic spelling variants and digits (احمد misses أحمد)](7-planning-import-and-search/7J-search-arabic-variants.md) ([#51](https://github.com/LightningEg/Lightning/issues/51)) | bug | search | ready |
 | **7L** | [Smart suggestions exist but sit 2-3 clicks down - make Needs you the one inbox, widen Looks recurring](7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) | feature | planning | ready |
