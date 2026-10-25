@@ -17,6 +17,9 @@
   function apply(id, persist = true) {
     const next = normalize(id);
     root.dataset.theme = next;
+    const meta = themes.find(theme => theme.id === next) || {};
+    if (meta.pattern) root.dataset.texture = meta.pattern; else delete root.dataset.texture;
+    if (meta.motion) root.dataset.motion = meta.motion; else delete root.dataset.motion;
     let saved = true;
     if (persist) {
       try { localStorage.setItem(key, next); } catch (_) { saved = Boolean(profile); }

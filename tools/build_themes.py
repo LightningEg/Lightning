@@ -93,7 +93,11 @@ def build(check=False):
             raise ValueError("Only lightning-default is the built-in default")
         if manifest.get("status") not in ("built-in-default", "test-preview"):
             raise ValueError("Paid themes require verified ownership integration before registration")
-        registry.append({"id": manifest["id"], "name": manifest["name"], "preview": manifest["status"] == "test-preview"})
+        entry = {"id": manifest["id"], "name": manifest["name"], "preview": manifest["status"] == "test-preview"}
+        decor = parts["decoration"]
+        if decor["pattern"] != "none": entry["pattern"] = decor["pattern"]
+        if decor["motion"] != "none": entry["motion"] = decor["motion"]
+        registry.append(entry)
         css += compile_theme(manifest,parts)
     outputs = {STATIC / "themes.generated.css": css,
                STATIC / "themes.generated.json": json.dumps(registry, indent=2) + "\n",

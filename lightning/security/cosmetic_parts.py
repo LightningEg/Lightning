@@ -28,6 +28,10 @@ def validate_parts(manifest: dict, contract: dict) -> dict:
                 valid = re.fullmatch(r"#[a-fA-F0-9]{6}", value)
             elif key == "logoVariant":
                 valid = value in ("on-dark", "on-light")
+            elif key == "pattern" and slot == "decoration":
+                valid = value in contract["slots"]["decoration"].get("patterns", ["none"])
+            elif key == "motion" and slot == "decoration":
+                valid = value in contract["slots"]["decoration"].get("motions", ["none"])
             elif key in ("pattern", "motion", "decoration"):
                 valid = value == "none"
             else:

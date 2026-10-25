@@ -1,0 +1,61 @@
+/* Approved decoration layer (slot 10). Activated only by data-texture / data-motion set by theme-runtime.js.
+   Rules: behind content, never on numbers, no images or requests, transform/opacity/background-position only,
+   reduced motion = still frame. Layout, type and financial colours are never touched. */
+
+/* Texture: papyrus-guilloche */
+html[data-texture="papyrus-guilloche"] body { position: relative; isolation: isolate; }
+html[data-texture="papyrus-guilloche"] body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--text) 4%, transparent) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--text) 3%, transparent) 0 1px, transparent 1px 11px),
+    repeating-linear-gradient(0deg, transparent 0 23px, color-mix(in srgb, var(--text) 5%, transparent) 23px 24px);
+}
+html.phone[data-texture="papyrus-guilloche"] body::before { opacity: .75; }
+
+/* Guilloché rosette watermark behind the hero (drawn in currentColor, 6%) */
+html[data-texture="papyrus-guilloche"] :is(.hero-card, .portfolio-summary) {
+  position: relative; isolation: isolate; overflow: hidden;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--accent) 22%, transparent), inset 0 -2px 6px rgba(0,0,0,.35);
+}
+html[data-texture="papyrus-guilloche"] :is(.hero-card, .portfolio-summary)::after {
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  inset-inline-end: -60px; top: 50%; width: 320px; aspect-ratio: 1; translate: 0 -50%;
+  color: var(--accent); opacity: .06; background: currentColor;
+  -webkit-mask: var(--rosette) center/contain no-repeat; mask: var(--rosette) center/contain no-repeat;
+  animation: lt-rosette-in 600ms ease-out 1 both;
+}
+html[data-texture="papyrus-guilloche"] {
+  --rosette: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-100 -100 200 200' fill='none' stroke='%23000' stroke-width='.6'%3E%3Cg%3E%3Cellipse rx='92' ry='30'/%3E%3Cellipse rx='92' ry='30' transform='rotate(15)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(30)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(45)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(60)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(75)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(90)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(105)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(120)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(135)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(150)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(165)'/%3E%3Ccircle r='96'/%3E%3Ccircle r='60'/%3E%3Ccircle r='18'/%3E%3C/g%3E%3C/svg%3E");
+}
+html.phone[data-texture="papyrus-guilloche"] .hero-card::after { width: 200px; }
+
+/* Intaglio headings: stamped-in feel, no colour change */
+html[data-texture="papyrus-guilloche"] .topbar h1 { text-shadow: 0 1px 0 rgba(0,0,0,.55), 0 -1px 0 color-mix(in srgb, var(--accent) 18%, transparent); }
+
+/* Cartouche active mark (outline only; no geometry change) */
+html[data-texture="papyrus-guilloche"] :is(.nav a.active, .phone-tabbar [aria-current="page"]) {
+  outline: 1px solid color-mix(in srgb, var(--accent) 70%, transparent); outline-offset: -3px; border-radius: 999px;
+}
+
+/* Motion: security-thread — slow shimmer on the header seam only */
+html[data-motion="security-thread"] :is(.topbar, .phone-appbar) {
+  border-bottom-color: transparent;
+  background-image: linear-gradient(90deg, var(--theme-header-seam), #3E94FF 45%, var(--hero) 50%, #3E94FF 55%, var(--theme-header-seam));
+  background-size: 300% 1px; background-repeat: no-repeat; background-position: 0 100%;
+  animation: lt-thread 12s linear infinite;
+}
+
+/* Seal press reaction on primary actions */
+html[data-motion="security-thread"] :is(.btn.primary, .phone-add):active {
+  transform: translateY(1px); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 55%, transparent);
+  transition: transform 180ms cubic-bezier(.2,0,0,1), box-shadow 180ms cubic-bezier(.2,0,0,1);
+}
+
+@keyframes lt-thread { from { background-position: 100% 100%; } to { background-position: -200% 100%; } }
+@keyframes lt-rosette-in { from { opacity: 0; } to { opacity: .06; } }
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-motion] :is(.topbar, .phone-appbar), html[data-texture] :is(.hero-card, .portfolio-summary)::after { animation: none !important; }
+  html[data-motion] :is(.btn.primary, .phone-add):active { transition: none; }
+}
