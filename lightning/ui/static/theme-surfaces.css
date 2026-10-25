@@ -1,0 +1,46 @@
+/* Paint adapters only. Default uses the existing guideline stylesheet unchanged.
+   Financial series, semantic colours, geometry, type and touch targets are not overridden. */
+html[data-theme]:not([data-theme="lightning-default"]) .side,
+html[data-theme]:not([data-theme="lightning-default"]) .phone-tabbar {
+  background: var(--theme-nav); border-color: var(--line);
+}
+html[data-theme]:not([data-theme="lightning-default"]) .topbar,
+html[data-theme]:not([data-theme="lightning-default"]) .phone-appbar {
+  background: var(--theme-header); border-color: var(--theme-header-seam);
+}
+html[data-theme]:not([data-theme="lightning-default"]) .card {
+  background: var(--theme-card); border-color: var(--theme-card-border);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.hero-card, .portfolio-summary) {
+  background: var(--theme-hero); border-color: var(--theme-hero-edge);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.app-popup, .app-popup-frame, .phone-sheet, .phone-period-panel) {
+  background: var(--theme-overlay); color: var(--text);
+}
+html[data-theme]:not([data-theme="lightning-default"]) dialog::backdrop {
+  background: color-mix(in srgb, var(--theme-backdrop) 75%, transparent);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.pick-list, .pick-results, .dropdown-menu) {
+  background: var(--theme-menu); border-color: var(--theme-divider); color: var(--text);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.nav a.active, .section-tabs a.active) {
+  color: var(--text); border-color: var(--theme-active);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.btn.primary, .phone-invest-seg a.is-chosen, .phone-invest-chip.is-chosen) {
+  background: var(--action); color: var(--on-action); border-color: var(--action);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.brand-mark, .phone-mark img) {
+  content: var(--theme-logo);
+}
+/* Decorative patterns and motion stay inert until an approved pattern is registered.
+   Theme changes never animate content or amounts. This adapter is direction neutral. */
+
+
+html[data-theme]:not([data-theme="lightning-default"]) .main :is(.stat-tile, .kpi-card, .metric-card, .data-panel) {
+  background: var(--theme-card); border-color: var(--theme-card-border);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.key-card-row summary, .key-card-detail) { color: var(--muted); }
+html[data-theme]:not([data-theme="lightning-default"]) .key-card-detail a { color: var(--text); }
+html[data-theme]:not([data-theme="lightning-default"]) .main .plan-tab[aria-current="page"] {
+  background: var(--action); color: var(--on-action);
+}

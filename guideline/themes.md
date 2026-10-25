@@ -144,3 +144,11 @@ A theme's tier says which parts it fills. Each tier fills every part of the one 
 - One textured theme a month (the drop), so earlier buyers have something new to buy.
 - Seasonal items at tier prices.
 - Animated only once one theme passes section 6 with its motion.
+
+## 8. PC and phone creator handoff
+
+The app's [`theme-kit/README.md`](https://github.com/LightningEg/Lightning/blob/main/theme-kit/README.md) is the external creator brief, delivery checklist and acceptance process. `theme-kit/theme.template.json` is the complete starting manifest, and `theme-kit/preview.html` exercises components using the real app tokens. Give creators this guideline, Parts A and C, and `lightning/ui/static/cosmetics/slots.json` together.
+
+`python tools/build_themes.py --validate path/to/theme.json` checks the existing data-only contract and text/control contrast pairs. Reviewed app previews are bundled under `lightning/ui/static/cosmetics/`; `python tools/build_themes.py` generates the root `data-theme` CSS and boot registry. Both app frames load the same switcher before content paints. Settings → Appearance switches paint without navigating and remembers it with the profile across native launches; an unknown saved ID returns to Lightning default. The exact default paint stays in the existing guideline stylesheets.
+
+This first app implementation accepts palette previews. Decoration remains `none`; arbitrary CSS, URLs and motion are rejected. Financial tokens and series retain their existing meanings. Actual Windows/Android screens, English/Arabic, contrast and geometry still require the kit's acceptance checks. Bundling a preview does not enable sale or prove paid ownership; verified claiming remains a separate release prerequisite.

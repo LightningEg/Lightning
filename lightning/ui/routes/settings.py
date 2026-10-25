@@ -193,6 +193,18 @@ async def save_financial_health_limit(request: Request):
     return redirect("/settings?section=financial-health", message)
 
 
+@router.post("/theme")
+async def save_theme(request: Request):
+    """Keep appearance through native launches whose loopback port changes."""
+    from ..themes import theme_ids
+    form = await request.form()
+    selected = str(form.get("theme", ""))
+    if selected not in theme_ids():
+        return Response("Unknown theme", status_code=400)
+    container(request).settings.set("appearance_theme", selected)
+    return Response(status_code=204)
+
+
 @router.post("/privacy")
 async def save_privacy(request: Request):
     """Remember privacy mode in the profile; the window has already switched it with its cookie."""

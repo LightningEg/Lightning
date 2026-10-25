@@ -14,6 +14,13 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    'Appearance': 'المظهر',
+    'Theme': 'السمة',
+    'Lightning default': 'مظهر لايتنينج الأساسي',
+    'Nile Nocturne (preview)': 'ليل النيل (معاينة)',
+    'Royal Obsidian & Gold (preview)': 'السبج الملكي والذهب (معاينة)',
+    'Theme applied for this session; could not save on this device.': 'السمة اتطبقت للجلسة دي؛ مقدرناش نحفظها على الجهاز.',
+
     'Manage Needs you': 'نظّم اللي محتاجك',
     'Active items': 'العناصر الحالية',
     'Reviewed and snoozed': 'اتراجعت أو اتأجلت',

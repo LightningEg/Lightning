@@ -17,6 +17,10 @@ Swappable data-only appearance parts, themes bundled with the app, permanent acc
 
 Bundled slot inventory and two test manifests; strict part validation and Ed25519 offline ownership verification, with portable account identity and no license expiry/device quota. Website companion: `codex/store-wallet-foundation`, Supabase activation/proof migration and test previews. No app public keys or signing secrets seeded.
 
+## App swap and creator kit (2026-10-25)
+
+Built the shared root-attribute switcher, pre-paint profile preference restoration across changing native loopback ports, Settings selector, bundled CSS compiler with contrast gates, and PC/phone paint adapters. `theme-kit/` supplies an external brief, complete JSON template, component workbench and submission checklist. Only the default and existing labelled test previews are enabled; decoration remains inert. The generated tokens cover every compartment; existing financial chart series remain unchanged. Full native screen paint/contrast inventory, account ownership and paid activation remain below.
+
 ## Remaining acceptance
 
 1. Add native Settings activation/restore UI, safe HTTPS exchange and release-pinned public key distribution.

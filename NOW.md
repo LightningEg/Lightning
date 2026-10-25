@@ -18,6 +18,8 @@
 
 ## Next
 
+- **8J app theme acceptance:** palette swap and creator kit built; native paint/contrast and ownership remain. **Read:** `theme-kit/README.md`; `issues/8-website/8J-cosmetic-parts-and-claiming.md`.
+
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 
 1. **Audit 6 disposition is complete; four other app PRs are open.** As of 2026-10-24, GitHub shows app PRs #117 and #121–#123 open, and no open website PRs. #117 is a CSV amount-format contribution; #121–#123 are Dependabot updates. They are separate from the historical PRs listed in Audit 6 and still need their own review. The remaining items below are plan or owner acceptance work. **Read:** `reports/audit-6.md`.
