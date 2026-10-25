@@ -140,10 +140,17 @@ A theme's tier says which parts it fills. Each tier fills every part of the one 
 - A tier keeps one price. A sale is a new seasonal item, not a cut on an old one.
 - Why these prices: buyers pay once, not monthly. The arithmetic against fixed costs is in the website repository's `docs/payment-operations.md` › Pricing and operational economics.
 
+**Beyond themes (the supporter release, website, 2026-10-25).** The same rules hold for every look sold beside themes:
+- **Names** (type and slot `name`): a colour 150, a gradient 300, one slow shimmer 500 (tier `motion`). Each hue is mixed 60% with the page's text colour, so a styled name keeps 4.5:1 on every theme, light and dark.
+- **Animated banners** (tier `motion`): one slow motion each, behind content, still under reduced motion. 300 to 350.
+- **Seasonal items** carry a window (`available_from`, `available_until`): sold and shown only inside it; owners keep them after.
+- **Sets** cost 80% of the parts not owned yet. A set is never a fifth slot: buying it delivers its parts.
+- **Earned badges** (supporter, founding) are never sold, and contribution badges stay earned by work.
+
 **What comes next:**
-- One textured theme a month (the drop), so earlier buyers have something new to buy.
+- One textured theme a month (the drop), so earlier buyers have something new to buy. Supporters vote on which one.
 - Seasonal items at tier prices.
-- Animated only once one theme passes section 6 with its motion.
+- An animated theme only once one passes section 6 with its motion.
 
 ## 8. PC and phone creator handoff
 
