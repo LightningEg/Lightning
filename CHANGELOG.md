@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-25 · Claude: 8J website leaderboard (website repo): a table of rank, display name, contributions and score over each member's banner; `leaderboard.html?sample` shows made-up people to preview it.
 - 2026-10-25 · Codex: 8J creator brief now specifies mode, a mandatory PC/phone screenshot roster, WCAG AA contrast and LTR amounts in Arabic; adds a reusable AI prompt.
 
 - 2026-10-25 · Claude: 8J owner dashboard (website repo): Today view (needs, revenue vs fixed cost, 30-day chart), each top-up one ticket confirmed in place, simpler InstaPay checkout (payer address or wallet phone, no reference); fixes the live coin quote.
