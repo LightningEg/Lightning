@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-25 · Codex: 8J creator brief now specifies mode, a mandatory PC/phone screenshot roster, WCAG AA contrast and LTR amounts in Arabic; adds a reusable AI prompt.
+
 - 2026-10-25 · Codex: 8J app theme swap and external creator kit: shared PC/phone runtime, validated palette compiler, Settings previews and handoff template; sync themes guideline in both repos. Native and paid activation acceptance remain.
 
 - 2026-10-25 · Claude: 8J theme tiers and prices (website repo): Palette 300 coins, Textured 600 (Papyrus, Cotton), Animated later; market shows EGP, a textured row and what buyers get. guideline/themes.md section 7 (both repos).

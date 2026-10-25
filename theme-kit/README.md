@@ -2,14 +2,19 @@
 
 Give this folder, `guideline/themes.md`, the app's `guideline/app.html` and `guideline/phone.html`, and `lightning/ui/static/cosmetics/slots.json` to the external creator. This kit covers PC and phone. A store theme must also supply the website versions described in the guideline.
 
+For an AI creator, copy [AI-PROMPT.md](AI-PROMPT.md), complete its fields, and provide this kit or repository access.
+
 ## Brief to complete before design
 
 - Theme ID (lowercase letters, numbers and hyphens), display name, creator, version and contact:
 - Mood and reference images:
+- Mode: [Dark | Light | Both] (required; specify OLED black explicitly if wanted):
 - Light or dark ground; four seed colours (ground, text, quiet, accent):
 - Requested tier: palette / textured / animated:
 - Asset ownership and licence allowing Lightning to distribute it:
 - Delivery date and reviewer:
+
+Confirm the requested mode before choosing colours; do not infer it from a theme name or reference image. Each app manifest contains one palette. For **Both**, deliver two complete manifests with distinct IDs such as `your-theme-dark` and `your-theme-light`, and validate/capture each independently. Users select each variant explicitly; the current runtime does not automatically switch between them. Mode belongs in this brief, not an invented JSON field.
 
 Current app support is palette-only. `pattern`, `motion` and hero `decoration` must be `none`. Textured and animated proposals require a separately reviewed app implementation before acceptance; arbitrary CSS, scripts, SVG fragments and remote URLs cannot be imported. Do not promise a textured release using this template alone.
 
@@ -42,19 +47,37 @@ The compiler exposes `--theme-chart-grid` and `--theme-chart-accent` for nonfina
 
 ## Submission package
 
-Return `your-theme.json`, this completed brief, a short rationale for each compartment, licence/credits, and labelled screenshots:
+Return the theme manifest(s), this completed brief, a short rationale for each compartment, licence/credits, and labelled screenshots. Capture every screen in this roster on **both PC and phone**, in **English and Arabic/RTL**, for **every requested mode**:
+
+| Screen | Required evidence |
+|---|---|
+| Overview | Hero, KPI cards, comparisons and navigation |
+| Transactions | Populated list, income/expense/transfer rows, transaction pills, and an open transaction dialog or phone sheet |
+| Budget | Progress, remaining/overspent states and category chips |
+| Investments | Holdings table/list, chart and legend |
+| Accounts | Balances and account list |
+| Settings | Theme selector, input focus, disabled control, validation error and an open menu |
+
+Use dummy data and identify any state that cannot be reached. A workbench screenshot alone does not satisfy this roster.
 
 - PC: 1366×768 and 1920×1080; phone: 320, 360 and 390 px wide.
-- English and Arabic (RTL) for Overview, Budget, Investments, Accounts and Settings.
 - Navigation, hero, table/list, positive/negative/held amounts, input focus, disabled control, validation error, empty state, menu and open dialog.
 - Default and new theme in the same position for geometry comparison.
+
+## Contrast and RTL rules
+
+Meet **WCAG AA: at least 4.5:1 for body text, labels and numbers, including text inside chips; at least 3:1 for meaningful control borders, chip indicators and focus rings against adjacent backgrounds**. A 3:1 chip outline does not permit 3:1 chip text. Purely decorative hairlines need not meet the control-border threshold. Keep Lightning's stricter primary-text-on-ground requirement of 7:1. Check real financial colours and interactive states on their actual surfaces; the validator covers only the pairs described above.
+
+In Arabic, layout and text mirror, but each complete amount remains **left-to-right**, for example `EGP 14,250.00`. Preserve the app's existing `dir="ltr"`/`bdi` isolation around amounts, including currency, sign, grouping and decimal separators. This example specifies direction, not a new number format: keep the existing locale's digits, precision and currency labels. Do not reverse strings, change financial formatting, or force the whole page left-to-right. Capture positive, negative and decimal amounts in transaction rows and the open dialog/sheet; report missing isolation as an app issue rather than introducing per-theme markup.
 
 ## Acceptance checklist and sign-off
 
 - [ ] Validator passes; generated files are current (`python tools/build_themes.py --check`).
-- [ ] Primary text on ground ≥7:1; all ordinary text ≥4.5:1; large text and control/focus indicators ≥3:1, including actual financial colours on proposed surfaces.
+- [ ] Requested mode is recorded; Both supplies two independently validated and captured manifests.
+- [ ] WCAG AA: body text, labels, numbers and chip text ≥4.5:1; meaningful borders, chip indicators and focus rings ≥3:1; primary text on ground ≥7:1, including actual financial colours on proposed surfaces.
 - [ ] No layout, font, spacing, radius, border width, target size, wording or route changes. No additional page HTML.
-- [ ] Every compartment checked on PC/phone and English/Arabic; long labels and large balances remain readable.
+- [ ] Every screen in the roster captured on PC/phone, English/Arabic and every requested mode; long labels and large balances remain readable.
+- [ ] Arabic layout/text mirror while complete amounts remain LTR, with existing digits, signs, separators, precision and currency labels preserved.
 - [ ] Switching preserves scroll, current page, open dialog and an unsaved form. Reload and a fresh launch restore the theme before content paints.
 - [ ] Invalid/stale saved ID returns to default. Blocked storage still allows a session switch. Reset means selecting Lightning default.
 - [ ] Keyboard, screen reader labels, forced colours and reduced motion checked; no decorative animation.
