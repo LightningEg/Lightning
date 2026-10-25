@@ -8,16 +8,18 @@ This file sits beside the four guideline documents and is copied to both reposit
 
 ## 1. What is on sale now
 
-Owner, 2026-10-25: five palettes on sale while each is proven on both sites, and no more until they are.
+Owner, 2026-10-25: five palettes and two textured themes on sale while each is proven on both sites. Prices are in coins (5 coins = 1 EGP); section 7 explains them.
 
-| Theme | Seed: ground · text · quiet · accent | Side | Price |
-|---|---|---|---|
-| Mono | `#0a0a0a` `#f2f2f2` `#b8b8b8` `#ffffff` | dark | free, the default |
-| Paper | `#f4f1ea` `#161616` `#45413a` `#a8401c` | light | 100 |
-| Frost | `#eef2f7` `#0f1722` `#3b475a` `#3340c4` | light | 250 |
-| Meadow | `#08192A` `#EAF4F1` `#B8CAD2` `#3FCB93` | dark | 100 |
-| Nile | `#070b16` `#e9edf7` `#b7c0d8` `#e6b450` | dark | 100 |
-| Garnet | `#1a0608` `#fbeee4` `#e0b9ab` `#ff6b57` | dark | 200 |
+| Theme | Tier | Seed: ground · text · quiet · accent | Side | Coins |
+|---|---|---|---|---|
+| Mono | palette | `#0a0a0a` `#f2f2f2` `#b8b8b8` `#ffffff` | dark | free, the default |
+| Paper | palette | `#f4f1ea` `#161616` `#45413a` `#a8401c` | light | 300 |
+| Frost | palette | `#eef2f7` `#0f1722` `#3b475a` `#3340c4` | light | 300 |
+| Meadow | palette | `#08192A` `#EAF4F1` `#B8CAD2` `#3FCB93` | dark | 300 |
+| Nile | palette | `#070b16` `#e9edf7` `#b7c0d8` `#e6b450` | dark | 300 |
+| Garnet | palette | `#1a0608` `#fbeee4` `#e0b9ab` `#ff6b57` | dark | 300 |
+| Papyrus | textured | Nile's seed, texture `papyrus` | dark | 600 |
+| Cotton | textured | Paper's seed, texture `cotton` | light | 600 |
 
 **Archived:** Ocean, Tokyo, Dracula, Rose, Synthwave, Phosphor, Amber, Solarized and Moss. They are not sold and not shown, but a member who owns one keeps it, sees it and can wear it. Their seeds stay in `js/forgeeks.js` marked `archived:true` and their tokens stay in `css/forgeeks.css`. To bring one back, take it through section 5 like a new theme, then set `active = true` in a migration and drop `archived:true`.
 
@@ -56,7 +58,7 @@ Eleven parts, the same eleven on every surface. A part not listed for a surface 
 | 7 | **Buttons and inputs** | Primary and secondary buttons, links, focus, fields | `--nile` `--nile-2` `--on-nile` `--azure` `--line-ctl` `--field` `--field-focus` | `--btn` `--btn-ink` `--accent` | `controls` |
 | 8 | **Sheets and dialogs** | Windows, the buy window, overlays | reads part 5 | `--panel` | `overlays` |
 | 9 | **Settings and menus** | Menus, dropdowns, dividers | reads part 5 | reads part 5 | `menus` |
-| 10 | **Texture and motion** | Pattern, ambient motion | none: fixed | the field's colour only (part 4) | `decoration`: `none` for now |
+| 10 | **Texture and motion** | Pattern behind the page; later, one motion | textured tier: `:root[data-texture]` (`css/textures.css`) | the same texture, under the field | `decoration`: `none` for now |
 | 11 | **Brand mark** | The two-leaf logo | the light or dark mark, never recoloured | `geeks-mark-light` / `-dark` | `brand`: `on-light` / `on-dark` |
 
 The footer and the consent bar are part 1 plus part 5 (`--sf-*` and `--lc-*` on the main site).
@@ -87,10 +89,10 @@ To change how one part looks in every theme (say, buttons), change that part's r
 
 ## 5. Making a theme, step by step
 
-1. **Seed.** Add `{id, name, note, c:[ground, text, quiet, accent]}` to `THEMES` in `js/forgeeks.js`. Add `light:true` for a light side, and `paid:true, price:n`.
+1. **Seed.** Add `{id, name, note, c:[ground, text, quiet, accent]}` to `THEMES` in `js/forgeeks.js`. Add `light:true` for a light side, `tex:'id'` for the textured tier (its pattern goes in `css/textures.css`), and `paid:true, price:n` at the tier's price (section 7).
 2. **For Geeks part values.** Add one `:root[data-theme="id"]{…}` rule with all fourteen tokens to `css/forgeeks.css`. For a light theme, also add it to the light lists.
 3. **Lists.** Add the id to `THEME_IDS` in `tools/geeks_shell.py`, bump its `VERSION`, and run it. Run `python tools/site_accounts.py` so the main site reads the new seed.
-4. **Catalogue.** Add a migration that inserts the `catalog_items` row (type `theme`, name, note, price). The price in `js/forgeeks.js` must match it.
+4. **Catalogue.** Add a migration that inserts the `catalog_items` row (type `theme`, name, note, price, tier). The price in `js/forgeeks.js` must match it.
 5. **Check every part on every surface.**
    - `python tools/theme_contrast.py` checks For Geeks.
    - `supabase/tests/market-ui-pages.test.mjs` checks both main-site sides at 4.5:1 and the app mix.
@@ -110,3 +112,35 @@ A theme with any of these is not done:
 - A layout shift: put screenshots against the default theme side by side, and nothing may move.
 - Motion that ignores reduced motion. For now there is no motion at all.
 - A seed edited without rechecking every part.
+
+## 7. Tiers and prices
+
+A theme's tier says which parts it fills. Each tier fills every part of the one below it.
+
+| Tier | Fills | Coins | EGP | On sale |
+|---|---|---|---|---|
+| **Palette** | Parts 1 to 9: colours on both sites, with a light and a dark side on the main site | 300 | 60 | Paper, Frost, Meadow, Nile, Garnet |
+| **Textured** | The palette, plus part 10's pattern behind every page | 600 | 120 | Papyrus, Cotton |
+| **Animated** | The texture, plus one signature motion in part 10 | 1,000 | 200 | none yet |
+
+**Texture rules:**
+- Gradients only: no images and no motion.
+- Drawn in the text colour at 3 to 7%, behind all content, never inside a card.
+- Text keeps its 4.5:1 because the pattern sits on the ground, not under letters.
+- One texture serves every surface: `css/textures.css` styles the page (`:root[data-texture]`) and the previews (`.pv[data-tex]`).
+- A texture's id is listed in `js/theme.js` (`TEXTURES`) and `js/theme-preview.js`, and set by `tex:` in the seed.
+
+**Motion rules (Animated, later):**
+- One motion per theme, slow (8 seconds or more), behind content.
+- Never on a number, and never anything that blinks.
+- Under reduced motion it stops and shows one still frame.
+
+**Prices:**
+- Prices live in the catalogue (`catalog_items.price`, `tier`). The market shows coins and the EGP they cost (`coin_rate()`).
+- A tier keeps one price. A sale is a new seasonal item, not a cut on an old one.
+- Why these prices: buyers pay once, not monthly. The arithmetic against fixed costs is in the website repository's `docs/payment-operations.md` › Pricing and operational economics.
+
+**What comes next:**
+- One textured theme a month (the drop), so earlier buyers have something new to buy.
+- Seasonal items at tier prices.
+- Animated only once one theme passes section 6 with its motion.

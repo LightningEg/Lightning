@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-25 · Claude: 8J theme tiers and prices (website repo): Palette 300 coins, Textured 600 (Papyrus, Cotton), Animated later; market shows EGP, a textured row and what buyers get. guideline/themes.md section 7 (both repos).
 - 2026-10-25 · Claude: 8J website community tabs (website repo): banners behind leaderboard rows, Wallet rebuilt, Profile opens your own (owners see private ones), sentence case on main-site forms.
 - 2026-10-25 · Claude: 8J five website themes on sale (Paper, Frost, Meadow, Nile, Garnet), nine archived for their owners; new guideline/themes.md: a theme is one seed and eleven parts, each surface its own version. D03.1 updated (both repos).
 - 2026-10-25 · Claude: 8J market shop floor on both website markets (website repo): tabs, Your look, app themes in testing, PC/phone/website theme previews, Try it, missing-coin buy; owned themes can dress the main website. Cotton-boll coin, no Threads.
