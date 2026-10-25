@@ -23,11 +23,16 @@ Read only the section your task needs (`grep -n '^## ' docs/ARCHITECTURE.md`, th
 | Budget and reserve contract | You change the budget, reserves or the emergency fund |
 | Persistence, precision, and indexing | You add a migration, an index, a money column or foreign currency |
 | UI contract | You add a page, route or template |
+| Visual flow presentation layer | You change page hierarchy or the phone page picker |
 | CSV import and export contract | You change import, export or the AI-analysis workbook |
 | Search and identity contract | You change names, counterparties or search |
 | Desktop app and encrypted profiles | You touch the Windows window, profiles, encryption, devices, packaging or releases |
 | Working rules | Always, before you push code (short) |
 | Cosmetic parts and offline ownership (8J infrastructure) | You change bundled parts, offline entitlements or claiming |
+
+## Visual flow presentation layer
+
+`ui/static/visual-flow.css` is a token-only presentation adapter loaded after theme surfaces in both frames. It preserves separate PC and phone templates, financial colours and server calculations. The phone page picker derives primary destinations from `sections_for(request)` and explicitly includes Transactions, Financial health, Weekly review and Profile and lock; the existing five-slot bottom bar stays unchanged. Native disclosures keep secondary detail available without putting it before the page's answer.
 
 ## Stack and local operation
 

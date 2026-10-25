@@ -1,0 +1,38 @@
+/* Shared visual flow: existing brand and theme tokens only; logical properties support RTL. */
+.phone-page-menu { position:relative; min-width:0; flex:1; }
+.phone-page-menu>summary { display:flex; align-items:center; gap:8px; min-height:44px; cursor:pointer; list-style:none; }
+.phone-page-menu>summary::-webkit-details-marker { display:none; }
+.phone-page-menu .phone-mark { flex-shrink:0; }
+.phone-page-menu .phone-appbar-title { min-width:0; overflow-wrap:anywhere; }
+.phone-page-grid { position:absolute; inset-inline-start:0; top:100%; width:min(340px,calc(100vw - 32px)); max-height:calc(100dvh - 130px); overflow-y:auto; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; padding:12px; border:1px solid var(--line); border-radius:8px; background:var(--surface); box-shadow:var(--shadow); z-index:80; }
+.phone-page-grid a { display:flex; align-items:center; gap:8px; min-height:48px; padding:8px; color:var(--ink); border-radius:6px; text-decoration:none; overflow-wrap:anywhere; }
+.phone-page-grid a[aria-current] { background:var(--track); font-weight:700; }
+.phone-page-grid svg { width:22px; height:22px; flex-shrink:0; fill:none; stroke:currentColor; stroke-width:1.8; }
+.phone-page-grid a:focus-visible,summary:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+.flow-disclosure>summary { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:48px; cursor:pointer; color:var(--ink); }
+.flow-disclosure>summary h2 { margin:0; }
+.flow-disclosure[open]>summary { margin-block-end:16px; }
+.flow-disclosure>summary small { color:var(--muted); font-size:13px; }
+.phone .flow-disclosure { margin-block:16px; }
+.phone .phone-row { min-height:56px; gap:12px; }
+.phone .phone-row>span:first-child { min-width:0; overflow-wrap:anywhere; }
+.phone .phone-row>b { flex-shrink:0; white-space:nowrap; }
+.phone .phone-kpi { min-width:0; }
+.phone .phone-kpi-value { white-space:nowrap; }
+.phone .phone-reg-step,.phone .phone-reg-bar .phone-more-menu>summary { min-width:44px; min-height:44px; }
+.phone .phone-invest-seg a,.phone .phone-invest-chip,.phone .phone-reg-quiet .phone-quiet { min-height:44px; }
+html:not(.phone) .main .overview-wealth-card { background:var(--theme-card,var(--surface)); }
+html:not(.phone) .main .overview-wealth-card>.overview-split { background:none; }
+html:not(.phone) .main a.holding-link { color:var(--ink); text-decoration:underline; text-underline-offset:3px; }
+html:not(.phone) .main .card { margin-block-end:20px; }
+@media(max-width:360px) { .phone-page-grid { gap:2px; padding:8px; } .phone-page-grid a { font-size:13px; } }
+
+.phone .phone-limit { display:grid; grid-template-columns:minmax(0,1fr) 100px; align-items:center; }
+.phone .phone-limit form { min-width:0; }
+.phone .phone-limit input { width:100%; min-height:44px; }
+.phone .phone-group-head { grid-template-columns:minmax(0,1fr) auto; }
+.phone .phone-group-left { white-space:nowrap; }
+
+/* phone.css collapses every *-grid with !important; the page picker is intentionally two columns. */
+.phone .phone-page-menu nav.phone-page-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+.phone .phone-page-menu nav.phone-page-grid a { min-width:0; margin:0; }

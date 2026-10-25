@@ -18,6 +18,8 @@
 
 ## Next
 
+- **3AH visual flow review:** implementation and browser evidence ready for owner review; native Windows/Android and assistive-technology acceptance remain. **Read:** `reports/audit-7.md`.
+
 - **8J app theme acceptance:** palette swap and creator kit built; native paint/contrast and ownership remain. **Read:** `theme-kit/README.md`; `issues/8-website/8J-cosmetic-parts-and-claiming.md`.
 
 The whole plan, by milestone and code, is `issues/INDEX.md`.

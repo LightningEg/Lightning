@@ -66,7 +66,7 @@
 
 <section class="phone-section" aria-labelledby="alloc-heading">
   <header class="phone-section-head"><h2 id="alloc-heading">{{ "Allocation"|tr(locale) }}</h2><span>{{ period.end_text }}</span></header>
-  <article class="card phone-card" aria-label="By asset class">
+  <article class="card phone-card" aria-label="{{ 'By asset class'|tr(locale) }}">
     <h3 class="phone-card-title">{{ fig.holdings_value.label }} by asset class</h3>
     {{ donut(investment_donut, fig.holdings_value.label, base) }}
   </article>
@@ -81,7 +81,7 @@
 <section class="phone-section" aria-labelledby="income-heading">
   <header class="phone-section-head"><h2 id="income-heading">{{ "Income collected (dividends and interest)"|tr(locale) }}</h2><span>{{ ytd_year }} so far</span></header>
   <article class="card phone-card">
-    {% if ytd_dividends and ytd_dividends.rows %}{{ phone_bars(ytd_dividends.rows, 'Income collected this year') }}
+    {% if ytd_dividends and ytd_dividends.rows %}{{ phone_bars(ytd_dividends.rows, 'Income collected this year'|tr(locale)) }}
     <a class="phone-quiet" data-popup-open href="/investments/report-detail?kind=dividends&amp;from={{ ytd_year }}-01-01&amp;to={{ today }}">{{ "See them"|tr(locale) }}</a>
     {% else %}<p class="chart-empty">{{ "No dividends collected this year yet."|tr(locale) }}</p>{% endif %}
   </article>
@@ -90,7 +90,7 @@
 <section class="phone-section" aria-labelledby="horizon-heading">
   <header class="phone-section-head"><h2 id="horizon-heading">{{ "Intended horizon"|tr(locale) }}</h2><span>{{ 'Today'|tr(locale) }}</span></header>
   <article class="card phone-card">
-    <div class="phone-bars" role="list" aria-label="Holdings by intended horizon">{% for label in ['Short', 'Medium', 'Long', 'Unassigned'] %}{% set v = horizons.get(label, 0) %}{% if v %}
+    <div class="phone-bars" role="list" aria-label="{{ 'Holdings by intended horizon'|tr(locale) }}">{% for label in ['Short', 'Medium', 'Long', 'Unassigned'] %}{% set v = horizons.get(label, 0) %}{% if v %}
       <div class="phone-bar-row" role="listitem"><span class="phone-bar-name">{{ label }}<small> · {{ '%.0f'|format(v / holdings_total * 100 if holdings_total else 0) }}%</small></span><b class="phone-bar-value">{{ v|money }}</b><span class="phone-bar-track"><i style="width:{{ '%.1f'|format([v / holdings_total * 100 if holdings_total else 0, 1]|max) }}%"></i></span></div>
     {% endif %}{% endfor %}</div>
     <p class="phone-note">{{ "Set a holding's horizon on the PC's Holdings table for now."|tr(locale) }}</p>

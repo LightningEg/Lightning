@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ fig.held_for_others.label }}{% endblock %}
 {% block heading %}<h1>{{ fig.held_for_others.label }}</h1><p class="muted">{{ fig.held_for_others.meaning }} It is left out of {{ fig.what_you_own.label|lower }}.</p>{% endblock %}
-{% block top_actions %}{% if held_total %}<b class="section-total">{{ held_total|money(places=0) }} <small>{{ base }} in all</small></b>{% endif %}{% endblock %}
+{% block top_actions %}<b class="section-total">{{ held_total|money(places=0) }} <small>{{ base }} in all</small></b>{% endblock %}
 {% block content %}
 <section class="card data-panel wide-card">
   <div class="section-head"><div><h2>{{ 'Cash'|tr(locale) }}</h2></div></div>
