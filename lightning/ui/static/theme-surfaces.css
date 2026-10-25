@@ -47,11 +47,12 @@ html[data-theme]:not([data-theme="lightning-default"]) .main .plan-tab[aria-curr
 
 /* Dark-theme readability adapters (2026-10-25). Found by screenshotting the real app in every non-default theme:
    light tints and fills hard-coded for the default paint stayed light while text turned light, so labels vanished.
+   Money tints come from the theme's own income and expense colours (--theme-income and --theme-expense, from tools/build_themes.py).
    Only paint changes here: no size, spacing, order or money colour. */
 html[data-theme]:not([data-theme="lightning-default"]) {
   --theme-tint: color-mix(in srgb, var(--accent) 14%, var(--theme-card));
-  --theme-tint-good: color-mix(in srgb, #4FD8A4 16%, var(--theme-card));
-  --theme-tint-bad: color-mix(in srgb, #FF9393 16%, var(--theme-card));
+  --theme-tint-good: color-mix(in srgb, var(--theme-income) 16%, var(--theme-card));
+  --theme-tint-bad: color-mix(in srgb, var(--theme-expense) 16%, var(--theme-card));
   --theme-tint-info: color-mix(in srgb, #7FB2FF 16%, var(--theme-card));
   --tint-growth: var(--theme-tint); --ok-bg: var(--theme-tint-good); --mint-50: var(--theme-tint-good);
   --rose-soft: var(--theme-tint-bad); --coral-50: var(--theme-tint-bad);
@@ -80,16 +81,16 @@ html[data-theme]:not([data-theme="lightning-default"]) :is(.btn.small, .btn.phon
   background: var(--surface-2) !important; color: var(--text) !important; border-color: var(--line) !important;
 }
 /* Phone: transaction direction discs keep their meaning, on a dark tint */
-html[data-theme]:not([data-theme="lightning-default"]) .phone-txn-av.is-out { background: var(--theme-tint-bad); color: #FF9393; }
-html[data-theme]:not([data-theme="lightning-default"]) .phone-txn-av.is-in { background: var(--theme-tint-good); color: #4FD8A4; }
-html[data-theme]:not([data-theme="lightning-default"]) .phone-txn-av.is-invest { background: var(--theme-tint-info); color: #7FB2FF; }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-txn-av.is-out { background: var(--theme-tint-bad); color: var(--theme-expense); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-txn-av.is-in { background: var(--theme-tint-good); color: var(--theme-income); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-txn-av.is-invest { background: var(--theme-tint-info); color: #7FB2FF; } /* Azure held: no theme moves it */
 /* Phone: month heat map steps stay ordered, readable text */
-html[data-theme]:not([data-theme="lightning-default"]) .phone-month.heat-1 { background: color-mix(in srgb, #FF9393 12%, var(--theme-card)); }
-html[data-theme]:not([data-theme="lightning-default"]) .phone-month.heat-2 { background: color-mix(in srgb, #FF9393 24%, var(--theme-card)); }
-html[data-theme]:not([data-theme="lightning-default"]) .phone-month.heat-3 { background: color-mix(in srgb, #FF9393 38%, var(--theme-card)); }
-html[data-theme]:not([data-theme="lightning-default"]) .phone-month.flow-in-1 { background: color-mix(in srgb, #4FD8A4 12%, var(--theme-card)); }
-html[data-theme]:not([data-theme="lightning-default"]) .phone-month.flow-in-2 { background: color-mix(in srgb, #4FD8A4 24%, var(--theme-card)); }
-html[data-theme]:not([data-theme="lightning-default"]) .phone-month.flow-in-3 { background: color-mix(in srgb, #4FD8A4 38%, var(--theme-card)); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-month.heat-1 { background: color-mix(in srgb, var(--theme-expense) 12%, var(--theme-card)); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-month.heat-2 { background: color-mix(in srgb, var(--theme-expense) 24%, var(--theme-card)); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-month.heat-3 { background: color-mix(in srgb, var(--theme-expense) 38%, var(--theme-card)); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-month.flow-in-1 { background: color-mix(in srgb, var(--theme-income) 12%, var(--theme-card)); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-month.flow-in-2 { background: color-mix(in srgb, var(--theme-income) 24%, var(--theme-card)); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-month.flow-in-3 { background: color-mix(in srgb, var(--theme-income) 38%, var(--theme-card)); }
 /* Phone: chosen filter chip and the Add disc used the ink colour as a fill */
 html[data-theme]:not([data-theme="lightning-default"]) .phone-chip.is-chosen,
 html[data-theme]:not([data-theme="lightning-default"]) .phone-chip.is-chosen a,

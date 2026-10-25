@@ -16,7 +16,7 @@ For an AI creator, copy [AI-PROMPT.md](AI-PROMPT.md), complete its fields, and p
 
 Confirm the requested mode before choosing colours; do not infer it from a theme name or reference image. Each app manifest contains one palette. For **Both**, deliver two complete manifests with distinct IDs such as `your-theme-dark` and `your-theme-light`, and validate/capture each independently. Users select each variant explicitly; the current runtime does not automatically switch between them. Mode belongs in this brief, not an invented JSON field.
 
-Current app support is palette-only. `pattern`, `motion` and hero `decoration` must be `none`. Textured and animated proposals require a separately reviewed app implementation before acceptance; arbitrary CSS, scripts, SVG fragments and remote URLs cannot be imported. Do not promise a textured release using this template alone.
+The app supports palettes plus the approved decoration in `slots.json`: `pattern` and `motion` are `none` or a name on its `patterns` and `motions` lists (drawn by `theme-decor.css`), and hero `decoration` stays `none`. A new texture or motion needs a separately reviewed app implementation before acceptance; arbitrary CSS, scripts, SVG fragments and remote URLs cannot be imported. Do not promise a textured release using this template alone.
 
 ## Create and validate
 
@@ -41,7 +41,7 @@ Current app support is palette-only. `pattern`, `motion` and hero `decoration` m
 | Controls | Fill, label and focus references | Behaviour, sizes, validation |
 | Overlays | Surface and backdrop references | Focus containment and stacking |
 | Menus | Surface and divider references | Contents and keyboard access |
-| Decoration | Pattern and motion `none` | App-owned inert decoration hooks |
+| Decoration | Pattern and motion: `none` or an approved name from `slots.json` | What the pattern and motion draw (`theme-decor.css`) |
 
 The compiler exposes `--theme-chart-grid` and `--theme-chart-accent` for nonfinancial chart components. Existing financial charts keep their series. New components must consume their compartment variables; never add per-theme markup.
 

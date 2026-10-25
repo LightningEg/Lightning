@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-25 · Claude: Nile Papyrus & Lapis Guilloché app theme (from #136, reviewed): papyrus texture, page-corner rosette and one 12 s header-seam motion, reduced motion still; dark-theme readability fixes use each theme's own money tints. themes.md and theme-kit allow approved decoration.
 - 2026-10-25 · Claude: 8J website leaderboard (website repo): a table of rank, display name, contributions and score over each member's banner; `leaderboard.html?sample` shows made-up people to preview it.
 - 2026-10-25 · Codex: 8J creator brief now specifies mode, a mandatory PC/phone screenshot roster, WCAG AA contrast and LTR amounts in Arabic; adds a reusable AI prompt.
 

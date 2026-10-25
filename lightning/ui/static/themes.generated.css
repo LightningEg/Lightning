@@ -58,6 +58,8 @@
   --theme-divider: #1C3A4F;
   --c-well: #112839;
   --theme-on-accent: #03222A;
+  --theme-income: #4FD8A4;
+  --theme-expense: #FF9393;
   --theme-logo: url(/static/lightning-mark-on-dark.svg);
   color-scheme: dark;
 }
@@ -120,6 +122,8 @@
   --theme-divider: #1E324D;
   --c-well: #142236;
   --theme-on-accent: #100C02;
+  --theme-income: #4FD8A4;
+  --theme-expense: #FF9393;
   --theme-logo: url(/static/lightning-mark-on-dark.svg);
   color-scheme: dark;
 }
@@ -182,6 +186,8 @@
   --theme-divider: #2F2A20;
   --c-well: #1E1B15;
   --theme-on-accent: #1A1405;
+  --theme-income: #9ED08A;
+  --theme-expense: #EE9A86;
   --theme-logo: url(/static/lightning-mark-on-dark.svg);
   color-scheme: dark;
 }

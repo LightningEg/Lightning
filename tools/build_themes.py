@@ -72,6 +72,8 @@ def compile_theme(manifest, parts):
             values.update((name,p[parts[slot][field]]) for name in names.split())
     values["c-well"] = p["raised"]
     values["theme-on-accent"] = p[parts["controls"]["label"]]
+    # The manifest's own money colours, for tints on its dark surfaces (theme-surfaces.css); the default keeps its paint.
+    values.update({"theme-income": p["income"], "theme-expense": p["expense"]})
     values["theme-logo"] = "url(/static/lightning-mark-on-dark.svg)" if parts["brand"]["logoVariant"] == "on-dark" else "url(/static/lightning-mark.svg)"
     scheme = "dark" if contrast(p["background"], "#FFFFFF") > contrast(p["background"], "#000000") else "light"
     return ':root[data-theme="'+manifest["id"]+'"] {\n  '+"\n  ".join('--'+k+': '+v+';' for k,v in values.items())+'\n  color-scheme: '+scheme+';\n}\n'

@@ -23,7 +23,7 @@ Owner, 2026-10-25: five palettes and two textured themes on sale while each is p
 
 **Archived:** Ocean, Tokyo, Dracula, Rose, Synthwave, Phosphor, Amber, Solarized and Moss. They are not sold and not shown, but a member who owns one keeps it, sees it and can wear it. Their seeds stay in `js/forgeeks.js` marked `archived:true` and their tokens stay in `css/forgeeks.css`. To bring one back, take it through section 5 like a new theme, then set `active = true` in a migration and drop `archived:true`.
 
-The two app themes in testing, Nile Nocturne and Royal Obsidian & Gold (`cosmetics/*.json`), have no price until the app can wear them.
+The app themes in testing, Nile Nocturne, Royal Obsidian & Gold and Nile Papyrus & Lapis Guilloché are in `cosmetics/*.json` and have no price until verified claiming ships. Nile Papyrus is the first with a texture and a motion.
 
 ## 2. The seed
 
@@ -58,7 +58,7 @@ Eleven parts, the same eleven on every surface. A part not listed for a surface 
 | 7 | **Buttons and inputs** | Primary and secondary buttons, links, focus, fields | `--nile` `--nile-2` `--on-nile` `--azure` `--line-ctl` `--field` `--field-focus` | `--btn` `--btn-ink` `--accent` | `controls` |
 | 8 | **Sheets and dialogs** | Windows, the buy window, overlays | reads part 5 | `--panel` | `overlays` |
 | 9 | **Settings and menus** | Menus, dropdowns, dividers | reads part 5 | reads part 5 | `menus` |
-| 10 | **Texture and motion** | Pattern behind the page; later, one motion | textured tier: `:root[data-texture]` (`css/textures.css`) | the same texture, under the field | `decoration`: `none` for now |
+| 10 | **Texture and motion** | Pattern behind the page; later, one motion | textured tier: `:root[data-texture]` (`css/textures.css`) | the same texture, under the field | `decoration`: a pattern and a motion from the approved lists in `slots.json`, drawn by `theme-decor.css` |
 | 11 | **Brand mark** | The two-leaf logo | the light or dark mark, never recoloured | `geeks-mark-light` / `-dark` | `brand`: `on-light` / `on-dark` |
 
 The footer and the consent bar are part 1 plus part 5 (`--sf-*` and `--lc-*` on the main site).
@@ -110,7 +110,7 @@ A theme with any of these is not done:
 - A colour outside its part: a button colour in a card, an accent in body text.
 - Money colours moved on the main site or in the app, or any money colour on For Geeks.
 - A layout shift: put screenshots against the default theme side by side, and nothing may move.
-- Motion that ignores reduced motion. For now there is no motion at all.
+- Motion that ignores reduced motion, or more than one motion in a theme.
 - A seed edited without rechecking every part.
 
 ## 7. Tiers and prices
@@ -151,4 +151,4 @@ The app's [`theme-kit/README.md`](https://github.com/LightningEg/Lightning/blob/
 
 `python tools/build_themes.py --validate path/to/theme.json` checks the existing data-only contract and text/control contrast pairs. Reviewed app previews are bundled under `lightning/ui/static/cosmetics/`; `python tools/build_themes.py` generates the root `data-theme` CSS and boot registry. Both app frames load the same switcher before content paints. Settings → Appearance switches paint without navigating and remembers it with the profile across native launches; an unknown saved ID returns to Lightning default. The exact default paint stays in the existing guideline stylesheets.
 
-This first app implementation accepts palette previews. Decoration remains `none`; arbitrary CSS, URLs and motion are rejected. Financial tokens and series retain their existing meanings. Actual Windows/Android screens, English/Arabic, contrast and geometry still require the kit's acceptance checks. Bundling a preview does not enable sale or prove paid ownership; verified claiming remains a separate release prerequisite.
+The app accepts palette previews, plus decoration from approved lists only: `slots.json` names each pattern and motion (now `papyrus-guilloche` and `security-thread`), and `lightning/ui/static/theme-decor.css` draws them under section 7's rules. A new pattern or motion is app code, reviewed like any other; a manifest can only pick from the lists. Arbitrary CSS, URLs and other motion are rejected. Financial tokens and series retain their existing meanings. Actual Windows/Android screens, English/Arabic, contrast and geometry still require the kit's acceptance checks. Bundling a preview does not enable sale or prove paid ownership; verified claiming remains a separate release prerequisite.

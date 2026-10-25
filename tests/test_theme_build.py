@@ -43,6 +43,41 @@ class ThemeBuildTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     self.validate()
 
+    def test_decoration_takes_only_approved_patterns_and_motions(self):
+        self.manifest['parts']['decoration'] = {'pattern': 'papyrus-guilloche', 'motion': 'security-thread'}
+        self.validate()
+        for key, value in [('pattern', 'url(x)'), ('motion', 'spin'), ('motion', 'papyrus-guilloche')]:
+            with self.subTest(key=key, value=value):
+                self.setUp()
+                self.manifest['parts']['decoration'] = {'pattern': 'none', 'motion': 'none', key: value}
+                with self.assertRaises(ValueError):
+                    self.validate()
+
+    def test_registry_names_decoration_and_every_one_is_drawn(self):
+        registry = json.loads((builder.STATIC / 'themes.generated.json').read_text())
+        decor = (builder.STATIC / 'theme-decor.css').read_text()
+        contract = json.loads((builder.SOURCE / 'slots.json').read_text())['slots']['decoration']
+        papyrus = next(t for t in registry if t['id'] == 'nile-papyrus-guilloche')
+        self.assertEqual((papyrus['pattern'], papyrus['motion']), ('papyrus-guilloche', 'security-thread'))
+        self.assertNotIn('pattern', next(t for t in registry if t['id'] == 'nile-nocturne'))
+        for name in contract['patterns'][1:]:
+            self.assertIn(f'[data-texture="{name}"]', decor)
+        for name in contract['motions'][1:]:
+            self.assertIn(f'[data-motion="{name}"]', decor)
+
+    def test_decoration_layer_keeps_the_motion_rules(self):
+        decor = (builder.STATIC / 'theme-decor.css').read_text()
+        # one motion per theme, slow, stopped by reduced motion; no requests; the brand watermark (::after) untouched
+        self.assertEqual(decor.count('animation:') - decor.count('animation: none'), 1)
+        self.assertIn('12s linear infinite', decor)
+        self.assertIn('@media (prefers-reduced-motion: reduce)', decor)
+        self.assertNotRegex(decor, r'url\((?!"data:)')
+        self.assertNotIn('lead-card', decor)  # never inside a card; the Lead card keeps the brand watermark
+        self.assertNotIn('transition', decor)
+        for shell in ['base.html', 'phone/base.html']:
+            source = (ROOT / 'lightning/ui/templates' / shell).read_text()
+            self.assertLess(source.index('/static/theme-surfaces.css'), source.index('/static/theme-decor.css'))
+
     def test_rejects_unreadable_card_and_button(self):
         for part, key, value in [('cards', 'surface', 'text'), ('controls', 'label', 'accent')]:
             with self.subTest(part=part):
@@ -58,6 +93,9 @@ class ThemeBuildTests(unittest.TestCase):
         self.assertIn('--theme-card-border: #0B6DD6', css)
         for token in ['--positive:', '--rose:', '--azure:', '--chart-equity:', '--pos:', '--neg:']:
             self.assertNotIn(token, css)
+        # the theme's own money colours are offered as tint sources only, under their own names
+        self.assertIn('--theme-income: ', css)
+        self.assertIn('--theme-expense: ', css)
 
     def test_both_shells_boot_before_layout_styles(self):
         for shell in ['base.html', 'phone/base.html']:

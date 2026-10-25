@@ -26,6 +26,16 @@ test('boot restores before DOMContentLoaded and rejects stale IDs', () => {
   assert.equal(boot('nile-nocturne').root.dataset.theme, 'nile-nocturne');
   for (const id of [null, 'removed-theme', '"><script>']) assert.equal(boot(id).root.dataset.theme, 'lightning-default');
 });
+test('a decorated theme sets its texture and motion, and switching away clears them', () => {
+  const app = boot('nile-papyrus-guilloche');
+  assert.equal(app.root.dataset.texture, 'papyrus-guilloche');
+  assert.equal(app.root.dataset.motion, 'security-thread');
+  app.events.DOMContentLoaded();
+  app.select.value = 'nile-nocturne'; app.select.change();
+  assert.equal(app.root.dataset.texture, undefined);
+  assert.equal(app.root.dataset.motion, undefined);
+  assert.equal(boot('nile-nocturne').root.dataset.texture, undefined);
+});
 test('switch persists with the existing root and unsaved input untouched', () => {
   const app = boot(null), root = app.root;
   app.events.DOMContentLoaded();
