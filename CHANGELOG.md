@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-25 · Claude: 8J owner dashboard (website repo): Today view (needs, revenue vs fixed cost, 30-day chart), each top-up one ticket confirmed in place, simpler InstaPay checkout (payer address or wallet phone, no reference); fixes the live coin quote.
 - 2026-10-25 · Codex: 8J app theme swap and external creator kit: shared PC/phone runtime, validated palette compiler, Settings previews and handoff template; sync themes guideline in both repos. Native and paid activation acceptance remain.
 
 - 2026-10-25 · Claude: 8J theme tiers and prices (website repo): Palette 300 coins, Textured 600 (Papyrus, Cotton), Animated later; market shows EGP, a textured row and what buyers get. guideline/themes.md section 7 (both repos).
