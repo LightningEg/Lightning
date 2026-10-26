@@ -899,6 +899,35 @@ class TransactionService:
             "SELECT t.id FROM transactions t WHERE t.type='VAL' AND t.source='SYSTEM' AND t.status='VOID' "
             "AND NOT EXISTS (SELECT 1 FROM reevaluation_account_posts p WHERE p.transaction_id=t.id)")}
 
+    # -- one save per submitted form (2J) ------------------------------------------------------------------
+    @staticmethod
+    def _submission(token, payload: dict) -> tuple[str, str] | None:
+        token = str(token or "")
+        if len(token) != 32 or any(char not in "0123456789abcdef" for char in token):
+            return None  # Callers without a token keep the old contract.
+        body = json.dumps({key: str(value) for key, value in payload.items()}, sort_keys=True, ensure_ascii=False)
+        return token, hashlib.sha256(body.encode()).hexdigest()
+
+    def submitted(self, token, payload: dict) -> Transaction | None:
+        """The transaction an earlier delivery of this same form created, if any. Call inside the write transaction."""
+        found = self._submission(token, payload)
+        if found is None:
+            return None
+        row = self.db.one("SELECT entity_id, after_json FROM audit_log WHERE entity='form' AND summary=?", (found[0],))
+        if row is None:
+            return None
+        txn = self.repo.get(int(row["entity_id"]))
+        if txn is None or txn.is_void or json.loads(row["after_json"]) != found[1]:
+            ref = f" as {txn.ref}" if txn is not None else ""
+            raise ValidationError(f"This form was already saved{ref}. Open a new one to add another.")
+        return txn
+
+    def remember_submission(self, token, payload: dict, txn_id: int) -> None:
+        """Saved in the audit log, in the same write as the transaction; the log is outside Undo and the journal."""
+        found = self._submission(token, payload)
+        if found is not None:
+            self.audit.record("form", txn_id, "SUBMITTED", found[0], after=found[1])
+
     def get(self, txn_id: int) -> Transaction:
         found = self.repo.get(txn_id) if 0 < txn_id <= 9_223_372_036_854_775_807 else None  # SQLite's largest id (2E6)
         if not found:
@@ -1069,6 +1098,7 @@ class TransactionService:
     def _create(self, doc_type: DocType, day, lines: list[PostingLine], description: str, counterparty: str,
                 notes: str, source: TxnSource, validate_all_cash: bool = False) -> Transaction:
         with self.db.transaction():
+            self._check_line_identity(lines)
             self._validate_owner_balances(lines, day, force_brokerage_cash=doc_type == DocType.BUY,
                                           validate_all_cash=validate_all_cash,
                                           ignore_before_day=validate_all_cash)
@@ -1124,6 +1154,7 @@ class TransactionService:
     def _update(self, current: Transaction, day, lines: list[PostingLine], description: str, counterparty: str,
                 notes: str, validate_all_cash: bool = False) -> Transaction:
         with self.db.transaction():
+            self._check_line_identity(lines)
             self._refuse_linked_loan_edit(current, day, lines)
             self._validate_owner_balances(lines, day, exclude_txn_id=current.id,
                                          force_brokerage_cash=current.type == DocType.BUY,
@@ -1188,6 +1219,24 @@ class TransactionService:
                 raise ValidationError("Change an opening balance from the account's edit page.")
             raise ValidationError(f"{t.type_label} transactions cannot be edited here.")
         return t
+
+    def _check_line_identity(self, lines) -> None:
+        """Every writer, built-in or not, must agree with master data (2I): a line is cash exactly when its asset
+        is, cash sits only in an account of its own currency, and profile-currency cash moves at a rate of 1."""
+        for i, line in enumerate(lines, start=1):
+            if not isinstance(line, PostingLine):
+                continue  # Stored lines kept as they are by a metadata-only save.
+            asset = self.assets.get_asset(line.asset_id)
+            if line.effect != Effect.REVALUATION and line.is_cash != asset.is_cash:
+                raise ValidationError(f"Line {i}: {asset.name} is {'' if asset.is_cash else 'not '}cash.")
+            if not asset.is_cash:
+                continue
+            account = self.accounts.get(line.account_id)
+            if asset.currency != account.currency:
+                raise ValidationError(
+                    f"Line {i}: {account.label} holds {account.currency}, not {asset.currency} cash.", "currency")
+            if asset.currency == self.base_currency and line.fx_rate != ONE:
+                raise ValidationError(f"Line {i}: {asset.currency} cash moves at a rate of 1.", "fx_rate")
 
     def _check_holdings(self, lines) -> None:
         """No holding may ever go below zero units (you cannot sell or remove what you did not have)."""

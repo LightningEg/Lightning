@@ -4,7 +4,7 @@ from decimal import Decimal, ROUND_UP
 
 from lightning.core.dates import fmt_date, parse_date, today
 from lightning.core.errors import ValidationError
-from lightning.core.money import ZERO, from_e6, to_decimal
+from lightning.core.money import ZERO, check_places, from_e6, to_decimal
 from .domain import Frequency, PaymentStatus, PlanKind, PlannedItem
 from .schedule import scheduled_dates
 
@@ -43,7 +43,9 @@ def adjusted_payments(payments, terms, extras):
 
 
 def purchase_quote(price, fee, months, first_date):
-    value, charge = to_decimal(price, "price"), to_decimal(fee or "0", "fee")
+    # Instalments are paid in the profile currency: a sub-cent price would leave a final payment nobody can post (2L).
+    value = check_places(to_decimal(price, "price"), 2, "price")
+    charge = check_places(to_decimal(fee or "0", "fee"), 2, "fee")
     try:
         count = int(str(months))
     except ValueError:
@@ -84,7 +86,8 @@ def preview_early_payment(planning, item_id, principal, fee="0", on=None):
     day = parse_date(on or fmt_date(today()), "date_paid")
     if day > today():
         raise ValidationError("Record the payment on its actual date, not a future date.", "date_paid")
-    value, charge = to_decimal(principal, "principal"), to_decimal(fee or "0", "fee")
+    value = check_places(to_decimal(principal, "principal"), 2, "principal")
+    charge = check_places(to_decimal(fee or "0", "fee"), 2, "fee")
     payments = planning.payments(item, "2999-12-31", day)
     remaining = sum((p.still_owed for p in payments), ZERO)
     if value <= ZERO or value > remaining or charge < ZERO:
