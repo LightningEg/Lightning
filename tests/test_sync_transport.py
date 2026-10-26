@@ -111,18 +111,24 @@ def test_another_device_at_the_phones_address_is_refused(phone, tmp_path):
         fake.stop()
 
 
-def test_unpaired_or_revoked_pc_and_forged_signature_are_refused(phone, tmp_path):
+@pytest.mark.parametrize("protected", [False, True], ids=["native-default", "injected-protection"])
+def test_unpaired_or_revoked_pc_and_forged_signature_are_refused(phone, tmp_path, protected):
     node, pc_id = join(phone, tmp_path)
-    stranger = load_or_create(tmp_path / "stranger", "Stranger")
+    from test_device_credentials import TestProtector
+    stranger = load_or_create(tmp_path / "stranger", "Stranger",
+                              protector=TestProtector() if protected else None)
     home = node.store.peer(node.model.home_id)
     with pytest.raises(ProtocolError) as unknown:
         TlsLink(phone.endpoint, home.certificate_sha256, stranger).status(Status(stranger.device_id))
     assert unknown.value.code == "UNAUTHORIZED"
-    # The stranger claims the paired PC's ID but cannot sign for it.
-    from dataclasses import replace
-    forged = replace(stranger, device_id=pc_id.device_id)
-    with pytest.raises(ProtocolError):
+    # Lie on the wire while signing with the stranger's intact identity. Changing
+    # DeviceIdentity.device_id also changes its OS key binding and fails locally.
+    from types import SimpleNamespace
+    forged = SimpleNamespace(device_id=pc_id.device_id, sign=stranger.sign)
+    with pytest.raises(ProtocolError) as invalid_signature:
         TlsLink(phone.endpoint, home.certificate_sha256, forged).status(Status(pc_id.device_id))
+    assert invalid_signature.value.code == "UNAUTHORIZED"
+    assert link_to_home(node, pc_id).status(Status(pc_id.device_id)).state == "AT_HOME"
     phone.pair.home.revoke(pc_id.device_id)
     with pytest.raises(ProtocolError):
         link_to_home(node, pc_id).status(Status(pc_id.device_id))

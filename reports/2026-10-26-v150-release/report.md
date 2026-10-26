@@ -63,3 +63,20 @@ No production credentials, keys, migrations or payment records were changed duri
 2026-10-26: displayed version now agrees at 1.5.0. The repeated theme-switching browser run passed all four PC/phone and English/Arabic combinations; screenshots were refreshed after the version fix. Documentation links/catalogues and the theme compiler check pass.
 
 2026-10-26: owner approved the contributor workflows; #117 passed PR checks and CodeQL and was merged at cfd693e5. Release-preparation head af8ac8c9 also passed both required workflows. Synchronizing the release notes with the contributor merge changes no application behavior.
+
+2026-10-26: [manual package run #597](https://github.com/LightningEg/Lightning/actions/runs/40363515349)
+used main 884476c2892816a9412ffa2ba42ee633e194a194. Android built, signed and passed its certificate/package checks.
+Windows stopped before packaging: 273 tests passed, 12 skipped, and
+`test_unpaired_or_revoked_pc_and_forged_signature_are_refused` failed with `DeviceCredentialError`.
+The fixture changed `DeviceIdentity.device_id` to impersonate a paired PC, changing the authenticated binding
+used to unseal its DPAPI-protected key. Windows correctly refused the altered binding before a forged request
+could be sent; the fixture expected a network `ProtocolError`. The same failure was reproduced on Linux
+with an injected AES-GCM protector, so the regression is now exercised on every host.
+The fixture now claims the paired ID on the wire while signing with the stranger's unchanged identity.
+It requires the phone's `UNAUTHORIZED` response and checks the legitimate PC still works before revocation.
+Both default and injected protection cases pass; sync/credential tests: 31 passed, one Windows-only skip.
+No application, credential-protection, signature-verification, signing or workflow code changed.
+The full suite and required PR checks must pass before merge; a fresh manual build on the fixed main is
+needed for Windows package evidence. Retrying #597 uses the old source and cannot apply the fix.
+
+2026-10-26: full local suite after the #597 fixture fix: 2,687 passed, 11 skipped, 26 subtests passed in 564.65 seconds. All four import contracts and documentation/link checks pass. Native Windows packaging still needs the fresh build run.
