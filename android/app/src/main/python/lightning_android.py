@@ -11,10 +11,22 @@ _devices = None
 _launched = False
 
 
+def configure_device_credentials():
+    """Install the native adapter before any pairing identity is opened."""
+    try:
+        from java import jclass
+    except ImportError:
+        return False  # Desktop probe only; Android platform detection still fails closed.
+    from lightning.security.device_credentials import configure_android_credentials
+    configure_android_credentials(jclass("org.lightning.app.DeviceCredentialBridge"))
+    return True
+
+
 def start(files_dir):
     """The URL the WebView opens: the single-use launch link the first time, the app itself afterwards."""
     global _host, _devices, _launched
     if _host is None:
+        configure_device_credentials()
         from lightning.runtime.app import profile_app
         from lightning.runtime.devices import Devices
         from lightning.runtime.http import Host

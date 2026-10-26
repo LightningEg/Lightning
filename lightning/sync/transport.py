@@ -219,7 +219,7 @@ class HomeServer:
         self.on_authenticated, self.arriving = on_authenticated, arriving
         self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         self.context.minimum_version = ssl.TLSVersion.TLSv1_3
-        self.context.load_cert_chain(identity.cert_path, identity.key_path)
+        identity.load_cert_chain(self.context)
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
             self.listener.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)

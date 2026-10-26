@@ -3,12 +3,15 @@
 It finds pages, actions, a transaction by its reference, accounts, counterparties, categories,
 investments and #tags, ranks them (exact name, starts with, a word starts with, contains, then a close
 spelling), groups them by type so an own account is never mistaken for a counterparty, and always ends
-with "Find transactions with ...". A close spelling is never tried on amounts or dates. Choosing a
-result is the user's click; the matcher changes nothing.
+with "Find transactions with ...". A close spelling is never tried on amounts or dates. Both sides of a
+compare fold the same way first (`_fold_search_text`), so Arabic spelling variants and tashkeel, Arabic-
+Indic and Persian digits, and Latin case and accents read equal; folded text is for comparing only.
+Choosing a result is the user's click; the matcher changes nothing.
 """
 from __future__ import annotations
 
 import re
+import unicodedata
 from difflib import SequenceMatcher
 from urllib.parse import quote, urlencode
 
@@ -16,6 +19,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from lightning.core.errors import LightningError
+from lightning.core.money import ascii_digits
 from lightning.core.refs import parse_ref
 from lightning.transactions.tags import normalize as normal_tag
 
@@ -63,10 +67,45 @@ ACTIONS = (
 GROUPS = ("Transaction", "Page", "Action", "Account", "Counterparty", "Category", "Investment", "Tag", "Search")
 _LOOKS_NUMERIC = re.compile(r"[\d\s,./:+−-]+")
 
+# Letters and signs NFKD alone does not bring together: the taa marbuta typed as heh, the alef
+# maqsura typed as ya, the wasla alef (NFKD leaves its superscript alef attached), the tatweel (a
+# letter, not a mark), and the punctuation someone may type in either script quoted either way.
+# Folded only at compare time; labels, links and stored data keep the original.
+_COMPARE_FOLDS = str.maketrans({
+    "ة": "ه",
+    "ى": "ي",
+    "ٱ": "ا",
+    "ـ": "",
+    "،": ",", "؛": ";", "؟": "?", "٪": "%",
+    "`": "'", "‘": "'", "’": "'", "‛": "'", "ʻ": "'", "ʼ": "'", "ʽ": "'",
+    "“": '"', "”": '"', "„": '"', "«": '"', "»": '"',
+    "‐": "-", "‑": "-", "‒": "-", "–": "-", "—": "-", "―": "-",
+})
+
+
+def _fold_search_text(text: str) -> str:
+    """The one folding for what search compares; both the query and the text are folded by it (7J).
+
+    In order: NFKD, so full-width Latin, Arabic presentation forms, hamza-carrying letters
+    (أ، إ، آ → ا; ؤ → و; ئ → ي, through their marks) and the lam-alef ligature break apart;
+    Arabic-Indic and Persian digits through `core.money.ascii_digits`; combining marks and invisible
+    format characters dropped, which removes tashkeel, shadda and tanween, Quran annotation marks and
+    zero-width joiners; then the explicit folds above (ة → ه, ى → ي, ٱ → ا, the tatweel out, quotes
+    and dashes to their ASCII forms) and Latin case and accents (casefold does Straße and STRASSE; the
+    marks NFKD separates cover é vs e). A mark never carries an identity of its own here: dropping it
+    joins no words that a space or punctuation kept apart. Empty input stays empty, and the fold is its
+    own fixed point, so folding twice is folding once.
+    """
+    s = " ".join(str(text or "").casefold().split())
+    s = unicodedata.normalize("NFKD", s)
+    s = ascii_digits(s)
+    s = "".join(c for c in s if unicodedata.category(c) not in ("Mn", "Cf"))
+    return " ".join(s.translate(_COMPARE_FOLDS).split())
+
 
 def _score(needle: str, text: str, fuzzy: bool = True) -> float:
     """1 for the exact name, then starts with, a word starts with, contains, then a close spelling."""
-    text = " ".join(text.casefold().split())
+    needle, text = _fold_search_text(needle), _fold_search_text(text)
     if not needle or not text:
         return 0.0
     if text == needle:
@@ -84,8 +123,8 @@ def _score(needle: str, text: str, fuzzy: bool = True) -> float:
 def matches(c, query: str, privacy: bool = False, per_group: int = 6) -> list[dict]:
     """Ranked results grouped by type: {label, href, kind, context}; an action may carry "action"."""
     query = " ".join(str(query or "").split())
-    needle = query.casefold()
-    fuzzy = not _LOOKS_NUMERIC.fullmatch(query)  # never a close spelling for amounts or dates
+    needle = _fold_search_text(query)
+    fuzzy = not _LOOKS_NUMERIC.fullmatch(needle)  # never a close spelling for amounts or dates
     privacy_action = {"label": "Show amounts" if privacy else "Hide amounts", "href": "#", "kind": "Action",
                       "context": "Privacy mode for this profile", "action": "privacy"}
     pages = [p for p in PAGES if p[1] != "/zakat" or c.zakat.enabled()]

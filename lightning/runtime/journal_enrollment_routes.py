@@ -93,7 +93,7 @@ def journal_enrollment_router(session) -> APIRouter:
                      for identifier, candidate in enrollment.candidates.items()]
         context = dict(request=request, locale=locale, texts=strings(locale), csrf=session.csrf,
                        error=error_text(error, locale) if error else "", notice=notice,
-                       stage=stage, state=state or {}, candidates=found, name=name, pairing_version=digest(found),
+                       stage=stage, state=state or {}, candidates=found, name=name, pairing_version=digest(state if state is not None else found),
                        on_phone=bool(getattr(request.state, "phone", False)))
         response = _views.TemplateResponse(request=request, name="journal/journal_enrollment.html",
                                            context=context, status_code=status)
@@ -162,8 +162,13 @@ def journal_enrollment_router(session) -> APIRouter:
         try:
             await form(request)
             enrollment = active()
-            if enrollment is None or enrollment.state() is not None:
+            if enrollment is None:
                 return JSONResponse(dict(version=digest([])))
+            state = enrollment.state()
+            if state is not None:
+                if state["stage"] in ("handshake", "proving", "waiting", "cancelling"):
+                    await enrollment.resume()
+                return JSONResponse(dict(version=digest(enrollment.state() or {})))
             found = await enrollment.find()
             return JSONResponse(dict(version=digest(found)))
         except (JournalError, OSError, ValueError, TimeoutError):
@@ -179,6 +184,12 @@ def journal_enrollment_router(session) -> APIRouter:
     async def join(request: Request):
         async def operation(enrollment, data):
             await enrollment.join(str(data.get("candidate", "")), str(data.get("code", "")))
+        return await post_action(request, operation)
+
+    @router.post(_BASE + "/resume", response_class=HTMLResponse)
+    async def resume(request: Request):
+        async def operation(enrollment, _data):
+            await enrollment.resume()
         return await post_action(request, operation)
 
     @router.post(_BASE + "/compare", response_class=HTMLResponse)
@@ -213,7 +224,7 @@ def journal_enrollment_router(session) -> APIRouter:
             state = enrollment.state()
             if state is not None and state.get("stage") not in {"compare", "password"}:
                 raise JournalError("The password proof has already been sent. Ask the home device to stop this pairing.")
-            enrollment.cancel()
+            await enrollment.cancel()
             return "cancelled"
         return await post_action(request, operation)
 

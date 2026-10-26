@@ -329,6 +329,49 @@ async def new_transaction_popup(request: Request, account_id: int):
                   **_transaction_popup_context(request, account, values, f"/accounts/{account_id}/transaction/new"))
 
 
+def _save_popup_transaction(c, account_id: int, values: dict):
+    kind = values["kind"]
+    if kind not in {"out", "in", "transfer"}:
+        raise ValidationError("Choose Money out, Money in, or Transfer.", "kind")
+    day = fmt_date(parse_date(values["date"], "date"))
+    amount = to_decimal(values["amount"], "amount")
+    if amount <= 0:
+        raise ValidationError("Enter an amount greater than zero.", "amount")
+    owner_id = int(values["owner_id"]) if values["owner_id"].isdigit() else None
+    if owner_id is not None:
+        party = c.counterparties.get(owner_id)
+        if not party or not party["active"]:
+            raise ValidationError("Choose an active owner.", "owner_id")
+    if kind == "transfer":
+        to_account = int(values["to_account_id"]) if values["to_account_id"].isdigit() else None
+        if not to_account or to_account == account_id:
+            raise ValidationError("Choose a different destination account.", "to_account_id")
+        txn = c.transactions.record_transfer(day, account_id, to_account, amount,
+                                             notes=values["notes"], owner_id=owner_id)
+    else:
+        category_id = int(values["category_id"]) if values["category_id"].isdigit() else None
+        if not category_id and values["counterparty"].strip():
+            # Left empty: a rule decides first, then the counterparty's usual category, as in the register.
+            category_id = register.category_when_empty(c, values["counterparty"].strip(), values["notes"],
+                                                       -amount if kind == "out" else amount, account_id)
+        if not category_id:
+            raise ValidationError("Choose a category.", "category")
+        category = c.categories.get(category_id)
+        if kind == "out" and category.movement.value != "OUTFLOW":  # money in to an expense is a refund
+            raise ValidationError("Choose a category that matches this transaction type.", "category")
+        counterparty = _popup_counterparty(c, values["counterparty"])
+        if counterparty and any(a.name.casefold() == counterparty.casefold()
+                                for a in c.accounts.list(active_only=True)):
+            raise ValidationError("Choose Transfer and select the destination account explicitly.", "counterparty")
+        if kind == "out":
+            txn = c.transactions.record_outflow(day, account_id, amount, category_id,
+                                               counterparty=counterparty, notes=values["notes"], owner_id=owner_id)
+        else:
+            txn = c.transactions.record_inflow(day, account_id, amount, category_id,
+                                              counterparty=counterparty, notes=values["notes"], owner_id=owner_id)
+    return txn
+
+
 @router.post("/{account_id:int}/transaction/new")
 async def save_transaction_popup(request: Request, account_id: int):
     c = container(request)
@@ -337,46 +380,16 @@ async def save_transaction_popup(request: Request, account_id: int):
     values = {key: str(form.get(key, "")) for key in
               ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes")}
     values["return_to"] = _safe_return(form.get("return_to"), f"/accounts/{account_id}")
+    submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+    payload = {key: value for key, value in values.items() if key != "return_to"} | {"account": account_id}
     try:
-        kind = values["kind"]
-        if kind not in {"out", "in", "transfer"}:
-            raise ValidationError("Choose Money out, Money in, or Transfer.", "kind")
-        day = fmt_date(parse_date(values["date"], "date"))
-        amount = to_decimal(values["amount"], "amount")
-        if amount <= 0:
-            raise ValidationError("Enter an amount greater than zero.", "amount")
-        owner_id = int(values["owner_id"]) if values["owner_id"].isdigit() else None
-        if owner_id is not None:
-            party = c.counterparties.get(owner_id)
-            if not party or not party["active"]:
-                raise ValidationError("Choose an active owner.", "owner_id")
-        if kind == "transfer":
-            to_account = int(values["to_account_id"]) if values["to_account_id"].isdigit() else None
-            if not to_account or to_account == account_id:
-                raise ValidationError("Choose a different destination account.", "to_account_id")
-            txn = c.transactions.record_transfer(day, account_id, to_account, amount,
-                                                 notes=values["notes"], owner_id=owner_id)
-        else:
-            category_id = int(values["category_id"]) if values["category_id"].isdigit() else None
-            if not category_id and values["counterparty"].strip():
-                # Left empty: a rule decides first, then the counterparty's usual category, as in the register.
-                category_id = register.category_when_empty(c, values["counterparty"].strip(), values["notes"],
-                                                           -amount if kind == "out" else amount, account_id)
-            if not category_id:
-                raise ValidationError("Choose a category.", "category")
-            category = c.categories.get(category_id)
-            if kind == "out" and category.movement.value != "OUTFLOW":  # money in to an expense is a refund
-                raise ValidationError("Choose a category that matches this transaction type.", "category")
-            counterparty = _popup_counterparty(c, values["counterparty"])
-            if counterparty and any(a.name.casefold() == counterparty.casefold()
-                                    for a in c.accounts.list(active_only=True)):
-                raise ValidationError("Choose Transfer and select the destination account explicitly.", "counterparty")
-            if kind == "out":
-                txn = c.transactions.record_outflow(day, account_id, amount, category_id,
-                                                   counterparty=counterparty, notes=values["notes"], owner_id=owner_id)
-            else:
-                txn = c.transactions.record_inflow(day, account_id, amount, category_id,
-                                                  counterparty=counterparty, notes=values["notes"], owner_id=owner_id)
+        with c.db.transaction():
+            earlier = c.transactions.submitted(submission, payload)  # a resent form returns its first save (2J)
+            txn = earlier or _save_popup_transaction(c, account_id, values)
+            if earlier is None:
+                c.transactions.remember_submission(submission, payload, txn.id)
+        if earlier is not None:
+            return redirect(values["return_to"], f"Saved {txn.ref}.")
         matched_reserve = c.reserves.auto_link_transaction(txn.id)
         feedback = register._budget_feedback(c, txn)
         if matched_reserve < 0:

@@ -5,6 +5,7 @@ Everything is derived from ledger lines; nothing here writes to the database.
 
 from __future__ import annotations
 
+import calendar
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from decimal import Decimal
@@ -228,7 +229,10 @@ class ReportingService:
             if account.account_type == AccountType.OTHER_ASSET and asset.is_cash:
                 manual = self.other_asset_values.latest(account.id, day)
                 if manual:
-                    valuation = self.valuer.value(asset, manual["value"], day)
+                    # The estimate plus what moved in or out after its date, so money taken out later still
+                    # lowers net worth (audit 2026-10-26).
+                    since = quantity - from_e6(self.q.account_quantity(account.id, as_of=manual["effective_date"]))
+                    valuation = self.valuer.value(asset, manual["value"] + since, day)
                     valuation.price_date = manual["effective_date"]
                     valuation.source = "MANUAL_VALUE"
             if valuation.value is None:
@@ -627,7 +631,7 @@ class ReportingService:
         data: dict[str, dict] = {}
         while cursor <= last:
             key = cursor.strftime("%Y-%m")
-            month_end = (cursor.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+            month_end = cursor.replace(day=calendar.monthrange(cursor.year, cursor.month)[1])  # December 9999 too
             data[key] = {"month": key, "inflows": ZERO, "outflows": ZERO,
                          "date_from": fmt_date(max(first, cursor)), "date_to": fmt_date(min(last, month_end))}
             if cursor.year == 9999 and cursor.month == 12:

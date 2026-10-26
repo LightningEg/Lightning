@@ -10,9 +10,11 @@ from datetime import date
 
 from lightning.core.dates import now_iso
 from lightning.core.errors import ConflictError, NotFoundError, ValidationError
-from lightning.core.money import from_e6, to_decimal, to_e6
+from lightning.core.money import check_places, from_e6, to_decimal, to_e6
 from lightning.core.refs import parse_row_id
 from lightning.database.connection import Database
+from lightning.database.currencies import minor_units
+from lightning.database.settings import SettingsStore
 
 
 class ReimbursementService:
@@ -222,13 +224,17 @@ class ReimbursementService:
                 receipts.append(info)
         return receipts
 
+    def _money(self, value, field):
+        """Whole minor units of the profile currency, as every other money field (audit 2026-10-26)."""
+        return check_places(to_decimal(value, field), minor_units(SettingsStore(self.db).base_currency), field)
+
     def create_claim(self, transaction_id: int, expected, payer_id: int | None = None,
                      due_date: str | None = None) -> dict:
         self._require_writable()
         transaction_id = self._id(transaction_id, "transaction_id")
         if payer_id is not None:
             payer_id = self._id(payer_id, "payer_id")
-        value = to_decimal(expected, "expected")
+        value = self._money(expected, "expected")
         value_e6 = to_e6(value)
         if value_e6 <= 0:
             raise ValidationError("Enter an expected amount greater than zero.", "expected")
@@ -268,7 +274,7 @@ class ReimbursementService:
         self._require_writable()
         claim_id = self._id(claim_id, "claim_id")
         transaction_id = self._id(transaction_id, "receipt_id")
-        value = to_decimal(amount, "amount")
+        value = self._money(amount, "amount")
         value_e6 = to_e6(value)
         if value_e6 <= 0:
             raise ValidationError("Enter a receipt amount greater than zero.", "amount")

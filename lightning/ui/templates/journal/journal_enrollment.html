@@ -83,6 +83,11 @@
             <p class="empty-note">{{ texts.none }}</p>
           {% endif %}
 
+        {% elif stage in ['handshake', 'proving', 'cancelling'] %}
+          <div data-pairing-poll="/profiles/journal/join/poll" data-token-name="csrf" data-token="{{ csrf }}" data-version="{{ pairing_version }}"></div>
+          <p>{{ texts.interrupted }}</p>
+          <form method="post" action="/profiles/journal/join/resume" class="form-stack"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="button button-primary">{{ texts.resume }}</button></form>
+
         {% elif stage == 'compare' %}
           <h2>{{ texts.compare_heading }}</h2>
           <p>{{ texts.compare_help }}</p>
@@ -105,6 +110,7 @@
           </form>
 
         {% elif stage == 'waiting' %}
+          <div data-pairing-poll="/profiles/journal/join/poll" data-token-name="csrf" data-token="{{ csrf }}" data-version="{{ pairing_version }}"></div>
           <h2>{{ texts.waiting_heading }}</h2>
           <p>{{ texts.waiting_help }}</p>
           <h2>{{ texts.finish_heading }}</h2>
@@ -119,7 +125,7 @@
           </form>
         {% endif %}
 
-        {% if stage in ['find', 'compare', 'password'] %}
+        {% if stage in ['find', 'handshake', 'compare', 'password', 'proving', 'cancelling'] %}
           <form method="post" action="/profiles/journal/join/cancel" class="cancel-form">
             <input type="hidden" name="csrf" value="{{ csrf }}">
             <button class="text-button" type="submit">{{ texts.cancel }}</button>

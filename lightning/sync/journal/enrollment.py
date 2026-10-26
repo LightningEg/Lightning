@@ -43,7 +43,8 @@ class EnrollmentSource:
         saved = self.approval(body["request"])
         if not saved:
             raise JournalError("Enrollment has not been approved")
-        original = unpack(saved["request"].encode())["body"]
+        from .pairing import approval_receipt
+        original = approval_receipt(self.device,saved)
         authenticate(envelope,original["key"])
         if body["type"] != "journal-enrollment" or body["sender"] != original["device"]:
             raise JournalError("Enrollment belongs to another device")
