@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dendera Theme Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: one reading column on aged papyrus, sections divided by the theme's own lotus frieze and pigment seam;
+   wide figures (palettes, drawings, screens) break to a wider measure. Tokens are Dendera's own pigments. */
+:root {
+  --frieze: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 10' color='%231F3F8C' stroke-opacity='0.9' fill-opacity='0.9'%3E%3Cstyle%3E.p-accent%7Bcolor:%231F3F8C%7D.p-focus%7Bcolor:%230F6E6A%7D.p-hero%7Bcolor:%238A6410%7D.p-warning%7Bcolor:%239C3A1F%7D%3C/style%3E%3Cpath class='p-focus' fill='currentColor' d='M6 8.6C3.2 7.2 3.4 3.6 6 1C8.6 3.6 8.8 7.2 6 8.6Z' /%3E%3Cpath class='p-hero' stroke='currentColor' stroke-width='1' stroke-linecap='round' d='M6 7.4V3.6' /%3E%3Ccircle class='p-warning' fill='currentColor' cx='18' cy='6.4' r='1.15' /%3E%3Crect class='p-accent' fill='currentColor' x='0' y='9.2' width='24' height='.8' /%3E%3C/svg%3E");
+  --ground: #F1E6CC; --fresco: #FAF3E2; --well: #ECDFC3; --ink: #1E1A14; --quiet: #54483A; --reed: #D9C9A3;
+  --lapis: #1F3F8C; --kenit: #8A6410; --mefkat: #0F6E6A; --desher: #9C3A1F; --on-lapis: #FFFBF1;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: Manrope, "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --measure: 46rem; --wide: 72rem;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ground: #14130F; --fresco: #1C1A15; --well: #26231C; --ink: #F2E9D6; --quiet: #C2B396; --reed: #3A352B;
+  --lapis: #8FA8F2; --kenit: #E2B755; --mefkat: #5FD0C4; --desher: #F08A68; --on-lapis: #0D1530; --frieze: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 10' color='%238FA8F2' stroke-opacity='0.9' fill-opacity='0.9'%3E%3Cstyle%3E.p-accent%7Bcolor:%238FA8F2%7D.p-focus%7Bcolor:%235FD0C4%7D.p-hero%7Bcolor:%23E2B755%7D.p-warning%7Bcolor:%23F08A68%7D%3C/style%3E%3Cpath class='p-focus' fill='currentColor' d='M6 8.6C3.2 7.2 3.4 3.6 6 1C8.6 3.6 8.8 7.2 6 8.6Z' /%3E%3Cpath class='p-hero' stroke='currentColor' stroke-width='1' stroke-linecap='round' d='M6 7.4V3.6' /%3E%3Ccircle class='p-warning' fill='currentColor' cx='18' cy='6.4' r='1.15' /%3E%3Crect class='p-accent' fill='currentColor' x='0' y='9.2' width='24' height='.8' /%3E%3C/svg%3E"); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --ground: #14130F; --fresco: #1C1A15; --well: #26231C; --ink: #F2E9D6; --quiet: #C2B396; --reed: #3A352B;
+  --lapis: #8FA8F2; --kenit: #E2B755; --mefkat: #5FD0C4; --desher: #F08A68; --on-lapis: #0D1530; --frieze: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 10' color='%238FA8F2' stroke-opacity='0.9' fill-opacity='0.9'%3E%3Cstyle%3E.p-accent%7Bcolor:%238FA8F2%7D.p-focus%7Bcolor:%235FD0C4%7D.p-hero%7Bcolor:%23E2B755%7D.p-warning%7Bcolor:%23F08A68%7D%3C/style%3E%3Cpath class='p-focus' fill='currentColor' d='M6 8.6C3.2 7.2 3.4 3.6 6 1C8.6 3.6 8.8 7.2 6 8.6Z' /%3E%3Cpath class='p-hero' stroke='currentColor' stroke-width='1' stroke-linecap='round' d='M6 7.4V3.6' /%3E%3Ccircle class='p-warning' fill='currentColor' cx='18' cy='6.4' r='1.15' /%3E%3Crect class='p-accent' fill='currentColor' x='0' y='9.2' width='24' height='.8' /%3E%3C/svg%3E"); color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 400 16px/1.65 var(--body);
+  background-image: repeating-linear-gradient(0deg, color-mix(in srgb, var(--ink) 3%, transparent) 0 1px, transparent 1px 9px),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--ink) 2%, transparent) 0 1px, transparent 1px 37px); }
+.page { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 72px; }
+.col { max-width: var(--measure); margin-inline: auto; }
+.wide { max-width: var(--wide); margin-inline: auto; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h2 { font-weight: 800; font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.2rem); line-height: 1.15; letter-spacing: -.02em; }
+h3 { font-weight: 600; font-size: 1.12rem; line-height: 1.3; }
+p { margin: 0; }
+a { color: var(--lapis); text-underline-offset: 3px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--mefkat); outline-offset: 3px; border-radius: 4px; }
+code, .mono { font: 400 .86em/1.5 var(--mono); }
+.eyebrow { font: 700 .74rem/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--kenit); }
+.lead { font-size: 1.14rem; color: var(--quiet); max-width: 40rem; }
+.muted { color: var(--quiet); }
+.stack { display: grid; gap: 18px; }
+.stack > * { min-width: 0; }
+.col { width: 100%; }
+code { overflow-wrap: anywhere; }
+
+/* the seam: the four pigments, the way the theme paints its header */
+.seam { height: 2px; background: linear-gradient(90deg, var(--lapis), var(--kenit) 36%, var(--mefkat) 66%, var(--desher)); border-radius: 2px; }
+.frieze { height: 12px; background: var(--frieze) 0 0 / 20px 10px repeat-x; opacity: .9; }
+
+/* cover */
+.cover { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px); gap: 32px; align-items: center; padding-block: 56px 36px; }
+.cover h1 { font-weight: 800; font-size: clamp(3rem, 2rem + 6vw, 5.6rem); line-height: .95; letter-spacing: -.04em; color: var(--lapis); }
+.cover .stack { gap: 16px; }
+.cover svg { width: 100%; height: auto; color: var(--lapis); }
+.cover svg .p-hero { color: var(--kenit); }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.fact { background: var(--fresco); border: 1px solid var(--reed); border-radius: 999px; padding: 4px 12px; font-size: .84rem; white-space: nowrap; }
+.fact b { font-weight: 700; }
+@media (max-width: 720px) { .cover { grid-template-columns: minmax(0, 1fr); padding-block: 36px 24px; } .cover figure { max-width: 220px; } }
+
+section { padding-block: 48px 8px; }
+section > .col > .stack > h2 + p { margin-top: -6px; }
+
+/* tables */
+.scroll { overflow-x: auto; border: 1px solid var(--reed); border-radius: 14px; background: var(--fresco); }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+th, td { text-align: start; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--reed); }
+th { font: 700 .74rem/1.2 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--quiet); background: color-mix(in srgb, var(--well) 60%, var(--fresco)); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.changes td:first-child { color: var(--quiet); width: 32%; }
+.changes td:nth-child(2) { width: 32%; font-weight: 500; }
+
+/* references */
+.refs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.ref { background: var(--fresco); border: 1px solid var(--reed); border-radius: 14px; padding: 18px; display: grid; gap: 10px; align-content: start; }
+.ref ul { margin: 0; padding-inline-start: 18px; display: grid; gap: 4px; font-size: .92rem; }
+.ref .src { font-size: .8rem; color: var(--quiet); border-top: 1px solid var(--reed); padding-top: 10px; }
+@media (max-width: 860px) { .refs { grid-template-columns: minmax(0, 1fr); } }
+
+/* palettes: each mode drawn on its own ground, whatever the reader's theme */
+.palettes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.mode { border-radius: 16px; padding: 20px; display: grid; gap: 14px; }
+.mode.day { background: #F1E6CC; color: #1E1A14; border: 1px solid #D9C9A3; }
+.mode.night { background: #14130F; color: #F2E9D6; border: 1px solid #3A352B; }
+.mode h3 span { font: 400 .8rem/1 var(--mono); opacity: .75; margin-inline-start: 8px; }
+.sw { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: center; font-size: .88rem; }
+.sw i { width: 34px; height: 34px; border-radius: 9px; border: 1px solid rgba(127,127,127,.35); display: block; }
+.sw small { display: block; opacity: .78; font-size: .78rem; }
+.sw .r { font: 400 .8rem/1 var(--mono); white-space: nowrap; }
+@media (max-width: 860px) { .palettes { grid-template-columns: minmax(0, 1fr); } }
+
+/* drawings */
+.drawings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.drawing { background: var(--fresco); border: 1px solid var(--reed); border-radius: 14px; padding: 18px; display: grid; gap: 12px; align-content: start; }
+.drawing .art { display: grid; place-items: center; min-height: 190px; color: var(--lapis); }
+.drawing .art { min-width: 0; } .drawing .art svg { max-width: 100%; width: 100%; max-height: 220px; height: auto; }
+.drawing .art svg .p-hero { color: var(--kenit); } .drawing .art svg .p-focus { color: var(--mefkat); }
+.drawing .art svg .p-warning { color: var(--desher); } .drawing .art svg .p-accent { color: var(--lapis); }
+.drawing .art.band { min-height: 120px; width: 100%; }
+.drawing .art.band .frieze { width: 100%; height: 30px; background-size: 60px 25px; }
+.drawing .art.band .seam { width: 100%; height: 4px; margin-top: 10px; }
+.drawing p { font-size: .92rem; }
+@media (max-width: 760px) { .drawings { grid-template-columns: minmax(0, 1fr); } }
+
+/* motion budget */
+.budget { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.slot { background: var(--fresco); border: 1px solid var(--reed); border-radius: 14px; padding: 18px; display: grid; gap: 8px; align-content: start; }
+.slot.no { background: transparent; border-style: dashed; }
+.slot ul { margin: 0; padding-inline-start: 18px; display: grid; gap: 4px; font-size: .92rem; }
+.tag { justify-self: start; font: 700 .72rem/1 var(--body); letter-spacing: .1em; text-transform: uppercase; padding: 5px 9px; border-radius: 999px; }
+.tag.run { background: color-mix(in srgb, var(--mefkat) 16%, transparent); color: var(--mefkat); }
+.tag.ans { background: color-mix(in srgb, var(--lapis) 14%, transparent); color: var(--lapis); }
+.tag.cut { background: color-mix(in srgb, var(--desher) 14%, transparent); color: var(--desher); }
+@media (max-width: 860px) { .budget { grid-template-columns: minmax(0, 1fr); } }
+.proof { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.proof div { border-top: 2px solid var(--kenit); padding-top: 10px; }
+.proof b { display: block; font: 800 2rem/1.1 var(--display); font-variant-numeric: tabular-nums; color: var(--ink); }
+@media (max-width: 640px) { .proof { grid-template-columns: minmax(0, 1fr); } }
+
+/* screens */
+.shots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.shots.phones { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.shots.sites { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+figure { margin: 0; display: grid; gap: 8px; }
+.shots img { width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--reed); display: block; background: var(--well); }
+figcaption { font-size: .86rem; color: var(--quiet); }
+figcaption b { color: var(--ink); font-weight: 700; }
+@media (max-width: 900px) { .shots, .shots.sites { grid-template-columns: minmax(0, 1fr); } .shots.phones { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.checks td:first-child { font-weight: 600; width: 26%; }
+.ok { color: var(--mefkat); font-weight: 700; white-space: nowrap; }
+.open { color: var(--desher); font-weight: 700; white-space: nowrap; }
+footer { padding-top: 48px; font-size: .86rem; color: var(--quiet); }
+@media (prefers-reduced-motion: no-preference) { .seam.live { background-size: 300% 100%; animation: seam 14s linear infinite;
+  background-image: linear-gradient(90deg, transparent 0 45%, color-mix(in srgb, var(--kenit) 30%, #fff) 50%, transparent 55% 100%), linear-gradient(90deg, var(--lapis), var(--kenit) 36%, var(--mefkat) 66%, var(--desher));
+  background-size: 300% 100%, 100% 100%; }
+  @keyframes seam { to { background-position: -150% 0, 0 0; } } }
+</style>
+</head>
+<body>
+<div class="page">
+<header class="wide cover">
+  <div class="stack">
+    <span class="eyebrow">Lightning theme plan · animated tier</span>
+    <h1>Dendera</h1>
+    <p class="lead">Temple ceiling pigments on aged papyrus, engraved like a banknote. Lapis ink, kenit gold, mefkat turquoise and desher red ochre, a lotus-bud frieze and one slow thread of pigment along the header. By night, the star ceiling.</p>
+    <div class="facts">
+      <span class="fact"><b>App</b> <code>dendera</code> · <code>dendera-night</code></span>
+      <span class="fact"><b>Sites</b> <code>dendera</code></span>
+      <span class="fact"><b>Tier</b> animated · 1,000 coins (200 EGP)</span>
+      <span class="fact"><b>Built</b> 2026-10-26</span>
+    </div>
+  </div>
+  <figure aria-label="The zodiac ring drawing"><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 200 200" fill="none" stroke="currentColor" stroke-width=".6">
+  <title>Zodiac ring: Dendera's round zodiac. 36 decan stars between a double ring, a dial, and a sky of five-armed stars round the sun. Dendera.</title>
+  <circle r="97"/>
+  <circle r="93"/>
+  <circle r="62"/>
+  <circle r="58"/>
+  <circle r="9"/>
+  <circle r="5"/>
+  <path d="M88 0L93 0M87.7 7.7L92.6 8.1M86.7 15.3L91.6 16.1M85 22.8L89.8 24.1M82.7 30.1L87.4 31.8M79.8 37.2L84.3 39.3M76.2 44L80.5 46.5M72.1 50.5L76.2 53.3M67.4 56.6L71.2 59.8M62.2 62.2L65.8 65.8M56.6 67.4L59.8 71.2M50.5 72.1L53.3 76.2M44 76.2L46.5 80.5M37.2 79.8L39.3 84.3M30.1 82.7L31.8 87.4M22.8 85L24.1 89.8M15.3 86.7L16.1 91.6M7.7 87.7L8.1 92.6M0 88L0 93M-7.7 87.7L-8.1 92.6M-15.3 86.7L-16.1 91.6M-22.8 85L-24.1 89.8M-30.1 82.7L-31.8 87.4M-37.2 79.8L-39.3 84.3M-44 76.2L-46.5 80.5M-50.5 72.1L-53.3 76.2M-56.6 67.4L-59.8 71.2M-62.2 62.2L-65.8 65.8M-67.4 56.6L-71.2 59.8M-72.1 50.5L-76.2 53.3M-76.2 44L-80.5 46.5M-79.8 37.2L-84.3 39.3M-82.7 30.1L-87.4 31.8M-85 22.8L-89.8 24.1M-86.7 15.3L-91.6 16.1M-87.7 7.7L-92.6 8.1M-88 0L-93 0M-87.7 -7.7L-92.6 -8.1M-86.7 -15.3L-91.6 -16.1M-85 -22.8L-89.8 -24.1M-82.7 -30.1L-87.4 -31.8M-79.8 -37.2L-84.3 -39.3M-76.2 -44L-80.5 -46.5M-72.1 -50.5L-76.2 -53.3M-67.4 -56.6L-71.2 -59.8M-62.2 -62.2L-65.8 -65.8M-56.6 -67.4L-59.8 -71.2M-50.5 -72.1L-53.3 -76.2M-44 -76.2L-46.5 -80.5M-37.2 -79.8L-39.3 -84.3M-30.1 -82.7L-31.8 -87.4M-22.8 -85L-24.1 -89.8M-15.3 -86.7L-16.1 -91.6M-7.7 -87.7L-8.1 -92.6M-0 -88L-0 -93M7.7 -87.7L8.1 -92.6M15.3 -86.7L16.1 -91.6M22.8 -85L24.1 -89.8M30.1 -82.7L31.8 -87.4M37.2 -79.8L39.3 -84.3M44 -76.2L46.5 -80.5M50.5 -72.1L53.3 -76.2M56.6 -67.4L59.8 -71.2M62.2 -62.2L65.8 -65.8M67.4 -56.6L71.2 -59.8M72.1 -50.5L76.2 -53.3M76.2 -44L80.5 -46.5M79.8 -37.2L84.3 -39.3M82.7 -30.1L87.4 -31.8M85 -22.8L89.8 -24.1M86.7 -15.3L91.6 -16.1M87.7 -7.7L92.6 -8.1" stroke-width=".5"/>
+  <path d="M74.7 6.5L74.7 1.5M74.7 6.5L79.5 5M74.7 6.5L77.7 10.6M74.7 6.5L71.8 10.6M74.7 6.5L70 5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M72.4 19.4L72.4 14.4M72.4 19.4L77.2 17.9M72.4 19.4L75.4 23.5M72.4 19.4L69.5 23.5M72.4 19.4L67.7 17.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M68 31.7L68 26.7M68 31.7L72.7 30.2M68 31.7L70.9 35.7M68 31.7L65 35.7M68 31.7L63.2 30.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M61.4 43L61.4 38M61.4 43L66.2 41.5M61.4 43L64.4 47.1M61.4 43L58.5 47.1M61.4 43L56.7 41.5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M53 53L53 48M53 53L57.8 51.5M53 53L56 57.1M53 53L50.1 57.1M53 53L48.3 51.5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M43 61.4L43 56.4M43 61.4L47.8 59.9M43 61.4L46 65.5M43 61.4L40.1 65.5M43 61.4L38.3 59.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M31.7 68L31.7 63M31.7 68L36.5 66.4M31.7 68L34.6 72M31.7 68L28.8 72M31.7 68L26.9 66.4" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M19.4 72.4L19.4 67.4M19.4 72.4L24.2 70.9M19.4 72.4L22.4 76.5M19.4 72.4L16.5 76.5M19.4 72.4L14.7 70.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M6.5 74.7L6.5 69.7M6.5 74.7L11.3 73.2M6.5 74.7L9.5 78.8M6.5 74.7L3.6 78.8M6.5 74.7L1.8 73.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-6.5 74.7L-6.5 69.7M-6.5 74.7L-1.8 73.2M-6.5 74.7L-3.6 78.8M-6.5 74.7L-9.5 78.8M-6.5 74.7L-11.3 73.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-19.4 72.4L-19.4 67.4M-19.4 72.4L-14.7 70.9M-19.4 72.4L-16.5 76.5M-19.4 72.4L-22.4 76.5M-19.4 72.4L-24.2 70.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-31.7 68L-31.7 63M-31.7 68L-26.9 66.4M-31.7 68L-28.8 72M-31.7 68L-34.6 72M-31.7 68L-36.5 66.4" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-43 61.4L-43 56.4M-43 61.4L-38.3 59.9M-43 61.4L-40.1 65.5M-43 61.4L-46 65.5M-43 61.4L-47.8 59.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-53 53L-53 48M-53 53L-48.3 51.5M-53 53L-50.1 57.1M-53 53L-56 57.1M-53 53L-57.8 51.5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-61.4 43L-61.4 38M-61.4 43L-56.7 41.5M-61.4 43L-58.5 47.1M-61.4 43L-64.4 47.1M-61.4 43L-66.2 41.5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-68 31.7L-68 26.7M-68 31.7L-63.2 30.2M-68 31.7L-65 35.7M-68 31.7L-70.9 35.7M-68 31.7L-72.7 30.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-72.4 19.4L-72.4 14.4M-72.4 19.4L-67.7 17.9M-72.4 19.4L-69.5 23.5M-72.4 19.4L-75.4 23.5M-72.4 19.4L-77.2 17.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-74.7 6.5L-74.7 1.5M-74.7 6.5L-70 5M-74.7 6.5L-71.8 10.6M-74.7 6.5L-77.7 10.6M-74.7 6.5L-79.5 5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-74.7 -6.5L-74.7 -11.5M-74.7 -6.5L-70 -8.1M-74.7 -6.5L-71.8 -2.5M-74.7 -6.5L-77.7 -2.5M-74.7 -6.5L-79.5 -8.1" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-72.4 -19.4L-72.4 -24.4M-72.4 -19.4L-67.7 -21M-72.4 -19.4L-69.5 -15.4M-72.4 -19.4L-75.4 -15.4M-72.4 -19.4L-77.2 -21" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-68 -31.7L-68 -36.7M-68 -31.7L-63.2 -33.2M-68 -31.7L-65 -27.7M-68 -31.7L-70.9 -27.7M-68 -31.7L-72.7 -33.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-61.4 -43L-61.4 -48M-61.4 -43L-56.7 -44.6M-61.4 -43L-58.5 -39M-61.4 -43L-64.4 -39M-61.4 -43L-66.2 -44.6" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-53 -53L-53 -58M-53 -53L-48.3 -54.6M-53 -53L-50.1 -49M-53 -53L-56 -49M-53 -53L-57.8 -54.6" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-43 -61.4L-43 -66.4M-43 -61.4L-38.3 -63M-43 -61.4L-40.1 -57.4M-43 -61.4L-46 -57.4M-43 -61.4L-47.8 -63" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-31.7 -68L-31.7 -73M-31.7 -68L-26.9 -69.5M-31.7 -68L-28.8 -63.9M-31.7 -68L-34.6 -63.9M-31.7 -68L-36.5 -69.5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-19.4 -72.4L-19.4 -77.4M-19.4 -72.4L-14.7 -74M-19.4 -72.4L-16.5 -68.4M-19.4 -72.4L-22.4 -68.4M-19.4 -72.4L-24.2 -74" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-6.5 -74.7L-6.5 -79.7M-6.5 -74.7L-1.8 -76.3M-6.5 -74.7L-3.6 -70.7M-6.5 -74.7L-9.5 -70.7M-6.5 -74.7L-11.3 -76.3" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M6.5 -74.7L6.5 -79.7M6.5 -74.7L11.3 -76.3M6.5 -74.7L9.5 -70.7M6.5 -74.7L3.6 -70.7M6.5 -74.7L1.8 -76.3" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M19.4 -72.4L19.4 -77.4M19.4 -72.4L24.2 -74M19.4 -72.4L22.4 -68.4M19.4 -72.4L16.5 -68.4M19.4 -72.4L14.7 -74" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M31.7 -68L31.7 -73M31.7 -68L36.5 -69.5M31.7 -68L34.6 -63.9M31.7 -68L28.8 -63.9M31.7 -68L26.9 -69.5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M43 -61.4L43 -66.4M43 -61.4L47.8 -63M43 -61.4L46 -57.4M43 -61.4L40.1 -57.4M43 -61.4L38.3 -63" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M53 -53L53 -58M53 -53L57.8 -54.6M53 -53L56 -49M53 -53L50.1 -49M53 -53L48.3 -54.6" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M61.4 -43L61.4 -48M61.4 -43L66.2 -44.6M61.4 -43L64.4 -39M61.4 -43L58.5 -39M61.4 -43L56.7 -44.6" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M68 -31.7L68 -36.7M68 -31.7L72.7 -33.2M68 -31.7L70.9 -27.7M68 -31.7L65 -27.7M68 -31.7L63.2 -33.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M72.4 -19.4L72.4 -24.4M72.4 -19.4L77.2 -21M72.4 -19.4L75.4 -15.4M72.4 -19.4L69.5 -15.4M72.4 -19.4L67.7 -21" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M74.7 -6.5L74.7 -11.5M74.7 -6.5L79.5 -8.1M74.7 -6.5L77.7 -2.5M74.7 -6.5L71.8 -2.5M74.7 -6.5L70 -8.1" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M64 0L86 0" stroke-width=".35"/>
+  <path d="M63 11.1L84.7 14.9" stroke-width=".35"/>
+  <path d="M60.1 21.9L80.8 29.4" stroke-width=".35"/>
+  <path d="M55.4 32L74.5 43" stroke-width=".35"/>
+  <path d="M49 41.1L65.9 55.3" stroke-width=".35"/>
+  <path d="M41.1 49L55.3 65.9" stroke-width=".35"/>
+  <path d="M32 55.4L43 74.5" stroke-width=".35"/>
+  <path d="M21.9 60.1L29.4 80.8" stroke-width=".35"/>
+  <path d="M11.1 63L14.9 84.7" stroke-width=".35"/>
+  <path d="M0 64L0 86" stroke-width=".35"/>
+  <path d="M-11.1 63L-14.9 84.7" stroke-width=".35"/>
+  <path d="M-21.9 60.1L-29.4 80.8" stroke-width=".35"/>
+  <path d="M-32 55.4L-43 74.5" stroke-width=".35"/>
+  <path d="M-41.1 49L-55.3 65.9" stroke-width=".35"/>
+  <path d="M-49 41.1L-65.9 55.3" stroke-width=".35"/>
+  <path d="M-55.4 32L-74.5 43" stroke-width=".35"/>
+  <path d="M-60.1 21.9L-80.8 29.4" stroke-width=".35"/>
+  <path d="M-63 11.1L-84.7 14.9" stroke-width=".35"/>
+  <path d="M-64 0L-86 0" stroke-width=".35"/>
+  <path d="M-63 -11.1L-84.7 -14.9" stroke-width=".35"/>
+  <path d="M-60.1 -21.9L-80.8 -29.4" stroke-width=".35"/>
+  <path d="M-55.4 -32L-74.5 -43" stroke-width=".35"/>
+  <path d="M-49 -41.1L-65.9 -55.3" stroke-width=".35"/>
+  <path d="M-41.1 -49L-55.3 -65.9" stroke-width=".35"/>
+  <path d="M-32 -55.4L-43 -74.5" stroke-width=".35"/>
+  <path d="M-21.9 -60.1L-29.4 -80.8" stroke-width=".35"/>
+  <path d="M-11.1 -63L-14.9 -84.7" stroke-width=".35"/>
+  <path d="M-0 -64L-0 -86" stroke-width=".35"/>
+  <path d="M11.1 -63L14.9 -84.7" stroke-width=".35"/>
+  <path d="M21.9 -60.1L29.4 -80.8" stroke-width=".35"/>
+  <path d="M32 -55.4L43 -74.5" stroke-width=".35"/>
+  <path d="M41.1 -49L55.3 -65.9" stroke-width=".35"/>
+  <path d="M49 -41.1L65.9 -55.3" stroke-width=".35"/>
+  <path d="M55.4 -32L74.5 -43" stroke-width=".35"/>
+  <path d="M60.1 -21.9L80.8 -29.4" stroke-width=".35"/>
+  <path d="M63 -11.1L84.7 -14.9" stroke-width=".35"/>
+  <path d="M16.5 23L16.5 19M16.5 23L20.4 21.8M16.5 23L18.9 26.3M16.5 23L14.2 26.3M16.5 23L12.7 21.8" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M34.9 17.1L34.9 13.6M34.9 17.1L38.2 16M34.9 17.1L36.9 19.9M34.9 17.1L32.8 19.9M34.9 17.1L31.5 16" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-23.4 26.3L-23.4 23.3M-23.4 26.3L-20.5 25.3M-23.4 26.3L-21.6 28.7M-23.4 26.3L-25.1 28.7M-23.4 26.3L-26.2 25.3" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-19.8 -0.9L-19.8 -4.9M-19.8 -0.9L-16 -2.2M-19.8 -0.9L-17.5 2.3M-19.8 -0.9L-22.2 2.3M-19.8 -0.9L-23.6 -2.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M14.7 -28L14.7 -31.5M14.7 -28L18 -29.1M14.7 -28L16.7 -25.1M14.7 -28L12.6 -25.1M14.7 -28L11.3 -29.1" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M36 -12.3L36 -15.8M36 -12.3L39.4 -13.4M36 -12.3L38.1 -9.5M36 -12.3L34 -9.5M36 -12.3L32.7 -13.4" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-11.2 44.1L-11.2 40.1M-11.2 44.1L-7.4 42.8M-11.2 44.1L-8.8 47.3M-11.2 44.1L-13.6 47.3M-11.2 44.1L-15 42.8" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-35.7 17.5L-35.7 14M-35.7 17.5L-32.4 16.4M-35.7 17.5L-33.7 20.3M-35.7 17.5L-37.8 20.3M-35.7 17.5L-39.1 16.4" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-24.1 -14.4L-24.1 -17.9M-24.1 -14.4L-20.8 -15.4M-24.1 -14.4L-22 -11.5M-24.1 -14.4L-26.2 -11.5M-24.1 -14.4L-27.4 -15.4" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-10 30.9L-10 27.9M-10 30.9L-7.1 30M-10 30.9L-8.2 33.4M-10 30.9L-11.8 33.4M-10 30.9L-12.9 30" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-13.7 -41.2L-13.7 -44.2M-13.7 -41.2L-10.8 -42.1M-13.7 -41.2L-11.9 -38.8M-13.7 -41.2L-15.4 -38.8M-13.7 -41.2L-16.5 -42.1" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M36.4 33.4L36.4 29.9M36.4 33.4L39.7 32.3M36.4 33.4L38.5 36.2M36.4 33.4L34.3 36.2M36.4 33.4L33.1 32.3" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M1.4 -31.3L1.4 -34.8M1.4 -31.3L4.7 -32.4M1.4 -31.3L3.5 -28.5M1.4 -31.3L-0.6 -28.5M1.4 -31.3L-1.9 -32.4" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-9.5 -16.8L-9.5 -20.3M-9.5 -16.8L-6.1 -17.8M-9.5 -16.8L-7.4 -13.9M-9.5 -16.8L-11.5 -13.9M-9.5 -16.8L-12.8 -17.8" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-38.1 -18.8L-38.1 -22.3M-38.1 -18.8L-34.7 -19.9M-38.1 -18.8L-36 -16M-38.1 -18.8L-40.1 -16M-38.1 -18.8L-41.4 -19.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-17 -28.5L-17 -32M-17 -28.5L-13.7 -29.5M-17 -28.5L-15 -25.6M-17 -28.5L-19.1 -25.6M-17 -28.5L-20.4 -29.5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M0.3 22.1L0.3 19.1M0.3 22.1L3.2 21.2M0.3 22.1L2.1 24.6M0.3 22.1L-1.4 24.6M0.3 22.1L-2.5 21.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M29 -33.4L29 -36.4M29 -33.4L31.9 -34.3M29 -33.4L30.8 -30.9M29 -33.4L27.3 -30.9M29 -33.4L26.2 -34.3" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M8.8 -46L8.8 -49M8.8 -46L11.6 -46.9M8.8 -46L10.5 -43.5M8.8 -46L7 -43.5M8.8 -46L5.9 -46.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M18.2 8.2L18.2 4.2M18.2 8.2L22 7M18.2 8.2L20.6 11.4M18.2 8.2L15.9 11.4M18.2 8.2L14.4 7" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-13.9 16.1L-13.9 12.6M-13.9 16.1L-10.6 15M-13.9 16.1L-11.9 18.9M-13.9 16.1L-16 18.9M-13.9 16.1L-17.2 15" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M13.2 -13.4L13.2 -17.4M13.2 -13.4L17.1 -14.6M13.2 -13.4L15.6 -10.1M13.2 -13.4L10.9 -10.1M13.2 -13.4L9.4 -14.6" stroke-width="0.7" stroke-linecap="round"/>
+</svg>
+</figure>
+</header>
+<div class="wide"><div class="seam live" role="presentation"></div></div>
+
+<section><div class="col stack">
+  <span class="eyebrow">The order of care</span>
+  <h2>Function first, then clarity and polish, then looks</h2>
+  <p>A theme is a material laid over Lightning, never a new layout. Every decision below was checked against that order: a texture or motion stays only if it costs no speed, sits under no reading and never competes with the figure for the eye. Where a look and a reading disagreed, the reading won.</p>
+</div></section>
+
+<section><div class="wide stack">
+  <div class="col stack"><span class="eyebrow">What changed from the first plan</span>
+  <h2>Ten corrections before any code</h2>
+  <p class="muted">The first plan had the right mood and several things a theme may not do. Each row says what it proposed, what was built, and the rule that decided it.</p></div>
+  <div class="scroll"><table class="changes">
+    <thead><tr><th>First plan</th><th>Built</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Three motions: a shimmer, a seal press and a rosette reveal</td><td>One continuous motion, the pigment thread (14 s); dialogs rise and the theme unveils once</td><td>One continuous motion per theme. Motions that answer the user may join it; none loops.</td></tr>
+      <tr><td>A lotus fret on the top edge of every card header</td><td>One lotus-bud frieze in the header's bottom padding</td><td>Decoration never sits inside a card or under a reading. One place, under no text.</td></tr>
+      <tr><td>New screen layouts: a safe-to-spend hero, swipe cards, a health score ring, stepped review</td><td>Every screen keeps its layout; the plan says how each wears the parts</td><td>A theme never moves layout, order, words or sizes. Zero elements moved on 12 screen and mode pairs.</td></tr>
+      <tr><td>Fonts named: Cairo, Segoe UI and Bricolage for figures</td><td>The app's own fonts, untouched</td><td>Fonts are never a part of a theme.</td></tr>
+      <tr><td>Tokens of its own (<code>--info</code>, <code>--highlight</code>, <code>--accent-glow</code>)</td><td>The app's fourteen palette keys: kenit is <code>hero</code>, mefkat <code>focus</code>, desher <code>warning</code></td><td>Every theme fills the same compartments, so a part can change in all themes at once.</td></tr>
+      <tr><td>A dual-tone guilloché rosette</td><td>The zodiac ring, Dendera's own round zodiac, and the winged sun disc</td><td>The rosette is Papyrus's. Dendera draws what only Dendera has.</td></tr>
+      <tr><td>A dark palette as a table only</td><td>A complete night mode, <code>dendera-night</code>, worn with Dendera's one licence</td><td>One purchase dresses every surface and both modes.</td></tr>
+      <tr><td>A papyrus overlay and a 40% soot shade behind sheets</td><td>A plain dim shade, no blur</td><td>Backdrop blur costs frames on phones. Speed comes before a softer edge.</td></tr>
+      <tr><td>Contrast measured on the flat surface</td><td>Contrast measured at each surface's worst point: finish, grain and drawing together</td><td>The validator refuses text under 4.5:1 where the material is darkest.</td></tr>
+      <tr><td>No website version; a new pattern id written into the contract</td><td>Both sites, the market and the catalogue; drawings as SVG files in the theme's own asset folder</td><td>A theme that works on one surface is not finished. Drawings are files a designer can open.</td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<section><div class="wide stack">
+  <div class="col stack"><span class="eyebrow">References</span>
+  <h2>What each source gives, and where it lands</h2>
+  <p class="muted">References are studied, never shipped. Nothing from a scan, photograph or product image is copied into Lightning; only drawings made for it.</p></div>
+  <div class="refs">
+    <article class="ref"><h3>Egyptian banknotes, 1940s to 1970s</h3><ul>
+      <li><b>Guilloché and fine engraved line</b>: every drawing is single-weight line at 12%, crossings slightly darker</li>
+      <li><b>Frieze borders</b>: the lotus-bud band in the header</li>
+      <li><b>Security thread</b>: the moving light along the pigment seam</li>
+      <li><b>Intaglio edge</b>: the hero's gold foil ring</li></ul>
+      <p class="src">Twelve archival scans, Wikimedia Commons file records. Historical designs, not reproduced.</p></article>
+    <article class="ref"><h3>Dendera, Esna and Abydos temple walls</h3><ul>
+      <li><b>The four pigments</b>: irtiu lapis, kenit yellow ochre, mefkat turquoise, desher red ochre</li>
+      <li><b>The astronomical ceiling and round zodiac</b>: the zodiac ring and its decan stars</li>
+      <li><b>The winged sun disc over the doors</b>: the hero's watermark</li>
+      <li><b>Night ceiling</b>: the night mode's basalt ground and gold</li></ul>
+      <p class="src">Photographs by Panegyrics of Granovetter (CC BY-SA 2.0) and Kyera Giannini, AWIB-ISAW. See each Wikimedia record.</p></article>
+    <article class="ref"><h3>Knana, Goran porcelain</h3><ul>
+      <li><b>Restraint</b>: one strong drawing on a quiet ground, nothing crowded</li>
+      <li><b>A rim in a second colour</b>: confirms the foil ring as the only edge that glows</li>
+      <li><b>Stars as a field</b>: the zodiac's scattered five-armed stars</li></ul>
+      <p class="src">A modern commercial product, imagery © Knana. Inspiration for restraint only; no motif is taken.</p></article>
+  </div>
+</div></section>
+
+<section><div class="wide stack">
+  <div class="col stack"><span class="eyebrow">Pigments</span>
+  <h2>Two modes, fourteen colours each</h2>
+  <p class="muted">Ratios are measured on the mode's surface. Primary text needs 7:1, every other text 4.5:1, controls and focus 3:1. Money keeps the app's own green, rose and azure in both modes.</p></div>
+  <div class="palettes"><div class="mode day"><h3>Day · aged papyrus and temple fresco<span>dendera</span></h3><div class="sw"><i style="background:#F1E6CC"></i><div><b>Aged papyrus</b> <code>background</code><small>Ground</small></div><span class="r">#F1E6CC<br>—</span></div><div class="sw"><i style="background:#FAF3E2"></i><div><b>Temple fresco</b> <code>surface</code><small>Cards</small></div><span class="r">#FAF3E2<br>—</span></div><div class="sw"><i style="background:#ECDFC3"></i><div><b>Limestone well</b> <code>raised</code><small>Wells, hero at night</small></div><span class="r">#ECDFC3<br>—</span></div><div class="sw"><i style="background:#1E1A14"></i><div><b>Soot black</b> <code>text</code><small>Primary text</small></div><span class="r">#1E1A14<br>15.6:1</span></div><div class="sw"><i style="background:#54483A"></i><div><b>Faded ink</b> <code>muted</code><small>Quiet text</small></div><span class="r">#54483A<br>8.0:1</span></div><div class="sw"><i style="background:#D9C9A3"></i><div><b>Reed line</b> <code>border</code><small>Lines</small></div><span class="r">#D9C9A3<br>—</span></div><div class="sw"><i style="background:#1F3F8C"></i><div><b>Irtiu lapis</b> <code>accent</code><small>Buttons, links, drawings</small></div><span class="r">#1F3F8C<br>8.8:1</span></div><div class="sw"><i style="background:#FFFBF1"></i><div><b>Papyrus white</b> <code>onAccent</code><small>Label on lapis</small></div><span class="r">#FFFBF1<br>9.5:1 on lapis</span></div><div class="sw"><i style="background:#8A6410"></i><div><b>Kenit gold</b> <code>hero</code><small>Cartouche, foil ring, glint</small></div><span class="r">#8A6410<br>4.9:1</span></div><div class="sw"><i style="background:#0F6E6A"></i><div><b>Mefkat turquoise</b> <code>focus</code><small>Focus ring, frieze bud</small></div><span class="r">#0F6E6A<br>5.5:1</span></div><div class="sw"><i style="background:#9C3A1F"></i><div><b>Desher red ochre</b> <code>warning</code><small>Warnings, frieze dot</small></div><span class="r">#9C3A1F<br>6.2:1</span></div><div class="sw"><i style="background:#2E7A4F"></i><div><b>Money in</b> <code>income</code><small>Tint only: money stays the app’s</small></div><span class="r">#2E7A4F<br>4.7:1</span></div><div class="sw"><i style="background:#B23A5B"></i><div><b>Money out</b> <code>expense</code><small>Tint only</small></div><span class="r">#B23A5B<br>5.2:1</span></div><div class="sw"><i style="background:#5A4E3C"></i><div><b>Transfer</b> <code>transfer</code><small>Tint only</small></div><span class="r">#5A4E3C<br>7.3:1</span></div></div><div class="mode night"><h3>Night · sanctuary basalt and the star ceiling<span>dendera-night</span></h3><div class="sw"><i style="background:#14130F"></i><div><b>Sanctuary basalt</b> <code>background</code><small>Ground</small></div><span class="r">#14130F<br>—</span></div><div class="sw"><i style="background:#1C1A15"></i><div><b>Slate stele</b> <code>surface</code><small>Cards</small></div><span class="r">#1C1A15<br>—</span></div><div class="sw"><i style="background:#26231C"></i><div><b>Polished diorite</b> <code>raised</code><small>Wells, hero at night</small></div><span class="r">#26231C<br>—</span></div><div class="sw"><i style="background:#F2E9D6"></i><div><b>Lamp-lit limestone</b> <code>text</code><small>Primary text</small></div><span class="r">#F2E9D6<br>14.4:1</span></div><div class="sw"><i style="background:#C2B396"></i><div><b>Dust ochre</b> <code>muted</code><small>Quiet text</small></div><span class="r">#C2B396<br>8.4:1</span></div><div class="sw"><i style="background:#3A352B"></i><div><b>Chisel line</b> <code>border</code><small>Lines</small></div><span class="r">#3A352B<br>—</span></div><div class="sw"><i style="background:#8FA8F2"></i><div><b>Night irtiu</b> <code>accent</code><small>Buttons, links, drawings</small></div><span class="r">#8FA8F2<br>7.5:1</span></div><div class="sw"><i style="background:#0D1530"></i><div><b>Lapis night</b> <code>onAccent</code><small>Label on lapis</small></div><span class="r">#0D1530<br>7.8:1 on lapis</span></div><div class="sw"><i style="background:#E2B755"></i><div><b>Kenit gold</b> <code>hero</code><small>Cartouche, foil ring, glint</small></div><span class="r">#E2B755<br>9.2:1</span></div><div class="sw"><i style="background:#5FD0C4"></i><div><b>Mefkat glow</b> <code>focus</code><small>Focus ring, frieze bud</small></div><span class="r">#5FD0C4<br>9.4:1</span></div><div class="sw"><i style="background:#F08A68"></i><div><b>Desher ember</b> <code>warning</code><small>Warnings, frieze dot</small></div><span class="r">#F08A68<br>7.1:1</span></div><div class="sw"><i style="background:#4FD8A4"></i><div><b>Money in</b> <code>income</code><small>Tint only: money stays the app’s</small></div><span class="r">#4FD8A4<br>9.7:1</span></div><div class="sw"><i style="background:#FF9393"></i><div><b>Money out</b> <code>expense</code><small>Tint only</small></div><span class="r">#FF9393<br>8.2:1</span></div><div class="sw"><i style="background:#C2B396"></i><div><b>Transfer</b> <code>transfer</code><small>Tint only</small></div><span class="r">#C2B396<br>8.4:1</span></div></div></div>
+</div></section>
+
+<section><div class="wide stack">
+  <div class="col stack"><span class="eyebrow">Drawings</span>
+  <h2>Four new recipes, now free for every theme</h2>
+  <p class="muted">Each drawing is an SVG of plain shapes in <code>lightning/ui/static/cosmetics/assets/dendera/</code>. The build recolours it in the wearer's palette and inlines it, so nothing is fetched, and refuses links, scripts and images.</p></div>
+  <div class="drawings">
+    <article class="drawing"><div class="art"><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 200 200" fill="none" stroke="currentColor" stroke-width=".6">
+  <title>Zodiac ring: Dendera's round zodiac. 36 decan stars between a double ring, a dial, and a sky of five-armed stars round the sun. Dendera.</title>
+  <circle r="97"/>
+  <circle r="93"/>
+  <circle r="62"/>
+  <circle r="58"/>
+  <circle r="9"/>
+  <circle r="5"/>
+  <path d="M88 0L93 0M87.7 7.7L92.6 8.1M86.7 15.3L91.6 16.1M85 22.8L89.8 24.1M82.7 30.1L87.4 31.8M79.8 37.2L84.3 39.3M76.2 44L80.5 46.5M72.1 50.5L76.2 53.3M67.4 56.6L71.2 59.8M62.2 62.2L65.8 65.8M56.6 67.4L59.8 71.2M50.5 72.1L53.3 76.2M44 76.2L46.5 80.5M37.2 79.8L39.3 84.3M30.1 82.7L31.8 87.4M22.8 85L24.1 89.8M15.3 86.7L16.1 91.6M7.7 87.7L8.1 92.6M0 88L0 93M-7.7 87.7L-8.1 92.6M-15.3 86.7L-16.1 91.6M-22.8 85L-24.1 89.8M-30.1 82.7L-31.8 87.4M-37.2 79.8L-39.3 84.3M-44 76.2L-46.5 80.5M-50.5 72.1L-53.3 76.2M-56.6 67.4L-59.8 71.2M-62.2 62.2L-65.8 65.8M-67.4 56.6L-71.2 59.8M-72.1 50.5L-76.2 53.3M-76.2 44L-80.5 46.5M-79.8 37.2L-84.3 39.3M-82.7 30.1L-87.4 31.8M-85 22.8L-89.8 24.1M-86.7 15.3L-91.6 16.1M-87.7 7.7L-92.6 8.1M-88 0L-93 0M-87.7 -7.7L-92.6 -8.1M-86.7 -15.3L-91.6 -16.1M-85 -22.8L-89.8 -24.1M-82.7 -30.1L-87.4 -31.8M-79.8 -37.2L-84.3 -39.3M-76.2 -44L-80.5 -46.5M-72.1 -50.5L-76.2 -53.3M-67.4 -56.6L-71.2 -59.8M-62.2 -62.2L-65.8 -65.8M-56.6 -67.4L-59.8 -71.2M-50.5 -72.1L-53.3 -76.2M-44 -76.2L-46.5 -80.5M-37.2 -79.8L-39.3 -84.3M-30.1 -82.7L-31.8 -87.4M-22.8 -85L-24.1 -89.8M-15.3 -86.7L-16.1 -91.6M-7.7 -87.7L-8.1 -92.6M-0 -88L-0 -93M7.7 -87.7L8.1 -92.6M15.3 -86.7L16.1 -91.6M22.8 -85L24.1 -89.8M30.1 -82.7L31.8 -87.4M37.2 -79.8L39.3 -84.3M44 -76.2L46.5 -80.5M50.5 -72.1L53.3 -76.2M56.6 -67.4L59.8 -71.2M62.2 -62.2L65.8 -65.8M67.4 -56.6L71.2 -59.8M72.1 -50.5L76.2 -53.3M76.2 -44L80.5 -46.5M79.8 -37.2L84.3 -39.3M82.7 -30.1L87.4 -31.8M85 -22.8L89.8 -24.1M86.7 -15.3L91.6 -16.1M87.7 -7.7L92.6 -8.1" stroke-width=".5"/>
+  <path d="M74.7 6.5L74.7 1.5M74.7 6.5L79.5 5M74.7 6.5L77.7 10.6M74.7 6.5L71.8 10.6M74.7 6.5L70 5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M72.4 19.4L72.4 14.4M72.4 19.4L77.2 17.9M72.4 19.4L75.4 23.5M72.4 19.4L69.5 23.5M72.4 19.4L67.7 17.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M68 31.7L68 26.7M68 31.7L72.7 30.2M68 31.7L70.9 35.7M68 31.7L65 35.7M68 31.7L63.2 30.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M61.4 43L61.4 38M61.4 43L66.2 41.5M61.4 43L64.4 47.1M61.4 43L58.5 47.1M61.4 43L56.7 41.5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M53 53L53 48M53 53L57.8 51.5M53 53L56 57.1M53 53L50.1 57.1M53 53L48.3 51.5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M43 61.4L43 56.4M43 61.4L47.8 59.9M43 61.4L46 65.5M43 61.4L40.1 65.5M43 61.4L38.3 59.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M31.7 68L31.7 63M31.7 68L36.5 66.4M31.7 68L34.6 72M31.7 68L28.8 72M31.7 68L26.9 66.4" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M19.4 72.4L19.4 67.4M19.4 72.4L24.2 70.9M19.4 72.4L22.4 76.5M19.4 72.4L16.5 76.5M19.4 72.4L14.7 70.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M6.5 74.7L6.5 69.7M6.5 74.7L11.3 73.2M6.5 74.7L9.5 78.8M6.5 74.7L3.6 78.8M6.5 74.7L1.8 73.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-6.5 74.7L-6.5 69.7M-6.5 74.7L-1.8 73.2M-6.5 74.7L-3.6 78.8M-6.5 74.7L-9.5 78.8M-6.5 74.7L-11.3 73.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-19.4 72.4L-19.4 67.4M-19.4 72.4L-14.7 70.9M-19.4 72.4L-16.5 76.5M-19.4 72.4L-22.4 76.5M-19.4 72.4L-24.2 70.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-31.7 68L-31.7 63M-31.7 68L-26.9 66.4M-31.7 68L-28.8 72M-31.7 68L-34.6 72M-31.7 68L-36.5 66.4" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-43 61.4L-43 56.4M-43 61.4L-38.3 59.9M-43 61.4L-40.1 65.5M-43 61.4L-46 65.5M-43 61.4L-47.8 59.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-53 53L-53 48M-53 53L-48.3 51.5M-53 53L-50.1 57.1M-53 53L-56 57.1M-53 53L-57.8 51.5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-61.4 43L-61.4 38M-61.4 43L-56.7 41.5M-61.4 43L-58.5 47.1M-61.4 43L-64.4 47.1M-61.4 43L-66.2 41.5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-68 31.7L-68 26.7M-68 31.7L-63.2 30.2M-68 31.7L-65 35.7M-68 31.7L-70.9 35.7M-68 31.7L-72.7 30.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-72.4 19.4L-72.4 14.4M-72.4 19.4L-67.7 17.9M-72.4 19.4L-69.5 23.5M-72.4 19.4L-75.4 23.5M-72.4 19.4L-77.2 17.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-74.7 6.5L-74.7 1.5M-74.7 6.5L-70 5M-74.7 6.5L-71.8 10.6M-74.7 6.5L-77.7 10.6M-74.7 6.5L-79.5 5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-74.7 -6.5L-74.7 -11.5M-74.7 -6.5L-70 -8.1M-74.7 -6.5L-71.8 -2.5M-74.7 -6.5L-77.7 -2.5M-74.7 -6.5L-79.5 -8.1" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-72.4 -19.4L-72.4 -24.4M-72.4 -19.4L-67.7 -21M-72.4 -19.4L-69.5 -15.4M-72.4 -19.4L-75.4 -15.4M-72.4 -19.4L-77.2 -21" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-68 -31.7L-68 -36.7M-68 -31.7L-63.2 -33.2M-68 -31.7L-65 -27.7M-68 -31.7L-70.9 -27.7M-68 -31.7L-72.7 -33.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-61.4 -43L-61.4 -48M-61.4 -43L-56.7 -44.6M-61.4 -43L-58.5 -39M-61.4 -43L-64.4 -39M-61.4 -43L-66.2 -44.6" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-53 -53L-53 -58M-53 -53L-48.3 -54.6M-53 -53L-50.1 -49M-53 -53L-56 -49M-53 -53L-57.8 -54.6" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-43 -61.4L-43 -66.4M-43 -61.4L-38.3 -63M-43 -61.4L-40.1 -57.4M-43 -61.4L-46 -57.4M-43 -61.4L-47.8 -63" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-31.7 -68L-31.7 -73M-31.7 -68L-26.9 -69.5M-31.7 -68L-28.8 -63.9M-31.7 -68L-34.6 -63.9M-31.7 -68L-36.5 -69.5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-19.4 -72.4L-19.4 -77.4M-19.4 -72.4L-14.7 -74M-19.4 -72.4L-16.5 -68.4M-19.4 -72.4L-22.4 -68.4M-19.4 -72.4L-24.2 -74" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-6.5 -74.7L-6.5 -79.7M-6.5 -74.7L-1.8 -76.3M-6.5 -74.7L-3.6 -70.7M-6.5 -74.7L-9.5 -70.7M-6.5 -74.7L-11.3 -76.3" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M6.5 -74.7L6.5 -79.7M6.5 -74.7L11.3 -76.3M6.5 -74.7L9.5 -70.7M6.5 -74.7L3.6 -70.7M6.5 -74.7L1.8 -76.3" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M19.4 -72.4L19.4 -77.4M19.4 -72.4L24.2 -74M19.4 -72.4L22.4 -68.4M19.4 -72.4L16.5 -68.4M19.4 -72.4L14.7 -74" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M31.7 -68L31.7 -73M31.7 -68L36.5 -69.5M31.7 -68L34.6 -63.9M31.7 -68L28.8 -63.9M31.7 -68L26.9 -69.5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M43 -61.4L43 -66.4M43 -61.4L47.8 -63M43 -61.4L46 -57.4M43 -61.4L40.1 -57.4M43 -61.4L38.3 -63" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M53 -53L53 -58M53 -53L57.8 -54.6M53 -53L56 -49M53 -53L50.1 -49M53 -53L48.3 -54.6" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M61.4 -43L61.4 -48M61.4 -43L66.2 -44.6M61.4 -43L64.4 -39M61.4 -43L58.5 -39M61.4 -43L56.7 -44.6" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M68 -31.7L68 -36.7M68 -31.7L72.7 -33.2M68 -31.7L70.9 -27.7M68 -31.7L65 -27.7M68 -31.7L63.2 -33.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M72.4 -19.4L72.4 -24.4M72.4 -19.4L77.2 -21M72.4 -19.4L75.4 -15.4M72.4 -19.4L69.5 -15.4M72.4 -19.4L67.7 -21" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M74.7 -6.5L74.7 -11.5M74.7 -6.5L79.5 -8.1M74.7 -6.5L77.7 -2.5M74.7 -6.5L71.8 -2.5M74.7 -6.5L70 -8.1" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M64 0L86 0" stroke-width=".35"/>
+  <path d="M63 11.1L84.7 14.9" stroke-width=".35"/>
+  <path d="M60.1 21.9L80.8 29.4" stroke-width=".35"/>
+  <path d="M55.4 32L74.5 43" stroke-width=".35"/>
+  <path d="M49 41.1L65.9 55.3" stroke-width=".35"/>
+  <path d="M41.1 49L55.3 65.9" stroke-width=".35"/>
+  <path d="M32 55.4L43 74.5" stroke-width=".35"/>
+  <path d="M21.9 60.1L29.4 80.8" stroke-width=".35"/>
+  <path d="M11.1 63L14.9 84.7" stroke-width=".35"/>
+  <path d="M0 64L0 86" stroke-width=".35"/>
+  <path d="M-11.1 63L-14.9 84.7" stroke-width=".35"/>
+  <path d="M-21.9 60.1L-29.4 80.8" stroke-width=".35"/>
+  <path d="M-32 55.4L-43 74.5" stroke-width=".35"/>
+  <path d="M-41.1 49L-55.3 65.9" stroke-width=".35"/>
+  <path d="M-49 41.1L-65.9 55.3" stroke-width=".35"/>
+  <path d="M-55.4 32L-74.5 43" stroke-width=".35"/>
+  <path d="M-60.1 21.9L-80.8 29.4" stroke-width=".35"/>
+  <path d="M-63 11.1L-84.7 14.9" stroke-width=".35"/>
+  <path d="M-64 0L-86 0" stroke-width=".35"/>
+  <path d="M-63 -11.1L-84.7 -14.9" stroke-width=".35"/>
+  <path d="M-60.1 -21.9L-80.8 -29.4" stroke-width=".35"/>
+  <path d="M-55.4 -32L-74.5 -43" stroke-width=".35"/>
+  <path d="M-49 -41.1L-65.9 -55.3" stroke-width=".35"/>
+  <path d="M-41.1 -49L-55.3 -65.9" stroke-width=".35"/>
+  <path d="M-32 -55.4L-43 -74.5" stroke-width=".35"/>
+  <path d="M-21.9 -60.1L-29.4 -80.8" stroke-width=".35"/>
+  <path d="M-11.1 -63L-14.9 -84.7" stroke-width=".35"/>
+  <path d="M-0 -64L-0 -86" stroke-width=".35"/>
+  <path d="M11.1 -63L14.9 -84.7" stroke-width=".35"/>
+  <path d="M21.9 -60.1L29.4 -80.8" stroke-width=".35"/>
+  <path d="M32 -55.4L43 -74.5" stroke-width=".35"/>
+  <path d="M41.1 -49L55.3 -65.9" stroke-width=".35"/>
+  <path d="M49 -41.1L65.9 -55.3" stroke-width=".35"/>
+  <path d="M55.4 -32L74.5 -43" stroke-width=".35"/>
+  <path d="M60.1 -21.9L80.8 -29.4" stroke-width=".35"/>
+  <path d="M63 -11.1L84.7 -14.9" stroke-width=".35"/>
+  <path d="M16.5 23L16.5 19M16.5 23L20.4 21.8M16.5 23L18.9 26.3M16.5 23L14.2 26.3M16.5 23L12.7 21.8" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M34.9 17.1L34.9 13.6M34.9 17.1L38.2 16M34.9 17.1L36.9 19.9M34.9 17.1L32.8 19.9M34.9 17.1L31.5 16" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-23.4 26.3L-23.4 23.3M-23.4 26.3L-20.5 25.3M-23.4 26.3L-21.6 28.7M-23.4 26.3L-25.1 28.7M-23.4 26.3L-26.2 25.3" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-19.8 -0.9L-19.8 -4.9M-19.8 -0.9L-16 -2.2M-19.8 -0.9L-17.5 2.3M-19.8 -0.9L-22.2 2.3M-19.8 -0.9L-23.6 -2.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M14.7 -28L14.7 -31.5M14.7 -28L18 -29.1M14.7 -28L16.7 -25.1M14.7 -28L12.6 -25.1M14.7 -28L11.3 -29.1" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M36 -12.3L36 -15.8M36 -12.3L39.4 -13.4M36 -12.3L38.1 -9.5M36 -12.3L34 -9.5M36 -12.3L32.7 -13.4" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-11.2 44.1L-11.2 40.1M-11.2 44.1L-7.4 42.8M-11.2 44.1L-8.8 47.3M-11.2 44.1L-13.6 47.3M-11.2 44.1L-15 42.8" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-35.7 17.5L-35.7 14M-35.7 17.5L-32.4 16.4M-35.7 17.5L-33.7 20.3M-35.7 17.5L-37.8 20.3M-35.7 17.5L-39.1 16.4" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-24.1 -14.4L-24.1 -17.9M-24.1 -14.4L-20.8 -15.4M-24.1 -14.4L-22 -11.5M-24.1 -14.4L-26.2 -11.5M-24.1 -14.4L-27.4 -15.4" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-10 30.9L-10 27.9M-10 30.9L-7.1 30M-10 30.9L-8.2 33.4M-10 30.9L-11.8 33.4M-10 30.9L-12.9 30" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-13.7 -41.2L-13.7 -44.2M-13.7 -41.2L-10.8 -42.1M-13.7 -41.2L-11.9 -38.8M-13.7 -41.2L-15.4 -38.8M-13.7 -41.2L-16.5 -42.1" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M36.4 33.4L36.4 29.9M36.4 33.4L39.7 32.3M36.4 33.4L38.5 36.2M36.4 33.4L34.3 36.2M36.4 33.4L33.1 32.3" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M1.4 -31.3L1.4 -34.8M1.4 -31.3L4.7 -32.4M1.4 -31.3L3.5 -28.5M1.4 -31.3L-0.6 -28.5M1.4 -31.3L-1.9 -32.4" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-9.5 -16.8L-9.5 -20.3M-9.5 -16.8L-6.1 -17.8M-9.5 -16.8L-7.4 -13.9M-9.5 -16.8L-11.5 -13.9M-9.5 -16.8L-12.8 -17.8" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-38.1 -18.8L-38.1 -22.3M-38.1 -18.8L-34.7 -19.9M-38.1 -18.8L-36 -16M-38.1 -18.8L-40.1 -16M-38.1 -18.8L-41.4 -19.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-17 -28.5L-17 -32M-17 -28.5L-13.7 -29.5M-17 -28.5L-15 -25.6M-17 -28.5L-19.1 -25.6M-17 -28.5L-20.4 -29.5" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M0.3 22.1L0.3 19.1M0.3 22.1L3.2 21.2M0.3 22.1L2.1 24.6M0.3 22.1L-1.4 24.6M0.3 22.1L-2.5 21.2" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M29 -33.4L29 -36.4M29 -33.4L31.9 -34.3M29 -33.4L30.8 -30.9M29 -33.4L27.3 -30.9M29 -33.4L26.2 -34.3" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M8.8 -46L8.8 -49M8.8 -46L11.6 -46.9M8.8 -46L10.5 -43.5M8.8 -46L7 -43.5M8.8 -46L5.9 -46.9" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M18.2 8.2L18.2 4.2M18.2 8.2L22 7M18.2 8.2L20.6 11.4M18.2 8.2L15.9 11.4M18.2 8.2L14.4 7" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M-13.9 16.1L-13.9 12.6M-13.9 16.1L-10.6 15M-13.9 16.1L-11.9 18.9M-13.9 16.1L-16 18.9M-13.9 16.1L-17.2 15" stroke-width="0.7" stroke-linecap="round"/>
+  <path d="M13.2 -13.4L13.2 -17.4M13.2 -13.4L17.1 -14.6M13.2 -13.4L15.6 -10.1M13.2 -13.4L10.9 -10.1M13.2 -13.4L9.4 -14.6" stroke-width="0.7" stroke-linecap="round"/>
+</svg>
+</div><h3>Zodiac ring <code>zodiac-ring</code></h3><p>Dendera's round zodiac: 36 decan stars between a double ring, a dial, and a sky of five-armed stars round the sun. The page's far corner, accent at 12%, mirrored in Arabic.</p></article>
+    <article class="drawing"><div class="art"><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="-150 -60 300 120" fill="none" stroke="currentColor" stroke-width=".7" stroke-linecap="round">
+  <title>Winged sun disc: the disc, two cobras and two wings of feathers, as over Dendera's doors. Dendera.</title>
+  <path d="M-20 -12C-62 -40 -114 -34 -146 -6"/>
+  <path d="M-20 26C-66 28 -116 10 -146 -6"/>
+  <path d="M-20 -2C-60 -24 -108 -24 -140 -8" stroke-width=".45"/>
+  <path d="M-20 10C-62 -2 -110 -6 -144 -7" stroke-width=".5"/>
+  <path d="M-23.7 -14.4L-23.6 -3.9M-27.5 -16.6L-27.3 -5.7M-31.3 -18.6L-31 -7.4M-35.2 -20.5L-34.7 -9M-39.1 -22.2L-38.5 -10.4M-43 -23.7L-42.2 -11.8M-47 -25.1L-46 -13M-50.9 -26.3L-49.9 -14.1M-54.9 -27.3L-53.7 -15.1M-58.9 -28.2L-57.5 -16M-62.9 -28.9L-61.4 -16.8M-66.9 -29.5L-65.2 -17.5M-70.9 -29.9L-69 -18.1M-74.9 -30.1L-72.9 -18.5M-78.9 -30.2L-76.7 -18.9M-82.8 -30.2L-80.5 -19.1M-86.8 -30L-84.3 -19.3M-90.7 -29.7L-88 -19.3M-94.5 -29.2L-91.8 -19.3M-98.4 -28.6L-95.5 -19.1M-102.2 -27.8L-99.1 -18.9M-106 -26.9L-102.8 -18.5M-109.7 -25.9L-106.3 -18.1M-113.3 -24.7L-109.9 -17.5M-116.9 -23.4L-113.4 -16.9M-120.5 -22L-116.8 -16.2M-124 -20.4L-120.2 -15.3M-127.4 -18.7L-123.5 -14.4M-130.7 -16.9L-126.8 -13.4M-133.9 -14.9L-129.9 -12.3M-137.1 -12.9L-133.1 -11.1M-140.2 -10.7L-136.1 -9.8M-143.1 -8.4L-139 -8.5" stroke-width="0.35"/>
+  <path d="M-24 -4.1L-24.3 8.8M-28.1 -6.1L-28.6 7.7M-32.2 -7.9L-33 6.6M-36.4 -9.6L-37.4 5.5M-40.6 -11.2L-41.8 4.5M-44.8 -12.6L-46.3 3.6M-49 -13.9L-50.7 2.7M-53.3 -15L-55.2 1.9M-57.5 -16L-59.7 1.1M-61.8 -16.9L-64.1 0.3M-66 -17.6L-68.6 -0.4M-70.3 -18.2L-73 -1M-74.6 -18.7L-77.5 -1.7M-78.8 -19L-81.9 -2.2M-83 -19.2L-86.3 -2.8M-87.2 -19.3L-90.7 -3.3M-91.3 -19.3L-95 -3.8M-95.5 -19.1L-99.3 -4.2M-99.5 -18.9L-103.5 -4.6M-103.6 -18.4L-107.7 -5M-107.5 -17.9L-111.9 -5.3M-111.4 -17.3L-115.9 -5.6M-115.3 -16.5L-120 -5.9M-119.1 -15.6L-123.9 -6.1M-122.8 -14.6L-127.8 -6.3M-126.4 -13.5L-131.6 -6.5M-129.9 -12.3L-135.4 -6.7M-133.4 -11L-139 -6.8M-136.7 -9.5L-142.6 -7" stroke-width="0.4"/>
+  <path d="M-24.9 8.7L-25.4 26.1M-29.8 7.4L-30.9 26.1M-34.7 6.2L-36.4 25.9M-39.7 5L-41.9 25.5M-44.8 3.9L-47.3 25M-49.8 2.9L-52.8 24.4M-54.8 1.9L-58.3 23.6M-59.9 1L-63.8 22.7M-64.9 0.2L-69.2 21.6M-70 -0.6L-74.5 20.4M-75 -1.3L-79.9 19.2M-80 -2L-85.1 17.8M-85 -2.6L-90.3 16.4M-89.9 -3.2L-95.4 14.8M-94.8 -3.7L-100.5 13.2M-99.7 -4.2L-105.4 11.6M-104.5 -4.7L-110.3 9.8M-109.2 -5.1L-115 8.1M-113.9 -5.4L-119.6 6.2M-118.5 -5.8L-124.1 4.4M-123 -6.1L-128.4 2.5M-127.4 -6.3L-132.6 0.6M-131.7 -6.5L-136.7 -1.3M-135.9 -6.7L-140.5 -3.2M-140 -6.9L-144.2 -5.1" stroke-width="0.5"/>
+  <path d="M-12 16C-15 24 -7 28 -11 36C-14 41 -19 40 -18 34"/>
+  <path d="M20 -12C62 -40 114 -34 146 -6"/>
+  <path d="M20 26C66 28 116 10 146 -6"/>
+  <path d="M20 -2C60 -24 108 -24 140 -8" stroke-width=".45"/>
+  <path d="M20 10C62 -2 110 -6 144 -7" stroke-width=".5"/>
+  <path d="M23.7 -14.4L23.6 -3.9M27.5 -16.6L27.3 -5.7M31.3 -18.6L31 -7.4M35.2 -20.5L34.7 -9M39.1 -22.2L38.5 -10.4M43 -23.7L42.2 -11.8M47 -25.1L46 -13M50.9 -26.3L49.9 -14.1M54.9 -27.3L53.7 -15.1M58.9 -28.2L57.5 -16M62.9 -28.9L61.4 -16.8M66.9 -29.5L65.2 -17.5M70.9 -29.9L69 -18.1M74.9 -30.1L72.9 -18.5M78.9 -30.2L76.7 -18.9M82.8 -30.2L80.5 -19.1M86.8 -30L84.3 -19.3M90.7 -29.7L88 -19.3M94.5 -29.2L91.8 -19.3M98.4 -28.6L95.5 -19.1M102.2 -27.8L99.1 -18.9M106 -26.9L102.8 -18.5M109.7 -25.9L106.3 -18.1M113.3 -24.7L109.9 -17.5M116.9 -23.4L113.4 -16.9M120.5 -22L116.8 -16.2M124 -20.4L120.2 -15.3M127.4 -18.7L123.5 -14.4M130.7 -16.9L126.8 -13.4M133.9 -14.9L129.9 -12.3M137.1 -12.9L133.1 -11.1M140.2 -10.7L136.1 -9.8M143.1 -8.4L139 -8.5" stroke-width="0.35"/>
+  <path d="M24 -4.1L24.3 8.8M28.1 -6.1L28.6 7.7M32.2 -7.9L33 6.6M36.4 -9.6L37.4 5.5M40.6 -11.2L41.8 4.5M44.8 -12.6L46.3 3.6M49 -13.9L50.7 2.7M53.3 -15L55.2 1.9M57.5 -16L59.7 1.1M61.8 -16.9L64.1 0.3M66 -17.6L68.6 -0.4M70.3 -18.2L73 -1M74.6 -18.7L77.5 -1.7M78.8 -19L81.9 -2.2M83 -19.2L86.3 -2.8M87.2 -19.3L90.7 -3.3M91.3 -19.3L95 -3.8M95.5 -19.1L99.3 -4.2M99.5 -18.9L103.5 -4.6M103.6 -18.4L107.7 -5M107.5 -17.9L111.9 -5.3M111.4 -17.3L115.9 -5.6M115.3 -16.5L120 -5.9M119.1 -15.6L123.9 -6.1M122.8 -14.6L127.8 -6.3M126.4 -13.5L131.6 -6.5M129.9 -12.3L135.4 -6.7M133.4 -11L139 -6.8M136.7 -9.5L142.6 -7" stroke-width="0.4"/>
+  <path d="M24.9 8.7L25.4 26.1M29.8 7.4L30.9 26.1M34.7 6.2L36.4 25.9M39.7 5L41.9 25.5M44.8 3.9L47.3 25M49.8 2.9L52.8 24.4M54.8 1.9L58.3 23.6M59.9 1L63.8 22.7M64.9 0.2L69.2 21.6M70 -0.6L74.5 20.4M75 -1.3L79.9 19.2M80 -2L85.1 17.8M85 -2.6L90.3 16.4M89.9 -3.2L95.4 14.8M94.8 -3.7L100.5 13.2M99.7 -4.2L105.4 11.6M104.5 -4.7L110.3 9.8M109.2 -5.1L115 8.1M113.9 -5.4L119.6 6.2M118.5 -5.8L124.1 4.4M123 -6.1L128.4 2.5M127.4 -6.3L132.6 0.6M131.7 -6.5L136.7 -1.3M135.9 -6.7L140.5 -3.2M140 -6.9L144.2 -5.1" stroke-width="0.5"/>
+  <path d="M12 16C15 24 7 28 11 36C14 41 19 40 18 34"/>
+  <circle cx="0" cy="2" r="18"/>
+  <circle cx="0" cy="2" r="14" stroke-width=".4"/>
+</svg>
+</div><h3>Winged sun disc <code>winged-disc</code></h3><p>The disc, two cobras and three rows of feathers, as over Dendera's doors. The hero card's empty corner, away from the figure, accent at 12%.</p></article>
+    <article class="drawing"><div class="art band"><div class="frieze" role="presentation"></div></div><h3>Lotus-bud frieze <code>lotus-frieze</code></h3><p>A 24 by 10 tile: a mefkat bud with a kenit heart, a desher dot, a lapis ground line. A header finish in the bottom padding, at 70%, 7 px tall on the PC and 5 px on the phone, under no text.</p></article>
+    <article class="drawing"><div class="art band"><div class="seam live" role="presentation"></div></div><h3>Pigment thread <code>pigment-thread</code></h3><p>The header's 1 px seam in lapis, kenit, mefkat and desher, with one soft light travelling it every 14 seconds. Only that strip repaints. Under reduced motion it is the still pigment seam.</p></article>
+  </div>
+</div></section>
+
+<section><div class="wide stack">
+  <div class="col stack"><span class="eyebrow">Elements and layers</span>
+  <h2>Every element states its paint, material and motion</h2>
+  <p class="muted">Paint names a palette key; material and motion come from the recipe library. Day and night share everything but the colours and a few strengths.</p></div>
+  <div class="scroll"><table><thead><tr><th>Element</th><th>Paint</th><th>Material</th><th>Motion</th><th>Night differs</th></tr></thead><tbody><tr><td><b>brand</b></td><td>—</td><td>logoVariant <code>on-light</code></td><td>—</td><td>logoVariant <code>on-dark</code></td></tr><tr><td><b>ground</b></td><td>—</td><td>texture <code>papyrus</code>, textureStrength <code>subtle</code>, artwork <code>zodiac-ring</code>, vignette <code>none</code></td><td>ambient <code>none</code>, equip <code>unveil</code></td><td>textureStrength <code>whisper</code>, vignette <code>soft</code></td></tr><tr><td><b>header</b></td><td>surface <code>background</code>, seam <code>border</code></td><td>finish <code>lotus-frieze</code></td><td>thread <code>pigment-thread</code></td><td>same</td></tr><tr><td><b>navigation</b></td><td>surface <code>surface</code>, activeMark <code>hero</code></td><td>finish <code>flat</code>, activeStyle <code>cartouche</code></td><td>—</td><td>same</td></tr><tr><td><b>hero</b></td><td>surface <code>surface</code>, edge <code>hero</code></td><td>finish <code>satin</code>, grain <code>paper</code>, edgeStyle <code>foil</code>, depth <code>mid</code>, artwork <code>winged-disc</code></td><td>sheen <code>none</code></td><td>surface <code>raised</code>, grain <code>fibre</code></td></tr><tr><td><b>cards</b></td><td>surface <code>surface</code>, border <code>border</code></td><td>finish <code>flat</code>, grain <code>paper</code>, edgeLight <code>soft</code>, depth <code>low</code></td><td>hover <code>none</code></td><td>grain <code>film</code></td></tr><tr><td><b>charts</b></td><td>grid <code>border</code>, accent <code>accent</code></td><td>—</td><td>—</td><td>same</td></tr><tr><td><b>controls</b></td><td>fill <code>accent</code>, label <code>onAccent</code>, focus <code>focus</code></td><td>finish <code>satin</code>, depth <code>low</code></td><td>press <code>none</code></td><td>same</td></tr><tr><td><b>buttons</b></td><td>surface <code>surface</code>, label <code>text</code>, border <code>border</code></td><td>finish <code>embossed</code></td><td>—</td><td>surface <code>raised</code>, finish <code>flat</code></td></tr><tr><td><b>tabs</b></td><td>surface <code>raised</code>, chosen <code>accent</code>, chosenLabel <code>onAccent</code></td><td>finish <code>flat</code></td><td>—</td><td>surface <code>surface</code></td></tr><tr><td><b>fields</b></td><td>surface <code>raised</code>, border <code>border</code></td><td>well <code>inset</code></td><td>—</td><td>same</td></tr><tr><td><b>progress</b></td><td>track <code>raised</code></td><td>finish <code>flat</code></td><td>—</td><td>same</td></tr><tr><td><b>overlays</b></td><td>surface <code>surface</code>, backdrop <code>text</code></td><td>finish <code>flat</code>, grain <code>paper</code>, depth <code>high</code>, shade <code>dim</code></td><td>enter <code>rise</code></td><td>surface <code>raised</code>, backdrop <code>background</code>, grain <code>film</code></td></tr><tr><td><b>menus</b></td><td>surface <code>surface</code>, divider <code>border</code></td><td>finish <code>flat</code>, depth <code>mid</code></td><td>—</td><td>surface <code>raised</code></td></tr></tbody></table></div>
+</div></section>
+
+<section><div class="wide stack">
+  <div class="col stack"><span class="eyebrow">Motion and speed</span>
+  <h2>One motion that runs, two that answer, five refused</h2></div>
+  <div class="budget">
+    <div class="slot"><span class="tag run">Runs</span><h3>Pigment thread</h3><ul><li>14 s loop along the header seam</li><li>One 1 px strip repaints</li><li>Still seam under reduced motion</li></ul></div>
+    <div class="slot"><span class="tag ans">Answers</span><h3>When you act</h3><ul><li>Dialogs and sheets rise in, 0.32 s</li><li>One light sweep when you put the theme on, 1.2 s, never at launch</li></ul></div>
+    <div class="slot no"><span class="tag cut">Refused</span><h3>Cost more than they give</h3><ul><li>Seal press on every button</li><li>Rosette fade-in on Overview</li><li>A light that follows the pointer</li><li>Cards lifting on hover</li><li>Blur behind dialogs</li></ul></div>
+  </div>
+  <div class="proof">
+    <div><b>0 of 3,600</b><span class="muted">element boxes moved against the default on six screens, checked in each mode</span></div>
+    <div><b>16.7 ms</b><span class="muted">mean frame with the thread running, the same as the default</span></div>
+    <div><b>0</b><span class="muted">frames over 34 ms on Overview and Budget, both modes</span></div>
+  </div>
+  <p class="muted">Measured with <code>python tools/theme_check.py --themes dendera,dendera-night</code> in headless desktop Chromium. A low-end phone is still to be checked by hand.</p>
+</div></section>
+
+<section><div class="wide stack">
+  <div class="col stack"><span class="eyebrow">The screens</span>
+  <h2>How the app wears it</h2>
+  <p class="muted">Mohab's sample year on the PC and dummy data on the phone, captured with <code>tools/theme_shots.py</code>. Look for the frieze and pigment seam under the title, the cartouche on the current page, the foil ring and winged disc on the lead card, and the zodiac in the far corner.</p></div>
+  <div class="shots">
+    <figure><img src="../../reports/2026-10-26-dendera-theme/evidence/pc-day-overview.jpg" alt="Overview on the PC in Dendera day" loading="lazy" width="1440" height="900"><figcaption><b>Overview, day.</b> Net worth on fresco with a gold foil ring; the winged disc in its empty corner.</figcaption></figure>
+    <figure><img src="../../reports/2026-10-26-dendera-theme/evidence/pc-night-overview.jpg" alt="Overview on the PC in Dendera night" loading="lazy" width="1440" height="900"><figcaption><b>Overview, night.</b> Basalt ground, lamp-lit limestone text, gold cartouche.</figcaption></figure>
+    <figure><img src="../../reports/2026-10-26-dendera-theme/evidence/pc-day-budget.jpg" alt="Budget on the PC in Dendera day" loading="lazy" width="1440" height="900"><figcaption><b>Budget, day.</b> Meters keep their meaning colours; only the track takes the well.</figcaption></figure>
+    <figure><img src="../../reports/2026-10-26-dendera-theme/evidence/pc-night-investments.jpg" alt="Investments on the PC in Dendera night" loading="lazy" width="1440" height="900"><figcaption><b>Investments, night.</b> The By currency card now reads on every dark theme (fixed here for all).</figcaption></figure>
+    <figure><img src="../../reports/2026-10-26-dendera-theme/evidence/pc-day-transactions.jpg" alt="Transactions on the PC in Dendera day" loading="lazy" width="1440" height="900"><figcaption><b>Transactions, day.</b> In, out and transfer keep the app's own colours.</figcaption></figure>
+    <figure><img src="../../reports/2026-10-26-dendera-theme/evidence/pc-ar-day-overview.jpg" alt="Overview on the PC in Arabic, Dendera day" loading="lazy" width="1440" height="900"><figcaption><b>Arabic, day.</b> Layout mirrors and the drawings move to the mirrored corners; amounts stay left to right.</figcaption></figure>
+  </div>
+  <div class="shots phones">
+    <figure><img src="../../reports/2026-10-26-dendera-theme/evidence/phone-day-overview.jpg" alt="Phone overview, Dendera day" loading="lazy" width="390" height="844"><figcaption><b>Phone, day.</b></figcaption></figure>
+    <figure><img src="../../reports/2026-10-26-dendera-theme/evidence/phone-night-overview.jpg" alt="Phone overview, Dendera night" loading="lazy" width="390" height="844"><figcaption><b>Phone, night.</b></figcaption></figure>
+    <figure><img src="../../reports/2026-10-26-dendera-theme/evidence/phone-day-transactions.jpg" alt="Phone transactions, Dendera day" loading="lazy" width="390" height="844"><figcaption><b>Transactions, day.</b></figcaption></figure>
+    <figure><img src="../../reports/2026-10-26-dendera-theme/evidence/phone-ar-night-transactions.jpg" alt="Phone transactions in Arabic, Dendera night" loading="lazy" width="390" height="844"><figcaption><b>Arabic, night.</b></figcaption></figure>
+  </div>
+</div></section>
+
+<section><div class="wide stack">
+  <div class="col stack"><span class="eyebrow">The sites</span>
+  <h2>One purchase, every surface</h2>
+  <p class="muted">The main site draws a light and a dark side from Dendera's seed; For Geeks wears the day side in its own terminal look. The market features Dendera among the themes that dress the app too, and the catalogue sells it in the animated tier.</p></div>
+  <div class="shots sites">
+    <figure><img src="../../reports/2026-10-26-dendera-theme/evidence/site-main-light.jpg" alt="Main site in Dendera, light side" loading="lazy" width="1280" height="800"><figcaption><b>Main site, light.</b> Papyrus fibres, lapis pill, the pigment seam under the bar.</figcaption></figure>
+    <figure><img src="../../reports/2026-10-26-dendera-theme/evidence/site-main-dark.jpg" alt="Main site in Dendera, dark side" loading="lazy" width="1280" height="800"><figcaption><b>Main site, dark.</b> Turned over from the seed by rule.</figcaption></figure>
+    <figure><img src="../../reports/2026-10-26-dendera-theme/evidence/site-forgeeks.jpg" alt="For Geeks market in Dendera" loading="lazy" width="1280" height="800"><figcaption><b>For Geeks.</b> The fourteen D03 tokens set by hand.</figcaption></figure>
+  </div>
+  <p class="muted">The market's lists need the live store, so these captures show its offline notice; the skin, texture and seam are what they prove.</p>
+</div></section>
+
+<section><div class="wide stack">
+  <div class="col stack"><span class="eyebrow">Checks</span>
+  <h2>What passed, and what is left</h2></div>
+  <div class="scroll"><table class="checks">
+    <thead><tr><th>Check</th><th>Result</th><th>How</th></tr></thead>
+    <tbody>
+      <tr><td>Contract and contrast</td><td class="ok">Passed</td><td><code>build_themes.py --validate</code>, both manifests, at each surface's worst point</td></tr>
+      <tr><td>Nothing moves</td><td class="ok">Passed</td><td><code>theme_check.py</code>: 0 of 3,600 element boxes differ from the default</td></tr>
+      <tr><td>No long frames</td><td class="ok">Passed</td><td><code>theme_check.py</code>: 60 fps, 0 frames over 34 ms with the thread running</td></tr>
+      <tr><td>Both modes, PC and phone, English and Arabic</td><td class="ok">Captured</td><td><code>theme_shots.py --themes dendera,dendera-night [--ar]</code>, all six roster screens</td></tr>
+      <tr><td>Both sites and the market</td><td class="ok">Passed</td><td><code>theme_contrast.py</code> and every <code>supabase/tests/*.test.mjs</code></td></tr>
+      <tr><td>One licence wears both modes</td><td class="ok">Passed</td><td><code>tests/test_theme_entitlements.py</code></td></tr>
+      <tr><td>Windows WebView2 and the Android app</td><td class="open">Open</td><td>Owner check on devices, offline after install</td></tr>
+      <tr><td>Screen readers and forced colours</td><td class="open">Open</td><td>Owner check with NVDA and TalkBack</td></tr>
+      <tr><td>A low-end phone with the thread running</td><td class="open">Open</td><td>Owner check; headless desktop is a floor, not a phone</td></tr>
+      <tr><td>On sale in the app</td><td class="open">Waits</td><td>The app release that carries it ships, then the owner turns on <code>dendera</code> version 1 in the console</td></tr>
+      <tr><td>Pigments against real samples</td><td class="open">Known</td><td>Hex values are designed for screens, not measured from the walls</td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<footer class="col stack">
+  <div class="frieze" role="presentation"></div>
+  <p>How a theme is made, step by step, for any person or AI: <code>guideline/themes.md</code> section 5. The full record of this build, with the comparison against the earlier flow: <code>reports/2026-10-26-dendera-theme/report.md</code> in the app repository.</p>
+</footer>
+</div>
+
+</body>
+</html>

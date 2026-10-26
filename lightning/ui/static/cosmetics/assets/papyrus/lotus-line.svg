@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-100 -96 200 200" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round">
+  <title>Lotus in line: five petals over three water lines. Papyrus.</title>
+  <path d="M0 40C-10 10-6-30 0-60C6-30 10 10 0 40Z"/>
+  <path d="M0 40C-24 18-34-14-30-46C-14-24-4 6 0 40Z"/>
+  <path d="M0 40C24 18 34-14 30-46C14-24 4 6 0 40Z"/>
+  <path d="M0 40C-38 28-58 2-66-26C-40-14-16 10 0 40Z"/>
+  <path d="M0 40C38 28 58 2 66-26C40-14 16 10 0 40Z"/>
+  <path d="M-96 58c16-8 32-8 48 0s32 8 48 0 32-8 48 0 32 8 48 0"/>
+  <path d="M-96 70c16-8 32-8 48 0s32 8 48 0 32-8 48 0 32 8 48 0"/>
+  <path d="M-96 82c16-8 32-8 48 0s32 8 48 0 32-8 48 0 32 8 48 0"/>
+</svg>

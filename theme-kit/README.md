@@ -11,6 +11,7 @@ For an AI creator, copy [AI-PROMPT.md](AI-PROMPT.md), complete its fields, and p
 - Mode: [Dark | Light | Both] (required; specify OLED black explicitly if wanted):
 - Light or dark ground; four seed colours (ground, text, quiet, accent):
 - Requested tier: palette / textured / animated:
+- One sentence on what the theme says, and each reference with its source and licence (references are studied, never shipped):
 - Asset ownership and licence allowing Lightning to distribute it:
 - Delivery date and reviewer:
 
@@ -38,7 +39,9 @@ A Lightning theme is not a palette swap. It is a **complete specification**: eve
 - **Material**: how the surface is made: finish, grain, edge light, depth, artwork. Values come from the recipe library.
 - **Motion**: how it moves: one continuous (ambient) motion at most per theme; hover, press and enter answer the user; equip plays once when the theme is put on.
 
-Creators choose recipes; they never write CSS. A recipe is app code in `lightning/ui/static/theme-materials.css` (grain and artwork are drawn per theme, in its own colours, by `tools/build_themes.py`). A new recipe is proposed to the maintainers, reviewed once, and then every theme can use it.
+The whole process, from references to both pull requests, is `guideline/themes.md` section 5; write the plan (`theme-kit/plans/<id>.html`, [Dendera's](plans/dendera.html) is the model) before any code. Function first, then clarity and polish, then looks.
+
+Creators choose recipes; they never write CSS. A recipe is app code in `lightning/ui/static/theme-materials.css` (grain and artwork are drawn per theme, in its own colours, by `tools/build_themes.py`). A recipe's drawing is an SVG in the asset folder of the theme that introduced it, `lightning/ui/static/cosmetics/assets/<theme>/<recipe>.svg`: shapes only, lines in `currentColor` (the accent), a part in another palette colour by `class="p-<key>"`. The build recolours it for each wearer and inlines it, so nothing is fetched; it refuses links, scripts, images and unknown classes. A new recipe is proposed to the maintainers, reviewed once, and then every theme can use it.
 
 ## Element inventory
 
@@ -49,7 +52,7 @@ Every element, where it appears, and what each layer may be. `slots.json` is the
 | `palette` | Every colour. The money colours stay the app's own | 14 hex colours | | |
 | `brand` | The two-leaf mark | | `logoVariant` | |
 | `ground` | The page behind everything | (palette `background`) | `texture`, `textureStrength`, `artwork`, `vignette` | `ambient`, `equip` |
-| `header` | Top bar · app bar | `surface`, `seam` | `finish` | `thread` |
+| `header` | Top bar · app bar | `surface`, `seam` | `finish` (a frieze is a finish) | `thread` |
 | `navigation` | Sidebar and current page · tab bar and current tab | `surface`, `activeMark` | `finish`, `activeStyle` | |
 | `hero` | Lead figure card, focal metrics, portfolio summary · (phone lead sits on the ground) | `surface`, `edge` | `finish`, `grain`, `edgeStyle`, `depth`, `artwork` | `sheen` |
 | `cards` | Cards, panels, KPI tiles, overview blocks, list dividers · phone cards and tiles | `surface`, `border` | `finish`, `grain`, `edgeLight`, `depth` | `hover` |
@@ -66,19 +69,19 @@ Every element, where it appears, and what each layer may be. `slots.json` is the
 
 | Recipe | Values | What it is |
 |---|---|---|
-| finish | `flat` · `satin` · `lacquer` · `glass` · `foil` · `embossed` · `gloss` | satin: light falling from the top; lacquer: deeper corner light and a darker foot; glass: blurred translucent bar (phone app bar); foil: metallic accent gradient (buttons, chosen tab); embossed: pressed paper edges; gloss: a lit meter |
+| finish | `flat` · `satin` · `lacquer` · `glass` · `foil` · `embossed` · `gloss` · `lotus-frieze` (header) | satin: light falling from the top; lacquer: deeper corner light and a darker foot; glass: blurred translucent bar (phone app bar); foil: metallic accent gradient (buttons, chosen tab); embossed: pressed paper edges; gloss: a lit meter; lotus-frieze: a band of lotus buds in the focus, hero, warning and accent colours, in the header's bottom padding, under no text |
 | grain | `none` · `film` · `paper` · `fibre` | fine noise in the text colour, inside the surface |
 | texture (ground) | `none` · `film` · `papyrus` · `linen` · `laid`, at `whisper` · `subtle` · `rich` | the page's material, in the text colour at 2, 4 or 6% |
-| artwork | `none` · `guilloche-rosette` · `lotus-line` | a fine-line watermark in the accent at 12%: the ground's far corner, the hero's empty corner; mirrored in Arabic |
+| artwork | `none` · `guilloche-rosette` · `lotus-line` · `zodiac-ring` · `winged-disc` | a fine-line watermark in the accent at 12%: the ground's far corner, the hero's empty corner; mirrored in Arabic |
 | edgeLight / depth | `none` · `soft` · `bright` / `none` · `low` · `mid` · `high` | a highlight on the top edge / a shadow under the surface |
 | edgeStyle | `hairline` · `foil` | the hero's border as a plain line or a gold foil ring |
 | activeStyle | `bar` · `cartouche` · `glow` | how the current page is marked |
 | well · shade · vignette | `flat` · `inset` · `deep` · `dim` · `blur` · `none` · `soft` | field depth · what sits behind a dialog · darker page edges |
 | ambient | `none` · `glow-drift` (48 s) | continuous |
-| thread · sheen | `none` · `security-thread` (12 s) · `edge-glint` (16 s) | continuous: a glint along the header seam / round the hero's foil edge |
+| thread · sheen | `none` · `security-thread` (12 s) · `pigment-thread` (14 s) · `edge-glint` (16 s) | continuous: a glint along the header seam; the seam painted in accent, hero, focus and warning with one soft light along it; a glint round the hero's foil edge |
 | hover · press · enter · equip | `lift`, `light` · `sheen` · `rise` · `unveil` | answer the user: card lifts or a pointer light; foil sheen on hover/press; dialogs rise in; one light sweep when the theme is put on |
 
-**The two references.** `cotton.json` (light: linen ground, paper cards, rosette watermark, embossed buttons, ink tabs) and `papyrus.json` (dark: papyrus ground, lapis lacquer hero with a gold foil edge whose light travels, lotus watermark, foil buttons and tabs, cartouche navigation, pointer light on cards) use most of the library. Start from whichever is closer.
+**The two references.** `cotton.json` (light: linen ground, paper cards, rosette watermark, embossed buttons, ink tabs) and `papyrus.json` (dark: papyrus ground, lapis lacquer hero with a gold foil edge whose light travels, lotus watermark, foil buttons and tabs, cartouche navigation, pointer light on cards) use most of the library. `dendera.json` and `dendera-night.json` are the model for a theme with two modes (one store item, `"item": "dendera"` on the night) and for new recipes (the zodiac ring, winged disc, lotus frieze and pigment thread, in `cosmetics/assets/dendera/`). Start from whichever is closer.
 
 **Hard rules the validator enforces.** Every layer stated. Values only from the library. Text 4.5:1 and primary text 7:1 measured at each surface's worst point: the finish's lift, plus the grain, plus the artwork (limits in `slots.json`); foil labels on both the light and dark ends of the foil. One continuous motion. Never moved by any layer: layout, sizes, spacing, radii, fonts, words, order, money colours; nothing is drawn over a figure; reduced motion stops every motion on a still frame.
 

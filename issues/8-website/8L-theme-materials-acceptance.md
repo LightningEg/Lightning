@@ -18,15 +18,15 @@ repo: app
 
 ## Only the owner can do (in this order)
 
-1. **Deploy** the website's migrations through `20261026110000_catalogue_and_app_release.sql` and the new `admin.html` assets.
+1. **Deploy** the website's migrations through `20261026120000_dendera_theme.sql` and the new `admin.html` assets.
 2. **Open checkout** in the console (Settings › Checkout: InstaPay address, exact name, private QR), then make one real top-up from a second account, credit it, buy a theme, and check it on a second device. *Ready to sell* ticks each step.
 3. **Store key:** generate an Ed25519 key pair; keep the private JWK offline with a backup. Set the Supabase secrets `STORE_SIGNING_PRIVATE_JWK`, `STORE_SIGNING_KEY_ID`, `STORE_ALLOWED_ORIGINS`; deploy `redeem-purchase` (JWT off) and `restore-purchases` (JWT on) with gateway rate limits. Give an AI only the public key and its id, to add to `lightning/security/store_keys.json`.
-4. **Ship the app release** that carries the key, then Catalogue › App themes › *Turn on unlock* for Nile, Cotton and Papyrus.
+4. **Ship the app release** that carries the key, then Catalogue › App themes › *Turn on unlock* for Nile, Cotton, Papyrus and Dendera (its night mode rides on the same licence).
 5. Turn on leaked-password protection in Supabase Auth.
 
 ## Still to do by an AI
 
-1. Native acceptance (8J): WebView2 and Android paint, cost of grain and blur on a low-end phone, Arabic mirroring of artwork and glow, forced colours.
+1. Native acceptance (8J): WebView2 and Android paint, cost of grain and blur on a low-end phone, Arabic mirroring of artwork and glow, forced colours; Dendera's frieze and pigment thread on a low-end phone.
 2. Royal Obsidian & Gold needs a website version before it can be sold.
 3. Pre-existing: the app's own green on dark cards reads low in every dark theme; the fix belongs to the dark adapter in `theme-surfaces.css`.
 4. After 60 days of sales, review prices as `docs/payment-operations.md` (website) › Pricing describes.

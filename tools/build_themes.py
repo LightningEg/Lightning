@@ -7,6 +7,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import xml.etree.ElementTree as ET
 from urllib.parse import quote
 from pathlib import Path
 import sys
@@ -129,18 +130,59 @@ TEXTURES = {  # each is a list of layers; percent is the strength
     "laid": lambda c, pc: [svg(f"<path d='M0 .5H6' stroke='{c}' stroke-opacity='{pc / 100 * 1.4:.3f}'/>", 6, 5),
                             noise(c, pc * .6, ".05 .4", seed=4, octaves=3, w=320, h=320)],
 }
-ROSETTE = "".join(f"<ellipse rx='92' ry='30' transform='rotate({a})'/>" for a in range(0, 180, 15)) + \
-    "<circle r='96'/><circle r='60'/><circle r='18'/>" + \
-    "".join(f"<ellipse rx='46' ry='14' transform='rotate({a})'/>" for a in range(0, 180, 30))
-LOTUS = ("<path d='M0 40C-10 10-6-30 0-60C6-30 10 10 0 40Z'/><path d='M0 40C-24 18-34-14-30-46C-14-24-4 6 0 40Z'/>"
-         "<path d='M0 40C24 18 34-14 30-46C14-24 4 6 0 40Z'/><path d='M0 40C-38 28-58 2-66-26C-40-14-16 10 0 40Z'/>"
-         "<path d='M0 40C38 28 58 2 66-26C40-14 16 10 0 40Z'/>"
-         + "".join(f"<path d='M-96 {y}c16-8 32-8 48 0s32 8 48 0 32-8 48 0 32 8 48 0'/>" for y in (58, 70, 82)))
-ARTWORK = {
-    "guilloche-rosette": lambda c, op: svg(f"<g transform='translate(100 100)' fill='none' stroke='{c}' stroke-opacity='{op}' stroke-width='.6'>{ROSETTE}</g>", 200, 200),
-    "lotus-line": lambda c, op: svg(f"<g transform='translate(100 96)' fill='none' stroke='{c}' stroke-opacity='{op}' stroke-width='1' stroke-linejoin='round'>{LOTUS}</g>", 200, 200),
-}
+# Drawings live as plain SVG files in each theme's asset folder (cosmetics/assets/<theme>/<recipe>.svg): the theme
+# that introduced a recipe keeps its drawing, and every theme may then wear it. The build recolours a drawing in the
+# wearer's palette and inlines it, so nothing is fetched. Lines draw in currentColor (the accent); an element with
+# class p-<key> takes that palette colour instead. Only shapes are allowed: no links, scripts, images or styles of
+# the file's own (its <style> is for opening the file and is replaced).
+ASSETS = SOURCE / "assets"
+SVG_NS = "http://www.w3.org/2000/svg"
+ET.register_namespace("", SVG_NS)
+SHAPES = {"svg", "g", "path", "circle", "ellipse", "rect", "line", "polyline", "polygon"}
+SHAPE_ATTRS = {"xmlns", "viewBox", "d", "cx", "cy", "r", "rx", "ry", "x", "y", "x1", "y1", "x2", "y2", "width", "height",
+               "points", "transform", "fill", "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin", "opacity", "class"}
+
+def drawings():
+    found = {}
+    for path in sorted(ASSETS.glob("*/*.svg")):
+        if path.stem in found:
+            raise ValueError(f"Two drawings named {path.stem}: {found[path.stem]} and {path}")
+        found[path.stem] = path
+    return found
+
+def drawing(name, palette, opacity=1.0):
+    """A drawing from the asset folders, in this palette, as an inline data URL. Refuses anything but shapes."""
+    root = ET.fromstring(drawings()[name].read_text())
+    for parent in list(root.iter()):
+        for child in list(parent):
+            if child.tag in (f"{{{SVG_NS}}}title", f"{{{SVG_NS}}}desc", f"{{{SVG_NS}}}style"):
+                parent.remove(child)
+    keys = set()
+    for node in root.iter():
+        tag = node.tag.replace(f"{{{SVG_NS}}}", "")
+        if tag not in SHAPES or set(node.attrib) - SHAPE_ATTRS:
+            raise ValueError(f"{name}.svg: only plain shapes are allowed, not {tag} {sorted(set(node.attrib) - SHAPE_ATTRS)}")
+        if any(re.search(r"url|#[^0-9a-fA-F]|javascript|data:", v) for v in node.attrib.values()):
+            raise ValueError(f"{name}.svg: no references or links")
+        for cls in node.attrib.get("class", "").split():
+            if not cls.startswith("p-") or cls[2:] not in palette:
+                raise ValueError(f"{name}.svg: class {cls} is not p-<palette key>")
+            keys.add(cls[2:])
+    root.set("color", palette["accent"])
+    if opacity < 1:  # each line fades on its own, so crossings darken a little, as engraved lines do
+        root.set("stroke-opacity", f"{opacity:g}")
+        root.set("fill-opacity", f"{opacity:g}")
+    body = ET.tostring(root, encoding="unicode").replace("\n", "").replace('"', "'")
+    body = re.sub(r">\s+<", "><", body)
+    if keys:
+        body = body.replace(">", "><style>" + "".join(f".p-{k}{{color:{palette[k]}}}" for k in sorted(keys)) + "</style>", 1)
+    return 'url("data:image/svg+xml,' + quote(body, safe=" ='/:;,.()-") + '")'
+
+_CONTRACT = json.loads((SOURCE / "slots.json").read_text())
+ARTWORK = {name: drawings()[name] for name in _CONTRACT["slots"]["hero"]["material"]["artwork"] if name != "none"}
+FRIEZES = {name for name in _CONTRACT["slots"]["header"]["material"]["finish"] if name in drawings()}
 STRENGTH = {"whisper": 2, "subtle": 4, "rich": 6}
+FRIEZE_ALPHA = 70  # a frieze is a painted border: the pigments, softened a little so the title leads
 ARTWORK_ALPHA = 12  # artwork is a watermark: fine accent lines at 12%, like the guilloché behind a banknote's text
 
 def material_values(parts, contract, scheme):
@@ -157,9 +199,11 @@ def material_values(parts, contract, scheme):
     if ground["texture"] != "none":
         values["m-ground-texture"] = ", ".join(TEXTURES[ground["texture"]](p["text"], STRENGTH[ground["textureStrength"]]))
     if ground["artwork"] != "none":
-        values["m-ground-artwork"] = ARTWORK[ground["artwork"]](p["accent"], ARTWORK_ALPHA / 100)
+        values["m-ground-artwork"] = drawing(ground["artwork"], p, ARTWORK_ALPHA / 100)
     if parts["hero"]["artwork"] != "none":
-        values["m-hero-artwork"] = ARTWORK[parts["hero"]["artwork"]](p["accent"], ARTWORK_ALPHA / 100)
+        values["m-hero-artwork"] = drawing(parts["hero"]["artwork"], p, ARTWORK_ALPHA / 100)
+    if parts["header"]["finish"] in FRIEZES:  # a frieze in the header's bottom padding, under no text
+        values["m-header-frieze"] = drawing(parts["header"]["finish"], p, FRIEZE_ALPHA / 100)
     return values
 
 def compile_theme(manifest, parts, contract):
@@ -204,10 +248,17 @@ def build(check=False):
         entry = {"id": manifest["id"], "name": manifest["name"], "preview": manifest["status"] == "test-preview"}
         if manifest["status"] == "paid":
             entry.update(paid=True, version=manifest["version"])
+        if "item" in manifest:  # a theme's other mode: worn with its item's licence (Dendera's night rides on Dendera)
+            entry["item"] = manifest["item"]
         if manifest["id"] != "lightning-default":  # the default keeps its exact approved paint
             entry["materials"] = materials(parts, contract)
         registry.append(entry)
         css += compile_theme(manifest,parts,contract)
+    paid = {e["id"]: e for e in registry if e.get("paid") and "item" not in e}
+    for entry in registry:
+        if "item" in entry and (entry["item"] not in paid or paid[entry["item"]]["version"] != entry.get("version")
+                                or not entry.get("paid")):
+            raise ValueError(f"{entry['id']}: its item {entry['item']} must be a bundled paid theme at the same version")
     outputs = {STATIC / "themes.generated.css": css,
                STATIC / "themes.generated.json": json.dumps(registry, indent=2) + "\n",
                STATIC / "themes.generated.js": "/* Generated. */\nwindow.LIGHTNING_THEMES = "+json.dumps(registry)+";\n"}

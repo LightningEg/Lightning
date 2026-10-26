@@ -8,7 +8,7 @@ This file sits beside the four guideline documents and is copied to both reposit
 
 ## 1. What is on sale now
 
-Owner, 2026-10-25: five palettes and two textured themes on sale while each is proven on both sites; 2026-10-26: Papyrus moves to the animated tier. Prices are in coins (5 coins = 1 EGP); section 7 explains them.
+Owner, 2026-10-25: five palettes and two textured themes on sale while each is proven on both sites; 2026-10-26: Papyrus moves to the animated tier, and Dendera joins it. Prices are in coins (5 coins = 1 EGP); section 7 explains them.
 
 | Theme | Tier | Seed: ground · text · quiet · accent | Side | Coins |
 |---|---|---|---|---|
@@ -20,10 +20,11 @@ Owner, 2026-10-25: five palettes and two textured themes on sale while each is p
 | Garnet | palette | `#1a0608` `#fbeee4` `#e0b9ab` `#ff6b57` | dark | 300 |
 | Papyrus | animated | Nile's seed, texture `papyrus`, one gold thread | dark | 1,000 |
 | Cotton | textured | Paper's seed, texture `cotton` | light | 600 |
+| Dendera | animated | `#f1e6cc` `#1e1a14` `#54483a` `#1f3f8c`, texture `dendera`, one pigment thread | light | 1,000 |
 
 **Archived:** Ocean, Tokyo, Dracula, Rose, Synthwave, Phosphor, Amber, Solarized and Moss. They are not sold and not shown, but a member who owns one keeps it, sees it and can wear it. Their seeds stay in `js/forgeeks.js` marked `archived:true` and their tokens stay in `css/forgeeks.css`. To bring one back, take it through section 5 like a new theme, then set `active = true` in a migration and drop `archived:true`.
 
-**Ready to sell (owner, 2026-10-26).** One theme is one purchase on every surface, so the app's paid themes take the website's ids: **Nile** (palette), **Cotton** (textured) and **Papyrus** (animated: a lapis lacquer hero with a travelling gold-foil edge in the app, a slow gold thread along the header on the sites). The animated tier is on sale at 1,000 coins with Papyrus. In the app a paid theme is tried by anyone and kept with a licence unlocked by the website's one-time code (`lightning/ui/entitlements.py`); each stays off in the store until the app release that carries it ships. Royal Obsidian & Gold stays a test preview: it has no website version yet.
+**Ready to sell (owner, 2026-10-26).** One theme is one purchase on every surface, so the app's paid themes take the website's ids: **Nile** (palette), **Cotton** (textured) and **Papyrus** (animated: a lapis lacquer hero with a travelling gold-foil edge in the app, a slow gold thread along the header on the sites). The animated tier is on sale at 1,000 coins with Papyrus and **Dendera** (temple pigments on aged papyrus, a lotus-bud frieze, the zodiac ring and the winged sun disc; one slow pigment thread along the header). Dendera is the first theme with two app modes: `dendera` (day) and `dendera-night`, one purchase, worn with Dendera's one licence. In the app a paid theme is tried by anyone and kept with a licence unlocked by the website's one-time code (`lightning/ui/entitlements.py`); each stays off in the store until the app release that carries it ships. Royal Obsidian & Gold stays a test preview: it has no website version yet.
 
 ## 2. The seed
 
@@ -89,17 +90,32 @@ To change how one part looks in every theme (say, buttons), change that part's r
 
 ## 5. Making a theme, step by step
 
-1. **Seed.** Add `{id, name, note, c:[ground, text, quiet, accent]}` to `THEMES` in `js/forgeeks.js`. Add `light:true` for a light side, `tex:'id'` for the textured tier (its pattern goes in `css/textures.css`), and `paid:true, price:n` at the tier's price (section 7).
-2. **For Geeks part values.** Add one `:root[data-theme="id"]{…}` rule with all fourteen tokens to `css/forgeeks.css`. For a light theme, also add it to the light lists.
-3. **Lists.** Add the id to `THEME_IDS` in `tools/geeks_shell.py`, bump its `VERSION`, and run it. Run `python tools/site_accounts.py` so the main site reads the new seed.
-4. **Catalogue.** Add a migration that inserts the `catalog_items` row (type `theme`, name, note, price, tier). The price in `js/forgeeks.js` must match it.
-5. **Check every part on every surface.**
-   - `python tools/theme_contrast.py` checks For Geeks.
-   - `supabase/tests/market-ui-pages.test.mjs` checks both main-site sides at 4.5:1 and the app mix.
-   - Then open the market's Details for the theme and look at every view: Website (light and dark), For Geeks, Computer, Phone. Use Try it on both sites.
-6. **Record.** Add the theme to the table in section 1 and to D03.1, in both repositories, and add a changelog entry.
+One flow for every theme and every maker, person or AI. Each step names its files and the check that closes it. A worked example, with what each step found, is the Dendera report (app repository, `reports/2026-10-26-dendera-theme/report.md`).
 
-To archive a theme: add a migration setting `active = false` (owners keep it), mark it `archived:true` in `js/forgeeks.js`, and move it to the archived line in section 1 and D03.1.
+**The order of care (owner, 2026-10-26): function first, then clarity and polish, then looks.** Texture and motion are welcome, never at the cost of a working screen, speed or a clear reading. When a look and a reading disagree, the reading wins.
+
+1. **Brief.** Fill the brief in the app's `theme-kit/README.md`: id, name, mode (day, night or both), tier, and one sentence on what the theme says. List each reference with its source and licence. References are studied, never shipped: only drawings made for Lightning ship.
+2. **Plan.** Write the plan in `theme-kit/plans/<id>.html` before any code: what each reference gives (a colour, a pattern, an edge, a light, a motion); the seed and each mode's fourteen colours with their contrast; every element's paint, material and motion (the inventory in the kit); which motifs the recipe library already draws and which need a new recipe; the one continuous motion and why it is cheap. Keep layout, sizes, fonts, words and money colours out of the plan: a theme never moves them.
+3. **Seed and palettes.** The seed passes section 2. Each mode's fourteen app colours pass `python tools/build_themes.py --validate <manifest>`, run as soon as the palette exists, not at the end.
+4. **Recipes: reuse first.** Use the library in the kit. A motif it lacks becomes a new recipe, reviewed once, then free for every theme:
+   - its drawing is an SVG in `lightning/ui/static/cosmetics/assets/<id>/<recipe>.svg`, in the folder of the theme that introduces it: shapes only, lines in `currentColor` (the accent), a part in another palette colour by `class="p-<key>"`; the build recolours it per theme and inlines it, so nothing is fetched;
+   - its name goes on its list in `cosmetics/slots.json` (a finish also gets its lift in `limits`);
+   - its paint goes in `theme-materials.css`, with its still frame under reduced motion;
+   - a test in `tests/test_theme_build.py`.
+5. **App manifests.** Start from `theme-kit/theme.template.json`, one manifest per mode; a second mode names its store item (`"item": "<id>"`), so one licence wears both. Run `python tools/build_themes.py`, bump the theme asset versions in both shells, and run `tests/test_theme_build.py tests/test_theme_entitlements.py`.
+6. **Real screens.** `python tools/theme_shots.py OUT --themes <id>` captures the six roster screens on PC and phone (`--ar` for Arabic). Put each beside the default. A spot that is unreadable is fixed once in the app's CSS for every theme, never with theme markup. Then `python tools/theme_check.py --themes <id>`: no element may move against the default on any roster screen, and no frame may run long while the motion plays.
+7. **The sites.** In the website repository:
+   - seed in `THEMES` in `js/forgeeks.js` (`light:true`, `tex:'<id>'`, `paid:true, price:n` at the tier price);
+   - the fourteen For Geeks tokens in `css/forgeeks.css`, and the light lists for a light theme;
+   - its texture and motion in `css/textures.css`, with the id in `TEXTURES` (`js/theme.js`) and `TEX` (`js/theme-preview.js`);
+   - the id in `THEME_IDS` and a new `VERSION` in `tools/geeks_shell.py`, then run it and `python tools/site_accounts.py` (bump its `SHOP` version when the market's files change);
+   - when it dresses the app, its line in `APP` in `js/market-ui.js`, and copies of the app's manifests and asset folder in `cosmetics/`;
+   - a migration with the `catalog_items` row (type `theme`, tier, the tier's price) and a disabled `bundled_item_versions` row;
+   - `python tools/theme_contrast.py` and every `supabase/tests/*.test.mjs`.
+8. **Check.** Section 6, on every surface, both modes, PC and phone.
+9. **Record and hand over.** The table in section 1 (D03 points here), the plan and the report with its evidence, a changelog line in each repository, and one pull request in each.
+
+To archive a theme: add a migration setting `active = false` (owners keep it), mark it `archived:true` in `js/forgeeks.js`, and move it to the archived line in section 1.
 
 ## 6. Before a theme ships
 
@@ -112,6 +128,8 @@ A theme with any of these is not done:
 - A layout shift: put screenshots against the default theme side by side, and nothing may move.
 - Motion that ignores reduced motion, or more than one continuous motion in a theme.
 - A seed edited without rechecking every part.
+- A texture or motion that slows a page, sits under a reading, or competes with the figure for the eye. One continuous motion, cheap to draw (a 1px seam or a transform); no pointer-following light or blur where the phone has to keep up.
+- A screen checked only in a workbench: every roster screen, both modes, PC and phone, English and Arabic.
 
 ## 7. Tiers and prices
 
@@ -127,7 +145,7 @@ Every look climbs the same three steps, and each step keeps everything below it.
 |---|---|---|---|---|
 | **Palette** (recolour) | Every colour on every screen: page, header, menu, cards, buttons, tabs, fields, charts, dialogs; a light and a dark side on the main site | 300 | 60 | Paper, Frost, Meadow, Nile, Garnet |
 | **Textured** (recolour + texture) | Plus the material: a texture behind every page, grain and a lit edge on cards, depth, a watermark, finishes on buttons, tabs and fields | 600 | 120 | Cotton |
-| **Animated** (all three) | Plus one slow signature motion (Papyrus: gold-foil light travelling the lead card's edge in the app, a gold thread along the site's header) and motions that answer you: a light following the pointer on cards, a sheen on buttons, dialogs rising in, one light sweep when you put it on | 1,000 | 200 | Papyrus |
+| **Animated** (all three) | Plus one slow signature motion (Papyrus: gold-foil light travelling the lead card's edge in the app, a gold thread along the site's header) and motions that answer you: a light following the pointer on cards, a sheen on buttons, dialogs rising in, one light sweep when you put it on | 1,000 | 200 | Papyrus, Dendera |
 
 **Banners**: the strip on your profile, leaderboard row and account.
 
@@ -199,4 +217,4 @@ The app's [`theme-kit/README.md`](https://github.com/LightningEg/Lightning/blob/
 
 `python tools/build_themes.py --validate path/to/theme.json` checks the existing data-only contract and text/control contrast pairs. Reviewed app previews are bundled under `lightning/ui/static/cosmetics/`; `python tools/build_themes.py` generates the root `data-theme` CSS and boot registry. Both app frames load the same switcher before content paints. Settings → Appearance switches paint without navigating and remembers it with the profile across native launches; an unknown saved ID returns to Lightning default. The exact default paint stays in the existing guideline stylesheets.
 
-**The app's material system.** An app theme is every element times three layers, all stated: **paint** (palette keys), **material** (finish, grain, edge light, depth, artwork) and **motion**. The element inventory and the recipe library are in `theme-kit/README.md`; `slots.json` is their machine copy and `lightning/ui/static/theme-materials.css` draws the recipes. A manifest only picks recipes; a new recipe is app code, reviewed like any other, and then serves every theme. The validator refuses a missing layer, a value off the list, more than one continuous motion, and text under 4.5:1 at a surface's worst point. `python tools/theme_shots.py OUT --themes id` captures the six roster screens on PC and phone. Financial tokens and series retain their existing meanings. Actual Windows/Android screens, English/Arabic, contrast and geometry still require the kit's acceptance checks. Bundling a preview does not enable sale or prove paid ownership; verified claiming remains a separate release prerequisite.
+**The app's material system.** An app theme is every element times three layers, all stated: **paint** (palette keys), **material** (finish, grain, edge light, depth, artwork) and **motion**. The element inventory and the recipe library are in `theme-kit/README.md`; `slots.json` is their machine copy and `lightning/ui/static/theme-materials.css` draws the recipes. A manifest only picks recipes; a new recipe is app code, reviewed like any other, and then serves every theme. Its drawing lives in the asset folder of the theme that introduced it (`cosmetics/assets/<theme>/<recipe>.svg`), and the website keeps a copy of every folder. The validator refuses a missing layer, a value off the list, more than one continuous motion, and text under 4.5:1 at a surface's worst point. `python tools/theme_shots.py OUT --themes id` captures the six roster screens on PC and phone. Financial tokens and series retain their existing meanings. Actual Windows/Android screens, English/Arabic, contrast and geometry still require the kit's acceptance checks. Bundling a preview does not enable sale or prove paid ownership; verified claiming remains a separate release prerequisite.

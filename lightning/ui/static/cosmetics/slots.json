@@ -14,7 +14,8 @@
       "glass": 5,
       "foil": 0,
       "embossed": 4,
-      "gloss": 0
+      "gloss": 0,
+      "lotus-frieze": 0
     },
     "grain": {
       "none": 0,
@@ -28,7 +29,7 @@
       "#000000",
       22
     ],
-    "rule": "lift and grain are the most text colour (per cent) a recipe lays over a surface; the validator checks text and quiet text against that worst point. foilStops are the lightest and darkest mixes a foil gradient takes of its fill; its label must read on both. At most one continuous motion (listed in continuous) per theme; the rest answer the user or play once.",
+    "rule": "lift and grain are the most text colour (per cent) a recipe lays over a surface; the validator checks text and quiet text against that worst point. foilStops are the lightest and darkest mixes a foil gradient takes of its fill; its label must read on both. At most one continuous motion (listed in continuous) per theme; the rest answer the user or play once. A frieze finish (lotus-frieze) is drawn in the header's bottom padding, under no text, so it lifts nothing. Drawings (artwork, friezes) are SVG files in cosmetics/assets/<theme>/ named after their recipe.",
     "continuous": [
       "ground.ambient",
       "header.thread",
@@ -84,7 +85,9 @@
         "artwork": [
           "none",
           "guilloche-rosette",
-          "lotus-line"
+          "lotus-line",
+          "zodiac-ring",
+          "winged-disc"
         ],
         "vignette": [
           "none",
@@ -113,13 +116,15 @@
         "finish": [
           "flat",
           "satin",
-          "glass"
+          "glass",
+          "lotus-frieze"
         ]
       },
       "motion": {
         "thread": [
           "none",
-          "security-thread"
+          "security-thread",
+          "pigment-thread"
         ]
       },
       "rule": "Paint only; preserve header height, controls and navigation order."
@@ -174,7 +179,9 @@
         "artwork": [
           "none",
           "guilloche-rosette",
-          "lotus-line"
+          "lotus-line",
+          "zodiac-ring",
+          "winged-disc"
         ]
       },
       "motion": {

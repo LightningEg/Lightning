@@ -76,12 +76,12 @@ html[data-m-ground-texture]:not([data-m-ground-texture="none"]) .topbar:not(#_) 
 html[data-m-header-finish="satin"] :is(.topbar, .phone-appbar) {
   background-image: linear-gradient(180deg, var(--m-hi), transparent);
 }
-html[data-m-header-finish="glass"] .phone-appbar {
+html[data-m-header-finish="glass"] .phone-appbar:not(#_) {
   background: color-mix(in srgb, var(--theme-header) 78%, transparent);
   -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
 }
 /* security-thread: a slow (12 s) glint along the header seam, in the seam's own 1px. */
-html[data-m-header-thread="security-thread"] :is(.topbar, .phone-appbar) {
+html[data-m-header-thread="security-thread"] :is(.topbar, .phone-appbar):not(#_) {
   border-bottom-color: transparent;
   background-image: linear-gradient(90deg, var(--theme-header-seam) 0 40%, color-mix(in srgb, var(--accent) 35%, var(--surface)) 46%,
     var(--hero) 50%, color-mix(in srgb, var(--accent) 35%, var(--surface)) 54%, var(--theme-header-seam) 60% 100%);
@@ -89,6 +89,28 @@ html[data-m-header-thread="security-thread"] :is(.topbar, .phone-appbar) {
   animation: m-thread 12s linear infinite;
 }
 @keyframes m-thread { from { background-position: 0 100%; } to { background-position: -150% 100%; } }
+
+/* lotus-frieze: the band temple walls and banknote borders run along their edges, painted in the theme's pigments
+   (cosmetics/assets/dendera/lotus-frieze.svg). It sits in the bar's bottom padding, above the seam and under no text;
+   still, so the page title stays the first thing read. */
+html[data-m-header-finish="lotus-frieze"] .main > .topbar {
+  background-image: var(--m-header-frieze); background-repeat: repeat-x; background-size: 16.8px 7px; background-position: 0 calc(100% - 2px);
+}
+html[data-m-header-finish="lotus-frieze"] .phone-appbar:not(#_) {
+  background-image: var(--m-header-frieze); background-repeat: repeat-x; background-size: 12px 5px; background-position: 0 calc(100% - 2px);
+}
+/* pigment-thread: the seam painted in the theme's four pigments (accent, hero, focus, warning), with one soft light
+   travelling along it every 14 s. Drawn by the bar's free ::before in the seam's own 1px: nothing moves, and only a
+   1px strip repaints. Reduced motion keeps the still pigment seam. */
+html[data-m-header-thread="pigment-thread"] :is(.main > .topbar, .phone-appbar):not(#_) { border-bottom-color: transparent; }
+html[data-m-header-thread="pigment-thread"] :is(.main > .topbar, .phone-appbar)::before {
+  content: ""; position: absolute; inset-inline: 0; bottom: -1px; height: 1px; pointer-events: none;
+  background-image: linear-gradient(90deg, transparent 0 45%, color-mix(in srgb, var(--hero) 30%, #FFFFFF) 50%, transparent 55% 100%),
+    linear-gradient(90deg, var(--accent), var(--hero) 36%, var(--focus) 66%, var(--warning));
+  background-size: 300% 100%, 100% 100%; background-repeat: repeat-x, no-repeat; background-position: 0 0, 0 0;
+  animation: m-pigment 14s linear infinite;
+}
+@keyframes m-pigment { from { background-position: 0 0, 0 0; } to { background-position: -150% 0, 0 0; } }
 
 /* ---------- Navigation ---------- */
 html[data-m-navigation-finish="satin"] :is(.side, .phone-tabbar) {
@@ -126,6 +148,13 @@ html[data-m-cards-finish] :is(.card, .data-panel, .metric-card, .kpi-card, .over
   background-color: var(--theme-card) !important;
   background-image: var(--m-card-grain), var(--m-card-finish) !important;
   box-shadow: var(--m-card-edge), var(--m-card-depth);
+}
+/* Wide cards: the default paints them with its light --wide-gradient through a selector that holds an id
+   (#budget-meters), which outranks the rule above; on a dark theme their titles became unreadable. Same paint here. */
+html[data-m-cards-finish] .main :is(.wide-card, .overview-investment-card, #budget-meters, .budget-rollup, .plan-section > .card:not(.plan-lead):not(.plan-loan),
+  .plan-loan, .emergency-fund, .reserve-list, .holdings-card, section.analysis-card, .money-from-others-card):not(#_) {
+  background-color: var(--theme-card) !important;
+  background-image: var(--m-card-grain), var(--m-card-finish) !important;
 }
 /* hover: lift raises the shadow, light follows the pointer (theme-runtime.js gives --lt-x/--lt-y). */
 html[data-m-cards-hover="lift"] :is(.card, .kpi-card, .overview-block, .data-panel, .phone-kpi) { transition: transform .25s ease, box-shadow .25s ease; }
@@ -257,6 +286,7 @@ html[data-m-menus-finish] :is(.pick-list, .pick-results, .dropdown-menu, .contex
 @media (prefers-reduced-motion: reduce) {
   html[data-m-ground-ambient]::before { animation: none; }
   html[data-m-header-thread] :is(.topbar, .phone-appbar) { animation: none; background-position: 0 100%; }
+  html[data-m-header-thread="pigment-thread"] :is(.main > .topbar, .phone-appbar)::before { animation: none; background-position: 0 0, 0 0; /* the plain pigment seam */ }
   html[data-m-hero-sheen] .main :is(.overview-owned-card, .hero-card, .portfolio-summary, .metric-card--focal, .lead-card),
   html[data-m-hero-sheen] .main .lead-card::before { animation: none; }
   html[data-m-overlays-enter] :is(dialog.app-popup[open], .phone-sheet[open]) { animation: none; }
