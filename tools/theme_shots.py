@@ -45,6 +45,16 @@ def wear(page, theme):
     page.wait_for_timeout(250)
 
 
+def arabic(page, origin):
+    """--ar: switch the profile to Arabic through Settings, the way a person does, so every screen is right to left."""
+    page.goto(origin + "/settings")
+    page.evaluate("""async () => { const body = new URLSearchParams({locale: 'ar'});
+        const s = document.querySelector('meta[name=lightning-session]'); if (s) body.set('__session', s.content);
+        const f = document.querySelector('form[action="/settings/locale"] input[name=__session]'); if (f && f.value) body.set('__session', f.value);
+        await fetch('/settings/locale', {method: 'POST', body}); }""")
+    assert page.goto(origin + "/settings") and page.evaluate("document.documentElement.dir") == "rtl", "Arabic did not take"
+
+
 def shoot(page, origin, screens, prefix, theme):
     folder = OUT / theme
     folder.mkdir(parents=True, exist_ok=True)
@@ -70,6 +80,8 @@ def pc():
             b = browser(p)
             page = b.new_page(viewport={"width": 1440, "height": 900}, reduced_motion=None if "--motion" in ARGS else "reduce")
             page.goto("http://127.0.0.1:8768/")
+            if "--ar" in ARGS:
+                arabic(page, "http://127.0.0.1:8768")
             for theme in THEMES:
                 shoot(page, "http://127.0.0.1:8768", PC, "pc", theme)
             b.close()
@@ -108,6 +120,8 @@ def phone():
                 page.goto(host.origin + "/")
                 page.evaluate("""async () => { const t = document.querySelector('meta[name=lightning-session]').content;
                     await fetch('/demo', {method: 'POST', body: new URLSearchParams({__session: t})}); }""")
+                if "--ar" in ARGS:
+                    arabic(page, host.origin)
                 for theme in THEMES:
                     shoot(page, host.origin, PHONE, "phone", theme)
                 b.close()
