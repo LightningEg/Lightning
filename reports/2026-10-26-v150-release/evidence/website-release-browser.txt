@@ -1,0 +1,88 @@
+[
+  {
+    "page": "current-status.html",
+    "width": 390,
+    "no_overflow": true
+  },
+  {
+    "page": "ar/current-status.html",
+    "width": 390,
+    "no_overflow": true
+  },
+  {
+    "page": "release-log.html",
+    "width": 390,
+    "no_overflow": true
+  },
+  {
+    "page": "ar/release-log.html",
+    "width": 390,
+    "no_overflow": true
+  },
+  {
+    "page": "versions.html",
+    "width": 390,
+    "no_overflow": true
+  },
+  {
+    "page": "marketplace.html",
+    "width": 390,
+    "no_overflow": true,
+    "catalogue_price_coins": 1000,
+    "egp": 200,
+    "guide_focus": true,
+    "catalogue_mocked": true
+  },
+  {
+    "page": "forgeeks-market.html",
+    "width": 390,
+    "no_overflow": true,
+    "catalogue_price_coins": 1000,
+    "egp": 200,
+    "guide_focus": true,
+    "catalogue_mocked": true
+  },
+  {
+    "page": "current-status.html",
+    "width": 1280,
+    "no_overflow": true
+  },
+  {
+    "page": "ar/current-status.html",
+    "width": 1280,
+    "no_overflow": true
+  },
+  {
+    "page": "release-log.html",
+    "width": 1280,
+    "no_overflow": true
+  },
+  {
+    "page": "ar/release-log.html",
+    "width": 1280,
+    "no_overflow": true
+  },
+  {
+    "page": "versions.html",
+    "width": 1280,
+    "no_overflow": true
+  },
+  {
+    "page": "marketplace.html",
+    "width": 1280,
+    "no_overflow": true,
+    "catalogue_price_coins": 1000,
+    "egp": 200,
+    "guide_focus": true,
+    "catalogue_mocked": true
+  },
+  {
+    "page": "forgeeks-market.html",
+    "width": 1280,
+    "no_overflow": true,
+    "catalogue_price_coins": 1000,
+    "egp": 200,
+    "guide_focus": true,
+    "catalogue_mocked": true
+  }
+]

@@ -1,0 +1,56 @@
+{
+  "commit": "c73db53e4125001d52a968436869727adc1c5306",
+  "run": "40372502669",
+  "attempt": "1",
+  "built": "2026-10-26T18:06:01Z",
+  "windows": {
+    "file": "Lightning-v1.5.0-Windows-x64.zip",
+    "size": 30368727,
+    "sha256": "f5a11ad881cae62c89acbdd721d2cb189673e1ef2428d5db8073b1a48e9c4985",
+    "build_info": {
+      "Build": "release v1.5.0",
+      "Price files": "fx of 2026-10-11",
+      "Commit": "c73db53e4125001d52a968436869727adc1c5306",
+      "Run": "workflow run 600, attempt 1",
+      "Built": "2026-10-26T18:04:52Z",
+      "Python": "3.13.16 (Windows AMD64)"
+    },
+    "built_by_run": "40372502669"
+  },
+  "android": {
+    "file": "Lightning-Test-1.5.0-879-c73db53e.apk",
+    "size": 35819091,
+    "sha256": "52fd36339255cae6d9f6fc4f0d9dc5fc637031a167e08b6632a85a5030f5e7d3",
+    "application_id": "org.lightning.app.test",
+    "version_code": 879,
+    "version_name": "1.5.0-test.879+c73db53e",
+    "debuggable": true,
+    "abi": "arm64-v8a",
+    "certificate_sha256": "373d6ae1ccf484f2b3400ada865c54037f2b79059445abd4d9cd9d424636c6fb",
+    "android_wheels": "android-wheels-r37449625570",
+    "python_packages": {
+      "annotated-doc": "0.0.5",
+      "annotated-types": "0.8.0",
+      "anyio": "4.15.1",
+      "cffi": "2.0.0",
+      "click": "8.5.0",
+      "cryptography": "50.0.2",
+      "fastapi": "0.141.1",
+      "h11": "0.16.0",
+      "idna": "3.20",
+      "jinja2": "3.1.6",
+      "markupsafe": "3.0.4",
+      "pycparser": "3.0",
+      "pydantic": "2.13.5",
+      "pydantic-core": "2.46.5",
+      "python-multipart": "0.0.32",
+      "sqlcipher3": "0.6.2",
+      "starlette": "1.7.0",
+      "typing-extensions": "4.16.0",
+      "typing-inspection": "0.4.4",
+      "tzdata": "2026.2",
+      "uvicorn": "0.54.0"
+    },
+    "commit": "c73db53e4125001d52a968436869727adc1c5306"
+  }
+}

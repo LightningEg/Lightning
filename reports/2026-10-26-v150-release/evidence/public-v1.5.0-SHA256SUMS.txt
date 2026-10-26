@@ -1,0 +1,2 @@
+f5a11ad881cae62c89acbdd721d2cb189673e1ef2428d5db8073b1a48e9c4985  Lightning-v1.5.0-Windows-x64.zip
+52fd36339255cae6d9f6fc4f0d9dc5fc637031a167e08b6632a85a5030f5e7d3  Lightning-Test-1.5.0-879-c73db53e.apk
