@@ -15,8 +15,6 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from lightning.security.cosmetic_license import InvalidCosmeticLicense, verify_license
-
 STORE = Path(__file__).resolve().parents[1] / "security" / "store_keys.json"
 REGISTRY = Path(__file__).parent / "static" / "themes.generated.json"
 
@@ -45,12 +43,32 @@ def store_themes() -> list[dict]:
             for t in json.loads(REGISTRY.read_text()) if t.get("paid")]
 
 
+_FOLDER: Path | None = None
+
+
+def use_folder(folder: Path) -> None:
+    """The runtime names the folder beside the profiles (Documents/Lightning/cosmetics) when it opens the root."""
+    global _FOLDER
+    _FOLDER = Path(folder)
+
+
 def licence_file() -> Path:
     folder = os.environ.get("LIGHTNING_LICENSE_DIR")
     if folder:
         return Path(folder) / "licenses.json"
-    from lightning.runtime.paths import choose_data_root
-    return choose_data_root() / "cosmetics" / "licenses.json"
+    if _FOLDER is not None:
+        return _FOLDER / "licenses.json"
+    from lightning.bootstrap import DEFAULT_DATA_DIR  # the single-database and sample modes
+    return DEFAULT_DATA_DIR / "cosmetics" / "licenses.json"
+
+
+def _verifier():
+    """The licence check needs cryptography, which a plain install may lack: then nothing paid unlocks."""
+    try:
+        from lightning.security.cosmetic_license import InvalidCosmeticLicense, verify_license
+    except ImportError:
+        return None
+    return InvalidCosmeticLicense, verify_license
 
 
 def _envelopes() -> list[dict]:
@@ -63,7 +81,10 @@ def _envelopes() -> list[dict]:
 
 def owned() -> frozenset[str]:
     """Paid theme ids with a valid licence here. An invalid or unsupported licence unlocks nothing and harms nothing."""
-    keys, supported, ids = store()["keys"], paid_themes(), set()
+    keys, supported, ids, check = store()["keys"], paid_themes(), set(), _verifier()
+    if check is None:
+        return frozenset()
+    InvalidCosmeticLicense, verify_license = check
     for envelope in _envelopes():
         try:
             ids.update(name for name, _ in verify_license(envelope, keys, supported).items)
@@ -96,7 +117,10 @@ def _save(envelope: dict) -> None:
 
 def redeem(code: str, theme: str, *, opener=None) -> str:
     """Exchange a one-time website code for a signed licence, verify it, keep it. Returns the theme unlocked."""
-    supported, conf = paid_themes(), store()
+    supported, conf, check = paid_themes(), store(), _verifier()
+    if check is None:
+        raise UnlockError("Unlocking opens with the next Lightning update.")
+    InvalidCosmeticLicense, verify_license = check
     if theme not in supported:
         raise UnlockError("Choose the theme you bought.")
     code = "".join(code.split()).upper()
