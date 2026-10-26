@@ -885,6 +885,7 @@ class TransactionService:
             self._refuse_cash_below_zero(t.lines, t.date, t)
             self.repo.set_status(t.id, TxnStatus.POSTED)
             self._check_holdings(t.lines)
+            self.check_reserve_links([t.id])
             self.audit.record("transaction", t.id, "restore", f"Restored {t.ref}")
             if t.type == DocType.CNV:
                 conversion.refresh_trade_rates(self, [t])
@@ -1220,6 +1221,19 @@ class TransactionService:
             raise ValidationError(f"{t.type_label} transactions cannot be edited here.")
         return t
 
+    def check_reserve_links(self, txn_ids) -> None:
+        """A reserve never pays out more than was assigned to it, also after a restore or an undo brings back an
+        expense that was linked to it while another one took its place (audit 2026-10-26)."""
+        marks = ",".join("?" * len(txn_ids))
+        over = self.db.one(
+            f"SELECT r.name FROM cash_reserves r WHERE r.id IN (SELECT reserve_id FROM reserve_transaction_links "
+            f"WHERE transaction_id IN ({marks})) AND r.allocated_e6 < (SELECT COALESCE(SUM(l.amount_e6),0) "
+            f"FROM reserve_transaction_links l JOIN transactions t ON t.id=l.transaction_id "
+            f"WHERE l.reserve_id=r.id AND t.status='POSTED') LIMIT 1", tuple(txn_ids)) if txn_ids else None
+        if over is not None:
+            raise ValidationError(f"This would spend more from the reserve {over['name']} than is assigned to it. "
+                                  "Assign more cash to it, or unlink a payment, first.")
+
     def _check_line_identity(self, lines) -> None:
         """Every writer, built-in or not, must agree with master data (2I): a line is cash exactly when its asset
         is, cash sits only in an account of its own currency, and profile-currency cash moves at a rate of 1."""
@@ -1250,6 +1264,25 @@ class TransactionService:
                 raise ValidationError(
                     f"{account.label} would hold less than zero {asset.name} on {on}. "
                     "Check the quantities and dates of buys and sells.", "quantity")
+        self._check_circles({ln.account_id for ln in lines})
+
+    def _check_circles(self, account_ids) -> None:
+        """A gam'eya takes at most one instalment per member and pays you once, however the transfer was entered
+        or brought back (restore, undo, the register; audit 2026-10-26). Counted as the circle's own screen counts."""
+        for account_id in account_ids:
+            terms = self.db.one("SELECT members FROM gameya_terms WHERE account_id=?", (account_id,))
+            if terms is None:
+                continue
+            counts = self.db.one(
+                "SELECT COALESCE(SUM(le.quantity_e6>0),0) AS paid, COALESCE(SUM(le.quantity_e6<0),0) AS payouts "
+                "FROM ledger_entries le JOIN transactions t ON t.id=le.transaction_id AND t.status='POSTED' "
+                "AND t.type='TRF' JOIN financial_assets fa ON fa.id=le.asset_id AND fa.is_cash=1 "
+                "WHERE le.account_id=? AND le.owner_id IS NULL AND le.effect='INTERNAL'", (account_id,))
+            label = self.accounts.get(account_id).label
+            if counts["paid"] > terms["members"]:
+                raise ValidationError(f"{label} has {terms['members']} members: all its instalments are recorded.")
+            if counts["payouts"] > 1:
+                raise ValidationError(f"{label} has already paid you its pot.")
 
     def _check_date(self, date: str):
         day = parse_date(date)

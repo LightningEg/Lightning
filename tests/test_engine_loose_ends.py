@@ -189,3 +189,109 @@ def test_a_form_without_a_token_keeps_the_old_contract(c, setup):
         for _ in range(2):
             assert client.post(f'/accounts/{bank.id}/register', data=values, follow_redirects=False).status_code == 303
     assert entries(c, bank.id) == 2
+
+
+# -- write paths around the ledger (audit 2026-10-26, B1-B6) --------------------------------------------------
+
+from lightning.core.errors import ConflictError  # noqa: E402
+
+
+@pytest.fixture
+def cd(c):
+    bank = c.account_flows.open_account('Bank', 'BANK', '2026-01-01', '100000', institution='CIB')
+    payout = c.account_flows.open_account('Payout', 'BANK', '2026-01-01', '0', institution='CIB')
+    portfolio = c.account_flows.open_account('CIB CDs', 'DEPOSIT', '2026-01-01', '0', institution='CIB')
+    cert, _ = c.deposits.purchase(portfolio.id, 'CD1', '2026-02-01', '2026-03-01', '2027-02-01', '50000', '20',
+                                  'SIMPLE', 'MONTHLY', 'MONTHLY', payout.id, bank.id)
+    return bank, payout, cert.terms.id
+
+
+def test_a_voided_redemption_lets_the_certificate_be_redeemed_again(c, cd):
+    bank, _, cid = cd
+    first = c.deposits.redeem(cid, '2026-04-01', '51000', bank.id)
+    c.transactions.void(first.id)
+    c.deposits.redeem(cid, '2026-05-01', '52000', bank.id)
+    assert c.deposits.certificate(cid).redeemed
+    with pytest.raises(ValidationError, match='less than zero'):
+        c.transactions.restore(first.id)
+    assert c.reporting.account_balance(bank.id) == D('102000')
+
+
+def test_an_account_a_live_certificate_pays_into_stays_active(c, cd):
+    _, payout, cid = cd
+    with pytest.raises(ConflictError, match='the certificate CD1'):
+        c.account_flows.deactivate(payout.id)
+    assert c.accounts.get(payout.id).active
+
+
+def test_restoring_an_expense_cannot_overspend_its_reserve(c):
+    bank = c.account_flows.open_account('Bank', 'BANK', '2026-09-01', '1000')
+    food = c.categories.get_by_code('EXP.PERSONAL.FOOD').id
+    reserve = c.reserves.create('Trip', '500', due_date='2026-12-30')
+    c.reserves.allocate(reserve['id'], '300')
+    first = c.transactions.record_outflow('2026-09-02', bank.id, '200', food)
+    c.reserves.set_expense_link(reserve['id'], first.id, '200')
+    c.transactions.void(first.id)
+    second = c.transactions.record_outflow('2026-09-03', bank.id, '300', food)
+    c.reserves.set_expense_link(reserve['id'], second.id, '300')
+    with pytest.raises(ValidationError, match='more from the reserve Trip'):
+        c.transactions.restore(first.id)
+    assert c.reserves.get(reserve['id'])['spent'] == 300
+
+
+@pytest.mark.parametrize('user', ['plan', 'reserve'])
+def test_a_category_a_plan_or_reserve_uses_is_archived_not_a_crash(c, user):
+    bank = c.account_flows.open_account('Bank', 'BANK', '2026-01-01', '1000')
+    food = c.categories.get_by_code('EXP.PERSONAL.FOOD')
+    created = c.categories.create(food.id, 'Gym')
+    category = getattr(created, 'id', created)
+    if user == 'plan':
+        c.planning.create(kind='BILL', name='Gym fee', amount='300', frequency='MONTHLY', start_date='2027-01-05',
+                          category_id=category, account_id=bank.id)
+    else:
+        c.reserves.create('Gym fund', '100', category_id=category)
+    assert c.categories.delete_or_archive(category) is True
+    assert not c.categories.get(category).active
+
+
+def test_a_claim_payer_is_archived_not_silently_removed(c):
+    bank = c.account_flows.open_account('Bank', 'BANK', '2026-01-01', '1000')
+    food = c.categories.get_by_code('EXP.PERSONAL.FOOD').id
+    boss = c.counterparties.create('Boss')
+    claim = c.reimbursements.create_claim(c.transactions.record_outflow('2026-09-02', bank.id, '200', food).id,
+                                          '200', payer_id=boss)
+    assert c.counterparties.delete_or_archive(boss) is True
+    assert c.db.scalar('SELECT payer_id FROM reimbursement_claims WHERE id=?', (claim['id'],)) == boss
+
+
+def test_a_circle_pays_out_once_and_takes_one_instalment_per_member(c):
+    bank = c.account_flows.open_account('Bank', 'BANK', '2026-01-01', '100000')
+    circle = c.account_flows.open_account('Circle', 'GAMEYA', '2026-01-01', '0')
+    c.gameya.save_terms(circle.id, organiser='Aunt', members=3, installment='1000', first_date='2026-02-01',
+                        my_turn=1, funding_account_id=bank.id, payout_account_id=bank.id)
+    first = c.gameya.record_payout(circle.id, '2026-02-01')
+    c.transactions.void(first.id)
+    c.gameya.record_payout(circle.id, '2026-02-02')
+    with pytest.raises(ValidationError, match='already paid you its pot'):
+        c.transactions.restore(first.id)
+    for month in range(3):
+        c.gameya.record_instalment(circle.id, f'2026-0{2 + month}-01')
+    with pytest.raises(ValidationError, match='all its instalments are recorded'):
+        c.transactions.record_transfer('2026-06-01', bank.id, circle.id, '1000')
+    progress = c.gameya.progress(circle.id)
+    assert (progress.paid, progress.payouts) == (3, 1)
+
+
+@pytest.mark.parametrize('field', ['expected', 'receipt'])
+def test_reimbursement_amounts_use_whole_cents(c, field):
+    bank = c.account_flows.open_account('Bank', 'BANK', '2026-01-01', '1000')
+    food = c.categories.get_by_code('EXP.PERSONAL.FOOD').id
+    expense = c.transactions.record_outflow('2026-09-02', bank.id, '200', food)
+    with pytest.raises(ValidationError, match='decimal places'):
+        if field == 'expected':
+            c.reimbursements.create_claim(expense.id, '10.0001')
+        else:
+            claim = c.reimbursements.create_claim(expense.id, '200')
+            receipt = c.transactions.record_inflow('2026-09-05', bank.id, '200',
+                                                   c.categories.get_by_code('EXP.WORK.SALARY').id)
+            c.reimbursements.link_receipt(claim['id'], receipt.id, '200.005')
