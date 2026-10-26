@@ -193,6 +193,7 @@ Every look climbs the same three steps, and each step keeps everything below it.
 - Motions that answer the user (a card's hover light or lift, a button's sheen, a dialog rising in) and one equip moment when the theme is put on may join it. None loops.
 - Never on a number, and never anything that blinks.
 - Under reduced motion every motion stops and shows one still frame.
+- On For Geeks a theme also brings its own field scene (Part D, D08), in its `--particle` and `--glow`, with one event every 6–12 seconds: ink contours (Paper, Cotton), a river at night (Nile, Papyrus), embers (Garnet), snow and an aurora (Frost), a star ceiling (Dendera), grass and fireflies (Meadow). A theme without one keeps Mono's terrain and lightning.
 
 **Prices:**
 - Prices live in the catalogue (`catalog_items.price`, `tier`). The market shows coins and the EGP they cost (`coin_rate()`).
