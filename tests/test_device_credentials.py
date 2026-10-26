@@ -166,7 +166,9 @@ def test_protected_identity_backup_is_portable_only_inside_encrypted_database(de
     from lightning.database.connection import Database
     from test_journal_backups import backup
     device = devices[1]
-    device.identity = replace(device.identity, _protector=TestProtector())
+    # Native fixtures are already DPAPI-wrapped; preserve their original OS
+    # provider. Development fixtures are raw PEM and use an injected protector.
+    device.identity = replace(device.identity, _protector=device.identity._protector or TestProtector())
     device.identity.protect_at_rest()
     source = tmp_path / "encrypted-credential-backup.db"
     backup(device, source)
