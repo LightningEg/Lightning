@@ -140,6 +140,23 @@ class ThemeBuildTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     self.validate()
 
+    def test_each_paid_theme_fills_exactly_its_tier(self):
+        """themes.md section 7: recolour, then texture, then animation; the store's tier for each id (8L migration)."""
+        contract = json.loads((builder.SOURCE / 'slots.json').read_text())
+        neutral = {'none', 'flat', 'hairline', 'bar', 'dim', 'subtle'}
+        for theme, tier in {'nile': 'palette', 'cotton': 'texture', 'papyrus': 'motion'}.items():
+            parts = json.loads((builder.SOURCE / f'{theme}.json').read_text())['parts']
+            material = {f'{s}.{k}': parts[s][k] for s, spec in contract['slots'].items() if s != 'brand'
+                        for k in spec.get('material', {}) if parts[s][k] not in neutral}
+            running = [n for n in contract['limits']['continuous'] if parts[n.split('.')[0]][n.split('.')[1]] != 'none']
+            with self.subTest(theme=theme):
+                if tier == 'palette':
+                    self.assertEqual(material, {}, 'a palette is colour only')
+                    self.assertTrue(all(v == 'none' for s, spec in contract['slots'].items() for k in spec.get('motion', {}) for v in [parts[s][k]]))
+                else:
+                    self.assertTrue(material, 'a textured or animated theme has a material')
+                self.assertEqual(len(running), 1 if tier == 'motion' else 0, 'only the animated tier runs a motion')
+
     def test_money_is_not_recoloured(self):
         self.manifest['parts']['cards']['border'] = 'accent'
         manifest, parts = self.validate()

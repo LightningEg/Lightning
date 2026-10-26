@@ -16,6 +16,20 @@ For an AI creator, copy [AI-PROMPT.md](AI-PROMPT.md), complete its fields, and p
 
 Confirm the requested mode before choosing colours; do not infer it from a theme name or reference image. Each app manifest contains one palette. For **Both**, deliver two complete manifests with distinct IDs such as `your-theme-dark` and `your-theme-light`, and validate/capture each independently. Users select each variant explicitly; the current runtime does not automatically switch between them. Mode belongs in this brief, not an invented JSON field.
 
+## Tiers: what you build and what it sells for
+
+Every look climbs three steps, and the highest tier has all three: **recolour**, **texture** and **animation**. Decide the tier in the brief; it sets which layers you fill. Prices are in coins (5 coins = 1 EGP), one price per theme tier, set by the owner in the console. Full tables, with what each tier changes: `guideline/themes.md` section 7.
+
+| Kind | Recolour | + Texture | + Animation (highest) |
+|---|---|---|---|
+| **Theme** (both sites, PC, phone) | Palette: every colour on every screen · 300 coins, 60 EGP | Textured: plus the material (ground texture, card grain, edge light, depth, watermark, finishes) · 600 coins, 120 EGP | Animated: plus one slow signature motion and motions that answer you · 1,000 coins, 200 EGP |
+| **Banner** | One colour field · 100 coins, 20 EGP | A drawn scene or pattern · 120–200 coins, 24–40 EGP | The scene with one slow motion · 300–350 coins, 60–70 EGP |
+| **Frame** | A ring in one colour · 80 coins, 16 EGP | A metal or double ring · 100 coins, 20 EGP | One slow glint · 200 coins, 40 EGP |
+| **Badge** | A simple mark · 60 coins, 12 EGP | A drawn, detailed mark · 80–120 coins, 16–24 EGP | One slow motion · 200 coins, 40 EGP |
+| **Name** | One colour · 150 coins, 30 EGP | A gradient · 300 coins, 60 EGP | One slow shimmer · 500 coins, 100 EGP |
+
+For a theme, the tier maps to the layers below: a **Palette** theme fills paint only and leaves every material `flat`/`none` and every motion `none`; a **Textured** theme adds material (ground texture, grain, edge light, depth, finishes, artwork) with no continuous motion; an **Animated** theme adds exactly one continuous motion (`ground.ambient`, `header.thread` or `hero.sheen`) and may add the motions that answer the user (hover, press, enter, equip). Cotton is the Textured reference and Papyrus the Animated one.
+
 ## How a theme is built: elements × layers
 
 A Lightning theme is not a palette swap. It is a **complete specification**: every element in the inventory below states three layers, and nothing is left to the default by chance (the validator refuses a manifest with a missing layer).

@@ -115,13 +115,53 @@ A theme with any of these is not done:
 
 ## 7. Tiers and prices
 
-A theme's tier says which parts it fills. Each tier fills every part of the one below it.
+Every look climbs the same three steps, and each step keeps everything below it. The highest tier of anything has all three: recolour, texture and animation. Prices are in coins (5 coins = 1 EGP); the console sets them (Catalogue), and a theme tier keeps one price.
 
-| Tier | Fills | Coins | EGP | On sale |
+1. **Recolour**: new colours only.
+2. **Texture**: the colours plus a material: a woven ground, grain, edge light, depth, a pattern or a drawn scene.
+3. **Animation**: the texture plus one slow signature motion (8 seconds or more, still under reduced motion).
+
+**Themes**: one purchase dresses both sites, the PC and the phone.
+
+| Tier | What changes | Coins | EGP | On sale |
 |---|---|---|---|---|
-| **Palette** | Parts 1 to 9: colours on both sites, with a light and a dark side on the main site | 300 | 60 | Paper, Frost, Meadow, Nile, Garnet |
-| **Textured** | The palette, plus part 10's pattern behind every page | 600 | 120 | Cotton |
-| **Animated** | The texture, plus one signature motion in part 10 | 1,000 | 200 | Papyrus |
+| **Palette** (recolour) | Every colour on every screen: page, header, menu, cards, buttons, tabs, fields, charts, dialogs; a light and a dark side on the main site | 300 | 60 | Paper, Frost, Meadow, Nile, Garnet |
+| **Textured** (recolour + texture) | Plus the material: a texture behind every page, grain and a lit edge on cards, depth, a watermark, finishes on buttons, tabs and fields | 600 | 120 | Cotton |
+| **Animated** (all three) | Plus one slow signature motion (Papyrus: gold-foil light travelling the lead card's edge in the app, a gold thread along the site's header) and motions that answer you: a light following the pointer on cards, a sheen on buttons, dialogs rising in, one light sweep when you put it on | 1,000 | 200 | Papyrus |
+
+**Banners**: the strip on your profile, leaderboard row and account.
+
+| Tier | What changes | Coins | EGP | On sale |
+|---|---|---|---|---|
+| Recolour | One colour field or glow | 100 | 20 | Halo |
+| Texture | A drawn scene or pattern | 120–200 | 24–40 | Blueprint, Dusk, Circuit, Dunes, Borealis; seasonal 200–250 |
+| Animation | The scene with one slow motion | 300–350 | 60–70 | Drifting stars, Nile at night |
+
+**Frames**: the ring round your picture.
+
+| Tier | What changes | Coins | EGP | On sale |
+|---|---|---|---|---|
+| Recolour | A ring in one colour | 80 | 16 | Halo, Nile |
+| Texture | A metal or double ring | 100 | 20 | Gold, Double |
+| Animation | The ring with one slow glint | 200 | 40 | none yet |
+
+**Badges**: the mark beside your name. Earned badges (supporter, Founding, contribution) are never sold.
+
+| Tier | What changes | Coins | EGP | On sale |
+|---|---|---|---|---|
+| Recolour | A simple mark in one colour | 60 | 12 | Bolt, Coin |
+| Texture | A drawn, detailed mark | 80–120 | 16–24 | Pen, Star; seasonal Cotton boll, Fanous |
+| Animation | The mark with one slow motion | 200 | 40 | none yet |
+
+**Names**: your display name wherever it shows.
+
+| Tier | What changes | Coins | EGP | On sale |
+|---|---|---|---|---|
+| Recolour | One colour | 150 | 30 | Gold, Nile |
+| Texture | A gradient | 300 | 60 | Sunset |
+| Animation | One slow shimmer | 500 | 100 | Shimmer |
+
+**Sets** cost 80% of the parts you do not own yet (a theme, a banner, a frame and a fourth piece: 680 to 890 coins new). **Seasonal** items keep their tier's price and are sold only inside their window; owners keep them after.
 
 **Texture rules:**
 - Drawn by code: gradients, or inline SVG generated from the theme's own colours. No image files, requests or scripts.
@@ -142,8 +182,8 @@ A theme's tier says which parts it fills. Each tier fills every part of the one 
 - Why these prices: buyers pay once, not monthly. The arithmetic against fixed costs is in the website repository's `docs/payment-operations.md` › Pricing and operational economics.
 
 **Beyond themes (the supporter release, website, 2026-10-25).** The same rules hold for every look sold beside themes:
-- **Names** (type and slot `name`): a colour 150, a gradient 300, one slow shimmer 500 (tier `motion`). Each hue is mixed 60% with the page's text colour, so a styled name keeps 4.5:1 on every theme, light and dark.
-- **Animated banners** (tier `motion`): one slow motion each, behind content, still under reduced motion. 300 to 350.
+- **Names** (type and slot `name`, tiers above): each hue is mixed 60% with the page's text colour, so a styled name keeps 4.5:1 on every theme, light and dark.
+- **Animated banners** (tier `motion`): one slow motion each, behind content, still under reduced motion.
 - **Seasonal items** carry a window (`available_from`, `available_until`): sold and shown only inside it; owners keep them after.
 - **Sets** cost 80% of the parts not owned yet. A set is never a fifth slot: buying it delivers its parts.
 - **Earned badges** (supporter, founding) are never sold, and contribution badges stay earned by work.
