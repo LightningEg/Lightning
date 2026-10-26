@@ -15,13 +15,15 @@
           <p>{{ pairing.request_name }} wants to connect. Check that both screens show:</p>
           <p class="stat-value" dir="ltr">{{ pairing.digits }}</p>
           {% if pairing.confirmed %}<p class="muted">Waiting for {{ pairing.request_name }} to confirm and enter its profile password.</p>
-          {% else %}<form method="post" action="/devices/confirm"><input type="hidden" name="__session" value="{{ session }}"><input type="hidden" name="digits" value="{{ pairing.digits }}"><button class="btn primary">The numbers match</button></form>{% endif %}
+          {% else %}<form method="post" action="/devices/confirm"><input type="hidden" name="__session" value="{{ session }}"><input type="hidden" name="digits" value="{{ pairing.digits }}"><input type="hidden" name="request" value="{{ pairing.request_id }}"><button class="btn primary">The numbers match</button></form>{% endif %}
         {% else %}<p class="muted">Waiting for your other device.</p>{% endif %}
         <form method="post" action="/devices/stop"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Stop pairing</button></form>
       {% else %}
         <form method="post" action="/devices/open"><input type="hidden" name="__session" value="{{ session }}"><div class="field"><label for="pair-password">Profile password</label><input id="pair-password" name="password" type="password" autocomplete="current-password" required></div><button class="btn primary">Pair a device</button></form>
       {% endif %}
-    {% elif pairing.pending and pairing.stage == 'compare' %}
+    {% elif pairing.pending and pairing.stage in ['handshake','proving','cancelling'] %}<p>Pairing was interrupted. Resume to check its saved state.</p><form method="post" action="/devices/resume"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Resume pairing</button></form>
+<form method="post" action="/devices/cancel"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Cancel this pairing</button></form>
+{% elif pairing.pending and pairing.stage == 'compare' %}
       {% if pairing.failed %}<p role="alert">The number did not match. Stop pairing on the home, then cancel here and start again.</p>{% else %}<p>Select the number shown on the other device.</p>
       <form method="post" action="/devices/compare"><input type="hidden" name="__session" value="{{ session }}">{% for choice in pairing.choices %}<button class="btn" name="digits" value="{{ choice }}" dir="ltr">{{ choice }}</button>{% endfor %}</form>{% endif %}
       <form method="post" action="/devices/cancel"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">No, start over</button></form>

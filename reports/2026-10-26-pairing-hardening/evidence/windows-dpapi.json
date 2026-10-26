@@ -1,0 +1,21 @@
+{
+  "checks": {
+    "certificate_and_public_key_preserved": true,
+    "encrypted_tls_temporary_file": true,
+    "identity_survives_reload": true,
+    "native_round_trip": true,
+    "native_tamper_rejected": true,
+    "native_wrong_binding_rejected": true,
+    "os_protected_storage": true,
+    "tls_13_minimum": true,
+    "tls_temporary_file_removed": true
+  },
+  "dummy_only": true,
+  "format": 1,
+  "native_provider": true,
+  "passed": true,
+  "physical_wifi": "not_run",
+  "provider": "windows-dpapi-v1",
+  "evidence": "native-windows-runner",
+  "job_url": "https://github.com/LightningEg/Lightning/actions/runs/40336791932/job/121620412297"
+}

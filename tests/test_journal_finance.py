@@ -375,8 +375,8 @@ def test_real_pinned_tls_local_exchange(devices):
     listener.bind(("127.0.0.1", 0))
     port = listener.getsockname()[1]
     listener.close()
-    server = LabServer(uvicorn.Config(app, host="127.0.0.1", port=port, access_log=False, log_level="error",
-        ssl_keyfile=str(hd.identity.key_path), ssl_certfile=str(hd.identity.cert_path)))
+    server = LabServer(hd.identity.configure_uvicorn_tls(uvicorn.Config(
+        app, host="127.0.0.1", port=port, access_log=False, log_level="error")))
     pc.save(groups(pc))
     async def run():
         task = asyncio.create_task(server.serve())

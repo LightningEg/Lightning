@@ -354,13 +354,18 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
             raise JournalError("Nearby pairing is unavailable in this preview")
         if action == "poll":
             screen = pairing.screen()
-            if device.home is None and not screen["pending"] and not screen["paired"]:
-                await pairing.find()
+            if screen.get("stage") in ("handshake","proving","cancelling"):
+                try:
+                    await pairing.resume()
+                except (JournalError, OSError, TimeoutError):
+                    pass
             elif screen.get("stage") == "waiting":
                 try:
                     await pairing.finish()
                 except (JournalError, OSError, TimeoutError):
                     pass
+            elif device.home is None and not screen["pending"] and not screen["paired"]:
+                await pairing.find()
             return JSONResponse(dict(version=digest(pairing.screen())))
         if action == "open":
             pairing.begin(str(data.get("password","")))
@@ -370,14 +375,16 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
             await pairing.find()
         elif action == "join":
             await pairing.join(str(data.get("candidate","")),str(data.get("code","")))
+        elif action == "resume":
+            await pairing.resume()
         elif action == "compare":
             pairing.compare(str(data.get("digits","")))
         elif action == "prove":
             await pairing.prove(str(data.get("password","")))
         elif action == "cancel":
-            pairing.cancel()
+            await pairing.cancel()
         elif action == "confirm":
-            pairing.confirm(str(data.get("digits","")))
+            pairing.confirm(str(data.get("digits","")), request_id=str(data.get("request","")))
         elif action == "check":
             if data.get("automatic") == "1":
                 try:

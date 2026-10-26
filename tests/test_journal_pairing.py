@@ -96,8 +96,9 @@ def test_fake_home_receives_nothing_derived_from_the_password_when_the_user_stop
         with pytest.raises(JournalError):
             await replica.finish(PASSWORD)
         assert len(seen) == 1
-        replica.cancel()
-        assert replica.state() is None
+        with pytest.raises(JournalError):
+            await replica.cancel()
+        assert replica.state()["stage"] == "cancelling"
     asyncio.run(run())
 
 
@@ -111,7 +112,7 @@ def test_mismatched_digits_never_send_the_password_proof_on_a_compatible_replica
         with pytest.raises(JournalError, match="Compare"):
             await ps.prove(PASSWORD)
         assert len(wires) == 2 and ps.screen()["stage"] == "compare"
-        ps.cancel()
+        await ps.cancel()
         assert ps.screen()["pending"] is None
     asyncio.run(run())
 
@@ -121,6 +122,7 @@ def test_wrong_password_is_refused_and_counts_toward_the_three_attempts(devices)
     async def run():
         hs, make, ps = await started(devices)
         ps.compare(ps.screen()["pending"])
+        hs.confirm(hs.screen()["digits"])
         hs.confirm(hs.screen()["digits"])
         for _ in range(2):
             with pytest.raises(JournalError, match="password"):
@@ -165,7 +167,7 @@ def test_second_request_is_refused_and_a_resent_first_request_is_idempotent(devi
     home, pc = devices
     async def run():
         hs, make, ps = await started(devices)
-        wire = ps._value("pairing_client")["request"].encode()
+        wire = ps._value("pairing_client")["wire"].encode()
         assert hs.desk.accept(wire) == ps.screen()["pending"]
         intruder, _ = request_pairing(hs._value("pairing")["offer"].encode(), hs.screen()["code"], load_or_create(tmp_path/"other", "Other phone"),
                                       str(uuid4()), home_key=home.identity.public_key, secret=b"x"*32)

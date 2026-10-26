@@ -65,6 +65,25 @@ public final class ProbeActivity extends Activity {
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
+        if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+                && getIntent().getBooleanExtra("pairing_probe", false)) {
+            result = new TextView(this);
+            result.setTextIsSelectable(true);
+            result.setText("Checking dummy device credential protection…");
+            setContentView(result);
+            new Thread(() -> {
+                String text;
+                try {
+                    text = probe().callAttr("pairing_credentials").toString();
+                } catch (Throwable failed) {
+                    text = "{\"passed\":false,\"error\":\"credential_probe_failed\"}";
+                }
+                final String shown = text;
+                Log.i("LightningPairingProbe", shown);
+                runOnUiThread(() -> result.setText(shown));
+            }, "pairing-credential-probe").start();
+            return;
+        }
         WebView.setWebContentsDebuggingEnabled(false);  // no remote inspection of finance pages, even in this debug build
         result = new TextView(this);
         result.setPadding(32, 32, 32, 32);

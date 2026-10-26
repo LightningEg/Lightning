@@ -24,6 +24,8 @@ tasks live in the [app issue index](https://github.com/LightningEg/Lightning/blo
 
 ## Records
 
+- [Pairing backend hardening](2026-10-26-pairing-backend.md) · 2026-10-26
+
 No historical submissions have been imported into this structure. Earlier
 processed feedback survives in Git history, the changelog and regression tests;
 this catalogue does not imply that those observations were lost or re-reviewed.

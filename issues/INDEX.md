@@ -71,7 +71,7 @@ Edit on the phone or the PC; one home confirms every change and nothing is lost.
 | **4A** | [Edit journal: edit anywhere, one home confirms](4-edit-journal-and-devices/4A-edit-journal.md) | feature | devices | building |
 | **4B** | [Multiple devices: implementation plan](4-edit-journal-and-devices/4B-multiple-devices.md) | feature | devices | building |
 
-Done: 4C, 4D. Next free code: 4E.
+Done: 4C, 4D, 4E, 4F, 4G, 4H, 4I. Next free code: 4J.
 
 ## 5 Investments
 

@@ -29,6 +29,10 @@ jobs:
         run: |
           python -m pip install --require-hashes --only-binary=:all: -r requirements/build-tools.lock
           python -m pip install --require-hashes --only-binary=:all: --no-binary=proxy-tools --no-build-isolation -r requirements/desktop-probe-win.lock
+      - name: Verify native DPAPI identity protection and TLS loading
+        run: |
+          python -m lightning.runtime.pairing_probe --require-native
+          python -m pytest -q tests/test_device_credentials.py
       - run: python -m tools.market release
       - run: pyinstaller --clean --noconfirm packaging/desktop-app.spec
       - run: python packaging/package_app.py --strict
