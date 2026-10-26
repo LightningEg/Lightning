@@ -295,3 +295,118 @@ def test_reimbursement_amounts_use_whole_cents(c, field):
             receipt = c.transactions.record_inflow('2026-09-05', bank.id, '200',
                                                    c.categories.get_by_code('EXP.WORK.SALARY').id)
             c.reimbursements.link_receipt(claim['id'], receipt.id, '200.005')
+
+
+# -- loans, schedules, investment edits and onboarding (audit 2026-10-26, C1-C5) ------------------------------
+
+from datetime import date  # noqa: E402
+
+from lightning.planning.loan_actions import preview_early_payment, record_early_payment  # noqa: E402
+from lightning.planning.schedule import payment_dates  # noqa: E402
+
+
+@pytest.fixture
+def loan(c):
+    bank = c.account_flows.open_account('Bank', 'BANK', '2026-01-01', '50000')
+    food = c.categories.get_by_code('EXP.PERSONAL.FOOD')
+    item = c.planning.create(kind='LOAN', name='Car', amount='100', payment_count='3', principal='300',
+                             start_date='2026-09-02', account_id=bank.id, category_id=food.id)
+    return bank, item
+
+
+def test_a_backdated_early_payment_cannot_pay_a_settled_loan_twice(c, loan):
+    bank, item = loan
+    preview = preview_early_payment(c.planning, item, '300', '0', '2026-08-20')
+    record_early_payment(c.planning, item, '300', '0', '2026-08-20', bank.id, preview['remaining_before'])
+    with pytest.raises(ValidationError, match='no more than the remaining loan'):
+        preview_early_payment(c.planning, item, '300', '0', '2026-08-10')
+    assert c.reporting.account_balance(bank.id) == D('49700')
+
+
+def test_an_instalment_cannot_take_more_than_it_owes(c, loan):
+    bank, item = loan
+    with pytest.raises(ValidationError, match="remaining amount"):
+        c.planning.record_payment(item, '2026-09-02', '2026-09-02', '250', bank.id)
+    assert c.reporting.account_balance(bank.id) == D('50000')
+    c.planning.record_payment(item, '2026-09-02', '2026-09-02', '100', bank.id)
+    assert c.planning.loan_progress(c.planning.get(item))['still_to_pay'] == D('200')
+
+
+@pytest.mark.parametrize('start, weekend, as_of, expected', [
+    ('2026-07-31', 'none', date(2026, 8, 15), ['2026-08-31', '2026-09-30', '2026-10-31', '2026-11-30', '2026-12-31']),
+    ('2026-06-04', 'after', date(2026, 6, 20), ['2026-07-05', '2026-08-04', '2026-09-06', '2026-10-04', '2026-11-04']),
+])
+def test_already_paid_keeps_the_bills_day(c, start, weekend, as_of, expected):
+    bank = c.account_flows.open_account('Bank', 'BANK', '2026-01-01', '50000')
+    food = c.categories.get_by_code('EXP.PERSONAL.FOOD')
+    item = c.planning.create(kind='BILL', name='Rent', amount='100', frequency='MONTHLY', weekend_move=weekend,
+                             start_date=start, account_id=bank.id, category_id=food.id)
+    assert c.planning.start_after_paid(item, as_of) == expected[0]
+    assert [due for _, due in payment_dates(c.planning.get(item), '2026-11-30')] == [
+        due for due in expected if due <= '2026-11-30']
+
+
+def test_editing_a_brokerage_buy_cannot_pay_from_another_account(c):
+    bank = c.account_flows.open_account('Bank', 'BANK', '2026-01-01', '50000')
+    broker = c.account_flows.open_account('THNDR', 'BROKERAGE', '2026-01-01', '0')
+    stock = c.assets.create_investment('Commercial International Bank', 'STOCK', 'COMI')
+    c.transactions.record_transfer('2026-02-01', bank.id, broker.id, '10000')
+    buy = c.investments.buy('2026-02-02', broker.id, stock.id, '10', '100')
+    values = c.investments.values_of(buy.id)
+    values.pop('kind')
+    with pytest.raises(ValidationError, match='cash already in that brokerage'):
+        c.investments.update(buy.id, **(values | dict(cash_account_id=bank.id)))
+    assert c.reporting.account_balance(broker.id) == D('9000')
+
+
+def test_workbook_onboarding_refuses_a_future_transaction(c, tmp_path):
+    from lightning.reporting.xlsx import tabular_workbook_bytes
+    from lightning.workflows.data_export import _raw_tables
+    from lightning.workflows.workbook_import import confirm_import
+    from lightning.bootstrap import build
+
+    bank = c.account_flows.open_account('Example bank', 'BANK', '2026-01-01', '1000')
+    txn = c.transactions.record_outflow('2026-02-01', bank.id, '12.34', c.categories.get_by_code('EXP.PERSONAL.FOOD').id)
+    sheets = []
+    for name, headers, rows, widths in _raw_tables(c):
+        key = 'id' if name == 'transactions' else 'transaction_id' if name == 'ledger_entries' else None
+        if key:
+            rows = [tuple('2099-01-01' if column == 'date' and row[headers.index(key)] == txn.id else value
+                          for column, value in zip(headers, row)) for row in rows]
+        sheets.append((name[:31], headers, rows, widths))
+    target = build(tmp_path / 'new.db')
+    with pytest.raises(ValueError, match='dated in the future'):
+        confirm_import(target, tabular_workbook_bytes(sheets))
+    assert target.db.scalar('SELECT count(*) FROM transactions') == 0
+
+
+# -- integrity checks and valuation (audit 2026-10-26, A1-A3) -------------------------------------------------
+
+def checks_by_name(c, day):
+    return {check.name: check for check in c.integrity.checks(day)}
+
+
+def test_investment_fees_do_not_raise_a_budget_issue(c):
+    bank = c.account_flows.open_account('Bank', 'BANK', '2026-09-01', '1000')
+    c.transactions.record_outflow('2026-09-02', bank.id, '100', c.categories.get_by_code('EXP.PERSONAL.FOOD').id)
+    c.transactions.record_outflow('2026-09-03', bank.id, '40', c.categories.get_by_code('EXP.INVEST.FEES').id)
+    assert checks_by_name(c, '2026-09-30')['Budget actual equals categorized spending'].status == 'PASS'
+
+
+def test_profile_currency_cash_off_its_face_value_is_an_issue(c):
+    bank = c.account_flows.open_account('Bank', 'BANK', '2026-09-01', '1000')
+    expense = c.transactions.record_outflow('2026-09-02', bank.id, '100',
+                                            c.categories.get_by_code('EXP.PERSONAL.FOOD').id)
+    assert checks_by_name(c, '2026-09-30')['Profile-currency cash moves at face value'].status == 'PASS'
+    c.db.execute('UPDATE ledger_entries SET amount_base_e6=amount_base_e6*10 WHERE transaction_id=?', (expense.id,))
+    check = checks_by_name(c, '2026-09-30')['Profile-currency cash moves at face value']
+    assert check.status == 'ISSUE' and check.actual == D('900')
+
+
+def test_an_estimate_keeps_counting_money_moved_after_it(c):
+    c.account_flows.open_account('Bank', 'BANK', '2026-01-01', '500000')
+    flat = c.account_flows.open_account('Flat', 'OTHER_ASSET', '2026-01-01', '1000000')
+    c.reporting.other_asset_values.save(c.accounts.get(flat.id), '2026-02-01', '1200000')
+    assert c.reporting.net_worth('2026-02-28').total == D('1700000')
+    c.transactions.record_outflow('2026-03-05', flat.id, '100000', c.categories.get_by_code('EXP.PERSONAL.FOOD').id)
+    assert c.reporting.net_worth('2026-03-31').total == D('1600000')

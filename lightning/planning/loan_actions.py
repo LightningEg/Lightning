@@ -90,7 +90,10 @@ def preview_early_payment(planning, item_id, principal, fee="0", on=None):
     charge = check_places(to_decimal(fee or "0", "fee"), 2, "fee")
     payments = planning.payments(item, "2999-12-31", day)
     remaining = sum((p.still_owed for p in payments), ZERO)
-    if value <= ZERO or value > remaining or charge < ZERO:
+    # A backdated payment is capped by what is owed after every repayment already recorded, including ones
+    # dated after it (audit 2026-10-26: two payoffs of a 300 loan took 600).
+    owed_now = sum((p.still_owed for p in planning.payments(item, "2999-12-31", max(day, today()))), ZERO)
+    if value <= ZERO or value > min(remaining, owed_now) or charge < ZERO:
         raise ValidationError("Pay more than zero and no more than the remaining loan; a fee cannot be negative.")
     adjusted = adjusted_payments(payments, None, [{"due_date": None, "date": fmt_date(day), "principal_e6": int(value * 1_000_000)}])
     unpaid = [p for p in adjusted if p.still_owed > ZERO]
