@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-26 · Claude: website audit fixes: Net Worth hero and four Arabic heroes fit phones, Downloads builds as phone cards, invite waits for the cookie choice, Arabic runway/step digits, labels. Website PR `claude/site-audit-phone-and-arabic`.
 - 2026-10-26 · Claude: 8L guideline 3.35 (copy of the website's change): D08 and themes.md, each For Geeks theme draws its own scene instead of the lightning (ink, river, embers, snow, stars, meadow); Mono keeps the terrain. Website PR `claude/theme-weather`.
 - 2026-10-26 · Claude: 8J website Top-ups: oldest first, recorded journal money leads (no double record), amount starts at what is owed, search by email/sender/amount; community footers sit in the page column. Website PR `claude/topup-reconciliation`.
 - 2026-10-26 · Codex: 1I organize repository docs: dated report/evidence folders, durable sanitized feedback, guideline and template maps; repair links and enforce catalogues and complete guideline mirrors.
