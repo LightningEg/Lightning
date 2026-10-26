@@ -8,7 +8,7 @@ by: Claude
 ---
 
 ## Report
-Found by [Audit 5](../../reports/audit-5.md) §4. This breaks the rule "Routes never compute figures" (Architecture › Three layers).
+Found by [Audit 5](../../reports/2026-10-21-backend-streamlining/report.md) §4. This breaks the rule "Routes never compute figures" (Architecture › Three layers).
 
 Done (2026-10-22): the Overview's eight unread figures are gone; Budget reads its averages, background estimates and tracking suggestions from `BudgetService`; Investments weighs holdings against `Position.holdings_value`; the investment entry is `workflows/investment_entry.record`; the Other asset value comes from `AccountService.manual_value`. Left:
 

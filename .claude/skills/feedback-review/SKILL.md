@@ -1,6 +1,6 @@
 ---
 name: feedback-review
-description: Turn new user feedback into one report, investigate each ticket, have a strong model design the fixes and a fast one build them (two agents at most), then delete the reviewed files. Use when new feedback, survey rows or screenshots arrive, or when old feedback files should be retired.
+description: Preserve sanitized feedback observations, investigate each ticket and link chosen fixes to active issues. Use when new user feedback arrives or its disposition changes.
 ---
 
 The instructions are tool-neutral and live in `skills/feedback-review/SKILL.md`. Read that file and follow it.

@@ -50,7 +50,7 @@ def test_every_next_step_says_what_to_read():
 
 
 def test_docs_holds_only_the_carrying_files():
-    allowed = {"PROJECT_OVERVIEW.md", "ARCHITECTURE.md", "GLOSSARY.md", "COMPETITION.md"}
+    allowed = {"README.md", "PROJECT_OVERVIEW.md", "ARCHITECTURE.md", "GLOSSARY.md", "COMPETITION.md"}
     extra = {path.name for path in DOCS.iterdir()} - allowed
     assert not extra, f"new files under docs/ (AGENTS.md section 1; designs go in issues/): {sorted(extra)}"
 
@@ -109,13 +109,46 @@ def test_each_guideline_document_holds_only_its_part_and_names_the_others():
     assert len(versions) == 1, f"the four documents carry different versions: {versions}"
 
 
-def test_the_app_and_website_guidelines_are_the_same_four_files():
+def test_the_app_and_website_guidelines_are_all_mirrored():
     """AGENTS.md section 1: change both copies together. Checked when the website repo sits beside this one."""
     beside = [ROOT.parent / name / "guideline" for name in ("Lightning_website", "lightning_website")]
     website = next((path for path in beside if path.is_dir()), None)
     if website is None:
         pytest.skip("the website repository is not checked out next to this one")
-    for name in [*DOCUMENTS.values(), "themes.md"]:
-        same = (GUIDELINE / name).read_bytes().replace(b"\r\n", b"\n") == (website / name).read_bytes().replace(b"\r\n", b"\n")
-        assert same, (f"guideline/{name} ({_title(GUIDELINE / name)}) differs from the website's copy "
-                      f"({_title(website / name)}): pull both repos, copy the newer over the older, and push both")
+    tool = _docs_check_tool()
+    assert not tool.mirrors(ROOT, website.parent)
+
+
+def _docs_check_tool():
+    spec = importlib.util.spec_from_file_location("docs_check", ROOT / "tools" / "docs_check.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_documentation_links_and_catalogues():
+    assert not _docs_check_tool().check(ROOT)
+
+
+def test_mirror_check_detects_missing_arabic_and_changed_voice(tmp_path):
+    own, peer = tmp_path / "app", tmp_path / "site"
+    for base in (own, peer):
+        (base / "guideline").mkdir(parents=True)
+        (base / "guideline" / "brand-voice.md").write_text("same")
+    (own / "guideline" / "phone-ar.html").write_text("Arabic")
+    (peer / "guideline" / "brand-voice.md").write_text("changed")
+    errors = _docs_check_tool().mirrors(own, peer)
+    assert any("phone-ar.html" in error and "missing" in error for error in errors)
+    assert any("brand-voice.md" in error and "differs" in error for error in errors)
+
+
+def test_documentation_check_detects_unregistered_reports_and_dead_links(tmp_path):
+    for name in ("docs", "reports", "feedback", "templates", "guideline"):
+        (tmp_path / name).mkdir()
+        (tmp_path / name / "README.md").write_text("# Index")
+    folder = tmp_path / "reports" / "2026-10-26-review"
+    folder.mkdir()
+    (folder / "report.md").write_text("[Lost evidence](evidence/missing.png)")
+    errors = _docs_check_tool().check(tmp_path)
+    assert any("missing link evidence/missing.png" in error for error in errors)
+    assert any("absent from catalogue" in error for error in errors)

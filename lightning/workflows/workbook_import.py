@@ -10,6 +10,7 @@ from zipfile import ZipFile, BadZipFile
 from xml.etree import ElementTree as ET
 
 from .data_export import TABLES, readable_relations
+from lightning.core.dates import today
 from lightning.core.errors import ValidationError
 from lightning.core.ledger import Effect, PostingLine, validate_posting
 from lightning.core.money import from_e6
@@ -233,6 +234,15 @@ def _load(conn, tables, schema):
             validate_posting(lines)
         except ValidationError as exc:
             raise ValueError(f'Transaction {transaction_id}: {exc.message}') from None
+    # The rules manual entry keeps (audit 2026-10-26): nothing dated after today, no holding below zero units.
+    if conn.execute("SELECT 1 FROM transactions WHERE date > ? LIMIT 1", (today().isoformat(),)).fetchone():
+        raise ValueError('A transaction is dated in the future. Record transactions on or after the day they happen.')
+    if conn.execute(
+            "SELECT 1 FROM (SELECT le.asset_id, SUM(le.quantity_e6) OVER (PARTITION BY le.account_id, le.asset_id "
+            "ORDER BY le.date, t.id, le.line_no) AS q FROM ledger_entries le JOIN transactions t "
+            "ON t.id=le.transaction_id WHERE t.status='POSTED') x JOIN financial_assets f ON f.id=x.asset_id "
+            "WHERE f.is_cash=0 AND x.q < 0 LIMIT 1").fetchone():
+        raise ValueError('An account would hold less than zero units of an investment. Check its buys and sells.')
     if conn.execute('PRAGMA integrity_check').fetchone()[0] != 'ok':
         raise ValueError('The workbook does not form a valid financial database.')
 

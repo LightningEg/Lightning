@@ -5,10 +5,10 @@
 The owner asked four things: is the backend efficient, are there loose ends, is any function stale or any structure causing
 problems, and is the architecture streamlined. Three reviews ran in parallel: the ledger engine, the read and plan side, and
 runtime, workflows and imports. Every finding below was reproduced or traced in the code before filing; the high ones were rerun
-a second time. It builds on [Audit 2](audit-2.md) (conversion rates and eight dead helpers, both fixed) and does not repeat it.
+a second time. It builds on [Audit 2](../2026-10-21-backend-efficiency/report.md) (conversion rates and eight dead helpers, both fixed) and does not repeat it.
 Cleanup note (2026-10-23): this older report is Audit 5. Its original 2G–2K and 3AC codes are 2P–2T and 3AF; Audit 4 retains the later cash/Save findings.
 
-Each finding is now an item in [the plan](../issues/INDEX.md); this report is the summary and the evidence.
+Each finding is now an item in [the plan](../../issues/INDEX.md); this report is the summary and the evidence.
 
 ## Verdict
 
@@ -123,7 +123,7 @@ command strings (`assets.remove_price`, for example, is live through the journal
 - A linear import confirm, at about 40 statements a row.
 
 Two parts are not defects: the older lend-and-hand-back sync runs in production while the edit journal runs in the lab, and
-[4A](../issues/4-edit-journal-and-devices/4A-edit-journal.md) already retires the old sync at the J6 cutover.
+[4A](../../issues/4-edit-journal-and-devices/4A-edit-journal.md) already retires the old sync at the J6 cutover.
 
 ## Order to fix
 

@@ -22,6 +22,8 @@ from lightning.security.keys import unwrap_key, _password_bytes
 from lightning.sync.identity import check_digits
 from .codec import JournalError, authenticate, canonical, digest, fields, hash_value, seal, unpack, uuid
 
+CLOCK_SKEW_SECONDS = 60
+
 
 def _password_proof(password, salt):
     return Argon2id(salt=salt, length=32, iterations=4, lanes=4, memory_cost=131072).derive(_password_bytes(password))
@@ -67,7 +69,12 @@ def _offer(offer, home_key, now):
     fields(body, ("type", "profile", "generation", "home", "home_key", "nonce", "salt", "expires") + (("method",) if "method" in body else ()))
     if "method" in body and body["method"] != "number-match":
         raise JournalError("Unsupported pairing method")
-    if body["type"] != "journal-pairing" or body["home_key"] != home_key or not now() < body["expires"] <= now() + 600:
+    observed = now()
+    # The home still enforces its exact ten-minute deadline. A small allowance
+    # here prevents a slightly faster phone clock from making every new offer
+    # appear too far in the future to its PC.
+    if (type(body["expires"]) is not int or body["type"] != "journal-pairing" or body["home_key"] != home_key
+            or not observed < body["expires"] <= observed + 600 + CLOCK_SKEW_SECONDS):
         raise JournalError("Pairing offer expired or home identity changed")
     return body
 
@@ -128,6 +135,42 @@ def prove_pairing(offer, request, password, identity, *, home_key, now=time.time
     return seal(dict(type="journal-pairing-proof", offer=digest(body), request=digest(sent), device=identity.device_id, proof=proof), identity.sign)
 
 
+RECEIPT_LIFETIME = 24 * 60 * 60
+PENDING_SECONDS = 30
+COMPARISON_SECONDS = 180
+MAX_REQUESTS = 12
+
+
+def approval_receipt(device, saved, *, now=time.time):
+    """One current-membership/authority/expiry gate for every recovery carrier."""
+    if not saved or type(saved.get("expires")) is not int or saved["expires"] <= now():
+        raise JournalError("Pairing approval expired; reconnect from the current home")
+    device.store.require_confirmation_authority()
+    original = unpack(saved["request"].encode())["body"]
+    document = unpack(saved["membership"].encode())
+    authenticate(document, device.store.config["home_key"])
+    device.store._scope(document["body"])
+    from .membership import Membership
+    expected = dict(key=original["key"], incarnation=original["incarnation"])
+    current = Membership(device).state()
+    if (current["members"].get(original["device"]) != expected
+            or document["body"]["members"].get(original["device"]) != expected):
+        raise JournalError("Pairing device is no longer approved")
+    # A recovery receipt is an admission reference, not a frozen transport epoch.
+    # Serve the current individually wrapped key/membership after other peers
+    # were added or revoked during this receipt's bounded lifetime.
+    latest = device.store.db.scalar("SELECT value FROM journal_local WHERE name='membership_wire'")
+    if not latest:
+        raise JournalError("Current membership publication is unavailable")
+    published = unpack(latest.encode())
+    authenticate(published, device.store.config["home_key"])
+    device.store._scope(published["body"])
+    if any(published["body"].get(name) != current[name] for name in ("version","epoch","members","retired")):
+        raise JournalError("Current membership publication differs")
+    saved["membership"] = latest
+    return original
+
+
 class PairingDesk:
     def __init__(self, device, membership, *, clock=time.time, on_admit=None):
         if device.home is None:
@@ -140,6 +183,7 @@ class PairingDesk:
         self.device.store.require_confirmation_authority()
         if not hmac.compare_digest(unwrap_key(key_file, password), self.db.copy_key()):
             raise JournalError("Password belongs to a different profile")
+        self._abuse()
         salt, code = os.urandom(16), f"{secrets.randbelow(1000000):06d}"
         config = self.device.store.config
         body = dict(type="journal-pairing", profile=config["profile"], generation=config["generation"],
@@ -150,7 +194,7 @@ class PairingDesk:
         offer = seal(body, self.device.identity.sign)
         # Temporary proof verifier lives only in the encrypted profile and expires.
         state = dict(offer=offer.decode(), code=code, verifier=_password_proof(password, salt).hex(), attempts=0, proof_attempts=0,
-                     request=None, proof=None, confirmed=False, challenge=None, reveal=None)
+                     request=None, proof=None, confirmed=False, challenge=None, reveal=None, retired=[], cancelled={}, lease=None)
         with self.db.transaction():
             self.db.execute("INSERT OR REPLACE INTO journal_local VALUES('pairing',?)", (canonical(state).decode(),))
         return offer, code
@@ -160,24 +204,45 @@ class PairingDesk:
         if value is None:
             raise JournalError("Open pairing on the home first")
         state = json.loads(value)
-        return state, unpack(state["offer"].encode())["body"]
+        offer = unpack(state["offer"].encode())["body"]
+        if state.get("request") and self.clock() >= state.get("lease", offer["expires"]):
+            self._release(state)
+            self._save(state)
+        return state, offer
 
     def _save(self, state):
         with self.db.transaction():
             self.db.execute("UPDATE journal_local SET value=? WHERE name='pairing'", (canonical(state).decode(),))
 
+    def _abuse(self, *, failed=False):
+        value = self.db.scalar("SELECT value FROM journal_local WHERE name='pairing_abuse'")
+        guard = json.loads(value) if value else dict(until=int(self.clock())+900, failures=0)
+        if self.clock() >= guard["until"]:
+            guard = dict(until=int(self.clock())+900, failures=0)
+        if failed:
+            guard["failures"] += 1
+            with self.db.transaction():
+                self.db.execute("INSERT OR REPLACE INTO journal_local VALUES('pairing_abuse',?)", (canonical(guard).decode(),))
+        if guard["failures"] >= 3:
+            raise JournalError("Too many password attempts. Wait before reopening pairing")
+
+    @staticmethod
+    def _release(state):
+        if state.get("request"):
+            identifier = digest(unpack(state["request"].encode())["body"])
+            state.setdefault("retired", []).append(identifier)
+            state.setdefault("retired_requests", {})[identifier] = state["request"]
+        state.update(request=None, proof=None, confirmed=False, challenge=None, reveal=None, lease=None, queued_proof=None, proof_attempts=0)
+
     def accept(self, wire):
-        """Phase 1: verify the code proof and keep the request. No password is involved yet."""
+        """Reserve only validated requests; malformed packets cannot burn password tries."""
         state, offer = self._state()
-        if self.clock() >= offer["expires"] or state["attempts"] >= 3:
+        if self.clock() >= offer["expires"]:
             raise JournalError("Pairing expired; open a new code on the home")
         if state["request"]:
             if state["request"] != wire.decode():
-                raise JournalError("Another device is already pairing; stop and open a new code on the home")
+                raise JournalError("Another device is already pairing; wait for its lease or stop pairing")
             return self.digits(state, offer)
-        # Persist every attempt before interpreting the request, including malformed ones.
-        state["attempts"] += 1
-        self._save(state)
         envelope = unpack(wire)
         body = envelope["body"]
         fields(body, ("type", "offer", "device", "name", "key", "incarnation", "proof") + (("commitment",) if offer.get("method") == "number-match" else ()))
@@ -185,20 +250,82 @@ class PairingDesk:
             hash_value(body["commitment"])
         if type(body["name"]) is not str or not 1 <= len(body["name"].strip()) <= 60:
             raise JournalError("Invalid nearby device name")
-        uuid(body["device"])
-        uuid(body["incarnation"])
+        uuid(body["device"]); uuid(body["incarnation"])
         authenticate(envelope, body["key"])
         if body["type"] != "journal-pairing-request" or body["offer"] != digest(offer):
             raise JournalError("Pairing transcript changed")
-        unsigned = {key: value for key, value in body.items() if key != "proof"}
+        identifier = digest(body)
+        if identifier in state.get("retired", []):
+            raise JournalError("This pairing request expired; start a fresh pairing")
+        if state["attempts"] >= (MAX_REQUESTS if offer.get("method") == "number-match" else 3):
+            raise JournalError("Pairing request budget exhausted; reopen pairing")
+        unsigned = {key:value for key,value in body.items() if key != "proof"}
         expected = _request_proof(offer, unsigned, state["code"])
         if type(body["proof"]) is not str or not hmac.compare_digest(body["proof"], expected):
+            if offer.get("method") != "number-match":
+                state["attempts"] += 1
+                self._save(state)
             raise JournalError("Pairing code is wrong")
+        self._abuse()
+        state["attempts"] += 1
         state["request"] = wire.decode()
+        state["lease"] = min(offer["expires"], int(self.clock()) + (PENDING_SECONDS if offer.get("method") == "number-match" else COMPARISON_SECONDS))
         if offer.get("method") == "number-match":
             state["challenge"] = os.urandom(32).hex()
         self._save(state)
         return self.digits(state, offer)
+
+    def cancel(self, wire):
+        envelope = unpack(wire)
+        body = envelope["body"]
+        extended = ("original", "offer_wire") if "original" in body else ()
+        fields(body, ("type", "offer", "request", "device") + extended)
+        hash_value(body["request"]); hash_value(body["offer"]); uuid(body["device"])
+        if extended and (type(body["original"]) is not str or type(body["offer_wire"]) is not str
+                         or not 0 < len(body["original"]) <= 4096 or not 0 < len(body["offer_wire"]) <= 4096):
+            raise JournalError("Invalid signed pairing cancellation")
+        try:
+            state, offer = self._state()
+        except JournalError:
+            state, offer = {}, None
+        original_wire = body.get("original") or state.get("request") or state.get("cancelled", {}).get(body["request"])
+        if not original_wire:
+            raise JournalError("Pairing cancellation is no longer available")
+        original_envelope = unpack(original_wire.encode())
+        original = original_envelope["body"]
+        fields(original,("type","offer","device","name","key","incarnation","proof") + (("commitment",) if "commitment" in original else ()))
+        if original["type"] != "journal-pairing-request":
+            raise JournalError("Invalid original pairing request")
+        hash_value(original["offer"]); uuid(original["device"]); uuid(original["incarnation"])
+        authenticate(original_envelope,original["key"])
+        authenticate(envelope,original["key"])
+        if extended:
+            offered = unpack(body["offer_wire"].encode())
+            authenticate(offered,self.device.store.config["home_key"])
+            offer = offered["body"]
+            fields(offer,("type","profile","generation","home","home_key","nonce","salt","expires") + (("method",) if "method" in offer else ()))
+            if offer["type"] != "journal-pairing" or offer["home_key"] != self.device.store.config["home_key"]:
+                raise JournalError("Invalid original pairing offer")
+            self.device.store._scope(offer)
+            if offer["home"] != self.device.identity.device_id:
+                raise JournalError("Pairing cancellation belongs to another home")
+        if (body["type"] != "journal-pairing-cancel" or offer is None or body["offer"] != digest(offer)
+                or original["offer"] != digest(offer) or body["request"] != digest(original)
+                or body["device"] != original["device"]):
+            raise JournalError("Pairing cancellation belongs to another request")
+        expected = dict(key=original["key"],incarnation=original["incarnation"])
+        if self.membership.state()["members"].get(original["device"]) == expected:
+            raise JournalError("Device is already approved; remove it on the home")
+        owns_slot = state.get("request") == original_wire
+        if owns_slot and state.get("proof"):
+            raise JournalError("Password proof is already accepted; check pairing status")
+        if owns_slot:
+            state.setdefault("cancelled", {})[body["request"]] = original_wire
+            self._release(state)
+            self._save(state)
+        # Also acknowledges a request never received, expired, or already cancelled;
+        # no other candidate's slot is touched.
+        return seal(dict(type="pairing-cancelled", request=body["request"]), self.device.identity.sign)
 
     def digits(self, state, offer):
         request = unpack(state["request"].encode())["body"]
@@ -230,6 +357,8 @@ class PairingDesk:
                 or body["challenge"] != state["challenge"]
                 or not hmac.compare_digest(hashlib.sha256(bytes.fromhex(body["secret"])).hexdigest(), request["commitment"])):
             raise JournalError("Pairing transcript changed")
+        if not state.get("reveal"):
+            state["lease"] = min(offer["expires"], int(self.clock())+COMPARISON_SECONDS)
         state["reveal"] = body["secret"]
         self._save(state)
         return seal(dict(type="pairing-matched", request=digest(request), challenge=state["challenge"],
@@ -247,35 +376,52 @@ class PairingDesk:
             raise JournalError("Pairing expired; open a new code on the home")
         envelope = unpack(wire)
         body = envelope["body"]
-        if state["proof"] and type(body) is dict and state["proof"] == digest(body):
-            return None
-        state["proof_attempts"] += 1
-        self._save(state)
         request = unpack(state["request"].encode())["body"]
         fields(body, ("type", "offer", "request", "device", "proof"))
         authenticate(envelope, request["key"])
         if (body["type"] != "journal-pairing-proof" or body["offer"] != digest(offer) or body["request"] != digest(request)
                 or body["device"] != request["device"]):
             raise JournalError("Pairing transcript changed")
+        if state["proof"] and state["proof"] == digest(body):
+            return None
+        hash_value(body["proof"])
+        if not state["confirmed"]:
+            # No pre-approval password oracle or global lockout: only retain the
+            # signed candidate's bounded message in the encrypted home profile.
+            state["queued_proof"] = wire.decode()
+            self._save(state)
+            return None
+        self._abuse()
+        state["proof_attempts"] += 1
+        self._save(state)
         expected = hmac.new(bytes.fromhex(state["verifier"]), canonical(dict(offer=body["offer"], request=body["request"])), hashlib.sha256).hexdigest()
         if type(body["proof"]) is not str or not hmac.compare_digest(body["proof"], expected):
+            try:
+                self._abuse(failed=True)
+            except JournalError:
+                pass
             raise JournalError("Profile password is wrong")
         state["proof"] = digest(body)
         self._save(state)
         return self._admit(state) if state["confirmed"] else None
 
-    def confirm(self, digits):
+    def confirm(self, digits, request_id=None):
         """The home owner's comparison. Returns the membership update once the password proof exists, else None."""
         self.device.store.require_confirmation_authority()
         state, offer = self._state()
         if not state.get("request"):
             raise JournalError("No verified pairing request")
         body = unpack(state["request"].encode())["body"]
+        if request_id is not None and request_id != digest(body):
+            raise JournalError("Pairing request changed; compare the current device again")
         expected = self.digits(state, offer)
         if not expected or self.clock() >= offer["expires"] or type(digits) is not str or not hmac.compare_digest(digits, expected):
             raise JournalError("Check that both devices show the same six digits")
         state["confirmed"] = True
+        queued = state.pop("queued_proof", None)
         self._save(state)
+        if queued:
+            return self.prove(queued.encode())
         return self._admit(state) if state["proof"] else None
 
     def _admit(self, state):

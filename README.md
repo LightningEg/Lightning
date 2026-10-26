@@ -3,6 +3,10 @@
 Personal finance in one place: accounts, money in and out, transfers, budgets,
 investments, cash reserves, and owned wealth. Historical wealth analysis and a dated cash outlook are planned.
 
+## Documentation
+
+Start at the [documentation map](docs/README.md): [reports](reports/README.md), [user feedback](feedback/README.md), [brand guidelines](guideline/README.md) and [templates](templates/README.md).
+
 ## Licence
 
 Lightning is **source-available**, not open source. It is free for personal and other non-commercial use
@@ -104,5 +108,5 @@ lint-imports              # architecture contracts
 - [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) — start here: what Lightning is, what it answers, the roadmap
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — structure, rules, data model
 - [docs/GLOSSARY.md](docs/GLOSSARY.md) — what every term and code means
-- [guideline/](guideline/) — the brand guideline (3.26), four documents: `app.html` (Part A, the app on a PC), `website.html` (Part B, Normal: the website), `phone.html` (Part C), `coders.html` (Part D, Coders: the website's For Geeks pages); open one in a browser (AIs: `python tools/guideline.py A03` prints one section)
+- [guideline/](guideline/) — the [brand guideline map](guideline/README.md), four documents: `app.html` (Part A, the app on a PC), `website.html` (Part B, Normal: the website), `phone.html` (Part C), `coders.html` (Part D, Coders: the website's For Geeks pages); open one in a browser (AIs: `python tools/guideline.py A03` prints one section)
 - [CHANGELOG.md](CHANGELOG.md) — every change, every time

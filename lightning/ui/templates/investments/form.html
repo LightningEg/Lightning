@@ -11,6 +11,7 @@
 </div>
 {% endif %}
 <form method="post" class="card investment-ownership-form" data-trade-kind="{{ kind }}" {% if txn %}data-autosave-existing{% endif %} style="max-width:780px" autocomplete="off">
+  {% if txn %}<input type="hidden" name="revision" value="{{ values.revision }}">{% endif %}
   <div class="row">
     <div class="field {{ 'has-error' if error_field == 'account' }}">
       <label for="account_id">{{ 'Account'|tr(locale) }}</label>

@@ -72,6 +72,12 @@ public final class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
+        if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+                && getIntent().getBooleanExtra("pairing_probe", false)) {
+            startActivity(new Intent(this, ProbeActivity.class).putExtra("pairing_probe", true));
+            finish();
+            return;
+        }
         JournalSyncScheduler.schedule(this);
         SmsBridge.activity = this;
         BiometricBridge.activity = this;

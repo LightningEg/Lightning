@@ -5,17 +5,17 @@
 The owner asked for a tight app to demo, not more features: (1) the engine works with no bugs, (2) the logic links the sections and suggests
 things (such as tracking a bill) without redundancy or pain points, (3) the screens follow the guideline with fitting, working visuals, and the phone
 and Arabic checked alongside. Five audits ran in parallel, one per part. Every finding below was reproduced, and most high ones were rechecked in the
-code or in a screenshot before filing. Each finding is now an item in [the plan](../issues/INDEX.md); this report is the summary and the evidence.
+code or in a screenshot before filing. Each finding is now an item in [the plan](../../issues/INDEX.md); this report is the summary and the evidence.
 
 ## Verdict
 
 | Part | Verdict | Must fix before a demo |
 |---|---|---|
-| 1 Engine | **The math holds.** Every figure reconciled on both datasets, every write moved every tab by exactly its amount, and the full suite passes (2,112 tests, 0 failures). The faults are in what bad input gets through. | [2E](../issues/2-safe-for-real-money/2E-engine-input-checks.md) 1–5 |
-| 2 Logic | **The smart parts exist and mostly work, but three of them break trust and the rest are hidden.** Bill matching misses cross-account payments and offers last month's payment. Early salary counts twice. A false "your income went up" is the first nudge. | [7K](../issues/7-planning-import-and-search/7K-payment-matching-trust.md), [7L1](../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md), [3V](../issues/3-polish-and-arabic/3V-demo-data-shows-the-smart-features.md) |
-| 3 PC visuals | **Close to the guideline.** The brand audit passes, there are no JavaScript errors and every control works. One page scrolls sideways, and a few charts mislead. | [3S](../issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) 1–5, [3C](../issues/3-polish-and-arabic/3C-chart-end-labels-overlap.md), [3A](../issues/3-polish-and-arabic/3A-rate-decimals-and-arabic-order.md) |
-| Phone | **Usable, with three visible bugs in the first minute.** Every sheet shows a copy of the page's undo pill and tabs. Save does nothing without a category. The raise prompt covers the top bar. On Android, backup and import do nothing. | [3R](../issues/3-polish-and-arabic/3R-sheets-silent-save-and-prompt-over-top-bar.md), [2F](../issues/2-safe-for-real-money/2F-android-downloads-files-links.md) |
-| Arabic | **Nearly all translated and mirrored, but numbers can read wrong.** The "·" beside a number looks like the Arabic zero, so "Late 17 days" reads as 170. Decimals mix "." and ",". About ten strings are still English, one of them on every page. | [3U](../issues/3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) 1–3 |
+| 1 Engine | **The math holds.** Every figure reconciled on both datasets, every write moved every tab by exactly its amount, and the full suite passes (2,112 tests, 0 failures). The faults are in what bad input gets through. | [2E](../../issues/2-safe-for-real-money/2E-engine-input-checks.md) 1–5 |
+| 2 Logic | **The smart parts exist and mostly work, but three of them break trust and the rest are hidden.** Bill matching misses cross-account payments and offers last month's payment. Early salary counts twice. A false "your income went up" is the first nudge. | [7K](https://github.com/LightningEg/Lightning/blob/a64b83c0a84dc96f7e0f728b5e5317c461a0668d/issues/7-planning-import-and-search/7K-payment-matching-trust.md), [7L1](../../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md), [3V](https://github.com/LightningEg/Lightning/blob/ea9000e1599b7d7b4eb0c56f332fca276285d9d7/issues/3-polish-and-arabic/3V-demo-data-shows-the-smart-features.md) |
+| 3 PC visuals | **Close to the guideline.** The brand audit passes, there are no JavaScript errors and every control works. One page scrolls sideways, and a few charts mislead. | [3S](../../issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) 1–5, [3C](https://github.com/LightningEg/Lightning/blob/a4fc8d36cc1271143c8f126ed47bc3056b53477a/issues/3-polish-and-arabic/3C-chart-end-labels-overlap.md), [3A](https://github.com/LightningEg/Lightning/blob/a4fc8d36cc1271143c8f126ed47bc3056b53477a/issues/3-polish-and-arabic/3A-rate-decimals-and-arabic-order.md) |
+| Phone | **Usable, with three visible bugs in the first minute.** Every sheet shows a copy of the page's undo pill and tabs. Save does nothing without a category. The raise prompt covers the top bar. On Android, backup and import do nothing. | [3R](https://github.com/LightningEg/Lightning/blob/15bccff91edd2d32baa4252fd01d28cc8374ee35/issues/3-polish-and-arabic/3R-sheets-silent-save-and-prompt-over-top-bar.md), [2F](../../issues/2-safe-for-real-money/2F-android-downloads-files-links.md) |
+| Arabic | **Nearly all translated and mirrored, but numbers can read wrong.** The "·" beside a number looks like the Arabic zero, so "Late 17 days" reads as 170. Decimals mix "." and ",". About ten strings are still English, one of them on every page. | [3U](../../issues/3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) 1–3 |
 
 **In one line:** the engine can be shown today. What a viewer sees first can't yet: the demo data raises false alarms, the smart features sit two
 or three clicks down, and the phone has three bugs. The cut list below fixes those first.
@@ -24,27 +24,27 @@ or three clicks down, and the phone has three bugs. The cut list below fixes tho
 
 Must fix (each is small and is seen in the first minutes):
 
-1. **[3V](../issues/3-polish-and-arabic/3V-demo-data-shows-the-smart-features.md) Demo data.** The demo certificate's rate is set to 18%, but its payouts are 22%. As a result the demo's only Needs-you item can never be matched. The sample shows four late bills when opened today. The demo has nothing for Looks recurring to find.
-2. **[7L1](../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) False raise prompt.** The yearly bonus is spread over 12 months and read as a raise.
-3. **[3R](../issues/3-polish-and-arabic/3R-sheets-silent-save-and-prompt-over-top-bar.md) Phone.** Sheets copy the page chrome, Save fails silently, the prompt covers the top bar, and the tab bar sits above the keyboard.
-4. **[7K](../issues/7-planning-import-and-search/7K-payment-matching-trust.md) Bill matching.** Fix payments made from another account, last month's payment offered for this month, and early salary counted twice.
-5. **[2E](../issues/2-safe-for-real-money/2E-engine-input-checks.md) 1–5 Input checks.** A split can lose a piaster, a gold account accepts expenses, cash can go below zero, and two crashes (500 errors).
+1. **[3V](https://github.com/LightningEg/Lightning/blob/ea9000e1599b7d7b4eb0c56f332fca276285d9d7/issues/3-polish-and-arabic/3V-demo-data-shows-the-smart-features.md) Demo data.** The demo certificate's rate is set to 18%, but its payouts are 22%. As a result the demo's only Needs-you item can never be matched. The sample shows four late bills when opened today. The demo has nothing for Looks recurring to find.
+2. **[7L1](../../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) False raise prompt.** The yearly bonus is spread over 12 months and read as a raise.
+3. **[3R](https://github.com/LightningEg/Lightning/blob/15bccff91edd2d32baa4252fd01d28cc8374ee35/issues/3-polish-and-arabic/3R-sheets-silent-save-and-prompt-over-top-bar.md) Phone.** Sheets copy the page chrome, Save fails silently, the prompt covers the top bar, and the tab bar sits above the keyboard.
+4. **[7K](https://github.com/LightningEg/Lightning/blob/a64b83c0a84dc96f7e0f728b5e5317c461a0668d/issues/7-planning-import-and-search/7K-payment-matching-trust.md) Bill matching.** Fix payments made from another account, last month's payment offered for this month, and early salary counted twice.
+5. **[2E](../../issues/2-safe-for-real-money/2E-engine-input-checks.md) 1–5 Input checks.** A split can lose a piaster, a gold account accepts expenses, cash can go below zero, and two crashes (500 errors).
 6. **On-screen faults:**
-   - [3S](../issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) 1: Sale factors scrolls sideways.
-   - [3C](../issues/3-polish-and-arabic/3C-chart-end-labels-overlap.md) and 3S 2: chart end labels overlap.
-   - [3A](../issues/3-polish-and-arabic/3A-rate-decimals-and-arabic-order.md): "51.600000" rate.
-   - [5H](../issues/5-investments/5H-sample-reconciliation-difference.md): +1,394 "unresolved". The cause is now found: the revaluation of USD cash.
-7. **[3U](../issues/3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) Arabic.** Change the separator that reads as a zero, use one decimal style, and translate the English undo label shown on every page.
-8. **[2F](../issues/2-safe-for-real-money/2F-android-downloads-files-links.md) Android.** Downloads, file inputs and outside links do nothing. This is needed only if the demo shows backup, export or import on the phone.
+   - [3S](../../issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) 1: Sale factors scrolls sideways.
+   - [3C](https://github.com/LightningEg/Lightning/blob/a4fc8d36cc1271143c8f126ed47bc3056b53477a/issues/3-polish-and-arabic/3C-chart-end-labels-overlap.md) and 3S 2: chart end labels overlap.
+   - [3A](https://github.com/LightningEg/Lightning/blob/a4fc8d36cc1271143c8f126ed47bc3056b53477a/issues/3-polish-and-arabic/3A-rate-decimals-and-arabic-order.md): "51.600000" rate.
+   - [5H](https://github.com/LightningEg/Lightning/blob/676c42fe3c923ecd3c55975fd720ce4a029c39fa/issues/5-investments/5H-sample-reconciliation-difference.md): +1,394 "unresolved". The cause is now found: the revaluation of USD cash.
+7. **[3U](../../issues/3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) Arabic.** Change the separator that reads as a zero, use one decimal style, and translate the English undo label shown on every page.
+8. **[2F](../../issues/2-safe-for-real-money/2F-android-downloads-files-links.md) Android.** Downloads, file inputs and outside links do nothing. This is needed only if the demo shows backup, export or import on the phone.
 
 Makes the demo shine (wiring of what exists, no new engines):
 
-- **[7L2](../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) Needs you as the one smart inbox.** It would carry Looks recurring · Track, early payment found · Link, Make a rule, Refill a reserve, and a category over plan.
-- **[7L3](../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) Looks recurring finds subscriptions and bills that vary.** Today it misses Shahid and electricity.
-- **[5K](../issues/5-investments/5K-certificate-holding-page.md) The certificate's page.** It shows interest, not price charts.
-- **3S 3–5 and [3T](../issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) 1–3.** Charts that mislead, cut words on the phone, and pages with no way back.
+- **[7L2](../../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) Needs you as the one smart inbox.** It would carry Looks recurring · Track, early payment found · Link, Make a rule, Refill a reserve, and a category over plan.
+- **[7L3](../../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) Looks recurring finds subscriptions and bills that vary.** Today it misses Shahid and electricity.
+- **[5K](../../issues/5-investments/5K-certificate-holding-page.md) The certificate's page.** It shows interest, not price charts.
+- **3S 3–5 and [3T](../../issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) 1–3.** Charts that mislead, cut words on the phone, and pages with no way back.
 
-Polish after the demo: the rest of 3S and 3T, and the five pages left in [3Q](../issues/3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md).
+Polish after the demo: the rest of 3S and 3T, and the five pages left in [3Q](../../issues/3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md).
 
 ## 1 Engine: does the money math hold?
 
@@ -79,8 +79,8 @@ Polish after the demo: the rest of 3S and 3T, and the five pages left in [3Q](..
 | Medium | Money in or out is accepted on a gold account. The register offers it, and negative cash is left inside the gold account. | 2E 2 |
 | Medium | Cash goes below zero, even through money held for others: CIB ends at −58,672 while Mom's 10,000 is still listed, and every data check passes. | 2E 3 |
 | Medium | A 500 error on an unknown owner, and another on Planner amount 0. | 2E 4–5 |
-| Medium | Converting EGP to USD raises net worth by 875: the trade rate revalues every USD holding. | [5J](../issues/5-investments/5J-conversion-raises-net-worth.md) |
-| Medium | Paying a loan early empties the everyday budget, but Safe to spend moves only 21. | [7M](../issues/7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) |
+| Medium | Converting EGP to USD raises net worth by 875: the trade rate revalues every USD holding. | [5J](../../issues/5-investments/5J-conversion-raises-net-worth.md) |
+| Medium | Paying a loan early empties the everyday budget, but Safe to spend moves only 21. | [7M](../../issues/7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) |
 | Medium | Demo certificate: 18% set, 22% paid. Sample: late bills shown on today's date. | 3V |
 | Low | Dates before an account opened are accepted. Crafted posts can still cause 500 errors. | 2E 6 |
 | Low | Displayed parts don't add up after rounding (130,586 against 130,585). | 2E 7 |
@@ -120,9 +120,9 @@ Not checked: online prices, Gam'eya writes (no circle in either dataset, 5I), CS
 - Rule offers appear only on Weekly review.
 - Payday funding and reimbursements open only from Weekly review.
 - Needs you, the one inbox, carries none of these. Neither does it show a category over plan this month, or Health's own "Needs you" bands: the emergency fund at 0.8 months is flagged on Health and missing from the list.
-- The fix is wiring: [7L2](../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md).
+- The fix is wiring: [7L2](../../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md).
 
-**Redundancy, already filed and still open in [3G](../issues/3-polish-and-arabic/3G-one-organism-review-of-every-tab.md) and [3H](../issues/3-polish-and-arabic/3H-tab-by-tab-review.md):**
+**Redundancy, already filed and still open in [3G](../../issues/3-polish-and-arabic/3G-one-organism-review-of-every-tab.md) and [3H](../../issues/3-polish-and-arabic/3H-tab-by-tab-review.md):**
 
 - **Two pages for one transaction:** `/transactions/<id>` and `/activity/<id>`, under different tab bars.
 - **One word, two values:**
@@ -155,7 +155,7 @@ Not checked: online prices, Gam'eya writes (no circle in either dataset, 5I), CS
 - **Accounts and register.**
 - **Everywhere:** headers are Ink, there are no capitals, and fields are soft wells.
 
-**Found** (all in [3S](../issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) unless named):
+**Found** (all in [3S](../../issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) unless named):
 
 - **High:**
   - Settings › Sale factors runs out of its card, so the page scrolls sideways at 1366.
@@ -164,7 +164,7 @@ Not checked: online prices, Gam'eya writes (no circle in either dataset, 5I), CS
   - Health trends have no axis and don't start at zero.
   - Currencies "USD" plots cash only, so it falls by 88,000 when the ETF is bought.
   - The average-cost line is Meadow.
-  - The certificate's page shows price volatility, nine empty "Units out" rows and no interest ([5K](../issues/5-investments/5K-certificate-holding-page.md)).
+  - The certificate's page shows price volatility, nine empty "Units out" rows and no interest ([5K](../../issues/5-investments/5K-certificate-holding-page.md)).
 - **Colour off meaning (A03):**
   - The Overview "Left in plan" meter is Meadow.
   - Category direction colours are off A03.
@@ -183,9 +183,9 @@ Not checked: online prices, Gam'eya writes (no circle in either dataset, 5I), CS
   - Counterparties' buttons cover a field.
   - The first Escape in Ctrl-K only clears the search.
 
-![Sale factors](audit-1/pc-sale-factors-overflow.png)
-![End labels](audit-1/pc-chart-end-labels-overlap.png)
-![Overview KPIs](audit-1/pc-overview-kpis.png)
+![Sale factors](evidence/pc-sale-factors-overflow.png)
+![End labels](evidence/pc-chart-end-labels-overlap.png)
+![Overview KPIs](evidence/pc-overview-kpis.png)
 
 **Already filed, still present:**
 
@@ -200,7 +200,7 @@ This ran in the real phone frame that Android loads (`profile_app(phone=True)`),
 
 **Automatic:**
 
-- `tools/phone_check.py` reports nothing scrolling sideways. However, `.phone-content` hides overflow, so cut-off items pass unseen ([3T](../issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) asks the check to report them).
+- `tools/phone_check.py` reports nothing scrolling sideways. However, `.phone-content` hides overflow, so cut-off items pass unseen ([3T](../../issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) asks the check to report them).
 - The phone tests pass (46).
 - No JavaScript errors except the silent Save.
 
@@ -216,12 +216,12 @@ This ran in the real phone frame that Android loads (`profile_app(phone=True)`),
 
 **Found:**
 
-- **High ([3R](../issues/3-polish-and-arabic/3R-sheets-silent-save-and-prompt-over-top-bar.md)):**
+- **High ([3R](https://github.com/LightningEg/Lightning/blob/15bccff91edd2d32baa4252fd01d28cc8374ee35/issues/3-polish-and-arabic/3R-sheets-silent-save-and-prompt-over-top-bar.md)):**
   - Every sheet shows a copy of the page's undo pill and broken tabs.
   - Save does nothing without a category. The same code runs on PC.
   - The raise prompt is a fixed flash over the top bar, and its buttons vanish after 5 s (same cause as 3D).
   - The tab bar never hides for the keyboard.
-- **Medium ([3T](../issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md)):**
+- **Medium ([3T](../../issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md)):**
   - Cut words ("0.6 n", "By market", first letters of Plan headings).
   - Overlapping text on Recurring.
   - Five pages with no way back.
@@ -231,15 +231,15 @@ This ran in the real phone frame that Android loads (`profile_app(phone=True)`),
   - Revaluations shown as "Latest" money.
   - Axes with 8–10 labels.
   - 15 px field text.
-- **Android shell ([2F](../issues/2-safe-for-real-money/2F-android-downloads-files-links.md)):**
+- **Android shell ([2F](../../issues/2-safe-for-real-money/2F-android-downloads-files-links.md)):**
   - No download listener: Back up, Export and templates do nothing.
   - No file chooser: CSV import does nothing.
   - Outside links are swallowed.
   - Otherwise well locked down: localhost only, no backup, no debugging, insets padded.
 
-![Sheet](audit-1/phone-sheet-copies-page-chrome.png)
-![Prompt over the top bar](audit-1/phone-raise-prompt-covers-top-bar.png)
-![Recurring overlap](audit-1/phone-recurring-text-overlap.png)
+![Sheet](evidence/phone-sheet-copies-page-chrome.png)
+![Prompt over the top bar](evidence/phone-raise-prompt-covers-top-bar.png)
+![Recurring overlap](evidence/phone-recurring-text-overlap.png)
 
 **Checked and fine:**
 
@@ -272,7 +272,7 @@ not rechecked.
 - Noto Sans Arabic loads.
 - The phone tab bar and sheets are mirrored.
 
-**Found** (all in [3U](../issues/3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md)):
+**Found** (all in [3U](../../issues/3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md)):
 
 | Severity | Finding |
 |---|---|
@@ -282,13 +282,13 @@ not rechecked.
 | Medium | The Plan timeline's "اليوم" is drawn over "Landlord +٥". Chart axes use a Latin "k". |
 | Low | "الدفعة ١٠ من ٢٤" wraps, leaving "٢٤" alone on a line. |
 
-![The dot reads as zero](audit-1/ar-dot-reads-as-zero-holding.png)
-![Cash planning in Arabic](audit-1/ar-dot-reads-as-zero-plan.png)
+![The dot reads as zero](evidence/ar-dot-reads-as-zero-holding.png)
+![Cash planning in Arabic](evidence/ar-dot-reads-as-zero-plan.png)
 
 ## Owner decisions
 
-1. **[5J](../issues/5-investments/5J-conversion-raises-net-worth.md):** should a currency conversion's rate revalue the other dollar holdings?
-2. **[7M](../issues/7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md):**
+1. **[5J](../../issues/5-investments/5J-conversion-raises-net-worth.md):** should a currency conversion's rate revalue the other dollar holdings?
+2. **[7M](../../issues/7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md):**
    - Does principal paid early count against everyday money?
    - Does an expense covered by a reserve count against its budget category?
 3. **Safe to spend as a hero number on the Overview** (3G §9 Q1). It is the figure people ask about, and today it lives one tab down.

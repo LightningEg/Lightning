@@ -630,8 +630,14 @@ async def create(request: Request, account_id: int | None):
     form = await request.form()
     entry = {k: str(form.get(k, "")) for k in ENTRY_FIELDS}
     row_account = account_id or _int(entry["account_id"])
+    # A resent row returns its first save (2J). Journal profiles get their command identity from the journal.
+    submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+    payload = entry | {"row_account": row_account}
     try:
         with c.db.transaction():
+            earlier = c.transactions.submitted(submission, payload)
+            if earlier is not None:
+                return earlier, entry
             other_id, category_id, counterparty = _resolve(request, row_account, entry)
             category = c.categories.get(category_id) if category_id else None
             owner_name = (_transfer_custody_owner(c, entry) if other_id else _custody_owner(c, entry, category))
@@ -646,6 +652,7 @@ async def create(request: Request, account_id: int | None):
             else:
                 owner = _custody_owner(c, entry, category)
                 c.money_from_others.sync_transaction(txn.id, txn.date, owner, row_account, amount, entry["notes"])
+            c.transactions.remember_submission(submission, payload, txn.id)
     except LightningError as exc:
         return page(request, account_id, entry=entry, error=exc.message, error_field=exc.field or "",
                     status_code=400)

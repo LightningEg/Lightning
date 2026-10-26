@@ -12,13 +12,13 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 1](../../reports/audit-1.md) (§4 Phone) at 390 and 360 px with touch. The high ones are 3R. `tools/phone_check.py` passes, but
+Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§4 Phone) at 390 and 360 px with touch. The high ones are 3R. `tools/phone_check.py` passes, but
 `.phone-content` has `overflow-x:hidden`, so clipped items never scroll and the check cannot see them.
 
 1. **Cut words (C12).** Reserves "covers 0.6 months" cut to "0.6 n" (390) and "0." (360); Investments' "By market" chip; Currencies' "Custom" (320);
    the Planner form (320). Cash › Plan headings lose their first letter: `.phone-flat-rows` has `overflow:auto` and no padding.
 2. **Overlapping text.** Cash › Recurring: "Possible early/changed payment — review" over "North Cairo Electricity".
-   Shot: [phone-recurring-text-overlap.png](../../reports/audit-1/phone-recurring-text-overlap.png). Overview rows: "›" on its own line and a stray "▾" inside "Net ▾flow".
+   Shot: [phone-recurring-text-overlap.png](../../reports/2026-10-20-demo-readiness/evidence/phone-recurring-text-overlap.png). Overview rows: "›" on its own line and a stray "▾" inside "Net ▾flow".
 3. **No way back (C03.4).** /sms, /search, /accounts/N/import, /investments/planner and /settings show the logo, not "‹ page". A Budget category opens
    Transactions under Accounts with "‹ Accounts", losing Budget.
 4. **Budget category → Transactions (C08.3, A16).** A full-screen filter card comes before any row; it reads "Personal › Eating Out"; two period controls.

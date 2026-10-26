@@ -1,6 +1,6 @@
 """Audit 4 button/route probes. Dummy temporary ledgers only.
 
-Run: pytest -q -rx -o addopts='' reports/audit-4/workflow_probes.py
+Run: pytest -q -rx -o addopts='' reports/2026-10-23-backend-correctness/evidence/workflow_probes.py
 Known defects are strict xfails against the desired behavior; an XPASS needs review.
 The ordinary app test suite does not discover this audit artifact automatically.
 """
@@ -14,7 +14,7 @@ import sys
 from types import SimpleNamespace
 from urllib.parse import parse_qs, urlsplit
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 import httpx
 import pytest
 from lightning.bootstrap import build

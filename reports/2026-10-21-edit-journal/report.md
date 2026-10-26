@@ -2,7 +2,7 @@
 
 2026-10-21 · Claude · main `6e1c043` · encrypted dummy profiles, in-process carrier, no live Cloudflare.
 
-The owner asked whether the new multi-device sync holds up. This covers the edit journal ([4A](../issues/4-edit-journal-and-devices/4A-edit-journal.md)):
+The owner asked whether the new multi-device sync holds up. This covers the edit journal ([4A](../../issues/4-edit-journal-and-devices/4A-edit-journal.md)):
 `lightning/sync/journal/`, the device runtime and `cloudflare/journal/worker.mjs`. The design was read against its guarantees G1–G8, the code was read
 on the money path, and each suspected gap was run against real encrypted journals. Every finding was item 4C; all are fixed (see *Fixed* below), each with a test in `tests/test_journal_audit3.py`.
 

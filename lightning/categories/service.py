@@ -342,13 +342,8 @@ class CategoryService:
         category = self.get(category_id)
         if category.is_root or category.is_system or category.depth < 2:
             raise ValidationError("Top-level activity categories cannot be deleted.")
-        references = (
-            self.db.scalar("SELECT 1 FROM ledger_entries WHERE category_id=? LIMIT 1", (category_id,))
-            or self.db.scalar("SELECT 1 FROM budgets WHERE category_id=? LIMIT 1", (category_id,))
-            or self.db.scalar("SELECT 1 FROM counterparties WHERE default_category_id=? LIMIT 1", (category_id,))
-            or self.db.scalar("SELECT 1 FROM rule_actions WHERE category_id=? LIMIT 1", (category_id,))
-            or self.db.scalar("SELECT 1 FROM categories WHERE parent_id=? LIMIT 1", (category_id,))
-        )
+        # Any record that refers to it (history, budgets, rules, plans, reserves, children...) keeps it archived.
+        references = self.db.referenced("categories", category_id)
         with self.db.transaction():
             if references:
                 for item in [category, *self.descendants(category_id)]:

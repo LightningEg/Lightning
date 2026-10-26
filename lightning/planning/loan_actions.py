@@ -4,7 +4,7 @@ from decimal import Decimal, ROUND_UP
 
 from lightning.core.dates import fmt_date, parse_date, today
 from lightning.core.errors import ValidationError
-from lightning.core.money import ZERO, from_e6, to_decimal
+from lightning.core.money import ZERO, check_places, from_e6, to_decimal
 from .domain import Frequency, PaymentStatus, PlanKind, PlannedItem
 from .schedule import scheduled_dates
 
@@ -43,7 +43,9 @@ def adjusted_payments(payments, terms, extras):
 
 
 def purchase_quote(price, fee, months, first_date):
-    value, charge = to_decimal(price, "price"), to_decimal(fee or "0", "fee")
+    # Instalments are paid in the profile currency: a sub-cent price would leave a final payment nobody can post (2L).
+    value = check_places(to_decimal(price, "price"), 2, "price")
+    charge = check_places(to_decimal(fee or "0", "fee"), 2, "fee")
     try:
         count = int(str(months))
     except ValueError:
@@ -84,10 +86,14 @@ def preview_early_payment(planning, item_id, principal, fee="0", on=None):
     day = parse_date(on or fmt_date(today()), "date_paid")
     if day > today():
         raise ValidationError("Record the payment on its actual date, not a future date.", "date_paid")
-    value, charge = to_decimal(principal, "principal"), to_decimal(fee or "0", "fee")
+    value = check_places(to_decimal(principal, "principal"), 2, "principal")
+    charge = check_places(to_decimal(fee or "0", "fee"), 2, "fee")
     payments = planning.payments(item, "2999-12-31", day)
     remaining = sum((p.still_owed for p in payments), ZERO)
-    if value <= ZERO or value > remaining or charge < ZERO:
+    # A backdated payment is capped by what is owed after every repayment already recorded, including ones
+    # dated after it (audit 2026-10-26: two payoffs of a 300 loan took 600).
+    owed_now = sum((p.still_owed for p in planning.payments(item, "2999-12-31", max(day, today()))), ZERO)
+    if value <= ZERO or value > min(remaining, owed_now) or charge < ZERO:
         raise ValidationError("Pay more than zero and no more than the remaining loan; a fee cannot be negative.")
     adjusted = adjusted_payments(payments, None, [{"due_date": None, "date": fmt_date(day), "principal_e6": int(value * 1_000_000)}])
     unpaid = [p for p in adjusted if p.still_owed > ZERO]

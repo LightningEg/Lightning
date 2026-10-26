@@ -55,9 +55,9 @@ class PlanningRepository:
         self.db.execute("UPDATE planned_items SET amount_e6=?, updated_at=? WHERE id=?",
                         (to_e6(amount), now_iso(), item_id))
 
-    def set_start(self, item_id: int, start_date: str) -> None:
-        self.db.execute("UPDATE planned_items SET start_date=?, updated_at=? WHERE id=?",
-                        (start_date, now_iso(), item_id))
+    def set_start(self, item_id: int, start_date: str, month_day: int | None = None) -> None:
+        self.db.execute("UPDATE planned_items SET start_date=?, month_day=COALESCE(?, month_day), updated_at=? "
+                        "WHERE id=?", (start_date, month_day, now_iso(), item_id))
 
     def set_payment_count(self, item_id: int, count: int) -> None:
         self.db.execute("UPDATE planned_items SET payment_count=?,updated_at=? WHERE id=?", (count, now_iso(), item_id))

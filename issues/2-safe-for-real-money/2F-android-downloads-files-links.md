@@ -12,7 +12,7 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 1](../../reports/audit-1.md) (§4 Phone, Android shell), by reading `android/app/src/main/java/org/lightning/app/MainActivity.java`.
+Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§4 Phone, Android shell), by reading `android/app/src/main/java/org/lightning/app/MainActivity.java`.
 Not built or run on a device. Severity: high, because Back up does nothing on the phone.
 
 - No `setDownloadListener`: Export all data, Prepare AI analysis, the import template and reference downloads, and Back up do nothing.

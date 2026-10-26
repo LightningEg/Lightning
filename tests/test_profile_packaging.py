@@ -189,7 +189,8 @@ def _ci_scope():
 
 def test_only_documentation_skips_the_windows_build():
     scope = _ci_scope()
-    for path in ("docs/ARCHITECTURE.md", "CHANGELOG.md", "README.md", "user feedback/batch.md",
+    for path in ("docs/ARCHITECTURE.md", "CHANGELOG.md", "README.md", "user feedback/batch.md", "feedback/2026-10-26-test.md", "templates/report.md",
+                 "reports/2026-10-26-test/evidence/sample.png",
                  "Claude outputs/x.zip", "tools/guideline.py", "run.sh", "Lightning.desktop", "NOW.md"):
         assert scope.cannot_reach_app(path), path
     for path in ("lightning/ui/web.py", "lightning/samples/notes.md", "packaging/APP_README.txt",
@@ -483,10 +484,11 @@ def test_a_push_of_documents_only_runs_the_tests_that_read_them(monkeypatch, tmp
     """Measured against the last commit whose full suite passed, not the previous push: a code push whose
     run was cancelled by a later documents push still gets the full suite."""
     scope = _ci_scope()
-    for path in ("NOW.md", "CHANGELOG.md", "docs/ARCHITECTURE.md", "docs/proposals/x.md", "user feedback/a.md"):
+    for path in ("NOW.md", "CHANGELOG.md", "docs/ARCHITECTURE.md", "docs/proposals/x.md", "user feedback/a.md",
+                 "feedback/2026-10-26-test.md", "templates/report.md", "reports/2026-10-26-test/report.md"):
         assert scope.docs_only(path), path
     for path in ("lightning/ui/web.py", "lightning/README.md", "guideline/app.html", "tools/guideline.py",
-                 "packaging/notes.md", "tests/test_ui.py", "android/README.md"):
+                 "packaging/notes.md", "tests/test_ui.py", "android/README.md", "reports/2026-10-26-test/evidence/reproduce.py"):
         assert not scope.docs_only(path), path
 
     tests = tmp_path / "tests"

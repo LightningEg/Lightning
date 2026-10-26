@@ -8,7 +8,7 @@ by: Claude
 ---
 
 ## Report
-Found by [Audit 5](../../reports/audit-5.md) §4. Done (2026-10-22): every module has a layer in the import contract (a test keeps
+Found by [Audit 5](../../reports/2026-10-21-backend-streamlining/report.md) §4. Done (2026-10-22): every module has a layer in the import contract (a test keeps
 it so; `sync.transport.join_home` takes `borrowed_profile` instead of importing upward); one `core/refs.parse_row_id` replaces four
 id checks; Undo's ledger check is `transactions/history_check.validate_replay`, not a bootstrap closure; `open_profile_tasks` is one
 list for both entrypoints (month-end checkpoints post on unlock, failures are logged); `MoneyFromOthersService` gets its

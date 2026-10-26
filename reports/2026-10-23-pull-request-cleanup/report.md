@@ -13,7 +13,7 @@ The owner requested review and cleanup to zero open PRs. Original branches are r
 | App #78, #79 | Incorporate report and efficiency fixes. Older audit becomes Audit 5; its reused 2G–2K and 3AC codes become 2P–2T and 3AF. 9J–9L remain open. |
 | App #91 | Record existing v1.4.2 publication and finish 2D documentation. |
 | App #101, #104, #106, #107 | Incorporate correctness audit, cash lifecycle validation, accurate Save outcomes, stale-form guards and retryable mass edits. Preserve #111's Delete confirmation and device-status fixes. |
-| App #103 | Defer: input-only upgrade fails the Android lock contract and needs matching native wheels. Follow-up: [1H](../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md). |
+| App #103 | Defer: input-only upgrade fails the Android lock contract and needs matching native wheels. Follow-up: [1H](../../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md). |
 
 ## Status, 2026-10-24
 
@@ -29,4 +29,4 @@ Website: feedback security, website receiver, analytics receiver/rules, deployme
 
 App: full local suite: 2,457 passed, 10 skipped; one workflow-pin consistency failure identified missing updates in workflows added after #47, then corrected and checked again. All four import contracts pass. Journal worker: 12 tests pass, npm audit reports zero vulnerabilities. Final-head CI results belong to the integration PR.
 
-Browser review: ten English/Arabic PC/phone captures of Overview, holdings, Spending and More; no horizontal overflow or JavaScript errors. Review samples: [PC cards](audit-6/overview-pc.png), [Arabic holdings](audit-6/holdings-arabic.png), [Arabic phone](audit-6/overview-phone-arabic.png).
+Browser review: ten English/Arabic PC/phone captures of Overview, holdings, Spending and More; no horizontal overflow or JavaScript errors. Review samples: [PC cards](evidence/overview-pc.png), [Arabic holdings](evidence/holdings-arabic.png), [Arabic phone](evidence/overview-phone-arabic.png).
