@@ -120,7 +120,7 @@ class ThemeBuildTests(unittest.TestCase):
         css = (builder.STATIC / 'theme-materials.css').read_text()
         # continuous motions are slow; each animation stops under reduced motion; no requests; nothing per number
         for name, seconds in builder.re.findall(r'animation: (m-[a-z]+) ([0-9.]+)s', css):
-            if name in ('m-thread', 'm-glint', 'm-drift'):
+            if name in ('m-thread', 'm-glint', 'm-drift', 'm-pigment'):
                 self.assertGreaterEqual(float(seconds), 8, name)
         reduced = css[css.index('@media (prefers-reduced-motion: reduce)'):]
         for selector in ('ground-ambient', 'header-thread', 'hero-sheen', 'overlays-enter', 'cards-hover', 'controls-press', 'theme-unveil'):
@@ -131,6 +131,39 @@ class ThemeBuildTests(unittest.TestCase):
         for shell in ['base.html', 'phone/base.html']:
             source = (ROOT / 'lightning/ui/templates' / shell).read_text()
             self.assertLess(source.index('/static/theme-surfaces.css'), source.index('/static/theme-materials.css'))
+
+    def test_each_drawing_lives_in_its_theme_asset_folder(self):
+        """cosmetics/assets/<theme>/<recipe>.svg: every drawing a recipe names, nothing unused, shapes only."""
+        contract = json.loads((builder.SOURCE / 'slots.json').read_text())
+        found = builder.drawings()
+        named = set(builder.ARTWORK) | builder.FRIEZES
+        self.assertEqual(set(found), named, 'every drawing is a recipe and every drawing recipe has its file')
+        themes = {p.stem for p in builder.SOURCE.glob('*.json')} - {'slots'}
+        palette = json.loads((builder.SOURCE / 'dendera.json').read_text())['parts']['palette']
+        for name, path in found.items():
+            with self.subTest(drawing=name):
+                self.assertIn(path.parent.name, themes, 'a drawing sits in the folder of the theme that introduced it')
+                url = builder.drawing(name, palette, .12)
+                self.assertTrue(url.startswith('url("data:image/svg+xml,'))
+                self.assertNotIn('title', url)  # the file's notes and preview style are dropped
+        self.assertIn(palette['focus'][1:], builder.drawing('lotus-frieze', palette))  # pigments come from the palette
+        self.assertIn('lotus-frieze', contract['limits']['lift'])
+        for bad in ['<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
+                    '<svg xmlns="http://www.w3.org/2000/svg"><image href="https://example.com/x.png"/></svg>',
+                    '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0" fill="url(#g)"/></svg>',
+                    '<svg xmlns="http://www.w3.org/2000/svg"><path class="evil" d="M0 0"/></svg>',
+                    '<svg xmlns="http://www.w3.org/2000/svg"><path onload="x()" d="M0 0"/></svg>']:
+            with self.subTest(bad=bad), tempfile.TemporaryDirectory() as temp:
+                folder = Path(temp) / 'assets' / 'x'
+                folder.mkdir(parents=True)
+                (folder / 'bad.svg').write_text(bad)
+                original = builder.ASSETS
+                builder.ASSETS = Path(temp) / 'assets'
+                try:
+                    with self.assertRaises(ValueError):
+                        builder.drawing('bad', palette)
+                finally:
+                    builder.ASSETS = original
 
     def test_rejects_unreadable_card_and_button(self):
         for part, key, value in [('cards', 'surface', 'text'), ('controls', 'label', 'accent')]:
@@ -144,7 +177,7 @@ class ThemeBuildTests(unittest.TestCase):
         """themes.md section 7: recolour, then texture, then animation; the store's tier for each id (8L migration)."""
         contract = json.loads((builder.SOURCE / 'slots.json').read_text())
         neutral = {'none', 'flat', 'hairline', 'bar', 'dim', 'subtle'}
-        for theme, tier in {'nile': 'palette', 'cotton': 'texture', 'papyrus': 'motion'}.items():
+        for theme, tier in {'nile': 'palette', 'cotton': 'texture', 'papyrus': 'motion', 'dendera': 'motion', 'dendera-night': 'motion'}.items():
             parts = json.loads((builder.SOURCE / f'{theme}.json').read_text())['parts']
             material = {f'{s}.{k}': parts[s][k] for s, spec in contract['slots'].items() if s != 'brand'
                         for k in spec.get('material', {}) if parts[s][k] not in neutral}

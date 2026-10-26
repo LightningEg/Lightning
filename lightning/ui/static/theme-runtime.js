@@ -88,7 +88,7 @@
       themes.forEach(theme => {
         const option = document.createElement('option');
         option.value = theme.id;
-        option.textContent = theme.paid && !owned(theme.id) ? tr(theme.name) + ' ' + tr('(try it)')
+        option.textContent = theme.paid && !owned(theme.item || theme.id) ? tr(theme.name) + ' ' + tr('(try it)')
           : tr(theme.name + (theme.preview ? ' (preview)' : ''));
         select.append(option);
       });

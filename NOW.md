@@ -19,7 +19,7 @@
 
 - **3AH visual flow review:** implementation and browser evidence ready for owner review; native Windows/Android and assistive-technology acceptance remain. **Read:** `reports/2026-10-25-app-visual-flow/report.md`.
 
-- **8J/8L app themes:** ready to sell; the owner deploys, opens checkout, provisions the store key and turns on each app release. **Read:** `issues/8-website/8L-theme-materials-acceptance.md`.
+- **8J/8L app themes:** ready to sell, Dendera included; the owner deploys, opens checkout, provisions the store key and turns on each app release. New themes: `guideline/themes.md` §5. **Read:** `issues/8-website/8L-theme-materials-acceptance.md`.
 
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 
