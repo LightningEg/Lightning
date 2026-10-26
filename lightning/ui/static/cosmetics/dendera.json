@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 2,
+  "id": "dendera",
+  "name": "Dendera",
+  "version": 1,
+  "status": "paid",
+  "priceCoins": null,
+  "bundleTargets": [
+    "windows",
+    "android"
+  ],
+  "minimumAppVersion": null,
+  "parts": {
+    "palette": {
+      "background": "#F1E6CC",
+      "surface": "#FAF3E2",
+      "raised": "#ECDFC3",
+      "text": "#1E1A14",
+      "muted": "#54483A",
+      "border": "#D9C9A3",
+      "accent": "#1F3F8C",
+      "onAccent": "#FFFBF1",
+      "income": "#2E7A4F",
+      "expense": "#B23A5B",
+      "transfer": "#5A4E3C",
+      "warning": "#9C3A1F",
+      "focus": "#0F6E6A",
+      "hero": "#8A6410"
+    },
+    "brand": {
+      "logoVariant": "on-light"
+    },
+    "ground": {
+      "texture": "papyrus",
+      "textureStrength": "subtle",
+      "artwork": "zodiac-ring",
+      "vignette": "none",
+      "ambient": "none",
+      "equip": "unveil"
+    },
+    "header": {
+      "surface": "background",
+      "seam": "border",
+      "finish": "lotus-frieze",
+      "thread": "pigment-thread"
+    },
+    "navigation": {
+      "surface": "surface",
+      "activeMark": "hero",
+      "finish": "flat",
+      "activeStyle": "cartouche"
+    },
+    "hero": {
+      "surface": "surface",
+      "edge": "hero",
+      "finish": "satin",
+      "grain": "paper",
+      "edgeStyle": "foil",
+      "depth": "mid",
+      "artwork": "winged-disc",
+      "sheen": "none"
+    },
+    "cards": {
+      "surface": "surface",
+      "border": "border",
+      "finish": "flat",
+      "grain": "paper",
+      "edgeLight": "soft",
+      "depth": "low",
+      "hover": "none"
+    },
+    "charts": {
+      "grid": "border",
+      "accent": "accent"
+    },
+    "controls": {
+      "fill": "accent",
+      "label": "onAccent",
+      "focus": "focus",
+      "finish": "satin",
+      "depth": "low",
+      "press": "none"
+    },
+    "buttons": {
+      "surface": "surface",
+      "label": "text",
+      "border": "border",
+      "finish": "embossed"
+    },
+    "tabs": {
+      "surface": "raised",
+      "chosen": "accent",
+      "chosenLabel": "onAccent",
+      "finish": "flat"
+    },
+    "fields": {
+      "surface": "raised",
+      "border": "border",
+      "well": "inset"
+    },
+    "progress": {
+      "track": "raised",
+      "finish": "flat"
+    },
+    "overlays": {
+      "surface": "surface",
+      "backdrop": "text",
+      "finish": "flat",
+      "grain": "paper",
+      "depth": "high",
+      "shade": "dim",
+      "enter": "rise"
+    },
+    "menus": {
+      "surface": "surface",
+      "divider": "border",
+      "finish": "flat",
+      "depth": "mid"
+    }
+  }
+}

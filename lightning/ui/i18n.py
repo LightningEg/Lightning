@@ -34,6 +34,8 @@ ARABIC_UI = {
     'Nile': 'النيل',
     'Cotton': 'قطن',
     'Papyrus': 'بردي',
+    'Dendera': 'دندرة',
+    'Dendera, night': 'دندرة، بالليل',
     '(try it)': '(جرّبها)',
     'Trying it for this session. Buy it on lightningeg.com, then unlock it below to keep it.': 'بتجرّبها للجلسة دي. اشتريها من lightningeg.com وافتحها هنا تحت عشان تفضل معاك.',
     'Unlock a theme you bought': 'افتح سمة اشتريتها',

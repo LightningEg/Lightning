@@ -32,15 +32,16 @@ def store() -> dict:
 
 @lru_cache(maxsize=1)
 def paid_themes() -> dict[str, int]:
-    """Each paid theme this app version carries, at the exact version a licence must name."""
-    return {t["id"]: t["version"] for t in json.loads(REGISTRY.read_text()) if t.get("paid")}
+    """Each paid store item this app version carries, at the exact version a licence must name. A theme's other mode
+    (Dendera's night) names its item and rides on that item's licence: one purchase, both modes."""
+    return {t.get("item", t["id"]): t["version"] for t in json.loads(REGISTRY.read_text()) if t.get("paid")}
 
 
 def store_themes() -> list[dict]:
     """The paid themes for Settings, in registry order: id, name and whether this computer holds its licence."""
     mine = owned()
     return [{"id": t["id"], "name": t["name"], "owned": t["id"] in mine}
-            for t in json.loads(REGISTRY.read_text()) if t.get("paid")]
+            for t in json.loads(REGISTRY.read_text()) if t.get("paid") and "item" not in t]
 
 
 _FOLDER: Path | None = None
@@ -96,7 +97,8 @@ def owned() -> frozenset[str]:
 def wearable(theme: str) -> bool:
     # LIGHTNING_THEME_REVIEW=1 is for maintainers reviewing themes before release (tools/theme_shots.py); the app
     # is open source, so this is a convenience, not a lock. Ownership is the store's signed licence.
-    return theme not in paid_themes() or os.environ.get("LIGHTNING_THEME_REVIEW") == "1" or theme in owned()
+    item = next((t.get("item", t["id"]) for t in json.loads(REGISTRY.read_text()) if t["id"] == theme), theme)
+    return item not in paid_themes() or os.environ.get("LIGHTNING_THEME_REVIEW") == "1" or item in owned()
 
 
 def _save(envelope: dict) -> None:

@@ -50,7 +50,9 @@ def answer(envelope=None, status=200):
 
 
 def test_the_bundled_paid_themes_share_the_store_ids():
-    assert entitlements.paid_themes() == {"cotton": 1, "nile": 1, "papyrus": 1}
+    assert entitlements.paid_themes() == {"cotton": 1, "dendera": 1, "nile": 1, "papyrus": 1}
+    # Dendera's night is the same purchase: it is not a store item of its own and rides on Dendera's licence
+    assert [t["id"] for t in entitlements.store_themes()].count("dendera-night") == 0
     shipped = json.loads(entitlements.STORE.read_text())
     assert shipped["redeem_url"].startswith("https://") and shipped["redeem_url"].endswith("/functions/v1/redeem-purchase")
 
@@ -77,6 +79,14 @@ def test_redeem_verifies_keeps_and_unlocks(store):
     kept = json.loads(entitlements.licence_file().read_text())["licenses"]
     assert len(kept) == 2
     assert not list(entitlements.licence_file().parent.glob(".licenses-*")), "no temporary file left behind"
+
+
+def test_a_themes_night_mode_is_worn_with_its_items_licence(store):
+    assert not entitlements.wearable("dendera-night") and not entitlements.wearable("dendera")
+    entitlements.redeem("abcd1234abcd1234abcd1234abcd1234", "dendera", opener=answer(store([("dendera", 1)])))
+    assert entitlements.wearable("dendera") and entitlements.wearable("dendera-night")
+    from lightning.ui.themes import theme_id
+    assert theme_id("dendera-night") == "dendera-night"
 
 
 def test_forged_tampered_or_wrong_version_licences_unlock_nothing(store):
