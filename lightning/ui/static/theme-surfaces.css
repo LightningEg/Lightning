@@ -26,14 +26,16 @@ html[data-theme]:not([data-theme="lightning-default"]) :is(.pick-list, .pick-res
 html[data-theme]:not([data-theme="lightning-default"]) :is(.nav a.active, .section-tabs a.active) {
   color: var(--text); border-color: var(--theme-active);
 }
-html[data-theme]:not([data-theme="lightning-default"]) :is(.btn.primary, .phone-invest-seg a.is-chosen, .phone-invest-chip.is-chosen) {
+html[data-theme]:not([data-theme="lightning-default"]) .btn.primary {
   background: var(--action); color: var(--on-action); border-color: var(--action);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.phone-invest-seg a.is-chosen, .phone-invest-chip.is-chosen) {
+  background: var(--theme-tab-chosen); color: var(--theme-tab-chosen-label); border-color: var(--theme-tab-chosen);
 }
 html[data-theme]:not([data-theme="lightning-default"]) :is(.brand-mark, .phone-mark img) {
   content: var(--theme-logo);
 }
-/* Decorative patterns and motion stay inert until an approved pattern is registered.
-   Theme changes never animate content or amounts. This adapter is direction neutral. */
+/* Materials and motion are theme-materials.css; this file is paint only and direction neutral. */
 
 
 html[data-theme]:not([data-theme="lightning-default"]) .main :is(.stat-tile, .kpi-card, .metric-card, .data-panel) {
@@ -41,8 +43,8 @@ html[data-theme]:not([data-theme="lightning-default"]) .main :is(.stat-tile, .kp
 }
 html[data-theme]:not([data-theme="lightning-default"]) :is(.key-card-row summary, .key-card-detail) { color: var(--muted); }
 html[data-theme]:not([data-theme="lightning-default"]) .key-card-detail a { color: var(--text); }
-html[data-theme]:not([data-theme="lightning-default"]) .main .plan-tab[aria-current="page"] {
-  background: var(--action); color: var(--on-action);
+html[data-theme]:not([data-theme="lightning-default"]) :is(.main .plan-tab[aria-current="page"], .period-button.selected, .site-period-control .period-button.selected):not(#_) {
+  background-color: var(--theme-tab-chosen); color: var(--theme-tab-chosen-label); border-color: var(--theme-tab-chosen);
 }
 
 /* Dark-theme readability adapters (2026-10-25). Found by screenshotting the real app in every non-default theme:
@@ -75,10 +77,10 @@ html[data-theme]:not([data-theme="lightning-default"]) :is(.lead-row.is-result, 
 html[data-theme]:not([data-theme="lightning-default"]) :is(.bullet-plan, .budget-progress) { background: var(--track); }
 /* Fields and secondary buttons that kept a white fill */
 html[data-theme]:not([data-theme="lightning-default"]) :is(input, select, textarea):not([type=checkbox]):not([type=radio]):not([type=range]):not(#_):not(#_) {
-  background-color: var(--field) !important; color: var(--text) !important; border-color: var(--line) !important;
+  background-color: var(--theme-field) !important; color: var(--text) !important; border-color: var(--theme-field-border) !important;
 }
 html[data-theme]:not([data-theme="lightning-default"]) :is(.btn.small, .btn.phone-save, .date-picker-button):not(.primary):not(#_):not(#_) {
-  background: var(--surface-2) !important; color: var(--text) !important; border-color: var(--line) !important;
+  background-color: var(--theme-button) !important; color: var(--theme-button-label) !important; border-color: var(--theme-button-border) !important;
 }
 /* Phone: transaction direction discs keep their meaning, on a dark tint */
 html[data-theme]:not([data-theme="lightning-default"]) .phone-txn-av.is-out { background: var(--theme-tint-bad); color: var(--theme-expense); }
@@ -93,6 +95,6 @@ html[data-theme]:not([data-theme="lightning-default"]) .phone-month.flow-in-2 { 
 html[data-theme]:not([data-theme="lightning-default"]) .phone-month.flow-in-3 { background: color-mix(in srgb, var(--theme-income) 38%, var(--theme-card)); }
 /* Phone: chosen filter chip and the Add disc used the ink colour as a fill */
 html[data-theme]:not([data-theme="lightning-default"]) .phone-chip.is-chosen,
-html[data-theme]:not([data-theme="lightning-default"]) .phone-chip.is-chosen a,
-html[data-theme]:not([data-theme="lightning-default"]) .phone-add-disc { background: var(--action); color: var(--on-action); }
-html[data-theme]:not([data-theme="lightning-default"]) .phone-chip.is-chosen .phone-chip-n { background: var(--on-action); color: var(--action); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-chip.is-chosen a { background-color: var(--theme-tab-chosen); color: var(--theme-tab-chosen-label); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-add-disc { background-color: var(--action); color: var(--on-action); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-chip.is-chosen .phone-chip-n { background: var(--theme-tab-chosen-label); color: var(--theme-tab-chosen); }

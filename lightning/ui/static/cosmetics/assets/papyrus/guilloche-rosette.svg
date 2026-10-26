@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 200 200" fill="none" stroke="currentColor" stroke-width=".6">
+  <title>Guilloché rosette: twelve crossed ellipses, as behind a banknote's text. Papyrus; Cotton wears it too.</title>
+  <ellipse rx="92" ry="30" transform="rotate(0)"/>
+  <ellipse rx="92" ry="30" transform="rotate(15)"/>
+  <ellipse rx="92" ry="30" transform="rotate(30)"/>
+  <ellipse rx="92" ry="30" transform="rotate(45)"/>
+  <ellipse rx="92" ry="30" transform="rotate(60)"/>
+  <ellipse rx="92" ry="30" transform="rotate(75)"/>
+  <ellipse rx="92" ry="30" transform="rotate(90)"/>
+  <ellipse rx="92" ry="30" transform="rotate(105)"/>
+  <ellipse rx="92" ry="30" transform="rotate(120)"/>
+  <ellipse rx="92" ry="30" transform="rotate(135)"/>
+  <ellipse rx="92" ry="30" transform="rotate(150)"/>
+  <ellipse rx="92" ry="30" transform="rotate(165)"/>
+  <circle r="96"/>
+  <circle r="60"/>
+  <circle r="18"/>
+  <ellipse rx="46" ry="14" transform="rotate(0)"/>
+  <ellipse rx="46" ry="14" transform="rotate(30)"/>
+  <ellipse rx="46" ry="14" transform="rotate(60)"/>
+  <ellipse rx="46" ry="14" transform="rotate(90)"/>
+  <ellipse rx="46" ry="14" transform="rotate(120)"/>
+  <ellipse rx="46" ry="14" transform="rotate(150)"/>
+</svg>

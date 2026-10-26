@@ -10,20 +10,39 @@ Mode: [Dark | Light | Both]
 Mood and references: [description, images or links]
 Ground preference: [specify OLED black if required]
 
-Read theme-kit/README.md, guideline/themes.md, the relevant sections of
-guideline/app.html and guideline/phone.html, and
-lightning/ui/static/cosmetics/slots.json before designing.
-Start from theme-kit/theme.template.json. If a required brief field is
-unfilled, ask for it rather than assuming a mode or aesthetic.
+Follow guideline/themes.md section 5 step by step: brief, plan, seed and
+palettes, recipes, manifests, real screens, the sites, checks, record.
+Read theme-kit/README.md, the relevant sections of guideline/app.html and
+guideline/phone.html, and lightning/ui/static/cosmetics/slots.json first.
+Write the plan (theme-kit/plans/<id>.html; Dendera's is the model) before
+any code. Function first, then clarity and polish, then looks: a texture
+or motion never costs speed, a reading or a tap.
+Start from theme-kit/theme.template.json, or from the closest reference
+theme (cotton.json, light; papyrus.json, dark; dendera.json and
+dendera-night.json, two modes). If a
+required brief field is unfilled, ask for it rather than assuming a mode
+or aesthetic.
+
+A theme is every element in the README's inventory times three layers:
+paint (palette keys), material (finish, grain, edge light, depth, artwork)
+and motion. State every layer of every element; choose materials and
+motions only from the README's recipe library, with one continuous motion
+at most. Aim for a material, not a recolour: decide what the theme is made
+of (paper, lacquer, linen, foil) and let every element follow it.
 
 Each manifest represents one palette. For Both, deliver separate complete
 dark and light manifests with distinct IDs. They are selected explicitly;
 do not invent automatic mode switching or a JSON mode property.
-Keep status test-preview, priceCoins null, and decoration/motion none.
+Keep priceCoins null: prices live in the store's catalogue. A second
+mode of a sold theme names its store item ("item": "<id>").
 
 Preserve layout, typography, spacing, financial colours, number formatting
-and app behaviour. Follow the eleven compartments; do not introduce theme
-HTML, scripts, remote assets or arbitrary CSS.
+and app behaviour. Follow the element inventory; do not introduce theme
+HTML, scripts, remote assets or arbitrary CSS. If the theme needs a
+recipe the library lacks, propose it as a new recipe: an SVG of shapes
+only in lightning/ui/static/cosmetics/assets/<id>/<recipe>.svg, its name
+in slots.json, its paint in theme-materials.css, a test; maintainers
+review it once and then every theme may use it.
 
 Meet WCAG AA: body text, labels and numbers (including chip text) at least
 4.5:1; meaningful control borders, chip indicators and focus rings at least

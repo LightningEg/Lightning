@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 10">
+  <title>Lotus-bud frieze: one tile of the band temple walls and banknote borders run along their edges. Dendera.</title>
+  <style>.p-focus{color:#0F6E6A}.p-hero{color:#8A6410}.p-warning{color:#9C3A1F}.p-accent{color:#1F3F8C}</style>
+  <path class="p-focus" fill="currentColor" d="M6 8.6C3.2 7.2 3.4 3.6 6 1C8.6 3.6 8.8 7.2 6 8.6Z"/>
+  <path class="p-hero" stroke="currentColor" stroke-width="1" stroke-linecap="round" d="M6 7.4V3.6"/>
+  <circle class="p-warning" fill="currentColor" cx="18" cy="6.4" r="1.15"/>
+  <rect class="p-accent" fill="currentColor" x="0" y="9.2" width="24" height=".8"/>
+</svg>

@@ -12,6 +12,12 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 ## [Unreleased]
 
 - 2026-10-26 · @yoreva-01: 7H bank CSV imports accept accounting negatives, currency wrappers and Arabic digits. Review fixes preserve fractional amounts and reject unknown wrappers or extra signs. Closes #49.
+- 2026-10-26 · Claude: [8L] Dendera theme (animated): day and night, zodiac ring, winged disc, lotus frieze, pigment thread; drawings now live in `cosmetics/assets/<theme>/`. Wide cards readable on dark themes; `theme_shots.py --ar` really Arabic; new `tools/theme_check.py`. `themes.md` §5 is one flow for every maker; plan `theme-kit/plans/dendera.html`, report `reports/2026-10-26-dendera-theme/`.
+
+- 2026-10-26 · Claude: 8L ready to sell: app themes share the website's ids (Nile 300, Cotton 600, Papyrus 1,000 coins), tried by anyone and kept with a signed licence unlocked in Settings › Appearance (`ui/entitlements.py`).
+  Tiers for every look (recolour, texture, animation) in themes.md section 7; owner console rebuilt on the website.
+- 2026-10-26 · Claude: 8L theme materials: every app theme element states paint, material and motion from a reviewed recipe library (`theme-materials.css`, `slots.json` schema 2), validated at each surface's worst point.
+  New light reference Cotton; Nile Papyrus & Lapis Guilloché redone (lacquer hero, travelling gold-foil edge, papyrus ground, foil controls); `tools/theme_shots.py` captures the roster.
 - 2026-10-26 · Claude: Audit 8 engine fixes: 2I shared writer checks cash currency/rate, 2J resent add forms save once, 2L instalment cents, 2M last revision fields; 15 more write-path, loan,
   schedule, onboarding and integrity-check fixes (CD re-redeem, reserve/circle limits, deactivate/delete references, loan overpayment). Open: 2J journal, 2Z, 7R, 7S. reports/2026-10-26-engine-audit.
 - 2026-10-26 · Codex: 4E–4I makes interrupted pairing resumable, binds recovery to current membership, and limits unapproved requests.

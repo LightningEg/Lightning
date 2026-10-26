@@ -16,7 +16,7 @@ The website's supporter release (website repo, `supabase/migrations/202610253700
 
 ## Still to do
 
-1. **Sell the app themes** (Nile Nocturne, Royal Obsidian & Gold, Nile Papyrus & Lapis Guilloché). Blocked on 8J: no paid app item is sold before claiming and applying work on Windows and Android.
+1. **Sell the app themes.** Now Nile, Cotton and Papyrus, one purchase with their website versions; claiming and the owner's release switch are built (8L). Royal Obsidian & Gold waits for a website version.
 2. **Supporters on the app's About screen.** Members who opt in, by display name. Needs an opt-in on the website profile, a signed list the app can bundle at release time, and an About screen that shows it without any network call.
 3. **A beta channel for supporters.** Owner decision: who gets early builds, through which channel (GitHub release flag, a second download, or a WhatsApp group), and what they agree to.
 
