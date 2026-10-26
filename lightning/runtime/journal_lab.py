@@ -209,9 +209,9 @@ async def serve(devices, transport_key, port, *, browser=True, mailbox_origin=No
     protocol = create_journal_app(home, session_token=token, channel=home_channel, pairing=pairings[0])
     servers = [LabServer(uvicorn.Config(app, host="127.0.0.1", port=port + index, access_log=False, log_level="error", timeout_graceful_shutdown=5))
                for index, app in enumerate(apps)]
-    servers.append(LabServer(uvicorn.Config(protocol, host="0.0.0.0", port=port + 2,
-        ssl_keyfile=str(home.identity.key_path), ssl_certfile=str(home.identity.cert_path),
-        access_log=False, log_level="error", timeout_graceful_shutdown=5)))
+    servers.append(LabServer(home.identity.configure_uvicorn_tls(uvicorn.Config(
+        protocol, host="0.0.0.0", port=port + 2,
+        access_log=False, log_level="error", timeout_graceful_shutdown=5))))
     async def launch():
         for _ in range(100):
             if all(server.started for server in servers):

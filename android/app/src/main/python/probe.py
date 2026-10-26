@@ -144,6 +144,8 @@ def _guards(origin):
 def serve(files_dir):
     """Start the shared runtime on a fresh copy of the dummy profile. Returns the single-use launch URL."""
     global _host, _paths
+    from lightning_android import configure_device_credentials
+    configure_device_credentials()
     from lightning.runtime.app import profile_app
     from lightning.runtime.http import Host
     from lightning.runtime.paths import create_profile
@@ -213,6 +215,16 @@ def _roundtrip():
         raise AssertionError("differs from Windows/Linux:\n" + "\n".join(wrong))
     timings = ", ".join(f"{name} {value:.2f} s" for name, value in seconds.items())
     return f"same figures, inventory and key recovery as Windows/Linux (fingerprint {fingerprint(lines)}); {timings}"
+
+
+def pairing_credentials():
+    """Debug-only dummy credential check, exposed by an internal native activity."""
+    import json
+    from lightning_android import configure_device_credentials
+    if not configure_device_credentials():
+        raise RuntimeError("Android credential adapter is unavailable")
+    from lightning.runtime.pairing_probe import credential_checks
+    return json.dumps(credential_checks(require_native=True), sort_keys=True)
 
 
 def run():

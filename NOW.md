@@ -4,7 +4,6 @@
 
 | Who | Work | Files | Since |
 |---|---|---|---|
-| Codex | 4E–4I owner pairing hardening. | Pairing, identity protection, acceptance | 2026-10-26 |
 | Claude | Journal: 7 review fixes, then J6 (owner asked 10-16). | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
 
@@ -29,7 +28,7 @@ The whole plan, by milestone and code, is `issues/INDEX.md`.
 3. **9J–9L:** remain open from Audit 5. **Read:** `reports/2026-10-21-backend-streamlining/report.md`.
 4. **1H:** coordinated Android, desktop and build-tool dependency locks remain; this follows deferred PR #103. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
 5. **2A/2B:** run the Windows reboot drill; power-loss evidence remains. **Read:** each item in `issues/INDEX.md`.
-6. **2C and 4A:** ordinary-PC, recovery, and native PC/phone acceptance remain. **Read:** each item in `issues/INDEX.md`.
+6. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `reports/2026-10-26-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
 7. **3I owner check:** first run and import review on PC and phone. **Read:** `issues/3-polish-and-arabic/3I-owner-check-first-run-and-import.md`.
 8. **Website recapture** after 3W / 3AG / 7Q so the site shows the current screens. **Read:** `skills/site-recapture/SKILL.md`; Changelog 2026-10-21.
 9. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.

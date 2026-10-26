@@ -11,7 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-- 2026-10-26 · Codex: record 4E–4I pairing hardening: retry recovery, protected credentials, bounded requests and acceptance/security review.
+- 2026-10-26 · Codex: 4E–4I makes interrupted pairing resumable, binds recovery to current membership, and limits unapproved requests.
+  Device keys use DPAPI/Android Keystore; migration preserves identity and TLS uses encrypted temporary files.
+  Added process-death/network fault tests, native credential probes, an independent internal security review and a physical-device acceptance kit.
 
 - 2026-10-26 · Codex: 1I organize repository docs: dated report/evidence folders, durable sanitized feedback, guideline and template maps; repair links and enforce catalogues and complete guideline mirrors.
 - 2026-10-26 · Claude: 8J simple InstaPay top-up (website #95): members copy our details and their email for the note, then confirm date, amount and sender, no receipt; the owner reconciles every open top-up on one screen.
