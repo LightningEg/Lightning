@@ -8,7 +8,9 @@ const staticDir = path.join(__dirname, '../lightning/ui/static');
 function boot(saved, blocked = false) {
   const events = {}, windowEvents = {}, memory = new Map([['lightning_theme', saved]]);
   const select = { value: '', options: [], append(option) { this.options.push(option); }, addEventListener(type, fn) { this[type] = fn; } };
-  const root = { dataset: {}, scrollTop: 340 };
+  const attrs = new Map();
+  const root = { dataset: {}, scrollTop: 340, setAttribute(k, v) { attrs.set(k, String(v)); }, getAttribute(k) { return attrs.has(k) ? attrs.get(k) : null; },
+    removeAttribute(k) { attrs.delete(k); }, get attributes() { return [...attrs].map(([name, value]) => ({ name, value })); } };
   const input = { value: 'unsaved note' };
   const status = { textContent: '' };
   const document = { documentElement: root,
@@ -23,18 +25,19 @@ function boot(saved, blocked = false) {
   return { window, root, select, events, windowEvents, memory, input, status };
 }
 test('boot restores before DOMContentLoaded and rejects stale IDs', () => {
-  assert.equal(boot('nile-nocturne').root.dataset.theme, 'nile-nocturne');
+  assert.equal(boot('royal-obsidian-gold').root.dataset.theme, 'royal-obsidian-gold');
   for (const id of [null, 'removed-theme', '"><script>']) assert.equal(boot(id).root.dataset.theme, 'lightning-default');
 });
-test('a decorated theme sets its texture and motion, and switching away clears them', () => {
-  const app = boot('nile-papyrus-guilloche');
-  assert.equal(app.root.dataset.texture, 'papyrus-guilloche');
-  assert.equal(app.root.dataset.motion, 'security-thread');
+test('a material theme sets its recipes, and switching away clears them', () => {
+  const app = boot('papyrus');
+  assert.equal(app.root.getAttribute('data-m-ground-texture'), 'papyrus');
+  assert.equal(app.root.getAttribute('data-m-hero-edge-style'), 'foil');
   app.events.DOMContentLoaded();
-  app.select.value = 'nile-nocturne'; app.select.change();
-  assert.equal(app.root.dataset.texture, undefined);
-  assert.equal(app.root.dataset.motion, undefined);
-  assert.equal(boot('nile-nocturne').root.dataset.texture, undefined);
+  app.select.value = 'royal-obsidian-gold'; app.select.change();
+  assert.equal(app.root.getAttribute('data-m-ground-texture'), 'none');
+  assert.equal(app.root.getAttribute('data-m-hero-edge-style'), 'hairline');
+  app.window.LightningTheme.set('lightning-default');
+  assert.equal(app.root.attributes.filter(a => a.name.startsWith('data-m-')).length, 0);
 });
 test('switch persists with the existing root and unsaved input untouched', () => {
   const app = boot(null), root = app.root;
@@ -47,12 +50,12 @@ test('switch persists with the existing root and unsaved input untouched', () =>
 });
 test('blocked storage remains usable and reports unsaved preference', () => {
   const app = boot(null, true); app.events.DOMContentLoaded();
-  app.select.value = 'nile-nocturne'; app.select.change();
-  assert.equal(app.root.dataset.theme, 'nile-nocturne');
+  app.select.value = 'royal-obsidian-gold'; app.select.change();
+  assert.equal(app.root.dataset.theme, 'royal-obsidian-gold');
   assert.match(app.status.textContent, /could not save/);
 });
 test('storage change, reset and clear synchronize an existing selector', () => {
-  const app = boot('nile-nocturne'); app.events.DOMContentLoaded();
+  const app = boot('papyrus'); app.events.DOMContentLoaded();
   app.windowEvents.storage({ key: 'lightning_theme', newValue: 'royal-obsidian-gold' });
   assert.equal(app.select.value, 'royal-obsidian-gold');
   app.windowEvents.storage({ key: null, newValue: null });

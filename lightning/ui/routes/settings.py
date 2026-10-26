@@ -201,8 +201,24 @@ async def save_theme(request: Request):
     selected = str(form.get("theme", ""))
     if selected not in theme_ids():
         return Response("Unknown theme", status_code=400)
+    from ..entitlements import wearable
+    if not wearable(selected):  # anyone may try a paid theme for the session; keeping it needs its licence
+        return Response("Unlock this theme to keep it", status_code=402)
     container(request).settings.set("appearance_theme", selected)
     return Response(status_code=204)
+
+
+@router.post("/theme/unlock")
+async def unlock_theme(request: Request):
+    """Exchange the one-time code from the website account page for this theme's licence, then wear it."""
+    from ..entitlements import UnlockError, redeem
+    form = await request.form()
+    try:
+        theme = redeem(str(form.get("code", "")), str(form.get("theme", "")))
+    except UnlockError as exc:
+        return redirect("/settings", str(exc))
+    container(request).settings.set("appearance_theme", theme)
+    return redirect("/settings", "Theme unlocked. It is yours on this computer.")
 
 
 @router.post("/privacy")

@@ -16,34 +16,71 @@ For an AI creator, copy [AI-PROMPT.md](AI-PROMPT.md), complete its fields, and p
 
 Confirm the requested mode before choosing colours; do not infer it from a theme name or reference image. Each app manifest contains one palette. For **Both**, deliver two complete manifests with distinct IDs such as `your-theme-dark` and `your-theme-light`, and validate/capture each independently. Users select each variant explicitly; the current runtime does not automatically switch between them. Mode belongs in this brief, not an invented JSON field.
 
-The app supports palettes plus the approved decoration in `slots.json`: `pattern` and `motion` are `none` or a name on its `patterns` and `motions` lists (drawn by `theme-decor.css`), and hero `decoration` stays `none`. A new texture or motion needs a separately reviewed app implementation before acceptance; arbitrary CSS, scripts, SVG fragments and remote URLs cannot be imported. Do not promise a textured release using this template alone.
+## Tiers: what you build and what it sells for
 
-## Create and validate
+Every look climbs three steps, and the highest tier has all three: **recolour**, **texture** and **animation**. Decide the tier in the brief; it sets which layers you fill. Prices are in coins (5 coins = 1 EGP), one price per theme tier, set by the owner in the console. Full tables, with what each tier changes: `guideline/themes.md` section 7.
 
-1. Copy `theme.template.json` to `your-theme.json`, change its ID/name, and edit `parts.palette`. The sample is a complete valid dark palette. Keep the metadata fields, including `status: test-preview` and a null price; release and pricing are handled by Lightning.
-2. Fill the eleven compartments from `slots.json`. Each paint value outside the palette is a **palette key**, for example `cards.surface: "raised"`, not a hex colour. All palette colours are six-digit hex. Omitted part properties inherit the free default; prefer complete delivery so the intended result is explicit.
-3. Keep money meanings: Green in, Rose out and Azure held. Current app adapters leave financial tokens and financial series unchanged. The manifest's income/expense/transfer/warning fields are reserved; they do not recolour money. Check those existing colours against every proposed surface.
-4. From the repository root, run `python tools/build_themes.py --validate theme-kit/your-theme.json`. This checks schema, allowed values and key text/control contrast combinations. It does not establish that every real screen is accessible.
-5. For integration, the Lightning maintainer copies the reviewed JSON into `lightning/ui/static/cosmetics/` and runs `python tools/build_themes.py`. Commit all generated files. No HTML, layout or app logic should need changing for a palette.
-6. Launch the app normally, open Settings → Appearance and choose the new preview on PC and phone. `theme-kit/preview.html` is a static component workbench; serve the repository root with `python -m http.server 8765`, then open `http://localhost:8765/theme-kit/preview.html`. It uses the same generated tokens and switcher. Inspect actual app screens before signing off.
+| Kind | Recolour | + Texture | + Animation (highest) |
+|---|---|---|---|
+| **Theme** (both sites, PC, phone) | Palette: every colour on every screen · 300 coins, 60 EGP | Textured: plus the material (ground texture, card grain, edge light, depth, watermark, finishes) · 600 coins, 120 EGP | Animated: plus one slow signature motion and motions that answer you · 1,000 coins, 200 EGP |
+| **Banner** | One colour field · 100 coins, 20 EGP | A drawn scene or pattern · 120–200 coins, 24–40 EGP | The scene with one slow motion · 300–350 coins, 60–70 EGP |
+| **Frame** | A ring in one colour · 80 coins, 16 EGP | A metal or double ring · 100 coins, 20 EGP | One slow glint · 200 coins, 40 EGP |
+| **Badge** | A simple mark · 60 coins, 12 EGP | A drawn, detailed mark · 80–120 coins, 16–24 EGP | One slow motion · 200 coins, 40 EGP |
+| **Name** | One colour · 150 coins, 30 EGP | A gradient · 300 coins, 60 EGP | One slow shimmer · 500 coins, 100 EGP |
 
-## Eleven compartments
+For a theme, the tier maps to the layers below: a **Palette** theme fills paint only and leaves every material `flat`/`none` and every motion `none`; a **Textured** theme adds material (ground texture, grain, edge light, depth, finishes, artwork) with no continuous motion; an **Animated** theme adds exactly one continuous motion (`ground.ambient`, `header.thread` or `hero.sheen`) and may add the motions that answer the user (hover, press, enter, equip). Cotton is the Textured reference and Papyrus the Animated one.
 
-| Part | Creator supplies | Fixed by the application |
+## How a theme is built: elements × layers
+
+A Lightning theme is not a palette swap. It is a **complete specification**: every element in the inventory below states three layers, and nothing is left to the default by chance (the validator refuses a manifest with a missing layer).
+
+- **Paint**: which of the theme's fourteen palette colours the element wears. Values are palette keys (`"surface"`), never hex.
+- **Material**: how the surface is made: finish, grain, edge light, depth, artwork. Values come from the recipe library.
+- **Motion**: how it moves: one continuous (ambient) motion at most per theme; hover, press and enter answer the user; equip plays once when the theme is put on.
+
+Creators choose recipes; they never write CSS. A recipe is app code in `lightning/ui/static/theme-materials.css` (grain and artwork are drawn per theme, in its own colours, by `tools/build_themes.py`). A new recipe is proposed to the maintainers, reviewed once, and then every theme can use it.
+
+## Element inventory
+
+Every element, where it appears, and what each layer may be. `slots.json` is the machine copy of this table; the template fills every cell.
+
+| Element | Covers (PC · phone) | Paint | Material | Motion |
+|---|---|---|---|---|
+| `palette` | Every colour. The money colours stay the app's own | 14 hex colours | | |
+| `brand` | The two-leaf mark | | `logoVariant` | |
+| `ground` | The page behind everything | (palette `background`) | `texture`, `textureStrength`, `artwork`, `vignette` | `ambient`, `equip` |
+| `header` | Top bar · app bar | `surface`, `seam` | `finish` | `thread` |
+| `navigation` | Sidebar and current page · tab bar and current tab | `surface`, `activeMark` | `finish`, `activeStyle` | |
+| `hero` | Lead figure card, focal metrics, portfolio summary · (phone lead sits on the ground) | `surface`, `edge` | `finish`, `grain`, `edgeStyle`, `depth`, `artwork` | `sheen` |
+| `cards` | Cards, panels, KPI tiles, overview blocks, list dividers · phone cards and tiles | `surface`, `border` | `finish`, `grain`, `edgeLight`, `depth` | `hover` |
+| `charts` | Grid lines, nonfinancial accents | `grid`, `accent` | | |
+| `controls` | Primary buttons, chosen chip, Add disc, focus ring | `fill`, `label`, `focus` | `finish`, `depth` | `press` |
+| `buttons` | Secondary and small buttons, date picker | `surface`, `label`, `border` | `finish` | |
+| `tabs` | Period switch, section tabs, segments, filter chips | `surface`, `chosen`, `chosenLabel` | `finish` | |
+| `fields` | Inputs, selects, pickers, search | `surface`, `border` | `well` | |
+| `progress` | Budget meters, plan bullets, KPI meters | `track` | `finish` | |
+| `overlays` | Dialogs, pop-ups, sheets, period panel, their shade | `surface`, `backdrop` | `finish`, `grain`, `depth`, `shade` | `enter` |
+| `menus` | Dropdowns, pick lists, context menus | `surface`, `divider` | `finish`, `depth` | |
+
+## Recipe library
+
+| Recipe | Values | What it is |
 |---|---|---|
-| Palette | Background, text, quiet text, surfaces, accent, focus | Money meanings and financial series |
-| Brand | `on-light` or `on-dark` | Approved mark and dimensions |
-| Header | Surface and seam colour references | Height, controls, labels |
-| Navigation | Surface and active mark references | Routes, order, targets |
-| Hero | Surface and edge references; decoration `none` | Amounts and placement |
-| Cards | Surface and border references | Border width, padding, radii |
-| Charts | Grid and nonfinancial accent references | Financial series, axes, labels |
-| Controls | Fill, label and focus references | Behaviour, sizes, validation |
-| Overlays | Surface and backdrop references | Focus containment and stacking |
-| Menus | Surface and divider references | Contents and keyboard access |
-| Decoration | Pattern and motion: `none` or an approved name from `slots.json` | What the pattern and motion draw (`theme-decor.css`) |
+| finish | `flat` · `satin` · `lacquer` · `glass` · `foil` · `embossed` · `gloss` | satin: light falling from the top; lacquer: deeper corner light and a darker foot; glass: blurred translucent bar (phone app bar); foil: metallic accent gradient (buttons, chosen tab); embossed: pressed paper edges; gloss: a lit meter |
+| grain | `none` · `film` · `paper` · `fibre` | fine noise in the text colour, inside the surface |
+| texture (ground) | `none` · `film` · `papyrus` · `linen` · `laid`, at `whisper` · `subtle` · `rich` | the page's material, in the text colour at 2, 4 or 6% |
+| artwork | `none` · `guilloche-rosette` · `lotus-line` | a fine-line watermark in the accent at 12%: the ground's far corner, the hero's empty corner; mirrored in Arabic |
+| edgeLight / depth | `none` · `soft` · `bright` / `none` · `low` · `mid` · `high` | a highlight on the top edge / a shadow under the surface |
+| edgeStyle | `hairline` · `foil` | the hero's border as a plain line or a gold foil ring |
+| activeStyle | `bar` · `cartouche` · `glow` | how the current page is marked |
+| well · shade · vignette | `flat` · `inset` · `deep` · `dim` · `blur` · `none` · `soft` | field depth · what sits behind a dialog · darker page edges |
+| ambient | `none` · `glow-drift` (48 s) | continuous |
+| thread · sheen | `none` · `security-thread` (12 s) · `edge-glint` (16 s) | continuous: a glint along the header seam / round the hero's foil edge |
+| hover · press · enter · equip | `lift`, `light` · `sheen` · `rise` · `unveil` | answer the user: card lifts or a pointer light; foil sheen on hover/press; dialogs rise in; one light sweep when the theme is put on |
 
-The compiler exposes `--theme-chart-grid` and `--theme-chart-accent` for nonfinancial chart components. Existing financial charts keep their series. New components must consume their compartment variables; never add per-theme markup.
+**The two references.** `cotton.json` (light: linen ground, paper cards, rosette watermark, embossed buttons, ink tabs) and `papyrus.json` (dark: papyrus ground, lapis lacquer hero with a gold foil edge whose light travels, lotus watermark, foil buttons and tabs, cartouche navigation, pointer light on cards) use most of the library. Start from whichever is closer.
+
+**Hard rules the validator enforces.** Every layer stated. Values only from the library. Text 4.5:1 and primary text 7:1 measured at each surface's worst point: the finish's lift, plus the grain, plus the artwork (limits in `slots.json`); foil labels on both the light and dark ends of the foil. One continuous motion. Never moved by any layer: layout, sizes, spacing, radii, fonts, words, order, money colours; nothing is drawn over a figure; reduced motion stops every motion on a still frame.
 
 ## Submission package
 
@@ -80,7 +117,7 @@ In Arabic, layout and text mirror, but each complete amount remains **left-to-ri
 - [ ] Arabic layout/text mirror while complete amounts remain LTR, with existing digits, signs, separators, precision and currency labels preserved.
 - [ ] Switching preserves scroll, current page, open dialog and an unsaved form. Reload and a fresh launch restore the theme before content paints.
 - [ ] Invalid/stale saved ID returns to default. Blocked storage still allows a session switch. Reset means selecting Lightning default.
-- [ ] Keyboard, screen reader labels, forced colours and reduced motion checked; no decorative animation.
+- [ ] Keyboard, screen reader labels, forced colours and reduced motion checked; every motion stops on a still frame under reduced motion.
 - [ ] Windows WebView2 and Android wrapper checked on devices, offline after installation.
 - [ ] Creator licence and maintainer review recorded. Preview status does not authorize marketplace sale.
 

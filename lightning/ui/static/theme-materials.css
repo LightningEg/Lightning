@@ -1,0 +1,266 @@
+/* Theme materials and motion: the approved recipe library (guideline/themes.md, cosmetics/slots.json).
+   A theme picks a recipe per element; theme-runtime.js sets it on the root as data-m-<element>-<property>.
+   Colours come from the theme's tokens; grain and artwork are drawn per theme by tools/build_themes.py.
+   Never touched: layout, sizes, spacing, radii, fonts, words, order, money colours. Nothing sits over a figure:
+   every layer is a background, a box shadow, or a fixed layer behind the page. Reduced motion stops all motion.
+   A new recipe is app code: add it to slots.json and here together, with its lift in slots.json limits. */
+
+/* ---------- Element groups (the inventory in theme-kit/README.md) ---------- */
+/* cards  : .card .data-panel .metric-card .kpi-card .overview-block .interaction-panel .phone-kpi
+   hero   : .overview-owned-card .hero-card .portfolio-summary .metric-card--focal .lead-card
+   tabs   : .period-button.selected, .plan-tab[aria-current], .phone-chip.is-chosen, .phone-invest-seg .is-chosen */
+
+/* ---------- Shared values ---------- */
+html[data-m-cards-finish] {
+  --m-none: linear-gradient(transparent, transparent);
+  --m-satin: linear-gradient(180deg, var(--m-hi), transparent 58%);
+  --m-lacquer: radial-gradient(130% 95% at 0% 0%, var(--m-hi), transparent 62%),
+    linear-gradient(180deg, transparent 45%, color-mix(in srgb, var(--bg) 40%, transparent));
+  --m-depth-none: 0 0 #0000;
+  --m-depth-low: 0 1px 2px color-mix(in srgb, var(--m-shadow) 18%, transparent), 0 6px 14px -8px color-mix(in srgb, var(--m-shadow) 30%, transparent);
+  --m-depth-mid: 0 2px 4px color-mix(in srgb, var(--m-shadow) 20%, transparent), 0 16px 32px -14px color-mix(in srgb, var(--m-shadow) 45%, transparent);
+  --m-depth-high: 0 3px 6px color-mix(in srgb, var(--m-shadow) 24%, transparent), 0 28px 56px -20px color-mix(in srgb, var(--m-shadow) 60%, transparent);
+  --m-edge-none: 0 0 #0000;
+  --m-edge-soft: inset 0 1px 0 var(--m-hi-edge);
+  --m-edge-bright: inset 0 1px 0 var(--m-hi-strong), inset 0 0 0 1px var(--m-hi);
+  --m-foil: linear-gradient(120deg, color-mix(in srgb, var(--accent) 72%, #FFFFFF) 0%, var(--accent) 30%,
+    color-mix(in srgb, var(--accent) 78%, #000000) 55%, color-mix(in srgb, var(--accent) 82%, #FFFFFF) 80%, var(--accent) 100%);
+  /* every element's layers default to nothing; recipes below fill them */
+  --m-card-finish: var(--m-none); --m-card-grain: var(--m-none); --m-card-edge: var(--m-edge-none); --m-card-depth: var(--m-depth-none);
+  --m-hero-finish: var(--m-none); --m-hero-grain: var(--m-none); --m-hero-depth: var(--m-depth-none); --m-hero-art: var(--m-none);
+  --m-over-finish: var(--m-none); --m-over-grain: var(--m-none); --m-over-depth: var(--m-depth-none);
+  --m-menu-finish: var(--m-none); --m-menu-depth: var(--m-depth-none);
+}
+
+/* ---------- Ground: texture, artwork, vignette (behind everything) ---------- */
+html[data-m-ground-texture]:not([data-m-ground-texture="none"]) body,
+html[data-m-ground-artwork]:not([data-m-ground-artwork="none"]) body,
+html[data-m-ground-vignette="soft"] body { position: relative; isolation: isolate; }
+html[data-m-ground-texture]:not([data-m-ground-texture="none"]) body::before,
+html[data-m-ground-vignette="soft"] body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image: var(--m-ground-texture, none);
+}
+html[data-m-ground-vignette="soft"] body::before {
+  background-image: radial-gradient(140% 110% at 50% 30%, transparent 55%, color-mix(in srgb, var(--m-shadow) 22%, transparent)),
+    var(--m-ground-texture, linear-gradient(transparent, transparent));
+}
+html[data-m-ground-artwork]:not([data-m-ground-artwork="none"]) body::after {
+  content: ""; position: fixed; z-index: -1; pointer-events: none;
+  inset-inline-end: -150px; bottom: -150px; width: 600px; aspect-ratio: 1;
+  background: var(--m-ground-artwork) center / contain no-repeat;
+}
+html.phone[data-m-ground-artwork]:not([data-m-ground-artwork="none"]) body::after { width: 320px; inset-inline-end: -100px; bottom: -40px; }
+[dir="rtl"][data-m-ground-artwork] body::after { transform: scaleX(-1); }
+
+/* Ambient glow-drift: one wide accent glow crossing the ground in 48 s. Compositor-only (transform). */
+html[data-m-ground-ambient="glow-drift"]::before {
+  content: ""; position: fixed; z-index: -1; pointer-events: none; top: -30vh; left: -30vw; width: 90vw; height: 90vh;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 9%, transparent), transparent);
+  animation: m-drift 48s ease-in-out infinite alternate;
+}
+@keyframes m-drift { from { transform: translate(0, 0); } to { transform: translate(60vw, 40vh); } }
+
+/* The equip moment: one light sweep across the page when a theme is put on (theme-runtime.js adds the element). */
+.theme-unveil {
+  position: fixed; inset: 0; z-index: 2147483000; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, color-mix(in srgb, var(--accent) 26%, transparent) 50%, transparent 65%);
+  background-size: 300% 100%; animation: m-unveil 1.2s cubic-bezier(.3,.6,.2,1) forwards;
+}
+@keyframes m-unveil { from { background-position: 100% 0; opacity: 1; } 80% { opacity: 1; } to { background-position: 0 0; opacity: 0; } }
+
+/* ---------- Header ---------- */
+/* The PC top bar scrolls with the page, so on a textured ground it lets the texture through; the sticky phone bar
+   keeps its paint (or glass). */
+html[data-m-ground-texture]:not([data-m-ground-texture="none"]) .topbar:not(#_) { background-color: transparent; }
+html[data-m-header-finish="satin"] :is(.topbar, .phone-appbar) {
+  background-image: linear-gradient(180deg, var(--m-hi), transparent);
+}
+html[data-m-header-finish="glass"] .phone-appbar {
+  background: color-mix(in srgb, var(--theme-header) 78%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
+}
+/* security-thread: a slow (12 s) glint along the header seam, in the seam's own 1px. */
+html[data-m-header-thread="security-thread"] :is(.topbar, .phone-appbar) {
+  border-bottom-color: transparent;
+  background-image: linear-gradient(90deg, var(--theme-header-seam) 0 40%, color-mix(in srgb, var(--accent) 35%, var(--surface)) 46%,
+    var(--hero) 50%, color-mix(in srgb, var(--accent) 35%, var(--surface)) 54%, var(--theme-header-seam) 60% 100%);
+  background-size: 300% 1px; background-repeat: repeat-x; background-origin: border-box; background-position: 0 100%;
+  animation: m-thread 12s linear infinite;
+}
+@keyframes m-thread { from { background-position: 0 100%; } to { background-position: -150% 100%; } }
+
+/* ---------- Navigation ---------- */
+html[data-m-navigation-finish="satin"] :is(.side, .phone-tabbar) {
+  background-image: linear-gradient(180deg, var(--m-hi), transparent 40%);
+}
+html[data-m-navigation-active-style="cartouche"] .phone-tabbar [aria-current="page"] {
+  background-image: radial-gradient(60% 70% at 50% 0%, color-mix(in srgb, var(--theme-active) 20%, transparent), transparent 75%);
+  box-shadow: inset 0 2px 0 var(--theme-active);
+}
+html[data-m-navigation-active-style="cartouche"] .nav a.active {
+  outline: 1px solid color-mix(in srgb, var(--theme-active) 75%, transparent); outline-offset: -3px;
+  box-shadow: inset 0 0 0 3px var(--theme-nav), inset 0 0 0 4px color-mix(in srgb, var(--theme-active) 30%, transparent);
+}
+html[data-m-navigation-active-style="glow"] .nav a.active {
+  background-image: radial-gradient(120% 140% at 0% 50%, color-mix(in srgb, var(--theme-active) 22%, transparent), transparent 70%);
+}
+html[data-m-navigation-active-style="glow"] .phone-tabbar [aria-current="page"] {
+  background-image: radial-gradient(60% 70% at 50% 0%, color-mix(in srgb, var(--theme-active) 24%, transparent), transparent 75%);
+}
+[dir="rtl"][data-m-navigation-active-style="glow"] .nav a.active { background-image: radial-gradient(120% 140% at 100% 50%, color-mix(in srgb, var(--theme-active) 22%, transparent), transparent 70%); }
+
+/* ---------- Cards ---------- */
+html[data-m-cards-finish="satin"] { --m-card-finish: var(--m-satin); }
+html[data-m-cards-finish="lacquer"] { --m-card-finish: var(--m-lacquer); }
+html[data-m-cards-grain="film"] { --m-card-grain: var(--m-grain-film); }
+html[data-m-cards-grain="paper"] { --m-card-grain: var(--m-grain-paper); }
+html[data-m-cards-grain="fibre"] { --m-card-grain: var(--m-grain-fibre); }
+html[data-m-cards-edge-light="soft"] { --m-card-edge: var(--m-edge-soft); }
+html[data-m-cards-edge-light="bright"] { --m-card-edge: var(--m-edge-bright); }
+html[data-m-cards-depth="low"] { --m-card-depth: var(--m-depth-low); }
+html[data-m-cards-depth="mid"] { --m-card-depth: var(--m-depth-mid); }
+html[data-m-cards-depth="high"] { --m-card-depth: var(--m-depth-high); }
+html[data-m-cards-finish] :is(.card, .data-panel, .metric-card, .kpi-card, .overview-block, .interaction-panel, .phone-kpi):not(.lead-card):not(.overview-owned-card):not(.hero-card):not(.portfolio-summary) {
+  /* !important: wide cards carry the default's light --wide-gradient as !important in style.css */
+  background-color: var(--theme-card) !important;
+  background-image: var(--m-card-grain), var(--m-card-finish) !important;
+  box-shadow: var(--m-card-edge), var(--m-card-depth);
+}
+/* hover: lift raises the shadow, light follows the pointer (theme-runtime.js gives --lt-x/--lt-y). */
+html[data-m-cards-hover="lift"] :is(.card, .kpi-card, .overview-block, .data-panel, .phone-kpi) { transition: transform .25s ease, box-shadow .25s ease; }
+html[data-m-cards-hover="lift"] :is(.card, .kpi-card, .overview-block, .data-panel):hover { transform: translateY(-2px); box-shadow: var(--m-card-edge), var(--m-depth-high); }
+html[data-m-cards-hover="light"] :is(.card, .kpi-card, .overview-block, .data-panel, .metric-card):not(.lead-card):not(.overview-owned-card):hover {
+  background-image: radial-gradient(260px circle at var(--lt-x, 50%) var(--lt-y, 0%), color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%),
+    var(--m-card-grain), var(--m-card-finish) !important;
+}
+
+/* ---------- Hero ---------- */
+html[data-m-hero-finish="satin"] { --m-hero-finish: var(--m-satin); }
+html[data-m-hero-finish="lacquer"] { --m-hero-finish: var(--m-lacquer); }
+html[data-m-hero-grain="film"] { --m-hero-grain: var(--m-grain-film); }
+html[data-m-hero-grain="paper"] { --m-hero-grain: var(--m-grain-paper); }
+html[data-m-hero-grain="fibre"] { --m-hero-grain: var(--m-grain-fibre); }
+html[data-m-hero-depth="low"] { --m-hero-depth: var(--m-depth-low); }
+html[data-m-hero-depth="mid"] { --m-hero-depth: var(--m-depth-mid); }
+html[data-m-hero-depth="high"] { --m-hero-depth: var(--m-depth-high); }
+html[data-m-hero-artwork]:not([data-m-hero-artwork="none"]) { --m-hero-art: var(--m-hero-artwork) left -50px bottom -80px / 230px 230px no-repeat; }
+[dir="rtl"][data-m-hero-artwork]:not([data-m-hero-artwork="none"]) { --m-hero-art: var(--m-hero-artwork) right -50px bottom -80px / 230px 230px no-repeat; }
+html[data-m-hero-finish] .main :is(.overview-owned-card, .hero-card, .portfolio-summary, .metric-card--focal, .lead-card):not(#_):not(#_) {
+  background: var(--m-hero-art), var(--m-hero-grain), var(--m-hero-finish), var(--theme-hero) !important;
+  box-shadow: var(--m-card-edge), var(--m-hero-depth) !important;
+}
+/* foil edge: a gold foil gradient in the border's own 1px; nothing moves. The lead card has no border (its paint is
+   the focal gradient), so its foil is a 1px ring drawn by its free ::before, masked to the edge. */
+@property --m-glint { syntax: "<angle>"; inherits: false; initial-value: 200deg; }
+html[data-m-hero-edge-style="foil"] {
+  --m-foil-ring: conic-gradient(from var(--m-glint), color-mix(in srgb, var(--theme-hero-edge) 55%, transparent) 0deg,
+    var(--theme-hero-edge) 50deg, color-mix(in srgb, var(--theme-hero-edge) 35%, #FFFFFF) 80deg, var(--theme-hero-edge) 110deg,
+    color-mix(in srgb, var(--theme-hero-edge) 55%, transparent) 170deg, color-mix(in srgb, var(--theme-hero-edge) 70%, transparent) 260deg,
+    color-mix(in srgb, var(--theme-hero-edge) 55%, transparent) 360deg);
+}
+html[data-m-hero-edge-style="foil"] .main :is(.overview-owned-card, .hero-card, .portfolio-summary, .metric-card--focal):not(.lead-card):not(#_):not(#_) {
+  border-color: transparent !important;
+  background: var(--m-hero-art) padding-box, var(--m-hero-grain), var(--m-hero-finish),
+    linear-gradient(var(--theme-hero), var(--theme-hero)) padding-box, var(--m-foil-ring) border-box !important;
+}
+html[data-m-hero-edge-style="foil"] .main .lead-card::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit;
+  border: 1px solid transparent; background: var(--m-foil-ring) border-box;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0);
+}
+/* edge-glint: the foil's light travels round the edge once every 16 s. Only the edge; never the figure. */
+html[data-m-hero-sheen="edge-glint"][data-m-hero-edge-style="foil"] .main :is(.overview-owned-card, .hero-card, .portfolio-summary, .metric-card--focal):not(.lead-card),
+html[data-m-hero-sheen="edge-glint"][data-m-hero-edge-style="foil"] .main .lead-card::before {
+  animation: m-glint 16s linear infinite;
+}
+@keyframes m-glint { to { --m-glint: 560deg; } }
+/* The phone's lead figure sits on the ground (Part C): it takes no artwork of its own; the ground's sits behind. */
+
+/* ---------- Primary controls ---------- */
+html[data-m-controls-finish="satin"] :is(.btn.primary, .phone-add-disc) {
+  background-image: linear-gradient(180deg, color-mix(in srgb, #FFFFFF 14%, transparent), transparent 70%);
+}
+html[data-m-controls-finish="foil"] :is(.btn.primary, .phone-add-disc) {
+  background-image: var(--m-foil); background-size: 220% 100%; background-position: 0 0; border-color: transparent;
+}
+html[data-m-controls-finish="embossed"] :is(.btn.primary, .phone-add-disc) {
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #FFFFFF 30%, transparent), inset 0 -2px 0 color-mix(in srgb, #000000 18%, transparent);
+}
+html[data-m-controls-depth="low"] :is(.btn.primary, .phone-add-disc) { box-shadow: 0 4px 10px -6px color-mix(in srgb, var(--action) 70%, var(--m-shadow)); }
+html[data-m-controls-depth="mid"] :is(.btn.primary, .phone-add-disc) { box-shadow: inset 0 1px 0 color-mix(in srgb, #FFFFFF 26%, transparent), 0 8px 18px -8px color-mix(in srgb, var(--action) 75%, var(--m-shadow)); }
+html[data-m-controls-depth="high"] :is(.btn.primary, .phone-add-disc) { box-shadow: inset 0 1px 0 color-mix(in srgb, #FFFFFF 30%, transparent), 0 12px 26px -10px color-mix(in srgb, var(--action) 85%, var(--m-shadow)); }
+/* press sheen: the foil's light slides across on hover, focus and press. */
+html[data-m-controls-press="sheen"] :is(.btn.primary, .phone-add-disc) { transition: background-position .7s ease; }
+html[data-m-controls-press="sheen"] :is(.btn.primary, .phone-add-disc):is(:hover, :focus-visible, :active) { background-position: 100% 0; }
+
+/* ---------- Secondary buttons ---------- */
+html[data-m-buttons-finish="satin"] :is(.btn:not(.primary), .date-picker-button) {
+  background-image: linear-gradient(180deg, var(--m-hi), transparent 75%);
+}
+html[data-m-buttons-finish="embossed"] :is(.btn:not(.primary), .date-picker-button) {
+  box-shadow: inset 0 1px 0 var(--m-hi-edge), 0 1px 1px color-mix(in srgb, var(--m-shadow) 22%, transparent);
+}
+
+/* ---------- Tabs and segments (the chosen one) ---------- */
+html[data-m-tabs-finish="satin"] :is(.period-button.selected, .main .plan-tab[aria-current="page"], .phone-chip.is-chosen, .phone-invest-seg a.is-chosen) {
+  background-image: linear-gradient(180deg, color-mix(in srgb, #FFFFFF 14%, transparent), transparent 75%) !important;
+}
+html[data-m-tabs-finish="foil"] :is(.period-button.selected, .main .plan-tab[aria-current="page"], .phone-chip.is-chosen, .phone-invest-seg a.is-chosen) {
+  background-image: var(--m-foil) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #FFFFFF 25%, transparent), 0 4px 12px -6px color-mix(in srgb, var(--theme-tab-chosen) 70%, transparent) !important;
+}
+
+/* ---------- Fields ---------- */
+html[data-m-fields-well="inset"] :is(input, select, textarea, .side-search):not([type=checkbox]):not([type=radio]):not([type=range]) {
+  box-shadow: inset 0 1px 2px color-mix(in srgb, var(--m-shadow) 28%, transparent);
+}
+html[data-m-fields-well="deep"] :is(input, select, textarea, .side-search):not([type=checkbox]):not([type=radio]):not([type=range]) {
+  box-shadow: inset 0 2px 4px color-mix(in srgb, var(--m-shadow) 40%, transparent), 0 1px 0 var(--m-hi-edge);
+}
+
+/* ---------- Progress ---------- */
+html[data-m-progress-finish="gloss"] :is(.budget-progress, .bullet-plan, .plan-meter, .chart-meter-track) {
+  box-shadow: inset 0 1px 2px color-mix(in srgb, var(--m-shadow) 35%, transparent);
+}
+html[data-m-progress-finish="gloss"] .budget-progress i {
+  background-image: linear-gradient(180deg, color-mix(in srgb, #FFFFFF 30%, transparent), transparent 60%);
+}
+
+/* ---------- Overlays ---------- */
+html[data-m-overlays-finish="satin"] { --m-over-finish: var(--m-satin); }
+html[data-m-overlays-finish="lacquer"] { --m-over-finish: var(--m-lacquer); }
+html[data-m-overlays-grain="film"] { --m-over-grain: var(--m-grain-film); }
+html[data-m-overlays-grain="paper"] { --m-over-grain: var(--m-grain-paper); }
+html[data-m-overlays-grain="fibre"] { --m-over-grain: var(--m-grain-fibre); }
+html[data-m-overlays-depth="low"] { --m-over-depth: var(--m-depth-low); }
+html[data-m-overlays-depth="mid"] { --m-over-depth: var(--m-depth-mid); }
+html[data-m-overlays-depth="high"] { --m-over-depth: var(--m-depth-high); }
+html[data-m-overlays-finish] :is(.app-popup, .phone-sheet, .phone-period-panel) {
+  background-image: var(--m-over-grain), var(--m-over-finish); box-shadow: var(--m-edge-soft), var(--m-over-depth);
+}
+html[data-m-overlays-shade="blur"] dialog::backdrop { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+html[data-m-overlays-enter="rise"] :is(dialog.app-popup[open], .phone-sheet[open]) { animation: m-rise .32s cubic-bezier(.2,.8,.2,1); }
+@keyframes m-rise { from { opacity: 0; transform: translateY(14px) scale(.985); } }
+
+/* ---------- Menus ---------- */
+html[data-m-menus-finish="satin"] { --m-menu-finish: var(--m-satin); }
+html[data-m-menus-depth="low"] { --m-menu-depth: var(--m-depth-low); }
+html[data-m-menus-depth="mid"] { --m-menu-depth: var(--m-depth-mid); }
+html[data-m-menus-depth="high"] { --m-menu-depth: var(--m-depth-high); }
+html[data-m-menus-finish] :is(.pick-list, .pick-results, .dropdown-menu, .context-menu, .action-menu) {
+  background-image: var(--m-menu-finish); box-shadow: var(--m-edge-soft), var(--m-menu-depth);
+}
+
+/* ---------- Reduced motion: every motion stops on one still frame ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html[data-m-ground-ambient]::before { animation: none; }
+  html[data-m-header-thread] :is(.topbar, .phone-appbar) { animation: none; background-position: 0 100%; }
+  html[data-m-hero-sheen] .main :is(.overview-owned-card, .hero-card, .portfolio-summary, .metric-card--focal, .lead-card),
+  html[data-m-hero-sheen] .main .lead-card::before { animation: none; }
+  html[data-m-overlays-enter] :is(dialog.app-popup[open], .phone-sheet[open]) { animation: none; }
+  html[data-m-cards-hover] :is(.card, .kpi-card, .overview-block, .data-panel, .phone-kpi) { transition: none; transform: none !important; }
+  html[data-m-controls-press] :is(.btn.primary, .phone-add-disc) { transition: none; }
+  .theme-unveil { display: none; }
+}

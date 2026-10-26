@@ -11,6 +11,20 @@
   <label for="app-theme">{{ 'Theme'|tr(locale) }}</label>
   <select id="app-theme" data-theme-select aria-describedby="theme-status"></select>
   <p id="theme-status" data-theme-status role="status"></p>
+  {% set paid = store_themes() %}{% if paid %}
+  <details class="theme-unlock"{% if not paid|selectattr('owned')|list %} open{% endif %}>
+    <summary>{{ 'Unlock a theme you bought'|tr(locale) }}</summary>
+    <p class="muted">{{ 'Buy a theme once on lightningeg.com and it is yours on both sites, this PC and your phone. On your account page, get its app code, then paste it here.'|tr(locale) }}</p>
+    {% set mine = paid|selectattr('owned')|map(attribute='name')|list %}{% if mine %}<p>{{ 'Yours on this computer:'|tr(locale) }} {% for n in mine %}<b>{{ n|tr(locale) }}</b>{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+    <form method="post" action="/settings/theme/unlock" class="theme-unlock-form">
+      <label for="unlock-theme">{{ 'Theme'|tr(locale) }}</label>
+      <select id="unlock-theme" name="theme">{% for t in paid if not t.owned %}<option value="{{ t.id }}">{{ t.name|tr(locale) }}</option>{% endfor %}</select>
+      <label for="unlock-code">{{ 'Code from your account page'|tr(locale) }}</label>
+      <input id="unlock-code" name="code" autocomplete="off" spellcheck="false" dir="ltr" maxlength="64" required placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX">
+      <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+      <button class="btn primary">{{ 'Unlock'|tr(locale) }}</button>
+    </form>
+  </details>{% endif %}
 </section>
 {% endif %}
 {% if section == 'general' %}<div class="data-settings">{% endif %}

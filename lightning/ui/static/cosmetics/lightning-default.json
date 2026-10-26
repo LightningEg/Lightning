@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "lightning-default",
   "name": "Lightning default",
   "version": 1,
@@ -30,22 +30,44 @@
     "brand": {
       "logoVariant": "on-light"
     },
+    "ground": {
+      "texture": "none",
+      "textureStrength": "subtle",
+      "artwork": "none",
+      "vignette": "none",
+      "ambient": "none",
+      "equip": "none"
+    },
     "header": {
       "surface": "surface",
-      "seam": "accent"
+      "seam": "accent",
+      "finish": "flat",
+      "thread": "none"
     },
     "navigation": {
       "surface": "surface",
-      "activeMark": "accent"
+      "activeMark": "accent",
+      "finish": "flat",
+      "activeStyle": "bar"
     },
     "hero": {
       "surface": "surface",
       "edge": "accent",
-      "decoration": "none"
+      "finish": "flat",
+      "grain": "none",
+      "edgeStyle": "hairline",
+      "depth": "none",
+      "artwork": "none",
+      "sheen": "none"
     },
     "cards": {
       "surface": "surface",
-      "border": "border"
+      "border": "border",
+      "finish": "flat",
+      "grain": "none",
+      "edgeLight": "none",
+      "depth": "none",
+      "hover": "none"
     },
     "charts": {
       "grid": "border",
@@ -54,19 +76,46 @@
     "controls": {
       "fill": "accent",
       "label": "onAccent",
-      "focus": "focus"
+      "focus": "focus",
+      "finish": "flat",
+      "depth": "none",
+      "press": "none"
+    },
+    "buttons": {
+      "surface": "raised",
+      "label": "text",
+      "border": "border",
+      "finish": "flat"
+    },
+    "tabs": {
+      "surface": "surface",
+      "chosen": "accent",
+      "chosenLabel": "onAccent",
+      "finish": "flat"
+    },
+    "fields": {
+      "surface": "raised",
+      "border": "border",
+      "well": "flat"
+    },
+    "progress": {
+      "track": "raised",
+      "finish": "flat"
     },
     "overlays": {
       "surface": "raised",
-      "backdrop": "background"
+      "backdrop": "background",
+      "finish": "flat",
+      "grain": "none",
+      "depth": "none",
+      "shade": "dim",
+      "enter": "none"
     },
     "menus": {
       "surface": "raised",
-      "divider": "border"
-    },
-    "decoration": {
-      "pattern": "none",
-      "motion": "none"
+      "divider": "border",
+      "finish": "flat",
+      "depth": "none"
     }
   }
 }

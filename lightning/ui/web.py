@@ -34,6 +34,7 @@ from lightning.core.money import ZERO, fmt, quantize, to_decimal
 from lightning.workflows import live_prices
 from lightning.ui import charts, sections
 from lightning.ui.themes import theme_id
+from lightning.ui.entitlements import owned as owned_themes
 from lightning.ui.i18n import BROWSER_UI, localize_html, localized_figures, translate
 
 UI_DIR = Path(__file__).parent
@@ -364,6 +365,7 @@ def phone_mode() -> bool:
 
 
 templates.env.globals["phone_mode"] = phone_mode
+templates.env.globals["store_themes"] = __import__("lightning.ui.entitlements", fromlist=["store_themes"]).store_themes
 templates.env.globals["trend_end_labels"] = charts.end_labels
 
 
@@ -430,6 +432,7 @@ def _template_response(request, name, status_code, c, locale, total, owned_total
         {
             "base": c.base_currency,
             "app_theme": theme_id(c.settings.get("appearance_theme")),
+            "owned_themes": " ".join(sorted(owned_themes())),
             "locale": locale,
             "fig": localized_figures(locale),
             "arabic_ui_src": ARABIC_UI_SRC if locale == "ar" else "",

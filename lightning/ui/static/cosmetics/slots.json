@@ -1,9 +1,44 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "fallback": "lightning-default",
+  "layers": {
+    "paint": "Palette keys: which of the theme's fourteen colours the element wears.",
+    "material": "How the surface is made: finish, grain, edge light, depth, artwork. Picked from the approved recipes in theme-materials.css.",
+    "motion": "How it moves. Continuous motions are ambient; hover, press and enter answer the user; equip plays once when the theme is put on."
+  },
+  "limits": {
+    "lift": {
+      "flat": 0,
+      "satin": 6,
+      "lacquer": 8,
+      "glass": 5,
+      "foil": 0,
+      "embossed": 4,
+      "gloss": 0
+    },
+    "grain": {
+      "none": 0,
+      "film": 3,
+      "paper": 3,
+      "fibre": 4
+    },
+    "foilStops": [
+      "#FFFFFF",
+      28,
+      "#000000",
+      22
+    ],
+    "rule": "lift and grain are the most text colour (per cent) a recipe lays over a surface; the validator checks text and quiet text against that worst point. foilStops are the lightest and darkest mixes a foil gradient takes of its fill; its label must read on both. At most one continuous motion (listed in continuous) per theme; the rest answer the user or play once.",
+    "continuous": [
+      "ground.ambient",
+      "header.thread",
+      "hero.sheen"
+    ]
+  },
   "slots": {
     "palette": {
-      "allowed": [
+      "covers": "Every colour on every screen. The money colours (income, expense, transfer) are reserved: the app keeps its own.",
+      "paint": [
         "background",
         "surface",
         "raised",
@@ -22,83 +57,326 @@
       "rule": "Semantic colours only; income/expense/transfer remain distinguishable and labelled."
     },
     "brand": {
-      "allowed": [
-        "logoVariant"
-      ],
+      "covers": "The two-leaf mark in the sidebar and the phone bar.",
+      "material": {
+        "logoVariant": [
+          "on-dark",
+          "on-light"
+        ]
+      },
       "rule": "Approved light/dark mark only. Preserve identity, aspect ratio, dimensions and accessible name."
     },
+    "ground": {
+      "covers": "The page behind everything: PC main area and sidebar backdrop, phone screen.",
+      "material": {
+        "texture": [
+          "none",
+          "film",
+          "papyrus",
+          "linen",
+          "laid"
+        ],
+        "textureStrength": [
+          "whisper",
+          "subtle",
+          "rich"
+        ],
+        "artwork": [
+          "none",
+          "guilloche-rosette",
+          "lotus-line"
+        ],
+        "vignette": [
+          "none",
+          "soft"
+        ]
+      },
+      "motion": {
+        "ambient": [
+          "none",
+          "glow-drift"
+        ],
+        "equip": [
+          "none",
+          "unveil"
+        ]
+      },
+      "rule": "Behind all content and never under a figure's own surface. Texture is drawn in the text colour; artwork in the accent, mirrored in Arabic."
+    },
     "header": {
-      "allowed": [
+      "covers": "PC top bar under the page title; phone app bar.",
+      "paint": [
         "surface",
         "seam"
       ],
+      "material": {
+        "finish": [
+          "flat",
+          "satin",
+          "glass"
+        ]
+      },
+      "motion": {
+        "thread": [
+          "none",
+          "security-thread"
+        ]
+      },
       "rule": "Paint only; preserve header height, controls and navigation order."
     },
     "navigation": {
-      "allowed": [
+      "covers": "PC sidebar and its current page; phone tab bar and its current tab.",
+      "paint": [
         "surface",
         "activeMark"
       ],
+      "material": {
+        "finish": [
+          "flat",
+          "satin"
+        ],
+        "activeStyle": [
+          "bar",
+          "cartouche",
+          "glow"
+        ]
+      },
       "rule": "Preserve routes, labels, order, hit targets and selected/focus states."
     },
     "hero": {
-      "allowed": [
+      "covers": "The lead figure: Overview's net worth card, the focal metric cards, portfolio summary; on the phone, the lead figure's ground.",
+      "paint": [
         "surface",
-        "edge",
-        "decoration"
+        "edge"
       ],
-      "rule": "Never alter amounts, formatting, text colour meaning or figure position."
+      "material": {
+        "finish": [
+          "flat",
+          "satin",
+          "lacquer"
+        ],
+        "grain": [
+          "none",
+          "film",
+          "paper",
+          "fibre"
+        ],
+        "edgeStyle": [
+          "hairline",
+          "foil"
+        ],
+        "depth": [
+          "none",
+          "low",
+          "mid",
+          "high"
+        ],
+        "artwork": [
+          "none",
+          "guilloche-rosette",
+          "lotus-line"
+        ]
+      },
+      "motion": {
+        "sheen": [
+          "none",
+          "edge-glint"
+        ]
+      },
+      "rule": "Never alter amounts, formatting, text colour meaning or figure position. Artwork sits in the far corner, away from the figure."
     },
     "cards": {
-      "allowed": [
+      "covers": "Cards, panels, KPI tiles, overview blocks and list groups; phone cards and KPI tiles. Their borders also draw list dividers.",
+      "paint": [
         "surface",
         "border"
       ],
+      "material": {
+        "finish": [
+          "flat",
+          "satin",
+          "lacquer"
+        ],
+        "grain": [
+          "none",
+          "film",
+          "paper",
+          "fibre"
+        ],
+        "edgeLight": [
+          "none",
+          "soft",
+          "bright"
+        ],
+        "depth": [
+          "none",
+          "low",
+          "mid",
+          "high"
+        ]
+      },
+      "motion": {
+        "hover": [
+          "none",
+          "lift",
+          "light"
+        ]
+      },
       "rule": "Keep padding, shape, border width, row heights, reading order and content."
     },
     "charts": {
-      "allowed": [
+      "covers": "Chart grid lines and nonfinancial chart accents.",
+      "paint": [
         "grid",
         "accent"
       ],
       "rule": "Preserve financial series meaning, axes, labels and non-colour distinctions."
     },
     "controls": {
-      "allowed": [
+      "covers": "Primary buttons, the chosen filter chip, the phone Add disc, and the focus ring everywhere.",
+      "paint": [
         "fill",
         "label",
         "focus"
       ],
+      "material": {
+        "finish": [
+          "flat",
+          "satin",
+          "foil",
+          "embossed"
+        ],
+        "depth": [
+          "none",
+          "low",
+          "mid",
+          "high"
+        ]
+      },
+      "motion": {
+        "press": [
+          "none",
+          "sheen"
+        ]
+      },
       "rule": "Keep dimensions, keyboard behaviour, validation and disabled/error states."
     },
+    "buttons": {
+      "covers": "Secondary and small buttons, the date picker button.",
+      "paint": [
+        "surface",
+        "label",
+        "border"
+      ],
+      "material": {
+        "finish": [
+          "flat",
+          "satin",
+          "embossed"
+        ]
+      },
+      "rule": "Keep dimensions, icons and states."
+    },
+    "tabs": {
+      "covers": "Period switch, section tabs, segmented controls; on the phone, segments and filter rows.",
+      "paint": [
+        "surface",
+        "chosen",
+        "chosenLabel"
+      ],
+      "material": {
+        "finish": [
+          "flat",
+          "satin",
+          "foil"
+        ]
+      },
+      "rule": "Keep order, labels and the chosen state's meaning."
+    },
+    "fields": {
+      "covers": "Text inputs, selects, pickers and search fields.",
+      "paint": [
+        "surface",
+        "border"
+      ],
+      "material": {
+        "well": [
+          "flat",
+          "inset",
+          "deep"
+        ]
+      },
+      "rule": "Soft wells (A16): never white or boxed on a dark theme. Keep size, validation and error states."
+    },
+    "progress": {
+      "covers": "Budget meters, plan bullets, KPI meters.",
+      "paint": [
+        "track"
+      ],
+      "material": {
+        "finish": [
+          "flat",
+          "gloss"
+        ]
+      },
+      "rule": "The fill keeps its meaning colour; only the track and the finish change."
+    },
     "overlays": {
-      "allowed": [
+      "covers": "Dialogs, pop-ups, phone sheets and the period panel, and the shade behind them.",
+      "paint": [
         "surface",
         "backdrop"
       ],
+      "material": {
+        "finish": [
+          "flat",
+          "satin",
+          "lacquer"
+        ],
+        "grain": [
+          "none",
+          "film",
+          "paper",
+          "fibre"
+        ],
+        "depth": [
+          "none",
+          "low",
+          "mid",
+          "high"
+        ],
+        "shade": [
+          "dim",
+          "blur"
+        ]
+      },
+      "motion": {
+        "enter": [
+          "none",
+          "rise"
+        ]
+      },
       "rule": "Keep stacking, modal focus containment, dismiss behaviour and screen-reader labels."
     },
     "menus": {
-      "allowed": [
+      "covers": "Dropdowns, pick lists, context menus.",
+      "paint": [
         "surface",
         "divider"
       ],
+      "material": {
+        "finish": [
+          "flat",
+          "satin"
+        ],
+        "depth": [
+          "none",
+          "low",
+          "mid",
+          "high"
+        ]
+      },
       "rule": "Keep menu contents, order, keyboard access and hit targets."
-    },
-    "decoration": {
-      "allowed": [
-        "pattern",
-        "motion"
-      ],
-      "rule": "Approved inert patterns and motions only, drawn by theme-decor.css. Never obscure content or touch numbers. Reduced motion disables all decoration motion.",
-      "patterns": [
-        "none",
-        "papyrus-guilloche"
-      ],
-      "motions": [
-        "none",
-        "security-thread"
-      ]
     }
   }
 }
