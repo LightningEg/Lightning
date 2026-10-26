@@ -1,6 +1,6 @@
 ---
 name: feedback-review
-description: Turn new user feedback into items in issues/, investigate each ticket, have Opus design the fixes and Sonnet build them (two agents at most), then delete the reviewed files. Use when new feedback, survey rows or screenshots arrive, or when old feedback files should be retired.
+description: Turn new user feedback into items in issues/, investigate each ticket, have Opus design the fixes and Sonnet build them (two agents at most), and retain sanitized observations after implementation. Use when new feedback, survey rows or screenshots arrive, or when old feedback files should be retired.
 ---
 
 # Feedback review: compile, investigate, design, build, delete
@@ -9,8 +9,7 @@ Written for any AI tool (Claude, Codex, others). Where it names a model, use the
 capable one for everything else. In Claude Code that is `model: "opus"` and `model: "sonnet"` on the Agent tool.
 
 Each feedback ticket becomes one item in `issues/` (read `issues/README.md` once; type `bug`, `polish`, `feature` or `tech`, in the milestone it belongs to).
-A processed ticket's item is deleted with its fix; only a test, a changelog line and, for what stays open, its item survive.
-No separate batch files and no screenshots folder pile up: git history keeps the rest.
+Keep one durable sanitized record per review under `feedback/YYYY-MM-DD-subject.md`, using `templates/feedback.md`, and register it in `feedback/README.md`. A processed implementation item is deleted with its fix; the feedback record retains its observation, verdict and permanent resolution reference. Never create a second backlog or a temporary `user feedback/` design directory.
 The repo is public: nothing personal goes into it.
 
 **Budget: two sub-agents per batch, never more, never in a loop.** Stages 1, 2 and 5 are done by you (the main session).
@@ -26,15 +25,15 @@ Only stage 3 (one design agent) and stage 4 (one build agent) are agents. Hand e
 
 ## 1. Compile (you)
 
-1. Input is whatever the owner gives: pasted rows, a CSV, files with screenshots. There is no Drive access here; ask for the files if they are missing.
+1. Input is whatever the owner gives: pasted rows, a CSV, files with screenshots or an explicitly supplied connected source. Use available authorized source tools before asking for missing input. Preserve raw material in its private source. Create the sanitized feedback record first.
 2. Strip what must not be public: names, emails, phone numbers, account numbers, device ids, private links. Say "a user". Keep a screenshot only if it shows dummy or sample data; otherwise describe it in words.
-3. Write one item per ticket in `issues/<n>-<name>/` (code from `python tools/issues.py next <n>`; front matter per `issues/README.md`; `by` is the AI, `skills: feedback-review`). The body: what the person saw, what they want, the screen, and the screenshot if it is kept, as a relative link to `screenshots/<code>-<n>.png` in the item's milestone folder (small, dummy data only; deleted with the item). Merge tickets that are the same finding into one item.
-4. Merge duplicates, mark overlaps with existing items (read `issues/INDEX.md`), drop test and diagnostic rows and say how many.
+3. Write one item per ticket in `issues/<n>-<name>/` (code from `python tools/issues.py next <n>`; front matter per `issues/README.md`; `by` is the AI, `skills: feedback-review`). The body: what the person saw, what they want, the screen, and the screenshot if it is kept, as a relative link to `feedback/YYYY-MM-DD-subject/evidence/<observation-id>-<n>.png` (small, dummy data only; retained with the feedback record). Merge tickets that are the same finding into one item.
+4. Merge duplicates into shared implementation items, retaining distinct observations in the feedback record. Mark overlaps with existing items (read `issues/INDEX.md`), drop test and diagnostic rows and say how many. Count observations and known distinct respondents separately.
 5. Tell the owner: counts by category, the three biggest themes, anything that looks like a wrong number.
 
 ## 2. Investigate (you)
 
-For every ticket, in this order, and write the verdict beside it:
+For every ticket, in this order, and write the verdict in its feedback record, linked to the implementation item:
 
 1. Reproduce on the demo app, or read the code. If you cannot reproduce it, say what you tried; it is not "fixed".
 2. If a figure is reported wrong, reconcile it across tabs first. A wrong figure outranks any layout wish.
@@ -45,7 +44,7 @@ For every ticket, in this order, and write the verdict beside it:
 
 ## 3. Design (agent 1: strongest model, one call)
 
-Launch one agent on the strongest model available. Its prompt names only: the items, the list of chosen tickets, `AGENTS.md`, and the rule to read code by grep, not whole files. It writes `user feedback/designs-NNN.md` (deleted with the batch):
+Launch one agent on the strongest model available. Its prompt names only: the items, the list of chosen tickets, `AGENTS.md`, and the rule to read code by grep, not whole files. It writes the chosen design in each active issue's `## Fix` section:
 
 - per ticket: files to change, the approach in a few lines, the test, risks;
 - one section listing tickets that touch the same file, with the order to build them;
@@ -55,7 +54,7 @@ It writes designs only; it changes no code.
 
 ## 4. Build (agent 2: fast model, one call)
 
-Launch one agent on a fast, capable model. It gets the designs file path and `AGENTS.md`. It builds the tickets in the order given, one branch per feature (`claude/<feature>`, AGENTS.md §6), one test per ticket, changed-area tests after each, and the full suite once at the end. It pushes each branch and reports branch names, test results and anything it could not do. It does not merge.
+Launch one agent on a fast, capable model. It gets the chosen issue paths (including their Fix sections) and `AGENTS.md`. It builds the tickets in the order given, one branch per feature (`claude/<feature>`, AGENTS.md §6), one test per ticket, changed-area tests after each, and the full suite once at the end. It pushes each branch and reports branch names, test results and anything it could not do. It does not merge.
 
 You review the diffs, merge the branches into `main` one at a time and push.
 
@@ -65,8 +64,8 @@ Only when every ticket has a verdict and every built ticket has a test and a cha
 
 1. A ticket left Open or Request keeps its item (status `ready` or `blocked`, with why); a Fixed, Built, Existing or Declined ticket's item is deleted and its code added to `done:`. Run `python tools/issues.py`.
 2. One changelog entry for the batch, three lines at most.
-3. `git rm` the processed items, their screenshots and the designs file.
-4. `grep -rn "user-feedback-batch-NNN"` and repoint leftovers to the test or changelog.
+3. Before removing items, replace incoming report/feedback links with a commit-pinned item, resolution commit or regression test. Keep the sanitized feedback record and its sample-data evidence. Remove only processed implementation items and their temporary screenshots.
+4. Run `python tools/docs_check.py` and `python tools/issues.py --check`; the feedback record links to durable evidence rather than deleted item files.
 5. Commit, push, merge to `main`, push.
 
 ## Rules

@@ -17,7 +17,7 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | **1G** | [Cover all backend modules with explicit dependency and wiring contracts](1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | tech | tools | ready |
 | **1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | tech | tools | ready |
 
-Done: 1A, 1D, 1F. Next free code: 1I.
+Done: 1A, 1D, 1F, 1I. Next free code: 1J.
 
 ## 2 Safe for real money
 

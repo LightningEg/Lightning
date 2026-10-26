@@ -6,23 +6,23 @@
 
 The ledger/plan/report split is useful, and the ordinary financial arithmetic reconciles. The largest risk is inconsistent enforcement of financial rules across create, edit, void, restore, conversion and ownership changes. These paths share a database but do not share one complete invariant check. Ten reproducible defect groups and one architecture improvement are filed below, including the button-workflow extension requested after the backend pass. No production fixes are included.
 
-All reproductions use temporary dummy databases, offline prices and a fixed date of 2026-10-23. [Run the probes](audit-4/reproduce.py) with `python reports/audit-4/reproduce.py`; [captured output](audit-4/results.txt). HTTP probes use an in-process ASGI client; no network listener or real profiles are involved. GitHub's connected API confirmed that remote main matches the audited commit after shell Git could not reach its proxy.
+All reproductions use temporary dummy databases, offline prices and a fixed date of 2026-10-23. [Run the probes](evidence/reproduce.py) with `python reports/2026-10-23-backend-correctness/evidence/reproduce.py`; [captured output](evidence/results.txt). HTTP probes use an in-process ASGI client; no network listener or real profiles are involved. GitHub's connected API confirmed that remote main matches the audited commit after shell Git could not reach its proxy.
 
 ## Findings, ordered by risk
 
 | Item | Severity | Confirmed behavior | Expected behavior |
 |---|---|---|---|
-| [2M](../issues/2-safe-for-real-money/2M-stale-edit-form-overwrites.md) | High | A stale popup saved for notes overwrites a newer amount, 20 → 10. | Refuse stale revisions or merge only explicitly changed fields. |
-| [2N](../issues/2-safe-for-real-money/2N-save-error-after-commit.md) | High | Save reports HTTP 400 for missing bill FX after posting the expense. | Make failure/success accurately describe whether money committed. |
+| [2M](../../issues/2-safe-for-real-money/2M-stale-edit-form-overwrites.md) | High | A stale popup saved for notes overwrites a newer amount, 20 → 10. | Refuse stale revisions or merge only explicitly changed fields. |
+| [2N](#fix-progress) | High | Save reports HTTP 400 for missing bill FX after posting the expense. | Make failure/success accurately describe whether money committed. |
 | **2G · fixed** | High | Delete funding income, restore a spent expense or buy, reduce an opening balance, or convert unfunded cash: balances go negative. | Apply the cash/funding policy to every state transition; refuse an invalid resulting ledger. |
 | **2H · fixed** | High | Moving an income strands its old account at −50; reassigning a purchase strands its old owner at −1 shares. | Validate both the old and proposed account/asset/owner sets. |
-| [2I](../issues/2-safe-for-real-money/2I-posting-currency-contract.md) | Medium | Public `post()` accepts USD cash in an EGP account and a non-1 base-currency rate. Reports disagree. | Resolve assets/accounts in the posting boundary and enforce their currency/type relationship. |
-| [2J](../issues/2-safe-for-real-money/2J-register-submit-idempotency.md) | Medium | Two identical register POSTs return 303 twice and create two expenses. | A retry of one submitted action returns its original result. |
-| [2L](../issues/2-safe-for-real-money/2L-instalment-input-precision.md) | Medium | A price of 100.001 over two instalments produces 50.01 and 49.991; the last payment cannot post. | Refuse sub-cent price/fee inputs before saving a loan. |
-| [2K](../issues/2-safe-for-real-money/2K-converting-buy-atomicity.md) | Low | A rejected currency-converting buy leaves a new empty currency pocket. | Route selection, pocket creation, conversion and purchase roll back together. |
-| [2O](../issues/2-safe-for-real-money/2O-phone-delete-confirmation.md) | Medium | Phone bulk Delete voids selected rows without a confirmation question. | Confirm the selected scope and preserve the button’s delete action. |
-| [3AE](../issues/3-polish-and-arabic/3AE-failed-bulk-save-loses-work.md) | Medium | A refused PC bulk edit loses both selection and typed changes. | Keep the correction and selection available after a rejected save. |
-| [1G](../issues/1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | Tech | Major financial modules and `sync` are outside the layered import contract. | Give every production module an explicit dependency policy. |
+| [2I](../../issues/2-safe-for-real-money/2I-posting-currency-contract.md) | Medium | Public `post()` accepts USD cash in an EGP account and a non-1 base-currency rate. Reports disagree. | Resolve assets/accounts in the posting boundary and enforce their currency/type relationship. |
+| [2J](../../issues/2-safe-for-real-money/2J-register-submit-idempotency.md) | Medium | Two identical register POSTs return 303 twice and create two expenses. | A retry of one submitted action returns its original result. |
+| [2L](../../issues/2-safe-for-real-money/2L-instalment-input-precision.md) | Medium | A price of 100.001 over two instalments produces 50.01 and 49.991; the last payment cannot post. | Refuse sub-cent price/fee inputs before saving a loan. |
+| [2K](#fix-progress) | Low | A rejected currency-converting buy leaves a new empty currency pocket. | Route selection, pocket creation, conversion and purchase roll back together. |
+| [2O](#fix-progress) | Medium | Phone bulk Delete voids selected rows without a confirmation question. | Confirm the selected scope and preserve the button’s delete action. |
+| [3AE](#fix-progress) | Medium | A refused PC bulk edit loses both selection and typed changes. | Keep the correction and selection available after a rejected save. |
+| [1G](../../issues/1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | Tech | Major financial modules and `sync` are outside the layered import contract. | Give every production module an explicit dependency policy. |
 
 ### 2G: the cash rule depends on which operation was used
 
@@ -76,7 +76,7 @@ Move routing and pocket creation inside the transaction, as `_trade()` already d
 
 The owner asked to audit how buttons act, including changing ownership and mass editing. This extension exercises the actual POST routes with ASGI and real Chromium at 1280 × 900 and 390 × 844. It uses fresh temporary ledgers and invented people, not real profiles. The production source remains at the audited main commit; the report branch already contains the initial audit.
 
-[Workflow probes](audit-4/workflow_probes.py) contain passing controls and strict expected failures against the desired behavior. Run `pytest -q -rx -o addopts='' reports/audit-4/workflow_probes.py` with the development dependencies installed. [Results](audit-4/workflow-results.txt) record the run. A known defect becoming an unexpected pass requires reviewing its marker; a setup exception does not count as reproducing the defect.
+[Workflow probes](evidence/workflow_probes.py) contain passing controls and strict expected failures against the desired behavior. Run `pytest -q -rx -o addopts='' reports/2026-10-23-backend-correctness/evidence/workflow_probes.py` with the development dependencies installed. [Results](evidence/workflow-results.txt) record the run. A known defect becoming an unexpected pass requires reviewing its marker; a setup exception does not count as reproducing the defect.
 
 ### What each tested button does
 
@@ -127,7 +127,7 @@ Fix: give the financial workflow one clear commit boundary and success result. C
 
 ### 2O: the phone’s Delete button does not ask
 
-At 390 px, select two ordinary expenses in the account register and press Delete. The browser navigates immediately, displays “Deleted 2 transaction(s)”, and both rows are VOID. No confirmation dialog is opened or answered. [Screenshot after that click](audit-4/phone-delete-without-confirmation.png).
+At 390 px, select two ordinary expenses in the account register and press Delete. The browser navigates immediately, displays “Deleted 2 transaction(s)”, and both rows are VOID. No confirmation dialog is opened or answered. [Screenshot after that click](evidence/phone-delete-without-confirmation.png).
 
 `ui/templates/phone/register.html:109` sets `data-confirm-delete` on the **button**. The submit listener (`ui/static/app.js:738`) checks that attribute on the **form**, so it never asks for this flow. The phone selection bar also prints only “selected”, without the selected count; the scope is not made explicit there. PC bulk Delete uses a separate handler and its confirmation works.
 
@@ -135,7 +135,7 @@ Fix: handle the actual submitter, name the selected count, and retain its `forma
 
 ### 3AE: a rejected bulk edit loses the work needed to retry
 
-Select two expenses; one falls in checked bank history. Choose Edit selected, change notes to “keep this unsaved correction”, and choose All 2 rows. The server safely refuses the batch and leaves the ledger unchanged, but returns to the register with no selection and no editor. The typed correction is gone. [Screenshot of the refusal](audit-4/bulk-save-refused.png).
+Select two expenses; one falls in checked bank history. Choose Edit selected, change notes to “keep this unsaved correction”, and choose All 2 rows. The server safely refuses the batch and leaves the ledger unchanged, but returns to the register with no selection and no editor. The typed correction is gone. [Screenshot of the refusal](evidence/bulk-save-refused.png).
 
 The “all” branch clears `sessionStorage` selection before the server answers (`ui/static/app.js:886`); `ui/routes/transactions.py:476` redirects on a LightningError instead of retaining the submitted correction and selection. The atomic rollback itself passes.
 
@@ -155,9 +155,9 @@ The full existing suite now runs in an isolated environment: **2,349 passed, 9 s
 
 **Make wiring dependencies explicit.** `bootstrap.py` constructs services, then injects callbacks and optional collaborators into budgets, the forecaster and investments. This works through the composition root, but leaves hidden initialization requirements. Prefer constructor-required protocols or one explicit wiring/validation phase. Keep defaults that are genuinely optional; distinguish them from services that must exist for correct money calculations. This suggestion is included in 1G, not a reproduced runtime failure.
 
-**The database disk is a failure domain.** Profile databases and default backups are under Documents/Lightning. Same-disk copies help with bad edits and some corruption, but not disk loss or loss of the whole directory. Recommend an independently stored encrypted backup and a tested restore; verify the backup includes the recovery material required for its format. Windows crash/reboot evidence remains explicitly open in [2A](../issues/2-safe-for-real-money/2A-restore-safety.md), [2B](../issues/2-safe-for-real-money/2B-promotion-durability.md) and [2C](../issues/2-safe-for-real-money/2C-ordinary-pc-acceptance.md). This audit does not claim a power-loss defect or prove Windows durability.
+**The database disk is a failure domain.** Profile databases and default backups are under Documents/Lightning. Same-disk copies help with bad edits and some corruption, but not disk loss or loss of the whole directory. Recommend an independently stored encrypted backup and a tested restore; verify the backup includes the recovery material required for its format. Windows crash/reboot evidence remains explicitly open in [2A](../../issues/2-safe-for-real-money/2A-restore-safety.md), [2B](../../issues/2-safe-for-real-money/2B-promotion-durability.md) and [2C](../../issues/2-safe-for-real-money/2C-ordinary-pc-acceptance.md). This audit does not claim a power-loss defect or prove Windows durability.
 
-**The journal home is the confirmation authority.** Its unavailability delays final confirmation even if a device durably queues an edit; that is a deliberate consistency choice. Show pending/confirmed/rejected state clearly and rehearse the existing home-move/recovery procedures. Cloud delivery is still a configured placeholder, and native PC/Android acceptance remains open in [4A](../issues/4-edit-journal-and-devices/4A-edit-journal.md). The prior [journal audit](audit-3.md) has its own scope and fixes; none of its passed encryption or replay claims were revalidated here.
+**The journal home is the confirmation authority.** Its unavailability delays final confirmation even if a device durably queues an edit; that is a deliberate consistency choice. Show pending/confirmed/rejected state clearly and rehearse the existing home-move/recovery procedures. Cloud delivery is still a configured placeholder, and native PC/Android acceptance remains open in [4A](../../issues/4-edit-journal-and-devices/4A-edit-journal.md). The prior [journal audit](../2026-10-21-edit-journal/report.md) has its own scope and fixes; none of its passed encryption or replay claims were revalidated here.
 
 ## Validation and limits
 
@@ -182,7 +182,7 @@ Recommended sequence: fix 2G/2H behind one invariant boundary, and close the sta
 
 Validation for 2G/2H: full suite **2,368 passed, 9 skipped**; all four import contracts kept. The journal conversion fixture correction was explicitly approved by the owner because that test file belongs to Claude’s claim; it adds genuine funding before spending. No journal implementation changed.
 
-**2N fixed; 2M partly implemented (2026-10-23).** Optional budget feedback failures no longer turn a saved expense into an HTTP failure; financial validation failures still refuse the posting. Popup (PC/phone), inline register and split forms send a revision covering the header and all lines. Save compares it within the write transaction and retains the submitted token and inputs after a conflict. A replica Save keeps its pending proposal durable. Legacy callers without a revision keep their prior contract. Ownership, conversion and investment edit routes have the same guard, but their three hidden template fields await owner approval under Claude’s template claim; [the exact patch](audit-4/form-revision-fields.patch) is ready. 2M remains open until those fields and workflow checks land.
+**2N fixed; 2M partly implemented (2026-10-23).** Optional budget feedback failures no longer turn a saved expense into an HTTP failure; financial validation failures still refuse the posting. Popup (PC/phone), inline register and split forms send a revision covering the header and all lines. Save compares it within the write transaction and retains the submitted token and inputs after a conflict. A replica Save keeps its pending proposal durable. Legacy callers without a revision keep their prior contract. Ownership, conversion and investment edit routes have the same guard, but their three hidden template fields await owner approval under Claude’s template claim; [the exact patch](evidence/form-revision-fields.patch) is ready. 2M remains open until those fields and workflow checks land.
 
 **2O/3AE fixed (2026-10-23).** Phone Delete checks the actual submit button and asks about the unique selected count; Cancel keeps the ledger and selection, Confirm preserves Delete’s destination, and Undo restores the batch. Failed mass edits now return a structured refusal to the open editor; input and selection remain until a confirmed success, and a row-specific refusal names the blocking transaction. Seven new regressions cover phone Cancel/Confirm/Undo, category changes, retry after unlocking history, atomic rollback and legacy redirect compatibility, Arabic counts and translated row-specific refusals. The original screenshots describe the audited commit.
 

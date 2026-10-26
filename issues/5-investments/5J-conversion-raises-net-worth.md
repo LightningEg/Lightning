@@ -12,7 +12,7 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 1](../../reports/audit-1.md) (§1 Engine). Sample, prices offline: Convert 5,200 EGP → 100 USD, fee 10. Net worth +875, Holdings value
+Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§1 Engine). Sample, prices offline: Convert 5,200 EGP → 100 USD, fee 10. Net worth +875, Holdings value
 +792, Dollar brokerage +6,086. The executed rate 52.00 is saved as a TRADE rate and, on that day, beats the MARKET and ONLINE rates
 (`docs/ARCHITECTURE.md:293-295`), so every USD holding is revalued up from 51.60. Expected: net worth falls by the fee plus the spread paid. Voiding the
 conversion restores everything exactly. Severity: medium. It is documented, but it shows in a demo as "I bought dollars and got richer".

@@ -42,7 +42,7 @@ Read the real FastAPI/Jinja app, section registry, PC/phone guidelines, brand vo
 
 ## Evidence
 
-Representative real-app captures are in [audit-7/](audit-7/): PC/phone Overview, Budget, Investments and Weekly review in English/Arabic, plus page picker. Captures use disposable sample data, never private profiles.
+Representative real-app captures are in [audit-7/](evidence/): PC/phone Overview, Budget, Investments and Weekly review in English/Arabic, plus page picker. Captures use disposable sample data, never private profiles.
 
 Focused tests: phone frame/budget/investments, planning, Mohab, review decisions/inbox, investment views, health limits, Arabic labels/numbers, data pickers and app guards all passed. Import contracts: 4 kept, 0 broken.
 
@@ -54,4 +54,4 @@ Focused tests: phone frame/budget/investments, planning, Mohab, review decisions
 - The website's app screenshots need recapture after approval/merge, not replacement with mockups.
 - Full-suite packaging test `test_the_docs_only_skip_compares_with_the_last_successful_windows_build` remains unverified in this tarball/no-Git sandbox; its fixture attempts Git staging. No packaging source or assertion was weakened. Final affected/doc/issue/Mohab rerun passed with one existing skip.
 
-Owner review is tracked in [3AH](../issues/3-polish-and-arabic/3AH-visual-flow-acceptance.md).
+Owner review is tracked in [3AH](../../issues/3-polish-and-arabic/3AH-visual-flow-acceptance.md).

@@ -12,7 +12,7 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 1](../../reports/audit-1.md) (§3 PC) on Mohab's sample and the demo at 1366 and 1920 px. Items 1 (Sale factors scrolled sideways) and 2 (chart end labels) are fixed; the numbers below keep their places. Only what 3C, 3Q, 3G and 3H do not
+Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§3 PC) on Mohab's sample and the demo at 1366 and 1920 px. Items 1 (Sale factors scrolled sideways) and 2 (chart end labels) are fixed; the numbers below keep their places. Only what 3C, 3Q, 3G and 3H do not
 already list. The brand audit passes; it cannot see `<select>` text colour, the first-run page, `<fieldset>` boxes or overlapping chart labels.
 
 **Charts that mislead (A12)**
@@ -22,7 +22,7 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 5. Holding "Price against what you paid": the dashed average-cost line is Meadow; dashed Meadow means the plan. Use Neutral #C5D3D0 (A12.1.2).
 
 **Colour off its meaning (A03)**
-6. Overview "Left in plan": the used part of the meter is Meadow; spent of plan is soft rose, as on Budget. Shot: [pc-overview-kpis.png](../../reports/audit-1/pc-overview-kpis.png).
+6. Overview "Left in plan": the used part of the meter is Meadow; spent of plan is soft rose, as on Budget. Shot: [pc-overview-kpis.png](../../reports/2026-10-20-demo-readiness/evidence/pc-overview-kpis.png).
 7. Categories: "− Expense" is #A02E5A and "± Both" #0A5AB0, neither an A03 colour. First run: the sample cards' "Load" is Azure (links are Ink, underlined).
 8. Gam'eya: five late instalments are Muted grey with no Late chip, and "Next instalment" shows a past date. Holding "Worst month −1.1%" is strong rose.
 

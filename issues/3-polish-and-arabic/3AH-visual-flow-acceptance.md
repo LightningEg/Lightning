@@ -11,4 +11,4 @@ by: Codex
 
 **Acceptance.** Review the real Windows/Android pages in English and Arabic, with keyboard/screen reader and existing themes; website screenshots need later recapture. Browser evidence is not physical-device acceptance.
 
-**Read:** [Audit 7](../../reports/audit-7.md).
+**Read:** [Audit 7](../../reports/2026-10-25-app-visual-flow/report.md).

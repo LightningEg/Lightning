@@ -12,7 +12,7 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 1](../../reports/audit-1.md) (§1 Engine). The formulas hold; these are gaps in what the write paths refuse. Items 1–5 (split decimals, gold-account money, cash below zero, unknown owner, planner amount) are fixed and removed; the numbering below is unchanged. Severity: low for the rest.
+Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§1 Engine). The formulas hold; these are gaps in what the write paths refuse. Items 1–5 (split decimals, gold-account money, cash below zero, unknown owner, planner amount) are fixed and removed; the numbering below is unchanged. Severity: low for the rest.
 
 6. Low: dates before an account opened are accepted (1900-01-01; one 10 EGP entry in July cut average spending from 24,049 to 16,036 and lifted the
    emergency fund from 0.8 to 1.2 months), though history before opening is allowed on purpose (`transactions/service.py:486`): decide the rule first.

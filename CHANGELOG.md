@@ -11,8 +11,10 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-26 · Codex: 1I organize repository docs: dated report/evidence folders, durable sanitized feedback, guideline and template maps; repair links and enforce catalogues and complete guideline mirrors.
 - 2026-10-26 · Claude: 8J simple InstaPay top-up (website #95): members copy our details and their email for the note, then confirm date, amount and sender, no receipt; the owner reconciles every open top-up on one screen.
 - 2026-10-26 · Claude: 8J owner console (website #94): one owner account only (a second refused; extra ones removed from Settings); top-up tickets open from a list with the receipt shown, and take amount, date, sender and reference; a reference pays one ticket only.
+
 - 2026-10-25 · Codex: 3AH visual flow: direct phone page picker, answer-first Overview, decision-first review and price tasks, quieter recurring rows and explicit accessible form labels.
   Preserve brand/theme tokens, financial calculations and the five phone slots; page checks and acceptance gaps are in reports/audit-7.md.
 

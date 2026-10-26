@@ -13,7 +13,7 @@ repo: app
 
 ## Report
 
-Severity: medium. [Audit 4](../../reports/audit-4.md) owns the reproduction, expected behavior, source locations and scope for 2I. [Disposable probes](../../reports/audit-4/reproduce.py) and [captured results](../../reports/audit-4/results.txt) provide execution evidence.
+Severity: medium. [Audit 4](../../reports/2026-10-23-backend-correctness/report.md) owns the reproduction, expected behavior, source locations and scope for 2I. [Disposable probes](../../reports/2026-10-23-backend-correctness/evidence/reproduce.py) and [captured results](../../reports/2026-10-23-backend-correctness/evidence/results.txt) provide execution evidence.
 
 ## Fix
 

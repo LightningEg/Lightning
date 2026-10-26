@@ -12,7 +12,7 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 1](../../reports/audit-1.md) (§3 PC). Sample, `/investments/holding/10` (NBE 3-year certificate). Severity: medium (wrong data on screen).
+Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§3 PC). Sample, `/investments/holding/10` (NBE 3-year certificate). Severity: medium (wrong data on screen).
 
 - Planning › Allocation bucket shows "Equity Fund": the menu has no CDs option, falls back to its first entry, and the field saves on change.
 - "How bumpy has it been?" draws price movement for a fixed-price certificate: nine rows of 0.0%, a flat "Fall from its high", "Months up · down 0 · 0 of 0".

@@ -12,7 +12,7 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 1](../../reports/audit-1.md) (§2 Logic). The services work, but a viewer finds them only on secondary pages: Looks recurring at the
+Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§2 Logic). The services work, but a viewer finds them only on secondary pages: Looks recurring at the
 bottom of Recurring, rule offers only on Weekly review, payday funding and reimbursements only from Weekly review. Needs you, the one inbox, carries
 none of them. Wiring, not new engines. Builds on 3G §4.5 (Weekly review into Needs you) and 3H CP-10.
 

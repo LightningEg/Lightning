@@ -8,7 +8,7 @@ by: Claude
 ---
 
 ## Report
-Found by [Audit 5](../../reports/audit-5.md) §3. The stale code is removed (2026-10-22): 17 unused functions, `counterparty_suggestions`,
+Found by [Audit 5](../../reports/2026-10-21-backend-streamlining/report.md) §3. The stale code is removed (2026-10-22): 17 unused functions, `counterparty_suggestions`,
 the always-on `allow_foreign`, the unread `weekly_review_remaining` and `budget_carryover_month`, repeated imports and a legacy
 `owner_id` guard. Kept on purpose, because tests use them as oracles for a figure another path computes: `ReportingService.monthly_trend`,
 `bridge_for_month`, `foreign_currency_accounts`, `Position.deposits_after_sale`, `reserves.allocation_at`,

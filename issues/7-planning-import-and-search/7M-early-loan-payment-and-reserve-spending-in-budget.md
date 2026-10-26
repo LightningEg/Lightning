@@ -12,7 +12,7 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 1](../../reports/audit-1.md) (§1, §2). Both are documented behaviour, but both make Budget give the wrong advice in a demo.
+Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§1, §2). Both are documented behaviour, but both make Budget give the wrong advice in a demo.
 
 1. **Early loan payment.** Demo: pay the car loan early, 5,000 principal + 100 fee. Net worth −100 and loans −5,000 are right, but Money out +5,100,
    savings rate 58.4% → 47.5%, Left in plan 5,559 → 459, everyday 5,079 → 0, while Safe to spend falls by only 21. `planning/forecast.py:174` pools the

@@ -12,7 +12,7 @@ repo: app
 ---
 
 ## Report
-Found by [Audit 1](../../reports/audit-1.md) (§5 Arabic) on Mohab's sample and the demo, PC 1366 px and phone 390 px.
+Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§5 Arabic) on Mohab's sample and the demo, PC 1366 px and phone 390 px.
 Fixed: the "·" beside a number (now "،"), one decimal mark and one percent sign, the undo button and the English strings of the
 Plan this transaction page, the phone Settings labels, "1 entry", the placeholder, the budget move subtitle and "MONTH_END".
 

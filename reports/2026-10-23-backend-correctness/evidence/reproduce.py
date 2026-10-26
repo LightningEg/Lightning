@@ -1,6 +1,6 @@
 """Reproduce Audit 4 on disposable dummy ledgers; never opens profile data.
 
-Run from any directory: python /path/to/Lightning/reports/audit-4/reproduce.py
+Run from any directory: python /path/to/Lightning/reports/2026-10-23-backend-correctness/evidence/reproduce.py
 The displayed balances document observed defects, not desired regression expectations.
 Requires the app dependencies and httpx, but does not need pytest, SQLCipher or a server.
 """
@@ -8,7 +8,7 @@ import os, sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from decimal import Decimal as D
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 os.environ['LIGHTNING_PRICES_OFFLINE']='1'
 os.environ['LIGHTNING_TODAY']='2026-10-23'
 from lightning.bootstrap import build

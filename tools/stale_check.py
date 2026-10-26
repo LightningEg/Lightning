@@ -42,7 +42,7 @@ def hand_off(days: int) -> list[str]:
 
 def dead_links() -> list[str]:
     out = []
-    for path in [*ROOT.glob("*.md"), *(ROOT / "docs").rglob("*.md"), *(ROOT / "skills").rglob("*.md")]:
+    for path in [*ROOT.glob("*.md"), *(p for folder in ("docs", "skills", "reports", "feedback", "templates", "guideline", "issues", "theme-kit") for p in (ROOT / folder).rglob("*.md"))]:
         for target in re.findall(r"\]\(([^)#\s]+)", path.read_text(encoding="utf-8")):
             if "://" in target or target.startswith("mailto:"):
                 continue

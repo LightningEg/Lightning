@@ -14,6 +14,7 @@ step down with a number: **3C1**, **3C2**. Write the code wherever you mention t
 
 - A code is never reused. `python tools/issues.py next 3` prints the next free one.
 - An item moving to another milestone gets a new code there; write `was: 3C` in its front matter.
+- Before finishing, replace incoming links from reports and feedback with a commit-pinned issue snapshot, resolution commit or regression test; keep the code. Sanitized feedback records and audit evidence remain.
 - A finished item's file is **deleted in the commit that finishes it**, and its code is added to `done:` in the milestone's
   README. The record is the test, the changelog line and the commit message (name the code there).
 
@@ -30,6 +31,8 @@ issues/
 A file is named `<code>-<what>.md`, lower case after the code, hyphens. A step inside a big item is a heading in the item's
 own file: `## 3C1 Move the lower label down`. A new milestone is a new numbered folder with a README; the owner picks the
 order.
+
+Report and feedback formats are in [the template catalogue](../templates/README.md).
 
 ## Types
 

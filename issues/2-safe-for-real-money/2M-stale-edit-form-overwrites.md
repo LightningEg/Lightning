@@ -13,7 +13,7 @@ repo: app
 
 ## Report
 
-Severity: high. [Audit 4](../../reports/audit-4.md) owns the button sequence, observed result, source locations and scope for 2M. [Workflow probes](../../reports/audit-4/workflow_probes.py) and [results](../../reports/audit-4/workflow-results.txt) reproduce it on temporary dummy ledgers.
+Severity: high. [Audit 4](../../reports/2026-10-23-backend-correctness/report.md) owns the button sequence, observed result, source locations and scope for 2M. [Workflow probes](../../reports/2026-10-23-backend-correctness/evidence/workflow_probes.py) and [results](../../reports/2026-10-23-backend-correctness/evidence/workflow-results.txt) reproduce it on temporary dummy ledgers.
 
 ## Fix
 
@@ -21,4 +21,4 @@ Include a revision/hash in each financial edit form, check it atomically when sa
 
 ## Repair progress
 
-Popup, phone popup, inline register and split forms now check a header-and-ledger revision inside the write transaction. Tests cover newer amount/account/owner changes, retained conflict inputs, valid fresh saves and a durable replica proposal. Legacy programmatic requests without a revision retain their prior contract. Ownership, conversion and investment route guards are ready; their three hidden template fields remain unapplied. The original hold was Claude’s 3W template claim, which ends when #76 is integrated. The reviewable patch is `reports/audit-4/form-revision-fields.patch`; apply it and verify stale/fresh saves for all three workflows. Keep this item open until those forms emit the token and pass their workflow tests.
+Popup, phone popup, inline register and split forms now check a header-and-ledger revision inside the write transaction. Tests cover newer amount/account/owner changes, retained conflict inputs, valid fresh saves and a durable replica proposal. Legacy programmatic requests without a revision retain their prior contract. Ownership, conversion and investment route guards are ready; their three hidden template fields remain unapplied. The original hold was Claude’s 3W template claim, which ends when #76 is integrated. The reviewable patch is `reports/2026-10-23-backend-correctness/evidence/form-revision-fields.patch`; apply it and verify stale/fresh saves for all three workflows. Keep this item open until those forms emit the token and pass their workflow tests.

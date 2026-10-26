@@ -35,6 +35,8 @@ ROOT = Path(__file__).resolve().parent.parent
 # workflow, Markdown inside lightning/ or packaging/) does.
 _NEVER_SHIPPED = (
     re.compile(r"^docs/"),
+    re.compile(r"^(feedback|templates)/"),
+    re.compile(r"^reports/.*\.(md|png|jpg|jpeg|webp|txt)$"),
     re.compile(r"^user feedback/"),
     re.compile(r"^Claude outputs/"),
     re.compile(r"^tools/"),  # helpers for the people and AIs working here; nothing imports them
@@ -58,6 +60,8 @@ _REACHES_PHONE = (
 # Documents: a push that changes nothing else since the last full suite runs only the tests that read them.
 _DOCS_ONLY = (
     re.compile(r"^docs/"),
+    re.compile(r"^(feedback|templates)/"),
+    re.compile(r"^reports/.*\.(md|png|jpg|jpeg|webp|txt)$"),
     re.compile(r"^user feedback/"),
     re.compile(r"^Claude outputs/"),
     re.compile(r"^[^/]+\.md$"),  # NOW, OWNER, CHANGELOG, AGENTS, README and the like

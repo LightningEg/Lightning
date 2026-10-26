@@ -4,7 +4,7 @@ Codex, Luna and Claude sessions cannot talk to each other: **the repository is t
 
 ## 1. Files that carry the project
 
-Each fact lives in one file; link to it, never copy it. No other files under `docs/`.
+Each fact lives in one file; link to it, never copy it. Start at [the documentation map](docs/README.md). `docs/` holds that map and the four reference documents below; reports, feedback and templates have their own homes.
 
 | File | Holds | Update when |
 |---|---|---|
@@ -16,10 +16,12 @@ Each fact lives in one file; link to it, never copy it. No other files under `do
 | [Competition](docs/COMPETITION.md) | Competitors, what users love/hate, where we win/lose | You learn something, or choose between designs |
 | [guideline/](guideline/) | Brand: [app.html](guideline/app.html) (A, PC), [website.html](guideline/website.html) (B, Normal website), [phone.html](guideline/phone.html) (C), [coders.html](guideline/coders.html) (D, website's For Geeks), [brand-voice.md](guideline/brand-voice.md) (voice), [themes.md](guideline/themes.md) (how a theme is made, part by part, for every surface) | The owner gives a new version, or **any** guideline change: make it in both repos in the same session (branch and PR each); never leave one copy behind |
 | [issues/](issues/README.md) | The plan: numbered milestones, each with coded items (`3C`, `3C1`): bugs, polish, features and designs, tech, owner tasks; read `issues/INDEX.md` only | You find or plan something (add an item); you finish one (delete it, add its code to `done:`) |
-| [reports/](reports/) | Audits the owner asks for, one file each (`audit-1.md`) with its screenshots; every finding is also an item in `issues/` | You run an audit the owner asked for |
+| [reports/](reports/README.md) | Dated audits/reviews with adjacent evidence; catalogue and lifecycle in its README | You run an owner-requested audit; append dated follow-ups |
+| [feedback/](feedback/README.md) | Durable sanitized user observations and dispositions, linked to issues | Feedback arrives or its investigation/resolution changes |
+| [templates/](templates/README.md) | Reusable formats and links to specialist creator/GitHub kits | A repeated document workflow changes |
 | [CHANGELOG.md](CHANGELOG.md) | Every change, newest first under `Unreleased` | Every push |
 
-**Any guideline change lands in both repos.** Edit the app's `guideline/`, copy the changed files to the website repo's `guideline/` (`cmp` must pass), and open a PR in each; a CSS change that follows a guideline change ships in the same PR. `tests/test_docs_structure.py` checks the copies.
+**Any guideline change lands in both repos.** Edit the app's `guideline/`, copy the changed files to the website repo's `guideline/` (`cmp` must pass), and open a PR in each; a CSS change that follows a guideline change ships in the same PR. `tests/test_docs_structure.py` compares all Markdown/HTML copies, including Arabic, voice, themes and the map, when the sibling repo is present.
 
 **The brand guideline is strict.** CSS that differs from it is wrong. Missing a rule? Use the closest one and ask the owner in a GitHub issue; never invent a style. On a phone Part C wins over Part A, and never reuse the PC layout.
 
@@ -51,7 +53,7 @@ Never at the cost of a test, a required check, or a read you need.
 
 - **Claims and messages belong to their author.** Never edit another AI's, except deleting a message to you once handled (to all: keep seven days). Make each claim's *Work* distinguish parallel sessions. A helper (Codex's Luna) gets its own rows, written by its AI.
 - **Push rejected?** `git pull --rebase`, keep both sides in changelog and `NOW.md`, retest, push.
-- **Findings and plans:** every bug, improvement or design goes in `issues/` as one item in the milestone it belongs to, with the next free code (`python tools/issues.py next 3`); finishing it deletes the file and adds the code to the milestone's `done:`. Read `issues/INDEX.md` before anything else there. A small, self-contained one also gets a *Good first issue* (its template) titled `[3C] …`, linking the file, with `github: n` in the file's front matter, for people to `/take`.
+- **Findings and plans:** every bug, improvement or design goes in `issues/` as one item in the milestone it belongs to, with the next free code (`python tools/issues.py next 3`); finishing it first replaces incoming report/feedback links with permanent commit/test references, then deletes the file and adds the code to the milestone's `done:`. Read `issues/INDEX.md` before anything else there. A small, self-contained one also gets a *Good first issue* (its template) titled `[3C] …`, linking the file, with `github: n` in the file's front matter, for people to `/take`.
 - **People first:** never start on a GitHub issue that has an assignee or the `taken` label; a person has it ([CONTRIBUTING.md](CONTRIBUTING.md)). Fixing an item with an open GitHub issue closes it (`Closes #n`).
 - **Skills:** `skills/README.md` lists them: feedback-review, bug-hunt, number-audit, guideline-audit, arabic-check, perf-check, stale-check, release-check, website-sync. Read the one that fits and follow it.
 - **Never undo another AI's work** without the owner; disagree in a GitHub issue for the owner.
