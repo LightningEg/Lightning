@@ -7,6 +7,7 @@ from datetime import date
 from decimal import Decimal
 
 from lightning.accounts.domain import AccountType
+from lightning.categories.domain import CategoryFamily
 from lightning.core.dates import fmt_date, month_of, parse_date, parse_month, today
 from lightning.core.money import ZERO, from_e6
 from lightning.reporting.service import ReportingService
@@ -48,16 +49,18 @@ class IntegrityService:
 
         month = month_of(parse_date(day))
         first, last = parse_month(month)
-        flow = self.reporting.cash_flow(first, last)
-        categorized_outflows = sum(self.reporting.money_out_by_category(first, last).values(), ZERO)
-        checks.append(self._check("Categorized expenses equal reported spending", categorized_outflows,
-                                  flow.outflows,
-                                  "Refunds reduce their original category; transfers are excluded."))
+        # Rebuilt from the ledger lines themselves, not from the per-category totals the screens add up
+        # (audit 2026-10-26: comparing those totals with their own sum could never fail).
+        checks.append(self._base_cash_check())
 
+        by_category = self.reporting.money_out_by_category(first, last)
+        investment = {category.id for category in self.reporting.categories.tree()
+                      if category.family == CategoryFamily.INVESTMENT}
         budget = self.budgets.month_view(month)
         checks.append(self._check("Budget actual equals categorized spending", budget.actual,
-                                  categorized_outflows,
-                                  "Budget actuals should reconcile to posted money-out categories."))
+                                  sum((value for cid, value in by_category.items() if cid not in investment), ZERO),
+                                  "Budget actuals should reconcile to posted money-out categories, "
+                                  "leaving out investment fees and taxes as the budget does."))
 
         if self.position is not None:
             checks.append(self._free_cash_check(day))
@@ -67,6 +70,16 @@ class IntegrityService:
                                   "Opening + income − spending + valuation changes + new balances + custody changes.",
                                   complete))
         return checks
+
+    def _base_cash_check(self) -> IntegrityCheck:
+        """Profile-currency cash is worth its face value: each such line's base amount equals its quantity."""
+        gap = self.reporting.q.db.scalar(
+            "SELECT COALESCE(SUM(ABS(le.amount_base_e6 - le.quantity_e6)),0) FROM ledger_entries le "
+            "JOIN transactions t ON t.id=le.transaction_id AND t.status='POSTED' "
+            "JOIN financial_assets f ON f.id=le.asset_id AND f.is_cash=1 AND f.currency=? "
+            "WHERE le.effect<>'REVALUATION'", (self.reporting.base_currency,))
+        return self._check("Profile-currency cash moves at face value", from_e6(gap or 0), ZERO,
+                           "Every cash line in the profile currency is valued at exactly its amount.")
 
     def _free_cash_check(self, day: str) -> IntegrityCheck:
         """Free cash as every screen shows it (`Position.free_cash`, built from valued holdings) against free cash

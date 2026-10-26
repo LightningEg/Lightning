@@ -80,7 +80,7 @@
 <datalist id="owner-options">{% for name in owner_options %}<option value="{{ name }}"></option>{% endfor %}</datalist>
 <datalist id="counterparty-options"><option value="My money"></option>{% for name in counterparty_options %}<option value="{{ name }}"></option>{% endfor %}</datalist>
 <script nonce="{{ request.state.csp_nonce|default('') }}" id="category-catalogue" type="application/json">{{ category_choices|tojson }}</script>
-<form id="f-new" method="post" action="{{ post_url }}" autocomplete="off"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+<form id="f-new" method="post" action="{{ post_url }}" autocomplete="off"><input type="hidden" name="submission" value="{{ new_submission() }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 {% if edit_id is not none %}<form id="f-edit" method="post" action="{{ post_url }}/{{ edit_id }}" autocomplete="off"><input type="hidden" name="revision" value="{{ edit.revision }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
 {% set review_form_id = 'f-edit' if edit_id is not none else 'f-new' %}
 {% if entry.get('counterparty_choice') and review_mode != 'counterparty' %}<input form="{{ review_form_id }}" type="hidden" name="counterparty_choice" value="{{ entry.counterparty_choice }}">{% endif %}

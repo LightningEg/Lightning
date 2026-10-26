@@ -7,6 +7,7 @@
   {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
   <form method="post" action="{{ action }}">
     <input type="hidden" name="return_to" value="{{ values.return_to }}">
+    {% if values.revision is defined %}<input type="hidden" name="revision" value="{{ values.revision }}">{% endif %}
     <div class="row">
       <div class="field {{ 'has-error' if error_field == 'date' }}">
         <label for="convert-date">{{ 'Date'|tr(locale) }}</label>

@@ -120,7 +120,26 @@ class AccountWorkflows:
         if held:
             raise ConflictError(f"{account.label} still holds investments ({', '.join(h.asset_code for h in held)}). "
                                 "Sell or move them first, then deactivate it.")
+        user = self._still_used_by(account_id)
+        if user:
+            raise ConflictError(f"{account.label} is still where {user} pays or is paid from. "
+                                "Choose another account there first, then deactivate it.")
         return self.accounts.set_active(account_id, False)
+
+    def _still_used_by(self, account_id: int) -> str | None:
+        """A live certificate, circle, reserve or plan that would keep sending money to an inactive account
+        (audit 2026-10-26)."""
+        found = self.db.one(
+            "SELECT 'the certificate ' || c.name AS name FROM cd_certificates c "
+            "JOIN transactions p ON p.id=c.purchase_transaction_id AND p.status='POSTED' "
+            "WHERE c.destination_account_id=:a AND NOT EXISTS (SELECT 1 FROM cd_redemptions r "
+            "JOIN transactions t ON t.id=r.transaction_id WHERE r.certificate_id=c.id AND t.status='POSTED') "
+            "UNION ALL SELECT 'the circle ' || g.name FROM gameya_terms t JOIN accounts g ON g.id=t.account_id "
+            "WHERE g.active=1 AND :a IN (t.funding_account_id, t.payout_account_id) "
+            "UNION ALL SELECT 'the reserve ' || name FROM cash_reserves WHERE status='ACTIVE' AND account_id=:a "
+            "UNION ALL SELECT 'the plan ' || name FROM planned_items WHERE active=1 AND account_id=:a LIMIT 1",
+            {"a": account_id})
+        return found["name"] if found else None
 
     def reactivate(self, account_id: int) -> Account:
         return self.accounts.set_active(account_id, True)

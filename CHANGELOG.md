@@ -15,6 +15,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
   Tiers for every look (recolour, texture, animation) in themes.md section 7; owner console rebuilt on the website.
 - 2026-10-26 · Claude: 8L theme materials: every app theme element states paint, material and motion from a reviewed recipe library (`theme-materials.css`, `slots.json` schema 2), validated at each surface's worst point.
   New light reference Cotton; Nile Papyrus & Lapis Guilloché redone (lacquer hero, travelling gold-foil edge, papyrus ground, foil controls); `tools/theme_shots.py` captures the roster.
+- 2026-10-26 · Claude: Audit 8 engine fixes: 2I shared writer checks cash currency/rate, 2J resent add forms save once, 2L instalment cents, 2M last revision fields; 15 more write-path, loan,
+  schedule, onboarding and integrity-check fixes (CD re-redeem, reserve/circle limits, deactivate/delete references, loan overpayment). Open: 2J journal, 2Z, 7R, 7S. reports/2026-10-26-engine-audit.
 - 2026-10-26 · Codex: 4E–4I makes interrupted pairing resumable, binds recovery to current membership, and limits unapproved requests.
   Device keys use DPAPI/Android Keystore; native DPAPI binding/tamper/TLS checks pass, and migration preserves identity.
   Added process-death/network fault tests, native credential probes, an independent internal security review and a physical-device acceptance kit.

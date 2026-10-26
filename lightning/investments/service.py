@@ -386,6 +386,7 @@ class InvestmentService:
                                                     fees_included=values.get("fees_included", True), on=date)
             if owner_id:
                 lines = [replace(line, owner_id=int(owner_id)) for line in lines]
+            self._require_broker_cash(kind, values["account_id"], lines)  # an edit cannot skip it (audit 2026-10-26)
             updated = self.transactions.repost(txn_id, date, lines, "", counterparty, notes)
             if kind == DocType.SEL and self.reevaluations:
                 unit_line = next(line for line in lines if not self.assets.get_asset(line.asset_id).is_cash)
@@ -600,18 +601,21 @@ class InvestmentService:
             if not party:
                 raise ValidationError("Choose an active owner.", "owner")
             lines = [replace(line, owner_id=owner_id) for line in lines]
-        holding_account = self.accounts.get(account_id)
-        if holding_account.account_type == AccountType.BROKERAGE and kind == DocType.BUY:
-            cash_line = next(line for line in lines if self.assets.get_asset(line.asset_id).is_cash)
-            if cash_line.account_id != holding_account.id:
-                raise ValidationError("Brokerage purchases must use cash already in that brokerage account.",
-                                      "cash_account")
+        self._require_broker_cash(kind, account_id, lines)
         txn = self.transactions.post(kind, date, lines, "", counterparty, notes)
         if kind == DocType.SEL and self.reevaluations:
             unit_line = next(line for line in lines if not self.assets.get_asset(line.asset_id).is_cash)
             self.reevaluations.process_sale(txn.date, account_id, asset_id, unit_line.unit_price,
                                             owner_id=owner_id)
         return txn
+
+    def _require_broker_cash(self, kind, account_id, lines) -> None:
+        holding_account = self.accounts.get(int(account_id))
+        if holding_account.account_type == AccountType.BROKERAGE and kind == DocType.BUY:
+            cash_line = next(line for line in lines if self.assets.get_asset(line.asset_id).is_cash)
+            if cash_line.account_id != holding_account.id:
+                raise ValidationError("Brokerage purchases must use cash already in that brokerage account.",
+                                      "cash_account")
 
     def _rate(self, account: Account, on) -> Decimal:
         """The line rate (account currency -> base) on a day: one place for every investment line."""

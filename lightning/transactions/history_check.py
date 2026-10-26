@@ -41,6 +41,7 @@ def validate_replay(records, *, db, transactions, assets, accounts, reconciliati
             lines.extend(txn.lines)
     if lines:
         transactions._check_holdings(lines)
+    transactions.check_reserve_links(sorted(ids))
     surviving, owner_keys = [], set()
     for (account_id, asset_id, owner_id), row in affected.items():
         if not db.scalar("SELECT 1 FROM financial_assets WHERE id=?", (asset_id,)):

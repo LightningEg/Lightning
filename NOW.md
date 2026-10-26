@@ -24,7 +24,7 @@
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 
 1. **Audit 6 disposition is complete; four other app PRs are open.** As of 2026-10-24, GitHub shows app PRs #117 and #121–#123 open, and no open website PRs. #117 is a CSV amount-format contribution; #121–#123 are Dependabot updates. They are separate from the historical PRs listed in Audit 6 and still need their own review. The remaining items below are plan or owner acceptance work. **Read:** `reports/2026-10-23-pull-request-cleanup/report.md`.
-2. **2M:** the three form revision fields remain. **Read:** `reports/2026-10-23-backend-correctness/report.md`; `reports/2026-10-23-pull-request-cleanup/report.md`.
+2. **Audit 8 follow-ups:** 2J on journal profiles, 2Z (bridge check), owner decisions 7R and 7S. **Read:** `reports/2026-10-26-engine-audit/report.md`.
 3. **9J–9L:** remain open from Audit 5. **Read:** `reports/2026-10-21-backend-streamlining/report.md`.
 4. **1H:** coordinated Android, desktop and build-tool dependency locks remain; this follows deferred PR #103. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
 5. **2A/2B:** run the Windows reboot drill; power-loss evidence remains. **Read:** each item in `issues/INDEX.md`.
