@@ -3,6 +3,18 @@
 {% block title %}Investment prices{% endblock %}
 {% block heading %}{{ page_header('Investment prices'|tr(locale), 'Lightning fetches them online, falls back on the shared price files, or you type them. A price you type for a day wins.'|tr(locale)) }}{% endblock %}
 {% block content %}
+{% if pending %}
+<form method="post" class="card" style="max-width:1000px;margin-bottom:16px" autocomplete="off" id="missing">
+  <h2>{{ 'Prices needed to complete reevaluations'|tr(locale) }}</h2>
+  <p class="muted">These month-end checkpoints are waiting for a price. Get prices asks the sources again; {% if fails >= 2 and market %}they failed the last {{ fails }} times, so you can use the shared prices instead, or {% else %}or {% endif %}enter each price below. Its account return is then posted to the main ledger.</p>
+  <div class="actions" style="margin-bottom:12px"><button class="btn" formaction="/investments/prices/online" formnovalidate data-busy="Fetching prices…">{{ 'Get prices'|tr(locale) }}</button>{% if fails >= 2 and market %}<button class="btn" formaction="/investments/prices/market/update" formnovalidate data-busy="Downloading…">{{ 'Use shared prices'|tr(locale) }}</button>{% endif %}</div>
+  <table class="budget"><thead><tr><th>{{ 'Checkpoint'|tr(locale) }}</th><th>{{ 'Investment'|tr(locale) }}</th><th>{{ 'Price needed'|tr(locale) }}</th></tr></thead>
+    {% for row in pending %}<tr><td data-label="{{ 'Checkpoint'|tr(locale) }}">{{ row.date }}</td><td data-label="{{ 'Investment'|tr(locale) }}">{{ row.asset_name }}</td>
+      <td data-label="{{ 'Price needed'|tr(locale) }}"><input name="rp_{{ row.asset_id }}_{{ row.date }}" class="num" inputmode="decimal" placeholder="{{ 'Price per unit'|tr(locale) }}" aria-label="{{ row.asset_name }} · {{ row.date }}" required></td></tr>{% endfor %}
+  </table>
+  <div class="actions" style="margin-top:12px"><button class="btn primary">{{ 'Save missing prices'|tr(locale) }}</button></div>
+<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+{% endif %}
 <section class="card" style="max-width:1000px;margin-bottom:16px" aria-labelledby="price-files">
   <h2 id="price-files">{{ 'Update prices'|tr(locale) }}</h2>
   <p class="muted small">{{ 'Lightning updates the prices of what you hold by itself, the first time you open it after a month ends.'|tr(locale) }}</p>
@@ -10,7 +22,7 @@
   <form method="post" class="actions" action="/investments/prices/online">
     <button class="btn primary" data-busy="Fetching prices…">{{ 'Update prices'|tr(locale) }}</button>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
-  <h3 style="margin-top:16px">{{ 'Shared price files'|tr(locale) }}</h3>
+  <details class="flow-disclosure"><summary>{{ "Shared price files"|tr(locale) }}</summary>
   {% if market %}
   <table class="budget">
     <thead><tr><th>{{ 'Market'|tr(locale) }}</th><th class="num">{{ 'Prices'|tr(locale) }}</th><th>{{ 'Up to'|tr(locale) }}</th><th>{{ 'File'|tr(locale) }}</th></tr></thead>
@@ -33,19 +45,9 @@
       <div class="actions"><button class="btn">{{ 'Import and fill'|tr(locale) }}</button></div>
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
   </details>
+</details>
 </section>
-{% if pending %}
-<form method="post" class="card" style="max-width:1000px;margin-bottom:16px" autocomplete="off" id="missing">
-  <h2>{{ 'Prices needed to complete reevaluations'|tr(locale) }}</h2>
-  <p class="muted">These month-end checkpoints are waiting for a price. Get prices asks the sources again; {% if fails >= 2 and market %}they failed the last {{ fails }} times, so you can use the shared prices instead, or {% else %}or {% endif %}enter each price below. Its account return is then posted to the main ledger.</p>
-  <div class="actions" style="margin-bottom:12px"><button class="btn" formaction="/investments/prices/online" formnovalidate data-busy="Fetching prices…">{{ 'Get prices'|tr(locale) }}</button>{% if fails >= 2 and market %}<button class="btn" formaction="/investments/prices/market/update" formnovalidate data-busy="Downloading…">{{ 'Use shared prices'|tr(locale) }}</button>{% endif %}</div>
-  <table class="budget"><thead><tr><th>{{ 'Checkpoint'|tr(locale) }}</th><th>{{ 'Investment'|tr(locale) }}</th><th>{{ 'Price needed'|tr(locale) }}</th></tr></thead>
-    {% for row in pending %}<tr><td data-label="{{ 'Checkpoint'|tr(locale) }}">{{ row.date }}</td><td data-label="{{ 'Investment'|tr(locale) }}">{{ row.asset_name }}</td>
-      <td data-label="{{ 'Price needed'|tr(locale) }}"><input name="rp_{{ row.asset_id }}_{{ row.date }}" class="num" inputmode="decimal" placeholder="Price per unit" required></td></tr>{% endfor %}
-  </table>
-  <div class="actions" style="margin-top:12px"><button class="btn primary">{{ 'Save missing prices'|tr(locale) }}</button></div>
-<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
-{% endif %}
+
 <form method="post" class="card" style="max-width:1000px" autocomplete="off">
   <div class="field" style="max-width:220px">
     <label for="date">{{ 'As of'|tr(locale) }} <span class="muted small">{{ 'yyyy-mm-dd'|tr(locale) }}</span></label>

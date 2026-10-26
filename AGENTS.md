@@ -58,6 +58,8 @@ Never at the cost of a test, a required check, or a read you need.
 
 ## 4. Product rules
 
+- Keep shared visual-flow rules in the token-only presentation adapter and derive phone primary destinations from the existing section registry; this keeps themes and PC/phone navigation aligned without changing financial logic.
+
 - Local-first personal finance for salaried people in Egypt. One ledger records real money; plans move none; reports read both.
 - Financial calculations live in Python services, never templates or JavaScript.
 - Ships mainly as a Windows app (WebView2, encrypted profiles): no Back, address bar or tabs, so every page has its own way forward and back. Linux `--profiles` shares the pages; `python -m lightning` is separate legacy mode.

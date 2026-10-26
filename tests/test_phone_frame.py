@@ -136,3 +136,12 @@ def test_settings_on_the_phone_leads_to_pairing_sms_and_the_profile(phone):
 def test_overview_puts_needs_you_before_latest(phone):
     html = phone.get("/").text
     assert html.index('class="card phone-needs') < html.index('aria-labelledby="latest-heading"')
+
+
+def test_phone_page_menu_exposes_pc_sections_and_every_main_page(phone):
+    """Main pages must stay directly accessible without opening Settings or More."""
+    html = phone.get("/investments").text
+    menu = html.split('class="phone-page-grid"', 1)[1].split("</nav>", 1)[0]
+    for href in ("/", "/budget", "/plan", "/investments", "/accounts", "/settings", "/transactions", "/financial-health", "/review", "/profiles"):
+        assert f'href="{href}"' in menu
+    assert 'href="/investments" aria-current="page"' in menu

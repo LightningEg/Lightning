@@ -14,6 +14,20 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    "Budget for {name}: an amount, or a percentage of average monthly income": "ميزانية {name}: مبلغ أو نسبة من متوسط الدخل الشهري",
+
+    "Monthly limit for {name}": "الحد الشهري لـ{name}",
+    "Holdings by intended horizon": "الحيازات حسب المدة المستهدفة",
+
+    "Pages": "الصفحات",
+    "Good minimum": "الحد الأدنى الجيد",
+    "Good maximum": "الحد الأقصى الجيد",
+    "Needs you below": "يحتاجك تحت",
+    "Needs you above": "يحتاجك فوق",
+    "Good is at least": "الجيد على الأقل",
+    "Good is at most": "الجيد على الأكثر",
+    "Use {amount} from now on": "استخدم {amount} من دلوقتي",
+
     'Appearance': 'المظهر',
     'Theme': 'السمة',
     'Lightning default': 'مظهر لايتنينج الأساسي',
