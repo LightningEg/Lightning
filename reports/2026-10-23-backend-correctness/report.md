@@ -12,13 +12,13 @@ All reproductions use temporary dummy databases, offline prices and a fixed date
 
 | Item | Severity | Confirmed behavior | Expected behavior |
 |---|---|---|---|
-| [2M](../../issues/2-safe-for-real-money/2M-stale-edit-form-overwrites.md) | High | A stale popup saved for notes overwrites a newer amount, 20 → 10. | Refuse stale revisions or merge only explicitly changed fields. |
+| [2M · fixed](../../tests/test_engine_loose_ends.py) | High | A stale popup saved for notes overwrites a newer amount, 20 → 10. | Refuse stale revisions or merge only explicitly changed fields. |
 | [2N](#fix-progress) | High | Save reports HTTP 400 for missing bill FX after posting the expense. | Make failure/success accurately describe whether money committed. |
 | **2G · fixed** | High | Delete funding income, restore a spent expense or buy, reduce an opening balance, or convert unfunded cash: balances go negative. | Apply the cash/funding policy to every state transition; refuse an invalid resulting ledger. |
 | **2H · fixed** | High | Moving an income strands its old account at −50; reassigning a purchase strands its old owner at −1 shares. | Validate both the old and proposed account/asset/owner sets. |
-| [2I](../../issues/2-safe-for-real-money/2I-posting-currency-contract.md) | Medium | Public `post()` accepts USD cash in an EGP account and a non-1 base-currency rate. Reports disagree. | Resolve assets/accounts in the posting boundary and enforce their currency/type relationship. |
+| [2I · fixed](../../tests/test_engine_loose_ends.py) | Medium | Public `post()` accepts USD cash in an EGP account and a non-1 base-currency rate. Reports disagree. | Resolve assets/accounts in the posting boundary and enforce their currency/type relationship. |
 | [2J](../../issues/2-safe-for-real-money/2J-register-submit-idempotency.md) | Medium | Two identical register POSTs return 303 twice and create two expenses. | A retry of one submitted action returns its original result. |
-| [2L](../../issues/2-safe-for-real-money/2L-instalment-input-precision.md) | Medium | A price of 100.001 over two instalments produces 50.01 and 49.991; the last payment cannot post. | Refuse sub-cent price/fee inputs before saving a loan. |
+| [2L · fixed](../../tests/test_engine_loose_ends.py) | Medium | A price of 100.001 over two instalments produces 50.01 and 49.991; the last payment cannot post. | Refuse sub-cent price/fee inputs before saving a loan. |
 | [2K](#fix-progress) | Low | A rejected currency-converting buy leaves a new empty currency pocket. | Route selection, pocket creation, conversion and purchase roll back together. |
 | [2O](#fix-progress) | Medium | Phone bulk Delete voids selected rows without a confirmation question. | Confirm the selected scope and preserve the button’s delete action. |
 | [3AE](#fix-progress) | Medium | A refused PC bulk edit loses both selection and typed changes. | Keep the correction and selection available after a rejected save. |
@@ -189,3 +189,5 @@ Validation for 2G/2H: full suite **2,368 passed, 9 skipped**; all four import co
 The repaired workflow probes now pass all **36** cases, and the combined new regression set passes **47**. Arabic checks pass **16** existing cases; new phone count/confirmation and row-refusal regressions pass in Arabic. PC (1280 px) and phone (390 px) visual checks show no horizontal overflow; popup conflicts now render one alert. Native Arabic voice review remains outside this automated check.
 
 Combined full-suite validation: **2,395 passed, 10 skipped**; all four import contracts kept. The additional skip is the sibling-website guideline comparison in the temporary worktree; it passes separately from `/workspace/Lightning`, where the website is present. A final targeted run passes **21** Save/revision cases after deduplicating popup alerts; a phone smoke check confirms one alert and the newer amount retained.
+
+**2026-10-26 follow-up.** 2I, 2L and 2M are fixed, and 2J on ordinary profiles (journal profiles stay open in 2J); regressions in `tests/test_engine_loose_ends.py`. See [Audit 8](../2026-10-26-engine-audit/report.md).

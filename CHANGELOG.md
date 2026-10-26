@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-26 · Claude: Audit 8 engine fixes: 2I shared writer checks cash currency/rate, 2J resent add forms save once, 2L instalment cents, 2M last revision fields; 15 more write-path, loan,
+  schedule, onboarding and integrity-check fixes (CD re-redeem, reserve/circle limits, deactivate/delete references, loan overpayment). Open: 2J journal, 2Z, 7R, 7S. reports/2026-10-26-engine-audit.
 - 2026-10-26 · Codex: 1I organize repository docs: dated report/evidence folders, durable sanitized feedback, guideline and template maps; repair links and enforce catalogues and complete guideline mirrors.
 - 2026-10-26 · Claude: 8J simple InstaPay top-up (website #95): members copy our details and their email for the note, then confirm date, amount and sender, no receipt; the owner reconciles every open top-up on one screen.
 - 2026-10-26 · Claude: 8J owner console (website #94): one owner account only (a second refused; extra ones removed from Settings); top-up tickets open from a list with the receipt shown, and take amount, date, sender and reference; a reference pays one ticket only.

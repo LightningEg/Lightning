@@ -35,13 +35,11 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | 2C5 | ↳ Native notification delivery, Windows and Android | | | |
 | **2E** | [The engine accepts some bad input - dates before an account opened, crafted ids, rounding of plan amounts](2-safe-for-real-money/2E-engine-input-checks.md) | bug | transactions | ready |
 | **2F** | [On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone](2-safe-for-real-money/2F-android-downloads-files-links.md) | bug | android | ready |
-| **2I** | [The shared posting API accepts a cash asset in the wrong account currency](2-safe-for-real-money/2I-posting-currency-contract.md) | bug | transactions | ready |
-| **2J** | [Retrying one register submission creates a second expense](2-safe-for-real-money/2J-register-submit-idempotency.md) | bug | transactions | ready |
-| **2L** | [A sub-cent purchase price creates a final instalment that cannot be paid](2-safe-for-real-money/2L-instalment-input-precision.md) | bug | planning | ready |
-| **2M** | [A stale transaction edit form can silently reverse a newer amount](2-safe-for-real-money/2M-stale-edit-form-overwrites.md) | bug | transactions | building |
+| **2J** | [On a journal profile, retrying one add form can still save a second expense](2-safe-for-real-money/2J-register-submit-idempotency.md) | bug | transactions | ready |
 | **2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug | android | new |
+| **2Z** | [The net-worth bridge check cannot fail - its valuation change is whatever is left over](2-safe-for-real-money/2Z-net-worth-bridge-check-cannot-fail.md) | tech | reporting | ready |
 
-Done: 2D, 2K, 2O, 2P, 2Q, 2R, 2S, 2T, 2G, 2H, 2N, 2V, 2W, 2X, 2Y. Next free code: 2Z.
+Done: 2D, 2K, 2O, 2P, 2Q, 2R, 2S, 2T, 2G, 2H, 2N, 2V, 2W, 2X, 2Y, 2I, 2L, 2M. Next free code: 2AA.
 
 ## 3 Polish and Arabic
 
@@ -130,8 +128,10 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | 7L3 | ↳ Looks recurring finds real bills | | | |
 | 7L4 | ↳ Pair what belongs together | | | |
 | **7M** | [Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as overspending](7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) | owner | planning | new |
+| **7R** | [Changing an expense's amount silently unlinks it from its reserve](7-planning-import-and-search/7R-money-edit-drops-reserve-links.md) | owner | planning | new |
+| **7S** | [Money out filed under an income category counts as spending, not as less income](7-planning-import-and-search/7S-money-out-of-an-income-category.md) | owner | reporting | new |
 
-Done: 7Q, 7P, 7K, 7N, 7O, 7J. Next free code: 7R.
+Done: 7Q, 7P, 7K, 7N, 7O, 7J. Next free code: 7T.
 
 ## 8 Website
 
