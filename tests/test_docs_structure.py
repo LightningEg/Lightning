@@ -115,7 +115,7 @@ def test_the_app_and_website_guidelines_are_the_same_four_files():
     website = next((path for path in beside if path.is_dir()), None)
     if website is None:
         pytest.skip("the website repository is not checked out next to this one")
-    for name in DOCUMENTS.values():
+    for name in [*DOCUMENTS.values(), "themes.md"]:
         same = (GUIDELINE / name).read_bytes().replace(b"\r\n", b"\n") == (website / name).read_bytes().replace(b"\r\n", b"\n")
         assert same, (f"guideline/{name} ({_title(GUIDELINE / name)}) differs from the website's copy "
                       f"({_title(website / name)}): pull both repos, copy the newer over the older, and push both")

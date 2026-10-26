@@ -1,0 +1,2 @@
+/* Generated. */
+window.LIGHTNING_THEMES = [{"id": "lightning-default", "name": "Lightning default", "preview": false}, {"id": "nile-nocturne", "name": "Nile Nocturne", "preview": true}, {"id": "nile-papyrus-guilloche", "name": "Nile Papyrus & Lapis Guilloch\u00e9", "preview": true, "pattern": "papyrus-guilloche", "motion": "security-thread"}, {"id": "royal-obsidian-gold", "name": "Royal Obsidian & Gold", "preview": true}];

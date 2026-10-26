@@ -1,0 +1,46 @@
+/* Approved decoration layer (part 10, guideline/themes.md section 7). Active only through data-texture and
+   data-motion, which theme-runtime.js copies from the theme registry. Rules: behind content, never on a number,
+   no images or requests, one motion per theme, reduced motion = one still frame. Layout, type and money colours
+   are never touched. */
+
+/* Texture: papyrus-guilloche. Papyrus fibres in the text colour at 3 to 5%, behind the whole page. */
+html[data-texture="papyrus-guilloche"] body { position: relative; isolation: isolate; }
+html[data-texture="papyrus-guilloche"] body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--text) 4%, transparent) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--text) 3%, transparent) 0 1px, transparent 1px 11px),
+    repeating-linear-gradient(0deg, transparent 0 23px, color-mix(in srgb, var(--text) 5%, transparent) 23px 24px);
+}
+html.phone[data-texture="papyrus-guilloche"] body::before { opacity: .75; }
+
+/* The guilloché rosette: one still watermark in the accent at 6%, fixed in the page's far corner behind everything.
+   Never inside a card (themes.md section 7); the Lead card keeps its own brand watermark (A02.3). Mirrors in Arabic. */
+html[data-texture="papyrus-guilloche"] body::after {
+  content: ""; position: fixed; z-index: -1; pointer-events: none;
+  inset-inline-end: -140px; bottom: -140px; width: 560px; aspect-ratio: 1;
+  background: var(--accent); opacity: .06;
+  -webkit-mask: var(--rosette) center/contain no-repeat; mask: var(--rosette) center/contain no-repeat;
+  --rosette: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-100 -100 200 200' fill='none' stroke='%23000' stroke-width='.6'%3E%3Cg%3E%3Cellipse rx='92' ry='30'/%3E%3Cellipse rx='92' ry='30' transform='rotate(15)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(30)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(45)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(60)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(75)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(90)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(105)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(120)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(135)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(150)'/%3E%3Cellipse rx='92' ry='30' transform='rotate(165)'/%3E%3Ccircle r='96'/%3E%3Ccircle r='60'/%3E%3Ccircle r='18'/%3E%3C/g%3E%3C/svg%3E");
+}
+html.phone[data-texture="papyrus-guilloche"] body::after { width: 300px; inset-inline-end: -90px; bottom: -90px; }
+
+/* The current page: a thin cartouche outline in the accent. Outline only: nothing moves. */
+html[data-texture="papyrus-guilloche"] :is(.nav a.active, .phone-tabbar [aria-current="page"]) {
+  outline: 1px solid color-mix(in srgb, var(--accent) 70%, transparent); outline-offset: -3px;
+}
+
+/* Motion: security-thread, the theme's one motion. A slow (12 s) gold glint along the header seam, behind content. */
+html[data-motion="security-thread"] :is(.topbar, .phone-appbar) {
+  border-bottom-color: transparent; /* the thread takes the seam's place: same 1px, nothing moves */
+  background-image: linear-gradient(90deg, var(--theme-header-seam) 0 40%, color-mix(in srgb, var(--accent) 35%, var(--surface)) 46%,
+    var(--hero) 50%, color-mix(in srgb, var(--accent) 35%, var(--surface)) 54%, var(--theme-header-seam) 60% 100%);
+  background-size: 300% 1px; background-repeat: repeat-x; background-origin: border-box; background-position: 0 100%;
+  animation: lt-thread 12s linear infinite;
+}
+/* one tile is three header widths: moving it by -150% slides exactly one tile, so the loop has no seam or gap */
+@keyframes lt-thread { from { background-position: 0 100%; } to { background-position: -150% 100%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-motion] :is(.topbar, .phone-appbar) { animation: none; background-position: 0 100%; /* still: the plain seam */ }
+}
