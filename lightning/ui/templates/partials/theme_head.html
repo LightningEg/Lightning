@@ -1,0 +1,4 @@
+{% if app_theme is defined %}<meta name="lightning-theme" content="{{ app_theme }}">{% endif %}
+{# Parser-blocking local scripts restore appearance before the first body paint. #}
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/themes.generated.js?v=2"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/theme-runtime.js?v=2"></script>

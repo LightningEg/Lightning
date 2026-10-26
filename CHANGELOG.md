@@ -11,9 +11,30 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-- 2026-10-25 · Claude: Guideline D01, D03, D09, D11 (coders.html, both repos): member pages and their scripts, the account chip and menu in the top bar, the wordmark hiding at 420px, and three paid themes (Moss, Garnet, Frost) beside the twelve free ones.
-- 2026-10-25 · Claude: Tasks can carry Lightning Coins: contributors.yml records claims and the new rewards.yml pays the issues a merged pull request closes, through the website's database.
+- 2026-10-25 · Codex: 3AH visual flow: direct phone page picker, answer-first Overview, decision-first review and price tasks, quieter recurring rows and explicit accessible form labels.
+  Preserve brand/theme tokens, financial calculations and the five phone slots; page checks and acceptance gaps are in reports/audit-7.md.
+
+- 2026-10-25 · Claude: 8K supporter release (website repo): earned supporter and Founding badges, name styles, animated and seasonal banners, sets, gifts and a supporters' theme vote; 8K tracks app-theme sales, About credits and a beta channel. themes.md section 7.
+- 2026-10-25 · Claude: Nile Papyrus & Lapis Guilloché app theme (from #136, reviewed): papyrus texture, page-corner rosette and one 12 s header-seam motion, reduced motion still; dark-theme readability fixes use each theme's own money tints. themes.md and theme-kit allow approved decoration.
+- 2026-10-25 · Claude: 8J website leaderboard (website repo): a table of rank, display name, contributions and score over each member's banner; `leaderboard.html?sample` shows made-up people to preview it.
+- 2026-10-25 · Codex: 8J creator brief now specifies mode, a mandatory PC/phone screenshot roster, WCAG AA contrast and LTR amounts in Arabic; adds a reusable AI prompt.
+
+- 2026-10-25 · Claude: 8J owner dashboard (website repo): Today view (needs, revenue vs fixed cost, 30-day chart), each top-up one ticket confirmed in place, simpler InstaPay checkout (payer address or wallet phone, no reference); fixes the live coin quote.
+- 2026-10-25 · Codex: 8J app theme swap and external creator kit: shared PC/phone runtime, validated palette compiler, Settings previews and handoff template; sync themes guideline in both repos. Native and paid activation acceptance remain.
+
+- 2026-10-25 · Claude: 8J theme tiers and prices (website repo): Palette 300 coins, Textured 600 (Papyrus, Cotton), Animated later; market shows EGP, a textured row and what buyers get. guideline/themes.md section 7 (both repos).
+- 2026-10-25 · Claude: 8J website community tabs (website repo): banners behind leaderboard rows, Wallet rebuilt, Profile opens your own (owners see private ones), sentence case on main-site forms.
+- 2026-10-25 · Claude: 8J five website themes on sale (Paper, Frost, Meadow, Nile, Garnet), nine archived for their owners; new guideline/themes.md: a theme is one seed and eleven parts, each surface its own version. D03.1 updated (both repos).
+- 2026-10-25 · Claude: 8J market shop floor on both website markets (website repo): tabs, Your look, app themes in testing, PC/phone/website theme previews, Try it, missing-coin buy; owned themes can dress the main website. Cotton-boll coin, no Threads.
+- 2026-10-24 · Codex: Free-use policy replaces the seven-day licence model; optional in-app cosmetics support development without unlocking functionality. Update English/Arabic promise and FAQ.
+- 2026-10-24 · Codex: Docs status refresh: close completed guideline-sync item 8B, clarify Audit 6’s zero-open-PR result, and refresh the handoff.
+- 2026-10-24 · Claude: Guideline D01, D03, D09, D11 (coders.html, both repos): member pages and their scripts, the account chip and menu in the top bar, the wordmark hiding at 420px, and three paid themes (Moss, Garnet, Frost) beside the twelve free ones.
+- 2026-10-24 · Claude: Tasks can carry Lightning Coins: contributors.yml records claims and the new rewards.yml pays the issues a merged pull request closes, through the website's database.
   Needs the SUPABASE_SERVICE_ROLE_KEY secret (without it both only print a notice); bots and the owner's account never earn. CONTRIBUTING.md says how to link GitHub.
+
+- 2026-10-24 · Codex: 8J records the Mono-only free website palette policy, moderated stories and private website receipt uploads; syncs the Coders guideline.
+
+- 2026-10-24 · Codex: 8J bundles two test appearance manifests and validates fixed parts and signed account ownership offline. Native claiming/rendering remains gated on integration and acceptance.
 
 - 2026-10-24 · Codex: [7P, 7Q, 3AG] Make workbooks readable, add validated comprehensive onboarding, group data tools and move AI prompt editing into a popup.
   Clean investment rows and group via dropdown; let Needs you items be reviewed, snoozed or restored, with changed situations resurfacing.

@@ -4,24 +4,24 @@
 
 {% macro inputs(form_id, v, is_edit, balance=none) -%}
   <td class="register-edit-date">
-    <input id="{{ form_id }}-date" form="{{ form_id }}" type="text" name="date" value="{{ v.get('date', '') }}" placeholder="yyyy-mm-dd"
+    <input id="{{ form_id }}-date" form="{{ form_id }}" type="text" name="date" aria-label="{{ 'Date'|tr(locale) }}" value="{{ v.get('date', '') }}" placeholder="yyyy-mm-dd"
            inputmode="numeric" autocomplete="off" data-smart-date title="yyyy-mm-dd, like 2026-01-31" required class="{{ 'bad' if error_field == 'date' }}">
   </td>
   <td class="register-edit-counterparty">
-    <div class="counterparty-picker"><input form="{{ form_id }}" type="text" name="counterparty" value="{{ v.get('counterparty', '') }}" placeholder="Counterparty or your account"
+    <div class="counterparty-picker"><input form="{{ form_id }}" type="text" name="counterparty" aria-label="{{ 'Counterparty'|tr(locale) }}" value="{{ v.get('counterparty', '') }}" placeholder="Counterparty or your account"
              autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="{{ form_id }}-counterparty-results"
              data-counterparty-results="{{ form_id }}-counterparty-results"
              class="counterparty-input {{ 'bad' if error_field in ('counterparty', 'counterparty_review', 'to_account', 'from_account') }}"
              {{ '' if is_edit else 'id=counterparty' }}>
       <div id="{{ form_id }}-counterparty-results" class="counterparty-results" role="listbox" hidden></div>
     </div>
-    {% if show_account %}<select form="{{ form_id }}" name="account_id" required class="register-account-picker {{ 'bad' if error_field == 'account' }}" data-own-picker>
+    {% if show_account %}<select form="{{ form_id }}" name="account_id" required class="register-account-picker {{ 'bad' if error_field == 'account' }}" aria-label="{{ 'Account'|tr(locale) }}" data-own-picker>
       <option value="">{{ 'Account…'|tr(locale) }}</option>{% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if v.get('account_id') == a.id|string }}>{{ a.label }}</option>{% endfor %}
     </select>{% endif %}
   </td>
   <td class="register-edit-category">
     <div class="category-picker">
-    <input form="{{ form_id }}" type="text" name="category" value="{{ v.get('category', '') }}" placeholder="Category — type to search"
+    <input form="{{ form_id }}" type="text" name="category" aria-label="{{ 'Category'|tr(locale) }}" value="{{ v.get('category', '') }}" placeholder="Category — type to search"
            autocomplete="off" aria-autocomplete="list" aria-expanded="false"
            aria-controls="{{ form_id }}-category-results" data-category-results="{{ form_id }}-category-results"
            class="category-input {{ 'bad' if error_field == 'category' }}">
@@ -29,12 +29,12 @@
     <div id="{{ form_id }}-category-results" class="category-results" role="listbox" hidden></div>
     </div>
   </td>
-  <td class="register-edit-notes"><div class="register-notes-field"><input form="{{ form_id }}" type="text" name="notes" value="{{ v.get('notes', '') }}" placeholder="Notes">
-    <input class="whom-cell is-hidden" form="{{ form_id }}" type="text" name="whom" value="{{ v.get('whom', '') }}"
+  <td class="register-edit-notes"><div class="register-notes-field"><input form="{{ form_id }}" type="text" name="notes" aria-label="{{ 'Notes'|tr(locale) }}" value="{{ v.get('notes', '') }}" placeholder="Notes">
+    <input class="whom-cell is-hidden" form="{{ form_id }}" type="text" name="whom" aria-label="{{ 'Held for'|tr(locale) }}" value="{{ v.get('whom', '') }}"
            placeholder="Held for (if not you)" list="owner-options" data-own-suggestions"></div></td>
-  <td class="register-edit-amount"><input form="{{ form_id }}" type="text" name="amount" value="{{ v.get('amount', '')|amount_role('field') }}" placeholder="-450 or 1,200"
+  <td class="register-edit-amount"><input form="{{ form_id }}" type="text" name="amount" aria-label="{{ 'Amount'|tr(locale) }}" value="{{ v.get('amount', '')|amount_role('field') }}" placeholder="-450 or 1,200"
              inputmode="decimal" required class="num money-input {{ 'bad' if error_field == 'amount' }}">
-    <button form="{{ form_id }}" class="cat-icon register-submit" title="{{ 'Save' if is_edit else 'Add' }}" aria-label="{{ 'Save transaction' if is_edit else 'Add transaction' }}">{% if is_edit %}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l3 3v13H4V4h1z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></svg>{% else %}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>{% endif %}</button></td>
+    <button form="{{ form_id }}" class="cat-icon register-submit" title="{{ 'Save' if is_edit else 'Add' }}" aria-label="{{ ('Save transaction' if is_edit else 'Add transaction')|tr(locale) }}">{% if is_edit %}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l3 3v13H4V4h1z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></svg>{% else %}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>{% endif %}</button></td>
   <td class="register-edit-balance">{% if balance is not none %}{{ balance|amount_role('row') }} {{ account.currency }}{% else %}<span class="muted">—</span>{% endif %}</td>
 {%- endmacro %}
 

@@ -5,13 +5,7 @@
 {% block content %}
 {% from "partials/charts.html" import stat_tiles, kpi_row, donut, trend, waterfall, column_waterfall, sankey, day_calendar, saved_split, month_calendar as month_cal %}
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
-{% if setup %}{% set done = setup|selectattr("done")|list|length %}
-<section class="card setup-card" aria-labelledby="setup-heading">
-  <div class="card-head"><div><h2 id="setup-heading">{{ 'Get set up'|tr(locale) }}</h2><p>{{ done }} of {{ setup|length }} done · each step makes the Overview more useful</p></div></div>
-  <div class="overview-inline-list">{% for step in setup %}{% if step.done %}<div class="overview-action-row setup-step is-done"><span><b>{{ step.label }}</b><small>{{ step.detail }}</small></span><span class="status-word"><i class="dot dot-in"></i>{{ "Done"|tr(locale) }}</span></div>{% else %}<a class="overview-action-row setup-step" href="{{ step.href }}"><span><b>{{ step.label }}</b><small>{{ step.detail }}</small></span><span>{{ step.action }}</span></a>{% endif %}{% endfor %}</div>
-<form method="post" action="/setup/guide"><input type="hidden" name="action" value="dismiss"><button class="btn small">{{ "Done with setup"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
-</section>
-{% endif %}
+
 {% set period_query = request.url.query %}
 {% from "partials/macros.html" import needs_rows %}
 <div class="overview-stack">
@@ -44,9 +38,16 @@
   {{ needs_rows(attention_groups, attention|length, more=('Weekly review'|tr(locale), '/review')) }}
   {% if not attention %}<a class="quiet-link" href="/needs-you">{{ 'Reviewed and snoozed'|tr(locale) }}</a>{% endif %}
   {{ kpi_row(kpi_cards, base, 'This period') }}
+{% if setup %}{% set done = setup|selectattr("done")|list|length %}
+<details class="flow-disclosure setup-card"><summary><h2>{{ "Get set up"|tr(locale) }}</h2></summary>
+  <div class="card-head"><div><p>{{ done }} of {{ setup|length }} done · each step makes the Overview more useful</p></div></div>
+  <div class="overview-inline-list">{% for step in setup %}{% if step.done %}<div class="overview-action-row setup-step is-done"><span><b>{{ step.label }}</b><small>{{ step.detail }}</small></span><span class="status-word"><i class="dot dot-in"></i>{{ "Done"|tr(locale) }}</span></div>{% else %}<a class="overview-action-row setup-step" href="{{ step.href }}"><span><b>{{ step.label }}</b><small>{{ step.detail }}</small></span><span>{{ step.action }}</span></a>{% endif %}{% endfor %}</div>
+<form method="post" action="/setup/guide"><input type="hidden" name="action" value="dismiss"><button class="btn small">{{ "Done with setup"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+</details>
+{% endif %}
   </div>
-  <section class="overview-section" aria-labelledby="position-heading">
-    <header class="overview-section-head"><h2 id="position-heading">{{ 'Your position'|tr(locale) }}</h2><span>As of {{ position_as_of }}</span></header>
+  <details class="flow-disclosure"  aria-labelledby="position-heading">
+    <summary class="overview-section-head"><h2 id="position-heading">{{ 'Your position'|tr(locale) }}</h2><span>As of {{ position_as_of }}</span></summary>
     <article class="overview-block wide-card overview-cash-card" aria-labelledby="cash-heading">
       <div class="overview-split">
         <section>
@@ -96,7 +97,7 @@
         </section>
       </div>
     </article>
-  </section>
+  </details>
 
 </div>
 {% endblock %}

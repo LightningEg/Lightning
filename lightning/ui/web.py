@@ -32,6 +32,7 @@ from lightning.core.memo import request_cache
 from lightning.core.money import ZERO, fmt, quantize, to_decimal
 from lightning.workflows import live_prices
 from lightning.ui import charts, sections
+from lightning.ui.themes import theme_id
 from lightning.ui.i18n import BROWSER_UI, localize_html, localized_figures, translate
 
 UI_DIR = Path(__file__).parent
@@ -425,6 +426,7 @@ def _template_response(request, name, status_code, c, locale, total, owned_total
         name,
         {
             "base": c.base_currency,
+            "app_theme": theme_id(c.settings.get("appearance_theme")),
             "locale": locale,
             "fig": localized_figures(locale),
             "arabic_ui_src": ARABIC_UI_SRC if locale == "ar" else "",

@@ -1,6 +1,6 @@
 # Competition: our compass
 
-Last reviewed 2026-10-15 (Actual and Lightning workflow audit; other competitor dates unchanged). Who else helps people with their money, what their users love and hate, and what that means for Lightning. When a product decision is unclear, read *The compass* first. Every competitor fact is dated "as of" its reading; most Egyptian-app facts are from 2026-10-04 and are stale after about three months.
+Updated 2026-10-24 for Lightning's pricing policy; competitor facts remain dated as shown. Who else helps people with their money, what their users love and hate, and what that means for Lightning. When a product decision is unclear, read *The compass* first. Every competitor fact is dated "as of" its reading; most Egyptian-app facts are from 2026-10-04 and are stale after about three months.
 
 ## Contents
 
@@ -26,7 +26,7 @@ Last reviewed 2026-10-15 (Actual and Lightning workflow audit; other competitor 
 3. **Arabic and Egyptian money first.** Vodafone Cash, InstaPay, gold, certificates, CIB and NBE SMS. International apps do not know them; local apps know only the first few.
 4. **Never be the busy one.** YNAB's most common complaint is a busy interface; Actual's is setup. Mohab's test stands: fewest clicks, one name for one thing.
 5. **A wrong number is worse than a missing one.** Every bank-sync review complains of numbers that drift. Lightning shows what each figure includes (Architecture, financial rules).
-6. **Price stays obvious; a free trial never asks for a card.** Owner decision 2026-10-04: 7 days free, then a reminder, never a lock. Say's most repeated complaint is a paywall before trying. Users also leave over price rises (YNAB), per-person pricing (Copilot) and ads in paid versions (Money Manager).
+6. **Price stays obvious.** Owner decision (2026-10-24): all Lightning features are free indefinitely, with no trial, licence fee, subscription or paywall. Optional in-app cosmetic themes may support development; they change appearance only, and the shop is still being completed. Say's most repeated complaint is a paywall before trying. Users also leave over price rises (YNAB), per-person pricing (Copilot) and ads in paid versions (Money Manager).
 7. **Egyptian life is more than spending.** Qershnat adds gam'eya (rotating savings circle), zakat, family assets and reminders, and users ask for more. Wealth is the right ground; gam'eya and zakat are being built (owner, 2026-10-14).
 
 ## The field in one table
@@ -50,7 +50,7 @@ Prices and features as of 2026-10-04 (Egyptian apps, Google Play) and 2026-10-05
 | **Moneydance** | Windows, Mac, Linux | 49.99 once | Local, encrypted | Manual, downloads | Stocks, bonds, CDs, funds, cost basis |
 | **GnuCash** | Windows, Mac, Linux | Free (GPL) | Local file | Manual, import | Deep accounting: lots, gains, ROI/CAGR |
 | **Firefly III, Lunch Money** | Self-host; web | Free; subscription | Your server; cloud | Manual; import, some sync | Accounts only; basic |
-| **Lightning** | Windows; Android beta (phone holds the ledger, PC borrows it); English and Arabic | Free so far; 7 days then a licence reminder | Your devices, encrypted, no server | Manual, CSV, bank SMS (Android beta); PDF/Excel statements remain planned; no bank link | Gold, EGX and US shares, funds, certificates, loans, foreign cash with FX gains |
+| **Lightning** | Windows; Android beta (phone holds the ledger, PC borrows it); English and Arabic | Free indefinitely; optional cosmetic themes as support, shop in development | Your devices, encrypted, no server | Manual, CSV, bank SMS (Android beta); PDF/Excel statements remain planned; no bank link | Gold, EGX and US shares, funds, certificates, loans, foreign cash with FX gains |
 
 ## What users love and hate
 

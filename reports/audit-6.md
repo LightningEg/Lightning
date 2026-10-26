@@ -15,7 +15,11 @@ The owner requested review and cleanup to zero open PRs. Original branches are r
 | App #101, #104, #106, #107 | Incorporate correctness audit, cash lifecycle validation, accurate Save outcomes, stale-form guards and retryable mass edits. Preserve #111's Delete confirmation and device-status fixes. |
 | App #103 | Defer: input-only upgrade fails the Android lock contract and needs matching native wheels. Follow-up: [1H](../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md). |
 
-## Remaining scope
+## Status, 2026-10-24
+
+The dispositions in this historical cleanup are complete. As of 2026-10-24, GitHub shows four other open pull requests in Lightning (#117, #121, #122 and #123) and none in Lightning_website. #117 is an incoming CSV amount-format contribution; #121–#123 are Dependabot updates. These are outside the PR set audited here and require their own review. Remaining entries below are plan and acceptance work.
+
+## Remaining plan work
 
 2M retains its three form revision fields as a reviewable patch; its issue remains open. The native-device and recovery acceptance work in 2A–2C and 4A remains open. This cleanup does not sign or publish a release, alter repository protections, or delete remote branches.
 

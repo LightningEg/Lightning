@@ -14,7 +14,7 @@ Each fact lives in one file; link to it, never copy it. No other files under `do
 | [Architecture](docs/ARCHITECTURE.md) | Modules, financial rules, data model, UI contract, desktop app, encrypted profiles | How something is built or calculated changes |
 | [Glossary](docs/GLOSSARY.md) | One name and meaning per term and figure | You add or rename one |
 | [Competition](docs/COMPETITION.md) | Competitors, what users love/hate, where we win/lose | You learn something, or choose between designs |
-| [guideline/](guideline/) | Brand: [app.html](guideline/app.html) (A, PC), [website.html](guideline/website.html) (B, Normal website), [phone.html](guideline/phone.html) (C), [coders.html](guideline/coders.html) (D, website's For Geeks), [brand-voice.md](guideline/brand-voice.md) (voice) | The owner gives a new version, or **any** guideline change: make it in both repos in the same session (branch and PR each); never leave one copy behind |
+| [guideline/](guideline/) | Brand: [app.html](guideline/app.html) (A, PC), [website.html](guideline/website.html) (B, Normal website), [phone.html](guideline/phone.html) (C), [coders.html](guideline/coders.html) (D, website's For Geeks), [brand-voice.md](guideline/brand-voice.md) (voice), [themes.md](guideline/themes.md) (how a theme is made, part by part, for every surface) | The owner gives a new version, or **any** guideline change: make it in both repos in the same session (branch and PR each); never leave one copy behind |
 | [issues/](issues/README.md) | The plan: numbered milestones, each with coded items (`3C`, `3C1`): bugs, polish, features and designs, tech, owner tasks; read `issues/INDEX.md` only | You find or plan something (add an item); you finish one (delete it, add its code to `done:`) |
 | [reports/](reports/) | Audits the owner asks for, one file each (`audit-1.md`) with its screenshots; every finding is also an item in `issues/` | You run an audit the owner asked for |
 | [CHANGELOG.md](CHANGELOG.md) | Every change, newest first under `Unreleased` | Every push |
@@ -57,6 +57,8 @@ Never at the cost of a test, a required check, or a read you need.
 - **Never undo another AI's work** without the owner; disagree in a GitHub issue for the owner.
 
 ## 4. Product rules
+
+- Keep shared visual-flow rules in the token-only presentation adapter and derive phone primary destinations from the existing section registry; this keeps themes and PC/phone navigation aligned without changing financial logic.
 
 - Local-first personal finance for salaried people in Egypt. One ledger records real money; plans move none; reports read both.
 - Financial calculations live in Python services, never templates or JavaScript.

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lightning theme workbench</title>
+<script src="../lightning/ui/static/themes.generated.js"></script><script src="../lightning/ui/static/theme-runtime.js"></script>
+<link rel="stylesheet" href="../lightning/ui/static/fonts/fonts.css"><link rel="stylesheet" href="../lightning/ui/static/style.css">
+<link rel="stylesheet" href="../lightning/ui/static/themes.generated.css"><link rel="stylesheet" href="../lightning/ui/static/theme-surfaces.css"><link rel="stylesheet" href="../lightning/ui/static/theme-decor.css">
+</head><body><main class="main">
+<h1>Theme workbench</h1><label for="theme">Theme</label><select id="theme" data-theme-select></select><p data-theme-status role="status"></p>
+<p><a href="?phone">Phone components</a> · <a href="?">PC components</a> · <a href="?phone&ar">Arabic phone components</a></p>
+<section class="card hero-card"><h2>Overview</h2><p>Available this month</p><strong>24,500 EGP</strong><p class="muted">2,000 EGP more than last month</p></section>
+<section class="card"><h2>Controls and states</h2><label for="note">Unsaved note</label><input id="note" placeholder="Type here, then switch theme"><button class="btn primary" type="button">Save</button><button class="btn" disabled>Unavailable</button><p class="pos">Income +12,000 EGP</p><p class="neg">Expense −1,200 EGP</p><p>Held 3,000 EGP</p><p class="muted">Quiet text and helper messages</p></section>
+<section class="card" lang="ar" dir="rtl"><h2>نظرة عامة</h2><p>المتاح هذا الشهر</p><strong>٢٤٬٥٠٠ جنيه</strong><label for="arabic-note">ملاحظة</label><input id="arabic-note" placeholder="اكتب هنا"></section>
+<button class="btn" type="button" id="open-dialog">Open dialog</button><dialog class="app-popup" id="example-dialog"><h2>Confirm changes</h2><p>Switch themes with this dialog open.</p><form method="dialog"><button class="btn primary">Close</button></form></dialog>
+</main><script>
+const params = new URLSearchParams(location.search);
+if (params.has('phone')) {
+  document.documentElement.classList.add('phone'); document.body.classList.add('phone-body');
+  const link = document.createElement('link'); link.rel = 'stylesheet'; link.href = '../lightning/ui/static/phone.css';
+  document.head.insertBefore(link, document.querySelector('link[href$="themes.generated.css"]'));
+}
+if(params.has('ar')) { document.documentElement.lang='ar'; document.documentElement.dir='rtl'; }
+document.getElementById('open-dialog').addEventListener('click', () => document.getElementById('example-dialog').showModal());
+</script></body></html>

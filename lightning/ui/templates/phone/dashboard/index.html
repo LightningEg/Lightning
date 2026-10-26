@@ -8,13 +8,7 @@
 {% block heading %}<h1>{{ 'Overview'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
-{% if setup %}{% set done = setup|selectattr("done")|list|length %}
-<section class="card phone-card phone-flat-rows" aria-labelledby="setup-heading">
-  <h2 id="setup-heading" class="phone-card-title">{{ 'Get set up'|tr(locale) }}</h2><p class="phone-note">{{ done }} of {{ setup|length }} done</p>
-  <div class="phone-rows">{% for step in setup %}{% if step.done %}<div class="phone-row is-done"><span>{{ step.label }}</span><b>{{ "Done"|tr(locale) }}</b></div>{% else %}<a class="phone-row" href="{{ step.href }}"{% if step.popup %} data-popup-open{% endif %}><span>{{ step.label }}<small>{{ step.detail }}</small></span><b class="phone-row-action">{{ step.action or '›' }}</b></a>{% endif %}{% endfor %}</div>
-<form method="post" action="/setup/guide"><input type="hidden" name="action" value="dismiss"><button class="btn small">{{ "Done with setup"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
-</section>
-{% endif %}
+
 {% set owes = pos.what_you_owe > 0 %}{% set lead = 'net_worth' if owes else 'what_you_own' %}
 {% from "phone/partials/hero.html" import hero with context %}
 {# Phone overhaul (owner, 2026-10-22): "can I spend today?" in one glance. Safe to spend leads while the position is
@@ -35,6 +29,13 @@
 {# nothing waiting: no row at all (A09) #}
 {% set tiles = ([phone.worth] if phone else []) + (stats|selectattr('key', 'equalto', 'plan')|list) + (stats|rejectattr('key', 'in', ['plan', 'safe'] if phone else ['plan'])|list) %}
 {{ kpi_tiles(tiles, base) }}
+{% if setup %}{% set done = setup|selectattr("done")|list|length %}
+<details class="flow-disclosure phone-flat-rows"><summary><h2>{{ "Get set up"|tr(locale) }}</h2></summary>
+  <p class="phone-note">{{ done }} of {{ setup|length }} done</p>
+  <div class="phone-rows">{% for step in setup %}{% if step.done %}<div class="phone-row is-done"><span>{{ step.label }}</span><b>{{ "Done"|tr(locale) }}</b></div>{% else %}<a class="phone-row" href="{{ step.href }}"{% if step.popup %} data-popup-open{% endif %}><span>{{ step.label }}<small>{{ step.detail }}</small></span><b class="phone-row-action">{{ step.action or '›' }}</b></a>{% endif %}{% endfor %}</div>
+<form method="post" action="/setup/guide"><input type="hidden" name="action" value="dismiss"><button class="btn small">{{ "Done with setup"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+</details>
+{% endif %}
 
 {% from "phone/partials/txn.html" import txn_list with context %}
 <section class="phone-section phone-latest" aria-labelledby="latest-heading">
@@ -43,7 +44,7 @@
 </section>
 
 <section class="phone-section" aria-labelledby="position-heading">
-  <header class="phone-section-head"><h2 id="position-heading">{{ 'Your position'|tr(locale) }}</h2><span>As of {{ position_as_of }}</span></header>
+  <details class="flow-disclosure"><summary class="phone-section-head"><h2 id="position-heading">{{ 'Your position'|tr(locale) }}</h2><span>As of {{ position_as_of }}</span></summary>
   <article class="card phone-card phone-flat-rows" aria-labelledby="position-heading">
     <div class="phone-rows">
       {% if owes %}<div class="phone-row"><span>{{ fig.what_you_own.label }}</span><b>{{ pos.what_you_own|money }}</b></div>{% endif %}
@@ -84,10 +85,10 @@
     </div>
     </div></details>
   </article>
-</section>
+</details></section>
 
 <section class="phone-section" aria-labelledby="period-heading">
-  <header class="phone-section-head"><h2 id="period-heading">{{ 'This period'|tr(locale) }}</h2><span>{{ date_from }} to {{ date_to }}</span></header>
+  <details class="flow-disclosure"><summary class="phone-section-head"><h2 id="period-heading">{{ 'This period'|tr(locale) }}</h2><span>{{ date_from }} to {{ date_to }}</span></summary>
   <article class="card phone-card phone-folds phone-flat-rows">
   <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ fig.net_flow.label }} <span class="phone-chevron" aria-hidden="true">›</span></span><b class="{{ cash_flow.net|tone }}">{{ cash_flow.net|money(True) }}</b></summary>
     <div class="phone-fold-body">
@@ -123,5 +124,5 @@
     </div></details>
   {% endif %}
   </article>
-</section>
+</details></section>
 {% endblock %}

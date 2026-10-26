@@ -19,6 +19,7 @@ Read one section: `grep -n '^## ' docs/PROJECT_OVERVIEW.md`, then read from that
 | 7. Compared with the best budgeting apps | You plan a feature |
 | 8. UX plan (guideline 3.6) | You take a UX item |
 | 9. Plan and roadmap | You pick the next work or finish a milestone |
+| Cosmetic marketplace owner revision (2026-10-24) | You change cosmetic parts, purchasing or ownership |
 
 <a id="what-lightning-is"></a>
 ## 1. What Lightning is
@@ -61,7 +62,7 @@ Dates are when the owner decided. Undated rows are founding rules.
 | **Each visual names its time frame** | The chosen period or a fixed horizon (section 4). |
 | **Holdings value = Portfolio value** (2026-10-04) | Everything owned that is not cash, deposits included, on every tab and chart. |
 | **Every release stays downloadable** (2026-10-03) | Keep at least the three latest, each with its own immutable download and site entry. Never replace or remove an older one without the owner. |
-| **Free 7 days, then a reminder, never a lock** (2026-10-04) | Full app from minute one, no card or account. After 7 days it asks for a licence and never blocks or hides data. Price not set. |
+| **Free to use; optional cosmetic support** (owner, 2026-10-24) | Every app feature stays free indefinitely: no trial, licence fee, subscription or functional paywall. Optional in-app cosmetics, starting with themes, may be bought to support development; they change appearance only. The purchase and claim flow is still being completed. |
 | **The website never mentions other apps** (2026-10-05; again 2026-10-21) | No comparison or "vs" pages or tables, not even against a spreadsheet (guideline B10, B11). |
 | **Testing tab for testers only** (2026-10-21, left to Claude) | On lightningeg.com the Testing tab shows after `?testing`; the consent bar is a slim bottom strip. |
 | **Found as the all-in-one tracker** (2026-10-20) | The website answers "net worth, budget and expense tracker" with one page, English and Arabic, where every figure is Mohab's and no other app is named. Evidence and follow-up: [Competition](COMPETITION.md), issue 8C. |
@@ -258,3 +259,13 @@ schedules; Fill this month; entry helpers; gam'eya and zakat; and the five owner
 dated cash warnings, undo/review/provenance, reserve/bill/CD/reimbursement links, optional cash funding, saved views and
 weekly review). Detail: [CHANGELOG](../CHANGELOG.md) and [Architecture](ARCHITECTURE.md). Where each idea came from:
 [Competition](COMPETITION.md).
+
+## Cosmetic marketplace owner revision (2026-10-24)
+
+Appearance uses swappable, approved parts with fixed layout and financial semantics. Themes are intended to ship in the app; the website sells account-wide permanent ownership, then a temporary random code delivers a signed offline unlock over an initial online exchange. No device cap or repeat charge. Nile Nocturne and Royal Obsidian & Gold are the first design tests; pricing and release integration remain uncommitted. The site handles InstaPay plus a customer reference/WhatsApp receipt and separate owner settlement confirmation, with a stated final-purchase policy subject to required rights and error correction. Infrastructure status: Architecture › Cosmetic parts and offline ownership; remaining work: 8J.
+
+### Website gamification revision (2026-10-24)
+
+The website adds consented, moderated community stories with optional author-provided LinkedIn links. Accepted stories can earn recognition points once; a URL alone earns nothing. Recognition points do not fund purchases. Mono becomes the only free website palette; existing paid ownership and previously equipped free palettes are preserved. Account access uses a compact avatar/icon dropdown, and Features is linked as a card inside Guides. Top-up receipts move from WhatsApp to private website uploads, with the member email in the InstaPay note and the payer InstaPay address recorded for reconciliation; owner settlement confirmation remains mandatory.
+
+**Market owner revision (2026-10-25).** Both markets, main-site Marketplace (Part B) and For Geeks (Part D), share one structure (not one look: each keeps its own guideline) from the owner's market sheets: Your look beside the wallet, tabs (Themes, Banners, Frames, Badges, Owned), the two app themes in testing featured without a price, Details showing a theme on the website, the PC app and the phone, Try it for the visit with nothing saved, and a buy that says how many coins are missing. No Threads currency: coins keep their name and are drawn as a pixel-art cotton boll. Themes are shared, looks are not: one purchase dresses both sites, each drawing its own version (For Geeks its terminal palette; the main site a light and a dark side that follow the light/dark switch). A theme a member owns and equips may be worn across the main website (an owner exception to Part B's fixed palette); good and bad keep their colours. Five palettes are on sale (Paper, Frost, Meadow, Nile, Garnet) until each works on both sites; the other nine are archived but kept by their owners. How a theme is made: [guideline/themes.md](../guideline/themes.md). Owner, 2026-10-25: themes come in tiers priced for one-time buyers (Palette 300 coins = 60 EGP, Textured 600, Animated 1,000 later; 5 coins per EGP); the reasoning against about 3,000 EGP of monthly fixed cost is in the website repo's docs/payment-operations.md.
