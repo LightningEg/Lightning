@@ -83,7 +83,7 @@ def create(device, target, *, key_document, owner_document=None):
             saved.execute("CREATE TABLE IF NOT EXISTS journal_backup_material(id INTEGER PRIMARY KEY CHECK(id=1),document TEXT NOT NULL)")
             material = dict(device=device.identity.device_id, incarnation=store.config["incarnation"],
                             public_key=device.identity.public_key, name=device.identity.name,
-                            private_key=device.identity.key_path.read_text(), certificate=device.identity.cert_path.read_text(),
+                            private_key=device.identity.export_private_key(), certificate=device.identity.cert_path.read_text(),
                             keys=key_document, owner=owner_document)
             saved.execute("INSERT OR REPLACE INTO journal_backup_material VALUES(1,?)", (json.dumps(material, separators=(",", ":")),))
         verify_connection(saved.conn, encrypted=True)

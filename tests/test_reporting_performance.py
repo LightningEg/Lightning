@@ -217,7 +217,7 @@ def test_main_tabs_read_each_figure_once_and_show_the_same_pages_as_without_the_
     load_mohab_2026(c)
     _years_of_history(c, 2)
     app = web.create_app(c)
-    nonce = re.compile(r'nonce="[^"]*"')
+    nonce = re.compile(r'nonce="[^"]*"|name="submission" value="[0-9a-f]*"')  # per-render values
     with TestClient(app) as browser:
         for path in PAGE_READ_BUDGET:
             browser.get(path)  # settle anything a first visit records (matched bill payments)

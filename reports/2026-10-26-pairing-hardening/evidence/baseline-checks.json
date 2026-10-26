@@ -1,0 +1,16 @@
+{
+  "baseline_commit": "1b072575b8add30059a731aaf385facf9cb5689d",
+  "website_commit": "ea280520251cb66cbc6bd3b0831c8bcf51ad7ea4",
+  "unchanged_main_browser_failures": [
+    "tests/test_feedback_fixes_browser.py::test_forecast_bars_share_baseline[en-1366]",
+    "tests/test_feedback_fixes_browser.py::test_forecast_bars_share_baseline[ar-1366]",
+    "tests/test_feedback_fixes_browser.py::test_forecast_bars_share_baseline[en-390]",
+    "tests/test_feedback_fixes_browser.py::test_forecast_bars_share_baseline[ar-390]",
+    "tests/test_feedback_fixes_browser.py::test_savings_picture_browser[60]",
+    "tests/test_feedback_fixes_browser.py::test_savings_picture_browser[125]"
+  ],
+  "unchanged_main_guideline_mismatches": [
+    "guideline/themes.md: differs between repositories"
+  ],
+  "pairing_changes_touch_guidelines": false
+}

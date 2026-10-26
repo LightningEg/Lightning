@@ -182,6 +182,21 @@ class Database:
         row = self.conn.execute(sql, params).fetchone()
         return None if row is None else row[0]
 
+    def referenced(self, table: str, row_id: int, *, ignore: tuple[str, ...] = ()) -> str | None:
+        """The first table (other than ``ignore``) with a row whose foreign key points at ``table``'s row ``row_id``.
+        Asking every foreign key keeps delete-or-archive right when a new table starts referring to a record."""
+        tables = [row[0] for row in self.conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")]
+        for other in tables:
+            if other in ignore:
+                continue
+            for key in self.conn.execute(f'PRAGMA foreign_key_list("{other}")').fetchall():
+                if key["table"] == table and (key["to"] in (None, "id")):
+                    if self.conn.execute(f'SELECT 1 FROM "{other}" WHERE "{key["from"]}"=? LIMIT 1',
+                                         (row_id,)).fetchone():
+                        return other
+        return None
+
     def has_table(self, name: str) -> bool:
         return (
             self.scalar("SELECT 1 FROM sqlite_master WHERE name = ? AND type IN ('table','view')", (name,))

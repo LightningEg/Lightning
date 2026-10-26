@@ -1,6 +1,8 @@
 """Small, self-contained translations for the locked first-replica enrollment screens."""
 
 _EN = {
+    "interrupted": "Pairing was interrupted. Resume to check its saved state.",
+    "resume": "Resume pairing",
     "title": "Join this ledger",
     "eyebrow": "Private profiles",
     "heading": "Bring this ledger to another device",
@@ -41,6 +43,8 @@ _EN = {
 }
 
 _AR = {
+    "interrupted": "الربط اتقطع. كمّل عشان نراجع الحالة المحفوظة.",
+    "resume": "كمّل الربط",
     "title": "ضم الجهاز للسجل",
     "eyebrow": "ملفاتك الخاصة",
     "heading": "افتح السجل ده على جهاز تاني",
