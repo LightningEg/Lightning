@@ -25,7 +25,7 @@ OUT = Path(ARGS[0]) if ARGS and not ARGS[0].startswith("--") else None
 REGISTRY = json.loads((ROOT / "lightning/ui/static/themes.generated.json").read_text())
 THEMES = ARGS[ARGS.index("--themes") + 1].split(",") if "--themes" in ARGS else [t["id"] for t in REGISTRY]
 ONLY = ARGS[ARGS.index("--only") + 1] if "--only" in ARGS else ""
-os.environ.update(LIGHTNING_TODAY="2026-10-04", LIGHTNING_PRICES_OFFLINE="1")
+os.environ.update(LIGHTNING_TODAY="2026-10-04", LIGHTNING_PRICES_OFFLINE="1", LIGHTNING_THEME_REVIEW="1")  # paid themes too
 
 PC = {"overview": "/?period=ytd", "transactions": "/transactions", "budget": "/budget?period=month&month=2026-10",
       "investments": "/investments?period=ytd", "accounts": "/accounts", "settings": "/settings"}

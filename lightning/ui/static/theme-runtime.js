@@ -6,6 +6,11 @@
   const fallback = 'lightning-default';
   const root = document.documentElement;
   const profile = document.querySelector('meta[name=lightning-theme]');
+  // Paid themes this computer holds a licence for (server-verified, lightning/ui/entitlements.py). Without a profile
+  // (the theme workbench) nothing is sold, so every theme counts as owned there.
+  const ownedMeta = document.querySelector('meta[name=lightning-owned]');
+  const owned = id => !ownedMeta || (ownedMeta.content || '').split(' ').includes(id);
+  const tr = text => window.lightningT ? window.lightningT(text) : text;
   let writes = Promise.resolve();
   let writeVersion = 0;
   const known = id => themes.some(theme => theme.id === id);
@@ -48,12 +53,15 @@
       writes = writes.then(async () => {
         const response = await fetch('/settings/theme', { method: 'POST', credentials: 'same-origin',
           keepalive: true, body: new URLSearchParams({ theme: next, __session: token }) });
+        if (response.status === 402) throw Object.assign(new Error('try'), { trying: true });
         if (!response.ok) throw new Error('Could not save theme');
-      }).catch(() => {
+      }).catch(error => {
         if (version !== writeVersion) return;
         const status = document.querySelector('[data-theme-status]');
-        const message = 'Theme applied for this session; could not save on this device.';
-        if (status) status.textContent = window.lightningT ? window.lightningT(message) : message;
+        const message = error && error.trying
+          ? 'Trying it for this session. Buy it on lightningeg.com, then unlock it below to keep it.'
+          : 'Theme applied for this session; could not save on this device.';
+        if (status) status.textContent = tr(message);
         window.dispatchEvent(new CustomEvent('lightning:themechange', { detail: { id: next, saved: false } }));
       });
     }
@@ -80,8 +88,8 @@
       themes.forEach(theme => {
         const option = document.createElement('option');
         option.value = theme.id;
-        const name = theme.name + (theme.preview ? ' (preview)' : '');
-        option.textContent = window.lightningT ? window.lightningT(name) : name;
+        option.textContent = theme.paid && !owned(theme.id) ? tr(theme.name) + ' ' + tr('(try it)')
+          : tr(theme.name + (theme.preview ? ' (preview)' : ''));
         select.append(option);
       });
       select.addEventListener('change', () => {

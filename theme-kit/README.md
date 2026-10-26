@@ -64,7 +64,7 @@ Every element, where it appears, and what each layer may be. `slots.json` is the
 | thread · sheen | `none` · `security-thread` (12 s) · `edge-glint` (16 s) | continuous: a glint along the header seam / round the hero's foil edge |
 | hover · press · enter · equip | `lift`, `light` · `sheen` · `rise` · `unveil` | answer the user: card lifts or a pointer light; foil sheen on hover/press; dialogs rise in; one light sweep when the theme is put on |
 
-**The two references.** `cotton.json` (light: linen ground, paper cards, rosette watermark, embossed buttons, ink tabs) and `nile-papyrus-guilloche.json` (dark: papyrus ground, lapis lacquer hero with a gold foil edge whose light travels, lotus watermark, foil buttons and tabs, cartouche navigation, pointer light on cards) use most of the library. Start from whichever is closer.
+**The two references.** `cotton.json` (light: linen ground, paper cards, rosette watermark, embossed buttons, ink tabs) and `papyrus.json` (dark: papyrus ground, lapis lacquer hero with a gold foil edge whose light travels, lotus watermark, foil buttons and tabs, cartouche navigation, pointer light on cards) use most of the library. Start from whichever is closer.
 
 **Hard rules the validator enforces.** Every layer stated. Values only from the library. Text 4.5:1 and primary text 7:1 measured at each surface's worst point: the finish's lift, plus the grain, plus the artwork (limits in `slots.json`); foil labels on both the light and dark ends of the foil. One continuous motion. Never moved by any layer: layout, sizes, spacing, radii, fonts, words, order, money colours; nothing is drawn over a figure; reduced motion stops every motion on a still frame.
 

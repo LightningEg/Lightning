@@ -2,7 +2,9 @@
   {
     "id": "cotton",
     "name": "Cotton",
-    "preview": true,
+    "preview": false,
+    "paid": true,
+    "version": 1,
     "materials": {
       "ground-texture": "linen",
       "ground-texture-strength": "subtle",
@@ -47,9 +49,11 @@
     "preview": false
   },
   {
-    "id": "nile-nocturne",
-    "name": "Nile Nocturne",
-    "preview": true,
+    "id": "nile",
+    "name": "Nile",
+    "preview": false,
+    "paid": true,
+    "version": 1,
     "materials": {
       "ground-texture": "none",
       "ground-texture-strength": "subtle",
@@ -89,9 +93,11 @@
     }
   },
   {
-    "id": "nile-papyrus-guilloche",
-    "name": "Nile Papyrus & Lapis Guilloch\u00e9",
-    "preview": true,
+    "id": "papyrus",
+    "name": "Papyrus",
+    "preview": false,
+    "paid": true,
+    "version": 1,
     "materials": {
       "ground-texture": "papyrus",
       "ground-texture-strength": "subtle",

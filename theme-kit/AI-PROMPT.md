@@ -14,7 +14,7 @@ Read theme-kit/README.md, guideline/themes.md, the relevant sections of
 guideline/app.html and guideline/phone.html, and
 lightning/ui/static/cosmetics/slots.json before designing.
 Start from theme-kit/theme.template.json, or from the closer reference
-theme (cotton.json, light; nile-papyrus-guilloche.json, dark). If a
+theme (cotton.json, light; papyrus.json, dark). If a
 required brief field is unfilled, ask for it rather than assuming a mode
 or aesthetic.
 

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "id": "nile-nocturne",
-  "name": "Nile Nocturne",
+  "id": "nile",
+  "name": "Nile",
   "version": 1,
-  "status": "test-preview",
+  "status": "paid",
   "priceCoins": null,
   "bundleTargets": [
     "windows",
@@ -12,20 +12,20 @@
   "minimumAppVersion": null,
   "parts": {
     "palette": {
-      "background": "#06131D",
-      "surface": "#0B1D2B",
-      "raised": "#112839",
-      "text": "#E4F1F7",
-      "muted": "#93ADBE",
-      "border": "#1C3A4F",
-      "accent": "#3FD0E0",
-      "onAccent": "#03222A",
+      "background": "#070B16",
+      "surface": "#0E1526",
+      "raised": "#141E33",
+      "text": "#E9EDF7",
+      "muted": "#B7C0D8",
+      "border": "#22304A",
+      "accent": "#E6B450",
+      "onAccent": "#140E02",
       "income": "#4FD8A4",
       "expense": "#FF9393",
-      "transfer": "#A2B6C4",
+      "transfer": "#B7C0D8",
       "warning": "#F2C86B",
-      "focus": "#8BEAF2",
-      "hero": "#E9FBFF"
+      "focus": "#F0CB74",
+      "hero": "#FFF2CF"
     },
     "brand": {
       "logoVariant": "on-dark"

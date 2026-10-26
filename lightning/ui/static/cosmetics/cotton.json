@@ -3,7 +3,7 @@
   "id": "cotton",
   "name": "Cotton",
   "version": 1,
-  "status": "test-preview",
+  "status": "paid",
   "priceCoins": null,
   "bundleTargets": [
     "windows",
@@ -12,11 +12,11 @@
   "minimumAppVersion": null,
   "parts": {
     "palette": {
-      "background": "#F3EFE6",
+      "background": "#F4F1EA",
       "surface": "#FBF9F4",
       "raised": "#ECE6DA",
-      "text": "#1C1915",
-      "muted": "#575046",
+      "text": "#161616",
+      "muted": "#45413A",
       "border": "#DDD5C6",
       "accent": "#A8401C",
       "onAccent": "#FFFFFF",
@@ -25,7 +25,7 @@
       "transfer": "#6B645A",
       "warning": "#8A5A00",
       "focus": "#A8401C",
-      "hero": "#1C1915"
+      "hero": "#161616"
     },
     "brand": {
       "logoVariant": "on-light"

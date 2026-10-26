@@ -15,7 +15,7 @@ spec.loader.exec_module(builder)
 
 class ThemeBuildTests(unittest.TestCase):
     def setUp(self):
-        self.manifest = json.loads((builder.SOURCE / 'nile-nocturne.json').read_text())
+        self.manifest = json.loads((builder.SOURCE / 'nile.json').read_text())
 
     def validate(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -96,7 +96,7 @@ class ThemeBuildTests(unittest.TestCase):
         registry = json.loads((builder.STATIC / 'themes.generated.json').read_text())
         css = (builder.STATIC / 'theme-materials.css').read_text()
         contract = json.loads((builder.SOURCE / 'slots.json').read_text())
-        nile = next(t for t in registry if t['id'] == 'nile-papyrus-guilloche')
+        nile = next(t for t in registry if t['id'] == 'papyrus')
         self.assertNotEqual(nile['materials']['ground-texture'], 'none')
         self.assertNotIn('materials', next(t for t in registry if t['id'] == 'lightning-default'))
         neutral = {'none', 'flat', 'hairline', 'bar', 'dim', 'whisper', 'subtle', 'rich'}
@@ -144,7 +144,7 @@ class ThemeBuildTests(unittest.TestCase):
         self.manifest['parts']['cards']['border'] = 'accent'
         manifest, parts = self.validate()
         css = builder.compile_theme(manifest, parts, json.loads((builder.SOURCE / 'slots.json').read_text()))
-        self.assertIn('--theme-card-border: #3FD0E0', css)
+        self.assertIn('--theme-card-border: #E6B450', css)
         for token in ['--positive:', '--rose:', '--azure:', '--chart-equity:', '--pos:', '--neg:']:
             self.assertNotIn(token, css)
         # the theme's own money colours are offered as tint sources only, under their own names
@@ -162,13 +162,13 @@ def test_profile_preference_survives_new_app_and_rejects_unknown_theme(c):
     from fastapi.testclient import TestClient
     from lightning.ui.web import create_app
     first = TestClient(create_app(c))
-    assert first.post('/settings/theme', data={'theme': 'nile-nocturne'}).status_code == 204
+    assert first.post('/settings/theme', data={'theme': 'royal-obsidian-gold'}).status_code == 204
     # A fresh client has no browser storage; the server restores before head scripts.
     second = TestClient(create_app(c))
     source = second.get('/settings').text
-    assert '<meta name="lightning-theme" content="nile-nocturne">' in source
+    assert '<meta name="lightning-theme" content="royal-obsidian-gold">' in source
     assert second.post('/settings/theme', data={'theme': 'not-bundled'}).status_code == 400
-    assert c.settings.get('appearance_theme') == 'nile-nocturne'
+    assert c.settings.get('appearance_theme') == 'royal-obsidian-gold'
     assert second.post('/settings/theme', data={'theme': 'lightning-default'}).status_code == 204
     assert c.settings.get('appearance_theme') == 'lightning-default'
 

@@ -1,0 +1,5 @@
+{
+  "comment": "Pinned Ed25519 public keys of the Lightning store, by key id: raw 32-byte keys in base64url. Only the owner adds one (issues/8-website/8L). Keep every old key after a rotation: licences are permanent and offline. Empty means no paid theme can be unlocked.",
+  "redeem_url": "https://etecxblerynmkgppdfac.supabase.co/functions/v1/redeem-purchase",
+  "keys": {}
+}

@@ -8,7 +8,7 @@ This file sits beside the four guideline documents and is copied to both reposit
 
 ## 1. What is on sale now
 
-Owner, 2026-10-25: five palettes and two textured themes on sale while each is proven on both sites. Prices are in coins (5 coins = 1 EGP); section 7 explains them.
+Owner, 2026-10-25: five palettes and two textured themes on sale while each is proven on both sites; 2026-10-26: Papyrus moves to the animated tier. Prices are in coins (5 coins = 1 EGP); section 7 explains them.
 
 | Theme | Tier | Seed: ground · text · quiet · accent | Side | Coins |
 |---|---|---|---|---|
@@ -18,12 +18,12 @@ Owner, 2026-10-25: five palettes and two textured themes on sale while each is p
 | Meadow | palette | `#08192A` `#EAF4F1` `#B8CAD2` `#3FCB93` | dark | 300 |
 | Nile | palette | `#070b16` `#e9edf7` `#b7c0d8` `#e6b450` | dark | 300 |
 | Garnet | palette | `#1a0608` `#fbeee4` `#e0b9ab` `#ff6b57` | dark | 300 |
-| Papyrus | textured | Nile's seed, texture `papyrus` | dark | 600 |
+| Papyrus | animated | Nile's seed, texture `papyrus`, one gold thread | dark | 1,000 |
 | Cotton | textured | Paper's seed, texture `cotton` | light | 600 |
 
 **Archived:** Ocean, Tokyo, Dracula, Rose, Synthwave, Phosphor, Amber, Solarized and Moss. They are not sold and not shown, but a member who owns one keeps it, sees it and can wear it. Their seeds stay in `js/forgeeks.js` marked `archived:true` and their tokens stay in `css/forgeeks.css`. To bring one back, take it through section 5 like a new theme, then set `active = true` in a migration and drop `archived:true`.
 
-The app themes in testing, Nile Nocturne, Royal Obsidian & Gold, Nile Papyrus & Lapis Guilloché and Cotton are in `cosmetics/*.json` and have no price until verified claiming ships. Nile Papyrus (dark) and Cotton (light) are the two references for the app's material system (section 8).
+**Ready to sell (owner, 2026-10-26).** One theme is one purchase on every surface, so the app's paid themes take the website's ids: **Nile** (palette), **Cotton** (textured) and **Papyrus** (animated: a lapis lacquer hero with a travelling gold-foil edge in the app, a slow gold thread along the header on the sites). The animated tier is on sale at 1,000 coins with Papyrus. In the app a paid theme is tried by anyone and kept with a licence unlocked by the website's one-time code (`lightning/ui/entitlements.py`); each stays off in the store until the app release that carries it ships. Royal Obsidian & Gold stays a test preview: it has no website version yet.
 
 ## 2. The seed
 
@@ -120,8 +120,8 @@ A theme's tier says which parts it fills. Each tier fills every part of the one 
 | Tier | Fills | Coins | EGP | On sale |
 |---|---|---|---|---|
 | **Palette** | Parts 1 to 9: colours on both sites, with a light and a dark side on the main site | 300 | 60 | Paper, Frost, Meadow, Nile, Garnet |
-| **Textured** | The palette, plus part 10's pattern behind every page | 600 | 120 | Papyrus, Cotton |
-| **Animated** | The texture, plus one signature motion in part 10 | 1,000 | 200 | none yet |
+| **Textured** | The palette, plus part 10's pattern behind every page | 600 | 120 | Cotton |
+| **Animated** | The texture, plus one signature motion in part 10 | 1,000 | 200 | Papyrus |
 
 **Texture rules:**
 - Drawn by code: gradients, or inline SVG generated from the theme's own colours. No image files, requests or scripts.
@@ -151,7 +151,7 @@ A theme's tier says which parts it fills. Each tier fills every part of the one 
 **What comes next:**
 - One textured theme a month (the drop), so earlier buyers have something new to buy. Supporters vote on which one.
 - Seasonal items at tier prices.
-- An animated theme only once one passes section 6 with its motion. Nile Papyrus is the first candidate.
+- An animated theme only once one passes section 6 with its motion. Papyrus is the first.
 
 ## 8. PC and phone creator handoff
 

@@ -197,9 +197,13 @@ def build(check=False):
             raise ValueError("Preview themes must not have a price")
         if manifest.get('status') == 'built-in-default' and manifest['id'] != 'lightning-default':
             raise ValueError("Only lightning-default is the built-in default")
-        if manifest.get("status") not in ("built-in-default", "test-preview"):
-            raise ValueError("Paid themes require verified ownership integration before registration")
+        if manifest.get("status") not in ("built-in-default", "test-preview", "paid"):
+            raise ValueError("A theme is the built-in default, a test preview or paid")
+        # A paid theme shares its id with the store's catalogue item (one purchase on every surface) and is worn only
+        # with a verified licence for this exact version (lightning/ui/entitlements.py); anyone may try it for a session.
         entry = {"id": manifest["id"], "name": manifest["name"], "preview": manifest["status"] == "test-preview"}
+        if manifest["status"] == "paid":
+            entry.update(paid=True, version=manifest["version"])
         if manifest["id"] != "lightning-default":  # the default keeps its exact approved paint
             entry["materials"] = materials(parts, contract)
         registry.append(entry)
