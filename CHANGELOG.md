@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-26 · Claude: 8L ready to sell: app themes share the website's ids (Nile 300, Cotton 600, Papyrus 1,000 coins), tried by anyone and kept with a signed licence unlocked in Settings › Appearance (`ui/entitlements.py`).
+  Tiers for every look (recolour, texture, animation) in themes.md section 7; owner console rebuilt on the website.
 - 2026-10-26 · Claude: 8L theme materials: every app theme element states paint, material and motion from a reviewed recipe library (`theme-materials.css`, `slots.json` schema 2), validated at each surface's worst point.
   New light reference Cotton; Nile Papyrus & Lapis Guilloché redone (lacquer hero, travelling gold-foil edge, papyrus ground, foil controls); `tools/theme_shots.py` captures the roster.
 - 2026-10-26 · Codex: 1I organize repository docs: dated report/evidence folders, durable sanitized feedback, guideline and template maps; repair links and enforce catalogues and complete guideline mirrors.
