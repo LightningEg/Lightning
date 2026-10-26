@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-26 · Claude: 8L guideline 3.35 (copy of the website's change): D08 and themes.md, each For Geeks theme draws its own scene instead of the lightning (ink, river, embers, snow, stars, meadow); Mono keeps the terrain. Website PR `claude/theme-weather`.
+- 2026-10-26 · Claude: 8J website Top-ups: oldest first, recorded journal money leads (no double record), amount starts at what is owed, search by email/sender/amount; community footers sit in the page column. Website PR `claude/topup-reconciliation`.
 - 2026-10-26 · Codex: 1I organize repository docs: dated report/evidence folders, durable sanitized feedback, guideline and template maps; repair links and enforce catalogues and complete guideline mirrors.
 - 2026-10-26 · Claude: 8J simple InstaPay top-up (website #95): members copy our details and their email for the note, then confirm date, amount and sender, no receipt; the owner reconciles every open top-up on one screen.
 - 2026-10-26 · Claude: 8J owner console (website #94): one owner account only (a second refused; extra ones removed from Settings); top-up tickets open from a list with the receipt shown, and take amount, date, sender and reference; a reference pays one ticket only.
