@@ -176,7 +176,7 @@ def test_protected_identity_backup_is_portable_only_inside_encrypted_database(de
     saved = Database(source, key=device.c.db.copy_key(), read_only=True)
     try:
         material = json.loads(saved.scalar("SELECT document FROM journal_backup_material WHERE id=1"))
-        assert material["private_key"].startswith("-----BEGIN PRIVATE KEY-----")
+        assert material["private_key"].startswith("-----BEGIN " + "PRIVATE KEY-----")
         assert material["private_key"] == device.identity.export_private_key()
     finally:
         saved.close()

@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-26 · Codex: 4F release preparation: preserve the generated-key header assertion without a secret-shaped literal; no key material is committed.
 - 2026-10-26 · Codex: 4E–4I makes interrupted pairing resumable, binds recovery to current membership, and limits unapproved requests.
   Device keys use DPAPI/Android Keystore; native DPAPI binding/tamper/TLS checks pass, and migration preserves identity.
   Added process-death/network fault tests, native credential probes, an independent internal security review and a physical-device acceptance kit.
