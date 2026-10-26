@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from lightning.bank_imports import decode_csv
 from lightning.transactions.domain import TxnSource
 
@@ -403,3 +405,63 @@ def test_the_map_page_and_the_account_form_use_the_form_grid(c, setup):
     form = client.get("/accounts/new").text
     assert 'class="form-grid"' in form and 'class="soft-section"' in form and 'class="card" id="opening-balance-section"' not in form
     assert 'class="field wide"' in form  # Notes takes the whole row
+
+
+def test_decimal_amount_reads_common_bank_money_formats():
+    from decimal import Decimal as D
+
+    from lightning.bank_imports import _decimal_amount
+
+    assert _decimal_amount("(1,250.00)") == D("-1250.00")
+    assert _decimal_amount("1,250.00-") == D("-1250.00")
+    assert _decimal_amount("−1,250.00") == D("-1250.00")
+    assert _decimal_amount("EGP 1,250.00") == D("1250.00")
+    assert _decimal_amount("1,250.00 EGP") == D("1250.00")
+    assert _decimal_amount("1,250.00 ج.م") == D("1250.00")
+    assert _decimal_amount("١٬٢٥٠٫٠٠") == D("1250.00")
+    # Still accepted
+    assert _decimal_amount("-1,250.00") == D("-1250.00")
+    assert _decimal_amount("1.250,00") == D("1250.00")
+    assert _decimal_amount("") == D("0")
+    # Two signs and non-numbers stay rejected
+    for bad in ("-(5)", "(5)-", "abc", "EGP"):
+        with pytest.raises(ValueError):
+            _decimal_amount(bad)
+
+
+@pytest.mark.parametrize("text,expected", [
+    (".50", "0.50"), ("-.50", "-0.50"), (".50-", "-0.50"),
+    ("(.50)", "-0.50"), ("+1.25", "1.25"), ("EGP .50", "0.50"),
+    ("(EGP 1,250.00)", "-1250.00"), ("EGP -1,250.00", "-1250.00"),
+])
+def test_decimal_amount_preserves_decimal_points_and_one_sign(text, expected):
+    from decimal import Decimal
+    from lightning.bank_imports import _decimal_amount
+    assert _decimal_amount(text) == Decimal(expected)
+
+
+@pytest.mark.parametrize("text", ["5%", "abc5", "5abc", "+-5", "(-5)", "(+5)", "5+", "EGP 5 USD"])
+def test_decimal_amount_rejects_unknown_wrappers_and_extra_signs(text):
+    from lightning.bank_imports import _decimal_amount
+    with pytest.raises(ValueError):
+        _decimal_amount(text)
+
+
+def test_fractional_accounting_csv_changes_the_ledger_once_by_the_exact_amount(c, setup):
+    from decimal import Decimal
+    account_id = setup[0]["cib"].id
+    before = c.reporting.account_balance(account_id)
+    data = b"Date,Amount,Reference\n2026-09-22,(EGP .50),FRACTION-1\n"
+    batch_id, _ = c.bank_imports.stage(account_id, "fraction.csv", data)
+    _, rows = c.bank_imports.preview(batch_id)
+    assert rows[0]["Amount"] == "-0.50"
+    assert c.bank_imports.confirm(batch_id, {rows[0]["_import_row_id"]: {}})["posted"] == 1
+    expected = before - Decimal("0.50")
+    assert c.reporting.account_balance(account_id) == expected
+    ledger = c.db.one("SELECT SUM(amount_base_e6) AS balance FROM ledger_entries WHERE account_id=?", (account_id,))
+    assert Decimal(ledger["balance"]) / 1000000 == expected
+    again, _ = c.bank_imports.stage(account_id, "fraction.csv", data)
+    _, duplicates = c.bank_imports.preview(again)
+    assert duplicates[0]["_reference_duplicate"]
+    assert c.bank_imports.confirm(again, {duplicates[0]["_import_row_id"]: {"skip": True}})["duplicates"] == 1
+    assert c.reporting.account_balance(account_id) == expected

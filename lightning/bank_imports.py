@@ -15,7 +15,7 @@ from lightning.categories.domain import Movement
 from lightning.core.dates import now_iso, parse_date, today
 from lightning.core.errors import ConflictError, LightningError, NotFoundError, ValidationError
 from lightning.core.limits import MAX_CSV_IMPORT_BYTES
-from lightning.core.money import from_e6
+from lightning.core.money import ascii_digits, from_e6
 from lightning.core.refs import DocType
 from lightning.transactions.domain import TxnSource
 from lightning.transactions.tags import tags_in
@@ -57,9 +57,39 @@ def _date(value: str) -> str:
 
 def _decimal_amount(value: str) -> Decimal:
     try:
-        text = (value or "").strip().replace(" ", "")
+        text = ascii_digits((value or "").strip())
+        text = text.replace("−", "-").replace("–", "-").replace(" ", "")
         if not text:
             return Decimal("0")
+        # Strip a recognized currency wrapper, never arbitrary non-digit text: stripping
+        # punctuation would turn .50 into 50 and silently accept values such as 5%.
+        currency = r"(?:EGP|USD|EUR|GBP|LE|E£|ج\.?م\.?|[$€£])"
+        wrappers = 0
+
+        def strip_currency(text):
+            nonlocal wrappers
+            text, count = re.subn(rf"^{currency}|{currency}$", "", text, flags=re.IGNORECASE)
+            wrappers += count
+            if wrappers > 1:
+                raise ValueError("Enter a valid number.")
+            return text
+
+        text = strip_currency(text)
+        negative = False
+        if text.startswith("(") and text.endswith(")") and len(text) > 2:
+            negative = True
+            text = text[1:-1]
+        elif text.endswith("-") and len(text) > 1:
+            negative = True
+            text = text[:-1]
+        elif text.startswith(("-", "+")) and len(text) > 1:
+            negative = text[0] == "-"
+            text = text[1:]
+        text = strip_currency(text)
+        if not text or "-" in text or "(" in text or ")" in text:
+            raise ValueError("Enter a valid number.")
+        if not re.fullmatch(r"(?:[0-9][0-9.,]*|[.,][0-9]+)", text):
+            raise ValueError("Enter a valid number.")
         if "," in text and ("." not in text or text.rfind(",") > text.rfind(".")):
             tail = text.rsplit(",", 1)[1]
             text = text.replace(".", "").replace(",", ".") if len(tail) == 2 else text.replace(",", "")
@@ -68,7 +98,7 @@ def _decimal_amount(value: str) -> Decimal:
         amount = Decimal(text)
         if not amount.is_finite():
             raise InvalidOperation
-        return amount
+        return -amount if negative else amount
     except (InvalidOperation, ValueError):
         raise ValueError("Enter a valid number.") from None
 
