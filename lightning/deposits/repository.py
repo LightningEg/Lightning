@@ -163,6 +163,10 @@ class DepositRepository:
         )
 
     def record_redemption(self, transaction_id: int, certificate_id: int, destination_account_id: int) -> None:
+        # A voided redemption no longer redeems; the new one replaces its row, so restoring the old one is a
+        # plain sale the holding check refuses (audit 2026-10-26).
+        self.db.execute("DELETE FROM cd_redemptions WHERE certificate_id=? AND transaction_id IN "
+                        "(SELECT id FROM transactions WHERE status='VOID')", (certificate_id,))
         self.db.execute("INSERT INTO cd_redemptions(transaction_id,certificate_id,destination_account_id) "
                         "VALUES(?,?,?)", (transaction_id, certificate_id, destination_account_id))
 

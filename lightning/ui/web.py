@@ -9,6 +9,7 @@ import logging
 from datetime import timedelta
 
 import re
+import secrets
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from urllib.parse import parse_qsl, quote, urlencode, urlsplit
@@ -266,6 +267,8 @@ def _compact(value) -> str:
 
 templates.env.filters["compact"] = _compact
 templates.env.globals["abs"] = abs
+# 2J: a one-time token per rendered add form, so a resent request returns its first save.
+templates.env.globals["new_submission"] = lambda: secrets.token_hex(16)
 from lightning.accounts.institutions import tile as _institution_tile  # noqa: E402
 templates.env.globals["institution_tile"] = _institution_tile
 

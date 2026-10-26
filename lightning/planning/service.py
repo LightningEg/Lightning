@@ -165,17 +165,23 @@ class PlanningService:
         if any(p.status == PaymentStatus.PAID for p in payments) or not any(
                 p.status == PaymentStatus.DUE for p in payments):
             return None
-        later = [d for _, d in payment_dates(item, fmt_date(day + timedelta(days=400))) if d > fmt_date(day)]
+        later = [(on_calendar, due) for _, on_calendar, due in
+                 scheduled_dates(item, fmt_date(day + timedelta(days=400))) if due > fmt_date(day)]
         if not later:
             return None
+        # The new anchor is the calendar date, not the date a weekend or a short month moved it to, and a
+        # monthly plan keeps its day (audit 2026-10-26: the 31st became the 30th, the 4th became the 6th).
+        anchor, due = later[0]
+        month_day = (date.fromisoformat(item.start_date).day
+                     if item.frequency not in (Frequency.WEEKLY, Frequency.ONCE) and not item.month_day else None)
         with self.db.transaction():
-            self.repo.set_start(item_id, later[0])
+            self.repo.set_start(item_id, anchor, month_day)
             if item.payment_count:
                 # The payments before the new start are behind you: they still count toward a fixed
                 # number of payments, so the plan does not grow (audit 2026-10-05 #10: 6 became 8).
-                passed = sum(1 for _, d in payment_dates(item, later[0]) if d < later[0])
+                passed = sum(1 for _, d in payment_dates(item, due) if d < due)
                 self.repo.set_payment_count(item_id, item.payment_count - passed)
-        return later[0]
+        return due
 
     def set_amount(self, item_id: int, amount) -> None:
         """Plan every later payment at a new amount (for example after paying a higher rent)."""
@@ -399,6 +405,9 @@ class PlanningService:
         tolerance = Decimal(max(item.match_tolerance_pct, 50)) / Decimal(100)
         if abs(txn["amount"] - expected) > expected * tolerance:
             raise ValidationError("That transaction amount is too far from the planned payment.")
+        if item.kind == PlanKind.LOAN and txn["amount"] > expected:
+            # A loan only counts what an instalment owes; the rest would vanish (audit 2026-10-26).
+            raise ValidationError("Pay no more than this instalment's remaining amount. Record the rest as an early payment.")
         with self.db.transaction():
             if item.kind == PlanKind.LOAN and scheduled.status == PaymentStatus.PAID and scheduled.outstanding:
                 if txn["amount"] > scheduled.still_owed:
@@ -450,6 +459,9 @@ class PlanningService:
         value = to_decimal(amount, "amount")
         if value <= ZERO:
             raise ValidationError("Enter the amount paid.", "amount")
+        if item.kind == PlanKind.LOAN and value > scheduled.still_owed:
+            raise ValidationError("Pay no more than this instalment's remaining amount. Record the rest as an early payment.",
+                                  "amount")
         implicit_plan = self.is_installment_purchase(item.id) or item.month_day is not None
         party = self.counterparties.get(item.counterparty_id)["name"] if item.counterparty_id else ("" if implicit_plan else item.name)
         with self.db.transaction():

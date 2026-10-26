@@ -12,6 +12,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 ## [Unreleased]
 
 - 2026-10-26 · Codex: 4F release preparation: preserve the generated-key header assertion without a secret-shaped literal; no key material is committed.
+- 2026-10-26 · Claude: Audit 8 engine fixes: 2I shared writer checks cash currency/rate, 2J resent add forms save once, 2L instalment cents, 2M last revision fields; 15 more write-path, loan,
+  schedule, onboarding and integrity-check fixes (CD re-redeem, reserve/circle limits, deactivate/delete references, loan overpayment). Open: 2J journal, 2Z, 7R, 7S. reports/2026-10-26-engine-audit.
 - 2026-10-26 · Codex: 4E–4I makes interrupted pairing resumable, binds recovery to current membership, and limits unapproved requests.
   Device keys use DPAPI/Android Keystore; native DPAPI binding/tamper/TLS checks pass, and migration preserves identity.
   Added process-death/network fault tests, native credential probes, an independent internal security review and a physical-device acceptance kit.
