@@ -1,8 +1,8 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "nile-papyrus-guilloche",
   "name": "Nile Papyrus & Lapis Guilloché",
-  "version": 1,
+  "version": 2,
   "status": "test-preview",
   "priceCoins": null,
   "bundleTargets": [
@@ -12,40 +12,62 @@
   "minimumAppVersion": null,
   "parts": {
     "palette": {
-      "background": "#070B16",
-      "surface": "#0D1624",
-      "raised": "#142236",
-      "text": "#E9EDF7",
-      "muted": "#8FA3BF",
-      "border": "#1E324D",
-      "accent": "#E6B450",
-      "onAccent": "#100C02",
+      "background": "#060A14",
+      "surface": "#0C1424",
+      "raised": "#0F1A30",
+      "text": "#ECEFF7",
+      "muted": "#A8B5CC",
+      "border": "#1F2D47",
+      "accent": "#E3B556",
+      "onAccent": "#140E02",
       "income": "#4FD8A4",
       "expense": "#FF9393",
-      "transfer": "#8FA3BF",
+      "transfer": "#A8B5CC",
       "warning": "#F2C86B",
-      "focus": "#E6B450",
-      "hero": "#FFF4D6"
+      "focus": "#F0CB74",
+      "hero": "#FFF2CF"
     },
     "brand": {
       "logoVariant": "on-dark"
     },
+    "ground": {
+      "texture": "papyrus",
+      "textureStrength": "subtle",
+      "artwork": "guilloche-rosette",
+      "vignette": "soft",
+      "ambient": "none",
+      "equip": "unveil"
+    },
     "header": {
       "surface": "surface",
-      "seam": "accent"
+      "seam": "accent",
+      "finish": "glass",
+      "thread": "none"
     },
     "navigation": {
       "surface": "surface",
-      "activeMark": "accent"
+      "activeMark": "accent",
+      "finish": "satin",
+      "activeStyle": "cartouche"
     },
     "hero": {
-      "surface": "surface",
+      "surface": "raised",
       "edge": "accent",
-      "decoration": "none"
+      "finish": "lacquer",
+      "grain": "fibre",
+      "edgeStyle": "foil",
+      "depth": "high",
+      "artwork": "lotus-line",
+      "sheen": "edge-glint"
     },
     "cards": {
       "surface": "surface",
-      "border": "border"
+      "border": "border",
+      "finish": "satin",
+      "grain": "film",
+      "edgeLight": "soft",
+      "depth": "mid",
+      "hover": "light"
     },
     "charts": {
       "grid": "border",
@@ -54,19 +76,46 @@
     "controls": {
       "fill": "accent",
       "label": "onAccent",
-      "focus": "focus"
+      "focus": "focus",
+      "finish": "foil",
+      "depth": "mid",
+      "press": "sheen"
+    },
+    "buttons": {
+      "surface": "raised",
+      "label": "text",
+      "border": "border",
+      "finish": "satin"
+    },
+    "tabs": {
+      "surface": "surface",
+      "chosen": "accent",
+      "chosenLabel": "onAccent",
+      "finish": "foil"
+    },
+    "fields": {
+      "surface": "raised",
+      "border": "border",
+      "well": "deep"
+    },
+    "progress": {
+      "track": "raised",
+      "finish": "gloss"
     },
     "overlays": {
       "surface": "raised",
-      "backdrop": "background"
+      "backdrop": "background",
+      "finish": "lacquer",
+      "grain": "film",
+      "depth": "high",
+      "shade": "blur",
+      "enter": "rise"
     },
     "menus": {
       "surface": "raised",
-      "divider": "border"
-    },
-    "decoration": {
-      "pattern": "papyrus-guilloche",
-      "motion": "security-thread"
+      "divider": "border",
+      "finish": "satin",
+      "depth": "high"
     }
   }
 }

@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-26 · Claude: 8L theme materials: every app theme element states paint, material and motion from a reviewed recipe library (`theme-materials.css`, `slots.json` schema 2), validated at each surface's worst point.
+  New light reference Cotton; Nile Papyrus & Lapis Guilloché redone (lacquer hero, travelling gold-foil edge, papyrus ground, foil controls); `tools/theme_shots.py` captures the roster.
 - 2026-10-26 · Codex: 1I organize repository docs: dated report/evidence folders, durable sanitized feedback, guideline and template maps; repair links and enforce catalogues and complete guideline mirrors.
 - 2026-10-26 · Claude: 8J simple InstaPay top-up (website #95): members copy our details and their email for the note, then confirm date, amount and sender, no receipt; the owner reconciles every open top-up on one screen.
 - 2026-10-26 · Claude: 8J owner console (website #94): one owner account only (a second refused; extra ones removed from Settings); top-up tickets open from a list with the receipt shown, and take amount, date, sender and reference; a reference pays one ticket only.

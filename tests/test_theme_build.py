@@ -33,50 +33,104 @@ class ThemeBuildTests(unittest.TestCase):
         builder.build(check=True)
         builder.load(ROOT / 'theme-kit/theme.template.json')
 
-    def test_rejects_script_colour_layout_and_unapproved_pattern(self):
+    def test_rejects_script_colour_layout_and_unapproved_recipe(self):
         for part, key, value in [('palette', 'text', 'url(https://example.com)'),
                                  ('cards', 'width', '100px'),
-                                 ('decoration', 'pattern', 'remote-svg')]:
-            with self.subTest(part=part):
+                                 ('ground', 'texture', 'remote-svg'),
+                                 ('cards', 'finish', 'url(x)'),
+                                 ('hero', 'sheen', 'spin'),
+                                 ('controls', 'finish', 'accent')]:
+            with self.subTest(part=part, key=key):
                 self.setUp()
                 self.manifest['parts'][part][key] = value
                 with self.assertRaises(ValueError):
                     self.validate()
 
-    def test_decoration_takes_only_approved_patterns_and_motions(self):
-        self.manifest['parts']['decoration'] = {'pattern': 'papyrus-guilloche', 'motion': 'security-thread'}
-        self.validate()
-        for key, value in [('pattern', 'url(x)'), ('motion', 'spin'), ('motion', 'papyrus-guilloche')]:
-            with self.subTest(key=key, value=value):
+    def test_a_delivered_theme_states_every_layer_of_every_element(self):
+        contract = json.loads((builder.SOURCE / 'slots.json').read_text())
+        for slot, key in [('cards', 'grain'), ('ground', 'equip'), ('tabs', 'chosen')]:
+            with self.subTest(slot=slot, key=key):
                 self.setUp()
-                self.manifest['parts']['decoration'] = {'pattern': 'none', 'motion': 'none', key: value}
-                with self.assertRaises(ValueError):
+                del self.manifest['parts'][slot][key]
+                with self.assertRaisesRegex(ValueError, f'{slot} needs {key}'):
                     self.validate()
+        self.setUp()
+        del self.manifest['parts']['progress']
+        with self.assertRaises(ValueError):
+            self.validate()
+        # the creator template is complete: every element, every layer
+        template = json.loads((ROOT / 'theme-kit/theme.template.json').read_text())
+        for slot, spec in contract['slots'].items():
+            self.assertEqual(set(template['parts'][slot]), set(builder.slot_keys(spec)), slot)
 
-    def test_registry_names_decoration_and_every_one_is_drawn(self):
+    def test_one_continuous_motion_at_most(self):
+        self.manifest['parts']['header']['thread'] = 'security-thread'
+        self.validate()
+        self.manifest['parts']['hero']['sheen'] = 'edge-glint'
+        with self.assertRaisesRegex(ValueError, 'One continuous motion'):
+            self.validate()
+        # hover, press, enter and equip answer the user, so they ride along freely
+        self.setUp()
+        self.manifest['parts']['hero']['sheen'] = 'edge-glint'
+        self.manifest['parts']['cards']['hover'] = 'light'
+        self.manifest['parts']['controls']['press'] = 'sheen'
+        self.manifest['parts']['overlays']['enter'] = 'rise'
+        self.manifest['parts']['ground']['equip'] = 'unveil'
+        self.validate()
+
+    def test_contrast_is_checked_at_the_material_worst_point(self):
+        # the dimmest quiet text that passes on every flat surface ...
+        for level in range(0x60, 0x100):
+            self.manifest['parts']['palette']['muted'] = f'#{level:02X}{level:02X}{level:02X}'
+            try:
+                self.validate()
+                break
+            except ValueError:
+                continue
+        # ... fails once the cards wear lacquer and fibre grain
+        self.manifest['parts']['cards'].update(finish='lacquer', grain='fibre')
+        with self.assertRaisesRegex(ValueError, '4.5:1'):
+            self.validate()
+
+    def test_registry_carries_materials_and_every_recipe_is_drawn(self):
         registry = json.loads((builder.STATIC / 'themes.generated.json').read_text())
-        decor = (builder.STATIC / 'theme-decor.css').read_text()
-        contract = json.loads((builder.SOURCE / 'slots.json').read_text())['slots']['decoration']
-        papyrus = next(t for t in registry if t['id'] == 'nile-papyrus-guilloche')
-        self.assertEqual((papyrus['pattern'], papyrus['motion']), ('papyrus-guilloche', 'security-thread'))
-        self.assertNotIn('pattern', next(t for t in registry if t['id'] == 'nile-nocturne'))
-        for name in contract['patterns'][1:]:
-            self.assertIn(f'[data-texture="{name}"]', decor)
-        for name in contract['motions'][1:]:
-            self.assertIn(f'[data-motion="{name}"]', decor)
+        css = (builder.STATIC / 'theme-materials.css').read_text()
+        contract = json.loads((builder.SOURCE / 'slots.json').read_text())
+        nile = next(t for t in registry if t['id'] == 'nile-papyrus-guilloche')
+        self.assertNotEqual(nile['materials']['ground-texture'], 'none')
+        self.assertNotIn('materials', next(t for t in registry if t['id'] == 'lightning-default'))
+        neutral = {'none', 'flat', 'hairline', 'bar', 'dim', 'whisper', 'subtle', 'rich'}
+        for slot, spec in contract['slots'].items():
+            for key, values in builder.slot_keys(spec).items():
+                if values is None or slot == 'brand':
+                    continue
+                attribute = 'data-m-' + slot + '-' + builder.re.sub(r'([A-Z])', r'-\1', key).lower()
+                for value in set(values) - neutral:
+                    if (slot, key) in {('ground', 'texture'), ('ground', 'artwork'), ('hero', 'artwork'), ('ground', 'equip')}:
+                        continue  # drawn per theme by the compiler; equip by theme-runtime.js (.theme-unveil)
+                    self.assertTrue(f'{attribute}="{value}"' in css, f'{slot}.{key}={value} has no recipe')
+        self.assertIn("'unveil'", (builder.STATIC / 'theme-runtime.js').read_text())
+        self.assertIn('.theme-unveil', css)
+        self.assertLessEqual(set(contract['slots']['ground']['material']['texture']) - {'none'}, set(builder.TEXTURES))
+        self.assertLessEqual(set(contract['slots']['cards']['material']['grain']) - {'none'}, set(builder.TEXTURES))
+        self.assertEqual(set(contract['slots']['hero']['material']['artwork']) - {'none'}, set(builder.ARTWORK))
+        self.assertEqual(set(contract['slots']['ground']['material']['textureStrength']), set(builder.STRENGTH))
 
-    def test_decoration_layer_keeps_the_motion_rules(self):
-        decor = (builder.STATIC / 'theme-decor.css').read_text()
-        # one motion per theme, slow, stopped by reduced motion; no requests; the brand watermark (::after) untouched
-        self.assertEqual(decor.count('animation:') - decor.count('animation: none'), 1)
-        self.assertIn('12s linear infinite', decor)
-        self.assertIn('@media (prefers-reduced-motion: reduce)', decor)
-        self.assertNotRegex(decor, r'url\((?!"data:)')
-        self.assertNotIn('lead-card', decor)  # never inside a card; the Lead card keeps the brand watermark
-        self.assertNotIn('transition', decor)
+    def test_material_layer_keeps_the_motion_rules(self):
+        css = (builder.STATIC / 'theme-materials.css').read_text()
+        # continuous motions are slow; each animation stops under reduced motion; no requests; nothing per number
+        for name, seconds in builder.re.findall(r'animation: (m-[a-z]+) ([0-9.]+)s', css):
+            if name in ('m-thread', 'm-glint', 'm-drift'):
+                self.assertGreaterEqual(float(seconds), 8, name)
+        reduced = css[css.index('@media (prefers-reduced-motion: reduce)'):]
+        for selector in ('ground-ambient', 'header-thread', 'hero-sheen', 'overlays-enter', 'cards-hover', 'controls-press', 'theme-unveil'):
+            self.assertIn(selector, reduced)
+        self.assertNotRegex(css, r'url\((?!"data:)')
+        # geometry is never a material: no padding, margins, fonts, radii, border widths, gaps or line heights
+        self.assertNotRegex(css, r'[;{\s](padding|margin|font|border-radius|border-width|gap|line-height|min-height)[a-z-]*\s*:(?!\s*inherit)')
         for shell in ['base.html', 'phone/base.html']:
             source = (ROOT / 'lightning/ui/templates' / shell).read_text()
-            self.assertLess(source.index('/static/theme-surfaces.css'), source.index('/static/theme-decor.css'))
+            self.assertLess(source.index('/static/theme-surfaces.css'), source.index('/static/theme-materials.css'))
 
     def test_rejects_unreadable_card_and_button(self):
         for part, key, value in [('cards', 'surface', 'text'), ('controls', 'label', 'accent')]:
@@ -86,11 +140,11 @@ class ThemeBuildTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     self.validate()
 
-    def test_partial_parts_inherit_but_money_is_not_recoloured(self):
-        self.manifest['parts'] = {'cards': {'border': 'accent'}}
+    def test_money_is_not_recoloured(self):
+        self.manifest['parts']['cards']['border'] = 'accent'
         manifest, parts = self.validate()
-        css = builder.compile_theme(manifest, parts)
-        self.assertIn('--theme-card-border: #0B6DD6', css)
+        css = builder.compile_theme(manifest, parts, json.loads((builder.SOURCE / 'slots.json').read_text()))
+        self.assertIn('--theme-card-border: #3FD0E0', css)
         for token in ['--positive:', '--rose:', '--azure:', '--chart-equity:', '--pos:', '--neg:']:
             self.assertNotIn(token, css)
         # the theme's own money colours are offered as tint sources only, under their own names

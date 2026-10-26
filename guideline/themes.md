@@ -23,7 +23,7 @@ Owner, 2026-10-25: five palettes and two textured themes on sale while each is p
 
 **Archived:** Ocean, Tokyo, Dracula, Rose, Synthwave, Phosphor, Amber, Solarized and Moss. They are not sold and not shown, but a member who owns one keeps it, sees it and can wear it. Their seeds stay in `js/forgeeks.js` marked `archived:true` and their tokens stay in `css/forgeeks.css`. To bring one back, take it through section 5 like a new theme, then set `active = true` in a migration and drop `archived:true`.
 
-The app themes in testing, Nile Nocturne, Royal Obsidian & Gold and Nile Papyrus & Lapis Guilloché are in `cosmetics/*.json` and have no price until verified claiming ships. Nile Papyrus is the first with a texture and a motion.
+The app themes in testing, Nile Nocturne, Royal Obsidian & Gold, Nile Papyrus & Lapis Guilloché and Cotton are in `cosmetics/*.json` and have no price until verified claiming ships. Nile Papyrus (dark) and Cotton (light) are the two references for the app's material system (section 8).
 
 ## 2. The seed
 
@@ -58,7 +58,7 @@ Eleven parts, the same eleven on every surface. A part not listed for a surface 
 | 7 | **Buttons and inputs** | Primary and secondary buttons, links, focus, fields | `--nile` `--nile-2` `--on-nile` `--azure` `--line-ctl` `--field` `--field-focus` | `--btn` `--btn-ink` `--accent` | `controls` |
 | 8 | **Sheets and dialogs** | Windows, the buy window, overlays | reads part 5 | `--panel` | `overlays` |
 | 9 | **Settings and menus** | Menus, dropdowns, dividers | reads part 5 | reads part 5 | `menus` |
-| 10 | **Texture and motion** | Pattern behind the page; later, one motion | textured tier: `:root[data-texture]` (`css/textures.css`) | the same texture, under the field | `decoration`: a pattern and a motion from the approved lists in `slots.json`, drawn by `theme-decor.css` |
+| 10 | **Texture and motion** | Pattern behind the page; later, one motion | textured tier: `:root[data-texture]` (`css/textures.css`) | the same texture, under the field | `ground` (texture, artwork, ambient and equip motion), plus each element's material and motion layer (section 8) |
 | 11 | **Brand mark** | The two-leaf logo | the light or dark mark, never recoloured | `geeks-mark-light` / `-dark` | `brand`: `on-light` / `on-dark` |
 
 The footer and the consent bar are part 1 plus part 5 (`--sf-*` and `--lc-*` on the main site).
@@ -69,7 +69,7 @@ In code, each surface keeps the same compartments:
 
 - main site: `skinParts()` in `js/theme.js` returns `colours`, `header`, `hero`, `cards`, `controls`, `footer` and `consent`;
 - For Geeks: the fourteen tokens of D03, one rule per theme in `css/forgeeks.css`;
-- app: the parts of a manifest in `cosmetics/`.
+- app: the elements of a manifest in `cosmetics/`, finer than the eleven (ground, buttons, tabs, fields and progress are their own), each with paint, material and motion (`theme-kit/README.md` › Element inventory).
 
 To change how one part looks in every theme (say, buttons), change that part's rule on each surface and nothing else.
 
@@ -110,7 +110,7 @@ A theme with any of these is not done:
 - A colour outside its part: a button colour in a card, an accent in body text.
 - Money colours moved on the main site or in the app, or any money colour on For Geeks.
 - A layout shift: put screenshots against the default theme side by side, and nothing may move.
-- Motion that ignores reduced motion, or more than one motion in a theme.
+- Motion that ignores reduced motion, or more than one continuous motion in a theme.
 - A seed edited without rechecking every part.
 
 ## 7. Tiers and prices
@@ -124,16 +124,17 @@ A theme's tier says which parts it fills. Each tier fills every part of the one 
 | **Animated** | The texture, plus one signature motion in part 10 | 1,000 | 200 | none yet |
 
 **Texture rules:**
-- Gradients only: no images and no motion.
-- Drawn in the text colour at 3 to 7%, behind all content, never inside a card.
-- Text keeps its 4.5:1 because the pattern sits on the ground, not under letters.
+- Drawn by code: gradients, or inline SVG generated from the theme's own colours. No image files, requests or scripts.
+- On the ground: the text colour at 2 to 7%, behind all content.
+- In the app, a surface may carry its own grain (text colour, 3 to 4%) and one fine-line watermark (accent, 12%) in an empty corner, never under a figure. Text keeps 4.5:1 because contrast is checked at each surface's worst point: finish, grain and watermark together.
 - One texture serves every surface: `css/textures.css` styles the page (`:root[data-texture]`) and the previews (`.pv[data-tex]`).
 - A texture's id is listed in `js/theme.js` (`TEXTURES`) and `js/theme-preview.js`, and set by `tex:` in the seed.
 
-**Motion rules (Animated, later):**
-- One motion per theme, slow (8 seconds or more), behind content.
+**Motion rules:**
+- One continuous motion per theme, slow (8 seconds or more), behind content or along an edge.
+- Motions that answer the user (a card's hover light or lift, a button's sheen, a dialog rising in) and one equip moment when the theme is put on may join it. None loops.
 - Never on a number, and never anything that blinks.
-- Under reduced motion it stops and shows one still frame.
+- Under reduced motion every motion stops and shows one still frame.
 
 **Prices:**
 - Prices live in the catalogue (`catalog_items.price`, `tier`). The market shows coins and the EGP they cost (`coin_rate()`).
@@ -150,7 +151,7 @@ A theme's tier says which parts it fills. Each tier fills every part of the one 
 **What comes next:**
 - One textured theme a month (the drop), so earlier buyers have something new to buy. Supporters vote on which one.
 - Seasonal items at tier prices.
-- An animated theme only once one passes section 6 with its motion.
+- An animated theme only once one passes section 6 with its motion. Nile Papyrus is the first candidate.
 
 ## 8. PC and phone creator handoff
 
@@ -158,4 +159,4 @@ The app's [`theme-kit/README.md`](https://github.com/LightningEg/Lightning/blob/
 
 `python tools/build_themes.py --validate path/to/theme.json` checks the existing data-only contract and text/control contrast pairs. Reviewed app previews are bundled under `lightning/ui/static/cosmetics/`; `python tools/build_themes.py` generates the root `data-theme` CSS and boot registry. Both app frames load the same switcher before content paints. Settings → Appearance switches paint without navigating and remembers it with the profile across native launches; an unknown saved ID returns to Lightning default. The exact default paint stays in the existing guideline stylesheets.
 
-The app accepts palette previews, plus decoration from approved lists only: `slots.json` names each pattern and motion (now `papyrus-guilloche` and `security-thread`), and `lightning/ui/static/theme-decor.css` draws them under section 7's rules. A new pattern or motion is app code, reviewed like any other; a manifest can only pick from the lists. Arbitrary CSS, URLs and other motion are rejected. Financial tokens and series retain their existing meanings. Actual Windows/Android screens, English/Arabic, contrast and geometry still require the kit's acceptance checks. Bundling a preview does not enable sale or prove paid ownership; verified claiming remains a separate release prerequisite.
+**The app's material system.** An app theme is every element times three layers, all stated: **paint** (palette keys), **material** (finish, grain, edge light, depth, artwork) and **motion**. The element inventory and the recipe library are in `theme-kit/README.md`; `slots.json` is their machine copy and `lightning/ui/static/theme-materials.css` draws the recipes. A manifest only picks recipes; a new recipe is app code, reviewed like any other, and then serves every theme. The validator refuses a missing layer, a value off the list, more than one continuous motion, and text under 4.5:1 at a surface's worst point. `python tools/theme_shots.py OUT --themes id` captures the six roster screens on PC and phone. Financial tokens and series retain their existing meanings. Actual Windows/Android screens, English/Arabic, contrast and geometry still require the kit's acceptance checks. Bundling a preview does not enable sale or prove paid ownership; verified claiming remains a separate release prerequisite.
