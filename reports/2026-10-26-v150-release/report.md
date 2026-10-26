@@ -17,7 +17,7 @@ This report records preparation, not public publication or physical-device accep
 | App #143 | Complete allowlisted material recipes, reproducible compiler, offline signed licences, bounded HTTPS code redemption, ownership enforced by the server. Theme/licence/compiler tests pass. | Merged after green CI, d8239936. |
 | App #144 | Dendera day/night share one licence; SVG compiler accepts shapes only. No layout movement across six screens per mode; frame comparison against default passes on a quiet run. | Merged after green CI, b3d56c60. |
 | App #146 | Theme-scene guideline copied from the website; retain the same guideline files across repositories. | Merged after green CI, 11693019. |
-| App #117 | Recognized currency wrappers, Arabic digits, preserved leading decimal point, rejection of percent/arbitrary wrappers/extra signs; 0.50 EGP posts once. All 41 bank-import tests pass. | Updated against merged themes; fork-workflow approval required. |
+| App #117 | Recognized currency wrappers, Arabic digits, preserved leading decimal point, rejection of percent/arbitrary wrappers/extra signs; 0.50 EGP posts once. All 41 bank-import tests pass. | Merged after owner workflow approval and green CI, cfd693e5. |
 | App #122 | Dependency input changes do not match the packaged native-wheel lock matrix; phone build checks fail. | Leave open: [1H](../../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md). |
 | Website #99/#100 | Inline payment errors remain visible; recorded money leads, outstanding amount prefilled, oldest-first queue. Existing server authorization and credit RPCs unchanged. Relevant page tests and security/account CI pass. | Merged, fbc91480 / a9bd606a. |
 | Website #101 | Bounded theme-specific canvas scenes, mobile density and reduced-motion handling; mirrored guideline. | Merged after green CI, 920c194a. |
@@ -61,3 +61,5 @@ No production credentials, keys, migrations or payment records were changed duri
 2026-10-26: preparation continues on `codex/release-1.5.0`; no tag or public release has been created.
 
 2026-10-26: displayed version now agrees at 1.5.0. The repeated theme-switching browser run passed all four PC/phone and English/Arabic combinations; screenshots were refreshed after the version fix. Documentation links/catalogues and the theme compiler check pass.
+
+2026-10-26: owner approved the contributor workflows; #117 passed PR checks and CodeQL and was merged at cfd693e5. Release-preparation head af8ac8c9 also passed both required workflows. Synchronizing the release notes with the contributor merge changes no application behavior.
