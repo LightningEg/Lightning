@@ -17,7 +17,7 @@ BUNDLES = Path(__file__).resolve().parents[1] / 'lightning/ui/static/cosmetics'
 def license():
     key = Ed25519PrivateKey.generate()
     data = {'issuer':'lightning-store','schema_version':1,'account_id':str(uuid4()),
-            'items':[{'item_id':'nile-nocturne','asset_version':1,'deliveries':[]}]}
+            'items':[{'item_id':'nile','asset_version':1,'deliveries':[]}]}
     def sign(data):
         payload=json.dumps(data,separators=(',',':'))
         return {'algorithm':'Ed25519','key_id':'test','payload':payload,
@@ -28,8 +28,8 @@ def test_same_entitlement_is_portable_and_permanent(license):
     data,sign,keys=license
     envelope=sign(data)
     for _device in ('phone','pc','replacement-pc'):
-        owned=verify_license(envelope,keys,{'nile-nocturne':1},expected_account=data['account_id'])
-        assert owned.items == (('nile-nocturne',1),)
+        owned=verify_license(envelope,keys,{'nile':1},expected_account=data['account_id'])
+        assert owned.items == (('nile',1),)
     assert 'expires' not in envelope['payload'] and 'device' not in envelope['payload']
 
 @pytest.mark.parametrize('change',['signature','key','algorithm','account','version','tamper','oversize'])
@@ -40,13 +40,13 @@ def test_bad_claims_fail_closed(license,change):
     elif change=='algorithm':e['algorithm']='none'
     elif change=='account':expected=str(uuid4())
     elif change=='version':data['items'][0]['asset_version']=2;e=sign(data)
-    elif change=='tamper':e['payload']=e['payload'].replace('nile-nocturne','royal-obsidian-gold')
+    elif change=='tamper':e['payload']=e['payload'].replace('nile','royal-obsidian-gold')
     else:e['payload']='x'*131073
-    with pytest.raises(InvalidCosmeticLicense):verify_license(e,keys,{'nile-nocturne':1},expected_account=expected)
+    with pytest.raises(InvalidCosmeticLicense):verify_license(e,keys,{'nile':1},expected_account=expected)
 
 def test_bundled_parts_are_data_only_and_partial_themes_fall_back():
     contract=json.loads((BUNDLES/'slots.json').read_text())
-    for name in ('nile-nocturne','royal-obsidian-gold'):
+    for name in ('nile','royal-obsidian-gold'):
         manifest=json.loads((BUNDLES/(name+'.json')).read_text())
         assert validate_parts(manifest,contract) == manifest
         minimal=copy.deepcopy(manifest);minimal['parts']={}
@@ -59,7 +59,7 @@ def test_fallback_is_complete_and_unknown_theme_rolls_back_as_a_whole():
     from lightning.security.cosmetic_parts import resolve_parts
     contract=json.loads((BUNDLES/'slots.json').read_text())
     baseline=json.loads((BUNDLES/'lightning-default.json').read_text())
-    theme=json.loads((BUNDLES/'nile-nocturne.json').read_text())
+    theme=json.loads((BUNDLES/'nile.json').read_text())
     theme['parts']={'palette':{'accent':'#3FD0E0'}}
     parts,fallback=resolve_parts(theme,baseline,contract)
     assert not fallback and parts['palette']['accent']=='#3FD0E0'
@@ -76,14 +76,14 @@ def test_each_part_can_come_from_a_different_owned_theme():
     from lightning.security.cosmetic_parts import compose_parts
     contract=json.loads((BUNDLES/'slots.json').read_text())
     baseline=json.loads((BUNDLES/'lightning-default.json').read_text())
-    catalog={name:json.loads((BUNDLES/(name+'.json')).read_text()) for name in ('nile-nocturne','royal-obsidian-gold')}
-    selected={'palette':'nile-nocturne','cards':'royal-obsidian-gold','brand':'lightning-default'}
+    catalog={name:json.loads((BUNDLES/(name+'.json')).read_text()) for name in ('nile','royal-obsidian-gold')}
+    selected={'palette':'nile','cards':'royal-obsidian-gold','brand':'lightning-default'}
     parts=compose_parts(selected,baseline,catalog,{name:1 for name in catalog},contract)
-    assert parts['palette']==catalog['nile-nocturne']['parts']['palette']
+    assert parts['palette']==catalog['nile']['parts']['palette']
     assert parts['cards']==catalog['royal-obsidian-gold']['parts']['cards']
     assert parts['brand']==baseline['parts']['brand']
     with pytest.raises(InvalidCosmeticParts,match='not owned'):
-        compose_parts(selected,baseline,catalog,{'nile-nocturne':1},contract)
+        compose_parts(selected,baseline,catalog,{'nile':1},contract)
     with pytest.raises(InvalidCosmeticParts,match='not owned'):
         compose_parts(selected,baseline,catalog,{name:2 for name in catalog},contract)
     assert baseline['parts']['palette']['accent']=='#0B6DD6'

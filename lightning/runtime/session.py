@@ -21,6 +21,7 @@ from lightning.security.keys import (clean_question, create_key_file, key_id, ne
 
 from .instance import InstanceAlreadyRunning, InstanceLock
 from .paths import ProfilePaths, choose_data_root, create_profile, resolve_profile
+from lightning.ui.entitlements import use_folder as use_licence_folder
 from .roles import SessionRole
 
 
@@ -204,6 +205,7 @@ class ProfileSession:
 
     def __init__(self, root: str | Path | None = None):
         self.root = choose_data_root(root)
+        use_licence_folder(self.root / "cosmetics")  # paid theme licences live beside the profiles, not in one
         self.container: Container | None = None
         self.role = SessionRole.HOME
         self.paths: ProfilePaths | None = None

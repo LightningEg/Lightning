@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 2,
+  "id": "nile",
+  "name": "Nile",
+  "version": 1,
+  "status": "paid",
+  "priceCoins": null,
+  "bundleTargets": [
+    "windows",
+    "android"
+  ],
+  "minimumAppVersion": null,
+  "parts": {
+    "palette": {
+      "background": "#070B16",
+      "surface": "#0E1526",
+      "raised": "#141E33",
+      "text": "#E9EDF7",
+      "muted": "#B7C0D8",
+      "border": "#22304A",
+      "accent": "#E6B450",
+      "onAccent": "#140E02",
+      "income": "#4FD8A4",
+      "expense": "#FF9393",
+      "transfer": "#B7C0D8",
+      "warning": "#F2C86B",
+      "focus": "#F0CB74",
+      "hero": "#FFF2CF"
+    },
+    "brand": {
+      "logoVariant": "on-dark"
+    },
+    "ground": {
+      "texture": "none",
+      "textureStrength": "subtle",
+      "artwork": "none",
+      "vignette": "none",
+      "ambient": "none",
+      "equip": "none"
+    },
+    "header": {
+      "surface": "surface",
+      "seam": "accent",
+      "finish": "flat",
+      "thread": "none"
+    },
+    "navigation": {
+      "surface": "surface",
+      "activeMark": "accent",
+      "finish": "flat",
+      "activeStyle": "bar"
+    },
+    "hero": {
+      "surface": "surface",
+      "edge": "accent",
+      "finish": "flat",
+      "grain": "none",
+      "edgeStyle": "hairline",
+      "depth": "none",
+      "artwork": "none",
+      "sheen": "none"
+    },
+    "cards": {
+      "surface": "surface",
+      "border": "border",
+      "finish": "flat",
+      "grain": "none",
+      "edgeLight": "none",
+      "depth": "none",
+      "hover": "none"
+    },
+    "charts": {
+      "grid": "border",
+      "accent": "accent"
+    },
+    "controls": {
+      "fill": "accent",
+      "label": "onAccent",
+      "focus": "focus",
+      "finish": "flat",
+      "depth": "none",
+      "press": "none"
+    },
+    "buttons": {
+      "surface": "raised",
+      "label": "text",
+      "border": "border",
+      "finish": "flat"
+    },
+    "tabs": {
+      "surface": "surface",
+      "chosen": "accent",
+      "chosenLabel": "onAccent",
+      "finish": "flat"
+    },
+    "fields": {
+      "surface": "raised",
+      "border": "border",
+      "well": "flat"
+    },
+    "progress": {
+      "track": "raised",
+      "finish": "flat"
+    },
+    "overlays": {
+      "surface": "raised",
+      "backdrop": "background",
+      "finish": "flat",
+      "grain": "none",
+      "depth": "none",
+      "shade": "dim",
+      "enter": "none"
+    },
+    "menus": {
+      "surface": "raised",
+      "divider": "border",
+      "finish": "flat",
+      "depth": "none"
+    }
+  }
+}

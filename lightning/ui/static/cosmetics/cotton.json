@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 2,
+  "id": "cotton",
+  "name": "Cotton",
+  "version": 1,
+  "status": "paid",
+  "priceCoins": null,
+  "bundleTargets": [
+    "windows",
+    "android"
+  ],
+  "minimumAppVersion": null,
+  "parts": {
+    "palette": {
+      "background": "#F4F1EA",
+      "surface": "#FBF9F4",
+      "raised": "#ECE6DA",
+      "text": "#161616",
+      "muted": "#45413A",
+      "border": "#DDD5C6",
+      "accent": "#A8401C",
+      "onAccent": "#FFFFFF",
+      "income": "#2E7A4F",
+      "expense": "#B23A5B",
+      "transfer": "#6B645A",
+      "warning": "#8A5A00",
+      "focus": "#A8401C",
+      "hero": "#161616"
+    },
+    "brand": {
+      "logoVariant": "on-light"
+    },
+    "ground": {
+      "texture": "linen",
+      "textureStrength": "subtle",
+      "artwork": "none",
+      "vignette": "soft",
+      "ambient": "none",
+      "equip": "unveil"
+    },
+    "header": {
+      "surface": "background",
+      "seam": "border",
+      "finish": "flat",
+      "thread": "none"
+    },
+    "navigation": {
+      "surface": "surface",
+      "activeMark": "accent",
+      "finish": "satin",
+      "activeStyle": "glow"
+    },
+    "hero": {
+      "surface": "surface",
+      "edge": "accent",
+      "finish": "satin",
+      "grain": "paper",
+      "edgeStyle": "hairline",
+      "depth": "mid",
+      "artwork": "guilloche-rosette",
+      "sheen": "none"
+    },
+    "cards": {
+      "surface": "surface",
+      "border": "border",
+      "finish": "satin",
+      "grain": "paper",
+      "edgeLight": "bright",
+      "depth": "low",
+      "hover": "lift"
+    },
+    "charts": {
+      "grid": "border",
+      "accent": "accent"
+    },
+    "controls": {
+      "fill": "accent",
+      "label": "onAccent",
+      "focus": "focus",
+      "finish": "embossed",
+      "depth": "mid",
+      "press": "none"
+    },
+    "buttons": {
+      "surface": "raised",
+      "label": "text",
+      "border": "border",
+      "finish": "embossed"
+    },
+    "tabs": {
+      "surface": "surface",
+      "chosen": "text",
+      "chosenLabel": "surface",
+      "finish": "satin"
+    },
+    "fields": {
+      "surface": "raised",
+      "border": "border",
+      "well": "inset"
+    },
+    "progress": {
+      "track": "raised",
+      "finish": "gloss"
+    },
+    "overlays": {
+      "surface": "surface",
+      "backdrop": "text",
+      "finish": "satin",
+      "grain": "paper",
+      "depth": "high",
+      "shade": "blur",
+      "enter": "rise"
+    },
+    "menus": {
+      "surface": "surface",
+      "divider": "border",
+      "finish": "satin",
+      "depth": "mid"
+    }
+  }
+}

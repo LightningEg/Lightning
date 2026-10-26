@@ -41,6 +41,18 @@ On Linux, run `python -m lightning --profiles` from a source checkout for the
 same password-protected finance UI in a browser. The original browser workflow
 is still available with `python -m lightning`.
 
+## Change the app theme
+
+On PC or Android, open **Settings → Appearance** and choose a theme. It applies immediately;
+free and unlocked themes save automatically with the current profile and return on your next launch.
+Choose **Lightning default** to switch back. A paid theme marked **try it** is a preview until unlocked.
+
+For a purchased theme, get its one-time app code from your account on **lightningeg.com**.
+In **Settings → Appearance → Unlock a theme you bought**, choose the theme, paste the code and
+press **Unlock**. The app verifies its licence, applies it and remembers it. Each device needs its own
+app code; after unlocking, the licence is checked offline. Theme purchases must be enabled by the store
+before codes can be redeemed. Themes change appearance; all finance features remain free.
+
 ## Start the original browser version
 
 **Windows:** double-click `run.bat`. The first run sets everything up (needs Python 3.11+ from

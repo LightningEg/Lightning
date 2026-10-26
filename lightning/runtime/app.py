@@ -24,6 +24,7 @@ from .http import (MARKET_IMPORT_PATH, MAX_IMPORT_CONFIRM_BODY, MAX_IMPORT_CONFI
                    body_receiver, configure_memory_only_import_uploads, equal)
 from .devices import Devices, home_state_line, home_state_message, move_to_phone, open_move
 from .paths import choose_data_root, discover_profiles, resolve_profile
+from lightning.ui.entitlements import use_folder as use_licence_folder
 from .roles import READ_ONLY_REFUSAL, SessionRole
 
 READ_ONLY_PATH = "/__read-only"
@@ -326,6 +327,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
             root_value = request.query_params.get("root")
             if root_value:
                 session.root = choose_data_root(root_value)
+                use_licence_folder(session.root / "cosmetics")
             found = discover_profiles(session.root)
             backups = []
             for info in found:

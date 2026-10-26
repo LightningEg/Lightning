@@ -3664,3 +3664,8 @@ a.period-button { display:inline-flex; align-items:center; justify-content:cente
 .ai-export-actions form { margin:0; }
 .ai-prompt-dialog { width:min(760px,calc(100vw - 32px)); max-width:calc(100vw - 32px); }
 .ai-prompt-dialog textarea { width:100%; max-width:100%; box-sizing:border-box; }
+/* Settings › Appearance: unlock a paid theme with the code from the website (lightning/ui/entitlements.py, 8L) */
+.theme-unlock { margin-top:16px; padding-top:12px; border-top:1px solid var(--line); }
+.theme-unlock > summary { cursor:pointer; font-weight:700; color:var(--text); min-height:44px; display:flex; align-items:center; }
+.theme-unlock-form { display:grid; gap:8px; max-width:480px; }
+.theme-unlock-form .btn { justify-self:start; }
