@@ -138,3 +138,63 @@ async def saved_view(request: Request, view_id: int):
     return _csv(f"lightning-view-{view_id}.csv",
                 ("date", "reference", "type", "account", "counterparty", "category", "notes",
                  "amount", "currency", "amount_base"), rows)
+
+
+@router.get('/import')
+async def import_workbook_page(request: Request):
+    from lightning.workflows.workbook_import import SETUP_PROMPT
+    return render(request, 'exports/import.html', setup_prompt=SETUP_PROMPT)
+
+
+@router.get('/import/template')
+async def import_workbook_template(request: Request):
+    from lightning.workflows.data_export import export_all
+    from lightning.workflows.workbook_import import _unused
+    c = container(request)
+    try:
+        _unused(c)
+        data, _, media = export_all(c, 'xlsx')
+    except ValueError:
+        return Response('Download the template from a new, empty profile.', status_code=400, media_type='text/plain')
+    return Response(data, media_type=media, headers={'Content-Disposition': 'attachment; filename="lightning-onboarding-template.xlsx"', 'Cache-Control': 'no-store'})
+
+
+@router.post('/import')
+async def preview_workbook_import(request: Request):
+    import base64
+    import hashlib
+    import secrets
+    import time
+    from lightning.workflows.workbook_import import MAX_UPLOAD, SETUP_PROMPT, prepare_import, confirm_import
+    c = container(request)
+    try:
+        form = await request.form(max_part_size=MAX_UPLOAD * 2)
+        action = form.get('action', 'preview')
+        pending = getattr(request.app.state, 'workbook_import_tokens', {})
+        pending = {key: value for key, value in pending.items() if value[1] > time.monotonic()}
+        request.app.state.workbook_import_tokens = pending
+        if action == 'confirm':
+            try:
+                data = base64.b64decode(str(form.get('payload', '')), validate=True)
+            except ValueError:
+                raise ValueError('The preview expired. Upload the workbook again.') from None
+            token = str(form.get('token', ''))
+            saved = pending.pop(token, None)
+            if not saved or saved[0] != hashlib.sha256(data).hexdigest() or saved[2] != id(c.db):
+                raise ValueError('The preview expired or the file changed. Upload the workbook again.')
+            count = confirm_import(c, data)
+            return render(request, 'exports/import.html', setup_prompt=SETUP_PROMPT, imported=count)
+        upload = form.get('workbook')
+        if upload is None or not hasattr(upload, 'read'):
+            raise ValueError('Choose an Excel .xlsx workbook.')
+        data = await upload.read(MAX_UPLOAD + 1)
+        tables = prepare_import(c, data)
+        if len(pending) >= 8:
+            pending.pop(next(iter(pending)))
+        token = secrets.token_urlsafe(32)
+        pending[token] = (hashlib.sha256(data).hexdigest(), time.monotonic() + 900, id(c.db))
+        return render(request, 'exports/import.html', setup_prompt=SETUP_PROMPT,
+                      preview=[(name, len(rows)) for name, (_, rows) in tables.items()],
+                      token=token, payload=base64.b64encode(data).decode('ascii'))
+    except ValueError as exc:
+        return render(request, 'exports/import.html', setup_prompt=SETUP_PROMPT, error=str(exc), status_code=400)

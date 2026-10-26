@@ -28,7 +28,7 @@ setInterval(async () => {
   acknowledgeVisible();
   if (dirty || !initialVersion) return;
   try {
-    if (document.querySelector('[data-pairing-pending]') && token) {
+    if (document.querySelector('[data-pairing-pending]') && !document.querySelector('[data-pairing-poll]') && token) {
       const paired = await fetch('/devices/check', {method:'POST', credentials:'same-origin',
         body:new URLSearchParams({__session:token, automatic:'1'})});
       if (paired.ok && (await paired.json()).paired) { location.href='/devices'; return; }

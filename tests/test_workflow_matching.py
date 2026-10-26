@@ -19,7 +19,6 @@ def _bill(c, account_id, category_id, *, name="Bill", amount="100", due="2026-10
 
 def _usd_account(c):
     CurrencyRegistry(c.db).register("USD")
-    c.accounts.allow_foreign = True
     account = c.account_flows.open_account("Dollar bank", "BANK", "2026-09-01", "0", currency="USD")
     c.db.execute("INSERT INTO fx_rates(date,base,quote,rate_e6,source,created_at) VALUES(?,?,?,?,?,?)",
                  ("2026-09-01", "USD", "EGP", 50000000, "MANUAL", "2026-09-01T00:00:00Z"))

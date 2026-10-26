@@ -145,6 +145,8 @@ _TABLE = [
     ("per_month", "Per month", "A period's money out divided by the calendar months it covers, so a year to date "
      "compares with a single month."),
     ("usual_month", "Usual month", "The average money out of the last six earlier months, using matching calendar days for a partial period."),
+    ("usual_savings_rate", "Usual savings rate", "The average savings rate of the last six earlier whole months that had money "
+     "in; a month whose rate says nothing is left out."),
     ("usual_range", "Usual range", "The lowest, middle and highest money out of the twelve earlier months, using matching calendar days "
      "for a partial period. It needs three of them."),
     ("investing_rate", "Investing rate", "The share of what you kept (net flow) that you moved into investments. "
@@ -284,6 +286,7 @@ _SOURCES = {
     "per_month": (LEDGER, "lightning.reporting.spending.spending_profile"),
     "usual_month": (LEDGER, "lightning.reporting.spending._against_history"),
     "usual_range": (LEDGER, "lightning.reporting.spending._against_history"),
+    "usual_savings_rate": (LEDGER, "lightning.reporting.service.ReportingService.usual_savings_rate"),
     "typical_move": (LEDGER, "lightning.investments.journey.holding_history"),
     "fall_from_high": (LEDGER, "lightning.investments.journey.holding_history"),
     "investing_rate": (LEDGER, f"{INV}.investing_rate"),

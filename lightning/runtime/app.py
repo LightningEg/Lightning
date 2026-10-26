@@ -22,7 +22,7 @@ from lightning.ui.web import create_app, templates
 from .http import (MARKET_IMPORT_PATH, MAX_IMPORT_CONFIRM_BODY, MAX_IMPORT_CONFIRM_FIELDS, MAX_MARKET_IMPORT_BODY,
                    MAX_IMPORT_MAP_BODY, Credentials, Guard,
                    body_receiver, configure_memory_only_import_uploads, equal)
-from .devices import Devices, home_state_line, move_to_phone, open_move
+from .devices import Devices, home_state_line, home_state_message, move_to_phone, open_move
 from .paths import choose_data_root, discover_profiles, resolve_profile
 from .roles import READ_ONLY_REFUSAL, SessionRole
 
@@ -75,25 +75,30 @@ class SessionGate:
             finally:
                 self.app.state.container = self.session.container
 
-    def device_line(self) -> tuple[str, str]:
-        """The status line under the header while a ledger is borrowed or lent, and its action."""
+    def device_line(self) -> tuple[str, str, dict]:
+        """The status line under the header while a ledger is borrowed or lent, and its action.
+
+        The line is an i18n template; ``values`` holds the placeholders (for example ``name``).
+        """
         devices, session = getattr(self, "devices", None), self.session
         if session.journal is not None:
             runtime = session.journal
             pending = len(runtime.store.pending())
-            return (f"{pending} edits waiting for the home" if pending else "Synchronized profile", "")
+            return (f"{pending} edits waiting for the home" if pending else "Synchronized profile", "", {})
         if devices is None or session.paths is None:
-            return "", ""
+            return "", "", {}
         if session.borrowed is not None:
             if session.role.writable:
-                return f"Borrowed from {session.borrowed_home or 'your phone'}", "hand-back"
-            return "Read only on this PC: the ledger is going home or needs repair.", ""
+                if session.borrowed_home:
+                    return "Borrowed from {name}", "hand-back", {"name": session.borrowed_home}
+                return "Borrowed from your phone", "hand-back", {}
+            return "Read only on this PC: the ledger is going home or needs repair.", "", {}
         try:
             lending = devices.lending_state(session.paths)
-            line = home_state_line(devices.home_node(session.paths) if lending == "ok" else None, lending)
+            line, values = home_state_message(devices.home_node(session.paths) if lending == "ok" else None, lending)
         except Exception:  # noqa: BLE001 - an unreadable record shows as needing the Devices page
-            line = "The ledger's lending record needs checking."
-        return line, ("take-back" if line else "")
+            line, values = "The ledger's lending record needs checking.", {}
+        return line, ("take-back" if line else ""), values
 
     async def change_role(self, role) -> None:
         """Change the open profile's role between requests, never during one (multi-device task 06)."""
@@ -126,7 +131,8 @@ class SessionGate:
                 # Sync closed the ledger for a moment (a returned copy going in): wait, not the chooser.
                 return await RedirectResponse("/profiles/checking", 303)(scope, receive, send)
             if scope["method"] not in ("GET", "HEAD") and not profile_route and not self.session.role.writable:
-                line = self.device_line()[0]
+                line, _, values = self.device_line()
+                line = line.format(**values) if values else line
                 if request.headers.get("x-requested-with") == "fetch":  # an inline save shows this text as is
                     text = f"{line}. Nothing was saved." if line else READ_ONLY_REFUSAL
                     return await PlainTextResponse(text, 403)(scope, receive, send)
@@ -149,13 +155,14 @@ class SessionGate:
                     valid = False
                 if not valid:
                     return await PlainTextResponse("This form expired. Reload the page and try again.", 403)(scope, receive, send)
-            line, device_action = self.device_line()
+            line, device_action, device_values = self.device_line()
             scope.setdefault("state", {}).update(fingerprint_row=self.fingerprint_row(request.url.path),
                                                   secure_profiles=True, csrf=self.session.csrf,
                                                   phone=getattr(self, "phone", False),
                                                   session_token=self.session.token,
                                                   read_only=not self.session.role.writable,
-                                                  device_line=line, device_action=device_action)
+                                                  device_line=line, device_action=device_action,
+                                                  device_line_values=device_values)
             self.app.state.container = self.session.container
             if self.session.journal is not None and self.session.journal.task is None:
                 self.session.journal.start(self, files_dir=self.session.root.parent if getattr(self, "phone", False) else None)
@@ -742,6 +749,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     async def connect(request: Request):
         from lightning.sync.identity import normalize_code
         from lightning.sync.service import LinkDown
+        from lightning.runtime.paths import borrowed_profile
         from lightning.sync.transport import join_home, pair
         if session.container:
             return RedirectResponse("/profiles", 303)
@@ -755,7 +763,8 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
                 raise ValueError("Name this PC, so the phone can show it.")
             identity = devices.identity(pc_name)
             paired = await asyncio.to_thread(pair, address, code, identity)
-            node = await asyncio.to_thread(join_home, paired, endpoint=address, identity=identity, root=devices.root)
+            node = await asyncio.to_thread(join_home, paired, endpoint=address, identity=identity,
+                                          borrowed_profile=borrowed_profile, root=devices.root)
         except (ProfileError, ValueError) as exc:
             return page(request, "connect", error=str(exc), status=400, **values)
         except (LinkDown, ProtocolError) as exc:

@@ -1,7 +1,7 @@
 """Which POST routes of the app work on a journal profile (J6f)?
 
 Static inventory: for every POST route of `create_app`, the container calls its handler makes (following
-helpers in the same routes module, or another routes module), each classed as a write by its name's verb (else a read); a write is
+helpers in the same routes module, another routes module, or a workflow in FOLLOWED), each classed as a write by its name's verb (else a read); a write is
 covered when a registered journal command (`sync/journal/commands.py`) names that service method.
 Prints Markdown to stdout. `--check` exits 1 if a route listed in `tools/journal_coverage_allow.txt` is no
 longer covered. Heuristic: only calls on `c` / `container(request)` are seen, not on values derived from them.
@@ -61,6 +61,11 @@ ROUTE_COMMANDS = {
 }
 
 
+# Workflow modules whose functions a route hands its form to, followed like route helpers. Following every
+# workflow would also reclassify the price routes (live_prices, market_prices); that is for the journal's owner.
+FOLLOWED = ("lightning.ui.routes", "lightning.workflows.investment_entry")
+
+
 def covered_calls() -> set[str]:
     from lightning.sync.journal.commands import COMMANDS
     return ({entry.call for entry in COMMANDS.values() if type(entry.call) is str}
@@ -103,7 +108,7 @@ def _is_container(node, aliases):
 
 
 def _helper(func, owner):
-    """The routes-module function a call names (same module, or `module.name`), else None."""
+    """The routes-module (or FOLLOWED workflow) function a call names (same module, or `module.name`), else None."""
     namespace = vars(sys.modules[owner.__module__])
     if isinstance(func, ast.Name):
         target = namespace.get(func.id)
@@ -111,7 +116,7 @@ def _helper(func, owner):
         target = getattr(namespace.get(func.value.id), func.attr, None)
     else:
         return None
-    return target if inspect.isfunction(target) and target.__module__.startswith("lightning.ui.routes") else None
+    return target if inspect.isfunction(target) and target.__module__.startswith(FOLLOWED) else None
 
 
 def calls_of(function, modules, seen=None):

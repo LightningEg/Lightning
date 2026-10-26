@@ -170,28 +170,6 @@ def at_cost(items: list[dict]) -> dict | None:
                 "/investments/prices", "Update prices", label="Holdings valued at cost", figure=str(len(items)))
 
 
-def lowest_point(forecast) -> dict | None:
-    low = forecast.lowest
-    if low is None:
-        return None
-    if low.closing < 0:
-        return note("attention", f"Cash may run short in {low.month}", "The lowest point in the next three months.",
-                    "#plan-forecast", "See the forecast", label=f"Cash may run short · {low.month}", figure=fmt(low.closing))
-    return note("good", f"Lowest point: {fmt(low.closing)}", "Your cash at its lowest in the next three months.",
-                "#plan-forecast", "See the forecast", label=f"Lowest point · {low.month}", figure=fmt(low.closing))
-
-
-def next_payment(payments: list) -> dict | None:
-    upcoming = [p for p in payments if not p.item.is_income]
-    if not upcoming:
-        return None
-    p = upcoming[0]
-    return note("attention" if p.status.value == "DUE" else "info",
-                f"{p.item.name}: {fmt(p.amount)} {'due since' if p.status.value == 'DUE' else 'due'} {p.due_date}",
-                "Next payment going out.", f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2Fplan", "Mark paid", popup=True,
-                label=f"{p.item.name} · {'due since' if p.status.value == 'DUE' else 'due'} {p.due_date}", figure=fmt(p.amount))
-
-
 def emergency(fund) -> dict | None:
     """How long the emergency fund lasts, in months of the average Settings › Budget names."""
     months = fund.months
@@ -203,34 +181,6 @@ def emergency(fund) -> dict | None:
     of = FIGURES[fund.figure].label
     return note(tone, f"Emergency fund covers {months:.1f} months", f"Of {of[0].lower() + of[1:]}. The aim is six.",
                 label="Emergency fund covers", figure=f"{months:.1f} months")
-
-
-def largest_part(donut: dict, what: str, href: str = "") -> dict | None:
-    segments = donut.get("segments") or []
-    if not segments:
-        return None
-    top = max(segments, key=lambda s: s["value"])
-    return note("info", f"{top['label']} is {top['share']:.0f}% of {what}", f"{fmt(top['value'])} of {fmt(donut['total'])}.",
-                href, "See it" if href else "", label=f"{top['label']} · share of {what}", figure=f"{top['share']:.0f}%")
-
-
-def sale_cost(position) -> dict | None:
-    held = position.holdings_value
-    if not held or position.unvalued:
-        return None
-    cost = held - position.holdings_after_sale
-    return note("info", f"Selling everything would cost about {fmt(cost)}",
-                "What your sale factors expect to lose against today's value.",
-                label="Cost of selling everything (estimate)", figure=fmt(cost))
-
-
-def cash_share(position) -> dict | None:
-    if not position.what_you_own or position.what_you_own <= 0:
-        return None
-    share = position.cash_you_own / position.what_you_own * 100
-    text = f"{fmt(position.cash_you_own)} is ready to use; {fmt(position.free_cash)} of it is free cash." if position.free_cash is not None else f"{fmt(position.cash_you_own)} is ready to use."
-    return note("good" if share >= 10 else "attention", f"{share:.0f}% of what you own is cash", text, "/plan/reserves", "See cash",
-                label="Cash · share of what you own", figure=f"{share:.0f}%")
 
 
 def loans_summary(loans: list[dict]) -> dict | None:

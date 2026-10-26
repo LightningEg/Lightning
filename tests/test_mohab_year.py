@@ -945,7 +945,7 @@ def test_investments_lead_with_the_periods_result(mohab):
 
 def test_data_checks_pass_after_setup(mohab):
     assert route(mohab, "checks") == ["/", "/settings", "/checks"]
-    assert mohab.answers["checks"].shows("Passed 9 Needs attention 0")
+    assert mohab.answers["checks"].shows("Passed 5 Needs attention 0")
 
 
 def test_adding_an_investment_confirms_it_by_name(mohab):
@@ -1233,11 +1233,13 @@ def test_the_years_investments(mohab):
     # 1,025 from the sale + 225 price change + 300 dividends + 12 × 1,833.33 of certificate interest
     assert mohab.answers["year_investing"].shows("2026-10-01 to 2027-09-30", "+23,550 Net gain or loss")  # the Lead (3.33)
     # The interest lands on CIB Payroll from NBE, the certificate's bank, and is still the certificate's return.
-    assert mohab.answers["flat"].shows("1 certificate Set", "100,000 100,000 100,000 100,000 17.5% +27,500 +27.5% +24.6%")
+    assert mohab.answers["flat"].shows("100,000 100,000 +27,500 +27.5%")
+    holdings = mohab.answers["flat"].screen.html.split('id="holdings-table"', 1)[1].split('</table>', 1)[0]
+    assert '<small' not in holdings and 'data-horizon-edit' not in holdings
 
 
 def test_data_checks_pass_after_a_year(mohab):
-    assert mohab.answers["year_checks"].shows("Passed 9 Needs attention 0")
+    assert mohab.answers["year_checks"].shows("Passed 5 Needs attention 0")
 
 
 def test_cash_ownership_and_external_expense_keep_the_account_total(mohab):
@@ -1322,7 +1324,7 @@ def test_the_savings_rate_for_all_time(mohab):
 
 def test_the_overview_says_which_parts_follow_the_period(mohab):
     answer = mohab.answers["past_month"]
-    assert answer.shows("Cash flow 2026-10-01 to 2026-10-31", "Month by month 2026-07 to today")
+    assert answer.shows("Your position", "As of 2026-10-31")  # the flows and Month by month moved to Spending (owner, 2026-10-21)
 
 
 def test_your_position_follows_the_period_end(mohab):
@@ -1331,7 +1333,7 @@ def test_your_position_follows_the_period_end(mohab):
 
 
 def test_where_money_went_folds_small_categories_into_other(mohab):
-    assert mohab.answers["year"].shows("Other")
+    assert mohab.answers["year_spending"].shows("Where money in went", "Other")  # on Spending (owner, 2026-10-21)
 
 
 def test_a_month_of_spending_is_shown_day_by_day(mohab):
@@ -1452,14 +1454,14 @@ def test_settings_prepares_one_owned_ai_analysis_workbook(mohab):
 
     screen = mohab.b.go("Settings")
     assert screen.shows("Your data", "Export for AI", "All time", "YTD", "Monthly", "Custom",
-                        "Prepare AI analysis", "Prompt for your AI tool", "Copy prompt")
+                        "Export for AI analysis", "Copy AI prompt", "Edit AI prompt")
     screen = mohab.b.submit(button="All time", action=r"/settings$")
     assert screen.shows("2026-07-01 to 2027-09-30", "transactions", "investment records")
     prompt = screen.html.split('data-ai-prompt', 1)[1].split('>', 1)[1].split('</textarea>', 1)[0]
     prompt = prompt.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
     assert "lightning-analysis-2026-07-01-to-2027-09-30.xlsx" in prompt
     assert "Categories used in the exported activity" in prompt
-    form = screen.form(button="Prepare AI analysis", action=r"/settings/ai-analysis")
+    form = screen.form(button="Export for AI analysis", action=r"/settings/ai-analysis")
     response = mohab.b.client.post(form.action, data=form.fields)
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
@@ -1470,7 +1472,7 @@ def test_settings_prepares_one_owned_ai_analysis_workbook(mohab):
         assert [sheet.attrib["name"] for sheet in root.findall(f".//{{{xml}}}sheet")] == [
             "Summary", "Transactions", "Investment ledger", "Categories"]
         transaction_sheet = ET.fromstring(workbook.read("xl/worksheets/sheet2.xml"))
-        roles = {row.findall(f"{{{xml}}}c")[6].find(f"{{{xml}}}is/{{{xml}}}t").text
+        roles = {row.findall(f"{{{xml}}}c")[12].find(f"{{{xml}}}is/{{{xml}}}t").text
                  for row in transaction_sheet.findall(f".//{{{xml}}}row")[1:]
                  if len(row.findall(f"{{{xml}}}c")) > 6}
         assert {"transfer", "refund", "investment contribution", "investment sale", "dividend",
@@ -1504,9 +1506,9 @@ def test_a_figure_reads_the_same_on_every_tab(mohab, period):
     money_in = {"Overview": _figure(overview, r"<summary><span>Money in</span><b>([^<]+)</b>"),
                 "Investments": _figure(flat(investments), r"Money in ([\d,]+)")}
     assert len({money(v) for v in money_in.values() if v}) == 1, money_in
-    savings = {"Overview": _figure(overview, r'aria-label="Savings rate".*?stat-tile-value[^>]*>(.*?)</span>'),
+    savings = {"Overview": _figure(overview, r'<span class="kc-label">Savings rate</span>.*?class="kc-figure[^"]*">(.*?)</span>'),
                "Investments": _figure(flat(investments), r"Savings.*? ([\d.,−—-]+ ?%?) Savings rate")}
-    assert len({v.replace(" ", "").rstrip("%") for v in savings.values() if v}) == 1, savings
+    assert len({v.replace(" ", "").rstrip("%") for v in savings.values() if v}) <= 1, savings  # one home now (3.33)
     gain = {"Overview": _figure(overview, r"<span>Net gain or loss</span><b[^>]*>([^<]+)</b>"),
             "Investments": _figure(investments, r'class="lead-compare"><b[^>]*>([^<]+)</b>')}  # the Lead's comparison (3.33)
     assert len({v.strip() for v in gain.values() if v}) == 1, gain

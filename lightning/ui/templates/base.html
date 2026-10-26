@@ -1,6 +1,7 @@
 {# On the phone app the same pages render in the phone frame (guideline Part C): phone/base.html. #}{% if request.state.phone|default(false) %}{% extends "phone/base.html" %}{% endif %}{% if not request.state.phone|default(false) %}<!doctype html>
 <html lang="{{ 'ar-EG' if locale == 'ar' else 'en' }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}"{% if privacy_on(request) %} class="privacy"{% endif %}>
 <head>
+  {% include "partials/theme_head.html" %}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   {% if request.state.secure_profiles|default(false) %}<meta name="lightning-session" content="{{ request.state.session_token|default('') }}">{% endif %}
@@ -8,8 +9,13 @@
   <link rel="icon" type="image/svg+xml" href="/static/lightning-mark.svg">
   <link rel="stylesheet" href="/static/fonts/fonts.css?v=2">
   {# Bricolage Grotesque and Manrope (guideline A06) are bundled in fonts.css: no outside request, in every mode. #}
-  <link rel="stylesheet" href="/static/style{{ '.rtl' if locale == 'ar' else '' }}.css?v=94">
-<script nonce="{{ request.state.csp_nonce|default('') }}">window.LIGHTNING_UI={{ arabic_translations|tojson }};window.lightningT=(text,values)=>{const raw=String(text);let out=window.LIGHTNING_UI[raw];if(!out){for(const [pattern,translated] of Object.entries(window.LIGHTNING_UI)){if(!pattern.includes('{'))continue;const names=[...pattern.matchAll(/\{([a-z_]+)\}/g)].map(m=>m[1]);const parts=pattern.split(/\{[a-z_]+\}/g).map(part=>part.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));const match=new RegExp('^'+parts.join('(.+?)')+'$').exec(raw);if(match){out=translated;names.forEach((name,i)=>out=out.replaceAll(`{${name}}`,match[i+1]));break;}}}out=out||raw;for(const [key,value] of Object.entries(values||{}))out=out.replaceAll(`{${key}}`,String(value));return out;};</script>
+  <link rel="stylesheet" href="/static/style{{ '.rtl' if locale == 'ar' else '' }}.css?v=96">
+  <link rel="stylesheet" href="/static/themes.generated.css?v=2">
+  <link rel="stylesheet" href="/static/theme-surfaces.css?v=2">
+  <link rel="stylesheet" href="/static/theme-decor.css?v=1">
+  <link rel="stylesheet" href="/static/visual-flow.css?v=1">
+{% if arabic_ui_src %}<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ arabic_ui_src }}"></script>{% endif %}
+<script nonce="{{ request.state.csp_nonce|default('') }}">window.LIGHTNING_UI=window.LIGHTNING_UI||{{ arabic_translations|default({})|tojson }};window.lightningT=(text,values)=>{const raw=String(text);let out=window.LIGHTNING_UI[raw];if(!out){for(const [pattern,translated] of Object.entries(window.LIGHTNING_UI)){if(!pattern.includes('{'))continue;const names=[...pattern.matchAll(/\{([a-z_]+)\}/g)].map(m=>m[1]);const parts=pattern.split(/\{[a-z_]+\}/g).map(part=>part.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));const match=new RegExp('^'+parts.join('(.+?)')+'$').exec(raw);if(match){out=translated;names.forEach((name,i)=>out=out.replaceAll(`{${name}}`,match[i+1]));break;}}}out=out||raw;for(const [key,value] of Object.entries(values||{}))out=out.replaceAll(`{${key}}`,String(value));return out;};</script>
 </head>
 <body data-base-currency="{{ base }}">
 <div class="shell">
@@ -61,9 +67,9 @@
   <main class="main">
     <div class="topbar">{% set back = back_url(request) %}{% if back %}<a class="btn page-back" href="{{ back }}" aria-label="Back to the page you came from"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>{{ 'Back'|tr(locale) }}</a>{% endif %}<div class="topbar-main">{% block heading %}{% endblock %}</div><div class="actions">{% include "partials/history.html" %}{% block top_actions %}{% endblock %}</div></div>
     {% include "partials/section_tabs.html" %}
-    {% if request.state.device_line|default('') %}<div class="flash device-line" role="status"><span>{{ request.state.device_line|tr(locale) }}</span>{% if request.state.device_action == 'hand-back' %}<form method="post" action="/sync/hand-back"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn primary" type="submit">{{ 'Hand back'|tr(locale) }}</button></form>{% elif request.state.device_action == 'take-back' %}<a class="btn" href="/profiles/devices">{{ 'Devices'|tr(locale) }}</a>{% endif %}</div>{% endif %}
+    {% if request.state.device_line|default('') %}<div class="flash device-line" role="status"><span>{{ request.state.device_line|tr(locale, request.state.device_line_values) }}</span>{% if request.state.device_action == 'hand-back' %}<form method="post" action="/sync/hand-back"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn primary" type="submit">{{ 'Hand back'|tr(locale) }}</button></form>{% elif request.state.device_action == 'take-back' %}<a class="btn" href="/profiles/devices">{{ 'Devices'|tr(locale) }}</a>{% endif %}</div>{% endif %}
     {% if msg %}<div class="flash" role="status" aria-live="polite" aria-atomic="true">{{ msg|tr(locale) }}</div>{% endif %}
-    {% if error %}<div class="flash error" role="alert" aria-live="assertive" aria-atomic="true">{{ error|tr(locale) }}</div>{% endif %}
+    {% if error and not hide_global_error|default(false) %}<div class="flash error" role="alert" aria-live="assertive" aria-atomic="true">{{ error|tr(locale) }}</div>{% endif %}
     {% include "partials/checked_history.html" %}
     {% block content %}{% endblock %}
   </main>
@@ -86,7 +92,7 @@
 <button id="page-jump" class="page-jump" type="button" hidden aria-label="Go to end of page" title="Go to end of page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6M6 4l6 6 6-6M5 20h14"/></svg></button>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/arabic-numbers.js?v=6"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/info-tips.js?v=1"></script>
-<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/app.js?v=43"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/app.js?v=44"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/ai-handoff.js?v=2" defer></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}">(()=>{const section=document.getElementById('sidebar-accounts'),mobile=window.matchMedia('(max-width: 900px)');if(!section)return;const sync=()=>{section.open=!mobile.matches};sync();mobile.addEventListener('change',sync)})();</script>
 {% if request.state.secure_profiles|default(false) %}<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/session.js?v=4"></script>{% endif %}

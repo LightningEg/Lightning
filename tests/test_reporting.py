@@ -62,23 +62,6 @@ def test_money_from_others_is_deducted_and_reconciles_bridge(setup, c):
     assert bridge.difference == 0
 
 
-def test_owned_wealth_breakdown_allocates_custody_deduction_to_cash_class(setup, c):
-    from lightning.ui.routes.dashboard import _owned_wealth_rows
-
-    accounts, cats = setup
-    c.transactions.record_inflow("2026-09-20", accounts["cib"].id, "1000", cats["EXP.WORK.SALARY"].id)
-    c.money_from_others.record("2026-09-20", "Dad", accounts["cib"].id, Decimal("1000"))
-    net_worth = c.reporting.net_worth("2026-09-30")
-
-    rows = _owned_wealth_rows(c, net_worth, "2026-09-30")
-    values = {row["code"]: row["value"] for row in rows}
-    percentages = sum((row["percentage"] for row in rows), ZERO)
-
-    assert values["CASH"] == Decimal("51200")
-    assert sum(values.values(), ZERO) == net_worth.total
-    assert percentages == Decimal("100")
-
-
 def test_sidebar_separates_gross_account_balances_from_what_you_own(setup, c):
     accounts, cats = setup
     c.transactions.record_inflow("2026-09-20", accounts["cib"].id, "1000", cats["EXP.WORK.SALARY"].id)

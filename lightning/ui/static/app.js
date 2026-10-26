@@ -18,7 +18,7 @@ const initFlashMessages = (root = document, refresh = false) => {
     const prior = flashTimers.get(flash);
     if (prior) clearTimeout(prior);
     flashTimers.delete(flash);
-    if (isError || !flash.textContent.trim()) return;
+    if (isError || !flash.textContent.trim() || flash.classList.contains("device-line")) return;
     // Only newly inserted or explicitly refreshed messages get a fresh timer.
     if (!refresh && flash.dataset.flashReady) return;
     flash.dataset.flashReady = "1";
@@ -431,12 +431,16 @@ window.askChoice = ({ title, message = "", choices }) => new Promise((resolve) =
 // For a submit handler: stop this submit, ask, and send the same form (and button) again on yes.
 window.confirmSubmit = (() => {
   const passed = new WeakSet();
+  const asking = new WeakSet();
   return (event, options) => {
     const form = event.target;
     if (passed.has(form)) return true;
     event.preventDefault(); event.stopImmediatePropagation();
+    if (asking.has(form)) return false;
+    asking.add(form);
     const submitter = event.submitter?.form === form ? event.submitter : undefined;
     (typeof options === "string" ? window.askFrom(options) : window.ask(options)).then((yes) => {
+      asking.delete(form);
       if (!yes) return;
       passed.add(form);
       try { form.requestSubmit(submitter); } finally { passed.delete(form); }
@@ -735,8 +739,18 @@ document.addEventListener("pointerdown", (event) => {
 // Keep repeated Enter presses from posting the quick-add form twice.
 document.addEventListener("submit", (event) => {
   const form = event.target;
-  if (form.matches("[data-confirm-delete]") && !window.confirmSubmit(event,
-    form.dataset.confirmDelete || "Delete this transaction? You can restore it from its history page.")) return;
+  const confirmHost = form.matches("[data-confirm-delete]")
+    ? form
+    : event.submitter?.matches("[data-confirm-delete]")
+      ? event.submitter
+      : null;
+  if (confirmHost) {
+    const ids = new Set(new FormData(form).getAll("txn_ids"));
+    const options = ids.size ? { title: t("Delete {count} transactions?", {count: ids.size.toLocaleString(document.documentElement.lang)}),
+      message: t("You can restore them from transaction history."), tone: "danger", ok: t("Delete") }
+      : confirmHost.dataset.confirmDelete || "Delete this transaction? You can restore it from its history page.";
+    if (!window.confirmSubmit(event, options)) return;
+  }
   if (!(form.matches("#f-new, #f-edit, .investment-entry-form"))) return;
   if (form.dataset.submitting === "true") { event.preventDefault(); return; }
   form.dataset.submitting = "true";
@@ -751,13 +765,17 @@ const phoneBulk = document.getElementById("phone-bulk");
 if (phoneBulk) {
   const boxes = [...document.querySelectorAll('.transaction-select[form="phone-bulk"]:not(:disabled)')];
   const all = document.getElementById("phone-select-visible");
+  const phoneCount = phoneBulk.querySelector(".phone-select-count");
   const updateMerge = () => {
     const ids = [...new Set(boxes.filter((box) => box.checked && !box.disabled).map((box) => box.value))];
+    const count = phoneBulk.querySelector(".phone-select-count");
+    if (count) count.textContent = t("{count} selected", {count: ids.length.toLocaleString(document.documentElement.lang)});
     if (phoneMerge) {
       phoneMerge.hidden = ids.length !== 2;
       if (ids.length === 2) phoneMerge.href = `/transactions/merge?keep=${encodeURIComponent(ids[0])}&drop=${encodeURIComponent(ids[1])}`;
     }
     phoneBulk.querySelectorAll("button").forEach((button) => { button.disabled = ids.length === 0; });
+    if (phoneCount) phoneCount.textContent = t("{count} selected", {count: ids.length.toLocaleString(document.documentElement.lang)});
     if (all) {
       all.checked = boxes.length > 0 && boxes.every((box) => box.checked);
       all.indeterminate = ids.length > 0 && !all.checked;
@@ -848,7 +866,9 @@ if (ledger) {
   if (editForm && editRow) {
     let decided = false;
     let asking = false;
+    let bulkSaving = false;
     editForm.addEventListener("submit", (event) => {
+      if (bulkSaving) { event.preventDefault(); event.stopImmediatePropagation(); return; }
       if (decided) return;
       const ticked = selectedIds();
       const ids = ticked;
@@ -883,8 +903,26 @@ if (ledger) {
         ids.forEach((id) => add("txn_ids", id));
         changed.forEach((name) => add(name, value(name)));
         if (changed.includes("category")) add("category_choice", value("category_choice"));
-        writeSel([]);
-        document.body.append(form); form.submit();
+        // Keep the editor and selection in place until the server confirms the whole batch.
+        bulkSaving = true;
+        editForm.dataset.submitting = "true";
+        const notice = document.getElementById("bulk-edit-error") || document.createElement("div");
+        notice.id = "bulk-edit-error"; notice.className = "flash error"; notice.setAttribute("role", "alert");
+        notice.remove();
+        fetch(form.action, { method: "POST", body: new FormData(form),
+          headers: { "Accept": "application/json", "X-Requested-With": "fetch" } }).then(async (response) => {
+          // Session/journal middleware may redirect to its own explanation.
+          if (response.redirected) { location.assign(response.url); return; }
+          const result = await response.json();
+          if (!response.ok || result.error) throw new Error(result.error || t("Could not save"));
+          writeSel([]);
+          location.assign(result.location);
+        }).catch((error) => {
+          notice.textContent = error.message === "Failed to fetch" || error instanceof SyntaxError
+            ? t("Could not confirm this change. Check the register before trying again.") : t(error.message);
+          document.querySelector(".ledger").before(notice);
+          notice.scrollIntoView({block: "nearest"});
+        }).finally(() => { bulkSaving = false; delete editForm.dataset.submitting; });
       });
     }, true);
   }
@@ -2102,7 +2140,7 @@ document.querySelectorAll("[data-currency-search]").forEach((search) => {
   if (success) {
     sessionStorage.removeItem("lightning-popup-success");
     // Confirm what the popup just did, even on pages that had no message of their own.
-    let flash = document.querySelector(".flash:not(.error)");
+    let flash = document.querySelector(".flash:not(.error):not(.device-line)");
     if (!flash) {
       flash = document.createElement("div");
       flash.className = "flash";
@@ -2110,7 +2148,9 @@ document.querySelectorAll("[data-currency-search]").forEach((search) => {
       const topbar = document.querySelector("main .topbar");
       if (topbar) topbar.after(flash); else document.querySelector("main")?.prepend(flash);
     }
-    flash.textContent = success;
+    // Phone notices carry Undo beside their message; retain that action.
+    const message = flash.matches(".phone-flash") ? flash.querySelector(":scope > span") : flash;
+    (message || flash).textContent = success;
     initFlashMessages(flash, true);
   }
   if (new URLSearchParams(location.search).get("popup") === "1" && location.pathname.startsWith("/transactions/")) {

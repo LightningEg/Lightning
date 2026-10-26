@@ -55,6 +55,12 @@ def test_register_a_currency_save_a_rate_and_open_a_foreign_account(devices):
 
 def test_convert_with_a_fee_then_edit_the_conversion(devices):
     hd, pc = devices
+    # Fund the conversion and its fee without borrowing from the bank.
+    funding = hd.command("transactions.record_inflow", date="2026-09-01",
+                         account_id=uid(hd, "accounts", account(hd, "Bank").id), amount="5000",
+                         category_id=uid(hd, "categories", hd.c.categories.get_by_code("EXP.WORK.SALARY").id),
+                         counterparty="", notes="Conversion funding", owner_id=None)
+    settle(hd, pc, funding)
     dollars = usd_setup(hd, pc)
     bank = uid(pc, "accounts", account(pc, "Bank").id)
     convert = pc.command("transactions.record_conversion", date="2026-09-02", from_account_id=bank, to_account_id=dollars,

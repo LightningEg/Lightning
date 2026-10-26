@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import contextvars
+import hashlib
+import json
 import logging
 from datetime import timedelta
 
@@ -12,7 +14,7 @@ from pathlib import Path
 from urllib.parse import parse_qsl, quote, urlencode, urlsplit
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from jinja2 import pass_context
@@ -30,6 +32,7 @@ from lightning.core.memo import request_cache
 from lightning.core.money import ZERO, fmt, quantize, to_decimal
 from lightning.workflows import live_prices
 from lightning.ui import charts, sections
+from lightning.ui.themes import theme_id
 from lightning.ui.i18n import BROWSER_UI, localize_html, localized_figures, translate
 
 UI_DIR = Path(__file__).parent
@@ -105,11 +108,23 @@ def _keep_dates(text) -> Markup:
     return Markup(re.sub(r"\b(\d{4}-\d{2}(?:-\d{2})?)\b", r'<span class="nowrap">\1</span>', str(escape(text))))
 
 
+def _tr_filter(text, locale="en", values=None, **kwargs):
+    # Explicit mappings carry user data (device names), which must stay literal.
+    # Existing keyword-only calls retain translation of system labels.
+    if values:
+        merged = dict(values)
+        merged.update(kwargs)
+        return translate(text, locale).format(**merged)
+    merged = dict(values or {})
+    merged.update(kwargs)
+    return translate(text, locale, **merged)
+
+
 templates.env.filters["money"] = _money
 templates.env.filters["amount_role"] = _amount_role
 templates.env.filters["rate"] = _rate
 templates.env.filters["whole"] = lambda value: fmt(Decimal(value), 0)  # half-up like money, never banker's
-templates.env.filters["tr"] = translate
+templates.env.filters["tr"] = _tr_filter
 
 
 def _tagged(text) -> Markup:
@@ -400,15 +415,21 @@ def _render_page(request, name, status_code, c, total, owned_total, groups, cont
     return response
 
 
+# The browser half of the Arabic table, served once as a cached script instead of inside every Arabic page (3AC).
+_ARABIC_UI_JS = ("window.LIGHTNING_UI=" + json.dumps(BROWSER_UI, ensure_ascii=False, sort_keys=True) + ";").encode("utf-8")
+ARABIC_UI_SRC = "/static/ui-ar.js?v=" + hashlib.sha256(_ARABIC_UI_JS).hexdigest()[:12]
+
+
 def _template_response(request, name, status_code, c, locale, total, owned_total, groups, context):
     response = templates.TemplateResponse(
         request,
         name,
         {
             "base": c.base_currency,
+            "app_theme": theme_id(c.settings.get("appearance_theme")),
             "locale": locale,
             "fig": localized_figures(locale),
-            "arabic_translations": BROWSER_UI if locale == "ar" else {},
+            "arabic_ui_src": ARABIC_UI_SRC if locale == "ar" else "",
             "today": fmt_date(today()),
             "this_month": month_of(today()),
             "path": request.url.path,
@@ -445,6 +466,13 @@ PERIOD_KEYS = ("period", "month", "date_from", "date_to")
 PERIOD_COOKIE = "lightning_period"
 
 
+NOT_USER_ACTIONS = frozenset({"history", "demo", "sample", "exports"})
+ACTION_LABELS = {"accounts": "Account changes", "transactions": "Transaction changes", "plan": "Payment plan changes",
+                 "reserves": "Reserve changes", "budget": "Budget changes", "imports": "Statement import",
+                 "bank-imports": "Statement import", "sms": "SMS review", "rules": "Rule changes",
+                 "money-from-others": "Money held for others"}
+
+
 class RequestCache:
     """Each request computes a repeated figure once (``lightning.core.memo``); a write empties it."""
 
@@ -456,17 +484,12 @@ class RequestCache:
         if current is None:
             return await self.app(scope, receive, send)
         with request_cache(current.db):
-            path = scope.get("path", "")
-            roots = {"accounts", "transactions", "plan", "loans", "reserves", "budget", "rules", "categories",
-                     "counterparties", "imports", "bank-imports", "sms", "investments", "deposits", "gameya",
-                     "zakat", "activity", "payday", "views", "review", "reminders", "reimbursements",
-                     "setup", "physical-items", "settings", "people"}
-            if scope.get("method") == "POST" and path.strip("/").split("/")[0] in roots:
+            root = scope.get("path", "").strip("/").split("/")[0]
+            # Every write is one undoable action (2H), except Undo/Redo themselves, the demo and sample loaders
+            # (they fill an empty profile) and exports (they only read).
+            if scope.get("method") not in ("GET", "HEAD") and root not in NOT_USER_ACTIONS:
                 from lightning.undo import user_action
-                labels = {"accounts": "Account changes", "transactions": "Transaction changes", "plan": "Payment plan changes",
-                          "reserves": "Reserve changes", "budget": "Budget changes", "imports": "Statement import",
-                          "bank-imports": "Statement import", "sms": "SMS review", "rules": "Rule changes"}
-                with user_action(labels.get(path.strip("/").split("/")[0], "Saved changes")):
+                with user_action(ACTION_LABELS.get(root, "Saved changes")):
                     status = 500
                     async def action_send(message):
                         nonlocal status
@@ -535,6 +558,10 @@ def create_app(c: Container | None = None) -> FastAPI:
         except ValidationError as error:
             return JSONResponse({"error": error.message})
         return JSONResponse({"value": format(value.normalize(), "f")})
+
+    @app.get("/static/ui-ar.js", include_in_schema=False)
+    async def arabic_ui_script():
+        return Response(_ARABIC_UI_JS, media_type="text/javascript; charset=utf-8")
 
     app.mount("/static", StaticFiles(directory=str(UI_DIR / "static")), name="static")
     for module in (dashboard, financial_health, accounts, deposits, gameya, bank_imports, birdview, transactions, budget, investments, physical_items, planning, payday, reimbursements, reserves, history, activity, merge, weekly, integrity, counterparties, categories, rules, settings, search, exports, sms, zakat):

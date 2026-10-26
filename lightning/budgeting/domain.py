@@ -58,12 +58,6 @@ class BudgetLine:
         return None if self.budget is None else self.budget + self.opening_carryover
 
     @property
-    def used_pct(self) -> int | None:
-        if not self.available:
-            return None
-        return int((self.planned_actual / self.available * 100).to_integral_value())
-
-    @property
     def over(self) -> bool:
         return self.available is not None and self.planned_actual > self.available
 

@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from dataclasses import asdict, replace
 from decimal import Decimal
+import hashlib
+import json
 
 from lightning.accounts.domain import Account, AccountType
 from lightning.accounts.service import AccountService
@@ -17,9 +19,9 @@ from lightning.categories.domain import Direction, Movement
 from lightning.categories.service import CategoryService
 from lightning.counterparties import CounterpartyService
 from lightning.core.dates import fmt_date, parse_date, today
-from lightning.core.errors import NotFoundError, ValidationError
-from lightning.core.ledger import Effect, PostingLine, validate_posting
-from lightning.core.money import ONE, ZERO, check_places, fmt, to_decimal
+from lightning.core.errors import LightningError, NotFoundError, ValidationError
+from lightning.core.ledger import Effect, PostingLine, split_line_e6, validate_posting
+from lightning.core.money import ONE, ZERO, check_places, fmt, from_e6, to_decimal, to_e6
 from lightning.core.refs import DOC_LABELS, DocType, format_ref, ref_prefix
 from lightning.database.audit import AuditLog
 from lightning.database.connection import Database
@@ -31,7 +33,6 @@ from .repository import TransactionRepository
 from .tags import normalize as normal_tag, tags_in
 
 EDITABLE_TYPES = {DocType.IN, DocType.OUT, DocType.TRF}
-CASH_CHECKED_TYPES = {DocType.IN, DocType.OUT, DocType.TRF}  # whose cash may not go below zero (2E3)
 
 
 class TransactionService:
@@ -272,14 +273,73 @@ class TransactionService:
         """Assign the transaction's selected owner to each of its ledger lines."""
         txn = self.get(txn_id)
         proposed = [replace(line, owner_id=owner_id) for line in txn.lines]
-        self._validate_owner_balances(proposed, txn.date, exclude_txn_id=txn_id,
-                                     force_brokerage_cash=txn.type == DocType.BUY)
         with self.db.transaction():
+            self._refuse_linked_loan_edit(txn, txn.date, proposed)
+            self._validate_owner_balances(proposed, txn.date, exclude_txn_id=txn_id,
+                                         force_brokerage_cash=txn.type == DocType.BUY,
+                                         extra_keys=self._affected_owner_keys(txn.lines + proposed,
+                                             force_brokerage_cash=txn.type == DocType.BUY))
             self.db.execute("UPDATE ledger_entries SET owner_id=? WHERE transaction_id=?", (owner_id, txn_id))
             updated = self.get(txn_id)
             self.audit.record("transaction", txn_id, "edit", f"Changed owner on {txn.ref}",
                               before=self._snapshot(txn), after=self._snapshot(updated))
         return self.get(txn_id)
+
+    def mark_line_owner(self, txn_id: int, account_id: int, asset_id: int, quantity_e6: int,
+                        owner_id: int) -> bool:
+        """Mark ``quantity_e6`` (signed micro-units) of the transaction's first unowned line on this account and asset,
+        with the same sign, as held for ``owner_id``. A part splits the line in two (2G3); returns False when no
+        such line is left. Validated and audited like any other edit."""
+        current = self.get(txn_id)
+        if current.is_void:
+            raise ValidationError("Restore this transaction before editing it.")
+        index = next((i for i, line in enumerate(current.lines)
+                      if line.account_id == account_id and line.asset_id == asset_id and line.owner_id is None
+                      and to_e6(line.quantity) * quantity_e6 > 0), None)
+        if index is None:
+            return False
+        cleared = {row["id"]: row["cleared"] for row in self.db.all(
+            "SELECT id,cleared FROM ledger_entries WHERE transaction_id=?", (txn_id,))}
+        lines = [PostingLine(account_id=ln.account_id, asset_id=ln.asset_id, quantity=ln.quantity, effect=ln.effect,
+                             unit_price=ln.unit_price, fx_rate=ln.fx_rate, category_id=ln.category_id, memo=ln.memo,
+                             amount=ln.amount, amount_base=ln.amount_base, owner_id=ln.owner_id,
+                             is_cash=self.assets.get_asset(ln.asset_id).is_cash) for ln in current.lines]
+        flags = [cleared.get(ln.id, 0) for ln in current.lines]
+        line, stored = lines[index], current.lines[index]
+        total = abs(to_e6(line.quantity))
+        take = min(abs(quantity_e6), total)
+        if take == total:
+            lines[index] = replace(line, owner_id=owner_id)
+        else:
+            # Both parts keep whole cents and their own base amount (core/ledger.split_line_e6, 2G).
+            owned_amount, owned_base, rest_amount, rest_base = split_line_e6(
+                to_e6(line.amount), to_e6(line.fx_rate), take, total)
+            if line.effect == Effect.INTERNAL and owned_base + rest_base != to_e6(line.amount_base):
+                raise ValidationError("At this exchange rate that part leaves the transfer a cent out in "
+                                      "your currency; mark a slightly different amount.", "amount")
+            sign = -1 if line.quantity < ZERO else 1
+            lines[index] = replace(line, quantity=from_e6(sign * (total - take)), amount=from_e6(rest_amount),
+                                   amount_base=from_e6(rest_base))
+            lines.append(replace(line, quantity=from_e6(sign * take), amount=from_e6(owned_amount),
+                                 amount_base=from_e6(owned_base), owner_id=owner_id))
+            flags.append(flags[index])
+        validate_posting(lines)
+        day = parse_date(current.date)
+        self._refuse_linked_loan_edit(current, current.date, lines)
+        # Both owners of the account and asset are checked: the person's part and what is left as yours.
+        self._validate_owner_balances(lines, day, exclude_txn_id=txn_id,
+                                      force_brokerage_cash=current.type == DocType.BUY,
+                                      extra_keys={(account_id, asset_id, owner_id), (account_id, asset_id, None)})
+        with self.db.transaction():
+            self._refuse_linked_loan_edit(current, current.date, lines)
+            self.repo.replace_lines(txn_id, current.date, lines)
+            for line_no, flag in enumerate(flags, start=1):
+                if flag:
+                    self.db.execute("UPDATE ledger_entries SET cleared=? WHERE transaction_id=? AND line_no=?",
+                                    (flag, txn_id, line_no))
+            self.audit.record("transaction", txn_id, "edit", f"Changed owner on {current.ref}",
+                              before=self._snapshot(current), after=self._snapshot(self.get(txn_id)))
+        return True
 
     def update_refund(self, txn_id: int, date: str, account_id: int, amount, category_id: int,
                       description: str = "", counterparty: str = "", notes: str = "",
@@ -330,8 +390,7 @@ class TransactionService:
 
     def search_ids(self, text: str) -> set[int]:
         """Transaction ids matching a search (posted ones)."""
-        txns, _ = self.repo.list(TxnFilter(search=text, limit=100000))
-        ids = {t.id for t in txns}
+        ids = set(self.repo.ids(TxnFilter(search=text, limit=100000)))
         resolved = self.counterparties.resolve(text)
         if resolved:
             rows = self.repo.db.all(
@@ -349,10 +408,6 @@ class TransactionService:
             )
             ids.update(int(row["id"]) for row in rows)
         return ids
-
-    def counterparty_suggestions(self) -> dict[str, int]:
-        """Previously used counterparties and their most recent category."""
-        return self.repo.counterparty_categories()
 
     # A counterparty's usual category is a habit, not one odd filing (as in Actual Budget): the same
     # category in at least 3 of its last 5 transactions, or in every one while it has 2 to 4. Only the
@@ -396,8 +451,7 @@ class TransactionService:
             self.accounts.require_usable(account_id)
         self._validate_deposit_lines(lines, doc_type, source)
         day = self._check_date(date)
-        validate_posting(lines)
-        self._validate_owner_balances(lines, day, force_brokerage_cash=doc_type == DocType.BUY)
+        validate_posting(lines)  # _create checks owner balances
         return self._create(doc_type, day, lines, description, counterparty, notes, source)
 
     def repost(self, txn_id: int, date: str, lines: list[PostingLine], description: str = "",
@@ -410,13 +464,21 @@ class TransactionService:
             self.accounts.require_usable(account_id)
         self._validate_deposit_lines(lines, current.type, current.source)
         day = self._check_date(date)
-        validate_posting(lines)
-        self._validate_owner_balances(lines, day, exclude_txn_id=txn_id,
-                                     force_brokerage_cash=current.type == DocType.BUY)
+        validate_posting(lines)  # _update checks owner balances, excluding this transaction
         return self._update(current, day, lines, description, counterparty, notes)
 
+    def _affected_owner_keys(self, lines, *, force_brokerage_cash=False, validate_all_cash=False):
+        """Include removed owners and the owned side of an ownership change (2H)."""
+        cash_scopes = {(line.account_id, line.asset_id) for line in lines
+                       if line.owner_id is not None or validate_all_cash or
+                       (force_brokerage_cash and self.accounts.get(line.account_id).account_type == AccountType.BROKERAGE)}
+        return {(line.account_id, line.asset_id, line.owner_id) for line in lines
+                if not self.assets.get_asset(line.asset_id).is_cash or
+                (line.account_id, line.asset_id) in cash_scopes}
+
     def _validate_owner_balances(self, lines, day, exclude_txn_id=None, force_brokerage_cash=False,
-                                 validate_all_cash=False, extra_keys=(), ignore_before_day=False):
+                                 validate_all_cash=False, extra_keys=(), ignore_before_day=False,
+                                 validate_from=None):
         """An owner's dated account/asset position may never become negative."""
         keys = set(extra_keys)
         for line in lines:
@@ -450,7 +512,7 @@ class TransactionService:
             for on, quantity in sorted(by_day.items()):
                 before_day = running
                 running += quantity
-                if running < 0 and (not ignore_before_day or on >= str(day)):
+                if running < 0 and (not ignore_before_day or on >= str(validate_from or day)):
                     asset = self.assets.get_asset(asset_id)
                     if not asset.is_cash:
                         raise ValidationError(
@@ -469,52 +531,60 @@ class TransactionService:
                         f"{fmt(before, 2)} {account.currency}. {context}",
                         "owner")
 
-    def _refuse_cash_below_zero(self, lines, day, current: Transaction | None = None) -> None:
-        """Your own entry may not take a wallet or bank account below zero (Audit 1, 2E3).
+    def _refuse_cash_below_zero(self, lines, day, current: Transaction | None = None, *, removed=(), added=()) -> None:
+        """Compare every affected cash history before/after the whole action (2G/2H).
 
-        The account's whole cash, whoever it belongs to, is tracked by day from the first day the entry touches.
-        An entry that leaves the lowest balance where it already was (a note, a category, a balance that was
-        negative before) is never refused; imports and system postings are not checked here.
+        Snapshots of removed postings make this work before or after SQL changes,
+        including multi-delete and restoring a void document. Imported/system
+        posting history may contain deficits; unchanged or improved days remain editable.
         """
-        keys = {(ln.account_id, ln.asset_id) for ln in lines
-                if ln.quantity != ZERO and self.assets.get_asset(ln.asset_id).is_cash}
+        previous = [txn for txn in (([current] if current else []) + list(removed)) if not txn.is_void]
+        following = [(str(day), lines)] + [(txn.date, txn.lines) for txn in added if not txn.is_void]
+        old_lines = [line for txn in previous for line in txn.lines]
+        new_lines = [line for _, posting in following for line in posting]
+        keys = {(line.account_id, line.asset_id) for line in new_lines + old_lines
+                if line.quantity != ZERO and self.assets.get_asset(line.asset_id).is_cash}
+        excluded = {txn.id for txn in previous} | {txn.id for txn in added}
+        if current:
+            excluded.add(current.id)
+        first = min([str(day)] + [txn.date for txn in previous] + [on for on, _ in following])
         for account_id, asset_id in keys:
             account = self.accounts.get(account_id)
-            if account.account_type not in {AccountType.CASH, AccountType.BANK}:
+            if account.account_type not in {AccountType.CASH, AccountType.BANK, AccountType.BROKERAGE}:
                 continue
-            # Balances mean something from the day the account opened; a history entered before it is not judged.
-            start = max(min(str(day), current.date) if current else str(day), account.opening_date)
-            proposed = [(str(day), int(ln.quantity * 1_000_000)) for ln in lines
-                        if (ln.account_id, ln.asset_id) == (account_id, asset_id)]
-            rows = self.db.all(
-                "SELECT le.date, le.transaction_id tid, SUM(le.quantity_e6) q FROM ledger_entries le "
+            start = max(first, account.opening_date)
+            # Aggregate the opening balance once, then walk affected days on the account index.
+            exclusion = " AND le.transaction_id NOT IN (" + ",".join("?" for _ in excluded) + ")" if excluded else ""
+            opening = self.db.scalar(
+                "SELECT COALESCE(SUM(le.quantity_e6),0) FROM ledger_entries le "
                 "JOIN transactions t ON t.id=le.transaction_id "
-                "WHERE t.status='POSTED' AND le.account_id=? AND le.asset_id=? GROUP BY le.date, le.transaction_id",
-                (account_id, asset_id))
-            before, after = {}, {}
-            for row in rows:
-                before[row["date"]] = before.get(row["date"], 0) + int(row["q"])
-                if not current or row["tid"] != current.id:
-                    after[row["date"]] = after.get(row["date"], 0) + int(row["q"])
-            if not current:
-                before = dict(after)
-            for on, quantity in proposed:
-                after[on] = after.get(on, 0) + quantity
-
-            def lowest(by_day):
-                running, low = 0, None
-                for on in sorted(by_day):
-                    running += by_day[on]
-                    if on >= start:
-                        low = running if low is None else min(low, running)
-                return low
-
-            low_after, low_before = lowest(after), lowest(before)
-            if low_after is not None and low_after < 0 and (low_before is None or low_after < low_before):
-                account = self.accounts.get(account_id)
-                raise ValidationError(
-                    f"This would leave {account.label} at {fmt(Decimal(low_after).scaleb(-6), 2, True)} "
-                    f"{account.currency}. Move money in first, or record the smaller amount.", "amount")
+                "WHERE t.status='POSTED' AND le.account_id=? AND le.date<? AND +le.asset_id=?" + exclusion,
+                (account_id, start, asset_id, *excluded))
+            base = {"": int(opening)}
+            for row in self.db.all(
+                "SELECT le.date, SUM(le.quantity_e6) q FROM ledger_entries le "
+                "JOIN transactions t ON t.id=le.transaction_id "
+                "WHERE t.status='POSTED' AND le.account_id=? AND le.date>=? AND +le.asset_id=?" + exclusion +
+                " GROUP BY le.date",
+                (account_id, start, asset_id, *excluded)):
+                base[row["date"]] = int(row["q"])
+            before, after = dict(base), dict(base)
+            for txn in previous:
+                for line in txn.lines:
+                    if (line.account_id, line.asset_id) == (account_id, asset_id):
+                        before[txn.date] = before.get(txn.date, 0) + int(line.quantity * 1_000_000)
+            for on, posting in following:
+                for line in posting:
+                    if (line.account_id, line.asset_id) == (account_id, asset_id):
+                        after[on] = after.get(on, 0) + int(line.quantity * 1_000_000)
+            old_balance = new_balance = 0
+            for on in sorted(set(before) | set(after) | {start}):
+                old_balance += before.get(on, 0)
+                new_balance += after.get(on, 0)
+                if on >= start and new_balance < min(0, old_balance):
+                    raise ValidationError(
+                        f"This would leave {account.label} at {fmt(Decimal(new_balance).scaleb(-6), 2, True)} "
+                        f"{account.currency} on {on}. Move money in first, or record the smaller amount.", "amount")
 
     def _validate_deposit_lines(self, lines, doc_type: DocType, source: TxnSource) -> None:
         """CD portfolios hold certificate assets only; cash stays in bank and wallet accounts."""
@@ -552,8 +622,7 @@ class TransactionService:
                 return None
             lines = [PostingLine.cash(account.id, asset.id, amount, Effect.OPENING,
                                       fx_rate=self._fx(account, day), memo="Opening balance", owner_id=owner_id)]
-            validate_posting(lines)
-            self._validate_owner_balances(lines, day, exclude_txn_id=existing_id)
+            validate_posting(lines)  # _create/_update check owner balances, excluding the opening being replaced
             if existing_id:
                 current = self.get(existing_id)
                 return self._update(current, day, lines, current.description, "", current.notes)
@@ -628,9 +697,12 @@ class TransactionService:
                         skipped.append(txn_id)
                         continue
                     lines = [replace(line, owner_id=changes["owner_id"]) for line in lines]
-                self._update(current, day or parse_date(current.date), lines, current.description,
-                             changes["counterparty"] if "counterparty" in changes else current.counterparty,
-                             changes["notes"] if "notes" in changes else current.notes)
+                try:
+                    self._update(current, day or parse_date(current.date), lines, current.description,
+                                 changes["counterparty"] if "counterparty" in changes else current.counterparty,
+                                 changes["notes"] if "notes" in changes else current.notes)
+                except LightningError as exc:
+                    raise ValidationError(f"{current.ref}: {exc.message}", exc.field) from exc
                 changed.append(txn_id)
         return changed, skipped
 
@@ -731,11 +803,12 @@ class TransactionService:
             return t
         with self.db.transaction():
             self.repo.set_status(t.id, TxnStatus.VOID)
-            custody_keys = (self._ownership_cash_keys(t.lines) if self._is_ownership_transaction(t)
-                            else self._tagged_cash_keys(t.lines))
+            custody_keys = self._affected_owner_keys(t.lines, force_brokerage_cash=t.type == DocType.BUY,
+                                                      validate_all_cash=self._is_ownership_transaction(t))
             if custody_keys:
                 self._validate_owner_balances([], t.date, validate_all_cash=True, extra_keys=custody_keys,
                                               ignore_before_day=True)
+            self._refuse_cash_below_zero([], t.date, removed=[t])
             self._check_holdings(t.lines)
             self.audit.record("transaction", t.id, "void", reason or f"Voided {t.ref}")
             if t.type == DocType.CNV:
@@ -765,12 +838,13 @@ class TransactionService:
                 self.repo.set_status(txn.id, TxnStatus.VOID)
                 self.audit.record("transaction", txn.id, "void", f"Deleted by user: {txn.ref}")
             custody_keys = {key for txn in pending
-                            for key in (self._ownership_cash_keys(txn.lines) if self._is_ownership_transaction(txn)
-                                        else self._tagged_cash_keys(txn.lines))}
+                            for key in self._affected_owner_keys(txn.lines, force_brokerage_cash=txn.type == DocType.BUY,
+                                                                 validate_all_cash=self._is_ownership_transaction(txn))}
             if custody_keys:
                 self._validate_owner_balances([], min(txn.date for txn in pending),
                                               validate_all_cash=True, extra_keys=custody_keys,
                                               ignore_before_day=True)
+            self._refuse_cash_below_zero([], min(txn.date for txn in pending), removed=pending)
             self._check_holdings(lines)
             if any(txn.type == DocType.CNV for txn in pending):
                 conversion.refresh_trade_rates(self, pending)
@@ -805,8 +879,10 @@ class TransactionService:
             if self._is_ownership_transaction(t):
                 self._validate_owner_balances(t.lines, t.date, exclude_txn_id=t.id, validate_all_cash=True,
                                               ignore_before_day=True)
-            elif any(line.owner_id is not None for line in t.lines):
-                self._validate_owner_balances(t.lines, t.date, exclude_txn_id=t.id, ignore_before_day=True)
+            else:
+                self._validate_owner_balances(t.lines, t.date, exclude_txn_id=t.id, ignore_before_day=True,
+                                             force_brokerage_cash=t.type == DocType.BUY)
+            self._refuse_cash_below_zero(t.lines, t.date, t)
             self.repo.set_status(t.id, TxnStatus.POSTED)
             self._check_holdings(t.lines)
             self.audit.record("transaction", t.id, "restore", f"Restored {t.ref}")
@@ -828,6 +904,17 @@ class TransactionService:
         if not found:
             raise NotFoundError("Transaction not found.")
         return found
+
+    def revision(self, txn_id: int) -> str:
+        """Opaque form version, covering the header and every posting line."""
+        payload = json.dumps(self._snapshot(self.get(txn_id)), sort_keys=True, default=str)
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+    def require_revision(self, txn_id: int, expected: str | None) -> None:
+        """Call inside the write transaction. None retains legacy client behavior."""
+        if expected is not None and expected != self.revision(txn_id):
+            raise ValidationError(
+                "This transaction changed since you opened it. Reopen it before saving.", "revision")
 
     def get_by_ref(self, ref: str) -> Transaction:
         found = self.repo.get_by_ref((ref or "").strip().upper())
@@ -985,7 +1072,7 @@ class TransactionService:
             self._validate_owner_balances(lines, day, force_brokerage_cash=doc_type == DocType.BUY,
                                           validate_all_cash=validate_all_cash,
                                           ignore_before_day=validate_all_cash)
-            if source == TxnSource.MANUAL and doc_type in CASH_CHECKED_TYPES:
+            if source == TxnSource.MANUAL or doc_type == DocType.OPN:
                 self._refuse_cash_below_zero(lines, day)
             ref = format_ref(doc_type, day, self.repo.next_seq(ref_prefix(doc_type, day)))
             header = Transaction(
@@ -994,63 +1081,103 @@ class TransactionService:
                 status=TxnStatus.POSTED, source=source, notes=(notes or "").strip(),
                 created_at="", updated_at="",
             )
-            preserve_investment_name = doc_type in {DocType.BUY, DocType.SEL, DocType.DIV, DocType.OPN}
-            canonical = None if preserve_investment_name else (self.counterparties.resolve(header.counterparty) if header.counterparty else None)
-            if header.counterparty and not canonical and not preserve_investment_name:
-                if self.counterparties.suggestions(header.counterparty):
-                    raise ValidationError("This Counterparty resembles a saved one. Confirm reuse or explicitly create it.", "counterparty")
-                canonical_id = self.counterparties.create(header.counterparty)
-                canonical = self.counterparties.get(canonical_id)
+            canonical = self._canonical_counterparty(doc_type, header.counterparty)
             if canonical:
                 header.counterparty = canonical["name"]
             txn_id = self.repo.insert(header, lines, canonical["id"] if canonical else None)
             self._check_holdings(lines)
         return self.get(txn_id)
 
+    @staticmethod
+    def _same_posting(current: Transaction, day, lines) -> bool:
+        fields = ("account_id", "asset_id", "quantity", "unit_price", "fx_rate", "amount", "amount_base",
+                  "effect", "category_id", "memo", "owner_id")
+        def values(line):
+            return tuple(getattr(line, name) for name in fields)
+        return (current.date == str(day) and
+                [values(line) for line in current.lines] == [values(line) for line in lines])
+
+    def _refuse_linked_loan_edit(self, current, day, lines):
+        """A confirmed repayment's principal/fee allocation cannot be guessed after a ledger edit."""
+        if self._same_posting(current, day, lines):
+            return
+        if self.db.scalar("SELECT 1 FROM loan_extra_payments WHERE transaction_id=?", (current.id,)):
+            raise ValidationError("Void this loan repayment and record a corrected payment from Loans.")
+        if self.db.scalar("SELECT 1 FROM planned_payments p JOIN planned_items i ON i.id=p.planned_item_id "
+                          "WHERE p.transaction_id=? AND i.kind='LOAN'", (current.id,)):
+            raise ValidationError("Reopen this loan payment before changing its amount, date, account or category.")
+
+    def _validate_linked_loan_amount(self, txn):
+        """Undo may restore both the ledger and its settlement, but may not drift an existing link."""
+        expected = self.db.all(
+            "SELECT p.amount_e6 FROM planned_payments p JOIN planned_items i ON i.id=p.planned_item_id "
+            "WHERE p.transaction_id=? AND i.kind='LOAN' AND p.status='PAID' "
+            "UNION ALL SELECT principal_e6+fee_e6 AS amount_e6 FROM loan_extra_payments WHERE transaction_id=?",
+            (txn.id, txn.id))
+        if not expected:
+            return
+        actual = sum((abs(line.quantity) for line in txn.lines if line.owner_id is None and
+                      line.effect == Effect.OUTFLOW and self.assets.get_asset(line.asset_id).is_cash), ZERO)
+        if any(from_e6(row["amount_e6"]) != actual for row in expected):
+            raise ValidationError("Reopen this loan payment before changing its amount, date, account or category.")
+
     def _update(self, current: Transaction, day, lines: list[PostingLine], description: str, counterparty: str,
                 notes: str, validate_all_cash: bool = False) -> Transaction:
         with self.db.transaction():
+            self._refuse_linked_loan_edit(current, day, lines)
             self._validate_owner_balances(lines, day, exclude_txn_id=current.id,
                                          force_brokerage_cash=current.type == DocType.BUY,
                                          validate_all_cash=validate_all_cash,
-                                         ignore_before_day=validate_all_cash)
-            if current.source == TxnSource.MANUAL and current.type in CASH_CHECKED_TYPES:
-                self._refuse_cash_below_zero(lines, day, current)
+                                         ignore_before_day=validate_all_cash,
+                                         validate_from=min(str(day), current.date),
+                                         extra_keys=self._affected_owner_keys(current.lines + list(lines),
+                                             force_brokerage_cash=current.type == DocType.BUY,
+                                             validate_all_cash=validate_all_cash))
+            self._refuse_cash_below_zero(lines, day, current)
             updated = replace(
                 current, date=fmt_date(day), description=(description or "").strip(),
                 counterparty=(counterparty or "").strip(), notes=(notes or "").strip(),
             )
-            preserve_investment_name = current.type in {DocType.BUY, DocType.SEL, DocType.DIV, DocType.OPN}
-            canonical = None if preserve_investment_name else (self.counterparties.resolve(updated.counterparty) if updated.counterparty else None)
-            if updated.counterparty and not canonical and not preserve_investment_name:
-                if self.counterparties.suggestions(updated.counterparty):
-                    raise ValidationError("This Counterparty resembles a saved one. Confirm reuse or explicitly create it.", "counterparty")
-                canonical_id = self.counterparties.create(updated.counterparty)
-                canonical = self.counterparties.get(canonical_id)
+            canonical = self._canonical_counterparty(current.type, updated.counterparty)
             if canonical:
                 updated.counterparty = canonical["name"]
             self.repo.update_header(updated, canonical["id"] if canonical else None)
-            # Rebuilding an unchanged posting must not silently clear its
-            # reconciliation state. If its date/account/amount/category changed,
-            # leave the replacement uncleared so it can be reconciled again.
-            old_cleared = self.db.all(
-                "SELECT account_id,asset_id,quantity_e6,effect,category_id,memo,cleared "
-                "FROM ledger_entries WHERE transaction_id=? ORDER BY line_no", (current.id,))
-            self.repo.replace_lines(current.id, updated.date, lines)
-            if updated.date == current.date and len(old_cleared) == len(lines):
-                new_rows = self.db.all(
-                    "SELECT id,account_id,asset_id,quantity_e6,effect,category_id,memo "
+            # Metadata-only saves keep the actual rows and confirmed reserve links (2W).
+            # Financial edits still invalidate reserve use through the database trigger.
+            if not self._same_posting(current, day, lines):
+                old_cleared = self.db.all(
+                    "SELECT account_id,asset_id,quantity_e6,effect,category_id,memo,cleared "
                     "FROM ledger_entries WHERE transaction_id=? ORDER BY line_no", (current.id,))
-                for old, new in zip(old_cleared, new_rows):
-                    same_posting = all(old[key] == new[key] for key in
-                                       ("account_id", "asset_id", "quantity_e6", "effect", "category_id", "memo"))
-                    if same_posting and old["cleared"]:
-                        self.db.execute("UPDATE ledger_entries SET cleared=1 WHERE id=?", (new["id"],))
+                self.repo.replace_lines(current.id, updated.date, lines)
+                if updated.date == current.date and len(old_cleared) == len(lines):
+                    new_rows = self.db.all(
+                        "SELECT id,account_id,asset_id,quantity_e6,effect,category_id,memo "
+                        "FROM ledger_entries WHERE transaction_id=? ORDER BY line_no", (current.id,))
+                    for old, new in zip(old_cleared, new_rows):
+                        same_posting = all(old[key] == new[key] for key in
+                                           ("account_id", "asset_id", "quantity_e6", "effect", "category_id", "memo"))
+                        if same_posting and old["cleared"]:
+                            self.db.execute("UPDATE ledger_entries SET cleared=1 WHERE id=?", (new["id"],))
             self._check_holdings(list(current.lines) + list(lines))
             after = self.get(current.id)
             self.audit.record("transaction", current.id, "edit", f"Edited {current.ref}",
                               before=self._snapshot(current), after=self._snapshot(after))
-        return self.get(current.id)
+        return after
+
+    # Investment documents keep the name typed on them; every other one names a saved counterparty.
+    _INVESTMENT_NAMED = {DocType.BUY, DocType.SEL, DocType.DIV, DocType.OPN}
+
+    def _canonical_counterparty(self, doc_type: DocType, name: str):
+        """The saved counterparty a new or edited document names, created when the name is new (None if none)."""
+        if doc_type in self._INVESTMENT_NAMED or not name:
+            return None
+        canonical = self.counterparties.resolve(name)
+        if not canonical:
+            if self.counterparties.suggestions(name):
+                raise ValidationError("This Counterparty resembles a saved one. Confirm reuse or explicitly create it.",
+                                      "counterparty")
+            canonical = self.counterparties.get(self.counterparties.create(name))
+        return canonical
 
     def _editable(self, txn_id: int, allowed: set[DocType]) -> Transaction:
         t = self.get(txn_id)

@@ -7,8 +7,8 @@ from datetime import date
 from decimal import Decimal
 
 from lightning.accounts.domain import AccountType
-from lightning.core.dates import fmt_date, month_of, parse_date, parse_month
-from lightning.core.money import ZERO
+from lightning.core.dates import fmt_date, month_of, parse_date, parse_month, today
+from lightning.core.money import ZERO, from_e6
 from lightning.reporting.service import ReportingService
 
 
@@ -25,47 +25,21 @@ class IntegrityCheck:
 class IntegrityService:
     """Cross-check independently derived totals without changing ledger data."""
 
-    def __init__(self, reporting: ReportingService, reserves, budgets, planning=None):
+    def __init__(self, reporting: ReportingService, reserves, budgets, planning=None, position=None):
         self.reporting = reporting
         self.reserves = reserves
         self.budgets = budgets
         self.planning = planning
+        self.position = position
 
     def checks(self, as_of: date | str) -> list[IntegrityCheck]:
+        # Each check compares two separate computations. Checks that rebuilt a figure from the very parts they then
+        # compared against (gross vs asset classes, classes vs owned net worth, owned + held vs gross, the
+        # per-account split) could never fail and were removed (2K).
         day = fmt_date(parse_date(as_of))
         nw = self.reporting.net_worth(day)
-        gross = sum((value for _, value in nw.by_account), ZERO)
-        held = self.reporting.money_from_others_total(day)
-        account_split = sum((value for _, value in nw.by_account), ZERO)
-        owned_and_held = nw.total + held
         complete = not nw.unvalued
-        checks = [
-            self._check("Account balances equal asset classes",
-                        gross, sum((group.value for group in nw.by_class if group.code != "CUSTODY"), ZERO),
-                        "Gross account values should equal the asset-class breakdown."),
-            self._check("What I own plus money held for others equals account balances",
-                        account_split, owned_and_held,
-                        "Account balances = what you own + money you hold for others.", complete),
-            self._check("Asset-class report adds to owned net worth",
-                        sum((group.value for group in nw.by_class), ZERO), nw.total,
-                        "Money held for others is taken out of what you own.", complete),
-        ]
-
-        custody_by_account = self.reporting.custody_value_by_account(day)
-        account_differences = []
-        account_failure_labels = []
-        for account, gross_value in nw.by_account:
-            owned_value = self.reporting.owned_account_value(account.id, day)
-            held_value = custody_by_account.get(account.id, ZERO)
-            difference = gross_value - owned_value - held_value
-            account_differences.append(abs(difference))
-            if difference != ZERO:
-                account_failure_labels.append(f"{account.label}: {difference}")
-        account_difference = sum(account_differences, ZERO)
-        checks.append(self._check("Ownership split by account", account_difference, ZERO,
-                                  "For each account: gross value = owned value + money held for others. "
-                                  + ("; ".join(account_failure_labels) if account_failure_labels else ""), complete))
-
+        checks = []
         below_zero = [(account, value) for account, value in nw.by_account
                       if account.account_type in {AccountType.CASH, AccountType.BANK} and value < ZERO]
         checks.append(self._check("No cash account is below zero", sum((-value for _, value in below_zero), ZERO), ZERO,
@@ -85,18 +59,42 @@ class IntegrityService:
                                   categorized_outflows,
                                   "Budget actuals should reconcile to posted money-out categories."))
 
-        cash = self.reporting.owned_spendable_cash(day)
-        bills_due = self.planning.what_you_owe(parse_date(day)).bills_due if self.planning else ZERO
-        reserve = self.reserves.cash_summary(cash, bills_due)
-        checks.append(self._check("Free cash plus reserves and bills due equals spendable cash",
-                                  reserve["free_cash"] + reserve["allocated"] + reserve["bills_due"], cash,
-                                  "Budget limits are intentionally excluded; reserves assign real cash and bills due are owed now."))
+        if self.position is not None:
+            checks.append(self._free_cash_check(day))
 
         bridge = self.reporting.bridge(first, parse_date(day))
         checks.append(self._check("Month-to-date net-worth bridge", bridge.expected_closing, bridge.closing,
                                   "Opening + income − spending + valuation changes + new balances + custody changes.",
                                   complete))
         return checks
+
+    def _free_cash_check(self, day: str) -> IntegrityCheck:
+        """Free cash as every screen shows it (`Position.free_cash`, built from valued holdings) against free cash
+        rebuilt from ledger sums: each spendable account's cash quantity less the cash it holds for others."""
+        name = "Free cash matches the ledger"
+        detail = "Free cash = spendable cash you own − reserves − bills due, rebuilt from each account's ledger lines."
+        shown = self.position.at(day, match_payments=False)
+        reserves = self.reserves.allocation_at(day)
+        if reserves is None and day == fmt_date(today()):
+            reserves = sum((row["effective_allocated"] for row in self.reserves.list_active()), ZERO)
+        if shown.free_cash is None or reserves is None:
+            return self._check(name, ZERO, ZERO, detail, complete=False)
+        base, complete, ledger_cash = self.reporting.base_currency, True, ZERO
+        for account in self.reporting.accounts.list():
+            if (account.account_type not in {AccountType.CASH, AccountType.BANK, AccountType.BROKERAGE}
+                    or not account.counts_as_spendable(base)):
+                continue
+            owned = (from_e6(self.reporting.q.account_quantity(account.id, as_of=day))
+                     - self.reporting.money_from_others.cash_total_for_account(account.id, day))
+            if account.account_type == AccountType.BROKERAGE:
+                owned = max(ZERO, owned)
+            if account.currency != base and owned:
+                owned = self.reporting.valuer.value(self.reporting.assets.cash_asset(account.currency), owned, day).value
+                if owned is None:
+                    complete, owned = False, ZERO
+            ledger_cash += owned
+        expected = ledger_cash - reserves - shown.bills_due
+        return self._check(name, shown.free_cash, expected, detail, complete)
 
     @staticmethod
     def _check(name: str, actual: Decimal, expected: Decimal, detail: str,

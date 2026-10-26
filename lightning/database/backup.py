@@ -38,13 +38,25 @@ def list_backups(folder: str | Path, database: str | Path) -> list[BackupFile]:
     return sorted(found, key=lambda entry: (entry.date, entry.sequence, entry.path.name), reverse=True)
 
 
+def _today() -> str:
+    """The day in backup file names (UTC), so "one a day" and the names agree."""
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+
+def backed_up_today(folder: str | Path, database: str | Path) -> bool:
+    """Whether this database already has a backup (not a pre-upgrade copy) dated today."""
+    return any(not entry.pre_upgrade and entry.date == _today() for entry in list_backups(folder, database))
+
+
 def backup(db: Database, folder: str | Path, keep: int = 30, *,
-           pre_upgrade: bool = False) -> Path | None:
+           pre_upgrade: bool = False, verify_source: bool = True) -> Path | None:
+    """A verified encrypted copy. `verify_source=False` skips the source integrity check only when the caller
+    has just verified the same file (an unlock); the copy is always checked."""
     if db.path == ":memory:" or not Path(db.path).exists():
         return None
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
-    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    day = _today()
     kind = "upgrade" if pre_upgrade else "backup"
     prefix = f"{Path(db.path).stem}_{kind}_{day}_"
     # Count matching partials too: a crashed attempt must not reuse its sequence.
@@ -55,7 +67,7 @@ def backup(db: Database, folder: str | Path, keep: int = 30, *,
     staging = target.with_suffix(".partial")
     created = False
     try:
-        snapshot(db, staging)
+        snapshot(db, staging) if verify_source else snapshot(db, staging, verify_source=False)
         created = True
         if target.exists():
             raise FileExistsError(target)

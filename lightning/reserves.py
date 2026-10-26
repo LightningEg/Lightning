@@ -10,6 +10,7 @@ from lightning.core.dates import now_iso, today
 from lightning.core.errors import ConflictError, NotFoundError, ValidationError
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, check_places, from_e6, to_decimal, to_e6
+from lightning.core.refs import parse_row_id
 from lightning.database.connection import Database
 from lightning.database.currencies import minor_units
 from lightning.database.settings import SettingsStore
@@ -25,17 +26,7 @@ class CashReserveService:
 
     @staticmethod
     def _id(value, field: str) -> int:
-        if (isinstance(value, bool) or
-                not isinstance(value, int) and
-                not (isinstance(value, str) and value.strip().isascii() and value.strip().isdigit())):
-            raise ValidationError("Choose a valid saved item.", field)
-        try:
-            parsed = int(value)
-        except (TypeError, ValueError, OverflowError):
-            raise ValidationError("Choose a valid saved item.", field) from None
-        if parsed <= 0 or parsed > 9_223_372_036_854_775_807:
-            raise ValidationError("Choose a valid saved item.", field)
-        return parsed
+        return parse_row_id(value, field)
 
     @request_cached(deep=True)
     def list_active(self):
@@ -55,12 +46,12 @@ class CashReserveService:
         )]
 
     def cash_summary(self, owned_liquid_cash: Decimal, bills_due: Decimal = ZERO):
-        """Free cash = owned liquid cash − assigned reserves − bills due (unpaid and already due)."""
+        """Cash assigned to reserves, beside the owned liquid cash and bills due it was asked for. Free cash itself
+        has one formula, ``Position.free_cash`` (7N)."""
         allocated = ZERO
         for row in self.list_active():
             allocated += row["effective_allocated"]
-        return {"owned_liquid_cash": owned_liquid_cash, "allocated": allocated, "bills_due": bills_due,
-                "free_cash": owned_liquid_cash - allocated - bills_due}
+        return {"owned_liquid_cash": owned_liquid_cash, "allocated": allocated, "bills_due": bills_due}
 
     def allocation_at(self, as_of: str):
         """Return active effective assignments at a date, or None if history is incomplete."""

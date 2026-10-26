@@ -242,11 +242,16 @@ class CounterpartyService:
             raise NotFoundError("Alias not found.")
 
     def _link_historical(self, counterparty_id: int, alias: str) -> None:
+        # Each distinct unlinked spelling is normalised once, not each transaction (9I): thousands of buys and
+        # sells share a handful of names.
+        key = normalize(alias)
         target = self.get(counterparty_id)
-        for row in self.db.all("SELECT id,counterparty FROM transactions WHERE counterparty_id IS NULL AND counterparty<>''"):
-            if normalize(row["counterparty"]) == normalize(alias):
-                self.db.execute("UPDATE transactions SET counterparty_id=?,counterparty=? WHERE id=?",
-                                (counterparty_id, target["name"], row["id"]))
+        for row in self.db.all(
+                "SELECT DISTINCT counterparty FROM transactions WHERE counterparty_id IS NULL AND counterparty<>''"):
+            if normalize(row["counterparty"]) == key:
+                self.db.execute("UPDATE transactions SET counterparty_id=?,counterparty=? "
+                                "WHERE counterparty_id IS NULL AND counterparty=?",
+                                (counterparty_id, target["name"], row["counterparty"]))
 
     def set_default_category(self, counterparty_id: int, category_id: int | None) -> None:
         cur = self.db.execute(

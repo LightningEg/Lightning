@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import difflib
+import functools
 import hashlib
 import io
 import json
@@ -60,6 +61,20 @@ def _decimal_amount(value: str) -> Decimal:
         text = text.replace("−", "-").replace("–", "-").replace(" ", "")
         if not text:
             return Decimal("0")
+        # Strip a recognized currency wrapper, never arbitrary non-digit text: stripping
+        # punctuation would turn .50 into 50 and silently accept values such as 5%.
+        currency = r"(?:EGP|USD|EUR|GBP|LE|E£|ج\.?م\.?|[$€£])"
+        wrappers = 0
+
+        def strip_currency(text):
+            nonlocal wrappers
+            text, count = re.subn(rf"^{currency}|{currency}$", "", text, flags=re.IGNORECASE)
+            wrappers += count
+            if wrappers > 1:
+                raise ValueError("Enter a valid number.")
+            return text
+
+        text = strip_currency(text)
         negative = False
         if text.startswith("(") and text.endswith(")") and len(text) > 2:
             negative = True
@@ -67,15 +82,13 @@ def _decimal_amount(value: str) -> Decimal:
         elif text.endswith("-") and len(text) > 1:
             negative = True
             text = text[:-1]
-        elif text.startswith("-") and len(text) > 1:
-            negative = True
+        elif text.startswith(("-", "+")) and len(text) > 1:
+            negative = text[0] == "-"
             text = text[1:]
+        text = strip_currency(text)
         if not text or "-" in text or "(" in text or ")" in text:
             raise ValueError("Enter a valid number.")
-        # Currency codes and symbols around the number (EGP 1,250.00 / 1,250.00 EGP / 1,250.00 ج.م).
-        text = re.sub(r"^[^0-9]+", "", text)
-        text = re.sub(r"[^0-9]+$", "", text)
-        if not re.fullmatch(r"\d[\d.,]*", text):
+        if not re.fullmatch(r"(?:[0-9][0-9.,]*|[.,][0-9]+)", text):
             raise ValueError("Enter a valid number.")
         if "," in text and ("." not in text or text.rfind(",") > text.rfind(".")):
             tail = text.rsplit(",", 1)[1]
@@ -316,6 +329,8 @@ class BankImportService:
             except (TypeError, ValueError, KeyError):
                 continue
         seen_refs = set()
+        # A full-history query: run it at most once per preview, not once per row (7O).
+        usual = functools.cache(self.transactions.usual_categories)
         for row in rows:
             record = json.loads(row["raw_json"])
             parsed = record["parsed"]
@@ -346,7 +361,7 @@ class BankImportService:
                                           else self._link_candidates(batch["account_id"], parsed, batch["id"]))
             parsed["_internal"] = is_internal(parsed["Category"])
             outcome = self._rules_outcome(batch["account_id"], parsed, cp)
-            parsed["_category_id"] = None if parsed["_internal"] else self._category_for(parsed, cp, outcome)
+            parsed["_category_id"] = None if parsed["_internal"] else self._category_for(parsed, cp, outcome, usual)
             parsed["_transfer_target_suggestion"] = (self._own_account(batch["account_id"], parsed["Counterparty"])
                 or self._transfer_target_suggestion(batch["account_id"], parsed["Notes"])
                 or self._transfer_target_suggestion(batch["account_id"], parsed["Counterparty"])
@@ -508,7 +523,8 @@ class BankImportService:
             parsed["Notes"] = " ".join([parsed["Notes"].strip(), *(f"#{t}" for t in missing)]).strip()
         return outcome
 
-    def _category_for(self, parsed, counterparty, outcome=None):
+    def _category_for(self, parsed, counterparty, outcome=None, usual=None):
+        """`usual` returns `transactions.usual_categories()`; a preview passes one that computes it once."""
         if outcome and outcome.category_id:
             category = self.categories.get(outcome.category_id)
             # Money out needs a spending category; money in takes income or, as a refund, spending.
@@ -526,9 +542,9 @@ class BankImportService:
                 pass
         if counterparty and counterparty["default_category_id"]:
             return counterparty["default_category_id"]
-        usual = self.transactions.usual_categories()
+        found = (usual or self.transactions.usual_categories)()
         name = counterparty["name"] if counterparty else parsed["Counterparty"]
-        return (usual.get(name) or {}).get("category_id")
+        return (found.get(name) or {}).get("category_id")
 
     def _similarity_warning(self, account_id, parsed):
         if parsed["_errors"]:

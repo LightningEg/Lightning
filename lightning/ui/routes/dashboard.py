@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import calendar
+from datetime import date, timedelta
 
-from decimal import Decimal, InvalidOperation
-from datetime import timedelta
-from collections import defaultdict
+from decimal import InvalidOperation
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
@@ -25,11 +24,10 @@ from lightning.workflows.review import GROUP_LABELS, ReviewInbox, group_of, grou
 from ..web import container, render
 from ..web import redirect
 from ..periods import Period, parse_period
-from .. import keynotes, status as page_status, visuals
+from .. import keynotes, kpis, status as page_status, visuals
 from .sms import read_phone_sms
 
 router = APIRouter()
-PAIR_XS = (24.0, 45.0, 64.0)  # two Sankeys side by side: target names get a third of each (style.css .is-pair)
 
 _ACCOUNT_TYPE_LABELS = {
     AccountType.CASH: "Cash",
@@ -40,53 +38,6 @@ _ACCOUNT_TYPE_LABELS = {
     AccountType.PHYSICAL_ASSET: "Physical assets",
     AccountType.OTHER_ASSET: "Other assets",
 }
-
-
-def _owned_account_type_rows(c, accounts, as_of, include_types=None):
-    groups = {}
-    for account in accounts:
-        if include_types is not None and account.account_type not in include_types:
-            continue
-        value = c.reporting.owned_account_value(account.id, as_of)
-        group = groups.setdefault(account.account_type, {"label": _ACCOUNT_TYPE_LABELS[account.account_type],
-                                                         "value": ZERO, "accounts": []})
-        group["value"] += value
-        group["accounts"].append({"id": account.id, "label": account.label, "value": value})
-    return [groups[account_type] for account_type in AccountType if account_type in groups]
-
-
-def _owned_wealth_rows(c, net_worth, as_of):
-    """Allocate held-for-others balances to their classes for reconciled breakdowns."""
-    values = {group.code: group.value for group in net_worth.by_class if group.code != "CUSTODY"}
-    labels = {group.code: group.label for group in net_worth.by_class if group.code != "CUSTODY"}
-
-    def root_code(class_id):
-        return c.assets.get_class(class_id).code.split(".", 1)[0]
-
-    for account in c.accounts.list(active_only=True):
-        held = c.money_from_others.cash_total_for_account(account.id, as_of)
-        if held:
-            valuation = c.reporting.value_of(c.assets.cash_asset(account.currency).id, held, as_of)
-            code = root_code(account.cash_class_id)
-            if valuation.value is not None and code in values:
-                values[code] -= valuation.value
-    for position in c.money_from_others.investment_positions(as_of):
-        asset = c.assets.get_asset(position["asset_id"])
-        valuation = c.reporting.value_of(asset.id, position["units"], as_of)
-        code = root_code(asset.asset_class_id)
-        if valuation.value is not None and code in values:
-            values[code] -= valuation.value
-    if "GAMEYA" in values:
-        values["GAMEYA"] += net_worth.gameya_owed  # a negative circle is a debt (What you owe), not a negative asset
-    brokerage_cash = c.reporting.owned_brokerage_cash(as_of)
-    if brokerage_cash:
-        if "CASH" in values:
-            values["CASH"] -= brokerage_cash
-        values["BROKERAGE_CASH"] = brokerage_cash
-        labels["BROKERAGE_CASH"] = "Brokerage cash"
-    return [{"code": code, "label": labels[code], "value": value,
-             "percentage": value / net_worth.what_you_own * 100 if net_worth.what_you_own else ZERO}
-            for code, value in values.items()]
 
 
 @router.get("/")
@@ -126,8 +77,6 @@ async def dashboard(request: Request):
     # Net worth chart beside them, which ends there (feedback ticket 80, 2026-10-14).
     position_day = min(as_of, today())
     position = period_position if position_day == as_of else c.position.at(position_day)
-    net_worth = c.reporting.net_worth(as_of)
-    account_contributions = _owned_account_type_rows(c, accounts, position_day)
     cash_accounts = [
         {"id": account.id, "label": account.label,
          "value": c.reporting.owned_account_value(account.id, position_day),
@@ -144,54 +93,7 @@ async def dashboard(request: Request):
     attention_groups = grouped(attention)
     setup = _setup_steps(c, accounts)
     change, change_reason = c.position.change_in_what_you_own(first, as_of, since_first_record=period.key == "all")
-    change_label = (f"{label('change_in_what_you_own')} since your first record" if period.key == "all"
-                    else label("change_in_what_you_own"))
     cash_flow = c.reporting.cash_flow(first, as_of)
-    spending_groups = c.reporting.spending_by_category(first, as_of, depth=2)
-    categorized_spending = sum((max(group.value, ZERO) for group in spending_groups), ZERO)
-    expense_groups = []
-    expense_group_index = {}
-    for group in spending_groups:
-        category = c.categories.get_by_code(group.code)
-        parent = c.categories.get(category.parent_id) if category.parent_id else category
-        query = urlencode({"category_id": category.id, "date_from": fmt_date(first),
-                           "date_to": fmt_date(as_of)})
-        child = {"label": category.name, "value": group.value,
-                 "share": max(group.value, ZERO) / categorized_spending * 100
-                 if categorized_spending else ZERO,
-                 "category_id": category.id, "href": f"/transactions?{query}"}
-        if parent.id not in expense_group_index:
-            expense_group_index[parent.id] = {"id": parent.id, "label": parent.name,
-                                              "children": [], "total": ZERO}
-            expense_groups.append(expense_group_index[parent.id])
-        expense_group_index[parent.id]["children"].append(child)
-        expense_group_index[parent.id]["total"] += group.value
-    # Give every L1 group its two largest L2 categories first, then fill the
-    # remaining places with the next-largest categories overall, capped at 8.
-    selected_ids = set()
-    for parent in expense_groups:
-        for child in parent["children"][:2]:
-            if len(selected_ids) < 8:
-                selected_ids.add(child["category_id"])
-    remaining_children = sorted(
-        (child for parent in expense_groups for child in parent["children"]
-         if child["category_id"] not in selected_ids),
-        key=lambda child: child["value"], reverse=True)
-    for child in remaining_children:
-        if len(selected_ids) >= 8:
-            break
-        selected_ids.add(child["category_id"])
-    selected_groups = []
-    for parent in expense_groups:
-        children = [child for child in parent["children"] if child["category_id"] in selected_ids]
-        if children:
-            other_children = [child for child in parent["children"] if child["category_id"] not in selected_ids]
-            selected_groups.append({
-                "id": parent["id"], "label": parent["label"], "children": children,
-                "total": parent["total"], "other_count": len(other_children),
-                "other_total": sum((child["value"] for child in other_children), ZERO),
-            })
-    expense_groups = selected_groups
     closing_report = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(first), fmt_date(as_of))
     opening_report = closing_report["opening"]
     period_result = closing_report["result"]
@@ -207,28 +109,7 @@ async def dashboard(request: Request):
         "at_cost": closing_report["at_cost"],
         "holdings_count": sum(1 for row in closing_report["holdings"] if row["price_source"] != "CASH"),
     }
-    investment_holdings = [
-        {"label": f"{row['asset']} · {row['account']}", "value": row["value"],
-         "weight": (row["value"] / portfolio_value * 100
-                    if row["value"] is not None and portfolio_value else None)}
-        for row in sorted((row for row in closing_report["holdings"] if row["price_source"] != "CASH"),
-                          key=lambda row: (row["value"] is None, -(row["value"] or ZERO), row["asset"]))[:5]
-    ]
-    investment_flow = closing_report["new_money"]
-    investment_share = (investment_flow / cash_flow.inflows * 100
-                        if cash_flow.inflows > ZERO else None)
-    savings_rate = cash_flow.savings_rate
     networth_trend = visuals.net_worth_trend(c, as_of)
-    # Feedback ticket 78: a month's Where money in went sits beside the last six months' (ending with it).
-    money_sankey_six, six_from = None, None
-    if period.key == "month":
-        six_keys = months_back(as_of, 6, first_activity)
-        if len(six_keys) > 1:
-            six_from = parse_month(six_keys[0])[0]
-            six_added = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(six_from),
-                                          fmt_date(as_of))["net_money"]
-            money_sankey_six = visuals.money_sankey(c, six_from, as_of, c.reporting.cash_flow(six_from, as_of),
-                                                    money_added=six_added, xs=PAIR_XS)
     stats = _period_stats(c, period, first, as_of, period_position, cash_flow, change, change_reason,
                           closing_report["net_money"], networth_trend, urlencode(request.query_params))
     # Answer first (guideline 3.33, A09): the change in net worth is the Lead's comparison, not a card of its own;
@@ -237,40 +118,49 @@ async def dashboard(request: Request):
     current = as_of >= today()
     lead_change = page_status.change(change_tile["value"], period.key, current)
     if position_is_today := position_day == today():
-        stats.insert(len(stats) - 1, _safe_tile(inbox.forecast))
+        stats.insert(len(stats) - 1, _safe_tile(inbox.forecast))  # the phone's tiles (C06.1)
+    # The PC's row is A08 cards, each against something: the savings rate against your usual one, the investing
+    # rate against the period before, Safe to spend against free cash, Left in plan against the plan.
+    if period.key == "month":
+        before_to = first - timedelta(days=1)
+        before_from, before_label = before_to.replace(day=1), month_of(before_to)
+    else:
+        before_to = first - timedelta(days=1)
+        before_from, before_label = before_to - (as_of - first), "the period before"
+    flow_before = c.reporting.cash_flow(before_from, before_to)
+    added_before = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(before_from), fmt_date(before_to))["net_money"]
+    plan_month = month_of(as_of)
+    kpi_cards = kpis.overview(
+        cash_flow, period_chip=_period_chip(period, first, as_of), rates=visuals.savings_rates(c, as_of),
+        usual=c.reporting.usual_savings_rate(as_of), invest=investing_rate(closing_report["net_money"], cash_flow.net),
+        invest_before=investing_rate(added_before, flow_before.net), before_label=before_label,
+        money_added=closing_report["net_money"], forecast=inbox.forecast if position_is_today else None,
+        plan=c.budgets.plan_summary(plan_month) if c.budgets.has_plan(plan_month) else None, month=plan_month,
+        savings_href="#savings-squares", invest_href=f"/investments?{urlencode(request.query_params)}")
     status = page_status.overview(cash_flow.inflows, cash_flow.outflows, cash_flow.net, cash_flow.savings_rate,
                                   cash_flow.rate_says_nothing, period.key, current, bool(accounts))
     dates_note = ("so far" if current and period.key in ("month", "ytd") else "year to date" if period.key == "ytd" else "")
     recent_rows = c.reporting.register_page(None, "1900-01-01", "9999-12-31", 1, 10)[0]  # the phone leads with these (C11.1)
     phone = _phone_overview(position, inbox.forecast, attention_groups, lead_change) if getattr(request.state, "phone", False) and position_is_today else None
+    # The PC shows the flows on Spending (owner, 2026-10-21); the phone keeps them as folded rows (guideline C11.1).
+    phone_flows = (visuals.cash_flow_charts(c, first, as_of, period.key == "month", today())
+                   if getattr(request.state, "phone", False) else {})
     return render(
         request,
-        "dashboard/index.html",
+        "dashboard/index.html", **phone_flows,
         stats=stats, recent_rows=recent_rows,
         flow_columns=visuals.cash_flow_columns(c, first, as_of, cash_flow),
         money_in_rows=visuals.money_in_groups(c, first, as_of),
         money_out_rows=visuals.money_out_groups(c, first, as_of),
-        money_sankey=visuals.money_sankey(c, first, as_of, cash_flow, money_added=closing_report["net_money"],
-                                          xs=PAIR_XS if money_sankey_six else (22.0, 49.0, 76.0)),
-        money_sankey_six=money_sankey_six, six_from=month_of(six_from) if six_from else "",
         wealth_donut=visuals.holdings_donut(position, include_cash=True),
         networth_trend=networth_trend, free_cash_steps=visuals.free_cash_steps(position),
-        month_calendar=visuals.month_calendar(c, today()),
         month=month, this_month=month_of(today()), period=period, period_error=period_error,
-        date_from=fmt_date(first), date_to=fmt_date(as_of), as_of=fmt_date(as_of), position_as_of=fmt_date(position_day), position_is_today=position_is_today, status=status,
+        date_from=fmt_date(first), date_to=fmt_date(as_of), as_of=fmt_date(as_of), position_as_of=fmt_date(position_day), position_is_today=position_is_today, status=status, kpi_cards=kpi_cards,
         waffle=saved_and_invested(cash_flow, closing_report["net_money"]), dates_note=dates_note, lead_change=lead_change,
-        range_label=(f"No recorded activity · Position as of {fmt_date(position_day)}"
-                     if period.key == "all" and not first_activity else f"{fmt_date(first)} to {fmt_date(as_of)} · Position as of {fmt_date(position_day)}"),
         pos=position, cash_accounts=cash_accounts, owe=owe,
         kept_apart_accounts=c.reporting.owned_cash_kept_apart_by_account(position.as_of),
-        change=change, change_reason=change_reason, change_label=change_label,
         attention=attention, attention_groups=attention_groups, setup=setup,
-        net_worth=net_worth,
-        account_contributions=account_contributions, expense_groups=expense_groups,
-        categorized_spending=categorized_spending,
-        investment_report=investment_report, investment_holdings=investment_holdings,
-        cash_flow=cash_flow, investment_flow=investment_flow,
-        investment_share=investment_share, savings_rate=savings_rate, phone=phone,
+        investment_report=investment_report, cash_flow=cash_flow, phone=phone,
     )
 
 
@@ -511,6 +401,11 @@ async def more(request: Request):
                   portfolio=position.portfolio_value, in_accounts=position.in_your_accounts,
                   within=within, judged=len(judged), spent=spent, month=month_of(day), waiting=len(items),
                   last_review=(c.settings.get("weekly_review_at") or "")[:10], zakat=c.zakat.enabled())
+def _period_chip(period, first, as_of) -> str:
+    """The period, short, as every card's chip names it."""
+    partial = as_of.day < calendar.monthrange(as_of.year, as_of.month)[1]
+    return {"month": month_of(first) + (" so far" if partial else ""), "ytd": "Year to date",
+            "all": "All time"}.get(period.key, f"{fmt_date(first)} to {fmt_date(as_of)}")
 
 
 def _safe_tile(f) -> dict:
@@ -634,12 +529,36 @@ async def explain_overview_figure(request: Request, kind: str):
                   rows=rows, total=total, foot=foot, recent=[], action=action)
 
 
+@router.get("/needs-you")
+async def needs_you_inbox(request: Request):
+    items = ReviewInbox(container(request)).items(today(), include_handled=True)
+    handled = request.query_params.get("tab") == "handled"
+    counts = {state: sum(item["review_state"] == state for item in items)
+              for state in ("active", "reviewed", "snoozed")}
+    selected = [item for item in items if (item["review_state"] != "active") == handled]
+    return render(request, "needs_you.html", label="Needs you", items=selected, counts=counts,
+                  handled=handled, snooze_default=(today() + timedelta(days=7)).isoformat())
+
+
+@router.post("/needs-you/state")
+async def needs_you_state(request: Request):
+    form = await request.form()
+    back = "/needs-you?tab=handled" if form.get("tab") == "handled" else "/needs-you"
+    try:
+        ReviewInbox(container(request)).decide(str(form.get("identity", "")),
+            str(form.get("action", "")), today(), str(form.get("until", "")))
+    except LightningError as exc:
+        return redirect(back, exc.message)
+    return redirect(back)
+
+
 @router.get("/needs-you/{key}")
 async def needs_you_group(request: Request, key: str):
     """One group of Needs you (feedback ticket 84): its decisions, each with the action that settles it."""
     c = container(request)
     items = [item for item in ReviewInbox(c).items(today()) if group_of(item) == key]
-    return render(request, "needs_you.html", label=GROUP_LABELS.get(key, "Other"), items=items)
+    return render(request, "needs_you.html", label=GROUP_LABELS.get(key, "Other"), items=items,
+                  snooze_default=(today() + timedelta(days=7)).isoformat())
 
 
 @router.get("/money-from-others")

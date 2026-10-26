@@ -39,21 +39,21 @@ jobs:
       version_name: ${{ steps.identity.outputs.version_name }}
       apk: ${{ steps.identity.outputs.apk }}
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           fetch-depth: 0  # the version code is the number of commits
-      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961  # v5
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad  # v6.1.0
         with:
           distribution: temurin
           java-version: '17'
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: '3.13'
       - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd  # v4
         with:
           packages: platform-tools
       - run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
-      - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c  # v5
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6  # v6.4.0
         with:
           gradle-version: '8.11.1'
       - name: Test identity (version code = commits on main)
@@ -87,7 +87,7 @@ jobs:
           [ "$signer" = "$expected" ] || { echo "::error::signed by $signer, not the script's certificate $expected"; exit 1; }
           rm -rf "$RUNNER_TEMP/throwaway" "$RUNNER_TEMP/throwaway.p12" "$RUNNER_TEMP/throwaway.apk"
           echo "A key from tools/android_test_key.py signs and verifies with apksigner."
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: phone-unsigned  # to the sign job only; one day
           path: android/app/build/outputs/apk/debug/app-debug.apk
@@ -106,15 +106,15 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: '3.13'
       - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd  # v4
         with:
           packages: platform-tools
       - run: sdkmanager 'build-tools;35.0.0'
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
           name: phone-unsigned
           path: ${{ runner.temp }}/unsigned
@@ -179,7 +179,7 @@ jobs:
           python packaging/phone_build.py check "$RUNNER_TEMP/$APK"
           --build-tools "$ANDROID_HOME/build-tools/35.0.0" --code "$CODE" --name "$NAME"
           --certificate packaging/android-test-certificate.sha256 --info "$RUNNER_TEMP/apk.json"
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         if: inputs.bundle && steps.sign.outputs.signed == 'true'
         with:
           name: phone-apk

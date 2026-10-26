@@ -5,6 +5,7 @@ This is the only place that knows how modules connect. The UI receives a ready C
 
 from __future__ import annotations
 
+import functools
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
@@ -22,7 +23,7 @@ from lightning.rules.service import RuleService
 from lightning.categories.service import CategoryService
 from lightning.counterparties import CounterpartyService
 from lightning.database.audit import AuditLog
-from lightning.database.backup import backup, list_backups
+from lightning.database.backup import backed_up_today, backup, list_backups
 from lightning.database.connection import Database
 from lightning.database.currencies import CurrencyRegistry
 from lightning.database.seed import CASH_ASSETS
@@ -41,6 +42,7 @@ from lightning.reporting.service import ReportingService
 from lightning.reconciliation import ReconciliationService
 from lightning.reserves import CashReserveService
 from lightning.reevaluations import ReevaluationService
+from lightning.transactions.history_check import validate_replay
 from lightning.transactions.service import TransactionService
 from lightning.workflows.accounts import AccountWorkflows
 from lightning.undo import UndoService
@@ -115,12 +117,16 @@ class Container:
     def set_profile_currency(self, code: str) -> None:
         """Change an unused profile's base and refresh the live service graph."""
         CurrencyRegistry(self.db).set_base_currency(code)
+        self.refresh_profile_currency()
+
+    def refresh_profile_currency(self) -> None:
+        """Point every service that keeps a copy of the profile currency at the stored one.
+
+        The one place that lists those copies: anything that changes `settings.base_currency` (this container,
+        a replica applying settings rows) calls it. Reporting's setter also moves its valuer and FX positions."""
         base = self.settings.base_currency
-        self.assets.base_currency = base
-        self.accounts.base_currency = base
-        self.transactions.base_currency = base
-        self.reporting.base_currency = base
-        self.reporting.valuer.base = base
+        for service in (self.assets, self.accounts, self.transactions, self.reporting):
+            service.base_currency = base
         self.fx.profile_currency = base
 
     @property
@@ -161,8 +167,12 @@ class ReadOnlyCopyError(RuntimeError):
 
 def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
           key: bytes | None = None, backup_dir: Path | None = None, read_only: bool = False,
-          experimental_journal: bool = False) -> Container:
+          experimental_journal: bool = False, source_verified: bool = False) -> Container:
     """Open a ledger and wire its services.
+
+    `backup_on_start` takes an automatic backup at most once a day: none when this ledger already has a
+    (non-upgrade) backup dated today (2J). A pending upgrade always takes its own. `source_verified` says the
+    caller has just run the integrity checks on this file, so the backup checks only its copy.
 
     `read_only` opens an actual SQLite read-only connection and skips every startup write: no backup,
     migration, seed or ownership repair. A copy that needs any of them is refused, never upgraded
@@ -182,9 +192,10 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
             if inspection.pending:
                 raise ReadOnlyCopyError("This saved copy was made by an older Lightning and needs an upgrade "
                                         "that a read-only copy cannot make.")
-        elif existed and (inspection.needs_backup or backup_on_start):
+        elif existed and (inspection.needs_backup or (
+                backup_on_start and not backed_up_today(backup_dir or data_dir / "backups", db_path))):
             saved = backup(db, backup_dir or data_dir / "backups",
-                           pre_upgrade=inspection.needs_backup)
+                           pre_upgrade=inspection.needs_backup, verify_source=not source_verified)
             if saved is None:
                 raise RuntimeError("A verified backup is required before upgrading")
         if not read_only and not is_journal:
@@ -200,11 +211,11 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
     audit = AuditLog(db)
     assets = AssetService(db, base)
     categories = CategoryService(db)
-    accounts = AccountService(db, assets, base, allow_foreign=True)
+    accounts = AccountService(db, assets, base)
     transactions = TransactionService(db, accounts, assets, categories, audit, base)
     counterparties = CounterpartyService(db)
     reserves = CashReserveService(db)
-    money_from_others = MoneyFromOthersService(db, accounts, transactions)
+    money_from_others = MoneyFromOthersService(db, accounts, transactions, counterparties)
     physical_items = PhysicalItemService(db, accounts, assets, audit)
     rules = RuleService(db, categories, accounts, transactions, settings)
     bank_imports = BankImportService(db, accounts, categories, counterparties, transactions, money_from_others, reserves,
@@ -252,7 +263,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
         deposits=deposits,
         gameya=gameya,
         account_flows=AccountWorkflows(db, accounts, transactions, reporting),
-        integrity=IntegrityService(reporting, reserves, budgets, planning),
+        integrity=IntegrityService(reporting, reserves, budgets, planning, position),
         planning=planning,
         forecaster=forecaster,
         position=position,
@@ -267,12 +278,12 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
     if not read_only and not is_journal:
         result.undo = UndoService(db, audit)
         db.undo = result.undo
-        def validate_history(records):
+        result.undo.validate = functools.partial(
+            validate_replay, db=db, transactions=transactions, assets=assets, accounts=accounts,
+            reconciliation=result.reconciliation)
+        def prepare_history_validation(records):
             import json
-            from types import SimpleNamespace
-            from lightning.core.ledger import PostingLine, validate_posting
             ids = set()
-            affected, days = {}, []
             for record in records:
                 if record['table_name'] not in {'transactions', 'ledger_entries'}:
                     continue
@@ -281,43 +292,12 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
                     value = row.get('transaction_id') if record['table_name'] == 'ledger_entries' else row.get('id')
                     if value is not None:
                         ids.add(value)
-                    if record['table_name'] == 'ledger_entries' and row:
-                        affected[(row['account_id'], row['asset_id'], row.get('owner_id'))] = row
-                        days.append(row['date'])
-            lines = []
-            for txn_id in ids:
-                txn = transactions.repo.get(txn_id)
-                if txn and not txn.is_void:
-                    postings = [PostingLine(
-                        account_id=line.account_id, asset_id=line.asset_id, quantity=line.quantity,
-                        effect=line.effect, unit_price=line.unit_price, fx_rate=line.fx_rate,
-                        category_id=line.category_id, memo=line.memo, amount=line.amount,
-                        amount_base=line.amount_base, is_cash=assets.get_asset(line.asset_id).is_cash,
-                        owner_id=line.owner_id) for line in txn.lines]
-                    validate_posting(postings)
-                    lines.extend(txn.lines)
-            if lines:
-                transactions._check_holdings(lines)
-            surviving, owner_keys = [], set()
-            for (account_id, asset_id, owner_id), row in affected.items():
-                if not db.scalar("SELECT 1 FROM financial_assets WHERE id=?", (asset_id,)):
-                    continue
-                if not db.scalar("SELECT 1 FROM accounts WHERE id=?", (account_id,)):
-                    continue
-                surviving.append(SimpleNamespace(account_id=account_id, asset_id=asset_id))
-                asset = assets.get_asset(asset_id)
-                if not asset.is_cash or owner_id is not None:
-                    owner_keys.add((account_id, asset_id, owner_id))
-                if owner_id is not None or accounts.get(account_id).account_type.value == 'BROKERAGE':
-                    owner_keys.add((account_id, asset_id, None))
-            if surviving:
-                transactions._check_holdings(surviving)
-            if owner_keys:
-                transactions._validate_owner_balances([], min(days), extra_keys=owner_keys, ignore_before_day=True)
-            from lightning.core.errors import ValidationError
-            from lightning.core.money import from_e6
-            for checked in db.all("SELECT * FROM reconciled_through"):
-                if result.reconciliation.balance(checked["account_id"], checked["date"]) != from_e6(checked["bank_balance_e6"]):
-                    raise ValidationError("The balance changed. Check it against the bank again before closing.")
-        result.undo.validate = validate_history
+            before = [txn for txn_id in ids if (txn := transactions.repo.get(txn_id)) is not None]
+            def check_cash():
+                after = [txn for txn_id in ids if (txn := transactions.repo.get(txn_id)) is not None]
+                dates = [txn.date for txn in before + after]
+                if dates:
+                    transactions._refuse_cash_below_zero([], min(dates), removed=before, added=after)
+            return check_cash
+        result.undo.prepare_validation = prepare_history_validation
     return result

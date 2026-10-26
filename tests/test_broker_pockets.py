@@ -103,3 +103,47 @@ def test_one_row_per_broker_in_the_sidebar_and_accounts_and_its_page_shows_each_
     assert "Part of THNDR" in client.get(f"/accounts/{pocket.id}").text
     reply = client.post(f"/accounts/{thndr.id}/pockets", data={"currency": "eur"}, follow_redirects=False)
     assert reply.status_code == 303 and c.accounts.pocket_for(thndr, "EUR").name == "THNDR · EUR"
+
+
+def test_a_refused_converting_buy_leaves_no_usd_pocket(c, setup):
+    accounts, _ = setup
+    thndr, etf = _broker_with_cash(c, accounts)
+    with pytest.raises(LightningError):
+        c.investments.buy_converting("2026-09-03", thndr.id, etf.id, "0", "0", "0")
+    assert c.accounts.pocket_for(thndr, "USD") is None
+    assert c.accounts.pockets(thndr.id) == []
+    assert c.reporting.account_balance(thndr.id, "2026-09-03") == D("60000")
+
+
+def test_a_refused_converting_buy_after_conversion_failure_keeps_cash(c, setup):
+    accounts, _ = setup
+    thndr, etf = _broker_with_cash(c, accounts)
+    with pytest.raises(LightningError):
+        c.investments.buy_converting("2026-09-03", thndr.id, etf.id, "10", "1000", "0")
+    assert c.accounts.pocket_for(thndr, "USD") is None
+    assert c.reporting.account_balance(thndr.id, "2026-09-03") == D("60000")
+
+
+@pytest.mark.parametrize("existing_pocket", [False, True])
+def test_failed_purchase_rolls_back_a_successful_conversion_and_all_rows(c, setup, existing_pocket, monkeypatch):
+    accounts, _ = setup
+    thndr, etf = _broker_with_cash(c, accounts)
+    if existing_pocket:
+        c.accounts.add_pocket(thndr.id, "USD")
+    # Snapshot every persisted table, including audit and executed FX rates.
+    before = list(c.db.conn.iterdump())
+    converted = []
+    record = c.transactions.record_conversion
+
+    def observe(*args, **kwargs):
+        txn = record(*args, **kwargs)
+        converted.append(txn)
+        pocket = c.accounts.pocket_for(thndr, "USD")
+        assert c.reporting.account_balance(pocket.id, "2026-09-03") == D("1000")
+        return txn
+
+    monkeypatch.setattr(c.transactions, "record_conversion", observe)
+    with pytest.raises(LightningError):
+        c.investments.buy_converting("2026-09-03", thndr.id, etf.id, "0", "1000", "51000")
+    assert len(converted) == 1  # The conversion succeeded; the purchase then failed.
+    assert list(c.db.conn.iterdump()) == before

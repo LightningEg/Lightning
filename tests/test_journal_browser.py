@@ -58,7 +58,9 @@ def journal_server(tmp_path,request):
                 return [candidate]
             def factory(endpoint,certificate,timeout):
                 async def exchange(wire):
-                    return hs.exchange(wire)
+                    result = hs.exchange(wire)
+                    state["digits"] = hs.screen()["digits"]
+                    return result
                 return exchange
             pairing = NearbyPairing(pc,search=search,client_factory=factory)
             app = create_journal_app(pc, session_token=token, synchronize=sync,pairing=pairing)
@@ -133,25 +135,22 @@ def test_named_device_numeric_pairing_layout(journal_server,width,phone):
         context.add_cookies([dict(name="journal_session",value=token,url=url,httpOnly=True,sameSite="Strict")])
         page = context.new_page()
         page.goto(url + "/devices")
-        page.get_by_role("button",name="Find nearby devices").click()
-        code = page.get_by_label("Number shown on the home")
-        code.wait_for()
-        assert code.get_attribute("inputmode") == "numeric"
-        assert not page.locator('input[name="address"],input[name="port"]').count()
-        assert code.evaluate("n => getComputedStyle(n).backgroundColor") != "rgb(255, 255, 255)"
+        page.get_by_role("button",name="Pair with",exact=False).wait_for()
+        assert not page.locator('input[name="code"],input[name="address"],input[name="port"]').count()
+        page.get_by_role("button",name="Pair with",exact=False).click()
+        page.get_by_text("Select the number shown on the other device.",exact=True).wait_for()
+        choices = page.locator('button[name="digits"]')
+        assert choices.count() == 3
+        assert not page.get_by_label("Profile password").count()
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
         if phone:
-            assert code.bounding_box()["height"] >= 48
-        code.fill(state["code"])
-        page.get_by_role("button",name="Pair with",exact=False).click()
-        # Matching digits come first; only then is the profile password asked for.
-        page.get_by_text("Does the home show this number?",exact=True).wait_for()
-        assert not page.get_by_label("Profile password").count()
-        page.get_by_role("button",name="Yes, the numbers match").click()
+            assert all(box["height"] >= 48 for box in choices.evaluate_all("nodes=>nodes.map(n=>n.getBoundingClientRect().toJSON())"))
+        digits = state["digits"]
+        page.locator(f'button[name="digits"][value="{digits}"]').click()
         page.get_by_label("Profile password").fill("Pairing password")
         page.get_by_role("button",name="Continue").click()
         page.get_by_text("Confirm on the home. This screen will continue automatically.",exact=True).wait_for()
         assert page.locator("[data-pairing-pending] strong").inner_text().replace(" ","").isdigit()
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
-        page.screenshot(path=f"/workspace/journal-devices-{width}.png",full_page=True)
+        page.screenshot(path=f"/tmp/lightning-4d-harness-{width}.png",full_page=True)
         browser.close()

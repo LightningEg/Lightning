@@ -1,5 +1,7 @@
 {% if error %}<p class="flash error" role="alert">{{ error }}</p>{% endif %}
 {% if message %}<p class="flash" role="status">{{ message }}</p>{% endif %}
+<div data-pairing-poll="/devices/poll" data-token-name="__session" data-token="{{ session }}" data-version="{{ pairing_version }}"></div>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/pairing.js" defer></script>
 <section class="{{ 'phone-flat-rows' if phone else 'card' }}">
   <h2>Devices</h2>
   {% if not pairing.enabled %}<p>Nearby pairing is unavailable in this preview.</p>
@@ -7,11 +9,11 @@
     {% for name in pairing.members %}<p>{{ name }} · Paired</p>{% else %}<p>No other devices paired yet.</p>{% endfor %}
     {% if home %}
       {% if pairing.code %}
-        <h3>Pair a device</h3><p>On your other device, open Devices, find this home and enter this number.</p>
-        <p class="num"><strong>{{ pairing.code }}</strong></p>
+        <h3>Pair a device</h3><p>On your other device, select this device from Nearby devices.</p>
+        {% if not pairing.number_match %}<p class="num"><strong>{{ pairing.code }}</strong></p>{% endif %}
         {% if pairing.request_name %}
           <p>{{ pairing.request_name }} wants to connect. Check that both screens show:</p>
-          <p class="num"><strong>{{ pairing.digits }}</strong></p>
+          <p class="stat-value" dir="ltr">{{ pairing.digits }}</p>
           {% if pairing.confirmed %}<p class="muted">Waiting for {{ pairing.request_name }} to confirm and enter its profile password.</p>
           {% else %}<form method="post" action="/devices/confirm"><input type="hidden" name="__session" value="{{ session }}"><input type="hidden" name="digits" value="{{ pairing.digits }}"><button class="btn primary">The numbers match</button></form>{% endif %}
         {% else %}<p class="muted">Waiting for your other device.</p>{% endif %}
@@ -20,8 +22,8 @@
         <form method="post" action="/devices/open"><input type="hidden" name="__session" value="{{ session }}"><div class="field"><label for="pair-password">Profile password</label><input id="pair-password" name="password" type="password" autocomplete="current-password" required></div><button class="btn primary">Pair a device</button></form>
       {% endif %}
     {% elif pairing.pending and pairing.stage == 'compare' %}
-      <p>Does the home show this number?</p><p class="num"><strong>{{ pairing.pending }}</strong></p>
-      <form method="post" action="/devices/compare"><input type="hidden" name="__session" value="{{ session }}"><input type="hidden" name="digits" value="{{ pairing.pending }}"><button class="btn primary">Yes, the numbers match</button></form>
+      {% if pairing.failed %}<p role="alert">The number did not match. Stop pairing on the home, then cancel here and start again.</p>{% else %}<p>Select the number shown on the other device.</p>
+      <form method="post" action="/devices/compare"><input type="hidden" name="__session" value="{{ session }}">{% for choice in pairing.choices %}<button class="btn" name="digits" value="{{ choice }}" dir="ltr">{{ choice }}</button>{% endfor %}</form>{% endif %}
       <form method="post" action="/devices/cancel"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">No, start over</button></form>
     {% elif pairing.pending and pairing.stage == 'password' %}
       <form method="post" action="/devices/prove"><input type="hidden" name="__session" value="{{ session }}"><p>The numbers match. Enter your profile password to finish.</p>
@@ -37,7 +39,7 @@
       <form method="post" action="/devices/find"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Find nearby devices</button></form>
       {% for item in pairing.nearby %}
         <form method="post" action="/devices/join"><h3>{{ item.name }}</h3><input type="hidden" name="__session" value="{{ session }}"><input type="hidden" name="candidate" value="{{ item.id }}">
-          <div class="form-grid"><div class="field"><label for="pair-code-{{ loop.index }}">Number shown on the home</label><input id="pair-code-{{ loop.index }}" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="32" required></div></div><button class="btn primary">Pair with {{ item.name }}</button>
+          {% if not item.number_match %}<div class="form-grid"><div class="field"><label for="pair-code-{{ loop.index }}">Number shown on the home</label><input id="pair-code-{{ loop.index }}" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="32" required></div></div>{% endif %}<button class="btn primary">Pair with {{ item.name }}</button>
         </form>
       {% else %}<p class="muted">Search while the home’s pairing screen is open.</p>{% endfor %}
     {% endif %}

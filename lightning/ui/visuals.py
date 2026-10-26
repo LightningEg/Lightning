@@ -19,18 +19,6 @@ from lightning.reporting.spending import spending_profile
 from . import charts
 
 
-def flow_trend(c, end: date, count: int = 6) -> dict:
-    """Money in and money out per month (the same figures as Cash flow), ending with ``end``."""
-    keys = months_back(end, count, c.reporting.first_activity_date())
-    if not keys:
-        return charts.trend([], [])
-    rows = {r["month"]: r for r in c.reporting.monthly_flow_between(parse_month(keys[0])[0], end)}
-    return charts.trend(keys, [
-        {"name": "Money in", "tone": "in", "values": [rows.get(k, {}).get("inflows", ZERO) for k in keys]},
-        {"name": "Money out", "tone": "spend", "values": [rows.get(k, {}).get("outflows", ZERO) for k in keys]},
-    ])
-
-
 def spending_trend(c, end: date, category_code: str = "", count: int = 6) -> dict:
     """Money out per month, with the month's plan as a dashed line when one exists."""
     keys = months_back(end, count, c.reporting.first_activity_date())
@@ -55,20 +43,6 @@ def spending_trend(c, end: date, category_code: str = "", count: int = 6) -> dic
         plan = plans[-1] or None
     return charts.trend(keys, [{"name": "Money out", "tone": "hold", "values": values, "area": True, "over": over}],
                         plan=plan)
-
-
-def spending_bars(c, first: date, last: date, limit: int = 6) -> dict:
-    """Money out by category: each L1 as a header with its L2 categories under it, each linking to
-    its transactions."""
-    rows = []
-    for group in c.reporting.spending_by_category(first, last, depth=2):
-        if group.value <= 0:
-            continue
-        category = c.categories.get_by_code(group.code)
-        query = urlencode({"category_id": category.id, "date_from": fmt_date(first), "date_to": fmt_date(last)})
-        parent = c.categories.get(category.parent_id).name if category.parent_id else category.name
-        rows.append({"group": parent, "label": category.name, "value": group.value, "href": f"/transactions?{query}"})
-    return charts.grouped_bars(rows, limit)
 
 
 def _leaf(name: str) -> str:
@@ -145,12 +119,15 @@ def money_sankey(c, first: date, last: date, cash_flow, sources_shown: int = 3, 
     return charts.sankey(sources, targets, "Money in", xs=xs)
 
 
+def savings_rates(c, end: date, count: int = 6) -> list:
+    """Savings rate for each recent month, the service's own figure (None for a month with no money in)."""
+    return [c.reporting.cash_flow(parse_month(key)[0], day).savings_rate
+            for key, day in month_ends(end, count, c.reporting.first_activity_date())]
+
+
 def savings_rate_spark(c, end: date, count: int = 6) -> dict:
-    """Savings rate for each recent month (the service's own figure), as a sparkline."""
-    values = []
-    for key, day in month_ends(end, count, c.reporting.first_activity_date()):
-        values.append(c.reporting.cash_flow(parse_month(key)[0], day).savings_rate)
-    return charts.sparkline(values)
+    """Savings rate for each recent month, as a sparkline."""
+    return charts.sparkline(savings_rates(c, end, count))
 
 
 def holdings_donut(position, include_cash: bool = False) -> dict:
@@ -163,19 +140,6 @@ def holdings_donut(position, include_cash: bool = False) -> dict:
     if include_cash and position.other_you_own > 0:
         slices.append({"label": "Other you own", "value": position.other_you_own, "tone": "other"})
     return charts.donut(slices)
-
-
-def portfolio_trend(values: list[tuple[str, Decimal | None]]) -> dict:
-    """Portfolio value per month, starting at the first month that held anything."""
-    started = False
-    kept = []
-    for label, value in values:
-        if not started and not value:
-            continue
-        started = True
-        kept.append((label, value))
-    return charts.trend([k for k, _ in kept], [{"name": "Portfolio value", "tone": "hold",
-                                                "values": [v for _, v in kept], "area": True}])
 
 
 def forecast_trend(forecast) -> dict:
@@ -532,6 +496,27 @@ def cash_plan(c, forecast, day: date) -> dict:
         rest = loans[4:]
         loans = loans[:4] + [{"label": "Other", "value": sum((r["value"] for r in rest), ZERO), "note": f"{len(rest)} loans"}]
     return {"build": build, "marks": marks, "upcoming": upcoming, "before_income": before_income,
-            "before_total": sum((p.amount for p in before_income), ZERO), "heading": heading, "flows": rows,
+            "before_total": f.payments_before_income_total, "heading": heading, "flows": rows,
             "loan_bars": charts.bars(loans, 6), "loan_rows": loans, "forecast_spark": charts.sparkline([m.closing for m in f.months]),
             "parts": parts, "past_free": [(key, value) for key, value in zip(past_keys, past)]}
+
+
+PAIR_XS = (24.0, 45.0, 64.0)  # two Sankeys side by side: target names get a third of each (style.css .is-pair)
+
+
+def cash_flow_charts(c, first: date, last: date, month_period: bool, today_: date) -> dict:
+    """Spending's Cash flow section (moved from the Overview, owner 2026-10-21): where the period's money in went,
+    beside the last six months' when the period is a month (ticket 78), and net cash flow by month (tickets 79, 86)."""
+    from lightning.investments.report import investment_period
+    flow = c.reporting.cash_flow(first, last)
+    added = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(first), fmt_date(last))["net_money"]
+    six, six_from = None, None
+    if month_period:
+        keys = months_back(last, 6, c.reporting.first_activity_date())
+        if len(keys) > 1:
+            six_from = parse_month(keys[0])[0]
+            six_added = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(six_from), fmt_date(last))["net_money"]
+            six = money_sankey(c, six_from, last, c.reporting.cash_flow(six_from, last), money_added=six_added, xs=PAIR_XS)
+    return {"money_sankey": money_sankey(c, first, last, flow, money_added=added, xs=PAIR_XS if six else (22.0, 49.0, 76.0)),
+            "money_sankey_six": six, "six_from": six_from.strftime("%Y-%m") if six_from else "",
+            "month_calendar": month_calendar(c, today_)}

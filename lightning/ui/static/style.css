@@ -3065,6 +3065,7 @@ input[type=file]:not(#_):not(.x_):hover::file-selector-button { border-color:var
 
 /* Multiple devices: where the ledger is, with the one action that changes it. */
 .flash.device-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.flash.device-line > span { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .flash.device-line form { margin: 0; }
 
 /* Settings › Rules: the form's segments hug their choices (A10.2), two amount wells side by side; the undo
@@ -3096,7 +3097,7 @@ html[dir="rtl"] .code, html[dir="rtl"] code, html[dir="rtl"] [data-ref], html[di
 .main .register-row-action .amount.neg, .main .register-row-action .amount.negative { color:var(--ink)!important; }
 .main .register-row-action { white-space:nowrap; }
 .main .register-row-action .register-balance { display:inline-block; margin-left:7px; }
-.main .flash:not(.error) { position:fixed; z-index:100; top:16px; left:50%; transform:translateX(-50%); width:max-content; max-width:min(640px,calc(100vw - 32px)); margin:0; color:var(--ink)!important; background:var(--surface)!important; border:1px solid var(--edge); box-shadow:var(--shadow-card); }
+.main .flash:not(.error):not(.device-line) { position:fixed; z-index:100; top:16px; inset-inline:16px; width:max-content; max-width:min(640px,calc(100vw - 32px)); box-sizing:border-box; margin:0 auto; color:var(--ink)!important; background:var(--surface)!important; border:1px solid var(--edge); box-shadow:var(--shadow-card); }
 @media (max-width:760px) {
   .main .factor-table { table-layout:auto; }
   .main .factor-table col.c-num { width:auto; }
@@ -3646,3 +3647,20 @@ a.period-button { display:inline-flex; align-items:center; justify-content:cente
 .main .account-row-name small { font:500 var(--fs-meta)/1.3 var(--body); color:var(--muted); }
 .main .account-row .num { text-align:end; font-variant-numeric:tabular-nums; }
 @media (max-width:1100px) { .main .account-groups { grid-template-columns:1fr; } }
+/* Holdings in five columns (guideline 3.33, A11): units, average and price, and the account under the name. */
+.main .holdings-wide tr[data-search] td:first-child { min-width:280px; }
+.main .holdings-wide td:first-child .hold-sub { white-space:normal; }
+.main .spending-flows { margin-top:var(--gap-block); }
+
+/* Owner: compact holdings with detail on the holding page. */
+.main .holdings-wide .holding-link { color:var(--ink); text-decoration:none; }
+.main .holdings-wide .holding-link:is(:hover,:focus-visible) { color:var(--azure); text-decoration:none; }
+.main .holdings-group-picker { width:auto; min-width:160px; max-width:100%; }
+.main .holdings-wide tr[data-search] td:first-child { min-width:190px; }
+
+/* Data tools keep a readable measure on large screens and wrap on phones. */
+.data-settings { width:100%; max-width:960px; margin-inline:auto; min-width:0; }
+.ai-export-actions { align-items:center; flex-wrap:wrap; }
+.ai-export-actions form { margin:0; }
+.ai-prompt-dialog { width:min(760px,calc(100vw - 32px)); max-width:calc(100vw - 32px); }
+.ai-prompt-dialog textarea { width:100%; max-width:100%; box-sizing:border-box; }

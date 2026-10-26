@@ -15,7 +15,6 @@ class TestRecording:
         from lightning.database.currencies import CurrencyRegistry
         _, cats = setup
         CurrencyRegistry(c.db).register("USD")
-        c.accounts.allow_foreign = True
         usd = c.account_flows.open_account("Dollar account", "BANK", "2026-09-01", "0",
                                            institution="Test Bank", currency="USD")
         c.db.execute(
@@ -39,7 +38,6 @@ class TestRecording:
         from lightning.database.currencies import CurrencyRegistry
         _, cats = setup
         CurrencyRegistry(c.db).register("USD")
-        c.accounts.allow_foreign = True
         usd = c.account_flows.open_account("Dollar account", "BANK", "2026-09-01", "0",
                                            institution="Test Bank", currency="USD")
 
@@ -51,7 +49,6 @@ class TestRecording:
         from lightning.database.currencies import CurrencyRegistry
         accounts, _ = setup
         CurrencyRegistry(c.db).register("USD")
-        c.accounts.allow_foreign = True
         usd = c.account_flows.open_account("Dollar account", "BANK", "2026-09-01", "0",
                                            institution="Test Bank", currency="USD")
 
@@ -248,13 +245,6 @@ class TestRegister:
         cid = cats[category].id if category else None
         with pytest.raises(ValidationError, match=msg):
             c.transactions.record_in_account(accounts["wallet"].id, "2026-09-10", amount, cid)
-
-    def test_counterparty_memory(self, setup, c):
-        accounts, cats = setup
-        w = accounts["wallet"].id
-        c.transactions.record_in_account(w, "2026-09-10", "-5", cats["EXP.PERSONAL.FOOD"].id, counterparty="Kiosk")
-        c.transactions.record_in_account(w, "2026-09-12", "-5", cats["EXP.WORK.SOFTWARE"].id, counterparty="Kiosk")
-        assert c.transactions.counterparty_suggestions()["Kiosk"] == cats["EXP.WORK.SOFTWARE"].id
 
     def test_typed_category_and_account_lookup(self, setup, c):
         accounts, _ = setup

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "lightning-default",
+  "name": "Lightning default",
+  "version": 1,
+  "status": "built-in-default",
+  "priceCoins": null,
+  "bundleTargets": [
+    "windows",
+    "android"
+  ],
+  "minimumAppVersion": null,
+  "parts": {
+    "palette": {
+      "background": "#F5F8F7",
+      "surface": "#FFFFFF",
+      "raised": "#F5F8F7",
+      "text": "#0D2233",
+      "muted": "#566E7E",
+      "border": "#DDE9E6",
+      "accent": "#0B6DD6",
+      "onAccent": "#FFFFFF",
+      "income": "#097852",
+      "expense": "#C93D72",
+      "transfer": "#566E7E",
+      "warning": "#304A5C",
+      "focus": "#0B6DD6",
+      "hero": "#0D2233"
+    },
+    "brand": {
+      "logoVariant": "on-light"
+    },
+    "header": {
+      "surface": "surface",
+      "seam": "accent"
+    },
+    "navigation": {
+      "surface": "surface",
+      "activeMark": "accent"
+    },
+    "hero": {
+      "surface": "surface",
+      "edge": "accent",
+      "decoration": "none"
+    },
+    "cards": {
+      "surface": "surface",
+      "border": "border"
+    },
+    "charts": {
+      "grid": "border",
+      "accent": "accent"
+    },
+    "controls": {
+      "fill": "accent",
+      "label": "onAccent",
+      "focus": "focus"
+    },
+    "overlays": {
+      "surface": "raised",
+      "backdrop": "background"
+    },
+    "menus": {
+      "surface": "raised",
+      "divider": "border"
+    },
+    "decoration": {
+      "pattern": "none",
+      "motion": "none"
+    }
+  }
+}

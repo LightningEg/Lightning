@@ -1,6 +1,6 @@
 # Lightning — Project Overview
 
-**Last reviewed 2026-10-13 · app 1.1.0-beta.1** ([published Windows and Android beta](https://github.com/elfekimuhammed/Lightning-downloads/releases/tag/v1.1.0-beta.1)).
+**Last reviewed 2026-10-23 · source 1.4.4 · latest published beta 1.4.2** ([published Windows and Android beta](https://github.com/LightningEg/Lightning-downloads/releases/tag/v1.4.2)).
 
 What Lightning is, who it is for, what it answers and where it goes. Technical contracts: [Architecture](ARCHITECTURE.md). Look: [guideline](../guideline/). Terms and figures: [Glossary](GLOSSARY.md). Shipped changes: `CHANGELOG.md`. Hand-off between AIs: [NOW.md](../NOW.md). The plan and open items: [issues/](../issues/INDEX.md).
 
@@ -19,6 +19,7 @@ Read one section: `grep -n '^## ' docs/PROJECT_OVERVIEW.md`, then read from that
 | 7. Compared with the best budgeting apps | You plan a feature |
 | 8. UX plan (guideline 3.6) | You take a UX item |
 | 9. Plan and roadmap | You pick the next work or finish a milestone |
+| Cosmetic marketplace owner revision (2026-10-24) | You change cosmetic parts, purchasing or ownership |
 
 <a id="what-lightning-is"></a>
 ## 1. What Lightning is
@@ -42,12 +43,13 @@ Dates are when the owner decided. Undated rows are founding rules.
 
 | Decision | Rule |
 |---|---|
+| **Local pairing** (2026-10-23) | Automatically discover named nearby homes while pairing is open. The joining device selects the number displayed on the home from three distinct choices, then enters the profile password; the home confirms the named device. No QR or typed address. Saved identities reconnect automatically. Recovery keys stay unchanged. |
 | **Branches** (2026-10-12) | Work on `who/feature`, merge finished work into `main`. [AGENTS.md](../AGENTS.md) section 6. |
 | **Arabic is for Egypt** | English and Egyptian Arabic for the same profile; the website links matching pages. Arabic reads right to left; money, dates, codes and identifiers keep their natural order. Names: [Glossary](GLOSSARY.md#العربية--المسرد-العربي). |
 | **Feedback screenshots stay private** | Up to five images per ticket, stored in the Apps Script owner's private Drive folder, linked in the feedback Sheet. The website repo owns it. |
 | **Savings and reserve matching** (2026-10-19) | The waffle shows savings only, including savings allocated to investments, with positive Overspent figures and darker spending squares when spending exceeds income. Reserve matching can combine account, counterparty and category; all selected criteria must match. |
 | **KPI cards compare** (2026-10-19) | Every KPI card shows a comparison (guideline 3.32, A08): five fixed slots, no icon tile; two to four cards fill a row; a key note never forms a row of its own. Budget's day rate counts only everyday money, not bills still to pay in the plan. The savings waffle lives only behind the Overview's Savings rate. Price and net-worth charts keep their axis from zero and name the change. [3Q](../issues/3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md) builds it. |
-| **Answer first** (2026-10-21) | Every page opens on its answer: header with a status sentence and the dates, the Lead with its working, Needs you, KPIs, then details; one home per figure (guideline 3.33, A09). KPI tiles 2 × 2 on the phone. Rebuild: 3W. |
+| **Answer first** (2026-10-21) | Every page opens on its answer: header with a status sentence and the dates, the Lead with its working, Needs you, KPIs, then details; one home per figure (guideline 3.33, A09). KPI tiles 2 × 2 on the phone. Built (3W). Where money in went (beside the last six months, ticket 78) and Month by month (tickets 79, 86) moved from the Overview to Spending (owner, 2026-10-21). |
 | **Arabic body face** (2026-10-19) | Arabic body text is Noto Sans Arabic, more readable than IBM Plex Sans Arabic, which is gone; Readex Pro stays for titles and figures (A06.2). |
 | **One ledger** | Registers, budget actuals, investments, Overview and reports are views of one transaction ledger. |
 | **Other people's money** | *Held for others* stays in the account balance, is left out of *What you own*, and is not income, spending or money owed to you. |
@@ -60,7 +62,7 @@ Dates are when the owner decided. Undated rows are founding rules.
 | **Each visual names its time frame** | The chosen period or a fixed horizon (section 4). |
 | **Holdings value = Portfolio value** (2026-10-04) | Everything owned that is not cash, deposits included, on every tab and chart. |
 | **Every release stays downloadable** (2026-10-03) | Keep at least the three latest, each with its own immutable download and site entry. Never replace or remove an older one without the owner. |
-| **Free 7 days, then a reminder, never a lock** (2026-10-04) | Full app from minute one, no card or account. After 7 days it asks for a licence and never blocks or hides data. Price not set. |
+| **Free to use; optional cosmetic support** (owner, 2026-10-24) | Every app feature stays free indefinitely: no trial, licence fee, subscription or functional paywall. Optional in-app cosmetics, starting with themes, may be bought to support development; they change appearance only. The purchase and claim flow is still being completed. |
 | **The website never mentions other apps** (2026-10-05; again 2026-10-21) | No comparison or "vs" pages or tables, not even against a spreadsheet (guideline B10, B11). |
 | **Testing tab for testers only** (2026-10-21, left to Claude) | On lightningeg.com the Testing tab shows after `?testing`; the consent bar is a slim bottom strip. |
 | **Found as the all-in-one tracker** (2026-10-20) | The website answers "net worth, budget and expense tracker" with one page, English and Arabic, where every figure is Mohab's and no other app is named. Evidence and follow-up: [Competition](COMPETITION.md), issue 8C. |
@@ -72,7 +74,7 @@ Dates are when the owner decided. Undated rows are founding rules.
 | **Phone has its own design** (2026-10-06, 2026-10-07) | Part C of the guideline; never the PC layout squeezed. Every icon has its word (alone only if universal). The tab bar, Add and the Overview's order: Phone overhaul below. |
 | **Phone overhaul** (2026-10-22) | The owner's design "Lightning on your phone": a tab bar of words (Overview, Budget, Add, Transactions, More), Add in its middle; every tab opens on one hero figure with a calm sentence (Overview: Safe to spend); a month stepper whose month opens Choose period; tabs in words; arrow chips on rows, no ".00"; More holds the other sections with their figures. Supersedes icon-only tabs (2026-10-15). Guideline 3.34 Part C; step 2 in [3AD](../issues/3-polish-and-arabic/3AD-phone-overhaul-step-2.md). |
 | **Fewer steps to set up** (2026-10-06) | Recovery key shown once and confirmed with a press. One password on every device. |
-| **Edit-journal connection and cost** (2026-10-16) | Discover nearby device names and pair once using the home’s six-digit code, profile password proof and matching check digits; no typed address or port. Saved keys authenticate routine sync without another pairing prompt. Prefer the reachable paired home on the local network, then use free-tier cloud delivery. Workers Free and SQLite Durable Objects only: no R2 or paid subscriptions. Exhausted cloud quotas pause delivery while local edits remain saved. Live cloud configuration can wait while development continues locally. |
+| **Edit-journal connection and cost** (2026-10-16) | Pairing follows the Local pairing decision above. Saved keys authenticate routine sync without another pairing prompt. Prefer the reachable paired home on the local network, then use free-tier cloud delivery. Workers Free and SQLite Durable Objects only: no R2 or paid subscriptions. Exhausted cloud quotas pause delivery while local edits remain saved. Live cloud configuration can wait while development continues locally. |
 | **Fingerprint, gam'eya and zakat** (2026-10-14) | Android offers fingerprint unlock as an option; the password and recovery key always still work. Gam'eya is built on the CD backbone with the interest rate optional (none by default). Zakat is an estimate by the common rule, off until turned on in Settings. |
 | **Order to Google Play** (2026-10-06) | M1 phone and PC connected; M2 daily recording on the phone; M3 bank SMS into the ledger; then beta and Google Play. The owner reviews at each milestone. |
 
@@ -104,6 +106,10 @@ Specs live in [Architecture](ARCHITECTURE.md); terms in the [Glossary](GLOSSARY.
 - **Samples:** `python -m lightning --demo` (Mohab's last three months); an empty profile can load Mohab's year (1 January to 2 October 2026) or the stories of Amr, Abdelrahman, Menna or Fatma. Mohab's year holds one of every part of Lightning: ten accounts of every kind (a dollar account bought with pounds, a flat valued by hand), goals (one paid, two saving), a gam'eya, zakat, a rule, a reimbursement claim, Mom's money and a grocery bill she paid, a laptop on instalments with an early payment, investing targets and a monthly goal, a saved #eid report and a statement still waiting for decisions. `tests/test_mohab_sample.py` keeps it that way: a new feature gets sample data there.
 
 <a id="period-and-fixed-horizon-visuals"></a>
+Owner decision (2026-10-24, 7Q): Needs you supports Mark as reviewed, Snooze until a chosen date, and Restore from Reviewed and snoozed. Reviewed reminders return when their situation changes; snoozes wake on their chosen date. These preferences change inbox/reminder visibility without recording payments or resolving the financial issue.
+
+Owner decisions (2026-10-24, 7P / 3AG): exports use plain Arial 11 left alignment and readable names before mapping IDs; category levels are separate columns. Settings groups comprehensive export and empty-profile workbook onboarding in Move your data, with a narrower page and compact AI export/copy/edit controls; the prompt editor is a popup. Holdings rows show one clean line without secondary annotations, names turn blue on hover without underlines, and grouping uses one dropdown. Implementation and import boundaries: [Architecture › CSV import and export contract](ARCHITECTURE.md#csv-import-and-export-contract).
+
 ## 4. Period and fixed-horizon visuals
 
 The period picker (All time · YTD · Monthly · Custom) drives most visuals. A few keep a fixed horizon, and each section header says which.
@@ -253,3 +259,13 @@ schedules; Fill this month; entry helpers; gam'eya and zakat; and the five owner
 dated cash warnings, undo/review/provenance, reserve/bill/CD/reimbursement links, optional cash funding, saved views and
 weekly review). Detail: [CHANGELOG](../CHANGELOG.md) and [Architecture](ARCHITECTURE.md). Where each idea came from:
 [Competition](COMPETITION.md).
+
+## Cosmetic marketplace owner revision (2026-10-24)
+
+Appearance uses swappable, approved parts with fixed layout and financial semantics. Themes are intended to ship in the app; the website sells account-wide permanent ownership, then a temporary random code delivers a signed offline unlock over an initial online exchange. No device cap or repeat charge. Nile Nocturne and Royal Obsidian & Gold are the first design tests; pricing and release integration remain uncommitted. The site handles InstaPay plus a customer reference/WhatsApp receipt and separate owner settlement confirmation, with a stated final-purchase policy subject to required rights and error correction. Infrastructure status: Architecture › Cosmetic parts and offline ownership; remaining work: 8J.
+
+### Website gamification revision (2026-10-24)
+
+The website adds consented, moderated community stories with optional author-provided LinkedIn links. Accepted stories can earn recognition points once; a URL alone earns nothing. Recognition points do not fund purchases. Mono becomes the only free website palette; existing paid ownership and previously equipped free palettes are preserved. Account access uses a compact avatar/icon dropdown, and Features is linked as a card inside Guides. Top-up receipts move from WhatsApp to private website uploads, with the member email in the InstaPay note and the payer InstaPay address recorded for reconciliation; owner settlement confirmation remains mandatory.
+
+**Market owner revision (2026-10-25).** Both markets, main-site Marketplace (Part B) and For Geeks (Part D), share one structure (not one look: each keeps its own guideline) from the owner's market sheets: Your look beside the wallet, tabs (Themes, Banners, Frames, Badges, Owned), the two app themes in testing featured without a price, Details showing a theme on the website, the PC app and the phone, Try it for the visit with nothing saved, and a buy that says how many coins are missing. No Threads currency: coins keep their name and are drawn as a pixel-art cotton boll. Themes are shared, looks are not: one purchase dresses both sites, each drawing its own version (For Geeks its terminal palette; the main site a light and a dark side that follow the light/dark switch). A theme a member owns and equips may be worn across the main website (an owner exception to Part B's fixed palette); good and bad keep their colours. Five palettes are on sale (Paper, Frost, Meadow, Nile, Garnet) until each works on both sites; the other nine are archived but kept by their owners. How a theme is made: [guideline/themes.md](../guideline/themes.md). Owner, 2026-10-25: themes come in tiers priced for one-time buyers (Palette 300 coins = 60 EGP, Textured 600, Animated 1,000 later; 5 coins per EGP); the reasoning against about 3,000 EGP of monthly fixed cost is in the website repo's docs/payment-operations.md.

@@ -5,7 +5,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 from lightning.accounts.service import AccountService
-from lightning.core.dates import now_iso, parse_date
+from lightning.core.dates import parse_date
 from lightning.core.errors import ValidationError
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, check_places, from_e6, to_decimal, to_e6
@@ -14,60 +14,22 @@ from lightning.database.connection import Database
 
 
 class MoneyFromOthersService:
-    def __init__(self, db: Database, accounts: AccountService, transactions=None):
+    def __init__(self, db: Database, accounts: AccountService, transactions=None,
+                 counterparties: CounterpartyService | None = None):
         self.db, self.accounts, self.transactions = db, accounts, transactions
+        self.counterparties = counterparties or CounterpartyService(db)
 
     def _tag_exact_line(self, transaction_id: int, owner: str | None, account_id: int, asset_id: int,
                         quantity_e6: int) -> None:
+        """Mark part or all of a posted line as held for ``owner``; the ledger's owner is the one record (2G3)."""
         if not owner:
             return
-        party = CounterpartyService(self.db).resolve(owner.strip())
-        if not party:
-            party_id = CounterpartyService(self.db).create(owner.strip())
-            party = {"id": party_id}
-        if not party:
-            return
-        line = self.db.one("SELECT * FROM ledger_entries WHERE transaction_id=? AND account_id=? AND asset_id=? "
-                           "AND quantity_e6*?>0 AND owner_id IS NULL ORDER BY line_no LIMIT 1",
-                           (transaction_id, account_id, asset_id, quantity_e6))
-        if not line:
-            return
-        take = min(abs(quantity_e6), abs(line["quantity_e6"]))
-        if take == abs(line["quantity_e6"]):
-            self.db.execute("UPDATE ledger_entries SET owner_id=? WHERE id=?", (party["id"], line["id"]))
-            self._validate_owner_partition(account_id, asset_id, party["id"])
-            return
-        total = abs(line["quantity_e6"])
-        def proportional(value):
-            sign = -1 if value < 0 else 1
-            return sign * (abs(value) * take // total)
-        owned_amount, owned_base = proportional(line["amount_e6"]), proportional(line["amount_base_e6"])
-        sign = -1 if line["quantity_e6"] < 0 else 1
-        self.db.execute("UPDATE ledger_entries SET quantity_e6=?,amount_e6=?,amount_base_e6=? WHERE id=?",
-                        (line["quantity_e6"]-sign*take, line["amount_e6"]-owned_amount,
-                         line["amount_base_e6"]-owned_base, line["id"]))
-        self.db.execute("""INSERT INTO ledger_entries(transaction_id,line_no,date,account_id,asset_id,
-                     quantity_e6,unit_price_e6,amount_e6,fx_rate_e6,amount_base_e6,effect,category_id,memo,
-                     cleared,owner_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                        (line["transaction_id"], line["line_no"]+10000, line["date"], line["account_id"],
-                         line["asset_id"], sign*take, line["unit_price_e6"], owned_amount,
-                         line["fx_rate_e6"], owned_base, line["effect"], line["category_id"], line["memo"],
-                         line["cleared"], party["id"]))
-        self._validate_owner_partition(account_id, asset_id, party["id"])
-
-    def _validate_owner_partition(self, account_id: int, asset_id: int, owner_id: int) -> None:
-        for balance_owner in (owner_id, None):
-            rows = self.db.all("""SELECT le.date,SUM(le.quantity_e6) quantity FROM ledger_entries le
-                                 JOIN transactions t ON t.id=le.transaction_id
-                                 WHERE t.status='POSTED' AND le.account_id=? AND le.asset_id=? AND le.owner_id IS ?
-                                 GROUP BY le.date ORDER BY le.date""",
-                               (account_id, asset_id, balance_owner))
-            running = 0
-            for row in rows:
-                running += int(row["quantity"])
-                if running < 0:
-                    label = "selected owner" if balance_owner is not None else "user"
-                    raise ValidationError(f"The {label}'s balance would become negative on {row['date']}.", "owner")
+        if self.transactions is None:
+            raise ValidationError("Ownership changes must be posted through the transaction service.")
+        parties = self.counterparties
+        party = parties.resolve(owner.strip())
+        party_id = party["id"] if party else parties.create(owner.strip())
+        self.transactions.mark_line_owner(transaction_id, account_id, asset_id, quantity_e6, party_id)
 
     def record(self, day: str, owner: str, account_id: int, amount: Decimal, notes: str = "",
                transaction_id: int | None = None) -> None:
@@ -84,7 +46,7 @@ class MoneyFromOthersService:
             return
         if self.transactions is None:
             raise ValidationError("Ownership changes must be posted through the transaction service.")
-        parties = CounterpartyService(self.db)
+        parties = self.counterparties
         party = parties.resolve(owner.strip())
         if party and not party["active"]:
             raise ValidationError("Choose an active saved person.", "owner")
@@ -147,10 +109,7 @@ class MoneyFromOthersService:
                                 JOIN financial_assets f ON f.id=le.asset_id AND f.is_cash=1
                                 WHERE lower(p.name)=lower(?) AND le.account_id=? AND le.date<=?
                                 AND t.status='POSTED'""", (owner.strip(), account_id, day)) or 0
-        legacy = self.db.scalar("""SELECT COALESCE(SUM(amount_e6),0) FROM money_from_others
-                                WHERE lower(owner)=lower(?) AND account_id=? AND date<=? AND transaction_id IS NULL""",
-                                (owner.strip(), account_id, day)) or 0
-        return from_e6(int(total) + int(legacy))
+        return from_e6(int(total))
 
     @request_cached(deep=True)
     def cash_total_for_account(self, account_id: int, as_of: str) -> Decimal:
@@ -158,15 +117,8 @@ class MoneyFromOthersService:
         totals = {row["account_id"]: row["amount_e6"] for row in self.totals_by_account(day)}
         return from_e6(int(totals.get(account_id, 0)))
 
-    def transaction_owner(self, transaction_id: int) -> str:
-        row = self.db.one("SELECT p.name owner FROM ledger_entries le JOIN counterparties p ON p.id=le.owner_id WHERE le.transaction_id=? AND le.owner_id IS NOT NULL LIMIT 1", (transaction_id,))
-        if row:
-            return row["owner"]
-        row = self.db.one("SELECT owner FROM money_from_others WHERE transaction_id=?", (transaction_id,))
-        return row["owner"] if row else ""
-
     def transaction_owners(self, transaction_ids) -> dict[int, str]:
-        """transaction_owner for many transactions in two reads (a register page), "" when it is yours."""
+        """Who holds each transaction's money, in two reads (a register page); "" when it is yours."""
         ids = sorted(set(transaction_ids))
         owners = {txn_id: "" for txn_id in ids}
         if not ids:
@@ -174,7 +126,7 @@ class MoneyFromOthersService:
         marks = ",".join("?" * len(ids))
         for row in self.db.all(f"SELECT transaction_id, owner FROM money_from_others WHERE transaction_id IN ({marks})", ids):
             owners[row["transaction_id"]] = row["owner"]
-        # The ledger's owner wins over the legacy table, as in transaction_owner.
+        # The ledger's owner wins over the legacy table.
         for row in self.db.all("SELECT le.transaction_id, MIN(p.name) owner FROM ledger_entries le "
                                "JOIN counterparties p ON p.id=le.owner_id "
                                f"WHERE le.transaction_id IN ({marks}) AND le.owner_id IS NOT NULL "
@@ -184,43 +136,25 @@ class MoneyFromOthersService:
 
     def investment_transaction_owner(self, transaction_id: int) -> str:
         row = self.db.one("SELECT p.name owner FROM ledger_entries le JOIN counterparties p ON p.id=le.owner_id JOIN financial_assets f ON f.id=le.asset_id AND f.is_cash=0 WHERE le.transaction_id=? AND le.owner_id IS NOT NULL LIMIT 1", (transaction_id,))
-        if row:
-            return row["owner"]
-        row = self.db.one("SELECT owner FROM investment_custody_events WHERE transaction_id=?", (transaction_id,))
         return row["owner"] if row else ""
 
     def sync_investment(self, transaction_id: int, day: str, owner: str | None, account_id: int,
                         asset_id: int, units: Decimal) -> None:
+        """Mark a trade's units as held for ``owner``. The ledger's owner is the one record of who holds what, so
+        ``TransactionService._validate_owner_balances`` is the check: nobody sells units they do not hold (2G3)."""
         if not owner or units == ZERO:
-            self.db.execute("DELETE FROM investment_custody_events WHERE transaction_id=?", (transaction_id,))
             return
         units_e6 = to_e6(units)
-        existing = self.db.one("SELECT owner,account_id,asset_id,units_e6 FROM investment_custody_events WHERE transaction_id=?",
-                               (transaction_id,))
-        current = self.db.scalar(
-            "SELECT COALESCE(SUM(units_e6),0) FROM investment_custody_events "
-            "WHERE owner=? AND account_id=? AND asset_id=? AND date<=? AND transaction_id<>?",
-            (owner.strip(), account_id, asset_id, parse_date(day).isoformat(), transaction_id))
-        if int(current or 0) + units_e6 < 0:
-            raise ValidationError(f"There are not enough units owned by {owner} to record this sale.", "units")
-        custody_units = self.db.scalar(
-            "SELECT COALESCE(SUM(e.units_e6),0) FROM investment_custody_events e "
-            "JOIN transactions t ON t.id=e.transaction_id WHERE e.account_id=? AND e.asset_id=? "
-            "AND e.date<=? AND t.status='POSTED' AND e.transaction_id<>?",
-            (account_id, asset_id, parse_date(day).isoformat(), transaction_id))
-        total_units = self.db.scalar(
-            "SELECT COALESCE(SUM(le.quantity_e6),0) FROM ledger_entries le JOIN transactions t "
-            "ON t.id=le.transaction_id WHERE le.account_id=? AND le.asset_id=? AND le.date<=? "
-            "AND t.status='POSTED'",
-            (account_id, asset_id, parse_date(day).isoformat()))
-        if int(custody_units or 0) + units_e6 > int(total_units or 0):
-            raise ValidationError("The total marked for others cannot exceed the investment units held.", "units")
-        self.db.execute(
-            "INSERT INTO investment_custody_events(transaction_id,date,owner,account_id,asset_id,units_e6,created_at) "
-            "VALUES(?,?,?,?,?,?,?) ON CONFLICT(transaction_id) DO UPDATE SET date=excluded.date,owner=excluded.owner,"
-            "account_id=excluded.account_id,asset_id=excluded.asset_id,units_e6=excluded.units_e6",
-            (transaction_id, parse_date(day).isoformat(), owner.strip(), account_id, asset_id, units_e6, now_iso()))
-        self._tag_exact_line(transaction_id, owner, account_id, asset_id, units_e6)
+        try:
+            self._tag_exact_line(transaction_id, owner, account_id, asset_id, units_e6)
+        except ValidationError as error:
+            if error.field != "quantity":
+                raise
+            if units_e6 < 0:
+                raise ValidationError(f"There are not enough units owned by {owner.strip()} to record this sale.",
+                                      "units") from error
+            raise ValidationError("The total marked for others cannot exceed the investment units held.",
+                                  "units") from error
 
     @request_cached(deep=True)
     def totals_by_account(self, as_of: str) -> list[dict]:
@@ -232,9 +166,6 @@ class MoneyFromOthersService:
                                 WHERE le.owner_id IS NOT NULL AND le.date<=? AND t.status='POSTED'
                                 GROUP BY le.account_id""", (day,)):
             totals[row["account_id"]] = int(row["amount_e6"])
-        for row in self.db.all("""SELECT account_id,SUM(amount_e6) amount_e6 FROM money_from_others
-                                WHERE date<=? AND transaction_id IS NULL GROUP BY account_id""", (day,)):
-            totals[row["account_id"]] = totals.get(row["account_id"], 0) + int(row["amount_e6"])
         return [{"account_id": account_id, "amount_e6": amount} for account_id, amount in totals.items()]
 
     @request_cached(deep=True)
@@ -248,10 +179,6 @@ class MoneyFromOthersService:
                              WHERE le.date<=? AND t.status='POSTED' GROUP BY p.id,le.account_id""", (day,))
         for row in rows:
             sums[(row["owner"], row["account_id"])] = int(row["amount_e6"])
-        for row in self.db.all("""SELECT owner,account_id,SUM(amount_e6) amount_e6 FROM money_from_others
-                                 WHERE date<=? AND transaction_id IS NULL GROUP BY owner,account_id""", (day,)):
-            key = (row["owner"], row["account_id"])
-            sums[key] = sums.get(key, 0) + int(row["amount_e6"])
         return [dict(owner=owner, account_id=account_id,
                      account_name=self.accounts.get(account_id).name,
                      currency=self.accounts.get(account_id).currency, amount_e6=amount_e6,
@@ -267,15 +194,7 @@ class MoneyFromOthersService:
             "JOIN financial_assets f ON f.id=le.asset_id AND f.is_cash=1 "
             "WHERE le.owner_id IS NOT NULL GROUP BY t.id,le.account_id,p.id "
             "HAVING SUM(le.quantity_e6)<>0 ORDER BY t.date DESC,t.id DESC LIMIT ?", (limit,))
-        result = [dict(row) | {"amount": from_e6(row["amount_e6"])} for row in rows]
-        remaining = max(0, limit - len(result))
-        if remaining:
-            legacy = self.db.all(
-                "SELECT m.*,a.name AS account_name,a.currency FROM money_from_others m "
-                "JOIN accounts a ON a.id=m.account_id WHERE m.transaction_id IS NULL "
-                "ORDER BY m.date DESC,m.id DESC LIMIT ?", (remaining,))
-            result.extend(dict(row) | {"amount": from_e6(row["amount_e6"])} for row in legacy)
-        return sorted(result, key=lambda row: (row["date"], row.get("id", 0)), reverse=True)[:limit]
+        return [dict(row) | {"amount": from_e6(row["amount_e6"])} for row in rows]
 
     @request_cached(deep=True)
     def investment_positions(self, as_of: str) -> list[dict]:
@@ -289,10 +208,13 @@ class MoneyFromOthersService:
         return [dict(row) | {"units": from_e6(row["units_e6"])} for row in rows]
 
     def investment_history(self, limit: int = 100) -> list[dict]:
+        """Each posted trade's units held for someone, read from the ledger's owner (2G3)."""
         rows = self.db.all(
-            "SELECT e.date,e.owner,e.account_id,e.asset_id,e.units_e6,a.name AS account_name,"
-            "f.name AS asset_name,f.unit,t.ref FROM investment_custody_events e "
-            "JOIN transactions t ON t.id=e.transaction_id JOIN accounts a ON a.id=e.account_id "
-            "JOIN financial_assets f ON f.id=e.asset_id WHERE t.status='POSTED' "
-            "ORDER BY e.date DESC,e.id DESC LIMIT ?", (limit,))
+            "SELECT t.date,p.name owner,le.account_id,le.asset_id,SUM(le.quantity_e6) units_e6,a.name AS account_name,"
+            "f.name AS asset_name,f.unit,t.ref FROM ledger_entries le "
+            "JOIN transactions t ON t.id=le.transaction_id AND t.status='POSTED' "
+            "JOIN counterparties p ON p.id=le.owner_id JOIN accounts a ON a.id=le.account_id "
+            "JOIN financial_assets f ON f.id=le.asset_id AND f.is_cash=0 "
+            "GROUP BY t.id,le.account_id,le.asset_id,p.id HAVING SUM(le.quantity_e6)<>0 "
+            "ORDER BY t.date DESC,t.id DESC LIMIT ?", (limit,))
         return [dict(row) | {"units": from_e6(row["units_e6"])} for row in rows]

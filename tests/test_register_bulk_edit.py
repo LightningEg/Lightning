@@ -242,3 +242,60 @@ def test_browser_phone_select_all_and_clear(rows):
             browser.close()
     finally:
         host.stop()
+
+
+@pytest.mark.parametrize("locale", ["en", "ar"])
+def test_browser_phone_bulk_delete_asks_with_count_and_keeps_selection(rows, locale):
+    import shutil
+    pytest.importorskip("playwright")
+    from playwright.sync_api import sync_playwright
+    from lightning.runtime.http import Host
+
+    if not shutil.which("chromium"):
+        pytest.skip("Chromium is not installed")
+    c, accounts, cats, made = rows
+    c.settings.set("locale", locale)
+    app = create_app(c)
+
+    async def phone(scope, receive, send):
+        if scope["type"] == "http":
+            scope.setdefault("state", {})["phone"] = True
+        await app(scope, receive, send)
+
+    host = Host(lambda _: phone).start()
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(executable_path=shutil.which("chromium"), args=["--no-sandbox"])
+            page = browser.new_page(viewport={"width": 390, "height": 844})
+            page.goto(f"{host.origin}/accounts/{accounts['cib'].id}?select=1")
+            page.locator("#phone-select-visible").check()
+            assert page.locator(".phone-select-count").inner_text().strip() == ("٣ محدد" if locale == "ar" else "3 selected")
+            page.locator("#phone-bulk").evaluate('form => { const b = form.querySelector("[data-confirm-delete]"); form.requestSubmit(b); form.requestSubmit(b); }')
+            dialog = page.locator("dialog.ask-dialog")
+            dialog.wait_for()
+            assert ("تحذف ٣ معاملات؟" if locale == "ar" else "Delete 3 transactions?") in dialog.inner_text()
+            dialog.locator('[data-ask="no"]').click()
+            page.wait_for_selector("dialog.ask-dialog", state="detached")
+            assert page.locator(".transaction-select:checked").count() == 3
+            assert all(not c.transactions.get(t.id).is_void for t in made)
+            assert page.locator("dialog.ask-dialog").count() == 0
+            page.locator('#phone-bulk button[formaction="/transactions/bulk-delete"]').click()
+            dialog = page.locator("dialog.ask-dialog")
+            dialog.wait_for()
+            dialog.locator('[data-ask="yes"]').click()
+            page.wait_for_url("**/*msg=*")
+            assert all(c.transactions.get(t.id).is_void for t in made)
+            page.locator('form[action="/history/undo"] button').click()
+            page.wait_for_url("**/?msg=*")
+            assert all(not c.transactions.get(t.id).is_void for t in made)
+            page.goto(f"{host.origin}/accounts/{accounts['cib'].id}?select=1")
+            page.locator("#phone-select-visible").check()
+            category = cats["EXP.WORK.SOFTWARE"].id
+            page.locator('#phone-bulk select[name="category_id"]').evaluate('(el, value) => el.value = value', str(category))
+            page.locator('#phone-bulk button:not([formaction])').click()
+            page.wait_for_url("**/*msg=*")
+            assert page.locator("dialog.ask-dialog").count() == 0
+            assert all(any(line.category_id == category for line in c.transactions.get(t.id).lines) for t in made)
+            browser.close()
+    finally:
+        host.stop()

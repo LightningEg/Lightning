@@ -2,6 +2,7 @@
 
 from lightning.core.dates import now_iso
 from lightning.core.dates import parse_date
+from lightning.core.ledger import split_line_e6
 from lightning.core.refs import DocType, format_ref, ref_prefix
 from lightning.transactions.repository import TransactionRepository
 
@@ -61,15 +62,14 @@ def migrate_legacy_ownership(db):
                 if not take:
                     continue
                 total = abs(line["quantity_e6"])
-                owned_amount = (line["amount_e6"] * take) // total
-                owned_base = (line["amount_base_e6"] * take) // total
+                owned_amount, owned_base, rest_amount, rest_base = split_line_e6(
+                    line["amount_e6"], line["fx_rate_e6"], take, total)
                 if take == total:
                     db.execute("UPDATE ledger_entries SET owner_id=? WHERE id=?", (party["id"], line["id"]))
                 else:
                     sign = 1 if line["quantity_e6"] > 0 else -1
                     db.execute("UPDATE ledger_entries SET quantity_e6=?,amount_e6=?,amount_base_e6=? WHERE id=?",
-                               (line["quantity_e6"] - sign*take, line["amount_e6"] - owned_amount,
-                                line["amount_base_e6"] - owned_base, line["id"]))
+                               (line["quantity_e6"] - sign*take, rest_amount, rest_base, line["id"]))
                     db.execute("""INSERT INTO ledger_entries(transaction_id,line_no,date,account_id,asset_id,
                                  quantity_e6,unit_price_e6,amount_e6,fx_rate_e6,amount_base_e6,effect,
                                  category_id,memo,cleared,owner_id)

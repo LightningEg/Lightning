@@ -33,6 +33,7 @@ class UndoService:
     def __init__(self, db, audit=None):
         self.db, self.audit = db, audit
         self.validate = None
+        self.prepare_validation = None  # capture the pre-replay state; return a post-replay check
         self._tables = None
 
     def prepare(self, conn):
@@ -139,6 +140,7 @@ class UndoService:
                 "SELECT * FROM undo_records WHERE group_id=? ORDER BY id " + ("ASC" if redo else "DESC"),
                 (choice["id"],),
             )
+            validate_transition = self.prepare_validation(records) if self.prepare_validation else None
             self.db.execute("UPDATE undo_control SET group_id=NULL")
             self.db.execute("PRAGMA defer_foreign_keys=ON")
             # Verify the action's entire starting state before executing anything.
@@ -192,6 +194,8 @@ class UndoService:
                 raise ValidationError("Undo would leave an incomplete link. No changes were made.")
             if self.validate:
                 self.validate(records)
+            if validate_transition:
+                validate_transition()
             self.db.execute("UPDATE undo_groups SET undone=? WHERE id=?", (0 if redo else 1, choice["id"]))
             if self.audit:
                 self.audit.record("history", choice["id"], "redo" if redo else "undo", choice["label"])

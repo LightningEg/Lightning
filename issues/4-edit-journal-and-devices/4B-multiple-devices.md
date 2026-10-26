@@ -11,6 +11,8 @@ by: unknown (moved from docs/proposals)
 
 **Status: implementation started · 2026-10-05 · Tasks 01 and 02a–02b are foundations only; no working sync or restore yet.**
 
+**Pairing update:** the current pairing experience follows [the Local pairing decision](../../docs/PROJECT_OVERVIEW.md#2-product-decisions-that-must-hold) and [4A §7](4A-edit-journal.md#7-authority-pairing-and-recovery). The QR bootstrap described below is superseded.
+
 One Android phone holds the accepted encrypted ledger. It can lend editing to one paired Windows PC or laptop, which works from its own local copy even when the phone leaves. Returning the copy brings editing home. There is no automatic merge and no cloud dependency.
 
 This replaces the earlier proposal and separate review with one plan. The owner's product decisions live in [Project Overview](../../docs/PROJECT_OVERVIEW.md#product-decisions-that-must-hold); this file owns the proposed implementation, sequencing and acceptance gates. [NOW.md](../../NOW.md) owns claims and the next task. Existing financial and encryption contracts remain in [Architecture](../../docs/ARCHITECTURE.md). Nothing here means sync or Android support already exists.

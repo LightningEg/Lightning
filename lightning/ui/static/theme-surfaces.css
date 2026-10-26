@@ -1,0 +1,98 @@
+/* Paint adapters only. Default uses the existing guideline stylesheet unchanged.
+   Financial series, semantic colours, geometry, type and touch targets are not overridden. */
+html[data-theme]:not([data-theme="lightning-default"]) .side,
+html[data-theme]:not([data-theme="lightning-default"]) .phone-tabbar {
+  background: var(--theme-nav); border-color: var(--line);
+}
+html[data-theme]:not([data-theme="lightning-default"]) .topbar,
+html[data-theme]:not([data-theme="lightning-default"]) .phone-appbar {
+  background: var(--theme-header); border-color: var(--theme-header-seam);
+}
+html[data-theme]:not([data-theme="lightning-default"]) .card {
+  background: var(--theme-card); border-color: var(--theme-card-border);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.hero-card, .portfolio-summary) {
+  background: var(--theme-hero); border-color: var(--theme-hero-edge);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.app-popup, .app-popup-frame, .phone-sheet, .phone-period-panel) {
+  background: var(--theme-overlay); color: var(--text);
+}
+html[data-theme]:not([data-theme="lightning-default"]) dialog::backdrop {
+  background: color-mix(in srgb, var(--theme-backdrop) 75%, transparent);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.pick-list, .pick-results, .dropdown-menu) {
+  background: var(--theme-menu); border-color: var(--theme-divider); color: var(--text);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.nav a.active, .section-tabs a.active) {
+  color: var(--text); border-color: var(--theme-active);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.btn.primary, .phone-invest-seg a.is-chosen, .phone-invest-chip.is-chosen) {
+  background: var(--action); color: var(--on-action); border-color: var(--action);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.brand-mark, .phone-mark img) {
+  content: var(--theme-logo);
+}
+/* Decorative patterns and motion stay inert until an approved pattern is registered.
+   Theme changes never animate content or amounts. This adapter is direction neutral. */
+
+
+html[data-theme]:not([data-theme="lightning-default"]) .main :is(.stat-tile, .kpi-card, .metric-card, .data-panel) {
+  background: var(--theme-card); border-color: var(--theme-card-border);
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.key-card-row summary, .key-card-detail) { color: var(--muted); }
+html[data-theme]:not([data-theme="lightning-default"]) .key-card-detail a { color: var(--text); }
+html[data-theme]:not([data-theme="lightning-default"]) .main .plan-tab[aria-current="page"] {
+  background: var(--action); color: var(--on-action);
+}
+
+/* Dark-theme readability adapters (2026-10-25). Found by screenshotting the real app in every non-default theme:
+   light tints and fills hard-coded for the default paint stayed light while text turned light, so labels vanished.
+   Money tints come from the theme's own income and expense colours (--theme-income and --theme-expense, from tools/build_themes.py).
+   Only paint changes here: no size, spacing, order or money colour. */
+html[data-theme]:not([data-theme="lightning-default"]) {
+  --theme-tint: color-mix(in srgb, var(--accent) 14%, var(--theme-card));
+  --theme-tint-good: color-mix(in srgb, var(--theme-income) 16%, var(--theme-card));
+  --theme-tint-bad: color-mix(in srgb, var(--theme-expense) 16%, var(--theme-card));
+  --theme-tint-info: color-mix(in srgb, #7FB2FF 16%, var(--theme-card));
+  --tint-growth: var(--theme-tint); --ok-bg: var(--theme-tint-good); --mint-50: var(--theme-tint-good);
+  --rose-soft: var(--theme-tint-bad); --coral-50: var(--theme-tint-bad);
+}
+/* Sidebar search, privacy and the active page */
+html[data-theme]:not([data-theme="lightning-default"]) :is(.side-search, .side-privacy) {
+  background: var(--field); color: var(--muted); border-color: var(--line);
+}
+html[data-theme]:not([data-theme="lightning-default"]) .nav a.active { background: var(--theme-tint); color: var(--text); }
+html[data-theme]:not([data-theme="lightning-default"]) .nav a.active .nav-icon { color: var(--theme-active); }
+/* Overview lead card (light gradient in default) */
+html[data-theme]:not([data-theme="lightning-default"]) .main .lead-card:not(#_) {
+  background: linear-gradient(100deg, color-mix(in srgb, var(--accent) 8%, var(--theme-hero)), var(--theme-hero) 60%) !important;
+}
+/* Needs you rows, chips, plan status, result rows */
+html[data-theme]:not([data-theme="lightning-default"]) .needs-row { background: var(--theme-tint-bad); color: var(--text); }
+html[data-theme]:not([data-theme="lightning-default"]) :is(.kc-chip.is-good, .stat-chip.is-up, .plan-status-paid) { background: var(--theme-tint-good); color: var(--text); }
+html[data-theme]:not([data-theme="lightning-default"]) .kc-chip.is-bad { background: var(--theme-tint-bad); color: var(--text); }
+html[data-theme]:not([data-theme="lightning-default"]) :is(.lead-row.is-result, .budget-bulk):not(#_):not(#_) { background: var(--theme-tint) !important; color: var(--text); }
+html[data-theme]:not([data-theme="lightning-default"]) :is(.bullet-plan, .budget-progress) { background: var(--track); }
+/* Fields and secondary buttons that kept a white fill */
+html[data-theme]:not([data-theme="lightning-default"]) :is(input, select, textarea):not([type=checkbox]):not([type=radio]):not([type=range]):not(#_):not(#_) {
+  background-color: var(--field) !important; color: var(--text) !important; border-color: var(--line) !important;
+}
+html[data-theme]:not([data-theme="lightning-default"]) :is(.btn.small, .btn.phone-save, .date-picker-button):not(.primary):not(#_):not(#_) {
+  background: var(--surface-2) !important; color: var(--text) !important; border-color: var(--line) !important;
+}
+/* Phone: transaction direction discs keep their meaning, on a dark tint */
+html[data-theme]:not([data-theme="lightning-default"]) .phone-txn-av.is-out { background: var(--theme-tint-bad); color: var(--theme-expense); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-txn-av.is-in { background: var(--theme-tint-good); color: var(--theme-income); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-txn-av.is-invest { background: var(--theme-tint-info); color: #7FB2FF; } /* Azure held: no theme moves it */
+/* Phone: month heat map steps stay ordered, readable text */
+html[data-theme]:not([data-theme="lightning-default"]) .phone-month.heat-1 { background: color-mix(in srgb, var(--theme-expense) 12%, var(--theme-card)); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-month.heat-2 { background: color-mix(in srgb, var(--theme-expense) 24%, var(--theme-card)); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-month.heat-3 { background: color-mix(in srgb, var(--theme-expense) 38%, var(--theme-card)); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-month.flow-in-1 { background: color-mix(in srgb, var(--theme-income) 12%, var(--theme-card)); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-month.flow-in-2 { background: color-mix(in srgb, var(--theme-income) 24%, var(--theme-card)); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-month.flow-in-3 { background: color-mix(in srgb, var(--theme-income) 38%, var(--theme-card)); }
+/* Phone: chosen filter chip and the Add disc used the ink colour as a fill */
+html[data-theme]:not([data-theme="lightning-default"]) .phone-chip.is-chosen,
+html[data-theme]:not([data-theme="lightning-default"]) .phone-chip.is-chosen a,
+html[data-theme]:not([data-theme="lightning-default"]) .phone-add-disc { background: var(--action); color: var(--on-action); }
+html[data-theme]:not([data-theme="lightning-default"]) .phone-chip.is-chosen .phone-chip-n { background: var(--on-action); color: var(--action); }

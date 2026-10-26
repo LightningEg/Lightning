@@ -542,12 +542,12 @@ __all__ = ["HomeServer", "Moved", "PairingDesk", "Paired", "TlsLink", "move_prof
 
 # ==================================================================== the PC: keeping a pairing
 
-def join_home(paired: Paired, *, endpoint: str, identity: DeviceIdentity, root=None):
+def join_home(paired: Paired, *, endpoint: str, identity: DeviceIdentity, borrowed_profile, root=None):
     """Keep a new pairing on this PC: the borrowed profile's folder, the profile's key file (opened with the same
     password as on the phone), the phone's pinned certificate and address, and a borrower record. Returns its
-    BorrowerNode."""
+    BorrowerNode. ``borrowed_profile`` is ``lightning.runtime.paths.borrowed_profile``, passed in because sync
+    sits below runtime (9K)."""
     import json
-    from lightning.runtime.paths import borrowed_profile
     from lightning.security.keys import validate_key_file
     from .control import ControlStore, Peer
     from .service import BorrowerNode

@@ -24,14 +24,17 @@ def test_overview_cash_reserves_spending_and_investments_reconcile(c, setup, mon
     monkeypatch.setattr(dashboard_module, "render", capture)
     response = TestClient(create_app(c)).get("/?period=custom&date_from=2026-12-01&date_to=2026-12-31")
     assert response.status_code == 200
-    assert captured["net_worth"].total == sum((group["value"] for group in captured["account_contributions"]), Decimal(0))
     pos = captured["pos"]
+    assert c.reporting.net_worth(pos.as_of).total == sum(
+        (c.reporting.owned_account_value(account.id, pos.as_of) for account in c.accounts.list()), Decimal(0))
     assert pos.cash_you_own == sum((row["value"] for row in captured["cash_accounts"]), Decimal(0))
     assert pos.brokerage_cash == Decimal("1000")
     assert pos.reserves == sum((row["effective_allocated"] for row in pos.reserve_rows), Decimal(0))
     assert pos.kept_apart == pos.brokerage_cash  # brokerage cash is kept apart from spendable cash
     assert pos.free_cash == pos.cash_you_own - pos.kept_apart - Decimal("500")
-    flow = captured["money_sankey"]  # "Where money in went": sources into money in, out to categories
+    from datetime import date as _date
+    from lightning.ui import visuals as _visuals  # "Where money in went" lives on Spending (owner, 2026-10-21)
+    flow = _visuals.cash_flow_charts(c, _date(2026, 12, 1), _date(2026, 12, 31), False, _date(2026, 12, 31))["money_sankey"]
     assert "Food" in flow["targets"][0]["label"] and len(flow["targets"]) == 1 and flow["targets"][0]["value"] == Decimal("100")
     assert "category_id=" in flow["targets"][0]["href"]
     assert [s["label"] for s in flow["sources"]] == ["From what you had"] and flow["total"] == Decimal("100")
@@ -91,7 +94,10 @@ def test_where_money_in_went_splits_kept_into_invested_and_the_rest(c, setup, mo
 
     monkeypatch.setattr(dashboard_module, "render", capture)
     TestClient(create_app(c)).get("/?period=custom&date_from=2026-12-01&date_to=2026-12-31")
-    targets = {t["label"]: (t["value"], t["tone"]) for t in captured["money_sankey"]["targets"]}
+    from datetime import date as _date
+    from lightning.ui import visuals as _visuals  # on Spending since 2026-10-21
+    sankey = _visuals.cash_flow_charts(c, _date(2026, 12, 1), _date(2026, 12, 31), False, _date(2026, 12, 31))["money_sankey"]
+    targets = {t["label"]: (t["value"], t["tone"]) for t in sankey["targets"]}
     assert targets["Invested"] == (Decimal("2500"), "hold")
     assert targets["Kept"] == (Decimal("3500"), "in")
     assert sum(v for v, _ in targets.values()) == Decimal("10000")

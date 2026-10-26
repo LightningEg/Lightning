@@ -263,8 +263,12 @@ def quantize(value: Decimal, places: int = 2) -> Decimal:
 
 def to_e6(value: Decimal) -> int:
     """Decimal -> integer micro-units for storage. Refuses to lose precision."""
+    if not value.is_finite():
+        raise ValidationError("Enter a finite number.")
     if decimal_places(value) > SCALE_PLACES:
         raise ValidationError(f"At most {SCALE_PLACES} decimal places can be stored.")
+    if value < Decimal(-2**63) / SCALE or value > Decimal(2**63 - 1) / SCALE:
+        raise ValidationError("That amount is too large.", "amount")
     return int(value.scaleb(SCALE_PLACES))
 
 

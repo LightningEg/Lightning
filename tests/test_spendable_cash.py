@@ -54,4 +54,4 @@ def test_overview_names_what_is_kept_apart_and_the_check_still_adds_up(c, setup)
     account_page = client.get(f"/accounts/{accounts['thndr'].id}").text
     assert "Count its cash as spendable" in account_page
     checks = client.get("/checks").text
-    assert "Free cash plus reserves and bills due equals spendable cash" in checks
+    assert "Free cash matches the ledger" in checks

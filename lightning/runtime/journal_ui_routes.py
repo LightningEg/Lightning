@@ -7,10 +7,10 @@ from pathlib import Path
 from uuid import uuid4
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from lightning.sync.journal.codec import JournalError
+from lightning.sync.journal.codec import JournalError, digest
 from lightning.ui.journal_i18n import action_name, translate_journal
 
 _views = Jinja2Templates(directory=str(Path(__file__).parents[1] / "ui" / "journal_views"))
@@ -71,7 +71,7 @@ def journal_ui_router(session) -> APIRouter:
                                           if item["current"] and item["current"].get("groups") else [])
                 reviews.append(item)
         context = dict(request=request, phone=phone, page=page, home=device.home is not None,
-                       pairing=pairing_screen, command_rows=command_status_rows(device),
+                       pairing=pairing_screen, pairing_version=digest(pairing_screen), command_rows=command_status_rows(device),
                        reviews=reviews,
                        csrf=getattr(request.state, "csrf", ""), session=getattr(session, "token", ""),
                        trust_state=trust_state,
@@ -143,6 +143,18 @@ def journal_ui_router(session) -> APIRouter:
             data = await read_form(request)
             current = runtime()
             pairing = current.pairing
+            if action == "poll":
+                if pairing is None:
+                    raise JournalError("Nearby pairing is unavailable")
+                screen = pairing.screen()
+                if current.device.home is None and not screen["pending"] and not screen["paired"]:
+                    await pairing.find()
+                elif screen.get("stage") == "waiting":
+                    try:
+                        await pairing.finish()
+                    except (JournalError, OSError, TimeoutError):
+                        pass
+                return JSONResponse(dict(version=digest(pairing.screen())))
             if action == "revoke":
                 pairing.revoke(str(data.get("device", "")))
                 return RedirectResponse("/journal/devices", status_code=303)

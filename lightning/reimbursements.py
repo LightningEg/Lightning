@@ -11,6 +11,7 @@ from datetime import date
 from lightning.core.dates import now_iso
 from lightning.core.errors import ConflictError, NotFoundError, ValidationError
 from lightning.core.money import from_e6, to_decimal, to_e6
+from lightning.core.refs import parse_row_id
 from lightning.database.connection import Database
 
 
@@ -20,17 +21,7 @@ class ReimbursementService:
 
     @staticmethod
     def _id(value, field: str) -> int:
-        if (isinstance(value, bool) or
-                not isinstance(value, int) and
-                not (isinstance(value, str) and value.strip().isascii() and value.strip().isdigit())):
-            raise ValidationError("Choose a valid saved item.", field)
-        try:
-            parsed = int(value)
-        except (TypeError, ValueError, OverflowError):
-            raise ValidationError("Choose a valid saved item.", field) from None
-        if parsed <= 0 or parsed > 9_223_372_036_854_775_807:
-            raise ValidationError("Choose a valid saved item.", field)
-        return parsed
+        return parse_row_id(value, field)
 
     def _require_writable(self) -> None:
         if self.db.read_only:
@@ -38,91 +29,123 @@ class ReimbursementService:
 
     def _expense_capacity(self, transaction_id: int) -> dict:
         transaction_id = self._id(transaction_id, "transaction_id")
-        transaction = self.db.one(
-            "SELECT id,ref,type,date,status,description,counterparty,counterparty_id FROM transactions WHERE id=?",
-            (transaction_id,),
-        )
-        if not transaction:
-            return {"transaction_id": transaction_id, "expense_e6": 0, "refund_e6": 0, "net_e6": 0,
-                    "eligible": False}
-        if transaction["type"] != "OUT" or transaction["status"] != "POSTED":
-            return {"transaction_id": transaction_id, "expense_e6": 0, "refund_e6": 0, "net_e6": 0,
-                    "eligible": False, "transaction": transaction}
+        return self._expense_capacities([transaction_id])[transaction_id]
 
-        if (self.db.scalar("SELECT 1 FROM money_from_others WHERE transaction_id=?", (transaction_id,)) or
-                self.db.scalar("SELECT 1 FROM ledger_entries WHERE transaction_id=? AND owner_id IS NOT NULL",
-                               (transaction_id,))):
-            return {"transaction_id": transaction_id, "expense_e6": 0, "refund_e6": 0, "net_e6": 0,
-                    "eligible": False, "transaction": transaction}
+    def _expense_capacities(self, transaction_ids: list[int] | None = None) -> dict[int, dict]:
+        """Each expense's reimbursable amount, in six reads whatever the count (9I).
 
+        ``None`` reads every posted expense, newest first; a list reads those transactions, whatever they are.
+        """
+        if transaction_ids is None:
+            scope, params, order = "t.type='OUT' AND t.status='POSTED'", (), " ORDER BY t.date DESC,t.id DESC"
+        else:
+            scope, params, order = f"t.id IN ({','.join('?' for _ in transaction_ids)})", tuple(transaction_ids), ""
+        transactions = {int(row["id"]): row for row in self.db.all(
+            "SELECT t.id,t.ref,t.type,t.date,t.status,t.description,t.counterparty,t.counterparty_id "
+            f"FROM transactions t WHERE {scope}{order}", params)}
+        # Money from others and another owner's lines are not the user's expense.
+        shared = {int(row["id"]) for row in self.db.all(
+            f"SELECT t.id FROM transactions t WHERE {scope} AND ("
+            "EXISTS (SELECT 1 FROM money_from_others m WHERE m.transaction_id=t.id) OR "
+            "EXISTS (SELECT 1 FROM ledger_entries le WHERE le.transaction_id=t.id AND le.owner_id IS NOT NULL))",
+            params)}
         # Owned expense is the user's posted cash outflow, grouped by account/category.
-        expense_rows = self.db.all(
-            "SELECT le.account_id,le.category_id,SUM(ABS(le.amount_base_e6)) AS amount_e6 "
-            "FROM ledger_entries le JOIN financial_assets a ON a.id=le.asset_id "
-            "WHERE le.transaction_id=? AND a.is_cash=1 AND le.effect='OUTFLOW' AND le.owner_id IS NULL "
-            "GROUP BY le.account_id,le.category_id",
-            (transaction_id,),
-        )
-        expense_e6 = sum(int(row["amount_e6"] or 0) for row in expense_rows)
-        if expense_e6 <= 0:
-            return {"transaction_id": transaction_id, "expense_e6": 0, "refund_e6": 0, "net_e6": 0,
-                    "eligible": False, "transaction": transaction}
+        expense_e6: dict[int, int] = {}
+        for row in self.db.all(
+                "SELECT le.transaction_id tid,le.account_id,le.category_id,SUM(ABS(le.amount_base_e6)) AS amount_e6 "
+                "FROM transactions t JOIN ledger_entries le ON le.transaction_id=t.id "
+                f"JOIN financial_assets a ON a.id=le.asset_id WHERE {scope} "
+                "AND a.is_cash=1 AND le.effect='OUTFLOW' AND le.owner_id IS NULL "
+                "GROUP BY le.transaction_id,le.account_id,le.category_id", params):
+            tid = int(row["tid"])
+            expense_e6[tid] = expense_e6.get(tid, 0) + int(row["amount_e6"] or 0)
+        suggested: dict[int, bool] = {}
+        for row in self.db.all(
+                "SELECT DISTINCT le.transaction_id tid,c.default_reimbursable FROM transactions t "
+                "JOIN ledger_entries le ON le.transaction_id=t.id JOIN categories c ON c.id=le.category_id "
+                f"WHERE {scope} AND le.effect='OUTFLOW' AND le.owner_id IS NULL", params):
+            tid = int(row["tid"])
+            suggested[tid] = suggested.get(tid, False) or bool(row["default_reimbursable"])
+        categories: dict[int, list[str]] = {}
+        for row in self.db.all(
+                "SELECT DISTINCT le.transaction_id tid,c.name FROM transactions t "
+                "JOIN ledger_entries le ON le.transaction_id=t.id JOIN categories c ON c.id=le.category_id "
+                f"WHERE {scope} AND le.effect='OUTFLOW' AND le.owner_id IS NULL "
+                "ORDER BY le.transaction_id,c.name COLLATE NOCASE", params):
+            categories.setdefault(int(row["tid"]), []).append(row["name"])
+        accounts: dict[int, list[str]] = {}
+        for row in self.db.all(
+                "SELECT DISTINCT le.transaction_id tid,ac.id,ac.name FROM transactions t "
+                "JOIN ledger_entries le ON le.transaction_id=t.id JOIN financial_assets a ON a.id=le.asset_id "
+                f"JOIN accounts ac ON ac.id=le.account_id WHERE {scope} "
+                "AND a.is_cash=1 AND le.effect='OUTFLOW' AND le.owner_id IS NULL "
+                "ORDER BY le.transaction_id,ac.name COLLATE NOCASE", params):
+            accounts.setdefault(int(row["tid"]), []).append(row["name"])
 
-        # A refund is not identified by category/date alone: another purchase can
-        # share both. Explicitly linked refunds and repayments reduce outstanding
-        # once, through receipt links below.
-        refund_e6 = 0
-        net_e6 = expense_e6
-
-        account_ids = [int(row["account_id"]) for row in expense_rows]
-        categories = self.db.all(
-            "SELECT DISTINCT c.default_reimbursable FROM ledger_entries le "
-            "JOIN categories c ON c.id=le.category_id WHERE le.transaction_id=? "
-            "AND le.effect='OUTFLOW' AND le.owner_id IS NULL",
-            (transaction_id,),
-        )
-        category_names = self.db.all(
-            "SELECT DISTINCT c.name FROM ledger_entries le JOIN categories c ON c.id=le.category_id "
-            "WHERE le.transaction_id=? AND le.effect='OUTFLOW' AND le.owner_id IS NULL "
-            "ORDER BY c.name COLLATE NOCASE", (transaction_id,),
-        )
-        account_names = self.db.all(
-            "SELECT DISTINCT a.id,a.name FROM accounts a WHERE a.id IN (" +
-            ",".join("?" for _ in account_ids) + ") ORDER BY a.name COLLATE NOCASE",
-            tuple(account_ids),
-        ) if account_ids else []
-        return {"transaction_id": transaction_id, "transaction": transaction, "expense_e6": expense_e6,
-                "refund_e6": refund_e6, "net_e6": net_e6, "eligible": net_e6 > 0,
-                "suggested": any(bool(row["default_reimbursable"]) for row in categories),
-                "categories": [row["name"] for row in category_names],
-                "accounts": [row["name"] for row in account_names]}
+        result: dict[int, dict] = {}
+        for transaction_id in (list(transactions) if transaction_ids is None else transaction_ids):
+            transaction = transactions.get(transaction_id)
+            nothing = {"transaction_id": transaction_id, "expense_e6": 0, "refund_e6": 0, "net_e6": 0,
+                       "eligible": False}
+            if not transaction:
+                result[transaction_id] = nothing
+                continue
+            amount_e6 = expense_e6.get(transaction_id, 0)
+            if (transaction["type"] != "OUT" or transaction["status"] != "POSTED" or transaction_id in shared or
+                    amount_e6 <= 0):
+                result[transaction_id] = {**nothing, "transaction": transaction}
+                continue
+            # A refund is not identified by category/date alone: another purchase can
+            # share both. Explicitly linked refunds and repayments reduce outstanding
+            # once, through receipt links.
+            result[transaction_id] = {
+                "transaction_id": transaction_id, "transaction": transaction, "expense_e6": amount_e6,
+                "refund_e6": 0, "net_e6": amount_e6, "eligible": amount_e6 > 0,
+                "suggested": suggested.get(transaction_id, False),
+                "categories": categories.get(transaction_id, []),
+                "accounts": accounts.get(transaction_id, [])}
+        return result
 
     def _receipt_capacity(self, transaction_id: int) -> dict:
-        transaction = self.db.one(
-            "SELECT id,ref,type,date,status,description,counterparty FROM transactions WHERE id=?",
-            (transaction_id,),
-        )
-        if not transaction or transaction["type"] != "IN" or transaction["status"] != "POSTED":
-            return {"transaction_id": transaction_id, "amount_e6": 0, "eligible": False,
-                    "transaction": transaction}
-        amount_e6 = int(self.db.scalar(
-            "SELECT COALESCE(SUM(ABS(le.amount_base_e6)),0) FROM ledger_entries le "
-            "JOIN financial_assets a ON a.id=le.asset_id WHERE le.transaction_id=? AND a.is_cash=1 "
-            "AND le.quantity_e6>0 AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL AND COALESCE(le.category_id,0) NOT IN (SELECT id FROM categories WHERE code='EXP.SYSTEM.CUSTODY')", (transaction_id,),
-        ) or 0)
-        return {"transaction_id": transaction_id, "transaction": transaction, "amount_e6": amount_e6,
-                "eligible": amount_e6 > 0}
+        return self._receipt_capacities([transaction_id])[transaction_id]
+
+    def _receipt_capacities(self, transaction_ids: list[int] | None = None) -> dict[int, dict]:
+        """Each receipt's owned cash inflow, in two reads whatever the count (9I).
+
+        ``None`` reads every posted money in, newest first; a list reads those transactions, whatever they are.
+        """
+        if transaction_ids is None:
+            scope, params, order = "t.type='IN' AND t.status='POSTED'", (), " ORDER BY t.date DESC,t.id DESC"
+        else:
+            scope, params, order = f"t.id IN ({','.join('?' for _ in transaction_ids)})", tuple(transaction_ids), ""
+        transactions = {int(row["id"]): row for row in self.db.all(
+            "SELECT t.id,t.ref,t.type,t.date,t.status,t.description,t.counterparty "
+            f"FROM transactions t WHERE {scope}{order}", params)}
+        amounts = {int(row["tid"]): int(row["amount_e6"] or 0) for row in self.db.all(
+            "SELECT le.transaction_id tid,SUM(ABS(le.amount_base_e6)) amount_e6 FROM transactions t "
+            "JOIN ledger_entries le ON le.transaction_id=t.id JOIN financial_assets a ON a.id=le.asset_id "
+            f"WHERE {scope} AND a.is_cash=1 AND le.quantity_e6>0 AND le.effect IN ('INFLOW','OUTFLOW') "
+            "AND le.owner_id IS NULL AND COALESCE(le.category_id,0) NOT IN "
+            "(SELECT id FROM categories WHERE code='EXP.SYSTEM.CUSTODY') GROUP BY le.transaction_id", params)}
+        result: dict[int, dict] = {}
+        for transaction_id in (list(transactions) if transaction_ids is None else transaction_ids):
+            transaction = transactions.get(transaction_id)
+            if not transaction or transaction["type"] != "IN" or transaction["status"] != "POSTED":
+                result[transaction_id] = {"transaction_id": transaction_id, "amount_e6": 0, "eligible": False,
+                                          "transaction": transaction}
+                continue
+            amount_e6 = amounts.get(transaction_id, 0)
+            result[transaction_id] = {"transaction_id": transaction_id, "transaction": transaction,
+                                      "amount_e6": amount_e6, "eligible": amount_e6 > 0}
+        return result
 
     def eligible_expenses(self) -> list[dict]:
         claimed = {int(row["expense_id"]) for row in self.db.all(
             "SELECT expense_id FROM reimbursement_claims WHERE expense_id IS NOT NULL")}
-        rows = self.db.all("SELECT id FROM transactions WHERE type='OUT' AND status='POSTED' ORDER BY date DESC,id DESC")
         expenses = []
-        for row in rows:
-            transaction_id = int(row["id"])
+        for transaction_id, info in self._expense_capacities().items():
             if transaction_id in claimed:
                 continue
-            info = self._expense_capacity(transaction_id)
             if info["eligible"]:
                 info["max_amount"] = from_e6(info["net_e6"])
                 expenses.append(info)
@@ -188,13 +211,12 @@ class ReimbursementService:
     def available_receipts(self) -> list[dict]:
         used = {int(row["receipt_id"]) for row in self.db.all(
             "SELECT receipt_id FROM reimbursement_receipts WHERE receipt_id IS NOT NULL")}
-        rows = self.db.all("SELECT id FROM transactions WHERE type='IN' AND status='POSTED' ORDER BY date DESC,id DESC")
+        interest = {int(row["transaction_id"]) for row in self.db.all(
+            "SELECT transaction_id FROM cd_interest_receipt_links WHERE transaction_id IS NOT NULL")}
         receipts = []
-        for row in rows:
-            transaction_id = int(row["id"])
-            if transaction_id in used or self.db.scalar("SELECT 1 FROM cd_interest_receipt_links WHERE transaction_id=?", (transaction_id,)):
+        for transaction_id, info in self._receipt_capacities().items():
+            if transaction_id in used or transaction_id in interest:
                 continue
-            info = self._receipt_capacity(transaction_id)
             if info["eligible"]:
                 info["amount"] = from_e6(info["amount_e6"])
                 receipts.append(info)

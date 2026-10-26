@@ -105,12 +105,12 @@ def test_mismatched_digits_never_send_the_password_proof_on_a_compatible_replica
     wires = []
     async def run():
         hs, make, ps = await started(devices, wires)
-        assert len(wires) == 1
+        assert len(wires) == 2
         with pytest.raises(JournalError, match="same six"):
             ps.compare(other_digits(ps.screen()["pending"]))
         with pytest.raises(JournalError, match="Compare"):
             await ps.prove(PASSWORD)
-        assert len(wires) == 1 and ps.screen()["stage"] == "compare"
+        assert len(wires) == 2 and ps.screen()["stage"] == "compare"
         ps.cancel()
         assert ps.screen()["pending"] is None
     asyncio.run(run())
@@ -168,7 +168,7 @@ def test_second_request_is_refused_and_a_resent_first_request_is_idempotent(devi
         wire = ps._value("pairing_client")["request"].encode()
         assert hs.desk.accept(wire) == ps.screen()["pending"]
         intruder, _ = request_pairing(hs._value("pairing")["offer"].encode(), hs.screen()["code"], load_or_create(tmp_path/"other", "Other phone"),
-                                      str(uuid4()), home_key=home.identity.public_key)
+                                      str(uuid4()), home_key=home.identity.public_key, secret=b"x"*32)
         with pytest.raises(JournalError, match="already pairing"):
             hs.desk.accept(intruder)
     asyncio.run(run())
@@ -243,11 +243,12 @@ def test_devices_screen_walks_code_then_digits_then_password_then_waits(devices)
                 assert response.status_code == 303
                 return (await client.get("/devices")).text
             page = await post("find")
-            assert 'name="code"' in page and 'name="password"' not in page
+            assert 'name="code"' not in page and 'name="password"' not in page
             identifier = page.split('name="candidate" value="')[1].split('"')[0]
             page = await post("join", candidate=identifier, code=hs.screen()["code"])
             digits = hs.screen()["digits"]
-            assert "Does the home show this number?" in page and digits in page and 'name="password"' not in page
+            assert "Select the number shown on the other device." in page and digits in page and 'name="password"' not in page
+            assert page.count('name="digits" value=') == 3
             page = await post("compare", digits=digits)
             assert 'name="password"' in page and "/devices/prove" in page
             page = await post("prove", password=PASSWORD)

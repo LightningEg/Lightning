@@ -174,7 +174,7 @@ def test_screens_show_bills_due_and_net_worth(c, setup, monkeypatch):
     assert "Net worth" in overview and "What you owe" in overview and "Bills due" in overview
     assert "−5,480" in overview  # 480 due + 5,000 of loan payments still to pay
     checks = client.get("/checks").text
-    assert "Free cash plus reserves and bills due equals spendable cash" in checks
+    assert "Free cash matches the ledger" in checks
     assert client.get("/reserves", follow_redirects=False).headers["location"] == "/plan/reserves"
     for page in ("/plan", "/plan/recurring", "/plan/loans", "/plan/reserves"):
         assert client.get(page).status_code == 200
@@ -214,7 +214,7 @@ def test_overview_lists_due_bills_under_needs_you(c, setup, monkeypatch):
     page = TestClient(create_app(c), base_url="http://127.0.0.1").get("/").text
     start = page.index('<section class="needs"')
     attention = page[start:page.index("</section>", start)]  # rows under the Lead (guideline 3.33, A09)
-    assert page.index("lead-card") < start < page.index('class="stat-tiles"')
+    assert page.index("lead-card") < start < page.index('class="kpi-row')
     assert "Needs you" in attention and "<span>· 2</span>" in attention  # the count is every item
     # Feedback ticket 84: both are payments, so they are one row that opens their own page.
     assert "Bills and payments · 2" in attention and "Loan payment due: Car loan, Bill due: Electricity" in attention

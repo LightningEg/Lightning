@@ -120,7 +120,8 @@ def test_device_screen_has_numeric_pairing_and_no_address_or_port_fields(devices
             assert response.status_code == 303
             page = await client.get("/devices",headers={"user-agent":"Android Mobile"})
             assert page.status_code == 200
-            assert "Pair a device" in page.text and hs.screen()["code"] in page.text
+            assert "Pair a device" in page.text and "Nearby devices" in page.text
+            assert hs.screen()["code"] not in page.text
             assert 'name="port"' not in page.text and 'name="address"' not in page.text
             response = await client.post("/pairing/exchange",content=b'{}')
             assert response.status_code == 403

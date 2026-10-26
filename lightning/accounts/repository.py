@@ -46,10 +46,6 @@ class AccountRepository:
         row = self.db.one("SELECT * FROM accounts WHERE id = ?", (account_id,))
         return _row(row) if row else None
 
-    def get_by_code(self, code: str) -> Account | None:
-        row = self.db.one("SELECT * FROM accounts WHERE code = ?", (code,))
-        return _row(row) if row else None
-
     def code_exists(self, code: str, exclude_id: int | None = None) -> bool:
         return (
             self.db.scalar("SELECT 1 FROM accounts WHERE code = ? AND id IS NOT ?", (code, exclude_id))

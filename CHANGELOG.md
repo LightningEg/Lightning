@@ -11,6 +11,100 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-26 · @yoreva-01: 7H bank CSV imports accept accounting negatives, currency wrappers and Arabic digits. Review fixes preserve fractional amounts and reject unknown wrappers or extra signs. Closes #49.
+- 2026-10-25 · Codex: 3AH visual flow: direct phone page picker, answer-first Overview, decision-first review and price tasks, quieter recurring rows and explicit accessible form labels.
+  Preserve brand/theme tokens, financial calculations and the five phone slots; page checks and acceptance gaps are in reports/audit-7.md.
+
+- 2026-10-25 · Claude: 8K supporter release (website repo): earned supporter and Founding badges, name styles, animated and seasonal banners, sets, gifts and a supporters' theme vote; 8K tracks app-theme sales, About credits and a beta channel. themes.md section 7.
+- 2026-10-25 · Claude: Nile Papyrus & Lapis Guilloché app theme (from #136, reviewed): papyrus texture, page-corner rosette and one 12 s header-seam motion, reduced motion still; dark-theme readability fixes use each theme's own money tints. themes.md and theme-kit allow approved decoration.
+- 2026-10-25 · Claude: 8J website leaderboard (website repo): a table of rank, display name, contributions and score over each member's banner; `leaderboard.html?sample` shows made-up people to preview it.
+- 2026-10-25 · Codex: 8J creator brief now specifies mode, a mandatory PC/phone screenshot roster, WCAG AA contrast and LTR amounts in Arabic; adds a reusable AI prompt.
+
+- 2026-10-25 · Claude: 8J owner dashboard (website repo): Today view (needs, revenue vs fixed cost, 30-day chart), each top-up one ticket confirmed in place, simpler InstaPay checkout (payer address or wallet phone, no reference); fixes the live coin quote.
+- 2026-10-25 · Codex: 8J app theme swap and external creator kit: shared PC/phone runtime, validated palette compiler, Settings previews and handoff template; sync themes guideline in both repos. Native and paid activation acceptance remain.
+
+- 2026-10-25 · Claude: 8J theme tiers and prices (website repo): Palette 300 coins, Textured 600 (Papyrus, Cotton), Animated later; market shows EGP, a textured row and what buyers get. guideline/themes.md section 7 (both repos).
+- 2026-10-25 · Claude: 8J website community tabs (website repo): banners behind leaderboard rows, Wallet rebuilt, Profile opens your own (owners see private ones), sentence case on main-site forms.
+- 2026-10-25 · Claude: 8J five website themes on sale (Paper, Frost, Meadow, Nile, Garnet), nine archived for their owners; new guideline/themes.md: a theme is one seed and eleven parts, each surface its own version. D03.1 updated (both repos).
+- 2026-10-25 · Claude: 8J market shop floor on both website markets (website repo): tabs, Your look, app themes in testing, PC/phone/website theme previews, Try it, missing-coin buy; owned themes can dress the main website. Cotton-boll coin, no Threads.
+- 2026-10-24 · Codex: Free-use policy replaces the seven-day licence model; optional in-app cosmetics support development without unlocking functionality. Update English/Arabic promise and FAQ.
+- 2026-10-24 · Codex: Docs status refresh: close completed guideline-sync item 8B, clarify Audit 6’s zero-open-PR result, and refresh the handoff.
+- 2026-10-24 · Claude: Guideline D01, D03, D09, D11 (coders.html, both repos): member pages and their scripts, the account chip and menu in the top bar, the wordmark hiding at 420px, and three paid themes (Moss, Garnet, Frost) beside the twelve free ones.
+- 2026-10-24 · Claude: Tasks can carry Lightning Coins: contributors.yml records claims and the new rewards.yml pays the issues a merged pull request closes, through the website's database.
+  Needs the SUPABASE_SERVICE_ROLE_KEY secret (without it both only print a notice); bots and the owner's account never earn. CONTRIBUTING.md says how to link GitHub.
+
+- 2026-10-24 · Codex: 8J records the Mono-only free website palette policy, moderated stories and private website receipt uploads; syncs the Coders guideline.
+
+- 2026-10-24 · Codex: 8J bundles two test appearance manifests and validates fixed parts and signed account ownership offline. Native claiming/rendering remains gated on integration and acceptance.
+
+- 2026-10-24 · Codex: [7P, 7Q, 3AG] Make workbooks readable, add validated comprehensive onboarding, group data tools and move AI prompt editing into a popup.
+  Clean investment rows and group via dropdown; let Needs you items be reviewed, snoozed or restored, with changed situations resurfacing.
+  Update the existing journal HTTP parser override to undici 7.30.1 for the required security audit.
+
+- 2026-10-23 · Codex: 5L attributes investment distributions, withholding and realized gains to their ledger owner, including changed ownership and closed holdings; owned reports no longer prorate another person's income.
+
+- 2026-10-23 · Codex: 2Y validates scaled money against SQLite's signed integer limits; oversized converted values now show a validation error and roll back cleanly.
+
+- 2026-10-23 · Codex: 2X serializes payment linking, preserves settled occurrences against stale confirmations, and makes identical confirmations and partial-loan top-up retries harmless.
+
+- 2026-10-23 · Codex: 2W keeps confirmed reserve use and ledger rows when saving notes, descriptions or unchanged transaction details; financial changes still invalidate reserve links.
+
+- 2026-10-23 · Codex: 2V protects confirmed loan repayments from edits that would leave stale debt; reopen first, or void and replace an extra repayment. Notes remain editable.
+
+- 2026-10-23 · Codex: 4D discovers nearby devices automatically and pairs by selecting the home’s number from three choices.
+  The PC still requires the profile password; signed commitment/challenge/reveal protects number matching. Recovery keys are unchanged.
+
+- 2026-10-23 · Codex: record 2U, the phone's website APK download failure, for investigation after the v1.4.4 release at the owner's request.
+
+## [1.4.4] — 2026-10-23
+
+- 2026-10-23 · Claude: package version 1.4.4 (`pyproject.toml`, `lightning/__init__.py`, README, doc headers).
+- 2026-10-23 · Codex: reconcile the open PR backlog against current main; preserve the contributor fixes and phone overhaul.
+  Audit 5 is the older efficiency audit; its reused 2G–2K/3AC codes become 2P–2T/3AF. Dependency lock refresh remains deferred.
+
+- 2026-10-23 · Codex: fix 2O/3AE: phone Delete asks with the selected count; Cancel keeps the selection.
+  A refused mass edit names the blocking transaction and keeps the editor, inputs and selection; successful batches clear them. Add browser and rollback regressions.
+  Keep Arabic counts/messages readable and show popup validation once on a full page.
+- 2026-10-23 · Codex: fix 2N: optional budget warnings preserve a successful Save. Financial refusals still roll back.
+  Protect popup, inline and split edits from stale overwrites (2M); retain unsaved input on conflict. Three other form fields await claim approval.
+
+- 2026-10-23 · Codex: fix 2G/2H: all cash transitions and Undo/Redo refuse new or worse deficits; edits/removals validate previous owners too.
+  Imports retain harmless history corrections; multi-delete checks its final state. Add 19 regression cases and promote the ownership workflow probes.
+
+- 2026-10-23 · Codex: extend Audit 4 to button workflows: ownership, mass editing, cancellation, delete/restore, merge, split, bill payment and history.
+  File 2M–2O and 3AE, extend 2H; add browser/route probes and screenshots. Full existing suite: 2,349 pass, 9 skip; no production fixes.
+
+- 2026-10-23 · Codex: Audit 4 reproduces six backend defect groups (2G–2L) and files dependency/wiring improvements (1G).
+  Report and disposable probes cover cash lifecycle, ownership, currency consistency, retry safety, instalment precision and rollback; no production fixes.
+
+
+- 2026-10-23 · @yoreva-01: fix 2K/2O/3D/3E: roll back a refused converting buy, confirm phone Delete,
+  keep the device banner visible, and translate its borrowed status into Arabic (PRs #105, #108–110).
+- 2026-10-23 · Codex: review those fixes: count/Cancel/Undo/category browser checks, complete rollback snapshots,
+  lent-status Arabic and literal, escaped names; keep device banners in flow and preserve their action after popup saves.
+  Centre notices in both directions so Arabic Undo stays reachable; record the security review and validation.
+- 2026-10-22 · Claude: Audit 4 rest. 2G3 held-for-others tagging posts through TransactionService; the ledger's owner is the one record
+  of custody. 7N "Due before payday" shows one total (still owed, in EGP) on card, stat and Safe to spend; free cash has one formula.
+- 2026-10-22 · Claude: 2I a new profile currency reaches the Currencies tab at once; 2K Integrity checks free cash against the ledger,
+  four checks that could not fail removed; 7O import review reads past categories once per statement; 2J one unlock backup a day.
+- 2026-10-22 · Claude: 9I writes and the reimbursements page stop growing with history (1,980 → 11 reads); migration
+  `0068_drop_duplicate_indexes.sql` drops five duplicate indexes. 9J the Overview, Budget and investment entry stop computing figures.
+- 2026-10-22 · Claude: 9K every module has an import layer, one row-id parser, one profile-open task list (month-end checkpoints on
+  unlock); 9L 17 unused functions, an always-on flag and two unread settings removed.
+- 2026-10-22 · Claude: 2G1–2 marking part of a line as held for someone keeps whole cents (`core/ledger.split_line_e6`), so undo
+  works again; a voided sale no longer counts against the owner's next sale (`money_from_others.py`). 2G3 is left.
+- 2026-10-22 · Claude: 2H every successful write is its own undo action (except Undo, demo, sample and exports); money held for
+  others and the old Settings page were missing, so Undo reversed the action before them (`ui/web.py`).
+- 2026-10-22 · Claude: 3AC pages keep their request cache: matching payments no longer opens an empty write, and four budget and
+  cash-flow reads are cached (Overview 817 → 507 reads, Cash planning 536 → 274); the Arabic table loads once as `/static/ui-ar.js` (503 → 50 KB).
+- 2026-10-22 · Claude: Audit 4 backend engine (`reports/audit-4.md`, written as Audit 3): custody lines, undo grouping and two
+  formulas for one figure are wrong; pages redo work. Filed 2G–2K, 3AC, 7N, 7O, 9I–9L.
+- 2026-10-21 · Claude: 3W done: the Overview's row is A08 cards (Savings rate on your usual, new figure `usual_savings_rate`; Investing rate on
+  the period before; Safe to spend; Left in plan); the holdings table has five columns, units, average, price and account under the name. Where money in went and
+  Month by month moved to Spending (owner).
+- 2026-10-21 · Codex: 2D completed: v1.4.2 Windows ZIP and signed Android APK are published from the verified original artifacts, with SHA256SUMS and BUILD.json.
+  The owner-generated certificate passed signing checks; publishing-only recovery used the current downloads repository address and verified every uploaded file by read-back.
+
 ## [1.4.3] — 2026-10-23
 
 - 2026-10-22 · Claude: phone overhaul (3AC, owner PDF; guideline 3.34 Part C): tab bar Overview, Budget, Add, Transactions, More with words;
