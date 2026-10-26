@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-26 · Claude: 8J simple InstaPay top-up (website #95): members copy our details and their email for the note, then confirm date, amount and sender, no receipt; the owner reconciles every open top-up on one screen.
 - 2026-10-26 · Claude: 8J owner console (website #94): one owner account only (a second refused; extra ones removed from Settings); top-up tickets open from a list with the receipt shown, and take amount, date, sender and reference; a reference pays one ticket only.
 - 2026-10-25 · Claude: 8K supporter release (website repo): earned supporter and Founding badges, name styles, animated and seasonal banners, sets, gifts and a supporters' theme vote; 8K tracks app-theme sales, About credits and a beta channel. themes.md section 7.
 - 2026-10-25 · Claude: Nile Papyrus & Lapis Guilloché app theme (from #136, reviewed): papyrus texture, page-corner rosette and one 12 s header-seam motion, reduced motion still; dark-theme readability fixes use each theme's own money tints. themes.md and theme-kit allow approved decoration.
