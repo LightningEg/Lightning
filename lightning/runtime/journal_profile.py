@@ -266,9 +266,10 @@ class JournalRuntime:
             protocol = create_journal_app(self.device, session_token=secrets.token_urlsafe(32),
                                           channel=self.channel, pairing=self.pairing, move=self.move)
             guarded = _ProtocolGate(protocol, self)
-            self.server = LabServer(uvicorn.Config(guarded, host="0.0.0.0", port=port,
-                ssl_keyfile=str(self.identity.key_path), ssl_certfile=str(self.identity.cert_path),
-                access_log=False, log_level="error", timeout_graceful_shutdown=1))
+            self.server = LabServer(self.identity.configure_uvicorn_tls(uvicorn.Config(
+                guarded, host="0.0.0.0", port=port,
+                access_log=False, log_level="error", timeout_graceful_shutdown=1,
+                limit_concurrency=32, backlog=32, timeout_keep_alive=3)))
             server_task = asyncio.create_task(self.server.serve())
             try:
                 self.transport, _ = await self.loop.create_datagram_endpoint(
@@ -312,7 +313,9 @@ class JournalRuntime:
 
 class _ProtocolGate:
     def __init__(self, app, runtime):
+        from lightning.sync.journal.request_limits import PairingRequestLimits
         self.app, self.runtime = app, runtime
+        self.pairing_limits = PairingRequestLimits()
 
     async def __call__(self, scope, receive, send):
         from starlette.responses import PlainTextResponse
@@ -320,6 +323,52 @@ class _ProtocolGate:
             return await self.app(scope, receive, send)
         if scope["path"] not in {"/exchange", "/pairing/exchange", "/membership/exchange", "/enrollment/exchange", "/authority/exchange"}:
             return await PlainTextResponse("Journal protocol only", 404)(scope, receive, send)
+        pairing = scope["path"] == "/pairing/exchange"
+        if pairing:
+            peer = str((scope.get("client") or ("unknown",0))[0])
+            if not self.pairing_limits.enter(peer):
+                return await PlainTextResponse("Pairing request budget exceeded", 429)(scope, receive, send)
+            original_receive = receive
+            try:
+                headers = dict(scope.get("headers", []))
+                length = headers.get(b"content-length", b"0")
+                if not length.isdigit():
+                    return await PlainTextResponse("Invalid body length", 400)(scope, receive, send)
+                if int(length) > 4096:
+                    return await PlainTextResponse("Pairing request limit exceeded", 413)(scope, receive, send)
+                async def bounded_body():
+                    body = bytearray()
+                    while True:
+                        message = await original_receive()
+                        if message["type"] == "http.disconnect":
+                            raise ConnectionError("Peer disconnected")
+                        body.extend(message.get("body", b""))
+                        if len(body) > 4096:
+                            raise ValueError("Pairing body too large")
+                        if not message.get("more_body", False):
+                            return bytes(body)
+                try:
+                    body = await asyncio.wait_for(bounded_body(), timeout=3)
+                except (TimeoutError, ConnectionError):
+                    return await PlainTextResponse("Pairing request timed out", 408)(scope, original_receive, send)
+                except ValueError:
+                    return await PlainTextResponse("Pairing request limit exceeded", 413)(scope, original_receive, send)
+                delivered = False
+                async def buffered_receive():
+                    nonlocal delivered
+                    if not delivered:
+                        delivered = True
+                        return dict(type="http.request", body=body, more_body=False)
+                    return await original_receive()
+                receive = buffered_receive
+                await self._locked(scope, receive, send)
+            finally:
+                self.pairing_limits.leave()
+            return
+        return await self._locked(scope, receive, send)
+
+    async def _locked(self, scope, receive, send):
+        from starlette.responses import PlainTextResponse
         async with self.runtime.gate.mutex:
             if self.runtime.closed:
                 return await PlainTextResponse("Profile locked", 423)(scope, receive, send)

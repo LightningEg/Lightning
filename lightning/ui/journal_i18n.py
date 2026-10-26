@@ -56,6 +56,8 @@ EN = {
 }
 
 AR = {
+    "Pairing was interrupted. Resume to check its saved state.": "الربط اتقطع. كمّل عشان نراجع الحالة المحفوظة.",
+    "Resume pairing": "كمّل الربط",
     "On your other device, select this device from Nearby devices.": "على الجهاز التاني، اختار الجهاز ده من الأجهزة القريبة.",
     "Select this number on your other device, then approve here.": "اختار الرقم ده على الجهاز التاني، وبعدها وافق هنا.",
     "Waiting for the other device to enter the profile password.": "مستنيين الجهاز التاني يدخل كلمة سر الملف.",

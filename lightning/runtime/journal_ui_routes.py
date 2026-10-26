@@ -147,18 +147,23 @@ def journal_ui_router(session) -> APIRouter:
                 if pairing is None:
                     raise JournalError("Nearby pairing is unavailable")
                 screen = pairing.screen()
-                if current.device.home is None and not screen["pending"] and not screen["paired"]:
-                    await pairing.find()
+                if screen.get("stage") in ("handshake","proving","cancelling"):
+                    try:
+                        await pairing.resume()
+                    except (JournalError, OSError, TimeoutError):
+                        pass
                 elif screen.get("stage") == "waiting":
                     try:
                         await pairing.finish()
                     except (JournalError, OSError, TimeoutError):
                         pass
+                elif current.device.home is None and not screen["pending"] and not screen["paired"]:
+                    await pairing.find()
                 return JSONResponse(dict(version=digest(pairing.screen())))
             if action == "revoke":
                 pairing.revoke(str(data.get("device", "")))
                 return RedirectResponse("/journal/devices", status_code=303)
-            if action in {"open", "stop", "find", "join", "compare", "prove", "cancel", "confirm", "check"}:
+            if action in {"open", "stop", "find", "join", "compare", "prove", "cancel", "confirm", "check", "resume"}:
                 if pairing is None:
                     raise JournalError("Nearby pairing is unavailable")
                 if action == "open":
@@ -169,14 +174,16 @@ def journal_ui_router(session) -> APIRouter:
                     await pairing.find()
                 elif action == "join":
                     await pairing.join(str(data.get("candidate", "")), str(data.get("code", "")))
+                elif action == "resume":
+                    await pairing.resume()
                 elif action == "compare":
                     pairing.compare(str(data.get("digits", "")))
                 elif action == "prove":
                     await pairing.prove(str(data.get("password", "")))
                 elif action == "cancel":
-                    pairing.cancel()
+                    await pairing.cancel()
                 elif action == "confirm":
-                    pairing.confirm(str(data.get("digits", "")))
+                    pairing.confirm(str(data.get("digits", "")), request_id=str(data.get("request", "")))
                 elif action == "check":
                     await pairing.finish()
                 return RedirectResponse("/journal/devices", status_code=303)

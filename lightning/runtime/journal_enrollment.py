@@ -18,7 +18,8 @@ from lightning.sync.journal.codec import JournalError, authenticate, digest, sea
 from lightning.sync.journal.discovery import nearby_devices
 from lightning.sync.journal.enrollment import install_replica
 from lightning.sync.journal.local import PinnedLocalClient
-from lightning.sync.journal.pairing import complete_number_match, number_choices, require_live_offer, prove_pairing, request_pairing
+from lightning.sync.journal.pairing import number_choices, require_live_offer
+from lightning.sync.journal import pairing_client
 from .session import read_slot, write_slot
 
 
@@ -63,20 +64,28 @@ class NewJournalReplica:
         if candidate is None:
             raise JournalError("Find the nearby device again")
         offer = unpack(candidate["offer"].encode())["body"]
-        incarnation = str(uuid4())
-        secret = os.urandom(32) if offer.get("method") == "number-match" else None
-        wire,digits = request_pairing(candidate["offer"].encode(),code,self.identity,incarnation,home_key=offer["home_key"],secret=secret)
-        request = self.client_factory(candidate["endpoint"],candidate["certificate"],timeout=5)
-        response = unpack(await request(wire))
-        authenticate(response,offer["home_key"])
-        identifier = digest(unpack(wire)["body"])
-        if secret is not None:
-            digits = await complete_number_match(candidate["offer"].encode(),wire,response,secret,self.identity,request)
-        elif response["body"] != dict(type="pairing-wait",request=identifier):
-            raise JournalError("Pairing response does not match this device")
-        write_slot(self.root/"enrollment.json",dict(candidate=candidate,request=identifier,wire=wire.decode(),digits=digits,choices=number_choices(digits),incarnation=incarnation,
-                   profile=offer["profile"],generation=offer["generation"],home_key=offer["home_key"],stage="compare"))
-        return digits
+        state = pairing_client.begin(candidate,self.identity,str(uuid4()),code)
+        self._save_pairing(state)
+        await self.resume()
+        return self.state()["digits"]
+
+    def _save_pairing(self, state):
+        write_slot(self.root/"enrollment.json",state,replace=(self.root/"enrollment.json").exists())
+
+    def _pairing_exchange(self, state):
+        candidate = state["candidate"]
+        return self.client_factory(candidate["endpoint"],candidate["certificate"],timeout=5)
+
+    async def resume(self):
+        state = self.state()
+        if state is None:
+            raise JournalError("Find a nearby device first")
+        if state["stage"] == "handshake":
+            await pairing_client.handshake(state,self.identity,self._pairing_exchange(state),self._save_pairing)
+        elif state["stage"] in ("proving","waiting"):
+            await pairing_client.status(state,self.identity,self._pairing_exchange(state),self._save_pairing)
+        elif state["stage"] == "cancelling":
+            await self.cancel()
 
     def compare(self, digits):
         """The joining user's confirmation that the home shows the same digits. Nothing leaves the device here."""
@@ -92,29 +101,26 @@ class NewJournalReplica:
         write_slot(self.root/"enrollment.json",dict(state,stage="password"),replace=True)
 
     async def prove(self, password):
-        """Send the password proof, only after compare(). The password is never stored."""
         state = self.state()
-        if state is None or state.get("stage") != "password" or state.get("failed"):
+        if state is None:
             raise JournalError("Compare the numbers with the home first")
-        candidate = state["candidate"]
-        wire = prove_pairing(candidate["offer"].encode(),state["wire"].encode(),password,self.identity,home_key=state["home_key"])
-        request = self.client_factory(candidate["endpoint"],candidate["certificate"],timeout=5)
-        response = unpack(await request(wire))
-        authenticate(response,state["home_key"])
-        if response["body"] != dict(type="pairing-wait",request=state["request"]):
-            raise JournalError("Pairing response does not match this device")
-        write_slot(self.root/"enrollment.json",dict(state,stage="waiting"),replace=True)
+        await pairing_client.prove(state,self.identity,password,self._pairing_exchange(state),self._save_pairing)
 
-    def cancel(self):
-        """Forget a pairing that has not sent a password proof; the saved identity stays."""
+    async def cancel(self):
         state = self.state()
-        if state is not None and state.get("stage") in ("compare","password") and not (self.root/"ledger.db").exists():
-            (self.root/"enrollment.json").unlink()
+        if state is None:
+            return
+        if (self.root/"ledger.db").exists() or (self.root/"install-intent.json").exists():
+            raise JournalError("Resume the encrypted copy installation before cancelling")
+        await pairing_client.cancel(state,self.identity,self._pairing_exchange(state),self._save_pairing)
+        (self.root/"enrollment.json").unlink()
 
     async def finish(self, password, *, budget=50):
         state = self.state()
         if state is None:
             raise JournalError("Find a home and enter its number first")
+        if state.get("stage") == "proving":
+            await pairing_client.status(state,self.identity,self._pairing_exchange(state),self._save_pairing)
         if state.get("stage","waiting") != "waiting":
             raise JournalError("Compare the numbers and enter your password first")
         if (self.root/"complete.json").exists():

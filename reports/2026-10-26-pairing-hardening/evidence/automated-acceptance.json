@@ -1,0 +1,118 @@
+{
+  "format": 1,
+  "dummy_data": true,
+  "platform": "Linux",
+  "python": "3.12.14",
+  "cases": [
+    {
+      "case": "request-before-delivery",
+      "result": "passed",
+      "evidence": "automated-process-kill"
+    },
+    {
+      "case": "request-lost-reply",
+      "result": "passed",
+      "evidence": "automated-process-kill"
+    },
+    {
+      "case": "reveal-lost-reply",
+      "result": "passed",
+      "evidence": "automated-process-kill"
+    },
+    {
+      "case": "proof-lost-reply",
+      "result": "passed",
+      "evidence": "automated-process-kill"
+    },
+    {
+      "case": "status-lost-reply",
+      "result": "passed",
+      "evidence": "automated-process-kill"
+    },
+    {
+      "case": "discovery-open-stop-and-endpoint-change",
+      "result": "passed",
+      "evidence": "automated-loopback"
+    },
+    {
+      "case": "tls-certificate-substitution",
+      "result": "passed",
+      "evidence": "automated-loopback"
+    },
+    {
+      "case": "pinned-tls-pairing",
+      "result": "passed",
+      "evidence": "automated-loopback"
+    },
+    {
+      "case": "native-credentials",
+      "result": "passed",
+      "evidence": "development-provider",
+      "details": {
+        "format": 1,
+        "dummy_only": true,
+        "provider": "linux-development-private-file",
+        "native_provider": false,
+        "passed": true,
+        "checks": {
+          "identity_survives_reload": true,
+          "encrypted_tls_temporary_file": true,
+          "tls_temporary_file_removed": true,
+          "tls_13_minimum": true,
+          "certificate_and_public_key_preserved": true
+        },
+        "physical_wifi": "not_run"
+      }
+    }
+  ],
+  "physical": [
+    {
+      "case": "same-wifi",
+      "result": "unrun",
+      "evidence": "physical-unrun",
+      "instructions": "Both awake on the same Wi-Fi: discover names, select number, enter PC password, approve home, reconnect without another prompt."
+    },
+    {
+      "case": "phone-hotspot",
+      "result": "unrun",
+      "evidence": "physical-unrun",
+      "instructions": "Repeat on the phone hotspot. A blocked broadcast must leave a clear unavailable state and preserve the saved attempt."
+    },
+    {
+      "case": "guest-isolation",
+      "result": "unrun",
+      "evidence": "physical-unrun",
+      "instructions": "Repeat on guest/client-isolated Wi-Fi: refusal/unavailability is expected; do not weaken identity checks."
+    },
+    {
+      "case": "windows-firewall",
+      "result": "unrun",
+      "evidence": "physical-unrun",
+      "instructions": "Manually deny then allow the review app on a private network: no financial data changes while unavailable; retry resumes after access returns."
+    },
+    {
+      "case": "address-change",
+      "result": "unrun",
+      "evidence": "physical-unrun",
+      "instructions": "Switch Wi-Fi/change IP: rediscover and reconnect using the pinned identity. A different certificate must fail."
+    },
+    {
+      "case": "android-sleep",
+      "result": "unrun",
+      "evidence": "physical-unrun",
+      "instructions": "Screen off/Doze then reopen the phone: saved state survives and resumes; no claim of an always-running background listener."
+    },
+    {
+      "case": "force-stop-reboot",
+      "result": "unrun",
+      "evidence": "physical-unrun",
+      "instructions": "Force-stop/relaunch and reboot each device during request, reveal, proof and download: pairing reconciles or expires explicitly, without another writable home."
+    },
+    {
+      "case": "interrupted-enrollment",
+      "result": "unrun",
+      "evidence": "physical-unrun",
+      "instructions": "Interrupt download and reopen: verified chunks resume and the final financial fingerprint matches the home."
+    }
+  ]
+}
