@@ -1,0 +1,17 @@
+lightning-default overview: 759 elements, 0 moved
+lightning-default transactions: 1041 elements, 0 moved
+lightning-default budget: 731 elements, 0 moved
+lightning-default investments: 490 elements, 0 moved
+lightning-default accounts: 297 elements, 0 moved
+lightning-default settings: 276 elements, 0 moved
+lightning-default overview frames: mean 16.6 ms, p95 16.7 ms, 0 over 34 ms
+lightning-default budget frames: mean 16.7 ms, p95 16.7 ms, 0 over 34 ms
+dendera-night overview: 759 elements, 0 moved
+dendera-night transactions: 1041 elements, 0 moved
+dendera-night budget: 731 elements, 0 moved
+dendera-night investments: 490 elements, 0 moved
+dendera-night accounts: 297 elements, 0 moved
+dendera-night settings: 276 elements, 0 moved
+dendera-night overview frames: mean 16.6 ms, p95 16.7 ms, 0 over 34 ms
+dendera-night budget frames: mean 16.6 ms, p95 16.7 ms, 0 over 34 ms
+passed

@@ -16,6 +16,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | audit-8 | [Audit 8: backbone engine gaps and loose ends](2026-10-26-engine-audit/report.md) | 2026-10-26 |
 | pairing-hardening | [Pairing backend hardening and security review](2026-10-26-pairing-hardening/report.md) | 2026-10-26 |
 | contributor-review | [Yusuf contribution review · 2026-10-23](2026-10-23-contributor-review/report.md) | 2026-10-23 |
+| v1.5.0-preparation | [v1.5.0 PR review, theme switching and package preparation](2026-10-26-v150-release/report.md) | 2026-10-26 |
 
 ## Create and maintain a report
 

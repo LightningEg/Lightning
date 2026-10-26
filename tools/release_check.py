@@ -4,7 +4,7 @@
 
 Checks: the version agrees in pyproject.toml, lightning/__init__.py and the README; the tag it implies; the working
 tree is clean, on main and level with origin; LICENSE and CONTRIBUTING.md exist; the changelog has entries under
-Unreleased; no tracked file looks like a secret or private data (keys, keystores, databases other than the one
+Unreleased or the current version; no tracked file looks like a secret or private data (keys, keystores, databases other than the one
 encrypted test fixture, tokens, personal emails); and no TODO/FIXME/XXX markers sit in shipped code.
 It does not run the tests: the release skill does that next.
 """
@@ -30,12 +30,16 @@ def git(*args: str) -> str:
 
 def versions() -> list[str]:
     toml = re.search(r'^version = "([^"]+)"', (ROOT / "pyproject.toml").read_text(encoding="utf-8"), re.M).group(1)
-    init = re.search(r'__version__ = "([^"]+)"', (ROOT / "lightning" / "__init__.py").read_text(encoding="utf-8")).group(1)
+    source = (ROOT / "lightning" / "__init__.py").read_text(encoding="utf-8")
+    init = re.search(r'__version__ = "([^"]+)"', source).group(1)
+    display = re.search(r'DISPLAY_VERSION = "([^"]+)"', source).group(1)
     readme = re.search(r"source version is \*\*v?([^*]+)\*\*", (ROOT / "README.md").read_text(encoding="utf-8"))
     norm = lambda v: re.sub(r"[-.]?(beta|b)[.]?", "b", v)
     out = []
     if toml != init:
         out.append(f"pyproject.toml has {toml} but lightning/__init__.py has {init}")
+    if norm(display) != norm(toml):
+        out.append(f"the app displays {display} but pyproject.toml has {toml}")
     if readme and norm(readme.group(1)) != norm(toml):
         out.append(f"README names {readme.group(1)} but pyproject.toml has {toml}")
     tag = "v" + re.sub(r"b(\d+)$", r"-beta.\1", toml)
@@ -60,7 +64,10 @@ def files() -> list[str]:
     changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
     block = re.split(r"^## \[Unreleased\]", changelog, maxsplit=1, flags=re.M)[-1].split("\n## [", 1)[0]
     if not re.search(r"^- \d{4}-", block, re.M):
-        out.append("CHANGELOG.md has no entries under Unreleased (rename it to the version when tagging)")
+        version = re.search(r'^version = "([^"]+)"', (ROOT / "pyproject.toml").read_text(encoding="utf-8"), re.M).group(1)
+        released = re.search(r"^## \[" + re.escape(version) + r"\][^\n]*\n(.*?)(?=^## \[|\Z)", changelog, re.M | re.S)
+        if not released or not re.search(r"^- \d{4}-", released.group(1), re.M):
+            out.append("CHANGELOG.md has no entries under Unreleased or the current version")
     return out
 
 

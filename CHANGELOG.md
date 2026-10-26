@@ -11,6 +11,11 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+## [1.5.0] — 2026-10-26
+
+- 2026-10-26 · Codex · **8L:** Settings explains immediate theme switching, automatic saving, returning to default and paid previews; saved choices show a confirmation in English and Arabic.
+- 2026-10-26 · Codex · **4F:** Prepare v1.5.0; release validation checks the displayed version and accepts notes rotated under the matching release version.
+
 - 2026-10-26 · Codex: 4F release preparation: preserve the generated-key header assertion without a secret-shaped literal; no key material is committed.
 - 2026-10-26 · Claude: [8L] Dendera theme (animated): day and night, zodiac ring, winged disc, lotus frieze, pigment thread; drawings now live in `cosmetics/assets/<theme>/`. Wide cards readable on dark themes; `theme_shots.py --ar` really Arabic; new `tools/theme_check.py`. `themes.md` §5 is one flow for every maker; plan `theme-kit/plans/dendera.html`, report `reports/2026-10-26-dendera-theme/`.
 

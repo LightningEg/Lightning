@@ -110,6 +110,7 @@ def test_forecast_bars_share_baseline(c, setup, browser_page, monkeypatch, local
     if locale=='en' and width==1366:
         page.screenshot(path='/tmp/feedback-forecast.png',full_page=True)
     page.goto(origin+'/?period=month&month=2026-10')
+    page.locator('details[aria-labelledby="position-heading"] > summary').click()
     assert page.locator('.net-flow-bars').evaluate('(x)=>getComputedStyle(x).display')=='grid'
     assert page.locator('.net-flow-bars .flow-bar').first.evaluate('(x)=>x.getBoundingClientRect().height')==12
 
@@ -182,6 +183,7 @@ def test_savings_picture_browser(c,browser_page,spend):
     c.transactions.record_inflow('2026-09-02',account.id,'100',c.categories.get_by_code('EXP.WORK.SALARY').id)
     c.transactions.record_outflow('2026-09-03',account.id,spend,c.categories.get_by_code('EXP.PERSONAL.FOOD').id)
     page.goto(origin+'/?period=month&month=2026-09')
+    page.locator('details[aria-labelledby="position-heading"] > summary').click()
     page.locator('#savings-squares > summary').click()
     assert page.locator('.inv-waffle i').count()==100
     assert page.locator('.inv-waffle i.invested').count()==0

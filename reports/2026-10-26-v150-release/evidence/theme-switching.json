@@ -1,0 +1,34 @@
+[
+  {
+    "device": "pc",
+    "locale": "en",
+    "saved_and_restored": true,
+    "return_to_default": true,
+    "unowned_preview_not_saved": true,
+    "no_horizontal_overflow": true
+  },
+  {
+    "device": "pc",
+    "locale": "ar",
+    "saved_and_restored": true,
+    "return_to_default": true,
+    "unowned_preview_not_saved": true,
+    "no_horizontal_overflow": true
+  },
+  {
+    "device": "phone",
+    "locale": "en",
+    "saved_and_restored": true,
+    "return_to_default": true,
+    "unowned_preview_not_saved": true,
+    "no_horizontal_overflow": true
+  },
+  {
+    "device": "phone",
+    "locale": "ar",
+    "saved_and_restored": true,
+    "return_to_default": true,
+    "unowned_preview_not_saved": true,
+    "no_horizontal_overflow": true
+  }
+]

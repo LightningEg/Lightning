@@ -1,0 +1,1 @@
+Nothing scrolls sideways at 360 or 320.

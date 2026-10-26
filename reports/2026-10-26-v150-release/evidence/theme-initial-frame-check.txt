@@ -1,0 +1,17 @@
+dendera overview: 765 elements, 0 moved
+dendera transactions: 1041 elements, 0 moved
+dendera budget: 731 elements, 0 moved
+dendera investments: 490 elements, 0 moved
+dendera accounts: 297 elements, 0 moved
+dendera settings: 276 elements, 0 moved
+dendera overview frames: mean 16.6 ms, p95 16.7 ms, 0 over 34 ms
+dendera budget frames: mean 16.8 ms, p95 16.8 ms, 0 over 34 ms
+dendera-night overview: 765 elements, 0 moved
+dendera-night transactions: 1041 elements, 0 moved
+dendera-night budget: 731 elements, 0 moved
+dendera-night investments: 490 elements, 0 moved
+dendera-night accounts: 297 elements, 0 moved
+dendera-night settings: 276 elements, 0 moved
+dendera-night overview frames: mean 17.5 ms, p95 16.8 ms, 2 over 34 ms
+dendera-night budget frames: mean 19.0 ms, p95 33.3 ms, 5 over 34 ms
+1 problem(s)
