@@ -55,6 +55,9 @@ def test_the_bundled_paid_themes_share_the_store_ids():
     assert [t["id"] for t in entitlements.store_themes()].count("dendera-night") == 0
     shipped = json.loads(entitlements.STORE.read_text())
     assert shipped["redeem_url"].startswith("https://") and shipped["redeem_url"].endswith("/functions/v1/redeem-purchase")
+    assert len(shipped["keys"]) == 1
+    key_id, raw = next(iter(shipped["keys"].items()))
+    assert len(key_id) <= 80 and len(base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4))) == 32
 
 
 def test_without_a_licence_a_paid_theme_is_not_worn(store, monkeypatch):

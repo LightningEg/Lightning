@@ -20,7 +20,7 @@ repo: app
 
 1. **Deploy** the website's migrations through `20261026120000_dendera_theme.sql` and the new `admin.html` assets.
 2. **Open checkout** in the console (Settings › Checkout: InstaPay address, exact name, private QR), then make one real top-up from a second account, credit it, buy a theme, and check it on a second device. *Ready to sell* ticks each step.
-3. **Store key:** generate an Ed25519 key pair; keep the private JWK offline with a backup. Set the Supabase secrets `STORE_SIGNING_PRIVATE_JWK`, `STORE_SIGNING_KEY_ID`, `STORE_ALLOWED_ORIGINS`; deploy `redeem-purchase` (JWT off) and `restore-purchases` (JWT on) with gateway rate limits. Give an AI only the public key and its id, to add to `lightning/security/store_keys.json`.
+3. **Store key:** the owner provided the public key and key ID on 2026-10-26; they are pinned in `lightning/security/store_keys.json`. The owner confirms `STORE_SIGNING_PRIVATE_JWK` and `STORE_SIGNING_KEY_ID` are set as Supabase Edge Function secrets, and both functions are deployed with the intended JWT settings. Keep the private JWK offline with a backup. Set `STORE_ALLOWED_ORIGINS` and gateway rate limits. A signed response from Supabase must verify against the pinned public key before an app release; the secret/public pairing has not been verified.
 4. **Ship the app release** that carries the key, then Catalogue › App themes › *Turn on unlock* for Nile, Cotton, Papyrus and Dendera (its night mode rides on the same licence).
 5. Turn on leaked-password protection in Supabase Auth.
 
