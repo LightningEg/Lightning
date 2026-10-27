@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-27 · Claude: themes.md: a light theme never recolours dark mode on the website (copy of the website's change, `paintsOn()`).
+
+
 - 2026-10-27 · Claude: 8L: pinned the store public key `store-2026-1` in `store_keys.json`; paid themes now verify once the release ships.
 
 

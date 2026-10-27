@@ -83,6 +83,7 @@ To change how one part looks in every theme (say, buttons), change that part's r
 - The theme's own side keeps its seed.
 - The other side is turned over: the seed's ground becomes the text, on a ground tinted 5% (light) or 7% (dark) with the accent.
 - Quiet text and the accent then move toward the text until each reads at 4.5:1.
+- **Dark mode is the visitor's.** A light theme (Cotton, Papyrus) never recolours dark mode: the switch shows the plain dark site, and the theme stays worn for when light mode returns. A dark theme still shows in both modes (`paintsOn()` in `js/theme.js`).
 
 `js/theme-preview.js` holds the same rule for the previews, and a test keeps the two copies equal.
 
