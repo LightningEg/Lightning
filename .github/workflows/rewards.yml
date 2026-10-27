@@ -1,14 +1,15 @@
 # Lightning Coins for tasks (CONTRIBUTING.md). This file only reports facts to the database; the database does the
 # counting, one award per issue, and refuses anything it should not pay.
 #   issues assigned / unassigned    someone was given or lost an issue by hand: record or release their claim
-#   pull request merged             pay the issues it closed to its author, or keep it for them until they link GitHub
+#   pull request merged             count it (record_merge: recognition points by size, for every merge), and pay the issues it
+#                                   closed to its author (award_merge), or keep both for them until they link GitHub
 # (The /take bot assigns with GITHUB_TOKEN, which starts no other workflow, so contributors.yml records those claims.)
 #
 # Safety: pull_request_target runs with this repository's secrets, so this file NEVER checks out or runs pull request
 # code. It reads only the numbers and names GitHub puts in the event, and passes them to the shell through environment
 # variables, never through ${{ }} inside a script. Without the SUPABASE_SERVICE_ROLE_KEY secret (forks, before setup)
 # it prints a notice and does nothing. Bots and the owner's account (the owner and the AI sessions that push from
-# it) never earn coins; their merged pull requests only close the offers they finish.
+# it) never earn coins or points; their merged pull requests only close the offers they finish.
 name: Rewards
 
 on:
@@ -61,7 +62,7 @@ jobs:
           fi
 
   merged:
-    # Only a merge into the default branch closes issues, so only that can finish a task.
+    # Only a merge into the default branch closes issues and counts, so only that can finish a task.
     if: >-
       github.event_name == 'pull_request_target' && github.event.pull_request.merged == true &&
       github.event.pull_request.base.ref == github.event.repository.default_branch
@@ -100,13 +101,24 @@ jobs:
           # The issues this pull request closes, in this repository only (GitHub reads the "Closes #n" words).
           issues=$(gh pr view "$PR" --json closingIssuesReferences | jq -c --arg repo "$GH_REPO" \
             '[.closingIssuesReferences[] | select((.url | ascii_downcase) | startswith(("https://github.com/" + $repo + "/issues/") | ascii_downcase)) | .number]')
-          if [[ "$issues" == "[]" ]]; then echo "Pull request #$PR closes no issue of this repository: nothing to do."; exit 0; fi
           # Bots and the owner's account earn nothing; they only finish the task. (This repository belongs to an
           # organization, where its owner's own pull requests read MEMBER, so both words are skipped.)
           if [[ "$AUTHOR_TYPE" == Bot || "$ASSOC" == OWNER || "$ASSOC" == MEMBER ]]; then
+            if [[ "$issues" == "[]" ]]; then echo "Pull request #$PR closes no issue of this repository: nothing to do."; exit 0; fi
             rpc close_rewarded_issues "$(jq -nc --arg repo "$GH_REPO" --argjson pr "$PR" --argjson issues "$issues" \
               '{p_repo:$repo, p_pr:$pr, p_issues:$issues}')"
           else
+            # Every merged pull request counts, closing an issue or not: record_merge gives recognition points by size
+            # (small under 50 changed lines, medium under 400, large above), once per pull request. The size is the
+            # additions plus deletions of every file except lockfiles and generated or minified files. It comes from
+            # the API (the file list GitHub keeps for the pull request); the pull request's code is never fetched.
+            lines=$(gh pr view "$PR" --json files | jq '[.files[] | select(.path | test("\\.lock$|lock\\.json$|\\.generated\\.|\\.min\\.") | not) | .additions + .deletions] | add // 0')
+            [[ "$lines" =~ ^[0-9]+$ ]] || { echo "::error::unexpected changed-lines count"; exit 1; }
+            rpc record_merge "$(jq -nc --arg repo "$GH_REPO" --argjson pr "$PR" --arg title "$PR_TITLE" --arg url "$PR_URL" \
+              --arg at "$MERGED_AT" --argjson id "$AUTHOR_ID" --arg login "$AUTHOR" --argjson lines "$lines" \
+              '{p_repo:$repo, p_pr:$pr, p_title:$title, p_url:$url, p_merged_at:$at, p_author_github_id:$id, p_author_login:$login, p_lines:$lines}')"
+            # Coins come only from offers: an issue this pull request closes may have one.
+            if [[ "$issues" == "[]" ]]; then echo "Pull request #$PR closes no issue of this repository: no coins to pay."; exit 0; fi
             rpc award_merge "$(jq -nc --arg repo "$GH_REPO" --argjson pr "$PR" --arg title "$PR_TITLE" --arg url "$PR_URL" \
               --arg at "$MERGED_AT" --argjson id "$AUTHOR_ID" --arg login "$AUTHOR" --argjson issues "$issues" \
               '{p_repo:$repo, p_pr:$pr, p_title:$title, p_url:$url, p_merged_at:$at, p_author_github_id:$id, p_author_login:$login, p_issues:$issues}')"
