@@ -2,7 +2,7 @@
 
 **Last reviewed 2026-10-23 · source 1.4.4 · latest published beta 1.4.2** ([published Windows and Android beta](https://github.com/LightningEg/Lightning-downloads/releases/tag/v1.4.2)).
 
-What Lightning is, who it is for, what it answers and where it goes. Technical contracts: [Architecture](ARCHITECTURE.md). Look: [guideline](../guideline/). Terms and figures: [Glossary](GLOSSARY.md). Shipped changes: `CHANGELOG.md`. Hand-off between AIs: [NOW.md](../NOW.md). The plan and open items: [issues/](../issues/INDEX.md).
+What Lightning is, who it is for, and where it goes. What each screen must answer: [Users' main questions](USERS_MAIN_QUESTIONS.md). Technical contracts: [Architecture](ARCHITECTURE.md). Look: [guideline](../guideline/). Terms and figures: [Glossary](GLOSSARY.md). Shipped changes: `CHANGELOG.md`. Hand-off between AIs: [NOW.md](../NOW.md). The plan and open items: [issues/](../issues/INDEX.md).
 
 ## Contents
 
@@ -14,11 +14,11 @@ Read one section: `grep -n '^## ' docs/PROJECT_OVERVIEW.md`, then read from that
 | 2. Product decisions that must hold | You change any figure, rule or flow |
 | 3. What you can do today | You need the feature list |
 | 4. Period and fixed-horizon visuals | You change a chart, card or the period picker |
-| 5. The questions Lightning answers | You change what a screen answers, or take a known gap |
-| 6. Reference workflow: a month with Mohab | You change Mohab's test or a screen he uses |
-| 7. Compared with the best budgeting apps | You plan a feature |
-| 8. UX plan (guideline 3.6) | You take a UX item |
-| 9. Plan and roadmap | You pick the next work or finish a milestone |
+| [Users' main questions](USERS_MAIN_QUESTIONS.md) | You change what a screen answers, or take a known gap |
+| 5. Reference workflow: a month with Mohab | You change Mohab's test or a screen he uses |
+| 6. Compared with the best budgeting apps | You plan a feature |
+| 7. UX plan (guideline 3.6) | You take a UX item |
+| 8. Plan and roadmap | You pick the next work or finish a milestone |
 | Cosmetic marketplace owner revision (2026-10-24) | You change cosmetic parts, purchasing or ownership |
 
 <a id="what-lightning-is"></a>
@@ -125,48 +125,10 @@ The period picker (All time · YTD · Monthly · Custom) drives most visuals. A 
 A sparkline never follows the period. A comparison uses earlier months; a partial period uses matching calendar days, labelled so far with neutral comparison chips.
 
 <a id="the-questions-lightning-answers"></a>
-## 5. The questions Lightning answers
-
-Each tab answers one main question, then its follow-ups. Reviewed 2026-10-13; `tests/test_mohab_year.py` checks the answers, so only open gaps are listed below.
-
-| Screen | Main question | Leads with |
-|---|---|---|
-| Overview | Where do I stand, and what needs me? | Needs you, Net worth, Free cash, what it is made of, cash flow |
-| Expense analysis | Where did my money go? | Money out, ranked categories, change from last period |
-| Budget | Am I on plan? | Left in plan, everyday spending against pace, categories over plan |
-| Investments | What do I hold, and how did it do? | Net gain or loss, holdings, allocation |
-| Cash planning | How much can I actually spend? | Safe to spend, What you owe, forecast |
-| Reserves | Am I safe if something goes wrong? | Emergency fund in months |
-| Financial health | How do my figures compare with my limits? | Emergency fund, Savings rate, debt and fixed-cost ratios |
-| Account | What happened here? | One balance, add/import, register |
-| Held for others | Whose money am I holding? | Balances by person |
-| Settings · Checks | Is my data right? | Integrity checks |
-
-Every other follow-up (net worth breakdown, what I owe, spend until payday, due next, forecast low point, categories over plan, loans in the plan, class returns, sale value, target mix, payoff date, debt ratios, bonus and job-change effects, fees) is answered. Open gaps:
-
-| Question | Gap |
-|---|---|
-| Why did net worth change: saving, prices or new money? | Partial: no wealth-change bridge (M3.2) |
-| Can I afford this purchase now? | Partial: no "what if I buy it" check |
-| A merchant or a few categories I care about | Built locally: named live-date register views, matching report and export |
-| A refund: did my spending go down? | Partial: it lowers the category in the month the refund arrives, not the purchase month (Mohab 13) |
-| Work spending my employer owes me back | Built locally: explicit claims and partial receipt/refund links list outstanding amounts |
-| What about next month's plan? | Partial: rules repeat; a future month cannot be opened |
-| Where should the rest of my income go? | Built locally: optional funded payday preview using actual cash, with reserve top-ups |
-| Have I actually set aside the goal's monthly amount? | Partial: nothing asks him to assign it |
-| I paid from the emergency fund: what now? | Partial: nothing reminds him to refill (Mohab 14) |
-| Pay the loan off early | Missing: no lump-sum payment |
-| When does my certificate mature? | Portfolio dates and explicit interest receipt reconciliation built; legacy account-level conversion remains |
-| How are my dollar savings and US stocks doing? | Built in v1.1; open: bank-imported pairs across currencies, Europe and GCC listings |
-| No pay this month: does the average fall? | Known gap: zero-income months are skipped by the average (Mohab 27) |
-| Was I paid my raise? | Partial: the scheduled payment stays Due until linked by hand |
-| Is my salary late? | Left out by decision |
-| Stale prices | Needs you flags prices older than about two months; month-end price gaps are listed |
-
-Early pay, raise and rent changes need explicit confirmation by design: Lightning suggests, Mohab confirms, neither plan nor reserve changes silently. Left open by the 2026-10-05 audit: a payment scheduled on the 31st moves to the 30th after a shorter month and stays there.
+**Questions each screen answers and open gaps:** [Users' main questions](USERS_MAIN_QUESTIONS.md).
 
 <a id="reference-workflow-a-month-with-mohab"></a>
-## 6. Reference workflow: a month with Mohab
+## 5. Reference workflow: a month with Mohab
 
 **Mohab**, 31, salaried, Cairo: 45,000 EGP a month from ACME Egypt into CIB; a cash wallet and Vodafone Cash; an NBE 3-year certificate; a THNDR account with COMI, Fawry and a money market fund; an L'Azurde ring and a gold pound; 10,000 EGP of his mother's money in CIB; rent, internet, phone, electricity, and a 24-month car loan.
 
@@ -210,7 +172,7 @@ The dollar steps are not yet inside the year (NOW.md, Next 3). User feedback bat
 **Not scripted:** the NBE certificate maturing (forecast only; he enters redemption and interest by hand); paying the car loan off early (covered separately by milestone regression/browser tests); payslip deductions (record net pay).
 
 <a id="compared-with-the-best-budgeting-apps"></a>
-## 7. Compared with the best budgeting apps
+## 6. Compared with the best budgeting apps
 
 Evidence, and what users of the Egyptian apps love and hate, are in [Competition](COMPETITION.md); this is only the gap list, reviewed 2026-10-13. Already on par: suggested (never created) recurring items, bills with paid-matching, projected balance with its lowest point, dated goal needs, yearly subscription totals, loan payoff, rollover budgets, review inbox (2026-10-05), rules with conditions, multi-currency (v1.1), real investment returns, local gold, money held for others.
 
@@ -228,7 +190,7 @@ Evidence, and what users of the Egyptian apps love and hate, are in [Competition
 Bank sync and bill negotiation are not adopted: local CSV stays the foundation. "Safe to spend" must always say which obligations and income it includes. Certificate projections use an actual/365 estimate, are never posted, and bank interest is reconciled only through explicit existing-receipt links, never assumed received.
 
 <a id="ux-plan-guideline-36"></a>
-## 8. UX plan (guideline 3.6)
+## 7. UX plan (guideline 3.6)
 
 From the full UX review of 2026-10-03 (Mohab's year at 1,366 × 768) and the tab-by-tab audit of 2026-10-06. Structure is two levels (2026-10-06).
 
@@ -242,7 +204,7 @@ From the full UX review of 2026-10-03 (Mohab's year at 1,366 × 768) and the tab
 
 <a id="upcoming-projects"></a>
 <a id="roadmap"></a>
-## 9. Plan and roadmap
+## 8. Plan and roadmap
 
 The plan is [issues/](../issues/INDEX.md): numbered milestones in the order they are worked on, each with its action plan
 of coded items (**3C**, and **3C1** one step down). The owner picks the order; [issues/README.md](../issues/README.md) has

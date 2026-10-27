@@ -1,0 +1,262 @@
+{
+  "abk": {
+    "icon": "icons/abk.png",
+    "wordmark": "wordmarks/abk.png",
+    "original": "originals/abk.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/abk.webp",
+    "source_type": "third-party directory"
+  },
+  "cib": {
+    "icon": "icons/cib.png",
+    "wordmark": "wordmarks/cib.png",
+    "original": "originals/cib.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/cib.webp",
+    "source_type": "third-party directory"
+  },
+  "arab-bank": {
+    "icon": "icons/arab-bank.png",
+    "wordmark": "wordmarks/arab-bank.png",
+    "original": "originals/arab-bank.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/arab-bank.webp",
+    "source_type": "third-party directory"
+  },
+  "aaib": {
+    "icon": "icons/aaib.png",
+    "wordmark": "wordmarks/aaib.png",
+    "original": "originals/aaib.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/aaib.webp",
+    "source_type": "third-party directory"
+  },
+  "aib": {
+    "icon": "icons/aib.png",
+    "wordmark": "wordmarks/aib.png",
+    "original": "originals/aib.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/aib.webp",
+    "source_type": "third-party directory"
+  },
+  "ealb": {
+    "icon": "icons/ealb.png",
+    "wordmark": "wordmarks/ealb.png",
+    "original": "originals/ealb.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/ealb.webp",
+    "source_type": "third-party directory"
+  },
+  "saib": {
+    "icon": "icons/saib.png",
+    "wordmark": "wordmarks/saib.png",
+    "original": "originals/saib.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/saib.webp",
+    "source_type": "third-party directory"
+  },
+  "abc": {
+    "icon": "icons/abc.png",
+    "wordmark": "wordmarks/abc.png",
+    "original": "originals/abc.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/abc.webp",
+    "source_type": "third-party directory"
+  },
+  "united-bank": {
+    "icon": "icons/united-bank.png",
+    "wordmark": "wordmarks/united-bank.png",
+    "original": "originals/united-bank.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/united-bank.webp",
+    "source_type": "third-party directory"
+  },
+  "fabmisr": {
+    "icon": "icons/fabmisr.png",
+    "wordmark": "wordmarks/fabmisr.png",
+    "original": "originals/fabmisr.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/fab.webp",
+    "source_type": "third-party directory"
+  },
+  "adcb": {
+    "icon": "icons/adcb.png",
+    "wordmark": "wordmarks/adcb.png",
+    "original": "originals/adcb.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/adcb.webp",
+    "source_type": "third-party directory"
+  },
+  "hsbc": {
+    "icon": "icons/hsbc.png",
+    "wordmark": "wordmarks/hsbc.png",
+    "original": "originals/hsbc.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/hsbc.webp",
+    "source_type": "third-party directory"
+  },
+  "alexbank": {
+    "icon": "icons/alexbank.png",
+    "wordmark": "wordmarks/alexbank.png",
+    "original": "originals/alexbank.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/bank-of-alexandria.webp",
+    "source_type": "third-party directory"
+  },
+  "emirates-nbd": {
+    "icon": "icons/emirates-nbd.png",
+    "wordmark": "wordmarks/emirates-nbd.png",
+    "original": "originals/emirates-nbd.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/emirates-nbd.webp",
+    "source_type": "third-party directory"
+  },
+  "attijariwafa": {
+    "icon": "icons/attijariwafa.png",
+    "wordmark": "wordmarks/attijariwafa.png",
+    "original": "originals/attijariwafa.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/attijariwafa.webp",
+    "source_type": "third-party directory"
+  },
+  "hdb": {
+    "icon": "icons/hdb.png",
+    "wordmark": "wordmarks/hdb.png",
+    "original": "originals/hdb.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/hdb.webp",
+    "source_type": "third-party directory"
+  },
+  "ebank": {
+    "icon": "icons/ebank.png",
+    "wordmark": "wordmarks/ebank.png",
+    "original": "originals/ebank.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/edbe.webp",
+    "source_type": "third-party directory"
+  },
+  "egbank": {
+    "icon": "icons/egbank.png",
+    "wordmark": "wordmarks/egbank.png",
+    "original": "originals/egbank.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/eg-bank.webp",
+    "source_type": "third-party directory"
+  },
+  "banque-du-caire": {
+    "icon": "icons/banque-du-caire.png",
+    "wordmark": "wordmarks/banque-du-caire.png",
+    "original": "originals/banque-du-caire.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/banque-du-caire.webp",
+    "source_type": "third-party directory"
+  },
+  "nbk": {
+    "icon": "icons/nbk.png",
+    "wordmark": "wordmarks/nbk.png",
+    "original": "originals/nbk.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/nbk.webp",
+    "source_type": "third-party directory"
+  },
+  "mashreq": {
+    "icon": "icons/mashreq.png",
+    "wordmark": "wordmarks/mashreq.png",
+    "original": "originals/mashreq.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/mashreq.webp",
+    "source_type": "third-party directory"
+  },
+  "standard-chartered": {
+    "icon": "icons/standard-chartered.png",
+    "wordmark": "wordmarks/standard-chartered.png",
+    "original": "originals/standard-chartered.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/standard-chartered.webp",
+    "source_type": "third-party directory"
+  },
+  "citibank": {
+    "icon": "icons/citibank.png",
+    "wordmark": "wordmarks/citibank.png",
+    "original": "originals/citibank.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/citibank.webp",
+    "source_type": "third-party directory"
+  },
+  "qnb": {
+    "icon": "icons/qnb.png",
+    "wordmark": "wordmarks/qnb.png",
+    "original": "originals/qnb.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/qnb.webp",
+    "source_type": "third-party directory"
+  },
+  "suez-canal": {
+    "icon": "icons/suez-canal.png",
+    "wordmark": "wordmarks/suez-canal.png",
+    "original": "originals/suez-canal.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/suez-canal-bank.webp",
+    "source_type": "third-party directory"
+  },
+  "credit-agricole": {
+    "icon": "icons/credit-agricole.png",
+    "wordmark": "wordmarks/credit-agricole.png",
+    "original": "originals/credit-agricole.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/credit-agricole.webp",
+    "source_type": "third-party directory"
+  },
+  "midbank": {
+    "icon": "icons/midbank.png",
+    "wordmark": "wordmarks/midbank.png",
+    "original": "originals/midbank.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/midbank.webp",
+    "source_type": "third-party directory"
+  },
+  "bank-nxt": {
+    "icon": "icons/bank-nxt.png",
+    "wordmark": "wordmarks/bank-nxt.png",
+    "original": "originals/bank-nxt.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/bank-nxt.webp",
+    "source_type": "third-party directory"
+  },
+  "nbe": {
+    "icon": "icons/nbe.png",
+    "wordmark": "wordmarks/nbe.png",
+    "original": "originals/nbe.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/nbe.webp",
+    "source_type": "third-party directory"
+  },
+  "banque-misr": {
+    "icon": "icons/banque-misr.png",
+    "wordmark": "wordmarks/banque-misr.png",
+    "original": "originals/banque-misr.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/banque-misr.webp",
+    "source_type": "third-party directory"
+  },
+  "adib": {
+    "icon": "icons/adib.png",
+    "wordmark": "wordmarks/adib.png",
+    "original": "originals/adib.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/adib.webp",
+    "source_type": "third-party directory"
+  },
+  "albaraka": {
+    "icon": "icons/albaraka.png",
+    "wordmark": "wordmarks/albaraka.png",
+    "original": "originals/albaraka.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/al-baraka.webp",
+    "source_type": "third-party directory"
+  },
+  "faisal": {
+    "icon": "icons/faisal.png",
+    "wordmark": "wordmarks/faisal.png",
+    "original": "originals/faisal.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/faisal-bank.webp",
+    "source_type": "third-party directory"
+  },
+  "kfh": {
+    "icon": "icons/kfh.png",
+    "wordmark": "wordmarks/kfh.png",
+    "original": "originals/kfh.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/kfh.webp",
+    "source_type": "third-party directory"
+  },
+  "abe": {
+    "icon": "icons/abe.png",
+    "wordmark": "wordmarks/abe.png",
+    "original": "originals/abe.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/abe.webp",
+    "source_type": "third-party directory"
+  },
+  "idb": {
+    "icon": "icons/idb.png",
+    "wordmark": "wordmarks/idb.png",
+    "original": "originals/idb.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/idb.webp",
+    "source_type": "third-party directory"
+  },
+  "onebank": {
+    "icon": "icons/onebank.png",
+    "wordmark": "wordmarks/onebank.png",
+    "original": "originals/onebank.png",
+    "source_url": "https://www.onebank.eg/resources/img/favicon/android-icon-192x192.png",
+    "source_type": "official bank site",
+    "original_svg": "originals/onebank-wordmark.svg"
+  }
+}
