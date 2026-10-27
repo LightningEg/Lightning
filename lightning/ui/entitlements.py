@@ -119,7 +119,7 @@ def _synced_envelopes() -> list[dict]:
         return found
     for item in paid_themes():
         try:
-            envelope = json.loads(settings.get(LICENCE_KEY + item, "") or "null")
+            envelope = json.loads(settings.get(LICENCE_KEY + item) or "null")
         except Exception:  # unreadable or missing setting: ignored like any invalid licence
             continue
         if isinstance(envelope, dict):

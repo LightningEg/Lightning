@@ -186,8 +186,8 @@ class FakeSettings:
     def __init__(self, error=None):
         self.data, self.error = {}, error
 
-    def get(self, key, default=None):
-        return self.data.get(key, default)
+    def get(self, key):  # the same signature as lightning.database.settings.SettingsStore.get
+        return self.data.get(key, "")
 
     def set(self, key, value):
         if self.error:
@@ -196,19 +196,17 @@ class FakeSettings:
         self.data[key] = value
 
 
-def test_redeem_shares_the_licence_in_the_profile_settings(store, monkeypatch):
-    settings = FakeSettings()
-    monkeypatch.setattr(entitlements, "_SETTINGS", lambda: settings)
+def test_redeem_shares_the_licence_in_the_profile_settings(c, store, monkeypatch):
+    monkeypatch.setattr(entitlements, "_SETTINGS", lambda: c.settings)  # the real store, as ProfileSession hands it
     envelope = store([("papyrus", 1)])
     entitlements.redeem("abcd1234abcd1234abcd1234abcd1234", opener=answer(envelope))
-    assert json.loads(settings.data["store_licence.papyrus"]) == envelope
+    assert json.loads(c.settings.get("store_licence.papyrus")) == envelope
 
 
-def test_another_device_of_the_profile_unlocks_from_the_synced_setting(store, monkeypatch, tmp_path):
-    settings = FakeSettings()
-    settings.data["store_licence.nile"] = json.dumps(store([("nile", 1)]))
+def test_another_device_of_the_profile_unlocks_from_the_synced_setting(c, store, monkeypatch, tmp_path):
+    c.settings.set("store_licence.nile", json.dumps(store([("nile", 1)])))  # arrived from the profile's other device
     monkeypatch.setenv("LIGHTNING_LICENSE_DIR", str(tmp_path / "fresh-device"))  # no licence file here
-    monkeypatch.setattr(entitlements, "_SETTINGS", lambda: settings)
+    monkeypatch.setattr(entitlements, "_SETTINGS", lambda: c.settings)
     assert entitlements.owned() == frozenset({"nile"}) and entitlements.wearable("nile")
 
 
