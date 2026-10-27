@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-27 · Claude: [8Q] Offers by label: a `coins:<n>` label from someone with write access publishes the issue's offer, removing it closes it (`rewards.yml` offer job; the website's `publish_offer_from_label`).
+
 - 2026-10-27 · Claude: [8Q] Every merged pull request counts: the rewards workflow always calls `record_merge` (recognition points by size, lockfiles and generated files excluded), then `award_merge` only when it closed an issue; `tests/test_rewards_workflow.py`.
 
 - 2026-10-27 · Claude: [8L] Unlock a paid theme once per profile: the licence is shared in the profile's settings so its other devices wear it with no code; the code names its theme (no picker); Settings links to the marketplace, opened in the system browser (Windows and Android).

@@ -60,3 +60,32 @@ def test_a_failed_points_call_never_stops_the_coins():
     body = script()
     call = body[body.index("rpc record_merge"):body.index("rpc award_merge")]
     assert '|| echo "::warning::record_merge failed' in call
+
+
+def offer_job() -> str:
+    text = WORKFLOW.read_text()
+    start = text.index("\n  offer:")
+    return text[start:text.index("\n  merged:")]
+
+
+def test_a_coins_label_publishes_an_offer_only_for_people_who_can_write():
+    text = WORKFLOW.read_text()
+    assert "types: [assigned, unassigned, labeled, unlabeled]" in text
+    job = offer_job()
+    body = job[job.index("      - run: |"):]
+    assert "${{" not in body, "label, login and title reach the script through env"
+    assert "actions/checkout" not in text
+    assert r"^coins:[0-9]{1,5}$" in body
+    assert "collaborators/$SENDER/permission" in body
+    # the permission check comes before any call to the database, and only write, maintain or admin pass
+    assert body.index("collaborators/$SENDER/permission") < body.index("rpc publish_offer_from_label")
+    assert body.index("collaborators/$SENDER/permission") < body.index("rpc close_offer_from_label")
+    assert "admin|maintain|write) ;;" in body
+    assert "publish_offer_from_label" in body and "close_offer_from_label" in body
+    assert "github.event.sender.type != 'Bot'" in job
+
+
+def test_assignment_events_only_reach_the_claim_job():
+    text = WORKFLOW.read_text()
+    claim = text[text.index("\n  claim:"):text.index("\n  offer:")]
+    assert "github.event.action == 'assigned'" in claim and "github.event.action == 'unassigned'" in claim
