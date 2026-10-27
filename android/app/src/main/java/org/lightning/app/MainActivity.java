@@ -69,6 +69,14 @@ public final class MainActivity extends Activity {
                 && origin.getPort() == uri.getPort();
     }
 
+    /** The one outside page the app opens, in the phone's browser: the website's marketplace, any query or fragment. */
+    private boolean storeLink(Uri uri) {
+        String path = uri.getPath();
+        return "https".equals(uri.getScheme()) && "lightningeg.com".equals(uri.getHost())
+                && uri.getUserInfo() == null && uri.getPort() == -1
+                && ("/marketplace.html".equals(path) || "/ar/marketplace.html".equals(path));
+    }
+
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -137,7 +145,16 @@ public final class MainActivity extends Activity {
         web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                return !ours(request.getUrl());  // another site, a file or an app link: never opened
+                Uri target = request.getUrl();
+                if (storeLink(target)) {
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW, target));
+                    } catch (android.content.ActivityNotFoundException ignored) {
+                        // no browser installed: the app stays where it is
+                    }
+                    return true;
+                }
+                return !ours(target);  // another site, a file or an app link: never opened
             }
 
             @Override

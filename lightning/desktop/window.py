@@ -141,6 +141,37 @@ def _origin(value: str) -> tuple[str, str, int]:
     return scheme, host, port if port is not None else (443 if scheme == "https" else 80)
 
 
+def _store_link(uri: str) -> bool:
+    """The one outside page the app may open, in the system browser: the website's marketplace (any query or fragment)."""
+    try:
+        parsed = urlsplit(str(uri))
+        return (
+            parsed.scheme == "https"
+            and parsed.hostname == "lightningeg.com"
+            and parsed.username is None
+            and parsed.password is None
+            and parsed.port is None
+            and parsed.path in ("/marketplace.html", "/ar/marketplace.html")
+            and "\\" not in str(uri)
+        )
+    except ValueError:
+        return False
+
+
+def _open_in_browser(uri: str) -> None:
+    """Hand a store link to the person's default browser on a thread; the app window never navigates."""
+    def run() -> None:
+        try:
+            if os.name == "nt":
+                os.startfile(uri)  # the shell's default browser
+            else:
+                import webbrowser
+                webbrowser.open(uri)
+        except Exception:  # no browser to open: the page simply stays as it is
+            pass
+    threading.Thread(target=run, daemon=True).start()
+
+
 def _allowed_navigation(uri: str, allowed_origin: tuple[str, str, int]) -> bool:
     if uri == "about:blank":
         return True
@@ -276,13 +307,20 @@ def run_window(url: str, origin: str, *, smoke: bool = False, diagnostics: dict 
 
                         def navigation_starting(_sender, event) -> None:
                             uri = str(event.Uri)
-                            if not _allowed_navigation(uri, allowed_origin):
+                            if _store_link(uri):
+                                event.Cancel = True
+                                _open_in_browser(uri)
+                            elif not _allowed_navigation(uri, allowed_origin):
                                 event.Cancel = True
                                 state["rejected"].set()
 
                         def new_window(_sender, event) -> None:
                             event.set_Handled(True)
-                            state["rejected"].set()
+                            uri = str(getattr(event, "Uri", ""))
+                            if _store_link(uri):
+                                _open_in_browser(uri)
+                            else:
+                                state["rejected"].set()
 
                         core.NavigationStarting += navigation_starting
                         core.NewWindowRequested += new_window

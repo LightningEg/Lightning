@@ -35,6 +35,15 @@
     document.body.append(sweep);
     setTimeout(() => sweep.remove(), 2000);
   }
+  // A theme being tried opens the unlock panel and points "See prices" at that theme (an id from the registry only).
+  function showUnlock(id) {
+    const meta = themes.find(theme => theme.id === id);
+    const details = document.querySelector('details.theme-unlock');
+    if (!meta || !details) return;
+    details.open = true;
+    const link = details.querySelector('[data-theme-prices]');
+    if (link) link.href = 'https://lightningeg.com/marketplace.html?item=' + encodeURIComponent(meta.item || meta.id) + '&from=app#themes';
+  }
   function apply(id, persist = true) {
     const next = normalize(id);
     const changed = root.dataset.theme !== next;
@@ -63,9 +72,10 @@
         if (version !== writeVersion) return;
         const status = document.querySelector('[data-theme-status]');
         const message = error && error.trying
-          ? 'Trying it for this session. Buy it on lightningeg.com, then unlock it below to keep it.'
+          ? 'Trying it for this session. Unlock it below to keep it.'
           : 'Theme applied for this session; could not save on this device.';
         if (status) status.textContent = tr(message);
+        if (error && error.trying) showUnlock(next);
         window.dispatchEvent(new CustomEvent('lightning:themechange', { detail: { id: next, saved: false } }));
       });
     }

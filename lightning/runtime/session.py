@@ -206,7 +206,7 @@ class ProfileSession:
     def __init__(self, root: str | Path | None = None):
         self.root = choose_data_root(root)
         use_licence_folder(self.root / "cosmetics")  # paid theme licences live beside the profiles, not in one
-        use_licence_profile(self.licence_profile_id)  # and each is worn only by the profile it names
+        use_licence_profile(self.licence_profile_id, self.licence_settings)  # and each is worn only by the profile it names
         self.container: Container | None = None
         self.role = SessionRole.HOME
         self.paths: ProfilePaths | None = None
@@ -231,6 +231,10 @@ class ProfileSession:
             return None
         from lightning.sync.copies import profile_id_of
         return profile_id_of(self.container.db)
+
+    def licence_settings(self):
+        """The open profile's settings store, where a redeemed licence is shared with the profile's other devices."""
+        return self.container.settings if self.container is not None else None
 
     @property
     def name(self) -> str:
