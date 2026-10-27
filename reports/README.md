@@ -18,6 +18,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | contributor-review | [Yusuf contribution review · 2026-10-23](2026-10-23-contributor-review/report.md) | 2026-10-23 |
 | v1.5.0-preparation | [v1.5.0 PR review, theme switching and package preparation](2026-10-26-v150-release/report.md) | 2026-10-26 |
 | users-main-questions | [Users' main questions: what each screen must answer, with known gaps](2026-10-27-users-main-questions/report.md) | 2026-10-27 |
+| store-and-community | [Store and community: unlocking themes, the market, rewards and staying in Lightning](2026-10-27-store-and-community/report.md) | 2026-10-27 |
 
 ## Create and maintain a report
 
