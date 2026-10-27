@@ -146,15 +146,9 @@ The site is honest, quick and in step with the app.
 | **8J** | [Cosmetic parts, account-wide claiming and native acceptance](8-website/8J-cosmetic-parts-and-claiming.md) | feature | appearance | building |
 | **8K** | [Supporter perks still waiting on the app or the owner - app themes for sale, names on About, a beta channel](8-website/8K-supporter-perks-app-and-owner.md) | feature | appearance | blocked on 8J claiming; owner decision on the beta channel |
 | **8L** | [Theme materials, selling themes, owner console - what only the owner can do now](8-website/8L-theme-materials-acceptance.md) | feature | appearance | building |
-| **8M** | [Market layout and cart - a cart you can always reach, fewer buttons, the item first on a phone](8-website/8M-market-layout-and-cart.md) | polish | website | ready |
-| **8N** | [Bundles - the cart offers the cheaper set, and a starter bundle per theme](8-website/8N-bundles-and-sets-in-the-cart.md) | feature | website | ready |
-| **8O** | [The main site points to looks - sign-up pop-up and home](8-website/8O-market-hints-on-the-main-site.md) | feature | website | ready |
-| **8P** | [Profiles are public and on the leaderboard by default; no age requirement](8-website/8P-public-profiles-by-default.md) | feature | website | ready |
-| **8Q** | [Coders - every merge counts, offers by label, the leaderboard advertises who built what](8-website/8Q-coders-paid-and-shown.md) | feature | website | ready |
-| **8R** | [Stories - post on LinkedIn or Reddit, paste the link, get coins and a place on the blog](8-website/8R-stories-that-bring-people-in.md) | feature | website | ready |
 | **8S** | [Owner console - seats and app unlocks, community queues in one place](8-website/8S-owner-console-seats-and-community.md) | polish | website | ready |
 
-Done: 8E, 8G, 8H, 8B. Next free code: 8T.
+Done: 8E, 8G, 8H, 8B, 8M, 8N, 8O, 8P, 8Q, 8R. Next free code: 8T.
 
 ## 9 Later
 

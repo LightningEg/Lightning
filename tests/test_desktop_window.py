@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from lightning.desktop.window import _allowed_navigation, _origin, run_window
+from lightning.desktop.window import _allowed_navigation, _origin, _store_link, run_window
 
 
 ORIGIN = ("http", "127.0.0.1", 43123)
@@ -29,6 +29,31 @@ ORIGIN = ("http", "127.0.0.1", 43123)
 )
 def test_navigation_allowlist_is_exact(url, expected):
     assert _allowed_navigation(url, ORIGIN) is expected
+
+
+@pytest.mark.parametrize(
+    "url, expected",
+    [
+        ("https://lightningeg.com/marketplace.html", True),
+        ("https://lightningeg.com/marketplace.html?item=papyrus&from=app#themes", True),
+        ("https://lightningeg.com/ar/marketplace.html?x=1", True),
+        ("http://lightningeg.com/marketplace.html", False),
+        ("https://lightningeg.com:8443/marketplace.html", False),
+        ("https://user@lightningeg.com/marketplace.html", False),
+        ("https://lightningeg.com@evil.example/marketplace.html", False),
+        ("https://evil.lightningeg.com/marketplace.html", False),
+        ("https://lightningeg.com.evil.example/marketplace.html", False),
+        ("https://lightningeg.com/", False),
+        ("https://lightningeg.com/marketplace.html/x", False),
+        ("https://lightningeg.com/other.html", False),
+        ("https://lightningeg.com\\@evil.example/marketplace.html", False),
+        ("javascript:alert(1)", False),
+        ("file:///marketplace.html", False),
+        ("", False),
+    ],
+)
+def test_store_link_is_the_one_outside_page(url, expected):
+    assert _store_link(url) is expected
 
 
 @pytest.mark.parametrize(

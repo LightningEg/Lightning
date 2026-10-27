@@ -1,8 +1,10 @@
 """Paid themes unlocked on this computer: signed store licences, verified offline against the pinned store keys.
 
-A licence lives beside the profiles (Documents/Lightning/cosmetics/licenses.json), never inside a profile or its
-backups: it belongs to the person's store account, not to a ledger. Losing the file loses nothing; the owner of the
-purchase gets a fresh one-time code on the website. Nothing here touches money, calculations or roles.
+A redeemed licence is kept in two places: beside the profiles (Documents/Lightning/cosmetics/licenses.json, the
+instant cache on this computer) and in the open profile's own settings under `store_licence.<item>`, which sync to
+every device of the profile. So one code unlocks a theme once per profile: the profile's other devices verify the
+synced envelope themselves and need no code. Losing the file loses nothing. Nothing here touches money, calculations
+or roles.
 
 One purchase unlocks a theme for one profile: the store binds each licence to the profile's own stable id (the same on
 every device that profile lives on), so a licence is worn only while that profile is open. The same computer may hold
@@ -52,10 +54,22 @@ _FOLDER: Path | None = None
 _PROFILE = None  # a callable giving the open profile's id, or None when no profile is open
 
 
-def use_profile(provider) -> None:
-    """The runtime names how to read the open profile's id (lightning/runtime/session.py)."""
-    global _PROFILE
+_SETTINGS = None  # a callable giving the open profile's settings store, or None when no profile is open
+LICENCE_KEY = "store_licence."  # one profile setting per item: the signed envelope as compact JSON (well under 4000 chars)
+
+
+def use_profile(provider, settings=None) -> None:
+    """The runtime names how to read the open profile's id and settings (lightning/runtime/session.py)."""
+    global _PROFILE, _SETTINGS
     _PROFILE = provider
+    _SETTINGS = settings
+
+
+def _profile_settings():
+    try:
+        return _SETTINGS() if _SETTINGS else None
+    except Exception:  # a profile that cannot give its settings shares nothing
+        return None
 
 
 def profile_id() -> str | None:
@@ -98,6 +112,21 @@ def _envelopes() -> list[dict]:
     return [e for e in data.get("licenses", []) if isinstance(e, dict)] if isinstance(data, dict) else []
 
 
+def _synced_envelopes() -> list[dict]:
+    """The envelopes the profile's other devices (or this one, earlier) stored in the synced settings."""
+    settings, found = _profile_settings(), []
+    if settings is None:
+        return found
+    for item in paid_themes():
+        try:
+            envelope = json.loads(settings.get(LICENCE_KEY + item) or "null")
+        except Exception:  # unreadable or missing setting: ignored like any invalid licence
+            continue
+        if isinstance(envelope, dict):
+            found.append(envelope)
+    return found
+
+
 def owned() -> frozenset[str]:
     """Paid theme ids the open profile has a valid licence for. A licence for another profile, an invalid one or an
     unsupported one unlocks nothing and harms nothing."""
@@ -105,7 +134,7 @@ def owned() -> frozenset[str]:
     if check is None or profile is None:
         return frozenset()
     InvalidCosmeticLicense, verify_license = check
-    for envelope in _envelopes():
+    for envelope in _envelopes() + _synced_envelopes():
         try:
             ids.update(name for name, _ in verify_license(envelope, keys, supported, expected_profile=profile).items)
         except InvalidCosmeticLicense:
@@ -136,22 +165,33 @@ def _save(envelope: dict) -> None:
         raise
 
 
-def redeem(code: str, theme: str, *, opener=None) -> str:
-    """Exchange a one-time website code for a signed licence, verify it, keep it. Returns the theme unlocked."""
+def _share(item: str, envelope: dict) -> None:
+    """Put the envelope in the profile's synced settings so its other devices unlock by themselves."""
+    settings = _profile_settings()
+    if settings is None:
+        return
+    try:
+        settings.set(LICENCE_KEY + item, json.dumps(envelope, separators=(",", ":")))
+    except Exception:  # PendingOnHome (applies once the home confirms) or a read-only refusal: the file still unlocks here
+        pass
+
+
+def redeem(code: str, *, opener=None) -> str:
+    """Exchange a one-time website code for the signed licence of the theme it was bought for, verify it, keep it on this
+    computer and in the profile's settings. Returns the theme id the licence names."""
     supported, conf, check, profile = paid_themes(), store(), _verifier(), profile_id()
     if check is None:
         raise UnlockError("Unlocking opens with the next Lightning update.")
     if profile is None:
         raise UnlockError("Open the profile you want to unlock this on, then try again.")
     InvalidCosmeticLicense, verify_license = check
-    if theme not in supported:
-        raise UnlockError("Choose the theme you bought.")
     code = "".join(code.split()).upper()
     if not (8 <= len(code) <= 64):
         raise UnlockError("Paste the whole code from your account page.")
     if not conf["keys"] or not conf["redeem_url"].startswith("https://"):
         raise UnlockError("Unlocking opens with the next Lightning update.")
-    body = json.dumps({"code": code, "item_id": theme, "asset_version": supported[theme], "profile_id": profile}).encode()
+    items = [{"item_id": name, "asset_version": version} for name, version in supported.items()]
+    body = json.dumps({"code": code, "items": items, "profile_id": profile}).encode()
     request = Request(conf["redeem_url"], data=body, method="POST", headers={"Content-Type": "application/json"})
     try:
         with (opener or urlopen)(request, timeout=15) as response:
@@ -160,14 +200,19 @@ def redeem(code: str, theme: str, *, opener=None) -> str:
         if exc.code == 409:  # the store says every seat for this theme is taken by other profiles
             raise UnlockError("Every profile seat for this theme is used. Add another profile on your account page: "
                               "it costs a quarter of the price.") from exc
-        raise UnlockError("That code is used, expired or for another theme. Get a fresh one from your account page.") from exc
+        raise UnlockError("That code is used or expired. Get a fresh one from your account page.") from exc
     except (URLError, OSError, ValueError) as exc:
         raise UnlockError("Could not reach the Lightning store. Check the connection and try again.") from exc
     try:
-        names = {name for name, _ in verify_license(envelope, conf["keys"], supported, expected_profile=profile).items}
+        names = [name for name, _ in verify_license(envelope, conf["keys"], supported, expected_profile=profile).items]
     except InvalidCosmeticLicense as exc:
+        if str(exc).startswith("Update Lightning: unsupported"):  # signed, but names an item this app does not carry
+            raise UnlockError("Update Lightning to wear this theme.") from exc
         raise UnlockError("The store's answer did not verify. Update Lightning and try again.") from exc
-    if theme not in names:
-        raise UnlockError("That code is for another theme.")
+    names = [n for n in names if n in supported]
+    if not names:
+        raise UnlockError("Update Lightning to wear this theme.")
     _save(envelope)
-    return theme
+    for name in names:
+        _share(name, envelope)
+    return names[0]

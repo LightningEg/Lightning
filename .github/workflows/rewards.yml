@@ -1,19 +1,22 @@
 # Lightning Coins for tasks (CONTRIBUTING.md). This file only reports facts to the database; the database does the
 # counting, one award per issue, and refuses anything it should not pay.
 #   issues assigned / unassigned    someone was given or lost an issue by hand: record or release their claim
-#   pull request merged             pay the issues it closed to its author, or keep it for them until they link GitHub
+#   issue labelled / unlabelled     a maintainer's coins:<n> label publishes the offer (publish_offer_from_label); removing it closes the
+#                                   offer while nobody has claimed it. Only people with write access are heard.
+#   pull request merged             count it (record_merge: recognition points by size, for every merge), and pay the issues it
+#                                   closed to its author (award_merge), or keep both for them until they link GitHub
 # (The /take bot assigns with GITHUB_TOKEN, which starts no other workflow, so contributors.yml records those claims.)
 #
 # Safety: pull_request_target runs with this repository's secrets, so this file NEVER checks out or runs pull request
 # code. It reads only the numbers and names GitHub puts in the event, and passes them to the shell through environment
 # variables, never through ${{ }} inside a script. Without the SUPABASE_SERVICE_ROLE_KEY secret (forks, before setup)
 # it prints a notice and does nothing. Bots and the owner's account (the owner and the AI sessions that push from
-# it) never earn coins; their merged pull requests only close the offers they finish.
+# it) never earn coins or points; their merged pull requests only close the offers they finish.
 name: Rewards
 
 on:
   issues:
-    types: [assigned, unassigned]
+    types: [assigned, unassigned, labeled, unlabeled]
   pull_request_target:
     types: [closed]
 
@@ -24,7 +27,9 @@ permissions:
 
 jobs:
   claim:
-    if: github.event_name == 'issues' && github.event.assignee.type != 'Bot'
+    if: >-
+      github.event_name == 'issues' && (github.event.action == 'assigned' || github.event.action == 'unassigned') &&
+      github.event.assignee.type != 'Bot'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -60,8 +65,63 @@ jobs:
               '{p_repo:$repo, p_issue:$issue, p_github_id:$id}')"
           fi
 
+  offer:
+    # A label named coins:<n> (1 to 5000) is the offer. Only someone with write, maintain or admin access on this repository
+    # may set it, checked here with the API; the label name, issue and login are passed through env, never ${{ }} in the script.
+    if: >-
+      github.event_name == 'issues' && (github.event.action == 'labeled' || github.event.action == 'unlabeled') &&
+      github.event.sender.type != 'Bot' && startsWith(github.event.label.name, 'coins:')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      ACTION: ${{ github.event.action }}
+      NUMBER: ${{ github.event.issue.number }}
+      LABEL: ${{ github.event.label.name }}
+      SENDER: ${{ github.event.sender.login }}
+      ISSUE_TITLE: ${{ github.event.issue.title }}
+      ISSUE_URL: ${{ github.event.issue.html_url }}
+      SUPABASE_URL: https://etecxblerynmkgppdfac.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - run: |
+          set -euo pipefail
+          # rpc <function> <json>: POST to Supabase with the service key. No key (a fork, or before setup): skip.
+          rpc() {
+            if [[ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]]; then echo "::notice::SUPABASE_SERVICE_ROLE_KEY is not set, so $1 is skipped."; return 0; fi
+            local out code
+            out=$(mktemp)
+            code=$({
+              printf 'header = "apikey: %s"\n' "$SUPABASE_SERVICE_ROLE_KEY"
+              [[ "$SUPABASE_SERVICE_ROLE_KEY" == sb_secret_* ]] || printf 'header = "Authorization: Bearer %s"\n' "$SUPABASE_SERVICE_ROLE_KEY"
+            } | curl -sS --config - --max-time 30 --retry 2 -o "$out" -w '%{http_code}' -X POST \
+                  -H 'Content-Type: application/json' --data "$2" "$SUPABASE_URL/rest/v1/rpc/$1") || { echo "::error::could not reach Supabase ($1)"; return 1; }
+            cat "$out"; echo
+            [[ "$code" == 2* ]] || { echo "::error::Supabase $1 answered HTTP $code"; return 1; }
+          }
+          [[ "$NUMBER" =~ ^[0-9]+$ && "$SENDER" =~ ^[A-Za-z0-9-]+$ ]] || { echo "::error::unexpected issue number or login"; exit 1; }
+          [[ "$LABEL" =~ ^coins:[0-9]{1,5}$ ]] || { echo "Label $LABEL is not an offer label: nothing to do."; exit 0; }
+          # Only people who can write to the repository may publish or withdraw an offer.
+          role=$(gh api "repos/$GH_REPO/collaborators/$SENDER/permission" --jq '.role_name // .permission' || echo none)
+          case "$role" in
+            admin|maintain|write) ;;
+            *) echo "::notice::$SENDER has $role access, so the $LABEL label does not publish an offer."; exit 0 ;;
+          esac
+          # The label that counts is whichever coins:<n> label the issue has now (a change of amount is an unlabel and a label).
+          current=$(gh api "repos/$GH_REPO/issues/$NUMBER" --jq '[.labels[].name | select(test("^coins:[0-9]{1,5}$"))] | sort | last // ""')
+          if [[ -z "$current" ]]; then
+            rpc close_offer_from_label "$(jq -nc --arg repo "$GH_REPO" --argjson issue "$NUMBER" --arg by "$SENDER" \
+              '{p_repo:$repo, p_issue:$issue, p_by_login:$by}')"
+            exit 0
+          fi
+          amount=${current#coins:}
+          rpc publish_offer_from_label "$(jq -nc --arg repo "$GH_REPO" --argjson issue "$NUMBER" --argjson amount "$((10#$amount))" \
+            --arg title "$ISSUE_TITLE" --arg url "$ISSUE_URL" --arg by "$SENDER" \
+            '{p_repo:$repo, p_issue:$issue, p_amount:$amount, p_title:$title, p_url:$url, p_by_login:$by}')"
+
   merged:
-    # Only a merge into the default branch closes issues, so only that can finish a task.
+    # Only a merge into the default branch closes issues and counts, so only that can finish a task.
     if: >-
       github.event_name == 'pull_request_target' && github.event.pull_request.merged == true &&
       github.event.pull_request.base.ref == github.event.repository.default_branch
@@ -100,13 +160,25 @@ jobs:
           # The issues this pull request closes, in this repository only (GitHub reads the "Closes #n" words).
           issues=$(gh pr view "$PR" --json closingIssuesReferences | jq -c --arg repo "$GH_REPO" \
             '[.closingIssuesReferences[] | select((.url | ascii_downcase) | startswith(("https://github.com/" + $repo + "/issues/") | ascii_downcase)) | .number]')
-          if [[ "$issues" == "[]" ]]; then echo "Pull request #$PR closes no issue of this repository: nothing to do."; exit 0; fi
           # Bots and the owner's account earn nothing; they only finish the task. (This repository belongs to an
           # organization, where its owner's own pull requests read MEMBER, so both words are skipped.)
           if [[ "$AUTHOR_TYPE" == Bot || "$ASSOC" == OWNER || "$ASSOC" == MEMBER ]]; then
+            if [[ "$issues" == "[]" ]]; then echo "Pull request #$PR closes no issue of this repository: nothing to do."; exit 0; fi
             rpc close_rewarded_issues "$(jq -nc --arg repo "$GH_REPO" --argjson pr "$PR" --argjson issues "$issues" \
               '{p_repo:$repo, p_pr:$pr, p_issues:$issues}')"
           else
+            # Every merged pull request counts, closing an issue or not: record_merge gives recognition points by size
+            # (small under 50 changed lines, medium under 400, large above), once per pull request. The size is the
+            # additions plus deletions of every file except lockfiles and generated or minified files. It comes from
+            # the API (the file list GitHub keeps for the pull request); the pull request's code is never fetched.
+            lines=$(gh pr view "$PR" --json files | jq '[.files[] | select(.path | test("\\.lock$|lock\\.json$|\\.generated\\.|\\.min\\.") | not) | .additions + .deletions] | add // 0')
+            [[ "$lines" =~ ^[0-9]+$ ]] || { echo "::error::unexpected changed-lines count"; exit 1; }
+            rpc record_merge "$(jq -nc --arg repo "$GH_REPO" --argjson pr "$PR" --arg title "$PR_TITLE" --arg url "$PR_URL" \
+              --arg at "$MERGED_AT" --argjson id "$AUTHOR_ID" --arg login "$AUTHOR" --argjson lines "$lines" \
+              '{p_repo:$repo, p_pr:$pr, p_title:$title, p_url:$url, p_merged_at:$at, p_author_github_id:$id, p_author_login:$login, p_lines:$lines}')" \
+              || echo "::warning::record_merge failed (not deployed yet?): the points are not counted, the coins below still are"
+            # Coins come only from offers: an issue this pull request closes may have one.
+            if [[ "$issues" == "[]" ]]; then echo "Pull request #$PR closes no issue of this repository: no coins to pay."; exit 0; fi
             rpc award_merge "$(jq -nc --arg repo "$GH_REPO" --argjson pr "$PR" --arg title "$PR_TITLE" --arg url "$PR_URL" \
               --arg at "$MERGED_AT" --argjson id "$AUTHOR_ID" --arg login "$AUTHOR" --argjson issues "$issues" \
               '{p_repo:$repo, p_pr:$pr, p_title:$title, p_url:$url, p_merged_at:$at, p_author_github_id:$id, p_author_login:$login, p_issues:$issues}')"

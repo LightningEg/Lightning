@@ -67,4 +67,4 @@ payment, sign-in or app unlock was performed. Native shells were not run here.
 
 ## Dated follow-ups
 
-None yet.
+2026-10-27, built and merged the same day. App: LightningEg/Lightning#156 (8L unlock once per profile, See prices), #157 and #158 (8Q workflows). Website: LightningEg/Lightning_website#107 (owner console MFA one step), #108 (8L code names its theme), #109 (8P), #110 (8M, 8O), #111 (8N), #112 and #113 (8Q), #114 (8R). Each needs its migration run by the owner (see 8L and the website's supabase/README.md). Left: 8S, and Papyrus and Dendera sets (in 8S).

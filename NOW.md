@@ -19,6 +19,8 @@
 
 - **3AH visual flow review:** implementation and browser evidence ready for owner review; native Windows/Android and assistive-technology acceptance remain. **Read:** `reports/2026-10-25-app-visual-flow/report.md`.
 
+- **Store and community (2026-10-27):** 8L unlock once, 8M–8R merged in both repos; the owner runs the new website migrations (20261027140000 to 20261027200000, in order) and redeploys `redeem-purchase`. Next: 8S. **Read:** `reports/2026-10-27-store-and-community/report.md`.
+
 - **8J/8L app themes:** ready to sell, Dendera included; the owner deploys, opens checkout, provisions the store key and turns on each app release. New themes: `guideline/themes.md` §5. **Read:** `issues/8-website/8L-theme-materials-acceptance.md`.
 
 The whole plan, by milestone and code, is `issues/INDEX.md`.
