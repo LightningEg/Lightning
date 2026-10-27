@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-27 · Claude: 8L: pinned the store public key `store-2026-1` in `store_keys.json`; paid themes now verify once the release ships.
+
+
 - 2026-10-27 · Claude: `tools/store_keygen.py` makes the store's Ed25519 signing key (8L step 3): private JWK to a file, public half printed for `store_keys.json`. Redeem flow was already built; it unlocks once the key is pinned.
 
 
