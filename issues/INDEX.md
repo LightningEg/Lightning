@@ -146,9 +146,9 @@ The site is honest, quick and in step with the app.
 | **8J** | [Cosmetic parts, account-wide claiming and native acceptance](8-website/8J-cosmetic-parts-and-claiming.md) | feature | appearance | building |
 | **8K** | [Supporter perks still waiting on the app or the owner - app themes for sale, names on About, a beta channel](8-website/8K-supporter-perks-app-and-owner.md) | feature | appearance | blocked on 8J claiming; owner decision on the beta channel |
 | **8L** | [Theme materials, selling themes, owner console - what only the owner can do now](8-website/8L-theme-materials-acceptance.md) | feature | appearance | building |
-| **8S** | [Owner console - seats and app unlocks, community queues in one place](8-website/8S-owner-console-seats-and-community.md) | polish | website | ready |
+| **8T** | [Papyrus and Dendera bundles need a banner, frame and name designed first](8-website/8T-papyrus-and-dendera-bundles.md) | feature | appearance | ready |
 
-Done: 8E, 8G, 8H, 8B, 8M, 8N, 8O, 8P, 8Q, 8R. Next free code: 8T.
+Done: 8E, 8G, 8H, 8B, 8M, 8N, 8O, 8P, 8Q, 8R, 8S. Next free code: 8U.
 
 ## 9 Later
 

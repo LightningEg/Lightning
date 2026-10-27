@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-27 · Claude: 8S owner console done (seats, Community view, blog bonus; website #115); the Papyrus and Dendera sets become 8T.
+
 - 2026-10-27 · Claude: 8M–8S store and community audit (`reports/2026-10-27-store-and-community/`): market and cart, bundles, hints on the site, public profiles, paid merges, rewarded stories, owner console; seven new items.
 - 2026-10-27 · Claude: [8Q] Offers by label: a `coins:<n>` label from someone with write access publishes the issue's offer, removing it closes it (`rewards.yml` offer job; the website's `publish_offer_from_label`).
 
