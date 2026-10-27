@@ -1,6 +1,10 @@
-# Users' Main Questions
+# Users' main questions
 
-The user-facing questions each Lightning screen must answer, including known gaps and follow-ups. From [Project overview](PROJECT_OVERVIEW.md); related scenario coverage: [`tests/test_mohab_year.py`](../tests/test_mohab_year.py).
+Date: 2026-10-27 · Author/reviewer: Claude (filing), content from the owner's extraction (#154)
+Repository: app · Reviewed commit: 703865a34a553dd0ffa63d905459db787b02ccdf
+Historical ID: users-main-questions
+
+The user-facing questions each Lightning screen must answer, including known gaps and follow-ups. From [Project overview](../../docs/PROJECT_OVERVIEW.md); related scenario coverage: [`tests/test_mohab_year.py`](../../tests/test_mohab_year.py).
 
 
 Each tab answers one main question, then its follow-ups. Reviewed 2026-10-13; `tests/test_mohab_year.py` checks the answers, so only open gaps are listed below.

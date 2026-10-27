@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-27 · Claude: repo rules green again on `main`: the users' main questions reference now lives under `reports/` (docs/ keeps four documents) and the finished one-time `import-bank-logos-once.yml` is removed (its logos are already imported).
+
 - 2026-10-27 · Claude: 8L one purchase, one profile: the unlock code claims a seat for the open profile (its stable id) and is burned; the licence names that profile (`entitlements.py`, `cosmetic_license.py`); other profiles on the computer ignore it.
 
 - 2026-10-27 · Claude: themes.md: a light theme never recolours dark mode on the website (copy of the website's change, `paintsOn()`).

@@ -5,7 +5,7 @@ Start here to find a document or decide where new material belongs.
 | Need | Home | What belongs there |
 | --- | --- | --- |
 | Understand the product | [Project overview](PROJECT_OVERVIEW.md) | Adopted decisions, capabilities and roadmap |
-| Understand what each screen must answer | [Users' main questions](USERS_MAIN_QUESTIONS.md) | Main questions, follow-ups and known gaps |
+| Understand what each screen must answer | [Users' main questions](../reports/2026-10-27-users-main-questions/report.md) | Main questions, follow-ups and known gaps |
 | Understand the implementation | [Architecture](ARCHITECTURE.md) | Implemented contracts, financial rules and data ownership |
 | Understand a term or number | [Glossary](GLOSSARY.md) | One name and definition per concept |
 | Compare outside evidence | [Competition](COMPETITION.md) | Dated research and its sources |
@@ -24,7 +24,7 @@ Keep each fact in its authoritative home and link to it. Reports describe a
 reviewed snapshot; issues describe remaining work; Architecture describes what
 is implemented. An audit verdict is not a current release status.
 
-Keep the five reference documents here and this map. Active designs live in
+Keep the four reference documents here and this map. Active designs live in
 issues; accepted product decisions move into the overview, implemented contracts
 into Architecture. The decision template helps write those sections without
 creating another decision log.

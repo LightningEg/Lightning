@@ -2,7 +2,7 @@
 
 **Last reviewed 2026-10-23 · source 1.4.4 · latest published beta 1.4.2** ([published Windows and Android beta](https://github.com/LightningEg/Lightning-downloads/releases/tag/v1.4.2)).
 
-What Lightning is, who it is for, and where it goes. What each screen must answer: [Users' main questions](USERS_MAIN_QUESTIONS.md). Technical contracts: [Architecture](ARCHITECTURE.md). Look: [guideline](../guideline/). Terms and figures: [Glossary](GLOSSARY.md). Shipped changes: `CHANGELOG.md`. Hand-off between AIs: [NOW.md](../NOW.md). The plan and open items: [issues/](../issues/INDEX.md).
+What Lightning is, who it is for, and where it goes. What each screen must answer: [Users' main questions](../reports/2026-10-27-users-main-questions/report.md). Technical contracts: [Architecture](ARCHITECTURE.md). Look: [guideline](../guideline/). Terms and figures: [Glossary](GLOSSARY.md). Shipped changes: `CHANGELOG.md`. Hand-off between AIs: [NOW.md](../NOW.md). The plan and open items: [issues/](../issues/INDEX.md).
 
 ## Contents
 
@@ -14,7 +14,6 @@ Read one section: `grep -n '^## ' docs/PROJECT_OVERVIEW.md`, then read from that
 | 2. Product decisions that must hold | You change any figure, rule or flow |
 | 3. What you can do today | You need the feature list |
 | 4. Period and fixed-horizon visuals | You change a chart, card or the period picker |
-| [Users' main questions](USERS_MAIN_QUESTIONS.md) | You change what a screen answers, or take a known gap |
 | 5. Reference workflow: a month with Mohab | You change Mohab's test or a screen he uses |
 | 6. Compared with the best budgeting apps | You plan a feature |
 | 7. UX plan (guideline 3.6) | You take a UX item |
@@ -125,7 +124,7 @@ The period picker (All time · YTD · Monthly · Custom) drives most visuals. A 
 A sparkline never follows the period. A comparison uses earlier months; a partial period uses matching calendar days, labelled so far with neutral comparison chips.
 
 <a id="the-questions-lightning-answers"></a>
-**Questions each screen answers and open gaps:** [Users' main questions](USERS_MAIN_QUESTIONS.md).
+**Questions each screen answers and open gaps:** [Users' main questions](../reports/2026-10-27-users-main-questions/report.md).
 
 <a id="reference-workflow-a-month-with-mohab"></a>
 ## 5. Reference workflow: a month with Mohab
