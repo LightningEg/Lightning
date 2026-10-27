@@ -116,7 +116,8 @@ jobs:
             [[ "$lines" =~ ^[0-9]+$ ]] || { echo "::error::unexpected changed-lines count"; exit 1; }
             rpc record_merge "$(jq -nc --arg repo "$GH_REPO" --argjson pr "$PR" --arg title "$PR_TITLE" --arg url "$PR_URL" \
               --arg at "$MERGED_AT" --argjson id "$AUTHOR_ID" --arg login "$AUTHOR" --argjson lines "$lines" \
-              '{p_repo:$repo, p_pr:$pr, p_title:$title, p_url:$url, p_merged_at:$at, p_author_github_id:$id, p_author_login:$login, p_lines:$lines}')"
+              '{p_repo:$repo, p_pr:$pr, p_title:$title, p_url:$url, p_merged_at:$at, p_author_github_id:$id, p_author_login:$login, p_lines:$lines}')" \
+              || echo "::warning::record_merge failed (not deployed yet?): the points are not counted, the coins below still are"
             # Coins come only from offers: an issue this pull request closes may have one.
             if [[ "$issues" == "[]" ]]; then echo "Pull request #$PR closes no issue of this repository: no coins to pay."; exit 0; fi
             rpc award_merge "$(jq -nc --arg repo "$GH_REPO" --argjson pr "$PR" --arg title "$PR_TITLE" --arg url "$PR_URL" \

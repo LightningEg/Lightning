@@ -53,3 +53,10 @@ def test_the_safety_rules_stay():
     assert "${{" not in script(), "values reach the shell through env, never through ${{ }} in the script"
     assert "pull_request_target" in WORKFLOW.read_text()
     assert "jq -nc" in script()
+
+
+def test_a_failed_points_call_never_stops_the_coins():
+    """record_merge runs first under `set -e`; if it fails (not deployed yet), award_merge must still run."""
+    body = script()
+    call = body[body.index("rpc record_merge"):body.index("rpc award_merge")]
+    assert '|| echo "::warning::record_merge failed' in call
