@@ -136,3 +136,18 @@ def test_settings_tries_saves_only_owned_and_unlocks(c, store, monkeypatch):
     assert '<meta name="lightning-theme" content="papyrus">' in page
     assert '<meta name="lightning-owned" content="papyrus">' in page
     assert client.post('/settings/theme', data={'theme': 'papyrus'}).status_code == 204
+
+
+def test_store_keygen_makes_a_key_the_app_pins_and_never_overwrites(tmp_path, capsys):
+    import base64
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from tools.store_keygen import main, make_key
+    jwk, public = make_key("k1")
+    pad = lambda s: base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))
+    key = Ed25519PrivateKey.from_private_bytes(pad(jwk["d"]))
+    key.public_key().verify(key.sign(b"x"), b"x")
+    assert pad(public) == pad(jwk["x"]) and len(pad(public)) == 32
+    out = tmp_path / "private.json"
+    assert main([str(out), "--id", "k1"]) == 0 and json.loads(out.read_text())["d"]
+    assert json.loads(out.read_text())["d"] not in capsys.readouterr().out
+    assert main([str(out)]) == 1

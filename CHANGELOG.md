@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-27 · Claude: `tools/store_keygen.py` makes the store's Ed25519 signing key (8L step 3): private JWK to a file, public half printed for `store_keys.json`. Redeem flow was already built; it unlocks once the key is pinned.
+
+
 - 2026-10-26 · Codex · **4F/8F:** Publish the verified v1.5.0 Windows/Android pair; sync website downloads, release notes, archive and feedback choices. Add Dendera’s website price and usage guide; app unlocking remains unavailable in 1.5.0.
 
 - 2026-10-26 · Codex · **4F:** Fix the Windows packaging sync test: simulate a forged network ID without changing the attacker's OS-bound identity; cover protected keys on every host and retain server-side refusal checks.
