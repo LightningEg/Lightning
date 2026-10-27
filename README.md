@@ -49,8 +49,9 @@ Choose **Lightning default** to switch back. A paid theme marked **try it** is a
 
 For a purchased theme, get its one-time app code from your account on **lightningeg.com**.
 In **Settings → Appearance → Unlock a theme you bought**, choose the theme, paste the code and
-press **Unlock**. The app verifies its licence, applies it and remembers it. Each device needs its own
-app code; after unlocking, the licence is checked offline. Theme purchases must be enabled by the store
+press **Unlock**. The app verifies its licence, applies it and remembers it. One purchase unlocks a theme for
+**one profile**, on all of that profile's devices (each device uses its own free code); another profile needs
+another seat from your account page, at a quarter of the price. After unlocking, the licence is checked offline. Theme purchases must be enabled by the store
 before codes can be redeemed. Themes change appearance; all finance features remain free.
 
 ## Start the original browser version

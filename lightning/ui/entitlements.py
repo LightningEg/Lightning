@@ -3,6 +3,10 @@
 A licence lives beside the profiles (Documents/Lightning/cosmetics/licenses.json), never inside a profile or its
 backups: it belongs to the person's store account, not to a ledger. Losing the file loses nothing; the owner of the
 purchase gets a fresh one-time code on the website. Nothing here touches money, calculations or roles.
+
+One purchase unlocks a theme for one profile: the store binds each licence to the profile's own stable id (the same on
+every device that profile lives on), so a licence is worn only while that profile is open. The same computer may hold
+licences for several profiles; each wears only its own. Another profile needs another seat from the website.
 """
 from __future__ import annotations
 
@@ -45,6 +49,20 @@ def store_themes() -> list[dict]:
 
 
 _FOLDER: Path | None = None
+_PROFILE = None  # a callable giving the open profile's id, or None when no profile is open
+
+
+def use_profile(provider) -> None:
+    """The runtime names how to read the open profile's id (lightning/runtime/session.py)."""
+    global _PROFILE
+    _PROFILE = provider
+
+
+def profile_id() -> str | None:
+    try:
+        return _PROFILE() if _PROFILE else None
+    except Exception:  # a profile that cannot say who it is simply owns nothing paid
+        return None
 
 
 def use_folder(folder: Path) -> None:
@@ -81,14 +99,15 @@ def _envelopes() -> list[dict]:
 
 
 def owned() -> frozenset[str]:
-    """Paid theme ids with a valid licence here. An invalid or unsupported licence unlocks nothing and harms nothing."""
-    keys, supported, ids, check = store()["keys"], paid_themes(), set(), _verifier()
-    if check is None:
+    """Paid theme ids the open profile has a valid licence for. A licence for another profile, an invalid one or an
+    unsupported one unlocks nothing and harms nothing."""
+    keys, supported, ids, check, profile = store()["keys"], paid_themes(), set(), _verifier(), profile_id()
+    if check is None or profile is None:
         return frozenset()
     InvalidCosmeticLicense, verify_license = check
     for envelope in _envelopes():
         try:
-            ids.update(name for name, _ in verify_license(envelope, keys, supported).items)
+            ids.update(name for name, _ in verify_license(envelope, keys, supported, expected_profile=profile).items)
         except InvalidCosmeticLicense:
             continue
     return frozenset(ids)
@@ -119,9 +138,11 @@ def _save(envelope: dict) -> None:
 
 def redeem(code: str, theme: str, *, opener=None) -> str:
     """Exchange a one-time website code for a signed licence, verify it, keep it. Returns the theme unlocked."""
-    supported, conf, check = paid_themes(), store(), _verifier()
+    supported, conf, check, profile = paid_themes(), store(), _verifier(), profile_id()
     if check is None:
         raise UnlockError("Unlocking opens with the next Lightning update.")
+    if profile is None:
+        raise UnlockError("Open the profile you want to unlock this on, then try again.")
     InvalidCosmeticLicense, verify_license = check
     if theme not in supported:
         raise UnlockError("Choose the theme you bought.")
@@ -130,17 +151,20 @@ def redeem(code: str, theme: str, *, opener=None) -> str:
         raise UnlockError("Paste the whole code from your account page.")
     if not conf["keys"] or not conf["redeem_url"].startswith("https://"):
         raise UnlockError("Unlocking opens with the next Lightning update.")
-    body = json.dumps({"code": code, "item_id": theme, "asset_version": supported[theme]}).encode()
+    body = json.dumps({"code": code, "item_id": theme, "asset_version": supported[theme], "profile_id": profile}).encode()
     request = Request(conf["redeem_url"], data=body, method="POST", headers={"Content-Type": "application/json"})
     try:
         with (opener or urlopen)(request, timeout=15) as response:
             envelope = json.loads(response.read(200_000))
     except HTTPError as exc:
+        if exc.code == 409:  # the store says every seat for this theme is taken by other profiles
+            raise UnlockError("Every profile seat for this theme is used. Add another profile on your account page: "
+                              "it costs a quarter of the price.") from exc
         raise UnlockError("That code is used, expired or for another theme. Get a fresh one from your account page.") from exc
     except (URLError, OSError, ValueError) as exc:
         raise UnlockError("Could not reach the Lightning store. Check the connection and try again.") from exc
     try:
-        names = {name for name, _ in verify_license(envelope, conf["keys"], supported).items}
+        names = {name for name, _ in verify_license(envelope, conf["keys"], supported, expected_profile=profile).items}
     except InvalidCosmeticLicense as exc:
         raise UnlockError("The store's answer did not verify. Update Lightning and try again.") from exc
     if theme not in names:

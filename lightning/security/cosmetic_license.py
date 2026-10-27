@@ -1,4 +1,5 @@
-"""Verify store entitlement signatures offline. No private keys, device binding or expiry.
+"""Verify store entitlement signatures offline. No private keys, device binding or expiry. A licence names one Lightning
+profile (the store's "one purchase, one profile" rule): it is worn only by that profile, on any of its devices.
 
 This module grants cosmetic IDs only. It cannot affect ledger balances, calculations or roles.
 The caller supplies the built-in supported registry and pinned public keys, never downloaded keys.
@@ -32,10 +33,14 @@ def _object(pairs):
 class CosmeticOwnership:
     account_id: str
     items: tuple[tuple[str, int], ...]
+    profile_id: str | None = None
+
+
+_PROFILE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
 
 
 def verify_license(envelope: dict, public_keys: dict[str, bytes], supported: dict[str, int],
-                   *, expected_account: str | None = None) -> CosmeticOwnership:
+                   *, expected_account: str | None = None, expected_profile: str | None = None) -> CosmeticOwnership:
     """Verify first, parse second; fail closed on unshipped items and account mismatch.
 
     Public keys are raw 32-byte Ed25519 keys pinned in an app release. Key rotation must
@@ -58,6 +63,11 @@ def verify_license(envelope: dict, public_keys: dict[str, bytes], supported: dic
         account = str(UUID(data["account_id"]))
         if expected_account is not None and account != expected_account:
             raise InvalidCosmeticLicense("License belongs to a different store account")
+        profile = data.get("profile_id")
+        if not isinstance(profile, str) or _PROFILE.fullmatch(profile) is None:
+            raise InvalidCosmeticLicense("License names no profile: update Lightning and unlock again")
+        if expected_profile is not None and profile != expected_profile:
+            raise InvalidCosmeticLicense("License belongs to a different profile")
         items = data["items"]
         if not isinstance(items, list) or len(items) > 500:
             raise InvalidCosmeticLicense("Invalid item list")
@@ -69,7 +79,7 @@ def verify_license(envelope: dict, public_keys: dict[str, bytes], supported: dic
             if any(name == existing[0] for existing in owned):
                 raise InvalidCosmeticLicense("Duplicate item")
             owned.append((name, version))
-        return CosmeticOwnership(account, tuple(owned))
+        return CosmeticOwnership(account, tuple(owned), profile)
     except (InvalidSignature, ValueError, TypeError, KeyError, AttributeError) as exc:
         if isinstance(exc, InvalidCosmeticLicense):
             raise

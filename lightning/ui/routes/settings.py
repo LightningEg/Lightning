@@ -210,15 +210,20 @@ async def save_theme(request: Request):
 
 @router.post("/theme/unlock")
 async def unlock_theme(request: Request):
-    """Exchange the one-time code from the website account page for this theme's licence, then wear it."""
+    """Exchange the one-time code from the website account page for this theme's licence, then wear it. The code claims
+    a seat for THIS profile (one purchase, one profile); the profile's other devices use fresh codes for free."""
     from ..entitlements import UnlockError, redeem
     form = await request.form()
+    db = container(request).db
+    if not db.read_only:  # the licence names this profile's own id, so a profile that has none yet gets it now
+        from lightning.sync.copies import ensure_profile_id
+        ensure_profile_id(db)
     try:
         theme = redeem(str(form.get("code", "")), str(form.get("theme", "")))
     except UnlockError as exc:
         return redirect("/settings", str(exc))
     container(request).settings.set("appearance_theme", theme)
-    return redirect("/settings", "Theme unlocked. It is yours on this computer.")
+    return redirect("/settings", "Theme unlocked for this profile.")
 
 
 @router.post("/privacy")

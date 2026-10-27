@@ -14,6 +14,8 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 from lightning.ui import entitlements
 
 ACCOUNT = "11111111-1111-4111-8111-111111111111"
+PROFILE = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+OTHER_PROFILE = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
 
 
 def b64(raw: bytes) -> str:
@@ -30,8 +32,10 @@ def store(tmp_path, monkeypatch):
     entitlements.store.cache_clear()
     monkeypatch.setattr(entitlements, "store", lambda: {"keys": {"test-1": public}, "redeem_url": "https://store.example/redeem"})
 
-    def sign(items, signer=key):
-        payload = json.dumps({"issuer": "lightning-store", "schema_version": 1, "account_id": ACCOUNT,
+    monkeypatch.setattr(entitlements, "_PROFILE", lambda: PROFILE)  # the open profile; the runtime supplies it
+
+    def sign(items, signer=key, profile=PROFILE):
+        payload = json.dumps({"issuer": "lightning-store", "schema_version": 1, "account_id": ACCOUNT, "profile_id": profile,
                               "items": [{"item_id": i, "asset_version": v, "deliveries": []} for i, v in items]})
         return {"algorithm": "Ed25519", "key_id": "test-1", "payload": payload, "signature": b64(signer.sign(payload.encode()))}
     return sign
@@ -42,7 +46,8 @@ def answer(envelope=None, status=200):
         assert request.full_url == "https://store.example/redeem" and request.get_method() == "POST" and timeout <= 15
         assert not request.has_header("Origin"), "the store refuses browser origins"
         sent = json.loads(request.data)
-        assert set(sent) == {"code", "item_id", "asset_version"}
+        assert set(sent) == {"code", "item_id", "asset_version", "profile_id"}
+        assert sent["profile_id"] == PROFILE, "the code claims a seat for the open profile"
         if status != 200:
             raise HTTPError(request.full_url, status, "no", {}, BytesIO(b"{}"))
         return BytesIO(json.dumps(envelope).encode())
@@ -105,6 +110,43 @@ def test_forged_tampered_or_wrong_version_licences_unlock_nothing(store):
     good["payload"] = good["payload"].replace("nile", "papyrus")
     entitlements.licence_file().write_text(json.dumps({"licenses": [good, {"junk": True}, 5]}))
     assert entitlements.owned() == frozenset()
+
+
+def test_a_licence_for_another_profile_unlocks_nothing_here(store, monkeypatch):
+    """One purchase, one profile: the store binds the licence to the profile id; other profiles on this computer ignore it."""
+    entitlements.redeem("abcd1234abcd1234abcd1234abcd1234", "papyrus", opener=answer(store([("papyrus", 1)])))
+    assert entitlements.owned() == frozenset({"papyrus"})
+    monkeypatch.setattr(entitlements, "_PROFILE", lambda: OTHER_PROFILE)
+    assert entitlements.owned() == frozenset() and not entitlements.wearable("papyrus")
+    monkeypatch.setattr(entitlements, "_PROFILE", lambda: PROFILE)  # back on the first profile, on any device of it
+    assert entitlements.owned() == frozenset({"papyrus"})
+    # the store answering for a different profile than the one that asked is refused, not saved
+    entitlements.licence_file().unlink()
+    with pytest.raises(entitlements.UnlockError, match="did not verify"):
+        entitlements.redeem("abcd1234abcd1234abcd1234abcd1234", "papyrus", opener=answer(store([("papyrus", 1)], profile=OTHER_PROFILE)))
+    assert not entitlements.licence_file().exists()
+    # two profiles on one computer each keep their own licence in the one file
+    monkeypatch.setattr(entitlements, "_PROFILE", lambda: OTHER_PROFILE)
+    monkeypatch.setattr(entitlements, "_PROFILE", lambda: PROFILE)
+    entitlements.redeem("abcd1234abcd1234abcd1234abcd1234", "nile", opener=answer(store([("nile", 1)])))
+    monkeypatch.setattr(entitlements, "_PROFILE", lambda: OTHER_PROFILE)
+    assert entitlements.owned() == frozenset()
+
+
+def test_no_open_profile_owns_nothing_and_cannot_unlock(store, monkeypatch):
+    entitlements.redeem("abcd1234abcd1234abcd1234abcd1234", "papyrus", opener=answer(store([("papyrus", 1)])))
+    monkeypatch.setattr(entitlements, "_PROFILE", None)
+    assert entitlements.owned() == frozenset() and entitlements.profile_id() is None
+    with pytest.raises(entitlements.UnlockError, match="Open the profile"):
+        entitlements.redeem("abcd1234abcd1234abcd1234abcd1234", "papyrus", opener=answer(store([("papyrus", 1)])))
+    monkeypatch.setattr(entitlements, "_PROFILE", lambda: 1 / 0)  # a profile that cannot say who it is owns nothing
+    assert entitlements.owned() == frozenset()
+
+
+def test_every_seat_taken_says_what_to_do(store):
+    with pytest.raises(entitlements.UnlockError, match="Every profile seat.*quarter of the price"):
+        entitlements.redeem("abcd1234abcd1234abcd1234abcd1234", "papyrus", opener=answer(status=409))
+    assert not entitlements.licence_file().exists()
 
 
 def test_store_refusals_and_missing_keys_say_what_to_do(store, monkeypatch):

@@ -21,7 +21,7 @@ from lightning.security.keys import (clean_question, create_key_file, key_id, ne
 
 from .instance import InstanceAlreadyRunning, InstanceLock
 from .paths import ProfilePaths, choose_data_root, create_profile, resolve_profile
-from lightning.ui.entitlements import use_folder as use_licence_folder
+from lightning.ui.entitlements import use_folder as use_licence_folder, use_profile as use_licence_profile
 from .roles import SessionRole
 
 
@@ -206,6 +206,7 @@ class ProfileSession:
     def __init__(self, root: str | Path | None = None):
         self.root = choose_data_root(root)
         use_licence_folder(self.root / "cosmetics")  # paid theme licences live beside the profiles, not in one
+        use_licence_profile(self.licence_profile_id)  # and each is worn only by the profile it names
         self.container: Container | None = None
         self.role = SessionRole.HOME
         self.paths: ProfilePaths | None = None
@@ -222,6 +223,14 @@ class ProfileSession:
         self.borrowed = None                  # the BorrowerNode of an open borrowed profile, else None
         self.journal = None
         self.enrollment = None
+
+    def licence_profile_id(self) -> str | None:
+        """The open profile's own stable id, the one a paid-theme licence names; None while none is open or made yet.
+        Read only: a page render never writes (the unlock route makes the id on a writable home profile first)."""
+        if self.container is None:
+            return None
+        from lightning.sync.copies import profile_id_of
+        return profile_id_of(self.container.db)
 
     @property
     def name(self) -> str:

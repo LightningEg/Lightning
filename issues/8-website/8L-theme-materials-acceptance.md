@@ -13,7 +13,7 @@ repo: app
 
 - **Materials:** every app theme element states paint, material and motion from a reviewed recipe library (`theme-kit/README.md`, `slots.json` schema 2, `theme-materials.css`); contrast checked at each surface's worst point; `tools/theme_shots.py` captures the roster.
 - **One purchase, every surface:** the app's paid themes take the website's ids: Nile (palette, 300 coins), Cotton (textured, 600), Papyrus (animated, 1,000). Tiers for every look: `guideline/themes.md` section 7.
-- **App ownership:** paid themes are tried by anyone and kept with a signed licence (`lightning/ui/entitlements.py`); Settings › Appearance redeems the website's one-time code.
+- **App ownership:** paid themes are tried by anyone and kept with a signed licence (`lightning/ui/entitlements.py`); Settings › Appearance redeems the website's one-time code. **One purchase, one profile (owner, 2026-10-27):** the code claims a seat for the open profile and is burned; the licence names that profile and its other devices use free codes; another profile costs 25% of the price. Needs the website's `20261027130000_profile_seats` migration and the redeployed `redeem-purchase` function before any app release that turns unlock on.
 - **Website:** schema 2 validator and manifest copies (a test keeps them equal), catalogue migration, owner console rebuilt (Overview with *Ready to sell*, Catalogue with tier prices and app releases), Papyrus's gold thread on the site.
 
 ## Only the owner can do (in this order)

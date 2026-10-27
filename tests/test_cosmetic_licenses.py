@@ -11,12 +11,13 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 from lightning.security.cosmetic_license import verify_license, InvalidCosmeticLicense
 from lightning.security.cosmetic_parts import validate_parts, InvalidCosmeticParts
 
+PROFILE = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
 BUNDLES = Path(__file__).resolve().parents[1] / 'lightning/ui/static/cosmetics'
 
 @pytest.fixture
 def license():
     key = Ed25519PrivateKey.generate()
-    data = {'issuer':'lightning-store','schema_version':1,'account_id':str(uuid4()),
+    data = {'issuer':'lightning-store','schema_version':1,'account_id':str(uuid4()),'profile_id':PROFILE,
             'items':[{'item_id':'nile','asset_version':1,'deliveries':[]}]}
     def sign(data):
         payload=json.dumps(data,separators=(',',':'))
@@ -27,10 +28,21 @@ def license():
 def test_same_entitlement_is_portable_and_permanent(license):
     data,sign,keys=license
     envelope=sign(data)
-    for _device in ('phone','pc','replacement-pc'):
-        owned=verify_license(envelope,keys,{'nile':1},expected_account=data['account_id'])
-        assert owned.items == (('nile',1),)
+    for _device in ('phone','pc','replacement-pc'):  # one profile, any of its devices
+        owned=verify_license(envelope,keys,{'nile':1},expected_account=data['account_id'],expected_profile=PROFILE)
+        assert owned.items == (('nile',1),) and owned.profile_id == PROFILE
     assert 'expires' not in envelope['payload'] and 'device' not in envelope['payload']
+
+def test_a_licence_is_for_its_own_profile_only(license):
+    data,sign,keys=license
+    other='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
+    with pytest.raises(InvalidCosmeticLicense,match='different profile'):
+        verify_license(sign(data),keys,{'nile':1},expected_profile=other)
+    for bad in (None,'','not-a-uuid','aaaaaaaa-aaaa-1aaa-8aaa-aaaaaaaaaaaa',5):
+        broken={k:v for k,v in data.items() if k!='profile_id'}
+        if bad is not None:broken['profile_id']=bad
+        with pytest.raises(InvalidCosmeticLicense,match='no profile'):
+            verify_license(sign(broken),keys,{'nile':1},expected_profile=PROFILE)
 
 @pytest.mark.parametrize('change',['signature','key','algorithm','account','version','tamper','oversize'])
 def test_bad_claims_fail_closed(license,change):
