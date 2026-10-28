@@ -5,7 +5,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 
 | Historical ID | Report | Review date | Kind | Open follow-ups |
 | --- | --- | --- | --- | --- |
-| audit-1 | [Audit 1: is Lightning ready to demo?](2026-10-20-demo-readiness/report.md) | 2026-10-20 | audit | 2E, 2F, 3G, 3H, 3Q, 3S, 3T, 3U, 5J, 5K, 7L, 7M |
+| audit-1 | [Audit 1: is Lightning ready to demo?](2026-10-20-demo-readiness/report.md) | 2026-10-20 | audit | 2E, 2F, 3G, 3H, 3Q, 3S, 3T, 5J, 5K, 7L, 7M |
 | audit-2 | [Audit 2: backend efficiency and loose ends](2026-10-21-backend-efficiency/report.md) | 2026-10-21 | audit | 2A, 2B, 2C, 2E, 4A, 5A |
 | audit-3 | [Audit 3: is the edit journal (multi-device sync) solid?](2026-10-21-edit-journal/report.md) | 2026-10-21 | audit | 4A |
 | audit-5 | [Audit 5: is the backend engine efficient and streamlined?](2026-10-21-backend-streamlining/report.md) | 2026-10-21 | audit | 4A, 9J, 9K, 2AA |
