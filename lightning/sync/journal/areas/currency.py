@@ -1,5 +1,4 @@
 """Currencies, rates, foreign accounts, conversions and money set aside (reserves)."""
-from .master import ACCOUNT_TYPES
 from .spec import AMOUNT, DATE, LONG, RATE, TEXT, Command, choice, optional, ref
 
 TABLES = ("registered_currencies", "fx_rates", "cash_reserves", "reserve_transaction_links", "reserve_allocation_history")

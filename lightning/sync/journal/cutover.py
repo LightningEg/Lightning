@@ -15,7 +15,7 @@ from uuid import uuid4
 
 from lightning.database.snapshot import _inventory, snapshot, verify_connection
 
-from .codec import JournalError
+from .codec import JournalError, stable_digest
 
 
 def _file_hash(path: Path) -> str:
@@ -65,8 +65,7 @@ def _budget_rows_fingerprint(db, category_ids) -> str:
         row.pop("id", None)
         row["category_code"] = codes.get(row.pop("category_id"), "")
     rows.sort(key=lambda row: (row["category_code"], row["month"], row["one_off"]))
-    encoded = json.dumps(rows, sort_keys=True, separators=(",", ":"), default=str)
-    return hashlib.sha256(encoded.encode()).hexdigest()
+    return stable_digest(rows, ensure_ascii=True, default=str, allow_nan=True)
 
 
 def _normalize_legacy_references(db) -> bool:
@@ -147,7 +146,6 @@ def _normalize_legacy_references(db) -> bool:
                     if type(category_ids) is not list:
                         raise ValueError("unsupported category selection")
                     codes = [_category_code(db, value) for value in category_ids]
-                code_by_id = {int(item["id"]): item["code"] for item in db.all("SELECT id,code FROM categories")}
                 portable_rows = []
                 for saved in snapshot["rows"]:
                     if type(saved) is not dict:

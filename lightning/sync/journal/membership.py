@@ -12,6 +12,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 from .codec import JournalError, authenticate, canonical, fields, number, seal, unpack, uuid
+from .errors import DeviceRevoked
 
 
 def _key(shared, context):
@@ -144,10 +145,13 @@ class Membership:
         number(body["version"],minimum=1)
         from .codec import hash_value
         hash_value(body["nonce"])
-        member = self.db.one("SELECT public_key FROM journal_origins WHERE device=? AND revoked=0",(body["sender"],))
-        if member is None or body["type"] != "journal-membership-fetch" or body["recipient"] != self.device.identity.device_id:
+        if body["type"] != "journal-membership-fetch" or body["recipient"] != self.device.identity.device_id:
             raise JournalError("Membership requester is not paired")
-        authenticate(envelope,member["public_key"])
+        member = self.db.one("SELECT public_key FROM journal_origins WHERE device=? AND revoked=0",(body["sender"],))
+        if member is not None:
+            authenticate(envelope,member["public_key"])
+        elif not self._removed(envelope, body["sender"]):
+            raise JournalError("Membership requester is not paired")
         state = self.state()
         if body["version"] >= state["version"]:
             raise JournalError("No newer membership transition")
@@ -155,6 +159,21 @@ class Membership:
         if update is None:
             raise JournalError("Membership history missing; explicit repair required")
         return seal(dict(type="journal-membership-reply",nonce=body["nonce"],latest=state["version"],update=update),self.device.identity.sign)
+
+    def _removed(self, envelope, sender):
+        """A removed device may fetch the next signed transition: it leaves the device out and wraps no key for it."""
+        for row in self.db.all("SELECT public_key FROM journal_origins WHERE device=? AND revoked=1", (sender,)):
+            try:
+                authenticate(envelope, row["public_key"])
+                return True
+            except JournalError:
+                continue
+        return False
+
+    def revoked(self):
+        """The home's signed membership left this device out (saved when it was learned), else None."""
+        value = self.db.scalar("SELECT value FROM journal_local WHERE name='membership_revoked'")
+        return json.loads(value) if value else None
 
     async def catch_up(self, send, home_id):
         for _ in range(16):
@@ -193,6 +212,12 @@ class Membership:
         own = self.device.identity.device_id
         if (own not in body["members"] or body["members"][own]["key"] != self.device.identity.public_key
                 or body["members"][own]["incarnation"] != self.device.store.config["incarnation"]):
+            if not initial:
+                # Signed by the home and the very next transition after this device's copy: proof it was removed.
+                with self.db.transaction():
+                    self.db.execute("INSERT OR REPLACE INTO journal_local VALUES('membership_revoked',?)",
+                                    (canonical(dict(version=body["version"])).decode(),))
+                raise DeviceRevoked("This device is no longer a member")
             raise JournalError("This device is no longer a member")
         retired = body["retired"]
         if type(retired) is not list or not set(state["retired"]) <= set(retired):

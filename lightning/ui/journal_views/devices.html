@@ -4,7 +4,8 @@
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/pairing.js" defer></script>
 <section class="{{ 'phone-flat-rows' if phone else 'card' }}">
   <h2>Devices</h2>
-  {% if not pairing.enabled %}<p>Nearby pairing is unavailable in this preview.</p>
+  {% if sync and sync.error %}<p role="status"><strong>{{ {'revoked': 'The home removed this device, so it no longer syncs. Edits made here stay on this device.', 'refused': 'The home refused the last sync. Your edits stay saved here, and it tries again.', 'error': 'The last sync did not finish. Your edits stay saved here, and it tries again.'}[sync.error.kind] }}</strong></p><p class="muted">Last tried <span dir="ltr">{{ sync.error.shown }}</span></p>{% endif %}
+  {% if not pairing.enabled %}<p>Nearby pairing is unavailable.</p>
   {% else %}
     {% for name in pairing.members %}<p>{{ name }} · Paired</p>{% else %}<p>No other devices paired yet.</p>{% endfor %}
     {% if home %}
@@ -34,6 +35,8 @@
     {% elif pairing.pending %}
       <div data-pairing-pending><p>Check that the home shows this same number:</p><p class="num"><strong>{{ pairing.pending }}</strong></p><p>Confirm on the home. This screen will continue automatically.</p></div>
       <form method="post" action="/devices/check"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Check connection</button></form>
+    {% elif pairing.revoked %}
+      <p>The home removed this device, so it no longer syncs. Edits made here stay on this device.</p>
     {% elif pairing.paired %}
       <p>This device is paired. It reconnects automatically when the home is available.</p>
     {% else %}

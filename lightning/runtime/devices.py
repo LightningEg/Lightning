@@ -23,7 +23,7 @@ from lightning.sync.identity import DEFAULT_PORT, DeviceIdentity, load_or_create
 from lightning.sync.service import BorrowerNode, HomeNode, LinkDown
 from lightning.sync.state import BorrowerState, HomeState, ProtocolError
 
-from .paths import ProfilePaths, app_data_root, resolve_profile
+from .paths import ProfilePaths, app_data_root, is_journal_profile, resolve_profile
 
 HOME_META = "home.json"
 LENDING_MARK = "lending.json"   # beside the ledger: it has a lending record on this device (review H1)
@@ -127,7 +127,7 @@ class Devices:
         for meta in sorted((self.root / "home").glob(f"*/{HOME_META}")):
             try:
                 live = Path(json.loads(meta.read_text(encoding="utf-8"))["live_path"])
-                if (live.parent / "journal-native.json").exists():
+                if is_journal_profile(live.parent):
                     continue
                 if (live.exists() or arriving_path(live).exists()) and (meta.parent / "control.db").exists():
                     nodes.append(self._node(meta.parent, live))
@@ -136,9 +136,9 @@ class Devices:
         return nodes
 
     def enable_home(self, session, phone_name: str) -> HomeNode:
+        """On the owning thread, profile unlocked and writable: make this device the ledger's home."""
         if getattr(session, "journal", None) is not None:
             raise ProtocolError("BAD_REQUEST", "This profile uses edit synchronization. Open its Devices page.")
-        """On the owning thread, profile unlocked and writable: make this device the ledger's home."""
         paths = session.paths
         folder = self.home_folder(paths)
         if folder is None or session.borrowed is not None:
@@ -168,10 +168,10 @@ class Devices:
             return "damaged"
 
     def role_for(self, selected: str) -> str:
-        if (Path(selected).parent / "journal-native.json").exists() or (Path(selected).parent / "complete.json").exists():
-            return "home"  # The journal runtime checks authority independently of v1 lending.
         """How a profile kept here may open: "home" (writable) or "reader" (lent away, a hand-back to finish,
         or a lending record missing or damaged). Decided before any connection opens."""
+        if is_journal_profile(Path(selected).parent):
+            return "home"  # The journal runtime checks authority independently of v1 lending.
         try:
             paths = resolve_profile(db_path=selected)
         except (OSError, ValueError):
@@ -187,10 +187,10 @@ class Devices:
             return "reader"
 
     def keep_as_home(self, session, phone_name: str) -> HomeNode:
-        if getattr(session, "journal", None) is not None:
-            raise ProtocolError("BAD_REQUEST", "Use the synchronized profile's Devices page.")
         """The owner's repair when the lending record is missing or damaged: this copy becomes the ledger under a
         new lineage, so no PC copy from before can come back. PCs pair again. On the owning thread."""
+        if getattr(session, "journal", None) is not None:
+            raise ProtocolError("BAD_REQUEST", "Use the synchronized profile's Devices page.")
         paths = session.paths
         folder = self.home_folder(paths)
         if folder is None:

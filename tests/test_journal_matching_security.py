@@ -30,13 +30,18 @@ def test_expired_matching_offer_cannot_advance_to_password(devices, monkeypatch)
     async def run():
         home, _, joiner = await started(devices)
         expiration = unpack(home._value("pairing")["offer"].encode())["body"]["expires"]
-        monkeypatch.setattr(pairing.time, "time", lambda: expiration + 1)
         home.desk.clock = lambda: expiration + 1
+        # Fifteen minutes past by this device's clock, it refuses before anything leaves it.
+        monkeypatch.setattr(pairing.time, "time", lambda: expiration + pairing.MAX_CLOCK_DIFFERENCE)
         with pytest.raises(JournalError, match="expired"):
             joiner.compare(joiner.screen()["pending"])
+        # A second past, its clock may just be ahead: it lets the home judge, and the home refuses.
+        monkeypatch.setattr(pairing.time, "time", lambda: expiration + 1)
+        joiner.compare(joiner.screen()["pending"])
         with pytest.raises(JournalError):
             await joiner.prove(PASSWORD)
         assert not home.screen()["code"]
+        assert joiner.device.identity.device_id not in home.membership.state()["members"]
     asyncio.run(run())
 
 

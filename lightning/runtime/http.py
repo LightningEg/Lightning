@@ -9,6 +9,7 @@ import threading
 import time
 from dataclasses import dataclass, field
 import re
+from contextlib import contextmanager
 
 import uvicorn
 from starlette.formparsers import MultiPartParser
@@ -241,3 +242,11 @@ class Host:
         if self.thread.is_alive():
             raise RuntimeError("The profile server did not stop cleanly")
         self.socket.close()
+
+
+class QuietServer(uvicorn.Server):
+    """A uvicorn server that leaves signals to its owner, so one loop can stop several servers together."""
+
+    @contextmanager
+    def capture_signals(self):
+        yield
