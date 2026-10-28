@@ -5,9 +5,14 @@ from pathlib import Path
 
 
 @lru_cache(maxsize=1)
-def theme_ids() -> frozenset[str]:
+def _registry() -> tuple[dict, ...]:
+    """The generated registry, read once per process (it only changes with a build)."""
     path = Path(__file__).parent / "static/themes.generated.json"
-    return frozenset(theme["id"] for theme in json.loads(path.read_text()))
+    return tuple(json.loads(path.read_text()))
+
+
+def theme_ids() -> frozenset[str]:
+    return frozenset(theme["id"] for theme in _registry())
 
 
 def theme_id(value: str) -> str:
@@ -18,5 +23,4 @@ def theme_id(value: str) -> str:
 
 def theme_name(value: str) -> str:
     """The registry's display name for a theme id (its own id when unknown)."""
-    path = Path(__file__).parent / "static/themes.generated.json"
-    return next((t["name"] for t in json.loads(path.read_text()) if t["id"] == value), value)
+    return next((t["name"] for t in _registry() if t["id"] == value), value)

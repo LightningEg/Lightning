@@ -39,6 +39,8 @@
 <p class="reserve-overview muted" data-reserve-refresh="overview">{{ pos.reserves|money }} {{ base }} set aside in reserves; {{ fig.free_cash.label|lower }} is {{ pos.free_cash|money }} {{ base }} after them and bills due. <a href="/plan">{{ "How free cash is built"|tr(locale) }}</a></p>
 
 <section class="card emergency-fund">
+  {% if refill %}<div class="refill-prompt" role="status"><span>{{ ('Free cash can fill your emergency fund.' if refill.full else 'Free cash can bring your emergency fund closer to its target.')|tr(locale) }}</span>
+    <form method="post" action="/reserves/emergency"><input type="hidden" name="allocated" value="{{ refill.to|money(False, 2) }}"><button class="btn primary small">{{ 'Refill'|tr(locale) }} {{ refill.move|money(False, 0) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% endif %}
   <div class="section-head"><div><h2>{{ 'Emergency fund'|tr(locale) }}</h2></div></div>
   {% set avg = fund.average %}{% set what = 'income' if fund.basis == 'income' else 'spending' %}
   <div data-reserve-refresh="emergency-progress">{% if emergency_meter %}<div class="emergency-meter">{{ meter('Towards six months of ' ~ what, emergency_set_aside, fund.target, emergency_meter, '', '', 'target') }}</div>{% endif %}
