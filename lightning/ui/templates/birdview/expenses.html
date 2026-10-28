@@ -12,7 +12,7 @@
 {% if spending_total == 0 and not a.rows %}
 <section class="card empty"><h2>{{ 'No spending in this period'|tr(locale) }}</h2><p>{{ 'Try a longer period, or review the transactions recorded for these dates.'|tr(locale) }}</p><a class="btn" href="/transactions?date_from={{ date_from }}&amp;date_to={{ date_to }}">{{ 'View transactions'|tr(locale) }}</a></section>
 {% else %}
-<header class="overview-section-head inv-head"><h2>{{ 'Where did it go?'|tr(locale) }}</h2><span>{{ date_from }} to {{ date_to }}</span></header>
+<header class="overview-section-head inv-head"><h2>{{ 'Where did it go?'|tr(locale) }}</h2><span>{{ date_from }} to {{ date_to }}</span><a class="small" href="/spending/compare">{{ 'Compare periods'|tr(locale) }}</a></header>
 <section class="card wide-card" aria-label="Where it went"><div class="overview-split{{ ' is-single' if a.rows|length <= 1 }}">
   <section><div class="overview-block-head"><div><h3>{{ 'By category'|tr(locale) }}</h3><p>{{ 'Size is money out'|tr(locale) }}</p></div></div>
   <div class="treemap" role="img" aria-label="Money out by category: {% for t in a.tiles %}{{ t.label }} {{ t.value|money }}{{ ', ' if not loop.last }}{% endfor %}">

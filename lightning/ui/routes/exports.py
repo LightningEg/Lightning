@@ -28,10 +28,13 @@ async def all_data(request: Request):
                                                   "Cache-Control": "no-store"})
 
 
+MAX_EXPORT = 10_000  # PC P7: was 1,000; a year of rows fits
+
+
 def _selected(form, field: str) -> set[int]:
     values = form.getlist(field)
-    if not values or len(values) > 1000 or any(not str(value).isdigit() or int(value) < 1 for value in values):
-        raise HTTPException(400, "Select between 1 and 1,000 records to export.")
+    if not values or len(values) > MAX_EXPORT or any(not str(value).isdigit() or int(value) < 1 for value in values):
+        raise HTTPException(400, "Select between 1 and 10,000 records to export.")
     return {int(value) for value in values}
 
 

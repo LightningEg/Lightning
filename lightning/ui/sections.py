@@ -1,6 +1,6 @@
 """Two levels: a section in the sidebar, then a tab in the bar under the title (owner, 2026-10-06).
 
-At most six sections and five tabs in a section; nothing opens a third page level. A tab's settings sit
+At most eight sections (six until 2026-10-28, when the menu was regrouped by question) and five tabs in a section; nothing opens a third page level. A tab's settings sit
 behind the gear at the end of its bar. Addresses do not change: a page joins a tab by its path (and, for
 Settings pages that belong to another tab, by its ``section``), so old links keep working.
 """
@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 
-MAX_SECTIONS = 6
+MAX_SECTIONS = 8
 MAX_TABS = 5
 
 
@@ -61,25 +61,32 @@ _I = {  # tab icons
 }
 
 SECTIONS: tuple[Section, ...] = (
-    Section("overview", "Overview", "overview", (
+    # Question-led (owner, 2026-10-28): each section answers one of the users' main questions, in the order
+    # they ask them (docs/reports/2026-10-27-users-main-questions).
+    Section("overview", "Overview", "overview", (       # Where do I stand?
         Tab("summary", "Summary", "/", _I["summary"], ("=/", "=/birdview", "/explain", "/birdview/class", "/review", "/activity", "/reimbursements"),
             settings=("valuations", "assets-valuations"), gear="/settings?section=valuations", gear_label="Sale factors"),
-        Tab("spending", "Spending", "/birdview/expenses", _I["spending"], ("/birdview/expenses",)),
-        Tab("health", "Health", "/financial-health", _I["health"], ("/financial-health",),
-            settings=("financial-health",), gear="/settings?section=financial-health", gear_label="Financial health limits"),
-        Tab("currencies", "Currencies", "/accounts/currencies", _I["currencies"], ("=/accounts/currencies",)),
     )),
-    Section("budget", "Budget", "budget", (
+    Section("spending", "Spending", "expenses", (       # Where did my money go?
+        Tab("spending", "Spending", "/birdview/expenses", _I["spending"], ("/birdview/expenses",)),
+        Tab("compare", "Compare periods", "/spending/compare", _I["plan"], ("/spending/compare", "/analysis")),
+        Tab("reports", "Reports", "/reports", _I["data"], ("/reports",)),
+    )),
+    Section("budget", "Budget", "budget", (             # Am I on plan?
         Tab("budget", "Budget", "/budget", _I["budget"], ("/budget", "/payday"), settings=("budget",),
             gear="/settings?section=budget", gear_label="Budget settings"),
     )),
-    Section("plan", "Cash planning", "cash", (
+    Section("plan", "Cash planning", "cash", (          # How much can I spend?
         Tab("plan", "Plan", "/plan", _I["plan"], ("=/plan", "/plan/items")),
         Tab("recurring", "Recurring", "/plan/recurring", _I["recurring"], ("/plan/recurring", "/setup/salary", "/plan/from-transaction")),
         Tab("loans", "Loans", "/plan/loans", _I["loans"], ("/plan/loans", "/plan/purchases")),
-        Tab("reserves", "Reserves", "/plan/reserves", _I["reserves"], ("/plan/reserves", "/reserves")),
     )),
-    Section("investments", "Investments", "investments", (
+    Section("safety", "Safety", "reserves", (           # Am I safe if something goes wrong?
+        Tab("reserves", "Reserves", "/plan/reserves", _I["reserves"], ("/plan/reserves", "/reserves")),
+        Tab("health", "Limits", "/financial-health", _I["health"], ("/financial-health",),
+            settings=("financial-health",), gear="/settings?section=financial-health", gear_label="Financial health limits"),
+    )),
+    Section("investments", "Investments", "investments", (   # What do I hold, and how did it do?
         Tab("holdings", "Holdings", "/investments", _I["holdings"],
             ("=/investments", "/investments/holding", "/investments/new", "/investments/report-detail", "/deposits",
              "/investments/assets"), gear="/investments/assets", gear_label="Financial assets"),
@@ -87,20 +94,22 @@ SECTIONS: tuple[Section, ...] = (
             settings=("targets",), gear="/settings?section=targets", gear_label="Target allocation"),
         Tab("prices", "Prices", "/investments/prices", _I["prices"], ("/investments/prices", "/investments/reevaluations"),
             gear="/investments/prices/markets", gear_label="Price files"),
+        Tab("currencies", "Currencies", "/accounts/currencies", _I["currencies"], ("=/accounts/currencies",)),
     )),
-    Section("accounts", "Accounts", "accounts", (
-        Tab("accounts", "Accounts", "/accounts", _I["accounts"], ("/accounts",)),
+    Section("accounts", "Transactions", "accounts", (   # What happened?
         Tab("transactions", "Transactions", "/transactions", _I["transactions"], ("/transactions", "/t/")),
+        Tab("import", "Import", "/import", _I["data"], ("/import", "/sms")),
+        Tab("accounts", "Accounts", "/accounts", _I["accounts"], ("/accounts",)),
         Tab("others", "Held for others", "/money-from-others", _I["people"], ("/money-from-others",)),
         Tab("zakat", "Zakat", "/zakat", _I["zakat"], ("/zakat",), settings=("zakat",),
             gear="/settings?section=zakat", gear_label="Zakat settings"),
     )),
-    Section("settings", "Settings", "settings", (
-        Tab("data", "Your data", "/settings", _I["data"], ("/settings", "/profiles", "/exports/all"), settings=("general",)),
+    Section("settings", "Settings", "settings", (       # Is my data right?
+        Tab("checks", "Data checks", "/checks", _I["checks"], ("/checks",)),
+        Tab("rules", "Rules", "/rules", _I["rules"], ("/rules",)),
         Tab("categories", "Categories", "/categories", _I["categories"], ("/categories",)),
         Tab("counterparties", "Counterparties", "/counterparties", _I["counterparties"], ("/counterparties",)),
-        Tab("rules", "Rules", "/rules", _I["rules"], ("/rules",)),
-        Tab("checks", "Data checks", "/checks", _I["checks"], ("/checks",)),
+        Tab("data", "Your data", "/settings", _I["data"], ("/settings", "/profiles", "/exports/all"), settings=("general",)),
     )),
 )
 

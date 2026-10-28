@@ -314,14 +314,14 @@ def _first_evening(o: Mohab) -> None:
     o.ask("setup", "My accounts are in. What should I do next?")
 
     # Three months of CIB from the bank's CSV.
-    b.go("Accounts", "CIB Payroll", "Import statement")
+    b.go("Transactions", "Accounts", "CIB Payroll", "Import statement")
     b.submit({}, button="Review statement", files={"file": ("cib-jul-sep.csv", _statement(), "text/csv")})
     b.submit({"map_Date": Choose("Date"), "map_Amount": Choose("Amount"), "map_Counterparty": Choose("Description")},
              button="Preview rows")
     o.notes["review"] = b.page
     # Halfway through he leaves to check something, then comes back to the review from the Overview.
     o.ask("import_waiting", "I left the import half done. Does Lightning remember it?")
-    o.notes["import_again"] = b.go("Accounts", "CIB Payroll", "Import statement")
+    o.notes["import_again"] = b.go("Transactions", "Accounts", "CIB Payroll", "Import statement")
     b.go("Imported activity needs a decision")
     review = b.page.form("Post ready rows")
     # Rows like the register: he answers each row's own wells. Rows share an imported name, so he answers the
@@ -379,15 +379,15 @@ def _first_evening(o: Mohab) -> None:
         o.notes["prices_saved"] = o.prices(when, typed)
 
     o.ask("position", "How much do I have, and how much of it is really mine?")
-    o.ask("moms_money", "How much of Mom's money am I holding?", "Accounts", "Held for others")
+    o.ask("moms_money", "How much of Mom's money am I holding?", "Transactions", "Held for others")
 
     # The plan: a budget from his own spending, an emergency fund, his bills and the car loan.
     b.go("Set a plan for 2026-09")
     b.submit({}, button="Create plan")
-    b.go("Cash planning", "Reserves")
+    b.go("Safety", "Reserves")
     b.submit({"allocated": "20,000"}, action="/reserves/emergency")
     o.ask("emergency_target", "Six months of income is far more than the cash I have. Does Lightning say so?",
-          "Cash planning", "Reserves")
+          "Safety", "Reserves")
     for name in ("ACME Egypt", "Landlord", "WE Internet", "North Cairo Electricity"):
         o.track(name)
     o.add_loan("Car loan", "Toyota Finance", "2,500", "2026-07-05", "24", "60,000")
@@ -400,7 +400,7 @@ def _first_evening(o: Mohab) -> None:
     o.ask("where", "Where did my money go in September?", "Spending")
     o.ask("plan", "Am I sticking to my plan?", "Budget")
     o.ask("investing", "How are my investments doing?", "Investments")
-    o.ask("checks", "Is my data right?", "Settings", "Data checks")
+    o.ask("checks", "Is my data right?", "Settings")
     # The sidebar's Search (Ctrl-K opens the same search in the app window); a typo still finds the page.
     b.go("Search")
     b.submit({"q": "lons"}, button="Search")
@@ -436,7 +436,7 @@ def _live_the_year(o: Mohab) -> None:
 
     o.ask("atm", "What did the ATM withdrawal cost me in October?", "Spending")
     o.ask("refund", "Amazon refunded me. Did my spending go down?", "Spending")
-    o.ask("emergency", "After the repair, how much is left in my emergency fund?", "Cash planning", "Reserves")
+    o.ask("emergency", "After the repair, how much is left in my emergency fund?", "Safety")
     o.ask("fixed", "Is the Carrefour mistake fixed, and the double Talabat gone?", "CIB Payroll")
     o.ask("reconcile", "Does Lightning match my bank statement?", "CIB Payroll", "Adjust balance")
     # The register header is intentionally whole EGP (A16). Reconciliation shows the exact cents.
@@ -467,8 +467,8 @@ def _live_the_year(o: Mohab) -> None:
     o.settle_due_income("ACME Egypt")   # he confirms the 24 December payment it suggests
     o.ask("january_pay_after", "And after I confirm it?", "Cash planning", "Recurring")
     o.ask("january_saved", "January's pay came in December. Does Lightning say I saved too little?")
-    o.ask("bonus_budget", "Does the bonus change what I can budget?", "Cash planning", "Reserves")
-    b.go("Cash planning", "Reserves")
+    o.ask("bonus_budget", "Does the bonus change what I can budget?", "Safety", "Reserves")
+    b.go("Safety", "Reserves")
     b.submit({"name": "Car insurance", "target": "9,000", "due_date": "2027-04-30"}, button="Add reserve")
     o.ask("set_aside", "How much should I put aside each month for the insurance?", "Cash planning")
 
@@ -483,7 +483,7 @@ def _live_the_year(o: Mohab) -> None:
     # Needs you notices the raise is not in his average yet; he keeps his plan and saves the 5,000.
     o.ask("income_up", "My pay went up. What should my plan do with it?", "Choose")
     o.notes["raise_saved"] = b.submit({}, button="Save it")
-    o.ask("raise_target", "Did my savings target go up?", "Health")
+    o.ask("raise_target", "Did my savings target go up?", "Safety", "Limits")
 
     # ============================================================== March: Eid, and a phone on installments
     o.on("2027-03-31")
@@ -498,7 +498,7 @@ def _live_the_year(o: Mohab) -> None:
     # ============================================================== April: the insurance, and selling COMI
     o.on("2027-04-30")
     o.month("2027-04", salary="50,000")
-    screen = b.go("Cash planning", "Reserves")
+    screen = b.go("Safety", "Reserves")
     b.submit({"allocated": "9,000"}, action=screen.action_after("Car insurance", "/allocate"))
     o.enter("CIB Payroll", "2027-04-25", "Misr Insurance", "Personal › Transportation", "-9,000")
     o.to_reserve("CIB Payroll", "Misr Insurance", "Car insurance")
@@ -512,17 +512,17 @@ def _live_the_year(o: Mohab) -> None:
     o.notes["loans_replanned"] = o.plan_category("Loan payments", "4,500")
     o.ask("loans_planned_after", "And now?")
     o.ask("safe_keeps_saving", "Does Safe to spend leave what I mean to save?", "Cash planning")
-    o.ask("insurance", "Is the insurance paid from its goal?", "Cash planning", "Reserves")
+    o.ask("insurance", "Is the insurance paid from its goal?", "Safety", "Reserves")
 
     # ============================================================== May and June: the rent goes up
     o.on("2027-05-31")
     o.month("2027-05", salary="50,000")
     # A laptop by the end of June: Needs you says the plan cannot get there in time, and that his free cash
     # can; he sets the 60,000 aside.
-    b.go("Cash planning", "Reserves")
+    b.go("Safety", "Reserves")
     b.submit({"name": "New laptop", "target": "60,000", "due_date": "2027-06-30"}, button="Add reserve")
     o.ask("laptop", "Can I have a 60,000 laptop by the end of June?")
-    screen = b.go("Cash planning", "Reserves")
+    screen = b.go("Safety", "Reserves")
     o.notes["laptop_set_aside"] = b.submit({"allocated": "60,000"}, action=screen.action_after("New laptop", "/allocate"))
     o.ask("laptop_after", "And once the money is set aside?")
     o.on("2027-06-30")
@@ -541,18 +541,18 @@ def _live_the_year(o: Mohab) -> None:
     o.month("2027-07", salary="50,000", rent="13,200")
     # The new model is out in the autumn: he lets the laptop goal go and its 60,000 is free again.
     o.ask("laptop_late", "The laptop's date has passed. What now?")
-    screen = b.go("Cash planning", "Reserves")
+    screen = b.go("Safety", "Reserves")
     o.notes["laptop_done"] = b.submit({}, action=screen.action_after("New laptop", "/complete"))
-    b.go("Cash planning", "Reserves")
+    b.go("Safety", "Reserves")
     b.submit({"name": "Sahel trip", "target": "15,000", "due_date": "2027-08-15", "allocated": "15,000"},
              button="Add reserve")
     o.on("2027-08-31")
     o.month("2027-08", salary="50,000", rent="13,200")
     o.enter("CIB Payroll", "2027-08-12", "Hacienda Bay", "Personal › Entertainment", "-14,200")
     o.to_reserve("CIB Payroll", "Hacienda Bay", "Sahel trip")
-    o.ask("trip", "How much is left from the Sahel money?", "Cash planning", "Reserves")
+    o.ask("trip", "How much is left from the Sahel money?", "Safety", "Reserves")
     o.enter("CIB Payroll", "2027-08-31", "ACME Egypt", "Bonus", "30,000", notes="End of service")
-    o.ask("end_of_service", "Does my end-of-service money change what I can budget?", "Cash planning", "Reserves")
+    o.ask("end_of_service", "Does my end-of-service money change what I can budget?", "Safety", "Reserves")
     b.go("Cash planning", "Recurring", "ACME Egypt")
     b.submit({}, button="Stop")
     b.go("Cash planning", "Recurring", "Add recurring item")
@@ -565,12 +565,12 @@ def _live_the_year(o: Mohab) -> None:
     o.on("2027-09-30")
     o.month("2027-09", salary=None, rent="13,200")
     o.ask("next_pay", "I'm between jobs. When is my next pay?", "Cash planning")
-    o.ask("last", "How long could my emergency fund carry me?", "Cash planning", "Reserves")
+    o.ask("last", "How long could my emergency fund carry me?", "Safety", "Reserves")
     # He would rather count it in months of what he spends; Reserves links to the setting.
-    b.go("Cash planning", "Reserves", "Change in Settings")
+    b.go("Safety", "Reserves", "Change in Settings")
     b.submit({"emergency_basis": "spending"}, button="Save budget settings")
-    o.ask("last_in_spending", "And in months of what I spend?", "Cash planning", "Reserves")
-    b.go("Cash planning", "Reserves", "Change in Settings")
+    o.ask("last_in_spending", "And in months of what I spend?", "Safety", "Reserves")
+    b.go("Safety", "Reserves", "Change in Settings")
     b.submit({"emergency_basis": "income"}, button="Save budget settings")
 
     # ============================================================== the year
@@ -654,7 +654,7 @@ def _a_gameya(o: Mohab) -> None:
     o.notes["gameya_third"] = b.submit(button="Record instalment")       # 2027-09-05, his turn's month
     o.notes["gameya_payout"] = b.submit(button="Record payout")          # 20,000 on 2027-09-05
     o.ask("gameya_after", "What am I worth now, and what do I owe the circle?")
-    o.ask("gameya_circle", "Where do I stand in the gam'eya?", "Accounts", "Office gam'eya", "Open gam’eya")
+    o.ask("gameya_circle", "Where do I stand in the gam'eya?", "Transactions", "Accounts", "Office gam'eya", "Open gam’eya")
     o.ask("gameya_plan", "Do I see the instalments still to pay?", "Cash planning")
 
 
@@ -672,12 +672,12 @@ def _a_dollar_account_and_a_nasdaq_etf(o: Mohab) -> None:
                                        "opening_balance": "3,000", "opening_balance_date": "2027-09-30"},
                                       button="Add account")
     # In his pound brokerage the ETF is on offer but says it needs a dollar account; he is not let buy it there.
-    thndr = b.go("Accounts", "THNDR")
+    thndr = b.go("Transactions", "Accounts", "THNDR")
     o.notes["etf_in_pounds_choice"] = next(x for x in thndr.catalogue("trade-instrument-catalogue") if x.get("ticker") == "QQQM")
     o.notes["etf_in_pounds"] = b.submit({"instrument_key": o.notes["etf_in_pounds_choice"]["key"], "trade_action": "buy",
                                          "date": "2027-09-30", "units": "5", "total": "1,000"}, action="investment-entry",
                                         expect=400)
-    screen = b.go("Accounts", "Dollar brokerage")
+    screen = b.go("Transactions", "Accounts", "Dollar brokerage")
     o.notes["etf_in_dollars_choice"] = next(x for x in screen.catalogue("trade-instrument-catalogue") if x.get("ticker") == "QQQM")
     o.notes["etf_bought"] = b.submit({"instrument_key": o.notes["etf_in_dollars_choice"]["key"], "trade_action": "buy",
                                       "date": "2027-09-30", "units": "10", "total": "2,200", "fees": "5"},
@@ -803,18 +803,18 @@ def _the_feedback_round(o: Mohab) -> None:
                                     button="Convert")
     b.open("/settings?section=currencies&tab=rates")   # the day's rate, typed after the bank's own
     b.submit({"currency": "USD", "date": "2027-09-30", "rate": "49.40"}, action="/settings/fx-rate")
-    o.ask("dollars", "I bought 1,000 dollars. What did they cost me and what are they worth?", "Currencies")
+    o.ask("dollars", "I bought 1,000 dollars. What did they cost me and what are they worth?", "Investments", "Currencies")
 
     # Zakat: he picks his zakat day once, gives part of it from his pay account (spending in the Zakat category)
     # and reads what is still to pay. It is an estimate by the common rule, said once.
     o.notes["zakat_off"] = b.open("/settings")                    # zakat is off until he turns it on
     o.notes["zakat_on"] = b.submit({"on": "1"}, action="/zakat/enabled")
-    o.ask("zakat_start", "Do I owe zakat?", "Accounts", "Zakat")
+    o.ask("zakat_start", "Do I owe zakat?", "Transactions", "Accounts", "Zakat")
     o.notes["zakat_day"] = b.submit({"zakat_day": "2027-12-01"}, button="Save zakat day")
-    o.notes["zakat_before"] = b.go("Accounts", "Zakat")
+    o.notes["zakat_before"] = b.go("Transactions", "Accounts", "Zakat")
     o.notes["zakat_figures_before"] = o.c.zakat.assess("2027-09-30")
     o.enter("CIB Payroll", "2027-09-30", "Charity", "Zakat", "-1,000")
-    o.ask("zakat", "And how much is still to pay?", "Accounts", "Zakat")
+    o.ask("zakat", "And how much is still to pay?", "Transactions", "Accounts", "Zakat")
     o.notes["zakat_figures_after"] = o.c.zakat.assess("2027-09-30")
     o.ask("zakat_plan", "Does Cash planning know about it?", "Cash planning")
 
@@ -888,7 +888,7 @@ def test_what_he_owns_leaves_out_moms_money(mohab):
     assert position.figure("What you own Excludes money held for others") == D("250565")  # reports show whole pounds
     assert position.figure("Gold") == D("57195")  # 8 g + 4.3 g of 21K at 4,650
     moms = mohab.answers["moms_money"]
-    assert route(mohab, "moms_money") == ["/", "/accounts", "/money-from-others"]
+    assert route(mohab, "moms_money") == ["/", "/transactions", "/money-from-others"]
     assert moms.shows("Mom CIB Payroll 10,000.00")
 
 
@@ -944,7 +944,7 @@ def test_investments_lead_with_the_periods_result(mohab):
 
 
 def test_data_checks_pass_after_setup(mohab):
-    assert route(mohab, "checks") == ["/", "/settings", "/checks"]
+    assert route(mohab, "checks") == ["/", "/checks"]  # Settings opens on Data checks (2026-10-28)
     assert mohab.answers["checks"].shows("Passed 5 Needs attention 0")
 
 
@@ -999,7 +999,7 @@ def test_where_it_went_adds_up_to_money_out(mohab):
 
 def test_a_repair_paid_from_the_emergency_fund(mohab):
     answer = mohab.answers["emergency"]
-    assert route(mohab, "emergency") == ["/", "/plan", "/plan/reserves"]
+    assert route(mohab, "emergency") == ["/", "/plan/reserves"]  # Safety opens on Reserves
     assert answer.shows("13,500 of 270,000")
 
 
@@ -1452,7 +1452,7 @@ def test_settings_prepares_one_owned_ai_analysis_workbook(mohab):
     from xml.etree import ElementTree as ET
     from zipfile import ZipFile
 
-    screen = mohab.b.go("Settings")
+    screen = mohab.b.go("Settings", "Your data")
     assert screen.shows("Your data", "Export for AI", "All time", "YTD", "Monthly", "Custom",
                         "Export for AI analysis", "Copy AI prompt", "Edit AI prompt")
     screen = mohab.b.submit(button="All time", action=r"/settings$")
@@ -1564,7 +1564,7 @@ def test_dollars_he_bought_show_their_cost_value_and_spread(mohab):
     his pay account; the Currencies tab says what they cost, what they are worth and what the bank kept."""
     assert mohab.notes["convert_form"].shows("You sent", "You received", "Fee")
     assert mohab.notes["converted"].shows("Saved CNV")
-    assert route(mohab, "dollars") == ["/", "/accounts/currencies"]
+    assert route(mohab, "dollars") == ["/", "/investments", "/accounts/currencies"]
     answer = mohab.answers["dollars"]
     assert answer.shows("USD", "Held", "1,000.00 USD", "Average rate", "50.00",
                         "Value", "49,400 EGP", "Unrealized FX gain", "−600", "Spread paid", "750",
@@ -1615,7 +1615,7 @@ def test_cash_planning_lists_the_instalments_still_to_pay(mohab):
 def test_zakat_is_an_estimate_from_his_position_and_what_he_gave_lowers_what_is_still_to_pay(mohab):
     assert mohab.notes["zakat_off"].shows("Show zakat") and not mohab.notes["zakat_off"].shows("Zakat settings")
     assert mohab.notes["zakat_on"].shows("Zakat is on.")
-    assert route(mohab, "zakat_start") == ["/", "/accounts", "/zakat"]
+    assert route(mohab, "zakat_start") == ["/", "/transactions", "/accounts", "/zakat"]
     assert mohab.answers["zakat_start"].shows("Your zakat day", "What counts", "Cash you own", "Debts due now",
                                               "a scholar answers your own case")
     assert mohab.notes["zakat_day"].shows("Zakat day saved.", "zakat day 2027-12-01")

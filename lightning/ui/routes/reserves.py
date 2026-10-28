@@ -62,8 +62,13 @@ def _context(request: Request, error: str = ""):
     liquidity_context = emergency_liquidity_context(position)
     # Free cash is the last tile below, so the one note is how long the emergency fund lasts.
     notes = [n for n in (keynotes.emergency(fund),) if n]
+    # Refill prompt (PC roadmap P5): below target with free cash to spare, one button moves what fits.
+    refill = None
+    if fund.target and set_aside < fund.target and position.free_cash and position.free_cash > ZERO:
+        move = min(fund.target - set_aside, position.free_cash)
+        refill = {"move": move, "to": set_aside + move, "full": set_aside + move >= fund.target}
     return {"reserves": listed, "completed_reserves": completed, "notes": notes, "emergency_meter": emergency_meter,
-            "emergency_set_aside": set_aside, "emergency": emergency, "fund": fund,
+            "emergency_set_aside": set_aside, "emergency": emergency, "fund": fund, "refill": refill,
             "pos": position, "liquidity_context": liquidity_context, "error": error,
             "counterparties": c.counterparties.list_active(),
             "accounts": [account for account in c.accounts.list(active_only=True)

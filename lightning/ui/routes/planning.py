@@ -130,10 +130,19 @@ async def plan_page(request: Request):
               "href": f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2Fplan", "popup": True, "action": "Mark paid"}
              for p in late]
     status = page_status.cash_plan(forecast.safe_to_spend, forecast.next_income_date, has_income)
+    afford, afford_error = None, ""
+    raw_afford = request.query_params.get("afford", "").replace(",", "").strip()
+    if raw_afford:
+        from lightning.planning.afford import can_afford
+        try:
+            afford = can_afford(Decimal(raw_afford), forecast.safe_to_spend, forecast.free_cash, forecast.next_income_date)
+        except (ArithmeticError, ValueError):
+            afford_error = "Type an amount above zero."
     cash = (_phone_cash(c, forecast, next_payments, late, position, day)
             if getattr(request.state, "phone", False) else None)
     return render(request, "planning/plan.html", tabs=TABS, plan_tab="plan", forecast=forecast, owe=owe, has_income=has_income,
-                  lead=lead, needs=needs, status=status, cash=cash,
+                  lead=lead, needs=needs, status=status, cash=cash, afford=afford, afford_error=afford_error,
+                  afford_amount=raw_afford,
                   gameya_owed=position.gameya_still_to_pay,
                   notes=[], plan=plan, stats=stats, kpi_cards=kpi_cards, forecast_chart=visuals.forecast_trend(forecast),
                   next_payments=next_payments, late_days=late_days, as_of=fmt_date(day), window_end=fmt_date(window_end),

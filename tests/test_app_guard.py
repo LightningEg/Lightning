@@ -112,7 +112,7 @@ def test_on_the_phone_the_overview_is_its_phone_screen_and_settings_is_the_pc_pa
     for html in (overview, settings):
         assert html.count('class="phone-tabbar"') == 1 and 'class="side"' not in html
     assert 'class="phone-section" aria-labelledby="position-heading"' in overview and "overview-section" not in overview
-    assert "<h2>Your data</h2>" in settings and "Back up now" in settings
+    assert "Your data</h2>" in settings and "Back up now" in settings
 
 
 class _Event:

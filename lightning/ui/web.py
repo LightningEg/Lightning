@@ -536,7 +536,7 @@ class RequestCache:
 
 
 def create_app(c: Container | None = None) -> FastAPI:
-    from .routes import accounts, activity, bank_imports, birdview, budget, categories, counterparties, dashboard, deposits, exports, financial_health, gameya, history, integrity, investments, merge, payday, physical_items, planning, reimbursements, reserves, rules, search, settings, sms, transactions, weekly, zakat
+    from .routes import accounts, activity, bank_imports, birdview, budget, categories, counterparties, dashboard, deposits, exports, financial_health, gameya, history, integrity, investments, merge, payday, physical_items, planning, reimbursements, reserves, rules, search, settings, sms, transactions, weekly, zakat, analysis, workbench
 
     app = FastAPI(title="Lightning", docs_url=None, redoc_url=None, openapi_url=None)
     app.state.container = c
@@ -600,7 +600,7 @@ def create_app(c: Container | None = None) -> FastAPI:
         return Response(_PHONE_CSS[".rtl"], media_type="text/css; charset=utf-8")
 
     app.mount("/static", StaticFiles(directory=str(UI_DIR / "static")), name="static")
-    for module in (dashboard, financial_health, accounts, deposits, gameya, bank_imports, birdview, transactions, budget, investments, physical_items, planning, payday, reimbursements, reserves, history, activity, merge, weekly, integrity, counterparties, categories, rules, settings, search, exports, sms, zakat):
+    for module in (dashboard, financial_health, accounts, deposits, gameya, bank_imports, birdview, transactions, budget, investments, physical_items, planning, payday, reimbursements, reserves, history, activity, merge, weekly, integrity, counterparties, categories, rules, settings, search, exports, sms, zakat, analysis, workbench):
         app.include_router(module.router)
 
     @app.exception_handler(ValidationError)
