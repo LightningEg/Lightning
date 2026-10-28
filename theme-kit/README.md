@@ -72,7 +72,7 @@ Every element, where it appears, and what each layer may be. `slots.json` is the
 | finish | `flat` · `satin` · `lacquer` · `glass` · `foil` · `embossed` · `gloss` · `lotus-frieze` (header) | satin: light falling from the top; lacquer: deeper corner light and a darker foot; glass: blurred translucent bar (phone app bar); foil: metallic accent gradient (buttons, chosen tab); embossed: pressed paper edges; gloss: a lit meter; lotus-frieze: a band of lotus buds in the focus, hero, warning and accent colours, in the header's bottom padding, under no text |
 | grain | `none` · `film` · `paper` · `fibre` | fine noise in the text colour, inside the surface |
 | texture (ground) | `none` · `film` · `papyrus` · `linen` · `laid`, at `whisper` · `subtle` · `rich` | the page's material, in the text colour at 2, 4 or 6% |
-| artwork | `none` · `guilloche-rosette` · `lotus-line` · `zodiac-ring` · `winged-disc` | a fine-line watermark in the accent at 12%: the ground's far corner, the hero's empty corner; mirrored in Arabic |
+| artwork | `none` · `guilloche-rosette` · `lotus-line` · `zodiac-ring` · `winged-disc` · `star-ceiling` (ground only) | a fine-line watermark in the accent at 12%: the ground's far corner, the hero's empty corner; mirrored in Arabic. `star-ceiling` is Dendera night's temple ceiling, gold stars in registers repeating across the ground: below the page title on the PC, rising from the foot on the phone |
 | edgeLight / depth | `none` · `soft` · `bright` / `none` · `low` · `mid` · `high` | a highlight on the top edge / a shadow under the surface |
 | edgeStyle | `hairline` · `foil` | the hero's border as a plain line or a gold foil ring |
 | activeStyle | `bar` · `cartouche` · `glow` | how the current page is marked |

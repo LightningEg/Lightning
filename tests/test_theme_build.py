@@ -117,7 +117,8 @@ class ThemeBuildTests(unittest.TestCase):
         self.assertIn('.theme-unveil', css)
         self.assertLessEqual(set(contract['slots']['ground']['material']['texture']) - {'none'}, set(builder.TEXTURES))
         self.assertLessEqual(set(contract['slots']['cards']['material']['grain']) - {'none'}, set(builder.TEXTURES))
-        self.assertEqual(set(contract['slots']['hero']['material']['artwork']) - {'none'}, set(builder.ARTWORK))
+        self.assertEqual((set(contract['slots']['hero']['material']['artwork'])
+                          | set(contract['slots']['ground']['material']['artwork'])) - {'none'}, set(builder.ARTWORK))
         self.assertEqual(set(contract['slots']['ground']['material']['textureStrength']), set(builder.STRENGTH))
 
     def test_material_layer_keeps_the_motion_rules(self):
@@ -169,6 +170,30 @@ class ThemeBuildTests(unittest.TestCase):
                         builder.drawing('bad', palette)
                 finally:
                     builder.ASSETS = original
+
+    def test_star_ceiling_draws_dendera_night_in_gold_and_lapis(self):
+        """NF-8V: a ground-only recipe, the temple ceiling's gold stars on the night's lapis lines, still, checked for
+        contrast in the colour that tints the ground most."""
+        contract = json.loads((builder.SOURCE / 'slots.json').read_text())
+        self.assertIn('star-ceiling', contract['slots']['ground']['material']['artwork'])
+        self.assertNotIn('star-ceiling', contract['slots']['hero']['material']['artwork'])  # a field, not a corner mark
+        self.assertEqual(builder.drawings()['star-ceiling'].parent.name, 'dendera')
+        self.assertEqual(builder.drawing_keys('star-ceiling'), ['hero'])
+        manifest, parts = builder.load(builder.SOURCE / 'dendera-night.json')
+        self.assertEqual(parts['ground']['artwork'], 'star-ceiling')
+        p = parts['palette']
+        css = builder.compile_theme(manifest, parts, contract)
+        self.assertIn('--m-ground-artwork: url("data:image/svg+xml,', css)
+        self.assertIn(p['hero'][1:], css.split('--m-ground-artwork: ')[1].split(';\n')[0])  # gold stars
+        self.assertEqual(builder.under_artwork(p['background'], p, 'star-ceiling'),
+                         min((builder.mix(p['background'], p[k], builder.ARTWORK_ALPHA) for k in ('accent', 'hero')),
+                             key=lambda c: builder.contrast(p['text'], c)))
+        materials = (builder.STATIC / 'theme-materials.css').read_text()
+        rule = materials[materials.index('html[data-m-ground-artwork="star-ceiling"]'):]
+        rule = rule[:rule.index('}')]
+        self.assertIn('repeat', rule)
+        self.assertNotIn('animation', rule)  # no new continuous motion
+        self.assertNotIn('star-ceiling', json.dumps(contract['limits']['continuous']))
 
     def test_rejects_unreadable_card_and_button(self):
         for part, key, value in [('cards', 'surface', 'text'), ('controls', 'label', 'accent')]:

@@ -56,7 +56,15 @@ def worst(p, parts, slot, surface, limits):
     material = parts.get(slot, {})
     lift = limits["lift"].get(material.get("finish", "flat"), 0) + limits["grain"].get(material.get("grain", "none"), 0)
     shaded = mix(surface, p["text"], lift)
-    return mix(shaded, p["accent"], ARTWORK_ALPHA) if material.get("artwork", "none") != "none" else shaded
+    return under_artwork(shaded, p, material.get("artwork", "none"))
+
+def under_artwork(surface, p, name):
+    """The surface under a drawing's lines at their watermark strength: of the drawing's colours (the accent, and any
+    p-<key> part), the one that leaves text the least contrast."""
+    if name == "none":
+        return surface
+    marks = [mix(surface, p[key], ARTWORK_ALPHA) for key in ["accent", *drawing_keys(name)]]
+    return min(marks, key=lambda colour: contrast(p["text"], colour))
 
 HELD = "#7FB2FF"  # Azure held (guideline A03) as themes wear it on their own surfaces: its hue never moves
 HELD_TINT = 16  # theme-surfaces.css lays held at 16% over the card for its tint (--theme-tint-info)
@@ -112,8 +120,7 @@ def load(path):
     # the ground's texture is drawn in the text colour at most at its strength: text still reads on it
     ground = mix(p["background"], p["text"], {"whisper": 2, "subtle": 4, "rich": 6}[parts["ground"]["textureStrength"]]
                  if parts["ground"]["texture"] != "none" else 0)
-    if parts["ground"]["artwork"] != "none":
-        ground = mix(ground, p["accent"], ARTWORK_ALPHA)
+    ground = under_artwork(ground, p, parts["ground"]["artwork"])
     checks += [(p["text"], ground, 7), (p["muted"], ground, 4.5)]
     surfaces = [(slot, p[parts[slot]["surface"]]) for slot in ("header", "navigation", "hero", "cards", "overlays", "menus")]
     surfaces += [("", p[key]) for key in ("background", "surface", "raised")]
@@ -191,6 +198,11 @@ def drawings():
         found[path.stem] = path
     return found
 
+def drawing_keys(name):
+    """The palette keys a drawing paints parts in (class="p-<key>"), besides its accent lines."""
+    root = ET.fromstring(drawings()[name].read_text())
+    return sorted({cls[2:] for node in root.iter() for cls in node.attrib.get("class", "").split() if cls.startswith("p-")})
+
 def drawing(name, palette, opacity=1.0):
     """A drawing from the asset folders, in this palette, as an inline data URL. Refuses anything but shapes."""
     root = ET.fromstring(drawings()[name].read_text())
@@ -220,7 +232,8 @@ def drawing(name, palette, opacity=1.0):
     return 'url("data:image/svg+xml,' + quote(body, safe=" ='/:;,.()-") + '")'
 
 _CONTRACT = json.loads((SOURCE / "slots.json").read_text())
-ARTWORK = {name: drawings()[name] for name in _CONTRACT["slots"]["hero"]["material"]["artwork"] if name != "none"}
+ARTWORK = {name: drawings()[name] for slot in ("ground", "hero")
+           for name in _CONTRACT["slots"][slot]["material"]["artwork"] if name != "none"}
 FRIEZES = {name for name in _CONTRACT["slots"]["header"]["material"]["finish"] if name in drawings()}
 STRENGTH = {"whisper": 2, "subtle": 4, "rich": 6}
 FRIEZE_ALPHA = 70  # a frieze is a painted border: the pigments, softened a little so the title leads

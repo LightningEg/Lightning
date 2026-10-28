@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-28 · Claude: [BT-8U][NF-8V] Night switch kept in the profile; Azure held per theme at 4.5:1; shell assets content-hashed, licences checked once per page; Arabic marketplace link from one source; paid manifests name their tier; Dendera night draws the star ceiling. Version rule in `themes.md` §5.
 - 2026-10-28 · Claude: [IV-8V] Dendera made premium: pointer light on cards, press sheen, satin/lacquer/gloss finishes, gold-leaf tabs at night; 0 elements moved, contrast passes. `tools/theme_shots.py` waits for each theme to take.
 - 2026-10-28 · Claude: [BT-8U][IT-1J][IT-1K] Paid-theme licences survive a version bump; unlock errors say busy or too many tries; Settings says "on this device" when sharing waits; profile theme test runs; unused imports cut; INDEX sorts done codes, reports by date.
 - 2026-10-28 · Claude: [IV-8V] Filed: Dendera is flatter than its 1,000-coin tier (no answering motions, flat materials); upgrade before its first licence.

@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-9 milestones, 79 open items, in the order they are worked on.
+9 milestones, 77 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -172,15 +172,8 @@ The site is honest, quick and in step with the app.
 | **NF-8K** | [Supporter perks still waiting on the app or the owner - app themes for sale, names on About, a beta channel](8-website/8K-supporter-perks-app-and-owner.md) | new feature | appearance | blocked on 8J claiming; owner decision on the beta channel |
 | **NF-8L** | [Theme materials, selling themes, owner console - what only the owner can do now](8-website/8L-theme-materials-acceptance.md) | new feature | appearance | building |
 | **NF-8T** | [Papyrus and Dendera bundles need a banner, frame and name designed first](8-website/8T-papyrus-and-dendera-bundles.md) | new feature | appearance | ready |
-| **BT-8U** | [Paid themes - the night switch resets, held colour too faint on light themes, PC cache numbers by hand](8-website/8U-theme-loose-ends.md) | bug, technical | appearance | ready |
-| BT-8U3 | ↳ Keep the night switch across launches | | | |
-| BT-8U4 | ↳ Held colour per theme | | | |
-| BT-8U5 | ↳ One cache rule | | | |
-| BT-8U6 | ↳ One marketplace link | | | |
-| BT-8U7 | ↳ Tier in the manifest | | | |
-| **NF-8V** | [Dendera night could draw the temple's star ceiling - a new artwork recipe](8-website/8V-dendera-flatter-than-its-tier.md) | new feature | appearance | new |
 
-Done: 8B, 8E, 8G, 8H, 8M, 8N, 8O, 8P, 8Q, 8R, 8S. Next free code: 8W.
+Done: 8B, 8E, 8G, 8H, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V. Next free code: 8W.
 
 ## 9 Later
 
