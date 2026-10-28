@@ -170,7 +170,12 @@ class Devices:
     def role_for(self, selected: str) -> str:
         """How a profile kept here may open: "home" (writable) or "reader" (lent away, a hand-back to finish,
         or a lending record missing or damaged). Decided before any connection opens."""
-        if is_journal_profile(Path(selected).parent):
+        folder = Path(selected).parent
+        try:
+            folder = resolve_profile(profile_path=folder).data_dir  # a posted path is a profile before anything reads beside it
+        except (OSError, ValueError):
+            folder = None
+        if folder is not None and is_journal_profile(folder):
             return "home"  # The journal runtime checks authority independently of v1 lending.
         try:
             paths = resolve_profile(db_path=selected)

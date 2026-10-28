@@ -508,6 +508,9 @@ def _template_response(request, name, status_code, c, locale, total, owned_total
 
 
 def redirect(url: str, msg: str = "") -> RedirectResponse:
+    # Only ever to a page of this app: a path, never another site (a "//host" or "/\\host" is not a path).
+    if not url.startswith("/") or url.startswith("//") or url.startswith("/\\") or "\n" in url or "\r" in url:
+        url = "/"
     if msg:
         url += ("&" if "?" in url else "?") + "msg=" + quote(msg)
     return RedirectResponse(url, status_code=303)
