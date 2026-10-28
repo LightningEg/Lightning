@@ -4,6 +4,18 @@
 {% block title %}More{% endblock %}
 {% block heading %}<h1>{{ 'More'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
+{# Hub (phone roadmap M7): what needs a tap this fortnight sits above the list of sections. #}
+<section class="card phone-card phone-hub-bills" aria-labelledby="bills-heading">
+  <header class="phone-section-head"><h2 id="bills-heading">{{ 'Next 14 days'|tr(locale) }}</h2><a class="phone-quiet" href="/plan">{{ 'All bills'|tr(locale) }}</a></header>
+  {% if bills %}<div class="phone-rows">
+  {% for b in bills %}<div class="phone-row phone-hub-bill{{ ' is-late' if b.late }}">
+    <span>{{ b.name }}<small>{% if b.late %}{{ ('1 day late' if b.late == 1 else '{n} days late')|tr(locale, n=b.late) }}{% else %}{{ b.due|day_label(locale) }}{% endif %}</small></span>
+    <b>{{ b.amount|amount_role('row') }}</b>
+    <a class="btn small" data-popup-open href="{{ b.pay }}">{{ 'Mark paid'|tr(locale) }}</a>
+  </div>{% endfor %}
+  </div>{% if bills_more %}<a class="phone-quiet" href="/plan">{{ '{n} more'|tr(locale, n=bills_more) }}</a>{% endif %}
+  {% else %}<p class="phone-note">{{ 'Nothing due in the next 14 days.'|tr(locale) }}</p>{% endif %}
+</section>
 <nav class="phone-rows phone-more-list" aria-label="{{ 'Sections'|tr(locale) }}">
   <a class="phone-row" href="/plan"><span>{{ 'Cash planning'|tr(locale) }}</span><b>{{ '{amt} due before payday'|tr(locale, amt=due|amount_role('total')) if until else '{amt} due in 3 months'|tr(locale, amt=due|amount_role('total')) }}</b></a>
   <a class="phone-row" href="/investments"><span>{{ 'Investments'|tr(locale) }}</span><b>{{ portfolio|amount_role('total') }}</b></a>

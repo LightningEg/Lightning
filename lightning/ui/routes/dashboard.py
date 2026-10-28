@@ -141,7 +141,7 @@ async def dashboard(request: Request):
                                   cash_flow.rate_says_nothing, period.key, current, bool(accounts))
     dates_note = ("so far" if current and period.key in ("month", "ytd") else "year to date" if period.key == "ytd" else "")
     recent_rows = c.reporting.register_page(None, "1900-01-01", "9999-12-31", 1, 10)[0]  # the phone leads with these (C11.1)
-    phone = _phone_overview(position, inbox.forecast, attention_groups, lead_change) if getattr(request.state, "phone", False) and position_is_today else None
+    phone = _phone_overview(position, inbox.forecast, attention_groups, lead_change, c) if getattr(request.state, "phone", False) and position_is_today else None
     # The PC shows the flows on Spending (owner, 2026-10-21); the phone keeps them as folded rows (guideline C11.1).
     phone_flows = (visuals.cash_flow_charts(c, first, as_of, period.key == "month", today())
                    if getattr(request.state, "phone", False) else {})
@@ -363,7 +363,7 @@ def _safe_hero(f) -> dict:
     return {"value": value, "line": line, "until": until or ""}
 
 
-def _phone_overview(position, forecast, groups, lead_change) -> dict:
+def _phone_overview(position, forecast, groups, lead_change, c=None) -> dict:
     """What the phone's Overview adds to the PC's figures: the Safe to spend hero, a Net worth tile, and the words
     on the Needs you card."""
     owes = position.what_you_owe > 0
@@ -376,7 +376,20 @@ def _phone_overview(position, forecast, groups, lead_change) -> dict:
     for group in groups[:3]:
         one, many = _NEEDS_SHORT.get(group["key"], _NEEDS_SHORT["other"])
         parts.append(page_status.sentence(one if group["count"] == 1 else many, n=group["count"]))
-    return {"safe": _safe_hero(forecast), "worth": worth, "needs": parts}
+    return {"safe": _safe_hero(forecast), "worth": worth, "needs": parts, "soon": _due_soon(c) if c else None}
+
+
+def _due_soon(c) -> dict | None:
+    """Phone roadmap M4: bills and loan payments due today, tomorrow or already late, as one line under the hero."""
+    from lightning.planning.domain import PlanKind
+    day = today()
+    due = [p for p in c.planning.all_payments(day + timedelta(days=2), day,
+                                              kinds=(PlanKind.BILL, PlanKind.SUBSCRIPTION, PlanKind.LOAN))
+           if p.outstanding]
+    if not due:
+        return None
+    total = sum((c.planning.amount_in_base(p, p.amount, day) for p in due), ZERO)
+    return {"count": len(due), "total": total, "late": any(p.days_late(day) for p in due)}
 
 
 @router.get("/more")
@@ -397,7 +410,19 @@ async def more(request: Request):
     within = sum(1 for item in judged if item.status == "within your limit")
     first = day.replace(day=1)
     spent = c.reporting.cash_flow(first, day).outflows
-    return render(request, "more.html", due=due, until=inbox.forecast.next_income_date or "",
+    # Hub (phone roadmap M7): the next 14 days of bills and loan payments, late first, each with Mark paid
+    from lightning.planning.domain import PlanKind
+    bills = []
+    for p in c.planning.all_payments(day + timedelta(days=14), day,
+                                     kinds=(PlanKind.BILL, PlanKind.SUBSCRIPTION, PlanKind.LOAN)):
+        if not p.outstanding:
+            continue
+        bills.append({"name": p.item.name, "due": p.due_date, "late": p.days_late(day),
+                      "amount": c.planning.amount_in_base(p, p.amount, day),
+                      "pay": f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2Fmore"})
+    bills.sort(key=lambda b: (-b["late"], b["due"]))
+    return render(request, "more.html", bills=bills[:5], bills_more=max(len(bills) - 5, 0),
+                  due=due, until=inbox.forecast.next_income_date or "",
                   portfolio=position.portfolio_value, in_accounts=position.in_your_accounts,
                   within=within, judged=len(judged), spent=spent, month=month_of(day), waiting=len(items),
                   last_review=(c.settings.get("weekly_review_at") or "")[:10], zakat=c.zakat.enabled())

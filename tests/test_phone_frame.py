@@ -1,1 +1,179 @@
-IiIiT24gdGhlIHBob25lIGFwcCBldmVyeSBwYWdlIHJlbmRlcnMgaW4gdGhlIHBob25lIGZyYW1lIChndWlkZWxpbmUgUGFydCBDKS4KCldoYXQgYSBicm93c2VyIG11c3QgbWVhc3VyZSAobm90aGluZyBzY3JvbGxzIHNpZGV3YXlzIGF0IDM2MCBhbmQgMzIwLCBDMTIpIGlzIGluIGB0b29scy9waG9uZV9jaGVjay5weWA7IGl0Cm5lZWRzIFBsYXl3cmlnaHQgYW5kIHJ1bnMgbG9jYWxseS4gVGhpcyB0ZXN0IG5lZWRzIG5vIGJyb3dzZXI6IHRoZSBmcmFtZSwgaXRzIGZpdmUgc2VjdGlvbnMgYW5kIG5vIGRlc2t0b3AKbGVmdG92ZXJzLiIiIgppbXBvcnQgcmUKCmltcG9ydCBweXRlc3QKZnJvbSBmYXN0YXBpLnRlc3RjbGllbnQgaW1wb3J0IFRlc3RDbGllbnQKCmZyb20gbGlnaHRuaW5nLnJ1bnRpbWUuYXBwIGltcG9ydCBwcm9maWxlX2FwcApmcm9tIGxpZ2h0bmluZy5ydW50aW1lLmRldmljZXMgaW1wb3J0IERldmljZXMKZnJvbSBsaWdodG5pbmcucnVudGltZS5odHRwIGltcG9ydCBDcmVkZW50aWFscwoKZnJvbSB0ZXN0X3Byb2ZpbGVfYXBwIGltcG9ydCBjcmVhdGUsIHRva2VuCgpQQUdFUyA9ICgiLyIsICIvYmlyZHZpZXcvZXhwZW5zZXMiLCAiL2ZpbmFuY2lhbC1oZWFsdGgiLCAiL2J1ZGdldCIsICIvcGxhbiIsICIvcGxhbi9yZWN1cnJpbmciLCAiL3BsYW4vbG9hbnMiLAogICAgICAgICAiL3BsYW4vcmVzZXJ2ZXMiLCAiL2ludmVzdG1lbnRzIiwgIi9hY2NvdW50cyIsICIvdHJhbnNhY3Rpb25zIiwgIi9zZXR0aW5ncyIsICIvY2hlY2tzIikKCgpAcHl0ZXN0LmZpeHR1cmUoc2NvcGU9Im1vZHVsZSIpCmRlZiBwaG9uZSh0bXBfcGF0aF9mYWN0b3J5KToKICAgIGZvbGRlciA9IHRtcF9wYXRoX2ZhY3RvcnkubWt0ZW1wKCJwaG9uZSIpCiAgICBjZmcgPSBDcmVkZW50aWFscygiaHR0cDovLzEyNy4wLjAuMTo5ODYxIikKICAgIGFwcCA9IHByb2ZpbGVfYXBwKGNmZywgZm9sZGVyIC8gImRvY3MiLCBkZXZpY2VzPURldmljZXMoZm9sZGVyIC8gImFwcCIsIHBvcnQ9MCksIHBob25lPVRydWUpCiAgICB3aXRoIFRlc3RDbGllbnQoYXBwLCBiYXNlX3VybD1jZmcub3JpZ2luLCBoZWFkZXJzPXsiT3JpZ2luIjogY2ZnLm9yaWdpbn0pIGFzIGJyb3dzZXI6CiAgICAgICAgYnJvd3Nlci5nZXQoIi9fX2xhdW5jaCIsIHBhcmFtcz17ImNvZGUiOiBjZmcubGF1bmNoX2NvZGV9KQogICAgICAgIGNyZWF0ZShicm93c2VyKQogICAgICAgIHBhZ2UgPSBicm93c2VyLmdldCgiLyIpCiAgICAgICAgYnJvd3Nlci5wb3N0KCIvZGVtbyIsIGRhdGE9eyJfX3Nlc3Npb24iOiB0b2tlbihwYWdlLnRleHQsICJfX3Nlc3Npb24iKX0pCiAgICAgICAgeWllbGQgYnJvd3NlcgoKCkBweXRlc3QubWFyay5wYXJhbWV0cml6ZSgicGF0aCIsIFBBR0VTKQpkZWYgdGVzdF9ldmVyeV9wYWdlX3JlbmRlcnNfaW5fdGhlX3Bob25lX2ZyYW1lKHBob25lLCBwYXRoKToKICAgIHBhZ2UgPSBwaG9uZS5nZXQocGF0aCkKICAgIGFzc2VydCBwYWdlLnN0YXR1c19jb2RlID09IDIwMAogICAgaHRtbCA9IHBhZ2UudGV4dAogICAgYXNzZXJ0IGh0bWwuY291bnQoJ2NsYXNzPSJwaG9uZS1hcHBiYXIiJykgPT0gMSBhbmQgaHRtbC5jb3VudCgnY2xhc3M9InBob25lLXRhYmJhciInKSA9PSAxCiAgICBhc3NlcnQgJ2NsYXNzPSJzaGVsbCInIG5vdCBpbiBodG1sIGFuZCAnY2xhc3M9InNpZGUiJyBub3QgaW4gaHRtbCAgIyBubyBkZXNrdG9wIHNpZGViYXIKICAgIGFzc2VydCAiQ3RybCBLIiBub3QgaW4gaHRtbCAgIyBDMTI6IG5vIGtleWJvYXJkIGhpbnRzIG9uIGEgcGhvbmUKICAgIGFzc2VydCBodG1sLmNvdW50KCdjbGFzcz0ic2VjdGlvbi1iYXIiJykgPD0gMQogICAgYXNzZXJ0ICJ2aWV3cG9ydC1maXQ9Y292ZXIiIGluIGh0bWwgYW5kICIvc3RhdGljL3Bob25lLmNzcyIgaW4gaHRtbAogICAgYXNzZXJ0ICIvc3RhdGljL3Bob25lLWZpZWxkcy5qcyIgaW4gaHRtbCAgIyBhIHRhcHBlZCBmaWVsZCBvcGVucyBlbXB0eSwgaXRzIG9sZCB0ZXh0IGJhY2sgaWYgbGVmdCBlbXB0eQogICAgbmFtZXMgPSByZS5maW5kYWxsKHInY2xhc3M9InBob25lLXRhYi1uYW1lIj4oW148XSspPCcsIGh0bWwpCiAgICBhc3NlcnQgbmFtZXMgPT0gWyJPdmVydmlldyIsICJCdWRnZXQiLCAiQWRkIiwgIlRyYW5zYWN0aW9ucyIsICJNb3JlIl0gICMgcGhvbmUgb3ZlcmhhdWwgMjAyNi0xMC0yMjogd29yZHMsIEFkZCBpbiB0aGUgbWlkZGxlCgoKZGVmIHRlc3RfdGhlX2Nob3Nlbl9zZWN0aW9uX2FuZF90aGVfcGVyaW9kX3dvcmRzKHBob25lKToKICAgIGh0bWwgPSBwaG9uZS5nZXQoIi9idWRnZXQiKS50ZXh0CiAgICBhc3NlcnQgcmUuc2VhcmNoKHInY2xhc3M9InBob25lLXRhYiBpcy1jaG9zZW4iIGhyZWY9Ii9idWRnZXQiIGFyaWEtY3VycmVudD0icGFnZSInLCBodG1sKQogICAgb3ZlcnZpZXcgPSBwaG9uZS5nZXQoIi8iKS50ZXh0CiAgICBhc3NlcnQgIj5Nb250aGx5PCIgbm90IGluIG92ZXJ2aWV3IGFuZCAnY2xhc3M9InBlcmlvZC1idXR0b25zIicgbm90IGluIG92ZXJ2aWV3ICAjIG9uZSBtb250aCBzdGVwcGVyLCBubyBzaWRld2F5cyBjaGlwcwogICAgYXNzZXJ0ICdjbGFzcz0icGhvbmUtcGVyaW9kLXNoZWV0IicgaW4gb3ZlcnZpZXcgYW5kICI+TGFzdCBtb250aDwiIGluIG92ZXJ2aWV3ICAjIHRoZSBtb250aCBvcGVucyBDaG9vc2UgcGVyaW9kCiAgICBhc3NlcnQgcmUuc2VhcmNoKHInY2xhc3M9InBob25lLXRhYiBpcy1jaG9zZW4iIGhyZWY9Ii9tb3JlIicsIHBob25lLmdldCgiL3BsYW4iKS50ZXh0KSAgIyBDYXNoIHBsYW5uaW5nIGxpdmVzIG9uIE1vcmUKICAgIGFzc2VydCByZS5zZWFyY2gocidjbGFzcz0icGhvbmUtdGFiIGlzLWNob3NlbiIgaHJlZj0iL3RyYW5zYWN0aW9ucyInLCBwaG9uZS5nZXQoIi90cmFuc2FjdGlvbnMiKS50ZXh0KQoKCmRlZiB0ZXN0X3RoZV9wY19rZWVwc19pdHNfb3duX2ZyYW1lKHRtcF9wYXRoKToKICAgIGNmZyA9IENyZWRlbnRpYWxzKCJodHRwOi8vMTI3LjAuMC4xOjk4NjIiKQogICAgYXBwID0gcHJvZmlsZV9hcHAoY2ZnLCB0bXBfcGF0aCAvICJkb2NzIiwgZGV2aWNlcz1EZXZpY2VzKHRtcF9wYXRoIC8gImFwcCIsIHBvcnQ9MCkpCiAgICB3aXRoIFRlc3RDbGllbnQoYXBwLCBiYXNlX3VybD1jZmcub3JpZ2luLCBoZWFkZXJzPXsiT3JpZ2luIjogY2ZnLm9yaWdpbn0pIGFzIGJyb3dzZXI6CiAgICAgICAgYnJvd3Nlci5nZXQoIi9fX2xhdW5jaCIsIHBhcmFtcz17ImNvZGUiOiBjZmcubGF1bmNoX2NvZGV9KQogICAgICAgIGNyZWF0ZShicm93c2VyKQogICAgICAgIGh0bWwgPSBicm93c2VyLmdldCgiLyIpLnRleHQKICAgIGFzc2VydCAnY2xhc3M9InNoZWxsIicgaW4gaHRtbCBhbmQgInBob25lLXRhYmJhciIgbm90IGluIGh0bWwgYW5kICJwaG9uZS5jc3MiIG5vdCBpbiBodG1sCgoKZGVmIHRlc3Rfb3ZlcnZpZXdfdXNlc190aGVfcGhvbmVfZm9ybXMocGhvbmUpOgogICAgaHRtbCA9IHBob25lLmdldCgiLyIpLnRleHQKICAgIGFzc2VydCAnY2xhc3M9InBob25lLWtwaXMiJyBpbiBodG1sIGFuZCBodG1sLmNvdW50KCdjbGFzcz0icGhvbmUta3BpICcpIDw9IDQgICMgQzA2LjE6IGZvdXIgdGlsZXMsIDIgw5cgMgogICAgYXNzZXJ0ICJzdGF0LXRpbGUtc3BhcmsiIG5vdCBpbiBodG1sICAjIG5vIHNwYXJrbGluZSBpbiBhIHBob25lIHRpbGUKICAgIGFzc2VydCAiY2hhcnQtc2Fua2V5IiBub3QgaW4gaHRtbCBhbmQgJ2NsYXNzPSJwaG9uZS1mbG93IicgaW4gaHRtbCAgIyBDMDcuMy4zCiAgICBhc3NlcnQgImNoYXJ0LWNmYWxsIiBub3QgaW4gaHRtbCBhbmQgInNjaGVtZS1mbG93IiBpbiBodG1sICAjIEMwNy4zLjI6IHRoZSB3YXRlcmZhbGwgYXMgcm93cwogICAgYXNzZXJ0ICdjbGFzcz0ibWNhbCInIG5vdCBpbiBodG1sIGFuZCAnY2xhc3M9InBob25lLW1vbnRocyInIGluIGh0bWwgICMgQzA3LjMuNAogICAgYXNzZXJ0IHJlLnNlYXJjaChyJ2NsYXNzPSJwaG9uZS1sZWFkIj5bXGQsXSsgPHNtYWxsPkVHUDwvc21hbGw+JywgaHRtbCkgICMgd2hvbGUgRUdQIG9uIHRoZSBiaWcgZmlndXJlCgoKQHB5dGVzdC5tYXJrLnBhcmFtZXRyaXplKCJwYXRoLCBtYXJrZXIiLCBbKCIvYnVkZ2V0IiwgJ2NsYXNzPSJwaG9uZS1wbGFuLWJhcicpLCAoIi9wbGFuIiwgJ2lkPSJwbGFuLWJ1aWxkIicpLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoIi9pbnZlc3RtZW50cyIsICdpZD0iaG9sZGluZ3MtaGVhZGluZyInKV0pCmRlZiB0ZXN0X2J1ZGdldF9jYXNoX2FuZF9pbnZlc3RtZW50c19oYXZlX3Bob25lX2Rlc2lnbnMocGhvbmUsIHBhdGgsIG1hcmtlcik6CiAgICBodG1sID0gcGhvbmUuZ2V0KHBhdGgpLnRleHQKICAgIGFzc2VydCBtYXJrZXIgaW4gaHRtbCBhbmQgIjx0YWJsZSIgbm90IGluIGh0bWwgICMgQzA3LjI6IHRhYmxlcyBiZWNvbWUgcm93cwogICAgYXNzZXJ0ICJzdGF0LXRpbGUtc3BhcmsiIG5vdCBpbiBodG1sIGFuZCAiYnRuLXBsYW5uZXIiIG5vdCBpbiBodG1sICAjIG5vIHNwYXJrbGluZTsgdGhlIHRhYiBpcyB0aGUgd2F5IGluCiAgICBhc3NlcnQgaHRtbC5jb3VudCgnY2xhc3M9InBob25lLWtwaSAnKSA8PSA0CgoKZGVmIHRlc3RfYW5fYWNjb3VudF9pc19hX2RheV9saXN0X2FuZF90aGVfc2hlZXRfc2F2ZXMocGhvbmUpOgogICAgcGFnZSA9IHBob25lLmdldCgiL2FjY291bnRzLzEiKS50ZXh0CiAgICBhc3NlcnQgIjx0YWJsZSIgbm90IGluIHBhZ2UgYW5kICdjbGFzcz0icGhvbmUtZGF5IicgaW4gcGFnZSBhbmQgJ2NsYXNzPSJwaG9uZS10YWIgcGhvbmUtYWRkIiBocmVmPSIvYWNjb3VudHMvMS90cmFuc2FjdGlvbi9uZXcnIGluIHBhZ2UgICMgQzA4LCBDMDUuMgogICAgYXNzZXJ0ICd0eXBlPSJjaGVja2JveCInIG5vdCBpbiBwYWdlICAjIG5vIGNoZWNrYm94IGNvbHVtbgogICAgc2hlZXQgPSBwaG9uZS5nZXQoIi9hY2NvdW50cy8xL3RyYW5zYWN0aW9uL25ldyIpLnRleHQKICAgIGFzc2VydCAnaW5wdXRtb2RlPSJkZWNpbWFsIicgaW4gc2hlZXQgYW5kICd0eXBlPSJkYXRlIicgaW4gc2hlZXQgYW5kICdjbGFzcz0iYnRuIHByaW1hcnkgcGhvbmUtc2F2ZSInIGluIHNoZWV0CiAgICBhc3NlcnQgIkNhbmNlbCIgbm90IGluIHNoZWV0ICAjIEMxMjogbm8gdHdvIGJ1dHRvbnMgc2lkZSBieSBzaWRlOyBiYWNrIG9yIHN3aXBlIGNsb3NlcyB0aGUgc2hlZXQKICAgIGNhdGVnb3J5ID0gcmUuc2VhcmNoKHInPG9wdGlvbiB2YWx1ZT0iKFxkKykiIGRhdGEtbW92ZW1lbnQ9Ik9VVEZMT1ciJywgc2hlZXQpLmdyb3VwKDEpCiAgICBzYXZlZCA9IHBob25lLnBvc3QoIi9hY2NvdW50cy8xL3RyYW5zYWN0aW9uL25ldyIsIGRhdGE9ewogICAgICAgICJfX3Nlc3Npb24iOiB0b2tlbihzaGVldCwgIl9fc2Vzc2lvbiIpLCAia2luZCI6ICJvdXQiLCAiYW1vdW50IjogIjEyLjUwIiwgImNhdGVnb3J5X2lkIjogY2F0ZWdvcnksCiAgICAgICAgImNvdW50ZXJwYXJ0eSI6ICJQaG9uZSBraW9zayIsICJkYXRlIjogIjIwMjYtMTAtMDYiLCAicmV0dXJuX3RvIjogIi9hY2NvdW50cy8xIn0pCiAgICBhc3NlcnQgc2F2ZWQuc3RhdHVzX2NvZGUgPT0gMjAwIGFuZCBzYXZlZC51cmwucGF0aCA9PSAiL2FjY291bnRzLzEiCiAgICBhc3NlcnQgIlBob25lIGtpb3NrIiBpbiBwaG9uZS5nZXQoIi9hY2NvdW50cy8xIikudGV4dAoKCmRlZiB0ZXN0X2FjY291bnRzX2FkZF9idXR0b25fYXNrc193aGljaF9hY2NvdW50KHBob25lKToKICAgIGFzc2VydCAnaHJlZj0iL2FjY291bnRzL2FkZC10cmFuc2FjdGlvbiInIGluIHBob25lLmdldCgiL2FjY291bnRzIikudGV4dAogICAgcGljayA9IHBob25lLmdldCgiL2FjY291bnRzL2FkZC10cmFuc2FjdGlvbj9waWNrPTEiKS50ZXh0CiAgICBhc3NlcnQgIlRvIHdoaWNoIGFjY291bnQ/IiBpbiBwaWNrIGFuZCAiL2FjY291bnRzLzEvdHJhbnNhY3Rpb24vbmV3IiBpbiBwaWNrCgoKZGVmIHRlc3RfYWRkX29wZW5zX3RoZV9sYXN0X3VzZWRfYWNjb3VudHNfc2hlZXRfd2l0aF9jaGFuZ2VfYWNjb3VudChwaG9uZSk6CiAgICAiIiJQaG9uZSByb2FkbWFwIE0yOiBhZnRlciBhbiBlbnRyeSwgQWRkIGdvZXMgc3RyYWlnaHQgdG8gdGhhdCBhY2NvdW50J3Mgc2hlZXQsIGFtb3VudCBmaXJzdDsgQ2hhbmdlIGFjY291bnQKICAgIGJyaW5ncyB0aGUgbGlzdCBiYWNrLiBXaXRob3V0IGEgcmVtZW1iZXJlZCBhY2NvdW50IHRoZSBsaXN0IHNob3dzLiIiIgogICAgcGhvbmUuY29va2llcy5kZWxldGUoImxpZ2h0bmluZ19sYXN0X2FjY291bnQiKQogICAgYXNzZXJ0ICJUbyB3aGljaCBhY2NvdW50PyIgaW4gcGhvbmUuZ2V0KCIvYWNjb3VudHMvYWRkLXRyYW5zYWN0aW9uIikudGV4dAogICAgc2hlZXQgPSBwaG9uZS5nZXQoIi9hY2NvdW50cy8yL3RyYW5zYWN0aW9uL25ldyIpLnRleHQKICAgIGNhdGVnb3J5ID0gcmUuc2VhcmNoKHInPG9wdGlvbiB2YWx1ZT0iKFxkKykiIGRhdGEtbW92ZW1lbnQ9Ik9VVEZMT1ciJywgc2hlZXQpLmdyb3VwKDEpCiAgICBwaG9uZS5wb3N0KCIvYWNjb3VudHMvMi90cmFuc2FjdGlvbi9uZXciLCBkYXRhPXsKICAgICAgICAiX19zZXNzaW9uIjogdG9rZW4oc2hlZXQsICJfX3Nlc3Npb24iKSwgImtpbmQiOiAib3V0IiwgImFtb3VudCI6ICI3IiwgImNhdGVnb3J5X2lkIjogY2F0ZWdvcnksCiAgICAgICAgImNvdW50ZXJwYXJ0eSI6ICJLaW9zayB0d28iLCAiZGF0ZSI6ICIyMDI2LTEwLTA2IiwgInJldHVybl90byI6ICIvYWNjb3VudHMvMiJ9KQogICAgcXVpY2sgPSBwaG9uZS5nZXQoIi9hY2NvdW50cy9hZGQtdHJhbnNhY3Rpb24iKS50ZXh0CiAgICBhc3NlcnQgIlRvIHdoaWNoIGFjY291bnQ/IiBub3QgaW4gcXVpY2sgYW5kICdhY3Rpb249Ii9hY2NvdW50cy8yL3RyYW5zYWN0aW9uL25ldyInIGluIHF1aWNrCiAgICBhc3NlcnQgJ2hyZWY9Ii9hY2NvdW50cy9hZGQtdHJhbnNhY3Rpb24/cGljaz0xIicgaW4gcXVpY2sgYW5kICJhdXRvZm9jdXMiIGluIHF1aWNrCiAgICBhc3NlcnQgImRhdGEtc21zLXBhc3RlIiBpbiBxdWljawoKCmRlZiB0ZXN0X3Bhc3RlX2Jhbmtfc21zX3JlYWRzX29uZV9tZXNzYWdlX2ludG9fdGhlX3NoZWV0KHBob25lKToKICAgICIiIlBob25lIHJvYWRtYXAgTTM6IGEgcGFzdGVkIENJQiBtZXNzYWdlIGNvbWVzIGJhY2sgYXMgdGhlIHNoZWV0J3MgZmllbGRzOyBub3RoaW5nIGlzIHNhdmVkLiIiIgogICAgc2hlZXQgPSBwaG9uZS5nZXQoIi9hY2NvdW50cy8xL3RyYW5zYWN0aW9uL25ldyIpLnRleHQKICAgIGJlZm9yZSA9IHBob25lLmdldCgiL3RyYW5zYWN0aW9ucyIpLnRleHQuY291bnQoIklSQU4gWkFNQUxFSyIpCiAgICB0ZXh0ID0gKCLYqtmFINiz2K3YqCDZhdio2YTYuiAgRUdQIDUwMDAuMDAgINmF2YYg2KjYt9in2YLYqSDYp9mE2K7YtdmFINin2YTZhdio2KfYtNixINin2YTZhdmG2KrZh9mK2Kkg2KjZgCAqKjczNTEg2YXZhiBDSUIgS1ogSVJBTiBaQU1BTEVLICIKICAgICAgICAgICAgItmB2YogMDQvMTAvMjYgMTk6Mjgg2Iwg2KfZhNix2LXZitivINin2YTZhdiq2KfYrSBFR1AgMTI5MDQuNTAiKQogICAgcmVhZCA9IHBob25lLnBvc3QoIi9zbXMvcmVhZC1vbmUiLCBkYXRhPXsiX19zZXNzaW9uIjogdG9rZW4oc2hlZXQsICJfX3Nlc3Npb24iKSwgInRleHQiOiB0ZXh0fSkKICAgIGFzc2VydCByZWFkLnN0YXR1c19jb2RlID09IDIwMAogICAgYm9keSA9IHJlYWQuanNvbigpCiAgICBhc3NlcnQgYm9keVsiYW1vdW50Il0gPT0gIjUwMDAuMDAiIGFuZCBib2R5WyJraW5kIl0gPT0gIm91dCIgYW5kIGJvZHlbImRhdGUiXSA9PSAiMjAyNi0xMC0wNCIKICAgIGFzc2VydCAiSVJBTiBaQU1BTEVLIiBpbiBib2R5WyJjb3VudGVycGFydHkiXQogICAgYXNzZXJ0IHBob25lLmdldCgiL3RyYW5zYWN0aW9ucyIpLnRleHQuY291bnQoIklSQU4gWkFNQUxFSyIpID09IGJlZm9yZQogICAgbm90aGluZyA9IHBob25lLnBvc3QoIi9zbXMvcmVhZC1vbmUiLCBkYXRhPXsiX19zZXNzaW9uIjogdG9rZW4oc2hlZXQsICJfX3Nlc3Npb24iKSwgInRleHQiOiAiWW91ciBjb2RlIGlzIDEyMzQifSkKICAgIGFzc2VydCBub3RoaW5nLnN0YXR1c19jb2RlID09IDQyMgoKCmRlZiB0ZXN0X3Byb2ZpbGVfcGFnZXNfb25fdGhlX3Bob25lX25hbWVfbm9fZm9sZGVycyhwaG9uZSk6CiAgICBodG1sID0gcGhvbmUuZ2V0KCIvcHJvZmlsZXMiKS50ZXh0ICAjIHVubG9ja2VkOiBzZXR0aW5nczsgbG9ja2VkOiB0aGUgY2hvb3NlcgogICAgYXNzZXJ0ICJvbiB0aGlzIHBob25lIiBpbiBodG1sIGFuZCAib24gdGhpcyBjb21wdXRlciIgbm90IGluIGh0bWwKICAgIGFzc2VydCAiVXNlIGFub3RoZXIgcHJvZmlsZSBsb2NhdGlvbiIgbm90IGluIGh0bWwgYW5kICJGdWxsIGRhdGFiYXNlIHBhdGgiIG5vdCBpbiBodG1sCgoKZGVmIHRlc3RfYV9wcm9maWxlX2Nhbl9iZV9jcmVhdGVkX3doZXJlX2hhcmRfbGlua3NfYXJlX3JlZnVzZWQodG1wX3BhdGgsIG1vbmtleXBhdGNoKToKICAgICIiIkFuZHJvaWQgcmVmdXNlcyBoYXJkIGxpbmtzIGluIGFwcCBzdG9yYWdlOyBjcmVhdGluZyBhIHByb2ZpbGUgbXVzdCBzdGlsbCB3b3JrIHRoZXJlLiIiIgogICAgaW1wb3J0IG9zCgogICAgZGVmIHJlZnVzZSgqYXJncywgKiprd2FyZ3MpOgogICAgICAgIHJhaXNlIFBlcm1pc3Npb25FcnJvcigiaGFyZCBsaW5rcyBhcmUgbm90IGFsbG93ZWQgaGVyZSIpCiAgICBtb25rZXlwYXRjaC5zZXRhdHRyKG9zLCAibGluayIsIHJlZnVzZSkKICAgIGNmZyA9IENyZWRlbnRpYWxzKCJodHRwOi8vMTI3LjAuMC4xOjk4NjMiKQogICAgYXBwID0gcHJvZmlsZV9hcHAoY2ZnLCB0bXBfcGF0aCAvICJkb2NzIiwgZGV2aWNlcz1EZXZpY2VzKHRtcF9wYXRoIC8gImFwcCIsIHBvcnQ9MCksIHBob25lPVRydWUpCiAgICB3aXRoIFRlc3RDbGllbnQoYXBwLCBiYXNlX3VybD1jZmcub3JpZ2luLCBoZWFkZXJzPXsiT3JpZ2luIjogY2ZnLm9yaWdpbn0pIGFzIGJyb3dzZXI6CiAgICAgICAgYnJvd3Nlci5nZXQoIi9fX2xhdW5jaCIsIHBhcmFtcz17ImNvZGUiOiBjZmcubGF1bmNoX2NvZGV9KQogICAgICAgIGNyZWF0ZShicm93c2VyKQogICAgICAgIGFzc2VydCBhcHAuc2Vzc2lvbi5jb250YWluZXIgaXMgbm90IE5vbmUgYW5kIGFwcC5zZXNzaW9uLnBhdGhzLmRiX3BhdGguZXhpc3RzKCkKCgpkZWYgdGVzdF9zZXR0aW5nc19vbl90aGVfcGhvbmVfbGVhZHNfdG9fcGFpcmluZ19zbXNfYW5kX3RoZV9wcm9maWxlKHBob25lKToKICAgIGh0bWwgPSBwaG9uZS5nZXQoIi9zZXR0aW5ncyIpLnRleHQKICAgIGFzc2VydCAnaHJlZj0iL3Byb2ZpbGVzL2RldmljZXMiJyBpbiBodG1sIGFuZCAnaHJlZj0iL3NtcyInIGluIGh0bWwgYW5kICdocmVmPSIvcHJvZmlsZXMiJyBpbiBodG1sCiAgICBhc3NlcnQgIlBhaXIgYSBQQyIgaW4gcGhvbmUuZ2V0KCIvcHJvZmlsZXMvZGV2aWNlcyIpLnRleHQKCgpkZWYgdGVzdF9vdmVydmlld19wdXRzX25lZWRzX3lvdV9iZWZvcmVfbGF0ZXN0KHBob25lKToKICAgIGh0bWwgPSBwaG9uZS5nZXQoIi8iKS50ZXh0CiAgICBhc3NlcnQgaHRtbC5pbmRleCgnY2xhc3M9ImNhcmQgcGhvbmUtbmVlZHMnKSA8IGh0bWwuaW5kZXgoJ2FyaWEtbGFiZWxsZWRieT0ibGF0ZXN0LWhlYWRpbmciJykKCgpkZWYgdGVzdF9waG9uZV9wYWdlX21lbnVfZXhwb3Nlc19wY19zZWN0aW9uc19hbmRfZXZlcnlfbWFpbl9wYWdlKHBob25lKToKICAgICIiIk1haW4gcGFnZXMgbXVzdCBzdGF5IGRpcmVjdGx5IGFjY2Vzc2libGUgd2l0aG91dCBvcGVuaW5nIFNldHRpbmdzIG9yIE1vcmUuIiIiCiAgICBodG1sID0gcGhvbmUuZ2V0KCIvaW52ZXN0bWVudHMiKS50ZXh0CiAgICBtZW51ID0gaHRtbC5zcGxpdCgnY2xhc3M9InBob25lLXBhZ2UtZ3JpZCInLCAxKVsxXS5zcGxpdCgiPC9uYXY+IiwgMSlbMF0KICAgIGZvciBocmVmIGluICgiLyIsICIvYnVkZ2V0IiwgIi9wbGFuIiwgIi9pbnZlc3RtZW50cyIsICIvYWNjb3VudHMiLCAiL3NldHRpbmdzIiwgIi90cmFuc2FjdGlvbnMiLCAiL2ZpbmFuY2lhbC1oZWFsdGgiLCAiL3JldmlldyIsICIvcHJvZmlsZXMiKToKICAgICAgICBhc3NlcnQgZidocmVmPSJ7aHJlZn0iJyBpbiBtZW51CiAgICBhc3NlcnQgJ2hyZWY9Ii9pbnZlc3RtZW50cyIgYXJpYS1jdXJyZW50PSJwYWdlIicgaW4gbWVudQo=
+"""On the phone app every page renders in the phone frame (guideline Part C).
+
+What a browser must measure (nothing scrolls sideways at 360 and 320, C12) is in `tools/phone_check.py`; it
+needs Playwright and runs locally. This test needs no browser: the frame, its five sections and no desktop
+leftovers."""
+import re
+
+import pytest
+from fastapi.testclient import TestClient
+
+from lightning.runtime.app import profile_app
+from lightning.runtime.devices import Devices
+from lightning.runtime.http import Credentials
+
+from test_profile_app import create, token
+
+PAGES = ("/", "/birdview/expenses", "/financial-health", "/budget", "/plan", "/plan/recurring", "/plan/loans",
+         "/plan/reserves", "/investments", "/accounts", "/transactions", "/settings", "/checks")
+
+
+@pytest.fixture(scope="module")
+def phone(tmp_path_factory):
+    folder = tmp_path_factory.mktemp("phone")
+    cfg = Credentials("http://127.0.0.1:9861")
+    app = profile_app(cfg, folder / "docs", devices=Devices(folder / "app", port=0), phone=True)
+    with TestClient(app, base_url=cfg.origin, headers={"Origin": cfg.origin}) as browser:
+        browser.get("/__launch", params={"code": cfg.launch_code})
+        create(browser)
+        page = browser.get("/")
+        browser.post("/demo", data={"__session": token(page.text, "__session")})
+        yield browser
+
+
+@pytest.mark.parametrize("path", PAGES)
+def test_every_page_renders_in_the_phone_frame(phone, path):
+    page = phone.get(path)
+    assert page.status_code == 200
+    html = page.text
+    assert html.count('class="phone-appbar"') == 1 and html.count('class="phone-tabbar"') == 1
+    assert 'class="shell"' not in html and 'class="side"' not in html  # no desktop sidebar
+    assert "Ctrl K" not in html  # C12: no keyboard hints on a phone
+    assert html.count('class="section-bar"') <= 1
+    assert "viewport-fit=cover" in html and "/static/phone.css" in html
+    assert "/static/phone-fields.js" in html  # a tapped field opens empty, its old text back if left empty
+    names = re.findall(r'class="phone-tab-name">([^<]+)<', html)
+    assert names == ["Overview", "Budget", "Add", "Transactions", "More"]  # phone overhaul 2026-10-22: words, Add in the middle
+
+
+def test_the_chosen_section_and_the_period_words(phone):
+    html = phone.get("/budget").text
+    assert re.search(r'class="phone-tab is-chosen" href="/budget" aria-current="page"', html)
+    overview = phone.get("/").text
+    assert ">Monthly<" not in overview and 'class="period-buttons"' not in overview  # one month stepper, no sideways chips
+    assert 'class="phone-period-sheet"' in overview and ">Last month<" in overview  # the month opens Choose period
+    assert re.search(r'class="phone-tab is-chosen" href="/more"', phone.get("/plan").text)  # Cash planning lives on More
+    assert re.search(r'class="phone-tab is-chosen" href="/transactions"', phone.get("/transactions").text)
+
+
+def test_the_pc_keeps_its_own_frame(tmp_path):
+    cfg = Credentials("http://127.0.0.1:9862")
+    app = profile_app(cfg, tmp_path / "docs", devices=Devices(tmp_path / "app", port=0))
+    with TestClient(app, base_url=cfg.origin, headers={"Origin": cfg.origin}) as browser:
+        browser.get("/__launch", params={"code": cfg.launch_code})
+        create(browser)
+        html = browser.get("/").text
+    assert 'class="shell"' in html and "phone-tabbar" not in html and "phone.css" not in html
+
+
+def test_overview_uses_the_phone_forms(phone):
+    html = phone.get("/").text
+    assert 'class="phone-kpis"' in html and html.count('class="phone-kpi ') <= 4  # C06.1: four tiles, 2 × 2
+    assert "stat-tile-spark" not in html  # no sparkline in a phone tile
+    assert "chart-sankey" not in html and 'class="phone-flow"' in html  # C07.3.3
+    assert "chart-cfall" not in html and "scheme-flow" in html  # C07.3.2: the waterfall as rows
+    assert 'class="mcal"' not in html and 'class="phone-months"' in html  # C07.3.4
+    assert re.search(r'class="phone-lead">[\d,]+ <small>EGP</small>', html)  # whole EGP on the big figure
+
+
+@pytest.mark.parametrize("path, marker", [("/budget", 'class="phone-plan-bar'), ("/plan", 'id="plan-build"'),
+                                          ("/investments", 'id="holdings-heading"')])
+def test_budget_cash_and_investments_have_phone_designs(phone, path, marker):
+    html = phone.get(path).text
+    assert marker in html and "<table" not in html  # C07.2: tables become rows
+    assert "stat-tile-spark" not in html and "btn-planner" not in html  # no sparkline; the tab is the way in
+    assert html.count('class="phone-kpi ') <= 4
+
+
+def test_an_account_is_a_day_list_and_the_sheet_saves(phone):
+    page = phone.get("/accounts/1").text
+    assert "<table" not in page and 'class="phone-day"' in page and 'class="phone-tab phone-add" href="/accounts/1/transaction/new' in page  # C08, C05.2
+    assert 'type="checkbox"' not in page  # no checkbox column
+    sheet = phone.get("/accounts/1/transaction/new").text
+    assert 'inputmode="decimal"' in sheet and 'type="date"' in sheet and 'class="btn primary phone-save"' in sheet
+    assert "Cancel" not in sheet  # C12: no two buttons side by side; back or swipe closes the sheet
+    category = re.search(r'<option value="(\d+)" data-movement="OUTFLOW"', sheet).group(1)
+    saved = phone.post("/accounts/1/transaction/new", data={
+        "__session": token(sheet, "__session"), "kind": "out", "amount": "12.50", "category_id": category,
+        "counterparty": "Phone kiosk", "date": "2026-10-06", "return_to": "/accounts/1"})
+    assert saved.status_code == 200 and saved.url.path == "/accounts/1"
+    assert "Phone kiosk" in phone.get("/accounts/1").text
+
+
+def test_accounts_add_button_asks_which_account(phone):
+    assert 'href="/accounts/add-transaction"' in phone.get("/accounts").text
+    pick = phone.get("/accounts/add-transaction?pick=1").text
+    assert "To which account?" in pick and "/accounts/1/transaction/new" in pick
+
+
+def test_add_opens_the_last_used_accounts_sheet_with_change_account(phone):
+    """Phone roadmap M2: after an entry, Add goes straight to that account's sheet, amount first; Change account
+    brings the list back. Without a remembered account the list shows."""
+    phone.cookies.delete("lightning_last_account")
+    assert "To which account?" in phone.get("/accounts/add-transaction").text
+    sheet = phone.get("/accounts/2/transaction/new").text
+    category = re.search(r'<option value="(\d+)" data-movement="OUTFLOW"', sheet).group(1)
+    phone.post("/accounts/2/transaction/new", data={
+        "__session": token(sheet, "__session"), "kind": "out", "amount": "7", "category_id": category,
+        "counterparty": "Kiosk two", "date": "2026-10-06", "return_to": "/accounts/2"})
+    quick = phone.get("/accounts/add-transaction").text
+    assert "To which account?" not in quick and 'action="/accounts/2/transaction/new"' in quick
+    assert 'href="/accounts/add-transaction?pick=1"' in quick and "autofocus" in quick
+    assert "data-sms-paste" in quick
+
+
+def test_paste_bank_sms_reads_one_message_into_the_sheet(phone):
+    """Phone roadmap M3: a pasted CIB message comes back as the sheet's fields; nothing is saved."""
+    sheet = phone.get("/accounts/1/transaction/new").text
+    before = phone.get("/transactions").text.count("IRAN ZAMALEK")
+    text = ("تم سحب مبلغ  EGP 5000.00  من بطاقة الخصم المباشر المنتهية بـ **7351 من CIB KZ IRAN ZAMALEK "
+            "في 04/10/26 19:28 ، الرصيد المتاح EGP 12904.50")
+    read = phone.post("/sms/read-one", data={"__session": token(sheet, "__session"), "text": text})
+    assert read.status_code == 200
+    body = read.json()
+    assert body["amount"] == "5000.00" and body["kind"] == "out" and body["date"] == "2026-10-04"
+    assert "IRAN ZAMALEK" in body["counterparty"]
+    assert phone.get("/transactions").text.count("IRAN ZAMALEK") == before
+    nothing = phone.post("/sms/read-one", data={"__session": token(sheet, "__session"), "text": "Your code is 1234"})
+    assert nothing.status_code == 422
+
+
+def test_profile_pages_on_the_phone_name_no_folders(phone):
+    html = phone.get("/profiles").text  # unlocked: settings; locked: the chooser
+    assert "on this phone" in html and "on this computer" not in html
+    assert "Use another profile location" not in html and "Full database path" not in html
+
+
+def test_a_profile_can_be_created_where_hard_links_are_refused(tmp_path, monkeypatch):
+    """Android refuses hard links in app storage; creating a profile must still work there."""
+    import os
+
+    def refuse(*args, **kwargs):
+        raise PermissionError("hard links are not allowed here")
+    monkeypatch.setattr(os, "link", refuse)
+    cfg = Credentials("http://127.0.0.1:9863")
+    app = profile_app(cfg, tmp_path / "docs", devices=Devices(tmp_path / "app", port=0), phone=True)
+    with TestClient(app, base_url=cfg.origin, headers={"Origin": cfg.origin}) as browser:
+        browser.get("/__launch", params={"code": cfg.launch_code})
+        create(browser)
+        assert app.session.container is not None and app.session.paths.db_path.exists()
+
+
+def test_settings_on_the_phone_leads_to_pairing_sms_and_the_profile(phone):
+    html = phone.get("/settings").text
+    assert 'href="/profiles/devices"' in html and 'href="/sms"' in html and 'href="/profiles"' in html
+    assert "Pair a PC" in phone.get("/profiles/devices").text
+
+
+def test_overview_puts_needs_you_before_latest(phone):
+    html = phone.get("/").text
+    assert html.index('class="card phone-needs') < html.index('aria-labelledby="latest-heading"')
+
+
+def test_phone_page_menu_exposes_pc_sections_and_every_main_page(phone):
+    """Main pages must stay directly accessible without opening Settings or More."""
+    html = phone.get("/investments").text
+    menu = html.split('class="phone-page-grid"', 1)[1].split("</nav>", 1)[0]
+    for href in ("/", "/budget", "/plan", "/investments", "/accounts", "/settings", "/transactions", "/financial-health", "/review", "/profiles"):
+        assert f'href="{href}"' in menu
+    assert 'href="/investments" aria-current="page"' in menu

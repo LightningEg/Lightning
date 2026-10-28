@@ -7,3 +7,4 @@ android.permission.FOREGROUND_SERVICE_DATA_SYNC
 android.permission.POST_NOTIFICATIONS            # the visible notification of that wait
 android.permission.READ_SMS                      # bank SMS (milestone 3), asked for on From SMS after saying why
 android.permission.USE_BIOMETRIC                 # optional fingerprint unlock (Settings > This phone); the password always works
+android.permission.VIBRATE                        # a short buzz on save, swipe and delete (phone roadmap M8)

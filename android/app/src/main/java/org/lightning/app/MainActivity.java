@@ -91,6 +91,7 @@ public final class MainActivity extends Activity {
         BiometricBridge.activity = this;
         takeShare(getIntent());
         queueReminder(getIntent());
+        addShortcuts();
         WebView.setWebContentsDebuggingEnabled(false);
         FrameLayout frame = new FrameLayout(this);
         fitSystemBars(frame);
@@ -276,6 +277,28 @@ public final class MainActivity extends Activity {
             ReminderNotifications.PollResult result = ReminderNotifications.check(this, currentOrigin, cookie);
             reminderEnabled = result.enabled;
         }, "lightning-reminders").start();
+    }
+
+    /** Long-press the app icon (phone roadmap M8): Add expense and Bank SMS open straight away, through the same
+     *  safe in-app link path as a reminder (reminder_href, checked by safeHrefForActivity). */
+    private void addShortcuts() {
+        if (Build.VERSION.SDK_INT < 25) return;
+        try {
+            android.content.pm.ShortcutManager manager = getSystemService(android.content.pm.ShortcutManager.class);
+            if (manager == null) return;
+            java.util.List<android.content.pm.ShortcutInfo> list = new java.util.ArrayList<>();
+            String[][] items = {{"add", "Add expense", "/accounts/add-transaction"}, {"sms", "Bank SMS", "/sms"}};
+            for (String[] item : items) {
+                Intent open = new Intent(this, MainActivity.class).setAction("org.lightning.app.OPEN_REMINDER")
+                        .putExtra("reminder_href", item[2]).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                list.add(new android.content.pm.ShortcutInfo.Builder(this, item[0]).setShortLabel(item[1])
+                        .setIcon(android.graphics.drawable.Icon.createWithResource(this, R.drawable.ic_lightning))
+                        .setIntent(open).build());
+            }
+            manager.setDynamicShortcuts(list);
+        } catch (RuntimeException ignored) {
+            // a launcher without shortcuts: nothing to add
+        }
     }
 
     private void queueReminder(Intent intent) {
