@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-9 milestones, 78 open items, in the order they are worked on.
+9 milestones, 79 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -180,8 +180,9 @@ The site is honest, quick and in step with the app.
 | BT-8U5 | ↳ One cache rule, one registry read | | | |
 | BT-8U6 | ↳ Honest messages, one marketplace link | | | |
 | BT-8U7 | ↳ Tier in the manifest; stale docs | | | |
+| **IV-8V** | [Dendera sells at 1,000 like Papyrus but is flat - no answering motions, flat cards, menus, tabs and dialogs](8-website/8V-dendera-flatter-than-its-tier.md) | improvement, visual | appearance | new |
 
-Done: 8E, 8G, 8H, 8B, 8M, 8N, 8O, 8P, 8Q, 8R, 8S. Next free code: 8V.
+Done: 8E, 8G, 8H, 8B, 8M, 8N, 8O, 8P, 8Q, 8R, 8S. Next free code: 8W.
 
 ## 9 Later
 

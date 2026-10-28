@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-28 · Claude: [IV-8V] Filed: Dendera is flatter than its 1,000-coin tier (no answering motions, flat materials); upgrade before its first licence.
 - 2026-10-28 · Claude: Audit 9 (`reports/2026-10-28-loose-ends-and-linking/`): theme, sync/pairing and lint loose ends, section-linking ideas, and how issues/reports are filed; new items IT-1J, IT-1K, BT-4J, IT-4K, NF-7T, BT-8U.
 - 2026-10-28 · Claude: Item codes now start with what the item is: BV/BT bug visual/technical, IV/IT improvement, NF feature, OW owner (`BV-3B`); bugs carry `look:`; `python tools/issues.py tag 3B`.
 - 2026-10-28 · Claude: [6E] Every wallet and fintech logo in `assets/institutions-logos/` is linked: 22 institutions added (bank wallets, Halan, Khazna, MoneyFellows, InstaPay and more); tiles trimmed to the mark (`tools/bundle_institution_logos.py`). Codex's import workflow pinned like the others.
