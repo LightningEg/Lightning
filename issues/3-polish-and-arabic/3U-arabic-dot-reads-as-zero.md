@@ -2,6 +2,7 @@
 title: Arabic leftovers - the budget move preview arrow, two overlaps and a wrapped number
 type: bug
 look: visual
+severity: low
 area: arabic
 status: ready
 created: 2026-10-20

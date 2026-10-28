@@ -56,13 +56,19 @@ Report and feedback formats are in [the template catalogue](../templates/README.
 | `tech` | Under the hood: speed, structure, tests, tooling, security; nothing a person sees change |
 | `owner` | Needs the owner: a decision, an account, a key, a check on their PC or phone |
 
-**Area** is the screen or module in one word: `overview`, `budget`, `investments`, `accounts`, `import`, `phone`, `arabic`,
-`website`, `tools`...
+**Area** is where the item belongs, one of a fixed list that `tools/issues.py` checks (`AREAS`): `accounts`, `android`,
+`appearance` (themes and cosmetics), `arabic`, `architecture`, `desktop`, `devices` (sync and pairing), `docs`, `github`
+(contributing through GitHub), `import`, `investments`, `market` (price data), `performance`, `phone`, `planning`
+(budget, reserves, recurring), `product` (whole-app reviews and owner checks), `reporting`, `restore`, `search`, `tools`,
+`transactions`, `ui` (how routes and templates are built), `website`. Add one there and here only when none fits.
+
+**Severity**, on every bug and only on bugs: `high` (wrong money or lost data), `medium` (wrong on screen, or a task that
+cannot be done), `low` (it reads or looks off). INDEX shows it after the kind.
 
 ## Status
 
 `new` (found, not looked at) · `ready` (understood; anyone can build it) · `building` (someone has it: a claim in `NOW.md`
-or a `/take` on GitHub) · `blocked` (say what it waits for in `blocked_by`). Finished is never a status: delete the file.
+naming its code, or a `/take` on GitHub; `--check` warns about one with no claim, without failing) · `blocked` (say what it waits for in `blocked_by`). Finished is never a status: delete the file.
 
 ## Front matter (required, between two `---` lines, first in the file)
 
@@ -71,7 +77,8 @@ or a `/take` on GitHub) · `blocked` (say what it waits for in `blocked_by`). Fi
 title: Short sentence saying what is wrong or wanted
 type: bug
 look: visual                         # bugs: visual or technical; polish: optional, visual by default
-area: overview
+severity: medium                     # bugs only: high, medium or low
+area: investments                    # one of the areas above
 status: new
 created: 2026-10-19
 by: Claude Opus 5.5                  # the AI or "owner"; never a person's name
@@ -87,7 +94,7 @@ Bugs found by a skill also keep `skills`, `app_version`, `commit` and `repo` (ap
 ```
 ## Report
 What was seen or wanted, where (page, file, step), how to reproduce it, what should happen instead. Evidence: numbers,
-a command and its output, a screenshot path. Severity for bugs: high (wrong money or lost data), medium, low.
+a command and its output, a screenshot path. A bug's severity is in its front matter; say why here if it is not plain.
 
 ## Investigation        (added later; who and with which skill)
 What is true, what is not, the cause with file:line, what you ruled out.

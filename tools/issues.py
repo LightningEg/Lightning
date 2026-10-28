@@ -1,7 +1,7 @@
 """Check every item in issues/ and rebuild issues/INDEX.md, the plan: milestones in order, their items under them.
 
     python tools/issues.py            # rewrite issues/INDEX.md
-    python tools/issues.py --check    # exit 1 if an item is malformed or INDEX.md is out of date
+    python tools/issues.py --check    # exit 1 if an item is malformed or INDEX.md is out of date; warnings never fail
     python tools/issues.py next 3     # the next free code in milestone 3, e.g. 3K
     python tools/issues.py tag 3B     # its full code with the kind tag, e.g. BV-3B
 
@@ -21,6 +21,11 @@ ROOT = Path(__file__).resolve().parent.parent
 ISSUES = ROOT / "issues"
 TYPES = ("bug", "polish", "feature", "tech", "owner")
 STATUSES = ("new", "ready", "building", "blocked")
+SEVERITIES = ("high", "medium", "low")  # bugs only: high is wrong money or lost data
+# Where an item belongs. Add one here, with its meaning in issues/README.md, only when no existing area fits.
+AREAS = ("accounts", "android", "appearance", "arabic", "architecture", "desktop", "devices", "docs", "github", "import",
+         "investments", "market", "performance", "phone", "planning", "product", "reporting", "restore", "search",
+         "tools", "transactions", "ui", "website")
 LOOKS = ("visual", "technical")  # visual: how a screen looks or reads; technical: what the app computes, stores or does
 TAGS = {"BV": "bug, visual", "BT": "bug, technical", "IV": "improvement, visual", "IT": "improvement, technical",
         "NF": "new feature", "OW": "owner task"}
@@ -84,6 +89,27 @@ def look_problem(meta: dict) -> str | None:
     return None
 
 
+def severity_problem(meta: dict) -> str | None:
+    kind, severity = meta.get("type"), meta.get("severity")
+    if kind == "bug" and severity not in SEVERITIES:
+        return f"a bug says how bad it is: severity: {' or '.join(SEVERITIES)} (high is wrong money or lost data)"
+    if severity is not None and kind != "bug":
+        return "severity is only on a bug"
+    return None
+
+
+CLAIMED = re.compile(r"^## Claimed\s*$(.*?)(?=^## |\Z)", re.M | re.S)
+
+
+def warnings(milestones: list[dict], now: Path = ROOT / "NOW.md") -> list[str]:
+    """A building item should be claimed in NOW.md. Only a warning: a claim may name its work in words, not by code."""
+    found = CLAIMED.search(now.read_text(encoding="utf-8")) if now.exists() else None
+    claimed = found.group(1) if found else ""
+    return [f"warning: {i['file']} is building, but {i['code']} is not in NOW.md's Claimed table"
+            for m in milestones for i in m["items"]
+            if i.get("status") == "building" and not re.search(rf"(?<![0-9A-Za-z]){i['code']}(?![0-9A-Za-z])", claimed)]
+
+
 def load() -> tuple[list[dict], list[str]]:
     milestones, problems = [], []
     for path in sorted(ISSUES.iterdir(), key=lambda p: (int(p.name.split("-")[0]) if MILESTONE.match(p.name) else 999, p.name)):
@@ -124,6 +150,10 @@ def load() -> tuple[list[dict], list[str]]:
                     problems.append(f"{rel}: front matter lacks '{key}'")
             if meta_i.get("type") not in TYPES:
                 problems.append(f"{rel}: type '{meta_i.get('type')}' is not one of {', '.join(TYPES)}")
+            if meta_i.get("area") and meta_i["area"] not in AREAS:
+                problems.append(f"{rel}: area '{meta_i['area']}' is not one of {', '.join(AREAS)} (issues/README.md)")
+            if severity_problem(meta_i):
+                problems.append(f"{rel}: {severity_problem(meta_i)}")
             if look_problem(meta_i):
                 problems.append(f"{rel}: {look_problem(meta_i)}")
             if meta_i.get("status") in DONE:
@@ -179,7 +209,8 @@ def render(milestones: list[dict]) -> str:
         for i in m["items"]:
             status = i["status"] + (f" on {i['blocked_by']}" if i.get("blocked_by") else "")
             github = f" ([#{i['github']}](https://github.com/LightningEg/Lightning/issues/{i['github']}))" if i.get("github") else ""
-            lines.append(f"| **{i['tag']}-{i['code']}** | [{i['title']}]({i['file']}){github} | {TAGS[i['tag']]} | {i['area']} | {status} |")
+            kind = TAGS[i["tag"]] + (f" · {i['severity']}" if i.get("severity") else "")
+            lines.append(f"| **{i['tag']}-{i['code']}** | [{i['title']}]({i['file']}){github} | {kind} | {i['area']} | {status} |")
             for step, title in i["steps"]:
                 lines.append(f"| {i['tag']}-{step} | ↳ {title} | | | |")
         done = sorted(m["done"], key=lambda c: number(re.sub(r"^\d+", "", c)))
@@ -208,7 +239,7 @@ def main() -> int:
     if "--check" in sys.argv:
         if not index.exists() or index.read_text(encoding="utf-8") != text:
             problems.append("issues/INDEX.md is out of date: run python tools/issues.py")
-        print("\n".join(problems) or "issues fine")
+        print("\n".join(warnings(milestones) + problems) or "issues fine")
         return 1 if problems else 0
     if problems:
         print("\n".join(problems))

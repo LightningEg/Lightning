@@ -2,6 +2,7 @@
 title: Paid themes - the night switch resets, held colour too faint on light themes, PC cache numbers by hand
 type: bug
 look: technical
+severity: low
 area: appearance
 status: ready
 created: 2026-10-28
