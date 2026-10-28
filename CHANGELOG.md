@@ -21,6 +21,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - 2026-10-28 · Claude: [IV-8V] Filed: Dendera is flatter than its 1,000-coin tier (no answering motions, flat materials); upgrade before its first licence.
 - 2026-10-28 · Claude: Audit 9 (`reports/2026-10-28-loose-ends-and-linking/`): theme, sync/pairing and lint loose ends, section-linking ideas, and how issues/reports are filed; new items IT-1J, IT-1K, BT-4J, IT-4K, NF-7T, BT-8U.
 - 2026-10-28 · Claude: Item codes now start with what the item is: BV/BT bug visual/technical, IV/IT improvement, NF feature, OW owner (`BV-3B`); bugs carry `look:`; `python tools/issues.py tag 3B`.
+- 2026-10-28 · Claude: Guideline coders.html: copy of the website's Garnet wording fix (site 311b86d).
+- 2026-10-28 · Claude: Guideline themes.md: the Bolt badge is now the Lightning mark, the two-leaf logo in its own colours (owner; site PR on `claude/leaderboard-banners`).
 - 2026-10-28 · Claude: [8U][8V][8W] Owner: real data is welcome (AGENTS.md §4, Overview §2), the Home account invite stays; Downloads leads with your platform (site #127). Store analytics: site #126.
 - 2026-10-28 · Claude: [8U][8V][8W] Website review: account modal on arrival, "real statements welcome" on Downloads, Downloads leads with Windows on phones; 2U link checked server-side.
 - 2026-10-28 · Claude: [1B][1C][2B][3I][3AH][8C][8I] Owner-only checks closed as items and held in Project Overview §9, to bring up at end-to-end testing (owner 2026-10-28).
