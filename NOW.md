@@ -23,7 +23,7 @@
 
 - **8J/8L app themes:** ready to sell, Dendera included; the owner deploys, opens checkout, provisions the store key and turns on each app release. New themes: `guideline/themes.md` §5. **Read:** `issues/8-website/8L-theme-materials-acceptance.md`.
 
-- **Website (2026-10-28):** store analytics, Downloads platform-first, leaderboard contrast and the two-leaf badge merged; banners redrawn plus Felucca and Sand wind (site #130). Next: watch Sales › From browsing to buying. **Read:** site README › Analytics.
+- **Website (2026-10-28):** store analytics, Downloads platform-first, leaderboard contrast and the two-leaf badge merged; banners redrawn plus Felucca and Sand wind (site #130). **Read:** site README › Analytics.
 
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 
