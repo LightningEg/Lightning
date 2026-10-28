@@ -1,0 +1,15 @@
+name: Question or other
+description: Ask a question or tell us anything that does not fit the other forms
+body:
+  - type: markdown
+    attributes:
+      value: |
+        These prompts help us investigate. Fill in what you know and skip the rest.
+        Prefer your own format? Use a blank issue from the issue chooser.
+        Use dummy examples only. Do not share financial records, account numbers, passwords, recovery keys or backups.
+        Report security problems privately: https://github.com/LightningEg/Lightning/security/advisories/new
+  - type: textarea
+    id: question
+    attributes:
+      label: What would you like to share?
+      description: Write in your own words. No particular structure is needed.

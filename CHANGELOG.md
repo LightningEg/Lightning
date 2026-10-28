@@ -13,6 +13,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 - 2026-10-29 · Codex: [2AA] Clamp the exchange-rate search to valid calendar dates, avoiding a crash on early dates; add a boundary regression and backend audit report.
 
+- 2026-10-29 · Codex / @Abo3baziz: [1I] Issue reporting is flexible: blank issues enabled (#187), optional Bug, Idea and Question prompts, and privacy/private-security guidance. Maintainer task prompts are optional too.
+
 - 2026-10-28 · Claude: Guideline coders.html: copy of the website's Garnet wording fix (site 311b86d).
 - 2026-10-28 · Claude: Guideline themes.md: the Bolt badge is now the Lightning mark, the two-leaf logo in its own colours (owner; site PR on `claude/leaderboard-banners`).
 - 2026-10-28 · Claude: [8U][8V][8W] Owner: real data is welcome (AGENTS.md §4, Overview §2), the Home account invite stays; Downloads leads with your platform (site #127). Store analytics: site #126.
