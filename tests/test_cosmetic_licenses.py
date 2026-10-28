@@ -33,6 +33,15 @@ def test_same_entitlement_is_portable_and_permanent(license):
         assert owned.items == (('nile',1),) and owned.profile_id == PROFILE
     assert 'expires' not in envelope['payload'] and 'device' not in envelope['payload']
 
+def test_a_licence_survives_a_theme_version_bump_and_skips_what_this_app_lacks(license):
+    data,sign,keys=license
+    assert verify_license(sign(data),keys,{'nile':2}).items == (('nile',1),), "an update never takes a bought theme away"
+    data['items'].append({'item_id':'future-theme','asset_version':1,'deliveries':[]})
+    data['items'].append({'item_id':'papyrus','asset_version':3,'deliveries':[]})
+    assert verify_license(sign(data),keys,{'nile':1,'papyrus':1}).items == (('nile',1),)
+    data['items']=[{'item_id':'nile','asset_version':0,'deliveries':[]}]
+    with pytest.raises(InvalidCosmeticLicense,match='Invalid item'):verify_license(sign(data),keys,{'nile':1})
+
 def test_a_licence_is_for_its_own_profile_only(license):
     data,sign,keys=license
     other='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'

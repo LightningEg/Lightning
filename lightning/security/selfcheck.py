@@ -7,7 +7,7 @@ import tempfile
 from importlib import resources
 from pathlib import Path
 
-from .keys import create_key_file, key_id, new_data_key, new_recovery_key, open_with_recovery, unwrap_key, wrap_key
+from .keys import create_key_file, new_data_key, new_recovery_key, open_with_recovery, unwrap_key, wrap_key
 
 
 def _key_literal(key: bytes) -> str:

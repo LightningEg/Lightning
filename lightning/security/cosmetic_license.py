@@ -41,7 +41,7 @@ _PROFILE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[
 
 def verify_license(envelope: dict, public_keys: dict[str, bytes], supported: dict[str, int],
                    *, expected_account: str | None = None, expected_profile: str | None = None) -> CosmeticOwnership:
-    """Verify first, parse second; fail closed on unshipped items and account mismatch.
+    """Verify first, parse second; fail closed on account or profile mismatch and when nothing in it is carried here.
 
     Public keys are raw 32-byte Ed25519 keys pinned in an app release. Key rotation must
     retain old verification keys for permanent offline licenses. Empty keys unlock nothing.
@@ -71,14 +71,20 @@ def verify_license(envelope: dict, public_keys: dict[str, bytes], supported: dic
         items = data["items"]
         if not isinstance(items, list) or len(items) > 500:
             raise InvalidCosmeticLicense("Invalid item list")
-        owned = []
+        # A licence is permanent: a theme this app carries at the licence's version or a later one is owned. A newer
+        # version, or an item this app does not carry yet, is skipped here and worn after an update.
+        owned, names = [], set()
         for item in items:
             name, version = item["item_id"], item["asset_version"]
-            if not isinstance(name, str) or type(version) is not int or supported.get(name) != version:
-                raise InvalidCosmeticLicense("Update Lightning: unsupported bundled item version")
-            if any(name == existing[0] for existing in owned):
+            if not isinstance(name, str) or type(version) is not int or version < 1:
+                raise InvalidCosmeticLicense("Invalid item")
+            if name in names:
                 raise InvalidCosmeticLicense("Duplicate item")
-            owned.append((name, version))
+            names.add(name)
+            if name in supported and version <= supported[name]:
+                owned.append((name, version))
+        if not owned:
+            raise InvalidCosmeticLicense("Update Lightning: unsupported bundled item version")
         return CosmeticOwnership(account, tuple(owned), profile)
     except (InvalidSignature, ValueError, TypeError, KeyError, AttributeError) as exc:
         if isinstance(exc, InvalidCosmeticLicense):

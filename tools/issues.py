@@ -182,7 +182,8 @@ def render(milestones: list[dict]) -> str:
             lines.append(f"| **{i['tag']}-{i['code']}** | [{i['title']}]({i['file']}){github} | {TAGS[i['tag']]} | {i['area']} | {status} |")
             for step, title in i["steps"]:
                 lines.append(f"| {i['tag']}-{step} | ↳ {title} | | | |")
-        lines += ["", f"Done: {', '.join(m['done']) or 'nothing yet'}. Next free code: {next_code(m)}."]
+        done = sorted(m["done"], key=lambda c: number(re.sub(r"^\d+", "", c)))
+        lines += ["", f"Done: {', '.join(done) or 'nothing yet'}. Next free code: {next_code(m)}."]
     return "\n".join(lines) + "\n"
 
 

@@ -9,11 +9,10 @@ from __future__ import annotations
 import csv
 import io
 import json
-import re
 from pathlib import Path
 from urllib.parse import urlparse
 import requests
-from PIL import Image, ImageOps, ImageDraw
+from PIL import Image, ImageOps
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "assets" / "institutions-logos"

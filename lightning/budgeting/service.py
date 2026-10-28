@@ -369,7 +369,6 @@ class BudgetService:
         actual: dict[int, Decimal] = {}
         planned_actual: dict[int, Decimal] = {}
         budget: dict[int, Decimal | None] = {}
-        average_cache: dict[tuple[int, int], Decimal | None] = {}
         for c in reversed(cats):  # children before parents
             kids = children.get(c.id, [])
             # A one-off child keeps its own actual but does not add to its parent's (unless it has a plan).
@@ -864,7 +863,7 @@ class BudgetService:
 
     def set_income_percentage(self, category_id: int, month: str, percent: object,
                               only_this_month: bool = False) -> bool:
-        parse_month(month); category = self._budgetable(category_id)
+        parse_month(month); self._budgetable(category_id)
         value = check_places(to_decimal(percent, "percentage"), 2, "percentage")
         if value < ZERO or value > 10000:
             raise ValidationError("Enter an income percentage from 0 to 10,000.", "percentage")

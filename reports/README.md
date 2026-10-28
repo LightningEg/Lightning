@@ -8,17 +8,17 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | audit-1 | [Audit 1: is Lightning ready to demo?](2026-10-20-demo-readiness/report.md) | 2026-10-20 |
 | audit-2 | [Audit 2: backend efficiency and loose ends](2026-10-21-backend-efficiency/report.md) | 2026-10-21 |
 | audit-3 | [Audit 3: is the edit journal (multi-device sync) solid?](2026-10-21-edit-journal/report.md) | 2026-10-21 |
-| audit-4 | [Audit 4: backend correctness and failure boundaries](2026-10-23-backend-correctness/report.md) | 2026-10-23 |
 | audit-5 | [Audit 5: is the backend engine efficient and streamlined?](2026-10-21-backend-streamlining/report.md) | 2026-10-21 |
+| audit-4 | [Audit 4: backend correctness and failure boundaries](2026-10-23-backend-correctness/report.md) | 2026-10-23 |
 | audit-6 | [Audit 6: open pull request cleanup](2026-10-23-pull-request-cleanup/report.md) | 2026-10-23 |
-| audit-7 | [Audit 7 — app visual flow](2026-10-25-app-visual-flow/report.md) | 2026-10-25 |
-| dendera-theme | [Dendera theme: the workflow, and how it compares with the theme flow](2026-10-26-dendera-theme/report.md) | 2026-10-26 |
-| audit-8 | [Audit 8: backbone engine gaps and loose ends](2026-10-26-engine-audit/report.md) | 2026-10-26 |
-| pairing-hardening | [Pairing backend hardening and security review](2026-10-26-pairing-hardening/report.md) | 2026-10-26 |
 | contributor-review | [Yusuf contribution review · 2026-10-23](2026-10-23-contributor-review/report.md) | 2026-10-23 |
+| audit-7 | [Audit 7 — app visual flow](2026-10-25-app-visual-flow/report.md) | 2026-10-25 |
+| audit-8 | [Audit 8: backbone engine gaps and loose ends](2026-10-26-engine-audit/report.md) | 2026-10-26 |
+| dendera-theme | [Dendera theme: the workflow, and how it compares with the theme flow](2026-10-26-dendera-theme/report.md) | 2026-10-26 |
+| pairing-hardening | [Pairing backend hardening and security review](2026-10-26-pairing-hardening/report.md) | 2026-10-26 |
 | v1.5.0-preparation | [v1.5.0 PR review, theme switching and package preparation](2026-10-26-v150-release/report.md) | 2026-10-26 |
-| users-main-questions | [Users' main questions: what each screen must answer, with known gaps](2026-10-27-users-main-questions/report.md) | 2026-10-27 |
 | store-and-community | [Store and community: unlocking themes, the market, rewards and staying in Lightning](2026-10-27-store-and-community/report.md) | 2026-10-27 |
+| users-main-questions | [Users' main questions: what each screen must answer, with known gaps](2026-10-27-users-main-questions/report.md) | 2026-10-27 |
 | audit-9 | [Audit 9: loose ends after themes and sync, linking sections, and how the plan is filed](2026-10-28-loose-ends-and-linking/report.md) | 2026-10-28 |
 
 ## Create and maintain a report

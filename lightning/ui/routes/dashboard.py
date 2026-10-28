@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import calendar
-from datetime import date, timedelta
+from datetime import timedelta
 
 from decimal import InvalidOperation
 from urllib.parse import urlencode
@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 from fastapi import APIRouter, Request
 
 from lightning.accounts.domain import AccountType
-from lightning.core.dates import fmt_date, month_of, months_back, parse_date, parse_month, today
+from lightning.core.dates import fmt_date, month_of, parse_date, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.figures import FIGURES, label
 from lightning.core.money import ZERO, fmt as _fmt, to_decimal
@@ -257,7 +257,6 @@ async def salary_setup(request: Request):
 
 @router.post("/setup/salary")
 async def save_salary_setup(request: Request):
-    from lightning.workflows.salary_setup import set_up_salary
     form = await request.form()
     values = {key: str(form.get(key, "")) for key in ("account_id", "amount", "payday")}
     try:

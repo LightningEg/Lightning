@@ -16,7 +16,7 @@
 
 ## Next
 
-- **Audit 9:** BT-8U1, BT-4J first; IT-1K: owner calls; NF-7T: links. **Read:** `reports/2026-10-28-loose-ends-and-linking/report.md`.
+- **Audit 9:** BT-4J first; IT-1K: owner calls; NF-7T: links. **Read:** `reports/2026-10-28-loose-ends-and-linking/report.md`.
 
 - **3AH visual flow review:** implementation and browser evidence ready for owner review; native Windows/Android and assistive-technology acceptance remain. **Read:** `reports/2026-10-25-app-visual-flow/report.md`.
 

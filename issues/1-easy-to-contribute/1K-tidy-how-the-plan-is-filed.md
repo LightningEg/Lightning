@@ -24,9 +24,9 @@ Audit 9 part E (`../../reports/2026-10-28-loose-ends-and-linking/report.md`) che
 - E2: `severity` required for bugs and shown in INDEX.
 - E3: a fixed `area` list in `tools/issues.py`.
 - E4: warn when a `building` item has no claim in `NOW.md` (2B, 3H, 5G, 6A, 8J, 8L today).
-- E7: sort `done:` lists.
+- E7 done 2026-10-28: INDEX sorts `done:` lists.
 
 ## 1K3 Reports catalogue
 
 - E8: test that each report has the `Reviewed commit` line (9 of 14 lack it), or relax the `evidence/` rule.
-- E9: sort the catalogue by date; add Kind and Open follow-ups columns.
+- E9: sorted by date 2026-10-28; Kind and Open follow-ups columns remain.

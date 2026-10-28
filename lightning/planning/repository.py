@@ -158,7 +158,6 @@ class PlanningRepository:
                             category_id: int | None, counterparty_id: int | None, currency: str) -> dict | None:
         """Read a posted, owned transaction that is valid for an explicit payment link."""
         effect = "INFLOW" if incoming else "OUTFLOW"
-        doc_type = "IN" if incoming else "OUT"
         where = ["t.id=?", "t.status='POSTED'", "l.effect=?", "l.owner_id IS NULL"]
         where.append("l.asset_id IN (SELECT id FROM financial_assets WHERE is_cash=1)")
         where.append("l.quantity_e6>0" if incoming else "l.quantity_e6<0")

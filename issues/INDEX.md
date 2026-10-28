@@ -46,7 +46,7 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical | android | new |
 | **IT-2Z** | [The net-worth bridge check cannot fail - its valuation change is whatever is left over](2-safe-for-real-money/2Z-net-worth-bridge-check-cannot-fail.md) ([#163](https://github.com/LightningEg/Lightning/issues/163)) | improvement, technical | reporting | ready |
 
-Done: 2D, 2K, 2O, 2P, 2Q, 2R, 2S, 2T, 2G, 2H, 2N, 2V, 2W, 2X, 2Y, 2I, 2L, 2M. Next free code: 2AA.
+Done: 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y. Next free code: 2AA.
 
 ## 3 Polish and Arabic
 
@@ -67,7 +67,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **NF-3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | new feature | phone | new |
 | **OW-3AH** | [Visual flow acceptance on PC and phone](3-polish-and-arabic/3AH-visual-flow-acceptance.md) | owner task | product | ready |
 
-Done: 3AG, 3W, 3D, 3E, 3A, 3C, 3L, 3M, 3N, 3O, 3P, 3R, 3V, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AF, 3AE. Next free code: 3AI.
+Done: 3A, 3C, 3D, 3E, 3L, 3M, 3N, 3O, 3P, 3R, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG. Next free code: 3AI.
 
 ## 4 Edit journal and devices
 
@@ -155,7 +155,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7T5 | ↳ Salary-day cascade | | | |
 | NF-7T6 | ↳ A reserve tied to its bill | | | |
 
-Done: 7Q, 7P, 7K, 7N, 7O, 7J, 7H. Next free code: 7U.
+Done: 7H, 7J, 7K, 7N, 7O, 7P, 7Q. Next free code: 7U.
 
 ## 8 Website
 
@@ -172,17 +172,15 @@ The site is honest, quick and in step with the app.
 | **NF-8K** | [Supporter perks still waiting on the app or the owner - app themes for sale, names on About, a beta channel](8-website/8K-supporter-perks-app-and-owner.md) | new feature | appearance | blocked on 8J claiming; owner decision on the beta channel |
 | **NF-8L** | [Theme materials, selling themes, owner console - what only the owner can do now](8-website/8L-theme-materials-acceptance.md) | new feature | appearance | building |
 | **NF-8T** | [Papyrus and Dendera bundles need a banner, frame and name designed first](8-website/8T-papyrus-and-dendera-bundles.md) | new feature | appearance | ready |
-| **BT-8U** | [Paid themes - a version bump locks out every buyer, one runtime test never runs, the night switch resets](8-website/8U-theme-loose-ends.md) | bug, technical | appearance | ready |
-| BT-8U1 | ↳ Licences survive a theme version bump | | | |
-| BT-8U2 | ↳ Run the profile runtime test | | | |
+| **BT-8U** | [Paid themes - the night switch resets, held colour too faint on light themes, PC cache numbers by hand](8-website/8U-theme-loose-ends.md) | bug, technical | appearance | ready |
 | BT-8U3 | ↳ Keep the night switch across launches | | | |
 | BT-8U4 | ↳ Held colour per theme | | | |
-| BT-8U5 | ↳ One cache rule, one registry read | | | |
-| BT-8U6 | ↳ Honest messages, one marketplace link | | | |
-| BT-8U7 | ↳ Tier in the manifest; stale docs | | | |
+| BT-8U5 | ↳ One cache rule | | | |
+| BT-8U6 | ↳ One marketplace link | | | |
+| BT-8U7 | ↳ Tier in the manifest | | | |
 | **IV-8V** | [Dendera sells at 1,000 like Papyrus but is flat - no answering motions, flat cards, menus, tabs and dialogs](8-website/8V-dendera-flatter-than-its-tier.md) | improvement, visual | appearance | new |
 
-Done: 8E, 8G, 8H, 8B, 8M, 8N, 8O, 8P, 8Q, 8R, 8S. Next free code: 8W.
+Done: 8B, 8E, 8G, 8H, 8M, 8N, 8O, 8P, 8Q, 8R, 8S. Next free code: 8W.
 
 ## 9 Later
 

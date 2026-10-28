@@ -117,4 +117,4 @@ What does not:
 
 ## Dated follow-ups
 
-None yet.
+- 2026-10-28, `claude/audit-9-quick-fixes`: fixed A1, A2, A6 (registry), A7, A10, most of C1, E7 and E9's order; see BT-8U, IT-1J, IT-1K for what is left.

@@ -37,17 +37,23 @@ def store() -> dict:
 
 
 @lru_cache(maxsize=1)
+def _registry() -> tuple[dict, ...]:
+    """The bundled theme registry: built with the app, read once."""
+    return tuple(json.loads(REGISTRY.read_text()))
+
+
+@lru_cache(maxsize=1)
 def paid_themes() -> dict[str, int]:
     """Each paid store item this app version carries, at the exact version a licence must name. A theme's other mode
     (Dendera's night) names its item and rides on that item's licence: one purchase, both modes."""
-    return {t.get("item", t["id"]): t["version"] for t in json.loads(REGISTRY.read_text()) if t.get("paid")}
+    return {t.get("item", t["id"]): t["version"] for t in _registry() if t.get("paid")}
 
 
 def store_themes() -> list[dict]:
     """The paid themes for Settings, in registry order: id, name and whether this computer holds its licence."""
     mine = owned()
     return [{"id": t["id"], "name": t["name"], "owned": t["id"] in mine}
-            for t in json.loads(REGISTRY.read_text()) if t.get("paid") and "item" not in t]
+            for t in _registry() if t.get("paid") and "item" not in t]
 
 
 _FOLDER: Path | None = None
@@ -145,7 +151,7 @@ def owned() -> frozenset[str]:
 def wearable(theme: str) -> bool:
     # LIGHTNING_THEME_REVIEW=1 is for maintainers reviewing themes before release (tools/theme_shots.py); the app
     # is open source, so this is a convenience, not a lock. Ownership is the store's signed licence.
-    item = next((t.get("item", t["id"]) for t in json.loads(REGISTRY.read_text()) if t["id"] == theme), theme)
+    item = next((t.get("item", t["id"]) for t in _registry() if t["id"] == theme), theme)
     return item not in paid_themes() or os.environ.get("LIGHTNING_THEME_REVIEW") == "1" or item in owned()
 
 
@@ -176,6 +182,15 @@ def _share(item: str, envelope: dict) -> None:
         pass
 
 
+def shared(theme: str) -> bool:
+    """Whether the open profile's synced settings hold this theme's licence, so its other devices unlock by themselves."""
+    settings = _profile_settings()
+    try:
+        return bool(settings is not None and settings.get(LICENCE_KEY + theme))
+    except Exception:  # a profile that cannot read its settings shares nothing
+        return False
+
+
 def redeem(code: str, *, opener=None) -> str:
     """Exchange a one-time website code for the signed licence of the theme it was bought for, verify it, keep it on this
     computer and in the profile's settings. Returns the theme id the licence names."""
@@ -200,6 +215,10 @@ def redeem(code: str, *, opener=None) -> str:
         if exc.code == 409:  # the store says every seat for this theme is taken by other profiles
             raise UnlockError("Every profile seat for this theme is used. Add another profile on your account page: "
                               "it costs a quarter of the price.") from exc
+        if exc.code == 429:
+            raise UnlockError("Too many tries. Wait a minute, then try again.") from exc
+        if exc.code >= 500:
+            raise UnlockError("The Lightning store is not answering right now. Try again in a few minutes.") from exc
         raise UnlockError("That code is used or expired. Get a fresh one from your account page.") from exc
     except (URLError, OSError, ValueError) as exc:
         raise UnlockError("Could not reach the Lightning store. Check the connection and try again.") from exc

@@ -9,7 +9,6 @@ from __future__ import annotations
 import hashlib
 import json
 from datetime import date, timedelta
-from decimal import Decimal
 
 from lightning.categories.domain import Movement
 from lightning.core.dates import fmt_date, today

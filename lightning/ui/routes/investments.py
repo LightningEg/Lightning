@@ -9,7 +9,6 @@ from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
-from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, parse_date, parse_month, today
 from lightning.core.errors import LightningError, NotFoundError, ValidationError
 from lightning.core.refs import DocType
@@ -22,7 +21,7 @@ from ..i18n import translate
 from ...investments import views as holding_views
 from ...assets.catalog import instruments
 from ..periods import parse_period
-from ...investments.report import (PLANNER_MODES, build_investment_report, investing_rate, investment_period, reconcile_portfolio,
+from ...investments.report import (PLANNER_MODES, build_investment_report, investment_period, reconcile_portfolio,
                                     saved_and_invested,
                                     period_growth, results_by_asset, suggest_contributions, suggest_by_current_mix,
                                     normalized_target_weights)
@@ -165,7 +164,6 @@ async def portfolio(request: Request):
         yours = own_by_holding.get(key, h.value) if h.value is not None else None
         asset=assets.get(h.asset_id)
         bucket=(asset["allocation_bucket"] if asset else None) or h.asset_class.split(" › ")[-1]
-        class_text=h.asset_class.casefold()
         horizon=(asset["investment_horizon"] if asset else None) or "Unassigned"
         if yours is not None:
             buckets[bucket]+=yours
@@ -559,7 +557,6 @@ async def holding_detail(request: Request, asset_id: int):
         previous=replace(previous,realized=previous.owned_realized,dividends=previous.owned_dividends,
                          dividend_tax=previous.owned_dividend_tax)
     journey = visuals.holding_journey(c, h.account_id, asset_id, parse_date(day))
-    period_realized = h.realized-(previous.realized if previous else ZERO)
     gain_pct = h.unrealized / h.cost_basis * 100 if h.unrealized is not None and h.cost_basis else None
     total_return = h.total_return
     breakdown = charts.waterfall(("What you paid", h.cost_basis),

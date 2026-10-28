@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Request
 
-from lightning.core.errors import LightningError, ValidationError
+from lightning.core.errors import LightningError
 from ..web import container, redirect, render
 
 router = APIRouter()

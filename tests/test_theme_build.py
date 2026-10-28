@@ -25,7 +25,8 @@ class ThemeBuildTests(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which('node'), 'Node is needed for the runtime contract checks')
     def test_runtime_contract(self):
-        result = subprocess.run(['node', '--test', str(ROOT / 'tests/theme-runtime.test.cjs')],
+        result = subprocess.run(['node', '--test', str(ROOT / 'tests/theme-runtime.test.cjs'),
+                                 str(ROOT / 'tests/theme-runtime-profile.test.cjs')],
                                 cwd=ROOT, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 

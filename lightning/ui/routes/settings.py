@@ -2,13 +2,12 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Request
 from fastapi import Response
-from decimal import Decimal
 
 from lightning.core.errors import LightningError
 from lightning.investments.domain import DEFAULT_SALE_FACTOR
 from lightning.core.money import ZERO
 from lightning.budgeting.domain import INCOME_FROM_RECURRING
-from lightning.core.dates import fmt_date, today
+from lightning.core.dates import today
 
 from ..sections import SECTIONS
 from ..web import container, redirect, render
@@ -213,7 +212,7 @@ async def unlock_theme(request: Request):
     """Exchange the one-time code from the website account page for the licence of the theme it was bought for, then wear
     it. The code claims a seat for THIS profile; the licence is shared through the profile's settings, so its other
     devices unlock by themselves."""
-    from ..entitlements import UnlockError, redeem
+    from ..entitlements import UnlockError, redeem, shared
     from ..i18n import translate
     from ..web import ui_locale
     from ..themes import theme_name
@@ -227,7 +226,9 @@ async def unlock_theme(request: Request):
     except UnlockError as exc:
         return redirect("/settings", str(exc))
     container(request).settings.set("appearance_theme", theme)
-    return redirect("/settings", translate("{name} is unlocked for this profile and its other devices.", ui_locale(), name=theme_name(theme)))
+    done = ("{name} is unlocked for this profile and its other devices." if shared(theme)
+            else "{name} is unlocked on this device.")  # sharing waits for the home, or this profile is read-only
+    return redirect("/settings", translate(done, ui_locale(), name=theme_name(theme)))
 
 
 @router.post("/privacy")
