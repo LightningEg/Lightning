@@ -215,3 +215,18 @@
     }
   });
 })();
+
+// Closed folds on the Overview load when opened (backend roadmap B1): one small request instead of every chart.
+document.addEventListener("toggle", (event) => {
+  const fold = event.target;
+  if (!(fold instanceof HTMLDetailsElement) || !fold.open) return;
+  fold.querySelectorAll("[data-fold-src]").forEach((box) => {
+    const src = box.getAttribute("data-fold-src");
+    box.removeAttribute("data-fold-src");
+    fetch(src, { credentials: "same-origin", headers: { "X-Requested-With": "fetch" } })
+      .then((r) => (r.ok ? r.text() : Promise.reject(r.status)))
+      .then((html) => { box.innerHTML = html; })
+      .catch(() => { box.setAttribute("data-fold-src", src); });
+  });
+}, true);
+

@@ -1,8 +1,9 @@
-# Android dependency probe (task 04a)
+# Lightning Android app
 
-This is a disposable arm64 build probe, not the Lightning Android app. It loads the
-same Python 3.13 runtime and pinned native dependencies needed by the proposed
-phone home node. It contains no profile or financial data.
+This directory builds the Lightning phone app (`org.lightning.app`): a WebView over the same Python 3.13 server
+the PC runs, with the phone frame and screens (guideline Part C), fingerprint unlock, bank SMS reading, app-icon
+shortcuts and a Quick Settings tile for Add. It began as the task 04a dependency probe; that history is below.
+To see how fast the phone's pages are on a representative profile, run `python tools/perf_check.py --phone`.
 
 **Building (2026-10-07).** Run the **Phone app** workflow by hand to check a change, or **PC and phone app**
 on `main` for the matched test builds the owner installs; both are described in

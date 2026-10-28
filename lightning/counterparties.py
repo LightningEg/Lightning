@@ -37,6 +37,19 @@ class CounterpartyService:
             "ON a.counterparty_id=c.id WHERE a.normalized_alias=? LIMIT 1", (key, key)
         )
 
+    def resolve_many(self, values) -> dict:
+        """{value: row or None} for many names at once, in one read (backend roadmap B4): a saved name wins over
+        an alias, as in `resolve`."""
+        keys = {value: normalize(value) for value in values}
+        found: dict = {}
+        if any(keys.values()):
+            by_alias = {row["_key"]: row for row in self.db.all(
+                "SELECT c.*, a.normalized_alias AS _key FROM counterparties c "
+                "JOIN counterparty_aliases a ON a.counterparty_id=c.id")}
+            by_name = {row["normalized_name"]: row for row in self.db.all("SELECT c.* FROM counterparties c")}
+            found = {key: by_name.get(key) or by_alias.get(key) for key in set(keys.values()) if key}
+        return {value: found.get(key) if key else None for value, key in keys.items()}
+
     @request_cached
     def get(self, counterparty_id: int):
         return self.db.one("SELECT * FROM counterparties WHERE id=?", (counterparty_id,))

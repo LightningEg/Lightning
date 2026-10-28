@@ -72,6 +72,20 @@ class RuleService:
         rules = [r for r in self.repo.rules() if all(c.field == "counterparty" for c in r.conditions)]
         return engine.run(rules, {"counterparty": [name]}).category_id
 
+    def name_categories(self, names) -> dict:
+        """{name: (category_id, depends_on_more)} for many counterparties, reading the rules once (backend roadmap
+        B4): the same answers as `category_for_name` and `depends_on_more_than_name` name by name."""
+        rules = self.repo.rules()
+        name_only = [r for r in rules if all(c.field == "counterparty" for c in r.conditions)]
+        mixed = [(r, [c for c in r.conditions if c.field == "counterparty"]) for r in rules]
+        mixed = [(r, named) for r, named in mixed if named and len(named) < len(r.conditions)]
+        found = {}
+        for name in names:
+            txn = {"counterparty": [name]}
+            found[name] = (engine.run(name_only, txn).category_id,
+                           any(any(engine.holds(c, txn) for c in named) for _, named in mixed))
+        return found
+
     def depends_on_more_than_name(self, name: str) -> bool:
         """A rule names this counterparty and also looks at the amount, notes, account or direction."""
         txn = {"counterparty": [name]}

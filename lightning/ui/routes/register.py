@@ -77,16 +77,18 @@ def counterparty_category_map(c, names) -> dict:
     wins (one that also needs the amount decides when the row is saved), then the category set on the
     Counterparty, else the one it is usually filed under. Every saved Counterparty stays in the map."""
     usual = c.transactions.usual_categories()
-    pickable = {item.id for item in c.categories.pickable()}
+    pickable = {item.id: item for item in c.categories.pickable()}
+    names = list(names)
+    parties = c.counterparties.resolve_many(names)  # one read for every name, not one each (backend roadmap B4)
+    by_rules = c.rules.name_categories(names)
     found = {}
     for name in names:
-        party = c.counterparties.resolve(name)
         found[name] = None
-        category_id = c.rules.category_for_name(name)
+        category_id, depends = by_rules[name]
         if category_id not in pickable:
-            category_id = None if c.rules.depends_on_more_than_name(name) else _category_for_party(party, usual, pickable)
+            category_id = None if depends else _category_for_party(parties[name], usual, pickable)
         if category_id:
-            category = c.categories.get(category_id)
+            category = pickable.get(category_id) or c.categories.get(category_id)
             found[name] = {"id": category.id, "name": category.name}
     return found
 

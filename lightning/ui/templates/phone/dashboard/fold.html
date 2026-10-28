@@ -1,0 +1,3 @@
+{# One fold of the phone's Overview, loaded when opened (backend roadmap B1); no frame, it goes inside the page. #}
+{% if fold == 'trend' %}{% from "partials/charts.html" import trend %}{{ trend(networth_trend, fig[lead].label ~ ' at the end of each month', 'Plan', 160) }}
+{% else %}{% from "phone/partials/charts.html" import flow_bars %}{{ flow_bars(money_sankey, base) }}{% endif %}

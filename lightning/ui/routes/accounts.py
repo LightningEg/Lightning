@@ -381,6 +381,41 @@ def _save_popup_transaction(c, account_id: int, values: dict):
     return txn
 
 
+@router.post("/quick-add")
+async def quick_add(request: Request):
+    """One tap from the phone's Quick Add or its offline queue (backend roadmap B5): saves one entry and answers in
+    JSON. The account is the form's, else the last one used; `submission` makes a double tap or a resend return
+    the first save instead of a second entry."""
+    c = container(request)
+    form = await request.form()
+    raw = str(form.get("account_id", "") or request.cookies.get(LAST_ACCOUNT_COOKIE, ""))
+    if not raw.isdigit():
+        return JSONResponse({"ok": False, "error": "Choose an account."}, 422)
+    account_id = int(raw)
+    values = {key: str(form.get(key, "")) for key in
+              ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes")}
+    values["kind"] = values["kind"] or "out"
+    values["date"] = values["date"] or fmt_date(today())
+    submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+    payload = values | {"account": account_id}
+    try:
+        c.accounts.require_usable(account_id)
+        with c.db.transaction():
+            earlier = c.transactions.submitted(submission, payload)
+            txn = earlier or _save_popup_transaction(c, account_id, values)
+            if earlier is None:
+                c.transactions.remember_submission(submission, payload, txn.id)
+        if earlier is None:
+            c.reserves.auto_link_transaction(txn.id)
+    except (LightningError, ValueError) as exc:
+        message = exc.message if isinstance(exc, LightningError) else "Choose valid values for this transaction."
+        return JSONResponse({"ok": False, "error": message}, 422)
+    response = JSONResponse({"ok": True, "id": txn.id, "ref": txn.ref, "account_id": account_id,
+                             "repeat": earlier is not None})
+    response.set_cookie(LAST_ACCOUNT_COOKIE, str(account_id), max_age=365 * 24 * 3600, httponly=True, samesite="lax")
+    return response
+
+
 @router.post("/{account_id:int}/transaction/new")
 async def save_transaction_popup(request: Request, account_id: int):
     c = container(request)

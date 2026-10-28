@@ -342,7 +342,12 @@ def render(request: Request, name: str, status_code: int = 200, **context) -> HT
         context["msg"] = f"{context['msg']} {note}".strip()
     context.setdefault("error", "")
     context.setdefault("error_field", "")
-    total, owned_total, groups = c.reporting.sidebar(today())
+    # The phone frame has no sidebar (backend roadmap B2): skip its account totals there.
+    if getattr(request.state, "phone", False):
+        total = owned_total = Decimal(0)
+        groups = []
+    else:
+        total, owned_total, groups = c.reporting.sidebar(today())
     token = _ROUND_MONEY.set(name.startswith(REPORTING_TEMPLATES))
     try:
         return _render(request, name, status_code, c, total, owned_total, groups, context)

@@ -122,6 +122,12 @@ class SessionGate:
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
         generation = self.session.token
+        path = scope.get("path", "")
+        if path.startswith("/static/") and scope["method"] in ("GET", "HEAD"):
+            # Stylesheets, scripts and fonts never touch the ledger (backend roadmap B3): they no longer wait
+            # behind a slow page, so a phone's page paints while its numbers are still being worked out.
+            scope.setdefault("state", {}).update(phone=getattr(self, "phone", False))
+            return await self.app(scope, receive, send)
         async with self.mutex:
             request = Request(scope)
             profile_route = request.url.path == "/profiles" or request.url.path.startswith("/profiles/")

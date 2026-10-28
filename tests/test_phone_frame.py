@@ -70,7 +70,8 @@ def test_overview_uses_the_phone_forms(phone):
     html = phone.get("/").text
     assert 'class="phone-kpis"' in html and html.count('class="phone-kpi ') <= 4  # C06.1: four tiles, 2 × 2
     assert "stat-tile-spark" not in html  # no sparkline in a phone tile
-    assert "chart-sankey" not in html and 'class="phone-flow"' in html  # C07.3.3
+    fold = phone.get("/overview/fold/money-in").text  # the money-in fold loads when opened (backend roadmap B1)
+    assert "chart-sankey" not in html + fold and 'class="phone-flow"' in fold  # C07.3.3
     assert "chart-cfall" not in html and "scheme-flow" in html  # C07.3.2: the waterfall as rows
     assert 'class="mcal"' not in html and 'class="phone-months"' in html  # C07.3.4
     assert re.search(r'class="phone-lead">[\d,]+ <small>EGP</small>', html)  # whole EGP on the big figure

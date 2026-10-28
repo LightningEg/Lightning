@@ -1899,6 +1899,7 @@ ARABIC_UI = {
     '1 day late': 'متأخر يوم',
     'All bills': 'كل الفواتير',
     'Next 14 days': 'الـ 14 يوم الجايين',
+    'Loading…': 'بيحمّل…',
     'Ahead of pace': 'أسرع من المعدل',
     'Cover it': 'غطّيه',
     'Nothing due in the next 14 days.': 'مفيش حاجة مستحقة في الـ 14 يوم الجايين.',
