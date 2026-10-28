@@ -1,0 +1,20 @@
+name: Idea or improvement
+description: Optional prompts for a suggestion; use your own format if you prefer
+body:
+  - type: markdown
+    attributes:
+      value: |
+        These prompts help us investigate. Fill in what you know and skip the rest.
+        Prefer your own format? Use a blank issue from the issue chooser.
+        Use dummy examples only. Do not share financial records, account numbers, passwords, recovery keys or backups.
+        Report security problems privately: https://github.com/LightningEg/Lightning/security/advisories/new
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+      description: Describe your idea in your own words.
+  - type: textarea
+    id: context
+    attributes:
+      label: What are you trying to do? (optional)
+      description: A dummy example can help explain the problem this would solve.
