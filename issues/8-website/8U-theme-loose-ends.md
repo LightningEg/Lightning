@@ -1,6 +1,7 @@
 ---
 title: Paid themes - a version bump locks out every buyer, one runtime test never runs, the night switch resets
 type: bug
+look: technical
 area: appearance
 status: ready
 created: 2026-10-28

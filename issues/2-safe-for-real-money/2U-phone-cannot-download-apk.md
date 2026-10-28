@@ -1,6 +1,7 @@
 ---
 title: The website APK still cannot be downloaded on the owner's phone
 type: bug
+look: technical
 area: android
 status: new
 created: 2026-10-23

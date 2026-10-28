@@ -1,6 +1,7 @@
 ---
 title: Download shared prices brings nothing: only the exchange-rate pack is published, and not since 11 Oct
 type: bug
+look: technical
 area: market
 status: ready
 created: 2026-10-16

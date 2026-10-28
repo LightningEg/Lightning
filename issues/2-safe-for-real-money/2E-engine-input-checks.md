@@ -1,6 +1,7 @@
 ---
 title: The engine accepts some bad input - dates before an account opened, crafted ids, rounding of plan amounts
 type: bug
+look: technical
 area: transactions
 status: ready
 created: 2026-10-20

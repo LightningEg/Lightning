@@ -4,7 +4,7 @@ labels: ["good first issue"]
 body:
   - type: input
     id: code
-    attributes: {label: Code, description: "The item's code in issues/ (e.g. 3C); also put it at the start of the title: [3C] …"}
+    attributes: {label: Code, description: "The item's code in issues/ with its tag (e.g. BV-3C; python tools/issues.py tag 3C); also put it at the start of the title: [BV-3C] …"}
     validations: {required: true}
   - type: textarea
     id: what

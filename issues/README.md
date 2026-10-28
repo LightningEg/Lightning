@@ -8,9 +8,21 @@ need. The index is generated: `python tools/issues.py` rewrites it, `--check` ve
 
 ## Codes
 
-Every item has a code: the milestone's number, then a letter. **3C** is the third item of milestone 3. A big item is split one
-step down with a number: **3C1**, **3C2**. Write the code wherever you mention the item: commit messages, the changelog,
-`NOW.md`, pull requests and GitHub issue titles (`[3C] Charts: two end labels overlap`).
+Every item has a code: two letters saying what it is, then the milestone's number and a letter. **BV-3C** is a visual bug,
+the third item of milestone 3. A big item is split one step down with a number: **BV-3C1**, **BV-3C2**.
+
+| Tag | What it is | From the front matter |
+|---|---|---|
+| **BV** | Bug, visual: how a screen looks or reads | `type: bug`, `look: visual` |
+| **BT** | Bug, technical: what the app computes, stores or does | `type: bug`, `look: technical` |
+| **IV** | Improvement, visual | `type: polish` |
+| **IT** | Improvement, technical | `type: tech`, or `type: polish` with `look: technical` |
+| **NF** | New feature | `type: feature` |
+| **OW** | Owner task | `type: owner` |
+
+The tag comes from the front matter, so the generator writes it; the part after it (`3C`) never changes, names the file and
+finds all older history. Write the full code wherever you mention the item: commit messages, the changelog, `NOW.md`, pull
+requests and GitHub issue titles (`[BV-3C] Charts: two end labels overlap`). `python tools/issues.py tag 3C` prints it.
 
 - A code is never reused. `python tools/issues.py next 3` prints the next free one.
 - An item moving to another milestone gets a new code there; write `was: 3C` in its front matter.
@@ -58,6 +70,7 @@ or a `/take` on GitHub) · `blocked` (say what it waits for in `blocked_by`). Fi
 ---
 title: Short sentence saying what is wrong or wanted
 type: bug
+look: visual                         # bugs: visual or technical; polish: optional, visual by default
 area: overview
 status: new
 created: 2026-10-19

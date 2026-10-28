@@ -1,6 +1,7 @@
 ---
 title: A certificate's holding page shows price charts, nine empty "Units out" rows, no interest, and saves it as Equity Fund
 type: bug
+look: visual
 area: investments
 status: ready
 created: 2026-10-20

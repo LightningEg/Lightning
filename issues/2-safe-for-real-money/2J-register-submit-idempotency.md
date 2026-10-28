@@ -1,6 +1,7 @@
 ---
 title: On a journal profile, retrying one add form can still save a second expense
 type: bug
+look: technical
 area: transactions
 status: ready
 created: 2026-10-23

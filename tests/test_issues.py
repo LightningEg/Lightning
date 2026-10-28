@@ -25,3 +25,13 @@ def test_codes_run_a_to_z_then_aa_and_never_reuse_a_done_code():
     milestone = {"n": 3, "items": [{"code": "3A"}, {"code": "3C"}], "done": ["3D"]}
     assert module.next_code(milestone) == "3E"
     assert module.next_code({"n": 9, "items": [], "done": []}) == "9A"
+
+
+def test_the_tag_says_bug_or_improvement_and_visual_or_technical():
+    module = _tool()
+    cases = [({"type": "bug", "look": "visual"}, "BV"), ({"type": "bug", "look": "technical"}, "BT"),
+             ({"type": "polish"}, "IV"), ({"type": "polish", "look": "technical"}, "IT"), ({"type": "tech"}, "IT"),
+             ({"type": "feature"}, "NF"), ({"type": "owner"}, "OW")]
+    assert [module.tag(meta) for meta, _ in cases] == [want for _, want in cases]
+    assert module.look_problem({"type": "bug"}) and module.look_problem({"type": "tech", "look": "visual"})
+    assert module.look_problem({"type": "bug", "look": "technical"}) is None

@@ -1,6 +1,7 @@
 ---
 title: In Arabic the holdings table's price and FX split reads out of order
 type: bug
+look: visual
 area: arabic
 status: new
 created: 2026-10-15
