@@ -18,6 +18,7 @@ Read one section: `grep -n '^## ' docs/PROJECT_OVERVIEW.md`, then read from that
 | 6. Compared with the best budgeting apps | You plan a feature |
 | 7. UX plan (guideline 3.6) | You take a UX item |
 | 8. Plan and roadmap | You pick the next work or finish a milestone |
+| 9. Owner checks held for testing | A milestone works end to end, or you plan a release |
 | Cosmetic marketplace owner revision (2026-10-24) | You change cosmetic parts, purchasing or ownership |
 
 <a id="what-lightning-is"></a>
@@ -220,6 +221,22 @@ schedules; Fill this month; entry helpers; gam'eya and zakat; and the five owner
 dated cash warnings, undo/review/provenance, reserve/bill/CD/reimbursement links, optional cash funding, saved views and
 weekly review). Detail: [CHANGELOG](../CHANGELOG.md) and [Architecture](ARCHITECTURE.md). Where each idea came from:
 [Competition](COMPETITION.md).
+
+## 9. Owner checks held for testing
+
+Owner, 2026-10-28: owner-only tasks are closed as items and held here. **Bring this list to the owner when we test a milestone end to end or prepare a release**; reopen an item only if a check fails. Each link is the item as it stood when held.
+
+| Code | Check | Why it matters |
+|---|---|---|
+| [1B](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/1-easy-to-contribute/1B-owner-runs-security-setup.md) | Run `python tools/security_setup.py --apply` | Until run, the no-push-to-`main` rule, tag protection and secret scanning are not confirmed active |
+| [1C](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/1-easy-to-contribute/1C-trial-contribution.md) | One trial contribution from the website to a merged PR (needs 1B) | Milestone 1's *done when* |
+| [2B](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/2-safe-for-real-money/2B-promotion-durability.md) | Windows reboot drill, `tools/promotion_drill.py`, phases P1–P4 | Real-money gate (§4 of AGENTS.md); code and fault tests already pass |
+| [3I](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/3-polish-and-arabic/3I-owner-check-first-run-and-import.md) | First run and import review on PC and phone | |
+| [3AH](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/3-polish-and-arabic/3AH-visual-flow-acceptance.md) | Visual flow on real Windows/Android, English and Arabic, keyboard and screen reader | Browser evidence only so far |
+| [8C](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/8-website/8C-be-found-as-the-all-in-one-tracker.md) | Resubmit the sitemap; Reddit post; re-ask AI search after two weeks | |
+| [8I](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/8-website/8I-guides-owner-checks.md) | Search Console impressions of the merged guide; read the Arabic topic pages | |
+
+Owner *decisions* (7M, 7R, 7S, 8D, 9L) stay open items: they change what we build.
 
 ## Cosmetic marketplace owner revision (2026-10-24)
 
