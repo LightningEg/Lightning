@@ -42,6 +42,13 @@ def test_a_rate_is_never_read_from_the_future(c):
     assert rate(c, "USD", "EGP", "2026-09-19") is None
 
 
+def test_rate_lookup_at_start_of_calendar(c):
+    assert rate(c, "USD", "EGP", "0001-01-01") is None
+    save_rate(c.db, "0001-01-01", "USD", "EGP", D("50"), "MANUAL")
+    assert rate(c, "USD", "EGP", "0001-02-15").rate == D("50")
+    assert rate(c, "USD", "EGP", "0001-02-16") is None
+
+
 def test_old_rates_are_shown_as_of_then_missing(c):
     save_rate(c.db, "2026-08-01", "USD", "EGP", D("50"), "MANUAL")
     assert rate(c, "USD", "EGP", "2026-08-01").as_of is None

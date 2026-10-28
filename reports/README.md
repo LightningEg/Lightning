@@ -8,7 +8,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | audit-1 | [Audit 1: is Lightning ready to demo?](2026-10-20-demo-readiness/report.md) | 2026-10-20 | audit | 2E, 2F, 3G, 3H, 3Q, 3S, 3T, 5J, 5K, 7L, 7M |
 | audit-2 | [Audit 2: backend efficiency and loose ends](2026-10-21-backend-efficiency/report.md) | 2026-10-21 | audit | 2A, 2C, 2E, 4A, 5A |
 | audit-3 | [Audit 3: is the edit journal (multi-device sync) solid?](2026-10-21-edit-journal/report.md) | 2026-10-21 | audit | 4A |
-| audit-5 | [Audit 5: is the backend engine efficient and streamlined?](2026-10-21-backend-streamlining/report.md) | 2026-10-21 | audit | 4A, 9J, 9K, 2AA |
+| audit-5 | [Audit 5: is the backend engine efficient and streamlined?](2026-10-21-backend-streamlining/report.md) | 2026-10-21 | audit | 4A, 9J, 9K, 2AB |
 | audit-4 | [Audit 4: backend correctness and failure boundaries](2026-10-23-backend-correctness/report.md) | 2026-10-23 | audit | 1G, 2A, 2C, 2J, 4A |
 | audit-6 | [Audit 6: open pull request cleanup](2026-10-23-pull-request-cleanup/report.md) | 2026-10-23 | review | 1H |
 | contributor-review | [Yusuf contribution review · 2026-10-23](2026-10-23-contributor-review/report.md) | 2026-10-23 | review | none |
@@ -20,6 +20,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | store-and-community | [Store and community: unlocking themes, the market, rewards and staying in Lightning](2026-10-27-store-and-community/report.md) | 2026-10-27 | research | 10C, 10D |
 | users-main-questions | [Users' main questions: what each screen must answer, with known gaps](2026-10-27-users-main-questions/report.md) | 2026-10-27 | reference | none |
 | audit-9 | [Audit 9: loose ends after themes and sync, linking sections, and how the plan is filed](2026-10-28-loose-ends-and-linking/report.md) | 2026-10-28 | audit | 4K, 7T |
+| fx-date-boundary | [Backend audit: exchange-rate date boundary](2026-10-29-backend-audit/report.md) | 2026-10-29 | audit | none |
 
 ## Create and maintain a report
 

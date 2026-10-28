@@ -11,7 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-- 2026-10-28 · Claude: [IT-1J][IT-1K] Ruff covers the journal files too (1J done); owner decisions on the plan (1K done): app theme items move to milestone 10 Looks and store (8J→10A, 8K→10B, 8L→10C, 8T→10D), 9L→2AA, 6E→3AI.
+- 2026-10-28 · Claude: [IT-1J][IT-1K] Ruff covers the journal files too (1J done); owner decisions on the plan (1K done): app theme items move to milestone 10 Looks and store (8J→10A, 8K→10B, 8L→10C, 8T→10D), 9L→2AB, 6E→3AI.
 - 2026-10-28 · Claude: [BT-8U][NF-8V] Night switch kept in the profile; Azure held per theme at 4.5:1; shell assets content-hashed, licences checked once per page; Arabic marketplace link from one source; paid manifests name their tier; Dendera night draws the star ceiling. Version rule in `themes.md` §5.
 - 2026-10-28 · Claude: [IT-1J][IT-1K] Ruff (F401/F811/F841, pinned) runs in the PR checks, journal files excluded for now; last six unused variables cut. Bugs carry a `severity` shown in INDEX, areas are a fixed list, `--check` warns about unclaimed building items; reports have Kind, Open follow-ups and tested header lines.
 - 2026-10-28 · Claude: [NF-7T] Linked sections: one transaction page shows what it touched (`/activity/{id}` lands there), `/counterparties/{id}`, an account's dependants and first day below zero, `/tags/{tag}` totals; `workflows/linked.py`.
@@ -21,6 +21,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - 2026-10-28 · Claude: [IV-8V] Filed: Dendera is flatter than its 1,000-coin tier (no answering motions, flat materials); upgrade before its first licence.
 - 2026-10-28 · Claude: Audit 9 (`reports/2026-10-28-loose-ends-and-linking/`): theme, sync/pairing and lint loose ends, section-linking ideas, and how issues/reports are filed; new items IT-1J, IT-1K, BT-4J, IT-4K, NF-7T, BT-8U.
 - 2026-10-28 · Claude: Item codes now start with what the item is: BV/BT bug visual/technical, IV/IT improvement, NF feature, OW owner (`BV-3B`); bugs carry `look:`; `python tools/issues.py tag 3B`.
+- 2026-10-29 · Codex: [2AA] Clamp the exchange-rate search to valid calendar dates, avoiding a crash on early dates; add a boundary regression and backend audit report.
+- 2026-10-29 · Codex / @Abo3baziz: [1I] Issue reporting is flexible: blank issues enabled (#187), optional Bug, Idea and Question prompts, and privacy/private-security guidance. Maintainer task prompts are optional too.
 - 2026-10-28 · Claude: Guideline coders.html: copy of the website's Garnet wording fix (site 311b86d).
 - 2026-10-28 · Claude: Guideline themes.md: the Bolt badge is now the Lightning mark, the two-leaf logo in its own colours (owner; site PR on `claude/leaderboard-banners`).
 - 2026-10-28 · Claude: [8U][8V][8W] Owner: real data is welcome (AGENTS.md §4, Overview §2), the Home account invite stays; Downloads leads with your platform (site #127). Store analytics: site #126.

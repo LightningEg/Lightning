@@ -37,9 +37,9 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | **BT-2J** | [On a journal profile, retrying one add form can still save a second expense](2-safe-for-real-money/2J-register-submit-idempotency.md) | bug, technical · medium | transactions | ready |
 | **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical · medium | android | new |
 | **IT-2Z** | [The net-worth bridge check cannot fail - its valuation change is whatever is left over](2-safe-for-real-money/2Z-net-worth-bridge-check-cannot-fail.md) ([#163](https://github.com/LightningEg/Lightning/issues/163)) | improvement, technical | reporting | ready |
-| **OW-2AA** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AA-stale-code.md) | owner task | architecture | ready |
+| **OW-2AB** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AB-stale-code.md) | owner task | architecture | ready |
 
-Done: 2B, 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y. Next free code: 2AB.
+Done: 2B, 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2AA. Next free code: 2AC.
 
 ## 3 Polish and Arabic
 

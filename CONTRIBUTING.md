@@ -3,6 +3,17 @@
 Lightning is a free, local-first money app for salaried people in Egypt. This is the only collaboration guide: the first
 part is for contributors, the second for the owner and the AIs.
 
+## Report a problem, share an idea or ask a question
+
+Choose an optional [guided form or a blank issue](https://github.com/LightningEg/Lightning/issues/new/choose).
+Fill in what you know and skip the rest; your own format is welcome. A short description is enough to start.
+Version, device, reproduction steps and screenshots help when available, but are not required.
+Maintainers can ask for details later.
+
+Use dummy examples only. Never include financial records, account numbers, passwords, recovery keys or backups.
+Report vulnerabilities through [private security reporting](https://github.com/LightningEg/Lightning/security/advisories/new),
+never in a public issue. The Good first issue form is a starting point for maintainers publishing tasks.
+
 ## Help in four steps
 
 Everything happens on GitHub; you need only a free GitHub account.

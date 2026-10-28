@@ -10,7 +10,7 @@ and fill it with observed evidence. Templates are starting points, not policy.
 | Product/technical decision | [Decision section](decision.md) | Active issue, then authoritative reference |
 | Brand rules | [Guideline map](../guideline/README.md) | Follow the relevant surface/language |
 | App theme | [Creator kit](https://github.com/LightningEg/Lightning/tree/main/theme-kit) | Brief, AI prompt, manifest template and preview workbench |
-| App bug or contribution | [GitHub issue templates](https://github.com/LightningEg/Lightning/tree/main/.github/ISSUE_TEMPLATE) | GitHub issue linked to the coded repo item |
+| App report or contribution | [GitHub issue templates](https://github.com/LightningEg/Lightning/tree/main/.github/ISSUE_TEMPLATE) | Optional guided GitHub report or blank issue; maintainers link accepted tasks to coded repo items |
 | App pull request | [PR template](https://github.com/LightningEg/Lightning/blob/main/.github/pull_request_template.md) | Pull request description |
 
 The kits and GitHub templates stay at their existing paths. This catalogue links
