@@ -35,3 +35,15 @@ def test_a_code_offer_stops_advertising_once_its_three_requests_are_spent(device
     assert hs.advertise("0" * 64, 47513) is not None
     _with_attempts(hs, MAX_REQUESTS)
     assert hs.advertise("0" * 64, 47513) is None
+
+
+def test_one_helper_decides_a_journal_profile_and_its_role(tmp_path):
+    from lightning.runtime.devices import Devices
+    from lightning.runtime.paths import JOURNAL_MARKERS, is_journal_profile
+    assert not is_journal_profile(tmp_path)
+    for name in JOURNAL_MARKERS:
+        folder = tmp_path / name.split(".")[0]
+        folder.mkdir()
+        (folder / name).write_text("{}", encoding="utf-8")
+        assert is_journal_profile(folder)
+        assert Devices(tmp_path / "devices").role_for(str(folder / "ledger.db")) == "home"

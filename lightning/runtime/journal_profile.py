@@ -256,7 +256,7 @@ class JournalRuntime:
     async def _run(self):
         from lightning.sync.journal.discovery import DISCOVERY_PORT, LanResponder
         from lightning.ui.journal import create_journal_app
-        from .journal_lab import LabServer
+        from .http import QuietServer
         import uvicorn
         server_task = None
         try:
@@ -266,7 +266,7 @@ class JournalRuntime:
             protocol = create_journal_app(self.device, session_token=secrets.token_urlsafe(32),
                                           channel=self.channel, pairing=self.pairing, move=self.move)
             guarded = _ProtocolGate(protocol, self)
-            self.server = LabServer(self.identity.configure_uvicorn_tls(uvicorn.Config(
+            self.server = QuietServer(self.identity.configure_uvicorn_tls(uvicorn.Config(
                 guarded, host="0.0.0.0", port=port,
                 access_log=False, log_level="error", timeout_graceful_shutdown=1,
                 limit_concurrency=32, backlog=32, timeout_keep_alive=3)))
