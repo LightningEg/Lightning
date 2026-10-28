@@ -33,8 +33,8 @@ The desktop preview asks for a profile password and provides a recovery key.
 Its encrypted profile databases and backups live under the user's
 `Documents/Lightning`, outside the extracted app folder. Close the app before
 replacing that entire folder with a newer ZIP; replacing app files does not
-replace profile data. Testers may use sample or real data; keep an independent
-backup because legacy database import and backup restore in the UI are not finished. Do not sync a live database between running
+replace profile data. Use sample or real data. Legacy database import and backup restore in the UI
+are not finished yet. Do not sync a live database between running
 computers.
 
 On Linux, run `python -m lightning --profiles` from a source checkout for the
