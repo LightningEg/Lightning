@@ -79,7 +79,7 @@
 </section>{% endif %}
 
 {% if filter_category %}<div class="phone-reg-filter"><p class="phone-note">Category: {{ filter_category.split(' › ')[-1] }}</p><a class="phone-quiet" href="{{ reg.clear_category }}">{{ 'Clear'|tr(locale) }}</a></div>{% endif %}
-{% if filter_tag %}<div class="phone-reg-filter"><p class="phone-note">Tagged #{{ filter_tag }} · {{ total_rows }} transaction{{ 's' if total_rows != 1 }}</p><a class="phone-quiet" href="{{ reg.clear_tag }}">{{ 'Clear'|tr(locale) }}</a></div>{% endif %}
+{% if filter_tag %}<div class="phone-reg-filter"><p class="phone-note">Tagged #{{ filter_tag }} · {{ total_rows }} transaction{{ 's' if total_rows != 1 }}</p><a class="phone-quiet" href="/tags/{{ filter_tag|urlencode }}">{{ 'Totals for #{tag}'|tr(locale, tag=filter_tag) }}</a><a class="phone-quiet" href="{{ reg.clear_tag }}">{{ 'Clear'|tr(locale) }}</a></div>{% endif %}
 
 {# Quiet: the saved views and the value updates. #}
 <div class="phone-reg-quiet">

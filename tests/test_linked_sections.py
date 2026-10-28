@@ -154,3 +154,39 @@ def test_the_first_day_an_account_goes_below_zero_comes_from_the_dated_forecast(
     finally:
         with c.db.transaction():
             c.planning.remove(item_id)
+
+
+# ------------------------------------------------------------------ 7T4
+def test_a_tag_has_one_total_across_categories_and_accounts(sample):
+    c, client = sample
+    page = c.linked.tag("#Eid")
+    ids = c.transactions.tag_transaction_ids("eid")
+    assert page["count"] == len(ids) and (page["money_in"], page["money_out"]) == c.reporting.money_in_out(ids)
+    assert sum(row["money_out"] for row in page["categories"]) == page["money_out"]
+    assert sum(row["money_out"] for row in page["accounts"]) == page["money_out"]
+    assert page["reserves"] == []
+    html = client.get("/tags/eid").text
+    assert "Its transactions" in html and 'href="/transactions?tag=eid"' in html
+    assert 'href="/tags/eid"' in client.get("/transactions?tag=eid").text  # reachable where the tag is shown
+    assert 'href="/tags/eid"' in client.get(f"/transactions/{min(ids)}").text
+
+
+def test_a_reserve_named_like_the_tag_is_compared_with_it(sample):
+    c, client = sample
+    with c.db.transaction():
+        reserve = c.reserves.create("Eid", "10000")
+    try:
+        page = c.linked.tag("eid")
+        assert [r["name"] for r in page["reserves"]] == ["Eid"]
+        assert page["reserves"][0]["left_after"] == Decimal("10000") - page["money_out"]
+        assert "of the 10,000 target for Eid" in client.get("/tags/eid").text
+    finally:
+        with c.db.transaction():
+            c.reserves.delete(reserve["id"])
+
+
+def test_four_names_then_other():
+    from lightning.workflows.linked import _four_then_other
+    rows = {i: {"name": str(i), "money_out": Decimal(i)} for i in range(1, 8)}
+    shown = _four_then_other(rows)
+    assert [row["name"] for row in shown] == ["7", "6", "5", "4", "Other"] and shown[-1]["money_out"] == Decimal(6)

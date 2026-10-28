@@ -2781,6 +2781,17 @@ ARABIC_UI = {
     'Gam’eya payout comes here': 'قبض الجمعية بييجي هنا',
     'Certificate interest comes here · matures {date}': 'عائد الشهادة بييجي هنا · بتستحق {date}',
     'Reserve held here': 'مبلغ محجوز هنا',
+    'Its transactions': 'معاملاته',
+    'By account': 'حسب الحساب',
+    'Open reserves': 'افتح المبالغ المحجوزة',
+    'Target {amt}': 'الهدف {amt}',
+    '{n} transactions': '{n} معاملة',
+    'of the {amt} target for {name}': 'من هدف {amt} لـ {name}',
+    '{amt} paid from it with this tag': '{amt} اتدفعوا منه بالوسم ده',
+    'No money out carries this tag.': 'مفيش فلوس خارجة عليها الوسم ده.',
+    'No reserve shares this name. A reserve named like the tag is compared with it.': 'مفيش مبلغ محجوز بنفس الاسم. لو سميت مبلغ محجوز زي الوسم هيتقارن بيه.',
+    'Totals for #{tag}': 'إجماليات #{tag}',
+    'Tagged #{tag}': 'عليها الوسم #{tag}',
     '{n} plans, circles, certificates or reserves still use this account. Choose another account for them first.': '{n} من الخطط أو الجمعيات أو الشهادات أو المبالغ المحجوزة لسه بتستخدم الحساب ده. اختار لهم حساب تاني الأول.',
 }
 

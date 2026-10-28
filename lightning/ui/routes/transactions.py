@@ -553,3 +553,14 @@ async def restore_transaction(request: Request, txn_id: int):
 async def by_ref(request: Request, ref: str):
     txn = container(request).transactions.get_by_ref(ref)
     return redirect(f"/transactions/{txn.id}")
+
+
+@router.get("/tags/{tag}")
+async def tag_totals(request: Request, tag: str):
+    """A tag's one total across categories and accounts, beside the reserve that shares its name (7T4)."""
+    c = container(request)
+    try:
+        page = c.linked.tag(tag)
+    except LightningError as exc:
+        return redirect("/transactions", exc.message)
+    return render(request, "tag.html", page=page)
