@@ -1,5 +1,17 @@
 {
-  "imported": 37,
-  "expected": 37,
-  "failed": []
+  "imported": 46,
+  "expected": 46,
+  "failed": [],
+  "new_fintech_logos": [
+    "vodafone-cash",
+    "telda",
+    "thndr",
+    "money-fellows",
+    "orange-cash",
+    "etisalat-cash",
+    "we-pay",
+    "instapay",
+    "fawry"
+  ],
+  "last_updated": "2026-10-28"
 }

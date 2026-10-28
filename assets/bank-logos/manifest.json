@@ -258,5 +258,87 @@
     "source_url": "https://www.onebank.eg/resources/img/favicon/android-icon-192x192.png",
     "source_type": "official bank site",
     "original_svg": "originals/onebank-wordmark.svg"
+  },
+  "vodafone-cash": {
+    "name": "Vodafone Cash",
+    "category": "mobile_wallet",
+    "icon": "icons/vodafone-cash.svg",
+    "original": "originals/vodafone-cash.svg",
+    "source_url": "https://github.com/shahwan42/ClearMoney/blob/main/static/img/institutions/vodafone-cash.svg",
+    "source_type": "third-party public GitHub repository",
+    "wordmark": "wordmarks/vodafone-cash.svg",
+    "note": "Vodafone mark; Cash-specific wordmark not verified"
+  },
+  "telda": {
+    "name": "Telda",
+    "category": "fintech_account",
+    "icon": "icons/telda.svg",
+    "original": "originals/telda.svg",
+    "source_url": "https://github.com/P3DROVFX/ii-icon-pack/blob/main/ii-icon-pack/apps/scalable/telda.svg",
+    "source_type": "third-party public GitHub repository",
+    "note": "Third-party icon pack stylization; may not match current official Telda mark"
+  },
+  "thndr": {
+    "name": "Thndr",
+    "category": "investment",
+    "icon": "icons/thndr.png",
+    "original": "originals/thndr.png",
+    "source_url": "https://github.com/DAFFAsd/thndr-homepage-challenge/blob/main/public/thndr-favicon.png",
+    "source_type": "third-party public GitHub repository",
+    "wordmark": "wordmarks/thndr.png",
+    "wordmark_source_url": "https://github.com/DAFFAsd/thndr-homepage-challenge/blob/main/public/thndr_logo.png"
+  },
+  "money-fellows": {
+    "name": "Money Fellows",
+    "category": "fintech_savings",
+    "icon": "icons/money-fellows.png",
+    "original": "originals/money-fellows.png",
+    "source_url": "https://github.com/amrmohamed25/MoneyFellows/blob/main/public/images/logo.png",
+    "source_type": "third-party public GitHub repository",
+    "wordmark": "wordmarks/money-fellows.png",
+    "wordmark_source_url": "https://github.com/amrmohamed25/MoneyFellows/blob/main/public/images/web_logo.png"
+  },
+  "orange-cash": {
+    "name": "Orange Cash",
+    "category": "mobile_wallet",
+    "icon": "icons/orange-cash.svg",
+    "original": "originals/orange-cash.svg",
+    "source_url": "https://github.com/shahwan42/ClearMoney/blob/main/static/img/institutions/orange-cash.svg",
+    "source_type": "third-party public GitHub repository",
+    "note": "Orange corporate brand mark"
+  },
+  "etisalat-cash": {
+    "name": "Etisalat Cash",
+    "category": "mobile_wallet",
+    "icon": "icons/etisalat-cash.svg",
+    "original": "originals/etisalat-cash.svg",
+    "source_url": "https://github.com/shahwan42/ClearMoney/blob/main/static/img/institutions/etisalat-cash.svg",
+    "source_type": "third-party public GitHub repository",
+    "wordmark": "wordmarks/etisalat-cash.svg",
+    "note": "Legacy Etisalat Cash artwork; see current etisalat money / e& brand"
+  },
+  "we-pay": {
+    "name": "WE Pay",
+    "category": "mobile_wallet",
+    "icon": "icons/we-pay.svg",
+    "original": "originals/we-pay.svg",
+    "source_url": "https://github.com/shahwan42/ClearMoney/blob/main/static/img/institutions/we-pay.svg",
+    "source_type": "third-party public GitHub repository"
+  },
+  "instapay": {
+    "name": "InstaPay",
+    "category": "payment_network",
+    "icon": "icons/instapay.svg",
+    "original": "originals/instapay.svg",
+    "source_url": "https://github.com/mahafez-app/mahafez_app/blob/main/assets/icons/instapay.svg",
+    "source_type": "third-party public GitHub repository"
+  },
+  "fawry": {
+    "name": "Fawry",
+    "category": "payment_platform",
+    "icon": "icons/fawry.png",
+    "original": "originals/fawry.png",
+    "source_url": "https://github.com/shahwan42/ClearMoney/blob/main/static/img/institutions/fawry.png",
+    "source_type": "third-party public GitHub repository"
   }
 }
