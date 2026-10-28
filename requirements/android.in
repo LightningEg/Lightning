@@ -1,13 +1,13 @@
 # What the phone app (android/) installs. tools/android_lock.py turns this into requirements/android.lock,
 # where every package is one exact file; edit this, then rerun that tool.
-fastapi==0.141.1
+fastapi==0.162.0
 uvicorn==0.54.0
 jinja2==3.1.6
 python-multipart==0.0.32
-tzdata==2026.2
+tzdata==2026.5
 # Native: no index has these for CPython 3.13 on arm64 Android. Built by android-native-wheels.yml and
 # published as the release android-wheels-r<run>; the lock takes them from that release.
 cryptography==50.0.2
-sqlcipher3==0.6.2
-cffi==2.0.0
-pydantic-core==2.46.5
+sqlcipher3==0.6.4
+cffi==2.1.1
+pydantic-core==2.50.1
