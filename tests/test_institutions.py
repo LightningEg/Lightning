@@ -31,9 +31,27 @@ def test_the_list_has_egypts_banks_brokers_and_wallets():
 
 
 def test_a_missing_logo_shows_the_monogram_tile():
-    assert institutions.tile("My Credit Union") == {"logo": "", "mono": "MC", "name": "My Credit Union"}
+    assert institutions.tile("My Credit Union") == {"logo": "", "mono": "MC", "name": "My Credit Union", "icon": ""}
     assert institutions.tile("CIB")["mono"] == "CI"
     assert institutions.monogram("Banque Misr") == "BM"
+
+
+def test_every_bank_logo_is_bundled_and_linked():
+    banks = [i for i in institutions.builtin() if i.logo]
+    assert len(banks) >= 37 and institutions.tile("CIB")["logo"] == "/static/institutions/cib.png"
+    static = institutions.Path(institutions.__file__).parents[1] / "ui" / "static" / "institutions"
+    for item in banks:
+        assert (static / item.logo).stat().st_size <= 8 * 1024, item.code
+
+
+def test_an_account_with_no_institution_shows_the_icon_of_its_kind():
+    assert institutions.tile("Cash wallet", "CASH")["icon"] == "wallet"
+    assert institutions.tile("Pocket money", "CASH_AT_HAND")["icon"] == "banknote"
+    assert institutions.tile("Gold at home", "PHYSICAL_ASSET")["icon"] == "gem"
+    assert institutions.tile("Family circle", "GAMEYA")["icon"] == "people"
+    # a named institution keeps its logo or initials; a bank never becomes an icon
+    assert institutions.tile("Vodafone Cash", "CASH") == {"logo": "", "mono": "VC", "name": "Vodafone Cash", "icon": ""}
+    assert institutions.tile("My Credit Union", "BANK")["icon"] == ""
 
 
 def test_used_before_comes_first_and_the_form_renders_the_options(c):

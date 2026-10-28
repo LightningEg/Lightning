@@ -9,7 +9,7 @@
   <link rel="icon" type="image/svg+xml" href="/static/lightning-mark.svg">
   <link rel="stylesheet" href="/static/fonts/fonts.css?v=2">
   {# Bricolage Grotesque and Manrope (guideline A06) are bundled in fonts.css: no outside request, in every mode. #}
-  <link rel="stylesheet" href="/static/style{{ '.rtl' if locale == 'ar' else '' }}.css?v=96">
+  <link rel="stylesheet" href="/static/style{{ '.rtl' if locale == 'ar' else '' }}.css?v=97">
   <link rel="stylesheet" href="/static/themes.generated.css?v=4">
   <link rel="stylesheet" href="/static/theme-surfaces.css?v=3">
   <link rel="stylesheet" href="/static/theme-materials.css?v=2">
@@ -52,11 +52,12 @@
       <div class="sidebar-heading">{{ 'Accounts'|tr(locale) }} <span>{{ "· Balances in"|tr(locale) }} <bdi dir="ltr">{{ base }}</bdi></span></div>
       <a class="side-row side-total {{ 'active' if path == '/transactions' }}" href="/transactions" {% if path == '/transactions' %}aria-current="page"{% endif %}>
         <span>{{ fig.in_your_accounts.label }}</span><span class="num" title="{{ fig.in_your_accounts.equation }}">{{ sidebar_total|amount_role('total') }}</span></a>
+      {% from "partials/macros.html" import inst_tile with context %}
       {% for g in sidebar_groups %}
         <div class="side-row side-group"><span>{{ g.label }}</span></div>
         {% for a in g.children %}
         <a class="side-row side-account {{ 'active' if path == '/accounts/' ~ a.id or path.startswith('/accounts/' ~ a.id ~ '/') }}" href="/accounts/{{ a.id }}" title="{{ a.label }}">
-          {% set tl = institution_tile(a.institution or a.label) %}<span class="inst-tile" aria-hidden="true">{% if tl.logo %}<img src="{{ tl.logo }}" alt="" loading="lazy">{% else %}{{ tl.mono }}{% endif %}</span><span class="side-name">{{ a.label }}</span>
+          {{ inst_tile(a.institution or a.label, kind=a.kind) }}<span class="side-name">{{ a.label }}</span>
           <span class="num {{ 'neg' if a.value < 0 }}">{{ a.value|amount_role('total') }}</span></a>
         {% endfor %}
       {% endfor %}

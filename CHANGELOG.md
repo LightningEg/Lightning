@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-28 · Claude: [6E] Bank logos: the 37 in `assets/bank-logos/icons/` now show on account tiles (64 px, `lightning/ui/static/institutions/`); Standard Chartered, United Bank, onebank, Telda and WE Pay added to `institutions.csv`. Cash, cash at hand, physical assets, other assets and gam'eyas with no institution show an icon of their kind (`KIND_ICON`).
+
 - 2026-10-27 · Claude: 8S owner console done (seats, Community view, blog bonus; website #115); the Papyrus and Dendera sets become 8T.
 
 - 2026-10-27 · Claude: 8M–8S store and community audit (`reports/2026-10-27-store-and-community/`): market and cart, bundles, hints on the site, public profiles, paid merges, rewarded stories, owner console; seven new items.

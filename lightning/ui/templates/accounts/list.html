@@ -17,7 +17,7 @@
   <div class="account-group-cols"><span></span><span>{{ fig.in_your_accounts.label }}</span><span>{{ fig.what_you_own.label }}</span></div>
   {% for acc, balance, owned, count in g.rows %}
   <a class="account-row{{ ' is-void' if not acc.active }}" href="{{ '/deposits/' ~ acc.id if acc.account_type.value == 'DEPOSIT' else ('/gameya/' ~ acc.id if acc.account_type.value == 'GAMEYA' else '/accounts/' ~ acc.id) }}">
-    <span class="account-row-name">{{ inst_tile(acc.institution or acc.name) }}<span><b>{{ acc.name }}</b><small>{{ acc.type_label }}{% if not acc.active %} · {{ "inactive"|tr(locale) }}{% endif %}</small></span></span>
+    <span class="account-row-name">{{ inst_tile(acc.institution or acc.name, kind='CASH_AT_HAND' if acc.cash_at_hand else acc.account_type.value) }}<span><b>{{ acc.name }}</b><small>{{ acc.type_label }}{% if not acc.active %} · {{ "inactive"|tr(locale) }}{% endif %}</small></span></span>
     <span class="num">{% if balance is none %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% else %}{{ balance|money }}{% endif %}</span>
     <span class="num">{% if owned is none %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% else %}{{ owned|money }}{% endif %}</span>
   </a>{% endfor %}

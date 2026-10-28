@@ -105,15 +105,20 @@
 {% for g in groups %}<optgroup label="{{ g.label }}">{% for o in g.options %}{% if o.id is none %}<option disabled>{{ o.name }}</option>{% else %}<option value="{{ o.id }}" data-movement="{{ o.movement }}" {{ 'selected' if selected|string == o.id|string }}{% if o.header %} class="option-head"{% endif %}>{{ '  ' if o.level == 3 }}{{ o.name }}</option>{% endif %}{% endfor %}</optgroup>{% endfor %}
 {%- endmacro %}
 
-{% macro inst_tile(name, size='') -%}
-{%- set tl = institution_tile(name) -%}
-<span class="inst-tile{{ ' inst-' ~ size if size }}" aria-hidden="true">{% if tl.logo %}<img src="{{ tl.logo }}" alt="" loading="lazy">{% else %}{{ tl.mono }}{% endif %}</span>
+{# An account's kind when no institution names it (accounts/institutions.py KIND_ICON; Lucide icons). #}
+{% macro kind_icon(name) -%}
+<svg viewBox="0 0 24 24" aria-hidden="true">{% if name == 'wallet' %}<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>{% elif name == 'banknote' %}<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>{% elif name == 'gem' %}<path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/>{% elif name == 'box' %}<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>{% elif name == 'people' %}<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>{% endif %}</svg>
+{%- endmacro %}
+
+{% macro inst_tile(name, size='', kind='') -%}
+{%- set tl = institution_tile(name, kind) -%}
+<span class="inst-tile{{ ' inst-' ~ size if size }}{{ ' inst-kind' if tl.icon }}" aria-hidden="true">{% if tl.logo %}<img src="{{ tl.logo }}" alt="" loading="lazy">{% elif tl.icon %}{{ kind_icon(tl.icon) }}{% else %}{{ tl.mono }}{% endif %}</span>
 {%- endmacro %}
 
 {# One page header (A05): an optional tile, the title, the line under it, and an optional figure strip on the right.
    Pass the title and line already translated. #}
-{% macro page_header(title, line='', tile=none, figure='') -%}
-<div class="page-head">{% if tile %}{{ inst_tile(tile) }}{% endif %}
+{% macro page_header(title, line='', tile=none, figure='', tile_kind='') -%}
+<div class="page-head">{% if tile %}{{ inst_tile(tile, kind=tile_kind) }}{% endif %}
   <div class="page-head-text"><h1>{{ title }}</h1>{% if line %}<p class="page-line">{{ line }}</p>{% endif %}</div>
   {% if figure %}<div class="page-figures">{{ figure }}</div>{% endif %}
 </div>

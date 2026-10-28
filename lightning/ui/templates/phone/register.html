@@ -8,7 +8,7 @@
 {% block title %}{{ account.name if account else 'Transactions' }}{% endblock %}
 {% block phone_back %}{% if account %}<a class="phone-back" href="/accounts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Accounts'|tr(locale) }}</span></a>{% else %}{{ super() }}{% endif %}{% endblock %}
 {% block heading %}
-{% if account %}<div class="page-head">{{ inst_tile(account.institution or account.name) }}<div class="page-head-text"><h1>{{ account.name }}</h1>{% if account.type_short|lower not in account.name|lower %}<p>{{ account.type_short }}{% if account.institution %} · {{ account.institution }}{% endif %}</p>{% endif %}</div></div>
+{% if account %}<div class="page-head">{{ inst_tile(account.institution or account.name, kind='CASH_AT_HAND' if account.cash_at_hand else account.account_type.value) }}<div class="page-head-text"><h1>{{ account.name }}</h1>{% if account.type_short|lower not in account.name|lower %}<p>{{ account.type_short }}{% if account.institution %} · {{ account.institution }}{% endif %}</p>{% endif %}</div></div>
 {% if account_held_value %}<p class="phone-note">{{ "In this account"|tr(locale) }}</p>{% endif %}
 <div class="phone-lead">{{ (account_value if account_value is not none else account_balance)|money(False, 0) }} <small>{{ account.currency }}</small></div>
 {% if account_held_value %}<p class="phone-note">{{ fig.what_you_own.label }} {{ account_owned_value|money(False, 0) }} · Held for others {{ account_held_value|money(False, 0) }}</p>{% endif %}

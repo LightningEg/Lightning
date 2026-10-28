@@ -89,12 +89,19 @@ def match_builtin(text: str) -> Institution | None:
     return _builtin_index().get(normalize(text))
 
 
-def tile(text: str) -> dict[str, str]:
-    """What a tile shows for an institution's written name: a bundled logo, else a monogram."""
+# Accounts that need no institution (cash, gold, a flat, a gam'eya) show an icon of their kind instead of initials
+# when no known institution names them (owner, 2026-10-28). Names are the Lucide icons drawn by macros.kind_icon.
+KIND_ICON = {"CASH": "wallet", "CASH_AT_HAND": "banknote", "PHYSICAL_ASSET": "gem", "OTHER_ASSET": "box",
+             "GAMEYA": "people"}
+
+
+def tile(text: str, kind: str = "") -> dict[str, str]:
+    """What a tile shows for an institution's written name: a bundled logo, else a known institution's
+    monogram, else the icon of the account's kind (AccountType value, or CASH_AT_HAND), else a monogram."""
     found = match_builtin(text)
     if found is not None:
-        return {"logo": found.logo_url, "mono": found.mono, "name": found.name}
-    return {"logo": "", "mono": monogram(text), "name": str(text or "")}
+        return {"logo": found.logo_url, "mono": found.mono, "name": found.name, "icon": ""}
+    return {"logo": "", "mono": monogram(text), "name": str(text or ""), "icon": KIND_ICON.get(str(kind or ""), "")}
 
 
 class InstitutionService:
