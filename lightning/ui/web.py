@@ -265,7 +265,7 @@ def _compact(value) -> str:
         unit = thousand
     else:
         return sign + f"{quantize(v, 0):.0f}"
-    text = f"{amount:.1f}" if amount != amount.to_integral_value() else f"{amount:.0f}"
+    text = f"{amount:.1f}".removesuffix(".0")
     return sign + text + ((" " + unit) if arabic else unit)
 
 
