@@ -383,7 +383,7 @@ def _save_popup_transaction(c, account_id: int, values: dict):
 
 @router.post("/quick-add")
 async def quick_add(request: Request):
-    """One tap from the phone's Quick Add or its offline queue (backend roadmap B5): saves one entry and answers in
+    """One tap from the phone's Quick Add (backend roadmap B5): saves one entry and answers in
     JSON. The account is the form's, else the last one used; `submission` makes a double tap or a resend return
     the first save instead of a second entry."""
     c = container(request)
@@ -399,7 +399,7 @@ async def quick_add(request: Request):
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = values | {"account": account_id}
     try:
-        c.accounts.require_usable(account_id)
+        account = c.accounts.require_usable(account_id)
         with c.db.transaction():
             earlier = c.transactions.submitted(submission, payload)
             txn = earlier or _save_popup_transaction(c, account_id, values)
@@ -412,7 +412,7 @@ async def quick_add(request: Request):
         return JSONResponse({"ok": False, "error": message}, 422)
     response = JSONResponse({"ok": True, "id": txn.id, "ref": txn.ref, "account_id": account_id,
                              "repeat": earlier is not None})
-    response.set_cookie(LAST_ACCOUNT_COOKIE, str(account_id), max_age=365 * 24 * 3600, httponly=True, samesite="lax")
+    response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600, httponly=True, samesite="lax")
     return response
 
 
@@ -439,7 +439,7 @@ async def save_transaction_popup(request: Request, account_id: int):
         if matched_reserve < 0:
             feedback = (feedback + " Several reserves match; choose beside the transaction in its account list.").strip()
         response = redirect(values["return_to"], f"Saved {txn.ref}. {feedback}".strip())
-        response.set_cookie(LAST_ACCOUNT_COOKIE, str(account_id), max_age=365 * 24 * 3600,
+        response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600,  # the stored id
                             httponly=True, samesite="lax")
         return response
     except (LightningError, ValueError) as exc:
