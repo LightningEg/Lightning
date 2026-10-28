@@ -37,7 +37,7 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | **2F** | [On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone](2-safe-for-real-money/2F-android-downloads-files-links.md) | bug | android | ready |
 | **2J** | [On a journal profile, retrying one add form can still save a second expense](2-safe-for-real-money/2J-register-submit-idempotency.md) | bug | transactions | ready |
 | **2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug | android | new |
-| **2Z** | [The net-worth bridge check cannot fail - its valuation change is whatever is left over](2-safe-for-real-money/2Z-net-worth-bridge-check-cannot-fail.md) | tech | reporting | ready |
+| **2Z** | [The net-worth bridge check cannot fail - its valuation change is whatever is left over](2-safe-for-real-money/2Z-net-worth-bridge-check-cannot-fail.md) ([#163](https://github.com/LightningEg/Lightning/issues/163)) | tech | reporting | ready |
 
 Done: 2D, 2K, 2O, 2P, 2Q, 2R, 2S, 2T, 2G, 2H, 2N, 2V, 2W, 2X, 2Y, 2I, 2L, 2M. Next free code: 2AA.
 
@@ -56,7 +56,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **3Q** | [Visual audit - every KPI card should answer, compare and point; one card system for PC and phone](3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md) | polish | product | ready |
 | **3S** | [PC screens break the guideline in 18 places not yet filed - misleading charts, colours off meaning](3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) | polish | product | ready |
 | **3T** | [Phone screens break Part C - cut words, overlapping text, no way back on five pages, small targets, five Settings tabs](3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | polish | phone | ready |
-| **3U** | [Arabic leftovers - the budget move preview arrow, two overlaps and a wrapped number](3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) | bug | arabic | ready |
+| **3U** | [Arabic leftovers - the budget move preview arrow, two overlaps and a wrapped number](3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) ([#161](https://github.com/LightningEg/Lightning/issues/161)) | bug | arabic | ready |
 | **3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | feature | phone | new |
 | **3AH** | [Visual flow acceptance on PC and phone](3-polish-and-arabic/3AH-visual-flow-acceptance.md) | owner | product | ready |
 
@@ -88,7 +88,7 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | **5G** | [Brokerages that span exchanges and currencies - structure, workflows and analysis to build](5-investments/5G-brokerages-across-exchanges.md) | feature | investments | building |
 | **5I** | [Gam'eya and zakat follow-ups: no circle in the sample, no phone breakdown, an early-turn circle shown below zero](5-investments/5I-gameya-and-zakat-follow-ups.md) | bug | investments | new |
 | **5J** | [Converting EGP to dollars raises net worth - the conversion's own rate revalues every dollar holding](5-investments/5J-conversion-raises-net-worth.md) | bug | investments | new |
-| **5K** | [A certificate's holding page shows price charts, nine empty "Units out" rows, no interest, and saves it as Equity Fund](5-investments/5K-certificate-holding-page.md) | bug | investments | ready |
+| **5K** | [A certificate's holding page shows price charts, nine empty "Units out" rows, no interest, and saves it as Equity Fund](5-investments/5K-certificate-holding-page.md) ([#162](https://github.com/LightningEg/Lightning/issues/162)) | bug | investments | ready |
 
 Done: 5H, 5L. Next free code: 5M.
 

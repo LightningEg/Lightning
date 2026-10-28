@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-28 · Claude: [8Q] Coin offers by difficulty (CONTRIBUTING.md: 200 small, 500 medium, 800+ money logic): #34 and #50 labelled `coins:200`; 3U, 5K and 2Z published as #161–#163.
+
 - 2026-10-27 · Claude: 8S owner console done (seats, Community view, blog bonus; website #115); the Papyrus and Dendera sets become 8T.
 
 - 2026-10-27 · Claude: 8M–8S store and community audit (`reports/2026-10-27-store-and-community/`): market and cart, bundles, hints on the site, public profiles, paid merges, rewarded stories, owner console; seven new items.
