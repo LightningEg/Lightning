@@ -119,7 +119,10 @@ async def read_one_message(request: Request):
     The sheet fills Amount, Counterparty, Date and Money in or out; the person checks them and taps Save."""
     form = await request.form()
     text = str(form.get("text", ""))[:MAX_TEXT]
-    found = parse_sms(text)
+    try:
+        found = parse_sms(text)
+    except ValueError:  # a clock or date the bank wrote wrongly (29:13): nothing to fill in
+        found = None
     if found is None:
         return JSONResponse({"error": "No amount found in this message."}, status_code=422)
     return JSONResponse({"amount": f"{found.amount:.2f}", "counterparty": found.place, "date": found.when[:10],

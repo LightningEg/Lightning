@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import calendar
 import csv
+import re
 from datetime import date, timedelta
 from decimal import Decimal
 from io import StringIO
@@ -144,12 +145,17 @@ def analyse(c, kind: str, item, now: date | None = None) -> dict:
             "top": sorted((e for e in by_txn.values() if e["value"] > ZERO), key=lambda e: -e["value"])[:TOP_SHOWN]}
 
 
+NUMBER = re.compile(r"-?\d+(\.\d+)?")
+
+
 def _csv(filename: str, headings: tuple, rows: list[tuple]) -> Response:
     buffer = StringIO(newline="")
     writer = csv.writer(buffer)
     writer.writerow(headings)
     for row in rows:
-        writer.writerow(["'" + v if isinstance(v, str) and v.lstrip().startswith(("=", "+", "-", "@")) else v for v in row])
+        # a name that starts like a formula is written as text; a number such as -200.00 stays a number
+        writer.writerow(["'" + v if isinstance(v, str) and v.lstrip().startswith(("=", "+", "-", "@"))
+                         and not NUMBER.fullmatch(v.strip()) else v for v in row])
     return Response("\ufeff" + buffer.getvalue(), media_type="text/csv; charset=utf-8",
                     headers={"Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-store"})
 

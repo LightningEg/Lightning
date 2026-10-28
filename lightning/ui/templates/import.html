@@ -23,5 +23,5 @@
   <tbody>{% for b in batches %}<tr><td>{{ b.file_name }}</td><td><a href="/accounts/{{ b.account_id }}">{{ b.account }}</a></td><td>{{ (b.posted_at or b.created_at)[:10] }}</td><td class="num">{{ b.live }}</td>
     <td>{% if b.live %}<form method="post" action="/import/{{ b.id }}/undo" data-confirm-delete="{{ 'Undo this import? {n} entries from {filename} are deleted.'|tr(locale, n=b.live, filename=b.file_name) }}"><button class="btn small">{{ 'Undo'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% elif b.status == 'REVIEW' %}<a class="btn small" href="/accounts/{{ b.account_id }}/import/{{ b.id }}">{{ 'Review'|tr(locale) }}</a>{% else %}<span class="muted small">{{ ('Undone' if b.status == 'POSTED' else 'Discarded')|tr(locale) }}</span>{% endif %}</td></tr>{% endfor %}</tbody></table>{% endif %}
 </section>
-<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/import-drop.js?v=1" defer></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/import-drop.js?v=2" defer></script>
 {% endblock %}

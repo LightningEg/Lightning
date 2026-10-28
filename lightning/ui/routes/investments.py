@@ -1025,11 +1025,12 @@ async def import_price_csv(request: Request):
                 c.assets.set_price(asset_id, day, price)
     except (ValueError, LightningError) as exc:
         return redirect("/investments/prices", getattr(exc, "message", str(exc)))
-    note = f"Saved {len(rows.matched)} price{'' if len(rows.matched) == 1 else 's'}."
+    parts = [f"Saved {len(rows.matched)} price{'' if len(rows.matched) == 1 else 's'}"]  # one part each, " · ", for Arabic
     if rows.unmatched:
-        note += f" Not found: {', '.join(rows.unmatched[:5])}{'…' if len(rows.unmatched) > 5 else ''}."
+        parts.append(f"Not found: {', '.join(rows.unmatched[:5])}{'…' if len(rows.unmatched) > 5 else ''}")
     if rows.bad:
-        note += f" Skipped {len(rows.bad)} row(s) with no usable price or date."
+        parts.append(f"Skipped {len(rows.bad)} row(s) with no usable price or date")
+    note = " · ".join(parts)
     return redirect("/investments/prices", note)
 
 

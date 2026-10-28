@@ -412,12 +412,12 @@ def _due_soon(c) -> dict | None:
     """Phone roadmap M4: bills and loan payments due today, tomorrow or already late, as one line under the hero."""
     from lightning.planning.domain import PlanKind
     day = today()
-    due = [p for p in c.planning.all_payments(day + timedelta(days=2), day,
+    due = [p for p in c.planning.all_payments(day + timedelta(days=1), day,
                                               kinds=(PlanKind.BILL, PlanKind.SUBSCRIPTION, PlanKind.LOAN))
            if p.outstanding]
     if not due:
         return None
-    total = sum((c.planning.amount_in_base(p, p.amount, day) for p in due), ZERO)
+    total = sum((c.planning.amount_in_base(p, p.still_owed, day) for p in due), ZERO)
     return {"count": len(due), "total": total, "late": any(p.days_late(day) for p in due)}
 
 
@@ -447,7 +447,7 @@ async def more(request: Request):
         if not p.outstanding:
             continue
         bills.append({"name": p.item.name, "due": p.due_date, "late": p.days_late(day),
-                      "amount": c.planning.amount_in_base(p, p.amount, day),
+                      "amount": c.planning.amount_in_base(p, p.still_owed, day),
                       "pay": f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2Fmore"})
     bills.sort(key=lambda b: (-b["late"], b["due"]))
     return render(request, "more.html", bills=bills[:5], bills_more=max(len(bills) - 5, 0),

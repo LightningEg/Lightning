@@ -21,7 +21,7 @@
     const data = new FormData();
     data.append("__session", token());
     Object.entries(extra || {}).forEach(([k, v]) => data.append(k, v));
-    return fetch(url, { method: "POST", body: data, credentials: "same-origin" });
+    return fetch(url, { method: "POST", body: data, credentials: "same-origin", headers: { "X-Requested-With": "fetch" } });
   };
 
   /* Toast with one action (Undo), shown for 6 seconds. */
@@ -87,9 +87,12 @@
     const id = row.dataset.txn;
     buzz(25);
     row.classList.add("is-gone");
-    post(`/transactions/${id}/delete`).then((response) => {
-      if (!response.ok) throw new Error(String(response.status));
-      toast("Deleted.", "Undo", () => post(`/transactions/${id}/restore`).then(() => location.reload()));
+    // the server answers a fetch in plain text: 200 deleted, anything else is why not (a read-only device, an opening balance)
+    post(`/transactions/${id}/delete`).then(async (response) => {
+      if (!response.ok) { row.classList.remove("is-gone"); toast(await response.text()); return; }
+      toast("Deleted.", "Undo", () => post(`/transactions/${id}/restore`).then(async (undo) => {
+        if (undo.ok) location.reload(); else toast(await undo.text());
+      }));
     }).catch(() => { row.classList.remove("is-gone"); });
   });
   document.addEventListener("click", (event) => {
@@ -112,25 +115,11 @@
     document.head.appendChild(hint);
   }, { passive: true });
 
-  /* M8: a Save button goes busy on submit; buzz once. Offline-safe new entries (see below). */
-  const QUEUE = "lightning-offline-entries";
-  const queued = () => { try { return JSON.parse(localStorage.getItem(QUEUE) || "[]"); } catch (_) { return []; } };
-  const keep = (list) => { try { localStorage.setItem(QUEUE, JSON.stringify(list)); } catch (_) { /* storage full */ } };
+  /* M8: a Save button goes busy on submit; buzz once. (Entries always save: the server runs on this device.) */
   document.addEventListener("submit", (event) => {
     const form = event.target;
     if (!(form instanceof HTMLFormElement) || event.defaultPrevented) return;
     const entry = form.closest(".phone-entry") && (form.getAttribute("method") || "").toLowerCase() === "post";
-    if (entry && navigator.onLine === false) {
-      event.preventDefault();
-      const fields = [];
-      new FormData(form).forEach((value, key) => { if (key !== "__session" && typeof value === "string") fields.push([key, value]); });
-      keep(queued().concat([{ action: form.action, fields }]));
-      buzz(15);
-      toast("Saved offline. It will be sent when the app can save again.");
-      const close = document.querySelector("#app-popup [data-popup-close]");
-      if (close) close.click();
-      return;
-    }
     const button = event.submitter || form.querySelector("button.primary, button:not([type])");
     if (button && button.matches(".phone-save, .primary")) {
       setTimeout(() => { button.disabled = true; button.classList.add("is-busy"); button.setAttribute("aria-busy", "true"); }, 0);
@@ -138,21 +127,6 @@
     }
     if (entry) buzz(15);
   });
-  const flush = async () => {
-    const list = queued();
-    if (!list.length || navigator.onLine === false) return;
-    const left = [];
-    for (const item of list) {
-      try {
-        const response = await post(item.action, Object.fromEntries(item.fields));
-        if (!response.ok) left.push(item);
-      } catch (_) { left.push(item); }
-    }
-    keep(left);
-    if (left.length < list.length) { toast("Saved entries sent."); setTimeout(() => location.reload(), 1200); }
-  };
-  window.addEventListener("online", flush);
-  document.addEventListener("DOMContentLoaded", flush);
 
   /* M8: pull down at the very top of the page to reload it. */
   let pull = null;

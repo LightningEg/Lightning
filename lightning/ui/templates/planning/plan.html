@@ -17,7 +17,7 @@
   <h3 id="afford-h">{{ 'Can I afford this?'|tr(locale) }}</h3>
   <input name="afford" inputmode="decimal" class="money-input" value="{{ afford_amount }}" placeholder="{{ 'Price'|tr(locale) }}" aria-label="{{ 'Price'|tr(locale) }} ({{ base }})">
   <button class="btn">{{ 'Check'|tr(locale) }}</button>
-  {% if afford %}<p class="afford-answer is-{{ afford.verdict }}" role="status">{{ afford.headline }}</p>{% elif afford_error %}<p class="afford-answer is-no" role="status">{{ afford_error|tr(locale) }}</p>{% endif %}
+  {% if afford %}<p class="afford-answer is-{{ afford.verdict }}" role="status">{{ afford.headline|tr(locale) }}</p>{% elif afford_error %}<p class="afford-answer is-no" role="status">{{ afford_error|tr(locale) }}</p>{% endif %}
 </form>
 {{ needs_rows(needs) }}
 {{ kpi_row(kpi_cards, base, 'Your cash') }}

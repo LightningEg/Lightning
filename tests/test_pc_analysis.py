@@ -72,3 +72,23 @@ def test_find_and_replace_renames_a_payee_on_every_match(c):
     assert response.status_code in (302, 303)
     names = [r["counterparty"] for r in c.db.all("SELECT counterparty FROM transactions WHERE type='OUT'")]
     assert names.count("Carrefour Maadi") == 2 and "Spinneys" in names
+
+
+def test_find_and_replace_stays_in_the_register_it_was_sent_from_and_matches_whole_words(c):
+    bank, food = _spend(c)
+    other = c.account_flows.open_account("NBE", "BANK", "2026-01-01", "5000")
+    c.transactions.record_outflow("2026-12-11", bank.id, "50", food.id, counterparty="Khalil")
+    c.transactions.record_outflow("2026-12-11", other.id, "70", food.id, counterparty="Carrefour")
+    client = TestClient(create_app(c))
+    client.get("/import")
+    client.post("/transactions/find-replace", data={"field": "counterparty", "find": "carrefour", "replace": "Carrefour Maadi",
+                                                     "account_id": str(bank.id), "date_from": "2026-12-01"})
+    client.post("/transactions/find-replace", data={"field": "counterparty", "find": "ali", "replace": "Ali Baba"})
+    names = sorted(r["counterparty"] for r in c.db.all("SELECT counterparty FROM transactions WHERE type='OUT'"))
+    assert names == ["Carrefour", "Carrefour", "Carrefour Maadi", "Khalil", "Spinneys"]
+
+
+def test_compare_export_keeps_negative_differences_as_numbers():
+    from lightning.ui.routes.analysis import _csv
+    body = _csv("x.csv", ("Name", "Change"), [("=cmd", "-200.00")]).body.decode("utf-8-sig")
+    assert body.splitlines()[1] == "'=cmd,-200.00"

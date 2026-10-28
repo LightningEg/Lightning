@@ -502,6 +502,8 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         filter_category=filter_category, filter_tag=filter_tag, tag_flows=tag_flows, matched_flows=matched_flows, matched_net=matched_flows[0] - matched_flows[1] if matched_flows else None, matching_ids=matching_ids,
         import_accounts=[] if account_id or phone else [a for a in c.accounts.list(active_only=True)
                                                           if a.account_type.value in ("CASH", "BANK") and not a.parent_id],
+        replace_scope={"account_id": account_id or "", "date_from": "" if date_from == FAR_PAST else date_from,
+                       "date_to": "" if date_to == FAR_FUTURE else date_to},
         date_from=from_query, date_to=to_query, base_url=base_url, keep_qs=urlencode(keep),
         page_number=page_number, total_pages=total_pages, total_rows=total_rows, page_base_qs=page_base_qs,
         search_suggestions=c.counterparties.suggestions(q, limit=3) if q else [],

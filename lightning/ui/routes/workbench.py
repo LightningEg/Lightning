@@ -53,14 +53,22 @@ async def undo_batch(request: Request, batch_id: int):
     return redirect("/import", f"Undid the import: deleted {count} entr{'ies' if count != 1 else 'y'}. You can restore them from history.")
 
 
-def matches(c, field: str, find: str, search: str = "") -> list:
-    rows, _ = c.transactions.find(TxnFilter(search=search or find, limit=REPLACE_LIMIT))
-    needle = find.casefold()
-    return [r for r in rows if needle in str(getattr(r, field, "") or "").casefold()]
+def _word(find: str) -> re.Pattern:
+    """The text as a whole word or phrase, any case: "ali" finds "Ali" and "Ali Hassan", never "Khalil"."""
+    return re.compile(rf"(?<!\w){re.escape(find)}(?!\w)", re.I)
+
+
+def matches(c, field: str, find: str, account_id: int | None = None, date_from: str | None = None,
+            date_to: str | None = None) -> list:
+    """Rows of the register the form was sent from (its account and dates) whose field holds the text."""
+    rows, _ = c.transactions.find(TxnFilter(search=find, account_id=account_id, date_from=date_from or None,
+                                            date_to=date_to or None, limit=REPLACE_LIMIT))
+    word = _word(find)
+    return [r for r in rows if word.search(str(getattr(r, field, "") or ""))]
 
 
 def _replace(text: str, find: str, new: str) -> str:
-    return re.sub(re.escape(find), lambda _: new, text, flags=re.I)
+    return _word(find).sub(lambda _: new, text)
 
 
 @router.post("/transactions/find-replace")
@@ -74,7 +82,9 @@ async def find_replace(request: Request):
     destination = back if back.startswith("/") and not back.startswith("//") else "/transactions"
     if field not in FIELDS or not find:
         return redirect(destination, "Type the text to find.")
-    rows = matches(c, field, find)
+    account = str(form.get("account_id", "")).strip()
+    rows = matches(c, field, find, int(account) if account.isdigit() else None,
+                   str(form.get("date_from", "")).strip(), str(form.get("date_to", "")).strip())
     if not rows:
         return redirect(destination, f"No counterparty or note contains “{find}”.")
     groups: dict[str, list[int]] = {}

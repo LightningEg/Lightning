@@ -43,21 +43,19 @@
 
   send.addEventListener("click", async () => {
     send.disabled = true; send.setAttribute("aria-busy", "true");
-    const groups = new Map();
-    for (const f of files) (groups.get(f.select.value) || groups.set(f.select.value, []).get(f.select.value)).push(f);
     let stuck = false;
-    for (const [account, group] of groups) {
+    // one file per request: the profile app takes one file part per upload, and each file is its own batch to undo
+    for (const f of files) {
+      const account = f.select.value;
       const body = new FormData();
-      group.forEach((f) => body.append("file", f.file));
+      body.append("file", f.file);
       body.append("__session", session);
       const res = await fetch(`/accounts/${account}/import`, { method: "POST", body, credentials: "same-origin" });
       const ok = res.ok && /\/import\/\d+/.test(res.url);
-      group.forEach((f) => {
-        const state = f.item.querySelector(".import-state");
-        state.innerHTML = "";
-        if (ok) state.textContent = t("Ready to review");
-        else { stuck = true; const a = document.createElement("a"); a.href = `/accounts/${account}/import`; a.textContent = t("Set the columns"); state.append(a); }
-      });
+      const state = f.item.querySelector(".import-state");
+      state.innerHTML = "";
+      if (ok) state.textContent = t("Ready to review");
+      else { stuck = true; const a = document.createElement("a"); a.href = `/accounts/${account}/import`; a.textContent = t("Set the columns"); state.append(a); }
     }
     send.removeAttribute("aria-busy");
     if (!stuck) location.reload();

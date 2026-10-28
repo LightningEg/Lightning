@@ -101,3 +101,30 @@ def test_an_overview_fold_draws_when_opened(c, monkeypatch):
     assert trend.status_code == 200 and "<svg" in trend.text and "phone-tabbar" not in trend.text
     assert money.status_code == 200 and "phone-tabbar" not in money.text
     assert missing.status_code == 404
+
+
+def test_swipe_delete_hears_a_refusal_instead_of_following_the_redirect(c):
+    """The phone's swipe posts with X-Requested-With: fetch; a refused delete is a 409 with the reason, not a 200 page."""
+    bank = c.account_flows.open_account("CIB", "BANK", "2026-01-01", "1000")
+    food = c.categories.get_by_code("EXP.PERSONAL.FOOD")
+    spent = c.transactions.record_outflow("2026-02-01", bank.id, "100", food.id, counterparty="Carrefour")
+    opening = next(r["id"] for r in c.db.all("SELECT id FROM transactions WHERE id != ? ORDER BY id", (spent.id,)))
+    client = TestClient(web.create_app(c))
+    client.get("/")
+    fetch = {"X-Requested-With": "fetch"}
+    refused = client.post(f"/transactions/{opening}/delete", headers=fetch)
+    assert refused.status_code == 409 and refused.text
+    deleted = client.post(f"/transactions/{spent.id}/delete", headers=fetch)
+    assert deleted.status_code == 200 and deleted.text == "Deleted."
+    assert client.post(f"/transactions/{spent.id}/restore", headers=fetch).status_code == 200
+
+
+def test_pasted_sms_with_an_impossible_clock_is_no_amount_not_an_error(c, monkeypatch):
+    import lightning.ui.routes.sms as sms
+
+    def bad_clock(text):
+        raise ValueError("hour must be in 0..23")  # what a bank's "الساعه 29:13" gives the parser
+    monkeypatch.setattr(sms, "parse_sms", bad_clock)
+    client = TestClient(web.create_app(c))
+    client.get("/")
+    assert client.post("/sms/read-one", data={"text": "x"}).status_code == 422
