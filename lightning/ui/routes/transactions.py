@@ -320,6 +320,12 @@ async def all_accounts_update(request: Request, txn_id: int):
 
 @router.get("/transactions/{txn_id:int}")
 async def transaction_detail(request: Request, txn_id: int):
+    return detail_page(request, txn_id)
+
+
+def detail_page(request: Request, txn_id: int, status_code: int = 200, error: str = ""):
+    """The one transaction page (7T1): its details, what it touched, its suggested links and its history."""
+    from lightning.workflows.activity import ActivityReview
     c = container(request)
     txn = c.transactions.get(txn_id)
     lines = []
@@ -343,40 +349,21 @@ async def transaction_detail(request: Request, txn_id: int):
                           for cat in c.categories.pickable() if cat.movement.value == "OUTFLOW"]
     split_lines = [{"category_id": line.category_id, "amount": -line.quantity}
                    for line in txn.lines if line.category_id is not None]
-    budget_impacts = []
-    expense_lines = [line for line in txn.lines if line.category_id and line.effect.value == "OUTFLOW"]
-    if expense_lines and not txn.is_void:
-        budget_month = c.budgets.month_view(txn.date[:7])
-        budget_by_id = {line.category_id: line for section in budget_month.sections for line in section.lines}
-        seen_categories = set()
-        for posting in expense_lines:
-            if posting.category_id in seen_categories:
-                continue
-            seen_categories.add(posting.category_id)
-            budget_line = budget_by_id.get(posting.category_id)
-            if budget_line:
-                shown = budget_line
-                if shown.remaining is None and shown.covered:
-                    parent = c.categories.get(posting.category_id).parent_id
-                    while parent:
-                        ancestor = budget_by_id.get(parent)
-                        if ancestor and ancestor.remaining is not None:
-                            shown = ancestor
-                            break
-                        parent = c.categories.get(parent).parent_id
-                budget_impacts.append({"name": budget_line.name, "remaining": budget_line.remaining,
-                                       "covered_by": shown.name if shown is not budget_line else "",
-                                       "covered_remaining": shown.remaining if shown is not budget_line else None,
-                                       "month": txn.date[:7]})
-    return render(request, "transactions/detail.html", txn=txn, summary=c.transactions.summarize(txn),
+    review = None
+    if not txn.is_void and not getattr(request.state, "read_only", False):
+        try:  # only owned cash money in or out can be reviewed; every other transaction simply has no suggestions
+            review = ActivityReview(c).summary(txn_id)
+        except LightningError:
+            review = None
+    return render(request, "transactions/detail.html", status_code=status_code, error=error,
+                  txn=txn, summary=c.transactions.summarize(txn),
                   is_ownership=c.transactions._is_ownership_transaction(txn),
                   conversion=c.transactions.conversion_of(txn), conversion_spread=c.transactions.conversion_spread(txn),
                   replaced_revaluation=txn.id in c.transactions.replaced_revaluation_ids(),
                   lines=lines, history=c.transactions.history(txn_id), can_split=can_split, revision=c.transactions.revision(txn_id),
                   cash_effects=cash_effects,
                   expense_categories=expense_categories, split_lines=split_lines,
-                  budget_impacts=budget_impacts,
-                  reserve_links=c.reserves.links_for_transaction(txn_id), reserves=c.reserves.list_active())
+                  touched=c.linked.transaction(txn_id), review=review, reserves=c.reserves.list_active())
 
 
 @router.post("/transactions/{txn_id:int}/split")

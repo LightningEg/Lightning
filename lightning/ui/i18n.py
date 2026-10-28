@@ -2738,6 +2738,24 @@ ARABIC_UI = {
     'Money out is {amt} lower than {sa} to {sb}.': 'الفلوس اللي خرجت أقل بـ {amt} من {sa} إلى {sb}.',
     'Money out is {amt} higher than {sa} to {sb}.': 'الفلوس اللي خرجت أكتر بـ {amt} من {sa} إلى {sb}.',
     'Money out is the same as {sa} to {sb}.': 'الفلوس اللي خرجت زي {sa} إلى {sb}.',
+    # Link the sections (NF-7T)
+    'What this touched': 'العملية دي أثرت على إيه',
+    'Suggested links': 'روابط مقترحة',
+    'Budget · {month}': 'الميزانية · {month}',
+    '{amt} left': 'فاضل {amt}',
+    'Inside {name} · {amt} left': 'ضمن {name} · فاضل {amt}',
+    '{kind} · due {date}': '{kind} · مستحق {date}',
+    'Certificate interest · {date}': 'عائد شهادة · {date}',
+    'Paid from this reserve': 'اتدفعت من المبلغ المحجوز ده',
+    'Reimbursement from {name}': 'استرداد من {name}',
+    'Claimed {amt} · received {amt2}': 'طالبت بـ {amt} · وصلك {amt2}',
+    '{amt} still owed': 'لسه ليك {amt}',
+    'Paid back': 'اترد بالكامل',
+    'Pays back a claim': 'بترد مطالبة',
+    'Row {n}': 'صف {n}',
+    'The rule that files it': 'القاعدة اللي بتصنّفها',
+    'Tag totals': 'إجماليات الوسم',
+    'No budget line, bill, reserve, claim or import is linked to this transaction.': 'مفيش بند ميزانية أو فاتورة أو مبلغ محجوز أو مطالبة أو استيراد مربوط بالعملية دي.',
 }
 
 

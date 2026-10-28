@@ -1,0 +1,53 @@
+{# Link the sections (NF-7T): rows that open the page where each linked thing lives. One partial for PC and phone. #}
+{% macro link_row(href, title, sub='', figure='', tone='') -%}
+{% if href %}<a class="{{ 'phone-row' if phone_mode() else 'compact-row' }} linked-row" href="{{ href }}">{% else %}<div class="{{ 'phone-row' if phone_mode() else 'compact-row' }} linked-row">{% endif %}<span><span class="linked-name">{{ title }}</span>{% if sub %}<small>{{ sub }}</small>{% endif %}</span>{% if figure %}<b class="num {{ tone }}">{{ figure }}</b>{% endif %}{% if href %}</a>{% else %}</div>{% endif %}
+{%- endmacro %}
+
+{# 7T1: everything one transaction touched. `t` is LinkedSections.transaction. #}
+{% macro touched_panel(t, txn, base) -%}
+<section class="card linked-panel" aria-labelledby="touched-title">
+  <h2 id="touched-title">{{ 'What this touched'|tr(locale) }}</h2>
+  {% if t.count %}<div class="linked-rows">
+  {% for impact in t.budget %}{{ link_row('/budget?month=' ~ impact.month ~ '#category-plan', impact.name, 'Budget · {month}'|tr(locale, month=impact.month),
+      ('{amt} left'|tr(locale, amt=impact.remaining|money(False, 0)) if impact.remaining is not none else ('Inside {name} · {amt} left'|tr(locale, name=impact.covered_by, amt=impact.covered_remaining|money(False, 0)) if impact.covered_by else 'No covering limit'|tr(locale))),
+      'neg' if impact.remaining is not none and impact.remaining < 0 else '') }}{% endfor %}
+  {% for link in t.settled %}{{ link_row(link.href, link.name, '{kind} · due {date}'|tr(locale, kind=({'BILL':'Bill','SUBSCRIPTION':'Subscription','INCOME':'Income','LOAN':'Loan'}[link.kind])|tr(locale), date=link.due_date), link.status|capitalize|tr(locale)) }}{% endfor %}
+  {% for link in t.interest %}{{ link_row('/deposits/' ~ link.account_id, link.name, 'Certificate interest · {date}'|tr(locale, date=link.event_date), link.amount|money) }}{% endfor %}
+  {% for link in t.reserves %}<div class="{{ 'phone-row' if phone_mode() else 'compact-row' }} linked-row"><span><a class="linked-name" href="/reserves/{{ link.reserve_id }}/payments">{{ link.name }}</a><small>{{ 'Paid from this reserve'|tr(locale) }} · {{ link.amount|money }} {{ base }}</small></span>
+    {% if not request.state.read_only|default(false) %}<form method="post" action="/transactions/{{ txn.id }}/reserve"><input type="hidden" name="reserve_id" value="{{ link.reserve_id }}"><input type="hidden" name="action" value="unlink"><button class="btn small">{{ 'Remove link'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}</div>{% endfor %}
+  {% for claim in t.claims %}{% if claim.role == 'expense' %}{{ link_row('/reimbursements', ('Reimbursement from {name}'|tr(locale, name=claim.payer_name) if claim.payer_name else 'Reimbursement claim'|tr(locale)),
+      'Claimed {amt} · received {amt2}'|tr(locale, amt=claim.expected|money, amt2=claim.received|money),
+      ('{amt} still owed'|tr(locale, amt=claim.outstanding|money) if claim.outstanding else 'Paid back'|tr(locale))) }}
+    {% else %}{{ link_row('/reimbursements', 'Pays back a claim'|tr(locale), claim.payer_name or '', claim.received|money) }}{% endif %}{% endfor %}
+  {% for source in t.sources %}{{ link_row('/accounts/' ~ source.account_id ~ '/import/' ~ source.batch_id, ('From SMS'|tr(locale) if source.sms else source.file_name),
+      'Row {n}'|tr(locale, n=source.row_number) ~ (' · ' ~ source.bank_reference if source.bank_reference else ''), source.status|capitalize|tr(locale)) }}{% endfor %}
+  {% if t.rule %}{{ link_row('/rules/' ~ t.rule.id ~ '/edit', t.rule.when, 'The rule that files it'|tr(locale)) }}{% endif %}
+  {% for tag in t.tags %}{{ link_row('/tags/' ~ tag|urlencode, '#' ~ tag, 'Tag totals'|tr(locale)) }}{% endfor %}
+  </div>{% else %}<p class="muted">{{ 'No budget line, bill, reserve, claim or import is linked to this transaction.'|tr(locale) }}</p>{% endif %}
+  {% if not txn.is_void and txn.type.value in ('IN', 'OUT') %}<p class="linked-actions">{% if txn.type.value == 'OUT' and not t.claims %}<a class="quiet-link" href="/reimbursements?expense_id={{ txn.id }}">{{ 'Claim reimbursement'|tr(locale) }}</a>{% endif %}{% if not t.settled %}<a class="quiet-link" href="/plan/from-transaction/{{ txn.id }}">{{ 'Make a recurring plan'|tr(locale) }}</a>{% endif %}<a class="quiet-link" href="/transactions?select=1&amp;pick={{ txn.id }}">{{ 'Merge duplicate transactions'|tr(locale) }}</a></p>{% endif %}
+</section>
+{%- endmacro %}
+
+{# The one-tap suggested links (was /activity/{id}): `d` is ActivityReview.summary. #}
+{% macro suggested_links(d, base) -%}
+<section class="card linked-panel" aria-labelledby="suggested-title">
+  <h2 id="suggested-title">{{ 'Suggested links'|tr(locale) }}</h2>
+  <p class="muted small">{{ 'Choose any actions that apply. This only changes the category or links this transaction; it does not post cash.'|tr(locale) }}</p>
+  <script nonce="{{ request.state.csp_nonce|default('') }}" id="category-catalogue" type="application/json">{{ d.categories|tojson }}</script>
+  <form id="activity-review" method="post" action="/activity/{{ d.txn.id }}/apply">
+    <input type="hidden" name="fingerprint" value="{{ d.fingerprint }}">
+    {% if d.can_recategorize %}<div class="field"><label for="activity-category">{{ 'Change category'|tr(locale) }}</label>
+      <div class="category-picker"><input id="activity-category" class="category-input" form="activity-review" type="text" name="category" autocomplete="off" aria-autocomplete="list"
+        placeholder="{{ 'Type to search category'|tr(locale) }}" aria-expanded="false" aria-controls="activity-category-results"
+        data-category-results="activity-category-results"><div id="activity-category-results" class="category-results" role="listbox" hidden></div></div></div>{% endif %}
+    {% if d.planned_choices %}<div class="field"><label for="activity-payment">{{ 'Settle a planned payment'|tr(locale) }}</label><select id="activity-payment" name="payment" data-own-picker>
+      <option value="">{{ 'No planned payment'|tr(locale) }}</option>{% for choice in d.planned_choices %}<option value="{{ choice.item_id }}|{{ choice.due_date }}">{{ choice.label }}</option>{% endfor %}</select></div>{% endif %}
+    {% if d.reserve_choices %}<div class="field"><label for="activity-reserve">{{ 'Assign part to a reserve'|tr(locale) }}</label><select id="activity-reserve" name="reserve_id" data-own-picker>
+      <option value="">{{ 'No reserve link'|tr(locale) }}</option>{% for choice in d.reserve_choices %}<option value="{{ choice.id }}">{{ choice.name }} · up to {{ choice.amount|money }} {{ base }}</option>{% endfor %}</select>
+    </div><div class="field"><label for="activity-reserve-amount">{{ 'Amount from this reserve'|tr(locale) }}</label><input id="activity-reserve-amount" type="text" name="reserve_amount" inputmode="decimal" placeholder="{{ 'Enter a positive amount'|tr(locale) }}"></div>{% endif %}
+    <div class="actions"><button class="btn primary{{ ' phone-save' if phone_mode() }}">{{ 'Apply selected review'|tr(locale) }}</button></div>
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  </form>
+  <p class="muted small">{{ 'Choices are checked again when you apply them. Ambiguous suggestions are never linked automatically.'|tr(locale) }}</p>
+</section>
+{%- endmacro %}

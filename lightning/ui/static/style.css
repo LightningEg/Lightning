@@ -3758,3 +3758,6 @@ table.figures tfoot th { border-top: 1px solid var(--line); }
 .refill-prompt { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
   margin: 0 0 12px; padding: 10px 14px; border-radius: var(--radius); background: var(--accent-soft); }
 .refill-prompt form { margin: 0; }
+
+/* Link the sections (NF-7T): rows that open where each linked thing lives. */
+.linked-actions{display:flex;flex-wrap:wrap;gap:6px 16px;margin:12px 0 0}.linked-row form{margin:0;flex:none}.linked-row .linked-name{color:var(--text)}

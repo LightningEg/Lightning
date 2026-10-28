@@ -275,7 +275,8 @@ templates.env.globals["institution_tile"] = _institution_tile
 
 
 # Pages reached from many places with no Back of their own; the main tabs are left out on purpose.
-_REFERER_BACK_PAGES = ("/transactions", "/investments/holding", "/investments/planner", "/investments/prices")
+_REFERER_BACK_PAGES = ("/transactions", "/investments/holding", "/investments/planner", "/investments/prices",
+                       "/counterparties/", "/tags/")
 
 
 def _back_url(request) -> str:
