@@ -8,21 +8,24 @@ from lightning.ui.sections import MAX_SECTIONS, MAX_TABS, SECTIONS, locate
 from lightning.ui.web import create_app
 
 
-def test_six_sections_and_five_tabs_at_most():
+def test_eight_sections_and_five_tabs_at_most():
     assert len(SECTIONS) <= MAX_SECTIONS
     assert all(1 <= len(section.tabs) <= MAX_TABS for section in SECTIONS)
-    assert [s.label for s in SECTIONS] == ["Overview", "Budget", "Cash planning", "Investments", "Accounts", "Settings"]
+    assert [s.label for s in SECTIONS] == ["Overview", "Spending", "Budget", "Cash planning", "Safety", "Investments",
+                                          "Transactions", "Settings"]
 
 
 def test_every_page_sits_in_one_tab():
     expected = {
-        "/": ("overview", "summary"), "/birdview/expenses": ("overview", "spending"),
-        "/financial-health": ("overview", "health"), "/accounts/currencies": ("overview", "currencies"),
+        "/": ("overview", "summary"), "/birdview/expenses": ("spending", "spending"),
+        "/financial-health": ("safety", "health"), "/accounts/currencies": ("investments", "currencies"),
         "/budget": ("budget", "budget"),
-        "/plan": ("plan", "plan"), "/plan/recurring": ("plan", "recurring"), "/reserves/3/payments": ("plan", "reserves"),
+        "/plan": ("plan", "plan"), "/plan/recurring": ("plan", "recurring"), "/reserves/3/payments": ("safety", "reserves"),
         "/investments": ("investments", "holdings"), "/investments/holding/4": ("investments", "holdings"),
         "/investments/planner": ("investments", "planner"), "/investments/reevaluations": ("investments", "prices"),
         "/accounts/2": ("accounts", "accounts"), "/transactions": ("accounts", "transactions"),
+        "/spending/compare": ("spending", "compare"), "/analysis/category/3": ("spending", "compare"),
+        "/reports": ("spending", "reports"), "/import": ("accounts", "import"), "/sms": ("accounts", "import"),
         "/money-from-others": ("accounts", "others"), "/zakat": ("accounts", "zakat"), "/settings": ("settings", "data"),
         "/categories/5/edit": ("settings", "categories"), "/checks": ("settings", "checks"),
     }

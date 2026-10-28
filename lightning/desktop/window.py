@@ -192,6 +192,54 @@ def _allowed_navigation(uri: str, allowed_origin: tuple[str, str, int]) -> bool:
         return False
 
 
+# Windows 11 paints the title bar black when the system is dark; these let the window take the page's own colours.
+_DWMWA_USE_IMMERSIVE_DARK_MODE, _DWMWA_CAPTION_COLOR, _DWMWA_TEXT_COLOR = 20, 35, 36
+_TITLE_BAR_SCRIPT = (
+    "(()=>{const s=getComputedStyle(document.documentElement);"
+    "return [s.getPropertyValue('--canvas-start').trim()||getComputedStyle(document.body).backgroundColor,"
+    "s.getPropertyValue('--ink').trim()].join('|')})()"
+)
+
+
+def _colorref(css: str) -> int | None:
+    """``#RRGGBB`` or ``rgb(r, g, b)`` as a Windows COLORREF (0x00BBGGRR); None for anything else."""
+    css = (css or "").strip()
+    if re.fullmatch(r"#[0-9a-fA-F]{6}", css):
+        r, g, b = (int(css[i:i + 2], 16) for i in (1, 3, 5))
+    elif found := re.fullmatch(r"rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,[^)]*)?\)", css):
+        r, g, b = (min(int(v), 255) for v in found.groups())
+    else:
+        return None
+    return r | g << 8 | b << 16
+
+
+def _is_dark(colorref: int) -> bool:
+    r, g, b = colorref & 255, colorref >> 8 & 255, colorref >> 16 & 255
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b < 128
+
+
+def _paint_title_bar(window) -> None:
+    """The title bar in the page's canvas and Ink (any theme, its night version too), not the system's black.
+    Windows 11 only; elsewhere, or on any failure, the system's own bar stays."""
+    import ctypes
+
+    caption, _, text = str(window.evaluate_js(_TITLE_BAR_SCRIPT) or "").partition("|")
+    caption_ref, text_ref = _colorref(caption), _colorref(text)
+    if caption_ref is None:
+        return
+    hwnd = ctypes.c_void_p(int(window.native.Handle.ToInt64()))
+    dwm = ctypes.windll.dwmapi
+
+    def put(attribute: int, value: int) -> None:
+        data = ctypes.c_int(value)
+        dwm.DwmSetWindowAttribute(hwnd, attribute, ctypes.byref(data), ctypes.sizeof(data))
+
+    put(_DWMWA_USE_IMMERSIVE_DARK_MODE, int(_is_dark(caption_ref)))  # caption buttons readable on the bar
+    put(_DWMWA_CAPTION_COLOR, caption_ref)
+    if text_ref is not None:
+        put(_DWMWA_TEXT_COLOR, text_ref)
+
+
 def _show_error(message: str) -> None:
     """Show a native Windows error without importing GUI bindings on other platforms."""
     import ctypes
@@ -440,6 +488,7 @@ def run_window(url: str, origin: str, *, smoke: bool = False, diagnostics: dict 
                         current_url, allowed_origin
                     ):
                         app_ready.set()
+                        _paint_title_bar(window)  # each page: a theme change shows on the next one
                 except Exception:
                     pass
 

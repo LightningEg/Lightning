@@ -919,7 +919,8 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
     <li><b>Overview gathers Needs you:</b> its count is every page's items together, and each row opens the page where it is fixed. A page never shows fewer than it has.</li>
     <li><b>Lists put what needs you first:</b> over plan, late or short at the top, then by size. Never alphabetical, never two columns to read across.</li>
     <li><b>Leave out what says nothing:</b> a section with nothing to tell is one line (“All in EGP”) or gone; never a chart of one colour at 100%.</li>
-    <li><b>Fewer columns:</b> five at most (A11). The account and the type go under the name, not in a column of their own.</li>
+    <li><b>Settings rows (A12, 2026-10-28):</b> a settings card holds one topic as rows: name, a one-line hint, the control at the end. Never a full-width card around one button; explanations stay to one line, details go behind a link.</li>
+<li><b>Fewer columns:</b> five at most (A11). The account and the type go under the name, not in a column of their own.</li>
   </ul>
 </section>
 
@@ -950,7 +951,7 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
   </ul>
   <h3 class="sub"><span class="subnum">A10.4</span>Sub-tabs</h3>
   <div class="demo-row"><span class="seg"><span class="on">Plan</span><span>Recurring</span><span>Loans</span><span>Reserves</span></span></div>
-  <ul class="short"><li>One pill bar, chosen tab in Nile, under the page header; the tab opens straight onto its content, with no line describing it. Two levels: a section in the sidebar, then a tab, never a third; at most six sections and five tabs. The tab's settings sit behind a gear at the end of the bar. No tab colours: icons tell them apart.</li></ul>
+  <ul class="short"><li>One pill bar, chosen tab in Nile, under the page header; the tab opens straight onto its content, with no line describing it. Two levels: a section in the sidebar, then a tab, never a third; at most eight sections and five tabs. Sections follow the users’ questions in order: Overview (where do I stand), Spending, Budget, Cash planning, Safety, Investments, Transactions, Settings. A section opens on the tab that answers its question first (Settings opens on Data checks). Analysis pages (Compare periods, Item analysis, Reports) open with an answer strip: the question’s figure, its change, then the actions beside it. The tab's settings sit behind a gear at the end of the bar. No tab colours: icons tell them apart.</li></ul>
   <h3 class="sub"><span class="subnum">A10.5</span>Dialogs</h3>
   <div class="grid3">
     <div class="card entry" style="border-top:4px solid var(--rose-strong)"><b style="font:700 16px var(--display)">Delete this category?</b><p class="muted" style="font-size:13px;margin:6px 0 12px">It is archived if it has history.</p><div class="demo-row" style="margin:0"><span class="btn secondary sm">Cancel</span><span class="btn danger sm">Delete</span></div></div>
@@ -999,6 +1000,7 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
     <li><b>L1 set:</b> Personal, Work, Investment, System. L2s are each account's own.</li>
     <li>In: green with +. Out: ink with −. Transfers: no sign. Status: a word with a dot.</li>
     <li>Tables: five columns at most; the account and the type go under the name. Plan lines are ordered by what needs you first, then by size (A09.2). No empty table with headers: say what is missing and offer the next step.</li>
+    <li><b>Filtered lists (PC):</b> a search or filter opens on what it found: the count, Money in, Money out and Net in one line. Bulk actions reach every match, not only the page shown: “Select all 55 matching” appears once the visible rows are ticked. Importing a statement is offered wherever transactions are listed, never only inside one account's menu.</li>
   </ul>
 </section>
 
@@ -1132,6 +1134,7 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
   <div class="g-head"><div><h2>Versions</h2></div></div>
   <div class="scroll"><table class="t">
     <tr><th>Version</th><th>Date</th><th>What changed</th></tr>
+    <tr><td><b>3.36</b></td><td>2026-10-28</td><td>Question-led menu (owner): eight sections at most, in the order users ask; Spending and Safety get their own section, Import joins Transactions, Settings opens on Data checks. Analysis pages open with an answer strip (figure, change, actions).</td></tr>
     <tr><td><b>3.35</b></td><td>2026-10-26</td><td>Each theme's own scene on For Geeks (owner: "instead of the lightning it can be something else"). D08: Mono keeps the particle terrain and its lightning; Paper and Cotton draw ink contours, Nile and Papyrus a river at night, Garnet embers, Frost snow and an aurora, Dendera a star ceiling, Meadow grass and fireflies, each with its own event and the terrain's rules. themes.md says a theme brings its scene.</td></tr>
     <tr><td><b>3.33</b></td><td>2026-10-21</td><td>Answer first (owner, from a redesign study of the six tabs: take its essence, not its screens). A09 is now Page order: the header, the Lead, Needs you, KPIs, then the details, with A09.1 the question each page answers and A09.2 one home per figure. A05: a status sentence under the title, the dates kept under it; the hairline starts with the seam. A07: the page's Lead takes the row, its working beside it, in one card. New A02.3: the seam, the mark as the Needs you bullet, the watermark on the Lead. A01: The answer first. A11 and A16 follow. C04, C06 and C11 apply it on the phone; tabs stay icons; KPI tiles stay 2 × 2.</td></tr>
     <tr><td><b>3.32</b></td><td>2026-10-19</td><td>KPI cards that compare (owner, after the visual audit 3Q), and a more readable Arabic body face. A08: five fixed slots (label and chip, figure, comparison, one micro-visual, one line), the comparison always there, no icon tile; new A08.4 micro-visuals and A08.5 zero, empty and alone; the A08.3 Budget card is Left in plan, with Over plan as a Needs you card beside it. A07 and A09: two to four KPI cards fill the row, and one answer is a Lead with its Support. A12: thin data changes the form; a sparkline's dot sits on the point its label names; a trend that moves little names its change and keeps its axis from zero; the A12.3.2 share bar is Ready to use as the segmented bar. A16 adds A figure alone and A card alone in its row. C06.1: a tile's line is its comparison. Arabic body text is Noto Sans Arabic, not Noto Sans Arabic (A06.2, B04, C10).</td></tr>

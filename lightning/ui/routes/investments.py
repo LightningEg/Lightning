@@ -1009,6 +1009,31 @@ async def save_price_files(request: Request):
     return redirect("/investments/prices/markets", "Saved. Download shared prices on Investment prices brings the markets you added.")
 
 
+@router.post("/prices/csv")
+async def import_price_csv(request: Request):
+    """Many prices from one spreadsheet file: Symbol/ISIN/Name, Date (optional), Price (PC roadmap P6)."""
+    from lightning.assets.price_csv import read_prices
+    c = container(request)
+    form = await request.form()
+    upload = form.get("file")
+    if not upload or not getattr(upload, "filename", ""):
+        return redirect("/investments/prices", "Choose a CSV file first.")
+    try:
+        rows = read_prices(await upload.read(), c.assets.investments(active_only=True), fmt_date(today()))
+        with c.db.transaction():
+            for asset_id, day, price in rows.matched:
+                c.assets.set_price(asset_id, day, price)
+    except (ValueError, LightningError) as exc:
+        return redirect("/investments/prices", getattr(exc, "message", str(exc)))
+    parts = [f"Saved {len(rows.matched)} price{'' if len(rows.matched) == 1 else 's'}"]  # one part each, " · ", for Arabic
+    if rows.unmatched:
+        parts.append(f"Not found: {', '.join(rows.unmatched[:5])}{'…' if len(rows.unmatched) > 5 else ''}")
+    if rows.bad:
+        parts.append(f"Skipped {len(rows.bad)} row(s) with no usable price or date")
+    note = " · ".join(parts)
+    return redirect("/investments/prices", note)
+
+
 @router.post("/prices")
 async def save_prices(request: Request):
     c = container(request)

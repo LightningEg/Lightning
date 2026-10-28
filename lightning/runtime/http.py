@@ -34,6 +34,8 @@ MAX_IMPORT_CONFIRM_FIELDS = MAX_IMPORT_REVIEW_FIELDS
 # A market price file (prices only, nothing personal) imported by hand: one zip, bounded.
 MARKET_IMPORT_PATH = "/investments/prices/market/import"
 MAX_MARKET_IMPORT_BODY = 40 * 1024 * 1024
+# Many investment prices from one CSV (PC roadmap P6): one file, bounded like a statement upload.
+PRICE_CSV_PATH = "/investments/prices/csv"
 
 
 def request_body_limit(path: str, method: str = "POST") -> int:
@@ -48,11 +50,13 @@ def request_body_limit(path: str, method: str = "POST") -> int:
         return MAX_IMPORT_CONFIRM_BODY
     if path == MARKET_IMPORT_PATH:
         return MAX_MARKET_IMPORT_BODY
+    if path == PRICE_CSV_PATH:
+        return MAX_IMPORT_UPLOAD_BODY
     return MAX_BODY
 
 
 def request_too_large_message(path: str) -> str:
-    if re.fullmatch(r"/accounts/\d+/import(?:/map)?", path):
+    if re.fullmatch(r"/accounts/\d+/import(?:/map)?", path) or path == PRICE_CSV_PATH:
         return "CSV files must be 5 MB or smaller. Choose a smaller CSV and try again."
     if re.fullmatch(r"/accounts/\d+/import/\d+/confirm", path):
         return "This import review is too large to submit at once. Split the CSV into smaller files."

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Compare periods'|tr(locale) }}{% endblock %}
+{% block heading %}<div class="birdview-title"><div><h1>{{ 'Compare periods'|tr(locale) }}</h1><p class="page-status">{{ status|tr(locale) }}</p><p class="page-dates"><b dir="ltr">{{ fmt_date(a[0]) }} to {{ fmt_date(a[1]) }}</b></p></div></div>{% endblock %}
+{% block content %}
+<section class="card answer-strip" aria-label="{{ 'Answer'|tr(locale) }}">
+  <div class="answer-main"><span class="answer-label">{{ 'Money out'|tr(locale) }}</span>
+    <b class="answer-figure num">{{ total_a|whole }} {{ base }}</b>
+    <span class="answer-delta {{ 'is-up' if total_diff > 0 else ('is-down' if total_diff < 0 else '') }}">{{ total_diff|money(signed=true) }} {{ 'against'|tr(locale) }} {{ fmt_date(b[0]) }} {{ 'to'|tr(locale) }} {{ fmt_date(b[1]) }}</span></div>
+</section>
+
+<form class="card compare-picker" method="get" action="/spending/compare">
+  <div class="segmented" role="group" aria-label="{{ 'Preset'|tr(locale) }}">
+    {% for k, label in (('month','Month'),('quarter','Quarter'),('year','Year')) %}<a class="btn small{{ ' is-on' if kind == k }}" href="/spending/compare?preset={{ k }}&amp;by={{ by }}">{{ label|tr(locale) }}</a>{% endfor %}
+  </div>
+  <fieldset><legend>{{ 'This period'|tr(locale) }}</legend><input type="date" name="a_from" value="{{ fmt_date(a[0]) }}"> <input type="date" name="a_to" value="{{ fmt_date(a[1]) }}"></fieldset>
+  <fieldset><legend>{{ 'Against'|tr(locale) }}</legend><input type="date" name="b_from" value="{{ fmt_date(b[0]) }}"> <input type="date" name="b_to" value="{{ fmt_date(b[1]) }}"></fieldset>
+  <label>{{ 'By'|tr(locale) }}<select name="by"><option value="category" {{ 'selected' if by == 'category' }}>{{ 'Category'|tr(locale) }}</option><option value="payee" {{ 'selected' if by == 'payee' }}>{{ 'Counterparty'|tr(locale) }}</option></select></label>
+  <div class="actions"><button class="btn primary">{{ 'Compare'|tr(locale) }}</button><a class="btn" href="/spending/compare?{{ keep_qs }}&amp;format=csv">{{ 'Export CSV'|tr(locale) }}</a></div>
+</form>
+
+<section class="card data-panel" aria-labelledby="compare-rows">
+  <div class="section-head"><div><h2 id="compare-rows">{{ 'Biggest changes first'|tr(locale) }}</h2><p class="muted small">{{ 'Open any row to see why.'|tr(locale) }}</p></div></div>
+  {% if not rows %}<p class="muted">{{ 'No spending in either period.'|tr(locale) }}</p>{% else %}
+  <div class="table-wrap"><table class="figures">
+    <thead><tr><th>{{ ('Category' if by == 'category' else 'Counterparty')|tr(locale) }}</th><th class="num">{{ 'This period'|tr(locale) }}</th><th class="num">{{ 'Against'|tr(locale) }}</th><th class="num">{{ 'Difference'|tr(locale) }}</th><th class="num">%</th></tr></thead>
+    <tbody>{% for r in rows %}<tr>
+      <td>{% if by == 'category' and r.id %}<a href="/analysis/category/{{ r.id }}">{{ r.name }}</a>{% else %}<a href="/analysis/payee?name={{ r.name|urlencode }}">{{ r.name }}</a>{% endif %}</td>
+      <td class="num">{{ r.a|money }}</td><td class="num">{{ r.b|money }}</td>
+      <td class="num {{ 'is-up' if r.diff > 0 else ('is-down' if r.diff < 0 else '') }}">{{ r.diff|money(signed=true) }}</td>
+      <td class="num muted">{{ (r.pct ~ '%') if r.pct is not none else '—' }}</td></tr>{% endfor %}</tbody>
+    <tfoot><tr><th>{{ 'Total'|tr(locale) }}</th><th class="num">{{ total_a|money }}</th><th class="num">{{ total_b|money }}</th><th class="num">{{ total_diff|money(signed=true) }}</th><th></th></tr></tfoot>
+  </table></div>{% endif %}
+</section>
+{% endblock %}

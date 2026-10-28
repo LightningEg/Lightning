@@ -1,0 +1,8 @@
+{
+  "imported": 37,
+  "expected": 37,
+  "failed": [],
+  "wallet_fintech_expected": 31,
+  "wallet_fintech_imported": 31,
+  "wallet_fintech_failures": []
+}

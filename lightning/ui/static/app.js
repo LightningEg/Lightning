@@ -802,7 +802,10 @@ if (ledger) {
   boxes.forEach((box) => { if (!byId.has(box.value)) byId.set(box.value, []); byId.get(box.value).push(box); });
   const editRow = document.querySelector("tr.editing[data-txn]");
   const selKey = (() => { const q = new URLSearchParams(location.search); ["edit", "acct", "pick", "msg"].forEach((k) => q.delete(k)); q.sort(); return `lightning-selection:${location.pathname}?${q}`; })();
-  const readSel = () => { try { const ids = JSON.parse(sessionStorage.getItem(selKey) || "[]"); return Array.isArray(ids) ? ids.filter((id) => typeof id === "string" && byId.has(id)) : []; } catch (e) { return []; } };
+  let matching = [];
+  try { matching = JSON.parse(ledger.dataset.matchingIds || "[]").map(String); } catch (e) { matching = []; }
+  const matchingSet = new Set(matching);
+  const readSel = () => { try { const ids = JSON.parse(sessionStorage.getItem(selKey) || "[]"); return Array.isArray(ids) ? ids.filter((id) => typeof id === "string" && (byId.has(id) || matchingSet.has(id))) : []; } catch (e) { return []; } };
   const writeSel = (ids) => { try { ids.length ? sessionStorage.setItem(selKey, JSON.stringify(ids)) : sessionStorage.removeItem(selKey); } catch (e) {} };
   const selected = new Set(readSel());
   boxes.forEach((box) => { if (box.checked) selected.add(box.value); });
@@ -816,6 +819,8 @@ if (ledger) {
     const merge = document.getElementById("merge-selected");
     if (merge) merge.hidden = ids.length !== 2;
     if (count) count.textContent = t("{count} selected", {count: ids.length});
+    const matchingButton = document.getElementById("select-matching");
+    if (matchingButton) matchingButton.hidden = !(byId.size > 0 && [...byId.keys()].every((id) => selected.has(id))) || ids.length >= matching.length;
     const editSelected = document.getElementById("edit-selected");
     if (editSelected) editSelected.disabled = !boxes.some((box) => selected.has(box.value) && ["IN", "OUT"].includes(box.dataset.type));
     if (selectAll) {
@@ -935,6 +940,7 @@ if (ledger) {
     syncSelection();
   });
   document.getElementById("delete-selected")?.addEventListener("click", () => deleteTransactions(selectedIds()));
+  document.getElementById("select-matching")?.addEventListener("click", () => { matching.forEach((id) => selected.add(id)); syncSelection(); });
   document.getElementById("clear-selected")?.addEventListener("click", () => { selected.clear(); syncSelection(); });
   document.getElementById("edit-selected")?.addEventListener("click", () => {
     const box = boxes.find((item) => selected.has(item.value) && ["IN", "OUT"].includes(item.dataset.type));
@@ -955,6 +961,11 @@ if (ledger) {
     if (!ids.length) { event.preventDefault(); return; }
     const back = document.createElement("input"); back.type = "hidden"; back.name = "back"; back.value = location.pathname + location.search; form.append(back);
     ids.forEach((id) => { const input = document.createElement("input"); input.type = "hidden"; input.name = "txn_ids"; input.value = id; form.append(input); });
+  });
+  // PC P7: a rule from the selection, prefilled with the first selected payee.
+  document.getElementById("rule-from-selected")?.addEventListener("click", () => {
+    const box = selectedIds().map((id) => document.querySelector(`.transaction-select[value="${id}"]`)).find((b) => b?.dataset.payee);
+    location.href = "/rules/new" + (box ? "?counterparty=" + encodeURIComponent(box.dataset.payee) : "");
   });
   document.getElementById("export-selected")?.addEventListener("click", () => {
     const ids = selectedIds();

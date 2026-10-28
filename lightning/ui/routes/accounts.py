@@ -227,12 +227,21 @@ def _account_id(text: str, field: str) -> int:
     return int(text)
 
 
+LAST_ACCOUNT_COOKIE = "lightning_last_account"  # the account the last entry went to (phone roadmap M2)
+
+
 @router.get("/add-transaction")
 async def pick_account_for_entry(request: Request):
     """The phone's add button on Accounts: choose the account, then its entry sheet (guideline C05.2)."""
     c = container(request)
     accounts = [a for a in c.accounts.list(active_only=True)
                 if a.account_type.value not in ("PHYSICAL_ASSET", "OTHER_ASSET")]
+    # Amount first (phone roadmap M2): Add opens the entry sheet of the account used last, with Change account on
+    # it; ?pick=1, or no account remembered yet, shows the list.
+    remembered = str(request.cookies.get(LAST_ACCOUNT_COOKIE, ""))
+    if not request.query_params.get("pick") and remembered.isdigit() \
+            and any(a.id == int(remembered) for a in accounts):
+        return await new_transaction_popup(request, int(remembered))
     return render(request, "phone/accounts/pick.html", accounts=accounts)
 
 
@@ -372,6 +381,41 @@ def _save_popup_transaction(c, account_id: int, values: dict):
     return txn
 
 
+@router.post("/quick-add")
+async def quick_add(request: Request):
+    """One tap from the phone's Quick Add (backend roadmap B5): saves one entry and answers in
+    JSON. The account is the form's, else the last one used; `submission` makes a double tap or a resend return
+    the first save instead of a second entry."""
+    c = container(request)
+    form = await request.form()
+    raw = str(form.get("account_id", "") or request.cookies.get(LAST_ACCOUNT_COOKIE, ""))
+    if not raw.isdigit():
+        return JSONResponse({"ok": False, "error": "Choose an account."}, 422)
+    account_id = int(raw)
+    values = {key: str(form.get(key, "")) for key in
+              ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes")}
+    values["kind"] = values["kind"] or "out"
+    values["date"] = values["date"] or fmt_date(today())
+    submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+    payload = values | {"account": account_id}
+    try:
+        account = c.accounts.require_usable(account_id)
+        with c.db.transaction():
+            earlier = c.transactions.submitted(submission, payload)
+            txn = earlier or _save_popup_transaction(c, account_id, values)
+            if earlier is None:
+                c.transactions.remember_submission(submission, payload, txn.id)
+        if earlier is None:
+            c.reserves.auto_link_transaction(txn.id)
+    except (LightningError, ValueError) as exc:
+        message = exc.message if isinstance(exc, LightningError) else "Choose valid values for this transaction."
+        return JSONResponse({"ok": False, "error": message}, 422)
+    response = JSONResponse({"ok": True, "id": txn.id, "ref": txn.ref, "account_id": account_id,
+                             "repeat": earlier is not None})
+    response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600, httponly=True, samesite="lax")
+    return response
+
+
 @router.post("/{account_id:int}/transaction/new")
 async def save_transaction_popup(request: Request, account_id: int):
     c = container(request)
@@ -394,7 +438,10 @@ async def save_transaction_popup(request: Request, account_id: int):
         feedback = register._budget_feedback(c, txn)
         if matched_reserve < 0:
             feedback = (feedback + " Several reserves match; choose beside the transaction in its account list.").strip()
-        return redirect(values["return_to"], f"Saved {txn.ref}. {feedback}".strip())
+        response = redirect(values["return_to"], f"Saved {txn.ref}. {feedback}".strip())
+        response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600,  # the stored id
+                            httponly=True, samesite="lax")
+        return response
     except (LightningError, ValueError) as exc:
         error = exc if isinstance(exc, LightningError) else ValidationError("Choose valid values for this transaction.")
         return render(request, "transactions/form_popup.html", status_code=400,

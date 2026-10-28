@@ -56,9 +56,9 @@ def test_analysis_navigation_selects_only_the_current_page(c):
     client = TestClient(create_app(c))
     for path, current in (
         ("/birdview", "/"),  # Birdview now lives in the Overview
-        ("/birdview/expenses", "/"),  # Spending is a tab of the Overview (two levels, 2026-10-06)
-        ("/settings", "/settings"),
-        ("/counterparties", "/settings"),
+        ("/birdview/expenses", "/birdview/expenses"),  # Spending is its own section (question-led menu, 2026-10-28)
+        ("/settings", "/checks"),  # Settings opens on Data checks (2026-10-28)
+        ("/counterparties", "/checks"),
     ):
         page = client.get(path)
         assert page.status_code == 200
@@ -155,7 +155,7 @@ def test_general_settings_card_is_not_nested_in_workspace_grid(c):
     structure = _SettingsGeneralStructure()
     structure.feed(page.text)
     assert structure.general_card_in_workspace_grid is False
-    assert {"card", "data-panel"} <= structure.general_card_classes
+    assert {"card", "settings-list"} <= structure.general_card_classes
 
 
 def test_responsive_layout_css_contracts_for_budget_and_period_controls():

@@ -65,11 +65,14 @@
   <header class="phone-section-head"><h2 id="cats-heading">{{ 'Categories'|tr(locale) }}</h2>{% if period.key == 'month' %}<a class="phone-quiet" href="{{ phone_plan.edit_href }}">{{ 'Edit plan'|tr(locale) }}</a>{% endif %}</header>
   <div class="phone-rows">
   {% for r in phone_plan.cats %}
-    <a class="phone-row phone-cat{{ ' is-over' if r.over }}" href="{{ r.href }}">
-      <span class="phone-cat-main"><b>{{ r.name }}</b><small>{{ r.spent|money }} {{ 'of'|tr(locale) }} {{ r.planned|money }}</small></span>
+    <div class="phone-cat-wrap">
+    <a class="phone-row phone-cat{{ ' is-over' if r.over }}{{ ' is-risk' if r.risk }}" href="{{ r.href }}">
+      <span class="phone-cat-main"><b>{{ r.name }}</b><small>{{ r.spent|money }} {{ 'of'|tr(locale) }} {{ r.planned|money }}{% if r.risk %} · <em class="phone-risk">{{ 'Ahead of pace'|tr(locale) }}</em>{% endif %}</small></span>
       <span class="phone-cat-left"><b>{{ ('−' if r.over else '') ~ (r.amount|money) }}</b><small>{{ 'Over plan'|tr(locale) if r.over else 'left'|tr(locale) }}</small></span>
-      <span class="phone-plan-bar{{ ' is-over' if r.over }}" aria-hidden="true"><i style="width:{{ '%.1f'|format(r.width) }}%"></i></span>
+      <span class="phone-plan-bar{{ ' is-over' if r.over }}" aria-hidden="true"><i style="width:{{ '%.1f'|format(r.width) }}%"></i>{% if r.pace is not none %}<s class="phone-pace-tick" style="inset-inline-start:{{ '%.1f'|format(r.pace) }}%"></s>{% endif %}</span>
     </a>
+    {% if r.cover %}<a class="phone-cover" data-popup-open href="{{ r.cover }}">{{ 'Cover it'|tr(locale) }}</a>{% endif %}
+    </div>
   {% endfor %}
   </div>
 </section>

@@ -809,3 +809,56 @@ html[dir="rtl"] .phone-reg-step svg { transform: scaleX(-1); }
 .phone-reg-filter .phone-note { margin: 0; flex: 1; min-width: 0; }
 .phone-reg-filter .phone-quiet { flex: none; min-height: 44px; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
 /* == end 3AC Transactions tab == */
+
+/* Phone roadmap M1: pages fade into each other instead of flashing white (cross-document view transitions,
+   Android WebView 126+; older ones just load as before). M2/M3: the entry sheet's account line and Paste bank SMS. */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 140ms; }
+.phone-tabbar { view-transition-name: phone-tabbar; }
+.phone-appbar { view-transition-name: phone-appbar; }
+.phone-entry-account a { min-height: 0; display: inline; }
+.phone-sms-paste { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; margin: 6px 0 0; }
+.phone-sms-paste[hidden] { display: none; }
+.phone-sms-paste::before { content: "📋"; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root), ::view-transition-group(*) { animation: none; }
+  .phone-sheet, .app-popup, .phone-sheet * { transition: none !important; animation: none !important; }
+}
+
+/* Phone roadmap M5: pace marker, at risk and Cover it on budget rows */
+.phone-cat .phone-plan-bar { position: relative; }
+.phone-pace-tick { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--c-text, #0D2233); opacity: .45; text-decoration: none; }
+.phone-cat.is-risk .phone-plan-bar i { background: #E68CA8; }  /* soft rose: spent of plan (A03) */
+.phone-risk { font-style: normal; font-weight: 600; color: #C93D72; }  /* strong rose: needs you */
+.phone-cat-wrap { display: flex; flex-direction: column; }
+.phone-cover { align-self: flex-end; min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px; margin: -6px 0 6px; font-weight: 700; color: var(--c-nile, #0A2442); text-decoration: none; }
+
+/* Phone roadmap M6: swipe a transaction row */
+.phone-txn { transition: transform .18s ease, opacity .18s ease; touch-action: pan-y; }
+.phone-txn.is-swipe-delete { box-shadow: inset -4px 0 0 #C93D72; }
+.phone-txn.is-swipe-open { box-shadow: inset 4px 0 0 #0A2442; }
+.phone-txn.is-gone { opacity: 0; height: 0; padding-top: 0; padding-bottom: 0; overflow: hidden; }
+.phone-toast { position: fixed; inset-inline: 16px; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 60; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: 12px; background: #0D2233; color: #FFFFFF; font-size: 15px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+.phone-toast[hidden] { display: none; }
+.phone-toast button { min-height: 44px; padding: 0 12px; border: 0; background: transparent; color: #FFFFFF; font: inherit; font-weight: 700; text-decoration: underline; }
+
+/* Phone roadmap M7: Hub bills */
+.phone-hub-bill { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; }
+.phone-hub-bill.is-late small { color: #C93D72; font-weight: 600; }
+
+/* Phone roadmap M8: busy Save, pull to refresh, readable figures */
+button.is-busy { opacity: .6; pointer-events: none; }
+button.is-busy::after { content: ""; display: inline-block; width: 14px; height: 14px; margin-inline-start: 8px; vertical-align: -2px; border: 2px solid currentColor; border-inline-end-color: transparent; border-radius: 50%; animation: phone-spin .7s linear infinite; }
+@keyframes phone-spin { to { transform: rotate(360deg); } }
+.phone-pull { position: fixed; top: 0; inset-inline: 0; z-index: 55; height: var(--pull, 0px); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--c-muted, #566E7E); pointer-events: none; overflow: hidden; }
+.phone-lead, .phone-txn-amount, .phone-cat-left, .phone-row > b, .phone-day-net { font-variant-numeric: tabular-nums; }
+#app-popup .app-popup-frame { transition: transform .15s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .phone-txn, #app-popup .app-popup-frame { transition: none; }
+  button.is-busy::after { animation: none; }
+}
+
+/* Phone roadmap M4: what is due in the next 48 hours, under the Safe to spend hero */
+.phone-soon { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 10px 16px; text-decoration: none; color: inherit; font-weight: 600; }
+.phone-soon b { font-variant-numeric: tabular-nums; }
+.phone-soon.is-late > span { color: #C93D72; }  /* the words say late; no coloured edge (C01) */

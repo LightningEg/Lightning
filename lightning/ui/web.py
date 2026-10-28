@@ -345,7 +345,12 @@ def render(request: Request, name: str, status_code: int = 200, **context) -> HT
         context["msg"] = f"{context['msg']} {note}".strip()
     context.setdefault("error", "")
     context.setdefault("error_field", "")
-    total, owned_total, groups = c.reporting.sidebar(today())
+    # The phone frame has no sidebar (backend roadmap B2): skip its account totals there.
+    if getattr(request.state, "phone", False):
+        total = owned_total = Decimal(0)
+        groups = []
+    else:
+        total, owned_total, groups = c.reporting.sidebar(today())
     token = _ROUND_MONEY.set(name.startswith(REPORTING_TEMPLATES))
     try:
         return _render(request, name, status_code, c, total, owned_total, groups, context)
@@ -428,6 +433,22 @@ _ARABIC_UI_JS = ("window.LIGHTNING_UI=" + json.dumps(BROWSER_UI, ensure_ascii=Fa
 ARABIC_UI_SRC = "/static/ui-ar.js?v=" + hashlib.sha256(_ARABIC_UI_JS).hexdigest()[:12]
 
 
+# The phone's stylesheets as one cached file (phone roadmap M8): one request instead of six, in this order, which is
+# the cascade the shells rely on (style, then phone, then the theme layers). fonts.css stays apart (relative urls).
+PHONE_CSS = ("style{rtl}.css", "phone{rtl}.css", "themes.generated.css", "theme-surfaces.css",
+             "theme-materials.css", "visual-flow.css")
+
+
+def _phone_bundle(rtl: str) -> bytes:
+    parts = [f"/* {name.format(rtl=rtl)} */\n" + (UI_DIR / "static" / name.format(rtl=rtl)).read_text(encoding="utf-8")
+             for name in PHONE_CSS]
+    return "\n".join(parts).encode("utf-8")
+
+
+_PHONE_CSS = {"": _phone_bundle(""), ".rtl": _phone_bundle(".rtl")}
+PHONE_CSS_SRC = {k: f"/static/phone-bundle{k}.css?v=" + hashlib.sha256(v).hexdigest()[:12] for k, v in _PHONE_CSS.items()}
+
+
 def _template_response(request, name, status_code, c, locale, total, owned_total, groups, context):
     response = templates.TemplateResponse(
         request,
@@ -439,6 +460,7 @@ def _template_response(request, name, status_code, c, locale, total, owned_total
             "locale": locale,
             "fig": localized_figures(locale),
             "arabic_ui_src": ARABIC_UI_SRC if locale == "ar" else "",
+            "phone_css_src": PHONE_CSS_SRC[".rtl" if locale == "ar" else ""],
             "today": fmt_date(today()),
             "this_month": month_of(today()),
             "path": request.url.path,
@@ -517,7 +539,7 @@ class RequestCache:
 
 
 def create_app(c: Container | None = None) -> FastAPI:
-    from .routes import accounts, activity, bank_imports, birdview, budget, categories, counterparties, dashboard, deposits, exports, financial_health, gameya, history, integrity, investments, merge, payday, physical_items, planning, reimbursements, reserves, rules, search, settings, sms, transactions, weekly, zakat
+    from .routes import accounts, activity, bank_imports, birdview, budget, categories, counterparties, dashboard, deposits, exports, financial_health, gameya, history, integrity, investments, merge, payday, physical_items, planning, reimbursements, reserves, rules, search, settings, sms, transactions, weekly, zakat, analysis, workbench
 
     app = FastAPI(title="Lightning", docs_url=None, redoc_url=None, openapi_url=None)
     app.state.container = c
@@ -572,8 +594,16 @@ def create_app(c: Container | None = None) -> FastAPI:
     async def arabic_ui_script():
         return Response(_ARABIC_UI_JS, media_type="text/javascript; charset=utf-8")
 
+    @app.get("/static/phone-bundle.css", include_in_schema=False)
+    async def phone_css():
+        return Response(_PHONE_CSS[""], media_type="text/css; charset=utf-8")
+
+    @app.get("/static/phone-bundle.rtl.css", include_in_schema=False)
+    async def phone_css_rtl():
+        return Response(_PHONE_CSS[".rtl"], media_type="text/css; charset=utf-8")
+
     app.mount("/static", StaticFiles(directory=str(UI_DIR / "static")), name="static")
-    for module in (dashboard, financial_health, accounts, deposits, gameya, bank_imports, birdview, transactions, budget, investments, physical_items, planning, payday, reimbursements, reserves, history, activity, merge, weekly, integrity, counterparties, categories, rules, settings, search, exports, sms, zakat):
+    for module in (dashboard, financial_health, accounts, deposits, gameya, bank_imports, birdview, transactions, budget, investments, physical_items, planning, payday, reimbursements, reserves, history, activity, merge, weekly, integrity, counterparties, categories, rules, settings, search, exports, sms, zakat, analysis, workbench):
         app.include_router(module.router)
 
     @app.exception_handler(ValidationError)
@@ -633,3 +663,4 @@ def create_app(c: Container | None = None) -> FastAPI:
 
     app.add_middleware(RequestCache, state=app.state)  # outermost, so every page and middleware shares it
     return app
+

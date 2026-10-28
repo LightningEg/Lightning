@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download actual Egyptian bank logo artwork into assets/bank-logos (one-time)."""
+"""Download actual Egyptian bank logo artwork into assets/institutions-logos (one-time)."""
 import io, json, sys
 from pathlib import Path
 from PIL import Image, ImageOps, ImageDraw
@@ -7,7 +7,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 ROOT=Path(__file__).resolve().parent.parent
-TARGET=ROOT/"assets"/"bank-logos"
+TARGET=ROOT/"assets"/"institutions-logos"
 LOGOS={
 "abk":"abk","cib":"cib","arab-bank":"arab-bank","aaib":"aaib","aib":"aib",
 "ealb":"ealb","saib":"saib","abc":"abc","united-bank":"united-bank",
@@ -28,7 +28,9 @@ def main():
     s.mount("https://",HTTPAdapter(max_retries=Retry(total=3,backoff_factor=1,status_forcelist=[429,500,502,503,504])))
     entries=[(slug,"https://banksegypt.com/assets/img/egbanks/"+file+".webp","webp","third-party directory") for slug,file in LOGOS.items()]
     entries.append(("onebank","https://www.onebank.eg/resources/img/favicon/android-icon-192x192.png","png","official bank site"))
-    mapping={};failed=[]
+    existing=TARGET/"manifest.json"
+    mapping=json.loads(existing.read_text(encoding="utf-8")) if existing.exists() else {}
+    failed=[]
     for n,(slug,url,ext,provenance) in enumerate(entries,1):
         try:
             resp=s.get(url,timeout=(15,45));resp.raise_for_status()
@@ -59,7 +61,10 @@ def main():
             if "onebank" in mapping:mapping["onebank"]["original_svg"]="originals/onebank-wordmark.svg"
     except Exception as e:print("Optional onebank SVG failed:",e,flush=True)
     (TARGET/"manifest.json").write_text(json.dumps(mapping,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-    (TARGET/"download-report.json").write_text(json.dumps({"imported":len(mapping),"expected":len(entries),"failed":failed},indent=2)+"\n",encoding="utf-8")
-    print(f"Imported {len(mapping)}/{len(entries)}; errors: {failed}",flush=True)
+    report_path=TARGET/"download-report.json"
+    report=json.loads(report_path.read_text(encoding="utf-8")) if report_path.exists() else {}
+    report.update({"imported":len(entries)-len(failed),"expected":len(entries),"failed":failed})
+    report_path.write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8")
+    print(f"Imported {len(entries)-len(failed)}/{len(entries)} banks; errors: {failed}",flush=True)
     return int(bool(failed))
 if __name__=="__main__":raise SystemExit(main())

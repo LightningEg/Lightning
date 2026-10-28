@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Reports'|tr(locale) }}{% endblock %}
+{% block heading %}<div class="birdview-title"><div><h1>{{ 'Reports'|tr(locale) }}</h1><div class="muted small">{{ 'Ready-made comparisons and your saved views'|tr(locale) }}</div></div></div>{% endblock %}
+{% block content %}
+<div class="report-grid">
+{% for p in presets %}<a class="card report-card" href="/spending/compare?preset={{ p.kind }}">
+  <span class="answer-label">{{ p.label|tr(locale) }}</span>
+  <b class="answer-figure num">{{ p.total_a|money }} {{ base }}</b>
+  <span class="answer-delta {{ 'is-up' if p.diff > 0 else ('is-down' if p.diff < 0 else '') }}">{{ p.diff|money(signed=true) }}</span>
+  {% if p.mover %}<small class="muted">{{ 'Biggest change'|tr(locale) }}: {{ p.mover.name }} {{ p.mover.diff|money(signed=true) }}</small>{% endif %}
+</a>{% endfor %}
+</div>
+<section class="card data-panel" aria-labelledby="views-head"><div class="section-head"><div><h2 id="views-head">{{ 'Saved views'|tr(locale) }}</h2><p class="muted small">{{ 'Save a filter on Transactions to see it here.'|tr(locale) }}</p></div></div>
+  {% if not views %}<p class="muted">{{ 'No saved views yet.'|tr(locale) }}</p>{% else %}
+  <table class="figures"><tbody>{% for v in views %}<tr><td><a href="/transactions?saved_view={{ v.id }}">{{ v.name }}</a></td><td><a href="/transactions/views/{{ v.id }}/report">{{ 'Report'|tr(locale) }}</a></td><td><a href="/exports/views/{{ v.id }}">{{ 'Export'|tr(locale) }}</a></td></tr>{% endfor %}</tbody></table>{% endif %}
+</section>
+<section class="card"><div class="section-head"><div><h2>{{ 'Everything'|tr(locale) }}</h2></div></div><a class="btn" href="/exports/all">{{ 'Export all data (CSV or Excel)'|tr(locale) }}</a> <button type="button" class="btn" data-print>{{ 'Print this page'|tr(locale) }}</button><script nonce="{{ request.state.csp_nonce|default('') }}">document.querySelector("[data-print]").addEventListener("click",()=>window.print())</script></section>
+{% endblock %}

@@ -19,7 +19,11 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.content.res.ColorStateList;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.chaquo.python.Python;
 import java.io.ByteArrayInputStream;
@@ -91,17 +95,33 @@ public final class MainActivity extends Activity {
         BiometricBridge.activity = this;
         takeShare(getIntent());
         queueReminder(getIntent());
+        addShortcuts();
         WebView.setWebContentsDebuggingEnabled(false);
         FrameLayout frame = new FrameLayout(this);
         fitSystemBars(frame);
         frame.setBackgroundColor(0xFFF5F8F7);  // the app's own background, so the start looks like the app
-        TextView starting = new TextView(this);
+        // The start screen: the lockup (guideline A02, one drawing) over a slim bar that moves while Python starts.
+        float dp = getResources().getDisplayMetrics().density;
+        LinearLayout splash = new LinearLayout(this);
+        splash.setOrientation(LinearLayout.VERTICAL);
+        splash.setGravity(android.view.Gravity.CENTER);
+        ImageView lockup = new ImageView(this);
+        lockup.setImageResource(R.drawable.lightning_lockup);
+        lockup.setContentDescription("Lightning");
+        splash.addView(lockup, new LinearLayout.LayoutParams((int) (226 * dp), (int) (56 * dp)));
+        ProgressBar loading = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        loading.setIndeterminate(true);
+        loading.setIndeterminateTintList(ColorStateList.valueOf(0xFF0A2442));  // Nile
+        loading.setProgressBackgroundTintList(ColorStateList.valueOf(0xFFE6EFEC));  // Track
+        LinearLayout.LayoutParams bar = new LinearLayout.LayoutParams((int) (120 * dp), (int) (4 * dp));
+        bar.topMargin = (int) (28 * dp);
+        splash.addView(loading, bar);
+        frame.addView(splash, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        TextView starting = new TextView(this);  // only if Python cannot start: what went wrong, selectable
         starting.setPadding(48, 48, 48, 48);
-        starting.setGravity(android.view.Gravity.CENTER);
         starting.setTextColor(0xFF0D2233);
-        starting.setTextSize(22);
-        starting.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-        starting.setText("Lightning");
+        starting.setVisibility(View.GONE);
         frame.addView(starting, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         setContentView(frame);
@@ -117,8 +137,9 @@ public final class MainActivity extends Activity {
             } catch (Throwable error) {
                 String text = "Lightning could not start. Close it and open it again.\n\n" + Log.getStackTraceString(error);
                 runOnUiThread(() -> {
+                    splash.setVisibility(View.GONE);
+                    starting.setVisibility(View.VISIBLE);
                     starting.setTextSize(13);
-                    starting.setTypeface(android.graphics.Typeface.DEFAULT);
                     starting.setGravity(android.view.Gravity.START);
                     starting.setText(text);
                     starting.setTextIsSelectable(true);
@@ -276,6 +297,28 @@ public final class MainActivity extends Activity {
             ReminderNotifications.PollResult result = ReminderNotifications.check(this, currentOrigin, cookie);
             reminderEnabled = result.enabled;
         }, "lightning-reminders").start();
+    }
+
+    /** Long-press the app icon (phone roadmap M8): Add expense and Bank SMS open straight away, through the same
+     *  safe in-app link path as a reminder (reminder_href, checked by safeHrefForActivity). */
+    private void addShortcuts() {
+        if (Build.VERSION.SDK_INT < 25) return;
+        try {
+            android.content.pm.ShortcutManager manager = getSystemService(android.content.pm.ShortcutManager.class);
+            if (manager == null) return;
+            java.util.List<android.content.pm.ShortcutInfo> list = new java.util.ArrayList<>();
+            String[][] items = {{"add", "Add expense", "/accounts/add-transaction"}, {"sms", "Bank SMS", "/sms"}};
+            for (String[] item : items) {
+                Intent open = new Intent(this, MainActivity.class).setAction("org.lightning.app.OPEN_REMINDER")
+                        .putExtra("reminder_href", item[2]).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                list.add(new android.content.pm.ShortcutInfo.Builder(this, item[0]).setShortLabel(item[1])
+                        .setIcon(android.graphics.drawable.Icon.createWithResource(this, R.drawable.ic_lightning))
+                        .setIntent(open).build());
+            }
+            manager.setDynamicShortcuts(list);
+        } catch (RuntimeException ignored) {
+            // a launcher without shortcuts: nothing to add
+        }
     }
 
     private void queueReminder(Intent intent) {

@@ -161,6 +161,20 @@ class BankImportService:
             "WHERE r.status='REVIEW' ORDER BY r.id LIMIT 1"
         )
 
+    def history(self, limit: int = 20) -> list[dict]:
+        """Recent statements, newest first, with how many entries each one created that are still posted."""
+        return [dict(r) for r in self.db.all(
+            "SELECT b.id, b.account_id, b.file_name, b.status, b.created_at, b.posted_at, a.name AS account,"
+            " (SELECT COUNT(*) FROM bank_import_rows r JOIN transactions t ON t.id=r.transaction_id"
+            "  WHERE r.batch_id=b.id AND r.status='POSTED' AND t.source='IMPORT' AND t.status='POSTED') AS live"
+            " FROM bank_import_batches b JOIN accounts a ON a.id=b.account_id ORDER BY b.id DESC LIMIT ?", (limit,))]
+
+    def created_transactions(self, batch_id: int) -> list[int]:
+        """The entries a statement created (not the ones it only linked to), still in the books: what undo removes."""
+        return [int(r["transaction_id"]) for r in self.db.all(
+            "SELECT r.transaction_id FROM bank_import_rows r JOIN transactions t ON t.id=r.transaction_id"
+            " WHERE r.batch_id=? AND r.status='POSTED' AND t.source='IMPORT' AND t.status='POSTED'", (batch_id,))]
+
     def waiting_all(self) -> list[dict]:
         """Every statement with rows still waiting for a decision, oldest first, with its first waiting row."""
         return [dict(row) for row in self.db.all(

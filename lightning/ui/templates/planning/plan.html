@@ -13,6 +13,12 @@
     {% if f.safe_to_spend < 0 and budget_part < 0 and f.safe_to_spend - budget_part >= 0 %}<p class="notice">{{ "What is still planned to spend in your budget is more than your cash allows."|tr(locale) }} <a class="btn small" href="/budget">{{ 'Adjust your budget'|tr(locale) }}</a></p>
     {% elif f.safe_to_spend < 0 %}<p class="notice">{{ "Promised payments are larger than your free cash."|tr(locale) }}</p>{% endif %}
     <details class="chart-table"><summary>{{ 'Show the numbers'|tr(locale) }}</summary><table><tbody>{% for name, value in f.safe_to_spend_parts %}<tr><td>{{ name }}</td><td class="num">{{ value|money(not loop.first) }}</td></tr>{% endfor %}<tr><th>{{ fig.safe_to_spend.label }}</th><th class="num">{{ f.safe_to_spend|money }}</th></tr></tbody></table></details>{% endcall %}
+<form method="get" action="/plan" class="afford-box" role="search" aria-labelledby="afford-h">
+  <h3 id="afford-h">{{ 'Can I afford this?'|tr(locale) }}</h3>
+  <input name="afford" inputmode="decimal" class="money-input" value="{{ afford_amount }}" placeholder="{{ 'Price'|tr(locale) }}" aria-label="{{ 'Price'|tr(locale) }} ({{ base }})">
+  <button class="btn">{{ 'Check'|tr(locale) }}</button>
+  {% if afford %}<p class="afford-answer is-{{ afford.verdict }}" role="status">{{ afford.headline|tr(locale) }}</p>{% elif afford_error %}<p class="afford-answer is-no" role="status">{{ afford_error|tr(locale) }}</p>{% endif %}
+</form>
 {{ needs_rows(needs) }}
 {{ kpi_row(kpi_cards, base, 'Your cash') }}
 {% else %}{{ stat_tiles(stats, base, 'Your cash') }}{% endif %}

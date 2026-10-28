@@ -22,6 +22,13 @@
   <form method="post" class="actions" action="/investments/prices/online">
     <button class="btn primary" data-busy="Fetching prices…">{{ 'Update prices'|tr(locale) }}</button>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+<details class="flow-disclosure" id="price-csv"><summary>{{ 'Upload prices from a spreadsheet'|tr(locale) }}</summary>
+  <form method="post" enctype="multipart/form-data" action="/investments/prices/csv" class="inline-upload">
+    <input type="file" name="file" accept=".csv,text/csv" required aria-label="{{ 'CSV file'|tr(locale) }}">
+    <button class="btn">{{ 'Upload prices'|tr(locale) }}</button>
+    <span class="muted small">{{ 'Columns: Symbol or Name, Date, Price.'|tr(locale) }}</span>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+  </details>
   <details class="flow-disclosure"><summary>{{ "Shared price files"|tr(locale) }}</summary>
   {% if market %}
   <table class="budget">

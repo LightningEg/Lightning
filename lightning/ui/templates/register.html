@@ -57,7 +57,7 @@
 {% set cashy = account and account.active and kind in ('CASH','BANK') %}
 {% if kind == 'DEPOSIT' %}<a class="btn primary" href="/deposits/{{ account.id }}">{{ 'View CDs'|tr(locale) }}</a>{% endif %}
 {% if kind == 'GAMEYA' %}<a class="btn primary" href="/gameya/{{ account.id }}">{{ 'Open gam’eya'|tr(locale) }}</a>{% endif %}
-{% if not account %}<a class="btn primary" href="/accounts">{{ 'Choose an account'|tr(locale) }}</a>
+{% if not account %}{% if import_accounts %}<details class="action-menu import-menu"><summary class="btn">{{ 'Import statement'|tr(locale) }}</summary><div>{% for a in import_accounts %}<a href="/accounts/{{ a.id }}/import">{{ a.label }}</a>{% endfor %}</div></details>{% endif %}<a class="btn primary" href="/accounts">{{ 'Choose an account'|tr(locale) }}</a>
 {% elif cashy %}<details class="action-menu money-actions"><summary class="btn">{{ 'Money actions'|tr(locale) }}</summary><div><a href="/accounts/{{ account.id }}/convert">{{ 'Convert currency'|tr(locale) }}</a><a data-popup-open href="/accounts/{{ account.id }}/ownership/new">{{ 'Change ownership'|tr(locale) }}</a><a href="/plan/purchases/new" data-popup-open>{{ 'Bought in instalments'|tr(locale) }}</a></div></details>
 {% else %}<a class="btn" href="/accounts/{{ account.id }}/import">{{ 'Import statement'|tr(locale) }}</a>{% endif %}
 <details class="action-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">⋯</summary><div>{% if cashy %}<a href="/accounts/{{ account.id }}/import">{{ 'Import statement'|tr(locale) }}</a>{% endif %}{% if account and account.active and kind == 'BROKERAGE' %}<a data-popup-open href="/accounts/{{ account.id }}/ownership/new">{{ 'Change ownership'|tr(locale) }}</a>{% endif %}{% if account %}{% if kind in ('CASH','BANK','BROKERAGE','GAMEYA') %}<a href="/accounts/{{ account.id }}/reconcile">{{ 'Adjust balance'|tr(locale) }}</a>{% elif kind == 'DEPOSIT' %}<a href="/deposits/{{ account.id }}">{{ 'Update value'|tr(locale) }}</a>{% endif %}<a data-popup-open href="/accounts/{{ account.id }}/edit">{{ 'Edit account'|tr(locale) }}</a>{% if account.active and kind == 'BROKERAGE' and not account.parent_id %}<form method="post" action="/accounts/{{ account.id }}/pockets" class="pocket-add"><label><span class="sr-only">{{ 'Add a currency'|tr(locale) }}</span><input name="currency" maxlength="3" size="4" placeholder="USD" required></label><button>{{ 'Add currency'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}{% if account.active and kind in ('CASH','BANK','BROKERAGE') %}<form method="post" action="/accounts/{{ account.id }}/spendable"><input type="hidden" name="spendable" value="{{ 'no' if account_spendable else 'yes' }}"><button>{{ ('Keep its cash apart from spendable' if account_spendable else 'Count its cash as spendable')|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}{% else %}<a href="/plan/purchases/new" data-popup-open>{{ 'Bought in instalments'|tr(locale) }}</a>{% endif %}<a href="/transactions/deleted">{{ 'Deleted transactions'|tr(locale) }}</a>{% if account %}{% if account.active %}<form method="post" action="/accounts/{{ account.id }}/deactivate"><button class="danger-text">{{ 'Deactivate'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% else %}<form method="post" action="/accounts/{{ account.id }}/reactivate"><button>{{ 'Reactivate'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}{% endif %}</div></details>
@@ -144,23 +144,35 @@
     </form>
     {% if active_view %}<a href="/transactions/views/{{ active_view.id }}/report?account_id={{ view_account_id }}">{{ 'Summary and export'|tr(locale) }}</a><form method="post" action="/transactions/views/{{ active_view.id }}/delete"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><input type="hidden" name="account_id" value="{{ view_account_id }}"><button class="danger-text">{{ 'Delete view'|tr(locale) }}</button></form>{% endif %}
   </div></details>
+  <details class="find-replace"><summary>{{ 'Find and replace'|tr(locale) }}</summary>
+    <form method="post" action="/transactions/find-replace" class="field-row" data-confirm-delete="{{ 'Replace this text on every matching row?'|tr(locale) }}">
+      <label>{{ 'In'|tr(locale) }}<select name="field"><option value="counterparty">{{ 'Counterparty'|tr(locale) }}</option><option value="notes">{{ 'Notes'|tr(locale) }}</option></select></label>
+      <label>{{ 'Find'|tr(locale) }}<input name="find" required maxlength="120" value="{{ q }}"></label>
+      <label>{{ 'Replace with'|tr(locale) }}<input name="replace" maxlength="120"></label>
+      <button class="btn small">{{ 'Replace all'|tr(locale) }}</button>
+      {% for key, value in (replace_scope or {}).items() if value %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
+      <input type="hidden" name="back" value="{{ request.url.path }}{{ '?' ~ request.url.query if request.url.query }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    </form></details>
   {% if filter_category %}<div class="muted small">Only {{ filter_category }} · {{ total_rows }} transaction{{ 's' if total_rows != 1 }}</div>{% endif %}
+  {% if matched_flows and not filter_tag %}<div class="register-result" role="status"><b>{{ total_rows }}</b> {{ 'found'|tr(locale) }} · {{ fig.money_in.label }} <span class="num">{{ matched_flows[0]|money }}</span> · {{ fig.money_out.label }} <span class="num">{{ matched_flows[1]|money }}</span> · {{ 'Net'|tr(locale) }} <span class="num {{ matched_net|tone }}">{{ matched_net|money(True) }}</span></div>{% endif %}
   {% if filter_tag %}<div class="muted small tag-filter">Tagged #{{ filter_tag }} · {{ total_rows }} transaction{{ 's' if total_rows != 1 }} · {{ fig.money_in.label }} {{ tag_flows[0]|money }} · {{ fig.money_out.label }} {{ tag_flows[1]|money }}</div>{% endif %}
   {% if search_suggestions %}<div class="muted small">Did you mean {% for name, score in search_suggestions %}<a href="{{ base_url }}?q={{ name|urlencode }}">{{ name }}</a>{% if not loop.last %} · {% endif %}{% endfor %}?</div>{% endif %}
 </div>
 <script nonce="{{ request.state.csp_nonce|default('') }}">(()=>{const form=document.querySelector('[data-auto-filter]');if(!form)return;const search=form.elements.q,month=form.elements.month,preset=form.elements.preset;let timer;search?.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>form.requestSubmit(),350)});month?.addEventListener('change',()=>form.requestSubmit());preset?.addEventListener('change',()=>form.requestSubmit());search?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(timer);form.requestSubmit()}})})();</script>
 
 {% if val_count %}<p class="muted small register-val-toggle"><a href="{{ val_toggle_url }}">{{ ('Hide value updates'|tr(locale)) if show_val else ('Show value updates ({n})'|tr(locale, n=val_count)) }}</a></p>{% endif %}
-<div class="card ledger" data-counterparties='{{ counterparty_categories|tojson }}' data-accounts='{{ account_options|tojson }}'>
+<div class="card ledger"{% if matching_ids %} data-matching-ids='{{ matching_ids|tojson }}'{% endif %} data-counterparties='{{ counterparty_categories|tojson }}' data-accounts='{{ account_options|tojson }}'>
   <div class="selection-tools" id="selection-tools" hidden>
     <span id="selection-count" class="muted small" role="status" aria-live="polite">{{ "0 selected"|tr(locale) }}</span>
     <button type="button" class="btn small" id="edit-selected">{{ 'Edit selected'|tr(locale) }}</button>
+    {% if matching_ids %}<button type="button" class="btn small" id="select-matching" hidden>{{ 'Select all {n} matching'|tr(locale, n=matching_ids|length) }}</button>{% endif %}
     <button type="button" class="btn small" id="clear-selected">{{ 'Clear selection'|tr(locale) }}</button>
     {# Bulk edit (user feedback, ticket 20): one category for every selected row. #}
     <form method="post" action="/transactions/bulk-category" class="bulk-category" id="bulk-category-form">
       {% from "partials/macros.html" import category_options %}<select name="category_id" aria-label="Category for the selected rows" data-own-picker><option value="">{{ 'Set a category…'|tr(locale) }}</option>{{ category_options(category_groups()) }}</select>
       <button class="btn small">{{ 'Set category'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
     </form>
+    <button type="button" class="btn small" id="rule-from-selected" title="{{ 'Make a rule from the first selected counterparty'|tr(locale) }}">{{ 'Make a rule'|tr(locale) }}</button>
     <button type="button" class="btn small" id="export-selected">{{ 'Export selected'|tr(locale) }}</button>
     <button type="button" class="btn small" id="merge-selected" hidden>{{ 'Merge selected'|tr(locale) }}</button>
     <button type="button" class="btn small danger" id="delete-selected">{{ 'Delete selected'|tr(locale) }}</button>
@@ -179,7 +191,7 @@
       {% if r.type in ('TRF', 'CNV') %}{% set kind = 'transfer' %}{% elif r.type in ('BUY', 'SEL', 'DIV') %}{% set kind = 'invest' %}{% elif r.type == 'OPN' %}{% set kind = 'opening' %}{% endif %}
       {% if edit_id == r.txn_id and edit_acct == r.account_id %}
       <tr class="add-row editing" data-txn="{{ r.txn_id }}" data-original='{{ edit_original|tojson }}' data-cancel-href="{{ base_url }}{{ '?' ~ keep_qs if keep_qs }}" title="{{ r.ref }} · Enter to save · Esc to cancel · right-click for more">
-        <td><input type="checkbox" class="transaction-select" value="{{ r.txn_id }}"{{ ' checked' if request.query_params.get('pick') == r.txn_id|string }} data-type="{{ r.type }}" aria-label="Select {{ r.counterparty or r.type_label }}" {% if r.type == 'OPN' %}disabled{% endif %}><a class="sr-only" href="{{ base_url }}{{ '?' ~ keep_qs if keep_qs }}" data-cancel>{{ 'Cancel'|tr(locale) }}</a></td>
+        <td><input type="checkbox" class="transaction-select" value="{{ r.txn_id }}" data-payee="{{ r.counterparty if r.type in ('IN','OUT') else '' }}"{{ ' checked' if request.query_params.get('pick') == r.txn_id|string }} data-type="{{ r.type }}" aria-label="Select {{ r.counterparty or r.type_label }}" {% if r.type == 'OPN' %}disabled{% endif %}><a class="sr-only" href="{{ base_url }}{{ '?' ~ keep_qs if keep_qs }}" data-cancel>{{ 'Cancel'|tr(locale) }}</a></td>
         {{ inputs('f-edit', edit, True, r.balance if with_balance else none) }}
       </tr>
       {% else %}

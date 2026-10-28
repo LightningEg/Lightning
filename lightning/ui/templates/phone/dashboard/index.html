@@ -18,6 +18,8 @@
 {% else %}
 {{ hero(fig[lead].label, pos.net_worth if owes else pos.what_you_own, note="As of {date}"|tr(locale, date=position_as_of)) }}
 {% endif %}
+{% if phone and phone.soon %}{% set soon = phone.soon %}<a class="card phone-card phone-soon{{ ' is-late' if soon.late }}" href="/more#bills-heading">
+  <span>{{ ('1 payment due today or tomorrow' if soon.count == 1 else '{n} payments due today or tomorrow')|tr(locale, n=soon.count) }}</span><b>{{ soon.total|amount_role('total') }}</b></a>{% endif %}
 {% if pos.unvalued %}<p class="notice">{{ pos.unvalued|length }} asset valuation(s) are missing from this total.</p>{% endif %}
 {% from "partials/macros.html" import period_control with context %}{{ period_control("/", period.key, month, this_month, request.query_params.get("date_from", "") if period_error and period.key == "custom" else period.start_text, request.query_params.get("date_to", "") if period_error and period.key == "custom" else period.end_text) }}
 {% if attention %}
@@ -62,7 +64,7 @@
   <article class="card phone-card phone-folds phone-flat-rows" aria-label="More on your position">
   <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ "Over time"|tr(locale) }} <span class="phone-chevron" aria-hidden="true">›</span><small>{{ fig[lead].label }} at the end of each month</small></span></summary>
     <div class="phone-fold-body">
-    {{ trend(networth_trend, fig[lead].label ~ ' at the end of each month', 'Plan', 160) }}
+    {% if lazy_folds %}<div data-fold-src="/overview/fold/trend?{{ fold_query }}"><p class="chart-empty">{{ 'Loading…'|tr(locale) }}</p></div>{% else %}{{ trend(networth_trend, fig[lead].label ~ ' at the end of each month', 'Plan', 160) }}{% endif %}
     </div></details>
   <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ fig.free_cash.label }} <span class="phone-chevron" aria-hidden="true">›</span><small>{{ "After reserves and bills due"|tr(locale) }}</small></span><b>{{ pos.free_cash|money if pos.free_cash is not none else 'Unavailable' }}</b></summary>
     <div class="phone-fold-body">
@@ -97,7 +99,7 @@
     </div></details>
   <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ "Where money in went"|tr(locale) }} <span class="phone-chevron" aria-hidden="true">›</span></span><b>{{ cash_flow.inflows|money }}</b></summary>
     <div class="phone-fold-body">
-    {{ flow_bars(money_sankey, base) }}
+    {% if lazy_folds %}<div data-fold-src="/overview/fold/money-in?{{ fold_query }}"><p class="chart-empty">{{ 'Loading…'|tr(locale) }}</p></div>{% else %}{{ flow_bars(money_sankey, base) }}{% endif %}
     <a class="phone-quiet" href="/birdview/expenses?{{ request.url.query }}">{{ "See spending"|tr(locale) }}</a>
     </div></details>
   <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ 'Investments'|tr(locale) }} <span class="phone-chevron" aria-hidden="true">›</span><small>{{ fig.result.label }}</small></span><b>{% if investment_report.period_result_available %}{{ investment_report.period_result|money(True) }}{% else %}—{% endif %}</b></summary>

@@ -3,6 +3,7 @@
     python tools/perf_check.py              # the sample household (about ten months, 300 rows)
     python tools/perf_check.py --demo       # the small demo household
     python tools/perf_check.py --slow 150   # flag pages slower than 150 ms (default 150) or over 400 queries
+    python tools/perf_check.py --phone      # the phone app's pages (phone frame, folds load when opened)
 
 Builds a temporary database (never real data), asks each page twice (the first call is cold, the second is what a
 person feels), and prints one line per page: warm milliseconds, queries, and the query asked most often. Exit status 1
@@ -30,6 +31,7 @@ def main() -> int:
     parser.add_argument("--demo", action="store_true", help="the small demo household instead of the sample year")
     parser.add_argument("--slow", type=int, default=150, help="milliseconds a warm page may take")
     parser.add_argument("--queries", type=int, default=400, help="queries a page may ask")
+    parser.add_argument("--phone", action="store_true", help="render the pages as the phone app does")
     args = parser.parse_args()
 
     from fastapi.testclient import TestClient
@@ -53,7 +55,15 @@ def main() -> int:
                 counts[re.sub(r"\s+", " ", str(sql))[:90]] += 1
                 return _original(sql, *a, **k)
             setattr(container.db, name, counted)
-        client = TestClient(create_app(container), base_url="http://127.0.0.1")
+        app = create_app(container)
+        if args.phone:  # the phone app's frame and screens (backend roadmap B6: profile phone latency)
+            inner = app
+
+            async def app(scope, receive, send):
+                if scope["type"] == "http":
+                    scope.setdefault("state", {})["phone"] = True
+                return await inner(scope, receive, send)
+        client = TestClient(app, base_url="http://127.0.0.1")
         worst = 0
         print(f"{'page':26}{'warm ms':>8}{'queries':>9}  most repeated query")
         for page in PAGES:

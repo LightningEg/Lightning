@@ -1,0 +1,541 @@
+{
+  "abk": {
+    "icon": "icons/abk.png",
+    "wordmark": "wordmarks/abk.png",
+    "original": "originals/abk.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/abk.webp",
+    "source_type": "third-party directory"
+  },
+  "cib": {
+    "icon": "icons/cib.png",
+    "wordmark": "wordmarks/cib.png",
+    "original": "originals/cib.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/cib.webp",
+    "source_type": "third-party directory"
+  },
+  "arab-bank": {
+    "icon": "icons/arab-bank.png",
+    "wordmark": "wordmarks/arab-bank.png",
+    "original": "originals/arab-bank.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/arab-bank.webp",
+    "source_type": "third-party directory"
+  },
+  "aaib": {
+    "icon": "icons/aaib.png",
+    "wordmark": "wordmarks/aaib.png",
+    "original": "originals/aaib.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/aaib.webp",
+    "source_type": "third-party directory"
+  },
+  "aib": {
+    "icon": "icons/aib.png",
+    "wordmark": "wordmarks/aib.png",
+    "original": "originals/aib.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/aib.webp",
+    "source_type": "third-party directory"
+  },
+  "ealb": {
+    "icon": "icons/ealb.png",
+    "wordmark": "wordmarks/ealb.png",
+    "original": "originals/ealb.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/ealb.webp",
+    "source_type": "third-party directory"
+  },
+  "saib": {
+    "icon": "icons/saib.png",
+    "wordmark": "wordmarks/saib.png",
+    "original": "originals/saib.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/saib.webp",
+    "source_type": "third-party directory"
+  },
+  "abc": {
+    "icon": "icons/abc.png",
+    "wordmark": "wordmarks/abc.png",
+    "original": "originals/abc.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/abc.webp",
+    "source_type": "third-party directory"
+  },
+  "united-bank": {
+    "icon": "icons/united-bank.png",
+    "wordmark": "wordmarks/united-bank.png",
+    "original": "originals/united-bank.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/united-bank.webp",
+    "source_type": "third-party directory"
+  },
+  "fabmisr": {
+    "icon": "icons/fabmisr.png",
+    "wordmark": "wordmarks/fabmisr.png",
+    "original": "originals/fabmisr.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/fab.webp",
+    "source_type": "third-party directory"
+  },
+  "adcb": {
+    "icon": "icons/adcb.png",
+    "wordmark": "wordmarks/adcb.png",
+    "original": "originals/adcb.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/adcb.webp",
+    "source_type": "third-party directory"
+  },
+  "hsbc": {
+    "icon": "icons/hsbc.png",
+    "wordmark": "wordmarks/hsbc.png",
+    "original": "originals/hsbc.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/hsbc.webp",
+    "source_type": "third-party directory"
+  },
+  "alexbank": {
+    "icon": "icons/alexbank.png",
+    "wordmark": "wordmarks/alexbank.png",
+    "original": "originals/alexbank.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/bank-of-alexandria.webp",
+    "source_type": "third-party directory"
+  },
+  "emirates-nbd": {
+    "icon": "icons/emirates-nbd.png",
+    "wordmark": "wordmarks/emirates-nbd.png",
+    "original": "originals/emirates-nbd.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/emirates-nbd.webp",
+    "source_type": "third-party directory"
+  },
+  "attijariwafa": {
+    "icon": "icons/attijariwafa.png",
+    "wordmark": "wordmarks/attijariwafa.png",
+    "original": "originals/attijariwafa.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/attijariwafa.webp",
+    "source_type": "third-party directory"
+  },
+  "hdb": {
+    "icon": "icons/hdb.png",
+    "wordmark": "wordmarks/hdb.png",
+    "original": "originals/hdb.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/hdb.webp",
+    "source_type": "third-party directory"
+  },
+  "ebank": {
+    "icon": "icons/ebank.png",
+    "wordmark": "wordmarks/ebank.png",
+    "original": "originals/ebank.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/edbe.webp",
+    "source_type": "third-party directory"
+  },
+  "egbank": {
+    "icon": "icons/egbank.png",
+    "wordmark": "wordmarks/egbank.png",
+    "original": "originals/egbank.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/eg-bank.webp",
+    "source_type": "third-party directory"
+  },
+  "banque-du-caire": {
+    "icon": "icons/banque-du-caire.png",
+    "wordmark": "wordmarks/banque-du-caire.png",
+    "original": "originals/banque-du-caire.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/banque-du-caire.webp",
+    "source_type": "third-party directory"
+  },
+  "nbk": {
+    "icon": "icons/nbk.png",
+    "wordmark": "wordmarks/nbk.png",
+    "original": "originals/nbk.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/nbk.webp",
+    "source_type": "third-party directory"
+  },
+  "mashreq": {
+    "icon": "icons/mashreq.png",
+    "wordmark": "wordmarks/mashreq.png",
+    "original": "originals/mashreq.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/mashreq.webp",
+    "source_type": "third-party directory"
+  },
+  "standard-chartered": {
+    "icon": "icons/standard-chartered.png",
+    "wordmark": "wordmarks/standard-chartered.png",
+    "original": "originals/standard-chartered.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/standard-chartered.webp",
+    "source_type": "third-party directory"
+  },
+  "citibank": {
+    "icon": "icons/citibank.png",
+    "wordmark": "wordmarks/citibank.png",
+    "original": "originals/citibank.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/citibank.webp",
+    "source_type": "third-party directory"
+  },
+  "qnb": {
+    "icon": "icons/qnb.png",
+    "wordmark": "wordmarks/qnb.png",
+    "original": "originals/qnb.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/qnb.webp",
+    "source_type": "third-party directory"
+  },
+  "suez-canal": {
+    "icon": "icons/suez-canal.png",
+    "wordmark": "wordmarks/suez-canal.png",
+    "original": "originals/suez-canal.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/suez-canal-bank.webp",
+    "source_type": "third-party directory"
+  },
+  "credit-agricole": {
+    "icon": "icons/credit-agricole.png",
+    "wordmark": "wordmarks/credit-agricole.png",
+    "original": "originals/credit-agricole.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/credit-agricole.webp",
+    "source_type": "third-party directory"
+  },
+  "midbank": {
+    "icon": "icons/midbank.png",
+    "wordmark": "wordmarks/midbank.png",
+    "original": "originals/midbank.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/midbank.webp",
+    "source_type": "third-party directory"
+  },
+  "bank-nxt": {
+    "icon": "icons/bank-nxt.png",
+    "wordmark": "wordmarks/bank-nxt.png",
+    "original": "originals/bank-nxt.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/bank-nxt.webp",
+    "source_type": "third-party directory"
+  },
+  "nbe": {
+    "icon": "icons/nbe.png",
+    "wordmark": "wordmarks/nbe.png",
+    "original": "originals/nbe.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/nbe.webp",
+    "source_type": "third-party directory"
+  },
+  "banque-misr": {
+    "icon": "icons/banque-misr.png",
+    "wordmark": "wordmarks/banque-misr.png",
+    "original": "originals/banque-misr.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/banque-misr.webp",
+    "source_type": "third-party directory"
+  },
+  "adib": {
+    "icon": "icons/adib.png",
+    "wordmark": "wordmarks/adib.png",
+    "original": "originals/adib.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/adib.webp",
+    "source_type": "third-party directory"
+  },
+  "albaraka": {
+    "icon": "icons/albaraka.png",
+    "wordmark": "wordmarks/albaraka.png",
+    "original": "originals/albaraka.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/al-baraka.webp",
+    "source_type": "third-party directory"
+  },
+  "faisal": {
+    "icon": "icons/faisal.png",
+    "wordmark": "wordmarks/faisal.png",
+    "original": "originals/faisal.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/faisal-bank.webp",
+    "source_type": "third-party directory"
+  },
+  "kfh": {
+    "icon": "icons/kfh.png",
+    "wordmark": "wordmarks/kfh.png",
+    "original": "originals/kfh.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/kfh.webp",
+    "source_type": "third-party directory"
+  },
+  "abe": {
+    "icon": "icons/abe.png",
+    "wordmark": "wordmarks/abe.png",
+    "original": "originals/abe.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/abe.webp",
+    "source_type": "third-party directory"
+  },
+  "idb": {
+    "icon": "icons/idb.png",
+    "wordmark": "wordmarks/idb.png",
+    "original": "originals/idb.webp",
+    "source_url": "https://banksegypt.com/assets/img/egbanks/idb.webp",
+    "source_type": "third-party directory"
+  },
+  "onebank": {
+    "icon": "icons/onebank.png",
+    "wordmark": "wordmarks/onebank.png",
+    "original": "originals/onebank.png",
+    "source_url": "https://www.onebank.eg/resources/img/favicon/android-icon-192x192.png",
+    "source_type": "official bank site",
+    "original_svg": "originals/onebank-wordmark.svg"
+  },
+  "vodafone-cash": {
+    "name": "Vodafone Cash",
+    "category": "telecom_wallet",
+    "icon": "icons/vodafone-cash.png",
+    "wordmark": "wordmarks/vodafone-cash.png",
+    "original": "originals/vodafone-cash.png",
+    "source_url": "https://www.balad.me/logos/wallets/vodafone-cash-combined.png",
+    "source_type": "wallet-directory"
+  },
+  "orange-cash": {
+    "name": "Orange Cash",
+    "category": "telecom_wallet",
+    "icon": "icons/orange-cash.png",
+    "wordmark": "wordmarks/orange-cash.png",
+    "original": "originals/orange-cash.png",
+    "source_url": "https://www.balad.me/logos/wallets/orange.png",
+    "source_type": "wallet-directory"
+  },
+  "etisalat-cash": {
+    "name": "e& Cash",
+    "category": "telecom_wallet",
+    "icon": "icons/etisalat-cash.png",
+    "wordmark": "wordmarks/etisalat-cash.png",
+    "original": "originals/etisalat-cash.webp",
+    "source_url": "https://www.balad.me/logos/wallets/etisalat.webp",
+    "source_type": "wallet-directory"
+  },
+  "we-pay": {
+    "name": "WE Pay",
+    "category": "telecom_wallet",
+    "icon": "icons/we-pay.png",
+    "wordmark": "wordmarks/we-pay.png",
+    "original": "originals/we-pay.png",
+    "source_url": "https://www.balad.me/logos/wallets/we.png",
+    "source_type": "wallet-directory"
+  },
+  "nbe-phone-cash": {
+    "name": "NBE Phone Cash",
+    "category": "bank_wallet",
+    "icon": "icons/nbe-phone-cash.png",
+    "wordmark": "wordmarks/nbe-phone-cash.png",
+    "original": "originals/nbe-phone-cash.jpg",
+    "source_url": "https://www.balad.me/logos/wallets/nbe_phone_cash.jpeg",
+    "source_type": "wallet-directory"
+  },
+  "bm-wallet": {
+    "name": "Banque Misr Wallet",
+    "category": "bank_wallet",
+    "icon": "icons/bm-wallet.png",
+    "wordmark": "wordmarks/bm-wallet.png",
+    "original": "originals/bm-wallet.png",
+    "source_url": "https://www.balad.me/logos/wallets/bm.png",
+    "source_type": "wallet-directory"
+  },
+  "qnb-wallet": {
+    "name": "QNB Wallet",
+    "category": "bank_wallet",
+    "icon": "icons/qnb-wallet.png",
+    "wordmark": "wordmarks/qnb-wallet.png",
+    "original": "originals/qnb-wallet.jpg",
+    "source_url": "https://www.balad.me/logos/wallets/qnb_wallet.jpeg",
+    "source_type": "wallet-directory"
+  },
+  "saib-wallet": {
+    "name": "SAIB Wallet",
+    "category": "bank_wallet",
+    "icon": "icons/saib-wallet.png",
+    "wordmark": "wordmarks/saib-wallet.png",
+    "original": "originals/saib-wallet.jpg",
+    "source_url": "https://www.balad.me/logos/wallets/saib.jpg",
+    "source_type": "wallet-directory"
+  },
+  "aib-wallet": {
+    "name": "AIB Wallet",
+    "category": "bank_wallet",
+    "icon": "icons/aib-wallet.png",
+    "wordmark": "wordmarks/aib-wallet.png",
+    "original": "originals/aib-wallet.webp",
+    "source_url": "https://www.balad.me/logos/wallets/aib.webp",
+    "source_type": "wallet-directory"
+  },
+  "faisal-cash": {
+    "name": "Faisal Cash",
+    "category": "bank_wallet",
+    "icon": "icons/faisal-cash.png",
+    "wordmark": "wordmarks/faisal-cash.png",
+    "original": "originals/faisal-cash.png",
+    "source_url": "https://www.balad.me/logos/wallets/fisal.png",
+    "source_type": "wallet-directory"
+  },
+  "cib-smartwallet": {
+    "name": "CIB SmartWallet",
+    "category": "bank_wallet",
+    "icon": "icons/cib-smartwallet.png",
+    "wordmark": "wordmarks/cib-smartwallet.png",
+    "original": "originals/cib-smartwallet.jpg",
+    "source_url": "https://www.balad.me/logos/wallets/cib_smartwallet.jpeg",
+    "source_type": "wallet-directory"
+  },
+  "banki-wallet": {
+    "name": "Banki Wallet",
+    "category": "bank_wallet",
+    "icon": "icons/banki-wallet.png",
+    "wordmark": "wordmarks/banki-wallet.png",
+    "original": "originals/banki-wallet.jpg",
+    "source_url": "https://www.balad.me/logos/wallets/banki_wallet.jpeg",
+    "source_type": "wallet-directory"
+  },
+  "qahera-cash": {
+    "name": "Qahera Cash",
+    "category": "bank_wallet",
+    "icon": "icons/qahera-cash.png",
+    "wordmark": "wordmarks/qahera-cash.png",
+    "original": "originals/qahera-cash.jpg",
+    "source_url": "https://www.balad.me/logos/wallets/qaheeracash.jpeg",
+    "source_type": "wallet-directory"
+  },
+  "nbk-wallet": {
+    "name": "NBK Wallet",
+    "category": "bank_wallet",
+    "icon": "icons/nbk-wallet.png",
+    "wordmark": "wordmarks/nbk-wallet.png",
+    "original": "originals/nbk-wallet.jpg",
+    "source_url": "https://www.balad.me/logos/wallets/nbk.jpeg",
+    "source_type": "wallet-directory"
+  },
+  "adib-wallet": {
+    "name": "ADIB Wallet",
+    "category": "bank_wallet",
+    "icon": "icons/adib-wallet.png",
+    "wordmark": "wordmarks/adib-wallet.png",
+    "original": "originals/adib-wallet.jpg",
+    "source_url": "https://www.balad.me/logos/wallets/adib.jpg",
+    "source_type": "wallet-directory"
+  },
+  "cash2go": {
+    "name": "Cash 2GO",
+    "category": "bank_wallet",
+    "icon": "icons/cash2go.png",
+    "wordmark": "wordmarks/cash2go.png",
+    "original": "originals/cash2go.png",
+    "source_url": "https://www.balad.me/logos/wallets/cash2go.png",
+    "source_type": "wallet-directory"
+  },
+  "audi2pay": {
+    "name": "Audi2Pay",
+    "category": "bank_wallet",
+    "icon": "icons/audi2pay.png",
+    "wordmark": "wordmarks/audi2pay.png",
+    "original": "originals/audi2pay.jpg",
+    "source_url": "https://www.balad.me/logos/wallets/audi2pay.jpeg",
+    "source_type": "wallet-directory"
+  },
+  "halan-cash": {
+    "name": "Halan Cash",
+    "category": "fintech_wallet",
+    "icon": "icons/halan-cash.png",
+    "wordmark": "wordmarks/halan-cash.png",
+    "original": "originals/halan-cash.jpg",
+    "source_url": "https://www.balad.me/logos/wallets/halan.jpg",
+    "source_type": "wallet-directory"
+  },
+  "e-pocket": {
+    "name": "e-Pocket",
+    "category": "fintech_wallet",
+    "icon": "icons/e-pocket.png",
+    "wordmark": "wordmarks/e-pocket.png",
+    "original": "originals/e-pocket.jpg",
+    "source_url": "https://www.balad.me/logos/wallets/e-pocket.jpeg",
+    "source_type": "wallet-directory"
+  },
+  "masary": {
+    "name": "Masary",
+    "category": "payment_service",
+    "icon": "icons/masary.png",
+    "wordmark": "wordmarks/masary.png",
+    "original": "originals/masary.jpg",
+    "source_url": "https://www.balad.me/logos/wallets/masary-logo.jpg",
+    "source_type": "wallet-directory"
+  },
+  "easycash": {
+    "name": "easyCash",
+    "category": "fintech_wallet",
+    "icon": "icons/easycash.png",
+    "wordmark": "wordmarks/easycash.png",
+    "original": "originals/easycash.png",
+    "source_url": "https://www.balad.me/logos/wallets/easycash.png",
+    "source_type": "wallet-directory"
+  },
+  "axis": {
+    "name": "Axis",
+    "category": "fintech_wallet",
+    "icon": "icons/axis.png",
+    "wordmark": "wordmarks/axis.png",
+    "original": "originals/axis.webp",
+    "source_url": "https://www.balad.me/logos/wallets/axislogo.webp",
+    "source_type": "wallet-directory"
+  },
+  "telda": {
+    "name": "Telda",
+    "category": "finance_app",
+    "icon": "icons/telda.png",
+    "wordmark": "wordmarks/telda.png",
+    "original": "originals/telda.png",
+    "source_url": "https://telda.app/_next/static/media/telda-icon.f39ac0de.png",
+    "source_type": "official"
+  },
+  "thndr": {
+    "name": "Thndr",
+    "category": "investment_app",
+    "icon": "icons/thndr.png",
+    "wordmark": "wordmarks/thndr.png",
+    "original": "originals/thndr.png",
+    "source_url": "https://thndr.app/wp-content/uploads/2024/01/Thndr_Logo_Final_Thndr_Lockup_Yellow-1.png",
+    "source_type": "official"
+  },
+  "money-fellows": {
+    "name": "Money Fellows",
+    "category": "savings_app",
+    "icon": "icons/money-fellows.png",
+    "wordmark": "wordmarks/money-fellows.png",
+    "original": "originals/money-fellows.png",
+    "source_url": "https://moneyfellows.com/media/2xmlxxks/header-logo.png",
+    "source_type": "official"
+  },
+  "instapay": {
+    "name": "InstaPay",
+    "category": "payment_service",
+    "icon": "icons/instapay.png",
+    "wordmark": "wordmarks/instapay.png",
+    "original": "originals/instapay.png",
+    "source_url": "https://www.instapay.eg/wp-content/uploads/2022/03/logo.png",
+    "source_type": "official"
+  },
+  "fawry": {
+    "name": "Fawry",
+    "category": "payment_service",
+    "icon": "icons/fawry.png",
+    "wordmark": "wordmarks/fawry.png",
+    "original": "originals/fawry.png",
+    "source_url": "https://www.fawry.com/wp-content/uploads/2023/05/fawry-Logo.png",
+    "source_type": "official"
+  },
+  "paymob": {
+    "name": "Paymob",
+    "category": "payment_service",
+    "icon": "icons/paymob.png",
+    "wordmark": "wordmarks/paymob.png",
+    "original": "originals/paymob.png",
+    "source_url": "https://paymob.com/images/paymobLogo.png",
+    "source_type": "official"
+  },
+  "halan": {
+    "name": "Halan",
+    "category": "finance_app",
+    "icon": "icons/halan.png",
+    "wordmark": "wordmarks/halan.png",
+    "original": "originals/halan.png",
+    "source_url": "https://halan.com/wp-content/themes/halan/app/images/Full-logo-black-version.svg",
+    "source_type": "official"
+  },
+  "khazna": {
+    "name": "Khazna",
+    "category": "finance_app",
+    "icon": "icons/khazna.png",
+    "wordmark": "wordmarks/khazna.png",
+    "original": "originals/khazna.png",
+    "source_url": "https://khazna.app/assets/svgs/logo.svg",
+    "source_type": "official"
+  },
+  "valu": {
+    "name": "valU",
+    "category": "finance_app",
+    "icon": "icons/valu.png",
+    "wordmark": "wordmarks/valu.png",
+    "original": "originals/valu.png",
+    "source_url": "https://valugroup.com/icon.svg",
+    "source_type": "official"
+  }
+}

@@ -321,7 +321,14 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     status = page_status.budget(everyday, has_plan, period.key, period_actual, period_budgeted)
     phone_plan: dict = {}
     if getattr(request.state, "phone", False):  # the phone's Budget (templates/phone/budget.html); the PC reads none of this
-        phone_cats = _phone_categories(view, tracked, category_periods, by_group, period)
+        month_days = (month_last - month_first).days + 1
+        pace_pct = (Decimal(month_days - days_left) / month_days * 100) if period.key == "month" and days_left else None
+        phone_cats = _phone_categories(view, tracked, category_periods, by_group, period, pace_pct)
+        if period.key == "month" and everyday is not None:  # M5: a one-tap Cover on each over row that has a donor
+            for r in phone_cats:
+                if r["over"]:
+                    move = _cover_from(c, month, {"category_id": r["category_id"], "over": r["amount"]}, everyday.room)
+                    r["cover"] = move["href"] if move else ""
         phone_plan = {"ring": _plan_ring(period_budgeted, period_actual, period_left) if has_plan else None,
                       "cats": phone_cats,
                       "over": _phone_over(phone_cats, month, days_left if period.key == "month" else 0,
@@ -375,7 +382,8 @@ def _plan_ring(budgeted: Decimal, spent: Decimal, left: Decimal) -> dict | None:
             "arc": round(circumference * min(pct, 100) / 100, 2), "circumference": round(circumference, 2)}
 
 
-def _phone_categories(view, tracked: set[int], category_periods: dict, by_group: dict, period) -> list[dict]:
+def _phone_categories(view, tracked: set[int], category_periods: dict, by_group: dict, period,
+                      pace_pct: Decimal | None = None) -> list[dict]:
     """One row per category that has a limit: over plan first (largest overspend first), then the ones closest to
     their limit. The same figures as the group rows below: what was spent, the limit and what is left."""
     group_of = {category_id: group_id for group_id, ids in by_group.items() for category_id in ids}
@@ -394,8 +402,12 @@ def _phone_categories(view, tracked: set[int], category_periods: dict, by_group:
             rows.append({"category_id": cid, "group_id": group_of.get(cid), "name": line.name, "spent": spent,
                          "planned": planned, "over": left < ZERO, "amount": abs(left), "share": share,
                          "width": round(float(min(max(share, ZERO), Decimal(100))), 1),
+                         # M5 pace: ahead of the month by 10 points or more, not yet over, is at risk
+                         "risk": left >= ZERO and pace_pct is not None and planned > ZERO and share >= pace_pct + 10,
+                         "pace": round(float(pace_pct), 1) if pace_pct is not None else None, "cover": "",
                          "href": f"/transactions?category_id={cid}&date_from={period.start_text}&date_to={period.end_text}"})
-    rows.sort(key=lambda r: (0, -r["amount"], r["name"].casefold()) if r["over"] else (1, -r["share"], r["name"].casefold()))
+    rows.sort(key=lambda r: (0, -r["amount"], r["name"].casefold()) if r["over"]
+              else (1 if r["risk"] else 2, -r["share"], r["name"].casefold()))
     return rows
 
 

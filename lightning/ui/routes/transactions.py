@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 
 from lightning.transactions.domain import TxnFilter, TxnStatus
 
@@ -438,7 +438,11 @@ async def delete_transaction(request: Request, txn_id: int):
         if reevaluation:
             c.reevaluations.process_due()
     except LightningError as exc:
+        if request.headers.get("x-requested-with") == "fetch":  # the phone's swipe shows a refusal as is
+            return PlainTextResponse(exc.message, 409)
         return redirect(_back(request, f"/transactions/{txn_id}"), exc.message)
+    if request.headers.get("x-requested-with") == "fetch":
+        return PlainTextResponse("Deleted.")
     return redirect(_back(request, "/transactions"), "Transaction deleted. You can restore it from its history page.")
 
 
@@ -550,7 +554,11 @@ async def restore_transaction(request: Request, txn_id: int):
         if txn.type.value == "VAL":
             c.reevaluations.process_due()
     except LightningError as exc:
+        if request.headers.get("x-requested-with") == "fetch":
+            return PlainTextResponse(exc.message, 409)
         return redirect(f"/transactions/{txn_id}", exc.message)
+    if request.headers.get("x-requested-with") == "fetch":
+        return PlainTextResponse(f"{txn.ref} restored.")
     return redirect(_back(request, f"/transactions/{txn.id}"), f"{txn.ref} restored.")
 
 

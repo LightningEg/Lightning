@@ -45,12 +45,21 @@ class CategoryService:
 
     def pickable(self, movement: Movement | None = None) -> list[Category]:
         """L2 and L3 categories users can choose (an L2 with L3 detail can still be chosen)."""
+        by_id = {item.id: item for item in self.repo.list()}  # one read for every name (backend roadmap B4)
+
+        def shown(category_id: int) -> str:
+            names, current = [], by_id[category_id]
+            while current.parent_id is not None and current.parent_id in by_id:
+                names.append(current.name)
+                current = by_id[current.parent_id]
+            return " › ".join(reversed(names)) or current.name
+
         return sorted(
             (c for c in self.tree(active_only=True) if not c.is_root and not c.is_system
              and 2 <= c.depth <= MAX_DEPTH and c.code.startswith("EXP.")
              and not (movement is not None and c.code == "EXP.SYSTEM.CUSTODY")
              and (movement is None or c.movement == movement)),
-            key=lambda c: (self.display_name(c.id).casefold(), c.id),
+            key=lambda c: (shown(c.id).casefold(), c.id),
         )
 
     @request_cached

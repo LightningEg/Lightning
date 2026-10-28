@@ -40,7 +40,7 @@ def test_every_page_renders_in_the_phone_frame(phone, path):
     assert 'class="shell"' not in html and 'class="side"' not in html  # no desktop sidebar
     assert "Ctrl K" not in html  # C12: no keyboard hints on a phone
     assert html.count('class="section-bar"') <= 1
-    assert "viewport-fit=cover" in html and "/static/phone.css" in html
+    assert "viewport-fit=cover" in html and "/static/phone-bundle.css" in html
     assert "/static/phone-fields.js" in html  # a tapped field opens empty, its old text back if left empty
     names = re.findall(r'class="phone-tab-name">([^<]+)<', html)
     assert names == ["Overview", "Budget", "Add", "Transactions", "More"]  # phone overhaul 2026-10-22: words, Add in the middle
@@ -70,7 +70,8 @@ def test_overview_uses_the_phone_forms(phone):
     html = phone.get("/").text
     assert 'class="phone-kpis"' in html and html.count('class="phone-kpi ') <= 4  # C06.1: four tiles, 2 × 2
     assert "stat-tile-spark" not in html  # no sparkline in a phone tile
-    assert "chart-sankey" not in html and 'class="phone-flow"' in html  # C07.3.3
+    fold = phone.get("/overview/fold/money-in").text  # the money-in fold loads when opened (backend roadmap B1)
+    assert "chart-sankey" not in html + fold and 'class="phone-flow"' in fold  # C07.3.3
     assert "chart-cfall" not in html and "scheme-flow" in html  # C07.3.2: the waterfall as rows
     assert 'class="mcal"' not in html and 'class="phone-months"' in html  # C07.3.4
     assert re.search(r'class="phone-lead">[\d,]+ <small>EGP</small>', html)  # whole EGP on the big figure
@@ -102,8 +103,40 @@ def test_an_account_is_a_day_list_and_the_sheet_saves(phone):
 
 def test_accounts_add_button_asks_which_account(phone):
     assert 'href="/accounts/add-transaction"' in phone.get("/accounts").text
-    pick = phone.get("/accounts/add-transaction").text
+    pick = phone.get("/accounts/add-transaction?pick=1").text
     assert "To which account?" in pick and "/accounts/1/transaction/new" in pick
+
+
+def test_add_opens_the_last_used_accounts_sheet_with_change_account(phone):
+    """Phone roadmap M2: after an entry, Add goes straight to that account's sheet, amount first; Change account
+    brings the list back. Without a remembered account the list shows."""
+    phone.cookies.delete("lightning_last_account")
+    assert "To which account?" in phone.get("/accounts/add-transaction").text
+    sheet = phone.get("/accounts/2/transaction/new").text
+    category = re.search(r'<option value="(\d+)" data-movement="OUTFLOW"', sheet).group(1)
+    phone.post("/accounts/2/transaction/new", data={
+        "__session": token(sheet, "__session"), "kind": "out", "amount": "7", "category_id": category,
+        "counterparty": "Kiosk two", "date": "2026-10-06", "return_to": "/accounts/2"})
+    quick = phone.get("/accounts/add-transaction").text
+    assert "To which account?" not in quick and 'action="/accounts/2/transaction/new"' in quick
+    assert 'href="/accounts/add-transaction?pick=1"' in quick and "autofocus" in quick
+    assert "data-sms-paste" in quick
+
+
+def test_paste_bank_sms_reads_one_message_into_the_sheet(phone):
+    """Phone roadmap M3: a pasted CIB message comes back as the sheet's fields; nothing is saved."""
+    sheet = phone.get("/accounts/1/transaction/new").text
+    before = phone.get("/transactions").text.count("IRAN ZAMALEK")
+    text = ("تم سحب مبلغ  EGP 5000.00  من بطاقة الخصم المباشر المنتهية بـ **7351 من CIB KZ IRAN ZAMALEK "
+            "في 04/10/26 19:28 ، الرصيد المتاح EGP 12904.50")
+    read = phone.post("/sms/read-one", data={"__session": token(sheet, "__session"), "text": text})
+    assert read.status_code == 200
+    body = read.json()
+    assert body["amount"] == "5000.00" and body["kind"] == "out" and body["date"] == "2026-10-04"
+    assert "IRAN ZAMALEK" in body["counterparty"]
+    assert phone.get("/transactions").text.count("IRAN ZAMALEK") == before
+    nothing = phone.post("/sms/read-one", data={"__session": token(sheet, "__session"), "text": "Your code is 1234"})
+    assert nothing.status_code == 422
 
 
 def test_profile_pages_on_the_phone_name_no_folders(phone):

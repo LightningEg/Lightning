@@ -107,3 +107,10 @@ def test_adapter_defers_platform_imports_until_run():
         )
         if name is not None
     )
+
+
+def test_title_bar_takes_the_page_colours_as_windows_colorrefs():
+    from lightning.desktop.window import _colorref, _is_dark
+    assert _colorref("#E3F6EC") == 0xECF6E3 and _colorref("rgb(13, 34, 51)") == 0x33220D
+    assert _colorref("linear-gradient(160deg, red, blue)") is None and _colorref("") is None
+    assert _is_dark(_colorref("#070B16")) and not _is_dark(_colorref("#E3F6EC"))

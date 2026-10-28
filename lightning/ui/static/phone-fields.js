@@ -56,3 +56,55 @@
     if (input) { input.readOnly = true; input.inputMode = "none"; }
   });
 })();
+
+/* Entry sheet (phone roadmap M2, M3): a new entry opens with the amount ready to type, and Paste bank SMS reads the
+   copied bank message into Amount, Counterparty, Date and Money in or out. Nothing is saved until Save. */
+(() => {
+  const t = (text) => (window.lightningT ? window.lightningT(text) : text);
+  const ready = (root) => {
+    root.querySelectorAll("[data-sms-paste]").forEach((button) => {
+      if (navigator.clipboard && navigator.clipboard.readText) button.hidden = false;
+    });
+    const amount = root.querySelector(".phone-entry input[autofocus]");
+    if (amount && !amount.value) setTimeout(() => amount.focus({ preventScroll: true }), 60);
+  };
+  const box = document.getElementById("app-popup-content");
+  if (box) new MutationObserver(() => ready(box)).observe(box, { childList: true });
+  document.addEventListener("DOMContentLoaded", () => ready(document));
+
+  const put = (form, name, value) => {
+    const field = form.querySelector(`[name="${name}"]`);
+    if (!field || value === undefined || value === null || value === "") return;
+    field.value = value;
+    field.dispatchEvent(new Event("input", { bubbles: true }));
+    field.dispatchEvent(new Event("change", { bubbles: true }));
+  };
+  document.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-sms-paste]");
+    if (!button) return;
+    const sheet = button.closest(".phone-entry");
+    const form = sheet && sheet.querySelector("form.phone-form");
+    const status = sheet && sheet.querySelector("[data-sms-paste-status]");
+    if (!form) return;
+    const say = (text) => { if (status) status.textContent = t(text); };
+    let text = "";
+    try { text = (await navigator.clipboard.readText()).trim(); } catch (_) { text = ""; }
+    if (!text) { say("Paste a bank message first."); return; }
+    const data = new FormData();
+    data.append("text", text);
+    data.append("__session", form.querySelector('[name="__session"]').value);
+    button.disabled = true;
+    try {
+      const response = await fetch(button.dataset.smsUrl, { method: "POST", body: data, headers: { "X-Requested-With": "fetch" } });
+      const found = await response.json().catch(() => ({}));
+      if (!response.ok) { say(found.error || "No amount found in this message."); return; }
+      const kind = form.querySelector(`[name="kind"][value="${found.kind}"]`);
+      if (kind) { kind.checked = true; kind.dispatchEvent(new Event("change", { bubbles: true })); }
+      put(form, "amount", found.amount);
+      put(form, "counterparty", found.counterparty);
+      put(form, "date", found.date);
+      say("Filled from the message. Check and save.");
+      if (navigator.vibrate) navigator.vibrate(15);
+    } finally { button.disabled = false; }
+  });
+})();

@@ -6,9 +6,10 @@ import re
 from datetime import datetime
 
 from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse
 
 from lightning.core.errors import LightningError
-from lightning.sms_imports import MAX_TEXT, SALARY_ENDING
+from lightning.sms_imports import MAX_TEXT, SALARY_ENDING, parse_sms
 
 from ..web import container, redirect, render
 
@@ -110,3 +111,19 @@ async def assign(request: Request):
         return redirect("/sms", "Saved.")
     account_id = c.bank_imports.preview(batch)[0]["account_id"]
     return redirect(f"/accounts/{account_id}/import/{batch}", "Check each row, then post them.")
+
+
+@router.post("/read-one")
+async def read_one_message(request: Request):
+    """Paste bank SMS on the entry sheet (phone roadmap M3): one message read into the sheet's fields, saved nowhere.
+    The sheet fills Amount, Counterparty, Date and Money in or out; the person checks them and taps Save."""
+    form = await request.form()
+    text = str(form.get("text", ""))[:MAX_TEXT]
+    try:
+        found = parse_sms(text)
+    except ValueError:  # a clock or date the bank wrote wrongly (29:13): nothing to fill in
+        found = None
+    if found is None:
+        return JSONResponse({"error": "No amount found in this message."}, status_code=422)
+    return JSONResponse({"amount": f"{found.amount:.2f}", "counterparty": found.place, "date": found.when[:10],
+                         "kind": "in" if found.inflow else "out", "bank": found.bank, "sure": found.sure})

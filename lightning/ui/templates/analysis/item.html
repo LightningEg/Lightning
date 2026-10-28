@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ item_name }} · {{ 'Item analysis'|tr(locale) }}{% endblock %}
+{% block heading %}<div class="birdview-title"><div><h1>{{ item_name }}</h1><div class="muted small">{{ ({'category':'Category','payee':'Counterparty','account':'Account'}[kind])|tr(locale) }} · {{ data.date_from }} {{ 'to'|tr(locale) }} {{ data.date_to }}</div></div></div>{% endblock %}
+{% block content %}
+{% set d = data %}{% set change = d.this_month - d.last_month %}
+<section class="card answer-strip" aria-label="{{ 'Answer'|tr(locale) }}">
+  <div class="answer-main"><span class="answer-label">{{ 'This month'|tr(locale) }}</span><b class="answer-figure num">{{ d.this_month|whole }} {{ base }}</b>
+    <span class="answer-delta {{ 'is-up' if change > 0 else ('is-down' if change < 0 else '') }}">{{ change|money(signed=true) }} {{ 'against last month'|tr(locale) }}</span></div>
+  <dl class="answer-facts">
+    <div><dt>{{ '12-month total'|tr(locale) }}</dt><dd class="num">{{ d.total|money }}</dd></div>
+    <div><dt>{{ 'Monthly average'|tr(locale) }}</dt><dd class="num">{{ d.average|money }}</dd></div>
+    <div><dt>{{ 'Payments'|tr(locale) }}</dt><dd class="num">{{ d.count }}</dd></div>
+  </dl>
+  <div class="actions"><a class="btn primary" href="{{ edit_href }}">{{ 'Edit all these transactions'|tr(locale) }}</a><a class="btn" href="{{ rule_href }}">{{ 'Make a rule'|tr(locale) }}</a><a class="btn" href="{{ csv_href }}">{{ 'Export CSV'|tr(locale) }}</a></div>
+</section>
+<div class="analysis-split">
+<section class="card" aria-labelledby="trend-head"><div class="section-head"><div><h2 id="trend-head">{{ 'Month by month'|tr(locale) }}</h2></div></div>
+  <div class="month-bars" role="img" aria-label="{% for t in d.trend %}{{ t.month }} {{ t.value|money }}{{ ', ' if not loop.last }}{% endfor %}">
+    {% for t in d.trend %}<div class="month-bar" title="{{ t.month }} · {{ t.value|money }}"><i style="height:{{ t.pct }}%"></i><small>{{ t.month[5:] }}</small></div>{% endfor %}
+  </div>
+  <details class="chart-table"><summary>{{ 'Show the numbers'|tr(locale) }}</summary><table class="figures"><tbody>{% for t in d.trend %}<tr><td>{{ t.month }}</td><td class="num">{{ t.value|money }}</td></tr>{% endfor %}</tbody></table></details>
+</section>
+<section class="card data-panel" aria-labelledby="top-head"><div class="section-head"><div><h2 id="top-head">{{ 'Biggest payments'|tr(locale) }}</h2></div></div>
+  {% if not d.top %}<p class="muted">{{ 'No spending in the last 12 months.'|tr(locale) }}</p>{% else %}
+  <table class="figures"><tbody>{% for t in d.top %}<tr><td><a href="/transactions/{{ t.id }}">{{ t.date }}</a></td><td>{% if kind != 'payee' %}<a href="/analysis/payee?name={{ t.payee|urlencode }}">{{ t.payee }}</a>{% else %}{{ t.ref }}{% endif %}</td><td class="num">{{ t.value|money }}</td></tr>{% endfor %}</tbody></table>{% endif %}
+</section>
+</div>
+{% endblock %}

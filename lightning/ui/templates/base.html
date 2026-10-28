@@ -9,7 +9,7 @@
   <link rel="icon" type="image/svg+xml" href="/static/lightning-mark.svg">
   <link rel="stylesheet" href="/static/fonts/fonts.css?v=2">
   {# Bricolage Grotesque and Manrope (guideline A06) are bundled in fonts.css: no outside request, in every mode. #}
-  <link rel="stylesheet" href="/static/style{{ '.rtl' if locale == 'ar' else '' }}.css?v=97">
+  <link rel="stylesheet" href="/static/style{{ '.rtl' if locale == 'ar' else '' }}.css?v=98">
   <link rel="stylesheet" href="/static/themes.generated.css?v=4">
   <link rel="stylesheet" href="/static/theme-surfaces.css?v=3">
   <link rel="stylesheet" href="/static/theme-materials.css?v=2">
@@ -93,7 +93,7 @@
 <button id="page-jump" class="page-jump" type="button" hidden aria-label="Go to end of page" title="Go to end of page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6M6 4l6 6 6-6M5 20h14"/></svg></button>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/arabic-numbers.js?v=6"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/info-tips.js?v=1"></script>
-<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/app.js?v=44"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/app.js?v=47"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/ai-handoff.js?v=2" defer></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}">(()=>{const section=document.getElementById('sidebar-accounts'),mobile=window.matchMedia('(max-width: 900px)');if(!section)return;const sync=()=>{section.open=!mobile.matches};sync();mobile.addEventListener('change',sync)})();</script>
 {% if request.state.secure_profiles|default(false) %}<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/session.js?v=4"></script>{% endif %}

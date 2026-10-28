@@ -8,7 +8,9 @@
 {% block content %}
 <section class="card app-popup-content phone-entry" data-transaction-form data-account-name="{{ account.name }}" data-currency="{{ account.currency }}">
   <h2 data-popup-title class="phone-sheet-title">{{ title }}</h2>
-  <p class="phone-note">{{ account.label }}</p>
+  <p class="phone-note phone-entry-account">{{ account.label }}{% if not txn_id %} · <a class="phone-quiet" href="/accounts/add-transaction?pick=1" data-popup-open>{{ 'Change account'|tr(locale) }}</a>{% endif %}</p>
+  {% if not txn_id and not split_categories %}<button type="button" class="phone-chip phone-sms-paste" data-sms-paste data-sms-url="/sms/read-one" hidden>{{ 'Paste bank SMS'|tr(locale) }}</button>
+  <p class="phone-note" data-sms-paste-status role="status" aria-live="polite"></p>{% endif %}
   {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
   <form method="post" action="{{ action }}" class="phone-form" {% if txn_id %}data-popup-autosave{% endif %}>
     <input type="hidden" name="return_to" value="{{ return_to }}">
@@ -22,7 +24,7 @@
     </div>{% endif %}
     <div class="field phone-amount {{ 'has-error' if error_field == 'amount' }}">
       <label for="popup-amount">{{ 'Amount'|tr(locale) }}</label>
-      <input id="popup-amount" name="amount" type="text" value="{{ values.amount }}" inputmode="decimal" placeholder="0.00" required autocomplete="off" {{ 'readonly' if split_categories }}>
+      <input id="popup-amount" name="amount" type="text" value="{{ values.amount }}" inputmode="decimal" placeholder="0.00" required autocomplete="off"{% if not txn_id %} autofocus{% endif %} {{ 'readonly' if split_categories }}>
       {% if error_field == 'amount' %}<small class="field-error">{{ error|tr(locale) }}</small>{% endif %}
     </div>
     <div class="field money-only {{ 'has-error' if error_field == 'counterparty' }}" {{ 'hidden' if values.kind == 'transfer' }}>

@@ -128,9 +128,10 @@ class ThemeBuildTests(unittest.TestCase):
         self.assertNotRegex(css, r'url\((?!"data:)')
         # geometry is never a material: no padding, margins, fonts, radii, border widths, gaps or line heights
         self.assertNotRegex(css, r'[;{\s](padding|margin|font|border-radius|border-width|gap|line-height|min-height)[a-z-]*\s*:(?!\s*inherit)')
-        for shell in ['base.html', 'phone/base.html']:
-            source = (ROOT / 'lightning/ui/templates' / shell).read_text()
-            self.assertLess(source.index('/static/theme-surfaces.css'), source.index('/static/theme-materials.css'))
+        source = (ROOT / 'lightning/ui/templates/base.html').read_text()
+        self.assertLess(source.index('/static/theme-surfaces.css'), source.index('/static/theme-materials.css'))
+        from lightning.ui.web import PHONE_CSS  # the phone shell loads one bundle, built in this order
+        self.assertLess(PHONE_CSS.index('theme-surfaces.css'), PHONE_CSS.index('theme-materials.css'))
 
     def test_each_drawing_lives_in_its_theme_asset_folder(self):
         """cosmetics/assets/<theme>/<recipe>.svg: every drawing a recipe names, nothing unused, shapes only."""
@@ -202,10 +203,13 @@ class ThemeBuildTests(unittest.TestCase):
         self.assertIn('--theme-expense: ', css)
 
     def test_both_shells_boot_before_layout_styles(self):
-        for shell in ['base.html', 'phone/base.html']:
-            source = (ROOT / 'lightning/ui/templates' / shell).read_text()
-            self.assertLess(source.index('partials/theme_head.html'), source.index('/static/style'))
-            self.assertLess(source.index('/static/style'), source.index('/static/themes.generated.css'))
+        source = (ROOT / 'lightning/ui/templates/base.html').read_text()
+        self.assertLess(source.index('partials/theme_head.html'), source.index('/static/style'))
+        self.assertLess(source.index('/static/style'), source.index('/static/themes.generated.css'))
+        phone = (ROOT / 'lightning/ui/templates/phone/base.html').read_text()
+        self.assertLess(phone.index('partials/theme_head.html'), phone.index('phone_css_src'))
+        from lightning.ui.web import PHONE_CSS
+        self.assertLess(PHONE_CSS.index('style{rtl}.css'), PHONE_CSS.index('themes.generated.css'))
 
 
 def test_profile_preference_survives_new_app_and_rejects_unknown_theme(c):

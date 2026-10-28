@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Import'|tr(locale) }}{% endblock %}
+{% block heading %}<div class="birdview-title"><div><h1>{{ 'Import statements'|tr(locale) }}</h1><div class="muted small">{{ 'Drop your bank files; each one is matched to its account.'|tr(locale) }}</div></div></div>{% endblock %}
+{% block content %}
+{% for w in waiting %}<section class="card import-waiting"><h2>{{ w.file_name }} {{ 'is waiting for you'|tr(locale) }}</h2>
+  <p class="muted">{{ w.waiting }} {{ ('row' if w.waiting == 1 else 'rows')|tr(locale) }}</p>
+  <a class="btn primary" href="/accounts/{{ w.account_id }}/import/{{ w.batch_id }}">{{ 'Continue the review'|tr(locale) }}</a></section>{% endfor %}
+
+{% if not accounts %}<section class="card empty"><h2>{{ 'No bank or cash accounts yet'|tr(locale) }}</h2><a class="btn" href="/accounts">{{ 'Add an account'|tr(locale) }}</a></section>{% else %}
+<section class="card import-drop" data-import-drop>
+  <label class="drop-zone" for="import-files"><b>{{ 'Drop CSV files here'|tr(locale) }}</b><span class="muted small">{{ 'or click to choose · many files at once · up to 5 MB each'|tr(locale) }}</span></label>
+  <input id="import-files" type="file" accept=".csv,text/csv" multiple hidden>
+  <ol class="import-files" data-import-list></ol>
+  <template data-import-row><li class="import-file"><span class="import-name"></span><select aria-label="{{ 'Account'|tr(locale) }}"><option value="">{{ 'Choose the account'|tr(locale) }}</option>{% for a in accounts %}<option value="{{ a.id }}" data-last4="{{ a.last4 or '' }}" data-words="{{ (a.institution ~ ' ' ~ a.name)|lower }}">{{ a.name }}{% if a.last4 %} ·{{ a.last4 }}{% endif %}</option>{% endfor %}</select><span class="import-state muted small"></span></li></template>
+  <div class="actions"><button type="button" class="btn primary" data-import-send disabled>{{ 'Review statements'|tr(locale) }}</button></div>
+  <p class="muted small">{{ 'Each account opens its own review: duplicates are flagged and your rules fill the categories before anything is posted.'|tr(locale) }}</p>
+  <input type="hidden" data-session value="{{ request.state.session_token|default('') }}">
+</section>{% endif %}
+
+<section class="card data-panel" aria-labelledby="history-head"><div class="section-head"><div><h2 id="history-head">{{ 'Import history'|tr(locale) }}</h2><p class="muted small">{{ 'Undo removes every entry a file created; you can restore them from history.'|tr(locale) }}</p></div><a class="btn small" href="/sms">{{ 'Bank SMS'|tr(locale) }}</a></div>
+  {% if not batches %}<p class="muted">{{ 'No statements imported yet.'|tr(locale) }}</p>{% else %}
+  <table class="figures"><thead><tr><th>{{ 'File'|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th>{{ 'Date'|tr(locale) }}</th><th class="num">{{ 'Entries'|tr(locale) }}</th><th></th></tr></thead>
+  <tbody>{% for b in batches %}<tr><td>{{ b.file_name }}</td><td><a href="/accounts/{{ b.account_id }}">{{ b.account }}</a></td><td>{{ (b.posted_at or b.created_at)[:10] }}</td><td class="num">{{ b.live }}</td>
+    <td>{% if b.live %}<form method="post" action="/import/{{ b.id }}/undo" data-confirm-delete="{{ 'Undo this import? {n} entries from {filename} are deleted.'|tr(locale, n=b.live, filename=b.file_name) }}"><button class="btn small">{{ 'Undo'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% elif b.status == 'REVIEW' %}<a class="btn small" href="/accounts/{{ b.account_id }}/import/{{ b.id }}">{{ 'Review'|tr(locale) }}</a>{% else %}<span class="muted small">{{ ('Undone' if b.status == 'POSTED' else 'Discarded')|tr(locale) }}</span>{% endif %}</td></tr>{% endfor %}</tbody></table>{% endif %}
+</section>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/import-drop.js?v=2" defer></script>
+{% endblock %}

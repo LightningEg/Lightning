@@ -77,16 +77,18 @@ def counterparty_category_map(c, names) -> dict:
     wins (one that also needs the amount decides when the row is saved), then the category set on the
     Counterparty, else the one it is usually filed under. Every saved Counterparty stays in the map."""
     usual = c.transactions.usual_categories()
-    pickable = {item.id for item in c.categories.pickable()}
+    pickable = {item.id: item for item in c.categories.pickable()}
+    names = list(names)
+    parties = c.counterparties.resolve_many(names)  # one read for every name, not one each (backend roadmap B4)
+    by_rules = c.rules.name_categories(names)
     found = {}
     for name in names:
-        party = c.counterparties.resolve(name)
         found[name] = None
-        category_id = c.rules.category_for_name(name)
+        category_id, depends = by_rules[name]
         if category_id not in pickable:
-            category_id = None if c.rules.depends_on_more_than_name(name) else _category_for_party(party, usual, pickable)
+            category_id = None if depends else _category_for_party(parties[name], usual, pickable)
         if category_id:
-            category = c.categories.get(category_id)
+            category = pickable.get(category_id) or c.categories.get(category_id)
             found[name] = {"id": category.id, "name": category.name}
     return found
 
@@ -383,6 +385,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
     val_count = c.reporting.register_value_updates(account_id, date_from, date_to)
     # Money in and Money out of what a search, tag or category found (a tag's note and the phone's two tiles).
     matched_flows = None
+    matching_ids = None  # every row a filter found, so "Select all N matching" reaches past this page
     unsorted_ids = c.reporting.register_unsorted(account_id, date_from, date_to) if phone or kind == "unsorted" else set()
     if matched_ids is None and not kind and not (val_count and not show_val):
         # read only the page shown; its running balance comes from SQL
@@ -390,8 +393,6 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
             account_id, date_from, date_to, _int(qp.get("page")) or 1, page_size)
     else:  # a search, category or kind filter, or value updates folded: filter in Python; balances stay per row
         all_rows = c.reporting.register(account_id, date_from, date_to, matched_ids)
-        if matched_ids is not None and (phone or filter_tag):
-            matched_flows = c.reporting.money_in_out({row.txn_id for row in all_rows})
         if val_count and not show_val:
             all_rows = [row for row in all_rows if row.type != DocType.VAL]
         if kind == "unsorted":
@@ -399,6 +400,11 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         elif kind:
             all_rows = [row for row in all_rows if _row_kind(row) == kind]
         total_rows = len(all_rows)
+        if matched_ids is not None:  # the totals cover exactly the rows counted
+            matched_flows = c.reporting.money_in_out({row.txn_id for row in all_rows})
+        if not phone and matched_ids is not None and page_size < total_rows <= 2000:
+            # a transfer shows once per account here; one id each, so "Select all N" counts transactions
+            matching_ids = list(dict.fromkeys(row.txn_id for row in all_rows))
         page_number = min(max(_int(qp.get("page")) or 1, 1), max(1, -(-total_rows // page_size)))
         rows = all_rows[(page_number - 1) * page_size:page_number * page_size]
     total_pages = max(1, -(-total_rows // page_size))
@@ -493,7 +499,11 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         reg=phone_register, chosen_kind=kind,
         q=q, month=month, preset=preset, active_view=active_view, show_val=show_val, val_count=val_count, val_toggle_url=val_toggle_url,
         saved_views=c.saved_views.list(account_id), view_account_id=account_id or "",
-        filter_category=filter_category, filter_tag=filter_tag, tag_flows=tag_flows,
+        filter_category=filter_category, filter_tag=filter_tag, tag_flows=tag_flows, matched_flows=matched_flows, matched_net=matched_flows[0] - matched_flows[1] if matched_flows else None, matching_ids=matching_ids,
+        import_accounts=[] if account_id or phone else [a for a in c.accounts.list(active_only=True)
+                                                          if a.account_type.value in ("CASH", "BANK") and not a.parent_id],
+        replace_scope={"account_id": account_id or "", "date_from": "" if date_from == FAR_PAST else date_from,
+                       "date_to": "" if date_to == FAR_FUTURE else date_to},
         date_from=from_query, date_to=to_query, base_url=base_url, keep_qs=urlencode(keep),
         page_number=page_number, total_pages=total_pages, total_rows=total_rows, page_base_qs=page_base_qs,
         search_suggestions=c.counterparties.suggestions(q, limit=3) if q else [],

@@ -109,7 +109,10 @@ async def dashboard(request: Request):
         "at_cost": closing_report["at_cost"],
         "holdings_count": sum(1 for row in closing_report["holdings"] if row["price_source"] != "CASH"),
     }
-    networth_trend = visuals.net_worth_trend(c, as_of)
+    # The phone keeps the month-by-month trend and the money-in flow in closed folds: they load when opened
+    # (backend roadmap B1, /overview/fold), not with every Overview.
+    lazy_folds = bool(getattr(request.state, "phone", False))
+    networth_trend = {} if lazy_folds else visuals.net_worth_trend(c, as_of)
     stats = _period_stats(c, period, first, as_of, period_position, cash_flow, change, change_reason,
                           closing_report["net_money"], networth_trend, urlencode(request.query_params))
     # Answer first (guideline 3.33, A09): the change in net worth is the Lead's comparison, not a card of its own;
@@ -121,47 +124,73 @@ async def dashboard(request: Request):
         stats.insert(len(stats) - 1, _safe_tile(inbox.forecast))  # the phone's tiles (C06.1)
     # The PC's row is A08 cards, each against something: the savings rate against your usual one, the investing
     # rate against the period before, Safe to spend against free cash, Left in plan against the plan.
-    if period.key == "month":
-        before_to = first - timedelta(days=1)
-        before_from, before_label = before_to.replace(day=1), month_of(before_to)
-    else:
-        before_to = first - timedelta(days=1)
-        before_from, before_label = before_to - (as_of - first), "the period before"
-    flow_before = c.reporting.cash_flow(before_from, before_to)
-    added_before = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(before_from), fmt_date(before_to))["net_money"]
-    plan_month = month_of(as_of)
-    kpi_cards = kpis.overview(
-        cash_flow, period_chip=_period_chip(period, first, as_of), rates=visuals.savings_rates(c, as_of),
-        usual=c.reporting.usual_savings_rate(as_of), invest=investing_rate(closing_report["net_money"], cash_flow.net),
-        invest_before=investing_rate(added_before, flow_before.net), before_label=before_label,
-        money_added=closing_report["net_money"], forecast=inbox.forecast if position_is_today else None,
-        plan=c.budgets.plan_summary(plan_month) if c.budgets.has_plan(plan_month) else None, month=plan_month,
-        savings_href="#savings-squares", invest_href=f"/investments?{urlencode(request.query_params)}")
+    # The phone shows neither the KPI cards nor the money in/out groups, the waffle or the kept-apart list
+    # (backend roadmap B1): skip their reads, the period before above all, so the phone's Overview stays light.
+    on_phone = bool(getattr(request.state, "phone", False))
+    kpi_cards = []
+    if not on_phone:
+        if period.key == "month":
+            before_to = first - timedelta(days=1)
+            before_from, before_label = before_to.replace(day=1), month_of(before_to)
+        else:
+            before_to = first - timedelta(days=1)
+            before_from, before_label = before_to - (as_of - first), "the period before"
+        flow_before = c.reporting.cash_flow(before_from, before_to)
+        added_before = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(before_from), fmt_date(before_to))["net_money"]
+        plan_month = month_of(as_of)
+        kpi_cards = kpis.overview(
+            cash_flow, period_chip=_period_chip(period, first, as_of), rates=visuals.savings_rates(c, as_of),
+            usual=c.reporting.usual_savings_rate(as_of), invest=investing_rate(closing_report["net_money"], cash_flow.net),
+            invest_before=investing_rate(added_before, flow_before.net), before_label=before_label,
+            money_added=closing_report["net_money"], forecast=inbox.forecast if position_is_today else None,
+            plan=c.budgets.plan_summary(plan_month) if c.budgets.has_plan(plan_month) else None, month=plan_month,
+            savings_href="#savings-squares", invest_href=f"/investments?{urlencode(request.query_params)}")
     status = page_status.overview(cash_flow.inflows, cash_flow.outflows, cash_flow.net, cash_flow.savings_rate,
                                   cash_flow.rate_says_nothing, period.key, current, bool(accounts))
     dates_note = ("so far" if current and period.key in ("month", "ytd") else "year to date" if period.key == "ytd" else "")
     recent_rows = c.reporting.register_page(None, "1900-01-01", "9999-12-31", 1, 10)[0]  # the phone leads with these (C11.1)
-    phone = _phone_overview(position, inbox.forecast, attention_groups, lead_change) if getattr(request.state, "phone", False) and position_is_today else None
+    phone = _phone_overview(position, inbox.forecast, attention_groups, lead_change, c) if getattr(request.state, "phone", False) and position_is_today else None
     # The PC shows the flows on Spending (owner, 2026-10-21); the phone keeps them as folded rows (guideline C11.1).
-    phone_flows = (visuals.cash_flow_charts(c, first, as_of, period.key == "month", today())
-                   if getattr(request.state, "phone", False) else {})
+    phone_flows = {"month_calendar": visuals.month_calendar(c, today())} if lazy_folds else {}
     return render(
         request,
         "dashboard/index.html", **phone_flows,
         stats=stats, recent_rows=recent_rows,
         flow_columns=visuals.cash_flow_columns(c, first, as_of, cash_flow),
-        money_in_rows=visuals.money_in_groups(c, first, as_of),
-        money_out_rows=visuals.money_out_groups(c, first, as_of),
+        money_in_rows=[] if on_phone else visuals.money_in_groups(c, first, as_of),
+        money_out_rows=[] if on_phone else visuals.money_out_groups(c, first, as_of),
         wealth_donut=visuals.holdings_donut(position, include_cash=True),
         networth_trend=networth_trend, free_cash_steps=visuals.free_cash_steps(position),
         month=month, this_month=month_of(today()), period=period, period_error=period_error,
         date_from=fmt_date(first), date_to=fmt_date(as_of), as_of=fmt_date(as_of), position_as_of=fmt_date(position_day), position_is_today=position_is_today, status=status, kpi_cards=kpi_cards,
-        waffle=saved_and_invested(cash_flow, closing_report["net_money"]), dates_note=dates_note, lead_change=lead_change,
+        waffle=None if on_phone else saved_and_invested(cash_flow, closing_report["net_money"]), dates_note=dates_note, lead_change=lead_change,
         pos=position, cash_accounts=cash_accounts, owe=owe,
-        kept_apart_accounts=c.reporting.owned_cash_kept_apart_by_account(position.as_of),
+        kept_apart_accounts=[] if on_phone else c.reporting.owned_cash_kept_apart_by_account(position.as_of),
         attention=attention, attention_groups=attention_groups, setup=setup,
         investment_report=investment_report, cash_flow=cash_flow, phone=phone,
+        lazy_folds=lazy_folds, fold_query=urlencode(request.query_params),
     )
+
+
+@router.get("/overview/fold/{name}")
+async def overview_fold(request: Request, name: str):
+    """One closed fold of the phone's Overview, drawn when it is opened (backend roadmap B1)."""
+    from fastapi import HTTPException
+    if name not in ("trend", "money-in"):
+        raise HTTPException(404)
+    c = container(request)
+    try:
+        period = parse_period(request.query_params, today(), c.reporting.first_activity_date())
+    except ValidationError:
+        period = parse_period({"period": "month", "month": month_of(today())}, today(), None)
+    first, as_of = period.start, period.end
+    if name == "trend":
+        position = c.position.at(min(as_of, today()))
+        lead = "net_worth" if position.what_you_owe > 0 else "what_you_own"
+        return render(request, "phone/dashboard/fold.html", fold=name, lead=lead,
+                      networth_trend=visuals.net_worth_trend(c, as_of))
+    return render(request, "phone/dashboard/fold.html", fold=name,
+                  **visuals.cash_flow_charts(c, first, as_of, period.key == "month", today()))
 
 
 # The welcome page offers Mohab's year and these three stories; Abdelrahman's stays loadable by route.
@@ -363,7 +392,7 @@ def _safe_hero(f) -> dict:
     return {"value": value, "line": line, "until": until or ""}
 
 
-def _phone_overview(position, forecast, groups, lead_change) -> dict:
+def _phone_overview(position, forecast, groups, lead_change, c=None) -> dict:
     """What the phone's Overview adds to the PC's figures: the Safe to spend hero, a Net worth tile, and the words
     on the Needs you card."""
     owes = position.what_you_owe > 0
@@ -376,7 +405,20 @@ def _phone_overview(position, forecast, groups, lead_change) -> dict:
     for group in groups[:3]:
         one, many = _NEEDS_SHORT.get(group["key"], _NEEDS_SHORT["other"])
         parts.append(page_status.sentence(one if group["count"] == 1 else many, n=group["count"]))
-    return {"safe": _safe_hero(forecast), "worth": worth, "needs": parts}
+    return {"safe": _safe_hero(forecast), "worth": worth, "needs": parts, "soon": _due_soon(c) if c else None}
+
+
+def _due_soon(c) -> dict | None:
+    """Phone roadmap M4: bills and loan payments due today, tomorrow or already late, as one line under the hero."""
+    from lightning.planning.domain import PlanKind
+    day = today()
+    due = [p for p in c.planning.all_payments(day + timedelta(days=1), day,
+                                              kinds=(PlanKind.BILL, PlanKind.SUBSCRIPTION, PlanKind.LOAN))
+           if p.outstanding]
+    if not due:
+        return None
+    total = sum((c.planning.amount_in_base(p, p.still_owed, day) for p in due), ZERO)
+    return {"count": len(due), "total": total, "late": any(p.days_late(day) for p in due)}
 
 
 @router.get("/more")
@@ -397,7 +439,19 @@ async def more(request: Request):
     within = sum(1 for item in judged if item.status == "within your limit")
     first = day.replace(day=1)
     spent = c.reporting.cash_flow(first, day).outflows
-    return render(request, "more.html", due=due, until=inbox.forecast.next_income_date or "",
+    # Hub (phone roadmap M7): the next 14 days of bills and loan payments, late first, each with Mark paid
+    from lightning.planning.domain import PlanKind
+    bills = []
+    for p in c.planning.all_payments(day + timedelta(days=14), day,
+                                     kinds=(PlanKind.BILL, PlanKind.SUBSCRIPTION, PlanKind.LOAN)):
+        if not p.outstanding:
+            continue
+        bills.append({"name": p.item.name, "due": p.due_date, "late": p.days_late(day),
+                      "amount": c.planning.amount_in_base(p, p.still_owed, day),
+                      "pay": f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2Fmore"})
+    bills.sort(key=lambda b: (-b["late"], b["due"]))
+    return render(request, "more.html", bills=bills[:5], bills_more=max(len(bills) - 5, 0),
+                  due=due, until=inbox.forecast.next_income_date or "",
                   portfolio=position.portfolio_value, in_accounts=position.in_your_accounts,
                   within=within, judged=len(judged), spent=spent, month=month_of(day), waiting=len(items),
                   last_review=(c.settings.get("weekly_review_at") or "")[:10], zakat=c.zakat.enabled())
