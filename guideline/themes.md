@@ -168,7 +168,7 @@ Every look climbs the same three steps, and each step keeps everything below it.
 
 | Tier | What changes | Coins | EGP | On sale |
 |---|---|---|---|---|
-| Recolour | A simple mark in one colour | 60 | 12 | Bolt, Coin |
+| Recolour | A simple mark in one colour | 60 | 12 | Lightning mark (the two-leaf logo, in its own colours), Coin |
 | Texture | A drawn, detailed mark | 80–120 | 16–24 | Pen, Star; seasonal Cotton boll, Fanous |
 | Animation | The mark with one slow motion | 200 | 40 | none yet |
 
