@@ -32,6 +32,8 @@ Everything happens on GitHub; you need only a free GitHub account.
 **Lightning Coins.** Some tasks carry Lightning Coins, shown on lightningeg.com › For Geeks once you are signed in. They
 are cosmetic only (themes, banners, badges) and have no cash value. To receive them, link your GitHub account on the
 account page there; coins for a merged pull request wait for you until you do. Tasks without coins are just as welcome.
+The amount follows the work: 200 for a small, self-contained fix, 500 for a change across a few files with tests,
+800 or more for money logic or a feature. A maintainer sets it with a `coins:<n>` label.
 
 **Ground rules.** Never put real financial data, passwords or keys in a commit or issue. Security problems go to
 [SECURITY.md](SECURITY.md), never a public issue. Nobody pushes to `main`. Going deeper: [Project overview](docs/PROJECT_OVERVIEW.md),

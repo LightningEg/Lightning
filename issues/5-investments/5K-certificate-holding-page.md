@@ -5,6 +5,7 @@ area: investments
 status: ready
 created: 2026-10-20
 by: Claude
+github: 162
 skills: guideline-audit
 app_version: 1.3.0
 commit: 7591231

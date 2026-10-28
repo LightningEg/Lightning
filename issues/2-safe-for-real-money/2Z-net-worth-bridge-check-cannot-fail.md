@@ -5,6 +5,7 @@ area: reporting
 status: ready
 created: 2026-10-26
 by: Claude
+github: 163
 skills: number-audit
 app_version: 1.4.2
 commit: 705945c

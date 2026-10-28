@@ -5,6 +5,7 @@ area: arabic
 status: ready
 created: 2026-10-20
 by: Claude
+github: 161
 skills: arabic-check
 app_version: 1.3.0
 commit: 7591231
