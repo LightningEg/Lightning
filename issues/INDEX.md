@@ -147,11 +147,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | **OW-7M** | [Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as overspending](7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) | owner task | planning | new |
 | **OW-7R** | [Changing an expense's amount silently unlinks it from its reserve](7-planning-import-and-search/7R-money-edit-drops-reserve-links.md) | owner task | planning | new |
 | **OW-7S** | [Money out filed under an income category counts as spending, not as less income](7-planning-import-and-search/7S-money-out-of-an-income-category.md) | owner task | reporting | new |
-| **NF-7T** | [Link the sections - every transaction, person and account shows what it touches](7-planning-import-and-search/7T-link-the-sections.md) | new feature | planning | new |
-| NF-7T1 | ↳ What this transaction touched | | | |
-| NF-7T2 | ↳ A page per counterparty | | | |
-| NF-7T3 | ↳ What depends on this account | | | |
-| NF-7T4 | ↳ Tag totals | | | |
+| **NF-7T** | [Link the sections - salary-day cascade and a reserve tied to its bill](7-planning-import-and-search/7T-link-the-sections.md) | new feature | planning | new |
 | NF-7T5 | ↳ Salary-day cascade | | | |
 | NF-7T6 | ↳ A reserve tied to its bill | | | |
 

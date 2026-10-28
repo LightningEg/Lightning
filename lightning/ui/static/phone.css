@@ -867,3 +867,4 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 .phone .linked-actions { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 12px 0 0; }
 .phone .linked-actions a { min-height: 48px; display: inline-flex; align-items: center; }
 .phone .linked-row form { margin: 0; flex: none; }
+.phone a.linked-row { text-decoration: none; color: inherit; }

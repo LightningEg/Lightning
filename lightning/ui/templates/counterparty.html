@@ -20,7 +20,7 @@
 {% from "partials/charts.html" import lead_card %}
 {% set k = {'label': label, 'value': page.total|round(0), 'kind': 'money', 'signed': false, 'chip': none, 'visual': none,
             'compare': {'figure': page.this_month|money(False, 0), 'tone': 'plain', 'text': ('this month'|tr(locale)) ~ ' · ' ~ usual},
-            'line': {'text': 'last 12 months'|tr(locale), 'action': '', 'href': ''}} %}
+            'line': {'text': '', 'action': '', 'href': ''}} %}
 {% call lead_card(k, base) %}<div class="lead-side-head"><div><h3>{{ 'By month'|tr(locale) }}</h3><p>{{ 'Months with money'|tr(locale) }}</p></div></div>
   <div class="lead-rows">{% for row in shown %}<div class="lead-row"><span>{{ row.month }}</span><b>{{ row[page.side]|money(False, 0) }}</b></div>{% else %}<div class="lead-row"><span>{{ 'Nothing in the last 12 months'|tr(locale) }}</span></div>{% endfor %}</div>{% endcall %}
 {% endif %}
