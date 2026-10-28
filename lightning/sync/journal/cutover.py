@@ -147,7 +147,6 @@ def _normalize_legacy_references(db) -> bool:
                     if type(category_ids) is not list:
                         raise ValueError("unsupported category selection")
                     codes = [_category_code(db, value) for value in category_ids]
-                code_by_id = {int(item["id"]): item["code"] for item in db.all("SELECT id,code FROM categories")}
                 portable_rows = []
                 for saved in snapshot["rows"]:
                     if type(saved) is not dict:

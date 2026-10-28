@@ -19,7 +19,8 @@ from lightning.core.errors import ValidationError
 from lightning.core.ledger import Effect, PostingLine, validate_posting
 from lightning.core.money import from_e6
 
-from .codec import JournalError, canonical, digest, fields, hash_value, number, uuid
+from .codec import JournalError, canonical, digest, fields, hash_value, uuid
+from .errors import ChunksMissing  # noqa: F401 - re-exported for older imports
 from . import commands
 from .effects import CHUNK_BYTES, GUARDED, MAX_CHUNKS, MAX_ROWS, SCHEMA, Replicator
 from .store import JournalStore, SCHEMA as STORE_SCHEMA
@@ -98,13 +99,6 @@ def attach(container):
     store.db.conn.execute("PRAGMA synchronous=FULL")
     store.adapter = CashAdapter(container, store)
     return store
-
-
-class ChunksMissing(JournalError):
-    """A chunked commit waits for these chunk hashes; nothing was applied."""
-    def __init__(self, missing):
-        super().__init__("Effect chunks are still arriving")
-        self.missing = missing
 
 
 class CashAdapter:

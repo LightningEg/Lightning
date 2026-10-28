@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo
 import json
 
 from .codec import JournalError, origin_id, unpack
+from .errors import ChunksMissing
 
 
 class JournalDevice:
@@ -356,7 +357,6 @@ class JournalDevice:
             if not batch:
                 raise JournalError("Missing confirmed history; verified snapshot required")
             for wire in batch:
-                from .finance import ChunksMissing
                 try:
                     self.store.apply(wire)
                 except ChunksMissing as error:  # In process: copy the large effect's chunks, then apply.

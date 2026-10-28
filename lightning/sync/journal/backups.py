@@ -5,7 +5,6 @@ restores an older home ledger or silently reinstalls an old origin incarnation.
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import shutil
@@ -15,7 +14,7 @@ from uuid import uuid4
 
 from lightning.database.connection import Database
 from lightning.database.snapshot import snapshot, verify_connection
-from .codec import JournalError, authenticate, canonical, cursor as validate_cursor, digest, fields, hash_value, number, seal, unpack
+from .codec import JournalError, authenticate, cursor as validate_cursor, digest, fields, hash_value, number, seal, unpack
 from .snapshots import _hash, _stage
 
 _RECOVERED_MAP_DDL = ("CREATE TABLE journal_recovered_originals("

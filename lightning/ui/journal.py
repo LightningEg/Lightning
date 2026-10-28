@@ -23,6 +23,7 @@ from lightning.core.money import fmt
 from lightning.core.dates import today
 from lightning.sync.journal.capture import JournalCapture
 from lightning.sync.journal.codec import JournalError, digest
+from lightning.sync.journal.errors import MembershipUpdateRequired
 
 
 def _command_label(name):
@@ -297,7 +298,6 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
     @app.exception_handler(LightningError)
     async def failure(request, error):
         if request.url.path in ("/exchange", "/pairing/exchange", "/membership/exchange", "/enrollment/exchange", "/authority/exchange"):
-            from lightning.sync.journal.local import MembershipUpdateRequired
             if isinstance(error,MembershipUpdateRequired):
                 return PlainTextResponse("Membership update required.",status_code=409,headers={"X-Journal-Action":"membership"})
             return PlainTextResponse("Local journal request refused.", status_code=403)

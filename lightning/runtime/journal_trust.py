@@ -8,6 +8,7 @@ from uuid import uuid4
 from lightning.runtime.session import AttemptGuard, read_slot, write_slot
 from lightning.sync.journal.authority import AuthorityRegistry
 from lightning.sync.journal.codec import JournalError, seal
+from lightning.sync.journal.errors import CloudUnavailable
 from lightning.sync.journal.owner import OwnerCredential
 
 
@@ -154,7 +155,6 @@ class JournalTrustRuntime:
         """Claim the verified surviving replica after the registry accepts recovery."""
         from lightning.sync.journal.home import JournalHome
         from lightning.sync.journal.membership import Membership
-        from lightning.sync.journal.cloud import CloudUnavailable
         from lightning.sync.journal.codec import unpack
 
         device, store = self.device, self.device.store

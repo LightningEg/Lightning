@@ -63,7 +63,6 @@ class NewJournalReplica:
         candidate = self.candidates.get(candidate_id)
         if candidate is None:
             raise JournalError("Find the nearby device again")
-        offer = unpack(candidate["offer"].encode())["body"]
         state = pairing_client.begin(candidate,self.identity,str(uuid4()),code)
         self._save_pairing(state)
         await self.resume()

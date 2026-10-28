@@ -17,7 +17,7 @@ from lightning.database.migrator import inspect_schema
 from lightning.database.snapshot import verify_connection
 
 from .cloud import CHUNK_SIZE, CheckpointTransfer
-from .codec import JournalError, ZERO_HASH, authenticate, canonical, digest, fields, number, seal, unpack, uuid
+from .codec import JournalError, ZERO_HASH, authenticate, canonical, fields, number, seal, unpack, uuid
 from .finance import CashAdapter
 from .local import encode
 from .membership import Membership

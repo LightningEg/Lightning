@@ -10,11 +10,10 @@ import hashlib
 import json
 import os
 import tempfile
-import time
 from pathlib import Path
 from uuid import uuid4
 
-from lightning.sync.journal.codec import JournalError, authenticate, canonical, digest, fields, hash_value, number, seal, unpack, uuid
+from lightning.sync.journal.codec import JournalError, authenticate, fields, hash_value, number, seal, unpack, uuid
 from lightning.sync.journal.local import PinnedLocalClient, decode, encode
 from lightning.sync.journal.membership import Membership
 from lightning.runtime.session import read_slot, write_slot

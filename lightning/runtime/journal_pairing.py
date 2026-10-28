@@ -7,10 +7,9 @@ from __future__ import annotations
 
 import hmac
 import json
-import os
 import time
 
-from lightning.sync.journal.codec import JournalError, authenticate, canonical, digest, fields, hash_value, seal, unpack, uuid
+from lightning.sync.journal.codec import JournalError, authenticate, digest, fields, hash_value, seal, unpack, uuid
 from lightning.sync.journal.discovery import nearby_devices
 from lightning.sync.journal.local import PinnedLocalClient
 from lightning.sync.journal.membership import Membership
