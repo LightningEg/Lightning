@@ -154,7 +154,7 @@ Every look climbs the same three steps, and each step keeps everything below it.
 |---|---|---|---|---|
 | Recolour | One colour field or glow | 100 | 20 | Halo |
 | Texture | A drawn scene or pattern | 120–200 | 24–40 | Blueprint, Dusk, Circuit, Dunes, Borealis; seasonal 200–250 |
-| Animation | The scene with one slow motion | 300–350 | 60–70 | Drifting stars, Nile at night |
+| Animation | The scene with one slow motion | 300–350 | 60–70 | Drifting stars, Nile at night, Felucca, Sand wind |
 
 **Frames**: the ring round your picture.
 

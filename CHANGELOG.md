@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-28 · Claude: Guideline themes.md: two new animated banners, Felucca and Sand wind; four drawn banners redrawn for contrast (site `claude/banner-redraw`).
 - 2026-10-28 · Claude: Guideline coders.html: copy of the website's Garnet wording fix (site 311b86d).
 - 2026-10-28 · Claude: Guideline themes.md: the Bolt badge is now the Lightning mark, the two-leaf logo in its own colours (owner; site PR on `claude/leaderboard-banners`).
 - 2026-10-28 · Claude: [8U][8V][8W] Owner: real data is welcome (AGENTS.md §4, Overview §2), the Home account invite stays; Downloads leads with your platform (site #127). Store analytics: site #126.
