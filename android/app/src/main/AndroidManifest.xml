@@ -38,6 +38,13 @@
         <!-- The dependency and page checks of tasks 04a–04c; not on the home screen. -->
         <activity android:name=".ProbeActivity" android:exported="false"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|keyboard|uiMode" />
+        <!-- Quick Settings tile: Add expense from the notification shade (phone roadmap M8). -->
+        <service android:name=".QuickAddTile" android:exported="true" android:label="Add expense"
+            android:icon="@drawable/ic_lightning" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
         <service android:name=".SyncService" android:exported="false" android:foregroundServiceType="dataSync" />
         <service android:name=".JournalSyncJobService" android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />

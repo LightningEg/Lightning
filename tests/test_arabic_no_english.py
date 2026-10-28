@@ -217,7 +217,8 @@ def test_the_browser_translations_load_before_the_page_scripts(sample, phone):
     """Page scripts (the category count, dialogs) call window.lightningT as they run, so it is set in the head."""
     c, _ = sample
     page = _client(c, phone).get("/categories").text
-    assert page.index("window.lightningT=") < page.index("</head>")
+    marker = "/static/lightning-t.js" if phone else "window.lightningT="  # the phone loads it as a cached file
+    assert page.index(marker) < page.index("</head>")
 
 
 def test_choosing_arabic_in_settings_carries_to_the_profile_pages(sample):
@@ -243,7 +244,10 @@ def test_arabic_pages_use_the_mirrored_stylesheets_and_they_match_their_source(s
     c, _names = sample
     arabic = _client(c, False).get("/").text
     assert "/static/style.rtl.css" in arabic and "/static/style.css" not in arabic
-    assert "/static/phone.rtl.css" in _client(c, True).get("/").text
+    phone_client = _client(c, True)
+    assert "/static/phone-bundle.rtl.css" in phone_client.get("/").text  # one bundle: style.rtl, phone.rtl, themes
+    bundle = phone_client.get("/static/phone-bundle.rtl.css").text
+    assert "/* phone.rtl.css */" in bundle and "/* style.rtl.css */" in bundle and "/* phone.css */" not in bundle
     english_client = TestClient(create_app(c))
     english_client.post("/settings/locale", data={"locale": "en"}, follow_redirects=False)
     english = english_client.get("/").text

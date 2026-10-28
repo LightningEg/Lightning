@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-28 · Lovable: Phone roadmap M8 finished: the phone loads one cached stylesheet (`/static/phone-bundle{.rtl}.css`, parts in `web.PHONE_CSS`), the translation lookup is a cached `lightning-t.js`, and a Quick Settings tile (`QuickAddTile`) opens Add.
 - 2026-10-28 · Lovable: Phone roadmap M4–M8: Today shows payments due in 48 hours; Budget rows flag Ahead of pace with a pace tick and Cover it; transaction rows swipe to open or delete with Undo (`phone-gestures.js`); More opens with the next 14 days of bills and Mark paid; busy Save, pull to refresh, sheet swipe-down, offline entry queue, haptics (VIBRATE) and Android app-icon shortcuts.
 - 2026-10-28 · Lovable: Phone roadmap M1–M3: Add opens the last-used account's sheet, amount focused, with Change account (`lightning_last_account` cookie); Paste bank SMS fills the sheet via `POST /sms/read-one`; pages fade (view transitions) and honour reduced motion. Tests in `tests/test_phone_frame.py`.
 - 2026-10-28 · Claude: [6E] Bank logos: the 37 in `assets/bank-logos/icons/` now show on account tiles (64 px, `lightning/ui/static/institutions/`); Standard Chartered, United Bank, onebank, Telda and WE Pay added to `institutions.csv`. Cash, cash at hand, physical assets, other assets and gam'eyas with no institution show an icon of their kind (`KIND_ICON`).

@@ -40,7 +40,7 @@ def test_every_page_renders_in_the_phone_frame(phone, path):
     assert 'class="shell"' not in html and 'class="side"' not in html  # no desktop sidebar
     assert "Ctrl K" not in html  # C12: no keyboard hints on a phone
     assert html.count('class="section-bar"') <= 1
-    assert "viewport-fit=cover" in html and "/static/phone.css" in html
+    assert "viewport-fit=cover" in html and "/static/phone-bundle.css" in html
     assert "/static/phone-fields.js" in html  # a tapped field opens empty, its old text back if left empty
     names = re.findall(r'class="phone-tab-name">([^<]+)<', html)
     assert names == ["Overview", "Budget", "Add", "Transactions", "More"]  # phone overhaul 2026-10-22: words, Add in the middle
