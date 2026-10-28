@@ -23,7 +23,7 @@
 
 - **8J/8L app themes:** ready to sell, Dendera included; the owner deploys, opens checkout, provisions the store key and turns on each app release. New themes: `guideline/themes.md` §5. **Read:** `issues/8-website/8L-theme-materials-acceptance.md`.
 
-- **Website review (2026-10-28):** 8V first (Downloads invites real statements; contradicts §4), then 8U (account modal on arrival) and 8W (Downloads order). **Read:** each item.
+- **Website (2026-10-28):** store analytics (site PR #126, migration applied live), Downloads platform-first (site #127); leaderboard banners next. **Read:** site README › Analytics.
 
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 

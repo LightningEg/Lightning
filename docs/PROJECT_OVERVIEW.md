@@ -44,6 +44,7 @@ Dates are when the owner decided. Undated rows are founding rules.
 | Decision | Rule |
 |---|---|
 | **Local pairing** (2026-10-23) | Automatically discover named nearby homes while pairing is open. The joining device selects the number displayed on the home from three distinct choices, then enters the profile password; the home confirms the named device. No QR or typed address. Saved identities reconnect automatically. Recovery keys stay unchanged. |
+| **Real data is welcome** (2026-10-28) | People use Lightning with their own statements; the site and app never tell them not to. Milestone 2 keeps hardening what protects that data. The account invitation on Home stays: the app needs no account, so it costs nothing to say no. |
 | **Branches** (2026-10-12) | Work on `who/feature`, merge finished work into `main`. [AGENTS.md](../AGENTS.md) section 6. |
 | **Arabic is for Egypt** | English and Egyptian Arabic for the same profile; the website links matching pages. Arabic reads right to left; money, dates, codes and identifiers keep their natural order. Names: [Glossary](GLOSSARY.md#العربية--المسرد-العربي). |
 | **Feedback screenshots stay private** | Up to five images per ticket, stored in the Apps Script owner's private Drive folder, linked in the feedback Sheet. The website repo owns it. |

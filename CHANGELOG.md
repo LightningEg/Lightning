@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-28 · Claude: [8U][8V][8W] Owner: real data is welcome (AGENTS.md §4, Overview §2), the Home account invite stays; Downloads leads with your platform (site #127). Store analytics: site #126.
 - 2026-10-28 · Claude: [8U][8V][8W] Website review: account modal on arrival, "real statements welcome" on Downloads, Downloads leads with Windows on phones; 2U link checked server-side.
 - 2026-10-28 · Claude: [1B][1C][2B][3I][3AH][8C][8I] Owner-only checks closed as items and held in Project Overview §9, to bring up at end-to-end testing (owner 2026-10-28).
 - 2026-10-28 · Claude: [6E] Every wallet and fintech logo in `assets/institutions-logos/` is linked: 22 institutions added (bank wallets, Halan, Khazna, MoneyFellows, InstaPay and more); tiles trimmed to the mark (`tools/bundle_institution_logos.py`). Codex's import workflow pinned like the others.
