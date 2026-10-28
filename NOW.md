@@ -16,13 +16,13 @@
 
 ## Next
 
-- **Audit 9:** BT-4J first; IT-1K: owner calls; NF-7T: links. **Read:** `reports/2026-10-28-loose-ends-and-linking/report.md`.
+- **Audit 9:** built; left NF-7T5/7T6, IT-4K4. **Read:** `reports/2026-10-28-loose-ends-and-linking/report.md`.
 
 - **3AH visual flow review:** implementation and browser evidence ready for owner review; native Windows/Android and assistive-technology acceptance remain. **Read:** `reports/2026-10-25-app-visual-flow/report.md`.
 
 - **Store and community (2026-10-27):** 10C unlock once, 8M–8S merged in both repos; the website migrations (up to 20261027210000) are run and checked live and `redeem-purchase` is redeployed; the app release that carries 10C ships the unlock. Next: 10D (Papyrus and Dendera sets need a banner, frame and name designed). **Read:** `reports/2026-10-27-store-and-community/report.md`.
 
-- **10A/10C app themes:** ready to sell, Dendera included; the owner deploys, opens checkout, provisions the store key and turns on each app release. New themes: `guideline/themes.md` §5. **Read:** `issues/10-looks-and-store/10C-theme-materials-acceptance.md-theme-materials-acceptance.md`.
+- **10A/10C app themes:** ready to sell, Dendera included; the owner deploys, opens checkout, provisions the store key and turns on each app release. New themes: `guideline/themes.md` §5. **Read:** `issues/10-looks-and-store/10C-theme-materials-acceptance.md`.
 
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 

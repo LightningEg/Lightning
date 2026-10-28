@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-28 · Claude: [IT-1J][IT-1K] Ruff covers the journal files too (1J done); owner decisions on the plan (1K done): app theme items move to milestone 10 Looks and store (8J→10A, 8K→10B, 8L→10C, 8T→10D), 9L→2AA, 6E→3AI.
 - 2026-10-28 · Claude: [BT-8U][NF-8V] Night switch kept in the profile; Azure held per theme at 4.5:1; shell assets content-hashed, licences checked once per page; Arabic marketplace link from one source; paid manifests name their tier; Dendera night draws the star ceiling. Version rule in `themes.md` §5.
 - 2026-10-28 · Claude: [IT-1J][IT-1K] Ruff (F401/F811/F841, pinned) runs in the PR checks, journal files excluded for now; last six unused variables cut. Bugs carry a `severity` shown in INDEX, areas are a fixed list, `--check` warns about unclaimed building items; reports have Kind, Open follow-ups and tested header lines.
 - 2026-10-28 · Claude: [NF-7T] Linked sections: one transaction page shows what it touched (`/activity/{id}` lands there), `/counterparties/{id}`, an account's dependants and first day below zero, `/tags/{tag}` totals; `workflows/linked.py`.

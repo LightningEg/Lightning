@@ -19,13 +19,6 @@ addopts = "-q"
 [tool.ruff]
 # Checked by `ruff check lightning tools` in .github/workflows/pr-checks.yml (version pinned in requirements/lint.lock).
 # Unused imports, names defined twice and unused variables only: each was a real slip (IT-1J).
-extend-exclude = [
-    # until claude/sync-errors-and-journal-tidy merges; then remove
-    "lightning/sync/journal/",
-    "lightning/runtime/journal*",
-    "lightning/ui/journal*",
-]
-
 [tool.ruff.lint]
 select = ["F401", "F811", "F841"]
 
