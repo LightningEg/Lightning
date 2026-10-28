@@ -4,6 +4,7 @@
   "name": "Nile",
   "version": 1,
   "status": "paid",
+  "tier": "palette",
   "priceCoins": null,
   "bundleTargets": [
     "windows",

@@ -5,6 +5,7 @@
     "preview": false,
     "paid": true,
     "version": 1,
+    "tier": "texture",
     "materials": {
       "ground-texture": "linen",
       "ground-texture-strength": "subtle",
@@ -49,6 +50,7 @@
     "preview": false,
     "paid": true,
     "version": 1,
+    "tier": "motion",
     "item": "dendera",
     "materials": {
       "ground-texture": "papyrus",
@@ -94,6 +96,7 @@
     "preview": false,
     "paid": true,
     "version": 1,
+    "tier": "motion",
     "materials": {
       "ground-texture": "papyrus",
       "ground-texture-strength": "subtle",
@@ -143,6 +146,7 @@
     "preview": false,
     "paid": true,
     "version": 1,
+    "tier": "palette",
     "materials": {
       "ground-texture": "none",
       "ground-texture-strength": "subtle",
@@ -187,6 +191,7 @@
     "preview": false,
     "paid": true,
     "version": 1,
+    "tier": "motion",
     "materials": {
       "ground-texture": "papyrus",
       "ground-texture-strength": "subtle",

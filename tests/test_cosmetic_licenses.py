@@ -108,3 +108,11 @@ def test_each_part_can_come_from_a_different_owned_theme():
     with pytest.raises(InvalidCosmeticParts,match='not owned'):
         compose_parts(selected,baseline,catalog,{name:2 for name in catalog},contract)
     assert baseline['parts']['palette']['accent']=='#0B6DD6'
+    # BT-8U7: a theme's other mode is owned through its item; a licence covers its version and later ones
+    night={'dendera-night':json.loads((BUNDLES/'dendera-night.json').read_text())}
+    parts=compose_parts({'palette':'dendera-night'},baseline,night,{'dendera':1},contract)
+    assert parts['palette']==night['dendera-night']['parts']['palette']
+    with pytest.raises(InvalidCosmeticParts,match='not owned'):
+        compose_parts({'palette':'dendera-night'},baseline,night,{'dendera-night':1},contract)
+    newer={'nile':{**catalog['nile'],'version':2}}
+    assert compose_parts({'palette':'nile'},baseline,newer,{'nile':1},contract)['palette']==catalog['nile']['parts']['palette']

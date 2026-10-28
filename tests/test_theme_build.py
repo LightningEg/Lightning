@@ -16,6 +16,9 @@ spec.loader.exec_module(builder)
 class ThemeBuildTests(unittest.TestCase):
     def setUp(self):
         self.manifest = json.loads((builder.SOURCE / 'nile.json').read_text())
+        # the contract tests change Nile's layers freely; its palette tier is checked on its own below
+        self.manifest.update(status='test-preview', tier=None)
+        del self.manifest['tier']
 
     def validate(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -176,21 +179,25 @@ class ThemeBuildTests(unittest.TestCase):
                     self.validate()
 
     def test_each_paid_theme_fills_exactly_its_tier(self):
-        """themes.md section 7: recolour, then texture, then animation; the store's tier for each id (8L migration)."""
-        contract = json.loads((builder.SOURCE / 'slots.json').read_text())
-        neutral = {'none', 'flat', 'hairline', 'bar', 'dim', 'subtle'}
-        for theme, tier in {'nile': 'palette', 'cotton': 'texture', 'papyrus': 'motion', 'dendera': 'motion', 'dendera-night': 'motion'}.items():
-            parts = json.loads((builder.SOURCE / f'{theme}.json').read_text())['parts']
-            material = {f'{s}.{k}': parts[s][k] for s, spec in contract['slots'].items() if s != 'brand'
-                        for k in spec.get('material', {}) if parts[s][k] not in neutral}
-            running = [n for n in contract['limits']['continuous'] if parts[n.split('.')[0]][n.split('.')[1]] != 'none']
-            with self.subTest(theme=theme):
-                if tier == 'palette':
-                    self.assertEqual(material, {}, 'a palette is colour only')
-                    self.assertTrue(all(v == 'none' for s, spec in contract['slots'].items() for k in spec.get('motion', {}) for v in [parts[s][k]]))
-                else:
-                    self.assertTrue(material, 'a textured or animated theme has a material')
-                self.assertEqual(len(running), 1 if tier == 'motion' else 0, 'only the animated tier runs a motion')
+        """themes.md section 7: recolour, then texture, then animation. Every paid manifest names its store tier (the
+        website's catalog_items row) and the build checks it fills exactly that tier (BT-8U7)."""
+        paid = [path for path in sorted(builder.SOURCE.glob('*.json'))
+                if json.loads(path.read_text()).get('status') == 'paid']
+        self.assertGreaterEqual(len(paid), 5)
+        for path in paid:
+            with self.subTest(theme=path.stem):
+                manifest, _ = builder.load(path)
+                self.assertIn(manifest['tier'], builder.TIERS)
+        registry = {t['id']: t for t in json.loads((ROOT / 'lightning/ui/static/themes.generated.json').read_text())}
+        self.assertEqual(registry['dendera-night']['tier'], registry['dendera']['tier'])
+        for theme, wrong in (('nile', 'motion'), ('cotton', 'palette'), ('papyrus', 'texture'), ('nile', None), ('nile', 'gold')):
+            with self.subTest(theme=theme, tier=wrong), tempfile.TemporaryDirectory() as temp:
+                manifest = json.loads((builder.SOURCE / f'{theme}.json').read_text())
+                manifest['tier'] = wrong
+                path = Path(temp) / 'theme.json'
+                path.write_text(json.dumps(manifest))
+                with self.assertRaises(ValueError):
+                    builder.load(path)
 
     def test_held_keeps_its_hue_and_reads_on_every_theme_card(self):
         """BT-8U4: Azure held is generated per theme, same hue, at 4.5:1 on the card's darkest point and its tint."""

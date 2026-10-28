@@ -76,6 +76,28 @@ def held(card):
         light += step
     raise ValueError(f"Azure held cannot reach 4.5:1 on {card}")
 
+TIERS = ("palette", "texture", "motion")  # the store's tiers (themes.md section 7: recolour, texture, animation)
+NEUTRAL = {"none", "flat", "hairline", "bar", "dim", "subtle"}  # material values that add no material
+
+def check_tier(manifest, parts, contract):
+    """A paid theme names its store tier and fills exactly that tier: a palette is colour only, a textured theme adds
+    material and no motion, an animated one runs exactly one continuous motion (BT-8U7)."""
+    tier = manifest.get("tier")
+    if tier is None and manifest.get("status") != "paid":
+        return
+    if tier not in TIERS:
+        raise ValueError(f"{manifest['id']}: tier must be one of {', '.join(TIERS)}")
+    material = [f"{s}.{k}" for s, spec in contract["slots"].items() if s != "brand"
+                for k in spec.get("material", {}) if parts[s][k] not in NEUTRAL]
+    motions = [parts[s][k] for s, spec in contract["slots"].items() for k in spec.get("motion", {})]
+    running = [n for n in contract["limits"]["continuous"] if parts[n.split(".")[0]][n.split(".")[1]] != "none"]
+    if tier == "palette" and (material or any(v != "none" for v in motions)):
+        raise ValueError(f"{manifest['id']}: a palette theme is colour only, not {', '.join(material) or 'motion'}")
+    if tier != "palette" and not material:
+        raise ValueError(f"{manifest['id']}: a {tier} theme has a material")
+    if len(running) != (1 if tier == "motion" else 0):
+        raise ValueError(f"{manifest['id']}: only the motion tier runs one continuous motion")
+
 def load(path):
     contract = json.loads((SOURCE / "slots.json").read_text())
     default = json.loads((SOURCE / "lightning-default.json").read_text())
@@ -84,6 +106,7 @@ def load(path):
     if not isinstance(manifest.get("name"), str) or not manifest["name"].strip():
         raise ValueError("A theme name is required")
     parts, _ = resolve_parts(manifest, default, contract)
+    check_tier(manifest, parts, contract)
     p, limits = parts["palette"], contract["limits"]
     checks = [(p["text"], p["background"], 7), (p["muted"], p["background"], 4.5)]
     # the ground's texture is drawn in the text colour at most at its strength: text still reads on it
@@ -266,7 +289,7 @@ def build(check=False):
         # with a verified licence for this exact version (lightning/ui/entitlements.py); anyone may try it for a session.
         entry = {"id": manifest["id"], "name": manifest["name"], "preview": manifest["status"] == "test-preview"}
         if manifest["status"] == "paid":
-            entry.update(paid=True, version=manifest["version"])
+            entry.update(paid=True, version=manifest["version"], tier=manifest["tier"])
         if "item" in manifest:  # a theme's other mode: worn with its item's licence (Dendera's night rides on Dendera)
             entry["item"] = manifest["item"]
         if manifest["id"] != "lightning-default":  # the default keeps its exact approved paint
@@ -276,8 +299,8 @@ def build(check=False):
     paid = {e["id"]: e for e in registry if e.get("paid") and "item" not in e}
     for entry in registry:
         if "item" in entry and (entry["item"] not in paid or paid[entry["item"]]["version"] != entry.get("version")
-                                or not entry.get("paid")):
-            raise ValueError(f"{entry['id']}: its item {entry['item']} must be a bundled paid theme at the same version")
+                                or not entry.get("paid") or paid[entry["item"]]["tier"] != entry.get("tier")):
+            raise ValueError(f"{entry['id']}: its item {entry['item']} must be a bundled paid theme at the same version and tier")
     outputs = {STATIC / "themes.generated.css": css,
                STATIC / "themes.generated.json": json.dumps(registry, indent=2) + "\n",
                STATIC / "themes.generated.js": "/* Generated. */\nwindow.LIGHTNING_THEMES = "+json.dumps(registry)+";\n"}
