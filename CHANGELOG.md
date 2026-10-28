@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-28 · Claude: Guideline coders.html: copy of the website's Garnet wording fix (site 311b86d).
 - 2026-10-28 · Claude: Guideline themes.md: the Bolt badge is now the Lightning mark, the two-leaf logo in its own colours (owner; site PR on `claude/leaderboard-banners`).
 - 2026-10-28 · Codex: [3U] Reviewed #170 and preserved its Arabic fixes; compact labels omit trailing `.0` after rounding, with regression coverage in both languages.
 
