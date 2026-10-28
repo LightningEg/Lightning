@@ -19,10 +19,8 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | **IT-1G** | [Cover all backend modules with explicit dependency and wiring contracts](1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | improvement, technical | tools | ready |
 | **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | tools | ready |
 | **IT-1J** | [Ruff skips the journal files until their claim merges](1-easy-to-contribute/1J-ruff-in-ci.md) | improvement, technical | tools | ready |
-| **IT-1K** | [The plan's fields blur bugs with owner asks, areas overlap, and reports miss their header lines](1-easy-to-contribute/1K-tidy-how-the-plan-is-filed.md) | improvement, technical | docs | new |
+| **IT-1K** | [The plan's fields blur bugs with owner asks, and some items sit in the wrong milestone](1-easy-to-contribute/1K-tidy-how-the-plan-is-filed.md) | improvement, technical | docs | new |
 | IT-1K1 | ↳ Owner decides the rule changes | | | |
-| IT-1K2 | ↳ Make the generator check it | | | |
-| IT-1K3 | ↳ Reports catalogue | | | |
 
 Done: 1A, 1D, 1F, 1I. Next free code: 1L.
 

@@ -130,6 +130,24 @@ def test_documentation_links_and_catalogues():
     assert not _docs_check_tool().check(ROOT)
 
 
+def test_every_report_has_its_header_lines_and_open_follow_ups():  # IT-1K: the template's Date and Reviewed commit
+    for report in sorted((ROOT / "reports").glob("*/report.md")):
+        head = "\n".join(report.read_text(encoding="utf-8").splitlines()[:8])
+        assert re.search(r"^Date: \d{4}-\d\d-\d\d", head, re.M), f"{report.parent.name}: no Date: line"
+        assert re.search(r"Reviewed commit: `?[0-9a-f]{7,40}", head), f"{report.parent.name}: no Reviewed commit: line"
+    spec = importlib.util.spec_from_file_location("issues_tool", ROOT / "tools" / "issues.py")
+    issues = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(issues)
+    open_codes = {i["code"] for m in issues.load()[0] for i in m["items"]}
+    rows = re.findall(r"^\| [a-z0-9.-]+ \| \[.*\]\(.*\) \| [\d-]+ \| (\w+) \| (.*) \|$",
+                      (ROOT / "reports" / "README.md").read_text(encoding="utf-8"), re.M)
+    assert len(rows) == len(list((ROOT / "reports").glob("*/report.md")))
+    for kind, follow in rows:
+        assert kind in ("audit", "review", "release", "research", "reference")
+        finished = {c for c in follow.split(", ") if c != "none"} - open_codes
+        assert not finished, f"reports/README.md lists finished items as open follow-ups: {sorted(finished)}"
+
+
 def test_mirror_check_detects_missing_arabic_and_changed_voice(tmp_path):
     own, peer = tmp_path / "app", tmp_path / "site"
     for base in (own, peer):

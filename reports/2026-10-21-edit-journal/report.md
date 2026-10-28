@@ -1,6 +1,7 @@
 # Audit 3: is the edit journal (multi-device sync) solid?
 
-2026-10-21 · Claude · main `6e1c043` · encrypted dummy profiles, in-process carrier, no live Cloudflare.
+Date: 2026-10-21 · Claude · main `6e1c043` · encrypted dummy profiles, in-process carrier, no live Cloudflare.
+Reviewed commit: 6e1c04344b63d364fe62d7a034b0a417a750714c (the commit the line above names)
 
 The owner asked whether the new multi-device sync holds up. This covers the edit journal ([4A](../../issues/4-edit-journal-and-devices/4A-edit-journal.md)):
 `lightning/sync/journal/`, the device runtime and `cloudflare/journal/worker.mjs`. The design was read against its guarantees G1–G8, the code was read
