@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{# A page per counterparty (NF-7T2). One template for PC and phone; every figure comes from LinkedSections.counterparty. #}
+{% from "partials/macros.html" import page_title with context %}
+{% from "partials/linked.html" import link_row with context %}
+{% block title %}{{ party.name }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="{{ back_url(request) or '/counterparties' }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Back'|tr(locale) }}</span></a>{% endblock %}
+{% set paid_you = page.side == 'money_in' %}
+{% block heading %}{{ page_title(party.name, none, '{sa} to {sb}'|tr(locale, sa=page.first_month, sb=page.months[-1].month) if page.months else '') }}{% endblock %}
+{% block top_actions %}<a class="btn" href="/transactions?q={{ party.name|urlencode }}">{{ 'Their transactions'|tr(locale) }}</a>{% if not phone_mode() %}<a class="btn" href="/counterparties?q={{ party.name|urlencode }}">{{ 'Edit names'|tr(locale) }}</a>{% endif %}{% endblock %}
+{% block content %}
+{% set label = ('Money in from them'|tr(locale)) if paid_you else ('Money out to them'|tr(locale)) %}
+{% set usual = ('usual month {amt}'|tr(locale, amt=page.usual_month|money(False, 0))) if page.usual_month is not none else ('no earlier month to compare'|tr(locale)) %}
+{% set shown = page.months|selectattr(page.side)|list|reverse|list %}
+{% if phone_mode() %}
+{% from "phone/partials/hero.html" import hero %}
+{{ hero(label ~ ' · ' ~ ('last 12 months'|tr(locale)), page.total|round(0), ('This month {amt}'|tr(locale, amt=page.this_month|money(False, 0))) ~ ' · ' ~ usual) }}
+{% if shown %}<section class="phone-flat-rows" aria-labelledby="cp-months"><h2 id="cp-months">{{ 'By month'|tr(locale) }}</h2>
+  {% for row in shown %}{{ link_row('', row.month, '', row[page.side]|money(False, 0)) }}{% endfor %}</section>{% endif %}
+{% else %}
+{% from "partials/charts.html" import lead_card %}
+{% set k = {'label': label, 'value': page.total|round(0), 'kind': 'money', 'signed': false, 'chip': none, 'visual': none,
+            'compare': {'figure': page.this_month|money(False, 0), 'tone': '', 'text': ('this month'|tr(locale)) ~ ' · ' ~ usual},
+            'line': {'text': 'last 12 months'|tr(locale), 'action': '', 'href': ''}} %}
+{% call lead_card(k, base) %}<div class="lead-side-head"><div><h3>{{ 'By month'|tr(locale) }}</h3><p>{{ 'Months with money'|tr(locale) }}</p></div></div>
+  <div class="lead-rows">{% for row in shown %}<div class="lead-row"><span>{{ row.month }}</span><b>{{ row[page.side]|money(False, 0) }}</b></div>{% else %}<div class="lead-row"><span>{{ 'Nothing in the last 12 months'|tr(locale) }}</span></div>{% endfor %}</div>{% endcall %}
+{% endif %}
+
+{% set has_plans = page.plans or page.reserves %}{% set has_open = page.claims or page.held %}
+{% if has_plans or has_open %}<div class="grid g2" style="margin-top:16px">
+  {% if has_plans %}<section class="card linked-panel" aria-labelledby="cp-plans"><h2 id="cp-plans">{{ 'Plans and reserves'|tr(locale) }}</h2>
+    {% for item in page.plans %}{{ link_row(item.href, item.name, item.kind_label|tr(locale) ~ (' · ' ~ ('next {date}'|tr(locale, date=item.next_due)) if item.next_due else ''), item.amount|money(False, 0)) }}{% endfor %}
+    {% for reserve in page.reserves %}{{ link_row('/reserves/' ~ reserve.id ~ '/payments', reserve.name, 'Reserve'|tr(locale) ~ ' · ' ~ ('{amt} set aside'|tr(locale, amt=reserve.effective_allocated|money(False, 0))), reserve.target|money(False, 0)) }}{% endfor %}
+  </section>{% endif %}
+  {% if has_open %}<section class="card linked-panel" aria-labelledby="cp-open"><h2 id="cp-open">{{ 'Between you'|tr(locale) }}</h2>
+    {% for claim in page.claims %}{{ link_row('/reimbursements', claim.expense.counterparty or claim.expense.description if claim.expense else 'Reimbursement claim'|tr(locale),
+        'Claimed {amt} · received {amt2}'|tr(locale, amt=claim.expected|money, amt2=claim.received|money),
+        ('{amt} still owed'|tr(locale, amt=claim.outstanding|money) if claim.outstanding else 'Paid back'|tr(locale))) }}{% endfor %}
+    {% for row in page.held %}{{ link_row('/money-from-others', 'Held for them in {name}'|tr(locale, name=row.account_name), row.currency, row.amount|money) }}{% endfor %}
+  </section>{% endif %}
+</div>{% endif %}
+
+<div class="grid g2" style="margin-top:16px">
+  <section class="card linked-panel" aria-labelledby="cp-names"><h2 id="cp-names">{{ 'Names'|tr(locale) }}</h2>
+    {{ link_row('/counterparties?q=' ~ party.name|urlencode, party.name, 'Suggested category'|tr(locale) ~ ' · ' ~ (page.default_category|tr(locale) if page.default_category else 'No default'|tr(locale))) }}
+    {% for alias in page.aliases %}{{ link_row('', alias.alias, 'Alias'|tr(locale)) }}{% endfor %}
+  </section>
+  <section class="card linked-panel" aria-labelledby="cp-rules"><h2 id="cp-rules">{{ 'Rules'|tr(locale) }}</h2>
+    {% for rule in page.rules %}{{ link_row('/rules/' ~ rule.id ~ '/edit', rule.then, rule.when) }}{% else %}<p class="muted">{{ 'No rule looks at this name.'|tr(locale) }}</p><p class="linked-actions"><a class="quiet-link" href="/rules/new">{{ 'Add a rule'|tr(locale) }}</a></p>{% endfor %}
+  </section>
+</div>
+{% endblock %}

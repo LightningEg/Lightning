@@ -2,6 +2,8 @@
 and a tag's totals. Only stored links are read; nothing new is stored."""
 from __future__ import annotations
 
+from decimal import Decimal
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -93,3 +95,34 @@ def test_the_panel_renders_in_the_phone_frame_too(sample, phone):
             await inner(scope, receive, send)
     page = TestClient(app).get(f"/transactions/{_paid_plan_txn(c, 'LOAN')}").text
     assert ('class="phone-row linked-row"' if phone else 'class="compact-row linked-row"') in page
+
+
+# ------------------------------------------------------------------ 7T2
+def test_a_counterparty_page_gathers_money_by_month_plans_claims_and_money_held(sample):
+    c, _ = sample
+    employer = c.linked.counterparty(1)
+    assert employer["side"] == "money_in" and len(employer["months"]) == 12
+    assert employer["total"] == sum(row["money_in"] for row in employer["months"])
+    assert {plan["name"] for plan in employer["plans"]} == {"ACME Egypt", "Year-end bonus"}
+    assert [claim["payer_id"] for claim in employer["claims"]] == [1]
+    mom = c.linked.counterparty(13)
+    assert mom["side"] == "money_out" and mom["held"][0]["amount"] == Decimal("6900.00")
+    uber = c.linked.counterparty(14)
+    spent = c.reporting.spending_by_counterparty("2025-11-01", "2026-10-02")
+    assert uber["money_out"] == dict(spent)["Uber"]  # the same rule as Expense analysis
+
+
+def test_a_counterparty_page_lists_the_rules_that_look_at_its_names(sample):
+    c, _ = sample
+    rules = c.linked.counterparty(20)["rules"]  # the sample's Vodafone rule
+    assert rules and "Vodafone" in rules[0]["when"]
+
+
+def test_the_counterparty_page_opens_from_the_list_and_the_transaction(sample):
+    c, client = sample
+    assert 'href="/counterparties/14"' in client.get("/counterparties").text
+    page = client.get("/counterparties/14")
+    assert page.status_code == 200 and "Money out to them" in page.text
+    txn = c.db.scalar("SELECT id FROM transactions WHERE counterparty_id=14 AND status='POSTED' LIMIT 1")
+    assert 'href="/counterparties/14"' in client.get(f"/transactions/{txn}").text
+    assert client.get("/counterparties/999999", follow_redirects=False).headers["location"].startswith("/counterparties")

@@ -121,3 +121,14 @@ async def create_counterparty(request: Request):
                       error=str(exc) if isinstance(exc, ValueError) else exc.message,
                       entered_name=name, entered_category_id=raw_category_id)
     return redirect("/counterparties", f"Saved {name}.")
+
+
+@router.get("/{counterparty_id:int}")
+async def counterparty_page(request: Request, counterparty_id: int):
+    """A page per counterparty (7T2): money with them by month, plans, reserves, claims, money held, aliases, rules."""
+    c = container(request)
+    try:
+        page = c.linked.counterparty(counterparty_id)
+    except LightningError as exc:
+        return redirect("/counterparties", exc.message)
+    return render(request, "counterparty.html", page=page, party=page["party"])
