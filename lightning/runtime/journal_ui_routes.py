@@ -11,7 +11,10 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from lightning.sync.journal.codec import JournalError, digest
+from lightning.runtime.journal_pairing import ApprovalPending
 from lightning.ui.journal_i18n import action_name, translate_journal
+
+REMOVED = "The home removed this device, so it no longer syncs. Edits made here stay on this device."
 
 _views = Jinja2Templates(directory=str(Path(__file__).parents[1] / "ui" / "journal_views"))
 _views.env.filters["tr"] = translate_journal
@@ -45,8 +48,9 @@ def journal_ui_router(session) -> APIRouter:
         pairing = current.pairing
         try:
             pairing_screen = pairing.screen() if pairing is not None else dict(enabled=False)
-        except Exception:
-            pairing_screen = dict(enabled=False)
+        except Exception as failure:  # noqa: BLE001 - an unreadable pairing state still shows the page
+            pairing_screen = dict(enabled=False, unreadable=True, detail=f"{type(failure).__name__}: {failure}"[:200])
+        pairing_screen["nearby_off"] = bool(getattr(current, "discovery_error", None))
         from lightning.ui.journal import command_status_rows, command_values
         phone = bool(getattr(request.state, "phone", False))
         trust = getattr(current, "trust", None)
@@ -74,7 +78,7 @@ def journal_ui_router(session) -> APIRouter:
                        pairing=pairing_screen, pairing_version=digest(pairing_screen), command_rows=command_status_rows(device),
                        reviews=reviews,
                        csrf=getattr(request.state, "csrf", ""), session=getattr(session, "token", ""),
-                       trust_state=trust_state,
+                       trust_state=trust_state, sync=device.sync_status(),
                        base_path="/journal", message=message, error=error,
                        locale=locale)
         return _views.TemplateResponse(request=request, name="native.html", context=context)
@@ -109,6 +113,8 @@ def journal_ui_router(session) -> APIRouter:
                 return render(request, page="register", error="Home unavailable · Your pending edits are saved on this device")
             if result == "locked":
                 return render(request, page="register", error="Unlock this profile before syncing")
+            if result == "revoked":
+                return render(request, page="register", error=REMOVED)
             return render(request, page="register", error="Sync did not complete. Your pending edits remain saved on this device")
         except (JournalError, OSError, TimeoutError) as error:
             return render(request, page="register", error=str(error))
@@ -147,16 +153,15 @@ def journal_ui_router(session) -> APIRouter:
                 if pairing is None:
                     raise JournalError("Nearby pairing is unavailable")
                 screen = pairing.screen()
-                if screen.get("stage") in ("handshake","proving","cancelling"):
+                step = (pairing.resume if screen.get("stage") in ("handshake","proving","cancelling")
+                        else pairing.finish if screen.get("stage") == "waiting" else None)
+                if step is not None:
                     try:
-                        await pairing.resume()
-                    except (JournalError, OSError, TimeoutError):
-                        pass
-                elif screen.get("stage") == "waiting":
-                    try:
-                        await pairing.finish()
-                    except (JournalError, OSError, TimeoutError):
-                        pass
+                        await step()
+                    except (ApprovalPending, OSError, TimeoutError):
+                        pass  # still waiting for the home, or out of reach: the next poll tries again
+                    except JournalError as error:
+                        pairing.note_problem(error)  # say it, instead of waiting forever
                 elif current.device.home is None and not screen["pending"] and not screen["paired"]:
                     await pairing.find()
                 return JSONResponse(dict(version=digest(pairing.screen())))

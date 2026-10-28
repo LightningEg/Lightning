@@ -22,7 +22,10 @@ from lightning.security.keys import unwrap_key, _password_bytes
 from lightning.sync.identity import check_digits
 from .codec import JournalError, authenticate, canonical, digest, fields, hash_value, seal, unpack, uuid
 
-CLOCK_SKEW_SECONDS = 60
+CLOCK_SKEW_SECONDS = 60  # the joining screen's grace before it calls an offer's ten minutes up
+MAX_CLOCK_DIFFERENCE = 15 * 60  # how far apart two devices' clocks may be and still pair
+CLOCKS_DIFFER = "The clocks on these devices differ by more than 15 minutes. Set both to the right time, then pair again."
+OFFER_EXPIRED = "This pairing offer expired. Open pairing on the home again."
 OFFER_SECONDS = 600  # the home's own deadline for one offer
 MAX_REQUESTS = 12  # number-match requests one offer takes
 MAX_CODE_REQUESTS = 3  # six-digit-code requests one offer takes
@@ -68,6 +71,10 @@ def number_choices(digits):
     return choices
 
 
+class ClocksDiffer(JournalError):
+    """The offer's deadline is further ahead than any honest home clock within 15 minutes could set."""
+
+
 def require_live_offer(candidate):
     offer = unpack(candidate["offer"].encode())["body"]
     return _offer(candidate["offer"].encode(), offer["home_key"], time.time)
@@ -80,13 +87,16 @@ def _offer(offer, home_key, now):
     fields(body, ("type", "profile", "generation", "home", "home_key", "nonce", "salt", "expires") + (("method",) if "method" in body else ()))
     if "method" in body and body["method"] != "number-match":
         raise JournalError("Unsupported pairing method")
-    observed = now()
-    # The home still enforces its exact ten-minute deadline. A small allowance
-    # here prevents a slightly faster phone clock from making every new offer
-    # appear too far in the future to its PC.
-    if (type(body["expires"]) is not int or body["type"] != "journal-pairing" or body["home_key"] != home_key
-            or not observed < body["expires"] <= observed + OFFER_SECONDS + CLOCK_SKEW_SECONDS):
+    if type(body["expires"]) is not int or body["type"] != "journal-pairing" or body["home_key"] != home_key:
         raise JournalError("Pairing offer expired or home identity changed")
+    # The home enforces its exact ten-minute deadline on every step, by its own clock. This
+    # device's clock only rules out an offer that no clock up to 15 minutes apart could make live:
+    # one ending more than 10 + 15 minutes ahead, or more than 15 minutes ago.
+    remaining = body["expires"] - now()
+    if remaining > OFFER_SECONDS + MAX_CLOCK_DIFFERENCE:
+        raise ClocksDiffer(CLOCKS_DIFFER)
+    if remaining <= -MAX_CLOCK_DIFFERENCE:
+        raise JournalError(OFFER_EXPIRED)
     return body
 
 

@@ -32,3 +32,7 @@ class ChunksMissing(JournalError):
     def __init__(self, missing):
         super().__init__("Effect chunks are still arriving")
         self.missing = missing
+
+
+class DeviceRevoked(JournalError):
+    """The home's signed membership no longer lists this device: it stops syncing until paired afresh."""

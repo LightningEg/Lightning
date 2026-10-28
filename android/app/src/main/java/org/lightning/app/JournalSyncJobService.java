@@ -24,6 +24,10 @@ public final class JournalSyncJobService extends JobService {
                 } else if ("offline".equals(result)) {
                     Log.i(TAG, "Journal catch-up deferred: cloud is offline or not configured");
                     retry = true;
+                } else if ("revoked".equals(result)) {
+                    Log.w(TAG, "Journal catch-up stopped: the home removed this device");
+                } else if ("refused".equals(result)) {
+                    Log.w(TAG, "Journal catch-up refused by the home; the next scheduled window tries again");
                 } else if ("error".equals(result)) {
                     Log.w(TAG, "Journal catch-up failed; Android will retry");
                     retry = true;

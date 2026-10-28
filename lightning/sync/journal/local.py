@@ -79,6 +79,7 @@ class LocalChannel:
         number(body["epoch"], minimum=1)
         public_key = self.peers.get(body["sender"])
         if public_key is None:
+            self._removed_sender(envelope, body["sender"])
             raise JournalError("Sender is not paired")
         authenticate(envelope, public_key)  # Always authenticate before decryption.
         if self.device.home and not self.device.store.db.scalar(
@@ -102,6 +103,21 @@ class LocalChannel:
         except (ValueError, TypeError, InvalidTag) as error:
             raise JournalError("Invalid encrypted payload") from error
         return body["sender"], payload
+
+    def _removed_sender(self, envelope, sender):
+        """A device the home removed, proven by its own key, is told to fetch the signed membership
+        that leaves it out (4A section 7: a removed device learns it on contact)."""
+        if not self.device.home:
+            return
+        rows = self.device.store.db.all("SELECT public_key,revoked FROM journal_origins WHERE device=?", (sender,))
+        if not rows or any(not row["revoked"] for row in rows):
+            return
+        for row in rows:
+            try:
+                authenticate(envelope, row["public_key"])
+            except JournalError:
+                continue
+            raise MembershipUpdateRequired("Membership update required")
 
     def handle(self, wire):
         if self.device.home is None:

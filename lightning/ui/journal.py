@@ -534,6 +534,9 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
             chunks.append(chunk)
         try:
             result = channel.handle(b"".join(chunks))
+        except MembershipUpdateRequired:
+            # The paired client fetches the signed key wrap, or learns that the home removed it.
+            return PlainTextResponse("Membership update required.", status_code=409, headers={"X-Journal-Action": "membership"})
         except (JournalError, LightningError, ValueError, KeyError, TypeError):
             return PlainTextResponse("Local journal request refused.", status_code=403)
         return Response(result, media_type="application/octet-stream")
