@@ -56,6 +56,8 @@ EN = {
 }
 
 AR = {
+    "That device holds a different ledger. To bring it here, lock this profile and join it from Profiles.":
+        "الجهاز ده عليه سجل تاني. عشان تجيبه هنا، اقفل الملف ده وانضم له من صفحة الملفات الشخصية.",
     "Pairing was interrupted. Resume to check its saved state.": "الربط اتقطع. كمّل عشان نراجع الحالة المحفوظة.",
     "Resume pairing": "كمّل الربط",
     "On your other device, select this device from Nearby devices.": "على الجهاز التاني، اختار الجهاز ده من الأجهزة القريبة.",

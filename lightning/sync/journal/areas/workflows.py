@@ -1,6 +1,6 @@
 """Atomic app workflows that combine several ordinary service writes."""
-import hashlib
 import json
+from ..codec import stable_digest
 from .spec import AMOUNT, DATE, FLAG, INT, MONTH, RATE, TEXT, Command, choice, listof, optional, ref
 
 TABLES = ()  # These workflows touch tables owned by their underlying financial areas.
@@ -82,8 +82,7 @@ class JournalWorkflowService:
             row["category"] = code
             stable_carry.append(row)
         stable_carry.sort(key=lambda row: (row["category"], row["month"]))
-        body = json.dumps([preferences, stable_rows, stable_carry], sort_keys=True, separators=(",", ":"), default=str)
-        return hashlib.sha256(body.encode()).hexdigest()
+        return stable_digest([preferences, stable_rows, stable_carry], ensure_ascii=True, default=str, allow_nan=True)
 
     def save_budget_settings(self, income_categories, income_months, manual_income, exclusions, carryover,
                              carry_month, recurring_shown, income_from_recurring, emergency_basis, fingerprint):
@@ -140,8 +139,7 @@ class JournalWorkflowService:
             row.pop("id", None)
             row["category_code"] = names.get(row.pop("category_id"), "")
         rows.sort(key=lambda row: (row["category_code"], row["month"], row["one_off"]))
-        body = json.dumps(rows, sort_keys=True, separators=(",", ":"), default=str)
-        return hashlib.sha256(body.encode()).hexdigest()
+        return stable_digest(rows, ensure_ascii=True, default=str, allow_nan=True)
 
     def bulk_budget_fingerprint(self, category_ids):
         return self._budget_rows_fingerprint(category_ids)

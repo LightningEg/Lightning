@@ -13,7 +13,7 @@ import tempfile
 from pathlib import Path
 from uuid import uuid4
 
-from lightning.sync.journal.codec import JournalError, authenticate, fields, hash_value, number, seal, unpack, uuid
+from lightning.sync.journal.codec import JournalError, authenticate, fields, hash_value, number, seal, stable_json, unpack, uuid
 from lightning.sync.journal.local import PinnedLocalClient, decode, encode
 from lightning.sync.journal.membership import Membership
 from lightning.runtime.session import read_slot, write_slot
@@ -27,8 +27,7 @@ TABLES = ("journal_origins", "journal_inbox", "journal_reviews")
 
 def _line(value):
     """Canonical local JSON framing allows large DB blobs split at transport level."""
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
-                      allow_nan=False).encode("utf-8")
+    return stable_json(value)
 
 
 class JournalMoveRuntime:

@@ -1,4 +1,4 @@
-"""Nearby-device pairing flow for explicit compatible dummy profiles.
+"""Nearby-device pairing between copies of one ledger.
 
 User-visible choices use names and opaque candidate IDs, never typed endpoints.
 Native first-profile snapshot enrollment remains a separate cutover gate.
@@ -13,8 +13,12 @@ from lightning.sync.journal.codec import JournalError, authenticate, digest, fie
 from lightning.sync.journal.discovery import nearby_devices
 from lightning.sync.journal.local import PinnedLocalClient
 from lightning.sync.journal.membership import Membership
-from lightning.sync.journal.pairing import PairingDesk, RECEIPT_LIFETIME, approval_receipt, number_choices, require_live_offer
+from lightning.sync.journal.pairing import (MAX_PROOF_ATTEMPTS, PairingDesk, RECEIPT_LIFETIME, approval_receipt, number_choices,
+                                            request_budget, require_live_offer)
 from lightning.sync.journal import pairing_client
+
+
+DIFFERENT_LEDGER = "That device holds a different ledger. To bring it here, lock this profile and join it from Profiles."
 
 
 class NearbyPairing:
@@ -27,6 +31,10 @@ class NearbyPairing:
         self.enrollment = EnrollmentSource(device,key_document=key_document,owner_document=owner_document,
             approval=lambda identifier:self._value("pairing_result:"+identifier,{})) if device.home and key_document else None
 
+    def _now(self):
+        """The home's desk clock when there is one, so tests and the desk read the same time."""
+        return self.desk.clock() if self.desk is not None else time.time()
+
     def _value(self, name, default=None):
         value = self.db.scalar("SELECT value FROM journal_local WHERE name=?", (name,))
         return json.loads(value) if value else default
@@ -38,8 +46,8 @@ class NearbyPairing:
         names = self._value("paired_names",{})
         state = self._value("pairing",{})
         if state and self.desk:
-            state, _ = self.desk._state()
-        if state and unpack(state["offer"].encode())["body"]["expires"] <= time.time():
+            state, _ = self.desk.current()
+        if state and unpack(state["offer"].encode())["body"]["expires"] <= self._now():
             state = {}
         request = unpack(state["request"].encode())["body"] if state.get("request") else None
         digits = self.desk.digits(state, unpack(state["offer"].encode())["body"]) if request else None
@@ -70,7 +78,11 @@ class NearbyPairing:
 
     def advertise(self, nonce, port):
         state = self._value("pairing",{})
-        if not state or state["attempts"] >= 12 or state["proof_attempts"] >= 3 or unpack(state["offer"].encode())["body"]["expires"] <= time.time():
+        if not state:
+            return None
+        offer = unpack(state["offer"].encode())["body"]
+        if (state["attempts"] >= request_budget(offer) or state["proof_attempts"] >= MAX_PROOF_ATTEMPTS
+                or offer["expires"] <= self._now()):
             return None
         return seal(dict(type="journal-nearby-home", nonce=nonce, name=self.device.identity.name,
                          home=self.device.identity.device_id, offer=state["offer"], port=port,
@@ -95,7 +107,7 @@ class NearbyPairing:
         from types import SimpleNamespace
         if (offer["profile"] != config["profile"] or offer["generation"] != config["generation"]
                 or public_key(SimpleNamespace(public_key=offer["home_key"])) != public_key(SimpleNamespace(public_key=config["home_key"]))):
-            raise JournalError("This preview joins compatible dummy replicas; a new profile requires snapshot enrollment")
+            raise JournalError(DIFFERENT_LEDGER)
         if self.device.store.pending():
             raise JournalError("Sync existing pending work before pairing another connection")
         state = pairing_client.begin(candidate,self.device.identity,config["incarnation"],code)
@@ -222,8 +234,6 @@ class NearbyPairing:
             return seal(self.desk.waiting(),self.device.identity.sign)
         if kind == "journal-pairing-reveal":
             return self.desk.reveal(wire)
-        if kind == "journal-pairing-cancel":
-            return self.desk.cancel(wire)
         if kind == "journal-pairing-proof":
             self.desk.prove(wire)
             return seal(dict(type="pairing-wait",request=body["request"]),self.device.identity.sign)
@@ -231,7 +241,7 @@ class NearbyPairing:
         if "nonce" in body:
             hash_value(body["nonce"])
         uuid(body["device"])
-        state, offer = self.desk._state()
+        state, offer = self.desk.current()
         if kind != "journal-pairing-status" or not state.get("request") or self.desk.clock() >= offer["expires"]:
             raise JournalError("Pairing approval is not available yet")
         original = unpack(state["request"].encode())["body"]
