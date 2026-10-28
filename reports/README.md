@@ -6,13 +6,13 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | Historical ID | Report | Review date | Kind | Open follow-ups |
 | --- | --- | --- | --- | --- |
 | audit-1 | [Audit 1: is Lightning ready to demo?](2026-10-20-demo-readiness/report.md) | 2026-10-20 | audit | 2E, 2F, 3G, 3H, 3Q, 3S, 3T, 5J, 5K, 7L, 7M |
-| audit-2 | [Audit 2: backend efficiency and loose ends](2026-10-21-backend-efficiency/report.md) | 2026-10-21 | audit | 2A, 2B, 2C, 2E, 4A, 5A |
+| audit-2 | [Audit 2: backend efficiency and loose ends](2026-10-21-backend-efficiency/report.md) | 2026-10-21 | audit | 2A, 2C, 2E, 4A, 5A |
 | audit-3 | [Audit 3: is the edit journal (multi-device sync) solid?](2026-10-21-edit-journal/report.md) | 2026-10-21 | audit | 4A |
 | audit-5 | [Audit 5: is the backend engine efficient and streamlined?](2026-10-21-backend-streamlining/report.md) | 2026-10-21 | audit | 4A, 9J, 9K, 2AA |
-| audit-4 | [Audit 4: backend correctness and failure boundaries](2026-10-23-backend-correctness/report.md) | 2026-10-23 | audit | 1G, 2A, 2B, 2C, 2J, 4A |
+| audit-4 | [Audit 4: backend correctness and failure boundaries](2026-10-23-backend-correctness/report.md) | 2026-10-23 | audit | 1G, 2A, 2C, 2J, 4A |
 | audit-6 | [Audit 6: open pull request cleanup](2026-10-23-pull-request-cleanup/report.md) | 2026-10-23 | review | 1H |
 | contributor-review | [Yusuf contribution review · 2026-10-23](2026-10-23-contributor-review/report.md) | 2026-10-23 | review | none |
-| audit-7 | [Audit 7 — app visual flow](2026-10-25-app-visual-flow/report.md) | 2026-10-25 | audit | 3AH |
+| audit-7 | [Audit 7 — app visual flow](2026-10-25-app-visual-flow/report.md) | 2026-10-25 | audit | none |
 | audit-8 | [Audit 8: backbone engine gaps and loose ends](2026-10-26-engine-audit/report.md) | 2026-10-26 | audit | 2J, 2Z, 7R, 7S |
 | dendera-theme | [Dendera theme: the workflow, and how it compares with the theme flow](2026-10-26-dendera-theme/report.md) | 2026-10-26 | research | none |
 | pairing-hardening | [Pairing backend hardening and security review](2026-10-26-pairing-hardening/report.md) | 2026-10-26 | review | 4A |
