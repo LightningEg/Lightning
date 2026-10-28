@@ -9,12 +9,12 @@
   {% if request.state.secure_profiles|default(false) %}<meta name="lightning-session" content="{{ request.state.session_token|default('') }}">{% endif %}
   <title>{% block title %}Lightning{% endblock %} · Lightning</title>
   <link rel="icon" type="image/svg+xml" href="/static/lightning-mark.svg">
-  <link rel="stylesheet" href="/static/fonts/fonts.css?v=2">
+  <link rel="stylesheet" href="{{ asset('fonts/fonts.css') }}">
   {# one cached file: web.PHONE_CSS lists its parts in cascade order (style, phone, themes, theme-surfaces, theme-materials, visual-flow) #}
   <link rel="stylesheet" href="{{ phone_css_src }}">
 {% if arabic_ui_src %}<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ arabic_ui_src }}"></script>{% endif %}
 <script nonce="{{ request.state.csp_nonce|default('') }}">window.LIGHTNING_UI=window.LIGHTNING_UI||{{ arabic_translations|default({})|tojson }};</script>
-<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/lightning-t.js?v=1"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ asset('lightning-t.js') }}"></script>
 </head>
 {% set here = sections_for(request) %}{% set back = back_url(request) %}
 <body data-base-currency="{{ base }}" class="phone-body">
@@ -68,11 +68,11 @@
   </div>
 </dialog>
 <div id="busy-toast" class="busy-toast" role="status" aria-live="polite" hidden{% if prices_running %} data-watch="/investments/prices/online/status" data-watch-label="Fetching month-end prices…"{% endif %}><span class="busy-square" aria-hidden="true"></span><span class="busy-text"></span><a class="busy-link" href="/investments/prices" hidden>{{ 'Show'|tr(locale) }}</a></div>
-<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/arabic-numbers.js?v=6"></script>
-<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/info-tips.js?v=1"></script>
-<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/app.js?v=44"></script>
-<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/phone-fields.js?v=7"></script>
-<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/phone-gestures.js?v=3"></script>
-{% if request.state.secure_profiles|default(false) %}<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/session.js?v=4"></script>{% endif %}
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ asset('arabic-numbers.js') }}"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ asset('info-tips.js') }}"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ asset('app.js') }}"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ asset('phone-fields.js') }}"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ asset('phone-gestures.js') }}"></script>
+{% if request.state.secure_profiles|default(false) %}<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ asset('session.js') }}"></script>{% endif %}
 </body>
 </html>

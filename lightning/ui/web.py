@@ -426,6 +426,22 @@ def _render_page(request, name, status_code, c, total, owned_total, groups, cont
     return response
 
 
+@functools.lru_cache(maxsize=None)
+def _asset_hash(name: str) -> str:
+    return hashlib.sha256((UI_DIR / "static" / name).read_bytes()).hexdigest()[:12]
+
+
+def asset(name: str) -> str:
+    """A bundled static file's URL with its content hash, like the phone bundle: a changed file gets a new URL by
+    itself, so nobody bumps ?v= by hand and a cached old stylesheet never meets new theme code (BT-8U5)."""
+    if ".." in name or name.startswith("/"):
+        raise ValueError(f"Not a bundled static file: {name}")
+    return f"/static/{name}?v={_asset_hash(name)}"
+
+
+templates.env.globals["asset"] = asset
+
+
 # The browser half of the Arabic table, served once as a cached script instead of inside every Arabic page (3AC).
 _ARABIC_UI_JS = ("window.LIGHTNING_UI=" + json.dumps(BROWSER_UI, ensure_ascii=False, sort_keys=True) + ";").encode("utf-8")
 ARABIC_UI_SRC = "/static/ui-ar.js?v=" + hashlib.sha256(_ARABIC_UI_JS).hexdigest()[:12]
