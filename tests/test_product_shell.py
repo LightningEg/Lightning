@@ -155,7 +155,7 @@ def test_general_settings_card_is_not_nested_in_workspace_grid(c):
     structure = _SettingsGeneralStructure()
     structure.feed(page.text)
     assert structure.general_card_in_workspace_grid is False
-    assert {"card", "data-panel"} <= structure.general_card_classes
+    assert {"card", "settings-list"} <= structure.general_card_classes
 
 
 def test_responsive_layout_css_contracts_for_budget_and_period_controls():
