@@ -37,7 +37,7 @@ Screenshots: [PC English](evidence/pc-en-theme-switching.png), [PC Arabic](evide
 [phone English](evidence/phone-en-theme-switching.png), [phone Arabic](evidence/phone-ar-theme-switching.png).
 
 Paid unlocking is intentionally unavailable until the owner supplies the store's public verification key
-and completes deployment/checkout acceptance in [8L](../../issues/8-website/8L-theme-materials-acceptance.md).
+and completes deployment/checkout acceptance in [8L](../../issues/10-looks-and-store/10C-theme-materials-acceptance.md) (now 10C).
 No production credentials, keys, migrations or payment records were changed during this review.
 
 ## Validation and limits
@@ -53,7 +53,7 @@ No production credentials, keys, migrations or payment records were changed duri
 - All main pages pass the 150 ms/400-query budget on the quiet final candidate: [measurements](evidence/page-performance-final.txt). The concurrent-test measurement was slow with unchanged query counts; no financial or caching behavior was changed to compensate.
 - Market release bundle generation succeeds; the available FX snapshot is dated 2026-10-11. The generated ZIP is not committed.
 - Native WebView2/Android builds, signed packages, low-end-phone visual/motion and accessibility acceptance are pending.
-  Browser screenshots do not replace [8J](../../issues/8-website/8J-cosmetic-parts-and-claiming.md) acceptance.
+  Browser screenshots do not replace [8J](../../issues/10-looks-and-store/10A-cosmetic-parts-and-claiming.md) (now 10A) acceptance.
 - Public tag publication requires owner approval under [release-check](../../skills/release-check/SKILL.md).
 
 ## Dated follow-ups

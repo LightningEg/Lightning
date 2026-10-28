@@ -20,15 +20,15 @@
 
 - **3AH visual flow review:** implementation and browser evidence ready for owner review; native Windows/Android and assistive-technology acceptance remain. **Read:** `reports/2026-10-25-app-visual-flow/report.md`.
 
-- **Store and community (2026-10-27):** 8L unlock once, 8M–8S merged in both repos; the website migrations (up to 20261027210000) are run and checked live and `redeem-purchase` is redeployed; the app release that carries 8L ships the unlock. Next: 8T (Papyrus and Dendera sets need a banner, frame and name designed). **Read:** `reports/2026-10-27-store-and-community/report.md`.
+- **Store and community (2026-10-27):** 10C unlock once, 8M–8S merged in both repos; the website migrations (up to 20261027210000) are run and checked live and `redeem-purchase` is redeployed; the app release that carries 10C ships the unlock. Next: 10D (Papyrus and Dendera sets need a banner, frame and name designed). **Read:** `reports/2026-10-27-store-and-community/report.md`.
 
-- **8J/8L app themes:** ready to sell, Dendera included; the owner deploys, opens checkout, provisions the store key and turns on each app release. New themes: `guideline/themes.md` §5. **Read:** `issues/8-website/8L-theme-materials-acceptance.md`.
+- **10A/10C app themes:** ready to sell, Dendera included; the owner deploys, opens checkout, provisions the store key and turns on each app release. New themes: `guideline/themes.md` §5. **Read:** `issues/10-looks-and-store/10C-theme-materials-acceptance.md-theme-materials-acceptance.md`.
 
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 
 1. **v1.5.0 is public; dependency PR #122 remains blocked.** CSV contribution #117 and the reviewed Actions/theme/engine PRs are merged. #122 still needs coordinated native wheels and lockfiles (1H). **Read:** `reports/2026-10-26-v150-release/report.md`.
 2. **Audit 8 follow-ups:** 2J on journal profiles, 2Z (bridge check), owner decisions 7R and 7S. **Read:** `reports/2026-10-26-engine-audit/report.md`.
-3. **9J–9L:** remain open from Audit 5. **Read:** `reports/2026-10-21-backend-streamlining/report.md`.
+3. **9J, 9K and 2AA:** remain open from Audit 5. **Read:** `reports/2026-10-21-backend-streamlining/report.md`.
 4. **1H:** coordinated Android, desktop and build-tool dependency locks remain; this follows deferred PR #103. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
 5. **2A/2B:** run the Windows reboot drill; power-loss evidence remains. **Read:** each item in `issues/INDEX.md`.
 6. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `reports/2026-10-26-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
@@ -37,5 +37,5 @@ The whole plan, by milestone and code, is `issues/INDEX.md`.
 9. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.
 10. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
 11. **Website:** 8F next (device captures ready; 3AB blocks Budget) and 8I owner checks. **Read:** 8F, 8I.
-12. **6B, 6D, 6E, 5I:** shares, gold, institution logos, and gam'eya/zakat follow-ups remain as their items describe. **Read:** each item in `issues/INDEX.md`.
+12. **6B, 6D, 3AI, 5I:** shares, gold, institution logos, and gam'eya/zakat follow-ups remain as their items describe. **Read:** each item in `issues/INDEX.md`.
 13. **3AD Phone overhaul:** amount-first quick add and transaction sheet; ask the owner about swipe-to-sort and a health score. **Read:** 3AD.

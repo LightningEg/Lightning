@@ -13,11 +13,11 @@ repo: app
 
 Audit 9 part E (`../../reports/2026-10-28-loose-ends-and-linking/report.md`) checked every item's front matter and every report.
 
-## 1K1 Owner decides the rule changes
+## 1K1 Owner decisions (2026-10-28)
 
-- E1: keep `type` for what an item is; add `needs: owner` for who must act (7M, 7R, 7S are bugs filed as `owner`).
-- E5: move app theme items 8J/8K/8L/8T out of Website, and 9L (plaintext legacy database) into milestone 2.
-- E9: move reference reports such as users' main questions into `docs/`.
+- E1: keep owner-blocked bugs as owner tasks (OW); no `needs:` field.
+- E5: done - app theme items moved to milestone 10 Looks and store (8J→10A, 8K→10B, 8L→10C, 8T→10D), 9L→2AA, 6E→3AI.
+- E9: users' main questions stays in reports as Kind: reference.
 
 ## 1K2 Make the generator check it
 

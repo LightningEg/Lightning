@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-9 milestones, 77 open items, in the order they are worked on.
+10 milestones, 77 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -20,7 +20,7 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | tools | ready |
 | **IT-1J** | [Unused imports and variables keep coming back - ruff is not run in CI](1-easy-to-contribute/1J-ruff-in-ci.md) | improvement, technical | tools | ready |
 | **IT-1K** | [The plan's fields blur bugs with owner asks, areas overlap, and reports miss their header lines](1-easy-to-contribute/1K-tidy-how-the-plan-is-filed.md) | improvement, technical | docs | new |
-| IT-1K1 | ↳ Owner decides the rule changes | | | |
+| IT-1K1 | ↳ Owner decisions (2026-10-28) | | | |
 | IT-1K2 | ↳ Make the generator check it | | | |
 | IT-1K3 | ↳ Reports catalogue | | | |
 
@@ -45,8 +45,9 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | **BT-2J** | [On a journal profile, retrying one add form can still save a second expense](2-safe-for-real-money/2J-register-submit-idempotency.md) | bug, technical | transactions | ready |
 | **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical | android | new |
 | **IT-2Z** | [The net-worth bridge check cannot fail - its valuation change is whatever is left over](2-safe-for-real-money/2Z-net-worth-bridge-check-cannot-fail.md) ([#163](https://github.com/LightningEg/Lightning/issues/163)) | improvement, technical | reporting | ready |
+| **OW-2AA** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AA-stale-code.md) | owner task | architecture | ready |
 
-Done: 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y. Next free code: 2AA.
+Done: 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y. Next free code: 2AB.
 
 ## 3 Polish and Arabic
 
@@ -66,8 +67,9 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **BV-3U** | [Arabic leftovers - the budget move preview arrow, two overlaps and a wrapped number](3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) ([#161](https://github.com/LightningEg/Lightning/issues/161)) | bug, visual | arabic | ready |
 | **NF-3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | new feature | phone | new |
 | **OW-3AH** | [Visual flow acceptance on PC and phone](3-polish-and-arabic/3AH-visual-flow-acceptance.md) | owner task | product | ready |
+| **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/3AI-institution-logos.md) | owner task | accounts | ready |
 
-Done: 3A, 3C, 3D, 3E, 3L, 3M, 3N, 3O, 3P, 3R, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG. Next free code: 3AI.
+Done: 3A, 3C, 3D, 3E, 3L, 3M, 3N, 3O, 3P, 3R, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG. Next free code: 3AJ.
 
 ## 4 Edit journal and devices
 
@@ -120,9 +122,8 @@ Prices arrive by themselves, from sources Lightning may redistribute.
 | **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](6-market-data/6B-europe-and-gcc-shares.md) | new feature | market | blocked on a source that allows redistribution |
 | **BT-6C** | [Download shared prices brings nothing: only the exchange-rate pack is published, and not since 11 Oct](6-market-data/6C-shared-prices-not-published.md) | bug, technical | market | ready |
 | **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](6-market-data/6D-gold-price-source.md) | improvement, technical | market | blocked on a test from a home connection |
-| **OW-6E** | [Additional broker and institution logos still needed](6-market-data/6E-institution-logos.md) | owner task | accounts | ready |
 
-Done: nothing yet. Next free code: 6F.
+Done: nothing yet. Next free code: 6E.
 
 ## 7 Planning, import and search
 
@@ -168,10 +169,6 @@ The site is honest, quick and in step with the app.
 | **OW-8D** | [For Geeks audit ideas left for the owner to choose](8-website/8D-for-geeks-audit-ideas-to-choose.md) | owner task | website | ready |
 | **IV-8F** | [Home and Features show the app, not only words](8-website/8F-home-and-features-show-the-app.md) | improvement, visual | website | ready |
 | **OW-8I** | [Guides redesign, two checks only the owner can do](8-website/8I-guides-owner-checks.md) | owner task | website | ready |
-| **NF-8J** | [Cosmetic parts, account-wide claiming and native acceptance](8-website/8J-cosmetic-parts-and-claiming.md) | new feature | appearance | building |
-| **NF-8K** | [Supporter perks still waiting on the app or the owner - app themes for sale, names on About, a beta channel](8-website/8K-supporter-perks-app-and-owner.md) | new feature | appearance | blocked on 8J claiming; owner decision on the beta channel |
-| **NF-8L** | [Theme materials, selling themes, owner console - what only the owner can do now](8-website/8L-theme-materials-acceptance.md) | new feature | appearance | building |
-| **NF-8T** | [Papyrus and Dendera bundles need a banner, frame and name designed first](8-website/8T-papyrus-and-dendera-bundles.md) | new feature | appearance | ready |
 
 Done: 8B, 8E, 8G, 8H, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V. Next free code: 8W.
 
@@ -189,6 +186,18 @@ Good ideas that wait until the milestones above are done.
 | **IT-9F** | [Page speed: a stable origin and cache, and a CSS trim](9-later/9F-page-speed-origin-and-css.md) | improvement, technical | performance | new |
 | **IT-9J** | [Routes still compute figures, some that no screen shows](9-later/9J-routes-compute-figures.md) | improvement, technical | ui | ready |
 | **IT-9K** | [Structure left - a 746-line profile_app, budgeting calls planning through bootstrap, three balance-floor checks](9-later/9K-layers-and-copies.md) | improvement, technical | architecture | ready |
-| **OW-9L** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](9-later/9L-stale-code.md) | owner task | architecture | ready |
 
-Done: 9G, 9H, 9I. Next free code: 9M.
+Done: 9G, 9H, 9I. Next free code: 9L.
+
+## 10 Looks and store
+
+App themes and looks are bought once, worn on every device of a profile, and never change a number.
+
+| Code | Item | Kind | Area | Status |
+|---|---|---|---|---|
+| **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](10-looks-and-store/10A-cosmetic-parts-and-claiming.md) | new feature | appearance | building |
+| **NF-10B** | [Supporter perks still waiting on the app or the owner - app themes for sale, names on About, a beta channel](10-looks-and-store/10B-supporter-perks-app-and-owner.md) | new feature | appearance | blocked on 10A claiming; owner decision on the beta channel |
+| **NF-10C** | [Theme materials, selling themes, owner console - what only the owner can do now](10-looks-and-store/10C-theme-materials-acceptance.md) | new feature | appearance | building |
+| **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](10-looks-and-store/10D-papyrus-and-dendera-bundles.md) | new feature | appearance | ready |
+
+Done: nothing yet. Next free code: 10E.

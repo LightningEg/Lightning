@@ -1,4 +1,5 @@
 ---
+was: 6E
 title: Additional broker and institution logos still needed
 type: owner
 area: accounts

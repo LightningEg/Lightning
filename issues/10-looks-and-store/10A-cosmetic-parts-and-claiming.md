@@ -1,4 +1,5 @@
 ---
+was: 8J
 title: Cosmetic parts, account-wide claiming and native acceptance
 type: feature
 area: appearance

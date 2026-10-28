@@ -1,4 +1,5 @@
 ---
+was: 8T
 title: Papyrus and Dendera bundles need a banner, frame and name designed first
 type: feature
 area: appearance

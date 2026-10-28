@@ -1,4 +1,4 @@
-"""Make the Lightning store's Ed25519 signing key (8L step 3). Run once, on the owner's own computer.
+"""Make the Lightning store's Ed25519 signing key (10C step 3). Run once, on the owner's own computer.
 
 Writes the PRIVATE JWK to the file you name (never printed, never in Git) and prints the PUBLIC half.
   1. Back the private file up offline, then set the Supabase secrets:

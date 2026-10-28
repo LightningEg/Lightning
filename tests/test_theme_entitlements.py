@@ -1,4 +1,4 @@
-"""Paid themes (8L): worn only with a verified licence, tried by anyone, unlocked with the website's one-time code.
+"""Paid themes (10C): worn only with a verified licence, tried by anyone, unlocked with the website's one-time code.
 
 A real Ed25519 key stands in for the store's; the store endpoint is a fake opener. No network, no real keys.
 """
