@@ -3662,7 +3662,7 @@ a.period-button { display:inline-flex; align-items:center; justify-content:cente
 .main .holdings-wide tr[data-search] td:first-child { min-width:190px; }
 
 /* Data tools keep a readable measure on large screens and wrap on phones. */
-.data-settings { width:100%; max-width:960px; margin-inline:auto; min-width:0; }
+.data-settings { width:100%; max-width:960px; min-width:0; }  /* starts where the Appearance card above it starts */
 .ai-export-actions { align-items:center; flex-wrap:wrap; }
 .ai-export-actions form { margin:0; }
 .ai-prompt-dialog { width:min(760px,calc(100vw - 32px)); max-width:calc(100vw - 32px); }
@@ -3677,8 +3677,8 @@ a.period-button { display:inline-flex; align-items:center; justify-content:cente
 /* PC analysis and big actions (2026-10-28): answer first, then the drill-down beside it. */
 .answer-strip { display: flex; flex-wrap: wrap; align-items: end; gap: 16px 32px; }
 .answer-main { display: grid; gap: 4px; }
-.answer-label { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
-.answer-figure { font-size: 32px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.answer-label { font-size: 13px; font-weight: 600; color: var(--muted); }  /* sentence case: no capitals (A16) */
+.answer-figure { font-size: 38px; line-height: 1.1; font-variant-numeric: tabular-nums; justify-self: start; text-align: start; }
 .answer-delta { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .answer-delta.is-up, td.is-up { color: var(--neg); }
 .answer-delta.is-down, td.is-down { color: var(--pos); }

@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Compare periods'|tr(locale) }}{% endblock %}
-{% block heading %}<div class="birdview-title"><div><h1>{{ 'Compare periods'|tr(locale) }}</h1><div class="muted small">{{ 'Where did my money go, against another time?'|tr(locale) }}</div></div></div>{% endblock %}
+{% block heading %}<div class="birdview-title"><div><h1>{{ 'Compare periods'|tr(locale) }}</h1><p class="page-status">{{ status|tr(locale) }}</p><p class="page-dates"><b dir="ltr">{{ fmt_date(a[0]) }} to {{ fmt_date(a[1]) }}</b></p></div></div>{% endblock %}
 {% block content %}
 <section class="card answer-strip" aria-label="{{ 'Answer'|tr(locale) }}">
-  <div class="answer-main"><span class="answer-label">{{ 'Money out' |tr(locale) }} · {{ fmt_date(a[0]) }} – {{ fmt_date(a[1]) }}</span>
-    <b class="answer-figure num">{{ total_a|money }} {{ base }}</b>
-    <span class="answer-delta {{ 'is-up' if total_diff > 0 else ('is-down' if total_diff < 0 else '') }}">{{ total_diff|money(signed=true) }} {{ 'against'|tr(locale) }} {{ fmt_date(b[0]) }} – {{ fmt_date(b[1]) }}</span></div>
+  <div class="answer-main"><span class="answer-label">{{ 'Money out'|tr(locale) }}</span>
+    <b class="answer-figure num">{{ total_a|whole }} {{ base }}</b>
+    <span class="answer-delta {{ 'is-up' if total_diff > 0 else ('is-down' if total_diff < 0 else '') }}">{{ total_diff|money(signed=true) }} {{ 'against'|tr(locale) }} {{ fmt_date(b[0]) }} {{ 'to'|tr(locale) }} {{ fmt_date(b[1]) }}</span></div>
 </section>
 
 <form class="card compare-picker" method="get" action="/spending/compare">

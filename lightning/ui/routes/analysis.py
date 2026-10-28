@@ -16,7 +16,7 @@ from fastapi import APIRouter, HTTPException, Request, Response
 
 from lightning.core.dates import fmt_date, parse_date, today
 from lightning.core.errors import LightningError
-from lightning.core.money import ZERO
+from lightning.core.money import ZERO, fmt
 
 from ..web import container, render
 
@@ -90,7 +90,7 @@ def compare(c, a: tuple[date, date], b: tuple[date, date], by: str = "category")
         cat = c.categories.get(row["category_id"])
         code = ".".join(cat.code.split(".")[:3])
         top = c.categories.get_by_code(code) or cat
-        return top.code, c.categories.display_name(top.id), top.id
+        return top.code, top.name, top.id  # its own name: never "L1 › L2" (A16)
 
     rows: dict[str, dict] = {}
     for which, (start, end) in (("a", a), ("b", b)):
@@ -174,8 +174,12 @@ async def compare_page(request: Request):
                     ("item", f"{fmt_date(a[0])} to {fmt_date(a[1])}", f"{fmt_date(b[0])} to {fmt_date(b[1])}", "difference"),
                     [(r["name"], str(r["a"]), str(r["b"]), str(r["diff"])) for r in rows])
     keep = {"a_from": fmt_date(a[0]), "a_to": fmt_date(a[1]), "b_from": fmt_date(b[0]), "b_to": fmt_date(b[1]), "by": by}
-    return render(request, "analysis/compare.html", rows=rows, kind=kind, by=by, a=a, b=b,
-                  total_a=total_a, total_b=total_b, total_diff=total_a - total_b,
+    diff, against = total_a - total_b, {"sa": fmt_date(b[0]), "sb": fmt_date(b[1])}
+    # the page's answer in words, under its title (A05)
+    status = (f"Money out is the same as {against['sa']} to {against['sb']}." if diff == ZERO else
+              f"Money out is {fmt(abs(diff), 0)} {'lower' if diff < 0 else 'higher'} than {against['sa']} to {against['sb']}.")
+    return render(request, "analysis/compare.html", rows=rows, kind=kind, by=by, a=a, b=b, status=status,
+                  total_a=total_a, total_b=total_b, total_diff=diff,
                   keep_qs=urlencode(keep), base=c.base_currency, fmt_date=fmt_date)
 
 

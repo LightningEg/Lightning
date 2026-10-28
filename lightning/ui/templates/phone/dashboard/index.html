@@ -19,7 +19,7 @@
 {{ hero(fig[lead].label, pos.net_worth if owes else pos.what_you_own, note="As of {date}"|tr(locale, date=position_as_of)) }}
 {% endif %}
 {% if phone and phone.soon %}{% set soon = phone.soon %}<a class="card phone-card phone-soon{{ ' is-late' if soon.late }}" href="/more#bills-heading">
-  <span>{{ ('1 payment due in 48 hours' if soon.count == 1 else '{n} payments due in 48 hours')|tr(locale, n=soon.count) }}</span><b>{{ soon.total|amount_role('total') }}</b></a>{% endif %}
+  <span>{{ ('1 payment due today or tomorrow' if soon.count == 1 else '{n} payments due today or tomorrow')|tr(locale, n=soon.count) }}</span><b>{{ soon.total|amount_role('total') }}</b></a>{% endif %}
 {% if pos.unvalued %}<p class="notice">{{ pos.unvalued|length }} asset valuation(s) are missing from this total.</p>{% endif %}
 {% from "partials/macros.html" import period_control with context %}{{ period_control("/", period.key, month, this_month, request.query_params.get("date_from", "") if period_error and period.key == "custom" else period.start_text, request.query_params.get("date_to", "") if period_error and period.key == "custom" else period.end_text) }}
 {% if attention %}

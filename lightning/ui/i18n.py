@@ -1896,8 +1896,8 @@ ARABIC_UI = {
     'Paste a bank message first.': 'انسخ رسالة البنك الأول.',
     'Filled from the message. Check and save.': 'اتملت من الرسالة. راجع واحفظ.',
     'Mark paid': 'اتدفع',
-    '1 payment due in 48 hours': 'دفعة مستحقة خلال 48 ساعة',
-    '{n} payments due in 48 hours': '{n} دفعات مستحقة خلال 48 ساعة',
+    '1 payment due today or tomorrow': 'دفعة مستحقة النهارده أو بكره',
+    '{n} payments due today or tomorrow': '{n} دفعات مستحقة النهارده أو بكره',
     '{n} more': 'و{n} كمان',
     '1 day late': 'متأخر يوم',
     'All bills': 'كل الفواتير',
@@ -2732,6 +2732,9 @@ ARABIC_UI = {
     'Only by cutting your plan: it takes {amt} from budget, bills or goals until {date}.': 'بس لو قللت خطتك: هياخد {amt} من الميزانية أو الفواتير أو الأهداف لحد {date}.',
     'Only by cutting your plan: it takes {amt} from budget, bills or goals.': 'بس لو قللت خطتك: هياخد {amt} من الميزانية أو الفواتير أو الأهداف.',
     'No. You are {amt} short of free cash.': 'لأ. ناقصك {amt} من النقد الحر.',
+    'Money out is {amt} lower than {sa} to {sb}.': 'الفلوس اللي خرجت أقل بـ {amt} من {sa} إلى {sb}.',
+    'Money out is {amt} higher than {sa} to {sb}.': 'الفلوس اللي خرجت أكتر بـ {amt} من {sa} إلى {sb}.',
+    'Money out is the same as {sa} to {sb}.': 'الفلوس اللي خرجت زي {sa} إلى {sb}.',
 }
 
 
