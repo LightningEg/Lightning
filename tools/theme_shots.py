@@ -42,7 +42,12 @@ def browser(p):
 def wear(page, theme):
     # The profile meta wins over storage; set it the way Settings does, then reload so it paints before content.
     page.evaluate("id => window.LightningTheme.set(id)", theme)
-    page.wait_for_timeout(250)
+    for _ in range(20):  # the save is a request: wait until a fresh page paints the theme, or every shot shows the last one
+        page.wait_for_timeout(250)
+        page.reload()
+        if page.evaluate("document.documentElement.dataset.theme") == theme:
+            return
+    raise SystemExit(f"{theme} did not take")
 
 
 def arabic(page, origin):

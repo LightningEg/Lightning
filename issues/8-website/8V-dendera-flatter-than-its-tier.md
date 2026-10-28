@@ -1,24 +1,13 @@
 ---
-title: Dendera sells at 1,000 like Papyrus but is flat - no answering motions, flat cards, menus, tabs and dialogs
-type: polish
+title: Dendera night could draw the temple's star ceiling - a new artwork recipe
+type: feature
 area: appearance
 status: new
 created: 2026-10-28
 by: Claude
-commit: dae3aa3
 repo: both
 ---
 
 ## Report
 
-The animated tier promises "motions that answer you: a light following the pointer on cards, a sheen on buttons, dialogs rising in" (`guideline/themes.md` §7). Comparing `lightning/ui/static/cosmetics/dendera.json` with `papyrus.json`, Dendera has `cards.hover: none`, `controls.press: none`, `hero.sheen: none`, and `flat` cards, menus, overlays, tabs, navigation and progress at `low` depth, where Papyrus uses satin, foil, lacquer and gloss. Its pigment thread is its one continuous motion, so the gap is in the answering motions and materials, not in adding a second loop.
-
-## Fix
-
-Take it through `guideline/themes.md` §5-6 as a new plan revision in `theme-kit/plans/dendera.html`, using recipes the library already draws:
-- Answering motions: `cards.hover: light`, `controls.press: sheen`; dialogs rising in.
-- Materials: gold-leaf `foil` on tabs and the cartouche, `satin` cards and menus, `lacquer` dialogs, `gloss` progress, `mid` depth, a `soft` vignette.
-- Night mode: the Dendera ceiling - the zodiac ring as a star field, gold on lapis.
-- Pair with NF-8T (its banner, frame and name) so the set sells as one.
-
-Do it before any Dendera licence is issued: the version bump locks out buyers until BT-8U1 is fixed. Check contrast at each surface's worst point and `tools/theme_check.py` (no element moves).
+The premium revision (2026-10-28, `reports/2026-10-26-dendera-theme/report.md` › Dated follow-ups) gave Dendera its tier's answering motions and materials from the existing library. Left: night mode could draw the Dendera ceiling, the zodiac as a gold star field on lapis. That needs a new `ground.artwork` recipe (`guideline/themes.md` §5 step 4: SVG in `cosmetics/assets/dendera/`, its name in `slots.json`, a test), and pairs with NF-8T (banner, frame and name) so the set sells as one.

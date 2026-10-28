@@ -178,7 +178,7 @@ The site is honest, quick and in step with the app.
 | BT-8U5 | ↳ One cache rule | | | |
 | BT-8U6 | ↳ One marketplace link | | | |
 | BT-8U7 | ↳ Tier in the manifest | | | |
-| **IV-8V** | [Dendera sells at 1,000 like Papyrus but is flat - no answering motions, flat cards, menus, tabs and dialogs](8-website/8V-dendera-flatter-than-its-tier.md) | improvement, visual | appearance | new |
+| **NF-8V** | [Dendera night could draw the temple's star ceiling - a new artwork recipe](8-website/8V-dendera-flatter-than-its-tier.md) | new feature | appearance | new |
 
 Done: 8B, 8E, 8G, 8H, 8M, 8N, 8O, 8P, 8Q, 8R, 8S. Next free code: 8W.
 

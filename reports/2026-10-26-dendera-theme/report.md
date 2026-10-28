@@ -63,4 +63,4 @@ All captures use Mohab's sample year (PC) or the phone's dummy data. `pc-default
 
 ## Dated follow-ups
 
-None yet.
+- 2026-10-28, premium revision (owner asked; IV-8V, branch `claude/dendera-premium`): Dendera takes its tier's answering motions (pointer light on cards, press sheen) and satin, lacquer and gloss finishes, gold-leaf tabs at night. Foil on the lapis buttons and lacquer on the night lead card failed 4.5:1 and stay satin. `tools/theme_check.py`: 0 elements moved, 0 frames over 34 ms on Overview. Evidence: `evidence/premium-pc-day-before-after.jpg`, `evidence/premium-pc-night-before-after.jpg`. `tools/theme_shots.py` now waits for each theme to take: before, each folder showed the theme set before it.
