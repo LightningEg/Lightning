@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 74 open items, in the order they are worked on.
+10 milestones, 66 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -13,13 +13,11 @@ Anyone can find how to help in one click and send a first fix the same evening.
 
 | Code | Item | Kind | Area | Status |
 |---|---|---|---|---|
-| **OW-1B** | [Run the one-time security setup on your own computer](1-easy-to-contribute/1B-owner-runs-security-setup.md) | owner task | tools | ready |
-| **OW-1C** | [One harmless trial contribution from the website to a merged pull request](1-easy-to-contribute/1C-trial-contribution.md) | owner task | github | blocked on 1B |
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/1E-public-repository-security-audit.md) | improvement, technical | tools | ready |
 | **IT-1G** | [Cover all backend modules with explicit dependency and wiring contracts](1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | improvement, technical | tools | ready |
 | **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | tools | ready |
 
-Done: 1A, 1D, 1F, 1I, 1J, 1K. Next free code: 1L.
+Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K. Next free code: 1L.
 
 ## 2 Safe for real money
 
@@ -28,7 +26,6 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | Code | Item | Kind | Area | Status |
 |---|---|---|---|---|
 | **IT-2A** | [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic repair](2-safe-for-real-money/2A-restore-safety.md) | improvement, technical | restore | building |
-| **IT-2B** | [Promotion durability: code and fault tests pass; the ordinary Windows reboot drill remains](2-safe-for-real-money/2B-promotion-durability.md) | improvement, technical | restore | building |
 | **IT-2C** | [Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidence repair](2-safe-for-real-money/2C-ordinary-pc-acceptance.md) | improvement, technical | desktop | ready |
 | IT-2C1 | ↳ Ordinary-PC recovery and fault acceptance | | | |
 | IT-2C2 | ↳ Legacy import | | | |
@@ -42,7 +39,7 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | **IT-2Z** | [The net-worth bridge check cannot fail - its valuation change is whatever is left over](2-safe-for-real-money/2Z-net-worth-bridge-check-cannot-fail.md) ([#163](https://github.com/LightningEg/Lightning/issues/163)) | improvement, technical | reporting | ready |
 | **OW-2AA** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AA-stale-code.md) | owner task | architecture | ready |
 
-Done: 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y. Next free code: 2AB.
+Done: 2B, 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y. Next free code: 2AB.
 
 ## 3 Polish and Arabic
 
@@ -54,17 +51,14 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **IV-3F** | [The phone's top bar looks too white to one user](3-polish-and-arabic/3F-phone-top-bar-looks-too-white.md) | improvement, visual | phone | ready |
 | **IV-3G** | [Outside review of every tab - one organism, fewer numbers, smarter links, less explaining](3-polish-and-arabic/3G-one-organism-review-of-every-tab.md) | improvement, visual | product | ready |
 | **IV-3H** | [Tab-by-tab review: what a real user needs next](3-polish-and-arabic/3H-tab-by-tab-review.md) | improvement, visual | product | building |
-| **OW-3I** | [Check on your PC and phone: the new first run and the import review](3-polish-and-arabic/3I-owner-check-first-run-and-import.md) | owner task | product | ready |
 | **IT-3J** | [Version 1.1 is shipped: move what holds of its review into Architecture, then delete this file](3-polish-and-arabic/3J-fold-v1-1-review-into-architecture.md) | improvement, technical | docs | ready |
 | **IV-3Q** | [Visual audit - every KPI card should answer, compare and point; one card system for PC and phone](3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md) | improvement, visual | product | ready |
 | **IV-3S** | [PC screens break the guideline in 18 places not yet filed - misleading charts, colours off meaning](3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) | improvement, visual | product | ready |
 | **IV-3T** | [Phone screens break Part C - cut words, overlapping text, no way back on five pages, small targets, five Settings tabs](3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | improvement, visual | phone | ready |
-| **BV-3U** | [Arabic leftovers - the budget move preview arrow, two overlaps and a wrapped number](3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) ([#161](https://github.com/LightningEg/Lightning/issues/161)) | bug, visual · low | arabic | ready |
 | **NF-3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | new feature | phone | new |
-| **OW-3AH** | [Visual flow acceptance on PC and phone](3-polish-and-arabic/3AH-visual-flow-acceptance.md) | owner task | product | ready |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/3AI-institution-logos.md) | owner task | accounts | ready |
 
-Done: 3A, 3C, 3D, 3E, 3L, 3M, 3N, 3O, 3P, 3R, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG. Next free code: 3AJ.
+Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH. Next free code: 3AJ.
 
 ## 4 Edit journal and devices
 
@@ -147,12 +141,10 @@ The site is honest, quick and in step with the app.
 | Code | Item | Kind | Area | Status |
 |---|---|---|---|---|
 | **IT-8A** | [Feedback form: submit scrolls to the page end, images take 10 s, and the survey forms accept formula injection and spam](8-website/8A-feedback-form-send-and-spam-guard.md) | improvement, technical | website | ready |
-| **OW-8C** | [Be found as the all-in-one net worth, budget and expense tracker](8-website/8C-be-found-as-the-all-in-one-tracker.md) | owner task | website | ready |
 | **OW-8D** | [For Geeks audit ideas left for the owner to choose](8-website/8D-for-geeks-audit-ideas-to-choose.md) | owner task | website | ready |
 | **IV-8F** | [Home and Features show the app, not only words](8-website/8F-home-and-features-show-the-app.md) | improvement, visual | website | ready |
-| **OW-8I** | [Guides redesign, two checks only the owner can do](8-website/8I-guides-owner-checks.md) | owner task | website | ready |
 
-Done: 8B, 8E, 8G, 8H, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V. Next free code: 8W.
+Done: 8B, 8C, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W. Next free code: 8X.
 
 ## 9 Later
 
