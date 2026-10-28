@@ -17,11 +17,13 @@
 
 ## Next
 
-- **3AH visual flow review:** implementation and browser evidence ready for owner review; native Windows/Android and assistive-technology acceptance remain. **Read:** `reports/2026-10-25-app-visual-flow/report.md`.
+- **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
 - **Store and community (2026-10-27):** 8L unlock once, 8M–8S merged in both repos; the website migrations (up to 20261027210000) are run and checked live and `redeem-purchase` is redeployed; the app release that carries 8L ships the unlock. Next: 8T (Papyrus and Dendera sets need a banner, frame and name designed). **Read:** `reports/2026-10-27-store-and-community/report.md`.
 
 - **8J/8L app themes:** ready to sell, Dendera included; the owner deploys, opens checkout, provisions the store key and turns on each app release. New themes: `guideline/themes.md` §5. **Read:** `issues/8-website/8L-theme-materials-acceptance.md`.
+
+- **Website (2026-10-28):** store analytics (site PR #126, migration applied live), Downloads platform-first (site #127); leaderboard banners next. **Read:** site README › Analytics.
 
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 
@@ -29,12 +31,11 @@ The whole plan, by milestone and code, is `issues/INDEX.md`.
 2. **Audit 8 follow-ups:** 2J on journal profiles, 2Z (bridge check), owner decisions 7R and 7S. **Read:** `reports/2026-10-26-engine-audit/report.md`.
 3. **9J–9L:** remain open from Audit 5. **Read:** `reports/2026-10-21-backend-streamlining/report.md`.
 4. **1H:** coordinated Android, desktop and build-tool dependency locks remain; this follows deferred PR #103. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
-5. **2A/2B:** run the Windows reboot drill; power-loss evidence remains. **Read:** each item in `issues/INDEX.md`.
+5. **2A:** restore safety code (Luna's claim); its reboot drill joins the held checks. **Read:** 2A.
 6. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `reports/2026-10-26-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
-7. **3I owner check:** first run and import review on PC and phone. **Read:** `issues/3-polish-and-arabic/3I-owner-check-first-run-and-import.md`.
-8. **Website recapture** after 3W / 3AG / 7Q so the site shows the current screens. **Read:** `skills/site-recapture/SKILL.md`; Changelog 2026-10-21.
-9. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.
-10. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
-11. **Website:** 8F next (device captures ready; 3AB blocks Budget) and 8I owner checks. **Read:** 8F, 8I.
-12. **6B, 6D, 6E, 5I:** shares, gold, institution logos, and gam'eya/zakat follow-ups remain as their items describe. **Read:** each item in `issues/INDEX.md`.
-13. **3AD Phone overhaul:** amount-first quick add and transaction sheet; ask the owner about swipe-to-sort and a health score. **Read:** 3AD.
+7. **Website recapture** after 3W / 3AG / 7Q so the site shows the current screens. **Read:** `skills/site-recapture/SKILL.md`; Changelog 2026-10-21.
+8. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.
+9. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
+10. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
+11. **6B, 6D, 6E, 5I:** shares, gold, institution logos, and gam'eya/zakat follow-ups remain as their items describe. **Read:** each item in `issues/INDEX.md`.
+12. **3AD Phone overhaul:** amount-first quick add and transaction sheet; ask the owner about swipe-to-sort and a health score. **Read:** 3AD.

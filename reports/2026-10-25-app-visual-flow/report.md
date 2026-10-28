@@ -54,4 +54,4 @@ Focused tests: phone frame/budget/investments, planning, Mohab, review decisions
 - The website's app screenshots need recapture after approval/merge, not replacement with mockups.
 - Full-suite packaging test `test_the_docs_only_skip_compares_with_the_last_successful_windows_build` remains unverified in this tarball/no-Git sandbox; its fixture attempts Git staging. No packaging source or assertion was weakened. Final affected/doc/issue/Mohab rerun passed with one existing skip.
 
-Owner review is tracked in [3AH](../../issues/3-polish-and-arabic/3AH-visual-flow-acceptance.md).
+Owner review is tracked in [3AH](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/3-polish-and-arabic/3AH-visual-flow-acceptance.md) (held: Overview §9).
