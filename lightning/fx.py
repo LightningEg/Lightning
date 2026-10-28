@@ -80,7 +80,8 @@ class Rate:
 @request_cached  # valuation asks for the same rate dozens of times per page; a write clears the memo
 def _stored(db: Database, base: str, quote: str, day: str,
             exclude: tuple[str, ...] = ()) -> tuple[Decimal, str, str] | None:
-    floor = (_date.fromisoformat(day) - timedelta(days=MISSING_DAYS)).isoformat()
+    on = _date.fromisoformat(day)
+    floor = (on - timedelta(days=min(MISSING_DAYS, on.toordinal() - 1))).isoformat()
     skip = f" AND source NOT IN ({','.join('?' for _ in exclude)})" if exclude else ""
     row = db.one(
         f"SELECT rate_e6,date,source FROM fx_rates WHERE base=? AND quote=? AND date<=? AND date>=?{skip} "
