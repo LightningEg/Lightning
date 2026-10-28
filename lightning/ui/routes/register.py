@@ -393,8 +393,6 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
             account_id, date_from, date_to, _int(qp.get("page")) or 1, page_size)
     else:  # a search, category or kind filter, or value updates folded: filter in Python; balances stay per row
         all_rows = c.reporting.register(account_id, date_from, date_to, matched_ids)
-        if matched_ids is not None:
-            matched_flows = c.reporting.money_in_out({row.txn_id for row in all_rows})
         if val_count and not show_val:
             all_rows = [row for row in all_rows if row.type != DocType.VAL]
         if kind == "unsorted":
@@ -402,8 +400,11 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         elif kind:
             all_rows = [row for row in all_rows if _row_kind(row) == kind]
         total_rows = len(all_rows)
+        if matched_ids is not None:  # the totals cover exactly the rows counted
+            matched_flows = c.reporting.money_in_out({row.txn_id for row in all_rows})
         if not phone and matched_ids is not None and page_size < total_rows <= 2000:
-            matching_ids = [row.txn_id for row in all_rows]
+            # a transfer shows once per account here; one id each, so "Select all N" counts transactions
+            matching_ids = list(dict.fromkeys(row.txn_id for row in all_rows))
         page_number = min(max(_int(qp.get("page")) or 1, 1), max(1, -(-total_rows // page_size)))
         rows = all_rows[(page_number - 1) * page_size:page_number * page_size]
     total_pages = max(1, -(-total_rows // page_size))
@@ -498,7 +499,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         reg=phone_register, chosen_kind=kind,
         q=q, month=month, preset=preset, active_view=active_view, show_val=show_val, val_count=val_count, val_toggle_url=val_toggle_url,
         saved_views=c.saved_views.list(account_id), view_account_id=account_id or "",
-        filter_category=filter_category, filter_tag=filter_tag, tag_flows=tag_flows, matched_flows=matched_flows, matching_ids=matching_ids,
+        filter_category=filter_category, filter_tag=filter_tag, tag_flows=tag_flows, matched_flows=matched_flows, matched_net=matched_flows[0] - matched_flows[1] if matched_flows else None, matching_ids=matching_ids,
         import_accounts=[] if account_id or phone else [a for a in c.accounts.list(active_only=True)
                                                           if a.account_type.value in ("CASH", "BANK") and not a.parent_id],
         date_from=from_query, date_to=to_query, base_url=base_url, keep_qs=urlencode(keep),
