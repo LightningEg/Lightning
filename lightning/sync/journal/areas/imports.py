@@ -9,6 +9,7 @@ import zlib
 
 from lightning.core.errors import ValidationError
 
+from ..codec import stable_json
 from .spec import BYTES, FLAG, JSON, TEXT, Command, optional, ref
 
 TABLES = ("bank_import_batches", "bank_import_rows", "bank_import_column_maps")
@@ -55,7 +56,7 @@ def _encode_packed_decisions(adapter, values):
     """Portable UUID decisions in a bounded compressed envelope."""
     converted = _convert(values["decisions"], lambda key: adapter.uid("bank_import_rows", int(key)),
                          lambda table, value, whole: adapter.uid(table, int(value)))
-    raw = json.dumps(converted, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode("utf-8")
+    raw = stable_json(converted)
     if len(raw) > CONFIRM_EXPANDED_LIMIT:
         raise ValidationError("This statement has too many details to synchronize. Split it into smaller files.")
     compressed = zlib.compress(raw, level=6)

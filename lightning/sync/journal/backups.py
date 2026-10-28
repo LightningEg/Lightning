@@ -5,7 +5,6 @@ restores an older home ledger or silently reinstalls an old origin incarnation.
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import shutil
@@ -15,7 +14,7 @@ from uuid import uuid4
 
 from lightning.database.connection import Database
 from lightning.database.snapshot import snapshot, verify_connection
-from .codec import JournalError, authenticate, canonical, cursor as validate_cursor, digest, fields, hash_value, number, seal, unpack
+from .codec import JournalError, authenticate, cursor as validate_cursor, digest, fields, hash_value, number, seal, stable_json, unpack
 from .snapshots import _hash, _stage
 
 _RECOVERED_MAP_DDL = ("CREATE TABLE journal_recovered_originals("
@@ -260,7 +259,7 @@ def restore_copy(source, wire, *, backup_key, target, new_device, new_incarnatio
         elif target.exists():
             raise JournalError("The restore target already exists; keep both copies for review")
         else:
-            payload = json.dumps(descriptor, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            payload = stable_json(descriptor, ensure_ascii=True, allow_nan=True)
             fd = os.open(descriptor_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
             with os.fdopen(fd, "wb") as handle:
                 handle.write(payload)
@@ -278,7 +277,7 @@ def restore_copy(source, wire, *, backup_key, target, new_device, new_incarnatio
             descriptor["status"] = "requires-enrollment"
             temporary = descriptor_path.with_name(descriptor_path.name + f".{uuid4().hex}.partial")
             with temporary.open("xb") as handle:
-                handle.write(json.dumps(descriptor, sort_keys=True, separators=(",", ":")).encode("utf-8"))
+                handle.write(stable_json(descriptor, ensure_ascii=True, allow_nan=True))
                 handle.flush()
                 os.fsync(handle.fileno())
             os.replace(temporary, descriptor_path)
@@ -312,7 +311,7 @@ def restore_copy(source, wire, *, backup_key, target, new_device, new_incarnatio
         descriptor["status"] = "requires-enrollment"
         temporary = descriptor_path.with_name(descriptor_path.name + f".{uuid4().hex}.partial")
         with temporary.open("xb") as handle:
-            handle.write(json.dumps(descriptor, sort_keys=True, separators=(",", ":")).encode("utf-8"))
+            handle.write(stable_json(descriptor, ensure_ascii=True, allow_nan=True))
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary, descriptor_path)

@@ -543,3 +543,12 @@ def borrowed_profile(profile_id: str, *, root: Path | None = None, documents_roo
     data_dir = base / "borrowed" / profile_id
     check_borrowed_location(data_dir, documents_root=documents_root)
     return BorrowedPaths(profile_id, data_dir)
+
+
+JOURNAL_MARKERS = ("journal-native.json", "complete.json")  # a converted home; a copy joined from a home
+
+
+def is_journal_profile(data_dir) -> bool:
+    """One answer to "does this profile folder sync through the edit journal?", read from its markers."""
+    folder = Path(data_dir)
+    return any((folder / name).exists() for name in JOURNAL_MARKERS)

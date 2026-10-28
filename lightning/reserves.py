@@ -243,8 +243,6 @@ class CashReserveService:
         ) or 0)
         if total_e6 <= 0:
             raise ValidationError("This transaction has no expense amount to assign.")
-        old = self.db.one("SELECT id,amount_e6 FROM reserve_transaction_links WHERE reserve_id=? AND transaction_id=?",
-                          (reserve_id, transaction_id))
         other_for_txn = int(self.db.scalar(
             "SELECT COALESCE(SUM(amount_e6),0) FROM reserve_transaction_links WHERE transaction_id=? "
             "AND NOT (reserve_id=? AND transaction_id=?)", (transaction_id, reserve_id, transaction_id),

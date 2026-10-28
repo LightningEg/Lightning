@@ -13,7 +13,7 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 from uuid import UUID, uuid5
 
-from .codec import JournalError, canonical, origin_id, unpack
+from .codec import JournalError, canonical, origin_id, stable_json, unpack
 from .effects import CHUNK_BYTES, MAX_CHUNKS
 
 _ACTIONS = {
@@ -282,8 +282,8 @@ class JournalAutomation:
                 packed_found[key][day] = format(amount, "f")
         payload = dict(plan=_plan_record(work), found=packed_found,
                        failed=[str(item)[:120] for item in failed])
-        encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-        raw = encoded.encode("utf-8")
+        raw = stable_json(payload, allow_nan=True)
+        encoded = raw.decode("utf-8")
         if len(raw) > CHUNK_BYTES * MAX_CHUNKS:
             raise JournalError("Live-price result exceeds the journal staging limit")
         job_key = f"live-prices:{work.on}"

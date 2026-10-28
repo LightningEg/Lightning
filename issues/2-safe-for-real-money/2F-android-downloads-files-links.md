@@ -1,6 +1,8 @@
 ---
 title: On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone
 type: bug
+look: technical
+severity: high
 area: android
 status: ready
 created: 2026-10-20

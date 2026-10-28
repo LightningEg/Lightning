@@ -14,7 +14,6 @@ import os
 import secrets
 import time
 import webbrowser
-from contextlib import contextmanager
 from pathlib import Path
 from urllib.parse import parse_qs
 from uuid import uuid4
@@ -24,6 +23,7 @@ from starlette.responses import PlainTextResponse, RedirectResponse
 
 from lightning.bootstrap import build
 from lightning.core.dates import today
+from lightning.runtime.http import QuietServer
 from lightning.runtime.instance import InstanceLock
 from lightning.runtime.session import read_slot, write_slot
 from lightning.security.keys import create_key_file, new_recovery_key, unwrap_key
@@ -152,11 +152,7 @@ def _header(scope, name):
     return next((value.decode("latin-1") for key, value in scope.get("headers", []) if key == name), "")
 
 
-class LabServer(uvicorn.Server):
-    @contextmanager
-    def capture_signals(self):
-        # asyncio.run owns Ctrl-C and cancels all three servers together.
-        yield
+LabServer = QuietServer  # the old name; the class lives in runtime.http so production never imports the lab
 
 
 async def serve(devices, transport_key, port, *, browser=True, mailbox_origin=None, internet_only=False, full_app=False):

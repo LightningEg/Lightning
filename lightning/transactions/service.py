@@ -305,7 +305,7 @@ class TransactionService:
                              amount=ln.amount, amount_base=ln.amount_base, owner_id=ln.owner_id,
                              is_cash=self.assets.get_asset(ln.asset_id).is_cash) for ln in current.lines]
         flags = [cleared.get(ln.id, 0) for ln in current.lines]
-        line, stored = lines[index], current.lines[index]
+        line = lines[index]
         total = abs(to_e6(line.quantity))
         take = min(abs(quantity_e6), total)
         if take == total:
@@ -763,7 +763,7 @@ class TransactionService:
 
     def update_conversion(self, txn_id: int, date: str, from_account_id: int, to_account_id: int, sent, received,
                           fee=None, description: str = "", notes: str = "") -> Transaction:
-        current = self._editable(txn_id, {DocType.CNV})
+        self._editable(txn_id, {DocType.CNV})
         day, lines = self._conversion_lines(date, from_account_id, to_account_id, sent, received, fee)
         with self.db.transaction():
             previous = self.get(txn_id)

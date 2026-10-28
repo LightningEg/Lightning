@@ -154,6 +154,32 @@ class ReportQueries:
                 " GROUP BY le.category_id, le.effect", tuple(chunk))]
         return rows
 
+    def account_category_totals_for(self, txn_ids: list[int]) -> list[dict]:
+        """category_totals_for split by account too: a tag's total across categories and accounts (7T4)."""
+        rows: list[dict] = []
+        for at in range(0, len(txn_ids), 500):
+            chunk = txn_ids[at:at + 500]
+            rows += [dict(r) for r in self.db.all(
+                f"SELECT le.account_id, le.category_id, le.effect, SUM(le.amount_base_e6) AS total"
+                f" FROM ledger_entries le {POSTED}"
+                f" WHERE le.transaction_id IN ({','.join('?' * len(chunk))}) AND le.category_id IS NOT NULL"
+                f" AND le.effect IN ('INFLOW','OUTFLOW')"
+                " AND COALESCE(le.category_id,0) NOT IN (SELECT id FROM categories WHERE code='EXP.SYSTEM.CUSTODY')"
+                " AND le.owner_id IS NULL"
+                " GROUP BY le.account_id, le.category_id, le.effect", tuple(chunk))]
+        return rows
+
+    def counterparty_month_totals(self, counterparty_id: int, date_from: str, date_to: str) -> list[dict]:
+        """The same totals as category_totals, for one counterparty's transactions, by month (7T2)."""
+        return [dict(r) for r in self.db.all(
+            f"SELECT substr(le.date,1,7) AS month, le.category_id, le.effect, SUM(le.amount_base_e6) AS total"
+            f" FROM ledger_entries le {POSTED}"
+            f" WHERE t.counterparty_id = ? AND le.date BETWEEN ? AND ? AND le.category_id IS NOT NULL"
+            f" AND le.effect IN ('INFLOW','OUTFLOW')"
+            " AND COALESCE(le.category_id,0) NOT IN (SELECT id FROM categories WHERE code='EXP.SYSTEM.CUSTODY')"
+            " AND le.owner_id IS NULL"
+            " GROUP BY month, le.category_id, le.effect", (counterparty_id, date_from, date_to))]
+
     def category_totals_of_account(self, account_id: int, date_from: str, date_to: str) -> list[dict]:
         """The same totals as category_totals, for one account's lines (the phone's account page)."""
         return [dict(r) for r in self.db.all(

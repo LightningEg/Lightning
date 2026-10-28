@@ -1,6 +1,6 @@
 ---
 title: Easy to contribute
-done: 1A, 1D, 1F, 1I, 1B, 1C
+done: 1A, 1D, 1F, 1I, 1B, 1C, 1J, 1K
 ---
 
 **Goal.** Anyone can find how to help in one click and send a first fix the same evening.

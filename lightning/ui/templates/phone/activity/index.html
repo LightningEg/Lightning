@@ -4,7 +4,7 @@
 {% block content %}
 <section class="card phone-card">
   {% if rows %}{% for row in rows %}{% set txn = row.txn %}
-  <a class="phone-row" href="/activity/{{ txn.id }}">
+  <a class="phone-row" href="/transactions/{{ txn.id }}">
     <span><b>{{ txn.counterparty or txn.description or txn.ref }}</b>
       <small>{{ txn.date }} · {{ row.account_names|join(', ') }}{% if row.category_names %} · {{ row.category_names|join(', ') }}{% endif %}</small>
       {% if row.planned_links or row.reserve_links or row.claim %}<small>{% if row.planned_links %}{{ 'Planned'|tr(locale) }}{% endif %}{% if row.reserve_links %} · {{ 'Reserve linked'|tr(locale) }}{% endif %}{% if row.claim %} · {{ 'Reimbursement claim'|tr(locale) }}{% endif %}</small>{% endif %}

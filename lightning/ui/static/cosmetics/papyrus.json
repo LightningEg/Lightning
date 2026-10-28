@@ -4,6 +4,7 @@
   "name": "Papyrus",
   "version": 1,
   "status": "paid",
+  "tier": "motion",
   "priceCoins": null,
   "bundleTargets": [
     "windows",

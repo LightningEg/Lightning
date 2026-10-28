@@ -4,6 +4,7 @@
   "name": "Cotton",
   "version": 1,
   "status": "paid",
+  "tier": "texture",
   "priceCoins": null,
   "bundleTargets": [
     "windows",

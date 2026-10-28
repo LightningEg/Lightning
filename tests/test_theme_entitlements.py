@@ -1,10 +1,11 @@
-"""Paid themes (8L): worn only with a verified licence, tried by anyone, unlocked with the website's one-time code.
+"""Paid themes (10C): worn only with a verified licence, tried by anyone, unlocked with the website's one-time code.
 
 A real Ed25519 key stands in for the store's; the store endpoint is a fake opener. No network, no real keys.
 """
 import base64
 import json
 from io import BytesIO
+from pathlib import Path
 from urllib.error import HTTPError
 
 import pytest
@@ -154,6 +155,10 @@ def test_every_seat_taken_says_what_to_do(store):
 def test_store_refusals_and_missing_keys_say_what_to_do(store, monkeypatch):
     with pytest.raises(entitlements.UnlockError, match="used or expired.*fresh one"):
         entitlements.redeem("abcd1234abcd1234abcd1234abcd1234", opener=answer(status=400))
+    with pytest.raises(entitlements.UnlockError, match="Too many tries"):
+        entitlements.redeem("abcd1234abcd1234abcd1234abcd1234", opener=answer(status=429))
+    with pytest.raises(entitlements.UnlockError, match="not answering"):
+        entitlements.redeem("abcd1234abcd1234abcd1234abcd1234", opener=answer(status=503))
     with pytest.raises(entitlements.UnlockError, match="whole code"):
         entitlements.redeem("abc", opener=answer())
     monkeypatch.setattr(entitlements, "store", lambda: {"keys": {}, "redeem_url": "https://store.example/redeem"})
@@ -200,7 +205,7 @@ def test_redeem_shares_the_licence_in_the_profile_settings(c, store, monkeypatch
     monkeypatch.setattr(entitlements, "_SETTINGS", lambda: c.settings)  # the real store, as ProfileSession hands it
     envelope = store([("papyrus", 1)])
     entitlements.redeem("abcd1234abcd1234abcd1234abcd1234", opener=answer(envelope))
-    assert json.loads(c.settings.get("store_licence.papyrus")) == envelope
+    assert json.loads(c.settings.get("store_licence.papyrus")) == envelope and entitlements.shared("papyrus")
 
 
 def test_another_device_of_the_profile_unlocks_from_the_synced_setting(c, store, monkeypatch, tmp_path):
@@ -226,7 +231,7 @@ def test_sharing_that_waits_for_the_home_does_not_fail_the_unlock(store, monkeyp
     from lightning.sync.journal.proxy import PendingOnHome
     monkeypatch.setattr(entitlements, "_SETTINGS", lambda: FakeSettings(PendingOnHome("later")))
     assert entitlements.redeem("abcd1234abcd1234abcd1234abcd1234", opener=answer(store([("papyrus", 1)]))) == "papyrus"
-    assert entitlements.owned() == frozenset({"papyrus"})
+    assert entitlements.owned() == frozenset({"papyrus"}) and not entitlements.shared("papyrus"), "Settings says: this device"
 
 
 def test_a_licence_for_an_item_this_app_does_not_carry_says_update(store):
@@ -248,3 +253,23 @@ def test_store_keygen_makes_a_key_the_app_pins_and_never_overwrites(tmp_path, ca
     assert main([str(out), "--id", "k1"]) == 0 and json.loads(out.read_text())["d"]
     assert json.loads(out.read_text())["d"] not in capsys.readouterr().out
     assert main([str(out)]) == 1
+
+
+def test_the_marketplace_link_has_one_source_and_follows_the_language(c, store):
+    """BT-8U6: the server writes the marketplace address in the page's language; the PC window allows both."""
+    from fastapi.testclient import TestClient
+    from lightning.desktop.window import _store_link
+    from lightning.ui.web import create_app
+    client = TestClient(create_app(c))
+    assert 'href="https://lightningeg.com/marketplace.html?from=app#themes"' in client.get('/settings').text
+    c.settings.set('locale', 'ar')
+    page = client.get('/settings').text
+    assert 'data-marketplace="https://lightningeg.com/ar/marketplace.html"' in page
+    assert 'href="https://lightningeg.com/ar/marketplace.html?from=app#themes"' in page
+    for locale in ('en', 'ar'):
+        assert _store_link(entitlements.marketplace_url(locale) + '?item=papyrus&from=app#themes')
+    root = Path(__file__).resolve().parents[1]
+    for source in ('lightning/ui/static/theme-runtime.js', 'lightning/ui/templates/settings/index.html'):
+        assert 'https://lightningeg.com' not in (root / source).read_text(), source
+    java = (root / 'android/app/src/main/java/org/lightning/app/MainActivity.java').read_text()
+    assert all(f'"{path}"' in java for path in entitlements.MARKETPLACE_PATHS.values())

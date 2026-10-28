@@ -11,9 +11,9 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-from lightning.sync.identity import verify_signature
 from .codec import (JournalError, authenticate, canonical, cursor, digest, fields,
                     hash_value, number, seal, unpack, uuid)
+from .errors import CloudUnavailable
 
 
 def _public(key):
@@ -402,7 +402,6 @@ class AuthorityRegistry:
 
     async def publish(self, wire):
         from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
-        from .cloud import CloudUnavailable
         envelope = unpack(wire)
         body = envelope["body"]
         transition(body)

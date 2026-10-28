@@ -7,6 +7,8 @@ from lightning.core.errors import LightningError, ValidationError
 from lightning.ui.web import container, redirect, render
 from lightning.workflows.activity import ActivityReview
 
+from .transactions import detail_page
+
 router = APIRouter(prefix="/activity")
 
 
@@ -21,13 +23,14 @@ async def activity_page(request: Request):
 
 
 @router.get("/{transaction_id:int}")
-async def activity_detail(request: Request, transaction_id: int, error: str = ""):
-    workflow = ActivityReview(container(request))
+async def activity_detail(request: Request, transaction_id: int):
+    """The review merged into the one transaction page (7T1); old links still land there."""
+    c = container(request)
     try:
-        detail = workflow.summary(transaction_id)
+        c.transactions.get(ActivityReview._id(transaction_id))
     except LightningError as exc:
         return redirect("/activity", str(exc))
-    return render(request, _template(request, "detail"), detail=detail, error=error)
+    return redirect(f"/transactions/{transaction_id}", request.query_params.get("msg", ""))
 
 
 @router.post("/{transaction_id:int}/apply")
@@ -44,10 +47,9 @@ async def activity_apply(request: Request, transaction_id: int):
                                 str(form.get("reserve_amount", "")).strip())
     except (LightningError, ValueError) as exc:
         message = str(exc) if isinstance(exc, LightningError) else str(ValidationError("Choose valid review options."))
-        workflow = ActivityReview(c)
         try:
-            detail = workflow.summary(transaction_id)
+            c.transactions.get(ActivityReview._id(transaction_id))
         except LightningError as missing:
             return redirect("/activity", str(missing))
-        return render(request, _template(request, "detail"), status_code=400, detail=detail, error=message)
-    return redirect(f"/activity/{transaction_id}", "Review changes saved.")
+        return detail_page(request, transaction_id, status_code=400, error=message)
+    return redirect(f"/transactions/{transaction_id}", "Review changes saved.")

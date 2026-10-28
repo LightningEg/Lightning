@@ -19,8 +19,8 @@ never in a public issue. The Good first issue form is a starting point for maint
 Everything happens on GitHub; you need only a free GitHub account.
 
 1. **Pick a task.** Open the [good first issues](https://github.com/LightningEg/Lightning/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22+no%3Aassignee).
-   Each says what's wrong, when it's done and which file to look at. Its code, like `[3C]`, is its place in
-   [the plan](issues/INDEX.md): milestone 3, item C.
+   Each says what's wrong, when it's done and which file to look at. Its code, like `[BV-3C]`, says what it is and where it sits in
+   [the plan](issues/INDEX.md): BV a visual bug (BT technical bug, IV/IT visual/technical improvement, NF new feature), milestone 3, item C.
 2. **Comment `/take` on it.** A bot assigns it to you at once. One issue at a time; `/drop` gives it back; 14 days with no
    activity frees it for someone else, unless your pull request is open.
 3. **Make the change in a Codespace** (a full editor in your browser, nothing to install):

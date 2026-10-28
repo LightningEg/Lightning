@@ -16,7 +16,6 @@ from lightning.core.dates import now_iso, parse_date, today
 from lightning.core.errors import ConflictError, LightningError, NotFoundError, ValidationError
 from lightning.core.limits import MAX_CSV_IMPORT_BYTES
 from lightning.core.money import ascii_digits, from_e6
-from lightning.core.refs import DocType
 from lightning.transactions.domain import TxnSource
 from lightning.transactions.tags import tags_in
 

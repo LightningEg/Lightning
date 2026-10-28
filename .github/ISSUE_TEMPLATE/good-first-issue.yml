@@ -11,7 +11,7 @@ body:
         Report security problems privately: https://github.com/LightningEg/Lightning/security/advisories/new
   - type: input
     id: code
-    attributes: {label: Code, description: "The item's code in issues/ (e.g. 3C); also put it at the start of the title: [3C] …"}
+    attributes: {label: Code, description: "The item's code in issues/ with its tag (e.g. BV-3C; python tools/issues.py tag 3C); also put it at the start of the title: [BV-3C] …"}
   - type: textarea
     id: what
     attributes: {label: What's wrong, description: "One or two sentences. Dummy data only (Mohab's demo)."}

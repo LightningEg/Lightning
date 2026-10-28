@@ -52,6 +52,20 @@ html[data-m-ground-artwork]:not([data-m-ground-artwork="none"]) body::after {
 }
 html.phone[data-m-ground-artwork]:not([data-m-ground-artwork="none"]) body::after { width: 320px; inset-inline-end: -100px; bottom: -40px; }
 [dir="rtl"][data-m-ground-artwork] body::after { transform: scaleX(-1); }
+/* Star ceiling (Dendera night, NF-8V): the temple ceiling's star registers, repeating, kept clear of the reading. On the
+   PC it starts below the page title and fades out down the page; on the phone the lead figure sits on the ground
+   (Part C), so the field rises from the foot instead. Still: nothing moves, so reduced motion needs no other frame. */
+html[data-m-ground-artwork="star-ceiling"]:not([data-m-ground-artwork="none"]) body::after {
+  inset: 0 0 auto 0; width: auto; height: 80vh; aspect-ratio: auto;
+  background: var(--m-ground-artwork) top left / 240px 240px repeat;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent 150px, #000 260px, transparent);
+  mask-image: linear-gradient(to bottom, transparent 0, transparent 150px, #000 260px, transparent);
+}
+html.phone[data-m-ground-artwork="star-ceiling"]:not([data-m-ground-artwork="none"]) body::after {
+  inset: auto 0 0 0; width: auto; height: 45vh; background-size: 180px 180px;
+  -webkit-mask-image: linear-gradient(to top, #000 0, #000 30%, transparent);
+  mask-image: linear-gradient(to top, #000 0, #000 30%, transparent);
+}
 
 /* Ambient glow-drift: one wide accent glow crossing the ground in 48 s. Compositor-only (transform). */
 html[data-m-ground-ambient="glow-drift"]::before {

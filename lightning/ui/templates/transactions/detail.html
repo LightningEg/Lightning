@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import amount with context %}
+{% from "partials/linked.html" import touched_panel, suggested_links with context %}
 {% block title %}{{ txn.ref }}{% endblock %}
 {% block heading %}<h1 class="code" style="font-size:20px">{{ txn.ref }}</h1>
 <div class="muted">{{ ('Refund' if txn.type.value == 'IN' and lines and lines[0].effect == 'OUTFLOW' else summary.type_label)|tr(locale) }} · {{ txn.date }}{% if txn.source == 'SYSTEM' %} · <span class="pill">{{ 'System-generated'|tr(locale) }}</span>{% endif %}{% if txn.is_void %} · <span class="pill void">{{ 'deleted'|tr(locale) }}</span>{% endif %}</div>{% endblock %}
@@ -22,9 +23,8 @@
       {% if summary.category_label %}<tr><td class="muted">{{ 'Category'|tr(locale) }}</td><td>{{ summary.category_label }}</td></tr>{% endif %}
       {% endif %}
       {% for effect in cash_effects %}<tr><td class="muted">Effect · {{ effect.owner }}</td><td>Cash in {{ effect.account }} {{ 'increases' if effect.quantity > 0 else 'decreases' }} by {{ effect.quantity|abs|money }} {{ effect.currency }}</td></tr>{% endfor %}
-      {% if txn.counterparty %}<tr><td class="muted">{{ 'Counterparty'|tr(locale) }}</td><td>{{ txn.counterparty }}</td></tr>{% endif %}
-      {% set owner = lines|selectattr('owner_id', 'defined')|selectattr('owner_id')|first %}
-      {% if owner %}<tr><td class="muted">{{ 'Held for'|tr(locale) }}</td><td>{{ owner.owner_name }}</td></tr>{% endif %}
+      {% if txn.counterparty %}<tr><td class="muted">{{ 'Counterparty'|tr(locale) }}</td><td>{% if touched.counterparty %}<a href="/counterparties/{{ touched.counterparty.id }}">{{ txn.counterparty }}</a>{% else %}{{ txn.counterparty }}{% endif %}</td></tr>{% endif %}
+      {% for owner in touched.owners %}<tr><td class="muted">{{ 'Held for'|tr(locale) }}</td><td><a href="/counterparties/{{ owner.id }}">{{ owner.name }}</a></td></tr>{% endfor %}
       {% if txn.notes %}<tr><td class="muted">{{ 'Notes'|tr(locale) }}</td><td>{{ txn.notes|tagged }}</td></tr>{% endif %}
       <tr><td class="muted">{{ "Recorded"|tr(locale) }}</td><td class="small">{{ txn.created_at }}{% if txn.updated_at != txn.created_at %} · updated {{ txn.updated_at }}{% endif %}</td></tr>
     </table>
@@ -42,6 +42,11 @@
       {% endif %}
     </div>
   </div>
+  {{ touched_panel(touched, txn, base) }}
+</div>
+{% set suggest = review and (review.can_recategorize or review.planned_choices or review.reserve_choices) %}
+<div class="grid g2" style="margin-top:16px">
+  {% if suggest %}{{ suggested_links(review, base) }}{% endif %}
   <div class="card">
     <h2>{{ "History"|tr(locale) }}</h2>
     {% if history %}
@@ -49,9 +54,6 @@
     {% else %}<div class="muted small">{{ "No changes since it was recorded."|tr(locale) }}</div>{% endif %}
   </div>
 </div>
-{% if budget_impacts %}<section class="card" style="margin-top:16px"><div class="card-heading"><h2>{{ "Budget impact"|tr(locale) }}</h2><a href="/budget?month={{ budget_impacts[0].month }}#category-plan">Open {{ budget_impacts[0].month }} plan</a></div>
-  {% for impact in budget_impacts %}<div class="budget-attention-row"><span><b>{{ impact.name }}</b><small>{{ "Spending in this category changes its monthly plan."|tr(locale) }}</small></span><span class="num">{% if impact.remaining is not none %}{{ impact.remaining|money }} left{% elif impact.covered_by %}Inside {{ impact.covered_by }} · {{ impact.covered_remaining|money }} left{% else %}No covering limit{% endif %}</span></div>{% endfor %}
-</section>{% endif %}
 {% if can_split and not txn.is_void %}
 <section class="card expense-split" style="margin-top:16px">
   <h2>{{ "Expense categories"|tr(locale) }}</h2>
@@ -80,12 +82,6 @@
 <section class="card reserve-payment" style="margin-top:16px">
   <h2>{{ "Assign payment to a reserve"|tr(locale) }}</h2>
   <p class="muted small">{{ "Link this payment to the plan it covers. Its amount will stop counting as cash still set aside, while the project keeps its progress. Repeating projects advance when linked payments reach the target. Matching payments are suggested for your confirmation in the account transaction list."|tr(locale) }}</p>
-  {% if reserve_links %}<div class="reserve-payment-links">{% for link in reserve_links %}
-    <div><span>{{ link.name }} · {{ link.amount|money }}</span><form method="post" action="/transactions/{{ txn.id }}/reserve">
-      <input type="hidden" name="reserve_id" value="{{ link.reserve_id }}"><input type="hidden" name="action" value="unlink">
-      <button class="btn small">{{ "Remove link"|tr(locale) }}</button>
-    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>
-  {% endfor %}</div>{% endif %}
   {% if reserves %}<form method="post" action="/transactions/{{ txn.id }}/reserve" class="reserve-allocate">
     <select name="reserve_id" required aria-label="Reserve" data-own-picker>{% for reserve in reserves %}<option value="{{ reserve.id }}">{{ reserve.name }} · {{ reserve.effective_allocated|money }} available</option>{% endfor %}</select>
     <input type="text" name="amount" value="{{ abs(summary.amount) }}" inputmode="decimal" aria-label="Amount paid from reserve" required>

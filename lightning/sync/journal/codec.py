@@ -55,6 +55,20 @@ def digest(value) -> str:
     return hashlib.sha256(canonical(value)).hexdigest()
 
 
+def stable_json(value, *, ensure_ascii=False, default=None, allow_nan=False) -> bytes:
+    """Sorted, compact UTF-8 JSON without canonical()'s 256-item and nesting limits, for local records.
+
+    The options exist only so a fingerprint already saved by older code keeps its exact bytes.
+    """
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=ensure_ascii,
+                      default=default, allow_nan=allow_nan).encode("utf-8")
+
+
+def stable_digest(value, **options) -> str:
+    """sha256 of stable_json(value); for local fingerprints that may hold more rows than a message."""
+    return hashlib.sha256(stable_json(value, **options)).hexdigest()
+
+
 def fields(value, expected):
     if type(value) is not dict or set(value) != set(expected):
         raise JournalError("Unknown or missing message fields")

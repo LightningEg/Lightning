@@ -33,6 +33,15 @@ def test_same_entitlement_is_portable_and_permanent(license):
         assert owned.items == (('nile',1),) and owned.profile_id == PROFILE
     assert 'expires' not in envelope['payload'] and 'device' not in envelope['payload']
 
+def test_a_licence_survives_a_theme_version_bump_and_skips_what_this_app_lacks(license):
+    data,sign,keys=license
+    assert verify_license(sign(data),keys,{'nile':2}).items == (('nile',1),), "an update never takes a bought theme away"
+    data['items'].append({'item_id':'future-theme','asset_version':1,'deliveries':[]})
+    data['items'].append({'item_id':'papyrus','asset_version':3,'deliveries':[]})
+    assert verify_license(sign(data),keys,{'nile':1,'papyrus':1}).items == (('nile',1),)
+    data['items']=[{'item_id':'nile','asset_version':0,'deliveries':[]}]
+    with pytest.raises(InvalidCosmeticLicense,match='Invalid item'):verify_license(sign(data),keys,{'nile':1})
+
 def test_a_licence_is_for_its_own_profile_only(license):
     data,sign,keys=license
     other='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
@@ -99,3 +108,11 @@ def test_each_part_can_come_from_a_different_owned_theme():
     with pytest.raises(InvalidCosmeticParts,match='not owned'):
         compose_parts(selected,baseline,catalog,{name:2 for name in catalog},contract)
     assert baseline['parts']['palette']['accent']=='#0B6DD6'
+    # BT-8U7: a theme's other mode is owned through its item; a licence covers its version and later ones
+    night={'dendera-night':json.loads((BUNDLES/'dendera-night.json').read_text())}
+    parts=compose_parts({'palette':'dendera-night'},baseline,night,{'dendera':1},contract)
+    assert parts['palette']==night['dendera-night']['parts']['palette']
+    with pytest.raises(InvalidCosmeticParts,match='not owned'):
+        compose_parts({'palette':'dendera-night'},baseline,night,{'dendera-night':1},contract)
+    newer={'nile':{**catalog['nile'],'version':2}}
+    assert compose_parts({'palette':'nile'},baseline,newer,{'nile':1},contract)['palette']==catalog['nile']['parts']['palette']

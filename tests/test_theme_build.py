@@ -16,6 +16,9 @@ spec.loader.exec_module(builder)
 class ThemeBuildTests(unittest.TestCase):
     def setUp(self):
         self.manifest = json.loads((builder.SOURCE / 'nile.json').read_text())
+        # the contract tests change Nile's layers freely; its palette tier is checked on its own below
+        self.manifest.update(status='test-preview', tier=None)
+        del self.manifest['tier']
 
     def validate(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -25,7 +28,8 @@ class ThemeBuildTests(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which('node'), 'Node is needed for the runtime contract checks')
     def test_runtime_contract(self):
-        result = subprocess.run(['node', '--test', str(ROOT / 'tests/theme-runtime.test.cjs')],
+        result = subprocess.run(['node', '--test', str(ROOT / 'tests/theme-runtime.test.cjs'),
+                                 str(ROOT / 'tests/theme-runtime-profile.test.cjs')],
                                 cwd=ROOT, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
@@ -113,7 +117,8 @@ class ThemeBuildTests(unittest.TestCase):
         self.assertIn('.theme-unveil', css)
         self.assertLessEqual(set(contract['slots']['ground']['material']['texture']) - {'none'}, set(builder.TEXTURES))
         self.assertLessEqual(set(contract['slots']['cards']['material']['grain']) - {'none'}, set(builder.TEXTURES))
-        self.assertEqual(set(contract['slots']['hero']['material']['artwork']) - {'none'}, set(builder.ARTWORK))
+        self.assertEqual((set(contract['slots']['hero']['material']['artwork'])
+                          | set(contract['slots']['ground']['material']['artwork'])) - {'none'}, set(builder.ARTWORK))
         self.assertEqual(set(contract['slots']['ground']['material']['textureStrength']), set(builder.STRENGTH))
 
     def test_material_layer_keeps_the_motion_rules(self):
@@ -129,7 +134,7 @@ class ThemeBuildTests(unittest.TestCase):
         # geometry is never a material: no padding, margins, fonts, radii, border widths, gaps or line heights
         self.assertNotRegex(css, r'[;{\s](padding|margin|font|border-radius|border-width|gap|line-height|min-height)[a-z-]*\s*:(?!\s*inherit)')
         source = (ROOT / 'lightning/ui/templates/base.html').read_text()
-        self.assertLess(source.index('/static/theme-surfaces.css'), source.index('/static/theme-materials.css'))
+        self.assertLess(source.index("static_url('theme-surfaces.css')"), source.index("static_url('theme-materials.css')"))
         from lightning.ui.web import PHONE_CSS  # the phone shell loads one bundle, built in this order
         self.assertLess(PHONE_CSS.index('theme-surfaces.css'), PHONE_CSS.index('theme-materials.css'))
 
@@ -166,6 +171,30 @@ class ThemeBuildTests(unittest.TestCase):
                 finally:
                     builder.ASSETS = original
 
+    def test_star_ceiling_draws_dendera_night_in_gold_and_lapis(self):
+        """NF-8V: a ground-only recipe, the temple ceiling's gold stars on the night's lapis lines, still, checked for
+        contrast in the colour that tints the ground most."""
+        contract = json.loads((builder.SOURCE / 'slots.json').read_text())
+        self.assertIn('star-ceiling', contract['slots']['ground']['material']['artwork'])
+        self.assertNotIn('star-ceiling', contract['slots']['hero']['material']['artwork'])  # a field, not a corner mark
+        self.assertEqual(builder.drawings()['star-ceiling'].parent.name, 'dendera')
+        self.assertEqual(builder.drawing_keys('star-ceiling'), ['hero'])
+        manifest, parts = builder.load(builder.SOURCE / 'dendera-night.json')
+        self.assertEqual(parts['ground']['artwork'], 'star-ceiling')
+        p = parts['palette']
+        css = builder.compile_theme(manifest, parts, contract)
+        self.assertIn('--m-ground-artwork: url("data:image/svg+xml,', css)
+        self.assertIn(p['hero'][1:], css.split('--m-ground-artwork: ')[1].split(';\n')[0])  # gold stars
+        self.assertEqual(builder.under_artwork(p['background'], p, 'star-ceiling'),
+                         min((builder.mix(p['background'], p[k], builder.ARTWORK_ALPHA) for k in ('accent', 'hero')),
+                             key=lambda c: builder.contrast(p['text'], c)))
+        materials = (builder.STATIC / 'theme-materials.css').read_text()
+        rule = materials[materials.index('html[data-m-ground-artwork="star-ceiling"]'):]
+        rule = rule[:rule.index('}')]
+        self.assertIn('repeat', rule)
+        self.assertNotIn('animation', rule)  # no new continuous motion
+        self.assertNotIn('star-ceiling', json.dumps(contract['limits']['continuous']))
+
     def test_rejects_unreadable_card_and_button(self):
         for part, key, value in [('cards', 'surface', 'text'), ('controls', 'label', 'accent')]:
             with self.subTest(part=part):
@@ -175,21 +204,46 @@ class ThemeBuildTests(unittest.TestCase):
                     self.validate()
 
     def test_each_paid_theme_fills_exactly_its_tier(self):
-        """themes.md section 7: recolour, then texture, then animation; the store's tier for each id (8L migration)."""
+        """themes.md section 7: recolour, then texture, then animation. Every paid manifest names its store tier (the
+        website's catalog_items row) and the build checks it fills exactly that tier (BT-8U7)."""
+        paid = [path for path in sorted(builder.SOURCE.glob('*.json'))
+                if json.loads(path.read_text()).get('status') == 'paid']
+        self.assertGreaterEqual(len(paid), 5)
+        for path in paid:
+            with self.subTest(theme=path.stem):
+                manifest, _ = builder.load(path)
+                self.assertIn(manifest['tier'], builder.TIERS)
+        registry = {t['id']: t for t in json.loads((ROOT / 'lightning/ui/static/themes.generated.json').read_text())}
+        self.assertEqual(registry['dendera-night']['tier'], registry['dendera']['tier'])
+        for theme, wrong in (('nile', 'motion'), ('cotton', 'palette'), ('papyrus', 'texture'), ('nile', None), ('nile', 'gold')):
+            with self.subTest(theme=theme, tier=wrong), tempfile.TemporaryDirectory() as temp:
+                manifest = json.loads((builder.SOURCE / f'{theme}.json').read_text())
+                manifest['tier'] = wrong
+                path = Path(temp) / 'theme.json'
+                path.write_text(json.dumps(manifest))
+                with self.assertRaises(ValueError):
+                    builder.load(path)
+
+    def test_held_keeps_its_hue_and_reads_on_every_theme_card(self):
+        """BT-8U4: Azure held is generated per theme, same hue, at 4.5:1 on the card's darkest point and its tint."""
+        import colorsys
         contract = json.loads((builder.SOURCE / 'slots.json').read_text())
-        neutral = {'none', 'flat', 'hairline', 'bar', 'dim', 'subtle'}
-        for theme, tier in {'nile': 'palette', 'cotton': 'texture', 'papyrus': 'motion', 'dendera': 'motion', 'dendera-night': 'motion'}.items():
-            parts = json.loads((builder.SOURCE / f'{theme}.json').read_text())['parts']
-            material = {f'{s}.{k}': parts[s][k] for s, spec in contract['slots'].items() if s != 'brand'
-                        for k in spec.get('material', {}) if parts[s][k] not in neutral}
-            running = [n for n in contract['limits']['continuous'] if parts[n.split('.')[0]][n.split('.')[1]] != 'none']
-            with self.subTest(theme=theme):
-                if tier == 'palette':
-                    self.assertEqual(material, {}, 'a palette is colour only')
-                    self.assertTrue(all(v == 'none' for s, spec in contract['slots'].items() for k in spec.get('motion', {}) for v in [parts[s][k]]))
-                else:
-                    self.assertTrue(material, 'a textured or animated theme has a material')
-                self.assertEqual(len(running), 1 if tier == 'motion' else 0, 'only the animated tier runs a motion')
+        hls = lambda h: colorsys.rgb_to_hls(*(int(h[i:i+2], 16) / 255 for i in (1, 3, 5)))
+        for path in sorted(builder.SOURCE.glob('*.json')):
+            if path.name in ('slots.json', 'lightning-default.json'):
+                continue
+            manifest, parts = builder.load(path)
+            p = parts['palette']
+            card = builder.worst(p, parts, 'cards', p[parts['cards']['surface']], contract['limits'])
+            css = builder.compile_theme(manifest, parts, contract)
+            colour = css.split('--theme-held: ')[1][:7]
+            with self.subTest(theme=manifest['id']):
+                self.assertAlmostEqual(hls(colour)[0], hls(builder.HELD)[0], delta=0.01)
+                self.assertGreaterEqual(builder.contrast(colour, card), 4.5)
+                self.assertGreaterEqual(builder.contrast(colour, builder.mix(card, colour, builder.HELD_TINT)), 4.5)
+        surfaces = (ROOT / 'lightning/ui/static/theme-surfaces.css').read_text()
+        self.assertNotIn('#7FB2FF', surfaces.upper())
+        self.assertIn('var(--theme-held)', surfaces)
 
     def test_money_is_not_recoloured(self):
         self.manifest['parts']['cards']['border'] = 'accent'
@@ -204,8 +258,18 @@ class ThemeBuildTests(unittest.TestCase):
 
     def test_both_shells_boot_before_layout_styles(self):
         source = (ROOT / 'lightning/ui/templates/base.html').read_text()
-        self.assertLess(source.index('partials/theme_head.html'), source.index('/static/style'))
-        self.assertLess(source.index('/static/style'), source.index('/static/themes.generated.css'))
+        self.assertLess(source.index('partials/theme_head.html'), source.index("static_url('style.rtl.css'"))
+        self.assertLess(source.index("static_url('style.rtl.css'"), source.index("static_url('themes.generated.css')"))
+        # BT-8U5: every static file in both shells carries its content hash; nobody bumps ?v= by hand
+        head = (ROOT / 'lightning/ui/templates/partials/theme_head.html').read_text()
+        for text in (source, head, (ROOT / 'lightning/ui/templates/phone/base.html').read_text()):
+            self.assertNotRegex(text, r'/static/[^"]+\?v=\d')
+        from lightning.ui.web import static_url
+        import hashlib
+        self.assertEqual(static_url('theme-runtime.js'), '/static/theme-runtime.js?v=' + hashlib.sha256(
+            (ROOT / 'lightning/ui/static/theme-runtime.js').read_bytes()).hexdigest()[:12])
+        with self.assertRaises(ValueError):
+            static_url('../web.py')
         phone = (ROOT / 'lightning/ui/templates/phone/base.html').read_text()
         self.assertLess(phone.index('partials/theme_head.html'), phone.index('phone_css_src'))
         from lightning.ui.web import PHONE_CSS
@@ -225,6 +289,21 @@ def test_profile_preference_survives_new_app_and_rejects_unknown_theme(c):
     assert c.settings.get('appearance_theme') == 'royal-obsidian-gold'
     assert second.post('/settings/theme', data={'theme': 'lightning-default'}).status_code == 204
     assert c.settings.get('appearance_theme') == 'lightning-default'
+
+
+
+def test_follow_night_is_kept_by_the_profile_across_launches(c):
+    """BT-8U3: the PC's origin changes at every launch, so the switch lives in the profile and arrives in the head."""
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    first = TestClient(create_app(c))
+    assert '<meta name="lightning-follow-night" content="0">' in first.get('/settings').text
+    assert first.post('/settings/theme/night', data={'on': '1'}).status_code == 204
+    assert c.settings.get('appearance_follow_night') == '1'
+    second = TestClient(create_app(c))
+    assert '<meta name="lightning-follow-night" content="1">' in second.get('/settings').text
+    assert second.post('/settings/theme/night', data={'on': 'anything'}).status_code == 204
+    assert c.settings.get('appearance_follow_night') == '0'
 
 
 if __name__ == '__main__':

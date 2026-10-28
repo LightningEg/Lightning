@@ -19,7 +19,8 @@ from lightning.core.errors import ValidationError
 from lightning.core.ledger import Effect, PostingLine, validate_posting
 from lightning.core.money import from_e6
 
-from .codec import JournalError, canonical, digest, fields, hash_value, number, uuid
+from .codec import JournalError, canonical, digest, fields, hash_value, stable_digest, uuid
+from .errors import ChunksMissing  # noqa: F401 - re-exported for older imports
 from . import commands
 from .effects import CHUNK_BYTES, GUARDED, MAX_CHUNKS, MAX_ROWS, SCHEMA, Replicator
 from .store import JournalStore, SCHEMA as STORE_SCHEMA
@@ -98,13 +99,6 @@ def attach(container):
     store.db.conn.execute("PRAGMA synchronous=FULL")
     store.adapter = CashAdapter(container, store)
     return store
-
-
-class ChunksMissing(JournalError):
-    """A chunked commit waits for these chunk hashes; nothing was applied."""
-    def __init__(self, missing):
-        super().__init__("Effect chunks are still arriving")
-        self.missing = missing
 
 
 class CashAdapter:
@@ -459,8 +453,7 @@ class CashAdapter:
         # may contain more rows than a protocol message can carry (e.g. a statement).
         # Keep the same canonical JSON bytes so existing small-record tokens stay valid.
         body = dict(row=own, owned=self.rows.record_hashes(table, local_id))
-        encoded = json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode("utf-8")
-        return hashlib.sha256(encoded).hexdigest()
+        return stable_digest(body)
 
     def apply(self, domain):
         """Typed exact replay on replicas, with no normal save/rule/automation call."""

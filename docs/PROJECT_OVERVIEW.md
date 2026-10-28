@@ -241,7 +241,7 @@ Owner *decisions* (7M, 7R, 7S, 8D, 9L) stay open items: they change what we buil
 
 ## Cosmetic marketplace owner revision (2026-10-24)
 
-Appearance uses swappable, approved parts with fixed layout and financial semantics. Themes are intended to ship in the app; the website sells account-wide permanent ownership, then a temporary random code delivers a signed offline unlock over an initial online exchange. No device cap or repeat charge. Nile Nocturne and Royal Obsidian & Gold are the first design tests; pricing and release integration remain uncommitted. The site handles InstaPay plus a customer reference/WhatsApp receipt and separate owner settlement confirmation, with a stated final-purchase policy subject to required rights and error correction. Infrastructure status: Architecture › Cosmetic parts and offline ownership; remaining work: 8J.
+Appearance uses swappable, approved parts with fixed layout and financial semantics. Themes are intended to ship in the app; the website sells account-wide permanent ownership, then a temporary random code delivers a signed offline unlock over an initial online exchange. No device cap or repeat charge. Nile Nocturne and Royal Obsidian & Gold are the first design tests; pricing and release integration remain uncommitted. The site handles InstaPay plus a customer reference/WhatsApp receipt and separate owner settlement confirmation, with a stated final-purchase policy subject to required rights and error correction. Infrastructure status: Architecture › Cosmetic parts and offline ownership; remaining work: 10A.
 
 ### Website gamification revision (2026-10-24)
 

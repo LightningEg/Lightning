@@ -22,7 +22,16 @@ from lightning.security.keys import unwrap_key, _password_bytes
 from lightning.sync.identity import check_digits
 from .codec import JournalError, authenticate, canonical, digest, fields, hash_value, seal, unpack, uuid
 
-CLOCK_SKEW_SECONDS = 60
+CLOCK_SKEW_SECONDS = 60  # the joining screen's grace before it calls an offer's ten minutes up
+MAX_CLOCK_DIFFERENCE = 15 * 60  # how far apart two devices' clocks may be and still pair
+CLOCKS_DIFFER = "The clocks on these devices differ by more than 15 minutes. Set both to the right time, then pair again."
+OFFER_EXPIRED = "This pairing offer expired. Open pairing on the home again."
+OFFER_SECONDS = 600  # the home's own deadline for one offer
+MAX_REQUESTS = 12  # number-match requests one offer takes
+MAX_CODE_REQUESTS = 3  # six-digit-code requests one offer takes
+MAX_PROOF_ATTEMPTS = 3  # password proofs per request
+ABUSE_SECONDS = 900  # the window in which wrong passwords are counted
+MAX_PASSWORD_FAILURES = 3
 
 
 def _password_proof(password, salt):
@@ -47,6 +56,11 @@ def _request_proof(offer, request, code):
     return hmac.new(key, canonical(request), hashlib.sha256).hexdigest()
 
 
+def request_budget(offer):
+    """How many requests one offer takes: number matching allows more, as no code can be guessed."""
+    return MAX_REQUESTS if offer.get("method") == "number-match" else MAX_CODE_REQUESTS
+
+
 def number_choices(digits):
     choices = [digits]
     while len(choices) < 3:
@@ -55,6 +69,10 @@ def number_choices(digits):
             choices.append(candidate)
     secrets.SystemRandom().shuffle(choices)
     return choices
+
+
+class ClocksDiffer(JournalError):
+    """The offer's deadline is further ahead than any honest home clock within 15 minutes could set."""
 
 
 def require_live_offer(candidate):
@@ -69,13 +87,16 @@ def _offer(offer, home_key, now):
     fields(body, ("type", "profile", "generation", "home", "home_key", "nonce", "salt", "expires") + (("method",) if "method" in body else ()))
     if "method" in body and body["method"] != "number-match":
         raise JournalError("Unsupported pairing method")
-    observed = now()
-    # The home still enforces its exact ten-minute deadline. A small allowance
-    # here prevents a slightly faster phone clock from making every new offer
-    # appear too far in the future to its PC.
-    if (type(body["expires"]) is not int or body["type"] != "journal-pairing" or body["home_key"] != home_key
-            or not observed < body["expires"] <= observed + 600 + CLOCK_SKEW_SECONDS):
+    if type(body["expires"]) is not int or body["type"] != "journal-pairing" or body["home_key"] != home_key:
         raise JournalError("Pairing offer expired or home identity changed")
+    # The home enforces its exact ten-minute deadline on every step, by its own clock. This
+    # device's clock only rules out an offer that no clock up to 15 minutes apart could make live:
+    # one ending more than 10 + 15 minutes ahead, or more than 15 minutes ago.
+    remaining = body["expires"] - now()
+    if remaining > OFFER_SECONDS + MAX_CLOCK_DIFFERENCE:
+        raise ClocksDiffer(CLOCKS_DIFFER)
+    if remaining <= -MAX_CLOCK_DIFFERENCE:
+        raise JournalError(OFFER_EXPIRED)
     return body
 
 
@@ -138,7 +159,6 @@ def prove_pairing(offer, request, password, identity, *, home_key, now=time.time
 RECEIPT_LIFETIME = 24 * 60 * 60
 PENDING_SECONDS = 30
 COMPARISON_SECONDS = 180
-MAX_REQUESTS = 12
 
 
 def approval_receipt(device, saved, *, now=time.time):
@@ -188,7 +208,7 @@ class PairingDesk:
         config = self.device.store.config
         body = dict(type="journal-pairing", profile=config["profile"], generation=config["generation"],
                     home=config["device"], home_key=config["home_key"], nonce=os.urandom(32).hex(),
-                    salt=salt.hex(), expires=int(self.clock()) + 600)
+                    salt=salt.hex(), expires=int(self.clock()) + OFFER_SECONDS)
         if method is not None:
             body["method"] = method
         offer = seal(body, self.device.identity.sign)
@@ -198,6 +218,10 @@ class PairingDesk:
         with self.db.transaction():
             self.db.execute("INSERT OR REPLACE INTO journal_local VALUES('pairing',?)", (canonical(state).decode(),))
         return offer, code
+
+    def current(self):
+        """The open offer's saved state and body, after releasing an expired lease."""
+        return self._state()
 
     def _state(self):
         value = self.db.scalar("SELECT value FROM journal_local WHERE name='pairing'")
@@ -216,14 +240,14 @@ class PairingDesk:
 
     def _abuse(self, *, failed=False):
         value = self.db.scalar("SELECT value FROM journal_local WHERE name='pairing_abuse'")
-        guard = json.loads(value) if value else dict(until=int(self.clock())+900, failures=0)
+        guard = json.loads(value) if value else dict(until=int(self.clock())+ABUSE_SECONDS, failures=0)
         if self.clock() >= guard["until"]:
-            guard = dict(until=int(self.clock())+900, failures=0)
+            guard = dict(until=int(self.clock())+ABUSE_SECONDS, failures=0)
         if failed:
             guard["failures"] += 1
             with self.db.transaction():
                 self.db.execute("INSERT OR REPLACE INTO journal_local VALUES('pairing_abuse',?)", (canonical(guard).decode(),))
-        if guard["failures"] >= 3:
+        if guard["failures"] >= MAX_PASSWORD_FAILURES:
             raise JournalError("Too many password attempts. Wait before reopening pairing")
 
     @staticmethod
@@ -257,7 +281,7 @@ class PairingDesk:
         identifier = digest(body)
         if identifier in state.get("retired", []):
             raise JournalError("This pairing request expired; start a fresh pairing")
-        if state["attempts"] >= (MAX_REQUESTS if offer.get("method") == "number-match" else 3):
+        if state["attempts"] >= request_budget(offer):
             raise JournalError("Pairing request budget exhausted; reopen pairing")
         unsigned = {key:value for key,value in body.items() if key != "proof"}
         expected = _request_proof(offer, unsigned, state["code"])
@@ -372,7 +396,7 @@ class PairingDesk:
         state, offer = self._state()
         if not state["request"] or (offer.get("method") == "number-match" and not state.get("reveal")):
             raise JournalError("No verified pairing request")
-        if self.clock() >= offer["expires"] or state["proof_attempts"] >= 3:
+        if self.clock() >= offer["expires"] or state["proof_attempts"] >= MAX_PROOF_ATTEMPTS:
             raise JournalError("Pairing expired; open a new code on the home")
         envelope = unpack(wire)
         body = envelope["body"]

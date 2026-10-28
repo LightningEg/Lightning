@@ -1,9 +1,10 @@
 ---
+was: 8K
 title: Supporter perks still waiting on the app or the owner - app themes for sale, names on About, a beta channel
 type: feature
 area: appearance
 status: blocked
-blocked_by: 8J claiming; owner decision on the beta channel
+blocked_by: 10A claiming; owner decision on the beta channel
 created: 2026-10-25
 by: Claude
 skills: none
@@ -16,7 +17,7 @@ The website's supporter release (website repo, `supabase/migrations/202610253700
 
 ## Still to do
 
-1. **Sell the app themes.** Now Nile, Cotton and Papyrus, one purchase with their website versions; claiming and the owner's release switch are built (8L). Royal Obsidian & Gold waits for a website version.
+1. **Sell the app themes.** Now Nile, Cotton and Papyrus, one purchase with their website versions; claiming and the owner's release switch are built (10C). Royal Obsidian & Gold waits for a website version.
 2. **Supporters on the app's About screen.** Members who opt in, by display name. Needs an opt-in on the website profile, a signed list the app can bundle at release time, and an About screen that shows it without any network call.
 3. **A beta channel for supporters.** Owner decision: who gets early builds, through which channel (GitHub release flag, a second download, or a WhatsApp group), and what they agree to.
 

@@ -9,7 +9,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from lightning.accounts.service import AccountService
-from lightning.core.dates import fmt_date, now_iso, parse_date, parse_month, today
+from lightning.core.dates import fmt_date, now_iso, parse_date, today
 from lightning.core.errors import ValidationError
 from lightning.core.ledger import PostingLine
 from lightning.core.money import ONE, ZERO, from_e6, to_e6

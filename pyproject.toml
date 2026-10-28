@@ -16,6 +16,12 @@ desktop = ["pywebview==6.2.1; sys_platform == 'win32'", "pythonnet==3.1.0; sys_p
 testpaths = ["tests"]
 addopts = "-q"
 
+[tool.ruff]
+# Checked by `ruff check lightning tools` in .github/workflows/pr-checks.yml (version pinned in requirements/lint.lock).
+# Unused imports, names defined twice and unused variables only: each was a real slip (IT-1J).
+[tool.ruff.lint]
+select = ["F401", "F811", "F841"]
+
 # ---------------------------------------------------------------------------
 # Architecture rules, checked by `lint-imports` (and by tests/test_architecture.py)
 # ---------------------------------------------------------------------------

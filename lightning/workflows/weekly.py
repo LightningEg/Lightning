@@ -1,7 +1,6 @@
 """A short completion flow over existing decisions, plus explicit reusable-rule offers."""
 from __future__ import annotations
 
-from datetime import date
 from hashlib import sha256
 import json
 from urllib.parse import urlencode

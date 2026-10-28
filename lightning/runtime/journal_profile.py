@@ -17,6 +17,7 @@ from lightning.sync.identity import load_or_create
 from lightning.sync.journal.authority import AuthorityMemory
 from lightning.sync.journal.codec import JournalError, seal
 from lightning.sync.journal.device import JournalDevice
+from lightning.sync.journal.errors import DeviceRevoked
 from lightning.sync.journal.finance import attach
 from lightning.sync.journal.home import JournalHome
 from lightning.sync.journal.local import LocalChannel
@@ -91,6 +92,7 @@ class JournalRuntime:
         self.gate, self.loop = None, None
         self._sync_busy = False
         self.cloud = CloudPlaceholder()
+        self.discovery_error = None  # why nearby search could not start, for Devices
         identity_root = paths.data_dir / "identity"
         for name in ("device.json", "device-key.pem", "device-cert.pem"):
             path = identity_root / name
@@ -166,8 +168,22 @@ class JournalRuntime:
             self._sync_busy = False
 
     async def _sync_round(self):
+        """One round. A refusal is kept as the device's last sync error; a removed device stops here."""
         if self.closed:
             return "locked"
+        try:
+            result = await self._round()
+        except DeviceRevoked as error:
+            self.device.record_sync_error(error)
+            return "revoked"
+        except JournalError as error:
+            self.device.record_sync_error(error)
+            raise
+        if result in ("synced", "idle"):
+            self.device.clear_sync_error()
+        return result
+
+    async def _round(self):
         self.refresh_authority()
         before = self.store.cursor()
         if self.device.home:
@@ -175,6 +191,8 @@ class JournalRuntime:
             if self.automation:
                 self.automation.tick()
             return "synced" if self.store.cursor() != before else "idle"
+        if Membership(self.device).revoked():
+            raise DeviceRevoked("This device is no longer a member")
         from .journal_routes import LocalFirstSync
         certificate = self.store.db.scalar("SELECT value FROM journal_local WHERE name='home_certificate'")
         if not certificate:
@@ -256,7 +274,7 @@ class JournalRuntime:
     async def _run(self):
         from lightning.sync.journal.discovery import DISCOVERY_PORT, LanResponder
         from lightning.ui.journal import create_journal_app
-        from .journal_lab import LabServer
+        from .http import QuietServer
         import uvicorn
         server_task = None
         try:
@@ -266,7 +284,7 @@ class JournalRuntime:
             protocol = create_journal_app(self.device, session_token=secrets.token_urlsafe(32),
                                           channel=self.channel, pairing=self.pairing, move=self.move)
             guarded = _ProtocolGate(protocol, self)
-            self.server = LabServer(self.identity.configure_uvicorn_tls(uvicorn.Config(
+            self.server = QuietServer(self.identity.configure_uvicorn_tls(uvicorn.Config(
                 guarded, host="0.0.0.0", port=port,
                 access_log=False, log_level="error", timeout_graceful_shutdown=1,
                 limit_concurrency=32, backlog=32, timeout_keep_alive=3)))
@@ -275,13 +293,13 @@ class JournalRuntime:
                 self.transport, _ = await self.loop.create_datagram_endpoint(
                     lambda: LanResponder(self.channel, tls_port=port, nearby=self.pairing.advertise),
                     local_addr=("0.0.0.0", DISCOVERY_PORT))
-            except OSError:
-                pass
+            except OSError as error:
+                self.discovery_error = f"{type(error).__name__}: {error}"[:200]
             while not self.closed:
                 try:
                     await self.synchronize()
                 except (JournalError, OSError, TimeoutError):
-                    pass  # Saved edits remain queued; the next bounded round can retry.
+                    pass  # Saved edits stay queued; a refusal is kept as the last sync error, shown on Devices.
                 await asyncio.sleep(30)
         finally:
             if self.transport:

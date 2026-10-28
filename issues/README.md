@@ -8,9 +8,21 @@ need. The index is generated: `python tools/issues.py` rewrites it, `--check` ve
 
 ## Codes
 
-Every item has a code: the milestone's number, then a letter. **3C** is the third item of milestone 3. A big item is split one
-step down with a number: **3C1**, **3C2**. Write the code wherever you mention the item: commit messages, the changelog,
-`NOW.md`, pull requests and GitHub issue titles (`[3C] Charts: two end labels overlap`).
+Every item has a code: two letters saying what it is, then the milestone's number and a letter. **BV-3C** is a visual bug,
+the third item of milestone 3. A big item is split one step down with a number: **BV-3C1**, **BV-3C2**.
+
+| Tag | What it is | From the front matter |
+|---|---|---|
+| **BV** | Bug, visual: how a screen looks or reads | `type: bug`, `look: visual` |
+| **BT** | Bug, technical: what the app computes, stores or does | `type: bug`, `look: technical` |
+| **IV** | Improvement, visual | `type: polish` |
+| **IT** | Improvement, technical | `type: tech`, or `type: polish` with `look: technical` |
+| **NF** | New feature | `type: feature` |
+| **OW** | Owner task | `type: owner` |
+
+The tag comes from the front matter, so the generator writes it; the part after it (`3C`) never changes, names the file and
+finds all older history. Write the full code wherever you mention the item: commit messages, the changelog, `NOW.md`, pull
+requests and GitHub issue titles (`[BV-3C] Charts: two end labels overlap`). `python tools/issues.py tag 3C` prints it.
 
 - A code is never reused. `python tools/issues.py next 3` prints the next free one.
 - An item moving to another milestone gets a new code there; write `was: 3C` in its front matter.
@@ -44,13 +56,19 @@ Report and feedback formats are in [the template catalogue](../templates/README.
 | `tech` | Under the hood: speed, structure, tests, tooling, security; nothing a person sees change |
 | `owner` | Needs the owner: a decision, an account, a key, a check on their PC or phone |
 
-**Area** is the screen or module in one word: `overview`, `budget`, `investments`, `accounts`, `import`, `phone`, `arabic`,
-`website`, `tools`...
+**Area** is where the item belongs, one of a fixed list that `tools/issues.py` checks (`AREAS`): `accounts`, `android`,
+`appearance` (themes and cosmetics), `arabic`, `architecture`, `desktop`, `devices` (sync and pairing), `docs`, `github`
+(contributing through GitHub), `import`, `investments`, `market` (price data), `performance`, `phone`, `planning`
+(budget, reserves, recurring), `product` (whole-app reviews and owner checks), `reporting`, `restore`, `search`, `tools`,
+`transactions`, `ui` (how routes and templates are built), `website`. Add one there and here only when none fits.
+
+**Severity**, on every bug and only on bugs: `high` (wrong money or lost data), `medium` (wrong on screen, or a task that
+cannot be done), `low` (it reads or looks off). INDEX shows it after the kind.
 
 ## Status
 
 `new` (found, not looked at) · `ready` (understood; anyone can build it) · `building` (someone has it: a claim in `NOW.md`
-or a `/take` on GitHub) · `blocked` (say what it waits for in `blocked_by`). Finished is never a status: delete the file.
+naming its code, or a `/take` on GitHub; `--check` warns about one with no claim, without failing) · `blocked` (say what it waits for in `blocked_by`). Finished is never a status: delete the file.
 
 ## Front matter (required, between two `---` lines, first in the file)
 
@@ -58,7 +76,9 @@ or a `/take` on GitHub) · `blocked` (say what it waits for in `blocked_by`). Fi
 ---
 title: Short sentence saying what is wrong or wanted
 type: bug
-area: overview
+look: visual                         # bugs: visual or technical; polish: optional, visual by default
+severity: medium                     # bugs only: high, medium or low
+area: investments                    # one of the areas above
 status: new
 created: 2026-10-19
 by: Claude Opus 5.5                  # the AI or "owner"; never a person's name
@@ -74,7 +94,7 @@ Bugs found by a skill also keep `skills`, `app_version`, `commit` and `repo` (ap
 ```
 ## Report
 What was seen or wanted, where (page, file, step), how to reproduce it, what should happen instead. Evidence: numbers,
-a command and its output, a screenshot path. Severity for bugs: high (wrong money or lost data), medium, low.
+a command and its output, a screenshot path. A bug's severity is in its front matter; say why here if it is not plain.
 
 ## Investigation        (added later; who and with which skill)
 What is true, what is not, the cause with file:line, what you ruled out.

@@ -1,7 +1,7 @@
 # Backend audit: exchange-rate date boundary
 
 Date: 2026-10-29 · Author: Codex
-Repository: app · Reviewed checkout: `14be69fa0b89cad4e0e836ce4eee839d32fde593`
+Repository: app · Reviewed commit: `14be69fa0b89cad4e0e836ce4eee839d32fde593`
 
 ## Scope and method
 

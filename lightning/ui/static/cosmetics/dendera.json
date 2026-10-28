@@ -4,6 +4,7 @@
   "name": "Dendera",
   "version": 1,
   "status": "paid",
+  "tier": "motion",
   "priceCoins": null,
   "bundleTargets": [
     "windows",
@@ -34,7 +35,7 @@
       "texture": "papyrus",
       "textureStrength": "subtle",
       "artwork": "zodiac-ring",
-      "vignette": "none",
+      "vignette": "soft",
       "ambient": "none",
       "equip": "unveil"
     },
@@ -47,27 +48,27 @@
     "navigation": {
       "surface": "surface",
       "activeMark": "hero",
-      "finish": "flat",
+      "finish": "satin",
       "activeStyle": "cartouche"
     },
     "hero": {
       "surface": "surface",
       "edge": "hero",
-      "finish": "satin",
+      "finish": "lacquer",
       "grain": "paper",
       "edgeStyle": "foil",
-      "depth": "mid",
+      "depth": "high",
       "artwork": "winged-disc",
       "sheen": "none"
     },
     "cards": {
       "surface": "surface",
       "border": "border",
-      "finish": "flat",
+      "finish": "satin",
       "grain": "paper",
       "edgeLight": "soft",
-      "depth": "low",
-      "hover": "none"
+      "depth": "mid",
+      "hover": "light"
     },
     "charts": {
       "grid": "border",
@@ -78,8 +79,8 @@
       "label": "onAccent",
       "focus": "focus",
       "finish": "satin",
-      "depth": "low",
-      "press": "none"
+      "depth": "mid",
+      "press": "sheen"
     },
     "buttons": {
       "surface": "surface",
@@ -91,7 +92,7 @@
       "surface": "raised",
       "chosen": "accent",
       "chosenLabel": "onAccent",
-      "finish": "flat"
+      "finish": "satin"
     },
     "fields": {
       "surface": "raised",
@@ -100,12 +101,12 @@
     },
     "progress": {
       "track": "raised",
-      "finish": "flat"
+      "finish": "gloss"
     },
     "overlays": {
       "surface": "surface",
       "backdrop": "text",
-      "finish": "flat",
+      "finish": "lacquer",
       "grain": "paper",
       "depth": "high",
       "shade": "dim",
@@ -114,7 +115,7 @@
     "menus": {
       "surface": "surface",
       "divider": "border",
-      "finish": "flat",
+      "finish": "satin",
       "depth": "mid"
     }
   }
