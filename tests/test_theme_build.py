@@ -228,5 +228,20 @@ def test_profile_preference_survives_new_app_and_rejects_unknown_theme(c):
     assert c.settings.get('appearance_theme') == 'lightning-default'
 
 
+
+def test_follow_night_is_kept_by_the_profile_across_launches(c):
+    """BT-8U3: the PC's origin changes at every launch, so the switch lives in the profile and arrives in the head."""
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    first = TestClient(create_app(c))
+    assert '<meta name="lightning-follow-night" content="0">' in first.get('/settings').text
+    assert first.post('/settings/theme/night', data={'on': '1'}).status_code == 204
+    assert c.settings.get('appearance_follow_night') == '1'
+    second = TestClient(create_app(c))
+    assert '<meta name="lightning-follow-night" content="1">' in second.get('/settings').text
+    assert second.post('/settings/theme/night', data={'on': 'anything'}).status_code == 204
+    assert c.settings.get('appearance_follow_night') == '0'
+
+
 if __name__ == '__main__':
     unittest.main()

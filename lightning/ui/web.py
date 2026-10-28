@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextvars
+import functools
 import hashlib
 import json
 import logging
@@ -34,7 +35,7 @@ from lightning.core.money import ZERO, fmt, quantize, to_decimal
 from lightning.workflows import live_prices
 from lightning.ui import charts, sections
 from lightning.ui.themes import theme_id
-from lightning.ui.entitlements import owned as owned_themes
+from lightning.ui.entitlements import owned as owned_themes, store_themes
 from lightning.ui.i18n import BROWSER_UI, localize_html, localized_figures, translate
 
 UI_DIR = Path(__file__).parent
@@ -370,7 +371,7 @@ def phone_mode() -> bool:
 
 
 templates.env.globals["phone_mode"] = phone_mode
-templates.env.globals["store_themes"] = __import__("lightning.ui.entitlements", fromlist=["store_themes"]).store_themes
+templates.env.globals["store_themes"] = store_themes
 templates.env.globals["trend_end_labels"] = charts.end_labels
 
 
@@ -447,13 +448,16 @@ PHONE_CSS_SRC = {k: f"/static/phone-bundle{k}.css?v=" + hashlib.sha256(v).hexdig
 
 
 def _template_response(request, name, status_code, c, locale, total, owned_total, groups, context):
+    owned = owned_themes()  # licences are verified once per page: the head, the theme and Settings share it (BT-8U5)
     response = templates.TemplateResponse(
         request,
         name,
         {
             "base": c.base_currency,
-            "app_theme": theme_id(c.settings.get("appearance_theme")),
-            "owned_themes": " ".join(sorted(owned_themes())),
+            "app_theme": theme_id(c.settings.get("appearance_theme"), owned),
+            "store_themes": functools.partial(store_themes, owned),
+            "owned_themes": " ".join(sorted(owned)),
+            "follow_night": c.settings.get("appearance_follow_night") == "1",
             "locale": locale,
             "fig": localized_figures(locale),
             "arabic_ui_src": ARABIC_UI_SRC if locale == "ar" else "",

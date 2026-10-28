@@ -49,9 +49,10 @@ def paid_themes() -> dict[str, int]:
     return {t.get("item", t["id"]): t["version"] for t in _registry() if t.get("paid")}
 
 
-def store_themes() -> list[dict]:
-    """The paid themes for Settings, in registry order: id, name and whether this computer holds its licence."""
-    mine = owned()
+def store_themes(mine: frozenset[str] | None = None) -> list[dict]:
+    """The paid themes for Settings, in registry order: id, name and whether this computer holds its licence. A page
+    passes the `owned()` it already worked out, so licences are verified once per request."""
+    mine = owned() if mine is None else mine
     return [{"id": t["id"], "name": t["name"], "owned": t["id"] in mine}
             for t in _registry() if t.get("paid") and "item" not in t]
 
@@ -148,11 +149,12 @@ def owned() -> frozenset[str]:
     return frozenset(ids)
 
 
-def wearable(theme: str) -> bool:
+def wearable(theme: str, mine: frozenset[str] | None = None) -> bool:
     # LIGHTNING_THEME_REVIEW=1 is for maintainers reviewing themes before release (tools/theme_shots.py); the app
     # is open source, so this is a convenience, not a lock. Ownership is the store's signed licence.
     item = next((t.get("item", t["id"]) for t in _registry() if t["id"] == theme), theme)
-    return item not in paid_themes() or os.environ.get("LIGHTNING_THEME_REVIEW") == "1" or item in owned()
+    return item not in paid_themes() or os.environ.get("LIGHTNING_THEME_REVIEW") == "1" \
+        or item in (owned() if mine is None else mine)
 
 
 def _save(envelope: dict) -> None:

@@ -207,6 +207,15 @@ async def save_theme(request: Request):
     return Response(status_code=204)
 
 
+@router.post("/theme/night")
+async def save_theme_night(request: Request):
+    """Keep the "follow night" switch with the profile: the PC's loopback origin changes at every launch, so the
+    browser's own storage would forget it (BT-8U3)."""
+    form = await request.form()
+    container(request).settings.set("appearance_follow_night", "1" if form.get("on") == "1" else "0")
+    return Response(status_code=204)
+
+
 @router.post("/theme/unlock")
 async def unlock_theme(request: Request):
     """Exchange the one-time code from the website account page for the licence of the theme it was bought for, then wear

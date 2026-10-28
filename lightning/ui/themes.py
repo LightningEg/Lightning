@@ -15,10 +15,11 @@ def theme_ids() -> frozenset[str]:
     return frozenset(theme["id"] for theme in _registry())
 
 
-def theme_id(value: str) -> str:
-    """The theme to wear: a bundled one, and a paid one only with its licence here (lightning/ui/entitlements.py)."""
+def theme_id(value: str, owned: frozenset[str] | None = None) -> str:
+    """The theme to wear: a bundled one, and a paid one only with its licence here (lightning/ui/entitlements.py).
+    `owned` is the page's own `entitlements.owned()`, when it has already worked it out."""
     from lightning.ui.entitlements import wearable
-    return value if value in theme_ids() and wearable(value) else "lightning-default"
+    return value if value in theme_ids() and wearable(value, owned) else "lightning-default"
 
 
 def theme_name(value: str) -> str:
