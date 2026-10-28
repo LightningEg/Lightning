@@ -2,6 +2,7 @@
 title: Gam'eya and zakat follow-ups: no circle in the sample, no phone breakdown, an early-turn circle shown below zero
 type: bug
 look: visual
+severity: medium
 area: investments
 status: new
 created: 2026-10-19

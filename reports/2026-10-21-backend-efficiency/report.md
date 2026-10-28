@@ -1,6 +1,7 @@
 # Audit 2: backend efficiency and loose ends
 
-2026-10-21 · Codex · Lightning 1.3.0 · reviewed `e88a1b2`.
+Date: 2026-10-21 · Codex · Lightning 1.3.0 · reviewed `e88a1b2`.
+Reviewed commit: e88a1b2f10765e57f595c9dea30d91d2a850c58b (the commit the line above names)
 
 ## Fix follow-up
 

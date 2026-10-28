@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 77 open items, in the order they are worked on.
+10 milestones, 76 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -18,13 +18,9 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/1E-public-repository-security-audit.md) | improvement, technical | tools | ready |
 | **IT-1G** | [Cover all backend modules with explicit dependency and wiring contracts](1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | improvement, technical | tools | ready |
 | **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | tools | ready |
-| **IT-1J** | [Unused imports and variables keep coming back - ruff is not run in CI](1-easy-to-contribute/1J-ruff-in-ci.md) | improvement, technical | tools | ready |
-| **IT-1K** | [The plan's fields blur bugs with owner asks, areas overlap, and reports miss their header lines](1-easy-to-contribute/1K-tidy-how-the-plan-is-filed.md) | improvement, technical | docs | new |
-| IT-1K1 | ↳ Owner decisions (2026-10-28) | | | |
-| IT-1K2 | ↳ Make the generator check it | | | |
-| IT-1K3 | ↳ Reports catalogue | | | |
+| **IT-1J** | [Ruff skips the journal files until their claim merges](1-easy-to-contribute/1J-ruff-in-ci.md) | improvement, technical | tools | ready |
 
-Done: 1A, 1D, 1F, 1I. Next free code: 1L.
+Done: 1A, 1D, 1F, 1I, 1K. Next free code: 1L.
 
 ## 2 Safe for real money
 
@@ -40,10 +36,10 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | IT-2C3 | ↳ Native file pickers | | | |
 | IT-2C4 | ↳ Unresolved-evidence repair | | | |
 | IT-2C5 | ↳ Native notification delivery, Windows and Android | | | |
-| **BT-2E** | [The engine accepts some bad input - dates before an account opened, crafted ids, rounding of plan amounts](2-safe-for-real-money/2E-engine-input-checks.md) | bug, technical | transactions | ready |
-| **BT-2F** | [On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone](2-safe-for-real-money/2F-android-downloads-files-links.md) | bug, technical | android | ready |
-| **BT-2J** | [On a journal profile, retrying one add form can still save a second expense](2-safe-for-real-money/2J-register-submit-idempotency.md) | bug, technical | transactions | ready |
-| **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical | android | new |
+| **BT-2E** | [The engine accepts some bad input - dates before an account opened, crafted ids, rounding of plan amounts](2-safe-for-real-money/2E-engine-input-checks.md) | bug, technical · low | transactions | ready |
+| **BT-2F** | [On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone](2-safe-for-real-money/2F-android-downloads-files-links.md) | bug, technical · high | android | ready |
+| **BT-2J** | [On a journal profile, retrying one add form can still save a second expense](2-safe-for-real-money/2J-register-submit-idempotency.md) | bug, technical · medium | transactions | ready |
+| **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical · medium | android | new |
 | **IT-2Z** | [The net-worth bridge check cannot fail - its valuation change is whatever is left over](2-safe-for-real-money/2Z-net-worth-bridge-check-cannot-fail.md) ([#163](https://github.com/LightningEg/Lightning/issues/163)) | improvement, technical | reporting | ready |
 | **OW-2AA** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AA-stale-code.md) | owner task | architecture | ready |
 
@@ -55,7 +51,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 | Code | Item | Kind | Area | Status |
 |---|---|---|---|---|
-| **BV-3B** | [In Arabic the holdings table's price and FX split reads out of order](3-polish-and-arabic/3B-arabic-gain-split-reads-backwards.md) ([#34](https://github.com/LightningEg/Lightning/issues/34)) | bug, visual | arabic | new |
+| **BV-3B** | [In Arabic the holdings table's price and FX split reads out of order](3-polish-and-arabic/3B-arabic-gain-split-reads-backwards.md) ([#34](https://github.com/LightningEg/Lightning/issues/34)) | bug, visual · low | arabic | new |
 | **IV-3F** | [The phone's top bar looks too white to one user](3-polish-and-arabic/3F-phone-top-bar-looks-too-white.md) | improvement, visual | phone | ready |
 | **IV-3G** | [Outside review of every tab - one organism, fewer numbers, smarter links, less explaining](3-polish-and-arabic/3G-one-organism-review-of-every-tab.md) | improvement, visual | product | ready |
 | **IV-3H** | [Tab-by-tab review: what a real user needs next](3-polish-and-arabic/3H-tab-by-tab-review.md) | improvement, visual | product | building |
@@ -64,7 +60,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **IV-3Q** | [Visual audit - every KPI card should answer, compare and point; one card system for PC and phone](3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md) | improvement, visual | product | ready |
 | **IV-3S** | [PC screens break the guideline in 18 places not yet filed - misleading charts, colours off meaning](3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) | improvement, visual | product | ready |
 | **IV-3T** | [Phone screens break Part C - cut words, overlapping text, no way back on five pages, small targets, five Settings tabs](3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | improvement, visual | phone | ready |
-| **BV-3U** | [Arabic leftovers - the budget move preview arrow, two overlaps and a wrapped number](3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) ([#161](https://github.com/LightningEg/Lightning/issues/161)) | bug, visual | arabic | ready |
+| **BV-3U** | [Arabic leftovers - the budget move preview arrow, two overlaps and a wrapped number](3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) ([#161](https://github.com/LightningEg/Lightning/issues/161)) | bug, visual · low | arabic | ready |
 | **NF-3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | new feature | phone | new |
 | **OW-3AH** | [Visual flow acceptance on PC and phone](3-polish-and-arabic/3AH-visual-flow-acceptance.md) | owner task | product | ready |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/3AI-institution-logos.md) | owner task | accounts | ready |
@@ -79,7 +75,7 @@ Edit on the phone or the PC; one home confirms every change and nothing is lost.
 |---|---|---|---|---|
 | **NF-4A** | [Edit journal: edit anywhere, one home confirms](4-edit-journal-and-devices/4A-edit-journal.md) | new feature | devices | building |
 | **NF-4B** | [Multiple devices: implementation plan](4-edit-journal-and-devices/4B-multiple-devices.md) | new feature | devices | building |
-| **BT-4J** | [Sync and pairing hide their errors - a revoked or refused device looks like "home offline" forever](4-edit-journal-and-devices/4J-sync-and-pairing-hide-errors.md) | bug, technical | devices | ready |
+| **BT-4J** | [Sync and pairing hide their errors - a revoked or refused device looks like "home offline" forever](4-edit-journal-and-devices/4J-sync-and-pairing-hide-errors.md) | bug, technical · high | devices | ready |
 | BT-4J1 | ↳ Keep and show the last sync error | | | |
 | BT-4J2 | ↳ A revoked device says it is no longer paired | | | |
 | BT-4J3 | ↳ Clocks a minute apart cannot pair | | | |
@@ -106,9 +102,9 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | **NF-5E** | [Bonus shares and stock splits](5-investments/5E-bonus-shares-and-splits.md) | new feature | investments | blocked on 5A, 5B |
 | **IT-5F** | [One order of price sources](5-investments/5F-one-order-of-price-sources.md) | improvement, technical | investments | ready |
 | **NF-5G** | [Brokerages that span exchanges and currencies - structure, workflows and analysis to build](5-investments/5G-brokerages-across-exchanges.md) | new feature | investments | building |
-| **BV-5I** | [Gam'eya and zakat follow-ups: no circle in the sample, no phone breakdown, an early-turn circle shown below zero](5-investments/5I-gameya-and-zakat-follow-ups.md) | bug, visual | investments | new |
-| **BT-5J** | [Converting EGP to dollars raises net worth - the conversion's own rate revalues every dollar holding](5-investments/5J-conversion-raises-net-worth.md) | bug, technical | investments | new |
-| **BV-5K** | [A certificate's holding page shows price charts, nine empty "Units out" rows, no interest, and saves it as Equity Fund](5-investments/5K-certificate-holding-page.md) ([#162](https://github.com/LightningEg/Lightning/issues/162)) | bug, visual | investments | ready |
+| **BV-5I** | [Gam'eya and zakat follow-ups: no circle in the sample, no phone breakdown, an early-turn circle shown below zero](5-investments/5I-gameya-and-zakat-follow-ups.md) | bug, visual · medium | investments | new |
+| **BT-5J** | [Converting EGP to dollars raises net worth - the conversion's own rate revalues every dollar holding](5-investments/5J-conversion-raises-net-worth.md) | bug, technical · medium | investments | new |
+| **BV-5K** | [A certificate's holding page shows price charts, nine empty "Units out" rows, no interest, and saves it as Equity Fund](5-investments/5K-certificate-holding-page.md) ([#162](https://github.com/LightningEg/Lightning/issues/162)) | bug, visual · medium | investments | ready |
 
 Done: 5H, 5L. Next free code: 5M.
 
@@ -120,7 +116,7 @@ Prices arrive by themselves, from sources Lightning may redistribute.
 |---|---|---|---|---|
 | **NF-6A** | [Market data: price packs, collected in the cloud](6-market-data/6A-price-packs.md) | new feature | market | building |
 | **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](6-market-data/6B-europe-and-gcc-shares.md) | new feature | market | blocked on a source that allows redistribution |
-| **BT-6C** | [Download shared prices brings nothing: only the exchange-rate pack is published, and not since 11 Oct](6-market-data/6C-shared-prices-not-published.md) | bug, technical | market | ready |
+| **BT-6C** | [Download shared prices brings nothing: only the exchange-rate pack is published, and not since 11 Oct](6-market-data/6C-shared-prices-not-published.md) | bug, technical · medium | market | ready |
 | **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](6-market-data/6D-gold-price-source.md) | improvement, technical | market | blocked on a test from a home connection |
 
 Done: nothing yet. Next free code: 6E.

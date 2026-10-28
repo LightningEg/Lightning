@@ -1,7 +1,7 @@
 # v1.5.0 review and package preparation
 
 Date: 2026-10-26 · Reviewer: Codex
-Repository: app and website · Reviewed app base: d6bc3f1a5dd4599dfeb7c0a15aabc177ac98ba67
+Repository: app and website · Reviewed commit: d6bc3f1a5dd4599dfeb7c0a15aabc177ac98ba67 (the app base)
 
 ## Scope and method
 

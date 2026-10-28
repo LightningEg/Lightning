@@ -584,7 +584,7 @@ class InvestmentService:
             except ValidationError as error:
                 if kind != DocType.BUY or account_id == asked or cash_account_id is not None:
                     raise
-                pocket, broker = self.accounts.get(int(account_id)), self.accounts.get(int(asked))
+                broker = self.accounts.get(int(asked))
                 asset = self.assets.get_asset(int(asset_id))
                 home = self.accounts.broker_of(broker)
                 raise ValidationError(

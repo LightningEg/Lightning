@@ -216,7 +216,7 @@ def _features(c, accounts: dict[str, int], day: date) -> int:
     """Everything the monthly routine does not reach, so every part of Lightning has something to show: goals,
     a gam'eya, zakat, a reimbursement claim, cash held by Mom, a dollar account bought with pounds, investing
     targets, a saved report and a statement still waiting for decisions. Each uses the service its screen uses."""
-    cib, wallet, vodafone = accounts["CIB Payroll"], accounts["Cash wallet"], accounts["Vodafone Cash"]
+    cib, vodafone = accounts["CIB Payroll"], accounts["Vodafone Cash"]
     cat = lambda text: c.categories.find_by_text(text).id   # noqa: E731
     people = c.counterparties
 

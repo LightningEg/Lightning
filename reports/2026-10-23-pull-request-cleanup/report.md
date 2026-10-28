@@ -1,6 +1,7 @@
 # Audit 6: open pull request cleanup
 
-2026-10-23 · Codex · starting app main `fdbea6b`, website main `8a8a5c0`.
+Date: 2026-10-23 · Codex · starting app main `fdbea6b`, website main `8a8a5c0`.
+Reviewed commit: fdbea6b375a1080530cc679144710d4d5aef50fa (the commit the line above names) (app)
 
 The owner requested review and cleanup to zero open PRs. Original branches are retained. Changes are reconciled against current main and tested together before squash merging; closure does not delete source branches.
 

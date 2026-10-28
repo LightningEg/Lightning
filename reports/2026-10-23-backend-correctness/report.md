@@ -1,6 +1,7 @@
 # Audit 4: backend correctness and failure boundaries
 
-2026-10-23 · Codex · Lightning 1.4.2 · main `a19c844cad963ccd45e75baacd3c97cf774ecc83`.
+Date: 2026-10-23 · Codex · Lightning 1.4.2 · main `a19c844cad963ccd45e75baacd3c97cf774ecc83`.
+Reviewed commit: a19c844cad963ccd45e75baacd3c97cf774ecc83 (the commit the line above names)
 
 ## Assessment
 

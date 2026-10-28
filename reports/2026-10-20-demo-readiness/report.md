@@ -1,6 +1,7 @@
 # Audit 1: is Lightning ready to demo?
 
-2026-10-20 · Claude · app 1.3.0, commit `7591231` (main) · Mohab's 2026 sample and the demo household, prices offline.
+Date: 2026-10-20 · Claude · app 1.3.0, commit `7591231` (main) · Mohab's 2026 sample and the demo household, prices offline.
+Reviewed commit: 7591231c3937350907aa373c43aae10a31ea0b1b (the commit the line above names)
 
 The owner asked for a tight app to demo, not more features: (1) the engine works with no bugs, (2) the logic links the sections and suggests
 things (such as tracking a bill) without redundancy or pain points, (3) the screens follow the guideline with fitting, working visuals, and the phone

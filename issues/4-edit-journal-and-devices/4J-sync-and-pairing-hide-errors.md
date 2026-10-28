@@ -2,6 +2,7 @@
 title: Sync and pairing hide their errors - a revoked or refused device looks like "home offline" forever
 type: bug
 look: technical
+severity: high
 area: devices
 status: ready
 created: 2026-10-28
