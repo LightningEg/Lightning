@@ -118,6 +118,13 @@ def test_loan_notes_answer_the_end_date():  # Recurring's share of income is its
     assert due["title"] == "1 loan payment due now" and due["tone"] == "attention"
 
 
+def test_held_for_others_shows_its_total_once_as_the_figure():  # IT-1J: not repeated in the line under it (A16)
+    held = keynotes.held_for_others([{"owner": "Mom"}, {"owner": "Omar"}, {"owner": "Sara"}], D(12500))
+    assert held["figure"] == "12,500" and held["label"] == "Held for Mom, Omar and 1 more"
+    assert "12,500" not in held["text"]
+    assert keynotes.held_for_others([{"owner": "Mom"}], None)["figure"] == ""
+
+
 def test_comparing_spending_with_the_month_before():
     assert keynotes.compared(D(900), D(1000), "2026-08")["title"] == "100 less than 2026-08"
     assert keynotes.compared(D(1100), D(1000), "2026-08")["tone"] == "attention"

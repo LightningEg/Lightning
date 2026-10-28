@@ -386,7 +386,6 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
 
     @app.post("/profiles/confirm")
     async def confirm(request: Request):
-        form = await request.form()
         if session.pending is None:
             return page(request, "setup", error="Setup expired. Create the profile again.", status=400)
         pending = session.pending
@@ -606,7 +605,6 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
 
     @app.post("/profiles/recovery-key/confirm")
     async def confirm_recovery_key(request: Request):
-        form = await request.form()
         pending = session.pending_recovery
         def operation():
             session.confirm_recovery_key(pending.recovery if pending else "")
