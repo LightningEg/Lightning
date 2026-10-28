@@ -19,6 +19,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | v1.5.0-preparation | [v1.5.0 PR review, theme switching and package preparation](2026-10-26-v150-release/report.md) | 2026-10-26 |
 | users-main-questions | [Users' main questions: what each screen must answer, with known gaps](2026-10-27-users-main-questions/report.md) | 2026-10-27 |
 | store-and-community | [Store and community: unlocking themes, the market, rewards and staying in Lightning](2026-10-27-store-and-community/report.md) | 2026-10-27 |
+| audit-9 | [Audit 9: loose ends after themes and sync, linking sections, and how the plan is filed](2026-10-28-loose-ends-and-linking/report.md) | 2026-10-28 |
 
 ## Create and maintain a report
 

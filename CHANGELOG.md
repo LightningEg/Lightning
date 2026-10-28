@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-28 · Claude: Audit 9 (`reports/2026-10-28-loose-ends-and-linking/`): theme, sync/pairing and lint loose ends, section-linking ideas, and how issues/reports are filed; new items 1J, 1K, 4J, 4K, 7T, 8U.
 - 2026-10-28 · Claude: [6E] Every wallet and fintech logo in `assets/institutions-logos/` is linked: 22 institutions added (bank wallets, Halan, Khazna, MoneyFellows, InstaPay and more); tiles trimmed to the mark (`tools/bundle_institution_logos.py`). Codex's import workflow pinned like the others.
 - 2026-10-28 · Codex: [6E] Rename logo catalog to `assets/institutions-logos/` and add repeatable collection of Egyptian mobile-wallet, fintech and broker logos with app-picker icons.
 
