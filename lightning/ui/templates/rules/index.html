@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Rules · Settings{% endblock %}
-{% block heading %}<div><h1>{{ 'Settings'|tr(locale) }}</h1></div>{% endblock %}
+{% block title %}Rules{% endblock %}
+{% block heading %}<div><h1>{{ 'Rules'|tr(locale) }}</h1></div>{% endblock %}
 {% block top_actions %}<a class="btn primary" data-popup-open href="/rules/new">{{ "Add rule"|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% if undo %}<form method="post" action="/rules/undo" class="card rule-undo"><span>{{ "Refiled the wrong ones?"|tr(locale) }}</span><input type="hidden" name="token" value="{{ undo }}"><button class="btn">{{ 'Undo'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}

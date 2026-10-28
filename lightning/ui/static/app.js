@@ -956,6 +956,11 @@ if (ledger) {
     const back = document.createElement("input"); back.type = "hidden"; back.name = "back"; back.value = location.pathname + location.search; form.append(back);
     ids.forEach((id) => { const input = document.createElement("input"); input.type = "hidden"; input.name = "txn_ids"; input.value = id; form.append(input); });
   });
+  // PC P7: a rule from the selection, prefilled with the first selected payee.
+  document.getElementById("rule-from-selected")?.addEventListener("click", () => {
+    const box = selectedIds().map((id) => document.querySelector(`.transaction-select[value="${id}"]`)).find((b) => b?.dataset.payee);
+    location.href = "/rules/new" + (box ? "?counterparty=" + encodeURIComponent(box.dataset.payee) : "");
+  });
   document.getElementById("export-selected")?.addEventListener("click", () => {
     const ids = selectedIds();
     if (!ids.length) return;
