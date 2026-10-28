@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download actual Egyptian bank logo artwork into assets/bank-logos (one-time)."""
+"""Download actual Egyptian bank logo artwork into assets/institutions-logos (one-time)."""
 import io, json, sys
 from pathlib import Path
 from PIL import Image, ImageOps, ImageDraw
@@ -7,7 +7,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 ROOT=Path(__file__).resolve().parent.parent
-TARGET=ROOT/"assets"/"bank-logos"
+TARGET=ROOT/"assets"/"institutions-logos"
 LOGOS={
 "abk":"abk","cib":"cib","arab-bank":"arab-bank","aaib":"aaib","aib":"aib",
 "ealb":"ealb","saib":"saib","abc":"abc","united-bank":"united-bank",
