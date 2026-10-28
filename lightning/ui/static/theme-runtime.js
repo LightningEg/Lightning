@@ -42,7 +42,8 @@
     if (!meta || !details) return;
     details.open = true;
     const link = details.querySelector('[data-theme-prices]');
-    if (link) link.href = 'https://lightningeg.com/marketplace.html?item=' + encodeURIComponent(meta.item || meta.id) + '&from=app#themes';
+    // The page's own marketplace address, in its language, comes from the server (entitlements.marketplace_url).
+    if (link && link.dataset.marketplace) link.href = link.dataset.marketplace + '?item=' + encodeURIComponent(meta.item || meta.id) + '&from=app#themes';
   }
   function apply(id, persist = true) {
     const next = normalize(id);

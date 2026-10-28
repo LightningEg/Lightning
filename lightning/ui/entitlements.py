@@ -25,6 +25,17 @@ STORE = Path(__file__).resolve().parents[1] / "security" / "store_keys.json"
 REGISTRY = Path(__file__).parent / "static" / "themes.generated.json"
 
 
+# The website's marketplace: the one outside page the app opens (in the system browser), in the page's language. The
+# PC window (desktop/window.py) and the phone (MainActivity.java) allow exactly these paths (BT-8U6).
+MARKETPLACE_HOST = "lightningeg.com"
+MARKETPLACE_PATHS = {"en": "/marketplace.html", "ar": "/ar/marketplace.html"}
+
+
+def marketplace_url(locale: str = "en") -> str:
+    """The marketplace page for this language, without query or fragment: pages add ?from=app and the item."""
+    return f"https://{MARKETPLACE_HOST}{MARKETPLACE_PATHS.get(locale, MARKETPLACE_PATHS['en'])}"
+
+
 class UnlockError(ValueError):
     """A message the person can act on."""
 
