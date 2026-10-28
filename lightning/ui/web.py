@@ -431,7 +431,7 @@ def _asset_hash(name: str) -> str:
     return hashlib.sha256((UI_DIR / "static" / name).read_bytes()).hexdigest()[:12]
 
 
-def asset(name: str) -> str:
+def static_url(name: str) -> str:
     """A bundled static file's URL with its content hash, like the phone bundle: a changed file gets a new URL by
     itself, so nobody bumps ?v= by hand and a cached old stylesheet never meets new theme code (BT-8U5)."""
     if ".." in name or name.startswith("/"):
@@ -439,7 +439,7 @@ def asset(name: str) -> str:
     return f"/static/{name}?v={_asset_hash(name)}"
 
 
-templates.env.globals["asset"] = asset
+templates.env.globals["static_url"] = static_url
 
 
 # The browser half of the Arabic table, served once as a cached script instead of inside every Arabic page (3AC).

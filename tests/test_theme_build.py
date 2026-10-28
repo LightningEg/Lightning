@@ -134,7 +134,7 @@ class ThemeBuildTests(unittest.TestCase):
         # geometry is never a material: no padding, margins, fonts, radii, border widths, gaps or line heights
         self.assertNotRegex(css, r'[;{\s](padding|margin|font|border-radius|border-width|gap|line-height|min-height)[a-z-]*\s*:(?!\s*inherit)')
         source = (ROOT / 'lightning/ui/templates/base.html').read_text()
-        self.assertLess(source.index("asset('theme-surfaces.css')"), source.index("asset('theme-materials.css')"))
+        self.assertLess(source.index("static_url('theme-surfaces.css')"), source.index("static_url('theme-materials.css')"))
         from lightning.ui.web import PHONE_CSS  # the phone shell loads one bundle, built in this order
         self.assertLess(PHONE_CSS.index('theme-surfaces.css'), PHONE_CSS.index('theme-materials.css'))
 
@@ -258,18 +258,18 @@ class ThemeBuildTests(unittest.TestCase):
 
     def test_both_shells_boot_before_layout_styles(self):
         source = (ROOT / 'lightning/ui/templates/base.html').read_text()
-        self.assertLess(source.index('partials/theme_head.html'), source.index("asset('style.rtl.css'"))
-        self.assertLess(source.index("asset('style.rtl.css'"), source.index("asset('themes.generated.css')"))
+        self.assertLess(source.index('partials/theme_head.html'), source.index("static_url('style.rtl.css'"))
+        self.assertLess(source.index("static_url('style.rtl.css'"), source.index("static_url('themes.generated.css')"))
         # BT-8U5: every static file in both shells carries its content hash; nobody bumps ?v= by hand
         head = (ROOT / 'lightning/ui/templates/partials/theme_head.html').read_text()
         for text in (source, head, (ROOT / 'lightning/ui/templates/phone/base.html').read_text()):
             self.assertNotRegex(text, r'/static/[^"]+\?v=\d')
-        from lightning.ui.web import asset
+        from lightning.ui.web import static_url
         import hashlib
-        self.assertEqual(asset('theme-runtime.js'), '/static/theme-runtime.js?v=' + hashlib.sha256(
+        self.assertEqual(static_url('theme-runtime.js'), '/static/theme-runtime.js?v=' + hashlib.sha256(
             (ROOT / 'lightning/ui/static/theme-runtime.js').read_bytes()).hexdigest()[:12])
         with self.assertRaises(ValueError):
-            asset('../web.py')
+            static_url('../web.py')
         phone = (ROOT / 'lightning/ui/templates/phone/base.html').read_text()
         self.assertLess(phone.index('partials/theme_head.html'), phone.index('phone_css_src'))
         from lightning.ui.web import PHONE_CSS
