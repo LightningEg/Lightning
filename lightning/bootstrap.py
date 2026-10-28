@@ -135,6 +135,11 @@ class Container:
         return ActivityReview(self)
 
     @property
+    def linked(self):
+        from lightning.workflows.linked import LinkedSections
+        return LinkedSections(self)
+
+    @property
     def salary_setup(self):
         from functools import partial
         from types import SimpleNamespace

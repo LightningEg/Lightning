@@ -470,6 +470,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
     return render(
         request, "register.html", status_code=status_code,
         account=account,
+        depends=c.linked.account(account.id) if account else None,
         account_spendable=account.counts_as_spendable(c.base_currency) if account else None,
         pocket_cash=_pocket_cash(c, account),
         broker=c.accounts.broker_of(account) if account and account.parent_id else None,

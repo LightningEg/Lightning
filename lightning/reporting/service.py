@@ -777,6 +777,36 @@ class ReportingService:
             money_in, money_out = money_in + got_in, money_out + got_out
         return money_in, money_out
 
+    def flows_by_account_and_category(self, txn_ids: set[int]) -> list[dict]:
+        """Money in and Money out of the given transactions, one row per account and category, by the one flow
+        rule: the rows add up to money_in_out (a tag's totals, 7T4)."""
+        rows: dict[tuple[int, int], dict] = {}
+        for row in self.q.account_category_totals_for(sorted(txn_ids)):
+            got_in, got_out = flow_of(row["effect"], from_e6(row["total"]), self.categories.get(row["category_id"]))
+            entry = rows.setdefault((row["account_id"], row["category_id"]), {
+                "account_id": row["account_id"], "category_id": row["category_id"], "money_in": ZERO, "money_out": ZERO})
+            entry["money_in"] += got_in
+            entry["money_out"] += got_out
+        return list(rows.values())
+
+    def counterparty_months(self, counterparty_id: int, date_from: date | str, date_to: date | str) -> list[dict]:
+        """One counterparty's Money in and Money out by month, oldest first, every month of the range listed
+        (a month with nothing is zero), by the one flow rule (7T2)."""
+        start, end = parse_date(self._day(date_from)), parse_date(self._day(date_to))
+        months: dict[str, dict] = {}
+        at = start.replace(day=1)
+        while at <= end:
+            key = f"{at.year:04d}-{at.month:02d}"
+            months[key] = {"month": key, "money_in": ZERO, "money_out": ZERO}
+            at = (at.replace(day=28) + timedelta(days=4)).replace(day=1)
+        for row in self.q.counterparty_month_totals(counterparty_id, fmt_date(start), fmt_date(end)):
+            got_in, got_out = flow_of(row["effect"], from_e6(row["total"]), self.categories.get(row["category_id"]))
+            entry = months.get(row["month"])
+            if entry:
+                entry["money_in"] += got_in
+                entry["money_out"] += got_out
+        return list(months.values())
+
     def register_flows(self, account_id: int | None, date_from: date | str, date_to: date | str) -> tuple[Decimal, Decimal]:
         """Money in and Money out of a register's period: every account's by cash_flow, one account's by the same rule."""
         if account_id is None:
