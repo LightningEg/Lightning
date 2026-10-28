@@ -11,7 +11,7 @@ Reviewed the prior engine audit and its open follow-ups, the exchange-rate looku
 
 Low: date input accepts `0001-01-01`, but a foreign exchange lookup on that date raised `OverflowError` while calculating the 45-day search floor. Clamp the floor to the earliest supported date; preserve the ordinary 45-day cutoff. `tests/test_fx_rates.py::test_rate_lookup_at_start_of_calendar` checks missing, present and expired rates at this boundary.
 
-The PC Mohab year and `tests/test_fx_rates.py` pass on the reviewed checkout with the fix.
+The PC Mohab year passed on the reviewed checkout before the fix; `tests/test_fx_rates.py` passed with the fix. A later local test-client startup stalled; the full suite needs CI verification.
 
 ## Limits
 
