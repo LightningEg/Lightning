@@ -209,7 +209,7 @@ class LinkedSections:
         day = as_of or today()
         plans = [{"id": item.id, "name": item.name, "kind": item.kind.value, "kind_label": item.kind_label,
                   "amount": item.amount, "href": "/plan/loans" if item.kind.value == "LOAN" else "/plan/recurring"}
-                 for item in c.planning.items() if item.account_id == account.id]
+                 for item in sorted(c.planning.items(), key=lambda item: -item.amount) if item.account_id == account.id]
         circles = [dict(row) | {"installment": from_e6(row["installment_e6"]), "payout": from_e6(row["payout_e6"])}
                    for row in self.db.all(
             "SELECT g.id,g.name,t.installment_e6,t.payout_e6,t.funding_account_id,t.payout_account_id "
@@ -224,7 +224,8 @@ class LinkedSections:
             "ORDER BY c.maturity_date,c.id", (account.id,))]
         reserves = [row for row in c.reserves.list_active() if row.get("account_id") == account.id]
         shortfall = None
-        if account.account_type.value in ("CASH", "BANK", "BROKERAGE") and account.active:
+        # Only scheduled payments, circles and certificates move a dated balance: without them there is no date.
+        if account.account_type.value in ("CASH", "BANK", "BROKERAGE") and account.active and (plans or circles or certificates):
             dated = getattr(c.forecaster.forecast(day), "dated", None)
             shortfall = next((item for item in getattr(dated, "account_shortfalls", ()) or ()
                               if item.account_id == account.id), None)

@@ -2774,6 +2774,14 @@ ARABIC_UI = {
     'Held for them in {name}': 'محفوظ ليهم في {name}',
     '{amt} set aside': '{amt} متجنب',
     'Nothing in the last 12 months': 'مفيش حاجة في آخر 12 شهر',
+    'What depends on this account': 'اللي معتمد على الحساب ده',
+    'Goes below zero on {date}': 'هيبقى بالسالب يوم {date}',
+    'Scheduled payments leave it short': 'المدفوعات المجدولة هتخليه ناقص',
+    'Gam’eya paid from here': 'جمعية بتتدفع من هنا',
+    'Gam’eya payout comes here': 'قبض الجمعية بييجي هنا',
+    'Certificate interest comes here · matures {date}': 'عائد الشهادة بييجي هنا · بتستحق {date}',
+    'Reserve held here': 'مبلغ محجوز هنا',
+    '{n} plans, circles, certificates or reserves still use this account. Choose another account for them first.': '{n} من الخطط أو الجمعيات أو الشهادات أو المبالغ المحجوزة لسه بتستخدم الحساب ده. اختار لهم حساب تاني الأول.',
 }
 
 

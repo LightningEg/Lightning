@@ -201,7 +201,8 @@ PAGE_READ_BUDGET = {
     "/": 450,  # three years of history; tools/perf_check.py keeps the sample's 400-query limit
     # 3AC (2026-10-22): the budget's month view, plan summary, income average and cash flow are cached; Budget for
     # the month 92 reads, for all months 119 (was 334), Expense analysis 139.
-    "/accounts/1": 120, "/transactions": 110, "/budget?period=month": 120,
+    # 7T3 (2026-10-28): an account that plans pay from reads the dated forecast once for the day it goes below zero.
+    "/accounts/1": 150, "/transactions": 110, "/budget?period=month": 120,
     "/budget?period=all": 160, "/plan": 250, "/investments": 175, "/birdview/expenses?period=all": 180,
 }
 

@@ -126,3 +126,31 @@ def test_the_counterparty_page_opens_from_the_list_and_the_transaction(sample):
     txn = c.db.scalar("SELECT id FROM transactions WHERE counterparty_id=14 AND status='POSTED' LIMIT 1")
     assert 'href="/counterparties/14"' in client.get(f"/transactions/{txn}").text
     assert client.get("/counterparties/999999", follow_redirects=False).headers["location"].startswith("/counterparties")
+
+
+# ------------------------------------------------------------------ 7T3
+def test_an_account_lists_what_depends_on_it_and_deactivating_warns_first(sample):
+    c, client = sample
+    payroll = c.linked.account(1)
+    assert {"Landlord", "Car loan", "ACME Egypt"} <= {plan["name"] for plan in payroll["plans"]}
+    assert [plan["amount"] for plan in payroll["plans"]] == sorted((p["amount"] for p in payroll["plans"]), reverse=True)
+    assert [circle["name"] for circle in payroll["circles"]] == ["Office gam'eya"]
+    assert payroll["certificates"] and payroll["count"] >= 10
+    assert c.linked.account(2)["count"] == 0
+    page = client.get("/accounts/3").text
+    assert 'id="account-depends"' in page and "Vodafone" in page
+    assert "still use this account" in page  # the Deactivate button asks first
+    assert 'id="account-depends"' not in client.get("/accounts/2").text  # nothing depends: the section is left out
+
+
+def test_the_first_day_an_account_goes_below_zero_comes_from_the_dated_forecast(sample):
+    c, _ = sample
+    with c.db.transaction():
+        item_id = c.planning.create(kind="BILL", name="Big bill", amount="900000", frequency="ONCE",
+                                    start_date="2026-10-20", account_id=3)
+    try:
+        shortfall = c.linked.account(3)["shortfall"]
+        assert shortfall is not None and shortfall.date == "2026-10-20" and shortfall.balance < 0
+    finally:
+        with c.db.transaction():
+            c.planning.remove(item_id)
