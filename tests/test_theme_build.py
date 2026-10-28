@@ -192,6 +192,27 @@ class ThemeBuildTests(unittest.TestCase):
                     self.assertTrue(material, 'a textured or animated theme has a material')
                 self.assertEqual(len(running), 1 if tier == 'motion' else 0, 'only the animated tier runs a motion')
 
+    def test_held_keeps_its_hue_and_reads_on_every_theme_card(self):
+        """BT-8U4: Azure held is generated per theme, same hue, at 4.5:1 on the card's darkest point and its tint."""
+        import colorsys
+        contract = json.loads((builder.SOURCE / 'slots.json').read_text())
+        hls = lambda h: colorsys.rgb_to_hls(*(int(h[i:i+2], 16) / 255 for i in (1, 3, 5)))
+        for path in sorted(builder.SOURCE.glob('*.json')):
+            if path.name in ('slots.json', 'lightning-default.json'):
+                continue
+            manifest, parts = builder.load(path)
+            p = parts['palette']
+            card = builder.worst(p, parts, 'cards', p[parts['cards']['surface']], contract['limits'])
+            css = builder.compile_theme(manifest, parts, contract)
+            colour = css.split('--theme-held: ')[1][:7]
+            with self.subTest(theme=manifest['id']):
+                self.assertAlmostEqual(hls(colour)[0], hls(builder.HELD)[0], delta=0.01)
+                self.assertGreaterEqual(builder.contrast(colour, card), 4.5)
+                self.assertGreaterEqual(builder.contrast(colour, builder.mix(card, colour, builder.HELD_TINT)), 4.5)
+        surfaces = (ROOT / 'lightning/ui/static/theme-surfaces.css').read_text()
+        self.assertNotIn('#7FB2FF', surfaces.upper())
+        self.assertIn('var(--theme-held)', surfaces)
+
     def test_money_is_not_recoloured(self):
         self.manifest['parts']['cards']['border'] = 'accent'
         manifest, parts = self.validate()

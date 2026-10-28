@@ -58,6 +58,24 @@ def worst(p, parts, slot, surface, limits):
     shaded = mix(surface, p["text"], lift)
     return mix(shaded, p["accent"], ARTWORK_ALPHA) if material.get("artwork", "none") != "none" else shaded
 
+HELD = "#7FB2FF"  # Azure held (guideline A03) as themes wear it on their own surfaces: its hue never moves
+HELD_TINT = 16  # theme-surfaces.css lays held at 16% over the card for its tint (--theme-tint-info)
+
+def held(card):
+    """Azure held for this card: the same hue and saturation, darker on a light card and lighter on a dark one, until
+    the held glyph reads at 4.5:1 on the card and on its own tint. A money meaning keeps its colour family; only its
+    lightness answers the ground (BT-8U4)."""
+    import colorsys
+    r, g, b = (int(HELD[i:i+2], 16) / 255 for i in (1, 3, 5))
+    hue, light, sat = colorsys.rgb_to_hls(r, g, b)
+    step = -0.01 if contrast(card, "#FFFFFF") < contrast(card, "#000000") else 0.01
+    while 0 <= light <= 1:
+        colour = "#" + "".join(f"{round(v * 255):02X}" for v in colorsys.hls_to_rgb(hue, light, sat))
+        if min(contrast(colour, card), contrast(colour, mix(card, colour, HELD_TINT))) >= 4.5:
+            return colour
+        light += step
+    raise ValueError(f"Azure held cannot reach 4.5:1 on {card}")
+
 def load(path):
     contract = json.loads((SOURCE / "slots.json").read_text())
     default = json.loads((SOURCE / "lightning-default.json").read_text())
@@ -220,6 +238,7 @@ def compile_theme(manifest, parts, contract):
     values["theme-on-accent"] = p[parts["controls"]["label"]]
     # The manifest's own money colours, for tints on its dark surfaces (theme-surfaces.css); the default keeps its paint.
     values.update({"theme-income": p["income"], "theme-expense": p["expense"]})
+    values["theme-held"] = held(worst(p, parts, "cards", p[parts["cards"]["surface"]], contract["limits"]))
     values["theme-logo"] = "url(/static/lightning-mark-on-dark.svg)" if parts["brand"]["logoVariant"] == "on-dark" else "url(/static/lightning-mark.svg)"
     scheme = "dark" if contrast(p["background"], "#FFFFFF") > contrast(p["background"], "#000000") else "light"
     values.update(material_values(parts, contract, scheme))
