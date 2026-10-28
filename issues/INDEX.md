@@ -166,4 +166,3 @@ Good ideas that wait until the milestones above are done.
 | **9L** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](9-later/9L-stale-code.md) | owner | architecture | ready |
 
 Done: 9G, 9H, 9I. Next free code: 9M.
-
