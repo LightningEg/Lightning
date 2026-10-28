@@ -1,5 +1,5 @@
 ---
-title: Journal code - lab module in production, copied helpers, an import cycle, two pairing clients
+title: Journal code - two pairing clients
 type: tech
 area: devices
 status: ready
@@ -11,24 +11,12 @@ repo: app
 
 ## Report
 
-Audit 9 B5-B10: `../../reports/2026-10-28-loose-ends-and-linking/report.md`. No behaviour changes; under the journal claim in `NOW.md`.
-
-## 4K1 Keep the lab out of production
-
-`runtime/journal_profile.py:259` imports `LabServer` from `journal_lab.py`; `journal_setup.py:18` uses `open_lab`. Move the server to `runtime/http.py`. The production join says "This preview joins compatible dummy replicas" (`journal_pairing.py:96-97`).
-
-## 4K2 One canonical hash, named limits
-
-Canonical JSON + hash is rebuilt in `finance.py:462`, `journal_move.py:29-32`, `backups.py:263,281,315`, `cutover.py:68-164`, `areas/workflows.py:85,143`, `areas/imports.py:58`, `automation.py:285`: add `codec.stable_digest()` without the 256-item cap. Name the pairing limits (12, 3, 600 in `journal_pairing.py:74`, `pairing.py:77,191,260`); use the desk clock, not `time.time()`.
-
-## 4K3 One errors module
-
-`cloud.py:127,150` and `local.py:239` import each other's errors inside functions. Move them to `sync/journal/errors.py`.
+Audit 9 B8: `../../reports/2026-10-28-loose-ends-and-linking/report.md`. No behaviour changes; under the journal claim in `NOW.md`. 4K1-4K3 and 4K5 were done on 2026-10-28 (branch `claude/sync-errors-and-journal-tidy`, `tests/test_journal_tidy.py`).
 
 ## 4K4 One pairing client
 
-`runtime/journal_enrollment.NewJournalReplica` and `runtime/journal_pairing.NearbyPairing` repeat find, join, resume, compare, prove, finish and cancel, and already differ on "waiting".
+`runtime/journal_enrollment.NewJournalReplica` and `runtime/journal_pairing.NearbyPairing` repeat find, join, resume, compare, prove, finish and cancel. Not merged in 4K: they differ in behaviour, not only in storage (an enrollment slot file against `journal_local`). On "waiting", `resume()` asks the home for status in enrollment but leaves it to `finish()` in nearby pairing; `compare()` checks the offer before or after the failed flag; cancel and finish have different preconditions (an encrypted copy being installed; membership accepted in place). One driver needs those choices made first, with the owner or in 4A, then a store interface both use.
 
-## 4K5 Role fence and dead code
+## Note
 
-`runtime/devices.py:130,171` picks the journal role from marker files: one `is_journal_profile()` with a test. Dead: the cancel branch at `journal_pairing.py:222`; guards above docstrings at `devices.py:139,171,190`; stale `sync/__init__.py` docstring. Lending (`lightning/sync/*.py`) is still live; its retirement after J6 needs an item then.
+Lending (`lightning/sync/*.py`) is still live; its retirement after J6 needs an item then. `runtime/journal_setup.py` still uses `open_lab`: it is the dummy-lab enrollment tool and only accepts a lab marked dummy.

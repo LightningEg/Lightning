@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-28 · Claude: [BT-4J][IT-4K] Sync and pairing say what went wrong: last sync error on Devices, a removed device learns it on contact and stops, clocks 15 minutes apart pair, expiry shown. Journal tidy: one errors module, `codec.stable_digest`, named pairing limits, lab out of production, one `is_journal_profile`.
 - 2026-10-28 · Claude: [IV-8V] Dendera made premium: pointer light on cards, press sheen, satin/lacquer/gloss finishes, gold-leaf tabs at night; 0 elements moved, contrast passes. `tools/theme_shots.py` waits for each theme to take.
 - 2026-10-28 · Claude: [BT-8U][IT-1J][IT-1K] Paid-theme licences survive a version bump; unlock errors say busy or too many tries; Settings says "on this device" when sharing waits; profile theme test runs; unused imports cut; INDEX sorts done codes, reports by date.
 - 2026-10-28 · Claude: [IV-8V] Filed: Dendera is flatter than its 1,000-coin tier (no answering motions, flat materials); upgrade before its first licence.

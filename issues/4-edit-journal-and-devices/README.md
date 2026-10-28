@@ -1,6 +1,6 @@
 ---
 title: Edit journal and devices
-done: 4C, 4D, 4E, 4F, 4G, 4H, 4I
+done: 4C, 4D, 4E, 4F, 4G, 4H, 4I, 4J
 ---
 
 **Goal.** Edit on the phone or the PC; one home confirms every change and nothing is lost.
