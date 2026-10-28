@@ -35,7 +35,7 @@ midbank,MIDBank,MIDBank,ميد بنك,bank,midbank.com.eg,midbank.png,,
 nasser,Nasser Social Bank,Nasser Bank,بنك ناصر الاجتماعي,bank,nasserbank.gov.eg,,,
 citibank,Citibank Egypt,Citibank,سيتي بنك مصر,bank,citibank.com,citibank.png,,
 bank-nxt,Bank NXT,Bank NXT,بنك نكست,bank,banknxt.com.eg,bank-nxt.png,,
-thndr,THNDR,THNDR,ثندر,broker,thndr.app,,egx eg-funds,EGP
+thndr,THNDR,THNDR,ثندر,broker,thndr.app,thndr.png,egx eg-funds,EGP
 efg-hermes,EFG Hermes,EFG Hermes,إي إف جي هيرمس,broker,efghermes.com,,egx eg-funds gcc,EGP
 azimut,Azimut Egypt,Azimut,أزيموت مصر,broker,azimut.eg,,egx eg-funds,EGP
 ci-capital,CI Capital,CI Capital,سي آي كابيتال,broker,cicapital.com,,egx eg-funds,EGP
@@ -57,13 +57,13 @@ sahm-capital,Sahm Capital,Sahm,سهم كابيتال,broker,,,gcc us,SAR
 emirates-nbd-securities,Emirates NBD Securities,ENBD Securities,الإمارات دبي الوطني للأوراق المالية,broker,,,gcc,AED
 charles-schwab-intl,Charles Schwab International,Schwab International,تشارلز شواب الدولية,broker,,,us,USD
 trading-212,Trading 212,Trading 212,تريدينج 212,broker,trading212.com,,us europe,USD
-vodafone-cash,Vodafone Cash,Vodafone Cash,فودافون كاش,wallet,vodafone.com.eg,,,
-orange-cash,Orange Cash,Orange Cash,أورنج كاش,wallet,orange.eg,,,
-etisalat-cash,e& Cash,e& Cash,اتصالات كاش,wallet,etisalat.eg,,,
-telda,Telda,Telda,تلدا,wallet,telda.app,,,
-we-pay,WE Pay,WE Pay,وي باي,wallet,te.eg,,,
-valu,valU,valU,فاليو,fintech,valu.com.eg,,,
-fawry,Fawry,Fawry,فوري,fintech,fawry.com,,,
+vodafone-cash,Vodafone Cash,Vodafone Cash,فودافون كاش,wallet,vodafone.com.eg,vodafone-cash.png,,
+orange-cash,Orange Cash,Orange Cash,أورنج كاش,wallet,orange.eg,orange-cash.png,,
+etisalat-cash,e& Cash,e& Cash,اتصالات كاش,wallet,etisalat.eg,etisalat-cash.png,,
+telda,Telda,Telda,تلدا,wallet,telda.app,telda.png,,
+we-pay,WE Pay,WE Pay,وي باي,wallet,te.eg,we-pay.png,,
+valu,valU,valU,فاليو,fintech,valu.com.eg,valu.png,,
+fawry,Fawry,Fawry,فوري,fintech,fawry.com,fawry.png,,
 egypt-post,Egypt Post,Egypt Post,البريد المصري,bank,egyptpost.gov.eg,,,
 standard-chartered,Standard Chartered Egypt,Standard Chartered,ستاندرد تشارترد مصر,bank,sc.com/eg,standard-chartered.png,,
 united-bank,The United Bank,United Bank,المصرف المتحد,bank,theubeg.com,united-bank.png,,
