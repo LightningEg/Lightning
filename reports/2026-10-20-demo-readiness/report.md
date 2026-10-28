@@ -15,7 +15,7 @@ code or in a screenshot before filing. Each finding is now an item in [the plan]
 | 2 Logic | **The smart parts exist and mostly work, but three of them break trust and the rest are hidden.** Bill matching misses cross-account payments and offers last month's payment. Early salary counts twice. A false "your income went up" is the first nudge. | [7K](https://github.com/LightningEg/Lightning/blob/a64b83c0a84dc96f7e0f728b5e5317c461a0668d/issues/7-planning-import-and-search/7K-payment-matching-trust.md), [7L1](../../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md), [3V](https://github.com/LightningEg/Lightning/blob/ea9000e1599b7d7b4eb0c56f332fca276285d9d7/issues/3-polish-and-arabic/3V-demo-data-shows-the-smart-features.md) |
 | 3 PC visuals | **Close to the guideline.** The brand audit passes, there are no JavaScript errors and every control works. One page scrolls sideways, and a few charts mislead. | [3S](../../issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) 1–5, [3C](https://github.com/LightningEg/Lightning/blob/a4fc8d36cc1271143c8f126ed47bc3056b53477a/issues/3-polish-and-arabic/3C-chart-end-labels-overlap.md), [3A](https://github.com/LightningEg/Lightning/blob/a4fc8d36cc1271143c8f126ed47bc3056b53477a/issues/3-polish-and-arabic/3A-rate-decimals-and-arabic-order.md) |
 | Phone | **Usable, with three visible bugs in the first minute.** Every sheet shows a copy of the page's undo pill and tabs. Save does nothing without a category. The raise prompt covers the top bar. On Android, backup and import do nothing. | [3R](https://github.com/LightningEg/Lightning/blob/15bccff91edd2d32baa4252fd01d28cc8374ee35/issues/3-polish-and-arabic/3R-sheets-silent-save-and-prompt-over-top-bar.md), [2F](../../issues/2-safe-for-real-money/2F-android-downloads-files-links.md) |
-| Arabic | **Nearly all translated and mirrored, but numbers can read wrong.** The "·" beside a number looks like the Arabic zero, so "Late 17 days" reads as 170. Decimals mix "." and ",". About ten strings are still English, one of them on every page. | [3U](../../issues/3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) 1–3 |
+| Arabic | **Nearly all translated and mirrored, but numbers can read wrong.** The "·" beside a number looks like the Arabic zero, so "Late 17 days" reads as 170. Decimals mix "." and ",". About ten strings are still English, one of them on every page. | [3U](https://github.com/LightningEg/Lightning/blob/8f808161d26da6a62840b32bdb6aaad4a19eeff3/issues/3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) 1–3 |
 
 **In one line:** the engine can be shown today. What a viewer sees first can't yet: the demo data raises false alarms, the smart features sit two
 or three clicks down, and the phone has three bugs. The cut list below fixes those first.
@@ -34,7 +34,7 @@ Must fix (each is small and is seen in the first minutes):
    - [3C](https://github.com/LightningEg/Lightning/blob/a4fc8d36cc1271143c8f126ed47bc3056b53477a/issues/3-polish-and-arabic/3C-chart-end-labels-overlap.md) and 3S 2: chart end labels overlap.
    - [3A](https://github.com/LightningEg/Lightning/blob/a4fc8d36cc1271143c8f126ed47bc3056b53477a/issues/3-polish-and-arabic/3A-rate-decimals-and-arabic-order.md): "51.600000" rate.
    - [5H](https://github.com/LightningEg/Lightning/blob/676c42fe3c923ecd3c55975fd720ce4a029c39fa/issues/5-investments/5H-sample-reconciliation-difference.md): +1,394 "unresolved". The cause is now found: the revaluation of USD cash.
-7. **[3U](../../issues/3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) Arabic.** Change the separator that reads as a zero, use one decimal style, and translate the English undo label shown on every page.
+7. **[3U](https://github.com/LightningEg/Lightning/blob/8f808161d26da6a62840b32bdb6aaad4a19eeff3/issues/3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) Arabic.** Change the separator that reads as a zero, use one decimal style, and translate the English undo label shown on every page.
 8. **[2F](../../issues/2-safe-for-real-money/2F-android-downloads-files-links.md) Android.** Downloads, file inputs and outside links do nothing. This is needed only if the demo shows backup, export or import on the phone.
 
 Makes the demo shine (wiring of what exists, no new engines):
@@ -272,7 +272,7 @@ not rechecked.
 - Noto Sans Arabic loads.
 - The phone tab bar and sheets are mirrored.
 
-**Found** (all in [3U](../../issues/3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md)):
+**Found** (all in [3U](https://github.com/LightningEg/Lightning/blob/8f808161d26da6a62840b32bdb6aaad4a19eeff3/issues/3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md)):
 
 | Severity | Finding |
 |---|---|

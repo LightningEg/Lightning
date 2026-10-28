@@ -6,7 +6,7 @@
   <input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="to" value="{{ to.id }}"><input type="hidden" name="from" value="{{ source.id }}">
   <p>{{ to.name }} was over its plan two months running; {{ source.name }} had room both months.</p>
   <div class="field"><label for="move-amount">Amount to move ({{ base }})</label><input id="move-amount" name="amount" value="{{ amount|money(False, 0) }}" inputmode="decimal" class="money-input"></div>
-  <p class="muted small">{{ to.name }} {{ to_plan|money(False, 0) }} → {{ (to_plan + amount)|money(False, 0) }} · {{ source.name }} {{ from_plan|money(False, 0) }} → {{ (from_plan - amount)|money(False, 0) }}</p>
+  <p class="muted small">{{ '{to} {a} → {b} · {from} {c} → {d}'|tr(locale, values={'to': to.name, 'a': to_plan|money(False, 0), 'b': (to_plan + amount)|money(False, 0), 'from': source.name, 'c': from_plan|money(False, 0), 'd': (from_plan - amount)|money(False, 0)}) }}</p>
   <div class="actions"><button class="btn primary">{{ "Move it"|tr(locale) }}</button><button type="button" class="btn" data-popup-close>{{ 'Cancel'|tr(locale) }}</button></div>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
 </form>

@@ -889,6 +889,7 @@ ARABIC_UI = {
     'Setting': 'الإعداد',
     'Where': 'فين',
     'From {a} on · the total plan stays the same': 'من {a} وطالع · إجمالي الخطة زي ما هو',
+    '{to} {a} → {b} · {from} {c} → {d}': '{to} من {a} إلى {b} · {from} من {c} إلى {d}',
     'MONTH_END': 'نهاية الشهر',
     'SALE': 'يوم البيع',
     'Saved changes': 'تغييرات اتحفظت',

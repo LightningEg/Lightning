@@ -250,20 +250,23 @@ templates.env.filters["units_of"] = _units_of
 
 
 def _compact(value) -> str:
-    """A short whole number for tight cells: 950, 9.7k, 12k, 1.2M (signed values keep a −)."""
+    """A short whole number for tight cells: 950, 9.7k, 12k, 1.2M (signed values keep a −).
+    In Arabic the scale is a word beside the digits (A06.2): 9.7 ألف, ١٢ ألف, 1.2 مليون — a Latin "k" reads foreign."""
     if value is None:
         return "—"
     v = Decimal(value)
+    arabic = ui_locale() == "ar"
+    thousand, million = ("ألف", "مليون") if arabic else ("k", "M")
     sign, v = ("−" if v < 0 else ""), abs(v)
     if v >= 1_000_000:
-        text = f"{v / 1_000_000:.1f}M"
-    elif v >= 10_000:
-        text = f"{quantize(v / 1000, 0):.0f}k"
+        amount, unit = v / 1_000_000, million
     elif v >= 1000:
-        text = f"{v / 1000:.1f}k"
+        amount = quantize(v / 1000, 0) if v >= 10_000 else v / 1000
+        unit = thousand
     else:
-        text = f"{quantize(v, 0):.0f}"
-    return sign + text.replace(".0k", "k").replace(".0M", "M")
+        return sign + f"{quantize(v, 0):.0f}"
+    text = f"{amount:.1f}".removesuffix(".0")
+    return sign + text + ((" " + unit) if arabic else unit)
 
 
 templates.env.filters["compact"] = _compact
@@ -660,3 +663,4 @@ def create_app(c: Container | None = None) -> FastAPI:
 
     app.add_middleware(RequestCache, state=app.state)  # outermost, so every page and middleware shares it
     return app
+
