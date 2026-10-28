@@ -50,7 +50,9 @@ def test_an_account_with_no_institution_shows_the_icon_of_its_kind():
     assert institutions.tile("Gold at home", "PHYSICAL_ASSET")["icon"] == "gem"
     assert institutions.tile("Family circle", "GAMEYA")["icon"] == "people"
     # a named institution keeps its logo or initials; a bank never becomes an icon
-    assert institutions.tile("Vodafone Cash", "CASH") == {"logo": "", "mono": "VC", "name": "Vodafone Cash", "icon": ""}
+    assert institutions.tile("Vodafone Cash", "CASH") == {"logo": "/static/institutions/vodafone-cash.png", "mono": "VC",
+                                                          "name": "Vodafone Cash", "icon": ""}
+    assert institutions.tile("Egypt Post", "CASH")["icon"] == ""  # no logo yet: its initials, not an icon
     assert institutions.tile("My Credit Union", "BANK")["icon"] == ""
 
 
@@ -73,3 +75,17 @@ def test_saving_an_account_with_a_new_institution_remembers_it(c):
     assert "My Credit Union" in [i.name for i in c.institutions.list()]
     listing = client.get("/accounts").text
     assert 'class="inst-tile"' in listing and ">MC<" in listing  # a custom institution shows its monogram
+
+
+def test_every_catalog_logo_is_an_institution_with_its_tile():
+    """Each wallet, fintech or broker mark in assets/institutions-logos/icons is in the picker with its 64 px file."""
+    root = institutions.Path(institutions.__file__).parents[2]
+    # banks are linked under their CSV codes (abc is bank-abc); Paymob takes payments for shops, nobody holds money there
+    other_names = {"abc", "aib", "albaraka", "ebank", "egbank", "emirates-nbd", "fabmisr", "paymob"}
+    catalog = {p.stem for p in (root / "assets" / "institutions-logos" / "icons").glob("*.png")}
+    linked = {i.code: i.logo for i in institutions.builtin()}
+    missing = {code for code in catalog - other_names if code not in linked and not any(
+        i.logo == f"{code}.png" for i in institutions.builtin())}
+    assert missing == set()
+    for code in ("thndr", "vodafone-cash", "telda", "money-fellows", "instapay", "cib-smartwallet"):
+        assert linked[code] == f"{code}.png"

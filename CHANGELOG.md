@@ -11,6 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-28 · Claude: [6E] Every wallet and fintech logo in `assets/institutions-logos/` is linked: 22 institutions added (bank wallets, Halan, Khazna, MoneyFellows, InstaPay and more); tiles trimmed to the mark (`tools/bundle_institution_logos.py`). Codex's import workflow pinned like the others.
 - 2026-10-28 · Codex: [6E] Rename logo catalog to `assets/institutions-logos/` and add repeatable collection of Egyptian mobile-wallet, fintech and broker logos with app-picker icons.
 
 - 2026-10-28 · Claude: Reviewed and combined Lovable's #166, #169, #171–#173. Fixed: offline queue removed (entries outside the encrypted profile), swipe delete hears refusals, due cards use what is still owed, price CSV passes the profile gate, Find and replace stays in its register and matches whole words, price CSV never guesses.

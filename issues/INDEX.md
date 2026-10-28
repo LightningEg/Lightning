@@ -102,7 +102,7 @@ Prices arrive by themselves, from sources Lightning may redistribute.
 | **6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](6-market-data/6B-europe-and-gcc-shares.md) | feature | market | blocked on a source that allows redistribution |
 | **6C** | [Download shared prices brings nothing: only the exchange-rate pack is published, and not since 11 Oct](6-market-data/6C-shared-prices-not-published.md) | bug | market | ready |
 | **6D** | [Gold prices: test the source from home; silver waits for holdings](6-market-data/6D-gold-price-source.md) | tech | market | blocked on a test from a home connection |
-| **6E** | [Wallet, broker and fintech logos: banks have theirs, the rest still show a monogram](6-market-data/6E-institution-logos.md) | owner | accounts | ready |
+| **6E** | [Additional broker and institution logos still needed](6-market-data/6E-institution-logos.md) | owner | accounts | ready |
 
 Done: nothing yet. Next free code: 6F.
 
