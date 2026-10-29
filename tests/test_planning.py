@@ -291,6 +291,30 @@ def test_skipping_a_loan_payment_moves_it_to_the_end(c, setup, monkeypatch):
     assert c.planning.loan_progress(c.planning.get(item_id), day)["last_date"] == "2028-09-05"
 
 
+def test_skip_never_forgets_a_payment_or_lengthens_a_loan_off_its_schedule(c, setup, monkeypatch):
+    """Use-case audit 2026-10-29: "Move to the end of the loan" on a part-paid instalment dropped the part paid
+    (29,000 still owed went back to 30,000); a stale page could skip a paid one; an off-schedule date added an
+    instalment and a malformed one failed with a database error."""
+    accounts, _ = setup
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
+    item_id = c.planning.create(kind="LOAN", name="Car loan", amount="2500", frequency="MONTHLY",
+                                start_date="2026-10-05", payment_count="12", account_id=accounts["cib"].id)
+    client = TestClient(create_app(c), follow_redirects=False)
+    assert client.post(f"/plan/items/{item_id}/pay", data={
+        "due": "2026-10-05", "outcome": "record", "date_paid": "2026-10-05", "amount": "1000",
+        "account_id": str(accounts["cib"].id)}).status_code == 303
+    still_to_pay = lambda: c.planning.loan_progress(c.planning.get(item_id))["still_to_pay"]
+    assert still_to_pay() == Decimal("29000")
+    assert "Move to the end of the loan" not in client.get(f"/plan/items/{item_id}/pay?due=2026-10-05").text
+    refused = client.post(f"/plan/items/{item_id}/pay", data={"due": "2026-10-05", "outcome": "skip"})
+    assert refused.status_code == 303 and "already%20settled" in refused.headers["location"]
+    for due in ("2026-10-17", "", "not-a-date"):
+        with pytest.raises(ValidationError):
+            c.planning.skip(item_id, due)
+    assert still_to_pay() == Decimal("29000") and len(c.planning.linked_transaction_ids()) == 1
+    assert c.planning.loan_progress(c.planning.get(item_id))["total"] == 12
+
+
 def test_lazy_input_and_next_month(c, setup, monkeypatch):
     from lightning.core.dates import parse_date
     from lightning.core.money import to_decimal

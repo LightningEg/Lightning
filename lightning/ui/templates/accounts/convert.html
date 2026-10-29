@@ -5,7 +5,7 @@
 {% block content %}
 <section class="card convert-form" data-convert-form data-quote-url="/accounts/convert/quote">
   {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
-  <form method="post" action="{{ action }}">
+  <form method="post" action="{{ action }}"><input type="hidden" name="submission" value="{{ new_submission() }}">
     <input type="hidden" name="return_to" value="{{ values.return_to }}">
     {% if values.revision is defined %}<input type="hidden" name="revision" value="{{ values.revision }}">{% endif %}
     <div class="row">

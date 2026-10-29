@@ -19,6 +19,11 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§1 Engin
 (`docs/ARCHITECTURE.md:293-295`), so every USD holding is revalued up from 51.60. Expected: net worth falls by the fee plus the spread paid. Voiding the
 conversion restores everything exactly. Severity: medium. It is documented, but it shows in a demo as "I bought dollars and got richer".
 
+2026-10-29, [use-case audit](../../reports/2026-10-29-use-case-audit/report.md) F5: a typo makes it worse. Sent 100 EGP and received 5,000 USD
+(the two amounts swapped) saves without a question though the quote says 100% below the market rate; its rate (0.02) then values every
+dollar holding at 0.02 EGP, so net worth falls from 100,000 to 95,002 that day and stays there. Whatever the owner decides, ask before
+saving a conversion far from the day's rate.
+
 ## Fix
 Owner decision first: should a conversion's rate value other holdings? Proposal: value holdings with the market rate and keep the trade rate for the
 conversion's own legs, so the spread shows as a cost.
