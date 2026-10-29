@@ -31,7 +31,7 @@ Two passes. First, the open engine items from Audits 1 and 4 (2I, 2J, 2L, 2M). S
 | C4 | medium | Workbook onboarding accepted future-dated transactions and holdings below zero units, which manual entry refuses. Now refused before import. | fixed |
 | C5 | low–medium | Editing a brokerage buy could pay it from a bank account, bypassing "pay from the broker's own cash". The edit now runs the same check. | fixed |
 | A1 | medium | Investment fees in a month raised a false ISSUE in "Budget actual equals categorized spending" (the budget leaves them out by design). Compared like for like now. | fixed |
-| A2 | medium | Two integrity checks could never fail. "Categorized expenses equal reported spending" (one sum against itself) is replaced by an independent ledger check, "Profile-currency cash moves at face value". The net-worth bridge check remains. | bridge: [2Z](../../issues/2-safe-for-real-money/2Z-net-worth-bridge-check-cannot-fail.md) |
+| A2 | medium | Two integrity checks could never fail. "Categorized expenses equal reported spending" (one sum against itself) is replaced by an independent ledger check, "Profile-currency cash moves at face value". The net-worth bridge check remains. | bridge: [2Z](https://github.com/LightningEg/Lightning/blob/98af0af57c86a3b4e12fa342350cac0f682a62b7/issues/2-safe-for-real-money/2Z-net-worth-bridge-check-cannot-fail.md); see follow-up |
 | A3 | medium | An Other-asset estimate hid money moved out of that account after the estimate's date (net worth unchanged after a 100,000 outflow). The estimate now carries later movement. | fixed |
 | A4 | low | Money out under an income category counts as spending, not as less income; follows the documented `flow_of` rule. | owner decision: [7S](../../issues/7-planning-import-and-search/7S-money-out-of-an-income-category.md) |
 | A5 | low | `monthly_flow_between` overflowed in December 9999. | fixed |
@@ -45,3 +45,5 @@ Full suite on the final head: all pass except `test_the_app_and_website_guidelin
 Not checked: the edit journal, native Windows/Android behavior, real power loss, concurrency beyond the existing tests. 2E items 6–8 (dates before an account opened, rounded parts, revaluation churn) remain as filed. 5J (a conversion's rate revalues every dollar holding) still waits for the owner's decision.
 
 ## Dated follow-ups
+
+**2026-10-29 · IT-2Z:** Profile-currency cash now contributes zero revaluation to the bridge, except Other assets with manual estimates. The bridge flags both a corrupted cash line and a deliberately wrong cash valuation; `tests/test_engine_loose_ends.py` covers both and a legitimate estimate. Other holdings' revaluation remains residual and is not independently verified by this check.
