@@ -67,6 +67,29 @@ def test_real_finance_profile_flow_and_stale_form_rejection(tmp_path):
     assert app.session.container is None
 
 
+def test_the_unlock_form_sent_twice_opens_the_profile_not_an_error(tmp_path):
+    """BT-2AC (#193): Enter and then a click on Unlock sent the form twice; the second, with the token the first
+    renewed, showed "This form expired". It now opens the app, or shows the form again while still locked."""
+    browser, app, cfg = start(tmp_path)
+    with browser:
+        browser.get("/__launch", params={"code": cfg.launch_code})
+        create(browser)
+        path = app.session.paths.db_path
+        browser.post("/profiles/lock", data={"csrf": token(browser.get("/profiles").text)})
+        form = {"csrf": token(browser.get("/profiles/unlock", params={"db": str(path)}).text), "db": str(path),
+                "password": PASSWORD}
+        assert browser.post("/profiles/unlock", data=form, follow_redirects=False).status_code == 303
+        again = browser.post("/profiles/unlock", data=form, follow_redirects=False)
+        assert again.status_code == 303 and again.headers["location"] == "/"
+        assert app.session.container is not None
+        browser.post("/profiles/lock", data={"csrf": token(browser.get("/profiles").text)})
+        stale = browser.post("/profiles/unlock", data=form, follow_redirects=False)  # locked again: the form, empty
+        assert stale.status_code == 303 and stale.headers["location"].startswith("/profiles/unlock?db=")
+        page = browser.get(stale.headers["location"])
+        assert page.status_code == 200 and PASSWORD not in page.text and app.session.container is None
+        assert browser.post("/profiles/new", data={"csrf": "invalid"}).status_code == 403  # other forms unchanged
+        assert "busy-toast" not in page.text and "/static/app.js?v=" in page.text  # app.js guards the button
+
 def test_profile_setup_sets_the_chosen_currency(tmp_path):
     browser, app, cfg = start(tmp_path)
     with browser:

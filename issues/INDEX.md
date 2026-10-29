@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 69 open items, in the order they are worked on.
+10 milestones, 68 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -38,9 +38,8 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | **BT-2J** | [On a journal profile, retrying one add form can still save a second expense](2-safe-for-real-money/2J-register-submit-idempotency.md) | bug, technical · medium | transactions | ready |
 | **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical · medium | android | new |
 | **OW-2AB** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AB-stale-code.md) | owner task | architecture | ready |
-| **BT-2AC** | [Submitting the unlock form twice (Enter and the button) shows "This form expired" on the desktop app](2-safe-for-real-money/2AC-login-form-double-submit-expires.md) ([#193](https://github.com/LightningEg/Lightning/issues/193)) | bug, technical · medium | desktop | ready |
 
-Done: 2B, 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA. Next free code: 2AD.
+Done: 2B, 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AC. Next free code: 2AD.
 
 ## 3 Polish and Arabic
 

@@ -2694,18 +2694,19 @@ window.lightningPrivacy = (() => {
 // page, and work running in the background (month-end prices after opening a profile), show the same square
 // in a note at the bottom right. Downloads never leave the page, so they are left alone.
 (() => {
+  // The profile pages have no toast; their buttons still go unavailable, so Enter and a click unlock once (2AC).
   const toast = document.getElementById("busy-toast");
-  if (!toast) return;
-  const text = toast.querySelector(".busy-text"), link = toast.querySelector(".busy-link");
+  const text = toast?.querySelector(".busy-text"), link = toast?.querySelector(".busy-link");
   let slow = 0, safety = 0, fade = 0;
   const show = (words, done = false) => {
     window.clearTimeout(fade);
+    if (!toast) return;
     text.textContent = t(words);
     toast.classList.toggle("done", done);
     link.hidden = !done;
     toast.hidden = false;
   };
-  const hide = () => { toast.hidden = true; };
+  const hide = () => { if (toast) toast.hidden = true; };
   const reset = () => {
     window.clearTimeout(slow);
     window.clearTimeout(safety);
@@ -2746,7 +2747,7 @@ window.lightningPrivacy = (() => {
     }, 0);
   });
   window.addEventListener("pageshow", (event) => { if (event.persisted) reset(); });
-  const watch = toast.dataset.watch;
+  const watch = toast?.dataset.watch;
   if (watch) {
     show(toast.dataset.watchLabel || "Working…");
     const ask = async () => {
