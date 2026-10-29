@@ -25,7 +25,7 @@
 
 - **10A/10C app themes:** ready to sell, Dendera included; the owner deploys, opens checkout, provisions the store key and turns on each app release. New themes: `guideline/themes.md` §5. **Read:** `issues/10-looks-and-store/10C-theme-materials-acceptance.md`.
 
-- **Website (2026-10-28):** store analytics (site PR #126, migration applied live), Downloads platform-first (site #127); leaderboard banners next. **Read:** site README › Analytics.
+- **Website (2026-10-28):** analytics, Downloads, leaderboard contrast and badge merged; banners redrawn plus Felucca and Sand wind (site #130). **Read:** site README › Analytics.
 
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 
