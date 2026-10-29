@@ -68,7 +68,8 @@
       {% if selected and not on_phone %}<p class="selected-database">{{ 'Selected database:'|tr(locale) }} <code>{{ selected }}</code></p>{% endif %}
 
       {% if mode == 'choose' %}
-        <p><a class="button button-secondary" href="/profiles/journal/join">{{ 'انضم لجهازك الأساسي' if locale == 'ar' else 'Join your existing home' }}</a></p>
+        <p><a class="button button-primary" href="/profiles/journal/join">{{ 'Find your phone or PC'|tr(locale) }}</a></p>
+        <p>{{ 'Open pairing on the device with your profile.'|tr(locale) }}</p>
         <section class="panel" aria-labelledby="profiles-heading">
           <div class="panel-heading"><div><h2 id="profiles-heading">{{ 'Available profiles'|tr(locale) }}</h2><p>{{ 'Choose one to continue.'|tr(locale) }}</p></div></div>
           {% if profiles %}
@@ -100,7 +101,7 @@
           {% else %}
             <p class="empty-note">{{ 'Keep your ledger on your phone and borrow it here when you work on the PC.'|tr(locale) }}</p>
           {% endif %}
-          <a class="button button-secondary" href="/profiles/connect">{{ 'Connect to your phone'|tr(locale) }}</a>
+          <details><summary class="button button-secondary">{{ 'Connect with an address and code'|tr(locale) }}</summary><p><a class="button button-secondary" href="/profiles/connect">{{ 'Connect to your phone'|tr(locale) }}</a></p></details>
         </section>{% endif %}
 
         {% if not on_phone %}<section class="panel panel-secondary" aria-labelledby="other-location-heading">
@@ -249,12 +250,18 @@
         {% else %}
           <section class="panel form-panel" aria-labelledby="new-pair-heading">
             <h2 id="new-pair-heading">{{ 'Pair a PC'|tr(locale) }}</h2>
+            {% if not lent_to %}
+            <p>{{ 'Set up device editing once to find nearby devices automatically.'|tr(locale) }}</p>
+            <p><a class="button button-primary" href="/profiles/journal/setup">{{ 'Set up nearby pairing'|tr(locale) }}</a></p>
+            <details><summary class="button button-secondary">{{ 'Connect with an address and code'|tr(locale) }}</summary>
+            {% endif %}
             <p>{{ 'The PC can then borrow this ledger, edit it and hand it back. Only one device edits at a time.'|tr(locale) }}</p>
             <form method="post" action="/profiles/devices/pair" class="form-stack">
               <input type="hidden" name="csrf" value="{{ csrf }}">
               <div class="field"><label for="phone-name">{{ "This phone's name"|tr(locale) }}</label><input id="phone-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off"></div>
               <div class="form-actions"><button class="button button-primary" type="submit">{{ 'Show a pairing code'|tr(locale) }}</button></div>
             </form>
+            {% if not lent_to %}</details>{% endif %}
           </section>
         {% endif %}
         {% if peers %}
@@ -283,7 +290,10 @@
 
       {% elif mode == 'connect' %}
         <section class="panel form-panel" aria-labelledby="connect-heading">
-          <h2 id="connect-heading">{{ 'Your phone keeps the ledger'|tr(locale) }}</h2>
+          <h2 id="connect-heading">{{ 'Find your phone or PC'|tr(locale) }}</h2>
+          <p>{{ 'On the device with your profile, open Profile settings, Edit from your devices, then Devices.'|tr(locale) }}</p>
+          <p><a class="button button-primary" href="/profiles/journal/join">{{ 'Find your phone or PC'|tr(locale) }}</a></p>
+          <details{% if error %} open{% endif %}><summary class="button button-secondary">{{ 'Connect with an address and code'|tr(locale) }}</summary>
           <p>{{ 'On the phone, open Lightning, then Profile settings, Devices, Pair a PC. Type what it shows. The profile opens here with its own password.'|tr(locale) }}</p>
           <p class="key-warning">{{ 'Moving a profile from this PC to the phone instead? Unlock it here and choose Profile settings, Move to your phone.'|tr(locale) }}</p>
           <form method="post" action="/profiles/connect" class="form-stack">
@@ -293,6 +303,7 @@
             <div class="field"><label for="pc-name">{{ "This PC's name"|tr(locale) }}</label><input id="pc-name" name="pc_name" type="text" required maxlength="60" value="{{ pc_name|default('') }}" autocomplete="off"></div>
             <div class="form-actions"><button class="button button-primary" type="submit">{{ 'Connect'|tr(locale) }}</button></div>
           </form>
+          </details>
         </section>
 
       {% elif mode == 'connected' %}

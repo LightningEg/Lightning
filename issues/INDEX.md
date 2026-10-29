@@ -72,7 +72,7 @@ Edit on the phone or the PC; one home confirms every change and nothing is lost.
 | **IT-4K** | [Journal code - two pairing clients](4-edit-journal-and-devices/4K-journal-code-tidy.md) | improvement, technical | devices | ready |
 | IT-4K4 | ↳ One pairing client | | | |
 
-Done: 4C, 4D, 4E, 4F, 4G, 4H, 4I, 4J. Next free code: 4L.
+Done: 4C, 4D, 4E, 4F, 4G, 4H, 4I, 4J, 4L. Next free code: 4M.
 
 ## 5 Investments
 
