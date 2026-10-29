@@ -2,7 +2,7 @@
 title: Phone declutter, tab by tab - each tab opens on its answer and its daily action; analysis one tap away
 type: polish
 area: phone
-status: ready
+status: building
 created: 2026-10-29
 by: Claude Opus 5.5
 skills: guideline-audit

@@ -6,6 +6,7 @@
 |---|---|---|---|
 | Claude | Journal: 7 review fixes, then J6 (owner asked 10-16). | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
+| Claude | IV-3AL phone declutter (Audit 10); D1-D3 wait for the owner | `lightning/ui/templates/phone/`, `phone*.css` | 2026-10-29 |
 
 ## Messages
 
@@ -17,8 +18,6 @@
 ## Next
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
-
-- **Audit 10, phone (2026-10-29):** IV-3AL per tab, NF-3AD for Add; owner decides D1-D3 (Part C) first. **Read:** `reports/2026-10-29-phone-tab-audit/report.md`.
 
 - **Audit 9:** built; left NF-7T5/7T6, IT-4K4. **Read:** `reports/2026-10-28-loose-ends-and-linking/report.md`.
 

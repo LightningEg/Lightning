@@ -58,7 +58,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **NF-3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | new feature | phone | new |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/3AI-institution-logos.md) | owner task | accounts | ready |
 | **BT-3AJ** | [Changing the language is recorded as an undoable action, so Undo switches it back](3-polish-and-arabic/3AJ-language-change-is-undoable.md) ([#167](https://github.com/LightningEg/Lightning/issues/167)) | bug, technical · low | product | ready |
-| **IV-3AL** | [Phone declutter, tab by tab - each tab opens on its answer and its daily action; analysis one tap away](3-polish-and-arabic/3AL-phone-declutter-tab-by-tab.md) | improvement, visual | phone | ready |
+| **IV-3AL** | [Phone declutter, tab by tab - each tab opens on its answer and its daily action; analysis one tap away](3-polish-and-arabic/3AL-phone-declutter-tab-by-tab.md) | improvement, visual | phone | building |
 | IV-3AL1 | ↳ Overview (F1-F3) | | | |
 | IV-3AL2 | ↳ Budget (F5-F8) | | | |
 | IV-3AL3 | ↳ Transactions and an account (F10-F12) | | | |
