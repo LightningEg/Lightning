@@ -68,7 +68,7 @@
     <button class="btn">{{ 'Record past instalments'|tr(locale) }} · {{ progress.due_count }} · {{ progress.due_amount|money }} {{ account.currency }}</button>
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
   </form>{% endif %}
-  <form method="post" action="/gameya/{{ account.id }}/instalment" class="phone-form">
+  <form method="post" action="/gameya/{{ account.id }}/instalment" class="phone-form"><input type="hidden" name="submission" value="{{ new_submission() }}">
     <div class="field phone-amount"><label for="i-amount">{{ 'Amount'|tr(locale) }} ({{ account.currency }})</label><input id="i-amount" name="amount" value="{{ prefill.instalment_amount }}" inputmode="decimal" required></div>
     <div class="field"><label for="i-date">{{ 'Date'|tr(locale) }}</label><input id="i-date" name="date" type="text" value="{{ prefill.instalment_date }}" placeholder="yyyy-mm-dd" data-smart-date required></div>
     <div class="field"><label for="i-from">{{ 'Paid from'|tr(locale) }}</label><select id="i-from" name="account_id" data-own-picker required>{{ account_options(prefill.instalment_from) }}</select></div>

@@ -19,7 +19,7 @@
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **Audit 9:** built; left NF-7T5/7T6, IT-4K4. **Read:** `reports/2026-10-28-loose-ends-and-linking/report.md`.
+- **Audits 9, 11:** left NF-7T5/7T6, IT-4K4; BT-2AD, BT-7U; owner: BT-2E/5J. **Read:** reports 2026-10-28, 2026-10-29-use-case-audit.
 
 
 - **Store and community (2026-10-27):** 10C unlock once, 8M–8S merged in both repos; the website migrations (up to 20261027210000) are run and checked live and `redeem-purchase` is redeployed; the app release that carries 10C ships the unlock. Next: 10D (Papyrus and Dendera sets need a banner, frame and name designed). **Read:** `reports/2026-10-27-store-and-community/report.md`.
