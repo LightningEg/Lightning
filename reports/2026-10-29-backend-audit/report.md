@@ -16,3 +16,7 @@ The PC Mohab year passed on the reviewed checkout before the fix; `tests/test_fx
 ## Limits
 
 This is a targeted audit, not proof that the whole engine is free of bugs. The journal and restore implementation were outside scope because those files were claimed. The earlier audit's open findings, including 2J, 2Z, 5J, 7R and 7S, remain; some require a product decision. Native device and power-loss behavior were not tested.
+
+**2026-10-29 follow-up:** IT-2Z's profile-currency cash bridge correction is covered in [Audit 8](../2026-10-26-engine-audit/report.md#dated-follow-ups); non-cash valuation changes remain residuals.
+
+On dummy demo data as of 2026-10-28, cash balances, custody-adjusted net worth and the bridge reconciled before and after a 125.50 EGP own-account transfer and a 12.34 EGP expense. Mohab's PC and phone scenarios, `tests/test_reporting.py`, the targeted IT-2Z cases and import contracts passed locally. This does not cover every write path or independent valuation of investments and foreign currency.
