@@ -2,8 +2,7 @@
 title: Refresh packaged dependencies with matching native wheels and lockfiles
 type: tech
 area: tools
-status: blocked
-blocked_by: GitHub publication approval for the native-wheel build inputs
+status: building
 created: 2026-10-23
 by: Codex
 skills: stale-check
@@ -57,11 +56,8 @@ finished with 2,749 passed and 42 skipped. Its one failure is the pre-existing
 app/website guideline mismatch (`guideline/app.html` and `app-ar.html`); neither
 file changes on this branch. Import contracts and the generated issue check pass.
 
-Automatic approval review rejected pushing the work branch, requiring explicit
-authorization for remote publication. The local recipe is prepared; publishing
-the work branch/PR and building/publishing native-wheel inputs are pending that
-approval. Candidate dependency files and verification results are retained at
-`/tmp/lightning-1h-candidate/` for the subsequent coordinated lock update.
+The owner authorized GitHub publication and the native-wheel workflow on
+2026-10-29. Native builds and the coordinated lock update are in progress.
 
 The upgraded candidate environment's full suite also finished with 2,749 passed
 and 42 skipped, and the same single guideline-copy failure (507 seconds, versus
