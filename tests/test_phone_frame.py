@@ -214,3 +214,11 @@ def test_more_is_flat_and_the_weekly_review_keeps_more_chosen(phone):
     review = phone.get("/review").text
     assert re.search(r'class="phone-tab is-chosen" href="/more"', review)
     assert 'class="phone-back" href="/more"' in review and '<a class="btn" href="/">' not in review
+
+
+def test_financial_health_puts_what_needs_you_under_its_lead_and_the_chart_in_its_own_card(phone):
+    """Audit 10, F20 (C12: one chart per card): on the phone the savings rate over time leaves the lead card."""
+    html = phone.get("/financial-health").text
+    lead = re.search(r'(?s)<section class="card lead-card lead-hero".*?</section>', html).group(0)
+    assert "lead-side" not in lead and "health-over-time-heading" not in lead
+    assert html.index('id="health-limits-heading"') < html.index('class="card phone-card health-side"')

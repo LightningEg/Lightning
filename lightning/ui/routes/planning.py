@@ -230,6 +230,13 @@ def _phone_cash(c, f, next_payments, late, position, day) -> dict:
     else:
         lines = [sentence("Nothing is due in the next 3 months.") if not count else
                  sentence("1 payment in the next 3 months." if count == 1 else "{n} payments in the next 3 months.", n=count)]
+    # Nothing before payday but bills just after it (Audit 10, F15): name the next one, so "0" does not read as
+    # nothing to pay.
+    following = min((p for p in next_payments if p.status == PaymentStatus.UPCOMING and not p.item.is_income
+                     and (p.item.id, p.due_date) not in shown), key=lambda p: p.due_date, default=None)
+    if not count and following is not None:
+        lines.append(sentence("Next: {name}, {amt} on {date}.", name=following.item.name,
+                              amt=fmt(base(following), 0), date=following.due_date))
     if due > ZERO:
         lines.append(sentence("All covered by free cash.") if f.free_cash >= due else
                      sentence("Free cash is {amt} short of what is due.", amt=fmt(due - f.free_cash, 0)))

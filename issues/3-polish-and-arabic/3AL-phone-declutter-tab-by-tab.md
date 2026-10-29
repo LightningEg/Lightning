@@ -14,15 +14,18 @@ repo: app
 ## Report
 [Audit 10](../../reports/2026-10-29-phone-tab-audit/report.md) (owner, 2026-10-29: "the phone is cluttered and not
 polished; focus on quick actions and info, not deep analysis"). Each step names its findings (F1...). Add's amount-first
-sheet is NF-3AD; Settings' tabs and the cut and small-target faults are IV-3T. Owner decisions D1-D3 change Part C:
-build those parts only once the owner has chosen, and change the guideline in both repos in the same session.
+sheet is NF-3AD; Settings' tabs and the cut and small-target faults are IV-3T. The owner left D1-D3 to Claude
+(2026-10-29): D1 sheets, D2 chips plus a one-line money strip, D3 flat (built). D1 and D2 change Part C (C06.2, C08.1,
+C08.3, C11.1): change the guideline in both repos in the same session, then build them.
 
 **The test for each step:** the first screen holds the tab's one answer, its daily action and the latest money; what
 explains, compares or charts is one tap away.
 
 **Built 2026-10-29** (tests in `tests/test_phone_frame.py`, `test_phone_budget.py`, `test_phone_transactions.py`): one
 Needs you strip; Budget lists each category once and edits behind Edit plan; Transactions opens on this month; More is
-flat; the weekly review keeps More chosen, and 3AL7 is done. Each step below says only what is left.
+flat; the weekly review keeps More chosen, and 3AL7 is done. Then: Cash planning names the next payment after payday;
+Recurring's page action is a Secondary; Investments' horizon note points to the holding; Financial health puts what
+needs you under its lead with the chart in its own card. Each step below says only what is left.
 
 ## 3AL1 Overview (F1-F3)
 Left: Your position as flat rows that open their pages; This period's figures as rows that open a sheet (D1), never a
@@ -38,15 +41,13 @@ Left: Money in and out as one line (D2). Views and value updates move into ⋯. 
 more rows. (Built: the tab opens on this month; an account's page stays its statement, all time with the balance after.)
 
 ## 3AL4 More (F13-F14)
-Built, flat with headings (the guideline's way of D3). Left: the Cash planning hero says what is next when nothing
-falls before payday, as More's row now does.
+Built, flat with headings (the guideline's way of D3). Done.
 
 ## 3AL5 Pages under More (F15-F20)
-Cash planning: the next payment when nothing is before payday; forecast, months ahead and What is promised as rows that
-open sheets. Recurring: the list first, Add as a Secondary, the fixed-costs ratio a link to Financial health, no ".00".
-Reserves: the app bar names Financial health; no card in a card. Investments: holdings right after the hero, the chart
-one row; the horizon set on the phone or its row removed. Accounts: Accounts tab first. Financial health: the limit that
-needs you leads, with its action; the chart one tap away.
+Left: Cash planning's forecast, months ahead and What is promised as rows that open sheets (D1). Recurring: the
+list first, the fixed-costs ratio a link to Financial health, no ".00" on rows. Reserves: the app bar names Financial
+health; no card in a card. Accounts: Accounts tab first (the section registry is shared with the PC: ask first).
+Investments keeps the owner's PDF order (chart, then holdings).
 
 ## 3AL6 Spending (F21)
 The lead (spent this month against the same days usually), four biggest categories then Other as rows, then one row

@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 68 open items, in the order they are worked on.
+10 milestones, 69 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -16,8 +16,9 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/1E-public-repository-security-audit.md) | improvement, technical | tools | ready |
 | **IT-1G** | [Cover all backend modules with explicit dependency and wiring contracts](1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | improvement, technical | tools | ready |
 | **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | tools | ready |
+| **BT-1L** | [The brand audit's page-jump check fails on /welcome only under a parallel full run](1-easy-to-contribute/1L-page-jump-check-flakes.md) | bug, technical · low | tools | ready |
 
-Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K. Next free code: 1L.
+Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K. Next free code: 1M.
 
 ## 2 Safe for real money
 

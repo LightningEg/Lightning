@@ -120,3 +120,14 @@ def test_no_income_date_reads_the_next_three_months_and_nothing_planned_asks_for
     html = _phone(c).get("/plan").text
     assert "payments in the next 3 months." in _text(_hero(html)) or "1 payment in the next 3 months." in _text(_hero(html))
     assert 'class="phone-row phone-plan-row' in _coming(html) and "Payday" not in _coming(html)
+
+
+def test_nothing_before_payday_names_the_next_payment_after_it(c, setup, monkeypatch):
+    """Audit 10, F15: "0 due before payday" with bills two days after it reads as nothing to pay; the hero names the
+    next one."""
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-29")
+    _plan(c, salary=("ACME Egypt", "INCOME", "45000", "2026-11-01", {}),
+          rent=("Landlord", "BILL", "12000", "2026-11-03", {}),
+          gym=("Gym", "BILL", "300", "2026-11-09", {}))
+    text = _text(_hero(_phone(c).get("/plan").text))
+    assert "Nothing is due before 2026-11-01. Next: Landlord, 12,000 on 2026-11-03." in text

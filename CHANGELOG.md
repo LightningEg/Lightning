@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-29 · Claude: [IV-3AL] Phone, step 2: Cash planning names the next payment after payday; Financial health puts what
+  needs you under its lead; Recurring's action is a Secondary; the horizon note points to a holding. D1-D3 recorded; BT-1L filed (a flaky brand-audit check).
+
 - 2026-10-29 · Claude: [IV-3AL] Phone: one Needs you strip on Overview; Budget lists each category once (limits under Edit plan);
   Transactions opens on this month; More is flat, a bill's row opens its pay sheet; the weekly review keeps More chosen.
 
