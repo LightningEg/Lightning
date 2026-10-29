@@ -38,9 +38,10 @@ def start(files_dir):
         _devices = Devices(files / "appdata")
         fingerprint = FingerprintUnlock(files / "appdata" / "biometric", AndroidBiometric.create())
         stay = FingerprintUnlock(files / "appdata" / "stay", AndroidBiometric.create("StayBridge"))
+        saver = AndroidFiles.create(files / "outgoing")
         _host = Host(lambda credentials: profile_app(credentials, files / "Lightning", devices=_devices, phone=True,
                                                      sms=AndroidSms.create(), biometric=fingerprint,
-                                                     stay=stay)).start()
+                                                     stay=stay, files=saver)).start()
     if not _launched:
         _launched = True
         return _host.launch_url
@@ -76,6 +77,36 @@ class AndroidSms:
     def take_shared(self):
         import json
         return [str(text) for text in json.loads(str(self.bridge.takeShared()))]
+
+
+class AndroidFiles:
+    """`lightning.runtime.phone_files.FileSaver` over the Java `FileBridge` (2F). The file waits in the app's own
+    `outgoing/` folder, which no other app can read; Java copies it where the person chooses, then deletes it.
+    Only a path, a name and a type cross to Java, as strings."""
+
+    def __init__(self, bridge, folder):
+        import shutil
+        self.bridge, self.folder = bridge, Path(folder)
+        shutil.rmtree(self.folder, ignore_errors=True)  # anything left by a closed app is never offered again
+        self.folder.mkdir(parents=True, exist_ok=True)
+
+    @classmethod
+    def create(cls, folder):
+        """None off the phone (the probe's tests run this module on a PC)."""
+        try:
+            from java import jclass
+        except ImportError:
+            return None
+        return cls(jclass("org.lightning.app.FileBridge"), folder)
+
+    def offer(self, name, media_type, data):
+        import secrets
+        path = self.folder / secrets.token_hex(16)
+        path.write_bytes(data)
+        if bool(self.bridge.offer(str(path), str(name), str(media_type))):
+            return True
+        path.unlink(missing_ok=True)
+        return False
 
 
 class AndroidBiometric:
