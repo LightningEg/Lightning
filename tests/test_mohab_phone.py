@@ -27,6 +27,7 @@ from test_mohab_year import Mohab, _live_the_year
 DETOURS = {
     "+ Add account": ("More", "Accounts", "Add account"),         # the PC's sidebar; the phone's Accounts ⋯
     "Manage accounts": ("More", "Accounts"),
+    "Held for others": ("More", "Accounts", "Held for others"),   # an Accounts tab; Transactions opens on this month
     "Accounts": ("More", "Accounts"),                             # sections without a tab-bar slot live on More
     "Cash planning": ("More", "Cash planning"),
     "Investments": ("More", "Investments"),

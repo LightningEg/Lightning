@@ -18,16 +18,17 @@
 {% else %}
 {{ hero(fig[lead].label, pos.net_worth if owes else pos.what_you_own, note="As of {date}"|tr(locale, date=position_as_of)) }}
 {% endif %}
-{% if phone and phone.soon %}{% set soon = phone.soon %}<a class="card phone-card phone-soon{{ ' is-late' if soon.late }}" href="/more#bills-heading">
-  <span>{{ ('1 payment due today or tomorrow' if soon.count == 1 else '{n} payments due today or tomorrow')|tr(locale, n=soon.count) }}</span><b>{{ soon.total|amount_role('total') }}</b></a>{% endif %}
 {% if pos.unvalued %}<p class="notice">{{ pos.unvalued|length }} asset valuation(s) are missing from this total.</p>{% endif %}
 {% from "partials/macros.html" import period_control with context %}{{ period_control("/", period.key, month, this_month, request.query_params.get("date_from", "") if period_error and period.key == "custom" else period.start_text, request.query_params.get("date_to", "") if period_error and period.key == "custom" else period.end_text) }}
-{% if attention %}
+{# One Needs you strip under the stepper (IV-3AL1): payments due today or tomorrow are its first row and the first words
+   of its summary, so no second card sits above the stepper; Manage Needs you is its last row. #}
+{% set soon = phone.soon if phone else none %}
+{% if attention or soon %}
 <details class="card phone-needs" aria-labelledby="needs-heading">
-  <summary><span class="needs-you-dot" aria-hidden="true"></span><span class="phone-needs-text"><b id="needs-heading">{{ ('1 item needs you' if attention|length == 1 else '{n} items need you')|tr(locale, n=attention|length) }}</b>{% if phone and phone.needs %}<small>{% for s in phone.needs %}{{ s.text|tr(locale, **s['values']) }}{{ ' · ' if not loop.last }}{% endfor %}</small>{% endif %}</span><span class="needs-you-count">{{ attention|length }}</span><span class="phone-needs-open">{{ 'Open'|tr(locale) }}</span></summary>
-  <div class="phone-rows">{% for item in attention %}<a class="phone-row" href="{{ item.href }}"{% if item.popup %} data-popup-open{% endif %}><span>{{ item.label }}<small>{{ item.detail }}</small></span>{% if item.late_days %}<span class="plan-status plan-status-late">{{ ("Late · 1 day" if item.late_days == 1 else "Late · {n} days")|tr(locale, n=item.late_days) }}</span> {% endif %}<b class="phone-row-action">{{ item.action or '›' }}</b></a>{% endfor %}</div>
+  <summary><span class="needs-you-dot" aria-hidden="true"></span><span class="phone-needs-text"><b id="needs-heading">{% if attention %}{{ ('1 item needs you' if attention|length == 1 else '{n} items need you')|tr(locale, n=attention|length) }}{% else %}{{ ('1 payment due today or tomorrow' if soon.count == 1 else '{n} payments due today or tomorrow')|tr(locale, n=soon.count) }}{% endif %}</b><small>{% if soon and attention %}{{ ('1 due by tomorrow' if soon.count == 1 else '{n} due by tomorrow')|tr(locale, n=soon.count) }}{{ ' · ' if phone.needs }}{% elif soon %}{{ soon.total|amount_role('total') }}{% endif %}{% if phone and phone.needs %}{% for s in phone.needs %}{{ s.text|tr(locale, **s['values']) }}{{ ' · ' if not loop.last }}{% endfor %}{% endif %}</small></span><span class="needs-you-count">{{ attention|length if attention else soon.count }}</span><span class="phone-needs-open">{{ 'Open'|tr(locale) }}</span></summary>
+  <div class="phone-rows">{% if soon %}<a class="phone-row{{ ' is-late' if soon.late }}" href="/more#bills-heading"><span>{{ ('1 payment due today or tomorrow' if soon.count == 1 else '{n} payments due today or tomorrow')|tr(locale, n=soon.count) }}</span><b>{{ soon.total|amount_role('total') }}</b></a>{% endif %}{% for item in attention %}<a class="phone-row" href="{{ item.href }}"{% if item.popup %} data-popup-open{% endif %}><span>{{ item.label }}<small>{{ item.detail }}</small></span>{% if item.late_days %}<span class="plan-status plan-status-late">{{ ("Late · 1 day" if item.late_days == 1 else "Late · {n} days")|tr(locale, n=item.late_days) }}</span> {% endif %}<b class="phone-row-action">{{ item.action or '›' }}</b></a>{% endfor %}<a class="phone-row" href="/needs-you"><span>{{ 'Manage Needs you'|tr(locale) }}</span><b>›</b></a></div>
 </details>
-{% endif %}<a class="quiet-link" href="/needs-you">{{ 'Manage Needs you'|tr(locale) }}</a>
+{% endif %}
 {# nothing waiting: no row at all (A09) #}
 {% set tiles = ([phone.worth] if phone else []) + (stats|selectattr('key', 'equalto', 'plan')|list) + (stats|rejectattr('key', 'in', ['plan', 'safe'] if phone else ['plan'])|list) %}
 {{ kpi_tiles(tiles, base) }}
