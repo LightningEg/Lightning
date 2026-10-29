@@ -57,7 +57,7 @@
   {% if not liquid_accounts %}<p class="error">Add a bank or cash account in {{ account.currency }} to fund the purchase and receive its payouts.</p>{% endif %}
   {% if error %}<p class="error" role="alert">{{ error|tr(locale) }}</p>{% endif %}
   <p class="muted">{{ 'The purchase is recorded from the account you choose. Interest is estimated for cash forecasting only and is never posted automatically; record it as money in when it appears on your bank statement. Record principal proceeds separately from interest.'|tr(locale) }}</p>
-  <form method="post" action="/deposits/{{ account.id }}/purchase" class="stack" style="max-width:900px">
+  <form method="post" action="/deposits/{{ account.id }}/purchase" class="stack" style="max-width:900px"><input type="hidden" name="submission" value="{{ new_submission() }}">
     <div class="row">
       <label>{{ 'Certificate name'|tr(locale) }}<input name="name" value="{{ values.name }}" placeholder="e.g. CIB 3-year certificate" required></label>
       <label>{{ 'Purchase date'|tr(locale) }}<input name="start_date" type="text" value="{{ values.start_date }}" placeholder="yyyy-mm-dd" data-smart-date required></label>

@@ -210,11 +210,17 @@ async def save_conversion(request: Request, account_id: int):
     c = container(request)
     form = await request.form()
     values = convert_values(form) | {"return_to": _safe_return(form.get("return_to"), f"/accounts/{account_id}")}
+    submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+    payload = {key: value for key, value in values.items() if key != "return_to"}
     try:
-        txn = c.transactions.record_conversion(
-            values["date"], _account_id(values["from_account_id"], "from_account"),
-            _account_id(values["to_account_id"], "to_account"), values["sent"], values["received"],
-            values["fee"] or None, notes=values["notes"])
+        with c.db.transaction():
+            txn = c.transactions.submitted(submission, payload)  # a resent form returns its first save
+            if txn is None:
+                txn = c.transactions.record_conversion(
+                    values["date"], _account_id(values["from_account_id"], "from_account"),
+                    _account_id(values["to_account_id"], "to_account"), values["sent"], values["received"],
+                    values["fee"] or None, notes=values["notes"])
+                c.transactions.remember_submission(submission, payload, txn.id)
     except LightningError as exc:
         return render(request, "accounts/convert.html", status_code=400,
                       **convert_context(request, values, f"/accounts/{account_id}/convert", "Convert money", exc))

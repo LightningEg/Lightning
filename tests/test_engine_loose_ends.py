@@ -191,6 +191,52 @@ def test_a_form_without_a_token_keeps_the_old_contract(c, setup):
     assert entries(c, bank.id) == 2
 
 
+@pytest.mark.parametrize('screen', ['convert', 'certificate', "gam'eya", "phone gam'eya"])
+def test_a_resent_money_form_saves_once(c, setup, screen):
+    """Use-case audit 2026-10-29: a resent conversion, certificate purchase or gam'eya instalment saved twice
+    (twice the dollars, two certificates, the next instalment recorded as well)."""
+    bank = setup[0]['cib']
+    if screen == 'convert':
+        c.currencies.register('USD')
+        c.fx.save('USD', '2026-09-01', '50')
+        target = c.account_flows.open_account('Dollars', 'BANK', '2026-09-01', '0', currency='USD')
+        get_path, post_path = f'/accounts/{bank.id}/convert', f'/accounts/{bank.id}/convert'
+        values = dict(date='2026-09-02', from_account_id=str(bank.id), to_account_id=str(target.id),
+                      sent='5000', received='100')
+    elif screen == 'certificate':
+        target = c.account_flows.open_account('CIB CDs', 'DEPOSIT', '2026-09-01', '0', institution='CIB')
+        get_path, post_path = f'/deposits/{target.id}', f'/deposits/{target.id}/purchase'
+        values = dict(name='1y CD', start_date='2026-09-02', maturity_date='2027-09-02', principal='10000',
+                      annual_rate='22', interest_method='SIMPLE', payout_frequency='MONTHLY',
+                      compounding_frequency='MONTHLY', destination_account_id=str(bank.id),
+                      funding_account_id=str(bank.id))
+    else:
+        target = c.account_flows.open_account('Office', 'GAMEYA', '2026-09-01', '0')
+        c.gameya.save_terms(target.id, organiser='Um Ali', members=10, installment='2000', first_date='2026-09-05',
+                            my_turn=3, funding_account_id=bank.id, payout_account_id=bank.id)
+        get_path, post_path = f'/gameya/{target.id}', f'/gameya/{target.id}/instalment'
+        values = dict(date='2026-09-05', amount='2000', account_id=str(bank.id))
+    saved = lambda: c.db.scalar("SELECT COUNT(DISTINCT t.id) FROM transactions t JOIN ledger_entries e "
+                                "ON e.transaction_id=t.id WHERE t.status='POSTED' AND e.account_id=? "
+                                "AND t.type<>'OPN'", (target.id,))
+    app = create_app(c)
+    if screen.startswith('phone'):
+        inner = app
+
+        async def app(scope, receive, send):
+            if scope['type'] == 'http':
+                scope.setdefault('state', {})['phone'] = True
+            await inner(scope, receive, send)
+    with TestClient(app) as client:
+        values['submission'] = submission(client.get(get_path))
+        for _ in range(2):
+            assert client.post(post_path, data=values, follow_redirects=False).status_code == 303
+        assert saved() == 1
+        values['submission'] = submission(client.get(get_path))  # a fresh form is a new action
+        assert client.post(post_path, data=values, follow_redirects=False).status_code == 303
+    assert saved() == 2
+
+
 # -- write paths around the ledger (audit 2026-10-26, B1-B6) --------------------------------------------------
 
 from lightning.core.errors import ConflictError  # noqa: E402
