@@ -57,8 +57,8 @@ def test_analysis_navigation_selects_only_the_current_page(c):
     for path, current in (
         ("/birdview", "/"),  # Birdview now lives in the Overview
         ("/birdview/expenses", "/birdview/expenses"),  # Spending is its own section (question-led menu, 2026-10-28)
-        ("/settings", "/checks"),  # Settings opens on Data checks (2026-10-28)
-        ("/counterparties", "/checks"),
+        ("/settings", "/settings"),  # Settings opens on Your data (owner, 2026-10-29)
+        ("/counterparties", "/settings"),
     ):
         page = client.get(path)
         assert page.status_code == 200

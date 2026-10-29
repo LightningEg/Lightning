@@ -400,7 +400,7 @@ def _first_evening(o: Mohab) -> None:
     o.ask("where", "Where did my money go in September?", "Spending")
     o.ask("plan", "Am I sticking to my plan?", "Budget")
     o.ask("investing", "How are my investments doing?", "Investments")
-    o.ask("checks", "Is my data right?", "Settings")
+    o.ask("checks", "Is my data right?", "Settings", "Data checks")
     # The sidebar's Search (Ctrl-K opens the same search in the app window); a typo still finds the page.
     b.go("Search")
     b.submit({"q": "lons"}, button="Search")
@@ -944,7 +944,7 @@ def test_investments_lead_with_the_periods_result(mohab):
 
 
 def test_data_checks_pass_after_setup(mohab):
-    assert route(mohab, "checks") == ["/", "/checks"]  # Settings opens on Data checks (2026-10-28)
+    assert route(mohab, "checks") == ["/", "/settings", "/checks"]  # Your data opens first (owner, 2026-10-29)
     assert mohab.answers["checks"].shows("Passed 5 Needs attention 0")
 
 
