@@ -1253,6 +1253,7 @@ ROUTES = {
     "This is not an active ownership entry.": "ده مش قيد ملكية شغّال.",
     "This is not an ownership entry.": "ده مش قيد ملكية.",
     "Saved {name}. Ownership is updated.": "اتحفظ {name}. الملكية اتحدّثت.",
+    "Choose where to save {name}.": "اختار هتحفظ {name} فين.",
     "Choose a valid reserve action.": "اختار إجراء صحيح للمبلغ المحجوز.",
     "Choose at least one transaction.": "اختار معاملة واحدة على الأقل.",
     "Choose a category to give the selected rows.": "اختار فئة للصفوف المحددة.",

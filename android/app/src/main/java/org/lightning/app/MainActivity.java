@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
 import android.webkit.CookieManager;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -40,6 +42,8 @@ public final class MainActivity extends Activity {
     private volatile boolean serverReady;
     private boolean openSms;  // a message was shared in before the pages were ready
     private String pendingReminderHref;
+    private ValueCallback<Uri[]> pendingFiles;  // a file field waiting for the system's file picker (2F)
+    private static final int REQUEST_FILES = 4;
     private final Handler reminderHandler = new Handler(Looper.getMainLooper());
     private final Handler journalSyncHandler = new Handler(Looper.getMainLooper());
     private final Runnable foregroundJournalSync = new Runnable() {
@@ -94,6 +98,7 @@ public final class MainActivity extends Activity {
         JournalSyncScheduler.schedule(this);
         SmsBridge.activity = this;
         BiometricBridge.activity = this;
+        FileBridge.activity = this;
         takeShare(getIntent());
         queueReminder(getIntent());
         addShortcuts();
@@ -191,6 +196,22 @@ public final class MainActivity extends Activity {
                 if (ours(Uri.parse(finishedUrl))) checkReminders();
             }
         });
+        web.setWebChromeClient(new WebChromeClient() {
+            /** A file field (CSV statement, market.zip, a profile backup): the system's picker, never a path (2F). */
+            @Override
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                if (pendingFiles != null) pendingFiles.onReceiveValue(null);
+                pendingFiles = callback;
+                try {
+                    startActivityForResult(params.createIntent(), REQUEST_FILES);
+                } catch (android.content.ActivityNotFoundException none) {
+                    pendingFiles = null;
+                    callback.onReceiveValue(null);
+                    return false;
+                }
+                return true;
+            }
+        });
         frame.removeAllViews();
         frame.addView(web);
         web.loadUrl(url);
@@ -230,6 +251,20 @@ public final class MainActivity extends Activity {
         super.onRequestPermissionsResult(code, permissions, results);
         if (code == SmsBridge.REQUEST_SMS && web != null && origin != null) {
             web.loadUrl(origin.buildUpon().path("/sms").build().toString());  // read right away, or say why not
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int code, int result, Intent data) {
+        super.onActivityResult(code, result, data);
+        if (code == REQUEST_FILES) {
+            ValueCallback<Uri[]> callback = pendingFiles;
+            pendingFiles = null;
+            if (callback != null) callback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(result, data));
+        } else if (code == FileBridge.REQUEST_SAVE) {
+            String cookie = origin == null ? null : CookieManager.getInstance().getCookie(origin.toString());
+            boolean arabic = cookie != null && cookie.contains("lightning_ui_locale=ar");
+            FileBridge.finish(this, result == RESULT_OK && data != null ? data.getData() : null, arabic);
         }
     }
 

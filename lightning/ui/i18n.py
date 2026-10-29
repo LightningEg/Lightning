@@ -88,6 +88,7 @@ ARABIC_UI = {
     'Export the workbook, copy the prompt, then upload both to your AI tool.': 'صدّر الملف، وانسخ التعليمات، وبعدها ارفع الاتنين لأداة الذكاء الاصطناعي.',
     'Select and copy the prompt in the editor.': 'حدد التعليمات وانسخها من نافذة التعديل.',
     'Workbook downloaded. Copy the AI prompt next.': 'الملف اتنزّل. انسخ تعليمات الذكاء الاصطناعي بعد كده.',
+    'Choose where to save the workbook.': 'اختار هتحفظ ملف التحليل فين.',
     'Your data is ready': 'بياناتك جاهزة',
     '{count} records imported.': 'تم استيراد {count} سجل.',
     'Open Accounts': 'افتح الحسابات',

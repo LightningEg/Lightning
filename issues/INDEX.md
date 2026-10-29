@@ -34,7 +34,7 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | IT-2C4 | ↳ Unresolved-evidence repair | | | |
 | IT-2C5 | ↳ Native notification delivery, Windows and Android | | | |
 | **BT-2E** | [The engine accepts some bad input - dates before an account opened, crafted ids, rounding of plan amounts](2-safe-for-real-money/2E-engine-input-checks.md) | bug, technical · low | transactions | ready |
-| **BT-2F** | [On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone](2-safe-for-real-money/2F-android-downloads-files-links.md) | bug, technical · high | android | ready |
+| **BT-2F** | [On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone](2-safe-for-real-money/2F-android-downloads-files-links.md) | bug, technical · high | android | building |
 | **BT-2J** | [On a journal profile, retrying one add form can still save a second expense](2-safe-for-real-money/2J-register-submit-idempotency.md) | bug, technical · medium | transactions | ready |
 | **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical · medium | android | new |
 | **OW-2AB** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AB-stale-code.md) | owner task | architecture | ready |

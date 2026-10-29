@@ -181,10 +181,11 @@ class SessionGate:
 
 
 def profile_app(credentials: Credentials, root: Path | str | None = None, devices: Devices | None = None,
-                *, phone: bool = False, sms=None, biometric=None):
+                *, phone: bool = False, sms=None, biometric=None, files=None):
     """`phone`: the Android app, whose pages use the phone frame and screens (guideline Part C). `sms`: where
     bank messages come from on that phone (`lightning.sms_imports.SmsSource`), or None. `biometric`: the phone's
-    optional fingerprint unlock (`lightning.security.biometric.FingerprintUnlock`), or None: never on a PC."""
+    optional fingerprint unlock (`lightning.security.biometric.FingerprintUnlock`), or None: never on a PC.
+    `files`: where the phone saves downloads (`lightning.runtime.phone_files.FileSaver`), or None."""
     configure_memory_only_import_uploads()
     session = ProfileSession(root)
     session.borrowed_home = ""
@@ -198,7 +199,11 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     app.include_router(journal_enrollment_router(session))
     app.include_router(journal_recovery_router(session))
     app.state.sms_source = sms
-    gate = SessionGate(app, session)
+    if phone and files is not None:
+        from .phone_files import PhoneSaves
+        gate = SessionGate(PhoneSaves(app, files), session)  # inside the gate: only authorized files (2F)
+    else:
+        gate = SessionGate(app, session)
     devices = devices if devices is not None else Devices()
     app.include_router(journal_setup_router(session, devices))
     gate.devices = devices
