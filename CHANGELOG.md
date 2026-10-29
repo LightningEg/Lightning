@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-29 · Codex: Require thorough review of every external pull request before merging.
+
 - 2026-10-29 · Claude: Guideline themes.md: two new animated banners, Felucca and Sand wind; four drawn banners redrawn for contrast (site `claude/banner-redraw`).
 - 2026-10-29 · Codex: [IT-2Z] The net-worth bridge flags incorrect profile-currency cash values instead of hiding them as revaluation; manual asset estimates still reconcile.
 
