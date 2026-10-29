@@ -2,7 +2,8 @@
 title: Refresh packaged dependencies with matching native wheels and lockfiles
 type: tech
 area: tools
-status: ready
+status: blocked
+blocked_by: GitHub publication approval for the native-wheel build inputs
 created: 2026-10-23
 by: Codex
 skills: stale-check
@@ -18,3 +19,46 @@ PR #103 updates Python dependency inputs but leaves Android and desktop lockfile
 ## Fix
 
 Refresh the Android native-wheel matrix and obtain matching verified wheels through the existing owner-controlled build/publication workflow. Regenerate Android, desktop and build-tool locks together; verify all hashes, the phone package contract and the full application suite. Review pure-Python and build-tool security updates as part of that coordinated refresh. Keep existing validated pins until then. The closed PR #103 and its branch preserve the proposed versions.
+
+## Coordinated refresh — 2026-10-29
+
+Stage 1 prepares the native-wheel recipe for sqlcipher3 0.6.4, cffi 2.1.1 and
+pydantic-core 2.50.2; cryptography stays at 50.0.2. Each source archive is pinned
+by SHA-256 and verified before extraction or build. The existing SQLCipher Conan
+and Android liblog patch anchors were checked against the 0.6.4 source.
+
+App inputs and installed locks deliberately keep the validated wheel set until
+the new native wheels are built and published through the existing workflow.
+After merging the recipe, run `android-native-wheels.yml` on main, verify the
+link/16 KB checks and publish that successful run using `publish_run`. Then:
+
+1. Update dependency inputs together (including encrypted/desktop extras and
+   developer requirements); resolve Pydantic with core 2.50.2 rather than assuming
+   the newest Pydantic matches it.
+2. Regenerate Android with `tools/android_lock.py` using the published SHA256SUMS;
+   regenerate both desktop locks and the build-tools lock with their recorded uv
+   commands. Verify downloaded hashes and review dependency advisories.
+3. Run package-contract tests, the full application suite and import contracts;
+   run native Windows/Android build checks for the changed package set.
+
+This item stays open until those stages pass. No app release or signing is part
+of the native-wheel recipe preparation.
+
+Local preparation also resolves candidate Windows/Linux and build-tool locks,
+and the Android graph with Pydantic 2.14.2/core 2.50.2. The candidate Linux
+environment installs with required hashes; all four import contracts pass. All
+18 non-native Android wheels were downloaded and their hashes verified. PyPI
+advisory metadata reports none for the 53 candidate packages checked. The four
+native packages have no compatible Android wheels on PyPI, so the repository's
+build/publication stage is required before the installed locks can change.
+
+Validation of the recipe-preparation branch: the full current-dependency suite
+finished with 2,749 passed and 42 skipped. Its one failure is the pre-existing
+app/website guideline mismatch (`guideline/app.html` and `app-ar.html`); neither
+file changes on this branch. Import contracts and the generated issue check pass.
+
+Automatic approval review rejected pushing the work branch, requiring explicit
+authorization for remote publication. The local recipe is prepared; publishing
+the work branch/PR and building/publishing native-wheel inputs are pending that
+approval. Candidate dependency files and verification results are retained at
+`/tmp/lightning-1h-candidate/` for the subsequent coordinated lock update.
