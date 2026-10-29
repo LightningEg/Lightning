@@ -525,16 +525,22 @@ class ReportingService:
     def _revaluation(self, before: str, start: str, end: str) -> Decimal:
         """Per holding: value change not explained by money moving in or out of it.
 
-        Base-currency cash is always exactly zero. From M3/M4 this captures price and FX moves.
+        Profile-currency cash has no revaluation, except for Other assets with manual estimates.
+        From M3/M4 this captures price and FX moves.
         """
-        start_values = {(h.account.id, h.asset_code): h.value or ZERO for h in self.holdings(before)[0]}
-        end_values = {(h.account.id, h.asset_code): h.value or ZERO for h in self.holdings(end)[0]}
-        flows: dict[tuple[int, str], Decimal] = {}
+        start_values = {(h.account.id, h.asset_id): h.value or ZERO for h in self.holdings(before)[0]}
+        end_values = {(h.account.id, h.asset_id): h.value or ZERO for h in self.holdings(end)[0]}
+        flows: dict[tuple[int, int], Decimal] = {}
         for row in self.q.flows_by_holding(start, end):
-            key = (row["account_id"], self.assets.get_asset(row["asset_id"]).code)
+            key = (row["account_id"], row["asset_id"])
             flows[key] = from_e6(row["amount_base_e6"])
+        base_cash = next((asset.id for asset in self.assets.list_assets()
+                          if asset.is_cash and asset.currency == self.base_currency), None)
+        accounts = {account.id: account for account in self.accounts.list()}
         total = ZERO
         for key in set(start_values) | set(end_values) | set(flows):
+            if key[1] == base_cash and accounts[key[0]].account_type != AccountType.OTHER_ASSET:
+                continue
             total += end_values.get(key, ZERO) - start_values.get(key, ZERO) - flows.get(key, ZERO)
         return total
 

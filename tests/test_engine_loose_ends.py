@@ -401,6 +401,27 @@ def test_profile_currency_cash_off_its_face_value_is_an_issue(c):
     c.db.execute('UPDATE ledger_entries SET amount_base_e6=amount_base_e6*10 WHERE transaction_id=?', (expense.id,))
     check = checks_by_name(c, '2026-09-30')['Profile-currency cash moves at face value']
     assert check.status == 'ISSUE' and check.actual == D('900')
+    assert checks_by_name(c, '2026-09-30')['Month-to-date net-worth bridge'].status == 'ISSUE'
+
+
+def test_bridge_detects_an_incorrect_base_cash_valuation(c, monkeypatch):
+    c.account_flows.open_account('Bank', 'BANK', '2026-09-01', '1000')
+    original = c.reporting.valuer.value
+
+    def wrong_on_closing_day(asset, quantity, day):
+        result = original(asset, quantity, day)
+        if asset.is_cash and asset.currency == c.reporting.base_currency and day == '2026-09-30':
+            result.value += D('5000')
+        return result
+
+    monkeypatch.setattr(c.reporting.valuer, 'value', wrong_on_closing_day)
+    check = checks_by_name(c, '2026-09-30')['Month-to-date net-worth bridge']
+    assert check.status == 'ISSUE' and abs(check.difference) == D('5000')
+
+
+def test_bridge_on_empty_profile_before_base_cash_is_registered(c):
+    c.reporting.base_currency = 'USD'
+    assert c.reporting.bridge('2026-09-01', '2026-09-30').difference == 0
 
 
 def test_an_estimate_keeps_counting_money_moved_after_it(c):
@@ -410,3 +431,4 @@ def test_an_estimate_keeps_counting_money_moved_after_it(c):
     assert c.reporting.net_worth('2026-02-28').total == D('1700000')
     c.transactions.record_outflow('2026-03-05', flat.id, '100000', c.categories.get_by_code('EXP.PERSONAL.FOOD').id)
     assert c.reporting.net_worth('2026-03-31').total == D('1600000')
+    assert c.reporting.bridge('2026-02-01', '2026-02-28').difference == 0
