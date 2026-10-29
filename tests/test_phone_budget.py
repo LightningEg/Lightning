@@ -90,12 +90,18 @@ def test_the_budget_page_leads_with_the_ring_then_the_stepper_then_the_categorie
     assert "<table" not in html
     ring = re.search(r'class="phone-budget-ring[^"]*" role="img" aria-label="(\d+)% of the plan spent"', html)
     assert ring and f"<b>{ring.group(1)}%</b>" in html
-    order = [html.index(marker) for marker in ('class="phone-budget-hero"', 'class="phone-period"', 'id="cats-heading"',
-                                              'id="plan-heading"', 'id="groups-heading"')]
+    order = [html.index(marker) for marker in ('class="phone-budget-hero"', 'class="phone-period"', 'class="phone-note phone-budget-line"',
+                                              'id="cats-heading"')]
     assert order == sorted(order)
     assert 'class="phone-plan-bar' in html  # each category's meter (tests/test_phone_frame.py)
-    assert 'href="/budget/fill?month=' in html and "Edit plan" in html
-    assert re.search(r'<form method="post" action="/budget/rule/\d+" data-budget-rule>', html)  # a limit is typed beside its category
+    assert "Edit plan" in html
+    # View, then edit (IV-3AL2): the page lists each category once and has no field; Edit plan shows the plan's
+    # figures and the groups, where a limit is typed beside its category.
+    assert 'id="groups-heading"' not in html and 'id="plan-heading"' not in html and "data-budget-rule" not in html
+    edit = phone.get("/budget?open_group=all").text
+    assert 'id="cats-heading"' not in edit and edit.index('id="plan-heading"') < edit.index('id="groups-heading"')
+    assert 'href="/budget/fill?month=' in edit
+    assert re.search(r'<form method="post" action="/budget/rule/\d+" data-budget-rule>', edit)
     if "phone-budget-over" in html:  # over plan: the first category row is an over-plan one, the other rows follow
         assert re.search(r'class="phone-row phone-cat is-over"', html)
         assert html.index("phone-budget-over") < html.index('id="cats-heading"')

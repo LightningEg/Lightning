@@ -219,7 +219,8 @@ class ReviewInbox:
             items.append({"label": f"{row['name']} is planned below its bills",
                           "detail": f"Planned {fmt(row['planned'])} {c.base_currency}; bills and loan payments "
                                     f"scheduled this month come to {fmt(row['scheduled'])}.",
-                          "href": f"/budget?month={month_of(on)}", "action": "Change the plan", "priority": 2})
+                          "href": f"/budget?month={month_of(on)}&open_group=all#limit-{row['category_id']}",
+                          "action": "Change the plan", "priority": 2})  # where its limit is typed (IV-3AL2)
         # The month's plan against the savings target and dated goals (one check: HealthService.plan_check).
         check = c.health.plan_check(month_of(on))
         if check.planned is not None and check.over_by and check.planned_savings_rate is not None:
@@ -320,7 +321,8 @@ class ReviewInbox:
             else:
                 found.append({"label": f"{row['name']} over plan two months running",
                               "detail": f"{detail} Raise its plan, or plan less elsewhere.",
-                              "href": f"/budget?month={month}", "action": "Change the plan", "priority": 2})
+                              "href": f"/budget?month={month}&open_group=all#limit-{row['category_id']}",
+                              "action": "Change the plan", "priority": 2})
         return found
 
     def _sms(self) -> list[dict]:

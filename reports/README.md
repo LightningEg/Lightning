@@ -21,7 +21,8 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | users-main-questions | [Users' main questions: what each screen must answer, with known gaps](2026-10-27-users-main-questions/report.md) | 2026-10-27 | reference | none |
 | audit-9 | [Audit 9: loose ends after themes and sync, linking sections, and how the plan is filed](2026-10-28-loose-ends-and-linking/report.md) | 2026-10-28 | audit | 4K, 7T |
 | fx-date-boundary | [Backend audit: exchange-rate date boundary](2026-10-29-backend-audit/report.md) | 2026-10-29 | audit | none |
-| audit-10 | [Audit 10: the backend walked through use cases](2026-10-29-use-case-audit/report.md) | 2026-10-29 | audit | 2AD, 2E, 5J, 7U |
+| audit-10 | [Audit 10: the phone, tab by tab - quick actions and the answer first](2026-10-29-phone-tab-audit/report.md) | 2026-10-29 | audit | 3AD, 3AL, 3T |
+| audit-11 | [Audit 11: the backend walked through use cases](2026-10-29-use-case-audit/report.md) | 2026-10-29 | audit | 2AD, 2E, 5J, 7U |
 
 ## Create and maintain a report
 

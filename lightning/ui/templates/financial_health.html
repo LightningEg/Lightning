@@ -11,14 +11,17 @@
   </form>{% endif %}{% endblock %}
 {% block content %}
 {% if error %}<p class="flash error" role="alert">{{ error|tr(locale) }}</p>{% endif %}
-{% if lead %}{% set sm = savings_summary %}{% call lead_card(lead, base) %}<div class="lead-side-head" id="health-over-time-heading"><div><h3>{{ fig.savings_rate.label }} {{ "over time"|tr(locale) }}</h3><p>{{ trends[0].month }} to {{ savings_month }} · {{ 'completed months'|tr(locale) }}</p></div><a class="quiet-link" href="/">{{ 'Overview'|tr(locale) }}</a></div>
+{% if lead %}{% set sm = savings_summary %}{% set side %}<div class="lead-side-head" id="health-over-time-heading"><div><h3>{{ fig.savings_rate.label }} {{ "over time"|tr(locale) }}</h3><p>{{ trends[0].month }} to {{ savings_month }} · {{ 'completed months'|tr(locale) }}</p></div><a class="quiet-link" href="/">{{ 'Overview'|tr(locale) }}</a></div>
   {% if sm %}<p class="health-trend-figure"><b>{{ '%.1f'|format(sm.last) }}%</b> <span class="muted">{{ 'in {month}'|tr(locale, month=sm.last_month) }} · {{ 'lowest {value}% in {month}'|tr(locale, value='%.1f'|format(sm.low), month=sm.low_month) }}</span></p>{% endif %}
   {% set values = trends|map(attribute='savings_rate')|list %}{% if savings_spark.points and values|reject('none')|list|length >= 2 %}{{ sparkline(savings_spark, 'in', fig.savings_rate.label ~ ' ' ~ 'over six completed months'|tr(locale)) }}<div class="health-trend-axis muted" aria-hidden="true"><span>{{ trends[0].month }}</span><span>{{ trends[-1].month }}</span></div>{% else %}<p class="muted small">{{ 'Not enough completed months to draw a line yet.'|tr(locale) }}</p>{% endif %}
   <details class="health-numbers"><summary>{{ 'Show the numbers'|tr(locale) }}</summary>
     <div class="table-wrap"><table><thead><tr><th>{{ 'Completed month'|tr(locale) }}</th><th class="num">{{ fig.savings_rate.label }}</th></tr></thead><tbody>
     {% for month in trends %}<tr><td data-label="{{ 'Completed month'|tr(locale) }}">{{ month.month }}</td><td class="num" data-label="{{ fig.savings_rate.label }}">{% if month.gap %}{{ month.gap }}{% elif month.savings_rate is none %}Unavailable{% else %}{{ '%.1f'|format(month.savings_rate) }}%{% endif %}</td></tr>{% endfor %}
     </tbody></table></div>
-  </details>{% endcall %}
+  </details>{% endset %}
+{# The phone (Audit 10, F20; C12 one chart per card): the lead, then what needs you; the savings rate over time gets
+   its own card after the limits. The PC keeps it beside the lead. #}
+{% if phone_mode() %}{{ lead_card(lead, base) }}{% else %}{% call lead_card(lead, base) %}{{ side }}{% endcall %}{% endif %}
 {{ needs_rows(needs) }}
 {% else %}
 {{ stat_tiles(kpis, base, 'Your financial health'|tr(locale)) }}
@@ -69,5 +72,6 @@
   {% endfor %}
   </div>
 </section>
+{% if lead and phone_mode() %}<section class="card phone-card health-side">{{ side }}</section>{% endif %}
 <p class="muted small health-limit-note">{{ 'Limits only compare figures you already have; they change no transactions, plans or reports. Change them behind the gear.'|tr(locale) }}</p>
 {% endblock %}

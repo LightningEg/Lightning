@@ -1,29 +1,36 @@
-{# The phone's More tab (phone overhaul 2026-10-22): each section without a tab-bar slot, with its live figure; the
-   weekly review as a card you start; then settings as one grouped list. #}
+{# The phone's More tab (phone overhaul 2026-10-22; IV-3AL4): what is due soon, each section without a tab-bar slot
+   with its live figure, the weekly review as a card you start, then settings as one list. #}
 {% extends "base.html" %}
 {% block title %}More{% endblock %}
 {% block heading %}<h1>{{ 'More'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
-{# Hub (phone roadmap M7): what needs a tap this fortnight sits above the list of sections. #}
-<section class="card phone-card phone-hub-bills" aria-labelledby="bills-heading">
+{# Flat, three headings (IV-3AL4, C01.1 "flat, not boxed"): what is due in the next 14 days as rows (a tap opens the pay
+   sheet; no button on each row, C05.3), the sections with their figures, the weekly review card, then settings by name. #}
+<section class="phone-section phone-hub-bills" aria-labelledby="bills-heading">
   <header class="phone-section-head"><h2 id="bills-heading">{{ 'Next 14 days'|tr(locale) }}</h2><a class="phone-quiet" href="/plan">{{ 'All bills'|tr(locale) }}</a></header>
   {% if bills %}<div class="phone-rows">
-  {% for b in bills %}<div class="phone-row phone-hub-bill{{ ' is-late' if b.late }}">
+  {% for b in bills %}<a class="phone-row phone-hub-bill{{ ' is-late' if b.late }}" data-popup-open href="{{ b.pay }}">
     <span>{{ b.name }}<small>{% if b.late %}{{ ('1 day late' if b.late == 1 else '{n} days late')|tr(locale, n=b.late) }}{% else %}{{ b.due|day_label(locale) }}{% endif %}</small></span>
     <b>{{ b.amount|amount_role('row') }}</b>
-    <a class="btn small" data-popup-open href="{{ b.pay }}">{{ 'Mark paid'|tr(locale) }}</a>
-  </div>{% endfor %}
-  </div>{% if bills_more %}<a class="phone-quiet" href="/plan">{{ '{n} more'|tr(locale, n=bills_more) }}</a>{% endif %}
+  </a>{% endfor %}
+  {% if bills_more %}<a class="phone-row" href="/plan"><span>{{ '{n} more'|tr(locale, n=bills_more) }}</span><b>›</b></a>{% endif %}
+  </div>
   {% else %}<p class="phone-note">{{ 'Nothing due in the next 14 days.'|tr(locale) }}</p>{% endif %}
 </section>
-<nav class="phone-rows phone-more-list" aria-label="{{ 'Sections'|tr(locale) }}">
-  <a class="phone-row" href="/plan"><span>{{ 'Cash planning'|tr(locale) }}</span><b>{{ '{amt} due before payday'|tr(locale, amt=due|amount_role('total')) if until else '{amt} due in 3 months'|tr(locale, amt=due|amount_role('total')) }}</b></a>
-  <a class="phone-row" href="/investments"><span>{{ 'Investments'|tr(locale) }}</span><b>{{ portfolio|amount_role('total') }}</b></a>
-  <a class="phone-row" href="/accounts"><span>{{ 'Accounts'|tr(locale) }}</span><b>{{ in_accounts|amount_role('total') }}</b></a>
-  <a class="phone-row" href="/financial-health"><span>{{ 'Financial health'|tr(locale) }}</span><b>{{ '{n} of {m} within limits'|tr(locale, n=within, m=judged) if judged else 'No limits yet'|tr(locale) }}</b></a>
-  <a class="phone-row" href="/birdview/expenses"><span>{{ 'Spending'|tr(locale) }}</span><b>{{ '{amt} in {sa}'|tr(locale, amt=spent|amount_role('total'), sa=month) }}</b></a>
-  {% if zakat %}<a class="phone-row" href="/zakat"><span>{{ 'Zakat'|tr(locale) }}</span><b>›</b></a>{% endif %}
-</nav>
+
+<section class="phone-section" aria-labelledby="money-heading">
+  <header class="phone-section-head"><h2 id="money-heading">{{ 'Your money'|tr(locale) }}</h2></header>
+  <nav class="phone-rows phone-more-list" aria-labelledby="money-heading">
+    {# Nothing before payday but bills just after it: name the next one, not "0 due" (F14). #}
+    {% set next = bills|rejectattr('late')|first if bills else none %}
+    <a class="phone-row" href="/plan"><span>{{ 'Cash planning'|tr(locale) }}</span><b>{% if until and not due and next %}{{ 'Next: {name} · {sa}'|tr(locale, name=next.name, sa=next.due) }}{% elif until %}{{ '{amt} due before payday'|tr(locale, amt=due|amount_role('total')) }}{% else %}{{ '{amt} due in 3 months'|tr(locale, amt=due|amount_role('total')) }}{% endif %}</b></a>
+    <a class="phone-row" href="/accounts"><span>{{ 'Accounts'|tr(locale) }}</span><b>{{ in_accounts|amount_role('total') }}</b></a>
+    <a class="phone-row" href="/investments"><span>{{ 'Investments'|tr(locale) }}</span><b>{{ portfolio|amount_role('total') }}</b></a>
+    <a class="phone-row" href="/financial-health"><span>{{ 'Financial health'|tr(locale) }}</span><b>{{ '{n} of {m} within limits'|tr(locale, n=within, m=judged) if judged else 'No limits yet'|tr(locale) }}</b></a>
+    <a class="phone-row" href="/birdview/expenses"><span>{{ 'Spending'|tr(locale) }}</span><b>{{ '{amt} in {sa}'|tr(locale, amt=spent|amount_role('total'), sa=month) }}</b></a>
+    {% if zakat %}<a class="phone-row" href="/zakat"><span>{{ 'Zakat'|tr(locale) }}</span><b>›</b></a>{% endif %}
+  </nav>
+</section>
 
 <a class="phone-review-card" href="/review">
   <span class="phone-review-mark" aria-hidden="true"></span>
@@ -34,13 +41,14 @@
 <section class="phone-section" aria-labelledby="settings-heading">
   <header class="phone-section-head"><h2 id="settings-heading">{{ 'Settings'|tr(locale) }}</h2></header>
   <nav class="phone-rows phone-more-list" aria-labelledby="settings-heading">
-    <a class="phone-row" href="/settings"><span>{{ 'All settings'|tr(locale) }}<small>{{ "Backups, language, currencies and each tab's settings"|tr(locale) }}</small></span><b>›</b></a>
+    <a class="phone-row" href="/settings"><span>{{ 'All settings'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/needs-you"><span>{{ 'Needs you'|tr(locale) }}</span><b>›</b></a>
     <a class="phone-row" href="/categories"><span>{{ 'Categories'|tr(locale) }}</span><b>›</b></a>
     <a class="phone-row" href="/counterparties"><span>{{ 'Counterparties'|tr(locale) }}</span><b>›</b></a>
     <a class="phone-row" href="/rules"><span>{{ 'Rules'|tr(locale) }}</span><b>›</b></a>
-    <a class="phone-row" href="/checks"><span>{{ 'Data checks'|tr(locale) }}</span><b>›</b></a>
     <a class="phone-row" href="/sms"><span>{{ 'From SMS'|tr(locale) }}</span><b>›</b></a>
-    <a class="phone-row" href="/profiles/devices"><span>{{ 'Devices'|tr(locale) }}<small>{{ 'Pair a PC'|tr(locale) }}</small></span><b>›</b></a>
+    <a class="phone-row" href="/profiles/devices"><span>{{ 'Devices'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/checks"><span>{{ 'Data checks'|tr(locale) }}</span><b>›</b></a>
   </nav>
 </section>
 {% endblock %}

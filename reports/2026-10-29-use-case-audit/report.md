@@ -1,8 +1,8 @@
-# Audit 10: the backend walked through use cases
+# Audit 11: the backend walked through use cases
 
 Date: 2026-10-29 · Author/reviewer: Claude
 Repository: app · Reviewed commit: `045ccd48dcb6a0d69605f6e0226259dcd823f119`
-Historical ID: audit-10
+Historical ID: audit-11
 
 ## Scope and method
 

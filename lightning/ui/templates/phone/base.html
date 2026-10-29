@@ -46,7 +46,7 @@
   {# Phone overhaul (owner, 2026-10-22): five slots with their words, Add in the middle. Transactions is a slot;
      Cash planning, Investments, Accounts, Financial health and Settings live on More with their figures. #}
   {% set skey = here.section.key if here.section else '' %}
-  {% set chosen = 'transactions' if here.tab and here.tab.key == 'transactions' else skey if skey in ('overview', 'budget') else 'more' if skey or request.url.path == '/more' else '' %}
+  {% set chosen = 'more' if request.url.path == '/review' else 'transactions' if here.tab and here.tab.key == 'transactions' else skey if skey in ('overview', 'budget') else 'more' if skey or request.url.path == '/more' else '' %}
   {% macro slot(chosen, key, label, href, path) %}<a class="phone-tab{{ ' is-chosen' if chosen == key }}" href="{{ href }}"{% if chosen == key %} aria-current="page"{% endif %}><span class="phone-tab-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{ path }}"/></svg></span><span class="phone-tab-name">{{ label|tr(locale) }}</span></a>{% endmacro %}
   {{ slot(chosen, 'overview', 'Overview', '/', 'm3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM9 21v-7h6v7') }}
   {{ slot(chosen, 'budget', 'Budget', '/budget', 'M12 3a9 9 0 1 0 9 9h-9zM15 3.5A9 9 0 0 1 20.5 9H15z') }}

@@ -93,7 +93,7 @@
     <div class="phone-bars" role="list" aria-label="{{ 'Holdings by intended horizon'|tr(locale) }}">{% for label in ['Short', 'Medium', 'Long', 'Unassigned'] %}{% set v = horizons.get(label, 0) %}{% if v %}
       <div class="phone-bar-row" role="listitem"><span class="phone-bar-name">{{ label }}<small> · {{ '%.0f'|format(v / holdings_total * 100 if holdings_total else 0) }}%</small></span><b class="phone-bar-value">{{ v|money }}</b><span class="phone-bar-track"><i style="width:{{ '%.1f'|format([v / holdings_total * 100 if holdings_total else 0, 1]|max) }}%"></i></span></div>
     {% endif %}{% endfor %}</div>
-    <p class="phone-note">{{ "Set a holding's horizon on the PC's Holdings table for now."|tr(locale) }}</p>
+    <p class="phone-note">{{ "Open a holding to set its horizon."|tr(locale) }}</p>
   </article>
 </section>
 {% endif %}

@@ -104,7 +104,7 @@ def test_the_tiles_are_the_periods_cash_flow(month):
     assert flow.inflows == D("45500") and flow.outflows == D("1580")   # the move to the wallet is neither
     # All time is the whole ledger's; an account's own page has its own, and only once a period is chosen.
     whole = c.reporting.cash_flow("1900-01-01", "9999-12-31")
-    assert f"+{whole.inflows:,.0f}" in _phone(c).get("/transactions").text
+    assert f"+{whole.inflows:,.0f}" in _phone(c).get("/transactions?preset=all_time").text
     cib = accounts["cib"].id
     assert "phone-reg-kpis" not in _phone(c).get(f"/accounts/{cib}").text
     assert "+45,500" in _phone(c).get(f"/accounts/{cib}?month=2026-09").text
@@ -142,9 +142,14 @@ def test_the_month_stepper_keeps_what_you_searched_and_ends_at_this_month(month)
     # This month is the last: the arrow forward is a dimmed mark, not a link.
     now = phone.get("/transactions?month=2026-12").text   # conftest pins today to 2026-12-31
     assert 'class="phone-reg-step is-off"' in now
-    # With no month chosen the control says All time and has no arrows.
-    free = phone.get("/transactions").text
+    # The tab opens on this month (IV-3AL3); All time is a choice in the sheet, and then the control has no arrows.
+    opened = phone.get("/transactions").text
+    assert '<summary class="phone-period-now" aria-label="Choose period">2026-12</summary>' in opened
+    assert {"preset": "all_time"} in _queries(opened)
+    free = phone.get("/transactions?preset=all_time").text
     assert "All time" in free and 'aria-label="Previous month"' not in free
+    assert {"preset": "all_time", "kind": "out"} in _queries(free)                # a chip keeps All time
+    assert "Kiosk" in phone.get("/transactions?q=Kiosk").text                      # a search still looks at every month
 
 
 def test_the_sheet_offers_the_periods_and_year_to_date_is_the_registers_own_preset(month):

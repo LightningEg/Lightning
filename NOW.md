@@ -6,6 +6,7 @@
 |---|---|---|---|
 | Claude | Journal: 7 review fixes, then J6 (owner asked 10-16). | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
+| Claude | IV-3AL phone declutter (Audit 10); D1, D2 need both repos' guideline | `lightning/ui/templates/phone/`, `phone*.css` | 2026-10-29 |
 
 ## Messages
 
@@ -18,7 +19,7 @@
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **Audits 9, 10:** left NF-7T5/7T6, IT-4K4; BT-2AD, BT-7U; owner: BT-2E/5J. **Read:** reports 2026-10-28, 2026-10-29-use-case-audit.
+- **Audits 9, 11:** left NF-7T5/7T6, IT-4K4; BT-2AD, BT-7U; owner: BT-2E/5J. **Read:** reports 2026-10-28, 2026-10-29-use-case-audit.
 
 
 - **Store and community (2026-10-27):** 10C unlock once, 8M–8S merged in both repos; the website migrations (up to 20261027210000) are run and checked live and `redeem-purchase` is redeployed; the app release that carries 10C ships the unlock. Next: 10D (Papyrus and Dendera sets need a banner, frame and name designed). **Read:** `reports/2026-10-27-store-and-community/report.md`.
@@ -40,4 +41,3 @@ The whole plan, by milestone and code, is `issues/INDEX.md`.
 9. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
 10. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
 11. **6B, 6D, 3AI, 5I:** shares, gold, institution logos, and gam'eya/zakat follow-ups remain as their items describe. **Read:** each item in `issues/INDEX.md`.
-12. **3AD Phone overhaul:** amount-first quick add and transaction sheet; ask the owner about swipe-to-sort and a health score. **Read:** 3AD.
