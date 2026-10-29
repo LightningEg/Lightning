@@ -4,7 +4,7 @@ type: bug
 look: technical
 severity: high
 area: android
-status: ready
+status: building
 created: 2026-10-20
 by: Claude
 skills: guideline-audit
@@ -26,3 +26,14 @@ What holds: only 127.0.0.1 over cleartext, other hosts 403, no file or content a
 
 ## Fix
 Add a download listener that saves to Downloads through MediaStore, a file chooser, and an intent for outside links; then check each on a phone.
+
+2026-10-29, built, not yet on a phone: every download (exports, the AI workbook, templates; GET or POST) is offered to the
+system's "Save to" screen and the page comes back saying so (`lightning/runtime/phone_files.py`, `FileBridge.java`,
+`tests/test_phone_downloads.py`); file fields open the system picker (`MainActivity.onShowFileChooser`). Left:
+
+1. **Check on a phone:** Export all data, Prepare AI analysis, the import template, a CSV statement import and market.zip,
+   in English and Arabic; cancel "Save to" once. Confirm a chosen file reaches the CSV import with `setAllowContentAccess(false)`.
+2. **Backups never leave the phone.** Back up writes inside the app's private folder, so uninstalling or losing the phone loses
+   them; there is no "Save a copy" of a backup on any screen. Offer the newest encrypted backup through the same "Save to".
+3. Outside links other than the marketplace stay blocked on purpose (`MainActivity.storeLink`); Back still follows WebView
+   history (C03.4 wants Overview first).
