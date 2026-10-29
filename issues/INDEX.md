@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 67 open items, in the order they are worked on.
+10 milestones, 68 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -58,8 +58,16 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **NF-3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | new feature | phone | new |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/3AI-institution-logos.md) | owner task | accounts | ready |
 | **BT-3AJ** | [Changing the language is recorded as an undoable action, so Undo switches it back](3-polish-and-arabic/3AJ-language-change-is-undoable.md) ([#167](https://github.com/LightningEg/Lightning/issues/167)) | bug, technical · low | product | ready |
+| **IV-3AL** | [Phone declutter, tab by tab - each tab opens on its answer and its daily action; analysis one tap away](3-polish-and-arabic/3AL-phone-declutter-tab-by-tab.md) | improvement, visual | phone | ready |
+| IV-3AL1 | ↳ Overview (F1-F3) | | | |
+| IV-3AL2 | ↳ Budget (F5-F8) | | | |
+| IV-3AL3 | ↳ Transactions and an account (F10-F12) | | | |
+| IV-3AL4 | ↳ More (F13-F14) | | | |
+| IV-3AL5 | ↳ Pages under More (F15-F20) | | | |
+| IV-3AL6 | ↳ Spending (F21) | | | |
+| IV-3AL7 | ↳ Weekly review (F22) | | | |
 
-Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK. Next free code: 3AL.
+Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK. Next free code: 3AM.
 
 ## 4 Edit journal and devices
 

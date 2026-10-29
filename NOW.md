@@ -18,6 +18,8 @@
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
+- **Audit 10, phone (2026-10-29):** IV-3AL per tab, NF-3AD for Add; owner decides D1-D3 (Part C) first. **Read:** `reports/2026-10-29-phone-tab-audit/report.md`.
+
 - **Audit 9:** built; left NF-7T5/7T6, IT-4K4. **Read:** `reports/2026-10-28-loose-ends-and-linking/report.md`.
 
 
@@ -40,4 +42,3 @@ The whole plan, by milestone and code, is `issues/INDEX.md`.
 9. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
 10. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
 11. **6B, 6D, 3AI, 5I:** shares, gold, institution logos, and gam'eya/zakat follow-ups remain as their items describe. **Read:** each item in `issues/INDEX.md`.
-12. **3AD Phone overhaul:** amount-first quick add and transaction sheet; ask the owner about swipe-to-sort and a health score. **Read:** 3AD.
