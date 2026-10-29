@@ -20,25 +20,26 @@ build those parts only once the owner has chosen, and change the guideline in bo
 **The test for each step:** the first screen holds the tab's one answer, its daily action and the latest money; what
 explains, compares or charts is one tap away.
 
+**Built 2026-10-29** (tests in `tests/test_phone_frame.py`, `test_phone_budget.py`, `test_phone_transactions.py`): one
+Needs you strip; Budget lists each category once and edits behind Edit plan; Transactions opens on this month; More is
+flat; the weekly review keeps More chosen, and 3AL7 is done. Each step below says only what is left.
+
 ## 3AL1 Overview (F1-F3)
-One Needs you strip under the stepper: the "due today or tomorrow" card joins it as its first item; "Manage Needs you"
-becomes the last row inside it. Your position as flat rows that open their pages; This period's figures as rows that open
-a sheet (D1), never a fold inside a fold.
+Left: Your position as flat rows that open their pages; This period's figures as rows that open a sheet (D1), never a
+fold inside a fold.
 
 ## 3AL2 Budget (F5-F8)
-One category list: over plan, then ahead of pace, then "N on track" as one row that opens the rest. A row opens a sheet
-with the limit field, Cover it and See transactions; no inputs in the list. Your plan becomes one line under the hero;
-Spending by group leaves the phone page. Show the System group's `note`, not "System Categories". Bulk undo, the raise
-offer and first limits take the strip's place one at a time.
+Left: a category row opens a sheet with its limit field, Cover it and See transactions (today the row opens its
+transactions and limits are typed under Edit plan). Bulk undo, the raise offer and first limits take the strip's place
+one at a time.
 
 ## 3AL3 Transactions and an account (F10-F12)
-Open on this month (the stepper shows), on Transactions and on an account; All time stays in Choose period. Money in and
-out as one line (D2). Views and value updates move into ⋯. A day's net only on a day with two or more rows.
+Left: Money in and out as one line (D2). Views and value updates move into ⋯. A day's net only on a day with two or
+more rows. (Built: the tab opens on this month; an account's page stays its statement, all time with the balance after.)
 
 ## 3AL4 More (F13-F14)
-Flat, three headings (D3): Due soon (rows; a tap opens the pay sheet, no button on each row), Your money (sections with
-their figures), the Weekly review card, Settings (names only, no subtitles). When nothing falls before payday, say what
-is next ("Next: Landlord 12,000 on 2026-11-03").
+Built, flat with headings (the guideline's way of D3). Left: the Cash planning hero says what is next when nothing
+falls before payday, as More's row now does.
 
 ## 3AL5 Pages under More (F15-F20)
 Cash planning: the next payment when nothing is before payday; forecast, months ahead and What is promised as rows that
@@ -51,10 +52,6 @@ needs you leads, with its action; the chart one tap away.
 The lead (spent this month against the same days usually), four biggest categories then Other as rows, then one row
 "More analysis" that opens the rest. The heat map, both money-flow diagrams, small multiples and month grid leave the
 first page.
-
-## 3AL7 Weekly review (F22)
-More stays chosen in the tab bar; no lone tab chip; a decision's title is not repeated in its row; no cut "Review"; one
-Primary to record the review.
 
 ## Fix
 `lightning/ui/templates/phone/` and `phone.css` (regenerate `phone.rtl.css`); the default period in

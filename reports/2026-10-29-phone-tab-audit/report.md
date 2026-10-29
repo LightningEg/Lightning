@@ -95,4 +95,10 @@ changed; `tools/phone_check.py` was not re-run. Figures counted by a pattern, so
 
 ## Dated follow-ups
 
-None yet.
+- **2026-10-29, built on `claude/phone-declutter`** (owner: "Start fixing"): F1, F2 (one Needs you strip with Manage
+  Needs you inside it), F5, F7 (Budget lists each category once; the plan's figures and the groups are under Edit plan,
+  where Adjust and Change the plan now land), F10 (Transactions opens on this month; an account keeps its statement),
+  F13, F14 (More flat with headings; a bill's row opens its pay sheet), F22. Tests: `tests/test_phone_frame.py`
+  (`test_one_needs_you_strip_under_the_stepper_holds_what_is_due_tomorrow`,
+  `test_more_is_flat_and_the_weekly_review_keeps_more_chosen`), `test_phone_budget.py`, `test_phone_transactions.py`.
+  After: Budget 1.1 screens (was 2.6); Transactions' tiles show this month (+46,833 / −24,290), not the lifetime. The rest stays in IV-3AL.

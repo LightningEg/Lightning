@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-29 · Claude: [IV-3AL] Phone: one Needs you strip on Overview; Budget lists each category once (limits under Edit plan);
+  Transactions opens on this month; More is flat, a bill's row opens its pay sheet; the weekly review keeps More chosen.
+
 - 2026-10-29 · Claude: Audit 10, the phone tab by tab (`reports/2026-10-29-phone-tab-audit/`): plan item IV-3AL (each tab opens on its answer and daily action), a note on NF-3AD, four owner decisions on Part C.
 
 - 2026-10-29 · Codex: [BV-3AK] Restore Your data first in Settings and Data checks last; [BT-10E] resolve the v1.5.1 unlock error by correcting the store signing-key ID (user verified); sync the existing website Coders account-menu guideline.
