@@ -62,3 +62,9 @@ authorization for remote publication. The local recipe is prepared; publishing
 the work branch/PR and building/publishing native-wheel inputs are pending that
 approval. Candidate dependency files and verification results are retained at
 `/tmp/lightning-1h-candidate/` for the subsequent coordinated lock update.
+
+The upgraded candidate environment's full suite also finished with 2,749 passed
+and 42 skipped, and the same single guideline-copy failure (507 seconds, versus
+548 seconds with current dependencies). No additional failures were observed.
+The post-record issue/document checks pass with the known mirror check excluded.
+Native Windows/Android build and runtime validation remains outstanding.
