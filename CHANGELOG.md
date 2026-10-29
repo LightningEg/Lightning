@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-29 · Claude: [BT-2AC] Unlocking with Enter and then a click no longer shows "This form expired": the profile pages' buttons go busy (`app.js` no longer needs the toast) and a repeated unlock opens the app or the form again (`runtime/app.py`). Closes #193.
+
 - 2026-10-29 · Claude: Audit 11 (backend use cases, `reports/2026-10-29-use-case-audit/`): skipping a loan payment can no longer drop a part payment, skip a paid or unscheduled date, or fail on a bad date; a resent conversion, certificate purchase or gam'eya instalment saves once. Filed BT-2AD and BT-7U; notes on BT-2E and BT-5J.
 
 - 2026-10-29 · Claude: [IV-3AL] Phone, step 2: Cash planning names the next payment after payday; Financial health puts what
