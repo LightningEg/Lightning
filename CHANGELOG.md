@@ -11,7 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-- 2026-10-28 · Claude: Guideline themes.md: two new animated banners, Felucca and Sand wind; four drawn banners redrawn for contrast (site `claude/banner-redraw`).
+- 2026-10-29 · Claude: Guideline themes.md: two new animated banners, Felucca and Sand wind; four drawn banners redrawn for contrast (site `claude/banner-redraw`).
 - 2026-10-29 · Codex: [2AA] Clamp the exchange-rate search to valid calendar dates, avoiding a crash on early dates; add a boundary regression and backend audit report.
 - 2026-10-29 · Codex / @Abo3baziz: [1I] Issue reporting is flexible: blank issues enabled (#187), optional Bug, Idea and Question prompts, and privacy/private-security guidance. Maintainer task prompts are optional too.
 - 2026-10-28 · Claude: [IT-1J][IT-1K] Ruff covers the journal files too (1J done); owner decisions on the plan (1K done): app theme items move to milestone 10 Looks and store (8J→10A, 8K→10B, 8L→10C, 8T→10D), 9L→2AB, 6E→3AI.
