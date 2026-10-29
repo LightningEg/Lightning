@@ -1,4 +1,4 @@
-"""Nearby-device pairing flow for explicit compatible dummy profiles.
+"""Nearby-device pairing between copies of one ledger.
 
 User-visible choices use names and opaque candidate IDs, never typed endpoints.
 Native first-profile snapshot enrollment remains a separate cutover gate.
@@ -7,15 +7,22 @@ from __future__ import annotations
 
 import hmac
 import json
-import os
 import time
 
-from lightning.sync.journal.codec import JournalError, authenticate, canonical, digest, fields, hash_value, seal, unpack, uuid
+from lightning.sync.journal.codec import JournalError, authenticate, digest, fields, hash_value, seal, unpack, uuid
 from lightning.sync.journal.discovery import nearby_devices
 from lightning.sync.journal.local import PinnedLocalClient
 from lightning.sync.journal.membership import Membership
-from lightning.sync.journal.pairing import PairingDesk, RECEIPT_LIFETIME, approval_receipt, number_choices, require_live_offer
+from lightning.sync.journal.pairing import (CLOCK_SKEW_SECONDS, MAX_PROOF_ATTEMPTS, PairingDesk, RECEIPT_LIFETIME, approval_receipt, number_choices,
+                                            request_budget, require_live_offer)
 from lightning.sync.journal import pairing_client
+
+
+class ApprovalPending(JournalError):
+    """The home has not approved this device yet: waiting, not a failure."""
+
+
+DIFFERENT_LEDGER = "That device holds a different ledger. To bring it here, lock this profile and join it from Profiles."
 
 
 class NearbyPairing:
@@ -28,6 +35,10 @@ class NearbyPairing:
         self.enrollment = EnrollmentSource(device,key_document=key_document,owner_document=owner_document,
             approval=lambda identifier:self._value("pairing_result:"+identifier,{})) if device.home and key_document else None
 
+    def _now(self):
+        """The home's desk clock when there is one, so tests and the desk read the same time."""
+        return self.desk.clock() if self.desk is not None else time.time()
+
     def _value(self, name, default=None):
         value = self.db.scalar("SELECT value FROM journal_local WHERE name=?", (name,))
         return json.loads(value) if value else default
@@ -39,8 +50,8 @@ class NearbyPairing:
         names = self._value("paired_names",{})
         state = self._value("pairing",{})
         if state and self.desk:
-            state, _ = self.desk._state()
-        if state and unpack(state["offer"].encode())["body"]["expires"] <= time.time():
+            state, _ = self.desk.current()
+        if state and unpack(state["offer"].encode())["body"]["expires"] <= self._now():
             state = {}
         request = unpack(state["request"].encode())["body"] if state.get("request") else None
         digits = self.desk.digits(state, unpack(state["offer"].encode())["body"]) if request else None
@@ -49,7 +60,11 @@ class NearbyPairing:
             client["choices"] = number_choices(client["digits"])
             with self.db.transaction():
                 self._save("pairing_client",client)
-        return dict(enabled=True, paired=self.device.identity.device_id in self.membership.state()["members"], code=state.get("code"), request_name=request["name"] if digits else None,
+        revoked = self.device.home is None and self.membership.revoked() is not None
+        # By this device's clock, a minute's grace past the offer's ten minutes; the home's clock decides.
+        expired = bool(client) and unpack(client["candidate"]["offer"].encode())["body"]["expires"] + CLOCK_SKEW_SECONDS <= self._now()
+        return dict(enabled=True, revoked=revoked,
+                    paired=not revoked and self.device.identity.device_id in self.membership.state()["members"], code=state.get("code"), request_name=request["name"] if digits else None,
                     digits=digits, request_id=digest(request) if request else None,
                     confirmed=bool(state.get("confirmed")), number_match=bool(state and unpack(state["offer"].encode())["body"].get("method") == "number-match"),
                     choices=client.get("choices", []), failed=client.get("failed", False),
@@ -59,7 +74,15 @@ class NearbyPairing:
                                     for identifier in self.membership.state()["members"]
                                     if identifier != self.device.identity.device_id],
                     nearby=[dict(id=identifier,name=value["name"], number_match=unpack(value["offer"].encode())["body"].get("method") == "number-match") for identifier,value in self._value("nearby",{}).items()],
-                    pending=client.get("digits") or ("…" if client else None), stage=client.get("stage"))
+                    pending=client.get("digits") or ("…" if client else None), stage=client.get("stage"),
+                    expired=expired, problem=client.get("problem"))
+
+    def note_problem(self, error):
+        """Keep why the last automatic step failed, for the joining screen; the next saved step clears it."""
+        state = self._value("pairing_client", {})
+        if state:
+            state["problem"] = str(error)[:200]
+            self._save_client(state)
 
     def begin(self, password):
         if self.desk is None or self.keys is None:
@@ -71,7 +94,11 @@ class NearbyPairing:
 
     def advertise(self, nonce, port):
         state = self._value("pairing",{})
-        if not state or state["attempts"] >= 12 or state["proof_attempts"] >= 3 or unpack(state["offer"].encode())["body"]["expires"] <= time.time():
+        if not state:
+            return None
+        offer = unpack(state["offer"].encode())["body"]
+        if (state["attempts"] >= request_budget(offer) or state["proof_attempts"] >= MAX_PROOF_ATTEMPTS
+                or offer["expires"] <= self._now()):
             return None
         return seal(dict(type="journal-nearby-home", nonce=nonce, name=self.device.identity.name,
                          home=self.device.identity.device_id, offer=state["offer"], port=port,
@@ -96,7 +123,7 @@ class NearbyPairing:
         from types import SimpleNamespace
         if (offer["profile"] != config["profile"] or offer["generation"] != config["generation"]
                 or public_key(SimpleNamespace(public_key=offer["home_key"])) != public_key(SimpleNamespace(public_key=config["home_key"]))):
-            raise JournalError("This preview joins compatible dummy replicas; a new profile requires snapshot enrollment")
+            raise JournalError(DIFFERENT_LEDGER)
         if self.device.store.pending():
             raise JournalError("Sync existing pending work before pairing another connection")
         state = pairing_client.begin(candidate,self.device.identity,config["incarnation"],code)
@@ -111,6 +138,7 @@ class NearbyPairing:
         state = self._value("pairing_client",{})
         if not state:
             raise JournalError("Choose a nearby device first")
+        state.pop("problem", None)
         # Migrate already saved comparisons from the preceding application.
         if "wire" not in state:
             state["wire"] = state["request"]
@@ -136,6 +164,7 @@ class NearbyPairing:
         state = self._value("pairing_client",{})
         if not state:
             raise JournalError("Choose a nearby device and enter its number first")
+        state.pop("problem", None)
         if state.get("failed"):
             raise JournalError("Compare the numbers again: cancel and start a new pairing")
         require_live_offer(state["candidate"])
@@ -223,8 +252,6 @@ class NearbyPairing:
             return seal(self.desk.waiting(),self.device.identity.sign)
         if kind == "journal-pairing-reveal":
             return self.desk.reveal(wire)
-        if kind == "journal-pairing-cancel":
-            return self.desk.cancel(wire)
         if kind == "journal-pairing-proof":
             self.desk.prove(wire)
             return seal(dict(type="pairing-wait",request=body["request"]),self.device.identity.sign)
@@ -232,7 +259,7 @@ class NearbyPairing:
         if "nonce" in body:
             hash_value(body["nonce"])
         uuid(body["device"])
-        state, offer = self.desk._state()
+        state, offer = self.desk.current()
         if kind != "journal-pairing-status" or not state.get("request") or self.desk.clock() >= offer["expires"]:
             raise JournalError("Pairing approval is not available yet")
         original = unpack(state["request"].encode())["body"]
@@ -250,7 +277,7 @@ class NearbyPairing:
             raise JournalError("Compare the numbers and enter your password first")
         answer = await pairing_client.status(state,self.device.identity,self._exchange(state),self._save_client)
         if answer["type"] != "pairing-approved":
-            raise JournalError("Pairing approval is not available yet")
+            raise ApprovalPending("Pairing approval is not available yet")
         candidate = state["candidate"]
         with self.db.transaction():
             self.membership.accept(answer["membership"].encode(),initial=True)

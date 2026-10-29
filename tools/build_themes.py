@@ -56,7 +56,55 @@ def worst(p, parts, slot, surface, limits):
     material = parts.get(slot, {})
     lift = limits["lift"].get(material.get("finish", "flat"), 0) + limits["grain"].get(material.get("grain", "none"), 0)
     shaded = mix(surface, p["text"], lift)
-    return mix(shaded, p["accent"], ARTWORK_ALPHA) if material.get("artwork", "none") != "none" else shaded
+    return under_artwork(shaded, p, material.get("artwork", "none"))
+
+def under_artwork(surface, p, name):
+    """The surface under a drawing's lines at their watermark strength: of the drawing's colours (the accent, and any
+    p-<key> part), the one that leaves text the least contrast."""
+    if name == "none":
+        return surface
+    marks = [mix(surface, p[key], ARTWORK_ALPHA) for key in ["accent", *drawing_keys(name)]]
+    return min(marks, key=lambda colour: contrast(p["text"], colour))
+
+HELD = "#7FB2FF"  # Azure held (guideline A03) as themes wear it on their own surfaces: its hue never moves
+HELD_TINT = 16  # theme-surfaces.css lays held at 16% over the card for its tint (--theme-tint-info)
+
+def held(card):
+    """Azure held for this card: the same hue and saturation, darker on a light card and lighter on a dark one, until
+    the held glyph reads at 4.5:1 on the card and on its own tint. A money meaning keeps its colour family; only its
+    lightness answers the ground (BT-8U4)."""
+    import colorsys
+    r, g, b = (int(HELD[i:i+2], 16) / 255 for i in (1, 3, 5))
+    hue, light, sat = colorsys.rgb_to_hls(r, g, b)
+    step = -0.01 if contrast(card, "#FFFFFF") < contrast(card, "#000000") else 0.01
+    while 0 <= light <= 1:
+        colour = "#" + "".join(f"{round(v * 255):02X}" for v in colorsys.hls_to_rgb(hue, light, sat))
+        if min(contrast(colour, card), contrast(colour, mix(card, colour, HELD_TINT))) >= 4.5:
+            return colour
+        light += step
+    raise ValueError(f"Azure held cannot reach 4.5:1 on {card}")
+
+TIERS = ("palette", "texture", "motion")  # the store's tiers (themes.md section 7: recolour, texture, animation)
+NEUTRAL = {"none", "flat", "hairline", "bar", "dim", "subtle"}  # material values that add no material
+
+def check_tier(manifest, parts, contract):
+    """A paid theme names its store tier and fills exactly that tier: a palette is colour only, a textured theme adds
+    material and no motion, an animated one runs exactly one continuous motion (BT-8U7)."""
+    tier = manifest.get("tier")
+    if tier is None and manifest.get("status") != "paid":
+        return
+    if tier not in TIERS:
+        raise ValueError(f"{manifest['id']}: tier must be one of {', '.join(TIERS)}")
+    material = [f"{s}.{k}" for s, spec in contract["slots"].items() if s != "brand"
+                for k in spec.get("material", {}) if parts[s][k] not in NEUTRAL]
+    motions = [parts[s][k] for s, spec in contract["slots"].items() for k in spec.get("motion", {})]
+    running = [n for n in contract["limits"]["continuous"] if parts[n.split(".")[0]][n.split(".")[1]] != "none"]
+    if tier == "palette" and (material or any(v != "none" for v in motions)):
+        raise ValueError(f"{manifest['id']}: a palette theme is colour only, not {', '.join(material) or 'motion'}")
+    if tier != "palette" and not material:
+        raise ValueError(f"{manifest['id']}: a {tier} theme has a material")
+    if len(running) != (1 if tier == "motion" else 0):
+        raise ValueError(f"{manifest['id']}: only the motion tier runs one continuous motion")
 
 def load(path):
     contract = json.loads((SOURCE / "slots.json").read_text())
@@ -66,13 +114,13 @@ def load(path):
     if not isinstance(manifest.get("name"), str) or not manifest["name"].strip():
         raise ValueError("A theme name is required")
     parts, _ = resolve_parts(manifest, default, contract)
+    check_tier(manifest, parts, contract)
     p, limits = parts["palette"], contract["limits"]
     checks = [(p["text"], p["background"], 7), (p["muted"], p["background"], 4.5)]
     # the ground's texture is drawn in the text colour at most at its strength: text still reads on it
     ground = mix(p["background"], p["text"], {"whisper": 2, "subtle": 4, "rich": 6}[parts["ground"]["textureStrength"]]
                  if parts["ground"]["texture"] != "none" else 0)
-    if parts["ground"]["artwork"] != "none":
-        ground = mix(ground, p["accent"], ARTWORK_ALPHA)
+    ground = under_artwork(ground, p, parts["ground"]["artwork"])
     checks += [(p["text"], ground, 7), (p["muted"], ground, 4.5)]
     surfaces = [(slot, p[parts[slot]["surface"]]) for slot in ("header", "navigation", "hero", "cards", "overlays", "menus")]
     surfaces += [("", p[key]) for key in ("background", "surface", "raised")]
@@ -150,6 +198,11 @@ def drawings():
         found[path.stem] = path
     return found
 
+def drawing_keys(name):
+    """The palette keys a drawing paints parts in (class="p-<key>"), besides its accent lines."""
+    root = ET.fromstring(drawings()[name].read_text())
+    return sorted({cls[2:] for node in root.iter() for cls in node.attrib.get("class", "").split() if cls.startswith("p-")})
+
 def drawing(name, palette, opacity=1.0):
     """A drawing from the asset folders, in this palette, as an inline data URL. Refuses anything but shapes."""
     root = ET.fromstring(drawings()[name].read_text())
@@ -179,7 +232,8 @@ def drawing(name, palette, opacity=1.0):
     return 'url("data:image/svg+xml,' + quote(body, safe=" ='/:;,.()-") + '")'
 
 _CONTRACT = json.loads((SOURCE / "slots.json").read_text())
-ARTWORK = {name: drawings()[name] for name in _CONTRACT["slots"]["hero"]["material"]["artwork"] if name != "none"}
+ARTWORK = {name: drawings()[name] for slot in ("ground", "hero")
+           for name in _CONTRACT["slots"][slot]["material"]["artwork"] if name != "none"}
 FRIEZES = {name for name in _CONTRACT["slots"]["header"]["material"]["finish"] if name in drawings()}
 STRENGTH = {"whisper": 2, "subtle": 4, "rich": 6}
 FRIEZE_ALPHA = 70  # a frieze is a painted border: the pigments, softened a little so the title leads
@@ -220,6 +274,7 @@ def compile_theme(manifest, parts, contract):
     values["theme-on-accent"] = p[parts["controls"]["label"]]
     # The manifest's own money colours, for tints on its dark surfaces (theme-surfaces.css); the default keeps its paint.
     values.update({"theme-income": p["income"], "theme-expense": p["expense"]})
+    values["theme-held"] = held(worst(p, parts, "cards", p[parts["cards"]["surface"]], contract["limits"]))
     values["theme-logo"] = "url(/static/lightning-mark-on-dark.svg)" if parts["brand"]["logoVariant"] == "on-dark" else "url(/static/lightning-mark.svg)"
     scheme = "dark" if contrast(p["background"], "#FFFFFF") > contrast(p["background"], "#000000") else "light"
     values.update(material_values(parts, contract, scheme))
@@ -247,7 +302,7 @@ def build(check=False):
         # with a verified licence for this exact version (lightning/ui/entitlements.py); anyone may try it for a session.
         entry = {"id": manifest["id"], "name": manifest["name"], "preview": manifest["status"] == "test-preview"}
         if manifest["status"] == "paid":
-            entry.update(paid=True, version=manifest["version"])
+            entry.update(paid=True, version=manifest["version"], tier=manifest["tier"])
         if "item" in manifest:  # a theme's other mode: worn with its item's licence (Dendera's night rides on Dendera)
             entry["item"] = manifest["item"]
         if manifest["id"] != "lightning-default":  # the default keeps its exact approved paint
@@ -257,8 +312,8 @@ def build(check=False):
     paid = {e["id"]: e for e in registry if e.get("paid") and "item" not in e}
     for entry in registry:
         if "item" in entry and (entry["item"] not in paid or paid[entry["item"]]["version"] != entry.get("version")
-                                or not entry.get("paid")):
-            raise ValueError(f"{entry['id']}: its item {entry['item']} must be a bundled paid theme at the same version")
+                                or not entry.get("paid") or paid[entry["item"]]["tier"] != entry.get("tier")):
+            raise ValueError(f"{entry['id']}: its item {entry['item']} must be a bundled paid theme at the same version and tier")
     outputs = {STATIC / "themes.generated.css": css,
                STATIC / "themes.generated.json": json.dumps(registry, indent=2) + "\n",
                STATIC / "themes.generated.js": "/* Generated. */\nwindow.LIGHTNING_THEMES = "+json.dumps(registry)+";\n"}

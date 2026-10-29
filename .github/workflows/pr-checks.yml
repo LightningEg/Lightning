@@ -31,6 +31,10 @@ jobs:
       - run: |
           python -m pytest -o addopts= -o faulthandler_timeout=120 -q -n auto --dist loadfile
       - run: lint-imports
+      - name: Unused imports and variables (ruff, IT-1J)
+        run: |
+          python -m pip install --require-hashes --only-binary=:all: --no-deps -r requirements/lint.lock
+          ruff check lightning tools
 
   protected-paths:
     # Tells the owner at a glance when a PR touches build, release or CI files; the owner still decides.

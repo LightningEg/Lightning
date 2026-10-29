@@ -56,6 +56,24 @@ EN = {
 }
 
 AR = {
+    "The home removed this device, so it no longer syncs. Edits made here stay on this device.":
+        "الجهاز الأساسي شال الجهاز ده، فمبقاش بيتزامن. التعديلات اللي اتعملت هنا فاضلة على الجهاز ده.",
+    "The home refused the last sync. Your edits stay saved here, and it tries again.":
+        "الجهاز الأساسي رفض آخر مزامنة. تعديلاتك محفوظة هنا، وهيجرّب تاني.",
+    "The last sync did not finish. Your edits stay saved here, and it tries again.":
+        "آخر مزامنة ماكملتش. تعديلاتك محفوظة هنا، وهيجرّب تاني.",
+    "Last tried": "آخر محاولة",
+    "Nearby search could not start on this device. Close Lightning and open it again to retry.":
+        "البحث عن الأجهزة القريبة ماشتغلش على الجهاز ده. اقفل Lightning وافتحه تاني عشان تجرّب.",
+    "Pairing could not read this device's saved state.": "الربط ماقدرش يقرا الحالة المحفوظة على الجهاز ده.",
+    "This pairing's ten minutes are up. If the home no longer shows it, cancel here and start again.":
+        "العشر دقايق بتوع الربط ده خلصوا. لو الجهاز الأساسي مبقاش بيعرضه، الغيه هنا وابدأ تاني.",
+    "The last step did not go through:": "آخر خطوة ماعدّتش:",
+    "The clocks on these devices differ by more than 15 minutes. Set both to the right time, then pair again.":
+        "الساعة على الجهازين دول مختلفة بأكتر من ١٥ دقيقة. اظبط الوقت الصح على الاتنين، وبعدها اربط تاني.",
+    "This pairing offer expired. Open pairing on the home again.": "عرض الربط ده خلص. افتح الربط على الجهاز الأساسي تاني.",
+    "That device holds a different ledger. To bring it here, lock this profile and join it from Profiles.":
+        "الجهاز ده عليه سجل تاني. عشان تجيبه هنا، اقفل الملف ده وانضم له من صفحة الملفات الشخصية.",
     "Pairing was interrupted. Resume to check its saved state.": "الربط اتقطع. كمّل عشان نراجع الحالة المحفوظة.",
     "Resume pairing": "كمّل الربط",
     "On your other device, select this device from Nearby devices.": "على الجهاز التاني، اختار الجهاز ده من الأجهزة القريبة.",

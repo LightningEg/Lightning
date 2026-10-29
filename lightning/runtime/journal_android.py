@@ -10,6 +10,11 @@ import threading
 from pathlib import Path
 from typing import Awaitable, Callable
 
+from lightning.sync.journal.codec import JournalError
+
+# "revoked": the home removed this device, so it stops syncing. "refused": the home said no this time.
+RESULTS = {"synced", "idle", "offline", "locked", "syncing", "revoked", "refused"}
+
 _guard = threading.RLock()
 _active: dict[str, tuple[object, asyncio.AbstractEventLoop, Callable[[], Awaitable[str]]]] = {}
 
@@ -55,7 +60,11 @@ async def sync_once(files_dir) -> str:
             result = await asyncio.wrap_future(pending)
     except asyncio.CancelledError:
         raise
+    except JournalError:
+        # The home answered and said no; the runtime kept the reason for Devices. No backoff retry:
+        # the periodic job tries again later.
+        return "refused"
     except Exception:  # noqa: BLE001 - the native scheduler will retry on the next network window
         return "offline"
 
-    return result if result in {"synced", "idle", "offline", "locked", "syncing"} else "offline"
+    return result if result in RESULTS else "offline"

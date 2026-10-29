@@ -125,5 +125,5 @@
 });
 const createDetails=document.getElementById('add-reserve');document.querySelector('.reserve-add-link')?.addEventListener('click',()=>{if(createDetails)createDetails.open=true});if(location.hash==='#add-reserve'&&createDetails){createDetails.open=true;createDetails.scrollIntoView({block:'start'})}
 </script>
-<script nonce="{{ request.state.csp_nonce|default('') }}" src="/static/reserve-autosave.js?v=2"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('reserve-autosave.js') }}"></script>
 {% endblock %}

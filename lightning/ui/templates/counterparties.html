@@ -68,6 +68,7 @@
       <option value="">{{ ('Learned: ' ~ learned_label.split(' › ')[-1]) if learned_label else 'No default' }}</option>{% from "partials/macros.html" import category_options %}{{ category_options(category_groups(categories), party.default_category_id or '') }}
     </select>{% if learned_label and not party.default_category_id %}<small class="muted learned-note">{{ learned.count }} of the last {{ learned.total }}</small>{% endif %}</td>
     <td data-label="{{ 'Actions'|tr(locale) }}"><div class="counterparty-actions">
+      <a class="btn small" href="/counterparties/{{ party.id }}" aria-label="{{ 'Open {name}'|tr(locale, name=party.name) }}">{{ 'Open'|tr(locale) }}</a>
       <form method="post" action="/counterparties" class="counterparty-kind" aria-label="{{ 'Person or business'|tr(locale) }}"><input type="hidden" name="counterparty_id" value="{{ party.id }}">
         <button class="btn small {{ 'primary' if party.kind == 'PERSON' }}" name="counterparty_action" value="kind:PERSON" aria-pressed="{{ 'true' if party.kind == 'PERSON' else 'false' }}">{{ 'Person'|tr(locale) }}</button>
         <button class="btn small {{ 'primary' if party.kind == 'BUSINESS' }}" name="counterparty_action" value="kind:BUSINESS" aria-pressed="{{ 'true' if party.kind == 'BUSINESS' else 'false' }}">{{ 'Business'|tr(locale) }}</button>

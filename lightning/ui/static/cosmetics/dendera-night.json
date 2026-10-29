@@ -4,6 +4,7 @@
   "name": "Dendera, night",
   "version": 1,
   "status": "paid",
+  "tier": "motion",
   "priceCoins": null,
   "bundleTargets": [
     "windows",
@@ -34,7 +35,7 @@
     "ground": {
       "texture": "papyrus",
       "textureStrength": "whisper",
-      "artwork": "zodiac-ring",
+      "artwork": "star-ceiling",
       "vignette": "soft",
       "ambient": "none",
       "equip": "unveil"
@@ -48,7 +49,7 @@
     "navigation": {
       "surface": "surface",
       "activeMark": "hero",
-      "finish": "flat",
+      "finish": "satin",
       "activeStyle": "cartouche"
     },
     "hero": {
@@ -57,18 +58,18 @@
       "finish": "satin",
       "grain": "fibre",
       "edgeStyle": "foil",
-      "depth": "mid",
+      "depth": "high",
       "artwork": "winged-disc",
       "sheen": "none"
     },
     "cards": {
       "surface": "surface",
       "border": "border",
-      "finish": "flat",
+      "finish": "satin",
       "grain": "film",
       "edgeLight": "soft",
-      "depth": "low",
-      "hover": "none"
+      "depth": "mid",
+      "hover": "light"
     },
     "charts": {
       "grid": "border",
@@ -78,21 +79,21 @@
       "fill": "accent",
       "label": "onAccent",
       "focus": "focus",
-      "finish": "satin",
-      "depth": "low",
-      "press": "none"
+      "finish": "foil",
+      "depth": "mid",
+      "press": "sheen"
     },
     "buttons": {
       "surface": "raised",
       "label": "text",
       "border": "border",
-      "finish": "flat"
+      "finish": "embossed"
     },
     "tabs": {
       "surface": "surface",
       "chosen": "accent",
       "chosenLabel": "onAccent",
-      "finish": "flat"
+      "finish": "foil"
     },
     "fields": {
       "surface": "raised",
@@ -101,12 +102,12 @@
     },
     "progress": {
       "track": "raised",
-      "finish": "flat"
+      "finish": "gloss"
     },
     "overlays": {
       "surface": "raised",
       "backdrop": "background",
-      "finish": "flat",
+      "finish": "lacquer",
       "grain": "film",
       "depth": "high",
       "shade": "dim",
@@ -115,7 +116,7 @@
     "menus": {
       "surface": "raised",
       "divider": "border",
-      "finish": "flat",
+      "finish": "satin",
       "depth": "mid"
     }
   }

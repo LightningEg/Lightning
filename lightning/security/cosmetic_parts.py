@@ -84,9 +84,11 @@ def compose_parts(selection: dict[str, str], baseline: dict, catalog: dict[str, 
                   owned_versions: dict[str, int], contract: dict) -> dict:
     """Choose each compartment from an owned, bundled theme or the free default.
 
-    owned_versions must come from verified licenses, not editable preferences. References
-    remain semantic tokens: mixing paint cannot introduce layout or executable content.
-    Validate the composed visual states/contrast before the renderer saves a selection.
+    owned_versions maps each store item to its licensed version and must come from verified licenses, not editable
+    preferences. A theme's other mode names its item (Dendera's night rides on Dendera), and a licence covers its
+    version and later ones (cosmetic_license.verify_license). References remain semantic tokens: mixing paint cannot
+    introduce layout or executable content. Validate the composed visual states/contrast before the renderer saves a
+    selection.
     """
     result, _ = resolve_parts(baseline, baseline, contract)
     for slot, source in selection.items():
@@ -95,7 +97,8 @@ def compose_parts(selection: dict[str, str], baseline: dict, catalog: dict[str, 
         if source == baseline['id']:
             continue
         manifest = catalog.get(source)
-        if not manifest or owned_versions.get(source) != manifest.get('version'):
+        licensed = owned_versions.get(manifest.get('item', source)) if isinstance(manifest, dict) else None
+        if type(licensed) is not int or not 1 <= licensed <= manifest.get('version', 0):
             raise InvalidCosmeticParts('Part source is not owned at this bundled version')
         validate_parts(manifest, contract)
         result[slot].update(manifest['parts'].get(slot, {}))

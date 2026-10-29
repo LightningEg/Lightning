@@ -1,4 +1,5 @@
 ---
+was: 8L
 title: Theme materials, selling themes, owner console - what only the owner can do now
 type: feature
 area: appearance
@@ -27,7 +28,7 @@ repo: app
 
 ## Still to do by an AI
 
-1. Native acceptance (8J): WebView2 and Android paint, cost of grain and blur on a low-end phone, Arabic mirroring of artwork and glow, forced colours; Dendera's frieze and pigment thread on a low-end phone.
+1. Native acceptance (10A): WebView2 and Android paint, cost of grain and blur on a low-end phone, Arabic mirroring of artwork and glow, forced colours; Dendera's frieze and pigment thread on a low-end phone.
 2. Royal Obsidian & Gold needs a website version before it can be sold.
 3. Pre-existing: the app's own green on dark cards reads low in every dark theme; the fix belongs to the dark adapter in `theme-surfaces.css`.
 4. After 60 days of sales, review prices as `docs/payment-operations.md` (website) › Pricing describes.

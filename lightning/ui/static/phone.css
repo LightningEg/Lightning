@@ -862,3 +862,9 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 .phone-soon { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 10px 16px; text-decoration: none; color: inherit; font-weight: 600; }
 .phone-soon b { font-variant-numeric: tabular-nums; }
 .phone-soon.is-late > span { color: #C93D72; }  /* the words say late; no coloured edge (C01) */
+
+/* Link the sections (NF-7T) */
+.phone .linked-actions { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 12px 0 0; }
+.phone .linked-actions a { min-height: 48px; display: inline-flex; align-items: center; }
+.phone .linked-row form { margin: 0; flex: none; }
+.phone a.linked-row { text-decoration: none; color: inherit; }

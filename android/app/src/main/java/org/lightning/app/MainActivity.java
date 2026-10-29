@@ -73,7 +73,8 @@ public final class MainActivity extends Activity {
                 && origin.getPort() == uri.getPort();
     }
 
-    /** The one outside page the app opens, in the phone's browser: the website's marketplace, any query or fragment. */
+    /** The one outside page the app opens, in the phone's browser: the website's marketplace, any query or fragment.
+     *  English or Arabic, as the server writes it (lightning/ui/entitlements.py MARKETPLACE_PATHS). */
     private boolean storeLink(Uri uri) {
         String path = uri.getPath();
         return "https".equals(uri.getScheme()) && "lightningeg.com".equals(uri.getHost())

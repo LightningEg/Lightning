@@ -205,7 +205,6 @@ def held_for_others(owners: list[dict], total: Decimal | None) -> dict | None:
         return note("info", "You hold nothing for anyone", "Money you keep for family or friends shows here, apart from what you own.")
     names = sorted({row["owner"] for row in owners})
     who = ", ".join(names[:2]) + (f" and {len(names) - 2} more" if len(names) > 2 else "")
-    amount = f"{fmt(total)} in all. " if total else ""
     return note("info", f"You hold money for {who}", "It stays in your accounts but is not counted as yours.",
                 label=f"Held for {who}", figure=fmt(total) if total else "")
 

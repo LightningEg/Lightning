@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{# A tag's totals (NF-7T4): one total across categories and accounts, compared with its reserve. Figures from LinkedSections.tag. #}
+{% from "partials/macros.html" import page_title with context %}
+{% from "partials/linked.html" import link_row with context %}
+{% block title %}#{{ page.tag }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="{{ back_url(request) or '/transactions?tag=' ~ page.tag|urlencode }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Back'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}{{ page_title('#' ~ page.tag, none, ('{sa} to {sb}'|tr(locale, sa=page.first, sb=page.last)) if page.count else '') }}{% endblock %}
+{% block top_actions %}<a class="btn" href="/transactions?tag={{ page.tag|urlencode }}">{{ 'Its transactions'|tr(locale) }}</a>{% endblock %}
+{% block content %}
+{% set reserve = page.reserves[0] if page.reserves else none %}
+{% set compare_text = ('of the {amt} target for {name}'|tr(locale, amt=reserve.target|money(False, 0), name=reserve.name)) if reserve else ('{n} transactions'|tr(locale, n=page.count)) %}
+{% if phone_mode() %}
+{% from "phone/partials/hero.html" import hero %}
+{{ hero('Money out'|tr(locale) ~ ' · #' ~ page.tag, page.money_out|round(0), compare_text) }}
+{% else %}
+{% from "partials/charts.html" import lead_card %}
+{% set k = {'label': 'Money out'|tr(locale), 'value': page.money_out|round(0), 'kind': 'money', 'signed': false, 'chip': none, 'visual': none,
+            'compare': {'figure': ('{amt} left'|tr(locale, amt=reserve.left_after|money(False, 0))) if reserve and reserve.left_after >= 0 else (('{amt} over'|tr(locale, amt=(0 - reserve.left_after)|money(False, 0))) if reserve else ''),
+                        'tone': ('good' if reserve.left_after >= 0 else 'bad') if reserve else '', 'text': compare_text},
+            'line': {'text': ('Money in'|tr(locale) ~ ' ' ~ page.money_in|money(False, 0)) if page.money_in else '', 'action': '', 'href': ''}} %}
+{% call lead_card(k, base) %}<div class="lead-side-head"><div><h3>{{ 'By category'|tr(locale) }}</h3><p>{{ '{n} transactions'|tr(locale, n=page.count) }}</p></div></div>
+  <div class="lead-rows">{% for row in page.categories %}{% if row.href %}<a class="lead-row" href="{{ row.href }}">{% else %}<div class="lead-row">{% endif %}<span>{{ row.name|tr(locale) }}</span><b>{{ row.money_out|money(False, 0) }}</b>{% if row.href %}</a>{% else %}</div>{% endif %}{% else %}<div class="lead-row"><span>{{ 'No money out carries this tag.'|tr(locale) }}</span></div>{% endfor %}</div>{% endcall %}
+{% endif %}
+<div class="grid g2" style="margin-top:16px">
+  {% if phone_mode() %}<section class="card linked-panel" aria-labelledby="tag-categories"><h2 id="tag-categories">{{ 'By category'|tr(locale) }}</h2>
+    {% for row in page.categories %}{{ link_row(row.href, row.name|tr(locale), '', row.money_out|money(False, 0)) }}{% else %}<p class="muted">{{ 'No money out carries this tag.'|tr(locale) }}</p>{% endfor %}</section>{% endif %}
+  <section class="card linked-panel" aria-labelledby="tag-accounts"><h2 id="tag-accounts">{{ 'By account'|tr(locale) }}</h2>
+    {% for row in page.accounts %}{{ link_row(row.href, row.name, '', row.money_out|money(False, 0)) }}{% else %}<p class="muted">{{ 'No money out carries this tag.'|tr(locale) }}</p>{% endfor %}</section>
+  <section class="card linked-panel" aria-labelledby="tag-reserves"><h2 id="tag-reserves">{{ 'Reserves'|tr(locale) }}</h2>
+    {% for r in page.reserves %}{{ link_row('/reserves/' ~ r.id ~ '/payments', r.name, ('Target {amt}'|tr(locale, amt=r.target|money(False, 0))) ~ ' · ' ~ ('{amt} paid from it with this tag'|tr(locale, amt=r.from_tag|money(False, 0))), r.effective_allocated|money(False, 0)) }}{% else %}<p class="muted">{{ 'No reserve shares this name. A reserve named like the tag is compared with it.'|tr(locale) }}</p><p class="linked-actions"><a class="quiet-link" href="/plan/reserves">{{ 'Open reserves'|tr(locale) }}</a></p>{% endfor %}</section>
+</div>
+{% endblock %}

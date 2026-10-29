@@ -42,7 +42,8 @@
     if (!meta || !details) return;
     details.open = true;
     const link = details.querySelector('[data-theme-prices]');
-    if (link) link.href = 'https://lightningeg.com/marketplace.html?item=' + encodeURIComponent(meta.item || meta.id) + '&from=app#themes';
+    // The page's own marketplace address, in its language, comes from the server (entitlements.marketplace_url).
+    if (link && link.dataset.marketplace) link.href = link.dataset.marketplace + '?item=' + encodeURIComponent(meta.item || meta.id) + '&from=app#themes';
   }
   function apply(id, persist = true) {
     const next = normalize(id);
@@ -102,10 +103,33 @@
     apply(event.newValue, false);
   });
   // Night version: a theme with an "-night" twin (dendera / dendera-night) can follow the computer's light or
-  // dark setting. A device choice, so it lives in this browser; the profile keeps the day theme.
+  // dark setting. With a profile the switch is kept in the profile (the PC's origin changes at every launch, so
+  // the browser's storage would forget it) and arrives in the head; the profile keeps the day theme. Without a
+  // profile (the theme workbench) the browser keeps it.
   const nightKey = 'lightning_theme_follow_night';
+  const nightMeta = document.querySelector('meta[name=lightning-follow-night]');
+  let followNight = profile && nightMeta ? nightMeta.content === '1' : null;
   const twin = id => known(id + '-night') ? id + '-night' : null;
-  const follows = () => { try { return localStorage.getItem(nightKey) === '1'; } catch (_) { return false; } };
+  const follows = () => {
+    if (followNight !== null) return followNight;
+    try { return localStorage.getItem(nightKey) === '1'; } catch (_) { return false; }
+  };
+  function keepNight(on) {
+    if (followNight === null) {
+      try { localStorage.setItem(nightKey, on ? '1' : '0'); } catch (_) { /* session only */ }
+      return;
+    }
+    followNight = on;
+    const token = document.querySelector('meta[name=lightning-session]')?.content
+      || document.querySelector('input[name=__session]')?.value || '';
+    fetch('/settings/theme/night', { method: 'POST', credentials: 'same-origin', keepalive: true,
+      body: new URLSearchParams({ on: on ? '1' : '0', __session: token }) }).then(response => {
+      if (!response.ok) throw new Error('Could not save');
+    }).catch(() => {
+      const status = document.querySelector('[data-theme-status]');
+      if (status) status.textContent = tr('Theme applied for this session; could not save on this device.');
+    });
+  }
   const dark = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
   let dayTheme = root.dataset.theme;
   function wearForScheme() {
@@ -151,7 +175,7 @@
       if (!box) return;
       box.checked = follows();
       box.addEventListener('change', () => {
-        try { localStorage.setItem(nightKey, box.checked ? '1' : '0'); } catch (_) { /* session only */ }
+        keepNight(box.checked);
         if (box.checked) wearForScheme(); else if (root.dataset.theme !== dayTheme) apply(dayTheme, false);
       });
     });

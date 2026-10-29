@@ -20,7 +20,7 @@ from lightning.security.keys import (clean_question, create_key_file, key_id, ne
                                      unwrap_key, validate_key_file, with_password, with_question, with_recovery_key)
 
 from .instance import InstanceAlreadyRunning, InstanceLock
-from .paths import ProfilePaths, choose_data_root, create_profile, resolve_profile
+from .paths import ProfilePaths, choose_data_root, create_profile, is_journal_profile, resolve_profile
 from lightning.ui.entitlements import use_folder as use_licence_folder, use_profile as use_licence_profile
 from .roles import SessionRole
 
@@ -589,7 +589,7 @@ class ProfileSession:
         # authority or reuse an origin counter. Only signed package recovery above
         # can create a quarantined comparison copy.
         paths = self._select(selected)
-        if (paths.data_dir / "journal-native.json").exists() or (paths.data_dir / "complete.json").exists():
+        if is_journal_profile(paths.data_dir):
             raise ProfileError("Choose a signed journal backup. Upgrade checkpoints are retained for explicit repair.")
         EncryptedBackupRestorer(self).restore_backup(selected, backup_path, password)
 

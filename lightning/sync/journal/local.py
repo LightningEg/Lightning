@@ -19,7 +19,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from .codec import (MAX_MESSAGE, JournalError, authenticate, canonical, cursor as check_cursor, fields, hash_value, origin,
                     origin_id, number, uuid, seal, unpack)
-from .finance import ChunksMissing
+from .errors import CatchupPaused, ChunksMissing, HomeRefused, MembershipUpdateRequired, UploadHeld  # noqa: F401 - re-exported
 
 # Plaintext budgets for one combined round. A sealed message is AES-GCM + base64 + signature,
 # so about 4/3 of its plaintext plus ~2 KiB of header must stay within MAX_MESSAGE. A commit is
@@ -32,18 +32,6 @@ SEALED_OVERHEAD = 2048
 
 def fits(payload):
     return 4 * ((len(canonical(payload)) + 18) // 3) + SEALED_OVERHEAD <= MAX_MESSAGE
-
-
-class CatchupPaused(JournalError):
-    """This bounded wake-up ended; resume from its already durable cursor."""
-
-
-class UploadHeld(JournalError):
-    """Downloads finished, but the home would not take every pending edit yet; they stay pending."""
-
-
-class MembershipUpdateRequired(JournalError):
-    """Fetch the signed individual key wrap using saved device credentials."""
 
 
 def encode(data):
@@ -91,6 +79,7 @@ class LocalChannel:
         number(body["epoch"], minimum=1)
         public_key = self.peers.get(body["sender"])
         if public_key is None:
+            self._removed_sender(envelope, body["sender"])
             raise JournalError("Sender is not paired")
         authenticate(envelope, public_key)  # Always authenticate before decryption.
         if self.device.home and not self.device.store.db.scalar(
@@ -114,6 +103,21 @@ class LocalChannel:
         except (ValueError, TypeError, InvalidTag) as error:
             raise JournalError("Invalid encrypted payload") from error
         return body["sender"], payload
+
+    def _removed_sender(self, envelope, sender):
+        """A device the home removed, proven by its own key, is told to fetch the signed membership
+        that leaves it out (4A section 7: a removed device learns it on contact)."""
+        if not self.device.home:
+            return
+        rows = self.device.store.db.all("SELECT public_key,revoked FROM journal_origins WHERE device=?", (sender,))
+        if not rows or any(not row["revoked"] for row in rows):
+            return
+        for row in rows:
+            try:
+                authenticate(envelope, row["public_key"])
+            except JournalError:
+                continue
+            raise MembershipUpdateRequired("Membership update required")
 
     def handle(self, wire):
         if self.device.home is None:
@@ -236,7 +240,6 @@ class LocalChannel:
             if result["request_nonce"] != unpack(outgoing)["body"]["nonce"]:
                 raise JournalError("Response belongs to an earlier request")
             if type(result["result"]) is dict and set(result["result"]) == {"refused"}:
-                from .cloud import HomeRefused
                 raise HomeRefused(str(result["result"]["refused"])[:200])
             return result["result"]
         from .compatibility import capabilities, check

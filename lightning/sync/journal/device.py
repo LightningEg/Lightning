@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo
 import json
 
 from .codec import JournalError, origin_id, unpack
+from .errors import ChunksMissing, DeviceRevoked, HomeRefused
 
 
 class JournalDevice:
@@ -331,10 +332,32 @@ class JournalDevice:
             "SELECT status,reason,COUNT(*) AS count FROM journal_remote_states GROUP BY status,reason ORDER BY status,reason")],
             outbox=dict(self.store.db.one("SELECT COUNT(*) AS count,MAX(seq) AS latest,SUM(decision IS NOT NULL) AS decided FROM journal_outbox"))))
 
+    @staticmethod
+    def _shown(timestamp):
+        return datetime.fromisoformat(timestamp).astimezone(ZoneInfo("Africa/Cairo")).strftime("%Y-%m-%d %H:%M")
+
+    def record_sync_error(self, error):
+        """Keep the last failed round (its kind, class, short message and time) for Devices to show."""
+        kind = "revoked" if isinstance(error, DeviceRevoked) else "refused" if isinstance(error, HomeRefused) else "error"
+        value = dict(kind=kind, error=type(error).__name__, message=str(error)[:200],
+                     at=datetime.now(timezone.utc).isoformat())
+        with self.store.db.transaction():
+            self.store.db.execute("INSERT OR REPLACE INTO journal_local VALUES('sync_error',?)", (json.dumps(value),))
+        return kind
+
+    def clear_sync_error(self):
+        if self.store.db.scalar("SELECT 1 FROM journal_local WHERE name='sync_error'"):
+            with self.store.db.transaction():
+                self.store.db.execute("DELETE FROM journal_local WHERE name='sync_error'")
+
     def sync_status(self):
         timestamp = self.store.db.scalar("SELECT value FROM journal_local WHERE name='last_sync'")
-        shown = datetime.fromisoformat(timestamp).astimezone(ZoneInfo("Africa/Cairo")).strftime("%Y-%m-%d %H:%M") if timestamp else "Not yet synced"
-        return dict(last=shown, pending=len(self.store.pending()))
+        shown = self._shown(timestamp) if timestamp else "Not yet synced"
+        saved = self.store.db.scalar("SELECT value FROM journal_local WHERE name='sync_error'")
+        error = json.loads(saved) if saved else None
+        if error:
+            error["shown"] = self._shown(error["at"])
+        return dict(last=shown, pending=len(self.store.pending()), error=error)
 
     def sync_with(self, home):
         """Local delta exchange; transport adapters deliver these same signed bytes."""
@@ -356,7 +379,6 @@ class JournalDevice:
             if not batch:
                 raise JournalError("Missing confirmed history; verified snapshot required")
             for wire in batch:
-                from .finance import ChunksMissing
                 try:
                     self.store.apply(wire)
                 except ChunksMissing as error:  # In process: copy the large effect's chunks, then apply.

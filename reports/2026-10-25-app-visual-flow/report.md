@@ -1,6 +1,7 @@
 # Audit 7 — app visual flow
 
-2026-10-25 · Codex · Owner-requested PC/phone visual recovery and implementation.
+Date: 2026-10-25 · Codex · Owner-requested PC/phone visual recovery and implementation.
+Reviewed commit: 2c697f3ea4ae8d765ad798cb61fe8709908b2481 (the commit before this report was added)
 
 ## Scope and brand
 

@@ -1,7 +1,7 @@
 # Pairing backend hardening and security review
 
 Date: 2026-10-26 · Author/reviewer: Codex implementation review plus a separate design-review agent
-Repository: app · Reviewed baseline: 1b072575b8add30059a731aaf385facf9cb5689d
+Repository: app · Reviewed commit: 1b072575b8add30059a731aaf385facf9cb5689d (the baseline)
 
 ## Scope and method
 

@@ -89,7 +89,7 @@ async def create_item(request: Request, account_id: int):
     values = {key: str(form.get(key, "")) for key in ("name", "kind", "weight", "karat", "reference_asset_id", "details")}
     values["worn"] = "1" if form.get("worn") == "1" else ""
     try:
-        asset_id = c.physical_items.create(account_id, values["name"], values["kind"], values["weight"],
+        c.physical_items.create(account_id, values["name"], values["kind"], values["weight"],
                                            int(values["karat"]), int(values["reference_asset_id"]), values["details"],
                                            worn=values["worn"] == "1")
     except (ValueError, LightningError) as exc:

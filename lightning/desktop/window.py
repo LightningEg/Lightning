@@ -12,6 +12,7 @@ from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
 from lightning import DISPLAY_VERSION
+from lightning.ui.entitlements import MARKETPLACE_HOST, MARKETPLACE_PATHS
 
 _PYWEBVIEW_VERSION = "6.2.1"
 _SMOKE_TIMEOUT = 20.0
@@ -147,11 +148,11 @@ def _store_link(uri: str) -> bool:
         parsed = urlsplit(str(uri))
         return (
             parsed.scheme == "https"
-            and parsed.hostname == "lightningeg.com"
+            and parsed.hostname == MARKETPLACE_HOST
             and parsed.username is None
             and parsed.password is None
             and parsed.port is None
-            and parsed.path in ("/marketplace.html", "/ar/marketplace.html")
+            and parsed.path in MARKETPLACE_PATHS.values()
             and "\\" not in str(uri)
         )
     except ValueError:

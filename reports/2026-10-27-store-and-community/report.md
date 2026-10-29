@@ -1,7 +1,7 @@
 # Store and community: unlocking themes, the market, rewards and staying in Lightning
 
 Date: 2026-10-27 · Author/reviewer: Claude (owner-requested audit)
-Repository: both · Reviewed commits: app `4c997908eada2944118d5ab6c6369f105444f832`, website `c41d2c78438f33496d13ea0cb2c9b741aa76fb7d`
+Repository: both · Reviewed commit: `4c997908eada2944118d5ab6c6369f105444f832` (app), `c41d2c78438f33496d13ea0cb2c9b741aa76fb7d` (website)
 
 ## Scope and method
 

@@ -1,6 +1,7 @@
 # Audit 5: is the backend engine efficient and streamlined?
 
-2026-10-21 · Claude · app 1.3.0, commit `6e1c043` (main). Written as Audit 3; renumbered when the edit-journal audit took that number · temporary databases only (Mohab's 2026 sample, plus synthetic history), prices offline.
+Date: 2026-10-21 · Claude · app 1.3.0, commit `6e1c043` (main). Written as Audit 3; renumbered when the edit-journal audit took that number · temporary databases only (Mohab's 2026 sample, plus synthetic history), prices offline.
+Reviewed commit: 6e1c04344b63d364fe62d7a034b0a417a750714c (the commit the line above names)
 
 The owner asked four things: is the backend efficient, are there loose ends, is any function stale or any structure causing
 problems, and is the architecture streamlined. Three reviews ran in parallel: the ledger engine, the read and plan side, and

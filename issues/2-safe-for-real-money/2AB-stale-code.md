@@ -1,4 +1,5 @@
 ---
+was: 9L
 title: Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths
 type: owner
 area: architecture

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextvars
+import functools
 import hashlib
 import json
 import logging
@@ -34,7 +35,7 @@ from lightning.core.money import ZERO, fmt, quantize, to_decimal
 from lightning.workflows import live_prices
 from lightning.ui import charts, sections
 from lightning.ui.themes import theme_id
-from lightning.ui.entitlements import owned as owned_themes
+from lightning.ui.entitlements import marketplace_url, owned as owned_themes, store_themes
 from lightning.ui.i18n import BROWSER_UI, localize_html, localized_figures, translate
 
 UI_DIR = Path(__file__).parent
@@ -52,7 +53,7 @@ _ROUND_MONEY: contextvars.ContextVar[bool] = contextvars.ContextVar("round_money
 REPORTING_TEMPLATES = ("dashboard/", "budget.html", "birdview/", "investments/index.html", "investments/holding.html", "financial_health.html",
                        "investments/_targets.html", "investments/targets.html", "investments/report_detail.html",
                        "planning/plan.html", "reserves.html", "settings/index.html", "accounts/currencies.html", "zakat.html",
-                       "accounts/list.html")
+                       "accounts/list.html", "counterparty.html", "tag.html")
 
 
 def _money(value, signed: bool = False, places: int | None = None) -> str:
@@ -278,7 +279,8 @@ templates.env.globals["institution_tile"] = _institution_tile
 
 
 # Pages reached from many places with no Back of their own; the main tabs are left out on purpose.
-_REFERER_BACK_PAGES = ("/transactions", "/investments/holding", "/investments/planner", "/investments/prices")
+_REFERER_BACK_PAGES = ("/transactions", "/investments/holding", "/investments/planner", "/investments/prices",
+                       "/counterparties/", "/tags/")
 
 
 def _back_url(request) -> str:
@@ -373,7 +375,7 @@ def phone_mode() -> bool:
 
 
 templates.env.globals["phone_mode"] = phone_mode
-templates.env.globals["store_themes"] = __import__("lightning.ui.entitlements", fromlist=["store_themes"]).store_themes
+templates.env.globals["store_themes"] = store_themes
 templates.env.globals["trend_end_labels"] = charts.end_labels
 
 
@@ -428,6 +430,22 @@ def _render_page(request, name, status_code, c, total, owned_total, groups, cont
     return response
 
 
+@functools.lru_cache(maxsize=None)
+def _asset_hash(name: str) -> str:
+    return hashlib.sha256((UI_DIR / "static" / name).read_bytes()).hexdigest()[:12]
+
+
+def static_url(name: str) -> str:
+    """A bundled static file's URL with its content hash, like the phone bundle: a changed file gets a new URL by
+    itself, so nobody bumps ?v= by hand and a cached old stylesheet never meets new theme code (BT-8U5)."""
+    if ".." in name or name.startswith("/"):
+        raise ValueError(f"Not a bundled static file: {name}")
+    return f"/static/{name}?v={_asset_hash(name)}"
+
+
+templates.env.globals["static_url"] = static_url
+
+
 # The browser half of the Arabic table, served once as a cached script instead of inside every Arabic page (3AC).
 _ARABIC_UI_JS = ("window.LIGHTNING_UI=" + json.dumps(BROWSER_UI, ensure_ascii=False, sort_keys=True) + ";").encode("utf-8")
 ARABIC_UI_SRC = "/static/ui-ar.js?v=" + hashlib.sha256(_ARABIC_UI_JS).hexdigest()[:12]
@@ -450,13 +468,17 @@ PHONE_CSS_SRC = {k: f"/static/phone-bundle{k}.css?v=" + hashlib.sha256(v).hexdig
 
 
 def _template_response(request, name, status_code, c, locale, total, owned_total, groups, context):
+    owned = owned_themes()  # licences are verified once per page: the head, the theme and Settings share it (BT-8U5)
     response = templates.TemplateResponse(
         request,
         name,
         {
             "base": c.base_currency,
-            "app_theme": theme_id(c.settings.get("appearance_theme")),
-            "owned_themes": " ".join(sorted(owned_themes())),
+            "app_theme": theme_id(c.settings.get("appearance_theme"), owned),
+            "store_themes": functools.partial(store_themes, owned),
+            "marketplace": marketplace_url(locale),
+            "owned_themes": " ".join(sorted(owned)),
+            "follow_night": c.settings.get("appearance_follow_night") == "1",
             "locale": locale,
             "fig": localized_figures(locale),
             "arabic_ui_src": ARABIC_UI_SRC if locale == "ar" else "",
@@ -486,6 +508,9 @@ def _template_response(request, name, status_code, c, locale, total, owned_total
 
 
 def redirect(url: str, msg: str = "") -> RedirectResponse:
+    # Only ever to a page of this app: a path, never another site (a "//host" or "/\\host" is not a path).
+    if not url.startswith("/") or url.startswith("//") or url.startswith("/\\") or "\n" in url or "\r" in url:
+        url = "/"
     if msg:
         url += ("&" if "?" in url else "?") + "msg=" + quote(msg)
     return RedirectResponse(url, status_code=303)

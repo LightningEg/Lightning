@@ -1,10 +1,34 @@
-name: Bug or improvement
-description: Something is wrong, confusing or missing
+name: Bug report
+description: Optional prompts for something wrong or confusing; blank issues are welcome too
 body:
+  - type: markdown
+    attributes:
+      value: |
+        These prompts help us investigate. Fill in what you know and skip the rest.
+        Prefer your own format? Use a blank issue from the issue chooser.
+        Use dummy examples only. Do not share financial records, account numbers, passwords, recovery keys or backups.
+        Report security problems privately: https://github.com/LightningEg/Lightning/security/advisories/new
   - type: textarea
     id: what
-    attributes: {label: What happened or what should change, description: "Use dummy data only. Never paste real balances, account numbers or backups."}
-    validations: {required: true}
+    attributes:
+      label: What happened?
+      description: A short description is enough to get started.
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect? (optional)
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we reproduce it? (optional)
+      description: If you know the steps, share them using dummy examples.
   - type: input
     id: version
-    attributes: {label: Lightning version and platform (Windows, Linux, phone)}
+    attributes:
+      label: Lightning version and device (optional)
+      placeholder: For example, v1.5.0 on Windows or Android
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else? (optional)
+      description: Screenshots are optional. Remove personal and financial details before attaching anything.

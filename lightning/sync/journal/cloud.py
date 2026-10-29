@@ -20,6 +20,7 @@ from urllib.request import Request, urlopen
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 
 from .codec import JournalError, authenticate, canonical, digest, fields, unpack
+from .errors import CloudUnavailable, HomeRefused, MembershipUpdateRequired  # noqa: F401 - HomeRefused re-exported
 
 CHUNK_SIZE = 32768
 MAX_SNAPSHOT = 200 * 1024 * 1024
@@ -32,16 +33,8 @@ def raw_signature(identity, body):
     return (r.to_bytes(32, "big") + s.to_bytes(32, "big")).hex()
 
 
-class CloudUnavailable(JournalError):
-    """Transient carrier failure. The caller retains every durable source."""
-
-
 class ReplyPending(CloudUnavailable):
     """The carrier works; the home has not answered yet. This is waiting, not failure."""
-
-
-class HomeRefused(CloudUnavailable):
-    """The home answered that it cannot take this request now (frozen, full); retry later."""
 
 
 class MailboxClient:
@@ -124,7 +117,6 @@ class MailboxPeer:
 
     async def pump(self, *, budget=20, fault=lambda phase: None):
         """Bound work per wake-up; no sleeping while holding an open transaction."""
-        from .local import MembershipUpdateRequired
         if type(budget) is not int or not 1 <= budget <= 50:
             raise JournalError("Invalid background work budget")
         for row in self.db.all("SELECT * FROM journal_mail_out ORDER BY rowid LIMIT ?", (budget,)):
@@ -147,7 +139,6 @@ class MailboxPeer:
                 raise JournalError("Invalid mailbox encoding") from error
             if hashlib.sha256(wire).hexdigest() != message["id"]:
                 raise JournalError("Invalid mailbox content digest")
-            from .local import MembershipUpdateRequired
             obsolete = False
             try:
                 sender, _ = self.channel.open(wire)
