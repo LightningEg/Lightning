@@ -46,8 +46,8 @@
 </details>
 {% endif %}
   </div>
-  <details class="flow-disclosure"  aria-labelledby="position-heading">
-    <summary class="overview-section-head"><h2 id="position-heading">{{ 'Your position'|tr(locale) }}</h2><span>As of {{ position_as_of }}</span></summary>
+  <section class="overview-section" aria-labelledby="position-heading">
+    <header class="overview-section-head"><h2 id="position-heading">{{ 'Your position'|tr(locale) }}</h2><span>As of {{ position_as_of }}</span></header>
     <article class="overview-block wide-card overview-cash-card" aria-labelledby="cash-heading">
       <div class="overview-split">
         <section>
@@ -55,9 +55,9 @@
           <div class="overview-cash-figure"><div class="overview-headline">{% if pos.free_cash is not none %}{{ pos.free_cash|money }} <small>{{ base }}</small>{% else %}Unavailable{% endif %}</div>{% if pos.free_cash and pos.free_cash > 0 and position_is_today %}<a class="btn btn-planner small" data-popup-open href="/investments/planner?amount={{ pos.free_cash|int }}"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h18M6 16l4-5 4 3 6-8"/><path d="M16 6h4v4"/></svg>{{ "Plan to invest"|tr(locale) }}</a>{% endif %}</div>
           <div class="overview-inline-list">
           <div class="overview-static-row"><span>{{ fig.cash_you_own.label }}</span><b>{{ pos.cash_you_own|money }}</b></div>
-          {% if pos.kept_apart %}<details class="overview-disclosure"><summary><span>{{ fig.kept_apart.label }}</span><b>−{{ pos.kept_apart|money }}</b></summary><div class="overview-disclosure-body">{% for row in kept_apart_accounts %}<a href="/accounts/{{ row.id }}"><span>{{ row.label }} <small>{{ row.currency }}</small></span><b>{{ row.value|money }}</b></a>{% endfor %}</div></details>{% endif %}
-          {% if pos.reserve_rows is not none %}<details class="overview-disclosure"><summary><span>{{ fig.reserves.label }}</span><b>−{{ pos.reserves|money }}</b></summary><div class="overview-disclosure-body">{% for reserve in pos.reserve_rows if reserve.effective_allocated != 0 %}<a href="/plan/reserves"><span>{{ 'Emergency fund' if reserve.kind == 'EMERGENCY' else reserve.name }}</span><b>{{ reserve.effective_allocated|money }}</b></a>{% else %}<p class="muted small">{{ "No cash is set aside on this date."|tr(locale) }}</p>{% endfor %}</div></details>{% else %}<div class="overview-static-row"><span>{{ fig.reserves.label }}</span><b>{{ "History unavailable"|tr(locale) }}</b></div><p class="muted small">{{ "Reserve history cannot be rebuilt for this date."|tr(locale) }}<a href="/plan/reserves">{{ "Review current reserves"|tr(locale) }}</a></p>{% endif %}
-          <details class="overview-disclosure"><summary><span>{{ fig.bills_due.label }}</span><b>{{ ('−' ~ (pos.bills_due|money)) if pos.bills_due > 0 else '0' }}</b></summary><div class="overview-disclosure-body">{% for p in owe.bills_due_items[:6] %}<a data-popup-open href="/plan/items/{{ p.item.id }}/pay?due={{ p.due_date }}&amp;back=%2F"><span>{{ p.item.name }} <small>{{ p.due_date }}</small></span><b>{{ p.amount|money }}</b></a>{% else %}<p class="muted small">{{ "Nothing is due and unpaid."|tr(locale) }}</p>{% endfor %}{% if owe.bills_due_items|length > 6 %}<a href="/plan"><span>{{ owe.bills_due_items|length - 6 }} more</span><b></b></a>{% endif %}</div></details>
+          {% if pos.kept_apart %}<div class="overview-static-row"><span>{{ fig.kept_apart.label }}</span><b>−{{ pos.kept_apart|money }}</b></div>{% endif %}
+          {% if pos.reserve_rows is not none %}<div class="overview-static-row"><span>{{ fig.reserves.label }}</span><b>−{{ pos.reserves|money }}</b></div>{% else %}<div class="overview-static-row"><span>{{ fig.reserves.label }}</span><b>{{ "History unavailable"|tr(locale) }}</b></div><p class="muted small">{{ "Reserve history cannot be rebuilt for this date."|tr(locale) }}<a href="/plan/reserves">{{ "Review current reserves"|tr(locale) }}</a></p>{% endif %}
+          <div class="overview-static-row"><span>{{ fig.bills_due.label }}</span><b>{{ ('−' ~ (pos.bills_due|money)) if pos.bills_due > 0 else '0' }}</b></div>
           </div>
         </section>
         {# Feedback ticket 83 (and batch 002 row 51): the right half no longer repeats the left as bars. #}
@@ -70,7 +70,7 @@
       <div class="overview-split">
         <section aria-labelledby="sold-heading"><div class="overview-block-head"><div><h3 id="sold-heading">{{ fig.if_you_sold_today.label }}</h3><p>{{ "After selling your investments"|tr(locale) }}</p></div><a class="quiet-link" href="/settings?section=assets-valuations">{{ 'Sale factors'|tr(locale) }}</a></div>
           <div class="overview-headline">{% if pos.if_you_sold_today is not none %}{{ pos.if_you_sold_today|money }} <small>{{ base }}</small>{% else %}Unavailable{% endif %}</div>
-          {% for item in pos.locked_holdings %}<div class="overview-static-row locked-row"><span>{{ "Locked certificate"|tr(locale) }} · {{ item.asset }} <small>{{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small></span><b class="muted">{{ item.value|money }}</b></div>{% endfor %}
+          {% for item in pos.locked_holdings %}<div class="overview-static-row locked-row"><span>{{ "Locked certificate"|tr(locale) }}</span><b class="muted">{{ item.value|money }}</b></div>{% endfor %}
           <div class="overview-inline-list">
             <div class="overview-static-row"><span>{{ fig.free_cash.label }}</span><b>{{ pos.free_cash|money if pos.free_cash is not none else 'Unavailable' }}</b></div>
             {% if pos.kept_apart %}<div class="overview-static-row"><span>{{ fig.kept_apart.label }}</span><b>{{ pos.kept_apart|money }}</b></div>{% endif %}
@@ -97,7 +97,7 @@
         </section>
       </div>
     </article>
-  </details>
+  </section>
 
 </div>
 {% endblock %}

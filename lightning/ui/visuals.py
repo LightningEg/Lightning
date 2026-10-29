@@ -501,7 +501,7 @@ def cash_plan(c, forecast, day: date) -> dict:
             "parts": parts, "past_free": [(key, value) for key, value in zip(past_keys, past)]}
 
 
-PAIR_XS = (24.0, 45.0, 64.0)  # two Sankeys side by side: target names get a third of each (style.css .is-pair)
+PAIR_XS = (18.0, 42.0, 64.0)  # two Sankeys side by side: target names get a third of each (style.css .is-pair)
 
 
 def cash_flow_charts(c, first: date, last: date, month_period: bool, today_: date) -> dict:
