@@ -11,7 +11,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-## [1.5.1] · 2026-10-29
+## [1.5.1] — 2026-10-29
 
 - 2026-10-29 · Codex: Require thorough review of every external pull request before merging.
 
