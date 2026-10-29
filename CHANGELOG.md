@@ -13,6 +13,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 - 2026-10-29 · Claude: plan items BT-2AC (login form submitted twice, #193) and BT-3AJ (language change is undoable, #167) filed; the For Geeks roadmap on the site brought in step with the plan.
 
+## [1.5.1] — 2026-10-29
+
 - 2026-10-29 · Codex: Require thorough review of every external pull request before merging.
 
 - 2026-10-29 · Claude: Guideline themes.md: two new animated banners, Felucca and Sand wind; four drawn banners redrawn for contrast (site `claude/banner-redraw`).
