@@ -102,3 +102,8 @@ changed; `tools/phone_check.py` was not re-run. Figures counted by a pattern, so
   (`test_one_needs_you_strip_under_the_stepper_holds_what_is_due_tomorrow`,
   `test_more_is_flat_and_the_weekly_review_keeps_more_chosen`), `test_phone_budget.py`, `test_phone_transactions.py`.
   After: Budget 1.1 screens (was 2.6); Transactions' tiles show this month (+46,833 / −24,290), not the lifetime. The rest stays in IV-3AL.
+- **2026-10-29, step 2** (owner: "Do as you deem fit and merge"; step 1 merged as #201): D1-D3 decided as recommended
+  and recorded in the Project Overview. Built: F14/F15 (the Cash planning hero names the next payment), F16 (Recurring's
+  page action is a Secondary on the phone), F18 (the horizon note points to the holding's page; the chart stays before
+  holdings, the owner's PDF order, so that part of F18 is withdrawn), F20 (what needs you sits under the lead; the
+  chart has its own card). D1 and D2 wait for a session that can change the website repo's guideline copy too.

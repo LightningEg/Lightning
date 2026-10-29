@@ -2,7 +2,7 @@
 {% from "planning/_macros.html" import status %}
 {% block title %}Recurring · Cash planning{% endblock %}
 {% block heading %}<div><h1>{{ 'Cash planning'|tr(locale) }}</h1></div>{% endblock %}
-{% block top_actions %}<a class="btn primary" data-popup-open href="/plan/items/new?kind=BILL">{{ 'Add recurring item'|tr(locale) }}</a>{% endblock %}
+{% block top_actions %}<a class="btn{{ '' if phone_mode() else ' primary' }}" data-popup-open href="/plan/items/new?kind=BILL">{{ 'Add recurring item'|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import stat_tiles %}
 {{ stat_tiles(fixed_tiles, base, 'Your fixed costs') }}
