@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 65 open items, in the order they are worked on.
+10 milestones, 67 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -37,8 +37,9 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | **BT-2J** | [On a journal profile, retrying one add form can still save a second expense](2-safe-for-real-money/2J-register-submit-idempotency.md) | bug, technical · medium | transactions | ready |
 | **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical · medium | android | new |
 | **OW-2AB** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AB-stale-code.md) | owner task | architecture | ready |
+| **BT-2AC** | [Submitting the unlock form twice (Enter and the button) shows "This form expired" on the desktop app](2-safe-for-real-money/2AC-login-form-double-submit-expires.md) ([#193](https://github.com/LightningEg/Lightning/issues/193)) | bug, technical · medium | desktop | ready |
 
-Done: 2B, 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA. Next free code: 2AC.
+Done: 2B, 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA. Next free code: 2AD.
 
 ## 3 Polish and Arabic
 
@@ -56,8 +57,9 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **IV-3T** | [Phone screens break Part C - cut words, overlapping text, no way back on five pages, small targets, five Settings tabs](3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | improvement, visual | phone | ready |
 | **NF-3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | new feature | phone | new |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/3AI-institution-logos.md) | owner task | accounts | ready |
+| **BT-3AJ** | [Changing the language is recorded as an undoable action, so Undo switches it back](3-polish-and-arabic/3AJ-language-change-is-undoable.md) ([#167](https://github.com/LightningEg/Lightning/issues/167)) | bug, technical · low | product | ready |
 
-Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH. Next free code: 3AJ.
+Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH. Next free code: 3AK.
 
 ## 4 Edit journal and devices
 
