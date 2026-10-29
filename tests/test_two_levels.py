@@ -15,6 +15,19 @@ def test_eight_sections_and_five_tabs_at_most():
                                           "Transactions", "Settings"]
 
 
+def test_settings_opens_on_your_data_with_checks_last(c):
+    settings = next(section for section in SECTIONS if section.key == "settings")
+    assert [tab.key for tab in settings.tabs] == ["data", "rules", "categories", "counterparties", "checks"]
+    assert settings.href == "/settings"
+    client = TestClient(create_app(c))
+    for path in ("/settings", "/checks"):
+        page = client.get(path)
+        assert page.status_code == 200
+        bar = re.search(r'<nav class="plan-tabs-bar section-tabs"[^>]*>(.*?)</nav>', page.text, re.S).group(1)
+        assert re.findall(r'href="([^"]+)"', bar) == ["/settings", "/rules", "/categories", "/counterparties", "/checks"]
+        assert f'href="{path}" aria-current="page"' in bar
+
+
 def test_every_page_sits_in_one_tab():
     expected = {
         "/": ("overview", "summary"), "/birdview/expenses": ("spending", "spending"),

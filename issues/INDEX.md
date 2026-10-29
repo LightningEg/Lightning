@@ -59,7 +59,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/3AI-institution-logos.md) | owner task | accounts | ready |
 | **BT-3AJ** | [Changing the language is recorded as an undoable action, so Undo switches it back](3-polish-and-arabic/3AJ-language-change-is-undoable.md) ([#167](https://github.com/LightningEg/Lightning/issues/167)) | bug, technical · low | product | ready |
 
-Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH. Next free code: 3AK.
+Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK. Next free code: 3AL.
 
 ## 4 Edit journal and devices
 
@@ -175,4 +175,4 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 | **NF-10C** | [Theme materials, selling themes, owner console - what only the owner can do now](10-looks-and-store/10C-theme-materials-acceptance.md) | new feature | appearance | building |
 | **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](10-looks-and-store/10D-papyrus-and-dendera-bundles.md) | new feature | appearance | ready |
 
-Done: nothing yet. Next free code: 10E.
+Done: 10E. Next free code: 10F.
