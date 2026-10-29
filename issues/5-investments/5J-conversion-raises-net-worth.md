@@ -24,6 +24,10 @@ conversion restores everything exactly. Severity: medium. It is documented, but 
 dollar holding at 0.02 EGP, so net worth falls from 100,000 to 95,002 that day and stays there. Whatever the owner decides, ask before
 saving a conversion far from the day's rate.
 
+2026-10-29, built: Convert (new and edit) asks once when the rate is 20% or more from the day's market rate; pressing
+Convert again saves it as typed (`lightning/ui/routes/accounts.py` `check_conversion_rate`,
+`tests/test_fx_conversion.py::test_a_rate_far_from_the_market_is_asked_once_before_it_is_saved`). The owner decision above stays open.
+
 ## Fix
 Owner decision first: should a conversion's rate value other holdings? Proposal: value holdings with the market rate and keep the trade rate for the
 conversion's own legs, so the spread shows as a cost.
