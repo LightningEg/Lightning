@@ -551,8 +551,12 @@ class BankImportService:
         if parsed["Category"]:
             try:
                 return self.categories.find_by_text(parsed["Category"]).id
-            except ValidationError:
-                pass
+            except ValidationError as exc:
+                if str(exc.message).startswith("Which one"):
+                    # "Transportation" under Personal and under Work: say so and leave it for the person, never let the
+                    # counterparty's history pick one of two same-named categories (owner, 2026-10-30: ids, not names).
+                    parsed["_category_ambiguous"] = exc.message
+                    return None
         if counterparty and counterparty["default_category_id"]:
             return counterparty["default_category_id"]
         found = (usual or self.transactions.usual_categories)()

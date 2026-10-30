@@ -51,17 +51,60 @@ if (fullscreenButton) {
   document.addEventListener("fullscreenchange", syncFullscreenButton);
   syncFullscreenButton();
 }
-// Keep the reader's place when a normal form post returns a fresh server page.
-const savedPageScroll = sessionStorage.getItem("lightning-page-scroll");
-if (savedPageScroll !== null) {
-  sessionStorage.removeItem("lightning-page-scroll");
-  requestAnimationFrame(() => window.scrollTo({ top: Number(savedPageScroll) || 0, behavior: "instant" }));
-}
+// Keep the reader's place when a form post or a save returns a fresh server page (owner, 2026-10-30: no button may
+// throw you out): where the page was scrolled to, and which sections were open or shut. The note is for this address,
+// for fifteen seconds, and is used once. Sections are matched by their words with the numbers left out ("Tracked ·
+// 5 categories" is "Tracked · # categories"), in order, so a list that grew or shrank still finds its own.
+const PLACE_KEY = "lightning-page-place";
+const placeLabel = (box) => (box.querySelector(":scope > summary")?.textContent || "").replace(/[\d.,+\-−]+/g, "#").replace(/\s+/g, " ").trim().slice(0, 40);
+const placeBoxes = () => Array.from(document.querySelectorAll("details")).filter((box) => !box.closest(".action-menu, #app-popup-content, dialog"));
+window.lightningRememberPlace = () => {
+  try {
+    sessionStorage.setItem(PLACE_KEY, JSON.stringify({
+      path: location.pathname, at: Date.now(), top: window.scrollY,
+      sections: placeBoxes().map((box) => [placeLabel(box), box.open]),
+    }));
+  } catch (error) { /* private mode: the page simply starts at the top */ }
+};
+window.lightningReload = () => { window.lightningRememberPlace(); location.reload(); };
+(() => {
+  let note = null;
+  try { note = JSON.parse(sessionStorage.getItem(PLACE_KEY) || "null"); sessionStorage.removeItem(PLACE_KEY); } catch (error) { note = null; }
+  if (!note || note.path !== location.pathname || Date.now() - note.at > 15000) return;
+  const restore = () => {
+    const kept = new Map();
+    (note.sections || []).forEach(([label, open]) => kept.set(label, [...(kept.get(label) || []), open]));
+    placeBoxes().forEach((box) => {
+      const queue = kept.get(placeLabel(box));
+      if (queue && queue.length) box.open = queue.shift();
+    });
+    window.scrollTo({ top: Number(note.top) || 0, behavior: "instant" });
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => requestAnimationFrame(restore));
+  else requestAnimationFrame(restore);
+})();
 document.addEventListener("submit", (event) => {
-  if ((event.target.method || "get").toLowerCase() === "post" && !event.target.closest("#app-popup-content")) {
-    sessionStorage.setItem("lightning-page-scroll", String(window.scrollY));
-  }
+  if ((event.target.method || "get").toLowerCase() === "post") window.lightningRememberPlace();
 }, true);
+// One menu open at a time (owner, 2026-10-30: two stacked on each other). Opening a menu shuts the others; a click
+// anywhere else, or Escape, shuts them all.
+(() => {
+  const open = () => Array.from(document.querySelectorAll("details.action-menu[open]"));
+  document.addEventListener("toggle", (event) => {
+    const menu = event.target;
+    if (!menu.matches?.("details.action-menu") || !menu.open) return;
+    open().forEach((other) => { if (other !== menu) other.open = false; });
+  }, true);
+  document.addEventListener("click", (event) => {
+    open().forEach((menu) => { if (!menu.contains(event.target)) menu.open = false; });
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    const menus = open();
+    menus.forEach((menu) => { menu.open = false; });
+    if (menus.length) menus[0].querySelector(":scope > summary")?.focus();
+  });
+})();
 const flashObserver = new MutationObserver((changes) => {
   changes.forEach((change) => {
     if (change.type === "characterData") {
@@ -86,6 +129,14 @@ if (popupFlashRoot) {
 // Own-data fields keep their native submitted value and gain an accessible
 // type-and-pick surface. Popup markup is inserted after startup, so this must
 // be safe to call repeatedly on any subtree.
+// A pick list is position:fixed, so it must not sit inside a card that carries a transform, filter or contain (a theme's
+// card lift, a popup's rise): there "fixed" means "relative to the card" and the list lands far from its field. It lives
+// at the top of the page instead, or inside the open window when the field is in one (a modal window hides the page).
+// A pick list redraws on every keystroke; page-wide scans that look for new forms and fields have nothing to find there,
+// and on a long import (tens of thousands of nodes) each scan cost milliseconds per key.
+const pickListOnly = (records) => records.every((record) => record.target.closest?.(".counterparty-results, .category-results, .pick-list"));
+const pickerHome = (input) => input.closest("#app-popup-content") || input.closest("dialog") || document.body;
+const pinFixed = (list, left, top) => { list.style.left = `${left}px`; list.style.top = `${top}px`; };
 let ownPickerId = 0;
 const initOwnDataPickers = (root = document) => {
   const find = (selector) => [
@@ -125,7 +176,7 @@ const initOwnDataPickers = (root = document) => {
   list.hidden = true;
   input.setAttribute("aria-controls", list.id);
   wrapper.insertBefore(input, select);
-  wrapper.append(list);
+  pickerHome(input).append(list);
   let active = -1;
   const entries = () => Array.from(select.options).filter((option) => !option.disabled && option.value !== "");
   const close = () => { list.hidden = true; input.setAttribute("aria-expanded", "false"); input.removeAttribute("aria-activedescendant"); active = -1; };
@@ -151,8 +202,7 @@ const initOwnDataPickers = (root = document) => {
     const height = Math.min(280, upward ? above : below);
     list.style.width = `${width}px`;
     list.style.maxHeight = `${Math.max(48, height)}px`;
-    list.style.left = `${Math.max(8, Math.min(rect.left, innerWidth - width - 8))}px`;
-    list.style.top = `${upward ? Math.max(8, rect.top - Math.min(list.scrollHeight, height) - 4) : rect.bottom + 4}px`;
+    pinFixed(list, Math.max(8, Math.min(rect.left, innerWidth - width - 8)), upward ? Math.max(8, rect.top - Math.min(list.scrollHeight, height) - 4) : rect.bottom + 4);
   };
   document.addEventListener('scroll', () => { if (!list.hidden) place(); }, true);
   window.addEventListener('resize', place);
@@ -210,7 +260,7 @@ const initOwnDataPickers = (root = document) => {
   disabledObserver.observe(select, { attributes: true, attributeFilter: ["disabled"] });
   if (wasRequired) select.setPickerRequired(true);
   select.form?.addEventListener("reset", () => requestAnimationFrame(() => { input.value = shown(); close(); }));
-  document.addEventListener("click", (event) => { if (!wrapper.contains(event.target)) close(); });
+  document.addEventListener("click", (event) => { if (!wrapper.contains(event.target) && !list.contains(event.target)) close(); });
   });
 
 // Free-text fields backed by app-owned datalists use the same menu behavior;
@@ -227,7 +277,7 @@ find("input[data-own-suggestions][list]").forEach((input) => {
   list.className = "counterparty-results";
   list.id = `${input.id || `own-suggestions-${ownPickerId++}`}-options`;
   while (document.getElementById(list.id)) list.id = `own-suggestions-${ownPickerId++}-options`;
-  list.setAttribute("role", "listbox"); list.hidden = true; wrapper.append(list);
+  list.setAttribute("role", "listbox"); list.hidden = true; pickerHome(input).append(list);
   input.removeAttribute("list"); input.autocomplete = "off";
   input.setAttribute("role", "combobox"); input.setAttribute("aria-autocomplete", "list");
   input.setAttribute("aria-haspopup", "listbox"); input.setAttribute("aria-controls", list.id); input.setAttribute("aria-expanded", "false");
@@ -270,6 +320,8 @@ find("input[data-own-suggestions][list]").forEach((input) => {
     wellTile.replaceWith(fresh); wellTile = fresh; wellTile.hidden = !typed;
   };
   const render = () => {
+    // Measure the field before the list changes: the page's layout is still clean, so this read costs nothing.
+    const rect = input.getBoundingClientRect();
     const query = input.value.trim().toLocaleLowerCase();
     const hints = suggested().filter((row) => !query || row.hay.includes(query));
     const listed = rowsOf().filter((row) => row.value && (!query || row.hay.includes(query)) && !hints.some((hint) => hint.value === row.value));
@@ -287,7 +339,7 @@ find("input[data-own-suggestions][list]").forEach((input) => {
       option.append(row.value);
       if (row.label && row.label !== row.value) { const hint = document.createElement("span"); hint.className = "counterparty-kind"; hint.textContent = row.label; option.append(hint); }
       option.addEventListener("mousedown", (event) => event.preventDefault());
-      option.addEventListener("click", () => { input.value = row.value; input.dispatchEvent(new Event("change", { bubbles: true })); setPick(row.pick); close(); });
+      option.addEventListener("click", () => { input.value = row.value; setPick(row.pick); input.dispatchEvent(new Event("change", { bubbles: true })); close(); });
       list.append(option);
     });
     const typed = input.value.trim();
@@ -295,12 +347,33 @@ find("input[data-own-suggestions][list]").forEach((input) => {
       const add = document.createElement("button"); add.type = "button"; add.className = "counterparty-option picker-add";
       add.setAttribute("role", "option"); add.id = `${list.id}-add`; add.textContent = t(input.dataset.addLabel || '+ Add "{name}"', { name: typed });
       add.addEventListener("mousedown", (event) => event.preventDefault());
-      add.addEventListener("click", () => { input.value = typed; input.dispatchEvent(new Event("change", { bubbles: true })); setPick(`new:${typed}`); close(); });
+      add.addEventListener("click", async () => {
+        input.value = typed; close();
+        // data-create-url: the name is saved now (the import review), and every list offers it at once. If the save fails
+        // the name stays "new" and is made when the rows post, as before.
+        let made = null;
+        if (input.dataset.createUrl) {
+          input.setAttribute("aria-busy", "true");
+          try {
+            const body = new FormData();
+            body.set("name", typed); body.set("kind", input.dataset.createKind || "");
+            body.set("__session", document.querySelector('meta[name="lightning-session"]')?.content || document.querySelector('input[name="__session"]')?.value || "");
+            const response = await fetch(input.dataset.createUrl, { method: "POST", body, headers: { "Accept": "application/json", "X-Requested-With": "fetch" } });
+            if (response.ok) made = await response.json();
+          } catch (error) { made = null; }
+          input.removeAttribute("aria-busy");
+        }
+        if (made && made.pick) {
+          input.value = made.name; setPick(made.pick);
+          document.dispatchEvent(new CustomEvent("lightning:counterparty-created", { detail: { id: made.id, name: made.name, pick: made.pick, typed, from: input } }));
+        } else setPick(`new:${typed}`);
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      });
       list.append(add);
     } else if (!matches.length) { close(); return; }
-    const rect = input.getBoundingClientRect();
-    list.style.left = `${Math.max(8, rect.left)}px`; list.style.top = `${rect.bottom + 4}px`; list.style.width = `${Math.max(230, rect.width)}px`;
+    list.style.width = `${Math.max(230, rect.width)}px`;
     list.hidden = false; input.setAttribute("aria-expanded", "true"); active = -1;
+    pinFixed(list, Math.max(8, rect.left), rect.bottom + 4);
   };
   input.addEventListener("input", () => { setPick(""); syncTile(); }); input.addEventListener("change", syncTile); syncTile();
   input.addEventListener("input", render); input.addEventListener("focus", render);
@@ -318,7 +391,7 @@ find("input[data-own-suggestions][list]").forEach((input) => {
       if (current.length) { event.preventDefault(); current[active >= 0 ? active : 0].click(); }
     } else if (event.key === "Escape") close();
   });
-  document.addEventListener("click", (event) => { if (!wrapper.contains(event.target)) close(); });
+  document.addEventListener("click", (event) => { if (!wrapper.contains(event.target) && !list.contains(event.target)) close(); });
   });
 };
 initOwnDataPickers();
@@ -717,7 +790,7 @@ initDateFields();
 document.addEventListener("click", (e) => {
   const row = e.target.closest("tr[data-href]");
   if (row && !e.target.closest("a, button, input, select")) {
-    sessionStorage.setItem("lightning-page-scroll", String(window.scrollY));
+    window.lightningRememberPlace();
     location.href = row.dataset.href;
   }
 });
@@ -1551,7 +1624,9 @@ if (categoryCatalogueNode) {
           option.textContent = t(item.name);
           option.addEventListener("mousedown", (event) => event.preventDefault());
           option.addEventListener("click", () => {
-            input.value = item.name;
+            // Two categories with one plain name (Personal and Work "Transportation") show their group in the text too, so
+            // the text alone never means the wrong one; the hidden id below is what is saved.
+            input.value = categories.filter((other) => other.name === item.name).length > 1 ? item.label : item.name;
             input.dispatchEvent(new Event("input", { bubbles: true }));
             input.dataset.autofilled = "false";
             const choice = document.createElement("input");
@@ -2122,7 +2197,7 @@ document.querySelectorAll("[data-currency-search]").forEach((search) => {
         if (goToResponse) location.href = next.href;
         else {
           sessionStorage.setItem("lightning-popup-scroll", String(baseScroll));
-          location.reload();
+          window.lightningReload();
         }
       }
     } catch (error) {
@@ -2140,7 +2215,7 @@ document.querySelectorAll("[data-currency-search]").forEach((search) => {
     }
     close(false, true);
     const base = new URL(baseUrl, location.href);
-    if (base.pathname + base.search + base.hash !== location.pathname + location.search + location.hash) location.reload();
+    if (base.pathname + base.search + base.hash !== location.pathname + location.search + location.hash) window.lightningReload();
   });
   const savedScroll = sessionStorage.getItem("lightning-popup-scroll");
   if (savedScroll !== null) {
@@ -2350,7 +2425,7 @@ document.querySelectorAll("[data-month-picker]").forEach((picker) => {
     });
   };
   bind(document);
-  new MutationObserver(() => bind(document)).observe(document.body, { childList: true, subtree: true });
+  new MutationObserver((records) => { if (!pickListOnly(records)) bind(document); }).observe(document.body, { childList: true, subtree: true });
 })();
 
 // No browser history under fields: suggestions come only from the app's own lists (counterparties,
@@ -2418,7 +2493,7 @@ document.addEventListener("click", (event) => {
     });
   });
   enhance();
-  new MutationObserver(() => enhance()).observe(document.body, { childList: true, subtree: true });
+  new MutationObserver((records) => { if (!pickListOnly(records)) enhance(); }).observe(document.body, { childList: true, subtree: true });
 })();
 
 /* Our dropdown list. The select box itself stays (its style, form value and change events); clicking

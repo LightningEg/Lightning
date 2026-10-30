@@ -470,7 +470,7 @@ async def categorize_transactions(request: Request):
         changed, skipped = c.transactions.set_category(ids, category_id)
     except LightningError as exc:
         return redirect(destination, exc.message)
-    name = c.categories.get(category_id).name
+    name = c.categories.display_name(category_id)   # Personal › Transportation, never just "Transportation"
     message = f"{name} is now the category of {len(changed)} row{'s' if len(changed) != 1 else ''}."
     if skipped:
         message += (f" {len(skipped)} left as {'they were' if len(skipped) != 1 else 'it was'}: transfers, investment rows, "

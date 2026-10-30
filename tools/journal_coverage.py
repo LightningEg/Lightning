@@ -38,7 +38,9 @@ NOT_WRITES = {"reserves.auto_link_transaction", "planning.from_transaction", "wo
 
 # Writes that run only for new free text: the route works without them, and with them the app's guard answers
 # "not available yet". They are listed in the Notes column and do not change a route's state.
-CONDITIONAL = {}
+CONDITIONAL = {
+    "counterparties.merge": "Merge into... is refused on a lent ledger until the journal has a merge command (owner request 2026-10-30)",
+}
 
 # These operations intentionally stay outside the replicated command log. Undo history is
 # connection-local and contains arbitrary row snapshots; backup and fresh-profile operations

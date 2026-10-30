@@ -191,3 +191,68 @@ def test_a_day_ending_below_zero_keeps_statement_order(c, setup):
     c.bank_imports.confirm(batch, {ids[2]: {"counterparty": "Carrefour", "category": str(cats["EXP.PERSONAL.FOOD"].id)},
                                    ids[3]: {"counterparty": "Employer", "category": str(_income_code(c))}})
     assert order[:2] == [ids[2], ids[3]]
+
+
+def test_a_new_counterparty_on_the_review_page_is_saved_at_once(c, setup):
+    """"+ New counterparty" does not wait for "Post ready rows" (owner, 2026-10-30): the name exists as soon as it is chosen,
+    a name that already matches is reused, and "Held for" saves a person."""
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    accounts, _ = setup
+    client = TestClient(create_app(c))
+    url = f"/accounts/{accounts['cib'].id}/import/counterparty"
+    made = client.post(url, data={"name": "  Uber   Egypt "}).json()
+    assert made["name"] == "Uber Egypt" and made["pick"] == f"counterparty:{made['id']}"
+    assert c.counterparties.resolve("uber egypt")["id"] == made["id"]
+    assert client.post(url, data={"name": "UBER EGYPT"}).json()["id"] == made["id"]  # never doubled
+    person = client.post(url, data={"name": "Fatma Abdullah", "kind": "PERSON"}).json()
+    assert c.counterparties.get(person["id"])["kind"] == "PERSON"
+    refused = client.post(url, data={"name": "   "})
+    assert refused.status_code == 400 and refused.json()["error"]
+
+
+def test_merging_a_counterparty_moves_its_history_and_keeps_its_names_as_aliases(c, setup):
+    """Merge contacts (owner request, 2026-10-30): the old name's transactions follow the kept name, and both the old name and
+    its aliases lead there afterwards."""
+    from fastapi.testclient import TestClient
+    from lightning.core.errors import ValidationError
+    from lightning.ui.web import create_app
+    accounts, cats = setup
+    bank = accounts['cib'].id
+    keep = c.counterparties.create("Uber")
+    drop = c.counterparties.create("Uber Downtown", alias="UBER TRIP CAIRO")
+    client = TestClient(create_app(c))
+    for name in ("Uber Downtown", "Uber"):
+        assert client.post(f'/accounts/{bank}/register', data={
+            'date': '2026-12-30', 'amount': '-85', 'counterparty': name,
+            'category': cats['EXP.PERSONAL.FOOD'].name}).status_code == 200
+    page = client.get('/counterparties').text
+    assert 'name="merge_into"' in page and 'value="merge"' in page and 'id="merge-parties"' in page
+    done = client.post('/counterparties', data={'counterparty_action': 'merge', 'counterparty_id': str(drop),
+                                                'merge_into': f'counterparty:{keep}'})
+    assert done.status_code == 200 and 'Merged Uber Downtown into Uber.' in done.text
+    assert c.counterparties.get(drop) is None
+    assert c.db.scalar('SELECT count(*) FROM transactions WHERE counterparty_id=?', (keep,)) == 2
+    assert c.counterparties.resolve("uber downtown")["id"] == keep
+    assert c.counterparties.resolve("UBER TRIP CAIRO")["id"] == keep
+    try:
+        c.counterparties.merge(keep, keep)
+        assert False, "merging a name into itself must be refused"
+    except ValidationError:
+        pass
+
+
+def test_same_named_categories_are_never_guessed_between(c, setup):
+    """Personal and Work both have a "Transportation": a CSV row that says just that is left for the person (with the two
+    choices named), and the register's own text for a shared name carries its group (owner, 2026-10-30: ids, not names)."""
+    from lightning.ui.routes.register import counterparty_category_map
+    personal = c.categories.get_by_code("EXP.PERSONAL.TRANSPORT")
+    work = c.categories.get_by_code("EXP.WORK.TRANSPORT")
+    party = c.counterparties.create("Uber Test", default_category_id=personal.id)
+    row = {"Category": "Transportation", "Amount": "-10", "Counterparty": "Uber Test"}
+    assert c.bank_imports._category_for(row, c.counterparties.get(party), None, lambda: {}) is None
+    assert "Personal › Transportation" in row["_category_ambiguous"] and "Work › Transportation" in row["_category_ambiguous"]
+    exact = {"Category": "Work › Transportation", "Amount": "-10", "Counterparty": "Uber Test"}
+    assert c.bank_imports._category_for(exact, c.counterparties.get(party), None, lambda: {}) == work.id
+    shown = counterparty_category_map(c, ["Uber Test"])["Uber Test"]
+    assert shown == {"id": personal.id, "name": "Personal › Transportation"}

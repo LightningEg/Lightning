@@ -1,3 +1,5 @@
+import re
+
 from fastapi import APIRouter, Request
 import sqlite3
 from urllib.parse import urlencode
@@ -7,6 +9,17 @@ from lightning.core.errors import LightningError
 from ..web import container, redirect
 
 router = APIRouter(prefix="/history")
+
+
+def _still_there(c, back: str) -> str:
+    """The page the person pressed Undo or Redo on, or Overview when that page's record is gone."""
+    match = re.match(r"^/accounts/(\d+)(?:[/?#]|$)", back)
+    if match:
+        try:
+            c.accounts.get(int(match.group(1)))
+        except LightningError:
+            return "/"
+    return back
 
 
 @router.post("/{operation}")
@@ -32,4 +45,5 @@ async def replay(request: Request, operation: str):
             c.undo.replay(redo=operation == "redo", expected_id=group_id)
     except (LightningError, ValueError, sqlite3.IntegrityError) as exc:
         return redirect(back, getattr(exc, "message", "Choose an action from the current history."))
-    return redirect("/", "Action redone." if operation == "redo" else "Action undone.")
+    # Stay where you were (owner, 2026-10-30), unless the action made this very page: an undone account has no page.
+    return redirect(_still_there(c, back), "Action redone." if operation == "redo" else "Action undone.")

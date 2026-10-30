@@ -296,3 +296,19 @@ def test_gold_is_priced_from_the_world_price_for_each_purity(c, setup):
     assert c.reporting.value_of(ref.id, D(1), "2026-10-01").price == D("4200")  # 100 × 48 × 21/24
     assert c.reporting.value_of(ring, D(1), "2026-10-01").value == D("16800")  # 4 grams
     assert "Gold is an estimate from the world price" in report.summary()
+
+
+def test_a_fund_matches_by_its_words_not_their_order_and_the_nearest_names_are_offered():
+    """An Egyptian equity fund written "Misr Bank Equity Fund" is Mubasher's "Equity Fund Misr Bank"; a USD issue is not the
+    pound fund; and a fund with no exact name is offered the nearest names, never linked by guess."""
+    from types import SimpleNamespace as NS
+    from lightning.workflows.live_prices import Plan, Want, fund_name, link_funds
+    assert fund_name("Misr Bank Equity Fund") == fund_name("The Equity Fund, Misr Bank")
+    assert fund_name("Beltone Equity Fund") != fund_name("Beltone Equity Fund USD")
+    listing = [NS(key="EG:FUND:1", name="Equity Fund Misr Bank"), NS(key="EG:FUND:2", name="Beltone Equity Fund USD"),
+               NS(key="EG:FUND:3", name="Beltone Equity Opportunity Fund")]
+    work = Plan("2026-10-30", unlinked=[Want(1, "Misr Bank Equity Fund", "", "eg-funds"),
+                                        Want(2, "Beltone Equity Fund", "", "eg-funds")])
+    matched = link_funds(work, listing)
+    assert [w.asset_id for w in matched] == [1] and work.linked == {1: "EG:FUND:1"}
+    assert 2 not in work.linked and "Beltone Equity Opportunity Fund" in work.closest[2]

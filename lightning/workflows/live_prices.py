@@ -31,6 +31,7 @@ found on the database's own thread (an encrypted profile is used from one thread
 """
 from __future__ import annotations
 
+import difflib
 import json
 import os
 import re
@@ -83,6 +84,7 @@ class Plan:
     other_currency: list[str] = field(default_factory=list)   # priced in another currency than the holding
     unlinked: list[Want] = field(default_factory=list)        # held funds without a Mubasher number yet
     linked: dict[int, str] = field(default_factory=dict)      # asset id -> the number its name matched
+    closest: dict[int, list[str]] = field(default_factory=dict)  # asset id -> the Mubasher names nearest to its own
 
     def month_ends_missing(self) -> int:
         return sum(len(w.month_ends) for w in self.wants + self.unlinked) + sum(len(r.days) for r in self.rates)
@@ -100,6 +102,7 @@ class Report:
     gold: list[str] = field(default_factory=list)            # gold priced from the world price (an estimate)
     linked: list[str] = field(default_factory=list)          # funds found on Mubasher by their name
     unmatched: list[str] = field(default_factory=list)       # funds Mubasher has no such name for
+    closest: dict[str, list[str]] = field(default_factory=dict)  # fund -> the Mubasher names nearest to it
 
     def summary(self) -> str:
         parts = [f"Fetched {self.saved} price{'s' if self.saved != 1 else ''} for {len(self.priced)} "
@@ -120,6 +123,9 @@ class Report:
         if self.unmatched:
             parts.append(f"No fund on Mubasher is named {', '.join(self.unmatched[:3])}"
                          f"{' and more' if len(self.unmatched) > 3 else ''}; paste its Mubasher page in Edit investment.")
+            for name in self.unmatched[:3]:
+                if self.closest.get(name):
+                    parts.append(f"Nearest to {name}: {'; '.join(self.closest[name])}.")
         if self.unknown:
             parts.append(f"No online source for {', '.join(self.unknown[:3])}{' and more' if len(self.unknown) > 3 else ''}"
                          "; type their prices.")
@@ -150,7 +156,9 @@ def instrument_key(asset) -> tuple[str, str] | None:
 def fund_name(text: str) -> str:
     """A fund's name for matching: case, punctuation and the words every fund name shares set aside."""
     words = re.sub(r"[^\w]+", " ", (text or "").casefold().replace("&", " and ")).split()
-    return " ".join(word for word in words if word not in {"fund", "funds", "the", "mutual"})
+    # Word order does not name a fund ("Misr Bank Equity Fund" and "Equity Fund Misr Bank" are one); every other word does,
+    # so a USD issue or a second issuance (a digit) never matches the pound fund.
+    return " ".join(sorted(word for word in words if word not in {"fund", "funds", "the", "mutual"}))
 
 
 def link_funds(work: Plan, instruments) -> list[Want]:
@@ -159,12 +167,16 @@ def link_funds(work: Plan, instruments) -> list[Want]:
     for instrument in instruments:
         by_name.setdefault(fund_name(instrument.name), []).append(instrument.key)
     matched = []
+    names = {instrument.key: instrument.name for instrument in instruments}
     for want in work.unlinked:
         keys = by_name.get(fund_name(want.name), [])
         if len(keys) == 1 and want.asset_id not in work.linked:
             want.key, work.linked[want.asset_id] = keys[0], keys[0]
             work.wants.append(want)
             matched.append(want)
+        elif not keys:   # no exact name: offer the nearest, for the person to choose (never linked by guess)
+            near = difflib.get_close_matches(fund_name(want.name), list(by_name), n=3, cutoff=0.6)
+            work.closest[want.asset_id] = [names[by_name[name][0]] for name in near]
     return matched
 
 
@@ -391,6 +403,8 @@ def save(c, work: Plan, found: dict, failed: list[str]) -> Report:
             report.linked.append(want.name)
         elif "Mubasher" not in failed:
             report.unmatched.append(want.name)
+            if work.closest.get(want.asset_id):
+                report.closest[want.name] = work.closest[want.asset_id]
     for want in work.wants:
         closes = found.get(want.asset_id, {})
         for day, close in sorted(closes.items()):

@@ -189,3 +189,35 @@ def test_saved_device_discovers_changed_home_address_after_key_rotation_but_revo
     async def async_answer(value):
         return value
     asyncio.run(run())
+
+
+def test_a_search_announces_on_every_local_network_and_more_than_once():
+    """One limited broadcast leaves through one adapter and one lost datagram ended the search (owner, 2026-10-30: the PC
+    and phone were not found by themselves). The default search names each local /24 as well and announces three times."""
+    import asyncio
+    from lightning.sync.journal import discovery
+    destinations = discovery.broadcast_destinations()
+    assert destinations[0] == "255.255.255.255" and len(destinations) <= 8
+    assert all(item == "255.255.255.255" or item.endswith(".255") for item in destinations)
+    sent = []
+
+    class Spy:
+        def sendto(self, wire, address): sent.append(address)
+        def close(self): pass
+
+    async def fake_endpoint(self, factory, **kw):
+        return Spy(), factory()
+
+    async def run():
+        loop = asyncio.get_running_loop()
+        original, sealed = loop.create_datagram_endpoint, discovery.seal
+        loop.create_datagram_endpoint = lambda factory, **kw: fake_endpoint(loop, factory, **kw)
+        discovery.seal = lambda body, sign: b"probe"
+        try:
+            from types import SimpleNamespace as NS
+            identity = NS(sign=lambda data: b"\0" * 64)
+            await discovery.nearby_devices(identity, timeout=0.3, destinations=("10.0.0.255",), tries=3)
+        finally:
+            loop.create_datagram_endpoint, discovery.seal = original, sealed
+    asyncio.run(run())
+    assert sent.count(("10.0.0.255", discovery.DISCOVERY_PORT)) == 3

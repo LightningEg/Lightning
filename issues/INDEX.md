@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 71 open items, in the order they are worked on.
+10 milestones, 72 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -147,8 +147,9 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7T5 | ↳ Salary-day cascade | | | |
 | NF-7T6 | ↳ A reserve tied to its bill | | | |
 | **BT-7U** | [Editing a paid bill's transaction keeps the bill paid at the old amount and date](7-planning-import-and-search/7U-bill-link-after-payment-edit.md) | bug, technical · low | planning | new |
+| **NF-7V** | [More AI prompt buttons that carry Lightning's context](7-planning-import-and-search/7V-more-ai-prompt-buttons.md) | new feature | import | ready |
 
-Done: 7H, 7J, 7K, 7N, 7O, 7P, 7Q. Next free code: 7V.
+Done: 7H, 7J, 7K, 7N, 7O, 7P, 7Q. Next free code: 7W.
 
 ## 8 Website
 

@@ -163,6 +163,10 @@ html[data-m-cards-finish] :is(.card, .data-panel, .metric-card, .kpi-card, .over
   background-image: var(--m-card-grain), var(--m-card-finish) !important;
   box-shadow: var(--m-card-edge), var(--m-card-depth);
 }
+/* The import review is one card as tall as the whole statement, with thousands of fields. A tiled noise texture (an SVG
+   turbulence filter) over an element that size is re-drawn on every repaint, and on some graphics drivers that stalled the
+   whole computer (owner report, 2026-10-30, Dendera). The review keeps the theme's colour and edge, without grain or sheen. */
+html[data-m-cards-finish] .main .card.import-review:not(#_):not(#_):not(#_) { background-image: none !important; }
 /* Wide cards: the default paints them with its light --wide-gradient through a selector that holds an id
    (#budget-meters), which outranks the rule above; on a dark theme their titles became unreadable. Same paint here. */
 html[data-m-cards-finish] .main :is(.wide-card, .overview-investment-card, #budget-meters, .budget-rollup, .plan-section > .card:not(.plan-lead):not(.plan-loan),
@@ -172,7 +176,8 @@ html[data-m-cards-finish] .main :is(.wide-card, .overview-investment-card, #budg
 }
 /* hover: lift raises the shadow, light follows the pointer (theme-runtime.js gives --lt-x/--lt-y). */
 html[data-m-cards-hover="lift"] :is(.card, .kpi-card, .overview-block, .data-panel, .phone-kpi) { transition: transform .25s ease, box-shadow .25s ease; }
-html[data-m-cards-hover="lift"] :is(.card, .kpi-card, .overview-block, .data-panel):hover { transform: translateY(-2px); box-shadow: var(--m-card-edge), var(--m-depth-high); }
+/* A card that holds fields does not lift: a transform makes its fixed pick lists measure from the card, not the window. */
+html[data-m-cards-hover="lift"] :is(.card, .kpi-card, .overview-block, .data-panel):hover:not(:has([data-own-suggestions], [data-own-picker])) { transform: translateY(-2px); box-shadow: var(--m-card-edge), var(--m-depth-high); }
 html[data-m-cards-hover="light"] :is(.card, .kpi-card, .overview-block, .data-panel, .metric-card):not(.lead-card):not(.overview-owned-card):hover {
   background-image: radial-gradient(260px circle at var(--lt-x, 50%) var(--lt-y, 0%), color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%),
     var(--m-card-grain), var(--m-card-finish) !important;
@@ -292,7 +297,9 @@ html[data-m-menus-finish="satin"] { --m-menu-finish: var(--m-satin); }
 html[data-m-menus-depth="low"] { --m-menu-depth: var(--m-depth-low); }
 html[data-m-menus-depth="mid"] { --m-menu-depth: var(--m-depth-mid); }
 html[data-m-menus-depth="high"] { --m-menu-depth: var(--m-depth-high); }
-html[data-m-menus-finish] :is(.pick-list, .pick-results, .dropdown-menu, .context-menu, .action-menu) {
+/* .action-menu is the <details> that holds a round button: only its opened panel is a menu. Painting the wrapper put a
+   square card (grain, edge, shadow) behind every Money actions, Views and ⋯ button. */
+html[data-m-menus-finish] :is(.pick-list, .pick-results, .dropdown-menu, .context-menu, .action-menu > div) {
   background-image: var(--m-menu-finish); box-shadow: var(--m-edge-soft), var(--m-menu-depth);
 }
 
