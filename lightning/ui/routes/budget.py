@@ -242,6 +242,9 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         names = [lines[cid].name for cid in by_group.get(system_id, []) if cid in lines
                  and (period_spending.get(cid) or category_periods.get(cid, {}).get("budgeted"))]
         group_totals[system_id]["note"] = ", ".join(names[:3]) + (f" and {len(names) - 3} more" if len(names) > 3 else "")
+        # The PC page names the group by what is in it, never by the internal "System Categories" (audit 12, B4).
+        if names:
+            group_totals[system_id]["title"] = ", ".join(names[:3]) + (f", +{len(names) - 3}" if len(names) > 3 else "")
     group_rows = sorted(group_totals.items(),
                         key=lambda item: (item[1]["left"] >= ZERO, -item[1]["spent"], item[1]["name"].casefold()))
     unplanned_spending = period_actual - sum((row["spent"] for row in group_totals.values()), ZERO)

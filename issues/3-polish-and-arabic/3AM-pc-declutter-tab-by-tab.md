@@ -25,6 +25,7 @@ content starts by y = 140, and no figure contradicts another page.
 ## 3AM1 Wrong on screen (SA1, SA2, ST1, T3, T4, B4)
 Reserves takes Safety's title; one emergency-fund answer on both Safety tabs; Counterparties' buttons stop covering the
 category well; no all-"—" Balance column; whole EGP in the register; no "System Categories".
+**Built:** SA1, SA2 (Limits reads today's emergency reserve as Reserves does), T3, T4 (balances whole; row amounts keep cents, A06.1), B4, and ST1 as a column-width stop (the redesign is 3AM4).
 
 ## 3AM2 The shell gives back space (S1-S3, S6)
 Add/Manage accounts reachable without scrolling the sidebar; a gear with no tabs moves into the header (A05 change,
