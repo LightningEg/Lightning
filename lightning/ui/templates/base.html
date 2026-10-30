@@ -49,7 +49,8 @@
     </nav>
     <details class="side-accounts" id="sidebar-accounts">
       <summary class="mobile-accounts-summary"><span>{{ 'Accounts'|tr(locale) }}</span><b dir="ltr">{{ sidebar_total|amount_role('total') }} {{ base }}</b></summary>
-      <div class="sidebar-heading">{{ 'Accounts'|tr(locale) }} <span>{{ "· Balances in"|tr(locale) }} <bdi dir="ltr">{{ base }}</bdi></span></div>
+      <div class="sidebar-heading side-accounts-head"><a class="side-accounts-link" href="/accounts" title="{{ 'Manage accounts'|tr(locale) }}">{{ 'Accounts'|tr(locale) }} <span>{{ "· Balances in"|tr(locale) }} <bdi dir="ltr">{{ base }}</bdi></span></a><a class="side-add-icon" data-popup-open href="/accounts/new" aria-label="{{ 'Add account'|tr(locale) }}" title="{{ 'Add account'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a></div>
+      <div class="side-account-list">
       <a class="side-row side-total {{ 'active' if path == '/transactions' }}" href="/transactions" {% if path == '/transactions' %}aria-current="page"{% endif %}>
         <span>{{ fig.in_your_accounts.label }}</span><span class="num" title="{{ fig.in_your_accounts.equation }}">{{ sidebar_total|amount_role('total') }}</span></a>
       {% from "partials/macros.html" import inst_tile with context %}
@@ -61,8 +62,7 @@
           <span class="num {{ 'neg' if a.value < 0 }}">{{ a.value|amount_role('total') }}</span></a>
         {% endfor %}
       {% endfor %}
-      <a class="side-add" data-popup-open href="/accounts/new">+ {{ 'Add account'|tr(locale) }}</a>
-      <a class="side-add" href="/accounts">{{ 'Manage accounts'|tr(locale) }}</a>
+      </div>
     </details>
   </aside>
   <main class="main">
@@ -95,7 +95,7 @@
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('info-tips.js') }}"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('app.js') }}"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('ai-handoff.js') }}" defer></script>
-<script nonce="{{ request.state.csp_nonce|default('') }}">(()=>{const section=document.getElementById('sidebar-accounts'),mobile=window.matchMedia('(max-width: 900px)');if(!section)return;const sync=()=>{section.open=!mobile.matches};sync();mobile.addEventListener('change',sync)})();</script>
+<script nonce="{{ request.state.csp_nonce|default('') }}">(()=>{const section=document.getElementById('sidebar-accounts'),mobile=window.matchMedia('(max-width: 900px)');if(!section)return;const sync=()=>{section.open=!mobile.matches};sync();section.querySelector('.side-account.active')?.scrollIntoView({block:'nearest'});mobile.addEventListener('change',sync)})();</script>
 {% if request.state.secure_profiles|default(false) %}<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('session.js') }}"></script>{% endif %}
 </body>
 </html>{% endif %}
