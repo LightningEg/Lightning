@@ -86,6 +86,25 @@ window.lightningReload = () => { window.lightningRememberPlace(); location.reloa
 document.addEventListener("submit", (event) => {
   if ((event.target.method || "get").toLowerCase() === "post") window.lightningRememberPlace();
 }, true);
+// One menu open at a time (owner, 2026-10-30: two stacked on each other). Opening a menu shuts the others; a click
+// anywhere else, or Escape, shuts them all.
+(() => {
+  const open = () => Array.from(document.querySelectorAll("details.action-menu[open]"));
+  document.addEventListener("toggle", (event) => {
+    const menu = event.target;
+    if (!menu.matches?.("details.action-menu") || !menu.open) return;
+    open().forEach((other) => { if (other !== menu) other.open = false; });
+  }, true);
+  document.addEventListener("click", (event) => {
+    open().forEach((menu) => { if (!menu.contains(event.target)) menu.open = false; });
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    const menus = open();
+    menus.forEach((menu) => { menu.open = false; });
+    if (menus.length) menus[0].querySelector(":scope > summary")?.focus();
+  });
+})();
 const flashObserver = new MutationObserver((changes) => {
   changes.forEach((change) => {
     if (change.type === "characterData") {
