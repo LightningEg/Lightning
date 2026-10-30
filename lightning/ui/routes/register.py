@@ -82,6 +82,17 @@ def counterparty_category_map(c, names) -> dict:
     parties = c.counterparties.resolve_many(names)  # one read for every name, not one each (backend roadmap B4)
     by_rules = c.rules.name_categories(names)
     found = {}
+    plain = [item.name for item in pickable.values()]
+    shared_labels = {}
+    if len(set(plain)) < len(plain):   # a plain name used twice: read the tree once and spell those out
+        tree = {item.id: item for item in c.categories.tree()}
+        for item in pickable.values():
+            if plain.count(item.name) > 1:
+                chain, node = [], item
+                while node.parent_id is not None:
+                    chain.append(node.name)
+                    node = tree[node.parent_id]
+                shared_labels[item.id] = " › ".join(reversed(chain))
     for name in names:
         found[name] = None
         category_id, depends = by_rules[name]
@@ -91,8 +102,7 @@ def counterparty_category_map(c, names) -> dict:
             category = pickable.get(category_id) or c.categories.get(category_id)
             # The id is what counts; the text is only what the field shows, and it carries its group when another category
             # shares the plain name, so even the text alone cannot mean the wrong one.
-            shared = sum(1 for item in pickable.values() if item.name == category.name) > 1
-            found[name] = {"id": category.id, "name": c.categories.display_name(category.id) if shared else category.name}
+            found[name] = {"id": category.id, "name": shared_labels.get(category.id, category.name)}
     return found
 
 
