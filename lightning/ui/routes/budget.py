@@ -274,6 +274,9 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                                     "b": charts.bullet(line.planned_actual, line.available),
                                     "href": f"/transactions?category_id={line.category_id}&date_from={month}-01"})
     meter_lines.sort(key=lambda r: (not r["m"]["over"], -(r["m"].get("share") or 0)))
+    # Over plan or already spending first; the categories nothing has touched fold under "N untouched" (audit 12, B3).
+    meter_active = [r for r in meter_lines if r["used"] or r["m"]["over"]]
+    meter_rest = [r for r in meter_lines if not (r["used"] or r["m"]["over"])]
     month_first, month_last = parse_month(month)
     days_left = (month_last - today()).days + 1 if month_first <= today() <= month_last else 0
     # The same Left in plan as the headline and the Overview (background estimates counted in).
@@ -337,7 +340,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                                           c, everyday),
                       "edit_href": f"/budget?month={month}&open_group=all#groups-heading",
                       "notes": [n for n in notes if n.get("label") not in OVER_NOTE_LABELS]}
-    return render(request, "budget.html", notes=notes, phone_plan=phone_plan, kpi_cards=kpi_cards, pace=pace, plan_bills=plan_bills, everyday=everyday,
+    return render(request, "budget.html", notes=notes, phone_plan=phone_plan, meter_active=meter_active, meter_rest=meter_rest, kpi_cards=kpi_cards, pace=pace, plan_bills=plan_bills, everyday=everyday,
                   lead=lead, pace_card=pace_card, needs=needs, status=status,
                   raise_in_card=bool(needs and needs[-1]["href"].startswith("/budget/raise")) or any(k["key"] == "saves" for k in kpi_cards),
                   raise_offer=raise_offer, meter_lines=meter_lines, left_note=left_note, check=check,
@@ -891,7 +894,7 @@ async def save_budget(request: Request):
     if not changed:
         return redirect(f"/budget?month={month}", "Nothing changed.")
     scope = f"for {month} only" if only else f"from {month} onward"
-    return redirect(f"/budget?month={month}", f"Saved {changed} budget{'s' if changed != 1 else ''} {scope}.")
+    return redirect(f"/budget?month={month}&open_group=all", f"Saved {changed} budget{'s' if changed != 1 else ''} {scope}.")
 
 
 @router.post("/setup")

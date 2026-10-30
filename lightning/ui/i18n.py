@@ -2804,6 +2804,10 @@ ARABIC_UI = {
     'In cash you own': 'في الكاش اللي معاك',
     'months of average monthly spending': 'شهور من متوسط المصروف الشهري',
     'months of average monthly income': 'شهور من متوسط الدخل الشهري',
+    '{n} untouched': '{n} لسه ما اتلمستش',
+    '{n} not tracked · {amount} expected': '{n} مش متتابعة · المتوقع {amount}',
+    'Bills still to pay this month': 'فواتير لسه هتتدفع الشهر ده',
+    'Mark them paid in Cash planning': 'علّمها مدفوعة من تخطيط النقدية',
 }
 
 
