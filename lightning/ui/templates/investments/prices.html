@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import page_header with context %}
 {% block title %}Investment prices{% endblock %}
-{% block heading %}{{ page_header('Investment prices'|tr(locale), 'Lightning fetches them online, falls back on the shared price files, or you type them. A price you type for a day wins.'|tr(locale)) }}{% endblock %}
+{% block heading %}{{ page_header('Investment prices'|tr(locale), '') }}{% endblock %}
 {% block content %}
 {% if pending %}
 <form method="post" class="card" style="max-width:1000px;margin-bottom:16px" autocomplete="off" id="missing">
@@ -17,8 +17,7 @@
 {% endif %}
 <section class="card" style="max-width:1000px;margin-bottom:16px" aria-labelledby="price-files">
   <h2 id="price-files">{{ 'Update prices'|tr(locale) }}</h2>
-  <p class="muted small">{{ 'Lightning updates the prices of what you hold by itself, the first time you open it after a month ends.'|tr(locale) }}</p>
-  <details class="price-sources"><summary class="muted small">{{ 'Where prices come from'|tr(locale) }}</summary><p class="muted small">{{ 'Sources: TradingView and Yahoo Finance for stocks, Mubasher for funds, and for gold an estimate from the world price and the dollar’s rate (Yahoo Finance). Month-end prices make your monthly returns.'|tr(locale) }}</p></details>
+  <details class="price-sources"><summary class="muted small">{{ 'Where prices come from'|tr(locale) }}</summary><p class="muted small">{{ 'A price you type wins over the price files and the last trade price for the same day.'|tr(locale) }} {{ 'Sources: TradingView and Yahoo Finance for stocks, Mubasher for funds, and for gold an estimate from the world price and the dollar’s rate (Yahoo Finance). Month-end prices make your monthly returns.'|tr(locale) }}</p></details>
   <form method="post" class="actions" action="/investments/prices/online">
     <button class="btn primary" data-busy="Fetching prices…">{{ 'Update prices'|tr(locale) }}</button>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
@@ -76,6 +75,5 @@
     {% endfor %}
   </table>
   <div class="actions" style="margin-top:14px"><button class="btn primary">{{ 'Save prices'|tr(locale) }}</button><a class="btn" href="/investments">{{ 'Cancel'|tr(locale) }}</a></div>
-  <p class="muted small">{{ 'A price you type wins over the price files and the last trade price for the same day.'|tr(locale) }}</p>
 <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 {% endblock %}

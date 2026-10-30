@@ -434,6 +434,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
             if edit_values is None:
                 edit_values = dict(edit_original)
     holdings, account_value, account_owned_value, account_held_value = [], None, None, None
+    held_total = None if account else c.reporting.money_from_others_total(today())  # the one Held for others figure
     account_asset_breakdown = []
     if account:
         holdings = c.investments.portfolio(fmt_date(today()), account.id).open
@@ -484,6 +485,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         group=c.accounts.reporting_group(account) if account else "",
         account_value=account_value, account_owned_value=account_owned_value,
         account_native_value=_native_value(c, account, account_value),
+        held_total=held_total,
         account_held_value=account_held_value, account_asset_breakdown=account_asset_breakdown,
         holdings=holdings,
         composition=account_composition(account_asset_breakdown, account_value, account_owned_value, account_held_value) if account_asset_breakdown else None,

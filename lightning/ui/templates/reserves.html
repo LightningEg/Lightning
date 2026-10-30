@@ -7,8 +7,8 @@
   <button class="btn small date-picker-button" type="button" data-open-date-picker="{{ control_id }}" aria-label="Choose date">▦</button>
 </span>
 {%- endmacro %}
-{% block title %}Reserves · Cash planning{% endblock %}
-{% block heading %}<div><h1>{{ 'Cash planning'|tr(locale) }}</h1></div>{% endblock %}
+{% block title %}{{ 'Reserves'|tr(locale) }} · {{ 'Safety'|tr(locale) }}{% endblock %}
+{% block heading %}<div><h1>{{ 'Safety'|tr(locale) }}</h1></div>{% endblock %}
 {% block content %}
 {% macro repeat_seg(current) %}<div class="planner-mode" role="radiogroup" aria-label="Repeat"><span class="planner-mode-label">{{ "Repeat"|tr(locale) }}</span><span class="planner-mode-seg">{% for value, text in [('NONE', 'Once'), ('WEEKLY', 'Weekly'), ('MONTHLY', 'Monthly'), ('YEARLY', 'Yearly')] %}<label{% if value == 'NONE' %} title="Does not repeat"{% endif %}><input type="radio" name="recurrence" value="{{ value }}"{% if value == current %} checked{% endif %}><span>{{ text }}</span></label>{% endfor %}</span></div>{% endmacro %}
 {% macro match_by(reserve, label) %}
@@ -36,7 +36,7 @@
 {% from "partials/charts.html" import key_notes, meter %}
 <div data-reserve-refresh="notes">{{ key_notes(notes) }}</div>
 {% if error %}<p class="flash error">{{ error|tr(locale) }}</p>{% endif %}
-<p class="reserve-overview muted" data-reserve-refresh="overview">{{ pos.reserves|money }} {{ base }} set aside in reserves; {{ fig.free_cash.label|lower }} is {{ pos.free_cash|money }} {{ base }} after them and bills due. <a href="/plan">{{ "How free cash is built"|tr(locale) }}</a></p>
+{% set edit = request.query_params.get('edit', '') or ('all' if request.method == 'POST' else '') %}
 
 <section class="card emergency-fund">
   {% if refill %}<div class="refill-prompt" role="status"><span>{{ ('Free cash can fill your emergency fund.' if refill.full else 'Free cash can bring your emergency fund closer to its target.')|tr(locale) }}</span>
@@ -51,25 +51,26 @@
   </div>
   {% if not fund.monthly %}<p class="muted small">{% if fund.basis == 'income' %}Choose your income categories in <a href="/settings?section=budget">{{ 'Settings'|tr(locale) }}</a> to measure months covered.{% else %}Months covered are measured once a month of spending is recorded.{% endif %}</p>{% endif %}
   <p class="muted small">Counted in months of {{ what }} · <a href="/settings?section=budget">{{ "Change in Settings"|tr(locale) }}</a></p>
-  {% include "partials/emergency_liquidity_context.html" %}
-  <form method="post" action="/reserves/emergency" class="emergency-form" data-autosave-form>
+  {% if edit in ('emergency', 'all') %}<form method="post" action="/reserves/emergency" class="emergency-form" data-autosave-form>
     <label>{{ "Amount set aside"|tr(locale) }}<input class="money-input" type="text" name="allocated" value="{{ emergency.effective_allocated|money(False, 2) if emergency else '0.00' }}" inputmode="decimal" required>{% if emergency and emergency.spent %}<small class="muted">{{ emergency.effective_allocated|money(False, 0) }} left of {{ (emergency.effective_allocated + emergency.spent)|money(False, 0) }} · {{ emergency.spent|money(False, 0) }} used</small>{% endif %}</label>
     <span class="inline-save-status" aria-live="polite"></span>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+  {% else %}<p class="emergency-set"><span class="muted small">{{ "Amount set aside"|tr(locale) }}</span> <b>{{ (emergency.effective_allocated if emergency else 0)|money(False, 0) }}</b> <small class="muted">{{ base }}</small><a class="quiet-link" href="/plan/reserves?edit=emergency">{{ 'Edit'|tr(locale) }}</a>{% if emergency and emergency.spent %}<small class="muted">{{ emergency.effective_allocated|money(False, 0) }} left of {{ (emergency.effective_allocated + emergency.spent)|money(False, 0) }} · {{ emergency.spent|money(False, 0) }} used</small>{% endif %}</p>{% endif %}
   {% if emergency and emergency.spent %}<form method="post" action="/reserves/emergency" class="emergency-refill"><input type="hidden" name="allocated" value="{{ (emergency.effective_allocated + emergency.spent)|money(False, 2) }}"><button class="btn small">Refill to {{ (emergency.effective_allocated + emergency.spent)|money(False, 0) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
+  {% include "partials/emergency_liquidity_context.html" %}
 </section>
 
 <section class="card reserve-list data-panel">
   <div class="section-head"><div><h2>{{ "What are you saving for?"|tr(locale) }}</h2></div></div>
   {% if not reserves %}<p class="muted">{{ "Nothing yet. Add a reserve below for a payment or a savings goal."|tr(locale) }}</p>{% else %}
   <ul class="reserve-rows">
-    {% for reserve in reserves %}{% set status = 'Spent in full' if reserve.spent >= reserve.target else ('Partly spent' if reserve.spent > 0 else 'Not spent yet') %}<li class="reserve-row">
+    {% for reserve in reserves %}{% set status = 'Spent in full' if reserve.spent >= reserve.target else ('Partly spent' if reserve.spent > 0 else 'Not spent yet') %}<li class="reserve-row" id="reserve-{{ reserve.id }}">
       <div class="reserve-line">
         <div class="reserve-what" data-reserve-refresh="name-{{ reserve.id }}"><b>{{ reserve.name }}</b><small class="muted">{{ ('Upcoming payment' if reserve.due_date else 'Savings goal') if reserve.kind == 'PROJECT' else 'Reserve' }}{% if reserve.due_date %} · due {{ reserve.due_date }}{% endif %}{% if reserve.recurrence != 'NONE' %} · {{ reserve.recurrence|lower }}{% endif %}</small></div>
-        <div class="reserve-set"><span class="muted small" data-reserve-refresh="target-{{ reserve.id }}">Set aside of {{ reserve.target|money(False, 0) }}</span><form method="post" action="/reserves/{{ reserve.id }}/allocate" class="reserve-allocate" data-autosave-form>
+        <div class="reserve-set"><span class="muted small" data-reserve-refresh="target-{{ reserve.id }}">Set aside of {{ reserve.target|money(False, 0) }}</span>{% if edit in ('all', reserve.id|string) %}<form method="post" action="/reserves/{{ reserve.id }}/allocate" class="reserve-allocate" data-autosave-form>
         <input class="money-input" type="text" name="allocated" value="{{ reserve.allocated|money(False, 2) }}" inputmode="decimal" aria-label="Amount set aside for {{ reserve.name }}" required>
         <span class="inline-save-status" aria-live="polite"></span>
-      <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>
+      <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% else %}<b class="num">{{ reserve.allocated|money(False, 0) }}</b><a class="quiet-link" href="/plan/reserves?edit={{ reserve.id }}#reserve-{{ reserve.id }}">{{ 'Edit'|tr(locale) }}</a>{% endif %}</div>
       </div>
       <div class="reserve-line">
         <div class="reserve-meter" data-reserve-refresh="progress-{{ reserve.id }}"><div class="bartrack"><div class="bar" style="width:{{ reserve.progress }}%"></div></div>

@@ -131,7 +131,7 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
         tail = (line(f"{_signed(e.everyday_spent - before)} against {previous} by day {e.day}") if before is not None
                 else line(f"Everyday plan {fmt(e.everyday_plan)}"))
         cards.append(card("Everyday spending", e.everyday_spent, pace_compare, tone="out", key="everyday",
-                          chip_=chip(f"by day {e.day}"), visual=meter(e.everyday_spent, e.everyday_plan, e.pace, "pace"),
+                          chip_=chip(f"by day {e.day}"), visual=None,  # the pace chart beside it is its picture (audit 12, B1)
                           line_=tail, href="#budget-pace"))
     elif e.day:
         before = e.last_month_by_day[-1] if e.last_month_by_day else None

@@ -174,7 +174,10 @@ def test_budget_page(c, b):
     assert "Nothing changed" in r.text
     r = client.post("/budget?month=2026-09", data={f"b_{ids['EXP.PERSONAL.FOOD']}": "abc"})
     assert r.status_code == 400 and "not a valid number" in r.text
-    assert 'value="6,000.00"' in client.get("/budget?month=2026-09").text
+    # Audit 12 (B2): the page reads; Edit plan (open_group) turns the inputs on.
+    read, edit = client.get("/budget?month=2026-09").text, client.get("/budget?month=2026-09&open_group=all").text
+    assert 'value="6,000.00"' not in read and "budget-read-row" in read and ">6,000<" in read
+    assert 'value="6,000.00"' in edit
 
 
 def test_current_month_uses_full_month_limit_before_month_end(c, b, monkeypatch):

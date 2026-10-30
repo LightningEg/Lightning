@@ -5,7 +5,7 @@
 {% block top_actions %}<a class="btn{{ '' if phone_mode() else ' primary' }}" data-popup-open href="/plan/items/new?kind=BILL">{{ 'Add recurring item'|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import stat_tiles %}
-{{ stat_tiles(fixed_tiles, base, 'Your fixed costs') }}
+{% if fixed_tiles|length > 1 %}{{ stat_tiles(fixed_tiles, base, 'Your fixed costs') }}{% endif %}
 {% for r in rows %}{% if r.last_paid and r.last_paid.paid_amount is not none and r.last_paid.paid_amount != r.item.amount and r.item.frequency.value != 'ONCE' %}
 <section class="card stack" aria-label="Review changed recurring amount">
   <h2>Review {{ r.item.name }} amount</h2>
@@ -19,7 +19,7 @@
   <header class="overview-section-head"><h2 id="recurring-totals">{{ 'Every month'|tr(locale) }}</h2></header>
   <article class="card">
     <div class="section-head"><div><h2>{{ 'Bills and subscriptions'|tr(locale) }}</h2></div></div>
-    <div class="plan-figure plan-figure-small">{{ monthly_out|money(False, 0) }} <small>{{ base }} a month</small></div>
+    <div class="plan-figure plan-figure-small">{{ monthly_out|money(False, 0) }} <small>{{ base }} a month</small></div>{% if fixed_tiles|length == 1 and fixed_tiles[0].value is not none %}<p class="muted small"><b>{{ '%.1f'|format(fixed_tiles[0].value) }}%</b> {{ fixed_tiles[0].label }} · {{ fixed_tiles[0].sub }}</p>{% endif %}
     {% if subscriptions_per_year %}<p class="muted small">Subscriptions come to {{ subscriptions_per_year|money(places=0) }} a year.</p>{% endif %}
     {% from "partials/charts.html" import bars %}{{ bars(bill_bars, 'spend', 'No bills or subscriptions yet.') }}
   </article>
@@ -43,7 +43,6 @@
 {% if suggestions %}<section class="plan-section" aria-labelledby="recurring-suggest">
   <header class="overview-section-head"><h2 id="recurring-suggest">{{ "Looks recurring"|tr(locale) }}</h2><span>{{ "From your last six months"|tr(locale) }}</span></header>
   <article class="card">
-    <p class="muted small">{{ "Repeated about monthly. Track one to plan for it."|tr(locale) }}</p>
     <div class="compact-list">{% for s in suggestions %}
       <div class="compact-row plan-item-row">
         <span><b>{{ s.name }}</b><small class="muted">{{ s.months }} months · usually around day {{ s.day }} · last {{ s.last_date }}</small></span>

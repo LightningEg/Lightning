@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 70 open items, in the order they are worked on.
+10 milestones, 71 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -15,7 +15,7 @@ Anyone can find how to help in one click and send a first fix the same evening.
 |---|---|---|---|---|
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/1E-public-repository-security-audit.md) | improvement, technical | tools | ready |
 | **IT-1G** | [Cover all backend modules with explicit dependency and wiring contracts](1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | improvement, technical | tools | ready |
-| **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | tools | ready |
+| **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | tools | building |
 | **BT-1L** | [The brand audit's page-jump check fails on /welcome only under a parallel full run](1-easy-to-contribute/1L-page-jump-check-flakes.md) | bug, technical · low | tools | ready |
 
 Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K. Next free code: 1M.
@@ -66,8 +66,14 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3AL4 | ↳ More (F13-F14) | | | |
 | IV-3AL5 | ↳ Pages under More (F15-F20) | | | |
 | IV-3AL6 | ↳ Spending (F21) | | | |
+| **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md) | improvement, visual | product | building |
+| IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | |
+| IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | |
+| IV-3AM3 | ↳ Each tab opens on its answer (O1-O2, B1-B3, B5, T1-T2, T5-T6, SP1-SP3, SA3-SA5, I1-I2, A1-A3, C1-C2) | | | |
+| IV-3AM4 | ↳ Settings stop being forms (ST1-ST4) | | | |
+| IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | |
 
-Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK. Next free code: 3AM.
+Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK. Next free code: 3AN.
 
 ## 4 Edit journal and devices
 

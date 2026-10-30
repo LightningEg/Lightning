@@ -110,5 +110,5 @@ def test_a_foreign_account_register_reads_in_its_own_currency(c, setup):
                                        opening_balance_date="2026-09-01")
     c.transactions.record_inflow("2026-09-05", usd.id, "50", cats["EXP.WORK.SALARY"].id, "gift")
     page = TestClient(create_app(c)).get(f"/accounts/{usd.id}").text
-    assert "Amount (USD)" in page and "≈ +2,410.00 EGP" in page and "250.00 USD" in page
+    assert "Amount (USD)" in page and "≈ +2,410.00 EGP" in page and "Balance (USD)" in page and 'register-balance-cell">250<' in page
     assert "Amount (EGP)" in TestClient(create_app(c)).get(f"/accounts/{accounts['cib'].id}").text

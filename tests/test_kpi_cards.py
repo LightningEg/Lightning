@@ -89,7 +89,7 @@ def test_the_budget_opens_with_cards_that_compare(mohab, monkeypatch):
     assert left.strip().startswith("Left in plan 13 days left") and f"{e.everyday_left:,.0f} for everyday, about {e.per_day:,.0f} a day" in left
     assert f"Spent {e.spent:,.0f} of {e.planned:,.0f} planned" in left
     assert "Everyday spending by day 19" in everyday and "the plan's pace" in everyday
-    assert "Is everyday spending on pace?" in _text(html) and "Bills in this month's plan" in _text(html)
+    assert "Is everyday spending on pace?" in _text(html) and "Bills still to pay this month" in _text(html)
     assert 'class="waffle' not in html and 'class="key-notes' not in html   # the waffle and the strip left Budget
 
 

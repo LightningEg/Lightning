@@ -23,6 +23,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | fx-date-boundary | [Backend audit: exchange-rate date boundary](2026-10-29-backend-audit/report.md) | 2026-10-29 | audit | none |
 | audit-10 | [Audit 10: the phone, tab by tab - quick actions and the answer first](2026-10-29-phone-tab-audit/report.md) | 2026-10-29 | audit | 3AD, 3AL, 3T |
 | audit-11 | [Audit 11: the backend walked through use cases](2026-10-29-use-case-audit/report.md) | 2026-10-29 | audit | 2AD, 2E, 5J, 7U |
+| audit-12 | [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](2026-10-30-desktop-tab-audit/report.md) | 2026-10-30 | audit | 3AM |
 
 ## Create and maintain a report
 

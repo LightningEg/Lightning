@@ -80,8 +80,9 @@ def test_the_system_group_says_what_it_holds(c, setup, monkeypatch):
     loans = c.categories.get_by_code("EXP.SYSTEM.LOANS")
     c.transactions.record_outflow("2026-10-05", accounts["cib"].id, "2500", loans.id, allow_system_category=True)
     page = TestClient(create_app(c)).get("/budget?period=month&month=2026-10").text
-    summary = re.search(r"<b>System Categories</b>(<small>[^<]*</small>)?", page)
-    assert summary and summary.group(1) == "<small>Loan payments</small>"
+    # Audit 12 (B4): the PC row is named by what it holds, so the internal group name never shows there.
+    assert "<b>Loan payments</b></span>" in page
+    assert not re.search(r"<b>System Categories</b>", page)
 
 
 def test_the_investing_rate_is_the_share_of_what_you_kept(c, setup):

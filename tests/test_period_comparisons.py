@@ -33,7 +33,7 @@ def test_running_month_excludes_late_prior_payments_and_includes_refunds(c, setu
     page = client.get('/birdview/expenses?month=2026-10').text
     assert 'Money out so far' in page
     assert '2026-09 days 1–14' in page
-    assert 'same calendar days' in page
+    assert 'the same days in earlier months' in page
     assert 'is-down' not in page.split('cluster-change')[1].split('>')[0]
     client.post('/settings/locale', data={'locale': 'ar'})
     arabic = client.get('/birdview/expenses?month=2026-10').text

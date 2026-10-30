@@ -2,7 +2,7 @@
 {% from "partials/charts.html" import tone_icon %}
 {% block title %}Investments{% endblock %}
 {% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Investments'|tr(locale), status, period.start_text ~ ' to ' ~ period.end_text, 'valued as of {date}'|tr(locale, date=period.end_display)) }}{% endblock %}
-{% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}{% if lens.available %}<div class="period-buttons" role="group" aria-label="{{ 'Show figures in'|tr(locale) }}"><a class="period-button{{ '' if lens.usd else ' selected' }}" href="{{ lens.egp_link }}">{{ base }}</a><a class="period-button{{ ' selected' if lens.usd }}" href="{{ lens.usd_link }}">USD</a></div>{% endif %}{% endblock %}
+{% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}{% if lens.available %}<details class="action-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">⋯</summary><div><a href="{{ lens.egp_link }}"{% if not lens.usd %} aria-current="true"{% endif %}>{{ 'Show figures in'|tr(locale) }} {{ base }}</a><a href="{{ lens.usd_link }}"{% if lens.usd %} aria-current="true"{% endif %}>{{ 'Show figures in'|tr(locale) }} USD</a></div></details>{% endif %}{% endblock %}
 {% block content %}
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
 {% from "partials/charts.html" import key_notes, trend, donut, bars, diverging, saved_split %}
@@ -50,7 +50,7 @@
   </div>
 </section>
 {% endif %}
-{% if not lead or currency_card.abroad_share %}<section class="card wide-card inv-currency" aria-label="{{ 'By currency'|tr(locale) }}">
+{% if not lead or currency_card.abroad_share %}<section class="inv-currency" aria-label="{{ 'By currency'|tr(locale) }}">
   <div class="overview-block-head"><div><h3>{{ "By currency"|tr(locale) }}</h3><p>{{ "Holdings and brokerage cash, by the currency they are in"|tr(locale) }} · {{ period.end_text }}</p></div></div>
   {% set cc = currency_card %}{% if cc.rows %}
   {% for r in cc.rows %}<div class="overview-static-row"><span>{{ r.label }}{% if r.note %} <small>{{ r.note }}</small>{% endif %}</span><b>{{ r.value|money }} <small>{{ lens.code }} · {{ '%.1f'|format(r.share) }}%</small></b></div>{% endfor %}
