@@ -3843,6 +3843,9 @@ table.figures tfoot th { border-top: 1px solid var(--line); }
 .main .planner-popup-form .money-input { width:200px; max-width:100%; }
 .main .inv-currency { margin:0 0 var(--gap-block); }
 
+/* IV-3AM3 · Accounts: What you own only where it differs (audit 12: A1 A2) */
+.main .account-group-cols.is-one, .main .account-row.is-one { grid-template-columns:minmax(0,1fr) 140px; }
+
 /* IV-3AM2 · S3 (owner decision 1): a section with one tab has only the gear in its bar. The gear stays the bar's end
    (A05) but takes no row: it sits at the header's right edge, and the header leaves room for it. */
 @media (min-width:901px) {

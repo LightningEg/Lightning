@@ -2812,6 +2812,8 @@ ARABIC_UI = {
     '{n} more sources': '{n} مصادر كمان',
     'less to more spent': 'من الأقل للأكتر إنفاق',
     'lowest {amount} in {month}': 'الأدنى {amount} في {month}',
+    'An estimate by the common rule; a scholar answers your own case.': 'تقدير بالقاعدة المعروفة؛ وعالم يجاوبك على حالتك.',
+    'Your zakat day follows the lunar year, so it comes about 11 days earlier each year.': 'يوم زكاتك بيمشي بالسنة القمرية، فبييجي حوالي 11 يوم أبكر كل سنة.',
 }
 
 
