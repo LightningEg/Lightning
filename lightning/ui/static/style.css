@@ -3815,3 +3815,16 @@ table.figures tfoot th { border-top: 1px solid var(--line); }
 @media (max-width:760px) { .main .budget-read-grid, .main .budget-read-grid.no-carry { grid-template-columns:1fr 1fr; } .main .budget-read-head { display:none; } }
 .main a.compact-row.budget-bills-link, .main a.compact-row.budget-bills-link:hover { text-decoration:none; }
 .main a.compact-row.budget-bills-link small { color:var(--muted); }
+
+/* IV-3AM3 · Overview: the answer, what needs you and the KPI row on the first screen (audit 12: O1 O2) */
+.main .needs-row { min-height:44px; margin:0 0 6px; padding:6px 16px; border:1px solid var(--line); border-radius:14px; background:var(--paper); }
+.main .needs-row:hover { background:var(--hover); filter:none; }
+.main .needs-top { justify-content:flex-start; align-items:center; margin:0 0 6px; }
+.main .needs-top .needs-head { margin:0; }
+.main .needs-top .quiet-link:first-of-type { margin-inline-start:auto; }
+.main .needs-top .quiet-link, .main .card-heading > .quiet-link, .main .section-head > .quiet-link { display:inline-flex; align-items:center; min-height:30px; padding:0 12px; border-radius:999px; background:rgba(10,36,66,.05); color:var(--ink-2); font:700 var(--fs-2)/1 var(--body); text-decoration:none; white-space:nowrap; }
+.main .needs-top .quiet-link:hover, .main .card-heading > .quiet-link:hover, .main .section-head > .quiet-link:hover { background:rgba(10,36,66,.1); color:var(--ink); }
+.main .overview-lead .overview-disclosure > summary, .main .overview-lead .overview-static-row { min-height:38px; padding-block:6px; }
+.main .overview-lead .lead-compare, .main .overview-lead .overview-headline { margin-block:4px; }
+.main details.flow-disclosure:not([open]) > .overview-section-head { margin-bottom:0; padding-block:6px; }
+.main .setup-card:not([open]) { margin-bottom:8px; }

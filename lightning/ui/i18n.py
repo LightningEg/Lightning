@@ -2808,6 +2808,7 @@ ARABIC_UI = {
     '{n} not tracked · {amount} expected': '{n} مش متتابعة · المتوقع {amount}',
     'Bills still to pay this month': 'فواتير لسه هتتدفع الشهر ده',
     'Mark them paid in Cash planning': 'علّمها مدفوعة من تخطيط النقدية',
+    '{done} of {total} done': '{done} من {total} اتعملت',
 }
 
 
