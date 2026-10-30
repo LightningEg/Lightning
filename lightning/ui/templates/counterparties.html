@@ -26,10 +26,11 @@
   <form method="get" action="/counterparties" class="toolbar-filters" data-counterparty-search><input type="search" name="q" value="{{ query }}" placeholder="Search names and aliases" autocomplete="off">{% if query %}<a class="btn small" href="/counterparties">{{ 'Clear'|tr(locale) }}</a>{% endif %}</form>
   {% if search_suggestions %}<p class="muted small">Did you mean {% for name, score in search_suggestions %}<a href="/counterparties?q={{ name|urlencode }}">{{ name }}</a>{% if not loop.last %} · {% endif %}{% endfor %}?</p>{% endif %}
   {% if parties %}
-  <table class="cp-table"><colgroup><col><col class="c-cat"><col class="c-act"></colgroup><thead><tr><th>{{ "Counterparty and aliases"|tr(locale) }}</th><th>{{ 'Suggested category'|tr(locale) }}</th><th class="num">{{ 'Actions'|tr(locale) }}</th></tr></thead><tbody>
+  <div class="cp-list cp-table">
     {% for party in parties %}{% set aliases = aliases_by_id.get(party.id, []) %}{% set edit_form = 'counterparty-edit-' ~ party.id %}
-    <tr class="{{ 'muted' if not party.active }}"><td data-label="{{ 'Counterparty and aliases'|tr(locale) }}">
-      <div class="counterparty-one-line">
+    {% set learned = (usual or {}).get(party.name) %}{% set learned_label = category_labels.get(learned.category_id) if learned else none %}{% set own_label = category_labels.get(party.default_category_id) if party.default_category_id else none %}
+    <details class="cp-row{{ ' muted' if not party.active }}"{{ ' open' if phone_mode() }}><summary><b>{{ party.name }}</b><span class="muted small">{% if party.kind == 'PERSON' %}{{ 'Person'|tr(locale) }}{% elif party.kind == 'BUSINESS' %}{{ 'Business'|tr(locale) }}{% endif %}{% if not party.active %} · {{ "Archived"|tr(locale) }}{% endif %}</span><span class="cp-cat">{{ own_label.split(' › ')[-1] if own_label else (('Learned: ' ~ learned_label.split(' › ')[-1]) if learned_label else '') }}</span></summary>
+    <div class="cp-edit"><div class="counterparty-one-line">
       <form id="{{ edit_form }}" method="post" action="/counterparties" class="counterparty-name-edit" data-counterparty-autosave>
         <input type="hidden" name="counterparty_action" value="rename">
         <input type="hidden" name="counterparty_id" value="{{ party.id }}">
@@ -63,11 +64,10 @@
       </div>{% else %}<span class="muted small">{{ "Alias limit reached"|tr(locale) }}</span>{% endif %}</details>{% endif %}
       {% if not party.active %}<span class="small muted">{{ "Archived"|tr(locale) }}</span>{% endif %}
       </div>
-    </td><td data-label="{{ 'Suggested category'|tr(locale) }}"><select form="{{ edit_form }}" name="default_category_id" aria-label="Suggested category" data-submit-on-change data-own-picker>
-      {% set learned = (usual or {}).get(party.name) %}{% set learned_label = category_labels.get(learned.category_id) if learned else none %}
+    <div class="cp-field"><span class="muted small">{{ 'Suggested category'|tr(locale) }}</span><select form="{{ edit_form }}" name="default_category_id" aria-label="Suggested category" data-submit-on-change data-own-picker>
       <option value="">{{ ('Learned: ' ~ learned_label.split(' › ')[-1]) if learned_label else 'No default' }}</option>{% from "partials/macros.html" import category_options %}{{ category_options(category_groups(categories), party.default_category_id or '') }}
-    </select>{% if learned_label and not party.default_category_id %}<small class="muted learned-note">{{ learned.count }} of the last {{ learned.total }}</small>{% endif %}</td>
-    <td data-label="{{ 'Actions'|tr(locale) }}"><div class="counterparty-actions">
+    </select>{% if learned_label and not party.default_category_id %}<small class="muted learned-note">{{ learned.count }} of the last {{ learned.total }}</small>{% endif %}</div>
+    <div class="counterparty-actions">
       <a class="btn small" href="/counterparties/{{ party.id }}" aria-label="{{ 'Open {name}'|tr(locale, name=party.name) }}">{{ 'Open'|tr(locale) }}</a>
       <form method="post" action="/counterparties" class="counterparty-kind" aria-label="{{ 'Person or business'|tr(locale) }}"><input type="hidden" name="counterparty_id" value="{{ party.id }}">
         <button class="btn small {{ 'primary' if party.kind == 'PERSON' }}" name="counterparty_action" value="kind:PERSON" aria-pressed="{{ 'true' if party.kind == 'PERSON' else 'false' }}">{{ 'Person'|tr(locale) }}</button>
@@ -75,8 +75,8 @@
       <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
       {% if not party.active %}<form method="post" action="/counterparties"><input type="hidden" name="counterparty_id" value="{{ party.id }}"><button class="btn small" name="counterparty_action" value="activate">{{ "Activate"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
       <form method="post" action="/counterparties" data-counterparty-delete><input type="hidden" name="counterparty_id" value="{{ party.id }}"><button class="cat-icon is-danger" name="counterparty_action" value="delete" title="Delete" aria-label="Delete {{ party.name }}"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
-    </div></td></tr>{% endfor %}
-  </tbody></table>
+    </div></div></details>{% endfor %}
+  </div>
   {% else %}<p class="muted">{{ "No saved counterparties yet."|tr(locale) }}</p>{% endif %}
 </section>
 {% if review_required %}

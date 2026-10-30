@@ -11,9 +11,12 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
-- 2026-10-30 · Claude: [IV-3AM3, IV-3AM5] Each tab opens on its answer, page by page (in progress): Transactions has one filter line, an entry-styled new row and single-line rows (11 above the fold at 1366 x 768).
+- 2026-10-30 · Claude: [IV-3AM4] Settings stop being forms (ST2-ST4): Counterparties is a one-column read list, a click opens the row's edit; Categories reads down one column; Data checks folds passed checks into one line;
+  the database path sits behind Advanced and Settings in each tab moves up on Your data.
+- 2026-10-30 · Claude: [IV-3AM3, IV-3AM5] Each tab opens on its answer, page by page: Transactions, Budget, Overview, Safety, Spending, Compare, Reports, Cash planning, Recurring, Loans, Investments, Planner,
+  Prices, Accounts, Held for others, Zakat, Import, Weekly review and Needs you lose method sentences and lone cards and gain the shared visuals; Transactions shows 11 rows at 1366 x 768.
 - 2026-10-30 · Claude: [IV-3AM2] The shell gives back space (S1, S2, S3, S6): the sidebar's accounts list scrolls inside itself with + Add account on its heading; one header row; a one-tab
-  section's gear sits at the header's end instead of a row of its own; Review activity moves into the ⋯ menu; Investments' EGP/USD choice moves into ⋯.
+  section's gear stays at the bar's end but sits on the header's row, not a row of its own; Review activity moves into the ⋯ menu; Investments' EGP/USD choice moves into ⋯.
 - 2026-10-30 · Claude: [IV-3AM1] Wrong on screen (SA1, SA2, ST1, T3, T4, B4): Reserves is titled Safety; Limits reads today's emergency fund the way Reserves does (0.5 months, Needs you; No limit rows draw no bar);
   the register hides its all-dash Balance column and shows whole balances; Budget names the system group by what it holds; Counterparties' buttons no longer overlap.
 - 2026-10-30 · Claude: Audit 12, the PC app tab by tab at 1366 and 1920 px: 13 pages measured, the outside desktop report
