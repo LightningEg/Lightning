@@ -42,7 +42,7 @@
 <section class="card phone-card" aria-labelledby="this-phone-heading">
   <h2 id="this-phone-heading" class="phone-card-title">{{ 'This phone'|tr(locale) }}</h2>
   <div class="phone-rows">
-    <a class="phone-row" href="/profiles/devices"><span>{{ "Pair a PC"|tr(locale) }}<small>{{ 'Devices: lend the ledger to your PC, take it back'|tr(locale) }}</small></span><b>›</b></a>
+    <a class="phone-row" href="/profiles/devices"><span>{{ 'Devices'|tr(locale) }}<small>{{ 'Pair your phone or PC'|tr(locale) }}</small></span><b>›</b></a>
     <a class="phone-row" href="/sms"><span>{{ 'Bank SMS'|tr(locale) }}<small>{{ 'Read bank messages into transactions'|tr(locale) }}</small></span><b>›</b></a>
     {% if request.state.fingerprint_row|default('') %}<a class="phone-row" href="/profiles/fingerprint"><span>{{ 'Unlock with fingerprint'|tr(locale) }}<small>{{ ('On' if request.state.fingerprint_row == 'on' else 'Off')|tr(locale) }}</small></span><b>›</b></a>{% endif %}
     <a class="phone-row" href="/profiles"><span>{{ 'Profile and lock'|tr(locale) }}<small>{{ 'Password, recovery key, backups, lock'|tr(locale) }}</small></span><b>›</b></a>

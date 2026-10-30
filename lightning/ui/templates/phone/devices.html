@@ -37,12 +37,18 @@
 {% else %}
 <section class="card phone-card" aria-labelledby="new-pair-heading">
   <h2 id="new-pair-heading" class="phone-card-title">{{ 'Pair a PC'|tr(locale) }}</h2>
+  {% if not lent_to %}
+  <p class="phone-note">{{ 'Set up device editing once to find nearby devices automatically.'|tr(locale) }}</p>
+  <a class="btn primary phone-save" href="/profiles/journal/setup">{{ 'Set up nearby pairing'|tr(locale) }}</a>
+  <details class="phone-more"><summary>{{ 'Connect with an address and code'|tr(locale) }}</summary>
+  {% endif %}
   <p class="phone-note">{{ 'The PC can then borrow this ledger, edit it and hand it back. One device edits at a time.'|tr(locale) }}</p>
   <form method="post" action="/profiles/devices/pair" class="phone-form">
     <input type="hidden" name="csrf" value="{{ csrf }}">
     <div class="field"><label for="phone-name">{{ 'This phone\'s name'|tr(locale) }}</label><input id="phone-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off"></div>
     <button class="btn primary phone-save" type="submit">{{ 'Show a pairing code'|tr(locale) }}</button>
   </form>
+  {% if not lent_to %}</details>{% endif %}
 </section>
 {% endif %}
 {% if peers %}
