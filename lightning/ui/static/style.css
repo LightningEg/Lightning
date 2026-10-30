@@ -2478,7 +2478,7 @@ a.chart-sankey-label:hover b { color:var(--azure); }
 .pick-option[hidden], .pick-group[hidden] { display:none; }
 /* Counterparties as a table of rows: the name takes the room, fields are row fields, Delete an icon. */
 .main .cp-table { width:100%; border-collapse:collapse; table-layout:fixed; }
-.main .cp-table col.c-cat { width:300px; } .main .cp-table col.c-act { width:96px; }
+.main .cp-table col.c-cat { width:250px; } .main .cp-table col.c-act { width:270px; }
 .main .cp-table :is(th,td) { height:40px; padding:4px 8px; border-bottom:1px solid var(--line); vertical-align:middle; background:transparent; }
 .main .cp-table thead th { height:34px; font:700 var(--fs-meta)/1.2 var(--body); color:var(--muted); }
 .main .cp-table tbody tr:hover td { background:var(--hover); }
@@ -3140,7 +3140,7 @@ html[dir="rtl"] .code, html[dir="rtl"] code, html[dir="rtl"] [data-ref], html[di
 .main .register-rows .register-edit-amount input { display:inline-block; width:calc(100% - 36px)!important; vertical-align:middle; }
 .main .register-rows .register-edit-amount .register-submit { display:inline-grid; vertical-align:middle; margin-left:3px; color:var(--ink); }
 .main .register-rows .register-edit-balance { color:var(--muted); text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
-.main .register-rows :is(th:last-child, .register-balance-cell, .register-edit-balance) { text-align:center!important; }
+.main .register-rows :is(.register-balance-head, .register-balance-cell, .register-edit-balance) { text-align:center!important; }
 .main .register-rows .register-row-action { text-align:right; white-space:nowrap; }
 .main .register-rows .register-notes-cell .register-note { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .main .register-rows .register-edit-notes input { overflow:hidden; text-overflow:ellipsis; }

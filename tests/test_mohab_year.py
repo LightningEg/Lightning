@@ -1435,7 +1435,7 @@ def test_a_small_difference_from_the_bank_is_one_adjustment(mohab):
     assert check.shows("A small difference", "Lightning is 30.00 EGP above your bank", "Post adjustment of −30.00")
     assert mohab.notes["wallet_adjusted"].shows("Balance adjustment", "The account now matches your bank")
     assert mohab.notes["wallet_adjusted"].shows("2027-09-30 Balance adjustment Other Personal Bank showed",
-                                                "−30.00 Edit 42,950.00 EGP")
+                                                "−30.00 Edit 42,950")
     assert mohab.notes["wallet_rechecked"].shows("It matches")
 
 
