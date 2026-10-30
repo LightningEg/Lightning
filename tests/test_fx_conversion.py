@@ -2,6 +2,7 @@
 zero in the profile currency, a fee is an expense, the executed rate is saved as a TRADE rate, and the cent
 rounding of very large amounts never breaks the ledger."""
 import random
+import re
 from decimal import Decimal as D
 
 import pytest
@@ -223,3 +224,37 @@ def test_conversion_preview_rejects_invalid_amounts_without_crashing(c, wallets)
             assert response.status_code == 200 and response.json() == {}
     # Preview uses the same parser as posting, including Arabic digits.
     assert client.get("/accounts/convert/quote", params=params | {"received": "٨٢٤"}).json()["rate"] == "48.543689"
+
+
+@pytest.mark.parametrize("locale", ["en", "ar"])
+def test_a_rate_far_from_the_market_is_asked_once_before_it_is_saved(c, wallets, locale):
+    """Audit 11 F5 (5J): 100 EGP sent and 5,000 USD received (the two amounts swapped) saved without a question,
+    and its rate then valued every dollar. Now Convert asks once; pressing it again saves the rate as typed."""
+    from fastapi.testclient import TestClient
+
+    from lightning.ui.web import create_app
+    accounts, _ = wallets
+    cib, usd = accounts["cib"].id, accounts["usd"].id
+    client = TestClient(create_app(c), follow_redirects=False)
+    if locale == "ar":
+        client.post("/settings/locale", data={"locale": "ar"})
+    count = lambda: c.db.scalar("SELECT COUNT(*) FROM transactions WHERE type='CNV' AND status='POSTED'")
+    form = {"date": "2026-09-10", "from_account_id": str(cib), "to_account_id": str(usd), "sent": "100",
+            "received": "5000", "fee": "", "notes": "", "return_to": f"/accounts/{cib}"}
+    asked = client.post(f"/accounts/{cib}/convert", data=form)
+    assert asked.status_code == 400 and count() == 0
+    if locale == "en":
+        assert "below the market rate (48.2000 EGP on 2026-09-01)" in asked.text and "swapped" in asked.text
+    else:
+        assert "أقل من سعر السوق" in asked.text and "swapped" not in asked.text
+    checked = re.search(r'name="rate_checked" value="([^"]+)"', asked.text).group(1)
+    changed = client.post(f"/accounts/{cib}/convert", data=form | {"received": "4000", "rate_checked": checked})
+    assert changed.status_code == 400 and count() == 0  # another rate is asked about again
+    assert client.post(f"/accounts/{cib}/convert", data=form | {"rate_checked": checked}).status_code == 303
+    assert count() == 1
+    near = form | {"sent": "4820", "received": "100"}  # the market rate: no question
+    assert client.post(f"/accounts/{cib}/convert", data=near).status_code == 303 and count() == 2
+    txn = c.db.scalar("SELECT id FROM transactions WHERE type='CNV' ORDER BY id DESC LIMIT 1")
+    revision = c.transactions.revision(txn)
+    edit = client.post(f"/transactions/{txn}/convert/edit", data=near | {"received": "5000", "revision": revision})
+    assert edit.status_code == 400 and c.transactions.conversion_of(c.transactions.get(txn)).received == 100

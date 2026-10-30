@@ -30,6 +30,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
   checked claim by claim, a four-step declutter plan for the owner's review (`reports/2026-10-30-desktop-tab-audit`).
 - 2026-10-29 · Codex: [IT-1H] Prepare refreshed Android native-wheel build inputs with verified source hashes;
   keep installed app dependencies unchanged pending published wheels and coordinated lock validation.
+- 2026-10-29 · Claude: [BT-5J] Convert asks once before saving a rate 20% or more from the day's market rate (the two amounts swapped valued every dollar at 0.02 EGP); pressing Convert again saves it as typed.
 
 - 2026-10-29 · Claude: [BT-2AC] Unlocking with Enter and then a click no longer shows "This form expired": the profile pages' buttons go busy (`app.js` no longer needs the toast) and a repeated unlock opens the app or the form again (`runtime/app.py`). Closes #193.
 
