@@ -11,6 +11,10 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+## [1.5.4] — 2026-10-30
+
+- 2026-10-30 · Claude: Release 1.5.4. Tags v1.5.2 and v1.5.3 were published on commits whose source version did not match,
+  so their runs stopped at the tag check and built nothing; 1.5.4 ships what was prepared as 1.5.2.
 - 2026-10-30 · Claude: `docs/handbook/` — readable product, design, data-model, requirements, API, gap and decision pages (owner request); `docs/` may hold this one folder.
 
 ## [1.5.2] — 2026-10-30
