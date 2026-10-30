@@ -6,6 +6,7 @@ Start here to find a document or decide where new material belongs.
 | --- | --- | --- |
 | Understand the product | [Project overview](PROJECT_OVERVIEW.md) | Adopted decisions, capabilities and roadmap |
 | Understand what each screen must answer | [Users' main questions](../reports/2026-10-27-users-main-questions/report.md) | Main questions, follow-ups and known gaps |
+| Get a readable tour of everything | [Handbook](handbook/README.md) | Plain-language product, design, data, requirements and gap pages that link to the references below |
 | Understand the implementation | [Architecture](ARCHITECTURE.md) | Implemented contracts, financial rules and data ownership |
 | Understand a term or number | [Glossary](GLOSSARY.md) | One name and definition per concept |
 | Compare outside evidence | [Competition](COMPETITION.md) | Dated research and its sources |
