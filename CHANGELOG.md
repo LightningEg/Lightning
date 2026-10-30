@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-30 · Claude: Owner feedback batch 2: merge counterparties (Merge into… on each name; history, rules and plans move, its names become aliases); Undo and Redo stay on the page; every post keeps scroll and which sections were open (Budget Track no longer closes the group); Held for in the register uses the app's own list; thin themed scrollbars.
+- 2026-10-30 · Claude: Import review under heavy themes: pick lists live at the page top (no transformed-card offset, one layout read per key, fewer page scans), and the review card drops its tiled grain (Dendera stall report; cause not reproduced off a real GPU).
+
 - 2026-10-30 · Claude: Owner feedback batch: Import statement is a button, not in ⋯; ticked import rows take one edit together and a new counterparty is saved at once (7V adds the AI-prompt ideas); cotton menu buttons lose their square card and pick lists keep to their field; register money out is rose.
 - 2026-10-30 · Claude: Every AI hand-off prompt is Copy and Edit, never open text, with the reason it helps; the statement, setup and analysis prompts say more (digits, dates, ask-first, lead with the answer). Guideline A03 and the page header changed in both repos.
 

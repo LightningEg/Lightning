@@ -26,6 +26,7 @@
   <form method="get" action="/counterparties" class="toolbar-filters" data-counterparty-search><input type="search" name="q" value="{{ query }}" placeholder="Search names and aliases" autocomplete="off">{% if query %}<a class="btn small" href="/counterparties">{{ 'Clear'|tr(locale) }}</a>{% endif %}</form>
   {% if search_suggestions %}<p class="muted small">Did you mean {% for name, score in search_suggestions %}<a href="/counterparties?q={{ name|urlencode }}">{{ name }}</a>{% if not loop.last %} · {% endif %}{% endfor %}?</p>{% endif %}
   {% if parties %}
+  {% if merge_choices|default([]) %}<datalist id="merge-parties">{% for other in merge_choices %}<option value="{{ other.name }}" data-pick="counterparty:{{ other.id }}">{% endfor %}</datalist>{% endif %}
   <div class="cp-list cp-table">
     {% for party in parties %}{% set aliases = aliases_by_id.get(party.id, []) %}{% set edit_form = 'counterparty-edit-' ~ party.id %}
     {% set learned = (usual or {}).get(party.name) %}{% set learned_label = category_labels.get(learned.category_id) if learned else none %}{% set own_label = category_labels.get(party.default_category_id) if party.default_category_id else none %}
@@ -68,6 +69,10 @@
       <option value="">{{ ('Learned: ' ~ learned_label.split(' › ')[-1]) if learned_label else 'No default' }}</option>{% from "partials/macros.html" import category_options %}{{ category_options(category_groups(categories), party.default_category_id or '') }}
     </select>{% if learned_label and not party.default_category_id %}<small class="muted learned-note">{{ learned.count }} of the last {{ learned.total }}</small>{% endif %}</div>
     <div class="counterparty-actions">
+      {% if party.active and (merge_choices|default([]))|length > 1 %}<form method="post" action="/counterparties" class="counterparty-merge" data-confirm-delete="{{ 'Merge {name} into the name you picked? Everything that uses {name} (transactions, rules, plans) moves to it, and {name} becomes one of its aliases. This cannot be split again.'|tr(locale, name=party.name) }}">
+        <input type="hidden" name="counterparty_action" value="merge"><input type="hidden" name="counterparty_id" value="{{ party.id }}">
+        <div class="counterparty-picker-slot"><input type="text" id="merge-into-{{ party.id }}" list="merge-parties" data-own-suggestions data-pick-target="merge-pick-{{ party.id }}" placeholder="{{ 'Merge into…'|tr(locale) }}" aria-label="{{ 'Merge {name} into'|tr(locale, name=party.name) }}" autocomplete="off" required><input type="hidden" id="merge-pick-{{ party.id }}" name="merge_into" required></div>
+        <button class="btn small">{{ 'Merge'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
       <a class="btn small" href="/counterparties/{{ party.id }}" aria-label="{{ 'Open {name}'|tr(locale, name=party.name) }}">{{ 'Open'|tr(locale) }}</a>
       <form method="post" action="/counterparties" class="counterparty-kind" aria-label="{{ 'Person or business'|tr(locale) }}"><input type="hidden" name="counterparty_id" value="{{ party.id }}">
         <button class="btn small {{ 'primary' if party.kind == 'PERSON' }}" name="counterparty_action" value="kind:PERSON" aria-pressed="{{ 'true' if party.kind == 'PERSON' else 'false' }}">{{ 'Person'|tr(locale) }}</button>

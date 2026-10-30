@@ -117,3 +117,24 @@ def test_every_write_route_is_its_own_undo_action(c, setup):
         assert undone.status_code == 200 and 'Action undone.' in undone.text
     assert c.reporting.money_from_others_history() == held
     assert c.reporting.account_balance(bank) == 49960  # the earlier expense stays
+
+
+def test_undo_and_redo_return_to_the_page_they_were_pressed_on(c, setup):
+    """Ctrl+Z used to land on Overview; it stays where you were (owner, 2026-10-30), with the page's own filters,
+    and falls back to Overview only when the page's record is gone."""
+    import re
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    accounts, cats = setup
+    bank = accounts['cib'].id
+    with TestClient(create_app(c)) as client:
+        posted = client.post(f'/accounts/{bank}/register', data={
+            'date': '2026-12-30', 'amount': '-85', 'category': cats['EXP.PERSONAL.FOOD'].name})
+        group = re.search(r'action="/history/undo".*?name="group_id" value="(\d+)"', posted.text, re.S).group(1)
+        back = f'/accounts/{bank}?period=ytd'
+        undone = client.post('/history/undo', data={'group_id': group, 'back': back}, follow_redirects=False)
+        assert undone.status_code == 303 and undone.headers['location'].startswith(back)
+        assert 'name="back" value="/accounts/' in client.get(back).text
+        redo = re.search(r'action="/history/redo".*?name="group_id" value="(\d+)"', client.get(back).text, re.S).group(1)
+        gone = client.post('/history/redo', data={'group_id': redo, 'back': '/accounts/99999'}, follow_redirects=False)
+        assert gone.status_code == 303 and gone.headers['location'].startswith('/?')

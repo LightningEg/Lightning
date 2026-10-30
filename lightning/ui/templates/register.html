@@ -32,7 +32,7 @@
   </td>
   <td class="register-edit-notes"><div class="register-notes-field"><input form="{{ form_id }}" type="text" name="notes" aria-label="{{ 'Notes'|tr(locale) }}" value="{{ v.get('notes', '') }}" placeholder="Notes">
     <input class="whom-cell is-hidden" form="{{ form_id }}" type="text" name="whom" aria-label="{{ 'Held for'|tr(locale) }}" value="{{ v.get('whom', '') }}"
-           placeholder="Held for (if not you)" list="owner-options" data-own-suggestions"></div></td>
+           placeholder="Held for (if not you)" list="owner-options" data-own-suggestions></div></td>
   <td class="register-edit-amount"><input form="{{ form_id }}" type="text" name="amount" aria-label="{{ 'Amount'|tr(locale) }}" value="{{ v.get('amount', '')|amount_role('field') }}" placeholder="-450 or 1,200"
              inputmode="decimal" required class="num money-input {{ 'bad' if error_field == 'amount' }}">
     <button form="{{ form_id }}" class="cat-icon register-submit" title="{{ 'Save' if is_edit else 'Add' }}" aria-label="{{ ('Save transaction' if is_edit else 'Add transaction')|tr(locale) }}">{% if is_edit %}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l3 3v13H4V4h1z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></svg>{% else %}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>{% endif %}</button></td>

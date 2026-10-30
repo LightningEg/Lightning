@@ -209,3 +209,34 @@ def test_a_new_counterparty_on_the_review_page_is_saved_at_once(c, setup):
     assert c.counterparties.get(person["id"])["kind"] == "PERSON"
     refused = client.post(url, data={"name": "   "})
     assert refused.status_code == 400 and refused.json()["error"]
+
+
+def test_merging_a_counterparty_moves_its_history_and_keeps_its_names_as_aliases(c, setup):
+    """Merge contacts (owner request, 2026-10-30): the old name's transactions follow the kept name, and both the old name and
+    its aliases lead there afterwards."""
+    from fastapi.testclient import TestClient
+    from lightning.core.errors import ValidationError
+    from lightning.ui.web import create_app
+    accounts, cats = setup
+    bank = accounts['cib'].id
+    keep = c.counterparties.create("Uber")
+    drop = c.counterparties.create("Uber Downtown", alias="UBER TRIP CAIRO")
+    client = TestClient(create_app(c))
+    for name in ("Uber Downtown", "Uber"):
+        assert client.post(f'/accounts/{bank}/register', data={
+            'date': '2026-12-30', 'amount': '-85', 'counterparty': name,
+            'category': cats['EXP.PERSONAL.FOOD'].name}).status_code == 200
+    page = client.get('/counterparties').text
+    assert 'name="merge_into"' in page and 'value="merge"' in page and 'id="merge-parties"' in page
+    done = client.post('/counterparties', data={'counterparty_action': 'merge', 'counterparty_id': str(drop),
+                                                'merge_into': f'counterparty:{keep}'})
+    assert done.status_code == 200 and 'Merged Uber Downtown into Uber.' in done.text
+    assert c.counterparties.get(drop) is None
+    assert c.db.scalar('SELECT count(*) FROM transactions WHERE counterparty_id=?', (keep,)) == 2
+    assert c.counterparties.resolve("uber downtown")["id"] == keep
+    assert c.counterparties.resolve("UBER TRIP CAIRO")["id"] == keep
+    try:
+        c.counterparties.merge(keep, keep)
+        assert False, "merging a name into itself must be refused"
+    except ValidationError:
+        pass

@@ -153,6 +153,47 @@ class CounterpartyService:
             self.db.execute("DELETE FROM counterparties WHERE id=?", (counterparty_id,))
         return False
 
+    def merge(self, source_id: int, target_id: int) -> dict:
+        """Fold one saved name into another (owner request, 2026-10-30): every record that points at ``source`` (history,
+        rules, plans, reserves, owners, claims: every foreign key, asked of the database) now points at ``target``, and
+        ``source``'s name and spellings become aliases of ``target``, so a later statement that says either finds it.
+        ``target`` keeps its own name; it takes ``source``'s kind and suggested category only where it has none. If a
+        record could not move (it would break a rule that allows one per counterparty), ``source`` is archived, never
+        deleted. Returns what moved."""
+        if source_id == target_id:
+            raise ValidationError("Choose a different counterparty to merge into.", "counterparty")
+        source, target = self.get(source_id), self.get(target_id)
+        if not source or not target:
+            raise NotFoundError("Counterparty not found.")
+        if not target["active"]:
+            raise ValidationError(f"{target['name']} is archived. Turn it on first, or choose another name.", "counterparty")
+        spellings = [source["name"]] + [row["alias"] for row in self.aliases_for(source_id)]
+        moved = 0
+        with self.db.transaction():
+            self.db.execute("DELETE FROM counterparty_aliases WHERE counterparty_id=?", (source_id,))
+            for other in [row[0] for row in self.db.conn.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")]:
+                if other in ("counterparties", "counterparty_aliases"):
+                    continue
+                for key in self.db.conn.execute(f'PRAGMA foreign_key_list("{other}")').fetchall():
+                    if key["table"] == "counterparties" and key["to"] in (None, "id"):
+                        moved += self.db.execute(
+                            f'UPDATE OR IGNORE "{other}" SET "{key["from"]}"=? WHERE "{key["from"]}"=?',
+                            (target_id, source_id)).rowcount
+            self.db.execute("UPDATE transactions SET counterparty=? WHERE counterparty_id=?", (target["name"], target_id))
+            if target["kind"] is None and source["kind"] is not None:
+                self.db.execute("UPDATE counterparties SET kind=?,updated_at=? WHERE id=?", (source["kind"], now_iso(), target_id))
+            if target["default_category_id"] is None and source["default_category_id"] is not None:
+                self.set_default_category(target_id, int(source["default_category_id"]))
+            archived = self.delete_or_archive(source_id)
+            if not archived:   # the old name is free again: it and its spellings now lead to the target
+                for spelling in spellings:
+                    try:
+                        self.add_alias(target_id, spelling)
+                    except (ValidationError, ConflictError):
+                        pass   # already the target's, or past the alias limit: the target still holds the history
+        return {"moved": moved, "archived": archived, "source": source["name"], "target": target["name"]}
+
     def suggestions(self, value: str, limit: int = 3) -> list[tuple[str, float]]:
         """Rank likely matches for a human to confirm; suggestions are never auto-merged."""
         key = normalize(value)

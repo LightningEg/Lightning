@@ -27,7 +27,8 @@ async def list_counterparties(request: Request):
                   total_parties=len(all_parties), search_suggestions=suggestions,
                   category_labels={item.id: c.categories.display_name(item.id) for item in categories},
                   aliases_by_id={party["id"]: aliases[party["id"]] for party in parties},
-                  alias_limit=MAX_ALIASES_PER_COUNTERPARTY, usual=c.transactions.usual_categories())
+                  alias_limit=MAX_ALIASES_PER_COUNTERPARTY, usual=c.transactions.usual_categories(),
+                  merge_choices=[party for party in all_parties if party["active"]])
 
 
 @router.post("")
@@ -85,6 +86,12 @@ async def create_counterparty(request: Request):
                 raise ValidationError("Choose a saved counterparty.")
             c.counterparties.remove_alias(int(counterparty_id), int(alias_id))
             return redirect("/counterparties", f"Removed alias from {selected['name']}.")
+        elif action == "merge":
+            if getattr(c, "is_journal", False):
+                raise ValidationError("Merging names is not available on a lent ledger. Do it on the home PC.")
+            result = c.counterparties.merge(int(counterparty_id), int(str(form.get("merge_into", "")).strip().removeprefix("counterparty:") or 0))
+            note = f" {result['source']} is archived because something still uses it." if result["archived"] else ""
+            return redirect("/counterparties", f"Merged {result['source']} into {result['target']}.{note}")
         elif action == "create":
             c.counterparties.create(name, category_id, kind=str(form.get("kind", "")).strip().upper() or None)
         elif action.startswith("existing:"):
