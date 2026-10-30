@@ -279,3 +279,75 @@ card system (3Q), chart fixes (3S). Each step links them where it touches them.
   `NODE_PATH=$(npm root -g) node reports/2026-10-30-desktop-tab-audit/evidence/capture.js <out>`.
 
 ## Dated follow-ups
+
+### 2026-10-30 · the owner's answers, and a second pass: words, visuals, size
+
+**Owner's answers:** 1. **No**: the gear stays at the tab bar's end (A05 unchanged); S3 is solved inside A05 by
+making a gear-only bar take no row of its own. 2. **Stay**: Accounts and Zakat stay under Transactions; S4 is dropped.
+3. **An Edit button on the Budget page** (as on the phone). 4. **The new-transaction row stays at the top**; T5 only
+restyles it as an entry row.
+
+The owner then asked for three more checks: "we tend to overexplain things, I want the page to look polished"; "new
+tabs we created have no visuals"; "sometimes the form or card is just taking too much space for no reason". Measured on
+all 26 pages at 1366 × 768: explanatory sentences of six words or more, charts (SVG over 60 × 30 px), and cards
+over 120 px tall whose text covers under 12% of their area.
+
+**P1 · over-explaining (medium, every page).** Sentences that describe the page, its method or a chart's legend:
+
+| Page | Says | Fix |
+|---|---|---|
+| Reports | "Ready-made comparisons and your saved views" (a description under the title, A05 forbids it) | a status sentence from its figures |
+| Import | "Drop your bank files; each one is matched to its account." · "Each account opens its own review: duplicates are flagged…" · "Undo removes every entry a file created…" | cut; the drop zone says it |
+| Prices | a two-sentence subtitle, then "Lightning updates the prices… by itself", then "A price you type wins…" again | one status sentence ("Prices from 2026-09-30; next update after 2026-10-31") |
+| Limits | "Limits only compare figures you already have…; change them behind the gear." | cut |
+| Data checks | an intro paragraph, one method sentence per check, and a closing paragraph | cut the intro and the closing; method behind the check's info tip |
+| Zakat | two paragraphs: the lunar year, "a scholar answers your own case…" | one line under the Lead; the rest behind an info tip |
+| Needs you / Weekly review | "Reviewed items stay quiet…" · "Reminders use your existing plans… Native alerts require…" | cut, or one line |
+| Planner | "Every class below its target gets the same share of its gap…" | behind an info tip on the two choices |
+| Loans | "Every unpaid payment, due or upcoming. Only payments already due come off free cash." | cut |
+| Reserves | "0 EGP set aside in reserves; free cash is 163,701 EGP after them and bills due." | cut (Cash planning owns free cash) |
+| Cash planning | "Solid: what it was · dashed: the forecast" · "Money in includes income, CD proceeds and a gam'eya payout · projected values are estimates" | the legend says it; cut |
+| Spending | "Lowest month on the left, highest on the right · the tick its middle month · the dot now" · "less to more spent · the biggest day darkest" · "So far · comparisons use the same calendar days…" | the key says it; cut |
+| Settings | "Applies at once and saves with this profile." · "One is made each time the app starts." · "Lightning does not upload your data…" | keep only hints that change what you do |
+| Recurring | "Repeated about monthly. Track one to plan for it." | cut |
+| Budget | "Day by day against the plan, bills and loan payments left out." | the chart's key |
+| Weekly review | each card's heading repeats its only row word for word (A16: a line that repeats its label) | one list of Needs you rows, no card per item |
+
+The rule for the fix: a sentence stays only if it reads a figure ("2,122 over the plan's pace") or changes what the user
+does next. A method goes behind the existing info tip (`info-tips.js`) or the page's "How it is worked out" link. A
+chart's key replaces any sentence that describes the chart.
+
+**P2 · tabs with no visual (medium).** No chart on Compare periods, Reports, Loans, Planner, Prices, Import, Held for
+others, Zakat, Weekly review or Needs you. Recurring has bars, but its KPI stands alone. Each fix uses an existing
+macro in `partials/charts.html` (`meter`, `bullet_row`, `bars`, `share_bar`, `diverging`, `lead_card`) and a figure the
+service already computes:
+
+| Tab | Visual |
+|---|---|
+| Compare periods | a Lead (Money out, this vs against) and `diverging`/`bullet_row` per category, biggest change first |
+| Reports | each of the three comparisons as a KPI card with a two-bar or `meter` comparison (A08), not a bare figure |
+| Loans | a Lead: Loans still to pay with paid-vs-left `share_bar` per loan; the payoff date in its working |
+| Planner | per class, a `bullet_row` of current share with the target as the tick; the suggested split as `share_bar` |
+| Zakat | a Lead: Still to pay 13,720, with a `meter` of zakatable wealth against the nisab and paid against due |
+| Held for others | a `share_bar` by person (or one row when one person) inside a Lead with the total |
+| Prices | each row's last-price date as a freshness mark (A03 meaning colours) instead of a second wide well |
+| Import | none needed; cut it to one card (P3) |
+
+**P3 · cards and forms bigger than what they hold (medium).** Cards over 120 px with under 12% text, and forms
+wider than their values:
+
+- Lone cards around one thing (A09.2: never a full-width card around one button): Reports' *Saved views* (3 links)
+  and *Everything* (2 buttons); Import's "vodafone-october.csv is waiting" (one button, already a Needs you row);
+  Held for others' empty *Investments* card; Cash planning's *Can I afford this?*; Accounts' *What you own* Lead (left
+  half empty); Investments' *By currency*; Loans' *Loans still to pay* (a figure and a sentence across 1,046 px).
+- Oversized fields: Planner's *Amount in EGP* is 760 px for a five-digit number; Compare's period form fills a card
+  with two date pairs, a chip set and a select; Prices' two 200 px wells per row; Reserves' *Amount set aside* well.
+  A10 widths apply: a money field fits its value. Forms sit on one line where they fit.
+- KPI cards alone in their row: Recurring's *Fixed costs to income*, Spending's *Money out so far*, Data checks'
+  three cards (a fourth slot empty).
+- Compare periods and Reports draw their figures in another type (letter-spaced, with decimals: 315,748.75 EGP);
+  they must use the KPI card (A08) and whole EGP.
+- Loans' progress bars are labelled "Pay early" (the link above them), not what they show (9 of 24 paid).
+- Weekly review: one card per item (five cards for three rows); Held for others: three closed cards at the end.
+
+These join the plan as **IV-3AM5** (words, visuals and sizes), built with each tab's step where it overlaps.
