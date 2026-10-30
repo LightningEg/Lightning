@@ -57,4 +57,4 @@ Run changed areas with `pytest -q <files>`; full suite once before pushing: `pyt
 
 ## Build and release
 
-Windows: `packaging/package_app.py` + `desktop-app.spec`. Android: `packaging/phone_build.py`, `android/`. Release procedure: `skills/release-check`. Version lives in `lightning/__init__.py` and `pyproject.toml` (both 1.5.1) and must agree (`release-check`).
+Windows: `packaging/package_app.py` + `desktop-app.spec`. Android: `packaging/phone_build.py`, `android/`. Release procedure: `skills/release-check`. Version lives in `lightning/__init__.py` and `pyproject.toml` (both 1.5.2) and must agree (`release-check`).

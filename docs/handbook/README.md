@@ -1,7 +1,7 @@
 # Lightning handbook
 
 A plain-language guide to what Lightning is, how it is built, and where it falls short.
-Written from the code at version **1.5.1** (schema migration **0068**), 2026-10-30.
+Written from the code at version **1.5.2** (schema migration **0068**), 2026-10-30.
 
 > **How this relates to the other docs.** `docs/ARCHITECTURE.md`, `PROJECT_OVERVIEW.md` and
 > `GLOSSARY.md` are the detailed, authoritative references and are updated with every change.
