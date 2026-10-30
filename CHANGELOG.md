@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-30 · Claude: Egyptian fund matching on Update prices ignores word order ("Misr Bank Equity Fund" = "Equity Fund Misr Bank") and, when no name matches, lists the nearest Mubasher names; USD and numbered issues still never match the pound fund.
+
 - 2026-10-30 · Claude: Same-named categories (Personal and Work Transportation) are never guessed between: a CSV row naming only that is left blank with both choices shown, the pickers write the group into the text, bulk-category says Personal › Transportation.
 
 - 2026-10-30 · Claude: Owner feedback batch 2: merge counterparties (Merge into… on each name; history, rules and plans move, its names become aliases); Undo and Redo stay on the page; every post keeps scroll and which sections were open (Budget Track no longer closes the group); Held for in the register uses the app's own list; thin themed scrollbars.
