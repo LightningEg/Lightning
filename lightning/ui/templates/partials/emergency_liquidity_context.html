@@ -1,5 +1,6 @@
-<div class="muted small emergency-liquidity-context">
-  <h3>{{ 'Could also use'|tr(locale) }}</h3>
+{% set more = liquidity_context.within_days|length + liquidity_context.locked|length + liquidity_context.unknown|length %}
+<details class="muted small emergency-liquidity-context">
+  <summary><b>{{ 'Could also use'|tr(locale) }}</b> · {{ 'Free cash'|tr(locale) }} {{ liquidity_context.free_cash|amount_role('total') if liquidity_context.free_cash is not none else 'Unavailable'|tr(locale) }}{% if more %} · {{ '{n} more sources'|tr(locale, n=more) }}{% endif %}</summary>
   <ul>
     <li>{{ 'Free cash'|tr(locale) }} <b>{{ liquidity_context.free_cash|amount_role('total') if liquidity_context.free_cash is not none else 'Unavailable'|tr(locale) }} {{ base if liquidity_context.free_cash is not none }}</b></li>
     {% for item in liquidity_context.within_days %}
@@ -12,4 +13,4 @@
     <li>{{ item.label }}{% if item.value is not none %} <b>{{ item.value|amount_role('total') }} {{ base }}</b>{% else %} · {{ 'Value unavailable'|tr(locale) }}{% endif %} · {{ 'Access timing unknown'|tr(locale) }}{% if item.unvalued and item.value is not none %} · {{ item.unvalued }} {{ 'unvalued'|tr(locale) }}{% endif %}</li>
     {% endfor %}
   </ul>
-</div>
+</details>

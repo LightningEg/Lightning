@@ -384,7 +384,7 @@ def _first_evening(o: Mohab) -> None:
     # The plan: a budget from his own spending, an emergency fund, his bills and the car loan.
     b.go("Set a plan for 2026-09")
     b.submit({}, button="Create plan")
-    b.go("Safety", "Reserves")
+    b.go("Safety", "Reserves", "Edit")  # Reserves reads; Edit opens the emergency fund's amount
     b.submit({"allocated": "20,000"}, action="/reserves/emergency")
     o.ask("emergency_target", "Six months of income is far more than the cash I have. Does Lightning say so?",
           "Safety", "Reserves")
@@ -498,7 +498,8 @@ def _live_the_year(o: Mohab) -> None:
     # ============================================================== April: the insurance, and selling COMI
     o.on("2027-04-30")
     o.month("2027-04", salary="50,000")
-    screen = b.go("Safety", "Reserves")
+    b.go("Safety", "Reserves")
+    screen = b.open("/plan/reserves?edit=all")  # the amounts are read-only until Edit
     b.submit({"allocated": "9,000"}, action=screen.action_after("Car insurance", "/allocate"))
     o.enter("CIB Payroll", "2027-04-25", "Misr Insurance", "Personal › Transportation", "-9,000")
     o.to_reserve("CIB Payroll", "Misr Insurance", "Car insurance")
@@ -522,7 +523,8 @@ def _live_the_year(o: Mohab) -> None:
     b.go("Safety", "Reserves")
     b.submit({"name": "New laptop", "target": "60,000", "due_date": "2027-06-30"}, button="Add reserve")
     o.ask("laptop", "Can I have a 60,000 laptop by the end of June?")
-    screen = b.go("Safety", "Reserves")
+    b.go("Safety", "Reserves")
+    screen = b.open("/plan/reserves?edit=all")
     o.notes["laptop_set_aside"] = b.submit({"allocated": "60,000"}, action=screen.action_after("New laptop", "/allocate"))
     o.ask("laptop_after", "And once the money is set aside?")
     o.on("2027-06-30")

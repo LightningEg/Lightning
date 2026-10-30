@@ -13,7 +13,7 @@ def test_the_box_shows_the_fund_after_payments_and_saving_it_changes_nothing(c, 
     repair = c.transactions.record_outflow("2026-10-18", accounts["cib"].id, "6500", cats["EXP.PERSONAL.FOOD"].id)
     c.reserves.set_expense_link(fund["id"], repair.id, "6500")
     client = TestClient(create_app(c))
-    page = client.get("/plan/reserves").text
+    page = client.get("/plan/reserves?edit=emergency").text  # Reserves reads; Edit opens the amount (audit 12, SA4)
     assert 'name="allocated" value="13,500.00"' in page and "13,500 left of 20,000 · 6,500 used" in page and "Refill to 20,000" in page
     c.reserves.set_emergency_fund("13,500")
     emergency = next(r for r in c.reserves.list_active() if r["kind"] == "EMERGENCY")
@@ -35,6 +35,6 @@ def test_reserve_autosave_returns_fresh_server_calculated_summaries(c, setup):
                            headers={"X-Requested-With": "fetch"})
     assert response.status_code == 200
     assert c.position.at(today()).free_cash == before - Decimal("2000")
-    assert 'data-reserve-refresh="overview"' in response.text
+    assert 'data-reserve-refresh="emergency-progress"' in response.text  # the one-sentence overview was cut (P1)
     assert fmt(before - Decimal("2000"), places=0) in response.text
     assert 'src="/static/reserve-autosave.js?v=' in response.text

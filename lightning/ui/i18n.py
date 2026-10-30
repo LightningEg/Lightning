@@ -2809,6 +2809,7 @@ ARABIC_UI = {
     'Bills still to pay this month': 'فواتير لسه هتتدفع الشهر ده',
     'Mark them paid in Cash planning': 'علّمها مدفوعة من تخطيط النقدية',
     '{done} of {total} done': '{done} من {total} اتعملت',
+    '{n} more sources': '{n} مصادر كمان',
 }
 
 
