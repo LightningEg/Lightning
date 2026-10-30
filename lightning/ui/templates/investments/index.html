@@ -2,7 +2,7 @@
 {% from "partials/charts.html" import tone_icon %}
 {% block title %}Investments{% endblock %}
 {% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Investments'|tr(locale), status, period.start_text ~ ' to ' ~ period.end_text, 'valued as of {date}'|tr(locale, date=period.end_display)) }}{% endblock %}
-{% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}{% if lens.available %}<div class="period-buttons" role="group" aria-label="{{ 'Show figures in'|tr(locale) }}"><a class="period-button{{ '' if lens.usd else ' selected' }}" href="{{ lens.egp_link }}">{{ base }}</a><a class="period-button{{ ' selected' if lens.usd }}" href="{{ lens.usd_link }}">USD</a></div>{% endif %}{% endblock %}
+{% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}{% if lens.available %}<details class="action-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">⋯</summary><div><a href="{{ lens.egp_link }}"{% if not lens.usd %} aria-current="true"{% endif %}>{{ 'Show figures in'|tr(locale) }} {{ base }}</a><a href="{{ lens.usd_link }}"{% if lens.usd %} aria-current="true"{% endif %}>{{ 'Show figures in'|tr(locale) }} USD</a></div></details>{% endif %}{% endblock %}
 {% block content %}
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
 {% from "partials/charts.html" import key_notes, trend, donut, bars, diverging, saved_split %}

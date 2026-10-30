@@ -3761,3 +3761,22 @@ table.figures tfoot th { border-top: 1px solid var(--line); }
 
 /* Link the sections (NF-7T): rows that open where each linked thing lives. */
 .linked-actions{display:flex;flex-wrap:wrap;gap:6px 16px;margin:12px 0 0}.linked-row form{margin:0;flex:none}.linked-row .linked-name{color:var(--text)}a.linked-row,a.linked-row:hover{text-decoration:none}a.linked-row:hover .linked-name,.linked-row a.linked-name:hover{text-decoration:underline}
+
+/* IV-3AM2 · the shell gives back space (audit 12: S1 the sidebar keeps its ends, S2 one header row, S3 no gear-only row) */
+.side-accounts-head { display:flex; align-items:center; justify-content:space-between; gap:8px; padding-inline:10px 4px; }
+.side-accounts-link { min-width:0; color:inherit; text-decoration:none; }
+.side-accounts-link:hover, .side-accounts-link:focus-visible { color:var(--ink); text-decoration:none; }
+.side-add-icon { display:inline-grid; place-items:center; flex:none; width:28px; height:28px; border-radius:999px; color:var(--ink-2); background:rgba(10,36,66,.05); text-decoration:none; }
+.side-add-icon:hover, .side-add-icon:focus-visible { color:var(--ink); background:rgba(10,36,66,.1); }
+.side-add-icon svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+@media (min-width:901px) {
+  .side { display:flex; flex-direction:column; }
+  .side > * { flex:none; }
+  .side > .side-accounts { flex:1 1 auto; display:flex; flex-direction:column; min-height:170px; }
+  .side-accounts > .side-account-list { flex:1 1 0; min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; }
+}
+.main > .topbar { margin-bottom:16px; }
+.main > .topbar > .topbar-main { flex-basis:220px; }
+.main .section-bar { margin-bottom:16px; }
+.app-popup .actions .section-gear { display:none; }
+.main > .topbar { padding-bottom:12px; }

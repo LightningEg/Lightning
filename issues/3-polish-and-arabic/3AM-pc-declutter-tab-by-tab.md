@@ -31,6 +31,7 @@ category well; no all-"—" Balance column; whole EGP in the register; no "Syste
 Add/Manage accounts reachable without scrolling the sidebar; a gear with no tabs moves into the header (A05 change,
 a gear-only bar takes no row of its own (A05 unchanged); the header stays one row; Review activity becomes a quiet
 action.
+**Built:** S1 (heading link + round + button, list scrolls inside), S2 (title shrinks first; Investments' currency lens in ⋯), S3 (gear ends the header actions when the section has one tab), S6 (Review activity in ⋯). Content starts at y 134 on Overview and 156 on Budget; pages with a tab bar start at 153-199 (the bar is a row).
 
 ## 3AM3 Each tab opens on its answer (O1-O2, B1-B3, B5, T1-T2, T5-T6, SP1-SP3, SA3-SA5, I1-I2, A1-A3, C1-C2)
 Overview's KPIs above the fold; Budget one meter plus pace, read-only rows with Edit plan; Transactions ten rows above the

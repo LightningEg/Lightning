@@ -102,7 +102,7 @@ class Mohab:
 
     # -------------------------------------------------------------- things he does
     def account(self, name: str, kind: str, balance: str, when: str = "1/7", bank: str = "") -> Screen:
-        self.b.go("+ Add account")
+        self.b.go("Add account")
         return self.b.submit({"name": name, "account_type": Choose(kind), "institution": bank,
                               "opening_balance": balance, "opening_balance_date": when}, button="Add account")
 
@@ -309,7 +309,7 @@ def _first_evening(o: Mohab) -> None:
         "funding_account_id": Choose("CIB Payroll"), "annual_rate": "22", "interest_method": Choose("Simple"),
         "lockup_end_date": "2027-07-01", "maturity_date": "2029-07-01", "payout_frequency": Choose("Monthly"),
         "destination_account_id": Choose("CIB Payroll")}, button="Record CD purchase")
-    o.ask("accounts", "Are all six accounts in, with the right balances?", "Manage accounts")
+    o.ask("accounts", "Are all six accounts in, with the right balances?", "Accounts")
     o.ask("opening", "I typed 1/7. Did the starting balances go in on 1 July?", "Vodafone Cash")
     o.ask("setup", "My accounts are in. What should I do next?")
 
@@ -638,7 +638,7 @@ def _a_gameya(o: Mohab) -> None:
     o.on("2027-09-30")
     b = o.b
     o.ask("gameya_before", "What am I worth before I join the gam'eya?")
-    b.go("+ Add account")
+    b.go("Add account")
     o.notes["gameya_account"] = b.submit({"name": "Office gam'eya", "account_type": Choose("Gam'eya"), "currency": "EGP"},
                                          button="Add account")
     o.notes["gameya_terms"] = b.submit(
@@ -667,7 +667,7 @@ def _a_dollar_account_and_a_nasdaq_etf(o: Mohab) -> None:
     b, c = o.b, o.c
     c.currencies.register("USD")
     c.fx.save("USD", "2027-09-30", "49.50")
-    b.go("+ Add account")
+    b.go("Add account")
     o.notes["usd_account"] = b.submit({"name": "Dollar brokerage", "account_type": Choose("Brokerage"), "currency": "USD",
                                        "opening_balance": "3,000", "opening_balance_date": "2027-09-30"},
                                       button="Add account")
@@ -794,7 +794,7 @@ def _the_feedback_round(o: Mohab) -> None:
     b.submit({"action": "register", "code": "USD"}, action="/settings/currency")
     b.open("/settings?section=currencies&tab=rates")
     b.submit({"currency": "USD", "date": "2027-09-28", "rate": "49.25"}, action="/settings/fx-rate")
-    b.go("+ Add account")
+    b.go("Add account")
     b.submit({"name": "Dollar savings", "account_type": Choose("Bank"), "currency": "USD", "opening_balance": "0",
               "opening_balance_date": "2027-09-28"}, button="Add account")
     o.notes["convert_form"] = b.go("CIB Payroll", "Convert")
