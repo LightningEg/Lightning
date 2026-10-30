@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from decimal import Decimal
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
@@ -176,7 +177,32 @@ def convert_context(request: Request, values: dict, action: str, title: str, err
 
 
 def convert_values(form) -> dict:
-    return {key: str(form.get(key, "")).strip() for key in CONVERT_FIELDS}
+    return {key: str(form.get(key, "")).strip() for key in CONVERT_FIELDS} | {
+        "rate_checked": str(form.get("rate_checked", "")).strip()}
+
+
+FAR_FROM_MARKET = Decimal("20")  # percent; past it a typo (the two amounts swapped) is likelier than a bank's spread
+
+
+def check_conversion_rate(c, values: dict) -> None:
+    """Ask once before saving a rate far from the day's market rate (5J): saved, its rate values every holding in
+    that currency. The second press, with the same rate, saves it as typed."""
+    quote = c.transactions.conversion_quote(values["date"] or fmt_date(today()),
+                                            _account_id(values["from_account_id"], "from_account"),
+                                            _account_id(values["to_account_id"], "to_account"),
+                                            values["sent"], values["received"])
+    if not quote or "percent" not in quote or Decimal(quote["percent"]) < FAR_FROM_MARKET:
+        return
+    if values.get("rate_checked") == quote["rate"]:
+        return
+    values["rate_checked"] = quote["rate"]
+    rate = f"1 {quote['base']} = {fmt(Decimal(quote['rate']), 4)} {quote['quote']}"
+    market = f"{fmt(Decimal(quote['reference']), 4)} {quote['quote']} on {quote['reference_date']}"
+    template = ("{rate} is {percent}% above the market rate ({market}). Check the two amounts are not swapped, then "
+                "press Convert again to save it." if quote["direction"] == "above" else
+                "{rate} is {percent}% below the market rate ({market}). Check the two amounts are not swapped, then "
+                "press Convert again to save it.")
+    raise ValidationError(template.format(rate=rate, percent=quote["percent"], market=market), "received")
 
 
 @router.get("/convert/quote")
@@ -211,11 +237,12 @@ async def save_conversion(request: Request, account_id: int):
     form = await request.form()
     values = convert_values(form) | {"return_to": _safe_return(form.get("return_to"), f"/accounts/{account_id}")}
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
-    payload = {key: value for key, value in values.items() if key != "return_to"}
+    payload = {key: value for key, value in values.items() if key not in ("return_to", "rate_checked")}
     try:
         with c.db.transaction():
             txn = c.transactions.submitted(submission, payload)  # a resent form returns its first save
             if txn is None:
+                check_conversion_rate(c, values)
                 txn = c.transactions.record_conversion(
                     values["date"], _account_id(values["from_account_id"], "from_account"),
                     _account_id(values["to_account_id"], "to_account"), values["sent"], values["received"],

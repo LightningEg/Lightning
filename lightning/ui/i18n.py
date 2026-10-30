@@ -14,6 +14,13 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    'Find your phone or PC': 'دور على موبايلك أو الكمبيوتر',
+    'Open pairing on the device with your profile.': 'افتح الاقتران على الجهاز اللي عليه ملفك.',
+    'Connect with an address and code': 'اتصل بعنوان وكود',
+    'Set up nearby pairing': 'جهّز الاقتران بالأجهزة القريبة',
+    'Set up device editing once to find nearby devices automatically.': 'فعّل التعديل من الأجهزة مرة واحدة عشان تلاقي الأجهزة القريبة تلقائيًا.',
+    'On the device with your profile, open Profile settings, Edit from your devices, then Devices.': 'على الجهاز اللي عليه ملفك، افتح إعدادات الملف، ثم التعديل من أجهزتك، وبعدها الأجهزة.',
+    'Pair your phone or PC': 'اربط موبايلك أو الكمبيوتر',
     "Budget for {name}: an amount, or a percentage of average monthly income": "ميزانية {name}: مبلغ أو نسبة من متوسط الدخل الشهري",
 
     "Monthly limit for {name}": "الحد الشهري لـ{name}",

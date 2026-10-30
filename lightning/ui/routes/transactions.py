@@ -124,13 +124,14 @@ async def edit_conversion(request: Request, txn_id: int):
 
 @router.post("/transactions/{txn_id:int}/convert/edit")
 async def save_edited_conversion(request: Request, txn_id: int):
-    from .accounts import _account_id, convert_context, convert_values
+    from .accounts import _account_id, check_conversion_rate, convert_context, convert_values
     c = container(request)
     form = await request.form()
     values = convert_values(form) | {"return_to": f"/transactions/{txn_id}", "revision": form.get("revision")}
     try:
         with c.db.transaction():
             c.transactions.require_revision(txn_id, values["revision"])
+            check_conversion_rate(c, values)
             txn = c.transactions.update_conversion(
                 txn_id, values["date"], _account_id(values["from_account_id"], "from_account"),
                 _account_id(values["to_account_id"], "to_account"), values["sent"], values["received"],
