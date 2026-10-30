@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-30 · Claude: Rewards workflow skips authors with admin or maintain permission: the owner's account reads
+  COLLABORATOR here and was paid every AI pull request on signing in with GitHub (website migration reverses it).
 - 2026-10-30 · Claude: [IV-3AM5] Finalised: Loans leads with what is left to pay; Planner shows each class against its
   target; Compare periods' answer is a Lead beside its picker; Held for others and Planner show whole EGP.
 - 2026-10-30 · Claude: [IV-3AM2, IV-3AM3] Review fixes: the one-tab gear sits on the header's hairline, not among its actions;
