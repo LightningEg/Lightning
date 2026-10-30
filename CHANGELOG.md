@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-30 · Claude: Finding the PC or phone on the network (owner report): a search now announces on every local subnet as well as 255.255.255.255, three times within its window, and the home answers repeats; untested on a real network.
+
 - 2026-10-30 · Claude: Only one action menu (Money actions, ⋯, Views, Find and replace) is open at a time; a click elsewhere or Escape closes it.
 
 - 2026-10-30 · Claude: Egyptian fund matching on Update prices ignores word order ("Misr Bank Equity Fund" = "Equity Fund Misr Bank") and, when no name matches, lists the nearest Mubasher names; USD and numbered issues still never match the pound fund.

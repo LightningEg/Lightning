@@ -12,6 +12,7 @@ import hashlib
 import hmac
 import ipaddress
 import os
+import socket
 import time
 
 from .codec import JournalError, authenticate, canonical, fields, seal, unpack
@@ -25,6 +26,31 @@ def local_address(host):
         return (address.is_private or address.is_link_local or address.is_loopback) and not (address.is_unspecified or address.is_multicast)
     except ValueError:
         return False
+
+
+def broadcast_destinations():
+    """Where a search is announced: the limited broadcast, and the /24 broadcast of every private address this computer has.
+    A limited broadcast (255.255.255.255) leaves through one adapter only, so a computer with a VPN, a virtual switch or a
+    phone's hotspot often announced on the wrong network and never reached the device sitting on the right one."""
+    found = ["255.255.255.255"]
+    addresses = set()
+    try:
+        addresses |= {info[4][0] for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET)}
+    except OSError:
+        pass
+    try:   # the address the default route uses (a UDP connect sends nothing)
+        probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            probe.connect(("10.255.255.255", 9))
+            addresses.add(probe.getsockname()[0])
+        finally:
+            probe.close()
+    except OSError:
+        pass
+    for address in sorted(addresses):
+        if local_address(address) and not address.startswith(("127.", "169.254.")):
+            found.append(".".join(address.split(".")[:3] + ["255"]))
+    return tuple(dict.fromkeys(found))[:8]
 
 
 def _scope(channel):
@@ -115,7 +141,7 @@ class LanResponder(asyncio.DatagramProtocol):
                     _open(self.channel, wire, kind="journal-discover", recipient=device.identity.device_id))
             if not device.store.db.scalar("SELECT 1 FROM journal_origins WHERE device=? AND revoked=0", (body["sender"],)):
                 return
-            if self.replied.get(body["sender"], -1) + 1 > now:
+            if self.replied.get(body["sender"], -1) + 0.2 > now:   # a repeated probe (the searcher announces three times) is answered again
                 return
             self.replied[body["sender"]] = now
             reply = dict(type="journal-found", scope=body.get("scope"), sender=device.identity.device_id,
@@ -150,8 +176,9 @@ class _DiscoveryInbox(asyncio.DatagramProtocol):
             return
 
 
-async def discover(channel, home_id, *, port=DISCOVERY_PORT, timeout=0.6, destinations=("255.255.255.255",)):
-    if home_id not in channel.peers or len(destinations) > 8 or not 0.1 <= timeout <= 2:
+async def discover(channel, home_id, *, port=DISCOVERY_PORT, timeout=0.6, destinations=None, tries=3):
+    destinations = broadcast_destinations() if destinations is None else destinations
+    if home_id not in channel.peers or len(destinations) > 8 or not 0.1 <= timeout <= 2 or not 1 <= tries <= 5:
         raise JournalError("Invalid paired-home discovery request")
     loop = asyncio.get_running_loop()
     nonce, future = os.urandom(32).hex(), loop.create_future()
@@ -164,13 +191,16 @@ async def discover(channel, home_id, *, port=DISCOVERY_PORT, timeout=0.6, destin
     transport, _ = await loop.create_datagram_endpoint(lambda: _DiscoveryInbox(channel, home_id, nonce, future),
                                                       local_addr=("0.0.0.0", 0), allow_broadcast=True)
     try:
-        for address in destinations:
-            transport.sendto(wire, (address, port))
-            transport.sendto(locator, (address, port))
-        try:
-            return [await asyncio.wait_for(future, timeout)]
-        except asyncio.TimeoutError:
-            return []
+        # A broadcast is one datagram that a busy wireless network may drop: announce again within the same window.
+        for _ in range(tries):
+            for address in destinations:
+                transport.sendto(wire, (address, port))
+                transport.sendto(locator, (address, port))
+            try:
+                return [await asyncio.wait_for(asyncio.shield(future), timeout / tries)]
+            except asyncio.TimeoutError:
+                continue
+        return []
     finally:
         transport.close()
 
@@ -207,8 +237,9 @@ class _NearbyInbox(asyncio.DatagramProtocol):
             return
 
 
-async def nearby_devices(identity, *, port=DISCOVERY_PORT, timeout=0.6, destinations=("255.255.255.255",)):
-    if len(destinations) > 8 or not 0.1 <= timeout <= 2:
+async def nearby_devices(identity, *, port=DISCOVERY_PORT, timeout=0.6, destinations=None, tries=3):
+    destinations = broadcast_destinations() if destinations is None else destinations
+    if len(destinations) > 8 or not 0.1 <= timeout <= 2 or not 1 <= tries <= 5:
         raise JournalError("Invalid nearby-device search")
     nonce = os.urandom(32).hex()
     inbox = _NearbyInbox(nonce)
@@ -216,9 +247,10 @@ async def nearby_devices(identity, *, port=DISCOVERY_PORT, timeout=0.6, destinat
     transport, _ = await loop.create_datagram_endpoint(lambda: inbox, local_addr=("0.0.0.0",0), allow_broadcast=True)
     try:
         wire = seal(dict(type="journal-nearby",nonce=nonce), identity.sign)
-        for address in destinations:
-            transport.sendto(wire,(address,port))
-        await asyncio.sleep(timeout)
+        for _ in range(tries):
+            for address in destinations:
+                transport.sendto(wire,(address,port))
+            await asyncio.sleep(timeout / tries)
         return sorted(inbox.found.values(),key=lambda item:(item["name"],item["home"]))[:16]
     finally:
         transport.close()
