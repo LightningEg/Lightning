@@ -1,0 +1,13 @@
+{# One way to hand a prompt to an AI tool (owner, 2026-10-30): two buttons, never the text. Copy sends the prompt
+   to the clipboard; Edit opens it in a window to add what only you know. Set ai_text before including.
+   static/ai-handoff.js runs it; the text stays in the page, inside the window, so nothing is fetched or sent. #}
+<div class="ai-prompt-block" data-ai-block>
+  <button type="button" class="btn" data-ai-copy>{{ 'Copy prompt'|tr(locale) }}</button>
+  <button type="button" class="btn" data-ai-edit>{{ 'Edit prompt'|tr(locale) }}</button>
+  <dialog class="review-dialog ai-prompt-dialog" data-ai-dialog aria-label="{{ 'Edit prompt'|tr(locale) }}">
+    <h2>{{ 'Edit prompt'|tr(locale) }}</h2>
+    <textarea dir="ltr" rows="16" data-prompt-text aria-label="{{ 'Prompt for your AI tool'|tr(locale) }}">{{ ai_text }}</textarea>
+    <div class="actions"><button type="button" class="btn primary" data-ai-save>{{ 'Save'|tr(locale) }}</button><button type="button" class="btn" data-ai-cancel>{{ 'Cancel'|tr(locale) }}</button></div>
+  </dialog>
+  <p class="muted small" data-prompt-status role="status" aria-live="polite"></p>
+</div>

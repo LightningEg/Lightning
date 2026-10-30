@@ -191,3 +191,21 @@ def test_a_day_ending_below_zero_keeps_statement_order(c, setup):
     c.bank_imports.confirm(batch, {ids[2]: {"counterparty": "Carrefour", "category": str(cats["EXP.PERSONAL.FOOD"].id)},
                                    ids[3]: {"counterparty": "Employer", "category": str(_income_code(c))}})
     assert order[:2] == [ids[2], ids[3]]
+
+
+def test_a_new_counterparty_on_the_review_page_is_saved_at_once(c, setup):
+    """"+ New counterparty" does not wait for "Post ready rows" (owner, 2026-10-30): the name exists as soon as it is chosen,
+    a name that already matches is reused, and "Held for" saves a person."""
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    accounts, _ = setup
+    client = TestClient(create_app(c))
+    url = f"/accounts/{accounts['cib'].id}/import/counterparty"
+    made = client.post(url, data={"name": "  Uber   Egypt "}).json()
+    assert made["name"] == "Uber Egypt" and made["pick"] == f"counterparty:{made['id']}"
+    assert c.counterparties.resolve("uber egypt")["id"] == made["id"]
+    assert client.post(url, data={"name": "UBER EGYPT"}).json()["id"] == made["id"]  # never doubled
+    person = client.post(url, data={"name": "Fatma Abdullah", "kind": "PERSON"}).json()
+    assert c.counterparties.get(person["id"])["kind"] == "PERSON"
+    refused = client.post(url, data={"name": "   "})
+    assert refused.status_code == 400 and refused.json()["error"]

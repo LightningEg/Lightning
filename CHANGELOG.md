@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-30 · Claude: Owner feedback batch: Import statement is a button, not in ⋯; ticked import rows take one edit together and a new counterparty is saved at once (7V adds the AI-prompt ideas); cotton menu buttons lose their square card and pick lists keep to their field; register money out is rose.
+- 2026-10-30 · Claude: Every AI hand-off prompt is Copy and Edit, never open text, with the reason it helps; the statement, setup and analysis prompts say more (digits, dates, ask-first, lead with the answer). Guideline A03 and the page header changed in both repos.
+
 ## [1.5.4] — 2026-10-30
 
 - 2026-10-30 · Claude: Release 1.5.4. Tags v1.5.2 and v1.5.3 were published on commits whose source version did not match,

@@ -82,7 +82,7 @@
 </section>
 
 
-<section class="card settings-list" id="export-for-ai"><h2>{{ 'Export for AI'|tr(locale) }}</h2><p class="muted small">{{ 'Lightning does not upload your data.'|tr(locale) }} {{ 'Export the workbook, copy the prompt, then upload both to your AI tool.'|tr(locale) }}</p>
+<section class="card settings-list" id="export-for-ai"><h2>{{ 'Export for AI'|tr(locale) }}</h2><p class="muted small">{{ 'Lightning does not upload your data.'|tr(locale) }} {{ 'Export the workbook, copy the prompt, then upload both to your AI tool.'|tr(locale) }}</p><p class="muted small">{{ 'The prompt gives your AI tool context it cannot guess: what the workbook holds, how the totals were made and what to check. Its answer is then about your numbers, not generic advice.'|tr(locale) }}</p>
 {% if ai_period %}{{ period_control('/settings', ai_period.key, ai_month, current_month, ai_period.start_text, ai_period.end_text, auto_apply=true) }}
 <p class="small muted">{{ ai_period.start_text }} to {{ ai_period.end_text }} · {{ ai_preview.transactions }} transactions · {{ ai_preview.investment_records }} investment records</p>
 <div class="actions ai-export-actions"><form action="/settings/ai-analysis" method="post" data-ai-export-form>

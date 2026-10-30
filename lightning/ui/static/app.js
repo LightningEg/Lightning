@@ -86,6 +86,16 @@ if (popupFlashRoot) {
 // Own-data fields keep their native submitted value and gain an accessible
 // type-and-pick surface. Popup markup is inserted after startup, so this must
 // be safe to call repeatedly on any subtree.
+// A list set to position:fixed is placed against the viewport, unless an ancestor carries a transform, filter or
+// contain (a theme's card lift, a popup's rise): then it is placed against that ancestor and lands far from its field.
+// Set the wanted viewport coordinates, measure where the list really is and move it by the difference.
+const pinFixed = (list, left, top) => {
+  list.style.left = `${left}px`; list.style.top = `${top}px`;
+  if (list.hidden) return;
+  const at = list.getBoundingClientRect();
+  if (Math.abs(at.left - left) > 0.5) list.style.left = `${left - (at.left - left)}px`;
+  if (Math.abs(at.top - top) > 0.5) list.style.top = `${top - (at.top - top)}px`;
+};
 let ownPickerId = 0;
 const initOwnDataPickers = (root = document) => {
   const find = (selector) => [
@@ -151,8 +161,7 @@ const initOwnDataPickers = (root = document) => {
     const height = Math.min(280, upward ? above : below);
     list.style.width = `${width}px`;
     list.style.maxHeight = `${Math.max(48, height)}px`;
-    list.style.left = `${Math.max(8, Math.min(rect.left, innerWidth - width - 8))}px`;
-    list.style.top = `${upward ? Math.max(8, rect.top - Math.min(list.scrollHeight, height) - 4) : rect.bottom + 4}px`;
+    pinFixed(list, Math.max(8, Math.min(rect.left, innerWidth - width - 8)), upward ? Math.max(8, rect.top - Math.min(list.scrollHeight, height) - 4) : rect.bottom + 4);
   };
   document.addEventListener('scroll', () => { if (!list.hidden) place(); }, true);
   window.addEventListener('resize', place);
@@ -287,7 +296,7 @@ find("input[data-own-suggestions][list]").forEach((input) => {
       option.append(row.value);
       if (row.label && row.label !== row.value) { const hint = document.createElement("span"); hint.className = "counterparty-kind"; hint.textContent = row.label; option.append(hint); }
       option.addEventListener("mousedown", (event) => event.preventDefault());
-      option.addEventListener("click", () => { input.value = row.value; input.dispatchEvent(new Event("change", { bubbles: true })); setPick(row.pick); close(); });
+      option.addEventListener("click", () => { input.value = row.value; setPick(row.pick); input.dispatchEvent(new Event("change", { bubbles: true })); close(); });
       list.append(option);
     });
     const typed = input.value.trim();
@@ -295,12 +304,34 @@ find("input[data-own-suggestions][list]").forEach((input) => {
       const add = document.createElement("button"); add.type = "button"; add.className = "counterparty-option picker-add";
       add.setAttribute("role", "option"); add.id = `${list.id}-add`; add.textContent = t(input.dataset.addLabel || '+ Add "{name}"', { name: typed });
       add.addEventListener("mousedown", (event) => event.preventDefault());
-      add.addEventListener("click", () => { input.value = typed; input.dispatchEvent(new Event("change", { bubbles: true })); setPick(`new:${typed}`); close(); });
+      add.addEventListener("click", async () => {
+        input.value = typed; close();
+        // data-create-url: the name is saved now (the import review), and every list offers it at once. If the save fails
+        // the name stays "new" and is made when the rows post, as before.
+        let made = null;
+        if (input.dataset.createUrl) {
+          input.setAttribute("aria-busy", "true");
+          try {
+            const body = new FormData();
+            body.set("name", typed); body.set("kind", input.dataset.createKind || "");
+            body.set("__session", document.querySelector('meta[name="lightning-session"]')?.content || document.querySelector('input[name="__session"]')?.value || "");
+            const response = await fetch(input.dataset.createUrl, { method: "POST", body, headers: { "Accept": "application/json", "X-Requested-With": "fetch" } });
+            if (response.ok) made = await response.json();
+          } catch (error) { made = null; }
+          input.removeAttribute("aria-busy");
+        }
+        if (made && made.pick) {
+          input.value = made.name; setPick(made.pick);
+          document.dispatchEvent(new CustomEvent("lightning:counterparty-created", { detail: { id: made.id, name: made.name, pick: made.pick, typed, from: input } }));
+        } else setPick(`new:${typed}`);
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      });
       list.append(add);
     } else if (!matches.length) { close(); return; }
     const rect = input.getBoundingClientRect();
-    list.style.left = `${Math.max(8, rect.left)}px`; list.style.top = `${rect.bottom + 4}px`; list.style.width = `${Math.max(230, rect.width)}px`;
+    list.style.width = `${Math.max(230, rect.width)}px`;
     list.hidden = false; input.setAttribute("aria-expanded", "true"); active = -1;
+    pinFixed(list, Math.max(8, rect.left), rect.bottom + 4);
   };
   input.addEventListener("input", () => { setPick(""); syncTile(); }); input.addEventListener("change", syncTile); syncTile();
   input.addEventListener("input", render); input.addEventListener("focus", render);

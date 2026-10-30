@@ -13,15 +13,12 @@
   <p class="muted small">{{ 'We’ll preview rows before posting. Money out is negative; money in is positive. For investment holdings, use the investment transaction row to record units; this imports account cash movements.'|tr(locale) }}</p>
   <details class="ai-handoff context-detail">
     <summary>{{ 'Prepare this CSV with an AI assistant'|tr(locale) }}</summary>
+    <p class="muted small">{{ 'These prompts give your AI tool context it cannot guess: this account’s name and currency, your categories, your counterparty names and exactly how Lightning reads a file. With that context it matches your names instead of inventing them, and you fix less in the review.'|tr(locale) }}</p>
     <p class="muted small">{{ 'Nothing is sent automatically. The prompt and reference include this account’s name and currency plus active counterparty names and pickable categories; no transactions are included.'|tr(locale) }}</p>
-    <label for="ai-import-prompt">{{ 'Copyable instructions'|tr(locale) }}</label>
-    <textarea id="ai-import-prompt" rows="16" readonly>{{ ai_prompt }}</textarea>
-    <div class="actions">
-      <button type="button" class="btn" data-copy-prompt>{{ 'Copy prompt'|tr(locale) }}</button>
+    {% set ai_text = ai_prompt %}<div class="actions">{% include "partials/ai_prompt.html" %}
       <a class="btn" href="/accounts/{{ account.id }}/import/ai-template.csv">{{ 'Download CSV template'|tr(locale) }}</a>
       <a class="btn" href="/accounts/{{ account.id }}/import/ai-reference.json">{{ 'Download matching reference'|tr(locale) }}</a>
     </div>
-    <p class="muted small" data-copy-status role="status" aria-live="polite"></p>
   </details>
   {% if error %}<p class="flash error">{{ error|tr(locale) }}</p>{% endif %}
   <form method="post" enctype="multipart/form-data" action="/accounts/{{ account.id }}/import">

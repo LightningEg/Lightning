@@ -82,7 +82,9 @@ Existing active counterparties:\n{parties or '- (none)'}
 
 Pickable categories:\n{cats or '- (none)'}
 
-Review every output row against the source before confirming the import. Do not claim the import is complete.'''
+Statements from Egyptian banks and wallets often use Arabic-Indic digits (٠١٢٣٤٥٦٧٨٩) and day-first dates: write digits as 0-9 and dates as YYYY-MM-DD. If a date could be read two ways (05/06/2026), ask me which order the source uses before converting. Keep Arabic names as written. Opening and closing balances, running balances and totals are not transactions: leave them out and tell me which rows you left out. If the source holds more than one account or currency, ask me which one this file is for.
+
+Return only the CSV, then list every row you were unsure about so I can check it in Lightning's review. Review every output row against the source before confirming the import. Do not claim the import is complete.'''
 
 
 def _review_form_max_fields(row_count: int) -> int:
@@ -339,6 +341,30 @@ def _render_review(request, c, account_id: int, batch, rows, *, summary, form=No
                   groups=groups, counts=counts, categories=_categories(c),
                   counterparties=c.counterparties.list_active(), owners=c.counterparties.list_people(), account_choices=accounts_here,
                   summary=summary, msg=msg, error=error, status_code=status_code)
+
+
+@router.post("/{account_id:int}/import/counterparty")
+async def create_counterparty_now(request: Request, account_id: int):
+    """"+ New counterparty" on the review page saves the name at once, so every other row's list offers it and the
+    rows that carry the same statement name take it, instead of waiting for "Post ready rows". A name that already
+    matches a saved counterparty is used, never doubled. In "Held for" the name is a person."""
+    c = container(request)
+    form = await request.form()
+    name = " ".join(str(form.get("name", "")).split())
+    try:
+        if not name:
+            raise ValidationError("Enter a counterparty name.", "counterparty")
+        if str(form.get("kind", "")).upper() == "PERSON":
+            party_id = c.counterparties.ensure_person(name)
+        else:
+            found = c.counterparties.resolve(name)
+            party_id = int(found["id"]) if found else c.counterparties.create(name)
+        party = c.counterparties.get(party_id)
+        if not party["active"]:
+            raise ValidationError(f"{party['name']} is archived. Turn it on in Counterparties first.", "counterparty")
+    except LightningError as exc:
+        return JSONResponse({"error": exc.message}, status_code=400)
+    return JSONResponse({"id": party_id, "name": party["name"], "pick": f"counterparty:{party_id}"})
 
 
 @router.get("/{account_id:int}/import/{batch_id:int}")

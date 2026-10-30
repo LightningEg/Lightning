@@ -32,25 +32,26 @@
   </div>
   <div class="import-bulk" id="import-bulk" hidden>
     <b class="import-bulk-count"><span data-bulk-count>0</span> {{ 'selected'|tr(locale) }}</b>
-    <div class="counterparty-picker-slot"><input type="text" id="bulk-cp" form="import-bulk-none" list="import-parties" data-own-suggestions data-allow-add data-add-label="+ New counterparty &quot;{name}&quot;" data-pick-target="bulk-cp-pick" placeholder="{{ 'Counterparty or account'|tr(locale) }}" aria-label="{{ 'Counterparty or account'|tr(locale) }}" autocomplete="off"><input type="hidden" id="bulk-cp-pick" form="import-bulk-none"></div>
+    <small class="import-bulk-hint">{{ 'Change a field in any ticked row and every ticked row takes it.'|tr(locale) }}</small>
+    <div class="counterparty-picker-slot"><input type="text" id="bulk-cp" form="import-bulk-none" list="import-parties" data-own-suggestions data-allow-add data-add-label="+ New counterparty &quot;{name}&quot;" data-pick-target="bulk-cp-pick" data-create-url="/accounts/{{ account.id }}/import/counterparty" placeholder="{{ 'Counterparty or account'|tr(locale) }}" aria-label="{{ 'Counterparty or account'|tr(locale) }}" autocomplete="off"><input type="hidden" id="bulk-cp-pick" form="import-bulk-none"></div>
     <select id="bulk-category" form="import-bulk-none" data-own-picker aria-label="{{ 'Category'|tr(locale) }}"><option value="">{{ 'Category'|tr(locale) }}</option><option value="__uncategorized__">{{ 'Uncategorized'|tr(locale) }}</option>{{ category_options(cat_groups, '') }}</select>
-    <div class="counterparty-picker-slot"><input type="text" id="bulk-whom" form="import-bulk-none" list="import-owners" data-own-suggestions data-allow-add data-add-label="+ New counterparty &quot;{name}&quot;" data-pick-target="bulk-whom-pick" placeholder="{{ 'Held for'|tr(locale) }}" aria-label="{{ 'Held for'|tr(locale) }}" autocomplete="off"><input type="hidden" id="bulk-whom-pick" form="import-bulk-none"></div>
+    <div class="counterparty-picker-slot"><input type="text" id="bulk-whom" form="import-bulk-none" list="import-owners" data-own-suggestions data-allow-add data-add-label="+ New counterparty &quot;{name}&quot;" data-pick-target="bulk-whom-pick" data-create-url="/accounts/{{ account.id }}/import/counterparty" data-create-kind="PERSON" placeholder="{{ 'Held for'|tr(locale) }}" aria-label="{{ 'Held for'|tr(locale) }}" autocomplete="off"><input type="hidden" id="bulk-whom-pick" form="import-bulk-none"></div>
     <label class="import-check"><input type="checkbox" id="bulk-remember" form="import-bulk-none"> {{ 'Use this category for this counterparty next time'|tr(locale) }}</label>
     <button type="button" class="btn primary" data-bulk-apply>{{ 'Apply'|tr(locale) }}</button>
     <button type="button" class="btn" data-bulk-skip>{{ 'Skip'|tr(locale) }}</button>
   </div>
   <div class="import-head" aria-hidden="true"><span></span><span>{{ 'Date'|tr(locale) }}</span><span>{{ 'Counterparty or account'|tr(locale) }}</span><span>{{ 'Category'|tr(locale) }}</span><span>{{ 'Held for'|tr(locale) }}</span><span>{{ 'Notes'|tr(locale) }}</span><span>{{ 'Amount'|tr(locale) }}</span><span>{{ 'Status'|tr(locale) }}</span></div>
   {% for g in groups %}
-  <details class="import-group" id="import-group-{{ g.i }}" data-state="{{ g.status }}" {{ 'open' if g.status != 'ready' }}>
+  <details class="import-group" id="import-group-{{ g.i }}" data-name="{{ g.name }}" data-state="{{ g.status }}" {{ 'open' if g.status != 'ready' }}>
     <summary><input type="checkbox" class="import-pick-group" data-group="{{ g.i }}" aria-label="{{ 'Select every row of'|tr(locale) }} {{ g.name }}"><span class="import-group-name"><b>{{ g.name }}</b><small>{{ g.count }} row{{ 's' if g.count != 1 }}</small></span><b class="num">{{ g.total|money(True) }}</b>{{ state_word(g.status) }}</summary>
     <div class="import-lines">
     {% for r in g.rows %}{% set rid = r._import_row_id %}{% set ui = r._ui %}
     <div class="import-line is-{{ r._state }}{{ ' has-error' if r._state == 'err' }}" id="import-row-{{ rid }}" data-state="{{ r._state }}" data-group="{{ g.i }}">
       <input type="checkbox" class="import-pick" data-row="{{ rid }}" aria-label="{{ 'Select line'|tr(locale) }} {{ r._line }}">
       <input type="text" name="date_{{ rid }}" value="{{ r.Date }}" placeholder="yyyy-mm-dd" inputmode="numeric" aria-label="Date, line {{ r._line }}" data-smart-date>
-      <div class="import-cell"><input type="text" id="cp-{{ rid }}" name="counterparty_{{ rid }}" value="{{ ui.cp }}" list="import-parties" data-own-suggestions data-allow-add data-add-label="+ New counterparty &quot;{name}&quot;" data-pick-target="cp-pick-{{ rid }}"{% if r._suggest %} data-suggest="{{ r._suggest }}"{% endif %} placeholder="{{ 'Counterparty or account'|tr(locale) }}" aria-label="Counterparty or account, line {{ r._line }}" autocomplete="off"><input type="hidden" id="cp-pick-{{ rid }}" name="counterparty_pick_{{ rid }}" value="{{ ui.cp_pick }}"></div>
+      <div class="import-cell"><input type="text" id="cp-{{ rid }}" name="counterparty_{{ rid }}" value="{{ ui.cp }}" list="import-parties" data-own-suggestions data-allow-add data-add-label="+ New counterparty &quot;{name}&quot;" data-pick-target="cp-pick-{{ rid }}" data-create-url="/accounts/{{ account.id }}/import/counterparty"{% if r._suggest %} data-suggest="{{ r._suggest }}"{% endif %} placeholder="{{ 'Counterparty or account'|tr(locale) }}" aria-label="Counterparty or account, line {{ r._line }}" autocomplete="off"><input type="hidden" id="cp-pick-{{ rid }}" name="counterparty_pick_{{ rid }}" value="{{ ui.cp_pick }}"></div>
       <select name="category_{{ rid }}" id="category-{{ rid }}" aria-label="Category, line {{ r._line }}" data-own-picker><option value="" {{ 'selected' if not ui.cat }}>{{ 'Category'|tr(locale) }}</option><option value="__uncategorized__" {{ 'selected' if ui.cat == '__uncategorized__' }}>{{ 'Uncategorized'|tr(locale) }}</option>{{ category_options(cat_groups, ui.cat) }}</select>
-      <div class="import-cell"><input type="text" id="whom-{{ rid }}" name="whom_{{ rid }}" value="{{ ui.whom }}" list="import-owners" data-own-suggestions data-allow-add data-add-label="+ New counterparty &quot;{name}&quot;" data-pick-target="whom-pick-{{ rid }}" placeholder="{{ 'Held for'|tr(locale) }}" aria-label="Held for, line {{ r._line }}" autocomplete="off"><input type="hidden" id="whom-pick-{{ rid }}" name="whom_pick_{{ rid }}" value="{{ ui.whom_pick }}"></div>
+      <div class="import-cell"><input type="text" id="whom-{{ rid }}" name="whom_{{ rid }}" value="{{ ui.whom }}" list="import-owners" data-own-suggestions data-allow-add data-add-label="+ New counterparty &quot;{name}&quot;" data-pick-target="whom-pick-{{ rid }}" data-create-url="/accounts/{{ account.id }}/import/counterparty" data-create-kind="PERSON" placeholder="{{ 'Held for'|tr(locale) }}" aria-label="Held for, line {{ r._line }}" autocomplete="off"><input type="hidden" id="whom-pick-{{ rid }}" name="whom_pick_{{ rid }}" value="{{ ui.whom_pick }}"></div>
       <input type="text" name="notes_{{ rid }}" value="{{ r.Notes }}" placeholder="{{ 'Notes'|tr(locale) }}" aria-label="Note, line {{ r._line }}">
       <input class="num money-input" type="text" inputmode="decimal" autocomplete="off" name="amount_{{ rid }}" value="{{ r.Amount }}" aria-label="Amount, line {{ r._line }}">
       <div class="import-status">{{ state_word(r._state, r) }}
@@ -107,10 +108,55 @@
     input.value = textValue; input.dispatchEvent(new Event('change', {bubbles: true}));
     if (hidden) hidden.value = pickValue;
   };
+  // Ticked rows are one edit. With two or more ticked, a change in a ticked row's counterparty, category, held-for or
+  // notes goes to every ticked row, so nobody retypes the same thing row by row. Date and amount stay the row's own.
+  let relaying = false;
+  const spread = (event) => {
+    if (relaying) return;
+    const line = event.target.closest('.import-line');
+    const field = event.target.name || '';
+    const kind = ['counterparty', 'category', 'whom', 'notes'].find((key) => field.startsWith(key + '_') && !field.includes('_pick_'));
+    if (!line || !kind || !line.querySelector('.import-pick')?.checked) return;
+    const others = picks().filter((box) => box.dataset.row !== line.querySelector('.import-pick').dataset.row);
+    if (!others.length) return;
+    const id = field.slice(kind.length + 1), pickName = kind === 'counterparty' ? 'counterparty_pick_' : kind === 'whom' ? 'whom_pick_' : '';
+    const pick = pickName ? (form.elements[pickName + id]?.value ?? '') : '';
+    relaying = true;
+    others.forEach((box) => {
+      const to = box.dataset.row;
+      if (pickName) setPicker(`${kind === 'counterparty' ? 'cp' : 'whom'}-${to}`, `${kind === 'counterparty' ? 'cp' : 'whom'}-pick-${to}`, event.target.value, pick);
+      else { const target = form.elements[`${kind}_${to}`]; if (target) { target.value = event.target.value; target.dispatchEvent(new Event('change', {bubbles: true})); } }
+    });
+    relaying = false;
+  };
+  form.addEventListener('change', spread);
+  // A counterparty made here is saved already: every row's list offers it, and the rows of the same statement name
+  // that were still only typed take it, so a name is settled once, not once per row.
+  document.addEventListener('lightning:counterparty-created', (event) => {
+    const {id, name, pick, typed, from} = event.detail;
+    document.querySelectorAll('#import-parties, #import-owners').forEach((list) => {
+      if (Array.from(list.options).some((option) => option.dataset.pick === pick)) return;
+      const option = document.createElement('option');
+      option.value = name; option.dataset.pick = pick; option.dataset.group = 'People and businesses';
+      list.append(option);
+    });
+    const same = typed.trim().toLocaleLowerCase();
+    const group = from.closest('details.import-group');
+    const kind = from.name?.startsWith('whom_') ? 'whom' : (from.name?.startsWith('counterparty_') ? 'cp' : '');
+    if (!kind || !group) return;
+    relaying = true;
+    group.querySelectorAll(`.import-line input[name^="${kind === 'cp' ? 'counterparty' : 'whom'}_"]:not([name*="_pick_"])`).forEach((input) => {
+      const rowId = input.name.slice(input.name.indexOf('_') + 1);
+      const hidden = document.getElementById(`${kind === 'cp' ? 'cp' : 'whom'}-pick-${rowId}`);
+      if (input !== from && input.value.trim().toLocaleLowerCase() === same && hidden && !hidden.value) setPicker(input.id, hidden.id, name, pick);
+    });
+    relaying = false;
+  });
   // Apply writes the bar's choices into the ticked rows' wells; nothing is posted yet.
   bar.querySelector('[data-bulk-apply]').addEventListener('click', () => {
     const cp = val('bulk-cp').trim(), cpPick = val('bulk-cp-pick'), cat = val('bulk-category');
     const whom = val('bulk-whom').trim(), whomPick = val('bulk-whom-pick'), remember = document.getElementById('bulk-remember').checked;
+    relaying = true;
     picks().forEach((box) => {
       const id = box.dataset.row;
       if (cp) setPicker(`cp-${id}`, `cp-pick-${id}`, cp, cpPick);
@@ -118,6 +164,7 @@
       if (whom) setPicker(`whom-${id}`, `whom-pick-${id}`, whom, whomPick);
       if (remember) { const keep = form.elements[`remember_${id}`]; if (keep) keep.checked = true; }
     });
+    relaying = false;
   });
   bar.querySelector('[data-bulk-skip]').addEventListener('click', () => {
     picks().forEach((box) => {
