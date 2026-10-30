@@ -1202,7 +1202,7 @@ def test_how_much_of_my_income_is_already_promised(mohab):
     fixed = mohab.answers["fixed_costs"]
     assert route(mohab, "fixed_costs") == ["/", "/plan", "/plan/recurring"]
     assert fixed.figure("Bills and subscriptions") + D("2500") == D("15630")
-    assert fixed.shows("Fixed costs to income 2026-09-30 34.7 % 15,630 a month of 45,000 income · bills, subscriptions and loans")
+    assert fixed.shows("34.7% Fixed costs to income · 15,630 a month of 45,000 income · bills, subscriptions and loans")
 
 
 def test_the_emergency_fund_in_months(mohab):

@@ -2811,6 +2811,7 @@ ARABIC_UI = {
     '{done} of {total} done': '{done} من {total} اتعملت',
     '{n} more sources': '{n} مصادر كمان',
     'less to more spent': 'من الأقل للأكتر إنفاق',
+    'lowest {amount} in {month}': 'الأدنى {amount} في {month}',
 }
 
 
