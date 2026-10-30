@@ -30,7 +30,7 @@ Written from the code at version **1.5.1** (schema migration **0068**), 2026-10-
 
 - **Status words:** *Implemented* (found in code and covered by a test), *Partial*, *Planned* (an open item in `issues/`), *Unknown* (could not be verified from the repository).
 - **IDs:** `FR-###` functional, `NFR-###` non-functional, `GAP-###` findings, `D-###` decisions, `WF-#` workflows, `US-#` stories. They are the same in every file.
-- **Pending Clarification** marks anything that needs the owner. Nothing there has been guessed.
+- **Decisions** are in [analysis/DECISIONS.md](analysis/DECISIONS.md); anything unknown is marked *Unknown*, never guessed.
 - File references are relative to the repository root, e.g. `lightning/bootstrap.py`.
 - Application code was **not** changed to produce this handbook.
 

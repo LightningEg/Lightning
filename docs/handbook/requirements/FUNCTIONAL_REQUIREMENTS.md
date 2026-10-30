@@ -1,7 +1,7 @@
 # Functional Requirements (as built)
 
 Status: **I** Implemented (code + tests found) · **P** Partial · **U** Unknown. Priority is MoSCoW and
-is an inference from the Overview's decisions unless noted (Pending Clarification, D-005).
+is an inference from the Overview's decisions unless noted (decided, D-005).
 Verification: test files are examples; run `pytest -q tests/<file>`.
 
 ## Profiles and security

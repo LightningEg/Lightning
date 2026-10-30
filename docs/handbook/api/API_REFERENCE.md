@@ -50,4 +50,4 @@ Counts are decorators per file. Prefixes are set where each router is included (
 | `GET /reminders/due.json` | Due reminders |
 | `GET /{account}/import/ai-reference.json` | Import helper data |
 
-**Pending Clarification (D-009):** whether any route is meant to be consumed by something other than the bundled UI (e.g. the Android shell). Until decided, per-endpoint request/response schemas are intentionally not documented; the path list can be regenerated with `grep -rnE "@\w+\.(get|post)\(" lightning/ui/routes lightning/runtime`.
+**Decision D-009:** these routes are the bundled UI's internal surface with no stability promise, so per-endpoint request/response schemas are intentionally not documented; the path list can be regenerated with `grep -rnE "@\w+\.(get|post)\(" lightning/ui/routes lightning/runtime`.

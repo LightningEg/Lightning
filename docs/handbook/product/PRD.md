@@ -93,7 +93,7 @@ One ledger; plan ≠ money; held-for-others money is excluded from *What you own
 
 ## 11. Success metrics
 
-**Pending Clarification** (D-001): no product KPIs (installs, retention, time-to-first-month) are defined in the repository. The only acceptance measure found is Mohab's test passing without `known_gap` markers.
+**Decision D-001:** no product KPIs (installs, retention, time-to-first-month) are defined in the repository. The only acceptance measure found is Mohab's test passing without `known_gap` markers.
 
 ## 12. Implementation status and future
 

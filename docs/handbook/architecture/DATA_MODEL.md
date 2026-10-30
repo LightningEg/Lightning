@@ -64,7 +64,7 @@ Indexes: ledger by (account,date), (asset,date), (category,date), transaction; t
 | Reimbursements | `reimbursement_claims`, `reimbursement_receipts` (0059) | Claims linked from ledger lines (`ledger_entries.claim_id`). |
 | Views and checks | `saved_views` (0058), `reconciled_through` (0056), `zakat_settings` (0054) | Saved filters; per-account "checked against the bank through date D" marker; zakat settings. |
 
-Detailed per-column definitions for these: read the named migration. `Pending Clarification` (D-004): a full column-level dictionary was not generated for all 63 tables.
+Detailed per-column definitions for these: read the named migration. Decision D-004: a full column dictionary will be generated from the schema, not hand-written.
 
 ## 4. Relationships and cascades
 
