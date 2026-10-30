@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-30 · Claude: `docs/handbook/` — readable product, design, data-model, requirements, API, gap and decision pages (owner request); `docs/` may hold this one folder.
+
 ## [1.5.2] — 2026-10-30
 
 - 2026-10-30 · Claude: Rewards workflow skips authors with admin or maintain permission: the owner's account reads
