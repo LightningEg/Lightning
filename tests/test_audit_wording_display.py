@@ -46,9 +46,24 @@ def test_months_in_cash_sit_beside_the_emergency_fund(c, setup):
     assert months == cash / Decimal("10000") and months > 1
     assert c.health.overview(day)["cash_months"] == months
     page = visible_text(_ScreenClient(create_app(c), "http://testserver").get("/financial-health").text)
-    assert f"{months:.1f} months in cash you own" in page
+    # Audit 12 (SA2): the row's headline is the Reserves figure; the cash cover is a labelled line in its numbers.
+    assert f"In cash you own {months:.1f} months" in page
 
 
 def test_the_planned_link_is_neutral(c, setup):
     browser = _ScreenClient(create_app(c), "http://testserver")
     assert "Bill linked" not in browser.get("/activity").text
+
+
+def test_limits_and_reserves_say_the_same_emergency_months(c, setup, monkeypatch):
+    """Audit 12 (SA2): both tabs read today's emergency reserve the same way, even when the reserve was recorded
+    after the date the app calls today (the sample year), so Limits never says Unavailable beside Reserves' months."""
+    from lightning.core.dates import month_of, today
+    monkeypatch.setenv("LIGHTNING_TODAY", "2020-01-15")  # earlier than the reserve's recorded date
+    c.reserves.set_emergency_fund("20000", "60000")
+    c.budgets.set_emergency_basis("income")
+    c.settings.set("budget_manual_monthly_income", "10000")
+    reserve = next(r for r in c.reserves.list_active() if r["kind"] == "EMERGENCY")
+    on_reserves = c.budgets.emergency_fund(month_of(today()), reserve["effective_allocated"])
+    on_limits = c.health.overview(today())["fund"]
+    assert on_limits.months == on_reserves.months and on_limits.months is not None

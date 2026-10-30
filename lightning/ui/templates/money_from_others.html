@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ fig.held_for_others.label }}{% endblock %}
-{% block heading %}<h1>{{ fig.held_for_others.label }}</h1><p class="muted">{{ fig.held_for_others.meaning }} It is left out of {{ fig.what_you_own.label|lower }}.</p>{% endblock %}
+{% block heading %}<h1>{{ fig.held_for_others.label }}</h1>{% endblock %}
 {% block top_actions %}<b class="section-total">{{ held_total|money(places=0) }} <small>{{ base }} in all</small></b>{% endblock %}
 {% block content %}
 <section class="card data-panel wide-card">
@@ -10,25 +10,25 @@
   {% endfor %}
   </tbody></table>{% else %}<p class="muted">{{ "No cash is held for others."|tr(locale) }}</p>{% endif %}
 </section>
-<section class="card data-panel wide-card">
+{% if investments %}<section class="card data-panel wide-card">
   <div class="section-head"><div><h2>{{ 'Investments'|tr(locale) }}</h2></div></div>
   {% if investments %}<table><thead><tr><th>{{ 'Held for'|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th>{{ 'Investment'|tr(locale) }}</th><th class="num">{{ "Units"|tr(locale) }}</th><th class="num">{{ "Value"|tr(locale) }}</th></tr></thead><tbody>
   {% for row in investments %}<tr><td data-label="{{ 'Held for'|tr(locale) }}">{{ row.owner }}</td><td data-label="{{ 'Account'|tr(locale) }}">{{ row.account_name }}</td><td data-label="{{ 'Investment'|tr(locale) }}">{{ row.asset_name }}</td>
     <td class="num" data-label="{{ 'Units'|tr(locale) }}">{{ row.units|units_of(row.unit) }}</td><td class="num" data-label="{{ 'Value'|tr(locale) }}">{{ row.value|money if row.value is not none else '—' }}</td>
   {% endfor %}
   </tbody></table>{% else %}<p class="muted">{{ "No investments are held for others."|tr(locale) }}</p>{% endif %}
-</section>
-<details class="card"><summary><b>{{ "How to record ownership"|tr(locale) }}</b></summary>
+</section>{% else %}<p class="muted small">{{ "No investments are held for others."|tr(locale) }}</p>{% endif %}
+<details class="flow-disclosure"><summary><b>{{ "How to record ownership"|tr(locale) }}</b></summary>
   <p class="muted">{{ "Use the account’s transaction form and choose the person in"|tr(locale) }}<b>{{ 'Held for'|tr(locale) }}</b>{{ ". For cash already held for someone else, record money in; record a return with a negative amount. Both paths update the owner’s balance."|tr(locale) }}</p>
   <a class="btn primary" href="/transactions">{{ "Open transactions"|tr(locale) }}</a>
 </details>
-<details class="card data-panel"><summary><b>{{ "Cash ownership history"|tr(locale) }}</b><span class="muted small">{{ entries|length }} {{ 'entry' if entries|length == 1 else 'entries' }}</span></summary>
+<details class="flow-disclosure data-panel"><summary><b>{{ "Cash ownership history"|tr(locale) }}</b><span class="muted small">{{ entries|length }} {{ 'entry' if entries|length == 1 else 'entries' }}</span></summary>
   <table><thead><tr><th>{{ 'Date'|tr(locale) }}</th><th>{{ 'Held for'|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th>{{ 'Notes'|tr(locale) }}</th><th class="num">{{ "Change"|tr(locale) }}</th></tr></thead><tbody>
   {% for row in entries %}<tr><td data-label="{{ 'Date'|tr(locale) }}">{{ row.date }}</td><td data-label="{{ 'Held for'|tr(locale) }}">{{ row.owner }}</td><td data-label="{{ 'Account'|tr(locale) }}">{{ row.account_name }}</td><td data-label="{{ 'Notes'|tr(locale) }}">{{ row.notes }}</td><td class="num" data-label="{{ 'Change'|tr(locale) }}">{{ row.amount|money(True) }} {{ row.currency }}</td>
   {% else %}<tr><td class="empty" colspan="5">{{ "No entries yet."|tr(locale) }}</td></tr>{% endfor %}
   </tbody></table>
 </details>
-<details class="card data-panel"><summary><b>{{ "Investment ownership history"|tr(locale) }}</b><span class="muted small">{{ investment_entries|length }} {{ 'entry' if investment_entries|length == 1 else 'entries' }}</span></summary>
+<details class="flow-disclosure data-panel"><summary><b>{{ "Investment ownership history"|tr(locale) }}</b><span class="muted small">{{ investment_entries|length }} {{ 'entry' if investment_entries|length == 1 else 'entries' }}</span></summary>
   <table><thead><tr><th>{{ 'Date'|tr(locale) }}</th><th>{{ 'Held for'|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th>{{ 'Investment'|tr(locale) }}</th><th class="num">{{ "Units change"|tr(locale) }}</th><th>{{ "Reference"|tr(locale) }}</th></tr></thead><tbody>
   {% for row in investment_entries %}<tr><td data-label="{{ 'Date'|tr(locale) }}">{{ row.date }}</td><td data-label="{{ 'Held for'|tr(locale) }}">{{ row.owner }}</td><td data-label="{{ 'Account'|tr(locale) }}">{{ row.account_name }}</td><td data-label="{{ 'Investment'|tr(locale) }}">{{ row.asset_name }}</td>
     <td class="num" data-label="{{ 'Units change'|tr(locale) }}">{{ row.units|money(True, 4) }} {{ row.unit }}</td><td data-label="{{ 'Reference'|tr(locale) }}">{{ row.ref }}</td>

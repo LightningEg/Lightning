@@ -161,8 +161,11 @@ jobs:
           issues=$(gh pr view "$PR" --json closingIssuesReferences | jq -c --arg repo "$GH_REPO" \
             '[.closingIssuesReferences[] | select((.url | ascii_downcase) | startswith(("https://github.com/" + $repo + "/issues/") | ascii_downcase)) | .number]')
           # Bots and the owner's account earn nothing; they only finish the task. (This repository belongs to an
-          # organization, where its owner's own pull requests read MEMBER, so both words are skipped.)
-          if [[ "$AUTHOR_TYPE" == Bot || "$ASSOC" == OWNER || "$ASSOC" == MEMBER ]]; then
+          # organization, where its owner's own pull requests read MEMBER, so both words are skipped. The owner's
+          # account also reads COLLABORATOR here, so anyone with admin or maintain permission is skipped too:
+          # 2026-10-30, the owner was paid every AI pull request on signing in with GitHub.)
+          perm=$(gh api "repos/$GH_REPO/collaborators/$AUTHOR/permission" --jq .permission 2>/dev/null || echo unknown)
+          if [[ "$AUTHOR_TYPE" == Bot || "$ASSOC" == OWNER || "$ASSOC" == MEMBER || "$perm" == admin || "$perm" == maintain ]]; then
             if [[ "$issues" == "[]" ]]; then echo "Pull request #$PR closes no issue of this repository: nothing to do."; exit 0; fi
             rpc close_rewarded_issues "$(jq -nc --arg repo "$GH_REPO" --argjson pr "$PR" --argjson issues "$issues" \
               '{p_repo:$repo, p_pr:$pr, p_issues:$issues}')"

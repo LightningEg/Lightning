@@ -4,12 +4,13 @@ from decimal import Decimal
 
 from fastapi import APIRouter, Request
 
-from lightning.core.dates import parse_date, today
+from lightning.core.dates import month_of, parse_date, today
 from lightning.core.figures import FIGURES
 from lightning.core.errors import ValidationError
 from lightning.planning.emergency_context import emergency_liquidity_context
 
 from .. import charts, kpis, status as page_status
+from ..periods import parse_period
 from ..web import container, render
 
 router = APIRouter()
@@ -95,22 +96,28 @@ def _trend_summary(trends, attr: str) -> dict:
         return {}
     low = min(known, key=lambda x: x[1])
     return {"first": trends[0].month, "last_month": known[-1][0], "last": known[-1][1],
-            "low_month": low[0], "low": low[1]}
+            "low_month": low[0], "low": low[1], "high": max(value for _, value in known)}
 
 
 @router.get("/financial-health")
 async def financial_health(request: Request):
     c = container(request)
     raw = request.query_params.get("as_of")
+    error = ""
+    period = None
     try:
-        as_of = parse_date(raw, "as-of date") if raw else today()
-        if as_of > today():
-            raise ValidationError("Choose today or an earlier as-of date.", "as_of")
+        if raw:  # the phone's date box and old links
+            as_of = parse_date(raw, "as-of date")
+            if as_of > today():
+                raise ValidationError("Choose today or an earlier as-of date.", "as_of")
+        else:  # the PC's one period control (A05): balances as of the period's last day
+            period = parse_period(request.query_params, today(), c.reporting.first_activity_date())
+            as_of = period.end
     except ValidationError as exc:
         as_of = today()
         error = exc.message
-    else:
-        error = ""
+    if period is None or error:
+        period = parse_period({"period": "month", "month": month_of(as_of)}, today())
     overview = c.health.overview(as_of)
     liquidity_context = emergency_liquidity_context(c.position.at(as_of, match_payments=False))
     trends = overview["trends"]
@@ -142,7 +149,7 @@ async def financial_health(request: Request):
                   within=within, judged=len(judged),
                   savings_summary=_trend_summary(trends, "savings_rate"),
                   worth_summary=_trend_summary(trends, "net_worth"),
-                  as_of_iso=as_of.isoformat(),
+                  as_of_iso=as_of.isoformat(), period=period, month=period.start_text[:7],
                   today_iso=today().isoformat(),
                   # A month that says its gap in words is left out of the line (it skips missing points).
                   savings_spark=charts.sparkline(savings_values),

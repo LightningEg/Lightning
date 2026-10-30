@@ -11,9 +11,42 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-30 · Claude: Rewards workflow skips authors with admin or maintain permission: the owner's account reads
+  COLLABORATOR here and was paid every AI pull request on signing in with GitHub (website migration reverses it).
+- 2026-10-30 · Claude: [IV-3AM5] Finalised: Loans leads with what is left to pay; Planner shows each class against its
+  target; Compare periods' answer is a Lead beside its picker; Held for others and Planner show whole EGP.
+- 2026-10-30 · Claude: [IV-3AM2, IV-3AM3] Review fixes: the one-tab gear sits on the header's hairline, not among its actions;
+  Spending leads with last month only under 7 days or 3 categories (it counted the 3 groups); Zakat leads with your zakat;
+  Loans' Pay early joins the loan's actions; Compare periods, Reports and Loans show whole EGP.
+- 2026-10-30 · Claude: [IV-3AM4] Settings stop being forms (ST2-ST4): Counterparties is a one-column read list, a click opens the row's edit; Categories reads down one column; Data checks folds passed checks into one line;
+  the database path sits behind Advanced and Settings in each tab moves up on Your data.
+- 2026-10-30 · Claude: [IV-3AM3, IV-3AM5] Each tab opens on its answer, page by page: Transactions, Budget, Overview, Safety, Spending, Compare, Reports, Cash planning, Recurring, Loans, Investments, Planner,
+  Prices, Accounts, Held for others, Zakat, Import, Weekly review and Needs you lose method sentences and lone cards and gain the shared visuals; Transactions shows 11 rows at 1366 x 768.
+- 2026-10-30 · Claude: [IV-3AM2] The shell gives back space (S1, S2, S3, S6): the sidebar's accounts list scrolls inside itself with + Add account on its heading; one header row; a one-tab
+  section's gear stays at the bar's end but sits on the header's row, not a row of its own; Review activity moves into the ⋯ menu; Investments' EGP/USD choice moves into ⋯.
+- 2026-10-30 · Claude: [IV-3AM1] Wrong on screen (SA1, SA2, ST1, T3, T4, B4): Reserves is titled Safety; Limits reads today's emergency fund the way Reserves does (0.5 months, Needs you; No limit rows draw no bar);
+  the register hides its all-dash Balance column and shows whole balances; Budget names the system group by what it holds; Counterparties' buttons no longer overlap.
+- 2026-10-30 · Claude: Audit 12, the PC app tab by tab at 1366 and 1920 px: 13 pages measured, the outside desktop report
+  checked claim by claim, a four-step declutter plan for the owner's review (`reports/2026-10-30-desktop-tab-audit`).
+- 2026-10-29 · Codex: [IT-1H] Prepare refreshed Android native-wheel build inputs with verified source hashes;
+  keep installed app dependencies unchanged pending published wheels and coordinated lock validation.
+- 2026-10-29 · Claude: [BT-5J] Convert asks once before saving a rate 20% or more from the day's market rate (the two amounts swapped valued every dollar at 0.02 EGP); pressing Convert again saves it as typed.
+
+- 2026-10-29 · Claude: [BT-2AC] Unlocking with Enter and then a click no longer shows "This form expired": the profile pages' buttons go busy (`app.js` no longer needs the toast) and a repeated unlock opens the app or the form again (`runtime/app.py`). Closes #193.
+
+- 2026-10-29 · Claude: Audit 11 (backend use cases, `reports/2026-10-29-use-case-audit/`): skipping a loan payment can no longer drop a part payment, skip a paid or unscheduled date, or fail on a bad date; a resent conversion, certificate purchase or gam'eya instalment saves once. Filed BT-2AD and BT-7U; notes on BT-2E and BT-5J.
+
+- 2026-10-29 · Claude: [IV-3AL] Phone, step 2: Cash planning names the next payment after payday; Financial health puts what
+  needs you under its lead; Recurring's action is a Secondary; the horizon note points to a holding. D1-D3 recorded; BT-1L filed (a flaky brand-audit check).
+
+- 2026-10-29 · Claude: [IV-3AL] Phone: one Needs you strip on Overview; Budget lists each category once (limits under Edit plan);
+  Transactions opens on this month; More is flat, a bill's row opens its pay sheet; the weekly review keeps More chosen.
+
+- 2026-10-29 · Claude: Audit 10, the phone tab by tab (`reports/2026-10-29-phone-tab-audit/`): plan item IV-3AL (each tab opens on its answer and daily action), a note on NF-3AD, four owner decisions on Part C.
 - 2026-10-29 · Codex: [BT-4L] Lead PC/phone pairing with nearby discovery and explicit existing-profile setup; keep address/code pairing as a secondary option and preserve active connections.
 
 - 2026-10-29 · Codex: [BV-3AK] Restore Your data first in Settings and Data checks last; [BT-10E] resolve the v1.5.1 unlock error by correcting the store signing-key ID (user verified); sync the existing website Coders account-menu guideline.
+- 2026-10-29 · Codex: Publish the verified v1.5.1 Windows and Android builds; prepare the website downloads and release notes.
 
 - 2026-10-29 · Claude: plan items BT-2AC (login form submitted twice, #193) and BT-3AJ (language change is undoable, #167) filed; the For Geeks roadmap on the site brought in step with the plan.
 

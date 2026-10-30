@@ -8,6 +8,7 @@ from lightning.core.dates import fmt_date, today
 from lightning.core.errors import LightningError
 from lightning.zakat import ZAKAT_CATEGORY
 
+from .. import charts
 from ..web import container, redirect, render
 
 router = APIRouter()
@@ -36,7 +37,9 @@ async def zakat_page(request: Request):
     c = container(request)
     if not c.zakat.enabled():
         return redirect("/settings", "Zakat is off. Turn it on in Settings.")
-    return render(request, "zakat.html", a=c.zakat.assess(today()), payment_link=_payment_link(c),
+    a = c.zakat.assess(today())
+    paid_meter = (charts.meter(a.paid, a.zakat_due) if a.zakat_due and a.zakat_day and a.paid is not None else None)
+    return render(request, "zakat.html", a=a, paid_meter=paid_meter, payment_link=_payment_link(c),
                   today_iso=fmt_date(today()))
 
 

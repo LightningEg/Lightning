@@ -34,7 +34,7 @@ def test_transfer_row_has_direction_sign_and_same_amount_on_pc_and_phone(c, setu
     for html in (pc, phone):
         assert "−468.50" in html
         assert html.count("To Wallet") == 1
-        assert "49,531.50" in html
+        assert "49,532" in html  # the running balance is whole EGP (audit 12, T4); the row's amount keeps its cents
     assert "−468.50" in pc and "−468.50" in phone
     assert "To Wallet</small>" not in pc
 

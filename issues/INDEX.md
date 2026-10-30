@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 67 open items, in the order they are worked on.
+10 milestones, 71 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -15,9 +15,10 @@ Anyone can find how to help in one click and send a first fix the same evening.
 |---|---|---|---|---|
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/1E-public-repository-security-audit.md) | improvement, technical | tools | ready |
 | **IT-1G** | [Cover all backend modules with explicit dependency and wiring contracts](1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | improvement, technical | tools | ready |
-| **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | tools | ready |
+| **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | tools | building |
+| **BT-1L** | [The brand audit's page-jump check fails on /welcome only under a parallel full run](1-easy-to-contribute/1L-page-jump-check-flakes.md) | bug, technical · low | tools | ready |
 
-Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K. Next free code: 1L.
+Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K. Next free code: 1M.
 
 ## 2 Safe for real money
 
@@ -37,9 +38,9 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | **BT-2J** | [On a journal profile, retrying one add form can still save a second expense](2-safe-for-real-money/2J-register-submit-idempotency.md) | bug, technical · medium | transactions | ready |
 | **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical · medium | android | new |
 | **OW-2AB** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AB-stale-code.md) | owner task | architecture | ready |
-| **BT-2AC** | [Submitting the unlock form twice (Enter and the button) shows "This form expired" on the desktop app](2-safe-for-real-money/2AC-login-form-double-submit-expires.md) ([#193](https://github.com/LightningEg/Lightning/issues/193)) | bug, technical · medium | desktop | ready |
+| **BT-2AD** | [Five more money forms save twice when the same form is sent again - investment entry, gold trade, ownership change, money held for others, instalment purchase](2-safe-for-real-money/2AD-resent-money-forms-save-twice.md) | bug, technical · low | transactions | ready |
 
-Done: 2B, 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA. Next free code: 2AD.
+Done: 2B, 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AC. Next free code: 2AE.
 
 ## 3 Polish and Arabic
 
@@ -58,8 +59,21 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **NF-3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | new feature | phone | new |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/3AI-institution-logos.md) | owner task | accounts | ready |
 | **BT-3AJ** | [Changing the language is recorded as an undoable action, so Undo switches it back](3-polish-and-arabic/3AJ-language-change-is-undoable.md) ([#167](https://github.com/LightningEg/Lightning/issues/167)) | bug, technical · low | product | ready |
+| **IV-3AL** | [Phone declutter, tab by tab - each tab opens on its answer and its daily action; analysis one tap away](3-polish-and-arabic/3AL-phone-declutter-tab-by-tab.md) | improvement, visual | phone | building |
+| IV-3AL1 | ↳ Overview (F1-F3) | | | |
+| IV-3AL2 | ↳ Budget (F5-F8) | | | |
+| IV-3AL3 | ↳ Transactions and an account (F10-F12) | | | |
+| IV-3AL4 | ↳ More (F13-F14) | | | |
+| IV-3AL5 | ↳ Pages under More (F15-F20) | | | |
+| IV-3AL6 | ↳ Spending (F21) | | | |
+| **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md) | improvement, visual | product | building |
+| IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | |
+| IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | |
+| IV-3AM3 | ↳ Each tab opens on its answer (O1-O2, B1-B3, B5, T1-T2, T5-T6, SP1-SP3, SA3-SA5, I1-I2, A1-A3, C1-C2) | | | |
+| IV-3AM4 | ↳ Settings stop being forms (ST1-ST4) | | | |
+| IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | |
 
-Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK. Next free code: 3AL.
+Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK. Next free code: 3AN.
 
 ## 4 Edit journal and devices
 
@@ -132,8 +146,9 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | **NF-7T** | [Link the sections - salary-day cascade and a reserve tied to its bill](7-planning-import-and-search/7T-link-the-sections.md) | new feature | planning | new |
 | NF-7T5 | ↳ Salary-day cascade | | | |
 | NF-7T6 | ↳ A reserve tied to its bill | | | |
+| **BT-7U** | [Editing a paid bill's transaction keeps the bill paid at the old amount and date](7-planning-import-and-search/7U-bill-link-after-payment-edit.md) | bug, technical · low | planning | new |
 
-Done: 7H, 7J, 7K, 7N, 7O, 7P, 7Q. Next free code: 7U.
+Done: 7H, 7J, 7K, 7N, 7O, 7P, 7Q. Next free code: 7V.
 
 ## 8 Website
 

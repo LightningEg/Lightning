@@ -67,14 +67,21 @@ async def purchase(request: Request, account_id: int):
     form = await request.form()
     values = _values() | {key: str(form.get(key, "")).strip() for key in _values()}
     c = container(request)
+    submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+    payload = values | {"account": account_id}
     try:
-        certificate, txn = c.deposits.purchase(
-            account_id, values["name"], values["start_date"], values["lockup_end_date"],
-            values["maturity_date"], values["principal"], values["annual_rate"],
-            values["interest_method"], values["payout_frequency"], values["compounding_frequency"],
-            _int(values["destination_account_id"]), _int(values["funding_account_id"]),
-            term_years=values["term_years"],
-        )
+        with c.db.transaction():
+            earlier = c.transactions.submitted(submission, payload)  # a resent form returns its first purchase
+            if earlier is not None:
+                return redirect(f"/deposits/{account_id}", f"Saved {earlier.ref}.")
+            certificate, txn = c.deposits.purchase(
+                account_id, values["name"], values["start_date"], values["lockup_end_date"],
+                values["maturity_date"], values["principal"], values["annual_rate"],
+                values["interest_method"], values["payout_frequency"], values["compounding_frequency"],
+                _int(values["destination_account_id"]), _int(values["funding_account_id"]),
+                term_years=values["term_years"],
+            )
+            c.transactions.remember_submission(submission, payload, txn.id)
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose the funding and payout accounts."
         return _page(request, account_id, values, message, 400)

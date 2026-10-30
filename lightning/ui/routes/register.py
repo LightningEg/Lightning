@@ -259,8 +259,6 @@ def _phone_register(c, account_id, base_url, keep, kind, month, preset, from_que
     keep = {k: v for k, v in keep.items() if k != "page"}
     if month or preset not in ("", "custom"):   # a month or a preset says its own days: they need not ride along
         keep = {k: v for k, v in keep.items() if k not in ("date_from", "date_to")}
-    if preset == "all_time":
-        keep.pop("preset", None)
 
     def href(changes: dict) -> str:
         params = {k: v for k, v in {**keep, **changes}.items() if v not in ("", None)}
@@ -290,7 +288,7 @@ def _phone_register(c, account_id, base_url, keep, kind, month, preset, from_que
         "prev": href({**ranged, "month": shift_month(chosen, -1)}) if chosen else "",
         "next": href({**ranged, "month": shift_month(chosen, 1)}) if chosen and chosen < now else "",
         "this_href": href({**ranged, "month": now}), "last_href": href({**ranged, "month": last}),
-        "ytd_href": href({**ranged, "preset": "year_to_date"}), "all_href": href(ranged),
+        "ytd_href": href({**ranged, "preset": "year_to_date"}), "all_href": href({**ranged, "preset": "all_time"}),
         "ytd_from": f"{now[:4]}-01",
         # taking a tag or a category off again
         "clear_tag": href({"tag": "", **({"q": ""} if keep.get("q", "").startswith("#") else {})}),
@@ -323,6 +321,12 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
             month = ""
         except LightningError as exc:
             error = error or exc.message
+    # The phone's Transactions tab opens on this month (IV-3AL3, C08.3): the stepper shows and Money in and out answer
+    # for the month. All time stays a choice (preset=all_time); a search, tag or category still looks across every
+    # year; an account's own page stays its statement, every row with its balance after.
+    narrowed = month or preset or from_query or to_query or active_view or q or qp.get("tag") or qp.get("category_id")
+    if getattr(request.state, "phone", False) and account_id is None and not narrowed:
+        month = fmt_date(today())[:7]
     if preset == "custom" and not (from_query and to_query):
         # Let the user choose the range after selecting the custom option.
         date_from, date_to = FAR_PAST, FAR_FUTURE
@@ -430,6 +434,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
             if edit_values is None:
                 edit_values = dict(edit_original)
     holdings, account_value, account_owned_value, account_held_value = [], None, None, None
+    held_total = None if account else c.reporting.money_from_others_total(today())  # the one Held for others figure
     account_asset_breakdown = []
     if account:
         holdings = c.investments.portfolio(fmt_date(today()), account.id).open
@@ -480,6 +485,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         group=c.accounts.reporting_group(account) if account else "",
         account_value=account_value, account_owned_value=account_owned_value,
         account_native_value=_native_value(c, account, account_value),
+        held_total=held_total,
         account_held_value=account_held_value, account_asset_breakdown=account_asset_breakdown,
         holdings=holdings,
         composition=account_composition(account_asset_breakdown, account_value, account_owned_value, account_held_value) if account_asset_breakdown else None,

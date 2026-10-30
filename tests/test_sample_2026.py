@@ -104,7 +104,7 @@ def test_the_whole_sample_loads_and_adds_up(c, on_2_october):
     for page in ("/", "/budget", "/investments", "/birdview/expenses", "/plan", "/plan/recurring", "/plan/loans",
                  "/plan/reserves", "/money-from-others", "/transactions", "/checks"):
         b.open(page)
-    assert b.open("/checks").shows("Needs attention 0")
+    assert b.open("/checks").shows("5 checks passed")
 
 
 def test_the_welcome_page_loads_the_sample_and_the_files_stay_downloadable(c, on_2_october):

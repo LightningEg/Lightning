@@ -230,6 +230,13 @@ def _phone_cash(c, f, next_payments, late, position, day) -> dict:
     else:
         lines = [sentence("Nothing is due in the next 3 months.") if not count else
                  sentence("1 payment in the next 3 months." if count == 1 else "{n} payments in the next 3 months.", n=count)]
+    # Nothing before payday but bills just after it (Audit 10, F15): name the next one, so "0" does not read as
+    # nothing to pay.
+    following = min((p for p in next_payments if p.status == PaymentStatus.UPCOMING and not p.item.is_income
+                     and (p.item.id, p.due_date) not in shown), key=lambda p: p.due_date, default=None)
+    if not count and following is not None:
+        lines.append(sentence("Next: {name}, {amt} on {date}.", name=following.item.name,
+                              amt=fmt(base(following), 0), date=following.due_date))
     if due > ZERO:
         lines.append(sentence("All covered by free cash.") if f.free_cash >= due else
                      sentence("Free cash is {amt} short of what is due.", amt=fmt(due - f.free_cash, 0)))
@@ -318,9 +325,17 @@ async def loans_page(request: Request):
     for entry in loans:
         entry["meter"] = charts.meter(entry["progress"]["paid_amount"], entry["progress"]["total_amount"])
     notes = [n for n in (keynotes.loans_summary(loans),) if n]
-    return render(request, "planning/loans.html", tabs=TABS, plan_tab="loans", loans=loans, notes=notes,
+    still_to_pay = c.planning.what_you_owe(day).loans_still_to_pay
+    paid = sum((e["progress"]["paid_amount"] for e in loans), ZERO)
+    borrowed = sum((e["progress"]["total_amount"] for e in loans), ZERO)
+    # The page's answer is a Lead (A07): what is left to pay, against what was borrowed, paid and left as its picture.
+    lead = kpis.card("Loans still to pay", still_to_pay,
+                     kpis.compare(f"of {fmt(borrowed, 0)} in {len(loans)} loan{'s' if len(loans) != 1 else ''}",
+                                  f"{fmt(paid, 0)} paid", "good"),
+                     tone="out", visual=kpis.segments([("Paid", paid, "in"), ("Left", borrowed - paid, "neutral")])) if loans else None
+    return render(request, "planning/loans.html", tabs=TABS, plan_tab="loans", loans=loans, notes=notes, lead=lead,
                   debt_tiles=_debt_tiles(c.health.at(day), fmt_date(day)),
-                  still_to_pay=c.planning.what_you_owe(day).loans_still_to_pay, as_of=fmt_date(day))
+                  still_to_pay=still_to_pay, as_of=fmt_date(day))
 
 
 @router.get("/reserves")

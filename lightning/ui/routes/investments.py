@@ -201,7 +201,8 @@ async def portfolio(request: Request):
                                                                   if spark.get("added") else "")) if change is not None else ""
         since = f"Return since purchase {ret.percent:+.1f}%" if ret and ret.percent is not None else ""
         lead = kpis.card(label("portfolio_value"), value, compare, tone="hold", key="value", chip_=kpis.chip(chip_text),
-                         line_=kpis.line(six or since))  # the return since purchase is also the table's All holdings row
+                         visual=kpis.segments([("Cost", owned_cost, "neutral"), ("Unrealized gain", owned_unrealized, "in")]),
+                         line_=kpis.line((f"Cost {fmt(owned_cost, 0)} · Unrealized gain {fmt(owned_unrealized, 0, True)}" if owned_cost else "") + (" · " if owned_cost and (six or since) else "") + (six or since)))  # the return since purchase is also the table's All holdings row
     status = page_status.investments(investment_report.get("result"), bool(owned_rows), period.key, current)
     return render(request, "investments/index.html", p=p, asset_class_rows=asset_class_rows, **extras, lead=lead, status=status,
                   pos=position, notes=notes, investment_donut=visuals.holdings_donut(position),

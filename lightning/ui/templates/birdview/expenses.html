@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Expense analysis · Birdview{% endblock %}
 {% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/birdview/expenses", period, month, this_month, date_from, date_to, category_filter) }}{% endblock %}
-{% block heading %}<div class="birdview-title"><div><h1>{{ "Expense analysis"|tr(locale) }}</h1><div class="muted small">{{ category_name if category_name else "Where your money went" }}</div></div></div>{% endblock %}
+{% block heading %}<div class="birdview-title"><div><h1>{{ "Spending"|tr(locale) }}</h1>{% if category_name %}<div class="muted small">{{ category_name }}</div>{% endif %}</div></div>{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import key_notes, key_note, bars, trend, sparkline, stat_tiles %}
 {% if error %}<div class="flash error">{{ error|tr(locale) }}</div>{% endif %}
 {% if category_filter %}<p class="muted small"><a href="/birdview/expenses?period={{ period }}&amp;month={{ month }}&amp;date_from={{ custom_from }}&amp;date_to={{ custom_to }}">{{ 'All spending'|tr(locale) }}</a> / {{ category_name }}</p>{% endif %}
+{% if so_far %}<p class="so-far-line"><b>{{ so_far.month }}</b> {{ 'so far'|tr(locale) }} · {{ fig.money_out.label }} {{ so_far.total|money(False, 0) }} {{ base }} · <a href="/birdview/expenses?period=month&amp;month={{ so_far.month }}">{{ 'See it'|tr(locale) }}</a></p>{% endif %}
 {% set summary = stats[:1] if stats and stats[0].payment_count == 1 else stats %}{% if phone_mode() %}{% from "phone/partials/charts.html" import stat_rows with context %}{{ stat_rows(summary, base) }}{% else %}{{ stat_tiles(summary, base, 'Spending summary') }}{% endif %}
 {% set a = analysis %}
-{% if a.partial %}<p class="muted small">{{ 'So far · comparisons use the same calendar days in earlier months.'|tr(locale) }}</p>{% endif %}
 {% if spending_total == 0 and not a.rows %}
 <section class="card empty"><h2>{{ 'No spending in this period'|tr(locale) }}</h2><p>{{ 'Try a longer period, or review the transactions recorded for these dates.'|tr(locale) }}</p><a class="btn" href="/transactions?date_from={{ date_from }}&amp;date_to={{ date_to }}">{{ 'View transactions'|tr(locale) }}</a></section>
 {% else %}
@@ -37,7 +37,7 @@
       <span class="cluster-name">{{ k.name }}</span>
       <em class="cluster-change {{ 'is-up' if not a.partial and k.change and k.change > 0.5 else ('is-down' if not a.partial and k.change and k.change < -0.5 else '') }}">{% if k.change is none %}—{% else %}{{ k.change|signed_pct(0) }}%{% endif %}</em></div>{% endfor %}</div>
     <details class="chart-table"><summary>{{ 'Show the numbers'|tr(locale) }}</summary><table><thead><tr><th>{{ 'Category'|tr(locale) }}</th><th class="num">{{ 'Usual'|tr(locale) }}</th><th class="num">{{ 'Now'|tr(locale) }}</th><th class="num">{{ 'Change'|tr(locale) }}</th></tr></thead><tbody>{% for k in a.clusters %}<tr><td>{{ k.name }}</td><td class="num">{{ k.usual|money if k.usual is not none else '—' }}</td><td class="num">{{ k.now|money }}</td><td class="num">{% if k.change is not none %}{{ k.change|signed_pct(0) }}%{% else %}—{% endif %}</td></tr>{% endfor %}</tbody></table></details></section>
-  <section><div class="overview-block-head"><div><h3>{{ 'Inside its usual range?'|tr(locale) }}</h3><p>{{ 'Lowest month on the left, highest on the right · the tick its middle month · the dot now'|tr(locale) }}</p></div></div>
+  <section><div class="overview-block-head"><div><h3>{{ 'Inside its usual range?'|tr(locale) }}</h3></div></div>
     {% if not a.has_range %}<p class="chart-empty">{{ 'A usual range needs three months before this period.'|tr(locale) }}</p>{% endif %}
     <div class="ranges">{% for r in a.rows if a.has_range %}{% if r.range %}<a class="range-row{{ ' is-above' if r.above and not a.partial }}{{ ' is-below' if r.below and not a.partial }}" href="{{ r.href }}" title="Lowest {{ r.low|money }} · middle {{ r.median|money }} · highest {{ r.high|money }} · now {{ r.per_month|money }}"><span class="range-name">{{ r.name }}</span><span class="range-low">{{ r.low|compact }}</span><span class="range-track"><i class="range-pill" style="left:{{ '%.2f'|format(r.range.low) }}%;width:{{ '%.2f'|format([r.range.high - r.range.low, 2]|max) }}%"></i><i class="range-mid" style="left:{{ '%.2f'|format(r.range.median) }}%"></i><i class="range-now" style="left:{{ '%.2f'|format(r.range.now) }}%"></i></span><span class="range-high">{{ r.high|compact }}</span><span class="range-note">{% if r.above %}<em class="{{ 'over' if not a.partial }}">{{ 'Above its range'|tr(locale) }}</em>{% elif r.below %}<em class="{{ 'under' if not a.partial }}">{{ 'Below its range'|tr(locale) }}</em>{% else %}<em>{{ 'Within range'|tr(locale) }}</em>{% endif %}<small>now {{ r.per_month|compact }}</small></span></a>{% endif %}{% endfor %}</div></section>
 </div></section>
@@ -51,7 +51,7 @@
     {% if calendar.long_period %}<div class="table-wrap"><table><thead><tr><th>{{ 'Month'|tr(locale) }}</th><th class="num">{{ 'Money out'|tr(locale) }}</th></tr></thead><tbody>{% for month in calendar.monthly %}<tr><td><a href="/birdview/expenses?period=month&month={{ month.key }}">{{ month.key }}</a></td><td class="num">{{ month.spend|money }}</td></tr>{% endfor %}</tbody></table></div>
     {% else %}
     {{ day_calendar(calendar, 'spend') }}
-    <p class="muted small heat-key"><span class="heat-1"></span><span class="heat-2"></span><span class="heat-3"></span><span class="heat-4"></span> {{ 'less to more spent · the biggest day darkest'|tr(locale) }}</p>{% endif %}
+    <p class="heat-key" role="img" aria-label="{{ 'less to more spent'|tr(locale) }}"><span class="heat-1"></span><span class="heat-2"></span><span class="heat-3"></span><span class="heat-4"></span></p>{% endif %}
 </section>
 
 {% endif %}

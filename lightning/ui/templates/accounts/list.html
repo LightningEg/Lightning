@@ -2,7 +2,7 @@
 {% from "partials/macros.html" import amount, held, inst_tile, page_header with context %}
 {% block title %}Accounts{% endblock %}
 {% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Accounts'|tr(locale), status) }}{% endblock %}
-{% block top_actions %}<a class="btn primary" href="/accounts/new">{{ 'Add account'|tr(locale) }}</a> <a class="btn" href="/accounts/currencies">{{ 'Other currencies'|tr(locale) }}</a> <a class="btn" href="/sms">{{ "From SMS"|tr(locale) }}</a>{% endblock %}
+{% block top_actions %}<a class="btn primary" href="/accounts/new">{{ 'Add account'|tr(locale) }}</a> <details class="action-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">⋯</summary><div><a href="/accounts/currencies">{{ 'Other currencies'|tr(locale) }}</a><a href="/sms">{{ "From SMS"|tr(locale) }}</a></div></details>{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import lead_card %}
 {% if lead %}{% call lead_card(lead, base) %}<div class="lead-side-head"><div><h3>{{ 'How it adds up'|tr(locale) }}</h3><p>{{ 'Today'|tr(locale) }}</p></div></div>
@@ -14,12 +14,13 @@
 {% if rows %}<div class="account-groups">
 {% for name, g in groups %}<section class="card account-group" aria-labelledby="group-{{ loop.index }}">
   <div class="account-group-head"><h2 id="group-{{ loop.index }}">{{ name|tr(locale) }}</h2><b>{% if g.owned is none %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% else %}{{ g.owned|money }} <small>{{ base }}</small>{% endif %}</b></div>
-  <div class="account-group-cols"><span></span><span>{{ fig.in_your_accounts.label }}</span><span>{{ fig.what_you_own.label }}</span></div>
+  {% set differs = namespace(any=false) %}{% for acc, balance, owned, count in g.rows %}{% if owned is none or balance is none or owned != balance %}{% set differs.any = true %}{% endif %}{% endfor %}
+  <div class="account-group-cols{{ '' if differs.any else ' is-one' }}"><span></span><span>{{ fig.in_your_accounts.label }}</span>{% if differs.any %}<span>{{ fig.what_you_own.label }}</span>{% endif %}</div>
   {% for acc, balance, owned, count in g.rows %}
-  <a class="account-row{{ ' is-void' if not acc.active }}" href="{{ '/deposits/' ~ acc.id if acc.account_type.value == 'DEPOSIT' else ('/gameya/' ~ acc.id if acc.account_type.value == 'GAMEYA' else '/accounts/' ~ acc.id) }}">
+  <a class="account-row{{ ' is-void' if not acc.active }}{{ '' if differs.any else ' is-one' }}" href="{{ '/deposits/' ~ acc.id if acc.account_type.value == 'DEPOSIT' else ('/gameya/' ~ acc.id if acc.account_type.value == 'GAMEYA' else '/accounts/' ~ acc.id) }}">
     <span class="account-row-name">{{ inst_tile(acc.institution or acc.name, kind='CASH_AT_HAND' if acc.cash_at_hand else acc.account_type.value) }}<span><b>{{ acc.name }}</b><small>{{ acc.type_label }}{% if not acc.active %} · {{ "inactive"|tr(locale) }}{% endif %}</small></span></span>
     <span class="num">{% if balance is none %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% else %}{{ balance|money }}{% endif %}</span>
-    <span class="num">{% if owned is none %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% else %}{{ owned|money }}{% endif %}</span>
+    {% if differs.any %}<span class="num">{% if owned is none %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% else %}{{ owned|money }}{% endif %}</span>{% endif %}
   </a>{% endfor %}
 </section>{% endfor %}
 </div>

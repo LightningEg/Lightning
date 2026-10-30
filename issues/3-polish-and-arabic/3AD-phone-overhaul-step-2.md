@@ -28,6 +28,9 @@ The owner's design "Lightning on your phone" (2026-10-22) has fourteen fixes. 3A
 - Left out: KPI cards that swipe sideways (C01: nothing scrolls sideways; hidden cards are missed), and money in
   shown in Azure (A03: Azure is money you hold; money in is green).
 
+Audit 10 (2026-10-29, F9): Add still opens on "To which account?" with six accounts, rare ones included. The owner
+asks for the amount first with the last-used account already chosen as a chip, and Save pinned above the keyboard.
+
 ## Fix
 Build the first two as phone sheets (C09), then ask the owner about the score and the swipe. Add each to Part C when it
 is built, in both repos.

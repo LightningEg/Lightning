@@ -7,7 +7,7 @@ import time
 from contextlib import suppress
 from contextlib import asynccontextmanager
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import urlencode, urlsplit
 
 from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse, RedirectResponse, Response
@@ -153,6 +153,7 @@ class SessionGate:
                     return await PlainTextResponse("Profile changed. Reload before submitting.", 409)(scope, receive, send)
                 body = scope["state"]["request_body"]
                 parsed = Request(scope, body_receiver(body))
+                selected = ""
                 try:
                     async with parsed.form(max_files=_form_file_limit(request.url.path),
                                            max_fields=_form_field_limit(request.url.path),
@@ -160,8 +161,16 @@ class SessionGate:
                         token = form.get("csrf" if profile_route else "__session", "")
                         expected = self.session.csrf if profile_route else self.session.token
                         valid = isinstance(token, str) and equal(token, expected)
+                        selected = str(form.get("db", ""))
                 except Exception:
                     valid = False
+                if not valid and request.url.path == "/profiles/unlock":
+                    # The unlock form sent twice (Enter and a click): the first opened the profile and renewed the
+                    # token. Open the app, or show the form again with the password empty, never an error (2AC).
+                    if self.session.container is not None:
+                        return await RedirectResponse("/", 303)(scope, receive, send)
+                    again = "/profiles/unlock" + (f"?{urlencode({'db': selected})}" if selected else "")
+                    return await RedirectResponse(again, 303)(scope, receive, send)
                 if not valid:
                     return await PlainTextResponse("This form expired. Reload the page and try again.", 403)(scope, receive, send)
             line, device_action, device_values = self.device_line()
