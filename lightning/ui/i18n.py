@@ -2801,6 +2801,9 @@ ARABIC_UI = {
     'Totals for #{tag}': 'إجماليات #{tag}',
     'Tagged #{tag}': 'عليها الوسم #{tag}',
     '{n} plans, circles, certificates or reserves still use this account. Choose another account for them first.': '{n} من الخطط أو الجمعيات أو الشهادات أو المبالغ المحجوزة لسه بتستخدم الحساب ده. اختار لهم حساب تاني الأول.',
+    'In cash you own': 'في الكاش اللي معاك',
+    'months of average monthly spending': 'شهور من متوسط المصروف الشهري',
+    'months of average monthly income': 'شهور من متوسط الدخل الشهري',
 }
 
 
