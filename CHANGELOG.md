@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-30 · Claude: [IV-3AM5] Finalised: Loans leads with what is left to pay; Planner shows each class against its
+  target; Compare periods' answer is a Lead beside its picker; Held for others and Planner show whole EGP.
 - 2026-10-30 · Claude: [IV-3AM2, IV-3AM3] Review fixes: the one-tab gear sits on the header's hairline, not among its actions;
   Spending leads with last month only under 7 days or 3 categories (it counted the 3 groups); Zakat leads with your zakat;
   Loans' Pay early joins the loan's actions; Compare periods, Reports and Loans show whole EGP.

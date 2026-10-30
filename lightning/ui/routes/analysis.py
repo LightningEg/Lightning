@@ -183,7 +183,11 @@ async def compare_page(request: Request):
     top = max((abs(r["diff"]) for r in movers), default=ZERO) or Decimal(1)
     moved = {"rows": [{"label": r["name"], "value": r["diff"], "width": float(abs(r["diff"]) / top * 48), "group": "money"}
                       for r in movers if r["diff"]]}
-    return render(request, "analysis/compare.html", moved=moved, rows=rows, kind=kind, by=by, a=a, b=b, status=status,
+    lead = kpis.card("Money out", total_a.quantize(Decimal(1)),
+                     kpis.compare(f"against {fmt_date(b[0])} to {fmt_date(b[1])}",
+                                  ("+" if diff > 0 else "−" if diff < 0 else "") + fmt(abs(diff), 0),
+                                  "bad" if diff > 0 else "good" if diff < 0 else "plain"), tone="out")
+    return render(request, "analysis/compare.html", lead=lead, moved=moved, rows=rows, kind=kind, by=by, a=a, b=b, status=status,
                   total_a=total_a, total_b=total_b, total_diff=diff,
                   keep_qs=urlencode(keep), base=c.base_currency, fmt_date=fmt_date)
 

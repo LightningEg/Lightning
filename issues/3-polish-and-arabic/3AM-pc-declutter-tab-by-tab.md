@@ -49,8 +49,8 @@ captions. A visual from the existing macros on Compare periods, Reports, Loans, 
 card around one button or one empty state; fields as wide as their values; Compare and Reports on the KPI card in
 whole EGP.
 
-**Left (Claude's review, 2026-10-30):** Loans: a Lead with paid-vs-left per loan; its three KPIs leave a fourth slot
-empty. Planner: current share against target as `bullet_row`, the title as the tab's name, whole EGP. Compare periods:
-the Lead in the KPI type (it is letter-spaced), the period form on one line. Held for others: whole EGP, its subtitle cut,
-a `share_bar` by person. Categories: no edit drawer (inline autosave kept). Arabic/RTL screens not looked at. Tabbed pages
-start at 161-214 px, not 140: the owner decides whether the target holds there.
+**Finalised (2026-10-30):** Loans leads with what is left to pay (paid against left, each loan beside it); Planner shows
+each class's share against its target; Compare periods' answer is a Lead with its period picker as the working; Held
+for others and Planner in whole EGP, Held for others without its describing sentence. **Left:** Categories keeps inline
+autosave (no edit drawer); Arabic/RTL screens not looked at by eye (the Arabic text tests pass); tabbed pages start at
+161-214 px, not 140 (the tab bar is a row).

@@ -891,7 +891,7 @@ def test_what_he_owns_leaves_out_moms_money(mohab):
     assert position.figure("Gold") == D("57195")  # 8 g + 4.3 g of 21K at 4,650
     moms = mohab.answers["moms_money"]
     assert route(mohab, "moms_money") == ["/", "/transactions", "/money-from-others"]
-    assert moms.shows("Mom CIB Payroll 10,000.00")
+    assert moms.shows("Mom CIB Payroll 10,000")
 
 
 def test_what_he_owes_and_when_the_car_is_paid_off(mohab):
