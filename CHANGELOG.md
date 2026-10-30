@@ -11,6 +11,8 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-30 · Claude: Audit 12, the PC app tab by tab at 1366 and 1920 px: 13 pages measured, the outside desktop report
+  checked claim by claim, a four-step declutter plan for the owner's review (`reports/2026-10-30-desktop-tab-audit`).
 - 2026-10-29 · Codex: [IT-1H] Prepare refreshed Android native-wheel build inputs with verified source hashes;
   keep installed app dependencies unchanged pending published wheels and coordinated lock validation.
 
