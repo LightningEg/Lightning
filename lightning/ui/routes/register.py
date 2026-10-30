@@ -89,7 +89,10 @@ def counterparty_category_map(c, names) -> dict:
             category_id = None if depends else _category_for_party(parties[name], usual, pickable)
         if category_id:
             category = pickable.get(category_id) or c.categories.get(category_id)
-            found[name] = {"id": category.id, "name": category.name}
+            # The id is what counts; the text is only what the field shows, and it carries its group when another category
+            # shares the plain name, so even the text alone cannot mean the wrong one.
+            shared = sum(1 for item in pickable.values() if item.name == category.name) > 1
+            found[name] = {"id": category.id, "name": c.categories.display_name(category.id) if shared else category.name}
     return found
 
 

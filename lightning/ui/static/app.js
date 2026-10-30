@@ -1605,7 +1605,9 @@ if (categoryCatalogueNode) {
           option.textContent = t(item.name);
           option.addEventListener("mousedown", (event) => event.preventDefault());
           option.addEventListener("click", () => {
-            input.value = item.name;
+            // Two categories with one plain name (Personal and Work "Transportation") show their group in the text too, so
+            // the text alone never means the wrong one; the hidden id below is what is saved.
+            input.value = categories.filter((other) => other.name === item.name).length > 1 ? item.label : item.name;
             input.dispatchEvent(new Event("input", { bubbles: true }));
             input.dataset.autofilled = "false";
             const choice = document.createElement("input");

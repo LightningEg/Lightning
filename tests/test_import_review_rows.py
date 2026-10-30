@@ -240,3 +240,19 @@ def test_merging_a_counterparty_moves_its_history_and_keeps_its_names_as_aliases
         assert False, "merging a name into itself must be refused"
     except ValidationError:
         pass
+
+
+def test_same_named_categories_are_never_guessed_between(c, setup):
+    """Personal and Work both have a "Transportation": a CSV row that says just that is left for the person (with the two
+    choices named), and the register's own text for a shared name carries its group (owner, 2026-10-30: ids, not names)."""
+    from lightning.ui.routes.register import counterparty_category_map
+    personal = c.categories.get_by_code("EXP.PERSONAL.TRANSPORT")
+    work = c.categories.get_by_code("EXP.WORK.TRANSPORT")
+    party = c.counterparties.create("Uber Test", default_category_id=personal.id)
+    row = {"Category": "Transportation", "Amount": "-10", "Counterparty": "Uber Test"}
+    assert c.bank_imports._category_for(row, c.counterparties.get(party), None, lambda: {}) is None
+    assert "Personal › Transportation" in row["_category_ambiguous"] and "Work › Transportation" in row["_category_ambiguous"]
+    exact = {"Category": "Work › Transportation", "Amount": "-10", "Counterparty": "Uber Test"}
+    assert c.bank_imports._category_for(exact, c.counterparties.get(party), None, lambda: {}) == work.id
+    shown = counterparty_category_map(c, ["Uber Test"])["Uber Test"]
+    assert shown == {"id": personal.id, "name": "Personal › Transportation"}

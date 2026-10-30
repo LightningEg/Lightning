@@ -1505,6 +1505,7 @@ ARABIC_UI = {
     'Merge': 'ادمج',
     'Merge {name} into': 'ادمج {name} في',
     'Merge {name} into the name you picked? Everything that uses {name} (transactions, rules, plans) moves to it, and {name} becomes one of its aliases. This cannot be split again.': 'تدمج {name} في الاسم اللي اخترته؟ كل حاجة بتستخدم {name} (معاملات وقواعد وخطط) هتتنقل ليه، و{name} هيبقى واحد من أسمائه البديلة. مفيش رجوع للفصل تاني.',
+    'Pick the category for this row.': 'اختار التصنيف للصف ده.',
     'Edit prompt': 'عدّل التعليمات',
     'These prompts give your AI tool context it cannot guess: this account’s name and currency, your categories, your counterparty names and exactly how Lightning reads a file. With that context it matches your names instead of inventing them, and you fix less in the review.': 'التعليمات دي بتدّي أداة الذكاء الاصطناعي سياق مش هتخمّنه: اسم الحساب وعملته، وتصنيفاتك، وأسماء الجهات اللي بتتعامل معاها، والطريقة اللي لايتنينج بيقرا بيها الملف. بالسياق ده بتطابق أسماءك بدل ما تألّف أسماء، وبتصلّح أقل في المراجعة.',
     'This prompt gives your AI tool context it cannot guess: every sheet, id and column Lightning needs. With it the workbook comes back in a shape the review accepts, instead of one you rebuild by hand.': 'التعليمات دي بتدّي أداة الذكاء الاصطناعي سياق مش هتخمّنه: كل شيت ومعرّف وعمود محتاجه لايتنينج. بيها الملف بيرجع بالشكل اللي المراجعة بتقبله، بدل ما تعيد بناءه بإيدك.',
