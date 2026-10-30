@@ -72,12 +72,13 @@ async def expense_analysis(request: Request):
     if plain and selected.key == "month" and not error and first <= today() <= last and last >= today():
         days = (today() - first).days + 1
         now_groups = [g for g in c.reporting.spending_by_category(first, last, depth=1) if g.value]
-        if days < 7 or len(now_groups) < 3:
+        categories = [g for g in c.reporting.spending_by_category(first, last, depth=2) if g.value]  # not the 3 groups
+        if days < 7 or len(categories) < 3:
             before_last = first - timedelta(days=1)
             before_first = before_last.replace(day=1)
             if c.reporting.cash_flow(before_first, before_last).outflows > 0:
                 so_far = {"month": month_of(first), "total": sum((g.value for g in now_groups), ZERO),
-                          "categories": len(now_groups), "days": days}
+                          "categories": len(categories), "days": days}
                 selected = Period("month", "Monthly", before_first, before_last)
                 first, last = selected.start, selected.end
     flow = c.reporting.cash_flow(first, last)

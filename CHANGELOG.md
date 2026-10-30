@@ -11,6 +11,9 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 
 ## [Unreleased]
 
+- 2026-10-30 · Claude: [IV-3AM2, IV-3AM3] Review fixes: the one-tab gear sits on the header's hairline, not among its actions;
+  Spending leads with last month only under 7 days or 3 categories (it counted the 3 groups); Zakat leads with your zakat;
+  Loans' Pay early joins the loan's actions; Compare periods, Reports and Loans show whole EGP.
 - 2026-10-30 · Claude: [IV-3AM4] Settings stop being forms (ST2-ST4): Counterparties is a one-column read list, a click opens the row's edit; Categories reads down one column; Data checks folds passed checks into one line;
   the database path sits behind Advanced and Settings in each tab moves up on Your data.
 - 2026-10-30 · Claude: [IV-3AM3, IV-3AM5] Each tab opens on its answer, page by page: Transactions, Budget, Overview, Safety, Spending, Compare, Reports, Cash planning, Recurring, Loans, Investments, Planner,

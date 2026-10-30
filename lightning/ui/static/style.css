@@ -3847,12 +3847,11 @@ table.figures tfoot th { border-top: 1px solid var(--line); }
 .main .account-group-cols.is-one, .main .account-row.is-one { grid-template-columns:minmax(0,1fr) 140px; }
 
 /* IV-3AM2 · S3 (owner decision 1): a section with one tab has only the gear in its bar. The gear stays the bar's end
-   (A05) but takes no row: it sits at the header's right edge, and the header leaves room for it. */
+   (A05) and takes no row: the bar has no height and its gear sits at the right end of the header's hairline, under the
+   header's actions, never among them. */
 @media (min-width:901px) {
-  .main:has(> .section-bar-gear) { position:relative; }
-  .main > .section-bar-gear { position:absolute; top:29px; inset-inline-end:24px; margin:0; float:none; z-index:2; }
-  @media (max-width:1200px) { .main > .section-bar-gear { top:24px; } }
-  .main > .topbar:has(+ .section-bar-gear) { padding-inline-end:50px; }
+  .main > .section-bar-gear { height:0; margin:0; padding:0; display:flex; justify-content:flex-end; overflow:visible; position:relative; z-index:2; }
+  .main > .section-bar-gear > .section-gear { transform:translateY(calc(-100% - 6px)); }
 }
 
 /* IV-3AM4 · Counterparties: a one-column read list; a click opens the row's edit (audit 12: ST2) */

@@ -12,8 +12,7 @@
   {% if loans %}{% for l in loans %}{% set i = l.item %}{% set pr = l.progress %}
   <article class="card plan-loan">
     <div class="section-head"><div><h2><a href="/plan/items/{{ i.id }}/edit" data-popup-open>{{ i.name }}</a></h2><p>{{ l.schedule }}{% if l.account %} · from {{ l.account }}{% endif %}{% if i.principal %} · borrowed {{ i.principal|money(places=0) }} {{ base }}{% endif %}</p></div>
-      {% if pr.due %}<a class="btn small" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ pr.due[0].due_date }}&amp;back=%2Fplan%2Floans">{{ pr.due|length }} due · mark paid</a>{% endif %}</div>
-    {% if pr.still_to_pay > 0 %}<a class="quiet-link" data-popup-open href="/plan/items/{{ i.id }}/early-payment">{{ 'Pay early'|tr(locale) }}</a>{% endif %}
+      {% if pr.due %}<a class="btn small" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ pr.due[0].due_date }}&amp;back=%2Fplan%2Floans">{{ pr.due|length }} due · mark paid</a>{% endif %}{% if pr.still_to_pay > 0 %}<a class="quiet-link" data-popup-open href="/plan/items/{{ i.id }}/early-payment">{{ 'Pay early'|tr(locale) }}</a>{% endif %}</div>
     <div class="chart-meter-track" role="img" aria-label="{{ pr.paid_amount|money }} of {{ pr.total_amount|money }} paid"><i style="width:{{ '%.1f'|format(l.meter.width) }}%"></i></div>
     <div class="compact-list">
       <div class="compact-row"><span>{{ ("Paid towards loan" if pr.extra_paid else "Payments made")|tr(locale) }}</span><b>{% if not pr.extra_paid %}{{ pr.paid }} of {{ pr.total }} · {% endif %}{{ pr.paid_amount|money }}</b></div>

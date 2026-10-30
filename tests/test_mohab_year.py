@@ -434,8 +434,8 @@ def _live_the_year(o: Mohab) -> None:
     o.enter("CIB Payroll", "2026-10-18", "Al Mansour Service", "Personal › Transportation", "-6,500")
     o.to_reserve("CIB Payroll", "Al Mansour Service", "Emergency Fund")                         # paid from the emergency fund
 
-    o.ask("atm", "What did the ATM withdrawal cost me in October?", start="/birdview/expenses?period=month")  # explicit month: a plain Spending early in a month leads with the last one
-    o.ask("refund", "Amazon refunded me. Did my spending go down?", start="/birdview/expenses?period=month")  # explicit month: a plain Spending early in a month leads with the last one
+    o.ask("atm", "What did the ATM withdrawal cost me in October?", "Spending")
+    o.ask("refund", "Amazon refunded me. Did my spending go down?", "Spending")
     o.ask("emergency", "After the repair, how much is left in my emergency fund?", "Safety")
     o.ask("fixed", "Is the Carrefour mistake fixed, and the double Talabat gone?", "CIB Payroll")
     o.ask("reconcile", "Does Lightning match my bank statement?", "CIB Payroll", "Adjust balance")
@@ -456,7 +456,7 @@ def _live_the_year(o: Mohab) -> None:
     o.enter("CIB Payroll", "2026-12-22", "ACME Egypt", "Work › Transportation", "1,200")
     o.enter("CIB Payroll", "2026-12-20", "ACME Egypt", "Bonus", "90,000")
     o.enter("CIB Payroll", "2026-12-24", "ACME Egypt", "Salary", "45,000", notes="January salary, paid early")
-    o.ask("work", "Did ACME pay back my work Uber?", start="/birdview/expenses?period=month")  # explicit month: a plain Spending early in a month leads with the last one
+    o.ask("work", "Did ACME pay back my work Uber?", "Spending")
     o.ask("bonus", "Where did my bonus go?")
     o.ask("early_salary", "January's salary came on the 24th. Does Needs you notice and offer to link it?")
 
@@ -492,7 +492,7 @@ def _live_the_year(o: Mohab) -> None:
     o.enter("Cash wallet", "2027-03-10", "Uncle Hassan", "Gifts Received", "1,000", notes="#eid")
     o.add_loan("Phone installments", "valU", "2,000", "2027-04-15", "12", "24,000")
     o.ask("owe_more", "With the phone, what do I owe now?", "Loans still to pay")
-    o.ask("eid", "What did Eid cost me?", start="/birdview/expenses?period=month")  # explicit month: a plain Spending early in a month leads with the last one
+    o.ask("eid", "What did Eid cost me?", "Spending")
     o.ask("eid_tag", "And everything I tagged #eid?", "Cash wallet", "#Eid")
 
     # ============================================================== April: the insurance, and selling COMI

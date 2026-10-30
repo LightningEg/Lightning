@@ -28,10 +28,9 @@ category well; no all-"—" Balance column; whole EGP in the register; no "Syste
 **Built:** SA1, SA2 (Limits reads today's emergency reserve as Reserves does), T3, T4 (balances whole; row amounts keep cents, A06.1), B4, and ST1 as a column-width stop (the redesign is 3AM4).
 
 ## 3AM2 The shell gives back space (S1-S3, S6)
-Add/Manage accounts reachable without scrolling the sidebar; a gear with no tabs moves into the header (A05 change,
-a gear-only bar takes no row of its own (A05 unchanged); the header stays one row; Review activity becomes a quiet
-action.
-**Built:** S1 (heading link + round + button, list scrolls inside), S2 (title shrinks first; Investments' currency lens in ⋯), S3 (a gear-only bar sits at the header's right edge, no row; the header leaves it room), S6 (Review activity in ⋯). Content starts at y 134 on Overview and 156 on Budget; pages with a tab bar start at 153-199 (the bar is a row).
+Add/Manage accounts reachable without scrolling the sidebar; a gear-only bar takes no row of its own (A05 unchanged);
+the header stays one row; Review activity becomes a quiet action.
+**Built:** S1 (heading link + round + button, list scrolls inside), S2 (title shrinks first; Investments' currency lens in ⋯), S3 (a gear-only bar has no height; its gear sits at the right end of the header's hairline, under the actions), S6 (Review activity in ⋯). Content starts at y 132 on Overview and Budget; pages with a tab bar start at 161-214 (the bar is a row).
 
 ## 3AM3 Each tab opens on its answer (O1-O2, B1-B3, B5, T1-T2, T5-T6, SP1-SP3, SA3-SA5, I1-I2, A1-A3, C1-C2)
 Overview's KPIs above the fold; Budget one meter plus pace, read-only rows with Edit plan; Transactions ten rows above the
@@ -49,3 +48,9 @@ A sentence stays only if it reads a figure or changes the next action; methods b
 captions. A visual from the existing macros on Compare periods, Reports, Loans, Planner, Zakat and Held for others. No
 card around one button or one empty state; fields as wide as their values; Compare and Reports on the KPI card in
 whole EGP.
+
+**Left (Claude's review, 2026-10-30):** Loans: a Lead with paid-vs-left per loan; its three KPIs leave a fourth slot
+empty. Planner: current share against target as `bullet_row`, the title as the tab's name, whole EGP. Compare periods:
+the Lead in the KPI type (it is letter-spaced), the period form on one line. Held for others: whole EGP, its subtitle cut,
+a `share_bar` by person. Categories: no edit drawer (inline autosave kept). Arabic/RTL screens not looked at. Tabbed pages
+start at 161-214 px, not 140: the owner decides whether the target holds there.

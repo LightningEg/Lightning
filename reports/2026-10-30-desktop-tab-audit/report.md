@@ -351,3 +351,18 @@ wider than their values:
 - Weekly review: one card per item (five cards for three rows); Held for others: three closed cards at the end.
 
 These join the plan as **IV-3AM5** (words, visuals and sizes), built with each tab's step where it overlaps.
+
+### 2026-10-30 · built, and Claude's review of the build
+
+IV-3AM1-3AM5 were built on this branch (commits d4219e7 to a348839), then reviewed: full suite green, screens captured
+again at 1366 and 1920. Review fixes (one commit): the one-tab gear had been moved among the header's actions, which the
+owner refused; it now sits on the header's hairline. Spending's early-month rule counted the three category groups, so
+it showed last month in nearly every month; Mohab's test had been edited to open October by URL, and now clicks
+Spending again. Zakat leads with your zakat. Loans' "Pay early" no longer labels the progress bar. Compare periods,
+Reports and Loans show whole EGP. SA2 changed `HealthService.emergency_fund` to read today's active reserve, as
+Reserves does. It gives the same figure on a normal profile, and fixes the sample, whose reserve is recorded after its
+"today".
+
+Measured after (1366 × 768): content at y 132 on Overview and Budget, 161-214 on tabbed pages; Transactions shows 11
+rows; Overview's KPI row starts above the fold and is whole at 1080. What is left is listed in IV-3AM. The site's
+screenshots need a recapture (`skills/site-recapture`) once the owner accepts the screens.
