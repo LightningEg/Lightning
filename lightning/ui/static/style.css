@@ -3780,3 +3780,24 @@ table.figures tfoot th { border-top: 1px solid var(--line); }
 .main .section-bar { margin-bottom:16px; }
 .app-popup .actions .section-gear { display:none; }
 .main > .topbar { padding-bottom:12px; }
+
+/* IV-3AM3 · Transactions: one filter line, an entry row that does not read as data, single-line rows (audit 12: T1 T2 T5) */
+.main .register-filters { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin:0 0 12px; }
+.main .register-filters .toolbar-filters { flex:1 1 360px; justify-content:flex-start; flex-wrap:nowrap; gap:10px; }
+.main .register-filters .toolbar-filters input[type=search] { flex:1 1 260px; width:auto; min-width:160px; max-width:440px; }
+.main .register-filters .toolbar-filters select { flex:0 0 auto; width:auto; min-width:150px; }
+.main .register-filters .action-menu > summary { height:var(--control-h); display:inline-flex; align-items:center; padding:0 16px; border-radius:999px; font-size:var(--fs-2); background:var(--paper); border-color:var(--line); color:var(--ink); }
+.main .register-filters .find-panel { min-width:460px; padding:12px; }
+.main .register-filters .find-panel form { margin:0; }
+.main .register-filters .register-val-toggle { margin:0; white-space:nowrap; font-size:var(--fs-meta); }
+.main .register-filters > :is(.muted,.register-result,.tag-filter) { flex-basis:100%; }
+.main .register-rows tbody td { padding-block:6px!important; }
+.main .register-rows :is(.register-subline) { display:inline; margin-inline-start:8px; }
+.main .register-rows .register-counterparty-cell { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.main .register-rows .quick-add-row > td { background:var(--hover); border-bottom:1px solid var(--line); }
+.main .register-rows .quick-add-row > td:first-child { text-align:center; }
+.main .register-rows .entry-mark { width:18px; height:18px; fill:none; stroke:var(--meadow-dark); stroke-width:2; stroke-linecap:round; vertical-align:middle; }
+.main .register-intro { margin:0 0 8px; }
+.main .register-rows .register-counterparty-cell .register-primary-line { display:inline; }
+.main .register-rows .register-edit-counterparty { display:table-cell; }
+.main .register-rows .register-edit-counterparty .register-account-picker { margin-top:4px; }
