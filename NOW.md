@@ -29,7 +29,7 @@
 
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 
-1. **v1.5.0 is public; dependency PR #122 remains blocked.** CSV contribution #117 and the reviewed Actions/theme/engine PRs are merged. #122 still needs coordinated native wheels and lockfiles (1H). **Read:** `reports/2026-10-26-v150-release/report.md`.
+1. **v1.5.1 is public; dependency PR #122 remains blocked.** CSV contribution #117 and the reviewed Actions/theme/engine PRs are merged. #122 still needs coordinated native wheels and lockfiles (1H). **Read:** `reports/2026-10-26-v150-release/report.md`.
 2. **Audit 8 follow-ups:** 2J on journal profiles, owner decisions 7R and 7S. **Read:** `reports/2026-10-26-engine-audit/report.md`.
 3. **9J, 9K and 2AB:** remain open from Audit 5. **Read:** `reports/2026-10-21-backend-streamlining/report.md`.
 4. **1H:** native recipe, then matched locks. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.

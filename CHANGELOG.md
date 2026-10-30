@@ -42,6 +42,7 @@ Every change to Lightning is recorded here — newest first. Dates are `yyyy-mm-
 - 2026-10-29 · Claude: Audit 10, the phone tab by tab (`reports/2026-10-29-phone-tab-audit/`): plan item IV-3AL (each tab opens on its answer and daily action), a note on NF-3AD, four owner decisions on Part C.
 
 - 2026-10-29 · Codex: [BV-3AK] Restore Your data first in Settings and Data checks last; [BT-10E] resolve the v1.5.1 unlock error by correcting the store signing-key ID (user verified); sync the existing website Coders account-menu guideline.
+- 2026-10-29 · Codex: Publish the verified v1.5.1 Windows and Android builds; prepare the website downloads and release notes.
 
 - 2026-10-29 · Claude: plan items BT-2AC (login form submitted twice, #193) and BT-3AJ (language change is undoable, #167) filed; the For Geeks roadmap on the site brought in step with the plan.
 
