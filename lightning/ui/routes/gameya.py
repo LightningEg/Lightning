@@ -97,10 +97,17 @@ async def record_instalment(request: Request, account_id: int):
     record = {"instalment_date": str(form.get("date", "")).strip(), "instalment_amount": str(form.get("amount", "")).strip(),
               "instalment_from": str(form.get("account_id", "")).strip()}
     c = container(request)
+    submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+    payload = record | {"account": account_id}
     try:
         _circle(c, account_id)
-        txn = c.gameya.record_instalment(account_id, record["instalment_date"], record["instalment_amount"],
-                                         _int(record["instalment_from"], "funding_account_id"))
+        with c.db.transaction():
+            # A resent form returns its first save; without this it recorded the next instalment too.
+            txn = c.transactions.submitted(submission, payload)
+            if txn is None:
+                txn = c.gameya.record_instalment(account_id, record["instalment_date"], record["instalment_amount"],
+                                                 _int(record["instalment_from"], "funding_account_id"))
+                c.transactions.remember_submission(submission, payload, txn.id)
     except (LightningError, ValueError) as exc:
         return _page(request, account_id, record=record, error=_message(exc), error_form="instalment",
                      status_code=400)

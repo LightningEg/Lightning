@@ -30,14 +30,18 @@ jobs:
         include:
           - package: cryptography
             version: 50.0.2
+            sha256: 7b46165bb56eb4704e2eaaf86f3c940d19154535d9b0ca7d6d590b04060e00d5
           - package: sqlcipher3
-            version: 0.6.2
+            version: 0.6.4
+            sha256: b02a3edfc554c9197d63ab4c38a30f7682eec65b10e5be2c9285a0d6ffb7a29a
           # cryptography 50 needs cffi >= 2.0 at run time; Chaquopy's index stops at 1.17.1.
           - package: cffi
-            version: 2.0.0
-          # fastapi needs pydantic; the shipped app's lock pins pydantic-core 2.46.5 (Rust, no C libraries).
+            version: 2.1.1
+            sha256: dd31f52ea1086513bb9df30f8fcee9b8918323ae067a3d5b78bc826a000712be
+          # Build inputs for IT-1H; app inputs and locks change together after these wheels are verified.
           - package: pydantic_core
-            version: 2.46.5
+            version: 2.50.2
+            sha256: 1b0e8dc3932cf4e9ed5727570325cacc716b9409ffc794a221c0ccc72e8eb775
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad  # v6.1.0
@@ -56,11 +60,30 @@ jobs:
         env:
           PROBE_PACKAGE: ${{ matrix.package }}
           PROBE_VERSION: ${{ matrix.version }}
+          PROBE_SHA256: ${{ matrix.sha256 }}
         run: |
-          mkdir -p /tmp/lightning-android-source
-          python -m pip download --no-deps --no-binary=:all: \
-            --dest /tmp/lightning-android-source "${PROBE_PACKAGE}==${PROBE_VERSION}"
-          tar -xzf /tmp/lightning-android-source/*.tar.gz -C /tmp/lightning-android-source
+          python - <<'PY'
+          import hashlib
+          import io
+          import json
+          import os
+          import tarfile
+          import urllib.request
+          from pathlib import Path
+
+          package, version = os.environ['PROBE_PACKAGE'], os.environ['PROBE_VERSION']
+          with urllib.request.urlopen(f'https://pypi.org/pypi/{package}/{version}/json', timeout=30) as response:
+              files = [item for item in json.load(response)['urls'] if item['packagetype'] == 'sdist']
+          assert len(files) == 1, 'expected exactly one source distribution'
+          with urllib.request.urlopen(files[0]['url'], timeout=60) as response:
+              source = response.read()
+          assert hashlib.sha256(source).hexdigest() == os.environ['PROBE_SHA256'], 'source SHA-256 mismatch'
+          destination = Path('/tmp/lightning-android-source')
+          destination.mkdir(parents=True, exist_ok=True)
+          with tarfile.open(fileobj=io.BytesIO(source), mode='r:gz') as archive:
+              archive.extractall(destination, filter='data')
+          assert (destination / f'{package}-{version}' / 'pyproject.toml').is_file(), 'unexpected source layout'
+          PY
       - name: Give SQLCipher's Conan explicit Android host and Linux build profiles
         if: matrix.package == 'sqlcipher3'
         env:

@@ -65,6 +65,22 @@ async def expense_analysis(request: Request):
         selected = Period("custom", "Custom", fallback.start, fallback.end) if request.query_params.get("period") == "custom" else fallback
         error = exc.message
     first, last = selected.start, selected.end
+    # Early in a month (under 7 days, or under 3 categories with spending) the charts have nothing to compare, so the
+    # page leads with last month's whole picture and says in one line where this month stands (audit 12, SP1).
+    so_far = None
+    plain = not any(key in request.query_params for key in ("period", "month", "date_from", "date_to", "category_id"))
+    if plain and selected.key == "month" and not error and first <= today() <= last and last >= today():
+        days = (today() - first).days + 1
+        now_groups = [g for g in c.reporting.spending_by_category(first, last, depth=1) if g.value]
+        categories = [g for g in c.reporting.spending_by_category(first, last, depth=2) if g.value]  # not the 3 groups
+        if days < 7 or len(categories) < 3:
+            before_last = first - timedelta(days=1)
+            before_first = before_last.replace(day=1)
+            if c.reporting.cash_flow(before_first, before_last).outflows > 0:
+                so_far = {"month": month_of(first), "total": sum((g.value for g in now_groups), ZERO),
+                          "categories": len(categories), "days": days}
+                selected = Period("month", "Monthly", before_first, before_last)
+                first, last = selected.start, selected.end
     flow = c.reporting.cash_flow(first, last)
     l1 = c.reporting.spending_by_category(first, last, depth=1)
     l2 = c.reporting.spending_by_category(first, last, depth=2)
@@ -134,7 +150,7 @@ async def expense_analysis(request: Request):
                            category_filter, c, prior_from if prior else None, prior_to if prior else None, category_code)
     days = visuals.day_calendars(c, first, last, category_code)
     flows = visuals.cash_flow_charts(c, first, last, selected.key == "month", today())
-    return render(request, "birdview/expenses.html", **flows, period_query=urlencode(request.query_params), notes=notes, analysis=analysis, calendar=days, stats=stats, category_bars=category_bars, spend_trend=spend_trend,
+    return render(request, "birdview/expenses.html", **flows, so_far=so_far, period_query=urlencode(request.query_params), notes=notes, analysis=analysis, calendar=days, stats=stats, category_bars=category_bars, spend_trend=spend_trend,
                   usual=visuals.usual_rows(usual), who_bars=visuals.counterparty_bars(c, first, last),
                   account_bars=visuals.account_bars(c, first, last), largest=largest,
                   period=selected.key, month=last.strftime("%Y-%m"),

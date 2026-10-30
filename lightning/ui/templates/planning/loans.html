@@ -3,24 +3,17 @@
 {% block heading %}<div><h1>{{ 'Cash planning'|tr(locale) }}</h1></div>{% endblock %}
 {% block top_actions %}<a class="btn primary" data-popup-open href="/plan/items/new?kind=LOAN">{{ "Add loan"|tr(locale) }}</a>{% endblock %}
 {% block content %}
-{% from "partials/charts.html" import key_notes, stat_tiles %}
+{% from "partials/charts.html" import key_notes, stat_tiles, lead_card %}
+{% if lead %}{% call lead_card(lead, base) %}<div class="compact-list">{% for l in loans %}<a class="compact-row" href="#loan-{{ l.item.id }}"><span>{{ l.item.name }}<small>{{ l.progress.paid }} of {{ l.progress.total }} {{ 'paid'|tr(locale) }}</small></span><b>{{ l.progress.still_to_pay|money }}</b></a>{% endfor %}</div>{% endcall %}{% endif %}
 {{ stat_tiles(debt_tiles, base, 'Your debt') }}
 {{ key_notes(notes) }}
-<section class="plan-section" aria-labelledby="loans-total">
-  <header class="overview-section-head"><h2 id="loans-total">{{ 'Loans still to pay'|tr(locale) }}</h2></header>
-  <article class="card plan-lead lead-card">
-    <div class="plan-figure">{{ still_to_pay|money(False, 0) }} <small>{{ base }}</small></div>
-    <p class="muted small">{{ "Every unpaid payment, due or upcoming. Only payments already due come off free cash."|tr(locale) }}</p>
-  </article>
-</section>
 <section class="plan-section" aria-labelledby="loans-list">
   <a class="quiet-link" data-popup-open href="/plan/purchases/new">{{ 'Bought in instalments'|tr(locale) }}</a>
-  <header class="overview-section-head"><h2 id="loans-list">{{ "Your loans"|tr(locale) }}</h2><span>{{ loans|length }}</span></header>
+  <header class="overview-section-head"><h2 id="loans-list">{{ "Your loans"|tr(locale) }}</h2><span>{{ fig.loans_still_to_pay.label }} <b>{{ still_to_pay|money(False, 0) }}</b> {{ base }}</span></header>
   {% if loans %}{% for l in loans %}{% set i = l.item %}{% set pr = l.progress %}
-  <article class="card plan-loan">
+  <article class="card plan-loan" id="loan-{{ i.id }}">
     <div class="section-head"><div><h2><a href="/plan/items/{{ i.id }}/edit" data-popup-open>{{ i.name }}</a></h2><p>{{ l.schedule }}{% if l.account %} · from {{ l.account }}{% endif %}{% if i.principal %} · borrowed {{ i.principal|money(places=0) }} {{ base }}{% endif %}</p></div>
-      {% if pr.due %}<a class="btn small" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ pr.due[0].due_date }}&amp;back=%2Fplan%2Floans">{{ pr.due|length }} due · mark paid</a>{% endif %}</div>
-    {% if pr.still_to_pay > 0 %}<a class="quiet-link" data-popup-open href="/plan/items/{{ i.id }}/early-payment">{{ 'Pay early'|tr(locale) }}</a>{% endif %}
+      {% if pr.due %}<a class="btn small" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ pr.due[0].due_date }}&amp;back=%2Fplan%2Floans">{{ pr.due|length }} due · mark paid</a>{% endif %}{% if pr.still_to_pay > 0 %}<a class="quiet-link" data-popup-open href="/plan/items/{{ i.id }}/early-payment">{{ 'Pay early'|tr(locale) }}</a>{% endif %}</div>
     <div class="chart-meter-track" role="img" aria-label="{{ pr.paid_amount|money }} of {{ pr.total_amount|money }} paid"><i style="width:{{ '%.1f'|format(l.meter.width) }}%"></i></div>
     <div class="compact-list">
       <div class="compact-row"><span>{{ ("Paid towards loan" if pr.extra_paid else "Payments made")|tr(locale) }}</span><b>{% if not pr.extra_paid %}{{ pr.paid }} of {{ pr.total }} · {% endif %}{{ pr.paid_amount|money }}</b></div>

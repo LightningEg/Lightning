@@ -20,6 +20,11 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§1 Engin
    emergency fund from 0.8 to 1.2 months), though history before opening is allowed on purpose (`transactions/service.py:486`): decide the rule first.
    Fixed: a crafted category direction, ids ≥ 2^63 on a transaction, and a plan or reserve amount with more decimals than its currency allows
    (the bad investment bucket was already refused).
+   2026-10-29, [use-case audit](../../reports/2026-10-29-use-case-audit/report.md) F1: the cash guard checks only from the account's
+   opening date (`_refuse_cash_below_zero`, `start = max(first, opening_date)`), so moving the opening date past existing spending,
+   or spending before it, leaves a balance below zero (−9,000 on 2026-01-31) that Integrity then reports as an ISSUE. The rule to
+   decide: either the guard covers days before opening too (`tests/test_transactions.py::test_restore_allows_transaction_before_account_opening_date`
+   changes), or an opening date cannot move past the account's first transaction.
 7. Low: shown parts don't add up by rounding: "If you sold today" 130,586 against parts summing to 130,585; "Where money in went" 46,834 against 46,833.
    Round the parts so they sum to the shown total (largest remainder).
 8. Low (tech): every investment post voids and reposts the month-end revaluation entries; a fuzz run left 456 void VAL transactions. Reuse them when unchanged.

@@ -5,19 +5,16 @@
 {% block top_actions %}{% if phone_mode() %}<form class="phone-as-of" method="get" action="/checks"><label class="phone-chip is-chosen">As of {{ as_of }}<input type="date" data-native-date name="date" value="{{ as_of }}"  aria-label="As of"></label><noscript><button class="btn">{{ 'Show'|tr(locale) }}</button></noscript></form>{% else %}<form method="get" class="actions"><label for="check-date" class="small">{{ 'As of'|tr(locale) }}</label><input id="check-date" name="date" type="text" placeholder="yyyy-mm-dd" inputmode="numeric" autocomplete="off" data-smart-date value="{{ as_of }}"><button class="btn small">{{ "Check"|tr(locale) }}</button></form>{% endif %}{% endblock %}
 {% block content %}
 
-<section class="metric-grid integrity-summary" aria-label="Check results">
-  <div class="metric-card"><div class="metric-label">{{ "Passed"|tr(locale) }}</div><div class="metric-value pos">{{ counts.PASS }}</div></div>
-  <div class="metric-card"><div class="metric-label">{{ "Needs attention"|tr(locale) }}</div><div class="metric-value {{ 'neg' if counts.ISSUE else '' }}">{{ counts.ISSUE }}</div></div>
-  <div class="metric-card"><div class="metric-label">{{ "Incomplete valuations"|tr(locale) }}</div><div class="metric-value">{{ counts.INCOMPLETE }}</div></div>
-</section>
-<p class="muted small">{{ "These checks compare independently derived totals. An incomplete check means a missing price or exchange rate prevents a full comparison."|tr(locale) }}</p>
-<section class="integrity-list">
-{% for check in checks %}
+{% set passed = checks|selectattr('status', 'equalto', 'PASS')|list %}{% set open_checks = checks|rejectattr('status', 'equalto', 'PASS')|list %}
+<p class="integrity-line" role="status"><b class="{{ 'pos' if not open_checks }}">{{ ('{n} check passed' if counts.PASS == 1 else '{n} checks passed')|tr(locale, n=counts.PASS) }}</b>{% if counts.ISSUE %} · <b class="neg">{{ ('{n} needs attention' )|tr(locale, n=counts.ISSUE) }}</b>{% endif %}{% if counts.INCOMPLETE %} · <span>{{ ('{n} incomplete: a missing price or exchange rate prevents a full comparison')|tr(locale, n=counts.INCOMPLETE) }}</span>{% endif %}</p>
+{% if open_checks %}<section class="integrity-list">
+{% for check in open_checks %}
   <article class="card data-panel integrity-check integrity-check--{{ check.status|lower }}">
     <div class="integrity-title"><span class="integrity-indicator" aria-hidden="true"></span><div><h2>{{ check.name }}</h2><p>{{ check.detail }}</p></div><span class="pill">{{ check.status|lower }}</span></div>
     <div class="integrity-values"><div><small>{{ "Actual"|tr(locale) }}</small><b>{{ check.actual|money(True) }} {{ base }}</b></div><div><small>{{ "Expected"|tr(locale) }}</small><b>{{ check.expected|money(True) }} {{ base }}</b></div><div><small>{{ 'Difference'|tr(locale) }}</small><b class="{{ check.difference|tone }}">{{ check.difference|money(True) }} {{ base }}</b></div></div>
   </article>
 {% endfor %}
-</section>
-<p class="small muted">{{ "A failed check points to a mismatch; this page does not change transactions or balances. Open"|tr(locale) }}<a href="/transactions">{{ "the register"|tr(locale) }}</a>, <a href="/">{{ 'Overview'|tr(locale) }}</a>, or <a href="/reserves">{{ 'Reserves'|tr(locale) }}</a>{{ "to inspect source entries."|tr(locale) }}</p>
+</section>{% endif %}
+{% if passed %}<details class="flow-disclosure"><summary>{{ 'Passed checks'|tr(locale) }}</summary><div class="compact-list">{% for check in passed %}<div class="compact-row"><span>{{ check.name }}<small>{{ check.detail }}</small></span><b class="pos">{{ 'passed'|tr(locale) }}</b></div>{% endfor %}</div></details>{% endif %}
+{% if open_checks %}<p class="small muted">{{ "A failed check points to a mismatch; this page does not change transactions or balances. Open"|tr(locale) }}<a href="/transactions">{{ "the register"|tr(locale) }}</a>, <a href="/">{{ 'Overview'|tr(locale) }}</a>, or <a href="/reserves">{{ 'Reserves'|tr(locale) }}</a>{{ "to inspect source entries."|tr(locale) }}</p>{% endif %}
 {% endblock %}

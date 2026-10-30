@@ -1,0 +1,1922 @@
+{
+ "/": {
+  "height": 1408,
+  "screens": 1.8,
+  "topbar_px": 94,
+  "tabs_px": 38,
+  "content_top": 200,
+  "figures": 27,
+  "words": 239,
+  "targets": 63,
+  "inputs": 1,
+  "notices": 0,
+  "details": 13,
+  "cards": 0,
+  "nested_cards": 0,
+  "headings": [
+   "Overview",
+   "Net worth",
+   "Over time",
+   "Needs you · 3",
+   "Get set up",
+   "Your position",
+   "",
+   "",
+   "",
+   ""
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "All time",
+   "YTD",
+   "Monthly",
+   "Custom",
+   "Previous month",
+   "Next month"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Overview\n\nYou kept 93% of what came in this month.\n\n2026-10-01 to 2026-10-02 · so far\n\nAll time\nYTD\nMonthly\nCustom\nNet worth\n\nExcludes money held for others\n\n922,304\nEGP\n\n+46,590 this month\n\nWhat you own\n988,804\nCash you own\n236,317\nHoldings value\n752,486\nWhat you owe\n−66,500\nOver time\n\nAt the end of each month · 2026-01 to 2026-10\n\n1,000,000\n500,000\n0\n922,304\n01\n2026\n02\n03\n04\n05\n06\n07\n08\n09\n10\nShow the numbers\nNet worth at the end of each month\nNeeds you · 3\nManage Needs you\nWeekly review\nNBE 3-year certificate · 22%: 9 interest payments to match\n16,455 EGP still unmatched; 8 have a suggested bank receipt.\nReview\nImported activity needs a decision\nvodafone-october.csv · 3 rows wait · from row 2 · 2026-10-01.\nFinish the import\nThis month's plan is short for your goals\nIt leaves 11,572 EGP; your goals and emergency fund need 14,395. Plan 2,823 less.\nReview\nSavings rate\n2026-10 so far\n93.2%\n+67.2 points on your usual 25.9%\n46,590 kept of 50,000 money in\nInvesting rate\n2026-10 so far\n—\nNo",
+  "status": 200
+ },
+ "/birdview/expenses": {
+  "height": 3481,
+  "screens": 4.5,
+  "topbar_px": 69,
+  "tabs_px": 44,
+  "content_top": 181,
+  "figures": 34,
+  "words": 381,
+  "targets": 37,
+  "inputs": 1,
+  "notices": 0,
+  "details": 5,
+  "cards": 3,
+  "nested_cards": 0,
+  "headings": [
+   "Expense analysis",
+   "Where did it go?",
+   "By category",
+   "How each one moved",
+   "Is this period unusual?",
+   "Now against your usual month",
+   "Inside its usual range?",
+   "Day by day",
+   "Total expenses",
+   "Cash flow",
+   "Where money in went",
+   "The last six months",
+   "Month by month",
+   "Net cash flow"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "All time",
+   "YTD",
+   "Monthly",
+   "Custom",
+   "Previous month",
+   "Next month"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Expense analysis\nWhere your money went\nAll time\nYTD\nMonthly\nCustom\nSpending\nCompare periods\nReports\nMoney out so far\n3,410EGP\nAgainst 2026-09 days 1–2\n+476 · 16%\nAgainst the same days in earlier months\n+83 · 2%\n\nSo far · comparisons use the same calendar days in earlier months.\n\nWhere did it go?\n2026-10-01 to 2026-10-02\nCompare periods\nBy category\n\nSize is money out\n\nFood & Groceries\n3,410 · 100%\nShow the numbers\nHow each one moved\n\nSame days in earlier months, then now so far · one scale for all\n\nFood & Groceries\n3,410\nShow the numbers\nIs this period unusual?\nThis month against the 9 months before it\nNow against your usual month\n\nUsual: the same days in the last 6 months · now\n\nUsual\nNow\n3,327\n3,410\nFood & Groceries\n+2%\nShow the numbers\nInside its usual range?\n\nLowest month on the left, highest on the right · the tick its middle month · the dot now\n\nFood & Groceries\n2.9k\n3.6k\nWithin range\nnow 3.4k\nDay by day\n2026-10-01 to 2026-10-02\nTotal expenses\n\nMost on 2026-10-02 · 3,410 · nothing",
+  "status": 200
+ },
+ "/spending/compare": {
+  "height": 918,
+  "screens": 1.2,
+  "topbar_px": 96,
+  "tabs_px": 44,
+  "content_top": 208,
+  "figures": 6,
+  "words": 66,
+  "targets": 15,
+  "inputs": 5,
+  "notices": 0,
+  "details": 0,
+  "cards": 3,
+  "nested_cards": 0,
+  "headings": [
+   "Compare periods",
+   "Biggest changes first"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Compare periods\n\nMoney out is 476 higher than 2026-09-01 to 2026-09-02.\n\n2026-10-01 to 2026-10-02\n\nSpending\nCompare periods\nReports\nMoney out\n3,410 EGP\n+475.50 against 2026-09-01 to 2026-09-02\nMonth\nQuarter\nYear\nThis period\nAgainst\nBy\nCategory\nCounterparty\nCompare\nExport CSV\nBiggest changes first\n\nOpen any row to see why.\n\nCategory\tThis period\tAgainst\tDifference\t%\nFood & Groceries\t3,410.00\t2,934.50\t+475.50\t16%\nTotal\t3,410.00\t2,934.50\t+475.50\t",
+  "status": 200
+ },
+ "/reports": {
+  "height": 793,
+  "screens": 1,
+  "topbar_px": 69,
+  "tabs_px": 44,
+  "content_top": 181,
+  "figures": 5,
+  "words": 77,
+  "targets": 12,
+  "inputs": 0,
+  "notices": 0,
+  "details": 0,
+  "cards": 5,
+  "nested_cards": 0,
+  "headings": [
+   "Reports",
+   "Saved views",
+   "Everything"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Reports\nReady-made comparisons and your saved views\nSpending\nCompare periods\nReports\nThis month against last month\n3,410.00 EGP\n+475.50\nBiggest change: Food & Groceries +475.50\nThis quarter against last quarter\n3,410.00 EGP\n−175.50\nBiggest change: Food & Groceries −175.50\nThis year against last year\n315,748.75 EGP\n+315,748.75\nBiggest change: Housing & Rent +108,000.00\nSaved views\n\nSave a filter on Transactions to see it here.\n\nEid\tReport\tExport\nEverything\nExport all data (CSV or Excel) Print this page",
+  "status": 200
+ },
+ "/budget": {
+  "height": 2187,
+  "screens": 2.8,
+  "topbar_px": 154,
+  "tabs_px": 38,
+  "content_top": 260,
+  "figures": 48,
+  "words": 304,
+  "targets": 92,
+  "inputs": 15,
+  "notices": 0,
+  "details": 6,
+  "cards": 4,
+  "nested_cards": 0,
+  "headings": [
+   "Budget",
+   "Left in plan",
+   "Is everyday spending on pace?",
+   "Spent of plan",
+   "Bills in this month's plan",
+   "Spending by group",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "All time",
+   "YTD",
+   "Monthly",
+   "Custom",
+   "Previous month",
+   "Next month",
+   "Fill this month"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Budget\n\nYou are 2,122 over your plan's pace.\n\n2026-10-01 to 2026-10-02 · so far\n\nAll time\nYTD\nMonthly\nCustom\nFill this month\nLeft in plan\n30 days left\n35,018EGP\n\n16,558 for everyday, about 552 a day\n\nSpent\nBills to pay\nEveryday\n\nSpent 3,410 of 38,428 planned\n\nIs everyday spending on pace?\n\nDay by day against the plan, bills and loan payments left out.\n\n9,984\n19,968\n3,410\nPlan's pace 1,288\nPlan 19,968\n2026-09 13,808\n1\nToday\n31\n\nEveryday spending\nPlan\n2026-09\n\nEveryday spending\nby day 2\n3,410EGP\n2,122 over the plan's pace\n+476 against 2026-09 by day 2\nPlan leaves to save\nWatch\n11,572EGP\n23% of income, target 20%\nPlan 2,823 less to keep 14,395 a month\nSpent of plan\nSpent\nPlan\nOver plan\nFood & Groceries\n3,410 of 5,217\n1,807 left\nEating Out\n0 of 1,954\n1,954 left\nTransportation\n0 of 2,949\n2,949 left\nHousing & Rent\n0 of 12,000\n12,000 left\nUtilities & Bills\n0 of 1,863\n1,863 left\nHealth\n0 of 1,500\n1,500 left\nEntertainment\n0 of 5,072\n5,072 left\nGifts & Donations\n0 of 2,200\n2,200 left\nOther Perso",
+  "status": 200
+ },
+ "/plan": {
+  "height": 2875,
+  "screens": 3.7,
+  "topbar_px": 94,
+  "tabs_px": 44,
+  "content_top": 206,
+  "figures": 33,
+  "words": 392,
+  "targets": 31,
+  "inputs": 1,
+  "notices": 0,
+  "details": 8,
+  "cards": 5,
+  "nested_cards": 0,
+  "headings": [
+   "Cash planning",
+   "Safe to spend",
+   "How safe to spend is worked out",
+   "Can I afford this?",
+   "The next 30 days",
+   "Where is my cash heading?",
+   "Free cash, then the forecast",
+   "In and out each month ahead",
+   "Zakat",
+   "What is promised?",
+   "What you owe",
+   "By loan"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Cash planning\n\nYou can spend 112,288 before payday and stay on plan.\n\n2026-10-02 to 2026-11-01 · until payday\n\nPlan\nRecurring\nLoans\nSafe to spend\nuntil 2026-11-01\n112,288EGP\n\n69% of your free cash\n\nSafe\nBudget\nSavings\nDue\n\nOn top of your plan How it is worked out\n\nHow safe to spend is worked out\n\nFrom free cash to safe to spend\n\nFree cash\n163,701\nDue before payday\n−18,460\nGam'eya instalments before next income\n−2,000\nBudget until payday\n−16,558\nSaving for goals\n−5,500\nEmergency fund top-up\n−8,895\nSafe to spend\n112,288\nShow the numbers\nCan I afford this?\nCheck\nFree cash\n2026-10\n163,701EGP\n+46,590 since 2026-09-30\nCash you own 236,317, less 72,616 set aside or due\nDue before payday\n7 payments\n18,460EGP\n7 payments before payday\nNext: Landlord · 2026-10-03\nLowest point ahead\n2026-11\n101,534EGP\n62,167 below today\n2.6 months of spending at its lowest\nSee the forecast\nThe next 30 days\n\n2026-10-02 to 2026-11-01 · money in above the line, payments below\n\nRecurring\nLandlord\n2026-10-03 · Bill\n−12",
+  "status": 200
+ },
+ "/plan/recurring": {
+  "height": 2063,
+  "screens": 2.7,
+  "topbar_px": 63,
+  "tabs_px": 44,
+  "content_top": 175,
+  "figures": 11,
+  "words": 286,
+  "targets": 22,
+  "inputs": 0,
+  "notices": 0,
+  "details": 0,
+  "cards": 3,
+  "nested_cards": 0,
+  "headings": [
+   "Cash planning",
+   "Every month",
+   "Bills and subscriptions",
+   "Recurring items",
+   "Looks recurring"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Add recurring item"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Cash planning\nAdd recurring item\nPlan\nRecurring\nLoans\nFixed costs to income\n2026-10-02\n38.2%\n19,110 a month of 50,000 income · bills, subscriptions and loans\nEvery month\nBills and subscriptions\n14,610 EGP a month\n\nSubscriptions come to 7,080 a year.\n\nLandlord\nBill · Housing & Rent\n12,000.00\nNorth Cairo Electricity\nBill · Utilities & Bills\n720.00\nWE Internet\nBill · Utilities & Bills\n650.00\nEnglish course\nBill · Education\n650.00\n2 more\n590.00\nRecurring items\n8 active\nLandlord\nBill · Monthly on day 3 · Housing & Rent · CIB Payroll\nNext 2026-10-03\n−12,000.00\nVodafone\nSubscription · Monthly on day 9 · Utilities & Bills · Vodafone Cash\nNext 2026-10-09\n−350.00\nNetflix\nSubscription · Monthly on day 12 · Entertainment · CIB Payroll\nNext 2026-10-12\n−240.00\nWE Internet\nBill · Monthly on day 20 · Utilities & Bills · CIB Payroll\nNext 2026-10-20\n−650.00\nNorth Cairo Electricity\nBill · Monthly on day 24 · Utilities & Bills · CIB Payroll\nNext 2026-10-24\n−720.00\nACME Egypt\nIncome · Monthly on day 1 · Sa",
+  "status": 200
+ },
+ "/plan/loans": {
+  "height": 1655,
+  "screens": 2.2,
+  "topbar_px": 63,
+  "tabs_px": 44,
+  "content_top": 175,
+  "figures": 19,
+  "words": 155,
+  "targets": 14,
+  "inputs": 0,
+  "notices": 0,
+  "details": 0,
+  "cards": 3,
+  "nested_cards": 0,
+  "headings": [
+   "Cash planning",
+   "Loans still to pay",
+   "Your loans",
+   "Car loan",
+   "Laptop instalments"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Add loan"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Cash planning\nAdd loan\nPlan\nRecurring\nLoans\nDebt to net worth\n2026-10-02\n7.2%\n66,500 owed against 922,304 net worth\nDebt to cash\n2026-10-02\n28.1%\n66,500 owed against 236,317 cash you own\nLoan payments to income\n2026-10-02\n9.0%\n4,500 a month of 50,000 income\nPaid off on\n2027-12-05\n\n12 of 35 payments made.\n\nLoans still to pay\n52,500 EGP\n\nEvery unpaid payment, due or upcoming. Only payments already due come off free cash.\n\nBought in instalments\nYour loans\n2\nCar loan\n\nMonthly on day 5 · 24 payments · from CIB Payroll · borrowed 60,000 EGP\n\nPay early\nPayments made\n9 of 24 · 22,500.00\nStill to pay\n37,500.00\nNext payment\n2,500.00 on 2026-10-05\nLast payment\n2027-12-05\nLaptop instalments\n\nMonthly on day 28 · 12 payments · from CIB Payroll · borrowed 24,000 EGP\n\nPay early\nPaid towards loan\n9,000.00\nStill to pay\n15,000.00\nNext payment\n2,000.00 on 2026-10-28\nLast payment\n2027-05-28\nExtra payment\n2026-09-30\n3,000.00",
+  "status": 200
+ },
+ "/plan/reserves": {
+  "height": 1669,
+  "screens": 2.2,
+  "topbar_px": 63,
+  "tabs_px": 44,
+  "content_top": 175,
+  "figures": 21,
+  "words": 235,
+  "targets": 53,
+  "inputs": 25,
+  "notices": 0,
+  "details": 4,
+  "cards": 4,
+  "nested_cards": 0,
+  "headings": [
+   "Cash planning",
+   "Emergency fund",
+   "Could also use",
+   "What are you saving for?"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Cash planning\nReserves\nLimits\nEmergency fund covers\n0.5 months\n\nOf average monthly spending. The aim is six.\n\n0 EGP set aside in reserves; free cash is 163,701 EGP after them and bills due.\nHow free cash is built\n\nFree cash can bring your emergency fund closer to its target.\nRefill 163,701\nEmergency fund\nTowards six months of spending\n213,474 to go\n20,000 of 233,474\nEmergency fund top-up\n8,895\na month to reach six months within two years; the budget leaves room for it\nAverage monthly spending\n38,912\n2026-07 to 2026-09 · 3 months with spending\n\nCounted in months of spending · Change in Settings\n\nCould also use\nFree cash 163,701 EGP\nMoney Market Fund 10,376 EGP · Accessible in days\nNBE 3-year certificate · 22% 100,000 EGP · Locked until 2027-01-01\nEquity Fund 102,085 EGP · Access timing unknown\nGold 110,295 EGP · Access timing unknown\nOther Investments 400,000 EGP · Access timing unknown\nStocks 29,730 EGP · Access timing unknown\nAmount set aside\nWhat are you saving for?\nCar insurance\nUpc",
+  "status": 200
+ },
+ "/financial-health": {
+  "height": 1329,
+  "screens": 1.7,
+  "topbar_px": 94,
+  "tabs_px": 44,
+  "content_top": 206,
+  "figures": 8,
+  "words": 168,
+  "targets": 22,
+  "inputs": 1,
+  "notices": 0,
+  "details": 8,
+  "cards": 2,
+  "nested_cards": 0,
+  "headings": [
+   "Financial health",
+   "Within your limits",
+   "Savings rate over time",
+   "Against your limits",
+   "Cushion",
+   "",
+   "Saving",
+   "Debt and monthly commitments"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Show"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Financial health\n\nAll 5 figures are within your limits.\n\nBalances as of 2026-10-02 · savings rate from 2026-09\n\nAs of\nShow\nReserves\nLimits\nWithin your limits\n5\n\nof the 5 figures you set a limit for\n\nAll of them are good\n\nSavings rate over time\n\n2026-04 to 2026-09 · completed months\n\nOverview\n\n32.0% in 2026-09 · lowest 13.9% in 2026-08\n\n2026-04\n2026-09\nShow the numbers\nAgainst your limits\n5 of 5 within your limits\nCushion\nEmergency fund\nUnavailable\nNo comparison available\nAs of 2026-10-02 · months of average monthly spending\n6.1 months in cash you own\nSaving\nSavings rate\n32.0%\nGood\n2026-09\nPlanned savings rate\n23.1%\nGood\n2026-10 plan\nDebt and monthly commitments\nDebt to cash\n28.1%\nNo limit\n2026-10-02\nDebt to net worth\n7.2%\nGood\n2026-10-02\nFixed costs to income\n38.2%\nGood\nMonthly · 2026-07 to 2026-09\nLoan payments to income\n9.0%\nGood\nMonthly · 2026-07 to 2026-09\n\nLimits only compare figures you already have; they change no transactions, plans or reports. Change them behind the gear.",
+  "status": 200
+ },
+ "/investments": {
+  "height": 2450,
+  "screens": 3.2,
+  "topbar_px": 154,
+  "tabs_px": 44,
+  "content_top": 266,
+  "figures": 91,
+  "words": 344,
+  "targets": 30,
+  "inputs": 4,
+  "notices": 0,
+  "details": 0,
+  "cards": 4,
+  "nested_cards": 0,
+  "headings": [
+   "Investments",
+   "Portfolio value",
+   "Allocation",
+   "By currency",
+   "Holdings",
+   "Income collected (dividends and interest)",
+   "Money and value by class"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "All time",
+   "YTD",
+   "Monthly",
+   "Custom",
+   "Previous month",
+   "Next month",
+   "EGP",
+   "USD"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Investments\n\nYour holdings' value did not move this month.\n\n2026-10-01 to 2026-10-02 · valued as of 2026-10-02\n\nAll time\nYTD\nMonthly\nCustom\nEGP\nUSD\nHoldings\nPlanner\nPrices\nCurrencies\nPortfolio value\n2026-10\n752,486EGP\n\n0 Net gain or loss\n\n+77,073 since six months ago\n\nAllocation\n\nHoldings value by asset class · 2026-10-02\n\n752,486\nHoldings value\nCDs / Time Deposits\n13.3%\n100,000\nGold\n14.7%\n110,295\nEquity Fund\n13.6%\n102,085\nOther Investments\n53.2%\n400,000\nOther\n5.3%\n40,106\nTotal · 76% of what you own\n100%\n752,486\nLocked certificate · NBE 3-year certificate · 22%\nnot counted until 2027-01-01\n100,000\nBrokerage cash\n21,016\nHoldings after sale (estimate)\n619,862\nBy currency\n\nHoldings and brokerage cash, by the currency they are in · 2026-10-02\n\nEGP\n659,291 EGP · 85.2%\nUSD\n114,211 EGP · 14.8%\n\nNot in EGP: 15% of your investments\n\nOf your total gain +44,559, +2,206 came from exchange rates\n\nHoldings\nAs of 2026-10-02\nBy class\nBy account\nBy currency\nBy market\nBy security\nAll horizons\nShort\nMedi",
+  "status": 200
+ },
+ "/investments/planner": {
+  "height": 1003,
+  "screens": 1.3,
+  "topbar_px": 63,
+  "tabs_px": 44,
+  "content_top": 175,
+  "figures": 16,
+  "words": 119,
+  "targets": 11,
+  "inputs": 4,
+  "notices": 0,
+  "details": 0,
+  "cards": 2,
+  "nested_cards": 0,
+  "headings": [
+   "How much do you want to invest?",
+   "Suggested allocation"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "How much do you want to invest?\nHoldings\nPlanner\nPrices\nCurrencies\nAmount in EGP\nMonthly investing goal\nHow to split it\nSpread across gaps\nBiggest gaps first\nShow suggested split\nSuggested allocation\n10,000\nGold\nCurrent 110,295.00 · 31.3% · Target 30.0%\n0\nEquity Fund\nCurrent 102,085.44 · 29.0% · Target %\n0\nCDs / Time Deposits\nCurrent 100,000.00 · 28.4% · Target %\n0\nStocks\nCurrent 29,730.00 · 8.4% · Target 40.0%\n5,395\nMoney Market Fund\nCurrent 10,376.00 · 2.9% · Target 30.0%\n4,605\n\nEvery class below its target gets the same share of its gap, so each one moves part of the way. If the money covers every gap, both ways give the same split. Nothing is sold.",
+  "status": 200
+ },
+ "/investments/prices": {
+  "height": 1688,
+  "screens": 2.2,
+  "topbar_px": 71,
+  "tabs_px": 44,
+  "content_top": 183,
+  "figures": 7,
+  "words": 212,
+  "targets": 52,
+  "inputs": 23,
+  "notices": 0,
+  "details": 4,
+  "cards": 2,
+  "nested_cards": 0,
+  "headings": [
+   "Investment prices",
+   "Update prices"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Investment prices\n\nLightning fetches them online, falls back on the shared price files, or you type them. A price you type for a day wins.\n\nHoldings\nPlanner\nPrices\nCurrencies\nUpdate prices\n\nLightning updates the prices of what you hold by itself, the first time you open it after a month ends.\n\nWhere prices come from\nUpdate prices\nUpload prices from a spreadsheet\nShared price files\nAs of yyyy-mm-dd\nInvestment\tYou hold\tLast price\tTotal value\tNew price per unit\nAzimut money market fund edit\t80 units\t129.7\n2026-09-30\n\t\t\nBTC 10 g bar edit\t1 piece\t53,100\n2026-09-30\n\t\t\nCommercial International Bank (COMI) edit\t180 shares\t92\n2026-09-30\n\t\t\nFawry for Banking Technology edit\t300 shares\t9.8\n2026-09-30\n\t\t\nGold pound (from grandma) edit\t1 piece\t37,200\n2026-09-30\n\t\t\nInvesco NASDAQ 100 ETF edit\t8 units\t247.3 USD\n2026-09-30\n\t\t\nL'Azurde ring edit\t1 piece\t19,995\n2026-09-30\n\t\t\nNBE 3-year certificate · 22% edit\t1 certificate\t100,000\n2026-01-01 · last trade\n\t\tSet at purchase\nTalaat Moustafa Group edit\t150 s",
+  "status": 200
+ },
+ "/accounts/currencies": {
+  "height": 1405,
+  "screens": 1.8,
+  "topbar_px": 92,
+  "tabs_px": 44,
+  "content_top": 204,
+  "figures": 19,
+  "words": 199,
+  "targets": 14,
+  "inputs": 0,
+  "notices": 0,
+  "details": 1,
+  "cards": 2,
+  "nested_cards": 0,
+  "headings": [
+   "Currencies",
+   "USD · Value against cost",
+   "USD"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "All time",
+   "YTD",
+   "Monthly",
+   "Custom",
+   "Accounts",
+   "Add account"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Currencies\n\nForeign money you hold: what it cost, what it is worth, what it earned or lost.\n\nAll time\nYTD\nMonthly\nCustom\nAccounts\nAdd account\nHoldings\nPlanner\nPrices\nCurrencies\nForeign money\n165,811 EGP\nCash 63,726 · investments 102,085\nUnrealized FX gain\n+2,023 EGP\nNot locked in until you spend or convert.\nRealized FX gain\n+971 EGP\n2026-01-01 → 2026-10-02\nSpread paid\n−1,450 EGP\nBeyond the market rate, on conversions in this period.\nUSD · Value against cost\n\nBy month, in EGP. The dashed line is what the money cost.\n\nValue of what you hold\nWhat it cost\n200,000\n100,000\n0\n63,726\n61,703\n01\n2026\n02\n03\n04\n05\n06\n07\n08\n09\n10\nShow the numbers\nValue of USD you hold against what it cost, by month\nUSD\nHeld\n1,235.00 USD\nAnd 102,085 EGP in USD investments.\nValue\n63,726 EGP\n1 USD = 51.60 EGP\nAverage rate\n49.96\nCost 61,703 EGP\nUnrealized FX gain\n+2,023 EGP\nRealized FX gain\n+971 EGP\nSince the first holding: +971 EGP\nSpread paid\n−1,450 EGP\n1 conversion in this period\nAccount\tBalance (USD)\tYou own\tValue ",
+  "status": 200
+ },
+ "/transactions": {
+  "height": 3588,
+  "screens": 4.7,
+  "topbar_px": 149,
+  "tabs_px": 44,
+  "content_top": 261,
+  "figures": 33,
+  "words": 694,
+  "targets": 139,
+  "inputs": 14,
+  "notices": 0,
+  "details": 4,
+  "cards": 1,
+  "nested_cards": 0,
+  "headings": [
+   "Transactions"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Import statement",
+   "",
+   "",
+   "",
+   "",
+   "Choose an account",
+   "⋯",
+   "",
+   ""
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Transactions\n\nEvery account · EGP\n\nIn your accounts\n981,704\nWhat you own\n988,804\nHeld for others\n−7,100\nImport statement\nChoose an account\n⋯\nTransactions\nImport\nAccounts\nHeld for others\nZakat\n\nReview activity\n\nDate period\nAll time\nThis month\nLast month\nYear to date\nCustom dates\nViews\nFind and replace\n\nShow value updates (28)\n\n\tDate\tCounterparty\tCategory\tNotes\tAmount (EGP)\tBalance\nNew\t\n\t\n\t\n\t\n\t \n\t—\n\t2026-10-02\t\nCarrefour\nCIB Payroll\n\tFood & Groceries\t—\t\n−3,410.00\nEdit\n\t—\n\t2026-10-01\t\nACME Egypt\nCIB Payroll\n\tSalary\t\nSalary\n\t\n+50,000.00\nEdit\n\t—\n\t2026-09-30\t\nvalU\nCIB Payroll\n\tLoan payments\t\nLoan payment · Laptop instalments\n\t\n−3,000.00\nEdit\n\t—\n\t2026-09-29\t\n↔ CIB Payroll\n50,000.00 EGP → 1,000.00 USD\n\tConversion\t\nDollars from Banque Misr\n\t\n50,000.00\nUSD · +1,000.00\nDetails\n\t—\n\t2026-09-29\t\n↔ Dollar savings\n50,000.00 EGP → 1,000.00 USD\n\tConversion\t\nDollars from Banque Misr\n\t\n−50,050.00\nDetails\n\t—\n\t2026-09-28\t\nOwnership: You → Mom\nCIB Payroll\nHeld for Mom\n\tAdjustment\t\nKept for Mom\n\t\n0.00\nDetails",
+  "status": 200
+ },
+ "/import": {
+  "height": 1187,
+  "screens": 1.5,
+  "topbar_px": 69,
+  "tabs_px": 44,
+  "content_top": 181,
+  "figures": 0,
+  "words": 115,
+  "targets": 18,
+  "inputs": 1,
+  "notices": 0,
+  "details": 0,
+  "cards": 3,
+  "nested_cards": 0,
+  "headings": [
+   "Import statements",
+   "vodafone-october.csv is waiting for you",
+   "Import history"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Import statements\nDrop your bank files; each one is matched to its account.\nTransactions\nImport\nAccounts\nHeld for others\nZakat\nvodafone-october.csv is waiting for you\n\n3 rows\n\nContinue the review\nDrop CSV files here\nor click to choose · many files at once · up to 5 MB each\nReview statements\n\nEach account opens its own review: duplicates are flagged and your rules fill the categories before anything is posted.\n\nImport history\n\nUndo removes every entry a file created; you can restore them from history.\n\nBank SMS\nFile\tAccount\tDate\tEntries\t\nvodafone-october.csv\tVodafone Cash\t2026-10-30\t0\tReview\nvodafone-cash.csv\tVodafone Cash\t2026-10-30\t27\t\nUndo\n\ncash-wallet.csv\tCash wallet\t2026-10-30\t102\t\nUndo\n\ncib-payroll.csv\tCIB Payroll\t2026-10-30\t180\t\nUndo",
+  "status": 200
+ },
+ "/accounts": {
+  "height": 1450,
+  "screens": 1.9,
+  "topbar_px": 73,
+  "tabs_px": 44,
+  "content_top": 185,
+  "figures": 31,
+  "words": 184,
+  "targets": 20,
+  "inputs": 0,
+  "notices": 0,
+  "details": 0,
+  "cards": 6,
+  "nested_cards": 0,
+  "headings": [
+   "Accounts",
+   "What you own",
+   "How it adds up",
+   "Cash & bank",
+   "Deposits",
+   "Investments",
+   "Other",
+   "Gam'eya"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Add account",
+   "Other currencies",
+   "From SMS"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Accounts\n\n10 accounts. 6,900 of it is held for others.\n\nAdd account\nOther currencies\nFrom SMS\nTransactions\nImport\nAccounts\nHeld for others\nZakat\nWhat you own\n988,804EGP\n\n6,900 is held for others, not yours\n\nAcross 10 accounts\n\nHow it adds up\n\nToday\n\nIn your accounts\n981,704\nHeld for others\n−6,900\nWhat you own\n988,804\nCash & bank\n215,301 EGP\nIn your accounts\nWhat you own\nCash wallet\nCash wallet\n10,564\n10,564\nCIB Payroll\nBank account (current or savings)\n157,582\n150,682\nDS\nDollar savings\nBank account (current or savings)\n51,600\n51,600\nVodafone Cash\nCash wallet\n2,455\n2,455\nDeposits\n100,000 EGP\nIn your accounts\nWhat you own\nNBE 3-year certificate\nCertificates of deposit (CD portfolio)\n100,000\n100,000\nInvestments\n273,502 EGP\nIn your accounts\nWhat you own\nDB\nDollar brokerage\nBrokerage (stocks and funds)\n114,211\n114,211\nGold at home\nPhysical asset (gold and things you own)\n110,295\n110,295\nTHNDR\nBrokerage (stocks and funds)\n48,996\n48,996\nOther\n400,000 EGP\nIn your accounts\nWhat you own\nFamily f",
+  "status": 200
+ },
+ "/money-from-others": {
+  "height": 873,
+  "screens": 1.1,
+  "topbar_px": 70,
+  "tabs_px": 44,
+  "content_top": 182,
+  "figures": 2,
+  "words": 64,
+  "targets": 10,
+  "inputs": 0,
+  "notices": 0,
+  "details": 3,
+  "cards": 5,
+  "nested_cards": 0,
+  "headings": [
+   "Held for others",
+   "Cash",
+   "Investments"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Held for others\n\nMoney and units in your accounts that belong to other people. It is left out of what you own.\n\n6,900 EGP in all\nTransactions\nImport\nAccounts\nHeld for others\nZakat\nCash\nHeld for\tAccount\tAmount held\nMom\tCIB Payroll\t6,900.00\nInvestments\n\nNo investments are held for others.\n\nHow to record ownership\nCash ownership history\n4 entries\nInvestment ownership history\n0 entries",
+  "status": 200
+ },
+ "/zakat": {
+  "height": 1172,
+  "screens": 1.5,
+  "topbar_px": 70,
+  "tabs_px": 44,
+  "content_top": 182,
+  "figures": 11,
+  "words": 152,
+  "targets": 8,
+  "inputs": 0,
+  "notices": 0,
+  "details": 0,
+  "cards": 2,
+  "nested_cards": 0,
+  "headings": [
+   "Zakat",
+   "What counts",
+   "Your zakat"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Record payment"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Zakat\n\nAs of 2026-10-02 · zakat day 2026-12-01\n\nRecord payment\nTransactions\nImport\nAccounts\nHeld for others\nZakat\nWhat counts\nCash you own\n236,317\nDeposits\n100,000\nShares and funds\n142,191\nGold held as savings\n110,295\nGam'eya paid in\n0\nDebts due now\n0\nYour zakat\nzakat day 2026-12-01\nZakatable wealth\n588,804\nNisab\n85 g of 24K gold at the price of 2026-09-30\n451,350\nZakat due\n2.5% of your zakatable wealth\n14,720\nPaid this zakat year\n2025-12-12 to 2026-12-01\n1,000\nStill to pay\n13,720\nEGP\n\nYour zakat day is 2026-12-01. The next is 354 days later: it follows the lunar year, so it comes about 11 days earlier each year.\n\nThis is an estimate by the common rule: 2.5% of your zakatable wealth when it reaches the nisab on your zakat day; a scholar answers your own case. Lightning counts cash, deposits, gam’eya, shares and funds, and gold. Other assets are not in it.",
+  "status": 200
+ },
+ "/settings": {
+  "height": 1832,
+  "screens": 2.4,
+  "topbar_px": 63,
+  "tabs_px": 44,
+  "content_top": 175,
+  "figures": 0,
+  "words": 201,
+  "targets": 38,
+  "inputs": 4,
+  "notices": 0,
+  "details": 2,
+  "cards": 6,
+  "nested_cards": 0,
+  "headings": [
+   "Settings",
+   "Appearance and language",
+   "Your data",
+   "Features",
+   "Settings in each tab",
+   "Export for AI",
+   "Advanced"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Full screen"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Settings\nFull screen\nYour data\nRules\nCategories\nCounterparties\nData checks\nAppearance and language\nTheme\nApplies at once and saves with this profile.\nCotton (try it)\nDendera, night (try it)\nDendera (try it)\nLightning default\nNile (try it)\nPapyrus (try it)\nRoyal Obsidian & Gold (preview)\nLanguage\nEnglish\nالعربية\nSetup guide\nShows the first steps on Overview again.\nShow setup guide\nUnlock a theme you bought\nYour data\nBackup\nOne is made each time the app starts.\nBack up now\nMove your data\nA full copy out, or records in from another profile.\nExport your data\nImport your data\nBase currency\nEGP\nManage currencies\nApp version\n/home/user/Lightning/data/sample.db\nv1.5.1\nFeatures\nShow zakat\nA zakat estimate under Transactions.\nShow zakat\nSettings in each tab\nSale factors\nOverview\nBudget settings\nBudget\nFinancial health limits\nSafety · Limits\nFinancial assets\nInvestments · Holdings\nTarget allocation\nInvestments · Planner\nPrice files\nInvestments · Prices\nZakat settings\nTransactions · Zakat\nExport f",
+  "status": 200
+ },
+ "/rules": {
+  "height": 768,
+  "screens": 1,
+  "topbar_px": 63,
+  "tabs_px": 44,
+  "content_top": 175,
+  "figures": 2,
+  "words": 27,
+  "targets": 8,
+  "inputs": 0,
+  "notices": 0,
+  "details": 0,
+  "cards": 1,
+  "nested_cards": 0,
+  "headings": [
+   "Rules",
+   "Rules"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Add rule"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Rules\nAdd rule\nYour data\nRules\nCategories\nCounterparties\nData checks\nRules\n1 saved · most specific first\nCounterparty contains Vodafone · Amount between 1,000 and 50,000\nShopping",
+  "status": 200
+ },
+ "/categories": {
+  "height": 1511,
+  "screens": 2,
+  "topbar_px": 71,
+  "tabs_px": 44,
+  "content_top": 183,
+  "figures": 0,
+  "words": 304,
+  "targets": 255,
+  "inputs": 69,
+  "notices": 0,
+  "details": 0,
+  "cards": 1,
+  "nested_cards": 0,
+  "headings": [
+   "Settings",
+   "Personal15 categories",
+   "Work8 categories",
+   "Investment5 categories",
+   "System Categories6 categories"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Settings\n\nCategories · why money moved\n\nYour data\nRules\nCategories\nCounterparties\nData checks\n34 categories\nRecurringcounts toward the income average and forecast ·One-offstays in cash flow, out of the budget · changes save as you make them\nSelect all\n0 selected\nArchive selected\nExport selected\nDelete selected\nPersonal15 categories\nAdd category\n− Expense\n+ Income\n± Both\nRecurring\n− Expense\n+ Income\n± Both\nRecurring\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\nWork8 categories\nAdd category\n− Expense\n+ Income\n± Both\nRecurring\n− Expense\n+ Income\n± Both\nRecurring\n− Expense\n+ Income\n± Both\nRecurring\n−",
+  "status": 200
+ },
+ "/counterparties": {
+  "height": 3175,
+  "screens": 4.1,
+  "topbar_px": 71,
+  "tabs_px": 44,
+  "content_top": 183,
+  "figures": 0,
+  "words": 328,
+  "targets": 336,
+  "inputs": 112,
+  "notices": 0,
+  "details": 37,
+  "cards": 2,
+  "nested_cards": 0,
+  "headings": [
+   "Settings",
+   "Find and correct names"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Settings\n\nCounterparties · saved names, aliases, and suggested categories\n\nYour data\nRules\nCategories\nCounterparties\nData checks\nAdd a counterparty\nSave a name and optional suggested category\nFind and correct names\n\n36 shown · 36 saved. Rename, add aliases, or change the suggested category.\n\nCounterparty and aliases\tSuggested category\tActions\n\nAliases\n\t\n3 of the last 3\t\nOpen\nPerson Business\n\n\nAliases\n\t\n4 of the last 5\t\nOpen\nPerson Business\n\n\nAliases\n\t\n\t\nOpen\nPerson Business\n\n\nAliases\n\t\n\t\nOpen\nPerson Business\n\n\nAliases\n\t\n2 of the last 2\t\nOpen\nPerson Business\n\n\nAliases\n\t\n5 of the last 5\t\nOpen\nPerson Business\n\n\nAliases\n\t\n5 of the last 5\t\nOpen\nPerson Business\n\n\nAliases\n\t\n\t\nOpen\nPerson Business\n\n\nAliases\n\t\n5 of the last 5\t\nOpen\nPerson Business\n\n\nAliases\n\t\n\t\nOpen\nPerson Business\n\n\nAliases\n\t\n5 of the last 5\t\nOpen\nPerson Business\n\n\nAliases\n\t\n2 of the last 2\t\nOpen\nPerson Business\n\n\nAliases\n\t\n5 of the last 5\t\nOpen\nPerson Business\n\n\nAliases\n\t\n\t\nOpen\nPerson Business\n\n\nAliases\n\t\n5 of the last 5\t\nOp",
+  "status": 200
+ },
+ "/checks": {
+  "height": 1459,
+  "screens": 1.9,
+  "topbar_px": 71,
+  "tabs_px": 44,
+  "content_top": 183,
+  "figures": 6,
+  "words": 218,
+  "targets": 11,
+  "inputs": 1,
+  "notices": 0,
+  "details": 0,
+  "cards": 5,
+  "nested_cards": 0,
+  "headings": [
+   "Settings",
+   "No cash account is below zero",
+   "Profile-currency cash moves at face value",
+   "Budget actual equals categorized spending",
+   "Free cash matches the ledger",
+   "Month-to-date net-worth bridge"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Check"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Settings\n\nData checks · compare totals across your ledger and reports\n\nAs of\nCheck\nYour data\nRules\nCategories\nCounterparties\nData checks\nPassed\n5\nNeeds attention\n0\nIncomplete valuations\n0\n\nThese checks compare independently derived totals. An incomplete check means a missing price or exchange rate prevents a full comparison.\n\nNo cash account is below zero\n\nWallets and bank accounts hold money you have.\n\npass\nActual\n0.00 EGP\nExpected\n0.00 EGP\nDifference\n0.00 EGP\nProfile-currency cash moves at face value\n\nEvery cash line in the profile currency is valued at exactly its amount.\n\npass\nActual\n0.00 EGP\nExpected\n0.00 EGP\nDifference\n0.00 EGP\nBudget actual equals categorized spending\n\nBudget actuals should reconcile to posted money-out categories, leaving out investment fees and taxes as the budget does.\n\npass\nActual\n+3,410.00 EGP\nExpected\n+3,410.00 EGP\nDifference\n0.00 EGP\nFree cash matches the ledger\n\nFree cash = spendable cash you own − reserves − bills due, rebuilt from each account's ledger",
+  "status": 200
+ },
+ "/accounts/1": {
+  "height": 3390,
+  "screens": 4.4,
+  "topbar_px": 71,
+  "tabs_px": 0,
+  "content_top": 119,
+  "figures": 95,
+  "words": 696,
+  "targets": 144,
+  "inputs": 13,
+  "notices": 0,
+  "details": 4,
+  "cards": 2,
+  "nested_cards": 0,
+  "headings": [
+   "CIB Payroll",
+   "Transactions",
+   "What depends on this account"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Money actions",
+   "",
+   "",
+   "",
+   "⋯",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "CIB Payroll\n\nBank account · CIB · EGP\n\nIn this account\n157,582\nWhat you own\n150,682\nHeld for others\n6,900\nMoney actions\n⋯\n\nReview activity\n\nTransactions\nDate period\nAll time\nThis month\nLast month\nYear to date\nCustom dates\nViews\nFind and replace\n\tDate\tCounterparty\tCategory\tNotes\tAmount (EGP)\tBalance\nNew\t\n\t\n\t\n\t\n\t \n\t—\n\t2026-10-02\t\nCarrefour\n\tFood & Groceries\t—\t\n−3,410.00\nEdit\n\t157,582.22 EGP\n\t2026-10-01\t\nACME Egypt\n\tSalary\t\nSalary\n\t\n+50,000.00\nEdit\n\t160,992.22 EGP\n\t2026-09-30\t\nvalU\n\tLoan payments\t\nLoan payment · Laptop instalments\n\t\n−3,000.00\nEdit\n\t110,992.22 EGP\n\t2026-09-29\t\n↔ Dollar savings\n50,000.00 EGP → 1,000.00 USD\n\tConversion\t\nDollars from Banque Misr\n\t\n−50,050.00\nDetails\n\t113,992.22 EGP\n\t2026-09-28\t\nOwnership: You → Mom\nHeld for Mom\n\tAdjustment\t\nKept for Mom\n\t\n0.00\nDetails\n\t164,042.22 EGP\n\t2026-09-28\t\nvalU\n\tLoan payments\t\nLaptop instalments · payment 3 of 12\n\t\n−2,000.00\nEdit\n\t164,042.22 EGP\n\t2026-09-28\t\nCIB\n\tFees & Charges\t\nMonthly account fee\n\t\n−15.00\nEdit\n\t166,042.22 EGP\n\t2026-0",
+  "status": 200
+ },
+ "/review": {
+  "height": 1131,
+  "screens": 1.5,
+  "topbar_px": 63,
+  "tabs_px": 38,
+  "content_top": 169,
+  "figures": 6,
+  "words": 132,
+  "targets": 14,
+  "inputs": 0,
+  "notices": 0,
+  "details": 1,
+  "cards": 5,
+  "nested_cards": 0,
+  "headings": [
+   "Weekly review",
+   "NBE 3-year certificate · 22%: 9 interest payments to match",
+   "Imported activity needs a decision",
+   "This month's plan is short for your goals",
+   "Record this review",
+   "Optional reminders"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Overview"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Weekly review\nOverview\nNBE 3-year certificate · 22%: 9 interest payments to match\nNBE 3-year certificate · 22%: 9 interest payments to match\n16,455 EGP still unmatched; 8 have a suggested bank receipt.\nReview\nMatch all suggested\nImported activity needs a decision\nImported activity needs a decision\nvodafone-october.csv · 3 rows wait · from row 2 · 2026-10-01.\nFinish the import\nThis month's plan is short for your goals\nThis month's plan is short for your goals\nIt leaves 11,572 EGP; your goals and emergency fund need 14,395. Plan 2,823 less.\nReview\nRecord this review\n I reviewed the remaining decisions. They stay visible until resolved.Record this review\nOptional reminders\n\nReminders use your existing plans and Needs you. Native alerts require an unlocked app session and notification permission.\n\nTurn on reminders\nReview activity",
+  "status": 200
+ },
+ "/needs-you": {
+  "height": 768,
+  "screens": 1,
+  "topbar_px": 63,
+  "tabs_px": 0,
+  "content_top": 111,
+  "figures": 5,
+  "words": 120,
+  "targets": 21,
+  "inputs": 3,
+  "notices": 0,
+  "details": 3,
+  "cards": 1,
+  "nested_cards": 0,
+  "headings": [
+   "Needs you"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Needs you\nActive items\nReviewed and snoozed\nWeekly review\n\n3 active · 0 reviewed · 0 snoozed\n\nReviewed items stay quiet until the situation changes. Snoozed items return on your chosen date. These actions do not record payments.\n\nImported activity needs a decision\nvodafone-october.csv · 3 rows wait · from row 2 · 2026-10-01.\nFinish the import\nMark as reviewed\nSnooze\nNBE 3-year certificate · 22%: 9 interest payments to match\n16,455 EGP still unmatched; 8 have a suggested bank receipt.\nReview\nMatch all suggested\nMark as reviewed\nSnooze\nThis month's plan is short for your goals\nIt leaves 11,572 EGP; your goals and emergency fund need 14,395. Plan 2,823 less.\nReview\nMark as reviewed\nSnooze\nBack to the Overview",
+  "status": 200
+ },
+ "/explain": {
+  "height": 768,
+  "screens": 1,
+  "topbar_px": 63,
+  "tabs_px": 38,
+  "content_top": 169,
+  "figures": 0,
+  "words": 11,
+  "targets": 3,
+  "inputs": 0,
+  "notices": 0,
+  "details": 0,
+  "cards": 1,
+  "nested_cards": 0,
+  "headings": [
+   "Not found"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   768
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Not found\nThat page does not exist. Back to the dashboard",
+  "status": 404
+ },
+ "/-1080": {
+  "height": 1388,
+  "screens": 1.3,
+  "topbar_px": 94,
+  "tabs_px": 38,
+  "content_top": 200,
+  "figures": 27,
+  "words": 239,
+  "targets": 63,
+  "inputs": 1,
+  "notices": 0,
+  "details": 13,
+  "cards": 0,
+  "nested_cards": 0,
+  "headings": [
+   "Overview",
+   "Net worth",
+   "Over time",
+   "Needs you · 3",
+   "Get set up",
+   "Your position",
+   "",
+   "",
+   "",
+   ""
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "All time",
+   "YTD",
+   "Monthly",
+   "Custom",
+   "Previous month",
+   "Next month"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Overview\n\nYou kept 93% of what came in this month.\n\n2026-10-01 to 2026-10-02 · so far\n\nAll time\nYTD\nMonthly\nCustom\nNet worth\n\nExcludes money held for others\n\n922,304\nEGP\n\n+46,590 this month\n\nWhat you own\n988,804\nCash you own\n236,317\nHoldings value\n752,486\nWhat you owe\n−66,500\nOver time\n\nAt the end of each month · 2026-01 to 2026-10\n\n1,000,000\n500,000\n0\n922,304\n01\n2026\n02\n03\n04\n05\n06\n07\n08\n09\n10\nShow the numbers\nNet worth at the end of each month\nNeeds you · 3\nManage Needs you\nWeekly review\nNBE 3-year certificate · 22%: 9 interest payments to match\n16,455 EGP still unmatched; 8 have a suggested bank receipt.\nReview\nImported activity needs a decision\nvodafone-october.csv · 3 rows wait · from row 2 · 2026-10-01.\nFinish the import\nThis month's plan is short for your goals\nIt leaves 11,572 EGP; your goals and emergency fund need 14,395. Plan 2,823 less.\nReview\nSavings rate\n2026-10 so far\n93.2%\n+67.2 points on your usual 25.9%\n46,590 kept of 50,000 money in\nInvesting rate\n2026-10 so far\n—\nNo",
+  "status": 200
+ },
+ "/birdview/expenses-1080": {
+  "height": 3481,
+  "screens": 3.2,
+  "topbar_px": 69,
+  "tabs_px": 44,
+  "content_top": 181,
+  "figures": 34,
+  "words": 381,
+  "targets": 37,
+  "inputs": 1,
+  "notices": 0,
+  "details": 5,
+  "cards": 3,
+  "nested_cards": 0,
+  "headings": [
+   "Expense analysis",
+   "Where did it go?",
+   "By category",
+   "How each one moved",
+   "Is this period unusual?",
+   "Now against your usual month",
+   "Inside its usual range?",
+   "Day by day",
+   "Total expenses",
+   "Cash flow",
+   "Where money in went",
+   "The last six months",
+   "Month by month",
+   "Net cash flow"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "All time",
+   "YTD",
+   "Monthly",
+   "Custom",
+   "Previous month",
+   "Next month"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Expense analysis\nWhere your money went\nAll time\nYTD\nMonthly\nCustom\nSpending\nCompare periods\nReports\nMoney out so far\n3,410EGP\nAgainst 2026-09 days 1–2\n+476 · 16%\nAgainst the same days in earlier months\n+83 · 2%\n\nSo far · comparisons use the same calendar days in earlier months.\n\nWhere did it go?\n2026-10-01 to 2026-10-02\nCompare periods\nBy category\n\nSize is money out\n\nFood & Groceries\n3,410 · 100%\nShow the numbers\nHow each one moved\n\nSame days in earlier months, then now so far · one scale for all\n\nFood & Groceries\n3,410\nShow the numbers\nIs this period unusual?\nThis month against the 9 months before it\nNow against your usual month\n\nUsual: the same days in the last 6 months · now\n\nUsual\nNow\n3,327\n3,410\nFood & Groceries\n+2%\nShow the numbers\nInside its usual range?\n\nLowest month on the left, highest on the right · the tick its middle month · the dot now\n\nFood & Groceries\n2.9k\n3.6k\nWithin range\nnow 3.4k\nDay by day\n2026-10-01 to 2026-10-02\nTotal expenses\n\nMost on 2026-10-02 · 3,410 · nothing",
+  "status": 200
+ },
+ "/spending/compare-1080": {
+  "height": 1080,
+  "screens": 1,
+  "topbar_px": 96,
+  "tabs_px": 44,
+  "content_top": 208,
+  "figures": 6,
+  "words": 66,
+  "targets": 15,
+  "inputs": 5,
+  "notices": 0,
+  "details": 0,
+  "cards": 3,
+  "nested_cards": 0,
+  "headings": [
+   "Compare periods",
+   "Biggest changes first"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Compare periods\n\nMoney out is 476 higher than 2026-09-01 to 2026-09-02.\n\n2026-10-01 to 2026-10-02\n\nSpending\nCompare periods\nReports\nMoney out\n3,410 EGP\n+475.50 against 2026-09-01 to 2026-09-02\nMonth\nQuarter\nYear\nThis period\nAgainst\nBy\nCategory\nCounterparty\nCompare\nExport CSV\nBiggest changes first\n\nOpen any row to see why.\n\nCategory\tThis period\tAgainst\tDifference\t%\nFood & Groceries\t3,410.00\t2,934.50\t+475.50\t16%\nTotal\t3,410.00\t2,934.50\t+475.50\t",
+  "status": 200
+ },
+ "/reports-1080": {
+  "height": 1080,
+  "screens": 1,
+  "topbar_px": 69,
+  "tabs_px": 44,
+  "content_top": 181,
+  "figures": 5,
+  "words": 77,
+  "targets": 12,
+  "inputs": 0,
+  "notices": 0,
+  "details": 0,
+  "cards": 5,
+  "nested_cards": 0,
+  "headings": [
+   "Reports",
+   "Saved views",
+   "Everything"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Reports\nReady-made comparisons and your saved views\nSpending\nCompare periods\nReports\nThis month against last month\n3,410.00 EGP\n+475.50\nBiggest change: Food & Groceries +475.50\nThis quarter against last quarter\n3,410.00 EGP\n−175.50\nBiggest change: Food & Groceries −175.50\nThis year against last year\n315,748.75 EGP\n+315,748.75\nBiggest change: Housing & Rent +108,000.00\nSaved views\n\nSave a filter on Transactions to see it here.\n\nEid\tReport\tExport\nEverything\nExport all data (CSV or Excel) Print this page",
+  "status": 200
+ },
+ "/budget-1080": {
+  "height": 2127,
+  "screens": 2,
+  "topbar_px": 94,
+  "tabs_px": 38,
+  "content_top": 200,
+  "figures": 48,
+  "words": 304,
+  "targets": 92,
+  "inputs": 15,
+  "notices": 0,
+  "details": 6,
+  "cards": 4,
+  "nested_cards": 0,
+  "headings": [
+   "Budget",
+   "Left in plan",
+   "Is everyday spending on pace?",
+   "Spent of plan",
+   "Bills in this month's plan",
+   "Spending by group",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "All time",
+   "YTD",
+   "Monthly",
+   "Custom",
+   "Previous month",
+   "Next month",
+   "Fill this month"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Budget\n\nYou are 2,122 over your plan's pace.\n\n2026-10-01 to 2026-10-02 · so far\n\nAll time\nYTD\nMonthly\nCustom\nFill this month\nLeft in plan\n30 days left\n35,018EGP\n\n16,558 for everyday, about 552 a day\n\nSpent\nBills to pay\nEveryday\n\nSpent 3,410 of 38,428 planned\n\nIs everyday spending on pace?\n\nDay by day against the plan, bills and loan payments left out.\n\n9,984\n19,968\n3,410\nPlan's pace 1,288\nPlan 19,968\n2026-09 13,808\n1\nToday\n31\n\nEveryday spending\nPlan\n2026-09\n\nEveryday spending\nby day 2\n3,410EGP\n2,122 over the plan's pace\n+476 against 2026-09 by day 2\nPlan leaves to save\nWatch\n11,572EGP\n23% of income, target 20%\nPlan 2,823 less to keep 14,395 a month\nSpent of plan\nSpent\nPlan\nOver plan\nFood & Groceries\n3,410 of 5,217\n1,807 left\nEating Out\n0 of 1,954\n1,954 left\nTransportation\n0 of 2,949\n2,949 left\nHousing & Rent\n0 of 12,000\n12,000 left\nUtilities & Bills\n0 of 1,863\n1,863 left\nHealth\n0 of 1,500\n1,500 left\nEntertainment\n0 of 5,072\n5,072 left\nGifts & Donations\n0 of 2,200\n2,200 left\nOther Perso",
+  "status": 200
+ },
+ "/plan-1080": {
+  "height": 2855,
+  "screens": 2.6,
+  "topbar_px": 94,
+  "tabs_px": 44,
+  "content_top": 206,
+  "figures": 33,
+  "words": 392,
+  "targets": 31,
+  "inputs": 1,
+  "notices": 0,
+  "details": 8,
+  "cards": 5,
+  "nested_cards": 0,
+  "headings": [
+   "Cash planning",
+   "Safe to spend",
+   "How safe to spend is worked out",
+   "Can I afford this?",
+   "The next 30 days",
+   "Where is my cash heading?",
+   "Free cash, then the forecast",
+   "In and out each month ahead",
+   "Zakat",
+   "What is promised?",
+   "What you owe",
+   "By loan"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Cash planning\n\nYou can spend 112,288 before payday and stay on plan.\n\n2026-10-02 to 2026-11-01 · until payday\n\nPlan\nRecurring\nLoans\nSafe to spend\nuntil 2026-11-01\n112,288EGP\n\n69% of your free cash\n\nSafe\nBudget\nSavings\nDue\n\nOn top of your plan How it is worked out\n\nHow safe to spend is worked out\n\nFrom free cash to safe to spend\n\nFree cash\n163,701\nDue before payday\n−18,460\nGam'eya instalments before next income\n−2,000\nBudget until payday\n−16,558\nSaving for goals\n−5,500\nEmergency fund top-up\n−8,895\nSafe to spend\n112,288\nShow the numbers\nCan I afford this?\nCheck\nFree cash\n2026-10\n163,701EGP\n+46,590 since 2026-09-30\nCash you own 236,317, less 72,616 set aside or due\nDue before payday\n7 payments\n18,460EGP\n7 payments before payday\nNext: Landlord · 2026-10-03\nLowest point ahead\n2026-11\n101,534EGP\n62,167 below today\n2.6 months of spending at its lowest\nSee the forecast\nThe next 30 days\n\n2026-10-02 to 2026-11-01 · money in above the line, payments below\n\nRecurring\nLandlord\n2026-10-03 · Bill\n−12",
+  "status": 200
+ },
+ "/plan/recurring-1080": {
+  "height": 2078,
+  "screens": 1.9,
+  "topbar_px": 63,
+  "tabs_px": 44,
+  "content_top": 175,
+  "figures": 11,
+  "words": 286,
+  "targets": 22,
+  "inputs": 0,
+  "notices": 0,
+  "details": 0,
+  "cards": 3,
+  "nested_cards": 0,
+  "headings": [
+   "Cash planning",
+   "Every month",
+   "Bills and subscriptions",
+   "Recurring items",
+   "Looks recurring"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Add recurring item"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Cash planning\nAdd recurring item\nPlan\nRecurring\nLoans\nFixed costs to income\n2026-10-02\n38.2%\n19,110 a month of 50,000 income · bills, subscriptions and loans\nEvery month\nBills and subscriptions\n14,610 EGP a month\n\nSubscriptions come to 7,080 a year.\n\nLandlord\nBill · Housing & Rent\n12,000.00\nNorth Cairo Electricity\nBill · Utilities & Bills\n720.00\nWE Internet\nBill · Utilities & Bills\n650.00\nEnglish course\nBill · Education\n650.00\n2 more\n590.00\nRecurring items\n8 active\nLandlord\nBill · Monthly on day 3 · Housing & Rent · CIB Payroll\nNext 2026-10-03\n−12,000.00\nVodafone\nSubscription · Monthly on day 9 · Utilities & Bills · Vodafone Cash\nNext 2026-10-09\n−350.00\nNetflix\nSubscription · Monthly on day 12 · Entertainment · CIB Payroll\nNext 2026-10-12\n−240.00\nWE Internet\nBill · Monthly on day 20 · Utilities & Bills · CIB Payroll\nNext 2026-10-20\n−650.00\nNorth Cairo Electricity\nBill · Monthly on day 24 · Utilities & Bills · CIB Payroll\nNext 2026-10-24\n−720.00\nACME Egypt\nIncome · Monthly on day 1 · Sa",
+  "status": 200
+ },
+ "/plan/loans-1080": {
+  "height": 1651,
+  "screens": 1.5,
+  "topbar_px": 63,
+  "tabs_px": 44,
+  "content_top": 175,
+  "figures": 19,
+  "words": 155,
+  "targets": 14,
+  "inputs": 0,
+  "notices": 0,
+  "details": 0,
+  "cards": 3,
+  "nested_cards": 0,
+  "headings": [
+   "Cash planning",
+   "Loans still to pay",
+   "Your loans",
+   "Car loan",
+   "Laptop instalments"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Add loan"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Cash planning\nAdd loan\nPlan\nRecurring\nLoans\nDebt to net worth\n2026-10-02\n7.2%\n66,500 owed against 922,304 net worth\nDebt to cash\n2026-10-02\n28.1%\n66,500 owed against 236,317 cash you own\nLoan payments to income\n2026-10-02\n9.0%\n4,500 a month of 50,000 income\nPaid off on\n2027-12-05\n\n12 of 35 payments made.\n\nLoans still to pay\n52,500 EGP\n\nEvery unpaid payment, due or upcoming. Only payments already due come off free cash.\n\nBought in instalments\nYour loans\n2\nCar loan\n\nMonthly on day 5 · 24 payments · from CIB Payroll · borrowed 60,000 EGP\n\nPay early\nPayments made\n9 of 24 · 22,500.00\nStill to pay\n37,500.00\nNext payment\n2,500.00 on 2026-10-05\nLast payment\n2027-12-05\nLaptop instalments\n\nMonthly on day 28 · 12 payments · from CIB Payroll · borrowed 24,000 EGP\n\nPay early\nPaid towards loan\n9,000.00\nStill to pay\n15,000.00\nNext payment\n2,000.00 on 2026-10-28\nLast payment\n2027-05-28\nExtra payment\n2026-09-30\n3,000.00",
+  "status": 200
+ },
+ "/plan/reserves-1080": {
+  "height": 1669,
+  "screens": 1.5,
+  "topbar_px": 63,
+  "tabs_px": 44,
+  "content_top": 175,
+  "figures": 21,
+  "words": 235,
+  "targets": 53,
+  "inputs": 25,
+  "notices": 0,
+  "details": 4,
+  "cards": 4,
+  "nested_cards": 0,
+  "headings": [
+   "Cash planning",
+   "Emergency fund",
+   "Could also use",
+   "What are you saving for?"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Cash planning\nReserves\nLimits\nEmergency fund covers\n0.5 months\n\nOf average monthly spending. The aim is six.\n\n0 EGP set aside in reserves; free cash is 163,701 EGP after them and bills due.\nHow free cash is built\n\nFree cash can bring your emergency fund closer to its target.\nRefill 163,701\nEmergency fund\nTowards six months of spending\n213,474 to go\n20,000 of 233,474\nEmergency fund top-up\n8,895\na month to reach six months within two years; the budget leaves room for it\nAverage monthly spending\n38,912\n2026-07 to 2026-09 · 3 months with spending\n\nCounted in months of spending · Change in Settings\n\nCould also use\nFree cash 163,701 EGP\nMoney Market Fund 10,376 EGP · Accessible in days\nNBE 3-year certificate · 22% 100,000 EGP · Locked until 2027-01-01\nEquity Fund 102,085 EGP · Access timing unknown\nGold 110,295 EGP · Access timing unknown\nOther Investments 400,000 EGP · Access timing unknown\nStocks 29,730 EGP · Access timing unknown\nAmount set aside\nWhat are you saving for?\nCar insurance\nUpc",
+  "status": 200
+ },
+ "/financial-health-1080": {
+  "height": 1310,
+  "screens": 1.2,
+  "topbar_px": 94,
+  "tabs_px": 44,
+  "content_top": 206,
+  "figures": 8,
+  "words": 168,
+  "targets": 22,
+  "inputs": 1,
+  "notices": 0,
+  "details": 8,
+  "cards": 2,
+  "nested_cards": 0,
+  "headings": [
+   "Financial health",
+   "Within your limits",
+   "Savings rate over time",
+   "Against your limits",
+   "Cushion",
+   "",
+   "Saving",
+   "Debt and monthly commitments"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Show"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Financial health\n\nAll 5 figures are within your limits.\n\nBalances as of 2026-10-02 · savings rate from 2026-09\n\nAs of\nShow\nReserves\nLimits\nWithin your limits\n5\n\nof the 5 figures you set a limit for\n\nAll of them are good\n\nSavings rate over time\n\n2026-04 to 2026-09 · completed months\n\nOverview\n\n32.0% in 2026-09 · lowest 13.9% in 2026-08\n\n2026-04\n2026-09\nShow the numbers\nAgainst your limits\n5 of 5 within your limits\nCushion\nEmergency fund\nUnavailable\nNo comparison available\nAs of 2026-10-02 · months of average monthly spending\n6.1 months in cash you own\nSaving\nSavings rate\n32.0%\nGood\n2026-09\nPlanned savings rate\n23.1%\nGood\n2026-10 plan\nDebt and monthly commitments\nDebt to cash\n28.1%\nNo limit\n2026-10-02\nDebt to net worth\n7.2%\nGood\n2026-10-02\nFixed costs to income\n38.2%\nGood\nMonthly · 2026-07 to 2026-09\nLoan payments to income\n9.0%\nGood\nMonthly · 2026-07 to 2026-09\n\nLimits only compare figures you already have; they change no transactions, plans or reports. Change them behind the gear.",
+  "status": 200
+ },
+ "/investments-1080": {
+  "height": 2359,
+  "screens": 2.2,
+  "topbar_px": 94,
+  "tabs_px": 44,
+  "content_top": 206,
+  "figures": 91,
+  "words": 344,
+  "targets": 30,
+  "inputs": 4,
+  "notices": 0,
+  "details": 0,
+  "cards": 4,
+  "nested_cards": 0,
+  "headings": [
+   "Investments",
+   "Portfolio value",
+   "Allocation",
+   "By currency",
+   "Holdings",
+   "Income collected (dividends and interest)",
+   "Money and value by class"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "All time",
+   "YTD",
+   "Monthly",
+   "Custom",
+   "Previous month",
+   "Next month",
+   "EGP",
+   "USD"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Investments\n\nYour holdings' value did not move this month.\n\n2026-10-01 to 2026-10-02 · valued as of 2026-10-02\n\nAll time\nYTD\nMonthly\nCustom\nEGP\nUSD\nHoldings\nPlanner\nPrices\nCurrencies\nPortfolio value\n2026-10\n752,486EGP\n\n0 Net gain or loss\n\n+77,073 since six months ago\n\nAllocation\n\nHoldings value by asset class · 2026-10-02\n\n752,486\nHoldings value\nCDs / Time Deposits\n13.3%\n100,000\nGold\n14.7%\n110,295\nEquity Fund\n13.6%\n102,085\nOther Investments\n53.2%\n400,000\nOther\n5.3%\n40,106\nTotal · 76% of what you own\n100%\n752,486\nLocked certificate · NBE 3-year certificate · 22%\nnot counted until 2027-01-01\n100,000\nBrokerage cash\n21,016\nHoldings after sale (estimate)\n619,862\nBy currency\n\nHoldings and brokerage cash, by the currency they are in · 2026-10-02\n\nEGP\n659,291 EGP · 85.2%\nUSD\n114,211 EGP · 14.8%\n\nNot in EGP: 15% of your investments\n\nOf your total gain +44,559, +2,206 came from exchange rates\n\nHoldings\nAs of 2026-10-02\nBy class\nBy account\nBy currency\nBy market\nBy security\nAll horizons\nShort\nMedi",
+  "status": 200
+ },
+ "/investments/planner-1080": {
+  "height": 1080,
+  "screens": 1,
+  "topbar_px": 63,
+  "tabs_px": 44,
+  "content_top": 175,
+  "figures": 16,
+  "words": 119,
+  "targets": 11,
+  "inputs": 4,
+  "notices": 0,
+  "details": 0,
+  "cards": 2,
+  "nested_cards": 0,
+  "headings": [
+   "How much do you want to invest?",
+   "Suggested allocation"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "How much do you want to invest?\nHoldings\nPlanner\nPrices\nCurrencies\nAmount in EGP\nMonthly investing goal\nHow to split it\nSpread across gaps\nBiggest gaps first\nShow suggested split\nSuggested allocation\n10,000\nGold\nCurrent 110,295.00 · 31.3% · Target 30.0%\n0\nEquity Fund\nCurrent 102,085.44 · 29.0% · Target %\n0\nCDs / Time Deposits\nCurrent 100,000.00 · 28.4% · Target %\n0\nStocks\nCurrent 29,730.00 · 8.4% · Target 40.0%\n5,395\nMoney Market Fund\nCurrent 10,376.00 · 2.9% · Target 30.0%\n4,605\n\nEvery class below its target gets the same share of its gap, so each one moves part of the way. If the money covers every gap, both ways give the same split. Nothing is sold.",
+  "status": 200
+ },
+ "/investments/prices-1080": {
+  "height": 1688,
+  "screens": 1.6,
+  "topbar_px": 71,
+  "tabs_px": 44,
+  "content_top": 183,
+  "figures": 7,
+  "words": 212,
+  "targets": 52,
+  "inputs": 23,
+  "notices": 0,
+  "details": 4,
+  "cards": 2,
+  "nested_cards": 0,
+  "headings": [
+   "Investment prices",
+   "Update prices"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Investment prices\n\nLightning fetches them online, falls back on the shared price files, or you type them. A price you type for a day wins.\n\nHoldings\nPlanner\nPrices\nCurrencies\nUpdate prices\n\nLightning updates the prices of what you hold by itself, the first time you open it after a month ends.\n\nWhere prices come from\nUpdate prices\nUpload prices from a spreadsheet\nShared price files\nAs of yyyy-mm-dd\nInvestment\tYou hold\tLast price\tTotal value\tNew price per unit\nAzimut money market fund edit\t80 units\t129.7\n2026-09-30\n\t\t\nBTC 10 g bar edit\t1 piece\t53,100\n2026-09-30\n\t\t\nCommercial International Bank (COMI) edit\t180 shares\t92\n2026-09-30\n\t\t\nFawry for Banking Technology edit\t300 shares\t9.8\n2026-09-30\n\t\t\nGold pound (from grandma) edit\t1 piece\t37,200\n2026-09-30\n\t\t\nInvesco NASDAQ 100 ETF edit\t8 units\t247.3 USD\n2026-09-30\n\t\t\nL'Azurde ring edit\t1 piece\t19,995\n2026-09-30\n\t\t\nNBE 3-year certificate · 22% edit\t1 certificate\t100,000\n2026-01-01 · last trade\n\t\tSet at purchase\nTalaat Moustafa Group edit\t150 s",
+  "status": 200
+ },
+ "/accounts/currencies-1080": {
+  "height": 1385,
+  "screens": 1.3,
+  "topbar_px": 71,
+  "tabs_px": 44,
+  "content_top": 183,
+  "figures": 19,
+  "words": 199,
+  "targets": 14,
+  "inputs": 0,
+  "notices": 0,
+  "details": 1,
+  "cards": 2,
+  "nested_cards": 0,
+  "headings": [
+   "Currencies",
+   "USD · Value against cost",
+   "USD"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "All time",
+   "YTD",
+   "Monthly",
+   "Custom",
+   "Accounts",
+   "Add account"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Currencies\n\nForeign money you hold: what it cost, what it is worth, what it earned or lost.\n\nAll time\nYTD\nMonthly\nCustom\nAccounts\nAdd account\nHoldings\nPlanner\nPrices\nCurrencies\nForeign money\n165,811 EGP\nCash 63,726 · investments 102,085\nUnrealized FX gain\n+2,023 EGP\nNot locked in until you spend or convert.\nRealized FX gain\n+971 EGP\n2026-01-01 → 2026-10-02\nSpread paid\n−1,450 EGP\nBeyond the market rate, on conversions in this period.\nUSD · Value against cost\n\nBy month, in EGP. The dashed line is what the money cost.\n\nValue of what you hold\nWhat it cost\n200,000\n100,000\n0\n63,726\n61,703\n01\n2026\n02\n03\n04\n05\n06\n07\n08\n09\n10\nShow the numbers\nValue of USD you hold against what it cost, by month\nUSD\nHeld\n1,235.00 USD\nAnd 102,085 EGP in USD investments.\nValue\n63,726 EGP\n1 USD = 51.60 EGP\nAverage rate\n49.96\nCost 61,703 EGP\nUnrealized FX gain\n+2,023 EGP\nRealized FX gain\n+971 EGP\nSince the first holding: +971 EGP\nSpread paid\n−1,450 EGP\n1 conversion in this period\nAccount\tBalance (USD)\tYou own\tValue ",
+  "status": 200
+ },
+ "/transactions-1080": {
+  "height": 3588,
+  "screens": 3.3,
+  "topbar_px": 149,
+  "tabs_px": 44,
+  "content_top": 261,
+  "figures": 33,
+  "words": 694,
+  "targets": 139,
+  "inputs": 14,
+  "notices": 0,
+  "details": 4,
+  "cards": 1,
+  "nested_cards": 0,
+  "headings": [
+   "Transactions"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Import statement",
+   "",
+   "",
+   "",
+   "",
+   "Choose an account",
+   "⋯",
+   "",
+   ""
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Transactions\n\nEvery account · EGP\n\nIn your accounts\n981,704\nWhat you own\n988,804\nHeld for others\n−7,100\nImport statement\nChoose an account\n⋯\nTransactions\nImport\nAccounts\nHeld for others\nZakat\n\nReview activity\n\nDate period\nAll time\nThis month\nLast month\nYear to date\nCustom dates\nViews\nFind and replace\n\nShow value updates (28)\n\n\tDate\tCounterparty\tCategory\tNotes\tAmount (EGP)\tBalance\nNew\t\n\t\n\t\n\t\n\t \n\t—\n\t2026-10-02\t\nCarrefour\nCIB Payroll\n\tFood & Groceries\t—\t\n−3,410.00\nEdit\n\t—\n\t2026-10-01\t\nACME Egypt\nCIB Payroll\n\tSalary\t\nSalary\n\t\n+50,000.00\nEdit\n\t—\n\t2026-09-30\t\nvalU\nCIB Payroll\n\tLoan payments\t\nLoan payment · Laptop instalments\n\t\n−3,000.00\nEdit\n\t—\n\t2026-09-29\t\n↔ CIB Payroll\n50,000.00 EGP → 1,000.00 USD\n\tConversion\t\nDollars from Banque Misr\n\t\n50,000.00\nUSD · +1,000.00\nDetails\n\t—\n\t2026-09-29\t\n↔ Dollar savings\n50,000.00 EGP → 1,000.00 USD\n\tConversion\t\nDollars from Banque Misr\n\t\n−50,050.00\nDetails\n\t—\n\t2026-09-28\t\nOwnership: You → Mom\nCIB Payroll\nHeld for Mom\n\tAdjustment\t\nKept for Mom\n\t\n0.00\nDetails",
+  "status": 200
+ },
+ "/import-1080": {
+  "height": 1187,
+  "screens": 1.1,
+  "topbar_px": 69,
+  "tabs_px": 44,
+  "content_top": 181,
+  "figures": 0,
+  "words": 115,
+  "targets": 18,
+  "inputs": 1,
+  "notices": 0,
+  "details": 0,
+  "cards": 3,
+  "nested_cards": 0,
+  "headings": [
+   "Import statements",
+   "vodafone-october.csv is waiting for you",
+   "Import history"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Import statements\nDrop your bank files; each one is matched to its account.\nTransactions\nImport\nAccounts\nHeld for others\nZakat\nvodafone-october.csv is waiting for you\n\n3 rows\n\nContinue the review\nDrop CSV files here\nor click to choose · many files at once · up to 5 MB each\nReview statements\n\nEach account opens its own review: duplicates are flagged and your rules fill the categories before anything is posted.\n\nImport history\n\nUndo removes every entry a file created; you can restore them from history.\n\nBank SMS\nFile\tAccount\tDate\tEntries\t\nvodafone-october.csv\tVodafone Cash\t2026-10-30\t0\tReview\nvodafone-cash.csv\tVodafone Cash\t2026-10-30\t27\t\nUndo\n\ncash-wallet.csv\tCash wallet\t2026-10-30\t102\t\nUndo\n\ncib-payroll.csv\tCIB Payroll\t2026-10-30\t180\t\nUndo",
+  "status": 200
+ },
+ "/accounts-1080": {
+  "height": 1383,
+  "screens": 1.3,
+  "topbar_px": 73,
+  "tabs_px": 44,
+  "content_top": 185,
+  "figures": 31,
+  "words": 184,
+  "targets": 20,
+  "inputs": 0,
+  "notices": 0,
+  "details": 0,
+  "cards": 6,
+  "nested_cards": 0,
+  "headings": [
+   "Accounts",
+   "What you own",
+   "How it adds up",
+   "Cash & bank",
+   "Deposits",
+   "Investments",
+   "Other",
+   "Gam'eya"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Add account",
+   "Other currencies",
+   "From SMS"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Accounts\n\n10 accounts. 6,900 of it is held for others.\n\nAdd account\nOther currencies\nFrom SMS\nTransactions\nImport\nAccounts\nHeld for others\nZakat\nWhat you own\n988,804EGP\n\n6,900 is held for others, not yours\n\nAcross 10 accounts\n\nHow it adds up\n\nToday\n\nIn your accounts\n981,704\nHeld for others\n−6,900\nWhat you own\n988,804\nCash & bank\n215,301 EGP\nIn your accounts\nWhat you own\nCash wallet\nCash wallet\n10,564\n10,564\nCIB Payroll\nBank account (current or savings)\n157,582\n150,682\nDS\nDollar savings\nBank account (current or savings)\n51,600\n51,600\nVodafone Cash\nCash wallet\n2,455\n2,455\nDeposits\n100,000 EGP\nIn your accounts\nWhat you own\nNBE 3-year certificate\nCertificates of deposit (CD portfolio)\n100,000\n100,000\nInvestments\n273,502 EGP\nIn your accounts\nWhat you own\nDB\nDollar brokerage\nBrokerage (stocks and funds)\n114,211\n114,211\nGold at home\nPhysical asset (gold and things you own)\n110,295\n110,295\nTHNDR\nBrokerage (stocks and funds)\n48,996\n48,996\nOther\n400,000 EGP\nIn your accounts\nWhat you own\nFamily f",
+  "status": 200
+ },
+ "/money-from-others-1080": {
+  "height": 1080,
+  "screens": 1,
+  "topbar_px": 70,
+  "tabs_px": 44,
+  "content_top": 182,
+  "figures": 2,
+  "words": 64,
+  "targets": 10,
+  "inputs": 0,
+  "notices": 0,
+  "details": 3,
+  "cards": 5,
+  "nested_cards": 0,
+  "headings": [
+   "Held for others",
+   "Cash",
+   "Investments"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Held for others\n\nMoney and units in your accounts that belong to other people. It is left out of what you own.\n\n6,900 EGP in all\nTransactions\nImport\nAccounts\nHeld for others\nZakat\nCash\nHeld for\tAccount\tAmount held\nMom\tCIB Payroll\t6,900.00\nInvestments\n\nNo investments are held for others.\n\nHow to record ownership\nCash ownership history\n4 entries\nInvestment ownership history\n0 entries",
+  "status": 200
+ },
+ "/zakat-1080": {
+  "height": 1155,
+  "screens": 1.1,
+  "topbar_px": 70,
+  "tabs_px": 44,
+  "content_top": 182,
+  "figures": 11,
+  "words": 152,
+  "targets": 8,
+  "inputs": 0,
+  "notices": 0,
+  "details": 0,
+  "cards": 2,
+  "nested_cards": 0,
+  "headings": [
+   "Zakat",
+   "What counts",
+   "Your zakat"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Record payment"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Zakat\n\nAs of 2026-10-02 · zakat day 2026-12-01\n\nRecord payment\nTransactions\nImport\nAccounts\nHeld for others\nZakat\nWhat counts\nCash you own\n236,317\nDeposits\n100,000\nShares and funds\n142,191\nGold held as savings\n110,295\nGam'eya paid in\n0\nDebts due now\n0\nYour zakat\nzakat day 2026-12-01\nZakatable wealth\n588,804\nNisab\n85 g of 24K gold at the price of 2026-09-30\n451,350\nZakat due\n2.5% of your zakatable wealth\n14,720\nPaid this zakat year\n2025-12-12 to 2026-12-01\n1,000\nStill to pay\n13,720\nEGP\n\nYour zakat day is 2026-12-01. The next is 354 days later: it follows the lunar year, so it comes about 11 days earlier each year.\n\nThis is an estimate by the common rule: 2.5% of your zakatable wealth when it reaches the nisab on your zakat day; a scholar answers your own case. Lightning counts cash, deposits, gam’eya, shares and funds, and gold. Other assets are not in it.",
+  "status": 200
+ },
+ "/settings-1080": {
+  "height": 1832,
+  "screens": 1.7,
+  "topbar_px": 63,
+  "tabs_px": 44,
+  "content_top": 175,
+  "figures": 0,
+  "words": 201,
+  "targets": 38,
+  "inputs": 4,
+  "notices": 0,
+  "details": 2,
+  "cards": 6,
+  "nested_cards": 0,
+  "headings": [
+   "Settings",
+   "Appearance and language",
+   "Your data",
+   "Features",
+   "Settings in each tab",
+   "Export for AI",
+   "Advanced"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Full screen"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Settings\nFull screen\nYour data\nRules\nCategories\nCounterparties\nData checks\nAppearance and language\nTheme\nApplies at once and saves with this profile.\nCotton (try it)\nDendera, night (try it)\nDendera (try it)\nLightning default\nNile (try it)\nPapyrus (try it)\nRoyal Obsidian & Gold (preview)\nLanguage\nEnglish\nالعربية\nSetup guide\nShows the first steps on Overview again.\nShow setup guide\nUnlock a theme you bought\nYour data\nBackup\nOne is made each time the app starts.\nBack up now\nMove your data\nA full copy out, or records in from another profile.\nExport your data\nImport your data\nBase currency\nEGP\nManage currencies\nApp version\n/home/user/Lightning/data/sample.db\nv1.5.1\nFeatures\nShow zakat\nA zakat estimate under Transactions.\nShow zakat\nSettings in each tab\nSale factors\nOverview\nBudget settings\nBudget\nFinancial health limits\nSafety · Limits\nFinancial assets\nInvestments · Holdings\nTarget allocation\nInvestments · Planner\nPrice files\nInvestments · Prices\nZakat settings\nTransactions · Zakat\nExport f",
+  "status": 200
+ },
+ "/rules-1080": {
+  "height": 1080,
+  "screens": 1,
+  "topbar_px": 63,
+  "tabs_px": 44,
+  "content_top": 175,
+  "figures": 2,
+  "words": 27,
+  "targets": 8,
+  "inputs": 0,
+  "notices": 0,
+  "details": 0,
+  "cards": 1,
+  "nested_cards": 0,
+  "headings": [
+   "Rules",
+   "Rules"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Add rule"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Rules\nAdd rule\nYour data\nRules\nCategories\nCounterparties\nData checks\nRules\n1 saved · most specific first\nCounterparty contains Vodafone · Amount between 1,000 and 50,000\nShopping",
+  "status": 200
+ },
+ "/categories-1080": {
+  "height": 1507,
+  "screens": 1.4,
+  "topbar_px": 71,
+  "tabs_px": 44,
+  "content_top": 183,
+  "figures": 0,
+  "words": 304,
+  "targets": 255,
+  "inputs": 69,
+  "notices": 0,
+  "details": 0,
+  "cards": 1,
+  "nested_cards": 0,
+  "headings": [
+   "Settings",
+   "Personal15 categories",
+   "Work8 categories",
+   "Investment5 categories",
+   "System Categories6 categories"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Settings\n\nCategories · why money moved\n\nYour data\nRules\nCategories\nCounterparties\nData checks\n34 categories\nRecurringcounts toward the income average and forecast ·One-offstays in cash flow, out of the budget · changes save as you make them\nSelect all\n0 selected\nArchive selected\nExport selected\nDelete selected\nPersonal15 categories\nAdd category\n− Expense\n+ Income\n± Both\nRecurring\n− Expense\n+ Income\n± Both\nRecurring\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\n− Expense\n+ Income\n± Both\nOne-off\nWork8 categories\nAdd category\n− Expense\n+ Income\n± Both\nRecurring\n− Expense\n+ Income\n± Both\nRecurring\n− Expense\n+ Income\n± Both\nRecurring\n−",
+  "status": 200
+ },
+ "/counterparties-1080": {
+  "height": 3175,
+  "screens": 2.9,
+  "topbar_px": 71,
+  "tabs_px": 44,
+  "content_top": 183,
+  "figures": 0,
+  "words": 328,
+  "targets": 336,
+  "inputs": 112,
+  "notices": 0,
+  "details": 37,
+  "cards": 2,
+  "nested_cards": 0,
+  "headings": [
+   "Settings",
+   "Find and correct names"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Settings\n\nCounterparties · saved names, aliases, and suggested categories\n\nYour data\nRules\nCategories\nCounterparties\nData checks\nAdd a counterparty\nSave a name and optional suggested category\nFind and correct names\n\n36 shown · 36 saved. Rename, add aliases, or change the suggested category.\n\nCounterparty and aliases\tSuggested category\tActions\n\nAliases\n\t\n3 of the last 3\t\nOpen\nPerson Business\n\n\nAliases\n\t\n4 of the last 5\t\nOpen\nPerson Business\n\n\nAliases\n\t\n\t\nOpen\nPerson Business\n\n\nAliases\n\t\n\t\nOpen\nPerson Business\n\n\nAliases\n\t\n2 of the last 2\t\nOpen\nPerson Business\n\n\nAliases\n\t\n5 of the last 5\t\nOpen\nPerson Business\n\n\nAliases\n\t\n5 of the last 5\t\nOpen\nPerson Business\n\n\nAliases\n\t\n\t\nOpen\nPerson Business\n\n\nAliases\n\t\n5 of the last 5\t\nOpen\nPerson Business\n\n\nAliases\n\t\n\t\nOpen\nPerson Business\n\n\nAliases\n\t\n5 of the last 5\t\nOpen\nPerson Business\n\n\nAliases\n\t\n2 of the last 2\t\nOpen\nPerson Business\n\n\nAliases\n\t\n5 of the last 5\t\nOpen\nPerson Business\n\n\nAliases\n\t\n\t\nOpen\nPerson Business\n\n\nAliases\n\t\n5 of the last 5\t\nOp",
+  "status": 200
+ },
+ "/checks-1080": {
+  "height": 1459,
+  "screens": 1.4,
+  "topbar_px": 71,
+  "tabs_px": 44,
+  "content_top": 183,
+  "figures": 6,
+  "words": 218,
+  "targets": 11,
+  "inputs": 1,
+  "notices": 0,
+  "details": 0,
+  "cards": 5,
+  "nested_cards": 0,
+  "headings": [
+   "Settings",
+   "No cash account is below zero",
+   "Profile-currency cash moves at face value",
+   "Budget actual equals categorized spending",
+   "Free cash matches the ledger",
+   "Month-to-date net-worth bridge"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Check"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Settings\n\nData checks · compare totals across your ledger and reports\n\nAs of\nCheck\nYour data\nRules\nCategories\nCounterparties\nData checks\nPassed\n5\nNeeds attention\n0\nIncomplete valuations\n0\n\nThese checks compare independently derived totals. An incomplete check means a missing price or exchange rate prevents a full comparison.\n\nNo cash account is below zero\n\nWallets and bank accounts hold money you have.\n\npass\nActual\n0.00 EGP\nExpected\n0.00 EGP\nDifference\n0.00 EGP\nProfile-currency cash moves at face value\n\nEvery cash line in the profile currency is valued at exactly its amount.\n\npass\nActual\n0.00 EGP\nExpected\n0.00 EGP\nDifference\n0.00 EGP\nBudget actual equals categorized spending\n\nBudget actuals should reconcile to posted money-out categories, leaving out investment fees and taxes as the budget does.\n\npass\nActual\n+3,410.00 EGP\nExpected\n+3,410.00 EGP\nDifference\n0.00 EGP\nFree cash matches the ledger\n\nFree cash = spendable cash you own − reserves − bills due, rebuilt from each account's ledger",
+  "status": 200
+ },
+ "/accounts/1-1080": {
+  "height": 3390,
+  "screens": 3.1,
+  "topbar_px": 71,
+  "tabs_px": 0,
+  "content_top": 119,
+  "figures": 95,
+  "words": 696,
+  "targets": 144,
+  "inputs": 13,
+  "notices": 0,
+  "details": 4,
+  "cards": 2,
+  "nested_cards": 0,
+  "headings": [
+   "CIB Payroll",
+   "Transactions",
+   "What depends on this account"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Money actions",
+   "",
+   "",
+   "",
+   "⋯",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "CIB Payroll\n\nBank account · CIB · EGP\n\nIn this account\n157,582\nWhat you own\n150,682\nHeld for others\n6,900\nMoney actions\n⋯\n\nReview activity\n\nTransactions\nDate period\nAll time\nThis month\nLast month\nYear to date\nCustom dates\nViews\nFind and replace\n\tDate\tCounterparty\tCategory\tNotes\tAmount (EGP)\tBalance\nNew\t\n\t\n\t\n\t\n\t \n\t—\n\t2026-10-02\t\nCarrefour\n\tFood & Groceries\t—\t\n−3,410.00\nEdit\n\t157,582.22 EGP\n\t2026-10-01\t\nACME Egypt\n\tSalary\t\nSalary\n\t\n+50,000.00\nEdit\n\t160,992.22 EGP\n\t2026-09-30\t\nvalU\n\tLoan payments\t\nLoan payment · Laptop instalments\n\t\n−3,000.00\nEdit\n\t110,992.22 EGP\n\t2026-09-29\t\n↔ Dollar savings\n50,000.00 EGP → 1,000.00 USD\n\tConversion\t\nDollars from Banque Misr\n\t\n−50,050.00\nDetails\n\t113,992.22 EGP\n\t2026-09-28\t\nOwnership: You → Mom\nHeld for Mom\n\tAdjustment\t\nKept for Mom\n\t\n0.00\nDetails\n\t164,042.22 EGP\n\t2026-09-28\t\nvalU\n\tLoan payments\t\nLaptop instalments · payment 3 of 12\n\t\n−2,000.00\nEdit\n\t164,042.22 EGP\n\t2026-09-28\t\nCIB\n\tFees & Charges\t\nMonthly account fee\n\t\n−15.00\nEdit\n\t166,042.22 EGP\n\t2026-0",
+  "status": 200
+ },
+ "/review-1080": {
+  "height": 1131,
+  "screens": 1,
+  "topbar_px": 63,
+  "tabs_px": 38,
+  "content_top": 169,
+  "figures": 6,
+  "words": 132,
+  "targets": 14,
+  "inputs": 0,
+  "notices": 0,
+  "details": 1,
+  "cards": 5,
+  "nested_cards": 0,
+  "headings": [
+   "Weekly review",
+   "NBE 3-year certificate · 22%: 9 interest payments to match",
+   "Imported activity needs a decision",
+   "This month's plan is short for your goals",
+   "Record this review",
+   "Optional reminders"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece",
+   "Overview"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Weekly review\nOverview\nNBE 3-year certificate · 22%: 9 interest payments to match\nNBE 3-year certificate · 22%: 9 interest payments to match\n16,455 EGP still unmatched; 8 have a suggested bank receipt.\nReview\nMatch all suggested\nImported activity needs a decision\nImported activity needs a decision\nvodafone-october.csv · 3 rows wait · from row 2 · 2026-10-01.\nFinish the import\nThis month's plan is short for your goals\nThis month's plan is short for your goals\nIt leaves 11,572 EGP; your goals and emergency fund need 14,395. Plan 2,823 less.\nReview\nRecord this review\n I reviewed the remaining decisions. They stay visible until resolved.Record this review\nOptional reminders\n\nReminders use your existing plans and Needs you. Native alerts require an unlocked app session and notification permission.\n\nTurn on reminders\nReview activity",
+  "status": 200
+ },
+ "/needs-you-1080": {
+  "height": 1080,
+  "screens": 1,
+  "topbar_px": 63,
+  "tabs_px": 0,
+  "content_top": 111,
+  "figures": 5,
+  "words": 120,
+  "targets": 21,
+  "inputs": 3,
+  "notices": 0,
+  "details": 3,
+  "cards": 1,
+  "nested_cards": 0,
+  "headings": [
+   "Needs you"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Needs you\nActive items\nReviewed and snoozed\nWeekly review\n\n3 active · 0 reviewed · 0 snoozed\n\nReviewed items stay quiet until the situation changes. Snoozed items return on your chosen date. These actions do not record payments.\n\nImported activity needs a decision\nvodafone-october.csv · 3 rows wait · from row 2 · 2026-10-01.\nFinish the import\nMark as reviewed\nSnooze\nNBE 3-year certificate · 22%: 9 interest payments to match\n16,455 EGP still unmatched; 8 have a suggested bank receipt.\nReview\nMatch all suggested\nMark as reviewed\nSnooze\nThis month's plan is short for your goals\nIt leaves 11,572 EGP; your goals and emergency fund need 14,395. Plan 2,823 less.\nReview\nMark as reviewed\nSnooze\nBack to the Overview",
+  "status": 200
+ },
+ "/explain-1080": {
+  "height": 1080,
+  "screens": 1,
+  "topbar_px": 63,
+  "tabs_px": 38,
+  "content_top": 169,
+  "figures": 0,
+  "words": 11,
+  "targets": 3,
+  "inputs": 0,
+  "notices": 0,
+  "details": 0,
+  "cards": 1,
+  "nested_cards": 0,
+  "headings": [
+   "Not found"
+  ],
+  "top_actions": [
+   "Undo · Link reimbursement rece"
+  ],
+  "side_scroll": [
+   1274,
+   1080
+  ],
+  "side_add_bottom": 1250,
+  "fold_text": "Not found\nThat page does not exist. Back to the dashboard",
+  "status": 404
+ }
+}

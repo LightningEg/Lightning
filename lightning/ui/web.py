@@ -53,7 +53,8 @@ _ROUND_MONEY: contextvars.ContextVar[bool] = contextvars.ContextVar("round_money
 REPORTING_TEMPLATES = ("dashboard/", "budget.html", "birdview/", "investments/index.html", "investments/holding.html", "financial_health.html",
                        "investments/_targets.html", "investments/targets.html", "investments/report_detail.html",
                        "planning/plan.html", "reserves.html", "settings/index.html", "accounts/currencies.html", "zakat.html",
-                       "accounts/list.html", "counterparty.html", "tag.html")
+                       "accounts/list.html", "counterparty.html", "tag.html", "analysis/", "planning/loans.html",
+                       "investments/planner.html", "money_from_others.html")
 
 
 def _money(value, signed: bool = False, places: int | None = None) -> str:

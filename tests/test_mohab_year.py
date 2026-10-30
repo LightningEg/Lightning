@@ -102,7 +102,7 @@ class Mohab:
 
     # -------------------------------------------------------------- things he does
     def account(self, name: str, kind: str, balance: str, when: str = "1/7", bank: str = "") -> Screen:
-        self.b.go("+ Add account")
+        self.b.go("Add account")
         return self.b.submit({"name": name, "account_type": Choose(kind), "institution": bank,
                               "opening_balance": balance, "opening_balance_date": when}, button="Add account")
 
@@ -309,7 +309,7 @@ def _first_evening(o: Mohab) -> None:
         "funding_account_id": Choose("CIB Payroll"), "annual_rate": "22", "interest_method": Choose("Simple"),
         "lockup_end_date": "2027-07-01", "maturity_date": "2029-07-01", "payout_frequency": Choose("Monthly"),
         "destination_account_id": Choose("CIB Payroll")}, button="Record CD purchase")
-    o.ask("accounts", "Are all six accounts in, with the right balances?", "Manage accounts")
+    o.ask("accounts", "Are all six accounts in, with the right balances?", "Accounts")
     o.ask("opening", "I typed 1/7. Did the starting balances go in on 1 July?", "Vodafone Cash")
     o.ask("setup", "My accounts are in. What should I do next?")
 
@@ -384,7 +384,7 @@ def _first_evening(o: Mohab) -> None:
     # The plan: a budget from his own spending, an emergency fund, his bills and the car loan.
     b.go("Set a plan for 2026-09")
     b.submit({}, button="Create plan")
-    b.go("Safety", "Reserves")
+    b.go("Safety", "Reserves", "Edit")  # Reserves reads; Edit opens the emergency fund's amount
     b.submit({"allocated": "20,000"}, action="/reserves/emergency")
     o.ask("emergency_target", "Six months of income is far more than the cash I have. Does Lightning say so?",
           "Safety", "Reserves")
@@ -400,7 +400,7 @@ def _first_evening(o: Mohab) -> None:
     o.ask("where", "Where did my money go in September?", "Spending")
     o.ask("plan", "Am I sticking to my plan?", "Budget")
     o.ask("investing", "How are my investments doing?", "Investments")
-    o.ask("checks", "Is my data right?", "Settings")
+    o.ask("checks", "Is my data right?", "Settings", "Data checks")
     # The sidebar's Search (Ctrl-K opens the same search in the app window); a typo still finds the page.
     b.go("Search")
     b.submit({"q": "lons"}, button="Search")
@@ -498,7 +498,8 @@ def _live_the_year(o: Mohab) -> None:
     # ============================================================== April: the insurance, and selling COMI
     o.on("2027-04-30")
     o.month("2027-04", salary="50,000")
-    screen = b.go("Safety", "Reserves")
+    b.go("Safety", "Reserves")
+    screen = b.open("/plan/reserves?edit=all")  # the amounts are read-only until Edit
     b.submit({"allocated": "9,000"}, action=screen.action_after("Car insurance", "/allocate"))
     o.enter("CIB Payroll", "2027-04-25", "Misr Insurance", "Personal › Transportation", "-9,000")
     o.to_reserve("CIB Payroll", "Misr Insurance", "Car insurance")
@@ -522,7 +523,8 @@ def _live_the_year(o: Mohab) -> None:
     b.go("Safety", "Reserves")
     b.submit({"name": "New laptop", "target": "60,000", "due_date": "2027-06-30"}, button="Add reserve")
     o.ask("laptop", "Can I have a 60,000 laptop by the end of June?")
-    screen = b.go("Safety", "Reserves")
+    b.go("Safety", "Reserves")
+    screen = b.open("/plan/reserves?edit=all")
     o.notes["laptop_set_aside"] = b.submit({"allocated": "60,000"}, action=screen.action_after("New laptop", "/allocate"))
     o.ask("laptop_after", "And once the money is set aside?")
     o.on("2027-06-30")
@@ -638,7 +640,7 @@ def _a_gameya(o: Mohab) -> None:
     o.on("2027-09-30")
     b = o.b
     o.ask("gameya_before", "What am I worth before I join the gam'eya?")
-    b.go("+ Add account")
+    b.go("Add account")
     o.notes["gameya_account"] = b.submit({"name": "Office gam'eya", "account_type": Choose("Gam'eya"), "currency": "EGP"},
                                          button="Add account")
     o.notes["gameya_terms"] = b.submit(
@@ -667,7 +669,7 @@ def _a_dollar_account_and_a_nasdaq_etf(o: Mohab) -> None:
     b, c = o.b, o.c
     c.currencies.register("USD")
     c.fx.save("USD", "2027-09-30", "49.50")
-    b.go("+ Add account")
+    b.go("Add account")
     o.notes["usd_account"] = b.submit({"name": "Dollar brokerage", "account_type": Choose("Brokerage"), "currency": "USD",
                                        "opening_balance": "3,000", "opening_balance_date": "2027-09-30"},
                                       button="Add account")
@@ -794,7 +796,7 @@ def _the_feedback_round(o: Mohab) -> None:
     b.submit({"action": "register", "code": "USD"}, action="/settings/currency")
     b.open("/settings?section=currencies&tab=rates")
     b.submit({"currency": "USD", "date": "2027-09-28", "rate": "49.25"}, action="/settings/fx-rate")
-    b.go("+ Add account")
+    b.go("Add account")
     b.submit({"name": "Dollar savings", "account_type": Choose("Bank"), "currency": "USD", "opening_balance": "0",
               "opening_balance_date": "2027-09-28"}, button="Add account")
     o.notes["convert_form"] = b.go("CIB Payroll", "Convert")
@@ -889,7 +891,7 @@ def test_what_he_owns_leaves_out_moms_money(mohab):
     assert position.figure("Gold") == D("57195")  # 8 g + 4.3 g of 21K at 4,650
     moms = mohab.answers["moms_money"]
     assert route(mohab, "moms_money") == ["/", "/transactions", "/money-from-others"]
-    assert moms.shows("Mom CIB Payroll 10,000.00")
+    assert moms.shows("Mom CIB Payroll 10,000")
 
 
 def test_what_he_owes_and_when_the_car_is_paid_off(mohab):
@@ -944,8 +946,8 @@ def test_investments_lead_with_the_periods_result(mohab):
 
 
 def test_data_checks_pass_after_setup(mohab):
-    assert route(mohab, "checks") == ["/", "/checks"]  # Settings opens on Data checks (2026-10-28)
-    assert mohab.answers["checks"].shows("Passed 5 Needs attention 0")
+    assert route(mohab, "checks") == ["/", "/settings", "/checks"]  # Your data opens first (owner, 2026-10-29)
+    assert mohab.answers["checks"].shows("5 checks passed")
 
 
 def test_adding_an_investment_confirms_it_by_name(mohab):
@@ -1200,7 +1202,7 @@ def test_how_much_of_my_income_is_already_promised(mohab):
     fixed = mohab.answers["fixed_costs"]
     assert route(mohab, "fixed_costs") == ["/", "/plan", "/plan/recurring"]
     assert fixed.figure("Bills and subscriptions") + D("2500") == D("15630")
-    assert fixed.shows("Fixed costs to income 2026-09-30 34.7 % 15,630 a month of 45,000 income · bills, subscriptions and loans")
+    assert fixed.shows("34.7% Fixed costs to income · 15,630 a month of 45,000 income · bills, subscriptions and loans")
 
 
 def test_the_emergency_fund_in_months(mohab):
@@ -1239,7 +1241,7 @@ def test_the_years_investments(mohab):
 
 
 def test_data_checks_pass_after_a_year(mohab):
-    assert mohab.answers["year_checks"].shows("Passed 5 Needs attention 0")
+    assert mohab.answers["year_checks"].shows("5 checks passed")
 
 
 def test_cash_ownership_and_external_expense_keep_the_account_total(mohab):
@@ -1435,7 +1437,7 @@ def test_a_small_difference_from_the_bank_is_one_adjustment(mohab):
     assert check.shows("A small difference", "Lightning is 30.00 EGP above your bank", "Post adjustment of −30.00")
     assert mohab.notes["wallet_adjusted"].shows("Balance adjustment", "The account now matches your bank")
     assert mohab.notes["wallet_adjusted"].shows("2027-09-30 Balance adjustment Other Personal Bank showed",
-                                                "−30.00 Edit 42,950.00 EGP")
+                                                "−30.00 Edit 42,950")
     assert mohab.notes["wallet_rechecked"].shows("It matches")
 
 

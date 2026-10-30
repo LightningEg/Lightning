@@ -476,8 +476,20 @@ class PlanningService:
 
     def skip(self, item_id: int, due_date: str) -> None:
         item = self.get(item_id)
+        try:
+            due = fmt_date(date.fromisoformat(str(due_date)))
+        except (TypeError, ValueError):
+            raise ValidationError("Choose a scheduled payment date.", "due_date") from None
         with self.db.transaction():
-            self.repo.settle(item.id, due_date, "SKIPPED", None, ZERO)
+            # Read under the writer lock: a stale page or second window must not skip a paid one. A skipped date
+            # off the schedule would still lengthen a loan, and skipping a part-paid instalment would forget the
+            # part paid (use-case audit 2026-10-29).
+            scheduled = next((p for p in self.payments(item, due) if p.due_date == due), None)
+            if scheduled is None:
+                raise ValidationError("That date is not on this payment schedule.", "due_date")
+            if self.repo.is_settled(item.id, due):
+                raise ValidationError(f"{item.name} · {due} is already settled. Open it again first to change it.")
+            self.repo.settle(item.id, due, "SKIPPED", None, ZERO)
 
     def reopen(self, item_id: int, due_date: str) -> None:
         self.get(item_id)

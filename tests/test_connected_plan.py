@@ -207,7 +207,7 @@ def test_needs_you_names_a_category_planned_below_its_bills(c):
     inbox = {item["label"]: item for item in ReviewInbox(c).items(today())}
     item = inbox["Food & Groceries is planned below its bills"]
     assert item["detail"] == "Planned 500 EGP; bills and loan payments scheduled this month come to 900."
-    assert item["href"] == f"/budget?month={MONTH}"
+    assert item["href"] == f"/budget?month={MONTH}&open_group=all#limit-{food}"   # where its limit is typed
     c.budgets.set_budget(food, MONTH, "900")
     assert c.budgets.below_scheduled(MONTH) == []
 

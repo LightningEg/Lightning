@@ -178,3 +178,47 @@ def test_phone_page_menu_exposes_pc_sections_and_every_main_page(phone):
     for href in ("/", "/budget", "/plan", "/investments", "/accounts", "/settings", "/transactions", "/financial-health", "/review", "/profiles"):
         assert f'href="{href}"' in menu
     assert 'href="/investments" aria-current="page"' in menu
+
+
+def test_one_needs_you_strip_under_the_stepper_holds_what_is_due_tomorrow(c, setup, monkeypatch):
+    """IV-3AL1: a payment due today or tomorrow is the Needs you strip's first row, under the month stepper; no second
+    card above the stepper, and Manage Needs you is the strip's last row, not a loose link."""
+    from lightning.ui.web import create_app
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-30")
+    accounts, _ = setup
+    c.planning.create(kind="BILL", name="Internet", amount="650", frequency="MONTHLY", start_date="2026-10-01",
+                      account_id=str(accounts["cib"].id))
+    app = create_app(c)
+
+    @app.middleware("http")
+    async def as_phone(request, call_next):
+        request.state.phone = True
+        return await call_next(request)
+
+    html = TestClient(app).get("/").text
+    assert 'class="card phone-card phone-soon' not in html and html.count('class="card phone-needs"') == 1
+    strip = re.search(r'<details class="card phone-needs".*?</details>', html, re.S).group(0)
+    assert html.index('class="phone-period"') < html.index('class="card phone-needs"')
+    assert "1 payment due today or tomorrow" in strip and "650" in strip
+    assert strip.rindex('href="/needs-you"') > strip.index("1 payment due today or tomorrow")
+    assert html.count('href="/needs-you"') == 1
+
+
+def test_more_is_flat_and_the_weekly_review_keeps_more_chosen(phone):
+    """IV-3AL4 and IV-3AL7: More has no card of buttons (a bill's row opens its pay sheet) and no subtitles; the
+    weekly review, reached from More, keeps More chosen with ‹ More in the app bar."""
+    more = phone.get("/more").text
+    assert 'class="btn small"' not in more and "Backups, language" not in more
+    assert more.index('id="bills-heading"') < more.index('id="money-heading"') < more.index('id="settings-heading"')
+    assert re.search(r'class="phone-row phone-hub-bill[^"]*" data-popup-open href="/plan/items/\d+/pay', more)
+    review = phone.get("/review").text
+    assert re.search(r'class="phone-tab is-chosen" href="/more"', review)
+    assert 'class="phone-back" href="/more"' in review and '<a class="btn" href="/">' not in review
+
+
+def test_financial_health_puts_what_needs_you_under_its_lead_and_the_chart_in_its_own_card(phone):
+    """Audit 10, F20 (C12: one chart per card): on the phone the savings rate over time leaves the lead card."""
+    html = phone.get("/financial-health").text
+    lead = re.search(r'(?s)<section class="card lead-card lead-hero".*?</section>', html).group(0)
+    assert "lead-side" not in lead and "health-over-time-heading" not in lead
+    assert html.index('id="health-limits-heading"') < html.index('class="card phone-card health-side"')

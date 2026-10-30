@@ -105,11 +105,11 @@ SECTIONS: tuple[Section, ...] = (
             gear="/settings?section=zakat", gear_label="Zakat settings"),
     )),
     Section("settings", "Settings", "settings", (       # Is my data right?
-        Tab("checks", "Data checks", "/checks", _I["checks"], ("/checks",)),
+        Tab("data", "Your data", "/settings", _I["data"], ("/settings", "/profiles", "/exports/all"), settings=("general",)),
         Tab("rules", "Rules", "/rules", _I["rules"], ("/rules",)),
         Tab("categories", "Categories", "/categories", _I["categories"], ("/categories",)),
         Tab("counterparties", "Counterparties", "/counterparties", _I["counterparties"], ("/counterparties",)),
-        Tab("data", "Your data", "/settings", _I["data"], ("/settings", "/profiles", "/exports/all"), settings=("general",)),
+        Tab("checks", "Data checks", "/checks", _I["checks"], ("/checks",)),
     )),
 )
 

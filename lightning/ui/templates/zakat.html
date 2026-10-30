@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Zakat'|tr(locale) }}{% endblock %}
-{# Zakat (Architecture › Zakat): what counts, then your zakat. An estimate by the common rule, said once at the
+{# Zakat (Architecture › Zakat): your zakat first, then what counts. An estimate by the common rule, said once at the
    foot. Every figure comes from ZakatService.assess; the settings sit behind the tab's gear. #}
 {% macro amount(value) %}{{ value|money }} <small>{{ base }}</small>{% endmacro %}
 {% block heading %}<h1>{{ 'Zakat'|tr(locale) }}</h1><p class="muted">{{ 'As of {date}'|tr(locale, date=a.as_of) }}{% if a.zakat_day %} · {{ 'zakat day {date}'|tr(locale, date=a.zakat_day) }}{% endif %}</p>{% endblock %}
@@ -18,19 +18,11 @@
 </section>
 {% endif %}
 
-<section class="plan-section" aria-labelledby="zakat-counts-head">
-  <header class="overview-section-head"><h2 id="zakat-counts-head">{{ 'What counts'|tr(locale) }}</h2></header>
-  <div class="card wide-card"><div class="compact-list">
-    {% for line in a.lines %}
-    <div class="compact-row"><span>{{ line.label|tr(locale) }}{% if not line.counted %}<small>{{ ('Not taken off. Turn it on behind the gear.' if line.minus else 'Not counted. Turn it on behind the gear.')|tr(locale) }}</small>{% endif %}</span>
-      <b class="{{ 'muted' if not line.counted }}">{% if line.minus and line.counted %}{{ (0 - line.amount)|money }}{% else %}{{ line.amount|money }}{% endif %}</b></div>
-    {% endfor %}
-  </div></div>
-</section>
-
 <section class="plan-section" aria-labelledby="zakat-yours-head">
   <header class="overview-section-head"><h2 id="zakat-yours-head">{{ 'Your zakat'|tr(locale) }}</h2>{% if a.zakat_day %}<span>{{ 'zakat day {date}'|tr(locale, date=a.zakat_day) }}</span>{% endif %}</header>
-  <div class="card wide-card"><div class="compact-list">
+  <div class="card wide-card">{% from "partials/charts.html" import meter %}
+  {% if paid_meter %}{{ meter(fig.zakat_paid.label, a.paid, a.zakat_due, paid_meter, '', fig.zakat_due.label ~ ' ' ~ (a.zakat_due|money), 'target') }}{% endif %}
+  <div class="compact-list">
     <div class="compact-row"><span>{{ fig.zakatable_wealth.label }}</span><b>{{ a.zakatable_wealth|money }}</b></div>
     <div class="compact-row"><span>{{ fig.nisab.label }}{% if a.nisab_source == 'gold' %}<small>{{ '85 g of 24K gold at the price of {date}'|tr(locale, date=a.nisab_date) }}</small>{% elif a.nisab_source == 'typed' %}<small>{{ 'The nisab you typed on {date}'|tr(locale, date=a.nisab_date) }}</small>{% endif %}</span><b>{% if a.nisab is not none %}{{ a.nisab|money }}{% else %}—{% endif %}</b></div>
     <div class="compact-row"><span>{{ fig.zakat_due.label }}{% if a.zakat_due is not none %}<small>{{ ('2.5% of your zakatable wealth' if a.reaches_nisab else 'Below the nisab, so nothing is due')|tr(locale) }}</small>{% endif %}</span><b>{% if a.zakat_due is not none %}{{ a.zakat_due|money }}{% else %}—{% endif %}</b></div>
@@ -40,8 +32,17 @@
     {% endif %}
   </div>
   {% if a.unavailable_reason %}<p class="muted small">{{ a.unavailable_reason|tr(locale) }}</p>{% endif %}
-  {% if a.zakat_day %}<p class="muted small">{{ 'Your zakat day is {date}. The next is 354 days later: it follows the lunar year, so it comes about 11 days earlier each year.'|tr(locale, date=a.zakat_day) }}</p>{% endif %}
   </div>
 </section>
-<p class="muted small">{{ 'This is an estimate by the common rule: 2.5% of your zakatable wealth when it reaches the nisab on your zakat day; a scholar answers your own case. Lightning counts cash, deposits, gam’eya, shares and funds, and gold. Other assets are not in it.'|tr(locale) }}</p>
+
+<section class="plan-section" aria-labelledby="zakat-counts-head">
+  <header class="overview-section-head"><h2 id="zakat-counts-head">{{ 'What counts'|tr(locale) }}</h2></header>
+  <div class="card wide-card"><div class="compact-list">
+    {% for line in a.lines %}
+    <div class="compact-row"><span>{{ line.label|tr(locale) }}{% if not line.counted %}<small>{{ ('Not taken off. Turn it on behind the gear.' if line.minus else 'Not counted. Turn it on behind the gear.')|tr(locale) }}</small>{% endif %}</span>
+      <b class="{{ 'muted' if not line.counted }}">{% if line.minus and line.counted %}{{ (0 - line.amount)|money }}{% else %}{{ line.amount|money }}{% endif %}</b></div>
+    {% endfor %}
+  </div></div>
+</section>
+<p class="muted small">{{ 'An estimate by the common rule; a scholar answers your own case.'|tr(locale) }}{% if a.zakat_day %} {{ 'Your zakat day follows the lunar year, so it comes about 11 days earlier each year.'|tr(locale) }}{% endif %}</p>
 {% endblock %}
