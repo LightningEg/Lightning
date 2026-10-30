@@ -3838,3 +3838,4 @@ table.figures tfoot th { border-top: 1px solid var(--line); }
 .main .emergency-liquidity-context > summary { cursor:pointer; padding:6px 0; }
 .main .emergency-liquidity-context[open] > summary { margin-bottom:6px; }
 .main .reserve-set b.num { order:-1; }
+.main .so-far-line { margin:0 0 12px; padding:8px 14px; border-radius:14px; background:rgba(10,36,66,.05); font:600 var(--fs-2)/1.4 var(--body); color:var(--ink-2); }

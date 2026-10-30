@@ -5,7 +5,7 @@
 <section class="card answer-strip" aria-label="{{ 'Answer'|tr(locale) }}">
   <div class="answer-main"><span class="answer-label">{{ 'Money out'|tr(locale) }}</span>
     <b class="answer-figure num">{{ total_a|whole }} {{ base }}</b>
-    <span class="answer-delta {{ 'is-up' if total_diff > 0 else ('is-down' if total_diff < 0 else '') }}">{{ total_diff|money(signed=true) }} {{ 'against'|tr(locale) }} {{ fmt_date(b[0]) }} {{ 'to'|tr(locale) }} {{ fmt_date(b[1]) }}</span></div>
+    <span class="answer-delta {{ 'is-up' if total_diff > 0 else ('is-down' if total_diff < 0 else '') }}">{{ total_diff|money(true, 0) }} {{ 'against'|tr(locale) }} {{ fmt_date(b[0]) }} {{ 'to'|tr(locale) }} {{ fmt_date(b[1]) }}</span></div>
 </section>
 
 <form class="card compare-picker" method="get" action="/spending/compare">
@@ -18,8 +18,11 @@
   <div class="actions"><button class="btn primary">{{ 'Compare'|tr(locale) }}</button><a class="btn" href="/spending/compare?{{ keep_qs }}&amp;format=csv">{{ 'Export CSV'|tr(locale) }}</a></div>
 </form>
 
+{% from "partials/charts.html" import diverging %}
 <section class="card data-panel" aria-labelledby="compare-rows">
-  <div class="section-head"><div><h2 id="compare-rows">{{ 'Biggest changes first'|tr(locale) }}</h2><p class="muted small">{{ 'Open any row to see why.'|tr(locale) }}</p></div></div>
+  <div class="section-head"><div><h2 id="compare-rows">{{ 'Biggest changes first'|tr(locale) }}</h2></div></div>
+  {% if moved.rows %}{{ diverging(moved, 'Biggest changes first'|tr(locale)) }}{% endif %}
+  <details class="chart-table"{{ '' if moved.rows else ' open' }}><summary>{{ 'Show the numbers'|tr(locale) }}</summary>
   {% if not rows %}<p class="muted">{{ 'No spending in either period.'|tr(locale) }}</p>{% else %}
   <div class="table-wrap"><table class="figures">
     <thead><tr><th>{{ ('Category' if by == 'category' else 'Counterparty')|tr(locale) }}</th><th class="num">{{ 'This period'|tr(locale) }}</th><th class="num">{{ 'Against'|tr(locale) }}</th><th class="num">{{ 'Difference'|tr(locale) }}</th><th class="num">%</th></tr></thead>
@@ -29,6 +32,6 @@
       <td class="num {{ 'is-up' if r.diff > 0 else ('is-down' if r.diff < 0 else '') }}">{{ r.diff|money(signed=true) }}</td>
       <td class="num muted">{{ (r.pct ~ '%') if r.pct is not none else '—' }}</td></tr>{% endfor %}</tbody>
     <tfoot><tr><th>{{ 'Total'|tr(locale) }}</th><th class="num">{{ total_a|money }}</th><th class="num">{{ total_b|money }}</th><th class="num">{{ total_diff|money(signed=true) }}</th><th></th></tr></tfoot>
-  </table></div>{% endif %}
+  </table></div>{% endif %}</details>
 </section>
 {% endblock %}

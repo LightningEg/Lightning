@@ -18,6 +18,7 @@ from lightning.core.dates import fmt_date, parse_date, today
 from lightning.core.errors import LightningError
 from lightning.core.money import ZERO, fmt
 
+from .. import kpis
 from ..web import container, render
 
 router = APIRouter()
@@ -178,7 +179,11 @@ async def compare_page(request: Request):
     # the page's answer in words, under its title (A05)
     status = (f"Money out is the same as {against['sa']} to {against['sb']}." if diff == ZERO else
               f"Money out is {fmt(abs(diff), 0)} {'lower' if diff < 0 else 'higher'} than {against['sa']} to {against['sb']}.")
-    return render(request, "analysis/compare.html", rows=rows, kind=kind, by=by, a=a, b=b, status=status,
+    movers = sorted(rows, key=lambda r: -abs(r["diff"]))[:8]
+    top = max((abs(r["diff"]) for r in movers), default=ZERO) or Decimal(1)
+    moved = {"rows": [{"label": r["name"], "value": r["diff"], "width": float(abs(r["diff"]) / top * 48), "group": "money"}
+                      for r in movers if r["diff"]]}
+    return render(request, "analysis/compare.html", moved=moved, rows=rows, kind=kind, by=by, a=a, b=b, status=status,
                   total_a=total_a, total_b=total_b, total_diff=diff,
                   keep_qs=urlencode(keep), base=c.base_currency, fmt_date=fmt_date)
 
@@ -235,4 +240,11 @@ async def reports_page(request: Request):
         views = c.saved_views.list(None)
     except (LightningError, TypeError, AttributeError):
         views = []
-    return render(request, "analysis/reports.html", presets=presets, views=views, base=c.base_currency, fmt_date=fmt_date)
+    # Each comparison is a KPI card (A08): money out now, against the period before, in whole currency.
+    cards = [kpis.card(p["label"], p["total_a"].quantize(Decimal(1)),
+                       kpis.compare(f"against {fmt(p['total_b'], 0)} before" + (f" · biggest change {p['mover']['name']}" if p["mover"] else ""),
+                                    ("+" if p["diff"] > 0 else "−" if p["diff"] < 0 else "") + fmt(abs(p["diff"]), 0),
+                                    "bad" if p["diff"] > 0 else "good" if p["diff"] < 0 else "plain"),
+                       tone="out", visual=kpis.meter(p["total_a"], p["total_b"]) if p["total_b"] else None,
+                       href=f"/spending/compare?preset={p['kind']}") for p in presets]
+    return render(request, "analysis/reports.html", presets=presets, cards=cards, views=views, base=c.base_currency, fmt_date=fmt_date)

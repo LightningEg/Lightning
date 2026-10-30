@@ -2810,6 +2810,7 @@ ARABIC_UI = {
     'Mark them paid in Cash planning': 'علّمها مدفوعة من تخطيط النقدية',
     '{done} of {total} done': '{done} من {total} اتعملت',
     '{n} more sources': '{n} مصادر كمان',
+    'less to more spent': 'من الأقل للأكتر إنفاق',
 }
 
 
