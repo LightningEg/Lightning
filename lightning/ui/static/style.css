@@ -3778,7 +3778,6 @@ table.figures tfoot th { border-top: 1px solid var(--line); }
 .main > .topbar { margin-bottom:16px; }
 .main > .topbar > .topbar-main { flex-basis:220px; }
 .main .section-bar { margin-bottom:16px; }
-.app-popup .actions .section-gear { display:none; }
 .main > .topbar { padding-bottom:12px; }
 
 /* IV-3AM3 · Transactions: one filter line, an entry row that does not read as data, single-line rows (audit 12: T1 T2 T5) */
@@ -3843,3 +3842,12 @@ table.figures tfoot th { border-top: 1px solid var(--line); }
 /* IV-3AM3 · fields as wide as their values (A10): the planner's amounts */
 .main .planner-popup-form .money-input { width:200px; max-width:100%; }
 .main .inv-currency { margin:0 0 var(--gap-block); }
+
+/* IV-3AM2 · S3 (owner decision 1): a section with one tab has only the gear in its bar. The gear stays the bar's end
+   (A05) but takes no row: it sits at the header's right edge, and the header leaves room for it. */
+@media (min-width:901px) {
+  .main:has(> .section-bar-gear) { position:relative; }
+  .main > .section-bar-gear { position:absolute; top:29px; inset-inline-end:24px; margin:0; float:none; z-index:2; }
+  @media (max-width:1200px) { .main > .section-bar-gear { top:24px; } }
+  .main > .topbar:has(+ .section-bar-gear) { padding-inline-end:50px; }
+}
