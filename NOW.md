@@ -8,7 +8,6 @@
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
 | Claude | IV-3AL phone declutter (Audit 10); D1, D2 need both repos' guideline | `lightning/ui/templates/phone/`, `phone*.css` | 2026-10-29 |
-| Claude | Docs spine (`claude/docs-spine`, both repos): `docs/` people, `ai/` AIs. Moved files: pull first | `docs/`, `ai/`, `README.md`, `RELEASES.md`, `tools/{issues,status,release_notes}.py` | 2026-10-31 |
 
 ## Messages
 
@@ -17,7 +16,7 @@
 
 ## Next
 
-- **Docs spine (2026-10-31):** pushed in both repos, PRs wait for the owner. Commits end with `Release-note:` and `Detail:` (AGENTS §3). Then 1N (post issues with coins), 1M, 7W, 8X-8Z. **Read:** `docs/README.md`, 1N.
+- **Docs spine is on main (2026-10-31, #214, site #146).** Commits end with `Release-note:` and `Detail:` (AGENTS §3); `python tools/status.py` after plan changes. Next: 1N (split L items, post issues with coins), 1M, 7W, 8X-8Z. **Read:** `docs/README.md`, 1N.
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
