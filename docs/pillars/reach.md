@@ -15,5 +15,8 @@ The website, search, downloads, community and the store. Its own repository is L
 | **IT-8A** | [Feedback form: submit scrolls to the page end, images take 10 s, and the survey forms accept formul…](../../issues/8-website/8A-feedback-form-send-and-spam-guard.md) | M | ready |
 | **OW-8D** | [For Geeks audit ideas left for the owner to choose](../../issues/8-website/8D-for-geeks-audit-ideas-to-choose.md) | owner | ready |
 | **IV-8F** | [Home and Features show the app, not only words](../../issues/8-website/8F-home-and-features-show-the-app.md) | M | ready |
+| **NF-8X** | [All tracking in the owner console, as tabs that each answer one question](../../issues/8-website/8X-tracking-in-the-owner-console.md) | L | new |
+| **NF-8Y** | [Downloads shows what is new, from the release notes, in English and Arabic](../../issues/8-website/8Y-downloads-shows-whats-new.md) | M | new |
+| **NF-8Z** | [Honest comparison pages: Lightning against a spreadsheet, a traditional expense tracker and a cloud…](../../issues/8-website/8Z-honest-comparison-pages.md) | L | new |
 | **IT-9F** | [Page speed: a stable origin and cache, and a CSS trim](../../issues/9-later/9F-page-speed-origin-and-css.md) | M | new |
 <!-- work:end -->

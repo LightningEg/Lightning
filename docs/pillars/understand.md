@@ -15,6 +15,7 @@ The overview, spending, financial health, net worth and reports. They read the l
 | **NF-7G** | [Age of Money and a spending calendar](../../issues/7-planning-import-and-search/7G-more-analytics.md) | M | new |
 | **OW-7S** | [Money out filed under an income category counts as spending, not as less income](../../issues/7-planning-import-and-search/7S-money-out-of-an-income-category.md) | owner | new |
 | **NF-7V** | [More AI prompt buttons that carry Lightning's context](../../issues/7-planning-import-and-search/7V-more-ai-prompt-buttons.md) | M | ready |
+| **NF-7W** | [Ask AI: one readable file with the question, Lightning's own words, the answers and the drivers](../../issues/7-planning-import-and-search/7W-ask-ai-one-readable-file.md) | L | new |
 | **IT-9A** | [Stored month-end figures](../../issues/9-later/9A-stored-month-end-figures.md) | M | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
 
 ## Reports with open follow-ups here

@@ -15,6 +15,8 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 | **IT-1G** | [Cover all backend modules with explicit dependency and wiring contracts](../../issues/1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | M | ready |
 | **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](../../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | L | building |
 | **BT-1L** | [The brand audit's page-jump check fails on /welcome only under a parallel full run](../../issues/1-easy-to-contribute/1L-page-jump-check-flakes.md) | S | ready |
+| **IT-1M** | [Archive closed reports and keep their evidence out of the checkout](../../issues/1-easy-to-contribute/1M-archive-closed-reports.md) | M | ready |
+| **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](../../issues/1-easy-to-contribute/1N-split-large-items-and-post-them.md) | M | ready |
 | **IT-3J** | [Version 1.1 is shipped: move what holds of its review into Architecture, then delete this file](../../issues/3-polish-and-arabic/3J-fold-v1-1-review-into-architecture.md) | M | ready |
 | **IT-4K** | [Journal code](../../issues/4-edit-journal-and-devices/4K-journal-code-tidy.md) | M | ready |
 | **IT-9J** | [Routes still compute figures, some that no screen shows](../../issues/9-later/9J-routes-compute-figures.md) | M | ready |

@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 72 open items, in the order they are worked on.
+10 milestones, 78 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -17,8 +17,10 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | **IT-1G** | [Cover all backend modules with explicit dependency and wiring contracts](1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | improvement, technical | Build | M | ready |
 | **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | Build | L | building |
 | **BT-1L** | [The brand audit's page-jump check fails on /welcome only under a parallel full run](1-easy-to-contribute/1L-page-jump-check-flakes.md) | bug, technical · low | Build | S | ready |
+| **IT-1M** | [Archive closed reports and keep their evidence out of the checkout](1-easy-to-contribute/1M-archive-closed-reports.md) | improvement, technical | Build | M | ready |
+| **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | ready |
 
-Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K. Next free code: 1M.
+Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K. Next free code: 1O.
 
 ## 2 Safe for real money
 
@@ -148,8 +150,15 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7T6 | ↳ A reserve tied to its bill | | | | |
 | **BT-7U** | [Editing a paid bill's transaction keeps the bill paid at the old amount and date](7-planning-import-and-search/7U-bill-link-after-payment-edit.md) | bug, technical · low | Plan | S | new |
 | **NF-7V** | [More AI prompt buttons that carry Lightning's context](7-planning-import-and-search/7V-more-ai-prompt-buttons.md) | new feature | Understand | M | ready |
+| **NF-7W** | [Ask AI: one readable file with the question, Lightning's own words, the answers and the drivers](7-planning-import-and-search/7W-ask-ai-one-readable-file.md) | new feature | Understand | L | new |
+| NF-7W1 | ↳ Look at what exists | | | | |
+| NF-7W2 | ↳ The file | | | | |
+| NF-7W3 | ↳ Presets | | | | |
+| NF-7W4 | ↳ Sizes and masking | | | | |
+| NF-7W5 | ↳ Separate the machine export | | | | |
+| NF-7W6 | ↳ Tests | | | | |
 
-Done: 7H, 7J, 7K, 7N, 7O, 7P, 7Q. Next free code: 7W.
+Done: 7H, 7J, 7K, 7N, 7O, 7P, 7Q. Next free code: 7X.
 
 ## 8 Website
 
@@ -160,8 +169,20 @@ The site is honest, quick and in step with the app.
 | **IT-8A** | [Feedback form: submit scrolls to the page end, images take 10 s, and the survey forms accept formula injection and spam](8-website/8A-feedback-form-send-and-spam-guard.md) | improvement, technical | Reach | M | ready |
 | **OW-8D** | [For Geeks audit ideas left for the owner to choose](8-website/8D-for-geeks-audit-ideas-to-choose.md) | owner task | Reach |  | ready |
 | **IV-8F** | [Home and Features show the app, not only words](8-website/8F-home-and-features-show-the-app.md) | improvement, visual | Reach | M | ready |
+| **NF-8X** | [All tracking in the owner console, as tabs that each answer one question](8-website/8X-tracking-in-the-owner-console.md) | new feature | Reach | L | new |
+| NF-8X1 | ↳ Inventory | | | | |
+| NF-8X2 | ↳ Tabs | | | | |
+| NF-8X3 | ↳ Move and redirect | | | | |
+| NF-8X4 | ↳ Update the docs | | | | |
+| **NF-8Y** | [Downloads shows what is new, from the release notes, in English and Arabic](8-website/8Y-downloads-shows-whats-new.md) | new feature | Reach | M | new |
+| **NF-8Z** | [Honest comparison pages: Lightning against a spreadsheet, a traditional expense tracker and a cloud budgeting app](8-website/8Z-honest-comparison-pages.md) | new feature | Reach | L | new |
+| NF-8Z1 | ↳ Scorecard and evidence rule | | | | |
+| NF-8Z2 | ↳ Guideline B10 and B12 | | | | |
+| NF-8Z3 | ↳ English pages | | | | |
+| NF-8Z4 | ↳ Arabic pages | | | | |
+| NF-8Z5 | ↳ Keep it true | | | | |
 
-Done: 8B, 8C, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W. Next free code: 8X.
+Done: 8B, 8C, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W. Next free code: 8AA.
 
 ## 9 Later
 
