@@ -5,6 +5,7 @@ type: feature
 pillar: feel
 size: M
 status: ready
+post: no
 created: 2026-10-27
 by: Claude
 repo: website

@@ -3,7 +3,9 @@ title: One order of price sources
 type: tech
 pillar: own
 size: M
+coins: 800
 status: ready
+github: 217
 created: 2026-10-05
 by: Claude
 ---

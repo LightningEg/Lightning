@@ -4,6 +4,7 @@ type: polish
 pillar: feel
 size: S
 status: ready
+post: no
 created: 2026-10-15
 by: Claude Sonnet 5.5
 skills: feedback-review

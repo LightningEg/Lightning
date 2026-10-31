@@ -6,6 +6,7 @@ severity: medium
 pillar: own
 size: M
 status: ready
+post: no
 created: 2026-10-16
 by: Claude Sonnet 5.5
 skills: feedback-review

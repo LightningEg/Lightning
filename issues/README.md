@@ -66,7 +66,7 @@ website, search, community). Add one only when none fits.
 **Size** is the work, and sets the Lightning Coins if the item is posted for contributors: `S` a small self-contained fix (200),
 `M` a change across a few files with tests (500), `L` money logic or a feature (800 or more). An `L` item is split into
 steps before it is posted. A step is a heading with its size: `## 3C1 Title · M` (`S`, `M`, `L`, or `owner` for what only the
-owner can do), then a line or two saying what done looks like; once posted it ends `· #123`. An owner task has no size.
+owner can do), then a line or two saying what done looks like; once posted it ends `· #123`. An owner task has no size. An item may carry `coins: 800` (a multiple of 100) to raise its reward above its size's; it never lowers one.
 
 `python tools/issues.py github` is a dry run of what would go on GitHub for contributors: a step, or an item with no steps,
 that is `ready`, not an owner task, not marked `post: no` (front matter, for the sensitive or owner-run), and not already
