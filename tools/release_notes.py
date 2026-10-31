@@ -68,9 +68,11 @@ def latest_tag() -> str | None:
     return max(tags, key=lambda t: version_key(t[1:])) if tags else None
 
 
-def commits(since: str | None) -> list[dict]:
+def commits(since: str | None, first_parent: bool = True) -> list[dict]:
+    """Commits since a ref. On main, history is squash commits, so first-parent. A pull request's CI checks out a merge commit
+    whose first parent is the base, so check-pr reads every commit in the range instead."""
     rng = f"{since}..HEAD" if since else "HEAD"
-    raw = git("log", "--first-parent", "--format=%H%x1f%ad%x1f%s%x1f%b%x1e", "--date=short", rng)
+    raw = git("log", *(["--first-parent"] if first_parent else []), "--format=%H%x1f%ad%x1f%s%x1f%b%x1e", "--date=short", rng)
     out = []
     for block in raw.split("\x1e"):
         if not block.strip():
@@ -169,7 +171,7 @@ def cut(version: str, since: str | None, day: str) -> None:
 
 def check_pr(base: str) -> int:
     notes, details, problems = [], [], []
-    for c in commits(base):
+    for c in commits(base, first_parent=False):
         notes += c["notes"]
         details += c["details"]
     if not notes:

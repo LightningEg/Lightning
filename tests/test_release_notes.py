@@ -80,3 +80,13 @@ def test_a_pull_request_needs_both_trailers(repo, capsys):
     assert release_notes.check_pr("v1.0.0") == 0
     _commit(repo, "Bad", "Release-note: Import is faster.\nDetail: x")
     assert release_notes.check_pr("v1.0.0") == 1
+
+
+def test_a_pull_request_checked_out_as_a_merge_commit_is_still_read(repo):
+    """CI checks out the merge of the PR into the base; the base is the merge's first parent."""
+    _git(repo, "checkout", "-q", "-b", "pr")
+    _commit(repo, "Change", "Release-note: capture: Import is faster.\nDetail: Cached the header read.")
+    _git(repo, "checkout", "-q", "main")
+    _git(repo, "checkout", "-q", "-b", "merge-ref")
+    _git(repo, "merge", "-q", "--no-ff", "-m", "Merge pr", "pr")
+    assert release_notes.check_pr("v1.0.0") == 0
