@@ -1506,9 +1506,15 @@ def test_ask_ai_brief_of_mohabs_year_agrees_with_the_reports_in_every_preset_and
     assert sizes[("review", "digest")] < 5_000 and sizes[("review", "standard")] < 20_000
     masked = mohab.b.client.post("/settings/ask-ai", data={**form.fields, "preset": "spending", "size": "full", "hide_names": "1"}).text
     plain_text = mohab.b.client.post("/settings/ask-ai", data={**form.fields, "preset": "spending", "size": "full"}).text
-    owners = {name for name, _ in mohab.c.reporting.spending_by_counterparty("2026-07-01", "2027-09-30")}
-    assert owners and all(name in plain_text for name in list(owners)[:3])
-    assert not [name for name in owners if len(name) > 3 and name in masked], "a counterparty survived hide names"
+    # The biggest spenders are named in the brief; every real name in the rows (payees, employers, accounts) is gone when hidden.
+    top = [name for name, _ in mohab.c.reporting.spending_by_counterparty("2026-07-01", "2027-09-30")[:3]]
+    assert top and all(name in plain_text for name in top)
+    lines = mohab.c.reporting.q.ai_analysis_lines("2026-07-01", "2027-09-30")
+    categories = " ".join(mohab.c.categories.display_name(item.id) for item in mohab.c.categories.tree())
+    real = {name for line in lines for name in (line["counterparty"], line["account_name"])
+            if name and len(name) > 3 and name not in categories}      # a category name stays: it is the person's own word
+    assert real
+    assert not sorted(name for name in real if name in masked), "a real name survived hide names"
     assert "Counterparty 1" in masked and "Names are replaced by labels" in masked
 
 
