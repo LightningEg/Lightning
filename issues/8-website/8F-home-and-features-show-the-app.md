@@ -4,6 +4,7 @@ type: polish
 pillar: reach
 size: M
 status: ready
+post: no
 created: 2026-10-21
 by: Claude
 skills: guideline-audit, site-recapture

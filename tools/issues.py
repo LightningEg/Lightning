@@ -158,6 +158,10 @@ def load() -> tuple[list[dict], list[str]]:
                 problems.append(f"{rel}: type '{meta_i.get('type')}' is not one of {', '.join(TYPES)}")
             if meta_i.get("pillar") and meta_i["pillar"] not in PILLARS:
                 problems.append(f"{rel}: pillar '{meta_i['pillar']}' is not one of {', '.join(PILLARS)} (issues/README.md)")
+            if meta_i.get("coins"):
+                floor = COINS.get(meta_i.get("size"), 0)
+                if not meta_i["coins"].isdigit() or int(meta_i["coins"]) < floor or int(meta_i["coins"]) % 100:
+                    problems.append(f"{rel}: coins is a multiple of 100, at least the size's {floor}: it raises the reward, never lowers it")
             if meta_i.get("post") not in (None, "no"):
                 problems.append(f"{rel}: post is only ever `no` (keep this item off the public list)")
             if meta_i.get("type") == "owner":
@@ -239,6 +243,12 @@ def render(milestones: list[dict]) -> str:
 REPO = "https://github.com/LightningEg/Lightning"
 
 
+def coins_for(unit: dict) -> int:
+    """The reward: the size's coins, or the item's own higher `coins:` (the owner: raise as you see fit)."""
+    item = unit["item"]
+    return int(item["coins"]) if item.get("coins") and not unit["step"] else COINS[unit["size"]]
+
+
 def post_units(milestones: list[dict]) -> tuple[list[dict], list[tuple[str, str]]]:
     """What would go on GitHub for contributors, and what stays off it and why.
 
@@ -300,7 +310,7 @@ def issue_text(unit: dict) -> tuple[str, str, list[str]]:
         what = re.sub(r"^## .*$", "", body.split("## Fix")[0], flags=re.M).strip()
         heading = "What's wrong or wanted"
     done = body.split("## Fix", 1)[1].strip() if "## Fix" in body else ""
-    coins = COINS[unit["size"]]
+    coins = coins_for(unit)
     kind = TAGS[item["tag"]].replace(", ", "-").replace(" ", "-")
     link = f"{REPO}/blob/main/issues/{item['file']}"
     title = f"[{unit['code']}] {unit['title'] if step else item['title']}"
@@ -328,9 +338,9 @@ def main() -> int:
         units, held = post_units(milestones)
         sizes = {s: sum(1 for u in units if u["size"] == s) for s in COINS}
         print(f"# Would post {len(units)} issues (dry run: nothing is sent)\n")
-        print("Sizes: " + ", ".join(f"{n} {s} ({COINS[s]})" for s, n in sizes.items()) + f" · {sum(COINS[u['size']] for u in units):,} coins in all\n")
+        print("Sizes: " + ", ".join(f"{n} {s} ({COINS[s]})" for s, n in sizes.items()) + f" · {sum(coins_for(u) for u in units):,} coins in all\n")
         for u in units:
-            print(f"- {issue_text(u)[0]}  · {u['size']} · {COINS[u['size']]} coins · {PILLARS[u['item']['pillar']]}")
+            print(f"- {issue_text(u)[0]}  · {u['size']} · {coins_for(u)} coins · {PILLARS[u['item']['pillar']]}")
         print(f"\n# Held back ({len(held)})\n")
         for name, why in held:
             print(f"- {name}: {why}")

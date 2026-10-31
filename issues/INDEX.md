@@ -161,7 +161,7 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | **NF-5C** | [Investment checks in the integrity screen](5-investments/5C-investment-checks-in-integrity.md) | new feature | Own | M | blocked on 5B |
 | **NF-5D** | [Return per purchase (ROI and CAGR)](5-investments/5D-return-per-purchase.md) | new feature | Own | M | blocked on 5B |
 | **NF-5E** | [Bonus shares and stock splits](5-investments/5E-bonus-shares-and-splits.md) | new feature | Own | M | blocked on 5A, 5B |
-| **IT-5F** | [One order of price sources](5-investments/5F-one-order-of-price-sources.md) | improvement, technical | Own | M | ready |
+| **IT-5F** | [One order of price sources](5-investments/5F-one-order-of-price-sources.md) ([#217](https://github.com/LightningEg/Lightning/issues/217)) | improvement, technical | Own | M | ready |
 | **NF-5G** | [Brokerages that span exchanges and currencies - structure, workflows and analysis to build](5-investments/5G-brokerages-across-exchanges.md) | new feature | Own | L | building |
 | NF-5G1 | ↳ Phase 0: honest display | | | M | |
 | NF-5G2 | ↳ Phase 1: listings | | | L | |
@@ -212,12 +212,12 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7C2 | ↳ A mapping preset per app in the CSV review | | | L | |
 | NF-7C3 | ↳ A move-in guide | | | M | |
 | **NF-7D** | [Search and matching: what is not built](7-planning-import-and-search/7D-search-and-matching.md) | new feature | Capture | L | ready |
-| NF-7D1 | ↳ Agree the matching contract | | | M | |
-| NF-7D2 | ↳ Replace difflib with RapidFuzz | | | L | |
-| NF-7D3 | ↳ Scoped pickers use the matcher | | | M | |
-| NF-7D4 | ↳ Page search grouped by type | | | M | |
-| NF-7D5 | ↳ History search through matched IDs | | | M | |
-| NF-7D6 | ↳ Edge cases and speed | | | M | |
+| NF-7D1 | ↳ Agree the matching contract ([#218](https://github.com/LightningEg/Lightning/issues/218)) | | | M | |
+| NF-7D2 | ↳ Replace difflib with RapidFuzz ([#219](https://github.com/LightningEg/Lightning/issues/219)) | | | L | |
+| NF-7D3 | ↳ Scoped pickers use the matcher ([#220](https://github.com/LightningEg/Lightning/issues/220)) | | | M | |
+| NF-7D4 | ↳ Page search grouped by type ([#221](https://github.com/LightningEg/Lightning/issues/221)) | | | M | |
+| NF-7D5 | ↳ History search through matched IDs ([#222](https://github.com/LightningEg/Lightning/issues/222)) | | | M | |
+| NF-7D6 | ↳ Edge cases and speed ([#223](https://github.com/LightningEg/Lightning/issues/223)) | | | M | |
 | **NF-7E** | [Match bank-imported transfer pairs across currencies](7-planning-import-and-search/7E-imported-pairs-across-currencies.md) | new feature | Capture | M | new |
 | **NF-7F** | [Small planning gaps](7-planning-import-and-search/7F-small-planning-gaps.md) | new feature | Plan | M | new |
 | NF-7F2 | ↳ Rename a rule | | | S | |
@@ -225,9 +225,9 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | **NF-7G** | [Age of Money and a spending calendar](7-planning-import-and-search/7G-more-analytics.md) | new feature | Understand | M | new |
 | **NF-7I** | [A planned payment due on a public holiday doesn't move to a working day](7-planning-import-and-search/7I-public-holidays-in-schedules.md) ([#50](https://github.com/LightningEg/Lightning/issues/50)) | new feature | Plan | S | ready |
 | **NF-7L** | [Smart suggestions exist but sit 2-3 clicks down - make Needs you the one inbox, widen Looks recurring](7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) | new feature | Plan | L | ready |
-| NF-7L2 | ↳ Needs you carries the suggestions | | | L | |
-| NF-7L3 | ↳ Looks recurring finds real bills | | | M | |
-| NF-7L4 | ↳ Pair what belongs together | | | M | |
+| NF-7L2 | ↳ Needs you carries the suggestions ([#224](https://github.com/LightningEg/Lightning/issues/224)) | | | L | |
+| NF-7L3 | ↳ Looks recurring finds real bills ([#225](https://github.com/LightningEg/Lightning/issues/225)) | | | M | |
+| NF-7L4 | ↳ Pair what belongs together ([#226](https://github.com/LightningEg/Lightning/issues/226)) | | | M | |
 | **OW-7M** | [Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as overspending](7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) | owner task | Plan |  | new |
 | **OW-7R** | [Changing an expense's amount silently unlinks it from its reserve](7-planning-import-and-search/7R-money-edit-drops-reserve-links.md) | owner task | Plan |  | new |
 | **OW-7S** | [Money out filed under an income category counts as spending, not as less income](7-planning-import-and-search/7S-money-out-of-an-income-category.md) | owner task | Understand |  | new |

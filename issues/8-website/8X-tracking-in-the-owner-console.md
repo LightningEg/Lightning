@@ -18,6 +18,7 @@ List every figure on the dashboard, the owner console and the daily GoatCounter 
 
 ## 8X2 Tabs · L
 Visitors and sources, Downloads funnel, Search and findability, Store and coins, Errors and speed, with the 11 decision rules from `analytics/rules.js` leading.
+Sign-ups tab (owner, 2026-10-31): accounts created per day, by provider (email, Google, GitHub), confirmed, and how many then did something (top-up, purchase, contribution), against the day's visitors; it needs a `signup` event in the page-view record, because page views alone cannot give a conversion. On 2026-10-31 the answer was 4 accounts (see Supabase `auth.users`, aggregate counts only).
 
 ## 8X3 Move and redirect · M
 Port the data reads, keep the tests (`rules.test.js`, `dashboard-smoke.js`), redirect `analytics/dashboard.html`.

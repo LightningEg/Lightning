@@ -118,3 +118,11 @@ def test_the_public_list_in_the_plan_carries_coins_and_never_an_owner_task():
     assert units and all(u["size"] in module.COINS and u["item"]["type"] != "owner" for u in units)
     title, body, labels = module.issue_text(units[0])
     assert title.startswith("[") and f"coins:{module.COINS[units[0]['size']]}" in labels and "/take" in body
+
+
+def test_a_reward_can_be_raised_above_its_size_but_never_lowered():
+    module = _tool()
+    unit = {"item": _item(coins="800"), "step": None, "size": "M"}
+    assert module.coins_for(unit) == 800
+    assert module.coins_for({"item": _item(), "step": None, "size": "M"}) == 500
+    assert module.coins_for({"item": _item(coins="800"), "step": {"code": "9Z1"}, "size": "S"}) == 200  # a step keeps its own size
