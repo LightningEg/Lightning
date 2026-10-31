@@ -4,6 +4,7 @@ type: tech
 pillar: build
 size: M
 status: ready
+post: no
 created: 2026-10-28
 by: Claude
 commit: 9ca53bd
@@ -21,3 +22,5 @@ Audit 9 B8: `../../reports/2026-10-28-loose-ends-and-linking/report.md`. No beha
 ## Note
 
 Lending (`lightning/sync/*.py`) is still live; its retirement after J6 needs an item then. `runtime/journal_setup.py` still uses `open_lab`: it is the dummy-lab enrollment tool and only accepts a lab marked dummy.
+
+**Not posted to contributors (2026-10-31):** it is pairing and journal code, inside the journal claim.

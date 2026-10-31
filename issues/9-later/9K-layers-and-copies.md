@@ -4,6 +4,7 @@ type: tech
 pillar: build
 size: M
 status: ready
+post: no
 created: 2026-10-21
 by: Claude
 ---
@@ -25,3 +26,5 @@ list for both entrypoints (month-end checkpoints post on unlock, failures are lo
 
 ## Fix
 One branch each, tests unchanged.
+
+**Not posted to contributors (2026-10-31):** splitting `profile_app` touches the journal and device code that is claimed.

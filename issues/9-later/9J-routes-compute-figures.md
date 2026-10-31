@@ -4,6 +4,7 @@ type: tech
 pillar: build
 size: M
 status: ready
+post: no
 created: 2026-10-21
 by: Claude
 ---
@@ -20,3 +21,5 @@ Done (2026-10-22): the Overview's eight unread figures are gone; Budget reads it
 ## Fix
 - Move what screens use into the service the figures registry names.
 - Test: cached and uncached HTML stay identical (`tests/test_reporting_performance.py`).
+
+**Not posted to contributors (2026-10-31):** what is left needs the owner's decision on how the gam'eya circle counts, and touches routes under active declutter work.

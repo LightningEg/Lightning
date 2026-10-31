@@ -6,6 +6,7 @@ severity: low
 pillar: capture
 size: M
 status: ready
+github: 230
 created: 2026-10-29
 by: Claude
 skills: bug-hunt, number-audit

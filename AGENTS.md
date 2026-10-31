@@ -57,7 +57,7 @@ Never at the cost of a test, a required check, or a read you need.
 - **Push rejected?** `git pull --rebase`, keep both sides in `NOW.md`, retest, push.
 - **Findings and plans:** every bug, improvement or design goes in `issues/` as one item in the milestone it belongs to, with the next free code (`python tools/issues.py next 3`); finishing it first replaces incoming report/feedback links with permanent commit/test references, then deletes the file and adds the code to the milestone's `done:`. Read `issues/INDEX.md` before anything else there. A small, self-contained one also gets a *Good first issue* (its template) titled `[BV-3C] …`, linking the file, with `github: n` in the file's front matter, for people to `/take`.
 - **People first:** never start on a GitHub issue that has an assignee or the `taken` label; a person has it ([CONTRIBUTING.md](CONTRIBUTING.md)). Fixing an item with an open GitHub issue closes it (`Closes #n`).
-- **Skills:** `skills/README.md` lists them: feedback-review, bug-hunt, number-audit, guideline-audit, arabic-check, perf-check, stale-check, release-check, website-sync. Read the one that fits and follow it.
+- **Skills:** `skills/README.md` lists them, one per activity: reviewing and testing (feedback-review, bug-hunt, number-audit, guideline-audit, arabic-check, perf-check, stale-check, release-check), the website (website-sync, site-recapture, owner-console-view, supabase-migration, usage-question), and the repo's own work (organise-repo, add-plan-item, split-large-item, post-contributor-issues, write-release-notes, ship-pr, review-external-pr). Read the one that fits and follow it.
 - **Never undo another AI's work** without the owner; disagree in a GitHub issue for the owner.
 
 ## 4. Product rules

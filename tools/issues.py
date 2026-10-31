@@ -185,14 +185,19 @@ def load() -> tuple[list[dict], list[str]]:
             except ValueError:
                 problems.append(f"{rel}: 'created' must be yyyy-mm-dd")
             steps = []
-            for step, title, size, github in STEP.findall(item.read_text(encoding="utf-8")):
+            whole = item.read_text(encoding="utf-8")
+            for step, title, size, github in STEP.findall(whole):
                 if not step.startswith(code) or not step[len(code):].isdigit():
                     problems.append(f"{rel}: step {step} must be {code}1, {code}2, …")
                 if not size:
                     problems.append(f"{rel}: step {step} needs a size: `## {step} {title} · S|M|L|owner`")
                 if meta_i.get("type") == "owner" and size and size != "owner":
                     problems.append(f"{rel}: steps of an owner task are `owner`")
-                steps.append({"code": step, "title": title, "size": size, "github": github})
+                found = re.search(rf"^## {step} .*?\n(.*?)(?=^## |\Z)", whole, re.M | re.S)
+                # "Needs 5A1 and 5A2 merged first": the steps named in that sentence must be finished before this one is offered.
+                sentence = re.search(r"Needs ([^.]*?) (?:merged|agreed|finished) first", found.group(1) if found else "")
+                steps.append({"code": step, "title": title, "size": size, "github": github,
+                              "needs": re.findall(r"\d+[A-Z]+\d+", sentence.group(1)) if sentence else []})
             items.append({**meta_i, "code": code, "tag": tag(meta_i), "file": rel, "steps": steps})
         codes = [i["code"] for i in items]
         for code in {c for c in codes if codes.count(c) > 1}:
@@ -270,6 +275,9 @@ def post_units(milestones: list[dict]) -> tuple[list[dict], list[tuple[str, str]
                         held.append((f"{i['tag']}-{s['code']}", "owner step"))
                     elif s["github"]:
                         held.append((f"{i['tag']}-{s['code']}", f"already #{s['github']}"))
+                    elif any(n in {x["code"] for x in i["steps"]} for n in s.get("needs", [])):
+                        waiting = [n for n in s.get("needs", []) if n in {x["code"] for x in i["steps"]}]
+                        held.append((f"{i['tag']}-{s['code']}", f"waits for {', '.join(waiting)} to be finished (its heading deleted)"))
                     else:
                         units.append({"code": f"{i['tag']}-{s['code']}", "title": s["title"], "size": s["size"], "item": i, "step": s})
             elif i.get("github"):
@@ -309,7 +317,9 @@ def issue_text(unit: dict) -> tuple[str, str, list[str]]:
     else:
         what = re.sub(r"^## .*$", "", body.split("## Fix")[0], flags=re.M).strip()
         heading = "What's wrong or wanted"
-    done = body.split("## Fix", 1)[1].strip() if "## Fix" in body else ""
+    # A step carries its own what and done-when; the item's plan would repeat every sibling step.
+    fix = re.search(r"^## Fix\n(.*?)(?=^## |\Z)", body, re.M | re.S)
+    done = "" if step else (fix.group(1).strip() if fix else "")
     coins = coins_for(unit)
     kind = TAGS[item["tag"]].replace(", ", "-").replace(" ", "-")
     link = f"{REPO}/blob/main/issues/{item['file']}"
