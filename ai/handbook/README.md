@@ -3,21 +3,22 @@
 A plain-language guide to what Lightning is, how it is built, and where it falls short.
 Written from the code at version **1.5.2** (schema migration **0068**), 2026-10-30.
 
-> **How this relates to the other docs.** `docs/ARCHITECTURE.md`, `PROJECT_OVERVIEW.md` and
-> `GLOSSARY.md` are the detailed, authoritative references and are updated with every change.
-> This handbook is the **readable front door**: it explains the same system in a fixed, familiar
-> shape (product, design, data, requirements, API, gaps) and links to the references instead of
-> copying them. Where the two disagree, the code wins, then the references, then this handbook.
+> **How this relates to the other docs.** People read the plain pages in `docs/`:
+> [product](../../docs/product.md), [how it is built](../../docs/how-it-is-built.md) and
+> [journeys](../../docs/journeys.md). This folder holds the formal, ID-bearing material (requirements,
+> data model, API list, traceability, gaps, decisions) for AI sessions. `ai/ARCHITECTURE.md`,
+> `PROJECT_OVERVIEW.md` and `GLOSSARY.md` stay the detailed, authoritative references. Where they
+> disagree with this folder, the code wins, then the references, then this folder.
 > Findings that contradict the references are listed in [GAP_ANALYSIS](analysis/GAP_ANALYSIS.md).
 
 ## Read in this order
 
 | If you want to… | Read |
 |---|---|
-| Understand the product in five minutes | [product/PRD.md](product/PRD.md) |
-| See how the pieces fit | [architecture/SDD.md](architecture/SDD.md) |
+| Understand the product in five minutes | [product/PRD.md](../../docs/product.md) |
+| See how the pieces fit | [architecture/SDD.md](../../docs/how-it-is-built.md) |
 | Know where data lives and what the tables mean | [architecture/DATA_MODEL.md](architecture/DATA_MODEL.md) |
-| Follow a real journey end to end | [architecture/WORKFLOWS.md](architecture/WORKFLOWS.md) |
+| Follow a real journey end to end | [architecture/WORKFLOWS.md](../../docs/journeys.md) |
 | Find a library, command or test | [architecture/TECHNICAL_DESIGN.md](architecture/TECHNICAL_DESIGN.md) |
 | Check what the system must do | [requirements/FUNCTIONAL_REQUIREMENTS.md](requirements/FUNCTIONAL_REQUIREMENTS.md) |
 | Check how well it must do it | [requirements/NON_FUNCTIONAL_REQUIREMENTS.md](requirements/NON_FUNCTIONAL_REQUIREMENTS.md) |

@@ -1,7 +1,7 @@
 # Product Requirements (as built)
 
-Source of truth for decisions: [`docs/PROJECT_OVERVIEW.md`](../../PROJECT_OVERVIEW.md). This page
-restates it in PRD shape and adds status. IDs link to [FUNCTIONAL_REQUIREMENTS](../requirements/FUNCTIONAL_REQUIREMENTS.md).
+Source of truth for decisions: [`ai/PROJECT_OVERVIEW.md`](../ai/PROJECT_OVERVIEW.md). This page
+restates it in PRD shape and adds status. IDs link to [FUNCTIONAL_REQUIREMENTS](../ai/handbook/requirements/FUNCTIONAL_REQUIREMENTS.md).
 
 ## 1. Overview and vision
 
@@ -17,7 +17,7 @@ no account and no server; people may use it with their real money.
 Salaried Egyptians hold money across banks, wallets, cash, gold, certificates, savings circles
 (gam'eya) and brokerages, often in EGP and USD. Generic budgeting apps do not model Egyptian
 instruments or bank formats, and cloud apps require handing data to a server. Competitor research
-is in [`docs/COMPETITION.md`](../../COMPETITION.md).
+is in [`ai/COMPETITION.md`](../ai/COMPETITION.md).
 
 ## 3. Audience, personas, stakeholders
 
@@ -25,7 +25,7 @@ is in [`docs/COMPETITION.md`](../../COMPETITION.md).
 |---|---|
 | **Mohab** (reference user: 31, salaried, Cairo) | Monthly budget, safe-to-spend, savings, a few investments, a gam'eya, some USD. Lives a full year in `tests/test_mohab_year.py`. |
 | Partner / household member | Same ledger from the phone (multi-device edit journal). |
-| Contributor | Fixes issues via forks and PRs ([CONTRIBUTING.md](../../../CONTRIBUTING.md)). |
+| Contributor | Fixes issues via forks and PRs ([CONTRIBUTING.md](../CONTRIBUTING.md)). |
 
 Stakeholders: the **owner** (decides product, merges, releases); AI contributors (Claude, Codex, Luna) coordinating through `NOW.md`; users via the feedback process (`feedback/`).
 
@@ -77,7 +77,7 @@ Each has a status. "Implemented" means code plus tests exist; the owner still ho
 
 ## 8. Journeys and workflows
 
-Step-by-step versions with diagrams: [WORKFLOWS](../architecture/WORKFLOWS.md). Month-in-the-life of Mohab: Overview §5.
+Step-by-step versions with diagrams: [WORKFLOWS](journeys.md). Month-in-the-life of Mohab: Overview §5.
 
 ## 9. Business rules (headline)
 
@@ -89,7 +89,7 @@ One ledger; plan ≠ money; held-for-others money is excluded from *What you own
 - Never open one live database on two computers (no cross-PC lock).
 - Prices from some sources cannot be redistributed; each app fetches its own.
 - Assumption: users on Android/Windows trust their device (no protection from malware on an unlocked device).
-- Risks and open items: [GAP_ANALYSIS](../analysis/GAP_ANALYSIS.md).
+- Risks and open items: [GAP_ANALYSIS](../ai/handbook/analysis/GAP_ANALYSIS.md).
 
 ## 11. Success metrics
 
@@ -97,4 +97,4 @@ One ledger; plan ≠ money; held-for-others money is excluded from *What you own
 
 ## 12. Implementation status and future
 
-See [`issues/INDEX.md`](../../../issues/INDEX.md) for the full plan by milestone. Largest open areas: edit journal (4), investment lots/ROI (5), more import formats (7), cosmetic store (10).
+See [`issues/INDEX.md`](../issues/INDEX.md) for the full plan by milestone. Largest open areas: edit journal (4), investment lots/ROI (5), more import formats (7), cosmetic store (10).

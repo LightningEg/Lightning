@@ -21,14 +21,14 @@ the third item of milestone 3. A big item is split one step down with a number: 
 | **OW** | Owner task | `type: owner` |
 
 The tag comes from the front matter, so the generator writes it; the part after it (`3C`) never changes, names the file and
-finds all older history. Write the full code wherever you mention the item: commit messages, the changelog, `NOW.md`, pull
+finds all older history. Write the full code wherever you mention the item: commit messages, release-note trailers, `NOW.md`, pull
 requests and GitHub issue titles (`[BV-3C] Charts: two end labels overlap`). `python tools/issues.py tag 3C` prints it.
 
 - A code is never reused. `python tools/issues.py next 3` prints the next free one.
 - An item moving to another milestone gets a new code there; write `was: 3C` in its front matter.
 - Before finishing, replace incoming links from reports and feedback with a commit-pinned issue snapshot, resolution commit or regression test; keep the code. Sanitized feedback records and audit evidence remain.
 - A finished item's file is **deleted in the commit that finishes it**, and its code is added to `done:` in the milestone's
-  README. The record is the test, the changelog line and the commit message (name the code there).
+  README. The record is the test, the release note and the commit message (name the code there).
 
 ## Where things go
 
@@ -56,11 +56,16 @@ Report and feedback formats are in [the template catalogue](../templates/README.
 | `tech` | Under the hood: speed, structure, tests, tooling, security; nothing a person sees change |
 | `owner` | Needs the owner: a decision, an account, a key, a check on their PC or phone |
 
-**Area** is where the item belongs, one of a fixed list that `tools/issues.py` checks (`AREAS`): `accounts`, `android`,
-`appearance` (themes and cosmetics), `arabic`, `architecture`, `desktop`, `devices` (sync and pairing), `docs`, `github`
-(contributing through GitHub), `import`, `investments`, `market` (price data), `performance`, `phone`, `planning`
-(budget, reserves, recurring), `product` (whole-app reviews and owner checks), `reporting`, `restore`, `search`, `tools`,
-`transactions`, `ui` (how routes and templates are built), `website`. Add one there and here only when none fits.
+**Pillar** is the part of the product an item serves: one fixed list (`PILLARS` in `tools/issues.py`) shared by issues, reports,
+feedback, docs and GitHub labels. `capture` (adding, importing, bank SMS, rules, search), `plan` (budget, bills, reserves,
+forecast, safe to spend), `understand` (overview, spending, reports, net worth), `own` (accounts, investments, gold, foreign
+currency, loans, prices), `protect` (backup, restore, encryption, privacy), `everywhere` (phone, PC, sync, Android, the
+desktop app), `feel` (Arabic, themes, layout, words, the store), `build` (tools, tests, docs, contributors) and `reach` (the
+website, search, community). Add one only when none fits.
+
+**Size** is the work, and sets the Lightning Coins if the item is posted for contributors: `S` a small self-contained fix (200),
+`M` a change across a few files with tests (500), `L` money logic or a feature (800 or more). An `L` item is split into
+steps (`## 3C1 …`) before it is posted; each step then gets its own size. An owner task has no size.
 
 **Severity**, on every bug and only on bugs: `high` (wrong money or lost data), `medium` (wrong on screen, or a task that
 cannot be done), `low` (it reads or looks off). INDEX shows it after the kind.
@@ -78,7 +83,8 @@ title: Short sentence saying what is wrong or wanted
 type: bug
 look: visual                         # bugs: visual or technical; polish: optional, visual by default
 severity: medium                     # bugs only: high, medium or low
-area: investments                    # one of the areas above
+pillar: own                          # one of the pillars above
+size: M                              # S, M or L; not on an owner task
 status: new
 created: 2026-10-19
 by: Claude Opus 5.5                  # the AI or "owner"; never a person's name
@@ -104,7 +110,7 @@ What will change, the branch, the test that proves it.
 ```
 
 A `feature` may instead be a full design (as [4A](4-edit-journal-and-devices/4A-edit-journal.md) is). When part of it is
-built, move what holds into [Architecture](../docs/ARCHITECTURE.md) and shrink the item to what is left.
+built, move what holds into [Architecture](../ai/ARCHITECTURE.md) and shrink the item to what is left.
 
 ## People and GitHub
 

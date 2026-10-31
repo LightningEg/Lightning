@@ -10,12 +10,12 @@
 #   own Lightning.exe must pass the self-check and the real WebView2 window check.
 # - A tag vX.Y.Z[-beta.N] that matches the source version and sits on main publishes the tested ZIP
 #   and matching signed APK as a new, never-replaced release in LightningEg/Lightning-downloads.
-#   How to release: docs/ARCHITECTURE.md › Desktop app and encrypted profiles › Build and release.
+#   How to release: ai/ARCHITECTURE.md › Desktop app and encrypted profiles › Build and release.
 # - The daily run also builds and checks the phone app (no key, nothing offered) when its files changed.
 # - A manual run on main makes the matched test builds: the Windows ZIP and the phone APK (Lightning Test)
 #   of one commit, as two seven-day downloads, offered only when both pass every check. It reuses a
 #   Windows ZIP an earlier run built and tested for this commit, and skips a Linux suite that already
-#   passed on it (packaging/ci_scope.py). It needs the test key: docs/ARCHITECTURE.md › Build and release.
+#   passed on it (packaging/ci_scope.py). It needs the test key: ai/ARCHITECTURE.md › Build and release.
 name: PC and phone app
 
 on:

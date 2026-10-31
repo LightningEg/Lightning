@@ -1,7 +1,8 @@
 ---
 title: Version 1.1 is shipped: move what holds of its review into Architecture, then delete this file
 type: tech
-area: docs
+pillar: build
+size: M
 status: ready
 created: 2026-10-13
 by: Claude

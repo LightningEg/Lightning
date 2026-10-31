@@ -1,4 +1,4 @@
-"""The matched PC and phone test builds (docs/ARCHITECTURE.md › Build and release): the scripts that pin, check,
+"""The matched PC and phone test builds (ai/ARCHITECTURE.md › Build and release): the scripts that pin, check,
 sign and bundle the phone app. The workflow runs them on real builds; these tests run them on fakes."""
 from __future__ import annotations
 

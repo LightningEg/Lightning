@@ -1,7 +1,8 @@
 ---
 title: Phone screens break Part C - cut words, overlapping text, no way back on five pages, small targets, five Settings tabs
 type: polish
-area: phone
+pillar: feel
+size: L
 status: ready
 created: 2026-10-20
 by: Claude

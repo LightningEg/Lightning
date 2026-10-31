@@ -33,12 +33,12 @@ Let the tests find untranslated strings; do not read the dictionaries (they are 
    For a singular and a plural English string (for example "Held {n} day" and "Held {n} days") add both.
 4. **Check by eye** (one screenshot per screen at 1280 and 390 wide, only for changed pages): text aligns right; icons that point (back, forward, chevrons) mirror; tables read right to left; numbers keep their sign next to them;
    dates read as `yyyy-mm-dd` left to right (wrap them in a bidi-isolating element if they scramble); nothing overflows sideways; no half-English labels; charts keep their labels in Arabic.
-5. **Voice.** Read `guideline/brand-voice.md` once, and keep to its words list: the same term for the same thing everywhere (use the glossary `docs/GLOSSARY.md` names). No literal word-by-word translations.
-6. **Tests and merge.** Re-run step 1, then the changed-area tests and Mohab. Add a test only for logic (a new plural, a new pattern); strings are covered by the no-English test. One branch (`claude/arabic-<what>`), changelog line, merge.
+5. **Voice.** Read `guideline/brand-voice.md` once, and keep to its words list: the same term for the same thing everywhere (use the glossary `ai/GLOSSARY.md` names). No literal word-by-word translations.
+6. **Tests and merge.** Re-run step 1, then the changed-area tests and Mohab. Add a test only for logic (a new plural, a new pattern); strings are covered by the no-English test. One branch (`claude/arabic-<what>`), release-note trailer, merge.
 
 ## Report
 
-**Where findings go.** Read `issues/README.md` once. Fix a small finding now (branch, test, changelog line) and file **no** item. File anything bigger as one item in
+**Where findings go.** Read `issues/README.md` once. Fix a small finding now (branch, test, release-note trailer) and file **no** item. File anything bigger as one item in
 the milestone it belongs to, `issues/<n>-<name>/<code>-<what>.md` (code from `python tools/issues.py next <n>`; this skill's name in `skills`, your model in `by`, `app_version`
 from `pyproject.toml`, `commit` from `git rev-parse --short HEAD`), then run `python tools/issues.py`. Finishing an item means deleting its file in the same commit and adding its code to the milestone's `done:`. Never leave a finding only in chat.
 

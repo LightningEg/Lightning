@@ -1,7 +1,8 @@
 ---
 title: Multiple devices: implementation plan
 type: feature
-area: devices
+pillar: everywhere
+size: L
 status: building
 created: 2026-10-05
 by: unknown (moved from docs/proposals)
@@ -11,11 +12,11 @@ by: unknown (moved from docs/proposals)
 
 **Status: implementation started · 2026-10-05 · Tasks 01 and 02a–02b are foundations only; no working sync or restore yet.**
 
-**Pairing update:** the current pairing experience follows [the Local pairing decision](../../docs/PROJECT_OVERVIEW.md#2-product-decisions-that-must-hold) and [4A §7](4A-edit-journal.md#7-authority-pairing-and-recovery). The QR bootstrap described below is superseded.
+**Pairing update:** the current pairing experience follows [the Local pairing decision](../../ai/PROJECT_OVERVIEW.md#2-product-decisions-that-must-hold) and [4A §7](4A-edit-journal.md#7-authority-pairing-and-recovery). The QR bootstrap described below is superseded.
 
 One Android phone holds the accepted encrypted ledger. It can lend editing to one paired Windows PC or laptop, which works from its own local copy even when the phone leaves. Returning the copy brings editing home. There is no automatic merge and no cloud dependency.
 
-This replaces the earlier proposal and separate review with one plan. The owner's product decisions live in [Project Overview](../../docs/PROJECT_OVERVIEW.md#product-decisions-that-must-hold); this file owns the proposed implementation, sequencing and acceptance gates. [NOW.md](../../NOW.md) owns claims and the next task. Existing financial and encryption contracts remain in [Architecture](../../docs/ARCHITECTURE.md). Nothing here means sync or Android support already exists.
+This replaces the earlier proposal and separate review with one plan. The owner's product decisions live in [Project Overview](../../ai/PROJECT_OVERVIEW.md#product-decisions-that-must-hold); this file owns the proposed implementation, sequencing and acceptance gates. [NOW.md](../../NOW.md) owns claims and the next task. Existing financial and encryption contracts remain in [Architecture](../../ai/ARCHITECTURE.md). Nothing here means sync or Android support already exists.
 
 **Start here for implementation:** read NOW.md, the row for your task in section 15, and that row's **Read** sections. Read section 5 once when joining the project. Task numbers identify work packages, not a requirement to wait for every lower number. Section 15 names dependencies, independent work and the smaller commits within large packages; do not load the whole plan for every task.
 
@@ -426,7 +427,7 @@ Publish coordinated, reproducible Windows and Android artifacts and a small comp
 
 ### How the PC gets the compatible version
 
-The owner has already requested **in-app Windows updates, planned for later**, in [Project Overview, Roadmap](../../docs/PROJECT_OVERVIEW.md#roadmap), recorded by commit [18d7af4](https://github.com/elfekimuhammed/Lightning/commit/18d7af4da92d666b5cbbd2f8276f96d8aa43c7ed). This resolves the review's open product question about update direction; it does not mean the updater is implemented or required before all early deliverables.
+The owner has already requested **in-app Windows updates, planned for later**, in [Project Overview, Roadmap](../../ai/PROJECT_OVERVIEW.md#roadmap), recorded by commit [18d7af4](https://github.com/elfekimuhammed/Lightning/commit/18d7af4da92d666b5cbbd2f8276f96d8aa43c7ed). This resolves the review's open product question about update direction; it does not mean the updater is implemented or required before all early deliverables.
 
 Task 19 is divided into a compatibility contract (19a), a usable manual-update path for the first multi-device beta (19b), update/migration rehearsals (19c), and a later signed-updater integration (19d). A generic “Update this PC” error alone is insufficient.
 

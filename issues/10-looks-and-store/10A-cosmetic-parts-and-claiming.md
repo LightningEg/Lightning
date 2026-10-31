@@ -2,7 +2,8 @@
 was: 8J
 title: Cosmetic parts, account-wide claiming and native acceptance
 type: feature
-area: appearance
+pillar: feel
+size: L
 status: building
 created: 2026-10-24
 by: Codex
@@ -33,7 +34,7 @@ Built the shared root-attribute switcher, pre-paint profile preference restorati
 
 ## Read
 
-`docs/ARCHITECTURE.md` › Cosmetic parts and offline ownership; website `cosmetics/README.md`, `cosmetics/payment-policy.md` and `supabase/README.md`.
+`ai/ARCHITECTURE.md` › Cosmetic parts and offline ownership; website `cosmetics/README.md`, `cosmetics/payment-policy.md` and `supabase/README.md`.
 
 ## Baseline regression note
 

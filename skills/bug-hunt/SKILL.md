@@ -5,7 +5,7 @@ description: Run Lightning on the demo data, try every page, button and form, re
 
 # Bug hunt
 
-Tool-neutral. Report only what you reproduced. Fix nothing until the owner chooses (each fix gets its own branch, a test and a changelog line).
+Tool-neutral. Report only what you reproduced. Fix nothing until the owner chooses (each fix gets its own branch, a test and a release-note trailer).
 
 ## Token rules
 
@@ -29,7 +29,7 @@ Reconcile with SQL on `data/demo.db`, not by reading pages twice. Print only dif
 
 ## Report
 
-**Where findings go.** Read `issues/README.md` once. Fix a small finding now (branch, test, changelog line) and file **no** item. File anything bigger as one item in
+**Where findings go.** Read `issues/README.md` once. Fix a small finding now (branch, test, release-note trailer) and file **no** item. File anything bigger as one item in
 the milestone it belongs to, `issues/<n>-<name>/<code>-<what>.md` (code from `python tools/issues.py next <n>`; this skill's name in `skills`, your model in `by`, `app_version`
 from `pyproject.toml`, `commit` from `git rev-parse --short HEAD`), then run `python tools/issues.py`. Finishing an item means deleting its file in the same commit and adding its code to the milestone's `done:`. Never leave a finding only in chat.
 

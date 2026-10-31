@@ -3,7 +3,8 @@ title: A certificate's holding page shows price charts, nine empty "Units out" r
 type: bug
 look: visual
 severity: medium
-area: investments
+pillar: own
+size: M
 status: ready
 created: 2026-10-20
 by: Claude

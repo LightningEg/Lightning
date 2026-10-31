@@ -1,7 +1,8 @@
 ---
 title: One order of price sources
 type: tech
-area: investments
+pillar: own
+size: M
 status: ready
 created: 2026-10-05
 by: Claude
@@ -9,7 +10,7 @@ by: Claude
 
 # One order of price sources
 
-**Status:** proposal, 2026-10-05 · Claude, not built. Learned from GnuCash (`Gnucash/gnucash` at `53cc9e6`; Lightning at `5665786`). When built, move what holds into [Architecture](../../docs/ARCHITECTURE.md) and delete this file.
+**Status:** proposal, 2026-10-05 · Claude, not built. Learned from GnuCash (`Gnucash/gnucash` at `53cc9e6`; Lightning at `5665786`). When built, move what holds into [Architecture](../../ai/ARCHITECTURE.md) and delete this file.
 
 **They do better:** when two prices exist for one day, which one wins is a single written rule.
 

@@ -1,7 +1,8 @@
 ---
 title: Brokerages that span exchanges and currencies - structure, workflows and analysis to build
 type: feature
-area: investments
+pillar: own
+size: L
 status: building
 created: 2026-10-15
 by: Claude

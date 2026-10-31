@@ -2,7 +2,8 @@
 was: 8K
 title: Supporter perks still waiting on the app or the owner - app themes for sale, names on About, a beta channel
 type: feature
-area: appearance
+pillar: feel
+size: M
 status: blocked
 blocked_by: 10A claiming; owner decision on the beta channel
 created: 2026-10-25

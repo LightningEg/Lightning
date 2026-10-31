@@ -1,7 +1,8 @@
 ---
 title: Return against the risk-free rate
 type: feature
-area: investments
+pillar: own
+size: M
 status: new
 created: 2026-10-19
 by: Claude

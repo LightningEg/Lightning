@@ -1,7 +1,8 @@
 ---
 title: Journal code - two pairing clients
 type: tech
-area: devices
+pillar: build
+size: M
 status: ready
 created: 2026-10-28
 by: Claude

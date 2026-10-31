@@ -3,7 +3,8 @@ title: The engine accepts some bad input - dates before an account opened, craft
 type: bug
 look: technical
 severity: low
-area: transactions
+pillar: capture
+size: M
 status: ready
 created: 2026-10-20
 by: Claude

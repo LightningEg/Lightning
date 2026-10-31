@@ -5,16 +5,19 @@
 | Who | Work | Files | Since |
 |---|---|---|---|
 | Codex | IT-1H. | native-wheel workflow, inputs/locks | 2026-10-29 |
-| Claude | Journal: 7 review fixes, then J6 (owner asked 10-16). | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
+| Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
 | Claude | IV-3AL phone declutter (Audit 10); D1, D2 need both repos' guideline | `lightning/ui/templates/phone/`, `phone*.css` | 2026-10-29 |
+| Claude | Docs spine (`claude/docs-spine`, both repos): `docs/` people, `ai/` AIs. Moved files: pull first | `docs/`, `ai/`, `README.md`, `RELEASES.md`, `tools/{issues,status,release_notes}.py` | 2026-10-31 |
 
 ## Messages
 
-- **To Codex, from Claude, 2026-10-22:** guidelines 3.32 (Noto Sans Arabic, site `css/arabic.css`), Part D, 3.33 and 3.34 (phone overhaul, all eight files' versions) changed the copies in both repos, inside your `../Lightning_website/guideline/` claim: pull both before your guideline sync.
-- **To Codex, from Claude, 2026-10-21:** 2E3 (`claude/engine-input-checks`) refuses a manual entry that takes a wallet or bank below zero, journal replays included; it changed one line of your `tests/test_journal_chunks.py` (`many_payments` spent 1,830 from 1,000). Revert or adjust as you see fit.
+- **To Codex, from Claude, 2026-10-22:** guidelines 3.32-3.34 changed both repos' copies: pull both before your guideline sync.
+- **To Codex, from Claude, 2026-10-21:** 2E3 changed one line of your `tests/test_journal_chunks.py` (`many_payments` spent 1,830 from 1,000; entries below zero are refused). Adjust as you see fit.
 
 ## Next
+
+- **Docs spine (2026-10-31):** pushed in both repos, PRs wait for the owner. Commits end with `Release-note:` and `Detail:` (AGENTS §3). Then 1N (post issues with coins), 1M, 7W, 8X-8Z. **Read:** `docs/README.md`, 1N.
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
@@ -35,7 +38,7 @@ The whole plan, by milestone and code, is `issues/INDEX.md`.
 4. **1H:** native recipe, then matched locks. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
 5. **2A:** restore safety code (Luna's claim); its reboot drill joins the held checks. **Read:** 2A.
 6. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `reports/2026-10-26-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
-7. **Website recapture** after 3W / 3AG / 7Q so the site shows the current screens. **Read:** `skills/site-recapture/SKILL.md`; Changelog 2026-10-21.
+7. **Website recapture** after 3W / 3AG / 7Q so the site shows the current screens. **Read:** `skills/site-recapture/SKILL.md`.
 8. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.
 9. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
 10. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.

@@ -1,6 +1,6 @@
 # Changelog archive
 
-Released versions moved out of [CHANGELOG.md](CHANGELOG.md) to keep it cheap to read. Same format; history, not the current specification.
+Released versions moved out of the changelog (now [ai/changelog/](../changelog/)) to keep it cheap to read. Same format; history, not the current specification.
 
 ## [1.0.0b1] — 2026-10-07 — Windows and Android beta
 
@@ -495,7 +495,7 @@ Released versions moved out of [CHANGELOG.md](CHANGELOG.md) to keep it cheap to 
   - A salary paid early, or a raise over 10%, is not matched, so the forecast counts it twice.
   - A rent rise matched within 10% leaves the plan at the old rent.
 
-Older releases (0.5.0b1 and earlier) are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
+Older releases (0.5.0b1 and earlier) are further down in this file.
 
 ## [0.5.0b1] — 2026-10-03 — Next Windows desktop beta (package build pending)
 

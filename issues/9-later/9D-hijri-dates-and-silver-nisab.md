@@ -1,7 +1,8 @@
 ---
 title: Hijri dates, and the silver nisab for zakat
 type: feature
-area: product
+pillar: own
+size: M
 status: new
 created: 2026-10-19
 by: Claude

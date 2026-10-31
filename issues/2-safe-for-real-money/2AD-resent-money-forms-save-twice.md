@@ -3,7 +3,8 @@ title: Five more money forms save twice when the same form is sent again - inves
 type: bug
 look: technical
 severity: low
-area: transactions
+pillar: capture
+size: M
 status: ready
 created: 2026-10-29
 by: Claude

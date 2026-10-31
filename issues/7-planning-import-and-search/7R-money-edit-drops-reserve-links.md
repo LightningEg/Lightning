@@ -1,7 +1,7 @@
 ---
 title: Changing an expense's amount silently unlinks it from its reserve
 type: owner
-area: planning
+pillar: plan
 status: new
 created: 2026-10-26
 by: Claude

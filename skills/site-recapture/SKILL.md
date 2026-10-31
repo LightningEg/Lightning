@@ -26,7 +26,7 @@ Never open a guideline file whole; `python tools/guideline.py --dir ../Lightning
    A figure whose meaning changed (the investing rate became a share of what you kept, 2026-10-14) needs its sentence rewritten, not just its number. New rows on a screen (a savings-target row in safe to spend) need a new row in the breakdown and its alt text.
    Update `width`/`height` on images whose size changed, every `alt` that quotes a figure, the JSON-LD FAQ answers that repeat visible text, scripts that hold figures (`data-from`/`data-to` on the runway), `llms.txt` and the site README's *App screenshots*.
 7. **Check.** In the site: `python tools/site_check.py` (links, JSON-LD, snapshots, version list, titles), then view the changed sections at 1280 and 390 px wide in light mode; nothing may scroll sideways.
-8. **Ship.** One branch per repo (`claude/<feature>`), merge to `main`, push both. Changelog line here (the site has none) and a `NOW.md` message if other AIs quote site figures.
+8. **Ship.** One branch per repo (`claude/<feature>`), merge to `main`, push both. Release-note trailers here (the site has no changelog) and a `NOW.md` message if other AIs quote site figures.
 
 ## Report
 

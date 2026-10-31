@@ -1,7 +1,8 @@
 ---
 title: Outside review of every tab - one organism, fewer numbers, smarter links, less explaining
 type: polish
-area: product
+pillar: feel
+size: L
 status: ready
 created: 2026-10-15
 by: Claude

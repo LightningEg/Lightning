@@ -10,7 +10,7 @@
 
 - [ ] Tests for the changed area pass; full suite green in CI
 - [ ] Brand guideline A16 checklist for any visible change
-- [ ] Changelog entry at the top of `Unreleased` (3 lines at most)
+- [ ] A commit ends with `Release-note: <pillar>: one sentence` (or `none`) and `Detail: one line`
 - [ ] Changes to `.github/`, `packaging/`, `android/`, `cloudflare/` or `tools/` are explained
 
 </details>

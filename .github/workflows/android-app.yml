@@ -3,7 +3,7 @@
 # check a change cheaply (Linux, about 3 minutes); without the bundle input it uploads only a one-day
 # artifact for its own sign job. "PC and phone app" (desktop-probe.yml) calls it for the matched test
 # builds, which need the test key, and in the daily run when the phone's files changed.
-# How it fits: docs/ARCHITECTURE.md › Build and release.
+# How it fits: ai/ARCHITECTURE.md › Build and release.
 name: Phone app
 
 on:

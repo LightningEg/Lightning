@@ -1,7 +1,8 @@
 ---
 title: Edit journal: edit anywhere, one home confirms
 type: feature
-area: devices
+pillar: everywhere
+size: L
 status: building
 created: 2026-10-16
 by: unknown (moved from docs/proposals)
@@ -9,7 +10,7 @@ by: unknown (moved from docs/proposals)
 
 # Edit journal: edit anywhere, one home confirms
 
-**Status: implementation authorized · 2026-10-16 · J1 core and experimental J2/J3 cash workflows built; stage acceptance remains open.** The owner requested this replacement after reviewing the moving-writer design and authorized all six delivery stages on 2026-10-16. Product decisions live in [Project Overview](../../docs/PROJECT_OVERVIEW.md#product-decisions-that-must-hold); the current implementation and experimental core live in [Architecture](../../docs/ARCHITECTURE.md#desktop-app-and-encrypted-profiles). This file owns the proposed protocol and its acceptance gates.
+**Status: implementation authorized · 2026-10-16 · J1 core and experimental J2/J3 cash workflows built; stage acceptance remains open.** The owner requested this replacement after reviewing the moving-writer design and authorized all six delivery stages on 2026-10-16. Product decisions live in [Project Overview](../../ai/PROJECT_OVERVIEW.md#product-decisions-that-must-hold); the current implementation and experimental core live in [Architecture](../../ai/ARCHITECTURE.md#desktop-app-and-encrypted-profiles). This file owns the proposed protocol and its acceptance gates.
 
 Every paired device saves edits immediately. One stable **home** validates them and publishes confirmed changes. Devices exchange those small changes continuously. Opening a PC does not borrow the ledger, move writing rights or require a whole database transfer. The home changes only through an explicit move or recovery.
 
@@ -42,7 +43,7 @@ Every paired device saves edits immediately. One stable **home** validates them 
 
 This replaces the earlier automatic transfer of writing rights. It preserves local-first storage, Python financial rules, encrypted transport, home-only review, short visible history and the home's compatibility policy. It does not turn sync into a backup service.
 
-**Why this design.** Copy-and-handover spends bandwidth on unchanged data and complicates everyday editing. Unrestricted merging of database rows cannot by itself enforce bill settlement, linked transfers or investment rules. This proposal keeps one financial decision point but removes it from the local save interaction. See the existing [competition analysis](../../docs/COMPETITION.md#actual-budget-code-analysis) for workflow lessons; no external sync engine is selected here.
+**Why this design.** Copy-and-handover spends bandwidth on unchanged data and complicates everyday editing. Unrestricted merging of database rows cannot by itself enforce bill settlement, linked transfers or investment rules. This proposal keeps one financial decision point but removes it from the local save interaction. See the existing [competition analysis](../../ai/COMPETITION.md#actual-budget-code-analysis) for workflow lessons; no external sync engine is selected here.
 
 ## 2. Guarantees and limits
 
@@ -159,7 +160,7 @@ A profile has one home public key, an authority generation, a membership version
 
 Owner decision 2026-10-23: automatically discover nearby named homes while pairing is explicitly open, without typing an address or bootstrap code. The home displays a six-digit transcript verification number; the joining device selects it from three distinct choices before sending its profile-password proof. The PC still requires the profile password, and the existing home confirms the named request. Discovery alone never admits a device. Signed offers explicitly distinguish this number-matching flow from older code-based offers. The proof is bound to the pairing transcript and both device keys. A new device receives the verified authority and membership state with its snapshot. Repeated pairing does not reset another origin's sequence. No QR; recovery keys remain unchanged.
 
-Pairing recovery, credential protection and admission bounds are defined in [Architecture](../../docs/ARCHITECTURE.md); executable fault/native checks and physical acceptance limits are recorded in [the pairing hardening review](../../reports/2026-10-26-pairing-hardening/report.md).
+Pairing recovery, credential protection and admission bounds are defined in [Architecture](../../ai/ARCHITECTURE.md); executable fault/native checks and physical acceptance limits are recorded in [the pairing hardening review](../../reports/2026-10-26-pairing-hardening/report.md).
 
 Use a fresh random group transport secret independent of the shared profile data key; derive domain-separated transport keys from it and bind an explicit key epoch. A revoked device must not derive the next secret from its old data key. Use authenticated encryption plus an outer device signature over the ciphertext and routing header, bound to recipient, profile, message type and envelope identity. Authenticate that outer signature before decrypting; the enclosed proposal retains its original signature across forwarding. Retransmit identical sealed bytes or use a fresh unique nonce; never reuse a nonce for different plaintext. TLS pinning remains an additional local-channel defense. Keys and plaintext financial payloads never enter logs or the plain control store.
 

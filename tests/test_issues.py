@@ -43,7 +43,7 @@ def test_a_bug_says_how_bad_it_is_and_every_area_is_on_the_list():  # IT-1K
     assert module.severity_problem({"type": "bug", "severity": "high"}) is None
     assert module.severity_problem({"type": "feature", "severity": "low"})  # only bugs have one
     milestones, _ = module.load()
-    assert {i["area"] for m in milestones for i in m["items"]} <= set(module.AREAS)
+    assert {i["pillar"] for m in milestones for i in m["items"]} <= set(module.PILLARS)
     index = module.render(milestones)
     bugs = [i for m in milestones for i in m["items"] if i["type"] == "bug"]
     assert bugs and all(f"**{i['tag']}-{i['code']}**" in line and f"· {i['severity']} |" in line

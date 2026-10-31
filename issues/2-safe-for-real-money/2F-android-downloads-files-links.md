@@ -3,7 +3,8 @@ title: On Android, downloads, file inputs and outside links do nothing - no back
 type: bug
 look: technical
 severity: high
-area: android
+pillar: everywhere
+size: M
 status: ready
 created: 2026-10-20
 by: Claude

@@ -1,7 +1,8 @@
 ---
 title: Audit public repositories for personal data and security exposure
 type: tech
-area: tools
+pillar: build
+size: M
 status: ready
 created: 2026-10-16
 by: GPT-6
@@ -35,7 +36,7 @@ Remaining: deploy/verify the live Apps Script receiver and verify the replacemen
 
 3. **HIGH (conditional impact) — Spreadsheet formula injection surfaces in public feedback receivers.** Website `apps-script/AppFeedbackReceiverPatch.gs:125-144` writes user-supplied descriptions, names and other fields directly to Sheets. `apps-script/UXTestsReceiverPatch.gs:51-71` likewise writes submitted feedback fields to Sheets without visible formula neutralization. A value beginning with a spreadsheet formula prefix may be interpreted as a formula. Whether practical exploitation succeeds depends on the deployed receiver and Sheets behavior; no exploit was attempted. **Action:** normalize untrusted values to literal text (not formulas) before writing; enforce limits and test with benign formula-shaped inputs.
 
-4. **MEDIUM — Internal operational files are publicly accessible.** App `AGENTS.md`, `NOW.md`, `docs/PROJECT_OVERVIEW.md`, `docs/COMPETITION.md`, `docs/proposals/`, and `report/` expose coordination practices, roadmap, unresolved bugs, security design and product priorities. Website `CLAUDE.md`, `README.md`, `audit/`, `test.html`, `analytics/dashboard.html` and `apps-script/` reveal development workflow, analytics architecture and testing surfaces. `noindex` does **not** restrict access. Not intrinsically a vulnerability: owner should decide which operational details belong in a public source-available project. **Action:** classify public documentation versus private operational notes; do not presume that removing current files removes past commits.
+4. **MEDIUM — Internal operational files are publicly accessible.** App `AGENTS.md`, `NOW.md`, `ai/PROJECT_OVERVIEW.md`, `ai/COMPETITION.md`, `docs/proposals/`, and `report/` expose coordination practices, roadmap, unresolved bugs, security design and product priorities. Website `CLAUDE.md`, `README.md`, `audit/`, `test.html`, `analytics/dashboard.html` and `apps-script/` reveal development workflow, analytics architecture and testing surfaces. `noindex` does **not** restrict access. Not intrinsically a vulnerability: owner should decide which operational details belong in a public source-available project. **Action:** classify public documentation versus private operational notes; do not presume that removing current files removes past commits.
 
 5. **MEDIUM — Public write-only telemetry receiver invites abuse/metric poisoning.** `js/analytics.js` and `analytics/dashboard.html` publish the Apps Script receiver address, while `apps-script/AnalyticsEventsReceiverPatch.gs:268-342,689-750` accepts browser-submitted analytics events without a client authentication secret (as expected for anonymous analytics). Source contains daily row/visitor caps; these mitigate but cannot prevent fabricated traffic or quota exhaustion. The read-side dashboard checks a key (`analyticsRead_`, lines 804-807). **Action:** treat telemetry as untrusted, monitor anomalies/quotas, enforce server-side controls, and avoid using anonymous events as security signals.
 

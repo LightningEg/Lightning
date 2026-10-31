@@ -22,15 +22,17 @@ ISSUES = ROOT / "issues"
 TYPES = ("bug", "polish", "feature", "tech", "owner")
 STATUSES = ("new", "ready", "building", "blocked")
 SEVERITIES = ("high", "medium", "low")  # bugs only: high is wrong money or lost data
-# Where an item belongs. Add one here, with its meaning in issues/README.md, only when no existing area fits.
-AREAS = ("accounts", "android", "appearance", "arabic", "architecture", "desktop", "devices", "docs", "github", "import",
-         "investments", "market", "performance", "phone", "planning", "product", "reporting", "restore", "search",
-         "tools", "transactions", "ui", "website")
+# The pillar is what part of the product an item serves. One list for issues, reports, feedback, docs and GitHub
+# labels; see docs/README.md. Add one only when no existing pillar fits, and say so in issues/README.md.
+PILLARS = {"capture": "Capture", "plan": "Plan", "understand": "Understand", "own": "Own", "protect": "Protect",
+           "everywhere": "Everywhere", "feel": "Feel", "build": "Build", "reach": "Reach"}
+# Size sets the Lightning Coins on a task for contributors. A large item is split into steps before it is posted.
+COINS = {"S": 200, "M": 500, "L": 800}
 LOOKS = ("visual", "technical")  # visual: how a screen looks or reads; technical: what the app computes, stores or does
 TAGS = {"BV": "bug, visual", "BT": "bug, technical", "IV": "improvement, visual", "IT": "improvement, technical",
         "NF": "new feature", "OW": "owner task"}
 DONE = ("done", "fixed", "built", "declined")  # a finished item is deleted and its code listed as done, never kept
-REQUIRED = ("title", "type", "area", "status", "created", "by")
+REQUIRED = ("title", "type", "pillar", "status", "created", "by")
 MILESTONE = re.compile(r"^(\d+)-[a-z0-9]+(-[a-z0-9]+)*$")
 ITEM = re.compile(r"^(\d+)([A-Z]+)-[a-z0-9]+(-[a-z0-9]+)*\.md$")
 STEP = re.compile(r"^## (\d+[A-Z]+\d+) (.+)$", re.M)
@@ -102,12 +104,14 @@ CLAIMED = re.compile(r"^## Claimed\s*$(.*?)(?=^## |\Z)", re.M | re.S)
 
 
 def warnings(milestones: list[dict], now: Path = ROOT / "NOW.md") -> list[str]:
-    """A building item should be claimed in NOW.md. Only a warning: a claim may name its work in words, not by code."""
+    """A building item should be claimed in NOW.md; a large one should be split into steps. Only warnings."""
     found = CLAIMED.search(now.read_text(encoding="utf-8")) if now.exists() else None
     claimed = found.group(1) if found else ""
-    return [f"warning: {i['file']} is building, but {i['code']} is not in NOW.md's Claimed table"
-            for m in milestones for i in m["items"]
-            if i.get("status") == "building" and not re.search(rf"(?<![0-9A-Za-z]){i['code']}(?![0-9A-Za-z])", claimed)]
+    out = [f"warning: {i['file']} is building, but {i['code']} is not in NOW.md's Claimed table"
+           for m in milestones for i in m["items"]
+           if i.get("status") == "building" and not re.search(rf"(?<![0-9A-Za-z]){i['code']}(?![0-9A-Za-z])", claimed)]
+    return out + [f"warning: {i['file']} is size L with no steps: split it into {i['code']}1, {i['code']}2 … before posting it"
+                  for m in milestones for i in m["items"] if i.get("size") == "L" and not i["steps"]]
 
 
 def load() -> tuple[list[dict], list[str]]:
@@ -150,8 +154,13 @@ def load() -> tuple[list[dict], list[str]]:
                     problems.append(f"{rel}: front matter lacks '{key}'")
             if meta_i.get("type") not in TYPES:
                 problems.append(f"{rel}: type '{meta_i.get('type')}' is not one of {', '.join(TYPES)}")
-            if meta_i.get("area") and meta_i["area"] not in AREAS:
-                problems.append(f"{rel}: area '{meta_i['area']}' is not one of {', '.join(AREAS)} (issues/README.md)")
+            if meta_i.get("pillar") and meta_i["pillar"] not in PILLARS:
+                problems.append(f"{rel}: pillar '{meta_i['pillar']}' is not one of {', '.join(PILLARS)} (issues/README.md)")
+            if meta_i.get("type") == "owner":
+                if meta_i.get("size"):
+                    problems.append(f"{rel}: an owner task has no size (no coins)")
+            elif meta_i.get("size") not in COINS:
+                problems.append(f"{rel}: size must be {', '.join(COINS)} (S small fix, M a few files with tests, L money logic or a feature)")
             if severity_problem(meta_i):
                 problems.append(f"{rel}: {severity_problem(meta_i)}")
             if look_problem(meta_i):
@@ -205,14 +214,14 @@ def render(milestones: list[dict]) -> str:
         lines += ["", f"## {m['n']} {m['title']}", ""]
         if m["goal"]:
             lines += [m["goal"], ""]
-        lines += ["| Code | Item | Kind | Area | Status |", "|---|---|---|---|---|"]
+        lines += ["| Code | Item | Kind | Pillar | Size | Status |", "|---|---|---|---|---|---|"]
         for i in m["items"]:
             status = i["status"] + (f" on {i['blocked_by']}" if i.get("blocked_by") else "")
             github = f" ([#{i['github']}](https://github.com/LightningEg/Lightning/issues/{i['github']}))" if i.get("github") else ""
             kind = TAGS[i["tag"]] + (f" · {i['severity']}" if i.get("severity") else "")
-            lines.append(f"| **{i['tag']}-{i['code']}** | [{i['title']}]({i['file']}){github} | {kind} | {i['area']} | {status} |")
+            lines.append(f"| **{i['tag']}-{i['code']}** | [{i['title']}]({i['file']}){github} | {kind} | {PILLARS[i['pillar']]} | {i.get('size', '')} | {status} |")
             for step, title in i["steps"]:
-                lines.append(f"| {i['tag']}-{step} | ↳ {title} | | | |")
+                lines.append(f"| {i['tag']}-{step} | ↳ {title} | | | | |")
         done = sorted(m["done"], key=lambda c: number(re.sub(r"^\d+", "", c)))
         lines += ["", f"Done: {', '.join(done) or 'nothing yet'}. Next free code: {next_code(m)}."]
     return "\n".join(lines) + "\n"

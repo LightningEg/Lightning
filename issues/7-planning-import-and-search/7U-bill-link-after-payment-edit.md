@@ -3,7 +3,8 @@ title: Editing a paid bill's transaction keeps the bill paid at the old amount a
 type: bug
 look: technical
 severity: low
-area: planning
+pillar: plan
+size: S
 status: new
 created: 2026-10-29
 by: Claude

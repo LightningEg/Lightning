@@ -1,7 +1,7 @@
 ---
 title: For Geeks audit ideas left for the owner to choose
 type: owner
-area: website
+pillar: reach
 status: ready
 created: 2026-10-21
 by: Claude
@@ -16,7 +16,7 @@ What it found that the guideline already asks for is built (website `claude/forg
 `tools/geeks_stats.py`, the secure card linking `lightning/security/keys.py`, a hero word in Ink that no longer moves the
 line, a ringed theme chip, a quiet terminal during the replay, [secret] at 4.5:1, two font weights, the mission's columns
 balanced, the stack rows on one line, the current kept off headings, the roadmap glow running once, the M1 count's source,
-the contribute page linking Home's stack, `docs/GLOSSARY.md` and AGENTS.md instead of copying them (16,795 → 14,466px on a phone, owner 2026-10-21), the Arabic footer's For Geeks link labelled English, and
+the contribute page linking Home's stack, `ai/GLOSSARY.md` and AGENTS.md instead of copying them (16,795 → 14,466px on a phone, owner 2026-10-21), the Arabic footer's For Geeks link labelled English, and
 D07's demo port (8766).
 
 ## Left for the owner

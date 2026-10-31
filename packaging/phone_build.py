@@ -1,4 +1,4 @@
-"""The phone half of the matched PC and phone test builds (docs/ARCHITECTURE.md › Build and release). Standard library only.
+"""The phone half of the matched PC and phone test builds (ai/ARCHITECTURE.md › Build and release). Standard library only.
 
     python packaging/phone_build.py identity                       # GitHub outputs: version code and name, APK name
     python packaging/phone_build.py check APK --build-tools DIR --code N --name TEXT [--certificate FILE] --info OUT

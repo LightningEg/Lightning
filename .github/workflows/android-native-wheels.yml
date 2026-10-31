@@ -5,7 +5,7 @@
 # Run by hand with no input to build the four wheels as artifacts (they expire). Run again with publish_run
 # set to that run's id to publish them, unchanged, as the prerelease android-wheels-r<run> of this
 # repository, which never expires; then regenerate requirements/android.lock with tools/android_lock.py.
-# How it fits: docs/ARCHITECTURE.md › Build and release.
+# How it fits: ai/ARCHITECTURE.md › Build and release.
 name: Android native wheel experiment
 
 on:

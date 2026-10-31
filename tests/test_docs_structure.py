@@ -8,7 +8,8 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-DOCS = ROOT / "docs"
+DOCS = ROOT / "docs"  # for people: short pages, the big picture
+AI = ROOT / "ai"      # for AI sessions: depth and detail
 GUIDELINE = ROOT / "guideline"
 DOCUMENTS = {"A": "app.html", "B": "website.html", "C": "phone.html", "D": "coders.html"}
 
@@ -28,7 +29,7 @@ def test_the_hand_off_is_short_and_has_its_parts():
     assert "| Who | Work | Files | Since |" in text, "NOW.md's claims are one table: Who, Work, Files, Since"
     old_parts = re.findall(r"^## (?:Claude|Codex|For the owner)\b.*$", text, re.M)
     assert not old_parts, f"NOW.md has no lanes: claims go in Claimed (AGENTS.md section 3): {old_parts}"
-    overview = (DOCS / "PROJECT_OVERVIEW.md").read_text(encoding="utf-8")
+    overview = (AI / "PROJECT_OVERVIEW.md").read_text(encoding="utf-8")
     assert "## Now and next" not in overview, "the hand-off lives in NOW.md only"
 
 
@@ -49,27 +50,39 @@ def test_every_next_step_says_what_to_read():
     assert not missing, f"each Next step has a Read: line naming what it needs (AGENTS.md section 3): {missing}"
 
 
-def test_docs_holds_only_the_carrying_files():
-    allowed = {"README.md", "PROJECT_OVERVIEW.md", "ARCHITECTURE.md", "GLOSSARY.md", "COMPETITION.md", "handbook"}
+def test_docs_and_ai_hold_only_the_carrying_files():
+    allowed = {"README.md", "STATUS.md", "product.md", "how-it-is-built.md", "journeys.md", "themes.md", "pillars"}
     extra = {path.name for path in DOCS.iterdir()} - allowed
-    assert not extra, f"new files under docs/ (AGENTS.md section 1; designs go in issues/): {sorted(extra)}"
+    assert not extra, f"new files under docs/ (people read these; AGENTS.md section 1; designs go in issues/): {sorted(extra)}"
+    allowed = {"INDEX.md", "PROJECT_OVERVIEW.md", "ARCHITECTURE.md", "GLOSSARY.md", "COMPETITION.md", "handbook",
+               "changelog", "archive"}
+    extra = {path.name for path in AI.iterdir()} - allowed
+    assert not extra, f"new files under ai/ (AGENTS.md section 1; designs go in issues/): {sorted(extra)}"
 
 
 def test_every_long_doc_lists_all_its_sections():
     for name in ("PROJECT_OVERVIEW.md", "ARCHITECTURE.md", "GLOSSARY.md"):
-        text = (DOCS / name).read_text(encoding="utf-8")
+        text = (AI / name).read_text(encoding="utf-8")
         contents = text.split("## Contents", 1)[1].split("\n## ", 1)[0]
         listed = set(re.findall(r"^\| ([^|]+?) \|", contents, re.M)) - {"Section"}
         headings = set(re.findall(r"^## (.+)$", text, re.M)) - {"Contents"}
         assert headings == listed, f"{name}: Contents and headings differ: {sorted(headings ^ listed)}"
 
 
-def test_unreleased_comes_first_newest_first():
-    text = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-    assert re.findall(r"^## (.+)$", text, re.M)[0] == "[Unreleased]"
-    unreleased = text.split("\n## [Unreleased]\n", 1)[1].split("\n## ", 1)[0]
-    dates = re.findall(r"^- (\d{4}-\d{2}-\d{2}) ·", unreleased, re.M)
-    assert dates == sorted(dates, reverse=True), "add new changelog entries at the top of Unreleased"
+def test_generated_pages_are_up_to_date():
+    """STATUS, the pillar pages' work blocks and the AI map are built from the plan: python tools/status.py."""
+    from tools import status
+    stale = [path.relative_to(ROOT).as_posix() for path, text in status.expected().items()
+             if not path.exists() or path.read_text(encoding="utf-8") != text]
+    assert not stale, f"out of date, run python tools/status.py: {stale}"
+
+
+def test_the_pillars_are_one_list_everywhere():
+    from tools import issues, status
+    assert list(issues.PILLARS) == list(status.PILLARS) == list(status.PROSE)
+    readme = (DOCS / "README.md").read_text(encoding="utf-8")
+    for key in issues.PILLARS:
+        assert f"(pillars/{key}.md)" in readme, f"docs/README.md does not link the {key} pillar"
 
 
 def test_agents_md_carries_the_guidelines_a16_checklist():

@@ -1,7 +1,8 @@
 ---
 title: More AI prompt buttons that carry Lightning's context
 type: feature
-area: import
+pillar: understand
+size: M
 status: ready
 created: 2026-10-30
 by: Claude Sonnet 5.5

@@ -1,7 +1,8 @@
 ---
 title: Import cannot split a transfer into principal and fee
 type: feature
-area: import
+pillar: capture
+size: M
 status: ready
 created: 2026-10-15
 by: Claude Sonnet 5.5

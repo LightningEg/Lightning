@@ -1,7 +1,8 @@
 ---
 title: Feedback form: submit scrolls to the page end, images take 10 s, and the survey forms accept formula injection and spam
 type: tech
-area: website
+pillar: reach
+size: M
 status: ready
 created: 2026-10-16
 by: Claude Sonnet 5.5

@@ -1,7 +1,8 @@
 ---
 title: Stored month-end figures
 type: tech
-area: reporting
+pillar: understand
+size: M
 status: blocked
 blocked_by: a profile past about 4,000 transactions or a tab past 400 ms
 created: 2026-10-04
@@ -10,7 +11,7 @@ by: unknown (moved from docs/proposals)
 
 # Stored month-end figures
 
-**Status: proposal · decided not to build yet, 2026-10-04.** Why not now is in [Architecture](../../docs/ARCHITECTURE.md) › Position and reporting contract (*No stored calculations table*).
+**Status: proposal · decided not to build yet, 2026-10-04.** Why not now is in [Architecture](../../ai/ARCHITECTURE.md) › Position and reporting contract (*No stored calculations table*).
 
 **Build when** a real profile passes about 4,000 transactions, or any tab passes 400 ms (Budget › All time took 236 ms on 2,239 transactions, 2026-10-04).
 

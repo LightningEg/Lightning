@@ -1,4 +1,4 @@
-"""Mohab's year, through the screens only: the reference workflow in docs/PROJECT_OVERVIEW.md.
+"""Mohab's year, through the screens only: the reference workflow in ai/PROJECT_OVERVIEW.md.
 
 Mohab is 31, salaried, in Cairo. He starts with an empty Lightning on 30 September 2026, sets up the
 last three months, and then lives a year in it: October 2026 to September 2027. He only does what a
@@ -8,7 +8,7 @@ answered by starting at the Overview and clicking through to the page that answe
 for that question checks both the route he took and what the page told him.
 
 Each open product gap has a direct screen assertion. When a gap is fixed, update its assertion and
-the Overview's "Today" column in docs/PROJECT_OVERVIEW.md together.
+the Overview's "Today" column in ai/PROJECT_OVERVIEW.md together.
 
 What Mohab's test focuses on. Mohab is a real Egyptian user, not a tester: he judges Lightning by whether
 he gets the right answer quickly, with as little effort and as few words to decode as possible.

@@ -189,7 +189,7 @@ def _ci_scope():
 
 def test_only_documentation_skips_the_windows_build():
     scope = _ci_scope()
-    for path in ("docs/ARCHITECTURE.md", "CHANGELOG.md", "README.md", "user feedback/batch.md", "feedback/2026-10-26-test.md", "templates/report.md",
+    for path in ("ai/ARCHITECTURE.md", "CHANGELOG.md", "README.md", "user feedback/batch.md", "feedback/2026-10-26-test.md", "templates/report.md",
                  "reports/2026-10-26-test/evidence/sample.png",
                  "Claude outputs/x.zip", "tools/guideline.py", "run.sh", "Lightning.desktop", "NOW.md"):
         assert scope.cannot_reach_app(path), path
@@ -336,7 +336,7 @@ def test_notices_follow_what_pyinstaller_actually_bundled(tmp_path):
 
 
 def test_a_manual_run_reuses_what_this_commit_already_has(monkeypatch, tmp_path):
-    """Matched test builds (docs/ARCHITECTURE.md › Build and release): a manual run on main reuses an unexpired
+    """Matched test builds (ai/ARCHITECTURE.md › Build and release): a manual run on main reuses an unexpired
     Windows ZIP of this exact commit and skips a Linux suite that already passed on it; nothing else counts."""
     scope = _ci_scope()
     sha = "d" * 40
@@ -470,7 +470,7 @@ def test_the_daily_run_builds_the_phone_only_when_its_files_changed(monkeypatch)
     for path in ("lightning/ui/web.py", "android/app/build.gradle.kts", "requirements/android.lock",
                  "packaging/phone_build.py", ".github/workflows/android-app.yml", "tests/fixtures/roundtrip/expected.json"):
         assert scope.reaches_phone(path), path
-    for path in ("docs/ARCHITECTURE.md", "packaging/desktop-app.spec", "tests/test_ui.py", "CHANGELOG.md"):
+    for path in ("ai/ARCHITECTURE.md", "packaging/desktop-app.spec", "tests/test_ui.py", "CHANGELOG.md"):
         assert not scope.reaches_phone(path), path
     assert not scope.build_phone_daily("workflow_dispatch", "refs/heads/main", None, "HEAD")[0]
     assert scope.build_phone_daily("schedule", "refs/heads/main", None, "HEAD")[0]  # no earlier build: build
@@ -484,7 +484,7 @@ def test_a_push_of_documents_only_runs_the_tests_that_read_them(monkeypatch, tmp
     """Measured against the last commit whose full suite passed, not the previous push: a code push whose
     run was cancelled by a later documents push still gets the full suite."""
     scope = _ci_scope()
-    for path in ("NOW.md", "CHANGELOG.md", "docs/ARCHITECTURE.md", "docs/proposals/x.md", "user feedback/a.md",
+    for path in ("NOW.md", "CHANGELOG.md", "ai/ARCHITECTURE.md", "docs/proposals/x.md", "user feedback/a.md",
                  "feedback/2026-10-26-test.md", "templates/report.md", "reports/2026-10-26-test/report.md"):
         assert scope.docs_only(path), path
     for path in ("lightning/ui/web.py", "lightning/README.md", "guideline/app.html", "tools/guideline.py",
@@ -493,12 +493,12 @@ def test_a_push_of_documents_only_runs_the_tests_that_read_them(monkeypatch, tmp
 
     tests = tmp_path / "tests"
     tests.mkdir()
-    (tests / "test_reads_overview.py").write_text('OVERVIEW = ROOT / "docs" / "PROJECT_OVERVIEW.md"\n')
+    (tests / "test_reads_overview.py").write_text('OVERVIEW = ROOT / "ai" / "PROJECT_OVERVIEW.md"\n')
     (tests / "test_ui.py").write_text("def test_page(): pass\n")
-    assert scope.docs_tests(["docs/PROJECT_OVERVIEW.md"], tests) == [
+    assert scope.docs_tests(["ai/PROJECT_OVERVIEW.md"], tests) == [
         "tests/test_changelog.py", "tests/test_docs_structure.py", "tests/test_reads_overview.py"]
 
-    monkeypatch.setattr(scope, "changed_since", lambda baseline, sha, what: (["NOW.md", "docs/GLOSSARY.md"], ""))
+    monkeypatch.setattr(scope, "changed_since", lambda baseline, sha, what: (["NOW.md", "ai/GLOSSARY.md"], ""))
     suite, chosen, _ = scope.push_suite("a" * 40, "HEAD")
     assert suite == "docs" and "tests/test_docs_structure.py" in chosen and "tests/test_figures.py" in chosen
     monkeypatch.setattr(scope, "changed_since", lambda baseline, sha, what: (["NOW.md", "lightning/ui/web.py"], ""))

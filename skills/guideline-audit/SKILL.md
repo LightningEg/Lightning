@@ -49,11 +49,11 @@ One screenshot per page and width, no re-takes. Report findings, not the guideli
    spacing A15; phone C01–C12; website B01–B12. Compare spacing, hierarchy, chart style and wording by eye against the text.
 5. **Arabic and dark mode.** Repeat the pages in Arabic (`arabic-check`) and, on the website, dark mode (B09): the `*.rtl.css` files must mirror, not just flip text.
 6. **Fix only what is broken, in the one stylesheet that owns it** (`lightning/ui/static/style.css`, `phone.css`, `style.rtl.css`, `phone.rtl.css`; website `css/`). No inline styles, no new colours. After editing `style.css`, `phone.css` or `profiles.css`, regenerate the Arabic mirrors or `tests/test_arabic_no_english.py` fails: `cd <scratch> && npm i rtlcss postcss && NODE_PATH=<scratch>/node_modules node tools/build_rtl_css.js`, and commit the `*.rtl.css` files.
-   Visible change = run Mohab (`tests/test_mohab_year.py`) and the brand audit again. One branch per feature, changelog line, merge.
+   Visible change = run Mohab (`tests/test_mohab_year.py`) and the brand audit again. One branch per feature, release-note trailers, merge.
 
 ## Report
 
-**Where findings go.** Read `issues/README.md` once. Fix a small finding now (branch, test, changelog line) and file **no** item. File anything bigger as one item in
+**Where findings go.** Read `issues/README.md` once. Fix a small finding now (branch, test, release-note trailer) and file **no** item. File anything bigger as one item in
 the milestone it belongs to, `issues/<n>-<name>/<code>-<what>.md` (code from `python tools/issues.py next <n>`; this skill's name in `skills`, your model in `by`, `app_version`
 from `pyproject.toml`, `commit` from `git rev-parse --short HEAD`), then run `python tools/issues.py`. Finishing an item means deleting its file in the same commit and adding its code to the milestone's `done:`. Never leave a finding only in chat.
 

@@ -29,7 +29,7 @@ Measure first, change the one worst thing, measure again. Never read a service f
    Never cache across requests, and never cache a figure that a write in the same request can change without the memo being cleared.
 5. **Prove nothing changed.** The page's text must be identical before and after: fetch it before, change, fetch after, compare (strip session tokens). Add a test that counts queries (copy the pattern in
    `tests/test_reporting_performance.py::test_main_tabs_read_each_figure_once_and_show_the_same_pages_as_without_the_cache`). Run the suite and Mohab.
-6. **Record:** one changelog entry with the before and after numbers (queries and milliseconds), one branch per fix, merge.
+6. **Record:** one Release-note and Detail trailer with the before and after numbers (queries and milliseconds), one branch per fix, merge.
 
 ## Known hotspots (measured 2026-10-15 on the sample year, after the first round of fixes)
 
@@ -39,7 +39,7 @@ Overview `/` is still the heaviest page: 444 queries (was 642), about 110 ms. Fi
 
 ## Report
 
-**Where findings go.** Read `issues/README.md` once. Fix a small finding now (branch, test, changelog line) and file **no** item. File anything bigger as one item in
+**Where findings go.** Read `issues/README.md` once. Fix a small finding now (branch, test, release-note trailer) and file **no** item. File anything bigger as one item in
 the milestone it belongs to, `issues/<n>-<name>/<code>-<what>.md` (code from `python tools/issues.py next <n>`; this skill's name in `skills`, your model in `by`, `app_version`
 from `pyproject.toml`, `commit` from `git rev-parse --short HEAD`), then run `python tools/issues.py`. Finishing an item means deleting its file in the same commit and adding its code to the milestone's `done:`. Never leave a finding only in chat.
 

@@ -1,7 +1,8 @@
 ---
 title: Bonus shares and stock splits
 type: feature
-area: investments
+pillar: own
+size: M
 status: blocked
 blocked_by: 5A, 5B
 created: 2026-10-05
@@ -10,7 +11,7 @@ by: Claude
 
 # Bonus shares and stock splits
 
-**Status:** proposal, 2026-10-05 · Claude, not built. Learned from GnuCash (`Gnucash/gnucash` at `53cc9e6`; Lightning at `5665786`). When built, move what holds into [Architecture](../../docs/ARCHITECTURE.md) and delete this file. Needs [investment_lots.md](5B-cost-per-purchase-lots.md) and [investment_events.md](5A-one-table-of-investment-events.md).
+**Status:** proposal, 2026-10-05 · Claude, not built. Learned from GnuCash (`Gnucash/gnucash` at `53cc9e6`; Lightning at `5665786`). When built, move what holds into [Architecture](../../ai/ARCHITECTURE.md) and delete this file. Needs [investment_lots.md](5B-cost-per-purchase-lots.md) and [investment_events.md](5A-one-table-of-investment-events.md).
 
 **They do better:** a split or bonus issue is its own event: units change, cost does not, and no fake purchase appears.
 

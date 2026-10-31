@@ -3,7 +3,8 @@ title: On a journal profile, retrying one add form can still save a second expen
 type: bug
 look: technical
 severity: medium
-area: transactions
+pillar: everywhere
+size: M
 status: ready
 created: 2026-10-23
 by: Codex

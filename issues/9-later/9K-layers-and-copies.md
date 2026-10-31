@@ -1,7 +1,8 @@
 ---
 title: Structure left - a 746-line profile_app, budgeting calls planning through bootstrap, three balance-floor checks
 type: tech
-area: architecture
+pillar: build
+size: M
 status: ready
 created: 2026-10-21
 by: Claude

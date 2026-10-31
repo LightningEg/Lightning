@@ -3,8 +3,8 @@
     python tools/release_check.py
 
 Checks: the version agrees in pyproject.toml, lightning/__init__.py and the README; the tag it implies; the working
-tree is clean, on main and level with origin; LICENSE and CONTRIBUTING.md exist; the changelog has entries under
-Unreleased or the current version; no tracked file looks like a secret or private data (keys, keystores, databases other than the one
+tree is clean, on main and level with origin; LICENSE and CONTRIBUTING.md exist; the current version has release notes in
+ai/changelog/ and nothing waits in UNRELEASED.md; no tracked file looks like a secret or private data (keys, keystores, databases other than the one
 encrypted test fixture, tokens, personal emails); and no TODO/FIXME/XXX markers sit in shipped code.
 It does not run the tests: the release skill does that next.
 """
@@ -61,13 +61,12 @@ def tree() -> list[str]:
 
 def files() -> list[str]:
     out = [f"missing {name}" for name in ("LICENSE", "CONTRIBUTING.md") if not (ROOT / name).exists()]
-    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-    block = re.split(r"^## \[Unreleased\]", changelog, maxsplit=1, flags=re.M)[-1].split("\n## [", 1)[0]
-    if not re.search(r"^- \d{4}-", block, re.M):
-        version = re.search(r'^version = "([^"]+)"', (ROOT / "pyproject.toml").read_text(encoding="utf-8"), re.M).group(1)
-        released = re.search(r"^## \[" + re.escape(version) + r"\][^\n]*\n(.*?)(?=^## \[|\Z)", changelog, re.M | re.S)
-        if not released or not re.search(r"^- \d{4}-", released.group(1), re.M):
-            out.append("CHANGELOG.md has no entries under Unreleased or the current version")
+    version = re.search(r'^version = "([^"]+)"', (ROOT / "pyproject.toml").read_text(encoding="utf-8"), re.M).group(1)
+    notes = ROOT / "ai" / "changelog" / f"{version}.md"
+    if not notes.exists() or not re.search(r"^- ", notes.read_text(encoding="utf-8").split("## Detail", 1)[0], re.M):
+        out.append(f"ai/changelog/{version}.md has no notes: python tools/release_notes.py cut {version}")
+    if (ROOT / "ai" / "changelog" / "UNRELEASED.md").exists():
+        out.append("ai/changelog/UNRELEASED.md still holds entries: python tools/release_notes.py cut " + version)
     return out
 
 

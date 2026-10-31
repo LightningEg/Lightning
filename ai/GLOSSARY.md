@@ -2,11 +2,11 @@ Last reviewed 2026-10-23 · app 1.4.4
 
 # Glossary
 
-One name and one meaning per term and figure. How things are built is in [Architecture](ARCHITECTURE.md), the product story in [Project Overview](PROJECT_OVERVIEW.md), history in `CHANGELOG.md`, the look in the [guideline](../guideline/). The figures tables are generated from `lightning/core/figures.py` (`python -m lightning.core.figures`); change a figure there, never here.
+One name and one meaning per term and figure. How things are built is in [Architecture](ARCHITECTURE.md), the product story in [Project Overview](PROJECT_OVERVIEW.md), history in [ai/changelog/](changelog/), the look in the [guideline](../guideline/). The figures tables are generated from `lightning/core/figures.py` (`python -m lightning.core.figures`); change a figure there, never here.
 
 ## Contents
 
-Find a term: `grep -n -i '<term>' docs/GLOSSARY.md`.
+Find a term: `grep -n -i '<term>' ai/GLOSSARY.md`.
 
 | Section | When to read |
 |---|---|

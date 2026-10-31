@@ -1,7 +1,8 @@
 ---
 title: A planned payment due on a public holiday doesn't move to a working day
 type: feature
-area: planning
+pillar: plan
+size: S
 status: ready
 created: 2026-10-19
 by: Claude

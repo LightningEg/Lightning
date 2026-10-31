@@ -1,7 +1,8 @@
 ---
 title: Visual audit - every KPI card should answer, compare and point; one card system for PC and phone
 type: polish
-area: product
+pillar: understand
+size: L
 status: ready
 created: 2026-10-19
 by: Claude

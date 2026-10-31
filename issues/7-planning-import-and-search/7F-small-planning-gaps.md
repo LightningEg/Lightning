@@ -1,7 +1,8 @@
 ---
 title: Small planning gaps
 type: feature
-area: planning
+pillar: plan
+size: M
 status: new
 created: 2026-10-19
 by: Claude

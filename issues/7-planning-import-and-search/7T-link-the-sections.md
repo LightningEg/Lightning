@@ -1,7 +1,8 @@
 ---
 title: Link the sections - salary-day cascade and a reserve tied to its bill
 type: feature
-area: planning
+pillar: plan
+size: L
 status: new
 created: 2026-10-28
 by: Claude

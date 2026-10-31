@@ -1,7 +1,7 @@
 """Arabic for the words the system itself puts on a screen: built-in category, asset-class and currency names,
 months and weekdays, sentences built in Python, and the small labels of the shared chrome.
 
-Authority for every term and figure name is the Arabic glossary (docs/GLOSSARY.md, "العربية — المسرد العربي").
+Authority for every term and figure name is the Arabic glossary (ai/GLOSSARY.md, "العربية — المسرد العربي").
 Stored names, codes, URLs and form values never change; these entries are applied when a page is drawn
 (`lightning/ui/i18n.py`). A name a person typed has no entry here, so it stays as typed.
 """

@@ -1,7 +1,8 @@
 ---
 title: Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score
 type: feature
-area: phone
+pillar: capture
+size: L
 status: new
 created: 2026-10-22
 by: Claude Opus 5.5

@@ -1,7 +1,8 @@
 ---
 title: Silver, property and vehicles
 type: feature
-area: investments
+pillar: own
+size: L
 status: new
 created: 2026-10-19
 by: Claude
