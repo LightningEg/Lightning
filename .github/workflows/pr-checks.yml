@@ -36,6 +36,20 @@ jobs:
           python -m pip install --require-hashes --only-binary=:all: --no-deps -r requirements/lint.lock
           ruff check lightning tools
 
+  release-notes:
+    # A pull request from this repository ends with Release-note and Detail trailers (AGENTS.md section 3). The squash
+    # keeps every commit's trailers, so they reach main. A fork's contributor is not asked: the maintainer writes them at merge.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with: {fetch-depth: 0, persist-credentials: false}
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: '3.13'
+      - run: python tools/release_notes.py check-pr "origin/${{ github.base_ref }}"
+
   protected-paths:
     # Tells the owner at a glance when a PR touches build, release or CI files; the owner still decides.
     runs-on: ubuntu-latest

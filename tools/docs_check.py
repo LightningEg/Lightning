@@ -13,7 +13,7 @@ from pathlib import Path
 from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
-HOMES = ("docs", "reports", "feedback", "templates", "guideline", "issues", "skills", "theme-kit")
+HOMES = ("docs", "ai", "reports", "feedback", "templates", "guideline", "issues", "skills", "theme-kit")
 
 
 def check(root: Path) -> list[str]:
@@ -34,6 +34,8 @@ def check(root: Path) -> list[str]:
     for name in ("docs", "reports", "feedback", "templates", "guideline"):
         if not (root / name / "README.md").is_file():
             errors.append(f"{name}/README.md: missing entry point")
+    if not (root / "ai" / "INDEX.md").is_file():
+        errors.append("ai/INDEX.md: missing entry point")
     catalogue = root / "reports" / "README.md"
     registered = catalogue.read_text(encoding="utf-8") if catalogue.exists() else ""
     for report in sorted((root / "reports").rglob("report.md")):

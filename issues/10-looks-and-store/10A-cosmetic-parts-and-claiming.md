@@ -34,7 +34,7 @@ Built the shared root-attribute switcher, pre-paint profile preference restorati
 
 ## Read
 
-`docs/ARCHITECTURE.md` › Cosmetic parts and offline ownership; website `cosmetics/README.md`, `cosmetics/payment-policy.md` and `supabase/README.md`.
+`ai/ARCHITECTURE.md` › Cosmetic parts and offline ownership; website `cosmetics/README.md`, `cosmetics/payment-policy.md` and `supabase/README.md`.
 
 ## Baseline regression note
 

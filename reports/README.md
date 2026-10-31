@@ -1,7 +1,7 @@
 # Reports
 
 Audits and reviews of a specific source snapshot. Active work lives in
-[issues](../issues/INDEX.md); current behavior lives in [Architecture](../docs/ARCHITECTURE.md).
+[issues](../issues/INDEX.md); current behavior lives in [Architecture](../ai/ARCHITECTURE.md).
 
 | Historical ID | Report | Review date | Kind | Open follow-ups |
 | --- | --- | --- | --- | --- |

@@ -42,11 +42,11 @@ Then repeat each with edge amounts (cents, very large, zero is refused, negative
 ## If a figure is wrong
 
 Find the single source: grep the figure's label in `lightning/ui/templates`, follow it to the route and the service (`lightning/reporting`, `lightning/planning`, `lightning/budgeting`, `lightning/investments`). Fix it there once, add a test that fails before and passes after, add a Mohab step if a person would have seen it,
-and say in the changelog which screens changed. Never patch a number in a template.
+and say in the Detail trailer which screens changed. Never patch a number in a template.
 
 ## Report
 
-**Where findings go.** Read `issues/README.md` once. Fix a small finding now (branch, test, changelog line) and file **no** item. File anything bigger as one item in
+**Where findings go.** Read `issues/README.md` once. Fix a small finding now (branch, test, release-note trailer) and file **no** item. File anything bigger as one item in
 the milestone it belongs to, `issues/<n>-<name>/<code>-<what>.md` (code from `python tools/issues.py next <n>`; this skill's name in `skills`, your model in `by`, `app_version`
 from `pyproject.toml`, `commit` from `git rev-parse --short HEAD`), then run `python tools/issues.py`. Finishing an item means deleting its file in the same commit and adding its code to the milestone's `done:`. Never leave a finding only in chat.
 

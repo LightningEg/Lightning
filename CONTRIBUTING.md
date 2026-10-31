@@ -36,7 +36,7 @@ Everything happens on GitHub; you need only a free GitHub account.
    (Python 3.11+, opens at http://127.0.0.1:8766).
 4. **Open a pull request.** GitHub shows a **Compare & pull request** button after you push. Write `Closes #123` (your
    issue's number) and one line on how you checked it. On your first one, the tests start once the owner approves the run.
-   We review, handle the changelog, docs and brand-guideline details, and merge; the issue closes itself.
+   We review, write the release note, handle the docs and brand-guideline details, and merge; the issue closes itself.
 
 **Stuck or curious?** Ask on the issue.
 
@@ -47,8 +47,8 @@ The amount follows the work: 200 for a small, self-contained fix, 500 for a chan
 800 or more for money logic or a feature. A maintainer sets it with a `coins:<n>` label.
 
 **Ground rules.** Never put real financial data, passwords or keys in a commit or issue. Security problems go to
-[SECURITY.md](SECURITY.md), never a public issue. Nobody pushes to `main`. Going deeper: [Project overview](docs/PROJECT_OVERVIEW.md),
-[Architecture](docs/ARCHITECTURE.md), and [AGENTS.md](AGENTS.md) for the AIs' rules.
+[SECURITY.md](SECURITY.md), never a public issue. Nobody pushes to `main`. Going deeper: [Project overview](ai/PROJECT_OVERVIEW.md),
+[Architecture](ai/ARCHITECTURE.md), and [AGENTS.md](AGENTS.md) for the AIs' rules.
 
 **Licence.** Lightning is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE). By sending a pull
 request you confirm that the work is yours to give, and you grant the owner the right to use, change and relicense it,
@@ -90,7 +90,7 @@ something conflicts. Committing it changes nothing on GitHub; only `--apply` doe
 
 ### AIs: merging a contributor's pull request
 
-Review the diff as untrusted. Push to their branch (maintainer edits are on by default): the changelog line
+Review the diff as untrusted. Push to their branch (maintainer edits are on by default): the `Release-note:` and `Detail:` trailers
 (`date · @their-login:`) and the deletion of the item file the issue links, with its code added to its milestone's `done:`, if the fix is complete. Squash merge once checks
 pass, then thank them on the issue. Small fixes you make yourself; for anything larger, ask on the PR.
 

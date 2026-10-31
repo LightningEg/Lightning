@@ -23,6 +23,6 @@ body:
     attributes: {label: Where to look, description: "The file (and function) most likely to change."}
   - type: textarea
     id: read
-    attributes: {label: Read first (optional), description: "At most two links, e.g. a section of docs/ARCHITECTURE.md."}
+    attributes: {label: Read first (optional), description: "At most two links, e.g. a section of ai/ARCHITECTURE.md."}
   - type: markdown
     attributes: {value: "To work on it: comment `/take`. Setup and the rest: [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md)."}

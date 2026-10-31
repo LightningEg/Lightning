@@ -15,7 +15,7 @@ and tests:
   changed since the last commit whose Windows build succeeded (so a failed or cancelled build is redone).
   A manual run on main reuses an earlier run's unexpired ZIP of this exact commit.
 - Phone app. A manual run on main makes matched test builds; a release tag builds the same signed APK
-  for the permanent Windows and Android beta release (docs/ARCHITECTURE.md › Build and release).
+  for the permanent Windows and Android beta release (ai/ARCHITECTURE.md › Build and release).
   The daily run builds and checks it (no key, nothing offered) when a file that reaches it changed since
   its last successful build.
 """
@@ -34,7 +34,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # Files that never reach the Windows app or its build. Anything else (code, tests, packaging, locks, this
 # workflow, Markdown inside lightning/ or packaging/) does.
 _NEVER_SHIPPED = (
-    re.compile(r"^docs/"),
+    re.compile(r"^(docs|ai)/"),
     re.compile(r"^(feedback|templates)/"),
     re.compile(r"^reports/.*\.(md|png|jpg|jpeg|webp|txt)$"),
     re.compile(r"^user feedback/"),
@@ -59,7 +59,7 @@ _REACHES_PHONE = (
 )
 # Documents: a push that changes nothing else since the last full suite runs only the tests that read them.
 _DOCS_ONLY = (
-    re.compile(r"^docs/"),
+    re.compile(r"^(docs|ai)/"),
     re.compile(r"^(feedback|templates)/"),
     re.compile(r"^reports/.*\.(md|png|jpg|jpeg|webp|txt)$"),
     re.compile(r"^user feedback/"),

@@ -21,14 +21,14 @@ the third item of milestone 3. A big item is split one step down with a number: 
 | **OW** | Owner task | `type: owner` |
 
 The tag comes from the front matter, so the generator writes it; the part after it (`3C`) never changes, names the file and
-finds all older history. Write the full code wherever you mention the item: commit messages, the changelog, `NOW.md`, pull
+finds all older history. Write the full code wherever you mention the item: commit messages, release-note trailers, `NOW.md`, pull
 requests and GitHub issue titles (`[BV-3C] Charts: two end labels overlap`). `python tools/issues.py tag 3C` prints it.
 
 - A code is never reused. `python tools/issues.py next 3` prints the next free one.
 - An item moving to another milestone gets a new code there; write `was: 3C` in its front matter.
 - Before finishing, replace incoming links from reports and feedback with a commit-pinned issue snapshot, resolution commit or regression test; keep the code. Sanitized feedback records and audit evidence remain.
 - A finished item's file is **deleted in the commit that finishes it**, and its code is added to `done:` in the milestone's
-  README. The record is the test, the changelog line and the commit message (name the code there).
+  README. The record is the test, the release note and the commit message (name the code there).
 
 ## Where things go
 
@@ -110,7 +110,7 @@ What will change, the branch, the test that proves it.
 ```
 
 A `feature` may instead be a full design (as [4A](4-edit-journal-and-devices/4A-edit-journal.md) is). When part of it is
-built, move what holds into [Architecture](../docs/ARCHITECTURE.md) and shrink the item to what is left.
+built, move what holds into [Architecture](../ai/ARCHITECTURE.md) and shrink the item to what is left.
 
 ## People and GitHub
 

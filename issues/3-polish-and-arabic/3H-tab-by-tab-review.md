@@ -10,7 +10,7 @@ by: Codex
 
 # Tab-by-tab review: what a real user needs next
 
-**Status:** implementation started, 2026-10-14 · Codex; remaining work is below. A full walk through every section and tab as a demanding salaried user, on PC (1366 × 768) and phone (360 wide). When an item is built, move what holds into [Architecture](../../docs/ARCHITECTURE.md) or the [Project Overview](../../docs/PROJECT_OVERVIEW.md), tick it here, and delete this file once it is empty.
+**Status:** implementation started, 2026-10-14 · Codex; remaining work is below. A full walk through every section and tab as a demanding salaried user, on PC (1366 × 768) and phone (360 wide). When an item is built, move what holds into [Architecture](../../ai/ARCHITECTURE.md) or the [Project Overview](../../ai/PROJECT_OVERVIEW.md), tick it here, and delete this file once it is empty.
 
 **How it was done.** A fresh encrypted profile (`profile_app`, the same pages as the Windows app) with the sample household (`POST /demo`, Mohab, 2026-08 to 2026-10-14), zakat turned on and a 10-member gam'eya joined late, exactly as `tools/phone_check.py` sets it up. Every page in `lightning/ui/sections.py`, plus holding, certificate, gam'eya, register, transaction, import, reconcile and settings pages, was captured full-page on PC and phone and read figure by figure. Every number quoted below is from that run, so anyone can reproduce it.
 

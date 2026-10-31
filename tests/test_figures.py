@@ -89,7 +89,7 @@ def test_formulas_only_use_names_from_the_table():
 def test_glossary_section_is_generated_from_the_registry_and_every_function_exists():
     import importlib
     from lightning.core.figures import END, START, glossary_markdown
-    glossary = (ROOT / "docs" / "GLOSSARY.md").read_text(encoding="utf-8")
+    glossary = (ROOT / "ai" / "GLOSSARY.md").read_text(encoding="utf-8")
     section = glossary.split(START, 1)[1].split(END, 1)[0]
     assert section.strip() == glossary_markdown().strip(), "run: python -m lightning.core.figures"
     for figure in FIGURES.values():
@@ -108,7 +108,7 @@ def test_glossary_section_is_generated_from_the_registry_and_every_function_exis
 
 
 def test_glossary_lists_every_figure_and_screens_use_no_retired_name():
-    glossary = (ROOT / "docs" / "GLOSSARY.md").read_text(encoding="utf-8")
+    glossary = (ROOT / "ai" / "GLOSSARY.md").read_text(encoding="utf-8")
     for figure in FIGURES.values():
         assert f"**{figure.label}**" in glossary, figure.label
     text = "\n".join(path.read_text(encoding="utf-8") for path in TEMPLATES.rglob("*.html"))

@@ -7,7 +7,7 @@ Open product work is tracked in `issues/INDEX.md`; entries here add only what th
 
 | ID | Category | Finding | Evidence | Impact | Sev | Recommendation |
 |---|---|---|---|---|---|---|
-| GAP-001 | Documentation | `docs/ARCHITECTURE.md` says "Last reviewed 2026-10-23 · app 1.4.4"; code is 1.5.2 | `ARCHITECTURE.md` line 3; `lightning/__init__.py` | Readers cannot tell what is current | Low | Re-stamp on review |
+| GAP-001 | Documentation | `ai/ARCHITECTURE.md` says "Last reviewed 2026-10-23 · app 1.4.4"; code is 1.5.2 | `ARCHITECTURE.md` line 3; `lightning/__init__.py` | Readers cannot tell what is current | Low | Re-stamp on review |
 | GAP-002 | Documentation | Architecture › Desktop app says "State: v1.1.0-beta.1" | `ARCHITECTURE.md` §Desktop app | Misleads on maturity | Low | Update to current release |
 | GAP-003 | Documentation | `PROJECT_OVERVIEW.md` says "source 1.4.4 · latest published beta 1.4.2"; NOW.md says v1.5.2 is public | Overview header; `NOW.md` | Same | Low | Re-stamp |
 | GAP-004 | Documentation | `docs/` was restricted to five reference files by a test; this handbook needed an exception | `tests/test_docs_structure.py::test_docs_holds_only_the_carrying_files` | Rule change by owner request | Low | Confirm (D-010) |

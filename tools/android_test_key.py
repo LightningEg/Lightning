@@ -14,7 +14,7 @@ folder and prints what to do with them:
 
 Keep the folder (a USB stick or a password manager is fine). If the key is lost, the next APK cannot update
 the installed Lightning Test: it must be uninstalled once, losing its dummy data. This key is only for test
-builds; it is never a Google Play upload or app signing key. See docs/ARCHITECTURE.md › Build and release.
+builds; it is never a Google Play upload or app signing key. See ai/ARCHITECTURE.md › Build and release.
 """
 from __future__ import annotations
 

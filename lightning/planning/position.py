@@ -1,7 +1,7 @@
 """Your position on a date: one calculation for every figure the reporting tabs show.
 
 Base figures are read from the ledger once; every other figure is a formula of them, so a tab
-never re-adds balances its own way. The names match docs/GLOSSARY.md and the UI figure registry.
+never re-adds balances its own way. The names match ai/GLOSSARY.md and the UI figure registry.
 
     In your accounts            = What you own + Held for others
     What you own                = Cash you own + Holdings value + Other you own

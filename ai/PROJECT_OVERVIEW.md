@@ -2,11 +2,11 @@
 
 **Last reviewed 2026-10-23 · source 1.4.4 · latest published beta 1.4.2** ([published Windows and Android beta](https://github.com/LightningEg/Lightning-downloads/releases/tag/v1.4.2)).
 
-What Lightning is, who it is for, and where it goes. What each screen must answer: [Users' main questions](../reports/2026-10-27-users-main-questions/report.md). Technical contracts: [Architecture](ARCHITECTURE.md). Look: [guideline](../guideline/). Terms and figures: [Glossary](GLOSSARY.md). Shipped changes: `CHANGELOG.md`. Hand-off between AIs: [NOW.md](../NOW.md). The plan and open items: [issues/](../issues/INDEX.md).
+What Lightning is, who it is for, and where it goes. What each screen must answer: [Users' main questions](../reports/2026-10-27-users-main-questions/report.md). Technical contracts: [Architecture](ARCHITECTURE.md). Look: [guideline](../guideline/). Terms and figures: [Glossary](GLOSSARY.md). Shipped changes: [RELEASES.md](../RELEASES.md) (people) and [ai/changelog/](changelog/) (detail). Hand-off between AIs: [NOW.md](../NOW.md). The plan and open items: [issues/](../issues/INDEX.md).
 
 ## Contents
 
-Read one section: `grep -n '^## ' docs/PROJECT_OVERVIEW.md`, then read from that line.
+Read one section: `grep -n '^## ' ai/PROJECT_OVERVIEW.md`, then read from that line.
 
 | Section | Read it when |
 |---|---|
@@ -222,7 +222,7 @@ deposits; CSV import and Cash planning; search and Ctrl-K; multiple devices M1�
 apps beta; Arabic on PC and phone; financial health; undo and redo; rules with conditions; layered import match; weekend-aware
 schedules; Fill this month; entry helpers; gam'eya and zakat; and the five owner-approved smarter workflows (2026-10-15:
 dated cash warnings, undo/review/provenance, reserve/bill/CD/reimbursement links, optional cash funding, saved views and
-weekly review). Detail: [CHANGELOG](../CHANGELOG.md) and [Architecture](ARCHITECTURE.md). Where each idea came from:
+weekly review). Detail: [ai/changelog/](changelog/) and [Architecture](ARCHITECTURE.md). Where each idea came from:
 [Competition](COMPETITION.md).
 
 ## 9. Owner checks held for testing

@@ -1,37 +1,58 @@
-# Documentation map
+# Lightning documentation
 
-Start here to find a document or decide where new material belongs.
+Two folders, two readers. **People** read `docs/`: short pages, the big picture. **AI sessions** read `ai/`: depth and
+detail. Everything is sorted by the same nine pillars, so a thing is found in the same place whoever looks.
 
-| Need | Home | What belongs there |
-| --- | --- | --- |
-| Understand the product | [Project overview](PROJECT_OVERVIEW.md) | Adopted decisions, capabilities and roadmap |
-| Understand what each screen must answer | [Users' main questions](../reports/2026-10-27-users-main-questions/report.md) | Main questions, follow-ups and known gaps |
-| Get a readable tour of everything | [Handbook](handbook/README.md) | Plain-language product, design, data, requirements and gap pages that link to the references below |
-| Understand the implementation | [Architecture](ARCHITECTURE.md) | Implemented contracts, financial rules and data ownership |
-| Understand a term or number | [Glossary](GLOSSARY.md) | One name and definition per concept |
-| Compare outside evidence | [Competition](COMPETITION.md) | Dated research and its sources |
-| Read an audit or review | [Reports](../reports/README.md) | Historical findings, scope, evidence and dated follow-ups |
-| Understand what users experienced | [User feedback](../feedback/README.md) | Sanitized observations, themes and dispositions |
-| Find work to build | [Issue index](../issues/INDEX.md) | Active bugs, features, designs and owner acceptance |
-| Apply the brand | [Guidelines](../guideline/README.md) | Authoritative rules by surface and language |
-| Start from a template | [Templates](../templates/README.md) | Reports, feedback, decisions and specialist kits |
-| Coordinate current work | [NOW](../NOW.md) | Claims, messages and immediate next steps |
-| Follow a procedure | [Skills](../skills/README.md) | Repeatable workflows for contributors and agents |
-| Find shipped changes | [Changelog](../CHANGELOG.md) | Dated changes and implementation codes |
+## For people
 
-## Ownership and lifecycle
+| Read | To learn |
+|---|---|
+| [Where Lightning stands](STATUS.md) | What is being built, what waits for the owner, how each pillar is doing |
+| [Product](product.md) | What Lightning is, for whom, and what it will and will not do |
+| [How it is built](how-it-is-built.md) | The pieces and how they fit, in plain words |
+| [Journeys](journeys.md) | A real month, step by step |
+| [Change the app theme](themes.md) | Choose, try and unlock a theme |
+| [Release notes](../RELEASES.md) | What changed in each version, in plain words |
+| [Competition, honestly](../ai/COMPETITION.md) | Where Lightning wins and where it does not yet |
 
-Keep each fact in its authoritative home and link to it. Reports describe a
-reviewed snapshot; issues describe remaining work; Architecture describes what
-is implemented. An audit verdict is not a current release status.
+## The nine pillars
 
-Keep the four reference documents here and this map. Active designs live in
-issues; accepted product decisions move into the overview, implemented contracts
-into Architecture. The decision template helps write those sections without
-creating another decision log.
+Every plan item, report and page belongs to one. Each page lists its open work.
 
-Public documentation contains sample data only. Raw user submissions, private
-attachments, credentials and operational secrets stay outside the repository.
-The [website documentation map](https://github.com/LightningEg/Lightning_website/blob/main/docs/README.md)
-covers website-specific operations and reports. Reports stay beside the code
-they reviewed; shared guidelines are mirrored, not independently authored.
+| Pillar | Is about |
+|---|---|
+| [Capture](pillars/capture.md) | Adding, importing, bank SMS, rules, search |
+| [Plan](pillars/plan.md) | Budget, bills, reserves, forecast, safe to spend |
+| [Understand](pillars/understand.md) | Overview, spending, reports, net worth |
+| [Own](pillars/own.md) | Accounts, investments, gold, foreign currency, loans, prices |
+| [Protect](pillars/protect.md) | Backup, restore, encryption, privacy |
+| [Everywhere](pillars/everywhere.md) | Phone, PC, sync, Android |
+| [Feel](pillars/feel.md) | Arabic, themes, layout, words, the store |
+| [Build](pillars/build.md) | Tools, tests, documentation, contributors |
+| [Reach](pillars/reach.md) | The website, search, downloads, community |
+
+## Where each kind of thing lives
+
+One fact lives in one file; the rest link to it.
+
+| Kind | Home |
+|---|---|
+| The plan: bugs, polish, features, owner tasks | [issues/INDEX.md](../issues/INDEX.md) (codes like `BV-3C`; pillar and size on each item) |
+| Dated audits and reviews | [reports/](../reports/README.md) |
+| What users told us, sanitized | [feedback/](../feedback/README.md) |
+| The brand rules | [guideline/](../guideline/README.md) |
+| Formats for new documents | [templates/](../templates/README.md) |
+| Repeatable procedures | [skills/](../skills/README.md) |
+| Who is doing what now | [NOW.md](../NOW.md) |
+| How to help | [CONTRIBUTING.md](../CONTRIBUTING.md) |
+
+## For AI sessions
+
+Start at [ai/INDEX.md](../ai/INDEX.md). It lists what each file holds and how to read only the section you need.
+
+## Rules that keep it small
+
+- A person's page is one screen or two. If it needs more, the detail moves to `ai/` and the page links to it.
+- Public documentation holds sample data only. Raw user submissions, private attachments and credentials stay out.
+- Reports describe a reviewed snapshot, issues describe what remains, Architecture describes what is built.
+- The website has its own map: [Lightning_website docs](https://github.com/LightningEg/Lightning_website/blob/main/docs/README.md).

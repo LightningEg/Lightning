@@ -10,7 +10,7 @@ by: unknown (moved from docs/proposals)
 
 # Search and matching: what is not built
 
-**Status: proposal · 2026-10-13 · not scheduled.** The built part (one matcher for the Search page and Ctrl-K, `difflib` near spelling) is in [Architecture](../../docs/ARCHITECTURE.md) › Search and identity contract. The contract there holds for everything below.
+**Status: proposal · 2026-10-13 · not scheduled.** The built part (one matcher for the Search page and Ctrl-K, `difflib` near spelling) is in [Architecture](../../ai/ARCHITECTURE.md) › Search and identity contract. The contract there holds for everything below.
 
 Work, in order:
 

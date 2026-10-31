@@ -7,7 +7,7 @@ To see how fast the phone's pages are on a representative profile, run `python t
 
 **Building (2026-10-07).** Run the **Phone app** workflow by hand to check a change, or **PC and phone app**
 on `main` for the matched test builds the owner installs; both are described in
-docs/ARCHITECTURE.md › Build and release. Locally, `gradle --no-daemon :app:assembleDebug` from this
+ai/ARCHITECTURE.md › Build and release. Locally, `gradle --no-daemon :app:assembleDebug` from this
 directory (JDK 17, Gradle 8.11.1, Android SDK platform/build-tools 35, Python 3.13) builds
 `org.lightning.app` from `requirements/android.lock`. The notes below are the history of tasks 04a–04c.
 

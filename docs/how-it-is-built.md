@@ -1,6 +1,6 @@
 # Software Design (as built)
 
-Detailed contracts: [`docs/ARCHITECTURE.md`](../../ARCHITECTURE.md). This page is the map.
+Detailed contracts: [`ai/ARCHITECTURE.md`](../ai/ARCHITECTURE.md). This page is the map.
 
 ## 1. Overview and principles
 
@@ -122,4 +122,4 @@ Loopback-only bind; session-token on every write; form size limits; SQLCipher wi
 
 ## 11. Known weaknesses
 
-Collected with evidence in [GAP_ANALYSIS](../analysis/GAP_ANALYSIS.md): stale version stamps in references, sparse logging, unsigned Windows build, large single files (`ui/` ≈ 18.5k lines, `sync/` ≈ 11k).
+Collected with evidence in [GAP_ANALYSIS](../ai/handbook/analysis/GAP_ANALYSIS.md): stale version stamps in references, sparse logging, unsigned Windows build, large single files (`ui/` ≈ 18.5k lines, `sync/` ≈ 11k).

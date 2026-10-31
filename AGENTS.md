@@ -4,22 +4,24 @@ Codex, Luna and Claude sessions cannot talk to each other: **the repository is t
 
 ## 1. Files that carry the project
 
-Each fact lives in one file; link to it, never copy it. Start at [the documentation map](docs/README.md). `docs/` holds that map and the four reference documents below; reports, feedback and templates have their own homes.
+Each fact lives in one file; link to it, never copy it. Start at [the documentation map](docs/README.md). **Two folders, two readers:** `docs/` is for people (short pages, the big picture, nine pillar pages); `ai/` is for AI sessions (depth: Architecture, Glossary, Overview, Competition, the detailed changelog, the archive; its map is [ai/INDEX.md](ai/INDEX.md)). Reports, feedback, issues and templates have their own homes.
+
+**Every item, report and page belongs to one of nine pillars** (`capture plan understand own protect everywhere feel build reach`, defined in [issues/README.md](issues/README.md)); an item also has a size (S, M, L = 200, 500, 800+ coins). The pillar pages and `docs/STATUS.md` are generated from the plan: `python tools/status.py`.
 
 | File | Holds | Update when |
 |---|---|---|
 | [NOW.md](NOW.md) | Hand-off: claims, messages, next steps (each with a **Read:** line) | You claim/finish long work, message another AI, or change what's next |
-| [Project Overview](docs/PROJECT_OVERVIEW.md) | Product, owner decisions, screen questions, Mohab, UX plan, gaps, what has shipped | The owner decides, or the product/plan changes |
+| [Project Overview](ai/PROJECT_OVERVIEW.md) | Product, owner decisions, screen questions, Mohab, UX plan, gaps, what has shipped | The owner decides, or the product/plan changes |
 | [Contributing](CONTRIBUTING.md) | Contributor steps, who may merge, owner security setup | Collaboration or security setup changes |
-| [Architecture](docs/ARCHITECTURE.md) | Modules, financial rules, data model, UI contract, desktop app, encrypted profiles | How something is built or calculated changes |
-| [Glossary](docs/GLOSSARY.md) | One name and meaning per term and figure | You add or rename one |
-| [Competition](docs/COMPETITION.md) | Competitors, what users love/hate, where we win/lose | You learn something, or choose between designs |
+| [Architecture](ai/ARCHITECTURE.md) | Modules, financial rules, data model, UI contract, desktop app, encrypted profiles | How something is built or calculated changes |
+| [Glossary](ai/GLOSSARY.md) | One name and meaning per term and figure | You add or rename one |
+| [Competition](ai/COMPETITION.md) | Competitors, what users love/hate, where we win/lose | You learn something, or choose between designs |
 | [guideline/](guideline/) | Brand: [app.html](guideline/app.html) (A, PC), [website.html](guideline/website.html) (B, Normal website), [phone.html](guideline/phone.html) (C), [coders.html](guideline/coders.html) (D, website's For Geeks), [brand-voice.md](guideline/brand-voice.md) (voice), [themes.md](guideline/themes.md) (how a theme is made, part by part, for every surface) | The owner gives a new version, or **any** guideline change: make it in both repos in the same session (branch and PR each); never leave one copy behind |
 | [issues/](issues/README.md) | The plan: numbered milestones, each with coded items (`BV-3C`, `BV-3C1`; the tag says bug or improvement, visual or technical: [issues/README.md](issues/README.md)): bugs, polish, features and designs, tech, owner tasks; read `issues/INDEX.md` only | You find or plan something (add an item); you finish one (delete it, add its code to `done:`) |
 | [reports/](reports/README.md) | Dated audits/reviews with adjacent evidence; catalogue and lifecycle in its README | You run an owner-requested audit; append dated follow-ups |
 | [feedback/](feedback/README.md) | Durable sanitized user observations and dispositions, linked to issues | Feedback arrives or its investigation/resolution changes |
 | [templates/](templates/README.md) | Reusable formats and links to specialist creator/GitHub kits | A repeated document workflow changes |
-| [CHANGELOG.md](CHANGELOG.md) | Every change, newest first under `Unreleased` | Every push |
+| [RELEASES.md](RELEASES.md) · [ai/changelog/](ai/changelog/) | Release notes for people (generated) · the detail, one file per version (generated) | Every commit ends with `Release-note:` and `Detail:` trailers; nobody edits these two by hand |
 
 **Any guideline change lands in both repos.** Edit the app's `guideline/`, copy the changed files to the website repo's `guideline/` (`cmp` must pass), and open a PR in each; a CSS change that follows a guideline change ships in the same PR. `tests/test_docs_structure.py` compares all Markdown/HTML copies, including Arabic, voice, themes and the map, when the sibling repo is present.
 
@@ -34,9 +36,9 @@ Never at the cost of a test, a required check, or a read you need.
 - **Start:** `NOW.md` + `git log --oneline -15`. A *Next* item's code and **Read:** line name the rest; `issues/INDEX.md` is the whole plan.
 - **Read sections, not files:** `grep -n '^## ' <file>`, then read that range. Guideline: never open whole; `python tools/guideline.py` lists sections, `python tools/guideline.py A12` prints one.
 - **Grep before reading.** Don't re-read what you just edited or read code you aren't changing.
-- **Skip unless needed:** `CHANGELOG-archive.md` (0.5.0b1 and older), long designs in `issues/` other than yours, `Claude outputs/`, the Glossary's figures table.
+- **Skip unless needed:** `ai/archive/`, `ai/changelog/` files other than the newest, long designs in `issues/` other than yours, `Claude outputs/`, the Glossary's figures table.
 - **Tests:** changed areas with `-q`, failures only; full suite once before pushing: `-n auto --dist loadfile`.
-- **Write short:** changelog entry ≤ 3 lines; `NOW.md` < 4,500 bytes.
+- **Write short:** `Detail:` one line; `Release-note:` one plain sentence; `NOW.md` < 4,500 bytes. `python tools/release_notes.py recent` shows what is unreleased.
 - **CI minutes cost money** (2,000/month, Windows ×2): pushes run Linux only; run Windows/Android workflows by hand only when your change needs that evidence now. Push finished steps, not every edit.
 - **The owner reviews milestones, not steps:** ask for a phone/PC check only when a milestone works end to end.
 - **Tell the owner only what helps:** results, decisions, actions, real risks. No narration.
@@ -47,12 +49,12 @@ Never at the cost of a test, a required check, or a read you need.
 2. **Claim** work longer than one sitting in `NOW.md` *Claimed* and push that first. Stay out of others' claimed files.
 3. **Small finished steps:** commit and push each once its tests pass.
 4. **Test.** For visible changes also run Mohab (`tests/test_mohab_year.py`) and check A16.
-5. **Record:** changelog entry atop `Unreleased` (`2026-10-03 · Claude:` / `· Codex:`, date from `date`), naming the item's full code (`BV-3C`); update the §1 files you touched.
+5. **Record:** end the commit message with `Release-note: <pillar>: one plain sentence a user would understand` (or `Release-note: none`) and `Detail: <what changed, where, why, in one line>`, and name the item's full code (`BV-3C`) in the subject. CI checks the pull request has both; the squash keeps every commit's trailers. Update the §1 files you touched, and run `python tools/status.py` if you changed the plan.
 6. **Check claims:** `python tools/claims.py --me <Claude|Codex|Luna>` lists changed files someone else claimed; leave them or ask the owner.
 7. **Hand off:** update/remove your claim, drop finished *Next* items, add new ones with **Read:**. Messages only for what your commit doesn't say; owner questions as GitHub issues. Push.
 
 - **Claims and messages belong to their author.** Never edit another AI's, except deleting a message to you once handled (to all: keep seven days). Make each claim's *Work* distinguish parallel sessions. A helper (Codex's Luna) gets its own rows, written by its AI.
-- **Push rejected?** `git pull --rebase`, keep both sides in changelog and `NOW.md`, retest, push.
+- **Push rejected?** `git pull --rebase`, keep both sides in `NOW.md`, retest, push.
 - **Findings and plans:** every bug, improvement or design goes in `issues/` as one item in the milestone it belongs to, with the next free code (`python tools/issues.py next 3`); finishing it first replaces incoming report/feedback links with permanent commit/test references, then deletes the file and adds the code to the milestone's `done:`. Read `issues/INDEX.md` before anything else there. A small, self-contained one also gets a *Good first issue* (its template) titled `[BV-3C] …`, linking the file, with `github: n` in the file's front matter, for people to `/take`.
 - **People first:** never start on a GitHub issue that has an assignee or the `taken` label; a person has it ([CONTRIBUTING.md](CONTRIBUTING.md)). Fixing an item with an open GitHub issue closes it (`Closes #n`).
 - **Skills:** `skills/README.md` lists them: feedback-review, bug-hunt, number-audit, guideline-audit, arabic-check, perf-check, stale-check, release-check, website-sync. Read the one that fits and follow it.

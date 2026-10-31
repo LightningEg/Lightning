@@ -60,10 +60,10 @@ You review the diffs, merge the branches into `main` one at a time and push.
 
 ## 5. Delete (you)
 
-Only when every ticket has a verdict and every built ticket has a test and a changelog line:
+Only when every ticket has a verdict and every built ticket has a test and a release-note trailer:
 
 1. A ticket left Open or Request keeps its item (status `ready` or `blocked`, with why); a Fixed, Built, Existing or Declined ticket's item is deleted and its code added to `done:`. Run `python tools/issues.py`.
-2. One changelog entry for the batch, three lines at most.
+2. One Release-note and Detail trailer pair for the batch.
 3. Before removing items, replace incoming report/feedback links with a commit-pinned item, resolution commit or regression test. Keep the sanitized feedback record and its sample-data evidence. Remove only processed implementation items and their temporary screenshots.
 4. Run `python tools/docs_check.py` and `python tools/issues.py --check`; the feedback record links to durable evidence rather than deleted item files.
 5. Commit, push, merge to `main`, push.

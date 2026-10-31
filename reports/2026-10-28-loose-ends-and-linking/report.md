@@ -36,7 +36,7 @@ Every finding below was checked against the code at the commit above. Nothing wa
 | A7 | low | Some unlock messages are wrong. Any non-409 error, including 5xx and rate limits, reads "code used or expired". "Unlocked for its other devices" shows even when sharing failed. | `ui/entitlements.py:175,203`; `ui/routes/settings.py:230` | BT-8U6 |
 | A8 | low | The marketplace URL is written in four places and always opens the English page. | `settings/index.html:24`; `theme-runtime.js:45`; `desktop/window.py:154`; `MainActivity.java:81` | BT-8U6 |
 | A9 | low | A paid theme's tier exists only in a test dict, the guideline and the website migration. Manifests have no `tier`. `compose_parts` is called only by tests, and it would miss `dendera-night`. | `tests/test_theme_build.py:181`; `security/cosmetic_parts.py:83` | BT-8U7 |
-| A10 | low | Architecture and the theme kit still say entitlement, activation and the atomic cache are "still to build", but they are built. | `docs/ARCHITECTURE.md:526,532`; `theme-kit/README.md:133` | BT-8U7 |
+| A10 | low | Architecture and the theme kit still say entitlement, activation and the atomic cache are "still to build", but they are built. | `ai/ARCHITECTURE.md:526,532`; `theme-kit/README.md:133` | BT-8U7 |
 
 ### B. Multi-device sync and pairing (4A, 4B)
 

@@ -38,13 +38,13 @@ Read a site page only around the line you change.
 7. **Nothing private published.** The site is public: no analytics data, visitor lists, dashboard keys, owner emails or tokens in any file (README *Analytics and consent*: "Nothing analytical is committed").
    Scan with `git grep -n -I -E "ghp_|github_pat_|api[_-]?key|@gmail\.com"`; only the receiver URL and public contact lines may appear.
 8. **Licence and voice.** `LICENSE` (PolyForm Noncommercial 1.0.0) and the README licence section exist; copy follows `brand-voice.md` and B10 (no comparisons with named apps; describe only what the app does today).
-   "Today" means the released build on Downloads: a feature only on `main` (or built but blocked, like Gulf and European price files) is not claimed; check `CHANGELOG.md` against the release section before writing it up.
+   "Today" means the released build on Downloads: a feature only on `main` (or built but blocked, like Gulf and European price files) is not claimed; check `RELEASES.md` against the release section before writing it up.
    If the app changed a screen or figure the site quotes, run the site-recapture skill.
-9. **Merge.** One branch per kind of fix (`claude/<feature>`), changelog line in the app repo (the site has no changelog), push the branch, merge to `main`, push both repos.
+9. **Merge.** One branch per kind of fix (`claude/<feature>`), release-note trailers in the app repo (the site has no changelog), push the branch, merge to `main`, push both repos.
 
 ## Report
 
-**Where findings go.** Read `issues/README.md` once. Fix a small finding now (branch, test, changelog line) and file **no** item. File anything bigger as one item in
+**Where findings go.** Read `issues/README.md` once. Fix a small finding now (branch, test, release-note trailer) and file **no** item. File anything bigger as one item in
 the milestone it belongs to, `issues/<n>-<name>/<code>-<what>.md` (code from `python tools/issues.py next <n>`; this skill's name in `skills`, your model in `by`, `app_version`
 from `pyproject.toml`, `commit` from `git rev-parse --short HEAD`), then run `python tools/issues.py`. Finishing an item means deleting its file in the same commit and adding its code to the milestone's `done:`. Never leave a finding only in chat.
 
