@@ -16,7 +16,7 @@
 
 ## Next
 
-- **Docs spine is on main (2026-10-31, #214, site #146).** Commits end with `Release-note:` and `Detail:` (AGENTS §3); `python tools/status.py` after plan changes. Next: 1N (split and dry run done; posting waits for the owner), 1M, 7W, 8X-8Z. **Read:** 1N.
+- **Docs spine is on main (2026-10-31, #214, site #146).** Commits end with `Release-note:` and `Detail:` (AGENTS §3); `python tools/status.py` after plan changes. Next: 1N (split and dry run done; posting waits for the owner), 1M, 8X-8Z. **Read:** 1N.
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 

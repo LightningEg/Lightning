@@ -23,8 +23,9 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | **BT-1L** | [The brand audit's page-jump check fails on /welcome only under a parallel full run](1-easy-to-contribute/1L-page-jump-check-flakes.md) ([#228](https://github.com/LightningEg/Lightning/issues/228)) | bug, technical · low | Build | S | ready |
 | **IT-1M** | [Archive closed reports and keep their evidence out of the checkout](1-easy-to-contribute/1M-archive-closed-reports.md) | improvement, technical | Build | M | ready |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | ready |
+| **BT-1O** | [The brand audit still says register amounts must not be rose, but the owner decided money out reads rose](1-easy-to-contribute/1O-brand-audit-register-rose-test-is-stale.md) | bug, technical · low | Build | S | ready |
 
-Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K. Next free code: 1O.
+Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K. Next free code: 1P.
 
 ## 2 Safe for real money
 
@@ -241,15 +242,8 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7V3 | ↳ Spending analysis ([#234](https://github.com/LightningEg/Lightning/issues/234)) | | | S | |
 | NF-7V4 | ↳ Budget question ([#235](https://github.com/LightningEg/Lightning/issues/235)) | | | M | |
 | NF-7V5 | ↳ Category mapping for a bank ([#236](https://github.com/LightningEg/Lightning/issues/236)) | | | M | |
-| **NF-7W** | [Ask AI: one readable file with the question, Lightning's own words, the answers and the drivers](7-planning-import-and-search/7W-ask-ai-one-readable-file.md) | new feature | Understand | L | new |
-| NF-7W1 | ↳ Look at what exists | | | S | |
-| NF-7W2 | ↳ The file | | | L | |
-| NF-7W3 | ↳ Presets | | | M | |
-| NF-7W4 | ↳ Sizes and masking | | | M | |
-| NF-7W5 | ↳ Separate the machine export | | | M | |
-| NF-7W6 | ↳ Tests | | | S | |
 
-Done: 7H, 7J, 7K, 7N, 7O, 7P, 7Q. Next free code: 7X.
+Done: 7H, 7J, 7K, 7N, 7O, 7P, 7Q, 7W. Next free code: 7X.
 
 ## 8 Website
 

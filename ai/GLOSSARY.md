@@ -340,6 +340,8 @@ Categories are not split into income and expense trees: pick the activity that e
 | **Amount input** | A number (`1,250.50`, Arabic-Indic digits) or a sum with + - * / ^ and brackets, evaluated brackets, ^, * and /, then + and -; a bracket after a number multiplies. Unclear input is refused with the reason. |
 | **Tag** | A #word in notes (letters, digits, - or _, at least one letter, case-insensitive); links to every transaction with it; same as the exact register search. |
 | **Rule** | Settings › Rules: when counterparty, notes, amount, account or direction fit, set a category, add tags or split money out. The most specific wins; it applies before the counterparty's usual category; the past changes only on request. |
+| **Ask an AI / brief** | Settings › Your data: one Markdown file Lightning builds on this device for a person to paste or upload into an AI tool: the task, Lightning's words, the calculated numbers, where the money went, the rows. Copy or save; never sent, never open on the page. Presets, three sizes. Code: `workflows/ask_ai.py`. |
+| **Hide names** | Ask an AI option: counterparties, accounts and personal holdings become Counterparty 1, Account A, Holding 1 everywhere in the brief. Notes and memos are never included either way. |
 | **Privacy mode** | Blurs every money amount (not percentages, dates, names); hover shows it. The eye beside Search or "Hide amounts" in the command bar; remembered per profile. |
 
 ## Asset and account taxonomy (what vs where)

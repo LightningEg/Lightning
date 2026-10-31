@@ -71,7 +71,7 @@
 <section class="card settings-list" aria-labelledby="data-heading"><h2 id="data-heading">{{ 'Your data'|tr(locale) }}</h2>
   <div class="settings-row"><div><span class="settings-name">{{ 'Backup'|tr(locale) }}</span><small>{{ 'One is made each time the app starts.'|tr(locale) }}{% if backups and not phone_mode() %} <details class="settings-more"><summary>{{ 'Recent backups'|tr(locale) }} ({{ backups|length }})</summary><ul class="small code">{% for b in backups %}<li>{{ b }}</li>{% endfor %}</ul></details>{% endif %}</small></div>
     <form method="post" action="/settings/backup" class="settings-control"><button class="btn primary small">{{ 'Back up now'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>
-  <div class="settings-row" id="data-portability"><div><span class="settings-name">{{ 'Move your data'|tr(locale) }}</span><small>{{ 'A full copy out, or records in from another profile.'|tr(locale) }}</small></div>
+  <div class="settings-row" id="data-portability"><div><span class="settings-name">{{ 'Move your data'|tr(locale) }}</span><small>{{ 'A full copy for a backup or another computer, or records in from another profile. Not the file for an AI.'|tr(locale) }}</small></div>
     <div class="settings-control"><a class="btn small" href="/exports/all" data-popup-open>{{ 'Export your data'|tr(locale) }}</a><a class="btn small" href="/exports/import">{{ 'Import your data'|tr(locale) }}</a></div></div>
   <div class="settings-row"><div><span class="settings-name">{{ 'Base currency'|tr(locale) }}</span></div><div class="settings-control"><b dir="ltr">{{ base }}</b><a class="btn small" href="/settings?section=currencies">{{ 'Manage currencies'|tr(locale) }}</a></div></div>
   <div class="settings-row settings-facts"><div><span class="settings-name">{{ 'App version'|tr(locale) }}</span></div><div class="settings-control" dir="ltr">v{{ app_version }}</div></div>
@@ -82,18 +82,31 @@
 </section>
 
 
-<section class="card settings-list" id="export-for-ai"><h2>{{ 'Export for AI'|tr(locale) }}</h2><p class="muted small">{{ 'Lightning does not upload your data.'|tr(locale) }} {{ 'Export the workbook, copy the prompt, then upload both to your AI tool.'|tr(locale) }}</p><p class="muted small">{{ 'The prompt gives your AI tool context it cannot guess: what the workbook holds, how the totals were made and what to check. Its answer is then about your numbers, not generic advice.'|tr(locale) }}</p>
+<section class="card settings-list" id="export-for-ai" data-ask-ai aria-labelledby="ask-ai-heading"><h2 id="ask-ai-heading">{{ 'Ask an AI'|tr(locale) }}</h2><p class="muted small">{{ 'Lightning prepares one file on this device. You decide where to paste or upload it; Lightning sends nothing.'|tr(locale) }}</p>
 {% if ai_period %}{{ period_control('/settings', ai_period.key, ai_month, current_month, ai_period.start_text, ai_period.end_text, auto_apply=true) }}
-<p class="small muted">{{ ai_period.start_text }} to {{ ai_period.end_text }} · {{ ai_preview.transactions }} transactions · {{ ai_preview.investment_records }} investment records</p>
-<div class="actions ai-export-actions"><form action="/settings/ai-analysis" method="post" data-ai-export-form>
+<p class="small muted">{{ ai_period.start_text }} to {{ ai_period.end_text }} · {{ ai_preview.transactions }} {{ 'transactions'|tr(locale) }}</p>
+<form action="/settings/ask-ai" method="post" class="stack" data-ask-form>
   <input type="hidden" name="period" value="{{ ai_period.key }}"><input type="hidden" name="month" value="{{ ai_month }}">
   <input type="hidden" name="date_from" value="{{ ai_period.start_text }}"><input type="hidden" name="date_to" value="{{ ai_period.end_text }}">
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
-  <button class="btn primary" type="submit">{{ 'Export for AI analysis'|tr(locale) }}</button>
+  <label class="field"><span class="field-label">{{ 'What do you want to know?'|tr(locale) }}</span><select name="preset">{% for key, preset in ai_presets.items() %}<option value="{{ key }}">{{ preset[0]|tr(locale) }}</option>{% endfor %}</select></label>
+  <div class="planner-mode" role="radiogroup" aria-label="{{ 'How much detail'|tr(locale) }}"><span class="planner-mode-label">{{ 'How much detail'|tr(locale) }}</span><span class="planner-mode-seg">{% for key, size in ai_sizes.items() %}<label><input type="radio" name="size" value="{{ key }}" {{ 'checked' if key == 'standard' }}><span>{{ size[0]|tr(locale) }}</span></label>{% endfor %}</span>
+    <ul class="small muted ask-ai-sizes">{% for key, size in ai_sizes.items() %}<li><b>{{ size[0]|tr(locale) }}:</b> {{ size[1]|tr(locale) }}</li>{% endfor %}</ul></div>
+  <label class="field"><span class="field-label">{{ 'Your question (optional)'|tr(locale) }}</span><textarea name="question" rows="2" maxlength="800"></textarea></label>
+  <label class="field-check"><input type="checkbox" name="hide_names" value="1"> <span>{{ 'Hide names'|tr(locale) }}</span></label>
+  <p class="small muted">{{ 'Names of people, accounts and holdings become labels such as Counterparty 1. Notes are never included.'|tr(locale) }}</p>
+  <div class="actions"><button class="btn primary" type="button" data-ask-copy>{{ 'Copy for AI'|tr(locale) }}</button><button class="btn" type="button" data-ask-save>{{ 'Save as a file'|tr(locale) }}</button></div>
+  <p class="small muted" role="status" aria-live="polite" data-ask-status></p>
 </form>
-<button class="btn" type="button" data-copy-ai-prompt>{{ "Copy AI prompt"|tr(locale) }}</button><button class="btn" type="button" data-edit-ai-prompt>{{ "Edit AI prompt"|tr(locale) }}</button></div>
-<dialog class="review-dialog ai-prompt-dialog" data-ai-dialog aria-labelledby="ai-prompt-title"><h2 id="ai-prompt-title">{{ 'Edit AI prompt'|tr(locale) }}</h2><textarea name="ai_prompt" dir="ltr" rows="14" data-ai-prompt aria-label="{{ 'Prompt for your AI tool'|tr(locale) }}">{{ ai_prompt }}</textarea><div class="actions"><button class="btn primary" type="button" data-save-ai-prompt>{{ 'Save'|tr(locale) }}</button><button class="btn" type="button" data-cancel-ai-prompt>{{ 'Cancel'|tr(locale) }}</button></div></dialog>
-<p class="small muted" role="status" data-ai-status></p>
+<details class="settings-more"><summary>{{ 'Other formats'|tr(locale) }}</summary>
+  <p class="small muted">{{ 'An Excel workbook, for tools that read spreadsheets. The file above is easier for most tools.'|tr(locale) }}</p>
+  <form action="/settings/ai-analysis" method="post" data-ai-export-form>
+    <input type="hidden" name="period" value="{{ ai_period.key }}"><input type="hidden" name="month" value="{{ ai_month }}">
+    <input type="hidden" name="date_from" value="{{ ai_period.start_text }}"><input type="hidden" name="date_to" value="{{ ai_period.end_text }}">
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    <button class="btn small" type="submit">{{ 'Export for AI analysis'|tr(locale) }}</button>
+  </form>
+  <p class="small muted" role="status" data-ai-status></p></details>
 {% endif %}</section>
 <details class="card settings-list settings-advanced start-fresh"><summary><h2>{{ 'Advanced'|tr(locale) }}</h2></summary>
   {% if not phone_mode() %}<div class="settings-row settings-facts"><div><span class="settings-name">{{ 'Database file'|tr(locale) }}</span><small dir="ltr" class="code">{{ db_path }}</small></div></div>{% endif %}
@@ -106,13 +119,7 @@
 {% endif %}
 {% if section == 'general' %}</div>{% endif %}
 <script nonce="{{ request.state.csp_nonce|default('') }}">(()=>{document.querySelectorAll('[data-autosubmit]').forEach(control=>control.addEventListener('change',()=>control.form?.requestSubmit()));document.querySelectorAll('[data-locale-auto]').forEach(control=>control.addEventListener('change',()=>control.form?.requestSubmit()));document.querySelectorAll('.factor-form').forEach(form=>{const input=form.elements.factor,status=form.querySelector('.inline-save-status');let saved=input.value,busy=false;async function save(){if(input.value===saved||busy)return;busy=true;status.textContent=window.lightningT('Saving…');try{const r=await fetch(form.action,{method:'POST',body:new URLSearchParams(new FormData(form)),headers:{'X-Requested-With':'fetch'}});if(!r.ok)throw Error(await r.text());saved=input.value;status.textContent=window.lightningT('Saved');const page=await fetch(location.href,{headers:{'X-Requested-With':'fetch'}});if(page.ok){const doc=new DOMParser().parseFromString(await page.text(),'text/html');const fresh=doc.querySelector('#assets-valuations'),current=document.querySelector('#assets-valuations');if(fresh&&current){current.replaceWith(fresh);fresh.querySelectorAll('.factor-form').forEach(next=>{const field=next.elements.factor;let baseline=field.value;const message=next.querySelector('.inline-save-status');const update=async()=>{if(field.value===baseline)return;message.textContent=window.lightningT('Saving…');try{const response=await fetch(next.action,{method:'POST',body:new URLSearchParams(new FormData(next)),headers:{'X-Requested-With':'fetch'}});if(!response.ok)throw Error(await response.text());baseline=field.value;message.textContent=window.lightningT('Saved');}catch(error){message.textContent=window.lightningT(error.message||'Could not save')}};field.addEventListener('blur',update);field.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();update()}})});}}}catch(e){status.textContent=window.lightningT(e.message||'Could not save')}finally{busy=false}}input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();save()}});input.addEventListener('blur',save)});
-const exportForm=document.querySelector('[data-ai-export-form]'),prompt=document.querySelector('[data-ai-prompt]'),status=document.querySelector('[data-ai-status]'),dialog=document.querySelector('[data-ai-dialog]');
-let committed=prompt?.value||'';
-const edit=()=>{prompt.value=committed;dialog.showModal();prompt.focus()};
-document.querySelector('[data-edit-ai-prompt]')?.addEventListener('click',edit);
-document.querySelector('[data-save-ai-prompt]')?.addEventListener('click',()=>{committed=prompt.value;dialog.close()});
-document.querySelector('[data-cancel-ai-prompt]')?.addEventListener('click',()=>{prompt.value=committed;dialog.close()});
-dialog?.addEventListener('cancel',()=>{prompt.value=committed});
-document.querySelector('[data-copy-ai-prompt]')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(committed);status.textContent=window.lightningT('Prompt copied.')}catch{edit();prompt.select();status.textContent=window.lightningT('Select and copy the prompt in the editor.')}});
-exportForm?.addEventListener('submit',async event=>{event.preventDefault();status.textContent=window.lightningT('Preparing workbook…');try{const response=await fetch(exportForm.action,{method:'POST',body:new URLSearchParams(new FormData(exportForm)),headers:{'X-Requested-With':'fetch'}});if(!response.ok)throw Error(await response.text());const blob=await response.blob(),url=URL.createObjectURL(blob),anchor=document.createElement('a'),disposition=response.headers.get('Content-Disposition')||'',match=disposition.match(/filename="?([^";]+)"?/i);anchor.href=url;anchor.download=match?.[1]||'lightning-analysis.xlsx';anchor.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent=window.lightningT('Workbook downloaded. Copy the AI prompt next.')}catch(error){status.textContent=window.lightningT(error.message||'Could not prepare the workbook.')}})})();</script>
+const exportForm=document.querySelector('[data-ai-export-form]'),status=document.querySelector('[data-ai-status]');
+exportForm?.addEventListener('submit',async event=>{event.preventDefault();status.textContent=window.lightningT('Preparing workbook…');try{const response=await fetch(exportForm.action,{method:'POST',body:new URLSearchParams(new FormData(exportForm)),headers:{'X-Requested-With':'fetch'}});if(!response.ok)throw Error(await response.text());const blob=await response.blob(),url=URL.createObjectURL(blob),anchor=document.createElement('a'),disposition=response.headers.get('Content-Disposition')||'',match=disposition.match(/filename="?([^";]+)"?/i);anchor.href=url;anchor.download=match?.[1]||'lightning-analysis.xlsx';anchor.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent=window.lightningT('Workbook downloaded.')}catch(error){status.textContent=window.lightningT(error.message||'Could not prepare the workbook.')}})})();</script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('ask-ai.js') }}" defer></script>
 {% endblock %}
