@@ -4,6 +4,7 @@ type: polish
 pillar: understand
 size: L
 status: ready
+post: no
 created: 2026-10-19
 by: Claude
 skills: guideline-audit
@@ -132,3 +133,15 @@ Average payment line soft rose; loan progress in Azure; Currencies card in a car
 4. The savings waffle lives only behind the Overview's Savings rate: yes (leaves Budget and Investments).
 5. Guideline first: done in 3.32. Also asked the same day: Arabic body text is Noto Sans Arabic instead of IBM Plex Sans Arabic
    (app fonts, website `css/arabic.css`, A06.2, B04, C10).
+
+## 3Q1 KPI cards: Overview, Spending thin-data forms, Recurring, Loans, Reserves · M
+§6 step 3. 3W rebuilt the six main tabs answer-first since 2026-10-21. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+
+## 3Q2 KPI cards: Investments, holding page, Currencies, Accounts, account page · M
+§6 step 4.
+
+## 3Q3 Phone, arabic-check, Mohab and site-recapture pass · M
+§6 step 5.
+
+## 3Q4 Small fixes that need no decision · S
+Phone Budget Spent in Ink; Lowest point's dot on the low; Reserves `−0`; Average payment line soft rose; loan progress in Azure; Currencies card in a card.

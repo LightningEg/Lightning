@@ -37,3 +37,18 @@ repo: app
 ## Done when
 
 The owner has done steps 1-4 and a buyer has unlocked a theme on Windows and Android.
+
+## 10C1 Native theme acceptance · L
+WebView2 and Android paint, grain and blur cost on a low-end phone, Arabic mirroring of artwork, forced colours, Dendera's frieze and pigment thread.
+
+## 10C2 Royal Obsidian & Gold needs a website version · M
+Before it can be sold.
+
+## 10C3 Fix the app's own green on dark cards · S
+It reads low in every dark theme; the fix belongs to the dark adapter in `theme-surfaces.css`.
+
+## 10C4 Owner steps 1-6 in order · owner
+Deploy migrations, open checkout, generate the store key, ship the release, turn on unlock, redeploy `redeem-purchase`.
+
+## 10C5 Review prices after 60 days of sales · owner
+As the website's `docs/payment-operations.md` describes.

@@ -367,3 +367,24 @@ Round 2, 2026-10-16. The owner answered §13: one row per broker; convert then b
 - Turning on the Europe and Gulf packs once their sources are licensed.
 
 Owner direction (ticket 107, 2026-10-16): this design's pockets read as tabs: one tab per currency pocket of a brokerage, each limited to markets that trade in that pocket's currency, plus a main tab that adds them all up in EGP. Agree with section 1; next step is to settle the pocket list per broker and the tab layout before any code.
+
+## 5G1 Phase 0: honest display · M
+Currency on every non-EGP figure, native average cost, Currencies includes holdings, follow held markets, exchange names without MIC codes, spendable switch for broker cash.
+
+## 5G2 Phase 1: listings · L
+Currency from the pack per listing; GBX and KWF scale; USD funds; ISO decimals; FX coverage gate.
+
+## 5G3 Phase 2: pockets · L
+`parent_id`, the account page with a pocket strip, the trade form picks the pocket, Convert inside the broker, roll-ups, merge today's separate USD account into a broker.
+
+## 5G4 Phase 3: events · L
+Dividend gross, tax and net; broker fees; interest on cash; move shares between brokers.
+
+## 5G5 Phase 4: broker import · L
+Activity and positions CSV presets; unit reconciliation.
+
+## 5G6 Phase 5: analysis · L
+Five views, two-lens returns, what the pound did, costs, idle cash, targets by currency and market; every total equals Portfolio value.
+
+## 5G7 Phase 6: lots and corporate actions · L
+Follows 5B and 5E.

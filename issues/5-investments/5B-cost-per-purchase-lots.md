@@ -43,3 +43,12 @@ by: Claude
 5. Later, only if asked: choose the exact purchases a sale uses (GnuCash "manual"), as `sale_lot_picks(transaction_id, lot_opened, quantity)` read by `build_lots`.
 
 **Done when:** with `average`, every existing investment test and Mohab's test give the same numbers (the refactor guard); new tests for FIFO across three buys and a sale that spans two lots; the pieces always add up to the sale.
+
+## 5B1 Pure lots module with the average method · L
+`lightning/investments/lots.py` `build_lots`: `average` gives exactly today's numbers (every investment test and Mohab unchanged).
+
+## 5B2 FIFO across lots · L
+A sale cuts across lots; proceeds shared by quantity with the last piece taking the rounding remainder; the pieces add up to the sale.
+
+## 5B3 Cost method on the account · M
+Migration `accounts.cost_method` (default `average`) shown on the account edit page for brokerage accounts only.

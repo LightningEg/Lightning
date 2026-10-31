@@ -732,3 +732,21 @@ Platform guidance checked 2026-10-04; verify again when pinning the Android rele
 - [Google Play SMS permissions](https://support.google.com/googleplay/android-developer/answer/10208820?hl=en): money-management exception is subject to review, disclosure and approval.
 
 The earlier review remains available in Git history. Its requirements and accepted corrections are incorporated above; there is no separate review section that can be mistaken for a second current specification.
+
+## 4B1 Phase A: make local data replacement safe; prove Android is possible · L
+§15. Work packages 01-04.
+
+## 4B2 Phase B: prove authority without networking · L
+§15.
+
+## 4B3 Phase C: connect two ordinary PCs and cover offline use · L
+§15.
+
+## 4B4 Phase D: make the phone the actual home · L
+§15.
+
+## 4B5 Phase E: add bank messages without duplicate money · L
+§15.
+
+## 4B6 Phase F: measure, rehearse loss and release · L
+§15 and §16 acceptance.

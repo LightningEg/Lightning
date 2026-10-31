@@ -56,6 +56,6 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | 9 Later | 8 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 4 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |
 
-22 large items still need splitting into steps before they are posted for contributors (size L: 800 coins or more).
+0 large items still need splitting into steps before they are posted for contributors (size L: 800 coins or more).
 
 The full plan is [issues/INDEX.md](../issues/INDEX.md); the pillars are explained in [the map](README.md).

@@ -28,29 +28,29 @@ flat; the weekly review keeps More chosen, and 3AL7 is done. Then: Cash planning
 Recurring's page action is a Secondary; Investments' horizon note points to the holding; Financial health puts what
 needs you under its lead with the chart in its own card. Each step below says only what is left.
 
-## 3AL1 Overview (F1-F3)
+## 3AL1 Overview (F1-F3) · M
 Left: Your position as flat rows that open their pages; This period's figures as rows that open a sheet (D1), never a
 fold inside a fold.
 
-## 3AL2 Budget (F5-F8)
+## 3AL2 Budget (F5-F8) · M
 Left: a category row opens a sheet with its limit field, Cover it and See transactions (today the row opens its
 transactions and limits are typed under Edit plan). Bulk undo, the raise offer and first limits take the strip's place
 one at a time.
 
-## 3AL3 Transactions and an account (F10-F12)
+## 3AL3 Transactions and an account (F10-F12) · M
 Left: Money in and out as one line (D2). Views and value updates move into ⋯. A day's net only on a day with two or
 more rows. (Built: the tab opens on this month; an account's page stays its statement, all time with the balance after.)
 
-## 3AL4 More (F13-F14)
+## 3AL4 More (F13-F14) · S
 Built, flat with headings (the guideline's way of D3). Done.
 
-## 3AL5 Pages under More (F15-F20)
+## 3AL5 Pages under More (F15-F20) · L
 Left: Cash planning's forecast, months ahead and What is promised as rows that open sheets (D1). Recurring: the
 list first, the fixed-costs ratio a link to Financial health, no ".00" on rows. Reserves: the app bar names Financial
 health; no card in a card. Accounts: Accounts tab first (the section registry is shared with the PC: ask first).
 Investments keeps the owner's PDF order (chart, then holdings).
 
-## 3AL6 Spending (F21)
+## 3AL6 Spending (F21) · S
 The lead (spent this month against the same days usually), four biggest categories then Other as rows, then one row
 "More analysis" that opens the rest. The heat map, both money-flow diagrams, small multiples and month grid leave the
 first page.

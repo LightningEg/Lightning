@@ -186,3 +186,12 @@ These need the owner's decision before the file is published:
 2. **Built 2026-10-05:** the release ZIP carries `market.zip` (`python -m tools.market release`, required for a tagged release, so a release waits until the packs are published); opening a profile (first run, newer file, new month) and a brokerage statement import fill month-ends (`workflows/market_prices.fill_if_due`, `fill_followed`); Needs you lists what is missing until typed; the per-user Yahoo code (`assets/market_data.py`) is removed.
 3. Funds, currencies and gold matched to profile holdings; reviewed Thndr-to-Mubasher fund mapping.
 4. US stocks and FX revaluation, with multi-currency (Upcoming projects #15, #16).
+
+## 6A1 Funds, currencies and gold matched to holdings · M
+Includes the reviewed Thndr-to-Mubasher fund mapping.
+
+## 6A2 US stocks and FX revaluation, with multi-currency · L
+Upcoming projects #15 and #16.
+
+## 6A3 Publish the packs · owner
+The owner's go-ahead to publish; see 6C for what is not published today.

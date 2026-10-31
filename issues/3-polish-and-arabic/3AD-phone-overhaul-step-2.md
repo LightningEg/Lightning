@@ -35,3 +35,15 @@ asks for the amount first with the last-used account already chosen as a chip, a
 ## Fix
 Build the first two as phone sheets (C09), then ask the owner about the score and the swipe. Add each to Part C when it
 is built, in both repos.
+
+## 3AD1 Quick add, amount first · L
+Money in, Money out, Transfer on top; the amount with a number pad; usual categories as chips; the last-used account already chosen as a chip; one Primary button; Save pinned above the keyboard (Audit 10 F9).
+
+## 3AD2 Transaction detail as a sheet · L
+Arrow chip, name, date, account, amount, then Category, Plan left (from `BudgetService`, never the template), Note; Split and Done.
+
+## 3AD3 Swipe left to set a category · M
+Reveal Set category on a Transactions row without fighting C03.3 (swiping never changes tabs) or press-and-hold selection (C08.5).
+
+## 3AD4 Financial health as a score · owner
+There is no 0-100 score in the app. A score is a financial rule: the owner defines it first (Architecture › Financial rules).

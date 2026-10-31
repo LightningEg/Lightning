@@ -4,6 +4,7 @@ type: polish
 pillar: feel
 size: L
 status: ready
+post: no
 created: 2026-10-20
 by: Claude
 skills: guideline-audit
@@ -50,3 +51,21 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 ## Fix
 Fix in the stylesheet or template that owns each, regenerate the RTL mirrors, rerun `tests/test_brand_audit.py` and Mohab. Extend the brand audit to
 `<select>` text, the first-run page, `<fieldset>` and label overlap so these stay fixed.
+
+## 3S1 Charts that mislead (A12) · M
+Report items 3-5: Health over-time axes, Currencies USD value against cost, the holding's dashed average-cost line colour. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+
+## 3S2 Colour off its meaning (A03) · M
+Report items 6-8: Left in plan meter, Categories chip colours and first-run Load, Gam'eya late instalments. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+
+## 3S3 The A16 shipping list · M
+Report items 9-13: five or more names, `L1 › L2`, card in a card, dropdown for your data, a card alone. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+
+## 3S4 Controls and words · M
+Report items 14-19: period control, slogans under titles (A05), Certificates' ten Primary buttons, Counterparties overlap, empty-month Budget wording, Ctrl-K Escape. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+
+## 3S5 Small things · S
+Report item 20.
+
+## 3S6 Teach the brand audit what it cannot see · M
+Extend `tests/test_brand_audit.py` to `<select>` text colour, the first-run page, `<fieldset>` boxes and overlapping chart labels so these stay fixed.
