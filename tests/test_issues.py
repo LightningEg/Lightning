@@ -114,10 +114,10 @@ def test_an_issue_body_links_to_github_not_to_a_relative_path():
 def test_the_public_list_in_the_plan_carries_coins_and_never_an_owner_task():
     module = _tool()
     milestones, _ = module.load()
-    units, _ = module.post_units(milestones)
-    assert units and all(u["size"] in module.COINS and u["item"]["type"] != "owner" for u in units)
-    title, body, labels = module.issue_text(units[0])
-    assert title.startswith("[") and f"coins:{module.COINS[units[0]['size']]}" in labels and "/take" in body
+    units, _ = module.post_units(milestones)       # empty once everything contributor-ready is posted
+    assert all(u["size"] in module.COINS and u["item"]["type"] != "owner" for u in units)
+    unit = {"code": "NF-9Z", "title": "T", "size": "M", "item": _item("9Z", file="9-later/9Z-x.md", pillar="own"), "step": None}
+    assert module.COINS["M"] == 500 and module.coins_for(unit) == 500
 
 
 def test_a_reward_can_be_raised_above_its_size_but_never_lowered():
@@ -126,3 +126,35 @@ def test_a_reward_can_be_raised_above_its_size_but_never_lowered():
     assert module.coins_for(unit) == 800
     assert module.coins_for({"item": _item(), "step": None, "size": "M"}) == 500
     assert module.coins_for({"item": _item(coins="800"), "step": {"code": "9Z1"}, "size": "S"}) == 200  # a step keeps its own size
+
+
+def test_a_step_waits_until_the_steps_it_needs_are_finished():
+    module = _tool()
+    step = lambda code, needs=(): {"code": code, "title": "s", "size": "M", "github": "", "needs": list(needs)}
+    milestones = [{"items": [_item("9K", size="L", steps=[step("9K1"), step("9K2", ["9K1"]), step("9K3", ["9K1", "9K2"]), step("9K4")])]}]
+    units, held = module.post_units(milestones)
+    assert [u["code"] for u in units] == ["NF-9K1", "NF-9K4"]
+    assert dict(held)["NF-9K3"].startswith("waits for 9K1, 9K2") and "9K1" in dict(held)["NF-9K2"]
+    milestones[0]["items"][0]["steps"].pop(0)           # 9K1 finished: its heading is gone, so 9K2 is offered
+    assert "NF-9K2" in [u["code"] for u in module.post_units(milestones)[0]]
+
+
+def test_the_needs_sentence_in_a_real_item_is_read(tmp_path):
+    module = _tool()
+    milestones, _ = module.load()
+    five_a = next(i for m in milestones for i in m["items"] if i["code"] == "5A")
+    needs = {s["code"]: s["needs"] for s in five_a["steps"]}
+    assert needs["5A2"] == ["5A1"] and needs["5A4"] == ["5A1", "5A2"] and needs["5A1"] == []
+
+
+def test_a_step_issue_does_not_repeat_the_item_plan_or_its_sibling_steps(tmp_path, monkeypatch):
+    module = _tool()
+    (tmp_path / "9-later").mkdir()
+    (tmp_path / "9-later" / "9Z-x.md").write_text(
+        "---\ntitle: T\n---\n\n## Report\nWhy this matters.\n\n## Fix\nThe whole plan: A then B.\n\n"
+        "## 9Z1 First · M\nDo A. Done when: A works.\n\n## 9Z2 Second · M\nDo B.\n", encoding="utf-8")
+    monkeypatch.setattr(module, "ISSUES", tmp_path)
+    step = {"code": "9Z1", "title": "First", "size": "M", "github": "", "needs": []}
+    body = module.issue_text({"code": "NF-9Z1", "title": "First", "size": "M", "item": _item("9Z", file="9-later/9Z-x.md"), "step": step})[1]
+    assert "Do A. Done when: A works." in body and "Why this matters." in body
+    assert "How it was planned" not in body and "The whole plan" not in body and "Do B." not in body

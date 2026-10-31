@@ -4,6 +4,7 @@ type: tech
 pillar: build
 size: M
 status: ready
+post: no
 created: 2026-10-23
 by: Codex
 skills: number-audit
@@ -19,3 +20,5 @@ repo: app
 ## Fix
 
 Assign every production module to an explicit dependency policy or documented exemption and enforce coverage. Separate sync protocol, financial adapters and runtime boundaries. Make required wiring explicit through protocols or a validated composition phase.
+
+**Not posted to contributors (2026-10-31):** it is architecture work across the sync, financial and runtime layers, which overlaps the claimed journal code; it needs splitting by layer first.

@@ -4,6 +4,7 @@ type: tech
 pillar: build
 size: M
 status: ready
+post: no
 created: 2026-10-13
 by: Claude
 ---
@@ -119,3 +120,5 @@ Files: `lightning/fx.py`, `lightning/transactions/`, `lightning/reporting/` (new
 - Version number: when both packages are on main and green, bump to `1.1.0` and build Windows and Android (the build workflows are run by hand).
 - The US list is compiled, not downloaded; refresh it with `tools/market/us_catalogue.py` where TradingView is reachable.
 - Rate age limits (10 and 45 days) are a proposal; say if you want others.
+
+**Not posted to contributors (2026-10-31):** it needs someone who can tell which of the 2026-10-13 findings still hold; do it with the architecture owner.

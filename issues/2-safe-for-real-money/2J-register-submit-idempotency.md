@@ -6,6 +6,7 @@ severity: medium
 pillar: everywhere
 size: M
 status: ready
+post: no
 created: 2026-10-23
 by: Codex
 skills: number-audit
@@ -21,3 +22,5 @@ Severity: medium. [Audit 4](../../reports/2026-10-23-backend-correctness/report.
 ## Fix
 
 Map the form's `submission` token to the journal command identity, so a retried HTTP request reuses its proposal instead of minting a new one. Test a repeated and a changed submission through `JournalServices`, on the home and on a replica.
+
+**Not posted to contributors (2026-10-31):** it is journal code, inside Claude's claim on `lightning/sync/journal/` and `lightning/runtime/journal*`.

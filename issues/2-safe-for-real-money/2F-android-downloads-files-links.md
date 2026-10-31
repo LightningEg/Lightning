@@ -5,7 +5,9 @@ look: technical
 severity: high
 pillar: everywhere
 size: M
+coins: 800
 status: ready
+github: 229
 created: 2026-10-20
 by: Claude
 skills: guideline-audit

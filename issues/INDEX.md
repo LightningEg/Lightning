@@ -20,7 +20,7 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1H2 | ↳ Update the dependency inputs together | | | M | |
 | IT-1H3 | ↳ Regenerate the locks | | | M | |
 | IT-1H4 | ↳ Validate | | | M | |
-| **BT-1L** | [The brand audit's page-jump check fails on /welcome only under a parallel full run](1-easy-to-contribute/1L-page-jump-check-flakes.md) | bug, technical · low | Build | S | ready |
+| **BT-1L** | [The brand audit's page-jump check fails on /welcome only under a parallel full run](1-easy-to-contribute/1L-page-jump-check-flakes.md) ([#228](https://github.com/LightningEg/Lightning/issues/228)) | bug, technical · low | Build | S | ready |
 | **IT-1M** | [Archive closed reports and keep their evidence out of the checkout](1-easy-to-contribute/1M-archive-closed-reports.md) | improvement, technical | Build | M | ready |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | ready |
 
@@ -45,11 +45,11 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | IT-2C4 | ↳ Unresolved-evidence repair | | | M | |
 | IT-2C5 | ↳ Native notification delivery, Windows and Android | | | M | |
 | **BT-2E** | [The engine accepts some bad input - dates before an account opened, crafted ids, rounding of plan amounts](2-safe-for-real-money/2E-engine-input-checks.md) | bug, technical · low | Capture | M | ready |
-| **BT-2F** | [On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone](2-safe-for-real-money/2F-android-downloads-files-links.md) | bug, technical · high | Everywhere | M | ready |
+| **BT-2F** | [On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone](2-safe-for-real-money/2F-android-downloads-files-links.md) ([#229](https://github.com/LightningEg/Lightning/issues/229)) | bug, technical · high | Everywhere | M | ready |
 | **BT-2J** | [On a journal profile, retrying one add form can still save a second expense](2-safe-for-real-money/2J-register-submit-idempotency.md) | bug, technical · medium | Everywhere | M | ready |
 | **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical · medium | Reach | M | new |
 | **OW-2AB** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AB-stale-code.md) | owner task | Protect |  | ready |
-| **BT-2AD** | [Five more money forms save twice when the same form is sent again - investment entry, gold trade, ownership change, money held for others, instalment purchase](2-safe-for-real-money/2AD-resent-money-forms-save-twice.md) | bug, technical · low | Capture | M | ready |
+| **BT-2AD** | [Five more money forms save twice when the same form is sent again - investment entry, gold trade, ownership change, money held for others, instalment purchase](2-safe-for-real-money/2AD-resent-money-forms-save-twice.md) ([#230](https://github.com/LightningEg/Lightning/issues/230)) | bug, technical · low | Capture | M | ready |
 
 Done: 2B, 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AC. Next free code: 2AE.
 
@@ -150,7 +150,7 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
 | **NF-5A** | [One table of investment events](5-investments/5A-one-table-of-investment-events.md) | new feature | Own | L | ready |
-| NF-5A1 | ↳ The events table and the one validator | | | L | |
+| NF-5A1 | ↳ The events table and the one validator ([#231](https://github.com/LightningEg/Lightning/issues/231)) | | | L | |
 | NF-5A2 | ↳ Thin wrappers for buy, sell and dividend | | | M | |
 | NF-5A3 | ↳ The entry form reads the spec | | | M | |
 | NF-5A4 | ↳ Reinvested dividend and return of capital | | | L | |
@@ -236,6 +236,11 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7T6 | ↳ A reserve tied to its bill | | | L | |
 | **BT-7U** | [Editing a paid bill's transaction keeps the bill paid at the old amount and date](7-planning-import-and-search/7U-bill-link-after-payment-edit.md) | bug, technical · low | Plan | S | new |
 | **NF-7V** | [More AI prompt buttons that carry Lightning's context](7-planning-import-and-search/7V-more-ai-prompt-buttons.md) | new feature | Understand | M | ready |
+| NF-7V1 | ↳ A rejected CSV ([#232](https://github.com/LightningEg/Lightning/issues/232)) | | | M | |
+| NF-7V2 | ↳ Counterparty clean-up ([#233](https://github.com/LightningEg/Lightning/issues/233)) | | | S | |
+| NF-7V3 | ↳ Spending analysis ([#234](https://github.com/LightningEg/Lightning/issues/234)) | | | S | |
+| NF-7V4 | ↳ Budget question ([#235](https://github.com/LightningEg/Lightning/issues/235)) | | | M | |
+| NF-7V5 | ↳ Category mapping for a bank ([#236](https://github.com/LightningEg/Lightning/issues/236)) | | | M | |
 | **NF-7W** | [Ask AI: one readable file with the question, Lightning's own words, the answers and the drivers](7-planning-import-and-search/7W-ask-ai-one-readable-file.md) | new feature | Understand | L | new |
 | NF-7W1 | ↳ Look at what exists | | | S | |
 | NF-7W2 | ↳ The file | | | L | |

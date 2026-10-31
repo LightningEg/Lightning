@@ -6,6 +6,7 @@ severity: low
 pillar: build
 size: S
 status: ready
+github: 228
 created: 2026-10-29
 by: Claude Opus 5.5
 app_version: 1.5.1

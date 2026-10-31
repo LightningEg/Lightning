@@ -17,5 +17,15 @@ A new skill is written once, here, in plain words with no tool-only commands.
 | [arabic-check](arabic-check/SKILL.md) | Find and add untranslated Arabic strings, check RTL, digits and voice |
 | [website-sync](website-sync/SKILL.md) | Keep the app and website repos consistent after a release or guideline change |
 | [site-recapture](site-recapture/SKILL.md) | The app changed a screen or figure the website shows: recapture and update the site (`tools/site_shots.py`) |
+| [organise-repo](organise-repo/SKILL.md) | Decide where a document or fact belongs; keep docs/ and ai/ small and the generated pages current |
+| [add-plan-item](add-plan-item/SKILL.md) | File a bug, improvement, feature or owner decision as a coded item in `issues/` |
+| [split-large-item](split-large-item/SKILL.md) | Split a size L item into sized, ordered steps (`tools/issues.py --check` warns) |
+| [post-contributor-issues](post-contributor-issues/SKILL.md) | Choose what is ready for contributors and post it as GitHub issues with coins (`tools/issues.py github`) |
+| [write-release-notes](write-release-notes/SKILL.md) | Write the `Release-note:` and `Detail:` trailers; cut and check release notes (`tools/release_notes.py`) |
+| [ship-pr](ship-pr/SKILL.md) | From a finished branch to merged: checks, trailers, pull request, CI, verified merge, hand-off |
+| [review-external-pr](review-external-pr/SKILL.md) | Review an outside contributor's or bot's pull request before merging |
+| [owner-console-view](owner-console-view/SKILL.md) | Add a count or analysis view to the website's owner console (website repo) |
+| [supabase-migration](supabase-migration/SKILL.md) | Write, test and apply a Supabase migration safely (website repo) |
+| [usage-question](usage-question/SKILL.md) | Answer a question about users or traffic from Supabase and GoatCounter without exposing anyone |
 
-Order for a release: stale-check, release-check (which calls bug-hunt, number-audit, guideline-audit, arabic-check and perf-check), then website-sync, then site-recapture if the release changed what the site shows.
+Order for a release: write-release-notes (`cut`), stale-check, release-check (which calls bug-hunt, number-audit, guideline-audit, arabic-check and perf-check), then website-sync, then site-recapture if the release changed what the site shows.

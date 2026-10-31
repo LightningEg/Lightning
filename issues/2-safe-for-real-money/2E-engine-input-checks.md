@@ -6,6 +6,7 @@ severity: low
 pillar: capture
 size: M
 status: ready
+post: no
 created: 2026-10-20
 by: Claude
 skills: bug-hunt, number-audit
@@ -32,3 +33,5 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§1 Engin
 
 ## Fix
 One branch per group (6, 7–8), each with a test that posts the bad input and expects a refusal or matching totals.
+
+**Not posted to contributors (2026-10-31):** its remaining rule (dates before an account opened) needs the owner's decision first.
