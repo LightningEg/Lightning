@@ -23,28 +23,28 @@ IV-3AL (its Budget's *Edit plan* is the model for B2). Investments entry is 3G �
 **The test for each step:** at 1366 x 768 the page's Lead, what needs you and its daily action are on the first screen,
 content starts by y = 140, and no figure contradicts another page.
 
-## 3AM1 Wrong on screen (SA1, SA2, ST1, T3, T4, B4)
+## 3AM1 Wrong on screen (SA1, SA2, ST1, T3, T4, B4) · M
 Reserves takes Safety's title; one emergency-fund answer on both Safety tabs; Counterparties' buttons stop covering the
 category well; no all-"—" Balance column; whole EGP in the register; no "System Categories".
 **Built:** SA1, SA2 (Limits reads today's emergency reserve as Reserves does), T3, T4 (balances whole; row amounts keep cents, A06.1), B4, and ST1 as a column-width stop (the redesign is 3AM4).
 
-## 3AM2 The shell gives back space (S1-S3, S6)
+## 3AM2 The shell gives back space (S1-S3, S6) · M
 Add/Manage accounts reachable without scrolling the sidebar; a gear-only bar takes no row of its own (A05 unchanged);
 the header stays one row; Review activity becomes a quiet action.
 **Built:** S1 (heading link + round + button, list scrolls inside), S2 (title shrinks first; Investments' currency lens in ⋯), S3 (a gear-only bar has no height; its gear sits at the right end of the header's hairline, under the actions), S6 (Review activity in ⋯). Content starts at y 132 on Overview and Budget; pages with a tab bar start at 161-214 (the bar is a row).
 
-## 3AM3 Each tab opens on its answer (O1-O2, B1-B3, B5, T1-T2, T5-T6, SP1-SP3, SA3-SA5, I1-I2, A1-A3, C1-C2)
+## 3AM3 Each tab opens on its answer (O1-O2, B1-B3, B5, T1-T2, T5-T6, SP1-SP3, SA3-SA5, I1-I2, A1-A3, C1-C2) · L
 Overview's KPIs above the fold; Budget one meter plus pace, read-only rows with Edit plan; Transactions ten rows above the
 fold with one filter line; Spending early in a month leads with last month; Safety on the period control and read-only;
 Investments' Lead filled; Accounts one column with What you own only where it differs; Cash planning's lone cards paired.
 
-## 3AM4 Settings stop being forms (ST1-ST4)
+## 3AM4 Settings stop being forms (ST1-ST4) · M
 Counterparties and Categories as one-column read lists with an edit drawer; Data checks folds passed checks to one line;
 the database path behind Advanced; Settings in each tab first on Your data.
 
 **Built:** ST2 (Counterparties read list with click-to-edit rows; Categories one column, row icons on hover), ST3, ST4. Categories keeps its inline autosave edit (no drawer) and its bulk actions.
 
-## 3AM5 Words, visuals and sizes (report follow-up 2026-10-30: P1-P3)
+## 3AM5 Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) · M
 A sentence stays only if it reads a figure or changes the next action; methods behind info tips, chart keys instead of
 captions. A visual from the existing macros on Compare periods, Reports, Loans, Planner, Zakat and Held for others. No
 card around one button or one empty state; fields as wide as their values; Compare and Reports on the KPI card in

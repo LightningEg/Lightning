@@ -11,5 +11,5 @@ by: Claude
 ## Report
 Open ends of built features.
 
-## 7F2 Rename a rule
-## 7F3 Change one budget category without the full grid
+## 7F2 Rename a rule · S
+## 7F3 Change one budget category without the full grid · M

@@ -486,3 +486,15 @@ Beyond the open gaps already listed in the Project Overview, ranked by how often
 - A PC register row for a transfer out reads "To …" with a minus (AC-2).
 - He joins a gam'eya that started two months ago: the circle page says what he owes and records the past instalments in one step (GA-1).
 - Budget's daily figure and Cash planning's line do not contradict each other (CP-1).
+
+## 3H1 Step 1: trust · L
+§14 step 1 (P1): SP-1/X-4, X-3, CP-1, IN-2, AC-2, GA-1, IN-3, X-1, X-2, HL-1, OV-1/PH-1, SE-1, SR-1, CP-8, OV-2, TE-2, TE-3. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+
+## 3H2 Step 2: weekly friction · L
+§14 step 2 (P2): BU-1 to BU-4, CP-3, CD-1, RG-1, RG-2, TX-1, TX-2, PH-5, IN-8, PR-1, PR-2, CA-1 to CA-3, HO-1, X-5, X-6.
+
+## 3H3 Step 3: features · L
+§14 step 3: FR-2, X-11 reminders, OV-3 bridge, BU-8, LO-2, LO-3, SE-2, OV-8, then the owner's choices in §12.
+
+## 3H4 Mohab steps for the six known gaps · M
+§14: add each as a strict `known_gap` in `tests/test_mohab_year.py`, then remove the marker as each is fixed.

@@ -4,6 +4,7 @@ type: tech
 pillar: build
 size: M
 status: ready
+post: no
 created: 2026-10-31
 by: Claude Sonnet 5.5
 ---

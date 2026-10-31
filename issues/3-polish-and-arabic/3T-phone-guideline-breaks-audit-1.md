@@ -4,6 +4,7 @@ type: polish
 pillar: feel
 size: L
 status: ready
+post: no
 created: 2026-10-20
 by: Claude
 skills: guideline-audit
@@ -40,3 +41,24 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§4 Phone
 
 ## Fix
 `phone.css` and the `templates/phone/` pages; regenerate `phone.rtl.css`. Make `tools/phone_check.py` also report elements past the screen edge.
+
+## 3T1 Cut words and overlapping text (C12) · M
+Report items 1-2. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+
+## 3T2 No way back, and Budget category to Transactions · M
+Report items 3-4: /sms, /search, /accounts/N/import, /investments/planner and /settings need `‹ page`; Budget keeps its place. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+
+## 3T3 Search page and touch targets · M
+Report items 5-6: live search, targets under 48 px (C05.1). Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+
+## 3T4 Settings tabs and money first · M
+Report items 7-8: five tabs (C03.3), stacked rows still a table, Overview Latest led by revaluations. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+
+## 3T5 Charts and expense analysis · M
+Report items 9-10: two charts in one card, time axes with 8-10 labels, five or more names without Other.
+
+## 3T6 Fields, pairs and small things · M
+Report items 11-13: 15 px field text, focus fill, lone KPIs, Zakat date format, Profiles wordmark.
+
+## 3T7 Make phone_check see clipped elements · S
+`tools/phone_check.py` also reports elements past the screen edge; `.phone-content` hides overflow today.

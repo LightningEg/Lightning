@@ -270,3 +270,21 @@ Seeded simulation checks invariants after every transition, not just after succe
 | Legacy cutover | An outstanding lend cannot be ignored; no v1 path can reopen a converted profile for writes. |
 
 Measure encoded bytes, round trips, replay time, snapshot frequency, storage growth and catch-up latency on a representative year and large import. A small edit exchanges only bounded protocol overhead and its new data. Release evidence includes focused tests, the full suite, `tests/test_two_devices.py`, `tests/test_mohab_year.py`, ordinary-PC/phone checks, and A16/Part C review for affected screens. Passing the simulator is not evidence for phone wake-up timing or physical power-loss survival.
+
+## 4A1 Consolidate the local implementation on the integration branch · L
+Per the 2026-10-22 boundary: consolidated tests and Windows and Android development builds (PR #97). Claude's journal claim.
+
+## 4A2 J6c-e validation: areas, home automation, upgrades and backups · L
+Local implementation built; validation pending (§10).
+
+## 4A3 J4 Internet channel · L
+Cloudflare queues, resumable snapshots, push, quotas and the privacy note. The carrier is deliberately unconfigured; deploying it is the owner's decision.
+
+## 4A4 J5 Trust and recovery gates · L
+Registry, cooperative move, lost-home recovery, transport-key rotation, retired-branch reconciliation. Complete the fault and security gates before enabling replacement.
+
+## 4A5 J6 cutover · owner
+Freeze legacy lends, take a verified baseline, ordinary Windows and Android acceptance, Mohab's year, security and durability review.
+
+## 4A6 Real-device evidence · owner
+Ordinary-PC reboot and power-loss, and real Android sleep and background behaviour.

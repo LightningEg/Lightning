@@ -4,6 +4,7 @@ type: polish
 pillar: feel
 size: L
 status: ready
+post: no
 created: 2026-10-15
 by: Claude
 skills: bug-hunt
@@ -430,3 +431,24 @@ Round 2, 2026-10-16 (the owner said: pick what is sensible):
 - §3.2: the subtitles named there are gone, and price sources sit behind *Where prices come from*.
 
 **Still open:** three hero numbers (§3.1), one home per page (§3.3), and §8 Next and Later.
+
+## 3G1 One name per figure · M
+Retire the duplicates in §3.1 and rename the two Bills due. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+
+## 3G2 Cut subtitles and zero columns; add the (i) pattern · M
+§3.2. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+
+## 3G3 One home per page · M
+§3.3 and guideline A16 (one figure on two pages: one home, a link). Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+
+## 3G4 Smart wiring · L
+§3.4: certificate auto-match, follow held markets, spendable switch, people-only owner pickers, institution-first account form, late bills first. Parts overlap 5K and 5G.
+
+## 3G5 Home: three heroes and Needs you grouped by action · L
+§8 item 5, plus a since-last-visit line. Overlaps 7L2 and 3AL1: decide after those land.
+
+## 3G6 One bill sheet and one category sheet for every tab · L
+§8 item 6.
+
+## 3G7 Ctrl-K as Do anything · M
+§8 item 7. Overlaps 7D.

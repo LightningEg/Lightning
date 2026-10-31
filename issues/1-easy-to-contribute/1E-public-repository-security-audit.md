@@ -4,6 +4,7 @@ type: tech
 pillar: build
 size: M
 status: ready
+post: no
 created: 2026-10-16
 by: GPT-6
 skills: none

@@ -12,6 +12,7 @@ code 3C; a step inside a big item is a `## 3C1 Title` heading. issues/README.md 
 """
 from __future__ import annotations
 
+import os
 import re
 import sys
 from datetime import date
@@ -35,7 +36,8 @@ DONE = ("done", "fixed", "built", "declined")  # a finished item is deleted and 
 REQUIRED = ("title", "type", "pillar", "status", "created", "by")
 MILESTONE = re.compile(r"^(\d+)-[a-z0-9]+(-[a-z0-9]+)*$")
 ITEM = re.compile(r"^(\d+)([A-Z]+)-[a-z0-9]+(-[a-z0-9]+)*\.md$")
-STEP = re.compile(r"^## (\d+[A-Z]+\d+) (.+)$", re.M)
+# A step: `## 3C1 Title · M` (size S, M or L, or `owner` for a step only the owner can do), once posted `· #123`.
+STEP = re.compile(r"^## (\d+[A-Z]+\d+) (.+?)(?: · (S|M|L|owner))?(?: · #(\d+))?[ \t]*$", re.M)
 
 
 def front_matter(path: Path) -> dict[str, str]:
@@ -156,6 +158,8 @@ def load() -> tuple[list[dict], list[str]]:
                 problems.append(f"{rel}: type '{meta_i.get('type')}' is not one of {', '.join(TYPES)}")
             if meta_i.get("pillar") and meta_i["pillar"] not in PILLARS:
                 problems.append(f"{rel}: pillar '{meta_i['pillar']}' is not one of {', '.join(PILLARS)} (issues/README.md)")
+            if meta_i.get("post") not in (None, "no"):
+                problems.append(f"{rel}: post is only ever `no` (keep this item off the public list)")
             if meta_i.get("type") == "owner":
                 if meta_i.get("size"):
                     problems.append(f"{rel}: an owner task has no size (no coins)")
@@ -177,10 +181,14 @@ def load() -> tuple[list[dict], list[str]]:
             except ValueError:
                 problems.append(f"{rel}: 'created' must be yyyy-mm-dd")
             steps = []
-            for step, title in STEP.findall(item.read_text(encoding="utf-8")):
+            for step, title, size, github in STEP.findall(item.read_text(encoding="utf-8")):
                 if not step.startswith(code) or not step[len(code):].isdigit():
                     problems.append(f"{rel}: step {step} must be {code}1, {code}2, …")
-                steps.append((step, title))
+                if not size:
+                    problems.append(f"{rel}: step {step} needs a size: `## {step} {title} · S|M|L|owner`")
+                if meta_i.get("type") == "owner" and size and size != "owner":
+                    problems.append(f"{rel}: steps of an owner task are `owner`")
+                steps.append({"code": step, "title": title, "size": size, "github": github})
             items.append({**meta_i, "code": code, "tag": tag(meta_i), "file": rel, "steps": steps})
         codes = [i["code"] for i in items]
         for code in {c for c in codes if codes.count(c) > 1}:
@@ -220,15 +228,113 @@ def render(milestones: list[dict]) -> str:
             github = f" ([#{i['github']}](https://github.com/LightningEg/Lightning/issues/{i['github']}))" if i.get("github") else ""
             kind = TAGS[i["tag"]] + (f" · {i['severity']}" if i.get("severity") else "")
             lines.append(f"| **{i['tag']}-{i['code']}** | [{i['title']}]({i['file']}){github} | {kind} | {PILLARS[i['pillar']]} | {i.get('size', '')} | {status} |")
-            for step, title in i["steps"]:
-                lines.append(f"| {i['tag']}-{step} | ↳ {title} | | | | |")
+            for s in i["steps"]:
+                gh = f" ([#{s['github']}](https://github.com/LightningEg/Lightning/issues/{s['github']}))" if s["github"] else ""
+                lines.append(f"| {i['tag']}-{s['code']} | ↳ {s['title']}{gh} | | | {s['size'] or ''} | |")
         done = sorted(m["done"], key=lambda c: number(re.sub(r"^\d+", "", c)))
         lines += ["", f"Done: {', '.join(done) or 'nothing yet'}. Next free code: {next_code(m)}."]
     return "\n".join(lines) + "\n"
 
 
+REPO = "https://github.com/LightningEg/Lightning"
+
+
+def post_units(milestones: list[dict]) -> tuple[list[dict], list[tuple[str, str]]]:
+    """What would go on GitHub for contributors, and what stays off it and why.
+
+    A unit is a step, or an item with no steps. It is posted only if it is ready (understood, unclaimed, not blocked),
+    not an owner task, not marked `post: no`, sized, and not already on GitHub. An L item with no steps waits to be split."""
+    units, held = [], []
+    for m in milestones:
+        for i in m["items"]:
+            name = f"{i['tag']}-{i['code']}"
+            if i.get("post") == "no":
+                held.append((name, "marked post: no (sensitive, owner-run or being built by another AI)"))
+            elif i["type"] == "owner":
+                held.append((name, "owner task"))
+            elif i["status"] != "ready":
+                held.append((name, f"status {i['status']}"))
+            elif i["steps"]:
+                for s in i["steps"]:
+                    if s["size"] == "owner":
+                        held.append((f"{i['tag']}-{s['code']}", "owner step"))
+                    elif s["github"]:
+                        held.append((f"{i['tag']}-{s['code']}", f"already #{s['github']}"))
+                    else:
+                        units.append({"code": f"{i['tag']}-{s['code']}", "title": s["title"], "size": s["size"], "item": i, "step": s})
+            elif i.get("github"):
+                held.append((name, f"already #{i['github']}"))
+            elif i.get("size") == "L":
+                held.append((name, "size L with no steps: split it first"))
+            else:
+                units.append({"code": name, "title": i["title"], "size": i["size"], "item": i, "step": None})
+    return units, held
+
+
+def absolute_links(text: str, item_file: str) -> str:
+    """Markdown links in an item are relative to its file; an issue body is not, so point them at GitHub."""
+    base = Path("issues") / item_file
+
+    def fix(match):
+        target = match.group(2)
+        if re.match(r"[a-zA-Z][\w+.-]*:|#|/", target):
+            return match.group(0)
+        path, _, frag = target.partition("#")
+        resolved = Path(os.path.normpath(base.parent / path)).as_posix()
+        return f"{match.group(1)}{REPO}/blob/main/{resolved}{'#' + frag if frag else ''})"
+
+    return re.sub(r"(\[[^\]]*\]\()([^)\s]+)\)", fix, text)
+
+
+def issue_text(unit: dict) -> tuple[str, str, list[str]]:
+    """Title, body and labels for one unit, in the shape the existing good-first-issues use."""
+    item, step = unit["item"], unit["step"]
+    path = ISSUES / item["file"]
+    text = path.read_text(encoding="utf-8")
+    body = text.split("\n---\n", 1)[-1].strip()
+    if step:
+        found = re.search(rf"^## {step['code']} .*?\n(.*?)(?=^## |\Z)", text, re.M | re.S)
+        what = (found.group(1).strip() if found else "") or step["title"]
+        heading = f"What to build ({item['title']})"
+    else:
+        what = re.sub(r"^## .*$", "", body.split("## Fix")[0], flags=re.M).strip()
+        heading = "What's wrong or wanted"
+    done = body.split("## Fix", 1)[1].strip() if "## Fix" in body else ""
+    coins = COINS[unit["size"]]
+    kind = TAGS[item["tag"]].replace(", ", "-").replace(" ", "-")
+    link = f"{REPO}/blob/main/issues/{item['file']}"
+    title = f"[{unit['code']}] {unit['title'] if step else item['title']}"
+    out = [f"### Code\n{unit['code']}", f"### {heading}\n{what[:1800]}"]
+    if step:
+        report = re.search(r"^## Report\n(.*?)(?=^## |\Z)", text, re.M | re.S)
+        lead = (report.group(1).strip().split("\n\n")[0] if report else "")[:700]
+        if lead:
+            out.append(f"### Context\n{lead}")
+    if done:
+        out.append(f"### How it was planned\n{done[:1200]}")
+    out.append(f"### Read first\n[{item['file']}]({link}) · financial rules in `ai/ARCHITECTURE.md` (figures are computed in Python services, never templates).")
+    out.append(f"**Reward:** {coins} Lightning Coins once a pull request that says `Closes #<this issue>` is merged. "
+               f"To work on it: comment `/take`. Setup: [CONTRIBUTING.md]({REPO}/blob/main/CONTRIBUTING.md).")
+    labels = [f"coins:{coins}", f"pillar:{item['pillar']}", f"kind:{kind}"] + (["good first issue"] if unit["size"] == "S" else [])
+    return title, absolute_links("\n\n".join(out), item["file"]), labels
+
+
 def main() -> int:
     milestones, problems = load()
+    if sys.argv[1:2] == ["github"]:
+        if problems:
+            print("\n".join(problems))
+            return 1
+        units, held = post_units(milestones)
+        sizes = {s: sum(1 for u in units if u["size"] == s) for s in COINS}
+        print(f"# Would post {len(units)} issues (dry run: nothing is sent)\n")
+        print("Sizes: " + ", ".join(f"{n} {s} ({COINS[s]})" for s, n in sizes.items()) + f" · {sum(COINS[u['size']] for u in units):,} coins in all\n")
+        for u in units:
+            print(f"- {issue_text(u)[0]}  · {u['size']} · {COINS[u['size']]} coins · {PILLARS[u['item']['pillar']]}")
+        print(f"\n# Held back ({len(held)})\n")
+        for name, why in held:
+            print(f"- {name}: {why}")
+        return 0
     if sys.argv[1:2] == ["next"]:
         wanted = [m for m in milestones if str(m["n"]) == (sys.argv[2] if len(sys.argv) > 2 else "")]
         if not wanted:

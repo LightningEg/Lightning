@@ -65,3 +65,15 @@ and 42 skipped, and the same single guideline-copy failure (507 seconds, versus
 548 seconds with current dependencies). No additional failures were observed.
 The post-record issue/document checks pass with the known mirror check excluded.
 Native Windows/Android build and runtime validation remains outstanding.
+
+## 1H1 Build and publish the native wheels · L
+Merge the recipe, run `android-native-wheels.yml` on main, verify the link and 16 KB checks and publish the run with `publish_run`. Claimed by Codex.
+
+## 1H2 Update the dependency inputs together · M
+Encrypted and desktop extras and developer requirements; resolve Pydantic with core 2.50.2, not the newest Pydantic.
+
+## 1H3 Regenerate the locks · M
+`tools/android_lock.py` with the published SHA256SUMS, both desktop locks and the build-tools lock with their recorded uv commands; verify hashes and advisories.
+
+## 1H4 Validate · M
+Package-contract tests, the full suite and import contracts; native Windows and Android build checks for the changed packages.

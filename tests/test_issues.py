@@ -62,3 +62,59 @@ def test_a_building_item_without_a_claim_warns_but_never_fails(tmp_path, monkeyp
     monkeypatch.setattr(module, "warnings", lambda _milestones: ["warning: 9Z is building"])
     monkeypatch.setattr(module.sys, "argv", ["issues.py", "--check"])
     assert module.main() == 0 and "warning: 9Z" in capsys.readouterr().out
+
+
+def _item(code="9Z", **meta):
+    base = {"type": "feature", "status": "ready", "pillar": "own", "size": "M", "tag": "NF", "code": code, "steps": [],
+            "file": f"9-later/{code}-x.md", "title": "T"}
+    return {**base, **meta}
+
+
+def test_a_step_names_its_size_and_a_posted_step_its_issue():
+    module = _tool()
+    found = module.STEP.findall("## 5A1 The table · L\n## 5A2 Wrappers · M · #212\n## 5A3 Owner try · owner\n## 5A4 No size\n")
+    assert found == [("5A1", "The table", "L", ""), ("5A2", "Wrappers", "M", "212"), ("5A3", "Owner try", "owner", ""),
+                     ("5A4", "No size", "", "")]
+
+
+def test_every_step_in_the_plan_has_a_size():
+    module = _tool()
+    milestones, _ = module.load()
+    steps = [s for m in milestones for i in m["items"] for s in i["steps"]]
+    assert steps and all(s["size"] in (*module.COINS, "owner") for s in steps)
+
+
+def test_only_ready_unclaimed_sized_work_is_offered_to_contributors():
+    module = _tool()
+    step = lambda code, size, github="": {"code": code, "title": "s", "size": size, "github": github}
+    milestones = [{"items": [
+        _item("9A"),                                                    # ready, no steps: offered
+        _item("9B", status="building"), _item("9C", status="new"), _item("9D", status="blocked"),
+        _item("9E", type="owner", size=None, tag="OW"), _item("9F", post="no"),   # held: owner task, kept off the list
+        _item("9G", size="L"),                                          # large and unsplit: split it first
+        _item("9H", github="12"),                                       # already on GitHub
+        _item("9J", size="L", steps=[step("9J1", "M"), step("9J2", "owner"), step("9J3", "S", "30")]),
+    ]}]
+    units, held = module.post_units(milestones)
+    assert [u["code"] for u in units] == ["NF-9A", "NF-9J1"]
+    why = dict(held)
+    assert "building" in why["NF-9B"] and "new" in why["NF-9C"] and "blocked" in why["NF-9D"]
+    assert why["OW-9E"] == "owner task" and "post: no" in why["NF-9F"] and "split" in why["NF-9G"]
+    assert "#12" in why["NF-9H"] and why["NF-9J2"] == "owner step" and "#30" in why["NF-9J3"]
+
+
+def test_an_issue_body_links_to_github_not_to_a_relative_path():
+    module = _tool()
+    text = module.absolute_links("See [the report](../../reports/a/report.md#x) and [web](https://e.com) and [here](#top).",
+                                 "2-safe/2F-x.md")
+    assert "(https://github.com/LightningEg/Lightning/blob/main/reports/a/report.md#x)" in text
+    assert "(https://e.com)" in text and "(#top)" in text
+
+
+def test_the_public_list_in_the_plan_carries_coins_and_never_an_owner_task():
+    module = _tool()
+    milestones, _ = module.load()
+    units, _ = module.post_units(milestones)
+    assert units and all(u["size"] in module.COINS and u["item"]["type"] != "owner" for u in units)
+    title, body, labels = module.issue_text(units[0])
+    assert title.startswith("[") and f"coins:{module.COINS[units[0]['size']]}" in labels and "/take" in body
