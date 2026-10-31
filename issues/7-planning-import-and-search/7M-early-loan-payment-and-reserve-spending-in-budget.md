@@ -1,7 +1,7 @@
 ---
 title: Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as overspending
 type: owner
-area: planning
+pillar: plan
 status: new
 created: 2026-10-20
 by: Claude

@@ -1,7 +1,8 @@
 ---
 title: Tab-by-tab review: what a real user needs next
 type: polish
-area: product
+pillar: feel
+size: L
 status: building
 created: 2026-10-14
 by: Codex

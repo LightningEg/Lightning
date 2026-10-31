@@ -1,7 +1,8 @@
 ---
 title: Match bank-imported transfer pairs across currencies
 type: feature
-area: import
+pillar: capture
+size: M
 status: new
 created: 2026-10-19
 by: Claude

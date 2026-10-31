@@ -1,7 +1,8 @@
 ---
 title: Read PDF and Excel statements through the CSV review
 type: feature
-area: import
+pillar: capture
+size: L
 status: new
 created: 2026-10-19
 by: Claude

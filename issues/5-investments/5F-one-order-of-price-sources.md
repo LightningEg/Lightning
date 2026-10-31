@@ -1,7 +1,8 @@
 ---
 title: One order of price sources
 type: tech
-area: investments
+pillar: own
+size: M
 status: ready
 created: 2026-10-05
 by: Claude

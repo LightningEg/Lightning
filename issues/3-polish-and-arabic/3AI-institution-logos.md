@@ -2,7 +2,7 @@
 was: 6E
 title: Additional broker and institution logos still needed
 type: owner
-area: accounts
+pillar: feel
 status: ready
 created: 2026-10-19
 by: Claude

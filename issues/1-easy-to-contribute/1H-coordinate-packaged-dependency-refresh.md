@@ -1,7 +1,8 @@
 ---
 title: Refresh packaged dependencies with matching native wheels and lockfiles
 type: tech
-area: tools
+pillar: build
+size: L
 status: building
 created: 2026-10-23
 by: Codex

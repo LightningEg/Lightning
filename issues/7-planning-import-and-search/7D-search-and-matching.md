@@ -1,7 +1,8 @@
 ---
 title: Search and matching: what is not built
 type: feature
-area: search
+pillar: capture
+size: L
 status: ready
 created: 2026-10-13
 by: unknown (moved from docs/proposals)

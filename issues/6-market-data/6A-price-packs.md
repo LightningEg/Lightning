@@ -1,7 +1,8 @@
 ---
 title: Market data: price packs, collected in the cloud
 type: feature
-area: market
+pillar: own
+size: L
 status: building
 created: 2026-10-05
 by: Claude

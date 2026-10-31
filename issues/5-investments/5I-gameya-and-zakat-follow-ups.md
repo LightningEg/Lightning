@@ -3,7 +3,8 @@ title: Gam'eya and zakat follow-ups: no circle in the sample, no phone breakdown
 type: bug
 look: visual
 severity: medium
-area: investments
+pillar: own
+size: M
 status: new
 created: 2026-10-19
 by: Claude

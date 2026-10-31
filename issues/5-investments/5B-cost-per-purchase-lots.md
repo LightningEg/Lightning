@@ -1,7 +1,8 @@
 ---
 title: Cost per purchase (lots)
 type: feature
-area: investments
+pillar: own
+size: L
 status: blocked
 blocked_by: 5A
 created: 2026-10-05

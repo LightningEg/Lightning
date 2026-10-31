@@ -2,7 +2,8 @@
 was: 8L
 title: Theme materials, selling themes, owner console - what only the owner can do now
 type: feature
-area: appearance
+pillar: feel
+size: L
 status: building
 created: 2026-10-26
 by: Claude

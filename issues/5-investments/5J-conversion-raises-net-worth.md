@@ -3,7 +3,8 @@ title: Converting EGP to dollars raises net worth - the conversion's own rate re
 type: bug
 look: technical
 severity: medium
-area: investments
+pillar: own
+size: M
 status: new
 created: 2026-10-20
 by: Claude

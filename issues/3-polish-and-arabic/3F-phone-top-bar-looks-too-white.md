@@ -1,7 +1,8 @@
 ---
 title: The phone's top bar looks too white to one user
 type: polish
-area: phone
+pillar: feel
+size: S
 status: ready
 created: 2026-10-15
 by: Claude Sonnet 5.5

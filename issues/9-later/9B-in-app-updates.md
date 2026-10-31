@@ -1,7 +1,8 @@
 ---
 title: In-app updates on Windows
 type: feature
-area: desktop
+pillar: everywhere
+size: L
 status: new
 created: 2026-10-19
 by: Claude

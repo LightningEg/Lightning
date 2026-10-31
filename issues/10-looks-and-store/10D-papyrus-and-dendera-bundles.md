@@ -2,7 +2,8 @@
 was: 8T
 title: Papyrus and Dendera bundles need a banner, frame and name designed first
 type: feature
-area: appearance
+pillar: feel
+size: M
 status: ready
 created: 2026-10-27
 by: Claude

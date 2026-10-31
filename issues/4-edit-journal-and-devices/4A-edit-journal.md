@@ -1,7 +1,8 @@
 ---
 title: Edit journal: edit anywhere, one home confirms
 type: feature
-area: devices
+pillar: everywhere
+size: L
 status: building
 created: 2026-10-16
 by: unknown (moved from docs/proposals)

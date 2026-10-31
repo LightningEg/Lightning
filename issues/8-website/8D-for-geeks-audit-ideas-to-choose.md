@@ -1,7 +1,7 @@
 ---
 title: For Geeks audit ideas left for the owner to choose
 type: owner
-area: website
+pillar: reach
 status: ready
 created: 2026-10-21
 by: Claude

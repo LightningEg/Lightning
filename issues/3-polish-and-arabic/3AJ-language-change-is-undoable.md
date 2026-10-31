@@ -3,7 +3,8 @@ title: Changing the language is recorded as an undoable action, so Undo switches
 type: bug
 look: technical
 severity: low
-area: product
+pillar: feel
+size: S
 status: ready
 created: 2026-10-29
 by: Claude

@@ -1,7 +1,8 @@
 ---
 title: Bonus shares and stock splits
 type: feature
-area: investments
+pillar: own
+size: M
 status: blocked
 blocked_by: 5A, 5B
 created: 2026-10-05

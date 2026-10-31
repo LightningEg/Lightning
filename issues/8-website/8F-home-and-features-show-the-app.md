@@ -1,7 +1,8 @@
 ---
 title: Home and Features show the app, not only words
 type: polish
-area: website
+pillar: reach
+size: M
 status: ready
 created: 2026-10-21
 by: Claude

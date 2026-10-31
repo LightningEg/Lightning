@@ -3,7 +3,8 @@ title: The brand audit's page-jump check fails on /welcome only under a parallel
 type: bug
 look: technical
 severity: low
-area: tools
+pillar: build
+size: S
 status: ready
 created: 2026-10-29
 by: Claude Opus 5.5

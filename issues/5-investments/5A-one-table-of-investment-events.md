@@ -1,7 +1,8 @@
 ---
 title: One table of investment events
 type: feature
-area: investments
+pillar: own
+size: L
 status: ready
 created: 2026-10-05
 by: Claude

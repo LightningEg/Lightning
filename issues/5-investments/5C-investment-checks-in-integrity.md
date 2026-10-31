@@ -1,7 +1,8 @@
 ---
 title: Investment checks in the integrity screen
 type: feature
-area: investments
+pillar: own
+size: M
 status: blocked
 blocked_by: 5B
 created: 2026-10-05

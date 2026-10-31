@@ -3,7 +3,8 @@ title: Download shared prices brings nothing: only the exchange-rate pack is pub
 type: bug
 look: technical
 severity: medium
-area: market
+pillar: own
+size: M
 status: ready
 created: 2026-10-16
 by: Claude Sonnet 5.5

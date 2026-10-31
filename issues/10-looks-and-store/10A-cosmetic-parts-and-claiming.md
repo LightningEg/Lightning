@@ -2,7 +2,8 @@
 was: 8J
 title: Cosmetic parts, account-wide claiming and native acceptance
 type: feature
-area: appearance
+pillar: feel
+size: L
 status: building
 created: 2026-10-24
 by: Codex

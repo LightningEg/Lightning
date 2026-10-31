@@ -1,7 +1,8 @@
 ---
 title: Audit public repositories for personal data and security exposure
 type: tech
-area: tools
+pillar: build
+size: M
 status: ready
 created: 2026-10-16
 by: GPT-6

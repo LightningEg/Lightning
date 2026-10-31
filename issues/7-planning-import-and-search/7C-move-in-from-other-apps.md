@@ -1,7 +1,8 @@
 ---
 title: Move in from Wallet, Money Manager and Masareef exports
 type: feature
-area: import
+pillar: capture
+size: L
 status: new
 created: 2026-10-19
 by: Claude

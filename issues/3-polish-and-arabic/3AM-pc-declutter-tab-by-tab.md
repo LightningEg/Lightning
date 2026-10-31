@@ -1,7 +1,8 @@
 ---
 title: PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms
 type: polish
-area: product
+pillar: feel
+size: L
 status: building
 created: 2026-10-30
 by: Claude Opus 5.5

@@ -1,7 +1,8 @@
 ---
 title: Smart suggestions exist but sit 2-3 clicks down - make Needs you the one inbox, widen Looks recurring
 type: feature
-area: planning
+pillar: plan
+size: L
 status: ready
 created: 2026-10-20
 by: Claude

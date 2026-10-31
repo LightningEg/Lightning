@@ -1,7 +1,8 @@
 ---
 title: Cover all backend modules with explicit dependency and wiring contracts
 type: tech
-area: tools
+pillar: build
+size: M
 status: ready
 created: 2026-10-23
 by: Codex

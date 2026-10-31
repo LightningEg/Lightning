@@ -3,7 +3,8 @@ title: The website APK still cannot be downloaded on the owner's phone
 type: bug
 look: technical
 severity: medium
-area: android
+pillar: reach
+size: M
 status: new
 created: 2026-10-23
 by: Codex

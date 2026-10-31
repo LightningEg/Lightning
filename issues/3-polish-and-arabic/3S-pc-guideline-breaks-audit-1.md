@@ -1,7 +1,8 @@
 ---
 title: PC screens break the guideline in 18 places not yet filed - misleading charts, colours off meaning
 type: polish
-area: product
+pillar: feel
+size: L
 status: ready
 created: 2026-10-20
 by: Claude

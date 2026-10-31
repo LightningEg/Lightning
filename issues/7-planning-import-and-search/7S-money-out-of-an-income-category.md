@@ -1,7 +1,7 @@
 ---
 title: Money out filed under an income category counts as spending, not as less income
 type: owner
-area: reporting
+pillar: understand
 status: new
 created: 2026-10-26
 by: Claude

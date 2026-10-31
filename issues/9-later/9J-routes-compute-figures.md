@@ -1,7 +1,8 @@
 ---
 title: Routes still compute figures, some that no screen shows
 type: tech
-area: ui
+pillar: build
+size: M
 status: ready
 created: 2026-10-21
 by: Claude

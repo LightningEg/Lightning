@@ -56,11 +56,16 @@ Report and feedback formats are in [the template catalogue](../templates/README.
 | `tech` | Under the hood: speed, structure, tests, tooling, security; nothing a person sees change |
 | `owner` | Needs the owner: a decision, an account, a key, a check on their PC or phone |
 
-**Area** is where the item belongs, one of a fixed list that `tools/issues.py` checks (`AREAS`): `accounts`, `android`,
-`appearance` (themes and cosmetics), `arabic`, `architecture`, `desktop`, `devices` (sync and pairing), `docs`, `github`
-(contributing through GitHub), `import`, `investments`, `market` (price data), `performance`, `phone`, `planning`
-(budget, reserves, recurring), `product` (whole-app reviews and owner checks), `reporting`, `restore`, `search`, `tools`,
-`transactions`, `ui` (how routes and templates are built), `website`. Add one there and here only when none fits.
+**Pillar** is the part of the product an item serves: one fixed list (`PILLARS` in `tools/issues.py`) shared by issues, reports,
+feedback, docs and GitHub labels. `capture` (adding, importing, bank SMS, rules, search), `plan` (budget, bills, reserves,
+forecast, safe to spend), `understand` (overview, spending, reports, net worth), `own` (accounts, investments, gold, foreign
+currency, loans, prices), `protect` (backup, restore, encryption, privacy), `everywhere` (phone, PC, sync, Android, the
+desktop app), `feel` (Arabic, themes, layout, words, the store), `build` (tools, tests, docs, contributors) and `reach` (the
+website, search, community). Add one only when none fits.
+
+**Size** is the work, and sets the Lightning Coins if the item is posted for contributors: `S` a small self-contained fix (200),
+`M` a change across a few files with tests (500), `L` money logic or a feature (800 or more). An `L` item is split into
+steps (`## 3C1 …`) before it is posted; each step then gets its own size. An owner task has no size.
 
 **Severity**, on every bug and only on bugs: `high` (wrong money or lost data), `medium` (wrong on screen, or a task that
 cannot be done), `low` (it reads or looks off). INDEX shows it after the kind.
@@ -78,7 +83,8 @@ title: Short sentence saying what is wrong or wanted
 type: bug
 look: visual                         # bugs: visual or technical; polish: optional, visual by default
 severity: medium                     # bugs only: high, medium or low
-area: investments                    # one of the areas above
+pillar: own                          # one of the pillars above
+size: M                              # S, M or L; not on an owner task
 status: new
 created: 2026-10-19
 by: Claude Opus 5.5                  # the AI or "owner"; never a person's name

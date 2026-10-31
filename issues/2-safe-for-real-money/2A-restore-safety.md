@@ -1,7 +1,8 @@
 ---
 title: Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic repair
 type: tech
-area: restore
+pillar: protect
+size: L
 status: building
 created: 2026-10-19
 by: Codex

@@ -1,7 +1,8 @@
 ---
 title: Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidence repair
 type: tech
-area: desktop
+pillar: protect
+size: L
 status: ready
 created: 2026-10-19
 by: Claude

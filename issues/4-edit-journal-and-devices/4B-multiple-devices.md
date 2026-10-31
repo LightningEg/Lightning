@@ -1,7 +1,8 @@
 ---
 title: Multiple devices: implementation plan
 type: feature
-area: devices
+pillar: everywhere
+size: L
 status: building
 created: 2026-10-05
 by: unknown (moved from docs/proposals)

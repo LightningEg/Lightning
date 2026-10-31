@@ -1,7 +1,8 @@
 ---
 title: Age of Money and a spending calendar
 type: feature
-area: reporting
+pillar: understand
+size: M
 status: new
 created: 2026-10-19
 by: Claude
