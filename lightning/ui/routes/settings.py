@@ -270,9 +270,10 @@ async def ask_ai(request: Request):
         brief = AskAIService(c).build(AskOptions(
             period, preset=str(form.get("preset", "review")), size=str(form.get("size", "standard")),
             hide_names=str(form.get("hide_names", "")) == "1", question=str(form.get("question", ""))))
-    except (LightningError, ValueError) as exc:
-        message = exc.message if isinstance(exc, LightningError) else str(exc)
-        return Response(message, status_code=400, media_type="text/plain; charset=utf-8")
+    except LightningError as exc:                      # written for the person: a bad choice or an unreadable period
+        return Response(exc.message, status_code=400, media_type="text/plain; charset=utf-8")
+    except ValueError:                                 # anything else is not a message for a page: say so plainly, keep the detail out
+        return Response("Could not prepare the file.", status_code=400, media_type="text/plain; charset=utf-8")
     return Response(brief.text, media_type="text/markdown; charset=utf-8",
                     headers={"Content-Disposition": f'attachment; filename="{brief.filename}"', "Cache-Control": "no-store",
                              "X-Brief-Tokens": str(brief.tokens), "X-Brief-Rows": str(brief.rows_shown),

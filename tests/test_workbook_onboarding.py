@@ -141,6 +141,16 @@ def test_settings_keeps_the_ai_text_off_the_page_and_groups_data_tools(c):
     assert client.post('/settings/ask-ai',data={'period':'all','size':'enormous'}).status_code==400
 
 
+def test_ask_ai_never_shows_an_unexpected_errors_text(c, monkeypatch):
+    from lightning.workflows.ask_ai import AskAIService
+    def boom(self, options):
+        raise ValueError('secret detail at /home/someone/private/path')
+    monkeypatch.setattr(AskAIService,'build',boom)
+    response=TestClient(create_app(c)).post('/settings/ask-ai',data={'period':'all'})
+    assert response.status_code==400 and response.text=='Could not prepare the file.'
+    assert 'secret' not in response.text and '/home/' not in response.text
+
+
 @pytest.mark.parametrize('problem', ['unknown_sheet','missing_sheet','duplicate_heading','duplicate_id','external_link','expanded_limit'])
 def test_malformed_workbook_boundaries(c, tmp_path, monkeypatch, problem):
     from lightning.workflows import workbook_import
