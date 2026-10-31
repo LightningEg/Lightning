@@ -1455,14 +1455,13 @@ def test_settings_prepares_one_owned_ai_analysis_workbook(mohab):
     from zipfile import ZipFile
 
     screen = mohab.b.go("Settings", "Your data")
-    assert screen.shows("Your data", "Export for AI", "All time", "YTD", "Monthly", "Custom",
-                        "Export for AI analysis", "Copy AI prompt", "Edit AI prompt")
+    assert screen.shows("Your data", "Ask an AI", "All time", "YTD", "Monthly", "Custom",
+                        "Copy for AI", "Save as a file", "Hide names", "Digest", "Standard", "Full",
+                        "Review my period", "Where did the money go", "Check my budget",
+                        "What changed my net worth", "My own question", "Export for AI analysis")
     screen = mohab.b.submit(button="All time", action=r"/settings$")
-    assert screen.shows("2026-07-01 to 2027-09-30", "transactions", "investment records")
-    prompt = screen.html.split('data-ai-prompt', 1)[1].split('>', 1)[1].split('</textarea>', 1)[0]
-    prompt = prompt.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
-    assert "lightning-analysis-2026-07-01-to-2027-09-30.xlsx" in prompt
-    assert "Categories used in the exported activity" in prompt
+    assert screen.shows("2026-07-01 to 2027-09-30", "transactions")
+    assert "Rules for your answer" not in screen.html and "data-ai-prompt" not in screen.html
     form = screen.form(button="Export for AI analysis", action=r"/settings/ai-analysis")
     response = mohab.b.client.post(form.action, data=form.fields)
     assert response.status_code == 200
@@ -1479,6 +1478,44 @@ def test_settings_prepares_one_owned_ai_analysis_workbook(mohab):
                  if len(row.findall(f"{{{xml}}}c")) > 6}
         assert {"transfer", "refund", "investment contribution", "investment sale", "dividend",
                 "ownership change", "expense paid externally"} <= roles
+
+
+def test_ask_ai_brief_of_mohabs_year_agrees_with_the_reports_in_every_preset_and_size(mohab):
+    """7W: the file a person pastes into an AI tool says what the reports say, in every preset and size, and hides names on request."""
+    from lightning.workflows.ask_ai import PRESETS, SIZES, money
+
+    mohab.b.go("Settings", "Your data")
+    screen = mohab.b.submit(button="All time", action=r"/settings$")
+    form = screen.form(button="Export for AI analysis", action=r"/settings/ai-analysis")
+    flow = mohab.c.reporting.cash_flow("2026-07-01", "2027-09-30")
+    sizes = {}
+    for preset in PRESETS:
+        for size in SIZES:
+            response = mohab.b.client.post("/settings/ask-ai", data={**form.fields, "preset": preset, "size": size})
+            assert response.status_code == 200, (preset, size, response.text[:200])
+            text = response.text
+            assert f"## Your task: {PRESETS[preset][0]}" in text
+            assert f"| Money in | {money(flow.inflows)} |" in text and f"| Net flow | {money(flow.net)} |" in text
+            bridge = mohab.c.reporting.bridge("2026-07-01", "2027-09-30")
+            assert f"(unexplained difference: {money(bridge.difference)})" in text and bridge.difference == 0
+            assert text.count("```") in (0, 2) and "Rules for your answer" in text
+            sizes[(preset, size)] = int(response.headers["x-brief-tokens"])
+    for preset in PRESETS:
+        assert sizes[(preset, "digest")] < sizes[(preset, "standard")] <= sizes[(preset, "full")]
+    # A year of real use stays a size an AI tool can take in one go; the full brief is what to watch.
+    assert sizes[("review", "digest")] < 5_000 and sizes[("review", "standard")] < 20_000
+    masked = mohab.b.client.post("/settings/ask-ai", data={**form.fields, "preset": "spending", "size": "full", "hide_names": "1"}).text
+    plain_text = mohab.b.client.post("/settings/ask-ai", data={**form.fields, "preset": "spending", "size": "full"}).text
+    # The biggest spenders are named in the brief; every real name in the rows (payees, employers, accounts) is gone when hidden.
+    top = [name for name, _ in mohab.c.reporting.spending_by_counterparty("2026-07-01", "2027-09-30")[:3]]
+    assert top and all(name in plain_text for name in top)
+    lines = mohab.c.reporting.q.ai_analysis_lines("2026-07-01", "2027-09-30")
+    categories = " ".join(mohab.c.categories.display_name(item.id) for item in mohab.c.categories.tree())
+    real = {name for line in lines for name in (line["counterparty"], line["account_name"])
+            if name and len(name) > 3 and name not in categories}      # a category name stays: it is the person's own word
+    assert real
+    assert not sorted(name for name in real if name in masked), "a real name survived hide names"
+    assert "Counterparty 1" in masked and "Names are replaced by labels" in masked
 
 
 # ------------------------------------------------------------------ the same number on every tab, for every period

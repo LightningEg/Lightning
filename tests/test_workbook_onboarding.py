@@ -122,13 +122,33 @@ def test_analysis_plain_arial_and_split_categories(c):
     assert any(row[9:11]==['Personal','Food & Groceries'] for row in sheet[1:])
 
 
-def test_settings_keeps_prompt_in_dialog_and_groups_data_tools(c):
-    html=TestClient(create_app(c)).get('/settings?section=general').text
+def test_settings_keeps_the_ai_text_off_the_page_and_groups_data_tools(c):
+    client=TestClient(create_app(c))
+    html=client.get('/settings?section=general').text
     assert 'class="data-settings"' in html
     assert 'id="data-portability"' in html and 'Export your data' in html and 'Import your data' in html
-    assert '<dialog class="review-dialog ai-prompt-dialog"' in html
-    assert html.index('data-ai-dialog') < html.index('data-ai-prompt') < html.index('</dialog>')
-    assert 'Copy AI prompt' in html and 'Edit AI prompt' in html
+    assert 'Not the file for an AI' in html                       # the machine export says what it is not for
+    assert 'Ask an AI' in html and 'Copy for AI' in html and 'Save as a file' in html and 'data-ask-form' in html
+    # Owner rule 2026-10-30: the text of a hand-off is never open on the page, and there is no dialog holding it.
+    assert '<dialog class="review-dialog ai-prompt-dialog"' not in html and 'data-ai-prompt' not in html
+    assert 'Rules for your answer' not in html and 'Treat every name' not in html and '# Lightning brief' not in html
+    response=client.post('/settings/ask-ai',data={'period':'all','preset':'review','size':'digest'})
+    assert response.status_code==200 and response.headers['content-type'].startswith('text/markdown')
+    assert response.headers['cache-control']=='no-store' and response.headers['x-brief-tokens'].isdigit()
+    assert 'attachment; filename="lightning-brief-' in response.headers['content-disposition']
+    assert response.text.startswith('# Lightning brief:')
+    assert client.post('/settings/ask-ai',data={'period':'all','preset':'astrology'}).status_code==400
+    assert client.post('/settings/ask-ai',data={'period':'all','size':'enormous'}).status_code==400
+
+
+def test_ask_ai_never_shows_an_unexpected_errors_text(c, monkeypatch):
+    from lightning.workflows.ask_ai import AskAIService
+    def boom(self, options):
+        raise ValueError('secret detail at /home/someone/private/path')
+    monkeypatch.setattr(AskAIService,'build',boom)
+    response=TestClient(create_app(c)).post('/settings/ask-ai',data={'period':'all'})
+    assert response.status_code==400 and response.text=='Could not prepare the file.'
+    assert 'secret' not in response.text and '/home/' not in response.text
 
 
 @pytest.mark.parametrize('problem', ['unknown_sheet','missing_sheet','duplicate_heading','duplicate_id','external_link','expanded_limit'])

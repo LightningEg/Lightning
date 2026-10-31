@@ -14,6 +14,7 @@ from ..web import container, redirect, render
 from lightning.categories.domain import Movement, CategoryFamily
 from lightning.core.dates import month_of
 from lightning.workflows.ai_analysis import AIAnalysisService
+from lightning.workflows.ask_ai import PRESETS, SIZES, AskAIService, AskOptions
 from ..periods import parse_period
 
 router = APIRouter(prefix="/settings")
@@ -90,17 +91,13 @@ async def settings_page(request: Request):
     if section == "zakat" and not zakat_on:
         return redirect("/settings", "Zakat is off. Turn it on in Settings.")
     zakat_settings = c.zakat.settings() if section == "zakat" else None
-    ai_period = ai_preview = ai_prompt = None
+    ai_period = ai_preview = None
     if section == "general":
         try:
             ai_period = parse_period(request.query_params, today(), c.reporting.first_activity_date())
         except LightningError:
             ai_period = parse_period({}, today(), c.reporting.first_activity_date())
-        ai_service = AIAnalysisService(c)
-        ai_snapshot = ai_service._snapshot(ai_period, include_workbook_rows=False)
-        ai_preview = ai_snapshot["preview"]
-        ai_filename = f"lightning-analysis-{ai_period.start_text}-to-{ai_period.end_text}.xlsx"
-        ai_prompt = ai_service.prompt(ai_period, ai_filename, ai_snapshot)
+        ai_preview = AIAnalysisService(c).preview(ai_period)
     currency_registry = c.currencies
     currency_suggestions = currency_registry.suggestions()
     currency_tab = "rates" if request.query_params.get("tab") == "rates" else "currencies"
@@ -117,7 +114,7 @@ async def settings_page(request: Request):
                   emergency_basis=c.budgets.emergency_basis(),
                   manual_income=c.settings.get("budget_manual_monthly_income") or "",
                   income_from_recurring=c.settings.get(INCOME_FROM_RECURRING) == "1",
-                  ai_period=ai_period, ai_preview=ai_preview, ai_prompt=ai_prompt,
+                  ai_period=ai_period, ai_preview=ai_preview, ai_presets=PRESETS, ai_sizes=SIZES,
                   ai_month=month_of(ai_period.end) if ai_period else month_of(today()),
                   current_month=month_of(today()), health_limits=health_limits,
                   health_fund=health_fund, zakat_settings=zakat_settings, zakat_on=zakat_on,
@@ -261,6 +258,26 @@ async def save_locale(request: Request):
     response.set_cookie("lightning_ui_locale", locale, max_age=60 * 60 * 24 * 365, httponly=False,
                         secure=request.url.scheme == "https", samesite="lax", path="/")
     return response
+
+
+@router.post("/ask-ai")
+async def ask_ai(request: Request):
+    """The brief for an AI tool, built here from this profile's own figures. The page copies or saves it; nothing is sent."""
+    c = container(request)
+    try:
+        form = await request.form()
+        period = parse_period(form, today(), c.reporting.first_activity_date())
+        brief = AskAIService(c).build(AskOptions(
+            period, preset=str(form.get("preset", "review")), size=str(form.get("size", "standard")),
+            hide_names=str(form.get("hide_names", "")) == "1", question=str(form.get("question", ""))))
+    except LightningError as exc:                      # written for the person: a bad choice or an unreadable period
+        return Response(exc.message, status_code=400, media_type="text/plain; charset=utf-8")
+    except ValueError:                                 # anything else is not a message for a page: say so plainly, keep the detail out
+        return Response("Could not prepare the file.", status_code=400, media_type="text/plain; charset=utf-8")
+    return Response(brief.text, media_type="text/markdown; charset=utf-8",
+                    headers={"Content-Disposition": f'attachment; filename="{brief.filename}"', "Cache-Control": "no-store",
+                             "X-Brief-Tokens": str(brief.tokens), "X-Brief-Rows": str(brief.rows_shown),
+                             "X-Brief-Rows-Total": str(brief.rows_total)})
 
 
 @router.post("/ai-analysis")
