@@ -37,7 +37,7 @@ numbered as the item cites them.
 
 The owner then asked why the app is slow and whether it needs another language than Python. The timing, the
 answer (no rewrite: most of the wait is the phone's browser reloading the whole page on each tap) and the steps are
-[IT-3AO](../../issues/3-polish-and-arabic/3AO-phone-feels-slow-full-page-reloads.md).
+IT-3AO ([the item as finished](https://github.com/LightningEg/Lightning/blob/6600e86a2279a0b2b8b97df8557d28f3a22f123e/issues/3-polish-and-arabic/3AO-phone-feels-slow-full-page-reloads.md); regression test `tests/test_phone_nav_browser.py`).
 
 ## Validation and limits
 
@@ -46,3 +46,9 @@ back gesture, dark and paid themes, a profile with years of data. Tap counts sta
 choice and scroll. Figures counted by a pattern, so approximate. No code was changed.
 
 ## Dated follow-ups
+
+- **2026-11-01, IT-3AO built and closed** (owner: "fix it then", then "nevermind measuring on a real phone, finish the
+  rest"). Every phone page now swaps its content instead of reloading (`lightning/ui/static/phone-nav.js`): a tab switch
+  at 4x CPU went from about 1.0 s to 0.25-0.3 s, and on all 30 phone pages a swap shows the same content as a full load.
+  Settings, categories, payer names and aliases are read once per request; two forced layouts at load are gone.
+  Tests: `tests/test_phone_nav_browser.py`, `tests/test_settings_memo.py`, `tests/test_phone_sheets_browser.py`.
