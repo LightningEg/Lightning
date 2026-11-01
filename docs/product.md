@@ -43,7 +43,7 @@ There are no user accounts. Access is by **profile password** (one profile = one
 
 **In scope:** accounts and cash; transactions and transfers; categories, counterparties and rules; budgets and reserves; scheduled bills, income and loans; certificates and gam'eya; investments with prices; physical gold; FX; zakat estimate; CSV/SMS import; reports and exports; encrypted profiles, backups; multi-device sync.
 
-**Out of scope (owner decisions):** credit-card and loan-interest accounting, money owed *to* you, any functional paywall, comparison pages naming other apps on the website, cloud accounts.
+**Out of scope (owner decisions):** credit-card and loan-interest accounting, money owed *to* you, any functional paywall, comparison pages naming a product on the website (a kind of tool may be compared, with Low, Medium, High and evidence: guideline B10), cloud accounts.
 
 ## 6. Features
 
