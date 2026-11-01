@@ -69,8 +69,11 @@
     else fresh.textContent = `{\n${node.textContent}\n}`;  // a block: its names do not clash with the last visit's
     node.replaceWith(fresh);
   };
+  // The place on the page, noted as it scrolls: reading scrollY as the page leaves would force a layout (IT-3AO3).
+  let scrolled = 0;
+  window.addEventListener("scroll", () => { scrolled = window.scrollY; }, { passive: true });
   const keepScroll = () => {
-    try { history.replaceState({ ...(history.state || {}), lightningScroll: window.scrollY }, ""); } catch (error) { /* full */ }
+    try { history.replaceState({ ...(history.state || {}), lightningScroll: scrolled }, ""); } catch (error) { /* full */ }
   };
 
   const swap = async (url, { push = true, scroll = 0 } = {}) => {
@@ -122,6 +125,7 @@
     run.forEach(runAgain);
     document.dispatchEvent(new CustomEvent("lightning:page", { detail: { root: main } }));
     window.scrollTo({ top: scroll, behavior: "instant" });
+    scrolled = scroll;
     if (!main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");
     main.focus({ preventScroll: true });
   };
@@ -175,5 +179,5 @@
   // Leaving the app's page for good (a full load) keeps the place to come back to.
   window.addEventListener("pagehide", keepScroll);
   const back = history.state?.lightningScroll;
-  if (back) requestAnimationFrame(() => window.scrollTo({ top: back, behavior: "instant" }));
+  if (back) requestAnimationFrame(() => { window.scrollTo({ top: back, behavior: "instant" }); scrolled = back; });
 })();

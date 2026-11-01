@@ -34,8 +34,9 @@ Chromium's CPU throttle, a fair stand-in for a mid-range Android phone (the serv
 
 Why: every tap is a full page load (`no-store`), so the WebView parses the HTML again, recalculates every style
 (style recalculation is the biggest single cost: about 60-135 ms a load at x4) and runs seven scripts again
-(`app.js` alone is 165 KB), even when only the list under the tab bar changes. In Arabic each page also parses
-`ui-ar.js`, 264 KB of translations, so an Arabic user pays about twice the script cost. On the phone Python also runs slower
+(`app.js` alone is 165 KB), even when only the list under the tab bar changes. (Corrected 2026-11-01: the 264 KB
+Arabic `ui-ar.js` costs only 3-5 ms a load at 4x, its compiled code is cached; an earlier line here said Arabic
+doubled the script cost, which a trace disproved.) On the phone Python also runs slower
 (Chaquopy on ARM), so the 100-200 ms server time grows too, but it stays the smaller share.
 
 **Answer to the owner: no rewrite.** A faster language would shrink the smallest share of the wait. The same Python
@@ -57,10 +58,10 @@ Measure on a device, then the cheapest change with the biggest effect first; `to
 `evidence/flows.py` before and after each step; page text identical before and after (perf-check skill, step 5).
 
 ## 3AO3 Lighter pages for the browser · M
-Measured 2026-11-01 at 4x: leaving out the PC's rules from the phone bundle (526 KB, `style.css` included) or `app.js`
-alone barely changed a full load; the cost is building a whole document, which 3AO2 now avoids. Left for the first
-load and the pages that still load whole: Arabic text translated on the server so `ui-ar.js` (264 KB) is not parsed on
-every page, and the forced layouts while the page loads (about 55 ms at 4x).
+Done 2026-11-01. A trace showed two forced layouts on every full load (about 40-50 ms at 4x): the keyboard check in
+`app.js` measured the viewport before the first paint, and `phone-nav.js` read the scroll position as the page left;
+both now read at a cheap moment. Leaving out the PC's rules from the phone bundle or `app.js` barely changed a full
+load, and `ui-ar.js` costs 3-5 ms, so neither was worth changing.
 
 ## 3AO4 Fewer queries on the heaviest pages · M
 Done but for Spending, about 155 ms against the perf-check skill's 150: most of what is left builds its two money-flow

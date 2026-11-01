@@ -2996,5 +2996,6 @@ document.addEventListener('change', (event) => {
   viewport.addEventListener("resize", sync);
   document.addEventListener("focusin", () => { tallest = Math.max(tallest, viewport.height); sync(); });
   document.addEventListener("focusout", () => setTimeout(sync, 0));
-  sync();
+  // After the first paint: measuring the viewport while the page is still loading forces an early layout (IT-3AO3).
+  requestAnimationFrame(() => setTimeout(sync, 0));
 })();
