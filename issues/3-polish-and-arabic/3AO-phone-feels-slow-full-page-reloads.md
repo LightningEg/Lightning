@@ -34,7 +34,8 @@ Chromium's CPU throttle, a fair stand-in for a mid-range Android phone (the serv
 
 Why: every tap is a full page load (`no-store`), so the WebView parses the HTML again, recalculates every style
 (style recalculation is the biggest single cost: about 60-135 ms a load at x4) and runs seven scripts again
-(`app.js` alone is 165 KB), even when only the list under the tab bar changes. On the phone Python also runs slower
+(`app.js` alone is 165 KB), even when only the list under the tab bar changes. In Arabic each page also parses
+`ui-ar.js`, 264 KB of translations, so an Arabic user pays about twice the script cost. On the phone Python also runs slower
 (Chaquopy on ARM), so the 100-200 ms server time grows too, but it stays the smaller share.
 
 **Answer to the owner: no rewrite.** A faster language would shrink the smallest share of the wait. The same Python
@@ -56,7 +57,8 @@ address, ‹ and the phone's back gesture kept right; tab pages are fetched when
 already load this way. Done when a tab switch at x4 is under 300 ms.
 
 ## 3AO3 Lighter pages for the browser · M
-Scripts `defer`red and only what the page uses; phone CSS without the PC's rules or unused theme parts; no deep selectors
+Scripts `defer`red and only what the page uses; Arabic text translated on the server so `ui-ar.js` is not
+parsed on every page; phone CSS without the PC's rules or unused theme parts; no deep selectors
 that make every style recalculation expensive. Done when parse and scripts at x4 is under 250 ms on every tab.
 
 ## 3AO4 Fewer queries on the heaviest pages · M
