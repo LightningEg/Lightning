@@ -387,11 +387,11 @@ class SmsImportService:
                 if count >= QUIET_AFTER and sender not in banks}
 
     def unread(self) -> list[dict]:
-        """Messages with an amount that no rule could read, newest first. A message kept before the offer filter
-        (2026-11-01), or from a sender quieted since, is left out."""
+        """Messages with an amount that no rule could read, newest first. An offer kept before the offer filter
+        (2026-11-01), or a message from a sender quieted since, is left out."""
         quiet = self.quiet_senders()
         return [m for m in reversed(self._json(UNREAD_KEY, []))
-                if m.get("sender", "") not in quiet and (m.get("reason") or looks_like_money(m.get("text", "")))]
+                if m.get("reason") or (m.get("sender", "") not in quiet and not is_offer(m.get("text", "")))]
 
     def dismiss(self, message_id: str) -> None:
         """Remove a kept message. Its sender counts towards being quieted, unless it is a bank's."""
