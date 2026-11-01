@@ -40,6 +40,9 @@ public final class MainActivity extends Activity {
     static volatile boolean reminderEnabled;
     private static final AtomicBoolean journalSyncRunning = new AtomicBoolean();
     private WebView web;
+    private FrameLayout root;
+    private View trouble;  // our own "starting again" screen, in place of Android's "Web page not available"
+    private boolean failedNow;  // the page about to finish is the one that failed
     private Uri origin;
     private volatile boolean serverReady;
     private boolean openSms;  // a message was shared in before the pages were ready
@@ -193,13 +196,21 @@ public final class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String finishedUrl) {
                 if (ours(Uri.parse(finishedUrl))) checkReminders();
+                if (failedNow) failedNow = false;  // the failed load finishing: our screen stays
+                else if (ours(Uri.parse(finishedUrl))) hideTrouble();  // a page loaded: back to the app
             }
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                if (request.isForMainFrame() && ours(request.getUrl())) checkServer("page did not load");
+                if (request.isForMainFrame() && ours(request.getUrl())) {
+                    failedNow = true;
+                    view.stopLoading();
+                    showTrouble();
+                    checkServer("page did not load");
+                }
             }
         });
+        root = frame;
         frame.removeAllViews();
         frame.addView(web);
         web.loadUrl(url);
@@ -258,6 +269,76 @@ public final class MainActivity extends Activity {
         new Thread(() -> {
             if (!answers(current)) runOnUiThread(() -> restartApp(why));
         }, "lightning-server-check").start();
+    }
+
+    /** Lightning's own screen when a page cannot load: the lockup, one calm line, a moving bar and Try again. Drawn
+     *  by the app, not the server, so it shows even when the server is down. Arabic when the app is in Arabic. */
+    private void showTrouble() {
+        if (root == null || trouble != null) return;
+        String cookies = origin == null ? null : CookieManager.getInstance().getCookie(origin.toString());
+        boolean arabic = cookies != null && cookies.contains("lightning_ui_locale=ar");
+        float dp = getResources().getDisplayMetrics().density;
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setGravity(android.view.Gravity.CENTER);
+        box.setBackgroundColor(0xFFF5F8F7);
+        box.setPadding((int) (32 * dp), 0, (int) (32 * dp), 0);
+        box.setClickable(true);  // nothing behind it takes a tap
+        ImageView lockup = new ImageView(this);
+        lockup.setImageResource(R.drawable.lightning_lockup);
+        lockup.setContentDescription("Lightning");
+        box.addView(lockup, new LinearLayout.LayoutParams((int) (226 * dp), (int) (56 * dp)));
+        TextView title = new TextView(this);
+        title.setText(arabic ? "Lightning بيفتح من جديد" : "Lightning is starting again");
+        title.setTextColor(0xFF0D2233);  // Ink
+        title.setTextSize(20);
+        title.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        title.setGravity(android.view.Gravity.CENTER);
+        LinearLayout.LayoutParams titleAt = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        titleAt.topMargin = (int) (32 * dp);
+        box.addView(title, titleAt);
+        TextView line = new TextView(this);
+        line.setText(arabic ? "فلوسك وبياناتك في أمان على الموبايل ده. ثواني وهيرجع."
+                : "Your money and data are safe on this phone. It will be back in a moment.");
+        line.setTextColor(0xFF304A5C);  // Ink 2
+        line.setTextSize(15);
+        line.setGravity(android.view.Gravity.CENTER);
+        LinearLayout.LayoutParams lineAt = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lineAt.topMargin = (int) (8 * dp);
+        box.addView(line, lineAt);
+        ProgressBar moving = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        moving.setIndeterminate(true);
+        moving.setIndeterminateTintList(ColorStateList.valueOf(0xFF0A2442));  // Nile
+        moving.setProgressBackgroundTintList(ColorStateList.valueOf(0xFFE6EFEC));  // Track
+        LinearLayout.LayoutParams barAt = new LinearLayout.LayoutParams((int) (120 * dp), (int) (4 * dp));
+        barAt.topMargin = (int) (28 * dp);
+        box.addView(moving, barAt);
+        android.widget.Button again = new android.widget.Button(this);
+        again.setText(arabic ? "حاول تاني" : "Try again");
+        again.setAllCaps(false);
+        again.setTextColor(0xFFFFFFFF);
+        again.setTextSize(16);
+        android.graphics.drawable.GradientDrawable pill = new android.graphics.drawable.GradientDrawable();
+        pill.setColor(0xFF0A2442);  // Primary: Nile
+        pill.setCornerRadius(24 * dp);
+        again.setBackground(pill);
+        again.setOnClickListener(tap -> {
+            hideTrouble();
+            if (web != null && origin != null) web.loadUrl(origin.toString());
+        });
+        LinearLayout.LayoutParams againAt = new LinearLayout.LayoutParams((int) (200 * dp), (int) (48 * dp));
+        againAt.topMargin = (int) (32 * dp);
+        box.addView(again, againAt);
+        trouble = box;
+        root.addView(box, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+    }
+
+    private void hideTrouble() {
+        if (root != null && trouble != null) root.removeView(trouble);
+        trouble = null;
     }
 
     private static boolean answers(Uri origin) {
