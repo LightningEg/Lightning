@@ -833,9 +833,12 @@ document.addEventListener("submit", (event) => {
 });
 
 // Select rows, use the right-click menu, and soft-delete one or many transactions.
-const phoneMerge = document.getElementById("phone-merge-selected");
-const phoneBulk = document.getElementById("phone-bulk");
-if (phoneBulk) {
+// C08.5 selection bar. Runs again on a swapped phone page (lightning:page below).
+const initPhoneBulk = () => {
+  const phoneMerge = document.getElementById("phone-merge-selected");
+  const phoneBulk = document.getElementById("phone-bulk");
+  if (!phoneBulk || phoneBulk.dataset.bulkReady) return;
+  phoneBulk.dataset.bulkReady = "1";
   const boxes = [...document.querySelectorAll('.transaction-select[form="phone-bulk"]:not(:disabled)')];
   const all = document.getElementById("phone-select-visible");
   const phoneCount = phoneBulk.querySelector(".phone-select-count");
@@ -863,7 +866,8 @@ if (phoneBulk) {
     if (!boxes.some((box) => box.checked)) event.preventDefault();
   });
   updateMerge();
-}
+};
+initPhoneBulk();
 const ledger = document.querySelector(".ledger");
 if (ledger) {
   const menu = document.getElementById("transaction-context-menu");
@@ -1129,7 +1133,9 @@ document.querySelectorAll(".category-input").forEach((category) => {
 });
 
 // For brokerage trades, owner attribution is independent from the Counterparty field.
-document.querySelectorAll(".investment-entry-form").forEach((form) => {
+const initInvestmentEntry = (root = document) => root.querySelectorAll(".investment-entry-form").forEach((form) => {
+  if (form.dataset.pageReady) return;
+  form.dataset.pageReady = "1";
   const flag = form.querySelector('[name="is_others"]');
   const field = form.querySelector(".investment-owner-field");
   if (!flag || !field) return;
@@ -1137,7 +1143,10 @@ document.querySelectorAll(".investment-entry-form").forEach((form) => {
   flag.addEventListener("change", sync);
   sync();
 });
-document.querySelectorAll(".investment-ownership-form").forEach((form) => {
+initInvestmentEntry();
+const initInvestmentOwnership = (root = document) => root.querySelectorAll(".investment-ownership-form").forEach((form) => {
+  if (form.dataset.pageReady) return;
+  form.dataset.pageReady = "1";
   const flag = form.querySelector('[name="is_others"]');
   const field = form.querySelector(".investment-owner-field");
   if (!flag || !field) return;
@@ -1145,6 +1154,7 @@ document.querySelectorAll(".investment-ownership-form").forEach((form) => {
   flag.addEventListener("change", sync);
   sync();
 });
+initInvestmentOwnership();
 
 // CSV rows use the same Whom rule as the register when custody is selected.
 document.querySelectorAll(".import-category").forEach((category) => {
@@ -1289,7 +1299,9 @@ if (moneyPopup) new MutationObserver(() => moneyPopup.querySelectorAll(moneySele
 //  - an owned account as counterparty -> transfer: no category is needed
 //  - a known counterparty -> fill its most recent category when available
 // Show the per-unit price implied by the all-in total on investment trades.
-document.querySelectorAll(".trade-total").forEach((total) => {
+const initTradeTotals = (root = document) => root.querySelectorAll(".trade-total").forEach((total) => {
+  if (total.dataset.pageReady) return;
+  total.dataset.pageReady = "1";
   const form = total.closest("form");
   const quantity = form?.querySelector(".quantity-input");
   const preview = form?.querySelector(".unit-price-preview");
@@ -1322,10 +1334,13 @@ document.querySelectorAll(".trade-total").forEach((total) => {
   syncFeeField();
   update();
 });
+initTradeTotals();
 
 // Inline brokerage activity: pick an instrument, then sign units to buy or sell.
-const tradeCatalogueNode = document.getElementById("trade-instrument-catalogue");
-if (tradeCatalogueNode) {
+const initTradeCatalogue = () => {
+  const tradeCatalogueNode = document.getElementById("trade-instrument-catalogue");
+  if (!tradeCatalogueNode || tradeCatalogueNode.dataset.pageReady) return;
+  tradeCatalogueNode.dataset.pageReady = "1";
   const instruments = JSON.parse(tradeCatalogueNode.textContent || "[]");
   const form = document.querySelector(".investment-entry-form");
   const search = document.getElementById("trade-instrument-search");
@@ -1542,20 +1557,26 @@ if (tradeCatalogueNode) {
   });
   if (selected) { search.value = selectedLabel.value || `${selected.name} · ${selected.ticker}${selected.exchange ? ` · ${selected.exchange}` : ""}`; }
   sync();
-}
+};
+initTradeCatalogue();
 
 // Only physical gold uses a karat selector; funds have fund units, not gold purity.
-const investmentClass = document.getElementById("class_code");
-const karatField = document.getElementById("karat-field");
-if (investmentClass && karatField) {
+const initKarat = () => {
+  const investmentClass = document.getElementById("class_code");
+  const karatField = document.getElementById("karat-field");
+  if (!investmentClass || !karatField || investmentClass.dataset.pageReady) return;
+  investmentClass.dataset.pageReady = "1";
   const syncKarat = () => { karatField.hidden = investmentClass.value !== "GOLD"; };
   investmentClass.addEventListener("change", syncKarat);
   syncKarat();
-}
+};
+initKarat();
 
 // Investment picker: filter the bundled EGX stock and Thndr fund catalogue.
-const catalogueNode = document.getElementById("instrument-catalogue");
-if (catalogueNode) {
+const initInstrumentCatalogue = () => {
+  const catalogueNode = document.getElementById("instrument-catalogue");
+  if (!catalogueNode || catalogueNode.dataset.pageReady) return;
+  catalogueNode.dataset.pageReady = "1";
   const catalogue = JSON.parse(catalogueNode.textContent || "[]");
   const search = document.getElementById("instrument-search");
   const results = document.getElementById("instrument-results");
@@ -1578,11 +1599,14 @@ if (catalogueNode) {
   };
   search.addEventListener("input",render); search.addEventListener("focus",render);
   document.addEventListener("click",(event)=>{if(!event.target.closest(".instrument-picker")){results.hidden=true;search.setAttribute("aria-expanded","false");}});
-}
+};
+initInstrumentCatalogue();
 
 // Category picker: one alphabetized header per activity, with broad categories nested below.
-const categoryCatalogueNode = document.getElementById("category-catalogue");
-if (categoryCatalogueNode) {
+const initCategoryCatalogue = () => {
+  const categoryCatalogueNode = document.getElementById("category-catalogue");
+  if (!categoryCatalogueNode || categoryCatalogueNode.dataset.pageReady) return;
+  categoryCatalogueNode.dataset.pageReady = "1";
   const categories = JSON.parse(categoryCatalogueNode.textContent || "[]");
   const closeCategoryResults = (input, results) => {
     results.hidden = true;
@@ -1693,7 +1717,8 @@ if (categoryCatalogueNode) {
       document.querySelectorAll(".category-results").forEach((results) => { results.hidden = true; });
     }
   });
-}
+};
+initCategoryCatalogue();
 
 // How alike two spellings are, 0 to 1 (1 − edit distance / longer length).
 const similar = (a, b) => {
@@ -1811,7 +1836,9 @@ if (ledger) {
 }
 
 // Existing investment transactions save a complete valid edit on field commit.
-document.querySelectorAll("form[data-autosave-existing]").forEach((form) => {
+const initAutosaveExisting = (root = document) => root.querySelectorAll("form[data-autosave-existing]").forEach((form) => {
+  if (form.dataset.autosaveReady) return;
+  form.dataset.autosaveReady = "1";
   const status = form.querySelector(".inline-save-status");
   let saved = new URLSearchParams(new FormData(form)).toString(), busy = false;
   const save = async () => {
@@ -1834,10 +1861,13 @@ document.querySelectorAll("form[data-autosave-existing]").forEach((form) => {
     });
   });
 });
+initAutosaveExisting();
 
 // Budget: one-click averages, per-category overrides, and typing means manual.
-const budgetForm = document.querySelector("#budget-editor-form");
-if (budgetForm) {
+const initBudgetEditor = () => {
+  const budgetForm = document.querySelector("#budget-editor-form");
+  if (!budgetForm || budgetForm.dataset.editorReady) return;
+  budgetForm.dataset.editorReady = "1";
   const setMode = (row, value) => {
     const mode = row.querySelector(".budget-mode");
     const amount = row.querySelector(".budget-amount");
@@ -1860,22 +1890,27 @@ if (budgetForm) {
       budgetForm.querySelectorAll("tbody tr").forEach((row) => setMode(row, button.dataset.budgetAll));
     });
   });
-}
+};
+initBudgetEditor();
 
 // Account form: show where the chosen type appears on the dashboard.
-const typeSelect = document.getElementById("account_type");
-if (typeSelect) {
+const initAccountType = () => {
+  const typeSelect = document.getElementById("account_type");
+  if (!typeSelect || typeSelect.dataset.groupsReady || typeSelect.closest("#app-popup-content")) return;
+  typeSelect.dataset.groupsReady = "1";
   const groups = JSON.parse(typeSelect.dataset.groups || "{}");
   const target = document.getElementById("group_name");
   typeSelect.addEventListener("change", () => {
     if (target) target.textContent = groups[typeSelect.value] || "";
   });
-}
+};
+initAccountType();
 
 // Bank import: filter the canonical Counterparty chooser as the user types.
-document.querySelectorAll("[data-counterparty-filter]").forEach((search) => {
+const initCounterpartyFilters = (root = document) => root.querySelectorAll("[data-counterparty-filter]").forEach((search) => {
   const select = document.getElementById(search.dataset.counterpartyFilter);
-  if (!select) return;
+  if (!select || search.dataset.filterReady) return;
+  search.dataset.filterReady = "1";
   search.addEventListener("input", () => {
     const query = search.value.trim().toLocaleLowerCase();
     Array.from(select.options).forEach((option) => {
@@ -1884,9 +1919,12 @@ document.querySelectorAll("[data-counterparty-filter]").forEach((search) => {
     });
   });
 });
+initCounterpartyFilters();
 
 // Currency settings: filter the full ISO list as the user types.
-document.querySelectorAll("[data-currency-search]").forEach((search) => {
+const initCurrencySearch = (root = document) => root.querySelectorAll("[data-currency-search]").forEach((search) => {
+  if (search.dataset.currencyReady) return;
+  search.dataset.currencyReady = "1";
   const list = search.closest(".currency-settings")?.querySelector("[data-currency-list]");
   const empty = list?.querySelector("[data-currency-empty]");
   const filter = () => {
@@ -1902,6 +1940,7 @@ document.querySelectorAll("[data-currency-search]").forEach((search) => {
   search.addEventListener("input", filter);
   filter();
 });
+initCurrencySearch();
 
 // One contextual dialog for server-rendered forms and transaction details.
 (() => {
@@ -2884,6 +2923,19 @@ document.addEventListener("lightning:page", (event) => {
   initMonthPickers(root);
   initHoldToSelect(root);
   initAsOf(root);
+  initPhoneBulk();
+  initAutosaveExisting(root);
+  initBudgetEditor();
+  initAccountType();
+  initCounterpartyFilters(root);
+  initCurrencySearch(root);
+  initInvestmentEntry(root);
+  initInvestmentOwnership(root);
+  initTradeTotals(root);
+  initTradeCatalogue();
+  initKarat();
+  initInstrumentCatalogue();
+  initCategoryCatalogue();
 });
 
 // Setup, "Other currencies you hold": a type-and-pick that adds removable chips; each chip submits its code.

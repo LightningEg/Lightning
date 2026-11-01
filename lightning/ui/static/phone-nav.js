@@ -2,22 +2,24 @@
    next page and swaps only what changes - the app bar, the content and the tab bar - instead of loading the whole
    document again. On a phone's CPU a full load costs 400-600 ms of parsing, styling and starting scripts; a swap
    about 100 (Audit 13). Scripts, styles, the sheet and the search bar stay; the new content gets its set-up through
-   the "lightning:page" event (app.js, phone-fields.js) or the observers that already watch the page.
-   Anything this cannot do safely loads the normal way: another origin, a download, a new tab, a page that brings its
-   own script, a page whose set-up still runs only on a full load (LOADS_WHOLE), or a different frame (language,
-   theme, the profile gate). No financial logic: the server still builds every page. */
+   the "lightning:page" event (app.js, phone-fields.js) or the observers that already watch the page, and the page's
+   own scripts run again - only those carrying the nonce of the response they came in, as on a full load.
+   Anything this cannot do safely loads the normal way: another origin, a download, a new tab, a page script that
+   listens on the whole document, a page whose set-up still runs only on a full load (LOADS_WHOLE), or a different
+   frame (language, theme, the profile gate). No financial logic: the server still builds every page. */
 (() => {
   const html = document.documentElement;
   if (!html.classList.contains("phone") || !window.fetch || !window.DOMParser || !window.history?.pushState) return;
 
   // Content whose script is bound once at load and not run again on a swap; such a page loads whole.
+  // The PC register, statement import review, first-run setup and the profile gate: none is a phone page you tap into.
   const LOADS_WHOLE = [
-    "script", "#phone-bulk", "#phone-merge-selected", "#page-jump", "[data-fullscreen-toggle]", ".ledger", ".category-input",
-    ".investment-entry-form", ".investment-ownership-form", ".import-category", ".import-transfer-suggestion", ".trade-total",
-    "#trade-instrument-catalogue", "#class_code", "#karat-field", "#instrument-catalogue", "#category-catalogue",
-    "form[data-autosave-existing]", "#budget-editor-form", "#account_type", "[data-counterparty-filter]", "[data-currency-search]",
-    "select[data-chip-add]", "input[data-strength]", "[data-target-save]", ".row-field-unit", ".sc-unit",
+    "#page-jump", "[data-fullscreen-toggle]", ".ledger", ".category-input", ".import-category", ".import-transfer-suggestion",
+    "select[data-chip-add]", "input[data-strength]",
   ].join(", ");
+  // Page scripts from a file that may run again on a swapped page: each binds only to its own content.
+  const SAFE_SRC = /^\/static\/(reserve-autosave|ask-ai|import-drop)\.js$/;
+  const OWN_NONCE = document.currentScript?.nonce || "";
   const REGIONS = ["header.phone-appbar", "main.phone-content", "nav.phone-tabbar"];
   // Downloads and files (as the busy toast's leaves() in app.js), static files and the profile gate.
   const ELSEWHERE = /^\/(static|exports|samples|profiles)(\/|$)/;
@@ -38,6 +40,35 @@
   const sameDocument = (url) => url.pathname + url.search === here();
   const canSwap = (url) => url.origin === location.origin && !ELSEWHERE.test(url.pathname);
   const loadWhole = (url) => { window.location.assign(url); };
+  const nonceOf = (response) => /'nonce-([^']+)'/.exec(response.headers.get("content-security-policy") || "")?.[1] || "";
+  // The page scripts to run again, in order, or null when the page must load whole. A script without the response's
+  // nonce would not have run on a full load either, so it is dropped; a data island (JSON) stays as it is.
+  const scriptsOf = (parts, nonce) => {
+    const run = [];
+    for (const [, next] of parts) {
+      for (const node of next.querySelectorAll("script")) {
+        const type = (node.getAttribute("type") || "").trim().toLowerCase();
+        if (type && type !== "text/javascript") {
+          if (type === "module") return null;
+          continue;
+        }
+        if (!nonce || node.getAttribute("nonce") !== nonce) { node.remove(); continue; }
+        const src = node.getAttribute("src");
+        if (src ? !SAFE_SRC.test(new URL(src, location.href).pathname)
+            : /\b(document|window)\.addEventListener\b/.test(node.textContent)) return null;
+        run.push(node);
+      }
+    }
+    return run;
+  };
+  const runAgain = (node) => {
+    const fresh = document.createElement("script");
+    fresh.nonce = OWN_NONCE;
+    const src = node.getAttribute("src");
+    if (src) { fresh.src = src; fresh.async = false; }
+    else fresh.textContent = `{\n${node.textContent}\n}`;  // a block: its names do not clash with the last visit's
+    node.replaceWith(fresh);
+  };
   const keepScroll = () => {
     try { history.replaceState({ ...(history.state || {}), lightningScroll: window.scrollY }, ""); } catch (error) { /* full */ }
   };
@@ -52,10 +83,12 @@
     early = null;
     let doc;
     let address;
+    let nonce = "";
     try {
       const response = await (head || fetch(url, { signal: ask.signal, credentials: "same-origin" }));
       if (!response.ok || !(response.headers.get("content-type") || "").includes("text/html")) throw new Error("not a page");
       address = new URL(response.url || url, location.href);
+      nonce = nonceOf(response);
       doc = new DOMParser().parseFromString(await response.text(), "text/html");
     } catch (error) {
       if (ask.signal.aborted) return;
@@ -68,7 +101,8 @@
     const parts = REGIONS.map((selector) => [document.querySelector(selector), doc.querySelector(selector)]);
     const watching = doc.querySelector("#busy-toast[data-watch]");
     frame ||= frameKey(document);
-    if (frameKey(doc) !== frame || parts.some(([now, next]) => !now || !next) || watching
+    const run = parts.every(([now, next]) => now && next) ? scriptsOf(parts, nonce) : null;
+    if (frameKey(doc) !== frame || !run || watching
         || parts.some(([, next]) => next.matches(LOADS_WHOLE) || next.querySelector(LOADS_WHOLE))) {
       busy?.removeAttribute("aria-busy");
       loadWhole(address.href);
@@ -85,6 +119,7 @@
     document.body.dataset.baseCurrency = doc.body.dataset.baseCurrency || document.body.dataset.baseCurrency || "";
     for (const [now, next] of parts) now.replaceWith(document.adoptNode(next));
     const main = document.querySelector("main.phone-content");
+    run.forEach(runAgain);
     document.dispatchEvent(new CustomEvent("lightning:page", { detail: { root: main } }));
     window.scrollTo({ top: scroll, behavior: "instant" });
     if (!main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");

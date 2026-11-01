@@ -40,39 +40,29 @@ Why: every tap is a full page load (`no-store`), so the WebView parses the HTML 
 
 **Answer to the owner: no rewrite.** A faster language would shrink the smallest share of the wait. The same Python
 server would feel fast if the phone stopped reloading the frame on each tap and the pages it draws were lighter. Before
-any bigger decision, measure on a real phone (3AO1).
+any bigger decision, measure again.
 
 **Built 2026-11-01** (owner: "fix it then"): the phone keeps its frame and swaps the page (`phone-nav.js`, test
 `tests/test_phone_nav_browser.py`); at 4x CPU a tab switch went from about 1.0 s to 0.25-0.3 s (Budget 1,004 to 287 ms,
 Transactions 970 to 224, More 942 to 308, Overview 1,088 to 309); a tab's page is asked for as the finger lands (the
 old `<link rel=prefetch>` could not be used by a no-store page and only doubled the work). Settings and categories are
 read once per request: Overview 231 to 196 queries, Budget 57 to 33, Cash planning 198 to 176, Financial health 168
-to 142. Each step below says only what is left.
+to 142. Then every phone page swaps (3AO2): set-up moved behind `lightning:page`, and a page's own scripts run again
+when they carry the response's nonce; on all 30 phone pages a swap shows the same content as a full load. Payer names,
+aliases and by-id lookups read once (Overview 176 queries, Counterparties 44 to 9, Spending about 155 ms). The owner
+dropped the real-phone measurement (3AO1, 2026-11-01). Each step below says only what is left.
 
 ## Fix
 Measure on a device, then the cheapest change with the biggest effect first; `tools/perf_check.py` and Audit 13's
 `evidence/flows.py` before and after each step; page text identical before and after (perf-check skill, step 5).
 
-## 3AO1 Measure on a real phone · S
-Add navigation timing to the Android probe (server time, parse and scripts, total) for Overview, Budget, Transactions,
-More, Spending and opening Add; record a dated table in Audit 13's report. Done when the numbers above have a real-phone
-column.
-
-## 3AO2 Swap the rest of the pages · M
-Built for most pages. Left: pages that still load whole because of an inline script (Reserves, Settings, Categories,
-Counterparties) or set-up that runs only at load (`LOADS_WHOLE` in `phone-nav.js`: selection mode, the budget editor,
-investment and import forms). Move each script into `app.js` behind the `lightning:page` event, then drop it from the
-list. Done when only downloads and the profile gate load whole.
-
 ## 3AO3 Lighter pages for the browser · M
 Measured 2026-11-01 at 4x: leaving out the PC's rules from the phone bundle (526 KB, `style.css` included) or `app.js`
 alone barely changed a full load; the cost is building a whole document, which 3AO2 now avoids. Left for the first
 load and the pages that still load whole: Arabic text translated on the server so `ui-ar.js` (264 KB) is not parsed on
-every page, and the forced layouts while the page loads (about 55 ms at 4x). Measure again on a phone (3AO1) before
-doing either.
+every page, and the forced layouts while the page loads (about 55 ms at 4x).
 
 ## 3AO4 Fewer queries on the heaviest pages · M
-Settings and categories are done. Left: Overview's 20 counterparty look-ups per row
-(`SELECT t.counterparty AS n FROM transactions t WHERE t.id=? UNION ...`), Counterparties' 36 alias reads, the
-exchange-rate reads on Investments and Financial health (12-14 each), and the register's per-row reads on Cash
-planning and an account. Done when no phone page is over 150 ms warm on the sample.
+Done but for Spending, about 155 ms against the perf-check skill's 150: most of what is left builds its two money-flow
+diagrams, which IV-3AL6 moves off the phone's first page. Bill matching's per-item reads (12 on Overview and Cash
+planning) stay: every page is under the skill's 400 queries, and that is money logic.

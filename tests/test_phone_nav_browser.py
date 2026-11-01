@@ -88,11 +88,38 @@ def test_tabs_links_and_the_month_stepper_swap_the_page_and_keep_working(phone):
     assert phone.errors == []
 
 
-def test_a_page_with_its_own_script_loads_whole(phone):
-    page = phone.page
-    assert page.evaluate("() => !!document.querySelector('script[src*=\"phone-nav.js\"]')")
-    page.evaluate("() => { const a = document.createElement('a'); a.href = '/plan/reserves'; a.id = 'go';"
-                  " a.textContent = 'Reserves'; document.querySelector('main').prepend(a); }")
+def _go(page, href):
+    page.evaluate("(href) => { document.getElementById('go')?.remove(); const a = document.createElement('a');"
+                  " a.href = href; a.id = 'go'; a.textContent = 'Go'; document.querySelector('main').prepend(a); }", href)
     page.click("#go")
-    page.wait_for_function("() => location.pathname === '/plan/reserves' && document.readyState === 'complete'")
-    assert not phone.same()  # Reserves has an inline script: a swap could not run it
+    page.wait_for_function("(href) => location.pathname === href && document.readyState === 'complete'"
+                           " && !document.querySelector('main[aria-busy]')", arg=href)
+
+
+def test_a_swapped_page_runs_its_own_scripts_and_only_those(phone):
+    """Reserves brings an inline script: it runs again on each visit (no clash with the last visit's names); a script
+    without the response's nonce does not run, as on a full load; a script that listens on the whole document makes
+    the page load whole."""
+    page = phone.page
+    listen = {"on": False}
+
+    def add_scripts(route):
+        response = route.fetch()
+        nonce = response.headers["content-security-policy"].split("'nonce-")[1].split("'")[0]
+        extra = (f'<script nonce="{nonce}">window.__good = (window.__good || 0) + 1;</script>'
+                 '<script nonce="not-this-one">window.__bad = true;</script>')
+        if listen["on"]:
+            extra += f'<script nonce="{nonce}">document.addEventListener("click", () => {{}});</script>'
+        route.fulfill(response=response, body=response.text().replace("</main>", extra + "</main>"))
+
+    page.route("**/plan/reserves", add_scripts)
+    _go(page, "/plan/reserves")
+    assert phone.same() and page.evaluate("[window.__good, window.__bad]") == [1, None]
+    _go(page, "/more")
+    _go(page, "/plan/reserves")
+    assert phone.same() and page.evaluate("window.__good") == 2
+    listen["on"] = True
+    _go(page, "/more")
+    _go(page, "/plan/reserves")
+    assert not phone.same()  # loaded whole
+    assert phone.errors == []

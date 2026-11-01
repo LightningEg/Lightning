@@ -154,8 +154,12 @@
     card.style.setProperty('--lt-x', (event.clientX - box.left) + 'px');
     card.style.setProperty('--lt-y', (event.clientY - box.top) + 'px');
   }, { passive: true });
-  document.addEventListener('DOMContentLoaded', () => {
+  // The theme controls on Settings; again on a phone page swapped in without a reload (phone-nav.js).
+  const bound = new WeakSet();
+  const bindControls = () => {
     document.querySelectorAll('[data-theme-select]').forEach(select => {
+      if (bound.has(select)) return;
+      bound.add(select);
       themes.forEach(theme => {
         const option = document.createElement('option');
         option.value = theme.id;
@@ -170,6 +174,8 @@
       });
     });
     document.querySelectorAll('[data-theme-night]').forEach(row => {
+      if (bound.has(row)) return;
+      bound.add(row);
       row.hidden = !twin(dayTheme);
       const box = row.querySelector && row.querySelector('input');
       if (!box) return;
@@ -180,5 +186,7 @@
       });
     });
     syncControls();
-  });
+  };
+  document.addEventListener('DOMContentLoaded', bindControls);
+  document.addEventListener('lightning:page', bindControls);
 })();
