@@ -73,6 +73,7 @@
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('app.js') }}"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('phone-fields.js') }}"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('phone-gestures.js') }}"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('phone-nav.js') }}"></script>
 {% if request.state.secure_profiles|default(false) %}<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('session.js') }}"></script>{% endif %}
 </body>
 </html>

@@ -6,6 +6,8 @@ opening transaction, so every balance comes from the ledger.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from types import MappingProxyType
 from dataclasses import replace
 
 from lightning.assets.service import AssetService
@@ -33,8 +35,8 @@ class AccountService:
         return self.repo.list(active_only)
 
     @request_cached
-    def _by_id(self) -> dict[int, Account]:
-        return {item.id: item for item in self.repo.list(False)}
+    def _by_id(self) -> Mapping[int, Account]:
+        return MappingProxyType({item.id: item for item in self.repo.list(False)})
 
     def get(self, account_id: int) -> Account:
         found = self._by_id().get(account_id) if in_request() else self.repo.get(account_id)

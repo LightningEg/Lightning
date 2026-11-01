@@ -136,14 +136,24 @@ class DepositReceiptService:
         return [{"id": row["id"], "ref": row["ref"], "date": row["date"],
                  "description": row["description"], "amount": from_e6(row["amount_e6"])} for row in rows]
 
-    def _payer_names(self, transaction_id: int) -> set[str]:
-        """Every normalised name the payer of a bank row goes by: typed counterparty, canonical name, aliases."""
-        rows = self.db.all(
-            "SELECT t.counterparty AS n FROM transactions t WHERE t.id=? "
-            "UNION SELECT cp.name FROM transactions t JOIN counterparties cp ON cp.id=t.counterparty_id WHERE t.id=? "
-            "UNION SELECT a.alias FROM transactions t JOIN counterparty_aliases a ON a.counterparty_id=t.counterparty_id "
-            "WHERE t.id=?", (transaction_id,) * 3)
-        return {normalize(row["n"]) for row in rows if normalize(row["n"])}
+    def _payer_names(self, transaction_ids: list[int]) -> dict[int, set[str]]:
+        """Every normalised name the payer of each bank row goes by: typed counterparty, canonical name, aliases. One
+        read for all the rows (IT-3AO4: the Overview asked once per candidate)."""
+        names: dict[int, set[str]] = {tid: set() for tid in transaction_ids}
+        for start in range(0, len(transaction_ids), 400):
+            chunk = transaction_ids[start:start + 400]
+            marks = ",".join("?" * len(chunk))
+            rows = self.db.all(
+                f"SELECT t.id AS tid, t.counterparty AS n FROM transactions t WHERE t.id IN ({marks}) "
+                f"UNION SELECT t.id, cp.name FROM transactions t JOIN counterparties cp ON cp.id=t.counterparty_id "
+                f"WHERE t.id IN ({marks}) "
+                f"UNION SELECT t.id, a.alias FROM transactions t JOIN counterparty_aliases a "
+                f"ON a.counterparty_id=t.counterparty_id WHERE t.id IN ({marks})", tuple(chunk) * 3)
+            for row in rows:
+                name = normalize(row["n"])
+                if name:
+                    names[row["tid"]].add(name)
+        return names
 
     def match_plan(self, account_id: int, as_of=None) -> list[dict]:
         """expected_past() for a portfolio, each unmatched occurrence with ranked candidates and one suggestion.
@@ -164,8 +174,9 @@ class DepositReceiptService:
             destination = occurrence["destination_account_id"]
             if destination not in cache:
                 cache[destination] = self.candidates(occurrence["certificate_id"], occurrence["event_date"], as_of)
+                payers = self._payer_names([row["id"] for row in cache[destination]])
                 for row in cache[destination]:
-                    row["payers"] = self._payer_names(row["id"])
+                    row["payers"] = payers[row["id"]]
             expected, event_day = occurrence["expected"], parse_date(occurrence["event_date"])
             for row in cache[destination]:
                 days = (parse_date(row["date"]) - event_day).days

@@ -53,7 +53,7 @@ Investments keeps the owner's PDF order (chart, then holdings).
 ## 3AL6 Spending (F21) · S
 The lead (spent this month against the same days usually), four biggest categories then Other as rows, then one row
 "More analysis" that opens the rest. The heat map, both money-flow diagrams, small multiples and month grid leave the
-first page.
+first page. It also takes Spending under 150 ms: the money-flow diagrams are most of its server time (IT-3AO, 2026-11-01).
 
 ## Fix
 `lightning/ui/templates/phone/` and `phone.css` (regenerate `phone.rtl.css`); the default period in

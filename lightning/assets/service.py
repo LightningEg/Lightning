@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from types import MappingProxyType
 import re
 from dataclasses import replace
 from decimal import Decimal
@@ -93,16 +95,16 @@ class AssetService:
 
     # -- financial assets --------------------------------------------------
     @request_cached
-    def _classes_by_id(self) -> dict[int, AssetClass]:
-        return {item.id: item for item in self.repo.list_classes()}
+    def _classes_by_id(self) -> Mapping[int, AssetClass]:
+        return MappingProxyType({item.id: item for item in self.repo.list_classes()})
 
     @request_cached
     def list_assets(self) -> list[FinancialAsset]:
         return self.repo.list_assets()
 
     @request_cached
-    def _assets_by_id(self) -> dict[int, FinancialAsset]:
-        return {item.id: item for item in self.repo.list_assets()}
+    def _assets_by_id(self) -> Mapping[int, FinancialAsset]:
+        return MappingProxyType({item.id: item for item in self.repo.list_assets()})
 
     def get_asset(self, asset_id: int) -> FinancialAsset:
         found = (self._assets_by_id().get(asset_id) if in_request() else self.repo.get_asset(asset_id))
