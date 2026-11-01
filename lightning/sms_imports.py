@@ -29,6 +29,9 @@ SEEN_KEY = "sms_seen"                  # messages already read, newest last: "fp
 WAITING_KEY = "sms_waiting"            # parsed messages whose account ending is not known yet
 UNREAD_KEY = "sms_unread"              # messages with an amount that no rule could read: never dropped unseen
 LAST_READ_KEY = "sms_last_read_ms"     # the phone's inbox is read from here on
+QUIET_KEY = "sms_quiet_senders"        # {"Vodafone365": dismissals}: senders whose unreadable messages are offers
+BANK_SENDERS_KEY = "sms_bank_senders"  # senders that sent a message a rule read: never made quiet
+QUIET_AFTER = 2                        # dismissing this many of a sender's unreadable messages quiets it
 MAX_UNREAD = 200
 OVERLAP_MS = 10 * 60 * 1000            # the inbox is re-read this far before the cursor: late arrivals are not lost
 PAIR_MINUTES = 30                      # an own transfer's two messages arrive within this
@@ -183,10 +186,27 @@ _OUT_WORDS = r"(خصم|سحب|شراء|سداد|دفع|مدفوعات|تحويل
 _IN_WORDS = r"(إضافة|اضافة|إيداع|ايداع|استلام|استرداد|لحسابكم|إلى\s*حسابك|الى\s*حسابك|credited|received|deposit\w*|refund\w*)"
 
 
+# An offer, not a payment (owner, 2026-11-01: Nawy and Vodafone offers were kept as bank messages): a link, a dial
+# code, or the words offers use. A bank's own payment message carries none of these; a known pattern still reads it.
+_AR_START = r"(?<![\u0600-\u06FF])(?:و|ب|ل|ف)?(?:ال)?"  # an Arabic word's start, with its usual prefixes: not inside معرض
+_PROMO = re.compile(r"(https?://|www\.|\.link/|\*\d{2,}#|\boffers?\b|\bpromo|\brefer\b|\binvite|limited time|\bwin\b|"
+                    r"\bfree\b|cashback|" + _AR_START + r"(?:عرض|عروض|باق[ةه]|باقتك|اشتراك|اشترك|اشحن|شحن\s*رصيد|هدي[ةه]|"
+                    r"بلاش|مجان|اربح|كوبون|اكسب|استمتع)|خصم\s*\d+\s*%|\d+\s*%\s*خصم)", re.IGNORECASE)
+# Something that says money moved in an account, a card or a wallet.
+_ACCOUNTISH = re.compile(_OUT_WORDS + "|" + _IN_WORDS + r"|حساب|بطاق[ةه]|محفظ|الرصيد|رصيدك|عملية|account|card|wallet|"
+                         r"balance|transaction|" + "|".join(BANK_PHONES), re.IGNORECASE)
+
+
+def is_offer(text: str) -> bool:
+    return bool(_PROMO.search(_clean(text or "")))
+
+
 def looks_like_money(text: str) -> bool:
-    """An amount with a currency: a message the owner should see even when no rule reads it."""
+    """A message the owner should see even when no rule reads it: an amount with a currency, said about an account,
+    a card or a wallet, and not an offer. Codes, declined payments, adverts and bundles are not money."""
     flat = _clean(text or "")
-    return bool(re.search(_CUR + r"\s*" + _NUM + r"|" + _NUM + r"\s*" + _CUR, flat)) and not _IGNORE.search(flat)
+    return (bool(re.search(_CUR + r"\s*" + _NUM + r"|" + _NUM + r"\s*" + _CUR, flat)) and not _IGNORE.search(flat)
+            and bool(_ACCOUNTISH.search(flat)) and not _PROMO.search(flat))
 
 
 def _general(flat: str, received: datetime, balance: Decimal | None, bank: str) -> SmsTransaction | None:
@@ -197,7 +217,7 @@ def _general(flat: str, received: datetime, balance: Decimal | None, bank: str) 
                        re.IGNORECASE)
     out_word = re.search(_OUT_WORDS, flat, re.IGNORECASE)
     in_word = re.search(_IN_WORDS, flat, re.IGNORECASE)
-    if not money or not ending or bool(out_word) == bool(in_word):
+    if not money or not ending or bool(out_word) == bool(in_word) or _PROMO.search(flat):
         return None
     amount = _amount(money.group(1) or money.group(2))
     if amount is None:
@@ -276,6 +296,8 @@ class SmsImportService:
         by_account: dict[int, list[SmsTransaction]] = {}
         skipped = 0
         unread = self._json(UNREAD_KEY, [])
+        banks = set(self._json(BANK_SENDERS_KEY, []))
+        quiet = self.quiet_senders()
         for sender, text, received, *extra in messages:
             fp = fingerprint(text)
             mark = f"{fp}@{extra[0]}" if extra and extra[0] is not None else fp
@@ -286,8 +308,10 @@ class SmsImportService:
             (texts if mark == fp else stamped).add(fp)
             seen.append(mark)
             found = parse_sms(text, sender=sender, received=received)
+            if found is not None and sender:
+                banks.add(sender[:40])
             if found is None:
-                if looks_like_money(text):  # never dropped unseen: kept for the owner to enter or dismiss
+                if looks_like_money(text) and sender[:40] not in quiet:  # kept for the owner to enter or dismiss
                     unread.append({"id": mark, "sender": sender[:40], "text": text[:MAX_TEXT],
                                    "received": received.isoformat(timespec="minutes")})
                 else:
@@ -305,6 +329,7 @@ class SmsImportService:
             self.settings.set(SEEN_KEY, json.dumps(seen[-MAX_SEEN:]))
             self.settings.set(WAITING_KEY, json.dumps(waiting))
             self.settings.set(UNREAD_KEY, json.dumps(unread[-MAX_UNREAD:]))
+            self.settings.set(BANK_SENDERS_KEY, json.dumps(sorted(banks)[:200]))
             if cursor_ms is not None:
                 self.settings.set(LAST_READ_KEY, str(cursor_ms))
         return {"staged": staged, "waiting": len(waiting), "skipped": skipped, "unread": len(unread)}
@@ -354,14 +379,32 @@ class SmsImportService:
             counts.append(len(value) if isinstance(value, list) else 0)
         return counts[0], counts[1]
 
+    def quiet_senders(self) -> set[str]:
+        """Senders whose unreadable messages are not shown any more: the owner dismissed QUIET_AFTER of them and the
+        sender never sent a message a rule read (a bank's sender is never quieted)."""
+        banks = set(self._json(BANK_SENDERS_KEY, []))
+        return {sender for sender, count in self._json(QUIET_KEY, {}).items()
+                if count >= QUIET_AFTER and sender not in banks}
+
     def unread(self) -> list[dict]:
-        """Messages with an amount that no rule could read, newest first."""
-        return list(reversed(self._json(UNREAD_KEY, [])))
+        """Messages with an amount that no rule could read, newest first. A message kept before the offer filter
+        (2026-11-01), or from a sender quieted since, is left out."""
+        quiet = self.quiet_senders()
+        return [m for m in reversed(self._json(UNREAD_KEY, []))
+                if m.get("sender", "") not in quiet and (m.get("reason") or looks_like_money(m.get("text", "")))]
 
     def dismiss(self, message_id: str) -> None:
+        """Remove a kept message. Its sender counts towards being quieted, unless it is a bank's."""
+        kept = self._json(UNREAD_KEY, [])
+        gone = next((m for m in kept if m.get("id") == message_id), None)
+        counts = self._json(QUIET_KEY, {})
+        sender = "" if gone is None or gone.get("reason") else gone.get("sender", "")  # a held transfer half: a bank's
+        if sender:
+            counts[sender] = counts.get(sender, 0) + 1
         with self.db.transaction():
-            self.settings.set(UNREAD_KEY, json.dumps([m for m in self._json(UNREAD_KEY, [])
-                                                      if m.get("id") != message_id]))
+            self.settings.set(UNREAD_KEY, json.dumps([m for m in kept if m.get("id") != message_id]))
+            if sender:
+                self.settings.set(QUIET_KEY, json.dumps(dict(sorted(counts.items(), key=lambda kv: -kv[1])[:200])))
 
     def assign(self, ending: str, account_id: int) -> int | None:
         """The owner says which account an ending is: remember it and send its waiting messages to review."""

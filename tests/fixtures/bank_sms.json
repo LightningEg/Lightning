@@ -1,5 +1,5 @@
 {
- "about": "Bank SMS samples, one entry per message, collected bank by bank from the owner's phone. Each says what it is: inflow or outflow, the kind, and what Lightning should read from it. Identifying details are changed before a sample goes in: people's names, card and account endings, references, balances and neighbourhoods. Amounts, merchants and the exact wording stay. tests/test_sms_imports.py reads every entry; add a bank by adding its messages here.",
+ "about": "Bank SMS samples, one entry per message, collected bank by bank from the owner's phone. Each says what it is: inflow or outflow, the kind, and what Lightning should read from it. Identifying details are changed before a sample goes in: people's names, card and account endings, references, balances and neighbourhoods. Amounts, merchants and the exact wording stay. tests/test_sms_imports.py reads every entry; add a bank by adding its messages here. offers: adverts and bundles from the owner's inbox (2026-11-01, links replaced): never bank messages, never kept.",
  "samples": [
   {
    "bank": "CIB",
@@ -284,5 +284,10 @@
  ],
  "unreadable": [
   "تم تنفيذ عملية بمبلغ 900.00 جم على حسابكم، للاستفسار اتصل بـ 19623"
+ ],
+ "offers": [
+  "Refer your friends & share EGP 5k with them to start investing and get EGP 5k when they invest! Limited Time Offer! https://example.link/offer",
+  "باقتك خلصت، Plus300 الشهريه بـ150 جنيه بدل 300 لمدة شهرين و استمتع بـ 18000 ميجا! للتفعيل كلّم *215# او دوس هنا وليك هدية ببلاش العرض سارى ل28-10-2026 https://example.eg/offers",
+  "تم الاشتراك بالعرض لكن رصيدك الحالي لا يكفي، اشحن ب45 جنيه في خلال 7 ايام عشان تستمتع بالعرض و سيتم التفعيل خلال 20 دقيقة من الشحن"
  ]
 }

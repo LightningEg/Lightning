@@ -304,3 +304,43 @@ def test_egp_sms_cannot_be_assigned_or_staged_as_dollars(c, setup):
     assert not result["staged"] and result["waiting"] == 2 and _rows(c) == 0
     assert c.sms_imports.assign("2093", setup[0]["cib"].id)
     assert _rows(c) == 2
+
+
+@pytest.mark.parametrize("text", SAMPLES["offers"])
+def test_offers_and_bundles_are_never_kept_as_bank_messages(c, setup, text):
+    """Owner, 2026-11-01: Nawy and Vodafone offers were kept as "Messages kept for you"."""
+    assert parse_sms(text) is None
+    result = c.sms_imports.read([("Vodafone365", text, datetime(2026, 10, 23, 18))])
+    assert result["unread"] == 0 and c.sms_imports.unread() == []
+
+
+def test_a_wallet_receipt_and_a_payment_at_a_shop_named_maarad_are_still_kept():
+    from lightning.sms_imports import looks_like_money
+    assert looks_like_money("تم استلام مبلغ 500 جنيه من رقم 01000000000 في محفظتك. رصيدك الحالي 1200 جنيه")
+    assert parse_sms("تم سداد مبلغ 320.50 جم باستخدام بطاقتكم رقم 2093 لدى معرض النور يوم 07/10/26") is not None
+
+
+def test_offers_kept_before_the_filter_leave_the_list(c, setup):
+    import json as _json
+    from lightning.sms_imports import UNREAD_KEY
+    kept = [{"id": "old", "sender": "Nawy Shares", "text": SAMPLES["offers"][0], "received": "2026-10-31T14:22"},
+            {"id": "bank", "sender": "NBE", "text": SAMPLES["unreadable"][0], "received": "2026-10-07T13:00"}]
+    c.settings.set(UNREAD_KEY, _json.dumps(kept))
+    assert [m["id"] for m in c.sms_imports.unread()] == ["bank"]
+
+
+def test_dismissing_two_from_a_sender_quiets_it_but_never_a_bank(c, setup):
+    shop = "تم تنفيذ عملية بمبلغ {n}.00 جم على حسابكم"
+    for n in (100, 200):
+        c.sms_imports.read([("ShopPoints", shop.format(n=n), datetime(2026, 10, 7, 13, n // 100))])
+    for message in c.sms_imports.unread():
+        c.sms_imports.dismiss(message["id"])
+    c.sms_imports.read([("ShopPoints", shop.format(n=300), datetime(2026, 10, 8, 9))])
+    assert c.sms_imports.unread() == []  # quiet now
+    # A sender that sent a message a rule read is a bank: dismissing its unreadable ones never quiets it.
+    c.sms_imports.read([("NBE", SAMPLES["samples"][-1]["text"], datetime(2026, 10, 9, 9))])
+    for n in (400, 500, 600):
+        c.sms_imports.read([("NBE", shop.format(n=n), datetime(2026, 10, 9, 10, n // 100))])
+        c.sms_imports.dismiss(c.sms_imports.unread()[0]["id"])
+    c.sms_imports.read([("NBE", shop.format(n=700), datetime(2026, 10, 10, 9))])
+    assert len(c.sms_imports.unread()) == 1

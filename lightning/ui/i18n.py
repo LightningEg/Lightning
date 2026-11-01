@@ -575,6 +575,7 @@ ARABIC_UI = {
     'Waiting for your check': 'مستنية مراجعتك',
     'Messages kept for you': 'رسائل محفوظة ليك',
     'Ones Lightning could not read, and the other side of a transfer it sent to review once. Each stays until you enter or dismiss it. Send the unread ones to be added as a bank pattern.': 'الرسائل اللي Lightning مقدرش يقراها، والجزء التاني من التحويل اللي طلب منك تراجعه مرة. كل رسالة بتفضل لحد ما تسجلها أو تتجاهلها. ابعت الرسائل غير المقروءة عشان نضيفها كنمط للبنك.',
+    'Offers and adverts are left out. Dismiss two from one sender and its messages stop being kept.': 'العروض والإعلانات مش بتظهر هنا. لو تجاهلت رسالتين من نفس المرسل، رسايله مش هتتحفظ تاني.',
     'Dismiss': 'تجاهل',
     'Paste messages': 'الصق الرسائل',
     'Paste or share messages': 'الصق الرسائل أو شاركها',

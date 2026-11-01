@@ -28,6 +28,7 @@
 <section class="card" aria-labelledby="unread-heading">
   <h2 id="unread-heading">{{ "Messages kept for you"|tr(locale) }}</h2>
   <p class="muted">{{ "Ones Lightning could not read, and the other side of a transfer it sent to review once. Each stays until you enter or dismiss it. Send the unread ones to be added as a bank pattern."|tr(locale) }}</p>
+  <p class="muted">{{ "Offers and adverts are left out. Dismiss two from one sender and its messages stop being kept."|tr(locale) }}</p>
   {% for m in unread %}<div class="compact-row"><span dir="auto">{{ m.text }} <small class="muted">{{ m.sender or 'Pasted' }} · {{ m.received|replace('T', ' ') }}</small>{% if m.reason %}<small class="muted"> · {{ m.reason|tr(locale) }}</small>{% endif %}</span>
     <form method="post" action="/sms/dismiss"><input type="hidden" name="id" value="{{ m.id }}"><button class="btn small" type="submit">{{ "Dismiss"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% endfor %}
 </section>
