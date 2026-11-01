@@ -2988,13 +2988,14 @@ document.addEventListener('change', (event) => {
     if (field.tagName === "TEXTAREA" || field.isContentEditable) return true;
     return field.tagName === "INPUT" && !/^(checkbox|radio|button|submit|reset|range|file|color|image|hidden)$/i.test(field.type);
   };
+  const turned = () => { if (viewport.width !== width) { width = viewport.width; tallest = 0; } };  // turning the phone starts again
   const sync = () => {
-    if (viewport.width !== width) { width = viewport.width; tallest = 0; }  // turning the phone starts again
+    turned();
     if (!typing()) tallest = Math.max(tallest, viewport.height);
     root.classList.toggle("keyboard-open", typing() && tallest - viewport.height > 120);
   };
   viewport.addEventListener("resize", sync);
-  document.addEventListener("focusin", () => { tallest = Math.max(tallest, viewport.height); sync(); });
+  document.addEventListener("focusin", () => { turned(); tallest = Math.max(tallest, viewport.height); sync(); });
   document.addEventListener("focusout", () => setTimeout(sync, 0));
   // After the first paint: measuring the viewport while the page is still loading forces an early layout (IT-3AO3).
   requestAnimationFrame(() => setTimeout(sync, 0));
