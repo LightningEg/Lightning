@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 78 open items, in the order they are worked on.
+10 milestones, 76 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -254,20 +254,9 @@ The site is honest, quick and in step with the app.
 | **IT-8A** | [Feedback form: submit scrolls to the page end, images take 10 s, and the survey forms accept formula injection and spam](8-website/8A-feedback-form-send-and-spam-guard.md) | improvement, technical | Reach | M | ready |
 | **OW-8D** | [For Geeks audit ideas left for the owner to choose](8-website/8D-for-geeks-audit-ideas-to-choose.md) | owner task | Reach |  | ready |
 | **IV-8F** | [Home and Features show the app, not only words](8-website/8F-home-and-features-show-the-app.md) | improvement, visual | Reach | M | ready |
-| **NF-8X** | [All tracking in the owner console, as tabs that each answer one question](8-website/8X-tracking-in-the-owner-console.md) | new feature | Reach | L | new |
-| NF-8X1 | ↳ Inventory | | | M | |
-| NF-8X2 | ↳ Tabs | | | L | |
-| NF-8X3 | ↳ Move and redirect | | | M | |
-| NF-8X4 | ↳ Update the docs | | | S | |
-| **NF-8Y** | [Downloads shows what is new, from the release notes, in English and Arabic](8-website/8Y-downloads-shows-whats-new.md) | new feature | Reach | M | new |
-| **NF-8Z** | [Honest comparison pages: Lightning against a spreadsheet, a traditional expense tracker and a cloud budgeting app](8-website/8Z-honest-comparison-pages.md) | new feature | Reach | L | new |
-| NF-8Z1 | ↳ Scorecard and evidence rule | | | M | |
-| NF-8Z2 | ↳ Guideline B10 and B12 | | | M | |
-| NF-8Z3 | ↳ English pages | | | L | |
-| NF-8Z4 | ↳ Arabic pages | | | L | |
-| NF-8Z5 | ↳ Keep it true | | | S | |
+| **OW-8AA** | [Sign off the Low, Medium and High ratings on the comparison pages](8-website/8AA-sign-off-the-comparison-ratings.md) | owner task | Reach |  | ready |
 
-Done: 8B, 8C, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W. Next free code: 8AA.
+Done: 8B, 8C, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z. Next free code: 8AB.
 
 ## 9 Later
 

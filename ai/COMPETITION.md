@@ -126,6 +126,8 @@ How the best money apps lay out a phone, read 2026-10-06 (Claude) for the phone 
 
 ## Where Lightning wins and loses
 
+The site's three comparison pages rate Lightning against *kinds* of tool in Low, Medium and High, and cite this section as evidence: the scorecard is `comparisons.json` in the website repository (guideline B10). Change a claim here and the matching rating there.
+
 Checked against the code, Overview and changelog 2026-10-15 (v1.1: Arabic and right-to-left, Android beta with bank SMS, foreign currency, FX gains, US stocks).
 
 **Wins (say it on the website):**
