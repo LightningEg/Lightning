@@ -190,10 +190,11 @@ class SessionGate:
 
 
 def profile_app(credentials: Credentials, root: Path | str | None = None, devices: Devices | None = None,
-                *, phone: bool = False, sms=None, biometric=None):
+                *, phone: bool = False, sms=None, biometric=None, stay=None):
     """`phone`: the Android app, whose pages use the phone frame and screens (guideline Part C). `sms`: where
     bank messages come from on that phone (`lightning.sms_imports.SmsSource`), or None. `biometric`: the phone's
-    optional fingerprint unlock (`lightning.security.biometric.FingerprintUnlock`), or None: never on a PC."""
+    optional fingerprint unlock (`lightning.security.biometric.FingerprintUnlock`), or None: never on a PC.
+    `stay`: staying signed in on the phone (the same slots over `StayBridge`, no prompt), or None: never on a PC."""
     configure_memory_only_import_uploads()
     session = ProfileSession(root)
     session.borrowed_home = ""
@@ -214,6 +215,55 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     gate.phone = phone
     fingerprint = biometric if phone else None
     gate.fingerprint = fingerprint
+    # Stay signed in (owner, 2026-11-01): the phone opens the profile by itself until Lock, and never locks for idling.
+    kept = stay if phone else None
+
+    def open_profile_id() -> str:
+        if session.container is None or session.paths is None or session.paths.profile is None:
+            return ""
+        return session.paths.profile.profile_id
+
+    def kept_on() -> bool:
+        profile_id = open_profile_id()
+        return kept is not None and bool(profile_id) and kept.enabled(profile_id)
+
+    def keep_signed_in(form) -> None:
+        """After an unlock on the phone: "Stay signed in" ticked wraps the data key in a Keystore key that needs no
+        fingerprint (only an unlocked phone); unticked removes it. A read-only copy is never kept."""
+        profile_id = open_profile_id()
+        if kept is None or not profile_id or not session.role.writable or session.data_key is None:
+            return
+        if form.get("stay") == "yes":
+            kept.enrol(profile_id, session.data_key)
+        else:
+            kept.disable(profile_id)
+
+    async def open_kept(found) -> bool:
+        """Opening the app on the phone: a profile kept signed in opens without its password. Anything that does
+        not work (the phone is locked, the key changed) leaves the profile list, as before."""
+        from lightning.security.biometric import Outcome
+        if kept is None or session.container is not None:
+            return False
+        for info in found:
+            selected = str(info.db_path)
+            try:
+                profile_id, ident = session.fingerprint_target(selected)
+            except (ProfileError, OSError, ValueError):
+                continue
+            if not profile_id or not kept.enabled(profile_id) or devices.role_for(selected) == "reader":
+                continue
+            result = await asyncio.to_thread(kept.unlock, profile_id, ident)
+            if result.outcome is not Outcome.OK:
+                continue
+            try:
+                session.unlock_with_key(selected, result.key)
+                if session.journal is None:
+                    devices.after_unlock(session.paths)
+            except ProfileError:
+                continue
+            app.state.container = session.container
+            return True
+        return False
 
     async def expire_sessions():
         while True:
@@ -221,7 +271,8 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
             async with gate.mutex:
                 if session.pending and time.monotonic() >= session.pending.expires:
                     session.pending = None
-                if session.container and time.monotonic() - session.last_activity >= session.idle_seconds:
+                if (session.container and time.monotonic() - session.last_activity >= session.idle_seconds
+                        and not kept_on()):
                     borrowed = session.borrowed
                     session.close()
                     app.state.container = None
@@ -312,6 +363,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
             values["question"] = session.current_question()
         if mode == "unlock":
             values["fingerprint"] = fingerprint_offered(str(context.get("selected", "")))
+            values["stay_offered"] = kept is not None and kept.available()
         values.update(context)
         values["journal_restore"] = (mode == "restore" and bool(values["backup"])
             and Path(values["backup"]).with_suffix(".journal-manifest.json").is_file())
@@ -346,6 +398,8 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
                 session.root = choose_data_root(root_value)
                 use_licence_folder(session.root / "cosmetics")
             found = discover_profiles(session.root)
+            if not root_value and await open_kept(found):
+                return RedirectResponse("/", 303)
             backups = []
             for info in found:
                 paths = resolve_profile(info.path)
@@ -423,6 +477,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
             session.unlock(selected, str(form.get("password", "")), role=role)
             if session.journal is None:
                 devices.after_unlock(session.paths)
+            keep_signed_in(form)
         return await action(request, "unlock", operation, selected=selected)
 
     def fingerprint_offered(selected: str) -> bool:
@@ -624,6 +679,8 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     async def lock(request: Request):
         if session.borrowed is not None:
             return await hand_back(request)
+        if kept is not None and open_profile_id():
+            kept.disable(open_profile_id())  # Lock is signing out: the next open asks for the password
         return await action(request, "manage", session.close)
 
     # ------------------------------------------------------------ multiple devices: the phone's side
