@@ -15,7 +15,8 @@ async def list_counterparties(request: Request):
     c = container(request)
     query = " ".join(request.query_params.get("q", "").split())
     all_parties = c.counterparties.list_all()
-    aliases = {party["id"]: c.counterparties.aliases_for(party["id"]) for party in all_parties}
+    known = c.counterparties.aliases_by_counterparty()
+    aliases = {party["id"]: known.get(party["id"], []) for party in all_parties}
     suggestions = c.counterparties.suggestions(query, limit=10) if query else []
     suggested_names = {name.casefold() for name, _ in suggestions}
     parties = [party for party in all_parties if not query or
@@ -113,17 +114,19 @@ async def create_counterparty(request: Request):
                 matches.extend({"id": int(row["id"]), "name": row["name"]}
                                for row in parties if row["name"] in
                                {candidate for candidate, _ in c.counterparties.suggestions(name)})
+            known = c.counterparties.aliases_by_counterparty()
             return render(request, "counterparties.html", parties=parties, categories=categories,
                           category_labels=category_labels, entered_name=name,
                           entered_category_id=raw_category_id, similar_counterparties=matches,
-                          aliases_by_id={party["id"]: c.counterparties.aliases_for(party["id"]) for party in parties},
+                          aliases_by_id={party["id"]: known.get(party["id"], []) for party in parties},
                           alias_limit=MAX_ALIASES_PER_COUNTERPARTY,
                           exact_existing=bool(resolved), review_required=True)
     except (ValueError, LightningError) as exc:
         parties = c.counterparties.list_all()
+        known = c.counterparties.aliases_by_counterparty()
         return render(request, "counterparties.html", status_code=400, parties=parties, categories=categories,
                       category_labels=category_labels,
-                      aliases_by_id={party["id"]: c.counterparties.aliases_for(party["id"]) for party in parties},
+                      aliases_by_id={party["id"]: known.get(party["id"], []) for party in parties},
                       alias_limit=MAX_ALIASES_PER_COUNTERPARTY,
                       error=str(exc) if isinstance(exc, ValueError) else exc.message,
                       entered_name=name, entered_category_id=raw_category_id)

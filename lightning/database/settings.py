@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from types import MappingProxyType
+
 from lightning.core.dates import now_iso
 from lightning.core.memo import in_request, request_cached
 
@@ -13,8 +16,8 @@ DEFAULTS = {
 
 
 @request_cached  # the memo lives for one request and any write clears it
-def _stored_settings(db: Database) -> dict[str, str]:
-    return {row["key"]: row["value"] for row in db.all("SELECT key, value FROM settings")}
+def _stored_settings(db: Database) -> Mapping[str, str]:
+    return MappingProxyType({row["key"]: row["value"] for row in db.all("SELECT key, value FROM settings")})
 
 
 def raw_setting(db: Database, key: str):

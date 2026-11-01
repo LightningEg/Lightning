@@ -60,6 +60,13 @@ class CounterpartyService:
             (counterparty_id,),
         )
 
+    def aliases_by_counterparty(self) -> dict[int, list]:
+        """aliases_for every counterparty in one read (IT-3AO4: the Counterparties page asked once per row)."""
+        found: dict[int, list] = {}
+        for row in self.db.all("SELECT id,alias,counterparty_id FROM counterparty_aliases ORDER BY alias COLLATE NOCASE"):
+            found.setdefault(row["counterparty_id"], []).append(row)
+        return found
+
     def search_names(self):
         """Canonical names and confirmed aliases offered by smart-search pickers."""
         rows = self.db.all(

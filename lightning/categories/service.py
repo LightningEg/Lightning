@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from types import MappingProxyType
 from dataclasses import replace
 from difflib import SequenceMatcher
 import re
@@ -63,8 +65,8 @@ class CategoryService:
         )
 
     @request_cached
-    def _by_id(self) -> dict[int, Category]:
-        return {item.id: item for item in self.repo.list()}
+    def _by_id(self) -> Mapping[int, Category]:
+        return MappingProxyType({item.id: item for item in self.repo.list()})
 
     def get(self, category_id: int) -> Category:
         found = self._by_id().get(category_id) if in_request() else self.repo.get(category_id)

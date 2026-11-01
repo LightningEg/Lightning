@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from types import MappingProxyType
 import copy
 import sqlite3
 
@@ -43,8 +45,8 @@ class CategoryRepository:
         return _row(row) if row else None
 
     @request_cached
-    def _by_code(self) -> dict[str, Category]:
-        return {row["code"]: _row(row) for row in self.db.all("SELECT * FROM categories")}
+    def _by_code(self) -> Mapping[str, Category]:
+        return MappingProxyType({row["code"]: _row(row) for row in self.db.all("SELECT * FROM categories")})
 
     def get_by_code(self, code: str) -> Category | None:
         # A report names many categories by code: during a request one read serves them all (IT-3AO4; Spending asked
