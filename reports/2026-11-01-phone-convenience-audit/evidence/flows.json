@@ -1,0 +1,734 @@
+{
+ "pages": {
+  "/": {
+   "first_screen_targets": [
+    {
+     "t": "Safe to spend Cash planning ",
+     "y": 77,
+     "h": 111,
+     "w": 328
+    },
+    {
+     "t": "Previous month",
+     "y": 202,
+     "h": 40,
+     "w": 40
+    },
+    {
+     "t": "2026-11",
+     "y": 202,
+     "h": 40,
+     "w": 97
+    },
+    {
+     "t": "Next month",
+     "y": 202,
+     "h": 40,
+     "w": 40
+    },
+    {
+     "t": "1 item needs you 1 bill 1 Op",
+     "y": 261,
+     "h": 56,
+     "w": 294
+    },
+    {
+     "t": "Today Net worth 215,322 +52,",
+     "y": 346,
+     "h": 135,
+     "w": 158
+    },
+    {
+     "t": "0% used Left in plan 25,599",
+     "y": 346,
+     "h": 135,
+     "w": 158
+    },
+    {
+     "t": "So far Savings rate 100.0% +",
+     "y": 494,
+     "h": 155,
+     "w": 158
+    },
+    {
+     "t": "So far Investing rate 0.0%",
+     "y": 494,
+     "h": 155,
+     "w": 158
+    },
+    {
+     "t": "See all",
+     "y": 673,
+     "h": 44,
+     "w": 42
+    }
+   ],
+   "first_row_y": 682
+  },
+  "/budget": {
+   "first_screen_targets": [
+    {
+     "t": "Previous month",
+     "y": 207,
+     "h": 40,
+     "w": 40
+    },
+    {
+     "t": "2026-11",
+     "y": 207,
+     "h": 40,
+     "w": 97
+    },
+    {
+     "t": "Next month",
+     "y": 207,
+     "h": 40,
+     "w": 40
+    },
+    {
+     "t": "Edit plan",
+     "y": 334,
+     "h": 44,
+     "w": 59
+    },
+    {
+     "t": "Eating Out 0 of 671 671 left",
+     "y": 382,
+     "h": 90,
+     "w": 328
+    },
+    {
+     "t": "Fees & Charges 0 of 15 15 le",
+     "y": 472,
+     "h": 90,
+     "w": 328
+    },
+    {
+     "t": "Food & Groceries 0 of 4,666 ",
+     "y": 562,
+     "h": 90,
+     "w": 328
+    },
+    {
+     "t": "Gifts & Donations 0 of 2,000",
+     "y": 653,
+     "h": 90,
+     "w": 328
+    }
+   ],
+   "first_row_y": 343
+  },
+  "/transactions": {
+   "first_screen_targets": [
+    {
+     "t": "Search transactions",
+     "y": 85,
+     "h": 48,
+     "w": 328
+    },
+    {
+     "t": "All",
+     "y": 143,
+     "h": 40,
+     "w": 39
+    },
+    {
+     "t": "In",
+     "y": 143,
+     "h": 40,
+     "w": 34
+    },
+    {
+     "t": "Out",
+     "y": 143,
+     "h": 40,
+     "w": 47
+    },
+    {
+     "t": "Transfers",
+     "y": 143,
+     "h": 40,
+     "w": 85
+    },
+    {
+     "t": "To sort",
+     "y": 143,
+     "h": 40,
+     "w": 68
+    },
+    {
+     "t": "Previous month",
+     "y": 197,
+     "h": 44,
+     "w": 44
+    },
+    {
+     "t": "2026-11",
+     "y": 199,
+     "h": 40,
+     "w": 89
+    },
+    {
+     "t": "Select",
+     "y": 199,
+     "h": 40,
+     "w": 67
+    },
+    {
+     "t": "⋯",
+     "y": 197,
+     "h": 44,
+     "w": 44
+    },
+    {
+     "t": "Views",
+     "y": 338,
+     "h": 44,
+     "w": 59
+    },
+    {
+     "t": "Money market fund Buy · THND",
+     "y": 409,
+     "h": 64,
+     "w": 328
+    },
+    {
+     "t": "NBE Interest · CIB Payroll +",
+     "y": 473,
+     "h": 64,
+     "w": 328
+    },
+    {
+     "t": "ACME Egypt Salary · CIB Payr",
+     "y": 537,
+     "h": 64,
+     "w": 328
+    }
+   ],
+   "first_row_y": null
+  },
+  "/more": {
+   "first_screen_targets": [
+    {
+     "t": "All bills",
+     "y": 105,
+     "h": 44,
+     "w": 48
+    },
+    {
+     "t": "Landlord 2026-11-03 12,000",
+     "y": 161,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Car loan 2026-11-05 2,500",
+     "y": 217,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Vodafone 2026-11-09 350",
+     "y": 273,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Cash planning 15,980 due bef",
+     "y": 399,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Accounts 280,322",
+     "y": 455,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Investments 177,903",
+     "y": 511,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Financial health 5 of 6 with",
+     "y": 567,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Spending 0 in 2026-11",
+     "y": 623,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Weekly review is ready 1 dec",
+     "y": 699,
+     "h": 67,
+     "w": 328
+    }
+   ],
+   "first_row_y": 112
+  },
+  "/accounts": {
+   "first_screen_targets": [
+    {
+     "t": "From SMS",
+     "y": 216,
+     "h": 48,
+     "w": 118
+    },
+    {
+     "t": "⋯",
+     "y": 218,
+     "h": 44,
+     "w": 44
+    },
+    {
+     "t": "Import",
+     "y": 279,
+     "h": 40,
+     "w": 82
+    },
+    {
+     "t": "Accounts",
+     "y": 279,
+     "h": 40,
+     "w": 102
+    },
+    {
+     "t": "Held for others",
+     "y": 279,
+     "h": 40,
+     "w": 135
+    },
+    {
+     "t": "Cash wallet 7,475",
+     "y": 376,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "CIB Payroll Bank account 92,",
+     "y": 432,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Vodafone Cash 2,500",
+     "y": 488,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "NBE CDs Certificates 100,000",
+     "y": 598,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Gold at home Physical asset ",
+     "y": 708,
+     "h": 56,
+     "w": 328
+    }
+   ],
+   "first_row_y": null
+  },
+  "/plan": {
+   "first_screen_targets": [
+    {
+     "t": "Plan",
+     "y": 219,
+     "h": 40,
+     "w": 91
+    },
+    {
+     "t": "Recurring",
+     "y": 219,
+     "h": 40,
+     "w": 126
+    },
+    {
+     "t": "Loans",
+     "y": 219,
+     "h": 40,
+     "w": 101
+    },
+    {
+     "t": "Landlord Bill · in 2 days · ",
+     "y": 324,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Car loan Loan · in 4 days · ",
+     "y": 380,
+     "h": 57,
+     "w": 328
+    },
+    {
+     "t": "Vodafone Subscription · in 8",
+     "y": 437,
+     "h": 57,
+     "w": 328
+    },
+    {
+     "t": "WE Internet Bill · in 19 day",
+     "y": 494,
+     "h": 57,
+     "w": 328
+    },
+    {
+     "t": "North Cairo Electricity Bill",
+     "y": 551,
+     "h": 57,
+     "w": 328
+    },
+    {
+     "t": "ACME Egypt Payday · in 30 da",
+     "y": 608,
+     "h": 57,
+     "w": 328
+    },
+    {
+     "t": "Free cash 72,019 After bills",
+     "y": 677,
+     "h": 131,
+     "w": 158
+    },
+    {
+     "t": "Reserves 20,000 Emergency fu",
+     "y": 677,
+     "h": 131,
+     "w": 158
+    }
+   ],
+   "first_row_y": 286
+  }
+ },
+ "tasks": {
+  "add expense": [
+   {
+    "text": "×\nAdd transaction\n\nTo which account?\n\nCash wallet\n›\nCIB Payroll\nBank account\n›\nNBE CDs\nCertificates\n›\nTHNDR\nBrokerage\n›\nVodafone Cash\n›\nBought in instalments\n›",
+    "fields": [
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 334,
+      "h": 38,
+      "t": "×"
+     }
+    ],
+    "active": "A"
+   },
+   {
+    "text": "×\nAdd transaction\n\nCash wallet · Change account\n\nPaste bank SMS\n\nOut\nIn\nTransfer\nAmount\nCounterparty\nCategory\nDate\nNotes and held for\nCash in Cash wallet decreases by … EGP; balance owned by You.\n\nSave",
+    "fields": [
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 77,
+      "h": 38,
+      "t": "×"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 157,
+      "h": 40,
+      "t": "Paste bank SMS"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 213,
+      "h": 16,
+      "t": "out"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 213,
+      "h": 16,
+      "t": "in"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 213,
+      "h": 16,
+      "t": "transfer"
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "amount",
+      "mode": "decimal",
+      "auto": true,
+      "ph": "0.00",
+      "y": 300,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "counterparty",
+      "mode": "",
+      "auto": false,
+      "ph": "Who you paid or who paid you",
+      "y": 391,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "Choose a category",
+      "y": 482,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "date",
+      "mode": "numeric",
+      "auto": false,
+      "ph": "yyyy-mm-dd",
+      "y": 572,
+      "h": 48,
+      "t": "2026-11-01"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 572,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "notes",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 707,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "You",
+      "y": 786,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "button",
+      "type": "submit",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 847,
+      "h": 48,
+      "t": "Save"
+     }
+    ],
+    "active": "amount"
+   }
+  ],
+  "title menu": "Overview\nSpending\nBudget\nCash planning\nSafety\nInvestments\nTransactions\nSettings\nAccounts\nYour data\nFinancial health\nWeekly review\nProfile and lock",
+  "needs you": "96 this month\n0% used\nLeft in plan\n25,599\nSo far\nSavings rate\n100.0%\n+46,833 kept of 46,833 money in\nSo far\nInvesting rate\n0.0%\nLatest\nSee all\nToday\nMoney market fund\nBuy\n−3,000\nNBE\nInterest\n+1,833.33\nACME Egypt\nSalary\n+45,000\nYesterday\nInvestments moved\n2 value updates\n+2,590\n2026-10-28\nCIB\nFees & Charges\n−15\nYour position\nAs of 2026-11-01\nThis period\n2026-11-01 to 2026-11-01",
+  "row tap": {
+   "url": "http://127.0.0.1:46213/transactions/38/edit-popup?return_to=/transactions%3Fmonth%3D2026-11%26date_from%3D2026-11-01%26date_to%3D2026-11-30",
+   "sheet": {
+    "text": "×\nEdit transaction\n\nCIB Payroll\n\nOut\nIn\nTransfer\nAmount\nCounterparty\nCategory\nDate\nNotes and held for\nCash in CIB Payroll increases by 45,000 EGP; balance owned by You.\n\nAll details\nDelete",
+    "fields": [
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 77,
+      "h": 38,
+      "t": "×"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 167,
+      "h": 16,
+      "t": "out"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 167,
+      "h": 16,
+      "t": "in"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 167,
+      "h": 16,
+      "t": "transfer"
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "amount",
+      "mode": "decimal",
+      "auto": false,
+      "ph": "0.00",
+      "y": 254,
+      "h": 48,
+      "t": "45,000.00"
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "counterparty",
+      "mode": "",
+      "auto": false,
+      "ph": "Who you paid or who paid you",
+      "y": 345,
+      "h": 48,
+      "t": "ACME Egypt"
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "Salary",
+      "y": 436,
+      "h": 48,
+      "t": "Salary"
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "date",
+      "mode": "numeric",
+      "auto": false,
+      "ph": "yyyy-mm-dd",
+      "y": 526,
+      "h": 48,
+      "t": "2026-11-01"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 526,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "notes",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 661,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "You",
+      "y": 740,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "button",
+      "type": "submit",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 833,
+      "h": 48,
+      "t": "Delete"
+     }
+    ],
+    "active": "kind"
+   }
+  },
+  "search": {
+   "url": "http://127.0.0.1:46213/search",
+   "text": "Search\n⌄\nSearch\nFind a page, an action, an account, a counterparty, a category, an investment or a #tag\nSearch\n\nPress Ctrl K on any page to search from there. Search only suggests where to go; nothing changes until you choose.\n\nOverview\nBudget\nAdd\nTransactions\nMore"
+  },
+  "sms": "From SMS\n\nBank messages become transactions you check before they are posted\n\nImport\nAccounts\nHeld for others\nPaste or share messages\n\nOr share a message to Lightning from your SMS app. To paste several, leave a blank line between them. CIB and NBE are read today, other wordings by a general rule you check; codes, declined payments and offers are skipped.\n\nMessages\nRead them",
+  "budget category": {
+   "url": "http://127.0.0.1:46213/transactions?category_id=5&date_from=2026-11-01&date_to=2026-11-01",
+   "text": "Transactions\nAll\nIn\nOut\nTransfers\nTo sort\nCustom range\nSelect\n⋯\n\n2026-11-01 to 2026-11-01\n\nMoney in\n0\nMoney out\n0\n\nCategory: Food & Groceries\n\nClear\nViews\n\nNothing matches."
+  }
+ }
+}

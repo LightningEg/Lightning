@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 78 open items, in the order they are worked on.
+10 milestones, 80 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -116,8 +116,26 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3AM3 | ↳ Each tab opens on its answer (O1-O2, B1-B3, B5, T1-T2, T5-T6, SP1-SP3, SA3-SA5, I1-I2, A1-A3, C1-C2) | | | L | |
 | IV-3AM4 | ↳ Settings stop being forms (ST1-ST4) | | | M | |
 | IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | M | |
+| **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | ready |
+| IV-3AN0 | ↳ Approve the Part C changes | | | owner | |
+| IV-3AN1 | ↳ Small faults first | | | S | |
+| IV-3AN2 | ↳ One navigation | | | S | |
+| IV-3AN3 | ↳ The Add sheet and the transaction sheet | | | L | |
+| IV-3AN4 | ↳ Overview's first screen | | | M | |
+| IV-3AN5 | ↳ SMS in Add | | | M | |
+| IV-3AN6 | ↳ Search for money | | | M | |
+| IV-3AN7 | ↳ Budget in order of need | | | M | |
+| IV-3AN8 | ↳ Moves read as moves | | | S | |
+| IV-3AN9 | ↳ No wall of zeros | | | S | |
+| IV-3AN10 | ↳ Arabic daily screens | | | M | |
+| IV-3AN11 | ↳ Measure and hand to the owner | | | S | |
+| **IT-3AO** | [The phone feels slow - every tap reloads the whole page, and on a phone's CPU the browser side costs most of the time, not Python](3-polish-and-arabic/3AO-phone-feels-slow-full-page-reloads.md) | improvement, technical | Everywhere | L | ready |
+| IT-3AO1 | ↳ Measure on a real phone | | | S | |
+| IT-3AO2 | ↳ Keep the frame, swap the page | | | L | |
+| IT-3AO3 | ↳ Lighter pages for the browser | | | M | |
+| IT-3AO4 | ↳ Fewer queries on the heaviest pages | | | M | |
 
-Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK. Next free code: 3AN.
+Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK. Next free code: 3AP.
 
 ## 4 Edit journal and devices
 
