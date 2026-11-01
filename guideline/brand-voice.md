@@ -35,7 +35,7 @@ A salaried person in Egypt, phone first, counting in EGP. Money sits in a bank, 
 
 **Numbers.** Whole EGP on big figures with EGP once, rows are bare numbers, a true minus, dates as yyyy-mm-dd (A06.1).
 
-**Promise.** Describe only what the app does today. Show what Lightning does well. Never compare it with other apps or name them (B10).
+**Promise.** Describe only what the app does today. Show what Lightning does well. Compare only with a kind of tool (a spreadsheet, a traditional expense tracker, a cloud budgeting app), never a named product, and only as Low, Medium or High with a line of evidence; where another way is better, say so (B10).
 
 ## It sounds like / It never sounds like
 
