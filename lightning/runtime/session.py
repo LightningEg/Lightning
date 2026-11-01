@@ -219,6 +219,7 @@ class ProfileSession:
         self.last_activity = time.monotonic()
         self.idle_seconds = 15 * 60
         self.sync_key: bytes | None = None   # for the sync thread while unlocked (multiple devices); wiped on close
+        self.data_key: bytes | None = None   # the open profile's data key, for staying signed in on the phone; wiped on close
         self.label = ""                       # a borrowed profile's name (its working file has none)
         self.borrowed = None                  # the BorrowerNode of an open borrowed profile, else None
         self.journal = None
@@ -405,6 +406,7 @@ class ProfileSession:
         """What follows any unlock that has the data key, whichever way it was obtained: put back a missing key
         file, check an interrupted restore, verify the database, open it in `role`. The caller closes `lock`
         if this raises."""
+        self.data_key = None
         try:
             if read_slot(paths.keys_path) != document:
                 raise ProfileError("damaged")
@@ -433,6 +435,7 @@ class ProfileSession:
             try:
                 runtime = JournalRuntime(container, paths, document)
                 self._activate(paths, lock, runtime.services, SessionRole.HOME, journal=runtime)
+                self.data_key = key
             except BaseException:
                 if runtime is not None:
                     runtime.close()
@@ -449,6 +452,7 @@ class ProfileSession:
             except ReadOnlyCopyError as exc:
                 raise ProfileError(str(exc)) from exc
         self._activate(paths, lock, container, role)
+        self.data_key = key
 
     def fingerprint_target(self, selected: str) -> tuple[str, str]:
         """(profile id, key id) of a locked profile, for the phone's fingerprint unlock; ("", "") when the profile
@@ -763,6 +767,7 @@ class ProfileSession:
         self.container = None
         self.role = SessionRole.HOME
         self.sync_key = None
+        self.data_key = None
         self.label = ""
         self.borrowed = None
         self.paths = None

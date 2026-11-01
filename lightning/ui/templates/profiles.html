@@ -164,6 +164,7 @@
             <input type="hidden" name="csrf" value="{{ csrf }}">
             <input type="hidden" name="db" value="{{ selected }}">
             <div class="field"><label for="unlock-password">{{ 'Password'|tr(locale) }}</label><input id="unlock-password" name="password" type="password" required autocomplete="current-password"></div>
+            {% if stay_offered %}<label class="check-row"><input type="checkbox" name="stay" value="yes" checked><span>{{ "Stay signed in on this phone until you lock the profile"|tr(locale) }}</span></label>{% endif %}
             <div class="form-actions"><button class="button button-primary" type="submit">{{ 'Unlock profile'|tr(locale) }}</button><a class="text-link" href="/profiles/recover?db={{ selected|urlencode }}">{{ 'Forgot password?'|tr(locale) }}</a></div>
           </form>
         </section>
