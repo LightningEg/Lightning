@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
 import android.webkit.CookieManager;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -27,6 +28,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.chaquo.python.Python;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Lightning on the phone: the shared pages in a WebView locked to this phone's own server (task 04c rules). */
@@ -190,6 +194,11 @@ public final class MainActivity extends Activity {
             public void onPageFinished(WebView view, String finishedUrl) {
                 if (ours(Uri.parse(finishedUrl))) checkReminders();
             }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                if (request.isForMainFrame() && ours(request.getUrl())) checkServer("page did not load");
+            }
         });
         frame.removeAllViews();
         frame.addView(web);
@@ -239,9 +248,45 @@ public final class MainActivity extends Activity {
         else moveTaskToBack(true);  // keep the server and an open lend reachable
     }
 
+    /** The app's own server must take a connection; when it does not ("Web page not available ... CONNECTION_TIMED_OUT",
+     *  owner 2026-11-01), the app starts again in a fresh process. Only a refused or timed-out connection counts: a
+     *  server busy with a long page still takes connections and is never restarted. A kept profile (StayBridge)
+     *  opens by itself after the restart. */
+    private void checkServer(String why) {
+        Uri current = origin;
+        if (current == null) return;
+        new Thread(() -> {
+            if (!answers(current)) runOnUiThread(() -> restartApp(why));
+        }, "lightning-server-check").start();
+    }
+
+    private static boolean answers(Uri origin) {
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress("127.0.0.1", origin.getPort()), 3000);
+            return true;
+        } catch (IOException refused) {
+            return false;
+        }
+    }
+
+    private void restartApp(String why) {
+        android.content.SharedPreferences prefs = getSharedPreferences("lightning-recovery", MODE_PRIVATE);
+        long now = System.currentTimeMillis();
+        if (now - prefs.getLong("restarted_at", 0) < 60_000) return;  // once a minute at most: never a loop
+        prefs.edit().putLong("restarted_at", now).commit();
+        Log.w("Lightning", "The app's server did not answer (" + why + "): starting again");
+        Intent again = getPackageManager().getLaunchIntentForPackage(getPackageName());
+        if (again == null) return;
+        again.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(again);
+        finishAffinity();
+        Runtime.getRuntime().exit(0);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
+        if (serverReady) checkServer("back in front");
         stopService(new Intent(this, SyncService.class));
         if (serverReady) requestJournalSync();
         journalSyncHandler.removeCallbacks(foregroundJournalSync);

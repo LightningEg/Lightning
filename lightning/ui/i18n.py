@@ -1650,6 +1650,7 @@ ARABIC_UI = {
     'Cancel profile setup': 'إلغاء إعداد الملف الشخصي',
     'Enter your password': 'اكتب كلمة المرور',
     'Unlock profile': 'افتح الملف الشخصي',
+    'Stay signed in on this phone until you lock the profile': 'خليك مسجّل على الموبايل ده لحد ما تقفل الملف الشخصي',
     'Forgot password?': 'نسيت كلمة المرور؟',
     'Verify and reset': 'تحقق وغيّر كلمة المرور',
     'Recovery verifies this database and resets its password only. It does not alter your financial data.': 'الاستعادة بتتحقق من قاعدة البيانات وبتغيّر كلمة المرور بس. مش بتغيّر بياناتك المالية.',
