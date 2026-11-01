@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import copy
 import sqlite3
 
 from lightning.core.dates import now_iso
-from lightning.core.memo import request_cached
+from lightning.core.memo import in_request, request_cached
 from lightning.database.connection import Database
 
 from .domain import Category, CategoryFamily, Direction, IncomeClass, Movement, Scope
@@ -41,8 +42,16 @@ class CategoryRepository:
         row = self.db.one("SELECT * FROM categories WHERE id = ?", (category_id,))
         return _row(row) if row else None
 
-    @request_cached(deep=True)
+    @request_cached
+    def _by_code(self) -> dict[str, Category]:
+        return {row["code"]: _row(row) for row in self.db.all("SELECT * FROM categories")}
+
     def get_by_code(self, code: str) -> Category | None:
+        # A report names many categories by code: during a request one read serves them all (IT-3AO4; Spending asked
+        # 18 times). The caller gets its own copy.
+        if in_request():
+            found = self._by_code().get(code)
+            return copy.copy(found) if found else None
         row = self.db.one("SELECT * FROM categories WHERE code = ?", (code,))
         return _row(row) if row else None
 

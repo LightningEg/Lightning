@@ -2247,8 +2247,10 @@ document.querySelectorAll("[data-currency-search]").forEach((search) => {
 })();
 
 // Shared period controls use separate month/year fields and a bounded scroll list.
-document.querySelectorAll("[data-month-picker]").forEach((picker) => {
-  // One month stepper: ‹ yyyy-mm ›. The box is typeable; arrows move a month.
+// One month stepper: ‹ yyyy-mm ›. The box is typeable; arrows move a month. Runs again on a swapped phone page.
+const initMonthPickers = (root = document) => root.querySelectorAll("[data-month-picker]").forEach((picker) => {
+  if (picker.dataset.monthPickerReady) return;
+  picker.dataset.monthPickerReady = "1";
   const monthValue = picker.querySelector("[data-month-select]");
   const form = picker.matches("form") ? picker : picker.closest("form");
   const currentMonth = picker.dataset.currentMonth;
@@ -2323,6 +2325,7 @@ document.querySelectorAll("[data-month-picker]").forEach((picker) => {
   });
   updateButtons();
 });
+initMonthPickers();
 
 // Month picker: every month box (class "month-input") opens a small popup instead of being typed.
 // The year and the month are picked separately, so going back years is one tap per year.
@@ -2373,7 +2376,7 @@ document.querySelectorAll("[data-month-picker]").forEach((picker) => {
     open = { input, pop };
     pop.querySelector("button.selected, .month-popup-grid button:not([disabled])")?.focus();
   }
-  document.querySelectorAll("input.month-input").forEach((input) => {
+  const bind = (root) => root.querySelectorAll("input.month-input:not(.month-picker-box)").forEach((input) => {
     input.readOnly = true;
     input.classList.add("month-picker-box");
     input.setAttribute("aria-haspopup", "dialog");
@@ -2383,6 +2386,8 @@ document.querySelectorAll("[data-month-picker]").forEach((picker) => {
       if (event.key === "Escape") close();
     });
   });
+  bind(document);
+  document.addEventListener("lightning:page", (event) => { close(); bind(event.detail.root); });
   document.addEventListener("click", (event) => {
     if (open && !open.pop.contains(event.target) && event.target !== open.input) close();
   });
@@ -2837,31 +2842,48 @@ window.lightningPrivacy = (() => {
 })();
 
 // C08.5 on a phone: press and hold a transaction to start selecting, with that row chosen.
-(() => {
-  document.querySelectorAll(".phone-txn[data-txn]").forEach((row) => {
-    let timer = 0, held = false, x = 0, y = 0;
-    const stop = () => window.clearTimeout(timer);
-    row.addEventListener("pointerdown", (event) => {
-      held = false; x = event.clientX; y = event.clientY;
-      timer = window.setTimeout(() => {
-        held = true;
-        const url = new URL(window.location.href);
-        url.searchParams.set("select", "1");
-        url.searchParams.set("pick", row.dataset.txn);
-        window.location.href = url.toString();
-      }, 550);
-    });
-    row.addEventListener("pointermove", (event) => { if (Math.abs(event.clientX - x) + Math.abs(event.clientY - y) > 10) stop(); });
-    ["pointerup", "pointerleave", "pointercancel"].forEach((name) => row.addEventListener(name, stop));
-    row.addEventListener("contextmenu", (event) => event.preventDefault());
-    row.addEventListener("click", (event) => { if (held) { event.preventDefault(); event.stopImmediatePropagation(); } }, true);
+const initHoldToSelect = (root = document) => root.querySelectorAll(".phone-txn[data-txn]").forEach((row) => {
+  if (row.dataset.holdReady) return;
+  row.dataset.holdReady = "1";
+  let timer = 0, held = false, x = 0, y = 0;
+  const stop = () => window.clearTimeout(timer);
+  row.addEventListener("pointerdown", (event) => {
+    held = false; x = event.clientX; y = event.clientY;
+    timer = window.setTimeout(() => {
+      held = true;
+      const url = new URL(window.location.href);
+      url.searchParams.set("select", "1");
+      url.searchParams.set("pick", row.dataset.txn);
+      window.location.href = url.toString();
+    }, 550);
   });
-})();
+  row.addEventListener("pointermove", (event) => { if (Math.abs(event.clientX - x) + Math.abs(event.clientY - y) > 10) stop(); });
+  ["pointerup", "pointerleave", "pointercancel"].forEach((name) => row.addEventListener(name, stop));
+  row.addEventListener("contextmenu", (event) => event.preventDefault());
+  row.addEventListener("click", (event) => { if (held) { event.preventDefault(); event.stopImmediatePropagation(); } }, true);
+});
+initHoldToSelect();
 
 // C04.6 on a phone: the As-of chip is the phone's own date picker; choosing a day shows that day.
-document.querySelectorAll("form.phone-as-of input[data-native-date]").forEach((input) => {
+const initAsOf = (root = document) => root.querySelectorAll("form.phone-as-of input[data-native-date]").forEach((input) => {
+  if (input.dataset.asOfReady) return;
+  input.dataset.asOfReady = "1";
   input.addEventListener("change", () => { if (input.value) input.form.requestSubmit(); });
   input.addEventListener("click", () => { try { input.showPicker?.(); } catch (error) { /* the tap itself opens it */ } });
+});
+initAsOf();
+
+// A phone page swapped in without a reload (phone-nav.js, IT-3AO2) gets the set-up a loaded page gets. Everything else
+// here listens on the document or watches it, so it already covers the new content.
+document.addEventListener("lightning:page", (event) => {
+  const root = event.detail.root;
+  initFlashMessages(root, true);
+  initOwnDataPickers(root);
+  initDateFields(root);
+  root.querySelectorAll(moneySelector).forEach(setupMoneyInput);
+  initMonthPickers(root);
+  initHoldToSelect(root);
+  initAsOf(root);
 });
 
 // Setup, "Other currencies you hold": a type-and-pick that adds removable chips; each chip submits its code.

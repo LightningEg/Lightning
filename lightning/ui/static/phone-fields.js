@@ -38,13 +38,15 @@
 
 /* Phone tables (guideline C12): CSS stacks every table row; each cell carries its column's heading as a label. */
 (() => {
-  document.querySelectorAll("table").forEach((table) => {
+  const label = (root) => root.querySelectorAll("table").forEach((table) => {
     const heads = [...table.querySelectorAll("thead th")].map((th) => th.textContent.trim());
     if (!heads.some(Boolean)) return;
     table.querySelectorAll("tbody tr").forEach((row) => {
       [...row.cells].forEach((cell, i) => { if (heads[i] && cell.textContent.trim() && !cell.dataset.label) cell.dataset.label = heads[i]; });
     });
   });
+  label(document);
+  document.addEventListener("lightning:page", (event) => label(event.detail.root));
 })();
 
 /* Phone dates (guideline C12: a date is a picker, never typed): a date field is read-only so no keyboard opens; app.js opens the calendar on tap. */
@@ -71,6 +73,7 @@
   const box = document.getElementById("app-popup-content");
   if (box) new MutationObserver(() => ready(box)).observe(box, { childList: true });
   document.addEventListener("DOMContentLoaded", () => ready(document));
+  document.addEventListener("lightning:page", (event) => ready(event.detail.root));
 
   const put = (form, name, value) => {
     const field = form.querySelector(`[name="${name}"]`);

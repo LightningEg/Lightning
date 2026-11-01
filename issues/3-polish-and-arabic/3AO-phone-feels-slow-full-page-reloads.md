@@ -42,6 +42,13 @@ Why: every tap is a full page load (`no-store`), so the WebView parses the HTML 
 server would feel fast if the phone stopped reloading the frame on each tap and the pages it draws were lighter. Before
 any bigger decision, measure on a real phone (3AO1).
 
+**Built 2026-11-01** (owner: "fix it then"): the phone keeps its frame and swaps the page (`phone-nav.js`, test
+`tests/test_phone_nav_browser.py`); at 4x CPU a tab switch went from about 1.0 s to 0.25-0.3 s (Budget 1,004 to 287 ms,
+Transactions 970 to 224, More 942 to 308, Overview 1,088 to 309); a tab's page is asked for as the finger lands (the
+old `<link rel=prefetch>` could not be used by a no-store page and only doubled the work). Settings and categories are
+read once per request: Overview 231 to 196 queries, Budget 57 to 33, Cash planning 198 to 176, Financial health 168
+to 142. Each step below says only what is left.
+
 ## Fix
 Measure on a device, then the cheapest change with the biggest effect first; `tools/perf_check.py` and Audit 13's
 `evidence/flows.py` before and after each step; page text identical before and after (perf-check skill, step 5).
@@ -51,17 +58,21 @@ Add navigation timing to the Android probe (server time, parse and scripts, tota
 More, Spending and opening Add; record a dated table in Audit 13's report. Done when the numbers above have a real-phone
 column.
 
-## 3AO2 Keep the frame, swap the page · L
-The tab bar, app bar and scripts load once; a tab or row tap fetches only the page's `main` and swaps it in, with the
-address, ‹ and the phone's back gesture kept right; tab pages are fetched when the finger lands, before it lifts. Sheets
-already load this way. Done when a tab switch at x4 is under 300 ms.
+## 3AO2 Swap the rest of the pages · M
+Built for most pages. Left: pages that still load whole because of an inline script (Reserves, Settings, Categories,
+Counterparties) or set-up that runs only at load (`LOADS_WHOLE` in `phone-nav.js`: selection mode, the budget editor,
+investment and import forms). Move each script into `app.js` behind the `lightning:page` event, then drop it from the
+list. Done when only downloads and the profile gate load whole.
 
 ## 3AO3 Lighter pages for the browser · M
-Scripts `defer`red and only what the page uses; Arabic text translated on the server so `ui-ar.js` is not
-parsed on every page; phone CSS without the PC's rules or unused theme parts; no deep selectors
-that make every style recalculation expensive. Done when parse and scripts at x4 is under 250 ms on every tab.
+Measured 2026-11-01 at 4x: leaving out the PC's rules from the phone bundle (526 KB, `style.css` included) or `app.js`
+alone barely changed a full load; the cost is building a whole document, which 3AO2 now avoids. Left for the first
+load and the pages that still load whole: Arabic text translated on the server so `ui-ar.js` (264 KB) is not parsed on
+every page, and the forced layouts while the page loads (about 55 ms at 4x). Measure again on a phone (3AO1) before
+doing either.
 
 ## 3AO4 Fewer queries on the heaviest pages · M
-Overview reads settings 37 times, Cash planning 24, Financial health 28 (`SELECT value FROM settings WHERE key = ?`):
-read them once per request (`raw_setting`); then the category-by-code (Spending, 18) and alias (Counterparties, 36)
-loops. Done when no phone page is over 150 ms warm on the sample.
+Settings and categories are done. Left: Overview's 20 counterparty look-ups per row
+(`SELECT t.counterparty AS n FROM transactions t WHERE t.id=? UNION ...`), Counterparties' 36 alias reads, the
+exchange-rate reads on Investments and Financial health (12-14 each), and the register's per-row reads on Cash
+planning and an account. Done when no phone page is over 150 ms warm on the sample.

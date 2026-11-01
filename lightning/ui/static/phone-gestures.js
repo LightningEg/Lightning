@@ -1,7 +1,7 @@
 /* Phone gestures and polish (phone roadmap M6, M8). Everything here is an extra: each page still works by tapping.
    - Feed swipe: on a transaction row, swipe toward the end to open it (change category), toward the start to delete
      it with Undo. RTL flips the direction, so "toward the start" is always the side you read from.
-   - Tabs feel instant: a tab link is prefetched on touch, so the page fade (phone.css) has nothing to wait for.
+   - Tabs feel instant: phone-nav.js swaps only the content and asks for a tab's page as the finger lands.
    - Save buttons go busy on submit, so nobody saves twice.
    - Pull down at the top of a page to reload it.
    - Swipe the sheet's grabber down to close the sheet.
@@ -100,20 +100,6 @@
     if (row && !event.isTrusted) return;  // the swipe's own click opens it
     if (row) { event.preventDefault(); event.stopImmediatePropagation(); }
   }, true);
-
-  /* M8: prefetch a tab on touch, so the next page is already on its way. */
-  const fetched = new Set();
-  document.addEventListener("touchstart", (event) => {
-    const link = event.target.closest && event.target.closest(".phone-tabbar a[href], .phone-more-list a[href]");
-    if (!link || link.hasAttribute("data-popup-open")) return;
-    const url = new URL(link.href, location.href);
-    if (url.origin !== location.origin || fetched.has(url.href)) return;
-    fetched.add(url.href);
-    const hint = document.createElement("link");
-    hint.rel = "prefetch";
-    hint.href = url.href;
-    document.head.appendChild(hint);
-  }, { passive: true });
 
   /* M8: a Save button goes busy on submit; buzz once. (Entries always save: the server runs on this device.) */
   document.addEventListener("submit", (event) => {

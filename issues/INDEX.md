@@ -131,7 +131,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3AN11 | ↳ Measure and hand to the owner | | | S | |
 | **IT-3AO** | [The phone feels slow - every tap reloads the whole page, and on a phone's CPU the browser side costs most of the time, not Python](3-polish-and-arabic/3AO-phone-feels-slow-full-page-reloads.md) | improvement, technical | Everywhere | L | ready |
 | IT-3AO1 | ↳ Measure on a real phone | | | S | |
-| IT-3AO2 | ↳ Keep the frame, swap the page | | | L | |
+| IT-3AO2 | ↳ Swap the rest of the pages | | | M | |
 | IT-3AO3 | ↳ Lighter pages for the browser | | | M | |
 | IT-3AO4 | ↳ Fewer queries on the heaviest pages | | | M | |
 
