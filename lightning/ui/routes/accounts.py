@@ -335,8 +335,8 @@ async def update_other_asset_value(request: Request, account_id: int):
     account = c.accounts.get(account_id)
     form = await request.form()
     try:
-        c.reporting.other_asset_values.save(account, str(form.get("date") or today()),
-                                            str(form.get("value") or ""), str(form.get("notes") or ""))
+        c.accounts.save_other_asset_value(account, str(form.get("date") or today()),
+                                       str(form.get("value") or ""), str(form.get("notes") or ""))
     except LightningError as exc:
         return redirect(f"/accounts/{account_id}", exc.message)
     return redirect(f"/accounts/{account_id}", "Dated estimated value saved.")
