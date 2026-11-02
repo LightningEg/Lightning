@@ -239,7 +239,7 @@ async def save_conversion(request: Request, account_id: int):
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = {key: value for key, value in values.items() if key not in ("return_to", "rate_checked")}
     try:
-        with c.db.transaction():
+        with register.resent_guard(c, form), c.db.transaction():
             txn = c.transactions.submitted(submission, payload)  # a resent form returns its first save
             if txn is None:
                 check_conversion_rate(c, values)
@@ -433,7 +433,7 @@ async def quick_add(request: Request):
     payload = values | {"account": account_id}
     try:
         account = c.accounts.require_usable(account_id)
-        with c.db.transaction():
+        with register.resent_guard(c, form), c.db.transaction():
             earlier = c.transactions.submitted(submission, payload)
             txn = earlier or _save_popup_transaction(c, account_id, values)
             if earlier is None:
@@ -460,7 +460,7 @@ async def save_transaction_popup(request: Request, account_id: int):
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = {key: value for key, value in values.items() if key != "return_to"} | {"account": account_id}
     try:
-        with c.db.transaction():
+        with register.resent_guard(c, form), c.db.transaction():
             earlier = c.transactions.submitted(submission, payload)  # a resent form returns its first save (2J)
             txn = earlier or _save_popup_transaction(c, account_id, values)
             if earlier is None:
@@ -494,6 +494,33 @@ async def new_ownership_change(request: Request, account_id: int):
                   action=f"/accounts/{account_id}/ownership/new", error="", error_field="")
 
 
+def _save_ownership(c, account, values):
+    """One ownership change (an expense someone else paid, or cash assigned between people): its transaction."""
+    if values["mode"] == "expense":
+        if values["from_owner_id"]:
+            raise ValidationError("For an expense someone paid, set From to You.", "from_owner_id")
+        owner_id = int(values["to_owner_id"]) if values["to_owner_id"].isdigit() else None
+        category_id = int(values["category_id"]) if values["category_id"].isdigit() else None
+        if owner_id is None:
+            raise ValidationError("Choose the person who paid.", "to_owner_id")
+        if category_id is None:
+            raise ValidationError("Choose the expense category.", "category_id")
+        txn = c.transactions.record_expense_paid_by_person(values["date"], account.id, values["amount"],
+                                                           owner_id, category_id, values["notes"])
+        c.planning.match_payments(today())
+        c.reserves.auto_link_transaction(txn.id)
+    elif values["mode"] == "assign":
+        from_owner_id = int(values["from_owner_id"]) if values["from_owner_id"].isdigit() else None
+        to_owner_id = int(values["to_owner_id"]) if values["to_owner_id"].isdigit() else None
+        if from_owner_id is None and to_owner_id is None:
+            raise ValidationError("Choose a person to change ownership with.", "to_owner_id")
+        txn = c.transactions.change_cash_ownership(values["date"], account.id, values["amount"],
+                                                   from_owner_id, to_owner_id, values["notes"])
+    else:
+        raise ValidationError("Choose what happened.", "mode")
+    return txn
+
+
 @router.post("/{account_id:int}/ownership/new")
 async def save_ownership_change(request: Request, account_id: int):
     c = container(request)
@@ -502,29 +529,14 @@ async def save_ownership_change(request: Request, account_id: int):
     values = {key: str(form.get(key, "")).strip() for key in
               ("mode", "date", "amount", "from_owner_id", "to_owner_id", "category_id", "notes")}
     action = f"/accounts/{account_id}/ownership/new"
+    submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+    payload = values | {"account": account_id}
     try:
-        if values["mode"] == "expense":
-            if values["from_owner_id"]:
-                raise ValidationError("For an expense someone paid, set From to You.", "from_owner_id")
-            owner_id = int(values["to_owner_id"]) if values["to_owner_id"].isdigit() else None
-            category_id = int(values["category_id"]) if values["category_id"].isdigit() else None
-            if owner_id is None:
-                raise ValidationError("Choose the person who paid.", "to_owner_id")
-            if category_id is None:
-                raise ValidationError("Choose the expense category.", "category_id")
-            txn = c.transactions.record_expense_paid_by_person(values["date"], account.id, values["amount"],
-                                                               owner_id, category_id, values["notes"])
-            c.planning.match_payments(today())
-            c.reserves.auto_link_transaction(txn.id)
-        elif values["mode"] == "assign":
-            from_owner_id = int(values["from_owner_id"]) if values["from_owner_id"].isdigit() else None
-            to_owner_id = int(values["to_owner_id"]) if values["to_owner_id"].isdigit() else None
-            if from_owner_id is None and to_owner_id is None:
-                raise ValidationError("Choose a person to change ownership with.", "to_owner_id")
-            txn = c.transactions.change_cash_ownership(values["date"], account.id, values["amount"],
-                                                       from_owner_id, to_owner_id, values["notes"])
-        else:
-            raise ValidationError("Choose what happened.", "mode")
+        with c.db.transaction():
+            txn = c.transactions.submitted(submission, payload)  # a resent form returns its first save (2AD)
+            if txn is None:
+                txn = _save_ownership(c, account, values)
+                c.transactions.remember_submission(submission, payload, txn.id)
     except (LightningError, ValueError) as exc:
         error = exc if isinstance(exc, LightningError) else ValidationError("Check the date, amount, and choices.")
         return render(request, "accounts/ownership.html", status_code=400, account=account, values=values,

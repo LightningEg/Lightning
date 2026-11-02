@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import inspect
 from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import date
 from enum import Enum
 
@@ -29,8 +30,31 @@ class PendingOnHome(Exception):
         self.message = message
 
 
+_FORM = ContextVar("journal_form", default=None)
+
+
+class _FormScope:
+    """One delivery of one form: its commands take stable record ids from the form's token, in order."""
+    def __init__(self, token):
+        self.token, self.count = token, 0
+
+
 class JournalServices:
     is_journal = True
+
+    @contextmanager
+    def journal_submission(self, token):
+        """A form's one-time `submission` token (2J): inside this block a resent form (same token, same values)
+        reuses the proposal it already saved instead of staging a second one. No token, no effect."""
+        token = str(token or "")
+        if len(token) != 32 or any(char not in "0123456789abcdef" for char in token):
+            yield
+            return
+        mark = _FORM.set(_FormScope(token))
+        try:
+            yield
+        finally:
+            _FORM.reset(mark)
 
     @property
     def history_is_home(self):
@@ -94,7 +118,16 @@ class JournalServices:
             rehearsed = self._rehearse(method, args, kwargs)
             if isinstance(rehearsed, dict) and rehearsed.get("errors"):
                 return rehearsed  # Row-level refusals (an import): shown at once, nothing is saved.
-        wire = self._device.command(action, **values)
+        scope = _FORM.get()
+        earlier = None
+        if scope is not None and not entry.target:
+            from uuid import UUID, uuid5
+            scope.count += 1
+            record = str(uuid5(UUID(self._device.store.config["profile"]), f"form:{scope.token}:{scope.count}"))
+            earlier = self._device.resent(record, action, values)
+            wire = earlier or self._device.command(action, record=record, **values)
+        else:
+            wire = self._device.command(action, **values)
         identifier = origin_id(unpack(wire)["body"]["origin"])
         home = self._device.home
         state = home.status(identifier) if home else None
@@ -102,6 +135,8 @@ class JournalServices:
             raise PendingOnHome("Saved on this device. It takes effect when the home confirms it.")
         if state["status"] == "rejected":
             raise ValidationError(adapter.errors.pop(identifier, "The home could not apply this action."))
+        if earlier is not None:  # a resent form whose first save is already confirmed: its result is gone
+            raise ValidationError("This form was already saved. Open a new one to add another.")
         return adapter.results.pop(identifier, None)
 
 

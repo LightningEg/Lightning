@@ -21,3 +21,5 @@ Found by the [use-case audit](../../reports/2026-10-29-use-case-audit/report.md)
 ## Fix
 
 Owner decision with 7R: one rule for every link when its transaction's amount, date or account changes. Proposal: keep the link while the edited transaction still fits the item's match window and tolerance, refresh the paid amount from the transaction, treat a payment as unpaid before its transaction's date (as loans do), and otherwise unlink it and say so on Save.
+
+**Owner decision, 2026-11-02 (with 7R):** keep the link while the edited transaction still fits the item's match window and tolerance; refresh the paid amount from the transaction; treat a payment as unpaid before its transaction's date; otherwise unlink and say so on Save. One rule for bills, income, reserves and loans.

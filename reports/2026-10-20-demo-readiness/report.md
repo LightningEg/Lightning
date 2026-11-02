@@ -80,7 +80,7 @@ Polish after the demo: the rest of 3S and 3T, and the five pages left in [3Q](..
 | Medium | Money in or out is accepted on a gold account. The register offers it, and negative cash is left inside the gold account. | 2E 2 |
 | Medium | Cash goes below zero, even through money held for others: CIB ends at −58,672 while Mom's 10,000 is still listed, and every data check passes. | 2E 3 |
 | Medium | A 500 error on an unknown owner, and another on Planner amount 0. | 2E 4–5 |
-| Medium | Converting EGP to USD raises net worth by 875: the trade rate revalues every USD holding. | [5J](../../issues/5-investments/5J-conversion-raises-net-worth.md) |
+| Medium | Converting EGP to USD raises net worth by 875: the trade rate revalues every USD holding. | 5J (done: `tests/test_fx_conversion.py::test_buying_dollars_never_raises_net_worth_the_market_rate_values_the_holding`) |
 | Medium | Paying a loan early empties the everyday budget, but Safe to spend moves only 21. | [7M](../../issues/7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) |
 | Medium | Demo certificate: 18% set, 22% paid. Sample: late bills shown on today's date. | 3V |
 | Low | Dates before an account opened are accepted. Crafted posts can still cause 500 errors. | 2E 6 |
@@ -288,7 +288,7 @@ not rechecked.
 
 ## Owner decisions
 
-1. **[5J](../../issues/5-investments/5J-conversion-raises-net-worth.md):** should a currency conversion's rate revalue the other dollar holdings?
+1. **5J (done: `tests/test_fx_conversion.py::test_buying_dollars_never_raises_net_worth_the_market_rate_values_the_holding`):** should a currency conversion's rate revalue the other dollar holdings?
 2. **[7M](../../issues/7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md):**
    - Does principal paid early count against everyday money?
    - Does an expense covered by a reserve count against its budget category?

@@ -3,6 +3,7 @@ price change, Fall from its high, Typical move). `lightning.ui.visuals` only dra
 from __future__ import annotations
 
 from datetime import date
+from decimal import Decimal
 
 from lightning.core.dates import fmt_date, months_back, parse_date, parse_month
 from lightning.core.money import ZERO, from_e6
@@ -54,6 +55,8 @@ def holding_history(reporting, investments, account_id: int, asset_id: int, end:
     held, trail, native = ZERO, [], ZERO
     for l in lines:
         units = ZERO if l["type"] == "DIV" else from_e6(l["quantity_e6"] or 0)
+        if not units and l["type"] not in KINDS:
+            continue  # a month-end revaluation checkpoint is not a trade or a payout (5K)
         amount = from_e6(l["amount_base_e6"] or 0)
         amount_native = from_e6(l.get("amount_e6") or 0)
         if units > 0:
@@ -71,6 +74,7 @@ def holding_history(reporting, investments, account_id: int, asset_id: int, end:
             "cost": cost, "average": average, "average_native": average_native, "returns": returns, "drawdown": drawdown,
             "best": max(returns, key=lambda r: r[1]) if returns else None,
             "worst": min(returns, key=lambda r: r[1]) if returns else None,
+            "flat": bool(returns) and not any(abs(r[1]) > Decimal("0.0001") for r in returns),  # a fixed price: nothing to show as bumpy
             "typical": typical, "max_drawdown": min(known_dd) if known_dd else None,
             "up": sum(1 for m in moves if m > 0), "down": sum(1 for m in moves if m < 0),
             "trades": list(reversed(trail))}

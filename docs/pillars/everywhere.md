@@ -11,8 +11,7 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **BT-2F** | [On Android, downloads, file inputs and outside links do nothing](../../issues/2-safe-for-real-money/2F-android-downloads-files-links.md) | M | ready |
-| **BT-2J** | [On a journal profile, retrying one add form can still save a second expense](../../issues/2-safe-for-real-money/2J-register-submit-idempotency.md) | M | ready |
+| **BT-2F** | [On Android, downloads, file inputs and outside links do nothing](../../issues/2-safe-for-real-money/2F-android-downloads-files-links.md) | M | building |
 | **IV-3AN** | [Phone visual plan](../../issues/3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | L | ready |
 | **NF-4A** | [Edit journal: edit anywhere, one home confirms](../../issues/4-edit-journal-and-devices/4A-edit-journal.md) | L | building |
 | **NF-4B** | [Multiple devices: implementation plan](../../issues/4-edit-journal-and-devices/4B-multiple-devices.md) | L | building |
@@ -24,8 +23,7 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 - [Audit 2: backend efficiency and loose ends](../../reports/2026-10-21-backend-efficiency/report.md): 4A
 - [Audit 3: is the edit journal (multi-device sync) solid?](../../reports/2026-10-21-edit-journal/report.md): 4A
 - [Audit 5: is the backend engine efficient and streamlined?](../../reports/2026-10-21-backend-streamlining/report.md): 4A
-- [Audit 4: backend correctness and failure boundaries](../../reports/2026-10-23-backend-correctness/report.md): 2J, 4A
-- [Audit 8: backbone engine gaps and loose ends](../../reports/2026-10-26-engine-audit/report.md): 2J
+- [Audit 4: backend correctness and failure boundaries](../../reports/2026-10-23-backend-correctness/report.md): 4A
 - [Pairing backend hardening and security review](../../reports/2026-10-26-pairing-hardening/report.md): 4A
 - [Audit 13: the phone for quick jobs - convenience, taps and the look](../../reports/2026-11-01-phone-convenience-audit/report.md): 3AN
 <!-- work:end -->

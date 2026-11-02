@@ -67,6 +67,20 @@ def test_the_executed_rate_is_saved_as_a_trade_rate_and_follows_edit_and_void(c,
     assert c.reporting.account_balance(accounts["usd"].id, "2026-09-12") == D("800")
 
 
+def test_buying_dollars_never_raises_net_worth_the_market_rate_values_the_holding(c, wallets):
+    """BT-5J: the executed rate belongs to the conversion's own legs; the dollars you hold stay at the market rate."""
+    accounts, _ = wallets
+    c.db.execute("INSERT INTO fx_rates(date,base,quote,rate_e6,source,created_at) VALUES('2026-09-10','USD','EGP',"
+                 "48200000,'MARKET','2026-09-10')")
+    before = c.reporting.net_worth("2026-09-10").total
+    txn = c.transactions.record_conversion("2026-09-10", accounts["cib"].id, accounts["usd"].id, "40000", "824",
+                                           fee="10")
+    after = c.reporting.net_worth("2026-09-10").total
+    assert rate_for(c.db, "USD", "EGP", "2026-09-10").source == "MARKET"
+    assert before - after == D("10") + c.transactions.conversion_spread(txn)   # the fee plus the spread, nothing more
+    assert after < before
+
+
 def test_a_fee_is_an_expense_in_fees_and_charges_not_part_of_the_rate(c, wallets):
     accounts, _ = wallets
     txn = c.transactions.record_conversion("2026-09-10", accounts["cib"].id, accounts["usd"].id, "40000", "824",

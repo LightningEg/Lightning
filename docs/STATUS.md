@@ -6,22 +6,23 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
-| [Capture](pillars/capture.md) | 8 |  | 4 | 4 |  |  |
+| [Capture](pillars/capture.md) | 7 |  | 3 | 4 |  |  |
 | [Plan](pillars/plan.md) | 7 |  | 2 | 5 |  | 2 |
 | [Understand](pillars/understand.md) | 5 |  | 2 | 2 | 1 | 1 |
-| [Own](pillars/own.md) | 17 | 2 | 4 | 5 | 6 |  |
+| [Own](pillars/own.md) | 16 | 2 | 4 | 4 | 6 |  |
 | [Protect](pillars/protect.md) | 3 | 1 | 2 |  |  | 1 |
-| [Everywhere](pillars/everywhere.md) | 6 | 2 | 3 | 1 |  |  |
+| [Everywhere](pillars/everywhere.md) | 5 | 3 | 1 | 1 |  |  |
 | [Feel](pillars/feel.md) | 14 | 5 | 7 | 1 | 1 | 1 |
-| [Build](pillars/build.md) | 11 | 1 | 10 |  |  |  |
+| [Build](pillars/build.md) | 9 | 1 | 8 |  |  |  |
 | [Reach](pillars/reach.md) | 6 |  | 4 | 2 |  | 2 |
 
-77 open items in 10 milestones.
+72 open items in 10 milestones.
 
 ## Being built now
 
 - **IT-1H** (Build) [Refresh packaged dependencies with matching native wheels and lockfiles](../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md)
 - **IT-2A** (Protect) [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic rep…](../issues/2-safe-for-real-money/2A-restore-safety.md)
+- **BT-2F** (Everywhere) [On Android, downloads, file inputs and outside links do nothing](../issues/2-safe-for-real-money/2F-android-downloads-files-links.md)
 - **IV-3H** (Feel) [Tab-by-tab review: what a real user needs next](../issues/3-polish-and-arabic/3H-tab-by-tab-review.md)
 - **IV-3AL** (Feel) [Phone declutter, tab by tab](../issues/3-polish-and-arabic/3AL-phone-declutter-tab-by-tab.md)
 - **IV-3AM** (Feel) [PC declutter, tab by tab](../issues/3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md)
@@ -46,11 +47,11 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 
 | Milestone | Open | Goal |
 |---|---|---|
-| 1 Easy to contribute | 7 | Anyone can find how to help in one click and send a first fix the same evening. |
-| 2 Safe for real money | 8 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
+| 1 Easy to contribute | 5 | Anyone can find how to help in one click and send a first fix the same evening. |
+| 2 Safe for real money | 6 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
 | 3 Polish and Arabic | 14 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 3 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
-| 5 Investments | 10 | Every investment figure can be explained per purchase, and agrees with the ledger. |
+| 5 Investments | 9 | Every investment figure can be explained per purchase, and agrees with the ledger. |
 | 6 Market data | 4 | Prices arrive by themselves, from sources Lightning may redistribute. |
 | 7 Planning, import and search | 15 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 4 | The site is honest, quick and in step with the app. |

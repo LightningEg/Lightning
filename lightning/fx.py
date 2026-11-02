@@ -50,7 +50,7 @@ class CurrencyRates:
 # A rate is stored as quoted (foreign per profile currency, or any pair a price file quotes); derived rates
 # (inverse, cross through EGP) are computed here and never stored.
 
-SOURCE_RANK = ("MANUAL", "TRADE", "MARKET", "ONLINE")   # who wins when one day holds several rates
+SOURCE_RANK = ("MANUAL", "MARKET", "ONLINE", "TRADE")   # who wins when one day holds several rates; a conversion's own rate (TRADE) only fills a day no market rate covers (BT-5J)
 STALE_DAYS = MAX_GAP_DAYS       # older than this still values a balance but is shown "as of <date>"
 MISSING_DAYS = 45               # older than this is no rate at all (Needs you)
 PIVOT = "EGP"                   # cross rates run through the pound

@@ -18,3 +18,5 @@ Found by [Audit 8](../../reports/2026-10-26-engine-audit/report.md) (B7). Link 2
 ## Fix
 
 Owner decision: keep the link capped at the new amount, or keep removing it and say so on Save ("Unlinked from the Trip reserve; link it again if it still belongs there").
+
+**Owner decision, 2026-11-02:** same rule as 7U (keep the link while the edit still fits; otherwise unlink and say so). Build 7R and 7U together.

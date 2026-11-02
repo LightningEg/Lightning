@@ -1253,6 +1253,7 @@ ROUTES = {
     "This is not an active ownership entry.": "ده مش قيد ملكية شغّال.",
     "This is not an ownership entry.": "ده مش قيد ملكية.",
     "Saved {name}. Ownership is updated.": "اتحفظ {name}. الملكية اتحدّثت.",
+    "Choose where to save {name}.": "اختار هتحفظ {name} فين.",
     "Choose a valid reserve action.": "اختار إجراء صحيح للمبلغ المحجوز.",
     "{rate} is {percent}% above the market rate ({market}). Check the two amounts are not swapped, then press Convert again to save it.": "{rate} أعلى من سعر السوق ({market}) بـ {percent}%. اتأكد إن المبلغين مش متبدلين، وبعدين دوس «حوّل عملة» تاني عشان يتحفظ.",
     "{rate} is {percent}% below the market rate ({market}). Check the two amounts are not swapped, then press Convert again to save it.": "{rate} أقل من سعر السوق ({market}) بـ {percent}%. اتأكد إن المبلغين مش متبدلين، وبعدين دوس «حوّل عملة» تاني عشان يتحفظ.",

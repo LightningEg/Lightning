@@ -165,8 +165,15 @@ async def trade_item(request: Request, account_id: int, asset_id: int):
             raise LightningError("Choose Add holding, Purchase, or Sale.", "action")
         if action in ("buy", "sell") and not cash_id:
             raise LightningError("Choose the cash account that paid or received the money.", "cash_account_id")
+        submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+        payload = {key: str(form.get(key, "")) for key in
+                   ("action", "date", "quantity", "total", "fees", "cash_account_id", "owner", "notes", "workmanship")}
+        payload |= {"account": account_id, "asset": asset_id}
         with c.db.transaction():
-            if action == "buy":
+            txn = earlier = c.transactions.submitted(submission, payload)  # a resent form returns its first save (2AD)
+            if earlier is not None:
+                pass
+            elif action == "buy":
                 txn = c.investments.buy_total(date, account_id, asset_id, quantity, total, cash_id, notes,
                                               fees, True, owner)
                 if to_decimal(workmanship or "0") > to_decimal(total or "0"):
@@ -179,6 +186,8 @@ async def trade_item(request: Request, account_id: int, asset_id: int):
             else:
                 txn = c.investments.add_holding(account_id, asset_id, quantity, total, date, notes, owner)
                 c.physical_items.record_trade_details(txn.id, asset_id, "OPN", "0", notes)
+            if earlier is None:
+                c.transactions.remember_submission(submission, payload, txn.id)
     except (ValueError, InvalidOperation, LightningError) as exc:
         msg = exc.message if isinstance(exc, LightningError) else "Check the quantity, amount, and date."
         return redirect(f"/accounts/{account_id}", msg)

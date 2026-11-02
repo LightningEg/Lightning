@@ -5,15 +5,15 @@ Audits and reviews of a specific source snapshot. Active work lives in
 
 | Historical ID | Report | Review date | Kind | Open follow-ups |
 | --- | --- | --- | --- | --- |
-| audit-1 | [Audit 1: is Lightning ready to demo?](2026-10-20-demo-readiness/report.md) | 2026-10-20 | audit | 2E, 2F, 3G, 3H, 3Q, 3S, 3T, 5J, 5K, 7L, 7M |
+| audit-1 | [Audit 1: is Lightning ready to demo?](2026-10-20-demo-readiness/report.md) | 2026-10-20 | audit | 2E, 2F, 3G, 3H, 3Q, 3S, 3T, 5K, 7L, 7M |
 | audit-2 | [Audit 2: backend efficiency and loose ends](2026-10-21-backend-efficiency/report.md) | 2026-10-21 | audit | 2A, 2C, 2E, 4A, 5A |
 | audit-3 | [Audit 3: is the edit journal (multi-device sync) solid?](2026-10-21-edit-journal/report.md) | 2026-10-21 | audit | 4A |
 | audit-5 | [Audit 5: is the backend engine efficient and streamlined?](2026-10-21-backend-streamlining/report.md) | 2026-10-21 | audit | 4A, 9J, 9K, 2AB |
-| audit-4 | [Audit 4: backend correctness and failure boundaries](2026-10-23-backend-correctness/report.md) | 2026-10-23 | audit | 1G, 2A, 2C, 2J, 4A |
+| audit-4 | [Audit 4: backend correctness and failure boundaries](2026-10-23-backend-correctness/report.md) | 2026-10-23 | audit | 1G, 2A, 2C, 4A |
 | audit-6 | [Audit 6: open pull request cleanup](2026-10-23-pull-request-cleanup/report.md) | 2026-10-23 | review | 1H |
 | contributor-review | [Yusuf contribution review · 2026-10-23](2026-10-23-contributor-review/report.md) | 2026-10-23 | review | none |
 | audit-7 | [Audit 7 — app visual flow](2026-10-25-app-visual-flow/report.md) | 2026-10-25 | audit | none |
-| audit-8 | [Audit 8: backbone engine gaps and loose ends](2026-10-26-engine-audit/report.md) | 2026-10-26 | audit | 2J, 7R, 7S |
+| audit-8 | [Audit 8: backbone engine gaps and loose ends](2026-10-26-engine-audit/report.md) | 2026-10-26 | audit | 7R, 7S |
 | dendera-theme | [Dendera theme: the workflow, and how it compares with the theme flow](2026-10-26-dendera-theme/report.md) | 2026-10-26 | research | none |
 | pairing-hardening | [Pairing backend hardening and security review](2026-10-26-pairing-hardening/report.md) | 2026-10-26 | review | 4A |
 | v1.5.0-preparation | [v1.5.0 PR review, theme switching and package preparation](2026-10-26-v150-release/report.md) | 2026-10-26 | release | 1H, 10A, 10C |
@@ -22,7 +22,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | audit-9 | [Audit 9: loose ends after themes and sync, linking sections, and how the plan is filed](2026-10-28-loose-ends-and-linking/report.md) | 2026-10-28 | audit | 4K, 7T |
 | fx-date-boundary | [Backend audit: exchange-rate date boundary](2026-10-29-backend-audit/report.md) | 2026-10-29 | audit | none |
 | audit-10 | [Audit 10: the phone, tab by tab - quick actions and the answer first](2026-10-29-phone-tab-audit/report.md) | 2026-10-29 | audit | 3AD, 3AL, 3T |
-| audit-11 | [Audit 11: the backend walked through use cases](2026-10-29-use-case-audit/report.md) | 2026-10-29 | audit | 2AD, 2E, 5J, 7U |
+| audit-11 | [Audit 11: the backend walked through use cases](2026-10-29-use-case-audit/report.md) | 2026-10-29 | audit | 2E, 7U |
 | audit-12 | [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](2026-10-30-desktop-tab-audit/report.md) | 2026-10-30 | audit | 3AM |
 | audit-13 | [Audit 13: the phone for quick jobs - convenience, taps and the look](2026-11-01-phone-convenience-audit/report.md) | 2026-11-01 | audit | 3AN |
 

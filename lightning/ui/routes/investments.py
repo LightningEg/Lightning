@@ -572,7 +572,7 @@ async def holding_detail(request: Request, asset_id: int):
                   display_return=h.display_return,
                   start=start,period_realized=h.realized-(previous.realized if previous else ZERO),
                   period_dividends=h.dividends-(previous.dividends if previous else ZERO),
-                  allocation_classes=_allocation_classes(c),
+                  allocation_classes=sorted({*_allocation_classes(c), bucket}, key=str.casefold),  # its own bucket is always a choice (5K)
                   show_popup=request.headers.get("X-Lightning-Popup")=="1")
 
 
@@ -713,9 +713,15 @@ async def create_trade(request: Request):
     kind = kind if kind in KINDS else "buy"
     form = await request.form()
     values = {k: str(form.get(k, "")) for k in FIELDS}
+    c = container(request)
+    submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+    payload = values | {"kind": kind}
     try:
-        with container(request).db.transaction():
-            txn = _save(request, kind, values)
+        with c.db.transaction():
+            txn = c.transactions.submitted(submission, payload)  # a resent form returns its first save (2AD)
+            if txn is None:
+                txn = _save(request, kind, values)
+                c.transactions.remember_submission(submission, payload, txn.id)
     except LightningError as exc:
         return _form(request, kind, values, error=exc, status=400)
     return redirect(f"/accounts/{values['account_id']}" if values["account_id"] else "/investments",

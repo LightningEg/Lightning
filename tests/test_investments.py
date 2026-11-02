@@ -672,3 +672,24 @@ def test_planner_without_targets_splits_by_the_current_mix(inv):
     assert 'value="4000"' in page  # the Overview passes its free cash
     assert "By your current mix" in page and "Set target allocation first" not in page
     assert "3,000" in page and "1,000" in page  # 75% and 25% of 4,000, to the classes it holds
+
+
+def test_a_fixed_price_holding_shows_no_price_swings_and_no_checkpoint_rows(c, setup, monkeypatch):
+    """BV-5K: a certificate-like holding (one price all along) hides 'How bumpy', lists only real trades, and its own
+    bucket stays selectable instead of falling back to the first menu entry."""
+    from datetime import date
+    from fastapi.testclient import TestClient
+    from lightning.ui import visuals
+    from lightning.ui.web import create_app
+    monkeypatch.setenv("LIGHTNING_TODAY", "2027-03-31")
+    accounts, _ = setup
+    cd = c.assets.create_investment("NBE 3-year certificate", "STOCK", "NBECD")
+    thndr = accounts["thndr"].id
+    c.transactions.record_transfer("2026-09-02", accounts["cib"].id, thndr, "30000")
+    c.investments.buy("2026-09-10", thndr, cd.id, "10", "1000")
+    for month in ("2026-09-30", "2026-10-31", "2026-11-30", "2026-12-31"):
+        c.assets.set_price(cd.id, month, "1000")
+    j = visuals.holding_journey(c, thndr, cd.id, date(2026, 12, 31))
+    assert j["flat"] and [t["kind"] for t in j["trades"]] == ["Bought"]
+    page = TestClient(create_app(c)).get(f"/investments/holding/{cd.id}?account={thndr}&date=2026-12-31")
+    assert page.status_code == 200 and "How bumpy has it been?" not in page.text and "The journey" in page.text

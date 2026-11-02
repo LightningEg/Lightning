@@ -272,4 +272,5 @@ def test_the_marketplace_link_has_one_source_and_follows_the_language(c, store):
     for source in ('lightning/ui/static/theme-runtime.js', 'lightning/ui/templates/settings/index.html'):
         assert 'https://lightningeg.com' not in (root / source).read_text(), source
     java = (root / 'android/app/src/main/java/org/lightning/app/MainActivity.java').read_text()
-    assert all(f'"{path}"' in java for path in entitlements.MARKETPLACE_PATHS.values())
+    # the shell hands any https page (the store links among them) to the phone's browser, and loads no other host
+    assert 'private boolean outsideLink' in java and '"https".equals(uri.getScheme())' in java

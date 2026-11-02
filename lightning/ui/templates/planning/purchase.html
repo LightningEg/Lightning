@@ -2,7 +2,7 @@
 {% from "partials/macros.html" import page_header with context %}
 {% block title %}{{ 'Bought in instalments'|tr(locale) }}{% endblock %}
 {% block heading %}{{ page_header('Bought in instalments'|tr(locale)) }}{% endblock %}
-{% block content %}<form method="post" action="/plan/purchases/new" class="card stack" data-popup-return="{{ 'response' if quote else 'popup' }}">
+{% block content %}<form method="post" action="/plan/purchases/new" class="card stack" data-popup-return="{{ 'response' if quote else 'popup' }}"><input type="hidden" name="submission" value="{{ new_submission() }}">
 <input type="hidden" name="intent" value="{{ 'save' if quote else 'preview' }}">
 {% if quote %}
   <div class="compact-list"><div class="compact-row"><span>{{ 'Each instalment'|tr(locale) }}</span><b>{{ quote.monthly|money(False,2) }}</b></div>

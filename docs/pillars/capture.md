@@ -12,7 +12,6 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **BT-2E** | [The engine accepts some bad input](../../issues/2-safe-for-real-money/2E-engine-input-checks.md) | M | ready |
-| **BT-2AD** | [Five more money forms save twice when the same form is sent again](../../issues/2-safe-for-real-money/2AD-resent-money-forms-save-twice.md) | M | ready |
 | **NF-3AD** | [Phone overhaul, step 2](../../issues/3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | L | new |
 | **NF-7A** | [Import cannot split a transfer into principal and fee](../../issues/7-planning-import-and-search/7A-split-transfer-principal-and-fee.md) | M | ready |
 | **NF-7B** | [Read PDF and Excel statements through the CSV review](../../issues/7-planning-import-and-search/7B-pdf-and-excel-statements.md) | L | new |
@@ -25,5 +24,5 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 - [Audit 1: is Lightning ready to demo?](../../reports/2026-10-20-demo-readiness/report.md): 2E
 - [Audit 2: backend efficiency and loose ends](../../reports/2026-10-21-backend-efficiency/report.md): 2E
 - [Audit 10: the phone, tab by tab - quick actions and the answer first](../../reports/2026-10-29-phone-tab-audit/report.md): 3AD
-- [Audit 11: the backend walked through use cases](../../reports/2026-10-29-use-case-audit/report.md): 2AD, 2E
+- [Audit 11: the backend walked through use cases](../../reports/2026-10-29-use-case-audit/report.md): 2E
 <!-- work:end -->

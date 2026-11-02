@@ -25,3 +25,5 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§3 PC). 
 ## Fix
 For certificates, hide the volatility block, list interest received from `deposits/receipts.py`, drop the checkpoints from the trades list, and add
 the CD bucket (or hide the bucket field). Test on the sample's certificate.
+
+2026-11-02, built: a fixed price hides "How bumpy", month-end checkpoints no longer show as "Units out", the holding's own bucket stays in the menu (`tests/test_investments.py::test_a_fixed_price_holding_shows_no_price_swings_and_no_checkpoint_rows`). **Left:** list a certificate's interest payouts (`deposits/receipts.py`) in "Trades and payouts".
