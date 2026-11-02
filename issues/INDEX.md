@@ -103,7 +103,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3AM4 | ↳ Settings stop being forms (ST1-ST4) | | | M | |
 | IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | M | |
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | building |
-| IV-3AN9 | ↳ No wall of zeros | | | S | |
 | IV-3AN11 | ↳ Measure and hand to the owner | | | S | |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | |
 

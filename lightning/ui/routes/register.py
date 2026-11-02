@@ -294,7 +294,16 @@ def _phone_register(c, account_id, base_url, keep, kind, month, preset, from_que
     tiles = account_id is None or shown != "all" or matched_flows is not None
     money_in, money_out = (matched_flows if matched_flows is not None else
                            c.reporting.register_flows(account_id, date_from, date_to)) if tiles else (ZERO, ZERO)
+    # An empty month offers the month before with its figure instead of a wall of zeros (3AN9).
+    earlier = None
+    if shown == "month" and tiles and matched_flows is None and not kind and money_in == ZERO and money_out == ZERO:
+        before = shift_month(chosen, -1)
+        start, end = parse_month(before)
+        was_in, was_out = c.reporting.register_flows(account_id, start, end)
+        if was_in or was_out:
+            earlier = {"month": before, "out": -was_out, "in": was_in, "href": href({**ranged, "month": before})}
     return {
+        "earlier": earlier,
         "chips": [{"key": key, "label": label, "href": href({"kind": "" if key == "all" else key}),
                    "chosen": kind == ("" if key == "all" else key), "count": len(unsorted_ids) if key == "unsorted" else 0}
                   for key, label in (("all", "All"), ("in", "In"), ("out", "Out"), ("transfer", "Transfers"), ("unsorted", "To sort"))],

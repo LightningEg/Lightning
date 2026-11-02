@@ -176,10 +176,6 @@ the Arabic daily screens; no page without ‹; then the owner checks the phone e
 
 IV-3AL was folded into this item (owner, 2026-11-02): what it had left is 3AN12. `post: no` while Claude's claim holds the phone templates.
 
-## 3AN9 No wall of zeros · S
-On an empty month the Transactions list offers "Last month" with its figure (the Budget category, Spending and
-Investments parts are built).
-
 ## 3AN11 Measure and hand to the owner · S
 Re-run `evidence/flows.py` and the capture, fill the table with the new numbers in a dated follow-up of the report, run
 Mohab and `tools/phone_check.py` at 360 and 320, then ask the owner for one end-to-end phone check.

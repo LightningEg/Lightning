@@ -245,3 +245,12 @@ def test_saved_views_are_listed_in_their_sheet_and_open_with_their_summary(month
     everything = phone.post("/transactions/views", follow_redirects=True, data={"name": "Everything", "preset": "all_time"})
     assert re.search(r'<summary class="phone-period-now"[^>]*>All time</summary>', everything.text)
     assert "9999-12-31" not in "".join(re.findall(r'<nav class="phone-chips.*?</nav>', everything.text, re.S))
+
+
+def test_an_empty_month_offers_last_month_with_its_figures(month):
+    """3AN9: a month with nothing in it offers the month before, with its money in and out, not a wall of zeros."""
+    c, accounts, cats = month
+    phone = _phone(c)
+    body = phone.get("/transactions?month=2026-11").text.split('<p class="empty">')[0]
+    assert "<small>2026-10</small>" in body and "month=2026-10" in body and "−700" in body
+    assert "<small>2026-08</small>" not in phone.get("/transactions?month=2026-09").text

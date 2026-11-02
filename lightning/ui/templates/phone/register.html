@@ -93,7 +93,7 @@
 
 <section class="phone-list phone-reg-list" aria-label="{{ 'Transactions'|tr(locale) }}">
 {% from "phone/partials/txn.html" import txn_list with context %}
-{% if rows %}{{ txn_list(rows, show_account, not show_account, selecting, picked, base_url, keep_qs, reserve_suggestions=reserve_suggestions, day_net=True, sort_qs=reg.sort_qs) }}{% else %}<p class="empty">{{ 'Nothing matches.' if q or month or chosen_kind or preset or date_from or filter_tag or filter_category else 'No transactions yet.' }}</p>{% endif %}
+{% if rows %}{{ txn_list(rows, show_account, not show_account, selecting, picked, base_url, keep_qs, reserve_suggestions=reserve_suggestions, day_net=True, sort_qs=reg.sort_qs) }}{% else %}{% if reg and reg.earlier %}<div class="phone-rows"><a class="phone-row" href="{{ reg.earlier.href }}"><span>{{ 'Last month'|tr(locale) }}<small>{{ reg.earlier.month }}</small></span><b>{{ 'In {a} · out {b}'|tr(locale, a=reg.earlier['in']|amount_role('total'), b=reg.earlier.out|amount_role('total')) }}</b></a></div>{% endif %}<p class="empty">{{ 'Nothing matches.' if q or month or chosen_kind or preset or date_from or filter_tag or filter_category else 'No transactions yet.' }}</p>{% endif %}
 </section>
 {% if selecting %}{# C08.5: the bar replaces the tab bar with the count, Change category and Delete. #}
 {% from "partials/macros.html" import category_options %}
