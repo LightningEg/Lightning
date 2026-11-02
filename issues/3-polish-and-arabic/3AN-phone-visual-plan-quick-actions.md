@@ -176,48 +176,14 @@ the Arabic daily screens; no page without ‹; then the owner checks the phone e
 
 IV-3AL was folded into this item (owner, 2026-11-02): what it had left is 3AN12. `post: no` while Claude's claim holds the phone templates.
 
-## 3AN0 Approve the Part C changes · owner
-**Decided (owner, 2026-11-02):** (1)-(5) approved; (6) declined, the month stepper keeps its pill. Approved: (1) Overview
-shows two tiles, Net worth and Left in plan; the rates live on Financial health (C11.1); (2) Add opens on the amount with
-the last-used account chosen and usual categories as chips (C05.2, C09); (3) a row opens a detail sheet, Edit opens the
-form (C09.7); (4) app-bar Search looks for money first (C03.2); (5) Needs you names the next bill due within three days
-(C04.4). D1 and D2 (2026-10-29) ride with them. Next: write the five lines into Part C in both repos (AGENTS §1), then
-delete this step.
-
-## 3AN3 The Add sheet and the transaction sheet · L
-Built with NF-3AD1 and NF-3AD2, which own the flow; this step owns the look: no card inside the sheet, Save pinned above
-the keyboard, category chips (usual first, from the services), whole EGP, Saved · Undo toast, To sort chains to the next
-row. Done when J1 is 3 taps and J5's sort is 3 in `flows.py`.
-
-## 3AN5 SMS in Add · M
-Paste SMS at the top of the Add sheet, with no account asked (From SMS already maps a card ending to an account once;
-ask only for an ending it has not seen);
-/sms gets ‹, one line of help and its Primary on the page; More drops From SMS and Needs you from Settings. Done when J2 is
-2 taps.
-
-## 3AN6 Search for money · M
-App-bar search: live results, payments and counterparties first, then pages and actions; no "Ctrl K", no Search button.
-Extends IV-3T3's search half; close both together.
-
-## 3AN8 Moves read as moves · S
-A buy, sell or move between your own accounts shows with no sign on azure or Track (C08.2), so rows, Money in/out and the
-day's net agree on screen. Test with the sample's money-market buy.
-
 ## 3AN9 No wall of zeros · S
 On an empty month the Transactions list offers "Last month" with its figure (the Budget category, Spending and
 Investments parts are built).
-
-## 3AN10 Arabic daily screens · M
-Run the arabic-check skill on Add and Transactions (the reading screens are done): one digit system per screen,
-the sign on one side, chips that fit one line at 360. Done when the Arabic shots show no English and no wrapped chip.
 
 ## 3AN11 Measure and hand to the owner · S
 Re-run `evidence/flows.py` and the capture, fill the table with the new numbers in a dated follow-up of the report, run
 Mohab and `tools/phone_check.py` at 360 and 320, then ask the owner for one end-to-end phone check.
 
-## 3AN12 Left from IV-3AL · L
-Folded from IV-3AL (Audit 10, [report](../../reports/2026-10-29-phone-tab-audit/report.md)). Still open: Transactions:
-Money in and out as one line (D2); Views and value updates move into ⋯; a day's net only on a day with two or more rows.
-Accounts: Accounts tab first (the section registry is shared with the PC: ask first). Tests:
-`tests/test_phone_transactions.py`.
-
+## 3AN12 Left from IV-3AL · S
+Folded from IV-3AL (Audit 10, [report](../../reports/2026-10-29-phone-tab-audit/report.md)). Still open: Accounts tab
+first (the section registry is shared with the PC: ask the owner first).

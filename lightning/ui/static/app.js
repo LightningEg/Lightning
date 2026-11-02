@@ -1960,11 +1960,12 @@ initCurrencySearch();
     .map((form) => new URLSearchParams(new FormData(form)).toString()).join("&");
   const changed = () => dirty && formState() !== snapshot;
   let keepAfterError = false;
+  let pageStale = false;  // a sheet that saved and showed another sheet (To sort): the page behind it has changed
   const unsaved = () => keepAfterError || changed();
   const askDiscard = () => window.ask({ title: "Discard your changes?", message: "What you typed in this form has not been saved.",
     ok: "Discard", cancel: "Keep editing", tone: "warn" });
   // Closing with unsaved changes asks first, then closes on yes; it returns false while it asks.
-  const close = (goBack = true, force = false) => {
+  const close = (goBack = true, force = false, reopening = false) => {
     if (!dialog.open) return false;
     if (!force && unsaved()) { askDiscard().then((yes) => { if (yes) close(goBack, true); }); return false; }
     dirty = false;
@@ -1976,6 +1977,7 @@ initCurrencySearch();
     if (goBack && history.state?.lightningPopup) history.back();
     else if (opener?.isConnected) opener.focus();
     window.scrollTo({ top: baseScroll, behavior: "instant" });
+    if (pageStale && !reopening) { pageStale = false; sessionStorage.setItem("lightning-popup-scroll", String(baseScroll)); window.lightningReload(); }
     return true;
   };
   // A sheet or popup shows the form's own content. The page's chrome around it (the undo and redo pills, the
@@ -2138,7 +2140,7 @@ initCurrencySearch();
     const replacing = dialog.open;
     const priorOpener = opener;
     if (dialog.open && unsaved() && !(await askDiscard())) return;
-    if (dialog.open) close(false, true);
+    if (dialog.open) close(false, true, true);
     opener = replacing ? priorOpener : (trigger || document.activeElement);
     if (!replacing) {
       baseUrl = location.href;
@@ -2157,6 +2159,9 @@ initCurrencySearch();
       else history.pushState(state, "", destination.href);
     }
   };
+
+  // The Add sheet changes its account by opening the same sheet for the other one, with what was typed carried over.
+  window.lightningPopupOpen = (url) => { dirty = false; keepAfterError = false; return openUrl(url, opener || document.activeElement); };
 
   document.addEventListener("click", (event) => {
     const closeButton = event.target.closest("[data-popup-close]");
@@ -2225,14 +2230,20 @@ initCurrencySearch();
         if (keepInPopup) {
           const doc = new DOMParser().parseFromString(text, "text/html");
           show(extract(doc), doc.title);
+          pageStale = true;
           activePopupUrl = response.url;
           history.pushState({ lightningPopup: true, baseUrl, baseScroll }, "", response.url);
           return;
         }
         const next = new URL(goToResponse ? response.url : baseUrl, location.href);
+        // A phone entry or category chip (data-phone-toast): the page behind reloads with the message in its address, so the
+        // server draws "Saved" with Undo as the toast above the tab bar, and you stay where you were.
+        const toast = form.hasAttribute("data-phone-toast") && msg && !goToResponse;
+        if (toast) next.searchParams.set("msg", msg);
+        pageStale = false;  // this save reloads the page itself
         close(false, true);  // saved: nothing to discard
         history.replaceState(null, "", next.pathname + next.search + next.hash);
-        if (msg) sessionStorage.setItem("lightning-popup-success", msg);
+        if (msg && !toast) sessionStorage.setItem("lightning-popup-success", msg);
         if (goToResponse) location.href = next.href;
         else {
           sessionStorage.setItem("lightning-popup-scroll", String(baseScroll));

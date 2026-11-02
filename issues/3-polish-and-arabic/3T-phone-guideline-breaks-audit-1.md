@@ -46,10 +46,10 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§4 Phone
 Report items 1-2. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
 
 ## 3T2 No way back, and Budget category to Transactions · M
-Report items 3-4: /sms, /search, /accounts/N/import, /investments/planner and /settings need `‹ page`; Budget keeps its place. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+Report items 3-4: /accounts/N/import, /investments/planner and /settings need `‹ page` (/sms and /search have it since 3AN5 and 3AN6); Budget keeps its place. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
 
-## 3T3 Search page and touch targets · M
-Report items 5-6: live search, targets under 48 px (C05.1). Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+## 3T3 Touch targets · M
+Report item 6: targets under 48 px (C05.1). The search half (item 5: live search, results in a card, "Press Ctrl K") was built by IV-3AN's 3AN6 (2026-11-02). Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
 
 ## 3T4 Settings tabs and money first · M
 Report items 7-8: five tabs (C03.3), stacked rows still a table, Overview Latest led by revaluations. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.

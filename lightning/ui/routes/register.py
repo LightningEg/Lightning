@@ -308,6 +308,9 @@ def _phone_register(c, account_id, base_url, keep, kind, month, preset, from_que
         "clear_tag": href({"tag": "", **({"q": ""} if keep.get("q", "").startswith("#") else {})}),
         "clear_category": href({"category_id": ""}),
         "tiles": tiles, "money_in": money_in, "money_out": -money_out,
+        # a row opened from To sort walks that list: its account and days ride along (3AN3)
+        "sort_qs": urlencode({"sort": 1, "sa": account_id or "", "sf": "" if date_from == FAR_PAST else date_from,
+                              "st": "" if date_to == FAR_FUTURE else date_to}) if kind == "unsorted" else "",
         # what a form that adds one choice must send along: every other choice already made
         "keep_for_search": [(k, v) for k, v in keep.items() if k != "q"],
         "keep_for_dates": [(k, v) for k, v in keep.items() if k not in ranged],

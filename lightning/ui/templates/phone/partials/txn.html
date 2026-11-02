@@ -6,9 +6,9 @@
 {% macro arrow(kind) -%}
 <span class="phone-txn-av is-{{ kind }}" aria-hidden="true"><svg viewBox="0 0 24 24">{% if kind == 'in' %}<path d="M12 19V5M6 11l6-6 6 6"/>{% elif kind == 'out' %}<path d="M12 5v14M6 13l6 6 6-6"/>{% elif kind == 'move' %}<path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/>{% elif kind == 'invest' %}<path d="M4 17l6-6 4 4 6-7M14 8h6v6"/>{% else %}<path d="M6 10h12M6 14h12"/>{% endif %}</svg></span>
 {%- endmacro %}
-{% macro txn_list(rows, show_account=False, show_balance=False, selecting=False, picked='', base_url='', keep_qs='', limit=0, with_account=True, reserve_suggestions={}, day_net=False) %}
+{% macro txn_list(rows, show_account=False, show_balance=False, selecting=False, picked='', base_url='', keep_qs='', limit=0, with_account=True, reserve_suggestions={}, day_net=False, sort_qs='') %}
 {% set rows = rows|group_value_updates %}
-{% set nets = day_nets(rows) if day_net else {} %}
+{% set nets = day_nets(rows, show_account) if day_net else {} %}
 {% set ns = namespace(day='', shown=0) %}
 {% for r in rows if not (show_account and r.type == 'TRF' and r.amount > 0) %}
   {% if not limit or ns.shown < limit %}
@@ -26,10 +26,11 @@
   {% set cat = 'Transfer'|tr(locale) if r.type == 'TRF' else (r.type_label|tr(locale) if r.type in ('BUY', 'SEL', 'DIV', 'OPN') or r.type_label == 'Ownership change' else r.category_label.split(' › ')[-1]) %}
   {% set kind = 'move' if r.type in ('TRF', 'CNV') else 'invest' if r.type in ('BUY', 'SEL', 'VAL') else 'flat' if r.type in ('OPN', 'ADJ') else ('in' if r.amount > 0 else 'out') %}
   {% if selecting %}<label class="phone-txn is-pick"><input type="checkbox" class="transaction-select" name="txn_ids" value="{{ r.txn_id }}" form="phone-bulk" aria-label="Select {{ who }}"{{ ' checked' if picked == r.txn_id|string }}{{ ' disabled' if r.type == 'OPN' }}>
-  {% else %}<a class="phone-txn" href="{{ ('/transactions/' ~ r.txn_id ~ '/edit-popup?return_to=' ~ (base_url ~ ('?' ~ keep_qs if keep_qs else ''))|urlencode) if editable else '/transactions/' ~ r.txn_id }}" data-txn="{{ r.txn_id }}"{% if editable %} data-popup-open{% endif %}>{% endif %}
+  {% else %}<a class="phone-txn" href="{{ ('/transactions/' ~ r.txn_id ~ '/sheet?return_to=' ~ (base_url ~ ('?' ~ keep_qs if keep_qs else ''))|urlencode ~ ('&' ~ sort_qs if sort_qs else '')) if editable else '/transactions/' ~ r.txn_id }}" data-txn="{{ r.txn_id }}"{% if editable %} data-popup-open{% endif %}>{% endif %}
     {{ arrow(kind) }}
     <span class="phone-txn-who"><b>{{ who }}</b><small>{{ cat if cat != who else '' }}{% if show_account and with_account and r.type != 'TRF' %}{{ ' · ' if cat != who }}{{ r.account_label }}{% endif %}</small></span>
-    <span class="phone-txn-amount"><b class="{{ '' if r.type == 'TRF' else ('pos' if r.amount > 0 else '') }}">{{ r.amount|amount_role('row', True) }}</b>{% if show_balance and r.balance is not none %}<small>{{ r.balance|amount_role('row') }}</small>{% endif %}</span>
+    {# A buy, a sell and a move between your own accounts move nothing in or out: no sign, so the row, Money in and out and the day's net agree (C08.2, 3AN8). #}
+    <span class="phone-txn-amount">{% if kind in ('move', 'invest') %}<b><bdi class="fig">{{ (r.amount|abs)|amount_role('row') }}</bdi></b>{% else %}<b class="{{ 'pos' if r.amount > 0 else '' }}"><bdi class="fig">{{ r.amount|amount_role('row', True) }}</bdi></b>{% endif %}{% if show_balance and r.balance is not none %}<small>{{ r.balance|amount_role('row') }}</small>{% endif %}</span>
   {% if selecting %}</label>{% else %}</a>{% endif %}
   {% for reserve in reserve_suggestions.get(r.txn_id, []) %}<div class="phone-note">{{ 'Possible reserve use: {amount} from {name}; {remaining} remains assigned.'|tr(locale, amount=reserve.amount|money, name=reserve.name, remaining=reserve.remaining_after|money) }} <form method="post" action="/transactions/{{ r.txn_id }}/reserve?back={{ base_url|urlencode }}"><input type="hidden" name="reserve_id" value="{{ reserve.id }}"><input type="hidden" name="amount" value="{{ reserve.amount }}"><button class="btn small primary">{{ 'Assign to reserve'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% endfor %}
   {% endif %}

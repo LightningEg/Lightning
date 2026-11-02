@@ -8,6 +8,7 @@ Search reads transactions, accounts and categories directly, so nothing derived 
 from __future__ import annotations
 
 from dataclasses import asdict, replace
+from datetime import timedelta
 from decimal import Decimal
 import hashlib
 import json
@@ -441,6 +442,40 @@ class TransactionService:
             if count >= self.USUAL_MIN or (2 <= total < self.USUAL_WINDOW and count == total):
                 usual[name] = {"category_id": category_id, "count": count, "total": total}
         return usual
+
+    CAPTURE_DAYS = 180
+
+    def usual_capture_categories(self, kind: str, limit: int = 4) -> list[int]:
+        """The categories the Add sheet offers first as chips (3AN3): what this person files money of that kind
+        under most often in the last 180 days, then the other categories in the tree's own order until there are
+        ``limit``. kind is "out" or "in"; transfers have no category. Ids only; the page names them."""
+        if kind not in ("out", "in"):
+            return []
+        movement = Movement.OUTFLOW if kind == "out" else Movement.INFLOW
+        allowed = [c for c in self.categories.pickable()
+                   if c.movement == movement and not c.is_system and c.code != "EXP.SYSTEM.CUSTODY"
+                   and c.code not in ("EXP.UNACCOUNTED", "INC.UNACCOUNTED")]
+        by_id = {c.id: c for c in allowed}
+        since = fmt_date(today() - timedelta(days=self.CAPTURE_DAYS))
+        used = [int(row["category_id"]) for row in self.repo.category_use(movement.value, since)]
+        chosen = [category_id for category_id in used if category_id in by_id][:limit]
+        for category in allowed:  # a thin history: the tree's own order fills the rest
+            if len(chosen) >= limit:
+                break
+            if category.id not in chosen and not category.is_root:
+                chosen.append(category.id)
+        return chosen
+
+    def usual_account(self, candidates: list[int]) -> int | None:
+        """The account Add opens on when none was used last (3AN3): the one that took most of this person's own
+        entries in the last 90 days among ``candidates``, else the first of them."""
+        if not candidates:
+            return None
+        since = fmt_date(today() - timedelta(days=90))
+        for row in self.repo.account_use(since):
+            if int(row["account_id"]) in candidates:
+                return int(row["account_id"])
+        return candidates[0]
 
     def post(self, doc_type: DocType, date: str, lines: list[PostingLine], description: str = "",
              counterparty: str = "", notes: str = "", source: TxnSource = TxnSource.MANUAL) -> Transaction:

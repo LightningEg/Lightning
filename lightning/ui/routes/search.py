@@ -183,10 +183,35 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6) -> list[di
     return results
 
 
+PAYMENTS_SHOWN = 8  # the phone's Search lists this many payments, newest first, then "See all"
+
+
+def phone_results(c, query: str, privacy: bool = False) -> dict:
+    """What the phone's Search shows (3AN6, guideline C03.2): money first. Payments that match the words or the amount,
+    newest first with their rows as the Transactions list draws them; then the names behind them (counterparties,
+    categories, accounts, tags, holdings); then pages and actions under their own heading. The matching is `matches`
+    and the transactions' own search; nothing here changes anything."""
+    query = " ".join(str(query or "").split())
+    found = matches(c, query, privacy=privacy, per_group=5)
+    pages = [row for row in found if row["kind"] in ("Page", "Action")]
+    money = [row for row in found if row["kind"] in ("Counterparty", "Category", "Account", "Tag", "Investment")]
+    payments, total = [], 0
+    if query:
+        ordered = c.reporting.newest_first(c.transactions.search_ids(ascii_digits(query)))
+        rows = c.reporting.rows_for_transactions(ordered[:PAYMENTS_SHOWN])
+        payments, total = [row for row in rows if row.type != "VAL"], len(ordered)
+    return {"query": query, "payments": payments, "payments_total": total, "money": money, "pages": pages,
+            "see_all": "/transactions?" + urlencode({"q": query})}
+
+
 @router.get("/search")
 async def search(request: Request):
     c = container(request)
     query = " ".join(str(request.query_params.get("q", "")).split())
+    if getattr(request.state, "phone", False) and request.query_params.get("format") != "json":
+        # Live as you type (3AN6): the page asks for the results alone as the words change.
+        page = "search_results.html" if request.query_params.get("fragment") else "search.html"
+        return render(request, page, **phone_results(c, query, privacy=privacy_on(request)))
     results = matches(c, query, privacy=privacy_on(request))
     if request.query_params.get("format") == "json":
         if c.settings.get("locale") == "ar":

@@ -269,6 +269,28 @@ class TransactionRepository:
             (window,),
         )
 
+    def category_use(self, effect: str, since: str) -> list:
+        """Categories a person filed money of one effect (INFLOW or OUTFLOW) under since a day, most used first:
+        [{category_id, uses}]. One count per transaction; split rows count once per category."""
+        return self.db.all(
+            "SELECT le.category_id AS category_id, COUNT(DISTINCT t.id) AS uses, MAX(t.date) AS last"
+            " FROM ledger_entries le JOIN transactions t ON t.id = le.transaction_id"
+            " WHERE t.status = 'POSTED' AND t.type IN ('IN','OUT') AND le.effect = ? AND le.category_id IS NOT NULL"
+            " AND t.date >= ? GROUP BY le.category_id ORDER BY uses DESC, last DESC, le.category_id",
+            (effect, since),
+        )
+
+    def account_use(self, since: str) -> list:
+        """Accounts that took a person's own entries (money in, out or a transfer) since a day, most used first:
+        [{account_id, uses}]."""
+        return self.db.all(
+            "SELECT le.account_id AS account_id, COUNT(DISTINCT t.id) AS uses, MAX(t.date) AS last"
+            " FROM ledger_entries le JOIN transactions t ON t.id = le.transaction_id"
+            " WHERE t.status = 'POSTED' AND t.type IN ('IN','OUT','TRF') AND t.date >= ?"
+            " GROUP BY le.account_id ORDER BY uses DESC, last DESC, le.account_id",
+            (since,),
+        )
+
     def earliest_activity(self, account_id: int) -> str | None:
         return self.db.scalar(
             "SELECT MIN(le.date) FROM ledger_entries le JOIN transactions t ON t.id = le.transaction_id"

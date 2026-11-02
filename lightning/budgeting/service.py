@@ -436,6 +436,24 @@ class BudgetService:
         income = self.reporting.cash_flow(first, last).inflows
         return BudgetMonth(month, [s for s in sections.values() if s.lines], income, warnings)
 
+    def plan_left(self, category_id: int, month: str) -> dict | None:
+        """What is left of the plan for a category this month (the phone's transaction sheet, 3AD2): the limit that
+        covers it (its own, else the nearest group above that has one), what is spent against it and what is left,
+        negative when over. None when no limit covers the category."""
+        view = self.month_view(month)
+        by_id = {line.category_id: line for section in view.sections for line in section.lines}
+        line = shown = by_id.get(category_id)
+        node = category_id
+        while shown is None or shown.remaining is None:
+            node = self.categories.get(node).parent_id
+            if not node:
+                break
+            shown = by_id.get(node)
+        if shown is None or shown.remaining is None or shown.available is None:
+            return None
+        return {"name": shown.name, "limit": shown.available, "spent": shown.planned_actual, "left": shown.remaining,
+                "over": shown.over, "inside": shown is not line}
+
     def suggested_plan(self, month: str) -> dict[int, Decimal]:
         """Return stable, rounded suggestions for categories with recent spending."""
         parse_month(month)

@@ -9,7 +9,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from lightning.core.errors import LightningError
-from lightning.sms_imports import MAX_TEXT, SALARY_ENDING, parse_sms
+from lightning.sms_imports import MAX_TEXT, SALARY_ENDING, fingerprint, parse_sms
 
 from ..web import container, redirect, render
 
@@ -125,5 +125,10 @@ async def read_one_message(request: Request):
         found = None
     if found is None:
         return JSONResponse({"error": "No amount found in this message."}, status_code=422)
+    c = container(request)
+    # No account is asked (3AN5): the card or account ending in the message is the account, once it has been said. An
+    # ending not seen before comes back with no account; the sheet asks once, and saving remembers the answer.
     return JSONResponse({"amount": f"{found.amount:.2f}", "counterparty": found.place, "date": found.when[:10],
-                         "kind": "in" if found.inflow else "out", "bank": found.bank, "sure": found.sure})
+                         "kind": "in" if found.inflow else "out", "bank": found.bank, "sure": found.sure,
+                         "ending": found.ending, "account_id": c.sms_imports.account_for(found.ending),
+                         "fingerprint": fingerprint(text)})

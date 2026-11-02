@@ -46,7 +46,9 @@ EXTRA_PAGES = ("/accounts/1", "/accounts/2", "/accounts/3", "/accounts/6", "/acc
                "/transactions/315", "/transactions/315/edit-popup", "/t/OUT-2026-08-12-001", "/transactions/deleted",
                "/reserves", "/add-transaction", "/investments/targets", "/search?q=a")
 PHONE_EXTRA = ("/accounts/1", "/accounts/6", "/plan/loans", "/plan/recurring", "/plan/reserves", "/investments/holding/11",
-               "/transactions/315", "/accounts/1/transaction/new", "/budget/raise?month=2026-10", "/search?q=a")
+               "/transactions/315", "/accounts/1/transaction/new", "/budget/raise?month=2026-10", "/search?q=a",
+               "/search", "/search?q=carrefour", "/sms", "/transactions/315/sheet", "/transactions/315/sheet?change=1",
+               "/transactions/sorted", "/transactions?kind=unsorted")   # the capture half (3AN3, 3AN5, 3AN6)
 PHONE_PAGES = ("/exports/all", "/plan/purchases/new", "/", "/budget", "/plan", "/investments", "/accounts", "/transactions", "/birdview/expenses",
                "/financial-health", "/settings", "/categories", "/zakat")
 

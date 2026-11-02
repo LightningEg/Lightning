@@ -59,10 +59,12 @@
   });
 })();
 
-/* Entry sheet (phone roadmap M2, M3): a new entry opens with the amount ready to type, and Paste bank SMS reads the
-   copied bank message into Amount, Counterparty, Date and Money in or out. Nothing is saved until Save. */
+/* Entry sheet (phone roadmap M2, M3; 3AN3, 3AN5): a new entry opens with the amount ready to type, and Paste SMS reads the
+   copied bank message and fills the sheet in: Amount, Who, Date, Money in or out, and the account its card ending names
+   (said once; an ending not seen before is asked once, in the sheet, and saving remembers the answer). Nothing is saved
+   until Save. */
 (() => {
-  const t = (text) => (window.lightningT ? window.lightningT(text) : text);
+  const t = (text, values) => (window.lightningT ? window.lightningT(text, values) : text);
   const ready = (root) => {
     root.querySelectorAll("[data-sms-paste]").forEach((button) => {
       if (navigator.clipboard && navigator.clipboard.readText) button.hidden = false;
@@ -89,7 +91,7 @@
     const form = sheet && sheet.querySelector("form.phone-form");
     const status = sheet && sheet.querySelector("[data-sms-paste-status]");
     if (!form) return;
-    const say = (text) => { if (status) status.textContent = t(text); };
+    const say = (text, values) => { if (status) status.textContent = t(text, values); };
     let text = "";
     try { text = (await navigator.clipboard.readText()).trim(); } catch (_) { text = ""; }
     if (!text) { say("Paste a bank message first."); return; }
@@ -101,12 +103,30 @@
       const response = await fetch(button.dataset.smsUrl, { method: "POST", body: data, headers: { "X-Requested-With": "fetch" } });
       const found = await response.json().catch(() => ({}));
       if (!response.ok) { say(found.error || "No amount found in this message."); return; }
+      const amount = String(found.amount || "").replace(/\.00$/, "");  // whole EGP
+      const here = (form.getAttribute("action") || "").match(/\/accounts\/(\d+)\//);
+      if (found.account_id && here && String(found.account_id) !== here[1] && window.lightningPopupOpen) {
+        // The message names another account: the same sheet, for that account, filled in.
+        const params = new URLSearchParams({ kind: found.kind, amount, date: found.date || "", counterparty: found.counterparty || "",
+          sms_fp: found.fingerprint || "", return_to: form.querySelector('[name="return_to"]').value });
+        window.lightningPopupOpen(`/accounts/${found.account_id}/transaction/new?${params}`);
+        return;
+      }
       const kind = form.querySelector(`[name="kind"][value="${found.kind}"]`);
       if (kind) { kind.checked = true; kind.dispatchEvent(new Event("change", { bubbles: true })); }
-      put(form, "amount", found.amount);
+      put(form, "amount", amount);
       put(form, "counterparty", found.counterparty);
       put(form, "date", found.date);
-      say("Filled from the message. Check and save.");
+      const fp = form.querySelector('[name="sms_fp"]');
+      if (fp) fp.value = found.fingerprint || "";
+      const ending = form.querySelector('[name="sms_ending"]');
+      if (ending && !found.account_id && found.ending) {
+        ending.value = found.ending;  // saving remembers which account this ending is
+        say(found.ending === "salary" ? "Where is your salary paid? Choose the account above; Lightning remembers it."
+          : "Which account ends with {digits}? Choose it above; Lightning remembers it.", { digits: found.ending });
+        const chip = form.querySelector("[data-account-chip]");
+        if (chip) { chip.closest(".phone-account-chip").classList.add("needs-pick"); chip.focus({ preventScroll: true }); }
+      } else say("Filled from the message. Check and save.");
       if (navigator.vibrate) navigator.vibrate(15);
     } finally { button.disabled = false; }
   });

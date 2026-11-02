@@ -34,7 +34,7 @@
   {% if request.state.device_line|default('') %}<div class="flash device-line" role="status"><span>{{ request.state.device_line|tr(locale, request.state.device_line_values) }}</span>{% if request.state.device_action == 'hand-back' %}<form method="post" action="/sync/hand-back"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn primary" type="submit">{{ 'Hand back'|tr(locale) }}</button></form>{% elif request.state.device_action == 'take-back' %}<a class="btn" href="/profiles/devices">{{ 'Devices'|tr(locale) }}</a>{% endif %}</div>{% endif %}
   <div class="phone-header">{% block heading %}{% endblock %}</div>
   <div class="phone-page-actions">{% block top_actions %}{% endblock %}</div>
-  {% include "partials/section_tabs.html" %}
+  {% block section_tabs %}{% include "partials/section_tabs.html" %}{% endblock %}
   {# Undo and Redo ride on the message an action leaves (phone overhaul: no lone icon button at the top). #}
   {% if msg %}<div class="flash phone-flash" role="status" aria-live="polite" aria-atomic="true"><span>{{ msg|tr(locale) }}</span>{% include "partials/history.html" %}</div>{% endif %}
   {% if error and not hide_global_error|default(false) %}<div class="flash error" role="alert" aria-live="assertive" aria-atomic="true">{{ error|tr(locale) }}</div>{% endif %}
@@ -72,6 +72,7 @@
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('app.js') }}"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('phone-fields.js') }}"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('phone-gestures.js') }}"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('phone-capture.js') }}"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('phone-nav.js') }}"></script>
 {% if request.state.secure_profiles|default(false) %}<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('session.js') }}"></script>{% endif %}
 </body>

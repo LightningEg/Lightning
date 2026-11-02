@@ -1,0 +1,13 @@
+{# Search on a phone (guideline C03.2, 3AN6): money first, live as you type. One field on the page, no Search button and no
+   keyboard hint. The results come from lightning/ui/routes/search.py (phone_results) and are redrawn by phone-capture.js
+   as the words change; they are in search_results.html, which this page and that request share. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Search'|tr(locale) }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Overview'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}{% endblock %}
+{% block content %}
+<form class="phone-search phone-live-search" method="get" action="/search" role="search" data-live-search="#search-results">
+  <input id="search-query" type="search" name="q" value="{{ query }}" placeholder="{{ 'Search payee, category or amount'|tr(locale) }}" aria-label="{{ 'Search'|tr(locale) }}" aria-controls="search-results" autocomplete="off" enterkeyhint="search" autofocus>
+</form>
+<div id="search-results" class="phone-search-results" aria-live="polite">{% include "phone/search_results.html" %}</div>
+{% endblock %}
