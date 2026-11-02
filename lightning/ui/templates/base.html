@@ -60,6 +60,7 @@
         <a class="side-row side-account {{ 'active' if path == '/accounts/' ~ a.id or path.startswith('/accounts/' ~ a.id ~ '/') }}" href="/accounts/{{ a.id }}" title="{{ a.label }}">
           {{ inst_tile(a.institution or a.label, kind=a.kind) }}<span class="side-name">{{ a.label }}</span>
           <span class="num {{ 'neg' if a.value < 0 }}">{{ a.value|amount_role('total') }}</span></a>
+        {% if a.kind == 'GAMEYA' and a.value < 0 %}<a class="side-owed" href="/plan#what-you-owe">{{ "You owe the circle"|tr(locale) }} ›</a>{% endif %}
         {% endfor %}
       {% endfor %}
       </div>

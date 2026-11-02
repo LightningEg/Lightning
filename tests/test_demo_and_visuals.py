@@ -478,3 +478,16 @@ def test_the_phone_overview_breaks_what_you_owe_into_bills_loans_and_the_gameya(
     assert 'data-testid="gameya-owed"' in page.text
     assert "Gam&#39;eya still to pay" in page.text or "Gam'eya still to pay" in page.text
     assert "14,000" in page.text
+
+
+def test_an_owed_circle_is_labelled_and_linked_to_what_you_owe_in_the_sidebar(demo):
+    """BV-5I (owner 2026-11-02): the circle stays below zero in the account list, labelled and linked to What you owe."""
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    c, _ = demo
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    page = client.get("/")
+    assert 'class="side-owed" href="/plan#what-you-owe"' in page.text and "You owe the circle" in page.text
+    assert 'id="what-you-owe"' in client.get("/plan").text
+    c.settings.set("locale", "ar")
+    assert "عليك للجمعية" in client.get("/").text
