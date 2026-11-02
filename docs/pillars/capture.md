@@ -13,7 +13,6 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 |---|---|---|---|
 | **BT-2E** | [The engine accepts some bad input](../../issues/2-safe-for-real-money/2E-engine-input-checks.md) | M | ready |
 | **NF-3AD** | [Phone overhaul, step 2](../../issues/3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | L | new |
-| **NF-7A** | [Import cannot split a transfer into principal and fee](../../issues/7-planning-import-and-search/7A-split-transfer-principal-and-fee.md) | M | ready |
 | **NF-7B** | [Read PDF and Excel statements through the CSV review](../../issues/7-planning-import-and-search/7B-pdf-and-excel-statements.md) | L | new |
 | **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](../../issues/7-planning-import-and-search/7C-move-in-from-other-apps.md) | L | new |
 | **NF-7D** | [Search and matching: what is not built](../../issues/7-planning-import-and-search/7D-search-and-matching.md) | L | ready |

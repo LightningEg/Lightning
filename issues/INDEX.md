@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 70 open items, in the order they are worked on.
+10 milestones, 69 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -210,7 +210,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **NF-7A** | [Import cannot split a transfer into principal and fee](7-planning-import-and-search/7A-split-transfer-principal-and-fee.md) | new feature | Capture | M | ready |
 | **NF-7B** | [Read PDF and Excel statements through the CSV review](7-planning-import-and-search/7B-pdf-and-excel-statements.md) | new feature | Capture | L | new |
 | NF-7B1 | ↳ Design: parser choice, size caps, no macros, no formulas run | | | M | |
 | NF-7B2 | ↳ Excel statements through the CSV review | | | L | |
@@ -249,7 +248,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7V4 | ↳ Budget question ([#235](https://github.com/LightningEg/Lightning/issues/235)) | | | M | |
 | NF-7V5 | ↳ Category mapping for a bank ([#236](https://github.com/LightningEg/Lightning/issues/236)) | | | M | |
 
-Done: 7H, 7J, 7K, 7N, 7O, 7P, 7Q, 7R, 7U, 7W. Next free code: 7X.
+Done: 7A, 7H, 7J, 7K, 7N, 7O, 7P, 7Q, 7R, 7U, 7W. Next free code: 7X.
 
 ## 8 Website
 

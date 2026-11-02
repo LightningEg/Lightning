@@ -282,7 +282,7 @@ def _row_ui(row: dict, form=None) -> dict:
         return {"cp": own("counterparty"), "cp_pick": own("counterparty_pick"), "cat": own("category"),
                 "whom": own("whom"), "whom_pick": own("whom_pick"),
                 "remember": form.get(f"remember_{rid}") == "on", "skip": form.get(f"skip_{rid}") == "on",
-                "match": own("match")}
+                "match": own("match"), "fee": own("fee")}
     cp_pick = (f"account:{row['_transfer_account_id']}" if row.get("_transfer_account_id")
                else f"counterparty:{row['_counterparty_id']}" if row.get("_counterparty_id") else "")
     custody = row.get("_is_custody") and row.get("_whom") and row.get("_counterparty_id")
@@ -291,7 +291,7 @@ def _row_ui(row: dict, form=None) -> dict:
             "whom": row["_whom"] if custody else "",
             "whom_pick": f"counterparty:{row['_counterparty_id']}" if custody else "",
             "remember": bool(row.get("_remember_category")), "skip": bool(row.get("_skip")),
-            "match": str(row.get("_match") or row.get("_default_match") or "")}
+            "match": str(row.get("_match") or row.get("_default_match") or ""), "fee": ""}
 
 
 def _suggestions_json(c, row: dict, account_ids: dict[str, int], party_ids: dict[str, int]) -> str:
@@ -411,7 +411,8 @@ def _decision(form, row) -> dict:
                 "owner_choice": own("owner_choice"),
                 "counterparty_choice": own("counterparty_choice"),
                 "remember_category": (form.get(f"remember_{row_id}") or form.get(f"remember_category_{row_id}")) == "on",
-                "transfer_account_id": own("transfer_account_id")}
+                "transfer_account_id": own("transfer_account_id"),
+                "fee": own("fee")}
     pick = own("counterparty_pick")
     if pick.startswith("account:"):          # one of your accounts: a transfer to or from it
         decision["transfer_account_id"] = pick.split(":", 1)[1]
