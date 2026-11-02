@@ -18,7 +18,7 @@ from urllib.parse import urlencode
 
 from ..web import container, redirect, render, ui_locale
 from ..i18n import translate
-from ...investments import views as holding_views
+from ...investments import events, views as holding_views
 from ...assets.catalog import instruments
 from ..periods import parse_period
 from ...investments.report import (PLANNER_MODES, build_investment_report, investment_period, reconcile_portfolio,
@@ -642,6 +642,7 @@ async def save_asset_plan(request: Request,asset_id:int):
 def _form(request: Request, kind: str, values: dict, txn=None, error: LightningError | None = None, status=200):
     c = container(request)
     return render(request, "investments/form.html", status_code=status, kind=kind, title=KINDS[kind][0],
+                  spec=events.form_fields(kind) if kind in events.EVENTS else None,
                   hint=KINDS[kind][1], values=values, txn=txn,
                   holding_accounts=c.investments.investment_accounts(), all_accounts=c.accounts.list(active_only=True),
                   assets=c.assets.investments(active_only=True),

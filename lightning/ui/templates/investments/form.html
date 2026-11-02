@@ -17,7 +17,7 @@
       <label for="account_id">{{ 'Account'|tr(locale) }}</label>
       <select id="account_id" name="account_id" required data-own-picker>
         <option value="">{{ 'Choose…'|tr(locale) }}</option>
-        {% for a in (all_accounts if kind == 'dividend' else holding_accounts) %}<option value="{{ a.id }}" {{ 'selected' if values.account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
+        {% for a in (all_accounts if spec and spec.income else holding_accounts) %}<option value="{{ a.id }}" {{ 'selected' if values.account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
       </select>
       {% if not holding_accounts %}<div class="help">{{ "No brokerage or physical-asset account yet —"|tr(locale) }}<a href="/accounts/new?type=BROKERAGE">{{ "add one"|tr(locale) }}</a>.</div>{% endif %}
     </div>
@@ -31,7 +31,7 @@
     </div>
   </div>
 
-  {% if kind in ('buy', 'sell') %}
+  {% if spec and spec.units %}
   <div class="row">
     {{ date_field(values, error_field) }}
     {{ field('quantity', 'Units', values, error_field, placeholder='e.g. 100 shares, 12.5 grams', attrs='inputmode="decimal" required class="quantity-input"') }}
@@ -40,6 +40,8 @@
     {{ field('total', 'Amount (' ~ base ~ ')', values, error_field, help='Including fees, unless you tick Fees are extra.', placeholder='e.g. 10,000', attrs='inputmode="decimal" required class="money-input trade-total"') }}
     <div class="field"><label>Price per unit ({{ base }})</label><input type="text" class="num unit-price-preview" readonly placeholder="Calculated from total ÷ units"><div class="help">{{ "Calculated automatically from the trade value and fee choice."|tr(locale) }}</div></div>
   </div>
+  {% if not spec.fees %}
+  {% else %}
   <div class="field"><label><input type="checkbox" name="fees_included" value="0" data-fees-excluded {{ 'checked' if values.get('fees_included') == '0' }}>{{ "Fees are extra (not in the amount)"|tr(locale) }}</label></div>
   {% if txn and values.get('fees_included') != '0' %}
   <div class="field muted">{{ "Fees inside the amount:"|tr(locale) }}<b>{{ values.fees|money(False, 2) }}</b>
@@ -50,15 +52,18 @@
     {{ field('fees', 'Fees (' ~ base ~ ')', values, error_field, placeholder='e.g. 25', attrs='inputmode="decimal" class="money-input"') }}
   </div>
   {% endif %}
+  {% endif %}
+  {% if spec.cash_account %}
   <div class="field {{ 'has-error' if error_field == 'cash_account' }}">
     <label for="cash_account_id">{{ 'Cash account'|tr(locale) }}</label>
     <select id="cash_account_id" name="cash_account_id" data-own-picker>
       <option value="">{{ "The same account (its broker cash)"|tr(locale) }}</option>
       {% for a in all_accounts %}<option value="{{ a.id }}" {{ 'selected' if values.cash_account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
     </select>
-    <div class="help">{{ 'Where the money came from' if kind == 'buy' else 'Where the money went' }}. For gold at home, choose the wallet or bank account.</div>
+    <div class="help">{{ 'Where the money came from' if spec.cash_from else 'Where the money went' }}. For gold at home, choose the wallet or bank account.</div>
   </div>
-  {% elif kind == 'dividend' %}
+  {% endif %}
+  {% elif spec and spec.income %}
   <div class="row">
     {{ date_field(values, error_field) }}
     <div class="field {{ 'has-error' if error_field == 'amount' }}">
