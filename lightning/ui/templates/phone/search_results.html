@@ -1,0 +1,22 @@
+{# The phone Search results (3AN6): payments first as the Transactions list draws them, then the names behind them, then
+   pages and actions under their own heading. A fragment: the page includes it and the live search asks for it alone. #}
+{% from "phone/partials/txn.html" import txn_list with context %}
+{% if query and not payments and not money and not pages %}<p class="empty">{{ 'Nothing matches “{q}”.'|tr(locale, q=query) }}</p>{% elif not query %}<p class="phone-note">{{ 'Search a payee, a category or an amount. Pages and actions are below.'|tr(locale) }}</p>{% endif %}
+{% if payments %}
+<section class="phone-section" aria-labelledby="search-payments">
+  <header class="phone-section-head"><h2 id="search-payments">{{ 'Payments'|tr(locale) }}</h2>{% if payments_total > payments|length %}<a class="phone-quiet" href="{{ see_all }}">{{ 'See all {n}'|tr(locale, n=payments_total) }}</a>{% endif %}</header>
+  <div class="phone-list">{{ txn_list(payments, True, False, False, '', '/search', 'q=' ~ query|urlencode) }}</div>
+</section>
+{% endif %}
+{% if money %}
+<section class="phone-section" aria-labelledby="search-names">
+  <header class="phone-section-head"><h2 id="search-names">{{ 'Names and categories'|tr(locale) }}</h2></header>
+  <div class="phone-rows">{% for r in money %}<a class="phone-row" href="{{ r.href }}"><span>{{ r.label|tr(locale) if r.kind == 'Category' else r.label }}{% if r.context %}<small>{{ r.context|tr(locale) }}</small>{% endif %}</span><b>›</b></a>{% endfor %}</div>
+</section>
+{% endif %}
+{% if pages %}
+<section class="phone-section" aria-labelledby="search-pages">
+  <header class="phone-section-head"><h2 id="search-pages">{{ 'Pages and actions'|tr(locale) }}</h2></header>
+  <div class="phone-rows">{% for r in pages %}<a class="phone-row" href="{{ r.href }}"{% if r.action == 'privacy' %} data-privacy-toggle{% endif %}><span>{{ r.label|tr(locale) }}{% if r.context %}<small>{{ r.context|tr(locale) }}</small>{% endif %}</span><b>›</b></a>{% endfor %}</div>
+</section>
+{% endif %}

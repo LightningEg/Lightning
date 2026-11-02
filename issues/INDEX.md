@@ -86,7 +86,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **IV-3T** | [Phone screens break Part C - cut words, overlapping text, no way back on five pages, small targets, five Settings tabs](3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | improvement, visual | Feel | L | ready |
 | IV-3T1 | ↳ Cut words and overlapping text (C12) | | | M | |
 | IV-3T2 | ↳ No way back, and Budget category to Transactions | | | M | |
-| IV-3T3 | ↳ Search page and touch targets | | | M | |
+| IV-3T3 | ↳ Touch targets | | | M | |
 | IV-3T4 | ↳ Settings tabs and money first | | | M | |
 | IV-3T5 | ↳ Charts and expense analysis | | | M | |
 | IV-3T6 | ↳ Fields, pairs and small things | | | M | |
@@ -105,7 +105,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | building |
 | IV-3AN0 | ↳ Approve the Part C changes | | | owner | |
 | IV-3AN4 | ↳ Overview's first screen | | | M | |
-| IV-3AN6 | ↳ Search for money | | | M | |
 | IV-3AN7 | ↳ Budget in order of need | | | M | |
 | IV-3AN9 | ↳ No wall of zeros | | | S | |
 | IV-3AN10 | ↳ Arabic daily screens | | | M | |

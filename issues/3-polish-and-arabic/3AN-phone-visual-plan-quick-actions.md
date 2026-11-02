@@ -188,10 +188,6 @@ delete this step.
 Two tiles, Needs you naming the next bill, Latest in view (first row above 600 px at 360 × 800).
 Needs 3AN0 (1), (5); the stepper keeps its pill (owner, 2026-11-02). Mohab's Overview steps updated.
 
-## 3AN6 Search for money · M
-App-bar search: live results, payments and counterparties first, then pages and actions; no "Ctrl K", no Search button.
-Extends IV-3T3's search half; close both together.
-
 ## 3AN7 Budget in order of need · M
 Over plan and ahead of pace first, then by usual spending; 64 px rows with the meter inside; "N more on track ›"; the
 day-one line. With the category sheet (from IV-3AL2, folded here). Done when J4's row is in the first screen on the sample.
