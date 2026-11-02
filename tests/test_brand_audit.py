@@ -1,7 +1,8 @@
 """Brand audit in a real browser (guideline A03, A05, A10.3, A16): on the main PC pages, with the Mohab sample at
 1366 × 768 px, nothing is upper-case, text is only in A03 colours, plain links are Ink and underlined, H1 to H3 are Ink,
-no field is white or boxed, spending in the register is Ink, and the register fits its card.
-Skipped when Playwright or Chromium is missing."""
+no field is white or boxed, money out in the register is rose and never a positive figure, and the register fits its card.
+Skipped when Playwright or Chromium is missing (CI has neither), so it runs by hand:
+`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers python -m pytest tests/test_brand_audit.py -q`."""
 from __future__ import annotations
 
 import json
@@ -82,6 +83,13 @@ COLLECT = """() => {
   return out; }""".replace("%TEXT%", json.dumps(TEXT))
 
 
+def _collect(page):
+    """Measure only once the page is at rest: fonts loaded and two frames drawn, so the page-jump control's fade
+    has settled (BT-1L: under a parallel run it was measured mid-transition)."""
+    page.evaluate("async () => { await document.fonts.ready; await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))); }")
+    return page.evaluate(COLLECT)
+
+
 @pytest.fixture(scope="module")
 def audit():
     if not CHROMIUM.exists():
@@ -100,7 +108,7 @@ def audit():
                 page = browser.new_page(viewport={"width": 1366, "height": 768})
                 page.goto(host.launch_url)
                 page.goto(host.origin + "/profiles/new")
-                result = {"/profiles/new": page.evaluate(COLLECT)}
+                result = {"/profiles/new": _collect(page)}
                 page.fill("input[name=name]", "Mohab")
                 for field in ("password", "confirm"):
                     page.fill(f"input[name={field}]", "a dummy audit password")
@@ -115,7 +123,7 @@ def audit():
                     page.fill("input[name=recovery]", key)
                 page.click("form[action='/profiles/confirm'] button[type=submit]")
                 page.goto(host.origin + "/")
-                result["/welcome"] = page.evaluate(COLLECT)
+                result["/welcome"] = _collect(page)
                 page.evaluate("""async () => { const t = (document.querySelector('meta[name=lightning-session]')||{}).content
                     || document.querySelector('input[name=__session]').value;
                     await fetch('/demo', {method: 'POST', body: new URLSearchParams({__session: t})}); }""")
@@ -123,7 +131,7 @@ def audit():
                     response = page.goto(host.origin + path)
                     assert response is not None and response.status < 400, f"{path}: HTTP {response and response.status}"
                     page.mouse.move(1, 1)  # a pointer resting on a field would show its hover border
-                    result[path] = page.evaluate(COLLECT)
+                    result[path] = _collect(page)
                 browser.close()
         finally:
             host.stop()
@@ -154,8 +162,11 @@ def test_fields_are_soft_wells(audit):
     assert not _fails(audit, "fields")
 
 
-def test_register_amounts_are_not_strong_rose(audit):
-    assert not [row for row in audit["/transactions"]["rose"] + audit["/accounts/1"]["rose"] if "amount" in row]
+def test_register_amounts_in_rose_are_only_money_out(audit):
+    """Owner, 2026-10-30: register money out reads rose (money in stays green). Anything else that is an amount in
+    strong rose on a register page, a positive figure for example, is a colour off its meaning (A03)."""
+    rows = [row for row in audit["/transactions"]["rose"] + audit["/accounts/1"]["rose"] if "amount" in row]
+    assert not [row for row in rows if not row.split("amount", 1)[1].strip().startswith(("\u2212", "-"))]
 
 
 def test_pages_fit_their_cards(audit):

@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 74 open items, in the order they are worked on.
+10 milestones, 72 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -20,12 +20,10 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1H2 | ↳ Update the dependency inputs together | | | M | |
 | IT-1H3 | ↳ Regenerate the locks | | | M | |
 | IT-1H4 | ↳ Validate | | | M | |
-| **BT-1L** | [The brand audit's page-jump check fails on /welcome only under a parallel full run](1-easy-to-contribute/1L-page-jump-check-flakes.md) ([#228](https://github.com/LightningEg/Lightning/issues/228)) | bug, technical · low | Build | S | ready |
 | **IT-1M** | [Archive closed reports and keep their evidence out of the checkout](1-easy-to-contribute/1M-archive-closed-reports.md) | improvement, technical | Build | M | ready |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | ready |
-| **BT-1O** | [The brand audit still says register amounts must not be rose, but the owner decided money out reads rose](1-easy-to-contribute/1O-brand-audit-register-rose-test-is-stale.md) | bug, technical · low | Build | S | ready |
 
-Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K. Next free code: 1P.
+Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K, 1L, 1O. Next free code: 1P.
 
 ## 2 Safe for real money
 
