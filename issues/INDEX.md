@@ -103,8 +103,8 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3AM4 | ↳ Settings stop being forms (ST1-ST4) | | | M | |
 | IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | M | |
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | building |
-| IV-3AN11 | ↳ Measure and hand to the owner | | | S | |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | |
+| IV-3AN13 | ↳ Owner's phone check | | | owner | |
 
 Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK, 3AL, 3AO. Next free code: 3AP.
 

@@ -7,7 +7,6 @@
 | Codex | IT-1H. | native-wheel workflow, inputs/locks | 2026-10-29 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
-| Claude | IV-3AN phone plan (3AL folded in): 3AN3 next | `lightning/ui/templates/phone/`, `phone*.css`, `guideline/phone.html` | 2026-11-02 |
 
 ## Messages
 
@@ -21,7 +20,7 @@
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
 - **Audits 9, 11:** left NF-7T5/7T6, IT-4K4. **Read:** reports 2026-10-28, 2026-10-29.
-- **IV-3AN phone plan (Audit 13):** 3AN0 decided, IV-3AL is 3AN12, 3AN1-2 built; guideline 3.38 merged (#262, site #160). Next: 3AN3. **Read:** 3AN.
+- **IV-3AN phone plan (Audit 13):** built 2026-11-02; every job at its target (report follow-up). Waits on the owner: Accounts tab first (3AN12), one phone check (3AN13). **Read:** 3AN.
 - **IV-3AM PC declutter:** built and reviewed; the owner checks it on the PC, then the Left list. **Read:** 3AM.
 
 - **Store and community (2026-10-27):** 10C unlock once, 8M–8S merged in both repos; the website migrations (up to 20261027210000) are run and checked live and `redeem-purchase` is redeployed; the app release that carries 10C ships the unlock. Next: 10D (Papyrus and Dendera sets need a banner, frame and name designed). **Read:** `reports/2026-10-27-store-and-community/report.md`.

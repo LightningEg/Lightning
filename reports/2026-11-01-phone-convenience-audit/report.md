@@ -52,3 +52,16 @@ choice and scroll. Figures counted by a pattern, so approximate. No code was cha
   at 4x CPU went from about 1.0 s to 0.25-0.3 s, and on all 30 phone pages a swap shows the same content as a full load.
   Settings, categories, payer names and aliases are read once per request; two forced layouts at load are gone.
   Tests: `tests/test_phone_nav_browser.py`, `tests/test_settings_memo.py`, `tests/test_phone_sheets_browser.py`.
+- **2026-11-02, IV-3AN built** (owner: guideline 3.38 lines 1-5, the stepper keeps its pill; "finish the whole thing").
+  Re-run of `evidence/flows.py` and `tools/phone_check.py` on the sample at 360 × 800:
+
+  | Job | Before | After |
+  | --- | --- | --- |
+  | J1 Record a payment | 6 and a scroll | **3**: Add, a category chip, Save (amount typed; Save in view while typing) |
+  | J2 Bank SMS to a transaction | 3 from Add | **2**: Add, Paste SMS (then check and Save) |
+  | J3 Pay the next bill | 3 from More | **2** from Overview: "Landlord 12,000 tomorrow" in Needs you, Mark paid |
+  | J4 Left for groceries | a scan of 9 A-Z rows | **1**: the row at 382 px, ordered by need; it opens its sheet |
+  | J5 Find or fix a payment | pages only; 6 to sort | **1** to search (live, payments first); **3** to sort, the next row opens by itself |
+
+  Overview's first Latest row: 583 px (target under 600). Nothing scrolls sideways at 360 or 320, sheets included.
+  Left: Accounts tab first (3AN12, needs the owner), and the owner's one end-to-end check on a phone.

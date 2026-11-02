@@ -176,10 +176,10 @@ the Arabic daily screens; no page without ‹; then the owner checks the phone e
 
 IV-3AL was folded into this item (owner, 2026-11-02): what it had left is 3AN12. `post: no` while Claude's claim holds the phone templates.
 
-## 3AN11 Measure and hand to the owner · S
-Re-run `evidence/flows.py` and the capture, fill the table with the new numbers in a dated follow-up of the report, run
-Mohab and `tools/phone_check.py` at 360 and 320, then ask the owner for one end-to-end phone check.
-
 ## 3AN12 Left from IV-3AL · S
 Folded from IV-3AL (Audit 10, [report](../../reports/2026-10-29-phone-tab-audit/report.md)). Still open: Accounts tab
 first (the section registry is shared with the PC: ask the owner first).
+
+## 3AN13 Owner's phone check · owner
+Measured 2026-11-02 (report follow-up): every job is at its target. The owner checks the phone end to end once; anything
+wrong becomes its own step.
