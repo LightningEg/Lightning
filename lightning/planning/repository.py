@@ -97,6 +97,15 @@ class PlanningRepository:
             "INSERT INTO planned_payments(planned_item_id,due_date,status,transaction_id,amount_e6,created_at) "
             "VALUES(?,?,?,?,?,?)", (item_id, due_date, status, transaction_id, to_e6(amount), now_iso()))
 
+    def payments_of_transaction(self, transaction_id: int) -> list[dict]:
+        return [dict(row) for row in self.db.all(
+            "SELECT planned_item_id,due_date FROM planned_payments WHERE transaction_id=? AND status='PAID'",
+            (transaction_id,))]
+
+    def set_paid_amount(self, item_id: int, due_date: str, amount) -> None:
+        self.db.execute("UPDATE planned_payments SET amount_e6=? WHERE planned_item_id=? AND due_date=?",
+                        (to_e6(amount), item_id, due_date))
+
     def unsettle(self, item_id: int, due_date: str) -> None:
         self.db.execute("DELETE FROM planned_payments WHERE planned_item_id=? AND due_date=?", (item_id, due_date))
 

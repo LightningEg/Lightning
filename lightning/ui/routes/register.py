@@ -719,7 +719,9 @@ async def update(request: Request, account_id: int | None, txn_id: int):
                                                    other_id, counterparty, values["notes"], owner_party["id"] if owner_party else None)
             if txn.id != txn_id:
                 c.money_from_others.sync_transaction(txn_id, values["date"], None, row_account, ZERO, "")
-            values["_notice"] = c.reserves.carry_links(reserve_links, txn.id) if reserve_links else ""
+            values["_notice"] = " ".join(filter(None, (
+                c.reserves.carry_links(reserve_links, txn.id) if reserve_links else "",
+                c.planning.review_links(txn.id))))
             amount = to_decimal(values["amount"], "amount")
             if other_id:
                 source, target = (other_id, row_account) if amount > ZERO else (row_account, other_id)
