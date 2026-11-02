@@ -1,6 +1,6 @@
 ---
 title: Planning, import and search
-done: 7W, 7Q, 7P, 7K, 7N, 7O, 7J, 7H, 7U, 7R
+done: 7V, 7W, 7Q, 7P, 7K, 7N, 7O, 7J, 7H, 7U, 7R
 ---
 
 **Goal.** Getting a month in takes minutes: any bank file, any old app, one search box.
