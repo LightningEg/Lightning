@@ -24,7 +24,7 @@ Two passes. First, the open engine items from Audits 1 and 4 (2I, 2J, 2L, 2M). S
 | B4 | low–medium | Deleting a category or counterparty used only by a plan or reserve crashed; a claim's payer was silently removed. Delete now asks every foreign key and archives instead. | fixed |
 | B5 | low | A circle could record a second payout (void, record, restore) or a fourth instalment of three (plain transfer). The holding check now enforces the circle's terms on every path. | fixed |
 | B6 | low | Reimbursement amounts accepted 10.0001. Now whole minor units. | fixed |
-| B7 | low | Editing an expense's amount silently unlinks it from its reserve (deliberate trigger, no message). | owner decision: [7R](../../issues/7-planning-import-and-search/7R-money-edit-drops-reserve-links.md) |
+| B7 | low | Editing an expense's amount silently unlinks it from its reserve (deliberate trigger, no message). | owner decision: 7R (done: `tests/test_reserve_matching.py::test_editing_a_linked_expense_keeps_its_reserve_link_while_it_fits`) |
 | C1 | medium | A backdated early payment could pay off an already settled loan again (600 paid on a 300 loan). Capped by what is owed after every recorded repayment. | fixed |
 | C2 | medium | Paying 250 on a 100 instalment moved 250 but counted 100; the rest vanished. Paying or linking more than an instalment owes is now refused; the excess goes through early payment. | fixed |
 | C3 | medium | "Already paid up to today" moved a bill's day for good (the 31st became the 30th; a weekend-moved 4th became the 6th). The anchor is now the calendar date and monthly plans keep their day. | fixed |

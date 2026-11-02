@@ -46,3 +46,14 @@ def test_a_change_that_no_longer_fits_opens_the_payment_again_and_says_so(c, pai
     message = _edit(c, client, bank, txn, amount="-5000", date="2026-12-05")
     assert "no longer fits Internet" in message and "open again" in message
     assert _february(c, item).status != PaymentStatus.PAID
+
+
+def test_the_popup_edit_does_the_same(c, paid_bill):
+    client, bank, item, txn = paid_bill
+    food = c.categories.get_by_code("EXP.PERSONAL.FOOD")
+    form = dict(kind="out", date="2026-12-05", amount="5000", category_id=str(food.id), category_choice=str(food.id),
+                account_id=str(bank.id), notes="", counterparty="", owner_id="", to_account_id="",
+                revision=c.transactions.revision(txn), return_to=f"/accounts/{bank.id}")
+    reply = client.post(f"/transactions/{txn}/edit-popup", data=form, follow_redirects=False)
+    assert reply.status_code == 303 and "no longer fits Internet" in unquote_plus(reply.headers["location"])
+    assert _february(c, item).status != PaymentStatus.PAID
