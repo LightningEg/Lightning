@@ -12,4 +12,12 @@ PHONE_READING = {
     '1 payment due soon': 'دفعة مستحقة قريب',
     '{n} payments due soon': '{n} دفعات مستحقة قريب',
     'Tomorrow': 'بكرة',
+    # 3AN7: Budget in order of need, a category's sheet
+    'Over its limit by {amt}': 'عدّيت الحد بـ {amt}',
+    'Ahead of pace: {n}% spent, {m}% of the month gone': 'أسرع من المعدل: صرفت {n}% وعدّى {m}% من الشهر',
+    'On pace: {n}% spent, {m}% of the month gone': 'على المعدل: صرفت {n}% وعدّى {m}% من الشهر',
+    'Last payments': 'آخر المدفوعات',
+    'Nothing spent here yet this month.': 'لسه ماصرفتش هنا الشهر ده.',
+    'Save limit': 'احفظ الحد',
+    'New month: {amt} over {n} days': 'شهر جديد: {amt} على {n} يوم',
 }

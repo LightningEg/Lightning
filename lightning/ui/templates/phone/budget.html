@@ -2,11 +2,14 @@
    and the pace sentence, the month stepper, what is over plan with its one action, then one row per category with its
    meter, over plan first. The plan's own figures, the notes and the groups (where a limit is typed beside its
    category) follow. The ring, the rows and the over-plan row are worked out in budget.py.
-   View, then edit (IV-3AL2): the page lists each category once, the ones that need you first and the rest behind one
-   row; Edit plan (open_group, also where Adjust and Change the plan land) shows the plan's figures and the groups where
-   a limit is typed, so a tap on a row never lands in a field. #}
+   In order of need (3AN7): over plan, then ahead of the month's pace, then by what each usually costs; the rest behind
+   "N more on track". A row opens its sheet (spent of limit, pace, the last three payments, its limit, Cover it, See
+   transactions); Edit plan (open_group, also where Adjust and Change the plan land) shows the plan's figures and the
+   groups where a limit is typed. One strip at a time sits under the stepper: bulk undo, over plan, the raise offer or
+   the first limits. #}
 {% extends "base.html" %}
 {% from "partials/charts.html" import key_notes %}
+{% from "phone/partials/sheet.html" import sheet with context %}
 {% block title %}Budget{% endblock %}
 {% block heading %}<h1>{{ 'Budget'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
@@ -20,7 +23,7 @@
   <div class="phone-hero has-seam phone-budget-hero-text">
     <div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Over plan'|tr(locale) if ring.over else fig.left_in_plan.label }}</div>
     <div class="phone-lead{{ ' is-negative' if ring.over }}">{{ ring.amount|money }} <small>{{ base }}</small></div>
-    {% if status %}<p class="phone-hero-line">{{ status.text|tr(locale, **status['values']) }}</p>{% endif %}
+    {% set line = phone_plan.day_one or status %}{% if line %}<p class="phone-hero-line">{{ line.text|tr(locale, **line['values']) }}</p>{% endif %}
   </div>
 </section>
 {% else %}{# no plan to measure: the label and what is missing, no figure #}
@@ -31,12 +34,13 @@
 {% endif %}
 {% from "partials/macros.html" import period_control with context %}{{ period_control("/budget", period.key, month, this_month, period.start_text, period.end_text) }}
 {% if period.key != 'month' %}<p class="phone-note">{{ period.start_text }} {{ 'to'|tr(locale) }} {{ period.end_text }}</p>{% endif %}
-{% if not editing and has_plan %}<p class="phone-note phone-budget-line">{{ fig.planned.label }} {{ period_budgeted|money }}{% if check and check.plan_saves is not none and check.planned_savings_rate is not none %} · {{ fig.plan_leaves_to_save.label }} {{ check.plan_saves|money }}{% endif %}{% if left_note %} · {{ left_note }}{% endif %}</p>{% endif %}
+{% if not editing and has_plan and not phone_plan.day_one %}<p class="phone-note phone-budget-line">{{ fig.planned.label }} {{ period_budgeted|money }}{% if check and check.plan_saves is not none and check.planned_savings_rate is not none %} · {{ fig.plan_leaves_to_save.label }} {{ check.plan_saves|money }}{% endif %}{% if left_note %} · {{ left_note }}{% endif %}</p>{% endif %}
 
-{% if bulk_undo %}<form method="post" action="/budget/bulk/undo" class="flash"><input type="hidden" name="token" value="{{ bulk_undo }}">{{ "Bulk rules applied."|tr(locale) }}<button class="btn">{{ 'Undo'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
+{% set strip = phone_plan.strip %}
+{% if strip == 'undo' %}<form method="post" action="/budget/bulk/undo" class="flash"><input type="hidden" name="token" value="{{ bulk_undo }}">{{ "Bulk rules applied."|tr(locale) }}<button class="btn">{{ 'Undo'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
 
 {% set over = phone_plan.over %}
-{% if over %}
+{% if strip == 'over' %}
 <div class="card phone-card phone-needs phone-budget-over" role="group" aria-labelledby="over-heading">
   <span class="needs-you-dot" aria-hidden="true"></span>
   <span class="phone-needs-text"><b id="over-heading">{{ over.title.text|tr(locale, **over.title['values']) }}</b><small>{{ over.line.text|tr(locale, **over.line['values']) }}</small></span>
@@ -45,14 +49,14 @@
 </div>
 {% endif %}
 
-{% if raise_offer %}<section class="card phone-card raise-prompt" aria-labelledby="raise-heading">
+{% if strip == 'raise' %}<section class="card phone-card raise-prompt" aria-labelledby="raise-heading">
   <h2 id="raise-heading" class="phone-card-title">{{ 'Your income went up'|tr(locale) }}</h2>
   <p class="phone-note">{{ 'Recurring expects {recurring}, {raise} more than your average.'|tr(locale, recurring=raise_offer.recurring|money(False, 0) ~ ' ' ~ base, raise=raise_offer.raise|money(False, 0)) }}</p>
   <a class="btn primary phone-save" data-popup-open href="/budget/raise?month={{ raise_offer.month }}">{{ 'Raise the plan'|tr(locale) }}</a>
   <a class="phone-quiet" href="/plan/reserves">{{ 'Save the difference'|tr(locale) }}</a>
 </section>{% endif %}
 
-{% if period.key == 'month' and not has_plan %}
+{% if strip == 'first' %}
 <section class="card phone-card phone-budget-first" aria-labelledby="first-heading">
   <h2 id="first-heading" class="phone-card-title">{{ "Set your first spending limits"|tr(locale) }}</h2>
   <p class="phone-note">{{ "Lightning proposes a limit for each category from what you spent; change any before saving."|tr(locale) }}</p>
@@ -64,18 +68,24 @@
 </section>
 {% endif %}
 
-{% macro cat_row(r) %}<div class="phone-cat-wrap">
-    <a class="phone-row phone-cat{{ ' is-over' if r.over }}{{ ' is-risk' if r.risk }}" href="{{ r.href }}">
-      <span class="phone-cat-main"><b>{{ r.name }}</b><small>{{ r.spent|money }} {{ 'of'|tr(locale) }} {{ r.planned|money }}{% if r.risk %} · <em class="phone-risk">{{ 'Ahead of pace'|tr(locale) }}</em>{% endif %}</small></span>
+{% macro cat_row(r) %}
+  {% set row %}<span class="phone-cat-main"><b>{{ r.name }}</b><small>{{ r.spent|money }} {{ 'of'|tr(locale) }} {{ r.planned|money }}{% if r.risk %} · <em class="phone-risk">{{ 'Ahead of pace'|tr(locale) }}</em>{% endif %}</small></span>
       <span class="phone-cat-left"><b>{{ ('−' if r.over else '') ~ (r.amount|money) }}</b><small>{{ 'Over plan'|tr(locale) if r.over else 'left'|tr(locale) }}</small></span>
-      <span class="phone-plan-bar{{ ' is-over' if r.over }}" aria-hidden="true"><i style="width:{{ '%.1f'|format(r.width) }}%"></i>{% if r.pace is not none %}<s class="phone-pace-tick" style="inset-inline-start:{{ '%.1f'|format(r.pace) }}%"></s>{% endif %}</span>
-    </a>
-    {% if r.cover %}<a class="phone-cover" data-popup-open href="{{ r.cover }}">{{ 'Cover it'|tr(locale) }}</a>{% endif %}
-    </div>{% endmacro %}
+      <span class="phone-plan-bar{{ ' is-over' if r.over }}" aria-hidden="true"><i style="width:{{ '%.1f'|format(r.width) }}%"></i>{% if r.pace is not none %}<s class="phone-pace-tick" style="inset-inline-start:{{ '%.1f'|format(r.pace) }}%"></s>{% endif %}</span>{% endset %}
+  {% call sheet(r.name, row, 'phone-cat' ~ (' is-over' if r.over) ~ (' is-risk' if r.risk)) %}
+    <div class="phone-lead{{ ' is-negative' if r.over }}">{{ r.spent|money }} <small>{{ 'of'|tr(locale) }} {{ r.planned|money }} {{ base }}</small></div>
+    <span class="phone-plan-bar phone-sheet-bar{{ ' is-over' if r.over }}" aria-hidden="true"><i style="width:{{ '%.1f'|format(r.width) }}%"></i>{% if r.pace is not none %}<s class="phone-pace-tick" style="inset-inline-start:{{ '%.1f'|format(r.pace) }}%"></s>{% endif %}</span>
+    {% if r.line %}<p class="phone-note">{{ r.line.text|tr(locale, **r.line['values']) }}</p>{% endif %}
+    {% if r.payments %}<div class="phone-sheet-payments" data-fold-src="{{ r.payments }}"><p class="chart-empty">{{ 'Loading…'|tr(locale) }}</p></div>{% endif %}
+    {% if r.rule is not none and period.key == 'month' %}<form method="post" action="/budget/rule/{{ r.category_id }}" class="phone-form"><input type="hidden" name="month" value="{{ month }}">
+      <div class="field"><label for="limit-{{ r.category_id }}">{{ 'Monthly limit'|tr(locale) }}</label><input id="limit-{{ r.category_id }}" name="rule" value="{{ r.rule }}" inputmode="decimal" autocomplete="off" placeholder="{{ r.planned|money(False, 0) }}"></div>
+      <button class="btn primary phone-save">{{ 'Save limit'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
+    {% if r.cover %}<a class="btn phone-save" data-popup-open href="{{ r.cover }}">{{ 'Cover it'|tr(locale) }}</a>{% endif %}
+    <a class="phone-quiet" href="{{ r.see_all or r.href }}">{{ 'See transactions'|tr(locale) }}</a>
+  {% endcall %}
+{% endmacro %}
 {% if phone_plan.cats and not editing %}
-{% set first = phone_plan.cats|selectattr('over')|list + phone_plan.cats|rejectattr('over')|selectattr('risk')|list %}
-{% set rest = phone_plan.cats|rejectattr('over')|rejectattr('risk')|list %}
-{% if first|length + rest|length <= 5 or not first %}{% set first, rest = phone_plan.cats, [] %}{% endif %}
+{% set first, rest = phone_plan.shown, phone_plan.rest %}
 <section class="phone-section phone-budget-cats" aria-labelledby="cats-heading">
   <header class="phone-section-head"><h2 id="cats-heading">{{ 'Categories'|tr(locale) }}</h2>{% if period.key == 'month' %}<a class="phone-quiet" href="{{ phone_plan.edit_href }}">{{ 'Edit plan'|tr(locale) }}</a>{% endif %}</header>
   <div class="phone-rows">

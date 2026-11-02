@@ -199,10 +199,6 @@ ask only for an ending it has not seen);
 App-bar search: live results, payments and counterparties first, then pages and actions; no "Ctrl K", no Search button.
 Extends IV-3T3's search half; close both together.
 
-## 3AN7 Budget in order of need · M
-Over plan and ahead of pace first, then by usual spending; 64 px rows with the meter inside; "N more on track ›"; the
-day-one line. With the category sheet (from IV-3AL2, folded here). Done when J4's row is in the first screen on the sample.
-
 ## 3AN8 Moves read as moves · S
 A buy, sell or move between your own accounts shows with no sign on azure or Track (C08.2), so rows, Money in/out and the
 day's net agree on screen. Test with the sample's money-market buy.

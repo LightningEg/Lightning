@@ -109,7 +109,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3AN3 | ↳ The Add sheet and the transaction sheet | | | L | |
 | IV-3AN5 | ↳ SMS in Add | | | M | |
 | IV-3AN6 | ↳ Search for money | | | M | |
-| IV-3AN7 | ↳ Budget in order of need | | | M | |
 | IV-3AN8 | ↳ Moves read as moves | | | S | |
 | IV-3AN9 | ↳ No wall of zeros | | | S | |
 | IV-3AN10 | ↳ Arabic daily screens | | | M | |

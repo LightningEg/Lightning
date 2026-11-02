@@ -176,6 +176,20 @@
   });
 })();
 
+// A row's sheet (phone/partials/sheet.html) closes with its Done button or with a tap outside it.
+document.addEventListener("click", (event) => {
+  const target = event.target;
+  if (!target.closest) return;
+  const done = target.closest("[data-sheet-close]");
+  if (done) { event.preventDefault(); done.closest("details").open = false; return; }
+  const open = document.querySelector(".phone-sheet-row[open]");
+  if (!open || target.closest(".phone-sheet-panel")) return;
+  if (target.closest("summary") === open.querySelector(":scope > summary")) return;  // its own row toggles it
+  event.preventDefault();
+  event.stopPropagation();
+  open.open = false;
+}, true);
+
 // Closed folds on the Overview load when opened (backend roadmap B1): one small request instead of every chart.
 document.addEventListener("toggle", (event) => {
   const fold = event.target;
