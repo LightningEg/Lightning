@@ -223,3 +223,28 @@ def test_physical_item_edit_rebuilds_existing_checkpoints(c):
     assert row["value_base_e6"] == 5_000_000_000
     assert row["return_base_e6"] == 2_000_000_000
     assert c.transactions.get(old_journal_id).is_void
+
+
+def test_rebuilt_checkpoint_reuses_unchanged_revaluation_journals(c):
+    """BT-2E part 8: new inputs that leave a checkpoint's lines as they were do not void and repost them."""
+    account = c.account_flows.open_account("THNDR", "BROKERAGE", "2026-09-01", "10000")
+    fund = c.assets.create_investment("First fund", "FUND.EQUITY", "F1")
+    c.investments.add_holding(account.id, fund.id, "10", "1000", "2026-09-01")
+    c.assets.set_price(fund.id, "2026-09-30", "110")
+    assert c.reevaluations.process_date("2026-09-30", "MONTH_END")
+    before = c.db.one("SELECT id,status FROM transactions WHERE type='VAL'")
+    hash_before = c.db.scalar("SELECT source_hash FROM reevaluation_periods WHERE date='2026-09-30'")
+
+    c.assets.set_price(fund.id, "2026-09-15", "105")  # a new input before the month end: the hash changes, the lines do not
+    assert c.reevaluations.process_date("2026-09-30", "MONTH_END")
+
+    assert c.db.scalar("SELECT source_hash FROM reevaluation_periods WHERE date='2026-09-30'") != hash_before
+    rows = c.db.all("SELECT id,status FROM transactions WHERE type='VAL'")
+    assert [(r["id"], r["status"]) for r in rows] == [(before["id"], "POSTED")]  # not voided, not reposted
+    assert c.db.scalar("SELECT transaction_id FROM reevaluation_account_posts") == before["id"]
+    assert c.db.scalar("SELECT COUNT(*) FROM audit_log WHERE entity_id=? AND action='void'", (before["id"],)) == 0
+
+    c.assets.set_price(fund.id, "2026-09-30", "120")  # a changed price still rebuilds the journal
+    assert c.reevaluations.process_date("2026-09-30", "MONTH_END")
+    assert c.db.scalar("SELECT COUNT(*) FROM transactions WHERE type='VAL' AND status='VOID'") == 1
+    assert c.db.scalar("SELECT amount_base_e6 FROM reevaluation_account_posts") == 200_000_000

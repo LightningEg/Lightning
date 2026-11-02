@@ -7,6 +7,7 @@ import hashlib
 import json
 from datetime import date, timedelta
 from decimal import Decimal
+from types import SimpleNamespace
 
 from lightning.accounts.service import AccountService
 from lightning.core.dates import fmt_date, now_iso, parse_date, today
@@ -95,17 +96,21 @@ class ReevaluationService:
             period_id = self.db.scalar("SELECT id FROM reevaluation_periods WHERE date=? AND reason=?", (day, reason))
             source_hash = self._source_hash(day, reason, forced_prices)
             status = self.db.scalar("SELECT status FROM reevaluation_periods WHERE id=?", (period_id,))
+            old_posts: dict[int, tuple[int, tuple]] = {}
             saved_hash = self.db.scalar("SELECT source_hash FROM reevaluation_periods WHERE id=?", (period_id,))
             if status == "POSTED" and saved_hash == source_hash:
                 return True
             if status == "POSTED":
-                linked = self.db.all("SELECT transaction_id FROM reevaluation_account_posts WHERE period_id=?",
+                linked = self.db.all("SELECT account_id,transaction_id FROM reevaluation_account_posts WHERE period_id=?",
                                      (period_id,))
                 for row in linked:
                     txn_id = int(row["transaction_id"])
+                    old = self.transactions.get(txn_id)
+                    if not old.is_void:
+                        # Voided while the checkpoint is recomputed (its own returns must not count);
+                        # brought back below when the new journal turns out identical.
+                        old_posts[row["account_id"]] = (txn_id, self._journal_signature(old))
                     self.transactions.repo.set_status(txn_id, TxnStatus.VOID)
-                    self.transactions.audit.record("transaction", txn_id, "void",
-                                                   f"Rebuilt changed reevaluation checkpoint {day}")
                 # Keep the original link for a manually suppressed account so
                 # restoring its journal can re-enable this checkpoint later.
                 self.db.execute(
@@ -195,6 +200,7 @@ class ReevaluationService:
                     certificate_key = (account_id, asset_id, owner_id)
                     certificate_returns[certificate_key] = certificate_returns.get(certificate_key, ZERO) + ret
             if incomplete:
+                self._void_replaced(old_posts, day)
                 return False
             for account_id in sorted({key[0] for key in account_returns}):
                 if self.db.scalar("SELECT 1 FROM reevaluation_suppressed_accounts WHERE period_id=? AND account_id=?",
@@ -204,6 +210,7 @@ class ReevaluationService:
                 cash_asset = self.reporting.assets.cash_asset(account.currency)
                 fx = self.reporting.valuer._fx(account.currency, day)
                 if fx is None:
+                    self._void_replaced(old_posts, day)
                     return False
                 if self.accounts.get(account_id).account_type.value == "DEPOSIT":
                     owner_lines = [PostingLine.revaluation(
@@ -221,27 +228,57 @@ class ReevaluationService:
                         if row_account == account_id]
                 amount_base = sum((value for (row_account, _), value in account_returns.items()
                                    if row_account == account_id), ZERO)
-                journal = self.transactions.post(
-                    DocType.VAL, day, owner_lines,
-                    description="Investment revaluation", counterparty="", notes=f"System-generated · {reason}",
-                    source=TxnSource.SYSTEM)
+                notes = f"System-generated · {reason}"
+                reused = old_posts.get(account_id)
+                if reused and reused[1] == self._journal_signature(None, day, owner_lines, notes):
+                    # Same lines as the journal already posted: keep it instead of voiding and reposting (BT-2E).
+                    self.transactions.repo.set_status(reused[0], TxnStatus.POSTED)
+                    del old_posts[account_id]
+                    journal = SimpleNamespace(id=reused[0])
+                else:
+                    journal = self.transactions.post(
+                        DocType.VAL, day, owner_lines,
+                        description="Investment revaluation", counterparty="", notes=notes,
+                        source=TxnSource.SYSTEM)
                 self.db.execute("INSERT INTO reevaluation_account_posts(period_id,account_id,transaction_id,"
                                 "amount_base_e6) VALUES(?,?,?,?)",
                                 (period_id, account_id, journal.id, to_e6(amount_base)))
                 self.db.execute("UPDATE reevaluation_entries SET journal_transaction_id=? "
                                 "WHERE period_id=? AND account_id=?",
                                 (journal.id, period_id, account_id))
+            self._void_replaced(old_posts, day)
             self.db.execute("UPDATE reevaluation_periods SET status='POSTED',source_hash=? WHERE id=?",
                             (source_hash, period_id))
         return True
+
+    def _void_replaced(self, old_posts: dict[int, tuple[int, tuple]], day: str) -> None:
+        """Audit the earlier journals the rebuilt checkpoint did not reuse (they were voided when it started)."""
+        for txn_id, _ in old_posts.values():
+            self.transactions.audit.record("transaction", txn_id, "void",
+                                           f"Rebuilt changed reevaluation checkpoint {day}")
+        old_posts.clear()
+
+    @staticmethod
+    def _journal_signature(txn, day: str | None = None, lines=None, notes: str | None = None) -> tuple:
+        """What makes a revaluation journal the same journal: date, notes and every line, in micro-units."""
+        if txn is not None:
+            day, notes = txn.date, txn.notes
+            parts = [(l.account_id, l.asset_id, l.owner_id, l.quantity, l.amount, l.fx_rate, l.amount_base, l.memo)
+                     for l in txn.lines]
+        else:
+            parts = [(l.account_id, l.asset_id, l.owner_id, l.quantity, l.amount, l.fx_rate, l.amount_base, l.memo)
+                     for l in lines]
+        return (day, notes, tuple(sorted(
+            (a, b, o if o is not None else 0, to_e6(q), to_e6(m), to_e6(f), to_e6(base), memo)
+            for a, b, o, q, m, f, base, memo in parts)))
 
     def _source_hash(self, day: str, reason: str, forced_prices: dict | None) -> str:
         """Fingerprint posted holdings activity and dated inputs for this checkpoint."""
         activity = [tuple(row) for row in self.db.all(
             "SELECT le.date,le.account_id,le.asset_id,le.owner_id,le.quantity_e6,le.unit_price_e6,le.amount_base_e6,"
             "t.type,t.status FROM ledger_entries le JOIN transactions t ON t.id=le.transaction_id "
-            "JOIN financial_assets a ON a.id=le.asset_id WHERE "
-            "(a.is_cash=0 OR (a.is_cash=1 AND a.currency<>? AND t.type<>'VAL')) AND le.date<=? "
+            "JOIN financial_assets a ON a.id=le.asset_id WHERE t.type<>'VAL' AND "
+            "(a.is_cash=0 OR (a.is_cash=1 AND a.currency<>?)) AND le.date<=? "
             "ORDER BY le.date,le.account_id,le.asset_id,t.id,le.line_no",
             (self.reporting.base_currency, day))]
         prices = [tuple(row) for row in self.db.all(

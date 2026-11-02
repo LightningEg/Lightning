@@ -13,6 +13,7 @@ from lightning.core.errors import LightningError, ValidationError
 from lightning.core.limits import MAX_CSV_MAPPING_REQUEST_BYTES, MAX_IMPORT_REVIEW_REQUEST_BYTES
 from lightning.core.money import ZERO, fmt
 from lightning.sync.journal.proxy import PendingOnHome
+from lightning.workflows.ai_prompts import bank_category_prompt, rejected_csv_prompt
 
 from ..web import container, redirect, render
 
@@ -87,6 +88,19 @@ Statements from Egyptian banks and wallets often use Arabic-Indic digits (٠١٢
 Return only the CSV, then list every row you were unsure about so I can check it in Lightning's review. Review every output row against the source before confirming the import. Do not claim the import is complete.'''
 
 
+def _first_import_prompt(c, account):
+    """On the first import into an account: map the bank's own category words to the person's categories."""
+    if c.bank_imports.has_posted_import(account.id):
+        return ""
+    return bank_category_prompt(account.institution or account.name, account.currency,
+                                [item["label"] for item in _categories(c)])
+
+
+def _rejected_prompt(account, headers, problems, failing=0):
+    """A statement that did not read: its header, what failed on which line, and the schema. No values from any row."""
+    return rejected_csv_prompt(account.name, account.currency, headers, problems, failing)
+
+
 def _review_form_max_fields(row_count: int) -> int:
     # Each row submits about twelve fields (date, counterparty and its pick, category, held for and its pick,
     # notes, amount, skip, match, remember); leave room for form metadata.
@@ -98,7 +112,7 @@ async def import_page(request: Request, account_id: int):
     c = container(request)
     account = c.accounts.get(account_id)
     return render(request, "bank_import_upload.html", account=account, waiting=_waiting_imports(c, account_id),
-                  ai_prompt=_ai_prompt(account, _ai_reference(c)))
+                  ai_prompt=_ai_prompt(account, _ai_reference(c)), category_prompt=_first_import_prompt(c, account))
 
 
 def _waiting_imports(c, account_id: int) -> list[dict]:
@@ -108,7 +122,8 @@ def _waiting_imports(c, account_id: int) -> list[dict]:
 def _render_upload(request, c, account_id, *, error="", status_code=200):
     account = c.accounts.get(account_id)
     return render(request, "bank_import_upload.html", account=account, waiting=_waiting_imports(c, account_id),
-                  ai_prompt=_ai_prompt(account, _ai_reference(c)), error=error, status_code=status_code)
+                  ai_prompt=_ai_prompt(account, _ai_reference(c)), category_prompt=_first_import_prompt(c, account),
+                  error=error, status_code=status_code)
 
 
 @router.get("/{account_id:int}/import/ai-reference.json")
@@ -247,7 +262,8 @@ async def map_columns(request: Request, account_id: int):
                           bundle=bundle,
                           required=REQUIRED, optional=OPTIONAL, amount_fields=SEPARATE_AMOUNT_FIELDS,
                           suggested_amount_model=mapping.get("amount_model", "SINGLE"), mapping=mapping,
-                          invert_amount=form.get("amount_sign") == "invert", error=exc.message, status_code=400)
+                          invert_amount=form.get("amount_sign") == "invert", error=exc.message, status_code=400,
+                          reject_prompt=_rejected_prompt(c.accounts.get(account_id), headers, [("1", exc.message)]))
         msg = exc.message if isinstance(exc, LightningError) else "The uploaded statement could not be read. Upload it again."
         return _render_upload(request, c, account_id, error=msg, status_code=400)
     batch_id, repeated = batches[0]
@@ -337,10 +353,16 @@ def _render_review(request, c, account_id: int, batch, rows, *, summary, form=No
     groups = _review_groups(c, rows, form)
     counts = {"all": len(groups)} | {key: sum(1 for g in groups if g["status"] == key) for key in _STATUS_ORDER}
     accounts_here = [a for a in c.accounts.list(active_only=True) if a.id != account_id and a.currency == account.currency]
+    failing = [r for r in rows if _row_status(r) == "err"]
+    reject_prompt = ""
+    if failing and batch["status"] != "POSTED":
+        reject_prompt = _rejected_prompt(
+            account, c.bank_imports.source_header(batch["id"]),
+            [(str(r["_line"]), str(r.get("_row_error") or " ".join(r.get("_errors") or []))) for r in failing], len(failing))
     return render(request, "bank_import_preview.html", account=account, batch=batch, rows=rows,
                   groups=groups, counts=counts, categories=_categories(c),
                   counterparties=c.counterparties.list_active(), owners=c.counterparties.list_people(), account_choices=accounts_here,
-                  summary=summary, msg=msg, error=error, status_code=status_code)
+                  summary=summary, msg=msg, error=error, reject_prompt=reject_prompt, status_code=status_code)
 
 
 @router.post("/{account_id:int}/import/counterparty")

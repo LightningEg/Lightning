@@ -29,7 +29,7 @@ from decimal import Decimal
 from lightning.core.dates import fmt_date, parse_date, today
 from lightning.core.errors import NotFoundError
 from lightning.core.memo import request_cached
-from lightning.core.money import ZERO
+from lightning.core.money import ZERO, quantize, round_to_total
 
 from lightning.investments.domain import DEFAULT_SALE_FACTOR
 
@@ -182,6 +182,21 @@ class Position:
         if self.free_cash is None or self.unvalued:
             return None
         return self.free_cash + self.kept_apart + self.holdings_after_sale
+
+    @property
+    def sale_parts(self) -> dict | None:
+        """The "If you sold today" total and its parts in whole units, rounded (largest remainder) so the
+        parts shown add up to the total shown: keys total, free_cash, kept_apart, holdings_after_sale, and
+        classes (class id -> after-sale value, adding up to holdings_after_sale)."""
+        total = self.if_you_sold_today
+        if total is None:
+            return None
+        total = quantize(total, 0)
+        free, kept, holdings = round_to_total([self.free_cash, self.kept_apart, self.holdings_after_sale], total)
+        shown = [c for c in self.classes if c.value]
+        shares = round_to_total([c.after_sale for c in shown], holdings) if shown else []
+        return {"total": total, "free_cash": free, "kept_apart": kept, "holdings_after_sale": holdings,
+                "classes": {c.id: v for c, v in zip(shown, shares)}}
 
     @property
     def unavailable_reason(self) -> str:

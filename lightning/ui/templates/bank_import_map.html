@@ -5,6 +5,8 @@
 <section class="card form-card">
   <p class="muted">{{ 'Check the columns we matched. We remember them for this bank.'|tr(locale) }}</p>
   {% if error %}<p class="flash error">{{ error|tr(locale) }}</p>{% endif %}
+  {% if reject_prompt %}<p class="muted small">{{ 'This prompt gives your AI tool what it cannot guess: your file’s header, what Lightning rejected and the columns it accepts. It fixes the file for you instead of you hunting for the problem.'|tr(locale) }}</p>
+  {% set ai_text = reject_prompt %}<div class="actions">{% include "partials/ai_prompt.html" %}</div>{% endif %}
   {% macro column(name, label, required=False, empty='Not in file') -%}
   <div class="field"><label for="map_{{ name }}">{{ label|tr(locale) }}</label><select id="map_{{ name }}" name="map_{{ name }}"{{ ' required' if required }}><option value="">{{ empty|tr(locale) }}</option>{% for h in headers %}<option value="{{ h }}" {{ 'selected' if mapping.get(name) == h }}>{{ h }}</option>{% endfor %}</select></div>
   {%- endmacro %}
