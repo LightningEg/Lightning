@@ -32,3 +32,5 @@ Convert again saves it as typed (`lightning/ui/routes/accounts.py` `check_conver
 ## Fix
 Owner decision first: should a conversion's rate value other holdings? Proposal: value holdings with the market rate and keep the trade rate for the
 conversion's own legs, so the spread shows as a cost.
+
+2026-11-02, owner decided: the market rate values holdings (`SOURCE_RANK` in `lightning/fx.py`: MANUAL > MARKET > ONLINE > TRADE). Built, tested in `tests/test_fx_conversion.py` and `tests/test_fx_rates.py`.

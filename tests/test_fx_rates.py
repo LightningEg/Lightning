@@ -71,6 +71,8 @@ def test_a_cross_rate_is_as_old_as_its_older_leg(c):
 def test_source_order_on_a_day_and_newer_day_first(c):
     for source, value in (("ONLINE", "50.1"), ("MARKET", "50.2"), ("TRADE", "50.3")):
         save_rate(c.db, "2026-09-10", "USD", "EGP", D(value), source)
+    assert rate(c, "USD", "EGP", "2026-09-10").source == "MARKET"      # a conversion's own rate is the last resort (5J)
+    c.db.execute("DELETE FROM fx_rates WHERE source IN ('MARKET','ONLINE')")
     assert rate(c, "USD", "EGP", "2026-09-10").source == "TRADE"
     save_rate(c.db, "2026-09-10", "USD", "EGP", D("50.4"), "MANUAL")
     top = rate(c, "USD", "EGP", "2026-09-10")
