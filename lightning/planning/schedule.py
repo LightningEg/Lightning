@@ -19,13 +19,25 @@ def _add_months(anchor: date, months: int) -> date:
 
 WEEKEND = {4, 5}  # Friday and Saturday in date.weekday()
 
+# Egypt's public holidays that fall on the same date every year, as (month, day): 7 Jan (Coptic Christmas),
+# 25 Jan (Revolution/Police Day), 25 Apr (Sinai Liberation Day), 1 May (Labour Day), 30 Jun (30 June Revolution),
+# 23 Jul (Revolution Day), 6 Oct (Armed Forces Day). Holidays set by the moon (Eid al-Fitr, Eid al-Adha, Islamic
+# New Year, the Prophet's birthday) and Sham El-Nessim change every year and are NOT here: a dated table for
+# them would need yearly upkeep and is out of scope (7I).
+PUBLIC_HOLIDAYS = frozenset({(1, 7), (1, 25), (4, 25), (5, 1), (6, 30), (7, 23), (10, 6)})
+
+
+def is_working_day(day: date) -> bool:
+    """Not a Friday, a Saturday or one of Egypt's fixed-date public holidays."""
+    return day.weekday() not in WEEKEND and (day.month, day.day) not in PUBLIC_HOLIDAYS
+
 
 def on_working_day(day: date, move: WeekendMove) -> date:
-    """Move a Friday or Saturday to Thursday (before) or Sunday (after); other days stay."""
-    if move == WeekendMove.NONE or day.weekday() not in WEEKEND:
+    """Move a weekend or public-holiday date to the working day before or after it; other days stay."""
+    if move == WeekendMove.NONE:
         return day
     step = timedelta(days=-1 if move == WeekendMove.BEFORE else 1)
-    while day.weekday() in WEEKEND:
+    while not is_working_day(day):
         day += step
     return day
 
@@ -91,7 +103,7 @@ def describe(item: PlannedItem) -> str:
     else:
         text = ("Yearly" if every == 1 else f"Every {every} years") + f" on {start:%m-%d}"
     if item.weekend_move != WeekendMove.NONE:
-        text += " · " + ("Thursday" if item.weekend_move == WeekendMove.BEFORE else "Sunday") + " if on a weekend"
+        text += " · " + ("Previous" if item.weekend_move == WeekendMove.BEFORE else "Next") + " working day if on a weekend or holiday"
     if item.payment_count:
         text += f" · {item.payment_count} payments"
     elif item.end_date:
