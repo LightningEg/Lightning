@@ -69,8 +69,9 @@ async def expense_analysis(request: Request):
     # Early in a month (under 7 days, or under 3 categories with spending) the charts have nothing to compare, so the
     # page leads with last month's whole picture and says in one line where this month stands (audit 12, SP1).
     so_far = None
+    on_phone = bool(getattr(request.state, "phone", False))
     plain = not any(key in request.query_params for key in ("period", "month", "date_from", "date_to", "category_id"))
-    if plain and selected.key == "month" and not error and first <= today() <= last and last >= today():
+    if plain and not on_phone and selected.key == "month" and not error and first <= today() <= last and last >= today():
         days = (today() - first).days + 1
         now_groups = [g for g in c.reporting.spending_by_category(first, last, depth=1) if g.value]
         categories = [g for g in c.reporting.spending_by_category(first, last, depth=2) if g.value]  # not the 3 groups
@@ -129,6 +130,10 @@ async def expense_analysis(request: Request):
     else:
         spending_total = flow.outflows
         prior_spending = prior.outflows if prior else None
+    prior_label = (prior_from.strftime("%Y-%m") + (f" days {prior_from.day}–{prior_to.day}" if partial_months(first, last) else "") if selected.key == "month" else "the period before") if prior else ""
+    if on_phone:  # 3AN12: the lead, four categories and "More analysis"; the rest loads when its sheet opens
+        return _phone_spending(request, c, selected, first, last, spending_total, prior_spending, prior_label,
+                               category_filter, category_code, category_name, error)
     trend_chart = line_chart([item["outflows"] for item in trend])
     groups = l2 if l2 else l1
     bar_rows = [{"group": g.label.split(" › ")[0], "label": g.label.split(" › ")[-1], "value": g.value,
@@ -136,7 +141,6 @@ async def expense_analysis(request: Request):
                 for g in groups if g.value]
     category_bars = charts.grouped_bars(bar_rows, limit=10)
     spend_trend = visuals.spending_trend(c, last, category_code, count=max(6, min(len(trend), 24)))
-    prior_label = (prior_from.strftime("%Y-%m") + (f" days {prior_from.day}–{prior_to.day}" if partial_months(first, last) else "") if selected.key == "month" else "the period before") if prior else ""
     notes = [n for n in (keynotes.top_category(bar_rows, spending_total, ""),
                          keynotes.compared(spending_total, prior_spending, prior_label)) if n]
     usual = []
@@ -164,6 +168,73 @@ async def expense_analysis(request: Request):
                   base=c.reporting.base_currency,
                   spending_ai_prompt=spending_prompt(fmt_date(first), fmt_date(last), [r["name"] for r in analysis["rows"]],
                                                      c.reporting.base_currency) if analysis["rows"] else "")
+
+
+def _compare(label: str, now: Decimal, then: Decimal | None, first, last) -> dict:
+    """One comparison row: the difference and its share, rose when spending rose, green when it fell; a part-month
+    reads flat (same days, so far)."""
+    if then is None:
+        return {"label": label, "text": "nothing to compare yet", "tone": "flat"}
+    diff = now - then
+    pct = f" · {abs(diff) / then * 100:.0f}%" if then else ""
+    return {"label": label, "text": f"{'+' if diff > 0 else '−' if diff < 0 else ''}{fmt(abs(diff), 0)}{pct}",
+            "tone": "flat" if partial_months(first, last) else ("up" if diff > 0 else "down" if diff < 0 else "flat")}
+
+
+PHONE_CATEGORIES = 4  # four biggest, then Other (guideline A16)
+
+
+def _phone_spending(request, c, selected, first, last, total, prior_total, prior_label, category_filter, category_code,
+                    category_name, error):
+    """Spending on the phone (3AN12): the lead (spent against the same days usually), the four biggest categories then
+    Other as rows, then one row "More analysis" whose sheet loads the heat map, the money-flow diagrams, the small
+    multiples and the month grid when it opens. A month with nothing spent yet offers last month (3AN9)."""
+    analysis = visuals.expense_analysis(c, first, last, category_code)
+    months, usual = analysis["months_in"], analysis.get("usual_out")
+    partial = partial_months(first, last)
+    compare = [_compare("Against the same days in earlier months" if partial else
+                        f"Against your usual {'month' if months == 1 else 'months'}",
+                        total, usual * months if usual is not None else None, first, last),
+               _compare(f"Against {prior_label}" if prior_label else "Against the period before", total, prior_total,
+                        first, last)]
+    query = (f"category_id={category_filter}&" if category_filter else "") + f"date_from={fmt_date(first)}&date_to={fmt_date(last)}"
+    named = [r for r in analysis["rows"] if not r.get("others")]
+    rest = named[PHONE_CATEGORIES:] + [r for r in analysis["rows"] if r.get("others")]
+    other = ({"name": "Other", "value": sum((r["value"] for r in rest), ZERO), "share": sum((r["share"] for r in rest), ZERO),
+              "href": f"/transactions?{query}"} if rest else None)
+    earlier = None
+    if total == 0 and selected.key == "month" and not category_filter:
+        start = (first - timedelta(days=1)).replace(day=1)
+        spent = c.reporting.cash_flow(start, first - timedelta(days=1)).outflows
+        if spent > 0:
+            earlier = {"month": month_of(start), "value": spent,
+                       "href": f"/birdview/expenses?period=month&month={month_of(start)}"}
+    return render(request, "birdview/expenses.html", period=selected.key, month=last.strftime("%Y-%m"),
+                  this_month=month_of(today()), date_from=fmt_date(first), date_to=fmt_date(last),
+                  custom_from=request.query_params.get("date_from", ""), custom_to=request.query_params.get("date_to", ""),
+                  category_filter=category_filter, category_name=category_name, error=error, base=c.reporting.base_currency,
+                  total=total, partial=bool(partial), compare=compare, rows=named[:PHONE_CATEGORIES], other=other, earlier=earlier,
+                  more_query=urlencode(request.query_params), lead_href=f"/transactions?{query}")
+
+
+@router.get("/expenses/more")
+async def expense_more(request: Request):
+    """The phone's "More analysis" sheet: what the first page leaves out, drawn when the sheet opens (3AN12)."""
+    c = container(request)
+    selected = _period(c, request.query_params)
+    first, last = selected.start, selected.end
+    category_filter = str(request.query_params.get("category_id", ""))
+    category_code = c.categories.get(int(category_filter)).code if category_filter.isdigit() else ""
+    analysis = visuals.expense_analysis(c, first, last, category_code)
+    largest = c.reporting.largest_payments(first, last, 3)
+    for row in largest:
+        row["category"] = c.categories.get(row["category_id"]).name if row["category_id"] else ""
+    payments = [r["value"] for r in c.reporting.largest_payments(first, last, 10 ** 6)] if not category_code else []
+    flows = visuals.cash_flow_charts(c, first, last, selected.key == "month", today()) if not category_filter else {}
+    return render(request, "phone/birdview/more.html", **flows, analysis=analysis, largest=largest,
+                  average=(sum(payments, ZERO) / len(payments)) if payments else None, payment_count=len(payments),
+                  calendar=visuals.day_calendars(c, first, last, category_code), date_from=fmt_date(first),
+                  date_to=fmt_date(last), base=c.reporting.base_currency, category_filter=category_filter)
 
 
 @router.post("/settings")

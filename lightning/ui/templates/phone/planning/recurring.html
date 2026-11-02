@@ -1,0 +1,51 @@
+{# Recurring on a phone (3AN12): the list first, flat rows (name and what it is left, the amount right, whole EGP with no
+   ".00"); a row opens the item. Then what it all comes to a month, the fixed-costs ratio as a link to Financial health
+   (its home), the amounts that changed, what looks recurring and what stopped. #}
+{% extends "base.html" %}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% block title %}Recurring · Cash planning{% endblock %}
+{% block heading %}<h1>{{ 'Cash planning'|tr(locale) }}</h1>{% endblock %}
+{% block top_actions %}<a class="btn" data-popup-open href="/plan/items/new?kind=BILL">{{ 'Add recurring item'|tr(locale) }}</a>{% endblock %}
+{% block content %}
+<section class="phone-section phone-recurring-list" aria-labelledby="recurring-list">
+  <header class="phone-section-head"><h2 id="recurring-list">{{ 'Recurring items'|tr(locale) }}</h2><span>{{ '{n} active'|tr(locale, n=rows|length) }}</span></header>
+  {% if rows %}<div class="phone-rows">{% for r in rows %}{% set i = r.item %}
+    <div class="phone-row phone-recurring-row"><a class="phone-row-link" data-popup-open href="/plan/items/{{ i.id }}/edit"><span><b>{{ i.name }}</b><small>{{ i.kind_label|tr(locale) }} · {{ r.schedule }}{% if r.due %}{% elif r.next %} · {{ 'Next {date}'|tr(locale, date=r.next.due_date) }}{% else %} · {{ 'No more payments'|tr(locale) }}{% endif %}</small></span></a>
+      <span class="phone-recurring-side">{% if r.due %}<a class="plan-status plan-status-due" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ r.due[0].due_date }}&amp;back=%2Fplan%2Frecurring">{{ '{n} due'|tr(locale, n=r.due|length) }}</a>{% endif %}<b class="{{ 'pos' if i.is_income }}">{{ '+' if i.is_income else '−' }}{{ i.amount|amount_role('row') }}</b></span></div>{% endfor %}
+  </div>
+  {% else %}<p class="phone-note">{{ "Nothing yet. Add rent, internet, phone, subscriptions and your salary so the plan knows what is coming."|tr(locale) }}</p>{% endif %}
+</section>
+
+{% if rows %}<section class="phone-section" aria-labelledby="recurring-totals">
+  <header class="phone-section-head"><h2 id="recurring-totals">{{ 'Every month'|tr(locale) }}</h2></header>
+  <div class="phone-rows">
+    <div class="phone-row"><span>{{ 'Bills and subscriptions'|tr(locale) }}{% if subscriptions_per_year %}<small>{{ 'Subscriptions come to {amt} a year.'|tr(locale, amt=subscriptions_per_year|money(places=0)) }}</small>{% endif %}</span><b>{{ monthly_out|money(False, 0) }}</b></div>
+    {% if fixed_tiles|length == 1 and fixed_tiles[0].value is not none %}{% set t = fixed_tiles[0] %}<a class="phone-row" href="/financial-health"><span>{{ t.label }}<small>{{ t.sub }}</small></span><b>{{ '%.1f'|format(t.value) }}%</b></a>{% endif %}
+  </div>
+</section>{% endif %}
+
+{% for r in rows %}{% if r.last_paid and r.last_paid.paid_amount is not none and r.last_paid.paid_amount != r.item.amount and r.item.frequency.value != 'ONCE' %}
+<section class="card phone-card" aria-label="{{ 'Review changed recurring amount'|tr(locale) }}">
+  <h2 class="phone-card-title">{{ 'Review {name} amount'|tr(locale, name=r.item.name) }}</h2>
+  <p class="phone-note">{{ 'The matched payment on {date} was {paid}, while future payments are planned at {planned}.'|tr(locale, date=r.last_paid.due_date, paid=r.last_paid.paid_amount|money, planned=r.item.amount|money) }}</p>
+  <form method="post" action="/plan/items/{{ r.item.id }}/amount" class="phone-form"><input type="hidden" name="amount" value="{{ r.last_paid.paid_amount }}"><input type="hidden" name="back" value="/plan/recurring">
+    <small class="phone-note">{{ 'Last paid {amt}'|tr(locale, amt=r.last_paid.paid_amount|money) }}</small>
+    <button class="btn primary phone-save">{{ 'Use {amount} from now on'|tr(locale, amount=r.last_paid.paid_amount|money) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+  <a class="phone-quiet" href="/plan/reserves">{{ "Review reserves"|tr(locale) }}</a>
+</section>
+{% endif %}{% endfor %}
+
+{% if suggestions %}<section class="phone-section" aria-labelledby="recurring-suggest">
+  <header class="phone-section-head"><h2 id="recurring-suggest">{{ "Looks recurring"|tr(locale) }}</h2><span>{{ "From your last six months"|tr(locale) }}</span></header>
+  <div class="phone-rows">{% for s in suggestions %}
+    <div class="phone-row phone-suggest"><span><b>{{ s.name }}</b><small>{{ '{n} months · usually around day {day}'|tr(locale, n=s.months, day=s.day) }}</small></span><b class="{{ 'pos' if s.kind == 'INCOME' }}">{{ '+' if s.kind == 'INCOME' else '−' }}{{ s.amount|amount_role('row') }}</b></div>
+    <div class="phone-suggest-actions"><a class="phone-quiet" data-popup-open href="/plan/items/new?kind={{ s.kind }}&amp;name={{ s.name|urlencode }}&amp;amount={{ s.amount }}&amp;frequency=MONTHLY&amp;counterparty={{ s.name|urlencode }}&amp;account_id={{ s.account_id or '' }}&amp;category_id={{ s.category_id or '' }}&amp;start_date={{ as_of[:8] }}{{ '%02d'|format([s.day, 28]|min) }}">{{ 'Track'|tr(locale) }}</a>
+      <form method="post" action="/plan/suggestions/{{ s.counterparty_id }}/not-recurring"><button class="phone-quiet">{{ "Not recurring"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% endfor %}
+  </div>
+</section>{% endif %}
+
+{% if stopped %}<section class="phone-section"><div class="phone-rows">
+  {% set row %}<span>{{ 'Stopped'|tr(locale) }}</span><b>{{ stopped|length }}</b><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+  {% call sheet('Stopped'|tr(locale), row) %}<div class="phone-rows">{% for i in stopped %}<div class="phone-row"><span>{{ i.name }}<small>{{ i.kind_label|tr(locale) }}</small></span><b>{{ i.amount|amount_role('row') }}</b></div>{% endfor %}</div>{% endcall %}
+</div></section>{% endif %}
+{% endblock %}

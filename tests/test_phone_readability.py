@@ -66,15 +66,14 @@ def test_phone_content_fits_and_controls_remain_readable(phone_page, width):
     assert save.bounding_box()["height"] >= 48
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
 
+    # Spending (3AN12): the first page is the lead and rows; the charts load when "More analysis" opens and must fit too
     page.goto(origin + "/birdview/expenses")
-    chart = page.locator(".cluster-bars").first
-    assert chart.count()
-    assert chart.evaluate("el => parseFloat(getComputedStyle(el).height)") <= 104.5
-    amount_label = page.locator(".cluster-col small, .cluster-col b").first
-    assert amount_label.evaluate("el => parseFloat(getComputedStyle(el).fontSize)") >= 12
+    assert page.locator(".cluster-bars, .treemap, .cal-months").count() == 0  # nothing heavy on the first page
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
-    page.locator(".chart-table summary").first.click()
-    cell = page.locator(".chart-table table td[data-label]").first
-    assert cell.count()
-    assert cell.evaluate("el => getComputedStyle(el, '::before').content !== 'none'")
+    page.locator(".phone-sheet-row > summary").first.click()
+    page.wait_for_selector(".phone-sheet-more .multiple, .phone-sheet-more .cal-months")
+    label = page.locator(".phone-sheet-more .multiple-head b, .phone-sheet-more .cal-day").first
+    assert label.evaluate("el => parseFloat(getComputedStyle(el).fontSize)") >= 12
+    panel = page.locator(".phone-sheet-panel")
+    assert panel.evaluate("el => el.scrollWidth <= el.clientWidth + 1")
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")

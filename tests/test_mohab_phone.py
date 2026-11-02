@@ -48,6 +48,9 @@ DETOURS = {
     "#Eid": ("?q=%23eid",),                                       # a note's tag: typed into the search
     "Investment planner": ("Planner",),
 }
+# Your position on the Overview is flat rows that open their pages (3AN12, C11.1): the cash accounts the PC lists there
+# are reached through "Cash you own", which opens Accounts.
+VIA_CASH_YOU_OWN = "Cash you own"
 # Sections without a tab-bar slot (phone overhaul 2026-10-22): their taps go through More.
 MOVED = {"Accounts", "Cash planning", "Investments", "Financial health", "Health", "Spending", "Currencies", "Settings"}
 # The phone's Choose period sheet (phone overhaul 2026-10-22) names the PC's period buttons in words.
@@ -89,6 +92,10 @@ class PhoneBrowser(screens.Browser):
                 return self._framed(super().click(text))
             except AssertionError:
                 if text not in DETOURS:
+                    if self.page is not None and self.page.path.split("?")[0] == "/" and text not in MOVED:
+                        self.detours[VIA_CASH_YOU_OWN] += 1
+                        self._framed(super().click(VIA_CASH_YOU_OWN))
+                        return self._framed(super().click(text))
                     raise
         self.detours[text] += 1
         for step in DETOURS[text]:
@@ -165,7 +172,7 @@ def mohab(tmp_path_factory):
 
 
 def test_the_whole_year_is_lived_on_the_phone_with_only_the_known_detours(mohab):
-    expected = set(DETOURS) | {f"button {b}" for b in BUTTONS} | {"Select"}
+    expected = set(DETOURS) | {f"button {b}" for b in BUTTONS} | {"Select", VIA_CASH_YOU_OWN}
     assert set(mohab.b.detours) <= expected, set(mohab.b.detours) - expected
 
 
