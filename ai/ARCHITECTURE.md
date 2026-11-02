@@ -107,6 +107,8 @@ core/                 dates, money, identifiers, posting rules; no app dependenc
 
 **Bank SMS.** Unknown wording is read by a general rule and flagged *Check this*; money nothing reads stays on From SMS. Nothing posts unreviewed; `SmsImportService` stages rows into the bank import's review. On the phone, `profile_app(sms=…)` supplies the Java `SmsBridge` (`READ_SMS`, never phone-number senders), read only while the ledger is writable there. Duplicates, the re-read window and transfer pairing are in `lightning/sms_imports.py` and its tests.
 
+**Transfer fee in import review.** A money-out row that is a transfer between your accounts shows *Fee inside this amount*: the row's amount is the whole debit, the transfer posts for amount minus fee and the fee posts as its own expense in Fees & Charges on the source account (`BankImportService._transfer_fee`); an invalid fee blocks the post like any row error.
+
 **Cash at hand** is a form subtype of the cash account type (`accounts.cash_at_hand`); its balance stays in the Physical Cash child under Liquid Cash.
 
 ## One main ledger; one linked valuation ledger

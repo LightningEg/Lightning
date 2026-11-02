@@ -752,6 +752,34 @@ class BankImportService:
         self._pending_created = pending
         return new_id
 
+    def _transfer_fee(self, row, decision, amount: Decimal) -> Decimal:
+        """The part of a money-out transfer row that is the bank's fee (0 when none is entered). The row's amount
+        is the whole debit; the fee is inside it, so the transfer carries amount minus fee."""
+        text = str(decision.get("fee") or "").strip()
+        if not text:
+            return Decimal(0)
+        if amount >= 0:
+            raise ValidationError(f"CSV row {row['_line']}: a fee can only be split from money going out.", "fee")
+        try:
+            fee = _decimal_amount(text)
+        except ValueError as exc:
+            raise ValidationError(f"CSV row {row['_line']}: fee: {exc}", "fee") from None
+        if fee == 0:
+            return Decimal(0)
+        if fee < 0 or fee >= abs(amount):
+            raise ValidationError(f"CSV row {row['_line']}: the fee must be more than zero and less than the "
+                                  "amount, so something is left to transfer.", "fee")
+        return fee
+
+    def _fee_category(self, decision) -> int:
+        """The fee's category: the one picked beside the row's fee, else Fees & Charges."""
+        chosen = str(decision.get("fee_category_id") or "").strip()
+        if chosen:
+            category = self.categories.get(int(chosen))
+            self.categories.require(category.id, Movement.OUTFLOW)
+            return category.id
+        return self.categories.repo.get_by_code("EXP.PERSONAL.FEES").id
+
     def _held_for(self, row, decision, category, canonical, cp_text, similar, is_transfer):
         """Whose money this row moves: (owner name or None for your own money, id of a counterparty made for it).
         Held for works on any row, the way the register's does: an inflow is money you hold for them, an outflow is
@@ -867,11 +895,18 @@ class BankImportService:
             self.counterparties.set_default_category(int(counterparty_id), int(category_id))
         canonical = self.counterparties.get(int(counterparty_id)) if counterparty_id else None
         if target:
+            fee = self._transfer_fee(row, decision, amount)
             txn = self.transactions.record_transfer(
                 day, batch["account_id"] if amount < 0 else target.id,
-                target.id if amount < 0 else batch["account_id"], abs(amount),
+                target.id if amount < 0 else batch["account_id"], abs(amount) - fee,
                 notes=notes, source=TxnSource.IMPORT,
             )
+            if fee:
+                # The bank took the fee out of the same debit: it is its own expense, so the transfer shows
+                # what arrived and the fee shows in reports.
+                self.transactions.record_outflow(
+                    day, batch["account_id"], fee, self._fee_category(decision), notes=notes,
+                    source=TxnSource.IMPORT)
             category = self.categories.get(int(category_id)) if category_id else None
             if self.money_from_others:
                 owner, _ = self._held_for(row, decision, category, canonical, cp_text, similar, True)
@@ -879,7 +914,7 @@ class BankImportService:
                     source_id, target_id = ((batch["account_id"], target.id) if amount < 0
                                             else (target.id, batch["account_id"]))
                     self.money_from_others.sync_transfer(txn.id, day, owner, source_id, target_id,
-                                                        abs(amount), notes)
+                                                        abs(amount) - fee, notes)
         else:
             movement = Movement.OUTFLOW if amount < 0 else Movement.INFLOW
             self.categories.require(int(category_id), movement, allow_system=True)

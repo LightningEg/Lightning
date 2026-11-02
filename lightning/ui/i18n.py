@@ -1537,6 +1537,7 @@ ARABIC_UI = {
     'Merge {name} into': 'ادمج {name} في',
     'Merge {name} into the name you picked? Everything that uses {name} (transactions, rules, plans) moves to it, and {name} becomes one of its aliases. This cannot be split again.': 'تدمج {name} في الاسم اللي اخترته؟ كل حاجة بتستخدم {name} (معاملات وقواعد وخطط) هتتنقل ليه، و{name} هيبقى واحد من أسمائه البديلة. مفيش رجوع للفصل تاني.',
     'Pick the category for this row.': 'اختار التصنيف للصف ده.',
+    'Fee inside this amount': 'رسوم جوه المبلغ ده',
     'Edit prompt': 'عدّل التعليمات',
     'First import into this account? This prompt gives your AI tool what it cannot guess: your category names. It matches the bank’s own category words to them, so the review starts with your categories filled in.': 'أول استيراد للحساب ده؟ التعليمات دي بتدّي أداة الذكاء الاصطناعي اللي مش هتخمّنه: أسماء تصنيفاتك. بتطابق كلمات التصنيف بتاعة البنك عليها، فالمراجعة تبدأ وتصنيفاتك متعبّية.',
     'This prompt gives your AI tool what it cannot guess: your file’s header, what Lightning rejected and the columns it accepts. It fixes the file for you instead of you hunting for the problem.': 'التعليمات دي بتدّي أداة الذكاء الاصطناعي اللي مش هتخمّنه: عناوين أعمدة ملفك، وإيه اللي لايتنينج رفضه، والأعمدة اللي بيقبلها. فهي اللي تصلّح الملف بدل ما تدوّر إنت على المشكلة.',

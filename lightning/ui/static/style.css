@@ -3345,6 +3345,8 @@ html[dir="rtl"] td[dir="ltr"], html[dir="rtl"] li.code { text-align: right; }
 .main .import-status { display:flex; flex-direction:column; align-items:flex-start; gap:4px; min-width:0; }
 .main .import-line .import-match { font-size:var(--fs-meta); }
 .main .import-row-note { grid-column:2 / -1; color:var(--ink-2); font-size:var(--fs-2); }
+.main .import-fee { display:flex; align-items:center; gap:8px; }
+.main .import-line .import-fee input:not([type=checkbox]):not([type=hidden]):not(#_):not(.x_) { width:120px; }
 .main .import-line.is-err { box-shadow:inset 3px 0 0 var(--rose); padding-inline-start:6px; }
 .main .import-pick-group { width:18px; height:18px; }
 .main .import-discard { margin-top:12px; }
