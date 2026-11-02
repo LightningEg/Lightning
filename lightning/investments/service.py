@@ -24,13 +24,14 @@ from lightning.reporting.service import ReportingService
 from lightning.transactions.domain import Transaction
 from lightning.transactions.service import TransactionService
 
+from . import events
 from .domain import DEFAULT_SALE_FACTOR, Portfolio, Position
 from .xirr import xirr
 from .returns import display_return
 
-DIVIDEND_CATEGORY = "EXP.INVEST.DIVIDEND"
+DIVIDEND_CATEGORY = events.DIVIDEND_CATEGORY
 INTEREST_CATEGORY = "EXP.INVEST.INTEREST"
-TAX_CATEGORY = "EXP.INVEST.TAX"  # tax a broker withheld from a dividend
+TAX_CATEGORY = events.TAX_CATEGORY
 FEE_CATEGORY = "EXP.INVEST.FEES"  # a broker's own charge: custody, data, inactivity
 CENT = Decimal("0.01")
 
@@ -637,48 +638,13 @@ class InvestmentService:
         cash_account = self._cash_account(account, cash_account_id)
         self._same_currency(asset, account, cash_account)
         on = on or fmt_date(today())
-        units = self._units(asset, quantity)
-        fee = check_places(to_decimal(total_fees if str(total_fees or "").strip() else "0", "fees"), 2, "fees")
-        if fee < ZERO:
-            raise ValidationError("Fees cannot be negative.", "fees")
-        if total is not None:
-            entered = check_places(to_decimal(total, "total"), 2, "total")
-            if entered <= ZERO:
-                raise ValidationError("Enter the total amount.", "total")
-            if fees_included:
-                gross = entered - fee if kind == DocType.BUY else entered + fee
-            else:
-                gross = entered
-            unit_price = (gross / units).quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
-            if gross <= ZERO:
-                raise ValidationError("Fees must be lower than the total paid.", "fees")
-        else:
-            unit_price = check_places(to_decimal(price, "price"), 6, "price")
-            if unit_price <= ZERO:
-                raise ValidationError("Enter the price per unit.", "price")
-            fee = check_places(to_decimal(fees if str(fees or "").strip() else "0", "fees"), 2, "fees")
-            if fee < ZERO:
-                raise ValidationError("Fees cannot be negative.", "fees")
-            gross = _money(units * unit_price)
-        cash_asset = self.assets.cash_asset(cash_account.currency)
-        fee_text = f" + fee {fmt(fee)}" if kind == DocType.BUY and fee else (f" − fee {fmt(fee)}" if fee else "")
-        memo = (f"{'Buy' if kind == DocType.BUY else 'Sell'} {_num(units)} × {asset.code} @ {_num(unit_price)}"
-                f"{fee_text}" if total is None else
-                f"{'Buy' if kind == DocType.BUY else 'Sell'} {_num(units)} × {asset.code} @ {_num(unit_price)}"
-                f" · {'cash total' if fees_included else 'trade total'} {fmt(entered)}")
-        if kind == DocType.BUY:
-            cost = gross + fee
-            return [PostingLine.cash(cash_account.id, cash_asset.id, -cost, Effect.INTERNAL, memo=memo,
-                                     fx_rate=self._rate(cash_account, on)),
-                    PostingLine.units(account.id, asset.id, units, cost, Effect.INTERNAL, unit_price, memo,
-                                      fx_rate=self._rate(account, on))], asset.name
-        proceeds = gross - fee
-        if proceeds <= ZERO:
-            raise ValidationError("After fees nothing would be received — check the price and fees.", "fees")
-        return [PostingLine.units(account.id, asset.id, -units, -proceeds, Effect.INTERNAL, unit_price, memo,
-                                  fx_rate=self._rate(account, on)),
-                PostingLine.cash(cash_account.id, cash_asset.id, proceeds, Effect.INTERNAL, memo=memo,
-                                 fx_rate=self._rate(cash_account, on))], asset.name
+        values = events.EventValues(
+            asset=asset, account=account, cash_account=cash_account,
+            cash_asset_id=self.assets.cash_asset(cash_account.currency).id,
+            holding_rate=self._rate(account, on), cash_rate=self._rate(cash_account, on),
+            quantity=quantity, price=price, fees=fees, total=total, total_fees=total_fees,
+            fees_included=fees_included)
+        return events.lines_for("buy" if kind == DocType.BUY else "sell", values), asset.name
 
     def _dividend_lines(self, account_id, asset_id, amount, on=None, tax="0"):
         account = self.accounts.require_usable(account_id)
@@ -687,25 +653,11 @@ class InvestmentService:
         asset = self._investment(asset_id)
         self._validate_asset_account(account, asset)
         self._same_currency(asset, account)
-        value = check_places(to_decimal(amount, "amount"), 2, "amount")
-        if value <= ZERO:
-            raise ValidationError("Enter the dividend you received.", "amount")
-        withheld = check_places(to_decimal(tax if str(tax or "").strip() else "0", "tax"), 2, "tax")
-        if withheld < ZERO:
-            raise ValidationError("Tax withheld cannot be negative.", "tax")
-        if withheld >= value:
-            raise ValidationError("Tax withheld must be less than the dividend.", "tax")
-        category = self.categories.get_by_code(DIVIDEND_CATEGORY)
-        cash_asset = self.assets.cash_asset(account.currency)
-        rate = self._rate(account, on or fmt_date(today()))
-        # Asset attribution is stored in investment_dividend_assets; memo remains descriptive only.
-        lines = [PostingLine.cash(account.id, cash_asset.id, value, Effect.INFLOW, category.id, memo=asset.code,
-                                  fx_rate=rate)]
-        if withheld:
-            lines.append(PostingLine.cash(account.id, cash_asset.id, -withheld, Effect.OUTFLOW,
-                                          self.categories.get_by_code(TAX_CATEGORY).id,
-                                          memo=f"Tax withheld · {asset.code}", fx_rate=rate))
-        return lines, asset.name
+        values = events.EventValues(
+            asset=asset, account=account, cash_asset_id=self.assets.cash_asset(account.currency).id,
+            holding_rate=self._rate(account, on or fmt_date(today())), amount=amount, tax=tax,
+            category_ids={code: self.categories.get_by_code(code).id for code in (DIVIDEND_CATEGORY, TAX_CATEGORY)})
+        return events.lines_for("dividend", values), asset.name
 
     def _holding_lines(self, account: Account, asset: FinancialAsset, quantity, total_cost, on=None):
         self._same_currency(asset, account)

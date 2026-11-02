@@ -10,7 +10,7 @@ by: Claude
 
 # One table of investment events
 
-**Status:** proposal, 2026-10-05 · Claude, not built. Learned from GnuCash (`Gnucash/gnucash` at `53cc9e6`; Lightning at `5665786`). When built, move what holds into [Architecture](../../ai/ARCHITECTURE.md) and delete this file. Build first of the investment designs.
+**Status:** proposal, 2026-10-05 · Claude. 5A1 built 2026-11-02 (`lightning/investments/events.py`: `EventSpec`, `EVENTS` with buy, sell and dividend, `lines_for`, `validate`; the service's `_trade_lines` and `_dividend_lines` call them); 5A2-5A4 not built. Learned from GnuCash (`Gnucash/gnucash` at `53cc9e6`; Lightning at `5665786`). When built, move what holds into [Architecture](../../ai/ARCHITECTURE.md) and delete this file. Build first of the investment designs.
 
 **They do better:** adding an event type is one row in a table, not a new code path.
 
@@ -50,10 +50,6 @@ by: Claude
 4. Return of capital lowers open lots' cost by quantity share; any excess over cost is a gain.
 
 **Done when:** every existing investment test passes unchanged; new tests for reinvested dividend and return of capital.
-
-## 5A1 The events table and the one validator · L · #231
-`lightning/investments/events.py`: `EventSpec`, `EVENTS`, `lines_for`, `validate`. Every existing investment test passes unchanged.
-Done when: `EVENTS` holds buy, sell and dividend; `lines_for` and `validate` are the only builder and validator for them (the old branches in `investments/service.py` call them); every existing investment test passes unchanged and the Mohab test still passes.
 
 ## 5A2 Thin wrappers for buy, sell and dividend · M
 Needs 5A1 merged first. `buy()`, `sell()`, `dividend()` call the table, so routes and tests do not change.
