@@ -121,6 +121,17 @@ class ThemeBuildTests(unittest.TestCase):
                           | set(contract['slots']['ground']['material']['artwork'])) - {'none'}, set(builder.ARTWORK))
         self.assertEqual(set(contract['slots']['ground']['material']['textureStrength']), set(builder.STRENGTH))
 
+    def test_material_layer_names_only_defined_colours(self):
+        # A var() with no fallback that nothing defines makes its whole declaration invalid: Dendera's pigment thread
+        # named --hero and --warning, so the seam and its moving light never painted (audit 2026-11-02).
+        sheets = {p.name: p.read_text() for p in builder.STATIC.glob('*.css') if not p.name.endswith('.rtl.css')}
+        declared = {name for text in sheets.values() for name in builder.re.findall(r'(--[\w-]+)\s*:', text)}
+        for name in ('theme-materials.css', 'theme-surfaces.css'):
+            used = set(builder.re.findall(r'var\((--[\w-]+)\)', sheets[name]))
+            self.assertEqual(used - declared, set(), name)
+        generated = (builder.STATIC / 'themes.generated.css').read_text()
+        self.assertEqual(generated.count('--m-pigment-hero:'), generated.count('--m-shadow:'))
+
     def test_material_layer_keeps_the_motion_rules(self):
         css = (builder.STATIC / 'theme-materials.css').read_text()
         # continuous motions are slow; each animation stops under reduced motion; no requests; nothing per number
@@ -186,8 +197,9 @@ class ThemeBuildTests(unittest.TestCase):
         self.assertIn('--m-ground-artwork: url("data:image/svg+xml,', css)
         self.assertIn(p['hero'][1:], css.split('--m-ground-artwork: ')[1].split(';\n')[0])  # gold stars
         self.assertEqual(builder.under_artwork(p['background'], p, 'star-ceiling'),
-                         min((builder.mix(p['background'], p[k], builder.ARTWORK_ALPHA) for k in ('accent', 'hero')),
+                         min((builder.mix(p['background'], p[k], builder.artwork_alpha('star-ceiling')) for k in ('accent', 'hero')),
                              key=lambda c: builder.contrast(p['text'], c)))
+        self.assertGreater(builder.artwork_alpha('star-ceiling'), builder.ARTWORK_ALPHA)  # visible, audit 2026-11-02
         materials = (builder.STATIC / 'theme-materials.css').read_text()
         rule = materials[materials.index('html[data-m-ground-artwork="star-ceiling"]'):]
         rule = rule[:rule.index('}')]
@@ -304,6 +316,9 @@ def test_follow_night_is_kept_by_the_profile_across_launches(c):
     assert '<meta name="lightning-follow-night" content="1">' in second.get('/settings').text
     assert second.post('/settings/theme/night', data={'on': 'anything'}).status_code == 204
     assert c.settings.get('appearance_follow_night') == '0'
+    assert second.post('/settings/theme/night', data={'on': 'night'}).status_code == 204  # IV-10F7: night by choice
+    assert c.settings.get('appearance_follow_night') == 'night'
+    assert '<meta name="lightning-follow-night" content="night">' in second.get('/settings').text
 
 
 if __name__ == '__main__':

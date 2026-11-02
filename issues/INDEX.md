@@ -298,4 +298,4 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 | NF-10C5 | ↳ Review prices after 60 days of sales | | | owner | |
 | **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](10-looks-and-store/10D-papyrus-and-dendera-bundles.md) | new feature | Feel | M | ready |
 
-Done: 10E. Next free code: 10F.
+Done: 10E, 10F. Next free code: 10G.

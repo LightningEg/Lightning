@@ -14,8 +14,8 @@ function boot({ theme = 'lightning-default', owned = '', status = 204, night = n
   const metas = { 'meta[name=lightning-theme]': { content: theme }, 'meta[name=lightning-owned]': { content: owned } };
   if (night !== null) metas['meta[name=lightning-follow-night]'] = { content: night };
   const statusEl = { textContent: '' };
-  const box = { checked: false, addEventListener(type, fn) { this[type] = fn; } };
-  const row = { hidden: true, querySelector: () => box };
+  const box = { value: '', addEventListener(type, fn) { this[type] = fn; } };
+  const row = { hidden: true, querySelector: s => s === 'select' ? box : null };
   const document = { documentElement: root, querySelectorAll: s => s === '[data-theme-night]' ? [row] : [],
     querySelector: s => metas[s] || (s === '[data-theme-status]' ? statusEl : null),
     createElement: () => ({}), addEventListener(type, fn) { events[type] = fn; } };
@@ -68,17 +68,32 @@ test('another tab cannot put an unowned paid theme on this profile', () => {
   assert.equal(owner.root.dataset.theme, 'nile');
 });
 
-test('the night switch comes from the profile and is saved there, not in the browser', async () => {
+test('the night choice comes from the profile and is saved there, not in the browser', async () => {
   const app = boot({ theme: 'dendera', owned: 'dendera', night: '1', dark: true });
   assert.equal(app.root.dataset.theme, 'dendera-night');
   app.events.DOMContentLoaded();
-  assert.equal(app.box.checked, true);
+  assert.equal(app.box.value, 'follow');
   assert.equal(app.row.hidden, false);
-  app.box.checked = false; app.box.change();
+  app.box.value = 'day'; app.box.change();
   await settle();
   assert.equal(app.root.dataset.theme, 'dendera');
   assert.match(app.posts.at(-1), /^\/settings\/theme\/night on=0/);
   assert.equal(app.memory.get('lightning_theme_follow_night'), undefined);
   const off = boot({ theme: 'dendera', owned: 'dendera', night: '0', dark: true });
   assert.equal(off.root.dataset.theme, 'dendera');
+});
+
+test('night can be chosen on a light computer, and back to following it (IV-10F7)', async () => {
+  const app = boot({ theme: 'dendera', owned: 'dendera', night: 'night', dark: false });
+  assert.equal(app.root.dataset.theme, 'dendera-night');
+  app.events.DOMContentLoaded();
+  assert.equal(app.box.value, 'night');
+  app.box.value = 'follow'; app.box.change();
+  await settle();
+  assert.equal(app.root.dataset.theme, 'dendera');  // the computer is light
+  assert.match(app.posts.at(-1), /^\/settings\/theme\/night on=1/);
+  app.box.value = 'night'; app.box.change();
+  await settle();
+  assert.equal(app.root.dataset.theme, 'dendera-night');
+  assert.match(app.posts.at(-1), /^\/settings\/theme\/night on=night/);
 });

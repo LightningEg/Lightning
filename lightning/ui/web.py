@@ -479,7 +479,7 @@ def _template_response(request, name, status_code, c, locale, total, owned_total
             "store_themes": functools.partial(store_themes, owned),
             "marketplace": marketplace_url(locale),
             "owned_themes": " ".join(sorted(owned)),
-            "follow_night": c.settings.get("appearance_follow_night") == "1",
+            "follow_night": {"1": "1", "night": "night"}.get(c.settings.get("appearance_follow_night"), "0"),
             "locale": locale,
             "fig": localized_figures(locale),
             "arabic_ui_src": ARABIC_UI_SRC if locale == "ar" else "",

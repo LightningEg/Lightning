@@ -1,6 +1,6 @@
 ---
 title: Looks and store
-done: 10E
+done: 10E, 10F
 ---
 
 **Goal.** App themes and looks are bought once, worn on every device of a profile, and never change a number.
