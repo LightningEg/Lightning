@@ -21,7 +21,7 @@
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
 - **Audits 9, 11:** left NF-7T5/7T6, IT-4K4. **Read:** reports 2026-10-28, 2026-10-29.
-- **IV-3AN phone plan (Audit 13):** 3AN0 decided, IV-3AL is 3AN12, 3AN1-2 built; Part C 3.38 on `claude/phone-guideline-3an0` (both repos). Next: 3AN3. **Read:** 3AN.
+- **IV-3AN phone plan (Audit 13):** 3AN0 decided, IV-3AL is 3AN12, 3AN1-2 built; guideline 3.38 merged (#262, site #160). Next: 3AN3. **Read:** 3AN.
 - **IV-3AM PC declutter:** built and reviewed; the owner checks it on the PC, then the Left list. **Read:** 3AM.
 
 - **Store and community (2026-10-27):** 10C unlock once, 8M–8S merged in both repos; the website migrations (up to 20261027210000) are run and checked live and `redeem-purchase` is redeployed; the app release that carries 10C ships the unlock. Next: 10D (Papyrus and Dendera sets need a banner, frame and name designed). **Read:** `reports/2026-10-27-store-and-community/report.md`.
