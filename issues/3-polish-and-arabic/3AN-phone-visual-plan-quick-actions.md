@@ -3,7 +3,7 @@ title: Phone visual plan - a thumb-first phone built for five quick jobs, each d
 type: polish
 pillar: everywhere
 size: L
-status: ready
+status: building
 post: no
 created: 2026-11-01
 by: Claude
@@ -48,19 +48,19 @@ Severity: **high** blocks a quick job; **medium** clutter seen daily; **low** po
 | P5 | medium | **A hidden second navigation.** The page name in the app bar has a ⌄ that opens a 13-place grid with names found nowhere else ("Safety", "Your data", "Profile and lock") and one bank icon for both Transactions and Accounts. Part C has no such menu: the tab bar and More are the navigation. | [13](../../reports/2026-11-01-phone-convenience-audit/evidence/13-title-menu.png) | 3AN2 |
 | P6 | medium | **Needs you says "1 bill" for a certificate's interest match.** `_NEEDS_SHORT` in `routes/dashboard.py` files matches under payments; the bill truly due in two days is not in the strip. | [14](../../reports/2026-11-01-phone-convenience-audit/evidence/14-needs-you-open.png) | 3AN1, 3AN4 |
 | P7 | high | **SMS capture is buried under Settings** on More, asks for an account it does not need, and its page has Accounts' tabs, no ‹, help as a paragraph and the Primary inside a card. For CIB and NBE users this is the fastest way to record money. | [04](../../reports/2026-11-01-phone-convenience-audit/evidence/04-more-full.png), [16](../../reports/2026-11-01-phone-convenience-audit/evidence/16-from-sms.png) | 3AN5 |
-| P8 | medium | **Budget is a column of identical rows.** A-Z, 90 px each, a meter under every row, so 9 categories take 1.7 screens and the one at risk is wherever its letter puts it. On day one every row reads "0 of X / X left". | [02](../../reports/2026-11-01-phone-convenience-audit/evidence/02-budget-full.png) | 3AN7 with 3AL2 |
+| P8 | medium | **Budget is a column of identical rows.** A-Z, 90 px each, a meter under every row, so 9 categories take 1.7 screens and the one at risk is wherever its letter puts it. On day one every row reads "0 of X / X left". | [02](../../reports/2026-11-01-phone-convenience-audit/evidence/02-budget-full.png) | 3AN7 |
 | P9 | medium | **A buy reads as money out.** Transactions shows "Money market fund · Buy −3,000" in Ink with a minus, while Money out says 0 and the day's net (+46,833) leaves it out: what you see does not add up. It is a move inside your money (C08.2: investments on azure; moves carry no sign). | [03](../../reports/2026-11-01-phone-convenience-audit/evidence/03-transactions.png) | 3AN8 |
 | P10 | medium | **Search in the app bar is for pages**, not money, says "Press Ctrl K", and needs a Search button (IV-3T3, reproduced). | [15](../../reports/2026-11-01-phone-convenience-audit/evidence/15-search.png) | 3AN6 |
 | P11 | medium | **Day one is a wall of zeros.** Transactions "Money out 0", Budget all "0 of", Spending "0 in 2026-11", a Budget category says "Nothing matches", Investments keeps a 150 px card that says "Not enough history yet". Each should lead to something useful (last month, the plan, the holdings). | [08](../../reports/2026-11-01-phone-convenience-audit/evidence/08-spending.png), [07](../../reports/2026-11-01-phone-convenience-audit/evidence/07-investments.png), [17](../../reports/2026-11-01-phone-convenience-audit/evidence/17-budget-category.png) | 3AN9 |
 | P12 | medium | **Arabic daily screens mix systems.** Figures in Arabic digits, dates in fields in Latin; the sign sits before one figure and after the next ("+٤٦٬٨٣٣", "٤٥٬٠٠٠+"); tile chips ("لحد دلوقتي", "اتصرف ٠٪") and the filter chips wrap to two lines. | [19](../../reports/2026-11-01-phone-convenience-audit/evidence/19-ar-overview.png), [20](../../reports/2026-11-01-phone-convenience-audit/evidence/20-ar-transactions.png) | 3AN10 |
 | P13 | low | **At 320 a date breaks** across lines ("2026-12-" / "01.") in the hero sentence, and the "0% used" chip wraps (C12). | [18](../../reports/2026-11-01-phone-convenience-audit/evidence/18-overview-320.png) | 3AN1 |
-| P14 | low | **Names differ for one place.** More says *Spending*; the page's title says "Expense analysis · Birdview" on two lines and opens on last month while every other tab opens on this one. | [08](../../reports/2026-11-01-phone-convenience-audit/evidence/08-spending.png) | 3AN9, 3AL6 |
+| P14 | low | **Names differ for one place.** More says *Spending*; the page's title says "Expense analysis · Birdview" on two lines and opens on last month while every other tab opens on this one. | [08](../../reports/2026-11-01-phone-convenience-audit/evidence/08-spending.png) | 3AN9, 3AN12 |
 | P15 | low | **More lists actions as settings:** *Needs you* and *From SMS* sit under Settings; a 50 px gap opens the page. | [04](../../reports/2026-11-01-phone-convenience-audit/evidence/04-more-full.png) | 3AN5 |
 
 Still open and reproduced, filed elsewhere, not repeated: "Each month ahead" cut to "ach" and the forecast label over
 its line (IV-3T1, IV-3T5); no ‹ on /sms, /search, /settings (IV-3T2); Settings' five tabs (IV-3T4); small targets on
-Reserves 11, Prices 12, Financial health 9, Spending 15, Settings 14 (IV-3T3); Spending at 6 screens (IV-3AL6); the
-account page's "Money actions" and "All time" pill (IV-3AL3). One question goes to the **number-audit** skill, not
+Reserves 11, Prices 12, Financial health 9, Spending 15, Settings 14 (IV-3T3); Spending at 6 screens (3AN12); the
+account page's "Money actions" and "All time" pill (3AN12). One question goes to the **number-audit** skill, not
 here: Cash planning's "Each month ahead" shows 2026-11 as "In 0 · out 34,599" on the day the 45,000 salary arrived.
 
 ## The plan
@@ -80,7 +80,7 @@ These sit inside Part C; where one needs Part C to change, step 3AN0 asks the ow
 ### Screen by screen
 Each sketch is the first screen at 360 × 800. Figures are the sample's.
 
-**Overview: "can I spend, and what moved?"** (P1, P2, P6; with IV-3AL1)
+**Overview: "can I spend, and what moved?"** (P1, P2, P6; with 3AN12)
 ```
  [mark] Overview                       🔍  👁
  Safe to spend
@@ -121,7 +121,7 @@ A row opens a short sheet: the arrow chip, name, the amount in whole EGP, date a
 Note; Change category and Split at the foot, Edit for the rest. For a row in *To sort*, the sheet leads with the usual
 category chips and, after one tap, opens the next unsorted row (J5 in three taps).
 
-**Transactions** (P9, P10; with IV-3AL3 and D2)
+**Transactions** (P9, P10; with 3AN12 and D2)
 ```
  Search transactions                       (live as you type)
  [All] [In] [Out] [Transfers] [To sort 3]  (one line, Arabic too)
@@ -132,7 +132,7 @@ category chips and, after one tap, opens the next unsorted row (J5 in three taps
  ↑ NBE · Interest · CIB Payroll     +1,833
 ```
 
-**Budget: what needs a look, then the rest** (P8; with IV-3AL2)
+**Budget: what needs a look, then the rest** (P8; with 3AN7)
 ```
  (ring 0%)  Left in plan 25,599  · You are 321 under your plan's pace.
  ‹ 2026-11 ›
@@ -142,7 +142,7 @@ category chips and, after one tap, opens the next unsorted row (J5 in three taps
  6 more on track ›
 ```
 Rows 64 tall with the meter inside the row, not under it. On day one the hero line says "New month: 25,599 over 30 days"
-and the list keeps the usual order. A row opens its sheet (IV-3AL2): spent of limit, pace, the last three payments, Cover
+and the list keeps the usual order. A row opens its sheet (3AN7): spent of limit, pace, the last three payments, Cover
 it, See all, which keeps Budget chosen and the month, never a custom range.
 
 **More: places, not actions** (P15)
@@ -174,14 +174,15 @@ audit's `evidence/flows.py` to recount the taps. Part C changes land in both rep
 typing; J2 2 taps; J3 2 taps from Overview; J4 in the first screen; J5 search live from the app bar; no English word on
 the Arabic daily screens; no page without ‹; then the owner checks the phone end to end (one check, at the end).
 
-`post: no` while Claude's claim on IV-3AL holds the same templates; post steps once 3AL closes.
+IV-3AL was folded into this item (owner, 2026-11-02): what it had left is 3AN12. `post: no` while Claude's claim holds the phone templates.
 
 ## 3AN0 Approve the Part C changes · owner
-Six changes, each one line in Part C, made in both repos: (1) Overview shows two tiles, Net worth and Left in plan; the
-rates live on Financial health (C11.1); (2) Add opens on the amount with the last-used account chosen and usual categories
-as chips (C05.2, C09); (3) a row opens a detail sheet, Edit opens the form (C09.7); (4) app-bar Search looks for money
-first (C03.2); (5) Needs you names the next bill due within three days (C04.4); (6) the month stepper is quiet text, no
-pill (C04.2). D1 and D2 (2026-10-29) are already decided and ride with them.
+**Decided (owner, 2026-11-02):** (1)-(5) approved; (6) declined, the month stepper keeps its pill. Approved: (1) Overview
+shows two tiles, Net worth and Left in plan; the rates live on Financial health (C11.1); (2) Add opens on the amount with
+the last-used account chosen and usual categories as chips (C05.2, C09); (3) a row opens a detail sheet, Edit opens the
+form (C09.7); (4) app-bar Search looks for money first (C03.2); (5) Needs you names the next bill due within three days
+(C04.4). D1 and D2 (2026-10-29) ride with them. Next: write the five lines into Part C in both repos (AGENTS §1), then
+delete this step.
 
 ## 3AN1 Small faults first · S
 Needs you names what is inside (a match is "1 to match", not "1 bill"); the entry sheet's balance sentence is removed or
@@ -198,8 +199,8 @@ the keyboard, category chips (usual first, from the services), whole EGP, Saved 
 row. Done when J1 is 3 taps and J5's sort is 3 in `flows.py`.
 
 ## 3AN4 Overview's first screen · M
-Two tiles, the quiet stepper, Needs you naming the next bill, Latest in view (first row above 600 px at 360 × 800).
-Needs 3AN0 (1), (5), (6). Mohab's Overview steps updated.
+Two tiles, Needs you naming the next bill, Latest in view (first row above 600 px at 360 × 800).
+Needs 3AN0 (1), (5); the stepper keeps its pill (owner, 2026-11-02). Mohab's Overview steps updated.
 
 ## 3AN5 SMS in Add · M
 Paste SMS at the top of the Add sheet, with no account asked (From SMS already maps a card ending to an account once;
@@ -213,7 +214,7 @@ Extends IV-3T3's search half; close both together.
 
 ## 3AN7 Budget in order of need · M
 Over plan and ahead of pace first, then by usual spending; 64 px rows with the meter inside; "N more on track ›"; the
-day-one line. With IV-3AL2's category sheet. Done when J4's row is in the first screen on the sample.
+day-one line. With the category sheet (from IV-3AL2, folded here). Done when J4's row is in the first screen on the sample.
 
 ## 3AN8 Moves read as moves · S
 A buy, sell or move between your own accounts shows with no sign on azure or Track (C08.2), so rows, Money in/out and the
@@ -230,3 +231,16 @@ side, chips that fit one line at 360. Done when the Arabic shots show no English
 ## 3AN11 Measure and hand to the owner · S
 Re-run `evidence/flows.py` and the capture, fill the table with the new numbers in a dated follow-up of the report, run
 Mohab and `tools/phone_check.py` at 360 and 320, then ask the owner for one end-to-end phone check.
+
+## 3AN12 Left from IV-3AL · L
+Folded from IV-3AL (Audit 10, [report](../../reports/2026-10-29-phone-tab-audit/report.md)); D1 sheets, D2 one-line money
+strip, D3 flat (built). Overview: Your position as flat rows that open their pages; This period's figures as rows that
+open a sheet (D1), never a fold inside a fold. Budget: a category row opens a sheet with its limit field, Cover it and See
+transactions (with 3AN7); bulk undo, the raise offer and first limits take the strip's place one at a time. Transactions:
+Money in and out as one line (D2); Views and value updates move into ⋯; a day's net only on a day with two or more rows.
+Cash planning: forecast, months ahead and What is promised as rows that open sheets (D1). Recurring: the list first, the
+fixed-costs ratio a link to Financial health, no ".00" on rows. Reserves: the app bar names Financial health; no card in a
+card. Accounts: Accounts tab first (the section registry is shared with the PC: ask first). Investments keeps the owner's
+PDF order. Spending: the lead (spent this month against the same days usually), four biggest categories then Other, then
+one row "More analysis"; the heat map, both money-flow diagrams, small multiples and month grid leave the first page, and
+the page renders under 150 ms. Tests: `tests/test_phone_frame.py`, `test_phone_budget.py`, `test_phone_transactions.py`.
