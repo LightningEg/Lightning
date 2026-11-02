@@ -25,6 +25,7 @@ def paid_bill(c, setup, monkeypatch):
 def _edit(c, client, bank, txn, **changes):
     row = dict(date="2026-02-05", amount="-500", category="Food & Groceries", counterparty="", notes="",
                revision=c.transactions.revision(txn)) | changes
+    row["early_checked"] = row["date"]  # the test account opened later than these dates: the 2E ask is answered
     reply = client.post(f"/accounts/{bank.id}/register/{txn}", data=row, follow_redirects=False)
     assert reply.status_code == 303
     return unquote_plus(reply.headers["location"])
@@ -53,7 +54,7 @@ def test_the_popup_edit_does_the_same(c, paid_bill):
     food = c.categories.get_by_code("EXP.PERSONAL.FOOD")
     form = dict(kind="out", date="2026-12-05", amount="5000", category_id=str(food.id), category_choice=str(food.id),
                 account_id=str(bank.id), notes="", counterparty="", owner_id="", to_account_id="",
-                revision=c.transactions.revision(txn), return_to=f"/accounts/{bank.id}")
+                revision=c.transactions.revision(txn), return_to=f"/accounts/{bank.id}", early_checked="2026-12-05")
     reply = client.post(f"/transactions/{txn}/edit-popup", data=form, follow_redirects=False)
     assert reply.status_code == 303 and "no longer fits Internet" in unquote_plus(reply.headers["location"])
     assert _february(c, item).status != PaymentStatus.PAID
