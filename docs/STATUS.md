@@ -11,7 +11,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Understand](pillars/understand.md) | 5 |  | 2 | 2 | 1 | 1 |
 | [Own](pillars/own.md) | 17 | 2 | 4 | 5 | 6 |  |
 | [Protect](pillars/protect.md) | 3 | 1 | 2 |  |  | 1 |
-| [Everywhere](pillars/everywhere.md) | 6 | 2 | 3 | 1 |  |  |
+| [Everywhere](pillars/everywhere.md) | 6 | 3 | 2 | 1 |  |  |
 | [Feel](pillars/feel.md) | 14 | 5 | 7 | 1 | 1 | 1 |
 | [Build](pillars/build.md) | 11 | 1 | 10 |  |  |  |
 | [Reach](pillars/reach.md) | 6 |  | 4 | 2 |  | 2 |
@@ -22,6 +22,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 
 - **IT-1H** (Build) [Refresh packaged dependencies with matching native wheels and lockfiles](../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md)
 - **IT-2A** (Protect) [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic rep…](../issues/2-safe-for-real-money/2A-restore-safety.md)
+- **BT-2F** (Everywhere) [On Android, downloads, file inputs and outside links do nothing](../issues/2-safe-for-real-money/2F-android-downloads-files-links.md)
 - **IV-3H** (Feel) [Tab-by-tab review: what a real user needs next](../issues/3-polish-and-arabic/3H-tab-by-tab-review.md)
 - **IV-3AL** (Feel) [Phone declutter, tab by tab](../issues/3-polish-and-arabic/3AL-phone-declutter-tab-by-tab.md)
 - **IV-3AM** (Feel) [PC declutter, tab by tab](../issues/3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md)

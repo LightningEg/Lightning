@@ -84,13 +84,19 @@ public final class MainActivity extends Activity {
                 && origin.getPort() == uri.getPort();
     }
 
-    /** The one outside page the app opens, in the phone's browser: the website's marketplace, any query or fragment.
-     *  English or Arabic, as the server writes it (lightning/ui/entitlements.py MARKETPLACE_PATHS). */
-    private boolean storeLink(Uri uri) {
-        String path = uri.getPath();
-        return "https".equals(uri.getScheme()) && "lightningeg.com".equals(uri.getHost())
-                && uri.getUserInfo() == null && uri.getPort() == -1
-                && ("/marketplace.html".equals(path) || "/ar/marketplace.html".equals(path));
+    /** A web page the app may hand to the phone's browser: https only, no user name in it. The WebView itself still
+     *  loads nothing but this phone's server. The store links (lightningeg.com/marketplace.html and
+     *  /ar/marketplace.html, lightning/ui/entitlements.py MARKETPLACE_PATHS) are the ones the app writes itself. */
+    private boolean outsideLink(Uri uri) {
+        return "https".equals(uri.getScheme()) && uri.getHost() != null && uri.getUserInfo() == null;
+    }
+
+    private void openOutside(Uri target) {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, target).addCategory(Intent.CATEGORY_BROWSABLE));
+        } catch (android.content.ActivityNotFoundException ignored) {
+            android.widget.Toast.makeText(this, "No browser found to open this link.", android.widget.Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -180,15 +186,9 @@ public final class MainActivity extends Activity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri target = request.getUrl();
-                if (storeLink(target)) {
-                    try {
-                        startActivity(new Intent(Intent.ACTION_VIEW, target));
-                    } catch (android.content.ActivityNotFoundException ignored) {
-                        // no browser installed: the app stays where it is
-                    }
-                    return true;
-                }
-                return !ours(target);  // another site, a file or an app link: never opened
+                if (ours(target)) return false;
+                if (outsideLink(target)) openOutside(target);  // a web page: the phone's browser, never this window
+                return true;  // a file, an app link or anything else: never opened
             }
 
             @Override
@@ -291,6 +291,8 @@ public final class MainActivity extends Activity {
     @Override
     public void onBackPressed() {
         if (web != null && web.canGoBack()) web.goBack();
+        else if (web != null && origin != null && web.getUrl() != null && ours(Uri.parse(web.getUrl()))
+                && !"/".equals(Uri.parse(web.getUrl()).getPath())) web.loadUrl(origin.toString());  // C03.4: Overview, then leave
         else moveTaskToBack(true);  // keep the server and an open lend reachable
     }
 

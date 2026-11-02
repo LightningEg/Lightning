@@ -41,3 +41,6 @@ system's "Save to" screen and the page comes back saying so (`lightning/runtime/
    them; there is no "Save a copy" of a backup on any screen. Offer the newest encrypted backup through the same "Save to".
 3. Outside links other than the marketplace stay blocked on purpose (`MainActivity.storeLink`); Back still follows WebView
    history (C03.4 wants Overview first).
+
+## Added (2026-11-02)
+Any https link now opens in the phone's browser (a toast if none), and Back goes to Overview before leaving the app (C03.4); `tests/test_android_shell.py`. Backup copies still wait for a phone check with the rest.

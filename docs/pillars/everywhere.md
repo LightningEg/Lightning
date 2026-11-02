@@ -11,7 +11,7 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **BT-2F** | [On Android, downloads, file inputs and outside links do nothing](../../issues/2-safe-for-real-money/2F-android-downloads-files-links.md) | M | ready |
+| **BT-2F** | [On Android, downloads, file inputs and outside links do nothing](../../issues/2-safe-for-real-money/2F-android-downloads-files-links.md) | M | building |
 | **BT-2J** | [On a journal profile, retrying one add form can still save a second expense](../../issues/2-safe-for-real-money/2J-register-submit-idempotency.md) | M | ready |
 | **IV-3AN** | [Phone visual plan](../../issues/3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | L | ready |
 | **NF-4A** | [Edit journal: edit anywhere, one home confirms](../../issues/4-edit-journal-and-devices/4A-edit-journal.md) | L | building |
