@@ -20,3 +20,5 @@ Found by [Audit 8](../../reports/2026-10-26-engine-audit/report.md) (B7). Link 2
 Owner decision: keep the link capped at the new amount, or keep removing it and say so on Save ("Unlinked from the Trip reserve; link it again if it still belongs there").
 
 **Owner decision, 2026-11-02:** same rule as 7U (keep the link while the edit still fits; otherwise unlink and say so). Build 7R and 7U together.
+
+2026-11-02, built for the register's edit: `ReserveService.carry_links` puts a link back when the edited expense still fits (shrunk to a lower amount) and the Save message says when one no longer does; `tests/test_reserve_matching.py`. **Left:** the same on the transaction details edit, and 7U (bill and income links) with the same rule.
