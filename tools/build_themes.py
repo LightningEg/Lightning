@@ -246,7 +246,9 @@ def material_values(parts, contract, scheme):
     # light falls from above: on a dark theme it is the text colour, on a light one white paper catching it
     light, (hi, edge, strong) = (p["text"], (.06, .09, .16)) if scheme == "dark" else ("#FFFFFF", (.6, .85, 1))
     values = {"m-shadow": "#000000" if scheme == "dark" else p["text"],
-              "m-hi": alpha(light, hi), "m-hi-edge": alpha(light, edge), "m-hi-strong": alpha(light, strong)}
+              "m-hi": alpha(light, hi), "m-hi-edge": alpha(light, edge), "m-hi-strong": alpha(light, strong),
+              # the palette's own pigments for recipes drawn in them (the header threads); no other part names them
+              "m-pigment-hero": p["hero"], "m-pigment-warning": p["warning"]}
     for kind in sorted({parts[s]["grain"] for s in ("hero", "cards", "overlays")} - {"none"}):
         values[f"m-grain-{kind}"] = ", ".join(TEXTURES[kind](p["text"], limits["grain"][kind]))
     ground = parts["ground"]

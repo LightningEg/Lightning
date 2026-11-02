@@ -98,7 +98,7 @@ html[data-m-header-finish="glass"] .phone-appbar:not(#_) {
 html[data-m-header-thread="security-thread"] :is(.topbar, .phone-appbar):not(#_) {
   border-bottom-color: transparent;
   background-image: linear-gradient(90deg, var(--theme-header-seam) 0 40%, color-mix(in srgb, var(--accent) 35%, var(--surface)) 46%,
-    var(--hero) 50%, color-mix(in srgb, var(--accent) 35%, var(--surface)) 54%, var(--theme-header-seam) 60% 100%);
+    var(--m-pigment-hero, var(--accent)) 50%, color-mix(in srgb, var(--accent) 35%, var(--surface)) 54%, var(--theme-header-seam) 60% 100%);
   background-size: 300% 1px; background-repeat: repeat-x; background-origin: border-box; background-position: 0 100%;
   animation: m-thread 12s linear infinite;
 }
@@ -119,8 +119,8 @@ html[data-m-header-finish="lotus-frieze"] .phone-appbar:not(#_) {
 html[data-m-header-thread="pigment-thread"] :is(.main > .topbar, .phone-appbar):not(#_) { border-bottom-color: transparent; }
 html[data-m-header-thread="pigment-thread"] :is(.main > .topbar, .phone-appbar)::before {
   content: ""; position: absolute; inset-inline: 0; bottom: -1px; height: 1px; pointer-events: none;
-  background-image: linear-gradient(90deg, transparent 0 45%, color-mix(in srgb, var(--hero) 30%, #FFFFFF) 50%, transparent 55% 100%),
-    linear-gradient(90deg, var(--accent), var(--hero) 36%, var(--focus) 66%, var(--warning));
+  background-image: linear-gradient(90deg, transparent 0 45%, color-mix(in srgb, var(--m-pigment-hero, var(--accent)) 30%, #FFFFFF) 50%, transparent 55% 100%),
+    linear-gradient(90deg, var(--accent), var(--m-pigment-hero, var(--accent)) 36%, var(--focus) 66%, var(--m-pigment-warning, var(--focus)));
   background-size: 300% 100%, 100% 100%; background-repeat: repeat-x, no-repeat; background-position: 0 0, 0 0;
   animation: m-pigment 14s linear infinite;
 }
@@ -178,7 +178,9 @@ html[data-m-cards-finish] .main :is(.wide-card, .overview-investment-card, #budg
 html[data-m-cards-hover="lift"] :is(.card, .kpi-card, .overview-block, .data-panel, .phone-kpi) { transition: transform .25s ease, box-shadow .25s ease; }
 /* A card that holds fields does not lift: a transform makes its fixed pick lists measure from the card, not the window. */
 html[data-m-cards-hover="lift"] :is(.card, .kpi-card, .overview-block, .data-panel):hover:not(:has([data-own-suggestions], [data-own-picker])) { transform: translateY(-2px); box-shadow: var(--m-card-edge), var(--m-depth-high); }
-html[data-m-cards-hover="light"] :is(.card, .kpi-card, .overview-block, .data-panel, .metric-card):not(.lead-card):not(.overview-owned-card):hover {
+/* The ids outrank the card finish rules above (one holds an id), which otherwise kept the light from ever showing; the
+   import review keeps its plain paint (see above). */
+html[data-m-cards-hover="light"] :is(.card, .kpi-card, .overview-block, .data-panel, .metric-card):not(.lead-card):not(.overview-owned-card):not(.import-review):not(#_):not(#_):not(#_):hover {
   background-image: radial-gradient(260px circle at var(--lt-x, 50%) var(--lt-y, 0%), color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%),
     var(--m-card-grain), var(--m-card-finish) !important;
 }
@@ -201,7 +203,10 @@ html[data-m-hero-finish] .main :is(.overview-owned-card, .hero-card, .portfolio-
 /* foil edge: a gold foil gradient in the border's own 1px; nothing moves. The lead card has no border (its paint is
    the focal gradient), so its foil is a 1px ring drawn by its free ::before, masked to the edge. */
 @property --m-glint { syntax: "<angle>"; inherits: false; initial-value: 200deg; }
-html[data-m-hero-edge-style="foil"] {
+/* The ring is declared on each element that wears it: a var() resolves where it is declared, so a ring declared only on
+   html froze at the initial angle and the edge-glint below never moved. */
+html[data-m-hero-edge-style="foil"], html[data-m-hero-edge-style="foil"] .main :is(.overview-owned-card, .hero-card, .portfolio-summary, .metric-card--focal),
+html[data-m-hero-edge-style="foil"] .main .lead-card::before {
   --m-foil-ring: conic-gradient(from var(--m-glint), color-mix(in srgb, var(--theme-hero-edge) 55%, transparent) 0deg,
     var(--theme-hero-edge) 50deg, color-mix(in srgb, var(--theme-hero-edge) 35%, #FFFFFF) 80deg, var(--theme-hero-edge) 110deg,
     color-mix(in srgb, var(--theme-hero-edge) 55%, transparent) 170deg, color-mix(in srgb, var(--theme-hero-edge) 70%, transparent) 260deg,
@@ -242,6 +247,12 @@ html[data-m-controls-depth="high"] :is(.btn.primary, .phone-add-disc) { box-shad
 /* press sheen: the foil's light slides across on hover, focus and press. */
 html[data-m-controls-press="sheen"] :is(.btn.primary, .phone-add-disc) { transition: background-position .7s ease; }
 html[data-m-controls-press="sheen"] :is(.btn.primary, .phone-add-disc):is(:hover, :focus-visible, :active) { background-position: 100% 0; }
+/* On satin the finish is a vertical light, so moving it showed nothing: the sheen is its own band over the satin. */
+html[data-m-controls-press="sheen"][data-m-controls-finish="satin"] :is(.btn.primary, .phone-add-disc) {
+  background-image: linear-gradient(105deg, transparent 40%, color-mix(in srgb, #FFFFFF 24%, transparent) 50%, transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, #FFFFFF 14%, transparent), transparent 70%);
+  background-size: 250% 100%, 100% 100%; background-repeat: no-repeat; /* starts at 0 0: the press rule above moves it */
+}
 
 /* ---------- Secondary buttons ---------- */
 html[data-m-buttons-finish="satin"] :is(.btn:not(.primary), .date-picker-button) {

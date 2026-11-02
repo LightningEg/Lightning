@@ -121,6 +121,17 @@ class ThemeBuildTests(unittest.TestCase):
                           | set(contract['slots']['ground']['material']['artwork'])) - {'none'}, set(builder.ARTWORK))
         self.assertEqual(set(contract['slots']['ground']['material']['textureStrength']), set(builder.STRENGTH))
 
+    def test_material_layer_names_only_defined_colours(self):
+        # A var() with no fallback that nothing defines makes its whole declaration invalid: Dendera's pigment thread
+        # named --hero and --warning, so the seam and its moving light never painted (audit 2026-11-02).
+        sheets = {p.name: p.read_text() for p in builder.STATIC.glob('*.css') if not p.name.endswith('.rtl.css')}
+        declared = {name for text in sheets.values() for name in builder.re.findall(r'(--[\w-]+)\s*:', text)}
+        for name in ('theme-materials.css', 'theme-surfaces.css'):
+            used = set(builder.re.findall(r'var\((--[\w-]+)\)', sheets[name]))
+            self.assertEqual(used - declared, set(), name)
+        generated = (builder.STATIC / 'themes.generated.css').read_text()
+        self.assertEqual(generated.count('--m-pigment-hero:'), generated.count('--m-shadow:'))
+
     def test_material_layer_keeps_the_motion_rules(self):
         css = (builder.STATIC / 'theme-materials.css').read_text()
         # continuous motions are slow; each animation stops under reduced motion; no requests; nothing per number
