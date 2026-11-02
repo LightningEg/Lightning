@@ -140,7 +140,7 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
 | **NF-5A** | [One table of investment events](5-investments/5A-one-table-of-investment-events.md) | new feature | Own | L | ready |
-| NF-5A4 | ↳ Reinvested dividend and return of capital | | | L | |
+| NF-5A4 | ↳ Return of capital | | | M | |
 | **NF-5B** | [Cost per purchase (lots)](5-investments/5B-cost-per-purchase-lots.md) | new feature | Own | L | blocked on 5A |
 | NF-5B1 | ↳ Pure lots module with the average method | | | L | |
 | NF-5B2 | ↳ FIFO across lots | | | L | |

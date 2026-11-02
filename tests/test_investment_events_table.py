@@ -104,3 +104,77 @@ def test_entry_form_shows_only_what_the_spec_enables(c, monkeypatch):
     monkeypatch.setitem(EVENTS, "buy", replace(EVENTS["buy"], fees="none"))
     bare = client.get("/investments/new?kind=buy").text
     assert 'name="fees"' not in bare and 'name="fees_included"' not in bare and 'name="cash_account_id"' in bare
+
+
+# -- NF-5A4: reinvested dividend -----------------------------------------------------------------------------
+def test_reinvested_dividend_lines_are_income_tax_then_units_for_the_net():
+    income, tax, spend, units = lines_for("reinvested_dividend", values(amount="200", tax="20", quantity="4"))
+    assert (income.quantity, income.effect, income.category_id) == (D("200"), Effect.INFLOW, 11)
+    assert (tax.quantity, tax.effect, tax.category_id) == (D("-20"), Effect.OUTFLOW, 12)
+    assert (spend.quantity, spend.effect) == (D("-180"), Effect.INTERNAL)
+    assert (units.quantity, units.amount, units.unit_price, units.effect) == (D("4"), D("180"), D("45"), Effect.INTERNAL)
+    assert EVENTS["reinvested_dividend"].doc_type == DocType.DIV
+
+
+@pytest.mark.parametrize("kw,field", [
+    (dict(amount="200", quantity="0"), "quantity"), (dict(amount="200"), "quantity"),
+    (dict(amount="0", quantity="1"), "amount"), (dict(amount="10", tax="10", quantity="1"), "tax"),
+    (dict(amount="0.01", quantity="100000000"), "quantity"),
+])
+def test_reinvested_dividend_refuses_bad_numbers(kw, field):
+    with pytest.raises(ValidationError) as error:
+        validate("reinvested_dividend", values(**kw))
+    assert error.value.field == field
+
+
+def _held(c, setup):
+    accounts, _ = setup
+    thndr = accounts["thndr"]
+    c.transactions.record_transfer("2026-09-02", accounts["cib"].id, thndr.id, "30000")
+    comi = c.assets.create_investment("Commercial International Bank", "STOCK", "COMI")
+    c.investments.buy("2026-09-03", thndr.id, comi.id, "100", "50")  # 5,000
+    return thndr, comi
+
+
+def test_reinvested_dividend_posts_one_document_and_every_screen_agrees(c, setup):
+    from lightning.investments.report import investment_period
+    thndr, comi = _held(c, setup)
+    cash_before = c.reporting.account_balance(thndr.id, "2026-10-01")
+    txn = c.investments.record("reinvested_dividend", "2026-10-01", thndr.id, comi.id, amount="200", tax="20",
+                               quantity="4")
+    assert txn.type == DocType.DIV and len(txn.lines) == 4
+    assert c.reporting.account_balance(thndr.id, "2026-10-31") == cash_before  # net bought units; tax was income's
+    position = next(p for p in c.investments.portfolio("2026-10-31", thndr.id).positions if p.asset_id == comi.id)
+    assert (position.quantity, position.cost_basis, position.dividends, position.dividend_tax) == (
+        D("104"), D("5180"), D("200"), D("20"))
+    report = investment_period(c.db, c.accounts, c.assets, c.reporting, "2026-09-01", "2026-12-31")
+    held = next(h for h in report["holdings"] if h["asset_id"] == comi.id)
+    assert (held["units"], held["cost"], report["dividends"], report["tax"]) == (D("104"), D("5180"), D("200"), D("20"))
+    assert report["unresolved_dividends"] == 0
+
+
+def test_reinvested_dividend_sells_at_the_blended_cost_and_edits_in_place(c, setup):
+    thndr, comi = _held(c, setup)
+    txn = c.investments.record("reinvested_dividend", "2026-10-01", thndr.id, comi.id, amount="200", tax="0",
+                               quantity="4")
+    c.investments.update(txn.id, account_id=thndr.id, asset_id=comi.id, amount="300")  # units stay, cost follows
+    assert c.investments.values_of(txn.id)["quantity"] == D("4")
+    c.investments.sell("2026-10-02", thndr.id, comi.id, "104", "60")  # cost 5,300 -> proceeds 6,240
+    position = next(p for p in c.investments.portfolio("2026-10-31", thndr.id).positions if p.asset_id == comi.id)
+    assert (position.quantity, position.realized) == (D("0"), D("940"))
+    stored = c.investments.values_of(txn.id)
+    assert (stored["kind"], stored["amount"], stored["tax"], stored["quantity"]) == ("dividend", D("300"), D("0"), D("4"))
+    with pytest.raises(ValidationError):
+        c.investments.update(txn.id, account_id=thndr.id, asset_id=comi.id, amount="0")
+
+
+def test_holding_journey_lists_a_reinvested_dividend_once(c, setup):
+    from datetime import date
+
+    from lightning.investments.journey import holding_history
+    thndr, comi = _held(c, setup)
+    c.investments.record("reinvested_dividend", "2026-10-01", thndr.id, comi.id, amount="200", quantity="4")
+    trail = holding_history(c.reporting, c.investments, thndr.id, comi.id, date(2026, 10, 31))["trades"]
+    row = [t for t in trail if t["kind"] == "Dividend reinvested"]
+    assert len(row) == 1 and row[0]["units"] == D("4") and row[0]["held"] == D("104")
+    assert [t["kind"] for t in trail].count("Dividend") == 1  # the income row, with no units
