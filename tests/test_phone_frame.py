@@ -171,13 +171,22 @@ def test_overview_puts_needs_you_before_latest(phone):
     assert html.index('class="card phone-needs') < html.index('aria-labelledby="latest-heading"')
 
 
-def test_phone_page_menu_exposes_pc_sections_and_every_main_page(phone):
-    """Main pages must stay directly accessible without opening Settings or More."""
-    html = phone.get("/investments").text
-    menu = html.split('class="phone-page-grid"', 1)[1].split("</nav>", 1)[0]
-    for href in ("/", "/budget", "/plan", "/investments", "/accounts", "/settings", "/transactions", "/financial-health", "/review", "/profiles"):
-        assert f'href="{href}"' in menu
-    assert 'href="/investments" aria-current="page"' in menu
+def test_one_navigation_the_app_bar_title_is_plain_text_and_every_old_menu_page_is_still_reachable(phone):
+    """3AN2: the app bar's page menu (a second way to move) is gone; the title is text. Each page it used to reach is
+    a tab, a row on More, or reached from a page that has its own way back."""
+    more = phone.get("/more").text
+    for path in PAGES + ("/more", "/review", "/plan/reserves"):
+        html = phone.get(path).text
+        assert "phone-page-menu" not in html and "phone-page-grid" not in html and "⌄" not in html, path
+    assert 'class="phone-appbar-title"' in phone.get("/").text
+    tabs = ("/", "/budget", "/transactions")
+    for href in ("/plan", "/investments", "/accounts", "/settings", "/financial-health", "/review", "/birdview/expenses",
+                 "/plan/reserves"):
+        assert f'href="{href}"' in more, href
+    for href in tabs:
+        assert f'href="{href}"' in phone.get("/").text
+    assert 'href="/profiles"' in phone.get("/settings").text  # Profile and lock, from Settings
+    assert 'class="phone-back"' in phone.get("/review").text
 
 
 def test_one_needs_you_strip_under_the_stepper_holds_what_is_due_tomorrow(c, setup, monkeypatch):
@@ -222,3 +231,40 @@ def test_financial_health_puts_what_needs_you_under_its_lead_and_the_chart_in_it
     lead = re.search(r'(?s)<section class="card lead-card lead-hero".*?</section>', html).group(0)
     assert "lead-side" not in lead and "health-over-time-heading" not in lead
     assert html.index('id="health-limits-heading"') < html.index('class="card phone-card health-side"')
+
+
+def test_needs_you_names_what_is_inside_and_a_match_is_not_a_bill():
+    """3AN1 (P6): the payments group holds bills, interest to match and payments to check; each is named as itself."""
+    from lightning.ui.routes.dashboard import _needs_parts
+    match = {"label": "CD: 1 interest payment to match", "href": "/deposits/3#interest-receipts"}
+    bill = {"label": "Bill due: Internet", "href": "/plan/items/1/pay?due=2026-12-01&back=%2F"}
+    early = {"label": "Rent was paid early", "href": "/plan/items/2/pay?due=2026-12-01&back=%2F"}
+    text = lambda groups: [part["text"] for part in _needs_parts(groups)]
+    assert text([{"key": "payments", "count": 1, "items": [match]}]) == ["1 to match"]
+    assert text([{"key": "payments", "count": 1, "items": [bill]}]) == ["1 bill"]
+    assert text([{"key": "payments", "count": 3, "items": [bill, match, early]},
+                 {"key": "activity", "count": 4, "items": []}]) == ["1 bill", "1 to match", "1 payment to check", "4 to sort out"][:3]
+    assert "1 bill" not in text([{"key": "payments", "count": 2, "items": [match, match]}])
+    assert text([{"key": "payments", "count": 2, "items": [match, match]}]) == ["{n} to match"]
+
+
+def test_the_entry_sheet_has_no_balance_sentence_and_the_amount_starts_at_zero(phone):
+    """3AN1 (P3): "Cash in X decreases by …; balance owned by You." is gone (it was half English in Arabic); the
+    amount's placeholder is "0", not "0.00"."""
+    session = token(phone.get("/accounts/1/transaction/new").text, "__session")
+    for locale in ("en", "ar"):
+        phone.post("/settings/locale", data={"locale": locale, "__session": session})
+        sheet = phone.get("/accounts/1/transaction/new").text
+        assert ('lang="ar-EG"' in sheet) == (locale == "ar")
+        assert "data-transaction-effect" not in sheet and "transaction-effect" not in sheet
+        assert 'placeholder="0"' in sheet and 'placeholder="0.00"' not in sheet
+    phone.post("/settings/locale", data={"locale": "en", "__session": session})
+
+
+def test_a_date_in_a_phone_hero_line_never_breaks_across_lines():
+    """3AN1 (P13): at 320 "2026-12-01" split after a hyphen; the hero wraps every date in a no-break span."""
+    from lightning.ui.web import templates
+    html = templates.env.from_string(
+        '{% from "phone/partials/hero.html" import hero with context %}'
+        '{{ hero("Safe to spend", 1000, "About 50 a day until payday on 2026-12-01.") }}').render(base="EGP", locale="en")
+    assert '<span class="nowrap">2026-12-01</span>' in html

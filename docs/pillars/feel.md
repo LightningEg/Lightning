@@ -19,7 +19,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 | **IV-3T** | [Phone screens break Part C](../../issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | L | ready |
 | **OW-3AI** | [Additional broker and institution logos still needed](../../issues/3-polish-and-arabic/3AI-institution-logos.md) | owner | ready |
 | **BT-3AJ** | [Changing the language is recorded as an undoable action, so Undo switches it back](../../issues/3-polish-and-arabic/3AJ-language-change-is-undoable.md) | S | ready |
-| **IV-3AL** | [Phone declutter, tab by tab](../../issues/3-polish-and-arabic/3AL-phone-declutter-tab-by-tab.md) | L | building |
 | **IV-3AM** | [PC declutter, tab by tab](../../issues/3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md) | L | building |
 | **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](../../issues/10-looks-and-store/10A-cosmetic-parts-and-claiming.md) | L | building |
 | **NF-10B** | [Supporter perks still waiting on the app or the owner](../../issues/10-looks-and-store/10B-supporter-perks-app-and-owner.md) | M | blocked on 10A claiming; owner decision on the beta channel |
@@ -31,6 +30,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 - [Audit 1: is Lightning ready to demo?](../../reports/2026-10-20-demo-readiness/report.md): 3G, 3H, 3S, 3T
 - [v1.5.0 PR review, theme switching and package preparation](../../reports/2026-10-26-v150-release/report.md): 10A, 10C
 - [Store and community: unlocking themes, the market, rewards and staying in Lightning](../../reports/2026-10-27-store-and-community/report.md): 10C, 10D
-- [Audit 10: the phone, tab by tab - quick actions and the answer first](../../reports/2026-10-29-phone-tab-audit/report.md): 3AL, 3T
+- [Audit 10: the phone, tab by tab - quick actions and the answer first](../../reports/2026-10-29-phone-tab-audit/report.md): 3T
 - [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](../../reports/2026-10-30-desktop-tab-audit/report.md): 3AM
 <!-- work:end -->

@@ -2110,10 +2110,10 @@ initCurrencySearch();
       const account = root.dataset.accountName, currency = root.dataset.currency;
       if (kind === "transfer") {
         const to = destination.selectedOptions[0]?.textContent || "the selected account";
-        note.textContent = t("Cash in {account} decreases by {amount} {currency}; cash in {target} increases by the same amount.", {account, amount: shown, currency, target: to});
+        if (note) note.textContent = t("Cash in {account} decreases by {amount} {currency}; cash in {target} increases by the same amount.", {account, amount: shown, currency, target: to});
       } else {
         const own = owner.selectedOptions[0]?.textContent || "you";
-        note.textContent = t("Cash in {account} {direction} by {amount} {currency}; balance owned by {owner}.", {account, direction: t(kind === "out" ? "decreases" : "increases"), amount: shown, currency, owner: own});
+        if (note) note.textContent = t("Cash in {account} {direction} by {amount} {currency}; balance owned by {owner}.", {account, direction: t(kind === "out" ? "decreases" : "increases"), amount: shown, currency, owner: own});
       }
     };
     form.addEventListener("input", update); form.addEventListener("change", update); update();

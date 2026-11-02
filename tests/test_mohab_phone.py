@@ -35,6 +35,7 @@ DETOURS = {
     "Settings": ("More", "All settings"),
     "Health": ("More", "Financial health"),                       # the Overview opens on its answer, no tab row
     "Spending": ("More", "Spending"),
+    "Safety": ("More", "Reserves"),                               # the app bar's page menu is gone (3AN2): Reserves is a row on More
     "Currencies": ("More", "Financial health", "Currencies"),                         # the app bar's gear is a tab's own settings only                                  # the tab bar's Add, its word under the disc
     "NBE 3-year certificate": ("/accounts", "NBE 3-year certificate"),  # the PC lists accounts in its sidebar
     "Gold at home": ("/accounts", "Gold at home"),

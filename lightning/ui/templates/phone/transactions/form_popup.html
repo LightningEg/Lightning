@@ -24,7 +24,7 @@
     </div>{% endif %}
     <div class="field phone-amount {{ 'has-error' if error_field == 'amount' }}">
       <label for="popup-amount">{{ 'Amount'|tr(locale) }}</label>
-      <input id="popup-amount" name="amount" type="text" value="{{ values.amount }}" inputmode="decimal" placeholder="0.00" required autocomplete="off"{% if not txn_id %} autofocus{% endif %} {{ 'readonly' if split_categories }}>
+      <input id="popup-amount" name="amount" type="text" value="{{ values.amount }}" inputmode="decimal" placeholder="0" required autocomplete="off"{% if not txn_id %} autofocus{% endif %} {{ 'readonly' if split_categories }}>
       {% if error_field == 'amount' %}<small class="field-error">{{ error|tr(locale) }}</small>{% endif %}
     </div>
     <div class="field money-only {{ 'has-error' if error_field == 'counterparty' }}" {{ 'hidden' if values.kind == 'transfer' }}>
@@ -64,7 +64,6 @@
         </select>
       </div>
     </details>
-    <div class="transaction-effect" data-transaction-effect role="status" aria-live="polite"></div>
     <p class="small muted inline-save-status" data-popup-status aria-live="polite"></p>
     {% if not txn_id %}<button type="submit" class="btn primary phone-save">{{ 'Save'|tr(locale) }}</button>{% endif %}
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>

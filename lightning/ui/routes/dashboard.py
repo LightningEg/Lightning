@@ -374,7 +374,29 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
 # Needs you on the phone says what is inside in a few words (phone overhaul 2026-10-22): "2 bills · 4 to sort out".
 _NEEDS_SHORT = {"payments": ("1 bill", "{n} bills"), "activity": ("1 to sort out", "{n} to sort out"),
                 "budget": ("1 on the budget", "{n} on the budget"), "cash": ("1 on cash", "{n} on cash"),
-                "prices": ("1 price", "{n} prices"), "other": ("1 other", "{n} others")}
+                "prices": ("1 price", "{n} prices"), "other": ("1 other", "{n} others"),
+                "match": ("1 to match", "{n} to match"), "payment": ("1 payment to check", "{n} payments to check")}
+
+
+def _needs_parts(groups: list[dict], limit: int = 3) -> list[dict]:
+    """The words under Needs you's title, one per kind of thing inside (3AN1). The payments group holds bills but
+    also interest to match and payments to check, so it is split by what each item is: a match is "1 to match",
+    never "1 bill"."""
+    counts: dict[str, int] = {}
+    for group in groups:
+        if group["key"] != "payments":
+            counts[group["key"]] = group["count"]
+            continue
+        for item in group.get("items") or [{}]:
+            label, href = item.get("label", ""), item.get("href", "")
+            kind = ("match" if href.startswith("/deposits/") else
+                    "payments" if label.startswith(("Bill due", "Loan payment due")) else "payment")
+            counts[kind] = counts.get(kind, 0) + 1
+    parts = []
+    for key, n in counts.items():
+        one, many = _NEEDS_SHORT.get(key, _NEEDS_SHORT["other"])
+        parts.append(page_status.sentence(one if n == 1 else many, n=n))
+    return parts[:limit]
 
 
 def _safe_hero(f) -> dict:
@@ -400,10 +422,7 @@ def _phone_overview(position, forecast, groups, lead_change, c=None) -> dict:
              "badge": {"tone": "flat", "text": "Today"},
              "sub": f"{lead_change['figure']} {lead_change['text']}" if lead_change else "",
              "href": "/accounts"}
-    parts = []
-    for group in groups[:3]:
-        one, many = _NEEDS_SHORT.get(group["key"], _NEEDS_SHORT["other"])
-        parts.append(page_status.sentence(one if group["count"] == 1 else many, n=group["count"]))
+    parts = _needs_parts(groups)
     return {"safe": _safe_hero(forecast), "worth": worth, "needs": parts, "soon": _due_soon(c) if c else None}
 
 

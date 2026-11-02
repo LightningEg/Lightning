@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 64 open items, in the order they are worked on.
+10 milestones, 63 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -98,23 +98,14 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | NF-3AD4 | ↳ Financial health as a score | | | owner | |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/3AI-institution-logos.md) | owner task | Feel |  | ready |
 | **BT-3AJ** | [Changing the language is recorded as an undoable action, so Undo switches it back](3-polish-and-arabic/3AJ-language-change-is-undoable.md) ([#167](https://github.com/LightningEg/Lightning/issues/167)) | bug, technical · low | Feel | S | ready |
-| **IV-3AL** | [Phone declutter, tab by tab - each tab opens on its answer and its daily action; analysis one tap away](3-polish-and-arabic/3AL-phone-declutter-tab-by-tab.md) | improvement, visual | Feel | L | building |
-| IV-3AL1 | ↳ Overview (F1-F3) | | | M | |
-| IV-3AL2 | ↳ Budget (F5-F8) | | | M | |
-| IV-3AL3 | ↳ Transactions and an account (F10-F12) | | | M | |
-| IV-3AL4 | ↳ More (F13-F14) | | | S | |
-| IV-3AL5 | ↳ Pages under More (F15-F20) | | | L | |
-| IV-3AL6 | ↳ Spending (F21) | | | S | |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | |
 | IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | M | |
 | IV-3AM3 | ↳ Each tab opens on its answer (O1-O2, B1-B3, B5, T1-T2, T5-T6, SP1-SP3, SA3-SA5, I1-I2, A1-A3, C1-C2) | | | L | |
 | IV-3AM4 | ↳ Settings stop being forms (ST1-ST4) | | | M | |
 | IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | M | |
-| **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | ready |
+| **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | building |
 | IV-3AN0 | ↳ Approve the Part C changes | | | owner | |
-| IV-3AN1 | ↳ Small faults first | | | S | |
-| IV-3AN2 | ↳ One navigation | | | S | |
 | IV-3AN3 | ↳ The Add sheet and the transaction sheet | | | L | |
 | IV-3AN4 | ↳ Overview's first screen | | | M | |
 | IV-3AN5 | ↳ SMS in Add | | | M | |
@@ -124,8 +115,9 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3AN9 | ↳ No wall of zeros | | | S | |
 | IV-3AN10 | ↳ Arabic daily screens | | | M | |
 | IV-3AN11 | ↳ Measure and hand to the owner | | | S | |
+| IV-3AN12 | ↳ Left from IV-3AL | | | L | |
 
-Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK, 3AO. Next free code: 3AP.
+Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK, 3AL, 3AO. Next free code: 3AP.
 
 ## 4 Edit journal and devices
 

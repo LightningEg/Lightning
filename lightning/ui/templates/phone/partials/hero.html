@@ -5,6 +5,6 @@
 <{{ 'a' if href else 'section' }} class="phone-hero has-seam"{% if href %} href="{{ href }}"{% endif %} aria-labelledby="{{ id }}">
   <div id="{{ id }}" class="phone-hero-label" role="heading" aria-level="2">{{ label }}{% if note %} <span>{{ note }}</span>{% endif %}</div>
   <div class="phone-lead">{% if raw %}{{ raw }}{% elif value is none %}—{% else %}{{ value|money }} <small>{{ unit if unit is not none else base }}</small>{% endif %}</div>
-  {% if line %}<p class="phone-hero-line">{{ line }}</p>{% endif %}
+  {% if line %}<p class="phone-hero-line">{{ line|keep_dates }}</p>{% endif %}
 </{{ 'a' if href else 'section' }}>
 {%- endmacro %}
