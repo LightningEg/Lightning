@@ -68,6 +68,13 @@ def holding_history(reporting, investments, account_id: int, asset_id: int, end:
                       "units": units, "amount": abs(amount), "price": abs(amount / units) if units else None,
                       "price_native": abs(amount_native / units) if units else None,
                       "held": held, "ref": l.get("ref")})
+    # A certificate's interest lands on the bank, so no line of the holding carries it: list each payout (5K).
+    for paid in reporting.certificate_interest(fmt_date(end)):
+        if paid["account_id"] == account_id and paid["asset_id"] == asset_id:
+            held_then = next((t["held"] for t in reversed(trail) if t["date"] <= paid["date"]), ZERO)
+            trail.append({"date": paid["date"], "kind": "Interest paid", "units": ZERO, "amount": paid["amount"],
+                          "price": None, "price_native": None, "held": held_then, "ref": None})
+    trail.sort(key=lambda t: t["date"])   # stable: a payout follows a trade of the same day
     average = cost[-1] / (value[-1] / price[-1]) if cost[-1] and value[-1] and price[-1] else None
     average_native = native / held if held > 0 else None
     return {"labels": labels, "first": fmt_date(first), "months_held": len(keys), "price": price, "value": value,
