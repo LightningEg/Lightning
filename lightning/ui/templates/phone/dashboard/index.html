@@ -58,7 +58,11 @@
     <a class="phone-row" href="/accounts"><span>{{ fig.cash_you_own.label }}</span><b>{{ pos.cash_you_own|money }}</b><span class="phone-chevron" aria-hidden="true">›</span></a>
     {% if pos.holdings_value %}<a class="phone-row" href="/investments"><span>{{ fig.holdings_value.label }}</span><b>{{ pos.holdings_value|money }}</b><span class="phone-chevron" aria-hidden="true">›</span></a>{% endif %}
     {% if pos.other_you_own %}<a class="phone-row" href="/accounts"><span>{{ fig.other_you_own.label }}</span><b>{{ pos.other_you_own|money }}</b><span class="phone-chevron" aria-hidden="true">›</span></a>{% endif %}
-    {% if owes %}<a class="phone-row" href="/plan/loans"><span>{{ fig.what_you_owe.label }}</span><b>−{{ pos.what_you_owe|money }}</b><span class="phone-chevron" aria-hidden="true">›</span></a>{% endif %}
+    {% if owes %}{# What you owe opens on its parts, the circle among them (BV-5I), as a sheet (D1). #}
+    {% set row %}<span>{{ fig.what_you_owe.label }}</span><b>−{{ pos.what_you_owe|money }}</b><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+    {% call sheet(fig.what_you_owe.label, row) %}
+      <div class="phone-rows">{% if owe and owe.other_bills_due > 0 %}<a class="phone-row" href="/plan"><span>{{ "Bills due, loans apart"|tr(locale) }}</span><b>{{ owe.other_bills_due|money }}</b></a>{% endif %}{% if owe and owe.loans_still_to_pay > 0 %}<a class="phone-row" href="/plan/loans"><span>{{ fig.loans_still_to_pay.label }}</span><b>{{ owe.loans_still_to_pay|money }}</b></a>{% endif %}{% if pos.gameya_still_to_pay > 0 %}<a class="phone-row" href="/plan#what-you-owe" data-testid="gameya-owed"><span>{{ fig.gameya_still_to_pay.label }}</span><b>{{ pos.gameya_still_to_pay|money }}</b></a>{% endif %}</div>
+    {% endcall %}{% endif %}
     {% if owe and owe.bills_due_items %}
     {% set row %}<span>{{ '{label} to pay'|tr(locale, label=fig.bills_due.label) }}<small>{{ "Tap one to mark it paid"|tr(locale) }}</small></span><b>{{ owe.bills_due_items|length }}</b><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
     {% call sheet('{label} to pay'|tr(locale, label=fig.bills_due.label), row) %}

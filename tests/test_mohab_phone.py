@@ -41,7 +41,7 @@ DETOURS = {
     "Gold at home": ("/accounts", "Gold at home"),
     "Family flat (my share)": ("/accounts", "Family flat (my share)"),
     "Import statement": ("Import a statement",),                        # behind the account's ⋯
-    "Loans still to pay": ("What you owe",),                      # the Overview's row that opens Loans
+    "Loans still to pay": ("What you owe", "Loans still to pay"),  # the Overview's What you owe sheet (BV-5I, D1), then its Loans row
     "Data checks": ("/settings", "Data checks"),                  # from a settings sheet: Settings, then the tab
     "Categories": ("/settings", "Categories"),
     "Rules": ("/settings", "Rules"),

@@ -68,7 +68,7 @@ def test_overview_position_rows_open_their_pages_and_the_working_opens_sheets_ne
     html = phone.get("/").text
     position = html[html.index('id="position-heading"'):html.index('id="period-heading"')]
     assert re.search(r'<a class="phone-row" href="/accounts"><span>Cash you own</span>', position)
-    assert re.search(r'<a class="phone-row" href="/plan/loans"><span>What you owe</span>', position)  # Mohab's detour
+    assert re.search(r'(?s)<summary[^>]*>.*?What you owe.*?href="/plan/loans"', position)  # a sheet with its parts (BV-5I, D1)
     assert 'class="flow-disclosure' not in html and "phone-row-more" not in html and "phone-fold" not in html
     period = html[html.index('id="period-heading"'):]
     assert period.count('class="phone-sheet-row"') >= 3

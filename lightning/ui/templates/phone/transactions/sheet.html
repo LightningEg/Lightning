@@ -10,7 +10,7 @@
 {% block content %}
 {% set back_q = '?return_to=' ~ return_to|urlencode %}
 {% set sort_q = ('&' ~ sort_query) if sort_query else '' %}
-{% set hidden_fields %}<input type="hidden" name="return_to" value="{{ return_to }}">{% for key, value in sort.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">{% endset %}
+{% set hidden_fields %}<input type="hidden" name="return_to" value="{{ return_to }}">{% for key, value in sort.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}{% endset %}
 <section class="app-popup-content phone-txn-sheet">
   <header class="phone-txn-head">
     {{ arrow(kind) }}
@@ -26,9 +26,9 @@
   <section class="phone-sheet-section" aria-labelledby="sheet-cat-title">
     <h3 id="sheet-cat-title" class="phone-sheet-sub">{{ ('Which category?' if unsorted else 'Change category')|tr(locale) }}</h3>
     <div class="phone-cat-chips is-lead" role="group" aria-label="{{ 'Usual categories'|tr(locale) }}">
-      {% for chip in chips %}<form method="post" action="/transactions/{{ txn.id }}/category" {% if sort %}data-popup-return="popup"{% else %}data-phone-toast{% endif %}>{{ hidden_fields }}<input type="hidden" name="category_id" value="{{ chip.id }}"><button type="submit" class="phone-chip{{ ' is-chosen' if category and category.id == chip.id }}">{{ chip.label }}</button></form>{% endfor %}
+      {% for chip in chips %}<form method="post" action="/transactions/{{ txn.id }}/category" {% if sort %}data-popup-return="popup"{% else %}data-phone-toast{% endif %}>{{ hidden_fields }}<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><input type="hidden" name="category_id" value="{{ chip.id }}"><button type="submit" class="phone-chip{{ ' is-chosen' if category and category.id == chip.id }}">{{ chip.label }}</button></form>{% endfor %}
     </div>
-    <form method="post" action="/transactions/{{ txn.id }}/category" class="phone-form phone-cat-other" data-auto-submit {% if sort %}data-popup-return="popup"{% else %}data-phone-toast{% endif %}>{{ hidden_fields }}
+    <form method="post" action="/transactions/{{ txn.id }}/category" class="phone-form phone-cat-other" data-auto-submit {% if sort %}data-popup-return="popup"{% else %}data-phone-toast{% endif %}>{{ hidden_fields }}<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
       <div class="field"><label for="sheet-other-category">{{ 'Another category'|tr(locale) }}</label>
         <select id="sheet-other-category" name="category_id" data-own-picker><option value="">{{ 'Choose a category'|tr(locale) }}</option>
           {% from "partials/macros.html" import category_options %}{{ category_options(category_groups(other)) }}
