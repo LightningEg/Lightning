@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 
 from lightning.core.errors import ValidationError
 from lightning.planning.domain import Frequency, PaymentStatus, PlanKind, PlannedItem, WeekendMove
-from lightning.planning.schedule import describe, payment_dates
+from lightning.planning.schedule import describe, on_working_day, payment_dates
 from lightning.ui.web import create_app
 
 
@@ -45,7 +45,24 @@ def test_weekend_dates_move_to_thursday_or_sunday_or_stay():
     # A Friday month-end moved after falls in the next month, and only a window that reaches it counts it.
     late = _item(start_date="2026-07-31", weekend_move=WeekendMove.AFTER, payment_count=1)
     assert payment_dates(late, "2026-07-31") == [] and payment_dates(late, "2026-08-02") == [(1, "2026-08-02")]
-    assert describe(salary) == "Monthly on day 2 · Thursday if on a weekend"
+    assert describe(salary) == "Monthly on day 2 · Previous working day if on a weekend or holiday"
+
+
+def test_a_public_holiday_moves_to_a_working_day_like_the_weekend():
+    # 2026-10-06 (Armed Forces Day) is a Tuesday; 2026-04-25 a Saturday; 2026-01-07 a Wednesday.
+    holiday = date(2026, 10, 6)
+    assert on_working_day(holiday, WeekendMove.AFTER) == date(2026, 10, 7)
+    assert on_working_day(holiday, WeekendMove.BEFORE) == date(2026, 10, 5)
+    assert on_working_day(holiday, WeekendMove.NONE) == holiday
+    # 2027-01-07 is a Thursday: moved before it lands on Wednesday; moved after it runs through Fri/Sat to Sunday.
+    thursday = date(2027, 1, 7)
+    assert on_working_day(thursday, WeekendMove.BEFORE) == date(2027, 1, 6)
+    assert on_working_day(thursday, WeekendMove.AFTER) == date(2027, 1, 10)
+    # 2026-07-23 is a Thursday, 2026-07-22 a Wednesday: an ordinary weekday stays.
+    assert on_working_day(date(2026, 7, 22), WeekendMove.AFTER) == date(2026, 7, 22)
+    rent = _item(start_date="2026-10-06", weekend_move=WeekendMove.AFTER, payment_count=1)
+    assert payment_dates(rent, "2026-10-31") == [(1, "2026-10-07")]
+    assert payment_dates(_item(start_date="2026-10-06", payment_count=1), "2026-10-31") == [(1, "2026-10-06")]
 
 
 def test_a_new_item_keeps_its_date_until_you_choose_and_a_paid_date_stays_paid(c, setup, monkeypatch):

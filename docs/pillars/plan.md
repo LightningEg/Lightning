@@ -12,7 +12,6 @@ A budget by category, bills and loan payments, reserves for what is coming, and 
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **NF-7F** | [Small planning gaps](../../issues/7-planning-import-and-search/7F-small-planning-gaps.md) | M | new |
-| **NF-7I** | [A planned payment due on a public holiday doesn't move to a working day](../../issues/7-planning-import-and-search/7I-public-holidays-in-schedules.md) | S | ready |
 | **NF-7L** | [Smart suggestions exist but sit 2-3 clicks down](../../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) | L | ready |
 | **OW-7M** | [Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as…](../../issues/7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) | owner | new |
 | **NF-7T** | [Link the sections](../../issues/7-planning-import-and-search/7T-link-the-sections.md) | L | new |
