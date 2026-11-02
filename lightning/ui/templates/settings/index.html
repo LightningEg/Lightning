@@ -11,8 +11,8 @@
   <h2 id="theme-heading">{{ 'Appearance and language'|tr(locale) }}</h2>
   <div class="settings-row"><div><label for="app-theme">{{ 'Theme'|tr(locale) }}</label><small>{{ 'Applies at once and saves with this profile.'|tr(locale) }}</small></div>
     <div class="settings-control"><select id="app-theme" data-theme-select aria-describedby="theme-status"></select><span id="theme-status" class="settings-status" data-theme-status role="status"></span></div></div>
-  <div class="settings-row" data-theme-night hidden><div><label for="theme-night">{{ 'Night version'|tr(locale) }}</label><small>{{ "Follows this computer's light or dark setting."|tr(locale) }}</small></div>
-    <div class="settings-control"><label class="switch"><input id="theme-night" type="checkbox"><span class="sr-only">{{ 'Night version'|tr(locale) }}</span></label></div></div>
+  <div class="settings-row" data-theme-night hidden><div><label for="theme-night">{{ 'Night version'|tr(locale) }}</label><small>{{ "Day, night, or follow this computer's light or dark setting."|tr(locale) }}</small></div>
+    <div class="settings-control"><select id="theme-night"><option value="day">{{ 'Day'|tr(locale) }}</option><option value="night">{{ 'Night'|tr(locale) }}</option><option value="follow">{{ 'Follow this computer'|tr(locale) }}</option></select></div></div>
   {% if section == 'general' %}<div class="settings-row"><div><label for="ui-locale">{{ 'Language'|tr(locale) }}</label></div>
     <form method="post" action="/settings/locale" class="settings-control"><select id="ui-locale" name="locale" data-locale-auto><option value="en" {{ 'selected' if locale == 'en' }}>{{ 'English'|tr(locale) }}</option><option value="ar" {{ 'selected' if locale == 'ar' }}>{{ 'العربية'|tr(locale) }}</option></select><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% endif %}
   <div class="settings-row"><div><span class="settings-name">{{ 'Setup guide'|tr(locale) }}</span><small>{{ 'Shows the first steps on Overview again.'|tr(locale) }}</small></div>

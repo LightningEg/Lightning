@@ -102,28 +102,31 @@
     if (profile && meta && meta.paid && !owned(meta.item || meta.id)) return;
     apply(event.newValue, false);
   });
-  // Night version: a theme with an "-night" twin (dendera / dendera-night) can follow the computer's light or
-  // dark setting. With a profile the switch is kept in the profile (the PC's origin changes at every launch, so
-  // the browser's storage would forget it) and arrives in the head; the profile keeps the day theme. Without a
-  // profile (the theme workbench) the browser keeps it.
+  // Night version: a theme with an "-night" twin (dendera / dendera-night) is worn by day, by night, or following
+  // the computer's light or dark setting (owner, 2026-11-02, IV-10F7). Stored as "0" (day), "night" or "1" (follow).
+  // With a profile the choice is kept in the profile (the PC's origin changes at every launch, so the browser's
+  // storage would forget it) and arrives in the head; the profile keeps the day theme. Without a profile (the theme
+  // workbench) the browser keeps it.
   const nightKey = 'lightning_theme_follow_night';
   const nightMeta = document.querySelector('meta[name=lightning-follow-night]');
-  let followNight = profile && nightMeta ? nightMeta.content === '1' : null;
+  const modeOf = stored => stored === '1' ? 'follow' : stored === 'night' ? 'night' : 'day';
+  const storedOf = mode => mode === 'follow' ? '1' : mode === 'night' ? 'night' : '0';
+  let nightChoice = profile && nightMeta ? modeOf(nightMeta.content) : null;
   const twin = id => known(id + '-night') ? id + '-night' : null;
-  const follows = () => {
-    if (followNight !== null) return followNight;
-    try { return localStorage.getItem(nightKey) === '1'; } catch (_) { return false; }
+  const nightMode = () => {
+    if (nightChoice !== null) return nightChoice;
+    try { return modeOf(localStorage.getItem(nightKey)); } catch (_) { return 'day'; }
   };
-  function keepNight(on) {
-    if (followNight === null) {
-      try { localStorage.setItem(nightKey, on ? '1' : '0'); } catch (_) { /* session only */ }
+  function keepNight(mode) {
+    if (nightChoice === null) {
+      try { localStorage.setItem(nightKey, storedOf(mode)); } catch (_) { /* session only */ }
       return;
     }
-    followNight = on;
+    nightChoice = mode;
     const token = document.querySelector('meta[name=lightning-session]')?.content
       || document.querySelector('input[name=__session]')?.value || '';
     fetch('/settings/theme/night', { method: 'POST', credentials: 'same-origin', keepalive: true,
-      body: new URLSearchParams({ on: on ? '1' : '0', __session: token }) }).then(response => {
+      body: new URLSearchParams({ on: storedOf(mode), __session: token }) }).then(response => {
       if (!response.ok) throw new Error('Could not save');
     }).catch(() => {
       const status = document.querySelector('[data-theme-status]');
@@ -134,14 +137,17 @@
   let dayTheme = root.dataset.theme;
   function wearForScheme() {
     const night = twin(dayTheme);
-    if (!night || !follows()) return;
-    const want = dark && dark.matches ? night : dayTheme;
+    if (!night) return;
+    const mode = nightMode();
+    const want = mode === 'night' || (mode === 'follow' && dark && dark.matches) ? night : dayTheme;
     if (root.dataset.theme !== want) apply(want, false);
   }
   window.addEventListener('lightning:themechange', event => {
     const id = event.detail && event.detail.id;
-    if (id && !id.endsWith('-night')) dayTheme = id;
+    const picked = id && !id.endsWith('-night');
+    if (picked) dayTheme = id;
     document.querySelectorAll('[data-theme-night]').forEach(row => { row.hidden = !twin(dayTheme); });
+    if (picked && twin(id)) wearForScheme();  // a theme picked while night is chosen is worn at night
   });
   if (dark && dark.addEventListener) dark.addEventListener('change', wearForScheme);
   wearForScheme();
@@ -177,12 +183,12 @@
       if (bound.has(row)) return;
       bound.add(row);
       row.hidden = !twin(dayTheme);
-      const box = row.querySelector && row.querySelector('input');
-      if (!box) return;
-      box.checked = follows();
-      box.addEventListener('change', () => {
-        keepNight(box.checked);
-        if (box.checked) wearForScheme(); else if (root.dataset.theme !== dayTheme) apply(dayTheme, false);
+      const choice = row.querySelector && row.querySelector('select');
+      if (!choice) return;
+      choice.value = nightMode();
+      choice.addEventListener('change', () => {
+        keepNight(choice.value);
+        wearForScheme();
       });
     });
     syncControls();

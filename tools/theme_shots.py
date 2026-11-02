@@ -39,9 +39,18 @@ def browser(p):
     return p.chromium.launch(executable_path=str(CHROMIUM) if CHROMIUM.exists() else shutil.which("chromium"))
 
 
+NIGHT = """async on => { const t = document.querySelector('meta[name=lightning-session]');
+    const body = new URLSearchParams({on}); if (t) body.set('__session', t.content);
+    await fetch('/settings/theme/night', {method: 'POST', body}); }"""
+
+
 def wear(page, theme):
     # The profile meta wins over storage; set it the way Settings does, then reload so it paints before content.
-    page.evaluate("id => window.LightningTheme.set(id)", theme)
+    # A night version (dendera-night) is worn the way a person does: its day theme, then Night in Settings (IV-10F8).
+    night = theme.endswith("-night")
+    page.evaluate("id => window.LightningTheme.set(id)", theme.removesuffix("-night") if night else theme)
+    page.wait_for_timeout(300)
+    page.evaluate(NIGHT, "night" if night else "0")
     for _ in range(20):  # the save is a request: wait until a fresh page paints the theme, or every shot shows the last one
         page.wait_for_timeout(250)
         page.reload()

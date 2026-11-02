@@ -98,33 +98,39 @@ html[data-m-header-finish="glass"] .phone-appbar:not(#_) {
 html[data-m-header-thread="security-thread"] :is(.topbar, .phone-appbar):not(#_) {
   border-bottom-color: transparent;
   background-image: linear-gradient(90deg, var(--theme-header-seam) 0 40%, color-mix(in srgb, var(--accent) 35%, var(--surface)) 46%,
-    var(--hero) 50%, color-mix(in srgb, var(--accent) 35%, var(--surface)) 54%, var(--theme-header-seam) 60% 100%);
+    var(--m-pigment-hero, var(--accent)) 50%, color-mix(in srgb, var(--accent) 35%, var(--surface)) 54%, var(--theme-header-seam) 60% 100%);
   background-size: 300% 1px; background-repeat: repeat-x; background-origin: border-box; background-position: 0 100%;
   animation: m-thread 12s linear infinite;
 }
 @keyframes m-thread { from { background-position: 0 100%; } to { background-position: -150% 100%; } }
 
-/* lotus-frieze: the band temple walls and banknote borders run along their edges, painted in the theme's pigments
+/* lotus-frieze: the band temple walls and banknote borders run along their edges (an open lotus and a bud between two
+   register lines), painted in the theme's pigments
    (cosmetics/assets/dendera/lotus-frieze.svg). It sits in the bar's bottom padding, above the seam and under no text;
    still, so the page title stays the first thing read. */
 html[data-m-header-finish="lotus-frieze"] .main > .topbar {
-  background-image: var(--m-header-frieze); background-repeat: repeat-x; background-size: 16.8px 7px; background-position: 0 calc(100% - 2px);
+  background-image: var(--m-header-frieze); background-repeat: repeat-x; background-size: 27px 9px; background-position: 0 calc(100% - 2px);
 }
 html[data-m-header-finish="lotus-frieze"] .phone-appbar:not(#_) {
-  background-image: var(--m-header-frieze); background-repeat: repeat-x; background-size: 12px 5px; background-position: 0 calc(100% - 2px);
+  background-image: var(--m-header-frieze); background-repeat: repeat-x; background-size: 21px 7px; background-position: 0 calc(100% - 2px);
 }
-/* pigment-thread: the seam painted in the theme's four pigments (accent, hero, focus, warning), with one soft light
-   travelling along it every 14 s. Drawn by the bar's free ::before in the seam's own 1px: nothing moves, and only a
-   1px strip repaints. Reduced motion keeps the still pigment seam. */
+/* pigment-thread: a 2px band in the theme's four pigments (accent, hero, focus, warning) with a soft gold glow under it,
+   and gold leaf catching the light as it travels along (owner, 2026-11-02: "gold leaf 2px"). Two lights half a bar
+   apart, each crossing half the bar in 14 s, so one is always in view and the loop has no jump. Drawn by the bar's
+   free ::before over the seam (the border's 1px and 1px of padding): nothing moves, and only that strip repaints.
+   Reduced motion keeps the still band and its glow. */
 html[data-m-header-thread="pigment-thread"] :is(.main > .topbar, .phone-appbar):not(#_) { border-bottom-color: transparent; }
 html[data-m-header-thread="pigment-thread"] :is(.main > .topbar, .phone-appbar)::before {
-  content: ""; position: absolute; inset-inline: 0; bottom: -1px; height: 1px; pointer-events: none;
-  background-image: linear-gradient(90deg, transparent 0 45%, color-mix(in srgb, var(--hero) 30%, #FFFFFF) 50%, transparent 55% 100%),
-    linear-gradient(90deg, var(--accent), var(--hero) 36%, var(--focus) 66%, var(--warning));
-  background-size: 300% 100%, 100% 100%; background-repeat: repeat-x, no-repeat; background-position: 0 0, 0 0;
+  content: ""; position: absolute; inset-inline: 0; bottom: -1px; height: 2px; pointer-events: none;
+  background-image: linear-gradient(90deg, transparent 0 34%, var(--m-pigment-hero, var(--accent)) 44%,
+      color-mix(in srgb, var(--m-pigment-hero, var(--accent)) 35%, #FFF6D8) 50%, var(--m-pigment-hero, var(--accent)) 56%, transparent 66% 100%),
+    linear-gradient(90deg, var(--accent), var(--m-pigment-hero, var(--accent)) 36%, var(--focus) 66%, var(--m-pigment-warning, var(--focus)));
+  background-size: 50% 100%, 100% 100%; background-repeat: repeat-x, no-repeat; background-position: 0 0, 0 0;
+  box-shadow: 0 1px 6px -1px color-mix(in srgb, var(--m-pigment-hero, var(--accent)) 55%, transparent);
   animation: m-pigment 14s linear infinite;
 }
-@keyframes m-pigment { from { background-position: 0 0, 0 0; } to { background-position: -150% 0, 0 0; } }
+/* With a 50% tile, a position of 100% is exactly one tile along: the end frame equals the start. */
+@keyframes m-pigment { from { background-position: 0 0, 0 0; } to { background-position: 100% 0, 0 0; } }
 
 /* ---------- Navigation ---------- */
 html[data-m-navigation-finish="satin"] :is(.side, .phone-tabbar) {
@@ -178,7 +184,9 @@ html[data-m-cards-finish] .main :is(.wide-card, .overview-investment-card, #budg
 html[data-m-cards-hover="lift"] :is(.card, .kpi-card, .overview-block, .data-panel, .phone-kpi) { transition: transform .25s ease, box-shadow .25s ease; }
 /* A card that holds fields does not lift: a transform makes its fixed pick lists measure from the card, not the window. */
 html[data-m-cards-hover="lift"] :is(.card, .kpi-card, .overview-block, .data-panel):hover:not(:has([data-own-suggestions], [data-own-picker])) { transform: translateY(-2px); box-shadow: var(--m-card-edge), var(--m-depth-high); }
-html[data-m-cards-hover="light"] :is(.card, .kpi-card, .overview-block, .data-panel, .metric-card):not(.lead-card):not(.overview-owned-card):hover {
+/* The ids outrank the card finish rules above (one holds an id), which otherwise kept the light from ever showing; the
+   import review keeps its plain paint (see above). */
+html[data-m-cards-hover="light"] :is(.card, .kpi-card, .overview-block, .data-panel, .metric-card):not(.lead-card):not(.overview-owned-card):not(.import-review):not(#_):not(#_):not(#_):hover {
   background-image: radial-gradient(260px circle at var(--lt-x, 50%) var(--lt-y, 0%), color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%),
     var(--m-card-grain), var(--m-card-finish) !important;
 }
@@ -194,6 +202,11 @@ html[data-m-hero-depth="mid"] { --m-hero-depth: var(--m-depth-mid); }
 html[data-m-hero-depth="high"] { --m-hero-depth: var(--m-depth-high); }
 html[data-m-hero-artwork]:not([data-m-hero-artwork="none"]) { --m-hero-art: var(--m-hero-artwork) left -50px bottom -80px / 230px 230px no-repeat; }
 [dir="rtl"][data-m-hero-artwork]:not([data-m-hero-artwork="none"]) { --m-hero-art: var(--m-hero-artwork) right -50px bottom -80px / 230px 230px no-repeat; }
+/* The winged sun disc sits where Dendera carves it, over the doorway: centred across the card's top edge, like a lintel
+   (owner, 2026-11-02). Symmetric, so Arabic needs no mirror. */
+html[data-m-hero-artwork="winged-disc"]:not(#_) { --m-hero-art: var(--m-hero-artwork) center top -26px / 280px 112px no-repeat; }
+/* A theme's own hero artwork replaces Lightning's watermark mark, so the card carries one drawing, not two. */
+html[data-m-hero-artwork]:not([data-m-hero-artwork="none"]) .main .lead-card::after { content: none; }
 html[data-m-hero-finish] .main :is(.overview-owned-card, .hero-card, .portfolio-summary, .metric-card--focal, .lead-card):not(#_):not(#_) {
   background: var(--m-hero-art), var(--m-hero-grain), var(--m-hero-finish), var(--theme-hero) !important;
   box-shadow: var(--m-card-edge), var(--m-hero-depth) !important;
@@ -201,7 +214,10 @@ html[data-m-hero-finish] .main :is(.overview-owned-card, .hero-card, .portfolio-
 /* foil edge: a gold foil gradient in the border's own 1px; nothing moves. The lead card has no border (its paint is
    the focal gradient), so its foil is a 1px ring drawn by its free ::before, masked to the edge. */
 @property --m-glint { syntax: "<angle>"; inherits: false; initial-value: 200deg; }
-html[data-m-hero-edge-style="foil"] {
+/* The ring is declared on each element that wears it: a var() resolves where it is declared, so a ring declared only on
+   html froze at the initial angle and the edge-glint below never moved. */
+html[data-m-hero-edge-style="foil"], html[data-m-hero-edge-style="foil"] .main :is(.overview-owned-card, .hero-card, .portfolio-summary, .metric-card--focal),
+html[data-m-hero-edge-style="foil"] .main .lead-card::before {
   --m-foil-ring: conic-gradient(from var(--m-glint), color-mix(in srgb, var(--theme-hero-edge) 55%, transparent) 0deg,
     var(--theme-hero-edge) 50deg, color-mix(in srgb, var(--theme-hero-edge) 35%, #FFFFFF) 80deg, var(--theme-hero-edge) 110deg,
     color-mix(in srgb, var(--theme-hero-edge) 55%, transparent) 170deg, color-mix(in srgb, var(--theme-hero-edge) 70%, transparent) 260deg,
@@ -227,6 +243,14 @@ html[data-m-hero-sheen="edge-glint"][data-m-hero-edge-style="foil"] .main .lead-
 /* The phone's lead figure sits on the ground (Part C): it takes no artwork of its own; the ground's sits behind. */
 
 /* ---------- Primary controls ---------- */
+/* Foil is the metal of the element's own paint: the button's fill, the chosen tab's colour (Dendera night paints both
+   in its gold, so they read as gold leaf). Declared on the element itself so each var() resolves there. */
+html[data-m-controls-finish="foil"] :is(.btn.primary, .phone-add-disc) { --m-foil-from: var(--action); }
+html[data-m-tabs-finish="foil"] :is(.period-button.selected, .main .plan-tab[aria-current="page"], .phone-chip.is-chosen, .phone-invest-seg a.is-chosen) { --m-foil-from: var(--theme-tab-chosen); }
+html[data-m-controls-finish="foil"] :is(.btn.primary, .phone-add-disc), html[data-m-tabs-finish="foil"] :is(.period-button.selected, .main .plan-tab[aria-current="page"], .phone-chip.is-chosen, .phone-invest-seg a.is-chosen) {
+  --m-foil: linear-gradient(120deg, color-mix(in srgb, var(--m-foil-from) 72%, #FFFFFF) 0%, var(--m-foil-from) 30%,
+    color-mix(in srgb, var(--m-foil-from) 78%, #000000) 55%, color-mix(in srgb, var(--m-foil-from) 82%, #FFFFFF) 80%, var(--m-foil-from) 100%);
+}
 html[data-m-controls-finish="satin"] :is(.btn.primary, .phone-add-disc) {
   background-image: linear-gradient(180deg, color-mix(in srgb, #FFFFFF 14%, transparent), transparent 70%);
 }
@@ -242,6 +266,12 @@ html[data-m-controls-depth="high"] :is(.btn.primary, .phone-add-disc) { box-shad
 /* press sheen: the foil's light slides across on hover, focus and press. */
 html[data-m-controls-press="sheen"] :is(.btn.primary, .phone-add-disc) { transition: background-position .7s ease; }
 html[data-m-controls-press="sheen"] :is(.btn.primary, .phone-add-disc):is(:hover, :focus-visible, :active) { background-position: 100% 0; }
+/* On satin the finish is a vertical light, so moving it showed nothing: the sheen is its own band over the satin. */
+html[data-m-controls-press="sheen"][data-m-controls-finish="satin"] :is(.btn.primary, .phone-add-disc) {
+  background-image: linear-gradient(105deg, transparent 40%, color-mix(in srgb, #FFFFFF 24%, transparent) 50%, transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, #FFFFFF 14%, transparent), transparent 70%);
+  background-size: 250% 100%, 100% 100%; background-repeat: no-repeat; /* starts at 0 0: the press rule above moves it */
+}
 
 /* ---------- Secondary buttons ---------- */
 html[data-m-buttons-finish="satin"] :is(.btn:not(.primary), .date-picker-button) {
