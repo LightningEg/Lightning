@@ -35,3 +35,5 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§1 Engin
 One branch per group (6, 7–8), each with a test that posts the bad input and expects a refusal or matching totals.
 
 **Not posted to contributors (2026-10-31):** its remaining rule (dates before an account opened) needs the owner's decision first.
+
+**Owner decision, 2026-11-02 (item 6):** allow a date before the account opened, but ask once on save (like the far-from-market conversion rate: pressing Save again keeps it as typed). Build the ask in the register, popup and quick-add routes. Items 7 and 8 need no decision.
