@@ -18,7 +18,6 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 | **NF-5E** | [Bonus shares and stock splits](../../issues/5-investments/5E-bonus-shares-and-splits.md) | M | blocked on 5A, 5B |
 | **IT-5F** | [One order of price sources](../../issues/5-investments/5F-one-order-of-price-sources.md) | M | ready |
 | **NF-5G** | [Brokerages that span exchanges and currencies](../../issues/5-investments/5G-brokerages-across-exchanges.md) | L | building |
-| **BV-5I** | [Gam'eya and zakat follow-ups: no circle in the sample, no phone breakdown, an early-turn circle sho…](../../issues/5-investments/5I-gameya-and-zakat-follow-ups.md) | M | new |
 | **NF-6A** | [Market data: price packs, collected in the cloud](../../issues/6-market-data/6A-price-packs.md) | L | building |
 | **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](../../issues/6-market-data/6B-europe-and-gcc-shares.md) | L | blocked on a source that allows redistribution |
 | **BT-6C** | [Download shared prices brings nothing: only the exchange-rate pack is published, and not since 11 O…](../../issues/6-market-data/6C-shared-prices-not-published.md) | M | ready |

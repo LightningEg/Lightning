@@ -82,7 +82,7 @@
 {% endif %}
 <header class="overview-section-head inv-head"><h2>{{ 'What is promised?'|tr(locale) }}</h2><span>{{ 'Today'|tr(locale) }}</span></header>
 {% set by_loan = p.loan_bars.rows|length > 1 %}
-<section class="card wide-card owe-card"><div class="overview-split{{ '' if by_loan else ' is-single' }}">
+<section class="card wide-card owe-card" id="what-you-owe"><div class="overview-split{{ '' if by_loan else ' is-single' }}">
   <section><div class="overview-block-head"><div><h3>{{ fig.what_you_owe.label }}</h3></div><a class="quiet-link" href="/plan/loans">{{ 'Loans'|tr(locale) }}</a></div>
     <div class="overview-headline">{{ (owe.total + gameya_owed)|money }} <small>{{ base }}</small></div>
     {# Feedback ticket 95: each part opens like Free cash's rows on Overview; the loan note is a line inside, not a smaller font beside the name. #}
