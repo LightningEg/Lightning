@@ -55,7 +55,8 @@
         <div class="phone-rows is-inner">{% for account in cash_accounts if account.value %}<a class="phone-row" href="/accounts/{{ account.id }}"><span>{{ account.label }}</span><b>{{ account.value|money }}</b></a>{% endfor %}</div></details>
       {% if pos.holdings_value %}<a class="phone-row" href="/investments"><span>{{ fig.holdings_value.label }}</span><b>{{ pos.holdings_value|money }}</b></a>{% endif %}
       {% if pos.other_you_own %}<div class="phone-row"><span>{{ fig.other_you_own.label }}</span><b>{{ pos.other_you_own|money }}</b></div>{% endif %}
-      {% if owes %}<a class="phone-row" href="/plan/loans"><span>{{ fig.what_you_owe.label }}</span><b>−{{ pos.what_you_owe|money }}</b></a>{% endif %}
+      {% if owes %}<details class="phone-row-more"><summary class="phone-row"><span>{{ fig.what_you_owe.label }} <span class="phone-chevron" aria-hidden="true">›</span></span><b>−{{ pos.what_you_owe|money }}</b></summary>
+        <div class="phone-rows is-inner">{% if owe.other_bills_due > 0 %}<a class="phone-row" href="/plan"><span>{{ "Bills due, loans apart"|tr(locale) }}</span><b>{{ owe.other_bills_due|money }}</b></a>{% endif %}{% if owe.loans_still_to_pay > 0 %}<a class="phone-row" href="/plan/loans"><span>{{ fig.loans_still_to_pay.label }}</span><b>{{ owe.loans_still_to_pay|money }}</b></a>{% endif %}{% if pos.gameya_still_to_pay > 0 %}<div class="phone-row" data-testid="gameya-owed"><span>{{ fig.gameya_still_to_pay.label }}</span><b>{{ pos.gameya_still_to_pay|money }}</b></div>{% endif %}</div></details>{% endif %}
     </div>
   </article>
   {% if owe and owe.bills_due_items %}<article class="card phone-card phone-flat-rows">

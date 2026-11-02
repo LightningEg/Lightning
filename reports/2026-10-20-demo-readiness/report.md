@@ -42,7 +42,7 @@ Makes the demo shine (wiring of what exists, no new engines):
 
 - **[7L2](../../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) Needs you as the one smart inbox.** It would carry Looks recurring · Track, early payment found · Link, Make a rule, Refill a reserve, and a category over plan.
 - **[7L3](../../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) Looks recurring finds subscriptions and bills that vary.** Today it misses Shahid and electricity.
-- **[5K](../../issues/5-investments/5K-certificate-holding-page.md) The certificate's page.** It shows interest, not price charts.
+- **5K (fixed: `tests/test_investments.py::test_a_fixed_price_holding_shows_no_price_swings_and_no_checkpoint_rows`, `tests/test_deposit_certificates.py::test_a_certificate_holding_page_lists_its_interest_payouts`) The certificate's page.** It shows interest, not price charts.
 - **3S 3–5 and [3T](../../issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) 1–3.** Charts that mislead, cut words on the phone, and pages with no way back.
 
 Polish after the demo: the rest of 3S and 3T, and the five pages left in [3Q](../../issues/3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md).
@@ -165,7 +165,7 @@ Not checked: online prices, Gam'eya writes (no circle in either dataset, 5I), CS
   - Health trends have no axis and don't start at zero.
   - Currencies "USD" plots cash only, so it falls by 88,000 when the ETF is bought.
   - The average-cost line is Meadow.
-  - The certificate's page shows price volatility, nine empty "Units out" rows and no interest ([5K](../../issues/5-investments/5K-certificate-holding-page.md)).
+  - The certificate's page shows price volatility, nine empty "Units out" rows and no interest (5K (fixed: `tests/test_investments.py::test_a_fixed_price_holding_shows_no_price_swings_and_no_checkpoint_rows`, `tests/test_deposit_certificates.py::test_a_certificate_holding_page_lists_its_interest_payouts`)).
 - **Colour off meaning (A03):**
   - The Overview "Left in plan" meter is Meadow.
   - Category direction colours are off A03.

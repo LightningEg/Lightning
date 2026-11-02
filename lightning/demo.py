@@ -103,6 +103,19 @@ def build_demo(c, as_of: date | None = None) -> dict:
         if post_last:
             tx.record_outflow(post_last, cib.id, "1,299", cat["EXP.PERSONAL.SHOPPING"], counterparty="Amazon")
 
+        # An office gam'eya: 10 members, 2,000 a month from the first month, his turn is the second, so the pot
+        # came after two instalments and he now owes the circle (Gam'eya still to pay, under What you owe).
+        circle = flows.open_account("Office gam'eya", "GAMEYA", opened, "0")
+        c.gameya.save_terms(circle.id, organiser="Um Ali", members="10", installment="2,000",
+                            first_date=fmt_date(months[0].replace(day=5)), my_turn="2",
+                            funding_account_id=cib.id, payout_account_id=cib.id)
+        for index, start in enumerate(months):
+            when = _on(start, 5, day)
+            if when:
+                c.gameya.record_instalment(circle.id, when)
+                if index == 1:
+                    c.gameya.record_payout(circle.id, when)
+
         # Held for others: Mom keeps 10,000 in Mohab's CIB account.
         when = _on(months[1], 10, day)
         if when:

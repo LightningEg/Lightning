@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 70 open items, in the order they are worked on.
+10 milestones, 69 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -181,9 +181,8 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | NF-5G6 | ↳ Phase 5: analysis | | | L | |
 | NF-5G7 | ↳ Phase 6: lots and corporate actions | | | L | |
 | **BV-5I** | [Gam'eya and zakat follow-ups: no circle in the sample, no phone breakdown, an early-turn circle shown below zero](5-investments/5I-gameya-and-zakat-follow-ups.md) | bug, visual · medium | Own | M | new |
-| **BV-5K** | [A certificate's holding page shows price charts, nine empty "Units out" rows, no interest, and saves it as Equity Fund](5-investments/5K-certificate-holding-page.md) ([#162](https://github.com/LightningEg/Lightning/issues/162)) | bug, visual · medium | Own | M | ready |
 
-Done: 5H, 5J, 5L. Next free code: 5M.
+Done: 5H, 5J, 5K, 5L. Next free code: 5M.
 
 ## 6 Market data
 
