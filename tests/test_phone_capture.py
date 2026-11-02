@@ -154,7 +154,7 @@ def test_a_row_opens_its_sheet_first_and_the_sheet_looks_before_it_edits(month):
     assert ">−250</bdi>" in sheet and "−250.00" not in sheet                         # whole EGP, no .00
     assert "Seoudi" in body and "Food & Groceries" in unescape(body)
     left = D("5000") - D("1200") - D("300") - D("250")
-    assert f"{left:,.0f} of 5,000" in body                                          # Plan left, from BudgetService
+    assert f"{left:,.0f} left of 5,000" in body                                          # Plan left, from BudgetService
     assert "Change category" in body and "Split" in body and "/edit-popup" in sheet  # the foot; Edit opens the form
     assert "<form" not in sheet.split("phone-sheet-actions")[0].split("phone-txn-sheet\">")[1]       # nothing to type yet
     assert c.budgets.plan_left(cats["EXP.PERSONAL.FOOD"].id, "2026-09")["left"] == left

@@ -33,7 +33,7 @@ ARABIC_UI = {
     'Search a payee, a category or an amount. Pages and actions are below.': 'اكتب اسم جهة أو فئة أو مبلغ. الصفحات والإجراءات تحت.',
     'Paste one or more, a blank line between each.': 'الصق رسالة أو أكتر، وسيب سطر فاضي بين كل واحدة.',
     'Over by {amt} · limit {limit}': 'زيادة {amt} · الحد {limit}',
-    '{left} of {limit}': '{left} من {limit}',
+    '{left} left of {limit}': 'فاضل {left} من {limit}',
     'Split across {names}; the full amount and its split are kept.': 'متقسّمة على {names}؛ المبلغ كله وتقسيمه محفوظين.',
     'Which account ends with {digits}? Choose it above; Lightning remembers it.': 'أنهي حساب آخره {digits}؟ اختاره فوق وLightning هيفتكره.',
     'Where is your salary paid? Choose the account above; Lightning remembers it.': 'مرتبك بينزل على أنهي حساب؟ اختاره فوق وLightning هيفتكره.',

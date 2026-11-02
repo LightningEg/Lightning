@@ -40,7 +40,7 @@
   {% if not chips or txn.notes %}
   <dl class="phone-facts">
     {% if not chips %}<div><dt>{{ 'Category'|tr(locale) }}</dt><dd>{% if kind == 'move' %}{{ 'Transfer'|tr(locale) }}{% elif category %}{{ category.name }}{% else %}{{ 'Split'|tr(locale) }}{% endif %}</dd></div>
-    {% if plan %}<div><dt>{{ 'Plan left'|tr(locale) }}</dt><dd>{% if plan.over %}<span class="is-over">{{ 'Over by {amt} · limit {limit}'|tr(locale, amt=(-plan.left)|amount_role('total'), limit=plan.limit|amount_role('total')) }}</span>{% else %}{{ '{left} of {limit}'|tr(locale, left=plan.left|amount_role('total'), limit=plan.limit|amount_role('total')) }}{% endif %}</dd></div>{% endif %}{% endif %}
+    {% if plan %}<div><dt>{{ 'Plan left'|tr(locale) }}</dt><dd>{% if plan.over %}<span class="is-over">{{ 'Over by {amt} · limit {limit}'|tr(locale, amt=(-plan.left)|amount_role('total'), limit=plan.limit|amount_role('total')) }}</span>{% else %}{{ '{left} left of {limit}'|tr(locale, left=plan.left|amount_role('total'), limit=plan.limit|amount_role('total')) }}{% endif %}</dd></div>{% endif %}{% endif %}
     {% if txn.notes %}<div><dt>{{ 'Note'|tr(locale) }}</dt><dd dir="auto">{{ txn.notes }}</dd></div>{% endif %}
   </dl>
   {% endif %}
