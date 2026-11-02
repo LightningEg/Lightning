@@ -15,14 +15,10 @@ A budget by category, bills and loan payments, reserves for what is coming, and 
 | **NF-7I** | [A planned payment due on a public holiday doesn't move to a working day](../../issues/7-planning-import-and-search/7I-public-holidays-in-schedules.md) | S | ready |
 | **NF-7L** | [Smart suggestions exist but sit 2-3 clicks down](../../issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) | L | ready |
 | **OW-7M** | [Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as…](../../issues/7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) | owner | new |
-| **OW-7R** | [Changing an expense's amount silently unlinks it from its reserve](../../issues/7-planning-import-and-search/7R-money-edit-drops-reserve-links.md) | owner | new |
 | **NF-7T** | [Link the sections](../../issues/7-planning-import-and-search/7T-link-the-sections.md) | L | new |
-| **BT-7U** | [Editing a paid bill's transaction keeps the bill paid at the old amount and date](../../issues/7-planning-import-and-search/7U-bill-link-after-payment-edit.md) | S | new |
 
 ## Reports with open follow-ups here
 
 - [Audit 1: is Lightning ready to demo?](../../reports/2026-10-20-demo-readiness/report.md): 7L, 7M
-- [Audit 8: backbone engine gaps and loose ends](../../reports/2026-10-26-engine-audit/report.md): 7R
 - [Audit 9: loose ends after themes and sync, linking sections, and how the plan is filed](../../reports/2026-10-28-loose-ends-and-linking/report.md): 7T
-- [Audit 11: the backend walked through use cases](../../reports/2026-10-29-use-case-audit/report.md): 7U
 <!-- work:end -->

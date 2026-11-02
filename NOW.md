@@ -20,7 +20,7 @@
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **Audits 9, 11:** left NF-7T5/7T6, IT-4K4; BT-7U; owner: BT-2E. **Read:** reports 2026-10-28, 2026-10-29-use-case-audit.
+- **Audits 9, 11:** left NF-7T5/7T6, IT-4K4; owner: BT-2E. **Read:** reports 2026-10-28, 2026-10-29-use-case-audit.
 - **IV-3AN phone plan (Audit 13, 2026-11-01):** owner approves 3AN0 (six Part C lines); 3AN1-2 need no approval. IT-3AO (phone speed) is done. **Read:** 3AN.
 - **IV-3AM PC declutter:** built and reviewed; the owner checks it on the PC, then the Left list. **Read:** 3AM.
 
@@ -33,7 +33,7 @@
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 
 1. **v1.5.1 is public; dependency PR #122 remains blocked.** CSV contribution #117 and the reviewed Actions/theme/engine PRs are merged. #122 still needs coordinated native wheels and lockfiles (1H). **Read:** `reports/2026-10-26-v150-release/report.md`.
-2. **Audit 8 follow-ups:** owner decisions 7R and 7S. **Read:** `reports/2026-10-26-engine-audit/report.md`.
+2. **Audit 8 follow-ups:** owner decision 7S. **Read:** `reports/2026-10-26-engine-audit/report.md`.
 3. **9J, 9K and 2AB:** remain open from Audit 5. **Read:** `reports/2026-10-21-backend-streamlining/report.md`.
 4. **1H:** native recipe, then matched locks. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
 5. **2A:** restore safety code (Luna's claim); its reboot drill joins the held checks. **Read:** 2A.

@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 72 open items, in the order they are worked on.
+10 milestones, 70 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -238,12 +238,10 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7L3 | ↳ Looks recurring finds real bills ([#225](https://github.com/LightningEg/Lightning/issues/225)) | | | M | |
 | NF-7L4 | ↳ Pair what belongs together ([#226](https://github.com/LightningEg/Lightning/issues/226)) | | | M | |
 | **OW-7M** | [Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as overspending](7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) | owner task | Plan |  | new |
-| **OW-7R** | [Changing an expense's amount silently unlinks it from its reserve](7-planning-import-and-search/7R-money-edit-drops-reserve-links.md) | owner task | Plan |  | new |
 | **OW-7S** | [Money out filed under an income category counts as spending, not as less income](7-planning-import-and-search/7S-money-out-of-an-income-category.md) | owner task | Understand |  | new |
 | **NF-7T** | [Link the sections - salary-day cascade and a reserve tied to its bill](7-planning-import-and-search/7T-link-the-sections.md) | new feature | Plan | L | new |
 | NF-7T5 | ↳ Salary-day cascade | | | L | |
 | NF-7T6 | ↳ A reserve tied to its bill | | | L | |
-| **BT-7U** | [Editing a paid bill's transaction keeps the bill paid at the old amount and date](7-planning-import-and-search/7U-bill-link-after-payment-edit.md) | bug, technical · low | Plan | S | new |
 | **NF-7V** | [More AI prompt buttons that carry Lightning's context](7-planning-import-and-search/7V-more-ai-prompt-buttons.md) | new feature | Understand | M | ready |
 | NF-7V1 | ↳ A rejected CSV ([#232](https://github.com/LightningEg/Lightning/issues/232)) | | | M | |
 | NF-7V2 | ↳ Counterparty clean-up ([#233](https://github.com/LightningEg/Lightning/issues/233)) | | | S | |
@@ -251,7 +249,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7V4 | ↳ Budget question ([#235](https://github.com/LightningEg/Lightning/issues/235)) | | | M | |
 | NF-7V5 | ↳ Category mapping for a bank ([#236](https://github.com/LightningEg/Lightning/issues/236)) | | | M | |
 
-Done: 7H, 7J, 7K, 7N, 7O, 7P, 7Q, 7W. Next free code: 7X.
+Done: 7H, 7J, 7K, 7N, 7O, 7P, 7Q, 7R, 7U, 7W. Next free code: 7X.
 
 ## 8 Website
 

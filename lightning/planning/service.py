@@ -226,8 +226,8 @@ class PlanningService:
             # A payment settled before its weekend move changed stays settled under its old date.
             row = settled.get((item.id, due)) or settled.get((item.id, calendar_day))
             # A cash receipt dated later cannot clear debt in an earlier historical balance.
-            if (item.kind == PlanKind.LOAN and row and row["status"] == PaymentStatus.PAID.value
-                    and row["transaction_date"] > fmt_date(day)):
+            if (row and row["status"] == PaymentStatus.PAID.value
+                    and row["transaction_date"] > fmt_date(day)):  # for every kind (7U)
                 row = None
             if row:
                 status = PaymentStatus(row["status"])
@@ -415,6 +415,37 @@ class PlanningService:
                 self.repo.add_extra_payment(item.id, transaction_id, txn["amount"], ZERO, due_date)
             else:
                 self.repo.settle(item.id, due_date, "PAID", transaction_id, txn["amount"])
+
+    def review_links(self, transaction_id: int) -> str:
+        """After a linked transaction was edited, keep each bill or income link it still fits and refresh the paid
+        amount from it; unlink the rest and say which (7U, owner 2026-11-02). Fits means the same as a hand link:
+        the same kind of posted transaction, within the item's date window (at least 45 days) and amount tolerance
+        (at least 50%). Loan payments refuse the edit instead, so they are left alone. Returns a sentence for the
+        Save message, or an empty text."""
+        dropped = []
+        for row in self.repo.payments_of_transaction(transaction_id):
+            item = self.get(row["planned_item_id"])
+            if item.kind == PlanKind.LOAN:
+                continue
+            currency = self.accounts.get(item.account_id).currency if item.account_id else self.transactions.base_currency
+            txn = self.repo.payment_transaction(transaction_id, item.is_income, None,
+                                               item.category_id, item.counterparty_id, currency)
+            scheduled = next((p for p in self.payments(item, row["due_date"]) if p.due_date == row["due_date"]), None)
+            fits = bool(txn and scheduled)
+            if fits:
+                due = date.fromisoformat(row["due_date"])
+                expected = scheduled.amount
+                tolerance = Decimal(max(item.match_tolerance_pct, 50)) / Decimal(100)
+                fits = (abs((date.fromisoformat(txn["date"]) - due).days) <= max(item.match_window_days, 45)
+                        and abs(txn["amount"] - expected) <= expected * tolerance)
+            if fits:
+                self.repo.set_paid_amount(item.id, row["due_date"], txn["amount"])
+            else:
+                self.repo.unsettle(item.id, row["due_date"])
+                dropped.append(f"{item.name} · {row['due_date']}")
+        if not dropped:
+            return ""
+        return "It no longer fits " + ", ".join(dropped) + ", so that payment is open again."
 
     def record_payment(self, item_id: int, due_date: str, date_paid: str, amount, account_id: int | None) -> int:
         """Post the payment as a normal transaction and link it."""

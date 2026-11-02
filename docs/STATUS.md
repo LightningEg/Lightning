@@ -7,7 +7,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
 | [Capture](pillars/capture.md) | 7 |  | 3 | 4 |  |  |
-| [Plan](pillars/plan.md) | 7 |  | 2 | 5 |  | 2 |
+| [Plan](pillars/plan.md) | 5 |  | 2 | 3 |  | 1 |
 | [Understand](pillars/understand.md) | 5 |  | 2 | 2 | 1 | 1 |
 | [Own](pillars/own.md) | 16 | 2 | 4 | 4 | 6 |  |
 | [Protect](pillars/protect.md) | 3 | 1 | 2 |  |  | 1 |
@@ -16,7 +16,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Build](pillars/build.md) | 9 | 1 | 8 |  |  |  |
 | [Reach](pillars/reach.md) | 6 |  | 4 | 2 |  | 2 |
 
-72 open items in 10 milestones.
+70 open items in 10 milestones.
 
 ## Being built now
 
@@ -38,7 +38,6 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 - **OW-2AB** (Protect) [Legacy mode](../issues/2-safe-for-real-money/2AB-stale-code.md): ready
 - **OW-3AI** (Feel) [Additional broker and institution logos still needed](../issues/3-polish-and-arabic/3AI-institution-logos.md): ready
 - **OW-7M** (Plan) [Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as…](../issues/7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md): new
-- **OW-7R** (Plan) [Changing an expense's amount silently unlinks it from its reserve](../issues/7-planning-import-and-search/7R-money-edit-drops-reserve-links.md): new
 - **OW-7S** (Understand) [Money out filed under an income category counts as spending, not as less income](../issues/7-planning-import-and-search/7S-money-out-of-an-income-category.md): new
 - **OW-8D** (Reach) [For Geeks audit ideas left for the owner to choose](../issues/8-website/8D-for-geeks-audit-ideas-to-choose.md): ready
 - **OW-8AA** (Reach) [Sign off the Low, Medium and High ratings on the comparison pages](../issues/8-website/8AA-sign-off-the-comparison-ratings.md): ready
@@ -53,7 +52,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | 4 Edit journal and devices | 3 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 5 Investments | 9 | Every investment figure can be explained per purchase, and agrees with the ledger. |
 | 6 Market data | 4 | Prices arrive by themselves, from sources Lightning may redistribute. |
-| 7 Planning, import and search | 15 | Getting a month in takes minutes: any bank file, any old app, one search box. |
+| 7 Planning, import and search | 13 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 4 | The site is honest, quick and in step with the app. |
 | 9 Later | 8 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 4 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |
