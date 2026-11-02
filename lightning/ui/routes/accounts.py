@@ -645,11 +645,11 @@ async def register_update(request: Request, account_id: int, txn_id: int):
     result = await register.update(request, account_id, txn_id)
     if not isinstance(result, tuple):
         return result
-    txn, _ = result
+    txn, values = result
     c = container(request)
     c.reserves.auto_link_transaction(txn.id)
     message = f"Saved as {txn.ref}. The original transaction is kept in history." if txn.id != txn_id else f"Saved {txn.ref}."
-    message = f"{message} {register._budget_feedback(container(request), txn)}".strip()
+    message = f"{message} {register._budget_feedback(container(request), txn)} {values.get('_notice', '')}".strip()
     return redirect(f"/accounts/{account_id}", message)
 
 

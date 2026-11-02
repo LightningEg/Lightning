@@ -707,6 +707,7 @@ async def update(request: Request, account_id: int | None, txn_id: int):
         with c.db.transaction():
             c.transactions.require_revision(txn_id, values["revision"])
             existing = c.transactions.get(txn_id)
+            reserve_links = c.reserves.links_for_transaction(txn_id)  # an edit clears them; fitting ones come back (7R)
             cash_lines = [line for line in existing.lines if c.assets.get_asset(line.asset_id).is_cash]
             is_split = existing.type.value == "OUT" and len(cash_lines) > 1
             other_id, category_id, counterparty = _resolve(
@@ -718,6 +719,7 @@ async def update(request: Request, account_id: int | None, txn_id: int):
                                                    other_id, counterparty, values["notes"], owner_party["id"] if owner_party else None)
             if txn.id != txn_id:
                 c.money_from_others.sync_transaction(txn_id, values["date"], None, row_account, ZERO, "")
+            values["_notice"] = c.reserves.carry_links(reserve_links, txn.id) if reserve_links else ""
             amount = to_decimal(values["amount"], "amount")
             if other_id:
                 source, target = (other_id, row_account) if amount > ZERO else (row_account, other_id)

@@ -75,3 +75,43 @@ def test_repeated_matching_criteria_create_edit_and_clear(c):
     data.update(match_by='none')
     client.post(url, data=data)
     assert all(c.reserves.get(reserve['id'])[key] is None for key in ['account_id','category_id','counterparty_id'])
+
+
+def test_editing_a_linked_expense_keeps_its_reserve_link_while_it_fits(c):
+    """OW-7R (owner 2026-11-02): a lower amount keeps the link, shrunk to the new amount; the reserve then says so."""
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    account = c.account_flows.open_account("CIB", "BANK", "2026-09-01", "1000")
+    food = c.categories.get_by_code("EXP.PERSONAL.FOOD")
+    reserve = c.reserves.create("Groceries", "300", "PROJECT", "2026-10-01", account_id=account.id)
+    c.reserves.allocate(reserve["id"], "300")
+    expense = c.transactions.record_outflow("2026-09-10", account.id, "200", food.id)
+    c.reserves.set_expense_link(reserve["id"], expense.id, "200")
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    row = dict(date="2026-09-10", amount="-190", category="Food & Groceries", counterparty="", notes="",
+               revision=c.transactions.revision(expense.id))
+    reply = client.post(f"/accounts/{account.id}/register/{expense.id}", data=row, follow_redirects=False)
+    assert reply.status_code == 303
+    new_id = c.db.scalar("SELECT MAX(id) FROM transactions WHERE status='POSTED' AND type='OUT'")
+    links = c.reserves.links_for_transaction(new_id)
+    assert [(link["name"], link["amount"]) for link in links] == [("Groceries", 190)]
+    assert "link was removed" not in reply.headers["location"]
+
+
+def test_editing_a_linked_expense_into_money_in_drops_the_link_and_says_so(c):
+    from fastapi.testclient import TestClient
+    from urllib.parse import unquote_plus
+    from lightning.ui.web import create_app
+    account = c.account_flows.open_account("CIB", "BANK", "2026-09-01", "1000")
+    food = c.categories.get_by_code("EXP.PERSONAL.FOOD")
+    reserve = c.reserves.create("Groceries", "300", "PROJECT", "2026-10-01", account_id=account.id)
+    c.reserves.allocate(reserve["id"], "300")
+    expense = c.transactions.record_outflow("2026-09-10", account.id, "200", food.id)
+    c.reserves.set_expense_link(reserve["id"], expense.id, "200")
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    row = dict(date="2026-09-10", amount="200", category="Food & Groceries", counterparty="", notes="",
+               revision=c.transactions.revision(expense.id))
+    reply = client.post(f"/accounts/{account.id}/register/{expense.id}", data=row, follow_redirects=False)
+    assert reply.status_code == 303 and "link was removed" in unquote_plus(reply.headers["location"])
+    assert c.db.scalar("SELECT COUNT(*) FROM reserve_transaction_links l JOIN transactions t ON t.id=l.transaction_id "
+                       "WHERE t.status='POSTED'") == 0

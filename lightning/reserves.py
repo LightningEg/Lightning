@@ -391,6 +391,28 @@ class CashReserveService:
             row["amount"] = from_e6(row["amount_e6"])
         return rows
 
+    def carry_links(self, before: list[dict], transaction_id: int) -> str:
+        """After an expense was edited (the edit clears its reserve links), put back each link that still fits and say
+        which ones no longer do (7R, owner 2026-11-02). A link still fits while the transaction is a posted expense
+        and the reserve still holds enough assigned cash; its amount follows the expense if that fell. Returns a
+        sentence for the Save message, or an empty text when every link was kept."""
+        total = from_e6(int(self.db.scalar(
+            "SELECT COALESCE(SUM(ABS(le.amount_base_e6)),0) FROM ledger_entries le "
+            "JOIN financial_assets a ON a.id=le.asset_id WHERE le.transaction_id=? AND a.is_cash=1 "
+            "AND le.effect='OUTFLOW' AND le.owner_id IS NULL", (transaction_id,)) or 0))
+        dropped = []
+        for link in before:
+            amount = min(link["amount"], total)
+            try:
+                if amount <= ZERO:
+                    raise ValidationError("No expense amount.")
+                self.set_expense_link(link["reserve_id"], transaction_id, amount)
+            except ValidationError:
+                dropped.append(link["name"])
+        if not dropped:
+            return ""
+        return "It no longer fits " + ", ".join(dropped) + ", so the reserve link was removed."
+
     def complete(self, reserve_id: int):
         reserve = self.get(reserve_id)
         if reserve["kind"] == "EMERGENCY":
