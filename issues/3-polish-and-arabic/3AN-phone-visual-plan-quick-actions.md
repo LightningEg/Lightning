@@ -188,12 +188,6 @@ delete this step.
 Two tiles, Needs you naming the next bill, Latest in view (first row above 600 px at 360 × 800).
 Needs 3AN0 (1), (5); the stepper keeps its pill (owner, 2026-11-02). Mohab's Overview steps updated.
 
-## 3AN5 SMS in Add · M
-Paste SMS at the top of the Add sheet, with no account asked (From SMS already maps a card ending to an account once;
-ask only for an ending it has not seen);
-/sms gets ‹, one line of help and its Primary on the page; More drops From SMS and Needs you from Settings. Done when J2 is
-2 taps.
-
 ## 3AN6 Search for money · M
 App-bar search: live results, payments and counterparties first, then pages and actions; no "Ctrl K", no Search button.
 Extends IV-3T3's search half; close both together.

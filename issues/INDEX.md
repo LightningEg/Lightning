@@ -105,7 +105,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | building |
 | IV-3AN0 | ↳ Approve the Part C changes | | | owner | |
 | IV-3AN4 | ↳ Overview's first screen | | | M | |
-| IV-3AN5 | ↳ SMS in Add | | | M | |
 | IV-3AN6 | ↳ Search for money | | | M | |
 | IV-3AN7 | ↳ Budget in order of need | | | M | |
 | IV-3AN9 | ↳ No wall of zeros | | | S | |
