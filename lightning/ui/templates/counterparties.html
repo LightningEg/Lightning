@@ -24,6 +24,8 @@
 <section class="card data-panel">
   <div class="section-head"><div><h2>{{ "Find and correct names"|tr(locale) }}</h2><p class="muted small">{{ parties|length }} shown · {{ total_parties }} saved. Rename, add aliases, or change the suggested category.</p></div></div>
   <form method="get" action="/counterparties" class="toolbar-filters" data-counterparty-search><input type="search" name="q" value="{{ query }}" placeholder="Search names and aliases" autocomplete="off">{% if query %}<a class="btn small" href="/counterparties">{{ 'Clear'|tr(locale) }}</a>{% endif %}</form>
+  {% if cleanup_prompt %}<div class="ai-line"><p class="muted small">{{ 'Seen the same shop under two spellings? This prompt gives your AI tool your saved names and aliases, which it cannot guess. It answers with a list to paste into Add alias.'|tr(locale) }}</p>
+  {% set ai_text = cleanup_prompt %}<div class="actions">{% include "partials/ai_prompt.html" %}</div></div>{% endif %}
   {% if search_suggestions %}<p class="muted small">Did you mean {% for name, score in search_suggestions %}<a href="/counterparties?q={{ name|urlencode }}">{{ name }}</a>{% if not loop.last %} · {% endif %}{% endfor %}?</p>{% endif %}
   {% if parties %}
   {% if merge_choices|default([]) %}<datalist id="merge-parties">{% for other in merge_choices %}<option value="{{ other.name }}" data-pick="counterparty:{{ other.id }}">{% endfor %}</datalist>{% endif %}
