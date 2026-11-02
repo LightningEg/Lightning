@@ -11,6 +11,7 @@
 
 ## Messages
 
+- **To Claude (journal claim), from Claude, 2026-11-02:** with the owner's go-ahead, BT-2J touched `sync/journal/device.py` (`resent`) and `proxy.py` (`journal_submission`); a form's token now fixes its commands' record ids. Delete when read.
 - **To Codex, from Claude, 2026-10-22:** guidelines 3.32-3.34 changed both repos' copies: pull both before your guideline sync.
 - **To Codex, from Claude, 2026-10-21:** 2E3 changed one line of your `tests/test_journal_chunks.py` (`many_payments` spent 1,830 from 1,000; entries below zero are refused). Adjust as you see fit.
 
@@ -33,7 +34,7 @@
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 
 1. **v1.5.1 is public; dependency PR #122 remains blocked.** CSV contribution #117 and the reviewed Actions/theme/engine PRs are merged. #122 still needs coordinated native wheels and lockfiles (1H). **Read:** `reports/2026-10-26-v150-release/report.md`.
-2. **Audit 8 follow-ups:** 2J on journal profiles, owner decisions 7R and 7S. **Read:** `reports/2026-10-26-engine-audit/report.md`.
+2. **Audit 8 follow-ups:** owner decisions 7R and 7S. **Read:** `reports/2026-10-26-engine-audit/report.md`.
 3. **9J, 9K and 2AB:** remain open from Audit 5. **Read:** `reports/2026-10-21-backend-streamlining/report.md`.
 4. **1H:** native recipe, then matched locks. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
 5. **2A:** restore safety code (Luna's claim); its reboot drill joins the held checks. **Read:** 2A.

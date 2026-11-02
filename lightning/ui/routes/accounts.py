@@ -239,7 +239,7 @@ async def save_conversion(request: Request, account_id: int):
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = {key: value for key, value in values.items() if key not in ("return_to", "rate_checked")}
     try:
-        with c.db.transaction():
+        with register.resent_guard(c, form), c.db.transaction():
             txn = c.transactions.submitted(submission, payload)  # a resent form returns its first save
             if txn is None:
                 check_conversion_rate(c, values)
@@ -433,7 +433,7 @@ async def quick_add(request: Request):
     payload = values | {"account": account_id}
     try:
         account = c.accounts.require_usable(account_id)
-        with c.db.transaction():
+        with register.resent_guard(c, form), c.db.transaction():
             earlier = c.transactions.submitted(submission, payload)
             txn = earlier or _save_popup_transaction(c, account_id, values)
             if earlier is None:
@@ -460,7 +460,7 @@ async def save_transaction_popup(request: Request, account_id: int):
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = {key: value for key, value in values.items() if key != "return_to"} | {"account": account_id}
     try:
-        with c.db.transaction():
+        with register.resent_guard(c, form), c.db.transaction():
             earlier = c.transactions.submitted(submission, payload)  # a resent form returns its first save (2J)
             txn = earlier or _save_popup_transaction(c, account_id, values)
             if earlier is None:

@@ -8,6 +8,7 @@ Used by one account (/accounts/{id}) and by all accounts (/transactions). Only c
 from __future__ import annotations
 
 import logging
+from contextlib import nullcontext
 
 from decimal import Decimal, ROUND_HALF_UP
 from urllib.parse import urlencode
@@ -654,6 +655,12 @@ def _resolve(request: Request, row_account: int | None, values: dict, allow_miss
     return None, category.id, canonical
 
 
+def resent_guard(c, form):
+    """On a journal profile a resent form reuses its first proposal (2J); on every other profile, nothing."""
+    scope = getattr(c, "journal_submission", None)
+    return scope(form.get("submission")) if scope else nullcontext()
+
+
 async def create(request: Request, account_id: int | None):
     """Save the quick-add row; come back ready for the next one."""
     c = container(request)
@@ -664,7 +671,7 @@ async def create(request: Request, account_id: int | None):
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = entry | {"row_account": row_account}
     try:
-        with c.db.transaction():
+        with resent_guard(c, form), c.db.transaction():
             earlier = c.transactions.submitted(submission, payload)
             if earlier is not None:
                 return earlier, entry

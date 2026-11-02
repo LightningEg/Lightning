@@ -271,3 +271,26 @@ def test_lab_opens_the_apps_own_screens_and_a_pc_save_reaches_the_home(tmp_path,
     finally:
         for device in devices:
             device.store.close()
+
+
+def test_a_resent_add_form_stages_one_proposal_on_a_replica_and_saves_once_on_the_home(screens):
+    """BT-2J: the same form sent twice on a journal profile reuses its first proposal; changed values are refused."""
+    (hd, pc), (home, replica) = screens
+    wallet = next(a.id for a in pc.c.accounts.list() if a.name == "Wallet")
+    category = next(cat for cat in pc.c.categories.pickable() if cat.movement.value == "OUTFLOW")
+    token = "ab" * 16
+    form = dict(account_id=str(wallet), kind="out", amount="25", date="2026-09-02", category_id=str(category.id),
+                submission=token)
+    for _ in range(2):
+        replica.post("/accounts/quick-add", data=form)
+    assert len(pc.pending_commands()) == 1
+    changed = replica.post("/accounts/quick-add", data=form | {"amount": "99"})
+    assert changed.status_code == 422 and "already saved" in changed.text and len(pc.pending_commands()) == 1
+    pc.sync_with(hd.home)
+    spent = lambda: hd.c.db.scalar("SELECT COUNT(*) FROM transactions WHERE type='OUT' AND status='POSTED'")
+    assert spent() == 1
+    hform = form | {"submission": "cd" * 16, "account_id": str(next(a.id for a in hd.c.accounts.list() if a.name == "Wallet")),
+                    "category_id": str(next(cat for cat in hd.c.categories.pickable() if cat.movement.value == "OUTFLOW").id)}
+    answers = [home.post("/accounts/quick-add", data=hform) for _ in range(2)]
+    assert answers[0].status_code == 200 and answers[1].status_code == 422
+    assert spent() == 2

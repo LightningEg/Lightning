@@ -15,7 +15,7 @@ Two passes. First, the open engine items from Audits 1 and 4 (2I, 2J, 2L, 2M). S
 | ID | Severity | Observation and expected behavior | Follow-up |
 | --- | --- | --- | --- |
 | 2I | medium | `post()`/`repost()` accepted USD cash in an EGP account, EGP cash at a rate other than 1, and an investment posted as cash. The shared writer now checks every new line against master data inside the write. | fixed |
-| 2J | medium | Resending one add form saved two expenses. Register, all-accounts register and add popups now carry a one-time token saved in `audit_log` with the posting; a resend returns the first save, a changed resend is refused. | fixed on ordinary profiles; journal profiles remain in [2J](../../issues/2-safe-for-real-money/2J-register-submit-idempotency.md) |
+| 2J | medium | Resending one add form saved two expenses. Register, all-accounts register and add popups now carry a one-time token saved in `audit_log` with the posting; a resend returns the first save, a changed resend is refused. | fixed on ordinary profiles; journal profiles remain in 2J (done: `tests/test_journal_screens.py::test_a_resent_add_form_stages_one_proposal_on_a_replica_and_saves_once_on_the_home`) |
 | 2L | medium | A sub-cent purchase price or fee made an unpayable final instalment; early-payment principal and fee had the same gap. Now refused at entry. | fixed |
 | 2M | high | Conversion, ownership and investment edit forms lacked the revision field their routes already checked. Applied Audit 4's patch; stale saves are refused and keep the typed values. | fixed |
 | B1 | medium | After voiding a CD redemption, redeeming again crashed (HTTP 500, unique constraint). The voided redemption's row is now replaced; restoring it is refused by the holding check. | fixed |

@@ -139,6 +139,21 @@ class JournalDevice:
         self._offer(wire)
         return wire
 
+    def resent(self, record, action, args):
+        """The proposal an earlier delivery of the same form saved under this record id, or None. The same id with
+        other values means the form was changed after saving: refused (2J). Looks at the newest few only: a resend
+        comes seconds after the first."""
+        for row in self.store.db.all("SELECT wire FROM journal_outbox ORDER BY seq DESC LIMIT 60"):
+            body = unpack(bytes(row[0]))["body"]
+            if body["record"] != record:
+                continue
+            same = lambda value: json.dumps(value, sort_keys=True, default=str)
+            if body["kind"] != "command." + action or same(body["groups"]["args"]) != same(args):
+                from lightning.core.errors import ValidationError
+                raise ValidationError("This form was already saved. Open a new one to add another.")
+            return bytes(row[0])
+        return None
+
     def pending_commands(self):
         result = []
         for wire in self.store.pending():
