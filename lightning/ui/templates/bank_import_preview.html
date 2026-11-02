@@ -30,6 +30,8 @@
     <button type="button" class="chip" data-filter="dup">{{ 'Possible duplicates'|tr(locale) }} {{ counts.dup }}</button>
     <button type="button" class="chip" data-filter="ready">{{ 'Ready'|tr(locale) }} {{ counts.ready }}</button>
   </div>
+  {% if reject_prompt %}<div class="import-ai"><p class="muted small">{{ 'This prompt gives your AI tool what it cannot guess: your file’s header, what Lightning rejected on each line and the columns it accepts. It fixes the file for you instead of you hunting for the problem.'|tr(locale) }}</p>
+  {% set ai_text = reject_prompt %}<div class="actions">{% include "partials/ai_prompt.html" %}</div></div>{% endif %}
   <div class="import-bulk" id="import-bulk" hidden>
     <b class="import-bulk-count"><span data-bulk-count>0</span> {{ 'selected'|tr(locale) }}</b>
     <small class="import-bulk-hint">{{ 'Change a field in any ticked row and every ticked row takes it.'|tr(locale) }}</small>

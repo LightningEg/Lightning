@@ -202,3 +202,21 @@ def test_locked_certificate_has_a_separate_value_and_settings_use_the_same_sale_
         page = client.get(path).text
         assert "not counted until 2026-11-01" in page and "5,000" in page
     assert not c.position.at("2026-11-01").locked_holdings
+
+
+def test_a_certificate_holding_page_lists_its_interest_payouts(c, setup):
+    """BV-5K: the interest the bank paid shows in Trades and payouts, after the purchase, with the units held then."""
+    from datetime import date
+    from lightning.ui import visuals
+    accounts, cats = setup
+    certificate, _ = _buy(c, accounts, principal="5000")
+    interest, cib = cats["EXP.INVEST.INTEREST"].id, accounts["cib"].id
+    c.transactions.record_inflow("2026-10-01", cib, "100", interest, counterparty="CIB")
+    c.transactions.record_inflow("2026-11-01", cib, "100", interest, counterparty="CIB")
+    cd_id, asset_id = accounts["cd"].id, certificate.terms.asset_id
+    trades = visuals.holding_journey(c, cd_id, asset_id, date(2026, 12, 31))["trades"]
+    paid = [t for t in trades if t["kind"] == "Interest paid"]
+    assert [(t["date"], t["amount"]) for t in paid] == [("2026-11-01", Decimal("100.00")), ("2026-10-01", Decimal("100.00"))]
+    assert all(t["held"] == trades[-1]["held"] > 0 for t in paid)
+    page = TestClient(create_app(c)).get(f"/investments/holding/{asset_id}?account={cd_id}&date=2026-12-31")
+    assert page.status_code == 200 and page.text.count("Interest paid") == 2

@@ -142,7 +142,7 @@ def demo(c, monkeypatch):
 
 def test_the_demo_household_adds_up(demo):
     c, summary = demo
-    assert summary == {"accounts": 6, "from": "2026-07-01", "to": "2026-09-30"}
+    assert summary == {"accounts": 7, "from": "2026-07-01", "to": "2026-09-30"}
     position = c.position.at(date(2026, 9, 30))
     assert position.holdings_value == D("177902.50")   # the 100,000 CD is a holding (owner decision 2026-10-04)
     assert position.held_for_others == D(10000)
@@ -228,9 +228,9 @@ def test_the_welcome_button_adds_the_demo_only_once(c, monkeypatch):
     client = TestClient(create_app(c), base_url="http://127.0.0.1")
     added = client.post("/demo", follow_redirects=False)  # the route stays; the welcome page just no longer offers it
     assert added.status_code == 303 and "Sample+household+added" in added.headers["location"].replace("%20", "+")
-    assert len(c.accounts.list()) == 6
+    assert len(c.accounts.list()) == 7
     again = client.post("/demo", follow_redirects=False)
-    assert again.status_code == 303 and len(c.accounts.list()) == 6
+    assert again.status_code == 303 and len(c.accounts.list()) == 7
 
 
 def test_welcome_screen_can_set_the_profile_currency_before_the_first_account(c):
@@ -275,7 +275,7 @@ def test_the_demo_launcher_never_touches_another_database(tmp_path):
 def test_the_demo_reuses_an_investment_added_before_any_account(c, monkeypatch):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-30")
     comi = c.assets.create_investment("CIB", "STOCK", "COMI")
-    assert build_demo(c)["accounts"] == 6
+    assert build_demo(c)["accounts"] == 7
     thndr = next(a for a in c.accounts.list() if a.name == "THNDR")
     assert c.investments.holding(thndr.id, comi.id, "2026-09-30") == 150  # the same COMI, not a second one
 
@@ -456,3 +456,25 @@ def test_the_welcome_page_offers_four_sample_boxes_and_nothing_else(c):
     assert 'action="/demo"' not in page and "Just looking?" not in page and "abdelrahman" not in page
     assert "/samples/mohab-2026/" not in page  # no CSV download links
     assert "Samples fill this profile" in page or "--demo" in page
+
+
+def test_the_demo_has_a_gameya_circle_the_pot_of_which_is_already_taken(demo):
+    """BV-5I: the sample household owns an office circle he took the pot from early, so Gam'eya still to pay shows."""
+    c, _ = demo
+    circle = next(a for a in c.accounts.list() if a.name == "Office gam'eya")
+    progress = c.gameya.progress(circle.id, date(2026, 9, 30))
+    assert (progress.paid, progress.payouts, progress.balance) == (3, 1, D(-14000))
+    position = c.position.at(date(2026, 9, 30))
+    assert position.gameya_still_to_pay == D(14000)
+    assert position.net_worth == position.what_you_own - position.what_you_owe
+
+
+def test_the_phone_overview_breaks_what_you_owe_into_bills_loans_and_the_gameya(demo):
+    """BV-5I: the phone Overview's What you owe opens on its parts, the circle among them."""
+    c, _ = demo
+    from test_gameya_screens import _client
+    page = _client(c, phone=True).get("/")
+    assert page.status_code == 200
+    assert 'data-testid="gameya-owed"' in page.text
+    assert "Gam&#39;eya still to pay" in page.text or "Gam'eya still to pay" in page.text
+    assert "14,000" in page.text

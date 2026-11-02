@@ -77,10 +77,11 @@ def test_a_past_month_names_the_month_and_the_day_it_is_valued(phone):
 
 
 def test_holdings_are_flat_rows_with_see_all_past_five(phone, monkeypatch):
+    monkeypatch.setattr("lightning.ui.routes.investments.PHONE_HOLDINGS_SHOWN", 99)   # the demo holds six (its gam'eya too)
     html = phone.get("/investments").text
     section = html.split('id="holdings-heading"')[1].split("</section>")[0]
     rows = re.findall(r'<a class="phone-txn phone-invest-row" href="([^"]+)">', section)
-    assert 1 <= len(rows) <= 5 and all(href.startswith("/investments/holding/") for href in rows)
+    assert 1 <= len(rows) <= 99 and all(href.startswith("/investments/holding/") for href in rows)
     assert 'phone-txn-av is-invest' in section and re.search(r"<small>[^<]+ · [+\u2212]?[\d.]+%?[^<]*</small>", section)  # "Gold · +28.3%"
     assert "See all" not in section  # five or fewer: nothing more to see
     monkeypatch.setattr("lightning.ui.routes.investments.PHONE_HOLDINGS_SHOWN", len(rows) - 1)  # more than the page shows

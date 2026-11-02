@@ -30,7 +30,7 @@ from ..web import container, render, _shift_month as shift_month
 from ..charts import class_tone
 from ..i18n import translate
 
-ENTRY_FIELDS = ("date", "account_id", "counterparty", "counterparty_choice", "counterparty_typed", "category", "category_choice", "whom", "notes", "amount")
+ENTRY_FIELDS = ("date", "account_id", "counterparty", "counterparty_choice", "counterparty_typed", "category", "category_choice", "whom", "notes", "amount", "early_checked")
 FAR_PAST, FAR_FUTURE = "1900-01-01", "9999-12-31"
 # The phone's chips narrow the list by what a row did (?kind=): money in, money out, a move between accounts, or money
 # in or out nobody has sorted into a category yet. Without ?kind= the register is exactly what it was.
@@ -679,6 +679,24 @@ def _resolve(request: Request, row_account: int | None, values: dict, allow_miss
     return None, category.id, canonical
 
 
+def check_before_opening(c, account_id: int | None, day: str, values: dict) -> None:
+    """Ask once before saving a transaction dated before its account opened (2E, owner 2026-11-02): history from
+    before the opening is allowed on purpose, but it moves averages and can leave an earlier balance below zero.
+    The second Save, with the same date, keeps it as typed."""
+    if not account_id:
+        return
+    try:
+        opened = c.accounts.get(account_id).opening_date
+        when = fmt_date(parse_date(day, "date"))
+    except (LightningError, ValueError):
+        return  # a bad date is refused by the save itself
+    if not opened or when >= opened or values.get("early_checked") == when:
+        return
+    values["early_checked"] = when
+    raise ValidationError("{when} is before this account opened on {opened}. Check the date, then press Save again "
+                          "to keep it.".format(when=when, opened=opened), "date")
+
+
 def resent_guard(c, form):
     """On a journal profile a resent form reuses its first proposal (2J); on every other profile, nothing."""
     scope = getattr(c, "journal_submission", None)
@@ -699,6 +717,7 @@ async def create(request: Request, account_id: int | None):
             earlier = c.transactions.submitted(submission, payload)
             if earlier is not None:
                 return earlier, entry
+            check_before_opening(c, row_account, entry["date"], entry)
             other_id, category_id, counterparty = _resolve(request, row_account, entry)
             category = c.categories.get(category_id) if category_id else None
             owner_name = (_transfer_custody_owner(c, entry) if other_id else _custody_owner(c, entry, category))
@@ -730,6 +749,7 @@ async def update(request: Request, account_id: int | None, txn_id: int):
     try:
         with c.db.transaction():
             c.transactions.require_revision(txn_id, values["revision"])
+            check_before_opening(c, row_account, values["date"], values)
             existing = c.transactions.get(txn_id)
             reserve_links = c.reserves.links_for_transaction(txn_id)  # an edit clears them; fitting ones come back (7R)
             cash_lines = [line for line in existing.lines if c.assets.get_asset(line.asset_id).is_cash]
