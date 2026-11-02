@@ -53,7 +53,7 @@ Verification: test files are examples; run `pytest -q tests/<file>`.
 | FR-051 | Cash reserves | Lowers Free cash | `reserves.py` | Must | I |
 | FR-052 | Emergency fund | Default months of spending | `reserves.py` | Should | I |
 | FR-053 | Funded payday allocation | Optional | `ui/routes/payday.py` | Could | I |
-| FR-060 | Recurring bills and income | Public-holiday shift not supported (NF-7I) | `planning/` | Must | P |
+| FR-060 | Recurring bills and income | Fixed-date public holidays move like the weekend; moon-set ones do not | `planning/` | Must | P |
 | FR-061 | Loans and instalments | Schedules, not debt accounts | `planning/` | Should | I |
 | FR-062 | Cash forecast, Safe to spend | Obligations count, forecasts never | `planning/forecast.py`, `position.py` | Must | I |
 | FR-063 | Financial health ratios | — | `planning/health.py` | Should | I |

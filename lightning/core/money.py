@@ -9,7 +9,7 @@ Rules:
 from __future__ import annotations
 
 import re
-from decimal import ROUND_HALF_UP, Decimal, Inexact, InvalidOperation, localcontext
+from decimal import ROUND_FLOOR, ROUND_HALF_UP, Decimal, Inexact, InvalidOperation, localcontext
 
 from .errors import ValidationError
 
@@ -259,6 +259,24 @@ def check_places(value: Decimal, places: int, field: str = "amount") -> Decimal:
 
 def quantize(value: Decimal, places: int = 2) -> Decimal:
     return value.quantize(Decimal(1).scaleb(-places), rounding=ROUND_HALF_UP)
+
+
+def round_to_total(values: list[Decimal], total: Decimal | None = None, places: int = 0) -> list[Decimal]:
+    """Round each value to ``places`` so the rounded parts add up to the rounded total (largest remainder).
+
+    ``total`` defaults to the sum of the values. Each part moves by less than one unit of the last place."""
+    unit = Decimal(1).scaleb(-places)
+    exact = sum(values, ZERO) if total is None else total
+    target = quantize(exact, places)
+    floors = [(v / unit).to_integral_value(rounding=ROUND_FLOOR) for v in values]
+    left = int(target / unit - sum(floors, ZERO))
+    order = sorted(range(len(values)), key=lambda i: (floors[i] - values[i] / unit, i))  # biggest remainder first
+    for i in order[:max(left, 0)]:
+        floors[i] += 1
+    if left < 0:  # parts overshoot the total: take back from the smallest remainders
+        for i in order[::-1][:-left]:
+            floors[i] -= 1
+    return [f * unit for f in floors]
 
 
 def to_e6(value: Decimal) -> int:

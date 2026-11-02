@@ -10,7 +10,7 @@ from decimal import Decimal
 from urllib.parse import urlencode
 
 from lightning.core.dates import fmt_date, months_back, parse_date, parse_month
-from lightning.core.money import ZERO, fmt
+from lightning.core.money import ZERO, fmt, round_to_total
 
 from lightning.planning.domain import PlanKind
 from lightning.investments import journey
@@ -116,6 +116,10 @@ def money_sankey(c, first: date, last: date, cash_flow, sources_shown: int = 3, 
             targets.append({"label": "Invested", "value": invested, "tone": "hold"})
         if cash_flow.net - invested > 0:
             targets.append({"label": "Kept", "value": cash_flow.net - invested, "tone": "in"})
+    # Shown whole: round both columns to the same whole total so the parts add up to it (largest remainder).
+    for column in (sources, targets):
+        for row, value in zip(column, round_to_total([r["value"] for r in column])):
+            row["value"] = value
     return charts.sankey(sources, targets, "Money in", xs=xs)
 
 
