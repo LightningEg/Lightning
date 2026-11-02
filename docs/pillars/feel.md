@@ -25,7 +25,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 | **NF-10B** | [Supporter perks still waiting on the app or the owner](../../issues/10-looks-and-store/10B-supporter-perks-app-and-owner.md) | M | blocked on 10A claiming; owner decision on the beta channel |
 | **NF-10C** | [Theme materials, selling themes, owner console](../../issues/10-looks-and-store/10C-theme-materials-acceptance.md) | L | building |
 | **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](../../issues/10-looks-and-store/10D-papyrus-and-dendera-bundles.md) | M | ready |
-| **IV-10F** | [Dendera does not yet look or move like a 1,000-coin animated theme](../../issues/10-looks-and-store/10F-dendera-premium-pass.md) | L | ready |
 
 ## Reports with open follow-ups here
 
@@ -34,5 +33,4 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 - [Store and community: unlocking themes, the market, rewards and staying in Lightning](../../reports/2026-10-27-store-and-community/report.md): 10C, 10D
 - [Audit 10: the phone, tab by tab - quick actions and the answer first](../../reports/2026-10-29-phone-tab-audit/report.md): 3AL, 3T
 - [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](../../reports/2026-10-30-desktop-tab-audit/report.md): 3AM
-- [Dendera audit: why it does not feel animated, and how to make it premium](../../reports/2026-11-02-dendera-premium-audit/report.md): 10F
 <!-- work:end -->

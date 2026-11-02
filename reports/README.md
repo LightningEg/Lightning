@@ -25,7 +25,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | audit-11 | [Audit 11: the backend walked through use cases](2026-10-29-use-case-audit/report.md) | 2026-10-29 | audit | none |
 | audit-12 | [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](2026-10-30-desktop-tab-audit/report.md) | 2026-10-30 | audit | 3AM |
 | audit-13 | [Audit 13: the phone for quick jobs - convenience, taps and the look](2026-11-01-phone-convenience-audit/report.md) | 2026-11-01 | audit | 3AN |
-| dendera-premium | [Dendera audit: why it does not feel animated, and how to make it premium](2026-11-02-dendera-premium-audit/report.md) | 2026-11-02 | audit | 10F |
+| dendera-premium | [Dendera audit: why it does not feel animated, and how to make it premium](2026-11-02-dendera-premium-audit/report.md) | 2026-11-02 | audit | none |
 
 ## Create and maintain a report
 

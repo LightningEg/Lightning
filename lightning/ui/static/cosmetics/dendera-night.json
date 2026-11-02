@@ -56,7 +56,7 @@
       "surface": "raised",
       "edge": "hero",
       "finish": "satin",
-      "grain": "fibre",
+      "grain": "paper",
       "edgeStyle": "foil",
       "depth": "high",
       "artwork": "winged-disc",
@@ -76,8 +76,8 @@
       "accent": "accent"
     },
     "controls": {
-      "fill": "accent",
-      "label": "onAccent",
+      "fill": "hero",
+      "label": "background",
       "focus": "focus",
       "finish": "foil",
       "depth": "mid",
@@ -91,8 +91,8 @@
     },
     "tabs": {
       "surface": "surface",
-      "chosen": "accent",
-      "chosenLabel": "onAccent",
+      "chosen": "hero",
+      "chosenLabel": "background",
       "finish": "foil"
     },
     "fields": {

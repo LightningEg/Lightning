@@ -197,8 +197,9 @@ class ThemeBuildTests(unittest.TestCase):
         self.assertIn('--m-ground-artwork: url("data:image/svg+xml,', css)
         self.assertIn(p['hero'][1:], css.split('--m-ground-artwork: ')[1].split(';\n')[0])  # gold stars
         self.assertEqual(builder.under_artwork(p['background'], p, 'star-ceiling'),
-                         min((builder.mix(p['background'], p[k], builder.ARTWORK_ALPHA) for k in ('accent', 'hero')),
+                         min((builder.mix(p['background'], p[k], builder.artwork_alpha('star-ceiling')) for k in ('accent', 'hero')),
                              key=lambda c: builder.contrast(p['text'], c)))
+        self.assertGreater(builder.artwork_alpha('star-ceiling'), builder.ARTWORK_ALPHA)  # visible, audit 2026-11-02
         materials = (builder.STATIC / 'theme-materials.css').read_text()
         rule = materials[materials.index('html[data-m-ground-artwork="star-ceiling"]'):]
         rule = rule[:rule.index('}')]
@@ -315,6 +316,9 @@ def test_follow_night_is_kept_by_the_profile_across_launches(c):
     assert '<meta name="lightning-follow-night" content="1">' in second.get('/settings').text
     assert second.post('/settings/theme/night', data={'on': 'anything'}).status_code == 204
     assert c.settings.get('appearance_follow_night') == '0'
+    assert second.post('/settings/theme/night', data={'on': 'night'}).status_code == 204  # IV-10F7: night by choice
+    assert c.settings.get('appearance_follow_night') == 'night'
+    assert '<meta name="lightning-follow-night" content="night">' in second.get('/settings').text
 
 
 if __name__ == '__main__':

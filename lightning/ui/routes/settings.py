@@ -206,10 +206,12 @@ async def save_theme(request: Request):
 
 @router.post("/theme/night")
 async def save_theme_night(request: Request):
-    """Keep the "follow night" switch with the profile: the PC's loopback origin changes at every launch, so the
-    browser's own storage would forget it (BT-8U3)."""
+    """Keep the night choice with the profile: the PC's loopback origin changes at every launch, so the browser's own
+    storage would forget it (BT-8U3). "1" follows the computer, "night" always wears the night version (owner,
+    2026-11-02, IV-10F7), anything else is day."""
     form = await request.form()
-    container(request).settings.set("appearance_follow_night", "1" if form.get("on") == "1" else "0")
+    on = form.get("on")
+    container(request).settings.set("appearance_follow_night", on if on in ("1", "night") else "0")
     return Response(status_code=204)
 
 

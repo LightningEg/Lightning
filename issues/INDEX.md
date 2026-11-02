@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 65 open items, in the order they are worked on.
+10 milestones, 64 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -297,15 +297,5 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 | NF-10C4 | ↳ Owner steps 1-6 in order | | | owner | |
 | NF-10C5 | ↳ Review prices after 60 days of sales | | | owner | |
 | **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](10-looks-and-store/10D-papyrus-and-dendera-bundles.md) | new feature | Feel | M | ready |
-| **IV-10F** | [Dendera does not yet look or move like a 1,000-coin animated theme](10-looks-and-store/10F-dendera-premium-pass.md) | improvement, visual | Feel | L | ready |
-| IV-10F0 | ↳ Approve the look | | | owner | |
-| IV-10F1 | ↳ A signature thread people notice | | | M | |
-| IV-10F2 | ↳ A real lotus frieze | | | M | |
-| IV-10F3 | ↳ The winged disc as a lintel | | | S | |
-| IV-10F4 | ↳ Charts wear the theme | | | M | |
-| IV-10F5 | ↳ Gold leaf at night | | | M | |
-| IV-10F6 | ↳ Phone calm | | | S | |
-| IV-10F7 | ↳ Choose night, not only follow it | | | owner | |
-| IV-10F8 | ↳ Checks that see a dead motion | | | S | |
 
-Done: 10E. Next free code: 10G.
+Done: 10E, 10F. Next free code: 10G.

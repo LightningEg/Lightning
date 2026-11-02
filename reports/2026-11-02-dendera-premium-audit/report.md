@@ -76,4 +76,20 @@ of effect per unit of work:
 
 ## Dated follow-ups
 
-None yet.
+**2026-11-02, same day: the owner chose from the proposal, and 10F was built and closed.**
+
+- Approved and built: the 2 px gold-leaf thread (F5), the lotus frieze redrawn (F6), the winged disc as a lintel with
+  Lightning's watermark mark hidden under theme artwork (F7), gold leaf at night with paper grain and a visible star
+  ceiling (F9), and Day, Night or Follow this computer in Settings (F11). The night look needed no new recipe: foil is
+  now drawn from the element's own paint, and Dendera night paints its controls and chosen tab `hero`.
+- F8 not done: guideline A12 gives chart series their colours by meaning (azure for one total, class colours), and grid
+  lines already wear the theme's border through `--line`. A theme recolouring series would break A12, so the dead
+  `charts.accent` paint stays unread until the owner decides otherwise.
+- F10 (phone shadows and artwork placement): the owner did not choose it.
+- F12 fixed: `tools/theme_check.py` now checks that each declared motion paints. It also had a flaw of its own: it set
+  the theme and navigated before the save landed, so its geometry and frame results measured Lightning default. It now
+  waits for the theme to take. `tools/theme_shots.py` captures night versions.
+- Verified with `python tools/theme_check.py --themes dendera,dendera-night,papyrus`: 0 elements moved, 0 slow frames,
+  every declared motion paints. Regression tests: `tests/test_theme_build.py` (undefined colours, star ceiling strength,
+  night choice), `tests/theme-runtime-profile.test.cjs` (night by choice). The website copies of the night manifest and
+  frieze drawing are updated in its own pull request; the home page's Dendera demo images are older than this pass.

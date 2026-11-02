@@ -104,27 +104,33 @@ html[data-m-header-thread="security-thread"] :is(.topbar, .phone-appbar):not(#_)
 }
 @keyframes m-thread { from { background-position: 0 100%; } to { background-position: -150% 100%; } }
 
-/* lotus-frieze: the band temple walls and banknote borders run along their edges, painted in the theme's pigments
+/* lotus-frieze: the band temple walls and banknote borders run along their edges (an open lotus and a bud between two
+   register lines), painted in the theme's pigments
    (cosmetics/assets/dendera/lotus-frieze.svg). It sits in the bar's bottom padding, above the seam and under no text;
    still, so the page title stays the first thing read. */
 html[data-m-header-finish="lotus-frieze"] .main > .topbar {
-  background-image: var(--m-header-frieze); background-repeat: repeat-x; background-size: 16.8px 7px; background-position: 0 calc(100% - 2px);
+  background-image: var(--m-header-frieze); background-repeat: repeat-x; background-size: 27px 9px; background-position: 0 calc(100% - 2px);
 }
 html[data-m-header-finish="lotus-frieze"] .phone-appbar:not(#_) {
-  background-image: var(--m-header-frieze); background-repeat: repeat-x; background-size: 12px 5px; background-position: 0 calc(100% - 2px);
+  background-image: var(--m-header-frieze); background-repeat: repeat-x; background-size: 21px 7px; background-position: 0 calc(100% - 2px);
 }
-/* pigment-thread: the seam painted in the theme's four pigments (accent, hero, focus, warning), with one soft light
-   travelling along it every 14 s. Drawn by the bar's free ::before in the seam's own 1px: nothing moves, and only a
-   1px strip repaints. Reduced motion keeps the still pigment seam. */
+/* pigment-thread: a 2px band in the theme's four pigments (accent, hero, focus, warning) with a soft gold glow under it,
+   and gold leaf catching the light as it travels along (owner, 2026-11-02: "gold leaf 2px"). Two lights half a bar
+   apart, each crossing half the bar in 14 s, so one is always in view and the loop has no jump. Drawn by the bar's
+   free ::before over the seam (the border's 1px and 1px of padding): nothing moves, and only that strip repaints.
+   Reduced motion keeps the still band and its glow. */
 html[data-m-header-thread="pigment-thread"] :is(.main > .topbar, .phone-appbar):not(#_) { border-bottom-color: transparent; }
 html[data-m-header-thread="pigment-thread"] :is(.main > .topbar, .phone-appbar)::before {
-  content: ""; position: absolute; inset-inline: 0; bottom: -1px; height: 1px; pointer-events: none;
-  background-image: linear-gradient(90deg, transparent 0 45%, color-mix(in srgb, var(--m-pigment-hero, var(--accent)) 30%, #FFFFFF) 50%, transparent 55% 100%),
+  content: ""; position: absolute; inset-inline: 0; bottom: -1px; height: 2px; pointer-events: none;
+  background-image: linear-gradient(90deg, transparent 0 34%, var(--m-pigment-hero, var(--accent)) 44%,
+      color-mix(in srgb, var(--m-pigment-hero, var(--accent)) 35%, #FFF6D8) 50%, var(--m-pigment-hero, var(--accent)) 56%, transparent 66% 100%),
     linear-gradient(90deg, var(--accent), var(--m-pigment-hero, var(--accent)) 36%, var(--focus) 66%, var(--m-pigment-warning, var(--focus)));
-  background-size: 300% 100%, 100% 100%; background-repeat: repeat-x, no-repeat; background-position: 0 0, 0 0;
+  background-size: 50% 100%, 100% 100%; background-repeat: repeat-x, no-repeat; background-position: 0 0, 0 0;
+  box-shadow: 0 1px 6px -1px color-mix(in srgb, var(--m-pigment-hero, var(--accent)) 55%, transparent);
   animation: m-pigment 14s linear infinite;
 }
-@keyframes m-pigment { from { background-position: 0 0, 0 0; } to { background-position: -150% 0, 0 0; } }
+/* With a 50% tile, a position of 100% is exactly one tile along: the end frame equals the start. */
+@keyframes m-pigment { from { background-position: 0 0, 0 0; } to { background-position: 100% 0, 0 0; } }
 
 /* ---------- Navigation ---------- */
 html[data-m-navigation-finish="satin"] :is(.side, .phone-tabbar) {
@@ -196,6 +202,11 @@ html[data-m-hero-depth="mid"] { --m-hero-depth: var(--m-depth-mid); }
 html[data-m-hero-depth="high"] { --m-hero-depth: var(--m-depth-high); }
 html[data-m-hero-artwork]:not([data-m-hero-artwork="none"]) { --m-hero-art: var(--m-hero-artwork) left -50px bottom -80px / 230px 230px no-repeat; }
 [dir="rtl"][data-m-hero-artwork]:not([data-m-hero-artwork="none"]) { --m-hero-art: var(--m-hero-artwork) right -50px bottom -80px / 230px 230px no-repeat; }
+/* The winged sun disc sits where Dendera carves it, over the doorway: centred across the card's top edge, like a lintel
+   (owner, 2026-11-02). Symmetric, so Arabic needs no mirror. */
+html[data-m-hero-artwork="winged-disc"]:not(#_) { --m-hero-art: var(--m-hero-artwork) center top -26px / 280px 112px no-repeat; }
+/* A theme's own hero artwork replaces Lightning's watermark mark, so the card carries one drawing, not two. */
+html[data-m-hero-artwork]:not([data-m-hero-artwork="none"]) .main .lead-card::after { content: none; }
 html[data-m-hero-finish] .main :is(.overview-owned-card, .hero-card, .portfolio-summary, .metric-card--focal, .lead-card):not(#_):not(#_) {
   background: var(--m-hero-art), var(--m-hero-grain), var(--m-hero-finish), var(--theme-hero) !important;
   box-shadow: var(--m-card-edge), var(--m-hero-depth) !important;
@@ -232,6 +243,14 @@ html[data-m-hero-sheen="edge-glint"][data-m-hero-edge-style="foil"] .main .lead-
 /* The phone's lead figure sits on the ground (Part C): it takes no artwork of its own; the ground's sits behind. */
 
 /* ---------- Primary controls ---------- */
+/* Foil is the metal of the element's own paint: the button's fill, the chosen tab's colour (Dendera night paints both
+   in its gold, so they read as gold leaf). Declared on the element itself so each var() resolves there. */
+html[data-m-controls-finish="foil"] :is(.btn.primary, .phone-add-disc) { --m-foil-from: var(--action); }
+html[data-m-tabs-finish="foil"] :is(.period-button.selected, .main .plan-tab[aria-current="page"], .phone-chip.is-chosen, .phone-invest-seg a.is-chosen) { --m-foil-from: var(--theme-tab-chosen); }
+html[data-m-controls-finish="foil"] :is(.btn.primary, .phone-add-disc), html[data-m-tabs-finish="foil"] :is(.period-button.selected, .main .plan-tab[aria-current="page"], .phone-chip.is-chosen, .phone-invest-seg a.is-chosen) {
+  --m-foil: linear-gradient(120deg, color-mix(in srgb, var(--m-foil-from) 72%, #FFFFFF) 0%, var(--m-foil-from) 30%,
+    color-mix(in srgb, var(--m-foil-from) 78%, #000000) 55%, color-mix(in srgb, var(--m-foil-from) 82%, #FFFFFF) 80%, var(--m-foil-from) 100%);
+}
 html[data-m-controls-finish="satin"] :is(.btn.primary, .phone-add-disc) {
   background-image: linear-gradient(180deg, color-mix(in srgb, #FFFFFF 14%, transparent), transparent 70%);
 }

@@ -63,7 +63,7 @@ def under_artwork(surface, p, name):
     p-<key> part), the one that leaves text the least contrast."""
     if name == "none":
         return surface
-    marks = [mix(surface, p[key], ARTWORK_ALPHA) for key in ["accent", *drawing_keys(name)]]
+    marks = [mix(surface, p[key], artwork_alpha(name)) for key in ["accent", *drawing_keys(name)]]
     return min(marks, key=lambda colour: contrast(p["text"], colour))
 
 HELD = "#7FB2FF"  # Azure held (guideline A03) as themes wear it on their own surfaces: its hue never moves
@@ -238,6 +238,12 @@ FRIEZES = {name for name in _CONTRACT["slots"]["header"]["material"]["finish"] i
 STRENGTH = {"whisper": 2, "subtle": 4, "rich": 6}
 FRIEZE_ALPHA = 70  # a frieze is a painted border: the pigments, softened a little so the title leads
 ARTWORK_ALPHA = 12  # artwork is a watermark: fine accent lines at 12%, like the guilloché behind a banknote's text
+# Drawings that sit clear of every reading may show more: the night star ceiling is masked away from the page title
+# (PC) and kept to the foot (phone), and at 12% its small stars vanished (audit 2026-11-02).
+ARTWORK_STRENGTH = {"star-ceiling": 22}
+
+def artwork_alpha(name):
+    return ARTWORK_STRENGTH.get(name, ARTWORK_ALPHA)
 
 def material_values(parts, contract, scheme):
     p, limits = parts["palette"], contract["limits"]
@@ -255,9 +261,9 @@ def material_values(parts, contract, scheme):
     if ground["texture"] != "none":
         values["m-ground-texture"] = ", ".join(TEXTURES[ground["texture"]](p["text"], STRENGTH[ground["textureStrength"]]))
     if ground["artwork"] != "none":
-        values["m-ground-artwork"] = drawing(ground["artwork"], p, ARTWORK_ALPHA / 100)
+        values["m-ground-artwork"] = drawing(ground["artwork"], p, artwork_alpha(ground["artwork"]) / 100)
     if parts["hero"]["artwork"] != "none":
-        values["m-hero-artwork"] = drawing(parts["hero"]["artwork"], p, ARTWORK_ALPHA / 100)
+        values["m-hero-artwork"] = drawing(parts["hero"]["artwork"], p, artwork_alpha(parts["hero"]["artwork"]) / 100)
     if parts["header"]["finish"] in FRIEZES:  # a frieze in the header's bottom padding, under no text
         values["m-header-frieze"] = drawing(parts["header"]["finish"], p, FRIEZE_ALPHA / 100)
     return values
