@@ -831,6 +831,26 @@ class ReportingService:
         category_ids = [category.id for category in found if category]   # a profile without them has nothing filed there
         return self.q.statement_unsorted_txn_ids(account_id, self._day(date_from), self._day(date_to), category_ids)
 
+    def unsorted_in_order(self, account_id: int | None, date_from: date | str, date_to: date | str) -> list[int]:
+        """The rows nobody has sorted (``register_unsorted``) as transaction ids, newest first: the queue the
+        phone's *To sort* walks, one row after another."""
+        ids = self.register_unsorted(account_id, date_from, date_to)
+        return self.q.newest_first(ids)
+
+    def newest_first(self, txn_ids) -> list[int]:
+        """Transaction ids in register order, newest first."""
+        return self.q.newest_first(txn_ids)
+
+    def rows_for_transactions(self, txn_ids: list[int]) -> list[StatementRow]:
+        """The register rows of some transactions (a search's few newest hits), newest first, reading only the days
+        they span, not every day there is."""
+        days = self.q.transaction_days(txn_ids)
+        if not days:
+            return []
+        wanted = set(days)
+        rows = self._rows(self.q.statement_lines(None, min(days.values()), max(days.values())), None)
+        return list(reversed([row for row in rows if row.txn_id in wanted]))
+
     def register(self, account_id: int | None, date_from: date | str, date_to: date | str,
                  txn_ids: set[int] | None = None) -> list[StatementRow]:
         """Rows for the register view, newest first.

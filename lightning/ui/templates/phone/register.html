@@ -19,7 +19,7 @@
 {% if account %}
 {% set kind = account.account_type.value %}{% set cashy = account.active and kind in ('CASH','BANK') %}
 {% if kind == 'DEPOSIT' %}<a class="btn" href="/deposits/{{ account.id }}">{{ "View CDs"|tr(locale) }}</a>{% elif kind == 'GAMEYA' %}<a class="btn" href="/gameya/{{ account.id }}">{{ "Open gam’eya"|tr(locale) }}</a>{% elif cashy %}<details class="action-menu money-actions"><summary class="btn">{{ "Money actions"|tr(locale) }}</summary><div><a href="/accounts/{{ account.id }}/convert">{{ "Convert currency"|tr(locale) }}</a><a data-popup-open href="/accounts/{{ account.id }}/ownership/new">{{ "Change ownership"|tr(locale) }}</a><a href="/plan/purchases/new" data-popup-open>{{ 'Bought in instalments'|tr(locale) }}</a></div></details>{% elif kind == 'BROKERAGE' %}<a class="btn" href="/accounts/{{ account.id }}/import">{{ "Import a statement"|tr(locale) }}</a>{% endif %}
-<details class="action-menu phone-more-menu"><summary aria-label="More actions">⋯</summary><div><a href="/activity">{{ 'Review activity'|tr(locale) }}</a>{% if cashy %}<a href="/accounts/{{ account.id }}/import">{{ "Import a statement"|tr(locale) }}</a>{% endif %}{% if account.active and kind == 'BROKERAGE' %}<a data-popup-open href="/accounts/{{ account.id }}/ownership/new">{{ "Change ownership"|tr(locale) }}</a>{% endif %}{% if kind in ('CASH','BANK','BROKERAGE','GAMEYA') %}<a href="/accounts/{{ account.id }}/reconcile">{{ "Adjust balance"|tr(locale) }}</a>{% elif kind == 'DEPOSIT' %}<a href="/deposits/{{ account.id }}">{{ "Update value"|tr(locale) }}</a>{% endif %}<a data-popup-open href="/accounts/{{ account.id }}/edit">{{ 'Edit account'|tr(locale) }}</a><a href="/transactions/deleted">{{ "Deleted transactions"|tr(locale) }}</a>{% if account.active %}<form method="post" action="/accounts/{{ account.id }}/deactivate"{% if depends and depends.count %} data-confirm-delete="{{ deactivate_warning(depends) }}"{% endif %}><button class="danger-text">{{ "Deactivate"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% else %}<form method="post" action="/accounts/{{ account.id }}/reactivate"><button>{{ "Reactivate"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}</div></details>
+<details class="action-menu phone-more-menu"><summary aria-label="More actions">⋯</summary><div><a href="#phone-views" data-open-sheet>{{ 'Views'|tr(locale) }}{% if active_view %}: {{ active_view.name }}{% endif %}</a>{% if val_count and not chosen_kind %}<a href="{{ val_toggle_url }}">{{ ('Hide value updates'|tr(locale)) if show_val else ('Show value updates ({n})'|tr(locale, n=val_count)) }}</a>{% endif %}<a href="/activity">{{ 'Review activity'|tr(locale) }}</a>{% if cashy %}<a href="/accounts/{{ account.id }}/import">{{ "Import a statement"|tr(locale) }}</a>{% endif %}{% if account.active and kind == 'BROKERAGE' %}<a data-popup-open href="/accounts/{{ account.id }}/ownership/new">{{ "Change ownership"|tr(locale) }}</a>{% endif %}{% if kind in ('CASH','BANK','BROKERAGE','GAMEYA') %}<a href="/accounts/{{ account.id }}/reconcile">{{ "Adjust balance"|tr(locale) }}</a>{% elif kind == 'DEPOSIT' %}<a href="/deposits/{{ account.id }}">{{ "Update value"|tr(locale) }}</a>{% endif %}<a data-popup-open href="/accounts/{{ account.id }}/edit">{{ 'Edit account'|tr(locale) }}</a><a href="/transactions/deleted">{{ "Deleted transactions"|tr(locale) }}</a>{% if account.active %}<form method="post" action="/accounts/{{ account.id }}/deactivate"{% if depends and depends.count %} data-confirm-delete="{{ deactivate_warning(depends) }}"{% endif %}><button class="danger-text">{{ "Deactivate"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% else %}<form method="post" action="/accounts/{{ account.id }}/reactivate"><button>{{ "Reactivate"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}</div></details>
 {% endif %}
 {% endblock %}
 {% block content %}
@@ -67,24 +67,21 @@
   <div class="phone-reg-bar-end">
     {% if selecting %}<a class="phone-chip" id="phone-merge-selected" hidden href="/transactions/merge">{{ 'Merge selected'|tr(locale) }}</a>
     <a class="phone-chip is-chosen" href="{{ base_url }}{{ '?' ~ keep_qs if keep_qs }}">{{ "Done"|tr(locale) }}</a>{% else %}<a class="phone-chip" href="{{ base_url }}?{{ keep_qs ~ '&' if keep_qs }}select=1">{{ "Select"|tr(locale) }}</a>{% endif %}
-    {% if not account and not selecting %}<details class="action-menu phone-more-menu"><summary aria-label="More actions">⋯</summary><div><a href="/activity">{{ 'Review activity'|tr(locale) }}</a><a href="/transactions/deleted">{{ "Deleted transactions"|tr(locale) }}</a></div></details>{% endif %}
+    {% if not account and not selecting %}<details class="action-menu phone-more-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}">⋯</summary><div><a href="#phone-views" data-open-sheet>{{ 'Views'|tr(locale) }}{% if active_view %}: {{ active_view.name }}{% endif %}</a>{% if val_count and not chosen_kind %}<a href="{{ val_toggle_url }}">{{ ('Hide value updates'|tr(locale)) if show_val else ('Show value updates ({n})'|tr(locale, n=val_count)) }}</a>{% endif %}<a href="/activity">{{ 'Review activity'|tr(locale) }}</a><a href="/transactions/deleted">{{ "Deleted transactions"|tr(locale) }}</a></div></details>{% endif %}
   </div>
 </div>
 {% if reg.period == 'custom' %}<p class="phone-note phone-reg-dates">{{ date_from }} {{ 'to'|tr(locale) }} {{ date_to }}</p>{% endif %}
 
-{# This period: the money that came in and went out, by the one cash-flow rule (the rows' own when a search, tag or category narrows them). #}
-{% if reg.tiles %}<section class="phone-kpis phone-reg-kpis" aria-label="{{ 'This period'|tr(locale) }}">
-  <div class="phone-kpi"><span class="phone-kpi-label">{{ fig.money_in.label }}</span><span class="phone-kpi-value{{ ' is-in' if reg.money_in }}{{ ' is-long' if reg.money_in|amount_role('total', True)|length > 8 }}">{{ reg.money_in|amount_role('total', reg.money_in != 0) }}</span></div>
-  <div class="phone-kpi"><span class="phone-kpi-label">{{ fig.money_out.label }}</span><span class="phone-kpi-value{{ ' is-long' if reg.money_out|amount_role('total', True)|length > 8 }}">{{ reg.money_out|amount_role('total', reg.money_out != 0) }}</span></div>
-</section>{% endif %}
+{# This period (D2, C08.3): the money in and out of what is shown, one quiet line, by the one cash-flow rule (the rows' own when
+   a search, tag or category narrows them). The sign sits left of the figure in both languages. #}
+{% if reg.tiles %}<p class="phone-money-line" aria-label="{{ 'This period'|tr(locale) }}"><span>{{ 'In'|tr(locale) }} <b class="{{ 'is-in' if reg.money_in }}"><bdi class="fig">{{ reg.money_in|amount_role('total', reg.money_in != 0) }}</bdi></b></span><span class="phone-money-sep" aria-hidden="true">·</span><span>{{ 'Out'|tr(locale) }} <b><bdi class="fig">{{ reg.money_out|amount_role('total', reg.money_out != 0) }}</bdi></b></span></p>{% endif %}
 
 {% if filter_category %}<div class="phone-reg-filter"><p class="phone-note">Category: {{ filter_category.split(' › ')[-1] }}</p><a class="phone-quiet" href="{{ reg.clear_category }}">{{ 'Clear'|tr(locale) }}</a></div>{% endif %}
 {% if filter_tag %}<div class="phone-reg-filter"><p class="phone-note">Tagged #{{ filter_tag }} · {{ total_rows }} transaction{{ 's' if total_rows != 1 }}</p><a class="phone-quiet" href="/tags/{{ filter_tag|urlencode }}">{{ 'Totals for #{tag}'|tr(locale, tag=filter_tag) }}</a><a class="phone-quiet" href="{{ reg.clear_tag }}">{{ 'Clear'|tr(locale) }}</a></div>{% endif %}
 
-{# Quiet: the saved views and the value updates. #}
-<div class="phone-reg-quiet">
-  <details class="phone-period-sheet phone-reg-views">
-    <summary class="phone-period-now">{{ 'Views'|tr(locale) }}{% if active_view %}: {{ active_view.name }}{% endif %}</summary>
+{# Views: a sheet that the ⋯ menu opens (3AN12); value updates are a link in the same menu. #}
+<details class="phone-period-sheet phone-reg-views" id="phone-views">
+    <summary class="phone-period-now" aria-label="{{ 'Views'|tr(locale) }}"></summary>
     <div class="phone-period-panel" role="dialog" aria-label="{{ 'Saved register views'|tr(locale) }}">
       <span class="phone-grabber" aria-hidden="true"></span>
       <h2 class="phone-sheet-title">{{ 'Views'|tr(locale) }}</h2>
@@ -93,12 +90,10 @@
       {% if active_view %}<div class="phone-reg-view-actions"><a class="btn" href="/transactions/views/{{ active_view.id }}/report?account_id={{ view_account_id }}">{{ 'Summary and export'|tr(locale) }}</a><form method="post" action="/transactions/views/{{ active_view.id }}/delete"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><input type="hidden" name="account_id" value="{{ view_account_id }}"><button class="btn danger">{{ 'Delete view'|tr(locale) }}</button></form></div>{% endif %}
     </div>
   </details>
-  {% if val_count and not chosen_kind %}<a class="phone-quiet" href="{{ val_toggle_url }}">{{ ('Hide value updates'|tr(locale)) if show_val else ('Show value updates ({n})'|tr(locale, n=val_count)) }}</a>{% endif %}
-</div>
 
 <section class="phone-list phone-reg-list" aria-label="{{ 'Transactions'|tr(locale) }}">
 {% from "phone/partials/txn.html" import txn_list with context %}
-{% if rows %}{{ txn_list(rows, show_account, not show_account, selecting, picked, base_url, keep_qs, reserve_suggestions=reserve_suggestions, day_net=True) }}{% else %}<p class="empty">{{ 'Nothing matches.' if q or month or chosen_kind or preset or date_from or filter_tag or filter_category else 'No transactions yet.' }}</p>{% endif %}
+{% if rows %}{{ txn_list(rows, show_account, not show_account, selecting, picked, base_url, keep_qs, reserve_suggestions=reserve_suggestions, day_net=True, sort_qs=reg.sort_qs) }}{% else %}<p class="empty">{{ 'Nothing matches.' if q or month or chosen_kind or preset or date_from or filter_tag or filter_category else 'No transactions yet.' }}</p>{% endif %}
 </section>
 {% if selecting %}{# C08.5: the bar replaces the tab bar with the count, Change category and Delete. #}
 {% from "partials/macros.html" import category_options %}

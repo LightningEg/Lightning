@@ -269,6 +269,23 @@ class SmsImportService:
                 result[str(ending)] = int(account_id)
         return result
 
+    def account_for(self, ending: str) -> int | None:
+        """The account a card or account ending was told to be (once, by the person), if it is still usable."""
+        account_id = self.endings().get(ending)
+        if account_id is None:
+            return None
+        usable = {a.id for a in self.accounts.list(active_only=True) if a.currency == "EGP"}
+        return account_id if account_id in usable else None
+
+    def mark_seen(self, text_fingerprint: str) -> None:
+        """A message entered by hand on the Add sheet is read: the phone's inbox must not offer it again."""
+        if not re.fullmatch(r"[0-9a-f]{32}", text_fingerprint or ""):
+            return
+        seen = self._json(SEEN_KEY, [])
+        if text_fingerprint not in seen:
+            with self.db.transaction():
+                self.settings.set(SEEN_KEY, json.dumps((seen + [text_fingerprint])[-MAX_SEEN:]))
+
     def waiting(self) -> list[dict]:
         """Messages read whose account is not known yet, grouped by ending: [{"ending", "count", "total"}]."""
         groups: dict[str, dict] = {}

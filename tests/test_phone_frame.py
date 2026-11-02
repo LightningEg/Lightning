@@ -107,11 +107,13 @@ def test_accounts_add_button_asks_which_account(phone):
     assert "To which account?" in pick and "/accounts/1/transaction/new" in pick
 
 
-def test_add_opens_the_last_used_accounts_sheet_with_change_account(phone):
-    """Phone roadmap M2: after an entry, Add goes straight to that account's sheet, amount first; Change account
-    brings the list back. Without a remembered account the list shows."""
+def test_add_opens_on_the_amount_with_an_account_already_chosen(phone):
+    """3AN3 (C05.2): no list of accounts first. Without a remembered account Add opens on the one used most; after an entry
+    it opens on that account; the sheet's From chip changes it. ?pick=1 still shows the list."""
     phone.cookies.delete("lightning_last_account")
-    assert "To which account?" in phone.get("/accounts/add-transaction").text
+    first = phone.get("/accounts/add-transaction").text
+    assert "To which account?" not in first and 'name="amount"' in first and "autofocus" in first
+    assert 'data-account-chip' in first and "data-sms-paste" in first
     sheet = phone.get("/accounts/2/transaction/new").text
     category = re.search(r'<option value="(\d+)" data-movement="OUTFLOW"', sheet).group(1)
     phone.post("/accounts/2/transaction/new", data={
@@ -119,8 +121,7 @@ def test_add_opens_the_last_used_accounts_sheet_with_change_account(phone):
         "counterparty": "Kiosk two", "date": "2026-10-06", "return_to": "/accounts/2"})
     quick = phone.get("/accounts/add-transaction").text
     assert "To which account?" not in quick and 'action="/accounts/2/transaction/new"' in quick
-    assert 'href="/accounts/add-transaction?pick=1"' in quick and "autofocus" in quick
-    assert "data-sms-paste" in quick
+    assert "To which account?" in phone.get("/accounts/add-transaction?pick=1").text
 
 
 def test_paste_bank_sms_reads_one_message_into_the_sheet(phone):

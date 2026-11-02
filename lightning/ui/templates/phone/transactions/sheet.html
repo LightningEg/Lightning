@@ -1,0 +1,55 @@
+{# A transaction's own sheet on a phone (guideline C09.7; 3AD2, 3AN3): look first, edit second. The arrow chip, the name,
+   the amount in whole EGP, the date and account, then Category with the plan left, and the note. Change category and
+   Split are at the foot; Edit opens the form. A row nobody has sorted leads with the usual categories as chips, and in the
+   To sort list one tap files it and opens the next one (J5 in three taps). Figures come from the route's services. #}
+{% extends "base.html" %}
+{% from "phone/partials/txn.html" import arrow with context %}
+{% block title %}{{ who or label }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="{{ return_to }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Transactions'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}{% endblock %}
+{% block content %}
+{% set back_q = '?return_to=' ~ return_to|urlencode %}
+{% set sort_q = ('&' ~ sort_query) if sort_query else '' %}
+{% set hidden_fields %}<input type="hidden" name="return_to" value="{{ return_to }}">{% for key, value in sort.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">{% endset %}
+<section class="app-popup-content phone-txn-sheet">
+  <header class="phone-txn-head">
+    {{ arrow(kind) }}
+    <div class="phone-txn-head-text">
+      <h2 data-popup-title class="phone-sheet-title">{{ who if who else ('Transfer' if kind == 'move' else label)|tr(locale) }}</h2>
+      <p class="phone-note">{{ txn.date|day_label(locale) }} · {% if target %}{{ account.name }} → {{ target.name }}{% else %}{{ account.name }}{% endif %}</p>
+    </div>
+  </header>
+  <p class="phone-txn-sheet-amount{{ ' is-in' if kind == 'in' }}"><bdi class="fig">{% if kind == 'move' %}{{ amount|amount_role('row') }}{% else %}{{ ((amount if kind == 'in' else -amount))|amount_role('row', True) }}{% endif %}</bdi> <small>{{ currency }}</small></p>
+  {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
+
+  {% if chips %}
+  <section class="phone-sheet-section" aria-labelledby="sheet-cat-title">
+    <h3 id="sheet-cat-title" class="phone-sheet-sub">{{ ('Which category?' if unsorted else 'Change category')|tr(locale) }}</h3>
+    <div class="phone-cat-chips is-lead" role="group" aria-label="{{ 'Usual categories'|tr(locale) }}">
+      {% for chip in chips %}<form method="post" action="/transactions/{{ txn.id }}/category" {% if sort %}data-popup-return="popup"{% else %}data-phone-toast{% endif %}>{{ hidden_fields }}<input type="hidden" name="category_id" value="{{ chip.id }}"><button type="submit" class="phone-chip{{ ' is-chosen' if category and category.id == chip.id }}">{{ chip.label }}</button></form>{% endfor %}
+    </div>
+    <form method="post" action="/transactions/{{ txn.id }}/category" class="phone-form phone-cat-other" data-auto-submit {% if sort %}data-popup-return="popup"{% else %}data-phone-toast{% endif %}>{{ hidden_fields }}
+      <div class="field"><label for="sheet-other-category">{{ 'Another category'|tr(locale) }}</label>
+        <select id="sheet-other-category" name="category_id" data-own-picker><option value="">{{ 'Choose a category'|tr(locale) }}</option>
+          {% from "partials/macros.html" import category_options %}{{ category_options(category_groups(other)) }}
+        </select></div>
+    </form>
+  </section>
+  {% endif %}
+
+  {% if not chips or txn.notes %}
+  <dl class="phone-facts">
+    {% if not chips %}<div><dt>{{ 'Category'|tr(locale) }}</dt><dd>{% if kind == 'move' %}{{ 'Transfer'|tr(locale) }}{% elif category %}{{ category.name }}{% else %}{{ 'Split'|tr(locale) }}{% endif %}</dd></div>
+    {% if plan %}<div><dt>{{ 'Plan left'|tr(locale) }}</dt><dd>{% if plan.over %}<span class="is-over">{{ 'Over by {amt} · limit {limit}'|tr(locale, amt=(-plan.left)|amount_role('total'), limit=plan.limit|amount_role('total')) }}</span>{% else %}{{ '{left} of {limit}'|tr(locale, left=plan.left|amount_role('total'), limit=plan.limit|amount_role('total')) }}{% endif %}</dd></div>{% endif %}{% endif %}
+    {% if txn.notes %}<div><dt>{{ 'Note'|tr(locale) }}</dt><dd dir="auto">{{ txn.notes }}</dd></div>{% endif %}
+  </dl>
+  {% endif %}
+
+  <div class="phone-sheet-actions">
+    {% if not chips %}<a class="btn" data-popup-open href="/transactions/{{ txn.id }}/sheet{{ back_q }}{{ sort_q }}&change=1">{{ 'Change category'|tr(locale) }}</a>{% endif %}
+    {% if split %}<a class="btn" href="/transactions/{{ txn.id }}">{{ 'Split'|tr(locale) }}</a>{% endif %}
+    {% if skip %}<a class="btn" data-popup-open href="/transactions/{{ skip }}/sheet{{ back_q }}{{ sort_q }}">{{ 'Skip'|tr(locale) }}</a>{% endif %}
+  </div>
+  <a class="btn {{ 'primary ' if not chips }}phone-save" data-popup-open href="/transactions/{{ txn.id }}/edit-popup{{ back_q }}">{{ 'Edit'|tr(locale) }}</a>
+</section>
+{% endblock %}

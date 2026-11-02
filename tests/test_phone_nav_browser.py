@@ -76,7 +76,7 @@ def test_tabs_links_and_the_month_stepper_swap_the_page_and_keep_working(phone):
     rows = page.locator(".phone-txn[data-txn]").count()
     assert rows and page.locator(".phone-txn[data-hold-ready]").count() == rows  # press and hold is set up on them
     page.locator(".phone-txn[data-popup-open]").first.click()
-    page.wait_for_selector("#app-popup[open] #app-popup-content form")
+    page.wait_for_selector("#app-popup[open] #app-popup-content .phone-txn-sheet")  # a row opens its sheet to look at first (3AD2)
     page.go_back()
     page.wait_for_function("() => !document.querySelector('#app-popup[open]') && location.pathname === '/transactions'")
 

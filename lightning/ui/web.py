@@ -186,14 +186,20 @@ def _day_label(date_text, locale: str = "en") -> str:
 templates.env.filters["day_label"] = _day_label
 
 
-def _day_nets(rows) -> dict[str, Decimal]:
+def _day_nets(rows, show_account: bool = False) -> dict[str, Decimal]:
     """Each day's net on a phone list (phone overhaul 2026-10-22): money in less money out, in the base currency.
-    Transfers, investment rows and value updates move nothing in or out, so they are left out."""
+    Transfers, investment rows and value updates move nothing in or out, so they are left out. A day's net is shown only
+    for a day with two or more rows (3AN12): one row already says it. show_account: the all-accounts list shows a
+    transfer once, so its second leg is not a row."""
     nets: dict[str, Decimal] = {}
+    counts: dict[str, int] = {}
     for r in rows:
+        if show_account and getattr(r, "type", "") == "TRF" and r.amount > 0:
+            continue
+        counts[r.date] = counts.get(r.date, 0) + 1
         if getattr(r, "type", "") in ("IN", "OUT"):
             nets[r.date] = nets.get(r.date, ZERO) + (r.amount_base or r.amount)
-    return nets
+    return {day: net for day, net in nets.items() if counts.get(day, 0) >= 2}
 
 
 def _group_value_updates(rows) -> list:

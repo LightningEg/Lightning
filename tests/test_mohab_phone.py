@@ -51,7 +51,7 @@ DETOURS = {
 # Sections without a tab-bar slot (phone overhaul 2026-10-22): their taps go through More.
 MOVED = {"Accounts", "Cash planning", "Investments", "Financial health", "Health", "Spending", "Currencies", "Settings"}
 # The phone's Choose period sheet (phone overhaul 2026-10-22) names the PC's period buttons in words.
-BUTTONS = {"Custom": "Apply", "YTD": "Year to date", "Monthly": "This month"}
+BUTTONS = {"Custom": "Apply", "YTD": "Year to date", "Monthly": "This month", "Search": None}  # the phone's Search is live: no button, Enter sends it (3AN6)
 
 
 def _phone(app):
@@ -107,7 +107,7 @@ class PhoneBrowser(screens.Browser):
             if button not in BUTTONS:
                 raise
         self.detours[f"button {button}"] += 1
-        return super().submit(values, BUTTONS[button], *args, **kwargs)
+        return super().submit(values, BUTTONS[button] or None, *args, **kwargs)
 
 
 class PhoneMohab(Mohab):
@@ -187,7 +187,7 @@ def test_several_rows_get_one_category_together(mohab):
 
 
 def test_a_tag_gathers_its_rows_with_their_totals(mohab):
-    assert mohab.answers["eid_tag"].shows("Tagged #eid", "Money in", "Money out")
+    assert mohab.answers["eid_tag"].shows("Tagged #eid", "In +1,000 · Out −3,000")   # the period's money in and out, one quiet line (D2)
 
 
 def test_needs_you_and_get_set_up_say_what_a_tap_does(mohab):

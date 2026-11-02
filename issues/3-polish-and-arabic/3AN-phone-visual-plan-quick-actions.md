@@ -184,11 +184,6 @@ form (C09.7); (4) app-bar Search looks for money first (C03.2); (5) Needs you na
 (C04.4). D1 and D2 (2026-10-29) ride with them. Next: write the five lines into Part C in both repos (AGENTS §1), then
 delete this step.
 
-## 3AN3 The Add sheet and the transaction sheet · L
-Built with NF-3AD1 and NF-3AD2, which own the flow; this step owns the look: no card inside the sheet, Save pinned above
-the keyboard, category chips (usual first, from the services), whole EGP, Saved · Undo toast, To sort chains to the next
-row. Done when J1 is 3 taps and J5's sort is 3 in `flows.py`.
-
 ## 3AN4 Overview's first screen · M
 Two tiles, Needs you naming the next bill, Latest in view (first row above 600 px at 360 × 800).
 Needs 3AN0 (1), (5); the stepper keeps its pill (owner, 2026-11-02). Mohab's Overview steps updated.
@@ -207,10 +202,6 @@ Extends IV-3T3's search half; close both together.
 Over plan and ahead of pace first, then by usual spending; 64 px rows with the meter inside; "N more on track ›"; the
 day-one line. With the category sheet (from IV-3AL2, folded here). Done when J4's row is in the first screen on the sample.
 
-## 3AN8 Moves read as moves · S
-A buy, sell or move between your own accounts shows with no sign on azure or Track (C08.2), so rows, Money in/out and the
-day's net agree on screen. Test with the sample's money-market buy.
-
 ## 3AN9 No wall of zeros · S
 On an empty month: Transactions, a Budget category and Spending offer "Last month" with its figure; Investments hides the
 chart card until it has two months; Spending's title is "Spending" and it opens on this month like every tab.
@@ -227,8 +218,7 @@ Mohab and `tools/phone_check.py` at 360 and 320, then ask the owner for one end-
 Folded from IV-3AL (Audit 10, [report](../../reports/2026-10-29-phone-tab-audit/report.md)); D1 sheets, D2 one-line money
 strip, D3 flat (built). Overview: Your position as flat rows that open their pages; This period's figures as rows that
 open a sheet (D1), never a fold inside a fold. Budget: a category row opens a sheet with its limit field, Cover it and See
-transactions (with 3AN7); bulk undo, the raise offer and first limits take the strip's place one at a time. Transactions:
-Money in and out as one line (D2); Views and value updates move into ⋯; a day's net only on a day with two or more rows.
+transactions (with 3AN7); bulk undo, the raise offer and first limits take the strip's place one at a time.
 Cash planning: forecast, months ahead and What is promised as rows that open sheets (D1). Recurring: the list first, the
 fixed-costs ratio a link to Financial health, no ".00" on rows. Reserves: the app bar names Financial health; no card in a
 card. Accounts: Accounts tab first (the section registry is shared with the PC: ask first). Investments keeps the owner's

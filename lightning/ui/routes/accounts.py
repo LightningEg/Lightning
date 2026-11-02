@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import replace
 from decimal import Decimal
 
@@ -263,18 +264,27 @@ def _account_id(text: str, field: str) -> int:
 LAST_ACCOUNT_COOKIE = "lightning_last_account"  # the account the last entry went to (phone roadmap M2)
 
 
+def _entry_accounts(c) -> list:
+    """The accounts a hand-entered transaction can go to: every active one that holds money, not a thing you own."""
+    return [a for a in c.accounts.list(active_only=True) if a.account_type.value not in ("PHYSICAL_ASSET", "OTHER_ASSET")]
+
+
 @router.get("/add-transaction")
 async def pick_account_for_entry(request: Request):
-    """The phone's add button on Accounts: choose the account, then its entry sheet (guideline C05.2)."""
+    """The phone's Add button (guideline C05.2): the sheet opens on the amount with an account already chosen, the one
+    used last, else the one this person uses most (3AN3). No list of accounts first; the sheet's From chip changes it.
+    ?pick=1 still shows the list."""
     c = container(request)
-    accounts = [a for a in c.accounts.list(active_only=True)
-                if a.account_type.value not in ("PHYSICAL_ASSET", "OTHER_ASSET")]
-    # Amount first (phone roadmap M2): Add opens the entry sheet of the account used last, with Change account on
-    # it; ?pick=1, or no account remembered yet, shows the list.
-    remembered = str(request.cookies.get(LAST_ACCOUNT_COOKIE, ""))
-    if not request.query_params.get("pick") and remembered.isdigit() \
-            and any(a.id == int(remembered) for a in accounts):
-        return await new_transaction_popup(request, int(remembered))
+    accounts = _entry_accounts(c)
+    if not request.query_params.get("pick") and accounts:
+        remembered = str(request.cookies.get(LAST_ACCOUNT_COOKIE, ""))
+        ids = [a.id for a in accounts]
+        if remembered.isdigit() and int(remembered) in ids:
+            chosen = int(remembered)
+        else:
+            cashy = [a.id for a in accounts if a.account_type.value in ("CASH", "BANK") and not a.parent_id]
+            chosen = c.transactions.usual_account(cashy or ids)
+        return await new_transaction_popup(request, chosen)
     return render(request, "phone/accounts/pick.html", accounts=accounts)
 
 
@@ -332,10 +342,24 @@ async def update_other_asset_value(request: Request, account_id: int):
     return redirect(f"/accounts/{account_id}", "Dated estimated value saved.")
 
 
+def _capture_context(c, account) -> dict:
+    """What the phone's Add sheet shows besides the fields (3AN3): the accounts its From chip can change to, and the
+    usual categories for money out and money in as chips, most used first (computed from this person's history in
+    TransactionService.usual_capture_categories; never in the template)."""
+    def named(group):
+        names = [c.categories.get(category_id).name for category_id in group]
+        return [{"id": category_id, "label": c.categories.get(category_id).name if names.count(name) == 1
+                 else c.categories.display_name(category_id)} for category_id, name in zip(group, names)]
+    return {"entry_accounts": [{"id": a.id, "name": a.name} for a in _entry_accounts(c)],
+            "chips_out": named(c.transactions.usual_capture_categories("out")),
+            "chips_in": named(c.transactions.usual_capture_categories("in"))}
+
+
 def _transaction_popup_context(request, account, values, action, error=None, txn_id=None, split_categories=None):
     c = container(request)
     counterparties = c.counterparties.list_active()
-    return dict(account=account, values=values, action=action, txn_id=txn_id, hide_global_error=True,
+    capture = _capture_context(c, account) if txn_id is None and getattr(request.state, "phone", False) else {}
+    return dict(**capture, account=account, values=values, action=action, txn_id=txn_id, hide_global_error=True,
                 title="Edit transaction" if txn_id else "Add transaction",
                 revision=values.get("revision", c.transactions.revision(txn_id)) if txn_id else "",
                 accounts=c.accounts.list(active_only=True),
@@ -364,9 +388,18 @@ def _safe_return(value, fallback):
 @router.get("/{account_id:int}/transaction/new")
 async def new_transaction_popup(request: Request, account_id: int):
     account = container(request).accounts.get(account_id)
-    values = {"kind": "out", "date": fmt_date(today()), "amount": "", "category_id": _category_id(request),
-              "counterparty": "", "owner_id": "", "to_account_id": "",
-              "notes": "", "return_to": _safe_return(request.query_params.get("return_to"), f"/accounts/{account_id}")}
+    asked = request.query_params
+    kind = str(asked.get("kind", ""))
+    amount = str(asked.get("amount", "")).strip()[:20]
+    day = str(asked.get("date", ""))
+    values = {"kind": kind if kind in ("out", "in", "transfer") else "out",
+              "date": day if re.fullmatch(r"\d{4}-\d{2}-\d{2}", day) else fmt_date(today()),
+              "amount": amount if re.fullmatch(r"[\d,.]*", amount) else "",
+              "category_id": _category_id(request), "counterparty": str(asked.get("counterparty", ""))[:80],
+              "owner_id": "", "to_account_id": "", "notes": str(asked.get("notes", ""))[:200],
+              "sms_fp": str(asked.get("sms_fp", "")) if re.fullmatch(r"[0-9a-f]{32}", str(asked.get("sms_fp", ""))) else "",
+              "sms_ending": str(asked.get("sms_ending", "")) if re.fullmatch(r"\d{4}|salary", str(asked.get("sms_ending", ""))) else "",
+              "return_to": _safe_return(asked.get("return_to"), f"/accounts/{account_id}")}
     return render(request, "transactions/form_popup.html",
                   **_transaction_popup_context(request, account, values, f"/accounts/{account_id}/transaction/new"))
 
@@ -451,6 +484,19 @@ async def quick_add(request: Request):
     return response
 
 
+def _remember_sms(c, form, account_id: int) -> None:
+    """A sheet filled from a pasted bank SMS (3AN5): when its card ending was not known, the account the person saved it
+    to is the answer, remembered once; the message is marked read so the phone's inbox does not offer it again."""
+    ending, fingerprint = str(form.get("sms_ending", "")), str(form.get("sms_fp", ""))
+    if ending:
+        try:
+            c.sms_imports.assign(ending, account_id)
+        except LightningError:
+            pass  # not an EGP account: the entry is saved all the same; the ending is asked again next time
+    if fingerprint:
+        c.sms_imports.mark_seen(fingerprint)
+
+
 @router.post("/{account_id:int}/transaction/new")
 async def save_transaction_popup(request: Request, account_id: int):
     c = container(request)
@@ -470,6 +516,7 @@ async def save_transaction_popup(request: Request, account_id: int):
         if earlier is not None:
             return redirect(values["return_to"], f"Saved {txn.ref}.")
         matched_reserve = c.reserves.auto_link_transaction(txn.id)
+        _remember_sms(c, form, account_id)
         feedback = register._budget_feedback(c, txn)
         if matched_reserve < 0:
             feedback = (feedback + " Several reserves match; choose beside the transaction in its account list.").strip()
