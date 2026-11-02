@@ -1,6 +1,6 @@
 # Data Model (as built)
 
-Verified against the migrations in `lightning/database/migrations/` (68 files, `0001`–`0068`), not only code.
+Verified against the migrations in `lightning/database/migrations/` (69 files, `0001`–`0069`), not only code.
 Tables referenced here are those created by `CREATE TABLE` in those scripts (63 found). Column-level detail for
 the core tables below was read from `0001_initial.sql`; later migrations extend some (for example `0013` adds the
 `REVALUATION` effect), so treat the migration files as the final word.
@@ -74,7 +74,7 @@ Detailed per-column definitions for these: read the named migration. Decision D-
 
 ## 5. Integrity and validation
 
-**Database triggers** (`0056_checked_history.sql`): once an account is checked against the bank through a date, `checked_ledger_insert` / `checked_ledger_update` abort any ledger change on or before that date ("This month was checked against the bank. Unlock it first.").
+**Database triggers** (`0056_checked_history.sql`): once an account is checked against the bank through a date, `checked_ledger_insert` / `checked_ledger_update` abort any ledger change on or before that date ("This month was checked against the bank. Unlock it first. [LN-E0001]"). Migration `0069_checked_month_code.sql` recreated the five triggers with that code; `database/connection.py` matches the code, not the sentence.
 
 `TransactionService` re-checks each line inside the write: cash exactly when the asset is cash; cash only in an account of its currency; profile-currency cash at rate 1; foreign cash needs a saved rate on or before its date; manual entries may not take a wallet or bank below zero; `validate_posting` balances internal lines (base amounts net to zero). `integrity.py` and `transactions/history_check.py` replay history to find breaks.
 

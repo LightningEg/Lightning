@@ -13,6 +13,11 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
+# Migration 0069: the triggers that refuse a change inside a month checked against the bank put this code at the end
+# of their message; the database layer matches the code, so rewording the sentence cannot break the match (IT-9K).
+CHECKED_MONTH_CODE = "LN-E0001"
+CHECKED_MONTH_MESSAGE = f"This month was checked against the bank. Unlock it first. [{CHECKED_MONTH_CODE}]"
+
 
 class Database:
     def __init__(self, path: str | Path, *, key: bytes | None = None,
@@ -133,9 +138,9 @@ class Database:
                     conn.execute(f"ROLLBACK TO {savepoint}")
                     conn.execute(f"RELEASE {savepoint}")
 
-            if isinstance(error, self.IntegrityError) and "This month was checked against the bank" in str(error):
+            if isinstance(error, self.IntegrityError) and f"[{CHECKED_MONTH_CODE}]" in str(error):
                 from lightning.core.errors import ValidationError
-                raise ValidationError("This month was checked against the bank. Unlock it first.") from error
+                raise ValidationError(CHECKED_MONTH_MESSAGE) from error
             raise
         else:
             self._local.depth = depth
