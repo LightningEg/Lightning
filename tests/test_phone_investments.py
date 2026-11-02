@@ -73,7 +73,7 @@ def test_the_other_ranges_read_in_words(phone, period, when):
 def test_a_past_month_names_the_month_and_the_day_it_is_valued(phone):
     month, last_day = _months_ago(1)
     html = phone.get("/investments", params={"period": "month", "month": month}).text
-    assert re.search(r'class="phone-hero-line">(Up|Down) [\d,]+ in ' + month + r' \(', html) and f"As of {last_day}" in html
+    assert re.search(r'class="phone-hero-line">(Up|Down) [\d,]+ in (?:<span class="nowrap">)?' + month + r'(?:</span>)? \(', html) and f"As of {last_day}" in html
 
 
 def test_holdings_are_flat_rows_with_see_all_past_five(phone, monkeypatch):

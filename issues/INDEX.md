@@ -106,7 +106,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | M | |
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | building |
 | IV-3AN0 | ↳ Approve the Part C changes | | | owner | |
-| IV-3AN1 | ↳ Small faults first | | | S | |
 | IV-3AN2 | ↳ One navigation | | | S | |
 | IV-3AN3 | ↳ The Add sheet and the transaction sheet | | | L | |
 | IV-3AN4 | ↳ Overview's first screen | | | M | |

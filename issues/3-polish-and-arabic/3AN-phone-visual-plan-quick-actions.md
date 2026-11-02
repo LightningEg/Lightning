@@ -184,11 +184,6 @@ form (C09.7); (4) app-bar Search looks for money first (C03.2); (5) Needs you na
 (C04.4). D1 and D2 (2026-10-29) ride with them. Next: write the five lines into Part C in both repos (AGENTS §1), then
 delete this step.
 
-## 3AN1 Small faults first · S
-Needs you names what is inside (a match is "1 to match", not "1 bill"); the entry sheet's balance sentence is removed or
-fully translated; a date never breaks across lines (no-break inside dates); the amount placeholder is "0". Test each in
-`tests/test_phone_frame.py`.
-
 ## 3AN2 One navigation · S
 Remove the ⌄ page menu from the phone's app bar (`phone/base.html`); the title is plain text. Check that every page it
 reached is on More or behind ‹. Test: no `.phone-page-menu` in phone pages.
