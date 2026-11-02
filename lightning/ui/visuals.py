@@ -232,7 +232,7 @@ def holding_journey(c, account_id: int, asset_id: int, end: date, months: int = 
                                            "values": j["drawdown"]}]),
         "returns": charts.diverging([{"label": k, "value": v} for k, v in j["returns"]]),
         "best": j["best"], "worst": j["worst"], "typical": j["typical"], "max_drawdown": j["max_drawdown"],
-        "up": j["up"], "down": j["down"], "spark": charts.sparkline(value[-6:]), "trades": j["trades"],
+        "up": j["up"], "down": j["down"], "flat": j["flat"], "spark": charts.sparkline(value[-6:]), "trades": j["trades"],
     }
 
 

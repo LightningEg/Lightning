@@ -30,7 +30,7 @@
     {{ waterfall(breakdown) }}</section>
 </div></section>
 
-<header class="overview-section-head inv-head"><h2>{{ "How bumpy has it been?"|tr(locale) }}</h2><span>{{ "Month-to-month price moves"|tr(locale) }}</span></header>
+{% if not j.flat %}<header class="overview-section-head inv-head"><h2>{{ "How bumpy has it been?"|tr(locale) }}</h2><span>{{ "Month-to-month price moves"|tr(locale) }}</span></header>
 <section class="card wide-card"><div class="overview-split">
   <section><div class="overview-block-head"><div><h3>{{ "Monthly price change"|tr(locale) }}</h3></div></div>
     {{ diverging(j.returns, 'Monthly price change', 'pct', 'growth') if j.returns else '' }}
@@ -42,7 +42,7 @@
     </div></section>
   <section><div class="overview-block-head"><div><h3>{{ 'Fall from its high'|tr(locale) }}</h3><p>How far the price sat below its highest month-end{% if j.max_drawdown is not none %} · worst {{ '%.1f'|format(j.max_drawdown)|replace('-', '−') }}%{% endif %}</p></div></div>
     {{ trend(j.drawdown, 'Percent below its highest month-end price', 'Plan', 190) if j.drawdown else '' }}</section>
-</div></section>
+</div></section>{% endif %}
 
 <header class="overview-section-head inv-head"><h2>{{ "The journey"|tr(locale) }}</h2><span>{{ "What you put in and what it is worth"|tr(locale) }}</span></header>
 <section class="card wide-card"><div class="overview-split">

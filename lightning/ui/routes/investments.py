@@ -572,7 +572,7 @@ async def holding_detail(request: Request, asset_id: int):
                   display_return=h.display_return,
                   start=start,period_realized=h.realized-(previous.realized if previous else ZERO),
                   period_dividends=h.dividends-(previous.dividends if previous else ZERO),
-                  allocation_classes=_allocation_classes(c),
+                  allocation_classes=sorted({*_allocation_classes(c), bucket}, key=str.casefold),  # its own bucket is always a choice (5K)
                   show_popup=request.headers.get("X-Lightning-Popup")=="1")
 
 
