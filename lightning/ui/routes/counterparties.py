@@ -4,6 +4,7 @@ from fastapi import APIRouter, Request
 
 from lightning.core.errors import LightningError, ValidationError
 from lightning.counterparties import MAX_ALIASES_PER_COUNTERPARTY
+from lightning.workflows.ai_prompts import counterparty_cleanup_prompt
 
 from ..web import container, redirect, render
 
@@ -29,7 +30,8 @@ async def list_counterparties(request: Request):
                   category_labels={item.id: c.categories.display_name(item.id) for item in categories},
                   aliases_by_id={party["id"]: aliases[party["id"]] for party in parties},
                   alias_limit=MAX_ALIASES_PER_COUNTERPARTY, usual=c.transactions.usual_categories(),
-                  merge_choices=[party for party in all_parties if party["active"]])
+                  merge_choices=[party for party in all_parties if party["active"]],
+                  cleanup_prompt=counterparty_cleanup_prompt(all_parties, known) if sum(1 for p in all_parties if p["active"]) > 1 else "")
 
 
 @router.post("")

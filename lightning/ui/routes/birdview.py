@@ -13,6 +13,7 @@ from fastapi import APIRouter, Request, Response
 from lightning.core.dates import fmt_date, month_of, parse_month, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.money import ZERO, fmt, to_decimal
+from lightning.workflows.ai_prompts import spending_prompt
 
 from ..web import container, redirect, render
 from ..periods import Period, parse_period
@@ -160,7 +161,9 @@ async def expense_analysis(request: Request):
                   category_filter=category_filter, category_code=category_code, category_name=category_name, error=error,
                   spending_total=spending_total, prior_spending=prior_spending,
                   trend_truncated=trend_truncated, trend_chart=trend_chart,
-                  base=c.reporting.base_currency)
+                  base=c.reporting.base_currency,
+                  spending_ai_prompt=spending_prompt(fmt_date(first), fmt_date(last), [r["name"] for r in analysis["rows"]],
+                                                     c.reporting.base_currency) if analysis["rows"] else "")
 
 
 @router.post("/settings")

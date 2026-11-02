@@ -30,7 +30,7 @@ from ..web import container, render, _shift_month as shift_month
 from ..charts import class_tone
 from ..i18n import translate
 
-ENTRY_FIELDS = ("date", "account_id", "counterparty", "counterparty_choice", "counterparty_typed", "category", "category_choice", "whom", "notes", "amount")
+ENTRY_FIELDS = ("date", "account_id", "counterparty", "counterparty_choice", "counterparty_typed", "category", "category_choice", "whom", "notes", "amount", "early_checked")
 FAR_PAST, FAR_FUTURE = "1900-01-01", "9999-12-31"
 # The phone's chips narrow the list by what a row did (?kind=): money in, money out, a move between accounts, or money
 # in or out nobody has sorted into a category yet. Without ?kind= the register is exactly what it was.
@@ -314,15 +314,9 @@ def _phone_register(c, account_id, base_url, keep, kind, month, preset, from_que
     }
 
 
-def page(request: Request, account_id: int | None, entry: dict | None = None, edit_values: dict | None = None,
-         error: str = "", error_field: str = "", status_code: int = 200,
-         edit_id: int | None = None, edit_acct: int | None = None,
-         investment_entry: dict | None = None, investment_error_field: str = ""):
-
-    """Render the register for one account, or all accounts when account_id is None."""
-    c = container(request)
-    qp = request.query_params
-    account = c.accounts.get(account_id) if account_id else None
+def _period_filters(c, qp, account_id, phone: bool, error: str):
+    """The register's search text, month, date range and saved view from the query string, with the first
+    problem found: (q, month, preset, from_query, to_query, date_from, date_to, active_view, error)."""
     q, month = qp.get("q", "").strip(), qp.get("month", "").strip()
     date_from, date_to = FAR_PAST, FAR_FUTURE
     from_query, to_query = qp.get("date_from", "").strip(), qp.get("date_to", "").strip()
@@ -339,7 +333,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
     # for the month. All time stays a choice (preset=all_time); a search, tag or category still looks across every
     # year; an account's own page stays its statement, every row with its balance after.
     narrowed = month or preset or from_query or to_query or active_view or q or qp.get("tag") or qp.get("category_id")
-    if getattr(request.state, "phone", False) and account_id is None and not narrowed:
+    if phone and account_id is None and not narrowed:
         month = fmt_date(today())[:7]
     if preset == "custom" and not (from_query and to_query):
         # Let the user choose the range after selecting the custom option.
@@ -372,9 +366,69 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
             from_query, to_query, preset = date_from, date_to, ""
         except ValidationError as exc:
             error, month = error or exc.message, ""
+    return q, month, preset, from_query, to_query, date_from, date_to, active_view, error
+
+
+def _category_filter(c, category_id: int) -> tuple[str, set]:
+    """A category's display name and the ids of every transaction in it or in a category below it."""
+    category = c.categories.get(category_id)
+    children = {}
+    for item in c.categories.tree(Movement.OUTFLOW):
+        if item.parent_id:
+            children.setdefault(item.parent_id, []).append(item.id)
+    category_ids, pending = {category.id}, [category.id]
+    while pending:
+        for child in children.get(pending.pop(), []):
+            if child not in category_ids:
+                category_ids.add(child)
+                pending.append(child)
+    return c.categories.display_name(category.id), c.reporting.category_transaction_ids(category_ids)
+
+
+def _account_holdings(c, account):
+    """What an account page shows of its holdings and value, its broker pockets added in (owner 2026-10-16):
+    (holdings, account_value, owned_value, held_value, asset_breakdown)."""
+    day = today()
+    holdings = c.investments.portfolio(fmt_date(day), account.id).open
+    account_value = c.reporting.account_value(account.id, day)
+    account_owned_value = c.reporting.owned_account_value(account.id, day)
+    breakdown = []
+    if account.account_type == AccountType.BROKERAGE:
+        breakdown = c.reporting.account_asset_class_breakdown(account.id, day)
+    for pocket in c.accounts.pockets(account.id):
+        holdings = list(holdings) + list(c.investments.portfolio(fmt_date(day), pocket.id).open)
+        account_value += c.reporting.account_value(pocket.id, day)
+        account_owned_value += c.reporting.owned_account_value(pocket.id, day)
+    return holdings, account_value, account_owned_value, account_value - account_owned_value, breakdown
+
+
+def _edit_original(c, row, txn_id: int, custody_owners) -> dict:
+    """The register row being edited, as the form's own values (what a changed field is compared with)."""
+    return {
+        "date": row.date, "account_id": str(row.account_id), "notes": row.notes,
+        "counterparty": row.other_account_label if row.type == DocType.TRF else (row.counterparty or ""),
+        "category": c.categories.get(row.category_id).name if row.category_id else "",
+        "category_choice": str(row.category_id) if row.category_id else "",
+        "amount": str(row.amount),
+        "whom": custody_owners.get(row.txn_id, ""),
+        "revision": c.transactions.revision(txn_id),
+    }
+
+
+def page(request: Request, account_id: int | None, entry: dict | None = None, edit_values: dict | None = None,
+         error: str = "", error_field: str = "", status_code: int = 200,
+         edit_id: int | None = None, edit_acct: int | None = None,
+         investment_entry: dict | None = None, investment_error_field: str = ""):
+
+    """Render the register for one account, or all accounts when account_id is None."""
+    c = container(request)
+    qp = request.query_params
+    account = c.accounts.get(account_id) if account_id else None
+    phone = bool(getattr(request.state, "phone", False))
+    q, month, preset, from_query, to_query, date_from, date_to, active_view, error = _period_filters(
+        c, qp, account_id, phone, error)
     # A tag (#eid, from a note's link or typed in the search) matches exactly: never #eid2026.
     filter_tag = normal_tag(active_view["tag"] if active_view else qp.get("tag", "")) or (normal_tag(q) if q.startswith("#") and " " not in q else "")
-    phone = bool(getattr(request.state, "phone", False))
     kind = qp.get("kind", "").strip()
     kind = kind if kind in REGISTER_KINDS else ""
     matched_ids = c.transactions.search_ids(q) if q and q.casefold() != ("#" + filter_tag).casefold() else None
@@ -384,19 +438,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
     raw_category_id = active_view["category_id"] if active_view else qp.get("category_id", "")
     filter_category = ""
     if str(raw_category_id).isdigit():
-        category = c.categories.get(int(raw_category_id))
-        filter_category = c.categories.display_name(category.id)
-        tree = c.categories.tree(Movement.OUTFLOW)
-        children = {}
-        for item in tree:
-            if item.parent_id:
-                children.setdefault(item.parent_id, []).append(item.id)
-        category_ids, pending = {category.id}, [category.id]
-        while pending:
-            for child in children.get(pending.pop(), []):
-                if child not in category_ids:
-                    category_ids.add(child); pending.append(child)
-        category_txns = c.reporting.category_transaction_ids(category_ids)
+        filter_category, category_txns = _category_filter(c, int(raw_category_id))
         matched_ids = category_txns if matched_ids is None else matched_ids & category_txns
     page_size = 50
     show_val = qp.get("val") == "1"
@@ -436,33 +478,15 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
     if edit_id:
         row = next((r for r in rows if r.txn_id == edit_id and r.account_id == edit_acct), None)
         if row is not None:
-            edit_original = {
-                "date": row.date, "account_id": str(row.account_id), "notes": row.notes,
-                "counterparty": row.other_account_label if row.type == DocType.TRF else (row.counterparty or ""),
-                "category": c.categories.get(row.category_id).name if row.category_id else "",
-                "category_choice": str(row.category_id) if row.category_id else "",
-                "amount": str(row.amount),
-                "whom": custody_owners.get(row.txn_id, ""),
-                "revision": c.transactions.revision(edit_id),
-            }
+            edit_original = _edit_original(c, row, edit_id, custody_owners)
             if edit_values is None:
                 edit_values = dict(edit_original)
     holdings, account_value, account_owned_value, account_held_value = [], None, None, None
     held_total = None if account else c.reporting.money_from_others_total(today())  # the one Held for others figure
     account_asset_breakdown = []
     if account:
-        holdings = c.investments.portfolio(fmt_date(today()), account.id).open
-        account_value = c.reporting.account_value(account.id, today())
-        account_owned_value = c.reporting.owned_account_value(account.id, today())
-        account_held_value = account_value - account_owned_value
-        if account.account_type == AccountType.BROKERAGE:
-            account_asset_breakdown = c.reporting.account_asset_class_breakdown(account.id, today())
-        # One row per broker: its currency pockets add to the page's total and holdings (owner 2026-10-16).
-        for pocket in c.accounts.pockets(account.id):
-            holdings = list(holdings) + list(c.investments.portfolio(fmt_date(today()), pocket.id).open)
-            account_value += c.reporting.account_value(pocket.id, today())
-            account_owned_value += c.reporting.owned_account_value(pocket.id, today())
-        account_held_value = account_value - account_owned_value
+        holdings, account_value, account_owned_value, account_held_value, account_asset_breakdown = (
+            _account_holdings(c, account))
     can_invest = bool(account and account.account_type in INVESTMENT_ACCOUNT_TYPES)
     trade_choices = _trade_choices(c, account, holdings)
     investment_entry = investment_entry or {"date": fmt_date(today()), "instrument_key": "", "units": "",
@@ -655,6 +679,24 @@ def _resolve(request: Request, row_account: int | None, values: dict, allow_miss
     return None, category.id, canonical
 
 
+def check_before_opening(c, account_id: int | None, day: str, values: dict) -> None:
+    """Ask once before saving a transaction dated before its account opened (2E, owner 2026-11-02): history from
+    before the opening is allowed on purpose, but it moves averages and can leave an earlier balance below zero.
+    The second Save, with the same date, keeps it as typed."""
+    if not account_id:
+        return
+    try:
+        opened = c.accounts.get(account_id).opening_date
+        when = fmt_date(parse_date(day, "date"))
+    except (LightningError, ValueError):
+        return  # a bad date is refused by the save itself
+    if not opened or when >= opened or values.get("early_checked") == when:
+        return
+    values["early_checked"] = when
+    raise ValidationError("{when} is before this account opened on {opened}. Check the date, then press Save again "
+                          "to keep it.".format(when=when, opened=opened), "date")
+
+
 def resent_guard(c, form):
     """On a journal profile a resent form reuses its first proposal (2J); on every other profile, nothing."""
     scope = getattr(c, "journal_submission", None)
@@ -675,6 +717,7 @@ async def create(request: Request, account_id: int | None):
             earlier = c.transactions.submitted(submission, payload)
             if earlier is not None:
                 return earlier, entry
+            check_before_opening(c, row_account, entry["date"], entry)
             other_id, category_id, counterparty = _resolve(request, row_account, entry)
             category = c.categories.get(category_id) if category_id else None
             owner_name = (_transfer_custody_owner(c, entry) if other_id else _custody_owner(c, entry, category))
@@ -706,6 +749,7 @@ async def update(request: Request, account_id: int | None, txn_id: int):
     try:
         with c.db.transaction():
             c.transactions.require_revision(txn_id, values["revision"])
+            check_before_opening(c, row_account, values["date"], values)
             existing = c.transactions.get(txn_id)
             reserve_links = c.reserves.links_for_transaction(txn_id)  # an edit clears them; fitting ones come back (7R)
             cash_lines = [line for line in existing.lines if c.assets.get_asset(line.asset_id).is_cash]

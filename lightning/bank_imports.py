@@ -168,6 +168,15 @@ class BankImportService:
             "  WHERE r.batch_id=b.id AND r.status='POSTED' AND t.source='IMPORT' AND t.status='POSTED') AS live"
             " FROM bank_import_batches b JOIN accounts a ON a.id=b.account_id ORDER BY b.id DESC LIMIT ?", (limit,))]
 
+    def has_posted_import(self, account_id: int) -> bool:
+        """True once a statement into this account has been posted: later imports are not the first one."""
+        return bool(self.db.one("SELECT 1 FROM bank_import_batches WHERE account_id=? AND status='POSTED' LIMIT 1", (account_id,)))
+
+    def source_header(self, batch_id: int) -> list[str]:
+        """The statement's own column names, as the file had them (names only, never a row's values)."""
+        row = self.db.one("SELECT raw_json FROM bank_import_rows WHERE batch_id=? ORDER BY row_number LIMIT 1", (batch_id,))
+        return [key for key in json.loads(row["raw_json"])["raw"] if key != "__line__"] if row else []
+
     def created_transactions(self, batch_id: int) -> list[int]:
         """The entries a statement created (not the ones it only linked to), still in the books: what undo removes."""
         return [int(r["transaction_id"]) for r in self.db.all(

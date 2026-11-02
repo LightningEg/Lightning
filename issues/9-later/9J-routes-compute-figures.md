@@ -14,8 +14,8 @@ Found by [Audit 5](../../reports/2026-10-21-backend-streamlining/report.md) §4.
 
 Done (2026-10-22): the Overview's eight unread figures are gone; Budget reads its averages, background estimates and tracking suggestions from `BudgetService`; Investments weighs holdings against `Position.holdings_value`; the investment entry is `workflows/investment_entry.record`; the Other asset value comes from `AccountService.manual_value`. Left:
 
-- **Investments `_page_extras`** still sums each class's lifetime gain from `Holding.owned_result`; no service has that figure. The investment report's `value` (738,486 on Mohab, 2026-10-02) is 14,000 below the Holdings value the page and Position show (752,486): the gap is the Office gam'eya, which the report counts at −14,000 (an early-turn circle) and Position leaves out; settle that in [5I](../5-investments/5I-gameya-and-zakat-follow-ups.md) before the page reads the report.
-- **`register.page`** has a radon complexity of 119.
+- **Investments `_page_extras`** still sums each class's lifetime gain from `Holding.owned_result`; no service has that figure. The investment report's `value` (738,486 on Mohab, 2026-10-02) is 14,000 below the Holdings value the page and Position show (752,486): the gap is the Office gam'eya, which the report counts at −14,000 (an early-turn circle) and Position leaves out; settle that in 5I (decided 2026-11-02: the owed circle stays below zero, labelled and linked; `tests/test_demo_and_visuals.py::test_an_owed_circle_is_labelled_and_linked_to_what_you_owe_in_the_sidebar`) before the page reads the report.
+- **`register.page`**: split on 2026-11-02 into `_period_filters`, `_category_filter`, `_account_holdings` and `_edit_original` (no behaviour change; radon was not installed to re-measure the 119).
 - **`ui/routes/accounts.py:251`** saves an Other asset value through `c.reporting.other_asset_values`, a repository; move it to `AccountService`.
 
 ## Fix

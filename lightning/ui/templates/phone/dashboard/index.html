@@ -55,7 +55,8 @@
         <div class="phone-rows is-inner">{% for account in cash_accounts if account.value %}<a class="phone-row" href="/accounts/{{ account.id }}"><span>{{ account.label }}</span><b>{{ account.value|money }}</b></a>{% endfor %}</div></details>
       {% if pos.holdings_value %}<a class="phone-row" href="/investments"><span>{{ fig.holdings_value.label }}</span><b>{{ pos.holdings_value|money }}</b></a>{% endif %}
       {% if pos.other_you_own %}<div class="phone-row"><span>{{ fig.other_you_own.label }}</span><b>{{ pos.other_you_own|money }}</b></div>{% endif %}
-      {% if owes %}<a class="phone-row" href="/plan/loans"><span>{{ fig.what_you_owe.label }}</span><b>−{{ pos.what_you_owe|money }}</b></a>{% endif %}
+      {% if owes %}<details class="phone-row-more"><summary class="phone-row"><span>{{ fig.what_you_owe.label }} <span class="phone-chevron" aria-hidden="true">›</span></span><b>−{{ pos.what_you_owe|money }}</b></summary>
+        <div class="phone-rows is-inner">{% if owe.other_bills_due > 0 %}<a class="phone-row" href="/plan"><span>{{ "Bills due, loans apart"|tr(locale) }}</span><b>{{ owe.other_bills_due|money }}</b></a>{% endif %}{% if owe.loans_still_to_pay > 0 %}<a class="phone-row" href="/plan/loans"><span>{{ fig.loans_still_to_pay.label }}</span><b>{{ owe.loans_still_to_pay|money }}</b></a>{% endif %}{% if pos.gameya_still_to_pay > 0 %}<div class="phone-row" data-testid="gameya-owed"><span>{{ fig.gameya_still_to_pay.label }}</span><b>{{ pos.gameya_still_to_pay|money }}</b></div>{% endif %}</div></details>{% endif %}
     </div>
   </article>
   {% if owe and owe.bills_due_items %}<article class="card phone-card phone-flat-rows">
@@ -76,14 +77,14 @@
     <div class="phone-fold-body">
     {{ donut(wealth_donut, fig.what_you_own.label, base) }}
     </div></details>
-  <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ fig.if_you_sold_today.label }} <span class="phone-chevron" aria-hidden="true">›</span><small>{{ "After selling your investments"|tr(locale) }}</small></span><b>{{ pos.if_you_sold_today|money if pos.if_you_sold_today is not none else 'Unavailable' }}</b></summary>
+  <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ fig.if_you_sold_today.label }} <span class="phone-chevron" aria-hidden="true">›</span><small>{{ "After selling your investments"|tr(locale) }}</small></span><b>{{ pos.sale_parts.total|money if pos.sale_parts else 'Unavailable' }}</b></summary>
     <div class="phone-fold-body">
     <div class="phone-rows">
-      <div class="phone-row"><span>{{ fig.free_cash.label }}</span><b>{{ pos.free_cash|money if pos.free_cash is not none else 'Unavailable' }}</b></div>
-      {% if pos.kept_apart %}<div class="phone-row"><span>{{ fig.kept_apart.label }}</span><b>{{ pos.kept_apart|money }}</b></div>{% endif %}
+      <div class="phone-row"><span>{{ fig.free_cash.label }}</span><b>{{ (pos.sale_parts.free_cash if pos.sale_parts else pos.free_cash)|money if pos.free_cash is not none else 'Unavailable' }}</b></div>
+      {% if pos.kept_apart %}<div class="phone-row"><span>{{ fig.kept_apart.label }}</span><b>{{ (pos.sale_parts.kept_apart if pos.sale_parts else pos.kept_apart)|money }}</b></div>{% endif %}
       {% for item in pos.locked_holdings %}<div class="phone-row locked-row"><span>{{ "Locked certificate"|tr(locale) }} · {{ item.asset }} <small>{{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small></span><b class="muted">{{ item.value|money }}</b></div>{% endfor %}
-      <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ fig.holdings_after_sale.label }} <span class="phone-chevron" aria-hidden="true">›</span></span><b>{{ pos.holdings_after_sale|money }}</b></summary><div class="phone-fold-body"><div class="phone-rows">
-      {% for cls in pos.classes if cls.value %}<a class="phone-row" data-popup-open href="/birdview/class/{{ cls.id }}?as_of={{ as_of }}"><span>{{ cls.name }}<small>{% if cls.locked_until %}{{ "locked until {date}"|tr(locale, date=cls.locked_until) }}{% else %}{{ '%g'|format(cls.factor) }}%{% endif %}</small></span><b>{{ cls.after_sale|money }}</b></a>{% endfor %}
+      <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ fig.holdings_after_sale.label }} <span class="phone-chevron" aria-hidden="true">›</span></span><b>{{ (pos.sale_parts.holdings_after_sale if pos.sale_parts else pos.holdings_after_sale)|money }}</b></summary><div class="phone-fold-body"><div class="phone-rows">
+      {% for cls in pos.classes if cls.value %}<a class="phone-row" data-popup-open href="/birdview/class/{{ cls.id }}?as_of={{ as_of }}"><span>{{ cls.name }}<small>{% if cls.locked_until %}{{ "locked until {date}"|tr(locale, date=cls.locked_until) }}{% else %}{{ '%g'|format(cls.factor) }}%{% endif %}</small></span><b>{{ (pos.sale_parts.classes[cls.id] if pos.sale_parts else cls.after_sale)|money }}</b></a>{% endfor %}
       </div></div></details>
     </div>
     </div></details>
