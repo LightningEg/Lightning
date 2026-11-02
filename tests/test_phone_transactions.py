@@ -95,26 +95,32 @@ def test_each_chip_narrows_the_list(month):
     assert {"month": "2026-09", "q": "a"} in _queries(out)      # All drops only the kind
 
 
-def test_the_tiles_are_the_periods_cash_flow(month):
+def _money_line(page: str) -> str:
+    return re.search(r'<p class="phone-money-line".*?</p>', page, re.S).group(0)
+
+
+def test_money_in_and_out_are_one_quiet_line_of_the_periods_cash_flow(month):
+    """D2, C08.3 (3AN12): "In +45,500 · Out −1,580" on one line, not two tiles; the move to the wallet is neither."""
     c, accounts, _ = month
     flow = c.reporting.cash_flow("2026-09-01", "2026-09-30")
     page = _phone(c).get("/transactions?month=2026-09").text
-    tiles = re.search(r'<section class="phone-kpis phone-reg-kpis".*?</section>', page, re.S).group(0)
-    assert f"+{flow.inflows:,.0f}" in tiles and f"−{flow.outflows:,.0f}" in tiles
-    assert flow.inflows == D("45500") and flow.outflows == D("1580")   # the move to the wallet is neither
+    assert "phone-kpis" not in page.split('<section class="phone-list', 1)[0].rsplit("</nav>", 1)[-1]
+    line = _money_line(page)
+    assert f"+{flow.inflows:,.0f}" in line and f"−{flow.outflows:,.0f}" in line
+    assert re.sub(r"<[^>]+>", " ", line).split() == ["In", "+45,500", "·", "Out", "−1,580"]
+    assert flow.inflows == D("45500") and flow.outflows == D("1580")
     # All time is the whole ledger's; an account's own page has its own, and only once a period is chosen.
     whole = c.reporting.cash_flow("1900-01-01", "9999-12-31")
     assert f"+{whole.inflows:,.0f}" in _phone(c).get("/transactions?preset=all_time").text
     cib = accounts["cib"].id
-    assert "phone-reg-kpis" not in _phone(c).get(f"/accounts/{cib}").text
+    assert "phone-money-line" not in _phone(c).get(f"/accounts/{cib}").text
     assert "+45,500" in _phone(c).get(f"/accounts/{cib}?month=2026-09").text
 
 
-def test_a_search_makes_the_tiles_those_of_what_it_found(month):
+def test_a_search_makes_the_line_that_of_what_it_found(month):
     c, _, _ = month
-    page = _phone(c).get("/transactions?q=Carrefour").text
-    tiles = re.search(r'<section class="phone-kpis phone-reg-kpis".*?</section>', page, re.S).group(0)
-    assert "−1,200" in tiles and ">0<" in tiles
+    line = _money_line(_phone(c).get("/transactions?q=Carrefour").text)
+    assert "−1,200" in line and ">0<" in line
 
 
 def test_the_tab_has_no_back_link_but_an_accounts_page_has(month):
@@ -125,11 +131,26 @@ def test_the_tab_has_no_back_link_but_an_accounts_page_has(month):
     assert 'class="phone-back" href="/accounts"' in phone.get(f"/accounts/{accounts['cib'].id}").text
 
 
-def test_each_day_carries_its_net(month):
-    c, _, _ = month
+def test_a_day_carries_its_net_only_with_two_or_more_rows(month):
+    """3AN12: one row already says what the day was; the net appears from the second row on."""
+    c, accounts, cats = month
     page = _phone(c).get("/transactions?month=2026-09").text
-    assert 'class="phone-day-net"' in page
-    assert re.search(r'<span class="phone-day-net">\+45,000</span>', page)
+    assert 'class="phone-day-net"' not in page          # every day of the fixture has one row
+    c.transactions.record_in_account(accounts["cib"].id, "2026-09-02", "-20", cats["EXP.PERSONAL.FOOD"].id, None, "Bakery", "")
+    page = _phone(c).get("/transactions?month=2026-09").text
+    assert re.search(r'<span class="phone-day-net"><bdi class="fig">\+44,980</bdi></span>', page) or '+44,980' in page
+    assert page.count('class="phone-day-net"') == 1
+
+
+def test_a_move_between_your_accounts_and_a_buy_have_no_sign(month):
+    """3AN8 (C08.2): a transfer or a buy moves nothing in or out, so its row has no sign and the day's net, Money in and
+    Money out agree with what is on screen."""
+    c, accounts, _ = month
+    page = _phone(c).get("/transactions?month=2026-09").text
+    row = re.search(r'(?s)<a class="phone-txn"[^>]*>(?:(?!</a>).)*Transfer(?:(?!</a>).)*</a>', page).group(0)
+    amount = re.search(r'<span class="phone-txn-amount">(.*?)</span>', row, re.S).group(1)
+    assert "2,000" in amount and "+" not in amount and "−" not in amount and "-" not in amount
+    assert 'is-move' in row
 
 
 def test_the_month_stepper_keeps_what_you_searched_and_ends_at_this_month(month):
@@ -170,7 +191,8 @@ def test_select_value_updates_views_and_activity_are_still_there(month):
     page = phone.get("/transactions?month=2026-09").text
     assert _has(_queries(page), month="2026-09", select="1")                      # Select (C08.5)
     assert 'href="/activity"' in page and 'href="/transactions/deleted"' in page  # in the ⋯ menu
-    assert 'id="phone-view-name"' in page and "Save view" in page                # Views
+    assert 'id="phone-view-name"' in page and "Save view" in page                # Views, a sheet the ⋯ menu opens (3AN12)
+    assert 'href="#phone-views" data-open-sheet' in page and 'class="phone-reg-quiet"' not in page
     selecting = phone.get("/transactions?month=2026-09&select=1").text
     assert 'id="phone-merge-selected"' in selecting and 'id="phone-bulk"' in selecting and "Done" in selecting
     # The account's page keeps its own ⋯, now with Review activity in it.
@@ -223,3 +245,12 @@ def test_saved_views_are_listed_in_their_sheet_and_open_with_their_summary(month
     everything = phone.post("/transactions/views", follow_redirects=True, data={"name": "Everything", "preset": "all_time"})
     assert re.search(r'<summary class="phone-period-now"[^>]*>All time</summary>', everything.text)
     assert "9999-12-31" not in "".join(re.findall(r'<nav class="phone-chips.*?</nav>', everything.text, re.S))
+
+
+def test_an_empty_month_offers_last_month_with_its_figures(month):
+    """3AN9: a month with nothing in it offers the month before, with its money in and out, not a wall of zeros."""
+    c, accounts, cats = month
+    phone = _phone(c)
+    body = phone.get("/transactions?month=2026-11").text.split('<p class="empty">')[0]
+    assert "<small>2026-10</small>" in body and "month=2026-10" in body and "−700" in body
+    assert "<small>2026-08</small>" not in phone.get("/transactions?month=2026-09").text

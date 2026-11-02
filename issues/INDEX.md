@@ -86,14 +86,12 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **IV-3T** | [Phone screens break Part C - cut words, overlapping text, no way back on five pages, small targets, five Settings tabs](3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | improvement, visual | Feel | L | ready |
 | IV-3T1 | ↳ Cut words and overlapping text (C12) | | | M | |
 | IV-3T2 | ↳ No way back, and Budget category to Transactions | | | M | |
-| IV-3T3 | ↳ Search page and touch targets | | | M | |
+| IV-3T3 | ↳ Touch targets | | | M | |
 | IV-3T4 | ↳ Settings tabs and money first | | | M | |
 | IV-3T5 | ↳ Charts and expense analysis | | | M | |
 | IV-3T6 | ↳ Fields, pairs and small things | | | M | |
 | IV-3T7 | ↳ Make phone_check see clipped elements | | | S | |
 | **NF-3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | new feature | Capture | L | new |
-| NF-3AD1 | ↳ Quick add, amount first | | | L | |
-| NF-3AD2 | ↳ Transaction detail as a sheet | | | L | |
 | NF-3AD3 | ↳ Swipe left to set a category | | | M | |
 | NF-3AD4 | ↳ Financial health as a score | | | owner | |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/3AI-institution-logos.md) | owner task | Feel |  | ready |
@@ -105,17 +103,8 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3AM4 | ↳ Settings stop being forms (ST1-ST4) | | | M | |
 | IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | M | |
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | building |
-| IV-3AN0 | ↳ Approve the Part C changes | | | owner | |
-| IV-3AN3 | ↳ The Add sheet and the transaction sheet | | | L | |
-| IV-3AN4 | ↳ Overview's first screen | | | M | |
-| IV-3AN5 | ↳ SMS in Add | | | M | |
-| IV-3AN6 | ↳ Search for money | | | M | |
-| IV-3AN7 | ↳ Budget in order of need | | | M | |
-| IV-3AN8 | ↳ Moves read as moves | | | S | |
-| IV-3AN9 | ↳ No wall of zeros | | | S | |
-| IV-3AN10 | ↳ Arabic daily screens | | | M | |
-| IV-3AN11 | ↳ Measure and hand to the owner | | | S | |
-| IV-3AN12 | ↳ Left from IV-3AL | | | L | |
+| IV-3AN12 | ↳ Left from IV-3AL | | | S | |
+| IV-3AN13 | ↳ Owner's phone check | | | owner | |
 
 Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK, 3AL, 3AO. Next free code: 3AP.
 

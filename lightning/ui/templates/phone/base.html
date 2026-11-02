@@ -22,7 +22,7 @@
   {# Slim top bar (phone overhaul 2026-10-22, C03.2): the mark and the page's name, then Search and Hide amounts;
      the tab's gear only where the tab has settings. On an inner page, ‹ and the page it returns to. A page sets phone_back.
      One way to move: the tab bar, More and ‹; the title is plain text (3AN2). #}
-  {% block phone_back %}{% if back %}<a class="phone-back" href="{{ back }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ (here.section.label if here.section else 'Back')|tr(locale) }}</span></a>
+  {% block phone_back %}{% if back %}<a class="phone-back" href="{{ back }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ ('Budget' if back.startswith('/budget') else here.section.label if here.section else 'Back')|tr(locale) }}</span></a>
   {% else %}<span class="phone-mark"><img src="/static/lightning-mark.svg" alt="" width="20" height="28"></span><span class="phone-appbar-title">{% block phone_title %}{% set parts = (self.title()|trim).split(' · ') %}{{ (parts[-1] if parts|length > 1 and parts[-1] in ('Overview', 'Budget', 'Cash planning', 'Investments', 'Accounts', 'Settings') else parts|join(' · '))|tr(locale) }}{% endblock %}</span>{% endif %}{% endblock %}
   <nav class="phone-appbar-icons" aria-label="{{ 'Tools'|tr(locale) }}">
     <a class="phone-icon" href="/search" aria-label="{{ 'Search'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></a>
@@ -34,7 +34,7 @@
   {% if request.state.device_line|default('') %}<div class="flash device-line" role="status"><span>{{ request.state.device_line|tr(locale, request.state.device_line_values) }}</span>{% if request.state.device_action == 'hand-back' %}<form method="post" action="/sync/hand-back"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn primary" type="submit">{{ 'Hand back'|tr(locale) }}</button></form>{% elif request.state.device_action == 'take-back' %}<a class="btn" href="/profiles/devices">{{ 'Devices'|tr(locale) }}</a>{% endif %}</div>{% endif %}
   <div class="phone-header">{% block heading %}{% endblock %}</div>
   <div class="phone-page-actions">{% block top_actions %}{% endblock %}</div>
-  {% include "partials/section_tabs.html" %}
+  {% block section_tabs %}{% include "partials/section_tabs.html" %}{% endblock %}
   {# Undo and Redo ride on the message an action leaves (phone overhaul: no lone icon button at the top). #}
   {% if msg %}<div class="flash phone-flash" role="status" aria-live="polite" aria-atomic="true"><span>{{ msg|tr(locale) }}</span>{% include "partials/history.html" %}</div>{% endif %}
   {% if error and not hide_global_error|default(false) %}<div class="flash error" role="alert" aria-live="assertive" aria-atomic="true">{{ error|tr(locale) }}</div>{% endif %}
@@ -45,7 +45,7 @@
   {# Phone overhaul (owner, 2026-10-22): five slots with their words, Add in the middle. Transactions is a slot;
      Cash planning, Investments, Accounts, Financial health and Settings live on More with their figures. #}
   {% set skey = here.section.key if here.section else '' %}
-  {% set chosen = 'more' if request.url.path == '/review' else 'transactions' if here.tab and here.tab.key == 'transactions' else skey if skey in ('overview', 'budget') else 'more' if skey or request.url.path == '/more' else '' %}
+  {% set chosen = 'budget' if back and back.startswith('/budget') else 'more' if request.url.path == '/review' else 'transactions' if here.tab and here.tab.key == 'transactions' else skey if skey in ('overview', 'budget') else 'more' if skey or request.url.path == '/more' else '' %}
   {% macro slot(chosen, key, label, href, path) %}<a class="phone-tab{{ ' is-chosen' if chosen == key }}" href="{{ href }}"{% if chosen == key %} aria-current="page"{% endif %}><span class="phone-tab-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{ path }}"/></svg></span><span class="phone-tab-name">{{ label|tr(locale) }}</span></a>{% endmacro %}
   {{ slot(chosen, 'overview', 'Overview', '/', 'm3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM9 21v-7h6v7') }}
   {{ slot(chosen, 'budget', 'Budget', '/budget', 'M12 3a9 9 0 1 0 9 9h-9zM15 3.5A9 9 0 0 1 20.5 9H15z') }}
@@ -72,6 +72,7 @@
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('app.js') }}"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('phone-fields.js') }}"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('phone-gestures.js') }}"></script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('phone-capture.js') }}"></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('phone-nav.js') }}"></script>
 {% if request.state.secure_profiles|default(false) %}<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('session.js') }}"></script>{% endif %}
 </body>

@@ -14,6 +14,30 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    # Phone capture (3AN3, 3AN5, 3AN6, 3AN12): the Add sheet, a transaction's sheet, Search, From SMS, the one-line money strip.
+    'Into': 'على حساب',
+    'Who': 'مين',
+    'Plan left': 'المتبقي من الخطة',
+    'Usual categories': 'الفئات المعتادة',
+    'Other…': 'غيرها…',
+    'Paste SMS': 'الصق رسالة',
+    'Which category?': 'أنهي فئة؟',
+    'Another category': 'فئة تانية',
+    'Not sorted yet': 'لسه من غير فئة',
+    'All sorted': 'كله متصنّف',
+    'Every payment here has its category.': 'كل دفعة هنا ليها فئتها.',
+    'See all {n}': 'شوف الكل ({n})',
+    'Names and categories': 'الأسماء والفئات',
+    'Pages and actions': 'الصفحات والإجراءات',
+    'Nothing matches “{q}”.': 'مفيش حاجة تطابق “{q}”.',
+    'Search a payee, a category or an amount. Pages and actions are below.': 'اكتب اسم جهة أو فئة أو مبلغ. الصفحات والإجراءات تحت.',
+    'Paste one or more, a blank line between each.': 'الصق رسالة أو أكتر، وسيب سطر فاضي بين كل واحدة.',
+    'Over by {amt} · limit {limit}': 'زيادة {amt} · الحد {limit}',
+    '{left} left of {limit}': 'فاضل {left} من {limit}',
+    'Split across {names}; the full amount and its split are kept.': 'متقسّمة على {names}؛ المبلغ كله وتقسيمه محفوظين.',
+    'Which account ends with {digits}? Choose it above; Lightning remembers it.': 'أنهي حساب آخره {digits}؟ اختاره فوق وLightning هيفتكره.',
+    'Where is your salary paid? Choose the account above; Lightning remembers it.': 'مرتبك بينزل على أنهي حساب؟ اختاره فوق وLightning هيفتكره.',
+    '{name} is now the category of 1 row.': '{name} بقت فئة الصف ده.',
     'Find your phone or PC': 'دور على موبايلك أو الكمبيوتر',
     'Open pairing on the device with your profile.': 'افتح الاقتران على الجهاز اللي عليه ملفك.',
     'Connect with an address and code': 'اتصل بعنوان وكود',
@@ -1502,7 +1526,7 @@ ARABIC_UI = {
     'Export': 'تصدير',
     'Save changes': 'احفظ التغييرات',
     'Continue to profile': 'متابعة للملف الشخصي',
-    'Transfers': 'التحويلات',
+    'Transfers': 'تحويلات',
     'Set a category': 'حدد فئة',
     'Needs review': 'محتاج مراجعة',
     'Possible match': 'تطابق محتمل',
@@ -2615,7 +2639,7 @@ ARABIC_UI = {
     'Everyday spending {amt} by day {n}; the plan {x}': 'المصاريف اليومية {amt} لحد يوم {n}؛ والخطة {x}',
     # Phone overhaul tabs (2026-10-22): Budget, Cash planning, Investments, Accounts.
     'Search payee, category or amount': 'دوّر بالطرف أو الفئة أو المبلغ',
-    'To sort': 'محتاجة ترتيب',
+    'To sort': 'للترتيب',
     'spent': 'اتصرف',
     '{pct}% of the plan spent': '{pct}% من الخطة اتصرف',
     '{name} is over plan': '{name} زيادة عن الخطة',
@@ -2894,6 +2918,9 @@ ARABIC_UI = {
 }
 
 
+from lightning.ui.i18n_phone_reading import PHONE_READING as _PHONE_READING  # noqa: E402
+
+ARABIC_UI.update(_PHONE_READING)
 _ORIGINAL = frozenset(ARABIC_UI)
 for _key, _value in SYSTEM_TEXT.items():
     ARABIC_UI.setdefault(_key, _value)

@@ -4,6 +4,7 @@
 {% extends "base.html" %}
 {% from "phone/partials/charts.html" import kpi_tiles, bar_rows, flow_bars, month_tiles %}
 {% from "partials/charts.html" import trend, donut %}
+{% from "phone/partials/sheet.html" import sheet with context %}
 {% block title %}Overview{% endblock %}
 {% block heading %}<h1>{{ 'Overview'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
@@ -20,18 +21,20 @@
 {% endif %}
 {% if pos.unvalued %}<p class="notice">{{ pos.unvalued|length }} asset valuation(s) are missing from this total.</p>{% endif %}
 {% from "partials/macros.html" import period_control with context %}{{ period_control("/", period.key, month, this_month, request.query_params.get("date_from", "") if period_error and period.key == "custom" else period.start_text, request.query_params.get("date_to", "") if period_error and period.key == "custom" else period.end_text) }}
-{# One Needs you strip under the stepper (IV-3AL1): payments due today or tomorrow are its first row and the first words
-   of its summary, so no second card sits above the stepper; Manage Needs you is its last row. #}
-{% set soon = phone.soon if phone else none %}
-{% if attention or soon %}
+{# One Needs you card under the stepper (C04.4, 3AN4): it names the next bill due within three days by payee, amount
+   and days, and that line opens the bill's pay sheet (J3: tap it, then Record and mark paid). Opened in place, the card
+   lists every bill due within three days, then the rest of what waits; Manage Needs you is its last row. #}
+{% set soon = phone.soon if phone else none %}{% set needs_n = phone.needs_count if phone else attention|length %}
+{% if needs_n %}
 <details class="card phone-needs" aria-labelledby="needs-heading">
-  <summary><span class="needs-you-dot" aria-hidden="true"></span><span class="phone-needs-text"><b id="needs-heading">{% if attention %}{{ ('1 item needs you' if attention|length == 1 else '{n} items need you')|tr(locale, n=attention|length) }}{% else %}{{ ('1 payment due today or tomorrow' if soon.count == 1 else '{n} payments due today or tomorrow')|tr(locale, n=soon.count) }}{% endif %}</b><small>{% if soon and attention %}{{ ('1 due by tomorrow' if soon.count == 1 else '{n} due by tomorrow')|tr(locale, n=soon.count) }}{{ ' · ' if phone.needs }}{% elif soon %}{{ soon.total|amount_role('total') }}{% endif %}{% if phone and phone.needs %}{% for s in phone.needs %}{{ s.text|tr(locale, **s['values']) }}{{ ' · ' if not loop.last }}{% endfor %}{% endif %}</small></span><span class="needs-you-count">{{ attention|length if attention else soon.count }}</span><span class="phone-needs-open">{{ 'Open'|tr(locale) }}</span></summary>
-  <div class="phone-rows">{% if soon %}<a class="phone-row{{ ' is-late' if soon.late }}" href="/more#bills-heading"><span>{{ ('1 payment due today or tomorrow' if soon.count == 1 else '{n} payments due today or tomorrow')|tr(locale, n=soon.count) }}</span><b>{{ soon.total|amount_role('total') }}</b></a>{% endif %}{% for item in attention %}<a class="phone-row" href="{{ item.href }}"{% if item.popup %} data-popup-open{% endif %}><span>{{ item.label }}<small>{{ item.detail }}</small></span>{% if item.late_days %}<span class="plan-status plan-status-late">{{ ("Late · 1 day" if item.late_days == 1 else "Late · {n} days")|tr(locale, n=item.late_days) }}</span> {% endif %}<b class="phone-row-action">{{ item.action or '›' }}</b></a>{% endfor %}<a class="phone-row" href="/needs-you"><span>{{ 'Manage Needs you'|tr(locale) }}</span><b>›</b></a></div>
+  <summary><span class="needs-you-dot" aria-hidden="true"></span><span class="phone-needs-text"><b id="needs-heading">{% if attention %}{{ ('1 item needs you' if needs_n == 1 else '{n} items need you')|tr(locale, n=needs_n) }}{% else %}{{ ('1 payment due soon' if needs_n == 1 else '{n} payments due soon')|tr(locale, n=needs_n) }}{% endif %}</b>{% if soon %}{% set line = soon.next.line %}<a class="phone-needs-bill{{ ' is-late' if soon.next.late }}" data-popup-open href="{{ soon.next.pay }}">{{ line.text|tr(locale, **line['values']) }}</a>{% endif %}{% if phone and phone.needs and not soon %}<small>{% for s in phone.needs %}{{ s.text|tr(locale, **s['values']) }}{{ ' · ' if not loop.last }}{% endfor %}</small>{% endif %}</span><span class="needs-you-count">{{ needs_n }}</span><span class="phone-needs-open">{{ 'Open'|tr(locale) }}</span></summary>
+  <div class="phone-rows">{% if soon %}{% for r in soon.rows if not r.listed %}<a class="phone-row{{ ' is-late' if r.late }}" data-popup-open href="{{ r.pay }}"><span>{{ r.name }}<small>{{ r.amount|amount_role('total') }} · {% if r.late %}{{ ('1 day late' if r.late == 1 else '{n} days late')|tr(locale, n=r.late) }}{% elif r.days == 0 %}{{ 'Today'|tr(locale) }}{% elif r.days == 1 %}{{ 'Tomorrow'|tr(locale) }}{% else %}{{ 'in {n} days'|tr(locale, n=r.days) }}{% endif %}</small></span><b class="phone-row-action">{{ 'Mark paid'|tr(locale) }}</b></a>{% endfor %}{% endif %}{% for item in attention %}<a class="phone-row" href="{{ item.href }}"{% if item.popup %} data-popup-open{% endif %}><span>{{ item.label }}<small>{{ item.detail }}</small></span>{% if item.late_days %}<span class="plan-status plan-status-late">{{ ("Late · 1 day" if item.late_days == 1 else "Late · {n} days")|tr(locale, n=item.late_days) }}</span> {% endif %}<b class="phone-row-action">{{ item.action or '›' }}</b></a>{% endfor %}<a class="phone-row" href="/needs-you"><span>{{ 'Manage Needs you'|tr(locale) }}</span><b>›</b></a></div>
 </details>
 {% endif %}
 {# nothing waiting: no row at all (A09) #}
-{% set tiles = ([phone.worth] if phone else []) + (stats|selectattr('key', 'equalto', 'plan')|list) + (stats|rejectattr('key', 'in', ['plan', 'safe'] if phone else ['plan'])|list) %}
-{{ kpi_tiles(tiles, base) }}
+{# Two tiles, not four (C06.1, C11.1): the Lead already answers the page. The savings and investing rates live on Financial health. #}
+{% set plan_tile = stats|selectattr('key', 'equalto', 'plan')|list %}
+{{ kpi_tiles(([worth_tile] if worth_tile else []) + plan_tile, base) }}
 {% if setup %}{% set done = setup|selectattr("done")|list|length %}
 <details class="flow-disclosure phone-flat-rows"><summary><h2>{{ "Get set up"|tr(locale) }}</h2></summary>
   <p class="phone-note">{{ done }} of {{ setup|length }} done</p>
@@ -46,87 +49,86 @@
   {% if recent_rows %}{{ txn_list(recent_rows, True, False, False, '', '/transactions', '', 5, False) }}{% else %}<p class="phone-note">{{ 'No transactions yet.'|tr(locale) }}</p>{% endif %}
 </section>
 
+{# Your position (3AN12, C11.1): flat rows on the page, each one opens its page; the bills to pay and the working behind
+   the figures are rows that open a sheet (D1), never a fold in a fold. #}
 <section class="phone-section" aria-labelledby="position-heading">
-  <details class="flow-disclosure"><summary class="phone-section-head"><h2 id="position-heading">{{ 'Your position'|tr(locale) }}</h2><span>As of {{ position_as_of }}</span></summary>
-  <article class="card phone-card phone-flat-rows" aria-labelledby="position-heading">
-    <div class="phone-rows">
-      {% if owes %}<div class="phone-row"><span>{{ fig.what_you_own.label }}</span><b>{{ pos.what_you_own|money }}</b></div>{% endif %}
-      <details class="phone-row-more"><summary class="phone-row"><span>{{ fig.cash_you_own.label }} <span class="phone-chevron" aria-hidden="true">›</span></span><b>{{ pos.cash_you_own|money }}</b></summary>
-        <div class="phone-rows is-inner">{% for account in cash_accounts if account.value %}<a class="phone-row" href="/accounts/{{ account.id }}"><span>{{ account.label }}</span><b>{{ account.value|money }}</b></a>{% endfor %}</div></details>
-      {% if pos.holdings_value %}<a class="phone-row" href="/investments"><span>{{ fig.holdings_value.label }}</span><b>{{ pos.holdings_value|money }}</b></a>{% endif %}
-      {% if pos.other_you_own %}<div class="phone-row"><span>{{ fig.other_you_own.label }}</span><b>{{ pos.other_you_own|money }}</b></div>{% endif %}
-      {% if owes %}<details class="phone-row-more"><summary class="phone-row"><span>{{ fig.what_you_owe.label }} <span class="phone-chevron" aria-hidden="true">›</span></span><b>−{{ pos.what_you_owe|money }}</b></summary>
-        <div class="phone-rows is-inner">{% if owe.other_bills_due > 0 %}<a class="phone-row" href="/plan"><span>{{ "Bills due, loans apart"|tr(locale) }}</span><b>{{ owe.other_bills_due|money }}</b></a>{% endif %}{% if owe.loans_still_to_pay > 0 %}<a class="phone-row" href="/plan/loans"><span>{{ fig.loans_still_to_pay.label }}</span><b>{{ owe.loans_still_to_pay|money }}</b></a>{% endif %}{% if pos.gameya_still_to_pay > 0 %}<div class="phone-row" data-testid="gameya-owed"><span>{{ fig.gameya_still_to_pay.label }}</span><b>{{ pos.gameya_still_to_pay|money }}</b></div>{% endif %}</div></details>{% endif %}
-    </div>
-  </article>
-  {% if owe and owe.bills_due_items %}<article class="card phone-card phone-flat-rows">
-    {% if owe and owe.bills_due_items %}<details class="phone-row-more"><summary class="phone-row"><span>{{ '{label} to pay'|tr(locale, label=fig.bills_due.label) }} <span class="phone-chevron" aria-hidden="true">›</span><small>{{ "Tap one to mark it paid"|tr(locale) }}</small></span><b>{{ owe.bills_due_items|length }}</b></summary>
-      <div class="phone-rows is-inner">{% for p in owe.bills_due_items[:6] %}<a class="phone-row" data-popup-open href="/plan/items/{{ p.item.id }}/pay?due={{ p.due_date }}&amp;back=%2F"><span>{{ p.item.name }}<small>{{ p.due_date }}</small></span><b>{{ p.amount|money }}</b></a>{% endfor %}{% if owe.bills_due_items|length > 6 %}<a class="phone-row" href="/plan"><span>{{ owe.bills_due_items|length - 6 }} more</span><b>›</b></a>{% endif %}</div></details>{% endif %}
-  </article>{% endif %}
-  <article class="card phone-card phone-folds phone-flat-rows" aria-label="More on your position">
-  <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ "Over time"|tr(locale) }} <span class="phone-chevron" aria-hidden="true">›</span><small>{{ fig[lead].label }} at the end of each month</small></span></summary>
-    <div class="phone-fold-body">
-    {% if lazy_folds %}<div data-fold-src="/overview/fold/trend?{{ fold_query }}"><p class="chart-empty">{{ 'Loading…'|tr(locale) }}</p></div>{% else %}{{ trend(networth_trend, fig[lead].label ~ ' at the end of each month', 'Plan', 160) }}{% endif %}
-    </div></details>
-  <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ fig.free_cash.label }} <span class="phone-chevron" aria-hidden="true">›</span><small>{{ "After reserves and bills due"|tr(locale) }}</small></span><b>{{ pos.free_cash|money if pos.free_cash is not none else 'Unavailable' }}</b></summary>
-    <div class="phone-fold-body">
-    {% if free_cash_steps %}{{ bar_rows(free_cash_steps.rows, fig.free_cash.label) }}{% else %}<p class="chart-empty">{{ pos.unavailable_reason or 'Free cash is unavailable on this date.' }}</p>{% endif %}
-    <a class="phone-quiet" href="/plan">{{ 'Cash planning'|tr(locale) }}</a>
-    </div></details>
-  <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ "What it is made of"|tr(locale) }} <span class="phone-chevron" aria-hidden="true">›</span></span></summary>
-    <div class="phone-fold-body">
-    {{ donut(wealth_donut, fig.what_you_own.label, base) }}
-    </div></details>
-  <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ fig.if_you_sold_today.label }} <span class="phone-chevron" aria-hidden="true">›</span><small>{{ "After selling your investments"|tr(locale) }}</small></span><b>{{ pos.sale_parts.total|money if pos.sale_parts else 'Unavailable' }}</b></summary>
-    <div class="phone-fold-body">
-    <div class="phone-rows">
-      <div class="phone-row"><span>{{ fig.free_cash.label }}</span><b>{{ (pos.sale_parts.free_cash if pos.sale_parts else pos.free_cash)|money if pos.free_cash is not none else 'Unavailable' }}</b></div>
-      {% if pos.kept_apart %}<div class="phone-row"><span>{{ fig.kept_apart.label }}</span><b>{{ (pos.sale_parts.kept_apart if pos.sale_parts else pos.kept_apart)|money }}</b></div>{% endif %}
-      {% for item in pos.locked_holdings %}<div class="phone-row locked-row"><span>{{ "Locked certificate"|tr(locale) }} · {{ item.asset }} <small>{{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small></span><b class="muted">{{ item.value|money }}</b></div>{% endfor %}
-      <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ fig.holdings_after_sale.label }} <span class="phone-chevron" aria-hidden="true">›</span></span><b>{{ (pos.sale_parts.holdings_after_sale if pos.sale_parts else pos.holdings_after_sale)|money }}</b></summary><div class="phone-fold-body"><div class="phone-rows">
-      {% for cls in pos.classes if cls.value %}<a class="phone-row" data-popup-open href="/birdview/class/{{ cls.id }}?as_of={{ as_of }}"><span>{{ cls.name }}<small>{% if cls.locked_until %}{{ "locked until {date}"|tr(locale, date=cls.locked_until) }}{% else %}{{ '%g'|format(cls.factor) }}%{% endif %}</small></span><b>{{ (pos.sale_parts.classes[cls.id] if pos.sale_parts else cls.after_sale)|money }}</b></a>{% endfor %}
-      </div></div></details>
-    </div>
-    </div></details>
-  </article>
-</details></section>
+  <header class="phone-section-head"><h2 id="position-heading">{{ 'Your position'|tr(locale) }}</h2><span>{{ 'As of {date}'|tr(locale, date=position_as_of) }}</span></header>
+  <div class="phone-rows">
+    {% if owes %}<a class="phone-row" href="/accounts"><span>{{ fig.what_you_own.label }}</span><b>{{ pos.what_you_own|money }}</b><span class="phone-chevron" aria-hidden="true">›</span></a>{% endif %}
+    <a class="phone-row" href="/accounts"><span>{{ fig.cash_you_own.label }}</span><b>{{ pos.cash_you_own|money }}</b><span class="phone-chevron" aria-hidden="true">›</span></a>
+    {% if pos.holdings_value %}<a class="phone-row" href="/investments"><span>{{ fig.holdings_value.label }}</span><b>{{ pos.holdings_value|money }}</b><span class="phone-chevron" aria-hidden="true">›</span></a>{% endif %}
+    {% if pos.other_you_own %}<a class="phone-row" href="/accounts"><span>{{ fig.other_you_own.label }}</span><b>{{ pos.other_you_own|money }}</b><span class="phone-chevron" aria-hidden="true">›</span></a>{% endif %}
+    {% if owes %}{# What you owe opens on its parts, the circle among them (BV-5I), as a sheet (D1). #}
+    {% set row %}<span>{{ fig.what_you_owe.label }}</span><b>−{{ pos.what_you_owe|money }}</b><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+    {% call sheet(fig.what_you_owe.label, row) %}
+      <div class="phone-rows">{% if owe and owe.other_bills_due > 0 %}<a class="phone-row" href="/plan"><span>{{ "Bills due, loans apart"|tr(locale) }}</span><b>{{ owe.other_bills_due|money }}</b></a>{% endif %}{% if owe and owe.loans_still_to_pay > 0 %}<a class="phone-row" href="/plan/loans"><span>{{ fig.loans_still_to_pay.label }}</span><b>{{ owe.loans_still_to_pay|money }}</b></a>{% endif %}{% if pos.gameya_still_to_pay > 0 %}<a class="phone-row" href="/plan#what-you-owe" data-testid="gameya-owed"><span>{{ fig.gameya_still_to_pay.label }}</span><b>{{ pos.gameya_still_to_pay|money }}</b></a>{% endif %}</div>
+    {% endcall %}{% endif %}
+    {% if owe and owe.bills_due_items %}
+    {% set row %}<span>{{ '{label} to pay'|tr(locale, label=fig.bills_due.label) }}<small>{{ "Tap one to mark it paid"|tr(locale) }}</small></span><b>{{ owe.bills_due_items|length }}</b><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+    {% call sheet('{label} to pay'|tr(locale, label=fig.bills_due.label), row) %}
+      <div class="phone-rows">{% for p in owe.bills_due_items[:6] %}<a class="phone-row" data-popup-open href="/plan/items/{{ p.item.id }}/pay?due={{ p.due_date }}&amp;back=%2F"><span>{{ p.item.name }}<small>{{ p.due_date }}</small></span><b>{{ p.amount|money }}</b></a>{% endfor %}{% if owe.bills_due_items|length > 6 %}<a class="phone-row" href="/plan"><span>{{ '{n} more'|tr(locale, n=owe.bills_due_items|length - 6) }}</span><b>›</b></a>{% endif %}</div>
+    {% endcall %}{% endif %}
+    {% set row %}<span>{{ "Over time"|tr(locale) }}<small>{{ '{name} at the end of each month'|tr(locale, name=fig[lead].label) }}</small></span><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+    {% call sheet("Over time"|tr(locale), row) %}
+      {% if lazy_folds %}<div data-fold-src="/overview/fold/trend?{{ fold_query }}"><p class="chart-empty">{{ 'Loading…'|tr(locale) }}</p></div>{% else %}{{ trend(networth_trend, fig[lead].label ~ ' at the end of each month', 'Plan', 160) }}{% endif %}
+    {% endcall %}
+    {% set row %}<span>{{ fig.free_cash.label }}<small>{{ "After reserves and bills due"|tr(locale) }}</small></span><b>{{ pos.free_cash|money if pos.free_cash is not none else 'Unavailable'|tr(locale) }}</b><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+    {% call sheet(fig.free_cash.label, row) %}
+      {% if free_cash_steps %}{{ bar_rows(free_cash_steps.rows, fig.free_cash.label) }}{% else %}<p class="chart-empty">{{ pos.unavailable_reason or 'Free cash is unavailable on this date.'|tr(locale) }}</p>{% endif %}
+      <a class="phone-quiet" href="/plan">{{ 'Cash planning'|tr(locale) }}</a>
+    {% endcall %}
+    {% set row %}<span>{{ "What it is made of"|tr(locale) }}</span><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+    {% call sheet("What it is made of"|tr(locale), row) %}{{ donut(wealth_donut, fig.what_you_own.label, base) }}{% endcall %}
+    {% set row %}<span>{{ fig.if_you_sold_today.label }}<small>{{ "After selling your investments"|tr(locale) }}</small></span><b>{{ pos.sale_parts.total|money if pos.sale_parts else 'Unavailable'|tr(locale) }}</b><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+    {% call sheet(fig.if_you_sold_today.label, row) %}
+      <div class="phone-rows">
+        <div class="phone-row"><span>{{ fig.free_cash.label }}</span><b>{{ (pos.sale_parts.free_cash if pos.sale_parts else pos.free_cash)|money if pos.free_cash is not none else 'Unavailable'|tr(locale) }}</b></div>
+        {% if pos.kept_apart %}<div class="phone-row"><span>{{ fig.kept_apart.label }}</span><b>{{ (pos.sale_parts.kept_apart if pos.sale_parts else pos.kept_apart)|money }}</b></div>{% endif %}
+        {% for item in pos.locked_holdings %}<div class="phone-row locked-row"><span>{{ "Locked certificate"|tr(locale) }} · {{ item.asset }} <small>{{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small></span><b class="muted">{{ item.value|money }}</b></div>{% endfor %}
+        <div class="phone-row"><span>{{ fig.holdings_after_sale.label }}</span><b>{{ (pos.sale_parts.holdings_after_sale if pos.sale_parts else pos.holdings_after_sale)|money }}</b></div>
+        {% for cls in pos.classes if cls.value %}<a class="phone-row" data-popup-open href="/birdview/class/{{ cls.id }}?as_of={{ as_of }}"><span>{{ cls.name }}<small>{% if cls.locked_until %}{{ "locked until {date}"|tr(locale, date=cls.locked_until) }}{% else %}{{ '%g'|format(cls.factor) }}%{% endif %}</small></span><b>{{ (pos.sale_parts.classes[cls.id] if pos.sale_parts else cls.after_sale)|money }}</b></a>{% endfor %}
+      </div>
+    {% endcall %}
+  </div>
+</section>
 
+{# This period (3AN12): each figure a row that opens a sheet with its working (D1). #}
 <section class="phone-section" aria-labelledby="period-heading">
-  <details class="flow-disclosure"><summary class="phone-section-head"><h2 id="period-heading">{{ 'This period'|tr(locale) }}</h2><span>{{ date_from }} to {{ date_to }}</span></summary>
-  <article class="card phone-card phone-folds phone-flat-rows">
-  <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ fig.net_flow.label }} <span class="phone-chevron" aria-hidden="true">›</span></span><b class="{{ cash_flow.net|tone }}">{{ cash_flow.net|money(True) }}</b></summary>
-    <div class="phone-fold-body">
-    {% if cash_flow.inflows or cash_flow.outflows %}{{ bar_rows(flow_columns.columns, 'From money in to net flow', 'flow') }}{% else %}<p class="chart-empty">{{ "No money moved in this period."|tr(locale) }}</p>{% endif %}
-    <a class="phone-quiet" href="/transactions?date_from={{ date_from }}&amp;date_to={{ date_to }}">{{ "See transactions"|tr(locale) }}</a>
-    </div></details>
-  <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ "Where money in went"|tr(locale) }} <span class="phone-chevron" aria-hidden="true">›</span></span><b>{{ cash_flow.inflows|money }}</b></summary>
-    <div class="phone-fold-body">
-    {% if lazy_folds %}<div data-fold-src="/overview/fold/money-in?{{ fold_query }}"><p class="chart-empty">{{ 'Loading…'|tr(locale) }}</p></div>{% else %}{{ flow_bars(money_sankey, base) }}{% endif %}
-    <a class="phone-quiet" href="/birdview/expenses?{{ request.url.query }}">{{ "See spending"|tr(locale) }}</a>
-    </div></details>
-  <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ 'Investments'|tr(locale) }} <span class="phone-chevron" aria-hidden="true">›</span><small>{{ fig.result.label }}</small></span><b>{% if investment_report.period_result_available %}{{ investment_report.period_result|money(True) }}{% else %}—{% endif %}</b></summary>
-    <div class="phone-fold-body">
-    <div class="phone-rows">
-      <div class="phone-row"><span>{{ fig.portfolio_value.label }}</span><b>{{ pos.portfolio_value|money }}</b></div>
-      <div class="phone-row"><span>{{ fig.holdings_value.label }}</span><b>{{ pos.holdings_value|money }}</b></div>
-      <div class="phone-row"><span>{{ fig.new_money_in.label }}</span><b>{{ investment_report.new_money|money }}</b></div>
-      <div class="phone-row"><span>{{ fig.result.label }}</span><b class="{{ investment_report.period_result|tone if investment_report.period_result_available else '' }}">{% if investment_report.period_result_available %}{{ investment_report.period_result|money(True) }}{% else %}Unavailable{% endif %}</b></div>
-    </div>
-    <a class="phone-quiet" href="/investments?{{ request.url.query }}">{{ "See investments"|tr(locale) }}</a>
-    </div></details>
-  {% if month_calendar.years %}{% set mc = month_calendar %}
-  <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ "Total expenses by month"|tr(locale) }} <span class="phone-chevron" aria-hidden="true">›</span><small>{{ mc.years[-1].year }}</small></span></summary>
-    <div class="phone-fold-body">
-    {% if mc.biggest and mc.biggest.spend %}<div class="phone-lead">{{ mc.biggest.spend|money }} <small>{{ base }}</small></div><p class="phone-note">Most spent, {{ mc.biggest.key }}</p>{% endif %}
-    {{ month_tiles(mc, 'spend') }}
-    <p class="phone-scale"><span>{{ "Less"|tr(locale) }}</span><i class="heat-1"></i><i class="heat-2"></i><i class="heat-3"></i><i class="heat-4"></i><span>{{ "More"|tr(locale) }}</span></p>
-    </div></details>
-  <details class="phone-row-more phone-fold"><summary class="phone-row"><span>{{ "Net cash flow by month"|tr(locale) }} <span class="phone-chevron" aria-hidden="true">›</span><small>{{ mc.kept }} of {{ mc.count }} months kept money</small></span></summary>
-    <div class="phone-fold-body">
-    {{ month_tiles(mc, 'net') }}
-    <p class="phone-scale"><span>{{ 'Short'|tr(locale) }}</span><i class="flow-out-4"></i><i class="flow-out-2"></i><i class="flow-in-2"></i><i class="flow-in-4"></i><span>{{ "Kept"|tr(locale) }}</span></p>
-    </div></details>
-  {% endif %}
-  </article>
-</details></section>
+  <header class="phone-section-head"><h2 id="period-heading">{{ 'This period'|tr(locale) }}</h2><span>{{ date_from }} {{ 'to'|tr(locale) }} {{ date_to }}</span></header>
+  <div class="phone-rows">
+    {% set row %}<span>{{ fig.net_flow.label }}</span><b class="{{ cash_flow.net|tone }}">{{ cash_flow.net|money(True) }}</b><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+    {% call sheet(fig.net_flow.label, row) %}
+      {% if cash_flow.inflows or cash_flow.outflows %}{{ bar_rows(flow_columns.columns, 'From money in to net flow', 'flow') }}{% else %}<p class="chart-empty">{{ "No money moved in this period."|tr(locale) }}</p>{% endif %}
+      <a class="phone-quiet" href="/transactions?date_from={{ date_from }}&amp;date_to={{ date_to }}">{{ "See transactions"|tr(locale) }}</a>
+    {% endcall %}
+    {% set row %}<span>{{ "Where money in went"|tr(locale) }}</span><b>{{ cash_flow.inflows|money }}</b><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+    {% call sheet("Where money in went"|tr(locale), row) %}
+      {% if lazy_folds %}<div data-fold-src="/overview/fold/money-in?{{ fold_query }}"><p class="chart-empty">{{ 'Loading…'|tr(locale) }}</p></div>{% else %}{{ flow_bars(money_sankey, base) }}{% endif %}
+      <a class="phone-quiet" href="/birdview/expenses?{{ request.url.query }}">{{ "See spending"|tr(locale) }}</a>
+    {% endcall %}
+    {% set row %}<span>{{ 'Investments'|tr(locale) }}<small>{{ fig.result.label }}</small></span><b>{% if investment_report.period_result_available %}{{ investment_report.period_result|money(True) }}{% else %}—{% endif %}</b><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+    {% call sheet('Investments'|tr(locale), row) %}
+      <div class="phone-rows">
+        <div class="phone-row"><span>{{ fig.portfolio_value.label }}</span><b>{{ pos.portfolio_value|money }}</b></div>
+        <div class="phone-row"><span>{{ fig.holdings_value.label }}</span><b>{{ pos.holdings_value|money }}</b></div>
+        <div class="phone-row"><span>{{ fig.new_money_in.label }}</span><b>{{ investment_report.new_money|money }}</b></div>
+        <div class="phone-row"><span>{{ fig.result.label }}</span><b class="{{ investment_report.period_result|tone if investment_report.period_result_available else '' }}">{% if investment_report.period_result_available %}{{ investment_report.period_result|money(True) }}{% else %}{{ 'Unavailable'|tr(locale) }}{% endif %}</b></div>
+      </div>
+      <a class="phone-quiet" href="/investments?{{ request.url.query }}">{{ "See investments"|tr(locale) }}</a>
+    {% endcall %}
+    {% if month_calendar.years %}{% set mc = month_calendar %}
+    {% set row %}<span>{{ "Total expenses by month"|tr(locale) }}<small>{{ mc.years[-1].year }}</small></span><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+    {% call sheet("Total expenses by month"|tr(locale), row) %}
+      {% if mc.biggest and mc.biggest.spend %}<div class="phone-lead">{{ mc.biggest.spend|money }} <small>{{ base }}</small></div><p class="phone-note">{{ 'Most spent, {sa}'|tr(locale, sa=mc.biggest.key) }}</p>{% endif %}
+      {{ month_tiles(mc, 'spend') }}
+      <p class="phone-scale"><span>{{ "Less"|tr(locale) }}</span><i class="heat-1"></i><i class="heat-2"></i><i class="heat-3"></i><i class="heat-4"></i><span>{{ "More"|tr(locale) }}</span></p>
+    {% endcall %}
+    {% set row %}<span>{{ "Net cash flow by month"|tr(locale) }}<small>{{ '{n} of {m} months kept money'|tr(locale, n=mc.kept, m=mc.count) }}</small></span><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+    {% call sheet("Net cash flow by month"|tr(locale), row) %}
+      {{ month_tiles(mc, 'net') }}
+      <p class="phone-scale"><span>{{ 'Short'|tr(locale) }}</span><i class="flow-out-4"></i><i class="flow-out-2"></i><i class="flow-in-2"></i><i class="flow-in-4"></i><span>{{ "Kept"|tr(locale) }}</span></p>
+    {% endcall %}
+    {% endif %}
+  </div>
+</section>
 {% endblock %}

@@ -1,0 +1,16 @@
+{# A row that opens a sheet (D1, C06.2: never a fold inside a fold). The summary is the row, the call block the sheet's
+   body; the sheet owns the foot of the screen (grabber, a title, then the content and one full-width Done). It is a
+   <details>, so it works with no script: a tap on the backdrop or on Done closes it. Usage:
+     {% set row %}<span>Net flow</span><b>+1,200</b>{% endset %}
+     {% call sheet('Net flow', row) %}...{% endcall %} #}
+{% macro sheet(title, row, cls='') -%}
+<details class="phone-sheet-row">
+  <summary class="phone-row phone-sheet-summary {{ cls }}">{{ row }}</summary>
+  <div class="phone-sheet-panel" role="dialog" aria-label="{{ title }}">
+    <span class="phone-grabber" aria-hidden="true"></span>
+    <h2 class="phone-sheet-title">{{ title }}</h2>
+    {{ caller() }}
+    <button type="button" class="btn phone-save" data-sheet-close>{{ 'Done'|tr(locale) }}</button>
+  </div>
+</details>
+{%- endmacro %}

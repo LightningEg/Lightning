@@ -176,62 +176,10 @@ the Arabic daily screens; no page without ‹; then the owner checks the phone e
 
 IV-3AL was folded into this item (owner, 2026-11-02): what it had left is 3AN12. `post: no` while Claude's claim holds the phone templates.
 
-## 3AN0 Approve the Part C changes · owner
-**Decided (owner, 2026-11-02):** (1)-(5) approved; (6) declined, the month stepper keeps its pill. Approved: (1) Overview
-shows two tiles, Net worth and Left in plan; the rates live on Financial health (C11.1); (2) Add opens on the amount with
-the last-used account chosen and usual categories as chips (C05.2, C09); (3) a row opens a detail sheet, Edit opens the
-form (C09.7); (4) app-bar Search looks for money first (C03.2); (5) Needs you names the next bill due within three days
-(C04.4). D1 and D2 (2026-10-29) ride with them. Next: write the five lines into Part C in both repos (AGENTS §1), then
-delete this step.
+## 3AN12 Left from IV-3AL · S
+Folded from IV-3AL (Audit 10, [report](../../reports/2026-10-29-phone-tab-audit/report.md)). Still open: Accounts tab
+first (the section registry is shared with the PC: ask the owner first).
 
-## 3AN3 The Add sheet and the transaction sheet · L
-Built with NF-3AD1 and NF-3AD2, which own the flow; this step owns the look: no card inside the sheet, Save pinned above
-the keyboard, category chips (usual first, from the services), whole EGP, Saved · Undo toast, To sort chains to the next
-row. Done when J1 is 3 taps and J5's sort is 3 in `flows.py`.
-
-## 3AN4 Overview's first screen · M
-Two tiles, Needs you naming the next bill, Latest in view (first row above 600 px at 360 × 800).
-Needs 3AN0 (1), (5); the stepper keeps its pill (owner, 2026-11-02). Mohab's Overview steps updated.
-
-## 3AN5 SMS in Add · M
-Paste SMS at the top of the Add sheet, with no account asked (From SMS already maps a card ending to an account once;
-ask only for an ending it has not seen);
-/sms gets ‹, one line of help and its Primary on the page; More drops From SMS and Needs you from Settings. Done when J2 is
-2 taps.
-
-## 3AN6 Search for money · M
-App-bar search: live results, payments and counterparties first, then pages and actions; no "Ctrl K", no Search button.
-Extends IV-3T3's search half; close both together.
-
-## 3AN7 Budget in order of need · M
-Over plan and ahead of pace first, then by usual spending; 64 px rows with the meter inside; "N more on track ›"; the
-day-one line. With the category sheet (from IV-3AL2, folded here). Done when J4's row is in the first screen on the sample.
-
-## 3AN8 Moves read as moves · S
-A buy, sell or move between your own accounts shows with no sign on azure or Track (C08.2), so rows, Money in/out and the
-day's net agree on screen. Test with the sample's money-market buy.
-
-## 3AN9 No wall of zeros · S
-On an empty month: Transactions, a Budget category and Spending offer "Last month" with its figure; Investments hides the
-chart card until it has two months; Spending's title is "Spending" and it opens on this month like every tab.
-
-## 3AN10 Arabic daily screens · M
-Run the arabic-check skill on Overview, Add, Transactions, Budget and More: one digit system per screen, the sign on one
-side, chips that fit one line at 360. Done when the Arabic shots show no English and no wrapped chip.
-
-## 3AN11 Measure and hand to the owner · S
-Re-run `evidence/flows.py` and the capture, fill the table with the new numbers in a dated follow-up of the report, run
-Mohab and `tools/phone_check.py` at 360 and 320, then ask the owner for one end-to-end phone check.
-
-## 3AN12 Left from IV-3AL · L
-Folded from IV-3AL (Audit 10, [report](../../reports/2026-10-29-phone-tab-audit/report.md)); D1 sheets, D2 one-line money
-strip, D3 flat (built). Overview: Your position as flat rows that open their pages; This period's figures as rows that
-open a sheet (D1), never a fold inside a fold. Budget: a category row opens a sheet with its limit field, Cover it and See
-transactions (with 3AN7); bulk undo, the raise offer and first limits take the strip's place one at a time. Transactions:
-Money in and out as one line (D2); Views and value updates move into ⋯; a day's net only on a day with two or more rows.
-Cash planning: forecast, months ahead and What is promised as rows that open sheets (D1). Recurring: the list first, the
-fixed-costs ratio a link to Financial health, no ".00" on rows. Reserves: the app bar names Financial health; no card in a
-card. Accounts: Accounts tab first (the section registry is shared with the PC: ask first). Investments keeps the owner's
-PDF order. Spending: the lead (spent this month against the same days usually), four biggest categories then Other, then
-one row "More analysis"; the heat map, both money-flow diagrams, small multiples and month grid leave the first page, and
-the page renders under 150 ms. Tests: `tests/test_phone_frame.py`, `test_phone_budget.py`, `test_phone_transactions.py`.
+## 3AN13 Owner's phone check · owner
+Measured 2026-11-02 (report follow-up): every job is at its target. The owner checks the phone end to end once; anything
+wrong becomes its own step.

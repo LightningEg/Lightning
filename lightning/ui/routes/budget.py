@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
+from urllib.parse import quote
 from decimal import ROUND_CEILING, ROUND_HALF_UP, Decimal
 from math import pi
 import json
@@ -17,6 +18,7 @@ from lightning.core.money import ZERO, quantize, to_decimal
 from lightning.budgeting.domain import INCOME_FROM_RECURRING
 from lightning.planning.domain import KIND_LABELS, PaymentStatus
 from lightning.planning.health import PlanCheck
+from lightning.transactions.domain import TxnFilter
 
 from .. import charts, keynotes, kpis, status as page_status
 from ..web import container, redirect, render
@@ -329,16 +331,22 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     if getattr(request.state, "phone", False):  # the phone's Budget (templates/phone/budget.html); the PC reads none of this
         month_days = (month_last - month_first).days + 1
         pace_pct = (Decimal(month_days - days_left) / month_days * 100) if period.key == "month" and days_left else None
-        phone_cats = _phone_categories(view, tracked, category_periods, by_group, period, pace_pct)
+        phone_cats = _phone_categories(view, tracked, category_periods, by_group, period, pace_pct, averages,
+                                       month if period.key == "month" else "")
         if period.key == "month" and everyday is not None:  # M5: a one-tap Cover on each over row that has a donor
             for r in phone_cats:
                 if r["over"]:
                     move = _cover_from(c, month, {"category_id": r["category_id"], "over": r["amount"]}, everyday.room)
                     r["cover"] = move["href"] if move else ""
+        shown, rest = _split_rows(phone_cats)
+        over_row = _phone_over(phone_cats, month, days_left if period.key == "month" else 0, c, everyday)
+        # One strip at a time (3AN7): what was just applied, then what is over plan, then an income raise.
+        strip = _strip(bool(bulk_undo), over_row, bool(raise_offer), period.key == "month" and not has_plan)
         phone_plan = {"ring": _plan_ring(period_budgeted, period_actual, period_left) if has_plan else None,
-                      "cats": phone_cats,
-                      "over": _phone_over(phone_cats, month, days_left if period.key == "month" else 0,
-                                          c, everyday),
+                      "cats": phone_cats, "shown": shown, "rest": rest, "strip": strip,
+                      "day_one": _day_one(has_plan, period, month, period_actual, period_budgeted, month_days),
+                      "last_month": _neighbours(month)[0], "month": month,
+                      "over": over_row,
                       "edit_href": f"/budget?month={month}&open_group=all#groups-heading",
                       "notes": [n for n in notes if n.get("label") not in OVER_NOTE_LABELS]}
     return render(request, "budget.html", budget_ai_prompt=budget_prompt(), notes=notes, phone_plan=phone_plan, meter_active=meter_active, meter_rest=meter_rest, kpi_cards=kpi_cards, pace=pace, plan_bills=plan_bills, everyday=everyday,
@@ -372,6 +380,48 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                   previous_bridge=c.budgets.month_view(_neighbours(month)[0]))
 
 
+def _tree_ids(c, category_id: int) -> set[int]:
+    """A category and every category below it."""
+    children: dict[int, list[int]] = {}
+    for item in c.categories.tree(Movement.OUTFLOW):
+        if item.parent_id:
+            children.setdefault(item.parent_id, []).append(item.id)
+    found, pending = {category_id}, [category_id]
+    while pending:
+        for child in children.get(pending.pop(), []):
+            if child not in found:
+                found.add(child)
+                pending.append(child)
+    return found
+
+
+def _see_all(category_id: int, month: str) -> str:
+    """A category's payments for a month on the Transactions tab: the month stays chosen (never "Custom range") and ‹ goes
+    back to this Budget month, which also keeps Budget the chosen tab (3AN7)."""
+    back = quote(f"/budget?month={month}", safe="")
+    return f"/transactions?category_id={category_id}&month={month}&return_to={back}"
+
+
+@router.get("/category/{category_id:int}/payments")
+async def category_payments(request: Request, category_id: int):
+    """A category sheet's last three payments this month, drawn when the sheet opens (3AN7). Nothing yet this month: last
+    month's figure and a way to it, never a wall of zeros (3AN9)."""
+    c = container(request)
+    month = _month(request)
+    first, last = parse_month(month)
+    rows, total = c.transactions.find(TxnFilter(category_ids=sorted(_tree_ids(c, category_id)),
+                                                date_from=fmt_date(first), date_to=fmt_date(last), limit=3))
+    before = _neighbours(month)[0]
+    earlier = ZERO
+    if not rows:
+        start, end = parse_month(before)
+        one_offs = c.budgets.one_off_ids()
+        spending = {cid: v for cid, v in c.budgets.owned_spending(start, end).items() if cid not in one_offs}
+        earlier = sum((spending.get(cid, ZERO) for cid in _tree_ids(c, category_id)), ZERO)
+    return render(request, "phone/budget_payments.html", rows=rows, total=total, month=month, last_month=before,
+                  earlier=earlier, see_all=_see_all(category_id, month), see_last=_see_all(category_id, before))
+
+
 # The key notes the phone's over-plan row and hero already say (keynotes.budget_left).
 OVER_NOTE_LABELS = {"Categories over plan", "Over plan this month"}
 RING_RADIUS = 40
@@ -388,10 +438,27 @@ def _plan_ring(budgeted: Decimal, spent: Decimal, left: Decimal) -> dict | None:
             "arc": round(circumference * min(pct, 100) / 100, 2), "circumference": round(circumference, 2)}
 
 
+def _plain(amount: Decimal | None) -> str:
+    """An amount as a field holds it: "4666" or "4666.50", no thousands comma."""
+    return "" if amount is None else format(amount.normalize(), "f") if amount == amount.to_integral_value() else format(amount, "f")
+
+
+def _pace_line(r: dict) -> dict | None:
+    """The category sheet's one pace sentence (3AN7): over, ahead of the month's pace, or on it."""
+    if r["over"]:
+        return page_status.sentence("Over its limit by {amt}", amt=keynotes.fmt(r["amount"]))
+    if r["pace"] is None:
+        return None
+    text = "Ahead of pace: {n}% spent, {m}% of the month gone" if r["risk"] else "On pace: {n}% spent, {m}% of the month gone"
+    return page_status.sentence(text, n=round(float(r["share"])), m=round(r["pace"]))
+
+
 def _phone_categories(view, tracked: set[int], category_periods: dict, by_group: dict, period,
-                      pace_pct: Decimal | None = None) -> list[dict]:
-    """One row per category that has a limit: over plan first (largest overspend first), then the ones closest to
-    their limit. The same figures as the group rows below: what was spent, the limit and what is left."""
+                      pace_pct: Decimal | None = None, usual: dict | None = None, month: str = "") -> list[dict]:
+    """One row per category that has a limit, in order of need (3AN7): over plan first (largest overspend first), then
+    ahead of the month's pace (furthest ahead first), then by what the category usually costs (its three-month
+    average, else its limit). The same figures as the group rows below: what was spent, the limit and what is left."""
+    usual = usual or {}
     group_of = {category_id: group_id for group_id, ids in by_group.items() for category_id in ids}
     rows, seen = [], set()
     for section in view.sections:
@@ -405,16 +472,53 @@ def _phone_categories(view, tracked: set[int], category_periods: dict, by_group:
             if not planned and not spent:
                 continue
             share = (spent / planned * 100) if planned > ZERO else Decimal(100 if spent > ZERO else 0)
+            direct = getattr(line, "direct", None)
+            own = direct if direct is not None and not getattr(line, "average_months", None) else None
             rows.append({"category_id": cid, "group_id": group_of.get(cid), "name": line.name, "spent": spent,
                          "planned": planned, "over": left < ZERO, "amount": abs(left), "share": share,
                          "width": round(float(min(max(share, ZERO), Decimal(100))), 1),
                          # M5 pace: ahead of the month by 10 points or more, not yet over, is at risk
                          "risk": left >= ZERO and pace_pct is not None and planned > ZERO and share >= pace_pct + 10,
                          "pace": round(float(pace_pct), 1) if pace_pct is not None else None, "cover": "",
+                         "usual": usual.get(cid) or planned,
+                         "rule": (f"{line.income_percent:f}%" if getattr(line, "income_percent", None) is not None
+                                  else _plain(own)),
+                         "payments": f"/budget/category/{cid}/payments?month={month}" if month else "",
+                         "see_all": _see_all(cid, month) if month else "",
                          "href": f"/transactions?category_id={cid}&date_from={period.start_text}&date_to={period.end_text}"})
     rows.sort(key=lambda r: (0, -r["amount"], r["name"].casefold()) if r["over"]
-              else (1 if r["risk"] else 2, -r["share"], r["name"].casefold()))
+              else (1, -(r["share"] - Decimal(str(r["pace"]))), r["name"].casefold()) if r["risk"]
+              else (2, -r["usual"], r["name"].casefold()))
+    for r in rows:
+        r["line"] = _pace_line(r)
     return rows
+
+
+FIRST_ROWS = 4  # Budget's first screen lists what needs a look and the biggest usual spending, up to four rows
+
+
+def _split_rows(rows: list[dict]) -> tuple[list[dict], list[dict]]:
+    """The rows shown at once and the ones behind "N more on track": everything that is over or ahead of pace, then the
+    biggest usual spending up to four rows; a short list shows whole."""
+    if len(rows) <= FIRST_ROWS + 1:
+        return rows, []
+    needy = sum(1 for r in rows if r["over"] or r["risk"])
+    shown = max(needy, FIRST_ROWS)
+    return rows[:shown], rows[shown:]
+
+
+def _strip(undo: bool, over: dict | None, raise_offer: bool, first_limits: bool) -> str:
+    """The one strip under the stepper (3AN7): what was just applied (undo), then a decision waiting (the income raise),
+    then what is over plan, then the first limits; the next one takes the place when the one before is gone. What is
+    over plan still shows in its rows, in rose."""
+    return "undo" if undo else "raise" if raise_offer else "over" if over else "first" if first_limits else ""
+
+
+def _day_one(has_plan: bool, period, month: str, spent: Decimal, planned: Decimal, days: int) -> dict | None:
+    """A new month with nothing spent reads as the plan spread over the month, not "0 of" (3AN7)."""
+    if not has_plan or period.key != "month" or month != month_of(today()) or spent > ZERO or planned <= ZERO:
+        return None
+    return page_status.sentence("New month: {amt} over {n} days", amt=keynotes.fmt(planned), n=days)
 
 
 def _phone_over(rows: list[dict], month: str, days_left: int, c, everyday) -> dict | None:

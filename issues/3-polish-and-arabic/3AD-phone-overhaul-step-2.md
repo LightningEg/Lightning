@@ -33,14 +33,8 @@ Audit 10 (2026-10-29, F9): Add still opens on "To which account?" with six accou
 asks for the amount first with the last-used account already chosen as a chip, and Save pinned above the keyboard.
 
 ## Fix
-Build the first two as phone sheets (C09), then ask the owner about the score and the swipe. Add each to Part C when it
-is built, in both repos.
-
-## 3AD1 Quick add, amount first · L
-Money in, Money out, Transfer on top; the amount with a number pad; usual categories as chips; the last-used account already chosen as a chip; one Primary button; Save pinned above the keyboard (Audit 10 F9).
-
-## 3AD2 Transaction detail as a sheet · L
-Arrow chip, name, date, account, amount, then Category, Plan left (from `BudgetService`, never the template), Note; Split and Done.
+The first two are built as phone sheets (C09; quick add and the transaction sheet, IV-3AN 3AN3). Ask the owner about the
+score and the swipe. Add each to Part C when it is built, in both repos.
 
 ## 3AD3 Swipe left to set a category · M
 Reveal Set category on a Transactions row without fighting C03.3 (swiping never changes tabs) or press-and-hold selection (C08.5).

@@ -205,6 +205,20 @@ class ReportQueries:
             (*params, *category_ids))
         return {int(row["txn_id"]) for row in rows}
 
+    def transaction_days(self, txn_ids) -> dict[int, str]:
+        """{transaction id: its day}."""
+        ids = sorted(set(txn_ids))
+        if not ids:
+            return {}
+        marks = ",".join("?" for _ in ids)
+        return {int(row["id"]): row["date"] for row in self.db.all(
+            f"SELECT id, date FROM transactions WHERE id IN ({marks})", tuple(ids))}
+
+    def newest_first(self, txn_ids) -> list[int]:
+        """Transaction ids ordered as the register lists them: newest day first, the later entry first within a day."""
+        days = self.transaction_days(txn_ids)
+        return sorted(days, key=lambda txn_id: (days[txn_id], txn_id), reverse=True)
+
     def category_transaction_ids(self, category_ids: set[int]) -> set[int]:
         if not category_ids:
             return set()

@@ -1,0 +1,12 @@
+{# The end of To sort (3AN3): every row has its category. Done closes the sheet; the list behind it reloads. #}
+{% extends "base.html" %}
+{% block title %}{{ 'All sorted'|tr(locale) }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="{{ return_to }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Transactions'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}{% endblock %}
+{% block content %}
+<section class="app-popup-content phone-txn-sheet">
+  <h2 data-popup-title class="phone-sheet-title">{{ 'All sorted'|tr(locale) }}</h2>
+  <p class="phone-note">{{ 'Every payment here has its category.'|tr(locale) }}</p>
+  <a class="btn primary phone-save" href="{{ return_to }}" data-popup-close>{{ 'Done'|tr(locale) }}</a>
+</section>
+{% endblock %}

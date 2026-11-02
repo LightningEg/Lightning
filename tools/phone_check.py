@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 PAGES = ("/plan/purchases/new", "/exports/all", "/setup/salary", "/", "/birdview/expenses", "/financial-health", "/budget", "/plan", "/plan/recurring", "/plan/loans",
          "/plan/reserves", "/investments", "/investments/planner", "/investments/prices", "/accounts", "/transactions",
          "/money-from-others", "/zakat", "/settings", "/categories", "/counterparties", "/checks", "/profiles",
-         "/profiles/devices", "/accounts/1", "/accounts/1/transaction/new", "/accounts/add-transaction", "/sms")
+         "/profiles/devices", "/accounts/1", "/accounts/1/transaction/new", "/accounts/add-transaction", "/sms", "/search", "/search?q=food")
 SMS = ("تم خصم 147.87 EGP من بطاقة الخصم المباشر رقم 2093 عند Uber                  Dow يوم 06/10/26 الساعه 11:13 "
        "المتاح 3512.40EGP للمزيد إتصل ب ١٩٦٢٣")
 WIDEST = """() => { const w = innerWidth; let worst = null, right = w;
@@ -86,6 +86,16 @@ def run(shots: Path | None = None) -> list[str]:
                         over = page.evaluate("() => document.documentElement.scrollWidth - innerWidth")
                         if over > 0:
                             problems.append(f"{width} {path}: {over}px sideways; widest {page.evaluate(WIDEST)}")
+                        # Every row that opens a sheet (D1, 3AN12) opens it and the sheet fits too.
+                        for index in range(page.locator(".phone-sheet-row > summary:visible").count()):
+                            page.locator(".phone-sheet-row > summary:visible").nth(index).click()
+                            page.wait_for_timeout(400)
+                            wide = page.evaluate("() => { const p = document.querySelector('.phone-sheet-row[open] .phone-sheet-panel');"
+                                                 " return document.documentElement.scrollWidth - innerWidth"
+                                                 " + (p && p.scrollWidth > p.clientWidth + 1 ? 1 : 0); }")
+                            if wide > 0:
+                                problems.append(f"{width} {path}: sheet {index + 1} scrolls sideways")
+                            page.evaluate("() => document.querySelectorAll('.phone-sheet-row[open]').forEach((d) => { d.open = false; })")
                         if shots is not None and width == 360:
                             shots.mkdir(parents=True, exist_ok=True)
                             name = path.strip("/").replace("/", "-") or "overview"

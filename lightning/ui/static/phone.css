@@ -137,6 +137,61 @@ html.phone .main .cluster-name, html.phone .main .cluster span { white-space: no
 .phone-grabber { display: block; width: 40px; height: 4px; margin: 4px auto 8px; border-radius: 99px; background: var(--c-track); }
 .phone .phone-sheet form .btn.primary, .phone .phone-sheet form button[type="submit"].primary { width: 100%; }
 
+/* 3AN3, 3AN5, 3AN12: the Add sheet and a transaction's own sheet (C09, C05.2, C08.3). No card inside a sheet; one Primary pinned at the
+   foot; a sheet rides above the keyboard (phone-capture.js sets --kb and --vv-h from the visual viewport). */
+.phone .app-popup.phone-sheet { bottom: var(--kb, 0px); max-height: min(92vh, calc(var(--vv-h, 100vh) - 8px)); }
+.phone .phone-sheet .app-popup-frame { max-height: min(92vh, calc(var(--vv-h, 100vh) - 8px)); }
+.phone-entry, .phone-txn-sheet { background: none; border: 0; box-shadow: none; padding: 0; }
+.phone-entry .phone-form { gap: 10px; margin-top: 10px; }
+.phone-entry-top { display: flex; align-items: center; gap: 8px; }
+.phone-entry-top .phone-segment { flex: 1; min-width: 0; }
+.phone-entry-top .phone-sms-paste { flex: none; margin: 0; border: 0; cursor: pointer; font: 600 15px/1.2 var(--body); }
+.phone-sms-status { margin: 0; }
+.phone-sms-status:empty { display: none; }
+.phone-amount-box { position: relative; display: flex; }
+.phone-amount-box input { padding-inline-end: 64px; }
+.phone-amount-unit { position: absolute; inset-inline-end: 16px; top: 50%; transform: translateY(-50%); color: var(--c-muted); font-weight: 700; pointer-events: none; }
+.phone-account-chip { position: relative; display: inline-flex; align-self: flex-start; max-width: 100%; border-radius: 999px; }
+.phone-form .phone-account-chip select:not(#_) { width: auto; max-width: 100%; min-height: 40px; padding-block: 0; padding-inline: 16px 38px; border-radius: 999px;
+  font: 700 15px/1.2 var(--body); color: var(--c-ink); appearance: none; -webkit-appearance: none; background-repeat: no-repeat; background-position: right 14px center; background-size: 12px 8px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23304A5C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E"); }
+.phone-account-chip.needs-pick { box-shadow: 0 0 0 2px var(--c-nile); }
+.phone-cat-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.phone-cat-group { display: contents; }
+.phone-cat-chips form { display: contents; }
+.phone-cat-chips .phone-chip { max-width: 100%; border: 0; cursor: pointer; font: 600 15px/1.2 var(--body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.phone-cat-chips .phone-chip.is-chosen, .phone-cat-chips .phone-chip[aria-pressed="true"] { background: var(--c-nile); color: #fff; }
+.phone-chip-other { color: var(--c-ink-2); }
+.phone-cat-other { margin-top: 12px; }
+.phone-save-bar { position: sticky; bottom: 0; z-index: 2; margin: 4px -16px -16px; padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+  background: var(--surface, #fff); border-top: 1px solid var(--c-line); }
+.phone-save-bar .phone-save { margin: 0; }
+.phone-txn-head { display: flex; align-items: center; gap: 12px; padding-inline-end: 44px; }
+.phone-txn-head-text { min-width: 0; }
+.phone-txn-head .phone-note { margin: 2px 0 0; }
+.phone-txn-sheet-amount { margin: 14px 0 4px; font: 800 30px/1.1 var(--display, inherit); font-variant-numeric: tabular-nums; }
+.phone-txn-sheet-amount small { font-size: 14px; font-weight: 700; color: var(--c-muted); }
+.phone-txn-sheet-amount.is-in { color: #097852; }
+.phone-sheet-sub { margin: 16px 0 8px; font-size: 15px; }
+.phone-facts { margin: 8px 0 0; }
+.phone-facts > div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--c-line); }
+.phone-facts dt { color: var(--c-muted); font-weight: 600; }
+.phone-facts dd { margin: 0; min-width: 0; font-weight: 700; text-align: end; overflow-wrap: anywhere; }
+.phone-facts .is-over { color: #C93D72; }
+.phone-sheet-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; margin: 16px 0 8px; }
+.phone-sheet-actions .btn, .phone-txn-sheet > .btn { width: 100%; min-height: 48px; justify-content: center; }
+.fig { direction: ltr; unicode-bidi: isolate; }
+.phone-money-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin: 10px 0 0; color: var(--c-ink-2); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.phone-money-line b { color: var(--c-ink); font-weight: 700; }
+.phone-money-line b.is-in { color: #097852; }
+.phone-money-sep { color: var(--c-muted); }
+.phone-reg-views > .phone-period-now:not(#_) { display: block; height: 0; min-height: 0; margin: 0; padding: 0; border: 0; background: none; font-size: 0; line-height: 0; overflow: hidden; }
+.phone-live-search { margin: 12px 0 8px; }
+.phone-search-results .phone-section { margin-top: 16px; }
+.phone-sms-paste-form { margin-bottom: 8px; }
+/* A message and its Undo is a toast above the tab bar (3AN3): the generic flash is already fixed and themed; it moves to the foot, where the thumb is. */
+.phone-flash:not(#_) { top: auto; bottom: calc(var(--c-tabbar, 64px) + 12px + env(safe-area-inset-bottom)); max-width: calc(100vw - 32px); padding: 2px 6px 2px 16px; font-size: 15px; line-height: 1.35; }
+
 /* C06: cards, KPI tiles, lead figures and rows (guideline C06, C10). */
 .phone-note { color: var(--c-muted); font-size: 13px; margin: 2px 0 0; }
 .phone-section { margin: 32px 0 0; }
@@ -610,6 +665,9 @@ html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !import
 .phone-needs > summary .phone-needs-text b { font-size: 15px; color: var(--c-ink); }
 .phone-needs > summary .phone-needs-text small { color: var(--c-ink-2); font-size: 12.5px; line-height: 1.35; }
 .phone-needs > summary { padding: 8px 0; }
+/* 3AN4: the next bill due within three days, by payee, amount and days; it opens the bill's pay sheet (J3). */
+.phone-needs-bill { display: flex; align-items: center; min-height: 44px; color: var(--c-ink); font-size: 14px; font-weight: 700; text-decoration: underline; overflow-wrap: anywhere; }
+.phone-needs-bill.is-late { color: #C93D72; }
 .phone-needs-open { flex: none; color: var(--c-ink); font-weight: 700; text-decoration: underline; }
 .phone-needs[open] .phone-needs-open { visibility: hidden; }
 .phone-needs .needs-you-count { flex: none; }
@@ -686,6 +744,53 @@ html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !import
 .phone-cat.is-over .phone-cat-left > b, .phone-cat.is-over .phone-cat-left > small { color: #C93D72; }
 .phone-cat.is-over .phone-cat-left > small { font-weight: 600; }
 /* == end 3AC Budget tab == */
+
+/* == 3AN4 Overview first screen == two tiles, Needs you naming the bill; Latest's first row above 600 px at 360 x 800 */
+.phone-kpis .phone-kpi { gap: 4px; padding: 12px 14px; }
+.phone-kpis { margin-top: 10px; }
+html.phone .phone-kpi-head .stat-chip { white-space: nowrap; }  /* a tile's chip is one line (3AN10, C12) */
+.phone-latest { margin-top: 18px; }
+.phone-latest .phone-day { margin-top: 6px; }
+/* == end 3AN4 == */
+
+/* == 3AN sheets == a row that opens a sheet from the foot of the screen (D1, C06.2); phone/partials/sheet.html */
+.phone-sheet-row > summary { list-style: none; cursor: pointer; }
+.phone-sheet-row > summary::-webkit-details-marker { display: none; }
+.phone-sheet-panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; max-height: 85vh; overflow-y: auto; box-sizing: border-box;
+  padding: 8px var(--c-side) calc(16px + env(safe-area-inset-bottom)); border-radius: 20px 20px 0 0; background: var(--c-surface);
+  box-shadow: 0 0 0 100vmax rgba(13, 34, 51, .35); } /* the shadow dims the page behind; a tap outside closes (phone-gestures.js) */
+.phone-sheet-panel .phone-grabber { width: 36px; margin: 0 auto 12px; background: var(--c-line); }
+.phone-sheet-panel .phone-save { margin-top: 12px; }
+html.phone:has(.phone-sheet-row[open]) .phone-tabbar { display: none; }
+.phone-sheet-row > summary .phone-chevron { color: var(--c-muted); }
+.phone-sheet-panel .phone-lead { margin: 8px 0 0; font-size: 32px; }
+.phone-sheet-panel .phone-note { margin: 4px 0 0; }
+.phone-sheet-panel .phone-rows { margin: 12px 0 0; }
+.phone-sheet-panel .phone-sheet-sub { margin: 16px 0 0; font-size: 13px; font-weight: 700; color: var(--c-ink-2); }
+.phone-sheet-panel .phone-form { margin-top: 16px; }
+.phone-sheet-panel .btn:not(.phone-save), .phone-sheet-panel a.btn { display: flex; align-items: center; justify-content: center; min-height: 48px; margin-top: 10px; }
+.phone-sheet-bar { position: relative; display: block; height: 6px; margin: 10px 0 0; background: var(--c-track); }
+.phone-sheet-bar i { background: #14A874; border-radius: 99px; }
+.phone-sheet-bar.is-over i { background: #C93D72; }
+/* Budget rows: 64 tall, the 4 px meter inside the row (3AN7). */
+.phone-sheet-row > summary::after { display: none !important; }
+.phone-sheet-row > summary.phone-cat:not(#_) { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 2px 16px; min-height: 64px; padding: 8px 0 9px; align-content: center; }
+.phone-cat .phone-plan-bar { height: 4px; margin: 4px 0 0; }
+/* Reserves (3AN12): a key note stacks its head, figure and line (it was a row and cut the figure); the refill offer is a
+   line inside the one card, never a tinted card in a card. */
+html.phone .main .key-notes .key-note { display: block !important; }
+.phone .emergency-fund .refill-prompt:not(#_) { flex-direction: column; align-items: stretch; margin: 0 0 14px; padding: 0; border-radius: 0; background: none; }
+.phone .emergency-fund .refill-prompt .btn { width: 100%; min-height: 48px; justify-content: center; }
+.phone-suggest-actions { display: flex; gap: 24px; margin: -6px 0 6px; }
+.phone-suggest-actions form { margin: 0; }
+.phone-suggest-actions .phone-quiet { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; cursor: pointer; }
+.phone-recurring-row { padding: 0; }
+.phone-recurring-row .phone-row-link { flex: 1; min-width: 0; display: flex; align-items: center; min-height: 52px; padding: 6px 0; color: inherit; text-decoration: none; }
+.phone-recurring-row .phone-row-link > span, .phone-suggest > span { display: flex; flex-direction: column; min-width: 0; }
+.phone-recurring-row .phone-row-link > span > b, .phone-suggest > span > b { font-size: 15px; font-weight: 600; white-space: normal; }
+.phone-recurring-side { align-items: flex-end; flex: none; }
+.phone-recurring-side .plan-status-due { display: inline-flex; align-items: center; min-height: 32px; }
+/* == end 3AN sheets == */
 
 /* == 3AC Cash planning tab == (rules for phone/planning/plan.html) */
 /* The hero sits in the page header, so the tabs follow its sentence; its seam replaces the header's own. */
@@ -771,6 +876,9 @@ html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !import
 .phone-reg-search.is-first { margin-top: 0; }
 .phone-reg-chips { margin: 10px 0 0; gap: 6px; }
 .phone-reg-chips .phone-chip { padding: 0 11px; font-size: 14px; } /* all five fit one row at 360; at 320 they wrap */
+html[dir="rtl"] .phone-reg-chips { gap: 4px; }
+html[dir="rtl"] .phone-reg-chips .phone-chip { padding: 0 9px; font-size: 13.5px; } /* the Arabic words are wider: still one row at 360 (3AN10) */
+html[dir="rtl"] .phone-reg-chips .phone-chip-n { margin-inline-start: 4px; }
 .phone-chip-n { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; margin-inline-start: 6px; padding: 0 6px;
   border-radius: 10px; background: var(--c-nile); color: #fff; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .phone-chip.is-chosen .phone-chip-n { background: #fff; color: var(--c-nile); }

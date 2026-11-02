@@ -1,0 +1,35 @@
+{# Spending's "More analysis" sheet body (3AN12), drawn when the sheet opens; no frame. What left the first page: how big
+   a payment is, how each category moved against its usual month, the day-by-day heat map, where money in went, and the
+   net flow by month. Every figure comes from the services, as on the PC. #}
+{% from "phone/partials/charts.html" import flow_bars, month_tiles %}
+{% from "partials/charts.html" import day_calendar %}
+{% set a = analysis %}
+{% if average is not none %}<div class="phone-rows">
+  <div class="phone-row"><span>{{ 'Average payment'|tr(locale) }}<small>{{ ('1 payment' if payment_count == 1 else '{n} payments')|tr(locale, n=payment_count) }}</small></span><b>{{ average|amount_role('total') }}</b></div>
+  {% for r in largest[:1] %}<a class="phone-row" href="{{ '/t/' ~ r.ref if r.ref else '/transactions?date_from=' ~ date_from ~ '&date_to=' ~ date_to }}"><span>{{ 'Largest payment'|tr(locale) }}<small>{{ r.counterparty or r.category }} · {{ r.date }}</small></span><b>{{ r.value|amount_role('total') }}</b></a>{% endfor %}
+</div>{% endif %}
+
+{% if a.has_history and a.rows %}
+<h3 class="phone-sheet-sub">{{ 'Now against your usual month'|tr(locale) }}</h3>
+<div class="phone-rows">{% for k in a.clusters %}<div class="phone-row"><span>{{ k.name }}<small>{{ 'Usual {amt}'|tr(locale, amt=(k.usual|money(False, 0)) if k.usual is not none else '—') }}</small></span><b>{{ k.now|amount_role('total') }}{% if k.change is not none %} <small class="{{ 'neg' if not a.partial and k.change > 0.5 else 'pos' if not a.partial and k.change < -0.5 }}">{{ k.change|signed_pct(0) }}%</small>{% endif %}</b></div>{% endfor %}</div>
+<h3 class="phone-sheet-sub">{{ 'How each one moved'|tr(locale) }}</h3>
+<div class="multiples is-compact">{% for m in a.multiples %}<div class="multiple"><span class="multiple-head"><b>{{ m.name }}</b><span>{{ m.now|money }}</span></span><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="100" y1="92" y2="92" class="multiple-base" vector-effect="non-scaling-stroke"/><polyline points="{{ m.line }}" vector-effect="non-scaling-stroke"/></svg></div>{% endfor %}</div>
+{% endif %}
+
+<h3 class="phone-sheet-sub">{{ 'Month by month' if calendar.long_period else 'Day by day'|tr(locale) }}</h3>
+{% if calendar.long_period %}<div class="phone-rows">{% for month in calendar.monthly %}<a class="phone-row" href="/birdview/expenses?period=month&amp;month={{ month.key }}"><span>{{ month.key }}</span><b>{{ month.spend|amount_role('total') }}</b></a>{% endfor %}</div>
+{% else %}
+{% if calendar.busiest %}<p class="phone-note">{{ 'Most on {sa}'|tr(locale, sa=calendar.busiest[0]) }} · {{ calendar.busiest[1]|amount_role('total') }}</p>{% endif %}
+{{ day_calendar(calendar, 'spend') }}
+<p class="heat-key" role="img" aria-label="{{ 'less to more spent'|tr(locale) }}"><span class="heat-1"></span><span class="heat-2"></span><span class="heat-3"></span><span class="heat-4"></span></p>{% endif %}
+
+{% if money_sankey %}
+<h3 class="phone-sheet-sub">{{ 'Where money in went'|tr(locale) }}</h3>
+{{ flow_bars(money_sankey, base) }}
+{% if money_sankey_six %}<h3 class="phone-sheet-sub">{{ 'The last six months'|tr(locale) }}</h3>{{ flow_bars(money_sankey_six, base) }}{% endif %}
+{% endif %}
+{% if month_calendar and month_calendar.years %}
+<h3 class="phone-sheet-sub">{{ 'Net cash flow by month'|tr(locale) }}</h3>
+{{ month_tiles(month_calendar, 'net') }}
+<p class="phone-scale"><span>{{ 'Short'|tr(locale) }}</span><i class="flow-out-4"></i><i class="flow-out-2"></i><i class="flow-in-2"></i><i class="flow-in-4"></i><span>{{ 'Kept'|tr(locale) }}</span></p>
+{% endif %}

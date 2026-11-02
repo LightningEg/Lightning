@@ -294,7 +294,16 @@ def _phone_register(c, account_id, base_url, keep, kind, month, preset, from_que
     tiles = account_id is None or shown != "all" or matched_flows is not None
     money_in, money_out = (matched_flows if matched_flows is not None else
                            c.reporting.register_flows(account_id, date_from, date_to)) if tiles else (ZERO, ZERO)
+    # An empty month offers the month before with its figure instead of a wall of zeros (3AN9).
+    earlier = None
+    if shown == "month" and tiles and matched_flows is None and not kind and money_in == ZERO and money_out == ZERO:
+        before = shift_month(chosen, -1)
+        start, end = parse_month(before)
+        was_in, was_out = c.reporting.register_flows(account_id, start, end)
+        if was_in or was_out:
+            earlier = {"month": before, "out": -was_out, "in": was_in, "href": href({**ranged, "month": before})}
     return {
+        "earlier": earlier,
         "chips": [{"key": key, "label": label, "href": href({"kind": "" if key == "all" else key}),
                    "chosen": kind == ("" if key == "all" else key), "count": len(unsorted_ids) if key == "unsorted" else 0}
                   for key, label in (("all", "All"), ("in", "In"), ("out", "Out"), ("transfer", "Transfers"), ("unsorted", "To sort"))],
@@ -308,6 +317,9 @@ def _phone_register(c, account_id, base_url, keep, kind, month, preset, from_que
         "clear_tag": href({"tag": "", **({"q": ""} if keep.get("q", "").startswith("#") else {})}),
         "clear_category": href({"category_id": ""}),
         "tiles": tiles, "money_in": money_in, "money_out": -money_out,
+        # a row opened from To sort walks that list: its account and days ride along (3AN3)
+        "sort_qs": urlencode({"sort": 1, "sa": account_id or "", "sf": "" if date_from == FAR_PAST else date_from,
+                              "st": "" if date_to == FAR_FUTURE else date_to}) if kind == "unsorted" else "",
         # what a form that adds one choice must send along: every other choice already made
         "keep_for_search": [(k, v) for k, v in keep.items() if k != "q"],
         "keep_for_dates": [(k, v) for k, v in keep.items() if k not in ranged],

@@ -24,6 +24,8 @@ def _decode_read(adapter, values):
 COMMANDS = {
     # Assignment updates the portable account-ending map and stages all waiting rows atomically.
     "sms_imports.assign": Command("sms_imports.assign", dict(ending=TEXT, account_id=ref("accounts"))),
+    # A message entered by hand on the Add sheet is marked read, so the phone's inbox does not offer it again (3AN5).
+    "sms_imports.mark_seen": Command("sms_imports.mark_seen", dict(text_fingerprint=TEXT)),
     # Pasted/shared messages arrive as tuples with a local timestamp; the wire carries an ISO timestamp.
     "sms_imports.read": Command("sms_imports.read", dict(messages=JSON, cursor_ms=optional(INT)),
                                  encode=_encode_read, decode=_decode_read),

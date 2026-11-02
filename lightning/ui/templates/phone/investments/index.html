@@ -43,10 +43,12 @@
 {{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}
 {% if investment_report.missing %}<p class="flash">Prices missing: {% for issue in investment_report.missing %}{{ issue.asset }}{% if not loop.last %}, {% endif %}{% endfor %}. Their value may be out of date.</p>{% endif %}
 
-<article class="card phone-card phone-invest-card has-{{ ph.chart.count }}" aria-label="{{ 'Portfolio value over time'|tr(locale) }}">
+{# no chart until there are two months of history (3AN9): a card that only says "not enough history" is a wall of nothing #}
+{% if not ph.chart.too_short %}<article class="card phone-card phone-invest-card has-{{ ph.chart.count }}" aria-label="{{ 'Portfolio value over time'|tr(locale) }}">
   {{ trend(ph.chart, 'Portfolio value over time'|tr(locale), '', 160) }}
   <div class="phone-invest-seg" role="group" aria-label="{{ 'Choose period'|tr(locale) }}">{% for r in ph.ranges %}<a href="{{ r.href }}"{% if r.selected %} class="is-chosen" aria-current="true"{% endif %}>{{ r.text|tr(locale) }}</a>{% endfor %}</div>
 </article>
+{% endif %}
 {% if since_return and since_return.percent is not none %}<div class="phone-rows phone-invest-return"><div class="phone-row"><span>{{ ('XIRR' if since_return.annualized else 'Return')|tr(locale) }}<small>{{ ('Held {n} day' if since_return.days_held == 1 else 'Held {n} days')|tr(locale, n=since_return.days_held) }}</small></span><b>{{ since_return.percent|signed_pct }}{{ ('% a year' if since_return.annualized else '%')|tr(locale) }}</b></div></div>{% endif %}
 
 <section class="phone-section" aria-labelledby="holdings-heading">

@@ -1,0 +1,35 @@
+{# Spending on a phone (3AN12, C06.3): the lead (money out against the same days usually), the four biggest categories
+   then Other as flat rows, then one row "More analysis" whose sheet loads the rest (heat map, money-flow diagrams, small
+   multiples, month grid) when it opens, so the first page stays light. This month, like every tab; a month with
+   nothing spent yet offers last month (3AN9). The route (birdview.py, _phone_spending) works out every figure. #}
+{% extends "base.html" %}
+{% from "phone/partials/charts.html" import stat_rows with context %}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% from "partials/macros.html" import period_control with context %}
+{% block title %}Spending{% endblock %}
+{% block top_actions %}{{ period_control("/birdview/expenses", period, month, this_month, date_from, date_to, category_filter) }}{% endblock %}
+{% block heading %}<h1>{{ "Spending"|tr(locale) }}</h1>{% if category_name %}<p class="phone-note">{{ category_name }}</p>{% endif %}{% endblock %}
+{% block content %}
+{% if error %}<div class="flash error">{{ error|tr(locale) }}</div>{% endif %}
+{% if category_filter %}<p class="phone-note"><a href="/birdview/expenses?period={{ period }}&amp;month={{ month }}&amp;date_from={{ custom_from }}&amp;date_to={{ custom_to }}">{{ 'All spending'|tr(locale) }}</a></p>{% endif %}
+{% set lead = {'key': 'out', 'label': fig.money_out.label ~ ((' ' ~ 'so far'|tr(locale)) if partial else ''), 'value': total, 'kind': 'money', 'compare': compare if total or rows else []} %}
+{{ stat_rows([lead], base) }}
+
+{% if rows %}
+<section class="phone-section" aria-labelledby="where-heading">
+  <header class="phone-section-head"><h2 id="where-heading">{{ 'Where did it go?'|tr(locale) }}</h2><span>{{ date_from }} {{ 'to'|tr(locale) }} {{ date_to }}</span></header>
+  <div class="phone-rows">
+    {% for r in rows %}<a class="phone-row" href="{{ r.href }}"><span>{{ r.name }}<small>{{ '{n}% of money out'|tr(locale, n='%.0f'|format(r.share)) }}</small></span><b>{{ r.value|amount_role('total') }}</b></a>{% endfor %}
+    {% if other %}<a class="phone-row" href="{{ other.href }}"><span>{{ 'Other'|tr(locale) }}<small>{{ '{n}% of money out'|tr(locale, n='%.0f'|format(other.share)) }}</small></span><b>{{ other.value|amount_role('total') }}</b></a>{% endif %}
+    {% set row %}<span>{{ 'More analysis'|tr(locale) }}<small>{{ 'Days, months, money in and out'|tr(locale) }}</small></span><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+    {% call sheet('More analysis'|tr(locale), row) %}<div class="phone-sheet-more" data-fold-src="/birdview/expenses/more?{{ more_query }}"><p class="chart-empty">{{ 'Loading…'|tr(locale) }}</p></div>{% endcall %}
+  </div>
+</section>
+{% else %}
+<section class="phone-section" aria-labelledby="where-heading">
+  <header class="phone-section-head"><h2 id="where-heading">{{ 'No spending in this period'|tr(locale) }}</h2></header>
+  {% if earlier %}<div class="phone-rows"><a class="phone-row" href="{{ earlier.href }}"><span>{{ 'Last month'|tr(locale) }}<small>{{ earlier.month }}</small></span><b>{{ earlier.value|amount_role('total') }}</b></a></div>
+  {% else %}<p class="phone-note">{{ 'Try a longer period, or review the transactions recorded for these dates.'|tr(locale) }}</p><a class="phone-quiet" href="/transactions?date_from={{ date_from }}&amp;date_to={{ date_to }}">{{ 'View transactions'|tr(locale) }}</a>{% endif %}
+</section>
+{% endif %}
+{% endblock %}

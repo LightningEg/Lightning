@@ -41,17 +41,20 @@ DETOURS = {
     "Gold at home": ("/accounts", "Gold at home"),
     "Family flat (my share)": ("/accounts", "Family flat (my share)"),
     "Import statement": ("Import a statement",),                        # behind the account's ⋯
-    "Loans still to pay": ("What you owe",),                      # the Overview's row that opens Loans
+    "Loans still to pay": ("What you owe", "Loans still to pay"),  # the Overview's What you owe sheet (BV-5I, D1), then its Loans row
     "Data checks": ("/settings", "Data checks"),                  # from a settings sheet: Settings, then the tab
     "Categories": ("/settings", "Categories"),
     "Rules": ("/settings", "Rules"),
     "#Eid": ("?q=%23eid",),                                       # a note's tag: typed into the search
     "Investment planner": ("Planner",),
 }
+# Your position on the Overview is flat rows that open their pages (3AN12, C11.1): the cash accounts the PC lists there
+# are reached through "Cash you own", which opens Accounts.
+VIA_CASH_YOU_OWN = "Cash you own"
 # Sections without a tab-bar slot (phone overhaul 2026-10-22): their taps go through More.
 MOVED = {"Accounts", "Cash planning", "Investments", "Financial health", "Health", "Spending", "Currencies", "Settings"}
 # The phone's Choose period sheet (phone overhaul 2026-10-22) names the PC's period buttons in words.
-BUTTONS = {"Custom": "Apply", "YTD": "Year to date", "Monthly": "This month"}
+BUTTONS = {"Custom": "Apply", "YTD": "Year to date", "Monthly": "This month", "Search": None}  # the phone's Search is live: no button, Enter sends it (3AN6)
 
 
 def _phone(app):
@@ -89,6 +92,10 @@ class PhoneBrowser(screens.Browser):
                 return self._framed(super().click(text))
             except AssertionError:
                 if text not in DETOURS:
+                    if self.page is not None and self.page.path.split("?")[0] == "/" and text not in MOVED:
+                        self.detours[VIA_CASH_YOU_OWN] += 1
+                        self._framed(super().click(VIA_CASH_YOU_OWN))
+                        return self._framed(super().click(text))
                     raise
         self.detours[text] += 1
         for step in DETOURS[text]:
@@ -107,7 +114,7 @@ class PhoneBrowser(screens.Browser):
             if button not in BUTTONS:
                 raise
         self.detours[f"button {button}"] += 1
-        return super().submit(values, BUTTONS[button], *args, **kwargs)
+        return super().submit(values, BUTTONS[button] or None, *args, **kwargs)
 
 
 class PhoneMohab(Mohab):
@@ -165,7 +172,7 @@ def mohab(tmp_path_factory):
 
 
 def test_the_whole_year_is_lived_on_the_phone_with_only_the_known_detours(mohab):
-    expected = set(DETOURS) | {f"button {b}" for b in BUTTONS} | {"Select"}
+    expected = set(DETOURS) | {f"button {b}" for b in BUTTONS} | {"Select", VIA_CASH_YOU_OWN}
     assert set(mohab.b.detours) <= expected, set(mohab.b.detours) - expected
 
 
@@ -187,7 +194,7 @@ def test_several_rows_get_one_category_together(mohab):
 
 
 def test_a_tag_gathers_its_rows_with_their_totals(mohab):
-    assert mohab.answers["eid_tag"].shows("Tagged #eid", "Money in", "Money out")
+    assert mohab.answers["eid_tag"].shows("Tagged #eid", "In +1,000 · Out −3,000")   # the period's money in and out, one quiet line (D2)
 
 
 def test_needs_you_and_get_set_up_say_what_a_tap_does(mohab):
