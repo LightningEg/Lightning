@@ -17,7 +17,7 @@ from lightning.categories.service import CategoryService
 from lightning.core.dates import fmt_date, parse_date, today
 from lightning.core.errors import ConflictError, ValidationError
 from lightning.core.ledger import Effect, PostingLine
-from lightning.core.money import ZERO, check_places, fmt, from_e6, to_decimal
+from lightning.core.money import ZERO, check_places, from_e6, to_decimal
 from lightning.core.refs import DocType
 from lightning.database.connection import Database
 from lightning.reporting.service import ReportingService
