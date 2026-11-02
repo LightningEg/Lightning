@@ -10,6 +10,7 @@ from fastapi import APIRouter, Request, Response
 
 from lightning.core.dates import fmt_date, month_of, parse_month, today
 from lightning.core.errors import LightningError, ValidationError
+from lightning.workflows.ai_prompts import budget_prompt
 from lightning.categories.domain import Movement, Scope
 from lightning.core.money import ZERO, quantize, to_decimal
 
@@ -340,7 +341,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                                           c, everyday),
                       "edit_href": f"/budget?month={month}&open_group=all#groups-heading",
                       "notes": [n for n in notes if n.get("label") not in OVER_NOTE_LABELS]}
-    return render(request, "budget.html", notes=notes, phone_plan=phone_plan, meter_active=meter_active, meter_rest=meter_rest, kpi_cards=kpi_cards, pace=pace, plan_bills=plan_bills, everyday=everyday,
+    return render(request, "budget.html", budget_ai_prompt=budget_prompt(), notes=notes, phone_plan=phone_plan, meter_active=meter_active, meter_rest=meter_rest, kpi_cards=kpi_cards, pace=pace, plan_bills=plan_bills, everyday=everyday,
                   lead=lead, pace_card=pace_card, needs=needs, status=status,
                   raise_in_card=bool(needs and needs[-1]["href"].startswith("/budget/raise")) or any(k["key"] == "saves" for k in kpi_cards),
                   raise_offer=raise_offer, meter_lines=meter_lines, left_note=left_note, check=check,

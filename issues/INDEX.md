@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 69 open items, in the order they are worked on.
+10 milestones, 66 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -43,12 +43,11 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | IT-2C3 | ↳ Native file pickers | | | M | |
 | IT-2C4 | ↳ Unresolved-evidence repair | | | M | |
 | IT-2C5 | ↳ Native notification delivery, Windows and Android | | | M | |
-| **BT-2E** | [The engine accepts some bad input - dates before an account opened, crafted ids, rounding of plan amounts](2-safe-for-real-money/2E-engine-input-checks.md) | bug, technical · low | Capture | M | ready |
 | **BT-2F** | [On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone](2-safe-for-real-money/2F-android-downloads-files-links.md) ([#229](https://github.com/LightningEg/Lightning/issues/229)) | bug, technical · high | Everywhere | M | building |
 | **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical · medium | Reach | M | new |
 | **OW-2AB** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AB-stale-code.md) | owner task | Protect |  | ready |
 
-Done: 2B, 2D, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AC, 2AD. Next free code: 2AE.
+Done: 2B, 2D, 2E, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AC, 2AD. Next free code: 2AE.
 
 ## 3 Polish and Arabic
 
@@ -231,7 +230,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7F2 | ↳ Rename a rule | | | S | |
 | NF-7F3 | ↳ Change one budget category without the full grid | | | M | |
 | **NF-7G** | [Age of Money and a spending calendar](7-planning-import-and-search/7G-more-analytics.md) | new feature | Understand | M | new |
-| **NF-7I** | [A planned payment due on a public holiday doesn't move to a working day](7-planning-import-and-search/7I-public-holidays-in-schedules.md) ([#50](https://github.com/LightningEg/Lightning/issues/50)) | new feature | Plan | S | ready |
 | **NF-7L** | [Smart suggestions exist but sit 2-3 clicks down - make Needs you the one inbox, widen Looks recurring](7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) | new feature | Plan | L | ready |
 | NF-7L2 | ↳ Needs you carries the suggestions ([#224](https://github.com/LightningEg/Lightning/issues/224)) | | | L | |
 | NF-7L3 | ↳ Looks recurring finds real bills ([#225](https://github.com/LightningEg/Lightning/issues/225)) | | | M | |
@@ -241,14 +239,8 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | **NF-7T** | [Link the sections - salary-day cascade and a reserve tied to its bill](7-planning-import-and-search/7T-link-the-sections.md) | new feature | Plan | L | new |
 | NF-7T5 | ↳ Salary-day cascade | | | L | |
 | NF-7T6 | ↳ A reserve tied to its bill | | | L | |
-| **NF-7V** | [More AI prompt buttons that carry Lightning's context](7-planning-import-and-search/7V-more-ai-prompt-buttons.md) | new feature | Understand | M | ready |
-| NF-7V1 | ↳ A rejected CSV ([#232](https://github.com/LightningEg/Lightning/issues/232)) | | | M | |
-| NF-7V2 | ↳ Counterparty clean-up ([#233](https://github.com/LightningEg/Lightning/issues/233)) | | | S | |
-| NF-7V3 | ↳ Spending analysis ([#234](https://github.com/LightningEg/Lightning/issues/234)) | | | S | |
-| NF-7V4 | ↳ Budget question ([#235](https://github.com/LightningEg/Lightning/issues/235)) | | | M | |
-| NF-7V5 | ↳ Category mapping for a bank ([#236](https://github.com/LightningEg/Lightning/issues/236)) | | | M | |
 
-Done: 7H, 7J, 7K, 7N, 7O, 7P, 7Q, 7R, 7U, 7W. Next free code: 7X.
+Done: 7H, 7I, 7J, 7K, 7N, 7O, 7P, 7Q, 7R, 7U, 7V, 7W. Next free code: 7X.
 
 ## 8 Website
 

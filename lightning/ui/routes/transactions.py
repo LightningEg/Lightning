@@ -55,7 +55,7 @@ async def save_transaction_popup(request: Request, txn_id: int):
     c = container(request)
     form = await request.form()
     values = {key: str(form.get(key, "")) for key in
-              ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes", "account_id")}
+              ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes", "account_id", "early_checked")}
     values["revision"] = form.get("revision")
     from .accounts import _safe_return, _transaction_popup_context
     txn = c.transactions.get(txn_id)
@@ -90,6 +90,7 @@ async def save_transaction_popup(request: Request, txn_id: int):
                     raise ValidationError("Choose a category that matches this transaction type.", "category")
                 other = None
                 signed = -amount if values["kind"] == "out" else amount
+            register.check_before_opening(c, account_id, day, values)
             from .accounts import _popup_counterparty
             cp = _popup_counterparty(c, values["counterparty"])
             reserve_links = c.reserves.links_for_transaction(txn_id)  # an edit clears them; fitting ones come back (7R)
