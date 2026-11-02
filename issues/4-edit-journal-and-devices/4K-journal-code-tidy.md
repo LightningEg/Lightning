@@ -15,9 +15,9 @@ repo: app
 
 Audit 9 B8: `../../reports/2026-10-28-loose-ends-and-linking/report.md`. No behaviour changes; under the journal claim in `NOW.md`. 4K1-4K3 and 4K5 were done on 2026-10-28 (branch `claude/sync-errors-and-journal-tidy`, `tests/test_journal_tidy.py`).
 
-## 4K4 One pairing client · done 2026-11-02
+## 4K4 One pairing client · M
 
-Owner decided (2026-11-02) to keep the stricter behaviour of each: `resume()` asks the home for status while proving or waiting; `compare()` checks the offer before the failed flag; cancel and finish require a started pairing (cancel also refuses once the encrypted copy is being installed). `runtime/journal_pairing_driver.JoiningDriver` now holds resume, compare, prove and cancel once; `NearbyPairing` and `NewJournalReplica` only supply where the state is kept (`_load_join`, `_save_join`, `_clear_join`, `_installing`). Pinned by `tests/test_one_pairing_driver.py`. Native device pairing acceptance stays with 4A.
+Done 2026-11-02. Owner decided to keep the stricter behaviour of each: `resume()` asks the home for status while proving or waiting; `compare()` checks the offer before the failed flag; cancel and finish require a started pairing (cancel also refuses once the encrypted copy is being installed). `runtime/journal_pairing_driver.JoiningDriver` now holds resume, compare, prove and cancel once; `NearbyPairing` and `NewJournalReplica` only supply where the state is kept (`_load_join`, `_save_join`, `_clear_join`, `_installing`). Pinned by `tests/test_one_pairing_driver.py`. Native device pairing acceptance stays with 4A.
 
 ## Note
 
