@@ -26,6 +26,7 @@
     <a class="phone-row" href="/plan"><span>{{ 'Cash planning'|tr(locale) }}</span><b>{% if until and not due and next %}{{ 'Next: {name} · {sa}'|tr(locale, name=next.name, sa=next.due) }}{% elif until %}{{ '{amt} due before payday'|tr(locale, amt=due|amount_role('total')) }}{% else %}{{ '{amt} due in 3 months'|tr(locale, amt=due|amount_role('total')) }}{% endif %}</b></a>
     <a class="phone-row" href="/accounts"><span>{{ 'Accounts'|tr(locale) }}</span><b>{{ in_accounts|amount_role('total') }}</b></a>
     <a class="phone-row" href="/investments"><span>{{ 'Investments'|tr(locale) }}</span><b>{{ portfolio|amount_role('total') }}</b></a>
+    <a class="phone-row" href="/plan/reserves"><span>{{ 'Reserves'|tr(locale) }}</span><b>›</b></a>
     <a class="phone-row" href="/financial-health"><span>{{ 'Financial health'|tr(locale) }}</span><b>{{ '{n} of {m} within limits'|tr(locale, n=within, m=judged) if judged else 'No limits yet'|tr(locale) }}</b></a>
     <a class="phone-row" href="/birdview/expenses"><span>{{ 'Spending'|tr(locale) }}</span><b>{{ '{amt} in {sa}'|tr(locale, amt=spent|amount_role('total'), sa=month) }}</b></a>
     {% if zakat %}<a class="phone-row" href="/zakat"><span>{{ 'Zakat'|tr(locale) }}</span><b>›</b></a>{% endif %}

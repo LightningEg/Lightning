@@ -184,10 +184,6 @@ form (C09.7); (4) app-bar Search looks for money first (C03.2); (5) Needs you na
 (C04.4). D1 and D2 (2026-10-29) ride with them. Next: write the five lines into Part C in both repos (AGENTS §1), then
 delete this step.
 
-## 3AN2 One navigation · S
-Remove the ⌄ page menu from the phone's app bar (`phone/base.html`); the title is plain text. Check that every page it
-reached is on More or behind ‹. Test: no `.phone-page-menu` in phone pages.
-
 ## 3AN3 The Add sheet and the transaction sheet · L
 Built with NF-3AD1 and NF-3AD2, which own the flow; this step owns the look: no card inside the sheet, Save pinned above
 the keyboard, category chips (usual first, from the services), whole EGP, Saved · Undo toast, To sort chains to the next

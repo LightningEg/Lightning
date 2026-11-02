@@ -171,13 +171,22 @@ def test_overview_puts_needs_you_before_latest(phone):
     assert html.index('class="card phone-needs') < html.index('aria-labelledby="latest-heading"')
 
 
-def test_phone_page_menu_exposes_pc_sections_and_every_main_page(phone):
-    """Main pages must stay directly accessible without opening Settings or More."""
-    html = phone.get("/investments").text
-    menu = html.split('class="phone-page-grid"', 1)[1].split("</nav>", 1)[0]
-    for href in ("/", "/budget", "/plan", "/investments", "/accounts", "/settings", "/transactions", "/financial-health", "/review", "/profiles"):
-        assert f'href="{href}"' in menu
-    assert 'href="/investments" aria-current="page"' in menu
+def test_one_navigation_the_app_bar_title_is_plain_text_and_every_old_menu_page_is_still_reachable(phone):
+    """3AN2: the app bar's page menu (a second way to move) is gone; the title is text. Each page it used to reach is
+    a tab, a row on More, or reached from a page that has its own way back."""
+    more = phone.get("/more").text
+    for path in PAGES + ("/more", "/review", "/plan/reserves"):
+        html = phone.get(path).text
+        assert "phone-page-menu" not in html and "phone-page-grid" not in html and "⌄" not in html, path
+    assert 'class="phone-appbar-title"' in phone.get("/").text
+    tabs = ("/", "/budget", "/transactions")
+    for href in ("/plan", "/investments", "/accounts", "/settings", "/financial-health", "/review", "/birdview/expenses",
+                 "/plan/reserves"):
+        assert f'href="{href}"' in more, href
+    for href in tabs:
+        assert f'href="{href}"' in phone.get("/").text
+    assert 'href="/profiles"' in phone.get("/settings").text  # Profile and lock, from Settings
+    assert 'class="phone-back"' in phone.get("/review").text
 
 
 def test_one_needs_you_strip_under_the_stepper_holds_what_is_due_tomorrow(c, setup, monkeypatch):
