@@ -37,3 +37,5 @@ One branch per group (6, 7–8), each with a test that posts the bad input and e
 **Not posted to contributors (2026-10-31):** its remaining rule (dates before an account opened) needs the owner's decision first.
 
 **Owner decision, 2026-11-02 (item 6):** allow a date before the account opened, but ask once on save (like the far-from-market conversion rate: pressing Save again keeps it as typed). Build the ask in the register, popup and quick-add routes. Items 7 and 8 need no decision.
+
+2026-11-02, built (item 6): a date before the account opened asks once in the register row, the add and edit popups and the all-accounts row (`register.check_before_opening`, hidden `early_checked`; `tests/test_before_opening_ask.py`). Quick Add keeps its old behaviour (no second press). **Left:** items 7 (round shown parts to their total) and 8 (reuse unchanged month-end revaluations).

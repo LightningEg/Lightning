@@ -379,6 +379,7 @@ def _save_popup_transaction(c, account_id: int, values: dict):
     amount = to_decimal(values["amount"], "amount")
     if amount <= 0:
         raise ValidationError("Enter an amount greater than zero.", "amount")
+    register.check_before_opening(c, account_id, day, values)
     owner_id = int(values["owner_id"]) if values["owner_id"].isdigit() else None
     if owner_id is not None:
         party = c.counterparties.get(owner_id)
@@ -429,6 +430,7 @@ async def quick_add(request: Request):
               ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes")}
     values["kind"] = values["kind"] or "out"
     values["date"] = values["date"] or fmt_date(today())
+    values["early_checked"] = values["date"]  # Quick Add has no second press: a date before opening is kept as typed (2E)
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = values | {"account": account_id}
     try:
@@ -455,7 +457,7 @@ async def save_transaction_popup(request: Request, account_id: int):
     account = c.accounts.require_usable(account_id)
     form = await request.form()
     values = {key: str(form.get(key, "")) for key in
-              ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes")}
+              ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes", "early_checked")}
     values["return_to"] = _safe_return(form.get("return_to"), f"/accounts/{account_id}")
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = {key: value for key, value in values.items() if key != "return_to"} | {"account": account_id}
