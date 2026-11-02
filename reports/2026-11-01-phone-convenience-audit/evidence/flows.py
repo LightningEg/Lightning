@@ -51,7 +51,7 @@ with tempfile.TemporaryDirectory() as folder:
             page.goto(host.origin + path)
             ts = page.evaluate(TARGETS)
             res["pages"][path] = {"first_screen_targets": [t for t in ts if t["y"] < 735],
-                                  "first_row_y": page.evaluate("() => { const r = [...document.querySelectorAll('main section h2, main h2')].find(h => /Latest|Categories|Next 14|Coming up|Today/.test(h.innerText)); return r ? Math.round(r.getBoundingClientRect().top) : null }")}
+                                  "first_row_y": page.evaluate("() => { const r = document.querySelector('.phone-latest .phone-txn, .phone-cat, .phone-hub-bill, .phone-plan-row, .phone-day-rows .phone-txn'); return r ? Math.round(r.getBoundingClientRect().top + scrollY) : null }")}
         # Task 1: add an expense from Overview
         page.goto(host.origin + "/"); steps = []
         page.click(".phone-add"); page.wait_for_timeout(600); steps.append(page.evaluate(SHEET)); shot("t1-1-add")
@@ -59,10 +59,15 @@ with tempfile.TemporaryDirectory() as folder:
         steps.append(page.evaluate(SHEET)); shot("t1-2-entry")
         page.screenshot(path=str(OUT / "t1-2-entry-full.png"), full_page=True)
         res["tasks"]["add expense"] = steps
-        # Task 2: the page menu behind the title
-        page.goto(host.origin + "/")
-        page.click("details.phone-page-menu summary"); page.wait_for_timeout(300); shot("t2-page-menu")
-        res["tasks"]["title menu"] = page.locator(".phone-page-grid").inner_text()[:500]
+        # Task 2 (J3): pay the next bill from Overview: the bill Needs you names, then Record and mark paid
+        page.goto(host.origin + "/"); steps = []
+        bill = page.locator(".phone-needs-bill")
+        steps.append({"named": bill.inner_text() if bill.count() else None, "y": page.evaluate("() => { const b = document.querySelector('.phone-needs-bill'); return b ? Math.round(b.getBoundingClientRect().top) : null }")})
+        if bill.count():
+            bill.click(); page.wait_for_timeout(900); steps.append(page.evaluate(SHEET)); shot("t2-pay-sheet")
+            pay = page.locator("#app-popup button").filter(has_text="Record and mark")
+            steps.append({"mark paid button": pay.count(), "y": pay.first.evaluate("e => Math.round(e.getBoundingClientRect().top)") if pay.count() else None})
+        res["tasks"]["J3 pay the next bill"] = {"taps": 2 if bill.count() and pay.count() else None, "steps": steps}
         # Task 3: Needs you open
         page.goto(host.origin + "/")
         nd = page.locator("main details, main summary, main a").filter(has_text="Open").first
@@ -78,10 +83,13 @@ with tempfile.TemporaryDirectory() as folder:
         shot("t5-search"); res["tasks"]["search"] = {"url": page.url, "text": page.locator("body").inner_text()[:500]}
         # Task 6: From SMS
         page.goto(host.origin + "/sms"); shot("t6-sms"); res["tasks"]["sms"] = page.locator("main").inner_text()[:600]
-        # Task 7: budget category tap
+        # Task 7 (J4): "how much is left for groceries?": the row is in the first screen; one tap opens its sheet
         page.goto(host.origin + "/budget")
-        page.locator("main a").filter(has_text="Food & Groceries").first.click(); page.wait_for_timeout(700)
-        shot("t7-budget-category"); res["tasks"]["budget category"] = {"url": page.url, "text": page.locator("main").inner_text()[:500]}
+        row = page.locator(".phone-cat").filter(has_text="Food & Groceries").first
+        y = row.evaluate("e => Math.round(e.getBoundingClientRect().top)")
+        row.click(); page.wait_for_timeout(700)
+        shot("t7-budget-category")
+        res["tasks"]["J4 budget category"] = {"row_y": y, "in_first_screen": y < 735, "taps": 1, "sheet": page.locator(".phone-sheet-row[open] .phone-sheet-panel").inner_text()[:400]}
         # Task 8: 320 wide and Arabic overview
         page.set_viewport_size({"width": 320, "height": 700}); page.goto(host.origin + "/"); shot("t8-overview-320")
         page.goto(host.origin + "/transactions"); shot("t8-transactions-320")

@@ -86,6 +86,16 @@ def run(shots: Path | None = None) -> list[str]:
                         over = page.evaluate("() => document.documentElement.scrollWidth - innerWidth")
                         if over > 0:
                             problems.append(f"{width} {path}: {over}px sideways; widest {page.evaluate(WIDEST)}")
+                        # Every row that opens a sheet (D1, 3AN12) opens it and the sheet fits too.
+                        for index in range(page.locator(".phone-sheet-row > summary:visible").count()):
+                            page.locator(".phone-sheet-row > summary:visible").nth(index).click()
+                            page.wait_for_timeout(400)
+                            wide = page.evaluate("() => { const p = document.querySelector('.phone-sheet-row[open] .phone-sheet-panel');"
+                                                 " return document.documentElement.scrollWidth - innerWidth"
+                                                 " + (p && p.scrollWidth > p.clientWidth + 1 ? 1 : 0); }")
+                            if wide > 0:
+                                problems.append(f"{width} {path}: sheet {index + 1} scrolls sideways")
+                            page.evaluate("() => document.querySelectorAll('.phone-sheet-row[open]').forEach((d) => { d.open = false; })")
                         if shots is not None and width == 360:
                             shots.mkdir(parents=True, exist_ok=True)
                             name = path.strip("/").replace("/", "-") or "overview"
