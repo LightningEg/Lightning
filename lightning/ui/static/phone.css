@@ -610,6 +610,9 @@ html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !import
 .phone-needs > summary .phone-needs-text b { font-size: 15px; color: var(--c-ink); }
 .phone-needs > summary .phone-needs-text small { color: var(--c-ink-2); font-size: 12.5px; line-height: 1.35; }
 .phone-needs > summary { padding: 8px 0; }
+/* 3AN4: the next bill due within three days, by payee, amount and days; it opens the bill's pay sheet (J3). */
+.phone-needs-bill { display: flex; align-items: center; min-height: 44px; color: var(--c-ink); font-size: 14px; font-weight: 700; text-decoration: underline; overflow-wrap: anywhere; }
+.phone-needs-bill.is-late { color: #C93D72; }
 .phone-needs-open { flex: none; color: var(--c-ink); font-weight: 700; text-decoration: underline; }
 .phone-needs[open] .phone-needs-open { visibility: hidden; }
 .phone-needs .needs-you-count { flex: none; }
@@ -686,6 +689,14 @@ html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !import
 .phone-cat.is-over .phone-cat-left > b, .phone-cat.is-over .phone-cat-left > small { color: #C93D72; }
 .phone-cat.is-over .phone-cat-left > small { font-weight: 600; }
 /* == end 3AC Budget tab == */
+
+/* == 3AN4 Overview first screen == two tiles, Needs you naming the bill; Latest's first row above 600 px at 360 x 800 */
+.phone-kpis .phone-kpi { gap: 4px; padding: 12px 14px; }
+.phone-kpis { margin-top: 10px; }
+html.phone .phone-kpi-head .stat-chip { white-space: nowrap; }  /* a tile's chip is one line (3AN10, C12) */
+.phone-latest { margin-top: 18px; }
+.phone-latest .phone-day { margin-top: 6px; }
+/* == end 3AN4 == */
 
 /* == 3AC Cash planning tab == (rules for phone/planning/plan.html) */
 /* The hero sits in the page header, so the tabs follow its sentence; its seam replaces the header's own. */

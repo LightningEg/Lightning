@@ -4,10 +4,12 @@ from decimal import Decimal
 
 from fastapi import APIRouter, Request
 
-from lightning.core.dates import month_of, parse_date, today
+from lightning.core.dates import fmt_date, month_of, parse_date, parse_month, today
 from lightning.core.figures import FIGURES
 from lightning.core.errors import ValidationError
+from lightning.investments.report import investing_rate, investment_period
 from lightning.planning.emergency_context import emergency_liquidity_context
+from lightning.planning.health import HealthFigure
 
 from .. import charts, kpis, status as page_status
 from ..periods import parse_period
@@ -18,12 +20,12 @@ router = APIRouter()
 # What each figure's colour means when it is inside its limit (guideline A03, A08): a cushion is money you
 # hold, a savings rate is money kept, debt and fixed costs are money out. Outside its limit it needs you.
 _TONE = {"emergency_fund": "hold", "net_worth": "hold", "savings_rate": "in", "planned_savings_rate": "in",
-         "debt_to_cash": "out", "debt_to_net_worth": "out", "fixed_costs_to_income": "out",
+         "investing_rate": "in", "debt_to_cash": "out", "debt_to_net_worth": "out", "fixed_costs_to_income": "out",
          "loan_payments_to_income": "out"}
 # The page answers "Am I financially healthy?": four headline figures, then every figure against its limit.
 KPI_KEYS = ("emergency_fund", "savings_rate", "debt_to_net_worth", "fixed_costs_to_income")
 GROUPS = (("Cushion", ("emergency_fund",)),
-          ("Saving", ("savings_rate", "planned_savings_rate")),
+          ("Saving", ("savings_rate", "planned_savings_rate", "investing_rate")),
           ("Debt and monthly commitments", ("debt_to_cash", "debt_to_net_worth", "fixed_costs_to_income",
                                             "loan_payments_to_income")))
 
@@ -119,6 +121,8 @@ async def financial_health(request: Request):
     if period is None or error:
         period = parse_period({"period": "month", "month": month_of(as_of)}, today())
     overview = c.health.overview(as_of)
+    if getattr(request.state, "phone", False):  # the Overview's Investing rate tile moved here (3AN4, owner 2026-11-02)
+        overview = {**overview, "figures": overview["figures"] + (_investing_figure(c, overview["savings_month"]),)}
     liquidity_context = emergency_liquidity_context(c.position.at(as_of, match_payments=False))
     trends = overview["trends"]
     labels = {key: ("Emergency fund" if key == "emergency_fund" else FIGURES[key].label) for key in _TONE}
@@ -156,3 +160,13 @@ async def financial_health(request: Request):
                   worth_spark=(charts.sparkline(worth_values) if all(v is not None for v in worth_values)
                                else {"points": ""}),
                   error=error)
+
+
+def _investing_figure(c, month: str) -> HealthFigure:
+    """The investing rate of the last completed month, next to the savings rate it comes out of: the share of what
+    you kept that you moved into investments (3AN4). It has no limit; it is the Overview's old tile, moved here."""
+    first, last = parse_month(month)
+    flow = c.reporting.cash_flow(first, last)
+    added = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(first), fmt_date(last))["net_money"]
+    return HealthFigure("investing_rate", investing_rate(added, flow.net), "%", month, None, "minimum", None,
+                        (("Net flow", flow.net), ("Money added", added)), "/investments")

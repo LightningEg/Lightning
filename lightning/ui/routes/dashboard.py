@@ -149,7 +149,7 @@ async def dashboard(request: Request):
                                   cash_flow.rate_says_nothing, period.key, current, bool(accounts))
     dates_note = ("so far" if current and period.key in ("month", "ytd") else "year to date" if period.key == "ytd" else "")
     recent_rows = c.reporting.register_page(None, "1900-01-01", "9999-12-31", 1, 10)[0]  # the phone leads with these (C11.1)
-    phone = _phone_overview(position, inbox.forecast, attention_groups, lead_change, c) if getattr(request.state, "phone", False) and position_is_today else None
+    phone = _phone_overview(inbox.forecast, attention_groups, c, attention) if getattr(request.state, "phone", False) and position_is_today else None
     # The PC shows the flows on Spending (owner, 2026-10-21); the phone keeps them as folded rows (guideline C11.1).
     phone_flows = {"month_calendar": visuals.month_calendar(c, today())} if lazy_folds else {}
     return render(
@@ -168,6 +168,7 @@ async def dashboard(request: Request):
         kept_apart_accounts=[] if on_phone else c.reporting.owned_cash_kept_apart_by_account(position.as_of),
         attention=attention, attention_groups=attention_groups, setup=setup,
         investment_report=investment_report, cash_flow=cash_flow, phone=phone,
+        worth_tile=_worth_tile(position, lead_change) if on_phone else None,
         lazy_folds=lazy_folds, fold_query=urlencode(request.query_params),
     )
 
@@ -413,30 +414,61 @@ def _safe_hero(f) -> dict:
     return {"value": value, "line": line, "until": until or ""}
 
 
-def _phone_overview(position, forecast, groups, lead_change, c=None) -> dict:
-    """What the phone's Overview adds to the PC's figures: the Safe to spend hero, a Net worth tile, and the words
-    on the Needs you card."""
+def _worth_tile(position, lead_change) -> dict:
+    """The phone's Net worth tile (C06.1: with Left in plan, the only two on Overview)."""
     owes = position.what_you_owe > 0
-    worth = {"key": "networth", "surface": "hold", "label": label("net_worth" if owes else "what_you_own"),
-             "value": position.net_worth if owes else position.what_you_own, "kind": "money",
-             "badge": {"tone": "flat", "text": "Today"},
-             "sub": f"{lead_change['figure']} {lead_change['text']}" if lead_change else "",
-             "href": "/accounts"}
-    parts = _needs_parts(groups)
-    return {"safe": _safe_hero(forecast), "worth": worth, "needs": parts, "soon": _due_soon(c) if c else None}
+    return {"key": "networth", "surface": "hold", "label": label("net_worth" if owes else "what_you_own"),
+            "value": position.net_worth if owes else position.what_you_own, "kind": "money",
+            "badge": {"tone": "flat", "text": "Today"},
+            "sub": f"{lead_change['figure']} {lead_change['text']}" if lead_change else "",
+            "href": "/accounts"}
 
 
-def _due_soon(c) -> dict | None:
-    """Phone roadmap M4: bills and loan payments due today, tomorrow or already late, as one line under the hero."""
+def _phone_overview(forecast, groups, c, attention=()) -> dict:
+    """What the phone's Overview adds to the PC's figures: the Safe to spend hero and the words on the Needs you card
+    (3AN4: the next bill due within three days, named, so the bill's pay sheet is one tap from Overview)."""
+    soon = _due_soon(c, attention)
+    return {"safe": _safe_hero(forecast), "needs": _needs_parts(groups), "soon": soon,
+            "needs_count": len(attention) + (soon["extra"] if soon else 0)}
+
+
+DUE_SOON_DAYS = 3  # Needs you names a bill due today, late, or within three days (guideline C04.4)
+
+
+def _due_line(name: str, amount: str, days: int, late: int) -> dict:
+    """"Landlord 12,000 in 2 days": the bill Needs you names, as a translatable sentence."""
+    if late:
+        return page_status.sentence("{name} {amt}, 1 day late" if late == 1 else "{name} {amt}, {n} days late",
+                                    name=name, amt=amount, n=late)
+    if days == 0:
+        return page_status.sentence("{name} {amt} today", name=name, amt=amount)
+    if days == 1:
+        return page_status.sentence("{name} {amt} tomorrow", name=name, amt=amount)
+    return page_status.sentence("{name} {amt} in {n} days", name=name, amt=amount, n=days)
+
+
+def _due_soon(c, attention=()) -> dict | None:
+    """Phone Needs you (C04.4, 3AN4): the bills, subscriptions and loan payments that are late or due within three
+    days, earliest first, each with its pay sheet. ``next`` is the one the card names ("Landlord 12,000 in 2 days");
+    ``extra`` counts the ones the review inbox does not already list (it lists what is due today or late)."""
     from lightning.planning.domain import PlanKind
     day = today()
-    due = [p for p in c.planning.all_payments(day + timedelta(days=1), day,
-                                              kinds=(PlanKind.BILL, PlanKind.SUBSCRIPTION, PlanKind.LOAN))
-           if p.outstanding]
+    due = sorted((p for p in c.planning.all_payments(day + timedelta(days=DUE_SOON_DAYS), day,
+                                                     kinds=(PlanKind.BILL, PlanKind.SUBSCRIPTION, PlanKind.LOAN))
+                  if p.outstanding), key=lambda p: p.due_date)
     if not due:
         return None
-    total = sum((c.planning.amount_in_base(p, p.still_owed, day) for p in due), ZERO)
-    return {"count": len(due), "total": total, "late": any(p.days_late(day) for p in due)}
+    known = {str(item.get("href", "")).split("&")[0] for item in attention}
+    rows = []
+    for p in due:
+        late = p.days_late(day)
+        pay = f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2F"
+        amount = c.planning.amount_in_base(p, p.still_owed, day)
+        days = 0 if late else (parse_date(p.due_date) - day).days
+        rows.append({"name": p.item.name, "amount": amount, "late": late, "days": days, "pay": pay,
+                     "listed": pay.split("&")[0] in known, "line": _due_line(p.item.name, fmt(amount), days, late)})
+    return {"count": len(rows), "total": sum((r["amount"] for r in rows), ZERO), "late": any(r["late"] for r in rows),
+            "next": rows[0], "rows": rows, "extra": sum(1 for r in rows if not r["listed"])}
 
 
 @router.get("/more")

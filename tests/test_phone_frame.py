@@ -68,7 +68,8 @@ def test_the_pc_keeps_its_own_frame(tmp_path):
 
 def test_overview_uses_the_phone_forms(phone):
     html = phone.get("/").text
-    assert 'class="phone-kpis"' in html and html.count('class="phone-kpi ') <= 4  # C06.1: four tiles, 2 × 2
+    assert 'class="phone-kpis"' in html and html.count('class="phone-kpi ') == 2  # C06.1, 3AN4: two tiles, Net worth and Left in plan
+    assert "Savings rate" not in html and "Investing rate" not in html  # they live on Financial health (owner, 2026-11-02)
     assert "stat-tile-spark" not in html  # no sparkline in a phone tile
     fold = phone.get("/overview/fold/money-in").text  # the money-in fold loads when opened (backend roadmap B1)
     assert "chart-sankey" not in html + fold and 'class="phone-flow"' in fold  # C07.3.3
@@ -189,14 +190,9 @@ def test_one_navigation_the_app_bar_title_is_plain_text_and_every_old_menu_page_
     assert 'class="phone-back"' in phone.get("/review").text
 
 
-def test_one_needs_you_strip_under_the_stepper_holds_what_is_due_tomorrow(c, setup, monkeypatch):
-    """IV-3AL1: a payment due today or tomorrow is the Needs you strip's first row, under the month stepper; no second
-    card above the stepper, and Manage Needs you is the strip's last row, not a loose link."""
+def _phone_app(c, monkeypatch, today):
     from lightning.ui.web import create_app
-    monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-30")
-    accounts, _ = setup
-    c.planning.create(kind="BILL", name="Internet", amount="650", frequency="MONTHLY", start_date="2026-10-01",
-                      account_id=str(accounts["cib"].id))
+    monkeypatch.setenv("LIGHTNING_TODAY", today)
     app = create_app(c)
 
     @app.middleware("http")
@@ -204,13 +200,48 @@ def test_one_needs_you_strip_under_the_stepper_holds_what_is_due_tomorrow(c, set
         request.state.phone = True
         return await call_next(request)
 
-    html = TestClient(app).get("/").text
+    return TestClient(app)
+
+
+def test_one_needs_you_card_under_the_stepper_names_the_next_bill_and_opens_its_pay_sheet(c, setup, monkeypatch):
+    """IV-3AL1, 3AN4 (J3): a bill due within three days is named in the Needs you card by payee, amount and days, and
+    that line opens the bill's pay sheet (tap it, then Record and mark paid); no second card above the stepper, and
+    Manage Needs you is the card's last row, not a loose link."""
+    accounts, _ = setup
+    c.planning.create(kind="BILL", name="Internet", amount="650", frequency="MONTHLY", start_date="2026-10-01",
+                      account_id=str(accounts["cib"].id))
+    c.planning.create(kind="BILL", name="Landlord", amount="12000", frequency="MONTHLY", start_date="2026-10-03",
+                      account_id=str(accounts["cib"].id))
+    c.planning.create(kind="BILL", name="Gym", amount="400", frequency="MONTHLY", start_date="2026-10-20",
+                      account_id=str(accounts["cib"].id))
+    html = _phone_app(c, monkeypatch, "2026-09-30").get("/").text
     assert 'class="card phone-card phone-soon' not in html and html.count('class="card phone-needs"') == 1
     strip = re.search(r'<details class="card phone-needs".*?</details>', html, re.S).group(0)
     assert html.index('class="phone-period"') < html.index('class="card phone-needs"')
-    assert "1 payment due today or tomorrow" in strip and "650" in strip
-    assert strip.rindex('href="/needs-you"') > strip.index("1 payment due today or tomorrow")
+    named = re.search(r'<a class="phone-needs-bill" data-popup-open href="(/plan/items/\d+/pay\?due=2026-10-01[^"]*)">([^<]+)</a>', strip)
+    assert named and named.group(2) == "Internet 650 tomorrow"  # the earliest, by payee, amount and days
+    assert "2 payments due soon" in strip and "Landlord" in strip and "Gym" not in strip  # Landlord is 3 days out
+    assert "Mark paid" in strip  # each bill's row says what the tap does
+    assert strip.rindex('href="/needs-you"') > strip.index("Landlord")
     assert html.count('href="/needs-you"') == 1
+
+
+def test_a_bill_further_than_three_days_off_is_not_named(c, setup, monkeypatch):
+    accounts, _ = setup
+    c.planning.create(kind="BILL", name="Gym", amount="400", frequency="MONTHLY", start_date="2026-10-20",
+                      account_id=str(accounts["cib"].id))
+    html = _phone_app(c, monkeypatch, "2026-09-30").get("/").text
+    assert "phone-needs-bill" not in html and "Gym" not in html
+
+
+def test_the_due_line_says_today_tomorrow_days_and_late():
+    from lightning.ui.routes.dashboard import _due_line
+    text = lambda *a: (lambda s: s["text"].format(**s["values"]))(_due_line(*a))
+    assert text("Landlord", "12,000", 2, 0) == "Landlord 12,000 in 2 days"
+    assert text("Landlord", "12,000", 1, 0) == "Landlord 12,000 tomorrow"
+    assert text("Landlord", "12,000", 0, 0) == "Landlord 12,000 today"
+    assert text("Landlord", "12,000", 0, 1) == "Landlord 12,000, 1 day late"
+    assert text("Landlord", "12,000", 0, 4) == "Landlord 12,000, 4 days late"
 
 
 def test_more_is_flat_and_the_weekly_review_keeps_more_chosen(phone):
@@ -231,6 +262,14 @@ def test_financial_health_puts_what_needs_you_under_its_lead_and_the_chart_in_it
     lead = re.search(r'(?s)<section class="card lead-card lead-hero".*?</section>', html).group(0)
     assert "lead-side" not in lead and "health-over-time-heading" not in lead
     assert html.index('id="health-limits-heading"') < html.index('class="card phone-card health-side"')
+
+
+def test_financial_health_holds_the_savings_and_investing_rates_the_overview_gave_up(phone):
+    """3AN4 (owner, 2026-11-02): both rates left the Overview's tiles; Financial health's Saving group shows them."""
+    html = phone.get("/financial-health").text
+    saving = html[html.index(">Saving<"):html.index(">Debt and monthly commitments<")]
+    assert "Savings rate" in saving and "Investing rate" in saving
+    assert 'href="/investments"' in saving
 
 
 def test_needs_you_names_what_is_inside_and_a_match_is_not_a_bill():

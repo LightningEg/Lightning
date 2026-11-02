@@ -189,10 +189,6 @@ Built with NF-3AD1 and NF-3AD2, which own the flow; this step owns the look: no 
 the keyboard, category chips (usual first, from the services), whole EGP, Saved · Undo toast, To sort chains to the next
 row. Done when J1 is 3 taps and J5's sort is 3 in `flows.py`.
 
-## 3AN4 Overview's first screen · M
-Two tiles, Needs you naming the next bill, Latest in view (first row above 600 px at 360 × 800).
-Needs 3AN0 (1), (5); the stepper keeps its pill (owner, 2026-11-02). Mohab's Overview steps updated.
-
 ## 3AN5 SMS in Add · M
 Paste SMS at the top of the Add sheet, with no account asked (From SMS already maps a card ending to an account once;
 ask only for an ending it has not seen);

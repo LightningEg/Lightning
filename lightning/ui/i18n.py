@@ -2894,6 +2894,9 @@ ARABIC_UI = {
 }
 
 
+from lightning.ui.i18n_phone_reading import PHONE_READING as _PHONE_READING  # noqa: E402
+
+ARABIC_UI.update(_PHONE_READING)
 _ORIGINAL = frozenset(ARABIC_UI)
 for _key, _value in SYSTEM_TEXT.items():
     ARABIC_UI.setdefault(_key, _value)
