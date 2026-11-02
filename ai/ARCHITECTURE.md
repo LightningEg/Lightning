@@ -1,6 +1,6 @@
 # Architecture
 
-Last reviewed 2026-10-23 · app 1.4.4 · schema 0068
+Last reviewed 2026-10-23 · app 1.4.4 · schema 0069
 
 How Lightning is built and calculated: stack, module boundaries, data model and every calculation contract. History lives in [ai/changelog/](changelog/) (people read [RELEASES.md](../RELEASES.md)), the product story in [Project Overview](PROJECT_OVERVIEW.md), term definitions in the [Glossary](GLOSSARY.md), the visual system in the [Brand guideline](../guideline/), open items and unbuilt designs in [issues/](../issues/INDEX.md). Where the code or a test states a rule better, this file names it instead of copying it.
 
@@ -75,6 +75,8 @@ core/                 dates, money, identifiers, posting rules; no app dependenc
 ```
 
 `bootstrap.py` is the composition root. Cross-module operations call public services, never another module's repository. `import-linter` and tests enforce this. Only `TransactionService` writes postings; other modules build validated postings and ask it.
+
+**Budget reads the plan's schedule as an argument, never through a wired callback** (IT-9K, owner 2026-11-02). `budgeting` sits below `planning` and cannot import it, so `planning/schedule_view.py` builds one read-only `PlanSchedule` (loan payments, bills, recurring income, reserve-goal needs) per request (`c.schedules.view()`), and every budget call that depends on it takes it as `schedule=`. The `ScheduleView` protocol that describes it lives in `budgeting/domain.py`. The Savings-rate limit reaches the forecast the same way: `CashForecaster` is given `HealthService`.
 
 ## Modules
 

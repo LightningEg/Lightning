@@ -43,7 +43,7 @@ def test_cutover_portabilizes_legacy_budget_category_settings(c, setup):
 
     _, categories = setup
     category = categories["EXP.PERSONAL.FOOD"]
-    c.budgets.set_budget(category.id, "2026-10", "100")
+    c.budgets.set_budget(category.id, "2026-10", "100", schedule=c.schedules.view())
     c.settings.set("budget_tracked_categories", json.dumps([category.id]))
     c.settings.set("budget_income_categories", json.dumps([categories["EXP.WORK.SALARY"].id]))
     c.settings.set("budget_one_off_exclusions", json.dumps([category.id]))

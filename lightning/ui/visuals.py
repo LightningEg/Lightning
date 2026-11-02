@@ -38,7 +38,7 @@ def spending_trend(c, end: date, category_code: str = "", count: int = 6) -> dic
     plan, over = None, None
     if not category_code:
         # Each month is over (or not) against its own plan; the dashed line is the latest month's.
-        plans = [c.budgets.month_view(k).available if c.budgets.has_plan(k) else None for k in keys]
+        plans = [c.budgets.month_view(k, schedule=c.schedules.view()).available if c.budgets.has_plan(k, schedule=c.schedules.view()) else None for k in keys]
         over = [p is not None and v > p for p, v in zip(plans, values)]
         plan = plans[-1] or None
     return charts.trend(keys, [{"name": "Money out", "tone": "hold", "values": values, "area": True, "over": over}],

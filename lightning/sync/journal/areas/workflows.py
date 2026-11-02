@@ -103,8 +103,8 @@ class JournalWorkflowService:
         enabled = bool(carryover)
         c.settings.set("budget_carryover_global", "1" if enabled else "0")
         c.settings.set("budget_carryover_month", carry_month)
-        tracked = set(c.budgets.amounts_for(carry_month))
-        c.budgets.set_carryover(carry_month, {category_id: enabled for category_id in tracked})
+        tracked = set(c.budgets.amounts_for(carry_month, schedule=c.schedules.view()))
+        c.budgets.set_carryover(carry_month, {category_id: enabled for category_id in tracked}, schedule=c.schedules.view())
 
     def setup_currencies(self, code, extras, was_empty):
         c = self.c
@@ -157,7 +157,7 @@ class JournalWorkflowService:
             else:
                 period = 3 if action == "average3" else 6
                 c.budgets.save_month(month, {category_id: "" for category_id in category_ids},
-                                     average_months={category_id: period for category_id in category_ids})
+                                     average_months={category_id: period for category_id in category_ids}, schedule=c.schedules.view())
             c.settings.set("budget_bulk_undo", json.dumps({"token": token, "month": month,
                 "category_codes": sorted(self.c.categories.get(cid).code for cid in category_ids), "rows": snapshot,
                 "after_fingerprint": self._budget_rows_fingerprint(category_ids)}))
@@ -198,9 +198,9 @@ class JournalWorkflowService:
         if mode == "percentage":
             c.budgets.set_income_percentage(category_id, month, value)
         elif mode == "average3":
-            c.budgets.set_budget(category_id, month, "", average_months=3)
+            c.budgets.set_budget(category_id, month, "", average_months=3, schedule=c.schedules.view())
         else:
-            c.budgets.set_budget(category_id, month, value)
+            c.budgets.set_budget(category_id, month, value, schedule=c.schedules.view())
         tracked = c.budgets._id_list("budget_tracked_categories") or set()
         tracked.add(category_id)
         codes = {c.categories.get(item).code for item in tracked}

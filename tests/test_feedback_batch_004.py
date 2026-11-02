@@ -85,7 +85,7 @@ def test_a_budget_that_pushes_safe_to_spend_below_zero_points_to_the_budget(c, s
     to the budget instead of blaming promised payments."""
     from decimal import Decimal
     accounts, cats = setup
-    c.budgets.set_budget(cats["EXP.PERSONAL.FOOD"].id, "2026-12", "900000")
+    c.budgets.set_budget(cats["EXP.PERSONAL.FOOD"].id, "2026-12", "900000", schedule=c.schedules.view())
     assert c.forecaster.forecast(today()).safe_to_spend < Decimal(0)
     page = TestClient(create_app(c)).get("/plan").text
     assert "Adjust your budget" in page and 'href="/budget"' in page

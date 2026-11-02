@@ -64,6 +64,6 @@ def test_limits_and_reserves_say_the_same_emergency_months(c, setup, monkeypatch
     c.budgets.set_emergency_basis("income")
     c.settings.set("budget_manual_monthly_income", "10000")
     reserve = next(r for r in c.reserves.list_active() if r["kind"] == "EMERGENCY")
-    on_reserves = c.budgets.emergency_fund(month_of(today()), reserve["effective_allocated"])
+    on_reserves = c.budgets.emergency_fund(month_of(today()), reserve["effective_allocated"], schedule=c.schedules.view())
     on_limits = c.health.overview(today())["fund"]
     assert on_limits.months == on_reserves.months and on_limits.months is not None

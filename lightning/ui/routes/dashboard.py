@@ -143,7 +143,7 @@ async def dashboard(request: Request):
             usual=c.reporting.usual_savings_rate(as_of), invest=investing_rate(closing_report["net_money"], cash_flow.net),
             invest_before=investing_rate(added_before, flow_before.net), before_label=before_label,
             money_added=closing_report["net_money"], forecast=inbox.forecast if position_is_today else None,
-            plan=c.budgets.plan_summary(plan_month) if c.budgets.has_plan(plan_month) else None, month=plan_month,
+            plan=c.budgets.plan_summary(plan_month, schedule=c.schedules.view()) if c.budgets.has_plan(plan_month, schedule=c.schedules.view()) else None, month=plan_month,
             savings_href="#savings-squares", invest_href=f"/investments?{urlencode(request.query_params)}")
     status = page_status.overview(cash_flow.inflows, cash_flow.outflows, cash_flow.net, cash_flow.savings_rate,
                                   cash_flow.rate_says_nothing, period.key, current, bool(accounts))
@@ -293,7 +293,7 @@ def _setup_steps(c, accounts) -> list[dict] | None:
          "done": any(r.get("kind") == "EMERGENCY" and (r.get("allocated") or ZERO) > ZERO for r in c.reserves.list_active()),
          "href": "/plan/reserves", "action": "Set it"},
         {"label": "Make a budget", "detail": "A plan for this month, built from your own spending",
-         "done": c.budgets.has_plan(month_of(today())), "href": "/budget", "action": "Make a budget"},
+         "done": c.budgets.has_plan(month_of(today()), schedule=c.schedules.view()), "href": "/budget", "action": "Make a budget"},
     ]
     return None if all(step["done"] for step in steps) else steps
 
@@ -350,8 +350,8 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
         "href": f"/investments?{period_query}",
     })
     month = month_of(as_of)
-    if c.budgets.has_plan(month):
-        summary = c.budgets.plan_summary(month)  # the same figures as the Budget tab
+    if c.budgets.has_plan(month, schedule=c.schedules.view()):
+        summary = c.budgets.plan_summary(month, schedule=c.schedules.view())  # the same figures as the Budget tab
         planned, left = summary["planned"], summary["left"]
         used = planned - left
         share = used / planned * 100 if planned > 0 else None

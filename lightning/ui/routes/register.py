@@ -166,7 +166,7 @@ def _budget_feedback_text(c, txn) -> str:
     if not budget_effect_lines:
         return ""
     month = txn.date[:7]
-    view = c.budgets.month_view(month)
+    view = c.budgets.month_view(month, schedule=c.schedules.view())
     by_id = {line.category_id: line for section in view.sections for line in section.lines}
     impacts = []
     seen = set()

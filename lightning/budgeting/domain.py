@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from decimal import Decimal
+from typing import Protocol
 
 from lightning.core.money import ZERO
 
@@ -227,3 +228,20 @@ class BudgetFillProposal:
     month: str
     source: str
     rows: tuple[BudgetFillRow, ...]
+
+
+class ScheduleView(Protocol):
+    """What the plan has scheduled, as Budget reads it: one read-only view that Planning builds for a request and
+    passes into every budget call that needs it (Budgeting is below Planning and never imports it)."""
+
+    def loans(self, month: str) -> dict[int, Decimal]:
+        """Loan payments scheduled in the month, by spending category."""
+
+    def bills(self, month: str) -> dict[int, dict]:
+        """Bills and subscriptions due in the month, by category: {"amount", "items"}."""
+
+    def income(self) -> Decimal | None:
+        """Income a month that Cash planning › Recurring expects; None without any."""
+
+    def goal_needs(self, month: str) -> list[dict]:
+        """What dated reserve goals still need saved each month, from the month on."""

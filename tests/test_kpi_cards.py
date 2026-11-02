@@ -71,10 +71,10 @@ def test_budgets_everyday_money_is_cash_plannings_budget_until_payday(mohab, mon
     day = date(2026, 10, 19)
     e = c.forecaster.everyday("2026-10", day)
     assert e.everyday_left == c.forecaster.forecast(day).months[0].budget_spending
-    assert e.left == c.budgets.plan_summary("2026-10")["left"] and e.bills_to_pay == e.left - e.everyday_left
+    assert e.left == c.budgets.plan_summary("2026-10", schedule=c.schedules.view())["left"] and e.bills_to_pay == e.left - e.everyday_left
     assert e.days_left == 13 and e.per_day == (e.everyday_left / 13).quantize(D("0.01"))
     # September's rent was paid to the Landlord before the bill was scheduled: still a bill, not everyday spending.
-    assert e.last_month_by_day[-1] < c.budgets.plan_summary("2026-09")["spent"] - D("12000")
+    assert e.last_month_by_day[-1] < c.budgets.plan_summary("2026-09", schedule=c.schedules.view())["spent"] - D("12000")
 
 
 def test_the_budget_opens_with_cards_that_compare(mohab, monkeypatch):

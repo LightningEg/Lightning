@@ -236,7 +236,7 @@ def test_the_question_is_one_bounded_line_and_a_bad_choice_is_refused(c, househo
 
 
 def test_the_budget_preset_compares_plan_and_spending_when_a_plan_exists_and_says_so_when_not(c, household):
-    c.budgets.set_budget(c.categories.get_by_code("EXP.PERSONAL.FOOD").id, "2026-09", "1000")
+    c.budgets.set_budget(c.categories.get_by_code("EXP.PERSONAL.FOOD").id, "2026-09", "1000", schedule=c.schedules.view())
     with_plan = build(c, preset="budget", size="digest").text
     assert "## The plan for 2026-09" in with_plan and "| Category | Planned | Spent | Left |" in with_plan
     without = build(c, preset="budget", size="standard")

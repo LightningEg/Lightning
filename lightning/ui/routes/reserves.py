@@ -40,7 +40,7 @@ def _context(request: Request, error: str = ""):
     reserves = c.reserves.list_active()
     emergency = next((item for item in reserves if item["kind"] == "EMERGENCY"), None)
     # Months of Average monthly income or of Average monthly spending, as Settings › Budget says.
-    fund = c.budgets.emergency_fund(month_of(today()), emergency["effective_allocated"] if emergency else None)
+    fund = c.budgets.emergency_fund(month_of(today()), emergency["effective_allocated"] if emergency else None, schedule=c.schedules.view())
     listed = [item for item in reserves if item["kind"] != "EMERGENCY"]
     # Saving for goals, goal by goal: the same need the budget and the cash forecast count.
     needs = {row["id"]: row["amount"] for row in c.forecaster.goal_needs(month_of(today()))}
@@ -124,7 +124,7 @@ async def save_emergency_fund(request: Request):
     c = container(request)
     form = await request.form()
     try:
-        salary_target = c.budgets.emergency_fund(month_of(today()), None).target or ZERO
+        salary_target = c.budgets.emergency_fund(month_of(today()), None, schedule=c.schedules.view()).target or ZERO
         amount = str(form.get("allocated", ""))
         existing = next((row for row in c.reserves.list_active() if row["kind"] == "EMERGENCY"), None)
         assigned = c.reserves.cash_summary(c.reporting.owned_liquid_cash(today()))["allocated"]

@@ -144,7 +144,7 @@ def test_saving_from_the_sheet_remembers_the_account_and_says_saved_with_undo(mo
 def test_a_row_opens_its_sheet_first_and_the_sheet_looks_before_it_edits(month):
     c, accounts, cats = month
     phone = _phone(c)
-    c.budgets.set_budget(cats["EXP.PERSONAL.FOOD"].id, "2026-09", "5000")
+    c.budgets.set_budget(cats["EXP.PERSONAL.FOOD"].id, "2026-09", "5000", schedule=c.schedules.view())
     page = phone.get("/transactions?month=2026-09").text
     row = re.search(r'<a class="phone-txn" href="([^"]+)" data-txn="%d"' % _txn_id(c, "Seoudi"), page)
     assert row and unescape(row.group(1)).startswith(f"/transactions/{_txn_id(c, 'Seoudi')}/sheet?return_to=") and "data-popup-open" in page
@@ -157,7 +157,7 @@ def test_a_row_opens_its_sheet_first_and_the_sheet_looks_before_it_edits(month):
     assert f"{left:,.0f} left of 5,000" in body                                          # Plan left, from BudgetService
     assert "Change category" in body and "Split" in body and "/edit-popup" in sheet  # the foot; Edit opens the form
     assert "<form" not in sheet.split("phone-sheet-actions")[0].split("phone-txn-sheet\">")[1]       # nothing to type yet
-    assert c.budgets.plan_left(cats["EXP.PERSONAL.FOOD"].id, "2026-09")["left"] == left
+    assert c.budgets.plan_left(cats["EXP.PERSONAL.FOOD"].id, "2026-09", schedule=c.schedules.view())["left"] == left
 
 
 def test_the_sheet_of_a_move_and_of_a_row_without_a_plan(month):

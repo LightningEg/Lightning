@@ -117,7 +117,8 @@ def test_the_over_plan_row_names_it_counts_it_and_offers_the_fix():
 
 
 def test_adjust_opens_move_room_when_another_category_has_room():
-    c = SimpleNamespace(budgets=SimpleNamespace(amounts_for=lambda month, loans=False: {1: (Decimal(2000),), 3: (Decimal(900),)}),
+    c = SimpleNamespace(budgets=SimpleNamespace(amounts_for=lambda month, loans=False, schedule=None: {1: (Decimal(2000),), 3: (Decimal(900),)}),
+                        schedules=SimpleNamespace(view=lambda: None),
                         categories=SimpleNamespace(get=lambda category_id: SimpleNamespace(name="Health")))
     rows = [{"over": True, "amount": Decimal(840), "name": "Dining out", "category_id": 1, "group_id": 6}]
     over = budget._phone_over(rows, "2026-10", 9, c, SimpleNamespace(room={3: Decimal(900)}))

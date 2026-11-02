@@ -26,10 +26,11 @@ class IntegrityCheck:
 class IntegrityService:
     """Cross-check independently derived totals without changing ledger data."""
 
-    def __init__(self, reporting: ReportingService, reserves, budgets, planning=None, position=None):
+    def __init__(self, reporting: ReportingService, reserves, budgets, schedules, planning=None, position=None):
         self.reporting = reporting
         self.reserves = reserves
         self.budgets = budgets
+        self.schedules = schedules
         self.planning = planning
         self.position = position
 
@@ -56,7 +57,7 @@ class IntegrityService:
         by_category = self.reporting.money_out_by_category(first, last)
         investment = {category.id for category in self.reporting.categories.tree()
                       if category.family == CategoryFamily.INVESTMENT}
-        budget = self.budgets.month_view(month)
+        budget = self.budgets.month_view(month, schedule=self.schedules.view())
         checks.append(self._check("Budget actual equals categorized spending", budget.actual,
                                   sum((value for cid, value in by_category.items() if cid not in investment), ZERO),
                                   "Budget actuals should reconcile to posted money-out categories, "

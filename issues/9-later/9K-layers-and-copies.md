@@ -1,5 +1,5 @@
 ---
-title: Structure left - a 746-line profile_app, budgeting calls planning through bootstrap, three balance-floor checks
+title: Structure left - a 746-line profile_app and three balance-floor checks
 type: tech
 pillar: build
 size: M
@@ -18,11 +18,16 @@ list for both entrypoints (month-end checkpoints post on unlock, failures are lo
 
 1. **`runtime/app.py:profile_app`** is one 746-line function of nested routes; split it by area (profiles, devices, restore).
    The journal and device code it wires belong to claimed work (4A, 2A): split after those claims clear.
-2. **Budgeting calls planning through bootstrap callbacks** (`budgets.scheduled_*`, `reserve_goal_needs`, `savings_rate`), a
-   higher layer the linter cannot see. Pass those inputs into the budget calls instead.
-3. **Three balance-floor checks**: `_validate_owner_balances`, `_refuse_cash_below_zero`, `lowest_running_quantity`. One shared
-   running-balance helper, with each caller's refusal message kept.
-4. `database/connection.py` matches a trigger's message text to turn it into a `ValidationError`; give the trigger a code.
+2. **Three balance-floor checks**: `_validate_owner_balances`, `_refuse_cash_below_zero`, `lowest_running_quantity`. One shared
+   running-balance helper, with each caller's refusal message kept. Careful: merging them could change the order in which
+   same-day entries are checked, so it needs a decision on that order first.
+
+Done (2026-11-02, owner decision): **Budget no longer calls Planning through bootstrap callbacks.** Planning builds one
+`PlanSchedule` per request (`c.schedules.view()`, `planning/schedule_view.py`); every budget call that depends on loans, bills,
+recurring income or reserve goals takes it as `schedule=`; `forecaster.savings_rate` became the forecaster's `HealthService`;
+`tests/test_architecture.py` pins that budgeting imports no planning and wires no callback. **The checked-month trigger has a code:**
+migration 0069 recreates the five triggers of 0056 with `[LN-E0001]`, `database/connection.py` matches the code, the Arabic catalog
+has the coded sentence, and `tests/test_checked_month_code.py` upgrades a schema-68 profile.
 
 ## Fix
 One branch each, tests unchanged.

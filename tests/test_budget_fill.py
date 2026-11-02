@@ -12,16 +12,16 @@ def _food(c):
 
 
 def _proposal(c, source, month="2026-12"):
-    return c.budgets.fill_proposal(month, source)
+    return c.budgets.fill_proposal(month, source, schedule=c.schedules.view())
 
 
 def test_last_month_copies_base_limit_without_spending_or_carryover(c, setup):
     accounts, _ = setup
     food = _food(c)
-    c.budgets.set_budget(food.id, "2026-11", "4000")
+    c.budgets.set_budget(food.id, "2026-11", "4000", schedule=c.schedules.view())
     c.transactions.record_outflow("2026-11-12", accounts["cib"].id, "6500", food.id)
-    c.budgets.set_carryover("2026-12", {food.id: True})
-    c.budgets.set_budget(food.id, "2026-12", "7000", only_this_month=True)
+    c.budgets.set_carryover("2026-12", {food.id: True}, schedule=c.schedules.view())
+    c.budgets.set_budget(food.id, "2026-12", "7000", only_this_month=True, schedule=c.schedules.view())
 
     row = next(row for row in _proposal(c, "last_month").rows if row.category_id == food.id)
 
@@ -34,7 +34,7 @@ def test_last_month_copies_base_limit_without_spending_or_carryover(c, setup):
 
 def test_last_month_identifies_repeated_amounts_already_in_use(c, setup):
     food = _food(c)
-    c.budgets.set_budget(food.id, "2026-10", "4000")
+    c.budgets.set_budget(food.id, "2026-10", "4000", schedule=c.schedules.view())
 
     row = next(row for row in _proposal(c, "last_month", "2026-11").rows if row.category_id == food.id)
 
@@ -77,14 +77,14 @@ def test_goal_source_is_informational_and_never_a_spending_category(c, setup):
     assert "Reserves" in row.conflict
 
     with pytest.raises(ValidationError, match="at least one category"):
-        c.budgets.apply_fill("2026-12", {})
+        c.budgets.apply_fill("2026-12", {}, schedule=c.schedules.view())
 
 
 def test_parent_ceiling_conflict_is_shown_without_changing_the_ceiling(c, setup):
     food = _food(c)
     transport = c.categories.get_by_code("EXP.PERSONAL.TRANSPORT")
     personal = c.categories.get_by_code("EXP.PERSONAL")
-    c.budgets.set_budget(personal.id, "2026-12", "500")
+    c.budgets.set_budget(personal.id, "2026-12", "500", schedule=c.schedules.view())
     c.planning.create(kind="BILL", name="Food box", amount="400", frequency="ONCE",
                       start_date="2026-12-20", category_id=food.id)
     c.planning.create(kind="BILL", name="Taxi pass", amount="200", frequency="ONCE",
@@ -97,17 +97,17 @@ def test_parent_ceiling_conflict_is_shown_without_changing_the_ceiling(c, setup)
     assert "above the Personal ceiling of 500" in food_row.conflict
     assert "above the Personal ceiling of 500" in transport_row.conflict
     assert not food_row.selected and not transport_row.selected
-    assert c.budgets.amounts_for("2026-12", loans=False)[personal.id][0] == Decimal("500")
+    assert c.budgets.amounts_for("2026-12", loans=False, schedule=c.schedules.view())[personal.id][0] == Decimal("500")
 
 
 def test_apply_fill_changes_selected_month_only(c, setup):
     food = _food(c)
-    c.budgets.set_budget(food.id, "2026-11", "4000")
+    c.budgets.set_budget(food.id, "2026-11", "4000", schedule=c.schedules.view())
 
-    assert c.budgets.apply_fill("2026-12", {food.id: "5200"}) == 1
+    assert c.budgets.apply_fill("2026-12", {food.id: "5200"}, schedule=c.schedules.view()) == 1
 
-    dec = c.budgets.amounts_for("2026-12", loans=False)[food.id]
-    jan = c.budgets.amounts_for("2027-01", loans=False)[food.id]
+    dec = c.budgets.amounts_for("2026-12", loans=False, schedule=c.schedules.view())[food.id]
+    jan = c.budgets.amounts_for("2027-01", loans=False, schedule=c.schedules.view())[food.id]
     assert dec[0] == Decimal("5200") and dec[1] is True
     assert jan[0] == Decimal("4000") and jan[1] is False
 
@@ -127,16 +127,16 @@ def test_apply_fill_rolls_back_every_category_on_error(c, setup, monkeypatch):
 
     monkeypatch.setattr(c.budgets.repo, "upsert", fail_on_second)
     with pytest.raises(RuntimeError, match="simulated write failure"):
-        c.budgets.apply_fill("2026-12", {food.id: "1000", transport.id: "500"})
+        c.budgets.apply_fill("2026-12", {food.id: "1000", transport.id: "500"}, schedule=c.schedules.view())
 
-    assert all(c.budgets.amounts_for("2026-12", loans=False).get(cid) is None
+    assert all(c.budgets.amounts_for("2026-12", loans=False, schedule=c.schedules.view()).get(cid) is None
                for cid in (food.id, transport.id))
 
 
 def test_budget_fill_screen_reviews_and_posts_month_only_edits(c, setup):
     food = _food(c)
-    c.budgets.set_budget(food.id, "2026-11", "4000")
-    c.budgets.set_budget(food.id, "2026-12", "7000", only_this_month=True)
+    c.budgets.set_budget(food.id, "2026-11", "4000", schedule=c.schedules.view())
+    c.budgets.set_budget(food.id, "2026-12", "7000", only_this_month=True, schedule=c.schedules.view())
     client = _ScreenClient(create_app(c), base_url="http://testserver")
 
     preview = client.get("/budget/fill?month=2026-12&source=last_month")
@@ -150,5 +150,5 @@ def test_budget_fill_screen_reviews_and_posts_month_only_edits(c, setup):
     })
 
     assert "Applied 1 budget for 2026-12 only" in response.text
-    assert c.budgets.amounts_for("2026-12", loans=False)[food.id][0] == Decimal("5200")
-    assert c.budgets.amounts_for("2027-01", loans=False)[food.id][0] == Decimal("4000")
+    assert c.budgets.amounts_for("2026-12", loans=False, schedule=c.schedules.view())[food.id][0] == Decimal("5200")
+    assert c.budgets.amounts_for("2027-01", loans=False, schedule=c.schedules.view())[food.id][0] == Decimal("4000")

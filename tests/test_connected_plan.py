@@ -21,7 +21,7 @@ def _plan(c, spend: str, fund: str = "60000"):
     if fund:
         c.reserves.set_emergency_fund(fund)
     food = c.categories.get_by_code("EXP.PERSONAL.FOOD").id
-    c.budgets.set_budget(food, MONTH, spend)
+    c.budgets.set_budget(food, MONTH, spend, schedule=c.schedules.view())
 
 
 def test_a_plan_that_leaves_the_savings_target_passes(c):
@@ -100,11 +100,11 @@ def test_bills_and_subscriptions_are_planned_like_loans_until_you_set_your_own(c
     food = c.categories.get_by_code("EXP.PERSONAL.FOOD").id
     c.planning.create(kind="SUBSCRIPTION", name="Gym", amount="120", frequency="MONTHLY",
                       start_date="2026-12-20", category_id=food)
-    line = next(l for s in c.budgets.month_view(MONTH).sections for l in s.lines if l.category_id == food)
+    line = next(l for s in c.budgets.month_view(MONTH, schedule=c.schedules.view()).sections for l in s.lines if l.category_id == food)
     assert line.budget == Decimal("120") and line.from_bills and not line.from_loans
-    assert c.budgets.bill_lines(MONTH) == {food: Decimal("120")}
-    c.budgets.set_budget(food, MONTH, "3000")  # your own amount replaces the automatic line
-    assert c.budgets.bill_lines(MONTH) == {}
+    assert c.budgets.bill_lines(MONTH, schedule=c.schedules.view()) == {food: Decimal("120")}
+    c.budgets.set_budget(food, MONTH, "3000", schedule=c.schedules.view())  # your own amount replaces the automatic line
+    assert c.budgets.bill_lines(MONTH, schedule=c.schedules.view()) == {}
 
 
 def test_an_emergency_fund_below_six_months_adds_its_top_up(c):
@@ -123,9 +123,9 @@ def test_fill_this_month_stops_at_most_you_can_plan(c):
     c.reserves.set_emergency_fund("60000")
     food = c.categories.get_by_code("EXP.PERSONAL.FOOD").id
     transport = c.categories.get_by_code("EXP.PERSONAL.TRANSPORT").id
-    c.budgets.set_budget(food, "2026-11", "9000", only_this_month=True)
-    c.budgets.set_budget(transport, "2026-11", "1000", only_this_month=True)
-    proposal, left = c.health.fit_fill(c.budgets.fill_proposal(MONTH, "last_month"))
+    c.budgets.set_budget(food, "2026-11", "9000", only_this_month=True, schedule=c.schedules.view())
+    c.budgets.set_budget(transport, "2026-11", "1000", only_this_month=True, schedule=c.schedules.view())
+    proposal, left = c.health.fit_fill(c.budgets.fill_proposal(MONTH, "last_month", schedule=c.schedules.view()))
     rows = {row.category_id: row for row in proposal.rows}
     assert not rows[food].selected and "Past Most you can plan: 8,000 of room left." in rows[food].conflict
     assert rows[transport].selected and left == Decimal("7000.00")
@@ -165,13 +165,13 @@ def test_safe_to_spend_and_the_forecast_keep_the_emergency_top_up(c):
 def test_recurring_income_stands_in_until_a_month_has_income(c):
     # A new profile with its salary set up in Recurring gets a checked plan from the first day.
     c.budgets.set_emergency_basis("income")  # the optional salary-based cushion works before spending history
-    assert c.budgets.income_average(MONTH).amount is None
+    assert c.budgets.income_average(MONTH, schedule=c.schedules.view()).amount is None
     c.planning.create(kind="INCOME", name="Salary", amount="12000", frequency="MONTHLY", start_date="2027-01-01")
-    average = c.budgets.income_average(MONTH)
+    average = c.budgets.income_average(MONTH, schedule=c.schedules.view())
     assert (average.amount, average.scheduled, average.window) == (Decimal("12000.00"), True, "from your recurring income")
     c.reserves.set_emergency_fund("72000")
     food = c.categories.get_by_code("EXP.PERSONAL.FOOD").id
-    c.budgets.set_budget(food, MONTH, "11000")
+    c.budgets.set_budget(food, MONTH, "11000", schedule=c.schedules.view())
     assert c.health.plan_check(MONTH).over_by == Decimal("1400.00")  # 20% of 12,000 is 2,400; the plan leaves 1,000
     page = visible_text(_ScreenClient(create_app(c), "http://testserver").get("/plan/reserves").text)
     assert "From your recurring income" in page
@@ -200,16 +200,16 @@ def test_needs_you_names_a_category_planned_below_its_bills(c):
     food = c.categories.get_by_code("EXP.PERSONAL.FOOD").id
     c.planning.create(kind="BILL", name="Groceries box", amount="900", frequency="MONTHLY",
                       start_date="2026-12-20", category_id=food)
-    assert c.budgets.below_scheduled(MONTH) == []  # no rule of its own: the bill plans the category
-    c.budgets.set_budget(food, MONTH, "500")
-    assert c.budgets.below_scheduled(MONTH) == [{"category_id": food, "name": "Food & Groceries", "planned": Decimal("500"),
+    assert c.budgets.below_scheduled(MONTH, schedule=c.schedules.view()) == []  # no rule of its own: the bill plans the category
+    c.budgets.set_budget(food, MONTH, "500", schedule=c.schedules.view())
+    assert c.budgets.below_scheduled(MONTH, schedule=c.schedules.view()) == [{"category_id": food, "name": "Food & Groceries", "planned": Decimal("500"),
                                                  "scheduled": Decimal("900")}]
     inbox = {item["label"]: item for item in ReviewInbox(c).items(today())}
     item = inbox["Food & Groceries is planned below its bills"]
     assert item["detail"] == "Planned 500 EGP; bills and loan payments scheduled this month come to 900."
     assert item["href"] == f"/budget?month={MONTH}&open_group=all#limit-{food}"   # where its limit is typed
-    c.budgets.set_budget(food, MONTH, "900")
-    assert c.budgets.below_scheduled(MONTH) == []
+    c.budgets.set_budget(food, MONTH, "900", schedule=c.schedules.view())
+    assert c.budgets.below_scheduled(MONTH, schedule=c.schedules.view()) == []
 
 
 # ---- The smarter plan, all of it (owner, 2026-10-05: "do them all")
@@ -236,7 +236,7 @@ def test_a_goal_the_plan_cannot_reach_says_when_it_can(c):
     assert "leaves 1,000 for it. Setting aside 1,000 a month, it is ready in May 2027." in item["detail"]
     page = visible_text(_ScreenClient(create_app(c), "http://testserver").get("/plan/reserves").text)
     assert "Your plan leaves 1,000 a month for it: set that aside each month and it is ready in 2027-05" in page
-    c.budgets.set_budget(c.categories.get_by_code("EXP.PERSONAL.FOOD").id, MONTH, "7000")
+    c.budgets.set_budget(c.categories.get_by_code("EXP.PERSONAL.FOOD").id, MONTH, "7000", schedule=c.schedules.view())
     assert c.health.goal_reach() == []
 
 
@@ -251,8 +251,8 @@ def _salaried(c, setup):
     for month in ("10", "11"):
         c.transactions.record_outflow(f"2026-{month}-15", cib, "6,000", food)
         c.transactions.record_outflow(f"2026-{month}-16", cib, "500", transport)
-    c.budgets.set_budget(food, "2026-10", "5000")
-    c.budgets.set_budget(transport, "2026-10", "3000")
+    c.budgets.set_budget(food, "2026-10", "5000", schedule=c.schedules.view())
+    c.budgets.set_budget(transport, "2026-10", "3000", schedule=c.schedules.view())
     c.reserves.set_emergency_fund("180000")
     return food, transport
 
@@ -275,7 +275,7 @@ def test_a_raise_in_recurring_is_offered_to_the_plan(c, setup):
     page = visible_text(browser.post("/budget/raise", data={"month": MONTH, "choice": "save"}).text)
     assert "Savings target raised to 33.3%" in page and c.health.limit_values()["savings_rate"] == Decimal("33.3")
     assert c.health.take_raise("plan").startswith("The plan now counts your recurring income, 36,000")
-    average = c.budgets.income_average(MONTH)
+    average = c.budgets.income_average(MONTH, schedule=c.schedules.view())
     assert (average.amount, average.scheduled) == (Decimal("36000.00"), True) and c.health.raise_offer() is None
     assert "income_from_recurring\" value=\"1\" checked" in browser.get("/settings?section=budget").text
 
@@ -319,16 +319,16 @@ def test_a_month_that_saved_less_than_the_target_is_in_needs_you(c, setup):
 
 def test_over_plan_two_months_running_offers_to_move_room(c, setup):
     food, transport = _salaried(c, setup)
-    [row] = c.budgets.over_twice(MONTH)
+    [row] = c.budgets.over_twice(MONTH, schedule=c.schedules.view())
     assert (row["category_id"], row["amount"], row["from_id"]) == (food, Decimal("1000"), transport)
     item = {i["label"]: i for i in ReviewInbox(c).items(today())}["Food & Groceries over plan two months running"]
     assert "Over its plan in October and November, by up to 1,000 EGP. Move 1,000 from Transportation" in item["detail"]
     browser = _ScreenClient(create_app(c), "http://testserver")
     assert "Food & Groceries 5,000 → 6,000" in visible_text(browser.get(item["href"]).text)
     browser.post("/budget/move", data={"month": MONTH, "to": food, "from": transport, "amount": "1000"})
-    plans = c.budgets.amounts_for(MONTH, loans=False)
+    plans = c.budgets.amounts_for(MONTH, loans=False, schedule=c.schedules.view())
     assert (plans[food][0], plans[transport][0]) == (Decimal("6000"), Decimal("2000"))
-    assert c.budgets.amounts_for("2026-11", loans=False)[food][0] == Decimal("5000")  # history unchanged
+    assert c.budgets.amounts_for("2026-11", loans=False, schedule=c.schedules.view())[food][0] == Decimal("5000")  # history unchanged
 
 
 def test_editing_a_goal_saves_and_returns_it(c):

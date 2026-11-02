@@ -62,7 +62,7 @@ def _sheet_context(request: Request, c, txn) -> dict:
     kind = "move" if transfer else "out" if source.quantity < 0 else "in"
     plan = None
     if kind == "out" and category is not None and not unsorted:
-        plan = c.budgets.plan_left(category.id, txn.date[:7])
+        plan = c.budgets.plan_left(category.id, txn.date[:7], schedule=c.schedules.view())
     chips, other = [], []
     if unsorted or request.query_params.get("change"):
         movement = "out" if kind == "out" else "in"

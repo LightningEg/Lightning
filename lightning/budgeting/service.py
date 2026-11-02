@@ -19,7 +19,7 @@ from lightning.database.settings import raw_setting
 from lightning.reporting.service import ReportingService
 
 from .domain import (EMERGENCY_BASES, INCOME_FROM_RECURRING, BudgetFillProposal, BudgetFillRow, BudgetLine, BudgetMonth,
-                     BudgetSection, EmergencyFund, IncomeAverage, SpendingAverage)
+                     BudgetSection, EmergencyFund, IncomeAverage, ScheduleView, SpendingAverage)
 from .repository import BudgetRepository
 
 SECTION_NAMES = {Scope.PERSONAL: "Personal", Scope.WORK: "Work"}
@@ -37,13 +37,9 @@ class BudgetService:
         self.repo = BudgetRepository(db)
         self.categories = categories
         self.reporting = reporting
-        # Set by the composition root: month -> {category_id: loan payments scheduled that month}, and
-        # month -> {category_id: {"amount", "items"}} for bills and subscriptions. A category with no
-        # budget rule is planned at exactly what is scheduled (owner decision 2026-10-05: bills as loans).
-        self.scheduled_loans = lambda month: {}
-        self.scheduled_bills = lambda month: {}
-        self.scheduled_income = lambda: None
-        self.reserve_goal_needs = lambda month: []
+        # What the plan has scheduled (loans, bills, recurring income, reserve goals) comes in as ``schedule``
+        # on every call that needs it. A category with no budget rule is planned at exactly what is scheduled
+        # (owner decision 2026-10-05: bills as loans).
 
     def first_owned_spending_date(self) -> str | None:
         """Earliest posted, personally owned entry in a spending category."""
@@ -77,48 +73,48 @@ class BudgetService:
                                 tuple(row.get(key) for key in columns))
 
     # ------------------------------------------------------------------ reading
-    def scheduled_payments(self, month: str) -> dict[int, Decimal]:
+    def scheduled_payments(self, month: str, *, schedule: ScheduleView) -> dict[int, Decimal]:
         """Loan payments, bills and subscriptions scheduled in a month, by spending category."""
-        out = {cid: amount for cid, amount in self.scheduled_loans(month).items() if amount}
-        for cid, data in self.scheduled_bills(month).items():
+        out = {cid: amount for cid, amount in schedule.loans(month).items() if amount}
+        for cid, data in schedule.bills(month).items():
             if data["amount"]:
                 out[cid] = out.get(cid, ZERO) + data["amount"]
         return out
 
-    def bill_lines(self, month: str) -> dict[int, Decimal]:
+    def bill_lines(self, month: str, *, schedule: ScheduleView) -> dict[int, Decimal]:
         """Categories planned from scheduled bills and subscriptions because no budget rule is set for them."""
-        explicit = self.amounts_for(month, loans=False)
-        return {cid: data["amount"] for cid, data in self.scheduled_bills(month).items()
+        explicit = self.amounts_for(month, loans=False, schedule=schedule)
+        return {cid: data["amount"] for cid, data in schedule.bills(month).items()
                 if data["amount"] and cid not in explicit}
 
-    def loan_lines(self, month: str) -> dict[int, Decimal]:
+    def loan_lines(self, month: str, *, schedule: ScheduleView) -> dict[int, Decimal]:
         """Categories planned from scheduled loan payments because no budget rule is set for them."""
-        explicit = self.amounts_for(month, loans=False)
-        return {cid: amount for cid, amount in self.scheduled_loans(month).items()
+        explicit = self.amounts_for(month, loans=False, schedule=schedule)
+        return {cid: amount for cid, amount in schedule.loans(month).items()
                 if amount and cid not in explicit}
 
-    def below_scheduled(self, month: str) -> list[dict]:
+    def below_scheduled(self, month: str, *, schedule: ScheduleView) -> list[dict]:
         """Categories whose own rule plans less than the bills, subscriptions and loan payments scheduled
         in them that month: the plan cannot hold what is already promised."""
-        explicit = self.amounts_for(month, loans=False)
+        explicit = self.amounts_for(month, loans=False, schedule=schedule)
         names = {category.id: category.name for category in self.categories.tree()}
         rows = []
-        for cid, scheduled in self.scheduled_payments(month).items():
+        for cid, scheduled in self.scheduled_payments(month, schedule=schedule).items():
             planned = explicit.get(cid, (None,))[0]
             if planned is not None and planned < scheduled:
                 rows.append({"category_id": cid, "name": names.get(cid, ""), "planned": planned, "scheduled": scheduled})
         return rows
 
-    def over_twice(self, month: str) -> list[dict]:
+    def over_twice(self, month: str, *, schedule: ScheduleView) -> list[dict]:
         """Categories over their own plan (by OVER_PLAN_MARGIN or more) in both of the two completed months
         before `month`, with how much more a month they needed (the larger overspend, rounded up to 50) and, when one exists, a category
         whose plan was left with at least that much in both months to move it from."""
         start = parse_month(month)[0]
         earlier = month_of(start - timedelta(days=1))
         months = (month_of(parse_month(earlier)[0] - timedelta(days=1)), earlier)
-        views = [{line.category_id: line for section in self.month_view(key).sections for line in section.lines}
+        views = [{line.category_id: line for section in self.month_view(key, schedule=schedule).sections for line in section.lines}
                  for key in months]
-        now = {line.category_id: line for section in self.month_view(month).sections for line in section.lines}
+        now = {line.category_id: line for section in self.month_view(month, schedule=schedule).sections for line in section.lines}
 
         def own(line) -> bool:  # a rule you set, not a line planned from loans or bills
             return line is not None and line.depth >= 2 and line.direct is not None and line.remaining is not None
@@ -144,24 +140,24 @@ class BudgetService:
                          "from_plan": now[donor.category_id].direct if donor else None})
         return rows
 
-    def move_room(self, month: str, to_id: int, from_id: int, amount: object) -> None:
+    def move_room(self, month: str, to_id: int, from_id: int, amount: object, *, schedule: ScheduleView) -> None:
         """Move plan from one category to another from `month` on: both keep fixed amounts, the total is unchanged."""
         value = to_decimal(amount, "amount")
         if value <= 0:
             raise ValidationError("Move an amount above zero.", "amount")
         if to_id == from_id:
             raise ValidationError("Choose two different categories.", "category")
-        current = self.amounts_for(month, loans=False)
+        current = self.amounts_for(month, loans=False, schedule=schedule)
         give, take = current.get(from_id, (None,))[0], current.get(to_id, (None,))[0]
         if give is None or take is None:
             raise ValidationError("Both categories need a plan of their own this month.", "category")
         if give < value:
             raise ValidationError(f"{self.categories.get(from_id).name} plans only {fmt(give, 0)} this month.", "amount")
         with self.db.transaction():
-            self.save_month(month, {to_id: take + value, from_id: give - value})
+            self.save_month(month, {to_id: take + value, from_id: give - value}, schedule=schedule)
 
     @request_cached  # has_plan, loan_lines, bill_lines and month_view all ask for it
-    def amounts_for(self, month: str, loans: bool = True) -> dict[int, tuple[Decimal | None, bool, int | None, Decimal | None]]:
+    def amounts_for(self, month: str, loans: bool = True, *, schedule: ScheduleView) -> dict[int, tuple[Decimal | None, bool, int | None, Decimal | None]]:
         """Effective amount, one-off flag, average window, and income percentage.
 
         With ``loans``, a category that has scheduled loan payments, bills or subscriptions and no rule
@@ -179,7 +175,7 @@ class BudgetService:
         result = {cid: v for cid, v in result.items() if v[0] is not None or v[2] is not None or v[3] is not None}
         for cid, (amount, oneoff, period, percent) in list(result.items()):
             if percent is not None:
-                income = self.budgeting_income(month)
+                income = self.budgeting_income(month, schedule=schedule)
                 amount = None if income is None else (income * percent / Decimal(100)).quantize(Decimal("0.01"))
             elif period:
                 cats = [c for c in self.categories.tree(Movement.OUTFLOW) if not c.is_root]
@@ -190,7 +186,7 @@ class BudgetService:
                 amount = self._rolling_average(cid, month, period, children, {})
             result[cid] = (amount, oneoff, period, percent)
         if loans:
-            for cid, amount in self.scheduled_payments(month).items():
+            for cid, amount in self.scheduled_payments(month, schedule=schedule).items():
                 if amount and cid not in result:
                     result[cid] = (amount, False, None, None)
         return result
@@ -250,12 +246,12 @@ class BudgetService:
         ids = ids | {category_id} if one_off else ids - {category_id}
         self._save_id_list("budget_one_off_exclusions", ids)
 
-    def budgeting_income(self, month: str) -> Decimal | None:
+    def budgeting_income(self, month: str, *, schedule: ScheduleView) -> Decimal | None:
         """Average monthly income for a month's budget (see income_average)."""
-        return self.income_average(month).amount
+        return self.income_average(month, schedule=schedule).amount
 
     @request_cached(deep=True)
-    def income_average(self, month: str) -> IncomeAverage:
+    def income_average(self, month: str, *, schedule: ScheduleView) -> IncomeAverage:
         """Average monthly income: owned income in the chosen income categories, averaged over
         the last 3 (or 6) completed months before `month` that had any. A manual amount in
         Settings replaces the average. Before any completed month has income, the income set up in
@@ -269,7 +265,7 @@ class BudgetService:
         if manual:
             return IncomeAverage(to_decimal(manual, "manual_income"), 0, lookback, "", "", True)
         if raw_setting(self.db, INCOME_FROM_RECURRING) == "1":
-            scheduled = self.scheduled_income()  # chosen after a raise: plan with what Recurring expects
+            scheduled = schedule.income()  # chosen after a raise: plan with what Recurring expects
             if scheduled is not None:
                 return IncomeAverage(scheduled, 0, lookback, "", "", False, scheduled=True)
         end = parse_month(month)[0] - timedelta(days=1)
@@ -302,7 +298,7 @@ class BudgetService:
                 observed.append(sum((from_e6(row["total_e6"]) for row in included), ZERO))
             end = start - timedelta(days=1)
         if not observed:
-            scheduled = self.scheduled_income()
+            scheduled = schedule.income()
             if scheduled is not None:
                 return IncomeAverage(scheduled, 0, lookback, "", "", False, scheduled=True)
             return IncomeAverage(None, 0, lookback, month_of(end + timedelta(days=1)), last_month, False)
@@ -341,21 +337,21 @@ class BudgetService:
         from lightning.database.settings import SettingsStore
         SettingsStore(self.db).set("emergency_fund_basis", basis)
 
-    def emergency_fund(self, month: str, set_aside: Decimal | None) -> EmergencyFund:
+    def emergency_fund(self, month: str, set_aside: Decimal | None, *, schedule: ScheduleView) -> EmergencyFund:
         """The emergency fund in months of the chosen average, and its six-month target."""
         basis = self.emergency_basis()
-        average = self.income_average(month) if basis == "income" else self.spending_average(month)
+        average = self.income_average(month, schedule=schedule) if basis == "income" else self.spending_average(month)
         return EmergencyFund(set_aside, basis, average)
 
-    def has_plan(self, month: str) -> bool:
-        return bool(self.amounts_for(month, loans=False))
+    def has_plan(self, month: str, *, schedule: ScheduleView) -> bool:
+        return bool(self.amounts_for(month, loans=False, schedule=schedule))
 
     @request_cached(deep=True)
-    def month_view(self, month: str) -> BudgetMonth:
+    def month_view(self, month: str, *, schedule: ScheduleView) -> BudgetMonth:
         first, last = parse_month(month)
-        direct = self.amounts_for(month)
-        from_loans = self.loan_lines(month)
-        from_bills = self.bill_lines(month)
+        direct = self.amounts_for(month, schedule=schedule)
+        from_loans = self.loan_lines(month, schedule=schedule)
+        from_bills = self.bill_lines(month, schedule=schedule)
         spent = self.owned_spending(first, last)
         cats = [c for c in self.categories.tree(Movement.OUTFLOW) if not c.is_root
                 and c.family != CategoryFamily.INVESTMENT]  # investments are never budget spending
@@ -399,7 +395,7 @@ class BudgetService:
         carryover_settings = self.repo.carryover_settings(month)
         opening_carryovers = {category_id: self._opening_carryover(category_id, month,
                                                                     carryover_settings.get(category_id, False) and category_id in direct,
-                                                                    children)
+                                                                    children, schedule=schedule)
                               for category_id in carryover_settings if carryover_settings[category_id]}
         for category in reversed(cats):
             if category.id not in direct:
@@ -436,11 +432,11 @@ class BudgetService:
         income = self.reporting.cash_flow(first, last).inflows
         return BudgetMonth(month, [s for s in sections.values() if s.lines], income, warnings)
 
-    def plan_left(self, category_id: int, month: str) -> dict | None:
+    def plan_left(self, category_id: int, month: str, *, schedule: ScheduleView) -> dict | None:
         """What is left of the plan for a category this month (the phone's transaction sheet, 3AD2): the limit that
         covers it (its own, else the nearest group above that has one), what is spent against it and what is left,
         negative when over. None when no limit covers the category."""
-        view = self.month_view(month)
+        view = self.month_view(month, schedule=schedule)
         by_id = {line.category_id: line for section in view.sections for line in section.lines}
         line = shown = by_id.get(category_id)
         node = category_id
@@ -475,7 +471,7 @@ class BudgetService:
                 result[category.id] = avg
         return result
 
-    def fill_proposal(self, month: str, source: str) -> BudgetFillProposal:
+    def fill_proposal(self, month: str, source: str, *, schedule: ScheduleView) -> BudgetFillProposal:
         """Build a read-only month-fill preview; all returned amounts are base limits in EGP."""
         first, _ = parse_month(month)
         if source not in {"last_month", "schedule", "goal"}:
@@ -483,19 +479,19 @@ class BudgetService:
         categories = [c for c in self.categories.tree(Movement.OUTFLOW)
                       if not c.is_root and c.family != CategoryFamily.INVESTMENT]
         by_id = {c.id: c for c in categories}
-        current = self.amounts_for(month, loans=False)
+        current = self.amounts_for(month, loans=False, schedule=schedule)
         current_rules = {cid: rule for cid, rule in current.items() if cid in by_id}
         candidates: dict[int, tuple[Decimal | None, str]] = {}
 
         if source == "last_month":
             previous = month_of(first - timedelta(days=1))
-            for category_id, (amount, _, period, percent) in self.amounts_for(previous, loans=False).items():
+            for category_id, (amount, _, period, percent) in self.amounts_for(previous, loans=False, schedule=schedule).items():
                 if category_id in by_id:
                     detail = (f"{period}-month average" if period else
                               f"{fmt(percent)}% of income" if percent is not None else "fixed")
                     candidates[category_id] = (amount, f"From {previous} · {detail}")
         elif source == "schedule":
-            for category_id, data in self.scheduled_bills(month).items():
+            for category_id, data in schedule.bills(month).items():
                 if category_id in by_id and data["amount"] > ZERO:
                     names = ", ".join(dict.fromkeys(data["items"]))
                     candidates[category_id] = (data["amount"], f"Scheduled: {names}")
@@ -508,10 +504,10 @@ class BudgetService:
                 conflict="Savings goals are managed in Reserves, not in spending budgets.",
                 selectable=False,
                 note=f"Set aside monthly · due {item['due_date']}",
-            ) for item in self.reserve_goal_needs(month))
+            ) for item in schedule.goal_needs(month))
             return BudgetFillProposal(month, source, rows)
 
-        loans = self.scheduled_payments(month)
+        loans = self.scheduled_payments(month, schedule=schedule)
         rows = []
         for category_id, (amount, note) in candidates.items():
             rule = current_rules.get(category_id)
@@ -604,14 +600,14 @@ class BudgetService:
     def _investment_ids(self) -> set[int]:
         return {c.id for c in self.categories.tree() if c.family == CategoryFamily.INVESTMENT}
 
-    def set_carryover(self, month: str, settings: dict[int, bool]) -> int:
+    def set_carryover(self, month: str, settings: dict[int, bool], *, schedule: ScheduleView) -> int:
         parse_month(month)
         changed = 0
         current = self.repo.carryover_settings(month)
         with self.db.transaction():
             for category_id, enabled in settings.items():
                 self._budgetable(category_id)
-                if enabled and category_id not in self.amounts_for(month):
+                if enabled and category_id not in self.amounts_for(month, schedule=schedule):
                     raise ValidationError("Carryover needs a monthly limit on that category or group first.")
                 if current.get(category_id, False) == enabled:
                     continue
@@ -620,7 +616,7 @@ class BudgetService:
         return changed
 
     def _opening_carryover(self, category_id: int, month: str, enabled_now: bool,
-                           children: dict[int, list[int]]) -> Decimal:
+                           children: dict[int, list[int]], *, schedule: ScheduleView) -> Decimal:
         if not enabled_now:
             return ZERO
         first, _ = parse_month(month)
@@ -662,13 +658,13 @@ class BudgetService:
                 active = True
             next_cursor = (parse_month(current_month)[1] + timedelta(days=1))
             if active:
-                direct = self.amounts_for(current_month).get(category_id)
+                direct = self.amounts_for(current_month, schedule=schedule).get(category_id)
                 if direct:
                     amount, _, period, percent = direct
                     if period:
                         amount = self._rolling_average(category_id, current_month, period, children, {})
                     elif percent is not None:
-                        amount = self.budgeting_income(current_month)
+                        amount = self.budgeting_income(current_month, schedule=schedule)
                         if amount is not None:
                             amount = amount * percent / Decimal(100)
                     start, end = parse_month(current_month)
@@ -684,15 +680,15 @@ class BudgetService:
 
     # ------------------------------------------------------------------ writing
     def set_budget(self, category_id: int, month: str, amount: object, only_this_month: bool = False,
-                   average_months: int | None = None) -> bool:
+                   average_months: int | None = None, *, schedule: ScheduleView) -> bool:
         return self.save_month(month, {category_id: amount}, only_this_month,
-                               {category_id: average_months} if average_months else None) > 0
+                               {category_id: average_months} if average_months else None, schedule=schedule) > 0
 
     def save_month(self, month: str, amounts: dict[int, object], only_this_month: bool = False,
-                   average_months: dict[int, object] | None = None) -> int:
+                   average_months: dict[int, object] | None = None, *, schedule: ScheduleView) -> int:
         """Save several budget cells at once (the budget page). Returns how many changed."""
         parse_month(month)
-        current = self.amounts_for(month)
+        current = self.amounts_for(month, schedule=schedule)
         average_months = average_months or {}
         changed = 0
         carryover_now = self.repo.carryover_settings(month)
@@ -722,13 +718,13 @@ class BudgetService:
                 changed += 1
         return changed
 
-    def apply_fill(self, month: str, amounts: dict[int, object]) -> int:
+    def apply_fill(self, month: str, amounts: dict[int, object], *, schedule: ScheduleView) -> int:
         """Apply selected fill amounts as one atomic, one-month-only edit."""
         parse_month(month)
         if not amounts:
             raise ValidationError("Choose at least one category to fill.", "categories")
         with self.db.transaction():
-            return self.save_month(month, amounts, only_this_month=True)
+            return self.save_month(month, amounts, only_this_month=True, schedule=schedule)
 
     # ------------------------------------------------------------------ helpers
     def _repeating_before(self, category_id: int, month: str) -> tuple[Decimal | None, int | None]:
@@ -773,17 +769,17 @@ class BudgetService:
                 children.setdefault(category.parent_id, []).append(category.id)
         return {category.id: category for category in categories}, children
 
-    def tracked_ids(self, month: str) -> set[int]:
+    def tracked_ids(self, month: str, *, schedule: ScheduleView) -> set[int]:
         """Categories you track in a month: those with a rule of their own, and those you chose to track."""
-        view = self.month_view(month)
+        view = self.month_view(month, schedule=schedule)
         tracked = {line.category_id for section in view.sections for line in section.lines
                    if line.direct is not None or line.average_months or line.income_percent is not None}
         return tracked | (self._id_list("budget_tracked_categories") or set())
 
-    def category_averages(self, month: str) -> dict[int, dict]:
+    def category_averages(self, month: str, *, schedule: ScheduleView) -> dict[int, dict]:
         """Each budget line's spending (its subcategories included) averaged over the three and the six
         completed months before `month` that had spending in it, and how many months each saw."""
-        view = self.month_view(month)
+        view = self.month_view(month, schedule=schedule)
         _, children = self._outflow_children()
         six = self._completed_months(month, 6)
         averages = {}
@@ -797,14 +793,14 @@ class BudgetService:
                                               "spent6": sum((amounts.get(cid, ZERO) for amounts in six for cid in tree), ZERO)}
         return averages
 
-    def tracking_suggestions(self, month: str, percent: Decimal) -> list[dict]:
+    def tracking_suggestions(self, month: str, percent: Decimal, *, schedule: ScheduleView) -> list[dict]:
         """Untracked categories whose six-month average is at least `percent` of the month's budgeting
         income, unless one-off or dismissed (for good or for this month)."""
-        income = self.budgeting_income(month)
+        income = self.budgeting_income(month, schedule=schedule)
         if not income:
             return []
-        view = self.month_view(month)
-        tracked, exclusions = self.tracked_ids(month), self.one_off_ids(with_children=False)
+        view = self.month_view(month, schedule=schedule)
+        tracked, exclusions = self.tracked_ids(month, schedule=schedule), self.one_off_ids(with_children=False)
         by_id, _ = self._outflow_children()
         try:
             suppressed = json.loads(raw_setting(self.db, "budget_suppressed_categories") or "{}")
@@ -812,7 +808,7 @@ class BudgetService:
             suppressed = {}
         if isinstance(suppressed, list):
             suppressed = {str(category_id): "never" for category_id in suppressed}
-        averages = self.category_averages(month)
+        averages = self.category_averages(month, schedule=schedule)
         suggestions = []
         for line in (line for section in view.sections for line in section.lines
                      if line.depth > 1 and line.category_id not in tracked):
@@ -833,19 +829,19 @@ class BudgetService:
                                 "spent": average["spent6"]})
         return suggestions
 
-    def background_estimates(self, month: str) -> list[dict]:
+    def background_estimates(self, month: str, *, schedule: ScheduleView) -> list[dict]:
         """Monthly expectations for untracked spending categories: the average of the last three
         completed months that had spending. They count in the month's plan (owner decision
         2026-10-03); an estimate from one observed month is low confidence and the screens say so.
         Categories that are tracked, one-off, have children, or sit under a parent's own limit
         (covered) are left out, so nothing is counted twice."""
-        return [line for line in self.background(month) if line["estimate"] is not None]
+        return [line for line in self.background(month, schedule=schedule) if line["estimate"] is not None]
 
-    def background(self, month: str, tracked: set[int] | None = None) -> list[dict]:
+    def background(self, month: str, tracked: set[int] | None = None, *, schedule: ScheduleView) -> list[dict]:
         """Every untracked category background_estimates considers, with `estimate` None when it had no
         spending in the three completed months. `tracked` replaces the month's own tracked categories."""
-        view = self.month_view(month)
-        tracked = self.tracked_ids(month) if tracked is None else tracked
+        view = self.month_view(month, schedule=schedule)
+        tracked = self.tracked_ids(month, schedule=schedule) if tracked is None else tracked
         exclusions = self.one_off_ids(with_children=False)
         by_id, children = self._outflow_children()
         groups = {group.category_id for section in view.sections for group in section.groups}
@@ -867,11 +863,11 @@ class BudgetService:
         return lines
 
     @request_cached(deep=True)
-    def plan_summary(self, month: str) -> dict:
+    def plan_summary(self, month: str, *, schedule: ScheduleView) -> dict:
         """The month's plan as every screen shows it: Planned (limits plus background estimates),
         Spent (owned spending, one-off categories left out) and Left in plan."""
-        view = self.month_view(month)
-        estimates = self.background_estimates(month)
+        view = self.month_view(month, schedule=schedule)
+        estimates = self.background_estimates(month, schedule=schedule)
         planned = view.available + sum((e["estimate"] for e in estimates), ZERO)
         first, last = parse_month(month)
         one_offs = self.one_off_ids()
@@ -904,11 +900,11 @@ class BudgetService:
                     self.repo.upsert(category_id, month, False, None, None, value)
         return True
 
-    def reset_carryover(self, category_id: int, month: str) -> None:
+    def reset_carryover(self, category_id: int, month: str, *, schedule: ScheduleView) -> None:
         """Set a dated boundary clearing carryover from this month onward."""
         parse_month(month)
         self._budgetable(category_id)
-        if category_id not in self.amounts_for(month):
+        if category_id not in self.amounts_for(month, schedule=schedule):
             raise ValidationError("Reset carryover is available for tracked categories only.")
         self.repo.reset(category_id, month)
 

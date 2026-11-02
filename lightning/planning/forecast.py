@@ -14,6 +14,7 @@ from lightning.deposits.domain import DepositEvent
 
 from .domain import CashForecast, EverydayBudget, ForecastMonth, Payment, PaymentStatus, PlanKind
 from .dated_cash import dated_cash_forecast
+from .schedule_view import reserve_goal_needs
 
 HORIZON_MONTHS = 3
 
@@ -82,15 +83,15 @@ def _deposit_cash_events(service, as_of: date, end: date):
     return adjusted
 
 
-def emergency_fund(reserves, budgets, month: str):
+def emergency_fund(reserves, budgets, month: str, schedule):
     """The emergency fund the plan check and the forecast share: what Reserves sets aside, in months of the
     chosen average. Read straight from Reserves: building a whole position here doubled the budget page's queries."""
     reserve = next((row for row in reserves.list_active() if row["kind"] == "EMERGENCY"), None)
-    return budgets.emergency_fund(month, reserve["effective_allocated"] if reserve else None)
+    return budgets.emergency_fund(month, reserve["effective_allocated"] if reserve else None, schedule=schedule)
 
 
 class CashForecaster:
-    def __init__(self, planning, reporting, reserves, budgets, categories, position, deposits=None):
+    def __init__(self, planning, reporting, reserves, budgets, categories, position, schedules, health, deposits=None):
         self.planning = planning
         self.position = position
         self.reporting = reporting
@@ -98,12 +99,13 @@ class CashForecaster:
         self.budgets = budgets
         self.categories = categories
         self.deposits = deposits
-        self.savings_rate = lambda: ZERO  # the Savings rate limit (Financial health); bootstrap wires it
+        self.schedules = schedules
+        self.health = health  # its Savings rate limit sets the saving the forecast asks for
 
     # -------------------------------------------------------------- inputs
     def average_income(self, as_of: date) -> tuple[Decimal | None, int]:
         """Average monthly income: the same figure the budget uses (BudgetService.income_average)."""
-        average = self.budgets.income_average(month_of(as_of))
+        average = self.budgets.income_average(month_of(as_of), schedule=self.schedules.view())
         return average.amount, average.months_counted
 
     def free_cash(self, as_of: date) -> Decimal:
@@ -119,8 +121,8 @@ class CashForecaster:
 
         It is the Budget screen's own plan (BudgetService.plan_summary): limits plus background
         estimates, so the forecast and the Budget tab show one Left in plan (audit 2026-10-05 #7)."""
-        view = self.budgets.month_view(month)
-        summary = self.budgets.plan_summary(month)
+        view = self.budgets.month_view(month, schedule=self.schedules.view())
+        summary = self.budgets.plan_summary(month, schedule=self.schedules.view())
         covered = {line.category_id for section in view.sections for line in section.lines
                    if line.budget is not None or line.covered}
         covered |= {estimate["category_id"] for estimate in summary["estimates"]}
@@ -133,24 +135,7 @@ class CashForecaster:
 
     def goal_needs(self, month: str, as_of: date | None = None) -> list[dict]:
         """Informational monthly saving needs for dated project reserves."""
-        day = as_of or today()
-        month_start, _ = parse_month(month)
-        result = []
-        for reserve in self.reserves.list_active():
-            if reserve["kind"] == "EMERGENCY" or not reserve.get("due_date"):
-                continue
-            due = date.fromisoformat(reserve["due_date"])
-            if due < month_start:
-                continue
-            # Everything set aside so far counts, including what the goal has already paid for: a goal
-            # funded in full and partly spent needs nothing more (audit 2026-10-05 #8).
-            missing = max(reserve["target"] - reserve["allocated"], ZERO)
-            months_left = max((due.year - day.year) * 12 + due.month - day.month + 1, 1)
-            amount = (missing / months_left).quantize(Decimal("0.01"))
-            if amount:
-                result.append({"id": reserve["id"], "name": reserve["name"], "amount": amount,
-                               "due_date": reserve["due_date"], "missing": missing})
-        return result
+        return reserve_goal_needs(self.reserves, month, as_of)
 
     # -------------------------------------------------------------- everyday
     def everyday(self, month: str, as_of: date | None = None) -> EverydayBudget:
@@ -161,7 +146,7 @@ class CashForecaster:
         first, last = parse_month(month)
         current = first <= day <= last
         counted = day if current else last if day > last else None
-        summary = self.budgets.plan_summary(month)
+        summary = self.budgets.plan_summary(month, schedule=self.schedules.view())
         _, covered = self._budget(month, current)
         payments = [p for p in self.planning.all_payments(last, day)
                     if not p.item.is_income and p.item.category_id in covered and p.status != PaymentStatus.SKIPPED
@@ -173,11 +158,11 @@ class CashForecaster:
                     unpaid[p.item.category_id] = unpaid.get(p.item.category_id, ZERO) + self.planning.amount_in_base(p, p.still_owed, day)
         bills_to_pay = sum(unpaid.values(), ZERO)
         everyday_left = max(summary["left"] - bills_to_pay, ZERO) if current else summary["left"]
-        scheduled = sum((amount for cid, amount in self.budgets.scheduled_payments(month).items() if cid in covered), ZERO)
+        scheduled = sum((amount for cid, amount in self.budgets.scheduled_payments(month, schedule=self.schedules.view()).items() if cid in covered), ZERO)
         by_day = self._everyday_by_day(first, counted) if counted else []
         before_last = first - timedelta(days=1)
         last_month = self._everyday_by_day(before_last.replace(day=1), before_last)
-        view = self.budgets.month_view(month)
+        view = self.budgets.month_view(month, schedule=self.schedules.view())
         room = {line.category_id: line.remaining - unpaid.get(line.category_id, ZERO)
                 for section in view.sections for line in section.lines
                 if line.depth > 1 and line.remaining is not None}
@@ -232,10 +217,10 @@ class CashForecaster:
 
         rows, opening = [], free
         # The emergency fund's top-up, as the plan check counts it: what each month must leave for it until full.
-        fund = emergency_fund(self.reserves, self.budgets, month_keys[0])
+        fund = emergency_fund(self.reserves, self.budgets, month_keys[0], self.schedules.view())
         emergency_gap = max((fund.target or ZERO) - (fund.set_aside or ZERO), ZERO)
         # Saving needed, as the plan check counts it: the savings target, or goals and the top-up when larger.
-        target = (average * self.savings_rate() / 100).quantize(Decimal("0.01")) if average else ZERO
+        target = (average * (self.health.limit_values()["savings_rate"] or ZERO) / 100).quantize(Decimal("0.01")) if average else ZERO
         for index, key in enumerate(month_keys):
             current = index == 0
             in_month = [p for p in upcoming if p.due_date[:7] == key]

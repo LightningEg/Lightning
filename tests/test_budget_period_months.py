@@ -14,7 +14,7 @@ def test_a_long_period_counts_spending_only_from_the_first_planned_month(c, setu
     food = cats["EXP.PERSONAL.FOOD"]
     for month in ("01", "02", "03"):
         c.transactions.record_outflow(f"2026-{month}-10", accounts["cib"].id, "1000", food.id)
-    c.budgets.set_budget(food.id, "2026-03", "1200")      # the plan starts in March
+    c.budgets.set_budget(food.id, "2026-03", "1200", schedule=c.schedules.view())      # the plan starts in March
     page = TestClient(create_app(c)).get("/budget?period=ytd&month=2026-03").text
     text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", page.split('class="kpi-row', 1)[1]))
     assert "Planned and spent from 2026-03-01, the first month with a plan." in text
@@ -41,7 +41,7 @@ def test_sample_period_plan_matches_its_saved_month_and_group_rows(c, monkeypatc
 
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-04")
     load_mohab_2026(c)
-    expected = c.budgets.plan_summary("2026-10")["planned"]
+    expected = c.budgets.plan_summary("2026-10", schedule=c.schedules.view())["planned"]
     assert expected > Decimal("30000")
     contexts = []
     original = budget.render

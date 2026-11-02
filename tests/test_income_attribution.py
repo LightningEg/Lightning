@@ -22,7 +22,7 @@ def test_early_salary_is_averaged_in_scheduled_month_but_reported_on_bank_date(c
     c.transactions.record_inflow("2026-10-22", accounts["cib"].id, "50000", salary.id,
                                  owner_id=owner_id)
 
-    average = c.budgets.income_average("2026-12")
+    average = c.budgets.income_average("2026-12", schedule=c.schedules.view())
 
     # September, October and November each contribute exactly one recurring salary payment.
     assert average.months_counted == 3
@@ -39,6 +39,6 @@ def test_unlinked_salary_stays_in_bank_month(c, setup):
 
     # November's scheduled payment is outside this Sep–Oct lookback; the unlinked Oct
     # transaction remains in October and is included.
-    average = c.budgets.income_average("2026-11")
+    average = c.budgets.income_average("2026-11", schedule=c.schedules.view())
     assert average.months_counted == 1
     assert average.amount == Decimal("7000.00")

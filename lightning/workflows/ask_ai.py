@@ -247,7 +247,7 @@ class AskAIService:
             "today": today(),
         }
         month = month_of(parse_date(end))
-        facts["plan"] = c.budgets.month_view(month) if c.budgets.has_plan(month) else None
+        facts["plan"] = c.budgets.month_view(month, schedule=c.schedules.view()) if c.budgets.has_plan(month, schedule=c.schedules.view()) else None
         facts["plan_month"] = month
         if parse_date(end) >= today():
             facts["ahead"] = c.forecaster.forecast(today())
