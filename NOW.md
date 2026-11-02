@@ -26,7 +26,7 @@
 
 - **Store and community (2026-10-27):** 10C unlock once, 8M–8S merged in both repos; the website migrations (up to 20261027210000) are run and checked live and `redeem-purchase` is redeployed; the app release that carries 10C ships the unlock. Next: 10D (Papyrus and Dendera sets need a banner, frame and name designed). **Read:** `reports/2026-10-27-store-and-community/report.md`.
 
-- **10A/10C app themes:** ready to sell, Dendera included; owner steps in 10C4. Dendera's premium pass (10F) is built; the site's Dendera demo needs new shots. New themes: `guideline/themes.md` §5. **Read:** `issues/10-looks-and-store/10C-theme-materials-acceptance.md`.
+- **10A/10C app themes:** ready to sell, Dendera included; owner steps in 10C4. Dendera's premium pass (10F) is built; the site's demo shots are current (site #159). New themes: `guideline/themes.md` §5. **Read:** `issues/10-looks-and-store/10C-theme-materials-acceptance.md`.
 
 - **Website (2026-10-28):** analytics, Downloads, leaderboard contrast and badge merged; banners redrawn plus Felucca and Sand wind (site #130). **Read:** site README › Analytics.
 
