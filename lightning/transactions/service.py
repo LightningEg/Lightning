@@ -923,6 +923,25 @@ class TransactionService:
             raise ValidationError(f"This form was already saved{ref}. Open a new one to add another.")
         return txn
 
+    def form_seen(self, token, payload: dict) -> bool:
+        """True when an earlier delivery of this same form already saved something that is not one transaction (a
+        plan, a held-for-others entry). The same token with other values is refused. Call inside the write transaction."""
+        found = self._submission(token, payload)
+        if found is None:
+            return False
+        row = self.db.one("SELECT after_json FROM audit_log WHERE entity='form' AND summary=?", (found[0],))
+        if row is None:
+            return False
+        if json.loads(row["after_json"]) != found[1]:
+            raise ValidationError("This form was already saved. Open a new one to add another.")
+        return True
+
+    def remember_form(self, token, payload: dict) -> None:
+        """The same, for a form that saved something other than one transaction."""
+        found = self._submission(token, payload)
+        if found is not None:
+            self.audit.record("form", 0, "SUBMITTED", found[0], after=found[1])
+
     def remember_submission(self, token, payload: dict, txn_id: int) -> None:
         """Saved in the audit log, in the same write as the transaction; the log is outside Undo and the journal."""
         found = self._submission(token, payload)

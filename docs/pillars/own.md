@@ -19,7 +19,6 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 | **IT-5F** | [One order of price sources](../../issues/5-investments/5F-one-order-of-price-sources.md) | M | ready |
 | **NF-5G** | [Brokerages that span exchanges and currencies](../../issues/5-investments/5G-brokerages-across-exchanges.md) | L | building |
 | **BV-5I** | [Gam'eya and zakat follow-ups: no circle in the sample, no phone breakdown, an early-turn circle sho…](../../issues/5-investments/5I-gameya-and-zakat-follow-ups.md) | M | new |
-| **BT-5J** | [Converting EGP to dollars raises net worth](../../issues/5-investments/5J-conversion-raises-net-worth.md) | M | new |
 | **BV-5K** | [A certificate's holding page shows price charts, nine empty "Units out" rows, no interest, and save…](../../issues/5-investments/5K-certificate-holding-page.md) | M | ready |
 | **NF-6A** | [Market data: price packs, collected in the cloud](../../issues/6-market-data/6A-price-packs.md) | L | building |
 | **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](../../issues/6-market-data/6B-europe-and-gcc-shares.md) | L | blocked on a source that allows redistribution |
@@ -31,7 +30,6 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 
 ## Reports with open follow-ups here
 
-- [Audit 1: is Lightning ready to demo?](../../reports/2026-10-20-demo-readiness/report.md): 5J, 5K
+- [Audit 1: is Lightning ready to demo?](../../reports/2026-10-20-demo-readiness/report.md): 5K
 - [Audit 2: backend efficiency and loose ends](../../reports/2026-10-21-backend-efficiency/report.md): 5A
-- [Audit 11: the backend walked through use cases](../../reports/2026-10-29-use-case-audit/report.md): 5J
 <!-- work:end -->

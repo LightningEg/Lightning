@@ -369,7 +369,13 @@ async def add_purchase(request: Request):
             raise ValidationError("Name the purchase.", "name")
         quote = purchase_quote(values["price"], values["fee"], values["months"], values["first_date"])
         if form.get("intent") == "save":
-            container(request).planning.create_purchase(**(values | {"fee": quote["fee"]}))
+            c = container(request)
+            submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+            payload = {key: values[key] for key in ("name", "price", "fee", "months", "first_date", "account_id")}
+            with c.db.transaction():
+                if not c.transactions.form_seen(submission, payload):  # a resent form saves nothing more (2AD)
+                    c.planning.create_purchase(**(values | {"fee": quote["fee"]}))
+                    c.transactions.remember_form(submission, payload)
             return redirect("/plan/loans", "Instalment plan added. Record each payment when it leaves your account.")
         return _purchase_form(request, values, quote)
     except (LightningError, ValueError) as exc:

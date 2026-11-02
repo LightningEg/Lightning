@@ -1,6 +1,6 @@
 ---
 title: Investments
-done: 5H, 5L
+done: 5H, 5L, 5J
 ---
 
 **Goal.** Every investment figure can be explained per purchase, and agrees with the ledger.

@@ -20,7 +20,7 @@
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **Audits 9, 11:** left NF-7T5/7T6, IT-4K4; BT-2AD, BT-7U; owner: BT-2E/5J. **Read:** reports 2026-10-28, 2026-10-29-use-case-audit.
+- **Audits 9, 11:** left NF-7T5/7T6, IT-4K4; BT-7U; owner: BT-2E. **Read:** reports 2026-10-28, 2026-10-29-use-case-audit.
 - **IV-3AN phone plan (Audit 13, 2026-11-01):** owner approves 3AN0 (six Part C lines); 3AN1-2 need no approval. IT-3AO (phone speed) is done. **Read:** 3AN.
 - **IV-3AM PC declutter:** built and reviewed; the owner checks it on the PC, then the Left list. **Read:** 3AM.
 

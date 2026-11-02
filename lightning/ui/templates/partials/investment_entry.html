@@ -3,6 +3,7 @@
 <section class="card investment-entry-card">
   <h2 class="investment-entry-heading">{{ "Add investment transaction"|tr(locale) }}</h2>
   <form method="post" action="/accounts/{{ account.id }}/investment-entry" class="investment-entry-form" data-currency="{{ account.currency }}" autocomplete="off">
+    <input type="hidden" name="submission" value="{{ new_submission() }}">
     <input type="hidden" name="instrument_key" value="{{ investment_entry.get('instrument_key', '') }}">
     <input type="hidden" name="instrument_label" value="{{ investment_entry.get('instrument_label', '') }}">
     <input type="hidden" name="price_basis" value="{{ investment_entry.get('price_basis', 'total') }}">

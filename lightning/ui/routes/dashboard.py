@@ -642,7 +642,12 @@ async def add_money_from_others(request: Request):
         if amount == 0:
             raise ValidationError("Use a positive amount for money received and a negative amount when it is returned.", "amount")
         day = parse_date(form.get("date", today().isoformat())).isoformat()
-        c.money_from_others.record(day, owner, account.id, amount, str(form.get("notes", "")))
+        submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+        payload = {"owner": owner, "account": account.id, "amount": str(amount), "date": day, "notes": str(form.get("notes", ""))}
+        with c.db.transaction():
+            if not c.transactions.form_seen(submission, payload):  # a resent form saves nothing more (2AD)
+                c.money_from_others.record(day, owner, account.id, amount, payload["notes"])
+                c.transactions.remember_form(submission, payload)
     except (ValueError, ValidationError, InvalidOperation) as exc:
         message = exc.message if isinstance(exc, ValidationError) else "Check the amount, date, and account."
         return redirect("/money-from-others", message)

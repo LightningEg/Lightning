@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 77 open items, in the order they are worked on.
+10 milestones, 75 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -50,9 +50,8 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | **BT-2J** | [On a journal profile, retrying one add form can still save a second expense](2-safe-for-real-money/2J-register-submit-idempotency.md) | bug, technical · medium | Everywhere | M | ready |
 | **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical · medium | Reach | M | new |
 | **OW-2AB** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AB-stale-code.md) | owner task | Protect |  | ready |
-| **BT-2AD** | [Five more money forms save twice when the same form is sent again - investment entry, gold trade, ownership change, money held for others, instalment purchase](2-safe-for-real-money/2AD-resent-money-forms-save-twice.md) ([#230](https://github.com/LightningEg/Lightning/issues/230)) | bug, technical · low | Capture | M | ready |
 
-Done: 2B, 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AC. Next free code: 2AE.
+Done: 2B, 2D, 2G, 2H, 2I, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AC, 2AD. Next free code: 2AE.
 
 ## 3 Polish and Arabic
 
@@ -185,10 +184,9 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | NF-5G6 | ↳ Phase 5: analysis | | | L | |
 | NF-5G7 | ↳ Phase 6: lots and corporate actions | | | L | |
 | **BV-5I** | [Gam'eya and zakat follow-ups: no circle in the sample, no phone breakdown, an early-turn circle shown below zero](5-investments/5I-gameya-and-zakat-follow-ups.md) | bug, visual · medium | Own | M | new |
-| **BT-5J** | [Converting EGP to dollars raises net worth - the conversion's own rate revalues every dollar holding](5-investments/5J-conversion-raises-net-worth.md) | bug, technical · medium | Own | M | new |
 | **BV-5K** | [A certificate's holding page shows price charts, nine empty "Units out" rows, no interest, and saves it as Equity Fund](5-investments/5K-certificate-holding-page.md) ([#162](https://github.com/LightningEg/Lightning/issues/162)) | bug, visual · medium | Own | M | ready |
 
-Done: 5H, 5L. Next free code: 5M.
+Done: 5H, 5J, 5L. Next free code: 5M.
 
 ## 6 Market data
 
