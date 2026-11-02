@@ -19,6 +19,8 @@
       <a class="btn" href="/accounts/{{ account.id }}/import/ai-template.csv">{{ 'Download CSV template'|tr(locale) }}</a>
       <a class="btn" href="/accounts/{{ account.id }}/import/ai-reference.json">{{ 'Download matching reference'|tr(locale) }}</a>
     </div>
+    {% if category_prompt %}<p class="muted small">{{ 'First import into this account? This prompt gives your AI tool what it cannot guess: your category names. It matches the bank’s own category words to them, so the review starts with your categories filled in.'|tr(locale) }}</p>
+    {% set ai_text = category_prompt %}<div class="actions">{% include "partials/ai_prompt.html" %}</div>{% endif %}
   </details>
   {% if error %}<p class="flash error">{{ error|tr(locale) }}</p>{% endif %}
   <form method="post" enctype="multipart/form-data" action="/accounts/{{ account.id }}/import">
