@@ -91,12 +91,14 @@ class Mohab:
         self.answers[key] = Answer(question, list(self.b.trail), screen)
         return screen
 
-    def ask_needs(self, key: str, question: str, group: str) -> Screen:
+    def ask_needs(self, key: str, question: str, group: str, *actions: str) -> Screen:
         """Needs you groups its decisions (feedback ticket 84): a kind with several opens its own page; a kind
         with one shows that decision on the Overview itself."""
         screen = self.b.open("/")
         if any(link.text.startswith(group + " · ") for link in screen.links):
             screen = self.b.click(group + " · ")
+        for action in actions:
+            screen = self.b.click(action)
         self.answers[key] = Answer(question, list(self.b.trail), screen)
         return screen
 
@@ -481,7 +483,7 @@ def _live_the_year(o: Mohab) -> None:
     b.submit({}, button="Use 50,000.00 from now on")
     o.ask("raise_after", "Is the plan at 50,000 now?", "Cash planning", "Recurring")
     # Needs you notices the raise is not in his average yet; he keeps his plan and saves the 5,000.
-    o.ask("income_up", "My pay went up. What should my plan do with it?", "Budget and saving", "Choose")
+    o.ask_needs("income_up", "My pay went up. What should my plan do with it?", "Budget and saving", "Choose")
     o.notes["raise_saved"] = b.submit({}, button="Save it")
     o.ask("raise_target", "Did my savings target go up?", "Safety", "Limits")
 
@@ -522,11 +524,11 @@ def _live_the_year(o: Mohab) -> None:
     # can; he sets the 60,000 aside.
     b.go("Safety", "Reserves")
     b.submit({"name": "New laptop", "target": "60,000", "due_date": "2027-06-30"}, button="Add reserve")
-    o.ask("laptop", "Can I have a 60,000 laptop by the end of June?")
+    o.ask_needs("laptop", "Can I have a 60,000 laptop by the end of June?", "Cash and goals")
     b.go("Safety", "Reserves")
     screen = b.open("/plan/reserves?edit=all")
     o.notes["laptop_set_aside"] = b.submit({"allocated": "60,000"}, action=screen.action_after("New laptop", "/allocate"))
-    o.ask("laptop_after", "And once the money is set aside?")
+    o.ask_needs("laptop_after", "And once the money is set aside?", "Cash and goals")
     o.on("2027-06-30")
     o.month("2027-06", salary="50,000", rent="13,200")
     o.ask("rent", "My rent went up to 13,200. Does the plan know?", "Cash planning", "Recurring")
@@ -542,7 +544,7 @@ def _live_the_year(o: Mohab) -> None:
     o.on("2027-07-31")
     o.month("2027-07", salary="50,000", rent="13,200")
     # The new model is out in the autumn: he lets the laptop goal go and its 60,000 is free again.
-    o.ask("laptop_late", "The laptop's date has passed. What now?")
+    o.ask_needs("laptop_late", "The laptop's date has passed. What now?", "Cash and goals")
     screen = b.go("Safety", "Reserves")
     o.notes["laptop_done"] = b.submit({}, action=screen.action_after("New laptop", "/complete"))
     b.go("Safety", "Reserves")
