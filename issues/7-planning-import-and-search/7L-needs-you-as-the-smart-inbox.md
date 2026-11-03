@@ -35,3 +35,8 @@ the import settled ("2 posted, 1 linked · settled Landlord and WE Internet"). C
 
 ## Fix
 One branch per step (7L1, the false raise prompt, is done). Mohab: add a step where a tracked suggestion and a rule offer appear in Needs you and are accepted there.
+
+
+## Implementation of 7L2 · 2026-11-03
+
+Needs you now includes existing recurring candidates and reusable-rule offers, partially used replenishable/emergency reserves, current category overruns, and the emergency-fund alert band. Items use the existing situation identity, Mark as reviewed, Snooze and Restore controls. Rule offers are grouped with activity; no suggestions post money or create plans/rules automatically. Remaining health-band coverage and the 7L3/7L4 detection/pairing improvements stay open.

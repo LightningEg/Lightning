@@ -14,6 +14,13 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    'Refill a reserve': 'كمّل احتياطي',
+    '{name} · {amount} {currency} to refill.': '{name} · محتاج {amount} {currency} عشان يتكمّل.',
+    '{name} · {amount} {currency} · {months} months · last {day}.': '{name} · {amount} {currency} · بيتكرر من {months} شهور · آخر مرة {day}.',
+    '{name} · {count} corrections · {category}.': '{name} · {count} تعديلات · {category}.',
+    'Emergency fund needs you': 'احتياطي الطوارئ محتاجك',
+    '{months} months of cover. Review your emergency reserve.': 'يغطي {months} شهور. راجع احتياطي الطوارئ.',
+
     # Phone capture (3AN3, 3AN5, 3AN6, 3AN12): the Add sheet, a transaction's sheet, Search, From SMS, the one-line money strip.
     'Into': 'على حساب',
     'Who': 'مين',

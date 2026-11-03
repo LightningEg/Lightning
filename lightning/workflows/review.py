@@ -37,7 +37,7 @@ def _plural(count: int, one: str, many: str) -> str:
 # Needs you groups its items by what they are about (feedback ticket 84): one row per group on the Overview,
 # and each group opens its own page. First match on the item's link wins; the order is the order shown.
 GROUPS = (("payments", "Bills and payments", ("/plan/items/", "/gameya/", "/deposits/")),
-          ("activity", "Activity to sort out", ("/sms", "/accounts/", "/transactions", "/activity", "/reimbursements")),
+          ("activity", "Activity to sort out", ("/rules", "/sms", "/accounts/", "/transactions", "/activity", "/reimbursements")),
           ("budget", "Budget and saving", ("/budget", "/financial-health")),
           ("cash", "Cash and goals", ("/plan",)),
           ("prices", "Prices and valuations", ("/investments/", "/settings")))
@@ -97,7 +97,16 @@ class ReviewInbox:
         items.extend(self._statements())
         items.extend(self._sms())
         items.extend(self._uncategorized())
+        items.extend(self._smart_suggestions(on))
         for reserve in c.reserves.list_active():
+            if (reserve["spent"] > ZERO and reserve["remaining"] > ZERO
+                    and (reserve["kind"] == "EMERGENCY" or reserve["recurrence"] != "NONE")):
+                items.append({"label": "Refill a reserve",
+                              "detail": f"{reserve['name']} · {fmt(reserve['remaining'])} {c.base_currency} to refill.",
+                              "href": "/plan/reserves", "action": "Refill", "priority": 2,
+                              "source_version": {"reserve": reserve["id"],
+                                                 "payments": [(row["id"], row["amount_e6"]) for row in
+                                                              c.reserves.links_for_reserve(reserve["id"])]}})
             if reserve.get("due_date") and reserve["due_date"] < fmt_date(on) and reserve["effective_allocated"] > ZERO:
                 items.append({"label": f"{reserve['name']} is past its date",
                               "detail": f"Due {reserve['due_date']} · {fmt(reserve['effective_allocated'])} {c.base_currency} still set aside.",
@@ -210,6 +219,12 @@ class ReviewInbox:
                           "detail": f"Last priced: {named}{more}. Values use these old prices.",
                           "href": "/investments/prices", "action": "Update prices", "priority": 2})
         for section in c.budgets.month_view(month_of(on), schedule=c.schedules.view()).sections:
+            for line in section.lines:
+                if line.depth == 2 and line.over:
+                    items.append({"label": f"{line.name} over plan",
+                                  "detail": f"{fmt(line.planned_actual - line.available)} {c.base_currency} over this month's plan.",
+                                  "href": f"/budget?month={month_of(on)}&open_group=all#limit-{line.category_id}",
+                                  "action": "Change the plan", "priority": 2})
             if section.planned_actual > section.available:
                 items.append({"label": f"{section.name} over plan",
                               "detail": f"{fmt(section.planned_actual - section.available)} {c.base_currency} over this month's plan.",
@@ -253,6 +268,29 @@ class ReviewInbox:
             if include_handled or item["review_state"] == "active":
                 visible.append(item)
         return visible
+
+    def _smart_suggestions(self, on: date) -> list[dict]:
+        """Existing suggestion engines, routed through the same durable review decisions."""
+        from lightning.workflows.weekly import WeeklyReview
+        items = []
+        for offer in self.c.planning.suggestions(on):
+            currency = (self.c.accounts.get(offer["account_id"]).currency
+                        if offer.get("account_id") else self.c.base_currency)
+            items.append({"label": "Looks recurring",
+                          "detail": f"{offer['name']} · {fmt(offer['amount'])} {currency} · {offer['months']} months · last {offer['last_date']}.",
+                          "href": "/plan/recurring#recurring-suggest", "action": "Track", "priority": 2,
+                          "source_version": str(offer["counterparty_id"])})
+        for offer in WeeklyReview(self.c).rule_offers():
+            items.append({"label": "Make a rule",
+                          "detail": f"{offer['name']} · {offer['count']} corrections · {offer['category']}.",
+                          "href": offer["href"], "action": "Make a rule", "popup": True,
+                          "priority": 2, "source_version": offer["id"]})
+        fund = self.c.health.emergency_fund(on)
+        if self.c.health.band("emergency_fund", fund.months) == "alert":
+            items.append({"label": "Emergency fund needs you",
+                          "detail": f"{fmt(fund.months, 1)} months of cover. Review your emergency reserve.",
+                          "href": "/financial-health", "action": "Review", "priority": 2})
+        return items
 
     def _state(self, identity: str) -> dict:
         try:
@@ -374,3 +412,4 @@ class ReviewInbox:
                                   "ON l.transaction_id=t.id WHERE l.category_id=? AND t.status='POSTED' ORDER BY t.id",
                                   (category.id,))]).encode()).hexdigest()})
         return found
+
