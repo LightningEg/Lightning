@@ -45,3 +45,27 @@ def test_rule_suggestion_can_be_reviewed_without_hiding_recurring(c, setup, monk
     assert not any(i['label'] == 'Make a rule' for i in inbox.items(day))
     offers.clear()
     assert not any(i['label'] == 'Make a rule' for i in inbox.items(day, include_handled=True))
+
+
+def test_used_emergency_reserve_is_offered_for_refill(c, setup):
+    accounts, cats = setup
+    reserve = c.reserves.set_emergency_fund('400', '400')
+    txn = c.transactions.record_outflow('2026-09-13', accounts['cib'].id, '100', cats['EXP.PERSONAL.FOOD'].id)
+    c.reserves.set_expense_link(reserve['id'], txn.id, '100')
+    items = ReviewInbox(c).items(date(2026, 12, 31))
+    refill = next(i for i in items if i['label'] == 'Refill a reserve')
+    assert '100 EGP' in refill['detail'] and refill['href'] == '/plan/reserves'
+    c.reserves.allocate(reserve['id'], '500')
+    assert not any(i['label'] == 'Refill a reserve' for i in ReviewInbox(c).items(date(2026, 12, 31)))
+
+
+def test_emergency_alert_uses_existing_health_band_and_ignores_unknown(c, setup, monkeypatch):
+    from types import SimpleNamespace
+    monkeypatch.setattr(c.planning, 'suggestions', lambda on: [])
+    monkeypatch.setattr(WeeklyReview, 'rule_offers', lambda self: [])
+    fund = SimpleNamespace(months=Decimal('0.8'))
+    monkeypatch.setattr(c.health, 'emergency_fund', lambda on: fund)
+    inbox = ReviewInbox(c)
+    assert any(i['label'] == 'Emergency fund needs you' for i in inbox._smart_suggestions(date(2026, 12, 31)))
+    fund.months = None
+    assert not any(i['label'] == 'Emergency fund needs you' for i in inbox._smart_suggestions(date(2026, 12, 31)))
