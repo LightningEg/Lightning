@@ -26,7 +26,7 @@ from lightning.market.iso import venue_name
 from lightning.core.refs import DocType
 from lightning.transactions.tags import normalize as normal_tag
 
-from ..web import container, render, _shift_month as shift_month
+from ..web import settled_save, container, render, _shift_month as shift_month
 from ..charts import class_tone
 from ..i18n import translate
 
@@ -725,7 +725,7 @@ async def create(request: Request, account_id: int | None):
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = entry | {"row_account": row_account}
     try:
-        with resent_guard(c, form), c.db.transaction():
+        with resent_guard(c, form), settled_save(request, c):
             earlier = c.transactions.submitted(submission, payload)
             if earlier is not None:
                 return earlier, entry
@@ -759,7 +759,7 @@ async def update(request: Request, account_id: int | None, txn_id: int):
     values["revision"] = form.get("revision")
     row_account = account_id or _int(values["account_id"])
     try:
-        with c.db.transaction():
+        with settled_save(request, c):
             c.transactions.require_revision(txn_id, values["revision"])
             check_before_opening(c, row_account, values["date"], values)
             existing = c.transactions.get(txn_id)
@@ -826,7 +826,7 @@ async def create_investment_entry(request: Request, account_id: int):
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = values | {"account": account_id}
     try:
-        with c.db.transaction():
+        with settled_save(request, c):
             txn = c.transactions.submitted(submission, payload)  # a resent form returns its first save (2AD)
             if txn is None:
                 txn = entry_workflow.record(c, account, values)
@@ -853,3 +853,4 @@ def _pocket_cash(c, account):
     if not pockets:
         return []
     return [{"id": a.id, "currency": a.currency, "cash": c.reporting.account_balance(a.id, today())} for a in [account, *pockets]]
+

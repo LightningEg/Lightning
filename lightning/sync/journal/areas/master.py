@@ -23,7 +23,7 @@ def _account_institution(c, values):
 COMMANDS = {
     # A free-text institution is saved before the account. Built-in matches are a no-op.
     "institutions.add": Command("institutions.add", dict(name=TEXT)),
-    "reporting.other_asset_values.save": Command("reporting.other_asset_values.save", dict(
+    "reporting.other_asset_values.save": Command("accounts.save_other_asset_value", dict(
         account=ref("accounts"), effective_date=DATE, amount=AMOUNT, notes=TEXT),
         target=("other_asset_valuations", ("account", "effective_date")), prepare=_valuation_account),
     "accounts.open": Command("account_flows.open_account", dict(
