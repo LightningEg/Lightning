@@ -46,6 +46,24 @@ EVENTS: dict[str, EventSpec] = {
 }
 
 
+@dataclass(frozen=True)
+class FormFields:
+    """Which fields the entry form shows for an event; derived from the spec only, so a new row needs no template edit."""
+    units: bool  # quantity, amount, price preview
+    fees: bool
+    cash_account: bool
+    cash_from: bool  # the cash account is where money came from (else where it went)
+    income: bool  # the amount received (dividend)
+
+
+def form_fields(event: str) -> FormFields:
+    """The form's fields for an event name in ``EVENTS`` (the route passes this; the template only reads it)."""
+    spec = _spec(event)
+    trade = spec.units in (Sign.IN, Sign.OUT)
+    return FormFields(units=trade, fees=trade and spec.fees != "none", cash_account=trade and spec.cash != Sign.NONE,
+                      cash_from=spec.cash == Sign.OUT, income=spec.income_category is not None)
+
+
 @dataclass
 class EventValues:
     """What the service resolved (accounts, asset, ids, rates) plus what the person typed (raw text)."""

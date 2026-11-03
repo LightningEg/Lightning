@@ -10,7 +10,7 @@ by: Claude
 
 # One table of investment events
 
-**Status:** proposal, 2026-10-05 · Claude. 5A1 built 2026-11-02 (`lightning/investments/events.py`: `EventSpec`, `EVENTS` with buy, sell and dividend, `lines_for`, `validate`; the service's `_trade_lines` and `_dividend_lines` call them); 5A2 built 2026-11-02 (`InvestmentService.record(event, ...)` is the one recording path; `buy`, `sell`, `dividend` and `update` call it; `_event_lines` replaced `_trade_lines` and `_dividend_lines`); 5A3-5A4 not built. Learned from GnuCash (`Gnucash/gnucash` at `53cc9e6`; Lightning at `5665786`). When built, move what holds into [Architecture](../../ai/ARCHITECTURE.md) and delete this file. Build first of the investment designs.
+**Status:** proposal, 2026-10-05 · Claude. 5A1 built 2026-11-02 (`lightning/investments/events.py`: `EventSpec`, `EVENTS` with buy, sell and dividend, `lines_for`, `validate`; the service's `_trade_lines` and `_dividend_lines` call them); 5A2 built 2026-11-02 (`InvestmentService.record(event, ...)` is the one recording path; `buy`, `sell`, `dividend` and `update` call it; `_event_lines` replaced `_trade_lines` and `_dividend_lines`); 5A3 built 2026-11-02 (`events.form_fields(event)`; the route passes it as `spec`, `investments/form.html` only reads it); 5A4 not built. Learned from GnuCash (`Gnucash/gnucash` at `53cc9e6`; Lightning at `5665786`). When built, move what holds into [Architecture](../../ai/ARCHITECTURE.md) and delete this file. Build first of the investment designs.
 
 **They do better:** adding an event type is one row in a table, not a new code path.
 
@@ -50,9 +50,6 @@ by: Claude
 4. Return of capital lowers open lots' cost by quantity share; any excess over cost is a gain.
 
 **Done when:** every existing investment test passes unchanged; new tests for reinvested dividend and return of capital.
-
-## 5A3 The entry form reads the spec · M
-Needs 5A1 merged first. Show only the fields the event enables; the route passes the spec, the template only reads it.
 
 ## 5A4 Reinvested dividend and return of capital · L
 Needs 5A1 and 5A2 merged first. New tests for both; return of capital lowers open lots' cost by quantity share, and any excess over cost is a gain.

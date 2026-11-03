@@ -79,3 +79,28 @@ def test_service_wrappers_go_through_the_one_record_path(c, setup):
         c.investments.record("nonsense", "2026-09-05", thndr.id, comi.id)
     assert error.value.field == "event"
     assert not hasattr(c.investments, "_trade_lines") and not hasattr(c.investments, "_dividend_lines")
+
+
+def test_form_fields_come_from_the_spec():
+    buy, sell, div = (events.form_fields(k) for k in ("buy", "sell", "dividend"))
+    assert (buy.units, buy.fees, buy.cash_account, buy.cash_from, buy.income) == (True, True, True, True, False)
+    assert (sell.cash_from, sell.income) == (False, False)
+    assert (div.units, div.fees, div.cash_account, div.income) == (False, False, False, True)
+
+
+def test_entry_form_shows_only_what_the_spec_enables(c, monkeypatch):
+    """The template reads the spec: a row without fees shows no fee field, with no template change (NF-5A3)."""
+    from dataclasses import replace
+
+    from fastapi.testclient import TestClient
+
+    from lightning.ui.web import create_app
+
+    client = TestClient(create_app(c))
+    buy = client.get("/investments/new?kind=buy").text
+    assert 'name="fees"' in buy and 'name="cash_account_id"' in buy and 'name="amount"' not in buy
+    dividend = client.get("/investments/new?kind=dividend").text
+    assert 'name="amount"' in dividend and 'name="fees"' not in dividend and 'name="cash_account_id"' not in dividend
+    monkeypatch.setitem(EVENTS, "buy", replace(EVENTS["buy"], fees="none"))
+    bare = client.get("/investments/new?kind=buy").text
+    assert 'name="fees"' not in bare and 'name="fees_included"' not in bare and 'name="cash_account_id"' in bare
