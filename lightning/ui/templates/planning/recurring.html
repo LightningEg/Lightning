@@ -46,12 +46,14 @@
     <div class="compact-list">{% for s in suggestions %}
       <div class="compact-row plan-item-row">
         <span><b>{{ s.name }}</b><small class="muted">{{ s.months }} months · usually around day {{ s.day }} · last {{ s.last_date }}</small></span>
-        <span class="plan-payment-side"><b class="{{ 'pos' if s.kind == 'INCOME' }}">{{ '+' if s.kind == 'INCOME' else '−' }}{{ s.amount|money }}</b>
-        <a class="btn small" data-popup-open href="/plan/items/new?kind={{ s.kind }}&amp;name={{ s.name|urlencode }}&amp;amount={{ s.amount }}&amp;frequency=MONTHLY&amp;counterparty={{ s.name|urlencode }}&amp;account_id={{ s.account_id or '' }}&amp;category_id={{ s.category_id or '' }}&amp;start_date={{ as_of[:8] }}{{ '%02d'|format([s.day, 28]|min) }}">{{ 'Track'|tr(locale) }}</a>
+        <span class="plan-payment-side"><b class="{{ 'pos' if s.kind == 'INCOME' }}">{{ '+' if s.kind == 'INCOME' else '−' }}{{ s.amount|money }} {{ s.currency }}</b>
+        <a class="btn small" data-popup-open href="/plan/items/new?kind={{ s.kind }}&amp;name={{ s.name|urlencode }}&amp;amount={{ s.amount }}&amp;frequency=MONTHLY&amp;counterparty={{ s.name|urlencode }}&amp;account_id={{ s.account_id or '' }}&amp;category_id={{ s.category_id or '' }}&amp;start_date={{ s.start_date }}&amp;match_tolerance_pct={{ s.match_tolerance_pct }}">{{ 'Track'|tr(locale) }}</a>
         <form method="post" action="/plan/suggestions/{{ s.counterparty_id }}/not-recurring"><button class="btn small">{{ "Not recurring"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></span>
       </div>{% endfor %}</div>
   </article>
 </section>{% endif %}
 
 {% if stopped %}<details class="card context-detail"><summary>Stopped · {{ stopped|length }}</summary><div class="compact-list">{% for i in stopped %}<div class="compact-row"><span>{{ i.name }}<small class="muted">{{ i.kind_label|tr(locale) }}</small></span><b>{{ i.amount|money }}</b></div>{% endfor %}</div></details>{% endif %}
+{% if dismissed %}<details class="card context-detail"><summary>{{ 'Not recurring'|tr(locale) }} · {{ dismissed|length }}</summary>
+{% for item in dismissed %}<form method="post" action="/plan/suggestions/{{ item.id }}/restore"><span>{{ item.name }}</span> <button class="btn small">{{ 'Restore suggestion'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endfor %}</details>{% endif %}
 {% endblock %}

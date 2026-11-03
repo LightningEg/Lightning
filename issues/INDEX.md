@@ -210,7 +210,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | **NF-7G** | [Age of Money and a spending calendar](7-planning-import-and-search/7G-more-analytics.md) | new feature | Understand | M | new |
 | **NF-7L** | [Smart suggestions exist but sit 2-3 clicks down - make Needs you the one inbox, widen Looks recurring](7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) | new feature | Plan | L | ready |
 | NF-7L2 | ↳ Needs you carries the suggestions ([#224](https://github.com/LightningEg/Lightning/issues/224)) | | | L | |
-| NF-7L3 | ↳ Looks recurring finds real bills ([#225](https://github.com/LightningEg/Lightning/issues/225)) | | | M | |
 | NF-7L4 | ↳ Pair what belongs together ([#226](https://github.com/LightningEg/Lightning/issues/226)) | | | M | |
 | **OW-7M** | [Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as overspending](7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) | owner task | Plan |  | new |
 | **OW-7S** | [Money out filed under an income category counts as spending, not as less income](7-planning-import-and-search/7S-money-out-of-an-income-category.md) | owner task | Understand |  | new |

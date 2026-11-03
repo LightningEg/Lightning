@@ -310,7 +310,8 @@ async def recurring_page(request: Request):
                              for r in rows if not r["item"].is_income])
     return render(request, "planning/recurring.html", tabs=TABS, plan_tab="recurring", rows=rows, stopped=stopped,
                   bill_bars=bill_bars, fixed_tiles=fixed_tiles,
-                  suggestions=c.planning.suggestions(day), subscriptions_per_year=subscriptions,
+                  suggestions=c.planning.suggestions(day), dismissed=c.planning.dismissed_suggestions(),
+                  subscriptions_per_year=subscriptions,
                   monthly_out=monthly_out, monthly_in=monthly_in, labels=labels, as_of=fmt_date(day))
 
 
@@ -562,6 +563,14 @@ async def update_item(request: Request, item_id: int):
         return _item_form(request, c, values, item=item, error=exc.message, error_field=exc.field or "",
                           status_code=400, back=back)
     return redirect(back, " ".join(x for x in (f"{values['name']} saved.", c.health.commitments_note(item.kind.value)) if x))
+
+
+@router.post("/suggestions/{counterparty_id:int}/restore")
+async def restore_suggestion(request: Request, counterparty_id: int):
+    c = container(request)
+    value = c.planning.restored_suggestion_setting(counterparty_id)
+    c.settings.set("recurring_not_suggested", value)
+    return redirect("/plan/recurring", "Suggestion restored.")
 
 
 @router.post("/suggestions/{counterparty_id:int}/not-recurring")

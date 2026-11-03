@@ -38,8 +38,8 @@
 {% if suggestions %}<section class="phone-section" aria-labelledby="recurring-suggest">
   <header class="phone-section-head"><h2 id="recurring-suggest">{{ "Looks recurring"|tr(locale) }}</h2><span>{{ "From your last six months"|tr(locale) }}</span></header>
   <div class="phone-rows">{% for s in suggestions %}
-    <div class="phone-row phone-suggest"><span><b>{{ s.name }}</b><small>{{ '{n} months · usually around day {day}'|tr(locale, n=s.months, day=s.day) }}</small></span><b class="{{ 'pos' if s.kind == 'INCOME' }}">{{ '+' if s.kind == 'INCOME' else '−' }}{{ s.amount|amount_role('row') }}</b></div>
-    <div class="phone-suggest-actions"><a class="phone-quiet" data-popup-open href="/plan/items/new?kind={{ s.kind }}&amp;name={{ s.name|urlencode }}&amp;amount={{ s.amount }}&amp;frequency=MONTHLY&amp;counterparty={{ s.name|urlencode }}&amp;account_id={{ s.account_id or '' }}&amp;category_id={{ s.category_id or '' }}&amp;start_date={{ as_of[:8] }}{{ '%02d'|format([s.day, 28]|min) }}">{{ 'Track'|tr(locale) }}</a>
+    <div class="phone-row phone-suggest"><span><b>{{ s.name }}</b><small>{{ '{n} months · usually around day {day}'|tr(locale, n=s.months, day=s.day) }}</small></span><b class="{{ 'pos' if s.kind == 'INCOME' }}">{{ '+' if s.kind == 'INCOME' else '−' }}{{ s.amount|amount_role('row') }} {{ s.currency }}</b></div>
+    <div class="phone-suggest-actions"><a class="phone-quiet" data-popup-open href="/plan/items/new?kind={{ s.kind }}&amp;name={{ s.name|urlencode }}&amp;amount={{ s.amount }}&amp;frequency=MONTHLY&amp;counterparty={{ s.name|urlencode }}&amp;account_id={{ s.account_id or '' }}&amp;category_id={{ s.category_id or '' }}&amp;start_date={{ s.start_date }}&amp;match_tolerance_pct={{ s.match_tolerance_pct }}">{{ 'Track'|tr(locale) }}</a>
       <form method="post" action="/plan/suggestions/{{ s.counterparty_id }}/not-recurring"><button class="phone-quiet">{{ "Not recurring"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% endfor %}
   </div>
 </section>{% endif %}
@@ -48,4 +48,6 @@
   {% set row %}<span>{{ 'Stopped'|tr(locale) }}</span><b>{{ stopped|length }}</b><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
   {% call sheet('Stopped'|tr(locale), row) %}<div class="phone-rows">{% for i in stopped %}<div class="phone-row"><span>{{ i.name }}<small>{{ i.kind_label|tr(locale) }}</small></span><b>{{ i.amount|amount_role('row') }}</b></div>{% endfor %}</div>{% endcall %}
 </div></section>{% endif %}
+{% if dismissed %}<details class="phone-section"><summary>{{ 'Not recurring'|tr(locale) }} · {{ dismissed|length }}</summary>
+{% for item in dismissed %}<form method="post" action="/plan/suggestions/{{ item.id }}/restore"><span>{{ item.name }}</span> <button class="phone-quiet">{{ 'Restore suggestion'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endfor %}</details>{% endif %}
 {% endblock %}

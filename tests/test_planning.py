@@ -390,14 +390,14 @@ def test_tiny_repeats_are_not_suggested(c, setup, monkeypatch):
     assert "WE" in names and "Bank fee" not in names
 
 
-def test_everyday_spending_and_interest_are_not_suggested_and_a_suggestion_can_be_hidden(c, setup, monkeypatch):
+def test_variable_everyday_spending_and_interest_are_not_suggested_and_a_suggestion_can_be_hidden(c, setup, monkeypatch):
     # Owner's UX plan: Carrefour belongs in the budget, and certificate interest is already in the forecast.
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
     accounts, cats = setup
     for month in ("07", "08", "09"):
         for name, code in (("Carrefour", "EXP.PERSONAL.FOOD"), ("Talabat", "EXP.PERSONAL.DINING"),
                            ("Gym", "EXP.PERSONAL.HEALTH")):
-            c.transactions.record_outflow(f"2026-{month}-10", accounts["cib"].id, "900", c.categories.get_by_code(code).id,
+            c.transactions.record_outflow(f"2026-{month}-10", accounts["cib"].id, "900" if name == "Gym" else str(900 + int(month) * 7), c.categories.get_by_code(code).id,
                                           counterparty=name)
         c.transactions.record_inflow(f"2026-{month}-15", accounts["cib"].id, "1833.33",
                                      cats["EXP.INVEST.INTEREST"].id, counterparty="NBE")

@@ -650,7 +650,7 @@ def _a_gameya(o: Mohab) -> None:
          "funding_account_id": Choose("CIB Payroll"), "payout_account_id": Choose("CIB Payroll")}, button="Save terms")
     o.notes["gameya_first"] = b.submit(button="Record instalment")       # prefilled: 2027-07-05, 2,000, CIB Payroll
     o.notes["gameya_second"] = b.submit(button="Record instalment")      # 2027-08-05
-    o.ask("gameya_due", "Is a gam'eya instalment waiting for me?")
+    o.ask_needs("gameya_due", "Is a gam'eya instalment waiting for me?", "Bills and payments")
     o.notes["gameya_page"] = b.click("Gam'eya instalment due")
     if b.page.path.startswith("/needs-you/"):
         o.notes["gameya_group"] = b.page
@@ -1150,7 +1150,7 @@ def test_the_insurance_is_paid_from_its_goal(mohab):
 
 def test_the_rent_rise_is_offered_and_taken(mohab):
     assert mohab.answers["rent"].shows("Last paid 13,200.00 Use 13,200.00 from now on")
-    assert mohab.answers["rent_after"].shows("Landlord Bill · Housing & Rent 13,200.00")
+    assert mohab.answers["rent_after"].shows("Landlord Subscription · Housing & Rent 13,200.00")
 
 
 def test_the_rent_rise_reaches_the_budget(mohab):
@@ -1174,11 +1174,12 @@ def test_between_jobs_the_next_pay_is_the_new_employer(mohab):
     assert answer.shows("Safe to spend until 2027-10-01", "Valeo 2027-10-01 · Income +55,000")
 
 
-def test_looks_recurring_leaves_spending_and_interest_to_the_budget_and_forecast(mohab):
+def test_looks_recurring_offers_fixed_monthly_spending_but_not_investment_income(mohab):
     answer = mohab.answers["looks_recurring"]
     assert route(mohab, "looks_recurring") == ["/", "/plan", "/plan/recurring"]
     offered = re.findall(r"<b>([^<]+)</b><small class=\"muted\">\d+ months", answer.screen.html)
-    assert "Mom" in offered and not {"Carrefour", "Talabat", "Seoudi", "Koshary El Tahrir", "NBE"} & set(offered)
+    assert {"Mom", "Talabat", "Seoudi"} <= set(offered)
+    assert "NBE" not in offered  # certificate interest is already in the forecast
     assert mohab.notes["not_recurring"].shows("Mom will not be suggested again.")
     assert not re.search(r"<b>Mom</b><small", mohab.notes["not_recurring"].html)
 
@@ -1622,7 +1623,9 @@ def test_a_gameya_third_instalment_waits_under_needs_you_once(mohab):
     assert answer.shows("Gam'eya instalment due: Office gam'eya")
     decision = mohab.notes.get("gameya_group", answer.screen)
     assert decision.shows("1 instalment · 2,000 EGP · first due 2027-09-05")
-    needs_you = answer.screen.html.split('aria-labelledby="needs-heading"', 1)[1].split("</section>", 1)[0]
+    needs_you = answer.screen.html
+    if 'aria-labelledby="needs-heading"' in needs_you:
+        needs_you = needs_you.split('aria-labelledby="needs-heading"', 1)[1].split("</section>", 1)[0]
     assert html.unescape(needs_you).count("Gam'eya instalment due") == 1  # one decision row (guideline 3.33, A09)
     assert mohab.notes["gameya_terms"].shows("Gam'eya terms saved", "Nothing was posted")
     assert mohab.notes["gameya_page"].shows("Instalment 3 of 10", "2 of 10")
