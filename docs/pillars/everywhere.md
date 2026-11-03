@@ -27,4 +27,6 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 - [Pairing backend hardening and security review](../../reports/2026-10-26-pairing-hardening/report.md): 4A
 - [Audit 10: the phone, tab by tab - quick actions and the answer first](../../reports/2026-10-29-phone-tab-audit/report.md): 3AN
 - [Audit 13: the phone for quick jobs - convenience, taps and the look](../../reports/2026-11-01-phone-convenience-audit/report.md): 3AN
+- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 2F, 4A, 4B
 <!-- work:end -->
+

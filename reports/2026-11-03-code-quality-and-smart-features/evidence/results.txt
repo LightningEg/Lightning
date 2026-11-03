@@ -1,0 +1,4 @@
+F1: primary write committed (simulated) -> http.response.start 303 -> http.response.body complete -> settlement attempted -> simulated storage failure
+F3: XIRR returned None for flows -100, +230, -132.16; independently verified roots 12% and 18%.
+Existing XIRR assertions: 5 test functions passed (direct execution, not pytest).
+F2: field=new; results=OLD RESULTS; URL=/search?q=old (old response body overwrites newer search).
