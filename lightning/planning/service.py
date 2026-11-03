@@ -4,7 +4,7 @@ from __future__ import annotations
 import calendar
 from dataclasses import replace
 from datetime import date, timedelta
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal, ROUND_HALF_UP, ROUND_CEILING
 
 from lightning.core.dates import fmt_date, parse_date, parse_month, today
 from lightning.core.errors import NotFoundError, ValidationError
@@ -537,25 +537,48 @@ class PlanningService:
         start = date(day.year - (1 if day.month <= 6 else 0), (day.month - 7) % 12 + 1, 1)
         groups: dict[tuple, list[dict]] = {}
         for row in self.repo.history(fmt_date(start), fmt_date(day)):
-            groups.setdefault((row["counterparty_id"], row["effect"]), []).append(row)
-        planned = {i.counterparty_id for i in self.items()} | {
-            i.counterparty_id for i in self.items(active_only=False) if not i.active} | self._not_recurring()
+            groups.setdefault((row["counterparty_id"], row["effect"], row["account_id"], row["category_id"]), []).append(row)
+        planned = {i.counterparty_id for i in self.items(active_only=False)} | self._not_recurring()
         out = []
-        for (party, effect), rows in groups.items():
-            if party in planned or not self._may_recur(rows[-1]["category_id"]):
+        for (party, effect, _account, category_id), rows in groups.items():
+            if party in planned:
                 continue
-            months = {r["date"][:7] for r in rows}
-            if len(months) < 3 or len(rows) > len(months) + 1:
-                continue  # repeats monthly, not several times a month
+            category = self.categories.get(category_id) if category_id else None
+            if category is not None and category.family == "INVESTMENT":
+                continue
+            months = sorted({int(r["date"][:4]) * 12 + int(r["date"][5:7]) for r in rows})
+            if (len(months) < 3 or len(rows) != len(months)
+                    or months[-1] - months[0] + 1 != len(months)
+                    or day.year * 12 + day.month - months[-1] > 1):
+                continue
             amounts = [r["amount"] for r in rows]
             typical = median(amounts)
-            if typical < SUGGESTION_MINIMUM or any(abs(a - typical) > typical * Decimal("0.2") for a in amounts):
-                continue  # too small to plan around (bank fees), or the amount varies too much
+            if not typical or median(r["base_amount"] for r in rows) < SUGGESTION_MINIMUM:
+                continue
+            fixed = all(amount == typical for amount in amounts)
+            days = [int(r["date"][8:]) for r in rows]
+            if max(days) - min(days) > 7:
+                continue
+            utilities = category is not None and (category.code == "EXP.PERSONAL.UTILITIES"
+                                                  or category.code.startswith("EXP.PERSONAL.UTILITIES."))
+            if not fixed and not self._may_recur(category_id):
+                continue
+            deviation = max(abs(amount - typical) / typical for amount in amounts)
+            if deviation > (Decimal("0.50") if utilities else Decimal("0.20")):
+                continue
             latest = rows[-1]
+            month_index = int(latest["date"][:4]) * 12 + int(latest["date"][5:7])
+            year, month = divmod(month_index, 12)
+            month += 1
+            due_day = int(median(days))
+            next_date = date(year, month, min(due_day, calendar.monthrange(year, month)[1]))
+            tolerance = max(10, int((deviation * 100).to_integral_value(rounding=ROUND_CEILING)))
             out.append({"counterparty_id": party, "name": latest["counterparty"],
-                        "kind": "INCOME" if effect == "INFLOW" else "BILL", "amount": Decimal(typical).quantize(Decimal("0.01")),
-                        "day": int(median(int(r["date"][8:]) for r in rows)), "months": len(months),
-                        "account_id": latest["account_id"], "category_id": latest["category_id"],
+                        "kind": "INCOME" if effect == "INFLOW" else "SUBSCRIPTION" if fixed else "BILL",
+                        "amount": Decimal(typical).quantize(Decimal("0.01")), "currency": latest["currency"],
+                        "day": due_day, "months": len(months), "start_date": next_date.isoformat(),
+                        "match_tolerance_pct": tolerance,
+                        "account_id": latest["account_id"], "category_id": category_id,
                         "last_date": latest["date"]})
         return sorted(out, key=lambda s: (-s["months"], -s["amount"]))
 
@@ -572,6 +595,18 @@ class PlanningService:
     def _not_recurring(self) -> set[int]:
         saved = SettingsStore(self.db).get(NOT_RECURRING)
         return {int(x) for x in saved.split(",") if x.strip().isdigit()} if saved else set()
+
+    def dismissed_suggestions(self) -> list[dict]:
+        """The names hidden by Not recurring; restoring a name never creates a plan."""
+        parties = [self.counterparties.get(party_id) for party_id in self._not_recurring()]
+        return sorted((dict(id=p["id"], name=p["name"]) for p in parties if p is not None),
+                      key=lambda p: p["name"].casefold())
+
+    def restored_suggestion_setting(self, counterparty_id: int) -> str:
+        """A reviewed preference value for the existing synchronized settings command."""
+        if self.counterparties.get(counterparty_id) is None:
+            raise NotFoundError("That counterparty no longer exists.")
+        return ",".join(str(i) for i in sorted(self._not_recurring() - {counterparty_id}))
 
     def not_recurring(self, counterparty_id: int) -> str:
         """Stop suggesting a counterparty in Looks recurring. Returns its name."""
@@ -752,14 +787,17 @@ class PlanningService:
             raise ValidationError("Choose a matching window from 0 to 31 days.", "match_window_days") from None
         if not 0 <= match_window_days <= 31:
             raise ValidationError("Choose a matching window from 0 to 31 days.", "match_window_days")
+        utility_code = self.categories.get(category_id).code if category_id else ""
+        tolerance_limit = 50 if kind == PlanKind.BILL and (utility_code == "EXP.PERSONAL.UTILITIES"
+                             or utility_code.startswith("EXP.PERSONAL.UTILITIES.")) else 25
         default_tolerance = 1 if kind == PlanKind.LOAN else 10
         try:
             raw_tolerance = values.get("match_tolerance_pct")
             match_tolerance_pct = int(str(default_tolerance if raw_tolerance in (None, "") else raw_tolerance))
         except (ValueError, TypeError):
-            raise ValidationError("Choose an amount tolerance from 0 to 25 percent.", "match_tolerance_pct") from None
-        if not 0 <= match_tolerance_pct <= 25:
-            raise ValidationError("Choose an amount tolerance from 0 to 25 percent.", "match_tolerance_pct")
+            raise ValidationError(f"Choose an amount tolerance from 0 to {tolerance_limit} percent.", "match_tolerance_pct") from None
+        if not 0 <= match_tolerance_pct <= tolerance_limit:
+            raise ValidationError(f"Choose an amount tolerance from 0 to {tolerance_limit} percent.", "match_tolerance_pct")
         return {"kind": kind.value, "name": name, "amount": amount, "frequency": frequency.value,
                 "interval_count": interval, "start_date": start, "end_date": end, "payment_count": count,
                 "account_id": account_id, "category_id": category_id, "counterparty_id": counterparty_id,

@@ -144,3 +144,7 @@ Phone search now reads response bodies before checking the generation, invalidat
 ## Follow-up · 2026-11-03: atomic entry writes
 
 Transaction entry and edit workflows now commit their form retry markers and automatic payment matching together through `workflows/save.settled_write`. Matching failure rolls that scope back; a resend can safely retry the same form. A request-local completion flag prevents response middleware from matching again after commit. No database transaction spans request parsing or another await. Journal commands retain their own settlement behavior. Remaining write routes keep the earlier response-boundary fallback and remain in BT-2AE's scope.
+
+## Follow-up · 2026-11-03: recurring detection (NF-7L3)
+
+Fixed monthly subscriptions can now be suggested across spending categories, variable utilities use observed matching tolerances, Track starts after the latest recorded payment, and dismissed suggestions can be restored on PC and phone. The detector excludes frequent/irregular purchases, already tracked counterparties and investment income, keeps foreign amounts in their account currency, and never posts money. Regression coverage: [recurring detection tests](../../tests/test_recurring_detection.py).

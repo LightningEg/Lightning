@@ -224,6 +224,10 @@ An estimate by the common rule, never a ruling: the page says once that a schola
 
 ## Cash planning contract
 
+Recurring suggestions require at least three consecutive months with one similarly dated payment per month, grouped by counterparty, account and category. Fixed outgoing amounts suggest a Subscription; income stays Income. Variable utilities allow up to 50% historical variation, other eligible bills 20%; matching tolerance is the observed maximum rounded up, with the existing 10% default as a floor. Track starts after the last payment. Amounts remain in the account currency; the minimum-value filter uses profile currency. Dismissed suggestions can be restored through the existing synchronized settings command.
+
+Schema 71 preserves the original 0–25 matching column and adds a checked optional override for utility-bill policies up to 50. Existing policies and foreign-key relationships are unchanged; the repository presents one effective tolerance and clears the override when a policy is reduced.
+
 `lightning/planning/` owns planned items (`planned_items`) and payments (`planned_payments`). It reads the ledger, budget and reserves through services and never posts; recording a payment goes through `TransactionService`.
 
 Payment-link confirmations read the current settlement and transaction links inside one immediate write transaction. Repeating the same confirmation is harmless; replacing a settled occurrence requires reopening it. Partial loan top-ups remain explicit, and repeating a top-up never counts it twice. Automatic matching rechecks settlement/link availability before saving.

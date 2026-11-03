@@ -30,7 +30,7 @@
   <details class="form-more" id="plan-matching"{{ ' open' if matching_open }}><summary>{{ "Matching"|tr(locale) }} <span class="muted small">{{ "How a bank transaction is matched to this plan"|tr(locale) }}</span></summary>
   <div class="form-grid">
     <div class="field {{ err('match_window_days') }}"><label for="match_window_days">{{ 'Match within (days)'|tr(locale) }}</label><input id="match_window_days" name="match_window_days" type="number" min="0" max="31" step="1" value="{{ values.match_window_days }}" inputmode="numeric" required></div>
-    <div class="field {{ err('match_tolerance_pct') }}"><label for="match_tolerance_pct">{{ 'Amount difference allowed (%)'|tr(locale) }}</label><input id="match_tolerance_pct" name="match_tolerance_pct" type="number" min="0" max="25" step="1" value="{{ values.match_tolerance_pct }}" inputmode="numeric" required></div>
+    <div class="field {{ err('match_tolerance_pct') }}"><label for="match_tolerance_pct">{{ 'Amount difference allowed (%)'|tr(locale) }}</label><input id="match_tolerance_pct" name="match_tolerance_pct" type="number" min="0" max="50" step="1" value="{{ values.match_tolerance_pct }}" inputmode="numeric" required></div>
   </div>
   <div class="planner-mode plan-weekend {{ err('weekend_move') }}" role="radiogroup" aria-label="If a payment falls on Friday or Saturday"><span class="planner-mode-label">{{ "On a weekend"|tr(locale) }}</span><span class="planner-mode-seg">{% for value, text in weekend_moves %}<label><input type="radio" name="weekend_move" value="{{ value }}"{% if values.weekend_move == value %} checked{% endif %}><span>{{ text }}</span></label>{% endfor %}</span></div>
   </details>

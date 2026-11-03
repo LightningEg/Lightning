@@ -10,7 +10,7 @@ from .domain import Frequency, PlanKind, PlannedItem, WeekendMove
 
 _COLUMNS = ("kind", "name", "amount_e6", "frequency", "interval_count", "start_date", "end_date",
             "payment_count", "account_id", "category_id", "counterparty_id", "principal_e6", "notes", "weekend_move", "month_day",
-            "match_window_days", "match_tolerance_pct")
+            "match_window_days", "match_tolerance_pct", "match_tolerance_override_pct")
 
 
 def _item(row) -> PlannedItem:
@@ -22,7 +22,7 @@ def _item(row) -> PlannedItem:
         principal=from_e6(row["principal_e6"]) if row["principal_e6"] is not None else None,
         active=bool(row["active"]), notes=row["notes"],
         weekend_move=WeekendMove(row["weekend_move"]), month_day=row["month_day"],
-        match_window_days=row["match_window_days"], match_tolerance_pct=row["match_tolerance_pct"])
+        match_window_days=row["match_window_days"], match_tolerance_pct=row["match_tolerance_override_pct"] or row["match_tolerance_pct"])
 
 
 class PlanningRepository:
@@ -203,12 +203,13 @@ class PlanningRepository:
         """Owned money in and out with a counterparty, for spotting payments that repeat."""
         rows = self.db.all(
             "SELECT t.id,t.date,t.counterparty_id,c.name counterparty,l.account_id,l.category_id,l.effect,"
-            "SUM(ABS(l.amount_base_e6)) amount_e6 FROM transactions t "
+            "SUM(ABS(l.quantity_e6)) amount_e6,SUM(ABS(l.amount_base_e6)) base_e6,a.currency FROM transactions t "
             "JOIN ledger_entries l ON l.transaction_id=t.id JOIN counterparties c ON c.id=t.counterparty_id "
-            "WHERE t.status='POSTED' AND l.owner_id IS NULL AND l.effect IN ('INFLOW','OUTFLOW') "
+            "JOIN accounts a ON a.id=l.account_id JOIN financial_assets fa ON fa.id=l.asset_id "
+            "WHERE t.status='POSTED' AND fa.is_cash=1 AND l.owner_id IS NULL AND l.effect IN ('INFLOW','OUTFLOW') "
             "AND t.type IN ('IN','OUT') AND t.date BETWEEN ? AND ? "
-            "GROUP BY t.id,l.effect ORDER BY t.date", (date_from, date_to))
-        return [dict(row) | {"amount": from_e6(row["amount_e6"])} for row in rows]
+            "GROUP BY t.id,l.effect,l.account_id,l.category_id ORDER BY t.date,t.id", (date_from, date_to))
+        return [dict(row) | {"amount": from_e6(row["amount_e6"]), "base_amount": from_e6(row["base_e6"])} for row in rows]
 
     @staticmethod
     def _row(values: dict) -> tuple:
@@ -217,4 +218,5 @@ class PlanningRepository:
                 values.get("account_id"), values.get("category_id"), values.get("counterparty_id"),
                 to_e6(values["principal"]) if values.get("principal") is not None else None,
                 values.get("notes", ""), values.get("weekend_move", "none"), values.get("month_day"),
-                values["match_window_days"], values["match_tolerance_pct"])
+                values["match_window_days"], min(values["match_tolerance_pct"], 25),
+                values["match_tolerance_pct"] if values["match_tolerance_pct"] > 25 else None)

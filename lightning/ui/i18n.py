@@ -14,6 +14,9 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    'Choose an amount tolerance from 0 to 50 percent.': 'اختار نسبة فرق للمبلغ من صفر لـ 50%.',
+    'Restore suggestion': 'رجّع الاقتراح',
+    'Suggestion restored.': 'الاقتراح رجع.',
     'Refill a reserve': 'كمّل احتياطي',
     '{name} · {amount} {currency} to refill.': '{name} · محتاج {amount} {currency} عشان يتكمّل.',
     '{name} · {amount} {currency} · {months} months · last {day}.': '{name} · {amount} {currency} · بيتكرر من {months} شهور · آخر مرة {day}.',
