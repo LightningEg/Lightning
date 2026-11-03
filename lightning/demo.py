@@ -169,8 +169,8 @@ def build_demo(c, as_of: date | None = None) -> dict:
         this_month = fmt_date(months[2])[:7]
         suggested = c.budgets.suggested_plan(this_month)
         if suggested:
-            c.budgets.save_month(this_month, suggested)
-        c.reserves.set_emergency_fund("20,000", c.budgets.emergency_fund(this_month, None).target or D(0))
+            c.budgets.save_month(this_month, suggested, schedule=c.schedules.view())
+        c.reserves.set_emergency_fund("20,000", c.budgets.emergency_fund(this_month, None, schedule=c.schedules.view()).target or D(0))
 
         def party(name):
             found = c.counterparties.resolve(name)

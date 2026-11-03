@@ -31,13 +31,13 @@ def test_spending_is_default_and_income_remains_an_explicit_choice(household):
     c = household
     assert c.budgets.emergency_basis() == "spending"
     c.budgets.set_emergency_basis("income")
-    fund = c.budgets.emergency_fund("2026-12", D("45000"))
+    fund = c.budgets.emergency_fund("2026-12", D("45000"), schedule=c.schedules.view())
     assert (fund.basis, fund.monthly, fund.months, fund.target) == ("income", D("30000"), D("1.5"), D("180000"))
 
     c.budgets.set_emergency_basis("spending")
     spending = c.budgets.spending_average("2026-12")
     assert (spending.amount, spending.months_counted, spending.window) == (D("15000"), 3, "2026-09 to 2026-11")
-    fund = c.budgets.emergency_fund("2026-12", D("45000"))  # the one-off trip is left out, as in the budget
+    fund = c.budgets.emergency_fund("2026-12", D("45000"), schedule=c.schedules.view())  # the one-off trip is left out, as in the budget
     assert (fund.basis, fund.monthly, fund.months, fund.target) == ("spending", D("15000"), D("3"), D("90000"))
 
     with pytest.raises(ValidationError, match="months of income or of spending"):
@@ -46,9 +46,9 @@ def test_spending_is_default_and_income_remains_an_explicit_choice(household):
 
 
 def test_no_fund_or_no_history_is_not_measured(c, household):
-    assert c.budgets.emergency_fund("2026-12", None).months is None
+    assert c.budgets.emergency_fund("2026-12", None, schedule=c.schedules.view()).months is None
     c.budgets.set_emergency_basis("spending")
-    assert c.budgets.emergency_fund("2026-09", D("45000")).months is None  # nothing recorded before September
+    assert c.budgets.emergency_fund("2026-09", D("45000"), schedule=c.schedules.view()).months is None  # nothing recorded before September
 
 
 def test_default_spending_basis_reaches_the_screens_and_forecast(household):

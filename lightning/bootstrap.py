@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import functools
 from dataclasses import dataclass
-from decimal import Decimal
 from pathlib import Path
 
 from lightning.accounts.service import AccountService
@@ -16,6 +15,7 @@ from lightning.budgeting.service import BudgetService
 from lightning.planning.forecast import CashForecaster
 from lightning.planning.health import HealthService
 from lightning.planning.position import PositionService
+from lightning.planning.schedule_view import ScheduleSource
 from lightning.planning.service import PlanningService
 from lightning.bank_imports import BankImportService
 from lightning.sms_imports import SmsImportService
@@ -84,6 +84,7 @@ class Container:
     integrity: IntegrityService
     planning: PlanningService
     forecaster: CashForecaster
+    schedules: ScheduleSource
     position: PositionService
     health: HealthService
     zakat: ZakatService
@@ -229,19 +230,15 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
     budgets = BudgetService(db, categories, reporting)
     reevaluations = ReevaluationService(db, accounts, transactions, reporting)
     planning = PlanningService(db, accounts, categories, counterparties, transactions)
-    budgets.scheduled_loans = planning.loan_payments_by_category
-    budgets.scheduled_bills = planning.budget_fill_schedule
-    budgets.scheduled_income = planning.income_a_month
+    schedules = ScheduleSource(planning, reserves)
     investments = InvestmentService(db, accounts, assets, categories, transactions, reporting, reevaluations)
     gameya = GameyaService(db, accounts, assets, transactions)
     deposits = DepositService(db, accounts, assets, transactions, gameya)
     position = PositionService(reporting, assets, investments, money_from_others, reserves, planning, deposits)
-    forecaster = CashForecaster(planning, reporting, reserves, budgets, categories, position, deposits)
+    health = HealthService(planning, position, budgets, schedules)
+    forecaster = CashForecaster(planning, reporting, reserves, budgets, categories, position, schedules, health, deposits)
     deposit_receipts = DepositReceiptService(db, deposits, transactions, accounts, reporting)
     forecaster.deposit_receipts = deposit_receipts
-    budgets.reserve_goal_needs = forecaster.goal_needs
-    health = HealthService(planning, position, budgets)
-    forecaster.savings_rate = lambda: health.limit_values()["savings_rate"] or Decimal(0)
     zakat = ZakatService(db, position, reporting, assets, categories, physical_items, audit, gameya)
     result = Container(
         db=db,
@@ -268,16 +265,17 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
         deposits=deposits,
         gameya=gameya,
         account_flows=AccountWorkflows(db, accounts, transactions, reporting),
-        integrity=IntegrityService(reporting, reserves, budgets, planning, position),
+        integrity=IntegrityService(reporting, reserves, budgets, schedules, planning, position),
         planning=planning,
         forecaster=forecaster,
+        schedules=schedules,
         position=position,
         health=health,
         zakat=zakat,
         backup_dir=backup_dir,
         saved_views=SavedViewService(db, categories, transactions, reporting),
         reimbursements=ReimbursementService(db),
-        funding=CashFundingService(db, budgets, reporting, reserves, planning, categories, settings),
+        funding=CashFundingService(db, budgets, reporting, reserves, planning, categories, settings, schedules),
         deposit_receipts=deposit_receipts,
     )
     if not read_only and not is_journal:

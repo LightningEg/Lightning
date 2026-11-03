@@ -130,7 +130,7 @@ def test_set_a_budget_and_carry_it_over(devices):
                       average_months=None)
     pc.sync_with(hd.home)
     assert status(hd, wire)["status"] == "accepted"
-    assert hd.c.budgets.amounts_for("2026-09")[food.id][0] == Decimal("1200") == pc.c.budgets.amounts_for("2026-09")[food.id][0]
+    assert hd.c.budgets.amounts_for("2026-09", schedule=hd.c.schedules.view())[food.id][0] == Decimal("1200") == pc.c.budgets.amounts_for("2026-09", schedule=pc.c.schedules.view())[food.id][0]
     carry = pc.command("budgets.set_carryover", month="2026-09", lines=[dict(category=key, enabled=True)])
     pc.sync_with(hd.home)
     assert status(hd, carry) == dict(status="accepted", reason="accepted")
@@ -142,11 +142,11 @@ def test_set_a_budget_and_carry_it_over(devices):
                       lines=[dict(category=key, amount="900.00", average_months=None)])
     pc.sync_with(hd.home)
     assert status(hd, page)["status"] == "accepted"
-    assert pc.c.budgets.amounts_for("2026-10")[pc.c.categories.get(food.id).id][0] == Decimal("900")
+    assert pc.c.budgets.amounts_for("2026-10", schedule=pc.c.schedules.view())[pc.c.categories.get(food.id).id][0] == Decimal("900")
     clear = pc.command("budgets.set", category_id=key, month="2026-09", amount=None, only_this_month=False, average_months=None)
     pc.sync_with(hd.home)
     assert status(hd, clear)["status"] == "accepted"
-    assert food.id not in pc.c.budgets.amounts_for("2026-09")
+    assert food.id not in pc.c.budgets.amounts_for("2026-09", schedule=pc.c.schedules.view())
     same(hd, pc)
 
 
@@ -240,11 +240,11 @@ def test_move_room_and_fill_between_budgets(devices):
     move = pc.command("budgets.move_room", month="2026-09", to_id=keys[1], from_id=keys[0], amount="150.00")
     pc.sync_with(hd.home)
     assert status(hd, fill)["status"] == status(hd, move)["status"] == "accepted"
-    amounts = hd.c.budgets.amounts_for("2026-09")
+    amounts = hd.c.budgets.amounts_for("2026-09", schedule=hd.c.schedules.view())
     assert (amounts[food.id][0], amounts[other.id][0]) == (Decimal("850"), Decimal("550")) == tuple(
-        pc.c.budgets.amounts_for("2026-09")[item.id][0] for item in (food, other))
+        pc.c.budgets.amounts_for("2026-09", schedule=pc.c.schedules.view())[item.id][0] for item in (food, other))
     percent = pc.command("budgets.set_income_percent", category_id=keys[0], month="2026-10", percent="12.50", only_this_month=False)
     pc.sync_with(hd.home)
     assert status(hd, percent)["status"] == "accepted"
-    assert pc.c.budgets.amounts_for("2026-10")[food.id][3] == Decimal("12.5")
+    assert pc.c.budgets.amounts_for("2026-10", schedule=pc.c.schedules.view())[food.id][3] == Decimal("12.5")
     same(hd, pc)

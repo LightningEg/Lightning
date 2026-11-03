@@ -12,8 +12,9 @@ from lightning.core.money import ZERO, check_places, from_e6, to_decimal, to_e6
 
 
 class CashFundingService:
-    def __init__(self, db, budgets, reporting, reserves, planning, categories, settings):
+    def __init__(self, db, budgets, reporting, reserves, planning, categories, settings, schedules):
         self.db, self.budgets, self.reporting = db, budgets, reporting
+        self.schedules = schedules
         self.reserves, self.planning, self.categories, self.settings = reserves, planning, categories, settings
 
     @property
@@ -25,7 +26,7 @@ class CashFundingService:
         month = month_of(day)
         stored = {r["category_id"]: from_e6(r["amount_e6"]) for r in
                   self.db.all("SELECT * FROM cash_funding WHERE month=?", (month,))}
-        view = self.budgets.month_view(month)
+        view = self.budgets.month_view(month, schedule=self.schedules.view())
         candidates = [line for section in view.sections for line in section.lines
                       if not line.covered and (line.direct is not None or line.from_loans or line.from_bills)]
         selected = {key: self.categories.get(key) for key in stored}

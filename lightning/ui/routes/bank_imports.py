@@ -36,7 +36,7 @@ def _budget_import_feedback(c, batch_id: int) -> str:
                 by_month.setdefault(txn.date[:7], set()).add(line.category_id)
     impacts = []
     for month, category_ids in by_month.items():
-        view = c.budgets.month_view(month)
+        view = c.budgets.month_view(month, schedule=c.schedules.view())
         budget_lines = {line.category_id: line for section in view.sections for line in section.lines}
         for category_id in category_ids:
             line = budget_lines.get(category_id)

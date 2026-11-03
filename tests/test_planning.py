@@ -163,8 +163,8 @@ def test_forecast_counts_a_budgeted_bill_once_and_estimates_income(c, setup, mon
     accounts, cats = setup
     salary, food = cats["EXP.WORK.SALARY"], cats["EXP.PERSONAL.FOOD"]
     c.transactions.record_inflow("2026-09-01", accounts["cib"].id, "30000", salary.id)
-    c.budgets.set_budget(food.id, "2026-10", "5000")
-    c.budgets.set_budget(food.id, "2026-11", "5000")
+    c.budgets.set_budget(food.id, "2026-10", "5000", schedule=c.schedules.view())
+    c.budgets.set_budget(food.id, "2026-11", "5000", schedule=c.schedules.view())
     c.planning.create(kind="BILL", name="Groceries box", amount="1200", frequency="MONTHLY", start_date="2026-11-10",
                       category_id=str(food.id))
     forecast = c.forecaster.forecast(date(2026, 10, 15), months=2)
@@ -246,7 +246,7 @@ def test_a_due_bill_inside_a_budget_is_not_counted_twice(c, setup, monkeypatch):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
     accounts, cats = setup
     housing = c.categories.get_by_code("EXP.PERSONAL.HOUSING")
-    c.budgets.set_budget(housing.id, "2026-10", "12000")
+    c.budgets.set_budget(housing.id, "2026-10", "12000", schedule=c.schedules.view())
     c.planning.create(kind="BILL", name="Rent", amount="12000", frequency="MONTHLY", start_date="2026-10-03",
                       category_id=str(housing.id))
     day = date(2026, 10, 6)
@@ -275,22 +275,22 @@ def test_a_loan_adds_its_payments_as_a_budget_line(c, setup, monkeypatch):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
     accounts, _ = setup
     loans = c.categories.get_by_code("EXP.SYSTEM.LOANS")
-    assert not c.budgets.has_plan("2026-10")
+    assert not c.budgets.has_plan("2026-10", schedule=c.schedules.view())
     c.planning.create(kind="LOAN", name="Car loan", amount="2500", frequency="MONTHLY", start_date="2026-10-05",
                       payment_count="2", account_id=str(accounts["cib"].id))
-    assert not c.budgets.has_plan("2026-10")  # a loan alone does not count as having made a plan
+    assert not c.budgets.has_plan("2026-10", schedule=c.schedules.view())  # a loan alone does not count as having made a plan
 
     def line(month):
-        view = c.budgets.month_view(month)
+        view = c.budgets.month_view(month, schedule=c.schedules.view())
         return next(l for s in view.sections for l in s.lines if l.category_id == loans.id)
     october = line("2026-10")
     assert october.budget == Decimal("2500") and october.from_loans
     assert line("2026-11").budget == Decimal("2500")
-    assert not any(l.category_id == loans.id and l.budget for s in c.budgets.month_view("2026-12").sections
+    assert not any(l.category_id == loans.id and l.budget for s in c.budgets.month_view("2026-12", schedule=c.schedules.view()).sections
                    for l in s.lines)  # the loan has ended: no plan line
     page = TestClient(create_app(c), base_url="http://127.0.0.1").get("/budget?month=2026-10").text
     assert "Loan payments this month" in page
-    c.budgets.set_budget(loans.id, "2026-10", "3000")  # a rule you set replaces the scheduled amount
+    c.budgets.set_budget(loans.id, "2026-10", "3000", schedule=c.schedules.view())  # a rule you set replaces the scheduled amount
     assert line("2026-10").budget == Decimal("3000") and not line("2026-10").from_loans
 
 
@@ -414,7 +414,7 @@ def test_safe_to_spend_counts_every_month_until_the_next_income(c, setup, monkey
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-31")
     food = c.categories.get_by_code("EXP.PERSONAL.FOOD")
     for month in ("2026-10", "2026-11", "2026-12"):
-        c.budgets.set_budget(food.id, month, "3000")
+        c.budgets.set_budget(food.id, month, "3000", schedule=c.schedules.view())
     c.planning.create(kind="INCOME", name="New job", amount="40000", frequency="MONTHLY", start_date="2026-12-16")
     f = c.forecaster.forecast(date(2026, 10, 31))
     parts = dict(f.safe_to_spend_parts)
