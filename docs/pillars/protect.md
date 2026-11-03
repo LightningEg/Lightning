@@ -14,10 +14,13 @@ Encrypted profiles, backups, restore, and no account or server. Nothing is lost 
 | **IT-2A** | [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic rep…](../../issues/2-safe-for-real-money/2A-restore-safety.md) | L | building |
 | **IT-2C** | [Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidenc…](../../issues/2-safe-for-real-money/2C-ordinary-pc-acceptance.md) | L | ready |
 | **OW-2AB** | [Legacy mode](../../issues/2-safe-for-real-money/2AB-stale-code.md) | owner | ready |
+| **BT-2AE** | [Save responses finish before required payment matching](../../issues/2-safe-for-real-money/2AE-settlement-before-success.md) | M | new |
 
 ## Reports with open follow-ups here
 
 - [Audit 2: backend efficiency and loose ends](../../reports/2026-10-21-backend-efficiency/report.md): 2A, 2C
 - [Audit 5: is the backend engine efficient and streamlined?](../../reports/2026-10-21-backend-streamlining/report.md): 2AB
 - [Audit 4: backend correctness and failure boundaries](../../reports/2026-10-23-backend-correctness/report.md): 2A, 2C
+- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 2A, 2C, 2AB, 2AE
 <!-- work:end -->
+
