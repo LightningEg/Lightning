@@ -274,7 +274,7 @@ class InvestmentService:
         spec = events.EVENTS.get(event)
         if spec is None:
             raise ValidationError(f"Unknown investment event: {event}.", "event")
-        if spec.units == events.Sign.NONE:
+        if spec.income_category:
             return self._record_income(event, date, account_id, asset_id, owner_id, notes, typed)
         return self._trade(event, date, account_id, asset_id, cash_account_id, notes, owner_id, typed)
 
@@ -416,8 +416,11 @@ class InvestmentService:
             if self.holding_for_owner(values["account_id"], values["asset_id"], date, owner_id) <= ZERO:
                 raise ValidationError("A dividend requires shares held by the selected owner on that date.", "asset_id")
             tax = values["tax"] if "tax" in values else self.values_of(txn_id).get("tax", "0")
-            lines, counterparty = self._event_lines("dividend", values["account_id"], values["asset_id"], on=date,
-                                                    amount=values["amount"], tax=tax)
+            reinvested = any(not self.assets.get_asset(ln.asset_id).is_cash for ln in current.lines)
+            extra = {"quantity": values.get("quantity") or self.values_of(txn_id)["quantity"]} if reinvested else {}
+            lines, counterparty = self._event_lines("reinvested_dividend" if reinvested else "dividend",
+                                                    values["account_id"], values["asset_id"], on=date,
+                                                    amount=values["amount"], tax=tax, **extra)
             if owner_id:
                 lines = [replace(line, owner_id=int(owner_id)) for line in lines]
             updated = self.transactions.repost(txn_id, date, lines, "", counterparty, notes)
@@ -456,9 +459,12 @@ class InvestmentService:
                           fees_included=True, total=abs(c.quantity), cash_account_id=c.account_id)
         elif t.type == DocType.DIV and cash:
             asset_id = self.db.scalar("SELECT asset_id FROM investment_dividend_assets WHERE transaction_id=?", (t.id,))
-            gross = sum((ln.quantity for ln in cash if ln.quantity > ZERO), ZERO)
-            tax = -sum((ln.quantity for ln in cash if ln.quantity < ZERO), ZERO)
+            income = [ln for ln in cash if ln.effect in (Effect.INFLOW, Effect.OUTFLOW)]  # not a reinvestment's spend
+            gross = sum((ln.quantity for ln in income if ln.quantity > ZERO), ZERO)
+            tax = -sum((ln.quantity for ln in income if ln.quantity < ZERO), ZERO)
             values.update(account_id=cash[0].account_id, asset_id=asset_id, amount=gross, tax=tax)
+            if units:  # a reinvested dividend edits like a dividend; its units stay as they were
+                values["quantity"] = units[0].quantity
         elif t.type == DocType.OPN and units:
             values.update(account_id=units[0].account_id, asset_id=units[0].asset_id, quantity=units[0].quantity,
                           total_cost=units[0].amount)
@@ -479,7 +485,9 @@ class InvestmentService:
         cashflows: list[tuple[str, Decimal]] = []
         holding_flows: dict[tuple[int, int], list[tuple[str, Decimal]]] = {}
         for line in self.reporting.investment_lines(day, account_id):
-            if line["type"] == "DIV":
+            if line["type"] == "DIV" and line["effect"] == "INTERNAL" and line["is_cash"]:
+                continue  # a reinvested dividend's spend: the units line below carries the purchase
+            if line["type"] == "DIV" and line["effect"] != "INTERNAL":
                 asset_id = line.get("dividend_asset_id")
                 if asset_id is None:
                     continue
@@ -649,7 +657,7 @@ class InvestmentService:
         """Resolve accounts, asset, currency and rates for an event, then let the table build and check the lines."""
         spec = events.EVENTS[event]
         on = on or fmt_date(today())
-        if spec.units == events.Sign.NONE:
+        if spec.income_category:
             account = self.accounts.require_usable(account_id)
             if account.account_type != AccountType.BROKERAGE:
                 raise ValidationError("Dividends can only be recorded in a brokerage account.", "account")

@@ -54,7 +54,10 @@ def holding_history(reporting, investments, account_id: int, asset_id: int, end:
     # dashed line is the dollars paid, not today's pound cost turned back into dollars (audit 2026-10-15).
     held, trail, native = ZERO, [], ZERO
     for l in lines:
-        units = ZERO if l["type"] == "DIV" else from_e6(l["quantity_e6"] or 0)
+        reinvested = l["type"] == "DIV" and l.get("effect") == "INTERNAL"
+        if reinvested and l.get("is_cash"):
+            continue  # the spend of a reinvested dividend: the units line below is the row
+        units = from_e6(l["quantity_e6"] or 0) if reinvested else ZERO if l["type"] == "DIV" else from_e6(l["quantity_e6"] or 0)
         if not units and l["type"] not in KINDS:
             continue  # a month-end revaluation checkpoint is not a trade or a payout (5K)
         amount = from_e6(l["amount_base_e6"] or 0)
@@ -64,7 +67,7 @@ def holding_history(reporting, investments, account_id: int, asset_id: int, end:
         elif units < 0 and held:
             native -= native / held * -units
         held += units
-        trail.append({"date": l["date"], "kind": KINDS.get(l["type"], "Holding added" if units > 0 else "Units out"),
+        trail.append({"date": l["date"], "kind": "Dividend reinvested" if reinvested else KINDS.get(l["type"], "Holding added" if units > 0 else "Units out"),
                       "units": units, "amount": abs(amount), "price": abs(amount / units) if units else None,
                       "price_native": abs(amount_native / units) if units else None,
                       "held": held, "ref": l.get("ref")})
