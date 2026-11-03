@@ -23,3 +23,7 @@ repo: app
 Define whether settlement is required or deferred. For required settlement, execute primary write and matching in one explicit workflow/transaction and send success only after commit. For deferred work, persist a retryable pending state and communicate it. Add full route fault injection, retry/idempotency, undo and journal-mode tests. Do not hide errors or move encrypted database use to another thread.
 
 Not posted: affects financial consistency and requires workflow design review.
+
+## Implementation · 2026-11-03
+
+Matching moved into the response-start interception before success headers are forwarded. Targeted tests cover order, injected failure, rejected requests, read-only profiles and journal exclusion. Primary route writes still commit independently; retain this item for integrated fault/retry/undo tests and the required-versus-deferred workflow decision.

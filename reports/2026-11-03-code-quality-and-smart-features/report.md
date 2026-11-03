@@ -134,3 +134,9 @@ Safeguards observed in source, without claiming a full runtime security test:
 4. **Deliver intelligence:** finish NF-7L first, then choose the scenario or bill-change slice of NF-7X; add NF-7Y where stale inputs can mislead decisions.
 
 Use each item's acceptance criteria to size implementation after design review; these are relative effort estimates, not delivery-date promises.
+
+## Follow-up · 2026-11-03: first fixes
+
+The response boundary now runs required payment matching before forwarding success headers, within the same undo action. A settlement exception therefore cannot follow an acknowledged success. The primary route write is still committed independently: this change does not promise rollback of an already saved transaction, and BT-2AE remains open for integrated fault/retry/undo validation and the broader workflow decision.
+
+Phone search now reads response bodies before checking the generation, invalidates outstanding generations immediately on input, and rejects updates to detached forms. BT-3AP's response-order defect is fixed; further real-browser acceptance remains useful. Regression coverage is in `tests/test_save_response_boundary.py` and `tests/phone-search-race.test.cjs`. Four test functions passed by direct execution locally; full application validation is delegated to the PR checks because this workspace still lacks pytest and a full checkout.

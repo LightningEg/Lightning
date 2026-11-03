@@ -23,3 +23,7 @@ repo: app
 Read the body, then check the generation and mounted form immediately before DOM/history updates. Invalidate pending work on input and navigation; abort obsolete requests where useful. Add a real browser regression for delayed bodies, rapid input/clear and navigating away. Keep ordinary non-JavaScript form submission working.
 
 Not posted yet: regression spans asynchronous search and the phone navigation lifecycle.
+
+## Implementation · 2026-11-03
+
+The serial check now follows body decoding, input invalidates the previous generation immediately, and detached forms cannot update results/history. `tests/phone-search-race.test.cjs`, called by `tests/test_save_response_boundary.py`, covers a delayed old body after newer results. Keep this item open until input/clear/navigation browser acceptance is complete.
