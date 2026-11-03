@@ -85,3 +85,19 @@ def test_bootstrap_wires_no_callback_into_a_service():
                 and isinstance(node.targets[0].value, ast.Name) and node.targets[0].value.id in
                 {"budgets", "forecaster", "health", "planning", "reporting"}]
     assert assigned == []
+
+
+def test_other_asset_value_is_saved_through_the_account_service(c):
+    """9J: the route saves an Other asset value through AccountService, never the reporting repository; the journal
+    command keeps its key but calls the service method."""
+    route = (ROOT / "lightning" / "ui" / "routes" / "accounts.py").read_text(encoding="utf-8")
+    assert "other_asset_values" not in route
+    assert "accounts.save_other_asset_value" in route
+    from lightning.sync.journal.areas.master import COMMANDS
+    assert COMMANDS["reporting.other_asset_values.save"].call == "accounts.save_other_asset_value"
+    flat = c.account_flows.open_account("Flat", "OTHER_ASSET", "2026-01-01", "1000000")
+    saved = c.accounts.save_other_asset_value(c.accounts.get(flat.id), "2026-02-01", "1200000", " note ")
+    assert saved["value_e6"] == 1_200_000_000_000 and saved["notes"] == "note"
+    with pytest.raises(Exception, match="Choose an Other asset account"):
+        c.accounts.save_other_asset_value(c.accounts.get(c.account_flows.open_account("B", "BANK", "2026-01-01", "1").id),
+                                          "2026-02-01", "5")

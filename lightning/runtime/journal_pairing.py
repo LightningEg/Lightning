@@ -5,7 +5,6 @@ Native first-profile snapshot enrollment remains a separate cutover gate.
 """
 from __future__ import annotations
 
-import hmac
 import json
 import time
 
@@ -14,8 +13,9 @@ from lightning.sync.journal.discovery import nearby_devices
 from lightning.sync.journal.local import PinnedLocalClient
 from lightning.sync.journal.membership import Membership
 from lightning.sync.journal.pairing import (CLOCK_SKEW_SECONDS, MAX_PROOF_ATTEMPTS, PairingDesk, RECEIPT_LIFETIME, approval_receipt, number_choices,
-                                            request_budget, require_live_offer)
+                                            request_budget)
 from lightning.sync.journal import pairing_client
+from .journal_pairing_driver import JoiningDriver
 
 
 class ApprovalPending(JournalError):
@@ -25,11 +25,12 @@ class ApprovalPending(JournalError):
 DIFFERENT_LEDGER = "That device holds a different ledger. To bring it here, lock this profile and join it from Profiles."
 
 
-class NearbyPairing:
+class NearbyPairing(JoiningDriver):
     def __init__(self, device, *, key_document=None, owner_document=None, search=nearby_devices, client_factory=PinnedLocalClient):
         self.device, self.db = device, device.store.db
         self.membership = Membership(device)
         self.keys, self.search, self.client_factory = key_document, search, client_factory
+        self.identity = device.identity
         self.desk = PairingDesk(device,self.membership,on_admit=self._admitted) if device.home else None
         from lightning.sync.journal.enrollment import EnrollmentSource
         self.enrollment = EnrollmentSource(device,key_document=key_document,owner_document=owner_document,
@@ -134,10 +135,10 @@ class NearbyPairing:
         with self.db.transaction():
             self._save("pairing_client",state)
 
-    def _client_state(self):
+    def _load_join(self):
         state = self._value("pairing_client",{})
         if not state:
-            raise JournalError("Choose a nearby device first")
+            return None
         state.pop("problem", None)
         # Migrate already saved comparisons from the preceding application.
         if "wire" not in state:
@@ -147,52 +148,10 @@ class NearbyPairing:
             self._save_client(state)
         return state
 
-    def _exchange(self, state):
-        candidate = state["candidate"]
-        return self.client_factory(candidate["endpoint"],candidate["certificate"],timeout=5)
+    def _save_join(self, state):
+        self._save_client(state)
 
-    async def resume(self):
-        state = self._client_state()
-        if state["stage"] == "handshake":
-            await pairing_client.handshake(state,self.device.identity,self._exchange(state),self._save_client)
-        elif state["stage"] == "proving":
-            await pairing_client.status(state,self.device.identity,self._exchange(state),self._save_client)
-        elif state["stage"] == "cancelling":
-            await self.cancel()
-
-    def _client(self, stage):
-        state = self._value("pairing_client",{})
-        if not state:
-            raise JournalError("Choose a nearby device and enter its number first")
-        state.pop("problem", None)
-        if state.get("failed"):
-            raise JournalError("Compare the numbers again: cancel and start a new pairing")
-        require_live_offer(state["candidate"])
-        if state["stage"] != stage:
-            raise JournalError("Compare the numbers with the home first" if stage == "password" else "This step is already done")
-        return state
-
-    def compare(self, digits):
-        """The joining user's confirmation that the home shows the same digits. Nothing leaves the device here."""
-        state = self._client("compare")
-        if type(digits) is not str or not hmac.compare_digest(digits, state["digits"]):
-            state["failed"] = True
-            with self.db.transaction():
-                self._save("pairing_client", state)
-            raise JournalError("Check that both devices show the same six digits")
-        state["stage"] = "password"
-        with self.db.transaction():
-            self._save("pairing_client",state)
-
-    async def prove(self, password):
-        state = self._client_state()
-        await pairing_client.prove(state,self.device.identity,password,self._exchange(state),self._save_client)
-
-    async def cancel(self):
-        if not self._value("pairing_client",{}):
-            return
-        state = self._client_state()
-        await pairing_client.cancel(state,self.device.identity,self._exchange(state),self._save_client)
+    def _clear_join(self):
         self.db.execute("DELETE FROM journal_local WHERE name='pairing_client'")
 
     def revoke(self, identifier):
@@ -272,10 +231,10 @@ class NearbyPairing:
         return seal(answer,self.device.identity.sign)
 
     async def finish(self):
-        state = self._client_state()
+        state = self._started()
         if state["stage"] not in ("waiting","proving"):
             raise JournalError("Compare the numbers and enter your password first")
-        answer = await pairing_client.status(state,self.device.identity,self._exchange(state),self._save_client)
+        answer = await pairing_client.status(state,self.device.identity,self._exchange(state),self._save_join)
         if answer["type"] != "pairing-approved":
             raise ApprovalPending("Pairing approval is not available yet")
         candidate = state["candidate"]

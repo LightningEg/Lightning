@@ -14,7 +14,7 @@ from lightning.core.money import to_decimal
 from lightning.core.errors import ValidationError
 
 from . import register
-from ..web import container, redirect, render
+from ..web import settled_save, container, redirect, render
 from ..i18n import translate
 
 router = APIRouter()
@@ -184,7 +184,7 @@ async def save_transaction_popup(request: Request, txn_id: int):
     cash_lines = [line for line in txn.lines if c.assets.get_asset(line.asset_id).is_cash]
     split_categories = {line.category_id for line in cash_lines if line.category_id}
     try:
-        with c.db.transaction():
+        with settled_save(request, c):
             c.transactions.require_revision(txn_id, values["revision"])
             if txn.type.value == "OUT" and len(cash_lines) > 1:
                 from .accounts import _popup_counterparty
@@ -689,3 +689,4 @@ async def tag_totals(request: Request, tag: str):
     except LightningError as exc:
         return redirect("/transactions", exc.message)
     return render(request, "tag.html", page=page)
+

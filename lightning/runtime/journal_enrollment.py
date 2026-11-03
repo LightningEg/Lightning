@@ -6,7 +6,6 @@ native picker must publish a completed directory before offering it as a profile
 from __future__ import annotations
 
 import hashlib
-import hmac
 import os
 from pathlib import Path
 from uuid import uuid4
@@ -18,12 +17,13 @@ from lightning.sync.journal.codec import JournalError, authenticate, digest, sea
 from lightning.sync.journal.discovery import nearby_devices
 from lightning.sync.journal.enrollment import install_replica
 from lightning.sync.journal.local import PinnedLocalClient
-from lightning.sync.journal.pairing import number_choices, require_live_offer
+from lightning.sync.journal.pairing import number_choices
 from lightning.sync.journal import pairing_client
+from .journal_pairing_driver import JoiningDriver
 from .session import read_slot, write_slot
 
 
-class NewJournalReplica:
+class NewJournalReplica(JoiningDriver):
     def __init__(self, root, name, *, search=nearby_devices, client_factory=PinnedLocalClient):
         self.root = Path(root)
         if self.root.is_symlink():
@@ -64,62 +64,26 @@ class NewJournalReplica:
         if candidate is None:
             raise JournalError("Find the nearby device again")
         state = pairing_client.begin(candidate,self.identity,str(uuid4()),code)
-        self._save_pairing(state)
+        self._save_join(state)
         await self.resume()
         return self.state()["digits"]
 
-    def _save_pairing(self, state):
+    def _load_join(self):
+        return self.state()
+
+    def _save_join(self, state):
         write_slot(self.root/"enrollment.json",state,replace=(self.root/"enrollment.json").exists())
 
-    def _pairing_exchange(self, state):
-        candidate = state["candidate"]
-        return self.client_factory(candidate["endpoint"],candidate["certificate"],timeout=5)
-
-    async def resume(self):
-        state = self.state()
-        if state is None:
-            raise JournalError("Find a nearby device first")
-        if state["stage"] == "handshake":
-            await pairing_client.handshake(state,self.identity,self._pairing_exchange(state),self._save_pairing)
-        elif state["stage"] in ("proving","waiting"):
-            await pairing_client.status(state,self.identity,self._pairing_exchange(state),self._save_pairing)
-        elif state["stage"] == "cancelling":
-            await self.cancel()
-
-    def compare(self, digits):
-        """The joining user's confirmation that the home shows the same digits. Nothing leaves the device here."""
-        state = self.state()
-        if state is None or state.get("stage") != "compare":
-            raise JournalError("Find a home and enter its number first")
-        require_live_offer(state["candidate"])
-        if state.get("failed"):
-            raise JournalError("Compare the numbers again: cancel and start a new pairing")
-        if type(digits) is not str or not hmac.compare_digest(digits,state["digits"]):
-            write_slot(self.root/"enrollment.json",dict(state,failed=True),replace=True)
-            raise JournalError("Check that both devices show the same six digits")
-        write_slot(self.root/"enrollment.json",dict(state,stage="password"),replace=True)
-
-    async def prove(self, password):
-        state = self.state()
-        if state is None:
-            raise JournalError("Compare the numbers with the home first")
-        await pairing_client.prove(state,self.identity,password,self._pairing_exchange(state),self._save_pairing)
-
-    async def cancel(self):
-        state = self.state()
-        if state is None:
-            return
-        if (self.root/"ledger.db").exists() or (self.root/"install-intent.json").exists():
-            raise JournalError("Resume the encrypted copy installation before cancelling")
-        await pairing_client.cancel(state,self.identity,self._pairing_exchange(state),self._save_pairing)
+    def _clear_join(self):
         (self.root/"enrollment.json").unlink()
 
+    def _installing(self):
+        return (self.root/"ledger.db").exists() or (self.root/"install-intent.json").exists()
+
     async def finish(self, password, *, budget=50):
-        state = self.state()
-        if state is None:
-            raise JournalError("Find a home and enter its number first")
+        state = self._started()
         if state.get("stage") == "proving":
-            await pairing_client.status(state,self.identity,self._pairing_exchange(state),self._save_pairing)
+            await pairing_client.status(state,self.identity,self._exchange(state),self._save_join)
         if state.get("stage","waiting") != "waiting":
             raise JournalError("Compare the numbers and enter your password first")
         if (self.root/"complete.json").exists():
