@@ -48,6 +48,11 @@ class AccountService:
         """An Other asset account's latest value you entered on or before `as_of`: date, value and notes."""
         return OtherAssetValuationRepository(self.db).latest(account_id, as_of)
 
+    def save_other_asset_value(self, account: Account, effective_date: str, amount, notes: str = "") -> dict:
+        """Save an Other asset account's dated estimated value (one per day; a second save that day replaces it).
+        Journal command `reporting.other_asset_values.save`."""
+        return OtherAssetValuationRepository(self.db).save(account, effective_date, amount, notes)
+
     def find_by_text(self, text: str) -> Account | None:
         """An active account matching what was typed: its label ('CIB-CUR-EGP · CIB Current'), code or name."""
         wanted = " ".join((text or "").split()).casefold()

@@ -28,3 +28,8 @@ list for both entrypoints (month-end checkpoints post on unlock, failures are lo
 One branch each, tests unchanged.
 
 **Not posted to contributors (2026-10-31):** splitting `profile_app` touches the journal and device code that is claimed.
+
+
+## Audit follow-up · 2026-11-03
+
+The [code-quality audit](../../reports/2026-11-03-code-quality-and-smart-features/report.md) measures `profile_app` at 829 lines in commit 89848dc, rather than the older 746-line figure. After active runtime claims clear, retain the route-area extraction. Additional candidates within the same structural work: transaction service validation/search/submission collaborators (1,381-line facade), bank import parsing/proposals/posting (962-line module), and small typed reporting/page read models. Preserve public facades, transaction scopes, monetary invariants, replay and undo behavior; one extraction per change. These are refactoring opportunities, not new correctness findings.
