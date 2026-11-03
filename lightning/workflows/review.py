@@ -104,7 +104,9 @@ class ReviewInbox:
                 items.append({"label": "Refill a reserve",
                               "detail": f"{reserve['name']} · {fmt(reserve['remaining'])} {c.base_currency} to refill.",
                               "href": "/plan/reserves", "action": "Refill", "priority": 2,
-                              "source_version": str(reserve["id"])})
+                              "source_version": {"reserve": reserve["id"],
+                                                 "payments": [(row["id"], row["amount_e6"]) for row in
+                                                              c.reserves.links_for_reserve(reserve["id"])]}})
             if reserve.get("due_date") and reserve["due_date"] < fmt_date(on) and reserve["effective_allocated"] > ZERO:
                 items.append({"label": f"{reserve['name']} is past its date",
                               "detail": f"Due {reserve['due_date']} · {fmt(reserve['effective_allocated'])} {c.base_currency} still set aside.",

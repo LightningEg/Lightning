@@ -481,7 +481,7 @@ def _live_the_year(o: Mohab) -> None:
     b.submit({}, button="Use 50,000.00 from now on")
     o.ask("raise_after", "Is the plan at 50,000 now?", "Cash planning", "Recurring")
     # Needs you notices the raise is not in his average yet; he keeps his plan and saves the 5,000.
-    o.ask("income_up", "My pay went up. What should my plan do with it?", "Choose")
+    o.ask("income_up", "My pay went up. What should my plan do with it?", "Budget and saving", "Choose")
     o.notes["raise_saved"] = b.submit({}, button="Save it")
     o.ask("raise_target", "Did my savings target go up?", "Safety", "Limits")
 
@@ -1688,3 +1688,4 @@ def test_investing_targets_are_kept(mohab):
 def test_paying_the_phone_early_shortens_it(mohab):
     assert mohab.notes["early_preview"].shows("Still to pay afterwards")
     assert mohab.notes["early_paid"].shows("Loan payment recorded")
+

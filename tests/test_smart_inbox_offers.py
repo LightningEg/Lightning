@@ -55,8 +55,14 @@ def test_used_emergency_reserve_is_offered_for_refill(c, setup):
     items = ReviewInbox(c).items(date(2026, 12, 31))
     refill = next(i for i in items if i['label'] == 'Refill a reserve')
     assert '100 EGP' in refill['detail'] and refill['href'] == '/plan/reserves'
+    inbox = ReviewInbox(c)
+    inbox.decide(refill['review_id'], 'reviewed', date(2026, 12, 31))
     c.reserves.allocate(reserve['id'], '500')
     assert not any(i['label'] == 'Refill a reserve' for i in ReviewInbox(c).items(date(2026, 12, 31)))
+    next_txn = c.transactions.record_outflow('2026-09-14', accounts['cib'].id, '100', cats['EXP.PERSONAL.FOOD'].id)
+    c.reserves.set_expense_link(reserve['id'], next_txn.id, '100')
+    renewed = next(i for i in inbox.items(date(2026, 12, 31)) if i['label'] == 'Refill a reserve')
+    assert renewed['review_id'] != refill['review_id']
 
 
 def test_emergency_alert_uses_existing_health_band_and_ignores_unknown(c, setup, monkeypatch):
