@@ -18,3 +18,4 @@ The website, search, downloads, community and the store. Its own repository is L
 | **OW-8AA** | [Sign off the Low, Medium and High ratings on the comparison pages](../../issues/8-website/8AA-sign-off-the-comparison-ratings.md) | owner | ready |
 | **IT-9F** | [Page speed: a stable origin and cache, and a CSS trim](../../issues/9-later/9F-page-speed-origin-and-css.md) | M | new |
 <!-- work:end -->
+

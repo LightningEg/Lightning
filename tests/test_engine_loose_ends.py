@@ -473,7 +473,7 @@ def test_bridge_on_empty_profile_before_base_cash_is_registered(c):
 def test_an_estimate_keeps_counting_money_moved_after_it(c):
     c.account_flows.open_account('Bank', 'BANK', '2026-01-01', '500000')
     flat = c.account_flows.open_account('Flat', 'OTHER_ASSET', '2026-01-01', '1000000')
-    c.reporting.other_asset_values.save(c.accounts.get(flat.id), '2026-02-01', '1200000')
+    c.accounts.save_other_asset_value(c.accounts.get(flat.id), '2026-02-01', '1200000')
     assert c.reporting.net_worth('2026-02-28').total == D('1700000')
     c.transactions.record_outflow('2026-03-05', flat.id, '100000', c.categories.get_by_code('EXP.PERSONAL.FOOD').id)
     assert c.reporting.net_worth('2026-03-31').total == D('1600000')

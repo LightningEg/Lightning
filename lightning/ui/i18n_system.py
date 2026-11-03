@@ -177,6 +177,7 @@ GENERAL = {
     "Below its high": "تحت أعلى سعر",
     "Bought": "اشتريت",
     "Sold": "بعت",
+    "Dividend reinvested": "توزيعات أُعيد استثمارها",
     "Month-end price": "سعر آخر الشهر",
     "Full screen": "ملء الشاشة",
     "Key notes": "أهم الملاحظات",

@@ -43,7 +43,28 @@ EVENTS: dict[str, EventSpec] = {
     "buy": EventSpec(DocType.BUY, Sign.IN, Sign.OUT, "cost", None),
     "sell": EventSpec(DocType.SEL, Sign.OUT, Sign.IN, "proceeds", None),
     "dividend": EventSpec(DocType.DIV, Sign.NONE, Sign.IN, "none", DIVIDEND_CATEGORY),
+    # Income first, then the net buys units at its own price, in one document: cash nets to zero except the tax.
+    "reinvested_dividend": EventSpec(DocType.DIV, Sign.IN, Sign.NONE, "none", DIVIDEND_CATEGORY),
 }
+
+
+@dataclass(frozen=True)
+class FormFields:
+    """Which fields the entry form shows for an event; derived from the spec only, so a new row needs no template edit."""
+    units: bool  # quantity, amount, price preview
+    fees: bool
+    cash_account: bool
+    cash_from: bool  # the cash account is where money came from (else where it went)
+    income: bool  # the amount received (dividend)
+
+
+def form_fields(event: str) -> FormFields:
+    """The form's fields for an event name in ``EVENTS`` (the route passes this; the template only reads it)."""
+    spec = _spec(event)
+    trade = spec.units in (Sign.IN, Sign.OUT)
+    return FormFields(units=trade and not spec.income_category, fees=trade and spec.fees != "none",
+                      cash_account=trade and spec.cash != Sign.NONE,
+                      cash_from=spec.cash == Sign.OUT, income=spec.income_category is not None)
 
 
 @dataclass
@@ -92,8 +113,30 @@ def _spec(event: str) -> EventSpec:
         raise ValidationError(f"Unknown investment event: {event}.", "event") from None
 
 
+def _income_figures(v: EventValues) -> tuple[Decimal, Decimal]:
+    value = check_places(to_decimal(v.amount, "amount"), 2, "amount")
+    if value <= ZERO:
+        raise ValidationError("Enter the dividend you received.", "amount")
+    withheld = check_places(to_decimal(v.tax if str(v.tax or "").strip() else "0", "tax"), 2, "tax")
+    if withheld < ZERO:
+        raise ValidationError("Tax withheld cannot be negative.", "tax")
+    if withheld >= value:
+        raise ValidationError("Tax withheld must be less than the dividend.", "tax")
+    return value, withheld
+
+
 def _figures(spec: EventSpec, v: EventValues) -> _Figures:
     """Parse and check every number the event needs; the one place their rules live."""
+    if spec.income_category and spec.units == Sign.IN:  # a reinvested dividend: income, then units for the net
+        value, withheld = _income_figures(v)
+        units = check_places(to_decimal(v.quantity, "quantity"), v.asset.quantity_decimals, "quantity")
+        if units <= ZERO:
+            raise ValidationError(f"Enter how many {v.asset.unit}s the dividend bought.", "quantity")
+        net = value - withheld
+        unit_price = (net / units).quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
+        if unit_price <= ZERO:
+            raise ValidationError("The dividend is too small for that many units.", "quantity")
+        return _Figures(units=units, unit_price=unit_price, gross=net, amount=value, withheld=withheld)
     if spec.units in (Sign.IN, Sign.OUT):
         units = check_places(to_decimal(v.quantity, "quantity"), v.asset.quantity_decimals, "quantity")
         if units <= ZERO:
@@ -124,14 +167,7 @@ def _figures(spec: EventSpec, v: EventValues) -> _Figures:
         if spec.fees == "proceeds" and gross - fee <= ZERO:
             raise ValidationError("After fees nothing would be received — check the price and fees.", "fees")
         return _Figures(units=units, unit_price=unit_price, gross=gross, fee=fee, entered=entered)
-    value = check_places(to_decimal(v.amount, "amount"), 2, "amount")
-    if value <= ZERO:
-        raise ValidationError("Enter the dividend you received.", "amount")
-    withheld = check_places(to_decimal(v.tax if str(v.tax or "").strip() else "0", "tax"), 2, "tax")
-    if withheld < ZERO:
-        raise ValidationError("Tax withheld cannot be negative.", "tax")
-    if withheld >= value:
-        raise ValidationError("Tax withheld must be less than the dividend.", "tax")
+    value, withheld = _income_figures(v)
     return _Figures(amount=value, withheld=withheld)
 
 
@@ -145,7 +181,7 @@ def lines_for(event: str, values: EventValues) -> list[PostingLine]:
     spec = _spec(event)
     f = _figures(spec, values)
     v = values
-    if spec.units == Sign.NONE:  # income: cash in, tax out
+    if spec.income_category:  # income: cash in, tax out; a reinvested dividend then spends the net on units
         category = v.category_ids[spec.income_category]
         # Asset attribution is stored in investment_dividend_assets; memo remains descriptive only.
         lines = [PostingLine.cash(v.account.id, v.cash_asset_id, f.amount, Effect.INFLOW, category,
@@ -154,6 +190,13 @@ def lines_for(event: str, values: EventValues) -> list[PostingLine]:
             lines.append(PostingLine.cash(v.account.id, v.cash_asset_id, -f.withheld, Effect.OUTFLOW,
                                           v.category_ids[TAX_CATEGORY], memo=f"Tax withheld · {v.asset.code}",
                                           fx_rate=v.holding_rate))
+        if spec.units == Sign.IN:
+            net = f.gross
+            memo = f"Reinvested {_num(f.units)} × {v.asset.code} @ {_num(f.unit_price)}"
+            lines += [PostingLine.cash(v.account.id, v.cash_asset_id, -net, Effect.INTERNAL, memo=memo,
+                                       fx_rate=v.holding_rate),
+                      PostingLine.units(v.account.id, v.asset.id, f.units, net, Effect.INTERNAL, f.unit_price, memo,
+                                        fx_rate=v.holding_rate)]
         return lines
     word = "Buy" if spec.units == Sign.IN else "Sell"
     fee_sign = "+" if spec.fees == "cost" else "−"

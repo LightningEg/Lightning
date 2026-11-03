@@ -147,15 +147,17 @@
         try {
           const response = await fetch(`${form.getAttribute("action") || "/search"}?${new URLSearchParams({ q: query, fragment: "1" })}`,
             { credentials: "same-origin", headers: { "X-Requested-With": "fetch" } });
-          if (!response.ok || mine !== serial) return;
-          target.innerHTML = await response.text();
+          if (!response.ok) return;
+          const body = await response.text();
+          if (mine !== serial || !form.isConnected) return;
+          target.innerHTML = body;
           if (window.lightningRefresh) window.lightningRefresh(target);
           const url = new URL(location.href);
           if (query) url.searchParams.set("q", query); else url.searchParams.delete("q");
           history.replaceState(history.state, "", url.pathname + url.search + url.hash);
         } catch (_) { /* offline or the page closed: the results stay as they were */ }
       };
-      field.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(ask, 140); });
+      field.addEventListener("input", () => { ++serial; clearTimeout(timer); timer = setTimeout(ask, 140); });
       form.addEventListener("submit", (event) => { event.preventDefault(); clearTimeout(timer); ask(); });
     });
   };
@@ -163,3 +165,4 @@
   if (document.readyState !== "loading") live(document);
   document.addEventListener("lightning:page", (event) => live(event.detail.root));
 })();
+

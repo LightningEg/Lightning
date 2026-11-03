@@ -1,0 +1,271 @@
+{
+  "reviewed_commit": "89848dc0e4ce35bb18f72e861c7c620d8052fae4",
+  "scope": "Fetched source/test files in the partial snapshot; fetching is not a claim of exhaustive line-by-line review. Local copies may have one additional terminal newline.",
+  "files": [
+    {
+      "path": "lightning/sms_imports.py",
+      "sha256": "8a28ec5e0fbcaa216de3341e5eb1ae30740007ce721777071edba5014cac36ca",
+      "github_blob_sha": "df8883a0568e5c74d8801557847ed54c3d6b37bc"
+    },
+    {
+      "path": "lightning/bank_imports.py",
+      "sha256": "9bbb05a11131cfb6e90394c5a9d389dcdb274ab4fd2a8cf89780706a00d5b552",
+      "github_blob_sha": "36257c6f9d0f9d572e5ba9d7bd5bdcb52e468ac9"
+    },
+    {
+      "path": "lightning/main.py",
+      "sha256": "47340b5d765a346d9fd6547e1122d69cd97144375891c2b524b68c217b50bb63",
+      "github_blob_sha": "f2eb0eea0b10f66bdaa8a5a7510c4bd2d91ef083"
+    },
+    {
+      "path": "lightning/__init__.py",
+      "sha256": "4295c27993fdfafa62a44c33599cc89737e1a58e20c4df92268849832deafa36",
+      "github_blob_sha": "4bf01cfdf6afcfaa351f8236592d4735b17baf07"
+    },
+    {
+      "path": "lightning/bootstrap.py",
+      "sha256": "b3b948c99b6adf80b7332c664460c1cc0f79e73c5ac3cce9446b2aab31a55137",
+      "github_blob_sha": "adcac24dd8986327f534dca97f1386f2d31e2bad"
+    },
+    {
+      "path": "lightning/workflows/live_prices.py",
+      "sha256": "8853bdcecdd82b1747a80b308505586b71f3f4d43e62af6f736c3c4ca9cf100b",
+      "github_blob_sha": "10aae253e7abf6ecf60e0fc3f4d1f3b222ea580f"
+    },
+    {
+      "path": "lightning/workflows/ai_analysis.py",
+      "sha256": "0dbfbabaa413b3e5587720b62603888403c056e0b332f9696ce33d2d06e13ef3",
+      "github_blob_sha": "956448708f051eddf0201ad674ede9d45610cde3"
+    },
+    {
+      "path": "lightning/workflows/market_prices.py",
+      "sha256": "a593fa4aefdfd94d0ac4539382ad7d5dd6e59d11ffcf7145a3f650b94c77fba5",
+      "github_blob_sha": "45686932b842c7e700147805165b044572e6de9a"
+    },
+    {
+      "path": "lightning/workflows/review.py",
+      "sha256": "03e7a9fda768e158d5e91b8ac54a5e4844ea0a74e625423b7d3e5c4f214d73d8",
+      "github_blob_sha": "dcbe5731efaf0a5f4eefa8eb1921310da61ceae0"
+    },
+    {
+      "path": "lightning/workflows/ask_ai.py",
+      "sha256": "9bc48f7fbd70f8e7f8ca272d8a239028da7d07abacc1a736ddec7935ff215d8d",
+      "github_blob_sha": "3292caedfe7aa43f369c3b8c48152ecb06e2fbda"
+    },
+    {
+      "path": "lightning/sync/transport.py",
+      "sha256": "2f0356810ecd6ca926c20676415d59979f2fdfec400b42819fe65b2b7dc63bd1",
+      "github_blob_sha": "f0952ec753130a26361f9c4541d09827a4c53743"
+    },
+    {
+      "path": "lightning/core/limits.py",
+      "sha256": "adfa49db712d2eeb56f98fc2ce79cd4003c3027700b0e351d55df56852f2cf24",
+      "github_blob_sha": "c4c09ffe57a15d443dd0551b32c973648e34f6fd"
+    },
+    {
+      "path": "lightning/core/ledger.py",
+      "sha256": "604ed3948f40bdf82c9ec4242a252530f34820970da72c7ade49310cd083ae0b",
+      "github_blob_sha": "9ebfa2adb5b7c05118d936160123f309091011dd"
+    },
+    {
+      "path": "lightning/core/dates.py",
+      "sha256": "24aede45335f2ef499d0b3a6a37149cfe2776480d9f9fcc34fb1ad8cd24dc859",
+      "github_blob_sha": "cf0b98ddb0c532d0e6f88c7150fdabfc563a8fb9"
+    },
+    {
+      "path": "lightning/core/errors.py",
+      "sha256": "20973e97d2397b0261df31f079cdc06977582f60ffbdd48a09a34f9d30722536",
+      "github_blob_sha": "c91802284877e0ef9874128b8d9c9bb94deae125"
+    },
+    {
+      "path": "lightning/core/money.py",
+      "sha256": "087f3a2d64bc134160ef576b56bea7267aa6cc6ce15ed9a9f206b37d96527175",
+      "github_blob_sha": "33a412500eb9b002cd2cff2d85e8ed16dc095f22"
+    },
+    {
+      "path": "lightning/security/keys.py",
+      "sha256": "de197eb2339da2618be2b859b87320c38e868d488124552dc1105e6f53406dfd",
+      "github_blob_sha": "a4626a190407ec6feff4d54e4bc4f125d46d8380"
+    },
+    {
+      "path": "lightning/rules/engine.py",
+      "sha256": "554f7242e9aaaeee69ab54685666d6f495cd1893f2edc1c4dcd3e2db6b340755",
+      "github_blob_sha": "d6d31562538ca9b170b497f6e64ac8b1611002d9"
+    },
+    {
+      "path": "lightning/rules/repository.py",
+      "sha256": "ec3b9bf254b2c692c52b10375598675b6cfdab4355df2e5fdc0914c38c53fcc1",
+      "github_blob_sha": "473eea516af52c123958fcbb4fe0ab84f2111829"
+    },
+    {
+      "path": "lightning/rules/service.py",
+      "sha256": "a2f04f43cc2d347280b17f428f0bb8d87338b50c2feb03cee068ffcada3f517a",
+      "github_blob_sha": "1042858285356785bff9692ef3aa6a7cc643c9c4"
+    },
+    {
+      "path": "lightning/transactions/service.py",
+      "sha256": "8b8eca424830c094a2566a2c388cf6f73c29087cbb2d9224f42b37ede08be1d5",
+      "github_blob_sha": "cb45b8e90e29e9b4747588948e6f18dd62a39b39"
+    },
+    {
+      "path": "lightning/investments/xirr.py",
+      "sha256": "b1a6cdb7f1aec054afdbbc8efb73833d7c2e37d76b97313aab71354d0312797f",
+      "github_blob_sha": "c19fd2b4fa6303d94dbb5bcace6936f5e7460e34"
+    },
+    {
+      "path": "lightning/investments/service.py",
+      "sha256": "b8dd9119f50fc7db252f3e884addbb8ff4c8d8be335ff3b9235f083f14147c94",
+      "github_blob_sha": "2b2caa913ed6cab7f73c4cf24999ecaba0cfb802"
+    },
+    {
+      "path": "lightning/runtime/app.py",
+      "sha256": "bc6139716736ea21f3048c43ff5f9edda6bf161e36ae7937589cc012c6bc8093",
+      "github_blob_sha": "d0d94985730abee1570cbda0f4edf2b6a26b4d3b"
+    },
+    {
+      "path": "lightning/runtime/restore.py",
+      "sha256": "7951bd35e68e171e6d0fc60bff0eafdbaefc17c264e272f108c407c16b6c8dce",
+      "github_blob_sha": "3d0cfaad06d48a1955edd1b9d8f0ad295349fa85"
+    },
+    {
+      "path": "lightning/runtime/session.py",
+      "sha256": "1364142aab7a2518e56c9877f03d670f8ad2a9891019b99991ca73f38bd5f0f0",
+      "github_blob_sha": "2ca0f51d05a1f335b452659e66fc2e906e252e76"
+    },
+    {
+      "path": "lightning/runtime/http.py",
+      "sha256": "b63daabc6e83033ab2293ee892457569cff16bee8481dbc2307c90262d123eaa",
+      "github_blob_sha": "60c15f7460a979bc310589f09c4da9c413897e38"
+    },
+    {
+      "path": "lightning/ui/web.py",
+      "sha256": "6220d12ce6a92514c52ec54ee923c7051fe38c5c7bc869efafde1d36c9b16c59",
+      "github_blob_sha": "a7a9a2eebf800d2b7cc90e0b7801bc73f1640ae8"
+    },
+    {
+      "path": "lightning/planning/schedule.py",
+      "sha256": "a102246072062c79f940829adc8be2ccd8e7c4eb9d1885c4cb3705c4be288d21",
+      "github_blob_sha": "159abc3ca300314bb6256695dff5988e45267aed"
+    },
+    {
+      "path": "lightning/planning/forecast.py",
+      "sha256": "4022915aadf1bfe49aff403b623a0a713f083b0bb12ed434de9967822f32cb8e",
+      "github_blob_sha": "8d1b9daeead3ce942a594a7c1198e216eb9dad98"
+    },
+    {
+      "path": "lightning/planning/health.py",
+      "sha256": "8a467609e0668b85963143733517efa00c6868afd72d39be4e15be10264ee3e8",
+      "github_blob_sha": "431625c8b4538b6cb751bbc325c2751397a449d7"
+    },
+    {
+      "path": "lightning/planning/service.py",
+      "sha256": "02bcd9d3a8e5f922464b989e9c4ca40f9d67ac476c025531264c9cbb05201b26",
+      "github_blob_sha": "32c7d7d0ee842a9e758a3e8d1371ea1f90948b15"
+    },
+    {
+      "path": "lightning/reporting/service.py",
+      "sha256": "f759bf0a17cb7fdb6b2e40cb0f16cf99e6b01b599d2320ba27c490bf28f7c5df",
+      "github_blob_sha": "a45319207e2785ca7de87d2f5a7342176d93ccb8"
+    },
+    {
+      "path": "lightning/database/connection.py",
+      "sha256": "13496ba5ffd8dc26f2b000ade429e3abd42063bb1a83d0fd2508fee2d5d277cb",
+      "github_blob_sha": "2c31895f020eab1d64166d52148a8b8f76d752ed"
+    },
+    {
+      "path": "lightning/database/migrator.py",
+      "sha256": "20de2bc580220aabda789100aeaa329b5397370a4cbe0dcbfc3d045f50c6ac2a",
+      "github_blob_sha": "c9d2c172ea698a31e9f70d8b1d62f2416806316b"
+    },
+    {
+      "path": "lightning/database/backup.py",
+      "sha256": "72bcd6318e32e52778a39f62e492136063ae2b90f89d34e95b485f81050b38c7",
+      "github_blob_sha": "fa086de4d505cba976617175114ec779f03476d1"
+    },
+    {
+      "path": "lightning/sync/journal/pairing.py",
+      "sha256": "9a6c76b83e8d7a6fe671c744abd0f139be60439de5e850695c787e85498895e3",
+      "github_blob_sha": "dc2b01b13aeaae10502b6eecd4856cb3ea8ffb93"
+    },
+    {
+      "path": "lightning/sync/journal/pairing_client.py",
+      "sha256": "4492d81eda0c1f3e9b08f1dc42fc3bc68b6d7d06ca86ae475747a85a74f0a9a7",
+      "github_blob_sha": "9a214129bc9d70fb4653cb0bc60d9db573e7ee1d"
+    },
+    {
+      "path": "lightning/sync/journal/cloud.py",
+      "sha256": "86242ee19d4887ef8f9b40f8168281314cb8603a75bcef53bb49023f0fe5b246",
+      "github_blob_sha": "ab67d967b5a82e6f6867669a3ee4aa06d268d084"
+    },
+    {
+      "path": "lightning/ui/routes/transactions.py",
+      "sha256": "fcfece1c2bfe66dfe57f00191143da143b41227273842fd0e5687ddfc9c504c3",
+      "github_blob_sha": "a9748c4f71f3db9f4a378f351c01617251d677d4"
+    },
+    {
+      "path": "lightning/ui/routes/bank_imports.py",
+      "sha256": "d28e84c50778d88c8be4e67e175ba5174250e40ab2019905deabf2ed9ac23331",
+      "github_blob_sha": "448c6c81d42db33d8576f252551d2fe10393f288"
+    },
+    {
+      "path": "lightning/ui/routes/accounts.py",
+      "sha256": "23a5bbcd0878ee772f467ba078fd6ce82cada4883239e63bce0207f9ba275339",
+      "github_blob_sha": "e9d6b08af6578952f53c7c3235d3ac3d28c16f84"
+    },
+    {
+      "path": "lightning/ui/routes/register.py",
+      "sha256": "5b2df60461ed5baa28eeec5c9c0c2d22db486dff444140134281666b7f4d3f45",
+      "github_blob_sha": "6349c9e267be947d257cedd7487bcc4c7ade0f4c"
+    },
+    {
+      "path": "lightning/ui/static/phone-capture.js",
+      "sha256": "9bde9e67b122a542d48ebea4c95d8adb2475a74f0b6af540e64eb0418e7cece3",
+      "github_blob_sha": "ac9b518f9943e5c6a91d80331197f979816a6cc0"
+    },
+    {
+      "path": "lightning/ui/static/phone-nav.js",
+      "sha256": "a87e0365827f971eecdf6b6823adcbf429f9a2ac7dec7081c5cfc2043193a137",
+      "github_blob_sha": "1efb895c53e11a1ebfd7979d9ea25939ae993ccf"
+    },
+    {
+      "path": "lightning/ui/static/phone-gestures.js",
+      "sha256": "f1e1a379c20b37d9b86a626a0474535e6821f47d8c8d97d8218d8dfbc23d8a59",
+      "github_blob_sha": "54945c57f4be65e3c1fa31f0025b6952ff76ed32"
+    },
+    {
+      "path": "tests/test_issues.py",
+      "sha256": "ef8f85ab58b45c4e88c867e4e79b51a0e337d17468a05e0b88c02373db33ec0c",
+      "github_blob_sha": "a7ec7d3e912efcf964bd17c1cd4f46105fb547a3"
+    },
+    {
+      "path": "tests/test_phone_search.py",
+      "sha256": "f0f457c672675831512b3510d90f146f30bd4dddd1eb11d27bf3a0b0fffb23ad",
+      "github_blob_sha": "51fb97d058bc14f8bae3ff993c1afb5eb242c0ac"
+    },
+    {
+      "path": "tests/test_docs_structure.py",
+      "sha256": "1dbfcce1085a4b6ae2d028d6c9304c1927a7b099ea2fbfd57acab28759c92892",
+      "github_blob_sha": "d872cd9a3356841595a7e88cbd71ce40591272c0"
+    },
+    {
+      "path": "tests/test_xirr.py",
+      "sha256": "ff452cdaa363e52bc833d66473d8dea74adbb0d48d507df43467ce5b4b99b66b",
+      "github_blob_sha": "46d43b773ad2094443e330ef6121fa5babafaba2"
+    },
+    {
+      "path": "tests/test_architecture.py",
+      "sha256": "f292191980eea2c11ba5738e8e8543a1aaf3093cdf37148c44fe9eb67ecfccf9",
+      "github_blob_sha": "048d5b0dbb02b7f9dfb9450f27b8ba3ac6dd81a7"
+    },
+    {
+      "path": "tests/test_mohab_year.py",
+      "sha256": "6c1d04b3ec5fa09f72387f393a46c8f96fc7ad15cdaea25f32960ee4883bf0ed",
+      "github_blob_sha": "fce46c1f5fbc5235edc75febc5182d5786ce9132"
+    },
+    {
+      "path": "tests/test_reporting_performance.py",
+      "sha256": "39f12d14b50e33b942a8357b8143757c9d3cebc1d5620c02907d604eddc205ca",
+      "github_blob_sha": "0c1e3376f62d02dc816a353ff60a0f59108221f1"
+    }
+  ]
+}
