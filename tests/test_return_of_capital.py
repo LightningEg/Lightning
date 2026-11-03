@@ -136,10 +136,11 @@ def test_upgrade_keeps_every_row_and_allows_only_the_cost_only_line(monkeypatch,
     assert [tuple(r) for r in db.all("SELECT * FROM ledger_entries ORDER BY id")] == before
     assert len(db.all("PRAGMA foreign_key_check")) == dangling and db.scalar("PRAGMA integrity_check") == "ok"
     names = {r[0] for r in db.all("SELECT name FROM sqlite_master WHERE sql LIKE '%ledger_entries%' OR tbl_name='ledger_entries'")}
-    assert {"ix_ledger_account_date", "ix_ledger_asset_date", "ix_ledger_category_date", "ix_ledger_transaction",
+    assert {"ix_ledger_account_date", "ix_ledger_asset_date", "ix_ledger_category_date",
             "ix_ledger_account_cleared", "ix_ledger_owner_balance", "v_ledger", "v_balances",
             "tr_ledger_edit_clears_reserve_links", "checked_ledger_insert", "checked_ledger_update", "checked_ledger_delete",
             "checked_transaction_update", "checked_transaction_delete"} <= names
+    assert "ix_ledger_transaction" not in names  # 0068 dropped it as a duplicate; the rebuild must not bring it back
     insert = ("INSERT INTO ledger_entries(transaction_id,line_no,date,account_id,asset_id,quantity_e6,unit_price_e6,"
               "amount_e6,fx_rate_e6,amount_base_e6,effect,category_id) VALUES(1,9,'2026-09-02',1,2,0,0,?,1000000,?,?,NULL)")
     db.execute(insert, (-1_000_000, -1_000_000, "INTERNAL"))  # the one new shape

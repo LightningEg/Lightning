@@ -48,7 +48,7 @@ DROP TABLE ledger_entries_before_zero_unit;
 CREATE INDEX ix_ledger_account_date ON ledger_entries(account_id,date);
 CREATE INDEX ix_ledger_asset_date ON ledger_entries(asset_id,date);
 CREATE INDEX ix_ledger_category_date ON ledger_entries(category_id,date);
-CREATE INDEX ix_ledger_transaction ON ledger_entries(transaction_id);
+-- ix_ledger_transaction stays dropped: 0068 removed it as a duplicate of UNIQUE(transaction_id, line_no).
 CREATE INDEX ix_ledger_account_cleared ON ledger_entries(account_id, cleared, date);
 CREATE INDEX ix_ledger_owner_balance ON ledger_entries(account_id, asset_id, owner_id, date);
 
