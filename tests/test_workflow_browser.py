@@ -32,7 +32,7 @@ def test_workflow_pages_render_fit_and_keep_interactions_usable(c, setup, phone)
                                               counterparty="Browser grocery")
     c.transactions.record_inflow("2026-12-12", account.id, "10", salary.id)
     c.reimbursements.create_claim(expense.id, "25")
-    c.budgets.set_budget(food.id, "2026-12", "100")
+    c.budgets.set_budget(food.id, "2026-12", "100", schedule=c.schedules.view())
     view_id = c.saved_views.save("Browser report", {"preset": "all_time"}, account.id)
 
     app = create_app(c)

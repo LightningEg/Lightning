@@ -88,6 +88,7 @@ class JournalServices:
         bound = signature.bind(*args, **kwargs)
         bound.apply_defaults()
         arguments = {}
+        bound.arguments.pop("schedule", None)  # the plan's schedule view is read here, never sent to the home
         for name, value in bound.arguments.items():  # A **values parameter (a trade edit) carries its own names.
             if signature.parameters[name].kind is inspect.Parameter.VAR_KEYWORD:
                 arguments.update(value)

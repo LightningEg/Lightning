@@ -91,7 +91,7 @@ class LinkedSections:
         expense_lines = [line for line in txn.lines if line.category_id and line.effect.value == "OUTFLOW"]
         if not expense_lines or txn.is_void:
             return impacts
-        budget_month = c.budgets.month_view(txn.date[:7])
+        budget_month = c.budgets.month_view(txn.date[:7], schedule=c.schedules.view())
         budget_by_id = {line.category_id: line for section in budget_month.sections for line in section.lines}
         seen: set[int] = set()
         for posting in expense_lines:

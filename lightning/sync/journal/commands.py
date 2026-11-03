@@ -9,6 +9,7 @@ if another device changed the row since, the command waits for review.
 """
 from __future__ import annotations
 
+import inspect
 from datetime import date
 from decimal import Decimal, InvalidOperation
 
@@ -166,6 +167,8 @@ def run(adapter, kind, record, groups):
         owner = adapter.c
         for part in entry.call.split("."):  # "service.method", or a container method
             owner = getattr(owner, part)
+        if "schedule" in inspect.signature(owner).parameters:  # a budget call reads the plan's schedule (IT-9K)
+            values["schedule"] = adapter.c.schedules.view()
         try:
             result = owner(**values)
         except JournalError:

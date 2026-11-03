@@ -164,8 +164,8 @@ def _plan(c, accounts: dict[str, int], day: date) -> None:
     month = fmt_date(day)[:7]
     suggested = c.budgets.suggested_plan(month)
     if suggested:
-        c.budgets.save_month(month, suggested)
-    c.reserves.set_emergency_fund("20,000", c.budgets.emergency_fund(month, None).target or 0)
+        c.budgets.save_month(month, suggested, schedule=c.schedules.view())
+    c.reserves.set_emergency_fund("20,000", c.budgets.emergency_fund(month, None, schedule=c.schedules.view()).target or 0)
 
     def category(text):
         return str(c.categories.find_by_text(text).id)

@@ -58,13 +58,13 @@ def test_category_direction_flags_and_delete_or_archive(devices):
 def test_budget_rows_restore_after_a_bulk_change(devices):
     hd, pc = devices
     food = category(pc)
-    on_home(hd, lambda s: s.budgets.set_budget(food.id, "2026-09", "400", False, None))
+    on_home(hd, lambda s: s.budgets.set_budget(food.id, "2026-09", "400", False, None, schedule=s.schedules.view()))
     pc.sync_with(hd.home)
     before = pc.c.budgets.snapshot_rows([food.id])
-    act(hd, pc, lambda s: s.budgets.set_budget(food.id, "2026-09", "900", False, None))
-    assert pc.c.budgets.amounts_for("2026-09")[food.id][0] == Decimal("900")
+    act(hd, pc, lambda s: s.budgets.set_budget(food.id, "2026-09", "900", False, None, schedule=s.schedules.view()))
+    assert pc.c.budgets.amounts_for("2026-09", schedule=pc.c.schedules.view())[food.id][0] == Decimal("900")
     act(hd, pc, lambda s: s.budgets.restore_rows([food.id], before))
-    assert pc.c.budgets.amounts_for("2026-09")[food.id][0] == Decimal("400") == hd.c.budgets.amounts_for("2026-09")[food.id][0]
+    assert pc.c.budgets.amounts_for("2026-09", schedule=pc.c.schedules.view())[food.id][0] == Decimal("400") == hd.c.budgets.amounts_for("2026-09", schedule=hd.c.schedules.view())[food.id][0]
 
 
 def test_people_names_aliases_and_archiving(devices):
@@ -154,7 +154,7 @@ def test_emergency_fund_and_payday_funding(devices):
     fund = next(r for r in pc.c.reserves.list_active() if r["kind"] == "EMERGENCY")
     assert fund["allocated"] == Decimal("300") == next(r for r in hd.c.reserves.list_active() if r["kind"] == "EMERGENCY")["allocated"]
     food = category(pc).id
-    on_home(hd, lambda s: s.budgets.set_budget(food, "2026-10", "200", False, None))
+    on_home(hd, lambda s: s.budgets.set_budget(food, "2026-10", "200", False, None, schedule=s.schedules.view()))
     on_home(hd, lambda s: s.settings.set("cash_funding_enabled", "1"))
     pc.sync_with(hd.home)
     plan = pc.c.funding.preview()

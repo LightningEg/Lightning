@@ -152,6 +152,7 @@ ARABIC_UI = {
     'This transaction changed since you opened it. Reopen it before saving.': 'العملية دي اتغيرت من وقت ما فتحتها. افتحها من جديد قبل الحفظ.',
     'Budget details are unavailable. Open Budget to check them.': 'تفاصيل الميزانية مش متاحة دلوقتي. افتح الميزانية عشان تراجعها.',
     'This month was checked against the bank. Unlock it first.': 'الشهر ده اتراجع مع البنك. افتح السجل الأول.',
+    'This month was checked against the bank. Unlock it first. [LN-E0001]': 'الشهر ده اتراجع مع البنك. افتح السجل الأول. [LN-E0001]',
     'You can restore them from transaction history.': 'تقدر ترجعهم من سجل العمليات.',
     'Could not confirm this change. Check the register before trying again.': 'مش قادرين نأكد التغيير ده. راجع سجل العمليات قبل ما تحاول تاني.',
     'Saved register views': 'طرق عرض العمليات المحفوظة',

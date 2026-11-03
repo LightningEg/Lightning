@@ -67,10 +67,10 @@ def test_7_the_forecast_budget_is_the_budget_screens_left_in_plan(c, setup, monk
     accounts, cats = setup
     cib, food = accounts["cib"].id, cats["EXP.PERSONAL.FOOD"]
     transport = c.categories.get_by_code("EXP.PERSONAL.TRANSPORT")
-    c.budgets.set_budget(food.id, "2026-10", "8000")
+    c.budgets.set_budget(food.id, "2026-10", "8000", schedule=c.schedules.view())
     for month in ("2026-07", "2026-08", "2026-09"):  # untracked transport: a background estimate of 3,000
         c.transactions.record_outflow(f"{month}-15", cib, "3000", transport.id)
-    summary = c.budgets.plan_summary("2026-10")
+    summary = c.budgets.plan_summary("2026-10", schedule=c.schedules.view())
     assert summary["left"] == D("11000")
     october = c.forecaster.forecast(date(2026, 10, 1), months=2).months[0]
     assert october.budget_spending == summary["left"]
@@ -189,13 +189,13 @@ def test_11_carryover_leaves_out_one_off_spending_like_the_month_does(c, setup):
     cib, food = accounts["cib"].id, cats["EXP.PERSONAL.FOOD"]
     party = c.categories.create(food.id, "Wedding party")
     c.budgets.set_one_off(party.id, True)
-    c.budgets.set_budget(food.id, "2026-09", "8000")
+    c.budgets.set_budget(food.id, "2026-09", "8000", schedule=c.schedules.view())
     c.transactions.record_outflow("2026-09-10", cib, "5000", food.id)
     c.transactions.record_outflow("2026-09-20", cib, "5000", party.id)
-    c.budgets.set_carryover("2026-10", {food.id: True})
+    c.budgets.set_carryover("2026-10", {food.id: True}, schedule=c.schedules.view())
 
     def line(month):
-        view = c.budgets.month_view(month)
+        view = c.budgets.month_view(month, schedule=c.schedules.view())
         return next(l for s in view.sections for l in s.lines if l.category_id == food.id)
 
     september = line("2026-09")

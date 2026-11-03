@@ -143,9 +143,7 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
 | **NF-5A** | [One table of investment events](5-investments/5A-one-table-of-investment-events.md) | new feature | Own | L | ready |
-| NF-5A2 | ↳ Thin wrappers for buy, sell and dividend | | | M | |
-| NF-5A3 | ↳ The entry form reads the spec | | | M | |
-| NF-5A4 | ↳ Reinvested dividend and return of capital | | | L | |
+| NF-5A4 | ↳ Return of capital | | | M | |
 | **NF-5B** | [Cost per purchase (lots)](5-investments/5B-cost-per-purchase-lots.md) | new feature | Own | L | blocked on 5A |
 | NF-5B1 | ↳ Pure lots module with the average method | | | L | |
 | NF-5B2 | ↳ FIFO across lots | | | L | |
@@ -264,7 +262,7 @@ Good ideas that wait until the milestones above are done.
 | **NF-9E** | [Return against the risk-free rate](9-later/9E-return-against-risk-free-rate.md) | new feature | Own | M | new |
 | **IT-9F** | [Page speed: a stable origin and cache, and a CSS trim](9-later/9F-page-speed-origin-and-css.md) | improvement, technical | Reach | M | new |
 | **IT-9J** | [Routes still compute figures, some that no screen shows](9-later/9J-routes-compute-figures.md) | improvement, technical | Build | M | ready |
-| **IT-9K** | [Structure left - a 746-line profile_app, budgeting calls planning through bootstrap, three balance-floor checks](9-later/9K-layers-and-copies.md) | improvement, technical | Build | M | ready |
+| **IT-9K** | [Structure left - a 746-line profile_app and three balance-floor checks](9-later/9K-layers-and-copies.md) | improvement, technical | Build | M | ready |
 
 Done: 9G, 9H, 9I. Next free code: 9L.
 

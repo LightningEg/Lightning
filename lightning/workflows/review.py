@@ -218,7 +218,7 @@ class ReviewInbox:
             items.append({"label": "Prices are out of date",
                           "detail": f"Last priced: {named}{more}. Values use these old prices.",
                           "href": "/investments/prices", "action": "Update prices", "priority": 2})
-        for section in c.budgets.month_view(month_of(on)).sections:
+        for section in c.budgets.month_view(month_of(on), schedule=c.schedules.view()).sections:
             for line in section.lines:
                 if line.depth == 2 and line.over:
                     items.append({"label": f"{line.name} over plan",
@@ -230,7 +230,7 @@ class ReviewInbox:
                               "detail": f"{fmt(section.planned_actual - section.available)} {c.base_currency} over this month's plan.",
                               "href": "/budget", "priority": 2})
         # A category's own plan below what is already scheduled in it: the bill will overrun the plan.
-        for row in c.budgets.below_scheduled(month_of(on)):
+        for row in c.budgets.below_scheduled(month_of(on), schedule=c.schedules.view()):
             items.append({"label": f"{row['name']} is planned below its bills",
                           "detail": f"Planned {fmt(row['planned'])} {c.base_currency}; bills and loan payments "
                                     f"scheduled this month come to {fmt(row['scheduled'])}.",
@@ -346,8 +346,8 @@ class ReviewInbox:
                           "detail": f"It saved {fmt(short['rate'])}% of money in; your target is {fmt(short['limit'])}%, "
                                     f"{fmt(short['short'])} {cur} more.",
                           "href": "/financial-health", "action": "See financial health", "priority": 2})
-        below = {row["category_id"] for row in c.budgets.below_scheduled(month)}  # already named: plan below its bills
-        for row in (row for row in c.budgets.over_twice(month) if row["category_id"] not in below):
+        below = {row["category_id"] for row in c.budgets.below_scheduled(month, schedule=c.schedules.view())}  # already named: plan below its bills
+        for row in (row for row in c.budgets.over_twice(month, schedule=c.schedules.view()) if row["category_id"] not in below):
             first, second = (_month_name(key).split()[0] for key in row["months"])
             detail = f"Over its plan in {first} and {second}, by up to {fmt(row['amount'])} {cur}."
             if row["from_id"]:

@@ -176,7 +176,7 @@ def load_story(c, key: str, as_of: date | None = None) -> dict:
         month = fmt_date(day)[:7]
         suggested = c.budgets.suggested_plan(month)
         if suggested:
-            c.budgets.save_month(month, suggested)
+            c.budgets.save_month(month, suggested, schedule=c.schedules.view())
         if key == "menna":
             c.reserves.set_emergency_fund("4000", "60000")
         elif key == "fatma":

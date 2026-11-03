@@ -245,7 +245,7 @@ def _phone_cash(c, f, next_payments, late, position, day) -> dict:
 
     # Two tiles after the list: Free cash against what is left of it after the bills, and Reserves with the
     # emergency fund in months (the figure Reserves already shows).
-    fund = emergency_fund(c.reserves, c.budgets, month_of(day))
+    fund = emergency_fund(c.reserves, c.budgets, month_of(day), c.schedules.view())
     reserves = position.reserves
     after = fmt(f.free_cash - due, 0).replace("-", "−")
     free_sub = f"After bills: {after}" if due > ZERO else ""

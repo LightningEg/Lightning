@@ -256,9 +256,9 @@ def test_one_off_spending_stays_in_cash_flow_but_out_of_the_budget(c, setup):
     travel = c.categories.get_by_code("EXP.PERSONAL.ENTERTAINMENT")
     c.transactions.record_outflow("2026-09-12", accounts["cib"].id, "5000", travel.id)
     c.transactions.record_outflow("2026-09-13", accounts["cib"].id, "200", cats["EXP.PERSONAL.FOOD"].id)
-    before = c.budgets.month_view("2026-09")
+    before = c.budgets.month_view("2026-09", schedule=c.schedules.view())
     c.budgets.set_one_off(travel.id, True)
-    after = c.budgets.month_view("2026-09")
+    after = c.budgets.month_view("2026-09", schedule=c.schedules.view())
     personal = lambda view: next(g for s in view.sections for g in s.groups if g.name == "Personal")
     assert personal(before).actual == 5200 and personal(after).actual == 200
     assert after.one_off == 5000

@@ -71,14 +71,14 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         period = parse_period({"period": "month", "month": month}, today())
         error = error or exc.message  # say why the month is shown instead of the range asked for
     month = period.end.strftime("%Y-%m")
-    view = c.budgets.month_view(month)
+    view = c.budgets.month_view(month, schedule=c.schedules.view())
     cursor = period.start.replace(day=1)
     month_views = []
     while cursor <= period.end:
         key = cursor.strftime("%Y-%m")
         # A longer period includes only months with a saved plan, matching its spending window.
-        if period.key == "month" or c.budgets.has_plan(key):
-            month_views.append((key, c.budgets.month_view(key)))
+        if period.key == "month" or c.budgets.has_plan(key, schedule=c.schedules.view()):
+            month_views.append((key, c.budgets.month_view(key, schedule=c.schedules.view())))
         cursor = (cursor.replace(day=28) + timedelta(days=4)).replace(day=1)
     period_base = ZERO
     period_opening = ZERO
@@ -123,7 +123,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         # Keep the headline aligned with the L1 group rows, including carryover.
         period_budgeted = sum((row["budgeted"] for row in group_totals.values()), ZERO)
     prev_month, next_month = _neighbours(month)
-    has_plan = c.budgets.has_plan(month)
+    has_plan = c.budgets.has_plan(month, schedule=c.schedules.view())
     suggestions = c.budgets.suggested_plan(month) if not has_plan else {}
     suggestions_view = {category_id: (c.categories.display_name(category_id), amount)
                         for category_id, amount in suggestions.items()}
@@ -131,7 +131,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     for category_id, (name, amount) in suggestions_view.items():
         parts = name.split(" › ")
         suggestion_groups.setdefault(parts[0], []).append((category_id, " › ".join(parts[1:]) or parts[0], amount))
-    tracked = c.budgets.tracked_ids(month)
+    tracked = c.budgets.tracked_ids(month, schedule=c.schedules.view())
     categories = c.categories.tree(Movement.OUTFLOW)
     children: dict[int, list[int]] = {}
     for category in categories:
@@ -146,7 +146,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
             pending.extend(kids)
         return descendants
 
-    category_averages = c.budgets.category_averages(month)
+    category_averages = c.budgets.category_averages(month, schedule=c.schedules.view())
     averages = {cid: row["average3"] for cid, row in category_averages.items()}
     averages6 = {cid: row["average6"] for cid, row in category_averages.items()}
     average_observations = {cid: row["observed3"] for cid, row in category_averages.items()}
@@ -154,14 +154,14 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     for section in view.sections:
         for group in section.groups:
             by_group[group.category_id] = sorted(category_tree_ids(group.category_id) - {group.category_id})
-    income_basis = c.budgets.budgeting_income(month)
+    income_basis = c.budgets.budgeting_income(month, schedule=c.schedules.view())
     background_counts, background_totals = {}, {}
-    for line in c.budgets.background(month):
+    for line in c.budgets.background(month, schedule=c.schedules.view()):
         background_counts[line["group_id"]] = background_counts.get(line["group_id"], 0) + 1
         background_totals[line["group_id"]] = background_totals.get(line["group_id"], ZERO) + (line["estimate"] or ZERO)
     # A default, not a setting (owner, 2026-10-06): suggest tracking a category that averages a fifth of income.
     tracking_suggestions = [{**row, "reason": f"{row['share']:.1f}% of average monthly income"}
-                            for row in c.budgets.tracking_suggestions(month, TRACK_SUGGESTION_PERCENT)]
+                            for row in c.budgets.tracking_suggestions(month, TRACK_SUGGESTION_PERCENT, schedule=c.schedules.view())]
 
     # Background estimates are monthly expectations for untracked leaf
     # categories. Parent direct plans already cap these expenses, so children
@@ -173,7 +173,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         factor = (Decimal(1) if period.key != "custom" else
                   Decimal((overlap_end-overlap_start).days+1) / Decimal((m_last-m_first).days+1)
                   if overlap_end >= overlap_start else ZERO)
-        for line in c.budgets.background(month_view.month, tracked=tracked):
+        for line in c.budgets.background(month_view.month, tracked=tracked, schedule=c.schedules.view()):
             if line["estimate"] is not None and line["group_id"] in group_totals:
                 group_totals[line["group_id"]]["budgeted"] += line["estimate"] * factor
                 period_base += line["estimate"] * factor
@@ -181,7 +181,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     one_offs = c.budgets.one_off_ids()
     # Planned and Spent cover the same months: a long period (YTD, All time, custom) counts spending
     # from the first month that has a plan, because months before it have nothing planned.
-    plan_months = [key for key, _ in month_views if c.budgets.has_plan(key)]
+    plan_months = [key for key, _ in month_views if c.budgets.has_plan(key, schedule=c.schedules.view())]
     spending_start = period.start
     if period.key != "month" and plan_months:
         spending_start = max(period.start, parse_month(plan_months[0])[0])
@@ -219,7 +219,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
             row["left"] = quantize(row["budgeted"], 0) - quantize(row["spent"], 0)
     period_income = ZERO
     for key, _ in month_views:
-        basis = c.budgets.budgeting_income(key) or ZERO
+        basis = c.budgets.budgeting_income(key, schedule=c.schedules.view()) or ZERO
         m_first, m_last = parse_month(key)
         overlap_start, overlap_end = max(m_first, period.start), min(m_last, period.end)
         # Saved monthly limits stay whole in month, YTD and all-time views; only custom dates prorate them.
@@ -283,12 +283,12 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     month_first, month_last = parse_month(month)
     days_left = (month_last - today()).days + 1 if month_first <= today() <= month_last else 0
     # The same Left in plan as the headline and the Overview (background estimates counted in).
-    month_left = c.budgets.plan_summary(month)["left"] if c.budgets.has_plan(month) else ZERO
+    month_left = c.budgets.plan_summary(month, schedule=c.schedules.view())["left"] if c.budgets.has_plan(month, schedule=c.schedules.view()) else ZERO
     notes = keynotes.budget_left(month_left, days_left,
-                                 [r["label"] for r in meter_lines if r["m"]["over"]], "#budget-meters") if c.budgets.has_plan(month) else []
+                                 [r["label"] for r in meter_lines if r["m"]["over"]], "#budget-meters") if c.budgets.has_plan(month, schedule=c.schedules.view()) else []
     if check is not None and check.planned is not None:
         notes = keynotes.plan_check(check) + notes
-    left_note = keynotes.per_day(month_left, days_left) if c.budgets.has_plan(month) else ""
+    left_note = keynotes.per_day(month_left, days_left) if c.budgets.has_plan(month, schedule=c.schedules.view()) else ""
     # KPI cards (guideline 3.32 A08): every figure against something, two to four in the row. The figures come
     # from the forecaster's EverydayBudget, the same Budget until payday Cash planning shows.
     raise_offer = c.health.raise_offer(month) if period.key == "month" else None
@@ -304,8 +304,8 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         plan_bills = _plan_bills(c, everyday)
     elif period.key != "month":
         kpi_cards = kpis.budget_period(period_actual, period_budgeted,
-                                       [(key, c.budgets.plan_summary(key)["left"], parse_month(key)[1] < today())
-                                        for key, _ in month_views if c.budgets.has_plan(key)],
+                                       [(key, c.budgets.plan_summary(key, schedule=c.schedules.view())["left"], parse_month(key)[1] < today())
+                                        for key, _ in month_views if c.budgets.has_plan(key, schedule=c.schedules.view())],
                                        period.label)
     # Answer first (guideline 3.33, A09): Left in plan is the page's Lead with the pace chart beside it; what is over
     # plan is a Needs you row under it; Everyday spending and Plan leaves to save stay as the KPI row.
@@ -364,7 +364,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                   overall_ceiling=c.settings.get("budget_overall_ceiling"), this_month=month_of(today()),
                   personal_group=next((cat.id for cat in c.categories.tree(Movement.OUTFLOW)
                                        if cat.depth == 1 and cat.scope == Scope.PERSONAL), None),
-                  low_confidence=keynotes.low_confidence_note(c.budgets.plan_summary(month)["low_confidence"]) if period.key == "month" else "",
+                  low_confidence=keynotes.low_confidence_note(c.budgets.plan_summary(month, schedule=c.schedules.view())["low_confidence"]) if period.key == "month" else "",
                   plan_from=fmt_date(spending_start) if spending_start != period.start else "",
                   period=period, period_actual=period_actual, period_budgeted=period_budgeted,
                   period_left=period_left, period_carryover=period_carryover, group_totals=group_totals,
@@ -377,7 +377,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                   category_periods=category_periods,
                   bulk_undo=bulk_undo,
                   effective_month=month, previous_month=_neighbours(month)[0],
-                  previous_bridge=c.budgets.month_view(_neighbours(month)[0]))
+                  previous_bridge=c.budgets.month_view(_neighbours(month)[0], schedule=c.schedules.view()))
 
 
 def _tree_ids(c, category_id: int) -> set[int]:
@@ -547,7 +547,7 @@ def _phone_over(rows: list[dict], month: str, days_left: int, c, everyday) -> di
 def _cover_from(c, month: str, target: dict, room: dict[int, Decimal]) -> dict | None:
     """The category with the most room left (its bills still to pay set aside) that can cover the largest
     overspend; both need a plan of their own, as Move room asks (budget_move.html)."""
-    plans = c.budgets.amounts_for(month, loans=False)
+    plans = c.budgets.amounts_for(month, loans=False, schedule=c.schedules.view())
     if target["category_id"] not in plans:
         return None
     amount = Decimal(target["over"]).to_integral_value(rounding=ROUND_CEILING)
@@ -601,7 +601,7 @@ async def budget_suggestions(request: Request):
             selected = _category_setting_ids(c, "budget_tracked_categories")
             selected.add(category_id)
             _save_category_setting(c, "budget_tracked_categories", selected)
-            c.budgets.set_budget(category_id, month, "", average_months=3)
+            c.budgets.set_budget(category_id, month, "", average_months=3, schedule=c.schedules.view())
         elif action in {"later", "never"}:
             suppressed = json.loads(c.settings.get("budget_suppressed_categories") or "{}")
             if isinstance(suppressed, list):
@@ -689,8 +689,8 @@ async def save_budget_settings(request: Request):
         c.settings.set("budget_manual_monthly_income", manual)
         c.settings.set("budget_one_off_exclusions", json.dumps(sorted(set(exclusions))))
         c.settings.set("budget_carryover_global", "1" if enabled else "0")
-        tracked = set(c.budgets.amounts_for(carry_month))
-        c.budgets.set_carryover(carry_month, {category_id: enabled for category_id in tracked})
+        tracked = set(c.budgets.amounts_for(carry_month, schedule=c.schedules.view()))
+        c.budgets.set_carryover(carry_month, {category_id: enabled for category_id in tracked}, schedule=c.schedules.view())
         if request.headers.get("X-Requested-With") == "fetch":
             return Response(status_code=204)
     except (LightningError, ValueError) as exc:
@@ -709,7 +709,7 @@ async def carryover_reset_popup(request: Request, category_id: int):
     except ValidationError as exc:
         return redirect("/budget", exc.message)
     category = c.categories.get(category_id)
-    line = next((line for section in c.budgets.month_view(month).sections for line in section.lines
+    line = next((line for section in c.budgets.month_view(month, schedule=c.schedules.view()).sections for line in section.lines
                  if line.category_id == category_id), None)
     if line is None:
         return redirect(f"/budget?month={month}", "This category has no active budget in that month.")
@@ -724,7 +724,7 @@ async def carryover_bridge(request: Request):
     except ValidationError as exc:
         return redirect("/budget", exc.message)
     previous, _ = _neighbours(month)
-    prior_view = c.budgets.month_view(previous); current_view = c.budgets.month_view(month)
+    prior_view = c.budgets.month_view(previous, schedule=c.schedules.view()); current_view = c.budgets.month_view(month, schedule=c.schedules.view())
     prior = {line.category_id: line for section in prior_view.sections for line in section.lines}
     current = {line.category_id: line for section in current_view.sections for line in section.lines}
     categories = []
@@ -744,7 +744,7 @@ async def carryover_bridge(request: Request):
 async def reset_carryover(request: Request, category_id: int):
     c = container(request); form = await request.form(); month = str(form.get("month", month_of(today())))
     try:
-        c.budgets.reset_carryover(category_id, month)
+        c.budgets.reset_carryover(category_id, month, schedule=c.schedules.view())
     except LightningError as exc:
         return redirect(f"/budget?month={month}", exc.message)
     return redirect(f"/budget?month={month}", "Carryover reset from this month.")
@@ -761,7 +761,7 @@ async def inline_limit(request: Request, category_id: int):
                 value=str(form.get("amount", "")), fingerprint=c.journal_workflows.bulk_budget_fingerprint([category_id]))
             return Response("Saved", status_code=204) if request.headers.get("X-Requested-With") == "fetch" else redirect(
                 f"/budget?month={month}", "Limit saved.")
-        c.budgets.set_budget(category_id, month, str(form.get("amount", "")))
+        c.budgets.set_budget(category_id, month, str(form.get("amount", "")), schedule=c.schedules.view())
         current = _category_setting_ids(c, "budget_tracked_categories")
         current.add(category_id)
         _save_category_setting(c, "budget_tracked_categories", current)
@@ -793,7 +793,7 @@ async def inline_rule(request: Request, category_id: int):
         if raw.endswith("%"):
             c.budgets.set_income_percentage(category_id, month, raw[:-1].strip())
         else:
-            c.budgets.set_budget(category_id, month, raw)
+            c.budgets.set_budget(category_id, month, raw, schedule=c.schedules.view())
         current = _category_setting_ids(c, "budget_tracked_categories"); current.add(category_id)
         _save_category_setting(c, "budget_tracked_categories", current)
     except (LightningError, ValueError) as exc:
@@ -823,7 +823,7 @@ async def inline_percentage(request: Request, category_id: int):
         if raw:
             c.budgets.set_income_percentage(category_id, month, raw)
         else:
-            c.budgets.set_budget(category_id, month, "")
+            c.budgets.set_budget(category_id, month, "", schedule=c.schedules.view())
         current = _category_setting_ids(c, "budget_tracked_categories"); current.add(category_id)
         _save_category_setting(c, "budget_tracked_categories", current)
     except (LightningError, ValueError) as exc:
@@ -864,7 +864,7 @@ async def bulk_budget_rule(request: Request):
             else:
                 period = 3 if action == "average3" else 6
                 c.budgets.save_month(month, {category_id: "" for category_id in selected},
-                                     average_months={category_id: period for category_id in selected})
+                                     average_months={category_id: period for category_id in selected}, schedule=c.schedules.view())
         c.settings.set("budget_bulk_undo", json.dumps({"token": token, "month": month,
             "category_ids": selected, "rows": before}))
     except LightningError as exc:
@@ -939,7 +939,7 @@ async def budget_fill_page(request: Request):
         return redirect("/budget", f"{month} has not started yet. Choose a current or past month to fill.")
     source = request.query_params.get("source", "last_month")
     try:
-        proposal = c.budgets.fill_proposal(month, source)
+        proposal = c.budgets.fill_proposal(month, source, schedule=c.schedules.view())
     except LightningError as exc:
         return render(request, "budget_fill.html", month=month, source="last_month", proposal=None,
                       error=exc.message, status_code=400)
@@ -960,13 +960,13 @@ async def apply_budget_fill(request: Request):
     form = await request.form()
     source = str(form.get("source", ""))
     try:
-        proposal = c.budgets.fill_proposal(month, source)
+        proposal = c.budgets.fill_proposal(month, source, schedule=c.schedules.view())
         allowed = {row.category_id for row in proposal.rows if row.selectable and row.category_id is not None}
         selected = {int(value) for value in form.getlist("selected") if str(value).isdigit()}
         if not selected.issubset(allowed):
             raise ValidationError("Refresh the proposal before applying these categories.", "categories")
         amounts = {category_id: str(form.get(f"amount_{category_id}", "")) for category_id in selected}
-        changed = c.budgets.apply_fill(month, amounts)
+        changed = c.budgets.apply_fill(month, amounts, schedule=c.schedules.view())
     except LightningError as exc:
         values = {row.category_id: str(form.get(f"amount_{row.category_id}", ""))
                   for row in proposal.rows if row.category_id is not None} if "proposal" in locals() and proposal else {}
@@ -991,7 +991,7 @@ async def save_budget(request: Request):
                 if key.startswith("m_") and key[2:].isdigit()}
     only = bool(form.get("only_this_month"))
     try:
-        changed = c.budgets.save_month(month, amounts, only_this_month=only, average_months=averages)
+        changed = c.budgets.save_month(month, amounts, only_this_month=only, average_months=averages, schedule=c.schedules.view())
     except LightningError as exc:
         values = {f"b_{k}": v for k, v in amounts.items()} | {f"m_{k}": v for k, v in averages.items()}
         return _page(request, month, values=values, error=exc.message,
@@ -1016,10 +1016,10 @@ async def accept_plan(request: Request):
             if key.startswith("suggest_") and key[8:].isdigit():
                 amounts[int(key[8:])] = str(value)
         if amounts:
-            c.budgets.save_month(month, amounts)
+            c.budgets.save_month(month, amounts, schedule=c.schedules.view())
         else:
             group_id = int(str(form.get("group_id", "")))
-            c.budgets.set_budget(group_id, month, str(form.get("broad_limit", "")))
+            c.budgets.set_budget(group_id, month, str(form.get("broad_limit", "")), schedule=c.schedules.view())
     except (ValueError, LightningError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose a valid monthly limit."
         return _page(request, month, error=message, status_code=400)
@@ -1040,7 +1040,7 @@ async def update_carryover(request: Request):
                 if key.startswith("carryvalue_") and key[11:].isdigit()}
     settings.update({category_id: True for category_id in ids})
     try:
-        changed = c.budgets.set_carryover(month, settings)
+        changed = c.budgets.set_carryover(month, settings, schedule=c.schedules.view())
     except LightningError as exc:
         return redirect(f"/budget?month={month}", exc.message)
     return redirect(f"/budget?month={month}", f"Updated carryover for {changed} budget line{'s' if changed != 1 else ''}.")
@@ -1054,7 +1054,7 @@ async def update_global_carryover(request: Request):
     try:
         parse_month(month)
         enabled = form.get("enabled") == "1"
-        c.budgets.set_carryover(month, {category_id: enabled for category_id in c.budgets.amounts_for(month)})
+        c.budgets.set_carryover(month, {category_id: enabled for category_id in c.budgets.amounts_for(month, schedule=c.schedules.view())}, schedule=c.schedules.view())
     except LightningError as exc:
         if request.headers.get("X-Requested-With") == "fetch":
             return Response(exc.message, status_code=400, media_type="text/plain")
@@ -1100,7 +1100,7 @@ async def move_room_popup(request: Request):
         amount = to_decimal(str(query.get("amount", "")), "amount")
     except (LightningError, ValueError):
         return redirect(f"/budget?month={month}", "Choose two categories and an amount.")
-    plans = c.budgets.amounts_for(month, loans=False)
+    plans = c.budgets.amounts_for(month, loans=False, schedule=c.schedules.view())
     to_plan, from_plan = plans.get(to.id, (None,))[0], plans.get(source.id, (None,))[0]
     if to_plan is None or from_plan is None:
         return redirect(f"/budget?month={month}", "Both categories need a plan of their own this month.")
@@ -1116,7 +1116,7 @@ async def move_room(request: Request):
     try:
         parse_month(month)
         to_id, from_id = int(str(form.get("to", ""))), int(str(form.get("from", "")))
-        c.budgets.move_room(month, to_id, from_id, str(form.get("amount", "")))
+        c.budgets.move_room(month, to_id, from_id, str(form.get("amount", "")), schedule=c.schedules.view())
     except ValueError:
         return redirect(f"/budget?month={month}", "Choose two categories.")
     except LightningError as exc:

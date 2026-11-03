@@ -235,26 +235,28 @@ class InvestmentService:
     def buy(self, date: str, account_id: int, asset_id: int, quantity, price, fees="0",
             cash_account_id: int | None = None, notes: str = "", owner_id: int | None = None) -> Transaction:
         """Buy units: cash leaves the paying account, the holding grows at cost (fees included)."""
-        return self._trade(DocType.BUY, date, account_id, asset_id, quantity, price, fees, cash_account_id, notes,
-                           owner_id=owner_id)
+        return self.record("buy", date, account_id, asset_id, quantity=quantity, price=price, fees=fees,
+                           cash_account_id=cash_account_id, notes=notes, owner_id=owner_id)
 
     def buy_total(self, date, account_id, asset_id, quantity, total, cash_account_id=None, notes="",
                   fees="0", fees_included=True, owner_id: int | None = None):
         """Buy by total cash paid (fees included) or gross trade value (fees additional)."""
-        return self._trade(DocType.BUY, date, account_id, asset_id, quantity, None, "0", cash_account_id, notes,
-                           total=total, total_fees=fees, fees_included=fees_included, owner_id=owner_id)
+        return self.record("buy", date, account_id, asset_id, quantity=quantity, total=total, total_fees=fees,
+                           fees_included=fees_included, cash_account_id=cash_account_id, notes=notes,
+                           owner_id=owner_id)
 
     def sell_total(self, date, account_id, asset_id, quantity, total, cash_account_id=None, notes="",
                    fees="0", fees_included=True, owner_id: int | None = None):
         """Sell by net cash received (fees included) or gross trade value (fees additional)."""
-        return self._trade(DocType.SEL, date, account_id, asset_id, quantity, None, "0", cash_account_id, notes,
-                           total=total, total_fees=fees, fees_included=fees_included, owner_id=owner_id)
+        return self.record("sell", date, account_id, asset_id, quantity=quantity, total=total, total_fees=fees,
+                           fees_included=fees_included, cash_account_id=cash_account_id, notes=notes,
+                           owner_id=owner_id)
 
     def sell(self, date: str, account_id: int, asset_id: int, quantity, price, fees="0",
              cash_account_id: int | None = None, notes: str = "", owner_id: int | None = None) -> Transaction:
         """Sell units: the holding shrinks, what you receive (after fees) arrives as cash."""
-        return self._trade(DocType.SEL, date, account_id, asset_id, quantity, price, fees, cash_account_id, notes,
-                           owner_id=owner_id)
+        return self.record("sell", date, account_id, asset_id, quantity=quantity, price=price, fees=fees,
+                           cash_account_id=cash_account_id, notes=notes, owner_id=owner_id)
 
     def dividend(self, date: str, account_id: int, asset_id: int, amount, notes: str = "",
                  owner_id: int | None = None, tax="0") -> Transaction:
@@ -262,16 +264,32 @@ class InvestmentService:
 
         ``amount`` is what you received, unless ``tax`` is given: then it is the gross dividend and the tax
         withheld leaves the same account in the same transaction (net lands in cash)."""
+        return self.record("dividend", date, account_id, asset_id, amount=amount, tax=tax, notes=notes,
+                           owner_id=owner_id)
+
+    def record(self, event: str, date: str, account_id, asset_id, *, owner_id: int | None = None, notes: str = "",
+               cash_account_id=None, **typed) -> Transaction:
+        """Post one investment event named in ``events.EVENTS``: the one recording path behind buy, sell and
+        dividend. ``typed`` holds the figures the event's spec asks for (quantity, price, total, fees, amount, tax)."""
+        spec = events.EVENTS.get(event)
+        if spec is None:
+            raise ValidationError(f"Unknown investment event: {event}.", "event")
+        if spec.income_category:
+            return self._record_income(event, date, account_id, asset_id, owner_id, notes, typed)
+        return self._trade(event, date, account_id, asset_id, cash_account_id, notes, owner_id, typed)
+
+    def _record_income(self, event, date, account_id, asset_id, owner_id, notes, typed) -> Transaction:
+        spec = events.EVENTS[event]
         account_id, _ = self.route(account_id, asset_id)
         account = self.accounts.require_usable(account_id)
         if account.account_type != AccountType.BROKERAGE:
             raise ValidationError("Dividends can only be recorded in a brokerage account.", "account")
         if self.holding_for_owner(account_id, asset_id, date, owner_id) <= ZERO:
             raise ValidationError("A dividend requires shares held by the selected owner on that date.", "instrument")
-        lines, counterparty = self._dividend_lines(account_id, asset_id, amount, on=date, tax=tax)
+        lines, counterparty = self._event_lines(event, account_id, asset_id, on=date, **typed)
         if owner_id is not None:
             lines = [replace(line, owner_id=owner_id) for line in lines]
-        txn = self.transactions.post(DocType.DIV, date, lines, "", counterparty, notes)
+        txn = self.transactions.post(spec.doc_type, date, lines, "", counterparty, notes)
         self.db.execute("INSERT INTO investment_dividend_assets(transaction_id,asset_id) VALUES(?,?)",
                         (txn.id, asset_id))
         return txn
@@ -380,11 +398,11 @@ class InvestmentService:
         notes = values.get("notes", current.notes)
         owner_id = values.get("owner_id")
         if kind in (DocType.BUY, DocType.SEL):
-            lines, counterparty = self._trade_lines(kind, values["account_id"], values["asset_id"], values["quantity"],
-                                                    values["price"], values.get("fees", "0"),
-                                                    values.get("cash_account_id"), total=values.get("total") or None,
-                                                    total_fees=values.get("total_fees", "0"),
-                                                    fees_included=values.get("fees_included", True), on=date)
+            lines, counterparty = self._event_lines(
+                "buy" if kind == DocType.BUY else "sell", values["account_id"], values["asset_id"],
+                values.get("cash_account_id"), on=date, quantity=values["quantity"], price=values["price"],
+                fees=values.get("fees", "0"), total=values.get("total") or None,
+                total_fees=values.get("total_fees", "0"), fees_included=values.get("fees_included", True))
             if owner_id:
                 lines = [replace(line, owner_id=int(owner_id)) for line in lines]
             self._require_broker_cash(kind, values["account_id"], lines)  # an edit cannot skip it (audit 2026-10-26)
@@ -398,8 +416,11 @@ class InvestmentService:
             if self.holding_for_owner(values["account_id"], values["asset_id"], date, owner_id) <= ZERO:
                 raise ValidationError("A dividend requires shares held by the selected owner on that date.", "asset_id")
             tax = values["tax"] if "tax" in values else self.values_of(txn_id).get("tax", "0")
-            lines, counterparty = self._dividend_lines(values["account_id"], values["asset_id"], values["amount"],
-                                                       on=date, tax=tax)
+            reinvested = any(not self.assets.get_asset(ln.asset_id).is_cash for ln in current.lines)
+            extra = {"quantity": values.get("quantity") or self.values_of(txn_id)["quantity"]} if reinvested else {}
+            lines, counterparty = self._event_lines("reinvested_dividend" if reinvested else "dividend",
+                                                    values["account_id"], values["asset_id"], on=date,
+                                                    amount=values["amount"], tax=tax, **extra)
             if owner_id:
                 lines = [replace(line, owner_id=int(owner_id)) for line in lines]
             updated = self.transactions.repost(txn_id, date, lines, "", counterparty, notes)
@@ -438,9 +459,12 @@ class InvestmentService:
                           fees_included=True, total=abs(c.quantity), cash_account_id=c.account_id)
         elif t.type == DocType.DIV and cash:
             asset_id = self.db.scalar("SELECT asset_id FROM investment_dividend_assets WHERE transaction_id=?", (t.id,))
-            gross = sum((ln.quantity for ln in cash if ln.quantity > ZERO), ZERO)
-            tax = -sum((ln.quantity for ln in cash if ln.quantity < ZERO), ZERO)
+            income = [ln for ln in cash if ln.effect in (Effect.INFLOW, Effect.OUTFLOW)]  # not a reinvestment's spend
+            gross = sum((ln.quantity for ln in income if ln.quantity > ZERO), ZERO)
+            tax = -sum((ln.quantity for ln in income if ln.quantity < ZERO), ZERO)
             values.update(account_id=cash[0].account_id, asset_id=asset_id, amount=gross, tax=tax)
+            if units:  # a reinvested dividend edits like a dividend; its units stay as they were
+                values["quantity"] = units[0].quantity
         elif t.type == DocType.OPN and units:
             values.update(account_id=units[0].account_id, asset_id=units[0].asset_id, quantity=units[0].quantity,
                           total_cost=units[0].amount)
@@ -461,7 +485,9 @@ class InvestmentService:
         cashflows: list[tuple[str, Decimal]] = []
         holding_flows: dict[tuple[int, int], list[tuple[str, Decimal]]] = {}
         for line in self.reporting.investment_lines(day, account_id):
-            if line["type"] == "DIV":
+            if line["type"] == "DIV" and line["effect"] == "INTERNAL" and line["is_cash"]:
+                continue  # a reinvested dividend's spend: the units line below carries the purchase
+            if line["type"] == "DIV" and line["effect"] != "INTERNAL":
                 asset_id = line.get("dividend_asset_id")
                 if asset_id is None:
                     continue
@@ -573,17 +599,15 @@ class InvestmentService:
     # ======================================================================
     # Building lines
     # ======================================================================
-    def _trade(self, kind, date, account_id, asset_id, quantity, price, fees, cash_account_id, notes, total=None,
-               total_fees="0", fees_included=True, owner_id=None):
+    def _trade(self, event, date, account_id, asset_id, cash_account_id, notes, owner_id, typed):
         # One step: a pocket made for this trade is undone with it when the trade is refused.
         with self.db.transaction():
             asked = account_id
             account_id, cash_account_id = self.route(account_id, asset_id, cash_account_id)
             try:
-                return self._trade_in(kind, date, account_id, asset_id, quantity, price, fees, cash_account_id, notes,
-                                      total, total_fees, fees_included, owner_id)
+                return self._trade_in(event, date, account_id, asset_id, cash_account_id, notes, owner_id, typed)
             except ValidationError as error:
-                if kind != DocType.BUY or account_id == asked or cash_account_id is not None:
+                if event != "buy" or account_id == asked or cash_account_id is not None:
                     raise
                 broker = self.accounts.get(int(asked))
                 asset = self.assets.get_asset(int(asset_id))
@@ -593,10 +617,9 @@ class InvestmentService:
                     f"Enter what you paid in {home.currency} under Paid in another currency, or move "
                     f"{asset.currency} in first.", "instrument") from error
 
-    def _trade_in(self, kind, date, account_id, asset_id, quantity, price, fees, cash_account_id, notes, total=None,
-                  total_fees="0", fees_included=True, owner_id=None):
-        lines, counterparty = self._trade_lines(kind, account_id, asset_id, quantity, price, fees, cash_account_id,
-                                                total, total_fees, fees_included, on=date)
+    def _trade_in(self, event, date, account_id, asset_id, cash_account_id, notes, owner_id, typed):
+        kind = events.EVENTS[event].doc_type
+        lines, counterparty = self._event_lines(event, account_id, asset_id, cash_account_id, on=date, **typed)
         if owner_id is not None:
             party = self.db.one("SELECT id FROM counterparties WHERE id=? AND active=1", (owner_id,))
             if not party:
@@ -630,34 +653,33 @@ class InvestmentService:
                 raise ValidationError(f"{asset.name} is priced in {asset.currency}; {account.label} is in "
                                       f"{account.currency}. Use a {asset.currency} account.", "account")
 
-    def _trade_lines(self, kind, account_id, asset_id, quantity, price, fees, cash_account_id, total=None,
-                     total_fees="0", fees_included=True, on=None):
+    def _event_lines(self, event, account_id, asset_id, cash_account_id=None, on=None, **typed):
+        """Resolve accounts, asset, currency and rates for an event, then let the table build and check the lines."""
+        spec = events.EVENTS[event]
+        on = on or fmt_date(today())
+        if spec.income_category:
+            account = self.accounts.require_usable(account_id)
+            if account.account_type != AccountType.BROKERAGE:
+                raise ValidationError("Dividends can only be recorded in a brokerage account.", "account")
+            asset = self._investment(asset_id)
+            self._validate_asset_account(account, asset)
+            self._same_currency(asset, account)
+            values = events.EventValues(
+                asset=asset, account=account, cash_asset_id=self.assets.cash_asset(account.currency).id,
+                holding_rate=self._rate(account, on),
+                category_ids={code: self.categories.get_by_code(code).id
+                              for code in (DIVIDEND_CATEGORY, TAX_CATEGORY)}, **typed)
+            return events.lines_for(event, values), asset.name
         account = self._holding_account(account_id)
         asset = self._investment(asset_id)
         self._validate_asset_account(account, asset)
         cash_account = self._cash_account(account, cash_account_id)
         self._same_currency(asset, account, cash_account)
-        on = on or fmt_date(today())
         values = events.EventValues(
             asset=asset, account=account, cash_account=cash_account,
             cash_asset_id=self.assets.cash_asset(cash_account.currency).id,
-            holding_rate=self._rate(account, on), cash_rate=self._rate(cash_account, on),
-            quantity=quantity, price=price, fees=fees, total=total, total_fees=total_fees,
-            fees_included=fees_included)
-        return events.lines_for("buy" if kind == DocType.BUY else "sell", values), asset.name
-
-    def _dividend_lines(self, account_id, asset_id, amount, on=None, tax="0"):
-        account = self.accounts.require_usable(account_id)
-        if account.account_type != AccountType.BROKERAGE:
-            raise ValidationError("Dividends can only be recorded in a brokerage account.", "account")
-        asset = self._investment(asset_id)
-        self._validate_asset_account(account, asset)
-        self._same_currency(asset, account)
-        values = events.EventValues(
-            asset=asset, account=account, cash_asset_id=self.assets.cash_asset(account.currency).id,
-            holding_rate=self._rate(account, on or fmt_date(today())), amount=amount, tax=tax,
-            category_ids={code: self.categories.get_by_code(code).id for code in (DIVIDEND_CATEGORY, TAX_CATEGORY)})
-        return events.lines_for("dividend", values), asset.name
+            holding_rate=self._rate(account, on), cash_rate=self._rate(cash_account, on), **typed)
+        return events.lines_for(event, values), asset.name
 
     def _holding_lines(self, account: Account, asset: FinancialAsset, quantity, total_cost, on=None):
         self._same_currency(asset, account)

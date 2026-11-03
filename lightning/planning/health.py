@@ -194,8 +194,9 @@ def band_of(value: Decimal | None, good: Decimal | None, alert: Decimal | None, 
 
 
 class HealthService:
-    def __init__(self, planning, position, budgets, settings: SettingsStore | None = None):
+    def __init__(self, planning, position, budgets, schedules, settings: SettingsStore | None = None):
         self.planning = planning
+        self.schedules = schedules
         self.position = position
         self.budgets = budgets
         self.reporting = position.reporting
@@ -214,7 +215,7 @@ class HealthService:
     def at(self, day: date) -> Health:
         position = self.position.at(day, match_payments=False)
         owe = position.what_you_owe
-        income = self.budgets.income_average(day.strftime("%Y-%m")).amount
+        income = self.budgets.income_average(day.strftime("%Y-%m"), schedule=self.schedules.view()).amount
         loans, bills = self.loans_a_month(day), self.bills_a_month(day)
         return Health(
             debt_to_net_worth=Ratio("debt_to_net_worth", owe, position.net_worth),
@@ -303,10 +304,10 @@ class HealthService:
     def plan_check(self, month: str) -> PlanCheck:
         """The month's plan against the Savings rate limit and Saving for goals. The budget, Needs you
         and Financial health all read this one check."""
-        planned = self.budgets.plan_summary(month)["planned"] if self.budgets.has_plan(month) else None
-        goals = sum((row["amount"] for row in self.budgets.reserve_goal_needs(month)), ZERO)
-        fund = emergency_fund(self.reserves, self.budgets, month)
-        return PlanCheck(month, self.budgets.income_average(month).amount, planned,
+        planned = self.budgets.plan_summary(month, schedule=self.schedules.view())["planned"] if self.budgets.has_plan(month, schedule=self.schedules.view()) else None
+        goals = sum((row["amount"] for row in self.schedules.view().goal_needs(month)), ZERO)
+        fund = emergency_fund(self.reserves, self.budgets, month, self.schedules.view())
+        return PlanCheck(month, self.budgets.income_average(month, schedule=self.schedules.view()).amount, planned,
                          self.limit_values()["savings_rate"], goals, fund.top_up)
 
     def commitments_note(self, kind: str, day: date | None = None) -> str:
@@ -361,7 +362,7 @@ class HealthService:
         left = (check.plan_saves if check.plan_saves is not None
                 else check.income - self.bills_a_month(start) - self.loans_a_month(start))
         late = []
-        for goal in sorted(self.budgets.reserve_goal_needs(month), key=lambda row: row["due_date"]):
+        for goal in sorted(self.schedules.view().goal_needs(month), key=lambda row: row["due_date"]):
             share = max(min(goal["amount"], left), ZERO)
             left -= share
             if share >= goal["amount"]:
@@ -380,7 +381,7 @@ class HealthService:
         the average yet): what planning with it would give, and the savings target that keeps today's plan and saves the difference. None when the
         average is set by hand, already is the recurring income, or the offer was declined at this amount."""
         month = month or month_of(today())
-        average = self.budgets.income_average(month)
+        average = self.budgets.income_average(month, schedule=self.schedules.view())
         recurring = self.planning.income_a_month(regular_only=True)  # a yearly bonus is not a raise
         if average.manual or average.scheduled or not average.amount or recurring is None:
             return None
@@ -419,7 +420,7 @@ class HealthService:
         limit = self.limit_values()["savings_rate"]
         if flow.savings_rate is None or not flow.inflows or limit is None or flow.savings_rate >= limit:
             return None
-        usual = self.budgets.income_average(month_of(end)).amount
+        usual = self.budgets.income_average(month_of(end), schedule=self.schedules.view()).amount
         if usual and flow.inflows < usual / 2:
             return None
         return {"month": month_of(end), "rate": flow.savings_rate, "limit": limit,
@@ -452,7 +453,7 @@ class HealthService:
         rows = (self.reserves.list_active() if day == today()
                 else self.position.at(day, match_payments=False).reserve_rows or ())
         reserve = next((row for row in rows if row["kind"] == "EMERGENCY"), None)
-        return self.budgets.emergency_fund(month_of(day), reserve["effective_allocated"] if reserve else None)
+        return self.budgets.emergency_fund(month_of(day), reserve["effective_allocated"] if reserve else None, schedule=self.schedules.view())
 
     def cash_months(self, day: date, fund=None) -> Decimal | None:
         """Months of the fund's own average (income or spending) that the cash you own would cover:
@@ -473,7 +474,7 @@ class HealthService:
         savings_month = month_of(savings_end)
         savings_start, _ = parse_month(savings_month)
         savings = self.reporting.cash_flow(savings_start, savings_end)
-        income_average = self.budgets.income_average(month_of(day))
+        income_average = self.budgets.income_average(month_of(day), schedule=self.schedules.view())
         check = self.plan_check(month_of(day))
         limits, alerts = self.limit_values(), self.alert_values()
 

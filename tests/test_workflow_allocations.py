@@ -110,7 +110,7 @@ def test_funding_uses_owned_cash_not_expected_income_and_apply_undo(c):
     account = _cash(c, "2000")
     food = c.categories.get_by_code("EXP.PERSONAL.FOOD")
     salary = c.categories.get_by_code("EXP.WORK.SALARY")
-    c.budgets.set_budget(food.id, "2026-12", "1000")
+    c.budgets.set_budget(food.id, "2026-12", "1000", schedule=c.schedules.view())
     c.planning.create(kind="INCOME", name="Expected salary", amount="50000", frequency="ONCE",
                      start_date="2026-12-31", account_id=account.id, category_id=salary.id)
     c.settings.set("cash_funding_enabled", "1")
@@ -133,7 +133,7 @@ def test_funding_uses_owned_cash_not_expected_income_and_apply_undo(c):
 def test_funding_rejects_overassignment_and_stale_preview(c):
     account = _cash(c, "1000")
     food = c.categories.get_by_code("EXP.PERSONAL.FOOD")
-    c.budgets.set_budget(food.id, "2026-12", "2000")
+    c.budgets.set_budget(food.id, "2026-12", "2000", schedule=c.schedules.view())
     c.settings.set("cash_funding_enabled", "1")
     preview = c.funding.preview()
     with pytest.raises(ValidationError):

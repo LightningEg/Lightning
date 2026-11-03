@@ -166,13 +166,11 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
                     tax -= amount
                 elif row["category_code"] == "EXP.INVEST.FEES" and row["account_id"] in brokerage_ids:
                     fees -= amount  # the broker's own charge
-                elif (row["type"] == "DIV" or row["category_code"] in
+                elif ((row["type"] == "DIV" and row["effect"] != "INTERNAL") or row["category_code"] in
                       ("EXP.INVEST.DIVIDEND", "EXP.INVEST.INTEREST")):
                     dividends += amount
             continue
-        if row["type"] == "DIV":
-            # Missing legacy attribution is explicitly unresolved; cash remains in portfolio cash.
-            continue
+        # (A reinvested dividend's units line is a purchase like any other; its income is counted above.)
         b = books[key]
         if q > ZERO:
             b["units"] += q
@@ -287,12 +285,12 @@ def _realized_between(rows, start, end):
     books = defaultdict(lambda: {"units": ZERO, "cost": ZERO})
     realized = ZERO
     for row in rows:
-        if row["type"] == "DIV" or row["date"] > end:
+        if row["date"] > end:
             continue
         if row["asset_id"] is None:
             continue
         # Caller rows include cash; only sale/buy/opening investment lines have signed units and no cash asset.
-        if row["type"] not in ("BUY", "SEL", "OPN"):
+        if row["type"] not in ("BUY", "SEL", "OPN", "DIV"):
             continue
         key=(row["owner_id"],row["account_id"],row["asset_id"]); b=books[key]
         q,amount=from_e6(row["quantity_e6"]),from_e6(row["amount_base_e6"])

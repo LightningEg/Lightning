@@ -144,7 +144,7 @@ def test_the_needs_sentence_in_a_real_item_is_read(tmp_path):
     milestones, _ = module.load()
     five_a = next(i for m in milestones for i in m["items"] if i["code"] == "5A")
     needs = {s["code"]: s["needs"] for s in five_a["steps"]}
-    assert needs["5A2"] == ["5A1"] and needs["5A4"] == ["5A1", "5A2"]  # 5A1 is built: its heading is gone
+    assert needs["5A4"] == ["5A1", "5A2"]  # 5A1-5A3 are built: their headings are gone
 
 
 def test_a_step_issue_does_not_repeat_the_item_plan_or_its_sibling_steps(tmp_path, monkeypatch):

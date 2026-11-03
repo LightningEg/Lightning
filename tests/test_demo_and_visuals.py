@@ -149,8 +149,8 @@ def test_the_demo_household_adds_up(demo):
     assert position.loans_still_to_pay == D(52500)  # 21 car-loan payments left
     assert position.net_worth == position.what_you_own - position.what_you_owe
     assert position.free_cash == position.cash_you_own - position.kept_apart - position.reserves - position.bills_due
-    assert c.budgets.income_average("2026-09").amount == D(45000)
-    assert c.budgets.has_plan("2026-09")
+    assert c.budgets.income_average("2026-09", schedule=c.schedules.view()).amount == D(45000)
+    assert c.budgets.has_plan("2026-09", schedule=c.schedules.view())
     assert position.reserves == D(20000)  # the emergency fund
     # Every recurring payment that went out is matched to its transaction: nothing is due.
     assert position.bills_due == 0
@@ -289,7 +289,7 @@ def test_the_spending_trend_follows_a_chosen_category(demo):
     assert all(v > 0 for v in personal["series"][0]["values"])
     assert personal["plan"] is None  # the dashed plan line is the whole month's plan, so only unfiltered
     everything = visuals.spending_trend(c, date(2026, 9, 30))
-    assert everything["plan"]["value"] == c.budgets.month_view("2026-09").available
+    assert everything["plan"]["value"] == c.budgets.month_view("2026-09", schedule=c.schedules.view()).available
 
 
 def test_a_month_is_only_over_plan_against_its_own_plan(demo):
@@ -297,7 +297,7 @@ def test_a_month_is_only_over_plan_against_its_own_plan(demo):
     c, _ = demo
     # The demo plans September only: July and August can't be "over plan", whatever they spent.
     t = visuals.spending_trend(c, date(2026, 9, 30))
-    assert not c.budgets.has_plan("2026-07") and not c.budgets.has_plan("2026-08")
+    assert not c.budgets.has_plan("2026-07", schedule=c.schedules.view()) and not c.budgets.has_plan("2026-08", schedule=c.schedules.view())
     over = {d["label"]: d["over"] for d in t["series"][0]["dots"]}
     assert over["2026-07"] is False and over["2026-08"] is False
     assert over["2026-09"] is (t["series"][0]["values"][-1] > t["plan"]["value"])

@@ -27,7 +27,7 @@ def test_salary_setup_is_a_plan_preserves_payday_and_does_not_post_cash(c, setup
     item = c.planning.items((PlanKind.INCOME,))[0]
     dates = [p.due_date for p in c.planning.payments(item, '2026-03-31') if p.outstanding]
     assert dates == ['2026-02-28', '2026-03-31']
-    assert c.budgets.income_average('2026-02').amount == D('30000')
+    assert c.budgets.income_average('2026-02', schedule=c.schedules.view()).amount == D('30000')
     assert c.forecaster.forecast(date(2026, 2, 14)).next_income_date == '2026-02-28'
     assert c.reporting.account_balance(accounts['cib'].id, '2026-02-14') == before
     assert client.post('/setup/salary', data={'account_id': accounts['cib'].id, 'amount': '30000', 'payday': '31'}).status_code == 400
