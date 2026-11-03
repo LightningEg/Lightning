@@ -14,6 +14,18 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    'Record repayments as Money in using the original expense category. They reduce spending in that category; linking a receipt only tracks what is still owed.': 'سجّل الفلوس اللي رجعت كفلوس داخلة في نفس تصنيف المصروف. ده بيقلّل الصرف في التصنيف؛ ربط الإيصال بس بيتابع المبلغ اللي لسه ليك.',
+    'Possible reimbursement pairs': 'مصروفات وإيصالات ممكن يتربطوا',
+    'Same category and currency, within 90 days. Review the expense and receipt before linking.': 'نفس التصنيف والعملة، في خلال 90 يوم. راجع المصروف والإيصال قبل الربط.',
+    'Several possible matches': 'في أكتر من تطابق ممكن',
+    'Confirm pair': 'أكّد الربط',
+    'Review pair': 'راجع الربط',
+    'Record repayment in the same category': 'سجّل الفلوس اللي رجعت في نفس التصنيف',
+    'Use this only if the repayment is not recorded yet. Otherwise link its existing receipt.': 'استخدم ده لو الفلوس اللي رجعت لسه متسجّلتش. لو متسجّلة، اربط الإيصال الموجود.',
+    'This suggested pair changed. Review the receipts again.': 'الربط المقترح اتغيّر. راجع الإيصالات تاني.',
+    'Reimbursement receipts to pair': 'إيصالات مستردة للمراجعة والربط',
+    '{count} possible pairs in the original expense category. Review before linking.': '{count} روابط ممكنة في تصنيف المصروف الأصلي. راجعها قبل الربط.',
+
     'Choose an amount tolerance from 0 to 50 percent.': 'اختار نسبة فرق للمبلغ من صفر لـ 50%.',
     'Restore suggestion': 'رجّع الاقتراح',
     'Suggestion restored.': 'الاقتراح رجع.',

@@ -148,3 +148,19 @@ Transaction entry and edit workflows now commit their form retry markers and aut
 ## Follow-up · 2026-11-03: recurring detection (NF-7L3)
 
 Fixed monthly subscriptions can now be suggested across spending categories, variable utilities use observed matching tolerances, Track starts after the latest recorded payment, and dismissed suggestions can be restored on PC and phone. The detector excludes frequent/irregular purchases, already tracked counterparties and investment income, keeps foreign amounts in their account currency, and never posts money. Regression coverage: [recurring detection tests](../../tests/test_recurring_detection.py).
+
+
+## Follow-up · 2026-11-03: reimbursement pairing and same-category repayments
+
+Needs you and Reimbursements suggest receipt pairs in the original expense category. New pairs prefill a claim; existing claims can confirm partial receipts, with ambiguity and changed suggestions kept for review. A shortcut records actual money back in the same category, so spending falls without inflating income; linking never reposts cash. [Regression tests](../../tests/test_reimbursement_pairing.py) cover cash/report invariants, replay, duplicates, undo, ownership, currency and PC/phone confirmation. NF-7L4's import settlement feedback and certificate return navigation remain open.
+
+Dummy-data number check, 2026-09-01 through 2026-10-06:
+
+| Invariant | Expected | Found | Result |
+| --- | --- | --- | --- |
+| Record 600 back against a 1,200 expense in its original category | Money in 0; net spending 600 | Money in 0; net spending 600 | Pass |
+| Confirm the existing receipt link | Cash and ledger rows unchanged | Cash and ledger rows unchanged | Pass |
+| Partial reimbursement claim | Received 600; outstanding 600 | Received 600; outstanding 600 | Pass |
+| Duplicate receipt entry or pair confirmation | One cash receipt and one link | One cash receipt and one link | Pass |
+
+Exercised Money in entry, suggested-pair claim creation, receipt confirmation, unlink/undo, stale receipt edits and two-device command replay. The same-category flow tests also cover Arabic and PC/phone templates. Native packaging was not exercised.

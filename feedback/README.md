@@ -24,6 +24,8 @@ tasks live in the [app issue index](https://github.com/LightningEg/Lightning/blo
 
 ## Records
 
+- [Same-category repayments](2026-11-03-same-category-repayments.md) · 2026-11-03
+
 - [Automatic PC and phone pairing](2026-10-29-automatic-pairing.md) · 2026-10-29
 
 - [Settings order and theme unlock](2026-10-29-settings-and-theme-unlock.md) · 2026-10-29

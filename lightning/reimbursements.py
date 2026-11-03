@@ -6,9 +6,9 @@ All amounts are stored in the profile's base currency using each ledger line's r
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 
-from lightning.core.dates import now_iso
+from lightning.core.dates import now_iso, today
 from lightning.core.errors import ConflictError, NotFoundError, ValidationError
 from lightning.core.money import check_places, from_e6, to_decimal, to_e6
 from lightning.core.refs import parse_row_id
@@ -121,7 +121,7 @@ class ReimbursementService:
         else:
             scope, params, order = f"t.id IN ({','.join('?' for _ in transaction_ids)})", tuple(transaction_ids), ""
         transactions = {int(row["id"]): row for row in self.db.all(
-            "SELECT t.id,t.ref,t.type,t.date,t.status,t.description,t.counterparty "
+            "SELECT t.id,t.ref,t.type,t.date,t.status,t.description,t.counterparty,t.counterparty_id "
             f"FROM transactions t WHERE {scope}{order}", params)}
         amounts = {int(row["tid"]): int(row["amount_e6"] or 0) for row in self.db.all(
             "SELECT le.transaction_id tid,SUM(ABS(le.amount_base_e6)) amount_e6 FROM transactions t "
@@ -223,6 +223,77 @@ class ReimbursementService:
                 info["amount"] = from_e6(info["amount_e6"])
                 receipts.append(info)
         return receipts
+
+    def suggested_pairs(self, as_of: date | None = None, *, claims: list[dict] | None = None) -> list[dict]:
+        """Reviewable same-category pairs, never automatic settlements or ledger changes.
+
+        An unclaimed expense needs an exact repayment. An explicit claim may accept
+        a partial receipt. Payer identity, when known, must agree. Several possible
+        expenses or receipts remain choices for the person, never a guessed match.
+        """
+        on = as_of or today()
+        claims = self.list_claims() if claims is None else claims
+        # Only one owned cash line: split categories/ownership need manual review.
+        facts = {int(row["transaction_id"]): dict(row) for row in self.db.all(
+            "SELECT le.transaction_id,le.category_id,c.name category_name,"
+            "ac.currency FROM ledger_entries le JOIN financial_assets a ON a.id=le.asset_id "
+            "JOIN categories c ON c.id=le.category_id JOIN accounts ac ON ac.id=le.account_id "
+            "WHERE a.is_cash=1 AND le.owner_id IS NULL AND c.movement='OUTFLOW' AND c.is_system=0 "
+            "AND NOT EXISTS (SELECT 1 FROM money_from_others m WHERE m.transaction_id=le.transaction_id) "
+            "AND (SELECT COUNT(*) FROM ledger_entries x WHERE x.transaction_id=le.transaction_id)=1")}
+        settled = {int(row["transaction_id"]) for row in self.db.all(
+            "SELECT transaction_id FROM planned_payments WHERE transaction_id IS NOT NULL "
+            "UNION SELECT transaction_id FROM loan_extra_payments WHERE transaction_id IS NOT NULL")}
+        by_category: dict[int, list[dict]] = {}
+        by_amount: dict[tuple[int, int], list[dict]] = {}
+        for receipt in self.available_receipts():
+            tid = receipt["transaction_id"]
+            fact = facts.get(tid)
+            if fact and tid not in settled and receipt["transaction"]["date"] <= on.isoformat():
+                by_category.setdefault(fact["category_id"], []).append(receipt)
+                by_amount.setdefault((fact["category_id"], receipt["amount_e6"]), []).append(receipt)
+        expenses = [{"expense_id": info["transaction_id"], "expense": info["transaction"],
+                     "outstanding": info["max_amount"], "id": None, "payer_id": None, "issues": []}
+                    for info in self.eligible_expenses()]
+        expenses.extend(claim for claim in claims if claim["outstanding"] > 0 and not claim["issues"])
+        pairs = []
+        for claim in expenses:
+            tid = claim["expense_id"]
+            fact = facts.get(tid)
+            if not fact or not claim["expense"]:
+                continue
+            first = date.fromisoformat(claim["expense"]["date"])
+            last = first + timedelta(days=90)
+            candidates = (by_category.get(fact["category_id"], []) if claim["id"] is not None else
+                          by_amount.get((fact["category_id"], to_e6(claim["outstanding"])), []))
+            for receipt in candidates:
+                txn = receipt["transaction"]
+                if not first.isoformat() <= txn["date"] <= last.isoformat():
+                    continue
+                if facts[receipt["transaction_id"]]["currency"] != fact["currency"]:
+                    continue
+                if claim["payer_id"] is not None and claim["payer_id"] != txn["counterparty_id"]:
+                    continue
+                amount = receipt["amount"]
+                if amount > claim["outstanding"] or (claim["id"] is None and amount != claim["outstanding"]):
+                    continue
+                try:
+                    self._money(amount, "amount")
+                except ValidationError:
+                    continue  # a converted value must still fit the claim's profile-currency precision
+                pairs.append({"claim_id": claim["id"], "expense_id": tid, "expense": claim["expense"],
+                              "receipt_id": receipt["transaction_id"], "receipt": txn, "amount": amount,
+                              "category_id": fact["category_id"], "category_name": fact["category_name"],
+                              "payer_id": txn["counterparty_id"]})
+        expense_counts: dict[int, int] = {}
+        receipt_counts: dict[int, int] = {}
+        for pair in pairs:
+            expense_counts[pair["expense_id"]] = expense_counts.get(pair["expense_id"], 0) + 1
+            receipt_counts[pair["receipt_id"]] = receipt_counts.get(pair["receipt_id"], 0) + 1
+        for pair in pairs:
+            pair["ambiguous"] = expense_counts[pair["expense_id"]] > 1 or receipt_counts[pair["receipt_id"]] > 1
+        return sorted(pairs, key=lambda pair: (pair["ambiguous"], pair["receipt"]["date"], pair["expense_id"],
+                                               pair["receipt_id"]))
 
     def _money(self, value, field):
         """Whole minor units of the profile currency, as every other money field (audit 2026-10-26)."""

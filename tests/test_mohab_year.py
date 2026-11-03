@@ -599,10 +599,9 @@ def _the_rest_of_lightning(o: Mohab) -> None:
     o.on("2027-09-30")
     b = o.b
     claims = b.open("/reimbursements")
-    o.notes["claim_made"] = b.submit({"transaction_id": Choose("2026-12-10 · Uber"), "expected": "1,200",
-                                      "payer_id": Choose("ACME Egypt")}, button="Create claim")
-    o.notes["claim_linked"] = b.submit({"receipt_id": Choose("2026-12-22 · ACME Egypt"), "amount": "1,200"},
-                                       button="Link receipt")
+    o.notes["repayment_review"] = b.click("Review pair")
+    o.notes["claim_made"] = b.submit(button="Create claim")
+    o.notes["claim_linked"] = b.submit(button="Confirm pair")
     o.notes["claims_page"] = claims
 
     b.go("Cash wallet")
@@ -1676,6 +1675,7 @@ def test_zakat_is_an_estimate_from_his_position_and_what_he_gave_lowers_what_is_
 
 
 def test_a_reimbursement_claim_is_made_and_its_receipt_linked(mohab):
+    assert mohab.notes["repayment_review"].shows("Work › Transportation")
     assert mohab.notes["claim_made"].shows("Created reimbursement claim")
     assert mohab.notes["claim_linked"].shows("Linked the receipt")
     assert not mohab.notes["claim_linked"].shows("No receipts linked")

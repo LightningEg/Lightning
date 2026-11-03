@@ -24,7 +24,7 @@ Refill (3H RS-2, `reserves.links_for_reserve`); a category over plan this month 
 bands (emergency fund 0.8 months is flagged on Health but not in the list).
 
 ## 7L4 Pair what belongs together · M · #226
-Reimbursements: the sample's Uber 1,200 (06-08) and ACME's 1,200 back (06-21) are never paired; suggest the pair. Import: after posting, say which bills
+Reimbursement pairing and the same-category repayment flow are implemented (2026-11-03; [regression coverage](../../tests/test_reimbursement_pairing.py)). Remaining: Import: after posting, say which bills
 the import settled ("2 posted, 1 linked · settled Landlord and WE Internet"). Certificate Match all lands on the long certificate page; return to Needs you.
 
 ## Fix
