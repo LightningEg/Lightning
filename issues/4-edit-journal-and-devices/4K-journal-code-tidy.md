@@ -17,7 +17,7 @@ Audit 9 B8: `../../reports/2026-10-28-loose-ends-and-linking/report.md`. No beha
 
 ## 4K4 One pairing client · M
 
-`runtime/journal_enrollment.NewJournalReplica` and `runtime/journal_pairing.NearbyPairing` repeat find, join, resume, compare, prove, finish and cancel. Not merged in 4K: they differ in behaviour, not only in storage (an enrollment slot file against `journal_local`). On "waiting", `resume()` asks the home for status in enrollment but leaves it to `finish()` in nearby pairing; `compare()` checks the offer before or after the failed flag; cancel and finish have different preconditions (an encrypted copy being installed; membership accepted in place). One driver needs those choices made first, with the owner or in 4A, then a store interface both use.
+Done 2026-11-02. Owner decided to keep the stricter behaviour of each: `resume()` asks the home for status while proving or waiting; `compare()` checks the offer before the failed flag; cancel and finish require a started pairing (cancel also refuses once the encrypted copy is being installed). `runtime/journal_pairing_driver.JoiningDriver` now holds resume, compare, prove and cancel once; `NearbyPairing` and `NewJournalReplica` only supply where the state is kept (`_load_join`, `_save_join`, `_clear_join`, `_installing`). Pinned by `tests/test_one_pairing_driver.py`. Native device pairing acceptance stays with 4A.
 
 ## Note
 

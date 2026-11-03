@@ -153,7 +153,7 @@ def test_recovery_response_requires_fresh_status_nonce(devices):
                 return response
             return exchange
         pc.client_factory = replay
-        state = pc._client_state()
+        state = pc._started()
         from lightning.sync.journal import pairing_client
         await pairing_client.status(state,pc.device.identity,pc._exchange(state),pc._save_client)
         with pytest.raises(JournalError,match="challenge"):
@@ -167,7 +167,7 @@ def test_cached_approval_rejects_revocation_and_uses_latest_membership(devices,t
         pc.compare(pc.screen()["pending"])
         await pc.prove(PASSWORD)
         hs.confirm(hs.screen()["digits"])
-        state = pc._client_state()
+        state = pc._started()
         other = load_or_create(tmp_path/'third','Third device')
         members = dict(hs.membership.state()["members"])
         members[other.device_id] = dict(key=other.public_key,incarnation=str(uuid4()))
@@ -187,7 +187,7 @@ def test_expired_receipt_blocks_status_and_enrollment(devices):
         pc.compare(pc.screen()["pending"])
         await pc.prove(PASSWORD)
         hs.confirm(hs.screen()["digits"])
-        identifier = pc._client_state()["request"]
+        identifier = pc._started()["request"]
         saved = hs._value('pairing_result:'+identifier)
         saved['expires'] = int(time.time())-1
         hs._save('pairing_result:'+identifier,saved)
@@ -269,7 +269,7 @@ def test_unapproved_password_guesses_never_exhaust_owner_cooldown(devices):
         hs, _, pc = await started(devices)
         pc.compare(pc.screen()['pending'])
         from lightning.sync.journal.pairing import prove_pairing
-        state = pc._client_state()
+        state = pc._started()
         for _ in range(3):
             wire = prove_pairing(state['candidate']['offer'].encode(),state['wire'].encode(),
                                 'hostile wrong password',pc.device.identity,home_key=state['home_key'])
@@ -390,7 +390,7 @@ def test_cancel_can_clear_revoked_identity_after_receipt_expiry(devices):
         pc.compare(pc.screen()['pending'])
         await pc.prove(PASSWORD)
         hs.confirm(hs.screen()['digits'])
-        identifier = pc._client_state()['request']
+        identifier = pc._started()['request']
         saved = hs._value('pairing_result:'+identifier)
         saved['expires'] = int(time.time())-1
         hs._save('pairing_result:'+identifier,saved)
@@ -406,7 +406,7 @@ def test_cancel_can_clear_revoked_identity_after_receipt_expiry(devices):
 def test_malformed_extended_cancel_is_controlled_refusal(devices,field,value):
     async def run():
         hs, _, pc = await started(devices)
-        state = pc._client_state()
+        state = pc._started()
         offer = unpack(state['candidate']['offer'].encode())['body']
         body = dict(type='journal-pairing-cancel',offer=digest(offer),request=state['request'],
                     device=pc.device.identity.device_id,original=state['wire'],offer_wire=state['candidate']['offer'])
