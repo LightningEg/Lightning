@@ -143,7 +143,6 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
 | **NF-5A** | [One table of investment events](5-investments/5A-one-table-of-investment-events.md) | new feature | Own | L | ready |
-| NF-5A2 | ↳ Thin wrappers for buy, sell and dividend | | | M | |
 | NF-5A3 | ↳ The entry form reads the spec | | | M | |
 | NF-5A4 | ↳ Reinvested dividend and return of capital | | | L | |
 | **NF-5B** | [Cost per purchase (lots)](5-investments/5B-cost-per-purchase-lots.md) | new feature | Own | L | blocked on 5A |

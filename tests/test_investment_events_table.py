@@ -61,3 +61,21 @@ def test_validator_refuses_bad_numbers(event, kw, field):
 def test_unknown_event_is_refused():
     with pytest.raises(ValidationError):
         lines_for("split", values())
+
+
+def test_service_wrappers_go_through_the_one_record_path(c, setup):
+    """buy, sell and dividend are wrappers: record(event, ...) posts the same documents (NF-5A2)."""
+    accounts, _ = setup
+    thndr = accounts["thndr"]
+    c.transactions.record_transfer("2026-09-02", accounts["cib"].id, thndr.id, "30000")
+    comi = c.assets.create_investment("Commercial International Bank", "STOCK", "COMI")
+    bought = c.investments.record("buy", "2026-09-03", thndr.id, comi.id, quantity="10", price="50", fees="5")
+    assert bought.type == DocType.BUY and sorted(ln.quantity for ln in bought.lines) == [D("-505"), D("10")]
+    sold = c.investments.record("sell", "2026-09-04", thndr.id, comi.id, quantity="2", price="60")
+    assert sold.type == DocType.SEL
+    paid = c.investments.record("dividend", "2026-09-05", thndr.id, comi.id, amount="100", tax="10")
+    assert paid.type == DocType.DIV and sorted(ln.quantity for ln in paid.lines) == [D("-10"), D("100")]
+    with pytest.raises(ValidationError) as error:
+        c.investments.record("nonsense", "2026-09-05", thndr.id, comi.id)
+    assert error.value.field == "event"
+    assert not hasattr(c.investments, "_trade_lines") and not hasattr(c.investments, "_dividend_lines")
