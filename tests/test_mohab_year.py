@@ -1082,7 +1082,7 @@ def test_financial_health_says_the_early_paid_january_in_words(mohab):
 def test_needs_you_offers_the_raise_to_the_plan(mohab):
     # Recurring says 50,000 and his average still 45,000: plan with it, save the difference, or wait.
     offer = mohab.answers["income_up"]
-    assert route(mohab, "income_up") == ["/", "/budget/raise"]
+    assert route(mohab, "income_up") == ["/", "/needs-you/budget", "/budget/raise"]
     assert offer.shows("Recurring expects 50,000 EGP a month; your average is 45,000",
                        "What should the plan do with 5,000 EGP more a month?",
                        "Most you can plan becomes 36,313 EGP; your 20% target stays",
