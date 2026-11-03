@@ -5,7 +5,7 @@
 {% block content %}
 {% if not txn %}
 <div class="actions" style="margin-bottom:12px">
-  {% for k, label in [("buy", "Buy"), ("sell", "Sell"), ("dividend", "Dividend"), ("holding", "Holding I already own")] %}
+  {% for k, label in [("buy", "Buy"), ("sell", "Sell"), ("dividend", "Dividend"), ("return_of_capital", "Return of capital"), ("holding", "Holding I already own")] %}
   <a class="btn {{ 'primary' if kind == k }}" href="/investments/new?kind={{ k }}{{ '&account=' ~ values.account_id if values.account_id }}">{{ label|tr(locale) }}</a>
   {% endfor %}
 </div>
@@ -78,6 +78,21 @@
     </div>
   </div>
   <script nonce="{{ request.state.csp_nonce|default('') }}">const basis=document.getElementById('dividend-basis'),label=document.getElementById('dividend-amount-label');function syncDividendBasis(){label.textContent=window.lightningT(basis.value==='per_share'?'Amount per unit ({cur})':'Amount ({cur})',{cur:'{{ base }}'})}basis.addEventListener('change',syncDividendBasis);syncDividendBasis();</script>
+  {% elif spec and spec.capital %}
+  <div class="row">
+    {{ date_field(values, error_field) }}
+    {{ field('amount', 'Amount paid back (' ~ base ~ ')', values, error_field, help='The cash the fund paid you. Your units stay; your cost falls by this amount, and anything beyond your cost counts as a gain.', placeholder='e.g. 800', attrs='inputmode="decimal" required class="money-input"') }}
+  </div>
+  {% if spec.cash_account %}
+  <div class="field {{ 'has-error' if error_field == 'cash_account' }}">
+    <label for="cash_account_id">{{ 'Cash account'|tr(locale) }}</label>
+    <select id="cash_account_id" name="cash_account_id" data-own-picker>
+      <option value="">{{ "The same account (its broker cash)"|tr(locale) }}</option>
+      {% for a in all_accounts %}<option value="{{ a.id }}" {{ 'selected' if values.cash_account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
+    </select>
+    <div class="help">{{ 'Where the money went' }}.</div>
+  </div>
+  {% endif %}
   {% else %}
   <div class="row">
     {{ field('quantity', 'Units', values, error_field, attrs='inputmode="decimal" required') }}
@@ -97,7 +112,7 @@
   </div>
   <div class="field"><label for="notes">{{ 'Notes'|tr(locale) }}</label><textarea id="notes" name="notes" rows="2">{{ values.notes }}</textarea></div>
   <div class="actions">
-    {% if txn %}<span class="muted small">{{ "Changes save automatically."|tr(locale) }}</span><span class="inline-save-status" role="status" aria-live="polite"></span>{% else %}<button class="btn primary">Record {{ kind }}</button>{% endif %}
+    {% if txn %}<span class="muted small">{{ "Changes save automatically."|tr(locale) }}</span><span class="inline-save-status" role="status" aria-live="polite"></span>{% else %}<button class="btn primary">{% if kind == 'return_of_capital' %}{{ 'Record return of capital'|tr(locale) }}{% else %}Record {{ kind }}{% endif %}</button>{% endif %}
     <a class="btn" href="/investments">{{ 'Cancel'|tr(locale) }}</a>
     {% if txn %}<a class="btn" href="/transactions/{{ txn.id }}">{{ "Details &amp; history"|tr(locale) }}</a>{% endif %}
   </div>

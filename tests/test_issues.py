@@ -142,9 +142,9 @@ def test_a_step_waits_until_the_steps_it_needs_are_finished():
 def test_the_needs_sentence_in_a_real_item_is_read(tmp_path):
     module = _tool()
     milestones, _ = module.load()
-    five_a = next(i for m in milestones for i in m["items"] if i["code"] == "5A")
-    needs = {s["code"]: s["needs"] for s in five_a["steps"]}
-    assert needs["5A4"] == ["5A1", "5A2"]  # 5A1-5A3 are built: their headings are gone
+    item = next(i for m in milestones for i in m["items"] if i["code"] == "7D")
+    needs = {s["code"]: s["needs"] for s in item["steps"]}
+    assert needs["7D6"] == ["7D3", "7D5"]  # a step lists the steps it needs; finished steps drop out (NF-5A is done)
 
 
 def test_a_step_issue_does_not_repeat_the_item_plan_or_its_sibling_steps(tmp_path, monkeypatch):

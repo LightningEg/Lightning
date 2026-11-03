@@ -44,9 +44,9 @@ def test_upgrade_recreates_the_five_triggers_with_the_code(monkeypatch, tmp_path
     db = _old_profile(monkeypatch, tmp_path)
     assert CHECKED_MONTH_CODE not in _refusal(db)  # the old message had no code
     db.execute("DELETE FROM reconciled_through")
-    assert migrator.inspect_schema(db).pending == ("0069_checked_month_code",)
+    assert migrator.inspect_schema(db).pending[0] == "0069_checked_month_code"
     migrator.migrate(db)
-    assert migrator.inspect_schema(db).current_version == 69
+    assert migrator.inspect_schema(db).current_version == migrator.BUNDLED_LATEST_VERSION
     names = {row[0] for row in db.all("SELECT name FROM sqlite_master WHERE type='trigger' AND name LIKE 'checked_%'")}
     assert names == set(TRIGGERS)
     for name in TRIGGERS:

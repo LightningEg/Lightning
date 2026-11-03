@@ -25,7 +25,7 @@ from lightning.transactions.domain import Transaction
 from lightning.transactions.service import TransactionService
 
 from . import events
-from .domain import DEFAULT_SALE_FACTOR, Portfolio, Position
+from .domain import DEFAULT_SALE_FACTOR, Portfolio, Position, cost_returned
 from .xirr import xirr
 from .returns import display_return
 
@@ -267,6 +267,14 @@ class InvestmentService:
         return self.record("dividend", date, account_id, asset_id, amount=amount, tax=tax, notes=notes,
                            owner_id=owner_id)
 
+    def return_of_capital(self, date: str, account_id: int, asset_id: int, amount,
+                          cash_account_id: int | None = None, notes: str = "",
+                          owner_id: int | None = None) -> Transaction:
+        """A fund pays part of what you paid in back: the cash arrives (internal, not income), no units change and the
+        holding's cost falls by the amount. What is paid back beyond the cost left is a realized gain (NF-5A4)."""
+        return self.record("return_of_capital", date, account_id, asset_id, amount=amount,
+                           cash_account_id=cash_account_id, notes=notes, owner_id=owner_id)
+
     def record(self, event: str, date: str, account_id, asset_id, *, owner_id: int | None = None, notes: str = "",
                cash_account_id=None, **typed) -> Transaction:
         """Post one investment event named in ``events.EVENTS``: the one recording path behind buy, sell and
@@ -397,6 +405,13 @@ class InvestmentService:
         date = values.get("date", current.date)
         notes = values.get("notes", current.notes)
         owner_id = values.get("owner_id")
+        if kind == DocType.SEL and self._is_capital_return(current):
+            self._require_capital_held(values["account_id"], values["asset_id"], date, owner_id)
+            lines, counterparty = self._event_lines("return_of_capital", values["account_id"], values["asset_id"],
+                                                    values.get("cash_account_id"), on=date, amount=values["amount"])
+            if owner_id:
+                lines = [replace(line, owner_id=int(owner_id)) for line in lines]
+            return self.transactions.repost(txn_id, date, lines, "", counterparty, notes)
         if kind in (DocType.BUY, DocType.SEL):
             lines, counterparty = self._event_lines(
                 "buy" if kind == DocType.BUY else "sell", values["account_id"], values["asset_id"],
@@ -450,7 +465,10 @@ class InvestmentService:
         values = {"kind": {DocType.BUY: "buy", DocType.SEL: "sell", DocType.DIV: "dividend",
                            DocType.OPN: "holding"}.get(t.type, ""), "date": t.date, "notes": t.notes,
                   "owner_id": next((line.owner_id for line in t.lines if line.owner_id is not None), None)}
-        if t.type in (DocType.BUY, DocType.SEL) and units and cash:
+        if self._is_capital_return(t) and cash:
+            values.update(kind="return_of_capital", account_id=units[0].account_id, asset_id=units[0].asset_id,
+                          amount=cash[0].quantity, cash_account_id=cash[0].account_id)
+        elif t.type in (DocType.BUY, DocType.SEL) and units and cash:
             u, c = units[0], cash[0]
             gross = _money(abs(u.quantity) * u.unit_price)
             fees = abs(u.amount) - gross if t.type == DocType.BUY else gross - abs(u.amount)
@@ -519,6 +537,11 @@ class InvestmentService:
                 s["cost"] += amount
                 s["invested"] += amount
                 s["qty"] += qty
+            elif qty == 0:
+                if line["effect"] == "INTERNAL" and amount < 0:  # a return of capital: cost falls, the excess is a gain
+                    removed, gain = cost_returned(s["cost"], -amount)
+                    s["cost"] -= removed
+                    s["realized"] += gain
             else:
                 average = s["cost"] / s["qty"] if s["qty"] else ZERO
                 removed = average * -qty
@@ -618,7 +641,10 @@ class InvestmentService:
                     f"{asset.currency} in first.", "instrument") from error
 
     def _trade_in(self, event, date, account_id, asset_id, cash_account_id, notes, owner_id, typed):
-        kind = events.EVENTS[event].doc_type
+        spec = events.EVENTS[event]
+        kind = spec.doc_type
+        if spec.lowers_cost:
+            self._require_capital_held(account_id, asset_id, date, owner_id)
         lines, counterparty = self._event_lines(event, account_id, asset_id, cash_account_id, on=date, **typed)
         if owner_id is not None:
             party = self.db.one("SELECT id FROM counterparties WHERE id=? AND active=1", (owner_id,))
@@ -627,11 +653,20 @@ class InvestmentService:
             lines = [replace(line, owner_id=owner_id) for line in lines]
         self._require_broker_cash(kind, account_id, lines)
         txn = self.transactions.post(kind, date, lines, "", counterparty, notes)
-        if kind == DocType.SEL and self.reevaluations:
+        if kind == DocType.SEL and self.reevaluations and not spec.lowers_cost:  # no units were sold
             unit_line = next(line for line in lines if not self.assets.get_asset(line.asset_id).is_cash)
             self.reevaluations.process_sale(txn.date, account_id, asset_id, unit_line.unit_price,
                                             owner_id=owner_id)
         return txn
+
+    def _require_capital_held(self, account_id, asset_id, date, owner_id) -> None:
+        """A return of capital belongs to a fund held in a brokerage by that owner on that day."""
+        account = self.accounts.require_usable(account_id)
+        if account.account_type != AccountType.BROKERAGE:
+            raise ValidationError("A return of capital can only be recorded in a brokerage account.", "account")
+        if self.holding_for_owner(account_id, asset_id, date, owner_id) <= ZERO:
+            raise ValidationError("A return of capital requires units held by the selected owner on that date.",
+                                  "instrument")
 
     def _require_broker_cash(self, kind, account_id, lines) -> None:
         holding_account = self.accounts.get(int(account_id))
@@ -740,6 +775,12 @@ class InvestmentService:
         if units <= ZERO:
             raise ValidationError(f"Enter how many {asset.unit}s.", "quantity")
         return units
+
+    def _is_capital_return(self, t: Transaction) -> bool:
+        """A sell document whose holding line has no units: the fund paid part of the cost back."""
+        return t.type == DocType.SEL and any(
+            ln.quantity == ZERO and ln.effect == Effect.INTERNAL and not self.assets.get_asset(ln.asset_id).is_cash
+            for ln in t.lines)
 
     def _is_holding_opening(self, t: Transaction) -> bool:
         return any(not self.assets.get_asset(ln.asset_id).is_cash for ln in t.lines)

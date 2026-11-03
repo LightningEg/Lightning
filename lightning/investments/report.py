@@ -6,6 +6,8 @@ from lightning.accounts.domain import INVESTMENT_ACCOUNT_TYPES, AccountType
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, from_e6
 
+from .domain import cost_returned
+
 
 def investment_period(db, accounts, assets, reporting, start: str, end: str):
     """The investment report for a period, with its Result.
@@ -176,6 +178,12 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
             b["units"] += q
             b["cost"] += amount
             b["cost_native"] += from_e6(row["amount_e6"])
+        elif q == ZERO:
+            if row["effect"] == "INTERNAL" and amount < ZERO:  # a return of capital: cost falls, the excess is a gain
+                removed, gain = cost_returned(b["cost"], -amount)
+                b["cost_native"] -= b["cost_native"] * removed / b["cost"] if b["cost"] > ZERO else ZERO
+                b["cost"] -= removed
+                b["realized"] += gain
         elif q < ZERO:
             removed = b["cost"] / b["units"] * -q if b["units"] else ZERO
             removed_native = b["cost_native"] / b["units"] * -q if b["units"] else ZERO
@@ -295,6 +303,10 @@ def _realized_between(rows, start, end):
         key=(row["owner_id"],row["account_id"],row["asset_id"]); b=books[key]
         q,amount=from_e6(row["quantity_e6"]),from_e6(row["amount_base_e6"])
         if q>ZERO: b["units"]+=q; b["cost"]+=amount
+        elif q==ZERO:
+            if row["effect"]=="INTERNAL" and amount<ZERO:  # a return of capital: the excess over the cost is a gain
+                removed,gain=cost_returned(b["cost"],-amount); b["cost"]-=removed
+                if row["date"]>=start: realized += gain
         elif q<ZERO:
             removed=b["cost"]/b["units"]*(-q) if b["units"] else ZERO
             if row["type"]=="SEL" and row["date"]>=start: realized += -amount-removed

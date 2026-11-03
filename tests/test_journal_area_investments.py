@@ -107,6 +107,24 @@ def test_dividend_with_tax_fee_interest_and_edit(devices):
     assert cash(pc) == cash(hd) == 3900 + 90 - 25 + Decimal("7.50") and pc.c.transactions.get(bought_id).notes == "bigger"
 
 
+def test_return_of_capital_travels_with_its_zero_unit_cost_line(devices):
+    """NF-5A4: the cash line and the zero-unit cost line settle together, and the cost follows on both devices."""
+    hd, pc = devices
+    broker, stock = setup(hd, pc)
+    bought = buy(pc, broker, stock)
+    returned = pc.command("investments.return_of_capital", date="2026-09-10", account_id=broker, asset_id=stock,
+                          amount="300.00", cash_account_id=None, notes="Interim", owner_id=None)
+    settle(hd, pc, bought, returned)
+    assert cash(pc) == cash(hd) == 4000 + 300
+    assert held(pc).cost_basis == held(hd).cost_basis == 700 and held(hd).quantity == 100
+    assert hd.c.db.scalar("SELECT COUNT(*) FROM ledger_entries WHERE quantity_e6=0 AND effect='INTERNAL'") == 1
+    edit = pc.command("investments.update", txn_id=record(returned), date="2026-09-10", account_id=broker, asset_id=stock,
+                      quantity="", price="", fees="", total_fees="", fees_included=True, total="", cash_account_id=None,
+                      amount="1200.00", total_cost="", notes="Interim", owner_id=None)
+    settle(hd, pc, edit)
+    assert held(pc).cost_basis == held(hd).cost_basis == 0 and held(hd).realized == 200
+
+
 def test_move_shares_between_brokers(devices):
     hd, pc = devices
     broker, stock = setup(hd, pc)

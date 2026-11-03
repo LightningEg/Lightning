@@ -3,6 +3,8 @@
 How the numbers work (average cost, the way THNDR shows it):
 - Buy:   cost basis += what you paid (price × units + fees); units += bought.
 - Sell:  cost removed = average cost × units sold; realized gain = what you received (after fees) − cost removed.
+- Return of capital: no units move; cost removed = the amount paid back, but never more than the cost left; what is
+  paid back beyond the cost left is a realized gain (NF-5A4, owner decision 2026-11-02).
 - Value: units × latest price (a price you entered, else the last buy/sell price, else your cost).
 - Unrealized gain = value − cost basis still held.   Total return = unrealized + realized + dividends (after any tax withheld).
 Nothing here is stored — it is all recalculated from the ledger.
@@ -19,6 +21,13 @@ from .returns import DisplayReturn
 
 # Sale factor (percent of value a class would fetch if sold today) when none is set in Settings.
 DEFAULT_SALE_FACTOR = Decimal(95)
+
+
+def cost_returned(cost: Decimal, paid_back: Decimal) -> tuple[Decimal, Decimal]:
+    """(cost removed, realized gain) when a fund pays back ``paid_back`` of a holding whose cost left is ``cost``.
+    The one rule behind every average-cost walk: cost never falls below zero and the excess is a gain."""
+    removed = min(paid_back, max(cost, ZERO))
+    return removed, paid_back - removed
 
 
 @dataclass

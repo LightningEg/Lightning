@@ -3,15 +3,14 @@ title: Cost per purchase (lots)
 type: feature
 pillar: own
 size: L
-status: blocked
-blocked_by: 5A
+status: ready
 created: 2026-10-05
 by: Claude
 ---
 
 # Cost per purchase (lots)
 
-**Status:** proposal, 2026-10-05 · Claude, not built. Learned from GnuCash (`Gnucash/gnucash` at `53cc9e6`; Lightning at `5665786`). When built, move what holds into [Architecture](../../ai/ARCHITECTURE.md) and delete this file. Build after [investment_events.md](5A-one-table-of-investment-events.md).
+**Status:** proposal, 2026-10-05 · Claude, not built. Learned from GnuCash (`Gnucash/gnucash` at `53cc9e6`; Lightning at `5665786`). When built, move what holds into [Architecture](../../ai/ARCHITECTURE.md) and delete this file. Build after the built events table (`lightning/investments/events.py`, NF-5A).
 
 **They do better:** each purchase keeps its own cost and date, so a sale shows which purchases it used up, the gain on each and how long each was held.
 
