@@ -16,7 +16,7 @@ from lightning.core.money import ZERO, fmt, to_decimal
 from . import register
 from .. import charts, kpis, status as page_status
 from ..periods import parse_period
-from ..web import container, redirect, render
+from ..web import settled_save, container, redirect, render
 
 router = APIRouter(prefix="/accounts")
 
@@ -468,7 +468,7 @@ async def quick_add(request: Request):
     payload = values | {"account": account_id}
     try:
         account = c.accounts.require_usable(account_id)
-        with register.resent_guard(c, form), c.db.transaction():
+        with register.resent_guard(c, form), settled_save(request, c):
             earlier = c.transactions.submitted(submission, payload)
             txn = earlier or _save_popup_transaction(c, account_id, values)
             if earlier is None:
@@ -508,7 +508,7 @@ async def save_transaction_popup(request: Request, account_id: int):
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = {key: value for key, value in values.items() if key != "return_to"} | {"account": account_id}
     try:
-        with register.resent_guard(c, form), c.db.transaction():
+        with register.resent_guard(c, form), settled_save(request, c):
             earlier = c.transactions.submitted(submission, payload)  # a resent form returns its first save (2J)
             txn = earlier or _save_popup_transaction(c, account_id, values)
             if earlier is None:
@@ -786,3 +786,4 @@ async def set_spendable(request: Request, account_id: int):
 async def reactivate(request: Request, account_id: int):
     account = container(request).account_flows.reactivate(account_id)
     return redirect(f"/accounts/{account.id}", f"{account.label} is active again.")
+
