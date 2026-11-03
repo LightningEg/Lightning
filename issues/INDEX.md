@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 63 open items, in the order they are worked on.
+10 milestones, 69 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -22,8 +22,9 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1H4 | ↳ Validate | | | M | |
 | **IT-1M** | [Archive closed reports and keep their evidence out of the checkout](1-easy-to-contribute/1M-archive-closed-reports.md) | improvement, technical | Build | M | ready |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | ready |
+| **IT-1P** | [Check the minimum supported Python and asynchronous UI contracts](1-easy-to-contribute/1P-supported-runtime-contract-checks.md) | improvement, technical | Build | M | new |
 
-Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K, 1L, 1O. Next free code: 1P.
+Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K, 1L, 1O. Next free code: 1Q.
 
 ## 2 Safe for real money
 
@@ -46,8 +47,9 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | **BT-2F** | [On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone](2-safe-for-real-money/2F-android-downloads-files-links.md) ([#229](https://github.com/LightningEg/Lightning/issues/229)) | bug, technical · high | Everywhere | M | building |
 | **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical · medium | Reach | M | new |
 | **OW-2AB** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AB-stale-code.md) | owner task | Protect |  | ready |
+| **BT-2AE** | [Save responses finish before required payment matching](2-safe-for-real-money/2AE-settlement-before-success.md) | bug, technical · medium | Protect | M | new |
 
-Done: 2B, 2D, 2E, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AC, 2AD. Next free code: 2AE.
+Done: 2B, 2D, 2E, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AC, 2AD. Next free code: 2AF.
 
 ## 3 Polish and Arabic
 
@@ -105,8 +107,9 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | building |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner | |
+| **BT-3AP** | [An old search body overwrites the latest phone results and URL](3-polish-and-arabic/3AP-live-search-response-race.md) | bug, technical · medium | Capture | M | new |
 
-Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK, 3AL, 3AO. Next free code: 3AP.
+Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK, 3AL, 3AO. Next free code: 3AQ.
 
 ## 4 Edit journal and devices
 
@@ -159,8 +162,9 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | NF-5G5 | ↳ Phase 4: broker import | | | L | |
 | NF-5G6 | ↳ Phase 5: analysis | | | L | |
 | NF-5G7 | ↳ Phase 6: lots and corporate actions | | | L | |
+| **IT-5M** | [Distinguish ambiguous annualized returns from unavailable results](5-investments/5M-xirr-ambiguous-results.md) | improvement, technical | Own | M | new |
 
-Done: 5H, 5I, 5J, 5K, 5L. Next free code: 5M.
+Done: 5H, 5I, 5J, 5K, 5L. Next free code: 5N.
 
 ## 6 Market data
 
@@ -217,8 +221,15 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | **NF-7T** | [Link the sections - salary-day cascade and a reserve tied to its bill](7-planning-import-and-search/7T-link-the-sections.md) | new feature | Plan | L | new |
 | NF-7T5 | ↳ Salary-day cascade | | | L | |
 | NF-7T6 | ↳ A reserve tied to its bill | | | L | |
+| **NF-7X** | [Extend local planning with scenario comparisons and bill-change alerts](7-planning-import-and-search/7X-scenario-and-bill-intelligence.md) | new feature | Plan | L | new |
+| NF-7X1 | ↳ Specify scenario inputs and comparisons | | | M | |
+| NF-7X2 | ↳ Calculate read-only scenarios | | | M | |
+| NF-7X3 | ↳ Present scenario comparisons | | | M | |
+| NF-7X4 | ↳ Define and detect bill drift and repeated charges | | | M | |
+| NF-7X5 | ↳ Show reviewable alerts in Needs you | | | M | |
+| **NF-7Y** | [Explain which stale or pending inputs affect a financial figure](7-planning-import-and-search/7Y-financial-data-freshness.md) | new feature | Understand | M | new |
 
-Done: 7A, 7H, 7I, 7J, 7K, 7N, 7O, 7P, 7Q, 7R, 7U, 7V, 7W. Next free code: 7X.
+Done: 7A, 7H, 7I, 7J, 7K, 7N, 7O, 7P, 7Q, 7R, 7U, 7V, 7W. Next free code: 7Z.
 
 ## 8 Website
 
