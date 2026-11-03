@@ -8,6 +8,7 @@ import hashlib
 import json
 import logging
 from datetime import timedelta
+from contextlib import contextmanager
 
 import re
 import secrets
@@ -536,6 +537,15 @@ ACTION_LABELS = {"accounts": "Account changes", "transactions": "Transaction cha
                  "money-from-others": "Money held for others"}
 
 
+@contextmanager
+def settled_save(request, c):
+    """A synchronous entry workflow; no request awaits while the database transaction is open."""
+    from lightning.workflows.save import settled_write
+    with settled_write(c):
+        yield
+    request.state.payments_settled = True
+
+
 class RequestCache:
     """Each request computes a repeated figure once (``lightning.core.memo``); a write empties it."""
 
@@ -560,7 +570,8 @@ class RequestCache:
                             status = message["status"]
                             # Required settlement must finish before a successful response
                             # becomes visible. Keep it in the same undo action as the save.
-                            if (status < 400 and getattr(self.state, "container", None) is current
+                            if (status < 400 and not scope.get("state", {}).get("payments_settled", False)
+                                    and getattr(self.state, "container", None) is current
                                     and not current.db.closed and not current.db.read_only
                                     and not getattr(current, "is_journal", False)):
                                 current.planning.match_payments(today())

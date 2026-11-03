@@ -27,3 +27,9 @@ Not posted: affects financial consistency and requires workflow design review.
 ## Implementation · 2026-11-03
 
 Matching moved into the response-start interception before success headers are forwarded. Targeted tests cover order, injected failure, rejected requests, read-only profiles and journal exclusion. Primary route writes still commit independently; retain this item for integrated fault/retry/undo tests and the required-versus-deferred workflow decision.
+
+## Atomic entry workflows · 2026-11-03
+
+Register entry/create/edit, investment entry, cash quick-add and transaction popups now use `workflows/save.settled_write`: the save, form retry marker and payment matching share an outer database transaction. UI scopes contain no awaits. After commit, the request marks matching complete so the response middleware does not repeat it. Journal commands keep their own settlement authority. Other write routes retain the response-boundary fallback; broader command-by-command coverage remains open.
+
+Regression: `tests/test_atomic_entry_save.py` injects a failure after real settlement, verifies transaction/receipt/link rollback, retries the same token once, and checks one undo removes the payment link with the entry.
