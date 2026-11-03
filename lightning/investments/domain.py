@@ -7,6 +7,7 @@ How the numbers work (average cost, the way THNDR shows it):
   paid back beyond the cost left is a realized gain (NF-5A4, owner decision 2026-11-02).
 - Value: units × latest price (a price you entered, else the last buy/sell price, else your cost).
 - Unrealized gain = value − cost basis still held.   Total return = unrealized + realized + dividends (after any tax withheld).
+Each holding's lots and sale pieces come from lots.py (NF-5B).
 Nothing here is stored — it is all recalculated from the ledger.
 """
 
@@ -17,17 +18,11 @@ from decimal import Decimal
 
 from lightning.core.money import ZERO
 
+from .lots import Disposal, Lot, cost_returned  # noqa: F401  (cost_returned is re-exported for the walkers)
 from .returns import DisplayReturn
 
 # Sale factor (percent of value a class would fetch if sold today) when none is set in Settings.
 DEFAULT_SALE_FACTOR = Decimal(95)
-
-
-def cost_returned(cost: Decimal, paid_back: Decimal) -> tuple[Decimal, Decimal]:
-    """(cost removed, realized gain) when a fund pays back ``paid_back`` of a holding whose cost left is ``cost``.
-    The one rule behind every average-cost walk: cost never falls below zero and the excess is a gain."""
-    removed = min(paid_back, max(cost, ZERO))
-    return removed, paid_back - removed
 
 
 @dataclass
@@ -61,6 +56,8 @@ class Position:
     owned_dividends: Decimal = ZERO
     owned_dividend_tax: Decimal = ZERO
     has_other_owners: bool = False
+    lots: list[Lot] = field(default_factory=list)  # the purchases still held (NF-5B), every owner
+    disposals: list[Disposal] = field(default_factory=list)  # the pieces of every sale so far
 
     @property
     def owned_net_dividends(self) -> Decimal:

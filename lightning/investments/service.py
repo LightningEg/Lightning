@@ -25,7 +25,8 @@ from lightning.transactions.domain import Transaction
 from lightning.transactions.service import TransactionService
 
 from . import events
-from .domain import DEFAULT_SALE_FACTOR, Portfolio, Position, cost_returned
+from .domain import DEFAULT_SALE_FACTOR, Portfolio, Position
+from .lots import LotLine, build_lots
 from .xirr import xirr
 from .returns import display_return
 
@@ -494,7 +495,7 @@ class InvestmentService:
     def portfolio(self, as_of=None, account_id: int | None = None) -> Portfolio:
         """Every holding (open and closed) with cost basis, value and gains, as of a date (default today)."""
         day = fmt_date(as_of) if as_of and not isinstance(as_of, str) else (as_of or fmt_date(today()))
-        state: dict[tuple[int, int], dict] = {}
+        state: dict[tuple[int, int], dict[int | None, list[LotLine]]] = {}
         dividends: dict[tuple[int, str], Decimal] = {}
         taxes: dict[tuple[int, str], Decimal] = {}
         owned_dividends: dict[tuple[int, str], Decimal] = {}
@@ -528,29 +529,11 @@ class InvestmentService:
             flow = -from_e6(line["amount_base_e6"])
             cashflows.append((line["date"], flow))
             holding_flows.setdefault((line["account_id"], line["asset_id"]), []).append((line["date"], flow))
-            # One average-cost pool per owner (None is you): a sale by one owner removes units at that
-            # owner's own average cost, never at a blend of everyone's purchase prices.
+            # One pool per owner (None is you): a sale by one owner removes units at that owner's own
+            # cost, never at a blend of everyone's purchase prices. The lots are built after the loop.
             pools = state.setdefault((line["account_id"], line["asset_id"]), {})
-            s = pools.setdefault(line.get("owner_id"), {"qty": ZERO, "cost": ZERO, "realized": ZERO, "invested": ZERO})
-            qty, amount = from_e6(line["quantity_e6"]), from_e6(line["amount_base_e6"])
-            if qty > 0:
-                s["cost"] += amount
-                s["invested"] += amount
-                s["qty"] += qty
-            elif qty == 0:
-                if line["effect"] == "INTERNAL" and amount < 0:  # a return of capital: cost falls, the excess is a gain
-                    removed, gain = cost_returned(s["cost"], -amount)
-                    s["cost"] -= removed
-                    s["realized"] += gain
-            else:
-                average = s["cost"] / s["qty"] if s["qty"] else ZERO
-                removed = average * -qty
-                if line["type"] == "SEL":
-                    s["realized"] += -amount - removed
-                s["cost"] -= removed
-                s["qty"] += qty
-            if s["qty"] == ZERO:
-                s["cost"] = ZERO
+            pools.setdefault(line.get("owner_id"), []).append(LotLine(
+                line["date"], line["type"], line["effect"], from_e6(line["quantity_e6"]), from_e6(line["amount_base_e6"])))
         # A certificate's interest lands on the bank account; it is still the certificate's return.
         for paid in self.reporting.certificate_interest(day):
             if account_id is not None and paid["account_id"] != account_id:
@@ -561,9 +544,12 @@ class InvestmentService:
             cashflows.append((paid["date"], paid["amount"]))
             holding_flows.setdefault((paid["account_id"], paid["asset_id"]), []).append((paid["date"], paid["amount"]))
         positions = []
-        for (acc_id, asset_id), pools in state.items():
-            s = {key: sum((pool[key] for pool in pools.values()), ZERO) for key in ("qty", "cost", "realized")}
-            own = pools.get(None, {"qty": ZERO, "cost": ZERO, "realized": ZERO, "invested": ZERO})
+        for (acc_id, asset_id), lines in state.items():
+            pools = {owner: build_lots(owner_lines, owner_id=owner) for owner, owner_lines in lines.items()}
+            s = {"qty": sum((book.quantity for book in pools.values()), ZERO),
+                 "cost": sum((book.cost for book in pools.values()), ZERO),
+                 "realized": sum((book.realized for book in pools.values()), ZERO)}
+            own = pools.get(None) or build_lots([])
             account, asset = self.accounts.get(acc_id), self.assets.get_asset(asset_id)
             valuation = self.reporting.value_of(asset_id, s["qty"], day) if s["qty"] else None
             holding_cashflows = holding_flows.get((acc_id, asset_id), [])
@@ -586,11 +572,13 @@ class InvestmentService:
                 display_return=display_return(holding_cashflows, day, annual_rate,
                                               not s["qty"] or bool(valuation and valuation.value is not None)),
                 invested=sum((-amount for _, amount in holding_flows.get((acc_id, asset_id), []) if amount < ZERO), ZERO),
-                owned_quantity=own["qty"], owned_cost_basis=_money(own["cost"]),
-                owned_realized=_money(own["realized"]), owned_invested=own["invested"],
+                owned_quantity=own.quantity, owned_cost_basis=_money(own.cost),
+                owned_realized=_money(own.realized), owned_invested=own.invested,
                 owned_dividends=owned_dividends.pop((acc_id, asset.code), ZERO),
                 owned_dividend_tax=owned_taxes.pop((acc_id, asset.code), ZERO),
                 has_other_owners=any(owner is not None for owner in pools) or (acc_id, asset.code) in other_income,
+                lots=[lot for book in pools.values() for lot in book.lots],
+                disposals=[piece for book in pools.values() for piece in book.disposals],
             ))
         # dividends from something not (or no longer) held in that account still count
         for (acc_id, code), amount in dividends.items():
