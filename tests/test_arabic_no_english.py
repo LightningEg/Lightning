@@ -42,7 +42,7 @@ EXTRA_PAGES = ("/accounts/1", "/accounts/2", "/accounts/3", "/accounts/6", "/acc
                "/accounts/currencies", "/accounts/6/items/new", "/budget/raise?month=2026-10", "/budget/move?month=2026-10",
                "/budget/fill?month=2026-10", "/plan/items/new?kind=BILL", "/plan/items/new?kind=LOAN",
                "/plan/items/2/pay", "/investments/planner", "/investments/prices/markets", "/investments/assets/new",
-               "/investments/assets/13/edit", "/investments/new?kind=holding&account=4", "/investments/holding/11", "/investments/reevaluations", "/rules/new",
+               "/investments/assets/13/edit", "/investments/new?kind=holding&account=4", "/investments/new?kind=return_of_capital&account=4", "/investments/holding/11", "/investments/reevaluations", "/rules/new",
                "/transactions/315", "/transactions/315/edit-popup", "/t/OUT-2026-08-12-001", "/transactions/deleted",
                "/reserves", "/add-transaction", "/investments/targets", "/search?q=a")
 PHONE_EXTRA = ("/accounts/1", "/accounts/6", "/plan/loans", "/plan/recurring", "/plan/reserves", "/investments/holding/11",

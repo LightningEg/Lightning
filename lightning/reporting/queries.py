@@ -299,7 +299,7 @@ class ReportQueries:
         """Every buy and sell price of one asset, newest first; read once per asset per request."""
         return [dict(row) for row in self.db.all(
             f"SELECT le.unit_price_e6 AS price_e6, le.date FROM ledger_entries le {POSTED}"
-            " WHERE le.asset_id = ? AND t.type IN ('BUY', 'SEL') ORDER BY le.date DESC, t.id DESC",
+            " WHERE le.asset_id = ? AND t.type IN ('BUY', 'SEL') AND le.quantity_e6<>0 ORDER BY le.date DESC, t.id DESC",
             (asset_id,))]
 
     def latest_trade_price(self, asset_id: int, as_of: str) -> dict | None:

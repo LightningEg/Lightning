@@ -115,6 +115,21 @@ class PostingLine:
                            memo=memo, amount=amount, amount_base=_round2(amount * fx_rate), is_cash=is_cash,
                            owner_id=owner_id)
 
+    @staticmethod
+    def cost_only(account_id: int, asset_id: int, amount: Decimal, fx_rate: Decimal = ONE,
+                  memo: str = "") -> "PostingLine":
+        """A line of zero units that only lowers a holding's cost by ``amount`` (a return of capital, NF-5A4).
+        ``amount`` is positive here and stored negative, like units out; units stay as they are."""
+        return PostingLine(account_id, asset_id, ZERO, Effect.INTERNAL, ZERO, fx_rate, memo=memo, amount=-amount,
+                           amount_base=_round2(-amount * fx_rate), is_cash=False)
+
+    @property
+    def is_cost_only(self) -> bool:
+        """The one zero-unit line besides a revaluation: internal, a holding (not cash), cost falling."""
+        return (self.quantity == ZERO and self.effect == Effect.INTERNAL and not self.is_cash
+                and self.amount < ZERO)
+
+
 def _round2(value: Decimal) -> Decimal:
     return value.quantize(Decimal("0.01"))
 
@@ -139,7 +154,7 @@ def validate_posting(lines: list[PostingLine]) -> None:
         raise ValidationError("A transaction needs at least one line.")
     internal_total = ZERO
     for i, line in enumerate(lines, start=1):
-        if line.quantity == ZERO and line.effect != Effect.REVALUATION:
+        if line.quantity == ZERO and line.effect != Effect.REVALUATION and not line.is_cost_only:
             raise ValidationError(f"Line {i}: amount cannot be zero.", "amount")
         for name in ("quantity", "unit_price", "fx_rate", "amount", "amount_base"):
             places = 2 if name == "amount_base" or (name == "amount" and line.effect != Effect.REVALUATION) else 6

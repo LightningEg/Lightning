@@ -63,6 +63,7 @@ KINDS = {
     "buy": ("Buy", "Units in, cash out — at cost, fees included."),
     "sell": ("Sell", "Units out, cash in — what you receive after fees."),
     "dividend": ("Dividend", "Cash paid to you by an investment you hold."),
+    "return_of_capital": ("Return of capital", "A fund pays part of what you paid in back: cash arrives, your units stay, your cost falls."),
     "holding": ("Add a holding you already own", "Units you had when you started tracking, and what you paid in total."),
 }
 FIELDS = ("date", "account_id", "asset_id", "quantity", "price", "fees", "fees_included", "cash_account_id", "amount", "total_cost", "total",
@@ -690,6 +691,8 @@ def _save(request: Request, kind: str, v: dict, txn_id: int | None = None):
                 raise LightningError("A dividend requires shares held by the selected owner on that date.", "asset_id")
             amount = (amount * units).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         txn = inv.dividend(v["date"], account, asset, amount, v["notes"], owner)
+    elif kind == "return_of_capital":
+        txn = inv.return_of_capital(v["date"], account, asset, v["amount"], cash, v["notes"], owner)
     else:
         txn = inv.add_holding(account, asset, v["quantity"], v["total_cost"], v["date"] or None,
                               v["notes"], owner)

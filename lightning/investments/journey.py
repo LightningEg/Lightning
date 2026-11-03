@@ -62,12 +62,15 @@ def holding_history(reporting, investments, account_id: int, asset_id: int, end:
             continue  # a month-end revaluation checkpoint is not a trade or a payout (5K)
         amount = from_e6(l["amount_base_e6"] or 0)
         amount_native = from_e6(l.get("amount_e6") or 0)
-        if units > 0:
+        returned = not units and l["type"] == "SEL" and l.get("effect") == "INTERNAL" and amount < 0
+        if returned:  # a return of capital: the cost falls (never below zero), the units stay
+            native -= min(native, abs(amount_native))
+        elif units > 0:
             native += abs(amount_native)
         elif units < 0 and held:
             native -= native / held * -units
         held += units
-        trail.append({"date": l["date"], "kind": "Dividend reinvested" if reinvested else KINDS.get(l["type"], "Holding added" if units > 0 else "Units out"),
+        trail.append({"date": l["date"], "kind": "Capital returned" if returned else "Dividend reinvested" if reinvested else KINDS.get(l["type"], "Holding added" if units > 0 else "Units out"),
                       "units": units, "amount": abs(amount), "price": abs(amount / units) if units else None,
                       "price_native": abs(amount_native / units) if units else None,
                       "held": held, "ref": l.get("ref")})

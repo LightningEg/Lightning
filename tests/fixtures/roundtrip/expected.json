@@ -1,7 +1,7 @@
 {
- "fingerprint": "a07a4c81c74576f2",
+ "fingerprint": "c359df2b1798d01e",
  "lines": [
-  "schema: 69",
+  "schema: 70",
   "before net worth: 250565.290000",
   "before unvalued: 0",
   "before account CIB Payroll: 68892.790000",
@@ -84,7 +84,7 @@
   "rows rule_conditions: 0",
   "rows rules: 0",
   "rows saved_views: 0",
-  "rows schema_migrations: 69",
+  "rows schema_migrations: 70",
   "rows settings: 2",
   "rows transactions: 69",
   "rows zakat_settings: 1"

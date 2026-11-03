@@ -1,6 +1,6 @@
 # Data Model (as built)
 
-Verified against the migrations in `lightning/database/migrations/` (69 files, `0001`–`0069`), not only code.
+Verified against the migrations in `lightning/database/migrations/` (70 files, `0001`–`0070`), not only code.
 Tables referenced here are those created by `CREATE TABLE` in those scripts (63 found). Column-level detail for
 the core tables below was read from `0001_initial.sql`; later migrations extend some (for example `0013` adds the
 `REVALUATION` effect), so treat the migration files as the final word.
@@ -40,7 +40,7 @@ erDiagram
 | `accounts` | *Where* value is held | `account_type` ∈ CASH, BANK, DEPOSIT, BROKERAGE, PHYSICAL_ASSET, RECEIVABLE, OTHER_ASSET, CREDIT_CARD, LOAN, PAYABLE; one `currency`; `last4` must be 4 digits; `opening_date` is not a date boundary for transactions. |
 | `categories` | *Why* money moved (tree) | `movement` ∈ INFLOW, OUTFLOW; `scope` PERSONAL/WORK; `income_class` HOUSEHOLD/INVESTMENT; `is_system`; used ones are archived, never deleted. |
 | `transactions` | The document the user sees (one transfer = one row) | `ref` UNIQUE; `type` ∈ OPN, IN, OUT, TRF, CNV, BUY, SEL, DIV, VAL, ADJ; `status` ∈ DRAFT, POSTED, VOID; `source` ∈ MANUAL, IMPORT, MARKET_DATA, SYSTEM; `search_text`. |
-| `ledger_entries` | The effect: every balance and report derives from these lines | `transaction_id` FK **ON DELETE CASCADE**; `UNIQUE(transaction_id, line_no)`; `quantity_e6`, `unit_price_e6`, `amount_e6` (native), `fx_rate_e6`, `amount_base_e6` (profile currency, dated); `effect` ∈ INFLOW, OUTFLOW, INTERNAL, OPENING (+ REVALUATION from 0013); **CHECK: INFLOW/OUTFLOW lines must have a category.** |
+| `ledger_entries` | The effect: every balance and report derives from these lines | `transaction_id` FK **ON DELETE CASCADE**; `UNIQUE(transaction_id, line_no)`; `quantity_e6`, `unit_price_e6`, `amount_e6` (native), `fx_rate_e6`, `amount_base_e6` (profile currency, dated); `effect` ∈ INFLOW, OUTFLOW, INTERNAL, OPENING (+ REVALUATION from 0013); **CHECKs: INFLOW/OUTFLOW lines must have a category; quantity is non-zero unless the line is a REVALUATION or an INTERNAL line with a negative amount (0070, a return of capital's cost-only line).** |
 | `price_history` | Dated prices per asset | `price_e6 >= 0`; unique per asset/date/source. Typed (MANUAL) beats fetched. |
 | `fx_rates` | Dated rates | `base` = foreign, `quote` = profile currency; `rate_e6 > 0`; `UNIQUE(date, base, quote, source)`. Precedence on one day: MANUAL > TRADE > MARKET > ONLINE. |
 | `audit_log` | Before/after record of edits and voids; also one-time form tokens (entity `form`) | `entity`, `entity_id`, `action`, `before_json`, `after_json`. |
@@ -74,7 +74,7 @@ Detailed per-column definitions for these: read the named migration. Decision D-
 
 ## 5. Integrity and validation
 
-**Database triggers** (`0056_checked_history.sql`): once an account is checked against the bank through a date, `checked_ledger_insert` / `checked_ledger_update` abort any ledger change on or before that date ("This month was checked against the bank. Unlock it first. [LN-E0001]"). Migration `0069_checked_month_code.sql` recreated the five triggers with that code; `database/connection.py` matches the code, not the sentence.
+**Database triggers** (`0056_checked_history.sql`): once an account is checked against the bank through a date, `checked_ledger_insert` / `checked_ledger_update` abort any ledger change on or before that date ("This month was checked against the bank. Unlock it first. [LN-E0001]"). Migration `0069_checked_month_code.sql` recreated the five triggers with that code; `database/connection.py` matches the code, not the sentence. Migration `0070_zero_unit_cost_line.sql` rebuilt `ledger_entries` (as `0013` did) to allow one more zero-quantity shape: an INTERNAL line with a negative amount, the cost-only line of a return of capital; its indexes, views and triggers were recreated unchanged.
 
 `TransactionService` re-checks each line inside the write: cash exactly when the asset is cash; cash only in an account of its currency; profile-currency cash at rate 1; foreign cash needs a saved rate on or before its date; manual entries may not take a wallet or bank below zero; `validate_posting` balances internal lines (base amounts net to zero). `integrity.py` and `transactions/history_check.py` replay history to find breaks.
 

@@ -45,6 +45,10 @@ COMMANDS = {
     "investments.dividend": Command("investments.dividend", dict(
         date=DATE, account_id=ref("accounts"), asset_id=ref("financial_assets"), amount=AMOUNT, notes=LONG,
         owner_id=optional(ref("counterparties")), tax=FEES), creates="transactions", adapt=_none_is_zero("tax")),
+    "investments.return_of_capital": Command("investments.return_of_capital", dict(
+        date=DATE, account_id=ref("accounts"), asset_id=ref("financial_assets"), amount=AMOUNT,
+        cash_account_id=optional(ref("accounts")), notes=LONG, owner_id=optional(ref("counterparties"))),
+        creates="transactions"),
     "investments.add_holding": Command("investments.add_holding", dict(
         account_id=ref("accounts"), asset_id=ref("financial_assets"), quantity=RATE, total_cost=AMOUNT,
         date=optional(DATE), notes=LONG, owner_id=optional(ref("counterparties"))), creates="transactions"),

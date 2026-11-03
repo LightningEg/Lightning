@@ -45,6 +45,10 @@ EVENTS: dict[str, EventSpec] = {
     "dividend": EventSpec(DocType.DIV, Sign.NONE, Sign.IN, "none", DIVIDEND_CATEGORY),
     # Income first, then the net buys units at its own price, in one document: cash nets to zero except the tax.
     "reinvested_dividend": EventSpec(DocType.DIV, Sign.IN, Sign.NONE, "none", DIVIDEND_CATEGORY),
+    # A fund pays back part of what you paid in: cash arrives, no unit changes, the holding's cost falls (a zero-unit
+    # cost line; owner decision 2026-11-02). The cash is internal, not income. Where the amount exceeds the cost left,
+    # the engines take the cost to zero and book the rest as a realized gain.
+    "return_of_capital": EventSpec(DocType.SEL, Sign.NONE, Sign.IN, "none", None, lowers_cost=True),
 }
 
 
@@ -56,6 +60,7 @@ class FormFields:
     cash_account: bool
     cash_from: bool  # the cash account is where money came from (else where it went)
     income: bool  # the amount received (dividend)
+    capital: bool = False  # only the amount paid back and where it went (return of capital)
 
 
 def form_fields(event: str) -> FormFields:
@@ -63,8 +68,9 @@ def form_fields(event: str) -> FormFields:
     spec = _spec(event)
     trade = spec.units in (Sign.IN, Sign.OUT)
     return FormFields(units=trade and not spec.income_category, fees=trade and spec.fees != "none",
-                      cash_account=trade and spec.cash != Sign.NONE,
-                      cash_from=spec.cash == Sign.OUT, income=spec.income_category is not None)
+                      cash_account=(trade or spec.lowers_cost) and spec.cash != Sign.NONE,
+                      cash_from=spec.cash == Sign.OUT, income=spec.income_category is not None,
+                      capital=spec.lowers_cost)
 
 
 @dataclass
@@ -127,6 +133,11 @@ def _income_figures(v: EventValues) -> tuple[Decimal, Decimal]:
 
 def _figures(spec: EventSpec, v: EventValues) -> _Figures:
     """Parse and check every number the event needs; the one place their rules live."""
+    if spec.lowers_cost:  # a return of capital: one amount, no units
+        value = check_places(to_decimal(v.amount, "amount"), 2, "amount")
+        if value <= ZERO:
+            raise ValidationError("Enter the amount paid back.", "amount")
+        return _Figures(amount=value)
     if spec.income_category and spec.units == Sign.IN:  # a reinvested dividend: income, then units for the net
         value, withheld = _income_figures(v)
         units = check_places(to_decimal(v.quantity, "quantity"), v.asset.quantity_decimals, "quantity")
@@ -198,6 +209,12 @@ def lines_for(event: str, values: EventValues) -> list[PostingLine]:
                       PostingLine.units(v.account.id, v.asset.id, f.units, net, Effect.INTERNAL, f.unit_price, memo,
                                         fx_rate=v.holding_rate)]
         return lines
+    if spec.lowers_cost:
+        memo = f"Return of capital · {v.asset.code}"
+        cash_account = v.cash_account or v.account
+        return [PostingLine.cost_only(v.account.id, v.asset.id, f.amount, v.holding_rate, memo),
+                PostingLine.cash(cash_account.id, v.cash_asset_id, f.amount, Effect.INTERNAL, memo=memo,
+                                 fx_rate=v.cash_rate)]
     word = "Buy" if spec.units == Sign.IN else "Sell"
     fee_sign = "+" if spec.fees == "cost" else "−"
     fee_text = f" {fee_sign} fee {fmt(f.fee)}" if f.fee else ""

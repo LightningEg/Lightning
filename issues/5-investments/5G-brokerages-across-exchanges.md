@@ -139,7 +139,7 @@ These examples show the shapes; check each broker's current offer before it goes
 
 #### 6.3 New investment events
 
-These fit the one-events-table proposal (`issues/5-investments/5A-one-table-of-investment-events.md` (5A)).
+These fit the one-events-table proposal (the built events table, `lightning/investments/events.py`, NF-5A).
 
 | Event | Posting (pockets are accounts) |
 |---|---|
