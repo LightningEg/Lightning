@@ -1,8 +1,10 @@
 """Cost per purchase: a holding's lots and the pieces of every sale taken from them (NF-5B).
 
 Derived from the ledger lines every time and never stored, so a back-dated edit leaves nothing stale to repair.
-This step knows one method, ``average``: one lot absorbs every buy, which is exactly the cost the portfolio
-showed before lots existed. A pool is one account, asset and owner, so call it once per owner.
+Two methods: ``average`` has one lot that absorbs every buy (the cost the portfolio showed before lots existed);
+``fifo`` keeps every buy as its own lot and a sale takes the oldest first, cut across lots when it is bigger than the
+oldest. A sale's proceeds are shared by units, and the last piece takes the rounding remainder so the pieces add up
+to the sale. A pool is one account, asset and owner, so call it once per owner.
 """
 
 from __future__ import annotations
@@ -14,7 +16,8 @@ from typing import Iterable, NamedTuple
 
 from lightning.core.money import ZERO
 
-METHODS = ("average",)
+METHODS = ("average", "fifo")
+PLACES = Decimal("0.000001")  # money is kept to six decimals (e6)
 
 
 def cost_returned(cost: Decimal, paid_back: Decimal) -> tuple[Decimal, Decimal]:
@@ -85,6 +88,8 @@ def build_lots(lines: Iterable[LotLine], method: str = "average", owner_id: int 
     """Replay a pool's lines, oldest first, into its open lots and the disposals made so far."""
     if method not in METHODS:
         raise ValueError(f"Unknown cost method: {method}")
+    if method == "fifo":
+        return _fifo(lines, owner_id)
     book = LotBook()
     lot: Lot | None = None
     for line in lines:
@@ -110,4 +115,52 @@ def build_lots(lines: Iterable[LotLine], method: str = "average", owner_id: int 
             lot = None
     if lot is not None:
         book.lots.append(lot)
+    return book
+
+
+def _shares(total: Decimal, weights: list[Decimal]) -> list[Decimal]:
+    """Split ``total`` in proportion to ``weights`` to six decimals; the last share takes the remainder."""
+    whole = sum(weights, ZERO)
+    parts: list[Decimal] = []
+    for weight in weights[:-1]:
+        parts.append((total * weight / whole).quantize(PLACES) if whole else ZERO)
+    parts.append(total - sum(parts, ZERO))
+    return parts
+
+
+def _fifo(lines: Iterable[LotLine], owner_id: int | None) -> LotBook:
+    book = LotBook()
+    for line in lines:
+        quantity, amount = line.quantity, line.amount
+        if quantity > 0:
+            book.lots.append(Lot(line.date, quantity, amount, owner_id))
+            book.invested += amount
+        elif quantity == 0:
+            if line.effect == "INTERNAL" and amount < 0 and book.lots:  # a return of capital
+                removed, _ = cost_returned(book.cost, -amount)
+                # Each lot's cost falls in proportion to its cost, so none goes below zero.
+                for lot, share in zip(book.lots, _shares(removed, [lot.cost for lot in book.lots])):
+                    lot.cost -= share
+                book.disposals.append(Disposal(book.lots[0].opened, line.date, ZERO, removed, -amount, owner_id))
+            elif line.effect == "INTERNAL" and amount < 0:
+                book.disposals.append(Disposal(line.date, line.date, ZERO, ZERO, -amount, owner_id))
+        else:
+            need = -quantity
+            taken: list[tuple[Lot, Decimal, Decimal]] = []  # (lot, units, cost) for each piece
+            for lot in list(book.lots):
+                if need == ZERO:
+                    break
+                units = min(need, lot.quantity)
+                cost = lot.cost if units == lot.quantity else lot.cost * units / lot.quantity
+                taken.append((lot, units, cost))
+                lot.quantity -= units
+                lot.cost -= cost
+                need -= units
+            if need:  # more sold than held: the shortfall is a piece with no cost
+                taken.append((Lot(line.date, ZERO, ZERO, owner_id), need, ZERO))
+            if line.type == "SEL":
+                proceeds = _shares(-amount, [units for _, units, _ in taken])
+                for (lot, units, cost), got in zip(taken, proceeds):
+                    book.disposals.append(Disposal(lot.opened, line.date, units, cost, got, owner_id))
+            book.lots = [lot for lot in book.lots if lot.quantity != ZERO]
     return book

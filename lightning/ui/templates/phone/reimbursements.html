@@ -2,8 +2,23 @@
 {% block title %}{{ 'Reimbursements'|tr(locale) }}{% endblock %}
 {% block heading %}<h1>{{ 'Reimbursements'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
-<p class="phone-note">{{ 'Claims and receipts link existing transactions. Linking does not add income, expense, or cash.'|tr(locale) }}</p>
+<p class="phone-note">{{ 'Record repayments as Money in using the original expense category. They reduce spending in that category; linking a receipt only tracks what is still owed.'|tr(locale) }}</p>
 {% if error %}<p class="flash error">{{ error|tr(locale) }}</p>{% endif %}
+
+{% if pairs %}<section class="phone-section" aria-labelledby="suggested-pairs">
+  <h2 id="suggested-pairs">{{ 'Possible reimbursement pairs'|tr(locale) }}</h2>
+  <p class="phone-note">{{ 'Same category and currency, within 90 days. Review the expense and receipt before linking.'|tr(locale) }}</p>
+  <div class="phone-rows">{% for pair in pairs %}<div class="phone-row phone-suggest">
+    <span><a href="/transactions/{{ pair.expense_id }}">{{ pair.expense.counterparty or pair.expense.ref }} · {{ pair.expense.date }}</a>
+      <small>{{ pair.category_name|tr(locale) }} · <a href="/transactions/{{ pair.receipt_id }}">{{ pair.receipt.counterparty or pair.receipt.ref }} · {{ pair.receipt.date }}</a>{% if pair.ambiguous %} · {{ 'Several possible matches'|tr(locale) }}{% endif %}</small></span>
+    <b>{{ pair.amount|money }} {{ base }}</b>
+  </div><div class="phone-suggest-actions">
+    {% if pair.claim_id %}<form method="post" action="/reimbursements/{{ pair.claim_id }}/pair">
+      <input type="hidden" name="receipt_id" value="{{ pair.receipt_id }}"><input type="hidden" name="amount" value="{{ pair.amount }}">
+      <button class="phone-quiet">{{ 'Confirm pair'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    </form>{% else %}<a class="phone-quiet" href="{{ pair.review_url }}">{{ 'Review pair'|tr(locale) }}</a>{% endif %}
+  </div>{% endfor %}</div>
+</section>{% endif %}
 
 <section class="phone-section" aria-labelledby="new-claim-title"><article class="card phone-card">
   <h2 id="new-claim-title" class="phone-card-title">{{ 'Add an expense claim'|tr(locale) }}</h2>
@@ -26,7 +41,7 @@
 <section class="phone-section" aria-label="{{ 'Expense claims'|tr(locale) }}">
   <h2>{{ 'Expense claims'|tr(locale) }}</h2>
   {% if not claims %}<p class="empty">{{ 'No reimbursement claims yet.'|tr(locale) }}</p>{% else %}
-  {% for claim in claims %}<article class="card phone-card">
+  {% for claim in claims %}<article class="card phone-card" id="claim-{{ claim.id }}">
     <h3 class="phone-card-title">{% if claim.expense %}<a href="/transactions/{{ claim.expense.id }}">{{ claim.expense.counterparty or claim.expense.description or claim.expense.ref }}</a>{% else %}{{ 'Expense unavailable'|tr(locale) }}{% endif %}</h3>
     {% if claim.expense %}<p class="phone-note">{{ claim.expense.ref }} · {{ claim.expense.date }}</p>{% endif %}
     <div class="phone-rows">
@@ -37,6 +52,7 @@
       <div class="phone-row"><span>{{ 'Outstanding'|tr(locale) }}</span><b>{{ claim.outstanding|money }} {{ base }}</b></div>
     </div>
     {% if claim.issues %}<p class="flash">{% for issue in claim.issues %}{{ issue|tr(locale) }}{% if not loop.last %}<br>{% endif %}{% endfor %}</p>{% endif %}
+{% if claim.record_receipt_url %}<p><a class="phone-quiet" data-popup-open href="{{ claim.record_receipt_url }}">{{ 'Record repayment in the same category'|tr(locale) }}</a><small class="phone-note">{{ 'Use this only if the repayment is not recorded yet. Otherwise link its existing receipt.'|tr(locale) }}</small></p>{% endif %}
     <h4>{{ 'Receipts'|tr(locale) }}</h4>
     {% for receipt in claim.receipts %}<div class="phone-row"><span>{% if receipt.receipt_id %}<a href="/transactions/{{ receipt.receipt_id }}">{{ receipt.ref or ('Receipt ' ~ receipt.receipt_id) }}</a>{% else %}{{ 'Deleted receipt'|tr(locale) }}{% endif %}<small>{{ receipt.counted|money }} {{ base }}{% if receipt.issue %} · {{ receipt.issue|tr(locale) }}{% endif %}</small></span><form method="post" action="/reimbursements/{{ claim.id }}/receipts/{{ receipt.id }}/unlink"><button class="btn small">{{ 'Unlink'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% else %}<p class="phone-note">{{ 'No receipts linked'|tr(locale) }}</p>{% endfor %}
     {% if receipts and claim.outstanding > 0 and not claim.issues %}<form method="post" action="/reimbursements/{{ claim.id }}/receipts" class="phone-form">

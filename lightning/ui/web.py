@@ -520,7 +520,9 @@ def redirect(url: str, msg: str = "") -> RedirectResponse:
     if not url.startswith("/") or url.startswith("//") or url.startswith("/\\") or "\n" in url or "\r" in url:
         url = "/"
     if msg:
-        url += ("&" if "?" in url else "?") + "msg=" + quote(msg)
+        path, fragment_mark, fragment = url.partition("#")
+        path += ("&" if "?" in path else "?") + "msg=" + quote(msg)
+        url = path + (fragment_mark + fragment if fragment_mark else "")
     return RedirectResponse(url, status_code=303)
 
 

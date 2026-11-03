@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from urllib.parse import urlencode
+
 from fastapi import APIRouter, Request
 
-from lightning.core.errors import LightningError
+from lightning.core.errors import LightningError, ValidationError
+from lightning.core.money import to_decimal
 
 from ..web import container, redirect, render
 
@@ -11,12 +14,44 @@ router = APIRouter(prefix="/reimbursements")
 
 def _context(request: Request, error: str = "", values: dict | None = None):
     c = container(request)
-    return {"claims": c.reimbursements.list_claims(),
+    claims = c.reimbursements.list_claims()
+    pairs = c.reimbursements.suggested_pairs(claims=claims)
+    category_names = {category_id: c.categories.display_name(category_id)
+                      for category_id in {pair["category_id"] for pair in pairs}}
+    for pair in pairs:
+        pair["category_name"] = category_names[pair["category_id"]]
+        pair["review_url"] = "/reimbursements?" + urlencode({
+            "expense_id": pair["expense_id"], "expected": pair["amount"],
+            "payer_id": pair["payer_id"] or ""}) + "#new-claim-title"
+    for claim in claims:
+        claim["record_receipt_url"] = _receipt_entry(c, claim)
+    return {"claims": claims, "pairs": pairs,
             "expenses": c.reimbursements.eligible_expenses(),
             "receipts": c.reimbursements.available_receipts(),
             "counterparties": c.counterparties.list_active(),
             "base": c.base_currency, "error": error,
-            "values": values or {"transaction_id": str(request.query_params.get("expense_id", "")), "expected": "", "payer_id": "", "due_date": ""}}
+            "values": values or {"transaction_id": str(request.query_params.get("expense_id", "")), "expected": str(request.query_params.get("expected", "")),
+                                 "payer_id": str(request.query_params.get("payer_id", "")), "due_date": ""}}
+
+
+def _receipt_entry(c, claim):
+    """Reuse Money in with the original expense category; the person records actual cash once."""
+    if not claim["expense_id"] or claim["issues"] or claim["outstanding"] <= 0:
+        return ""
+    txn = c.transactions.get(claim["expense_id"])
+    if len(txn.lines) != 1:
+        return ""
+    line = txn.lines[0]
+    account = c.accounts.get(line.account_id)
+    category = c.categories.get(line.category_id) if line.category_id else None
+    if (not account.active or account.account_type.value not in ("BANK", "CASH", "BROKERAGE")
+            or category is None or category.movement.value != "OUTFLOW" or category.is_system):
+        return ""
+    values = {"kind": "in", "category_id": category.id,
+              "amount": str(claim["outstanding"]) if account.currency == c.base_currency else "",
+              "counterparty": claim["payer_name"] or "",
+              "return_to": f"/reimbursements#claim-{claim['id']}"}
+    return f"/accounts/{account.id}/transaction/new?" + urlencode(values)
 
 
 @router.get("")
@@ -42,7 +77,27 @@ async def create_claim(request: Request):
     except (ValueError, LightningError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose an expense and enter an amount."
         return render(request, "reimbursements.html", status_code=400, **_context(request, message, values))
-    return redirect("/reimbursements", f"Created reimbursement claim for {claim['expense']['ref']}.")
+    return redirect(f"/reimbursements#claim-{claim['id']}", f"Created reimbursement claim for {claim['expense']['ref']}.")
+
+
+@router.post("/{claim_id:int}/pair")
+async def confirm_pair(request: Request, claim_id: int):
+    c = container(request)
+    form = await request.form()
+    try:
+        receipt_id = int(str(form.get("receipt_id", "")))
+        amount = str(form.get("amount", ""))
+        value = to_decimal(amount, "amount")
+        candidate = next((pair for pair in c.reimbursements.suggested_pairs()
+                          if pair["claim_id"] == claim_id and pair["receipt_id"] == receipt_id
+                          and pair["amount"] == value), None)
+        if candidate is None:
+            raise ValidationError("This suggested pair changed. Review the receipts again.")
+        c.reimbursements.link_receipt(claim_id, receipt_id, amount)
+    except (ValueError, LightningError) as exc:
+        message = exc.message if isinstance(exc, LightningError) else "Choose a receipt and enter an amount."
+        return render(request, "reimbursements.html", status_code=400, **_context(request, message))
+    return redirect(f"/reimbursements#claim-{claim_id}", "Linked the receipt; no income or cash entry was added.")
 
 
 @router.post("/{claim_id:int}/receipts")

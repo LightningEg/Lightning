@@ -169,7 +169,14 @@ class ReviewInbox:
                                         "label": "Match all suggested"}
                     items.append(item)
         if getattr(c, "reimbursements", None) is not None:
-            for claim in c.reimbursements.list_claims():
+            claims = c.reimbursements.list_claims()
+            pairs = c.reimbursements.suggested_pairs(on, claims=claims)
+            if pairs:
+                count = len(pairs)
+                items.append({"label": "Reimbursement receipts to pair",
+                              "detail": f"{count} possible pairs in the original expense category. Review before linking.",
+                              "href": "/reimbursements#suggested-pairs", "priority": 2, "action": "Review"})
+            for claim in claims:
                 if claim["issues"] or (claim["outstanding"] and claim["due_date"] and claim["due_date"] <= on.isoformat()):
                     items.append({"label": "Reimbursement needs review",
                                   "detail": f"{fmt(claim['outstanding'])} {c.base_currency} outstanding.",
