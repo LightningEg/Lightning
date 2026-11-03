@@ -48,11 +48,16 @@ def test_atomic_entry_and_payment_link_are_one_undo_action(c, setup, monkeypatch
     account, category = accounts['cib'], cats['EXP.PERSONAL.FOOD']
     item = c.planning.create(kind='BILL', name='Box', amount='400', frequency='MONTHLY',
                              start_date='2026-09-12', account_id=str(account.id), category_id=str(category.id))
-    client = TestClient(create_app(c))
-    saved = client.post('/accounts/quick-add', data=dict(account_id=account.id, kind='out', date='2026-09-13',
-                        amount='400', category_id=category.id, submission='b' * 32))
-    assert saved.status_code == 200
-    undone = client.post('/history/undo', follow_redirects=False)
-    assert undone.status_code == 303
+    app = create_app(c)
+    @app.get('/test-undo-id')
+    async def undo_id():
+        return c.undo.available()['undo']['id']
+    with TestClient(app) as client:
+        saved = client.post('/accounts/quick-add', data=dict(account_id=account.id, kind='out', date='2026-09-13',
+                            amount='400', category_id=category.id, submission='b' * 32))
+        assert saved.status_code == 200
+        group_id = client.get('/test-undo-id').json()
+        undone = client.post('/history/undo', data={'group_id': group_id}, follow_redirects=False)
+        assert undone.status_code == 303
     assert c.reporting.account_balance(account.id) == Decimal('50000')
     assert c.db.scalar('SELECT COUNT(*) FROM planned_payments WHERE planned_item_id=?', (item,)) == 0
