@@ -52,7 +52,7 @@ Report items 1-2. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens
 ## 3T3 Touch targets · M
 Report item 6: targets under 48 px (C05.1). The search half (item 5: live search, results in a card, "Press Ctrl K") was built by IV-3AN's 3AN6 (2026-11-02). Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
 
-**2026-11-04:** The alias disclosure has a 44 px quiet target, picker choices have 48 px targets and wrap, and the picker is clamped to the viewport (`tests/test_phone_check.py`, 320 and 360 px). The rebuilt period arrows, including Ask an AI, are 48 px; Pay early and Show the numbers are 44 px, loan due buttons are at least 48 px and Add a reserve is 48 px. Other reported targets still need review.
+**2026-11-04:** The alias disclosure has a 44 px quiet target, picker choices have 48 px targets and wrap, and the picker is clamped to the viewport (`tests/test_phone_check.py`, 320 and 360 px). The rebuilt period arrows, including Ask an AI, are 48 px; Pay early and Show the numbers are 44 px, loan due buttons and recurring due chips are at least 48 px, and Add a reserve is 48 px. Other reported targets still need review.
 
 ## 3T4 Settings tabs and money first · M
 Report items 7-8: five tabs (C03.3), stacked rows still a table, Overview Latest led by revaluations. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.

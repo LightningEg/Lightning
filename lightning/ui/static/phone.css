@@ -818,7 +818,7 @@ html.phone .main .key-notes .key-note { display: block !important; }
 .phone-recurring-row .phone-row-link > span, .phone-suggest > span { display: flex; flex-direction: column; min-width: 0; }
 .phone-recurring-row .phone-row-link > span > b, .phone-suggest > span > b { font-size: 15px; font-weight: 600; white-space: normal; }
 .phone-recurring-side { align-items: flex-end; flex: none; }
-.phone-recurring-side .plan-status-due { display: inline-flex; align-items: center; min-height: 32px; }
+.phone-recurring-side .plan-status-due { display: inline-flex; align-items: center; justify-content: center; min-width: 48px; min-height: 48px; height: auto; }
 /* == end 3AN sheets == */
 
 /* == 3AC Cash planning tab == (rules for phone/planning/plan.html) */

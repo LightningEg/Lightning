@@ -155,11 +155,13 @@ def test_phone_loan_and_reserve_actions_have_touch_targets():
         page.set_content('<html class="phone"><body><main class="main"><article class="plan-loan">'
                          '<a class="quiet-link">Pay early</a><a class="btn small">1 due</a></article>'
                          '<details class="reserve-create"><summary>Add a reserve</summary></details>'
-                         '<details class="chart-table"><summary>Show the numbers</summary></details></main></body></html>')
+                         '<details class="chart-table"><summary>Show the numbers</summary></details>'
+                         '<span class="phone-recurring-side"><a class="plan-status plan-status-due">1 due</a></span></main></body></html>')
         page.add_style_tag(content=(static / "style.css").read_text())
         page.add_style_tag(content=(static / "phone.css").read_text())
-        for selector, minimum in ((".quiet-link", 44), (".btn.small", 48), (".reserve-create summary", 48), (".chart-table summary", 44)):
+        for selector, minimum in ((".quiet-link", 44), (".btn.small", 48), (".reserve-create summary", 48), (".chart-table summary", 44), (".phone-recurring-side .plan-status-due", 48)):
             assert page.locator(selector).bounding_box()["height"] >= minimum
+        assert page.locator(".phone-recurring-side .plan-status-due").bounding_box()["width"] >= 48
         browser.close()
 
 
