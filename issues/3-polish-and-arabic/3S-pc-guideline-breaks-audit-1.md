@@ -15,7 +15,7 @@ repo: app
 
 ## Report
 Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§3 PC) on Mohab's sample and the demo at 1366 and 1920 px. Items 1 (Sale factors scrolled sideways) and 2 (chart end labels) are fixed; the numbers below keep their places. Only what 3C, 3Q, 3G and 3H do not
-already list. The brand audit passes; it cannot see `<select>` text colour, the first-run page, `<fieldset>` boxes or overlapping chart labels.
+already list. The original brand audit could not see select text colour, the first-run page, fieldset boxes or overlapping chart labels. The Chromium audit now checks category select colours, first-run Load, visible boxed fieldsets and chart-end overlaps on its visited pages; wider coverage remains to review.
 
 **Charts that mislead (A12)**
 3. **2026-11-04:** PC Financial health uses zero-based axes for its Savings rate and Net worth trends, keeps gaps for missing months, and requires three known points. The current lead shows Savings rate; Net worth remains in the no-lead fallback.
@@ -47,8 +47,7 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
     **2026-11-04:** Spaces around the Integrity register and Cash planning Recurring links are restored; Review activity, Weekly review and Sale factors light the Summary tab; **2026-11-04:** PC From SMS links back to Accounts; at 1920 content is 1,435 px wide (owner question 7 in the report).
 
 ## Fix
-Fix in the stylesheet or template that owns each, regenerate the RTL mirrors, rerun `tests/test_brand_audit.py` and Mohab. Extend the brand audit to
-`<select>` text, the first-run page, `<fieldset>` and label overlap so these stay fixed.
+Fix remaining findings in the stylesheet or template that owns each, regenerate the RTL mirrors when needed, and rerun `tests/test_brand_audit.py` and Mohab. Expand the new select, first-run, fieldset and label-overlap checks to additional pages and chart types.
 
 ## 3S1 Charts that mislead (A12) · M
 Report items 3-5: Health over-time axes, Currencies USD value against cost, the holding's dashed average-cost line colour. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
@@ -66,4 +65,4 @@ Report items 14-19: period control, slogans under titles (A05), Certificates' te
 Report item 20.
 
 ## 3S6 Teach the brand audit what it cannot see · M
-Extend `tests/test_brand_audit.py` to `<select>` text colour, the first-run page, `<fieldset>` boxes and overlapping chart labels so these stay fixed.
+The Chromium audit now checks category select colours, first-run Load, visible boxed fieldsets and overlapping trend/pace end labels on visited pages. The controls are tested against both passing and failing browser geometry. More page and chart-label coverage remains to review.

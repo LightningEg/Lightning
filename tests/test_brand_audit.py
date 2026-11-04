@@ -1,6 +1,7 @@
 """Brand audit in a real browser (guideline A03, A05, A10.3, A16): on the main PC pages, with the Mohab sample at
 1366 × 768 px, nothing is upper-case, text is only in A03 colours, plain links are Ink and underlined, H1 to H3 are Ink,
-no field is white or boxed, money out in the register is rose and never a positive figure, and the register fits its card.
+no field is white or boxed, fieldsets do not draw nested boxes, chart end labels do not overlap, money out in the
+register is rose and never a positive figure, and the register fits its card.
 Skipped when Playwright or Chromium is missing (CI has neither), so it runs by hand:
 `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers python -m pytest tests/test_brand_audit.py -q`."""
 from __future__ import annotations
@@ -19,7 +20,7 @@ if not CHROMIUM.exists():
     CHROMIUM = Path(shutil.which("chromium") or str(CHROMIUM))
 
 PAGES = ("/plan/purchases/new", "/exports/all", "/setup/salary", "/", "/transactions", "/accounts", "/accounts/1", "/accounts/currencies", "/settings", "/investments",
-         "/investments/prices", "/budget", "/plan", "/birdview/expenses", "/financial-health", "/categories",
+         "/investments/prices", "/budget", "/plan", "/birdview/expenses", "/financial-health", "/categories", "/settings?section=budget",
          "/profiles")
 # A03: Ink, Ink 2, Muted, Meadow text, Azure, Strong rose, Nile, and white on Nile or on the vivid gradient.
 TEXT = ["#0D2233", "#304A5C", "#566E7E", "#097852", "#0B6DD6", "#C93D72", "#0A2442", "#FFFFFF"]
@@ -28,7 +29,7 @@ COLLECT = """() => {
   const TEXT = %TEXT%;
   const hex = c => { const m = c.match(/[\\d.]+/g); if (!m) return null; if (m.length > 3 && +m[3] === 0) return null;
     return '#' + m.slice(0, 3).map(x => (+x).toString(16).padStart(2, '0')).join('').toUpperCase(); };
-  const out = {upper: [], colors: [], links: [], heads: [], fields: [], rose: [], overflow: [], jump: [], kpi: []};
+  const out = {upper: [], colors: [], links: [], heads: [], fields: [], fieldsets: [], chart_labels: [], rose: [], overflow: [], jump: [], kpi: []};
   const name = el => el.tagName + '.' + String(el.className && el.className.baseVal === undefined ? el.className : '').trim().split(/\\s+/).slice(0, 2).join('.');
   for (const el of document.querySelectorAll('body *')) {
     const s = getComputedStyle(el), r = el.getBoundingClientRect();
@@ -54,6 +55,25 @@ COLLECT = """() => {
   }
   for (const c of document.querySelectorAll('.main .card')) {
     if (c.scrollWidth > c.clientWidth + 1 || [...c.querySelectorAll('*')].some(w => w.clientWidth && w.scrollWidth > w.clientWidth + 1 && ['auto', 'scroll'].includes(getComputedStyle(w).overflowX))) out.overflow.push(name(c));
+  }
+  // A16: a semantic fieldset must not draw a card inside a card; a segmented choice is a control, not a card.
+  for (const el of document.querySelectorAll('.main .card fieldset:not(.planner-mode)')) {
+    const r = el.getBoundingClientRect(), s = getComputedStyle(el);
+    if (!r.width || !r.height || s.visibility === 'hidden' || el.closest('[hidden],[inert]')) continue;
+    const bg = hex(s.backgroundColor);
+    if (parseFloat(s.borderTopWidth) > 0 || bg) out.fieldsets.push(name(el) + ' ' + (el.querySelector('legend')?.textContent.trim() || ''));
+  }
+  // A12: labels for different series must not overlap when the browser draws them.
+  for (const plot of document.querySelectorAll('.main .chart-plot, .main .pace-plot')) {
+    const labels = [...plot.querySelectorAll('.chart-end, .pace-end small')].filter(el => {
+      const r = el.getBoundingClientRect(), s = getComputedStyle(el);
+      return r.width && r.height && s.visibility !== 'hidden' && !el.closest('[hidden],[inert]');
+    });
+    for (let i = 0; i < labels.length; i++) for (let j = i + 1; j < labels.length; j++) {
+      const a = labels[i].getBoundingClientRect(), b = labels[j].getBoundingClientRect();
+      if (a.left < b.right - 0.5 && a.right > b.left + 0.5 && a.top < b.bottom - 0.5 && a.bottom > b.top + 0.5)
+        out.chart_labels.push(labels[i].textContent.trim() + ' / ' + labels[j].textContent.trim());
+    }
   }
   // A08 and A09 (guideline 3.32): two to four KPI cards fill a row, every card compares, the figures share a line.
   for (const row of document.querySelectorAll('.main .kpi-row')) {
@@ -171,6 +191,17 @@ def audit():
                                                         if reference.count() else None)
                 else:
                     result["holding_cost_reference"] = None
+                # Exercise the audit itself with real browser geometry in both failing and passing states.
+                page.set_content("""<main class="main"><section class="card"><fieldset style="border:1px solid black"><legend>Example</legend></fieldset>
+                    <div class="chart-plot" style="position:relative;width:200px;height:100px">
+                    <span class="chart-end" style="position:absolute;left:30px;top:10px">100</span>
+                    <span class="chart-end" style="position:absolute;left:30px;top:10px">200</span></div></section></main>""")
+                bad = page.evaluate(COLLECT)
+                page.locator('fieldset').evaluate("el => el.style.border='0'")
+                page.locator('.chart-end').last.evaluate("el => el.style.top='60px'")
+                good = page.evaluate(COLLECT)
+                result["detector_controls"] = [bool(bad["fieldsets"]), bool(bad["chart_labels"]),
+                                               bool(good["fieldsets"]), bool(good["chart_labels"])]
                 browser.close()
         finally:
             host.stop()
@@ -261,3 +292,15 @@ def test_activity_and_transaction_categories_are_not_breadcrumbs(audit):
     assert audit["transaction_category_breadcrumbs"] is not None
     assert not audit["activity_breadcrumbs"]
     assert not audit["transaction_category_breadcrumbs"]
+
+
+def test_fieldsets_do_not_draw_boxes_inside_cards(audit):
+    assert not _fails(audit, "fieldsets")
+
+
+def test_chart_end_labels_do_not_overlap(audit):
+    assert not _fails(audit, "chart_labels")
+
+
+def test_fieldset_and_label_detectors_find_and_clear_real_browser_overlap(audit):
+    assert audit["detector_controls"] == [True, True, False, False]

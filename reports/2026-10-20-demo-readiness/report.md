@@ -410,3 +410,7 @@ A PC first-run recheck found three built-in sample descriptions and one label le
 ## 2026-11-04 · PC category hierarchy
 
 IV-3S item 10: Review activity uses category leaf names, as the register does. Transaction detail keeps the hierarchy as a header and separate lines rather than a breadcrumb.
+
+## 2026-11-04 · PC brand-audit coverage
+
+IV-3S6: the Chromium audit now checks visible fieldsets for nested boxes and trend/pace end labels for overlap on its visited pages. A controlled browser fixture checks that both detectors identify and clear violations. Category select colours and the first-run Load action are also covered; other pages and chart-label types remain to review.
