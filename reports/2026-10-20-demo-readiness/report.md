@@ -402,3 +402,7 @@ IV-3S item 11: the four PC Budget settings groups retain fieldset legends and co
 ## 2026-11-04 · Spending and first-run surfaces
 
 IV-3S item 11: PC Spending small multiples and the first-run account list no longer draw boxed surfaces inside their cards. Chromium checks their computed backgrounds, borders and shadows.
+
+## 2026-11-04 · Arabic sample previews
+
+A PC first-run recheck found three built-in sample descriptions and one label left in English in Arabic. Their preview text is now translated; sample names remain unchanged. A targeted rendering test checks all three cards.
