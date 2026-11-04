@@ -244,3 +244,26 @@ def test_unrealized_plus_realized_equals_the_revaluation_journals_plus_the_chang
     p = c.reporting.fx_positions.position("USD", "2026-09-01", "2026-09-30")
     assert abs((p.unrealized + p.realized_total) - (journals + change_since)) <= CENT
     assert p.unrealized + p.realized_total == p.value - D(str(flow("2026-09-30")))   # and both equal M - N
+
+
+def test_phone_currency_chart_names_and_lists_both_series_below_plot(c, dollars):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+
+    accounts, cats = dollars
+    story(c, accounts, cats)
+    c.fx.save('USD', '2026-12-29', '51')
+    app = create_app(c)
+    async def phone(scope, receive, send):
+        if scope['type'] == 'http':
+            scope.setdefault('state', {})['phone'] = True
+        await app(scope, receive, send)
+    phone_html = TestClient(phone).get('/accounts/currencies').text
+    pc_html = TestClient(app).get('/accounts/currencies').text
+    chart = phone_html.split('class="chart chart-trend"', 1)[1].split('</figure>', 1)[0]
+    assert chart.index('class="chart-plot"') < chart.index('class="phone-rows phone-chart-legend"') < chart.index('class="chart-table"')
+    numbers = chart.split('class="chart-table"', 1)[1].split('</details>', 1)[0]
+    assert 'Value of what you hold' in numbers and 'What it cost' in numbers
+    assert '33,150' in numbers and '31,417' in numbers  # phone figures round to whole EGP
+    pc_chart = pc_html.split('class="chart chart-trend"', 1)[1].split('</figure>', 1)[0]
+    assert pc_chart.index('class="chart-legend"') < pc_chart.index('class="chart-plot"')

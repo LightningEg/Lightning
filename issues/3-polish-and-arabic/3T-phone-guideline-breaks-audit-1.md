@@ -51,6 +51,7 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§4 Phone
 3T2 is done: SMS and Search acquired Back in 3AN5/3AN6; Settings, account import and the investment planner now have fallback destinations. Budget category links return to Budget and the rebuilt register has one period control and a concise category filter (`tests/test_phone_frame.py`).
 
 ## 3T5 Charts and expense analysis · M
+**2026-11-04:** Reserves shows four named sources then Other, without inventing a combined value; Other opens every source and its timing (`tests/test_emergency_liquidity_context.py`, `tests/test_phone_liquidity_browser.py`). Phone trend legends now sit below the plot, and their number disclosure includes every series (`tests/test_fx_positions.py`, `tests/test_phone_recurring_browser.py`).
 Report items 9-10: two charts in one card, time axes with 8-10 labels, five or more names without Other.
 
 **2026-11-04:** Shared donut grouping now folds exactly five names (and combines an existing Other); phone time axes show at most three labels (`tests/test_demo_and_visuals.py`, `tests/test_phone_check.py`). Planner now keeps four named suggestions and an expandable Other, preserving every detailed allocation (`tests/test_investments.py`, `tests/test_phone_planner_browser.py`). Review Reserves sources and the remaining chart and comparison observations before closing.

@@ -74,6 +74,15 @@ def test_changed_monthly_payment_warning_fits_phone(c, setup, monkeypatch):
                         return h.bottom <= p.top + 1 && card.left >= 0 && card.right <= innerWidth &&
                           e.scrollWidth <= e.clientWidth + 1;
                     }''')
+                    page.goto(host.origin + '/accounts/currencies?period=all')
+                    chart = page.locator('.chart-trend').first
+                    assert chart.count() == 1
+                    legend = chart.locator('.phone-chart-legend')
+                    assert legend.locator('.phone-row').count() == 2
+                    assert legend.bounding_box()['y'] >= chart.locator('.chart-plot').bounding_box()['y'] + chart.locator('.chart-plot').bounding_box()['height']
+                    chart.locator('.chart-table > summary').click()
+                    names = chart.locator('.chart-table .phone-row small').all_text_contents()
+                    assert len(set(names)) == 2
                     page.goto(host.origin + '/settings?section=currencies&tab=rates')
                     assert page.locator('table').count() == 0
                     assert page.get_by_text('Dollar savings', exact=False).count() > 0
