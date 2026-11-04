@@ -52,4 +52,4 @@ Still open: restore, device and borrowed-profile routes after their claims clear
 
 ## Bank import parsing · 2026-11-04
 
-CSV decoding, numeric and date normalization, and row-level errors live in `bank_import_parsing.py`; `BankImportService` and the original helper imports remain available. Proposal and posting orchestration stay open. Regression: `tests/test_bank_imports.py`, `tests/test_import_upload_limits.py`, `tests/test_architecture.py`.
+CSV decoding, numeric and date normalization, and row-level errors live in `bank_import_parsing.py`; `BankImportService` and the original helper imports remain available. The review proposals and duplicate/transfer/category suggestions now live in `bank_import_proposals.py`; the facade retains its preview interface. Posting orchestration stays open. Regression: `tests/test_bank_imports.py`, `tests/test_import_upload_limits.py`, `tests/test_architecture.py`.
