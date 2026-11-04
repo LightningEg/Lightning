@@ -120,8 +120,10 @@ balance), Loan balance and Principal and interest (Loans), Histogram (Spending),
 4. Investments, holding page, Currencies, Accounts, account page.
 5. Phone, arabic-check, Mohab, site-recapture.
 
-Small fixes that need no decision may go first: phone Budget Spent in Ink; Lowest point's dot on the low; Reserves "−0";
-Average payment line soft rose; loan progress in Azure; Currencies card in a card.
+Small fixes (3Q4) are done (2026-11-04): loan paid in Azure and still owed in soft rose (Loans Lead, loan meters, By loan on
+PC and phone); Currencies' per-currency figures are no longer cards in a card (`tests/test_colour_meanings.py`). Already
+gone in the current build: Reserves "−0", the Recurring average-payment line; the phone Budget's Spent is Ink and Lowest
+point's dot sits on the low.
 
 ### 7. Owner's answers (2026-10-19: "yes to all five, update the guideline now")
 
@@ -142,6 +144,3 @@ Average payment line soft rose; loan progress in Azure; Currencies card in a car
 
 ## 3Q3 Phone, arabic-check, Mohab and site-recapture pass · M
 §6 step 5.
-
-## 3Q4 Small fixes that need no decision · S
-Phone Budget Spent in Ink; Lowest point's dot on the low; Reserves `−0`; Average payment line soft rose; loan progress in Azure; Currencies card in a card.

@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 39 open items, in the order they are worked on.
+10 milestones, 37 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -51,7 +51,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **BV-3B** | [In Arabic the holdings table's price and FX split reads out of order](3-polish-and-arabic/3B-arabic-gain-split-reads-backwards.md) ([#34](https://github.com/LightningEg/Lightning/issues/34)) | bug, visual · low | Feel | S | new |
 | **IV-3F** | [The phone's top bar looks too white to one user](3-polish-and-arabic/3F-phone-top-bar-looks-too-white.md) | improvement, visual | Feel | S | ready |
 | **IV-3G** | [Outside review of every tab - one organism, fewer numbers, smarter links, less explaining](3-polish-and-arabic/3G-one-organism-review-of-every-tab.md) | improvement, visual | Feel | L | ready |
 | IV-3G1 | ↳ One name per figure | | | M | |
@@ -70,7 +69,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3Q1 | ↳ KPI cards: Overview, Spending thin-data forms, Recurring, Loans, Reserves | | | M | |
 | IV-3Q2 | ↳ KPI cards: Investments, holding page, Currencies, Accounts, account page | | | M | |
 | IV-3Q3 | ↳ Phone, arabic-check, Mohab and site-recapture pass | | | M | |
-| IV-3Q4 | ↳ Small fixes that need no decision | | | S | |
 | **IV-3S** | [PC screens break the guideline in 18 places not yet filed - misleading charts, colours off meaning](3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) | improvement, visual | Feel | L | ready |
 | IV-3S1 | ↳ Charts that mislead (A12) | | | M | |
 | IV-3S2 | ↳ Colour off its meaning (A03) | | | M | |
@@ -81,11 +79,9 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **IV-3T** | [Phone screens break Part C - cut words, overlapping text, no way back on five pages, small targets, five Settings tabs](3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | improvement, visual | Feel | L | ready |
 | IV-3T5 | ↳ Charts and expense analysis | | | M | |
 | IV-3T6 | ↳ Fields, pairs and small things | | | M | |
-| **NF-3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | new feature | Capture | L | new |
+| **NF-3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | new feature | Capture | L | new |
 | NF-3AD3 | ↳ Swipe left to set a category | | | M | |
-| NF-3AD4 | ↳ Financial health as a score | | | owner | |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/3AI-institution-logos.md) | owner task | Feel |  | ready |
-| **BT-3AJ** | [Changing the language is recorded as an undoable action, so Undo switches it back](3-polish-and-arabic/3AJ-language-change-is-undoable.md) ([#167](https://github.com/LightningEg/Lightning/issues/167)) | bug, technical · low | Feel | S | ready |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | |
 | IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | M | |
@@ -96,7 +92,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner | |
 
-Done: 3A, 3C, 3D, 3E, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK, 3AL, 3AO, 3AP. Next free code: 3AQ.
+Done: 3A, 3B, 3C, 3D, 3E, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP. Next free code: 3AQ.
 
 ## 4 Edit journal and devices
 

@@ -87,3 +87,22 @@ def test_save_with_missing_budget_fx_keeps_the_posting_and_undo_in_one_action(c,
         assert undo.status_code == 303
     assert c.reporting.account_balance(bank.id) == 50000
     assert c.db.scalar("SELECT COUNT(*) FROM transactions WHERE type='OUT'") == 0
+
+
+def test_language_change_is_not_undoable_and_undo_reverts_the_money_action(c, setup):
+    """3AJ: Undo after a language switch reverts the last money action, never the language."""
+    import re
+    bank, food = setup[0]['cib'], setup[1]['EXP.PERSONAL.FOOD']
+    path, values = form_for(c, bank, food, 'popup-new')
+    with TestClient(create_app(c)) as client:
+        assert client.post(path, data=values, follow_redirects=False).status_code == 303
+        assert client.post('/settings/locale', data={'locale': 'ar'}, follow_redirects=False).status_code in (303, 302)
+        assert c.settings.get('locale') == 'ar'
+        page = client.get(f'/accounts/{bank.id}')
+        group = re.search(r'action="/history/undo".*?name="group_id" value="(\d+)"', page.text, re.S)
+        assert group
+        undo = client.post('/history/undo', data={'group_id': group.group(1)}, follow_redirects=False)
+        assert undo.status_code == 303
+    assert c.settings.get('locale') == 'ar'
+    assert c.db.scalar("SELECT COUNT(*) FROM transactions WHERE type='OUT'") == 0
+    assert c.reporting.account_balance(bank.id) == 50000

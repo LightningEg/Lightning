@@ -1,5 +1,5 @@
 ---
-title: Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score
+title: Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort
 type: feature
 pillar: capture
 size: L
@@ -39,5 +39,4 @@ score and the swipe. Add each to Part C when it is built, in both repos.
 ## 3AD3 Swipe left to set a category · M
 Reveal Set category on a Transactions row without fighting C03.3 (swiping never changes tabs) or press-and-hold selection (C08.5).
 
-## 3AD4 Financial health as a score · owner
-There is no 0-100 score in the app. A score is a financial rule: the owner defines it first (Architecture › Financial rules).
+**3AD4 dropped (owner, 2026-11-04):** no 0-100 health score; Health keeps its compared ratios.

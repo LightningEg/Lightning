@@ -90,6 +90,6 @@
       <details class="overview-disclosure"><summary><span>{{ fig.loans_still_to_pay.label }}</span><b>{{ owe.loans_still_to_pay|money }}</b></summary><div class="overview-disclosure-body">{% for loan in p.loan_rows %}<a href="/plan/loans"><span>{{ loan.label }}{% if loan.note %} <small>{{ loan.note }}</small>{% endif %}</span><b>{{ loan.value|money }}</b></a>{% else %}<p class="muted small">{{ "No loans to pay."|tr(locale) }}</p>{% endfor %}</div></details>
       {% if gameya_owed %}<div class="overview-static-row"><span>{{ fig.gameya_still_to_pay.label }}</span><b>{{ gameya_owed|money }}</b></div>{% endif %}</div></section>
   {% if by_loan %}<section><div class="overview-block-head"><div><h3>{{ "By loan"|tr(locale) }}</h3></div></div>
-    {{ bars(p.loan_bars, 'hold', 'No loans to pay.') }}</section>{% endif %}
+    {{ bars(p.loan_bars, 'spend', 'No loans to pay.') }}</section>{% endif %}
 </div></section>
 {% endblock %}
