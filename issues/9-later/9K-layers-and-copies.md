@@ -49,3 +49,7 @@ Still open: the unclaimed profile-route extraction, coordinated journal/device/r
 The profile lifecycle screens (list, new profile, unlock with password or fingerprint, recovery, password, question and recovery key) moved unchanged out of `profile_app` into `lightning/runtime/profile_screens.py`; the routes see the session, devices and gate through one `ProfileScreens` record, and `page`/`action` come back for the routes that stay. Restore, devices, borrowed-profile and Lock routes were not touched (they belong to the restore and journal claims). `runtime/app.py` is now about 750 lines. Existing profile, phone, restore and architecture tests pass unchanged; ruff and the import contracts pass.
 
 Still open: restore, device and borrowed-profile routes after their claims clear, and the bank-import parsing/proposal/posting split.
+
+## Bank import parsing · 2026-11-04
+
+CSV decoding, numeric and date normalization, and row-level errors live in `bank_import_parsing.py`; `BankImportService` and the original helper imports remain available. Proposal and posting orchestration stay open. Regression: `tests/test_bank_imports.py`, `tests/test_import_upload_limits.py`, `tests/test_architecture.py`.

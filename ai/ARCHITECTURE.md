@@ -96,7 +96,7 @@ core/                 dates, money, identifiers, posting rules; no app dependenc
 | `lightning/deposits` | Certificate terms and gam'eya (savings circle) terms; read-only interest/payout projections |
 | `lightning/money_from_others.py` | Custody attribution for money and units held for others |
 | `lightning/zakat.py` | `ZakatService`: the zakat estimate, its settings and the zakat day (see Position and reporting contract › Zakat) |
-| `lightning/bank_imports.py`, `reconciliation.py` | Staged CSV review and posting; checking an account against the bank's balance (a small difference posts one IN/OUT balance adjustment) |
+| `lightning/bank_imports.py`, `bank_import_parsing.py`, `reconciliation.py` | CSV decoding/normalization, staged review and posting; checking an account against the bank's balance (a small difference posts one IN/OUT balance adjustment) |
 | `lightning/sms_imports.py` | Bank SMS: `parse_sms` (CIB, NBE; samples `tests/fixtures/bank_sms.json`) |
 | `lightning/budgeting`, `reserves.py` | Spending plans and cash reserves (separate concepts) |
 | `lightning/planning` | Recurring items, loans, payments, forecast; `position.py` computes every position figure once; `health.py` ratios, Financial health, plan check |
