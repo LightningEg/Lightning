@@ -422,3 +422,7 @@ IV-3S item 13: when both forms are available, PC transaction detail pairs catego
 ## 2026-11-04 · Counterparty interaction recheck
 
 IV-3S item 17: Chromium measured every expanded sample row at 1024, 1366 and 1920 px without the reported overlap, and verified the alias Enter hint and a successful save. This covers the sample, not every possible name.
+
+## 2026-11-04 · Spending header dates
+
+IV-3S item 15: the PC Spending header now displays the same selected dates used by its figures and period control, including when the period has no spending. Its status sentence and the other named pages remain to review. Chromium checked the heading in English and Arabic.
