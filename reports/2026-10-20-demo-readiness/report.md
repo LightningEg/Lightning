@@ -354,3 +354,7 @@ IV-3S item 20: PC From SMS links back to Accounts, where its entry point lives.
 ## 2026-11-04 · Counterparty recheck
 
 IV-3S item 17: at 1366 px, an expanded sample counterparty did not have the reported overlap. On PC the Save alias button is intentionally screen-reader-only, with an Enter hint. Other rows and widths have not been checked.
+
+## 2026-11-04 · Planner allocation stack
+
+IV-3S item 9: the PC Planner stack groups suggestions beyond the four largest into Neutral Other, with a labelled key. All detailed allocation rows and inputs remain available; tests check exact totals for five and more classes, and Chromium checks the Neutral colour.

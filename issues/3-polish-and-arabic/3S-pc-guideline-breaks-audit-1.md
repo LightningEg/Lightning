@@ -29,7 +29,7 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 8. Gam'eya: five late instalments are Muted grey with no Late chip, and "Next instalment" shows a past date. **2026-11-04:** Ordinary negative holding monthly changes use Ink and keep their sign; the gam'eya finding remains open.
 
 **A16 shipping list**
-9. **2026-11-04:** The current Investments lead removes Biggest holdings when the portfolio can be valued; a six-holding browser fixture confirms it is absent. The older fallback limits its bars to four named holdings and a Neutral Other. The Planner's five-class split remains to review.
+9. **2026-11-04:** The current Investments lead removes Biggest holdings when the portfolio can be valued; a six-holding browser fixture confirms it is absent. The older fallback limits its bars to four named holdings and a Neutral Other. The Planner stack now shows four named parts and a Neutral Other with the exact remainder; all detailed allocation rows and inputs remain available.
 10. "L1 › L2": the transaction page's "Personal › Entertainment"; every row of Review activity. **2026-11-04:** PC Review activity shows a minus on money out; category hierarchy remains to review.
 11. Card in a card: Settings › Budget's four boxes; Spending's small multiples; Certificates' nine `<fieldset>` boxes; first run's account-type list.
 12. Dropdown for your data: Certificates "Buy from" and "Forecast payout account"; the empty profile's Budget spending groups.
