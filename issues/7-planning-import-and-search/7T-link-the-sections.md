@@ -14,9 +14,7 @@ repo: app
 
 7T1 to 7T4 are built (branch `claude/linked-sections`, `lightning/workflows/linked.py`, `tests/test_linked_sections.py`): one transaction page with what it touched, `/counterparties/{id}`, what depends on an account, `/tags/{tag}`. Architecture › Linked sections. The remaining salary-day review and bill reserve are being completed under the owner's delegated report work; 7L2 and the 7M/7R decisions are implemented. Every figure is computed in a Python service; plans move no money.
 
-## 7T5 Salary-day cascade · L
-
-When the real salary settles its planned income, Needs you shows bills before next payday, reserves to refill, goal top-ups and safe to spend, opening the payday allocation filled in (`workflows/salary_setup.py`, `planning/funding.py`). Builds with 7L2.
+7T5 is built: a settled salary opens the reviewed payday allocation with bills, reserves, goals and Safe to spend. `tests/test_salary_day_review.py` covers the review and explicit confirmation; no cash is assigned automatically.
 
 ## 7T6 A reserve tied to its bill · L
 

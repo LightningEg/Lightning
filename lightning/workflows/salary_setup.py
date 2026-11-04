@@ -34,3 +34,16 @@ def set_up_salary(c, account_id, amount, payday) -> int:
                                    start_date=fmt_date(start), month_day=day_number,
                                    account_id=account.id, category_id=category.id)
     return item_id
+
+
+def latest_settled_salary(c, on):
+    """Latest posted salary that actually settles a scheduled salary payment."""
+    row = c.db.one(
+        "SELECT p.id,p.transaction_id,p.due_date,t.date FROM planned_payments p "
+        "JOIN planned_items i ON i.id=p.planned_item_id "
+        "JOIN categories cat ON cat.id=i.category_id "
+        "JOIN transactions t ON t.id=p.transaction_id "
+        "WHERE i.kind='INCOME' AND (cat.code='EXP.WORK.SALARY' OR cat.code LIKE 'EXP.WORK.SALARY.%') "
+        "AND p.status='PAID' AND t.status='POSTED' AND t.type='IN' AND t.date<=? "
+        "ORDER BY t.date DESC,p.id DESC LIMIT 1", (fmt_date(on),))
+    return dict(row) if row else None

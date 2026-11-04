@@ -39,7 +39,7 @@ def _plural(count: int, one: str, many: str) -> str:
 GROUPS = (("payments", "Bills and payments", ("/plan/items/", "/gameya/", "/deposits/")),
           ("activity", "Activity to sort out", ("/rules", "/sms", "/accounts/", "/transactions", "/activity", "/reimbursements")),
           ("budget", "Budget and saving", ("/budget", "/financial-health")),
-          ("cash", "Cash and goals", ("/plan",)),
+          ("cash", "Cash and goals", ("/plan", "/payday")),
           ("prices", "Prices and valuations", ("/investments/", "/settings")))
 GROUP_LABELS = {key: label for key, label, _ in GROUPS}
 
@@ -98,6 +98,12 @@ class ReviewInbox:
         items.extend(self._sms())
         items.extend(self._uncategorized())
         items.extend(self._smart_suggestions(on))
+        from lightning.workflows.salary_setup import latest_settled_salary
+        salary = latest_settled_salary(c, on)
+        if salary:
+            items.append({"label": "Salary received", "detail": "Review bills, reserves, goals and safe to spend.",
+                          "href": "/payday", "action": "Review", "priority": 2,
+                          "source_version": [salary["id"], salary["transaction_id"], salary["due_date"]]})
         for reserve in c.reserves.list_active():
             if (reserve["spent"] > ZERO and reserve["remaining"] > ZERO
                     and (reserve["kind"] == "EMERGENCY" or reserve["recurrence"] != "NONE")):

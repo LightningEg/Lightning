@@ -996,6 +996,11 @@ ARABIC_UI = {
     'Choose an active project reserve.': 'اختار مبلغ محجوز نشط لهدف.',
     'Choose an active bill or subscription.': 'اختار فاتورة أو اشتراك نشط.',
     'This bill already has an active reserve.': 'الفاتورة دي مربوطة بمبلغ محجوز نشط بالفعل.',
+
+    'Salary received': 'المرتب وصل',
+    'Review bills, reserves, goals and safe to spend.': 'راجع الفواتير والاحتياطيات والأهداف والمتاح الآمن للصرف.',
+    'Before your next payday': 'قبل المرتب الجاي',
+    'Turn on cash funding to confirm this proposal.': 'شغّل توزيع الفلوس عشان تأكد الاقتراح.',
     'Safe to spend': 'المتاح الآمن للصرف',
     'Bills inside the plan': 'الفواتير ضمن الخطة',
     'Budget until payday': 'الميزانية لحد الراتب',
