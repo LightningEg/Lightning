@@ -11,7 +11,6 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IT-5F** | [One order of price sources](../../issues/5-investments/5F-one-order-of-price-sources.md) | M | ready |
 | **NF-5G** | [Brokerages that span exchanges and currencies](../../issues/5-investments/5G-brokerages-across-exchanges.md) | L | building |
 | **NF-6A** | [Market data: price packs, collected in the cloud](../../issues/6-market-data/6A-price-packs.md) | L | building |
 | **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](../../issues/6-market-data/6B-europe-and-gcc-shares.md) | L | blocked on a source that allows redistribution |

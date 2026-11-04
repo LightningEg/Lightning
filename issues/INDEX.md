@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 59 open items, in the order they are worked on.
+10 milestones, 58 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -140,7 +140,6 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **IT-5F** | [One order of price sources](5-investments/5F-one-order-of-price-sources.md) ([#217](https://github.com/LightningEg/Lightning/issues/217)) | improvement, technical | Own | M | ready |
 | **NF-5G** | [Brokerages that span exchanges and currencies - structure, workflows and analysis to build](5-investments/5G-brokerages-across-exchanges.md) | new feature | Own | L | building |
 | NF-5G1 | ↳ Phase 0: honest display | | | M | |
 | NF-5G2 | ↳ Phase 1: listings | | | L | |
@@ -150,7 +149,7 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | NF-5G6 | ↳ Phase 5: analysis | | | L | |
 | NF-5G7 | ↳ Phase 6: lots and corporate actions | | | L | |
 
-Done: 5A, 5B, 5C, 5D, 5E, 5H, 5I, 5J, 5K, 5L, 5M. Next free code: 5N.
+Done: 5A, 5B, 5C, 5D, 5E, 5F, 5H, 5I, 5J, 5K, 5L, 5M. Next free code: 5N.
 
 ## 6 Market data
 
