@@ -430,3 +430,7 @@ IV-3S item 15: the PC Spending header now displays the same selected dates used 
 ## 2026-11-04 · Privacy preference and undo
 
 IV-3S item 19: toggling Hide amounts no longer adds a generic undo entry or runs payment matching. A previous action remains undoable on both ordinary and journal-home profiles; the journal still synchronizes the preference. Chromium confirmed the saved privacy state after reload without a new Saved changes entry.
+
+## 2026-11-04 · Currency header dates
+
+IV-3S item 15: the PC Currencies header distinguishes balances and unrealized gain at the selected end date from realized gain and spread over the selected range. The balance note also names the end date rather than today. Chromium checked a past custom range in English and Arabic.

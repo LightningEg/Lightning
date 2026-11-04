@@ -2163,6 +2163,8 @@ ARABIC_UI = {
     'Realized FX gain': 'ربح فروق العملة المحقق',
     'Price part': 'جزء السعر',
     'FX part': 'جزء العملة',
+    'Balances and unrealized gain as of {date}; realized gain and spread from {start} to {end}.': 'الأرصدة وربح فرق العملة غير المحقق لحد {date}؛ والربح المحقق وتكلفة التحويل من {start} لحد {end}.',
+    'Everything you hold outside {base}, valued as of {date}.': 'كل اللي معاك بغير {base}، متقيّم لحد {date}.',
     'Foreign money you hold: what it cost, what it is worth, what it earned or lost.': 'الفلوس الأجنبية اللي معاك: تكلفتها وقيمتها وكسبت إيه أو خسرت إيه.',
     'Foreign money': 'الفلوس الأجنبية',
     'Everything you hold outside {base}, at today’s rates.': 'كل اللي معاك بغير {base}، بأسعار النهارده.',

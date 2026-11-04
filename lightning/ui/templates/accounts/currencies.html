@@ -2,7 +2,7 @@
 {% from "partials/macros.html" import held, period_control, page_header with context %}
 {% from "partials/charts.html" import trend as trend_chart %}
 {% block title %}{{ 'Currencies'|tr(locale) }}{% endblock %}
-{% block heading %}{{ page_header('Currencies'|tr(locale), 'Foreign money you hold: what it cost, what it is worth, what it earned or lost.'|tr(locale)) }}{% endblock %}
+{% block heading %}{{ page_header('Currencies'|tr(locale), 'Balances and unrealized gain as of {date}; realized gain and spread from {start} to {end}.'|tr(locale, date=period.end_text, start=period.start_text, end=period.end_text)) }}{% endblock %}
 {% block top_actions %}{{ period_control("/accounts/currencies", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }} <a class="btn" href="/accounts">{{ 'Accounts'|tr(locale) }}</a> <a class="btn primary" href="/accounts/new">{{ 'Add account'|tr(locale) }}</a>{% endblock %}
 {% macro gain(value) -%}
 {# A11: a gain is green with +; a loss is ink with −, strong rose is kept for what needs you #}
@@ -12,7 +12,7 @@
 {% if period_error %}<div class="flash error" role="alert">{{ period_error|tr(locale) }}</div>{% endif %}
 {% if positions %}
 <div class="metric-grid fx-kpis">
-  <div class="metric-card"><div class="metric-label">{{ 'Foreign money'|tr(locale) }}</div><div class="metric-value held">{% if totals.complete %}{{ (totals.value + totals.investments)|money }}{% else %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% endif %} <small>{{ base }}</small></div><div class="metric-note">{% if totals.investments %}{{ 'Cash {cash} · investments {inv}'|tr(locale, cash=totals.value|money, inv=totals.investments|money) }}{% else %}{{ 'Everything you hold outside {base}, at today’s rates.'|tr(locale, base=base) }}{% endif %}</div></div>
+  <div class="metric-card"><div class="metric-label">{{ 'Foreign money'|tr(locale) }}</div><div class="metric-value held">{% if totals.complete %}{{ (totals.value + totals.investments)|money }}{% else %}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{% endif %} <small>{{ base }}</small></div><div class="metric-note">{% if totals.investments %}{{ 'Cash {cash} · investments {inv}'|tr(locale, cash=totals.value|money, inv=totals.investments|money) }}{% else %}{{ 'Everything you hold outside {base}, valued as of {date}.'|tr(locale, base=base, date=period.end_text) }}{% endif %}</div></div>
   <div class="metric-card" title="{{ fig.unrealized_fx_gain.meaning }}"><div class="metric-label">{{ fig.unrealized_fx_gain.label }}</div><div class="metric-value">{{ gain(totals.unrealized if totals.complete else none) }} <small>{{ base }}</small></div><div class="metric-note">{{ 'Not locked in until you spend or convert.'|tr(locale) }}</div></div>
   <div class="metric-card" title="{{ fig.realized_fx_gain.meaning }}"><div class="metric-label">{{ fig.realized_fx_gain.label }}</div><div class="metric-value">{{ gain(totals.realized) }} <small>{{ base }}</small></div><div class="metric-note">{{ period.start_text }} → {{ period.end_text }}</div></div>
   <div class="metric-card" title="{{ fig.spread_paid.meaning }}"><div class="metric-label">{{ fig.spread_paid.label }}</div><div class="metric-value"><span class="num">{{ totals.spread|money }}</span> <small>{{ base }}</small></div><div class="metric-note">{{ 'Beyond the market rate, on conversions in this period.'|tr(locale) }}</div></div>
