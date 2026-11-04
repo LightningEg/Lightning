@@ -104,4 +104,4 @@ def investment_breakdown(owned_rows: list[OwnedRow], position: Position, report:
         g["weight"] = g["value"] / holdings_total * 100 if holdings_total else ZERO
         g["gain_pct"] = g["gain"] / g["invested"] * 100 if g["invested"] else None
     holding_groups = sorted(groups.values(), key=lambda g: (-g["value"], g["name"].casefold()))
-    return InvestmentBreakdown(holding_groups, dict(horizons), balances, holdings_total)
+    return InvestmentBreakdown(holding_groups, horizons, balances, holdings_total)
