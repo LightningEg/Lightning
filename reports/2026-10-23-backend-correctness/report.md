@@ -23,7 +23,7 @@ All reproductions use temporary dummy databases, offline prices and a fixed date
 | [2K](#fix-progress) | Low | A rejected currency-converting buy leaves a new empty currency pocket. | Route selection, pocket creation, conversion and purchase roll back together. |
 | [2O](#fix-progress) | Medium | Phone bulk Delete voids selected rows without a confirmation question. | Confirm the selected scope and preserve the button’s delete action. |
 | [3AE](#fix-progress) | Medium | A refused PC bulk edit loses both selection and typed changes. | Keep the correction and selection available after a rejected save. |
-| 1G (done: `tests/test_architecture.py`) | Tech | Major financial modules and `sync` are outside the layered import contract. | Give every production module an explicit dependency policy. |
+| 1G (finished 2026-11-04: `pyproject.toml` sync contracts, `tests/test_architecture.py`) | Tech | Major financial modules and `sync` are outside the layered import contract. | Give every production module an explicit dependency policy. |
 
 ### 2G: the cash rule depends on which operation was used
 
@@ -196,3 +196,6 @@ Combined full-suite validation: **2,395 passed, 10 skipped**; all four import co
 ### 1G follow-up (2026-11-04)
 
 The existing top-level inventory covers the original omissions. Sync modules and package initializers now have explicit policies and static direct-import checks, with negative tests in `tests/test_architecture.py`. Investment reevaluation and forecast deposit-receipt collaborators are now required and validated, and financial adapters cannot import runtime modules except the finance-to-store dependency. Ordinary undo now installs both validators before attaching; the root initializer and launcher are documented layer exemptions. Static checks cannot discover dynamically computed imports.
+
+## Follow-up · 2026-11-04: 1G finished
+Every top-level module has a layer (test), the sync protocol modules may import only the database and security, the journal core imports no financial module, and five named journal adapters may (a sixth fails `tests/test_architecture.py` and lint-imports). The forecaster gets its deposit receipts through its constructor, and a test refuses any service assigned to another after construction. Left, tracked in 9K: Undo's history-validation hook in `bootstrap.py`.

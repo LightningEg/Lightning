@@ -1,9 +1,8 @@
 # The original browser version (legacy)
 
-Moved out of the README on 2026-10-31. `python -m lightning` still starts it; it opens a plaintext database and is
-planned for removal (OW-2AB). The supported app is the Windows and Android app with encrypted profiles.
+Historical instructions moved out of the README on 2026-10-31. **Superseded 2026-11-04 (OW-2AB):** bare `python -m lightning` and `--db` no longer start a plaintext ledger. Use `python -m lightning --profiles` for encrypted profiles, or `--demo`/`--sample` for disposable examples. Existing legacy files are untouched; legacy import remains IT-2C work. The commands below describe the original version, not the supported way to open real data.
 
-### Start the original browser version
+### Historical startup instructions (no longer supported)
 
 **Windows:** double-click `run.bat`. The first run sets everything up (needs Python 3.11+ from
 python.org, with "Add python.exe to PATH" ticked). Your browser opens at `http://127.0.0.1:8765`.

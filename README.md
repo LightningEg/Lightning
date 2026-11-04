@@ -20,7 +20,7 @@ and never asks for a bank login. English and Arabic.
 ```
 pip install -r requirements-dev.txt
 python tools/install_source.py
-python -m lightning   # the password-protected app, in a browser (Linux)
+python -m lightning --profiles   # the password-protected app, in a browser (Linux)
 python -m pytest                 # the tests
 lint-imports                     # architecture contracts
 ```

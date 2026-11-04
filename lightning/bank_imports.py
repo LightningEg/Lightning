@@ -11,11 +11,12 @@ from lightning.core.errors import ConflictError, LightningError, NotFoundError, 
 from lightning.core.money import from_e6
 
 # Re-export the original helpers for the UI, journal capture and existing callers.
-from lightning.bank_import_parsing import (INTERNAL_WORDS as INTERNAL_WORDS, MAX_BYTES as MAX_BYTES, OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS,
+from lightning.bank_import_rows import (INTERNAL_WORDS as INTERNAL_WORDS, MAX_BYTES as MAX_BYTES, OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS,
                                           _amount as _amount, _date as _date, _decimal_amount as _decimal_amount,
-                                          _separate_amount as _separate_amount, decode_csv, is_internal as is_internal, normalize_rows)
+                                          _separate_amount as _separate_amount, decode_csv, is_internal as is_internal)
 from lightning.bank_import_proposals import ImportProposals, LINK_WINDOW_DAYS as LINK_WINDOW_DAYS
 from lightning.bank_import_posting import ImportPoster
+from lightning.bank_import_parsing import normalize_rows
 
 
 class _ImportReviewRequired(Exception):
