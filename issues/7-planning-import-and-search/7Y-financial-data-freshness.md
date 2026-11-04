@@ -3,7 +3,7 @@ title: Explain which stale or pending inputs affect a financial figure
 type: feature
 pillar: understand
 size: M
-status: new
+status: building
 post: no
 created: 2026-11-03
 by: Codex
@@ -21,3 +21,9 @@ repo: app
 Create a Python read model of reason, source date, affected figure and resolution link. Extend the existing figure explanation surface on PC/phone, with a clear distinction between known and unknown freshness. Test stale/fresh prices, absent FX, pending confirmations and reconciled accounts; verify the explanation cannot change the amount. Coordinate with market and journal owners.
 
 Not posted: proposal awaiting prioritization and shared freshness semantics.
+
+## Built so far · 2026-11-04
+
+`lightning/planning/freshness.py` (`FreshnessService`, on the container as `c.freshness`): for **What you own** it returns notes of kind stale price (dated, older than 62 days), no price (undated), stale rate (dated, older than the FX limit) and no rate (undated), each with the figure it affects and where to fix it. The Overview's "What you own" explanation popup (`/explain/owned`, PC and phone) lists them under "What this figure leans on", in English and Arabic. `tests/test_freshness.py` covers fresh and stale prices, an unpriced holding, stale and missing rates, a profile with nothing to say, the Arabic page, and that no amount changes.
+
+Left: the same notes under Free cash and the forecast; pending device edits (journal status) and unconfirmed receipts as reasons; an account not checked against its bank for a long time (reconciliation date).
