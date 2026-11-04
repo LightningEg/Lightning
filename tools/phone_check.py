@@ -1,7 +1,7 @@
 """Check every main page in the phone frame at 360 and 320 px wide (guideline C12): nothing may scroll
-sideways. Starts the phone app on a dummy profile with the sample household. Needs Playwright and Chromium.
+sideways or be clipped past the viewport. Starts the phone app on a dummy profile with the sample household. Needs Playwright and Chromium.
 
-    python tools/phone_check.py [--shots folder]      # prints each page that overflows and its widest element
+    python tools/phone_check.py [--arabic] [--shots folder]      # prints pages with sideways overflow or clipped elements
 """
 from __future__ import annotations
 
@@ -25,8 +25,37 @@ WIDEST = """() => { const w = innerWidth; let worst = null, right = w;
   if (!worst) return null;
   return {right: Math.round(right), tag: worst.tagName.toLowerCase(), cls: worst.className && worst.className.baseVal === undefined ? worst.className : '', text: (worst.innerText || '').slice(0, 40)}; }"""
 
+# Unlike scrollWidth, this catches content cut by overflow:hidden on the frame.
+# Ignore concealed details, off-canvas controls and horizontally scrollable regions.
+CLIPPED = """() => {
+  const found = [];
+  for (const el of document.querySelectorAll('body *')) {
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height || !el.checkVisibility({checkOpacity: true, checkVisibilityCSS: true}) ||
+        (r.left >= -0.5 && r.right <= innerWidth + 0.5)) continue;
+    if (!el.matches('input:not([type=hidden]), select, textarea, button, a') &&
+        !Array.from(el.childNodes).some(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim())) continue;
+    let clipped = false, ignore = false;
+    for (let parent = el.parentElement; parent; parent = parent.parentElement) {
+      const ps = getComputedStyle(parent), pr = parent.getBoundingClientRect();
+      if (parent.tagName === 'DETAILS' && !parent.open && !el.closest('summary')) { ignore = true; break; }
+      if ((ps.overflowX === 'auto' || ps.overflowX === 'scroll') && parent.scrollWidth > parent.clientWidth) {
+        ignore = true; break;
+      }
+      if (ps.overflowX === 'hidden' || ps.overflowX === 'clip') {
+        if (r.right <= pr.left || r.left >= pr.right) { ignore = true; break; }
+        if (r.left < pr.left - 0.5 || r.right > pr.right + 0.5) clipped = true;
+      }
+    }
+    if (!clipped || ignore) continue;
+    found.push({left: Math.round(r.left), right: Math.round(r.right), tag: el.tagName.toLowerCase(),
+      text: (el.innerText || el.value || el.getAttribute('aria-label') || '').trim().slice(0, 40)});
+  }
+  return found.slice(0, 10);
+}"""
 
-def run(shots: Path | None = None) -> list[str]:
+
+def run(shots: Path | None = None, *, arabic: bool = False) -> list[str]:
     from playwright.sync_api import sync_playwright
     from lightning.runtime.app import profile_app
     from lightning.runtime.devices import Devices
@@ -75,6 +104,9 @@ def run(shots: Path | None = None) -> list[str]:
                         organiser: 'Um Ali', members: '10', installment: '2000', first_date: '2026-08-05', my_turn: '3',
                         funding_account_id: '1', payout_account_id: '1', payout: '', interest: 'none', annual_rate: '0'})});
                     return '/gameya/' + found[1]; }""")
+                if arabic:
+                    page.evaluate("""async () => { const t = document.querySelector('meta[name=lightning-session]').content;
+                        await fetch('/settings/locale', {method: 'POST', body: new URLSearchParams({__session: t, locale: 'ar'})}); }""")
                 pages = (*PAGES, review, *([circle] if circle else []))  # the bank import's review, as an SMS reaches it; a gam'eya circle
                 for width in (360, 320):
                     page.set_viewport_size({"width": width, "height": 800})
@@ -96,6 +128,11 @@ def run(shots: Path | None = None) -> list[str]:
                             if wide > 0:
                                 problems.append(f"{width} {path}: sheet {index + 1} scrolls sideways")
                             page.evaluate("() => document.querySelectorAll('.phone-sheet-row[open]').forEach((d) => { d.open = false; })")
+                        if path == "/counterparties" and page.locator(".alias-details").count():
+                            page.locator(".alias-details").first.evaluate("el => el.open = true")
+                        clipped = page.evaluate(CLIPPED)
+                        if clipped:
+                            problems.append(f"{width} {path}: clipped past viewport {clipped}")
                         if shots is not None and width == 360:
                             shots.mkdir(parents=True, exist_ok=True)
                             name = path.strip("/").replace("/", "-") or "overview"
@@ -108,6 +145,6 @@ def run(shots: Path | None = None) -> list[str]:
 
 if __name__ == "__main__":
     shots = Path(sys.argv[sys.argv.index("--shots") + 1]) if "--shots" in sys.argv else None
-    found = run(shots)
-    print("\n".join(found) or "Nothing scrolls sideways at 360 or 320.")
+    found = run(shots, arabic="--arabic" in sys.argv)
+    print("\n".join(found) or "Nothing scrolls sideways or clips past the viewport at 360 or 320.")
     sys.exit(1 if found else 0)

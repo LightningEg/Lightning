@@ -86,7 +86,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3T4 | ↳ Settings tabs and money first | | | M | |
 | IV-3T5 | ↳ Charts and expense analysis | | | M | |
 | IV-3T6 | ↳ Fields, pairs and small things | | | M | |
-| IV-3T7 | ↳ Make phone_check see clipped elements | | | S | |
 | **NF-3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | new feature | Capture | L | new |
 | NF-3AD3 | ↳ Swipe left to set a category | | | M | |
 | NF-3AD4 | ↳ Financial health as a score | | | owner | |

@@ -15,7 +15,7 @@ repo: app
 
 ## Report
 Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§4 Phone) at 390 and 360 px with touch. The high ones are 3R. `tools/phone_check.py` passes, but
-`.phone-content` has `overflow-x:hidden`, so clipped items never scroll and the check cannot see them.
+`.phone-content` has `overflow-x:hidden`, so clipped items never scroll. The checker now detects content clipped past the viewport (3T7).
 
 1. **Cut words (C12).** Reserves "covers 0.6 months" cut to "0.6 n" (390) and "0." (360); Investments' "By market" chip; Currencies' "Custom" (320);
    the Planner form (320). Cash › Plan headings lose their first letter: `.phone-flat-rows` has `overflow:auto` and no padding.
@@ -59,6 +59,3 @@ Report items 9-10: two charts in one card, time axes with 8-10 labels, five or m
 
 ## 3T6 Fields, pairs and small things · M
 Report items 11-13: 15 px field text, focus fill, lone KPIs, Zakat date format, Profiles wordmark.
-
-## 3T7 Make phone_check see clipped elements · S
-`tools/phone_check.py` also reports elements past the screen edge; `.phone-content` hides overflow today.
