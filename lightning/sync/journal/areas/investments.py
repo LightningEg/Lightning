@@ -49,6 +49,9 @@ COMMANDS = {
         date=DATE, account_id=ref("accounts"), asset_id=ref("financial_assets"), amount=AMOUNT,
         cash_account_id=optional(ref("accounts")), notes=LONG, owner_id=optional(ref("counterparties"))),
         creates="transactions"),
+    "investments.bonus_or_split": Command("investments.bonus_or_split", dict(
+        date=DATE, account_id=ref("accounts"), asset_id=ref("financial_assets"), units_after=RATE, notes=LONG,
+        owner_id=optional(ref("counterparties"))), creates="transactions"),
     "investments.add_holding": Command("investments.add_holding", dict(
         account_id=ref("accounts"), asset_id=ref("financial_assets"), quantity=RATE, total_cost=AMOUNT,
         date=optional(DATE), notes=LONG, owner_id=optional(ref("counterparties"))), creates="transactions"),

@@ -8,7 +8,7 @@ from decimal import Decimal
 from lightning.core.dates import fmt_date, months_back, parse_date, parse_month
 from lightning.core.money import ZERO, from_e6
 
-from .lots import LotLine, build_lots
+from .lots import LotLine, build_lots, lot_type
 
 KINDS = {"BUY": "Bought", "SEL": "Sold", "DIV": "Dividend", "OPN": "Starting holding", "ADJ": "Adjusted"}
 
@@ -22,15 +22,31 @@ def holding_history(reporting, investments, account_id: int, asset_id: int, end:
         return {"labels": []}
     first = parse_date(trades[0]["date"])
     keys = months_back(end, months, fmt_date(first))
-    labels, price, value, cost = [], [], [], []
+    # A bonus or split changes the units, not the worth: each split's ratio (units after / units before), by date.
+    splits, held_so_far = [], ZERO
+    for l in lines:
+        if l.get("asset_id") != asset_id:
+            continue
+        step = from_e6(l["quantity_e6"] or 0)
+        if lot_type(l["type"], l.get("description", "")) == "SPL" and held_so_far:
+            splits.append((l["date"], (held_so_far + step) / held_so_far))
+        held_so_far += step
+    labels, price, value, cost, days = [], [], [], [], []
     for key in keys:
         _, last = parse_month(key)
         day = min(last, end)
+        days.append(fmt_date(day))
         pos = next((x for x in investments.portfolio(fmt_date(day), account_id).positions if x.asset_id == asset_id), None)
         labels.append(key)
         price.append(pos.price if pos and pos.quantity else None)
         value.append(pos.value if pos and pos.quantity else None)
         cost.append(pos.cost_basis if pos and pos.quantity else None)
+    # The price line as if the units had always been counted the new way, so a split is not a cliff (stored prices stay).
+    for i, month_end in enumerate(days):
+        if price[i] is not None:
+            for split_day, ratio in splits:
+                if split_day > month_end:
+                    price[i] = price[i] / ratio
     # Each month's price change, in percent.
     returns = []
     for i in range(1, len(price)):
@@ -64,15 +80,18 @@ def holding_history(reporting, investments, account_id: int, asset_id: int, end:
             continue  # a month-end revaluation checkpoint is not a trade or a payout (5K)
         amount = from_e6(l["amount_base_e6"] or 0)
         amount_native = from_e6(l.get("amount_e6") or 0)
+        split = lot_type(l["type"], l.get("description", "")) == "SPL"
         returned = not units and l["type"] == "SEL" and l.get("effect") == "INTERNAL" and amount < 0
-        if returned:  # a return of capital: the cost falls (never below zero), the units stay
+        if split:  # more or fewer units for the same cost
+            native_lines.append(LotLine(l["date"], "SPL", "INTERNAL", units, ZERO))
+        elif returned:  # a return of capital: the cost falls (never below zero), the units stay
             native_lines.append(LotLine(l["date"], "SEL", "INTERNAL", ZERO, -abs(amount_native)))
         elif units > 0:
             native_lines.append(LotLine(l["date"], l["type"], "EXTERNAL", units, abs(amount_native)))
         elif units < 0 and held:
             native_lines.append(LotLine(l["date"], l["type"], "EXTERNAL", units, -abs(amount_native)))
         held += units
-        trail.append({"date": l["date"], "kind": "Capital returned" if returned else "Dividend reinvested" if reinvested else KINDS.get(l["type"], "Holding added" if units > 0 else "Units out"),
+        trail.append({"date": l["date"], "kind": "Bonus or split" if split else "Capital returned" if returned else "Dividend reinvested" if reinvested else KINDS.get(l["type"], "Holding added" if units > 0 else "Units out"),
                       "units": units, "amount": abs(amount), "price": abs(amount / units) if units else None,
                       "price_native": abs(amount_native / units) if units else None,
                       "held": held, "ref": l.get("ref")})

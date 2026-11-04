@@ -79,6 +79,8 @@ Layer: **Ledger** (real money moved), **Plan** (what-if, moves nothing) or **Rep
 | **Linked (import row)** | Ledger | A statement row tied to an already recorded transaction instead of posting again; moves no money. |
 | **Realized / unrealized return** | Report | Gain from units sold / change in value of units held. |
 | **XIRR** | Report | Annualized money-weighted return from dated cash flows and an ending value; unavailable results need an explanation. |
+| **Return on a purchase** (ROI) | Report | What one purchase has made so far over what it cost: (units × price − cost) ÷ cost. Shown per purchase on a holding's page; XIRR stays the headline. Unavailable when nothing was paid. |
+| **Per year** (CAGR) | Report | The yearly rate that turns one purchase's cost into its value over the days held, counted in 365-day years like XIRR. Unavailable for less than a day or a zero cost. |
 | **Financial health** | Report | Read-only profile of named figures, periods and personal-limit comparisons; no score. |
 | **Financial health limit** | Report | Profile-owned minimum (passes at or above) or maximum (at or below) for a figure; unavailable figures get no judgement. |
 | **Budget** | Plan | Planned spending for a category and month; not a reserve or a transaction. |
@@ -458,6 +460,8 @@ Asset class and exposure are separate. Account kinds describe the container: cas
 | Value | القيمة |
 | Void / delete | إلغاء / حذف |
 | XIRR | العائد السنوي الداخلي |
+| عائد الشراء | ما حققته عملية شراء واحدة حتى الآن مقسومًا على تكلفتها |
+| في السنة | المعدل السنوي الذي يحوّل تكلفة عملية شراء إلى قيمتها خلال مدة الاحتفاظ |
 | In your accounts | في حساباتك |
 | Held for others | أموال لغيرك |
 | What you own | اللي تملكه |

@@ -95,3 +95,29 @@ def test_fifo_transfer_out_takes_the_oldest_cost_without_a_gain():
     book = build_lots(lines, method="fifo")
     assert book.realized == D(0) and book.quantity == D(8)
     assert [(lot.quantity, lot.cost) for lot in book.lots] == [(D(8), D(1600))]
+
+
+# ---- NF-5D: return and return per year, per purchase ----
+
+def test_a_single_purchases_cagr_equals_its_xirr():
+    from lightning.investments.xirr import xirr
+    book = build_lots([buy("2025-01-01", 10, 1000)])
+    lot = book.lots[0]
+    rate = lot.cagr(D(130), "2026-01-01")
+    assert lot.roi(D(130)) == D("0.3")
+    assert abs(rate - xirr([("2025-01-01", D(-1000)), ("2026-01-01", D(1300))], "2026-01-01")) < D("0.000001")
+
+
+def test_roi_and_cagr_are_none_without_a_day_or_a_cost():
+    lot = build_lots([buy("2026-01-01", 10, 1000)]).lots[0]
+    assert lot.roi(D(120)) == D("0.2") and lot.cagr(D(120), "2026-01-01") is None  # less than a day
+    free = build_lots([LotLine("2026-01-01", "SPL", "INTERNAL", D(5), D(0))]).lots[0]
+    assert free.roi(D(120)) is None and free.cagr(D(120), "2027-01-01") is None  # nothing was paid
+
+
+def test_a_sold_piece_has_its_own_return():
+    book = build_lots([buy("2025-01-01", 10, 1000), sell("2026-01-01", 10, 1300)])
+    (piece,) = book.disposals
+    assert piece.roi == D("0.3") and abs(piece.cagr - D("0.3")) < D("0.0001")
+    roc = LotLine("2026-02-01", "SEL", "INTERNAL", D(0), D(-100))
+    assert build_lots([buy("2025-01-01", 10, 1000), roc]).disposals[0].roi is None  # a return of capital sold nothing
