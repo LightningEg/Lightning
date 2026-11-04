@@ -18,6 +18,8 @@ def test_certificate_and_budget_pickers_preserve_submitted_ids(c, setup):
     if not chromium:
         pytest.skip('Chromium is not installed')
     accounts, _ = setup
+    from test_cd_interest_match import _scenario
+    _scenario(c, setup)
     session = SimpleNamespace(container=c, paths=None, journal=None, borrowed=None, role=SessionRole.HOME,
                               token='test-pc-own-picker-session', csrf='test-pc-own-picker-csrf')
     app = create_app(c)
@@ -33,6 +35,13 @@ def test_certificate_and_budget_pickers_preserve_submitted_ids(c, setup):
                 page = browser.new_page(viewport={'width': 1366, 'height': 768})
                 page.goto(host.launch_url)
                 page.goto(host.origin + f'/deposits/{accounts["cd"].id}')
+                fieldsets = page.locator('.cd-interest-receipt fieldset')
+                assert fieldsets.count() >= 3
+                assert all(style == '0px' for style in fieldsets.evaluate_all(
+                    'els => els.map(el => getComputedStyle(el).borderTopWidth)'))
+                page.locator('table details > summary').first.click()
+                assert page.locator('button.btn.primary:visible').count() == 1
+                assert page.get_by_role('button', name='Record CD purchase').evaluate("el => el.classList.contains('primary')")
                 funding = page.get_by_role('combobox', name='Buy from')
                 funding.fill('Wallet')
                 page.get_by_role('option', name='Wallet · Wallet').click()

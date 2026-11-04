@@ -31,7 +31,7 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 **A16 shipping list**
 9. **2026-11-04:** The current Investments lead removes Biggest holdings when the portfolio can be valued; a six-holding browser fixture confirms it is absent. The older fallback limits its bars to four named holdings and a Neutral Other. The Planner stack now shows four named parts and a Neutral Other with the exact remainder; all detailed allocation rows and inputs remain available.
 10. "L1 › L2": the transaction page's "Personal › Entertainment"; every row of Review activity. **2026-11-04:** PC Review activity shows a minus on money out; category hierarchy remains to review.
-11. Card in a card: Settings › Budget's four boxes; Spending's small multiples; Certificates' nine `<fieldset>` boxes; first run's account-type list.
+11. Card in a card: Settings › Budget's four boxes; Spending's small multiples; first run's account-type list. **2026-11-04:** Certificate interest-receipt fieldsets retain their semantic groups without boxes; Chromium checks their computed borders.
 12. **2026-11-04:** PC Certificates account fields and the empty-plan Budget spending group use the existing type-and-pick control. Chromium checks filtering, submitted IDs and required validation.
 13. A card alone: Cash planning "What you owe"; the transaction page's "Expense categories".
 
@@ -39,7 +39,7 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 14. **2026-11-04:** The shared PC period control says "Month" and places ‹ month › inside the one track. Chromium checks navigation, custom ranges and Arabic on Overview; the same macro serves Spending, Budget, Investments, Currencies and Export for AI.
 15. A05: the line under the title is a slogan ("Where your money went", "Your spending plan", Currencies, Prices, Held for others, From SMS, Review
     activity, Deleted, Settings tabs) instead of the exact dates; Overview and Cash planning have none.
-16. Certificates: a 5,400 px page with ten Primary buttons (A10.1 allows one).
+16. **2026-11-04:** PC Certificates keeps the purchase as its Primary; receipt matching and redemption actions are Secondary, including when the row is expanded. Chromium checks one visible Primary on a sample with three receipt groups. Page length remains to review.
 17. **2026-11-04:** At 1366 px, one expanded sample Counterparties row has no overlap between Suggested category and Person/Business. PC Save alias is intentionally screen-reader-only and an Enter hint accompanies the field. Other rows and widths remain to check.
 18. **2026-11-04:** An unplanned month says "Set spending limits for this month", whether or not other months have plans.
 19. **2026-11-04:** Escape closes Ctrl-K even with a query; the Chromium brand audit checks it. Hide amounts posts through the undo journal, so "Saved changes" appears in every header.

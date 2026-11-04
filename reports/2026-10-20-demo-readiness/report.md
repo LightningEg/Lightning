@@ -386,3 +386,11 @@ IV-3S item 14: the shared PC period control places the month and arrows in its s
 ## 2026-11-04 · PC own-data pickers
 
 IV-3S item 12: Certificates account fields and the empty-plan Budget spending group use the existing type-and-pick control. A browser test checks filtering, selected IDs and required validation.
+
+## 2026-11-04 · Certificate receipt groups
+
+IV-3S item 11: PC certificate receipt fieldsets retain their accessible grouping without browser-default boxes. Chromium checks the computed border; the other nested-card findings remain open.
+
+## 2026-11-04 · Certificate actions
+
+IV-3S item 16: the PC certificate page keeps purchase as its Primary and uses Secondary actions for receipt matching and redemption. Chromium checks one visible Primary with three receipt groups and an expanded certificate. Page length remains open.
