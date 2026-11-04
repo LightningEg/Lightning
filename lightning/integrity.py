@@ -26,13 +26,15 @@ class IntegrityCheck:
 class IntegrityService:
     """Cross-check independently derived totals without changing ledger data."""
 
-    def __init__(self, reporting: ReportingService, reserves, budgets, schedules, planning=None, position=None):
+    def __init__(self, reporting: ReportingService, reserves, budgets, schedules, planning=None, position=None,
+                 investments=None):
         self.reporting = reporting
         self.reserves = reserves
         self.budgets = budgets
         self.schedules = schedules
         self.planning = planning
         self.position = position
+        self.investments = investments
 
     def checks(self, as_of: date | str) -> list[IntegrityCheck]:
         # Each check compares two separate computations. Checks that rebuilt a figure from the very parts they then
@@ -70,7 +72,36 @@ class IntegrityService:
         checks.append(self._check("Month-to-date net-worth bridge", bridge.expected_closing, bridge.closing,
                                   "Opening + income − spending + valuation changes + new balances + custody changes.",
                                   complete))
+        if self.investments is not None:
+            checks.extend(self._investment_checks(day))
         return checks
+
+    def _investment_checks(self, day: str) -> list[IntegrityCheck]:
+        """The holdings' lots against the ledger lines they were built from (NF-5C): the units still held, whether
+        any holding was ever sold below zero, and the proceeds the sales are credited with."""
+        positions = self.investments.portfolio(day).positions
+        units = proceeds = ZERO
+        held: dict[tuple, Decimal] = {}
+        below: set[tuple] = set()
+        for line in self.reporting.investment_lines(day):
+            if line["type"] == "DIV" and (line["effect"] != "INTERNAL" or line["is_cash"]):
+                continue  # a dividend's income, or the spend of a reinvested one: not units of a holding
+            quantity, amount = from_e6(line["quantity_e6"]), from_e6(line["amount_base_e6"])
+            key = (line["account_id"], line["asset_id"], line.get("owner_id"))
+            units += quantity
+            held[key] = held.get(key, ZERO) + quantity
+            if held[key] < ZERO:
+                below.add(key)
+            if line["type"] == "SEL" and (quantity < ZERO or (quantity == ZERO and line["effect"] == "INTERNAL" and amount < ZERO)):
+                proceeds -= amount
+        return [
+            self._check("Units held match the ledger", sum((p.quantity for p in positions), ZERO), units,
+                        "The units in every holding's lots add up to the units on the ledger lines."),
+            self._check("Nothing was sold that was not held", Decimal(len(below)), ZERO,
+                        "Replayed by date, no holding drops below zero units. The figure is how many holdings did."),
+            self._check("Sales match the ledger", sum((d.proceeds for p in positions for d in p.disposals), ZERO), proceeds,
+                        "The proceeds credited to the sales (and returns of capital) equal what the ledger shows coming in."),
+        ]
 
     def _base_cash_check(self) -> IntegrityCheck:
         """Profile-currency cash is worth its face value: each such line's base amount equals its quantity."""

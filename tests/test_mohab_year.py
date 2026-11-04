@@ -948,7 +948,7 @@ def test_investments_lead_with_the_periods_result(mohab):
 
 def test_data_checks_pass_after_setup(mohab):
     assert route(mohab, "checks") == ["/", "/settings", "/checks"]  # Your data opens first (owner, 2026-10-29)
-    assert mohab.answers["checks"].shows("5 checks passed")
+    assert mohab.answers["checks"].shows("8 checks passed")
 
 
 def test_adding_an_investment_confirms_it_by_name(mohab):
@@ -1243,7 +1243,7 @@ def test_the_years_investments(mohab):
 
 
 def test_data_checks_pass_after_a_year(mohab):
-    assert mohab.answers["year_checks"].shows("5 checks passed")
+    assert mohab.answers["year_checks"].shows("8 checks passed")
 
 
 def test_cash_ownership_and_external_expense_keep_the_account_total(mohab):
