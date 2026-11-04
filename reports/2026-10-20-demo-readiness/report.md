@@ -418,3 +418,7 @@ IV-3S6: the Chromium audit now checks visible fieldsets for nested boxes and tre
 ## 2026-11-04 · Transaction action layout
 
 IV-3S item 13: when both forms are available, PC transaction detail pairs category splitting with reserve assignment, stacking them on narrow windows. Their buttons use Secondary styling so the page keeps at most one visible Primary. The Cash planning card remains to review.
+
+## 2026-11-04 · Counterparty interaction recheck
+
+IV-3S item 17: Chromium measured every expanded sample row at 1024, 1366 and 1920 px without the reported overlap, and verified the alias Enter hint and a successful save. This covers the sample, not every possible name.

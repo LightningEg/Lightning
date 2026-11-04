@@ -205,6 +205,26 @@ def audit():
                                                         if reference.count() else None)
                 else:
                     result["holding_cost_reference"] = None
+                page.goto(host.origin + "/counterparties")
+                result["counterparty_overlaps"] = []
+                for width in (1024, 1366, 1920):
+                    page.set_viewport_size({"width": width, "height": 768})
+                    result["counterparty_overlaps"].append(page.locator('.cp-row').evaluate_all("""rows => rows.flatMap(row => {
+                        row.open = true;
+                        const field = row.querySelector('.cp-field'), kind = row.querySelector('.counterparty-kind');
+                        if (!field || !kind) return [];
+                        const a = field.getBoundingClientRect(), b = kind.getBoundingClientRect();
+                        return a.width && b.width && a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+                            ? [row.querySelector('summary b')?.textContent.trim() || '?'] : [];
+                    })"""))
+                page.set_viewport_size({"width": 1366, "height": 768})
+                first = page.locator('.cp-row').first
+                first.locator('.alias-details > summary').click()
+                alias = first.locator('.alias-add input[name=alias]')
+                alias.fill('Audit example alias')
+                result["alias_enter_hint"] = first.locator('.alias-enter-hint').is_visible()
+                alias.press('Enter')
+                result["alias_saved"] = 'Audit example alias' in page.content()
                 # Exercise the audit itself with real browser geometry in both failing and passing states.
                 page.set_content("""<main class="main"><section class="card"><fieldset style="border:1px solid black"><legend>Example</legend></fieldset>
                     <div class="chart-plot" style="position:relative;width:200px;height:100px">
@@ -331,3 +351,8 @@ def test_transaction_action_cards_pair_where_they_fit(audit):
 def test_transaction_has_at_most_one_visible_primary(audit):
     assert audit["transaction_primary_count"] is not None
     assert audit["transaction_primary_count"] <= 1
+
+
+def test_counterparty_controls_do_not_overlap_and_alias_saves_with_enter(audit):
+    assert audit["counterparty_overlaps"] == [[], [], []]
+    assert audit["alias_enter_hint"] and audit["alias_saved"]
