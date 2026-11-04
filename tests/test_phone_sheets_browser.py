@@ -198,3 +198,17 @@ def test_the_pc_popup_says_what_is_missing_and_fills_a_learned_category(pc_page)
     page.click("dialog button[type=submit]")
     page.wait_for_selector("dialog[open]", state="detached")
     page.get_by_text("Corner Kiosk").first.wait_for()  # the saved row is on the page
+
+
+def test_phone_date_uses_picker_without_typing_hint(phone_page, pc_page):
+    page, origin = phone_page
+    _open_entry_sheet(page, origin)
+    field = page.locator('dialog[open] #popup-date')
+    _wait(page, "() => !document.querySelector('dialog[open] #popup-date')?.getAttribute('placeholder')")
+    assert not field.get_attribute('placeholder')
+    field.click()
+    assert field.get_attribute('readonly') is not None
+    assert page.locator('.date-popup:visible').count() == 1
+    pc, pc_origin = pc_page
+    _open_entry_sheet(pc, pc_origin)
+    assert pc.locator('dialog[open] #popup-date').get_attribute('placeholder') == 'yyyy-mm-dd'

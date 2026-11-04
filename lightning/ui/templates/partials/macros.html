@@ -40,7 +40,7 @@
 
 {% macro date_field(values, error_field, name='date', label='Date') -%}
 <div class="field {{ 'has-error' if error_field == name }}">
-  <label for="{{ name }}">{{ label|tr(locale) }} <span class="muted small">{{ 'yyyy-mm-dd'|tr(locale) }}</span></label>
+  <label for="{{ name }}">{{ label|tr(locale) }} {% if not phone_mode() %}<span class="muted small">{{ 'yyyy-mm-dd'|tr(locale) }}</span>{% endif %}</label>
   <span class="iso-date-control">
     <input type="text" id="{{ name }}" name="{{ name }}" value="{{ values.get(name, '') }}" placeholder="yyyy-mm-dd"
            inputmode="numeric" autocomplete="off" data-smart-date required>
