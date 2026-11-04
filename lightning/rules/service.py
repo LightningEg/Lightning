@@ -127,12 +127,13 @@ class RuleService:
 
     def form_values(self, rule: Rule | None = None) -> dict:
         """The rule as the form's fields."""
-        values = {"match": "all", "counterparty_op": "contains", "counterparty": "", "notes": "", "amount_op": "",
+        values = {"name": "", "match": "all", "counterparty_op": "contains", "counterparty": "", "notes": "", "amount_op": "",
                   "amount": "", "amount_to": "", "account_id": "", "direction": "", "category_id": "", "tag": ""}
         for i in range(1, MAX_PARTS + 1):
             values[f"part_category_{i}"] = values[f"part_value_{i}"] = ""
         if rule is None:
             return values
+        values["name"] = rule.name
         values["match"] = "all" if rule.match_all else "any"
         for c in rule.conditions:
             if c.field == "counterparty":
@@ -154,8 +155,12 @@ class RuleService:
 
     # ------------------------------------------------------------------ writing
     def save(self, values: dict, rule_id: int | None = None) -> int:
-        if rule_id is not None:
-            self.get(rule_id)
+        old = self.get(rule_id) if rule_id is not None else None
+        # Older portable forms omit name; editing their conditions must not erase a saved label.
+        raw_name = values.get("name")
+        name = " ".join(str(raw_name).split()) if raw_name is not None else (old.name if old else "")
+        if len(name) > 120:
+            raise ValidationError("Keep the rule name to 120 characters or fewer.", "name")
         match_all, conditions = self._conditions(values)
         category_id = self._category(values.get("category_id"), "category_id")
         tags = []
@@ -169,7 +174,7 @@ class RuleService:
         if not category_id and not tags:
             raise ValidationError("Choose a category or a tag for the rule to set.", "category_id")
         with self.db.transaction():
-            return self.repo.save(rule_id, match_all, conditions, category_id, tags, parts)
+            return self.repo.save(rule_id, match_all, conditions, category_id, tags, parts, name=name)
 
     def delete(self, rule_id: int) -> None:
         self.get(rule_id)

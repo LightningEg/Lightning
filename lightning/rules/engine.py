@@ -46,6 +46,7 @@ class Rule:
     tags: tuple[str, ...] = ()
     parts: tuple[Part, ...] = ()
     position: int = 0
+    name: str = ""
 
 
 @dataclass(frozen=True)

@@ -12,7 +12,7 @@ TABLES = ("rules", "rule_conditions", "rule_actions")
 
 PARTS = {f"part_{kind}_{i}": spec for i in range(1, MAX_PARTS + 1)
          for kind, spec in (("category", optional(ref("categories"))), ("value", TEXT))}
-RULE = mapping(match=TEXT, counterparty_op=TEXT, counterparty=TEXT, notes=TEXT, amount_op=TEXT, amount=TEXT,
+RULE = mapping(name=optional(TEXT), match=TEXT, counterparty_op=TEXT, counterparty=TEXT, notes=TEXT, amount_op=TEXT, amount=TEXT,
                amount_to=TEXT, account_id=optional(ref("accounts")), direction=TEXT,
                category_id=optional(ref("categories")), tag=TEXT, **PARTS)
 TARGET = ("rules", "rule_id")

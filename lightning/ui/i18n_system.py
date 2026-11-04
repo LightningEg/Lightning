@@ -1393,6 +1393,13 @@ ROUTES = {
     "Choose how this payment was settled.": "اختار الدفعة دي اتسددت إزاي.",
 }
 SERVICES = {
+    'Change loan payments from Loans.': 'غيّر أقساط القرض من صفحة القروض.',
+    'Back to Budget': 'ارجع للميزانية',
+    'An empty value clears this category’s limit.': 'سيب المبلغ فاضي عشان تشيل حد الفئة دي.',
+    'Change the monthly limit for this category only.': 'غيّر الحد الشهري للفئة دي بس.',
+    'Change limit': 'غيّر الحد',
+    "Rule name": "اسم القاعدة",
+    "Keep the rule name to 120 characters or fewer.": "خلي اسم القاعدة ١٢٠ حرف أو أقل.",
     "Choose a physical-asset account.": "اختار حساب أصل مادي.",
     "Enter an item name.": "اكتب اسم المقتنى.",
     "Choose an item kind.": "اختار نوع المقتنى.",
