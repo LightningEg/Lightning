@@ -2628,7 +2628,7 @@ document.addEventListener("click", (event) => {
     // the page, so a panel on the body would open behind it, out of reach.
     (select.closest("dialog[open]") || document.body).append(panel);
     const rect = select.getBoundingClientRect();
-    const width = Math.max(rect.width, 220);
+    const width = Math.min(Math.max(rect.width, 220), Math.max(0, window.innerWidth - 16));
     panel.style.minWidth = `${width}px`;
     const room = window.innerHeight - rect.bottom;
     panel.style.left = `${Math.min(rect.left, window.innerWidth - width - 8)}px`;
