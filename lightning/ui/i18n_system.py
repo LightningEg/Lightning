@@ -1393,6 +1393,15 @@ ROUTES = {
     "Choose how this payment was settled.": "اختار الدفعة دي اتسددت إزاي.",
 }
 SERVICES = {
+    '{name} was last checked against its statement on {date}, {days} days ago.': 'آخر مراجعة لحساب {name} مع البيان كانت يوم {date}، من {days} يوم.',
+    '{name} has no account check dated on or before this figure.': 'حساب {name} مفيش ليه مراجعة بتاريخ الرقم ده أو قبله.',
+    'The expected receipt for {name} on {date} still needs confirmation. It is not assumed received.': 'الإيداع المتوقع لـ {name} يوم {date} لسه محتاج تأكيد. مش محسوب إنه وصل.',
+    'Unconfirmed device changes are excluded. Review or sync them before relying on this figure.': 'تغييرات الأجهزة غير المؤكدة مش محسوبة. راجعها أو اعمل مزامنة قبل الاعتماد على الرقم ده.',
+    'Review inputs': 'راجع المدخلات',
+    'Forecast inputs': 'مدخلات التوقع',
+    'The forecast uses confirmed cash and scheduled payments. These notes change no balance or plan.': 'التوقع بيستخدم النقد المؤكد والدفعات المجدولة. الملاحظات دي مش بتغيّر رصيد ولا خطة.',
+    'No old or missing inputs were found.': 'مفيش مدخلات قديمة أو ناقصة ظهرت.',
+
     'Change loan payments from Loans.': 'غيّر أقساط القرض من صفحة القروض.',
     'Back to Budget': 'ارجع للميزانية',
     'An empty value clears this category’s limit.': 'سيب المبلغ فاضي عشان تشيل حد الفئة دي.',

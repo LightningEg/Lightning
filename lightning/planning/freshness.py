@@ -7,9 +7,9 @@ A note is either **known** (a dated input older than its limit) or **unknown** (
 there is no score and no second total."""
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import date
 
+from lightning.core.figure_inputs import FreshnessNote
 from lightning.core.dates import fmt_date, parse_date
 from lightning.fx import STALE_DAYS
 
@@ -19,24 +19,13 @@ STALE_RATE = "stale_rate"
 NO_RATE = "no_rate"
 
 
-@dataclass(frozen=True)
-class FreshnessNote:
-    kind: str                  # one of the four constants above
-    subject: str               # the holding, or the currency
-    source_date: str | None    # the date of the input used; None when there is none to date (unknown)
-    figure: str                # the figure it affects (a key of core.figures.FIGURES)
-    link: str                  # where to fix it
-
-    @property
-    def known(self) -> bool:
-        """True when the input has a date that is simply old; False when there is nothing to date."""
-        return self.source_date is not None
 
 
 class FreshnessService:
-    def __init__(self, reporting, position):
+    def __init__(self, reporting, position, accounts=None, reconciliation=None, receipts=None):
         self.reporting = reporting
         self.position = position
+        self.accounts, self.reconciliation, self.receipts = accounts, reconciliation, receipts
 
     def for_what_you_own(self, as_of: date | str) -> tuple[FreshnessNote, ...]:
         """Notes behind "What you own" on a day: holdings priced long ago or not at all, and foreign currency
@@ -46,7 +35,7 @@ class FreshnessService:
         notes = [FreshnessNote(STALE_PRICE, row["name"], row["price_date"], figure, "/investments/prices")
                  for row in self.reporting.stale_prices(day)]
         notes += [FreshnessNote(NO_PRICE, text.split(" — ")[0], None, figure, "/investments/prices")
-                  for text in self.position.at(day).unvalued]
+                  for text in self.position.at(day, match_payments=False).unvalued]
         for held in self.reporting.fx_positions.all(day, day):
             if held.units <= 0 and not held.accounts:
                 continue
@@ -54,6 +43,57 @@ class FreshnessService:
                 notes.append(FreshnessNote(NO_RATE, held.currency, None, figure, "/settings?section=currencies&tab=rates"))
             elif held.rate.age_days > STALE_DAYS:
                 notes.append(FreshnessNote(STALE_RATE, held.currency, held.rate.date, figure, "/settings?section=currencies&tab=rates"))
+        return tuple(notes) + self._cash_notes(day, figure, all_currencies=True)
+
+    def _cash_notes(self, day, figure, *, all_currencies=False):
+        if self.accounts is None:
+            return ()
+        notes = []
+        for account in self.accounts.list():
+            if account.account_type.value not in ("CASH", "BANK", "BROKERAGE"):
+                continue
+            if not all_currencies and not account.counts_as_spendable(self.reporting.base_currency):
+                continue
+            if not self.reporting.account_balance(account.id, day):
+                continue
+            checked = self.reconciliation.checked_through(account.id) if self.reconciliation else None
+            if checked and checked > day:
+                checked = None
+            if checked is None or (parse_date(day) - parse_date(checked)).days > 31:
+                notes.append(FreshnessNote("old_check" if checked else "no_check", account.name, checked, figure,
+                                           f"/accounts/{account.id}/reconcile"))
+        if self.receipts is not None:
+            for account in self.accounts.list():
+                if account.account_type.value != "DEPOSIT":
+                    continue
+                for receipt in self.receipts.expected_past(account.id, day):
+                    if not self.receipts.needs_match(receipt):
+                        continue
+                    destination = self.accounts.get(receipt["destination_account_id"])
+                    if not all_currencies and destination.currency != self.reporting.base_currency:
+                        continue
+                    notes.append(FreshnessNote("unconfirmed_receipt", receipt["certificate_name"],
+                                               receipt["event_date"], figure, f"/accounts/{account.id}"))
+        return tuple(notes)
+
+    def for_free_cash(self, as_of):
+        """Eligible cash only; equity prices and foreign cash do not establish Free cash."""
+        day = fmt_date(as_of) if isinstance(as_of, date) else str(as_of)
+        return self._cash_notes(day, "free_cash")
+
+    def for_forecast(self, as_of):
+        day = fmt_date(as_of) if isinstance(as_of, date) else str(as_of)
+        notes = list(self._cash_notes(day, "forecast", all_currencies=True))
+        if self.accounts is not None:
+            currencies = sorted({a.currency for a in self.accounts.list(active_only=True)
+                                 if a.account_type.value in ("CASH", "BANK", "BROKERAGE")
+                                 and a.currency != self.reporting.base_currency})
+            for currency in currencies:
+                rate = self.reporting.valuer.fx(currency, day)
+                if rate is None or rate.age_days > STALE_DAYS:
+                    notes.append(FreshnessNote(NO_RATE if rate is None else STALE_RATE, currency,
+                                               None if rate is None else rate.date, "forecast",
+                                               "/settings?section=currencies&tab=rates"))
         return tuple(notes)
 
     @staticmethod

@@ -26,4 +26,8 @@ Not posted: proposal awaiting prioritization and shared freshness semantics.
 
 `lightning/planning/freshness.py` (`FreshnessService`, on the container as `c.freshness`): for **What you own** it returns notes of kind stale price (dated, older than 62 days), no price (undated), stale rate (dated, older than the FX limit) and no rate (undated), each with the figure it affects and where to fix it. The Overview's "What you own" explanation popup (`/explain/owned`, PC and phone) lists them under "What this figure leans on", in English and Arabic. `tests/test_freshness.py` covers fresh and stale prices, an unpriced holding, stale and missing rates, a profile with nothing to say, the Arabic page, and that no amount changes.
 
-Left: the same notes under Free cash and the forecast; pending device edits (journal status) and unconfirmed receipts as reasons; an account not checked against its bank for a long time (reconciliation date).
+The remaining cash and forecast notes are implemented below; full-suite and PR validation remain before closure.
+
+## Completion work · 2026-11-04
+
+Cash explanations now read account checks (old after 31 days), certificate receipts awaiting confirmation and journal proposals excluded from confirmed figures. Forecast notes also identify missing or old rates. Reads do not match or post receipts; equity prices stay out of cash explanations. Focused boundary, historical cutoff, replica and bilingual frame tests cover these paths.

@@ -3,7 +3,7 @@
 {% block title %}Cash planning{% endblock %}
 {% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Cash planning'|tr(locale), status, as_of ~ ' to ' ~ (forecast.next_income_date or window_end), 'until payday' if forecast.next_income_date else 'the next 3 months') }}{% endblock %}
 
-{% block content %}
+{% block content %}<p><a href="/plan/inputs" data-popup-open>{{ 'Forecast inputs'|tr(locale) }}</a></p>
 {% from "partials/charts.html" import stat_tiles, kpi_row, trend, waterfall, bars, lead_card %}{% from "partials/macros.html" import needs_rows %}
 {% set f = forecast %}{% set p = plan %}
 {% if lead %}{% call lead_card(lead, base) %}<div class="lead-side-head" id="plan-build"><div><h3>{{ 'How safe to spend is worked out'|tr(locale) }}</h3><p>{{ "From free cash to safe to spend"|tr(locale) }}</p></div></div>

@@ -38,7 +38,7 @@ def test_a_holding_with_no_price_is_unknown_not_old():
     from types import SimpleNamespace
     from lightning.planning.freshness import FreshnessService
     reporting = SimpleNamespace(stale_prices=lambda day: [], fx_positions=SimpleNamespace(all=lambda a, b: []))
-    position = SimpleNamespace(at=lambda day: SimpleNamespace(unvalued=("THNDR — Gold fund — no price",)))
+    position = SimpleNamespace(at=lambda day, **kwargs: SimpleNamespace(unvalued=("THNDR — Gold fund — no price",)))
     note, = FreshnessService(reporting, position).for_what_you_own("2026-09-30")
     assert (note.kind, note.subject, note.source_date, note.known) == (NO_PRICE, "THNDR", None, False)
     assert note.link == "/investments/prices"
@@ -79,3 +79,66 @@ def test_the_explanation_popup_lists_them_in_both_languages(held):
         assert arabic.status_code == 200
         assert "متقيّم بسعر بتاريخ" in arabic.text and "الرقم ده معتمد على إيه" in arabic.text
         assert "is valued from a price" not in arabic.text
+
+
+def test_cash_checks_have_exact_31_day_boundary_and_historical_cutoff(c, setup):
+    bank = setup[0]['cib']
+    c.reconciliation.close(bank.id, '2026-09-30', '50000')
+    assert not [n for n in c.freshness.for_free_cash('2026-10-31') if n.subject == bank.name]
+    note, = [n for n in c.freshness.for_free_cash('2026-11-01') if n.subject == bank.name]
+    assert note.kind == 'old_check' and note.source_date == '2026-09-30'
+    earlier, = [n for n in c.freshness.for_free_cash('2026-09-29') if n.subject == bank.name]
+    assert earlier.kind == 'no_check' and earlier.source_date is None
+    assert c.reporting.account_balance(bank.id) == 50000
+
+
+def test_foreign_cash_rate_affects_forecast_but_not_free_cash(c):
+    CurrencyRegistry(c.db).register('USD')
+    c.fx.save('USD', '2026-09-01', '50')
+    c.account_flows.open_account('Dollar bank', 'BANK', '2026-09-01', '10', currency='USD')
+    assert not c.freshness.for_free_cash('2026-09-30')
+    assert any(n.kind == STALE_RATE for n in c.freshness.for_forecast('2026-09-30'))
+
+
+def test_unconfirmed_certificate_receipts_explain_cash_without_assuming_receipt(c, setup):
+    from test_workflow_receipts import _certificate
+    _certificate(c, setup[0])
+    before = c.db.conn.total_changes
+    notes = c.freshness.for_free_cash('2026-10-02')
+    assert any(n.kind == 'unconfirmed_receipt' and n.source_date == '2026-10-01' for n in notes)
+    assert c.db.conn.total_changes == before
+
+
+def test_pending_replica_edits_are_explained_without_entering_cash(devices):
+    from test_journal_finance import groups
+    from lightning.sync.journal.proxy import JournalServices
+    _, pc = devices
+    c = JournalServices(pc)
+    before = pc.balances()
+    pc.save(groups(pc))
+    for method in (c.freshness.for_what_you_own, c.freshness.for_free_cash, c.freshness.for_forecast):
+        assert any(n.kind == 'pending_edits' and n.link == '/journal' for n in method('2026-09-30'))
+    assert pc.balances() == before
+
+
+@pytest.mark.parametrize('phone', [False, True])
+@pytest.mark.parametrize('locale', ['en', 'ar'])
+def test_cash_and_forecast_explanations_are_accessible_in_both_frames(c, setup, phone, locale):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    c.settings.set('locale', locale)
+    app = create_app(c)
+    @app.middleware("http")
+    async def frame(request, call_next):
+        request.state.phone = phone
+        return await call_next(request)
+    with TestClient(app) as client:
+        for url in ('/explain/free-cash?period=all', '/plan/inputs'):
+            response = client.get(url)
+            assert response.status_code == 200
+            assert 'data-freshness="no_check"' in response.text
+            if locale == 'ar':
+                assert 'Review inputs' not in response.text
+
+
+from test_journal_finance import devices  # noqa: E402,F401

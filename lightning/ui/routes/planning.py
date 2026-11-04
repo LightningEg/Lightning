@@ -665,3 +665,11 @@ async def settle_payment(request: Request, item_id: int):
     except LightningError as exc:
         return redirect(f"/plan/items/{item_id}/pay?due={due}&back={back}", exc.message)
     return redirect(back, message)
+
+
+@router.get("/inputs")
+async def forecast_inputs(request: Request):
+    c = container(request)
+    day = today()
+    return render(request, "planning/inputs.html", notes=c.freshness.for_forecast(day),
+                  note_days=lambda note: c.freshness.days_old(note, day))
