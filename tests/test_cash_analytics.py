@@ -87,3 +87,27 @@ def test_calendar_and_age_page(c, phone, locale):
             assert 'phone-appbar' in page.text
         if locale == 'ar':
             assert 'Age of Money' not in page.text
+
+
+def test_same_day_cash_age_uses_stable_references_instead_of_local_transaction_ids(tmp_path):
+    from lightning.bootstrap import build
+    ages=[]
+    for i,order in enumerate((('spend','buy'),('buy','spend'))):
+        c=build(tmp_path/f'order-{i}.db')
+        try:
+            a=bank(c)
+            broker=c.account_flows.open_account('Broker','BROKERAGE','2026-01-01','0')
+            salary(c,a,'2026-01-01','200')
+            salary(c,a,'2026-01-11','100')
+            c.transactions.record_transfer('2026-01-12',a.id,broker.id,'50')
+            asset=c.assets.create_investment('Fictional stock','STOCK','FIFO')
+            for operation in order:
+                if operation=='spend':
+                    spend(c,a,'2026-01-21','250')
+                else:
+                    c.investments.buy_total('2026-01-21',broker.id,asset.id,'1','50')
+            assert not c.db.all('PRAGMA foreign_key_check')
+            ages.append(c.reporting.cash_age('2026-01-31').days)
+        finally:
+            c.db.close()
+    assert ages==[D('16'),D('16')]

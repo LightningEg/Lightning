@@ -67,7 +67,8 @@ def cash_age(db, as_of, currency):
         "FROM transactions t JOIN ledger_entries le ON le.transaction_id=t.id "
         "JOIN financial_assets f ON f.id=le.asset_id LEFT JOIN categories c ON c.id=le.category_id "
         "WHERE t.status='POSTED' AND t.date<=? AND f.is_cash=1 AND le.owner_id IS NULL "
-        "ORDER BY t.date,t.id,le.line_no", (str(as_of),))
+        "ORDER BY t.date,CASE t.type WHEN 'OPN' THEN 0 WHEN 'IN' THEN 1 WHEN 'DIV' THEN 1 "
+        "WHEN 'SEL' THEN 1 WHEN 'CNV' THEN 2 ELSE 3 END,t.ref,le.line_no", (str(as_of),))
     for _, lines in groupby(rows, key=lambda r: r['id']):
         lines = list(lines)
         day, kind = lines[0]['date'], lines[0]['type']
