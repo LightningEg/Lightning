@@ -132,3 +132,15 @@ def test_excel_refuses_mixed_currencies_or_multiple_accounts():
                           (['Date','Amount','Account'],[['2026-09-01',-1,'First'],['2026-09-02',-2,'Second']])]:
         with pytest.raises(ValidationError):
             read_statement('statement.xlsx',workbook([headers,*rows]),'EGP')
+
+
+def test_pdf_with_null_page_contents_is_refused_as_unreadable_text():
+    from pypdf import PdfWriter
+    from pypdf.generic import NameObject, NullObject
+    writer=PdfWriter()
+    page=writer.add_blank_page(width=600,height=800)
+    page[NameObject('/Contents')]=NullObject()
+    stream=BytesIO()
+    writer.write(stream)
+    with pytest.raises(ValidationError):
+        read_statement('empty.pdf',stream.getvalue(),'EGP')

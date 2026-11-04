@@ -170,9 +170,10 @@ def read_cib_pdf(data: bytes, currency: str) -> bytes:
             raise ValidationError("PDF statements must have 20 pages or fewer. Export a shorter period.", 'file')
         pages = []
         for page in reader.pages:
-            if '/Contents' in page and len(page.get_contents().get_data()) > 8 * 1024 * 1024:
+            contents = page.get_contents()
+            if contents is not None and len(contents.get_data()) > MAX_STATEMENT_DOCUMENT_BYTES:
                 raise ValidationError("This PDF contains too much text. Export a shorter period.", 'file')
-            text = (page.extract_text(extraction_mode='layout') or '') if '/Contents' in page else ''
+            text = (page.extract_text(extraction_mode='layout') or '') if contents is not None else ''
             if len(text) > 200000 or sum(map(len,pages))+len(text) > 1000000:
                 raise ValidationError("This PDF contains too much text. Export a shorter period.", 'file')
             pages.append(text)
@@ -181,7 +182,7 @@ def read_cib_pdf(data: bytes, currency: str) -> bytes:
         text='\n'.join(pages)
         if not re.search(r'ACCOUNT\s+TRANSACTIONS',text,re.I):
             raise ValidationError(PDF_LAYOUT,'file')
-        currencies = set(re.findall(r'Currency\s*:?\s*([A-Z]{3})\b',text))
+        currencies = {code.upper() for code in re.findall(r'Currency\s*:?\s*([A-Z]{3})\b',text,re.I)}
         if not currencies:
             raise ValidationError(PDF_LAYOUT, 'file')
         if currencies != {currency}:
