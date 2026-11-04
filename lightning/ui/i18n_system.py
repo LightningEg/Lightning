@@ -1393,6 +1393,12 @@ ROUTES = {
     "Choose how this payment was settled.": "اختار الدفعة دي اتسددت إزاي.",
 }
 SERVICES = {
+    'Transfer across currencies': 'تحويل بين عملتين',
+    'Other account amount': 'المبلغ في الحساب التاني',
+    'Enter the exact amount on the other currency statement.': 'اكتب المبلغ بالضبط من بيان العملة التانية.',
+    'Currency conversions in statement imports must use your own money.': 'تحويل العملات في استيراد البيان لازم يكون من فلوسك.',
+    'Choose your other account in Counterparty, then enter its exact statement amount as a positive number. No exchange rate is guessed. Import the debit first if it includes a fee; link the other statement row to the conversion.': 'اختار حسابك التاني في الطرف التاني، واكتب مبلغ بيانه بالضبط كرقم موجب. مش بنخمّن سعر الصرف. استورد الخصم الأول لو فيه رسوم، وبعدها اربط صف البيان التاني بالتحويل.',
+
     'Change loan payments from Loans.': 'غيّر أقساط القرض من صفحة القروض.',
     'Back to Budget': 'ارجع للميزانية',
     'An empty value clears this category’s limit.': 'سيب المبلغ فاضي عشان تشيل حد الفئة دي.',

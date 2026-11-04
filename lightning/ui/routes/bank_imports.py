@@ -303,7 +303,7 @@ def _row_ui(row: dict, form=None) -> dict:
         return {"cp": own("counterparty"), "cp_pick": own("counterparty_pick"), "cat": own("category"),
                 "whom": own("whom"), "whom_pick": own("whom_pick"),
                 "remember": form.get(f"remember_{rid}") == "on", "skip": form.get(f"skip_{rid}") == "on",
-                "match": own("match"), "fee": own("fee")}
+                "match": own("match"), "fee": own("fee"), "conversion_amount": own("conversion_amount")}
     cp_pick = (f"account:{row['_transfer_account_id']}" if row.get("_transfer_account_id")
                else f"counterparty:{row['_counterparty_id']}" if row.get("_counterparty_id") else "")
     custody = row.get("_is_custody") and row.get("_whom") and row.get("_counterparty_id")
@@ -312,7 +312,7 @@ def _row_ui(row: dict, form=None) -> dict:
             "whom": row["_whom"] if custody else "",
             "whom_pick": f"counterparty:{row['_counterparty_id']}" if custody else "",
             "remember": bool(row.get("_remember_category")), "skip": bool(row.get("_skip")),
-            "match": str(row.get("_match") or row.get("_default_match") or ""), "fee": ""}
+            "match": str(row.get("_match") or row.get("_default_match") or ""), "fee": "", "conversion_amount": ""}
 
 
 def _suggestions_json(c, row: dict, account_ids: dict[str, int], party_ids: dict[str, int]) -> str:
@@ -357,7 +357,7 @@ def _render_review(request, c, account_id: int, batch, rows, *, summary, form=No
     account = c.accounts.get(account_id)
     groups = _review_groups(c, rows, form)
     counts = {"all": len(groups)} | {key: sum(1 for g in groups if g["status"] == key) for key in _STATUS_ORDER}
-    accounts_here = [a for a in c.accounts.list(active_only=True) if a.id != account_id and a.currency == account.currency]
+    accounts_here = [a for a in c.accounts.list(active_only=True) if a.id != account_id and a.account_type.value in ("BANK", "CASH", "BROKERAGE")]
     failing = [r for r in rows if _row_status(r) == "err"]
     reject_prompt = ""
     if failing and batch["status"] != "POSTED":
@@ -441,7 +441,7 @@ def _decision(form, row) -> dict:
                 "counterparty_choice": own("counterparty_choice"),
                 "remember_category": (form.get(f"remember_{row_id}") or form.get(f"remember_category_{row_id}")) == "on",
                 "transfer_account_id": own("transfer_account_id"),
-                "fee": own("fee")}
+                "fee": own("fee"), "conversion_amount": own("conversion_amount")}
     pick = own("counterparty_pick")
     if pick.startswith("account:"):          # one of your accounts: a transfer to or from it
         decision["transfer_account_id"] = pick.split(":", 1)[1]

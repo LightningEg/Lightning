@@ -138,9 +138,8 @@ class ImportPoster:
             raise ValidationError(f"CSV row {row['_line']}: this is an internal transfer. Pick the account the money "
                                   "moved to or from.", "transfer_account_id")
         if selected_target:
-            source_currency = self.accounts.get(batch["account_id"]).currency
             target = next((a for a in accounts if str(a.id) == selected_target and a.id != batch["account_id"]
-                           and a.currency == source_currency), None)
+                           ), None)
             if target is None:
                 raise ValidationError(f"CSV row {row['_line']}: choose another active account for this transfer.", "transfer_account_id")
         counterparty_id = decision.get("counterparty_id") or (row["_counterparty_id"] if cp_text == row["Counterparty"] else None)
@@ -180,19 +179,38 @@ class ImportPoster:
         canonical = self.counterparties.get(int(counterparty_id)) if counterparty_id else None
         if target:
             fee = self._transfer_fee(row, decision, amount)
-            txn = self.transactions.record_transfer(
-                day, batch["account_id"] if amount < 0 else target.id,
-                target.id if amount < 0 else batch["account_id"], abs(amount) - fee,
-                notes=notes, source=TxnSource.IMPORT,
-            )
-            if fee:
+            cross_currency = target.currency != self.accounts.get(batch["account_id"]).currency
+            if cross_currency:
+                other_amount = str(decision.get("conversion_amount") or "").strip()
+                try:
+                    other_amount = _decimal_amount(other_amount)
+                except ValueError:
+                    raise ValidationError("Enter the exact amount on the other currency statement.", "conversion_amount") from None
+                if other_amount <= 0:
+                    raise ValidationError("Enter the exact amount on the other currency statement.", "conversion_amount")
+                category = self.categories.get(int(category_id)) if category_id else None
+                owner, _ = self._held_for(row, decision, category, canonical, cp_text, similar, True)
+                if owner:
+                    raise ValidationError("Currency conversions in statement imports must use your own money.", "whom")
+                source_id, destination_id = ((batch["account_id"], target.id) if amount < 0 else (target.id, batch["account_id"]))
+                txn = self.transactions.record_conversion(
+                    day, source_id, destination_id, abs(amount) - fee if amount < 0 else other_amount,
+                    other_amount if amount < 0 else amount, fee=fee or None,
+                    notes=notes, source=TxnSource.IMPORT)
+            else:
+                txn = self.transactions.record_transfer(
+                    day, batch["account_id"] if amount < 0 else target.id,
+                    target.id if amount < 0 else batch["account_id"], abs(amount) - fee,
+                    notes=notes, source=TxnSource.IMPORT,
+                )
+            if fee and not cross_currency:
                 # The bank took the fee out of the same debit: it is its own expense, so the transfer shows
                 # what arrived and the fee shows in reports.
                 self.transactions.record_outflow(
                     day, batch["account_id"], fee, self._fee_category(decision), notes=notes,
                     source=TxnSource.IMPORT)
             category = self.categories.get(int(category_id)) if category_id else None
-            if self.money_from_others:
+            if self.money_from_others and not cross_currency:
                 owner, _ = self._held_for(row, decision, category, canonical, cp_text, similar, True)
                 if owner:
                     source_id, target_id = ((batch["account_id"], target.id) if amount < 0
