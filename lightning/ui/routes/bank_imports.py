@@ -15,7 +15,7 @@ from lightning.core.money import ZERO, fmt
 from lightning.sync.journal.proxy import PendingOnHome
 from lightning.workflows.ai_prompts import bank_category_prompt, rejected_csv_prompt
 
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 
 router = APIRouter(prefix="/accounts")
 
@@ -483,7 +483,8 @@ async def confirm(request: Request, account_id: int, batch_id: int):
                               max_part_size=MAX_IMPORT_REVIEW_REQUEST_BYTES)
     decisions = {row["_import_row_id"]: _decision(form, row) for row in rows}
     try:
-        count = c.bank_imports.confirm(batch_id, decisions)
+        with settled_save(request, c):
+            count = c.bank_imports.confirm(batch_id, decisions)
     except LightningError as exc:
         batch, rows = c.bank_imports.preview(batch_id)
         _keep_typed(form, rows)
@@ -511,6 +512,10 @@ async def confirm(request: Request, account_id: int, batch_id: int):
     if count.get("ambiguous_reserves"):
         feedback += f" {count['ambiguous_reserves']} row(s) could match multiple reserves; choose beside each transaction in its account list."
     batch, result_rows = c.bank_imports.preview(batch_id)
+    settled = c.planning.settled_bill_names({row["_transaction_id"] for row in result_rows
+                                           if row.get("_transaction_id")})
+    if settled:
+        feedback += " Settled bills: " + ", ".join(settled) + "."
     return _render_review(request, c, account_id, batch, result_rows, summary=count,
                           msg=f"Import complete: {count['posted']} posted, "
                               + (f"{count['linked']} linked to entries you already had, " if count.get("linked") else "")

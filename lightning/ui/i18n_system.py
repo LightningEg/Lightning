@@ -2367,6 +2367,7 @@ PAGES = {
     "Nothing was imported yet: {n} row needs attention. Fix them below; your other choices are kept.": "لسه ما اتستوردش حاجة: صف محتاج انتباه. صلّحه تحت؛ وباقي اختياراتك محفوظة.",
     "{n} row(s) could match multiple reserves; choose beside each transaction in its account list.": "{n} صف ممكن يطابق أكتر من مبلغ محجوز؛ اختار جنب كل معاملة في قايمة الحساب.",
     "Budget · {list}.": "الميزانية · {list}.",
+    "Settled bills: {names}.": "الفواتير اللي اتسددت: {names}.",
     "Choose at least one CSV file.": "اختار ملف CSV واحد على الأقل.",
     "The uploaded statement could not be read. Upload it again.": "ما قدرناش نقرأ الكشف اللي اترفع. ارفعه تاني.",
     "Import complete: {a} posted, {b} linked to entries you already had, {c} skipped, {d} duplicates.": "الاستيراد خلص: {a} اتسجل، {b} اتربط بمعاملات عندك قبل كده، {c} اتخطى، {d} تكرار.",

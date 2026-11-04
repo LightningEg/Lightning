@@ -137,7 +137,7 @@ async def match_all_suggested_receipts(request: Request, account_id: int, certif
     c = container(request)
     form = await request.form()
     back = str(form.get("back", ""))
-    back = back if back.startswith("/") and not back.startswith("//") else f"/deposits/{account_id}"
+    back = back if back.startswith("/") and not back.startswith("//") else "/needs-you"
     try:
         if certificate_id is not None and c.deposits.certificate(certificate_id).terms.account_id != account_id:
             raise NotFoundError("Certificate not found in this portfolio.")

@@ -90,6 +90,7 @@ def test_page_preticks_the_suggestion_and_match_all_works_over_http(c, setup):
     assert needs.status_code == 200 and "interest payments to match" in needs.text
     posted = client.post(f"/deposits/{accounts['cd'].id}/interest/match-all", follow_redirects=False)
     assert posted.status_code == 303
+    assert posted.headers["location"].startswith("/needs-you?msg=")
     after = client.get(f"/deposits/{accounts['cd'].id}")
     assert "Match all suggested" not in after.text
 
