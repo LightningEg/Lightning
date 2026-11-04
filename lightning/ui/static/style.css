@@ -185,7 +185,7 @@ code, .code { font-family: "JetBrains Mono", ui-monospace, "Cascadia Mono", Cons
 .sample-box button:hover { background:var(--hover); }
 .sample-box button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 .sample-box small { color:var(--ink-2); font-size:var(--fs-2); line-height:1.45; }
-.sample-box-load { margin-top:auto; padding-top:6px; color:var(--azure); font-weight:700; font-size:var(--fs-2); }
+.sample-box-load { margin-top:auto; padding-top:6px; color:var(--ink); text-decoration:underline; font-weight:700; font-size:var(--fs-2); }
 @media (max-width:900px) { .sample-boxes { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:560px) { .sample-boxes { grid-template-columns:1fr; } }
 .onboarding-actions { display: flex; align-items: center; gap: 16px; margin-top: 24px; flex-wrap: wrap; }
@@ -1482,6 +1482,7 @@ summary > b + .muted { margin-left:8px; }
 /* Tones: colour follows meaning (guide 08). */
 .tone-in { --tone:var(--tone-in); } .tone-spend { --tone:var(--tone-spend); } .tone-over { --tone:var(--tone-over); }
 .tone-hold { --tone:var(--tone-hold); } .tone-cash { --tone:var(--chart-cash); } .tone-deposits { --tone:var(--chart-deposits); }
+.tone-reference { --tone:var(--neutral); }
 .tone-gold { --tone:var(--chart-gold); } .tone-equity { --tone:var(--chart-equity); } .tone-other { --tone:var(--chart-other); }
 
 .chart { margin:12px 0 4px; }
@@ -1490,6 +1491,7 @@ summary > b + .muted { margin-left:8px; }
 .chart-legend span { display:inline-flex; align-items:center; gap:6px; }
 .chart-key { display:inline-block; width:12px; height:12px; border-radius:4px; background:var(--tone); flex:none; }
 .chart-key-plan { height:0; width:16px; border-top:2px dashed var(--tone-plan); border-radius:0; background:none; }
+.chart-key-plan.is-reference { border-top-color:var(--neutral); }
 .chart-key.is-dashed { height:0; width:16px; border-top:2px dashed var(--tone); border-radius:0; background:none; }
 
 /* Trend: line + wash, hairline grid, month labels, value at the end. */
@@ -1501,6 +1503,7 @@ summary > b + .muted { margin-left:8px; }
 .chart-line { fill:none; stroke:var(--tone); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; }
 .chart-area { fill:var(--tone); opacity:.1; stroke:none; }
 .chart-plan { stroke:var(--tone-plan); stroke-width:2; stroke-dasharray:6 5; }
+.chart-plan.is-reference { stroke:var(--neutral); }
 .chart-dot { position:absolute; width:10px; height:10px; margin:-5px 0 0 -5px; border-radius:50%; background:var(--tone); box-shadow:0 0 0 2px var(--surface); cursor:default; }
 .chart-dot::before { content:""; position:absolute; inset:-9px; }
 .chart-dot.is-over { background:var(--tone-over); }
@@ -2115,8 +2118,8 @@ a.chart-sankey-label:hover b { color:var(--azure); }
 .main .cat-row.is-off .cat-name { color:var(--muted); }
 .main .cat-sign { display:inline-grid; place-items:center; width:22px; height:22px; border-radius:7px; font:800 14px/1 var(--body); }
 .main .cat-sign.is-in { background:var(--tint-growth); color:var(--positive); }
-.main .cat-sign.is-out { background:var(--rose-soft); color:#A02E5A; }
-.main .cat-sign.is-both { background:var(--tint-held); color:#0A5AB0; }
+.main .cat-sign.is-out { background:var(--rose-soft); color:var(--ink); }
+.main .cat-sign.is-both { background:var(--track); color:var(--ink); }
 .main .cat-kind { display:inline-flex; align-items:center; height:22px; padding:0 8px; margin-right:4px; border-radius:999px; background:rgba(10,36,66,.06); font:600 var(--fs-meta)/1 var(--body); color:var(--ink-2); }
 .main .cat-kind.is-recurring { background:var(--tint-growth); color:var(--positive); }
 .main .cat-kind.is-oneoff { background:var(--track); color:var(--ink-2); }
@@ -2424,7 +2427,7 @@ a.chart-sankey-label:hover b { color:var(--azure); }
 .main .cat-item .cat-name-field { flex:1 1 auto; min-width:90px; font-weight:500!important; }
 .main .cat-item.is-head .cat-name-field { font-weight:700!important; }
 .main .cat-item select:not(#_) { flex:none; width:104px; padding-right:26px!important; background-position:right 8px center!important; font-weight:600; }
-.main .cat-item select.dir-in:not(#_) { color:var(--positive); } .main .cat-item select.dir-out:not(#_) { color:#A02E5A; } .main .cat-item select.dir-both:not(#_) { color:#0A5AB0; }
+.main .cat-item select.dir-in:not(#_) { color:var(--positive); } .main .cat-item select.dir-out:not(#_), .main .cat-item select.dir-both:not(#_) { color:var(--ink); }
 .main .cat-item :is(.cat-name-field,select):not(#_):hover { background:var(--field-focus)!important; }
 .main .cat-item :is(.cat-name-field,select):not(#_):focus { background:var(--field-focus)!important; border-color:var(--meadow-dark)!important; box-shadow:0 0 0 3px rgba(11,138,95,.12)!important; outline:0; }
 .main .cat-pill { flex:none; height:26px; padding:0 10px; border:1px solid var(--line); border-radius:999px; background:var(--surface); color:var(--muted);

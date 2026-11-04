@@ -159,6 +159,18 @@ def bars(rows: list[dict], limit: int = 4) -> dict:
             "more": len(rest), "more_total": sum((r["value"] for r in rest), ZERO)}
 
 
+def bars_with_other(rows: list[dict], other_label: str, limit: int = 4) -> dict:
+    """Rank named holdings, then show the exact remainder as a neutral Other bar."""
+    ordered = sorted((r for r in rows if r["value"]), key=lambda r: -abs(r["value"]))
+    shown, rest = ordered[:limit], ordered[limit:]
+    if rest:
+        shown = shown + [{"label": other_label, "value": sum((r["value"] for r in rest), ZERO),
+                          "tone": "reference"}]
+    scale = max((abs(r["value"]) for r in shown), default=ZERO) or Decimal(1)
+    return {"rows": [{**r, "width": float(abs(r["value"]) / scale * 100)} for r in shown],
+            "more": 0, "more_total": ZERO}
+
+
 def grouped_bars(rows: list[dict], limit: int = 8) -> dict:
     """Bars under their parent category: an L1 header row with its total, then its L2 rows.
 

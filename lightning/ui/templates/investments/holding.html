@@ -25,7 +25,7 @@
 <header class="overview-section-head inv-head"><h2>{{ "Is it making money?"|tr(locale) }}</h2><span>Month ends · {{ j.labels[0] if j.labels }} to {{ j.labels[-1] if j.labels }}</span></header>
 <section class="card wide-card"><div class="overview-split">
   <section><div class="overview-block-head"><div><h3>{{ "Price against what you paid"|tr(locale) }}</h3><p>Month-end price · the dashed line is your {{ fig.average_cost.label|lower }}</p></div></div>
-    {{ trend(j.price, 'Month-end price against average cost', fig.average_cost.label, 210) if j.price else '' }}</section>
+    {{ trend(j.price, 'Month-end price against average cost', fig.average_cost.label, 210, reference=True) if j.price else '' }}</section>
   <section><div class="overview-block-head"><div><h3>{{ "Where the return came from"|tr(locale) }}</h3><p>{{ "From what you paid to value plus what it paid you"|tr(locale) }}</p></div></div>
     {{ waterfall(breakdown) }}</section>
 </div></section>
@@ -35,8 +35,8 @@
   <section><div class="overview-block-head"><div><h3>{{ "Monthly price change"|tr(locale) }}</h3></div></div>
     {{ diverging(j.returns, 'Monthly price change', 'pct', 'growth') if j.returns else '' }}
     <div class="vol-stats">
-      {% if j.best %}<div><span>{{ ("Monthly price change" if j.best and j.worst and j.best[0] == j.worst[0] else "Best month")|tr(locale) }}</span><b class="{{ 'pos' if j.best and j.best[1] > 0 else ('neg' if j.best and j.best[1] < 0 else '') }}">{% if j.best %}{{ (j.best[1])|signed_pct }}%{% else %}—{% endif %}</b><small>{{ j.best[0] if j.best }}</small></div>{% endif %}
-      {% if j.best and j.worst and j.best[0] != j.worst[0] %}<div><span>{{ "Worst month"|tr(locale) }}</span><b class="{{ 'pos' if j.worst[1] > 0 else ('neg' if j.worst[1] < 0 else '') }}">{% if j.worst %}{{ (j.worst[1])|signed_pct }}%{% else %}—{% endif %}</b><small>{{ j.worst[0] if j.worst }}</small></div>{% endif %}
+      {% if j.best %}<div><span>{{ ("Monthly price change" if j.best and j.worst and j.best[0] == j.worst[0] else "Best month")|tr(locale) }}</span><b class="{{ 'pos' if j.best and j.best[1] > 0 else '' }}">{% if j.best %}{{ (j.best[1])|signed_pct }}%{% else %}—{% endif %}</b><small>{{ j.best[0] if j.best }}</small></div>{% endif %}
+      {% if j.best and j.worst and j.best[0] != j.worst[0] %}<div><span>{{ "Worst month"|tr(locale) }}</span><b class="{{ 'pos' if j.worst[1] > 0 else '' }}">{% if j.worst %}{{ (j.worst[1])|signed_pct }}%{% else %}—{% endif %}</b><small>{{ j.worst[0] if j.worst }}</small></div>{% endif %}
       <div><span>{{ 'Typical move'|tr(locale) }}</span><b>{% if j.typical is not none %}±{{ '%.1f'|format(j.typical) }}%{% else %}—{% endif %}</b><small>{{ 'a month' if j.typical is not none else 'after three months' }}</small></div>
       <div><span>{{ "Months up · down"|tr(locale) }}</span><b>{{ j.up or 0 }} · {{ j.down or 0 }}</b><small>of {{ (j.up or 0) + (j.down or 0) }}</small></div>
     </div></section>

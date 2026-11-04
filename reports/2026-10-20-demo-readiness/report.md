@@ -316,3 +316,7 @@ Run the same audit again with `skills/bug-hunt`, `number-audit`, `guideline-audi
 - The full suite: `python -m pytest -n auto --dist loadfile`.
 
 The screenshots kept here are only the ones that show a must-fix.
+
+## 2026-11-04 · PC follow-up
+
+IV-3S items 5, 7 and the holding part of 8: average cost uses Neutral, ordinary negative monthly changes use Ink, and category directions and the first-run Load link use their A03 colours. Item 9: Biggest holdings shows four named bars and a Neutral Other bar for the exact remainder. The other findings remain open.

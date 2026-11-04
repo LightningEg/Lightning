@@ -348,11 +348,11 @@ def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, rep
     breakdown = c.position.investment_breakdown(day, owned_rows, report)
     holding_groups, horizons = breakdown.groups, breakdown.horizons
     balances, holdings_total = breakdown.balances, breakdown.total
-    biggest = charts.bars([{"label": r["name"], "value": r["value"], "note": f"{r['weight']:.1f}% · {g['name']}",
+    biggest = charts.bars_with_other([{"label": r["name"], "value": r["value"], "note": f"{r['weight']:.1f}% · {g['name']}",
                             "href": f"/accounts/{r['account_id']}"} if r["h"] is None else
                            {"label": r["h"].asset_name, "value": r["value"], "note": f"{r['weight']:.1f}% · {r['h'].asset_class.split(' › ')[-1]}",
                             "href": f"/investments/holding/{r['h'].asset_id}?account={r['h'].account_id}&date={day}&start={period.start_text}"}
-                           for g in holding_groups for r in g["rows"] if r["value"]], 6)
+                           for g in holding_groups for r in g["rows"] if r["value"]], translate("Other", ui_locale()))
     # Dividends collected this year, per holding (fixed: 1 January to today).
     now = today()
     year_start = fmt_date(date(now.year, 1, 1) - timedelta(days=1))

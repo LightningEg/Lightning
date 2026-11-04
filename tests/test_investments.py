@@ -485,6 +485,11 @@ def test_holding_page_tells_the_journey_of_one_asset(c, setup, monkeypatch):
     assert [t["kind"] for t in j["trades"]] == ["Bought"]
     page = TestClient(create_app(c)).get(f"/investments/holding/{comi.id}?account={thndr}&date=2027-03-31")
     assert page.status_code == 200
+    assert 'class="chart-plan is-reference"' in page.text
+    assert 'class="chart-key chart-key-plan is-reference"' in page.text
+    import re
+    worst = re.search(r'<span>Worst month</span><b class="([^"]*)">([^<]+)</b>', page.text)
+    assert worst and 'neg' not in worst.group(1) and '−11.1%' in worst.group(2)
     for question in ("Is it making money?", "How bumpy has it been?", "The journey", "Fall from its high"):
         assert question in page.text
 

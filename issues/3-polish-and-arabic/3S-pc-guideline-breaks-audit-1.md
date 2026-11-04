@@ -21,15 +21,15 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 3. Health › Over time: Savings rate and Net worth trends have no axis and do not start at zero, so net worth looks steep beside the Overview's flat one.
 4. Currencies "USD · Value against cost" plots USD cash only: it falls from about 100,000 to 12,126 when the cash bought the ETF, while the card above says
    Foreign money 114,211; the axis runs to 200,000.
-5. Holding "Price against what you paid": the dashed average-cost line is Meadow; dashed Meadow means the plan. Use Neutral #C5D3D0 (A12.1.2).
+5. **2026-11-04:** Holding average cost uses a Neutral dashed reference; plan references remain Meadow. The Chromium brand audit checks its computed stroke.
 
 **Colour off its meaning (A03)**
 6. Overview "Left in plan": the used part of the meter is Meadow; spent of plan is soft rose, as on Budget. Shot: [pc-overview-kpis.png](../../reports/2026-10-20-demo-readiness/evidence/pc-overview-kpis.png).
-7. Categories: "− Expense" is #A02E5A and "± Both" #0A5AB0, neither an A03 colour. First run: the sample cards' "Load" is Azure (links are Ink, underlined).
-8. Gam'eya: five late instalments are Muted grey with no Late chip, and "Next instalment" shows a past date. Holding "Worst month −1.1%" is strong rose.
+7. **2026-11-04:** Category Expense and Both controls use Ink, Income uses Meadow text, and the first-run Load link is Ink and underlined. The Chromium brand audit checks computed styles.
+8. Gam'eya: five late instalments are Muted grey with no Late chip, and "Next instalment" shows a past date. **2026-11-04:** Ordinary negative holding monthly changes use Ink and keep their sign; the gam'eya finding remains open.
 
 **A16 shipping list**
-9. Five or more names: Investments › Biggest holdings (six bars plus "3 more"), the Planner's five-class split.
+9. **2026-11-04:** Investments › Biggest holdings shows four named bars then the exact remainder as Neutral Other. The Planner's five-class split remains to review.
 10. "L1 › L2": the transaction page's "Personal › Entertainment"; every row of Review activity (which also shows money out without "−").
 11. Card in a card: Settings › Budget's four boxes; Spending's small multiples; Certificates' nine `<fieldset>` boxes; first run's account-type list.
 12. Dropdown for your data: Certificates "Buy from" and "Forecast payout account"; the empty profile's Budget spending groups.

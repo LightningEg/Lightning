@@ -124,6 +124,8 @@ def audit():
                 page.click("form[action='/profiles/confirm'] button[type=submit]")
                 page.goto(host.origin + "/")
                 result["/welcome"] = _collect(page)
+                result["sample_load_style"] = page.locator(".sample-box-load").first.evaluate(
+                    "el => [getComputedStyle(el).color, getComputedStyle(el).textDecorationLine]")
                 page.evaluate("""async () => { const t = (document.querySelector('meta[name=lightning-session]')||{}).content
                     || document.querySelector('input[name=__session]').value;
                     await fetch('/demo', {method: 'POST', body: new URLSearchParams({__session: t})}); }""")
@@ -132,6 +134,18 @@ def audit():
                     assert response is not None and response.status < 400, f"{path}: HTTP {response and response.status}"
                     page.mouse.move(1, 1)  # a pointer resting on a field would show its hover border
                     result[path] = _collect(page)
+                    if path == "/categories":
+                        result["category_direction_colors"] = page.locator(".cat-item select[name=direction]").first.evaluate(
+                            "el => ['dir-out', 'dir-both', 'dir-in'].map(c => { el.className=c; return getComputedStyle(el).color; })")
+                page.goto(host.origin + "/investments")
+                holding = page.locator('a[href*="/investments/holding/"]').first
+                if holding.count():
+                    page.goto(host.origin + holding.get_attribute("href"))
+                    reference = page.locator(".chart-plan.is-reference")
+                    result["holding_cost_reference"] = (reference.evaluate("el => getComputedStyle(el).stroke")
+                                                        if reference.count() else None)
+                else:
+                    result["holding_cost_reference"] = None
                 browser.close()
         finally:
             host.stop()
@@ -139,7 +153,7 @@ def audit():
 
 
 def _fails(audit, key):
-    return {path: found[key] for path, found in audit.items() if found[key]}
+    return {path: found[key] for path, found in audit.items() if isinstance(found, dict) and found[key]}
 
 
 def test_nothing_is_upper_case(audit):
@@ -179,3 +193,15 @@ def test_kpi_rows_compare_and_line_up(audit):
 
 def test_page_jump_stays_outside_the_figures(audit):
     assert not _fails(audit, "jump")
+
+
+def test_holding_average_cost_uses_neutral_reference(audit):
+    assert audit["holding_cost_reference"] == "rgb(197, 211, 208)"
+
+
+def test_category_direction_text_uses_meaningful_colours(audit):
+    assert audit["category_direction_colors"] == ["rgb(13, 34, 51)", "rgb(13, 34, 51)", "rgb(9, 120, 82)"]
+
+
+def test_sample_load_action_is_ink_and_underlined(audit):
+    assert audit["sample_load_style"] == ["rgb(13, 34, 51)", "underline"]
