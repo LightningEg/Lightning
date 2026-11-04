@@ -1,0 +1,46 @@
+# Focused validation authorized for Section 7. No app release or production signing job runs here.
+name: Section 7 dependency checks
+on:
+  push:
+    branches: ['codex/search-matching', 'codex/section-seven-*']
+    paths:
+      - 'requirements/**'
+      - 'packaging/third-party/**'
+      - '.github/workflows/section-seven-dependencies.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: section-seven-dependencies-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  matcher:
+    name: Matcher on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.13'
+      - name: Install the locked platform dependencies
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then platform=win; else platform=linux; fi
+          python -m pip install --require-hashes --only-binary=:all: -r "requirements/desktop-probe-$platform.lock"
+      - name: Compare native and portable ranking
+        run: python -m pytest -q tests/test_search_packaging.py
+  phone:
+    name: Check the Android dependency in the app build
+    uses: ./.github/workflows/android-app.yml
+    with:
+      bundle: false
+    secrets:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
