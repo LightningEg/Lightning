@@ -7,7 +7,7 @@ import json
 import re
 from decimal import Decimal
 
-from lightning.bank_import_parsing import is_internal
+from lightning.bank_import_rows import is_internal
 from lightning.categories.domain import Movement
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.transactions.tags import tags_in
