@@ -308,3 +308,29 @@ def test_a_date_in_a_phone_hero_line_never_breaks_across_lines():
         '{% from "phone/partials/hero.html" import hero with context %}'
         '{{ hero("Safe to spend", 1000, "About 50 a day until payday on 2026-12-01.") }}').render(base="EGP", locale="en")
     assert '<span class="nowrap">2026-12-01</span>' in html
+
+
+def test_inner_pages_have_a_back_destination_without_browser_history(phone):
+    for path, destination, label in (
+        ("/settings", "/more", "More"),
+        ("/rules", "/more", "More"),
+        ("/categories", "/more", "More"),
+        ("/counterparties", "/more", "More"),
+        ("/checks", "/more", "More"),
+        ("/investments/planner", "/investments", "Investments"),
+        ("/accounts/1/import", "/accounts/1", "Accounts"),
+        ("/settings?section=budget", "/budget", "Budget"),
+    ):
+        html = phone.get(path).text
+        assert f'class="phone-back" href="{destination}"' in html
+        assert f'<span>{label}</span></a>' in html
+    html = phone.get('/transactions', headers={'referer': 'http://127.0.0.1:9861/budget'}).text
+    assert 'class="phone-back" href="/budget"' in html
+
+
+def test_phone_settings_use_more_instead_of_five_tabs(phone):
+    for path in ("/settings", "/rules", "/categories", "/counterparties", "/checks"):
+        assert 'class="plan-tabs-bar section-tabs"' not in phone.get(path).text
+    more = phone.get("/more").text
+    for path in ("/settings", "/rules", "/categories", "/counterparties", "/checks"):
+        assert f'href="{path}"' in more
