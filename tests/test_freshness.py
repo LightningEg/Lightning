@@ -142,3 +142,11 @@ def test_cash_and_forecast_explanations_are_accessible_in_both_frames(c, setup, 
 
 
 from test_journal_finance import devices  # noqa: E402,F401
+
+
+def test_foreign_cash_explicitly_counted_as_spendable_uses_rate_notes(c):
+    CurrencyRegistry(c.db).register('USD')
+    c.fx.save('USD','2026-09-01','50')
+    a=c.account_flows.open_account('Spendable dollars','BANK','2026-09-01','10',currency='USD')
+    c.accounts.set_spendable(a.id,True)
+    assert any(n.kind==STALE_RATE for n in c.freshness.for_free_cash('2026-09-30'))

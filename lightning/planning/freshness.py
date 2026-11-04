@@ -54,7 +54,9 @@ class FreshnessService:
                 continue
             if not all_currencies and not account.counts_as_spendable(self.reporting.base_currency):
                 continue
-            if not self.reporting.account_balance(account.id, day):
+            owned_cash = (self.reporting.account_balance(account.id, day)
+                          - self.reporting.money_from_others.cash_total_for_account(account.id, day))
+            if not owned_cash:
                 continue
             checked = self.reconciliation.checked_through(account.id) if self.reconciliation else None
             if checked and checked > day:
@@ -70,7 +72,7 @@ class FreshnessService:
                     if not self.receipts.needs_match(receipt):
                         continue
                     destination = self.accounts.get(receipt["destination_account_id"])
-                    if not all_currencies and destination.currency != self.reporting.base_currency:
+                    if not all_currencies and not destination.counts_as_spendable(self.reporting.base_currency):
                         continue
                     notes.append(FreshnessNote("unconfirmed_receipt", receipt["certificate_name"],
                                                receipt["event_date"], figure, f"/accounts/{account.id}"))
@@ -79,20 +81,26 @@ class FreshnessService:
     def for_free_cash(self, as_of):
         """Eligible cash only; equity prices and foreign cash do not establish Free cash."""
         day = fmt_date(as_of) if isinstance(as_of, date) else str(as_of)
-        return self._cash_notes(day, "free_cash")
+        return self._cash_notes(day, "free_cash") + self._rate_notes(day, "free_cash", eligible_only=True)
 
     def for_forecast(self, as_of):
         day = fmt_date(as_of) if isinstance(as_of, date) else str(as_of)
         notes = list(self._cash_notes(day, "forecast", all_currencies=True))
+        notes.extend(self._rate_notes(day, "forecast"))
+        return tuple(notes)
+
+    def _rate_notes(self, day, figure, *, eligible_only=False):
+        notes = []
         if self.accounts is not None:
-            currencies = sorted({a.currency for a in self.accounts.list(active_only=True)
+            currencies = sorted({a.currency for a in self.accounts.list()
                                  if a.account_type.value in ("CASH", "BANK", "BROKERAGE")
+                                 and (not eligible_only or a.counts_as_spendable(self.reporting.base_currency))
                                  and a.currency != self.reporting.base_currency})
             for currency in currencies:
                 rate = self.reporting.valuer.fx(currency, day)
                 if rate is None or rate.age_days > STALE_DAYS:
                     notes.append(FreshnessNote(NO_RATE if rate is None else STALE_RATE, currency,
-                                               None if rate is None else rate.date, "forecast",
+                                               None if rate is None else rate.date, figure,
                                                "/settings?section=currencies&tab=rates"))
         return tuple(notes)
 
