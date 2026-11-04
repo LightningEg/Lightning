@@ -33,7 +33,7 @@ The whole plan, by milestone and code, is `issues/INDEX.md`.
 
 1. **v1.5.1 is public; dependency PR #122 remains blocked.** CSV contribution #117 and the reviewed Actions/theme/engine PRs are merged. #122 still needs coordinated native wheels and lockfiles (1H). **Read:** `reports/2026-10-26-v150-release/report.md`.
 2. **Audit 8 follow-ups:** owner decision 7S. **Read:** `reports/2026-10-26-engine-audit/report.md`.
-3. **9J, 9K, 2AB** need owner choices; **5A2-5A4** open. **Read:** `reports/2026-10-21-backend-streamlining/report.md`.
+3. **9J, 9K** need owner choices; **5A2-5A4** open. **Read:** `reports/2026-10-21-backend-streamlining/report.md`.
 4. **1H:** native recipe, then matched locks. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
 5. **2A:** restore safety code (Luna's claim); its reboot drill joins the held checks. **Read:** 2A.
 6. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `reports/2026-10-26-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
