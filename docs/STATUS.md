@@ -13,10 +13,10 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Protect](pillars/protect.md) | 3 | 1 | 2 |  |  | 1 |
 | [Everywhere](pillars/everywhere.md) | 5 | 4 |  | 1 |  |  |
 | [Feel](pillars/feel.md) | 13 | 4 | 7 | 1 | 1 | 1 |
-| [Build](pillars/build.md) | 10 | 1 | 8 | 1 |  |  |
+| [Build](pillars/build.md) | 9 | 1 | 8 |  |  |  |
 | [Reach](pillars/reach.md) | 6 |  | 4 | 2 |  | 2 |
 
-61 open items in 10 milestones.
+60 open items in 10 milestones.
 
 ## Being built now
 
@@ -46,7 +46,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 
 | Milestone | Open | Goal |
 |---|---|---|
-| 1 Easy to contribute | 6 | Anyone can find how to help in one click and send a first fix the same evening. |
+| 1 Easy to contribute | 5 | Anyone can find how to help in one click and send a first fix the same evening. |
 | 2 Safe for real money | 5 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
 | 3 Polish and Arabic | 14 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 3 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |

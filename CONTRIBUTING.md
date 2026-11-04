@@ -67,6 +67,26 @@ including commercially, as part of Lightning. You keep the copyright in what you
 - **Only the owner** changes settings and protections, signs or publishes releases, and handles keys and secrets.
   Permission to merge never covers those.
 
+### Checks before merging
+
+Every PR runs the full Linux suite on Python 3.13. The `minimum-python` job separately compiles application/tool syntax
+and runs dependency-free money, date, CSV, schedule and return contracts on Python 3.11, the minimum in `pyproject.toml`.
+Run that small check locally with `python -m unittest discover -s tests/runtime_contracts -v`; it does not load pytest's
+integration fixtures or install native wheels. It checks selected runtime behavior and syntax, while the full suite checks
+integration. Deterministic delayed-search-body ordering stays in `tests/phone-search-race.test.cjs`, invoked by the full suite.
+
+Additional checks depend on the changed paths; a Linux PR pass alone supplies no device or packaging evidence:
+
+| Change | Additional evidence before merge |
+| --- | --- |
+| Windows packaging, desktop startup, native wheels or encryption | Run the relevant manual Windows/native probe workflow and inspect startup, encrypted open and the affected packaged workflow. IT-1H owns native dependency inputs and locks. |
+| Android bridge, file handling, permissions, downloads or lifecycle | Run the relevant manual Android build/check and exercise the changed flow on a phone or emulator; record the evidence or an explicit owner waiver. |
+| Restore/promotion or device sync | Run the affected fault/recovery/security contracts and the relevant platform probe when filesystem or native behavior changes. |
+| Pure service or browser behavior | Targeted service/UI regressions and the normal PR jobs; browser tests for changed asynchronous lifecycle behavior. |
+
+PRs record the commands, device/platform evidence and any limits. Signing, release publication and manual release workflows
+remain owner-controlled; merge authorization does not authorize a release. There is no additional full OS/interpreter matrix.
+
 ### Owner: once
 
 On your own computer, logged in as yourself (`gh auth login`):
