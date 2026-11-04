@@ -143,3 +143,37 @@ def test_sync_package_initializers_are_assigned_and_checked(tmp_path):
     policies['runtime_boundary'].append('lightning.sync')
     (package / '__init__.py').write_text('')
     assert policy_problems(package, policies) == []
+
+
+def test_financial_adapter_cannot_import_runtime_module(tmp_path):
+    from tools.backend_policy import policy_problems
+    package = tmp_path / 'lightning' / 'sync'
+    package.mkdir(parents=True)
+    (package / 'adapter.py').write_text('from . import runtime\n')
+    (package / 'runtime.py').write_text('')
+    policies = {'protocol': [], 'financial_adapters': ['lightning.sync.adapter'],
+                'runtime_boundary': ['lightning.sync.runtime']}
+    assert any('imports runtime module lightning.sync.runtime' in problem
+               for problem in policy_problems(package, policies))
+
+
+def test_required_financial_collaborators_are_wired_and_validated(c):
+    from lightning.investments.service import InvestmentService
+    from lightning.planning.forecast import CashForecaster
+
+    assert c.investments.reevaluations is c.reevaluations
+    assert c.forecaster.deposits is c.deposits
+    assert c.forecaster.deposit_receipts is c.deposit_receipts
+    investment_args = (c.db, c.accounts, c.assets, c.categories, c.transactions, c.reporting)
+    with pytest.raises(TypeError):
+        InvestmentService(*investment_args)
+    with pytest.raises(TypeError, match='reevaluations'):
+        InvestmentService(*investment_args, None)
+    forecast_args = (c.planning, c.reporting, c.reserves, c.budgets, c.categories,
+                     c.position, c.schedules, c.health)
+    with pytest.raises(TypeError):
+        CashForecaster(*forecast_args, c.deposits)
+    with pytest.raises(TypeError, match='deposit_receipts'):
+        CashForecaster(*forecast_args, c.deposits, object())
+    with pytest.raises(TypeError, match='deposits'):
+        CashForecaster(*forecast_args, None, c.deposit_receipts)

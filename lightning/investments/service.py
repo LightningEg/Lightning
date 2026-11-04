@@ -7,6 +7,7 @@ It builds ledger lines and hands them to TransactionService.post(), so every rul
 from __future__ import annotations
 
 from decimal import ROUND_HALF_UP, Decimal
+from typing import Protocol
 from dataclasses import replace
 
 from lightning.accounts.domain import INVESTMENT_ACCOUNT_TYPES, Account, AccountType
@@ -50,9 +51,16 @@ def _num(value: Decimal) -> str:
 PRICE_REFERENCE_CODES = ("GLD:18K", "REF:GLD-21K", "REF:GLD-24K")  # seeded in database/seed.py
 
 
+class SaleReevaluation(Protocol):
+    def process_sale(self, day: str, account_id: int, asset_id: int, price: Decimal,
+                     owner_id: int | None = None) -> bool: ...
+
+
 class InvestmentService:
     def __init__(self, db: Database, accounts: AccountService, assets: AssetService, categories: CategoryService,
-                 transactions: TransactionService, reporting: ReportingService, reevaluations=None):
+                 transactions: TransactionService, reporting: ReportingService, reevaluations: SaleReevaluation):
+        if not callable(getattr(reevaluations, "process_sale", None)):
+            raise TypeError("reevaluations must provide process_sale")
         self.db = db
         self.accounts = accounts
         self.assets = assets
@@ -459,7 +467,7 @@ class InvestmentService:
                 lines = [replace(line, owner_id=int(owner_id)) for line in lines]
             self._require_broker_cash(kind, values["account_id"], lines)  # an edit cannot skip it (audit 2026-10-26)
             updated = self.transactions.repost(txn_id, date, lines, "", counterparty, notes)
-            if kind == DocType.SEL and self.reevaluations:
+            if kind == DocType.SEL:
                 unit_line = next(line for line in lines if not self.assets.get_asset(line.asset_id).is_cash)
                 self.reevaluations.process_sale(updated.date, values["account_id"], values["asset_id"],
                                                 unit_line.unit_price, owner_id=owner_id)
@@ -686,7 +694,7 @@ class InvestmentService:
             lines = [replace(line, owner_id=owner_id) for line in lines]
         self._require_broker_cash(kind, account_id, lines)
         txn = self.transactions.post(kind, date, lines, "", counterparty, notes)
-        if kind == DocType.SEL and self.reevaluations and not spec.lowers_cost:  # no units were sold
+        if kind == DocType.SEL and not spec.lowers_cost:  # no units were sold
             unit_line = next(line for line in lines if not self.assets.get_asset(line.asset_id).is_cash)
             self.reevaluations.process_sale(txn.date, account_id, asset_id, unit_line.unit_price,
                                             owner_id=owner_id)

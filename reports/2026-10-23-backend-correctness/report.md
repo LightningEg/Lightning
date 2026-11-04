@@ -195,4 +195,4 @@ Combined full-suite validation: **2,395 passed, 10 skipped**; all four import co
 
 ### 1G follow-up (2026-11-04)
 
-The existing top-level inventory covers the original omissions. Sync modules and package initializers now have explicit policies and static direct-import checks, with negative tests in `tests/test_architecture.py`. Required collaborator wiring and finer adapter/runtime boundaries remain in [1G](../../issues/1-easy-to-contribute/1G-complete-backend-architecture-contracts.md).
+The existing top-level inventory covers the original omissions. Sync modules and package initializers now have explicit policies and static direct-import checks, with negative tests in `tests/test_architecture.py`. Investment reevaluation and forecast deposit-receipt collaborators are now required and validated, and financial adapters cannot import runtime modules except the finance-to-store dependency. Other composition wiring and remaining runtime boundaries stay in [1G](../../issues/1-easy-to-contribute/1G-complete-backend-architecture-contracts.md).

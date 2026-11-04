@@ -238,9 +238,9 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
     deposits = DepositService(db, accounts, assets, transactions, gameya)
     position = PositionService(reporting, assets, investments, money_from_others, reserves, planning, deposits)
     health = HealthService(planning, position, budgets, schedules)
-    forecaster = CashForecaster(planning, reporting, reserves, budgets, categories, position, schedules, health, deposits)
     deposit_receipts = DepositReceiptService(db, deposits, transactions, accounts, reporting)
-    forecaster.deposit_receipts = deposit_receipts
+    forecaster = CashForecaster(planning, reporting, reserves, budgets, categories, position, schedules, health,
+                                deposits, deposit_receipts)
     zakat = ZakatService(db, position, reporting, assets, categories, physical_items, audit, gameya)
     result = Container(
         db=db,

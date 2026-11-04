@@ -12,6 +12,8 @@ GROUPS = ('protocol', 'financial_adapters', 'runtime_boundary')
 UPPER = ('lightning.ui', 'lightning.desktop', 'lightning.runtime', 'lightning.bootstrap')
 # Envelope authentication imports the existing signature verifier lazily; this is the sole protocol exception.
 PROTOCOL_EXCEPTIONS = {('lightning.sync.journal.codec', 'lightning.sync.identity')}
+# Finance validates replicated effects against the journal store's schema.
+ADAPTER_EXCEPTIONS = {('lightning.sync.journal.finance', 'lightning.sync.journal.store')}
 
 
 def policy_problems(package: Path, policies: dict[str, list[str]]) -> list[str]:
@@ -29,6 +31,9 @@ def policy_problems(package: Path, policies: dict[str, list[str]]) -> list[str]:
     problems += [f'unknown module: {name}' for name in sorted(counts.keys() - modules)]
     problems += [f'multiple policies: {name}' for name in sorted(name for name, count in counts.items() if count > 1)]
     protocol = set(policies.get('protocol', ()))
+    adapters = set(policies.get('financial_adapters', ()))
+    runtime = {name for name in policies.get('runtime_boundary', ())
+               if name in paths and paths[name].name != '__init__.py'}
     for name in sorted(modules):
         path = paths[name]
         tree = ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
@@ -49,6 +54,9 @@ def policy_problems(package: Path, policies: dict[str, list[str]]) -> list[str]:
                     problems.append(f'{name}:{node.lineno} imports upper layer {dependency}')
                 elif name in protocol and dependency not in protocol and (name, dependency) not in PROTOCOL_EXCEPTIONS:
                     problems.append(f'{name}:{node.lineno} imports outside protocol {dependency}')
+                elif (name in adapters and dependency in runtime
+                      and (name, dependency) not in ADAPTER_EXCEPTIONS):
+                    problems.append(f'{name}:{node.lineno} imports runtime module {dependency}')
     return problems
 
 
