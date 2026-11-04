@@ -16,7 +16,6 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 | **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](../../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | L | building |
 | **IT-1M** | [Archive closed reports and keep their evidence out of the checkout](../../issues/1-easy-to-contribute/1M-archive-closed-reports.md) | M | ready |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](../../issues/1-easy-to-contribute/1N-split-large-items-and-post-them.md) | M | ready |
-| **IT-1P** | [Check the minimum supported Python and asynchronous UI contracts](../../issues/1-easy-to-contribute/1P-supported-runtime-contract-checks.md) | M | new |
 | **IT-3J** | [Version 1.1 is shipped: move what holds of its review into Architecture, then delete this file](../../issues/3-polish-and-arabic/3J-fold-v1-1-review-into-architecture.md) | M | ready |
 | **IT-4K** | [Journal code](../../issues/4-edit-journal-and-devices/4K-journal-code-tidy.md) | M | ready |
 | **IT-9J** | [Routes still compute figures, some that no screen shows](../../issues/9-later/9J-routes-compute-figures.md) | M | ready |
@@ -29,6 +28,6 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 - [Audit 6: open pull request cleanup](../../reports/2026-10-23-pull-request-cleanup/report.md): 1H
 - [v1.5.0 PR review, theme switching and package preparation](../../reports/2026-10-26-v150-release/report.md): 1H
 - [Audit 9: loose ends after themes and sync, linking sections, and how the plan is filed](../../reports/2026-10-28-loose-ends-and-linking/report.md): 4K
-- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 1G, 1H, 1P, 4K, 9J, 9K
+- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 1G, 1H, 4K, 9J, 9K
 <!-- work:end -->
 
