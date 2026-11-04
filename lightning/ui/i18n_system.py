@@ -1393,6 +1393,10 @@ ROUTES = {
     "Choose how this payment was settled.": "اختار الدفعة دي اتسددت إزاي.",
 }
 SERVICES = {
+    "Choose account": "اختار الحساب",
+    "Comparison": "المقارنة",
+    "Missing rates": "أسعار صرف ناقصة",
+    "Income with a possible recorded match is excluded pending review. Unambiguous recorded payments are not counted again.": "الدخل اللي ليه عملية مسجلة محتملة مش محسوب لحد المراجعة. والدفعات المسجلة بتطابق واضح مش بتتحسب تاني.",
     "Review future payments": "راجع الدفعات الجاية",
     'Compare scenarios': 'قارن السيناريوهات',
     'Income delay': 'تأخير الدخل',
