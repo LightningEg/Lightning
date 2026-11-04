@@ -475,6 +475,29 @@ def _keep_typed(form, rows) -> None:
         row["_match"] = decision["match"]
 
 
+def _ready_decision(form, row, decision, account_names) -> bool:
+    """Only submit resolved review rows; the service also supports explicit fallback imports."""
+    if row["_status"] != "REVIEW":
+        return False
+    match = decision["match"]
+    if decision["skip"] or match == "skip" or match.startswith("link:"):
+        return True
+    if row.get("_possible_duplicate") and match != "new":
+        return False
+    category_key = f"category_{row['_import_row_id']}"
+    if decision["category_id"] or decision["force_uncategorized"]:
+        return True
+    if category_key not in form and row.get("_category_id"):
+        return True
+    if decision["transfer_account_id"] or decision["counterparty"].strip().casefold() in account_names:
+        return True
+    owner = str(decision["owner_choice"])
+    whom = str(decision["whom"]).strip().casefold()
+    held_for = owner.startswith(("existing:", "new:")) or (not owner and whom and whom not in
+                                                             {"you", "self", "me", "my money", "my own money"})
+    return bool(held_for and _amount({"Amount": decision["amount"]}) > ZERO)
+
+
 @router.post("/{account_id:int}/import/{batch_id:int}/confirm")
 async def confirm(request: Request, account_id: int, batch_id: int):
     c = container(request)
@@ -485,7 +508,12 @@ async def confirm(request: Request, account_id: int, batch_id: int):
     # controls per imported row, so size the parser budget to this staged batch.
     form = await request.form(max_fields=_review_form_max_fields(len(rows)),
                               max_part_size=MAX_IMPORT_REVIEW_REQUEST_BYTES)
-    decisions = {row["_import_row_id"]: _decision(form, row) for row in rows}
+    account_names = {a.name.casefold() for a in c.accounts.list(active_only=True) if a.id != account_id}
+    decisions = {}
+    for row in rows:
+        decision = _decision(form, row)
+        if _ready_decision(form, row, decision, account_names):
+            decisions[row["_import_row_id"]] = decision
     try:
         with settled_save(request, c):
             count = c.bank_imports.confirm(batch_id, decisions)
@@ -516,11 +544,15 @@ async def confirm(request: Request, account_id: int, batch_id: int):
     if count.get("ambiguous_reserves"):
         feedback += f" {count['ambiguous_reserves']} row(s) could match multiple reserves; choose beside each transaction in its account list."
     batch, result_rows = c.bank_imports.preview(batch_id)
+    remaining = sum(row["_status"] == "REVIEW" for row in result_rows)
+    if remaining:
+        _keep_typed(form, result_rows)
     settled = c.planning.settled_bill_names({row["_transaction_id"] for row in result_rows
                                            if row.get("_transaction_id")})
     if settled:
         feedback += " Settled bills: " + ", ".join(settled) + "."
-    return _render_review(request, c, account_id, batch, result_rows, summary=count,
-                          msg=f"Import complete: {count['posted']} posted, "
+    return _render_review(request, c, account_id, batch, result_rows, summary=count, form=form if remaining else None,
+                          msg=f"Import {'updated' if remaining else 'complete'}: {count['posted']} posted, "
                               + (f"{count['linked']} linked to entries you already had, " if count.get("linked") else "")
-                              + f"{count['skipped']} skipped, {count['duplicates']} duplicates.{feedback}")
+                              + f"{count['skipped']} skipped, {count['duplicates']} duplicates."
+                              + (" Some rows still need review." if remaining else "") + feedback)

@@ -26,7 +26,7 @@
   <h2>{{ "Record it now"|tr(locale) }}</h2>
   <input type="hidden" name="due" value="{{ payment.due_date }}"><input type="hidden" name="back" value="{{ back }}">
   <div class="row">
-    <div class="field"><label for="date_paid">{{ 'Date'|tr(locale) }} <span class="muted small">{{ 'yyyy-mm-dd'|tr(locale) }}</span></label><input id="date_paid" name="date_paid" value="{{ [payment.due_date, today]|min }}" data-smart-date inputmode="numeric"></div>
+    <div class="field"><label for="date_paid">{{ 'Date'|tr(locale) }} {% if not phone_mode() %}<span class="muted small">{{ 'yyyy-mm-dd'|tr(locale) }}</span>{% endif %}</label><input id="date_paid" name="date_paid" value="{{ [payment.due_date, today]|min }}" data-smart-date inputmode="numeric"></div>
     <div class="field"><label for="pay-amount">Amount ({{ currency }})</label><input id="pay-amount" name="amount" value="{{ '%.2f'|format(payment.still_owed) }}" inputmode="decimal" class="money-input"></div>
   </div>
   <div class="field"><label for="pay-account">{{ 'Account'|tr(locale) }}</label><select id="pay-account" name="account_id" data-own-picker>{% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if a.id == item.account_id }}>{{ a.name }}</option>{% endfor %}</select></div>

@@ -11,7 +11,8 @@
   <header class="phone-section-head"><h2 id="recurring-list">{{ 'Recurring items'|tr(locale) }}</h2><span>{{ '{n} active'|tr(locale, n=rows|length) }}</span></header>
   {% if rows %}<div class="phone-rows">{% for r in rows %}{% set i = r.item %}
     <div class="phone-row phone-recurring-row"><a class="phone-row-link" data-popup-open href="/plan/items/{{ i.id }}/edit"><span><b>{{ i.name }}</b><small>{{ i.kind_label|tr(locale) }} · {{ r.schedule }}{% if r.due %}{% elif r.next %} · {{ 'Next {date}'|tr(locale, date=r.next.due_date) }}{% else %} · {{ 'No more payments'|tr(locale) }}{% endif %}</small></span></a>
-      <span class="phone-recurring-side">{% if r.due %}<a class="plan-status plan-status-due" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ r.due[0].due_date }}&amp;back=%2Fplan%2Frecurring">{{ '{n} due'|tr(locale, n=r.due|length) }}</a>{% endif %}<b class="{{ 'pos' if i.is_income }}">{{ '+' if i.is_income else '−' }}{{ i.amount|amount_role('row') }}</b></span></div>{% endfor %}
+      <span class="phone-recurring-side">{% if r.due %}<a class="plan-status plan-status-due" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ r.due[0].due_date }}&amp;back=%2Fplan%2Frecurring">{{ '{n} due'|tr(locale, n=r.due|length) }}</a>{% endif %}<b class="{{ 'pos' if i.is_income }}">{{ '+' if i.is_income else '−' }}{{ i.amount|amount_role('row') }}</b></span></div>
+      {% if not r.due and r.next and r.review_next %}<a class="phone-row phone-recurring-review" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ r.next.due_date }}&amp;back=%2Fplan%2Frecurring"><span>{{ "Possible early/changed payment — review"|tr(locale) }}</span><span class="phone-chevron" aria-hidden="true">›</span></a>{% endif %}{% endfor %}
   </div>
   {% else %}<p class="phone-note">{{ "Nothing yet. Add rent, internet, phone, subscriptions and your salary so the plan knows what is coming."|tr(locale) }}</p>{% endif %}
 </section>
@@ -40,7 +41,7 @@
   <div class="phone-rows">{% for s in suggestions %}
     <div class="phone-row phone-suggest"><span><b>{{ s.name }}</b><small>{{ '{n} months · usually around day {day}'|tr(locale, n=s.months, day=s.day) }}</small></span><b class="{{ 'pos' if s.kind == 'INCOME' }}">{{ '+' if s.kind == 'INCOME' else '−' }}{{ s.amount|amount_role('row') }} {{ s.currency }}</b></div>
     <div class="phone-suggest-actions"><a class="phone-quiet" data-popup-open href="/plan/items/new?kind={{ s.kind }}&amp;name={{ s.name|urlencode }}&amp;amount={{ s.amount }}&amp;frequency=MONTHLY&amp;counterparty={{ s.name|urlencode }}&amp;account_id={{ s.account_id or '' }}&amp;category_id={{ s.category_id or '' }}&amp;start_date={{ s.start_date }}&amp;match_tolerance_pct={{ s.match_tolerance_pct }}">{{ 'Track'|tr(locale) }}</a>
-      <form method="post" action="/plan/suggestions/{{ s.counterparty_id }}/not-recurring"><button class="phone-quiet">{{ "Not recurring"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% endfor %}
+      <details class="action-menu phone-more-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}">⋯</summary><div><form method="post" action="/plan/suggestions/{{ s.counterparty_id }}/not-recurring"><button>{{ "Not recurring"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div></details></div>{% endfor %}
   </div>
 </section>{% endif %}
 

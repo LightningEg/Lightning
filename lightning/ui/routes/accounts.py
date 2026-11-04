@@ -15,8 +15,9 @@ from lightning.core.money import ZERO, fmt, to_decimal
 
 from . import register
 from .. import charts, kpis, status as page_status
+from ..i18n import translate
 from ..periods import parse_period
-from ..web import settled_save, container, redirect, render
+from ..web import settled_save, container, redirect, render, ui_locale
 
 router = APIRouter(prefix="/accounts")
 
@@ -156,14 +157,41 @@ async def currency_accounts(request: Request):
     shown, other = c.reporting.fx_positions.split(positions)
     chosen = next((p for p in shown if p.currency == request.query_params.get("currency")), shown[0] if shown else None)
     trend = None
+    combined_trend = None
+    combined_unavailable = False
     if chosen:
         points = [point for point in chosen.series]
         trend = charts.trend([point.day[:7] for point in points], [
             {"name": "Value of what you hold", "tone": "hold", "values": [point.value for point in points]},
             {"name": "What it cost", "tone": "other", "dashed": True, "values": [point.cost for point in points]}])
+        if not getattr(request.state, "phone", False):
+            values = []
+            for point in points:
+                invested, unpriced = c.position.foreign_holdings(point.day, c.base_currency).get(
+                    chosen.currency, (ZERO, False))
+                values.append(None if unpriced or point.value is None else point.value + invested)
+            # Never bridge an unknown valuation with a line that suggests a known history.
+            combined_unavailable = any(value is None for value in values)
+            combined_trend = charts.trend([point.day[:7] for point in points], [
+                {"name": translate("Cash and investments", ui_locale()), "tone": "hold", "values": values}])
+            if not combined_trend["too_short"]:
+                series = combined_trend["series"][0]
+                dots, run, lines = iter(series["dots"]), [], []
+                for value in values:
+                    if value is None:
+                        if len(run) > 1:
+                            lines.append(" ".join(run))
+                        run = []
+                    else:
+                        dot = next(dots)
+                        run.append(f"{dot['x']:.2f},{dot['y']:.2f}")
+                if len(run) > 1:
+                    lines.append(" ".join(run))
+                series["lines"] = lines
     totals = c.reporting.fx_positions.totals(positions)
     return render(request, "accounts/currencies.html", positions=shown, other=other, chosen=chosen, trend=trend,
-                  totals=totals, period=period, period_error=period_error)
+                  totals=totals, period=period, period_error=period_error,
+                  combined_trend=combined_trend, combined_unavailable=combined_unavailable)
 
 
 CONVERT_FIELDS = ("date", "from_account_id", "to_account_id", "sent", "received", "fee", "notes")

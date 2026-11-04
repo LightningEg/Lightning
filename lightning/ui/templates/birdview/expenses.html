@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Expense analysis · Birdview{% endblock %}
 {% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/birdview/expenses", period, month, this_month, date_from, date_to, category_filter) }}{% endblock %}
-{% block heading %}<div class="birdview-title"><div><h1>{{ "Spending"|tr(locale) }}</h1>{% if category_name %}<div class="muted small">{{ category_name }}</div>{% endif %}</div></div>{% endblock %}
+{% block heading %}<div class="birdview-title"><div><h1>{{ "Spending"|tr(locale) }}</h1>{% if category_name %}<div class="muted small">{{ category_name }}</div>{% endif %}<p class="page-dates"><b dir="ltr">{{ '{sa} to {sb}'|tr(locale, sa=date_from, sb=date_to) }}</b></p></div></div>{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import key_notes, key_note, bars, trend, sparkline, stat_tiles %}
 {% if error %}<div class="flash error">{{ error|tr(locale) }}</div>{% endif %}

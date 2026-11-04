@@ -350,7 +350,7 @@ Ranked by harm to trust, then by how often a user meets it.
 
 **IM-1 · Feature · P2 — CSV only.** Egyptian banks give PDF or Excel (project #17). Until then, save a column mapping per bank (CIB, NBE, Banque Misr, QNB) so the second import is one click, and say "5 MB" not "5 MiB".
 
-**IM-2 · Flow · P2 — "Post ready rows" while undecided rows post as Unaccounted.** Still open (UX plan §8).
+**[x] IM-2 · Flow · P2 — "Post ready rows" while undecided rows post as Unaccounted.** The review page now leaves undecided rows for review, accepts an explicit Uncategorized choice, and preserves duplicate decisions and retries. The service's explicit fallback remains available to non-review callers. Covered by import review and bank import tests.
 
 **IM-3 · Feature · P2 — Rule suggestions from filing.** Competition #3: after filing "Talabat → Eating Out" three times, offer a rule.
 

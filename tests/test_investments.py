@@ -729,3 +729,43 @@ def test_planner_renders_five_suggestions_without_losing_detail(c):
     detail = page.split('<div class="planner-popup-rows">', 1)[1]
     assert all(name in detail for name in ("Alpha", "Beta", "Gamma", "Delta", "Epsilon"))
     assert 'name="amount"' in page and 'name="monthly_goal"' in page and 'name="mode"' in page
+
+
+@pytest.mark.parametrize('values', [
+    [('A', '50'), ('B', '40'), ('C', '30'), ('D', '20'), ('E', '10')],
+    [('Other', '70'), ('A', '60'), ('B', '50'), ('C', '40'), ('D', '30'), ('E', '20')],
+    [('A', '100'), ('B', '0'), ('C', '0'), ('D', '0'), ('E', '0')],
+])
+def test_phone_planner_groups_without_losing_recommendations(values):
+    from lightning.ui.routes.investments import _planner_phone_groups, _planner_stack
+    rows = [{'bucket': name, 'suggested': D(value), 'tone': 'equity'} for name, value in values]
+    before = [dict(row) for row in rows]
+    shown, other, total = _planner_phone_groups(rows, _planner_stack(rows, 'Other'))
+    assert len(shown) <= 4 and len(shown) + len(other) == len(rows)
+    assert {r['bucket'] for r in shown + other} == {r['bucket'] for r in rows}
+    assert total == sum((r['suggested'] for r in other), ZERO)
+    assert sum((r['suggested'] for r in shown), ZERO) + total == sum((r['suggested'] for r in rows), ZERO)
+    assert rows == before
+
+
+def test_phone_planner_keeps_remainder_details_and_controls(c):
+    codes = ('STOCK', 'GOLD', 'FUND.GOLD', 'FUND.FIXED_INCOME', 'FUND.MONEY_MARKET')
+    names = ('Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon')
+    for name, code in zip(names, codes):
+        c.investments.set_target_weight(name, D('20'), c.assets.get_class_by_code(code).id)
+    app = create_app(c)
+    async def phone_app(scope, receive, send):
+        scope.setdefault('state', {})['phone'] = True
+        await app(scope, receive, send)
+    phone = TestClient(phone_app).get('/investments/planner?amount=1000').text
+    desktop = TestClient(app).get('/investments/planner?amount=1000').text
+    phone_rows = phone.split('<div class="planner-popup-rows">', 1)[1]
+    assert 'class="phone-row-more planner-other"' in phone_rows
+    before, remainder = phone_rows.split('<details class="phone-row-more planner-other">', 1)
+    after = remainder.split('</details>', 1)[0]
+    assert sum(f'data-planner-bucket="{name}"' in before for name in names) == 4
+    assert sum(f'data-planner-bucket="{name}"' in after for name in names) == 1
+    assert 'Other</span><b>200</b>' in after
+    assert all(f'data-planner-bucket="{name}"' in desktop for name in names)
+    assert 'planner-other' not in desktop
+    assert all(f'name="{field}"' in phone and f'name="{field}"' in desktop for field in ('amount', 'monthly_goal', 'mode'))

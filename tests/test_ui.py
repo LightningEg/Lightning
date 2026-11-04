@@ -442,3 +442,66 @@ def test_this_month_moves_on_and_a_past_month_stays(c, setup, monkeypatch):
     client.get("/budget?period=month&month=2026-08")                      # a past month on purpose
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-12-01")
     assert client.get("/budget", follow_redirects=False).headers["location"].endswith("month=2026-08")
+
+
+def test_phone_currency_settings_render_rates_and_fx_history_as_rows(c):
+    from lightning.database.currencies import CurrencyRegistry
+
+    CurrencyRegistry(c.db).register('USD')
+    c.fx.save('USD', '2026-09-01', '50')
+    c.account_flows.open_account('Dollar savings', 'BANK', '2026-09-01', '100', currency='USD',
+                                 opening_balance_date='2026-09-01')
+    c.fx.save('USD', '2026-09-30', '55')
+    assert c.reevaluations.process_date('2026-09-30', 'MONTH_END')
+    app = create_app(c)
+    async def phone_app(scope, receive, send):
+        scope.setdefault('state', {})['phone'] = True
+        await app(scope, receive, send)
+    phone = TestClient(phone_app).get('/settings?section=currencies&tab=rates').text
+    desktop = TestClient(app).get('/settings?section=currencies&tab=rates').text
+    assert '<table' not in phone and 'currency-rate-list' in phone
+    for value in ('USD', '55', 'Dollar savings', '2026-09-30', '500'):
+        assert value in phone and value in desktop
+    assert '<table' in desktop
+
+
+def test_phone_sale_factors_preserve_desktop_values_and_editing(c, setup):
+    from html.parser import HTMLParser
+
+    class FactorInputs(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.fields = {}
+        def handle_starttag(self, tag, attrs):
+            attrs = dict(attrs)
+            if tag == 'input' and attrs.get('name') == 'factor':
+                self.fields[attrs['id']] = (attrs.get('value'), attrs.get('placeholder'))
+
+    account = c.account_flows.open_account('Broker', 'BROKERAGE', '2026-09-01', '1000')
+    asset = c.assets.create_investment('Fund', 'FUND.EQUITY', 'FND')
+    c.investments.add_holding(account.id, asset.id, '2', '200', '2026-09-02')
+    app = create_app(c)
+    async def phone_app(scope, receive, send):
+        scope.setdefault('state', {})['phone'] = True
+        await app(scope, receive, send)
+    phone_client, desktop_client = TestClient(phone_app), TestClient(app)
+    path = '/settings?section=valuations'
+    phone, desktop = phone_client.get(path).text, desktop_client.get(path).text
+    assert '<table' not in phone and 'factor-phone-rows' in phone and '<table' in desktop
+    a, b = FactorInputs(), FactorInputs()
+    a.feed(phone)
+    b.feed(desktop)
+    assert a.fields and a.fields == b.fields
+    assert '200' in phone and '200' in desktop  # same holding value; phone drops .00
+    first_id = next(iter(a.fields)).removeprefix('factor-')
+    assert phone_client.post(f'/settings/liquidation-factor/{first_id}', data={'factor': '82'}).status_code == 204
+    updated = FactorInputs()
+    updated.feed(phone_client.get(path).text)
+    assert updated.fields['factor-' + first_id][0] == '82'
+
+
+def test_desktop_import_keeps_cancel(c, setup):
+    account = setup[0]['cib']
+    html = TestClient(create_app(c)).get(f'/accounts/{account.id}/import').text
+    upload = html.split('enctype="multipart/form-data"', 1)[1].split('</form>', 1)[0]
+    assert 'Review statement' in upload and '>Cancel</a>' in upload

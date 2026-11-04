@@ -228,7 +228,7 @@ class FxPositions:
                 "unrealized": sum((p.unrealized or ZERO for p in positions), ZERO),
                 "realized": sum((p.realized for p in positions), ZERO),
                 "spread": sum((p.spread for p in positions), ZERO),
-                "complete": all(p.value is not None for p in positions)}
+                "complete": all(p.value is not None and not p.investments_unpriced for p in positions)}
 
     @staticmethod
     def split(positions: list[Position], shown: int = 4) -> tuple[list[Position], Other | None]:
