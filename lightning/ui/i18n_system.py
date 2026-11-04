@@ -1441,6 +1441,11 @@ SERVICES = {
     'Recorded spending less refunds, by posting date. Transfers and money held for others are excluded.': 'المصروفات المسجلة ناقص المبالغ المستردة، حسب تاريخ التسجيل. التحويلات والفلوس اللي معاك لغيرك مش محسوبة.',
     '{count} transactions': '{count} عمليات',
     'No spending in this month.': 'مفيش مصروفات في الشهر ده.',
+    'Transfer across currencies': 'تحويل بين عملتين',
+    'Other account amount': 'المبلغ في الحساب التاني',
+    'Enter the exact amount on the other currency statement.': 'اكتب المبلغ بالضبط من بيان العملة التانية.',
+    'Currency conversions in statement imports must use your own money.': 'تحويل العملات في استيراد البيان لازم يكون من فلوسك.',
+    'Choose your other account in Counterparty, then enter its exact statement amount as a positive number. No exchange rate is guessed. Import the debit first if it includes a fee; link the other statement row to the conversion.': 'اختار حسابك التاني في الطرف التاني، واكتب مبلغ بيانه بالضبط كرقم موجب. مش بنخمّن سعر الصرف. استورد الخصم الأول لو فيه رسوم، وبعدها اربط صف البيان التاني بالتحويل.',
 
     'Change loan payments from Loans.': 'غيّر أقساط القرض من صفحة القروض.',
     'Back to Budget': 'ارجع للميزانية',

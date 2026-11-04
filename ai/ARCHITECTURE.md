@@ -605,3 +605,6 @@ CashForecaster.scheduled_inputs is the shared receipt-adjusted, early-payment-aw
 ### FIFO cash age and spending calendar (NF-7G)
 
 `reporting.cash_analytics.cash_age` scans posted owned cash lines by date/id. Per-currency FIFO lots retain receipt dates across same-currency transfers and two-currency conversions; opening balances and unfunded spending stay unknown. Investment buys consume lots but are not spending samples. The last ten cash expenses in profile currency supply amount-weighted days (previous ten as context); unknown lots suppress the result. This measures historical cash use, not a forecast. ReportingService.spending_calendar aggregates the existing Spending lines by posting day, preserving refunds and custody exclusions.
+### Cross-currency statement legs (NF-7E)
+
+ImportPoster requires an explicit other-account quantity before calling record_conversion. It never derives a received amount from market FX. A fee included in the debit remains a conversion expense. The second import links by account, exact signed native cash amount and the existing settlement-date window; both legs appear in the match label. The two statements back one CNV. Existing bounded journal decisions already carry the amount as text and the target account through UUID translation.
