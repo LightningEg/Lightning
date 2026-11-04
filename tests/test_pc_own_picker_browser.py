@@ -65,5 +65,13 @@ def test_certificate_and_budget_pickers_preserve_submitted_ids(c, setup):
                 page.locator('[name=broad_limit]').fill('5000')
                 page.get_by_role('button', name='Create plan').click()
                 assert c.budgets.has_plan('2026-09', schedule=c.schedules.view())
+                page.goto(host.origin + '/settings?section=budget')
+                groups = page.locator('.settings-compact fieldset.sc-group')
+                assert groups.count() == 4 and groups.locator('legend').count() == 4
+                assert all(style == '0px' for style in groups.evaluate_all(
+                    'els => els.map(el => getComputedStyle(el).borderTopWidth)'))
+                assert all(style == 'rgba(0, 0, 0, 0)' for style in groups.evaluate_all(
+                    'els => els.map(el => getComputedStyle(el).backgroundColor)'))
+                assert page.locator('.settings-compact input[name=carryover]').count() == 1
     finally:
         host.stop()

@@ -394,3 +394,7 @@ IV-3S item 11: PC certificate receipt fieldsets retain their accessible grouping
 ## 2026-11-04 · Certificate actions
 
 IV-3S item 16: the PC certificate page keeps purchase as its Primary and uses Secondary actions for receipt matching and redemption. Chromium checks one visible Primary with three receipt groups and an expanded certificate. Page length remains open.
+
+## 2026-11-04 · Budget settings groups
+
+IV-3S item 11: the four PC Budget settings groups retain fieldset legends and controls without boxed backgrounds. Chromium checks their borders and backgrounds; the phone styles are unchanged.
