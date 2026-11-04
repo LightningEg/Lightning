@@ -91,7 +91,7 @@ def emergency_fund(reserves, budgets, month: str, schedule):
 
 
 class CashForecaster:
-    def __init__(self, planning, reporting, reserves, budgets, categories, position, schedules, health, deposits=None):
+    def __init__(self, planning, reporting, reserves, budgets, categories, position, schedules, health, deposits=None, deposit_receipts=None):
         self.planning = planning
         self.position = position
         self.reporting = reporting
@@ -99,6 +99,7 @@ class CashForecaster:
         self.budgets = budgets
         self.categories = categories
         self.deposits = deposits
+        self.deposit_receipts = deposit_receipts  # matches paid receipts to the projected deposit events; None: none to match
         self.schedules = schedules
         self.health = health  # its Savings rate limit sets the saving the forecast asks for
 
@@ -200,7 +201,7 @@ class CashForecaster:
         month_keys = _months(day, months)
         horizon_end = parse_month(month_keys[-1])[1]
         all_events = _deposit_cash_events(self.deposits, day, horizon_end)
-        receipts = getattr(self, "deposit_receipts", None)
+        receipts = self.deposit_receipts
         if receipts is not None:
             all_events = receipts.adjust_events(all_events, day)
         deposit_events = [e for e in all_events if getattr(e, "source", "CD") != "GAMEYA"]

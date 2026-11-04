@@ -49,3 +49,5 @@ Still open: the unclaimed profile-route extraction, coordinated journal/device/r
 The profile lifecycle screens (list, new profile, unlock with password or fingerprint, recovery, password, question and recovery key) moved unchanged out of `profile_app` into `lightning/runtime/profile_screens.py`; the routes see the session, devices and gate through one `ProfileScreens` record, and `page`/`action` come back for the routes that stay. Restore, devices, borrowed-profile and Lock routes were not touched (they belong to the restore and journal claims). `runtime/app.py` is now about 750 lines. Existing profile, phone, restore and architecture tests pass unchanged; ruff and the import contracts pass.
 
 Still open: restore, device and borrowed-profile routes after their claims clear, and the bank-import parsing/proposal/posting split.
+
+Also left (from 1G, 2026-11-04): Undo's history-validation hook (`result.undo.validate`, `prepare_history_validation`, `db.undo`) is still assigned in `bootstrap.py`; pass it to `UndoService` through its constructor.
