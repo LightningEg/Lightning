@@ -22,3 +22,9 @@ repo: app
 Assign every production module to an explicit dependency policy or documented exemption and enforce coverage. Separate sync protocol, financial adapters and runtime boundaries. Make required wiring explicit through protocols or a validated composition phase.
 
 **Not posted to contributors (2026-10-31):** it is architecture work across the sync, financial and runtime layers, which overlaps the claimed journal code; it needs splitting by layer first.
+
+## Follow-up (2026-11-04)
+
+The top-level layer inventory is enforced. Sync now assigns every Python module and package initializer to a protocol, financial adapter or runtime policy; `tools/backend_policy.py` checks assignments and direct imports, including a documented codec exception. Dynamic imports are outside this static check. Regressions: `tests/test_architecture.py`.
+
+Still open: validate required collaborator wiring, including investment reevaluation and forecast deposit receipts, and assess finer financial-adapter/runtime dependency boundaries. Budget now receives `ScheduleView` explicitly under 9K; do not restore its old callbacks.

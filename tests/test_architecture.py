@@ -101,3 +101,45 @@ def test_other_asset_value_is_saved_through_the_account_service(c):
     with pytest.raises(Exception, match="Choose an Other asset account"):
         c.accounts.save_other_asset_value(c.accounts.get(c.account_flows.open_account("B", "BANK", "2026-01-01", "1").id),
                                           "2026-02-01", "5")
+def test_sync_module_policies_and_boundaries():
+    from tools.backend_policy import check
+    assert check() == []
+
+
+def test_sync_policy_detects_unassigned_modules_and_forbidden_protocol_imports(tmp_path):
+    from tools.backend_policy import policy_problems
+    package = tmp_path / 'lightning' / 'sync'
+    package.mkdir(parents=True)
+    (package / 'domain.py').write_text('from lightning.runtime import app\n')
+    (package / 'new.py').write_text('')
+    policies = {'protocol': ['lightning.sync.domain'], 'financial_adapters': [], 'runtime_boundary': []}
+    problems = policy_problems(package, policies)
+    assert 'unassigned: lightning.sync.new' in problems
+    assert any('imports upper layer lightning.runtime' in item for item in problems)
+    (package / 'domain.py').write_text('from lightning import runtime\n')
+    assert any('imports upper layer lightning.runtime' in item for item in policy_problems(package, policies))
+    (package / 'domain.py').write_text('from lightning.sync import new\n')
+    problems = policy_problems(package, policies)
+    assert any('imports outside protocol lightning.sync.new' in item for item in problems)
+    policies['financial_adapters'].append('lightning.sync.new')
+    (package / 'domain.py').write_text('')
+    (package / 'new.py').write_text('from lightning.ui import routes\n')
+    assert any('imports upper layer lightning.ui' in item for item in policy_problems(package, policies))
+    (package / 'new.py').write_text('')
+    assert policy_problems(package, policies) == []
+    policies['runtime_boundary'].append('lightning.sync.new')
+    assert 'multiple policies: lightning.sync.new' in policy_problems(package, policies)
+
+
+def test_sync_package_initializers_are_assigned_and_checked(tmp_path):
+    from tools.backend_policy import policy_problems
+    package = tmp_path / 'lightning' / 'sync'
+    package.mkdir(parents=True)
+    (package / '__init__.py').write_text('from lightning import runtime, harmless\n')
+    policies = {'protocol': [], 'financial_adapters': [], 'runtime_boundary': []}
+    problems = policy_problems(package, policies)
+    assert 'unassigned: lightning.sync' in problems
+    assert any('imports upper layer lightning.runtime' in item for item in problems)
+    policies['runtime_boundary'].append('lightning.sync')
+    (package / '__init__.py').write_text('')
+    assert policy_problems(package, policies) == []
