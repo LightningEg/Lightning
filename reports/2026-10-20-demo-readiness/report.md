@@ -398,3 +398,7 @@ IV-3S item 16: the PC certificate page keeps purchase as its Primary and uses Se
 ## 2026-11-04 · Budget settings groups
 
 IV-3S item 11: the four PC Budget settings groups retain fieldset legends and controls without boxed backgrounds. Chromium checks their borders and backgrounds; the phone styles are unchanged.
+
+## 2026-11-04 · Spending and first-run surfaces
+
+IV-3S item 11: PC Spending small multiples and the first-run account list no longer draw boxed surfaces inside their cards. Chromium checks their computed backgrounds, borders and shadows.

@@ -124,6 +124,8 @@ def audit():
                 page.click("form[action='/profiles/confirm'] button[type=submit]")
                 page.goto(host.origin + "/")
                 result["/welcome"] = _collect(page)
+                result["first_account_surface"] = page.locator('.first-account-choices').evaluate(
+                    'el => [getComputedStyle(el).backgroundColor, getComputedStyle(el).boxShadow]')
                 result["sample_load_style"] = page.locator(".sample-box-load").first.evaluate(
                     "el => [getComputedStyle(el).color, getComputedStyle(el).textDecorationLine]")
                 page.evaluate("""async () => { const t = (document.querySelector('meta[name=lightning-session]')||{}).content
@@ -134,6 +136,9 @@ def audit():
                     assert response is not None and response.status < 400, f"{path}: HTTP {response and response.status}"
                     page.mouse.move(1, 1)  # a pointer resting on a field would show its hover border
                     result[path] = _collect(page)
+                    if path == "/birdview/expenses":
+                        result["spending_multiple_surfaces"] = page.locator('.multiples .multiple').evaluate_all(
+                            'els => els.map(el => [getComputedStyle(el).borderTopWidth, getComputedStyle(el).backgroundColor])')
                     if path == "/categories":
                         result["category_direction_colors"] = page.locator(".cat-item select[name=direction]").first.evaluate(
                             "el => ['dir-out', 'dir-both', 'dir-in'].map(c => { el.className=c; return getComputedStyle(el).color; })")
@@ -235,3 +240,13 @@ def test_activity_outflow_is_signed_and_ink(audit):
 
 def test_transaction_title_has_page_heading_size(audit):
     assert audit["transaction_heading_size"] == "28px"
+
+
+def test_pc_first_account_list_is_not_a_box(audit):
+    assert audit["first_account_surface"] == ["rgba(0, 0, 0, 0)", "none"]
+
+
+def test_pc_spending_multiples_are_not_nested_boxes(audit):
+    assert audit["spending_multiple_surfaces"]
+    assert all(border == "0px" and background == "rgba(0, 0, 0, 0)"
+               for border, background in audit["spending_multiple_surfaces"])
