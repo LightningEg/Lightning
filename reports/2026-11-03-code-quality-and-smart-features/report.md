@@ -241,3 +241,5 @@ Live search now stops the request in flight when the field changes, a search is 
 ## Follow-up · 2026-11-04
 
 OW-2AB is resolved under the owner’s delegated report-completion instruction: the default source entry opens encrypted profiles, explicit real-data `--db` paths are refused before opening, and demo/sample paths remain isolated. Source launchers install the declared encrypted extras. `tests/test_legacy_entry.py` checks the default, refusal and optional owning-thread enforcement for plaintext fixtures; `tests/test_plain_install.py` checks source installation.
+
+**2026-11-04 import follow-up.** IT-9K separates CSV normalization, review proposals and posting one reviewed row into collaborators; `BankImportService` retains confirmation ordering and transaction/rollback scopes. Existing import, journal replay, financial and architecture tests cover the split.

@@ -38,7 +38,7 @@ layers = [
     "lightning.bootstrap",
     "lightning.sync",
     "lightning.workflows | lightning.bank_imports | lightning.sms_imports | lightning.reconciliation | lightning.integrity | lightning.ownership_migration | lightning.saved_views | lightning.demo | lightning.samples | lightning.zakat",
-    "lightning.bank_import_proposals",
+    "lightning.bank_import_proposals | lightning.bank_import_posting",
     "lightning.bank_import_parsing",
     "lightning.planning",
     "lightning.budgeting",
@@ -77,8 +77,6 @@ source_modules = [
     "lightning.budgeting",
     "lightning.investments",
     "lightning.deposits",
-    "lightning.bank_import_proposals",
-    "lightning.bank_import_parsing",
     "lightning.planning",
 ]
 forbidden_modules = [
