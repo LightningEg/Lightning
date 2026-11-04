@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 50 open items, in the order they are worked on.
+10 milestones, 49 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -123,10 +123,8 @@ Edit on the phone or the PC; one home confirms every change and nothing is lost.
 | NF-4B4 | ↳ Phase D: make the phone the actual home | | | L | |
 | NF-4B5 | ↳ Phase E: add bank messages without duplicate money | | | L | |
 | NF-4B6 | ↳ Phase F: measure, rehearse loss and release | | | L | |
-| **IT-4K** | [Journal code - two pairing clients](4-edit-journal-and-devices/4K-journal-code-tidy.md) | improvement, technical | Build | M | ready |
-| IT-4K4 | ↳ One pairing client | | | M | |
 
-Done: 4C, 4D, 4E, 4F, 4G, 4H, 4I, 4J, 4L. Next free code: 4M.
+Done: 4C, 4D, 4E, 4F, 4G, 4H, 4I, 4J, 4K, 4L. Next free code: 4M.
 
 ## 5 Investments
 

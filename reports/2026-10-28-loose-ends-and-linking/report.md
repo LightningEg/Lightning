@@ -124,3 +124,5 @@ What does not:
 ## Follow-up · 2026-11-04 — shipped v1.1 review
 
 IT-3J is closed. The shipped conversion, foreign-currency positions, source/date lookup and foreign-investment gain contracts are recorded in [Architecture](../../ai/ARCHITECTURE.md); the [historical v1.1 review](https://github.com/LightningEg/Lightning/blob/33a1067d/issues/3-polish-and-arabic/3J-fold-v1-1-review-into-architecture.md) remains in Git. Its old proposed designs and visual assessment are historical, with current visual work tracked separately. `tests/test_fx_rates.py`, `tests/test_fx_conversion.py`, `tests/test_fx_positions.py` and Mohab cover the shipped financial contracts.
+
+**2026-11-04 follow-up.** IT-4K4 is complete: commit `e3522823` shares the joining driver; `tests/test_one_pairing_driver.py` and `tests/test_pairing_hardening.py` cover the agreed behavior. Native device acceptance remains in 4A. Lending remains live until J6; `runtime/journal_setup.py` uses `open_lab` only for the dummy-marked lab enrollment tool.
