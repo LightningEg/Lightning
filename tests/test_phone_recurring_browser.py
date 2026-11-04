@@ -68,6 +68,15 @@ def test_changed_monthly_payment_warning_fits_phone(c, setup, monkeypatch):
                         return h.bottom <= p.top + 1 && card.left >= 0 && card.right <= innerWidth &&
                           e.scrollWidth <= e.clientWidth + 1;
                     }''')
+                    page.goto(host.origin + '/transactions')
+                    page.locator('.phone-more-menu > summary').first.click()
+                    activity = page.locator('.phone-more-menu a[href="/activity"]').first
+                    assert activity.is_visible()
+                    assert activity.evaluate('e => { const r=e.getBoundingClientRect(); return r.height >= 48 && r.left >= 0 && r.right <= innerWidth; }')
+                    page.goto(host.origin + '/review')
+                    assert page.locator('details.flow-disclosure > summary').first.bounding_box()['height'] >= 44
+                    page.goto(host.origin + '/more')
+                    assert page.locator('.phone-review-card').first.bounding_box()['height'] >= 48
                 context.close()
             browser.close()
     finally:

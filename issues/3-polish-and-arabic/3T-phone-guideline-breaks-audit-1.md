@@ -44,12 +44,9 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§4 Phone
 
 3T1 is done: 3AN12 (`89848dc0`) rebuilt Overview, Recurring and Plan; the Planner choices now wrap. `tools/phone_check.py` checks Plan headings, expanded holdings views and the currency period sheet at 320/360. `tests/test_phone_recurring_browser.py` checks both a matched 100/108 monthly payment and an unmatched candidate in English and Arabic at both widths; the candidate's review link has its own row.
 
+3T3 is done: the rebuilt period arrows and recurring due chips are 48 px; picker choices and loan due actions are at least 48 px; quiet links, chart disclosures and Aliases use the C05 44 px quiet target, and the reserve disclosure is 48 px. The picker stays within the viewport. Weekly review is a full row, Review activity is a menu row, and the old free-cash link is now a full row (`tests/test_phone_check.py`, `tests/test_phone_recurring_browser.py`; 3AN12 `89848dc0`).
+
 3T2 is done: SMS and Search acquired Back in 3AN5/3AN6; Settings, account import and the investment planner now have fallback destinations. Budget category links return to Budget and the rebuilt register has one period control and a concise category filter (`tests/test_phone_frame.py`).
-
-## 3T3 Touch targets · M
-Report item 6: targets under 48 px (C05.1). The search half (item 5: live search, results in a card, "Press Ctrl K") was built by IV-3AN's 3AN6 (2026-11-02). Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
-
-**2026-11-04:** The alias disclosure has a 44 px quiet target, picker choices have 48 px targets and wrap, and the picker is clamped to the viewport (`tests/test_phone_check.py`, 320 and 360 px). The rebuilt period arrows, including Ask an AI, are 48 px; Pay early and Show the numbers are 44 px, loan due buttons and recurring due chips are at least 48 px, and Add a reserve is 48 px. Other reported targets still need review.
 
 ## 3T4 Settings tabs and money first · M
 Report items 7-8: five tabs (C03.3), stacked rows still a table, Overview Latest led by revaluations. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
