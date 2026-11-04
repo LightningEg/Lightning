@@ -11,14 +11,12 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **BV-3B** | [In Arabic the holdings table's price and FX split reads out of order](../../issues/3-polish-and-arabic/3B-arabic-gain-split-reads-backwards.md) | S | new |
 | **IV-3F** | [The phone's top bar looks too white to one user](../../issues/3-polish-and-arabic/3F-phone-top-bar-looks-too-white.md) | S | ready |
 | **IV-3G** | [Outside review of every tab](../../issues/3-polish-and-arabic/3G-one-organism-review-of-every-tab.md) | L | ready |
 | **IV-3H** | [Tab-by-tab review: what a real user needs next](../../issues/3-polish-and-arabic/3H-tab-by-tab-review.md) | L | building |
 | **IV-3S** | [PC screens break the guideline in 18 places not yet filed](../../issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) | L | ready |
 | **IV-3T** | [Phone screens break Part C](../../issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | L | ready |
 | **OW-3AI** | [Additional broker and institution logos still needed](../../issues/3-polish-and-arabic/3AI-institution-logos.md) | owner | ready |
-| **BT-3AJ** | [Changing the language is recorded as an undoable action, so Undo switches it back](../../issues/3-polish-and-arabic/3AJ-language-change-is-undoable.md) | S | ready |
 | **IV-3AM** | [PC declutter, tab by tab](../../issues/3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md) | L | building |
 | **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](../../issues/10-looks-and-store/10A-cosmetic-parts-and-claiming.md) | L | building |
 | **NF-10B** | [Supporter perks still waiting on the app or the owner](../../issues/10-looks-and-store/10B-supporter-perks-app-and-owner.md) | M | blocked on 10A claiming; owner decision on the beta channel |
