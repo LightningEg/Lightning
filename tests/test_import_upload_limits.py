@@ -49,7 +49,7 @@ def _multipart(boundary: str, field: str, data: bytes, filename: str | None = No
 
 def test_only_csv_import_routes_receive_larger_bounded_body_budgets():
     assert request_body_limit("/accounts/17/import") == MAX_IMPORT_UPLOAD_BODY
-    assert MAX_IMPORT_UPLOAD_BODY == MAX_IMPORT_FILE_BYTES + 64 * 1024
+    assert MAX_IMPORT_UPLOAD_BODY == 8 * 1024 * 1024 + 64 * 1024
     assert request_body_limit("/accounts/17/import/map") == MAX_IMPORT_MAP_BODY
     assert MAX_IMPORT_MAP_BODY == ((MAX_IMPORT_FILE_BYTES + 2) // 3) * 4 + 64 * 1024
     assert request_body_limit("/accounts/17/import/25/confirm") == MAX_IMPORT_CONFIRM_BODY
@@ -94,7 +94,7 @@ def test_guard_enforces_route_specific_body_limit_and_preserves_default():
         assert (await send_body("/accounts/17/import", MAX_IMPORT_UPLOAD_BODY))[0] == 204
         upload_error = await send_body("/accounts/17/import", MAX_IMPORT_UPLOAD_BODY + 1)
         assert upload_error[0] == 413
-        assert "CSV files must be 5 MB or smaller" in upload_error[1]
+        assert "Statement uploads must total 8 MB or less" in upload_error[1]
         assert (await send_body("/accounts/17/import/map", MAX_IMPORT_MAP_BODY))[0] == 204
         assert (await send_body("/accounts/17/import/map", MAX_IMPORT_MAP_BODY + 1))[0] == 413
         assert (await send_body("/profiles/new", MAX_BODY))[0] == 204
@@ -160,12 +160,12 @@ def test_large_review_notes_field_uses_confirm_route_part_limit():
     asyncio.run(parse())
 
 
-def test_upload_picker_and_help_text_state_csv_limit_without_other_formats():
+def test_upload_picker_and_help_text_state_each_supported_format_and_limit():
     from pathlib import Path
 
     template = (Path(__file__).parents[1] / "lightning/ui/templates/bank_import_upload.html").read_text()
-    assert 'accept=".csv,text/csv"' in template
-    assert "CSV files up to 5 MB are supported." in template
+    assert 'accept=".csv,.xlsx,.pdf,text/csv,application/pdf,' in template
+    assert "CSV up to 5 MB" in template and "up to 8 MB" in template
 
 
 def test_oversized_csv_decoder_returns_readable_mib_limit():
@@ -228,3 +228,15 @@ def test_bounded_confirmation_limits_cover_about_fifty_thousand_rows():
     assert _review_form_max_fields(maximum_rows) <= MAX_IMPORT_CONFIRM_FIELDS
     assert _review_form_max_fields(maximum_rows + 1) > MAX_IMPORT_CONFIRM_FIELDS
     assert MAX_IMPORT_CONFIRM_BODY == 32 * 1024 * 1024
+
+
+def test_eight_mib_document_upload_stays_in_memory_under_the_guard_budget():
+    configure_memory_only_import_uploads()
+    payload=b'x'*(8*1024*1024)
+    body, content_type=_multipart('document-boundary','file',payload,'statement.pdf')
+    assert len(body)<=MAX_IMPORT_UPLOAD_BODY
+    async def parse():
+        async with _request(body,content_type).form(max_files=1,max_fields=10) as form:
+            assert form['file'].size==len(payload)
+            assert not form['file'].file._rolled
+    asyncio.run(parse())
