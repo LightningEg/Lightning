@@ -116,3 +116,15 @@ def test_scenario_get_and_alert_pages_work_without_preview_writes(c,phone,locale
         if locale == 'ar':
             assert 'Bill amount changed' not in response.text
     assert snapshot(c) == before
+
+
+def test_posted_income_awaiting_a_plan_link_is_not_counted_again_or_offered_for_delay(c):
+    a = c.account_flows.open_account('Bank','BANK','2026-09-01','0')
+    party = c.counterparties.create('Employer')
+    category = c.categories.get_by_code('EXP.WORK.SALARY')
+    planned(c,a,'INCOME','2026-09-05','1000',party=party,category=category.id)
+    c.transactions.record_inflow('2026-09-05',a.id,'1000',category.id,counterparty='Employer')
+    before=snapshot(c)
+    result=compare_scenario(c.forecaster,date(2026,9,5),date(2026,9,30))
+    assert result.baseline.balances[-1].balance == 1000
+    assert snapshot(c) == before
