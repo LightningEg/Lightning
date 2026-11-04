@@ -53,6 +53,19 @@
     {% for t in j.trades[:12] %}<tr><td class="code">{{ t.date }}</td><td>{{ t.kind }}</td><td class="num">{{ (('+' if t.units > 0 else '') ~ (t.units|units)) if t.units else '—' }}</td><td class="num">{% if j.currency and t.price_native is not none %}{{ t.price_native|money(False,2) }} <small>{{ j.currency }}</small>{% else %}{{ t.price|money(False,2 if t.price < 10 else 0) if t.price is not none else '—' }}{% endif %}</td><td class="num">{{ t.amount|money }}</td><td class="num">{{ t.held|units }}</td></tr>{% else %}<tr><td colspan="6" class="empty">{{ "No trades yet."|tr(locale) }}</td></tr>{% endfor %}
     </tbody></table>{% if j.trades|length > 12 %}<p class="muted small">{{ j.trades|length - 12 }} earlier entries</p>{% endif %}</section>
 </div></section>
+{% if purchases or sales %}
+<header class="overview-section-head inv-head"><h2>{{ "Each purchase"|tr(locale) }}</h2><span>{{ "What each one has made, and how fast per year"|tr(locale) }}</span></header>
+<section class="card wide-card"><div class="overview-split">
+  {% if purchases %}<section><div class="overview-block-head"><div><h3>{{ "Still held"|tr(locale) }}</h3></div></div>
+    <table class="journey-table"><thead><tr><th>{{ 'Bought'|tr(locale) }}</th><th class="num">{{ 'Units'|tr(locale) }}</th><th class="num">{{ 'Cost'|tr(locale) }}</th><th class="num">{{ 'Value'|tr(locale) }}</th><th class="num">{{ 'Return'|tr(locale) }}</th><th class="num">{{ 'Per year'|tr(locale) }}</th></tr></thead><tbody>
+    {% for p in purchases %}<tr><td class="code">{{ p.opened }}</td><td class="num">{{ p.units|units }}</td><td class="num">{{ p.cost|money }}</td><td class="num">{{ p.value|money if p.value is not none else '—' }}</td><td class="num">{{ p.roi|signed_pct if p.roi is not none else '—' }}</td><td class="num">{{ p.cagr|signed_pct if p.cagr is not none else '—' }}</td></tr>{% endfor %}
+    </tbody></table></section>{% endif %}
+  {% if sales %}<section><div class="overview-block-head"><div><h3>{{ "Sold"|tr(locale) }}</h3></div></div>
+    <table class="journey-table"><thead><tr><th>{{ 'Bought'|tr(locale) }}</th><th>{{ 'Sold'|tr(locale) }}</th><th class="num">{{ 'Units'|tr(locale) }}</th><th class="num">{{ 'Gain'|tr(locale) }}</th><th class="num">{{ 'Return'|tr(locale) }}</th><th class="num">{{ 'Per year'|tr(locale) }}</th></tr></thead><tbody>
+    {% for s in sales %}<tr><td class="code">{{ s.opened }}</td><td class="code">{{ s.sold }}</td><td class="num">{{ s.units|units }}</td><td class="num">{{ s.gain|money }}</td><td class="num">{{ s.roi|signed_pct if s.roi is not none else '—' }}</td><td class="num">{{ s.cagr|signed_pct if s.cagr is not none else '—' }}</td></tr>{% endfor %}
+    </tbody></table></section>{% endif %}
+</div></section>
+{% endif %}
 
 <header class="overview-section-head inv-head"><h2>{{ "Planning"|tr(locale) }}</h2><span>{{ "Your own classification"|tr(locale) }}</span></header>
 <section class="card"><p class="muted small">{{ "Horizon is your intended holding period: Short up to 1 year, Medium over 1 through 5 years, Long over 5 years. Edits save when you change them."|tr(locale) }}</p><form method="post" action="/investments/asset-plan/{{ asset.id }}" data-asset-autosave class="sc-row settings-compact"><label>{{ "Allocation bucket"|tr(locale) }}<select name="allocation_bucket">{% for option in allocation_classes %}<option value="{{ option }}" {% if bucket==option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></label><label>{{ 'Horizon'|tr(locale) }}<select name="investment_horizon"><option value="">{{ 'Unassigned'|tr(locale) }}</option>{% for option in ['Short','Medium','Long'] %}<option {% if horizon==option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></label><span class="muted" data-plan-state></span><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>

@@ -6,7 +6,7 @@ from lightning.accounts.domain import INVESTMENT_ACCOUNT_TYPES, AccountType
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, from_e6
 
-from .lots import LotLine, build_lots
+from .lots import LotLine, build_lots, lot_type
 
 
 def investment_period(db, accounts, assets, reporting, start: str, end: str):
@@ -133,7 +133,7 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
                 "holdings": [], "investment_cash": ZERO, "missing": [], "at_cost": [], "cost": ZERO,
                 "value": ZERO, "unrealized": ZERO, "cash_flow_base": ZERO}
     rows = db.all(
-        f"SELECT le.*,t.type,t.ref,t.status,c.code AS category_code, "
+        f"SELECT le.*,t.type,t.ref,t.status,t.description,c.code AS category_code, "
         f"da.asset_id AS dividend_asset_id "
         f"FROM ledger_entries le JOIN transactions t ON t.id=le.transaction_id "
         f"LEFT JOIN categories c ON c.id=le.category_id "
@@ -173,8 +173,9 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
                     dividends += amount
             continue
         # (A reinvested dividend's units line is a purchase like any other; its income is counted above.)
-        pool_lines[key].append(LotLine(row["date"], row["type"], row["effect"], q, amount))
-        pool_native[key].append(LotLine(row["date"], row["type"], row["effect"], q, from_e6(row["amount_e6"])))
+        kind = lot_type(row["type"], row["description"])
+        pool_lines[key].append(LotLine(row["date"], kind, row["effect"], q, amount))
+        pool_native[key].append(LotLine(row["date"], kind, row["effect"], q, from_e6(row["amount_e6"])))
     books = {}
     for key, lines in pool_lines.items():
         method = account_by_id[key[1]].cost_method
@@ -283,10 +284,11 @@ def _realized_between(rows, start, end, methods=None, cash_assets=frozenset()):
         if row["date"] > end or row["asset_id"] is None:
             continue
         # Caller rows include cash; only sale/buy/opening investment lines have signed units and no cash asset.
-        if row["type"] not in ("BUY", "SEL", "OPN", "DIV"):
+        kind = lot_type(row["type"], row["description"])
+        if kind not in ("BUY", "SEL", "OPN", "DIV", "SPL"):
             continue
         pools[(row["owner_id"], row["account_id"], row["asset_id"])].append(LotLine(
-            row["date"], row["type"], row["effect"], from_e6(row["quantity_e6"]), from_e6(row["amount_base_e6"])))
+            row["date"], kind, row["effect"], from_e6(row["quantity_e6"]), from_e6(row["amount_base_e6"])))
     realized = ZERO
     for (owner_id, account_id, asset_id), lines in pools.items():
         method = "average" if asset_id in cash_assets else (methods or {}).get(account_id, "average")

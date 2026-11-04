@@ -16,6 +16,8 @@ from lightning.core.ledger import Effect, PostingLine
 from lightning.core.money import ZERO, check_places, fmt, to_decimal
 from lightning.core.refs import DocType
 
+from .lots import SPLIT_MARK
+
 DIVIDEND_CATEGORY = "EXP.INVEST.DIVIDEND"
 TAX_CATEGORY = "EXP.INVEST.TAX"  # tax a broker withheld from a dividend
 CENT = Decimal("0.01")
@@ -49,6 +51,10 @@ EVENTS: dict[str, EventSpec] = {
     # cost line; owner decision 2026-11-02). The cash is internal, not income. Where the amount exceeds the cost left,
     # the engines take the cost to zero and book the rest as a realized gain.
     "return_of_capital": EventSpec(DocType.SEL, Sign.NONE, Sign.IN, "none", None, lowers_cost=True),
+    # Bonus shares (أسهم مجانية), a split or a reverse split: the person types the units held afterwards; the units
+    # change, the cost does not, no cash moves and no purchase appears (NF-5E). Recorded as an ADJ document marked by
+    # its description, like the Ownership entries.
+    "bonus_or_split": EventSpec(DocType.ADJ, Sign.NEW_BALANCE, Sign.NONE, "none", None),
 }
 
 
@@ -61,13 +67,14 @@ class FormFields:
     cash_from: bool  # the cash account is where money came from (else where it went)
     income: bool  # the amount received (dividend)
     capital: bool = False  # only the amount paid back and where it went (return of capital)
+    balance: bool = False  # only the units held afterwards (bonus shares, split)
 
 
 def form_fields(event: str) -> FormFields:
     """The form's fields for an event name in ``EVENTS`` (the route passes this; the template only reads it)."""
     spec = _spec(event)
     trade = spec.units in (Sign.IN, Sign.OUT)
-    return FormFields(units=trade and not spec.income_category, fees=trade and spec.fees != "none",
+    return FormFields(units=trade and not spec.income_category, balance=spec.units == Sign.NEW_BALANCE, fees=trade and spec.fees != "none",
                       cash_account=(trade or spec.lowers_cost) and spec.cash != Sign.NONE,
                       cash_from=spec.cash == Sign.OUT, income=spec.income_category is not None,
                       capital=spec.lowers_cost)
@@ -91,6 +98,7 @@ class EventValues:
     fees_included: bool = True
     amount: object = None
     tax: object = "0"
+    held: Decimal | None = None  # the units held that day (a bonus or split changes them to ``quantity``)
 
 
 @dataclass(frozen=True)
@@ -133,6 +141,16 @@ def _income_figures(v: EventValues) -> tuple[Decimal, Decimal]:
 
 def _figures(spec: EventSpec, v: EventValues) -> _Figures:
     """Parse and check every number the event needs; the one place their rules live."""
+    if spec.units == Sign.NEW_BALANCE:  # units after a bonus or split; the figure is the change
+        after = check_places(to_decimal(v.quantity, "quantity"), v.asset.quantity_decimals, "quantity")
+        if after <= ZERO:
+            raise ValidationError(f"Enter how many {v.asset.unit}s you hold after it.", "quantity")
+        if v.held is None or v.held <= ZERO:
+            raise ValidationError("A bonus or split needs units you hold on that date.", "instrument")
+        if after == v.held:
+            raise ValidationError(f"You already hold {_num(after)} {v.asset.unit}(s); enter the number after the bonus or split.",
+                                  "quantity")
+        return _Figures(units=after - v.held)
     if spec.lowers_cost:  # a return of capital: one amount, no units
         value = check_places(to_decimal(v.amount, "amount"), 2, "amount")
         if value <= ZERO:
@@ -209,6 +227,10 @@ def lines_for(event: str, values: EventValues) -> list[PostingLine]:
                       PostingLine.units(v.account.id, v.asset.id, f.units, net, Effect.INTERNAL, f.unit_price, memo,
                                         fx_rate=v.holding_rate)]
         return lines
+    if spec.units == Sign.NEW_BALANCE:
+        memo = f"{SPLIT_MARK} · {v.asset.code} {'+' if f.units > ZERO else '−'}{_num(abs(f.units))}"
+        return [PostingLine.units(v.account.id, v.asset.id, f.units, ZERO, Effect.INTERNAL, ZERO, memo,
+                                  fx_rate=v.holding_rate)]
     if spec.lowers_cost:
         memo = f"Return of capital · {v.asset.code}"
         cash_account = v.cash_account or v.account

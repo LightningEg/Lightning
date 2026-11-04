@@ -26,7 +26,7 @@ from lightning.transactions.service import TransactionService
 
 from . import events
 from .domain import DEFAULT_SALE_FACTOR, Portfolio, Position
-from .lots import LotLine, build_lots
+from .lots import SPLIT_MARK, LotLine, build_lots, lot_type
 from .xirr import solve_xirr
 from .returns import display_return
 
@@ -285,7 +285,39 @@ class InvestmentService:
             raise ValidationError(f"Unknown investment event: {event}.", "event")
         if spec.income_category:
             return self._record_income(event, date, account_id, asset_id, owner_id, notes, typed)
+        if spec.units == events.Sign.NEW_BALANCE:
+            return self._record_split(event, date, account_id, asset_id, owner_id, notes, typed)
         return self._trade(event, date, account_id, asset_id, cash_account_id, notes, owner_id, typed)
+
+    def bonus_or_split(self, date: str, account_id: int, asset_id: int, units_after, notes: str = "",
+                       owner_id: int | None = None) -> Transaction:
+        """Bonus shares, a split or a reverse split: the units become ``units_after``, the cost stays, no cash moves
+        and no purchase appears (NF-5E). Applies to the units of the chosen owner (yours by default)."""
+        return self.record("bonus_or_split", date, account_id, asset_id, quantity=units_after, notes=notes,
+                           owner_id=owner_id)
+
+    def _split_lines(self, account_id, asset_id, date, owner_id, quantity, editing: Transaction | None = None):
+        account = self._holding_account(account_id)
+        asset = self._investment(asset_id)
+        self._validate_asset_account(account, asset)
+        self._same_currency(asset, account)
+        # Editing: the units held without the split being replaced (it is part of today's total).
+        own = sum((ln.quantity for ln in editing.lines if ln.asset_id == asset.id), ZERO) \
+            if editing is not None and editing.date <= date else ZERO
+        values = events.EventValues(
+            asset=asset, account=account, holding_rate=self._rate(account, date), quantity=quantity,
+            held=self.holding_for_owner(account.id, asset.id, date, owner_id) - own)
+        lines = events.lines_for("bonus_or_split", values)
+        if owner_id:
+            party = self.db.one("SELECT id FROM counterparties WHERE id=? AND active=1", (owner_id,))
+            if not party:
+                raise ValidationError("Choose an active owner.", "owner")
+            lines = [replace(line, owner_id=int(owner_id)) for line in lines]
+        return lines, asset.name
+
+    def _record_split(self, event, date, account_id, asset_id, owner_id, notes, typed) -> Transaction:
+        lines, counterparty = self._split_lines(account_id, asset_id, date, owner_id, typed.get("quantity"))
+        return self.transactions.post(events.EVENTS[event].doc_type, date, lines, SPLIT_MARK, counterparty, notes)
 
     def _record_income(self, event, date, account_id, asset_id, owner_id, notes, typed) -> Transaction:
         spec = events.EVENTS[event]
@@ -406,6 +438,10 @@ class InvestmentService:
         date = values.get("date", current.date)
         notes = values.get("notes", current.notes)
         owner_id = values.get("owner_id")
+        if self._is_split(current):
+            lines, counterparty = self._split_lines(values["account_id"], values["asset_id"], date, owner_id,
+                                                    values["quantity"], editing=current)
+            return self.transactions.repost(txn_id, date, lines, SPLIT_MARK, counterparty, notes)
         if kind == DocType.SEL and self._is_capital_return(current):
             self._require_capital_held(values["account_id"], values["asset_id"], date, owner_id)
             lines, counterparty = self._event_lines("return_of_capital", values["account_id"], values["asset_id"],
@@ -466,7 +502,11 @@ class InvestmentService:
         values = {"kind": {DocType.BUY: "buy", DocType.SEL: "sell", DocType.DIV: "dividend",
                            DocType.OPN: "holding"}.get(t.type, ""), "date": t.date, "notes": t.notes,
                   "owner_id": next((line.owner_id for line in t.lines if line.owner_id is not None), None)}
-        if self._is_capital_return(t) and cash:
+        if self._is_split(t) and units:
+            owner = units[0].owner_id
+            values.update(kind="bonus_or_split", account_id=units[0].account_id, asset_id=units[0].asset_id,
+                          quantity=self.holding_for_owner(units[0].account_id, units[0].asset_id, t.date, owner))
+        elif self._is_capital_return(t) and cash:
             values.update(kind="return_of_capital", account_id=units[0].account_id, asset_id=units[0].asset_id,
                           amount=cash[0].quantity, cash_account_id=cash[0].account_id)
         elif t.type in (DocType.BUY, DocType.SEL) and units and cash:
@@ -527,13 +567,15 @@ class InvestmentService:
                 holding_flows.setdefault((line["account_id"], asset.id), []).append((line["date"], dividend))
                 continue
             flow = -from_e6(line["amount_base_e6"])
-            cashflows.append((line["date"], flow))
-            holding_flows.setdefault((line["account_id"], line["asset_id"]), []).append((line["date"], flow))
+            kind = lot_type(line["type"], line.get("description", ""))
+            if kind != "SPL":  # a bonus or split moves no money: it is no flow for XIRR
+                cashflows.append((line["date"], flow))
+                holding_flows.setdefault((line["account_id"], line["asset_id"]), []).append((line["date"], flow))
             # One pool per owner (None is you): a sale by one owner removes units at that owner's own
             # cost, never at a blend of everyone's purchase prices. The lots are built after the loop.
             pools = state.setdefault((line["account_id"], line["asset_id"]), {})
             pools.setdefault(line.get("owner_id"), []).append(LotLine(
-                line["date"], line["type"], line["effect"], from_e6(line["quantity_e6"]), from_e6(line["amount_base_e6"])))
+                line["date"], kind, line["effect"], from_e6(line["quantity_e6"]), from_e6(line["amount_base_e6"])))
         # A certificate's interest lands on the bank account; it is still the certificate's return.
         for paid in self.reporting.certificate_interest(day):
             if account_id is not None and paid["account_id"] != account_id:
@@ -766,6 +808,11 @@ class InvestmentService:
         if units <= ZERO:
             raise ValidationError(f"Enter how many {asset.unit}s.", "quantity")
         return units
+
+    @staticmethod
+    def _is_split(t: Transaction) -> bool:
+        """An ADJ document marked as a bonus issue, split or reverse split."""
+        return t.type == DocType.ADJ and t.description == SPLIT_MARK
 
     def _is_capital_return(self, t: Transaction) -> bool:
         """A sell document whose holding line has no units: the fund paid part of the cost back."""

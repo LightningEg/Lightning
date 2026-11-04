@@ -70,3 +70,13 @@ def test_the_account_menu_switches_the_method(held):
     client.post(f"/accounts/{thndr}/cost-method", data={"method": "fifo"})
     assert c.accounts.get(thndr).cost_method == "fifo"
     assert "Use the average cost for sales" in client.get(f"/accounts/{thndr}").text
+
+
+def test_the_holding_page_shows_each_purchase_and_each_sold_piece(held):
+    c, _, thndr, comi = held
+    c.accounts.set_cost_method(thndr, "fifo")
+    c.assets.set_price(comi.id, "2026-12-30", "300")
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    page = client.get(f"/investments/holding/{comi.id}?account={thndr}").text
+    assert "Each purchase" in page and "Still held" in page and "Per year" in page
+    assert "2026-03-01" in page and "2026-02-01" in page  # the open lot and the lot the sale came from
