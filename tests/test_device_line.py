@@ -129,8 +129,8 @@ def test_popup_success_preserves_phone_undo_as_well_as_device_action(c, setup, b
         assert page.locator('.device-line form[action="/sync/hand-back"]').is_visible()
         undo = page.locator('form[action="/history/undo"] button')
         assert undo.is_visible()
-        undo.click()
-        page.wait_for_url('**/?msg=*')
+        with page.expect_navigation(wait_until="domcontentloaded"):
+            undo.click()
         assert c.transactions.get(txn.id).notes == 'original'
         assert c.reporting.account_balance(bank.id) == 49990
         page.close()

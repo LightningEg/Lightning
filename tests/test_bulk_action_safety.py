@@ -64,8 +64,8 @@ def test_phone_delete_cancel_confirm_and_undo_use_the_selected_ids(c, rows, ui):
     dialog.get_by_role('button', name='Delete', exact=True).click()
     page.wait_for_url('**/*msg=*')
     assert all(c.transactions.get(t.id).is_void for t in made)
-    page.locator('form[action="/history/undo"] button').click()
-    page.wait_for_url('**/?msg=*')
+    with page.expect_navigation(wait_until="domcontentloaded"):
+        page.locator('form[action="/history/undo"] button').click()
     assert all(not c.transactions.get(t.id).is_void for t in made)
 
 

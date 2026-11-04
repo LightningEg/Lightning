@@ -285,8 +285,8 @@ def test_browser_phone_bulk_delete_asks_with_count_and_keeps_selection(rows, loc
             dialog.locator('[data-ask="yes"]').click()
             page.wait_for_url("**/*msg=*")
             assert all(c.transactions.get(t.id).is_void for t in made)
-            page.locator('form[action="/history/undo"] button').click()
-            page.wait_for_url("**/?msg=*")
+            with page.expect_navigation(wait_until="domcontentloaded"):
+                page.locator('form[action="/history/undo"] button').click()
             assert all(not c.transactions.get(t.id).is_void for t in made)
             page.goto(f"{host.origin}/accounts/{accounts['cib'].id}?select=1")
             page.locator("#phone-select-visible").check()
