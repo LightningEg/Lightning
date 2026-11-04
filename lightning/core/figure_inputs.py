@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class FreshnessNote:
-    kind: str                  # one of the four constants above
+    kind: str                  # stable reason key
     subject: str               # the holding, or the currency
     source_date: str | None    # the date of the input used; None when there is none to date (unknown)
     figure: str                # the figure it affects (a key of core.figures.FIGURES)

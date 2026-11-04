@@ -10,8 +10,9 @@ from __future__ import annotations
 from datetime import date
 
 from lightning.core.figure_inputs import FreshnessNote
-from lightning.core.dates import fmt_date, parse_date
+from lightning.core.dates import fmt_date, parse_date, parse_month
 from lightning.fx import STALE_DAYS
+from .forecast import HORIZON_MONTHS, _months
 
 STALE_PRICE = "stale_price"
 NO_PRICE = "no_price"
@@ -22,10 +23,11 @@ NO_RATE = "no_rate"
 
 
 class FreshnessService:
-    def __init__(self, reporting, position, accounts=None, reconciliation=None, receipts=None):
+    def __init__(self, reporting, position, accounts=None, reconciliation=None, receipts=None, forecaster=None):
         self.reporting = reporting
         self.position = position
         self.accounts, self.reconciliation, self.receipts = accounts, reconciliation, receipts
+        self.forecaster = forecaster
 
     def for_what_you_own(self, as_of: date | str) -> tuple[FreshnessNote, ...]:
         """Notes behind "What you own" on a day: holdings priced long ago or not at all, and foreign currency
@@ -92,9 +94,25 @@ class FreshnessService:
     def _rate_notes(self, day, figure, *, eligible_only=False):
         notes = []
         if self.accounts is not None:
-            currencies = sorted({a.currency for a in self.accounts.list()
-                                 if a.account_type.value in ("CASH", "BANK", "BROKERAGE")
-                                 and (not eligible_only or a.counts_as_spendable(self.reporting.base_currency))
+            used = set()
+            for account in self.accounts.list():
+                if account.account_type.value not in ("CASH", "BANK", "BROKERAGE"):
+                    continue
+                if eligible_only and not account.counts_as_spendable(self.reporting.base_currency):
+                    continue
+                owned = (self.reporting.account_balance(account.id, day)
+                         - self.reporting.money_from_others.cash_total_for_account(account.id, day))
+                if owned:
+                    used.add(account.id)
+            if self.forecaster is not None:
+                as_of = parse_date(day)
+                end = as_of if eligible_only else parse_month(_months(as_of, HORIZON_MONTHS)[-1])[1]
+                payments, events = self.forecaster.scheduled_inputs(as_of, end)
+                used.update(p.item.account_id for p in payments if p.item.account_id and
+                            (not p.item.is_income or (not eligible_only and p.due_date >= day)))
+                if not eligible_only:
+                    used.update(getattr(e, "destination_account_id", getattr(e, "account_id", None)) for e in events)
+            currencies = sorted({a.currency for a in self.accounts.list() if a.id in used
                                  and a.currency != self.reporting.base_currency})
             for currency in currencies:
                 rate = self.reporting.valuer.fx(currency, day)
