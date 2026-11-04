@@ -6,7 +6,7 @@ from lightning.accounts.domain import INVESTMENT_ACCOUNT_TYPES, AccountType
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, from_e6
 
-from .domain import cost_returned
+from .lots import LotLine, build_lots
 
 
 def investment_period(db, accounts, assets, reporting, start: str, end: str):
@@ -145,7 +145,7 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
     # local to this report (no cross-request invalidation concerns).
     asset_by_id = {a.id: a for a in assets.list_assets()}
     # Average cost is retained independently for each account and asset.
-    books = defaultdict(lambda: {"units": ZERO, "cost": ZERO, "cost_native": ZERO, "realized": ZERO})
+    pool_lines, pool_native = defaultdict(list), defaultdict(list)
     movements = defaultdict(Decimal)
     dividends = tax = fees = ZERO
     cash_quantities = defaultdict(Decimal)
@@ -173,27 +173,13 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
                     dividends += amount
             continue
         # (A reinvested dividend's units line is a purchase like any other; its income is counted above.)
-        b = books[key]
-        if q > ZERO:
-            b["units"] += q
-            b["cost"] += amount
-            b["cost_native"] += from_e6(row["amount_e6"])
-        elif q == ZERO:
-            if row["effect"] == "INTERNAL" and amount < ZERO:  # a return of capital: cost falls, the excess is a gain
-                removed, gain = cost_returned(b["cost"], -amount)
-                b["cost_native"] -= b["cost_native"] * removed / b["cost"] if b["cost"] > ZERO else ZERO
-                b["cost"] -= removed
-                b["realized"] += gain
-        elif q < ZERO:
-            removed = b["cost"] / b["units"] * -q if b["units"] else ZERO
-            removed_native = b["cost_native"] / b["units"] * -q if b["units"] else ZERO
-            if row["type"] == "SEL":
-                b["realized"] += -amount - removed
-            b["cost"] -= removed
-            b["cost_native"] -= removed_native
-            b["units"] += q
-            if not b["units"]:
-                b["cost"] = b["cost_native"] = ZERO
+        pool_lines[key].append(LotLine(row["date"], row["type"], row["effect"], q, amount))
+        pool_native[key].append(LotLine(row["date"], row["type"], row["effect"], q, from_e6(row["amount_e6"])))
+    books = {}
+    for key, lines in pool_lines.items():
+        method = account_by_id[key[1]].cost_method
+        base, native = build_lots(lines, method, key[0]), build_lots(pool_native[key], method, key[0])
+        books[key] = {"units": base.quantity, "cost": base.cost, "cost_native": native.cost, "realized": base.realized}
     # A certificate's interest lands on the bank account; it is still the certificate's return.
     dividends += sum((paid["amount"] for paid in reporting.certificate_interest(end) if paid["date"] >= start), ZERO)
     # Portfolio boundary movement per source transaction: inside-to-inside lines cancel. Deposit
@@ -214,7 +200,8 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
             new_money += delta
         elif delta < ZERO:
             withdrawn -= delta
-    period_realized = _realized_between(rows, start, end)
+    period_realized = _realized_between(rows, start, end, {a.id: a.cost_method for a in account_rows},
+                                        {a.id for a in asset_by_id.values() if a.is_cash})
     holdings = []; total_cost = total_value = unrealized = ZERO; missing=[]; at_cost=[]
     holdings_unavailable = False
     for (owner_id, account_id, asset_id), b in books.items():
@@ -289,29 +276,21 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
             "missing": missing, "at_cost": at_cost, "unresolved_dividends": unresolved}
 
 
-def _realized_between(rows, start, end):
-    books = defaultdict(lambda: {"units": ZERO, "cost": ZERO})
-    realized = ZERO
+def _realized_between(rows, start, end, methods=None, cash_assets=frozenset()):
+    """Gains locked in by sales (and returns of capital) dated start..end, by each account's cost method."""
+    pools = defaultdict(list)
     for row in rows:
-        if row["date"] > end:
-            continue
-        if row["asset_id"] is None:
+        if row["date"] > end or row["asset_id"] is None:
             continue
         # Caller rows include cash; only sale/buy/opening investment lines have signed units and no cash asset.
         if row["type"] not in ("BUY", "SEL", "OPN", "DIV"):
             continue
-        key=(row["owner_id"],row["account_id"],row["asset_id"]); b=books[key]
-        q,amount=from_e6(row["quantity_e6"]),from_e6(row["amount_base_e6"])
-        if q>ZERO: b["units"]+=q; b["cost"]+=amount
-        elif q==ZERO:
-            if row["effect"]=="INTERNAL" and amount<ZERO:  # a return of capital: the excess over the cost is a gain
-                removed,gain=cost_returned(b["cost"],-amount); b["cost"]-=removed
-                if row["date"]>=start: realized += gain
-        elif q<ZERO:
-            removed=b["cost"]/b["units"]*(-q) if b["units"] else ZERO
-            if row["type"]=="SEL" and row["date"]>=start: realized += -amount-removed
-            b["cost"]-=removed; b["units"]+=q
-            if not b["units"]: b["cost"]=ZERO
+        pools[(row["owner_id"], row["account_id"], row["asset_id"])].append(LotLine(
+            row["date"], row["type"], row["effect"], from_e6(row["quantity_e6"]), from_e6(row["amount_base_e6"])))
+    realized = ZERO
+    for (owner_id, account_id, asset_id), lines in pools.items():
+        method = "average" if asset_id in cash_assets else (methods or {}).get(account_id, "average")
+        realized += sum((piece.gain for piece in build_lots(lines, method, owner_id).disposals if piece.sold >= start), ZERO)
     return realized
 
 

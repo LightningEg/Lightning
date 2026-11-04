@@ -545,7 +545,8 @@ class InvestmentService:
             holding_flows.setdefault((paid["account_id"], paid["asset_id"]), []).append((paid["date"], paid["amount"]))
         positions = []
         for (acc_id, asset_id), lines in state.items():
-            pools = {owner: build_lots(owner_lines, owner_id=owner) for owner, owner_lines in lines.items()}
+            method = self.accounts.get(acc_id).cost_method
+            pools = {owner: build_lots(owner_lines, method, owner) for owner, owner_lines in lines.items()}
             s = {"qty": sum((book.quantity for book in pools.values()), ZERO),
                  "cost": sum((book.cost for book in pools.values()), ZERO),
                  "realized": sum((book.realized for book in pools.values()), ZERO)}

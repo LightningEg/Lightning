@@ -226,6 +226,17 @@ class AccountService:
             self.repo.update(replace(current, spendable=choice))
         return self.get(account_id)
 
+    def set_cost_method(self, account_id: int, method: str) -> Account:
+        """Choose which purchases a sale takes its cost from, for a brokerage account (average or fifo)."""
+        current = self.get(account_id)
+        if method not in ("average", "fifo"):
+            raise ValidationError("Choose average cost or oldest first.", "cost_method")
+        if current.account_type != AccountType.BROKERAGE:
+            raise ValidationError("Only a brokerage account has a cost method.", "cost_method")
+        with self.db.transaction():
+            self.repo.update(replace(current, cost_method=method))
+        return self.get(account_id)
+
     def _ensure_unique_name(self, name: str, exclude_id: int | None = None) -> None:
         wanted = name.casefold()
         if any(account.id != exclude_id and account.name.casefold() == wanted for account in self.repo.list()):

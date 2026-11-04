@@ -8,6 +8,8 @@ from decimal import Decimal
 from lightning.core.dates import fmt_date, months_back, parse_date, parse_month
 from lightning.core.money import ZERO, from_e6
 
+from .lots import LotLine, build_lots
+
 KINDS = {"BUY": "Bought", "SEL": "Sold", "DIV": "Dividend", "OPN": "Starting holding", "ADJ": "Adjusted"}
 
 
@@ -52,7 +54,7 @@ def holding_history(reporting, investments, account_id: int, asset_id: int, end:
     # The journey: every trade and payout, with units held after it.
     # Cost is also kept in the holding's own currency (the account's), average-cost method, so a dollar holding's
     # dashed line is the dollars paid, not today's pound cost turned back into dollars (audit 2026-10-15).
-    held, trail, native = ZERO, [], ZERO
+    held, trail, native_lines = ZERO, [], []
     for l in lines:
         reinvested = l["type"] == "DIV" and l.get("effect") == "INTERNAL"
         if reinvested and l.get("is_cash"):
@@ -64,11 +66,11 @@ def holding_history(reporting, investments, account_id: int, asset_id: int, end:
         amount_native = from_e6(l.get("amount_e6") or 0)
         returned = not units and l["type"] == "SEL" and l.get("effect") == "INTERNAL" and amount < 0
         if returned:  # a return of capital: the cost falls (never below zero), the units stay
-            native -= min(native, abs(amount_native))
+            native_lines.append(LotLine(l["date"], "SEL", "INTERNAL", ZERO, -abs(amount_native)))
         elif units > 0:
-            native += abs(amount_native)
+            native_lines.append(LotLine(l["date"], l["type"], "EXTERNAL", units, abs(amount_native)))
         elif units < 0 and held:
-            native -= native / held * -units
+            native_lines.append(LotLine(l["date"], l["type"], "EXTERNAL", units, -abs(amount_native)))
         held += units
         trail.append({"date": l["date"], "kind": "Capital returned" if returned else "Dividend reinvested" if reinvested else KINDS.get(l["type"], "Holding added" if units > 0 else "Units out"),
                       "units": units, "amount": abs(amount), "price": abs(amount / units) if units else None,
@@ -81,6 +83,7 @@ def holding_history(reporting, investments, account_id: int, asset_id: int, end:
             trail.append({"date": paid["date"], "kind": "Interest paid", "units": ZERO, "amount": paid["amount"],
                           "price": None, "price_native": None, "held": held_then, "ref": None})
     trail.sort(key=lambda t: t["date"])   # stable: a payout follows a trade of the same day
+    native = build_lots(native_lines, investments.accounts.get(account_id).cost_method).cost
     average = cost[-1] / (value[-1] / price[-1]) if cost[-1] and value[-1] and price[-1] else None
     average_native = native / held if held > 0 else None
     return {"labels": labels, "first": fmt_date(first), "months_held": len(keys), "price": price, "value": value,

@@ -18,7 +18,7 @@ from decimal import Decimal
 
 from lightning.core.money import ZERO
 
-from .lots import Disposal, Lot, cost_returned  # noqa: F401  (cost_returned is re-exported for the walkers)
+from .lots import Disposal, Lot
 from .returns import DisplayReturn
 
 # Sale factor (percent of value a class would fetch if sold today) when none is set in Settings.
