@@ -14,9 +14,9 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Everywhere](pillars/everywhere.md) | 4 | 3 |  | 1 |  |  |
 | [Feel](pillars/feel.md) | 13 | 4 | 7 | 1 | 1 | 1 |
 | [Build](pillars/build.md) | 5 |  | 4 |  | 1 |  |
-| [Reach](pillars/reach.md) | 6 |  | 4 | 2 |  | 2 |
+| [Reach](pillars/reach.md) | 5 |  | 3 | 2 |  | 2 |
 
-49 open items in 10 milestones.
+48 open items in 10 milestones.
 
 ## Being built now
 
@@ -49,7 +49,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | 5 Investments | 1 | Every investment figure can be explained per purchase, and agrees with the ledger. |
 | 6 Market data | 3 | Prices arrive by themselves, from sources Lightning may redistribute. |
 | 7 Planning, import and search | 9 | Getting a month in takes minutes: any bank file, any old app, one search box. |
-| 8 Website | 4 | The site is honest, quick and in step with the app. |
+| 8 Website | 3 | The site is honest, quick and in step with the app. |
 | 9 Later | 7 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 4 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |
 
