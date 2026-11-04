@@ -1,4 +1,4 @@
-"""`run.bat` installs requirements.txt only: the plain app must start without the `encrypted` extras."""
+"""The demo/sample backend remains importable without encrypted extras."""
 import subprocess
 import sys
 from pathlib import Path

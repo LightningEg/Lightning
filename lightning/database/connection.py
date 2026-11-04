@@ -21,7 +21,7 @@ CHECKED_MONTH_MESSAGE = f"This month was checked against the bank. Unlock it fir
 
 class Database:
     def __init__(self, path: str | Path, *, key: bytes | None = None,
-                 read_only: bool = False):
+                 read_only: bool = False, strict_thread: bool = False):
         if key is not None and (not isinstance(key, bytes) or len(key) != 32):
             raise ValueError("The database key must be exactly 32 bytes")
         self.path = str(path)
@@ -29,7 +29,7 @@ class Database:
         self.encrypted = key is not None
         self.read_only = read_only
         self._key = bytearray(key) if key is not None else None
-        self._owner = threading.current_thread() if self.encrypted else None
+        self._owner = threading.current_thread() if self.encrypted or strict_thread else None
         self._closed = False
         self.undo = None  # attached after startup migrations/seed; never active on read-only copies
         self.driver = sqlite3
@@ -44,8 +44,9 @@ class Database:
         if self.encrypted:
             if self._closed:
                 raise RuntimeError("Encrypted database has been closed")
-            if self._owner is not None and self._owner is not threading.current_thread():
-                raise RuntimeError("Encrypted database must stay on its owning thread")
+        if self._owner is not None and self._owner is not threading.current_thread():
+            label = "Encrypted database" if self.encrypted else "Database"
+            raise RuntimeError(f"{label} must stay on its owning thread")
 
     # -- connections -------------------------------------------------------
     @property

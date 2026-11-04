@@ -10,6 +10,6 @@ if not exist .venv\Scripts\python.exe (
     exit /b 1
   )
 )
-.venv\Scripts\python.exe -m pip install --quiet --disable-pip-version-check -r requirements.txt
+.venv\Scripts\python.exe tools\install_source.py
 .venv\Scripts\python.exe -m lightning %*
 pause

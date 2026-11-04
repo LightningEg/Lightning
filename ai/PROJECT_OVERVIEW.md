@@ -240,7 +240,7 @@ Owner, 2026-10-28: owner-only tasks are closed as items and held here. **Bring t
 | [8C](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/8-website/8C-be-found-as-the-all-in-one-tracker.md) | Resubmit the sitemap; Reddit post; re-ask AI search after two weeks | |
 | [8I](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/8-website/8I-guides-owner-checks.md) | Search Console impressions of the merged guide; read the Arabic topic pages | |
 
-Owner *decisions* (7M, 7R, 7S, 8D, 9L) stay open items: they change what we build.
+Owner *decisions* stay in the plan when they change what we build. On 2026-11-04 the owner delegated sensible decisions for report completion: income reversals reduce Money in (7S); source launch defaults to encrypted profiles with demo/sample as the plaintext exceptions (2AB).
 
 ## Cosmetic marketplace owner revision (2026-10-24)
 

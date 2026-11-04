@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 55 open items, in the order they are worked on.
+10 milestones, 53 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -44,9 +44,8 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | IT-2C4 | ↳ Unresolved-evidence repair | | | M | |
 | IT-2C5 | ↳ Native notification delivery, Windows and Android | | | M | |
 | **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical · medium | Reach | M | new |
-| **OW-2AB** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AB-stale-code.md) | owner task | Protect |  | ready |
 
-Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AC, 2AD, 2AE. Next free code: 2AF.
+Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AB, 2AC, 2AD, 2AE. Next free code: 2AF.
 
 ## 3 Polish and Arabic
 
@@ -195,7 +194,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7F3 | ↳ Change one budget category without the full grid | | | M | |
 | **NF-7G** | [Age of Money and a spending calendar](7-planning-import-and-search/7G-more-analytics.md) | new feature | Understand | M | new |
 | **OW-7M** | [Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as overspending](7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) | owner task | Plan |  | new |
-| **OW-7S** | [Money out filed under an income category counts as spending, not as less income](7-planning-import-and-search/7S-money-out-of-an-income-category.md) | owner task | Understand |  | new |
 | **NF-7T** | [Link the sections - salary-day cascade and a reserve tied to its bill](7-planning-import-and-search/7T-link-the-sections.md) | new feature | Plan | L | new |
 | NF-7T5 | ↳ Salary-day cascade | | | L | |
 | NF-7T6 | ↳ A reserve tied to its bill | | | L | |
@@ -207,7 +205,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7X5 | ↳ Show reviewable alerts in Needs you | | | M | |
 | **NF-7Y** | [Explain which stale or pending inputs affect a financial figure](7-planning-import-and-search/7Y-financial-data-freshness.md) | new feature | Understand | M | new |
 
-Done: 7A, 7H, 7I, 7J, 7K, 7L, 7N, 7O, 7P, 7Q, 7R, 7U, 7V, 7W. Next free code: 7Z.
+Done: 7A, 7H, 7I, 7J, 7K, 7L, 7N, 7O, 7P, 7Q, 7R, 7S, 7U, 7V, 7W. Next free code: 7Z.
 
 ## 8 Website
 

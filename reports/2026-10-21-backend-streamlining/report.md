@@ -146,3 +146,7 @@ Two parts are not defects: the older lend-and-hand-back sync runs in production 
 - **Measurements:** SQL counted with SQLite's trace callback. Pages were fetched through FastAPI's `TestClient` on Mohab's sample (`LIGHTNING_TODAY=2026-10-02`). Every "without" figure monkeypatched only the named call and compared the HTML byte for byte.
 - **Limits:** timings are single runs on Linux with plaintext SQLite. Windows and SQLCipher will be slower, though the query counts carry over.
 - **Changes:** no code was changed.
+
+## Follow-up · 2026-11-04
+
+OW-2AB is resolved under the owner’s delegated report-completion instruction: the default source entry opens encrypted profiles, explicit real-data `--db` paths are refused before opening, and demo/sample paths remain isolated. Source launchers install the declared encrypted extras. `tests/test_legacy_entry.py` checks the default, refusal and optional owning-thread enforcement for plaintext fixtures; `tests/test_plain_install.py` checks source installation.

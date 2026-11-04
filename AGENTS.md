@@ -67,7 +67,7 @@ Never at the cost of a test, a required check, or a read you need.
 
 - Local-first personal finance for salaried people in Egypt. One ledger records real money; plans move none; reports read both.
 - Financial calculations live in Python services, never templates or JavaScript.
-- Ships mainly as a Windows app (WebView2, encrypted profiles): no Back, address bar or tabs, so every page has its own way forward and back. Linux `--profiles` shares the pages; `python -m lightning` is separate legacy mode.
+- Ships mainly as a Windows app (WebView2, encrypted profiles): no Back, address bar or tabs, so every page has its own way forward and back. Linux `--profiles` shares the pages; `python -m lightning` also opens encrypted profiles; plaintext runs require `--demo` or `--sample`.
 - Profile data and backups live in Documents/Lightning, never in Git or the ZIP; the repository and tests use dummy data only. People may use Lightning with their real money (owner, 2026-10-28): never tell them not to.
 
 ## 5. Mohab's test is acceptance
