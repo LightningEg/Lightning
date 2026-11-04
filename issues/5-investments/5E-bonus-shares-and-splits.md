@@ -3,15 +3,14 @@ title: Bonus shares and stock splits
 type: feature
 pillar: own
 size: M
-status: blocked
-blocked_by: 5B
+status: ready
 created: 2026-10-05
 by: Claude
 ---
 
 # Bonus shares and stock splits
 
-**Status:** proposal, 2026-10-05 · Claude, not built. Learned from GnuCash (`Gnucash/gnucash` at `53cc9e6`; Lightning at `5665786`). When built, move what holds into [Architecture](../../ai/ARCHITECTURE.md) and delete this file. Needs [investment_lots.md](5B-cost-per-purchase-lots.md) and the built events table (`lightning/investments/events.py`, NF-5A).
+**Status:** proposal, 2026-10-05 · Claude, not built. Learned from GnuCash (`Gnucash/gnucash` at `53cc9e6`; Lightning at `5665786`). When built, move what holds into [Architecture](../../ai/ARCHITECTURE.md) and delete this file. Needs the built lots (`lightning/investments/lots.py`, NF-5B) and the built events table (`lightning/investments/events.py`, NF-5A).
 
 **They do better:** a split or bonus issue is its own event: units change, cost does not, and no fake purchase appears.
 
@@ -25,7 +24,7 @@ by: Claude
 
 **What to change:**
 1. `DocType.SPL = "SPL"` ("Bonus or split") in `core/refs.py`: one units line, `amount_base_e6 = 0`, no cash line, no category, no effect on spending or income.
-2. `build_lots` ([investment lots](5B-cost-per-purchase-lots.md)): on an SPL line, `ratio = (held + q) / held`; multiply every open lot's quantity by it, keep cost.
+2. `build_lots` (built lots, `lightning/investments/lots.py`): on an SPL line, `ratio = (held + q) / held`; multiply every open lot's quantity by it, keep cost.
 3. XIRR skips it (no money moved).
 4. The price chart divides prices before the split date by the cumulative ratio when it builds the series (Python), so the line does not fall off a cliff. Stored prices stay as they are.
 5. Form: "Units you hold after" (prefilled with today's holding), date, notes. Built as an event in the built events table (`lightning/investments/events.py`, NF-5A).

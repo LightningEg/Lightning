@@ -3,15 +3,14 @@ title: Investment checks in the integrity screen
 type: feature
 pillar: own
 size: M
-status: blocked
-blocked_by: 5B
+status: ready
 created: 2026-10-05
 by: Claude
 ---
 
 # Investment checks in the integrity screen
 
-**Status:** proposal, 2026-10-05 · Claude, not built. Learned from GnuCash (`Gnucash/gnucash` at `53cc9e6`; Lightning at `5665786`). When built, move what holds into [Architecture](../../ai/ARCHITECTURE.md) and delete this file. Needs [investment_lots.md](5B-cost-per-purchase-lots.md).
+**Status:** proposal, 2026-10-05 · Claude, not built. Learned from GnuCash (`Gnucash/gnucash` at `53cc9e6`; Lightning at `5665786`). When built, move what holds into [Architecture](../../ai/ARCHITECTURE.md) and delete this file. Needs the built lots (`lightning/investments/lots.py`, NF-5B).
 
 **They do better:** a report tab that finds broken investment records.
 
