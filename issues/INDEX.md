@@ -180,7 +180,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7D5 | ↳ History search through matched IDs ([#222](https://github.com/LightningEg/Lightning/issues/222)) | | | M | |
 | NF-7D6 | ↳ Edge cases and speed ([#223](https://github.com/LightningEg/Lightning/issues/223)) | | | M | |
 | **NF-7E** | [Match bank-imported transfer pairs across currencies](7-planning-import-and-search/7E-imported-pairs-across-currencies.md) | new feature | Capture | M | new |
-| **NF-7F** | [Small planning gaps](7-planning-import-and-search/7F-small-planning-gaps.md) | new feature | Plan | M | new |
+| **NF-7F** | [Small planning gaps](7-planning-import-and-search/7F-small-planning-gaps.md) | new feature | Plan | M | building |
 | NF-7F2 | ↳ Rename a rule | | | S | |
 | NF-7F3 | ↳ Change one budget category without the full grid | | | M | |
 | **NF-7G** | [Age of Money and a spending calendar](7-planning-import-and-search/7G-more-analytics.md) | new feature | Understand | M | new |
