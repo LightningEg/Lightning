@@ -120,7 +120,7 @@ def test_the_currencies_tab_shows_the_figures_with_their_names(c, dollars):
     page = client.get("/accounts/currencies")
     assert page.status_code == 200
     for text in ("Unrealized FX gain", "Realized FX gain", "Average rate", "Spread paid", "48.33", "33,150", "1,733",
-                 "<bdi dir=\"ltr\">1 USD = 51.00 EGP</bdi>", "Dollar savings", "Cash value against cost", "investments are not included"):
+                 "<bdi dir=\"ltr\">1 USD = 51.00 EGP</bdi>", "Dollar savings", "Cash and investments over time", "Cash and owned investments at month ends"):
         assert text in page.text, text
     assert "+1,733" in page.text and "Unavailable" not in page.text
     month = client.get("/accounts/currencies", params={"period": "month", "month": "2026-09"})
@@ -266,7 +266,8 @@ def test_phone_currency_chart_names_and_lists_both_series_below_plot(c, dollars)
     assert 'Value of what you hold' in numbers and 'What it cost' in numbers
     assert '33,150' in numbers and '31,417' in numbers  # phone figures round to whole EGP
     pc_chart = pc_html.split('class="chart chart-trend"', 1)[1].split('</figure>', 1)[0]
-    assert pc_chart.index('class="chart-legend"') < pc_chart.index('class="chart-plot"')
+    assert 'class="chart-plot"' in pc_chart and 'phone-chart-legend' not in pc_chart
+    assert 'Cash and investments over time' in pc_html
 
 
 def test_currency_history_includes_owned_investments_and_starts_axis_at_zero(c, dollars):
