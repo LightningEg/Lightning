@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 58 open items, in the order they are worked on.
+10 milestones, 57 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -105,9 +105,8 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | building |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner | |
-| **BT-3AP** | [An old search body overwrites the latest phone results and URL](3-polish-and-arabic/3AP-live-search-response-race.md) | bug, technical · medium | Capture | M | new |
 
-Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK, 3AL, 3AO. Next free code: 3AQ.
+Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK, 3AL, 3AO, 3AP. Next free code: 3AQ.
 
 ## 4 Edit journal and devices
 
