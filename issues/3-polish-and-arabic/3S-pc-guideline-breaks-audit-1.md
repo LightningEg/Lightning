@@ -36,8 +36,7 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 13. A card alone: Cash planning "What you owe"; the transaction page's "Expense categories".
 
 **Controls and words**
-14. The period control reads "Monthly" with the ‹ month › stepper as a separate pill; A10.2 says "Month", arrows inside the one track (Overview, Spending,
-    Budget, Investments, Currencies, Export for AI).
+14. **2026-11-04:** The shared PC period control says "Month" and places ‹ month › inside the one track. Chromium checks navigation, custom ranges and Arabic on Overview; the same macro serves Spending, Budget, Investments, Currencies and Export for AI.
 15. A05: the line under the title is a slogan ("Where your money went", "Your spending plan", Currencies, Prices, Held for others, From SMS, Review
     activity, Deleted, Settings tabs) instead of the exact dates; Overview and Cash planning have none.
 16. Certificates: a 5,400 px page with ten Primary buttons (A10.1 allows one).

@@ -378,3 +378,7 @@ IV-3S item 20: transaction detail names the action in its heading and keeps the 
 ## 2026-11-04 · Gam'eya dates
 
 IV-3S item 8: PC Gam'eya labels a passed date as not recorded and names it the oldest unrecorded instalment; today is not called late. The screen retains the count and amount due without claiming unrecorded instalments were unpaid.
+
+## 2026-11-04 · PC period control
+
+IV-3S item 14: the shared PC period control places the month and arrows in its single track and labels the unselected option Month. Chromium checks stepping, month selection and custom ranges, including Arabic.
