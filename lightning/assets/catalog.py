@@ -1,4 +1,5 @@
-"""Read the bundled picker catalogue: EGX stocks and Thndr funds, and the largest US stocks and ETFs."""
+"""Read the bundled picker catalogue: EGX stocks and Thndr funds, the largest US stocks and ETFs, and the Gulf and
+European listings the app prices itself (tools/market/abroad_catalogue.py)."""
 from __future__ import annotations
 
 import csv
@@ -8,6 +9,7 @@ from pathlib import Path
 
 CATALOGUE_FILE = Path(__file__).with_name("egx_instruments.csv")
 US_CATALOGUE_FILE = Path(__file__).with_name("us_instruments.csv")
+ABROAD_CATALOGUE_FILE = Path(__file__).with_name("abroad_instruments.csv")
 
 
 def _read(path: Path, mic: str, currency: str) -> list[dict[str, str]]:
@@ -24,4 +26,6 @@ def _read(path: Path, mic: str, currency: str) -> list[dict[str, str]]:
 def instruments() -> list[dict[str, str]]:
     """Return searchable instrument records from the local, versioned CSV files (stocks first, by name)."""
     records = _read(CATALOGUE_FILE, "XCAI", "EGP") + _read(US_CATALOGUE_FILE, "", "USD")
+    if ABROAD_CATALOGUE_FILE.exists():
+        records += _read(ABROAD_CATALOGUE_FILE, "", "")
     return sorted(records, key=lambda row: (row["kind"] != "Stocks", row["name"].casefold()))

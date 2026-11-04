@@ -202,6 +202,20 @@ def _catalog_key(item, duplicated):
     return f"catalog:{item['ticker']}@{mic}" if mic and item["ticker"].casefold() in duplicated else f"catalog:{item['ticker']}"
 
 
+def _offered_abroad(c, account, assets) -> set[str]:
+    """The Gulf and European packs whose catalogue rows the picker offers on this account: those the broker's
+    institution (else its name, as its tile reads it) lists, all of them for an unknown broker, and any market already held (the Gulf and Europe list is
+    large, so a broker that trades neither keeps a light page: 5G, owner 2026-11-04)."""
+    from lightning.accounts.institutions import match_builtin
+    from lightning.market.packs import PACKS
+    abroad = {"gcc", "europe"}
+    broker = c.accounts.broker_of(account)
+    found = match_builtin(broker.institution or broker.name) if account.account_type == AccountType.BROKERAGE else None
+    offered = abroad if found is None or not found.markets else abroad & set(found.markets)
+    held = {(a.mic or "").upper() for a in assets}
+    return offered | {p for p in abroad if held & set(PACKS[p].venues)}
+
+
 def _trade_choices(c, account, positions) -> list[dict]:
     """Typeahead choices: bundled stocks/funds plus any custom assets already in this account."""
     if not account or account.account_type not in INVESTMENT_ACCOUNT_TYPES:
@@ -228,9 +242,18 @@ def _trade_choices(c, account, positions) -> list[dict]:
             return translate(f"Priced in {currency}: buy it from a {currency} account.", c.settings.get("locale") or "en")
         return ""
 
-    catalogue = catalog_instruments()
+    from functools import lru_cache as _cache
+
+    @_cache(maxsize=None)
+    def note_for(currency: str) -> str:
+        return currency_note(currency)
+
+    from lightning.market.packs import PACKS
+    offered = _offered_abroad(c, account, assets)
+    hidden = {mic for p in ("gcc", "europe") if p not in offered for mic in PACKS[p].venues}
+    catalogue = [item for item in catalog_instruments() if (item.get("mic") or "").upper() not in hidden]
     seen, duplicated = set(), set()
-    for item in catalogue:
+    for item in catalog_instruments():  # every row: a ticker on two exchanges names its exchange wherever it shows
         name = item["ticker"].casefold()
         (duplicated if name in seen else seen).add(name)
     for item in catalogue:
@@ -247,7 +270,7 @@ def _trade_choices(c, account, positions) -> list[dict]:
             "decimals": asset.quantity_decimals if asset else (0 if item["class_code"] == "STOCK" else 4),
             "exchange": venue_name(item.get("mic")) if item.get("mic") else "",
             "currency": asset.currency if asset else item.get("currency", ""),
-            "note": currency_note(asset.currency if asset else item.get("currency", "")),
+            "note": note_for(asset.currency if asset else item.get("currency", "")),
         })
     for asset in assets:
         if asset.id in included_ids:
@@ -399,8 +422,18 @@ def _category_filter(c, category_id: int) -> tuple[str, set]:
 
 def _account_holdings(c, account):
     """What an account page shows of its holdings and value, its broker pockets added in (owner 2026-10-16):
-    (holdings, account_value, owned_value, held_value, asset_breakdown)."""
+    (holdings, account_value, owned_value, held_value, asset_breakdown). A broker with pockets shows the
+    selected pocket's holdings under its tab (owner 2026-11-04); its value stays the whole broker's."""
     day = today()
+    if account.account_type == AccountType.BROKERAGE and (account.parent_id or c.accounts.pockets(account.id)):
+        broker = c.accounts.broker_of(account)
+        holdings = c.investments.portfolio(fmt_date(day), account.id).open
+        value = owned = ZERO
+        for pocket in [broker, *c.accounts.pockets(broker.id)]:
+            value += c.reporting.account_value(pocket.id, day)
+            owned += c.reporting.owned_account_value(pocket.id, day)
+        breakdown = c.reporting.account_asset_class_breakdown(account.id, day)
+        return holdings, value, owned, value - owned, breakdown
     holdings = c.investments.portfolio(fmt_date(day), account.id).open
     account_value = c.reporting.account_value(account.id, day)
     account_owned_value = c.reporting.owned_account_value(account.id, day)
@@ -529,7 +562,8 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         account_spendable=account.counts_as_spendable(c.base_currency) if account else None,
         account_cost_method=account.cost_method if account else None,
         pocket_cash=_pocket_cash(c, account),
-        broker=c.accounts.broker_of(account) if account and account.parent_id else None,
+        pocket_homes=c.accounts.pocket_homes(account) if account else [],
+        broker=c.accounts.broker_of(account) if account and account.account_type == AccountType.BROKERAGE else None,
         today=fmt_date(today()),
         account_balance=c.reporting.account_balance(account.id, today()) if account else None,
         manual_asset_value=c.accounts.manual_value(account.id, fmt_date(today())) if account and account.account_type == AccountType.OTHER_ASSET else None,
@@ -851,11 +885,27 @@ def _native_value(c, account, value):
 
 
 def _pocket_cash(c, account):
-    """A broker's cash in each currency it holds, its own first (one row per broker, owner 2026-10-16)."""
-    if not account or account.account_type != AccountType.BROKERAGE or account.parent_id:
+    """A broker's pockets, its own currency first (one row per broker, owner 2026-10-16), as the overview and tabs
+    of its page (owner 2026-11-04): each pocket's cash and investments in its own currency and its value in the
+    profile currency. Empty for a broker with one pocket, which keeps the ordinary account page."""
+    if not account or account.account_type != AccountType.BROKERAGE:
         return []
-    pockets = c.accounts.pockets(account.id)
+    broker = c.accounts.broker_of(account)
+    pockets = c.accounts.pockets(broker.id)
     if not pockets:
         return []
-    return [{"id": a.id, "currency": a.currency, "cash": c.reporting.account_balance(a.id, today())} for a in [account, *pockets]]
+    day = today()
+    rows = []
+    for a in [broker, *pockets]:
+        cash = c.reporting.account_balance(a.id, day)
+        value = c.reporting.account_value(a.id, day)
+        if a.currency == c.base_currency:
+            rate = Decimal(1)
+        else:
+            found = c.reporting.valuer.fx(a.currency, fmt_date(day))
+            rate = found.rate if found and found.rate else None
+        invested = (value / rate - cash) if rate else None
+        rows.append({"id": a.id, "currency": a.currency, "cash": cash, "invested": invested, "value": value,
+                     "current": a.id == account.id})
+    return rows
 

@@ -97,10 +97,18 @@ def test_one_row_per_broker_in_the_sidebar_and_accounts_and_its_page_shows_each_
     client = TestClient(create_app(c), base_url="http://127.0.0.1")
     listing = client.get("/accounts").text
     assert "THNDR · USD" not in listing and "64,000" in listing
+    # Owner 2026-11-04: the broker's page leads with a small overview in pounds, then each pocket as a tab;
+    # a tab shows only its own pocket's holdings, and every tab carries the broker's header and total.
     page = client.get(f"/accounts/{thndr.id}").text
-    assert "0.00 USD" in page and "9,000.00 EGP" in page and "US index ETF" in page
-    assert f"/accounts/{pocket.id}" in page
-    assert "Part of THNDR" in client.get(f"/accounts/{pocket.id}").text
+    overview = page[page.index('class="card pocket-overview"'):page.index('class="plan-tabs-bar pocket-tabs"')]
+    assert "EGP" in overview and "Cash 9,000<" in overview and "Investments 0" not in overview and "USD" in overview and f"/accounts/{pocket.id}" in overview
+    tabs = page[page.index('class="plan-tabs-bar pocket-tabs"'):]
+    tabs = tabs[:tabs.index("</nav>")]
+    assert tabs.count('class="plan-tab"') == 2 and f'href="/accounts/{thndr.id}" aria-current="page"' in tabs
+    assert 'class="card holdings-strip"' not in page   # the EGP pocket holds no investments of its own
+    usd = client.get(f"/accounts/{pocket.id}").text
+    assert "THNDR · USD</h1>" not in usd and 'class="card holdings-strip"' in usd and "US index ETF" in usd
+    assert f'href="/accounts/{pocket.id}" aria-current="page"' in usd and 'class="card pocket-overview"' in usd
     reply = client.post(f"/accounts/{thndr.id}/pockets", data={"currency": "eur"}, follow_redirects=False)
     assert reply.status_code == 303 and c.accounts.pocket_for(thndr, "EUR").name == "THNDR · EUR"
 
@@ -147,3 +155,74 @@ def test_failed_purchase_rolls_back_a_successful_conversion_and_all_rows(c, setu
         c.investments.buy_converting("2026-09-03", thndr.id, etf.id, "0", "1000", "51000")
     assert len(converted) == 1  # The conversion succeeded; the purchase then failed.
     assert list(c.db.conn.iterdump()) == before
+
+
+def test_on_a_phone_the_broker_leads_in_pounds_then_a_chip_per_pocket(c, setup):
+    """Owner 2026-11-04 on the phone (C06.2, C08): the broker's name and its total in pounds lead every pocket's page;
+    one row per pocket, then one chip per pocket; a broker with one pocket keeps its ordinary page."""
+    accounts, _ = setup
+    thndr, etf = _broker_with_cash(c, accounts)
+    app = create_app(c)
+
+    @app.middleware("http")
+    async def as_phone(request, call_next):
+        request.state.phone = True
+        return await call_next(request)
+
+    client = TestClient(app, base_url="http://127.0.0.1")
+    plain = client.get(f"/accounts/{thndr.id}").text
+    assert "pocket-tabs" not in plain
+    c.investments.buy_converting("2026-09-03", thndr.id, etf.id, "10", "1000", "51000")
+    pocket = c.accounts.pocket_for(thndr, "USD")
+    usd = client.get(f"/accounts/{pocket.id}").text
+    assert "<h1>THNDR</h1>" in usd and "<small>EGP</small></div>" in usd
+    chips = usd[usd.index('class="phone-chips pocket-tabs"'):]
+    chips = chips[:chips.index("</nav>")]
+    assert chips.count('<a class="phone-chip') == 2 and f'href="/accounts/{pocket.id}" aria-current="page"' in chips
+
+
+def test_a_separate_dollar_brokerage_becomes_a_pocket_of_the_broker(c, setup):
+    """5G3: today's separate Dollar brokerage moves into the broker as its USD pocket: the same account, ledger and
+    holdings, now one row with the broker. Only a broker in another currency without that pocket can take it."""
+    accounts, _ = setup
+    thndr, etf = _broker_with_cash(c, accounts)
+    dollars = c.account_flows.open_account("Dollar brokerage", "BROKERAGE", "2026-09-01", "2000", currency="USD")
+    c.investments.buy_total("2026-09-03", dollars.id, etf.id, "10", "1000")
+    before = (c.reporting.account_value(dollars.id, date(2026, 12, 31)), c.investments.holding(dollars.id, etf.id, "2026-12-31"))
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    page = client.get(f"/accounts/{dollars.id}").text
+    assert "Make it a pocket of THNDR" in page
+    reply = client.post(f"/accounts/{dollars.id}/make-pocket", data={"broker_id": str(thndr.id)}, follow_redirects=False)
+    assert reply.status_code == 303
+    pocket = c.accounts.get(dollars.id)
+    assert pocket.parent_id == thndr.id and pocket.name == "THNDR · USD" and c.accounts.pocket_for(thndr, "USD") == pocket
+    assert (c.reporting.account_value(dollars.id, date(2026, 12, 31)),
+            c.investments.holding(dollars.id, etf.id, "2026-12-31")) == before
+    _, _, groups = c.reporting.sidebar(date(2026, 12, 31))
+    assert dollars.id not in [r.id for g in groups for r in g.children]
+    assert c.accounts.pocket_homes(pocket) == [] and "Make it a pocket" not in client.get(f"/accounts/{thndr.id}").text
+    with pytest.raises(LightningError):   # THNDR already holds USD now
+        c.accounts.make_pocket(c.account_flows.open_account("Other dollars", "BROKERAGE", "2026-09-01", "0",
+                                                            currency="USD").id, thndr.id)
+
+
+def test_the_picker_offers_gulf_and_european_shares_where_the_broker_trades_them(c, setup):
+    """5G (owner 2026-11-04): the bundled Gulf and Europe list shows on a broker that trades those markets (or an
+    unknown one), not on THNDR; picking Aramco makes an investment the app prices itself, in riyals."""
+    from lightning.ui.routes.register import _trade_choices
+    accounts, _ = setup
+    ibkr = c.account_flows.open_account("IBKR", "BROKERAGE", "2026-09-01", "0", institution="Interactive Brokers")
+    names = lambda acct: {row["name"] for row in _trade_choices(c, acct, [])}  # noqa: E731
+    assert "Saudi Arabian Oil Co." in names(ibkr) and "SAP SE" in names(ibkr)
+    assert "Saudi Arabian Oil Co." not in names(accounts["thndr"])
+    row = next(r for r in _trade_choices(c, ibkr, []) if r["name"] == "Saudi Arabian Oil Co.")
+    assert row["currency"] == "SAR" and row["exchange"]
+    from lightning.assets.catalog import instruments
+    assert not any(r["mic"] == "XLON" and r["ticker"].startswith("0") and len(r["ticker"]) == 4 for r in instruments())
+
+
+def test_a_ticker_on_egx_and_milan_makes_two_investments_with_their_own_price_keys(c, setup):
+    egx = c.assets.create_investment("Azimut Egypt fund", "STOCK", "AZM", mic="XCAI")
+    milan = c.assets.create_investment("Azimut Holding Spa", "STOCK", "AZM", mic="XMIL", currency="EUR")
+    assert (egx.code, egx.market_key) == ("STK:AZM", "EG:AZM")
+    assert (milan.code, milan.market_key, milan.currency) == ("STK:AZM-XMIL", "IT:AZM", "EUR")

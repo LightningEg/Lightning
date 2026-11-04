@@ -72,6 +72,7 @@ Layer: **Ledger** (real money moved), **Plan** (what-if, moves nothing) or **Rep
 | **Money in / money out** | Ledger | Direction value crosses an account boundary; direction never decides category. |
 | **Transfer** | Ledger | Value moved between the user's own accounts; not income or expense. |
 | **Investment trade** | Ledger | Brokerage cash for units (buy) or units for cash (sell), entered in that brokerage's register. |
+| **Pocket** | Ledger | A broker's cash and holdings in one currency: a child brokerage account ("IBKR · EUR") shown inside the broker's one row, one tab per pocket on its page. Arabic: جيب. |
 | **Opening balance** | Ledger | Separately dated entry for an account's value at a chosen point; earlier transactions may still be added. |
 | **Revaluation** | Ledger | Change in investment value from price, not deposits or withdrawals. |
 | **Reevaluation ledger** | Ledger | Monthly per-account, per-asset units, prices, values and returns; each account total is one system-generated `VAL` journal in the main ledger. |

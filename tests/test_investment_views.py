@@ -158,6 +158,10 @@ def test_the_usd_lens_divides_by_the_dated_rate(c, book, monkeypatch):
     assert lens["hero_value"] == plain["value_spark"]["latest"] / rate
     assert lens["hero_result"] == plain["investment_report"]["result"] / rate
     assert "at 1 USD = 53.00 EGP" in lens["html"]
+    # 5G: the allocation card and brokerage cash follow the lens as well
+    assert lens["allocation"]["cash"] == plain["investment_report"]["investment_cash"] / rate
+    assert lens["allocation"]["what_you_own"] == plain["allocation"]["what_you_own"] / rate
+    assert sum(r["value"] for r in lens["biggest"]["rows"]) == sum(r["value"] for r in plain["biggest"]["rows"]) / rate
     # nothing stored changes: the plain page is still in pounds
     assert plain["lens"]["code"] == "EGP" and not plain["lens"]["usd"]
     # the toggle keeps the view and the period

@@ -56,6 +56,11 @@ LOCAL_ONLY = {
 # calling a service through the route's container. Keep these explicit so static
 # inventory still checks the commands that own their financial effects.
 ROUTE_COMMANDS = {
+    # NF-5G5: the IBKR import posts each row through these commands (lightning/investments/broker_import.py).
+    ("accounts", "/accounts/{account_id:int}/broker-import"): (
+        "investments.buy_total", "investments.sell_total", "investments.dividend", "investments.broker_fee",
+        "investments.broker_interest", "transactions.record_conversion", "assets.create_investment",
+        "accounts.add_pocket"),
     ("investments", "/investments/prices/market/fill"): ("automation.fill_prices_now",),
     ("investments", "/investments/prices/market/update"): ("automation.fill_prices_now",),
     ("investments", "/investments/prices/markets"): ("automation.fill_prices_now",),

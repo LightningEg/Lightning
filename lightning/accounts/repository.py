@@ -85,6 +85,11 @@ class AccountRepository:
         )
         return int(cur.lastrowid)
 
+    def set_parent(self, account_id: int, parent_id: int, name: str) -> None:
+        """Make an account a broker's currency pocket (it keeps its own id, code and ledger)."""
+        self.db.execute("UPDATE accounts SET parent_id=?, name=?, updated_at=? WHERE id=?",
+                        (parent_id, name, now_iso(), account_id))
+
     def update(self, a: Account) -> None:
         self.db.execute(
             "UPDATE accounts SET code=?, name=?, institution=?, account_type=?, cash_class_id=?,"

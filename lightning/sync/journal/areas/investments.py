@@ -65,6 +65,7 @@ COMMANDS = {
         quantity=RATE, notes=LONG), creates="transactions"),
     "investments.add_pocket": Command("accounts.add_pocket", dict(broker_id=ref("accounts"), currency=TEXT),
                                       creates="accounts"),
+    "investments.make_pocket": Command("accounts.make_pocket", dict(account_id=ref("accounts"), broker_id=ref("accounts"))),
     # No precondition on a bucket or class: the last typed target or factor wins.
     "investments.set_target": Command("investments.set_target_weight", dict(
         bucket=TEXT, weight=AMOUNT, class_id=ref("asset_classes"))),

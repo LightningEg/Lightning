@@ -103,10 +103,14 @@ def parse(data: dict, board: Board, day: str, source: str) -> SourceResult:
     return result
 
 
-def fetch(session, pack: str, day: str) -> SourceResult:
-    """Every board of a pack, merged; a board that fails fails the pack's source (its last prices stay)."""
+def fetch(session, pack: str, day: str, countries=None) -> SourceResult:
+    """Every board of a pack, merged; a board that fails fails the pack's source (its last prices stay). The app
+    asks only the boards of the countries it holds (`countries`), each still whole, so a request never names a
+    holding."""
     result = SourceResult(f"tradingview-{pack}")
     for board in BOARDS[pack]:
+        if countries is not None and board.country not in countries:
+            continue
         url = SCAN.format(screener=board.screener)
         kinds = ["all"] if board.stocks == ALL else ["stocks"] + (["etfs"] if board.etfs else [])
         for kind in kinds:

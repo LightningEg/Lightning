@@ -18,7 +18,7 @@ repo: app
 **Brief from the owner:** look at every tab and button as an independent UX tester and brand strategist, not as a keeper of
 the guideline. Say what is good, what looks odd, what can be linked or wired better, and what to build next. Design for
 someone who is lazy and in a hurry. Do not fix anything. The companion report covers brokerages, exchanges and currencies:
-[2026-10-15-investments-brokerage-multi-exchange-design.md](../5-investments/5G-brokerages-across-exchanges.md).
+built as NF-5G (closed 2026-11-04); its design now lives in [Architecture › Position and reporting contract](../../ai/ARCHITECTURE.md#investment-report-contract), *Brokers and currency pockets*.
 
 **How I looked.** Mohab's sample year (`python -m lightning --sample`, prices offline, today 2026-10-15) on main `08bb699`,
 which includes designs 004 (institution pick list, first-run currencies, import review as rows). I crawled 734 pages
