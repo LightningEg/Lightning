@@ -120,3 +120,24 @@ def test_phone_fields_stay_readable_with_desktop_overrides():
         page.add_style_tag(content=(static / "profiles.css").read_text())
         assert page.locator('select').evaluate('e => getComputedStyle(e).fontSize') == '16px'
         browser.close()
+
+
+def test_phone_focused_field_deepens_its_well():
+    chromium = Path("/opt/pw-browsers/chromium")
+    executable = str(chromium) if chromium.exists() else shutil.which("chromium")
+    if not executable:
+        pytest.skip("Chromium is not installed")
+    static = Path(__file__).resolve().parents[1] / "lightning/ui/static"
+    with sync_playwright() as p:
+        browser = p.chromium.launch(executable_path=executable)
+        page = browser.new_page(viewport={"width": 320, "height": 800})
+        page.set_content('<html class="phone"><body><main class="main"><input></main></body></html>')
+        page.add_style_tag(content=(static / "style.css").read_text())
+        page.add_style_tag(content=(static / "phone.css").read_text())
+        field = page.locator('input')
+        before = field.evaluate('e => getComputedStyle(e).backgroundColor')
+        field.focus()
+        after = field.evaluate('e => getComputedStyle(e).backgroundColor')
+        assert before != after and after != 'rgb(245, 239, 207)'
+        assert field.evaluate('e => getComputedStyle(e).borderColor') == 'rgb(11, 138, 95)'
+        browser.close()

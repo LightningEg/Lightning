@@ -68,4 +68,4 @@ Report items 9-10: two charts in one card, time axes with 8-10 labels, five or m
 ## 3T6 Fields, pairs and small things · M
 Report items 11-13: 15 px field text, focus fill, lone KPIs, Zakat date format, Profiles wordmark.
 
-**2026-11-04:** Phone entry fields, including the profile language selector, now render at 16 px despite desktop overrides; the amount field keeps 24 px. A 320/360 browser sweep and `tests/test_phone_check.py` cover this. Focus fills, pairs and the small observations remain to review.
+**2026-11-04:** Phone entry fields, including the profile language selector, now render at 16 px despite desktop overrides; the amount field keeps 24 px. A 320/360 browser sweep and `tests/test_phone_check.py` cover this. Focused phone fields now deepen the theme well towards its focus colour, with a focus-coloured edge; pairs and the small observations remain to review.

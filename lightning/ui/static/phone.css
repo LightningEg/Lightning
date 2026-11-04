@@ -114,6 +114,12 @@ html.phone .main .cluster-name, html.phone .main .cluster span { white-space: no
 /* Override compact desktop field rules so the phone never zooms an editable field. */
 html.phone .main :is(input, select, textarea):not([type=hidden], [type=checkbox], [type=radio]):not(#_):not(.x_) { font-size: 16px !important; }
 html.phone .main .phone-amount input:not(#_):not(.x_) { font-size: 24px !important; }
+/* Focus deepens the theme's well towards its focus colour instead of switching to cream. */
+html.phone .main :is(input, select, textarea):not([type=hidden], [type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=file], [type=range], [type=color]):not(#_):not(.x_):focus {
+  background: color-mix(in srgb, var(--field) 90%, var(--focus) 10%) !important;
+  border-color: var(--focus) !important;
+  box-shadow: 0 0 0 2px var(--focus) !important;
+}
 .phone kbd, .phone .command-hint, .phone .side-search kbd { display: none; }
 
 /* C06 cards: one column, 16 inside, 20px corners, 12 between. */
