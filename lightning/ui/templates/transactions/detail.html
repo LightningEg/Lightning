@@ -2,7 +2,7 @@
 {% from "partials/macros.html" import amount with context %}
 {% from "partials/linked.html" import touched_panel, suggested_links with context %}
 {% block title %}{{ txn.ref }}{% endblock %}
-{% block heading %}<h1 class="code" style="font-size:20px">{{ txn.ref }}</h1>
+{% block heading %}<h1 dir="ltr">{{ txn.ref }}</h1>
 <div class="muted">{{ ('Refund' if txn.type.value == 'IN' and lines and lines[0].effect == 'OUTFLOW' else summary.type_label)|tr(locale) }} · {{ txn.date }}{% if txn.source == 'SYSTEM' %} · <span class="pill">{{ 'System-generated'|tr(locale) }}</span>{% endif %}{% if txn.is_void %} · <span class="pill void">{{ 'deleted'|tr(locale) }}</span>{% endif %}</div>{% endblock %}
 {% block content %}
 <div class="grid g2">
@@ -95,7 +95,7 @@
     <table style="margin-top:10px">
       <thead><tr><th>{{ "Line"|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th>{{ "Asset"|tr(locale) }}</th><th>{{ "Effect"|tr(locale) }}</th><th>{{ 'Category'|tr(locale) }}</th><th class="num">{{ "Quantity"|tr(locale) }}</th><th class="num">Value ({{ base }})</th></tr></thead>
       {% for l in lines %}
-      <tr><td class="code">{{ l.ref }}</td><td class="small">{{ l.account }}</td><td class="code">{{ l.asset }}</td><td><span class="pill">{{ l.effect }}</span></td>
+      <tr><td class="code">{{ l.ref }}</td><td class="small">{{ l.account }}</td><td class="code">{{ l.asset }}</td><td><span class="pill">{{ {'INFLOW': 'Money in', 'OUTFLOW': 'Money out', 'INTERNAL': 'Internal', 'OPENING': 'Opening', 'REVALUATION': 'Revaluation'}.get(l.effect, l.effect)|tr(locale) }}</span></td>
           <td class="small">{{ l.category }}</td><td class="num">{{ l.quantity|money(True) }}</td><td class="num">{{ l.amount_base|money(True) }}</td></tr>
       {% endfor %}
     </table>

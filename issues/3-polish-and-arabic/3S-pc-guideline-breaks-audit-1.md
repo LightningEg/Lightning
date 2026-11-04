@@ -44,7 +44,7 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 17. **2026-11-04:** At 1366 px, one expanded sample Counterparties row has no overlap between Suggested category and Person/Business. PC Save alias is intentionally screen-reader-only and an Enter hint accompanies the field. Other rows and widths remain to check.
 18. **2026-11-04:** An unplanned month says "Set spending limits for this month", whether or not other months have plans.
 19. **2026-11-04:** Escape closes Ctrl-K even with a query; the Chromium brand audit checks it. Hide amounts posts through the undo journal, so "Saved changes" appears in every header.
-20. Small: transaction title is the reference at 14 px, "OUTFLOW" in capitals, raw "2026-10-20T21:36:42+00:00"; **2026-11-04:** Planner has an h1 (5d6cef98) and its suggested amounts use whole EGP (2ce89717);
+20. Small: **2026-11-04:** The transaction reference uses the 28 px page heading, and ledger effects use sentence-case words instead of "OUTFLOW"; whether the reference should be the title remains to review; raw "2026-10-20T21:36:42+00:00"; **2026-11-04:** Planner has an h1 (5d6cef98) and its suggested amounts use whole EGP (2ce89717);
     **2026-11-04:** Spaces around the Integrity register and Cash planning Recurring links are restored; Review activity, Weekly review and Sale factors light the Summary tab; **2026-11-04:** PC From SMS links back to Accounts; at 1920 content is 1,435 px wide (owner question 7 in the report).
 
 ## Fix

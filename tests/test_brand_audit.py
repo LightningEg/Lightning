@@ -141,6 +141,12 @@ def audit():
                 expense = page.locator(".compact-row b.neg").first
                 result["activity_outflow"] = (expense.evaluate("el => [el.textContent.trim(), getComputedStyle(el).color]")
                                               if expense.count() else None)
+                detail = page.locator('.compact-row[href^="/transactions/"]').first
+                if detail.count():
+                    page.goto(host.origin + detail.get_attribute("href"))
+                    result["transaction_heading_size"] = page.locator(".topbar h1").evaluate("el => getComputedStyle(el).fontSize")
+                else:
+                    result["transaction_heading_size"] = None
                 page.goto(host.origin + "/")
                 page.keyboard.press("Control+k")
                 page.locator(".command-input").fill("budget")
@@ -225,3 +231,7 @@ def test_activity_outflow_is_signed_and_ink(audit):
     amount, color = audit["activity_outflow"]
     assert amount.startswith("−")
     assert color == "rgb(13, 34, 51)"
+
+
+def test_transaction_title_has_page_heading_size(audit):
+    assert audit["transaction_heading_size"] == "28px"

@@ -362,3 +362,7 @@ IV-3S item 9: the PC Planner stack groups suggestions beyond the four largest in
 ## 2026-11-04 · Financial health trends
 
 IV-3S item 3: PC Savings rate and Net worth trends use zero-based axes, leave missing months as gaps, and need three known points. The current lead shows Savings rate; Net worth is on the no-lead fallback. Chromium checked the Savings rate axis on Mohab’s sample.
+
+## 2026-11-04 · Transaction line labels
+
+IV-3S item 20: transaction detail uses the 28 px page heading and describes ledger effects in sentence-case words, including Money out.

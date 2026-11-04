@@ -200,3 +200,11 @@ def test_activity_shows_outflow_with_minus_and_income_unsigned(c, setup):
     expense_row = page.split(f'href="/transactions/{expense.id}"', 1)[1].split('</a>', 1)[0]
     income_row = page.split(f'href="/transactions/{income.id}"', 1)[1].split('</a>', 1)[0]
     assert '−120' in expense_row and '−500' not in income_row
+
+
+def test_transaction_lines_describe_outflow_in_plain_words(c, setup):
+    accounts, cats = setup
+    expense = c.transactions.record_outflow("2026-09-02", accounts["cib"].id, "120", cats["EXP.PERSONAL.FOOD"].id)
+    page = TestClient(create_app(c)).get(f"/transactions/{expense.id}").text
+    assert '<span class="pill">Money out</span>' in page
+    assert '<span class="pill">OUTFLOW</span>' not in page
