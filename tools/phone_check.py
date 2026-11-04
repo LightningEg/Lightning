@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 PAGES = ("/plan/purchases/new", "/exports/all", "/setup/salary", "/", "/birdview/expenses", "/financial-health", "/budget", "/plan", "/plan/recurring", "/plan/loans",
-         "/plan/reserves", "/investments", "/investments/planner", "/investments/prices", "/accounts", "/transactions",
+         "/plan/reserves", "/accounts/currencies", "/investments", "/investments?holdings=all", "/investments/planner", "/investments/prices", "/accounts", "/transactions",
          "/money-from-others", "/zakat", "/settings", "/categories", "/counterparties", "/checks", "/profiles",
          "/profiles/devices", "/accounts/1", "/accounts/1/transaction/new", "/accounts/add-transaction", "/sms", "/search", "/search?q=food")
 SMS = ("تم خصم 147.87 EGP من بطاقة الخصم المباشر رقم 2093 عند Uber                  Dow يوم 06/10/26 الساعه 11:13 "
@@ -128,14 +128,42 @@ def run(shots: Path | None = None, *, arabic: bool = False) -> list[str]:
                             if wide > 0:
                                 problems.append(f"{width} {path}: sheet {index + 1} scrolls sideways")
                             page.evaluate("() => document.querySelectorAll('.phone-sheet-row[open]').forEach((d) => { d.open = false; })")
+                        if arabic and not (page.locator("html").get_attribute("lang") or "").startswith("ar"):
+                            problems.append(f"{width} {path}: Arabic locale was not applied")
                         if path == "/counterparties" and page.locator(".alias-details").count():
                             page.locator(".alias-details").first.evaluate("el => el.open = true")
+                        if path == "/accounts/currencies":
+                            sheet = page.locator(".phone-period-sheet").first
+                            if sheet.count():
+                                sheet.evaluate("e => e.open = true")
+                                custom = sheet.locator(".phone-period-custom > span").first
+                                if not custom.count() or not custom.is_visible() or not custom.evaluate("""e => {
+                                    const r = e.getBoundingClientRect();
+                                    return r.left >= 0 && r.right <= innerWidth && e.scrollWidth <= e.clientWidth;
+                                }"""):
+                                    problems.append(f"{width} {path}: clipped custom period")
+                                sheet.evaluate("e => e.open = false")
+                        if path == "/plan":
+                            headings = page.evaluate("""() => [...document.querySelectorAll('.phone-flat-rows h2, .phone-flat-rows h3')]
+                                .filter(e => { const r = e.getBoundingClientRect(), p = e.closest('.phone-flat-rows').getBoundingClientRect();
+                                    return r.left < p.left - .5 || r.right > p.right + .5 || e.scrollWidth > e.clientWidth + 1; })
+                                .map(e => e.textContent.trim())""")
+                            if headings:
+                                problems.append(f"{width} {path}: clipped headings {headings}")
+                        if path == "/investments?holdings=all":
+                            views = page.locator(".phone-invest-views")
+                            if views.count():
+                                clipped_views = views.evaluate("""e => [...e.querySelectorAll('a')]
+                                    .filter(a => a.scrollWidth > a.clientWidth || a.getBoundingClientRect().right > innerWidth)
+                                    .map(a => a.textContent.trim())""")
+                                if clipped_views:
+                                    problems.append(f"{width} {path}: clipped views {clipped_views}")
                         clipped = page.evaluate(CLIPPED)
                         if clipped:
                             problems.append(f"{width} {path}: clipped past viewport {clipped}")
                         if shots is not None and width == 360:
                             shots.mkdir(parents=True, exist_ok=True)
-                            name = path.strip("/").replace("/", "-") or "overview"
+                            name = path.strip("/").replace("/", "-").replace("?", "-").replace("=", "-") or "overview"
                             page.screenshot(path=str(shots / f"{name}.png"), full_page=True)
                 browser.close()
         finally:

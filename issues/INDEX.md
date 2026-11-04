@@ -80,7 +80,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3S5 | ↳ Small things | | | S | |
 | IV-3S6 | ↳ Teach the brand audit what it cannot see | | | M | |
 | **IV-3T** | [Phone screens break Part C - cut words, overlapping text, no way back on five pages, small targets, five Settings tabs](3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | improvement, visual | Feel | L | ready |
-| IV-3T1 | ↳ Cut words and overlapping text (C12) | | | M | |
 | IV-3T3 | ↳ Touch targets | | | M | |
 | IV-3T4 | ↳ Settings tabs and money first | | | M | |
 | IV-3T5 | ↳ Charts and expense analysis | | | M | |

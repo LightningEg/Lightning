@@ -1,0 +1,74 @@
+"""The changed-payment warning must remain readable on narrow English and Arabic screens."""
+from datetime import date
+from pathlib import Path
+import shutil
+
+import pytest
+
+pytest.importorskip("playwright")
+from playwright.sync_api import sync_playwright
+
+from lightning.runtime.http import Host
+from lightning.ui.web import create_app
+
+
+def test_changed_monthly_payment_warning_fits_phone(c, setup, monkeypatch):
+    chromium = Path('/opt/pw-browsers/chromium')
+    executable = str(chromium) if chromium.exists() else shutil.which('chromium')
+    if not executable:
+        pytest.skip('Chromium is not installed')
+    monkeypatch.setenv('LIGHTNING_TODAY', '2026-10-06')
+    accounts, cats = setup
+    category = cats['EXP.PERSONAL.FOOD']
+    party_id = c.counterparties.create('North Cairo Electricity')
+    item_id = c.planning.create(kind='BILL', name='North Cairo Electricity', amount='100', frequency='MONTHLY',
+                                start_date='2026-10-02', account_id=str(accounts['cib'].id),
+                                category_id=str(category.id), counterparty_id=party_id, match_tolerance_pct='10')
+    c.transactions.record_outflow('2026-10-02', accounts['cib'].id, '108', category.id,
+                                  counterparty='North Cairo Electricity')
+    assert c.planning.match_payments(date(2026, 10, 6)) == 1
+    future_party = c.counterparties.create('Future Electricity')
+    future_id = c.planning.create(kind='BILL', name='Future Electricity', amount='100', frequency='MONTHLY',
+                                  start_date='2026-10-10', account_id=str(accounts['cib'].id),
+                                  category_id=str(category.id), counterparty_id=future_party, match_tolerance_pct='10')
+    c.transactions.record_outflow('2026-10-06', accounts['cib'].id, '140', category.id,
+                                  counterparty='Future Electricity')
+    app = create_app(c)
+    async def phone_app(scope, receive, send):
+        scope.setdefault('state', {})['phone'] = True
+        await app(scope, receive, send)
+    host = Host(lambda _: phone_app).start()
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(executable_path=executable)
+            for language in ('en', 'ar'):
+                c.settings.set('locale', language)
+                context = browser.new_context(viewport={'width': 320, 'height': 800}, is_mobile=True, has_touch=True)
+                context.add_cookies([{'name': 'lightning_ui_locale', 'value': language, 'url': host.origin}])
+                page = context.new_page()
+                for width in (320, 360):
+                    page.set_viewport_size({'width': width, 'height': 800})
+                    response = page.goto(host.origin + '/plan/recurring')
+                    assert response and response.status == 200
+                    assert page.locator('html').get_attribute('lang') == ('ar-EG' if language == 'ar' else 'en')
+                    warning = page.locator(f'section.phone-card:has(form[action="/plan/items/{item_id}/amount"])')
+                    assert warning.count() == 1
+                    review = page.locator(f'a.phone-recurring-review[href^="/plan/items/{future_id}/pay?"]')
+                    assert review.count() == 1 and review.is_visible()
+                    assert review.evaluate('''e => {
+                        const r = e.getBoundingClientRect(), name = e.previousElementSibling.getBoundingClientRect();
+                        const text = e.querySelector('span').getBoundingClientRect();
+                        return r.top >= name.bottom - 1 && r.height >= 48 && text.left >= r.left &&
+                               text.right <= r.right && e.scrollWidth <= e.clientWidth + 1;
+                    }''')
+                    assert warning.evaluate('''e => {
+                        const h = e.querySelector('h2').getBoundingClientRect();
+                        const p = e.querySelector('p').getBoundingClientRect();
+                        const card = e.getBoundingClientRect();
+                        return h.bottom <= p.top + 1 && card.left >= 0 && card.right <= innerWidth &&
+                          e.scrollWidth <= e.clientWidth + 1;
+                    }''')
+                context.close()
+            browser.close()
+    finally:
+        host.stop()

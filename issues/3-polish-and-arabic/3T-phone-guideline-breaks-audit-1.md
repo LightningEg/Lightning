@@ -42,12 +42,9 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§4 Phone
 ## Fix
 `phone.css` and the `templates/phone/` pages; regenerate `phone.rtl.css`. Make `tools/phone_check.py` also report elements past the screen edge.
 
+3T1 is done: 3AN12 (`89848dc0`) rebuilt Overview, Recurring and Plan; the Planner choices now wrap. `tools/phone_check.py` checks Plan headings, expanded holdings views and the currency period sheet at 320/360. `tests/test_phone_recurring_browser.py` checks both a matched 100/108 monthly payment and an unmatched candidate in English and Arabic at both widths; the candidate's review link has its own row.
+
 3T2 is done: SMS and Search acquired Back in 3AN5/3AN6; Settings, account import and the investment planner now have fallback destinations. Budget category links return to Budget and the rebuilt register has one period control and a concise category filter (`tests/test_phone_frame.py`).
-
-## 3T1 Cut words and overlapping text (C12) · M
-Report items 1-2. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
-
-**2026-11-04:** Chromium at 320/360 shows the current Reserves months label and Overview arrows/Net flow uncut; the expanded Investments By market chip is uncut at 320 (the latter was rebuilt by 3AN12, `89848dc0`). The Planner's choice labels now wrap inside the card (`tests/test_phone_check.py`). The sample had no changed-payment warning, so that overlap and the other reported states still need targeted verification.
 
 ## 3T3 Touch targets · M
 Report item 6: targets under 48 px (C05.1). The search half (item 5: live search, results in a card, "Press Ctrl K") was built by IV-3AN's 3AN6 (2026-11-02). Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
