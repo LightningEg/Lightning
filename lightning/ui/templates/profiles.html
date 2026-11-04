@@ -17,7 +17,7 @@
         <img src="/static/lightning-mark.svg" alt="" width="18" height="25">
         <span>Lightning</span>
       </a>
-      <form class="gate-language" method="post" action="/profiles/locale"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="return_to" value="{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}"><label for="gate-locale">{{ 'Language'|tr(locale) }}</label><select id="gate-locale" name="locale" data-locale-auto><option value="en" {{ 'selected' if locale == 'en' }}>{{ 'English'|tr(locale) }}</option><option value="ar" {{ 'selected' if locale == 'ar' }}>{{ 'العربية'|tr(locale) }}</option></select></form><span class="masthead-label">{{ 'Private profiles'|tr(locale) }}</span>
+      <form class="gate-language" method="post" action="/profiles/locale"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="return_to" value="{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}">{% if on_phone %}<button type="submit" name="locale" value="{{ 'en' if locale == 'ar' else 'ar' }}" aria-label="{{ 'Language'|tr(locale) }}: {{ 'English' if locale == 'ar' else 'العربية' }}">{{ 'English' if locale == 'ar' else 'العربية' }}</button>{% else %}<label for="gate-locale">{{ 'Language'|tr(locale) }}</label><select id="gate-locale" name="locale" data-locale-auto><option value="en" {{ 'selected' if locale == 'en' }}>{{ 'English'|tr(locale) }}</option><option value="ar" {{ 'selected' if locale == 'ar' }}>{{ 'العربية'|tr(locale) }}</option></select>{% endif %}</form><span class="masthead-label">{{ 'Private profiles'|tr(locale) }}</span>
     </header>
 
     <div class="content-wrap">

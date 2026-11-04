@@ -507,3 +507,14 @@ def test_donut_folds_five_names_and_preserves_an_existing_other():
     assert [s["label"] for s in combined["segments"]].count("Other") == 1
     assert combined["segments"][-1]["value"] == D(110)
     assert combined["total"] == D(250)
+
+
+@pytest.mark.parametrize("phone", [False, True], ids=["pc", "phone"])
+def test_arabic_welcome_translates_built_in_sample_previews_but_keeps_names(c, phone):
+    from test_gameya_screens import _client
+    c.settings.set("locale", "ar")
+    page = _client(c, phone=phone).get("/").text
+    for text in ("Amr", "Menna", "Fatma", "احتياطي الطوارئ", "بضاعة إعادة البيع", "الشهور اللي مفيهاش فواتير", "إصلاح التلاجة"):
+        assert text in page
+    for text in ("Which months did resale-stock", "How do zero-invoice months", "What does a EGP 7,800", "Emergency reserve"):
+        assert text not in page

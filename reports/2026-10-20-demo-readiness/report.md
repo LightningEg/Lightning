@@ -374,3 +374,67 @@ IV-3S item 20: transaction timestamps show the recorded date and time with their
 ## 2026-11-04 · Transaction heading
 
 IV-3S item 20: transaction detail names the action in its heading and keeps the exact reference beneath it and in the browser title.
+
+## 2026-11-04 · Gam'eya dates
+
+IV-3S item 8: PC Gam'eya labels a passed date as not recorded and names it the oldest unrecorded instalment; today is not called late. The screen retains the count and amount due without claiming unrecorded instalments were unpaid.
+
+## 2026-11-04 · PC period control
+
+IV-3S item 14: the shared PC period control places the month and arrows in its single track and labels the unselected option Month. Chromium checks stepping, month selection and custom ranges, including Arabic.
+
+## 2026-11-04 · PC own-data pickers
+
+IV-3S item 12: Certificates account fields and the empty-plan Budget spending group use the existing type-and-pick control. A browser test checks filtering, selected IDs and required validation.
+
+## 2026-11-04 · Certificate receipt groups
+
+IV-3S item 11: PC certificate receipt fieldsets retain their accessible grouping without browser-default boxes. Chromium checks the computed border; the other nested-card findings remain open.
+
+## 2026-11-04 · Certificate actions
+
+IV-3S item 16: the PC certificate page keeps purchase as its Primary and uses Secondary actions for receipt matching and redemption. Chromium checks one visible Primary with three receipt groups and an expanded certificate. Page length remains open.
+
+## 2026-11-04 · Budget settings groups
+
+IV-3S item 11: the four PC Budget settings groups retain fieldset legends and controls without boxed backgrounds. Chromium checks their borders and backgrounds; the phone styles are unchanged.
+
+## 2026-11-04 · Spending and first-run surfaces
+
+IV-3S item 11: PC Spending small multiples and the first-run account list no longer draw boxed surfaces inside their cards. Chromium checks their computed backgrounds, borders and shadows.
+
+## 2026-11-04 · Arabic sample previews
+
+A PC first-run recheck found three built-in sample descriptions and one label left in English in Arabic. Their preview text is now translated; sample names remain unchanged. A targeted rendering test checks all three cards.
+
+## 2026-11-04 · PC category hierarchy
+
+IV-3S item 10: Review activity uses category leaf names, as the register does. Transaction detail keeps the hierarchy as a header and separate lines rather than a breadcrumb.
+
+## 2026-11-04 · PC brand-audit coverage
+
+IV-3S6: the Chromium audit now checks visible fieldsets for nested boxes and trend/pace end labels for overlap on its visited pages. A controlled browser fixture checks that both detectors identify and clear violations. Category select colours and the first-run Load action are also covered; other pages and chart-label types remain to review.
+
+## 2026-11-04 · Transaction action layout
+
+IV-3S item 13: when both forms are available, PC transaction detail pairs category splitting with reserve assignment, stacking them on narrow windows. Their buttons use Secondary styling so the page keeps at most one visible Primary. The Cash planning card remains to review.
+
+## 2026-11-04 · Counterparty interaction recheck
+
+IV-3S item 17: Chromium measured every expanded sample row at 1024, 1366 and 1920 px without the reported overlap, and verified the alias Enter hint and a successful save. This covers the sample, not every possible name.
+
+## 2026-11-04 · Spending header dates
+
+IV-3S item 15: the PC Spending header now displays the same selected dates used by its figures and period control, including when the period has no spending. Its status sentence and the other named pages remain to review. Chromium checked the heading in English and Arabic.
+
+## 2026-11-04 · Privacy preference and undo
+
+IV-3S item 19: toggling Hide amounts no longer adds a generic undo entry or runs payment matching. A previous action remains undoable on both ordinary and journal-home profiles; the journal still synchronizes the preference. Chromium confirmed the saved privacy state after reload without a new Saved changes entry.
+
+## 2026-11-04 · Currency header dates
+
+IV-3S item 15: the PC Currencies header distinguishes balances and unrealized gain at the selected end date from realized gain and spread over the selected range. The balance note also names the end date rather than today. Chromium checked a past custom range in English and Arabic.
+
+## 2026-11-04 · Currency history
+
+IV-3S item 4: the PC chart combines owned cash and foreign holdings at each historical checkpoint, uses a zero-based axis, and leaves gaps for unpriced values. It no longer compares the combined value to the cash-only cost basis. A controlled Chromium fixture showed 48,000 before an ETF purchase and 50,000 after it, with axis ticks 0, 25,000 and 50,000. Historical availability depends on recorded prices and rates.

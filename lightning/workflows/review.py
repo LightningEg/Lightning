@@ -16,6 +16,7 @@ from lightning.core.errors import ValidationError
 from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, month_of
 from lightning.core.money import ZERO, fmt as _fmt
+from lightning.planning.salary_day import review_identity, salary_review
 from lightning.transactions.domain import TxnFilter
 from lightning.workflows.market_prices import missing_prices
 
@@ -39,7 +40,7 @@ def _plural(count: int, one: str, many: str) -> str:
 GROUPS = (("payments", "Bills and payments", ("/plan/items/", "/gameya/", "/deposits/")),
           ("activity", "Activity to sort out", ("/rules", "/sms", "/accounts/", "/transactions", "/activity", "/reimbursements")),
           ("budget", "Budget and saving", ("/budget", "/financial-health")),
-          ("cash", "Cash and goals", ("/plan",)),
+          ("cash", "Cash and goals", ("/plan", "/payday")),
           ("prices", "Prices and valuations", ("/investments/", "/settings")))
 GROUP_LABELS = {key: label for key, label, _ in GROUPS}
 
@@ -98,6 +99,9 @@ class ReviewInbox:
         items.extend(self._sms())
         items.extend(self._uncategorized())
         items.extend(self._smart_suggestions(on))
+        salary = salary_review(c.db, on)
+        if salary:
+            items.append(salary)
         for reserve in c.reserves.list_active():
             if (reserve["spent"] > ZERO and reserve["remaining"] > ZERO
                     and (reserve["kind"] == "EMERGENCY" or reserve["recurrence"] != "NONE")):
@@ -263,8 +267,7 @@ class ReviewInbox:
         for item in sorted(items, key=lambda item: item["priority"]):
             # Visible facts define the situation, not days-late badges or the current date.
             # A changed amount, due date, count or recommendation gets a fresh reminder.
-            facts = {key: item.get(key) for key in ("label", "detail", "href", "priority", "post", "source_version")}
-            identity = sha256(json.dumps(facts, sort_keys=True, default=str).encode()).hexdigest()
+            identity = review_identity(item)
             item["review_id"] = identity
             state = self._state(identity)
             item["review_state"] = "active"

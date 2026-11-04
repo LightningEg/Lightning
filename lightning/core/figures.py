@@ -95,9 +95,12 @@ _TABLE = [
      "(Bills and subscriptions a month + Loan payments a month) ÷ Average monthly income"),
     ("kept_apart", "Kept apart", "Cash you own that is not ready to spend: cash in a brokerage, cash in another "
      "currency, or an account you set apart. It stays in what you own and in If you sold today."),
+    ("bill_reserve_coverage", "Bill cash already set aside",
+     "Saved cash in a reserve explicitly linked to a bill, covering its earliest unpaid payments once. "
+     "Added back when those payments are deducted, because Reserves already holds the same cash."),
     ("free_cash", "Free cash", "Cash you can spend without touching reserves or leaving a bill unpaid. Cash kept "
      "apart (brokerage, other currencies) is left out.",
-     "Cash you own − Kept apart − Reserves − Bills due"),
+     "Cash you own − Kept apart − Reserves − Bills due + Bill cash already set aside"),
     ("portfolio_value", "Portfolio value", "Holdings value under the name the Investments tab uses: everything "
      "you own that is not cash. Cash waiting in a brokerage account counts in Cash you own (owner decisions "
      "2026-10-04).", "Holdings value"),
@@ -213,7 +216,7 @@ _TABLE = [
      "Unrealized gain − Price part"),
     # ------------------------------------------------------------ cash planning
     ("safe_to_spend", "Safe to spend", "Free cash after what is promised before your next income. An estimate. Budget until payday, Saving for goals, Emergency fund top-up and Rest of savings target count for every month until that income (only the days before it in the month it lands), so a long gap between pays is covered.",
-     "Free cash − Due before payday − Budget until payday − Saving for goals − Emergency fund top-up − Rest of savings target"),
+     "Free cash − Due before payday + Bill cash already set aside − Budget until payday − Saving for goals − Emergency fund top-up − Rest of savings target"),
     ("bills_inside_the_plan", "Bills inside the plan",
      "This month's scheduled bills, due or upcoming, in a category that has a budget. They are part of that budget."),
     ("left_in_plan_after_bills", "Budget until payday",
@@ -261,6 +264,7 @@ _SOURCES = {
     "loan_payments_to_income": (BOTH, "lightning.planning.health.Ratio.percent"),
     "fixed_costs_to_income": (BOTH, "lightning.planning.health.Ratio.percent"),
     "kept_apart": (LEDGER, "lightning.reporting.service.ReportingService.owned_cash_kept_apart"),
+    "bill_reserve_coverage": (PLAN, "lightning.planning.service.PlanningService.bill_reserve_coverage"),
     "free_cash": (BOTH, f"{P}.free_cash"),
     "portfolio_value": (LEDGER, f"{P}.portfolio_value"),
     "holdings_after_sale": (BOTH, f"{P}.holdings_after_sale"),

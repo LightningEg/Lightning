@@ -45,7 +45,8 @@ def _category_options(c, movement: Movement) -> list[dict]:
 def _labels(c) -> dict:
     accounts = {a.id: a.name for a in c.accounts.list()}
     categories = {cat.id: cat.name for cat in c.categories.tree()}
-    return {"accounts": accounts, "categories": categories}
+    reserves = {row["planned_item_id"]: row for row in c.reserves.list_active() if row.get("planned_item_id")}
+    return {"accounts": accounts, "categories": categories, "bill_reserves": reserves}
 
 
 def _row(c, item, labels, as_of, linked):
@@ -62,7 +63,8 @@ def _row(c, item, labels, as_of, linked):
     reserve_links = c.reserves.links_for_transaction(last.transaction_id) if last and last.transaction_id else []
     return {"item": item, "schedule": describe(item), "next": upcoming, "due": due, "last_paid": last, "skipped": skipped,
             "account": labels["accounts"].get(item.account_id), "category": labels["categories"].get(item.category_id),
-            "per_year": per_year, "reserve_links": reserve_links, "review_next": review_next}
+            "per_year": per_year, "reserve_links": reserve_links, "review_next": review_next,
+            "bill_reserve": labels["bill_reserves"].get(item.id)}
 
 
 _per_year = per_year  # one calculation, in lightning.planning.domain
@@ -624,7 +626,7 @@ async def pay_form(request: Request, item_id: int, error: str = ""):
     currency = c.accounts.get(item.account_id).currency if item.account_id else c.transactions.base_currency
     return render(request, "planning/pay.html", item=item, payment=payment,
                   exact=[r for r in exact if r["id"] not in linked], others=[r for r in others if r["id"] not in linked][:8],
-                  accounts=_paying_accounts(c), currency=currency,
+                  accounts=_paying_accounts(c), currency=currency, bill_reserve=c.reserves.bill_reserve(item.id),
                   back=str(request.query_params.get("back", "/plan")), today=fmt_date(today()), error=error)
 
 
