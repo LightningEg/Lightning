@@ -370,3 +370,7 @@ IV-3S item 20: transaction detail uses the 28 px page heading and describes ledg
 ## 2026-11-04 · Transaction timestamps
 
 IV-3S item 20: transaction timestamps show the recorded date and time with their UTC offset, preserving any stored UTC offset while removing raw ISO punctuation.
+
+## 2026-11-04 · Transaction heading
+
+IV-3S item 20: transaction detail names the action in its heading and keeps the exact reference beneath it and in the browser title.

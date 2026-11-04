@@ -219,3 +219,18 @@ def test_transaction_timestamps_keep_recorded_offsets_in_readable_form():
     assert _display_timestamp("2026-10-20T21:36:42") == "2026-10-20 21:36:42"
     assert _display_timestamp("2026-10-20T21:36:42.123456Z") == "2026-10-20 21:36:42.123456 UTC+00:00"
     assert _display_timestamp("unknown") == "unknown"
+
+
+def test_transaction_heading_names_action_and_keeps_reference_in_both_languages(c, setup):
+    accounts, cats = setup
+    expense = c.transactions.record_outflow("2026-09-02", accounts["cib"].id, "120", cats["EXP.PERSONAL.FOOD"].id)
+    client = TestClient(create_app(c))
+    page = client.get(f"/transactions/{expense.id}").text
+    assert '<h1>Money out</h1>' in page
+    assert f'<bdi dir="ltr">{expense.ref}</bdi>' in page
+    assert f'<title>{expense.ref} · Lightning</title>' in page
+    assert '−120' in page
+    c.settings.set('locale', 'ar')
+    arabic = client.get(f"/transactions/{expense.id}").text
+    assert '<h1>فلوس خارجة</h1>' in arabic
+    assert expense.ref in arabic and '120' in arabic
