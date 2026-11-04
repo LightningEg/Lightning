@@ -75,6 +75,7 @@
     <div class="settings-control"><a class="btn small" href="/exports/all" data-popup-open>{{ 'Export your data'|tr(locale) }}</a><a class="btn small" href="/exports/import">{{ 'Import your data'|tr(locale) }}</a></div></div>
   <div class="settings-row"><div><span class="settings-name">{{ 'Base currency'|tr(locale) }}</span></div><div class="settings-control"><b dir="ltr">{{ base }}</b><a class="btn small" href="/settings?section=currencies">{{ 'Manage currencies'|tr(locale) }}</a></div></div>
   <div class="settings-row settings-facts"><div><span class="settings-name">{{ 'App version'|tr(locale) }}</span></div><div class="settings-control" dir="ltr">v{{ app_version }}</div></div>
+  {% if phone_mode() %}<div class="settings-row"><a class="settings-name" href="/checks">{{ 'Data checks'|tr(locale) }}</a></div>{% endif %}
 </section>
 <section class="card settings-list" id="zakat-switch" aria-labelledby="features-heading"><h2 id="features-heading">{{ 'Features'|tr(locale) }}</h2>
   <form method="post" action="/zakat/enabled" class="settings-row"><div><label for="zakat-on">{{ 'Show zakat'|tr(locale) }}</label><small>{{ 'A zakat estimate under Transactions.'|tr(locale) }}</small></div>
