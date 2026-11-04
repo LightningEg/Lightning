@@ -1001,6 +1001,7 @@ ARABIC_UI = {
     'Review bills, reserves, goals and safe to spend.': 'راجع الفواتير والاحتياطيات والأهداف والمتاح الآمن للصرف.',
     'Before your next payday': 'قبل المرتب الجاي',
     'Turn on cash funding to confirm this proposal.': 'شغّل توزيع الفلوس عشان تأكد الاقتراح.',
+    'A record is not synchronized yet. Refresh and try again.': 'في بيانات لسه متزامنتش. حدّث وجرب تاني.',
     'Safe to spend': 'المتاح الآمن للصرف',
     'Bills inside the plan': 'الفواتير ضمن الخطة',
     'Budget until payday': 'الميزانية لحد الراتب',

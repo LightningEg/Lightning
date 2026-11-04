@@ -91,3 +91,24 @@ def test_salary_setup_payment_records_once_and_surfaces_review(c, setup, monkeyp
     assert c.db.scalar('SELECT count(*) FROM transactions') == before + 1
     assert _salary_item(c)['href'] == '/payday'
     assert c.db.scalar('SELECT count(*) FROM cash_funding') == 0
+
+
+def test_old_proposal_is_refused_if_a_different_salary_is_settled(c, setup, monkeypatch):
+    from lightning.core.errors import ValidationError
+    import pytest
+    monkeypatch.setenv('LIGHTNING_TODAY', '2026-12-31')
+    account, salary = setup[0]['cib'].id, setup[1]['EXP.WORK.SALARY'].id
+    first = c.planning.create(kind='INCOME', name='Salary', amount='2000', frequency='ONCE',
+                              start_date='2026-12-30', account_id=account, category_id=salary)
+    second = c.planning.create(kind='INCOME', name='Other salary', amount='1000', frequency='ONCE',
+                               start_date='2026-12-31', account_id=account, category_id=salary)
+    txn1 = c.transactions.record_inflow('2026-12-30', account, '2000', salary, counterparty='Employer')
+    txn2 = c.transactions.record_inflow('2026-12-31', account, '1000', salary, counterparty='Employer')
+    c.settings.set('cash_funding_enabled', '1')
+    c.planning.mark_paid(first, '2026-12-30', txn1.id)
+    old = c.funding.preview()
+    c.planning.mark_paid(second, '2026-12-31', txn2.id)
+    assert c.funding.preview()['cash'] == old['cash']
+    with pytest.raises(ValidationError, match='changed'):
+        c.funding.apply(old['token'], {}, {})
+    assert _salary_item(c)['review_state'] == 'active'

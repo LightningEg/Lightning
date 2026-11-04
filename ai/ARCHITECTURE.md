@@ -229,7 +229,7 @@ An estimate by the common rule, never a ruling: the page says once that a schola
 
 ## Cash planning contract
 
-A posted salary linked to a scheduled income creates a Needs you review for its payday allocation. Its identity follows the settlement, so review and snooze survive changing forecasts; opening the allocation only previews amounts, and confirming is the only action that assigns cash. The allocation reads the existing forecast for bills before the next payday and Safe to spend.
+A posted salary linked to a scheduled income creates a Needs you review for its payday allocation. Its identity follows the settlement, so review and snooze survive changing forecasts; opening the allocation only previews amounts, and confirming is the only action that assigns cash. The allocation reads the existing forecast for bills before the next payday and Safe to spend. Transaction references identify salary reviews across journal devices; funding preview fingerprints use portable journal identities, and an accepted funding command records the reviewed state in the same transaction.
 
 
 Recurring suggestions require at least three consecutive months with one similarly dated payment per month, grouped by counterparty, account and category. Fixed outgoing amounts suggest a Subscription; income stays Income. Variable utilities allow up to 50% historical variation, other eligible bills 20%; matching tolerance is the observed maximum rounded up, with the existing 10% default as a floor. Track starts after the last payment. Amounts remain in the account currency; the minimum-value filter uses profile currency. Dismissed suggestions can be restored through the existing synchronized settings command.

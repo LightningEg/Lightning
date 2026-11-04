@@ -9,6 +9,8 @@ from lightning.accounts.domain import AccountType
 from lightning.core.dates import month_of, now_iso, parse_month, today
 from lightning.core.errors import ValidationError
 from lightning.core.money import ZERO, check_places, from_e6, to_decimal, to_e6
+from lightning.database.portable_ids import portable_ids
+from lightning.planning.salary_day import review_identity, salary_review
 
 
 class CashFundingService:
@@ -91,9 +93,18 @@ class CashFundingService:
             pool -= add
             reserve_rows.append({"id": reserve["id"], "name": reserve["name"], "allocated": reserve["allocated"],
                                  "effective": reserve["effective_allocated"], "gap": gap, "suggested": add})
-        state = {"month": month, "cash": str(own_cash), "reserve": [(r["id"], str(r["allocated"]), str(r["effective"])) for r in reserve_rows],
-                 "rows": [(r["id"], str(r["stored"]), str(r["actual"]), str(r["due"]), str(r["target"])) for r in rows],
+        ids = portable_ids(self.db, {"categories": [r["id"] for r in rows],
+                                     "cash_reserves": [r["id"] for r in reserve_rows]})
+        salary = salary_review(self.db, day)
+        state = {"month": month, "cash": str(own_cash), "reserve": [(ids[("cash_reserves", r["id"])], str(r["allocated"]), str(r["effective"]), str(r["gap"])) for r in reserve_rows],
+                 "rows": [(ids[("categories", r["id"])], str(r["stored"]), str(r["actual"]), str(r["due"]), str(r["target"])) for r in rows],
                  "unfunded_due": str(unfunded_due), "missing": sorted(set(missing))}
+        if any(isinstance(value, str) for value in ids.values()):
+            # SQLite ids and ties in local row order differ across devices.
+            state["reserve"].sort(key=lambda entry: entry[0])
+            state["rows"].sort(key=lambda entry: entry[0])
+        if salary:
+            state["salary_review"] = review_identity(salary)
         token = sha256(json.dumps(state, sort_keys=True).encode()).hexdigest()
         return {"month": month, "rows": rows, "reserves": reserve_rows, "cash": own_cash,
                 "funded": funded, "reserved": assigned_reserves, "unfunded_due": unfunded_due,
@@ -138,3 +149,6 @@ class CashFundingService:
             for row in plan["reserves"]:
                 if additions[row["id"]]:
                     self.reserves.allocate(row["id"], row["allocated"] + additions[row["id"]])
+            salary = salary_review(self.db, today())
+            if salary:
+                self.settings.set("review_item_" + review_identity(salary), json.dumps({"status": "reviewed"}, sort_keys=True))

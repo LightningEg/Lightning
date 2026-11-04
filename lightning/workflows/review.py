@@ -16,6 +16,7 @@ from lightning.core.errors import ValidationError
 from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, month_of
 from lightning.core.money import ZERO, fmt as _fmt
+from lightning.planning.salary_day import review_identity, salary_review
 from lightning.transactions.domain import TxnFilter
 from lightning.workflows.market_prices import missing_prices
 
@@ -98,12 +99,9 @@ class ReviewInbox:
         items.extend(self._sms())
         items.extend(self._uncategorized())
         items.extend(self._smart_suggestions(on))
-        from lightning.workflows.salary_setup import latest_settled_salary
-        salary = latest_settled_salary(c, on)
+        salary = salary_review(c.db, on)
         if salary:
-            items.append({"label": "Salary received", "detail": "Review bills, reserves, goals and safe to spend.",
-                          "href": "/payday", "action": "Review", "priority": 2,
-                          "source_version": [salary["id"], salary["transaction_id"], salary["due_date"]]})
+            items.append(salary)
         for reserve in c.reserves.list_active():
             if (reserve["spent"] > ZERO and reserve["remaining"] > ZERO
                     and (reserve["kind"] == "EMERGENCY" or reserve["recurrence"] != "NONE")):
@@ -269,8 +267,7 @@ class ReviewInbox:
         for item in sorted(items, key=lambda item: item["priority"]):
             # Visible facts define the situation, not days-late badges or the current date.
             # A changed amount, due date, count or recommendation gets a fresh reminder.
-            facts = {key: item.get(key) for key in ("label", "detail", "href", "priority", "post", "source_version")}
-            identity = sha256(json.dumps(facts, sort_keys=True, default=str).encode()).hexdigest()
+            identity = review_identity(item)
             item["review_id"] = identity
             state = self._state(identity)
             item["review_state"] = "active"
