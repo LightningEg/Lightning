@@ -12,7 +12,7 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **IT-1E** | [Audit public repositories for personal data and security exposure](../../issues/1-easy-to-contribute/1E-public-repository-security-audit.md) | M | ready |
-| **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](../../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | L | building |
+| **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](../../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | L | blocked on repository Actions allowlist update and native runtime acceptance |
 | **IT-1M** | [Archive closed reports and keep their evidence out of the checkout](../../issues/1-easy-to-contribute/1M-archive-closed-reports.md) | M | ready |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](../../issues/1-easy-to-contribute/1N-split-large-items-and-post-them.md) | M | ready |
 | **IT-9K** | [Structure left](../../issues/9-later/9K-layers-and-copies.md) | M | ready |

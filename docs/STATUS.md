@@ -13,14 +13,13 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Protect](pillars/protect.md) | 2 | 1 | 1 |  |  |  |
 | [Everywhere](pillars/everywhere.md) | 4 | 3 |  | 1 |  |  |
 | [Feel](pillars/feel.md) | 13 | 4 | 7 | 1 | 1 | 1 |
-| [Build](pillars/build.md) | 5 | 1 | 4 |  |  |  |
+| [Build](pillars/build.md) | 5 |  | 4 |  | 1 |  |
 | [Reach](pillars/reach.md) | 6 |  | 4 | 2 |  | 2 |
 
 49 open items in 10 milestones.
 
 ## Being built now
 
-- **IT-1H** (Build) [Refresh packaged dependencies with matching native wheels and lockfiles](../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md)
 - **IT-2A** (Protect) [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic rep…](../issues/2-safe-for-real-money/2A-restore-safety.md)
 - **IV-3H** (Feel) [Tab-by-tab review: what a real user needs next](../issues/3-polish-and-arabic/3H-tab-by-tab-review.md)
 - **IV-3AM** (Feel) [PC declutter, tab by tab](../issues/3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md)

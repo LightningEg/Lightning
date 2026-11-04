@@ -14,7 +14,7 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/1E-public-repository-security-audit.md) | improvement, technical | Build | M | ready |
-| **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | Build | L | building |
+| **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | Build | L | blocked on repository Actions allowlist update and native runtime acceptance |
 | IT-1H1 | ↳ Build and publish the native wheels | | | L | |
 | IT-1H2 | ↳ Update the dependency inputs together | | | M | |
 | IT-1H3 | ↳ Regenerate the locks | | | M | |

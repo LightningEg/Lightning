@@ -18,6 +18,12 @@ APP = f'{ORG}/Lightning'
 WEBSITE = f'{ORG}/Lightning_website'
 DOWNLOADS = f'{ORG}/Lightning-downloads'
 MARKET = f'{ORG}/Lightning_Market_Data'
+APP_ACTION_PATTERNS = (
+    'android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd',
+    'gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c',
+)
+OLD_GRADLE_ACTION = 'gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c'
+
 
 class GitHub:
     def __init__(self, apply=False):
@@ -143,22 +149,53 @@ def migrate_secrets(gh):
                 gh.secret(repo, name, value, env)
                 gh.api('DELETE', f'repos/{repo}/actions/secrets/{name}')
 
+def update_app_actions(gh):
+    """Update only selected-action patterns, preserving unrelated approvals and flags."""
+    base = f'repos/{APP}/actions/permissions'
+    permissions = gh.api('GET', base)
+    if permissions.get('enabled') is not True or permissions.get('allowed_actions') != 'selected':
+        raise RuntimeError('App Actions must already be enabled with selected actions; no policy was changed.')
+    current = gh.api('GET', base + '/selected-actions')
+    if (not isinstance(current, dict) or not isinstance(current.get('patterns_allowed'), list)
+            or not all(isinstance(p, str) for p in current['patterns_allowed'])
+            or not isinstance(current.get('github_owned_allowed'), bool)
+            or not isinstance(current.get('verified_allowed'), bool)):
+        raise RuntimeError('Could not read the complete selected-actions policy; no policy was changed.')
+    patterns = [pattern for pattern in current['patterns_allowed'] if pattern != OLD_GRADLE_ACTION]
+    patterns.extend(pattern for pattern in APP_ACTION_PATTERNS if pattern not in patterns)
+    desired = {'github_owned_allowed': current['github_owned_allowed'],
+               'verified_allowed': current['verified_allowed'], 'patterns_allowed': patterns}
+    print('Selected-action policy:', json.dumps(desired, sort_keys=True))
+    if desired != {key: current[key] for key in desired}:
+        gh.api('PUT', base + '/selected-actions', desired)
+    else:
+        print('Selected-action policy already contains the intended pins.')
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--apply', action='store_true')
+    p.add_argument('--app-actions-only', action='store_true', help='Only update the app selected-action allowlist')
     p.add_argument('--org-controls', action='store_true', help='Also enforce no default org access and required 2FA')
     p.add_argument('--migrate-secrets', action='store_true', help='Prompt for known signing/publish values and move them into environments')
     p.add_argument('--analytics-key', action='store_true', help='Prompt for the rotated analytics key and set the website GitHub secret')
     p.add_argument('--market-publisher-app-id', type=int, help='Optional dedicated publisher GitHub App ID; never use a general AI app here')
     args = p.parse_args(argv)
+    if args.app_actions_only and (args.org_controls or args.migrate_secrets or args.analytics_key
+                                  or args.market_publisher_app_id is not None):
+        p.error('--app-actions-only cannot be combined with other setup options')
     gh = GitHub(args.apply)
     actor = gh.api('GET', 'user')
     if actor['login'].lower() != OWNER.lower():
         raise RuntimeError(f'Run this using the owner login @{OWNER}.')
     # Preflight every repository before starting any writes.
-    for repo in [APP, WEBSITE, DOWNLOADS, MARKET]:
+    for repo in ([APP] if args.app_actions_only else [APP, WEBSITE, DOWNLOADS, MARKET]):
         if not gh.api('GET', f'repos/{repo}').get('permissions', {}).get('admin'):
             raise RuntimeError(f'Administrator access required: {repo}')
+    if args.app_actions_only:
+        update_app_actions(gh)
+        print('Applied.' if args.apply else 'Preview only; add --apply to update this policy.')
+        return 0
     if args.org_controls:
         disabled = gh.collection(f'orgs/{ORG}/members?filter=2fa_disabled')
         disabled += gh.collection(f'orgs/{ORG}/outside_collaborators?filter=2fa_disabled')
@@ -179,8 +216,7 @@ def main(argv=None):
         gh.api('PATCH', f'repos/{repo}', {'allow_squash_merge': True, 'allow_merge_commit': False,
             'allow_rebase_merge': False, 'allow_auto_merge': True, 'delete_branch_on_merge': True})
         gh.api('PUT', f'repos/{repo}/actions/permissions', {'enabled': True, 'allowed_actions': 'selected'})
-        patterns = ['android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd',
-                    'gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c'] if repo == APP else []
+        patterns = list(APP_ACTION_PATTERNS) if repo == APP else []
         gh.api('PUT', f'repos/{repo}/actions/permissions/selected-actions', {
             'github_owned_allowed': True, 'verified_allowed': False, 'patterns_allowed': patterns})
         gh.api('PUT', f'repos/{repo}/actions/permissions/workflow', {
