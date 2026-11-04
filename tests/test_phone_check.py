@@ -154,9 +154,10 @@ def test_phone_loan_and_reserve_actions_have_touch_targets():
         page = browser.new_page(viewport={"width": 320, "height": 800})
         page.set_content('<html class="phone"><body><main class="main"><article class="plan-loan">'
                          '<a class="quiet-link">Pay early</a><a class="btn small">1 due</a></article>'
-                         '<details class="reserve-create"><summary>Add a reserve</summary></details></main></body></html>')
+                         '<details class="reserve-create"><summary>Add a reserve</summary></details>'
+                         '<details class="chart-table"><summary>Show the numbers</summary></details></main></body></html>')
         page.add_style_tag(content=(static / "style.css").read_text())
         page.add_style_tag(content=(static / "phone.css").read_text())
-        for selector, minimum in ((".quiet-link", 44), (".btn.small", 48), (".reserve-create summary", 48)):
+        for selector, minimum in ((".quiet-link", 44), (".btn.small", 48), (".reserve-create summary", 48), (".chart-table summary", 44)):
             assert page.locator(selector).bounding_box()["height"] >= minimum
         browser.close()

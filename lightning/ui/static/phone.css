@@ -94,6 +94,7 @@ html.phone .main .alias-submit:not(#_) { position: static; display: inline-flex;
   padding: 0 14px; margin: 0; overflow: visible; clip: auto; white-space: normal; border: 0; border-radius: 12px; background: var(--action); color: var(--on-action); font: 700 15px/1.2 var(--body); }
 html.phone .main .alias-enter-hint { display: none; }
 html.phone .main .alias-details > summary { display: inline-flex; align-items: center; min-height: 44px; }
+html.phone .main .chart-table > summary { min-height: 44px; }
 html.phone .main .plan-loan .quiet-link { display: inline-flex; align-items: center; min-height: 44px; }
 html.phone .main .plan-loan .btn.small:not(#_) { min-height: 48px; height: auto; }
 html.phone .main .reserve-create > summary { display: flex; align-items: center; min-height: 48px; }
