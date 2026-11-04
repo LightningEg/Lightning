@@ -26,7 +26,7 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 **Colour off its meaning (A03)**
 6. **2026-11-04:** The current Overview KPI uses the spending tone for the used meter within plan (`kpis.overview` and `.kpi-card.tone-out`); over plan uses Strong rose. The original shot predates the KPI rebuild in `5e847d41`.
 7. **2026-11-04:** Category Expense and Both controls use Ink, Income uses Meadow text, and the first-run Load link is Ink and underlined. The Chromium brand audit checks computed styles.
-8. Gam'eya: five late instalments are Muted grey with no Late chip, and "Next instalment" shows a past date. **2026-11-04:** Ordinary negative holding monthly changes use Ink and keep their sign; the gam'eya finding remains open.
+8. **2026-11-04:** PC Gam'eya marks a passed scheduled date as "Date passed · not recorded" and calls the past date the oldest unrecorded instalment; due-today is not called late. The current screen reports the count and total rather than listing the old five rows. **2026-11-04:** Ordinary negative holding monthly changes use Ink and keep their sign.
 
 **A16 shipping list**
 9. **2026-11-04:** The current Investments lead removes Biggest holdings when the portfolio can be valued; a six-holding browser fixture confirms it is absent. The older fallback limits its bars to four named holdings and a Neutral Other. The Planner stack now shows four named parts and a Neutral Other with the exact remainder; all detailed allocation rows and inputs remain available.

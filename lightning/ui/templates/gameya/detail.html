@@ -57,12 +57,12 @@
   {% else %}<p class="muted">{{ ('No recorded balance yet.' if progress.overdue or progress.payout_due else 'Nothing owed either way.')|tr(locale) }}</p>{% endif %}
   <div class="overview-inline-list">
     <div class="overview-static-row"><span>{{ 'Instalments paid'|tr(locale) }}</span><b>{{ progress.paid }} {{ 'of'|tr(locale) }} {{ terms.members }}</b></div>
-    <div class="overview-static-row"><span>{{ 'Next instalment'|tr(locale) }}</span><b>{% if progress.next_date %}{{ progress.next_date }} · {{ terms.installment|money(False, 0) }}{% else %}{{ 'All recorded'|tr(locale) }}{% endif %}</b></div>
+    <div class="overview-static-row"><span>{{ ('Oldest unrecorded instalment' if progress.next_date and progress.next_date < today_iso else 'Next instalment')|tr(locale) }}</span><b>{% if progress.next_date %}{{ progress.next_date }} · {{ terms.installment|money(False, 0) }}{% else %}{{ 'All recorded'|tr(locale) }}{% endif %}</b></div>
     <div class="overview-static-row"><span>{{ 'Your turn'|tr(locale) }}</span><b>{{ progress.payout_date }} · {{ terms.payout|money(False, 0) }}{% if progress.payouts %} · {{ 'received'|tr(locale) }}{% endif %}</b></div>
   </div>
   {% if progress.due_count %}<p class="muted">{{ 'Instalments due (not recorded)'|tr(locale) }}: {{ progress.due_count }} · {{ progress.due_amount|money }} {{ account.currency }}</p>{% endif %}
   {% if progress.payout_due %}<p class="muted">{{ 'Payout due to you (not recorded)'|tr(locale) }}: {{ terms.payout|money }} {{ account.currency }} · {{ progress.payout_date }}</p>{% endif %}
-  {% if progress.overdue %}<p class="muted">{{ 'An instalment is past its date and not recorded yet.'|tr(locale) }}</p>{% endif %}
+  {% if progress.next_date and progress.next_date < today_iso %}<p><span class="kc-chip is-over">{{ 'Date passed · not recorded'|tr(locale) }}</span></p>{% endif %}
   {% if progress.all_recorded and not progress.finished %}<p class="muted">{{ 'Everything is recorded, but the balance is not zero. Record the difference, such as a fee, in this account.'|tr(locale) }}</p>{% endif %}
   {% if progress.finished %}<p class="muted">{{ 'This circle is finished. It no longer appears in your forecast.'|tr(locale) }}</p>{% endif %}
   <p class="muted small">{{ 'Instalments and your payout move money between your accounts. They are never income or spending.'|tr(locale) }}</p>

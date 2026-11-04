@@ -2212,6 +2212,8 @@ ARABIC_UI = {
     'Nothing owed either way.': 'مفيش حد مديون للتاني.',
     'Instalments paid': 'الأقساط المدفوعة',
     'Next instalment': 'القسط الجاي',
+    'Oldest unrecorded instalment': 'أقدم قسط غير مسجّل',
+    'Date passed · not recorded': 'فات موعده · غير مسجّل',
     'All recorded': 'كلها متسجلة',
     'received': 'اتقبض',
     'An instalment is past its date and not recorded yet.': 'فيه قسط عدّى ميعاده ولسه ما اتسجلش.',
