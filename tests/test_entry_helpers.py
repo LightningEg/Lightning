@@ -90,3 +90,22 @@ def test_privacy_mode_is_the_windows_cookie_else_what_the_profile_remembers(c):
     client.post("/settings/privacy", data={"on": "0"})
     client.cookies.set("lightning_privacy", "1")  # a reader session cannot save, so its cookie decides
     assert '<html lang="en" dir="ltr" class="privacy">' in client.get("/").text and c.settings.get("privacy_mode") == "0"
+
+
+def test_privacy_toggle_preserves_previous_undo_and_does_not_settle(c, setup, monkeypatch):
+    accounts, categories = setup
+    bank = accounts['cib'].id
+    client = TestClient(create_app(c))
+    from lightning.undo import user_action
+    with user_action('Record expense'):
+        c.transactions.record_outflow('2026-09-10', bank, '40', categories['EXP.PERSONAL.FOOD'].id)
+    before = c.undo.available()['undo']
+    assert before is not None
+    monkeypatch.setattr(c.planning, 'match_payments', lambda day: (_ for _ in ()).throw(AssertionError('unexpected settlement')))
+    assert client.post('/settings/privacy', data={'on': '1'}).status_code == 204
+    assert c.settings.get('privacy_mode') == '1'
+    assert c.undo.available()['undo'] == before
+    monkeypatch.undo()
+    c.undo.replay(expected_id=before['id'])
+    assert c.reporting.account_balance(bank) == 50000
+    assert c.settings.get('privacy_mode') == '1'

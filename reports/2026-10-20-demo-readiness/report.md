@@ -426,3 +426,7 @@ IV-3S item 17: Chromium measured every expanded sample row at 1024, 1366 and 192
 ## 2026-11-04 · Spending header dates
 
 IV-3S item 15: the PC Spending header now displays the same selected dates used by its figures and period control, including when the period has no spending. Its status sentence and the other named pages remain to review. Chromium checked the heading in English and Arabic.
+
+## 2026-11-04 · Privacy preference and undo
+
+IV-3S item 19: toggling Hide amounts no longer adds a generic undo entry or runs payment matching. A previous action remains undoable on both ordinary and journal-home profiles; the journal still synchronizes the preference. Chromium confirmed the saved privacy state after reload without a new Saved changes entry.

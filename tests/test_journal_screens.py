@@ -294,3 +294,25 @@ def test_a_resent_add_form_stages_one_proposal_on_a_replica_and_saves_once_on_th
     answers = [home.post("/accounts/quick-add", data=hform) for _ in range(2)]
     assert answers[0].status_code == 200 and answers[1].status_code == 422
     assert spent() == 2
+
+
+def test_privacy_toggle_keeps_home_undo_and_syncs_without_settlement(screens, monkeypatch):
+    from lightning.sync.journal.history import attach_home_history
+
+    (hd, pc), (home, _) = screens
+    history = attach_home_history(hd.c, hd.adapter)
+    hd.command("settings.set", key="cash_funding_enabled", value="1")
+    before = history.available()["undo"]
+    assert before is not None
+    monkeypatch.setattr(hd.c.planning, "match_payments",
+                        lambda day: (_ for _ in ()).throw(AssertionError("unexpected settlement")))
+    assert home.post("/settings/privacy", data={"on": "1"}).status_code == 204
+    assert hd.c.settings.get("privacy_mode") == "1"
+    assert history.available()["undo"] == before
+    pc.sync_with(hd.home)
+    assert pc.c.settings.get("privacy_mode") == "1"
+    monkeypatch.undo()
+    hd.command("undo.replay", redo=False, expected_id=before["id"],
+               expected_fingerprint=hd.store.fingerprint())
+    assert hd.c.settings.get("cash_funding_enabled") != "1"
+    assert hd.c.settings.get("privacy_mode") == "1"
