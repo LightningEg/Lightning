@@ -852,6 +852,7 @@ ARABIC_UI = {
     'App version': 'إصدار التطبيق',
     'Base currency': 'العملة الأساسية',
     'Back up now': 'نسخ احتياطي الآن',
+    'Save a copy': 'احفظ نسخة',
     'Database file': 'ملف قاعدة البيانات',
     'A backup is made automatically each time the app starts.': 'يُنشأ نسخ احتياطي تلقائيًا عند بدء التطبيق.',
     'Summary': 'الملخص',

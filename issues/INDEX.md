@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 57 open items, in the order they are worked on.
+10 milestones, 55 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -43,11 +43,10 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | IT-2C3 | ↳ Native file pickers | | | M | |
 | IT-2C4 | ↳ Unresolved-evidence repair | | | M | |
 | IT-2C5 | ↳ Native notification delivery, Windows and Android | | | M | |
-| **BT-2F** | [On Android, downloads, file inputs and outside links do nothing - no backup, export or CSV import from the phone](2-safe-for-real-money/2F-android-downloads-files-links.md) ([#229](https://github.com/LightningEg/Lightning/issues/229)) | bug, technical · high | Everywhere | M | building |
 | **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](2-safe-for-real-money/2U-phone-cannot-download-apk.md) | bug, technical · medium | Reach | M | new |
 | **OW-2AB** | [Legacy mode - `python -m lightning` still opens a plaintext database with real-data paths](2-safe-for-real-money/2AB-stale-code.md) | owner task | Protect |  | ready |
 
-Done: 2B, 2D, 2E, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AC, 2AD, 2AE. Next free code: 2AF.
+Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AC, 2AD, 2AE. Next free code: 2AF.
 
 ## 3 Polish and Arabic
 
@@ -165,9 +164,8 @@ Prices arrive by themselves, from sources Lightning may redistribute.
 | NF-6B2 | ↳ A source that allows redistribution | | | owner | |
 | NF-6B3 | ↳ Switch publishing on per market | | | S | |
 | **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](6-market-data/6D-gold-price-source.md) | improvement, technical | Own | S | blocked on a test from a home connection |
-| **BT-6E** | [The Gulf-stocks price pack fails in the scheduled collector (run 103, 2026-11-04)](6-market-data/6E-gcc-price-pack-collection-fails.md) | bug, technical · low | Own | S | new |
 
-Done: 6C. Next free code: 6F.
+Done: 6C, 6E. Next free code: 6F.
 
 ## 7 Planning, import and search
 

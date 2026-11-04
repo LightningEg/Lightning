@@ -115,3 +115,17 @@ def test_the_android_adapter_hands_over_a_private_file_and_cleans_up(tmp_path, m
     refused = lightning_android.AndroidFiles(Bridge(False), folder)
     assert refused.offer("b.csv", "text/csv", b"3") is False and list(folder.iterdir()) == []
     assert lightning_android.AndroidFiles.create(folder) is None  # off the phone: no bridge
+
+
+def test_the_newest_backup_can_leave_the_phone(tmp_path):
+    """Backups were only written inside the app's private folder (2F step 2): Save a copy offers the newest one."""
+    saver = Saver()
+    with opened(tmp_path, saver=saver) as browser:
+        session = token(browser.get("/settings").text, "__session")
+        browser.post("/settings/backup", data={"__session": session})
+        assert "/settings/backup/latest" in browser.get("/settings").text
+        answer = browser.get("/settings/backup/latest", headers={"Referer": "http://127.0.0.1:9872/settings"}, follow_redirects=False)
+        assert answer.status_code == 303 and header(answer, "location").startswith("/settings")
+        name, media, data = saver.offers[-1]
+        assert re.fullmatch(r".+_backup_\d{4}-\d{2}-\d{2}_\d{3,}_[0-9a-f]{8}\.db", name) and data
+        assert b"SQLite format 3" not in data[:16]          # the copy stays encrypted: never a plain database

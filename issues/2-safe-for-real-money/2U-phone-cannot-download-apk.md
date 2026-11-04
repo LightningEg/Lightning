@@ -18,7 +18,7 @@ repo: website
 
 The owner reports that the APK still cannot be downloaded on their phone and explicitly asked to investigate later, after releasing v1.4.4 and updating the website download links.
 
-This is a website-to-phone APK download report, distinct from the in-app WebView downloads in [2F](2F-android-downloads-files-links.md). It has not been reproduced. The phone model, browser, exact failing URL and error are unknown.
+This is a website-to-phone APK download report, distinct from the in-app WebView downloads in 2F (finished 2026-11-04: `lightning/runtime/phone_files.py`, `tests/test_phone_downloads.py`, `tests/test_android_shell.py`). It has not been reproduced. The phone model, browser, exact failing URL and error are unknown.
 
 ## Next investigation
 
