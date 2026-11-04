@@ -34,6 +34,9 @@ ARABIC_UI = {
     '{name} · {amount} {currency} · {months} months · last {day}.': '{name} · {amount} {currency} · بيتكرر من {months} شهور · آخر مرة {day}.',
     '{name} · {count} corrections · {category}.': '{name} · {count} تعديلات · {category}.',
     'Emergency fund needs you': 'احتياطي الطوارئ محتاجك',
+    '{figure} needs you': '{figure} محتاج انتباهك',
+    '{value}% · Needs you below {limit}%.': '{value}٪ · محتاج انتباهك تحت {limit}٪.',
+    '{value}% · Needs you above {limit}%.': '{value}٪ · محتاج انتباهك فوق {limit}٪.',
     '{months} months of cover. Review your emergency reserve.': 'يغطي {months} شهور. راجع احتياطي الطوارئ.',
 
     # Phone capture (3AN3, 3AN5, 3AN6, 3AN12): the Add sheet, a transaction's sheet, Search, From SMS, the one-line money strip.

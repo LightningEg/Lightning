@@ -53,7 +53,7 @@
   {% for group in groups %}
     <h3 class="health-board-head">{{ group.title }}</h3>
     {% for row in group['items'] %}{% set item = row.item %}{% set label = labels[item.key] %}
-    <details class="health-row-wrap"><summary class="health-row {{ 'health-outside' if item.band == 'alert' else ('health-within' if item.band == 'good' else '') }}">
+    <details class="health-row-wrap"><summary id="health-{{ item.key }}" class="health-row {{ 'health-outside' if item.band == 'alert' else ('health-within' if item.band == 'good' else '') }}">
       <span class="health-row-name">{{ label|tr(locale) }}</span>
       <span class="health-meter" aria-hidden="true">{% if row.meter and (item.limit is not none or phone_mode()) %}<span class="health-meter-track"><i class="tone-{{ row.meter.tone }}" style="width:{{ '%.1f'|format(row.meter.fill) }}%"></i>{% for tick in row.meter.ticks %}<b style="left:{{ '%.1f'|format(tick) }}%"></b>{% endfor %}</span>{% endif %}</span>
       <b class="health-row-value">{% if item.gap %}—{% elif item.value is none %}{{ 'Unavailable'|tr(locale) }}{% elif item.unit == '%' %}{{ '%.1f'|format(item.value) }}%{% elif item.unit == 'months' %}{{ '%.1f'|format(item.value) }} {{ 'months'|tr(locale) }}{% else %}{{ item.value|money }} {{ base }}{% endif %}</b>

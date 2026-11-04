@@ -66,12 +66,13 @@ def test_used_emergency_reserve_is_offered_for_refill(c, setup):
 
 
 def test_emergency_alert_uses_existing_health_band_and_ignores_unknown(c, setup, monkeypatch):
-    from types import SimpleNamespace
+    from dataclasses import replace
     monkeypatch.setattr(c.planning, 'suggestions', lambda on: [])
     monkeypatch.setattr(WeeklyReview, 'rule_offers', lambda self: [])
-    fund = SimpleNamespace(months=Decimal('0.8'))
-    monkeypatch.setattr(c.health, 'emergency_fund', lambda on: fund)
+    figure = next(f for f in c.health.figures(date(2026, 12, 31)) if f.key == 'emergency_fund')
+    figure = replace(figure, value=Decimal('0.8'), band='alert')
+    monkeypatch.setattr(c.health, 'figures', lambda on: (figure,))
     inbox = ReviewInbox(c)
-    assert any(i['label'] == 'Emergency fund needs you' for i in inbox._smart_suggestions(date(2026, 12, 31)))
-    fund.months = None
-    assert not any(i['label'] == 'Emergency fund needs you' for i in inbox._smart_suggestions(date(2026, 12, 31)))
+    assert any(i['label'] == 'Emergency fund needs you' for i in inbox._health_alerts(date(2026, 12, 31), []))
+    figure = replace(figure, value=None, band=None)
+    assert not any(i['label'] == 'Emergency fund needs you' for i in inbox._health_alerts(date(2026, 12, 31), []))
