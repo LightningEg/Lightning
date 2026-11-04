@@ -79,3 +79,44 @@ def test_phone_period_arrows_have_touch_targets():
             box = arrow.bounding_box()
             assert box["width"] >= 48 and box["height"] >= 48
         browser.close()
+
+
+def test_phone_chart_time_axes_show_at_most_three_labels():
+    chromium = Path("/opt/pw-browsers/chromium")
+    executable = str(chromium) if chromium.exists() else shutil.which("chromium")
+    if not executable:
+        pytest.skip("Chromium is not installed")
+    css = Path(__file__).resolve().parents[1] / "lightning/ui/static/phone.css"
+    with sync_playwright() as p:
+        browser = p.chromium.launch(executable_path=executable)
+        page = browser.new_page(viewport={"width": 320, "height": 800})
+        labels = ''.join(f'<span>{n}</span>' for n in range(7))
+        page.set_content(f'<html class="phone"><body><div class="chart-x">{labels}</div>'
+                         f'<div class="phone-invest-card has-7"><div class="chart-x">{labels}</div></div></body></html>')
+        page.add_style_tag(content=css.read_text())
+        charts = page.locator('.chart-x')
+        assert charts.nth(0).locator('span:visible').count() == 2
+        assert charts.nth(1).locator('span:visible').count() == 3
+        browser.close()
+
+
+def test_phone_fields_stay_readable_with_desktop_overrides():
+    chromium = Path("/opt/pw-browsers/chromium")
+    executable = str(chromium) if chromium.exists() else shutil.which("chromium")
+    if not executable:
+        pytest.skip("Chromium is not installed")
+    static = Path(__file__).resolve().parents[1] / "lightning/ui/static"
+    with sync_playwright() as p:
+        browser = p.chromium.launch(executable_path=executable)
+        page = browser.new_page(viewport={"width": 320, "height": 800})
+        page.set_content('<html class="phone"><body><main class="main"><div class="cp-table">'
+                         '<form class="counterparty-name-edit"><input name="name"></form></div>'
+                         '<div class="phone-amount"><input name="amount"></div></main></body></html>')
+        page.add_style_tag(content=(static / "style.css").read_text())
+        page.add_style_tag(content=(static / "phone.css").read_text())
+        assert page.locator('[name=name]').evaluate('e => getComputedStyle(e).fontSize') == '16px'
+        assert page.locator('[name=amount]').evaluate('e => getComputedStyle(e).fontSize') == '24px'
+        page.set_content('<html class="phone"><body><form class="gate-language"><select><option>English</option></select></form></body></html>')
+        page.add_style_tag(content=(static / "profiles.css").read_text())
+        assert page.locator('select').evaluate('e => getComputedStyle(e).fontSize') == '16px'
+        browser.close()

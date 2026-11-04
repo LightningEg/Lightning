@@ -162,3 +162,6 @@ html.phone .account-actions .button, html.phone .account-actions form button { w
 html[dir="rtl"] body { font: 500 14px/1.75 "Manrope", "Noto Sans Arabic", system-ui, sans-serif; font-feature-settings: normal; }
 html[dir="rtl"] :is(h1,h2,h3) { font-family: "Bricolage Grotesque", "Readex Pro", system-ui, sans-serif; line-height: 1.3; font-weight: 600; }
 html[dir="rtl"] * { letter-spacing: normal !important; }
+
+/* Phone fields stay at 16px, including the language selector. */
+html.phone :is(input, select, textarea):not([type=hidden], [type=checkbox], [type=radio]) { font-size: 16px; }

@@ -53,7 +53,7 @@ Report items 3-4: /accounts/N/import, /investments/planner and /settings need `�
 ## 3T3 Touch targets · M
 Report item 6: targets under 48 px (C05.1). The search half (item 5: live search, results in a card, "Press Ctrl K") was built by IV-3AN's 3AN6 (2026-11-02). Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
 
-**2026-11-04:** The alias disclosure has a 44 px quiet target, picker choices have 48 px targets and wrap, and the picker is clamped to the viewport (`tests/test_phone_check.py`, 320 and 360 px). The rebuilt Overview and register period arrows are 48 px; legacy period controls and the other reported targets still need review.
+**2026-11-04:** The alias disclosure has a 44 px quiet target, picker choices have 48 px targets and wrap, and the picker is clamped to the viewport (`tests/test_phone_check.py`, 320 and 360 px). The rebuilt Overview and register period arrows are 48 px; Export for AI and the other reported targets still need review.
 
 ## 3T4 Settings tabs and money first · M
 Report items 7-8: five tabs (C03.3), stacked rows still a table, Overview Latest led by revaluations. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
@@ -63,5 +63,9 @@ Report items 7-8: five tabs (C03.3), stacked rows still a table, Overview Latest
 ## 3T5 Charts and expense analysis · M
 Report items 9-10: two charts in one card, time axes with 8-10 labels, five or more names without Other.
 
+**2026-11-04:** Shared donut grouping now folds exactly five names (and combines an existing Other); phone time axes show at most three labels. Tests: `tests/test_demo_and_visuals.py` and `tests/test_phone_check.py`. Review the remaining chart and comparison observations before closing.
+
 ## 3T6 Fields, pairs and small things · M
 Report items 11-13: 15 px field text, focus fill, lone KPIs, Zakat date format, Profiles wordmark.
+
+**2026-11-04:** Phone entry fields, including the profile language selector, now render at 16 px despite desktop overrides; the amount field keeps 24 px. A 320/360 browser sweep and `tests/test_phone_check.py` cover this. Focus fills, pairs and the small observations remain to review.
