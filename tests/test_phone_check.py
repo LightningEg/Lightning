@@ -58,3 +58,24 @@ def test_phone_picker_fits_and_choices_are_touchable(width):
         page.locator(".pick-search").fill("Choice 11")
         assert page.locator(".pick-option:visible").count() == 1
         browser.close()
+
+
+def test_phone_period_arrows_have_touch_targets():
+    chromium = Path("/opt/pw-browsers/chromium")
+    executable = str(chromium) if chromium.exists() else shutil.which("chromium")
+    if not executable:
+        pytest.skip("Chromium is not installed")
+    static = Path(__file__).resolve().parents[1] / "lightning/ui/static"
+    with sync_playwright() as p:
+        browser = p.chromium.launch(executable_path=executable)
+        page = browser.new_page(viewport={"width": 320, "height": 800})
+        page.set_content('<html class="phone"><body><div class="phone-period-row">'
+                         '<button class="period-step">‹</button><span>November</span>'
+                         '<button class="period-step">›</button></div>'
+                         '<a class="phone-reg-step">‹</a></body></html>')
+        page.add_style_tag(content=(static / "style.css").read_text())
+        page.add_style_tag(content=(static / "phone.css").read_text())
+        for arrow in page.locator(".period-step, .phone-reg-step").all():
+            box = arrow.bounding_box()
+            assert box["width"] >= 48 and box["height"] >= 48
+        browser.close()

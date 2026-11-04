@@ -639,7 +639,7 @@ a.phone-hero { display: block; color: inherit; text-decoration: none; }
 /* The month stepper: ‹ 2026-10 ›, compact; the month opens the Choose period sheet from the bottom. */
 .phone-period { margin: 12px 0 0; }
 .phone-period-row { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border-radius: 999px; background: var(--c-surface); box-shadow: 0 0 0 1px var(--c-line) inset; }
-.phone-period-row .period-step:not(#_) { width: 40px; height: 40px; min-width: 0; min-height: 40px; padding: 0; border: 0; border-radius: 50%; background: none; box-shadow: none; color: var(--c-ink); }
+.phone-period-row .period-step:not(#_) { width: 48px; height: 48px; min-width: 48px; min-height: 48px; padding: 0; border: 0; border-radius: 50%; background: none; box-shadow: none; color: var(--c-ink); }
 .phone-period-row .period-step svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .phone-period-row .period-step:disabled { opacity: .3; }
 .phone-period-now { display: inline-flex; align-items: center; min-height: 40px; padding: 0 12px; border-radius: 999px; list-style: none; cursor: pointer;
@@ -904,7 +904,7 @@ html[dir="rtl"] .phone-reg-chips .phone-chip-n { margin-inline-start: 4px; }
 html[dir="rtl"] .phone .phone-reg-bar .phone-more-menu > div:not(#_) { left: 0; right: auto; }
 .phone-reg-period .phone-period-now { padding: 0 8px; gap: 4px; }
 @media (max-width: 340px) { .phone-reg-period .phone-period-now::after { display: none; } } /* 320: the stepper, Select and ⋯ share one row */
-.phone-reg-step { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 40px; height: 40px; border-radius: 50%; color: var(--c-ink); }
+.phone-reg-step { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 48px; height: 48px; border-radius: 50%; color: var(--c-ink); }
 .phone-reg-step:hover { text-decoration: none; }
 .phone-reg-step svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .phone-reg-step.is-off { opacity: .3; }
