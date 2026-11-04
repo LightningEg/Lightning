@@ -27,7 +27,7 @@ from lightning.transactions.service import TransactionService
 from . import events
 from .domain import DEFAULT_SALE_FACTOR, Portfolio, Position
 from .lots import SPLIT_MARK, LotLine, build_lots, lot_type
-from .xirr import xirr
+from .xirr import solve_xirr
 from .returns import display_return
 
 DIVIDEND_CATEGORY = events.DIVIDEND_CATEGORY
@@ -598,7 +598,8 @@ class InvestmentService:
             holding_cashflows = holding_flows.get((acc_id, asset_id), [])
             if s["qty"] and valuation and valuation.value is not None:
                 holding_cashflows = [*holding_cashflows, (day, valuation.value)]
-            annual_rate = xirr(holding_cashflows, day)
+            annual_result = solve_xirr(holding_cashflows, day)
+            annual_rate = annual_result.rate
             positions.append(Position(
                 account_id=acc_id, account_label=account.label, asset_id=asset_id, asset_code=asset.code,
                 asset_name=asset.name, asset_class=self.assets.display_name(asset.asset_class_id),
@@ -612,7 +613,7 @@ class InvestmentService:
                 value=valuation.value if valuation and valuation.value is not None else (
                     None if s["qty"] else ZERO),  # full precision, like net worth; screens round
                 xirr=annual_rate,
-                display_return=display_return(holding_cashflows, day, annual_rate,
+                display_return=display_return(holding_cashflows, day, annual_result,
                                               not s["qty"] or bool(valuation and valuation.value is not None)),
                 invested=sum((-amount for _, amount in holding_flows.get((acc_id, asset_id), []) if amount < ZERO), ZERO),
                 owned_quantity=own.quantity, owned_cost_basis=_money(own.cost),
@@ -636,9 +637,10 @@ class InvestmentService:
         positions.sort(key=lambda p: (-(p.value or ZERO), p.asset_name))
         cashflows.extend((day, position.value)
                          for position in positions if position.is_open and position.value is not None)
-        annual_rate = xirr(cashflows, day)
+        annual_result = solve_xirr(cashflows, day)
+        annual_rate = annual_result.rate
         return Portfolio(day, positions, annual_rate,
-                         display_return(cashflows, day, annual_rate,
+                         display_return(cashflows, day, annual_result,
                                         all(p.value is not None for p in positions)))
 
     def holding(self, account_id: int, asset_id: int, as_of=None) -> Decimal:

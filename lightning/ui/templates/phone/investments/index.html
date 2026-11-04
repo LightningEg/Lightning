@@ -49,7 +49,7 @@
   <div class="phone-invest-seg" role="group" aria-label="{{ 'Choose period'|tr(locale) }}">{% for r in ph.ranges %}<a href="{{ r.href }}"{% if r.selected %} class="is-chosen" aria-current="true"{% endif %}>{{ r.text|tr(locale) }}</a>{% endfor %}</div>
 </article>
 {% endif %}
-{% if since_return and since_return.percent is not none %}<div class="phone-rows phone-invest-return"><div class="phone-row"><span>{{ ('XIRR' if since_return.annualized else 'Return')|tr(locale) }}<small>{{ ('Held {n} day' if since_return.days_held == 1 else 'Held {n} days')|tr(locale, n=since_return.days_held) }}</small></span><b>{{ since_return.percent|signed_pct }}{{ ('% a year' if since_return.annualized else '%')|tr(locale) }}</b></div></div>{% endif %}
+{% if since_return and (since_return.percent is not none or since_return.annualized) %}<div class="phone-rows phone-invest-return"><div class="phone-row"><span>{{ ('XIRR' if since_return.annualized else 'Return')|tr(locale) }}<small>{% if since_return.explanation %}{{ since_return.explanation|tr(locale) }}{% else %}{{ ('Held {n} day' if since_return.days_held == 1 else 'Held {n} days')|tr(locale, n=since_return.days_held) }}{% endif %}</small></span><b>{% if since_return.percent is not none %}{{ since_return.percent|signed_pct }}{{ ('% a year' if since_return.annualized else '%')|tr(locale) }}{% else %}—{% endif %}</b></div></div>{% endif %}
 
 <section class="phone-section" aria-labelledby="holdings-heading">
   <header class="phone-section-head"><h2 id="holdings-heading">{{ 'Holdings'|tr(locale) }}</h2>{% if ph.more %}<a class="phone-quiet" href="{{ ph.fewer_link if ph.expanded else ph.all_link }}">{{ ('Show fewer' if ph.expanded else 'See all')|tr(locale) }}</a>{% endif %}</header>

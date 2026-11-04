@@ -13,7 +13,6 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 |---|---|---|---|
 | **IT-5F** | [One order of price sources](../../issues/5-investments/5F-one-order-of-price-sources.md) | M | ready |
 | **NF-5G** | [Brokerages that span exchanges and currencies](../../issues/5-investments/5G-brokerages-across-exchanges.md) | L | building |
-| **IT-5M** | [Distinguish ambiguous annualized returns from unavailable results](../../issues/5-investments/5M-xirr-ambiguous-results.md) | M | new |
 | **NF-6A** | [Market data: price packs, collected in the cloud](../../issues/6-market-data/6A-price-packs.md) | L | building |
 | **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](../../issues/6-market-data/6B-europe-and-gcc-shares.md) | L | blocked on a source that allows redistribution |
 | **BT-6C** | [Download shared prices brings nothing: only the exchange-rate pack is published, and not since 11 O…](../../issues/6-market-data/6C-shared-prices-not-published.md) | M | ready |
@@ -24,6 +23,6 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 
 ## Reports with open follow-ups here
 
-- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 5M, 6C
+- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 6C
 <!-- work:end -->
 

@@ -26,7 +26,7 @@ Source was fetched through the GitHub connector at the pinned commit because Git
 | --- | --- | --- | --- |
 | F1 | P1 / medium bug | Payment matching happens after the HTTP success response has completed. A settlement error cannot be reported correctly to the saving user. | [ui/web.py:545–571](https://github.com/LightningEg/Lightning/blob/89848dc0e4ce35bb18f72e861c7c620d8052fae4/lightning/ui/web.py#L545); isolated fault probe; [BT-2AE](https://github.com/LightningEg/Lightning/blob/3d36077d19370fa7f732549419eee7c0457b020c/issues/2-safe-for-real-money/2AE-settlement-before-success.md) |
 | F2 | P2 / medium bug | Phone live search can replace newer results and the URL with an older response body. | [ui/static/phone-capture.js:142–159](https://github.com/LightningEg/Lightning/blob/89848dc0e4ce35bb18f72e861c7c620d8052fae4/lightning/ui/static/phone-capture.js#L142); controlled asynchronous reproduction; [BT-3AP](../../issues/3-polish-and-arabic/3AP-live-search-response-race.md) |
-| F3 | P3 / numerical design limitation | XIRR does not distinguish an ambiguous multi-root return from an unavailable return. Its coarse scan can miss two roots within one interval. | [investments/xirr.py:36–54](https://github.com/LightningEg/Lightning/blob/89848dc0e4ce35bb18f72e861c7c620d8052fae4/lightning/investments/xirr.py#L36); independently checked example; [IT-5M](../../issues/5-investments/5M-xirr-ambiguous-results.md) |
+| F3 | P3 / numerical design limitation | XIRR does not distinguish an ambiguous multi-root return from an unavailable return. Its coarse scan can miss two roots within one interval. | [investments/xirr.py:36–54](https://github.com/LightningEg/Lightning/blob/89848dc0e4ce35bb18f72e861c7c620d8052fae4/lightning/investments/xirr.py#L36); independently checked example; IT-5M (closed; [snapshot](https://github.com/LightningEg/Lightning/blob/d9d5c8e4c2aed9e8476a1b1ab51b2706445ad90c/issues/5-investments/5M-xirr-ambiguous-results.md); [regressions](../../tests/test_xirr_results.py)) |
 | F4 | P2 / validation improvement | Main PR tests use Python 3.13 although the package supports Python 3.11+. Selected phone-search tests verify generated HTML rather than response-order behavior. | [.github/workflows/pr-checks.yml:24–30](https://github.com/LightningEg/Lightning/blob/89848dc0e4ce35bb18f72e861c7c620d8052fae4/.github/workflows/pr-checks.yml#L24), `pyproject.toml`, `tests/test_phone_search.py`; [IT-1P](../../issues/1-easy-to-contribute/1P-supported-runtime-contract-checks.md), BT-3AP |
 
 ### F1 — success is sent before settlement finishes
@@ -176,3 +176,24 @@ NF-7L2 and the smart inbox (NF-7L) are complete. Needs you now uses the same ale
 ## Follow-up · 2026-11-04: complete atomic write routes
 
 BT-2AE is complete. Remaining transaction, plan, import, investment and supporting settings writes now commit required matching within explicit synchronous scopes, preserving retry tokens, revision checks, Undo labels and journal authority. Related register/popup follow-up reads and metadata finish before commit; failed profile-currency changes restore both stored and live service values. The response middleware no longer starts matching after a route has finished, so error redirects cannot retry a failed settlement and read-only POSTs do not start unrelated financial work. Network fetches finish before price-save scopes. Dedicated file/recovery flows and visibility-only actions retain their existing completion boundaries. [Route-boundary contracts](../../tests/test_atomic_write_routes.py), [integrated failures](../../tests/test_atomic_write_failures.py) and [response-order regressions](../../tests/test_save_response_boundary.py) cover no-await scopes, real settlement rollback, retry/duplicate markers, currency state and home/replica command behavior. The 160 targeted financial and journal checks passed; final full-suite validation is recorded in the PR.
+
+## Follow-up · 2026-11-04: explicit annualized-return uncertainty
+
+IT-5M is complete. A unique rate is shown only after an independent Decimal NPV residual check (relative tolerance 1e-10 of gross discounted flows). Non-conventional histories with multiple roots are explicitly ambiguous; absent roots, missing valuations, numerical instability and calculation limits have separate unavailable reasons. The solver partitions the log-rate NPV at derivative roots instead of relying on a coarse scan. Its work is bounded and a near-stationary root remains unavailable. The legacy `xirr` API returns a number only for a unique verified result. Under 365 days the existing plain-return policy is unchanged. PC and phone explain both ambiguous and unavailable results in English and Arabic.
+
+Dummy-data number audit (ACT/365; holding at 2025-12-31, bought 2024-01-01, sold 2024-12-31, repurchased 2025-12-31):
+
+| Invariant | Expected | Found | Result |
+| --- | --- | --- | --- |
+| Yearly flows −100, +230, −132.16 | Roots 12% and 18%; no selected rate | Both independent NPV residuals below 1e-50; ambiguous, no rate | Pass |
+| Yearly flows −100, +50, −100 | No real rate | Unavailable, no_root | Pass |
+| Non-conventional unique root; amount scales 1e-6, 1, 1e12 | 25%, residual within 1e-10 of gross flows | Same rate within tolerance; independent Decimal check passes | Pass |
+| Leap-year two-flow return | ACT/365 over 366 days | Decimal power agrees | Pass |
+| Repurchase cash | 1,000 − 100 + 230 − 232.16 = 897.84 EGP | 897.84 EGP | Pass |
+| Holding value / cost / realized / unrealized | 100 / 232.16 / 130 / −132.16 EGP | Exact agreement | Pass |
+| Return reads | No ledger changes | Full ledger snapshot unchanged | Pass |
+| Less than a year | Actual gain / all purchases | Existing plain-return tests unchanged | Pass |
+
+Evidence: [solver numerical regressions](../../tests/test_xirr_results.py), [real-ledger and PC/phone status checks](../../tests/test_return_uncertainty.py), [display policy](../../tests/test_display_returns.py). Paths exercised: buy, complete sale, repurchase and dated price; return calculation and portfolio/holding reads. This slice does not change financial write rules. Other write paths are covered by the separate atomic-save work, not this return audit. Arabic automated rendering checks cover the new explanations; a human Arabic reader should check their voice.
+
+Validation: 253 affected investment, number-audit, Mohab and Arabic checks passed. Arabic portfolio and holding pages were inspected at 1280 and 390 pixels: the new reasons fit, RTL text is readable and neither page has horizontal overflow. Eleven explanatory strings were added; examples cover multiple roots, no roots, insufficient dated flows, instability and missing prices or FX. A human Arabic reader should review the voice.
