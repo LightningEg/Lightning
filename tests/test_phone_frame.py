@@ -165,6 +165,7 @@ def test_a_profile_can_be_created_where_hard_links_are_refused(tmp_path, monkeyp
 def test_settings_on_the_phone_leads_to_pairing_sms_and_the_profile(phone):
     html = phone.get("/settings").text
     assert 'href="/profiles/devices"' in html and 'href="/sms"' in html and 'href="/profiles"' in html
+    assert '<table' not in html and 'settings-row' in html  # Settings itself is rows, not a stacked table
     assert "Pair a PC" in phone.get("/profiles/devices").text
 
 
