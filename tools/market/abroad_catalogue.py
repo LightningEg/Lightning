@@ -12,17 +12,27 @@ from __future__ import annotations
 
 import argparse
 import csv
+import re
 import sys
 from datetime import date
 from pathlib import Path
 
 from lightning.market.http import Polite
+from lightning.market.iso import RATED_CURRENCIES
 from lightning.market.sources import tradingview
 from tools.market.us_catalogue import fund_class
 
 ROOT = Path(__file__).resolve().parents[2] / "lightning" / "assets"
 HEAD = ["ticker", "name", "kind", "class_code", "source", "source_url", "catalogue_date", "mic", "currency"]
 PACKS = ("gcc", "europe")
+# London's International Order Book lines (0Q15 is Abbott in dollars) are foreign shares a person buys at home; the
+# picker offers the company's own listing instead.
+ORDER_BOOK = re.compile(r"0[A-Z0-9]{3}")
+
+
+def offered(ticker: str, mic: str, currency: str) -> bool:
+    """A row the picker offers: a currency the app has an exchange rate for, and no London order-book line."""
+    return currency in RATED_CURRENCIES and not (mic == "XLON" and ORDER_BOOK.fullmatch(ticker))
 
 
 def rows_from(results, day: str) -> list[list[str]]:
@@ -30,7 +40,7 @@ def rows_from(results, day: str) -> list[list[str]]:
     seen, rows = set(), []
     for pack, result in results:
         for item in result.instruments:
-            if (item.ticker, item.mic) in seen or not item.currency:
+            if (item.ticker, item.mic) in seen or not offered(item.ticker, item.mic, item.currency):
                 continue
             seen.add((item.ticker, item.mic))
             fund = item.category.startswith("FUND")

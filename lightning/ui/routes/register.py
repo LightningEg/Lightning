@@ -202,6 +202,19 @@ def _catalog_key(item, duplicated):
     return f"catalog:{item['ticker']}@{mic}" if mic and item["ticker"].casefold() in duplicated else f"catalog:{item['ticker']}"
 
 
+def _offered_abroad(c, account, assets) -> set[str]:
+    """The Gulf and European packs whose catalogue rows the picker offers on this account: those the broker's
+    institution lists, all of them for an unknown broker, and any market already held (the Gulf and Europe list is
+    large, so a broker that trades neither keeps a light page: 5G, owner 2026-11-04)."""
+    from lightning.accounts.institutions import match_builtin
+    from lightning.market.packs import PACKS
+    abroad = {"gcc", "europe"}
+    found = match_builtin(c.accounts.broker_of(account).institution or "") if account.account_type == AccountType.BROKERAGE else None
+    offered = abroad if found is None or not found.markets else abroad & set(found.markets)
+    held = {(a.mic or "").upper() for a in assets}
+    return offered | {p for p in abroad if held & set(PACKS[p].venues)}
+
+
 def _trade_choices(c, account, positions) -> list[dict]:
     """Typeahead choices: bundled stocks/funds plus any custom assets already in this account."""
     if not account or account.account_type not in INVESTMENT_ACCOUNT_TYPES:
@@ -228,7 +241,16 @@ def _trade_choices(c, account, positions) -> list[dict]:
             return translate(f"Priced in {currency}: buy it from a {currency} account.", c.settings.get("locale") or "en")
         return ""
 
-    catalogue = catalog_instruments()
+    from functools import lru_cache as _cache
+
+    @_cache(maxsize=None)
+    def note_for(currency: str) -> str:
+        return currency_note(currency)
+
+    from lightning.market.packs import PACKS
+    offered = _offered_abroad(c, account, assets)
+    hidden = {mic for p in ("gcc", "europe") if p not in offered for mic in PACKS[p].venues}
+    catalogue = [item for item in catalog_instruments() if (item.get("mic") or "").upper() not in hidden]
     seen, duplicated = set(), set()
     for item in catalogue:
         name = item["ticker"].casefold()
@@ -247,7 +269,7 @@ def _trade_choices(c, account, positions) -> list[dict]:
             "decimals": asset.quantity_decimals if asset else (0 if item["class_code"] == "STOCK" else 4),
             "exchange": venue_name(item.get("mic")) if item.get("mic") else "",
             "currency": asset.currency if asset else item.get("currency", ""),
-            "note": currency_note(asset.currency if asset else item.get("currency", "")),
+            "note": note_for(asset.currency if asset else item.get("currency", "")),
         })
     for asset in assets:
         if asset.id in included_ids:

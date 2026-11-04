@@ -204,3 +204,18 @@ def test_a_separate_dollar_brokerage_becomes_a_pocket_of_the_broker(c, setup):
     with pytest.raises(LightningError):   # THNDR already holds USD now
         c.accounts.make_pocket(c.account_flows.open_account("Other dollars", "BROKERAGE", "2026-09-01", "0",
                                                             currency="USD").id, thndr.id)
+
+
+def test_the_picker_offers_gulf_and_european_shares_where_the_broker_trades_them(c, setup):
+    """5G (owner 2026-11-04): the bundled Gulf and Europe list shows on a broker that trades those markets (or an
+    unknown one), not on THNDR; picking Aramco makes an investment the app prices itself, in riyals."""
+    from lightning.ui.routes.register import _trade_choices
+    accounts, _ = setup
+    ibkr = c.account_flows.open_account("IBKR", "BROKERAGE", "2026-09-01", "0", institution="Interactive Brokers")
+    names = lambda acct: {row["name"] for row in _trade_choices(c, acct, [])}  # noqa: E731
+    assert "Saudi Arabian Oil Co." in names(ibkr) and "SAP SE" in names(ibkr)
+    assert "Saudi Arabian Oil Co." not in names(accounts["thndr"])
+    row = next(r for r in _trade_choices(c, ibkr, []) if r["name"] == "Saudi Arabian Oil Co.")
+    assert row["currency"] == "SAR" and row["exchange"]
+    from lightning.assets.catalog import instruments
+    assert not any(r["mic"] == "XLON" and r["ticker"].startswith("0") and len(r["ticker"]) == 4 for r in instruments())
