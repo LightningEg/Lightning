@@ -17,6 +17,12 @@ from typing import Iterable, NamedTuple
 from lightning.core.money import ZERO
 
 METHODS = ("average", "fifo")
+SPLIT_MARK = "Bonus or split"  # the description of the document that records one (an ADJ document, like Ownership entries)
+
+
+def lot_type(doc_type: str, description: str = "") -> str:
+    """The type a ledger line goes into the lots as: a bonus or split is SPL, anything else keeps its document type."""
+    return "SPL" if doc_type == "ADJ" and description == SPLIT_MARK else doc_type
 PLACES = Decimal("0.000001")  # money is kept to six decimals (e6)
 
 
@@ -30,10 +36,26 @@ def cost_returned(cost: Decimal, paid_back: Decimal) -> tuple[Decimal, Decimal]:
 class LotLine(NamedTuple):
     """One ledger line of a holding, in date order: units (negative on a sale) and the money that moved."""
     date: str
-    type: str  # BUY, SEL, ... (the document type)
+    type: str  # BUY, SEL, ... (the document type), or SPL for a bonus or split (units change, cost does not)
     effect: str  # INTERNAL for a cost-only line such as a return of capital
     quantity: Decimal
     amount: Decimal  # cost added on a buy, minus what came back on a sale
+
+
+def roi(gain: Decimal, cost: Decimal) -> Decimal | None:
+    """Gain over what it cost, or None when nothing was paid."""
+    return gain / cost if cost > ZERO else None
+
+
+def cagr(end_value: Decimal, cost: Decimal, days: int) -> Decimal | None:
+    """The yearly rate that turns ``cost`` into ``end_value`` over ``days`` (365-day years, as XIRR counts them), or
+    None for less than a day, nothing paid or nothing left."""
+    if days < 1 or cost <= ZERO or end_value <= ZERO:
+        return None
+    try:
+        return (end_value / cost) ** (Decimal(365) / Decimal(days)) - 1
+    except (ArithmeticError, ValueError):
+        return None
 
 
 @dataclass
@@ -43,6 +65,14 @@ class Lot:
     quantity: Decimal
     cost: Decimal
     owner_id: int | None = None
+
+    def roi(self, price: Decimal) -> Decimal | None:
+        """What this lot has made so far over what it cost, at ``price`` a unit."""
+        return roi(self.quantity * price - self.cost, self.cost)
+
+    def cagr(self, price: Decimal, as_of: str) -> Decimal | None:
+        """The same per year, since it was bought."""
+        return cagr(self.quantity * price, self.cost, (date.fromisoformat(as_of) - date.fromisoformat(self.opened)).days)
 
 
 @dataclass
@@ -62,6 +92,16 @@ class Disposal:
     @property
     def days_held(self) -> int:
         return (date.fromisoformat(self.sold) - date.fromisoformat(self.lot_opened)).days
+
+    @property
+    def roi(self) -> Decimal | None:
+        """What the sold piece made over what it cost; None for a return of capital (no units sold)."""
+        return roi(self.gain, self.cost) if self.quantity else None
+
+    @property
+    def cagr(self) -> Decimal | None:
+        """The same per year, from the purchase to the sale."""
+        return cagr(self.proceeds, self.cost, self.days_held) if self.quantity else None
 
 
 @dataclass
@@ -95,7 +135,9 @@ def build_lots(lines: Iterable[LotLine], method: str = "average", owner_id: int 
     for line in lines:
         lot = lot or Lot(line.date, ZERO, ZERO, owner_id)
         quantity, amount = line.quantity, line.amount
-        if quantity > 0:
+        if line.type == "SPL":  # more or fewer units for the same cost
+            lot.quantity += quantity
+        elif quantity > 0:
             lot.quantity += quantity
             lot.cost += amount
             book.invested += amount
@@ -132,7 +174,13 @@ def _fifo(lines: Iterable[LotLine], owner_id: int | None) -> LotBook:
     book = LotBook()
     for line in lines:
         quantity, amount = line.quantity, line.amount
-        if quantity > 0:
+        if line.type == "SPL":  # every open lot gets its share of the new units; no cost moves
+            if book.lots:
+                for lot, share in zip(book.lots, _shares(quantity, [lot.quantity for lot in book.lots])):
+                    lot.quantity += share
+            else:
+                book.lots.append(Lot(line.date, quantity, ZERO, owner_id))
+        elif quantity > 0:
             book.lots.append(Lot(line.date, quantity, amount, owner_id))
             book.invested += amount
         elif quantity == 0:
