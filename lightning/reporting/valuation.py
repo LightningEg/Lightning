@@ -15,6 +15,7 @@ from lightning.assets.domain import FinancialAsset
 from lightning.core.money import ONE, from_e6
 from lightning.fx import MISSING_DAYS, Rate, rate_for
 
+from .price_sources import SOURCE_RANK, source_rank  # noqa: F401  (SOURCE_RANK is the written order, re-exported here)
 from .queries import ReportQueries
 
 
@@ -99,11 +100,12 @@ class Valuer:
                          rate.as_of)
 
     def _price(self, asset: FinancialAsset, day: str) -> tuple[Decimal, str, str] | None:
-        """Newest of: a price you entered, the last buy/sell price. A typed price wins on the same day.
-        Holdings entered as already owned fall back to their cost until a price exists."""
+        """Newest price wins; on one day the order is ``SOURCE_RANK`` (a price you typed, then a buy or sell, then the
+        market pack and online quotes). Holdings entered as already owned fall back to their cost until a price exists."""
         typed = self.q.latest_price(asset.id, day)
         trade = self.q.latest_trade_price(asset.id, day)
-        if typed and (not trade or typed["date"] >= trade["date"]):
+        if typed and (not trade or typed["date"] > trade["date"]
+                      or (typed["date"] == trade["date"] and source_rank(typed["source"]) <= source_rank("TRADE"))):
             return from_e6(typed["price_e6"]), typed["date"], typed["source"]
         if trade:
             return from_e6(trade["price_e6"]), trade["date"], "TRADE"

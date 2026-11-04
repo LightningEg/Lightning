@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 66 open items, in the order they are worked on.
+10 milestones, 65 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -148,7 +148,6 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | **NF-5C** | [Investment checks in the integrity screen](5-investments/5C-investment-checks-in-integrity.md) | new feature | Own | M | blocked on 5B |
 | **NF-5D** | [Return per purchase (ROI and CAGR)](5-investments/5D-return-per-purchase.md) | new feature | Own | M | blocked on 5B |
 | **NF-5E** | [Bonus shares and stock splits](5-investments/5E-bonus-shares-and-splits.md) | new feature | Own | M | blocked on 5B |
-| **IT-5F** | [One order of price sources](5-investments/5F-one-order-of-price-sources.md) ([#217](https://github.com/LightningEg/Lightning/issues/217)) | improvement, technical | Own | M | ready |
 | **NF-5G** | [Brokerages that span exchanges and currencies - structure, workflows and analysis to build](5-investments/5G-brokerages-across-exchanges.md) | new feature | Own | L | building |
 | NF-5G1 | ↳ Phase 0: honest display | | | M | |
 | NF-5G2 | ↳ Phase 1: listings | | | L | |
@@ -159,7 +158,7 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | NF-5G7 | ↳ Phase 6: lots and corporate actions | | | L | |
 | **IT-5M** | [Distinguish ambiguous annualized returns from unavailable results](5-investments/5M-xirr-ambiguous-results.md) | improvement, technical | Own | M | new |
 
-Done: 5A, 5H, 5I, 5J, 5K, 5L. Next free code: 5N.
+Done: 5A, 5F, 5H, 5I, 5J, 5K, 5L. Next free code: 5N.
 
 ## 6 Market data
 

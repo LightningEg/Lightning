@@ -15,7 +15,6 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 | **NF-5C** | [Investment checks in the integrity screen](../../issues/5-investments/5C-investment-checks-in-integrity.md) | M | blocked on 5B |
 | **NF-5D** | [Return per purchase (ROI and CAGR)](../../issues/5-investments/5D-return-per-purchase.md) | M | blocked on 5B |
 | **NF-5E** | [Bonus shares and stock splits](../../issues/5-investments/5E-bonus-shares-and-splits.md) | M | blocked on 5B |
-| **IT-5F** | [One order of price sources](../../issues/5-investments/5F-one-order-of-price-sources.md) | M | ready |
 | **NF-5G** | [Brokerages that span exchanges and currencies](../../issues/5-investments/5G-brokerages-across-exchanges.md) | L | building |
 | **IT-5M** | [Distinguish ambiguous annualized returns from unavailable results](../../issues/5-investments/5M-xirr-ambiguous-results.md) | M | new |
 | **NF-6A** | [Market data: price packs, collected in the cloud](../../issues/6-market-data/6A-price-packs.md) | L | building |

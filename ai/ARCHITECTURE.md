@@ -117,6 +117,8 @@ core/                 dates, money, identifiers, posting rules; no app dependenc
 
 The main ledger is the source of truth. Registers, budgets, net worth, positions and analysis are views over it, never competing stores.
 
+**Which price wins (NF-5F).** The newest day wins; on one day `reporting/price_sources.py` `SOURCE_RANK` decides everywhere (`ReportQueries.latest_price` and `ValuationService._price`): a price you typed (`MANUAL`, `REEVALUATION_MANUAL`), then a buy or sell (`TRADE`), then the market pack (`MARKET`), online quotes (`ONLINE`) and `GAMEYA`, and what the holding cost (`COST`) only when no price exists. FX rates have their own order in `fx.py`.
+
 ```
 transactions (documents) ──1:n──▶ ledger_entries (account + asset effects)
                                            ▲

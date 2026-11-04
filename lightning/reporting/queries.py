@@ -9,6 +9,8 @@ from __future__ import annotations
 from lightning.core.memo import request_cached
 from lightning.database.connection import Database
 
+from .price_sources import source_rank
+
 POSTED = "JOIN transactions t ON t.id = le.transaction_id AND t.status = 'POSTED'"
 CASH_ONLY = "le.asset_id IN (SELECT id FROM financial_assets WHERE is_cash = 1)"
 
@@ -283,12 +285,13 @@ class ReportQueries:
 
     @request_cached(deep=True)
     def _prices_of(self, asset_id: int) -> list[dict]:
-        """Every price of one asset, newest first, a typed price before an automatic one on the same day.
+        """Every price of one asset, newest first; on one day the best source first (``price_sources.SOURCE_RANK``).
         One read per asset per request: a page asks for the same asset at a dozen month ends."""
-        return [dict(row) for row in self.db.all(
-            "SELECT price_e6, currency, date, source FROM price_history WHERE asset_id = ?"
-            " ORDER BY date DESC, CASE WHEN source IN ('MANUAL','REEVALUATION_MANUAL') THEN 0 ELSE 1 END",
-            (asset_id,))]
+        rows = [dict(row) for row in self.db.all(
+            "SELECT price_e6, currency, date, source FROM price_history WHERE asset_id = ?", (asset_id,))]
+        rows.sort(key=lambda row: source_rank(row["source"]))
+        rows.sort(key=lambda row: row["date"], reverse=True)  # stable: the best source stays first within a day
+        return rows
 
     def latest_price(self, asset_id: int, as_of: str) -> dict | None:
         row = next((price for price in self._prices_of(asset_id) if price["date"] <= as_of), None)
