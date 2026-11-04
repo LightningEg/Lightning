@@ -134,8 +134,9 @@ def savings_rate_spark(c, end: date, count: int = 6) -> dict:
     return charts.sparkline(savings_rates(c, end, count))
 
 
-def holdings_donut(position, include_cash: bool = False) -> dict:
-    """What you hold by asset class, deposits included, in class colours (cash, deposits, gold, equity, other)."""
+def holdings_donut(position, include_cash: bool = False, divisor: Decimal = Decimal(1)) -> dict:
+    """What you hold by asset class, deposits included, in class colours (cash, deposits, gold, equity, other).
+    ``divisor`` shows it in another currency (the Investments USD lens): shares stay the same."""
     slices = []
     if include_cash and position.cash_you_own:
         slices.append({"label": "Cash you own", "value": position.cash_you_own, "tone": "cash"})
@@ -143,7 +144,7 @@ def holdings_donut(position, include_cash: bool = False) -> dict:
         slices.append({"label": cls.name, "value": cls.value, "tone": charts.class_tone(cls.code)})
     if include_cash and position.other_you_own > 0:
         slices.append({"label": "Other you own", "value": position.other_you_own, "tone": "other"})
-    return charts.donut(slices)
+    return charts.donut([{**slice_, "value": slice_["value"] / divisor} for slice_ in slices] if divisor != 1 else slices)
 
 
 def forecast_trend(forecast) -> dict:

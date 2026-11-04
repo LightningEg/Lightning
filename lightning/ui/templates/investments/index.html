@@ -15,9 +15,9 @@
 {% set result = investment_report.result %}
 {% from "partials/charts.html" import lead_card %}
 {% if lead %}{% call lead_card(lead, lens.code) %}<div class="lead-side-head"><div><h3>{{ "Allocation"|tr(locale) }}</h3><p>{{ fig.holdings_value.label }} by asset class · {{ period.end_text }}</p></div></div>
-      {{ donut(investment_donut, fig.holdings_value.label, base, (fig.what_you_own.label, pos.what_you_own)) }}
-      {% for item in pos.locked_holdings %}<div class="overview-static-row locked-row"><span>{{ "Locked certificate"|tr(locale) }} · {{ item.asset }} <small>{{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small></span><b class="muted">{{ item.value|money }}</b></div>{% endfor %}
-      <div class="overview-inline-list inv-after-sale"><div class="overview-static-row"><span>{{ fig.brokerage_cash.label }}</span><b>{{ investment_report.investment_cash|money if investment_report.investment_cash is not none else 'Unavailable' }}</b></div><a class="overview-static-row" href="/settings?section=assets-valuations"><span>{{ fig.holdings_after_sale.label }}</span><b>{{ pos.holdings_after_sale|money if investment_report.value is not none else 'Unavailable' }}</b></a></div>{% endcall %}
+      {{ donut(investment_donut, fig.holdings_value.label, lens.code, (fig.what_you_own.label, allocation.what_you_own)) }}
+      {% for item in allocation.locked %}<div class="overview-static-row locked-row"><span>{{ "Locked certificate"|tr(locale) }} · {{ item.asset }} <small>{{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small></span><b class="muted">{{ item.value|money }}</b></div>{% endfor %}
+      <div class="overview-inline-list inv-after-sale"><div class="overview-static-row"><span>{{ fig.brokerage_cash.label }}</span><b>{{ allocation.cash|money if allocation.cash is not none else 'Unavailable' }}</b></div><a class="overview-static-row" href="/settings?section=assets-valuations"><span>{{ fig.holdings_after_sale.label }}</span><b>{{ allocation.after_sale|money if investment_report.value is not none else 'Unavailable' }}</b></a></div>{% endcall %}
 {% if since_return and since_return.explanation %}<p class="muted small">{{ ('XIRR' if since_return.annualized else 'Return')|tr(locale) }} · {{ since_return.explanation|tr(locale) }}</p>{% endif %}
 {% else %}<section class="stat-tiles inv-top" aria-label="This period">
   {% if not phone_mode() %}{# on a phone the Overview's tiles carry these rates; never twice #}
@@ -43,9 +43,9 @@
 <section class="card wide-card inv-alloc" aria-label="Allocation">
   <div class="overview-split">
     <section><div class="overview-block-head"><div><h3>{{ "Allocation"|tr(locale) }}</h3><p>{{ fig.holdings_value.label }} by asset class · {{ period.end_text }}</p></div></div>
-      {{ donut(investment_donut, fig.holdings_value.label, base, (fig.what_you_own.label, pos.what_you_own)) }}
-      {% for item in pos.locked_holdings %}<div class="overview-static-row locked-row"><span>{{ "Locked certificate"|tr(locale) }} · {{ item.asset }} <small>{{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small></span><b class="muted">{{ item.value|money }}</b></div>{% endfor %}
-      <div class="overview-inline-list inv-after-sale"><div class="overview-static-row"><span>{{ fig.brokerage_cash.label }}</span><b>{{ investment_report.investment_cash|money if investment_report.investment_cash is not none else 'Unavailable' }}</b></div><a class="overview-static-row" href="/settings?section=assets-valuations"><span>{{ fig.holdings_after_sale.label }}</span><b>{{ pos.holdings_after_sale|money if investment_report.value is not none else 'Unavailable' }}</b></a></div></section>
+      {{ donut(investment_donut, fig.holdings_value.label, lens.code, (fig.what_you_own.label, allocation.what_you_own)) }}
+      {% for item in allocation.locked %}<div class="overview-static-row locked-row"><span>{{ "Locked certificate"|tr(locale) }} · {{ item.asset }} <small>{{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small></span><b class="muted">{{ item.value|money }}</b></div>{% endfor %}
+      <div class="overview-inline-list inv-after-sale"><div class="overview-static-row"><span>{{ fig.brokerage_cash.label }}</span><b>{{ allocation.cash|money if allocation.cash is not none else 'Unavailable' }}</b></div><a class="overview-static-row" href="/settings?section=assets-valuations"><span>{{ fig.holdings_after_sale.label }}</span><b>{{ allocation.after_sale|money if investment_report.value is not none else 'Unavailable' }}</b></a></div></section>
     <section><div class="overview-block-head"><div><h3>{{ "Biggest holdings"|tr(locale) }}</h3><p>Share of {{ fig.holdings_value.label|lower }} · {{ period.end_text }}</p></div></div>
       {{ bars(biggest, 'hold', 'No holdings to show.') }}</section>
   </div>
