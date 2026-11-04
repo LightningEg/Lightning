@@ -43,12 +43,21 @@ def test_one_expense_runs_the_same_statements_whatever_the_account_history(c, se
     assert elsewhere[1] <= steps * 1.2 + 10
 
 
-def test_the_negative_cash_check_reads_the_account_index():
-    import inspect
-    from lightning.transactions.service import TransactionService
-
-    source = inspect.getsource(TransactionService._refuse_cash_below_zero)
-    assert source.count("+le.asset_id=?") == 2  # keeps SQLite off ix_ledger_asset_date (every account's lines)
+def test_the_negative_cash_check_reads_the_account_index(c, setup):
+    statements = []
+    c.db.conn.set_trace_callback(statements.append)
+    try:
+        c.transactions.record_outflow("2026-09-30", setup[0]["cib"].id, "1", _food(c).id)
+    finally:
+        c.db.conn.set_trace_callback(None)
+    cash_reads = [sql for sql in statements if sql.startswith("SELECT")
+                  and "SUM(le.quantity_e6)" in sql and "WHERE t.status='POSTED' AND le.account_id=" in sql
+                  and ("le.date<" in sql or "le.date>=" in sql)]
+    assert len(cash_reads) == 2
+    for sql in cash_reads:
+        details = " ".join(row["detail"] for row in c.db.all("EXPLAIN QUERY PLAN " + sql))
+        assert "ix_ledger_account_date" in details
+        assert "ix_ledger_asset_date" not in details
 
 
 def test_an_edit_moved_later_still_counts_the_balance_before_it(c, setup):
