@@ -179,3 +179,28 @@ def test_on_a_phone_the_broker_leads_in_pounds_then_a_chip_per_pocket(c, setup):
     chips = usd[usd.index('class="phone-chips pocket-tabs"'):]
     chips = chips[:chips.index("</nav>")]
     assert chips.count('<a class="phone-chip') == 2 and f'href="/accounts/{pocket.id}" aria-current="page"' in chips
+
+
+def test_a_separate_dollar_brokerage_becomes_a_pocket_of_the_broker(c, setup):
+    """5G3: today's separate Dollar brokerage moves into the broker as its USD pocket: the same account, ledger and
+    holdings, now one row with the broker. Only a broker in another currency without that pocket can take it."""
+    accounts, _ = setup
+    thndr, etf = _broker_with_cash(c, accounts)
+    dollars = c.account_flows.open_account("Dollar brokerage", "BROKERAGE", "2026-09-01", "2000", currency="USD")
+    c.investments.buy_total("2026-09-03", dollars.id, etf.id, "10", "1000")
+    before = (c.reporting.account_value(dollars.id, date(2026, 12, 31)), c.investments.holding(dollars.id, etf.id, "2026-12-31"))
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    page = client.get(f"/accounts/{dollars.id}").text
+    assert "Make it a pocket of THNDR" in page
+    reply = client.post(f"/accounts/{dollars.id}/make-pocket", data={"broker_id": str(thndr.id)}, follow_redirects=False)
+    assert reply.status_code == 303
+    pocket = c.accounts.get(dollars.id)
+    assert pocket.parent_id == thndr.id and pocket.name == "THNDR · USD" and c.accounts.pocket_for(thndr, "USD") == pocket
+    assert (c.reporting.account_value(dollars.id, date(2026, 12, 31)),
+            c.investments.holding(dollars.id, etf.id, "2026-12-31")) == before
+    _, _, groups = c.reporting.sidebar(date(2026, 12, 31))
+    assert dollars.id not in [r.id for g in groups for r in g.children]
+    assert c.accounts.pocket_homes(pocket) == [] and "Make it a pocket" not in client.get(f"/accounts/{thndr.id}").text
+    with pytest.raises(LightningError):   # THNDR already holds USD now
+        c.accounts.make_pocket(c.account_flows.open_account("Other dollars", "BROKERAGE", "2026-09-01", "0",
+                                                            currency="USD").id, thndr.id)

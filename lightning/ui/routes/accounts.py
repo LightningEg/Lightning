@@ -770,6 +770,20 @@ async def add_pocket(request: Request, account_id: int):
     return redirect(f"/accounts/{account_id}", f"{c.accounts.get(account_id).name} now holds {pocket.currency}.")
 
 
+@router.post("/{account_id:int}/make-pocket")
+async def make_pocket(request: Request, account_id: int):
+    """Move a separate foreign-currency brokerage into a broker as its pocket in that currency (5G3)."""
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, container(request)):
+            pocket = c.accounts.make_pocket(account_id, int(str(form.get("broker_id", "0")) or 0))
+    except (LightningError, ValueError) as exc:
+        return redirect(f"/accounts/{account_id}", getattr(exc, "message", "Choose a broker."))
+    broker = c.accounts.get(pocket.parent_id)
+    return redirect(f"/accounts/{pocket.id}", f"{broker.name} now holds your {pocket.currency} account as a pocket.")
+
+
 @router.post("/{account_id:int}/spendable")
 async def set_spendable(request: Request, account_id: int):
     """Count this account's cash as spendable or keep it apart (Free cash, Safe to spend, payday)."""

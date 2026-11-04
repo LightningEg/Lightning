@@ -539,6 +539,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         account_spendable=account.counts_as_spendable(c.base_currency) if account else None,
         account_cost_method=account.cost_method if account else None,
         pocket_cash=_pocket_cash(c, account),
+        pocket_homes=c.accounts.pocket_homes(account) if account else [],
         broker=c.accounts.broker_of(account) if account and account.account_type == AccountType.BROKERAGE else None,
         today=fmt_date(today()),
         account_balance=c.reporting.account_balance(account.id, today()) if account else None,

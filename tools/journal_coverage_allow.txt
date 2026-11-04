@@ -15,6 +15,7 @@ POST /accounts/{account_id:int}/items/{asset_id:int}/trade
 POST /accounts/{account_id:int}/items/{asset_id:int}/value
 POST /accounts/{account_id:int}/ownership/new
 POST /accounts/{account_id:int}/pockets
+POST /accounts/{account_id:int}/make-pocket
 POST /accounts/{account_id:int}/reactivate
 POST /accounts/{account_id:int}/reconcile
 POST /accounts/{account_id:int}/reconcile/close

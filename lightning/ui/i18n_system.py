@@ -723,6 +723,8 @@ TEMPLATES = {
     "By currency": "حسب العملة",
     "Cash and investments in each pocket, valued in {base}": "النقدية والاستثمارات في كل جيب، بقيمتها بالـ {base}",
     "Pockets": "الجيوب",
+    "Make it a pocket of {broker}": "خلّيه جيب جوّه {broker}",
+    "{broker} now holds your {currency} account as a pocket.": "{broker} بقى فيه حسابك بالـ{currency} كجيب.",
     "Cash": "نقدية",
     "By market": "حسب السوق",
     "By security": "حسب الورقة",

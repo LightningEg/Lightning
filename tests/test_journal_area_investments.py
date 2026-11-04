@@ -158,6 +158,20 @@ def test_pocket_currency_and_a_foreign_listing_converted_in(devices):
     assert held(pc, "Broker · USD").quantity == held(hd, "Broker · USD").quantity == 10
 
 
+
+def test_a_separate_dollar_brokerage_joins_the_broker_as_its_pocket(devices):
+    hd, pc = devices
+    broker, _ = setup(hd, pc)
+    register = pc.command("currencies.register", code="USD", name=None)
+    dollars = pc.command("accounts.open", currency="USD", opening_balance_date=None, owner_id=None, name="Dollar brokerage",
+                         account_type="BROKERAGE", opening_date="2026-01-01", opening_balance="0", institution="",
+                         last4=None, notes="")
+    settle(hd, pc, register, dollars)
+    joined = pc.command("investments.make_pocket", account_id=record(dollars), broker_id=broker)
+    settle(hd, pc, joined)
+    assert [a.name for a in pc.c.accounts.list() if a.parent_id] == ["Broker · USD"] == [
+        a.name for a in hd.c.accounts.list() if a.parent_id]
+
 def test_targets_factors_and_the_investment_list(devices):
     hd, pc = devices
     broker, stock = setup(hd, pc)
