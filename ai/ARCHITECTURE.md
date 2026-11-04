@@ -598,3 +598,7 @@ The website issues an owned-item activation ticket to be redeemed online once fo
 ### Figure freshness (NF-7Y)
 
 FreshnessService reads dated valuation inputs, checks through a historical cutoff (31-day account threshold), and unmatched certificate receipts. Free cash uses eligible cash accounts; the dated forecast also uses foreign cash rates. JournalServices adds a read-only note when proposals await confirmation. Notes never post or reconcile money and link to existing resolution screens.
+
+### Scenario previews and bill warnings (NF-7X)
+
+CashForecaster.scheduled_inputs is the shared receipt-adjusted, early-payment-aware input for dated forecasts and scenario comparisons. planning.scenarios applies immutable occurrence overrides plus a purchase event to those inputs and projects twice without writes. Its scope excludes variable spending and goals, keeps reserves in cash and fixes FX at the baseline date. workflows.bill_alerts uses confirmed merchant/account/category identity, monthly cadence, median/MAD and a wider six-observation utility range. Stable evidence references identify Needs you warnings; existing reviewed/snoozed preferences change only reminder visibility.

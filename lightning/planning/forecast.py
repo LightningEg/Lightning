@@ -293,10 +293,16 @@ class CashForecaster:
         safe, parts, before_total = self._safe_to_spend(free, before, next_date, day, rows, instalments)
         return CashForecast(fmt_date(day), free, average, average_months, next_date, next_estimated,
                             safe, parts, rows, [p for p in upcoming if p.due_date <= next_date] if next_date else upcoming[:10],
-                            before, dated_cash_forecast(self.reporting, due + upcoming,
-                                                      all_events + _due_circle_events(self.deposits, day),
-                                                      day, horizon_end),
+                            before, dated_cash_forecast(self.reporting, *self.scheduled_inputs(day, horizon_end), day, horizon_end),
                             before_total)
+
+    def scheduled_inputs(self, day, end):
+        """Read the same confirmed occurrences and receipt-adjusted events for every dated projection."""
+        early = {(e['item'].id, e['payment'].due_date) for e in self.planning.early_payments(day)}
+        payments = [p for p in self.planning.all_payments(end, day)
+                    if p.outstanding and (p.item.id, p.due_date) not in early]
+        events = self.deposit_receipts.adjust_events(_deposit_cash_events(self.deposits, day, end), day)
+        return payments, list(events) + _due_circle_events(self.deposits, day)
 
     def _safe_to_spend(self, free: Decimal, before: list[Payment], until: str | None, day: date,
                        rows: list[ForecastMonth], instalments: Decimal = ZERO
