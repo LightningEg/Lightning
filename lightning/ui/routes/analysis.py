@@ -14,7 +14,7 @@ from urllib.parse import urlencode
 
 from fastapi import APIRouter, HTTPException, Request, Response
 
-from lightning.core.dates import fmt_date, parse_date, today
+from lightning.core.dates import fmt_date, parse_date, parse_month, month_of, today
 from lightning.core.errors import LightningError
 from lightning.core.money import ZERO, fmt
 
@@ -252,3 +252,20 @@ async def reports_page(request: Request):
                        tone="out", visual=kpis.meter(p["total_a"], p["total_b"]) if p["total_b"] else None,
                        href=f"/spending/compare?preset={p['kind']}") for p in presets]
     return render(request, "analysis/reports.html", presets=presets, cards=cards, views=views, base=c.base_currency, fmt_date=fmt_date)
+
+
+@router.get("/spending/calendar")
+async def spending_calendar_page(request: Request):
+    c = container(request)
+    month = request.query_params.get('month', month_of(today()))
+    try:
+        first, last = parse_month(month)
+    except LightningError:
+        first, last = parse_month(month_of(today()))
+        month = month_of(today())
+    rows = c.reporting.spending_calendar(first, last)
+    by_date = {row["date"]: row for row in rows}
+    weeks = [[None if d.month != first.month else by_date.get(str(d), {"date": str(d), "amount": ZERO, "transactions": 0})
+              for d in week] for week in calendar.Calendar().monthdatescalendar(first.year, first.month)]
+    return render(request, "analysis/calendar.html", month=month, weeks=weeks,
+                  days=rows, age=c.reporting.cash_age(today()))

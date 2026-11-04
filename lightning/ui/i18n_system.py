@@ -1393,6 +1393,18 @@ ROUTES = {
     "Choose how this payment was settled.": "اختار الدفعة دي اتسددت إزاي.",
 }
 SERVICES = {
+    "days": "يوم",
+    'Age of Money and spending calendar': 'عمر الفلوس وتقويم المصروفات',
+    'Age of Money': 'عمر الفلوس',
+    'Spending calendar': 'تقويم المصروفات',
+    'Unavailable until the sampled spending has known cash dates.': 'مش متاح لحد ما تواريخ دخول النقد المستخدم في عينة المصروفات تكون معروفة.',
+    'Amount-weighted age of cash used by your last {count} payments in the profile currency.': 'متوسط عمر النقد حسب المبلغ المستخدم في آخر {count} دفعات بعملة الملف.',
+    'Previous sample: {days} days.': 'العينة السابقة: {days} يوم.',
+    'Cash is consumed oldest first. Transfers preserve age. Opening cash has unknown age; investment purchases are not spending samples. This is past cash timing, not how long your money will last.': 'النقد الأقدم بيتصرف الأول، والتحويلات بتحافظ على عمره. عمر الرصيد الافتتاحي مش معروف، وشراء الاستثمارات مش داخل في عينة المصروفات. ده توقيت النقد اللي اتصرف، مش تقدير فلوسك هتكفي قد إيه.',
+    'Recorded spending less refunds, by posting date. Transfers and money held for others are excluded.': 'المصروفات المسجلة ناقص المبالغ المستردة، حسب تاريخ التسجيل. التحويلات والفلوس اللي معاك لغيرك مش محسوبة.',
+    '{count} transactions': '{count} عمليات',
+    'No spending in this month.': 'مفيش مصروفات في الشهر ده.',
+
     'Change loan payments from Loans.': 'غيّر أقساط القرض من صفحة القروض.',
     'Back to Budget': 'ارجع للميزانية',
     'An empty value clears this category’s limit.': 'سيب المبلغ فاضي عشان تشيل حد الفئة دي.',

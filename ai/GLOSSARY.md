@@ -560,3 +560,5 @@ Asset class and exposure are separate. Account kinds describe the container: cas
 | Due | مستحق |
 | Upcoming | قادم |
 | From | من |
+
+**Age of Money:** Amount-weighted days between receipt and use of owned cash, consumed FIFO, over the last ten cash expense transactions in profile currency. Opening cash age is unknown; it is not a runway estimate.
