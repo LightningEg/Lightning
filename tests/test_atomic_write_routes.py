@@ -5,6 +5,7 @@ from pathlib import Path
 ROUTES = Path(__file__).parents[1] / "lightning/ui/routes"
 # These handlers have a different completion boundary, or perform no financial write.
 OTHER_BOUNDARIES = {
+    "search": {"scoped_picker"},  # Read-only ranking of existing picker choices.
     "history": {"replay"},  # History restores both rows and links in its own replay transaction.
     "exports": {"transactions", "categories", "reevaluations", "preview_workbook_import"},
     "transactions": {"all_accounts_entry", "all_accounts_update"},  # register.create/update own the save.

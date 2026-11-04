@@ -293,10 +293,33 @@ class CashForecaster:
         safe, parts, before_total = self._safe_to_spend(free, before, next_date, day, rows, instalments)
         return CashForecast(fmt_date(day), free, average, average_months, next_date, next_estimated,
                             safe, parts, rows, [p for p in upcoming if p.due_date <= next_date] if next_date else upcoming[:10],
-                            before, dated_cash_forecast(self.reporting, due + upcoming,
-                                                      all_events + _due_circle_events(self.deposits, day),
-                                                      day, horizon_end),
+                            before, dated_cash_forecast(self.reporting, *self.scheduled_inputs(day, horizon_end), day, horizon_end),
                             before_total)
+
+    def scheduled_inputs(self, day, end):
+        """Read the same confirmed occurrences and receipt-adjusted events for every dated projection."""
+        early = {(e['item'].id, e['payment'].due_date) for e in self.planning.early_payments(day)}
+        payments = [p for p in self.planning.all_payments(end, day)
+                    if p.outstanding and (p.item.id, p.due_date) not in early]
+        linked = self.planning.linked_transaction_ids()
+        possible = {}
+        for payment in payments:
+            # A future window cannot contain a posted transaction as of today. Avoid
+            # querying it for every later occurrence in the dated projection.
+            starts = date.fromisoformat(payment.due_date) - timedelta(days=payment.item.match_window_days)
+            candidates = self.planning.candidates(payment, day) if starts <= day else ()
+            possible[(payment.item.id, payment.due_date)] = {r['id'] for r in candidates if r['id'] not in linked}
+        uses = {}
+        for matches in possible.values():
+            for txn_id in matches:
+                uses[txn_id] = uses.get(txn_id, 0) + 1
+        def already_recorded(payment):
+            matches = possible[(payment.item.id, payment.due_date)]
+            # Ambiguous income is not safe to assume a second time. Outgoing ambiguity stays conservative.
+            return bool(matches) if payment.item.is_income else (len(matches) == 1 and uses[next(iter(matches))] == 1)
+        payments = [p for p in payments if not already_recorded(p)]
+        events = self.deposit_receipts.adjust_events(_deposit_cash_events(self.deposits, day, end), day)
+        return payments, list(events) + _due_circle_events(self.deposits, day)
 
     def _safe_to_spend(self, free: Decimal, before: list[Payment], until: str | None, day: date,
                        rows: list[ForecastMonth], instalments: Decimal = ZERO

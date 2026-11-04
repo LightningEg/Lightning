@@ -1,7 +1,7 @@
 """Build with: pyinstaller --clean --noconfirm packaging/desktop-app.spec"""
 from pathlib import Path
 import sys
-from PyInstaller.utils.hooks import collect_data_files, copy_metadata
+from PyInstaller.utils.hooks import collect_data_files, copy_metadata, collect_submodules
 
 root = Path(SPECPATH).parent
 sys.path.insert(0, str(root))
@@ -20,7 +20,7 @@ analysis = Analysis(
         "uvicorn.loops.asyncio",
         "uvicorn.protocols.http.h11_impl",
         "uvicorn.lifespan.on",
-    ],
+    ] + collect_submodules("rapidfuzz") + collect_submodules("pypdf") + collect_submodules("openpyxl"),
     excludes=[
         "tkinter",
         "PyQt5",

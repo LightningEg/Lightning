@@ -23,6 +23,8 @@ SOURCE = ROOT / "requirements" / "android.in"
 LOCK = ROOT / "requirements" / "android.lock"
 REPOSITORY = "elfekimuhammed/Lightning"
 NATIVE = ("cffi", "cryptography", "pydantic-core", "sqlcipher3")
+# Upstream's unchanged portable wheel: MIT-licensed, no Android extension required.
+PORTABLE = {"rapidfuzz": ("3.14.3", "https://github.com/LightningEg/Lightning/raw/835b0bb48f8f134f73a0d754a3b5344e317931b0/packaging/third-party/rapidfuzz-3.14.3-py3-none-any.whl", "8e300f5974c411be699fd53f775fffbe94204a012a3091e23e1a300c2fc8ebad")}
 PYTHON, API = (3, 13), 24
 
 
@@ -71,7 +73,7 @@ def resolve() -> dict[str, str]:
     """The pure-Python packages (name -> version) uv resolves for arm64 Android from android.in."""
     command = ["uv", "pip", "compile", str(SOURCE), "--python-version", f"{PYTHON[0]}.{PYTHON[1]}",
                "--python-platform", "aarch64-linux-android", "--no-header", "--no-annotate", "--quiet"]
-    for name in NATIVE:
+    for name in (*NATIVE, *PORTABLE):
         command += ["--no-emit-package", name]
     return pinned(subprocess.run(command, check=True, capture_output=True, text=True).stdout)
 
@@ -125,6 +127,10 @@ def main(argv: list[str]) -> int:
     tag, sums = argv[0], Path(argv[1]).read_text()
     wanted = pinned(SOURCE.read_text())
     files = native_files(tag, sums, wanted)
+    for name, (version, url, digest) in PORTABLE.items():
+        if wanted.get(name) != version:
+            raise SystemExit(f"Portable {{name}} input does not match android.in")
+        files[name] = (url, digest)
     for name, version in resolve().items():
         files[name] = pypi_file(name, version)
     LOCK.write_text(lock_text(tag, files), encoding="utf-8")

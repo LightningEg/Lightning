@@ -42,6 +42,10 @@ class Figure:
 
 
 _TABLE = [
+    ("age_of_money", "Age of Money",
+     "Amount-weighted days from receipt to use of owned cash, consumed oldest first, over the last ten cash expense transactions in profile currency. Unknown opening cash makes the sample unavailable. This is historical timing, not a runway estimate."),
+    ("lowest_scheduled_cash", "Lowest scheduled cash",
+     "The lowest projected day-end owned cash balance from confirmed cash and scheduled payments. Excludes variable spending and savings goals; reserves remain in cash. Missing FX makes it unavailable."),
     ("cash_available_to_assign", "Cash available to assign",
      "Actual owned liquid cash left after reserves, funded spending and bills due outside those funds. Missing FX makes it unavailable; expected income never contributes.",
      ""),
@@ -238,6 +242,8 @@ P, WYO, CF, BL = ("lightning.planning.position.Position", "lightning.planning.do
                   "lightning.reporting.service.CashFlow", "lightning.budgeting.domain.BudgetLine")
 INV, FC = "lightning.investments.report", "lightning.planning.forecast.CashForecaster"
 _SOURCES = {
+    "age_of_money": (LEDGER, "lightning.reporting.cash_analytics.cash_age"),
+    "lowest_scheduled_cash": (BOTH, "lightning.planning.dated_cash.lowest_scheduled_balance"),
     "cash_available_to_assign": (BOTH, "lightning.planning.funding.CashFundingService.preview"),
     "funded_spending_left": (BOTH, "lightning.planning.funding.CashFundingService.preview"),
     "reimbursement_outstanding": (BOTH, "lightning.reimbursements.ReimbursementService._claim_summary"),

@@ -75,6 +75,8 @@ class JournalServices:
             return None
         if name in self._calls:  # A container-level action, e.g. set_profile_currency.
             return lambda *args, **kwargs: self._run(name, service, args, kwargs)
+        if name == "freshness":
+            return _Freshness(service, self._device)
         if name == "db":
             return _Database(service)
         if any(call.split(".")[0] == name for call in self._calls):
@@ -248,3 +250,24 @@ def _wire(adapter, spec, value):
     if bare == "flag":
         return bool(value)
     return value if type(value) is str else str(value)
+
+
+class _Freshness:
+    """Journal context around the same confirmed figure inputs; reads only."""
+    def __init__(self, service, device):
+        self.service, self.device = service, device
+
+    def __getattr__(self, name):
+        method = getattr(self.service, name)
+        if name not in ("for_what_you_own", "for_free_cash", "for_forecast"):
+            return method
+        def notes(day):
+            from lightning.core.figure_inputs import FreshnessNote
+            result = method(day)
+            pending = self.device.sync_status()["pending"]
+            reviews = len(self.device.review_items())
+            if pending or reviews:
+                figure = {"for_what_you_own": "what_you_own", "for_free_cash": "free_cash", "for_forecast": "forecast"}[name]
+                result += (FreshnessNote("pending_edits", str(pending + reviews), None, figure, "/journal"),)
+            return result
+        return notes

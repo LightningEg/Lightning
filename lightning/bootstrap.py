@@ -317,7 +317,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
         reimbursements=ReimbursementService(db),
         funding=CashFundingService(db, budgets, reporting, reserves, planning, categories, settings, schedules),
         deposit_receipts=deposit_receipts,
-        freshness=FreshnessService(reporting, position),
+        freshness=FreshnessService(reporting, position, accounts, reconciliation, deposit_receipts, forecaster),
     )
     # Attach only after both history validators and the container are complete.
     if undo is not None:

@@ -110,9 +110,7 @@ def _review_form_max_fields(row_count: int) -> int:
 @router.get("/{account_id:int}/import")
 async def import_page(request: Request, account_id: int):
     c = container(request)
-    account = c.accounts.get(account_id)
-    return render(request, "bank_import_upload.html", account=account, waiting=_waiting_imports(c, account_id),
-                  ai_prompt=_ai_prompt(account, _ai_reference(c)), category_prompt=_first_import_prompt(c, account))
+    return _render_upload(request, c, account_id)
 
 
 def _waiting_imports(c, account_id: int) -> list[dict]:
@@ -120,9 +118,10 @@ def _waiting_imports(c, account_id: int) -> list[dict]:
 
 
 def _render_upload(request, c, account_id, *, error="", status_code=200):
+    from lightning.workflows.ai_prompts import pdf_to_csv_prompt
     account = c.accounts.get(account_id)
     return render(request, "bank_import_upload.html", account=account, waiting=_waiting_imports(c, account_id),
-                  ai_prompt=_ai_prompt(account, _ai_reference(c)), category_prompt=_first_import_prompt(c, account),
+                  pdf_prompt=pdf_to_csv_prompt(account.currency), ai_prompt=_ai_prompt(account, _ai_reference(c)), category_prompt=_first_import_prompt(c, account),
                   error=error, status_code=status_code)
 
 
@@ -154,12 +153,14 @@ async def upload(request: Request, account_id: int):
     form = await request.form()
     upload_files = [item for item in form.getlist("file") if getattr(item, "filename", "")]
     if not upload_files:
-        return _render_upload(request, c, account_id, error="Choose at least one CSV file.", status_code=400)
+        return _render_upload(request, c, account_id, error="Choose at least one statement file.", status_code=400)
     try:
         prepared = []
         needs_mapping = None
         for upload_file in upload_files:
-            data = await upload_file.read()
+            from lightning.statement_files import MAX_FILE_BYTES, read_statement
+            data = await upload_file.read(MAX_FILE_BYTES + 1)
+            data = read_statement(upload_file.filename, data, c.accounts.get(account_id).currency)
             if getattr(c, "is_journal", False) and len(data) > MAX_JOURNAL_CSV_COMMAND_BYTES:
                 return _render_upload(request, c, account_id,
                                       error="This file is too large to synchronize; split it into smaller files.",
@@ -300,16 +301,18 @@ def _row_ui(row: dict, form=None) -> dict:
         return {"cp": own("counterparty"), "cp_pick": own("counterparty_pick"), "cat": own("category"),
                 "whom": own("whom"), "whom_pick": own("whom_pick"),
                 "remember": form.get(f"remember_{rid}") == "on", "skip": form.get(f"skip_{rid}") == "on",
-                "match": own("match"), "fee": own("fee")}
+                "match": own("match"), "fee": own("fee"), "conversion_amount": own("conversion_amount")}
     cp_pick = (f"account:{row['_transfer_account_id']}" if row.get("_transfer_account_id")
                else f"counterparty:{row['_counterparty_id']}" if row.get("_counterparty_id") else "")
+    if row.get("_identity_ambiguous"):
+        cp_pick = ""
     custody = row.get("_is_custody") and row.get("_whom") and row.get("_counterparty_id")
     return {"cp": row.get("Counterparty") or "", "cp_pick": cp_pick,
             "cat": str(row.get("_category_id") or "") if not row.get("_transfer_account_id") else "",
             "whom": row["_whom"] if custody else "",
             "whom_pick": f"counterparty:{row['_counterparty_id']}" if custody else "",
             "remember": bool(row.get("_remember_category")), "skip": bool(row.get("_skip")),
-            "match": str(row.get("_match") or row.get("_default_match") or ""), "fee": ""}
+            "match": str(row.get("_match") or row.get("_default_match") or ""), "fee": "", "conversion_amount": ""}
 
 
 def _suggestions_json(c, row: dict, account_ids: dict[str, int], party_ids: dict[str, int]) -> str:
@@ -327,7 +330,8 @@ def _suggestions_json(c, row: dict, account_ids: dict[str, int], party_ids: dict
 def _review_groups(c, rows: list[dict], form=None) -> list[dict]:
     """Rows grouped by imported name (a header with its total and state, the rows under it). Every row keeps its
     own counterparty, category, held-for, notes and amount; a group is only a place to fold and to tick."""
-    accounts = {a.name: a.id for a in c.accounts.list(active_only=True)}
+    all_accounts = c.accounts.list(active_only=True)
+    accounts = {a.name: a.id for a in all_accounts if sum(b.name == a.name for b in all_accounts) == 1}
     parties = {p["name"]: p["id"] for p in c.counterparties.list_active()}
     by_key: dict[str, list[dict]] = {}
     for row in rows:
@@ -354,7 +358,7 @@ def _render_review(request, c, account_id: int, batch, rows, *, summary, form=No
     account = c.accounts.get(account_id)
     groups = _review_groups(c, rows, form)
     counts = {"all": len(groups)} | {key: sum(1 for g in groups if g["status"] == key) for key in _STATUS_ORDER}
-    accounts_here = [a for a in c.accounts.list(active_only=True) if a.id != account_id and a.currency == account.currency]
+    accounts_here = [a for a in c.accounts.list(active_only=True) if a.id != account_id and (a.currency == account.currency or a.account_type.value in ("BANK", "CASH", "BROKERAGE"))]
     failing = [r for r in rows if _row_status(r) == "err"]
     reject_prompt = ""
     if failing and batch["status"] != "POSTED":
@@ -438,7 +442,7 @@ def _decision(form, row) -> dict:
                 "counterparty_choice": own("counterparty_choice"),
                 "remember_category": (form.get(f"remember_{row_id}") or form.get(f"remember_category_{row_id}")) == "on",
                 "transfer_account_id": own("transfer_account_id"),
-                "fee": own("fee")}
+                "fee": own("fee"), "conversion_amount": own("conversion_amount")}
     pick = own("counterparty_pick")
     if pick.startswith("account:"):          # one of your accounts: a transfer to or from it
         decision["transfer_account_id"] = pick.split(":", 1)[1]
@@ -483,6 +487,10 @@ def _ready_decision(form, row, decision, account_names) -> bool:
     if decision["skip"] or match == "skip" or match.startswith("link:"):
         return True
     if row.get("_possible_duplicate") and match != "new":
+        return False
+    if row.get("_identity_ambiguous") and not decision.get("transfer_account_id") and not (
+            decision.get("counterparty_id") or decision.get("counterparty_choice", "").startswith("existing:")
+            or decision.get("counterparty_choice") == "new"):
         return False
     category_key = f"category_{row['_import_row_id']}"
     if decision["category_id"] or decision["force_uncategorized"]:

@@ -17,7 +17,7 @@
 {% macro plan_row(r) %}
 <a class="phone-row phone-plan-row{{ ' is-late' if r.late }}"{% if r.popup %} data-popup-open{% endif %} href="{{ r.href }}"><span>{{ r.name }}<small>{{ r.kind|tr(locale) }}{% if r.estimated %} · {{ 'Estimated'|tr(locale) }}{% endif %} · {% if r.late_text %}<span class="nowrap">{{ r.date }}</span> · <span class="plan-status plan-status-late">{{ r.late_text.text|tr(locale, **r.late_text['values']) }}</span>{% else %}{{ r.when.text|tr(locale, **r.when['values']) }} · <span class="nowrap">{{ r.date }}</span>{% endif %}</small></span><b class="{{ 'pos' if r.income }}">{{ '+' if r.income else '−' }}{{ r.amount|money }}</b>{{ arrow('in' if r.income else 'out') }}</a>
 {% endmacro %}
-{% block content %}
+{% block content %}<p><a href="/plan/scenarios">{{ 'Compare scenarios'|tr(locale) }}</a></p><p><a href="/plan/inputs" data-popup-open>{{ 'Forecast inputs'|tr(locale) }}</a></p>
 {% set f = forecast %}{% set p = plan %}
 
 <section class="phone-section phone-plan-coming" id="plan-next" aria-labelledby="coming-section">

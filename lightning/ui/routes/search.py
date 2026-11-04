@@ -10,15 +10,14 @@ Choosing a result is the user's click; the matcher changes nothing.
 """
 from __future__ import annotations
 
-import re
-import unicodedata
-from difflib import SequenceMatcher
+import json
 from urllib.parse import quote, urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from lightning.core.errors import LightningError
+from lightning.core.matching import NUMERIC as _LOOKS_NUMERIC, fold_search_text as _fold_search_text, match_score as _score, rank_choices
 from lightning.core.money import ascii_digits
 from lightning.core.refs import parse_ref
 from lightning.transactions.tags import normalize as normal_tag
@@ -64,60 +63,7 @@ ACTIONS = (
     ("Add loan", "/plan/items/new?kind=LOAN", "new installment debt"),
     ("Add an investment to the catalogue", "/investments/assets/new", "new fund stock instrument"),
 )
-GROUPS = ("Transaction", "Page", "Action", "Account", "Counterparty", "Category", "Investment", "Tag", "Search")
-_LOOKS_NUMERIC = re.compile(r"[\d\s,./:+−-]+")
-
-# Letters and signs NFKD alone does not bring together: the taa marbuta typed as heh, the alef
-# maqsura typed as ya, the wasla alef (NFKD leaves its superscript alef attached), the tatweel (a
-# letter, not a mark), and the punctuation someone may type in either script quoted either way.
-# Folded only at compare time; labels, links and stored data keep the original.
-_COMPARE_FOLDS = str.maketrans({
-    "ة": "ه",
-    "ى": "ي",
-    "ٱ": "ا",
-    "ـ": "",
-    "،": ",", "؛": ";", "؟": "?", "٪": "%",
-    "`": "'", "‘": "'", "’": "'", "‛": "'", "ʻ": "'", "ʼ": "'", "ʽ": "'",
-    "“": '"', "”": '"', "„": '"', "«": '"', "»": '"',
-    "‐": "-", "‑": "-", "‒": "-", "–": "-", "—": "-", "―": "-",
-})
-
-
-def _fold_search_text(text: str) -> str:
-    """The one folding for what search compares; both the query and the text are folded by it (7J).
-
-    In order: NFKD, so full-width Latin, Arabic presentation forms, hamza-carrying letters
-    (أ، إ، آ → ا; ؤ → و; ئ → ي, through their marks) and the lam-alef ligature break apart;
-    Arabic-Indic and Persian digits through `core.money.ascii_digits`; combining marks and invisible
-    format characters dropped, which removes tashkeel, shadda and tanween, Quran annotation marks and
-    zero-width joiners; then the explicit folds above (ة → ه, ى → ي, ٱ → ا, the tatweel out, quotes
-    and dashes to their ASCII forms) and Latin case and accents (casefold does Straße and STRASSE; the
-    marks NFKD separates cover é vs e). A mark never carries an identity of its own here: dropping it
-    joins no words that a space or punctuation kept apart. Empty input stays empty, and the fold is its
-    own fixed point, so folding twice is folding once.
-    """
-    s = " ".join(str(text or "").casefold().split())
-    s = unicodedata.normalize("NFKD", s)
-    s = ascii_digits(s)
-    s = "".join(c for c in s if unicodedata.category(c) not in ("Mn", "Cf"))
-    return " ".join(s.translate(_COMPARE_FOLDS).split())
-
-
-def _score(needle: str, text: str, fuzzy: bool = True) -> float:
-    """1 for the exact name, then starts with, a word starts with, contains, then a close spelling."""
-    needle, text = _fold_search_text(needle), _fold_search_text(text)
-    if not needle or not text:
-        return 0.0
-    if text == needle:
-        return 1.0
-    if text.startswith(needle):
-        return 0.95
-    if any(word.startswith(needle) for word in re.split(r"[\s›·/&,()-]+", text)):
-        return 0.9
-    if needle in text:
-        return 0.8
-    ratio = SequenceMatcher(None, needle, text).ratio() if fuzzy else 0.0
-    return ratio * 0.75 if ratio >= 0.6 else 0.0
+GROUPS = ("Transaction", "Page", "Action", "Account", "Person", "Counterparty", "Category", "Reserve", "Investment", "Tag", "Search")
 
 
 def matches(c, query: str, privacy: bool = False, per_group: int = 6) -> list[dict]:
@@ -136,7 +82,7 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6) -> list[di
 
     def add(score: float, label: str, href: str, kind: str, context: str = "", **more) -> None:
         if score > 0:
-            found.append((score, {"label": label, "href": href, "kind": kind, "context": context, **more}))
+            found.append((score, {"label": label, "href": href, "kind": kind, "context": context, "entity_id": href, "rank": score, "match_reason": ("exact" if score == 1 else "prefix" if score >= 0.9 else "contains" if score >= 0.8 else "typo"), **more}))
 
     try:
         txn = c.transactions.get_by_ref(query) if parse_ref(query.upper()) else None
@@ -150,25 +96,35 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6) -> list[di
     add(max(_score(needle, privacy_action["label"], fuzzy), _score(needle, "privacy hide show amounts blur", False) * 0.85),
         privacy_action["label"], "#", "Action", privacy_action["context"], action="privacy")
     for account in c.accounts.list(active_only=True):
-        score = _score(needle, account.label, fuzzy)
+        score = max(_score(needle, account.label, fuzzy, "Account"), _score(needle, account.code, False))
         add(score, account.label, f"/accounts/{account.id}", "Account", account.account_type.label
             if hasattr(account.account_type, "label") else account.account_type.value.replace("_", " ").capitalize())
         if account.account_type.value in ("BANK", "CASH", "BROKERAGE"):
             for verb, path in (("Import CSV", "import"), ("Adjust balance", "reconcile")):
                 add(max(_score(needle, f"{verb} {account.label}", fuzzy), _score(needle, verb, False) * 0.85 if score
                         or len(needle) > 2 else 0), f"{verb} · {account.label}", f"/accounts/{account.id}/{path}", "Action")
+    aliases = c.counterparties.aliases_by_counterparty()
+    people = {p["id"] for p in c.counterparties.list_people()}
     for party in c.counterparties.list_active():
-        add(_score(needle, party["name"], fuzzy), party["name"], "/transactions?" + urlencode({"q": party["name"]}), "Counterparty",
-            "Its transactions")
+        names = [party["name"], *(row["alias"] for row in aliases.get(party["id"], []))]
+        kind = "Person" if party["id"] in people else "Counterparty"
+        canonical = _score(needle, party["name"], fuzzy, kind)
+        alias = max((_score(needle, name, fuzzy, kind) * 0.98 for name in names[1:]), default=0)
+        score = max(canonical, alias)
+        reason = "confirmed alias" if alias > canonical else "exact" if canonical == 1 else "prefix" if canonical >= 0.9 else "contains" if canonical >= 0.8 else "typo"
+        add(score, party["name"], "/transactions?" + urlencode({"q": party["name"]}), kind, "Its transactions", entity_id=party["id"], match_reason=reason)
+    for reserve in c.reserves.list_active():
+        add(_score(needle, reserve["name"], fuzzy, "Reserve"), reserve["name"],
+            f"/plan/reserves#reserve-{reserve['id']}", "Reserve")
     categories = c.categories.tree()
     category_names = {category.id: category.name for category in categories}
     for category in categories:
-        if not category.is_root:
-            add(_score(needle, category.name, fuzzy), category.name, f"/transactions?category_id={category.id}",
+        if category.active and not category.is_root:
+            add(_score(needle, category.name, fuzzy, "Category"), category.name, f"/transactions?category_id={category.id}",
                 "Category", category_names.get(category.parent_id, ""))
     for asset in c.assets.list_assets():
         if not asset.is_cash:
-            add(max(_score(needle, asset.name, fuzzy), _score(needle, asset.code or "", False)), asset.name,
+            add(max(_score(needle, asset.name, fuzzy, "Investment"), _score(needle, asset.code or "", False)), asset.name,
                 "/investments", "Investment", asset.code or "")
     tag_needle = normal_tag(needle) if needle.startswith("#") or len(needle) > 1 else ""
     for tag, count in (c.transactions.tags() if tag_needle else []):
@@ -179,7 +135,7 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6) -> list[di
         ranked = sorted((pair for pair in found if pair[1]["kind"] == group), key=lambda p: (-p[0], p[1]["label"].casefold()))
         results += [row for _, row in ranked[:per_group]]
     results.append({"label": f"Find transactions with “{query}”", "href": "/transactions?" + urlencode({"q": query}),
-                    "kind": "Search", "context": "Search every account's register"})
+                    "kind": "Search", "context": "Search every account's register", "entity_id": "history", "rank": 0, "match_reason": "literal history query"})
     return results
 
 
@@ -194,7 +150,7 @@ def phone_results(c, query: str, privacy: bool = False) -> dict:
     query = " ".join(str(query or "").split())
     found = matches(c, query, privacy=privacy, per_group=5)
     pages = [row for row in found if row["kind"] in ("Page", "Action")]
-    money = [row for row in found if row["kind"] in ("Counterparty", "Category", "Account", "Tag", "Investment")]
+    money = [row for row in found if row["kind"] in ("Person", "Counterparty", "Category", "Account", "Reserve", "Tag", "Investment")]
     payments, total = [], 0
     if query:
         ordered = c.reporting.newest_first(c.transactions.search_ids(ascii_digits(query)))
@@ -220,3 +176,22 @@ async def search(request: Request):
                         "context": translate(row.get("context", ""), "ar")} for row in results]
         return JSONResponse({"query": query, "results": results})
     return render(request, "search.html", query=query, results=results if query else [])
+
+
+@router.post("/search/picker")
+async def scoped_picker(request: Request):
+    """Rank the current enabled options of a picker; submitted values remain explicit choices."""
+    form = await request.form(max_fields=5)
+    raw, query = str(form.get("choices", "")), str(form.get("q", ""))
+    if len(raw) > 512_000 or len(query) > 256:
+        return JSONResponse({"error": "Too many choices."}, status_code=400)
+    try:
+        choices = json.loads(raw)
+        if (not isinstance(choices, list) or len(choices) > 4000
+                or any(not isinstance(row, dict) or not isinstance(row.get("id"), str)
+                       or any(not isinstance(row.get(key, ""), str) or len(row.get(key, "")) > 512
+                              for key in ("label", "context", "code")) for row in choices)):
+            raise ValueError
+    except (ValueError, TypeError):
+        return JSONResponse({"error": "Invalid choices."}, status_code=400)
+    return JSONResponse({"ids": rank_choices(query, choices, str(form.get("kind", "Text")))})

@@ -12,7 +12,7 @@ from ..web import container, redirect, render, settled_save
 
 router = APIRouter(prefix="/rules")
 
-FIELDS = ("match", "counterparty_op", "counterparty", "notes", "amount_op", "amount", "amount_to", "account_id",
+FIELDS = ("name", "match", "counterparty_op", "counterparty", "notes", "amount_op", "amount", "amount_to", "account_id",
           "direction", "category_id", "tag") + tuple(f"part_{k}_{i}" for i in range(1, MAX_PARTS + 1)
                                                     for k in ("category", "value"))
 PAST_SHOWN = 20
@@ -24,7 +24,7 @@ def _form(request: Request, c, values: dict, rule=None, error: str = "", error_f
                   categories=[cat.id for cat in pickable],
                   spending=[cat.id for cat in pickable if cat.movement == Movement.OUTFLOW],
                   accounts=c.accounts.list(active_only=True), counterparties=c.counterparties.list_active(),
-                  parts=range(1, MAX_PARTS + 1),
+                  rule_parts=range(1, MAX_PARTS + 1),
                   error=error, error_field=error_field)
 
 

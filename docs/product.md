@@ -55,7 +55,7 @@ Each has a status. "Implemented" means code plus tests exist; the owner still ho
 | Accounts and balances | Say *where* money is | All | One currency per account; cash asset per currency | `accounts/`, `assets/` | Implemented | FR-010–012 |
 | Transactions ledger | Single source of real money | All | Only `TransactionService` writes postings | `transactions/`, `core/ledger.py` | Implemented | FR-020–025 |
 | Categories, counterparties, rules | Sort activity consistently | All | Used categories archive, never delete; never silently merge names | `categories/`, `counterparties.py`, `rules/` | Implemented | FR-030–033 |
-| Import (CSV, SMS) | Get a month in minutes | Mohab | Nothing posts unreviewed | `bank_imports.py`, `sms_imports.py` | Implemented; PDF/Excel planned (NF-7B) | FR-040–042 |
+| Import (CSV, Excel, CIB text PDF, SMS) | Get a month in minutes | Mohab | Nothing posts unreviewed | `bank_imports.py`, `sms_imports.py` | Implemented; non-text PDFs use a local AI-to-CSV handoff | FR-040–042 |
 | Budget and reserves | Plan spending, set money aside | All | Reserve lowers Free cash; budget limit does not | `budgeting/`, `reserves.py` | Implemented | FR-050–053 |
 | Cash planning | Bills, income, loans, forecast, Safe to spend | All | Obligations count, forecasts never do | `planning/` | Implemented | FR-060–064 |
 | Investments and prices | Positions, returns, valuation | Investors | Typed price beats fetched | `investments/`, `market/`, `assets/` | Implemented; lots/ROI planned (5A–5E) | FR-070–074 |

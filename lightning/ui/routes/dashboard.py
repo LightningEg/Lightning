@@ -635,6 +635,7 @@ async def explain_overview_figure(request: Request, kind: str):
                 rows.append({"label": label("bills_due"), "value": -position.bills_due, "href": "/plan"})
             total, foot = position.free_cash, f"Position as of {day}."
         action = ("Open Cash planning", "/plan")
+        notes = c.freshness.for_free_cash(day)
     elif kind == "flow":
         title = label("net_flow")
         figure = "net_flow"

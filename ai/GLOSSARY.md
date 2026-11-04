@@ -131,6 +131,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 
 | Figure | Meaning | How it is calculated | Function |
 |---|---|---|---|
+| **Age of Money** | Amount-weighted days from receipt to use of owned cash, consumed oldest first, over the last ten cash expense transactions in profile currency. Unknown opening cash makes the sample unavailable. This is historical timing, not a runway estimate. | Read directly from the ledger | `reporting.cash_analytics.cash_age` |
 | **In your accounts** | Everything in your accounts, including what you hold for other people. | What you own + Held for others | `planning.position.Position.in_your_accounts` |
 | **Held for others** | Money and units in your accounts that belong to other people. | Read directly from the ledger | `reporting.service.ReportingService.money_from_others_total` |
 | **What you own** | The value of everything in your accounts that is yours. | Cash you own + Holdings value + Other you own | `reporting.service.ReportingService.net_worth` |
@@ -210,6 +211,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 
 | Figure | Meaning | How it is calculated | Function |
 |---|---|---|---|
+| **Lowest scheduled cash** | The lowest projected day-end owned cash balance from confirmed cash and scheduled payments. Excludes variable spending and savings goals; reserves remain in cash. Missing FX makes it unavailable. | Read directly from the plan | `planning.dated_cash.lowest_scheduled_balance` |
 | **Cash available to assign** | Actual owned liquid cash left after reserves, funded spending and bills due outside those funds. Missing FX makes it unavailable; expected income never contributes. | Read directly from the plan | `planning.funding.CashFundingService.preview` |
 | **Funded spending left** | This month's assigned category cash after owned spending and refunds, floored at zero. Unused funding does not carry automatically. | Read directly from the plan | `planning.funding.CashFundingService.preview` |
 | **Outstanding reimbursement** | The eligible amount claimed for an owned expense that valid explicitly linked repayments or refunds have not covered. A claim is not cash before receipt. | Read directly from the plan | `reimbursements.ReimbursementService._claim_summary` |

@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from types import MappingProxyType
 from dataclasses import replace
-from difflib import SequenceMatcher
+from lightning.core.matching import match_score
 import re
 
 from lightning.core.codes import path_segment, validate_path_code
@@ -123,11 +123,11 @@ class CategoryService:
             if parent_id is not None and category.parent_id != parent_id:
                 continue
             names = (category.name, self.display_name(category.id), category.code)
-            score = max((SequenceMatcher(None, wanted, re.sub(r"[^\w]+", " ", name.casefold()).strip()).ratio()
+            score = max((match_score(wanted, name, kind="Category")
                          for name in names), default=0.0)
             if any(wanted in re.sub(r"[^\w]+", " ", name.casefold()).strip() for name in names):
                 score = max(score, 0.8)
-            if score >= 0.5:
+            if score > 0:
                 matches.append((category, score))
         return sorted(matches, key=lambda item: (-item[1], self.display_name(item[0].id).casefold()))[:limit]
 

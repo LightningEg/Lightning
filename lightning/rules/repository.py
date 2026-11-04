@@ -34,11 +34,11 @@ class RuleRepository:
                 category_id=category, tags=tuple(a["value"] for a in acts if a["action"] == "tag"),
                 parts=tuple(Part(a["category_id"], a["method"], Decimal(a["value"])) for a in acts
                             if a["action"] == "split"),
-                position=head["position"]))
+                position=head["position"], name=head["name"]))
         return out
 
     def save(self, rule_id: int | None, match_all: bool, conditions: list[Condition], category_id: int | None,
-             tags: list[str], parts: list[Part]) -> int:
+             tags: list[str], parts: list[Part], name: str = "") -> int:
         now = now_iso()
         if rule_id is None:
             position = (self.db.scalar("SELECT MAX(position) FROM rules") or 0) + 1
@@ -49,6 +49,7 @@ class RuleRepository:
             self.db.execute("UPDATE rules SET match_all=?,updated_at=? WHERE id=?", (int(match_all), now, rule_id))
             self.db.execute("DELETE FROM rule_conditions WHERE rule_id=?", (rule_id,))
             self.db.execute("DELETE FROM rule_actions WHERE rule_id=?", (rule_id,))
+        self.db.execute("UPDATE rules SET name=? WHERE id=?", (name, rule_id))
         for c in conditions:
             self.db.execute("INSERT INTO rule_conditions(rule_id,field,op,value,value_to) VALUES (?,?,?,?,?)",
                             (rule_id, c.field, c.op, c.value, c.value_to))

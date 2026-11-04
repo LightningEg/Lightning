@@ -44,6 +44,7 @@ class ImportProposals:
                 pending_elsewhere.setdefault((staged["Date"], staged["Amount"]), other["file_name"])
             except (TypeError, ValueError, KeyError):
                 continue
+        active_accounts = self.accounts.list(active_only=True)
         seen_refs = set()
         # A full-history query: run it at most once per preview, not once per row (7O).
         usual = functools.cache(self.transactions.usual_categories)
@@ -87,6 +88,12 @@ class ImportProposals:
             # cannot be matched waits for the user to pick it.
             target = next((a for a in self.accounts.list(active_only=True)
                            if a.name == parsed["_transfer_target_suggestion"]), None)
+            same_name = [a for a in active_accounts if a.id != batch["account_id"]
+                         and a.name.casefold() == parsed["Counterparty"].strip().casefold()]
+            parsed["_identity_ambiguous"] = len(same_name) > 1 or bool(same_name and cp)
+            if parsed["_identity_ambiguous"]:
+                target = None
+                parsed["_transfer_target_suggestion"] = None
             is_transfer = parsed["_internal"] or self._own_account(batch["account_id"], parsed["Counterparty"])
             parsed["_transfer_target"] = target.name if target and is_transfer else None
             parsed["_transfer_account_id"] = str(target.id) if target and is_transfer else ""
@@ -101,7 +108,7 @@ class ImportProposals:
             parsed["_possible_duplicate"] = bool(ref_duplicate or repeat_import or parsed["_similarity_warning"]
                                                  or parsed["_voided_earlier"] or parsed["_link_candidates"])
             parsed["_ready"] = bool(not parsed.get("_errors") and not parsed["_possible_duplicate"]
-                                    and not parsed["_suggestions"] and not parsed["_needs_account"]
+                                    and not parsed["_suggestions"] and not parsed["_needs_account"] and not parsed["_identity_ambiguous"]
                                     and (parsed["_category_id"] or parsed["_transfer_target"]))
             parsed["_import_row_id"] = row["id"]
             parsed["_account_id"] = batch["account_id"]
@@ -135,7 +142,7 @@ class ImportProposals:
             "(SELECT GROUP_CONCAT(DISTINCT b.file_name) FROM bank_import_rows r "
             "JOIN bank_import_batches b ON b.id=r.batch_id WHERE r.transaction_id=t.id AND r.account_id=? "
             "AND r.status IN ('POSTED','LINKED')) AS source_files FROM transactions t "
-            "JOIN ledger_entries l ON l.transaction_id=t.id AND l.account_id=? "
+            "JOIN ledger_entries l ON l.transaction_id=t.id AND l.account_id=? AND (t.type<>'CNV' OR l.owner_id IS NULL) AND l.asset_id IN (SELECT id FROM financial_assets WHERE is_cash=1) "
             "WHERE t.status='POSTED' AND julianday(t.date) BETWEEN julianday(?)-? AND julianday(?)+? "
             "AND (? IS NULL OR NOT EXISTS (SELECT 1 FROM bank_import_rows r "
             "WHERE r.transaction_id=t.id AND r.account_id=? AND r.batch_id=? "
@@ -147,6 +154,7 @@ class ImportProposals:
         return [{"id": r["id"], "date": r["date"], "type": r["type"],
                  "counterparty": r["counterparty"] or "", "notes": r["notes"] or "",
                  "amount": parsed["Amount"], "source_count": r["source_count"],
+                 "conversion": self._conversion_legs(r["id"]) if r["type"] == "CNV" else "",
                  "source_files": r["source_files"] or ""} for r in rows]
 
     def _voided_earlier(self, account_id: int, batch_id: int, reference: str | None, parsed: dict) -> bool:
@@ -295,3 +303,12 @@ class ImportProposals:
         )
         return bool(row)
 
+
+
+    def _conversion_legs(self, txn_id):
+        from lightning.core.money import from_e6
+        rows = self.db.all("SELECT a.name,a.currency,SUM(l.quantity_e6) quantity FROM ledger_entries l "
+                           "JOIN accounts a ON a.id=l.account_id JOIN financial_assets f ON f.id=l.asset_id "
+                           "WHERE l.transaction_id=? AND l.owner_id IS NULL AND f.is_cash=1 "
+                           "GROUP BY a.id ORDER BY a.id", (txn_id,))
+        return " · ".join(f"{r['name']}: {from_e6(r['quantity']):f} {r['currency']}" for r in rows)

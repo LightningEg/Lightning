@@ -19,3 +19,7 @@ Categories, accounts and dates carried over, every row reviewed.
 
 ## 7C3 A move-in guide · M
 One screen that says how to export from each app and what carries over.
+
+## Owner decision · 2026-11-04
+
+The owner excluded NF-7C migration from the Section 7 implementation request. Leave this item unbuilt.

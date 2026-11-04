@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 44 open items, in the order they are worked on.
+10 milestones, 37 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -151,36 +151,12 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **NF-7B** | [Read PDF and Excel statements through the CSV review](7-planning-import-and-search/7B-pdf-and-excel-statements.md) | new feature | Capture | L | new |
-| NF-7B1 | ↳ Design: parser choice, size caps, no macros, no formulas run | | | M | |
-| NF-7B2 | ↳ Excel statements through the CSV review | | | L | |
-| NF-7B3 | ↳ PDF statements through the CSV review | | | L | |
-| NF-7B4 | ↳ Tests and a Mohab step | | | M | |
 | **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](7-planning-import-and-search/7C-move-in-from-other-apps.md) | new feature | Capture | L | new |
 | NF-7C1 | ↳ Read each app's export format | | | M | |
 | NF-7C2 | ↳ A mapping preset per app in the CSV review | | | L | |
 | NF-7C3 | ↳ A move-in guide | | | M | |
-| **NF-7D** | [Search and matching: what is not built](7-planning-import-and-search/7D-search-and-matching.md) | new feature | Capture | L | ready |
-| NF-7D1 | ↳ Agree the matching contract ([#218](https://github.com/LightningEg/Lightning/issues/218)) | | | M | |
-| NF-7D2 | ↳ Replace difflib with RapidFuzz ([#219](https://github.com/LightningEg/Lightning/issues/219)) | | | L | |
-| NF-7D3 | ↳ Scoped pickers use the matcher ([#220](https://github.com/LightningEg/Lightning/issues/220)) | | | M | |
-| NF-7D4 | ↳ Page search grouped by type ([#221](https://github.com/LightningEg/Lightning/issues/221)) | | | M | |
-| NF-7D5 | ↳ History search through matched IDs ([#222](https://github.com/LightningEg/Lightning/issues/222)) | | | M | |
-| NF-7D6 | ↳ Edge cases and speed ([#223](https://github.com/LightningEg/Lightning/issues/223)) | | | M | |
-| **NF-7E** | [Match bank-imported transfer pairs across currencies](7-planning-import-and-search/7E-imported-pairs-across-currencies.md) | new feature | Capture | M | new |
-| **NF-7F** | [Small planning gaps](7-planning-import-and-search/7F-small-planning-gaps.md) | new feature | Plan | M | new |
-| NF-7F2 | ↳ Rename a rule | | | S | |
-| NF-7F3 | ↳ Change one budget category without the full grid | | | M | |
-| **NF-7G** | [Age of Money and a spending calendar](7-planning-import-and-search/7G-more-analytics.md) | new feature | Understand | M | new |
-| **NF-7X** | [Extend local planning with scenario comparisons and bill-change alerts](7-planning-import-and-search/7X-scenario-and-bill-intelligence.md) | new feature | Plan | L | new |
-| NF-7X1 | ↳ Specify scenario inputs and comparisons | | | M | |
-| NF-7X2 | ↳ Calculate read-only scenarios | | | M | |
-| NF-7X3 | ↳ Present scenario comparisons | | | M | |
-| NF-7X4 | ↳ Define and detect bill drift and repeated charges | | | M | |
-| NF-7X5 | ↳ Show reviewable alerts in Needs you | | | M | |
-| **NF-7Y** | [Explain which stale or pending inputs affect a financial figure](7-planning-import-and-search/7Y-financial-data-freshness.md) | new feature | Understand | M | building |
 
-Done: 7A, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W. Next free code: 7Z.
+Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y. Next free code: 7Z.
 
 ## 8 Website
 

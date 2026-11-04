@@ -764,6 +764,23 @@ async def reset_carryover(request: Request, category_id: int):
     return redirect(f"/budget?month={month}", "Carryover reset from this month.")
 
 
+@router.get("/category/{category_id:int}/edit")
+async def one_category_limit(request: Request, category_id: int):
+    """Change one rule without opening or submitting the full budget grid."""
+    c = container(request)
+    category = c.categories.get(category_id)
+    if category.movement != Movement.OUTFLOW or category.is_root or category.is_system or not category.active:
+        raise ValidationError("Choose an active spending category.")
+    month = _month(request)
+    line = next((row for section in c.budgets.month_view(month, schedule=c.schedules.view()).sections
+                 for row in section.lines if row.category_id == category_id), None)
+    if line is not None and line.from_loans:
+        raise ValidationError("Change loan payments from Loans.")
+    rule = (f"{line.income_percent.normalize():f}%" if line and line.income_percent is not None
+            else f"{line.direct:f}" if line and line.direct is not None and not line.average_months else "")
+    return render(request, "budget_category_rule.html", category=category, month=month, rule=rule)
+
+
 @router.post("/limit/{category_id:int}")
 async def inline_limit(request: Request, category_id: int):
     c = container(request)

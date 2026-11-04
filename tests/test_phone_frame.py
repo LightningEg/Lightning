@@ -117,9 +117,10 @@ def test_add_opens_on_the_amount_with_an_account_already_chosen(phone):
     assert 'data-account-chip' in first and "data-sms-paste" in first
     sheet = phone.get("/accounts/2/transaction/new").text
     category = re.search(r'<option value="(\d+)" data-movement="OUTFLOW"', sheet).group(1)
-    phone.post("/accounts/2/transaction/new", data={
+    saved = phone.post("/accounts/2/transaction/new", data={
         "__session": token(sheet, "__session"), "kind": "out", "amount": "7", "category_id": category,
-        "counterparty": "Kiosk two", "date": "2026-10-06", "return_to": "/accounts/2"})
+        "counterparty": "Phone kiosk", "date": "2026-10-06", "return_to": "/accounts/2"})
+    assert saved.status_code == 200, re.findall(r'<[^>]*class="[^"]*(?:error|flash)[^"]*"[^>]*>(.*?)</[^>]+>', saved.text, re.S)
     quick = phone.get("/accounts/add-transaction").text
     assert "To which account?" not in quick and 'action="/accounts/2/transaction/new"' in quick
     assert "To which account?" in phone.get("/accounts/add-transaction?pick=1").text

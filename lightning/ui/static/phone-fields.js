@@ -70,7 +70,7 @@
       if (navigator.clipboard && navigator.clipboard.readText) button.hidden = false;
     });
     const amount = root.querySelector(".phone-entry input[autofocus]");
-    if (amount && !amount.value) setTimeout(() => amount.focus({ preventScroll: true }), 60);
+    if (amount && !amount.value) setTimeout(() => { if (document.activeElement === document.body || document.activeElement === amount || document.activeElement?.tagName === "DIALOG") amount.focus({ preventScroll: true }); }, 60);
   };
   const box = document.getElementById("app-popup-content");
   if (box) new MutationObserver(() => ready(box)).observe(box, { childList: true });
