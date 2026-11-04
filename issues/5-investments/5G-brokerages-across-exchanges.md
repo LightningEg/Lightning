@@ -368,6 +368,12 @@ Round 2, 2026-10-16. The owner answered §13: one row per broker; convert then b
 
 Owner direction (ticket 107, 2026-10-16): this design's pockets read as tabs: one tab per currency pocket of a brokerage, each limited to markets that trade in that pocket's currency, plus a main tab that adds them all up in EGP. Agree with section 1; next step is to settle the pocket list per broker and the tab layout before any code.
 
+**Owner decisions 2026-11-04 (question dialog):**
+- *Finalise:* build Phase 4 and the Dollar-brokerage merge now; anything that waits on a source licence moves to 6B, not here. Owner: "I think we can get the packs now", so check the Gulf and Europe boards live first.
+- *Import:* Interactive Brokers activity and positions statements first.
+- *Pocket layout (ticket 107, refined):* a broker's page leads with a small overview in the main currency, then its pockets inside as tabs (one per currency, each with only its markets). A broker with one pocket keeps the ordinary account page.
+- *Phase 6:* 5G7 is closed here; lots and corporate actions are tracked once, in 5B and 5E.
+
 ## 5G1 Phase 0: honest display · M
 Currency on every non-EGP figure, native average cost, Currencies includes holdings, follow held markets, exchange names without MIC codes, spendable switch for broker cash.
 

@@ -5,6 +5,7 @@
 | Who | Work | Files | Since |
 |---|---|---|---|
 | Codex | IT-1H and report follow-ups; preserve superseding fixes. | financial/report code, source entry, architecture policies | 2026-11-04 |
+| Claude | NF-5G brokerages: pocket tabs, Dollar-brokerage merge, Gulf/Europe own prices, IBKR import. | `lightning/investments/`, broker routes/templates, `lightning/workflows/live_prices.py`, `lightning/assets/catalog*`, `tests/test_*broker*` | 2026-11-04 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
 
@@ -37,6 +38,6 @@ The whole plan, by milestone and code, is `issues/INDEX.md`.
 6. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `reports/2026-10-26-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
 7. **Website recapture** after 3W / 3AG / 7Q so the site shows the current screens. **Read:** `skills/site-recapture/SKILL.md`.
 8. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.
-9. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
+9. **5G Brokers:** being finished (Claude claim). **Read:** 5G *Owner decisions 2026-11-04*.
 10. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
 11. **6B, 6D, 3AI:** shares, gold and institution logos remain as their items describe. **Read:** each item in `issues/INDEX.md`.
