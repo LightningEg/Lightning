@@ -19,7 +19,7 @@
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **Audits 9, 11:** left NF-7T5/7T6. **Read:** reports 2026-10-28, 2026-10-29.
+- **Audits 9, 11:** source follow-ups complete on the report branches. **Read:** reports 2026-10-28, 2026-10-29.
 - **IV-3AN phone plan (Audit 13):** built 2026-11-02; every job at its target (report follow-up). Waits on the owner: Accounts tab first (3AN12), one phone check (3AN13). **Read:** 3AN.
 - **IV-3AM PC declutter:** built and reviewed; the owner checks it on the PC, then the Left list. **Read:** 3AM.
 
@@ -32,7 +32,7 @@
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 
 1. **Report fixes:** 1G, 2AB, 3J, 4K, 7M and 7S are implemented; PC/phone audits continue. **Read:** `reports/README.md`.
-2. **Audit 9 links:** salary-day review and bill-linked reserves are being validated (7T5/7T6). **Read:** 7T.
+2. **Audit 9 links:** salary-day review and bill-linked reserves are complete; native CI remains held. **Read:** `tests/test_reserve_bills.py`, `tests/test_salary_day_portability.py`.
 3. **9K:** profile lifecycle routes split in #300; bank-import parsing/review/posting are split in the follow-up branch; claimed device/restore routes remain. **Read:** 9K.
 4. **1H:** wheels and coordinated locks merged in #286; native packaged validation and a phone install remain. Owner chose to leave native CI blocked while other work continues; PR #302 stays open. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
 5. **2A:** restore safety code (Luna's claim); its reboot drill joins the held checks. **Read:** 2A.

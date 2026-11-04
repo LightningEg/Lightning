@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 49 open items, in the order they are worked on.
+10 milestones, 48 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -184,9 +184,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7F2 | ↳ Rename a rule | | | S | |
 | NF-7F3 | ↳ Change one budget category without the full grid | | | M | |
 | **NF-7G** | [Age of Money and a spending calendar](7-planning-import-and-search/7G-more-analytics.md) | new feature | Understand | M | new |
-| **NF-7T** | [Link the sections - salary-day cascade and a reserve tied to its bill](7-planning-import-and-search/7T-link-the-sections.md) | new feature | Plan | L | building |
-| NF-7T5 | ↳ Salary-day cascade | | | L | |
-| NF-7T6 | ↳ A reserve tied to its bill | | | L | |
 | **NF-7X** | [Extend local planning with scenario comparisons and bill-change alerts](7-planning-import-and-search/7X-scenario-and-bill-intelligence.md) | new feature | Plan | L | new |
 | NF-7X1 | ↳ Specify scenario inputs and comparisons | | | M | |
 | NF-7X2 | ↳ Calculate read-only scenarios | | | M | |
@@ -195,7 +192,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7X5 | ↳ Show reviewable alerts in Needs you | | | M | |
 | **NF-7Y** | [Explain which stale or pending inputs affect a financial figure](7-planning-import-and-search/7Y-financial-data-freshness.md) | new feature | Understand | M | new |
 
-Done: 7A, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7U, 7V, 7W. Next free code: 7Z.
+Done: 7A, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W. Next free code: 7Z.
 
 ## 8 Website
 

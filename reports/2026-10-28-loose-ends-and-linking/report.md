@@ -132,3 +132,7 @@ IT-3J is closed. The shipped conversion, foreign-currency positions, source/date
 D6 is implemented with explicit reserve-to-bill linking, saved balances on bill/payment screens, atomic payment funding and dated association history. Saved cash is held once in Free cash, Safe to spend, forecast commitments and payday allocation; the bill replaces a separate linked-reserve goal top-up. Gross ledger spending remains unchanged. [Reserve-to-bill regressions](../../tests/test_reserve_bills.py) cover partial/full funding, payment/void/restore invariants, retries, rollback, edits, foreign rounding, migration and encrypted home/replica replay. The salary-day review D5 remains under replay validation; native acceptance remains separate.
 
 **2026-11-04 follow-up.** NF-7T5 now offers the payday allocation when a posted salary settles planned income; review and cash assignment require explicit action. Regression: `tests/test_salary_day_review.py`. NF-7T6 remains open.
+
+## Final source follow-up · 2026-11-04
+
+NF-7T5 and NF-7T6 are complete. [Salary review](../../tests/test_salary_day_review.py), [portable encrypted replay](../../tests/test_salary_day_portability.py), [bill reserve invariants](../../tests/test_reserve_bills.py) and [phone flows](../../tests/test_phone_payday_browser.py) cover the linked workflows. Earlier open-step notes above describe their dated state; native acceptance remains separately held in 1H/4A.
