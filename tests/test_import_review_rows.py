@@ -23,6 +23,43 @@ def _ids(rows):
     return {int(r["_line"]): r["_import_row_id"] for r in rows}
 
 
+def test_post_ready_rows_leaves_unresolved_rows_for_retry(c, setup):
+    accounts, cats = setup
+    cib = accounts["cib"].id
+    batch, rows = _stage(c, cib, "Date,Counterparty,Amount\n2026-09-10,A,-10\n2026-09-11,B,-20\n2026-09-12,C,-30\n")
+    ids = _ids(rows)
+    response = _post(c, cib, batch, {
+        f"category_{ids[2]}": str(cats["EXP.PERSONAL.FOOD"].id),
+        f"category_{ids[3]}": "__uncategorized__",
+        f"category_{ids[4]}": "", f"counterparty_{ids[4]}": "Edited B",
+    })
+    assert "Some rows still need review" in response.text and "Edited B" in response.text
+    assert c.bank_imports.summary(batch)["posted"] == 2
+    _, reviewed = c.bank_imports.preview(batch)
+    assert [r["_status"] for r in reviewed] == ["POSTED", "POSTED", "REVIEW"]
+    assert c.db.scalar("SELECT COUNT(*) FROM transactions t JOIN ledger_entries l ON l.transaction_id=t.id JOIN categories c ON c.id=l.category_id "
+                       "WHERE c.code='EXP.UNACCOUNTED' AND t.status='POSTED'") == 1
+    assert "Import complete" in _post(c, cib, batch, {f"category_{ids[4]}": str(cats["EXP.PERSONAL.FOOD"].id)}).text
+    _post(c, cib, batch, {f"category_{ids[4]}": str(cats["EXP.PERSONAL.FOOD"].id)})
+    assert c.bank_imports.summary(batch)["posted"] == 3
+
+
+def test_duplicate_requires_explicit_choice_before_posting(c, setup):
+    accounts, cats = setup
+    cib = accounts["cib"].id
+    data = "Date,Counterparty,Amount,Reference\n2026-09-10,Shop,-10,REF1\n"
+    first, rows = _stage(c, cib, data)
+    rid = rows[0]["_import_row_id"]
+    _post(c, cib, first, {f"category_{rid}": str(cats["EXP.PERSONAL.FOOD"].id)})
+    second, rows = _stage(c, cib, data, "again.csv")
+    rid = rows[0]["_import_row_id"]
+    assert rows[0]["_possible_duplicate"]
+    _post(c, cib, second, {f"category_{rid}": "__uncategorized__"})
+    assert c.bank_imports.summary(second)["posted"] == 0
+    _post(c, cib, second, {f"match_{rid}": "skip"})
+    assert c.bank_imports.summary(second)["duplicates"] == 1
+
+
 def test_the_dad_scenario_posts_both_rows_with_the_right_owner(c, setup):
     accounts, _ = setup
     cib, thndr = accounts["cib"].id, accounts["thndr"].id

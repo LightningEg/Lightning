@@ -2396,6 +2396,8 @@ PAGES = {
     "The uploaded statement could not be read. Upload it again.": "ما قدرناش نقرأ الكشف اللي اترفع. ارفعه تاني.",
     "Import complete: {a} posted, {b} linked to entries you already had, {c} skipped, {d} duplicates.": "الاستيراد خلص: {a} اتسجل، {b} اتربط بمعاملات عندك قبل كده، {c} اتخطى، {d} تكرار.",
     "Import complete: {a} posted, {c} skipped, {d} duplicates.": "الاستيراد خلص: {a} اتسجل، {c} اتخطى، {d} تكرار.",
+    "Import updated: {a} posted, {b} linked to entries you already had, {c} skipped, {d} duplicates. Some rows still need review.": "الاستيراد اتحدث: {a} اتسجل، {b} اتربط بمعاملات عندك قبل كده، {c} اتخطى، {d} تكرار. لسه فيه صفوف محتاجة مراجعة.",
+    "Import updated: {a} posted, {c} skipped, {d} duplicates. Some rows still need review.": "الاستيراد اتحدث: {a} اتسجل، {c} اتخطى، {d} تكرار. لسه فيه صفوف محتاجة مراجعة.",
     "Group files with the same columns together, or match each file separately.": "جمّع الملفات اللي ليها نفس الأعمدة مع بعض، أو طابق كل ملف لوحده.",
     "These files are too large to map together. Choose fewer files, or match them one at a time.": "الملفات دي كبيرة أوي على إنها تتطابق مع بعض. اختار ملفات أقل، أو طابقهم واحد واحد.",
     "{n} payments": "{n} دفعات",
