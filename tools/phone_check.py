@@ -82,7 +82,7 @@ def run(shots: Path | None = None, *, arabic: bool = False) -> list[str]:
                     page.select_option("select[name=question]", index=1)
                 elif page.locator("input[name=question]").count():
                     page.fill("input[name=question]", "Dummy question?")
-                page.click("button[type=submit]")
+                page.click("form[action='/profiles/new'] button[type=submit]")
                 key = re.search(r"\d{4}-\d{4}-\d{4}", page.content()).group(0)
                 if page.locator("form[action='/profiles/confirm'] input[name=recovery][type=text]").count():
                     page.fill("input[name=recovery]", key)
@@ -130,6 +130,14 @@ def run(shots: Path | None = None, *, arabic: bool = False) -> list[str]:
                             page.evaluate("() => document.querySelectorAll('.phone-sheet-row[open]').forEach((d) => { d.open = false; })")
                         if arabic and not (page.locator("html").get_attribute("lang") or "").startswith("ar"):
                             problems.append(f"{width} {path}: Arabic locale was not applied")
+                        if path == "/profiles":
+                            masthead = page.locator(".masthead")
+                            if masthead.count() and not masthead.evaluate("""e => {
+                                const toggle = e.querySelector('.gate-language button');
+                                return toggle && toggle.getBoundingClientRect().height >= 48 &&
+                                  [...e.children].every(c => { const r = c.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth; });
+                            }"""):
+                                problems.append(f"{width} {path}: clipped profile header or small language switch")
                         if path == "/counterparties" and page.locator(".alias-details").count():
                             page.locator(".alias-details").first.evaluate("el => el.open = true")
                         if path == "/accounts/currencies":

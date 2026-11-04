@@ -359,3 +359,26 @@ def test_loan_ratios_are_compared_rows_instead_of_an_unpaired_tile(phone):
     assert 'Debt to net worth' in ratios and 'Debt to cash' in ratios and 'Loan payments to income' in ratios
     assert 'owed against' in ratios and 'a month of' in ratios
     assert 'class="stat-tiles"' not in html
+
+
+def test_phone_profile_gate_switches_language_with_one_action(phone):
+    html = phone.get('/profiles').text
+    form = html.split('class="gate-language"', 1)[1].split('</form>', 1)[0]
+    assert 'name="locale" value="ar"' in form and '<select' not in form
+    csrf = re.search(r'name="csrf" value="([^"]+)"', form).group(1)
+    arabic = phone.post('/profiles/locale', data={'csrf': csrf, 'locale': 'ar', 'return_to': '/profiles'}).text
+    assert 'lang="ar-EG"' in arabic
+    switched = arabic.split('class="gate-language"', 1)[1].split('</form>', 1)[0]
+    assert 'name="locale" value="en"' in switched and '<select' not in switched
+    csrf = re.search(r'name="csrf" value="([^"]+)"', switched).group(1)
+    phone.post('/profiles/locale', data={'csrf': csrf, 'locale': 'en', 'return_to': '/profiles'})
+
+
+def test_desktop_profile_gate_retains_language_select(tmp_path):
+    cfg = Credentials("http://127.0.0.1:9862")
+    app = profile_app(cfg, tmp_path / "docs", devices=Devices(tmp_path / "app", port=0), phone=False)
+    with TestClient(app, base_url=cfg.origin, headers={"Origin": cfg.origin}) as browser:
+        browser.get("/__launch", params={"code": cfg.launch_code})
+        html = browser.get("/profiles").text
+        form = html.split('class="gate-language"', 1)[1].split('</form>', 1)[0]
+        assert '<select' in form and 'name="locale"' in form
