@@ -7,7 +7,7 @@ from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, today
 from lightning.core.errors import LightningError, NotFoundError, ValidationError
 
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 
 router = APIRouter(prefix="/deposits")
 METHODS = {"SIMPLE": "Simple", "COMPOUND": "Compound"}
@@ -70,7 +70,7 @@ async def purchase(request: Request, account_id: int):
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = values | {"account": account_id}
     try:
-        with c.db.transaction():
+        with settled_save(request, c):
             earlier = c.transactions.submitted(submission, payload)  # a resent form returns its first purchase
             if earlier is not None:
                 return redirect(f"/deposits/{account_id}", f"Saved {earlier.ref}.")
@@ -96,17 +96,18 @@ async def update_terms(request: Request, account_id: int, certificate_id: int):
         cert = c.deposits.certificate(certificate_id)
         if cert.terms.account_id != account_id:
             raise NotFoundError("Certificate not found in this portfolio.")
-        c.deposits.update_certificate(
-            certificate_id, name=str(form.get("name", "")).strip(),
-            lockup_end_date=str(form.get("lockup_end_date", "")),
-            maturity_date=str(form.get("maturity_date", "")),
-            annual_rate=str(form.get("annual_rate", "")),
-            interest_method=str(form.get("interest_method", "")),
-            payout_frequency=str(form.get("payout_frequency", "")),
-            compounding_frequency=str(form.get("compounding_frequency", "")),
-            destination_account_id=_int(str(form.get("destination_account_id", ""))),
-            term_years=str(form.get("term_years", "")),
-        )
+        with settled_save(request, container(request)):
+            c.deposits.update_certificate(
+                certificate_id, name=str(form.get("name", "")).strip(),
+                lockup_end_date=str(form.get("lockup_end_date", "")),
+                maturity_date=str(form.get("maturity_date", "")),
+                annual_rate=str(form.get("annual_rate", "")),
+                interest_method=str(form.get("interest_method", "")),
+                payout_frequency=str(form.get("payout_frequency", "")),
+                compounding_frequency=str(form.get("compounding_frequency", "")),
+                destination_account_id=_int(str(form.get("destination_account_id", ""))),
+                term_years=str(form.get("term_years", "")),
+            )
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose a valid payout account."
         return _page(request, account_id, error=message, status_code=400)
@@ -121,9 +122,10 @@ async def redeem(request: Request, account_id: int, certificate_id: int):
         cert = c.deposits.certificate(certificate_id)
         if cert.terms.account_id != account_id:
             raise NotFoundError("Certificate not found in this portfolio.")
-        txn = c.deposits.redeem(certificate_id, str(form.get("date", "")),
-                                str(form.get("proceeds", "")),
-                                _int(str(form.get("destination_account_id", ""))))
+        with settled_save(request, container(request)):
+            txn = c.deposits.redeem(certificate_id, str(form.get("date", "")),
+                                    str(form.get("proceeds", "")),
+                                    _int(str(form.get("destination_account_id", ""))))
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose a valid destination account."
         return _page(request, account_id, error=message, status_code=400)
@@ -141,7 +143,8 @@ async def match_all_suggested_receipts(request: Request, account_id: int, certif
     try:
         if certificate_id is not None and c.deposits.certificate(certificate_id).terms.account_id != account_id:
             raise NotFoundError("Certificate not found in this portfolio.")
-        result = c.deposit_receipts.confirm_suggested(account_id, certificate_id, today())
+        with settled_save(request, container(request)):
+            result = c.deposit_receipts.confirm_suggested(account_id, certificate_id, today())
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose valid bank receipts."
         return _page(request, account_id, error=message, status_code=400)
@@ -156,7 +159,8 @@ async def confirm_interest_receipts(request: Request, account_id: int, certifica
         cert = c.deposits.certificate(certificate_id)
         if cert.terms.account_id != account_id:
             raise NotFoundError("Certificate not found in this portfolio.")
-        result = c.deposit_receipts.confirm(certificate_id, event_date, form.getlist("transaction_ids"), today())
+        with settled_save(request, container(request)):
+            result = c.deposit_receipts.confirm(certificate_id, event_date, form.getlist("transaction_ids"), today())
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose valid bank receipts."
         return _page(request, account_id, error=message, status_code=400)
@@ -172,7 +176,8 @@ async def remove_interest_receipt(request: Request, account_id: int, certificate
         cert = c.deposits.certificate(certificate_id)
         if cert.terms.account_id != account_id:
             raise NotFoundError("Certificate not found in this portfolio.")
-        c.deposit_receipts.remove(certificate_id, event_date, form.get("transaction_id"))
+        with settled_save(request, container(request)):
+            c.deposit_receipts.remove(certificate_id, event_date, form.get("transaction_id"))
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose a valid bank receipt."
         return _page(request, account_id, error=message, status_code=400)
@@ -184,10 +189,11 @@ async def move_legacy_cash(request: Request, account_id: int):
     form = await request.form()
     c = container(request)
     try:
-        txn = c.deposits.move_legacy_cash(
-            account_id, str(form.get("date", "")), str(form.get("amount", "")),
-            _int(str(form.get("destination_account_id", ""))),
-        )
+        with settled_save(request, container(request)):
+            txn = c.deposits.move_legacy_cash(
+                account_id, str(form.get("date", "")), str(form.get("amount", "")),
+                _int(str(form.get("destination_account_id", ""))),
+            )
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose a valid destination account."
         return _page(request, account_id, error=message, status_code=400)
@@ -200,14 +206,15 @@ async def save_legacy(request: Request, account_id: int):
     form = await request.form()
     try:
         c = container(request)
-        c.deposits.save(
-            account_id, str(form.get("start_date", "")), str(form.get("maturity_date", "")),
-            str(form.get("principal", "")), str(form.get("annual_rate", "")),
-            str(form.get("interest_method", "SIMPLE")), str(form.get("payout_frequency", "AT_MATURITY")),
-            _int(str(form.get("destination_account_id", ""))),
-            lockup_end_date=str(form.get("lockup_end_date", "")),
-            compounding_frequency=str(form.get("compounding_frequency", "MONTHLY")),
-        )
+        with settled_save(request, container(request)):
+            c.deposits.save(
+                account_id, str(form.get("start_date", "")), str(form.get("maturity_date", "")),
+                str(form.get("principal", "")), str(form.get("annual_rate", "")),
+                str(form.get("interest_method", "SIMPLE")), str(form.get("payout_frequency", "AT_MATURITY")),
+                _int(str(form.get("destination_account_id", ""))),
+                lockup_end_date=str(form.get("lockup_end_date", "")),
+                compounding_frequency=str(form.get("compounding_frequency", "MONTHLY")),
+            )
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose a valid payout account."
         return _page(request, account_id, error=message, status_code=400)

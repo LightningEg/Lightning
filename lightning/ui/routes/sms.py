@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from lightning.core.errors import LightningError
 from lightning.sms_imports import MAX_TEXT, SALARY_ENDING, fingerprint, parse_sms
 
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 
 router = APIRouter(prefix="/sms")
 MAX_PASTE = 50  # messages in one paste
@@ -77,7 +77,8 @@ async def paste(request: Request):
     if not messages:
         return _page(request, c, error="Paste one or more bank messages, a blank line between each.")
     now = datetime.now()
-    result = c.sms_imports.read([("", m, now) for m in messages])
+    with settled_save(request, container(request)):
+        result = c.sms_imports.read([("", m, now) for m in messages])
     found = sum(len(c.bank_imports.preview(batch)[1]) for batch in result["staged"].values())
     parts = []
     if found:
@@ -95,7 +96,8 @@ async def paste(request: Request):
 async def dismiss(request: Request):
     c = container(request)
     form = await request.form()
-    c.sms_imports.dismiss(str(form.get("id", "")))
+    with settled_save(request, container(request)):
+        c.sms_imports.dismiss(str(form.get("id", "")))
     return redirect("/sms")
 
 
@@ -104,7 +106,8 @@ async def assign(request: Request):
     c = container(request)
     form = await request.form()
     try:
-        batch = c.sms_imports.assign(str(form.get("ending", "")), int(str(form.get("account_id", "0")) or 0))
+        with settled_save(request, container(request)):
+            batch = c.sms_imports.assign(str(form.get("ending", "")), int(str(form.get("account_id", "0")) or 0))
     except (LightningError, ValueError) as exc:
         return _page(request, c, error=getattr(exc, "message", "") or "Choose the account for these messages.")
     if batch is None:

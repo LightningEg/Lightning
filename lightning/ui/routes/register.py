@@ -716,7 +716,7 @@ def resent_guard(c, form):
     return scope(form.get("submission")) if scope else nullcontext()
 
 
-async def create(request: Request, account_id: int | None):
+async def create(request: Request, account_id: int | None, *, auto_reserves: bool = False):
     """Save the quick-add row; come back ready for the next one."""
     c = container(request)
     form = await request.form()
@@ -746,6 +746,8 @@ async def create(request: Request, account_id: int | None):
                 owner = _custody_owner(c, entry, category)
                 c.money_from_others.sync_transaction(txn.id, txn.date, owner, row_account, amount, entry["notes"])
             c.transactions.remember_submission(submission, payload, txn.id)
+            if auto_reserves:
+                entry["_matched_reserve"] = c.reserves.auto_link_transaction(txn.id)
     except LightningError as exc:
         return page(request, account_id, entry=entry, error=exc.message, error_field=exc.field or "",
                     status_code=400)
@@ -787,6 +789,7 @@ async def update(request: Request, account_id: int | None, txn_id: int):
             else:
                 owner = _custody_owner(c, values, category)
                 c.money_from_others.sync_transaction(txn.id, txn.date, owner, row_account, amount, values["notes"])
+            values["_matched_reserve"] = c.reserves.auto_link_transaction(txn.id)
     except LightningError as exc:
         return page(request, account_id, edit_values=values, error=exc.message, error_field=exc.field or "",
                     status_code=400, edit_id=txn_id, edit_acct=row_account)
@@ -832,6 +835,7 @@ async def create_investment_entry(request: Request, account_id: int):
             if txn is None:
                 txn = entry_workflow.record(c, account, values)
                 c.transactions.remember_submission(submission, payload, txn.id)
+                values["_matched_reserve"] = c.reserves.auto_link_transaction(txn.id)
     except LightningError as exc:
         return page(request, account_id, investment_entry=values, error=exc.message,
                     investment_error_field=exc.field or "", status_code=400)

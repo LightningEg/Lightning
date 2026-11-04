@@ -8,7 +8,7 @@ from lightning.categories.domain import Movement
 from lightning.core.errors import LightningError
 from lightning.rules.service import MAX_PARTS
 
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 
 router = APIRouter(prefix="/rules")
 
@@ -51,7 +51,8 @@ async def create_rule(request: Request):
     form = await request.form()
     values = {k: str(form.get(k, "")).strip() for k in FIELDS}
     try:
-        rule_id = c.rules.save(values)
+        with settled_save(request, container(request)):
+            rule_id = c.rules.save(values)
     except LightningError as exc:
         return _form(request, c, values, error=exc.message, error_field=exc.field or "", status_code=400)
     return redirect(f"/rules/{rule_id}/past", "Rule saved. It files your next imports and entries.")
@@ -71,7 +72,8 @@ async def update_rule(request: Request, rule_id: int):
     form = await request.form()
     values = {k: str(form.get(k, "")).strip() for k in FIELDS}
     try:
-        c.rules.save(values, rule_id)
+        with settled_save(request, container(request)):
+            c.rules.save(values, rule_id)
     except LightningError as exc:
         return _form(request, c, values, rule=rule, error=exc.message, error_field=exc.field or "", status_code=400)
     return redirect(f"/rules/{rule_id}/past", "Rule saved.")
@@ -80,7 +82,8 @@ async def update_rule(request: Request, rule_id: int):
 @router.post("/{rule_id:int}/delete")
 async def delete_rule(request: Request, rule_id: int):
     c = container(request)
-    c.rules.delete(rule_id)
+    with settled_save(request, container(request)):
+        c.rules.delete(rule_id)
     return redirect("/rules", "Rule deleted. Transactions it filed keep their category.")
 
 
@@ -105,7 +108,8 @@ async def apply_to_past(request: Request, rule_id: int):
     try:
         if len(selected) > 1000 or any(not str(value).isdigit() for value in selected):
             raise ValueError
-        count, token = c.rules.apply_past(rule_id, {int(value) for value in selected}, str(form.get("fingerprint", "")))
+        with settled_save(request, container(request)):
+            count, token = c.rules.apply_past(rule_id, {int(value) for value in selected}, str(form.get("fingerprint", "")))
     except (LightningError, ValueError) as exc:
         return redirect(f"/rules/{rule_id}/past", getattr(exc, "message", "Choose valid transactions."))
     if not count:
@@ -118,7 +122,8 @@ async def undo_apply(request: Request):
     c = container(request)
     form = await request.form()
     try:
-        count = c.rules.undo(str(form.get("token", "")))
+        with settled_save(request, container(request)):
+            count = c.rules.undo(str(form.get("token", "")))
     except LightningError as exc:
         return redirect("/rules", exc.message)
     return redirect("/rules", f"Undone: {count} transaction{'s' if count != 1 else ''} back as they were.")

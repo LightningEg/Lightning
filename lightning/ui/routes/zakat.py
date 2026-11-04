@@ -9,7 +9,7 @@ from lightning.core.errors import LightningError
 from lightning.zakat import ZAKAT_CATEGORY
 
 from .. import charts
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 
 router = APIRouter()
 
@@ -28,7 +28,8 @@ async def switch_zakat(request: Request):
     """Settings › Zakat: show or hide zakat everywhere. Turning it off keeps its settings."""
     form = await request.form()
     on = form.get("on") == "1"
-    container(request).zakat.set_enabled(on)
+    with settled_save(request, container(request)):
+        container(request).zakat.set_enabled(on)
     return redirect("/zakat" if on else "/settings", "Zakat is on." if on else "Zakat is off.")
 
 
@@ -51,12 +52,13 @@ async def save_zakat_settings(request: Request):
     form = await request.form()
     old = c.zakat.settings()
     try:
-        if form.get("only_day") == "1":  # the first-time form on the page: only the zakat day changes
-            c.zakat.save_settings(str(form.get("zakat_day", "")), old.typed_nisab, old.count_worn_gold,
-                                  old.deduct_debts_due)
-            return redirect("/zakat", "Zakat day saved.")
-        c.zakat.save_settings(str(form.get("zakat_day", "")), str(form.get("typed_nisab", "")),
-                              form.get("count_worn_gold") == "1", form.get("deduct_debts_due") == "1")
+        with settled_save(request, container(request)):
+            if form.get("only_day") == "1":  # the first-time form on the page: only the zakat day changes
+                c.zakat.save_settings(str(form.get("zakat_day", "")), old.typed_nisab, old.count_worn_gold,
+                                      old.deduct_debts_due)
+                return redirect("/zakat", "Zakat day saved.")
+            c.zakat.save_settings(str(form.get("zakat_day", "")), str(form.get("typed_nisab", "")),
+                                  form.get("count_worn_gold") == "1", form.get("deduct_debts_due") == "1")
     except LightningError as exc:
         return redirect("/settings?section=zakat", exc.message)
     return redirect("/settings?section=zakat", "Zakat settings saved.")

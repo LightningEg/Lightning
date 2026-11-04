@@ -109,8 +109,9 @@ async def set_transaction_category(request: Request, txn_id: int):
     args = _sort_args(form)
     back = _return_to(form.get("return_to") or request.query_params.get("return_to"))
     try:
-        category_id = int(str(form.get("category_id", "")))
-        changed, skipped = c.transactions.set_category([txn_id], category_id)
+        with settled_save(request, c):
+            category_id = int(str(form.get("category_id", "")))
+            changed, skipped = c.transactions.set_category([txn_id], category_id)
     except (ValueError, LightningError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose a category to give this row."
         txn = c.transactions.get(txn_id)
@@ -253,7 +254,7 @@ async def save_edited_conversion(request: Request, txn_id: int):
     form = await request.form()
     values = convert_values(form) | {"return_to": f"/transactions/{txn_id}", "revision": form.get("revision")}
     try:
-        with c.db.transaction():
+        with settled_save(request, c):
             c.transactions.require_revision(txn_id, values["revision"])
             check_conversion_rate(c, values)
             txn = c.transactions.update_conversion(
@@ -311,7 +312,7 @@ async def save_ownership_change(request: Request, txn_id: int):
     values["revision"] = form.get("revision")
     action = f"/transactions/{txn_id}/ownership/edit"
     try:
-        with c.db.transaction():
+        with settled_save(request, c):
             c.transactions.require_revision(txn_id, values["revision"])
             if values["mode"] == "expense":
                 if values["from_owner_id"]:
@@ -368,7 +369,8 @@ async def save_register_view(request: Request):
     form = await request.form()
     try:
         scope = _view_scope(c, form)
-        view_id = c.saved_views.save(str(form.get("name", "")), dict(form), scope)
+        with settled_save(request, container(request)):
+            view_id = c.saved_views.save(str(form.get("name", "")), dict(form), scope)
     except LightningError as exc:
         return redirect(f"/accounts/{form.get('account_id')}" if str(form.get("account_id", "")).isdigit()
                         else "/transactions", exc.message)
@@ -382,7 +384,8 @@ async def delete_register_view(request: Request, view_id: int):
     form = await request.form()
     try:
         scope = _view_scope(c, form)
-        c.saved_views.delete(view_id, scope)
+        with settled_save(request, container(request)):
+            c.saved_views.delete(view_id, scope)
     except LightningError as exc:
         return redirect(f"/accounts/{scope}" if 'scope' in locals() and scope else "/transactions", exc.message)
     return redirect(f"/accounts/{scope}" if scope else "/transactions", "Deleted saved view.")
@@ -415,11 +418,11 @@ async def deleted_transactions(request: Request):
 
 @router.post("/transactions/register")
 async def all_accounts_entry(request: Request):
-    result = await register.create(request, None)
+    result = await register.create(request, None, auto_reserves=True)
     if not isinstance(result, tuple):
         return result
     txn, entry = result
-    matched_reserve = container(request).reserves.auto_link_transaction(txn.id)
+    matched_reserve = entry.get("_matched_reserve", 0)
     feedback = register._budget_feedback(container(request), txn)
     if matched_reserve < 0:
         feedback = (feedback + " Several reserves match; choose beside the transaction in its account list.").strip()
@@ -433,7 +436,7 @@ async def all_accounts_update(request: Request, txn_id: int):
     if not isinstance(result, tuple):
         return result
     txn, values = result
-    matched_reserve = container(request).reserves.auto_link_transaction(txn.id)
+    matched_reserve = values.get("_matched_reserve", 0)
     message = (f"Saved as {txn.ref}. The original transaction is kept in history." if txn.id != txn_id
                else f"Saved {txn.ref}.")
     feedback = register._budget_feedback(container(request), txn)
@@ -504,7 +507,7 @@ async def update_transaction_split(request: Request, txn_id: int):
             if not str(category_id).strip() or not str(amount).strip():
                 raise LightningError("Choose a category and amount for every split row.")
             allocations.append((int(category_id), str(amount)))
-        with c.db.transaction():
+        with settled_save(request, c):
             c.transactions.require_revision(txn_id, form.get("revision"))
             txn = c.transactions.update_expense_split(txn_id, allocations)
     except (ValueError, LightningError) as exc:
@@ -519,13 +522,14 @@ async def link_transaction_reserve(request: Request, txn_id: int):
     form = await request.form()
     action = str(form.get("action", "link"))
     try:
-        reserve_id = int(str(form.get("reserve_id", "")))
-        if action == "unlink":
-            c.reserves.unlink_expense(reserve_id, txn_id)
-            return redirect(f"/transactions/{txn_id}", "Removed the payment from its reserve.")
-        if action != "link":
-            raise LightningError("Choose a valid reserve action.")
-        c.reserves.set_expense_link(reserve_id, txn_id, str(form.get("amount", "")))
+        with settled_save(request, c):
+            reserve_id = int(str(form.get("reserve_id", "")))
+            if action == "unlink":
+                c.reserves.unlink_expense(reserve_id, txn_id)
+                return redirect(f"/transactions/{txn_id}", "Removed the payment from its reserve.")
+            if action != "link":
+                raise LightningError("Choose a valid reserve action.")
+            c.reserves.set_expense_link(reserve_id, txn_id, str(form.get("amount", "")))
     except (ValueError, LightningError) as exc:
         msg = exc.message if isinstance(exc, LightningError) else "Choose a reserve."
         return redirect(_back(request, f"/transactions/{txn_id}"), msg)
@@ -534,8 +538,10 @@ async def link_transaction_reserve(request: Request, txn_id: int):
 
 @router.post("/transactions/{txn_id:int}/void")
 async def void_transaction(request: Request, txn_id: int):
+    c = container(request)
     try:
-        txn = container(request).transactions.void(txn_id)
+        with settled_save(request, c):
+            txn = c.transactions.void(txn_id)
     except LightningError as exc:
         return redirect(_back(request, f"/transactions/{txn_id}"), exc.message)
     return redirect(_back(request, f"/transactions/{txn.id}"), f"{txn.ref} is void — it no longer counts.")
@@ -545,10 +551,11 @@ async def void_transaction(request: Request, txn_id: int):
 async def delete_transaction(request: Request, txn_id: int):
     c = container(request)
     try:
-        reevaluation = c.transactions.get(txn_id).type.value == "VAL"
-        c.transactions.delete_many([txn_id])
-        if reevaluation:
-            c.reevaluations.process_due()
+        with settled_save(request, c):
+            reevaluation = c.transactions.get(txn_id).type.value == "VAL"
+            c.transactions.delete_many([txn_id])
+            if reevaluation:
+                c.reevaluations.process_due()
     except LightningError as exc:
         if request.headers.get("x-requested-with") == "fetch":  # the phone's swipe shows a refusal as is
             return PlainTextResponse(exc.message, 409)
@@ -568,10 +575,11 @@ async def delete_transactions(request: Request):
     if not ids:
         return redirect(destination, "Choose at least one transaction.")
     try:
-        reevaluation = any(c.transactions.get(txn_id).type.value == "VAL" for txn_id in ids)
-        count = c.transactions.delete_many(ids)
-        if reevaluation:
-            c.reevaluations.process_due()
+        with settled_save(request, c):
+            reevaluation = any(c.transactions.get(txn_id).type.value == "VAL" for txn_id in ids)
+            count = c.transactions.delete_many(ids)
+            if reevaluation:
+                c.reevaluations.process_due()
     except LightningError as exc:
         return redirect(destination, exc.message)
     return redirect(destination, f"Deleted {count} transaction(s). You can restore them from history.")
@@ -590,8 +598,9 @@ async def categorize_transactions(request: Request):
     if not str(form.get("category_id", "")).isdigit():
         return redirect(destination, "Choose a category to give the selected rows.")
     try:
-        category_id = int(str(form.get("category_id")))
-        changed, skipped = c.transactions.set_category(ids, category_id)
+        with settled_save(request, c):
+            category_id = int(str(form.get("category_id")))
+            changed, skipped = c.transactions.set_category(ids, category_id)
     except LightningError as exc:
         return redirect(destination, exc.message)
     name = c.categories.display_name(category_id)   # Personal › Transportation, never just "Transportation"
@@ -640,7 +649,7 @@ async def bulk_edit_transactions(request: Request):
             changes["owner_id"] = party["id"]
         if not changes:
             return respond("Nothing changed on the selected rows.", error=True)
-        with c.db.transaction():
+        with settled_save(request, c):
             changed, skipped = c.transactions.bulk_update(ids, changes)
             if "owner_id" in changes:
                 for txn_id in changed:
@@ -660,11 +669,12 @@ async def bulk_edit_transactions(request: Request):
 
 @router.post("/transactions/{txn_id:int}/restore")
 async def restore_transaction(request: Request, txn_id: int):
+    c = container(request)
     try:
-        c = container(request)
-        txn = c.transactions.restore(txn_id)
-        if txn.type.value == "VAL":
-            c.reevaluations.process_due()
+        with settled_save(request, c):
+            txn = c.transactions.restore(txn_id)
+            if txn.type.value == "VAL":
+                c.reevaluations.process_due()
     except LightningError as exc:
         if request.headers.get("x-requested-with") == "fetch":
             return PlainTextResponse(exc.message, 409)

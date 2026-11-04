@@ -240,7 +240,7 @@ async def save_conversion(request: Request, account_id: int):
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = {key: value for key, value in values.items() if key not in ("return_to", "rate_checked")}
     try:
-        with register.resent_guard(c, form), c.db.transaction():
+        with register.resent_guard(c, form), settled_save(request, c):
             txn = c.transactions.submitted(submission, payload)  # a resent form returns its first save
             if txn is None:
                 check_conversion_rate(c, values)
@@ -304,14 +304,15 @@ async def create_account(request: Request):
     try:
         # The internal start date is intentionally not shown: users can enter their first
         # transaction on its real date, including history predating account setup.
-        account = c.account_flows.open_account(
-            name=values["name"], account_type=values["account_type"],
-            opening_date="1900-01-01", opening_balance=values["opening_balance"],
-            currency=values.get("currency") or c.base_currency,
-            opening_balance_date=values["opening_balance_date"],
-            institution=values["institution"], last4=values["last4"], notes=values["notes"],
-            owner_id=int(values["owner_id"]) if values["owner_id"].isdigit() else None,
-        )
+        with settled_save(request, container(request)):
+            account = c.account_flows.open_account(
+                name=values["name"], account_type=values["account_type"],
+                opening_date="1900-01-01", opening_balance=values["opening_balance"],
+                currency=values.get("currency") or c.base_currency,
+                opening_balance_date=values["opening_balance_date"],
+                institution=values["institution"], last4=values["last4"], notes=values["notes"],
+                owner_id=int(values["owner_id"]) if values["owner_id"].isdigit() else None,
+            )
     except LightningError as exc:
         return render(request, "accounts/form.html", status_code=400, **_form_context(request, values, error=exc))
     _remember_institution(c, values["institution"])
@@ -335,8 +336,9 @@ async def update_other_asset_value(request: Request, account_id: int):
     account = c.accounts.get(account_id)
     form = await request.form()
     try:
-        c.accounts.save_other_asset_value(account, str(form.get("date") or today()),
-                                       str(form.get("value") or ""), str(form.get("notes") or ""))
+        with settled_save(request, container(request)):
+            c.accounts.save_other_asset_value(account, str(form.get("date") or today()),
+                                           str(form.get("value") or ""), str(form.get("notes") or ""))
     except LightningError as exc:
         return redirect(f"/accounts/{account_id}", exc.message)
     return redirect(f"/accounts/{account_id}", "Dated estimated value saved.")
@@ -473,8 +475,7 @@ async def quick_add(request: Request):
             txn = earlier or _save_popup_transaction(c, account_id, values)
             if earlier is None:
                 c.transactions.remember_submission(submission, payload, txn.id)
-        if earlier is None:
-            c.reserves.auto_link_transaction(txn.id)
+                c.reserves.auto_link_transaction(txn.id)
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose valid values for this transaction."
         return JSONResponse({"ok": False, "error": message}, 422)
@@ -513,10 +514,10 @@ async def save_transaction_popup(request: Request, account_id: int):
             txn = earlier or _save_popup_transaction(c, account_id, values)
             if earlier is None:
                 c.transactions.remember_submission(submission, payload, txn.id)
+                matched_reserve = c.reserves.auto_link_transaction(txn.id)
+                _remember_sms(c, form, account_id)
         if earlier is not None:
             return redirect(values["return_to"], f"Saved {txn.ref}.")
-        matched_reserve = c.reserves.auto_link_transaction(txn.id)
-        _remember_sms(c, form, account_id)
         feedback = register._budget_feedback(c, txn)
         if matched_reserve < 0:
             feedback = (feedback + " Several reserves match; choose beside the transaction in its account list.").strip()
@@ -581,7 +582,7 @@ async def save_ownership_change(request: Request, account_id: int):
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = values | {"account": account_id}
     try:
-        with c.db.transaction():
+        with settled_save(request, c):
             txn = c.transactions.submitted(submission, payload)  # a resent form returns its first save (2AD)
             if txn is None:
                 txn = _save_ownership(c, account, values)
@@ -633,7 +634,8 @@ async def close_checked_history(request: Request, account_id: int):
     c = container(request)
     form = await request.form()
     try:
-        c.reconciliation.close(account_id, str(form.get("date", "")), str(form.get("balance", "")))
+        with settled_save(request, container(request)):
+            c.reconciliation.close(account_id, str(form.get("date", "")), str(form.get("balance", "")))
     except LightningError as exc:
         return redirect(f"/accounts/{account_id}/reconcile", exc.message)
     return redirect(f"/accounts/{account_id}/reconcile", "Checked history is now protected. Unlock it before making corrections.")
@@ -641,7 +643,8 @@ async def close_checked_history(request: Request, account_id: int):
 
 @router.post("/{account_id:int}/reconcile/unlock")
 async def unlock_checked_history(request: Request, account_id: int):
-    container(request).reconciliation.unlock(account_id)
+    with settled_save(request, container(request)):
+        container(request).reconciliation.unlock(account_id)
     return redirect(f"/accounts/{account_id}/reconcile", "Checked history unlocked.")
 
 
@@ -659,7 +662,8 @@ async def adjust_to_bank(request: Request, account_id: int):
     raw_date, raw_balance = str(form.get("date", "")), str(form.get("balance", ""))
     try:
         through = c.reconciliation.validate_date(raw_date)
-        txn = c.reconciliation.adjust(account_id, through, c.reconciliation.parse_bank_balance(raw_balance))
+        with settled_save(request, container(request)):
+            txn = c.reconciliation.adjust(account_id, through, c.reconciliation.parse_bank_balance(raw_balance))
     except LightningError as exc:
         return _bank_check_page(request, c, account_id, raw_date, raw_balance, exc.message, status_code=400)
     return redirect(f"/accounts/{account_id}", f"Balance adjustment {txn.ref} posted. The account now matches your bank.")
@@ -672,8 +676,6 @@ async def investment_entry(request: Request, account_id: int):
     if not isinstance(result, tuple):
         return result
     txn, _ = result
-    c = container(request)
-    c.reserves.auto_link_transaction(txn.id)
     feedback = register._budget_feedback(container(request), txn)
     return redirect(f"/accounts/{account_id}?date={txn.date}", f"Saved {txn.ref}. {feedback}".strip())
 
@@ -695,8 +697,6 @@ async def register_update(request: Request, account_id: int, txn_id: int):
     if not isinstance(result, tuple):
         return result
     txn, values = result
-    c = container(request)
-    c.reserves.auto_link_transaction(txn.id)
     message = f"Saved as {txn.ref}. The original transaction is kept in history." if txn.id != txn_id else f"Saved {txn.ref}."
     message = f"{message} {register._budget_feedback(container(request), txn)} {values.get('_notice', '')}".strip()
     return redirect(f"/accounts/{account_id}", message)
@@ -731,13 +731,14 @@ async def update_account(request: Request, account_id: int):
     if "last4" not in form:  # the form no longer shows it: keep what is stored
         values["last4"] = account.last4 or ""
     try:
-        account = c.account_flows.update_account(
-            account_id, name=values["name"], account_type=values["account_type"],
-            opening_date=account.opening_date, opening_balance=str(c.account_flows.opening_of(account)),
-            institution=values["institution"], last4=values["last4"], notes=values["notes"],
-            opening_balance_date=values["opening_balance_date"],
-            owner_id=int(values["owner_id"]) if values["owner_id"].isdigit() else None,
-        )
+        with settled_save(request, container(request)):
+            account = c.account_flows.update_account(
+                account_id, name=values["name"], account_type=values["account_type"],
+                opening_date=account.opening_date, opening_balance=str(c.account_flows.opening_of(account)),
+                institution=values["institution"], last4=values["last4"], notes=values["notes"],
+                opening_balance_date=values["opening_balance_date"],
+                owner_id=int(values["owner_id"]) if values["owner_id"].isdigit() else None,
+            )
     except LightningError as exc:
         return render(request, "accounts/form.html", status_code=400,
                       **_form_context(request, values, account=account, error=exc))
@@ -749,7 +750,8 @@ async def update_account(request: Request, account_id: int):
 async def deactivate(request: Request, account_id: int):
     c = container(request)
     try:
-        account = c.account_flows.deactivate(account_id)
+        with settled_save(request, container(request)):
+            account = c.account_flows.deactivate(account_id)
     except LightningError as exc:
         return redirect(f"/accounts/{account_id}", exc.message)
     return redirect(f"/accounts/{account.id}", f"{account.label} is now inactive.")
@@ -761,7 +763,8 @@ async def add_pocket(request: Request, account_id: int):
     c = container(request)
     form = await request.form()
     try:
-        pocket = c.accounts.add_pocket(account_id, str(form.get("currency", "")))
+        with settled_save(request, container(request)):
+            pocket = c.accounts.add_pocket(account_id, str(form.get("currency", "")))
     except LightningError as exc:
         return redirect(f"/accounts/{account_id}", exc.message)
     return redirect(f"/accounts/{account_id}", f"{c.accounts.get(account_id).name} now holds {pocket.currency}.")
@@ -776,7 +779,8 @@ async def set_spendable(request: Request, account_id: int):
     account = c.accounts.get(account_id)
     if choice is not None and choice == replace(account, spendable=None).counts_as_spendable(c.base_currency):
         choice = None  # the default: store no override
-    account = c.accounts.set_spendable(account_id, choice)
+    with settled_save(request, container(request)):
+        account = c.accounts.set_spendable(account_id, choice)
     spendable = account.counts_as_spendable(c.base_currency)
     return redirect(f"/accounts/{account.id}",
                     "Its cash now counts as spendable." if spendable else "Its cash is now kept apart from spendable cash.")
@@ -788,7 +792,8 @@ async def set_cost_method(request: Request, account_id: int):
     c = container(request)
     form = await request.form()
     try:
-        account = c.accounts.set_cost_method(account_id, str(form.get("method", "")))
+        with settled_save(request, c):
+            account = c.accounts.set_cost_method(account_id, str(form.get("method", "")))
     except LightningError as exc:
         return redirect(f"/accounts/{account_id}", exc.message)
     return redirect(f"/accounts/{account.id}", "Sales now use the oldest purchase first." if account.cost_method == "fifo"
@@ -797,6 +802,7 @@ async def set_cost_method(request: Request, account_id: int):
 
 @router.post("/{account_id:int}/reactivate")
 async def reactivate(request: Request, account_id: int):
-    account = container(request).account_flows.reactivate(account_id)
+    with settled_save(request, container(request)):
+        account = container(request).account_flows.reactivate(account_id)
     return redirect(f"/accounts/{account.id}", f"{account.label} is active again.")
 

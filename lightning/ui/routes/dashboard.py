@@ -21,7 +21,7 @@ def fmt(value, places: int = 0, signed: bool = False) -> str:
 from lightning.investments.report import investing_rate, investment_period, saved_and_invested
 from lightning.workflows.review import GROUP_LABELS, ReviewInbox, group_of, grouped
 
-from ..web import container, render
+from ..web import container, render, settled_save
 from ..web import redirect
 from ..periods import Period, parse_period
 from .. import keynotes, kpis, status as page_status, visuals
@@ -214,17 +214,19 @@ async def set_welcome_currency(request: Request):
         return redirect("/", "Choose the profile currency before adding an account.")
     try:
         if getattr(c, "is_journal", False):
-            c.journal_workflows.setup_currencies(code=code, extras=extras, was_empty=not bool(c.accounts.list()))
+            with settled_save(request, c):
+                c.journal_workflows.setup_currencies(code=code, extras=extras, was_empty=not bool(c.accounts.list()))
             return redirect("/", f"Currencies saved: {' · '.join([c.base_currency] + extras)}.")
-        if not c.accounts.list():
-            c.currencies.register(code)
-            c.set_profile_currency(code)
-        for extra in extras:
-            c.currencies.register(extra)
+        with settled_save(request, container(request)):
+            if not c.accounts.list():
+                c.currencies.register(code)
+                c.set_profile_currency(code)
+            for extra in extras:
+                c.currencies.register(extra)
+            c.settings.set("setup_currencies_done", "1")
     except (ValueError, LightningError) as exc:
         message = exc.message if isinstance(exc, LightningError) else str(exc)
         return redirect("/", message)
-    c.settings.set("setup_currencies_done", "1")
     return redirect("/", f"Currencies saved: {' · '.join([c.base_currency] + extras)}.")
 
 
@@ -234,7 +236,8 @@ async def setup_guide(request: Request):
     action = str(form.get("action", ""))
     if action not in ("dismiss", "show"):
         raise LightningError("Choose whether to show or dismiss the setup guide.")
-    container(request).settings.set("setup_guide_dismissed", "1" if action == "dismiss" else "0")
+    with settled_save(request, container(request)):
+        container(request).settings.set("setup_guide_dismissed", "1" if action == "dismiss" else "0")
     return redirect("/")
 
 
@@ -261,7 +264,8 @@ async def save_salary_setup(request: Request):
     form = await request.form()
     values = {key: str(form.get(key, "")) for key in ("account_id", "amount", "payday")}
     try:
-        container(request).salary_setup.set_up_salary(**values)
+        with settled_save(request, container(request)):
+            container(request).salary_setup.set_up_salary(**values)
     except LightningError as exc:
         return _salary_form(request, values, exc.message, 400, exc.field or "")
     return redirect("/plan/recurring", "Salary added. Add your bills when you are ready.")
@@ -695,7 +699,7 @@ async def add_money_from_others(request: Request):
         day = parse_date(form.get("date", today().isoformat())).isoformat()
         submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
         payload = {"owner": owner, "account": account.id, "amount": str(amount), "date": day, "notes": str(form.get("notes", ""))}
-        with c.db.transaction():
+        with settled_save(request, c):
             if not c.transactions.form_seen(submission, payload):  # a resent form saves nothing more (2AD)
                 c.money_from_others.record(day, owner, account.id, amount, payload["notes"])
                 c.transactions.remember_form(submission, payload)

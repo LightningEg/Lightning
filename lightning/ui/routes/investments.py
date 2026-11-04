@@ -16,7 +16,7 @@ from lightning.core.money import ZERO, fmt, from_e6, to_decimal
 
 from urllib.parse import urlencode
 
-from ..web import container, redirect, render, ui_locale
+from ..web import container, redirect, render, ui_locale, settled_save
 from ..i18n import translate
 from ...investments import events, views as holding_views
 from ...assets.catalog import instruments
@@ -495,9 +495,10 @@ async def calculate_planner(request: Request):
     form=await request.form()
     c=container(request)
     mode=str(form.get("mode",""))
-    if mode in PLANNER_MODES: container(request).settings.set("investment_planner_mode", mode)
-    if str(form.get("monthly_goal", "")).strip():
-        c.settings.set("investment_monthly_goal", str(to_decimal(str(form.get("monthly_goal")), "monthly_goal")))
+    with settled_save(request, container(request)):
+        if mode in PLANNER_MODES: container(request).settings.set("investment_planner_mode", mode)
+        if str(form.get("monthly_goal", "")).strip():
+            c.settings.set("investment_monthly_goal", str(to_decimal(str(form.get("monthly_goal")), "monthly_goal")))
     return await _render_planner(request,str(form.get("amount","10000")))
 
 
@@ -604,20 +605,21 @@ async def save_target(request: Request):
     c=container(request); form=await request.form(); bucket=str(form.get("bucket","")).strip()
     try:
         allowed = set(_allocation_classes(c)) | {r["name"] for r in target_plan(c)["rows"]}  # every class in the table
-        if bucket in allowed and not str(form.get("target_weight", "")).strip():
-            c.investments.clear_target_weight(bucket)  # an empty field clears the target
-            return Response(status_code=204) if request.headers.get("X-Requested-With") == "fetch" else redirect("/investments/targets", "Target cleared.")
-        value=to_decimal(str(form.get("target_weight","")),"target")
-        others=sum((w for b, w in c.investments.target_weights().items() if b != bucket), ZERO)
-        if others + value > 100:
-            room = max(ZERO, 100 - others)
-            raise LightningError(f"Targets can add up to 100% at most. The others take {others.normalize():f}%, so "
-                                 f"{bucket} can be up to {room.normalize():f}%.")
-        if bucket not in allowed or value<ZERO or value>100: raise LightningError("Choose an available asset class and a target from 0 to 100.")
-        matches=[cls for cls in c.assets.list_classes() if cls.active and c.assets.display_name(cls.id).split(" › ")[-1] == bucket]
-        if len(matches)!=1: raise LightningError("This target label is ambiguous. Rename or resolve the asset classes first.")
-        cls_id=matches[0].id
-        c.investments.set_target_weight(bucket, value, cls_id)
+        with settled_save(request, container(request)):
+            if bucket in allowed and not str(form.get("target_weight", "")).strip():
+                c.investments.clear_target_weight(bucket)  # an empty field clears the target
+                return Response(status_code=204) if request.headers.get("X-Requested-With") == "fetch" else redirect("/investments/targets", "Target cleared.")
+            value=to_decimal(str(form.get("target_weight","")),"target")
+            others=sum((w for b, w in c.investments.target_weights().items() if b != bucket), ZERO)
+            if others + value > 100:
+                room = max(ZERO, 100 - others)
+                raise LightningError(f"Targets can add up to 100% at most. The others take {others.normalize():f}%, so "
+                                     f"{bucket} can be up to {room.normalize():f}%.")
+            if bucket not in allowed or value<ZERO or value>100: raise LightningError("Choose an available asset class and a target from 0 to 100.")
+            matches=[cls for cls in c.assets.list_classes() if cls.active and c.assets.display_name(cls.id).split(" › ")[-1] == bucket]
+            if len(matches)!=1: raise LightningError("This target label is ambiguous. Rename or resolve the asset classes first.")
+            cls_id=matches[0].id
+            c.investments.set_target_weight(bucket, value, cls_id)
     except LightningError as exc:
         if request.headers.get("X-Requested-With") == "fetch":
             return Response(exc.message, status_code=400, media_type="text/plain")
@@ -634,7 +636,8 @@ async def save_asset_plan(request: Request,asset_id:int):
     if bucket not in _allocation_classes(c): raise LightningError("Choose one of the available investment asset classes.","allocation_bucket")
     horizon=str(form.get("investment_horizon","")).strip()
     if horizon not in ("Short","Medium","Long",""): raise LightningError("Choose Short, Medium, Long, or Unassigned.")
-    c.assets.set_investment_preferences(asset_id, bucket, horizon or None)
+    with settled_save(request, container(request)):
+        c.assets.set_investment_preferences(asset_id, bucket, horizon or None)
     back = str(form.get("return_to", "")).strip()
     return redirect(back if back.startswith("/investments") else "/investments", "Horizon saved." if back else "Investment classification saved.")
 
@@ -721,7 +724,7 @@ async def create_trade(request: Request):
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = values | {"kind": kind}
     try:
-        with c.db.transaction():
+        with settled_save(request, c):
             txn = c.transactions.submitted(submission, payload)  # a resent form returns its first save (2AD)
             if txn is None:
                 txn = _save(request, kind, values)
@@ -757,7 +760,7 @@ async def update_trade(request: Request, txn_id: int):
     values = {k: str(form.get(k, "")) for k in FIELDS}
     values["revision"] = form.get("revision")
     try:
-        with c.db.transaction():
+        with settled_save(request, c):
             c.transactions.require_revision(txn_id, values["revision"])
             txn = _save(request, kind, values, txn_id=txn_id)
     except LightningError as exc:
@@ -788,9 +791,10 @@ async def create_asset(request: Request):
     values = {k: str(form.get(k, "")) for k in ("name", "class_code", "symbol", "karat", "isin", "mic", "notes",
                                                  "currency")}
     try:
-        asset = c.assets.create_investment(values["name"], values["class_code"], values["symbol"], values["karat"],
-                                           values["isin"], values["notes"], mic=values["mic"],
-                                           currency=values["currency"])
+        with settled_save(request, container(request)):
+            asset = c.assets.create_investment(values["name"], values["class_code"], values["symbol"], values["karat"],
+                                               values["isin"], values["notes"], mic=values["mic"],
+                                               currency=values["currency"])
     except LightningError as exc:
         return _asset_form(request, values, error=exc, status=400)
     back = request.query_params.get("then", "")
@@ -818,11 +822,12 @@ async def update_asset(request: Request, asset_id: int):
     values = {k: str(form.get(k, "")) for k in ("name", "class_code", "symbol", "isin", "mic", "notes", "active",
                                                 "fund_page")}
     try:
-        if "fund_page" in form:
-            c.assets.link_fund(asset_id, values["fund_page"])
-        asset = c.assets.update_investment(asset_id, values["name"], values["class_code"], values["isin"],
-                                           values["notes"], active=bool(values["active"]), ticker=values["symbol"],
-                                           mic=values["mic"])
+        with settled_save(request, container(request)):
+            if "fund_page" in form:
+                c.assets.link_fund(asset_id, values["fund_page"])
+            asset = c.assets.update_investment(asset_id, values["name"], values["class_code"], values["isin"],
+                                               values["notes"], active=bool(values["active"]), ticker=values["symbol"],
+                                               mic=values["mic"])
     except LightningError as exc:
         return _asset_form(request, values, asset=asset, error=exc, status=400)
     return redirect("/investments/assets", f"Saved {asset.name}.")
@@ -885,7 +890,11 @@ def _fill_from(c, done: str = "", back: str = "/investments/prices", request: Re
             return redirect(back, "Price update saved on this device and is waiting for the journal home.")
         return redirect(back, f"{done} Price update applied on the journal home.".strip())
     try:
-        report = fill_followed(c, today())
+        if request is None:
+            report = fill_followed(c, today())
+        else:
+            with settled_save(request, c):
+                report = fill_followed(c, today())
         if report is None:
             return redirect(back, f"{done} No price files yet. Download shared prices brings the markets you follow.".strip())
     except LightningError as exc:
@@ -931,9 +940,13 @@ async def online_update(request: Request):
     on = today()
     work = live_prices.plan(c, on)
     if not work.wants:
-        return redirect("/investments/prices", live_prices.save(c, work, {}, []).summary())
+        with settled_save(request, c):
+            report = live_prices.save(c, work, {}, [])
+        return redirect("/investments/prices", report.summary())
     found, failed = await run_in_threadpool(live_prices.gather, work)
-    return redirect("/investments/prices", live_prices.save(c, work, found, failed).summary())
+    with settled_save(request, c):
+        report = live_prices.save(c, work, found, failed)
+    return redirect("/investments/prices", report.summary())
 
 
 @router.post("/prices/market/fill")
@@ -968,7 +981,8 @@ async def market_import(request: Request):
         saved.append(pack_id)
         if pack_id not in followed:
             followed.append(pack_id)
-    c.settings.set("market_packs", ",".join(followed) or "none")
+    with settled_save(request, container(request)):
+        c.settings.set("market_packs", ",".join(followed) or "none")
     names = {r["id"]: r["name"] for r in pack_rows(c.data_dir, ())}
     done = f"Imported {', '.join(names.get(p, p) for p in saved)}." if saved else "Nothing was imported."
     if older:
@@ -1010,7 +1024,8 @@ async def save_price_files(request: Request):
     held = held_packs(c)  # a market you hold something on stays followed
     picked = [p for p in form.getlist("pack") if p in known]
     dropped = [p for p in followed_packs(c) if p not in picked and p not in held]
-    c.settings.set("market_packs", ",".join(picked) or "none")
+    with settled_save(request, container(request)):
+        c.settings.set("market_packs", ",".join(picked) or "none")
     forget(c.data_dir, dropped)
     if form.get("update"):
         return await _update(c, "/investments/prices/markets", request)
@@ -1028,7 +1043,7 @@ async def import_price_csv(request: Request):
         return redirect("/investments/prices", "Choose a CSV file first.")
     try:
         rows = read_prices(await upload.read(), c.assets.investments(active_only=True), fmt_date(today()))
-        with c.db.transaction():
+        with settled_save(request, c):
             for asset_id, day, price in rows.matched:
                 c.assets.set_price(asset_id, day, price)
     except (ValueError, LightningError) as exc:
@@ -1061,15 +1076,16 @@ async def save_prices(request: Request):
             if asset_id in values:
                 raise LightningError("Enter either a unit price or total value for each investment, not both.", "price")
             values[asset_id] = to_decimal(str(raw), "value") / position.quantity
-        count = c.assets.set_prices(day, values)
-        for key, raw in form.items():
-            if not key.startswith("rp_") or not str(raw).strip():
-                continue
-            asset_text, checkpoint = key[3:].split("_", 1)
-            c.reevaluations.record_manual_price(int(asset_text), checkpoint,
-                                                to_decimal(str(raw), "price"))
-            count += 1
-        c.reevaluations.process_due()
+        with settled_save(request, container(request)):
+            count = c.assets.set_prices(day, values)
+            for key, raw in form.items():
+                if not key.startswith("rp_") or not str(raw).strip():
+                    continue
+                asset_text, checkpoint = key[3:].split("_", 1)
+                c.reevaluations.record_manual_price(int(asset_text), checkpoint,
+                                                    to_decimal(str(raw), "price"))
+                count += 1
+            c.reevaluations.process_due()
     except LightningError as exc:
         return redirect(f"/investments/prices?date={day}", exc.message)
     return redirect("/investments", f"Saved {count} price input{'s' if count != 1 else ''}; reevaluation catch-up completed." if count

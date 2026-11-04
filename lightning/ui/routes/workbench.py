@@ -9,7 +9,7 @@ from fastapi import APIRouter, Request
 from lightning.core.errors import LightningError
 from lightning.transactions.domain import TxnFilter
 
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 
 router = APIRouter()
 
@@ -47,7 +47,8 @@ async def undo_batch(request: Request, batch_id: int):
     if not ids:
         return redirect("/import", "Nothing from this file is left to undo.")
     try:
-        count = c.transactions.delete_many(ids)
+        with settled_save(request, container(request)):
+            count = c.transactions.delete_many(ids)
     except LightningError as exc:
         return redirect("/import", exc.message)
     return redirect("/import", f"Undid the import: deleted {count} entr{'ies' if count != 1 else 'y'}. You can restore them from history.")
@@ -92,7 +93,7 @@ async def find_replace(request: Request):
         groups.setdefault(_replace(str(getattr(row, field) or ""), find, new), []).append(row.id)
     changed = skipped = 0
     try:
-        with c.db.transaction():
+        with settled_save(request, c):
             for value, ids in groups.items():
                 if field == "counterparty" and value and not c.counterparties.resolve(value):
                     c.counterparties.create(value)   # the user typed it on purpose: a new saved payee

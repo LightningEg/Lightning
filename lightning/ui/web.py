@@ -540,12 +540,11 @@ ACTION_LABELS = {"accounts": "Account changes", "transactions": "Transaction cha
 
 
 @contextmanager
-def settled_save(request, c):
-    """A synchronous entry workflow; no request awaits while the database transaction is open."""
+def settled_save(request, c, **transaction_options):
+    """A synchronous write workflow; no request awaits while the database transaction is open."""
     from lightning.workflows.save import settled_write
-    with settled_write(c):
+    with settled_write(c, **transaction_options):
         yield
-    request.state.payments_settled = True
 
 
 class RequestCache:
@@ -565,20 +564,9 @@ class RequestCache:
             if scope.get("method") not in ("GET", "HEAD") and root not in NOT_USER_ACTIONS:
                 from lightning.undo import user_action
                 with user_action(ACTION_LABELS.get(root, "Saved changes")):
-                    status = 500
-                    async def action_send(message):
-                        nonlocal status
-                        if message["type"] == "http.response.start":
-                            status = message["status"]
-                            # Required settlement must finish before a successful response
-                            # becomes visible. Keep it in the same undo action as the save.
-                            if (status < 400 and not scope.get("state", {}).get("payments_settled", False)
-                                    and getattr(self.state, "container", None) is current
-                                    and not current.db.closed and not current.db.read_only
-                                    and not getattr(current, "is_journal", False)):
-                                current.planning.match_payments(today())
-                        await send(message)
-                    await self.app(scope, receive, action_send)
+                    # Each write workflow commits required settlement itself. Read-only
+                    # POSTs and error redirects must not start unrelated financial work.
+                    await self.app(scope, receive, send)
             else:
                 await self.app(scope, receive, send)
 

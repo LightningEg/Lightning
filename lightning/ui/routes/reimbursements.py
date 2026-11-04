@@ -7,7 +7,7 @@ from fastapi import APIRouter, Request
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.money import to_decimal
 
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 
 router = APIRouter(prefix="/reimbursements")
 
@@ -72,8 +72,9 @@ async def create_claim(request: Request):
         if values["payer_id"] and not values["payer_id"].isdigit():
             raise ValueError
         payer_id = int(values["payer_id"]) if values["payer_id"] else None
-        claim = c.reimbursements.create_claim(transaction_id, values["expected"], payer_id,
-                                              values["due_date"] or None)
+        with settled_save(request, container(request)):
+            claim = c.reimbursements.create_claim(transaction_id, values["expected"], payer_id,
+                                                  values["due_date"] or None)
     except (ValueError, LightningError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose an expense and enter an amount."
         return render(request, "reimbursements.html", status_code=400, **_context(request, message, values))
@@ -93,7 +94,8 @@ async def confirm_pair(request: Request, claim_id: int):
                           and pair["amount"] == value), None)
         if candidate is None:
             raise ValidationError("This suggested pair changed. Review the receipts again.")
-        c.reimbursements.link_receipt(claim_id, receipt_id, amount)
+        with settled_save(request, container(request)):
+            c.reimbursements.link_receipt(claim_id, receipt_id, amount)
     except (ValueError, LightningError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose a receipt and enter an amount."
         return render(request, "reimbursements.html", status_code=400, **_context(request, message))
@@ -109,7 +111,8 @@ async def link_receipt(request: Request, claim_id: int):
     try:
         if not receipt_id.isdigit():
             raise ValueError
-        c.reimbursements.link_receipt(claim_id, int(receipt_id), amount)
+        with settled_save(request, container(request)):
+            c.reimbursements.link_receipt(claim_id, int(receipt_id), amount)
     except (ValueError, LightningError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose a receipt and enter an amount."
         return render(request, "reimbursements.html", status_code=400, **_context(request, message))
@@ -119,7 +122,8 @@ async def link_receipt(request: Request, claim_id: int):
 @router.post("/{claim_id:int}/receipts/{link_id:int}/unlink")
 async def unlink_receipt(request: Request, claim_id: int, link_id: int):
     try:
-        container(request).reimbursements.unlink_receipt(claim_id, link_id)
+        with settled_save(request, container(request)):
+            container(request).reimbursements.unlink_receipt(claim_id, link_id)
     except LightningError as exc:
         return redirect("/reimbursements", exc.message)
     return redirect("/reimbursements", "Removed the receipt link.")
@@ -128,7 +132,8 @@ async def unlink_receipt(request: Request, claim_id: int, link_id: int):
 @router.post("/{claim_id:int}/delete")
 async def delete_claim(request: Request, claim_id: int):
     try:
-        container(request).reimbursements.delete_claim(claim_id)
+        with settled_save(request, container(request)):
+            container(request).reimbursements.delete_claim(claim_id)
     except LightningError as exc:
         return redirect("/reimbursements", exc.message)
     return redirect("/reimbursements", "Deleted the reimbursement claim and its links.")

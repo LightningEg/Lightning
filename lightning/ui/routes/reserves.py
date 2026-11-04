@@ -13,7 +13,7 @@ from lightning.categories.domain import Movement
 from lightning.planning.emergency_context import emergency_liquidity_context
 
 from .. import charts, keynotes
-from ..web import container, redirect, render, ui_locale
+from ..web import container, redirect, render, ui_locale, settled_save
 from ..i18n import translate
 
 router = APIRouter(prefix="/reserves")
@@ -104,7 +104,7 @@ async def create_reserve(request: Request):
     c = container(request)
     form = await request.form()
     try:
-        with c.db.transaction():
+        with settled_save(request, c):
             reserve = c.reserves.create(str(form.get("name", "")), str(form.get("target", "")),
                                         "PROJECT", str(form.get("due_date", "")) or None,
                                         str(form.get("recurrence", "NONE")),
@@ -132,7 +132,8 @@ async def save_emergency_fund(request: Request):
         old_effective = existing["effective_allocated"] if existing else ZERO
         if assigned - old_effective + value > c.reporting.owned_liquid_cash(today()):
             raise LightningError("Reserves cannot be more than the cash you own.")
-        reserve = c.reserves.set_emergency_fund(amount, salary_target)
+        with settled_save(request, container(request)):
+            reserve = c.reserves.set_emergency_fund(amount, salary_target)
     except LightningError as exc:
         if request.headers.get("X-Requested-With") == "fetch":
             return Response(translate(exc.message, ui_locale()), status_code=400, media_type="text/plain")
@@ -147,10 +148,11 @@ async def edit_reserve(request: Request, reserve_id: int):
     c = container(request)
     form = await request.form()
     try:
-        reserve = c.reserves.update(reserve_id, str(form.get("name", "")), str(form.get("target", "")),
-                                    str(form.get("due_date", "")) or None,
-                                    str(form.get("recurrence", "NONE")),
-                                    *_match_criteria(form))
+        with settled_save(request, container(request)):
+            reserve = c.reserves.update(reserve_id, str(form.get("name", "")), str(form.get("target", "")),
+                                        str(form.get("due_date", "")) or None,
+                                        str(form.get("recurrence", "NONE")),
+                                        *_match_criteria(form))
     except LightningError as exc:
         if request.headers.get("X-Requested-With") == "fetch":
             return Response(translate(exc.message, ui_locale()), status_code=400, media_type="text/plain")
@@ -165,7 +167,8 @@ async def allocate_reserve(request: Request, reserve_id: int):
     c = container(request)
     form = await request.form()
     try:
-        reserve = _allocate(c, reserve_id, str(form.get("allocated", "")))
+        with settled_save(request, container(request)):
+            reserve = _allocate(c, reserve_id, str(form.get("allocated", "")))
     except LightningError as exc:
         if request.headers.get("X-Requested-With") == "fetch":
             return Response(translate(exc.message, ui_locale()), status_code=400, media_type="text/plain")
@@ -179,7 +182,8 @@ async def allocate_reserve(request: Request, reserve_id: int):
 async def complete_reserve(request: Request, reserve_id: int):
     c = container(request)
     try:
-        reserve = c.reserves.complete(reserve_id)
+        with settled_save(request, container(request)):
+            reserve = c.reserves.complete(reserve_id)
     except LightningError as exc:
         return redirect("/reserves", exc.message)
     return redirect("/reserves", _with_plan(c, f"Completed {reserve['name']}; its assigned cash is free again."))
@@ -199,7 +203,8 @@ async def link_reserve_payment(request: Request, reserve_id: int):
     form = await request.form()
     try:
         txn_id = int(str(form.get("transaction_id", "")))
-        c.reserves.set_expense_link(reserve_id, txn_id, str(form.get("amount", "")))
+        with settled_save(request, container(request)):
+            c.reserves.set_expense_link(reserve_id, txn_id, str(form.get("amount", "")))
     except (ValueError, LightningError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose a posted expense."
         return redirect(f"/reserves/{reserve_id}/payments", message)

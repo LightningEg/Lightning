@@ -12,7 +12,7 @@ from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, today
 from lightning.core.errors import LightningError, NotFoundError, ValidationError
 
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 
 router = APIRouter(prefix="/gameya")
 TERM_FIELDS = ("organiser", "members", "installment", "first_date", "my_turn", "payout", "interest", "annual_rate",
@@ -80,12 +80,13 @@ async def save_terms(request: Request, account_id: int):
     c = container(request)
     try:
         _circle(c, account_id)
-        c.gameya.save_terms(
-            account_id, organiser=values["organiser"], members=values["members"], installment=values["installment"],
-            first_date=values["first_date"], my_turn=values["my_turn"], payout=values["payout"],
-            annual_rate=values["annual_rate"] if values["interest"] == "rate" else "0",
-            funding_account_id=_int(values["funding_account_id"], "funding_account_id"),
-            payout_account_id=_int(values["payout_account_id"], "payout_account_id"))
+        with settled_save(request, container(request)):
+            c.gameya.save_terms(
+                account_id, organiser=values["organiser"], members=values["members"], installment=values["installment"],
+                first_date=values["first_date"], my_turn=values["my_turn"], payout=values["payout"],
+                annual_rate=values["annual_rate"] if values["interest"] == "rate" else "0",
+                funding_account_id=_int(values["funding_account_id"], "funding_account_id"),
+                payout_account_id=_int(values["payout_account_id"], "payout_account_id"))
     except (LightningError, ValueError) as exc:
         return _page(request, account_id, values=values, error=_message(exc), error_form="terms", status_code=400)
     return redirect(f"/gameya/{account_id}", "Gam'eya terms saved. Nothing was posted.")
@@ -101,7 +102,7 @@ async def record_instalment(request: Request, account_id: int):
     payload = record | {"account": account_id}
     try:
         _circle(c, account_id)
-        with c.db.transaction():
+        with settled_save(request, c):
             # A resent form returns its first save; without this it recorded the next instalment too.
             txn = c.transactions.submitted(submission, payload)
             if txn is None:
@@ -123,7 +124,8 @@ async def record_past_instalments(request: Request, account_id: int):
         expected = str(form.get("expected_paid", ""))
         if not expected.isdigit():
             raise ValidationError("Review the circle before recording past instalments.", "instalment")
-        txns = c.gameya.record_past_instalments(account_id, expected_paid=int(expected))
+        with settled_save(request, container(request)):
+            txns = c.gameya.record_past_instalments(account_id, expected_paid=int(expected))
     except LightningError as exc:
         return _page(request, account_id, error=exc.message, error_form="instalment", status_code=400)
     return redirect(f"/gameya/{account_id}", f"Recorded {len(txns)} past instalments.")
@@ -137,8 +139,9 @@ async def record_payout(request: Request, account_id: int):
     c = container(request)
     try:
         _circle(c, account_id)
-        txn = c.gameya.record_payout(account_id, record["payout_date"], record["payout_amount"],
-                                     _int(record["payout_into"], "payout_account_id"))
+        with settled_save(request, container(request)):
+            txn = c.gameya.record_payout(account_id, record["payout_date"], record["payout_amount"],
+                                         _int(record["payout_into"], "payout_account_id"))
     except (LightningError, ValueError) as exc:
         return _page(request, account_id, record=record, error=_message(exc), error_form="payout", status_code=400)
     return redirect(f"/gameya/{account_id}", f"Recorded payout · {txn.ref}.")
