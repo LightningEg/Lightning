@@ -7,7 +7,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
 | [Capture](pillars/capture.md) | 6 |  | 1 | 5 |  |  |
-| [Plan](pillars/plan.md) | 5 |  | 1 | 4 |  | 1 |
+| [Plan](pillars/plan.md) | 4 |  |  | 4 |  | 1 |
 | [Understand](pillars/understand.md) | 5 |  | 1 | 3 | 1 | 1 |
 | [Own](pillars/own.md) | 14 | 2 | 3 | 4 | 5 |  |
 | [Protect](pillars/protect.md) | 4 | 1 | 2 | 1 |  | 1 |
@@ -16,7 +16,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Build](pillars/build.md) | 10 | 1 | 8 | 1 |  |  |
 | [Reach](pillars/reach.md) | 6 |  | 4 | 2 |  | 2 |
 
-68 open items in 10 milestones.
+67 open items in 10 milestones.
 
 ## Being built now
 
@@ -52,7 +52,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | 4 Edit journal and devices | 3 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 5 Investments | 7 | Every investment figure can be explained per purchase, and agrees with the ledger. |
 | 6 Market data | 4 | Prices arrive by themselves, from sources Lightning may redistribute. |
-| 7 Planning, import and search | 12 | Getting a month in takes minutes: any bank file, any old app, one search box. |
+| 7 Planning, import and search | 11 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 4 | The site is honest, quick and in step with the app. |
 | 9 Later | 8 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 4 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |

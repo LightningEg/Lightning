@@ -9,6 +9,7 @@ from decimal import Decimal
 from lightning.core.dates import fmt_date, month_of, parse_month, today
 from lightning.core.errors import ValidationError
 from lightning.core.money import ZERO, check_places, fmt, to_decimal
+from lightning.core.memo import request_cached
 from lightning.database.settings import SettingsStore
 
 from lightning.budgeting.domain import INCOME_FROM_RECURRING
@@ -463,9 +464,13 @@ class HealthService:
             return None
         return self.position.at(day, match_payments=False).cash_you_own / fund.monthly
 
-    def overview(self, as_of: date | None = None) -> dict:
-        """Assemble the read-only figures and six completed-month trends for the Health page."""
-        day = as_of or today()
+    def figures(self, as_of: date | None = None) -> tuple[HealthFigure, ...]:
+        """The same current comparisons as Health, without calculating its six-month charts."""
+        return self._current(as_of or today())["figures"]
+
+    @request_cached
+    def _current(self, day: date) -> dict:
+        """Read-only inputs shared by the Health page and its inbox alerts."""
         position = self.position.at(day, match_payments=False)
         health = self.at(day)
         fund = self.emergency_fund(day)
@@ -519,6 +524,14 @@ class HealthService:
                     ("Average monthly income", health.loan_payments_to_income.whole)), "/plan/loans"),
         )
 
+        return {"as_of": fmt_date(day), "savings_month": savings_month, "fund": fund,
+                "figures": figures, "emergency_months": EMERGENCY_FUND_MONTHS,
+                "income_average": income_average, "cash_months": self.cash_months(day, fund)}
+
+    def overview(self, as_of: date | None = None) -> dict:
+        """Assemble the read-only figures and six completed-month trends for the Health page."""
+        current = self._current(as_of or today())
+        savings_start, _ = parse_month(current["savings_month"])
         first_activity = self.reporting.first_activity_date()
         first_date = date.fromisoformat(first_activity) if first_activity else None
         month_cursor = savings_start
@@ -537,6 +550,4 @@ class HealthService:
                                       _gap(flow) if flow.rate_says_nothing else ""))
             next_month = month_end + timedelta(days=1)
             cursor = next_month
-        return {"as_of": fmt_date(day), "savings_month": savings_month, "fund": fund,
-                "figures": figures, "trends": tuple(trends), "emergency_months": EMERGENCY_FUND_MONTHS,
-                "income_average": income_average, "cash_months": self.cash_months(day, fund)}
+        return current | {"trends": tuple(trends)}

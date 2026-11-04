@@ -258,6 +258,7 @@ class ReviewInbox:
                                         f"{fmt(check.target_percent)}%. Plan {fmt(check.over_by)} {c.base_currency} less.",
                               "href": f"/budget?month={check.month}", "priority": 2})
         items.extend(self._smarter_plan(on, forecast.free_cash))
+        items.extend(self._health_alerts(on, items))
         visible = []
         for item in sorted(items, key=lambda item: item["priority"]):
             # Visible facts define the situation, not days-late badges or the current date.
@@ -292,11 +293,37 @@ class ReviewInbox:
                           "detail": f"{offer['name']} · {offer['count']} corrections · {offer['category']}.",
                           "href": offer["href"], "action": "Make a rule", "popup": True,
                           "priority": 2, "source_version": offer["id"]})
-        fund = self.c.health.emergency_fund(on)
-        if self.c.health.band("emergency_fund", fund.months) == "alert":
-            items.append({"label": "Emergency fund needs you",
-                          "detail": f"{fmt(fund.months, 1)} months of cover. Review your emergency reserve.",
-                          "href": "/financial-health", "action": "Review", "priority": 2})
+        return items
+
+    def _health_alerts(self, on: date, existing: list[dict]) -> list[dict]:
+        """Reuse Health's alert bands, keeping its existing saving reminders as the single action."""
+        from lightning.planning.health import LIMIT_LABELS
+        items = []
+        for figure in self.c.health.figures(on):
+            if figure.band != "alert":
+                continue
+            if figure.key == "planned_savings_rate" and any(
+                    item["label"].startswith("This month's plan is ") for item in existing):
+                continue
+            if figure.key == "savings_rate" and any(
+                    item["label"].endswith(" saved less than your target") for item in existing):
+                continue
+            if figure.key == "emergency_fund":
+                items.append({"label": "Emergency fund needs you",
+                              "detail": f"{fmt(figure.value, 1)} months of cover. Review your emergency reserve.",
+                              "href": "/financial-health", "action": "Review", "priority": 2})
+                continue
+            label = "Planned savings rate" if figure.key == "planned_savings_rate" else LIMIT_LABELS[figure.key]
+            if figure.gap:
+                detail = figure.gap + "."
+            else:
+                side = "below" if figure.direction == "minimum" else "above"
+                detail = f"{fmt(figure.value, 1)}% · Needs you {side} {fmt(figure.alert, 1)}%."
+            if figure.key in {"savings_rate", "planned_savings_rate"}:
+                detail += f" {figure.period}."
+            items.append({"label": f"{label} needs you", "detail": detail,
+                          "href": f"/financial-health#health-{figure.key}", "action": "Review", "priority": 2,
+                          "source_version": {"good": str(figure.limit), "alert": str(figure.alert)}})
         return items
 
     def _state(self, identity: str) -> dict:
