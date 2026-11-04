@@ -8,10 +8,7 @@ Search reads transactions, accounts and categories directly, so nothing derived 
 from __future__ import annotations
 
 from dataclasses import asdict, replace
-from datetime import timedelta
 from decimal import Decimal
-import hashlib
-import json
 
 from lightning.accounts.domain import Account, AccountType
 from lightning.accounts.service import AccountService
@@ -28,10 +25,10 @@ from lightning.database.audit import AuditLog
 from lightning.database.connection import Database
 from lightning.fx import MISSING_DAYS, rate_for
 
-from . import conversion
+from . import conversion, search, submissions
+from .balances import BalanceChecks
 from .domain import Transaction, TxnFilter, TxnSource, TxnStatus, TxnSummary
 from .repository import TransactionRepository
-from .tags import normalize as normal_tag, tags_in
 
 EDITABLE_TYPES = {DocType.IN, DocType.OUT, DocType.TRF}
 
@@ -53,7 +50,9 @@ class TransactionService:
         self.categories = categories
         self.counterparties = CounterpartyService(db)
         self.audit = audit
+        self._submissions = submissions.SubmissionStore(db, self.repo, audit)
         self.base_currency = base_currency
+        self._balances = BalanceChecks(db, accounts, assets)
 
     def merge_preview(self, keep_id: int, drop_id: int):
         """Describe a duplicate merge; the confirmation fingerprint must be submitted to merge."""
@@ -374,41 +373,19 @@ class TransactionService:
         return (DocType.OUT if value < 0 else DocType.IN), value, category.id
 
     def _tagged_notes(self) -> list:
-        return self.repo.db.all("SELECT id, notes FROM transactions WHERE status='POSTED' AND instr(notes, '#') > 0")
+        return search.tagged_notes(self.repo)
 
     def tag_transaction_ids(self, tag: str) -> set[int]:
         """Posted transactions whose notes carry the tag (#eid matches #Eid, never #eid2026)."""
-        tag = normal_tag(tag)
-        return {int(row["id"]) for row in self._tagged_notes() if tag and tag in tags_in(row["notes"])}
+        return search.tag_transaction_ids(self.repo, tag)
 
     def tags(self) -> list[tuple[str, int]]:
         """Every tag in use, with how many posted transactions carry it, most used first."""
-        counts: dict[str, int] = {}
-        for row in self._tagged_notes():
-            for tag in tags_in(row["notes"]):
-                counts[tag] = counts.get(tag, 0) + 1
-        return sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+        return search.tags(self.repo)
 
     def search_ids(self, text: str) -> set[int]:
         """Transaction ids matching a search (posted ones)."""
-        ids = set(self.repo.ids(TxnFilter(search=text, limit=100000)))
-        resolved = self.counterparties.resolve(text)
-        if resolved:
-            rows = self.repo.db.all(
-                "SELECT id FROM transactions WHERE status!='VOID' AND counterparty_id=?",
-                (resolved["id"],),
-            )
-            ids.update(int(row["id"]) for row in rows)
-        # Include likely counterparty spellings so a near miss such as "Talbt"
-        # still finds transactions, while exposing a human-confirmed suggestion.
-        for name, _score in self.counterparties.suggestions(text, limit=5):
-            rows = self.repo.db.all(
-                "SELECT id FROM transactions WHERE status!='VOID' AND "
-                "(counterparty_id=(SELECT id FROM counterparties WHERE name=?) OR counterparty LIKE ?)",
-                (name, f"%{name}%"),
-            )
-            ids.update(int(row["id"]) for row in rows)
-        return ids
+        return search.search_ids(self.repo, self.counterparties, text)
 
     # A counterparty's usual category is a habit, not one odd filing (as in Actual Budget): the same
     # category in at least 3 of its last 5 transactions, or in every one while it has 2 to 4. Only the
@@ -421,27 +398,8 @@ class TransactionService:
         """The category each counterparty is usually filed under, when it has one: picked in at least
         3 of its last 5 transactions in the 180 days before its newest, or in all of them while it has
         2 to 4. {name: {category_id, count, total}}."""
-        tally: dict[str, dict[int, list]] = {}
-        totals: dict[str, set] = {}
-        newest: dict = {}
-        for row in self.repo.recent_categories(self.USUAL_WINDOW):
-            name = row["counterparty"]
-            day = parse_date(row["date"])
-            newest.setdefault(name, day)  # rows come newest first
-            if (newest[name] - day).days > self.USUAL_DAYS:
-                continue
-            seen = tally.setdefault(name, {})
-            totals.setdefault(name, set()).add(row["id"])
-            entry = seen.setdefault(row["category_id"], [0, (row["date"], row["id"])])
-            entry[0] += 1
-            entry[1] = max(entry[1], (row["date"], row["id"]))
-        usual = {}
-        for name, seen in tally.items():
-            category_id, (count, _) = max(seen.items(), key=lambda kv: (kv[1][0], kv[1][1]))
-            total = len(totals[name])
-            if count >= self.USUAL_MIN or (2 <= total < self.USUAL_WINDOW and count == total):
-                usual[name] = {"category_id": category_id, "count": count, "total": total}
-        return usual
+        return search.usual_categories(
+            self.repo, window=self.USUAL_WINDOW, minimum=self.USUAL_MIN, days=self.USUAL_DAYS)
 
     CAPTURE_DAYS = 180
 
@@ -449,33 +407,12 @@ class TransactionService:
         """The categories the Add sheet offers first as chips (3AN3): what this person files money of that kind
         under most often in the last 180 days, then the other categories in the tree's own order until there are
         ``limit``. kind is "out" or "in"; transfers have no category. Ids only; the page names them."""
-        if kind not in ("out", "in"):
-            return []
-        movement = Movement.OUTFLOW if kind == "out" else Movement.INFLOW
-        allowed = [c for c in self.categories.pickable()
-                   if c.movement == movement and not c.is_system and c.code != "EXP.SYSTEM.CUSTODY"
-                   and c.code not in ("EXP.UNACCOUNTED", "INC.UNACCOUNTED")]
-        by_id = {c.id: c for c in allowed}
-        since = fmt_date(today() - timedelta(days=self.CAPTURE_DAYS))
-        used = [int(row["category_id"]) for row in self.repo.category_use(movement.value, since)]
-        chosen = [category_id for category_id in used if category_id in by_id][:limit]
-        for category in allowed:  # a thin history: the tree's own order fills the rest
-            if len(chosen) >= limit:
-                break
-            if category.id not in chosen and not category.is_root:
-                chosen.append(category.id)
-        return chosen
+        return search.usual_capture_categories(self.repo, self.categories, kind, limit, days=self.CAPTURE_DAYS)
 
     def usual_account(self, candidates: list[int]) -> int | None:
         """The account Add opens on when none was used last (3AN3): the one that took most of this person's own
         entries in the last 90 days among ``candidates``, else the first of them."""
-        if not candidates:
-            return None
-        since = fmt_date(today() - timedelta(days=90))
-        for row in self.repo.account_use(since):
-            if int(row["account_id"]) in candidates:
-                return int(row["account_id"])
-        return candidates[0]
+        return search.usual_account(self.repo, candidates)
 
     def post(self, doc_type: DocType, date: str, lines: list[PostingLine], description: str = "",
              counterparty: str = "", notes: str = "", source: TxnSource = TxnSource.MANUAL) -> Transaction:
@@ -515,56 +452,9 @@ class TransactionService:
                                  validate_all_cash=False, extra_keys=(), ignore_before_day=False,
                                  validate_from=None):
         """An owner's dated account/asset position may never become negative."""
-        keys = set(extra_keys)
-        for line in lines:
-            asset = self.assets.get_asset(line.asset_id)
-            account = self.accounts.get(line.account_id)
-            if line.owner_id is not None:
-                owner = self.db.one("SELECT id FROM counterparties WHERE id=? AND active=1", (line.owner_id,))
-                if not owner:
-                    raise ValidationError("Choose an active saved owner.", "owner_id")
-            if ((line.owner_id is not None and line.quantity != ZERO) or not asset.is_cash or
-                    (validate_all_cash and asset.is_cash and line.quantity != ZERO) or
-                    (force_brokerage_cash and line.effect == Effect.INTERNAL and
-                     account.account_type == AccountType.BROKERAGE)):
-                keys.add((line.account_id, line.asset_id, line.owner_id))
-        for account_id, asset_id, owner_id in keys:
-            params = [account_id, asset_id, owner_id]
-            sql = ("SELECT le.date, SUM(le.quantity_e6) q FROM ledger_entries le "
-                   "JOIN transactions t ON t.id=le.transaction_id "
-                   "WHERE t.status='POSTED' AND le.account_id=? AND le.asset_id=? AND le.owner_id IS ?")
-            if exclude_txn_id is not None:
-                sql += " AND t.id<>?"
-                params.append(exclude_txn_id)
-            sql += " GROUP BY le.date ORDER BY le.date"
-            proposed = sum(int(line.quantity * 1_000_000) for line in lines
-                           if (line.account_id, line.asset_id, line.owner_id) == (account_id, asset_id, owner_id))
-            by_day = {}
-            for row in self.db.all(sql, tuple(params)):
-                by_day[row["date"]] = int(row["q"])
-            by_day[str(day)] = by_day.get(str(day), 0) + proposed
-            running = 0
-            for on, quantity in sorted(by_day.items()):
-                before_day = running
-                running += quantity
-                if running < 0 and (not ignore_before_day or on >= str(validate_from or day)):
-                    asset = self.assets.get_asset(asset_id)
-                    if not asset.is_cash:
-                        raise ValidationError(
-                            f"{self.accounts.get(account_id).label} would hold less than zero {asset.name} on {on}.",
-                            "quantity")
-                    owner_label = "the user's" if owner_id is None else "the selected owner's"
-                    after = Decimal(running).scaleb(-6)
-                    before = Decimal(before_day).scaleb(-6)
-                    account = self.accounts.get(account_id)
-                    context = (f"This purchase is dated {day}; check whether later payments still fit."
-                               if on > str(day) else
-                               "Only cash available on the purchase date can fund it.")
-                    raise ValidationError(
-                        f"This would leave {owner_label} balance at {fmt(after, 2, True)} {account.currency} "
-                        f"in {account.label} on {on}; the balance before that date's transactions was "
-                        f"{fmt(before, 2)} {account.currency}. {context}",
-                        "owner")
+        return self._balances._validate_owner_balances(
+            lines, day, exclude_txn_id, force_brokerage_cash, validate_all_cash,
+            extra_keys, ignore_before_day, validate_from)
 
     def _refuse_cash_below_zero(self, lines, day, current: Transaction | None = None, *, removed=(), added=()) -> None:
         """Compare every affected cash history before/after the whole action (2G/2H).
@@ -573,71 +463,11 @@ class TransactionService:
         including multi-delete and restoring a void document. Imported/system
         posting history may contain deficits; unchanged or improved days remain editable.
         """
-        previous = [txn for txn in (([current] if current else []) + list(removed)) if not txn.is_void]
-        following = [(str(day), lines)] + [(txn.date, txn.lines) for txn in added if not txn.is_void]
-        old_lines = [line for txn in previous for line in txn.lines]
-        new_lines = [line for _, posting in following for line in posting]
-        keys = {(line.account_id, line.asset_id) for line in new_lines + old_lines
-                if line.quantity != ZERO and self.assets.get_asset(line.asset_id).is_cash}
-        excluded = {txn.id for txn in previous} | {txn.id for txn in added}
-        if current:
-            excluded.add(current.id)
-        first = min([str(day)] + [txn.date for txn in previous] + [on for on, _ in following])
-        for account_id, asset_id in keys:
-            account = self.accounts.get(account_id)
-            if account.account_type not in {AccountType.CASH, AccountType.BANK, AccountType.BROKERAGE}:
-                continue
-            start = max(first, account.opening_date)
-            # Aggregate the opening balance once, then walk affected days on the account index.
-            exclusion = " AND le.transaction_id NOT IN (" + ",".join("?" for _ in excluded) + ")" if excluded else ""
-            opening = self.db.scalar(
-                "SELECT COALESCE(SUM(le.quantity_e6),0) FROM ledger_entries le "
-                "JOIN transactions t ON t.id=le.transaction_id "
-                "WHERE t.status='POSTED' AND le.account_id=? AND le.date<? AND +le.asset_id=?" + exclusion,
-                (account_id, start, asset_id, *excluded))
-            base = {"": int(opening)}
-            for row in self.db.all(
-                "SELECT le.date, SUM(le.quantity_e6) q FROM ledger_entries le "
-                "JOIN transactions t ON t.id=le.transaction_id "
-                "WHERE t.status='POSTED' AND le.account_id=? AND le.date>=? AND +le.asset_id=?" + exclusion +
-                " GROUP BY le.date",
-                (account_id, start, asset_id, *excluded)):
-                base[row["date"]] = int(row["q"])
-            before, after = dict(base), dict(base)
-            for txn in previous:
-                for line in txn.lines:
-                    if (line.account_id, line.asset_id) == (account_id, asset_id):
-                        before[txn.date] = before.get(txn.date, 0) + int(line.quantity * 1_000_000)
-            for on, posting in following:
-                for line in posting:
-                    if (line.account_id, line.asset_id) == (account_id, asset_id):
-                        after[on] = after.get(on, 0) + int(line.quantity * 1_000_000)
-            old_balance = new_balance = 0
-            for on in sorted(set(before) | set(after) | {start}):
-                old_balance += before.get(on, 0)
-                new_balance += after.get(on, 0)
-                if on >= start and new_balance < min(0, old_balance):
-                    raise ValidationError(
-                        f"This would leave {account.label} at {fmt(Decimal(new_balance).scaleb(-6), 2, True)} "
-                        f"{account.currency} on {on}. Move money in first, or record the smaller amount.", "amount")
+        return self._balances._refuse_cash_below_zero(lines, day, current, removed=removed, added=added)
 
     def _validate_deposit_lines(self, lines, doc_type: DocType, source: TxnSource) -> None:
         """CD portfolios hold certificate assets only; cash stays in bank and wallet accounts."""
-        for line in lines:
-            account = self.accounts.get(line.account_id)
-            asset = self.assets.get_asset(line.asset_id)
-            is_certificate = self.assets.get_class(asset.asset_class_id).code == "DEPOSIT.CD"
-            if account.account_type == AccountType.DEPOSIT:
-                if asset.is_cash:
-                    raise ValidationError("A CD portfolio cannot hold cash. Use the CD purchase or redemption action.")
-                if (doc_type == DocType.VAL and source == TxnSource.SYSTEM and
-                        line.effect == Effect.REVALUATION and line.quantity == ZERO and not line.is_cash and
-                        is_certificate):
-                    continue
-                if not is_certificate or doc_type not in {DocType.BUY, DocType.SEL}:
-                    raise ValidationError("Only CD certificates can be traded in a CD portfolio.", "asset")
-            elif is_certificate:
-                raise ValidationError("Certificates must be held in a bank-specific CD portfolio.", "account")
+        return self._balances._validate_deposit_lines(lines, doc_type, source)
 
     def set_opening_balance(self, account_id: int, amount: Decimal, date: str,
                             owner_id: int | None = None) -> Transaction | None:
@@ -938,50 +768,24 @@ class TransactionService:
     # -- one save per submitted form (2J) ------------------------------------------------------------------
     @staticmethod
     def _submission(token, payload: dict) -> tuple[str, str] | None:
-        token = str(token or "")
-        if len(token) != 32 or any(char not in "0123456789abcdef" for char in token):
-            return None  # Callers without a token keep the old contract.
-        body = json.dumps({key: str(value) for key, value in payload.items()}, sort_keys=True, ensure_ascii=False)
-        return token, hashlib.sha256(body.encode()).hexdigest()
+        return submissions.fingerprint(token, payload)
 
     def submitted(self, token, payload: dict) -> Transaction | None:
         """The transaction an earlier delivery of this same form created, if any. Call inside the write transaction."""
-        found = self._submission(token, payload)
-        if found is None:
-            return None
-        row = self.db.one("SELECT entity_id, after_json FROM audit_log WHERE entity='form' AND summary=?", (found[0],))
-        if row is None:
-            return None
-        txn = self.repo.get(int(row["entity_id"]))
-        if txn is None or txn.is_void or json.loads(row["after_json"]) != found[1]:
-            ref = f" as {txn.ref}" if txn is not None else ""
-            raise ValidationError(f"This form was already saved{ref}. Open a new one to add another.")
-        return txn
+        return self._submissions.submitted(token, payload)
 
     def form_seen(self, token, payload: dict) -> bool:
         """True when an earlier delivery of this same form already saved something that is not one transaction (a
         plan, a held-for-others entry). The same token with other values is refused. Call inside the write transaction."""
-        found = self._submission(token, payload)
-        if found is None:
-            return False
-        row = self.db.one("SELECT after_json FROM audit_log WHERE entity='form' AND summary=?", (found[0],))
-        if row is None:
-            return False
-        if json.loads(row["after_json"]) != found[1]:
-            raise ValidationError("This form was already saved. Open a new one to add another.")
-        return True
+        return self._submissions.form_seen(token, payload)
 
     def remember_form(self, token, payload: dict) -> None:
         """The same, for a form that saved something other than one transaction."""
-        found = self._submission(token, payload)
-        if found is not None:
-            self.audit.record("form", 0, "SUBMITTED", found[0], after=found[1])
+        return self._submissions.remember_form(token, payload)
 
     def remember_submission(self, token, payload: dict, txn_id: int) -> None:
         """Saved in the audit log, in the same write as the transaction; the log is outside Undo and the journal."""
-        found = self._submission(token, payload)
-        if found is not None:
-            self.audit.record("form", txn_id, "SUBMITTED", found[0], after=found[1])
+        return self._submissions.remember_submission(token, payload, txn_id)
 
     def get(self, txn_id: int) -> Transaction:
         found = self.repo.get(txn_id) if 0 < txn_id <= 9_223_372_036_854_775_807 else None  # SQLite's largest id (2E6)
@@ -991,8 +795,7 @@ class TransactionService:
 
     def revision(self, txn_id: int) -> str:
         """Opaque form version, covering the header and every posting line."""
-        payload = json.dumps(self._snapshot(self.get(txn_id)), sort_keys=True, default=str)
-        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        return submissions.revision(self._snapshot(self.get(txn_id)))
 
     def require_revision(self, txn_id: int, expected: str | None) -> None:
         """Call inside the write transaction. None retains legacy client behavior."""
