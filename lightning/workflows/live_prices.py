@@ -19,7 +19,8 @@ references your gold items use (18K, 21K, 24K) and gold held by the gram. Egypti
 the world price; a price you type (your shop's) wins for its day.
 
 How: one request for a whole board's latest closes (EGX from TradingView, every Egyptian fund from Mubasher),
-so asking reveals nothing about what you hold; a month-end close comes from the instrument's history (Yahoo
+so asking reveals nothing about what you hold; a Gulf or European holding asks its country's whole board, which
+names the country only (owner 2026-11-04: each app fetches its own, nothing is republished); a month-end close comes from the instrument's history (Yahoo
 for stocks, Mubasher for funds). Only closes that are final are kept: during trading hours today's moving
 price is skipped. Prices are saved with source ONLINE, so a price you type for the same day wins. What the
 sources cannot give is listed for Needs you, never guessed. The shared price files (the daily collector's
@@ -55,6 +56,11 @@ OFFLINE_ENV = "LIGHTNING_PRICES_OFFLINE"  # "1": never fetch (tests, and anyone 
 FAILS_SETTING = "prices_online_fails"    # fetches in a row that left month-ends missing because a source failed
 NEAR_DAYS = 10                           # a close this close to a month-end stands for it (as revaluation reads it)
 CURRENCY = {"egx": "EGP", "eg-funds": "EGP", "us": "USD", "gold": "EGP"}
+# Gulf and European listings: each app fetches its own (owner 2026-11-04), from the whole board of each country it
+# holds; their currency is the listing's own, so it is checked against the board's answer, not one pack currency.
+ABROAD = {**{country: "gcc" for country in ("SA", "AE", "QA", "KW", "BH")},
+          **{country: "europe" for country in ("GB", "DE", "FR", "NL", "BE", "PT", "ES", "IT", "CH", "SE", "DK",
+                                               "FI", "IS")}}
 RATE_PIVOT = "EGP"                          # Yahoo quotes currencies against the pound here
 OUNCE = Decimal("31.1034768")              # grams in a troy ounce
 
@@ -67,6 +73,8 @@ class Want:
     pack: str
     month_ends: list[str] = field(default_factory=list)  # held month-ends without a price
     purity: Decimal = Decimal(1)                          # gold: karat / 24
+    currency: str = ""                                    # Gulf and Europe: the holding's own, checked on the board
+    mic: str = ""
 
 
 @dataclass
@@ -150,7 +158,8 @@ def instrument_key(asset) -> tuple[str, str] | None:
         return key, "egx"
     if key.startswith("US:"):
         return key, "us"
-    return None
+    pack = ABROAD.get(key.partition(":")[0])
+    return (key, pack) if pack else None
 
 
 def fund_name(text: str) -> str:
@@ -244,10 +253,10 @@ def plan(c, on: date, now: datetime | None = None) -> Plan:
                 result.unknown.append(asset.name)
             continue
         key, pack = found
-        if pack != "eg-funds" and CURRENCY[pack] != asset.currency:
+        if pack in CURRENCY and pack != "eg-funds" and CURRENCY[pack] != asset.currency:
             result.other_currency.append(asset.name)
             continue
-        result.wants.append(Want(asset.id, asset.name, key, pack, month_ends))
+        result.wants.append(Want(asset.id, asset.name, key, pack, month_ends, currency=asset.currency, mic=asset.mic or ""))
     for asset_id, month_ends in sorted(gold.items()):
         asset = c.assets.get_asset(asset_id)
         if asset.purity and asset.currency == CURRENCY["gold"]:
@@ -332,6 +341,30 @@ def gather(work: Plan, session=None, now: datetime | None = None, budget: float 
                         keep(want, [closes[want.key]])
             except SourceError:
                 failed.append("TradingView")
+    for pack in ("gcc", "europe"):  # the whole board of each country held, after its market closes
+        wants = by_pack.get(pack) or []
+        final, utc_today = final_day(pack, now), now.astimezone(timezone.utc).date()
+        if not wants or (final != utc_today and utc_today.weekday() in PACKS[pack].days):
+            continue
+        try:
+            board = tradingview.fetch(session, pack, fmt_date(final), {w.key.partition(":")[0] for w in wants})
+        except SourceError:
+            if "TradingView" not in failed:
+                failed.append("TradingView")
+            continue
+        listed = {}
+        for instrument, quote in zip(board.instruments, board.quotes):
+            listed.setdefault(instrument.key, (instrument, quote))
+            listed[f"{instrument.key}@{instrument.mic}"] = (instrument, quote)
+        for want in wants:
+            instrument, quote = listed.get(f"{want.key}@{want.mic}") or listed.get(want.key) or (None, None)
+            if instrument is None:
+                continue
+            if instrument.currency != want.currency:  # a mismatched quote is left for you, never converted
+                if want.name not in work.other_currency:
+                    work.other_currency.append(want.name)
+                continue
+            keep(want, [quote])
     if by_pack.get("eg-funds") or work.unlinked:  # every Egyptian fund's latest NAV, one request
         try:
             listing = mubasher.fetch(session)
@@ -376,6 +409,8 @@ def gather(work: Plan, session=None, now: datetime | None = None, budget: float 
     for want in work.wants:  # history: month-ends still missing, and a latest close the board did not give
         latest_known = bool(found.get(want.asset_id))
         if want.pack == "gold" or (not want.month_ends and latest_known) or time.monotonic() > deadline:
+            continue
+        if want.name in work.other_currency:  # its board quoted another currency: its history would too
             continue
         oldest = date.fromisoformat(min(want.month_ends)) if want.month_ends else on
         try:

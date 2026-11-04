@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       packs:
-        description: 'Packs to collect, comma-separated'
+        description: 'Packs to collect, comma-separated; or "catalogue" to print the Gulf and Europe picker list'
         default: 'egx,eg-funds,fx,us,gcc,europe'
 
 permissions:
@@ -34,8 +34,25 @@ env:
   MARKET_REPO: LightningEg/Lightning_Market_Data
 
 jobs:
+  catalogue:
+    # Run by hand with the input "catalogue": prints lightning/assets/abroad_instruments.csv to the log, to copy
+    # into the repository (tools/market/abroad_catalogue.py); this machine can reach TradingView.
+    name: Print the Gulf and Europe picker list
+    if: github.event_name == 'workflow_dispatch' && inputs.packs == 'catalogue'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: '3.13'
+      - name: Print the list
+        run: python -m tools.market.abroad_catalogue --print
   collect:
     name: Collect, check and publish
+    if: github.event_name != 'workflow_dispatch' || inputs.packs != 'catalogue'
     environment: market-publishing
     runs-on: ubuntu-24.04
     timeout-minutes: 20

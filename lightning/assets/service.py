@@ -44,6 +44,9 @@ def _market_key(ticker: str, mic: str | None, country: str | None) -> str | None
         return f"EG:{ticker}"
     if mic in _US_VENUES:
         return f"US:{ticker}"
+    from lightning.market.packs import PACKS
+    if country and any(mic in PACKS[pack].venues for pack in ("gcc", "europe")):
+        return f"{country}:{ticker}"   # SA:2222, GB:VOD: the app fetches these itself (owner 2026-11-04)
     return None
 
 
