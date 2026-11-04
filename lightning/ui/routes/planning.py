@@ -335,7 +335,7 @@ async def loans_page(request: Request):
     lead = kpis.card("Loans still to pay", still_to_pay,
                      kpis.compare(f"of {fmt(borrowed, 0)} in {len(loans)} loan{'s' if len(loans) != 1 else ''}",
                                   f"{fmt(paid, 0)} paid", "good"),
-                     tone="out", visual=kpis.segments([("Paid", paid, "in"), ("Left", borrowed - paid, "neutral")])) if loans else None
+                     tone="out", visual=kpis.segments([("Paid", paid, "hold"), ("Left", borrowed - paid, "out")])) if loans else None
     return render(request, "planning/loans.html", tabs=TABS, plan_tab="loans", loans=loans, notes=notes, lead=lead,
                   debt_tiles=_debt_tiles(c.health.at(day), fmt_date(day)),
                   still_to_pay=still_to_pay, as_of=fmt_date(day))

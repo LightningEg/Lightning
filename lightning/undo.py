@@ -10,6 +10,8 @@ from lightning.core.errors import ValidationError
 
 _ACTION = ContextVar("lightning_undo_action", default=None)
 _EXCLUDED = {"schema_migrations", "audit_log", "profile_identity"}
+# Display preferences are not actions: Undo must never switch the language, theme or privacy back.
+_PREFERENCE_KEYS = ("locale", "appearance_theme", "appearance_follow_night", "privacy_mode")
 
 
 def recording_action():
@@ -73,9 +75,14 @@ class UndoService:
             for operation, before, after in (("INSERT", "NULL", row_json("NEW")),
                                              ("UPDATE", row_json("OLD"), row_json("NEW")),
                                              ("DELETE", row_json("OLD"), "NULL")):
+                skip = ""
+                if name == "settings":
+                    row = "OLD" if operation == "DELETE" else "NEW"
+                    keys = ",".join("'" + key + "'" for key in _PREFERENCE_KEYS)
+                    skip = f" AND {row}.key NOT IN ({keys})"
                 conn.execute(f"CREATE TEMP TRIGGER {_name('undo_' + name + '_' + operation)} "
                              f"AFTER {operation} ON main.{_name(name)} "
-                             "WHEN (SELECT group_id FROM undo_control) IS NOT NULL BEGIN "
+                             f"WHEN (SELECT group_id FROM undo_control) IS NOT NULL{skip} BEGIN "
                              "INSERT INTO undo_records(group_id,table_name,before_json,after_json) "
                              f"VALUES((SELECT group_id FROM undo_control),'{name}',{before},{after}); END")
 
