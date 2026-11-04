@@ -112,7 +112,7 @@ jobs:
           ROOT: ${{ steps.plan.outputs.publish == 'true' && 'market-data' || format('{0}/market', runner.temp) }}
         run: |
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
-          import json, os
+          import json, os, sys
           try:
               report = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "report.json")))
           except (OSError, ValueError):
@@ -123,6 +123,8 @@ jobs:
               for name, entry in sorted(health.items()):
                   if not name.startswith("_") and isinstance(entry, dict):
                       print(f"| {pack} | {name} | {entry.get('ok')} | {entry.get('rows', '')} | {str(entry.get('error', ''))[:120]} |")
+                      if entry.get("ok") is False:  # the whole error as an annotation: the summary table cuts it off
+                          print("::error title=Price source failing: %s::%s" % (name, " ".join(str(entry.get("error", "")).split())[:900]), file=sys.stderr)
               problems = health.get("_run", {}).get("problems", []) if isinstance(health, dict) else []
               for problem in problems[:20]:
                   print(f"\n- {pack}: {problem}")

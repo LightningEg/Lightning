@@ -92,7 +92,7 @@ Owner's request (2026-10-05): compile Gulf and European stocks too, let each use
 | `eg-funds` | Egyptian mutual funds' NAV, with fund class | — | Sun–Thu | 19:00 | On |
 | `fx` | Banque Misr transfer buy/sell midpoint in pounds | — | Sun–Thu | 13:30 | On |
 | `us` | 600 largest US stocks, 100 largest ETFs | XNAS, XNYS, ARCX, XASE | Mon–Fri | 22:30 | Off |
-| `gcc` | Every stock on Saudi, Dubai, Abu Dhabi, Qatar, Kuwait, Bahrain and Oman exchanges | XSAU, XDFM, XADS, DSMQ, XKUW, XBAH, XMUS | Sun–Fri | 13:30 | Off |
+| `gcc` | Every stock on Saudi, Dubai, Abu Dhabi, Qatar, Kuwait and Bahrain exchanges | XSAU, XDFM, XADS, DSMQ, XKUW, XBAH | Sun–Fri | 13:30 | Off |
 | `europe` | Largest stocks and UCITS ETFs in London, Xetra, Euronext, Madrid, Milan, Zurich, Nasdaq Nordic | XLON, XETR, XPAR, XAMS, XBRU, XLIS, XMAD, XMIL, XSWX, XSTO, XCSE, XHEL, XICE | Mon–Fri | 17:30 | Off |
 
 - **Published layout:** `index.json` (every pack's name, venues, date, instrument count and download size) and one folder per pack. A pack the app does not know yet still shows in Settings › Price files, by the name the index gives, so a new market needs no new app version.
@@ -100,7 +100,7 @@ Owner's request (2026-10-05): compile Gulf and European stocks too, let each use
 - **Whole units:** prices quoted in pence (`GBX`) or fils (`KWF`) are published in pounds and dinars (ISO 4217).
 - **In the app:** Settings › Price files lists every pack with its exchanges, download size and what this computer holds; the profile follows the default packs until it saves its own list (`market_packs`, `none` for none). Unfollowing removes the pack's folder; prices already filled stay. Download shared prices downloads only followed packs; Import a file takes one pack or a release's several, follows what it imports, and skips a pack older than the one held.
 - **Other currencies:** Gulf, European and US prices stay in their listing currency and fill only an asset with that same currency. The app values foreign holdings in the profile currency using dated FX; a mismatched quote or missing exchange rate is left explicit, never silently converted.
-- **Coverage implemented 2026-10-15:** Oman (`XMUS`) and Nasdaq Nordic (`XSTO`, `XCSE`, `XHEL`, `XICE`) join the existing Europe/GCC boards. Fixture tests cover venue/currency metadata, Nordic underscore tickers, and quote scaling; published keys stay stable. **Unverified live:** the five new board requests received HTTP tunnel 403 under this workspace network policy. Verify their market/exchange identifiers with permitted access before claiming live coverage. Europe/GCC `publish` remains false: the source review below requires permission or a licensed feed before redistribution.
+- **Coverage implemented 2026-10-15:** Oman (`XMUS`, withdrawn 2026-11-04: TradingView has no `oman` screener, HTTP 404; it needs another source) and Nasdaq Nordic (`XSTO`, `XCSE`, `XHEL`, `XICE`) join the existing Europe/GCC boards. Fixture tests cover venue/currency metadata, Nordic underscore tickers, and quote scaling; published keys stay stable. **Unverified live:** the five new board requests received HTTP tunnel 403 under this workspace network policy. Verify their market/exchange identifiers with permitted access before claiming live coverage. Europe/GCC `publish` remains false: the source review below requires permission or a licensed feed before redistribution.
 
 ## Sources, the whitelist
 

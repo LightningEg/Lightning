@@ -51,8 +51,8 @@ PACKS: dict[str, Pack] = {p.id: p for p in (
          "Banque Misr (banquemisr.com; transfer buy/sell midpoint)", publish=True),
     Pack("us", "US stocks and ETFs", "The 600 largest US stocks and 100 largest ETFs on Nasdaq, NYSE and NYSE Arca",
          ("XNAS", "XNYS", "ARCX", "XASE"), _MON_FRI, "22:30", source="TradingView, Yahoo Finance"),
-    Pack("gcc", "Gulf stocks", "Every stock on the Saudi Exchange, Dubai, Abu Dhabi, Qatar, Boursa Kuwait, Bahrain and Oman",
-         ("XSAU", "XDFM", "XADS", "DSMQ", "XKUW", "XBAH", "XMUS"), _SUN_THU | {4}, "13:30", source="TradingView"),
+    Pack("gcc", "Gulf stocks", "Every stock on the Saudi Exchange, Dubai, Abu Dhabi, Qatar, Boursa Kuwait and Bahrain",
+         ("XSAU", "XDFM", "XADS", "DSMQ", "XKUW", "XBAH"), _SUN_THU | {4}, "13:30", source="TradingView"),
     Pack("europe", "European stocks and ETFs", "The largest stocks and UCITS ETFs in London, Xetra, Euronext, Madrid, "
          "Milan, Zurich and Nasdaq Nordic", ("XLON", "XETR", "XPAR", "XAMS", "XBRU", "XLIS", "XMAD", "XMIL", "XSWX",
                                               "XSTO", "XCSE", "XHEL", "XICE"), _MON_FRI, "17:30", source="TradingView"),

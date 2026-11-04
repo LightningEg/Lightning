@@ -10,7 +10,7 @@ by: Claude
 ---
 
 ## Report
-Owner, high priority (2026-10-10). Europe (LSE, Euronext, Xetra, SIX, Nasdaq Nordic) and all six GCC countries have adapters and fixture coverage; Oman and Nasdaq Nordic complete the declared coverage. Current sources keep `publish=False` until live boards are verified with permitted access and a source allows redistribution.
+Owner, high priority (2026-10-10). Europe (LSE, Euronext, Xetra, SIX, Nasdaq Nordic) and five of the six GCC countries have adapters and fixture coverage (Oman: TradingView has no `oman` screener, so it needs another source); Nasdaq Nordic completes the declared coverage. Current sources keep `publish=False` until live boards are verified with permitted access and a source allows redistribution.
 
 **Read:** [6A](6A-price-packs.md).
 

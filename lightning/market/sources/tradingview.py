@@ -32,7 +32,7 @@ BOARDS: dict[str, list[Board]] = {
     "us": [Board("america", {"NASDAQ": "XNAS", "NYSE": "XNYS", "AMEX": ""}, "US", stocks=600, etfs=100)],
     "gcc": [Board("ksa", {"TADAWUL": "XSAU"}, "SA"), Board("uae", {"DFM": "XDFM", "ADX": "XADS"}, "AE"),
             Board("qatar", {"QSE": "DSMQ"}, "QA"), Board("kuwait", {"KSE": "XKUW"}, "KW"),
-            Board("bahrain", {"BAHRAIN": "XBAH"}, "BH"), Board("oman", {"MSM": "XMUS"}, "OM")],
+            Board("bahrain", {"BAHRAIN": "XBAH"}, "BH")],  # no Oman: TradingView has no "oman" screener (HTTP 404, 2026-11-04)
     "europe": [Board("uk", {"LSE": "XLON"}, "GB", 350, 100), Board("germany", {"XETR": "XETR"}, "DE", 160, 60),
                Board("france", {"EURONEXT": "XPAR"}, "FR", 120), Board("netherlands", {"EURONEXT": "XAMS"}, "NL", 75, 40),
                Board("belgium", {"EURONEXT": "XBRU"}, "BE", 30), Board("portugal", {"EURONEXT": "XLIS"}, "PT", 20),

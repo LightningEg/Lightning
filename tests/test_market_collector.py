@@ -217,12 +217,12 @@ def test_a_run_writes_one_folder_per_pack_and_a_failing_source_keeps_its_last_pr
                                                             ("fx", "banque-misr"), ("us", "tradingview-us"),
                                                             ("gcc", "tradingview-gcc"), ("europe", "tradingview-europe")))
     counts = {pack: len(MarketFile.open(root / pack).instruments()) for pack in PACKS}
-    assert counts == {"egx": 161, "eg-funds": 110, "fx": 10, "us": 520, "gcc": 420, "europe": 850}
+    assert counts == {"egx": 161, "eg-funds": 110, "fx": 10, "us": 520, "gcc": 350, "europe": 850}
     assert MarketFile.open(root / "egx").close_on("EG:COMI", "2026-10-01").close == D("85.25")
     assert MarketFile.open(root / "fx").close_on("USD/EGP", "2026-10-01").close == D("52.39")
     assert MarketFile.open(root / "gcc").manifest["pack"] == "gcc"
     gcc_market = MarketFile.open(root / "gcc")
-    assert any(i.mic == "XMUS" and i.currency == "OMR" for i in gcc_market.instruments().values())
+    assert not any(i.mic == "XMUS" for i in gcc_market.instruments().values())  # no Oman board: TradingView has none
     europe_market = MarketFile.open(root / "europe")
     assert {i.mic for i in europe_market.instruments().values()} >= {"XSTO", "XCSE", "XHEL", "XICE"}
     assert {(i.mic, i.currency) for i in europe_market.instruments().values()} >= {

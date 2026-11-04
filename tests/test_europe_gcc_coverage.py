@@ -18,7 +18,6 @@ from tools.market.collect import _settle_keys
 def market_samples():
     """Small screener rows with the columns TradingView's adapter consumes."""
     return {
-        "oman": {"data": [{"s": "MSM:OMVS", "d": ["OMVS", "Oman Investments", 1.235, "OMR", "stock", "common", "MSM"]}]},
         "sweden": {"data": [{"s": "OMXSTO:ERIC_B", "d": ["ERIC_B", "Ericsson B", 74.5, "SEK", "stock", "common", "OMXSTO"]}]},
         "denmark": {"data": [{"s": "OMXCOP:NOVO_B", "d": ["NOVO_B", "Novo Nordisk B", 640.2, "DKK", "stock", "common", "OMXCOP"]}]},
         "finland": {"data": [{"s": "OMXHEX:NOKIA", "d": ["NOKIA", "Nokia Oyj", 4.127, "EUR", "stock", "common", "OMXHEX"]}]},
@@ -30,7 +29,9 @@ def test_pack_registry_covers_all_gcc_and_nasdaq_nordic_venues():
     gcc = {mic for board in tradingview.BOARDS["gcc"] for mic in board.venues.values()}
     europe = {mic for board in tradingview.BOARDS["europe"] for mic in board.venues.values()}
 
-    assert gcc == set(PACKS["gcc"].venues) == {"XSAU", "XDFM", "XADS", "DSMQ", "XKUW", "XBAH", "XMUS"}
+    assert gcc == set(PACKS["gcc"].venues) == {"XSAU", "XDFM", "XADS", "DSMQ", "XKUW", "XBAH"}
+    # TradingView has no "oman" screener (HTTP 404 in the 2026-11-04 run): Oman waits for another source.
+    assert "oman" not in {board.screener for board in tradingview.BOARDS["gcc"]}
     assert {"XLON", "XETR", "XPAR", "XAMS", "XBRU", "XLIS", "XMAD", "XMIL", "XSWX",
             "XSTO", "XCSE", "XHEL", "XICE"} <= europe
     assert set(PACKS["europe"].venues) == europe
@@ -55,7 +56,6 @@ def test_new_venues_have_iso_country_name_and_currency(mic, country, currency, n
 
 
 @pytest.mark.parametrize("pack,screener,mic,country,currency,key,close", [
-    ("gcc", "oman", "XMUS", "OM", "OMR", "OM:OMVS", D("1.235")),
     ("europe", "sweden", "XSTO", "SE", "SEK", "SE:ERIC_B", D("74.5")),
     ("europe", "denmark", "XCSE", "DK", "DKK", "DK:NOVO_B", D("640.2")),
     ("europe", "finland", "XHEL", "FI", "EUR", "FI:NOKIA", D("4.127")),
