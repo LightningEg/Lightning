@@ -350,3 +350,12 @@ def test_budget_category_returns_to_budget_and_leads_with_register(phone):
     assert 'class="phone-reg-filter"' in page and 'Category:' in page
     assert 'phone-reg-search' in page and 'class="phone-period-row phone-reg-period"' in page
     assert ' › ' not in page.split('class="phone-reg-filter"', 1)[1].split('</div>', 1)[0]
+
+
+def test_loan_ratios_are_compared_rows_instead_of_an_unpaired_tile(phone):
+    html = phone.get('/plan/loans').text
+    ratios = html.split('data-loan-ratios', 1)[1].split('</div>', 1)[0]
+    assert ratios.count('class="phone-row"') == 3
+    assert 'Debt to net worth' in ratios and 'Debt to cash' in ratios and 'Loan payments to income' in ratios
+    assert 'owed against' in ratios and 'a month of' in ratios
+    assert 'class="stat-tiles"' not in html

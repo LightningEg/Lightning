@@ -92,6 +92,10 @@ def test_changed_monthly_payment_warning_fits_phone(c, setup, monkeypatch):
                             factor.fill('82')
                             factor.press('Tab')
                         assert saved.value.status == 204
+                    page.goto(host.origin + '/plan/loans')
+                    ratios = page.locator('[data-loan-ratios] .phone-row')
+                    assert ratios.count() == 3
+                    assert ratios.evaluate_all('rows => rows.every(e => e.scrollWidth <= e.clientWidth + 1)')
                     page.goto(host.origin + '/transactions')
                     page.locator('.phone-more-menu > summary').first.click()
                     activity = page.locator('.phone-more-menu a[href="/activity"]').first
