@@ -23,6 +23,7 @@ def _household(c, setup):
     fees = c.categories.get_by_code("EXP.INVEST.FEES").id
     for month in MONTHS:
         tx.record_inflow(f"{month}-01", cib, "30000", salary)
+        tx.record_outflow(f"{month}-03", cib, "2000", salary)  # returned income reduces Money in
         tx.record_outflow(f"{month}-05", cib, "1200", food)
         tx.record_outflow(f"{month}-28", wallet, "150", transport)
     tx.record_refund("2026-10-07", cib, "200", food)                     # a refund, as the register records it
@@ -78,5 +79,20 @@ def test_every_path_gives_the_same_money_in_and_money_out(c, setup):
         assert budget == card.outflows - invest_out, month
     october = r.cash_flow("2026-10-01", "2026-10-31")
     assert october.outflows == D("1350") - D("200") - D("90")       # both refunds reduce spending
-    assert october.inflows == D("30000")                              # the transfer and Mom's money are not income
+    assert october.inflows == D("28000")                              # the transfer and Mom's money are not income
     assert r.cash_flow("2026-11-01", "2026-11-30").outflows == D("1350") - D("60") + D("25")
+
+
+def test_income_reversal_reduces_income_without_creating_spending(c, setup):
+    accounts, cats = setup
+    bank = accounts["cib"].id
+    salary = cats["EXP.WORK.SALARY"].id
+    c.transactions.record_inflow("2026-10-01", bank, "20000", salary)
+    reversal = c.transactions.record_outflow("2026-10-02", bank, "2000", salary)
+    flow = c.reporting.cash_flow("2026-10-01", "2026-10-31")
+    assert flow.inflows == D("18000")
+    assert flow.outflows == D("0")
+    assert sum(c.budgets.owned_spending("2026-10-01", "2026-10-31").values(), D(0)) == 0
+    assert c.reporting.bridge("2026-10-01", "2026-10-31").difference == 0
+    c.transactions.void(reversal.id)
+    assert c.reporting.cash_flow("2026-10-01", "2026-10-31").inflows == D("20000")

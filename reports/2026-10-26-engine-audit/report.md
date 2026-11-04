@@ -33,7 +33,7 @@ Two passes. First, the open engine items from Audits 1 and 4 (2I, 2J, 2L, 2M). S
 | A1 | medium | Investment fees in a month raised a false ISSUE in "Budget actual equals categorized spending" (the budget leaves them out by design). Compared like for like now. | fixed |
 | A2 | medium | Two integrity checks could never fail. "Categorized expenses equal reported spending" (one sum against itself) is replaced by an independent ledger check, "Profile-currency cash moves at face value". The net-worth bridge check remains. | bridge: [2Z](https://github.com/LightningEg/Lightning/blob/98af0af57c86a3b4e12fa342350cac0f682a62b7/issues/2-safe-for-real-money/2Z-net-worth-bridge-check-cannot-fail.md); see follow-up |
 | A3 | medium | An Other-asset estimate hid money moved out of that account after the estimate's date (net worth unchanged after a 100,000 outflow). The estimate now carries later movement. | fixed |
-| A4 | low | Money out under an income category counts as spending, not as less income; follows the documented `flow_of` rule. | owner decision: [7S](../../issues/7-planning-import-and-search/7S-money-out-of-an-income-category.md) |
+| A4 | low | Money out under an income category counts as spending, not as less income; follows the documented `flow_of` rule. | owner decision: [7S](../../tests/test_one_money_rule.py) |
 | A5 | low | `monthly_flow_between` overflowed in December 9999. | fixed |
 
 Checked and sound, per the three reviews: Decimal-only money with consistent rounding; empty ledgers and leap days; FX direct/inverse/cross selection and its 45-day floor; average-cost pools and realized gain on partial sells; selling more than held; dividend currency and tax; schedule month-end clamping; bank CSV confirm atomicity and duplicate flags; SMS read and assign; merge checks; undo/redo replay validation; reconciliation locks; CD and circle write atomicity; the reserve amount limits.
@@ -47,3 +47,7 @@ Not checked: the edit journal, native Windows/Android behavior, real power loss,
 ## Dated follow-ups
 
 **2026-10-29 · IT-2Z:** Profile-currency cash now contributes zero revaluation to the bridge, except Other assets with manual estimates. The bridge flags both a corrupted cash line and a deliberately wrong cash valuation; `tests/test_engine_loose_ends.py` covers both and a legitimate estimate. Other holdings' revaluation remains residual and is not independently verified by this check.
+
+## Follow-up · 2026-11-04
+
+OW-7S is resolved under the owner’s delegated report-completion instruction: a negative income-class entry reduces Money in. Money out and net flow stay consistent across cards, categories, calendars and Budget. `tests/test_one_money_rule.py` checks monthly reversals, cross-report agreement, bridge reconciliation and voiding the reversal.

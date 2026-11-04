@@ -238,6 +238,10 @@ The 192 affected transaction/ownership/cash/investment/search checks passed, plu
 ### Follow-up 2026-11-04: BT-3AP finished
 Live search now stops the request in flight when the field changes, a search is submitted or the page is left, and ignores a body that still arrives (the serial, the form and the results box must all still be attached). `tests/test_phone_live_search_browser.py` runs the real initializer in Chromium with the network answer held back: a late body never overwrites newer results or the address, clearing the field lands on the empty search, and an answer for a page already left is dropped. Removing the serial check makes the first test fail.
 
+## Follow-up · 2026-11-04
+
+OW-2AB uses the explicit launch modes approved in #303: `--profiles` opens protected profiles, `--demo`/`--sample` stay isolated, and bare launch and every `--db` argument stop before opening data. Source launchers also install the declared encrypted extras (`tests/test_plain_install.py`). The later approved mode requirement supersedes this branch’s initial default-profile proposal.
+
 ## OW-2AB follow-up · 2026-11-04
 
 Owner approved restricting the legacy browser runner to explicit demo/sample data. Bare launch and every `--db` argument now stop before database or network work; `--profiles` retains encrypted-profile startup, and existing plaintext files are untouched. Plaintext tests may opt into encrypted-profile thread/close checks through `strict_thread=True` and the `strict_c` fixture. Evidence: [tests/test_legacy_launcher.py](../../tests/test_legacy_launcher.py) and [encrypted database regression tests](../../tests/test_encrypted_database.py). This closes OW-2AB; explicit legacy import remains separate IT-2C work.

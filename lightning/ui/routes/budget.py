@@ -185,9 +185,13 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     spending_start = period.start
     if period.key != "month" and plan_months:
         spending_start = max(period.start, parse_month(plan_months[0])[0])
-    period_spending = {cid: v for cid, v in c.budgets.owned_spending(spending_start, period.end).items()
+    gross_spending = {cid: value for cid, value in c.budgets.owned_spending(spending_start, period.end).items()
+                      if cid not in one_offs}
+    period_spending = {cid: v for cid, v in c.budgets.plan_funded_spending(spending_start, period.end).items()
                        if cid not in one_offs}  # one-off spending stays in cash flow, out of the budget
     period_actual = sum(period_spending.values(), ZERO)
+    gross_period_spending = sum(gross_spending.values(), ZERO)
+    funding_adjustment_total = gross_period_spending - period_actual
     category_periods = {}
     for _, month_view in month_views:
         m_first, m_last = parse_month(month_view.month)
@@ -211,6 +215,8 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         row["current_budget"] = row["base_budget"] + row["carryover"]
         row["budgeted"] = row["current_budget"]
         row["spent"] = sum((period_spending.get(cid, ZERO) for cid in category_tree_ids(category_id)), ZERO)
+        row["gross"] = sum((gross_spending.get(cid, ZERO) for cid in category_tree_ids(category_id)), ZERO)
+        row["funding_adjustment"] = row["gross"] - row["spent"]
         row["left"] = quantize(row["current_budget"], 0) - quantize(row["spent"], 0)  # as the figures beside it read
     for group_id, child_ids in by_group.items():
         row = group_totals.get(group_id)
@@ -298,7 +304,8 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         over = sorted(({"name": r["label"], "over": r["b"]["over_by"], "category_id": r["category_id"]}
                        for r in meter_lines if r["b"]["is_over"]), key=lambda r: -r["over"])
         kpi_cards = kpis.budget_month(everyday, over=over, check=check, raise_offer=raise_offer,
-                                      move=_cover_from(c, month, over[0], everyday.room) if over else None, month=month)
+                                      move=_cover_from(c, month, over[0], everyday.room) if over else None, month=month,
+                                      funded_elsewhere=funding_adjustment_total > ZERO)
         if everyday.day and everyday.everyday_plan > 0:
             pace = charts.pace(everyday.by_day, everyday.everyday_plan, everyday.days_in_month, everyday.last_month_by_day)
         plan_bills = _plan_bills(c, everyday)
@@ -306,7 +313,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         kpi_cards = kpis.budget_period(period_actual, period_budgeted,
                                        [(key, c.budgets.plan_summary(key, schedule=c.schedules.view())["left"], parse_month(key)[1] < today())
                                         for key, _ in month_views if c.budgets.has_plan(key, schedule=c.schedules.view())],
-                                       period.label)
+                                       period.label, funded_elsewhere=funding_adjustment_total > ZERO)
     # Answer first (guideline 3.33, A09): Left in plan is the page's Lead with the pace chart beside it; what is over
     # plan is a Needs you row under it; Everyday spending and Plan leaves to save stay as the KPI row.
     lead, pace_card, needs = None, None, []
@@ -366,6 +373,8 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                                        if cat.depth == 1 and cat.scope == Scope.PERSONAL), None),
                   low_confidence=keynotes.low_confidence_note(c.budgets.plan_summary(month, schedule=c.schedules.view())["low_confidence"]) if period.key == "month" else "",
                   plan_from=fmt_date(spending_start) if spending_start != period.start else "",
+                  funding_adjustment_total=funding_adjustment_total,
+                  gross_period_spending=gross_period_spending,
                   period=period, period_actual=period_actual, period_budgeted=period_budgeted,
                   period_left=period_left, period_carryover=period_carryover, group_totals=group_totals,
                   group_rows=group_rows,
@@ -737,7 +746,7 @@ async def carryover_bridge(request: Request):
         if not after or not after.carryover_enabled:
             continue
         categories.append({"name": after.name, "prior_budget": before.available if before else ZERO,
-                          "prior_spent": before.actual if before else ZERO,
+                          "prior_spent": before.planned_actual if before else ZERO,
                           "incoming": after.opening_carryover,
                           "base": after.budget or ZERO,
                           "current": after.available or ZERO})

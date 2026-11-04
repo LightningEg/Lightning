@@ -3,7 +3,8 @@ title: Refresh packaged dependencies with matching native wheels and lockfiles
 type: tech
 pillar: build
 size: L
-status: building
+status: blocked
+blocked_by: repository Actions allowlist update and native runtime acceptance
 created: 2026-10-23
 by: Codex
 skills: stale-check
@@ -84,3 +85,13 @@ Package-contract tests, the full suite and import contracts; native Windows and 
 libraries), Android, both desktop and the build-tools locks regenerated with their recorded commands. Full suite passes on
 the upgraded environment (`ruff`, import contracts too). Left: the native Windows and Android jobs on the pull request, then
 a phone install of the new wheels.
+
+2026-11-04: a local arm64 Android debug build at `30e608bb` passed the package/lock check and 16 KB ZIP alignment; the artifact was signed with Gradle’s automatically generated debug key, not a release key. [Evidence](../../reports/2026-10-26-v150-release/evidence/android-1h-debug-2026-11-04.md). Native Windows and CI checks and a physical phone install remain.
+
+## Actions policy blocker · 2026-11-04
+
+PR [#302](https://github.com/LightningEg/Lightning/pull/302) native workflow startup was blocked because the app's selected-action policy still allows `gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c`, while the security update in #276 pins `gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c`. The workflow retains the newer reviewed pin. The live policy has not been changed from this environment.
+
+From the reviewed PR branch on the owner's checkout, run `python tools/security_setup.py --app-actions-only` to preview the complete selected-action policy, then `python tools/security_setup.py --app-actions-only --apply` to update only that app policy. The command requires the owner login and app administrator access, preserves other approved patterns and the existing GitHub-owned/verified flags, and refuses a non-selected or unreadable policy. Re-run the affected checks after the update; native Windows and physical-phone acceptance remain separate.
+
+**Owner decision · 2026-11-04:** leave native CI blocked while other work continues. Keep PR #302 open; do not change the live allowlist or bypass missing native checks. The reviewed app-only policy helper remains available for a later authorized run.

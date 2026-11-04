@@ -348,11 +348,11 @@ def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, rep
     breakdown = c.position.investment_breakdown(day, owned_rows, report)
     holding_groups, horizons = breakdown.groups, breakdown.horizons
     balances, holdings_total = breakdown.balances, breakdown.total
-    biggest = charts.bars([{"label": r["name"], "value": r["value"], "note": f"{r['weight']:.1f}% · {g['name']}",
+    biggest = charts.bars_with_other([{"label": r["name"], "value": r["value"], "note": f"{r['weight']:.1f}% · {g['name']}",
                             "href": f"/accounts/{r['account_id']}"} if r["h"] is None else
                            {"label": r["h"].asset_name, "value": r["value"], "note": f"{r['weight']:.1f}% · {r['h'].asset_class.split(' › ')[-1]}",
                             "href": f"/investments/holding/{r['h'].asset_id}?account={r['h'].account_id}&date={day}&start={period.start_text}"}
-                           for g in holding_groups for r in g["rows"] if r["value"]], 6)
+                           for g in holding_groups for r in g["rows"] if r["value"]], translate("Other", ui_locale()))
     # Dividends collected this year, per holding (fixed: 1 January to today).
     now = today()
     year_start = fmt_date(date(now.year, 1, 1) - timedelta(days=1))
@@ -413,6 +413,20 @@ async def calculate_planner(request: Request):
     return await _render_planner(request,str(form.get("amount","10000")))
 
 
+
+def _planner_stack(rows: list[dict], other_label: str) -> list[dict]:
+    """Four named suggestions and a neutral remainder; keep the detailed rows unchanged."""
+    parts = sorted((r for r in rows if r["suggested"] > ZERO), key=lambda r: -r["suggested"])
+    if len(parts) <= 4:
+        return [{"label": r["bucket"], "value": r["suggested"], "tone": r["tone"]} for r in parts]
+    # An existing Other is already a remainder: include it in the one aggregate, even if large.
+    named = [r for r in parts if r["bucket"].casefold() != "other"]
+    shown = named[:4]
+    rest = named[4:] + [r for r in parts if r["bucket"].casefold() == "other"]
+    return ([{"label": r["bucket"], "value": r["suggested"], "tone": r["tone"]} for r in shown]
+            + [{"label": other_label, "value": sum((r["suggested"] for r in rest), ZERO), "tone": "reference"}])
+
+
 async def _render_planner(request: Request, raw_amount: str="10000"):
     c=container(request); amount=to_decimal(raw_amount,"amount")
     if amount<=ZERO: raise ValidationError("Enter an amount greater than zero.","amount")
@@ -444,6 +458,7 @@ async def _render_planner(request: Request, raw_amount: str="10000"):
                      "target":planning_targets.get(bucket),"suggested":suggested,"tone":tones.get(bucket,"other"),
                      "after":(value+suggested)/(total+amount)*100 if total+amount else ZERO})
     return render(request,"investments/planner.html",amount=amount,mode=mode,rows=rows,target_total=target_total,
+                  stack=_planner_stack(rows, translate("Other", ui_locale())),
                   monthly_goal=c.settings.get("investment_monthly_goal") or "",
                   planner_ready=bool(planning_targets) or by_current_mix, by_current_mix=by_current_mix,allocation_sum=sum((r["suggested"] for r in rows),ZERO))
 

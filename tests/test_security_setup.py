@@ -52,3 +52,98 @@ def test_market_rules_do_not_grant_general_ai_or_actions_bypass():
     rules = setup.branch_rules('price publication', updates_only=True)
     assert any(rule['type'] == 'update' for rule in rules['rules'])
     assert rules['bypass_actors'] == [{'actor_id': 5, 'actor_type': 'RepositoryRole', 'bypass_mode': 'always'}]
+
+
+def test_workflow_actions_match_app_policy():
+    """Every external action is pinned and allowed by the policy the tool installs."""
+    import re
+    seen_third_party = set()
+    workflows = ROOT / '.github/workflows'
+    for workflow in (*workflows.glob('*.yml'), *workflows.glob('*.yaml')):
+        for line in workflow.read_text(encoding='utf-8').splitlines():
+            match = re.search(r'\buses:\s*[\'"]?([^\s\'"]+)', line)
+            if not match:
+                continue
+            action = match.group(1)
+            if action.startswith('./'):
+                continue
+            assert re.fullmatch(r'[^@\s]+@[0-9a-f]{40}', action), (workflow, action)
+            if not action.lower().startswith(('actions/', 'github/', setup.ORG.lower() + '/')):
+                seen_third_party.add(action)
+                assert action in setup.APP_ACTION_PATTERNS, (workflow, action)
+    assert seen_third_party == set(setup.APP_ACTION_PATTERNS)
+
+
+class FakeActions:
+    def __init__(self, apply=False, *, owner=True, admin=True, selected=True):
+        self.apply, self.owner, self.admin, self.selected = apply, owner, admin, selected
+        self.calls, self.writes = [], []
+        self.current = {'github_owned_allowed': True, 'verified_allowed': False,
+                        'patterns_allowed': ['other/action@abcdef', setup.OLD_GRADLE_ACTION]}
+
+    def api(self, method, path, body=None, **kwargs):
+        self.calls.append((method, path))
+        if method == 'GET' and path == 'user':
+            return {'login': setup.OWNER if self.owner else 'someone-else', 'id': 1}
+        if method == 'GET' and path == f'repos/{setup.APP}':
+            return {'permissions': {'admin': self.admin}}
+        if method == 'GET' and path == f'repos/{setup.APP}/actions/permissions':
+            return {'enabled': True, 'allowed_actions': 'selected' if self.selected else 'all'}
+        if method == 'GET' and path == f'repos/{setup.APP}/actions/permissions/selected-actions':
+            return self.current
+        if method != 'GET' and self.apply:
+            self.writes.append((method, path, body))
+        return None
+
+
+def test_app_actions_only_previews_and_mutates_only_selected_policy(monkeypatch, capsys):
+    preview = FakeActions()
+    monkeypatch.setattr(setup, 'GitHub', lambda apply=False: preview)
+    assert setup.main(['--app-actions-only']) == 0
+    assert not preview.writes
+    assert setup.APP_ACTION_PATTERNS[1] in capsys.readouterr().out
+    assert all(path == 'user' or path.startswith(f'repos/{setup.APP}') for _, path in preview.calls)
+
+    applied = FakeActions(apply=True)
+    monkeypatch.setattr(setup, 'GitHub', lambda apply=False: applied)
+    assert setup.main(['--app-actions-only', '--apply']) == 0
+    assert len(applied.writes) == 1
+    method, path, body = applied.writes[0]
+    assert (method, path) == ('PUT', f'repos/{setup.APP}/actions/permissions/selected-actions')
+    assert body['github_owned_allowed'] is True and body['verified_allowed'] is False
+    assert body['patterns_allowed'] == ['other/action@abcdef', *setup.APP_ACTION_PATTERNS]
+    assert setup.OLD_GRADLE_ACTION not in body['patterns_allowed']
+
+
+def test_app_actions_only_refuses_missing_owner_admin_or_selected_policy(monkeypatch):
+    import pytest
+    for fake in (FakeActions(apply=True, owner=False), FakeActions(apply=True, admin=False),
+                 FakeActions(apply=True, selected=False)):
+        monkeypatch.setattr(setup, 'GitHub', lambda apply=False: fake)
+        with pytest.raises(RuntimeError):
+            setup.main(['--app-actions-only', '--apply'])
+        assert fake.writes == []
+    with pytest.raises(SystemExit):
+        setup.main(['--app-actions-only', '--org-controls'])
+
+
+def test_app_actions_only_requires_complete_existing_policy():
+    import pytest
+    fake = FakeActions(apply=True)
+    fake.current.pop('verified_allowed')
+    with pytest.raises(RuntimeError, match='complete'):
+        setup.update_app_actions(fake)
+    assert fake.writes == []
+
+
+def test_app_actions_only_preserves_flags_and_is_idempotent():
+    fake = FakeActions(apply=True)
+    fake.current = {'github_owned_allowed': False, 'verified_allowed': True,
+                    'patterns_allowed': ['other/action@abcdef', *setup.APP_ACTION_PATTERNS]}
+    setup.update_app_actions(fake)
+    assert fake.writes == []
+    fake.current['patterns_allowed'].remove(setup.APP_ACTION_PATTERNS[1])
+    setup.update_app_actions(fake)
+    assert fake.writes[0][2]['github_owned_allowed'] is False
+    assert fake.writes[0][2]['verified_allowed'] is True
+    assert fake.writes[0][2]['patterns_allowed'] == ['other/action@abcdef', *setup.APP_ACTION_PATTERNS]

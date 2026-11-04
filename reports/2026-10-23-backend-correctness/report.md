@@ -193,5 +193,9 @@ Combined full-suite validation: **2,395 passed, 10 skipped**; all four import co
 
 **2026-10-26 follow-up.** 2I, 2L and 2M are fixed, and 2J on ordinary profiles (journal profiles stay open in 2J); regressions in `tests/test_engine_loose_ends.py`. See [Audit 8](../2026-10-26-engine-audit/report.md).
 
+### 1G follow-up (2026-11-04)
+
+The existing top-level inventory covers the original omissions. Sync modules and package initializers now have explicit policies and static direct-import checks, with negative tests in `tests/test_architecture.py`. Investment reevaluation and forecast deposit-receipt collaborators are now required and validated, and financial adapters cannot import runtime modules except the finance-to-store dependency. Ordinary undo now installs both validators before attaching; the root initializer and launcher are documented layer exemptions. Static checks cannot discover dynamically computed imports.
+
 ## Follow-up · 2026-11-04: 1G finished
 Every top-level module has a layer (test), the sync protocol modules may import only the database and security, the journal core imports no financial module, and five named journal adapters may (a sixth fails `tests/test_architecture.py` and lint-imports). The forecaster gets its deposit receipts through its constructor, and a test refuses any service assigned to another after construction. Left, tracked in 9K: Undo's history-validation hook in `bootstrap.py`.

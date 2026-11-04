@@ -73,3 +73,17 @@ def test_the_paces_end_labels_part_when_the_totals_are_close():
     far = pace([D(100)] * 5, D(8719), 31, [D(4000) * (i + 1) / 31 for i in range(31)])
     assert abs(far["plan"]["label_y"] - far["plan"]["y"]) < 1e-6 and abs(far["before_label_y"] - far["before_end_y"]) < 1e-6  # untouched
     assert pace([D(100)], D(8719), 31)["before_label_y"] is None
+
+
+def test_biggest_holdings_show_four_and_preserve_the_rest_as_other():
+    from decimal import Decimal as D
+    from lightning.ui.charts import bars_with_other
+
+    values = [D('100'), D('90'), D('80'), D('70'), D('60'), D('50'), D('40')]
+    chart = bars_with_other([{'label': str(i), 'value': value} for i, value in enumerate(values)], 'Other')
+    assert [r['label'] for r in chart['rows']] == ['0', '1', '2', '3', 'Other']
+    assert chart['rows'][-1]['tone'] == 'reference'
+    assert chart['rows'][-1]['value'] == D('150')
+    assert sum(row['value'] for row in chart['rows']) == sum(values)
+    assert chart['rows'][-1]['width'] == 100
+    assert bars_with_other([{'label': 'Only', 'value': D('2')}], 'Other')['rows'][0]['label'] == 'Only'

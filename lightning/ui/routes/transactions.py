@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
@@ -451,6 +452,18 @@ async def transaction_detail(request: Request, txn_id: int):
     return detail_page(request, txn_id)
 
 
+
+def _display_timestamp(value: str) -> str:
+    """Make the recorded local time readable without losing its UTC offset."""
+    try:
+        moment = datetime.fromisoformat(value)
+    except (TypeError, ValueError):
+        return value
+    local = moment.replace(tzinfo=None).isoformat(sep=" ")
+    offset = moment.isoformat(sep=" ")[len(local):]
+    return local + (f" UTC{offset}" if offset else "")
+
+
 def detail_page(request: Request, txn_id: int, status_code: int = 200, error: str = ""):
     """The one transaction page (7T1): its details, what it touched, its suggested links and its history."""
     from lightning.workflows.activity import ActivityReview
@@ -484,7 +497,8 @@ def detail_page(request: Request, txn_id: int, status_code: int = 200, error: st
         except LightningError:
             review = None
     return render(request, "transactions/detail.html", status_code=status_code, error=error,
-                  txn=txn, summary=c.transactions.summarize(txn),
+                  txn=txn, recorded_at=_display_timestamp(txn.created_at), updated_at=_display_timestamp(txn.updated_at),
+                  summary=c.transactions.summarize(txn),
                   is_ownership=c.transactions._is_ownership_transaction(txn),
                   conversion=c.transactions.conversion_of(txn), conversion_spread=c.transactions.conversion_spread(txn),
                   replaced_revaluation=txn.id in c.transactions.replaced_revaluation_ids(),

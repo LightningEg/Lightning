@@ -674,11 +674,6 @@ class PlanningService:
                 if p.due_date >= fmt_date(first) and p.status != PaymentStatus.SKIPPED:
                     out[item.category_id] = out.get(item.category_id, ZERO) + self.amount_in_base(
                         p, p.amount, p.due_date)
-        loans = {item.id: item for item in self.items((PlanKind.LOAN,))}
-        for row in self.repo.extra_payments(fmt_date(today())):
-            item = loans.get(row["planned_item_id"])
-            if item and item.category_id and not row["due_date"] and row["date"].startswith(month):
-                out[item.category_id] = out.get(item.category_id, ZERO) + from_e6(row["principal_e6"] + row["fee_e6"])
         return out
 
     @request_cached(deep=True)  # rows hold lists of item names

@@ -36,6 +36,16 @@ class UndoService:
         self.prepare_validation = None  # capture the pre-replay state; return a post-replay check
         self._tables = None
 
+    @classmethod
+    def for_ledger(cls, db, audit, *, validate, prepare_validation):
+        """Build ordinary ledger history with both replay safety checks installed."""
+        if not callable(validate) or not callable(prepare_validation):
+            raise TypeError("ledger history requires replay and transition validators")
+        service = cls(db, audit)
+        service.validate = validate
+        service.prepare_validation = prepare_validation
+        return service
+
     def prepare(self, conn):
         if conn.execute("SELECT 1 FROM sqlite_temp_master WHERE name='undo_control'").fetchone():
             return

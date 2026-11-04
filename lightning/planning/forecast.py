@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 from decimal import Decimal
+from typing import Protocol
 
 from lightning.core.dates import fmt_date, month_of, parse_date, parse_month, today
 from lightning.core.figures import label
@@ -40,8 +41,6 @@ def _due_circle_events(service, day: date) -> list[DepositEvent]:
 
 def _deposit_cash_events(service, as_of: date, end: date):
     """Return projected CD events, replacing maturity projections already posted as transfers."""
-    if service is None:
-        return []
     events = service.future_events(as_of, end)
     db = getattr(service, "db", None)
     if db is None:
@@ -90,8 +89,17 @@ def emergency_fund(reserves, budgets, month: str, schedule):
     return budgets.emergency_fund(month, reserve["effective_allocated"] if reserve else None, schedule=schedule)
 
 
+class ReceiptAdjuster(Protocol):
+    def adjust_events(self, events, as_of=None): ...
+
+
 class CashForecaster:
-    def __init__(self, planning, reporting, reserves, budgets, categories, position, schedules, health, deposits=None, deposit_receipts=None):
+    def __init__(self, planning, reporting, reserves, budgets, categories, position, schedules, health,
+                 deposits, deposit_receipts: ReceiptAdjuster):
+        if not callable(getattr(deposits, "future_events", None)):
+            raise TypeError("deposits must provide future_events")
+        if not callable(getattr(deposit_receipts, "adjust_events", None)):
+            raise TypeError("deposit_receipts must provide adjust_events")
         self.planning = planning
         self.position = position
         self.reporting = reporting
@@ -99,7 +107,7 @@ class CashForecaster:
         self.budgets = budgets
         self.categories = categories
         self.deposits = deposits
-        self.deposit_receipts = deposit_receipts  # matches paid receipts to the projected deposit events; None: none to match
+        self.deposit_receipts = deposit_receipts
         self.schedules = schedules
         self.health = health  # its Savings rate limit sets the saving the forecast asks for
 
@@ -181,11 +189,18 @@ class CashForecaster:
                   if not item.is_income and item.counterparty_id and item.category_id}
         left_out = self.budgets.one_off_ids() | self.budgets._investment_ids()
         daily: dict[str, Decimal] = {}
+        adjustments = self.budgets.funding.adjustments(start, end)
+        deducted = set()
         for line in self.reporting.spending_lines(start, end):
             if (line["transaction_id"] in linked or line["category_id"] in left_out
                     or (line.get("counterparty_id"), line["category_id"]) in payees):
                 continue
-            daily[line["date"]] = daily.get(line["date"], ZERO) + line["value"]
+            key = (line["transaction_id"], line["category_id"])
+            adjustment = adjustments.get(key) if line["value"] > ZERO and key not in deducted else None
+            amount = line["value"] - (adjustment["principal"] + adjustment["reserve"] if adjustment else ZERO)
+            if adjustment:
+                deducted.add(key)
+            daily[line["date"]] = daily.get(line["date"], ZERO) + amount
         out, total, cursor = [], ZERO, start
         while cursor <= end:
             total += daily.get(fmt_date(cursor), ZERO)
@@ -201,9 +216,7 @@ class CashForecaster:
         month_keys = _months(day, months)
         horizon_end = parse_month(month_keys[-1])[1]
         all_events = _deposit_cash_events(self.deposits, day, horizon_end)
-        receipts = self.deposit_receipts
-        if receipts is not None:
-            all_events = receipts.adjust_events(all_events, day)
+        all_events = self.deposit_receipts.adjust_events(all_events, day)
         deposit_events = [e for e in all_events if getattr(e, "source", "CD") != "GAMEYA"]
         circle_events = [e for e in all_events if getattr(e, "source", "CD") == "GAMEYA"]
         # A payment whose money already moved early (salary 12 days before payday) is in free cash: counting

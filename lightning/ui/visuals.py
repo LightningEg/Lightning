@@ -10,7 +10,7 @@ from decimal import Decimal
 from urllib.parse import urlencode
 
 from lightning.core.dates import fmt_date, months_back, parse_date, parse_month
-from lightning.core.money import ZERO, fmt, round_to_total
+from lightning.core.money import ZERO, fmt, quantize, round_to_total
 
 from lightning.planning.domain import PlanKind
 from lightning.investments import journey
@@ -432,6 +432,15 @@ def expense_analysis(c, first: date, last: date, code_filter: str = "", history:
             "has_history": len(keys) >= 1, "has_range": len(keys) >= 3, "partial": profile["partial"]}
 
 
+def _safe_display_parts(parts, total):
+    """Whole-unit labels that retain Free cash and add exactly to the displayed result."""
+    if not parts or sum((value for _, value in parts), ZERO) != total:
+        raise ValueError("Safe to spend parts must sum to the exact total")
+    free = quantize(parts[0][1], 0)
+    deductions = round_to_total([value for _, value in parts[1:]], quantize(total, 0) - free)
+    return [(parts[0][0], free), *[(name, value) for (name, _), value in zip(parts[1:], deductions)]]
+
+
 def cash_plan(c, forecast, day: date) -> dict:
     """Cash planning in four questions: the gist (stat cards), how safe to spend is worked out, where
     cash is heading (actual month ends, then the forecast) and what is promised."""
@@ -439,6 +448,9 @@ def cash_plan(c, forecast, day: date) -> dict:
     parts = dict(f.safe_to_spend_parts)
     steps = [(name, value) for name, value in f.safe_to_spend_parts[1:]]
     build = charts.waterfall((f.safe_to_spend_parts[0][0], f.free_cash), steps, ("Safe to spend", f.safe_to_spend))
+    display_parts = _safe_display_parts(f.safe_to_spend_parts, f.safe_to_spend)
+    for row, (_, amount) in zip(build["rows"], display_parts):
+        row["display_value"] = amount
     # Next 30 days on one date axis from today: money in above the line, bills below.
     end = day + timedelta(days=30)
     upcoming = [p for p in c.planning.all_payments(end, day) if p.status.value in ("DUE", "UPCOMING")]
@@ -499,7 +511,7 @@ def cash_plan(c, forecast, day: date) -> dict:
     if len(loans) > 4:
         rest = loans[4:]
         loans = loans[:4] + [{"label": "Other", "value": sum((r["value"] for r in rest), ZERO), "note": f"{len(rest)} loans"}]
-    return {"build": build, "marks": marks, "upcoming": upcoming, "before_income": before_income,
+    return {"build": build, "safe_display_parts": display_parts, "marks": marks, "upcoming": upcoming, "before_income": before_income,
             "before_total": f.payments_before_income_total, "heading": heading, "flows": rows,
             "loan_bars": charts.bars(loans, 6), "loan_rows": loans, "forecast_spark": charts.sparkline([m.closing for m in f.months]),
             "parts": parts, "past_free": [(key, value) for key, value in zip(past_keys, past)]}

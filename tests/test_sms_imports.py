@@ -344,3 +344,12 @@ def test_dismissing_two_from_a_sender_quiets_it_but_never_a_bank(c, setup):
         c.sms_imports.dismiss(c.sms_imports.unread()[0]["id"])
     c.sms_imports.read([("NBE", shop.format(n=700), datetime(2026, 10, 10, 9))])
     assert len(c.sms_imports.unread()) == 1
+
+
+def test_pc_from_sms_links_back_to_accounts(c, setup):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+
+    page = TestClient(create_app(c)).get('/sms')
+    assert page.status_code == 200
+    assert '<a class="btn" href="/accounts">Accounts</a>' in page.text

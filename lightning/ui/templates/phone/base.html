@@ -17,12 +17,18 @@
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('lightning-t.js') }}"></script>
 </head>
 {% set here = sections_for(request) %}{% set back = back_url(request) %}
+{# Direct entry still needs a way back on a phone with no browser navigation. #}
+{% set path = request.url.path %}{% set parts = path.split('/') %}
+{% if not back and path == '/settings' %}{% set back = here.tab.href if request.query_params.get('section') and here.tab and here.tab.href != '/settings' else '/more' %}
+{% elif not back and path in ('/rules', '/categories', '/counterparties', '/checks') %}{% set back = '/more' %}
+{% elif not back and path == '/investments/planner' %}{% set back = '/investments' %}
+{% elif not back and parts|length >= 4 and parts[1] == 'accounts' and parts[2].isdigit() and parts[3] == 'import' %}{% set back = '/accounts/' ~ parts[2] %}{% endif %}
 <body data-base-currency="{{ base }}" class="phone-body">
 <header class="phone-appbar">
   {# Slim top bar (phone overhaul 2026-10-22, C03.2): the mark and the page's name, then Search and Hide amounts;
      the tab's gear only where the tab has settings. On an inner page, ‹ and the page it returns to. A page sets phone_back.
      One way to move: the tab bar, More and ‹; the title is plain text (3AN2). #}
-  {% block phone_back %}{% if back %}<a class="phone-back" href="{{ back }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ ('Budget' if back.startswith('/budget') else here.section.label if here.section else 'Back')|tr(locale) }}</span></a>
+  {% block phone_back %}{% if back %}<a class="phone-back" href="{{ back }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ ('Budget' if back.startswith('/budget') else 'More' if back == '/more' else 'Investments' if back == '/investments' else 'Accounts' if back.startswith('/accounts') else here.section.label if here.section else 'Back')|tr(locale) }}</span></a>
   {% else %}<span class="phone-mark"><img src="/static/lightning-mark.svg" alt="" width="20" height="28"></span><span class="phone-appbar-title">{% block phone_title %}{% set parts = (self.title()|trim).split(' · ') %}{{ (parts[-1] if parts|length > 1 and parts[-1] in ('Overview', 'Budget', 'Cash planning', 'Investments', 'Accounts', 'Settings') else parts|join(' · '))|tr(locale) }}{% endblock %}</span>{% endif %}{% endblock %}
   <nav class="phone-appbar-icons" aria-label="{{ 'Tools'|tr(locale) }}">
     <a class="phone-icon" href="/search" aria-label="{{ 'Search'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></a>

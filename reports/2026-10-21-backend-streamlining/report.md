@@ -147,6 +147,10 @@ Two parts are not defects: the older lend-and-hand-back sync runs in production 
 - **Limits:** timings are single runs on Linux with plaintext SQLite. Windows and SQLCipher will be slower, though the query counts carry over.
 - **Changes:** no code was changed.
 
+## Follow-up · 2026-11-04
+
+OW-2AB uses the explicit launch modes approved in #303: `--profiles` opens protected profiles, `--demo`/`--sample` stay isolated, and bare launch and every `--db` argument stop before opening data. Source launchers also install the declared encrypted extras (`tests/test_plain_install.py`). The later approved mode requirement supersedes this branch’s initial default-profile proposal.
+
 ## OW-2AB follow-up · 2026-11-04
 
 Owner approved restricting the legacy browser runner to explicit demo/sample data. Bare launch and every `--db` argument now stop before database or network work; `--profiles` retains encrypted-profile startup, and existing plaintext files are untouched. Plaintext tests may opt into encrypted-profile thread/close checks through `strict_thread=True` and the `strict_c` fixture. Evidence: [tests/test_legacy_launcher.py](../../tests/test_legacy_launcher.py) and [encrypted database regression tests](../../tests/test_encrypted_database.py). This closes OW-2AB; explicit legacy import remains separate IT-2C work.

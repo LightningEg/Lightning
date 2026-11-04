@@ -36,6 +36,8 @@
 {% if period.key != 'month' %}<p class="phone-note">{{ period.start_text }} {{ 'to'|tr(locale) }} {{ period.end_text }}</p>{% endif %}
 {% if not editing and has_plan and not phone_plan.day_one %}<p class="phone-note phone-budget-line">{{ fig.planned.label }} {{ period_budgeted|money }}{% if check and check.plan_saves is not none and check.planned_savings_rate is not none %} · {{ fig.plan_leaves_to_save.label }} {{ check.plan_saves|money }}{% endif %}{% if left_note %} · {{ left_note }}{% endif %}</p>{% endif %}
 
+{% if funding_adjustment_total %}<p class="phone-note">{{ 'Spent {gross} · From monthly plan {plan} · Funded outside the plan {amount}. Past periods reflect current confirmed links.'|tr(locale, gross=gross_period_spending|money, plan=period_actual|money, amount=funding_adjustment_total|money) }}</p>{% endif %}
+
 {% set strip = phone_plan.strip %}
 {% if strip == 'undo' %}<form method="post" action="/budget/bulk/undo" class="flash"><input type="hidden" name="token" value="{{ bulk_undo }}">{{ "Bulk rules applied."|tr(locale) }}<button class="btn">{{ 'Undo'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
 

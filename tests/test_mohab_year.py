@@ -515,6 +515,7 @@ def _live_the_year(o: Mohab) -> None:
     o.notes["loans_replanned"] = o.plan_category("Loan payments", "4,500")
     o.ask("loans_planned_after", "And now?")
     o.ask("safe_keeps_saving", "Does Safe to spend leave what I mean to save?", "Cash planning")
+    o.notes["safe_raw_forecast"] = o.c.forecaster.forecast()
     o.ask("insurance", "Is the insurance paid from its goal?", "Safety", "Reserves")
 
     # ============================================================== May and June: the rent goes up
@@ -1102,11 +1103,36 @@ def test_a_plan_below_both_loans_is_named_and_fixed(mohab):
     assert not mohab.answers["loans_planned_after"].shows("planned below its bills")
 
 
-def test_safe_to_spend_keeps_the_rest_of_the_savings_target(mohab):
+def test_safe_to_spend_keeps_the_rest_of_the_savings_target(mohab, monkeypatch):
     # His 28% target is 13,533 of 48,333; the emergency top-up already holds back 11,521 of it.
+    monkeypatch.setenv("LIGHTNING_TODAY", "2027-04-30")
+    gross = mohab.c.budgets.owned_spending("2027-04-01", "2027-04-30")
+    funding = mohab.c.budgets.funding.by_category("2027-04-01", "2027-04-30")
+    summary = mohab.c.budgets.plan_summary("2027-04", schedule=mohab.c.schedules.view())
+    assert sum(gross.values(), D(0)) == D("34415")
+    assert sum((row["reserve"] for row in funding.values()), D(0)) == D("9000")
+    assert (summary["planned"], summary["spent"], summary["left"]) == (D("26699"), D("25415"), D("1284"))
     assert route(mohab, "safe_keeps_saving") == ["/", "/plan"]
-    assert mohab.answers["safe_keeps_saving"].shows(
-        "Free cash 312,505 Emergency fund top-up −11,521 Rest of savings target −2,013 Safe to spend 298,972")
+    answer = mohab.answers["safe_keeps_saving"]
+    assert answer.shows("Free cash 312,505", "Emergency fund top-up", "Rest of savings target", "Safe to spend")
+    section = answer.screen.html.split('id="plan-build"', 1)[1].split('</details>', 1)[0]
+    rows = re.findall(r'<span class="chart-fall-label">([^<]+)</span>.*?'
+                      r'<b class="chart-fall-value">([^<]+)</b>', section, re.S)
+    values = [int(value.replace(',', '').replace('−', '-')) for _, value in rows]
+    raw = mohab.notes["safe_raw_forecast"]
+    assert [name for name, _ in rows[:-1]] == [name for name, _ in raw.safe_to_spend_parts]
+    assert rows[-1][0] == "Safe to spend" and values[0] == 312505
+    assert sum(values[:-1]) == values[-1]
+    assert raw.safe_to_spend == sum((value for _, value in raw.safe_to_spend_parts), D(0))
+    from lightning.core.money import quantize
+    expected = 297688
+    assert dict(raw.safe_to_spend_parts)["Budget until payday"] == -1284
+    assert values[-1] == quantize(raw.safe_to_spend, 0) == expected
+    assert quantize(dict(raw.safe_to_spend_parts)["Emergency fund top-up"], 0) == -11521
+    assert quantize(dict(raw.safe_to_spend_parts)["Rest of savings target"], 0) == -2013
+    for displayed, (_, actual) in zip(values, raw.safe_to_spend_parts):
+        assert abs(D(displayed) - actual) < 1
+
 
 
 def test_a_goal_the_plan_cannot_reach_says_when_and_what_else_works(mohab):

@@ -13,6 +13,7 @@ from lightning.core.dates import fmt_date, month_of, parse_date, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.figures import FIGURES, label
 from lightning.core.money import ZERO, fmt as _fmt, to_decimal
+from lightning.core.refs import DocType
 
 
 def fmt(value, places: int = 0, signed: bool = False) -> str:
@@ -148,7 +149,17 @@ async def dashboard(request: Request):
     status = page_status.overview(cash_flow.inflows, cash_flow.outflows, cash_flow.net, cash_flow.savings_rate,
                                   cash_flow.rate_says_nothing, period.key, current, bool(accounts))
     dates_note = ("so far" if current and period.key in ("month", "ytd") else "year to date" if period.key == "ytd" else "")
-    recent_rows = c.reporting.register_page(None, "1900-01-01", "9999-12-31", 1, 10)[0]  # the phone leads with these (C11.1)
+    # Match the register's default: system value updates are not money moving.
+    start, end = "1900-01-01", "9999-12-31"
+    recent_rows, total_rows, _ = c.reporting.register_page(None, start, end, 1, 10)
+    if on_phone and c.reporting.register_value_updates(None, start, end):
+        recent_rows = [row for row in recent_rows if row.type != DocType.VAL]
+        page = 1
+        while len(recent_rows) < 10 and page * 10 < total_rows:
+            page += 1
+            rows, _, _ = c.reporting.register_page(None, start, end, page, 10)
+            recent_rows.extend(row for row in rows if row.type != DocType.VAL)
+        recent_rows = recent_rows[:10]
     phone = _phone_overview(inbox.forecast, attention_groups, c, attention) if getattr(request.state, "phone", False) and position_is_today else None
     # The PC shows the flows on Spending (owner, 2026-10-21); the phone keeps them as folded rows (guideline C11.1).
     phone_flows = {"month_calendar": visuals.month_calendar(c, today())} if lazy_folds else {}

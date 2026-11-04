@@ -170,11 +170,11 @@ class Statement:
 def flow_of(effect: str, amount: Decimal, category) -> tuple[Decimal, Decimal]:
     """The one rule for Money in and Money out (every report, chart and budget uses it).
 
-    ``amount`` is a ledger line's signed base amount. A line with the income effect in a category with
-    an income class is Money in. Every other categorised line is spending: a payment (negative amount)
+    ``amount`` is a ledger line's signed base amount. A categorised line with an income class is signed Money in, including
+    a negative income reversal. Every other categorised line is spending: a payment (negative amount)
     adds to Money out, and a refund (positive amount, whichever effect it was recorded with) takes
     from it. Returns (money_in, money_out); one of them is zero."""
-    if effect == "INFLOW" and category.income_class is not None:
+    if category.income_class is not None:
         return amount, ZERO
     return ZERO, -amount
 

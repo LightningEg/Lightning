@@ -91,6 +91,70 @@ type = "forbidden"
 source_modules = ["lightning.workflows", "lightning.reporting", "lightning.budgeting", "lightning.investments", "lightning.deposits", "lightning.planning"]
 forbidden_modules = ["lightning.transactions.repository"]
 allow_indirect_imports = true
+# Each sync module, including package initializers, has an explicit policy.
+[tool.lightning-sync-policy]
+protocol = [
+    "lightning.sync.domain",
+    "lightning.sync.journal.areas.spec",
+    "lightning.sync.journal.codec",
+    "lightning.sync.journal.errors",
+    "lightning.sync.journal.request_limits",
+]
+financial_adapters = [
+    "lightning.sync.journal.areas.automation",
+    "lightning.sync.journal.areas.cash",
+    "lightning.sync.journal.areas.currency",
+    "lightning.sync.journal.areas.deposits",
+    "lightning.sync.journal.areas.history",
+    "lightning.sync.journal.areas.household",
+    "lightning.sync.journal.areas.imports",
+    "lightning.sync.journal.areas.investments",
+    "lightning.sync.journal.areas.master",
+    "lightning.sync.journal.areas.people",
+    "lightning.sync.journal.areas.physical",
+    "lightning.sync.journal.areas.plans",
+    "lightning.sync.journal.areas.rules",
+    "lightning.sync.journal.areas.settings",
+    "lightning.sync.journal.areas.sms",
+    "lightning.sync.journal.areas.workflows",
+    "lightning.sync.journal.automation",
+    "lightning.sync.journal.capture",
+    "lightning.sync.journal.commands",
+    "lightning.sync.journal.effects",
+    "lightning.sync.journal.finance",
+    "lightning.sync.journal.history",
+    "lightning.sync.journal.proxy",
+]
+runtime_boundary = [
+    "lightning.sync",
+    "lightning.sync.journal",
+    "lightning.sync.journal.areas",
+    "lightning.sync.control",
+    "lightning.sync.copies",
+    "lightning.sync.identity",
+    "lightning.sync.journal.__main__",
+    "lightning.sync.journal.authority",
+    "lightning.sync.journal.backups",
+    "lightning.sync.journal.cloud",
+    "lightning.sync.journal.compatibility",
+    "lightning.sync.journal.cutover",
+    "lightning.sync.journal.device",
+    "lightning.sync.journal.discovery",
+    "lightning.sync.journal.enrollment",
+    "lightning.sync.journal.home",
+    "lightning.sync.journal.local",
+    "lightning.sync.journal.membership",
+    "lightning.sync.journal.owner",
+    "lightning.sync.journal.pairing",
+    "lightning.sync.journal.pairing_client",
+    "lightning.sync.journal.snapshots",
+    "lightning.sync.journal.store",
+    "lightning.sync.journal.upgrades",
+    "lightning.sync.service",
+    "lightning.sync.state",
+    "lightning.sync.transport",
+]
+
 
 # 1G: `sync` is one layer, but three different things live in it. The protocol (state, transport, identity, copies,
 # control, service, domain) speaks only to the database and security; the journal core moves signed commands and

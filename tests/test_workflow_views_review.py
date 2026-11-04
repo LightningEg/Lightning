@@ -182,3 +182,23 @@ def test_desktop_notification_keeps_valid_click_links_on_exact_loopback_origin()
     assert _safe_reminder_href("/review?tab=week", origin, allowed) == "http://127.0.0.1:9000/review?tab=week"
     assert _safe_reminder_href("/%2F%2Fevil.example", origin, allowed) == \
         "http://127.0.0.1:9000/%2F%2Fevil.example"
+
+
+def test_rule_offer_query_count_is_bounded_with_many_corrections(c, setup):
+    bank, food = setup[0]['cib'].id, setup[1]['EXP.PERSONAL.FOOD'].id
+    utilities = c.categories.get_by_code('EXP.PERSONAL.UTILITIES').id
+    for index in range(90):
+        txn = c.transactions.record_outflow('2026-10-01', bank, '30', food,
+                                            counterparty='Waterworks')
+        c.transactions.update_money(txn.id, txn.date, bank, '30', utilities,
+                                    counterparty='Waterworks')
+    statements = []
+    c.db.conn.set_trace_callback(statements.append)
+    try:
+        offers = WeeklyReview(c).rule_offers()
+    finally:
+        c.db.conn.set_trace_callback(None)
+    selects = [s for s in statements if s.lstrip().upper().startswith('SELECT')]
+    assert len(offers) == 1
+    assert all(offer['count'] == 90 for offer in offers)
+    assert len(selects) <= 10, f'{len(selects)} SELECTs for 90 corrections'

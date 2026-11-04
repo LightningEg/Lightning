@@ -190,3 +190,47 @@ def test_four_names_then_other():
     rows = {i: {"name": str(i), "money_out": Decimal(i)} for i in range(1, 8)}
     shown = _four_then_other(rows)
     assert [row["name"] for row in shown] == ["7", "6", "5", "4", "Other"] and shown[-1]["money_out"] == Decimal(6)
+
+
+def test_activity_shows_outflow_with_minus_and_income_unsigned(c, setup):
+    accounts, cats = setup
+    expense = c.transactions.record_outflow("2026-09-02", accounts["cib"].id, "120", cats["EXP.PERSONAL.FOOD"].id)
+    income = c.transactions.record_inflow("2026-09-03", accounts["cib"].id, "500", cats["EXP.WORK.SALARY"].id)
+    page = TestClient(create_app(c)).get("/activity").text
+    expense_row = page.split(f'href="/transactions/{expense.id}"', 1)[1].split('</a>', 1)[0]
+    income_row = page.split(f'href="/transactions/{income.id}"', 1)[1].split('</a>', 1)[0]
+    assert '−120' in expense_row and '−500' not in income_row
+
+
+def test_transaction_lines_describe_outflow_in_plain_words(c, setup):
+    accounts, cats = setup
+    expense = c.transactions.record_outflow("2026-09-02", accounts["cib"].id, "120", cats["EXP.PERSONAL.FOOD"].id)
+    page = TestClient(create_app(c)).get(f"/transactions/{expense.id}").text
+    assert '<span class="pill">Money out</span>' in page
+    assert '<span class="pill">OUTFLOW</span>' not in page
+    from lightning.ui.routes.transactions import _display_timestamp
+    assert f'>{_display_timestamp(expense.created_at)}</time>' in page
+
+
+def test_transaction_timestamps_keep_recorded_offsets_in_readable_form():
+    from lightning.ui.routes.transactions import _display_timestamp
+    assert _display_timestamp("2026-10-20T21:36:42+03:00") == "2026-10-20 21:36:42 UTC+03:00"
+    assert _display_timestamp("2026-10-20T21:36:42-04:30") == "2026-10-20 21:36:42 UTC-04:30"
+    assert _display_timestamp("2026-10-20T21:36:42") == "2026-10-20 21:36:42"
+    assert _display_timestamp("2026-10-20T21:36:42.123456Z") == "2026-10-20 21:36:42.123456 UTC+00:00"
+    assert _display_timestamp("unknown") == "unknown"
+
+
+def test_transaction_heading_names_action_and_keeps_reference_in_both_languages(c, setup):
+    accounts, cats = setup
+    expense = c.transactions.record_outflow("2026-09-02", accounts["cib"].id, "120", cats["EXP.PERSONAL.FOOD"].id)
+    client = TestClient(create_app(c))
+    page = client.get(f"/transactions/{expense.id}").text
+    assert '<h1>Money out</h1>' in page
+    assert f'<bdi dir="ltr">{expense.ref}</bdi>' in page
+    assert f'<title>{expense.ref} · Lightning</title>' in page
+    assert '−120' in page
+    c.settings.set('locale', 'ar')
+    arabic = client.get(f"/transactions/{expense.id}").text
+    assert '<h1>فلوس خارجة</h1>' in arabic
+    assert expense.ref in arabic and '120' in arabic

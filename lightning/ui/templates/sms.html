@@ -3,6 +3,7 @@
 {% extends "base.html" %}
 {% block title %}{{ 'From SMS'|tr(locale) }}{% endblock %}
 {% block heading %}<div class="acct-title"><h1>{{ "From SMS"|tr(locale) }}</h1></div><p class="muted">{{ "Bank messages become transactions you check before they are posted"|tr(locale) }}</p>{% endblock %}
+{% block top_actions %}<a class="btn" href="/accounts">{{ 'Accounts'|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% if error %}<p class="flash error" role="alert">{{ error|tr(locale) }}</p>{% endif %}
 {% for group in waiting %}

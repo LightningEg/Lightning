@@ -159,6 +159,18 @@ def bars(rows: list[dict], limit: int = 4) -> dict:
             "more": len(rest), "more_total": sum((r["value"] for r in rest), ZERO)}
 
 
+def bars_with_other(rows: list[dict], other_label: str, limit: int = 4) -> dict:
+    """Rank named holdings, then show the exact remainder as a neutral Other bar."""
+    ordered = sorted((r for r in rows if r["value"]), key=lambda r: -abs(r["value"]))
+    shown, rest = ordered[:limit], ordered[limit:]
+    if rest:
+        shown = shown + [{"label": other_label, "value": sum((r["value"] for r in rest), ZERO),
+                          "tone": "reference"}]
+    scale = max((abs(r["value"]) for r in shown), default=ZERO) or Decimal(1)
+    return {"rows": [{**r, "width": float(abs(r["value"]) / scale * 100)} for r in shown],
+            "more": 0, "more_total": ZERO}
+
+
 def grouped_bars(rows: list[dict], limit: int = 8) -> dict:
     """Bars under their parent category: an L1 header row with its total, then its L2 rows.
 
@@ -404,8 +416,12 @@ def donut(slices: list[dict], limit: int = 5) -> dict:
     """
     parts = sorted((s for s in slices if s["value"] and s["value"] > 0), key=lambda s: -s["value"])
     folded = None
-    if len(parts) > limit:  # keep the largest, fold the smallest
-        parts, rest = parts[:limit - 1], parts[limit - 1:]
+    has_other = any(s["label"] == "Other" for s in parts)
+    if len(parts) > limit or (len(parts) == limit and not has_other):
+        # Reserve one slot for Other, combining any existing Other with the smallest names.
+        named = [s for s in parts if s["label"] != "Other"]
+        rest = named[limit - 1:] + [s for s in parts if s["label"] == "Other"]
+        parts = named[:limit - 1]
         folded = {"label": "Other", "value": sum((s["value"] for s in rest), ZERO), "tone": "other"}
     parts.sort(key=lambda s: (TONE_ORDER.index(s["tone"]) if s["tone"] in TONE_ORDER else 99, -s["value"]))
     if folded:

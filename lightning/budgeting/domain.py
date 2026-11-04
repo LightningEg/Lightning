@@ -42,7 +42,7 @@ class BudgetLine:
     average_months: int | None  # None = manual; 3/6 = auto budget from past spending
     budget: Decimal | None  # effective: direct, else sum of children's budgets, else None
     actual: Decimal  # money out, this line and everything under it
-    planned_actual: Decimal  # spending covered by a limit at this line or below
+    planned_actual: Decimal  # plan-funded spending covered by a limit at this line or below
     covered: bool  # an ancestor has a budget, so this spending is inside a budget
     opening_carryover: Decimal = ZERO
     carryover_enabled: bool = False

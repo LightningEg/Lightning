@@ -81,7 +81,7 @@ Polish after the demo: the rest of 3S and 3T, and the five pages left in [3Q](..
 | Medium | Cash goes below zero, even through money held for others: CIB ends at −58,672 while Mom's 10,000 is still listed, and every data check passes. | 2E 3 |
 | Medium | A 500 error on an unknown owner, and another on Planner amount 0. | 2E 4–5 |
 | Medium | Converting EGP to USD raises net worth by 875: the trade rate revalues every USD holding. | 5J (done: `tests/test_fx_conversion.py::test_buying_dollars_never_raises_net_worth_the_market_rate_values_the_holding`) |
-| Medium | Paying a loan early empties the everyday budget, but Safe to spend moves only 21. | [7M](../../issues/7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) |
+| Medium | Paying a loan early empties the everyday budget, but Safe to spend moves only 21. | [7M](../../tests/test_budget_funding.py) |
 | Medium | Demo certificate: 18% set, 22% paid. Sample: late bills shown on today's date. | 3V |
 | Low | Dates before an account opened are accepted. Crafted posts can still cause 500 errors. | 2E 6 |
 | Low | Displayed parts don't add up after rounding (130,586 against 130,585). | 2E 7 |
@@ -289,7 +289,7 @@ not rechecked.
 ## Owner decisions
 
 1. **5J (done: `tests/test_fx_conversion.py::test_buying_dollars_never_raises_net_worth_the_market_rate_values_the_holding`):** should a currency conversion's rate revalue the other dollar holdings?
-2. **[7M](../../issues/7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md):**
+2. **[7M](../../tests/test_budget_funding.py):**
    - Does principal paid early count against everyday money?
    - Does an expense covered by a reserve count against its budget category?
 3. **Safe to spend as a hero number on the Overview** (3G §9 Q1). It is the figure people ask about, and today it lives one tab down.
@@ -316,3 +316,61 @@ Run the same audit again with `skills/bug-hunt`, `number-audit`, `guideline-audi
 - The full suite: `python -m pytest -n auto --dist loadfile`.
 
 The screenshots kept here are only the ones that show a must-fix.
+
+## 2026-11-04 · PC follow-up
+
+IV-3S items 5, 7 and the holding part of 8: average cost uses Neutral, ordinary negative monthly changes use Ink, and category directions and the first-run Load link use their A03 colours. Item 9: the current Investments lead omits Biggest holdings; its older fallback limits bars to four named holdings and a Neutral Other for the remainder. A six-holding browser fixture confirmed the current lead has no such chart. The other findings remain open.
+
+## 2026-11-04 · Search follow-up
+
+IV-3S item 19: Escape closes the Ctrl-K search even when a query is present; the Chromium brand audit checks the interaction. The hide-amounts toast finding remains open.
+
+## 2026-11-04 · Budget wording
+
+IV-3S item 18: a month without a plan now asks for that month’s spending limits without calling them the first.
+
+## Follow-up · 2026-11-04 — budget funding
+
+OW-7M is resolved under the owner’s delegated report-completion instruction. Gross spending and net flow are retained; confirmed reserve funding and unscheduled early loan principal reduce what the monthly plan pays. Fees still reduce the plan unless reserve-funded; overlapping funding is capped and split exactly by category. Budget and phone disclose gross and plan-funded totals. Current confirmed links determine past periods; no historical link versions are invented.
+
+`tests/test_budget_funding.py` covers partial/multiple reserve links, split allocation, overlaps, fees, dated history, void/restore, undo, carryover and unchanged free cash. Mohab’s April independently recomputes gross spending 34,415, reserve funding 9,000, plan-funded spending 25,415 and plan 26,699, leaving 1,284 held in Safe to spend (297,688). `tests/test_safe_display_rounding.py` verifies the PC chart/table and phone labels add to the displayed total while exact forecasts retain their precision.
+
+## 2026-11-04 · Currency chart scope
+
+IV-3S item 4: the PC chart now identifies its existing series as cash only and says investments are excluded, so it does not imply it charts all foreign money. A combined history and the axis remain to review.
+
+## 2026-11-04 · PC link spacing
+
+IV-3S item 20: Integrity and Cash planning now leave spaces around their inline links. Its other small findings remain open.
+
+## 2026-11-04 · Review activity amounts
+
+IV-3S item 10: PC Review activity marks money out with a minus. Its category hierarchy remains open.
+
+## 2026-11-04 · From SMS navigation
+
+IV-3S item 20: PC From SMS links back to Accounts, where its entry point lives.
+
+## 2026-11-04 · Counterparty recheck
+
+IV-3S item 17: at 1366 px, an expanded sample counterparty did not have the reported overlap. On PC the Save alias button is intentionally screen-reader-only, with an Enter hint. Other rows and widths have not been checked.
+
+## 2026-11-04 · Planner allocation stack
+
+IV-3S item 9: the PC Planner stack groups suggestions beyond the four largest into Neutral Other, with a labelled key. All detailed allocation rows and inputs remain available; tests check exact totals for five and more classes, and Chromium checks the Neutral colour.
+
+## 2026-11-04 · Financial health trends
+
+IV-3S item 3: PC Savings rate and Net worth trends use zero-based axes, leave missing months as gaps, and need three known points. The current lead shows Savings rate; Net worth is on the no-lead fallback. Chromium checked the Savings rate axis on Mohab’s sample.
+
+## 2026-11-04 · Transaction line labels
+
+IV-3S item 20: transaction detail uses the 28 px page heading and describes ledger effects in sentence-case words, including Money out.
+
+## 2026-11-04 · Transaction timestamps
+
+IV-3S item 20: transaction timestamps show the recorded date and time with their UTC offset, preserving any stored UTC offset while removing raw ISO punctuation.
+
+## 2026-11-04 · Transaction heading
+
+IV-3S item 20: transaction detail names the action in its heading and keeps the exact reference beneath it and in the browser title.

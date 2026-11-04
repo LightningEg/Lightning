@@ -36,7 +36,7 @@
 {% macro bar_rows(rows, caption, scheme='cash') %}
 {% set top = (rows|map(attribute='value')|map('abs')|max) if rows else 0 %}
 <div class="phone-bars scheme-{{ scheme }}" role="list" aria-label="{{ caption }}">{% for r in rows %}
-  <div class="phone-bar-row is-{{ r.kind }}" role="listitem"><span class="phone-bar-name">{{ r.label }}</span><b class="phone-bar-value">{{ r.value|money(r.kind in ('down', 'up')) }}</b>
+  <div class="phone-bar-row is-{{ r.kind }}" role="listitem"><span class="phone-bar-name">{{ r.label }}</span><b class="phone-bar-value">{{ r.display_value|default(r.value)|money(r.kind in ('down', 'up')) }}</b>
     <span class="phone-bar-track"><i style="width:{{ '%.2f'|format([(r.value|abs) / top * 100 if top else 0, 1]|max) }}%"></i></span></div>
 {% endfor %}</div>
 {% endmacro %}

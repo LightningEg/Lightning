@@ -485,6 +485,11 @@ def test_holding_page_tells_the_journey_of_one_asset(c, setup, monkeypatch):
     assert [t["kind"] for t in j["trades"]] == ["Bought"]
     page = TestClient(create_app(c)).get(f"/investments/holding/{comi.id}?account={thndr}&date=2027-03-31")
     assert page.status_code == 200
+    assert 'class="chart-plan is-reference"' in page.text
+    assert 'class="chart-key chart-key-plan is-reference"' in page.text
+    import re
+    worst = re.search(r'<span>Worst month</span><b class="([^"]*)">([^<]+)</b>', page.text)
+    assert worst and 'neg' not in worst.group(1) and '−11.1%' in worst.group(2)
     for question in ("Is it making money?", "How bumpy has it been?", "The journey", "Fall from its high"):
         assert question in page.text
 
@@ -693,3 +698,34 @@ def test_a_fixed_price_holding_shows_no_price_swings_and_no_checkpoint_rows(c, s
     assert j["flat"] and [t["kind"] for t in j["trades"]] == ["Bought"]
     page = TestClient(create_app(c)).get(f"/investments/holding/{cd.id}?account={thndr}&date=2026-12-31")
     assert page.status_code == 200 and "How bumpy has it been?" not in page.text and "The journey" in page.text
+
+
+@pytest.mark.parametrize("values", [
+    [("A", "50"), ("B", "40"), ("C", "30"), ("D", "20"), ("E", "10")],
+    [("Other", "70"), ("A", "60"), ("B", "50"), ("C", "40"), ("D", "30"), ("E", "20")],
+])
+def test_planner_stack_keeps_four_named_parts_and_exact_neutral_remainder(values):
+    from lightning.ui.routes.investments import _planner_stack
+    rows = [{"bucket": name, "suggested": D(value), "tone": "equity"} for name, value in values]
+    before = [dict(row) for row in rows]
+    parts = _planner_stack(rows, "Other")
+    assert len(parts) == 5 and parts[-1]["label"] == "Other" and parts[-1]["tone"] == "reference"
+    assert len({part["label"] for part in parts}) == 5
+    assert sum((part["value"] for part in parts), ZERO) == sum((row["suggested"] for row in rows), ZERO)
+    assert parts[-1]["value"] == sum((row["suggested"] for row in rows if row["bucket"] not in {p["label"] for p in parts[:-1]}), ZERO)
+    assert rows == before
+
+
+def test_planner_renders_five_suggestions_without_losing_detail(c):
+    codes = ("STOCK", "GOLD", "FUND.GOLD", "FUND.FIXED_INCOME", "FUND.MONEY_MARKET")
+    for name, code in zip(("Alpha", "Beta", "Gamma", "Delta", "Epsilon"), codes):
+        c.investments.set_target_weight(name, D("20"), c.assets.get_class_by_code(code).id)
+    page = TestClient(create_app(c)).get("/investments/planner?amount=1000").text
+    stack = page.split('<div class="new-money-stack"', 1)[1].split('</div>', 1)[0]
+    assert stack.count('<span ') == 5 and 'tone-reference' in stack
+    assert 'Other · 200' in stack
+    legend = page.split('<div class="chart-legend">', 1)[1].split('</div>', 1)[0]
+    assert 'Other · 200 · 20%' in legend
+    detail = page.split('<div class="planner-popup-rows">', 1)[1]
+    assert all(name in detail for name in ("Alpha", "Beta", "Gamma", "Delta", "Epsilon"))
+    assert 'name="amount"' in page and 'name="monthly_goal"' in page and 'name="mode"' in page
