@@ -55,3 +55,44 @@ def test_phone_payday_preview_and_enable(c, setup, monkeypatch):
             browser.close()
     finally:
         host.stop()
+
+
+def test_phone_linked_reserve_and_payment_fit(c, setup, monkeypatch):
+    from test_reserve_bills import prepared
+    executable = shutil.which('chromium') or str(Path('/opt/pw-browsers/chromium'))
+    if not Path(executable).exists():
+        pytest.skip('Chromium is not installed')
+    monkeypatch.setenv('LIGHTNING_TODAY', '2026-12-01')
+    _, _, bill, reserve = prepared(c, setup)
+    app = create_app(c)
+    async def phone_app(scope, receive, send):
+        scope.setdefault('state', {})['phone'] = True
+        await app(scope, receive, send)
+    host = Host(lambda _: phone_app).start()
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(executable_path=executable)
+            for language in ('en', 'ar'):
+                c.settings.set('locale', language)
+                context = browser.new_context(viewport={'width': 320, 'height': 800}, is_mobile=True, has_touch=True)
+                context.add_cookies([{'name': 'lightning_ui_locale', 'value': language, 'url': host.origin}])
+                page = context.new_page()
+                for width in (320, 360):
+                    page.set_viewport_size({'width': width, 'height': 800})
+                    page.goto(host.origin + '/plan/reserves')
+                    edit = page.locator(f'#reserve-{reserve} details.reserve-edit')
+                    edit.locator('summary').click()
+                    link = edit.locator('form.reserve-bill-link')
+                    assert link.is_visible()
+                    assert link.locator('select').input_value() == str(bill)
+                    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+                    for path in ('/plan/recurring', f'/plan/items/{bill}/pay?due=2026-12-20'):
+                        page.goto(host.origin + path)
+                        text = page.locator('body').inner_text()
+                        assert ('محجوز للفاتورة دي' if language == 'ar' else 'Saved for this bill') in text
+                        assert ('٨٠٠' if language == 'ar' else '800') in text and 'Cover fund' in text
+                        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+                context.close()
+            browser.close()
+    finally:
+        host.stop()
