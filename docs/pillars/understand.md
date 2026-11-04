@@ -12,7 +12,7 @@ The overview, spending, financial health, net worth and reports. They read the l
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **IV-3Q** | [Visual audit](../../issues/3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md) | L | ready |
-| **NF-7G** | [Age of Money and a spending calendar](../../issues/7-planning-import-and-search/7G-more-analytics.md) | M | new |
+| **NF-7G** | [Age of Money and a spending calendar](../../issues/7-planning-import-and-search/7G-more-analytics.md) | M | building |
 | **NF-7Y** | [Explain which stale or pending inputs affect a financial figure](../../issues/7-planning-import-and-search/7Y-financial-data-freshness.md) | M | building |
 | **IT-9A** | [Stored month-end figures](../../issues/9-later/9A-stored-month-end-figures.md) | M | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
 

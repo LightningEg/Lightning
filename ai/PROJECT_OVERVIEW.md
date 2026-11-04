@@ -258,3 +258,4 @@ The website adds consented, moderated community stories with optional author-pro
 Report decisions delegated by the owner, 2026-11-04: early extra loan principal remains gross Money out but does not use the monthly plan; its fees do. Confirmed reserve funding also stays outside that plan, without changing the expense’s cash-flow classification (OW-7M).
 
 Section 7 scenarios compare scheduled cash over 90 days with explicit income-delay, purchase and one-payment bill overrides. Variable spending and savings goals stay outside this comparison and are stated on screen. Bill alerts remain questions backed by source transactions; they never change money.
+Section 7 owner decisions (2026-11-04): NF-7C migration is excluded. NF-7G uses FIFO cash age with unknown opening dates and a read-only posting-date spending calendar.

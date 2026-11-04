@@ -1034,3 +1034,17 @@ class ReportingService:
     @staticmethod
     def _day(value: date | str) -> str:
         return fmt_date(parse_date(value))
+
+
+    def cash_age(self, as_of):
+        from .cash_analytics import cash_age
+        return cash_age(self.q.db, self._day(as_of), self.base_currency)
+
+    def spending_calendar(self, date_from, date_to):
+        """Daily net spending, including refunds, with register links built by the UI."""
+        days = {}
+        for line in self.spending_lines(date_from, date_to):
+            row = days.setdefault(line['date'], {'date': line['date'], 'amount': ZERO, 'transactions': set()})
+            row['amount'] += line['value']
+            row['transactions'].add(line['transaction_id'])
+        return [row | {'transactions': len(row['transactions'])} for _, row in sorted(days.items())]
