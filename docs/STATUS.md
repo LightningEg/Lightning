@@ -6,7 +6,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
-| [Capture](pillars/capture.md) | 5 | 3 |  | 2 |  |  |
+| [Capture](pillars/capture.md) | 4 | 2 |  | 2 |  |  |
 | [Plan](pillars/plan.md) | 2 | 2 |  |  |  |  |
 | [Understand](pillars/understand.md) | 4 | 2 | 1 |  | 1 |  |
 | [Own](pillars/own.md) | 7 | 2 |  | 3 | 2 |  |
@@ -16,7 +16,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Build](pillars/build.md) | 5 |  | 4 |  | 1 |  |
 | [Reach](pillars/reach.md) | 5 |  | 3 | 2 |  | 2 |
 
-47 open items in 10 milestones.
+46 open items in 10 milestones.
 
 ## Being built now
 
@@ -29,7 +29,6 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 - **NF-5G** (Own) [Brokerages that span exchanges and currencies](../issues/5-investments/5G-brokerages-across-exchanges.md)
 - **NF-6A** (Own) [Market data: price packs, collected in the cloud](../issues/6-market-data/6A-price-packs.md)
 - **NF-7B** (Capture) [Read PDF and Excel statements through the CSV review](../issues/7-planning-import-and-search/7B-pdf-and-excel-statements.md)
-- **NF-7D** (Capture) [Search and matching: what is not built](../issues/7-planning-import-and-search/7D-search-and-matching.md)
 - **NF-7E** (Capture) [Match bank-imported transfer pairs across currencies](../issues/7-planning-import-and-search/7E-imported-pairs-across-currencies.md)
 - **NF-7F** (Plan) [Small planning gaps](../issues/7-planning-import-and-search/7F-small-planning-gaps.md)
 - **NF-7G** (Understand) [Age of Money and a spending calendar](../issues/7-planning-import-and-search/7G-more-analytics.md)
@@ -54,7 +53,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 5 Investments | 1 | Every investment figure can be explained per purchase, and agrees with the ledger. |
 | 6 Market data | 3 | Prices arrive by themselves, from sources Lightning may redistribute. |
-| 7 Planning, import and search | 8 | Getting a month in takes minutes: any bank file, any old app, one search box. |
+| 7 Planning, import and search | 7 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 3 | The site is honest, quick and in step with the app. |
 | 9 Later | 7 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 4 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |

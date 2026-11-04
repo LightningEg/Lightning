@@ -10,3 +10,5 @@
 - MIT license and copyright notices are inside the wheel.
 
 The Android lock uses an immutable repository commit URL and the wheel's hash. Its content and the native/Python ranking equivalence are checked by `tests/test_search_packaging.py`. This file is a dependency build input, not an application release.
+
+The source commit is retained by `third-party/rapidfuzz-3.14.3-portable`, so the immutable Android URL remains reachable after squash merges. This vendor tag publishes no app release.

@@ -396,7 +396,7 @@ Ranked by harm to trust, then by how often a user meets it.
 
 **[x] SR-1 · Visual · P1 — "Personal › Housing & Rent".** A16: "L1 › L2". Show "Housing & Rent" with "Personal" as a small label.
 
-**SR-2 · Logic · P2 — "rent" finds the category but no transaction.** Rent is paid to "Landlord". Search should match category names in transactions too ("12,000 · Landlord · Housing & Rent · 2026-10-03"). See [search_matching.md](../7-planning-import-and-search/7D-search-and-matching.md).
+**SR-2 · Logic · P2 — "rent" finds the category but no transaction.** Rent is paid to "Landlord". Search should match category names in transactions too ("12,000 · Landlord · Housing & Rent · 2026-10-03"). Implemented by NF-7D; see [the shared matching/history cases](../../tests/test_search_contract.py).
 
 ## 10. Phone only
 

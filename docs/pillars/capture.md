@@ -14,7 +14,6 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 | **NF-3AD** | [Phone overhaul, step 2](../../issues/3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | L | new |
 | **NF-7B** | [Read PDF and Excel statements through the CSV review](../../issues/7-planning-import-and-search/7B-pdf-and-excel-statements.md) | L | building |
 | **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](../../issues/7-planning-import-and-search/7C-move-in-from-other-apps.md) | L | new |
-| **NF-7D** | [Search and matching: what is not built](../../issues/7-planning-import-and-search/7D-search-and-matching.md) | L | building |
 | **NF-7E** | [Match bank-imported transfer pairs across currencies](../../issues/7-planning-import-and-search/7E-imported-pairs-across-currencies.md) | M | building |
 
 ## Reports with open follow-ups here

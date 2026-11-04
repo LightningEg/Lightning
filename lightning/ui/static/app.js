@@ -759,15 +759,15 @@ const initDateFields = (root = document) => {
   root.querySelectorAll('input[type="date"]:not(.date-picker-native):not([data-native-date])').forEach((native) => {
     native.type = "text";
     native.dataset.smartDate = "";
-    if (!native.placeholder) native.placeholder = "yyyy-mm-dd";
+    if (!native.placeholder) native.placeholder = t("yyyy-mm-dd");
     native.inputMode = "numeric";
     native.autocomplete = "off";
   });
   root.querySelectorAll("[data-smart-date]").forEach((input) => {
-    if (document.documentElement.classList.contains("phone") && input.placeholder === "yyyy-mm-dd") input.removeAttribute("placeholder");
+    if (document.documentElement.classList.contains("phone") && ["yyyy-mm-dd", t("yyyy-mm-dd")].includes(input.placeholder)) input.removeAttribute("placeholder");
     if (input.closest(".iso-date-control")) return;
     if (!input.id) input.id = `date-field-${++dateFieldCount}`;
-    if (!input.placeholder && !document.documentElement.classList.contains("phone")) input.placeholder = "yyyy-mm-dd";
+    if (!input.placeholder && !document.documentElement.classList.contains("phone")) input.placeholder = t("yyyy-mm-dd");
     const wrapper = document.createElement("span");
     wrapper.className = "iso-date-control";
     input.parentNode.insertBefore(wrapper, input);
