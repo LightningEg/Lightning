@@ -12,7 +12,7 @@ A budget by category, bills and loan payments, reserves for what is coming, and 
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **NF-7F** | [Small planning gaps](../../issues/7-planning-import-and-search/7F-small-planning-gaps.md) | M | new |
-| **NF-7X** | [Extend local planning with scenario comparisons and bill-change alerts](../../issues/7-planning-import-and-search/7X-scenario-and-bill-intelligence.md) | L | new |
+| **NF-7X** | [Extend local planning with scenario comparisons and bill-change alerts](../../issues/7-planning-import-and-search/7X-scenario-and-bill-intelligence.md) | L | building |
 
 ## Reports with open follow-ups here
 

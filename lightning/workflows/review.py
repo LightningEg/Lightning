@@ -37,7 +37,7 @@ def _plural(count: int, one: str, many: str) -> str:
 
 # Needs you groups its items by what they are about (feedback ticket 84): one row per group on the Overview,
 # and each group opens its own page. First match on the item's link wins; the order is the order shown.
-GROUPS = (("payments", "Bills and payments", ("/plan/items/", "/gameya/", "/deposits/")),
+GROUPS = (("payments", "Bills and payments", ("/plan/items/", "/plan/bill-alerts/", "/gameya/", "/deposits/")),
           ("activity", "Activity to sort out", ("/rules", "/sms", "/accounts/", "/transactions", "/activity", "/reimbursements")),
           ("budget", "Budget and saving", ("/budget", "/financial-health")),
           ("cash", "Cash and goals", ("/plan", "/payday")),
@@ -99,6 +99,9 @@ class ReviewInbox:
         items.extend(self._sms())
         items.extend(self._uncategorized())
         items.extend(self._smart_suggestions(on))
+        from lightning.workflows.bill_alerts import bill_alerts
+        intelligence = bill_alerts(c, on)
+        items.extend(intelligence)
         salary = salary_review(c.db, on)
         if salary:
             items.append(salary)
@@ -145,6 +148,8 @@ class ReviewInbox:
                 "AND p.due_date BETWEEN date(?,'-45 days') AND ? AND p.due_date=(SELECT MAX(q.due_date) "
                 "FROM planned_payments q WHERE q.planned_item_id=i.id AND q.status='PAID' AND q.due_date<=?)",
                 (on.isoformat(), on.isoformat(), on.isoformat())):
+            if any(alert["plan_id"] == changed["id"] for alert in intelligence):
+                continue
             from lightning.core.money import from_e6
             currency = c.accounts.get(changed["account_id"]).currency if changed["account_id"] else c.base_currency
             items.append({"label": f"{changed['name']} was paid at a different amount",

@@ -673,3 +673,32 @@ async def forecast_inputs(request: Request):
     day = today()
     return render(request, "planning/inputs.html", notes=c.freshness.for_forecast(day),
                   note_days=lambda note: c.freshness.days_old(note, day))
+
+
+@router.get("/scenarios")
+async def scenario_page(request: Request):
+    from lightning.planning.scenarios import compare_scenario, occurrence_key
+    c = container(request)
+    day, end = today(), today() + timedelta(days=90)
+    values = {key: str(request.query_params.get(key, '')) for key in
+              ('income', 'delay', 'purchase', 'purchase_date', 'account_id', 'bill', 'bill_amount')}
+    error = ''
+    try:
+        comparison = compare_scenario(c.forecaster, day, end, **values)
+    except LightningError as exc:
+        error = exc.message
+        comparison = compare_scenario(c.forecaster, day, end)
+    payments, _ = c.forecaster.scheduled_inputs(day, end)
+    return render(request, "planning/scenarios.html", comparison=comparison, values=values, error=error,
+                  day=str(day), end=str(end), payments=payments, occurrence_key=occurrence_key,
+                  accounts=_paying_accounts(c))
+
+
+@router.get("/bill-alerts/{key}")
+async def bill_alert_page(request: Request, key: str):
+    from lightning.workflows.bill_alerts import bill_alerts
+    c = container(request)
+    alert = next((row for row in bill_alerts(c, today()) if row['key'] == key), None)
+    if alert is None:
+        return render(request, "not_found.html", status_code=404, message="This bill alert no longer applies.")
+    return render(request, "planning/bill_alert.html", alert=alert)

@@ -3,7 +3,7 @@ title: Extend local planning with scenario comparisons and bill-change alerts
 type: feature
 pillar: plan
 size: L
-status: new
+status: building
 post: no
 created: 2026-11-03
 by: Codex
@@ -40,4 +40,10 @@ Use merchant/account/currency identity and robust historical ranges. Exclude tra
 
 Needs 7X4 merged first. Show supporting transactions and explain the threshold. Done when confirm, dismiss and snooze are durable and no alert automatically deletes or posts money.
 
-Not posted: a proposal awaiting prioritization and threshold/product decisions.
+Owner requested implementation of Section 7 on 2026-11-04; migration alone is excluded.
+
+## Implementation and contract · 2026-11-04
+
+The 90-day comparison uses the existing dated scheduled-cash projection, not the variable-budget monthly estimate. Optional overrides delay one outstanding income occurrence, replace one bill occurrence amount, and add a dated purchase in an explicitly chosen cash account. It invents no income average; overdue income stays excluded unless explicitly rescheduled, paid/early-received income stays excluded, and missing FX makes combined values unavailable. Baseline/scenario lowest day-end cash and first shortfall include dates and assumptions. No preview writes occur.
+
+Bill warnings require an active monthly bill/subscription with a confirmed merchant, account and category. Fixed bills need three single-charge monthly observations with a 21–40 day cadence and a historical range within 20%; drift exceeds max(20% of median, 4 MAD). Possible repeats require two charges within three days, each within max(5%, 3 MAD) of the usual amount. Utilities need six observations and exceed max(50%, 6 MAD); no repeated-utility inference. Refunds suppress current-period inference. Warning identity uses stable transaction references and evidence; Needs you retains reviewed/restore/snooze preferences. No charge is deleted or plan edited automatically. Labelled fixtures cover positive drift/repeats, ordinary changes, unstable/insufficient history and utilities; exact projection and bilingual frame tests pass. Full-suite and PR validation remain.
