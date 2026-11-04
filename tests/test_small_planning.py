@@ -89,3 +89,17 @@ def test_one_budget_category_changes_without_resubmitting_the_grid(c, setup, pho
         assert response.status_code == 303
         assert [tuple(x) for x in c.db.all('SELECT * FROM budgets WHERE category_id=?',(software,))] == [tuple(x) for x in untouched]
         assert c.budgets.plan_left(food,'2026-12',schedule=c.schedules.view()) is not None
+
+
+def test_phone_rule_form_uses_numeric_split_parts_in_the_phone_frame(c):
+    from lightning.ui.web import create_app
+    from fastapi.testclient import TestClient
+    app=create_app(c)
+    @app.middleware('http')
+    async def phone(request,call_next):
+        request.state.phone=True
+        return await call_next(request)
+    with TestClient(app) as client:
+        html=client.get('/rules/new').text
+        assert 'name="part_category_1"' in html and 'name="part_category_2"' in html
+        assert 'name="part_category_rules"' not in html and 'name="part_category_new"' not in html
