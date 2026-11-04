@@ -41,7 +41,7 @@ jobs:
       - name: Build and run a frozen matcher
         shell: bash
         run: |
-          python -m PyInstaller --clean --noconfirm --onefile --collect-submodules rapidfuzz --name matcher-probe tools/matcher_frozen_probe.py
+          python -m PyInstaller --clean --noconfirm --onefile --paths . --collect-submodules rapidfuzz --collect-submodules pypdf --collect-submodules openpyxl --name matcher-probe tools/matcher_frozen_probe.py
           if [ "$RUNNER_OS" = "Windows" ]; then dist/matcher-probe.exe; else dist/matcher-probe; fi
 # Android remains held by the owner's selected-action policy (2026-11-04).
 # Run android-app.yml only after that policy permits its already-pinned Gradle action.

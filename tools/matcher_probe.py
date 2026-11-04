@@ -13,7 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def lock(platform):
     names = {'rapidfuzz', 'pyinstaller', 'pyinstaller-hooks-contrib', 'altgraph',
-             'packaging', 'setuptools', 'pefile', 'pywin32-ctypes'}
+             'packaging', 'setuptools', 'pefile', 'pywin32-ctypes',
+             'pypdf', 'openpyxl', 'defusedxml', 'et-xmlfile'}
     blocks = re.split(r'(?m)(?=^[a-zA-Z0-9][a-zA-Z0-9_.-]*==)',
                       (ROOT / f'requirements/desktop-probe-{platform}.lock').read_text())
     selected = [b for b in blocks if b.split('==')[0] in names]

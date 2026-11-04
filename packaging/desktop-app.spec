@@ -20,7 +20,7 @@ analysis = Analysis(
         "uvicorn.loops.asyncio",
         "uvicorn.protocols.http.h11_impl",
         "uvicorn.lifespan.on",
-    ] + collect_submodules("rapidfuzz"),
+    ] + collect_submodules("rapidfuzz") + collect_submodules("pypdf") + collect_submodules("openpyxl"),
     excludes=[
         "tkinter",
         "PyQt5",
