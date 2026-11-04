@@ -51,3 +51,9 @@ The profile lifecycle screens (list, new profile, unlock with password or finger
 Still open: restore, device and borrowed-profile routes after their claims clear, and the bank-import parsing/proposal/posting split.
 
 Also left (from 1G, 2026-11-04): Undo's history-validation hook (`result.undo.validate`, `prepare_history_validation`, `db.undo`) is still assigned in `bootstrap.py`; pass it to `UndoService` through its constructor.
+
+## Bank-import row readers extracted · 2026-11-04
+
+The pure row readers (column names, `decode_csv`, date and amount parsing, the internal-transfer words) moved unchanged out of `bank_imports.py` into `lightning/bank_import_rows.py` (own layer above `core`); `bank_imports` still exports every name, so callers and tests are unchanged, and the journal's capture adapter now reads rows from the new module, which removes its `bank_imports` dependency. `bank_imports.py` is 852 lines. Money-posting code (`confirm`, `_post_import_row`) was not touched.
+
+Still open: proposal generation (`preview` and its helpers) and posting orchestration in `bank_imports.py`, restore, device and borrowed-profile routes.
