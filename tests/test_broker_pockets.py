@@ -97,10 +97,18 @@ def test_one_row_per_broker_in_the_sidebar_and_accounts_and_its_page_shows_each_
     client = TestClient(create_app(c), base_url="http://127.0.0.1")
     listing = client.get("/accounts").text
     assert "THNDR · USD" not in listing and "64,000" in listing
+    # Owner 2026-11-04: the broker's page leads with a small overview in pounds, then each pocket as a tab;
+    # a tab shows only its own pocket's holdings, and every tab carries the broker's header and total.
     page = client.get(f"/accounts/{thndr.id}").text
-    assert "0.00 USD" in page and "9,000.00 EGP" in page and "US index ETF" in page
-    assert f"/accounts/{pocket.id}" in page
-    assert "Part of THNDR" in client.get(f"/accounts/{pocket.id}").text
+    overview = page[page.index('class="card pocket-overview"'):page.index('class="plan-tabs-bar pocket-tabs"')]
+    assert "EGP" in overview and "Cash 9,000<" in overview and "Investments 0" not in overview and "USD" in overview and f"/accounts/{pocket.id}" in overview
+    tabs = page[page.index('class="plan-tabs-bar pocket-tabs"'):]
+    tabs = tabs[:tabs.index("</nav>")]
+    assert tabs.count('class="plan-tab"') == 2 and f'href="/accounts/{thndr.id}" aria-current="page"' in tabs
+    assert 'class="card holdings-strip"' not in page   # the EGP pocket holds no investments of its own
+    usd = client.get(f"/accounts/{pocket.id}").text
+    assert "THNDR · USD</h1>" not in usd and 'class="card holdings-strip"' in usd and "US index ETF" in usd
+    assert f'href="/accounts/{pocket.id}" aria-current="page"' in usd and 'class="card pocket-overview"' in usd
     reply = client.post(f"/accounts/{thndr.id}/pockets", data={"currency": "eur"}, follow_redirects=False)
     assert reply.status_code == 303 and c.accounts.pocket_for(thndr, "EUR").name == "THNDR · EUR"
 
@@ -147,3 +155,27 @@ def test_failed_purchase_rolls_back_a_successful_conversion_and_all_rows(c, setu
         c.investments.buy_converting("2026-09-03", thndr.id, etf.id, "0", "1000", "51000")
     assert len(converted) == 1  # The conversion succeeded; the purchase then failed.
     assert list(c.db.conn.iterdump()) == before
+
+
+def test_on_a_phone_the_broker_leads_in_pounds_then_a_chip_per_pocket(c, setup):
+    """Owner 2026-11-04 on the phone (C06.2, C08): the broker's name and its total in pounds lead every pocket's page;
+    one row per pocket, then one chip per pocket; a broker with one pocket keeps its ordinary page."""
+    accounts, _ = setup
+    thndr, etf = _broker_with_cash(c, accounts)
+    app = create_app(c)
+
+    @app.middleware("http")
+    async def as_phone(request, call_next):
+        request.state.phone = True
+        return await call_next(request)
+
+    client = TestClient(app, base_url="http://127.0.0.1")
+    plain = client.get(f"/accounts/{thndr.id}").text
+    assert "pocket-tabs" not in plain
+    c.investments.buy_converting("2026-09-03", thndr.id, etf.id, "10", "1000", "51000")
+    pocket = c.accounts.pocket_for(thndr, "USD")
+    usd = client.get(f"/accounts/{pocket.id}").text
+    assert "<h1>THNDR</h1>" in usd and "<small>EGP</small></div>" in usd
+    chips = usd[usd.index('class="phone-chips pocket-tabs"'):]
+    chips = chips[:chips.index("</nav>")]
+    assert chips.count('<a class="phone-chip') == 2 and f'href="/accounts/{pocket.id}" aria-current="page"' in chips
