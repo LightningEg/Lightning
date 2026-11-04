@@ -56,6 +56,37 @@ def test_sms_assignment_is_a_portable_command(screens):
     assert hd.c.db.scalar("SELECT COUNT(*) FROM bank_import_rows WHERE status='REVIEW'") == 1
 
 
+def test_other_asset_value_route_preserves_the_portable_action(screens):
+    from decimal import Decimal
+    from lightning.sync.journal.codec import unpack
+    from lightning.sync.journal.proxy import JournalServices
+
+    (hd, pc), (_, replica) = screens
+    JournalServices(hd).account_flows.open_account("Flat", "OTHER_ASSET", "2026-01-01", "0")
+    pc.sync_with(hd.home)
+    flat = next(a for a in pc.c.accounts.list() if a.name == "Flat")
+    response = replica.post(f"/accounts/{flat.id}/value", data={
+        "date": "2026-09-01", "value": "1250000", "notes": "Estimate"})
+    assert response.status_code == 303 and "Saved+on+this+device" in response.headers["location"]
+    assert pc.c.accounts.manual_value(flat.id, "2026-09-01") is None
+    body = unpack(pc.store.pending()[0])["body"]
+    assert body["kind"] == "command.reporting.other_asset_values.save"
+    pc.sync_with(hd.home)
+    home_flat = next(a for a in hd.c.accounts.list() if a.name == "Flat")
+    for device, account in ((hd, home_flat), (pc, flat)):
+        value = device.c.accounts.manual_value(account.id, "2026-09-01")
+        assert value["value"] == Decimal("1250000") and value["notes"] == "Estimate"
+    assert pc.store.fingerprint() == hd.store.fingerprint()
+
+
+def test_registered_command_names_fit_the_wire_format():
+    from lightning.sync.journal.codec import COMMAND
+    from lightning.sync.journal.commands import KINDS
+
+    assert all(COMMAND.fullmatch(kind) for kind in KINDS)
+    assert not COMMAND.fullmatch("command.accounts.save.extra.unregistered")
+
+
 def test_replica_history_action_stays_on_the_home(screens):
     (hd, pc), clients = screens
     response = clients[1].post("/history/undo", data={"group_id": "1"},
