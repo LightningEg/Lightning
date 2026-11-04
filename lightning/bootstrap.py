@@ -13,6 +13,7 @@ from lightning.accounts.service import AccountService
 from lightning.assets.service import AssetService
 from lightning.budgeting.service import BudgetService
 from lightning.planning.forecast import CashForecaster
+from lightning.planning.freshness import FreshnessService
 from lightning.planning.health import HealthService
 from lightning.planning.position import PositionService
 from lightning.planning.schedule_view import ScheduleSource
@@ -94,6 +95,7 @@ class Container:
     reimbursements: ReimbursementService | None = None
     funding: CashFundingService | None = None
     deposit_receipts: DepositReceiptService | None = None
+    freshness: FreshnessService | None = None
 
     @property
     def base_currency(self) -> str:
@@ -282,6 +284,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
         reimbursements=ReimbursementService(db),
         funding=CashFundingService(db, budgets, reporting, reserves, planning, categories, settings, schedules),
         deposit_receipts=deposit_receipts,
+        freshness=FreshnessService(reporting, position),
     )
     if not read_only and not is_journal:
         result.undo = UndoService(db, audit)

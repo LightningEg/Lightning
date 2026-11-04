@@ -201,7 +201,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7X3 | ↳ Present scenario comparisons | | | M | |
 | NF-7X4 | ↳ Define and detect bill drift and repeated charges | | | M | |
 | NF-7X5 | ↳ Show reviewable alerts in Needs you | | | M | |
-| **NF-7Y** | [Explain which stale or pending inputs affect a financial figure](7-planning-import-and-search/7Y-financial-data-freshness.md) | new feature | Understand | M | new |
+| **NF-7Y** | [Explain which stale or pending inputs affect a financial figure](7-planning-import-and-search/7Y-financial-data-freshness.md) | new feature | Understand | M | building |
 
 Done: 7A, 7H, 7I, 7J, 7K, 7L, 7N, 7O, 7P, 7Q, 7R, 7U, 7V, 7W. Next free code: 7Z.
 
