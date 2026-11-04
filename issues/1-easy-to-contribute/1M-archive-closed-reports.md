@@ -16,3 +16,6 @@ by: Claude Sonnet 5.5
 - Keep the report text, its verdict and the commit-pinned references issues already use.
 - `tools/docs_check.py` and `tests/test_docs_structure.py` learn the archive path; no link in `issues/`, `feedback/` or `ai/` may break.
 - Candidates today: Audit 7, dendera-theme, contributor-review, fx-date-boundary, Audit 6 once 1H closes.
+
+## Progress
+- `tools/archive.py` is built and tested (`tests/test_archive_reports.py`), and `tools/docs_check.py` checks the archive catalogue. It moves nothing today: the 30-day rule leaves every closed report too new (the first to qualify is `contributor-review`, 2026-11-22). Run `python tools/archive.py --write` then; `--days 0` would archive eight now. This item finishes after the first real archive.
