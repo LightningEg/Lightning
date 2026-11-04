@@ -43,3 +43,9 @@ The [code-quality audit](../../reports/2026-11-03-code-quality-and-smart-feature
 Complete: balance/certificate validation is in `transactions/balances.py`, read-only search/tags/capture suggestions in `transactions/search.py`, and exact submission fingerprints, duplicate delivery checks and revision hashing in `transactions/submissions.py`. The facade retains its signatures and policy constants; it still owns posting and save scopes. Audit rows, retry refusal messages and journal/Undo authority are unchanged. The shared balance walker does not buffer histories; the repository closes its streamed cursor. A 100,000-row dummy history agrees exactly with the former SQL window, with about 1.8 KB of Python allocations for the walk (SQLite allocations excluded); the local CPU sample was 407 ms versus 356 ms for the SQL window. This is a responsibility/consistency improvement, not a speed claim.
 
 Still open: the unclaimed profile-route extraction, coordinated journal/device/recovery route separation after active claims clear, and the bank-import parsing/proposal/posting split. Keep one extraction per change and retain all financial behavior.
+
+## Profile screens extracted · 2026-11-04
+
+The profile lifecycle screens (list, new profile, unlock with password or fingerprint, recovery, password, question and recovery key) moved unchanged out of `profile_app` into `lightning/runtime/profile_screens.py`; the routes see the session, devices and gate through one `ProfileScreens` record, and `page`/`action` come back for the routes that stay. Restore, devices, borrowed-profile and Lock routes were not touched (they belong to the restore and journal claims). `runtime/app.py` is now about 750 lines. Existing profile, phone, restore and architecture tests pass unchanged; ruff and the import contracts pass.
+
+Still open: restore, device and borrowed-profile routes after their claims clear, and the bank-import parsing/proposal/posting split.
