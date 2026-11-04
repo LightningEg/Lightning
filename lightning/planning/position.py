@@ -34,6 +34,7 @@ from lightning.core.money import ZERO, quantize, round_to_total
 from lightning.investments.domain import DEFAULT_SALE_FACTOR
 
 from .domain import WhatYouOwe
+from .investment_figures import InvestmentBreakdown, OwnedRow, investment_breakdown
 
 GAMEYA_CLASS = "GAMEYA"
 
@@ -216,6 +217,11 @@ class PositionService:
         self.reserves = reserves
         self.planning = planning
         self.deposits = deposits
+
+    def investment_breakdown(self, as_of: date | str, owned_rows: list[OwnedRow],
+                             report: dict) -> InvestmentBreakdown:
+        """Owned investment table figures and lifetime gains, using this position's holdings total."""
+        return investment_breakdown(owned_rows, self.at(as_of), report, self.reporting.base_currency)
 
     def owned_holdings(self, as_of: date | str) -> tuple[list[OwnedHolding], list[str]]:
         """Owned units and value per holding (not cash), after money held for others."""

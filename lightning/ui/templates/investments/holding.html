@@ -19,7 +19,7 @@
     <span class="stat-tile-sub">{{ "Price change, sales and payouts since you bought it"|tr(locale) }}</span></div>
   <div class="stat-tile surface-{{ 'over' if display_return and display_return.percent is not none and display_return.percent < 0 else 'in' }}"><span class="stat-tile-head">{{ tone_icon('in') }}<span class="stat-tile-label">{{ ('XIRR' if display_return and display_return.annualized else 'Return')|tr(locale) }}</span></span>
     <span class="stat-tile-value">{% if display_return and display_return.percent is not none %}{{ display_return.percent|signed_pct }}<small>{{ ('% a year' if display_return.annualized else '%')|tr(locale) }}</small>{% else %}—{% endif %}</span>
-    <span class="stat-tile-sub">{% if display_return and display_return.days_held is not none %}{{ (('Held {n} day' if display_return.days_held==1 else 'Held {n} days')|tr(locale, n=display_return.days_held)) }}{% else %}{{ 'Not enough dated cash flows to calculate a return'|tr(locale) }}{% endif %}</span></div>
+    <span class="stat-tile-sub">{% if display_return and display_return.explanation %}{{ display_return.explanation|tr(locale) }}{% elif display_return and display_return.days_held is not none %}{{ (('Held {n} day' if display_return.days_held==1 else 'Held {n} days')|tr(locale, n=display_return.days_held)) }}{% else %}{{ 'Not enough dated cash flows to calculate a return'|tr(locale) }}{% endif %}</span></div>
 </section>
 
 <header class="overview-section-head inv-head"><h2>{{ "Is it making money?"|tr(locale) }}</h2><span>Month ends · {{ j.labels[0] if j.labels }} to {{ j.labels[-1] if j.labels }}</span></header>

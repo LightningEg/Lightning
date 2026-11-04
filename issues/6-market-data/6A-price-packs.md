@@ -194,4 +194,4 @@ Includes the reviewed Thndr-to-Mubasher fund mapping.
 Upcoming projects #15 and #16.
 
 ## 6A3 Publish the packs · owner
-The owner's go-ahead to publish; see 6C for what is not published today.
+The owner's go-ahead to publish; only the exchange-rate pack publishes today (BT-6C, 2026-11-04); the other sources do not allow republishing.

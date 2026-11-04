@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 61 open items, in the order they are worked on.
+10 milestones, 58 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -22,9 +22,8 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1H4 | ↳ Validate | | | M | |
 | **IT-1M** | [Archive closed reports and keep their evidence out of the checkout](1-easy-to-contribute/1M-archive-closed-reports.md) | improvement, technical | Build | M | ready |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | ready |
-| **IT-1P** | [Check the minimum supported Python and asynchronous UI contracts](1-easy-to-contribute/1P-supported-runtime-contract-checks.md) | improvement, technical | Build | M | new |
 
-Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K, 1L, 1O. Next free code: 1Q.
+Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K, 1L, 1O, 1P. Next free code: 1Q.
 
 ## 2 Safe for real money
 
@@ -149,9 +148,8 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | NF-5G5 | ↳ Phase 4: broker import | | | L | |
 | NF-5G6 | ↳ Phase 5: analysis | | | L | |
 | NF-5G7 | ↳ Phase 6: lots and corporate actions | | | L | |
-| **IT-5M** | [Distinguish ambiguous annualized returns from unavailable results](5-investments/5M-xirr-ambiguous-results.md) | improvement, technical | Own | M | new |
 
-Done: 5A, 5B, 5C, 5D, 5E, 5F, 5H, 5I, 5J, 5K, 5L. Next free code: 5N.
+Done: 5A, 5B, 5C, 5D, 5E, 5F, 5H, 5I, 5J, 5K, 5L, 5M. Next free code: 5N.
 
 ## 6 Market data
 
@@ -167,10 +165,10 @@ Prices arrive by themselves, from sources Lightning may redistribute.
 | NF-6B1 | ↳ Verify live boards per market | | | M | |
 | NF-6B2 | ↳ A source that allows redistribution | | | owner | |
 | NF-6B3 | ↳ Switch publishing on per market | | | S | |
-| **BT-6C** | [Download shared prices brings nothing: only the exchange-rate pack is published, and not since 11 Oct](6-market-data/6C-shared-prices-not-published.md) | bug, technical · medium | Own | M | ready |
 | **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](6-market-data/6D-gold-price-source.md) | improvement, technical | Own | S | blocked on a test from a home connection |
+| **BT-6E** | [The Gulf-stocks price pack fails in the scheduled collector (run 103, 2026-11-04)](6-market-data/6E-gcc-price-pack-collection-fails.md) | bug, technical · low | Own | S | new |
 
-Done: nothing yet. Next free code: 6E.
+Done: 6C. Next free code: 6F.
 
 ## 7 Planning, import and search
 
@@ -246,10 +244,9 @@ Good ideas that wait until the milestones above are done.
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | new |
 | **NF-9E** | [Return against the risk-free rate](9-later/9E-return-against-risk-free-rate.md) | new feature | Own | M | new |
 | **IT-9F** | [Page speed: a stable origin and cache, and a CSS trim](9-later/9F-page-speed-origin-and-css.md) | improvement, technical | Reach | M | new |
-| **IT-9J** | [Routes still compute figures, some that no screen shows](9-later/9J-routes-compute-figures.md) | improvement, technical | Build | M | ready |
-| **IT-9K** | [Structure left - a 746-line profile_app and three balance-floor checks](9-later/9K-layers-and-copies.md) | improvement, technical | Build | M | ready |
+| **IT-9K** | [Structure left - runtime routes and bank-import orchestration](9-later/9K-layers-and-copies.md) | improvement, technical | Build | M | ready |
 
-Done: 9G, 9H, 9I. Next free code: 9L.
+Done: 9G, 9H, 9I, 9J. Next free code: 9L.
 
 ## 10 Looks and store
 

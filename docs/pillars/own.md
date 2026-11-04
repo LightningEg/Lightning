@@ -12,17 +12,12 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **NF-5G** | [Brokerages that span exchanges and currencies](../../issues/5-investments/5G-brokerages-across-exchanges.md) | L | building |
-| **IT-5M** | [Distinguish ambiguous annualized returns from unavailable results](../../issues/5-investments/5M-xirr-ambiguous-results.md) | M | new |
 | **NF-6A** | [Market data: price packs, collected in the cloud](../../issues/6-market-data/6A-price-packs.md) | L | building |
 | **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](../../issues/6-market-data/6B-europe-and-gcc-shares.md) | L | blocked on a source that allows redistribution |
-| **BT-6C** | [Download shared prices brings nothing: only the exchange-rate pack is published, and not since 11 O…](../../issues/6-market-data/6C-shared-prices-not-published.md) | M | ready |
 | **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](../../issues/6-market-data/6D-gold-price-source.md) | S | blocked on a test from a home connection |
+| **BT-6E** | [The Gulf-stocks price pack fails in the scheduled collector (run 103, 2026-11-04)](../../issues/6-market-data/6E-gcc-price-pack-collection-fails.md) | S | new |
 | **NF-9C** | [Silver, property and vehicles](../../issues/9-later/9C-silver-property-vehicles.md) | L | new |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](../../issues/9-later/9D-hijri-dates-and-silver-nisab.md) | M | new |
 | **NF-9E** | [Return against the risk-free rate](../../issues/9-later/9E-return-against-risk-free-rate.md) | M | new |
-
-## Reports with open follow-ups here
-
-- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 5M, 6C
 <!-- work:end -->
 

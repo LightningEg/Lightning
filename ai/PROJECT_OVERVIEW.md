@@ -122,7 +122,7 @@ The period picker (All time · YTD · Monthly · Custom) drives most visuals. A 
 |---|---|
 | Overview: stat cards, position cards (as of the period end, never after today), Cash flow, Investments section | Overview: Net worth over time (12 month ends up to the period end); Where money in went's last six months; Month by month |
 | Budget: KPI cards (a month: everyday pace and its bills), Spent of plan | Budget: plans are monthly; longer periods add months, each month's left in plan |
-| Investments: waffle, Net gain or loss, allocation and biggest holdings (as of period end), money and value by class | Portfolio value sparkline (last 6 months); Dividends (year to date); Return since first investment (plain before 365 days, annualized XIRR afterward, with days held); horizon bar (today) |
+| Investments: waffle, Net gain or loss, allocation and biggest holdings (as of period end), money and value by class | Portfolio value sparkline (last 6 months); Dividends (year to date); Return since first investment (plain before 365 days, annualized XIRR afterward, with days held and explicit ambiguous/unavailable explanations); horizon bar (today) |
 | Expense analysis: KPI cards, treemap, now against usual, daily calendar or monthly summaries | "Usual" is the 6 whole months before the period; usual range, small multiples, heatmap use the 12 before it |
 | — | Holding page: whole history up to 24 month ends; sparklines last 6 |
 

@@ -18,6 +18,7 @@
       {{ donut(investment_donut, fig.holdings_value.label, base, (fig.what_you_own.label, pos.what_you_own)) }}
       {% for item in pos.locked_holdings %}<div class="overview-static-row locked-row"><span>{{ "Locked certificate"|tr(locale) }} · {{ item.asset }} <small>{{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small></span><b class="muted">{{ item.value|money }}</b></div>{% endfor %}
       <div class="overview-inline-list inv-after-sale"><div class="overview-static-row"><span>{{ fig.brokerage_cash.label }}</span><b>{{ investment_report.investment_cash|money if investment_report.investment_cash is not none else 'Unavailable' }}</b></div><a class="overview-static-row" href="/settings?section=assets-valuations"><span>{{ fig.holdings_after_sale.label }}</span><b>{{ pos.holdings_after_sale|money if investment_report.value is not none else 'Unavailable' }}</b></a></div>{% endcall %}
+{% if since_return and since_return.explanation %}<p class="muted small">{{ ('XIRR' if since_return.annualized else 'Return')|tr(locale) }} · {{ since_return.explanation|tr(locale) }}</p>{% endif %}
 {% else %}<section class="stat-tiles inv-top" aria-label="This period">
   {% if not phone_mode() %}{# on a phone the Overview's tiles carry these rates; never twice #}
   <div class="stat-tile surface-{{ 'over' if waffle.bar.state == 'overspent' else 'in' }} inv-saved-tile">{% set w = waffle %}{% set bar = w.bar %}
@@ -29,7 +30,7 @@
     <span class="stat-tile-value{{ ' is-negative' if result is not none and result < 0 }}">{% if result is none %}Unavailable{% else %}{{ hero_result|money(True) }}<small>{{ lens.code }}</small>{% endif %}</span>
     <span class="stat-tile-sub inv-notes">
       <span>{% if growth is not none %}<b class="{{ growth|tone }}">{{ (growth)|signed_pct }}%</b>{% else %}<b>—</b>{% endif %}<em>{{ fig.period_growth.label }}</em></span>
-      <span>{% if since_return and since_return.percent is not none %}<b class="{{ since_return.percent|tone }}">{{ since_return.percent|signed_pct }}%{% if since_return.annualized %} {{ 'a year'|tr(locale) }}{% endif %}</b>{% else %}<b>—</b>{% endif %}<em>{{ ('XIRR' if since_return and since_return.annualized else 'Return')|tr(locale) }}{% if since_return and since_return.days_held is not none %} · {{ (('Held {n} day' if since_return.days_held==1 else 'Held {n} days')|tr(locale, n=since_return.days_held)) }}{% endif %}</em></span>
+      <span>{% if since_return and since_return.percent is not none %}<b class="{{ since_return.percent|tone }}">{{ since_return.percent|signed_pct }}%{% if since_return.annualized %} {{ 'a year'|tr(locale) }}{% endif %}</b>{% else %}<b>—</b>{% endif %}<em>{{ ('XIRR' if since_return and since_return.annualized else 'Return')|tr(locale) }}{% if since_return and since_return.explanation %} · {{ since_return.explanation|tr(locale) }}{% elif since_return and since_return.days_held is not none %} · {{ (('Held {n} day' if since_return.days_held==1 else 'Held {n} days')|tr(locale, n=since_return.days_held)) }}{% endif %}</em></span>
     </span>
   </div>
   <a class="stat-tile surface-hold" href="#holdings-table">
