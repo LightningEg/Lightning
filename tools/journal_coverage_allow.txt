@@ -1,5 +1,6 @@
 # Routes that must stay covered by the edit journal (tools/journal_coverage.py --check). One `POST path` per line.
 POST /accounts/new
+POST /accounts/{account_id:int}/broker-import
 POST /accounts/{account_id:int}/convert
 POST /accounts/{account_id:int}/deactivate
 POST /accounts/{account_id:int}/edit
