@@ -161,3 +161,25 @@ def test_phone_loan_and_reserve_actions_have_touch_targets():
         for selector, minimum in ((".quiet-link", 44), (".btn.small", 48), (".reserve-create summary", 48), (".chart-table summary", 44)):
             assert page.locator(selector).bounding_box()["height"] >= minimum
         browser.close()
+
+
+@pytest.mark.parametrize("width", [320, 360])
+def test_phone_planner_choices_fit_their_card(width):
+    chromium = Path("/opt/pw-browsers/chromium")
+    executable = str(chromium) if chromium.exists() else shutil.which("chromium")
+    if not executable:
+        pytest.skip("Chromium is not installed")
+    static = Path(__file__).resolve().parents[1] / "lightning/ui/static"
+    with sync_playwright() as p:
+        browser = p.chromium.launch(executable_path=executable)
+        page = browser.new_page(viewport={"width": width, "height": 800})
+        page.set_content('<html class="phone"><body><main class="main"><form class="card planner-popup-form">'
+                         '<fieldset class="planner-mode"><span class="planner-mode-seg">'
+                         '<label><input type="radio" name="mode"><span>Spread across gaps</span></label>'
+                         '<label><input type="radio" name="mode"><span>Biggest gaps first</span></label>'
+                         '</span></fieldset></form></main></body></html>')
+        page.add_style_tag(content=(static / "style.css").read_text())
+        page.add_style_tag(content=(static / "phone.css").read_text())
+        assert page.locator('.planner-mode-seg').evaluate(
+            'e => [...e.querySelectorAll("label span")].every(s => s.scrollWidth <= s.clientWidth && s.getBoundingClientRect().right <= e.getBoundingClientRect().right + 0.5)')
+        browser.close()
