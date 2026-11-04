@@ -160,7 +160,8 @@ def test_phone_recurring_suggestion_menu_can_dismiss_and_restore(c, setup, monke
                     page.wait_for_load_state()
                     assert page.locator('.phone-suggest').filter(has_text='Monthly Gym').count() == 0
                     restore = page.locator(f'form[action="/plan/suggestions/{party_id}/restore"]')
-                    restore.locator('xpath=ancestor::details[1]').evaluate('e => e.open = true')
+                    restore.locator('xpath=ancestor::details[1]/summary').click()
+                    assert restore.locator('button').is_visible()
                     with page.expect_response(lambda r: r.url.endswith('/restore') and r.request.method == 'POST') as restored:
                         restore.locator('button').click()
                     assert restored.value.status == 303
