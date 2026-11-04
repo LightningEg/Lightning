@@ -77,3 +77,10 @@ Encrypted and desktop extras and developer requirements; resolve Pydantic with c
 
 ## 1H4 Validate · M
 Package-contract tests, the full suite and import contracts; native Windows and Android build checks for the changed packages.
+
+2026-11-04: native wheels built by run 41803831558 on main (all four link and pass the 16 KB report) and published as
+`android-wheels-r41803831558`. Inputs updated together (the Dependabot group of #240 plus `pydantic==2.14.2`,
+`pydantic-core==2.50.2`, `starlette==1.10.0` pinned in `desktop-probe.in` so the PC and phone locks hold the same core
+libraries), Android, both desktop and the build-tools locks regenerated with their recorded commands. Full suite passes on
+the upgraded environment (`ruff`, import contracts too). Left: the native Windows and Android jobs on the pull request, then
+a phone install of the new wheels.
