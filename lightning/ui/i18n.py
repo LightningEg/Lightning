@@ -1174,6 +1174,7 @@ ARABIC_UI = {
     'People & businesses': 'أشخاص وشركات',
     'Did you mean': 'هل تقصد',
     'Internal': 'داخلي',
+    'Updated': 'تم التحديث',
     'Opening': 'رصيد افتتاحي',
     'Revaluation': 'إعادة تقييم',
     'External': 'خارجي',

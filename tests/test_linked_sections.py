@@ -208,3 +208,14 @@ def test_transaction_lines_describe_outflow_in_plain_words(c, setup):
     page = TestClient(create_app(c)).get(f"/transactions/{expense.id}").text
     assert '<span class="pill">Money out</span>' in page
     assert '<span class="pill">OUTFLOW</span>' not in page
+    from lightning.ui.routes.transactions import _display_timestamp
+    assert f'>{_display_timestamp(expense.created_at)}</time>' in page
+
+
+def test_transaction_timestamps_keep_recorded_offsets_in_readable_form():
+    from lightning.ui.routes.transactions import _display_timestamp
+    assert _display_timestamp("2026-10-20T21:36:42+03:00") == "2026-10-20 21:36:42 UTC+03:00"
+    assert _display_timestamp("2026-10-20T21:36:42-04:30") == "2026-10-20 21:36:42 UTC-04:30"
+    assert _display_timestamp("2026-10-20T21:36:42") == "2026-10-20 21:36:42"
+    assert _display_timestamp("2026-10-20T21:36:42.123456Z") == "2026-10-20 21:36:42.123456 UTC+00:00"
+    assert _display_timestamp("unknown") == "unknown"
