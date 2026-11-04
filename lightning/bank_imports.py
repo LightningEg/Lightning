@@ -2,22 +2,21 @@
 
 from __future__ import annotations
 
-import difflib
-import functools
 import hashlib
 import json
-import re
 from decimal import Decimal
 
-from lightning.bank_import_rows import (INTERNAL_WORDS, MAX_BYTES, OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS, _amount, _date,  # noqa: F401
-                                        _decimal_amount, _separate_amount, decode_csv, is_internal)
-from lightning.categories.domain import Movement
 from lightning.core.dates import now_iso
 from lightning.core.errors import ConflictError, LightningError, NotFoundError, ValidationError
 from lightning.core.money import from_e6
-from lightning.transactions.domain import TxnSource
-from lightning.transactions.tags import tags_in
 
+# Re-export the original helpers for the UI, journal capture and existing callers.
+from lightning.bank_import_rows import (INTERNAL_WORDS as INTERNAL_WORDS, MAX_BYTES as MAX_BYTES, OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS,
+                                          _amount as _amount, _date as _date, _decimal_amount as _decimal_amount,
+                                          _separate_amount as _separate_amount, decode_csv, is_internal as is_internal)
+from lightning.bank_import_proposals import ImportProposals, LINK_WINDOW_DAYS as LINK_WINDOW_DAYS
+from lightning.bank_import_posting import ImportPoster
+from lightning.bank_import_parsing import normalize_rows
 
 
 class _ImportReviewRequired(Exception):
@@ -27,10 +26,6 @@ class _ImportReviewRequired(Exception):
         self.errors = errors
 
 
-# A bank often posts a purchase a day or two after it happened: a transaction you
-# already recorded this many days either side can stand behind a statement row.
-LINK_WINDOW_DAYS = 3
-
 class BankImportService:
     def __init__(self, db, accounts, categories, counterparties, transactions, money_from_others=None, reserves=None,
                  rules=None):
@@ -39,6 +34,8 @@ class BankImportService:
         self.money_from_others = money_from_others
         self.reserves = reserves
         self.rules = rules
+        self._proposals = ImportProposals(db, accounts, categories, counterparties, transactions, rules)
+        self._poster = ImportPoster(db, accounts, categories, counterparties, transactions, money_from_others, reserves, rules)
 
     def first_pending_review(self):
         """Earliest staged import row still requiring a decision."""
@@ -166,7 +163,6 @@ class BankImportService:
                            ("SEPARATE" if any(mapping.get(key) for key in SEPARATE_AMOUNT_FIELDS) else "SINGLE"))
         if amount_model not in {"SINGLE", "SEPARATE"}:
             raise ValidationError("Choose one amount column or separate inflow/outflow columns.", "mapping")
-        fields = ("Date", *SEPARATE_AMOUNT_FIELDS, *OPTIONAL) if amount_model == "SEPARATE" else (*REQUIRED, *OPTIONAL)
         missing = [key for key in (("Date", *SEPARATE_AMOUNT_FIELDS) if amount_model == "SEPARATE" else REQUIRED)
                    if mapping.get(key) not in headers]
         if amount_model == "SEPARATE" and mapping.get("Inflow") == mapping.get("Outflow"):
@@ -174,23 +170,7 @@ class BankImportService:
         if missing:
             raise ValidationError(
                 "Map Date and either a signed Amount column or two different columns for Inflow and Outflow.", "mapping")
-        stored = []
-        for raw in raw_rows:
-            parsed = {key: raw.get(mapping.get(key, ""), "") for key in fields}
-            for key in ("Amount", *SEPARATE_AMOUNT_FIELDS):
-                parsed.setdefault(key, "")
-            errors = []
-            try:
-                parsed["Date"] = _date(parsed["Date"])
-                parsed["Amount"] = (_separate_amount(parsed["Inflow"], parsed["Outflow"])
-                                     if amount_model == "SEPARATE" else _amount(parsed["Amount"]))
-                if invert_amount:
-                    parsed["Amount"] = format(-Decimal(parsed["Amount"]), "f")
-            except ValueError as exc:
-                errors.append(str(exc))
-            parsed["_line"] = raw["__line__"]
-            parsed["_errors"] = errors
-            stored.append((raw, parsed))
+        stored = normalize_rows(raw_rows, mapping, amount_model, invert_amount)
         now = now_iso()
         with self.db.transaction():
             canonical_fields = ("Date", *SEPARATE_AMOUNT_FIELDS, *OPTIONAL) if amount_model == "SEPARATE" else (*REQUIRED, *OPTIONAL)
@@ -216,278 +196,10 @@ class BankImportService:
         return batch_id, False
 
     def preview(self, batch_id: int):
-        batch = self.db.one("SELECT * FROM bank_import_batches WHERE id=?", (batch_id,))
-        if not batch:
-            raise NotFoundError("Import batch not found.")
-        rows = self.db.all("SELECT * FROM bank_import_rows WHERE batch_id=? ORDER BY row_number", (batch_id,))
-        result = []
-        amount_dates = {}
-        for source_row in rows:
-            staged = json.loads(source_row["raw_json"])["parsed"]
-            if not staged.get("_errors"):
-                key = (staged["Date"], staged["Amount"])
-                amount_dates[key] = amount_dates.get(key, 0) + 1
-        # The same date and amount waiting in another review of this account (an SMS and a statement, or two
-        # copies of one message): flagged like a posted look-alike, so neither posts twice unnoticed.
-        pending_elsewhere = {}
-        for other in self.db.all(
-                "SELECT r.raw_json, b.file_name FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
-                "WHERE b.account_id=? AND b.id<>? AND r.status='REVIEW'", (batch["account_id"], batch_id)):
-            try:
-                staged = json.loads(other["raw_json"])["parsed"]
-                pending_elsewhere.setdefault((staged["Date"], staged["Amount"]), other["file_name"])
-            except (TypeError, ValueError, KeyError):
-                continue
-        seen_refs = set()
-        # A full-history query: run it at most once per preview, not once per row (7O).
-        usual = functools.cache(self.transactions.usual_categories)
-        for row in rows:
-            record = json.loads(row["raw_json"])
-            parsed = record["parsed"]
-            ref_duplicate = bool(row["bank_reference"] and (row["bank_reference"] in seen_refs or self.db.scalar(
-                "SELECT 1 FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
-                "JOIN transactions t ON t.id=r.transaction_id AND t.status='POSTED' "
-                "WHERE b.account_id=? AND r.bank_reference=? AND b.id<>? AND r.status IN ('POSTED','LINKED') LIMIT 1",
-                (batch["account_id"], row["bank_reference"], batch_id))))
-            file_digest = batch["file_hash"].split("#", 1)[0]
-            repeat_import = bool(self.db.scalar(
-                "SELECT 1 FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
-                "WHERE b.account_id=? AND b.id<>? AND (b.file_hash=? OR b.file_hash LIKE ?) "
-                "AND r.row_number=? AND r.status<>'REVIEW' LIMIT 1",
-                (batch["account_id"], batch_id, file_digest, file_digest + "#%", row["row_number"])))
-            if row["bank_reference"]:
-                seen_refs.add(row["bank_reference"])
-            cp = self.counterparties.resolve(parsed["Counterparty"])
-            parsed["_counterparty_id"] = cp["id"] if cp else None
-            parsed["_suggestions"] = self.counterparties.suggestions(parsed["Counterparty"])
-            parsed["_reference_duplicate"] = ref_duplicate
-            parsed["_repeat_import"] = repeat_import
-            parsed["_pending_elsewhere"] = pending_elsewhere.get((parsed.get("Date"), parsed.get("Amount")), "")
-            parsed["_similarity_warning"] = (self._similarity_warning(batch["account_id"], parsed)
-                or amount_dates.get((parsed["Date"], parsed["Amount"]), 0) > 1 or bool(parsed["_pending_elsewhere"]))
-            parsed["_voided_earlier"] = not ref_duplicate and self._voided_earlier(batch["account_id"], batch_id,
-                                                                                row["bank_reference"], parsed)
-            parsed["_link_candidates"] = ([] if ref_duplicate or repeat_import or row["status"] != "REVIEW"
-                                          else self._link_candidates(batch["account_id"], parsed, batch["id"]))
-            parsed["_internal"] = is_internal(parsed["Category"])
-            outcome = self._rules_outcome(batch["account_id"], parsed, cp)
-            parsed["_category_id"] = None if parsed["_internal"] else self._category_for(parsed, cp, outcome, usual)
-            parsed["_transfer_target_suggestion"] = (self._own_account(batch["account_id"], parsed["Counterparty"])
-                or self._transfer_target_suggestion(batch["account_id"], parsed["Notes"])
-                or self._transfer_target_suggestion(batch["account_id"], parsed["Counterparty"])
-                or self._matching_bank_transfer(batch["account_id"], parsed))
-            # One of your accounts as the counterparty, or "Internal" in the category, is a transfer.
-            # A transfer whose account is known needs no category; one marked internal whose account
-            # cannot be matched waits for the user to pick it.
-            target = next((a for a in self.accounts.list(active_only=True)
-                           if a.name == parsed["_transfer_target_suggestion"]), None)
-            is_transfer = parsed["_internal"] or self._own_account(batch["account_id"], parsed["Counterparty"])
-            parsed["_transfer_target"] = target.name if target and is_transfer else None
-            parsed["_transfer_account_id"] = str(target.id) if target and is_transfer else ""
-            parsed["_needs_account"] = parsed["_internal"] and not parsed["_transfer_target"]
-            if parsed["_transfer_target"]:
-                parsed["_suggestions"] = []
-            category = self.categories.get(parsed["_category_id"]) if parsed["_category_id"] else None
-            parsed["_is_custody"] = bool(category and category.code == "EXP.SYSTEM.CUSTODY")
-            # Keep the canonical owner ready in the form: the user may choose
-            # the custody category during review rather than in the CSV.
-            parsed["_whom"] = cp["name"] if cp and cp["active"] else ""
-            parsed["_possible_duplicate"] = bool(ref_duplicate or repeat_import or parsed["_similarity_warning"]
-                                                 or parsed["_voided_earlier"] or parsed["_link_candidates"])
-            parsed["_ready"] = bool(not parsed.get("_errors") and not parsed["_possible_duplicate"]
-                                    and not parsed["_suggestions"] and not parsed["_needs_account"]
-                                    and (parsed["_category_id"] or parsed["_transfer_target"]))
-            parsed["_import_row_id"] = row["id"]
-            parsed["_account_id"] = batch["account_id"]
-            parsed["_status"] = row["status"]
-            parsed["_transaction_id"] = row["transaction_id"]
-            result.append(parsed)
-        claimed = set()
-        for parsed in result:
-            free = [c for c in parsed["_link_candidates"] if c["id"] not in claimed]
-            # A single candidate can be a useful default. When more than one
-            # transaction fits, require the reviewer to choose explicitly.
-            if len(parsed["_link_candidates"]) == 1 and free and not free[0].get("source_count"):
-                parsed["_default_match"] = f"link:{free[0]['id']}"
-                claimed.add(free[0]["id"])
-            else:
-                parsed["_default_match"] = "skip" if parsed["_possible_duplicate"] else "new"
-        return batch, result
-
-    def _link_candidates(self, account_id: int, parsed: dict, batch_id: int | None = None) -> list[dict]:
-        """Posted transactions this source row may already stand for: the same signed amount on
-        this account within LINK_WINDOW_DAYS. Existing source rows from other batches are evidence,
-        not a reason to hide the transaction. A transaction can be linked at most once per batch.
-        Amount and date only suggest a match; the user confirms it in the review."""
-        if parsed.get("_errors"):
-            return []
-        amount_e6 = int(Decimal(parsed["Amount"]) * 1_000_000)
-        rows = self.db.all(
-            "SELECT t.id,t.date,t.type,t.counterparty,t.notes, "
-            "(SELECT COUNT(*) FROM bank_import_rows r WHERE r.transaction_id=t.id AND r.account_id=? "
-            "AND r.status IN ('POSTED','LINKED')) AS source_count, "
-            "(SELECT GROUP_CONCAT(DISTINCT b.file_name) FROM bank_import_rows r "
-            "JOIN bank_import_batches b ON b.id=r.batch_id WHERE r.transaction_id=t.id AND r.account_id=? "
-            "AND r.status IN ('POSTED','LINKED')) AS source_files FROM transactions t "
-            "JOIN ledger_entries l ON l.transaction_id=t.id AND l.account_id=? "
-            "WHERE t.status='POSTED' AND julianday(t.date) BETWEEN julianday(?)-? AND julianday(?)+? "
-            "AND (? IS NULL OR NOT EXISTS (SELECT 1 FROM bank_import_rows r "
-            "WHERE r.transaction_id=t.id AND r.account_id=? AND r.batch_id=? "
-            "AND r.status IN ('POSTED','LINKED'))) "
-            "GROUP BY t.id HAVING SUM(l.amount_e6)=? "
-            "ORDER BY abs(julianday(t.date)-julianday(?)), t.id",
-            (account_id, account_id, account_id, parsed["Date"], LINK_WINDOW_DAYS, parsed["Date"],
-             LINK_WINDOW_DAYS, batch_id, account_id, batch_id, amount_e6, parsed["Date"]))
-        return [{"id": r["id"], "date": r["date"], "type": r["type"],
-                 "counterparty": r["counterparty"] or "", "notes": r["notes"] or "",
-                 "amount": parsed["Amount"], "source_count": r["source_count"],
-                 "source_files": r["source_files"] or ""} for r in rows]
-
-    def _voided_earlier(self, account_id: int, batch_id: int, reference: str | None, parsed: dict) -> bool:
-        """An earlier import of this row was voided: importing it again must not quietly bring it back."""
-        if parsed.get("_errors"):
-            return False
-        if reference:
-            return bool(self.db.scalar(
-                "SELECT 1 FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
-                "JOIN transactions t ON t.id=r.transaction_id AND t.status='VOID' "
-                "WHERE b.account_id=? AND b.id<>? AND r.bank_reference=? LIMIT 1",
-                (account_id, batch_id, reference)))
-        amount_e6 = int(Decimal(parsed["Amount"]) * 1_000_000)
-        return bool(self.db.scalar(
-            "SELECT 1 FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
-            "JOIN transactions t ON t.id=r.transaction_id AND t.status='VOID' AND t.date=? "
-            "JOIN ledger_entries l ON l.transaction_id=t.id AND l.account_id=b.account_id "
-            "WHERE b.account_id=? AND b.id<>? GROUP BY t.id HAVING SUM(l.amount_e6)=? LIMIT 1",
-            (parsed["Date"], account_id, batch_id, amount_e6)))
-
-    def _own_account(self, source_account_id: int, name: str):
-        """The name of another of your accounts typed as the counterparty, if it is one."""
-        wanted = " ".join((name or "").split()).casefold()
-        matches = [a.name for a in self.accounts.list(active_only=True)
-                   if a.id != source_account_id and a.name.casefold() == wanted]
-        return matches[0] if len(matches) == 1 else None
-
-    def _transfer_target_suggestion(self, source_account_id: int, notes: str):
-        """Suggest an internal destination from an account name or transfer wording."""
-        destination = re.search(r"\b(?:transfer(?:red)?|send|sent|payment)\s+(?:to|into)\s+(.+)",
-                                notes or "", re.IGNORECASE)
-
-        def compact(value):
-            return "".join(character.casefold() for character in value if character.isalnum())
-
-        tokens = re.findall(r"[\w]+", destination.group(1), re.UNICODE) if destination else []
-        candidates = []
-        source_currency = self.accounts.get(source_account_id).currency
-        accounts = [account for account in self.accounts.list(active_only=True)
-                    if account.id != source_account_id and account.currency == source_currency]
-        for account in accounts:
-            name = compact(account.name)
-            if not name:
-                continue
-            if compact(notes or "") == name:
-                candidates.append((1.0, account))
-                continue
-            score = 0.0
-            for start in range(len(tokens)):
-                for width in range(1, min(4, len(tokens) - start) + 1):
-                    phrase = compact(" ".join(tokens[start:start + width]))
-                    if phrase == name:
-                        score = 1.0
-                    elif min(len(phrase), len(name)) >= 4:
-                        score = max(score, difflib.SequenceMatcher(None, phrase, name).ratio())
-            if score >= 0.8:
-                candidates.append((score, account))
-        candidates.sort(key=lambda match: (-match[0], match[1].name.casefold()))
-        if not candidates or (len(candidates) > 1 and candidates[0][0] - candidates[1][0] < 0.08):
-            return None
-        return candidates[0][1].name
-
-    def _matching_bank_transfer(self, source_account_id: int, parsed: dict):
-        """Spot the opposite side already posted in another bank on this date."""
-        if parsed.get("_errors"):
-            return None
-        amount_e6 = int(Decimal(parsed["Amount"]) * 1_000_000)
-        rows = self.db.all(
-            "SELECT DISTINCT le.account_id FROM ledger_entries le "
-            "JOIN transactions t ON t.id=le.transaction_id "
-            "WHERE t.status='POSTED' AND t.type IN ('IN','OUT') AND t.date=? "
-            "AND le.account_id<>? AND le.amount_e6=?",
-            (parsed["Date"], source_account_id, -amount_e6))
-        source_currency = self.accounts.get(source_account_id).currency
-        bank_ids = {account.id: account.name for account in self.accounts.list(active_only=True)
-                    if account.account_type.value == "BANK" and account.currency == source_currency}
-        matches = {bank_ids[row["account_id"]] for row in rows if row["account_id"] in bank_ids}
-        return next(iter(matches)) if len(matches) == 1 else None
-
-    def _rules_outcome(self, account_id, parsed, counterparty):
-        """What the user's rules say about a row (Rules with conditions). Their tags go into the row's notes
-        now, so the review shows them and the user can remove them; a split is shown and applied on posting."""
-        parsed["_rule_id"], parsed["_rule_split"] = None, []
-        if self.rules is None or parsed.get("_errors") or parsed["_internal"]:
-            return None
-        names = [parsed["Counterparty"], counterparty["name"] if counterparty else ""]
-        outcome = self.rules.outcome(names, parsed["Notes"], parsed["Amount"], account_id)
-        missing = [t for t in outcome.tags if t not in tags_in(parsed["Notes"])]
-        if missing:
-            parsed["Notes"] = " ".join([parsed["Notes"].strip(), *(f"#{t}" for t in missing)]).strip()
-        return outcome
+        return self._proposals.preview(batch_id)
 
     def _category_for(self, parsed, counterparty, outcome=None, usual=None):
-        """`usual` returns `transactions.usual_categories()`; a preview passes one that computes it once."""
-        if outcome and outcome.category_id:
-            category = self.categories.get(outcome.category_id)
-            # Money out needs a spending category; money in takes income or, as a refund, spending.
-            if category.active and (Decimal(parsed["Amount"]) > 0 or category.movement == Movement.OUTFLOW):
-                parsed["_rule_id"] = outcome.rule_id
-                if Decimal(parsed["Amount"]) < 0:
-                    parsed["_rule_split"] = [
-                        {"category": self.categories.get(category_id).name, "amount": format(value, "f")}
-                        for category_id, value in self.rules.split_for(outcome.rule_id, parsed["Amount"]) or []]
-                return category.id
-        if parsed["Category"]:
-            try:
-                return self.categories.find_by_text(parsed["Category"]).id
-            except ValidationError as exc:
-                if str(exc.message).startswith("Which one"):
-                    # "Transportation" under Personal and under Work: say so and leave it for the person, never let the
-                    # counterparty's history pick one of two same-named categories (owner, 2026-10-30: ids, not names).
-                    parsed["_category_ambiguous"] = exc.message
-                    return None
-        if counterparty and counterparty["default_category_id"]:
-            return counterparty["default_category_id"]
-        found = (usual or self.transactions.usual_categories)()
-        name = counterparty["name"] if counterparty else parsed["Counterparty"]
-        return (found.get(name) or {}).get("category_id")
-
-    def _similarity_warning(self, account_id, parsed):
-        if parsed["_errors"]:
-            return False
-        amount = Decimal(parsed["Amount"])
-        targets = self.db.all("SELECT id FROM accounts WHERE active=1 AND lower(name)=lower(?)",
-                              (parsed["Counterparty"].strip(),))
-        target = targets[0] if len(targets) == 1 else None
-        if target:
-            transfer = self.db.scalar(
-                "SELECT 1 FROM transactions t "
-                "JOIN ledger_entries mine ON mine.transaction_id=t.id AND mine.account_id=? "
-                "JOIN ledger_entries other ON other.transaction_id=t.id AND other.account_id=? "
-                "WHERE t.status='POSTED' AND t.type='TRF' AND t.date=? "
-                "AND mine.amount_e6=? AND other.amount_e6=? LIMIT 1",
-                # The imported row is from this account's point of view. If it
-                # is the other side of an existing transfer, its signed amount
-                # must match this account's existing ledger line exactly.
-                (account_id, target["id"], parsed["Date"], int(amount * 1_000_000), int(-amount * 1_000_000)),
-            )
-            if transfer:
-                return True
-        row = self.db.one(
-            "SELECT 1 FROM transactions t JOIN ledger_entries l ON l.transaction_id=t.id "
-            "WHERE t.status='POSTED' AND t.date=? AND l.account_id=? "
-            "AND l.amount_e6=? LIMIT 1",
-            (parsed["Date"], account_id, int(amount * 1_000_000)),
-        )
-        return bool(row)
+        return self._proposals._category_for(parsed, counterparty, outcome, usual)
 
     def waiting(self, account_id: int) -> list[dict]:
         """Statements this account left half-reviewed, oldest first: Import CSV offers to finish or
@@ -569,7 +281,7 @@ class BankImportService:
         ambiguous_reserves = 0
         # A merchant typed as new on several rows (salary every month) is
         # created once; later rows in this batch reuse it.
-        self._created_in_batch = {}
+        self._poster._created_in_batch = {}
         try:
             with self.db.transaction():
                 # Custody debits depend on earlier credits. Statements often arrive
@@ -598,12 +310,12 @@ class BankImportService:
                     if checked and effective_date and effective_date <= checked:
                         self.db.execute("UPDATE bank_import_rows SET status='SKIPPED' WHERE id=?", (row_id,))
                         continue
-                    self._pending_created = {}
+                    self._poster._pending_created = {}
                     try:
                         with self.db.transaction():
                             matched = self._post_import_row(batch, row_id, decision, row, accounts)
                             ambiguous_reserves += int(matched < 0)
-                        self._created_in_batch.update(self._pending_created)
+                        self._poster._created_in_batch.update(self._poster._pending_created)
                     except LightningError as exc:
                         errors[int(row_id)] = exc.message
                 if errors:
@@ -619,228 +331,11 @@ class BankImportService:
             errors = exc.errors
         return self.summary(batch_id) | {"errors": errors, "ambiguous_reserves": ambiguous_reserves}
 
-    def _create_once(self, name: str, alias: str | None = None, kind: str | None = None) -> int:
-        """A counterparty typed as new on several rows is created once per batch; a name that already exists is used."""
-        name = " ".join(str(name).split())
-        key = name.casefold()
-        created = getattr(self, "_created_in_batch", {})
-        pending = getattr(self, "_pending_created", {})
-        if key in created:
-            return created[key]
-        if key in pending:
-            return pending[key]
-        if kind == "PERSON":
-            return self.counterparties.ensure_person(name)
-        existing = self.counterparties.resolve(name)
-        if existing:
-            return existing["id"]
-        use_alias = alias if alias and not self.counterparties.resolve(alias) else None
-        new_id = self.counterparties.create(name, alias=use_alias)
-        pending[key] = new_id
-        self._pending_created = pending
-        return new_id
-
-    def _transfer_fee(self, row, decision, amount: Decimal) -> Decimal:
-        """The part of a money-out transfer row that is the bank's fee (0 when none is entered). The row's amount
-        is the whole debit; the fee is inside it, so the transfer carries amount minus fee."""
-        text = str(decision.get("fee") or "").strip()
-        if not text:
-            return Decimal(0)
-        if amount >= 0:
-            raise ValidationError(f"CSV row {row['_line']}: a fee can only be split from money going out.", "fee")
-        try:
-            fee = _decimal_amount(text)
-        except ValueError as exc:
-            raise ValidationError(f"CSV row {row['_line']}: fee: {exc}", "fee") from None
-        if fee == 0:
-            return Decimal(0)
-        if fee < 0 or fee >= abs(amount):
-            raise ValidationError(f"CSV row {row['_line']}: the fee must be more than zero and less than the "
-                                  "amount, so something is left to transfer.", "fee")
-        return fee
-
-    def _fee_category(self, decision) -> int:
-        """The fee's category: the one picked beside the row's fee, else Fees & Charges."""
-        chosen = str(decision.get("fee_category_id") or "").strip()
-        if chosen:
-            category = self.categories.get(int(chosen))
-            self.categories.require(category.id, Movement.OUTFLOW)
-            return category.id
-        return self.categories.repo.get_by_code("EXP.PERSONAL.FEES").id
-
-    def _held_for(self, row, decision, category, canonical, cp_text, similar, is_transfer):
-        """Whose money this row moves: (owner name or None for your own money, id of a counterparty made for it).
-        Held for works on any row, the way the register's does: an inflow is money you hold for them, an outflow is
-        paid out of their money, a transfer moves their custody with it. The custody category with no Held for
-        keeps its old fallbacks (the counterparty on the row owns it)."""
-        selfish = {"self", "me", "my money", "my own money"}
-        choice = str(decision.get("owner_choice", ""))
-        typed = str(decision.get("whom", "")).strip()
-        line = row["_line"]
-        if choice == "self" or (not choice and typed.casefold() in selfish):
-            return None, None
-        if choice.startswith("existing:"):
-            party = self.counterparties.get(int(choice.split(":", 1)[1]))
-            if not party or not party["active"]:
-                raise ValidationError(f"CSV row {line}: choose an active owner.", "whom")
-            self.counterparties.ensure_person(party["name"])
-            return party["name"], None
-        if choice.startswith("new:") and choice[4:].strip():
-            new_id = self._create_once(choice[4:], kind="PERSON")
-            return self.counterparties.get(new_id)["name"], new_id
-        if typed:
-            party = self.counterparties.get(self.counterparties.ensure_person(typed))
-            if not party["active"]:
-                raise ValidationError(f"CSV row {line}: choose a saved active Counterparty in Whom.", "whom")
-            return party["name"], None
-        if not (category and category.code == "EXP.SYSTEM.CUSTODY"):
-            return None, None
-        if canonical and canonical["active"]:
-            self.counterparties.ensure_person(canonical["name"])
-            return canonical["name"], None
-        if not is_transfer and cp_text and not similar:
-            # The person named on the row owns it; a name that is new and like no other is saved.
-            new_id = self._create_once(cp_text, kind="PERSON")
-            return self.counterparties.get(new_id)["name"], new_id
-        raise ValidationError(f"CSV row {line}: choose who owns this money.", "whom")
-
     def _link_import_row(self, row_id, row, match: str) -> None:
-        """Stand this statement row behind a transaction already recorded. No money moves and the
-        transaction keeps its own date, amount and category."""
-        try:
-            txn_id = int(match.split(":", 1)[1])
-        except ValueError:
-            raise ValidationError(f"CSV row {row['_line']}: choose an entry to link to.", "match") from None
-        if txn_id not in {c["id"] for c in row["_link_candidates"]}:
-            raise ValidationError(f"CSV row {row['_line']}: that entry no longer matches this row; "
-                                  "choose again or post it as new.", "match")
-        if self.db.scalar("SELECT 1 FROM bank_import_rows WHERE transaction_id=? AND account_id=? "
-                          "AND batch_id=(SELECT batch_id FROM bank_import_rows WHERE id=?) "
-                          "AND status IN ('POSTED','LINKED')", (txn_id, row["_account_id"], row_id)):
-            raise ValidationError(f"CSV row {row['_line']}: another statement row is already linked to that "
-                                  "entry in this import. Post this one as new if it is a second payment.", "match")
-        self.db.execute("UPDATE bank_import_rows SET status='LINKED',transaction_id=? WHERE id=?",
-                        (txn_id, row_id))
+        self._poster._link_import_row(row_id, row, match)
 
     def _post_import_row(self, batch, row_id, decision, row, accounts):
-        cp_text = str(decision.get("counterparty", row["Counterparty"])).strip()
-        try:
-            day = _date(str(decision.get("date", row["Date"])))
-            amount = Decimal(_amount(str(decision.get("amount", row["Amount"]))))
-        except ValueError as exc:
-            raise ValidationError(f"CSV row {row['_line']}: {exc}", "row") from None
-        notes = str(decision.get("notes", row["Notes"])).strip()
-        account_matches = [a for a in accounts if a.name.casefold() == cp_text.casefold()]
-        if len(account_matches) > 1:
-            raise ValidationError(f"CSV row {row['_line']}: account name is ambiguous; use a unique name.",
-                                  "counterparty")
-        target = account_matches[0] if account_matches else None
-        if "transfer_account_id" not in decision and row.get("_transfer_account_id"):
-            decision = decision | {"transfer_account_id": row["_transfer_account_id"]}
-        selected_target = str(decision.get("transfer_account_id", "")).strip()
-        if row.get("_internal") and not target and not selected_target:
-            raise ValidationError(f"CSV row {row['_line']}: this is an internal transfer. Pick the account the money "
-                                  "moved to or from.", "transfer_account_id")
-        if selected_target:
-            source_currency = self.accounts.get(batch["account_id"]).currency
-            target = next((a for a in accounts if str(a.id) == selected_target and a.id != batch["account_id"]
-                           and a.currency == source_currency), None)
-            if target is None:
-                raise ValidationError(f"CSV row {row['_line']}: choose another active account for this transfer.", "transfer_account_id")
-        counterparty_id = decision.get("counterparty_id") or (row["_counterparty_id"] if cp_text == row["Counterparty"] else None)
-        if cp_text and not counterparty_id:
-            exact = self.counterparties.resolve(cp_text)
-            counterparty_id = exact["id"] if exact else None
-        similar = self.counterparties.suggestions(cp_text) if cp_text and not counterparty_id else []
-        choice = str(decision.get("counterparty_choice", ""))
-        alias_text = str(decision.get("alias_text") or "").strip()  # the statement's own spelling, when the name was picked
-        if choice.startswith("existing:"):
-            counterparty_id = int(choice.split(":", 1)[1])
-        elif choice == "unlinked":
-            counterparty_id = None
-        elif choice == "typed":
-            pass  # the typed text is kept as written: linked only when it is exactly a saved name
-        elif choice == "new":
-            name = str(decision.get("new_counterparty", cp_text)).strip()
-            if name:
-                counterparty_id = self._create_once(name, alias_text or cp_text)
-        elif row.get("_suggestions") and not row.get("_counterparty_id") and not choice:
-            raise ValidationError(f"CSV row {row['_line']}: choose a Counterparty match or leave it unlinked.",
-                                  "counterparty")
-        if counterparty_id and not target:
-            if alias_text:
-                if not self.counterparties.resolve(alias_text):
-                    self.counterparties.add_alias(int(counterparty_id), alias_text)
-            elif cp_text:
-                self.counterparties.add_alias(int(counterparty_id), cp_text)
-        category_id = None if decision.get("force_uncategorized") else (decision.get("category_id") or row["_category_id"])
-        if category_id:
-            category_id = int(category_id)
-        else:
-            fallback_code = "EXP.UNACCOUNTED" if amount < 0 else "INC.UNACCOUNTED"
-            category_id = self.categories.repo.get_by_code(fallback_code).id
-        if decision.get("remember_category") and counterparty_id and category_id:
-            self.counterparties.set_default_category(int(counterparty_id), int(category_id))
-        canonical = self.counterparties.get(int(counterparty_id)) if counterparty_id else None
-        if target:
-            fee = self._transfer_fee(row, decision, amount)
-            txn = self.transactions.record_transfer(
-                day, batch["account_id"] if amount < 0 else target.id,
-                target.id if amount < 0 else batch["account_id"], abs(amount) - fee,
-                notes=notes, source=TxnSource.IMPORT,
-            )
-            if fee:
-                # The bank took the fee out of the same debit: it is its own expense, so the transfer shows
-                # what arrived and the fee shows in reports.
-                self.transactions.record_outflow(
-                    day, batch["account_id"], fee, self._fee_category(decision), notes=notes,
-                    source=TxnSource.IMPORT)
-            category = self.categories.get(int(category_id)) if category_id else None
-            if self.money_from_others:
-                owner, _ = self._held_for(row, decision, category, canonical, cp_text, similar, True)
-                if owner:
-                    source_id, target_id = ((batch["account_id"], target.id) if amount < 0
-                                            else (target.id, batch["account_id"]))
-                    self.money_from_others.sync_transfer(txn.id, day, owner, source_id, target_id,
-                                                        abs(amount) - fee, notes)
-        else:
-            movement = Movement.OUTFLOW if amount < 0 else Movement.INFLOW
-            self.categories.require(int(category_id), movement, allow_system=True)
-            category = self.categories.get(int(category_id))
-            owner, owner_id = self._held_for(row, decision, category, canonical, cp_text, similar, False)
-            if owner_id:
-                counterparty_id = counterparty_id or owner_id
-            if owner and amount > 0 and category.code != "EXP.SYSTEM.CUSTODY":
-                # Money in that you hold for someone is custody, whatever category the row had.
-                category = self.categories.repo.get_by_code("EXP.SYSTEM.CUSTODY")
-                category_id = category.id
-                self.categories.require(int(category_id), movement, allow_system=True)
-            linked_name = canonical["name"] if canonical else (
-                "" if (similar and choice != "typed") or choice == "unlinked" else cp_text)
-            kwargs = {"source": TxnSource.IMPORT, "counterparty": linked_name, "notes": notes}
-            if amount < 0:
-                txn = self.transactions.record_outflow(day, batch["account_id"], abs(amount), int(category_id),
-                                                      allow_system_category=True, **kwargs)
-                # A rule's split, while the row keeps the rule's category; the parts follow an edited amount.
-                parts = (self.rules.split_for(row.get("_rule_id"), abs(amount))
-                         if self.rules and not owner and int(category_id) == row.get("_category_id") else None)
-                if parts:
-                    txn = self.transactions.update_expense_split(txn.id, parts)
-            elif category.movement == Movement.OUTFLOW:
-                txn = self.transactions.record_refund(day, batch["account_id"], amount, int(category_id), **kwargs)
-            else:
-                txn = self.transactions.record_inflow(day, batch["account_id"], amount, int(category_id),
-                                                     allow_system_category=True, **kwargs)
-            if owner and self.money_from_others:
-                self.money_from_others.sync_transaction(txn.id, txn.date, owner, batch["account_id"], amount, notes)
-            if counterparty_id:
-                self.db.execute("UPDATE transactions SET counterparty_id=? WHERE id=?",
-                                (int(counterparty_id), txn.id))
-        self.db.execute("UPDATE bank_import_rows SET status='POSTED',transaction_id=? WHERE id=?",
-                        (txn.id, row_id))
-        if self.reserves:
-            return self.reserves.auto_link_transaction(txn.id)
-        return 0
+        return self._poster._post_import_row(batch, row_id, decision, row, accounts)
 
     def summary(self, batch_id: int) -> dict[str, int]:
         counts = {row["status"]: row["n"] for row in self.db.all(

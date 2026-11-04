@@ -42,29 +42,21 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§4 Phone
 ## Fix
 `phone.css` and the `templates/phone/` pages; regenerate `phone.rtl.css`. Make `tools/phone_check.py` also report elements past the screen edge.
 
+3T1 is done: 3AN12 (`89848dc0`) rebuilt Overview, Recurring and Plan; the Planner choices now wrap. `tools/phone_check.py` checks Plan headings, expanded holdings views and the currency period sheet at 320/360. `tests/test_phone_recurring_browser.py` checks both a matched 100/108 monthly payment and an unmatched candidate in English and Arabic at both widths; the candidate's review link has its own row.
+
+3T4 is done: Settings destinations are phone rows rather than five tabs; main Settings, currency rates/history and sale factors use rows rather than tables. Sale-factor values, inherited defaults and editing match desktop, and Overview Latest hides system value updates (`tests/test_phone_frame.py`, `tests/test_ui.py`, `tests/test_phone_recurring_browser.py`, `tests/test_register_folds_and_views.py`).
+
+3T3 is done: the rebuilt period arrows and recurring due chips are 48 px; picker choices and loan due actions are at least 48 px; quiet links, chart disclosures and Aliases use the C05 44 px quiet target, and the reserve disclosure is 48 px. The picker stays within the viewport. Weekly review is a full row, Review activity is a menu row, and the old free-cash link is now a full row (`tests/test_phone_check.py`, `tests/test_phone_recurring_browser.py`; 3AN12 `89848dc0`).
+
 3T2 is done: SMS and Search acquired Back in 3AN5/3AN6; Settings, account import and the investment planner now have fallback destinations. Budget category links return to Budget and the rebuilt register has one period control and a concise category filter (`tests/test_phone_frame.py`).
 
-## 3T1 Cut words and overlapping text (C12) · M
-Report items 1-2. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
-
-**2026-11-04:** Chromium at 320/360 shows the current Reserves months label and Overview arrows/Net flow uncut; the expanded Investments By market chip is uncut at 320 (the latter was rebuilt by 3AN12, `89848dc0`). The Planner's choice labels now wrap inside the card (`tests/test_phone_check.py`). The sample had no changed-payment warning, so that overlap and the other reported states still need targeted verification.
-
-## 3T3 Touch targets · M
-Report item 6: targets under 48 px (C05.1). The search half (item 5: live search, results in a card, "Press Ctrl K") was built by IV-3AN's 3AN6 (2026-11-02). Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
-
-**2026-11-04:** The alias disclosure has a 44 px quiet target, picker choices have 48 px targets and wrap, and the picker is clamped to the viewport (`tests/test_phone_check.py`, 320 and 360 px). The rebuilt period arrows, including Ask an AI, are 48 px; Pay early and Show the numbers are 44 px, loan due buttons and recurring due chips are at least 48 px, and Add a reserve is 48 px. Other reported targets still need review.
-
-## 3T4 Settings tabs and money first · M
-Report items 7-8: five tabs (C03.3), stacked rows still a table, Overview Latest led by revaluations. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
-
-**2026-11-04:** Phone Settings and its related pages now return to More, which already links to each page, instead of showing five tabs (`tests/test_phone_frame.py`). Overview Latest excludes value updates, as the register does (`tests/test_register_folds_and_views.py`). The Settings table layouts still need review.
-
 ## 3T5 Charts and expense analysis · M
+**2026-11-04:** Reserves shows four named sources then Other, without inventing a combined value; Other opens every source and its timing (`tests/test_emergency_liquidity_context.py`, `tests/test_phone_liquidity_browser.py`). Phone trend legends now sit below the plot, and their number disclosure includes every series (`tests/test_fx_positions.py`, `tests/test_phone_recurring_browser.py`).
 Report items 9-10: two charts in one card, time axes with 8-10 labels, five or more names without Other.
 
-**2026-11-04:** Shared donut grouping now folds exactly five names (and combines an existing Other); phone time axes show at most three labels. Tests: `tests/test_demo_and_visuals.py` and `tests/test_phone_check.py`. Review the remaining chart and comparison observations before closing.
+**2026-11-04:** Shared donut grouping now folds exactly five names (and combines an existing Other); phone time axes show at most three labels (`tests/test_demo_and_visuals.py`, `tests/test_phone_check.py`). Planner now keeps four named suggestions and an expandable Other, preserving every detailed allocation (`tests/test_investments.py`, `tests/test_phone_planner_browser.py`). Review Reserves sources and the remaining chart and comparison observations before closing.
 
 ## 3T6 Fields, pairs and small things · M
 Report items 11-13: 15 px field text, focus fill, lone KPIs, Zakat date format, Profiles wordmark.
 
-**2026-11-04:** Phone entry fields, including the profile language selector, now render at 16 px despite desktop overrides; the amount field keeps 24 px. A 320/360 browser sweep and `tests/test_phone_check.py` cover this. Focused phone fields now deepen the theme well towards its focus colour, with a focus-coloured edge; the profile page has its favicon and Prices says “another device” on the phone. Pairs, the Zakat date and the other small observations remain to review.
+**2026-11-04:** Phone entry fields, including the profile language selector, now render at 16 px despite desktop overrides; the amount field keeps 24 px. A 320/360 browser sweep and `tests/test_phone_check.py` cover this. Focused phone fields now deepen the theme well towards its focus colour, with a focus-coloured edge; the profile page has its favicon and Prices says “another device” on the phone. The three Loans ratios are compared phone rows; import uses Back instead of a second button, and recurring dismissal sits under More actions. The phone profile gate uses the mark and a one-tap language switch; picker-only date fields omit typing hints (`tests/test_phone_frame.py`, `tests/test_phone_sheets_browser.py`, `tests/test_phone_recurring_browser.py`). The deliberate native Zakat date needs Android acceptance; the other observations remain to review.

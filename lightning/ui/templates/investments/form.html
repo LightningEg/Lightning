@@ -104,7 +104,7 @@
     {{ field('total_cost', 'Cost (' ~ base ~ ')', values, error_field, help='What you paid for these units in total, fees included. THNDR shows it as average cost × units.', attrs='inputmode="decimal" required') }}
   </div>
   <div class="field {{ 'has-error' if error_field == 'date' }}">
-    <label for="date">{{ 'As of'|tr(locale) }} <span class="muted small">{{ 'yyyy-mm-dd'|tr(locale) }}</span></label>
+    <label for="date">{{ 'As of'|tr(locale) }} {% if not phone_mode() %}<span class="muted small">{{ 'yyyy-mm-dd'|tr(locale) }}</span>{% endif %}</label>
     <input type="text" id="date" name="date" value="{{ values.date }}" placeholder="yyyy-mm-dd" inputmode="numeric" data-smart-date>
     <div class="help">{{ "Choose when you want this existing holding to enter your tracked history."|tr(locale) }}</div>
   </div>

@@ -32,7 +32,7 @@
   <form method="post" enctype="multipart/form-data" action="/accounts/{{ account.id }}/import">
     <div class="field import-file-field"><label for="bank-csv">{{ 'Statement files'|tr(locale) }}</label><input id="bank-csv" type="file" name="file" accept=".csv,.xlsx,.pdf,text/csv,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple required>
     <p class="muted small">{{ 'CSV up to 5 MB; Excel .xlsx and text-based CIB PDFs up to 8 MB. Every row is reviewed before saving.'|tr(locale) }}</p></div>
-    <div class="actions"><button class="btn primary">{{ 'Review statement'|tr(locale) }}</button><a class="btn" href="/accounts/{{ account.id }}">{{ 'Cancel'|tr(locale) }}</a></div>
+    <div class="actions"><button class="btn primary">{{ 'Review statement'|tr(locale) }}</button>{% if not phone_mode() %}<a class="btn" href="/accounts/{{ account.id }}">{{ 'Cancel'|tr(locale) }}</a>{% endif %}</div>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 </section>
 {% endblock %}

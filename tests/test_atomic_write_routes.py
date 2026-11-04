@@ -5,6 +5,7 @@ from pathlib import Path
 ROUTES = Path(__file__).parents[1] / "lightning/ui/routes"
 # These handlers have a different completion boundary, or perform no financial write.
 OTHER_BOUNDARIES = {
+    "search": {"scoped_picker"},  # Read-only ranking of existing picker choices.
     "history": {"replay"},  # History restores both rows and links in its own replay transaction.
     "exports": {"transactions", "categories", "reevaluations", "preview_workbook_import"},
     "transactions": {"all_accounts_entry", "all_accounts_update"},  # register.create/update own the save.
@@ -13,7 +14,7 @@ OTHER_BOUNDARIES = {
     "sms": {"allow", "read_one_message"},  # OS permission and read-only parsing.
     "planning": {"not_recurring"},  # Suggestion visibility, a single settings write.
     "dashboard": {"add_demo_household", "add_sample_2026", "add_sample_story", "needs_you_state"},
-    "settings": {"ask_ai", "prepare_ai_analysis", "backup_now", "start_fresh"},  # Exports and dedicated file workflows.
+    "settings": {"ask_ai", "prepare_ai_analysis", "backup_now", "start_fresh", "save_privacy"},  # Exports, dedicated file workflows, and the display preference (no undo group, no settlement).
     "weekly": {"complete", "dismiss"},  # Review preferences never settle a financial issue.
 }
 

@@ -12,7 +12,6 @@ The website, search, downloads, community and the store. Its own repository is L
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **BT-2U** | [The website APK still cannot be downloaded on the owner's phone](../../issues/2-safe-for-real-money/2U-phone-cannot-download-apk.md) | M | new |
-| **IT-8A** | [Feedback form: submit scrolls to the page end, images take 10 s, and the survey forms accept formul…](../../issues/8-website/8A-feedback-form-send-and-spam-guard.md) | M | ready |
 | **OW-8D** | [For Geeks audit ideas left for the owner to choose](../../issues/8-website/8D-for-geeks-audit-ideas-to-choose.md) | owner | ready |
 | **IV-8F** | [Home and Features show the app, not only words](../../issues/8-website/8F-home-and-features-show-the-app.md) | M | ready |
 | **OW-8AA** | [Sign off the Low, Medium and High ratings on the comparison pages](../../issues/8-website/8AA-sign-off-the-comparison-ratings.md) | owner | ready |

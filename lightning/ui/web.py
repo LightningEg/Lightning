@@ -561,7 +561,8 @@ class RequestCache:
             root = scope.get("path", "").strip("/").split("/")[0]
             # Every write is one undoable action (2H), except Undo/Redo themselves, the demo and sample loaders
             # (they fill an empty profile) and exports (they only read).
-            if scope.get("method") not in ("GET", "HEAD") and root not in NOT_USER_ACTIONS:
+            if (scope.get("method") not in ("GET", "HEAD") and root not in NOT_USER_ACTIONS
+                    and scope.get("path") != "/settings/privacy"):
                 from lightning.undo import user_action
                 with user_action(ACTION_LABELS.get(root, "Saved changes")):
                     # Each write workflow commits required settlement itself. Read-only

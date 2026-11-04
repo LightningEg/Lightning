@@ -234,3 +234,21 @@ def test_transaction_heading_names_action_and_keeps_reference_in_both_languages(
     arabic = client.get(f"/transactions/{expense.id}").text
     assert '<h1>فلوس خارجة</h1>' in arabic
     assert expense.ref in arabic and '120' in arabic
+
+
+def test_pc_activity_uses_category_leaf_and_detail_keeps_hierarchy(c, setup):
+    from html import escape
+    accounts, cats = setup
+    food = cats["EXP.PERSONAL.FOOD"]
+    expense = c.transactions.record_outflow("2026-09-02", accounts["cib"].id, "120", food.id)
+    client = TestClient(create_app(c))
+    activity = client.get("/activity").text.split(f'href="/transactions/{expense.id}"', 1)[1].split('</a>', 1)[0]
+    assert 'Personal ›' not in activity and escape(food.name) in activity
+    detail = client.get(f"/transactions/{expense.id}").text
+    summary_category = detail.split('<td class="category-context">', 1)[1].split('</td>', 1)[0]
+    assert '<b>Personal</b>' in summary_category and f'<div>{escape(food.name)}</div>' in summary_category
+    assert ' › ' not in summary_category
+    from test_gameya_screens import _client
+    phone = _client(c, phone=True).get(f"/transactions/{expense.id}").text
+    phone_category = phone.split('<td class="category-context">', 1)[1].split('</td>', 1)[0]
+    assert 'Personal ›' in phone_category and escape(food.name) in phone_category

@@ -43,3 +43,18 @@ def test_one_unaffordable_instalment_rolls_back_the_entire_batch(c, setup):
         c.gameya.record_past_instalments(circle.id, expected_paid=0)
     assert c.gameya.progress(circle.id).paid == 0
     assert c.reporting.account_value(circle.id, '2026-12-31') == 0
+
+
+def test_pc_circle_distinguishes_passed_today_and_future_dates(c, setup, monkeypatch):
+    circle = _circle(c, setup)
+    client = _client(c)
+    monkeypatch.setenv('LIGHTNING_TODAY', '2026-10-04')
+    future = client.get(f'/gameya/{circle.id}').text
+    assert 'Next instalment' in future and 'Date passed · not recorded' not in future
+    monkeypatch.setenv('LIGHTNING_TODAY', '2026-10-05')
+    due = client.get(f'/gameya/{circle.id}').text
+    assert 'Next instalment' in due and 'Date passed · not recorded' not in due
+    monkeypatch.setenv('LIGHTNING_TODAY', '2026-12-31')
+    past = client.get(f'/gameya/{circle.id}').text
+    assert 'Oldest unrecorded instalment' in past and '2026-10-05' in past
+    assert 'Date passed · not recorded' in past and 'Instalments due (not recorded)' in past

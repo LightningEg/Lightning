@@ -20,6 +20,9 @@ COMMANDS = {
     "transactions.record_conversion": Command("transactions.record_conversion", CONVERSION, creates="transactions"),
     "transactions.update_conversion": Command("transactions.update_conversion", dict(txn_id=ref("transactions"), **CONVERSION),
                                               target=("transactions", "txn_id")),
+    "reserves.set_planned_item": Command("reserves.set_planned_item", dict(
+        reserve_id=ref("cash_reserves"), planned_item_id=optional(ref("planned_items"))),
+        target=("cash_reserves", "reserve_id")),
     "reserves.create": Command("reserves.create", dict(RESERVE, kind=choice("PROJECT", "EMERGENCY")), creates="cash_reserves"),
     "reserves.update": Command("reserves.update", dict(reserve_id=ref("cash_reserves"), **RESERVE),
                                target=("cash_reserves", "reserve_id")),
