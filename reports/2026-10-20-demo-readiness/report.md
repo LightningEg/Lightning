@@ -414,3 +414,7 @@ IV-3S item 10: Review activity uses category leaf names, as the register does. T
 ## 2026-11-04 · PC brand-audit coverage
 
 IV-3S6: the Chromium audit now checks visible fieldsets for nested boxes and trend/pace end labels for overlap on its visited pages. A controlled browser fixture checks that both detectors identify and clear violations. Category select colours and the first-run Load action are also covered; other pages and chart-label types remain to review.
+
+## 2026-11-04 · Transaction action layout
+
+IV-3S item 13: when both forms are available, PC transaction detail pairs category splitting with reserve assignment, stacking them on narrow windows. Their buttons use Secondary styling so the page keeps at most one visible Primary. The Cash planning card remains to review.

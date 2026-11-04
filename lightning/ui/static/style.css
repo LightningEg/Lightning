@@ -444,6 +444,9 @@ tr.clickable:hover td { background: var(--hover); }
 .reconcile-result { margin-top: 14px; }
 .pill.cleared { background: var(--ok-bg); color: var(--pos); }
 .expense-split { max-width: 760px; }
+@media (max-width:1100px) { html:not(.phone) .transaction-actions-grid { grid-template-columns:1fr; } }
+html:not(.phone) .transaction-actions-grid .reserve-allocate .counterparty-picker { flex:1 0 100%; }
+html:not(.phone) .transaction-actions-grid .reserve-allocate .counterparty-picker input { width:100%; }
 .split-row { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(130px, 220px); gap: 10px; margin: 8px 0; }
 @media (max-width: 560px) { .split-row { grid-template-columns: 1fr; } }
 .reserve-overview { display: flex; gap: 32px; flex-wrap: wrap; margin-bottom: 14px; }

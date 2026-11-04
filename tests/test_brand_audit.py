@@ -168,15 +168,29 @@ def audit():
                 expense = page.locator(".compact-row b.neg").first
                 result["activity_outflow"] = (expense.evaluate("el => [el.textContent.trim(), getComputedStyle(el).color]")
                                               if expense.count() else None)
-                detail = page.locator('.compact-row[href^="/transactions/"]').first
+                detail = page.locator('.compact-row[href^="/transactions/"]').filter(has=page.locator('b.neg')).first
                 if detail.count():
                     page.goto(host.origin + detail.get_attribute("href"))
                     result["transaction_heading_size"] = page.locator(".topbar h1").evaluate("el => getComputedStyle(el).fontSize")
                     result["transaction_category_breadcrumbs"] = page.locator('.category-context').evaluate_all(
                         'els => els.filter(el => el.textContent.includes(" › ")).map(el => el.textContent.trim())')
+                    result["transaction_primary_count"] = page.locator('.main button.primary:visible').count()
+                    result["transaction_actions_layout"] = []
+                    for width in (1024, 1366, 1920):
+                        page.set_viewport_size({"width": width, "height": 768})
+                        result["transaction_actions_layout"].append(page.locator('.transaction-actions-grid').evaluate("""el => {
+                            const cards = [...el.children], a = cards[0].getBoundingClientRect(), b = cards[1].getBoundingClientRect();
+                            const picker = el.querySelector('.reserve-allocate input[role="combobox"]');
+                            return {paired: Math.abs(a.top-b.top) < 2,
+                                    overflow: cards.some(c => c.scrollWidth > c.clientWidth + 1),
+                                    clipped: !!picker && picker.scrollWidth > picker.clientWidth + 1};
+                        }"""))
+                    page.set_viewport_size({"width": 1366, "height": 768})
                 else:
                     result["transaction_heading_size"] = None
                     result["transaction_category_breadcrumbs"] = None
+                    result["transaction_actions_layout"] = None
+                    result["transaction_primary_count"] = None
                 page.goto(host.origin + "/")
                 page.keyboard.press("Control+k")
                 page.locator(".command-input").fill("budget")
@@ -304,3 +318,16 @@ def test_chart_end_labels_do_not_overlap(audit):
 
 def test_fieldset_and_label_detectors_find_and_clear_real_browser_overlap(audit):
     assert audit["detector_controls"] == [True, True, False, False]
+
+
+def test_transaction_action_cards_pair_where_they_fit(audit):
+    assert audit["transaction_actions_layout"] == [
+        {"paired": False, "overflow": False, "clipped": False},
+        {"paired": True, "overflow": False, "clipped": False},
+        {"paired": True, "overflow": False, "clipped": False},
+    ]
+
+
+def test_transaction_has_at_most_one_visible_primary(audit):
+    assert audit["transaction_primary_count"] is not None
+    assert audit["transaction_primary_count"] <= 1

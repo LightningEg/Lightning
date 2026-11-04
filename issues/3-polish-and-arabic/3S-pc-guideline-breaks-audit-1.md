@@ -33,7 +33,7 @@ already list. The original brand audit could not see select text colour, the fir
 10. **2026-11-04:** PC Review activity uses category leaf names and shows a minus on money out. Transaction details retain category hierarchy as a header and separate lines rather than a breadcrumb.
 11. **2026-11-04:** PC Budget settings and certificate receipt fieldsets retain their semantic groups without boxes; Spending small multiples and the first-run account list no longer have nested surfaces. Chromium checks computed borders, backgrounds and shadows.
 12. **2026-11-04:** PC Certificates account fields and the empty-plan Budget spending group use the existing type-and-pick control. Chromium checks filtering, submitted IDs and required validation.
-13. A card alone: Cash planning "What you owe"; the transaction page's "Expense categories".
+13. Cash planning "What you owe" remains to review. **2026-11-04:** On PC, transaction "Expense categories" and reserve assignment share a row when both are available and the window is wide enough; they stack at narrower widths.
 
 **Controls and words**
 14. **2026-11-04:** The shared PC period control says "Month" and places ‹ month › inside the one track. Chromium checks navigation, custom ranges and Arabic on Overview; the same macro serves Spending, Budget, Investments, Currencies and Export for AI.

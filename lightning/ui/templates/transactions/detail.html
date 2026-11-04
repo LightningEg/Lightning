@@ -55,6 +55,8 @@
     {% else %}<div class="muted small">{{ "No changes since it was recorded."|tr(locale) }}</div>{% endif %}
   </div>
 </div>
+{% set pair_actions = not phone_mode() and can_split and txn.type.value == 'OUT' and not txn.is_void %}
+{% if pair_actions %}<div class="grid g2 transaction-actions-grid">{% endif %}
 {% if can_split and not txn.is_void %}
 <section class="card expense-split" style="margin-top:16px">
   <h2>{{ "Expense categories"|tr(locale) }}</h2>
@@ -75,7 +77,7 @@
         <input type="text" name="split_amount" placeholder="Amount" inputmode="decimal" aria-label="Split amount">
       </div>{% endfor %}
     </div>
-    <div class="actions"><button type="button" class="btn small" id="add-expense-split-row">{{ "Add category"|tr(locale) }}</button><button class="btn primary">{{ "Save split"|tr(locale) }}</button></div>
+    <div class="actions"><button type="button" class="btn small" id="add-expense-split-row">{{ "Add category"|tr(locale) }}</button><button class="btn{{ ' primary' if phone_mode() else '' }}">{{ "Save split"|tr(locale) }}</button></div>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 </section>
 {% endif %}
@@ -86,10 +88,11 @@
   {% if reserves %}<form method="post" action="/transactions/{{ txn.id }}/reserve" class="reserve-allocate">
     <select name="reserve_id" required aria-label="Reserve" data-own-picker>{% for reserve in reserves %}<option value="{{ reserve.id }}">{{ reserve.name }} · {{ reserve.effective_allocated|money }} available</option>{% endfor %}</select>
     <input type="text" name="amount" value="{{ abs(summary.amount) }}" inputmode="decimal" aria-label="Amount paid from reserve" required>
-    <button class="btn small primary">{{ "Apply payment"|tr(locale) }}</button>
+    <button class="btn small{{ ' primary' if phone_mode() else '' }}">{{ "Apply payment"|tr(locale) }}</button>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% else %}<p class="muted small">{{ "Create a reserve before assigning payments to one."|tr(locale) }}</p>{% endif %}
 </section>
 {% endif %}
+{% if pair_actions %}</div>{% endif %}
 <div class="card" style="margin-top:16px">
   <details>
     <summary>{{ "Ledger lines — how this transaction affects balances"|tr(locale) }}</summary>
