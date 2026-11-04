@@ -164,3 +164,7 @@ Dummy-data number check, 2026-09-01 through 2026-10-06:
 | Duplicate receipt entry or pair confirmation | One cash receipt and one link | One cash receipt and one link | Pass |
 
 Exercised Money in entry, suggested-pair claim creation, receipt confirmation, unlink/undo, stale receipt edits and two-device command replay. The same-category flow tests also cover Arabic and PC/phone templates. Native packaging was not exercised.
+
+## Follow-up · 2026-11-04: import settlement feedback and certificate navigation
+
+NF-7L4 is complete. Import confirmation now matches payments inside its atomic save before rendering success and names the bills paid by its posted or linked entries. Ambiguous matches are omitted; unrelated matches are not attributed to the import. Settlement failure rolls back the batch and ledger writes, allowing a safe retry. Certificate Match all defaults back to Needs you and preserves an explicit inbox return path. [Import regressions](../../tests/test_import_settlement_feedback.py) cover English/Arabic PC/phone feedback, existing-entry links, ambiguity, injected validation/storage failures, retry and undo; [certificate navigation](../../tests/test_cd_interest_match.py) is checked over HTTP. The remaining financial-health bands in NF-7L2 and the other write routes in BT-2AE remain open.

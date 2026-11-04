@@ -371,6 +371,16 @@ class PlanningService:
     def linked_transaction_ids(self) -> set[int]:
         return self.repo.linked_transaction_ids()
 
+    def settled_bill_names(self, transaction_ids: set[int]) -> list[str]:
+        """Bill names paid by these posted entries, including existing entries linked by an import."""
+        if not transaction_ids:
+            return []
+        bill_names = {item.id: item.name for item in self.items() if item.kind == PlanKind.BILL}
+        names = {bill_names[item_id] for (item_id, _), payment in self.repo.settled().items()
+                 if item_id in bill_names and payment["status"] == "PAID"
+                 and payment["transaction_id"] in transaction_ids}
+        return sorted(names, key=str.casefold)
+
     def mark_paid(self, item_id: int, due_date: str, transaction_id: int) -> None:
         # The current occurrence and source link are read under the same writer lock as the save.
         with self.db.transaction():

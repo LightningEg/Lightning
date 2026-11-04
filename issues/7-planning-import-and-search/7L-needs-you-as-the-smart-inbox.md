@@ -23,14 +23,12 @@ In `workflows/review.py::ReviewInbox.items` add: "N payments look recurring · T
 Refill (3H RS-2, `reserves.links_for_reserve`); a category over plan this month (today only on Budget and in the save message); Health's "Needs you"
 bands (emergency fund 0.8 months is flagged on Health but not in the list).
 
-## 7L4 Pair what belongs together · M · #226
-Reimbursement pairing and the same-category repayment flow are implemented (2026-11-03; [regression coverage](../../tests/test_reimbursement_pairing.py)). Remaining: Import: after posting, say which bills
-the import settled ("2 posted, 1 linked · settled Landlord and WE Internet"). Certificate Match all lands on the long certificate page; return to Needs you.
-
 ## Fix
 One branch per step (7L1, the false raise prompt, is done). Mohab: add a step where a tracked suggestion and a rule offer appear in Needs you and are accepted there.
 
 
 ## Implementation of 7L2 · 2026-11-03
 
-Needs you now includes existing recurring candidates and reusable-rule offers, partially used replenishable/emergency reserves, current category overruns, and the emergency-fund alert band. Items use the existing situation identity, Mark as reviewed, Snooze and Restore controls. Rule offers are grouped with activity; no suggestions post money or create plans/rules automatically. Remaining health-band coverage and the 7L4 pairing improvements stay open.
+Needs you now includes existing recurring candidates and reusable-rule offers, partially used replenishable/emergency reserves, current category overruns, and the emergency-fund alert band. Items use the existing situation identity, Mark as reviewed, Snooze and Restore controls. Rule offers are grouped with activity; no suggestions post money or create plans/rules automatically. Remaining health-band coverage stays open.
+
+Pairing (7L4) is complete: [reimbursement coverage](../../tests/test_reimbursement_pairing.py), [import settlement feedback and atomic retry/undo coverage](../../tests/test_import_settlement_feedback.py), and [certificate matching navigation](../../tests/test_cd_interest_match.py). Import confirmation names bills paid by its posted or linked transactions after matching completes; a settlement failure rolls back the import. Certificate Match all returns to Needs you by default, preserving an explicit inbox return path.
