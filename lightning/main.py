@@ -1,7 +1,6 @@
-"""Start Lightning: back up, migrate, then serve the app on this computer only.
+"""Start encrypted profiles or a disposable sample on this computer only.
 
-    python -m lightning                 # opens the encrypted profile chooser
-    python -m lightning --profiles --no-browser
+    python -m lightning --profiles      # encrypted profiles in Documents/Lightning
     python -m lightning --demo          # a sample household in its own database, on port 8766
     python -m lightning --sample        # Mohab's 2026 from the sample CSVs, in its own database, on port 8767
 """
@@ -27,7 +26,7 @@ def main(argv: list[str] | None = None) -> None:
     from lightning.ui.web import create_app
 
     parser = argparse.ArgumentParser(prog="lightning", description="Personal finance, in one place.")
-    parser.add_argument("--db", help="legacy option; real data uses encrypted profiles")
+    parser.add_argument("--db", help=argparse.SUPPRESS)  # reject old commands before touching their files
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--no-browser", action="store_true")
     parser.add_argument("--profiles", action="store_true", help="password-protected profiles in Documents/Lightning")
@@ -39,24 +38,24 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
     if args.demo and args.sample:
         parser.error("choose --demo or --sample, not both")
+    if args.db is not None:
+        parser.error("--db is no longer supported; use --profiles for encrypted profiles, or --demo or --sample "
+                     "for disposable sample data. Existing database files are left unchanged.")
     sample = "sample" if args.sample else "demo" if args.demo else None
     args.demo = bool(sample)
-    if not sample and args.db is not None:
-        parser.error("Plaintext database mode is retired; use --profiles for real data, or --demo/--sample.")
-    if not sample:
-        args.profiles = True
     if args.profiles:
-        if args.demo or args.db is not None or args.port != 8765:
+        if args.demo or args.port != 8765:
             parser.error("--profiles uses its own chooser and a random local port; omit --demo, --db and --port")
         from lightning.runtime.launcher import run_browser
         run_browser(args.profile_root, open_browser=not args.no_browser)
         return
     if args.profile_root:
         parser.error("--profile-root requires --profiles")
+    if not args.demo:
+        parser.error("choose --profiles for encrypted profiles, or --demo or --sample for disposable sample data; "
+                     "the legacy plaintext database launcher is no longer supported")
     if args.demo:
         # The demo file is deleted and rebuilt on every start, so it can never be pointed at real data.
-        if args.db is not None:
-            parser.error(f"--{sample} always uses its own database (data/{sample}.db); leave out --db")
         args.db = str(DEFAULT_DATA_DIR / f"{sample}.db")
         if args.port == 8765:
             args.port = 8766 if sample == "demo" else 8767  # never collide with (or reuse) your real Lightning

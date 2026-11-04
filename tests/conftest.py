@@ -46,6 +46,14 @@ def c(tmp_path) -> Container:
 
 
 @pytest.fixture
+def strict_c(tmp_path) -> Container:
+    """A plaintext fixture with the owning-thread and closed-session checks of encrypted profiles."""
+    container = build(tmp_path / "strict.db", strict_thread=True)
+    yield container
+    container.db.close()
+
+
+@pytest.fixture
 def setup(c):
     """A typical household: bank, wallet, a CD, THNDR cash."""
     f = c.account_flows

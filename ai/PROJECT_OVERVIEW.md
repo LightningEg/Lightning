@@ -45,6 +45,7 @@ Dates are when the owner decided. Undated rows are founding rules.
 |---|---|
 | **Local pairing** (2026-10-23) | Automatically discover named nearby homes while pairing is open. The joining device selects the number displayed on the home from three distinct choices, then enters the profile password; the home confirms the named device. No QR or typed address. Saved identities reconnect automatically. Recovery keys stay unchanged. |
 | **Real data is welcome** (2026-10-28) | People use Lightning with their own statements; the site and app never tell them not to. Milestone 2 keeps hardening what protects that data. The account invitation on Home stays: the app needs no account, so it costs nothing to say no. |
+| **Legacy launch is samples only** (2026-11-04, OW-2AB) | Real data uses encrypted profiles (`--profiles` from source). The old browser entry point permits only explicit `--demo` or `--sample`; bare launch and `--db` stop before touching files. Existing legacy databases remain untouched; migration/import is separate IT-2C work. Plaintext tests can opt into the profile database's owning-thread and closed-session checks. |
 | **Branches** (2026-10-12) | Work on `who/feature`, merge finished work into `main`. [AGENTS.md](../AGENTS.md) section 6. |
 | **Arabic is for Egypt** | English and Egyptian Arabic for the same profile; the website links matching pages. Arabic reads right to left; money, dates, codes and identifiers keep their natural order. Names: [Glossary](GLOSSARY.md#العربية--المسرد-العربي). |
 | **Feedback screenshots stay private** | Up to five images per ticket, stored in the Apps Script owner's private Drive folder, linked in the feedback Sheet. The website repo owns it. |
@@ -240,7 +241,7 @@ Owner, 2026-10-28: owner-only tasks are closed as items and held here. **Bring t
 | [8C](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/8-website/8C-be-found-as-the-all-in-one-tracker.md) | Resubmit the sitemap; Reddit post; re-ask AI search after two weeks | |
 | [8I](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/8-website/8I-guides-owner-checks.md) | Search Console impressions of the merged guide; read the Arabic topic pages | |
 
-Owner *decisions* stay in the plan when they change what we build. On 2026-11-04 the owner delegated sensible decisions for report completion: income reversals reduce Money in (7S); source launch defaults to encrypted profiles with demo/sample as the plaintext exceptions (2AB).
+Owner *decisions* stay in the plan when they change what we build. On 2026-11-04 the owner delegated sensible decisions for report completion: income reversals reduce Money in (7S); source launch uses explicit `--profiles`, `--demo` or `--sample` modes; bare launch and every `--db` argument stop before opening data (2AB, the later approved #303).
 
 ## Cosmetic marketplace owner revision (2026-10-24)
 

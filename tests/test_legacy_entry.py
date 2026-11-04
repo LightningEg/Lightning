@@ -5,11 +5,11 @@ from lightning.main import main
 from lightning.database.connection import Database
 
 
-def test_default_entry_uses_encrypted_profile_launcher(monkeypatch):
+def test_explicit_profile_entry_uses_encrypted_profile_launcher(monkeypatch):
     calls = []
     monkeypatch.setattr("lightning.runtime.launcher.run_browser", lambda root, **kw: calls.append((root, kw)))
     monkeypatch.setattr("lightning.bootstrap.build", lambda *a, **kw: pytest.fail("plaintext database opened"))
-    main(["--no-browser"])
+    main(["--profiles", "--no-browser"])
     assert calls == [(None, {"open_browser": False})]
 
 

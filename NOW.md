@@ -34,7 +34,7 @@ The whole plan, by milestone and code, is `issues/INDEX.md`.
 1. **Report fixes:** 1G, 2AB, 3J, 4K, 7M and 7S are implemented; PC/phone audits continue. **Read:** `reports/README.md`.
 2. **Audit 9 links:** salary-day review and bill-linked reserves are being validated (7T5/7T6). **Read:** 7T.
 3. **9K:** profile lifecycle routes split in #300; bank-import orchestration and claimed device/restore routes remain. **Read:** 9K.
-4. **1H:** wheels and coordinated locks merged in #286; native packaged validation and a phone install remain. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
+4. **1H:** wheels and coordinated locks merged in #286; native packaged validation and a phone install remain. Owner chose to leave native CI blocked while other work continues; PR #302 stays open. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
 5. **2A:** restore safety code (Luna's claim); its reboot drill joins the held checks. **Read:** 2A.
 6. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `reports/2026-10-26-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
 7. **Website recapture** after 3W / 3AG / 7Q so the site shows the current screens. **Read:** `skills/site-recapture/SKILL.md`.

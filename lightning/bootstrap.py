@@ -179,12 +179,16 @@ class ReadOnlyCopyError(RuntimeError):
 
 def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
           key: bytes | None = None, backup_dir: Path | None = None, read_only: bool = False,
-          experimental_journal: bool = False, source_verified: bool = False) -> Container:
+          experimental_journal: bool = False, source_verified: bool = False,
+          strict_thread: bool = False) -> Container:
     """Open a ledger and wire its services.
 
     `backup_on_start` takes an automatic backup at most once a day: none when this ledger already has a
     (non-upgrade) backup dated today (2J). A pending upgrade always takes its own. `source_verified` says the
     caller has just run the integrity checks on this file, so the backup checks only its copy.
+
+    `strict_thread` lets plaintext fixtures enforce the same owning-thread and closed-session
+    checks as encrypted profiles; ordinary plaintext callers retain per-thread connections.
 
     `read_only` opens an actual SQLite read-only connection and skips every startup write: no backup,
     migration, seed or ownership repair. A copy that needs any of them is refused, never upgraded
@@ -194,7 +198,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
     existed = db_path.is_file() and db_path.stat().st_size > 0
     if read_only and not existed:
         raise ReadOnlyCopyError("The saved copy is missing or empty.")
-    db = Database(db_path, key=key, read_only=read_only)
+    db = Database(db_path, key=key, read_only=read_only, strict_thread=strict_thread)
     try:
         is_journal = bool(db.scalar("SELECT 1 FROM sqlite_master WHERE type='table' AND name GLOB 'journal_*' LIMIT 1"))
         if is_journal and not experimental_journal:
