@@ -1392,6 +1392,7 @@ ARABIC_UI = {
     'Download shared prices': 'نزّل الأسعار المشتركة',
     'Fill from price files': 'املأ من ملفات الأسعار',
     'Import a file': 'استورد ملف',
+    'From a newer Lightning or another device. A pack older than yours is skipped.': 'من نسخة Lightning أحدث أو جهاز تاني. أي حزمة أقدم من نسختك هتتخطى.',
     'From a newer Lightning or another computer. A pack older than yours is skipped.': 'من نسخة Lightning أحدث أو كمبيوتر تاني. أي حزمة أقدم من نسختك هتتخطى.',
     'Import and fill': 'استورد واملأ',
     'Prices needed to complete reevaluations': 'أسعار مطلوبة لإكمال إعادة التقييم',

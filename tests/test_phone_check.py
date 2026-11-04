@@ -141,3 +141,22 @@ def test_phone_focused_field_deepens_its_well():
         assert before != after and after != 'rgb(245, 239, 207)'
         assert field.evaluate('e => getComputedStyle(e).borderColor') == 'rgb(11, 138, 95)'
         browser.close()
+
+
+def test_phone_loan_and_reserve_actions_have_touch_targets():
+    chromium = Path("/opt/pw-browsers/chromium")
+    executable = str(chromium) if chromium.exists() else shutil.which("chromium")
+    if not executable:
+        pytest.skip("Chromium is not installed")
+    static = Path(__file__).resolve().parents[1] / "lightning/ui/static"
+    with sync_playwright() as p:
+        browser = p.chromium.launch(executable_path=executable)
+        page = browser.new_page(viewport={"width": 320, "height": 800})
+        page.set_content('<html class="phone"><body><main class="main"><article class="plan-loan">'
+                         '<a class="quiet-link">Pay early</a><a class="btn small">1 due</a></article>'
+                         '<details class="reserve-create"><summary>Add a reserve</summary></details></main></body></html>')
+        page.add_style_tag(content=(static / "style.css").read_text())
+        page.add_style_tag(content=(static / "phone.css").read_text())
+        for selector, minimum in ((".quiet-link", 44), (".btn.small", 48), (".reserve-create summary", 48)):
+            assert page.locator(selector).bounding_box()["height"] >= minimum
+        browser.close()
