@@ -2313,6 +2313,7 @@ initCurrencySearch();
       const topbar = document.querySelector("main .topbar");
       if (topbar) topbar.after(flash); else document.querySelector("main")?.prepend(flash);
     }
+    flash.hidden = false;
     // Phone notices carry Undo beside their message; retain that action.
     const message = flash.matches(".phone-flash") ? flash.querySelector(":scope > span") : flash;
     (message || flash).textContent = success;
