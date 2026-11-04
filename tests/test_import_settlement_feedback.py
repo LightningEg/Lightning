@@ -8,10 +8,10 @@ from lightning.core.errors import ValidationError
 from lightning.ui.web import create_app
 
 
-def _import(c, setup):
+def _import(c, setup, kind="BILL"):
     accounts, cats = setup
     account, category = accounts["cib"], cats["EXP.PERSONAL.FOOD"]
-    bill = c.planning.create(kind="BILL", name="Landlord", amount="400", frequency="ONCE",
+    bill = c.planning.create(kind=kind, name="Landlord", amount="400", frequency="ONCE",
                              start_date="2026-09-22", account_id=account.id, category_id=category.id)
     batch, _ = c.bank_imports.stage(account.id, "bills.csv", b"Date,Counterparty,Amount\n2026-09-22,Landlord,-400\n")
     row = c.bank_imports.preview(batch)[1][0]["_import_row_id"]
@@ -77,8 +77,9 @@ def test_settlement_failure_rolls_back_import_then_retry_posts_once(c, setup, mo
     assert c.reporting.account_balance(account.id) == Decimal("49600")
 
 
-def test_existing_statement_link_reports_bill_without_posting_cash_again(c, setup):
-    account, category, _, batch, payload = _import(c, setup)
+@pytest.mark.parametrize("kind", ["BILL", "SUBSCRIPTION"])
+def test_existing_statement_link_reports_bill_without_posting_cash_again(c, setup, kind):
+    account, category, _, batch, payload = _import(c, setup, kind)
     txn = c.transactions.record_outflow("2026-09-22", account.id, "400", category.id, counterparty="Landlord")
     row = c.bank_imports.preview(batch)[1][0]["_import_row_id"]
     payload[f"match_{row}"] = f"link:{txn.id}"

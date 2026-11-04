@@ -375,7 +375,7 @@ class PlanningService:
         """Bill names paid by these posted entries, including existing entries linked by an import."""
         if not transaction_ids:
             return []
-        bill_names = {item.id: item.name for item in self.items() if item.kind == PlanKind.BILL}
+        bill_names = {item.id: item.name for item in self.items((PlanKind.BILL, PlanKind.SUBSCRIPTION), active_only=False)}
         names = {bill_names[item_id] for (item_id, _), payment in self.repo.settled().items()
                  if item_id in bill_names and payment["status"] == "PAID"
                  and payment["transaction_id"] in transaction_ids}
