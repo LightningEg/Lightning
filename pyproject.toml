@@ -90,3 +90,44 @@ type = "forbidden"
 source_modules = ["lightning.workflows", "lightning.reporting", "lightning.budgeting", "lightning.investments", "lightning.deposits", "lightning.planning"]
 forbidden_modules = ["lightning.transactions.repository"]
 allow_indirect_imports = true
+
+# 1G: `sync` is one layer, but three different things live in it. The protocol (state, transport, identity, copies,
+# control, service, domain) speaks only to the database and security; the journal core moves signed commands and
+# knows no financial module; five journal files are the adapters that reach the ledger (tests/test_architecture.py
+# names them and fails when a sixth appears).
+[[tool.importlinter.contracts]]
+name = "The sync protocol never imports the journal or any financial module"
+type = "forbidden"
+source_modules = [
+    "lightning.sync.control", "lightning.sync.copies", "lightning.sync.domain", "lightning.sync.identity",
+    "lightning.sync.service", "lightning.sync.state", "lightning.sync.transport",
+]
+forbidden_modules = [
+    "lightning.sync.journal", "lightning.bank_imports", "lightning.sms_imports", "lightning.workflows",
+    "lightning.planning", "lightning.budgeting", "lightning.investments", "lightning.deposits",
+    "lightning.reporting", "lightning.transactions", "lightning.accounts", "lightning.assets",
+    "lightning.categories", "lightning.undo", "lightning.reserves", "lightning.rules",
+]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "The journal core imports no financial module; only its adapters do"
+type = "forbidden"
+source_modules = ["lightning.sync.journal"]
+forbidden_modules = [
+    "lightning.bank_imports", "lightning.sms_imports", "lightning.workflows", "lightning.planning",
+    "lightning.budgeting", "lightning.investments", "lightning.deposits", "lightning.reporting",
+    "lightning.transactions", "lightning.accounts", "lightning.assets", "lightning.categories",
+    "lightning.undo", "lightning.reserves", "lightning.rules",
+]
+ignore_imports = [
+    "lightning.sync.journal.automation -> lightning.workflows.market_prices",
+    "lightning.sync.journal.areas.automation -> lightning.workflows.market_prices",
+    "lightning.sync.journal.areas.automation -> lightning.workflows.live_prices",
+    "lightning.sync.journal.areas.workflows -> lightning.budgeting.domain",
+    "lightning.sync.journal.automation -> lightning.workflows.live_prices",
+    "lightning.sync.journal.capture -> lightning.bank_imports",
+    "lightning.sync.journal.capture -> lightning.sms_imports",
+    "lightning.sync.journal.history -> lightning.undo",
+]
+allow_indirect_imports = true

@@ -85,6 +85,43 @@ def test_bootstrap_wires_no_callback_into_a_service():
                 and isinstance(node.targets[0].value, ast.Name) and node.targets[0].value.id in
                 {"budgets", "forecaster", "health", "planning", "reporting"}]
     assert assigned == []
+    # Nor any service handed to another by assignment after construction (the forecaster's deposit receipts were one).
+    late = [ast.unparse(node.targets[0]) for node in ast.walk(tree) if isinstance(node, ast.Assign)
+            and isinstance(node.targets[0], ast.Attribute) and isinstance(node.targets[0].value, ast.Name)
+            and node.targets[0].value.id in {"budgets", "forecaster", "health", "planning", "reporting", "investments"}
+            and isinstance(node.value, ast.Name)]
+    assert late == []
+
+
+# 1G: the only journal files that may reach a financial module. A sixth one fails here and in lint-imports.
+JOURNAL_ADAPTERS = {"areas/automation.py", "areas/workflows.py", "automation.py", "capture.py", "history.py"}
+FINANCIAL = {"bank_imports", "budgeting", "sms_imports", "undo", "workflows", "planning", "accounts", "assets", "categories",
+             "transactions", "reporting", "investments", "deposits", "reserves", "fx", "counterparties", "money_from_others",
+             "rules", "reimbursements", "reevaluations", "physical_items", "integrity", "reconciliation", "saved_views",
+             "zakat", "ownership_migration", "bootstrap"}
+
+
+def _imports_of(path):
+    for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+        names = [node.module] if isinstance(node, ast.ImportFrom) and node.level == 0 and node.module else (
+            [alias.name for alias in node.names] if isinstance(node, ast.Import) else [])
+        for name in names:
+            parts = name.split(".")
+            if parts[0] == "lightning" and len(parts) > 1:
+                yield parts[1]
+
+
+def test_only_the_named_journal_adapters_reach_a_financial_module():
+    journal = ROOT / "lightning" / "sync" / "journal"
+    reaching = {path.relative_to(journal).as_posix() for path in journal.rglob("*.py")
+                if set(_imports_of(path)) & FINANCIAL}
+    assert reaching == JOURNAL_ADAPTERS
+
+
+def test_the_sync_protocol_modules_speak_only_to_the_database_and_security():
+    sync = ROOT / "lightning" / "sync"
+    for name in ("control", "copies", "domain", "identity", "service", "state", "transport"):
+        assert set(_imports_of(sync / f"{name}.py")) <= {"database", "security", "sync"}, name
 
 
 def test_other_asset_value_is_saved_through_the_account_service(c):

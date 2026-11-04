@@ -12,7 +12,6 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **IT-1E** | [Audit public repositories for personal data and security exposure](../../issues/1-easy-to-contribute/1E-public-repository-security-audit.md) | M | ready |
-| **IT-1G** | [Cover all backend modules with explicit dependency and wiring contracts](../../issues/1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | M | ready |
 | **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](../../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | L | building |
 | **IT-1M** | [Archive closed reports and keep their evidence out of the checkout](../../issues/1-easy-to-contribute/1M-archive-closed-reports.md) | M | ready |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](../../issues/1-easy-to-contribute/1N-split-large-items-and-post-them.md) | M | ready |
@@ -23,10 +22,9 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 ## Reports with open follow-ups here
 
 - [Audit 5: is the backend engine efficient and streamlined?](../../reports/2026-10-21-backend-streamlining/report.md): 9K
-- [Audit 4: backend correctness and failure boundaries](../../reports/2026-10-23-backend-correctness/report.md): 1G
 - [Audit 6: open pull request cleanup](../../reports/2026-10-23-pull-request-cleanup/report.md): 1H
 - [v1.5.0 PR review, theme switching and package preparation](../../reports/2026-10-26-v150-release/report.md): 1H
 - [Audit 9: loose ends after themes and sync, linking sections, and how the plan is filed](../../reports/2026-10-28-loose-ends-and-linking/report.md): 4K
-- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 1G, 1H, 4K, 9K
+- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 1H, 4K, 9K
 <!-- work:end -->
 
