@@ -219,3 +219,10 @@ def test_the_picker_offers_gulf_and_european_shares_where_the_broker_trades_them
     assert row["currency"] == "SAR" and row["exchange"]
     from lightning.assets.catalog import instruments
     assert not any(r["mic"] == "XLON" and r["ticker"].startswith("0") and len(r["ticker"]) == 4 for r in instruments())
+
+
+def test_a_ticker_on_egx_and_milan_makes_two_investments_with_their_own_price_keys(c, setup):
+    egx = c.assets.create_investment("Azimut Egypt fund", "STOCK", "AZM", mic="XCAI")
+    milan = c.assets.create_investment("Azimut Holding Spa", "STOCK", "AZM", mic="XMIL", currency="EUR")
+    assert (egx.code, egx.market_key) == ("STK:AZM", "EG:AZM")
+    assert (milan.code, milan.market_key, milan.currency) == ("STK:AZM-XMIL", "IT:AZM", "EUR")

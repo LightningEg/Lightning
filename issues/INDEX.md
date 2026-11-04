@@ -131,16 +131,8 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **NF-5G** | [Brokerages that span exchanges and currencies - structure, workflows and analysis to build](5-investments/5G-brokerages-across-exchanges.md) | new feature | Own | L | building |
-| NF-5G1 | ↳ Phase 0: honest display | | | M | |
-| NF-5G2 | ↳ Phase 1: listings | | | L | |
-| NF-5G3 | ↳ Phase 2: pockets | | | L | |
-| NF-5G4 | ↳ Phase 3: events | | | L | |
-| NF-5G5 | ↳ Phase 4: broker import | | | L | |
-| NF-5G6 | ↳ Phase 5: analysis | | | L | |
-| NF-5G7 | ↳ Phase 6: lots and corporate actions | | | L | |
 
-Done: 5A, 5B, 5C, 5D, 5E, 5F, 5H, 5I, 5J, 5K, 5L, 5M. Next free code: 5N.
+Done: 5A, 5B, 5C, 5D, 5E, 5F, 5G, 5H, 5I, 5J, 5K, 5L, 5M. Next free code: 5N.
 
 ## 6 Market data
 
@@ -157,8 +149,9 @@ Prices arrive by themselves, from sources Lightning may redistribute.
 | NF-6B2 | ↳ A source that allows redistribution | | | owner | |
 | NF-6B3 | ↳ Switch publishing on per market | | | S | |
 | **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](6-market-data/6D-gold-price-source.md) | improvement, technical | Own | S | blocked on a test from a home connection |
+| **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history source](6-market-data/6F-london-board-and-gulf-history.md) | improvement, technical | Own | M | new |
 
-Done: 6C, 6E. Next free code: 6F.
+Done: 6C, 6E. Next free code: 6G.
 
 ## 7 Planning, import and search
 
