@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 47 open items, in the order they are worked on.
+10 milestones, 46 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -172,13 +172,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7C1 | ↳ Read each app's export format | | | M | |
 | NF-7C2 | ↳ A mapping preset per app in the CSV review | | | L | |
 | NF-7C3 | ↳ A move-in guide | | | M | |
-| **NF-7D** | [Search and matching: what is not built](7-planning-import-and-search/7D-search-and-matching.md) | new feature | Capture | L | building |
-| NF-7D1 | ↳ Agree the matching contract ([#218](https://github.com/LightningEg/Lightning/issues/218)) | | | M | |
-| NF-7D2 | ↳ Replace difflib with RapidFuzz ([#219](https://github.com/LightningEg/Lightning/issues/219)) | | | L | |
-| NF-7D3 | ↳ Scoped pickers use the matcher ([#220](https://github.com/LightningEg/Lightning/issues/220)) | | | M | |
-| NF-7D4 | ↳ Page search grouped by type ([#221](https://github.com/LightningEg/Lightning/issues/221)) | | | M | |
-| NF-7D5 | ↳ History search through matched IDs ([#222](https://github.com/LightningEg/Lightning/issues/222)) | | | M | |
-| NF-7D6 | ↳ Edge cases and speed ([#223](https://github.com/LightningEg/Lightning/issues/223)) | | | M | |
 | **NF-7E** | [Match bank-imported transfer pairs across currencies](7-planning-import-and-search/7E-imported-pairs-across-currencies.md) | new feature | Capture | M | new |
 | **NF-7F** | [Small planning gaps](7-planning-import-and-search/7F-small-planning-gaps.md) | new feature | Plan | M | new |
 | NF-7F2 | ↳ Rename a rule | | | S | |
@@ -192,7 +185,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7X5 | ↳ Show reviewable alerts in Needs you | | | M | |
 | **NF-7Y** | [Explain which stale or pending inputs affect a financial figure](7-planning-import-and-search/7Y-financial-data-freshness.md) | new feature | Understand | M | building |
 
-Done: 7A, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W. Next free code: 7Z.
+Done: 7A, 7D, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W. Next free code: 7Z.
 
 ## 8 Website
 

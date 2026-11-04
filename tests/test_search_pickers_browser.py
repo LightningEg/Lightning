@@ -1,5 +1,7 @@
 """The actual PC/phone fields use the server matcher and keep their stored selections explicit."""
 from pathlib import Path
+import os
+import shutil
 
 import pytest
 
@@ -9,9 +11,10 @@ from lightning.ui.web import create_app
 
 @pytest.mark.parametrize('phone', [False, True])
 def test_scoped_account_category_owner_counterparty_and_instrument_fields(c, setup, phone):
-    from playwright.sync_api import sync_playwright
-    if not Path('/usr/bin/chromium').exists():
-        pytest.skip('Chromium is not installed')
+    if os.environ.get('LIGHTNING_REQUIRE_BROWSER') == '1':
+        from playwright.sync_api import sync_playwright
+    else:
+        sync_playwright = pytest.importorskip('playwright.sync_api').sync_playwright
     accounts, _ = setup
     person = c.counterparties.create('أحمد', kind='PERSON')
     c.counterparties.create('Talabat')
@@ -26,7 +29,12 @@ def test_scoped_account_category_owner_counterparty_and_instrument_fields(c, set
     host = Host(lambda _: app).start()
     try:
         with sync_playwright() as pw:
-            browser = pw.chromium.launch(executable_path='/usr/bin/chromium', args=['--no-sandbox'])
+            executable = shutil.which('chromium') or pw.chromium.executable_path
+            if not Path(executable).is_file():
+                if os.environ.get('LIGHTNING_REQUIRE_BROWSER') == '1':
+                    pytest.fail('The required Chromium browser is missing')
+                pytest.skip('Chromium is not installed')
+            browser = pw.chromium.launch(executable_path=executable, args=['--no-sandbox'])
             page = browser.new_page(viewport={'width':390 if phone else 1366,'height':900})
             errors = []
             page.on('pageerror', lambda error: errors.append(str(error)))
