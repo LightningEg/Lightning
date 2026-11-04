@@ -68,5 +68,6 @@ def test_review_shows_the_fee_well_on_transfer_rows_only_and_posts_the_split(c):
                  f"notes_{rid}": ""}
     form[f"fee_{rows[0]['_import_row_id']}"] = "5"
     done = client.post(f"/accounts/{nbe.id}/import/{batch_id}/confirm", data=form)
-    assert done.status_code == 200 and "Import complete" in done.text
+    # The transfer to CIB is resolved by its own-account name and posts; "Shop" has no category yet, so it waits.
+    assert done.status_code == 200 and "Import updated: 1 posted" in done.text and "Some rows still need review" in done.text
     assert _fee_postings(c) == 1

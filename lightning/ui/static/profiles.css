@@ -165,3 +165,10 @@ html[dir="rtl"] * { letter-spacing: normal !important; }
 
 /* Phone fields stay at 16px, including the language selector. */
 html.phone :is(input, select, textarea):not([type=hidden], [type=checkbox], [type=radio]) { font-size: 16px; }
+
+/* The phone gate uses the mark, a short title and one-tap language switch. */
+html.phone .masthead { gap: 8px; }
+html.phone .brand > span { display: none; }
+html.phone .masthead-label { order: 1; }
+html.phone .gate-language { order: 2; }
+html.phone .gate-language button { min-height: 48px; padding: 0 12px; border: 0; border-radius: 12px; background: var(--paper); color: var(--ink); font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }

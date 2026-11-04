@@ -126,7 +126,7 @@ def phone():
                     page.select_option("select[name=question]", index=1)
                 elif page.locator("input[name=question]").count():
                     page.fill("input[name=question]", "Dummy question?")
-                page.click("button[type=submit]")
+                page.click("form[action='/profiles/new'] button[type=submit]")
                 key = re.search(r"\d{4}-\d{4}-\d{4}", page.content()).group(0)
                 if page.locator("form[action='/profiles/confirm'] input[name=recovery][type=text]").count():
                     page.fill("input[name=recovery]", key)

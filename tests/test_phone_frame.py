@@ -165,6 +165,7 @@ def test_a_profile_can_be_created_where_hard_links_are_refused(tmp_path, monkeyp
 def test_settings_on_the_phone_leads_to_pairing_sms_and_the_profile(phone):
     html = phone.get("/settings").text
     assert 'href="/profiles/devices"' in html and 'href="/sms"' in html and 'href="/profiles"' in html
+    assert '<table' not in html and 'settings-row' in html  # Settings itself is rows, not a stacked table
     assert "Pair a PC" in phone.get("/profiles/devices").text
 
 
@@ -349,3 +350,50 @@ def test_budget_category_returns_to_budget_and_leads_with_register(phone):
     assert 'class="phone-reg-filter"' in page and 'Category:' in page
     assert 'phone-reg-search' in page and 'class="phone-period-row phone-reg-period"' in page
     assert ' › ' not in page.split('class="phone-reg-filter"', 1)[1].split('</div>', 1)[0]
+
+
+def test_loan_ratios_are_compared_rows_instead_of_an_unpaired_tile(phone):
+    html = phone.get('/plan/loans').text
+    ratios = html.split('data-loan-ratios', 1)[1].split('</div>', 1)[0]
+    assert ratios.count('class="phone-row"') == 3
+    assert 'Debt to net worth' in ratios and 'Debt to cash' in ratios and 'Loan payments to income' in ratios
+    assert 'owed against' in ratios and 'a month of' in ratios
+    assert 'class="stat-tiles"' not in html
+
+
+def test_phone_import_uses_back_instead_of_a_second_button(phone):
+    html = phone.get('/accounts/1/import').text
+    assert 'class="phone-back" href="/accounts/1"' in html
+    upload = html.split('enctype="multipart/form-data"', 1)[1].split('</form>', 1)[0]
+    assert 'Review statement' in upload and '>Cancel</a>' not in upload
+
+
+def test_phone_recurring_suggestion_keeps_dismissal_in_more_actions(phone):
+    html = phone.get('/plan/recurring').text
+    assert 'class="phone-suggest-actions"' in html
+    actions = html.split('class="phone-suggest-actions"', 1)[1].split('</details>', 1)[0]
+    assert 'Track</a>' in actions and 'class="action-menu phone-more-menu"' in actions
+    assert '/not-recurring' in actions and 'Not recurring' in actions
+
+
+def test_phone_profile_gate_switches_language_with_one_action(phone):
+    html = phone.get('/profiles').text
+    form = html.split('class="gate-language"', 1)[1].split('</form>', 1)[0]
+    assert 'name="locale" value="ar"' in form and '<select' not in form
+    csrf = re.search(r'name="csrf" value="([^"]+)"', form).group(1)
+    arabic = phone.post('/profiles/locale', data={'csrf': csrf, 'locale': 'ar', 'return_to': '/profiles'}).text
+    assert 'lang="ar-EG"' in arabic
+    switched = arabic.split('class="gate-language"', 1)[1].split('</form>', 1)[0]
+    assert 'name="locale" value="en"' in switched and '<select' not in switched
+    csrf = re.search(r'name="csrf" value="([^"]+)"', switched).group(1)
+    phone.post('/profiles/locale', data={'csrf': csrf, 'locale': 'en', 'return_to': '/profiles'})
+
+
+def test_desktop_profile_gate_retains_language_select(tmp_path):
+    cfg = Credentials("http://127.0.0.1:9862")
+    app = profile_app(cfg, tmp_path / "docs", devices=Devices(tmp_path / "app", port=0), phone=False)
+    with TestClient(app, base_url=cfg.origin, headers={"Origin": cfg.origin}) as browser:
+        browser.get("/__launch", params={"code": cfg.launch_code})
+        html = browser.get("/profiles").text
+        form = html.split('class="gate-language"', 1)[1].split('</form>', 1)[0]
+        assert '<select' in form and 'name="locale"' in form

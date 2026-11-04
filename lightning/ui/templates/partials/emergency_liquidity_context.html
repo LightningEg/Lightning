@@ -1,8 +1,16 @@
 {% set more = liquidity_context.within_days|length + liquidity_context.locked|length + liquidity_context.unknown|length %}
-<details class="muted small emergency-liquidity-context">
+{% set sources = liquidity_context.within_days + liquidity_context.locked + liquidity_context.unknown %}
+{% set all_sources = phone_mode() and request.query_params.get('liquidity_view') == 'all' %}
+<details id="emergency-liquidity" class="muted small emergency-liquidity-context"{{ ' open' if all_sources }}>
   <summary><b>{{ 'Could also use'|tr(locale) }}</b> · {{ 'Free cash'|tr(locale) }} {{ liquidity_context.free_cash|amount_role('total') if liquidity_context.free_cash is not none else 'Unavailable'|tr(locale) }}{% if more %} · {{ '{n} more sources'|tr(locale, n=more) }}{% endif %}</summary>
   <ul>
     <li>{{ 'Free cash'|tr(locale) }} <b>{{ liquidity_context.free_cash|amount_role('total') if liquidity_context.free_cash is not none else 'Unavailable'|tr(locale) }} {{ base if liquidity_context.free_cash is not none }}</b></li>
+    {% if phone_mode() %}
+    {% for item in (sources if all_sources else sources[:3]) %}
+    <li>{{ item.label }}{% if item.value is not none %} <b>{{ item.value|amount_role('total') }} {{ base }}</b>{% else %} · {{ 'Value unavailable'|tr(locale) }}{% endif %} · {% if item in liquidity_context.within_days %}{{ 'Accessible in days'|tr(locale) }}{% elif item in liquidity_context.locked %}{{ 'Locked until {date}'|tr(locale, date=item.until) }}{% else %}{{ 'Access timing unknown'|tr(locale) }}{% endif %}{% if item.unvalued and item.value is not none %} · {{ item.unvalued }} {{ 'unvalued'|tr(locale) }}{% endif %}</li>
+    {% endfor %}
+    {% if sources|length > 3 %}<li><a data-no-swap href="{{ request.url.remove_query_params('liquidity_view') if all_sources else request.url.include_query_params(liquidity_view='all') }}#emergency-liquidity">{% if all_sources %}{{ 'Show fewer'|tr(locale) }}{% else %}{{ 'Other'|tr(locale) }} · {{ '{n} more sources'|tr(locale, n=sources|length - 3) }}{% endif %}</a></li>{% endif %}
+    {% else %}
     {% for item in liquidity_context.within_days %}
     <li>{{ item.label }}{% if item.value is not none %} <b>{{ item.value|amount_role('total') }} {{ base }}</b>{% else %} · {{ 'Value unavailable'|tr(locale) }}{% endif %} · {{ 'Accessible in days'|tr(locale) }}{% if item.unvalued and item.value is not none %} · {{ item.unvalued }} {{ 'unvalued'|tr(locale) }}{% endif %}</li>
     {% endfor %}
@@ -12,5 +20,6 @@
     {% for item in liquidity_context.unknown %}
     <li>{{ item.label }}{% if item.value is not none %} <b>{{ item.value|amount_role('total') }} {{ base }}</b>{% else %} · {{ 'Value unavailable'|tr(locale) }}{% endif %} · {{ 'Access timing unknown'|tr(locale) }}{% if item.unvalued and item.value is not none %} · {{ item.unvalued }} {{ 'unvalued'|tr(locale) }}{% endif %}</li>
     {% endfor %}
+    {% endif %}
   </ul>
 </details>

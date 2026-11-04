@@ -245,3 +245,5 @@ OW-2AB uses the explicit launch modes approved in #303: `--profiles` opens prote
 ## OW-2AB follow-up · 2026-11-04
 
 Owner approved restricting the legacy browser runner to explicit demo/sample data. Bare launch and every `--db` argument now stop before database or network work; `--profiles` retains encrypted-profile startup, and existing plaintext files are untouched. Plaintext tests may opt into encrypted-profile thread/close checks through `strict_thread=True` and the `strict_c` fixture. Evidence: [tests/test_legacy_launcher.py](../../tests/test_legacy_launcher.py) and [encrypted database regression tests](../../tests/test_encrypted_database.py). This closes OW-2AB; explicit legacy import remains separate IT-2C work.
+
+**Import follow-up:** parsing, review proposals and row posting are separated with existing confirmation and rollback contracts.

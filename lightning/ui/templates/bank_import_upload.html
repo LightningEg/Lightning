@@ -26,7 +26,7 @@
   <form method="post" enctype="multipart/form-data" action="/accounts/{{ account.id }}/import">
     <div class="field import-file-field"><label for="bank-csv">{{ 'CSV files'|tr(locale) }}</label><input id="bank-csv" type="file" name="file" accept=".csv,text/csv" multiple required>
     <p class="muted small">{{ 'CSV files up to 5 MB are supported.'|tr(locale) }}</p></div>
-    <div class="actions"><button class="btn primary">{{ 'Review statement'|tr(locale) }}</button><a class="btn" href="/accounts/{{ account.id }}">{{ 'Cancel'|tr(locale) }}</a></div>
+    <div class="actions"><button class="btn primary">{{ 'Review statement'|tr(locale) }}</button>{% if not phone_mode() %}<a class="btn" href="/accounts/{{ account.id }}">{{ 'Cancel'|tr(locale) }}</a>{% endif %}</div>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 </section>
 {% endblock %}
