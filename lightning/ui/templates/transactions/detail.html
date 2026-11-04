@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import amount with context %}
 {% from "partials/linked.html" import touched_panel, suggested_links with context %}
+{% macro category_context(label) %}{% if phone_mode() %}{{ label }}{% else %}{% set parts = label.split(' › ') %}{% if parts|length > 1 %}<b>{{ parts[0]|tr(locale) }}</b>{% for part in parts[1:] %}<div>{{ part|tr(locale) }}</div>{% endfor %}{% else %}{{ label|tr(locale) }}{% endif %}{% endif %}{% endmacro %}
 {% block title %}{{ txn.ref }}{% endblock %}
 {% block heading %}<h1>{{ ('Refund' if txn.type.value == 'IN' and lines and lines[0].effect == 'OUTFLOW' else summary.type_label)|tr(locale) }}</h1>
 <div class="muted"><bdi dir="ltr">{{ txn.ref }}</bdi> · {{ txn.date }}{% if txn.source == 'SYSTEM' %} · <span class="pill">{{ 'System-generated'|tr(locale) }}</span>{% endif %}{% if txn.is_void %} · <span class="pill void">{{ 'deleted'|tr(locale) }}</span>{% endif %}</div>{% endblock %}
@@ -20,7 +21,7 @@
       {% endif %}
       {% else %}
       <tr><td class="muted">{{ 'Account'|tr(locale) }}</td><td>{{ summary.account_label }}</td></tr>
-      {% if summary.category_label %}<tr><td class="muted">{{ 'Category'|tr(locale) }}</td><td>{{ summary.category_label }}</td></tr>{% endif %}
+      {% if summary.category_label %}<tr><td class="muted">{{ 'Category'|tr(locale) }}</td><td class="category-context">{{ category_context(summary.category_label) }}</td></tr>{% endif %}
       {% endif %}
       {% for effect in cash_effects %}<tr><td class="muted">Effect · {{ effect.owner }}</td><td>Cash in {{ effect.account }} {{ 'increases' if effect.quantity > 0 else 'decreases' }} by {{ effect.quantity|abs|money }} {{ effect.currency }}</td></tr>{% endfor %}
       {% if txn.counterparty %}<tr><td class="muted">{{ 'Counterparty'|tr(locale) }}</td><td>{% if touched.counterparty %}<a href="/counterparties/{{ touched.counterparty.id }}">{{ txn.counterparty }}</a>{% else %}{{ txn.counterparty }}{% endif %}</td></tr>{% endif %}
@@ -96,7 +97,7 @@
       <thead><tr><th>{{ "Line"|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th>{{ "Asset"|tr(locale) }}</th><th>{{ "Effect"|tr(locale) }}</th><th>{{ 'Category'|tr(locale) }}</th><th class="num">{{ "Quantity"|tr(locale) }}</th><th class="num">Value ({{ base }})</th></tr></thead>
       {% for l in lines %}
       <tr><td class="code">{{ l.ref }}</td><td class="small">{{ l.account }}</td><td class="code">{{ l.asset }}</td><td><span class="pill">{{ {'INFLOW': 'Money in', 'OUTFLOW': 'Money out', 'INTERNAL': 'Internal', 'OPENING': 'Opening', 'REVALUATION': 'Revaluation'}.get(l.effect, l.effect)|tr(locale) }}</span></td>
-          <td class="small">{{ l.category }}</td><td class="num">{{ l.quantity|money(True) }}</td><td class="num">{{ l.amount_base|money(True) }}</td></tr>
+          <td class="small category-context">{{ category_context(l.category) }}</td><td class="num">{{ l.quantity|money(True) }}</td><td class="num">{{ l.amount_base|money(True) }}</td></tr>
       {% endfor %}
     </table>
   </details>

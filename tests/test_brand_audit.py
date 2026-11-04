@@ -143,6 +143,8 @@ def audit():
                         result["category_direction_colors"] = page.locator(".cat-item select[name=direction]").first.evaluate(
                             "el => ['dir-out', 'dir-both', 'dir-in'].map(c => { el.className=c; return getComputedStyle(el).color; })")
                 page.goto(host.origin + "/activity")
+                result["activity_breadcrumbs"] = page.locator('.compact-row small').evaluate_all(
+                    'els => els.filter(el => el.textContent.includes(" › ")).map(el => el.textContent.trim())')
                 expense = page.locator(".compact-row b.neg").first
                 result["activity_outflow"] = (expense.evaluate("el => [el.textContent.trim(), getComputedStyle(el).color]")
                                               if expense.count() else None)
@@ -150,8 +152,11 @@ def audit():
                 if detail.count():
                     page.goto(host.origin + detail.get_attribute("href"))
                     result["transaction_heading_size"] = page.locator(".topbar h1").evaluate("el => getComputedStyle(el).fontSize")
+                    result["transaction_category_breadcrumbs"] = page.locator('.category-context').evaluate_all(
+                        'els => els.filter(el => el.textContent.includes(" › ")).map(el => el.textContent.trim())')
                 else:
                     result["transaction_heading_size"] = None
+                    result["transaction_category_breadcrumbs"] = None
                 page.goto(host.origin + "/")
                 page.keyboard.press("Control+k")
                 page.locator(".command-input").fill("budget")
@@ -250,3 +255,9 @@ def test_pc_spending_multiples_are_not_nested_boxes(audit):
     assert audit["spending_multiple_surfaces"]
     assert all(border == "0px" and background == "rgba(0, 0, 0, 0)"
                for border, background in audit["spending_multiple_surfaces"])
+
+
+def test_activity_and_transaction_categories_are_not_breadcrumbs(audit):
+    assert audit["transaction_category_breadcrumbs"] is not None
+    assert not audit["activity_breadcrumbs"]
+    assert not audit["transaction_category_breadcrumbs"]

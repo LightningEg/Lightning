@@ -406,3 +406,7 @@ IV-3S item 11: PC Spending small multiples and the first-run account list no lon
 ## 2026-11-04 · Arabic sample previews
 
 A PC first-run recheck found three built-in sample descriptions and one label left in English in Arabic. Their preview text is now translated; sample names remain unchanged. A targeted rendering test checks all three cards.
+
+## 2026-11-04 · PC category hierarchy
+
+IV-3S item 10: Review activity uses category leaf names, as the register does. Transaction detail keeps the hierarchy as a header and separate lines rather than a breadcrumb.
