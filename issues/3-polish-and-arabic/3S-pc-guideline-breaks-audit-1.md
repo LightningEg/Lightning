@@ -18,7 +18,7 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§3 PC) o
 already list. The brand audit passes; it cannot see `<select>` text colour, the first-run page, `<fieldset>` boxes or overlapping chart labels.
 
 **Charts that mislead (A12)**
-3. Health › Over time: Savings rate and Net worth trends have no axis and do not start at zero, so net worth looks steep beside the Overview's flat one.
+3. **2026-11-04:** PC Financial health uses zero-based axes for its Savings rate and Net worth trends, keeps gaps for missing months, and requires three known points. The current lead shows Savings rate; Net worth remains in the no-lead fallback.
 4. Currencies "USD · Value against cost" plots USD cash only: it falls from about 100,000 to 12,126 when the cash bought the ETF, while the card above says
    Foreign money 114,211; the axis runs to 200,000. **2026-11-04:** The PC chart now labels the series as cash only and explicitly excludes investments; a combined history and the axis still need review.
 5. **2026-11-04:** Holding average cost uses a Neutral dashed reference; plan references remain Meadow. The Chromium brand audit checks its computed stroke.

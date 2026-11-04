@@ -358,3 +358,7 @@ IV-3S item 17: at 1366 px, an expanded sample counterparty did not have the repo
 ## 2026-11-04 · Planner allocation stack
 
 IV-3S item 9: the PC Planner stack groups suggestions beyond the four largest into Neutral Other, with a labelled key. All detailed allocation rows and inputs remain available; tests check exact totals for five and more classes, and Chromium checks the Neutral colour.
+
+## 2026-11-04 · Financial health trends
+
+IV-3S item 3: PC Savings rate and Net worth trends use zero-based axes, leave missing months as gaps, and need three known points. The current lead shows Savings rate; Net worth is on the no-lead fallback. Chromium checked the Savings rate axis on Mohab’s sample.

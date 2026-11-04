@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import page_header with context %}
 {% from 'partials/charts.html' import sparkline, stat_tiles, lead_card %}{% from 'partials/macros.html' import needs_rows %}
+{% macro health_chart(chart, caption, percent=false) %}
+<figure class="chart chart-trend" aria-label="{{ caption }}">
+  {% if chart.too_short %}<p class="chart-empty">{{ "Not enough history yet — check back next month."|tr(locale) }}</p>{% else %}
+  <div class="chart-plot" style="height:180px">
+    {% for tick in chart.ticks %}<div class="chart-grid{{ ' chart-grid-zero' if tick.value == 0 }}" style="top:{{ '%.2f'|format(tick.y) }}%"><span>{% if percent %}{{ '%.1f'|format(tick.value) }}%{% else %}{{ tick.value|money }}{% endif %}</span></div>{% endfor %}
+    <svg class="chart-marks" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">{% for run in chart.runs %}{% if not percent %}<path class="chart-area tone-{{ chart.series[0].tone }}" d="{{ run.area }}"/>{% endif %}<polyline class="chart-line tone-{{ chart.series[0].tone }}" points="{{ run.line }}" vector-effect="non-scaling-stroke"/>{% endfor %}</svg>
+    {% for d in chart.series[0].dots %}{% set value = ('%.1f'|format(d.value) ~ '%') if percent else (d.value|money) %}<span class="chart-dot tone-{{ chart.series[0].tone }}" style="left:{{ '%.2f'|format(d.x) }}%;top:{{ '%.2f'|format(d.y) }}%" tabindex="0" data-tip="{{ d.label }} · {{ value }}" aria-label="{{ d.label }} · {{ value }}"></span>{% endfor %}
+    {% for e in trend_end_labels(chart, 180) %}<span class="chart-end is-{{ e.side }}" style="left:{{ '%.2f'|format(e.x) }}%;top:{{ '%.2f'|format(e.y) }}%">{% if percent %}{{ '%.1f'|format(e.value) }}%{% else %}{{ e.value|money }}{% endif %}</span>{% endfor %}
+  </div>
+  <div class="chart-x">{% for lab in chart.labels %}<span style="left:{{ '%.2f'|format(lab.x) }}%">{{ lab.text[5:] }}{% if loop.first or lab.text[5:] == '01' %}<small class="chart-year">{{ lab.text[:4] }}</small>{% endif %}</span>{% endfor %}</div>
+  {% endif %}<figcaption class="sr-only">{{ caption }}</figcaption>
+</figure>
+{% endmacro %}
 {% block title %}{{ 'Financial health'|tr(locale) }}{% endblock %}
 {# Answers "Am I financially healthy?": four headline figures, how saving and net worth moved, then every figure
    against the limit you set (grouped as cushion, saving, then debt). Limits sit behind the gear. #}
@@ -10,7 +23,7 @@
 {% if error %}<p class="flash error" role="alert">{{ error|tr(locale) }}</p>{% endif %}
 {% if lead %}{% set sm = savings_summary %}{% set side %}<div class="lead-side-head" id="health-over-time-heading"><div><h3>{{ fig.savings_rate.label }} {{ "over time"|tr(locale) }}</h3><p>{{ trends[0].month }} to {{ savings_month }} · {{ 'completed months'|tr(locale) }}</p></div><a class="quiet-link" href="/">{{ 'Overview'|tr(locale) }}</a></div>
   {% if sm %}<p class="health-trend-figure"><b>{{ '%.1f'|format(sm.last) }}%</b> <span class="muted">{{ 'in {month}'|tr(locale, month=sm.last_month) }} · {{ 'lowest {value}% in {month}'|tr(locale, value='%.1f'|format(sm.low), month=sm.low_month) }}</span></p>{% endif %}
-  {% set values = trends|map(attribute='savings_rate')|list %}{% if savings_spark.points and values|reject('none')|list|length >= 2 %}<div class="health-spark">{% if sm and not phone_mode() %}<span class="health-spark-y is-high" aria-hidden="true">{{ '%.0f'|format(sm.high) }}%</span><span class="health-spark-y is-low" aria-hidden="true">{{ '%.0f'|format(sm.low) }}%</span>{% endif %}{{ sparkline(savings_spark, 'in', fig.savings_rate.label ~ ' ' ~ 'over six completed months'|tr(locale)) }}</div><div class="health-trend-axis muted" aria-hidden="true"><span>{{ trends[0].month }}</span><span>{{ trends[-1].month }}</span></div>{% else %}<p class="muted small">{{ 'Not enough completed months to draw a line yet.'|tr(locale) }}</p>{% endif %}
+  {% if phone_mode() %}{% set values = trends|map(attribute='savings_rate')|list %}{% if savings_spark.points and values|reject('none')|list|length >= 2 %}<div class="health-spark">{{ sparkline(savings_spark, 'in', fig.savings_rate.label ~ ' ' ~ 'over six completed months'|tr(locale)) }}</div><div class="health-trend-axis muted" aria-hidden="true"><span>{{ trends[0].month }}</span><span>{{ trends[-1].month }}</span></div>{% else %}<p class="muted small">{{ 'Not enough completed months to draw a line yet.'|tr(locale) }}</p>{% endif %}{% else %}{{ health_chart(savings_chart, fig.savings_rate.label ~ ' ' ~ 'over six completed months'|tr(locale), true) }}{% endif %}
   <details class="health-numbers"><summary>{{ 'Show the numbers'|tr(locale) }}</summary>
     <div class="table-wrap"><table><thead><tr><th>{{ 'Completed month'|tr(locale) }}</th><th class="num">{{ fig.savings_rate.label }}</th></tr></thead><tbody>
     {% for month in trends %}<tr><td data-label="{{ 'Completed month'|tr(locale) }}">{{ month.month }}</td><td class="num" data-label="{{ fig.savings_rate.label }}">{% if month.gap %}{{ month.gap }}{% elif month.savings_rate is none %}Unavailable{% else %}{{ '%.1f'|format(month.savings_rate) }}%{% endif %}</td></tr>{% endfor %}
@@ -35,7 +48,7 @@
     <article class="card health-trend">
       <div class="health-trend-head"><h3>{{ title }}</h3><a href="/">{{ 'Overview'|tr(locale) }}</a></div>
       {% if sm %}<p class="health-trend-figure"><b>{% if key == 'savings_rate' %}{{ '%.1f'|format(sm.last) }}%{% else %}{{ sm.last|money }} <small>{{ base }}</small>{% endif %}</b> <span class="muted">{{ 'in {month}'|tr(locale, month=sm.last_month) }}{% if key == 'savings_rate' %} · {{ 'lowest {value}% in {month}'|tr(locale, value='%.1f'|format(sm.low), month=sm.low_month) }}{% endif %}</span></p>{% endif %}
-      {% if spark.points and values|reject('none')|list|length >= 2 %}{{ sparkline(spark, tone, title ~ ' ' ~ 'over six completed months'|tr(locale)) }}<div class="health-trend-axis muted" aria-hidden="true"><span>{{ trends[0].month }}</span><span>{{ trends[-1].month }}</span></div>{% else %}<p class="muted small">{{ 'Not enough completed months to draw a line yet.'|tr(locale) }}</p>{% endif %}
+      {% if phone_mode() %}{% if spark.points and values|reject('none')|list|length >= 2 %}{{ sparkline(spark, tone, title ~ ' ' ~ 'over six completed months'|tr(locale)) }}<div class="health-trend-axis muted" aria-hidden="true"><span>{{ trends[0].month }}</span><span>{{ trends[-1].month }}</span></div>{% else %}<p class="muted small">{{ 'Not enough completed months to draw a line yet.'|tr(locale) }}</p>{% endif %}{% else %}{{ health_chart(savings_chart if key == 'savings_rate' else worth_chart, title ~ ' ' ~ 'over six completed months'|tr(locale), key == 'savings_rate') }}{% endif %}
       <details class="health-numbers"><summary>{{ 'Show the numbers'|tr(locale) }}</summary>
         <div class="table-wrap"><table><thead><tr><th>{{ 'Completed month'|tr(locale) }}</th><th class="num">{{ title }}</th></tr></thead><tbody>
         {% for month in trends %}<tr><td data-label="{{ 'Completed month'|tr(locale) }}">{{ month.month }}</td><td class="num" data-label="{{ title }}">{% set val = month.savings_rate if key == 'savings_rate' else month.net_worth %}{% if key == 'savings_rate' and month.gap %}{{ month.gap }}{% elif val is none %}Unavailable{% elif key == 'savings_rate' %}{{ '%.1f'|format(val) }}%{% else %}{{ val|money }} {{ base }}{% endif %}</td></tr>{% endfor %}

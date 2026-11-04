@@ -67,3 +67,31 @@ def test_a_month_with_far_more_out_than_in_is_said_in_words(c, setup):
     assert "Savings rate — Needs you 4,000 more went out than the 1,000 that came in 2026-11" in page
     assert "2026-11 4,000 more went out than the 1,000 that came in" in page
     assert "-400" not in page
+
+
+def test_health_trend_includes_zero_and_does_not_join_missing_months():
+    from decimal import Decimal as D
+    from lightning.ui.routes.financial_health import _health_trend
+
+    months = [f'2026-0{i}' for i in range(1, 7)]
+    chart = _health_trend(months, [D('30'), D('32'), None, D('35'), D('36'), D('37')], 'Savings rate', 'in')
+    assert not chart['too_short'] and any(t['value'] == 0 for t in chart['ticks'])
+    assert len(chart['runs']) == 2
+    assert [len(run["line"].split()) for run in chart['runs']] == [2, 3]
+    assert all(run["area"].endswith(",100.00 Z") for run in chart["runs"])
+    assert _health_trend(months, [None, D('30'), None, D('35'), None, None], 'Savings rate', 'in')['too_short']
+    negative = _health_trend(months, [D('-5'), D('0'), D('5'), None, None, None], 'Savings rate', 'in')
+    assert min(t['value'] for t in negative['ticks']) < 0 < max(t['value'] for t in negative['ticks'])
+    assert any(t['value'] == 0 for t in negative['ticks'])
+
+
+def test_pc_savings_chart_has_zero_axis_and_percent_labels(c, setup, monkeypatch):
+    monkeypatch.setenv('LIGHTNING_TODAY', '2026-12-15')
+    accounts, cats = setup
+    for month in ('09', '10', '11'):
+        c.transactions.record_inflow(f'2026-{month}-05', accounts['cib'].id, '1000', cats['EXP.WORK.SALARY'].id)
+        c.transactions.record_outflow(f'2026-{month}-06', accounts['cib'].id, '500', cats['EXP.PERSONAL.FOOD'].id)
+    page = _ScreenClient(create_app(c), 'http://testserver').get('/financial-health').text
+    chart = page.split('<figure class="chart chart-trend"', 1)[1].split('</figure>', 1)[0]
+    assert 'chart-grid-zero' in chart and '0.0%' in chart
+    assert '50.0%' in chart and 'class="chart-line tone-in"' in chart

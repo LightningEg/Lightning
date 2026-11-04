@@ -34,6 +34,33 @@ BAND_WORDS = {"good": "Good", "watch": "Watch", "alert": "Needs you"}
 _BAND_CHIP = {"good": "up", "watch": "", "alert": "over"}  # green tint, quiet, rose (A08)
 
 
+
+def _health_trend(months, values, name: str, tone: str) -> dict:
+    """Use the zero-based trend axis and keep missing months as gaps in the line."""
+    chart = charts.trend(months, [{"name": name, "tone": tone, "values": values}], min_points=3)
+    if chart["too_short"]:
+        return chart
+    dots = iter(chart["series"][0]["dots"])
+    runs, run = [], []
+    for value in values:
+        if value is None:
+            if run:
+                runs.append(run)
+                run = []
+        else:
+            dot = next(dots)
+            run.append(dot)
+    if run:
+        runs.append(run)
+    zero = next(tick["y"] for tick in chart["ticks"] if tick["value"] == 0)
+    chart["runs"] = [{"line": " ".join(f"{d['x']:.2f},{d['y']:.2f}" for d in run),
+                      "area": (f"M{run[0]['x']:.2f},{zero:.2f} "
+                               + " ".join(f"L{d['x']:.2f},{d['y']:.2f}" for d in run)
+                               + f" L{run[-1]['x']:.2f},{zero:.2f} Z")}
+                     for run in runs if len(run) >= 2]
+    return chart
+
+
 def _tone(item) -> str:
     return "over" if item.band == "alert" else _TONE.get(item.key, "hold")
 
@@ -156,6 +183,8 @@ async def financial_health(request: Request):
                   as_of_iso=as_of.isoformat(), period=period, month=period.start_text[:7],
                   today_iso=today().isoformat(),
                   # A month that says its gap in words is left out of the line (it skips missing points).
+                  savings_chart=_health_trend([m.month for m in trends], savings_values, "Savings rate", "in"),
+                  worth_chart=_health_trend([m.month for m in trends], worth_values, "Net worth", "hold"),
                   savings_spark=charts.sparkline(savings_values),
                   worth_spark=(charts.sparkline(worth_values) if all(v is not None for v in worth_values)
                                else {"points": ""}),
