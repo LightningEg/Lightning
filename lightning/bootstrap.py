@@ -13,6 +13,7 @@ from lightning.accounts.service import AccountService
 from lightning.assets.service import AssetService
 from lightning.budgeting.service import BudgetService
 from lightning.planning.forecast import CashForecaster
+from lightning.planning.freshness import FreshnessService
 from lightning.planning.health import HealthService
 from lightning.planning.position import PositionService
 from lightning.planning.schedule_view import ScheduleSource
@@ -92,11 +93,12 @@ class Container:
     reimbursements: ReimbursementService
     funding: CashFundingService
     deposit_receipts: DepositReceiptService
+    freshness: FreshnessService
     backup_dir: Path | None = None
     undo: UndoService | None = None
 
     def __post_init__(self):
-        for name in ("saved_views", "reimbursements", "funding", "deposit_receipts"):
+        for name in ("saved_views", "reimbursements", "funding", "deposit_receipts", "freshness"):
             if getattr(self, name) is None:
                 raise TypeError(f"{name} is required")
 
@@ -315,6 +317,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
         reimbursements=ReimbursementService(db),
         funding=CashFundingService(db, budgets, reporting, reserves, planning, categories, settings, schedules),
         deposit_receipts=deposit_receipts,
+        freshness=FreshnessService(reporting, position),
     )
     # Attach only after both history validators and the container are complete.
     if undo is not None:

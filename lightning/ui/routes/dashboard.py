@@ -601,6 +601,7 @@ async def explain_overview_figure(request: Request, kind: str):
     day, first = fmt_date(period.end), fmt_date(period.start)
     destination = "/?" + request.url.query
     position = c.position.at(day)
+    notes = ()
     if kind == "owned":
         title = f"{label('what_you_own')} · known subtotal" if position.unvalued else label("what_you_own")
         figure = "what_you_own"
@@ -618,6 +619,7 @@ async def explain_overview_figure(request: Request, kind: str):
                 + (fmt(change_value, 0, True) if change_value is not None else f"unavailable · {change_reason}")
                 + f". This is wealth movement, not investment return.{missing}")
         action = ("Open Birdview", destination)
+        notes = c.freshness.for_what_you_own(day)
     elif kind == "free-cash":
         title = label("free_cash")
         figure = "free_cash"
@@ -645,7 +647,8 @@ async def explain_overview_figure(request: Request, kind: str):
     else:
         return render(request, "not_found.html", status_code=404, message="Explanation not found.")
     return render(request, "dashboard/explanation.html", title=title, explanation=explanation, figure=figure,
-                  rows=rows, total=total, foot=foot, recent=[], action=action)
+                  rows=rows, total=total, foot=foot, recent=[], action=action, notes=notes,
+                  note_days=lambda note: c.freshness.days_old(note, day))
 
 
 @router.get("/needs-you")
