@@ -416,8 +416,12 @@ def donut(slices: list[dict], limit: int = 5) -> dict:
     """
     parts = sorted((s for s in slices if s["value"] and s["value"] > 0), key=lambda s: -s["value"])
     folded = None
-    if len(parts) > limit:  # keep the largest, fold the smallest
-        parts, rest = parts[:limit - 1], parts[limit - 1:]
+    has_other = any(s["label"] == "Other" for s in parts)
+    if len(parts) > limit or (len(parts) == limit and not has_other):
+        # Reserve one slot for Other, combining any existing Other with the smallest names.
+        named = [s for s in parts if s["label"] != "Other"]
+        rest = named[limit - 1:] + [s for s in parts if s["label"] == "Other"]
+        parts = named[:limit - 1]
         folded = {"label": "Other", "value": sum((s["value"] for s in rest), ZERO), "tone": "other"}
     parts.sort(key=lambda s: (TONE_ORDER.index(s["tone"]) if s["tone"] in TONE_ORDER else 99, -s["value"]))
     if folded:

@@ -491,3 +491,19 @@ def test_an_owed_circle_is_labelled_and_linked_to_what_you_owe_in_the_sidebar(de
     assert 'id="what-you-owe"' in client.get("/plan").text
     c.settings.set("locale", "ar")
     assert "عليك للجمعية" in client.get("/").text
+
+
+def test_donut_folds_five_names_and_preserves_an_existing_other():
+    slices = [{"label": name, "value": D(value), "tone": "equity"}
+              for name, value in zip("ABCDE", (50, 40, 30, 20, 10))]
+    chart = charts.donut(slices)
+    assert [s["label"] for s in chart["segments"]] == ["A", "B", "C", "D", "Other"]
+    assert chart["segments"][-1]["value"] == D(10)
+    assert chart["total"] == D(150)
+    # An existing Other stays distinct from the named values and is never duplicated.
+    existing = slices[:4] + [{"label": "Other", "value": D(100), "tone": "other"}]
+    assert {s["label"] for s in charts.donut(existing)["segments"]} == {"A", "B", "C", "D", "Other"}
+    combined = charts.donut(existing + [{"label": "E", "value": D(10), "tone": "equity"}])
+    assert [s["label"] for s in combined["segments"]].count("Other") == 1
+    assert combined["segments"][-1]["value"] == D(110)
+    assert combined["total"] == D(250)
