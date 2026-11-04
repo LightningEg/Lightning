@@ -166,10 +166,10 @@ Prices arrive by themselves, from sources Lightning may redistribute.
 | NF-6B1 | ↳ Verify live boards per market | | | M | |
 | NF-6B2 | ↳ A source that allows redistribution | | | owner | |
 | NF-6B3 | ↳ Switch publishing on per market | | | S | |
-| **BT-6C** | [Download shared prices brings nothing: only the exchange-rate pack is published, and not since 11 Oct](6-market-data/6C-shared-prices-not-published.md) | bug, technical · medium | Own | M | ready |
 | **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](6-market-data/6D-gold-price-source.md) | improvement, technical | Own | S | blocked on a test from a home connection |
+| **BT-6E** | [The Gulf-stocks price pack fails in the scheduled collector (run 103, 2026-11-04)](6-market-data/6E-gcc-price-pack-collection-fails.md) | bug, technical · low | Own | S | new |
 
-Done: nothing yet. Next free code: 6E.
+Done: 6C. Next free code: 6F.
 
 ## 7 Planning, import and search
 

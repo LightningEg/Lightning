@@ -1,6 +1,6 @@
 ---
 title: Market data
-done:
+done: 6C
 ---
 
 **Goal.** Prices arrive by themselves, from sources Lightning may redistribute.
