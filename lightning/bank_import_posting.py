@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from lightning.bank_import_parsing import _amount, _date, _decimal_amount
+from lightning.bank_import_rows import _amount, _date, _decimal_amount
 from lightning.categories.domain import Movement
 from lightning.core.errors import ValidationError
 from lightning.transactions.domain import TxnSource
