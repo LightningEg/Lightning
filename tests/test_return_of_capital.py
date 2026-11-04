@@ -126,12 +126,12 @@ def test_upgrade_keeps_every_row_and_allows_only_the_cost_only_line(monkeypatch,
     before = [tuple(r) for r in db.all("SELECT * FROM ledger_entries ORDER BY id")]
     columns = [r[1] for r in db.all("PRAGMA table_info(ledger_entries)")]
     dangling = len(db.all("PRAGMA foreign_key_check"))  # the seed has no accounts or assets; the rebuild adds none
-    assert migrator.inspect_schema(db).pending == ("0070_zero_unit_cost_line", "0071_utility_match_tolerance", "0072_account_cost_method")
+    assert migrator.inspect_schema(db).pending == ("0070_zero_unit_cost_line", "0071_utility_match_tolerance", "0072_account_cost_method", "0073_reserve_bill")
     with pytest.raises(sqlite3.IntegrityError):  # before: no zero-unit cost line
         db.execute("INSERT INTO ledger_entries(transaction_id,line_no,date,account_id,asset_id,quantity_e6,unit_price_e6,"
                    "amount_e6,fx_rate_e6,amount_base_e6,effect) VALUES(1,9,'2026-09-02',1,2,0,0,-1000000,1000000,-1000000,'INTERNAL')")
     migrator.migrate(db)
-    assert migrator.inspect_schema(db).current_version == 72
+    assert migrator.inspect_schema(db).current_version == 73
     assert [r[1] for r in db.all("PRAGMA table_info(ledger_entries)")] == columns
     assert [tuple(r) for r in db.all("SELECT * FROM ledger_entries ORDER BY id")] == before
     assert len(db.all("PRAGMA foreign_key_check")) == dangling and db.scalar("PRAGMA integrity_check") == "ok"

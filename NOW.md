@@ -4,7 +4,6 @@
 
 | Who | Work | Files | Since |
 |---|---|---|---|
-| Codex | IT-1H and report follow-ups; preserve superseding fixes. | financial/report code, source entry, architecture policies | 2026-11-04 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
 
@@ -29,7 +28,8 @@
 
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 
-1. **Report fixes:** 1G, 2AB, 3J, 4K, 7M and 7S are implemented; PC/phone audits continue. **Read:** `reports/README.md`.
+1. **Report work paused by owner after finalization; branches stay open pending browser/native checks.** **Read:** `reports/2026-11-03-code-quality-and-smart-features/evidence/report-finalization-2026-11-04.md`.
+2. **Report fixes:** 1G, 2AB, 3J, 4K, 7M and 7S are implemented; PC/phone audits continue. **Read:** `reports/README.md`.
 2. **Audit 9 links:** salary-day review and bill-linked reserves are complete; native CI remains held. **Read:** `tests/test_reserve_bills.py`, `tests/test_salary_day_portability.py`.
 3. **9K:** profile lifecycle routes split in #300; bank-import parsing/review/posting are split in the follow-up branch; claimed device/restore routes remain. **Read:** 9K.
 4. **1H:** wheels and coordinated locks merged in #286; native packaged validation and a phone install remain. Owner chose to leave native CI blocked while other work continues; PR #302 stays open. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
