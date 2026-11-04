@@ -32,11 +32,14 @@ MAX_BUDGET = 100_000_000  # EGP a month for one category; above it is a typo, no
 
 
 class BudgetService:
-    def __init__(self, db: Database, categories: CategoryService, reporting: ReportingService):
+    def __init__(self, db: Database, categories: CategoryService, reporting: ReportingService, *, funding):
         self.db = db
         self.repo = BudgetRepository(db)
         self.categories = categories
         self.reporting = reporting
+        if not callable(getattr(funding, "by_category", None)) or not callable(getattr(funding, "adjustments", None)):
+            raise TypeError("Budget funding must provide by_category and adjustments")
+        self.funding = funding
         # What the plan has scheduled (loans, bills, recurring income, reserve goals) comes in as ``schedule``
         # on every call that needs it. A category with no budget rule is planned at exactly what is scheduled
         # (owner decision 2026-10-05: bills as loans).
@@ -353,6 +356,7 @@ class BudgetService:
         from_loans = self.loan_lines(month, schedule=schedule)
         from_bills = self.bill_lines(month, schedule=schedule)
         spent = self.owned_spending(first, last)
+        funded = self.plan_funded_spending(first, last)
         cats = [c for c in self.categories.tree(Movement.OUTFLOW) if not c.is_root
                 and c.family != CategoryFamily.INVESTMENT]  # investments are never budget spending
         by_id = {c.id: c for c in cats}
@@ -363,6 +367,7 @@ class BudgetService:
 
         one_offs = self.one_off_ids()
         actual: dict[int, Decimal] = {}
+        funded_actual: dict[int, Decimal] = {}
         planned_actual: dict[int, Decimal] = {}
         budget: dict[int, Decimal | None] = {}
         for c in reversed(cats):  # children before parents
@@ -370,6 +375,8 @@ class BudgetService:
             # A one-off child keeps its own actual but does not add to its parent's (unless it has a plan).
             actual[c.id] = spent.get(c.id, ZERO) + sum((actual[k] for k in kids
                                                         if k not in one_offs or k in direct), ZERO)
+            funded_actual[c.id] = funded.get(c.id, ZERO) + sum((funded_actual[k] for k in kids
+                                                               if k not in one_offs or k in direct), ZERO)
             if c.id in direct:
                 amount, _, period, percent = direct[c.id]
                 budget[c.id] = amount
@@ -377,7 +384,7 @@ class BudgetService:
                 kid_budgets = [budget[k] for k in kids if budget[k] is not None]
                 budget[c.id] = sum(kid_budgets, ZERO) if kid_budgets else None
             if budget[c.id] is not None and c.id in direct:
-                planned_actual[c.id] = actual[c.id]
+                planned_actual[c.id] = funded_actual[c.id]
             else:
                 planned_actual[c.id] = sum((planned_actual[k] for k in kids), ZERO)
 
@@ -408,7 +415,7 @@ class BudgetService:
                 if c.parent_id not in one_offs:
                     section.one_off += actual[c.id]
             elif c.id not in direct and not covered:
-                section.unbudgeted += spent.get(c.id, ZERO)
+                section.unbudgeted += funded.get(c.id, ZERO)
             shows = c.active or actual[c.id] != ZERO or c.id in direct
             if c.is_system and actual[c.id] == ZERO and c.id not in direct:
                 shows = False
@@ -597,6 +604,14 @@ class BudgetService:
         investment = self._investment_ids()
         return {cid: v for cid, v in self.reporting.money_out_by_category(start, end).items() if cid not in investment}
 
+    def plan_funded_spending(self, start, end) -> dict[int, Decimal]:
+        """Gross owned spending less confirmed funding outside this month's plan."""
+        gross = self.owned_spending(start, end)
+        for cid, adjustment in self.funding.by_category(start, end).items():
+            if cid in gross:
+                gross[cid] -= adjustment["principal"] + adjustment["reserve"]
+        return gross
+
     def _investment_ids(self) -> set[int]:
         return {c.id for c in self.categories.tree() if c.family == CategoryFamily.INVESTMENT}
 
@@ -668,7 +683,7 @@ class BudgetService:
                         if amount is not None:
                             amount = amount * percent / Decimal(100)
                     start, end = parse_month(current_month)
-                    spent = self.owned_spending(start, end)
+                    spent = self.plan_funded_spending(start, end)
                     actual = sum((spent.get(cid, ZERO) for cid in descendants), ZERO)
                     balance = (amount or ZERO) + balance - actual
                 else:
@@ -746,11 +761,11 @@ class BudgetService:
         return cache[key]
 
     def _completed_months(self, month: str, months: int) -> list[dict[int, Decimal]]:
-        """Owned spending by category in each of the completed months before `month`, newest first."""
+        """Plan-funded spending by category in completed months, newest first."""
         spending, cursor = [], parse_month(month)[0]
         for _ in range(months):
             start, end = parse_month((cursor - timedelta(days=1)).strftime("%Y-%m"))
-            spending.append(self.owned_spending(start, end))
+            spending.append(self.plan_funded_spending(start, end))
             cursor = start
         return spending
 
@@ -865,13 +880,13 @@ class BudgetService:
     @request_cached(deep=True)
     def plan_summary(self, month: str, *, schedule: ScheduleView) -> dict:
         """The month's plan as every screen shows it: Planned (limits plus background estimates),
-        Spent (owned spending, one-off categories left out) and Left in plan."""
+        Spent (owned spending funded by the monthly plan, one-off categories left out) and Left in plan."""
         view = self.month_view(month, schedule=schedule)
         estimates = self.background_estimates(month, schedule=schedule)
         planned = view.available + sum((e["estimate"] for e in estimates), ZERO)
         first, last = parse_month(month)
         one_offs = self.one_off_ids()
-        spent = sum((v for cid, v in self.owned_spending(first, last).items() if cid not in one_offs), ZERO)
+        spent = sum((v for cid, v in self.plan_funded_spending(first, last).items() if cid not in one_offs), ZERO)
         return {"planned": planned, "spent": spent, "left": planned - spent, "estimates": estimates,
                 "low_confidence": [e for e in estimates if e["low_confidence"]]}
 

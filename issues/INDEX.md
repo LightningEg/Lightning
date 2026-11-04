@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 53 open items, in the order they are worked on.
+10 milestones, 51 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -68,7 +68,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3H2 | ↳ Step 2: weekly friction | | | L | |
 | IV-3H3 | ↳ Step 3: features | | | L | |
 | IV-3H4 | ↳ Mohab steps for the six known gaps | | | M | |
-| **IT-3J** | [Version 1.1 is shipped: move what holds of its review into Architecture, then delete this file](3-polish-and-arabic/3J-fold-v1-1-review-into-architecture.md) | improvement, technical | Build | M | ready |
 | **IV-3Q** | [Visual audit - every KPI card should answer, compare and point; one card system for PC and phone](3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md) | improvement, visual | Understand | L | ready |
 | IV-3Q1 | ↳ KPI cards: Overview, Spending thin-data forms, Recurring, Loans, Reserves | | | M | |
 | IV-3Q2 | ↳ KPI cards: Investments, holding page, Currencies, Accounts, account page | | | M | |
@@ -104,7 +103,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner | |
 
-Done: 3A, 3C, 3D, 3E, 3I, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK, 3AL, 3AO, 3AP. Next free code: 3AQ.
+Done: 3A, 3C, 3D, 3E, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3R, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AE, 3AF, 3AG, 3AH, 3AK, 3AL, 3AO, 3AP. Next free code: 3AQ.
 
 ## 4 Edit journal and devices
 
@@ -193,7 +192,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7F2 | ↳ Rename a rule | | | S | |
 | NF-7F3 | ↳ Change one budget category without the full grid | | | M | |
 | **NF-7G** | [Age of Money and a spending calendar](7-planning-import-and-search/7G-more-analytics.md) | new feature | Understand | M | new |
-| **OW-7M** | [Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as overspending](7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md) | owner task | Plan |  | new |
 | **NF-7T** | [Link the sections - salary-day cascade and a reserve tied to its bill](7-planning-import-and-search/7T-link-the-sections.md) | new feature | Plan | L | new |
 | NF-7T5 | ↳ Salary-day cascade | | | L | |
 | NF-7T6 | ↳ A reserve tied to its bill | | | L | |
@@ -205,7 +203,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7X5 | ↳ Show reviewable alerts in Needs you | | | M | |
 | **NF-7Y** | [Explain which stale or pending inputs affect a financial figure](7-planning-import-and-search/7Y-financial-data-freshness.md) | new feature | Understand | M | new |
 
-Done: 7A, 7H, 7I, 7J, 7K, 7L, 7N, 7O, 7P, 7Q, 7R, 7S, 7U, 7V, 7W. Next free code: 7Z.
+Done: 7A, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7U, 7V, 7W. Next free code: 7Z.
 
 ## 8 Website
 

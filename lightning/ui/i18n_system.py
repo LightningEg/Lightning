@@ -424,6 +424,7 @@ SENTENCES = {
     "Emergency fund covers": "صندوق الطوارئ بيغطي",
     "Of {amount} money in: {a} invested, {b} kept, {c} spent; each square is 1%": "من {amount} فلوس داخلة: {a} استثمرتها، {b} فضلت، {c} صرفتها؛ كل مربع 1%",
     "Of {amount} money in · one square is 1%": "من {amount} فلوس داخلة · كل مربع 1%",
+    "From monthly plan {a} of {b} planned": "من خطة الشهر {a} من {b} مخطط",
     "Spent {a} of {b} planned": "صرفت {a} من {b} مخطط",
     "of {amount} planned": "من {amount} مخطط",
     "This plan leaves {a}; your emergency fund needs {b}": "الخطة دي بتسيب {a}؛ وصندوق الطوارئ محتاج {b}",

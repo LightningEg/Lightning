@@ -109,8 +109,8 @@
 
 {# Waterfall: a start value, what is taken off, and where it ends, as one path of bars. #}
 {% macro waterfall(w, values=True) %}
-{% if w %}<div class="chart chart-waterfall" role="img" aria-label="{% for r in w.rows %}{{ r.label }} {{ r.value|money }}{{ ', ' if not loop.last }}{% endfor %}">
-  {% for r in w.rows %}<div class="chart-fall-row is-{{ r.kind }}"><span class="chart-fall-label">{{ r.label }}</span><span class="chart-fall-track"><i style="margin-left:{{ '%.2f'|format(r.left) }}%;width:{{ '%.2f'|format([r.width, 0.6]|max) }}%"></i></span>{% if values %}<b class="chart-fall-value">{{ r.value|money(r.kind in ('down','up')) }}</b>{% endif %}</div>{% endfor %}
+{% if w %}<div class="chart chart-waterfall" role="img" aria-label="{% for r in w.rows %}{{ r.label }} {{ r.display_value|default(r.value)|money }}{{ ', ' if not loop.last }}{% endfor %}">
+  {% for r in w.rows %}<div class="chart-fall-row is-{{ r.kind }}"><span class="chart-fall-label">{{ r.label }}</span><span class="chart-fall-track"><i style="margin-left:{{ '%.2f'|format(r.left) }}%;width:{{ '%.2f'|format([r.width, 0.6]|max) }}%"></i></span>{% if values %}<b class="chart-fall-value">{{ r.display_value|default(r.value)|money(r.kind in ('down','up')) }}</b>{% endif %}</div>{% endfor %}
 </div>{% endif %}
 {% endmacro %}
 

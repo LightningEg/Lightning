@@ -141,7 +141,7 @@ def test_purchase_and_early_payment_have_preview_steps_and_no_new_tab(c, setup, 
     assert 'Paid off' in client.get('/plan/loans').text
 
 
-def test_overdue_instalments_are_paid_first_and_extra_cash_is_in_the_budget(c, setup, monkeypatch):
+def test_overdue_instalments_are_paid_first_and_fee_is_in_the_budget(c, setup, monkeypatch):
     monkeypatch.setenv('LIGHTNING_TODAY', '2026-10-14')
     accounts, _ = setup
     loan = c.planning.create(kind='LOAN', name='Old loan', amount='1000', frequency='MONTHLY',
@@ -152,7 +152,8 @@ def test_overdue_instalments_are_paid_first_and_extra_cash_is_in_the_budget(c, s
     assert (progress['next'].due_date, progress['next'].still_owed) == ('2026-09-20', D('500'))
     assert c.planning.what_you_owe().bills_due == D('500')
     assert c.planning.what_you_owe().other_bills_due == 0
-    assert c.planning.loan_payments_by_category('2026-10')[item.category_id] == D('2550')
+    assert c.planning.loan_payments_by_category('2026-10')[item.category_id] == D('1000')
+    assert c.budgets.plan_funded_spending('2026-10-01', '2026-10-31')[item.category_id] == D('50')
 
 
 def test_a_reduced_final_instalment_matches_actual_cash_and_dated_history_survives(c, setup, monkeypatch):

@@ -180,11 +180,18 @@ class CashForecaster:
                   if not item.is_income and item.counterparty_id and item.category_id}
         left_out = self.budgets.one_off_ids() | self.budgets._investment_ids()
         daily: dict[str, Decimal] = {}
+        adjustments = self.budgets.funding.adjustments(start, end)
+        deducted = set()
         for line in self.reporting.spending_lines(start, end):
             if (line["transaction_id"] in linked or line["category_id"] in left_out
                     or (line.get("counterparty_id"), line["category_id"]) in payees):
                 continue
-            daily[line["date"]] = daily.get(line["date"], ZERO) + line["value"]
+            key = (line["transaction_id"], line["category_id"])
+            adjustment = adjustments.get(key) if line["value"] > ZERO and key not in deducted else None
+            amount = line["value"] - (adjustment["principal"] + adjustment["reserve"] if adjustment else ZERO)
+            if adjustment:
+                deducted.add(key)
+            daily[line["date"]] = daily.get(line["date"], ZERO) + amount
         out, total, cursor = [], ZERO, start
         while cursor <= end:
             total += daily.get(fmt_date(cursor), ZERO)

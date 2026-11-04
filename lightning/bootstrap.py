@@ -228,7 +228,8 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
     bank_imports = BankImportService(db, accounts, categories, counterparties, transactions, money_from_others, reserves,
                                      rules)
     reporting = ReportingService(db, accounts, assets, categories, base, money_from_others)
-    budgets = BudgetService(db, categories, reporting)
+    from lightning.workflows.budget_funding import BudgetFunding
+    budgets = BudgetService(db, categories, reporting, funding=BudgetFunding(db))
     reevaluations = ReevaluationService(db, accounts, transactions, reporting)
     planning = PlanningService(db, accounts, categories, counterparties, transactions)
     schedules = ScheduleSource(planning, reserves)

@@ -14,6 +14,11 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    "Spent {gross} · From monthly plan {plan} · Funded outside the plan {amount}. Past periods reflect current confirmed links.": "المصروف {gross}. من خطة الشهر {plan}. الممول من خارج الخطة {amount}. الفترات السابقة بتعكس الروابط المؤكدة حاليًا.",
+    "from monthly plan": "من خطة الشهر",
+    "Total spent {gross}; {amount} was funded outside this monthly plan. Past periods reflect current confirmed links.": "إجمالي المصروف {gross}؛ {amount} اتمول من خارج خطة الشهر. الفترات السابقة بتعكس الروابط المؤكدة حاليًا.",
+    "From monthly plan": "من خطة الشهر",
+    "Total spent {gross}; funded outside the plan {amount}": "إجمالي المصروف {gross}؛ ممول من خارج الخطة {amount}",
     'Record repayments as Money in using the original expense category. They reduce spending in that category; linking a receipt only tracks what is still owed.': 'سجّل الفلوس اللي رجعت كفلوس داخلة في نفس تصنيف المصروف. ده بيقلّل الصرف في التصنيف؛ ربط الإيصال بس بيتابع المبلغ اللي لسه ليك.',
     'Possible reimbursement pairs': 'مصروفات وإيصالات ممكن يتربطوا',
     'Same category and currency, within 90 days. Review the expense and receipt before linking.': 'نفس التصنيف والعملة، في خلال 90 يوم. راجع المصروف والإيصال قبل الربط.',

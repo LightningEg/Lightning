@@ -104,7 +104,7 @@ def columns(values: list[Decimal], running: bool = False) -> dict | None:
 
 
 # ── Budget ─────────────────────────────────────────────────────────────────────────────────────────────────
-def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: dict | None, month: str) -> list[dict]:
+def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: dict | None, month: str, funded_elsewhere: bool = False) -> list[dict]:
     """A month's four cards: Left in plan, Everyday spending, Over plan (only when something is) and what the
     plan leaves to save. ``e`` is the forecaster's EverydayBudget; ``over`` the categories over plan, largest
     first, each {"name", "over"}; ``move`` the room to cover the largest from, {"href", "name", "amount"}."""
@@ -116,12 +116,13 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
                         else compare("for everyday: bills take the rest", "0", "bad"))
     else:
         left_compare = compare("of the plan spent", f"{e.spent / e.planned * 100:.0f}%" if e.planned else "—")
-    left_visual = (segments([("Spent", e.spent, "out"), ("Bills to pay", e.bills_to_pay, "neutral"), ("Everyday", e.everyday_left, "in")])
-                   if e.current else segments([("Spent", min(e.spent, e.planned), "out"), ("Left", max(e.left, ZERO), "in")]))
+    spent_label = "From monthly plan" if funded_elsewhere else "Spent"
+    left_visual = (segments([(spent_label, e.spent, "out"), ("Bills to pay", e.bills_to_pay, "neutral"), ("Everyday", e.everyday_left, "in")])
+                   if e.current else segments([(spent_label, min(e.spent, e.planned), "out"), ("Left", max(e.left, ZERO), "in")]))
     cards = [card(figure_label("left_in_plan"), e.left, left_compare, tone="in" if e.left >= 0 else "over", key="left",
                   chip_=chip(f"{e.days_left} days left" if e.current and e.days_left else month),
                   visual=left_visual or meter(e.spent, e.planned),
-                  line_=line(f"Spent {fmt(e.spent)} of {fmt(e.planned)} planned"), href="#budget-meters")]
+                  line_=line(f"{spent_label} {fmt(e.spent)} of {fmt(e.planned)} planned"), href="#budget-meters")]
 
     if e.current and e.day:
         gap = e.everyday_spent - e.pace
@@ -171,7 +172,8 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
     return row(cards)
 
 
-def budget_period(spent: Decimal, planned: Decimal, months: list[tuple[str, Decimal, bool]], period_label: str) -> list[dict]:
+def budget_period(spent: Decimal, planned: Decimal, months: list[tuple[str, Decimal, bool]], period_label: str,
+                  funded_elsewhere: bool = False) -> list[dict]:
     """A longer period (YTD, All time, Custom): what was spent of the plan, and how many finished months ended
     within it. ``months`` is (yyyy-mm, left in plan, finished) for each month with a plan; the running one is hatched."""
     if not planned or planned <= 0:
@@ -179,7 +181,7 @@ def budget_period(spent: Decimal, planned: Decimal, months: list[tuple[str, Deci
     left = planned - spent
     ended = [value for _, value, finished in months if finished]
     within = sum(1 for value in ended if value >= 0)
-    cards = [card("Spent", spent, compare(f"of the {fmt(planned)} plan", f"{spent / planned * 100:.0f}%",
+    cards = [card("From monthly plan" if funded_elsewhere else "Spent", spent, compare(f"of the {fmt(planned)} plan", f"{spent / planned * 100:.0f}%",
                                           "good" if spent <= planned else "bad"),
                   tone="out", key="spent", chip_=chip(period_label), visual=meter(spent, planned),
                   line_=line(f"Planned {fmt(planned)}"), href="#budget-meters"),
