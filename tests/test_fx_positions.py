@@ -267,3 +267,62 @@ def test_phone_currency_chart_names_and_lists_both_series_below_plot(c, dollars)
     assert '33,150' in numbers and '31,417' in numbers  # phone figures round to whole EGP
     pc_chart = pc_html.split('class="chart chart-trend"', 1)[1].split('</figure>', 1)[0]
     assert pc_chart.index('class="chart-legend"') < pc_chart.index('class="chart-plot"')
+
+
+def test_currency_history_includes_owned_investments_and_starts_axis_at_zero(c, dollars):
+    from fastapi.testclient import TestClient
+    from lightning.core.ledger import Effect, PostingLine
+    from lightning.core.refs import DocType
+    from lightning.ui.web import create_app
+
+    accounts, _ = dollars
+    broker = c.account_flows.open_account("US broker", "BROKERAGE", "2026-09-01", "0", currency="USD")
+    c.transactions.record_conversion("2026-09-02", accounts["cib"].id, broker.id, "48000", "1000")
+    asset = c.assets.create_investment("Index ETF", "FUND.EQUITY", "INDEX")
+    c.db.execute("UPDATE financial_assets SET currency='USD' WHERE id=?", (asset.id,))
+    c.fx.save("USD", "2026-10-01", "50")
+    cash = c.assets.cash_asset("USD")
+    c.transactions.post(DocType.BUY, "2026-10-02", [
+        PostingLine.cash(broker.id, cash.id, D("-500"), Effect.INTERNAL, fx_rate=D("50")),
+        PostingLine.units(broker.id, asset.id, D("10"), D("500"), Effect.INTERNAL, D("50"), fx_rate=D("50"))])
+    c.assets.set_price(asset.id, "2026-10-31", "50")
+    page = TestClient(create_app(c)).get("/accounts/currencies?period=custom&date_from=2026-09-01&date_to=2026-10-31")
+    assert page.status_code == 200
+    chart = page.text.split('class="card data-panel fx-chart"', 1)[1].split('</section>', 1)[0]
+    assert '<td>2026-09</td><td class="num">48,000</td>' in chart
+    assert '<td>2026-10</td><td class="num">50,000</td>' in chart
+    assert 'chart-grid chart-grid-zero' in chart
+    assert 'chart-line tone-hold' in chart and 'is-dashed' not in chart
+
+
+def test_currency_history_does_not_bridge_an_unpriced_holding(c, dollars, monkeypatch):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+
+    accounts, cats = dollars
+    story(c, accounts, cats)
+    monkeypatch.setattr(c.position, 'foreign_holdings', lambda *_: {'USD': (D('0'), True)})
+    page = TestClient(create_app(c)).get('/accounts/currencies?period=month&month=2026-09')
+    assert page.status_code == 200
+    assert 'Some months are missing because a value is unavailable.' in page.text
+    assert 'class="chart-line tone-hold"' not in page.text
+    assert 'Unavailable' in page.text
+
+
+def test_currency_history_leaves_a_gap_between_known_months(c, dollars, monkeypatch):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+
+    accounts, cats = dollars
+    story(c, accounts, cats)
+    c.fx.save('USD', '2026-10-31', '51')
+    c.fx.save('USD', '2026-11-30', '51')
+    monkeypatch.setattr(c.position, 'foreign_holdings',
+                        lambda day, base: {'USD': (D('100'), day == '2026-10-31')})
+    page = TestClient(create_app(c)).get(
+        '/accounts/currencies?period=custom&date_from=2026-09-01&date_to=2026-11-30')
+    chart = page.text.split('class="card data-panel fx-chart"', 1)[1].split('</section>', 1)[0]
+    assert 'Some months are missing because a value is unavailable.' in chart
+    assert chart.count('class="chart-dot tone-hold') == 2
+    assert 'class="chart-line tone-hold"' not in chart
+    assert '<td>2026-10</td><td class="num">—</td>' in chart

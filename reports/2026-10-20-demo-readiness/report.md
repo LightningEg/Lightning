@@ -434,3 +434,7 @@ IV-3S item 19: toggling Hide amounts no longer adds a generic undo entry or runs
 ## 2026-11-04 · Currency header dates
 
 IV-3S item 15: the PC Currencies header distinguishes balances and unrealized gain at the selected end date from realized gain and spread over the selected range. The balance note also names the end date rather than today. Chromium checked a past custom range in English and Arabic.
+
+## 2026-11-04 · Currency history
+
+IV-3S item 4: the PC chart combines owned cash and foreign holdings at each historical checkpoint, uses a zero-based axis, and leaves gaps for unpriced values. It no longer compares the combined value to the cash-only cost basis. A controlled Chromium fixture showed 48,000 before an ETF purchase and 50,000 after it, with axis ticks 0, 25,000 and 50,000. Historical availability depends on recorded prices and rates.

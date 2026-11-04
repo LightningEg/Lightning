@@ -19,8 +19,7 @@ already list. The original brand audit could not see select text colour, the fir
 
 **Charts that mislead (A12)**
 3. **2026-11-04:** PC Financial health uses zero-based axes for its Savings rate and Net worth trends, keeps gaps for missing months, and requires three known points. The current lead shows Savings rate; Net worth remains in the no-lead fallback.
-4. Currencies "USD · Value against cost" plots USD cash only: it falls from about 100,000 to 12,126 when the cash bought the ETF, while the card above says
-   Foreign money 114,211; the axis runs to 200,000. **2026-11-04:** The PC chart now labels the series as cash only and explicitly excludes investments; a combined history and the axis still need review.
+4. **2026-11-04:** The PC Currencies chart now plots owned cash and foreign holdings together on the existing zero-based axis. It leaves gaps where values are unavailable, with a note and table; the incomplete headline total is unavailable. It no longer compares the combined value with a cash-only cost line. Historical values depend on recorded prices and rates. The currency list still originates from cash accounts and cash history; investment-only currencies without either remain a separate coverage gap.
 5. **2026-11-04:** Holding average cost uses a Neutral dashed reference; plan references remain Meadow. The Chromium brand audit checks its computed stroke.
 
 **Colour off its meaning (A03)**

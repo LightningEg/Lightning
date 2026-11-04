@@ -17,8 +17,8 @@
   <div class="metric-card" title="{{ fig.realized_fx_gain.meaning }}"><div class="metric-label">{{ fig.realized_fx_gain.label }}</div><div class="metric-value">{{ gain(totals.realized) }} <small>{{ base }}</small></div><div class="metric-note">{{ period.start_text }} → {{ period.end_text }}</div></div>
   <div class="metric-card" title="{{ fig.spread_paid.meaning }}"><div class="metric-label">{{ fig.spread_paid.label }}</div><div class="metric-value"><span class="num">{{ totals.spread|money }}</span> <small>{{ base }}</small></div><div class="metric-note">{{ 'Beyond the market rate, on conversions in this period.'|tr(locale) }}</div></div>
 </div>
-{% if trend %}<section class="card data-panel fx-chart"><div class="section-head"><h2>{{ chosen.currency }} · {{ 'Cash value against cost'|tr(locale) }}</h2><p class="muted small">{{ 'Cash only, by month in {base}; investments are not included. The dashed line is what the cash cost.'|tr(locale, base=base) }}</p></div>
-  {{ trend_chart(trend, 'Value of {currency} cash against its cost, by month'|tr(locale, currency=chosen.currency)) }}
+{% if combined_trend or combined_unavailable %}<section class="card data-panel fx-chart"><div class="section-head"><h2>{{ chosen.currency }} · {{ 'Cash and investments over time'|tr(locale) }}</h2><p class="muted small">{{ 'Cash and owned investments at month ends and the selected end date, in {base}.'|tr(locale, base=base) }}</p></div>
+  {% if combined_unavailable %}<p class="muted small">{{ 'Some months are missing because a value is unavailable.'|tr(locale) }}</p>{% endif %}{{ trend_chart(combined_trend, 'Cash and investments in {currency}, by month'|tr(locale, currency=chosen.currency)) }}
 </section>{% endif %}
 {% for p in positions %}
 <section class="card data-panel fx-currency" id="currency-{{ p.currency }}"><div class="section-head"><h2>{{ p.currency }}</h2>
