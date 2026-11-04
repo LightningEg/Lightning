@@ -782,6 +782,19 @@ async def set_spendable(request: Request, account_id: int):
                     "Its cash now counts as spendable." if spendable else "Its cash is now kept apart from spendable cash.")
 
 
+@router.post("/{account_id:int}/cost-method")
+async def set_cost_method(request: Request, account_id: int):
+    """Choose average cost or oldest first for the sales of a brokerage account (NF-5B3)."""
+    c = container(request)
+    form = await request.form()
+    try:
+        account = c.accounts.set_cost_method(account_id, str(form.get("method", "")))
+    except LightningError as exc:
+        return redirect(f"/accounts/{account_id}", exc.message)
+    return redirect(f"/accounts/{account.id}", "Sales now use the oldest purchase first." if account.cost_method == "fifo"
+                    else "Sales now use the average cost.")
+
+
 @router.post("/{account_id:int}/reactivate")
 async def reactivate(request: Request, account_id: int):
     account = container(request).account_flows.reactivate(account_id)

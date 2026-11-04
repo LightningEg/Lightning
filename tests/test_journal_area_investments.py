@@ -381,3 +381,10 @@ def test_deposit_and_gameya_forms_on_both_devices(devices):
     assert {c.terms.name for c in pc.c.deposits.list_certificates(account(pc, "CDs").id)} == {"NBE one", "NBE two"}
     assert cash(pc, "Bank") == cash(hd, "Bank") == 1000 - 500 - 100 - 100
     same(hd, pc)
+
+
+def test_cost_method_of_a_broker_follows_to_the_other_device(devices):
+    hd, pc = devices
+    broker, _ = setup(hd, pc)
+    settle(hd, pc, pc.command("accounts.set_cost_method", account_id=broker, method="fifo"))
+    assert account(hd, "Broker").cost_method == account(pc, "Broker").cost_method == "fifo"

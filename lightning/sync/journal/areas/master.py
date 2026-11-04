@@ -56,4 +56,6 @@ COMMANDS = {
                                             target=("categories", "category_id")),
     "accounts.set_spendable": Command("accounts.set_spendable", dict(account_id=ref("accounts"), choice=optional(FLAG)),
                                       target=("accounts", "account_id")),
+    "accounts.set_cost_method": Command("accounts.set_cost_method", dict(
+        account_id=ref("accounts"), method=choice("average", "fifo")), target=("accounts", "account_id")),
 }

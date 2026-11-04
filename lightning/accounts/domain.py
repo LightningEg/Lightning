@@ -117,6 +117,7 @@ class Account:
     cash_at_hand: bool = False
     spendable: bool | None = None  # None follows the default (counts_as_spendable)
     parent_id: int | None = None   # set on a broker's currency pocket: the broker account it belongs to
+    cost_method: str = "average"  # which purchases a sale takes its cost from: average, or fifo (NF-5B3)
 
     def counts_as_spendable(self, profile_currency: str) -> bool:
         """Whether this account's own cash counts in Free cash and Safe to spend. By default wallets and bank
