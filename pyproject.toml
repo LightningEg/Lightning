@@ -47,6 +47,7 @@ layers = [
     "lightning.assets | lightning.categories | lightning.fx",
     "lightning.database | lightning.security | lightning.market",
     "lightning.undo",
+    "lightning.bank_import_rows",
     "lightning.core",
 ]
 
@@ -126,7 +127,6 @@ ignore_imports = [
     "lightning.sync.journal.areas.automation -> lightning.workflows.live_prices",
     "lightning.sync.journal.areas.workflows -> lightning.budgeting.domain",
     "lightning.sync.journal.automation -> lightning.workflows.live_prices",
-    "lightning.sync.journal.capture -> lightning.bank_imports",
     "lightning.sync.journal.capture -> lightning.sms_imports",
     "lightning.sync.journal.history -> lightning.undo",
 ]

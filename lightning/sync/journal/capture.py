@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from uuid import uuid4
 
-from lightning.bank_imports import decode_csv, _date, _amount
+from lightning.bank_import_rows import decode_csv, _date, _amount
 from lightning.sms_imports import parse_sms, fingerprint
 
 from .codec import JournalError, canonical, digest, origin_id, unpack
