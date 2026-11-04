@@ -334,3 +334,7 @@ IV-3S item 18: a month without a plan now asks for that month’s spending limit
 OW-7M is resolved under the owner’s delegated report-completion instruction. Gross spending and net flow are retained; confirmed reserve funding and unscheduled early loan principal reduce what the monthly plan pays. Fees still reduce the plan unless reserve-funded; overlapping funding is capped and split exactly by category. Budget and phone disclose gross and plan-funded totals. Current confirmed links determine past periods; no historical link versions are invented.
 
 `tests/test_budget_funding.py` covers partial/multiple reserve links, split allocation, overlaps, fees, dated history, void/restore, undo, carryover and unchanged free cash. Mohab’s April independently recomputes gross spending 34,415, reserve funding 9,000, plan-funded spending 25,415 and plan 26,699, leaving 1,284 held in Safe to spend (297,688). `tests/test_safe_display_rounding.py` verifies the PC chart/table and phone labels add to the displayed total while exact forecasts retain their precision.
+
+## 2026-11-04 · Currency chart scope
+
+IV-3S item 4: the PC chart now identifies its existing series as cash only and says investments are excluded, so it does not imply it charts all foreign money. A combined history and the axis remain to review.
