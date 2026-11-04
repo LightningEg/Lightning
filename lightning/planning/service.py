@@ -31,13 +31,16 @@ NOT_RECURRING = "recurring_not_suggested"  # counterparty ids the user said are 
 
 
 class PlanningService:
-    def __init__(self, db: Database, accounts, categories, counterparties, transactions):
+    def __init__(self, db: Database, accounts, categories, counterparties, transactions, reserves):
         self.db = db
         self.repo = PlanningRepository(db)
         self.accounts = accounts
         self.categories = categories
         self.counterparties = counterparties
         self.transactions = transactions
+        if not callable(getattr(reserves, "fund_bill_payment", None)):
+            raise TypeError("Planning requires bill reserve funding")
+        self.reserves = reserves
 
     def create_purchase(self, *, name, price, fee, months, first_date, account_id=None, counterparty_id=None):
         """Create an instalment purchase as one journalable service action."""
@@ -144,6 +147,8 @@ class PlanningService:
         values.setdefault("match_window_days", old.match_window_days)
         values.setdefault("match_tolerance_pct", old.match_tolerance_pct)
         clean = self._validate(values)
+        if clean["kind"] not in (PlanKind.BILL, PlanKind.SUBSCRIPTION) and self.reserves.bill_reserve(item_id):
+            raise ValidationError("Unlink the reserve before changing this bill into income or a loan.", "kind")
         if item_id in self.repo.installment_terms() and any(
                 clean[key] != getattr(old, key) for key in ("amount", "payment_count", "frequency", "interval_count")):
             raise ValidationError("This purchase's payment amount and count come from its price and fee.")
@@ -246,6 +251,25 @@ class PlanningService:
         payments = [p for item in self.items(kinds) for p in self.payments(item, until, as_of)]
         return sorted(payments, key=lambda p: (p.due_date, p.item.name.casefold()))
 
+    @request_cached(deep=True)
+    def bill_reserve_coverage(self, as_of: date, until: date):
+        """Allocate each saved pound once, to the bill's earliest outstanding payments."""
+        available = self.reserves.bill_savings(fmt_date(as_of))
+        if not available:
+            return {}
+        out = {}
+        payments = sorted(self.all_payments(until, as_of), key=lambda p: (p.due_date, p.item.id))
+        for payment in payments:
+            item_id = payment.item.id
+            if (payment.item.kind in (PlanKind.BILL, PlanKind.SUBSCRIPTION)
+                    and payment.outstanding and available.get(item_id, ZERO) > ZERO):
+                amount = self.amount_in_base(payment, payment.still_owed, as_of)
+                covered = min(available[item_id], max(amount, ZERO))
+                if covered:
+                    out[(item_id, payment.due_date)] = covered
+                    available[item_id] -= covered
+        return out
+
     def match_payments(self, as_of: date | None = None) -> int:
         """Link only unambiguous one-to-one candidates under each item's saved policy."""
         if self.db.read_only:
@@ -278,6 +302,7 @@ class PlanningService:
                         candidate["id"] in self.repo.linked_transaction_ids()):
                     continue  # a confirmation committed since the candidate read
                 self.repo.settle(item.id, payment.due_date, "PAID", candidate["id"], candidate["amount"])
+                self.reserves.fund_bill_payment(item.id, candidate["id"])
                 linked.add(candidate["id"])
                 count += 1
         return count
@@ -425,6 +450,7 @@ class PlanningService:
                 self.repo.add_extra_payment(item.id, transaction_id, txn["amount"], ZERO, due_date)
             else:
                 self.repo.settle(item.id, due_date, "PAID", transaction_id, txn["amount"])
+                self.reserves.fund_bill_payment(item.id, transaction_id)
 
     def review_links(self, transaction_id: int) -> str:
         """After a linked transaction was edited, keep each bill or income link it still fits and refresh the paid
@@ -513,6 +539,7 @@ class PlanningService:
                          counterparty=party, description=item.name if implicit_plan else "",
                          notes=f"{item.kind_label} · {item.name}")
             self.repo.settle(item.id, due, "PAID", txn.id, value)
+            self.reserves.fund_bill_payment(item.id, txn.id)
         return txn.id
 
     def skip(self, item_id: int, due_date: str) -> None:
@@ -685,6 +712,8 @@ class PlanningService:
         """
         first, last = parse_month(month)
         out: dict[int, dict] = {}
+        cover = self.bill_reserve_coverage(today(), max(today(), last))
+        funded = self.reserves.bill_payment_funding()
         for item in self.items((PlanKind.BILL, PlanKind.SUBSCRIPTION)):
             if item.category_id is None:
                 continue
@@ -692,7 +721,10 @@ class PlanningService:
                 if payment.due_date < fmt_date(first) or payment.status == PaymentStatus.SKIPPED:
                     continue
                 row = out.setdefault(item.category_id, {"amount": ZERO, "items": []})
-                row["amount"] += self.amount_in_base(payment, payment.amount, payment.due_date)
+                value = self.amount_in_base(payment, payment.amount, payment.due_date)
+                reserve = (funded.get((item.id, payment.transaction_id), ZERO) if payment.transaction_id
+                           else cover.get((item.id, payment.due_date), ZERO))
+                row["amount"] += max(value - reserve, ZERO)
                 row["items"].append(item.name)
         return out
 

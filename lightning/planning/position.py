@@ -10,7 +10,7 @@ never re-adds balances its own way. The names match ai/GLOSSARY.md and the UI fi
     What you owe                = Bills due (other than loan payments) + Loans still to pay + Gam'eya still to pay
     Net worth                   = What you own − What you owe
     Kept apart                  = Cash you own in brokerages, other currencies or accounts set apart
-    Free cash                   = Cash you own − Kept apart − Reserves − Bills due
+    Free cash                   = Cash you own − Kept apart − Reserves − Bills due + Bill cash already set aside
     Portfolio value             = Holdings value + Brokerage cash
     Investments after sale      = Σ (Deposits and Holdings value by class × sale factor)
     If you sold today           = Free cash + Kept apart + Investments after sale
@@ -105,6 +105,8 @@ class Position:
     gameya_owed: Decimal = ZERO         # Gam'eya still to pay: circles with a negative balance
     kept_apart: Decimal = ZERO          # owned cash that is not spendable (brokerage, foreign, set apart)
 
+    bill_reserve_coverage: Decimal = ZERO  # cash already counted under Reserves for bills due
+
     # ------------------------------------------------------------ base parts
     @property
     def deposits(self) -> Decimal:
@@ -154,7 +156,7 @@ class Position:
 
     @property
     def free_cash(self) -> Decimal | None:
-        return None if self.reserves is None else self.spendable_cash - self.reserves - self.bills_due
+        return None if self.reserves is None else self.spendable_cash - self.reserves - self.bills_due + self.bill_reserve_coverage
 
     @property
     def spendable_cash(self) -> Decimal:
@@ -382,4 +384,5 @@ class PositionService:
             reserves=None if rows is None else sum((r["effective_allocated"] for r in rows), ZERO),
             reserve_rows=None if rows is None else tuple(rows),
             owe=self.planning.what_you_owe(day), gameya_owed=wealth.gameya_owed,
-            kept_apart=self.reporting.owned_cash_kept_apart(text))
+            kept_apart=self.reporting.owned_cash_kept_apart(text),
+            bill_reserve_coverage=sum(self.planning.bill_reserve_coverage(day, day).values(), ZERO))

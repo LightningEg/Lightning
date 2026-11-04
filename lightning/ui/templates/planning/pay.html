@@ -2,6 +2,7 @@
 {% block title %}{{ item.name }} · {{ payment.due_date }}{% endblock %}
 {% block heading %}<div><h1>{{ item.name }}</h1><p class="muted small page-subtitle">{{ item.kind_label|tr(locale) }} due {{ payment.due_date }} · {{ payment.amount|money }} {{ currency }}</p></div>{% endblock %}
 {% block content %}
+{% if bill_reserve and payment.outstanding %}<p class="muted">{{ 'Saved for this bill: {amount} {currency} in {name}.'|tr(locale, amount=bill_reserve.effective_allocated|money(places=0), currency=base, name=bill_reserve.name) }}</p>{% endif %}
 {% if msg %}<div class="flash error">{{ msg }}</div>{% endif %}
 {% if not payment.outstanding %}
 <section class="card stack">
