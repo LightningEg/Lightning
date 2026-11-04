@@ -49,7 +49,14 @@ jobs:
         with:
           python-version: '3.13'
       - name: Print the list
-        run: python -m tools.market.abroad_catalogue --print
+        # Compressed, between markers, so the log stays short: decode with base64 -d | gunzip.
+        run: |
+          python -m tools.market.abroad_catalogue --print > "$RUNNER_TEMP/abroad.csv"
+          wc -l "$RUNNER_TEMP/abroad.csv"
+          echo "BEGIN abroad_instruments.csv.gz.b64"
+          gzip -9 -c "$RUNNER_TEMP/abroad.csv" | base64 -w 0
+          echo
+          echo "END abroad_instruments.csv.gz.b64"
   collect:
     name: Collect, check and publish
     if: github.event_name != 'workflow_dispatch' || inputs.packs != 'catalogue'
