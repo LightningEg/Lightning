@@ -9,7 +9,7 @@ from datetime import timedelta
 from lightning.core.dates import parse_date
 from lightning.core.errors import ValidationError
 from lightning.core.money import to_decimal
-from .dated_cash import dated_cash_forecast
+from .dated_cash import dated_cash_forecast, lowest_scheduled_balance
 from .domain import PlanKind
 
 
@@ -70,7 +70,4 @@ def compare_scenario(forecaster, day, end, *, income='', delay='', purchase='', 
         assumptions.append(f'{account.name}: −{value:f} {account.currency} · {when.isoformat()}')
     baseline = dated_cash_forecast(forecaster.reporting, payments, events, day, end)
     projected = dated_cash_forecast(forecaster.reporting, changed, changed_events, day, end)
-    def low(projection):
-        known = [row for row in projection.balances if row.balance is not None]
-        return min(known, key=lambda row: row.balance) if known else None
-    return ScenarioResult(baseline, projected, low(baseline), low(projected), tuple(assumptions))
+    return ScenarioResult(baseline, projected, lowest_scheduled_balance(baseline), lowest_scheduled_balance(projected), tuple(assumptions))

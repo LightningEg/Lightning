@@ -128,3 +128,23 @@ def test_posted_income_awaiting_a_plan_link_is_not_counted_again_or_offered_for_
     result=compare_scenario(c.forecaster,date(2026,9,5),date(2026,9,30))
     assert result.baseline.balances[-1].balance == 1000
     assert snapshot(c) == before
+
+
+def test_legitimate_purchases_in_other_accounts_or_categories_and_unplanned_repeats_are_not_alerts(c):
+    a,party,cat,txns=fixture(c,[100,100,100,100])
+    other=c.account_flows.open_account('Second bank','BANK','2026-01-01','1000')
+    c.transactions.record_outflow('2026-04-06',other.id,'100',cat.id,counterparty='Streaming')
+    assert not bill_alerts(c,date(2026,4,20))
+    food=c.categories.get_by_code('EXP.PERSONAL.FOOD')
+    c.transactions.record_outflow('2026-04-06',a.id,'100',food.id,counterparty='Streaming')
+    assert not bill_alerts(c,date(2026,4,20))
+    for day in ('2026-04-06','2026-04-07'):
+        c.transactions.record_outflow(day,a.id,'100',food.id,counterparty='Grocer')
+    assert not bill_alerts(c,date(2026,4,20))
+
+
+def test_a_voided_source_does_not_keep_a_drift_warning_alive(c):
+    _,_,_,txns=fixture(c,[100,100,100,140])
+    assert len(bill_alerts(c,date(2026,4,20)))==1
+    c.transactions.void(txns[-1].id)
+    assert not bill_alerts(c,date(2026,4,20))

@@ -134,3 +134,9 @@ def dated_cash_forecast(reporting, payments, events, as_of: date, end: date) -> 
     return DatedCashForecast(through, tuple(points), first,
                             tuple(sorted(account_shortfalls.values(), key=lambda s: (s.date, s.account_id))),
                             unassigned, tuple(sorted(missing)))
+
+
+def lowest_scheduled_balance(projection):
+    """Earliest lowest day-end combined balance; unavailable when FX prevents projection."""
+    known = [row for row in projection.balances if row.balance is not None]
+    return min(known, key=lambda row: row.balance) if known else None
