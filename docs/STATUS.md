@@ -9,7 +9,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Capture](pillars/capture.md) | 6 |  | 1 | 5 |  |  |
 | [Plan](pillars/plan.md) | 4 |  |  | 4 |  | 1 |
 | [Understand](pillars/understand.md) | 5 |  | 1 | 3 | 1 | 1 |
-| [Own](pillars/own.md) | 9 | 2 | 2 | 3 | 2 |  |
+| [Own](pillars/own.md) | 9 | 2 | 1 | 4 | 2 |  |
 | [Protect](pillars/protect.md) | 3 | 1 | 2 |  |  | 1 |
 | [Everywhere](pillars/everywhere.md) | 5 | 4 |  | 1 |  |  |
 | [Feel](pillars/feel.md) | 13 | 4 | 7 | 1 | 1 | 1 |
