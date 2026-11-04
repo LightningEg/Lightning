@@ -69,7 +69,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3Q1 | ↳ KPI cards: Overview, Spending thin-data forms, Recurring, Loans, Reserves | | | M | |
 | IV-3Q2 | ↳ KPI cards: Investments, holding page, Currencies, Accounts, account page | | | M | |
 | IV-3Q3 | ↳ Phone, arabic-check, Mohab and site-recapture pass | | | M | |
-| IV-3Q4 | ↳ Small fixes that need no decision | | | S | |
 | **IV-3S** | [PC screens break the guideline in 18 places not yet filed - misleading charts, colours off meaning](3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) | improvement, visual | Feel | L | ready |
 | IV-3S1 | ↳ Charts that mislead (A12) | | | M | |
 | IV-3S2 | ↳ Colour off its meaning (A03) | | | M | |
