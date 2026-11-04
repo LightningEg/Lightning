@@ -80,6 +80,7 @@
       <form method="post" action="/reserves/{{ reserve.id }}/complete" class="reserve-complete"><button class="cat-icon" title="Complete" aria-label="Complete {{ reserve.name }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>
       </div>
       <p class="muted small" data-reserve-refresh="goal-{{ reserve.id }}"{% if not reserve.a_month and not reserve.late %} hidden{% endif %}>{% if reserve.a_month %}About {{ reserve.a_month|money(False, 0) }} {{ base }} a month. {% endif %}{% if reserve.late %}{% if reserve.late.reached %}Your plan leaves {{ reserve.late.can|money(False, 0) }} a month for it: set that aside each month and it is ready in {{ reserve.late.reached }}.{% else %}Your plan leaves nothing for it yet.{% endif %}{% endif %}</p>
+
       <div class="reserve-foot small">{% for payment in reserve.payments %}<a href="/transactions/{{ payment.id }}">{{ payment.ref }} · {{ payment.date }} · {{ payment.amount|money }}</a> {% endfor %}<a href="/reserves/{{ reserve.id }}/payments" data-popup-open>{{ "Link or review a payment"|tr(locale) }}</a><details class="reserve-edit"><summary>{{ "Edit"|tr(locale) }}</summary>
         <form method="post" action="/reserves/{{ reserve.id }}/edit" class="stack" data-reserve-autosave>
           <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" value="{{ reserve.name }}" required></label>
@@ -89,7 +90,19 @@
           {{ match_by(reserve, 'Match payments for ' ~ reserve.name) }}
           <span class="inline-save-status" role="status" aria-live="polite"></span>
         <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
-      </details></div>
+            <form method="post" action="/reserves/{{ reserve.id }}/bill" class="reserve-bill-link">
+        <label>{{ 'Bill funded by this reserve'|tr(locale) }}
+          <select name="planned_item_id" data-own-picker>
+            <option value="">{{ 'No linked bill'|tr(locale) }}</option>
+            {% for bill in bills %}<option value="{{ bill.id }}"{% if reserve.planned_item_id == bill.id %} selected{% endif %}>{{ bill.name }}</option>{% endfor %}
+            {% if reserve.planned_item_id and not bills|selectattr('id', 'equalto', reserve.planned_item_id)|list %}<option value="{{ reserve.planned_item_id }}" selected disabled>{{ 'Bill no longer active'|tr(locale) }}</option>{% endif %}
+          </select>
+        </label>
+        <small>{{ "Payments use the cash saved here. Cash planning counts the remaining bill cost instead of a separate reserve top-up."|tr(locale) }}</small>
+        <button class="btn small">{{ 'Save bill link'|tr(locale) }}</button>
+        <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+      </form>
+</details></div>
     </li>
     {% endfor %}
   </ul>{% endif %}

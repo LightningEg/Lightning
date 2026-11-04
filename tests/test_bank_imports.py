@@ -227,7 +227,7 @@ def test_ui_upload_review_and_post(c, setup):
     assert c.reporting.account_balance(account_id) == 50000 - 14
 
 
-def test_ui_allows_incomplete_rows_and_defaults_category(c, setup):
+def test_ui_requires_explicit_uncategorized_choice(c, setup):
     from fastapi.testclient import TestClient
     from lightning.ui.web import create_app
     accounts, cats = setup
@@ -243,7 +243,11 @@ def test_ui_allows_incomplete_rows_and_defaults_category(c, setup):
         f"counterparty_{row_id}": "", f"category_{row_id}": "", f"date_{row_id}": "2026-09-22",
         f"amount_{row_id}": "-14"
     }, follow_redirects=False)
-    assert response.status_code == 200 and "Import complete" in response.text
+    assert response.status_code == 200 and "Some rows still need review" in response.text
+    assert c.db.scalar("SELECT COUNT(*) FROM transactions WHERE source='IMPORT'") == 0
+    response = client.post(f"/accounts/{account_id}/import/{batch_id}/confirm", data={
+        f"counterparty_{row_id}": "", f"category_{row_id}": "__uncategorized__"})
+    assert "Import complete" in response.text
     assert c.db.scalar("SELECT COUNT(*) FROM transactions WHERE source='IMPORT'") == 1
     txn = c.db.one("SELECT counterparty FROM transactions WHERE source='IMPORT'")
     assert txn["counterparty"] == ""
@@ -352,8 +356,8 @@ def test_review_with_a_row_error_rerenders_typed_amounts(c, setup):
     _, rows = c.bank_imports.preview(batch_id)
     first, second = (row["_import_row_id"] for row in rows)
     posted = client.post(f"/accounts/{account_id}/import/{batch_id}/confirm", data={
-        f"counterparty_choice_{first}": "unlinked", f"amount_{first}": "-1,200.00", f"date_{first}": "2026-09-02",
-        f"counterparty_choice_{second}": "unlinked", f"amount_{second}": "-4x5", f"date_{second}": "2026-09-03",
+        f"counterparty_choice_{first}": "unlinked", f"category_{first}": "__uncategorized__", f"amount_{first}": "-1,200.00", f"date_{first}": "2026-09-02",
+        f"counterparty_choice_{second}": "unlinked", f"category_{second}": "__uncategorized__", f"amount_{second}": "-4x5", f"date_{second}": "2026-09-03",
     })
     assert posted.status_code == 200
     assert "Nothing was imported" in posted.text and "To fix 1" in posted.text

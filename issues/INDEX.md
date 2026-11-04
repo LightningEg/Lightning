@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 49 open items, in the order they are worked on.
+10 milestones, 47 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -80,9 +80,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3S5 | ↳ Small things | | | S | |
 | IV-3S6 | ↳ Teach the brand audit what it cannot see | | | M | |
 | **IV-3T** | [Phone screens break Part C - cut words, overlapping text, no way back on five pages, small targets, five Settings tabs](3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | improvement, visual | Feel | L | ready |
-| IV-3T1 | ↳ Cut words and overlapping text (C12) | | | M | |
-| IV-3T3 | ↳ Touch targets | | | M | |
-| IV-3T4 | ↳ Settings tabs and money first | | | M | |
 | IV-3T5 | ↳ Charts and expense analysis | | | M | |
 | IV-3T6 | ↳ Fields, pairs and small things | | | M | |
 | **NF-3AD** | [Phone overhaul, step 2 - quick add with the amount first, a transaction sheet with the plan left, swipe to sort, a health score](3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | new feature | Capture | L | new |
@@ -166,7 +163,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **NF-7B** | [Read PDF and Excel statements through the CSV review](7-planning-import-and-search/7B-pdf-and-excel-statements.md) | new feature | Capture | L | new |
+| **NF-7B** | [Read PDF and Excel statements through the CSV review](7-planning-import-and-search/7B-pdf-and-excel-statements.md) | new feature | Capture | L | building |
 | NF-7B1 | ↳ Design: parser choice, size caps, no macros, no formulas run | | | M | |
 | NF-7B2 | ↳ Excel statements through the CSV review | | | L | |
 | NF-7B3 | ↳ PDF statements through the CSV review | | | L | |
@@ -175,7 +172,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7C1 | ↳ Read each app's export format | | | M | |
 | NF-7C2 | ↳ A mapping preset per app in the CSV review | | | L | |
 | NF-7C3 | ↳ A move-in guide | | | M | |
-| **NF-7D** | [Search and matching: what is not built](7-planning-import-and-search/7D-search-and-matching.md) | new feature | Capture | L | ready |
+| **NF-7D** | [Search and matching: what is not built](7-planning-import-and-search/7D-search-and-matching.md) | new feature | Capture | L | building |
 | NF-7D1 | ↳ Agree the matching contract ([#218](https://github.com/LightningEg/Lightning/issues/218)) | | | M | |
 | NF-7D2 | ↳ Replace difflib with RapidFuzz ([#219](https://github.com/LightningEg/Lightning/issues/219)) | | | L | |
 | NF-7D3 | ↳ Scoped pickers use the matcher ([#220](https://github.com/LightningEg/Lightning/issues/220)) | | | M | |
@@ -187,9 +184,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7F2 | ↳ Rename a rule | | | S | |
 | NF-7F3 | ↳ Change one budget category without the full grid | | | M | |
 | **NF-7G** | [Age of Money and a spending calendar](7-planning-import-and-search/7G-more-analytics.md) | new feature | Understand | M | new |
-| **NF-7T** | [Link the sections - salary-day cascade and a reserve tied to its bill](7-planning-import-and-search/7T-link-the-sections.md) | new feature | Plan | L | new |
-| NF-7T5 | ↳ Salary-day cascade | | | L | |
-| NF-7T6 | ↳ A reserve tied to its bill | | | L | |
 | **NF-7X** | [Extend local planning with scenario comparisons and bill-change alerts](7-planning-import-and-search/7X-scenario-and-bill-intelligence.md) | new feature | Plan | L | new |
 | NF-7X1 | ↳ Specify scenario inputs and comparisons | | | M | |
 | NF-7X2 | ↳ Calculate read-only scenarios | | | M | |
@@ -198,7 +192,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7X5 | ↳ Show reviewable alerts in Needs you | | | M | |
 | **NF-7Y** | [Explain which stale or pending inputs affect a financial figure](7-planning-import-and-search/7Y-financial-data-freshness.md) | new feature | Understand | M | building |
 
-Done: 7A, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7U, 7V, 7W. Next free code: 7Z.
+Done: 7A, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W. Next free code: 7Z.
 
 ## 8 Website
 
@@ -206,12 +200,11 @@ The site is honest, quick and in step with the app.
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **IT-8A** | [Feedback form: submit scrolls to the page end, images take 10 s, and the survey forms accept formula injection and spam](8-website/8A-feedback-form-send-and-spam-guard.md) | improvement, technical | Reach | M | ready |
 | **OW-8D** | [For Geeks audit ideas left for the owner to choose](8-website/8D-for-geeks-audit-ideas-to-choose.md) | owner task | Reach |  | ready |
 | **IV-8F** | [Home and Features show the app, not only words](8-website/8F-home-and-features-show-the-app.md) | improvement, visual | Reach | M | ready |
 | **OW-8AA** | [Sign off the Low, Medium and High ratings on the comparison pages](8-website/8AA-sign-off-the-comparison-ratings.md) | owner task | Reach |  | ready |
 
-Done: 8B, 8C, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z. Next free code: 8AB.
+Done: 8A, 8B, 8C, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z. Next free code: 8AB.
 
 ## 9 Later
 

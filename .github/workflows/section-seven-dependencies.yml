@@ -1,0 +1,44 @@
+# Focused validation authorized for Section 7. No app release or production signing job runs here.
+name: Section 7 dependency checks
+on:
+  push:
+    branches: ['codex/search-matching', 'codex/section-seven-*']
+    paths:
+      - 'requirements/**'
+      - 'packaging/third-party/**'
+      - '.github/workflows/section-seven-dependencies.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: section-seven-dependencies-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  matcher:
+    name: Matcher on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.13'
+      - name: Install the focused hash-locked matcher and freezer
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then platform=win; else platform=linux; fi
+          python tools/matcher_probe.py lock "$platform" > matcher-probe.lock
+          python -m pip install --require-hashes --only-binary=:all: -r matcher-probe.lock
+      - name: Compare native and portable ranking
+        run: python tools/matcher_probe.py check
+      - name: Build and run a frozen matcher
+        shell: bash
+        run: |
+          python -m PyInstaller --clean --noconfirm --onefile --collect-submodules rapidfuzz --name matcher-probe tools/matcher_frozen_probe.py
+          if [ "$RUNNER_OS" = "Windows" ]; then dist/matcher-probe.exe; else dist/matcher-probe; fi
+# Android remains held by the owner's selected-action policy (2026-11-04).
+# Run android-app.yml only after that policy permits its already-pinned Gradle action.

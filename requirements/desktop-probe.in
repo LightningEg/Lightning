@@ -21,3 +21,10 @@ httpx==0.28.1
 import-linter==2.15
 httpx2==2.16.0
 pytest-xdist==3.8.0
+
+# Shared retrieval; Android uses the verified upstream portable implementation.
+rapidfuzz==3.14.3
+pypdf==6.10.0
+openpyxl==3.1.5
+defusedxml==0.7.1
+et-xmlfile==2.0.0

@@ -1,6 +1,7 @@
 """Brand audit in a real browser (guideline A03, A05, A10.3, A16): on the main PC pages, with the Mohab sample at
 1366 × 768 px, nothing is upper-case, text is only in A03 colours, plain links are Ink and underlined, H1 to H3 are Ink,
-no field is white or boxed, money out in the register is rose and never a positive figure, and the register fits its card.
+no field is white or boxed, fieldsets do not draw nested boxes, chart end labels do not overlap, money out in the
+register is rose and never a positive figure, and the register fits its card.
 Skipped when Playwright or Chromium is missing (CI has neither), so it runs by hand:
 `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers python -m pytest tests/test_brand_audit.py -q`."""
 from __future__ import annotations
@@ -19,7 +20,7 @@ if not CHROMIUM.exists():
     CHROMIUM = Path(shutil.which("chromium") or str(CHROMIUM))
 
 PAGES = ("/plan/purchases/new", "/exports/all", "/setup/salary", "/", "/transactions", "/accounts", "/accounts/1", "/accounts/currencies", "/settings", "/investments",
-         "/investments/prices", "/budget", "/plan", "/birdview/expenses", "/financial-health", "/categories",
+         "/investments/prices", "/budget", "/plan", "/birdview/expenses", "/financial-health", "/categories", "/settings?section=budget",
          "/profiles")
 # A03: Ink, Ink 2, Muted, Meadow text, Azure, Strong rose, Nile, and white on Nile or on the vivid gradient.
 TEXT = ["#0D2233", "#304A5C", "#566E7E", "#097852", "#0B6DD6", "#C93D72", "#0A2442", "#FFFFFF"]
@@ -28,7 +29,7 @@ COLLECT = """() => {
   const TEXT = %TEXT%;
   const hex = c => { const m = c.match(/[\\d.]+/g); if (!m) return null; if (m.length > 3 && +m[3] === 0) return null;
     return '#' + m.slice(0, 3).map(x => (+x).toString(16).padStart(2, '0')).join('').toUpperCase(); };
-  const out = {upper: [], colors: [], links: [], heads: [], fields: [], rose: [], overflow: [], jump: [], kpi: []};
+  const out = {upper: [], colors: [], links: [], heads: [], fields: [], fieldsets: [], chart_labels: [], rose: [], overflow: [], jump: [], kpi: []};
   const name = el => el.tagName + '.' + String(el.className && el.className.baseVal === undefined ? el.className : '').trim().split(/\\s+/).slice(0, 2).join('.');
   for (const el of document.querySelectorAll('body *')) {
     const s = getComputedStyle(el), r = el.getBoundingClientRect();
@@ -54,6 +55,25 @@ COLLECT = """() => {
   }
   for (const c of document.querySelectorAll('.main .card')) {
     if (c.scrollWidth > c.clientWidth + 1 || [...c.querySelectorAll('*')].some(w => w.clientWidth && w.scrollWidth > w.clientWidth + 1 && ['auto', 'scroll'].includes(getComputedStyle(w).overflowX))) out.overflow.push(name(c));
+  }
+  // A16: a semantic fieldset must not draw a card inside a card; a segmented choice is a control, not a card.
+  for (const el of document.querySelectorAll('.main .card fieldset:not(.planner-mode)')) {
+    const r = el.getBoundingClientRect(), s = getComputedStyle(el);
+    if (!r.width || !r.height || s.visibility === 'hidden' || el.closest('[hidden],[inert]')) continue;
+    const bg = hex(s.backgroundColor);
+    if (parseFloat(s.borderTopWidth) > 0 || bg) out.fieldsets.push(name(el) + ' ' + (el.querySelector('legend')?.textContent.trim() || ''));
+  }
+  // A12: labels for different series must not overlap when the browser draws them.
+  for (const plot of document.querySelectorAll('.main .chart-plot, .main .pace-plot')) {
+    const labels = [...plot.querySelectorAll('.chart-end, .pace-end small')].filter(el => {
+      const r = el.getBoundingClientRect(), s = getComputedStyle(el);
+      return r.width && r.height && s.visibility !== 'hidden' && !el.closest('[hidden],[inert]');
+    });
+    for (let i = 0; i < labels.length; i++) for (let j = i + 1; j < labels.length; j++) {
+      const a = labels[i].getBoundingClientRect(), b = labels[j].getBoundingClientRect();
+      if (a.left < b.right - 0.5 && a.right > b.left + 0.5 && a.top < b.bottom - 0.5 && a.bottom > b.top + 0.5)
+        out.chart_labels.push(labels[i].textContent.trim() + ' / ' + labels[j].textContent.trim());
+    }
   }
   // A08 and A09 (guideline 3.32): two to four KPI cards fill a row, every card compares, the figures share a line.
   for (const row of document.querySelectorAll('.main .kpi-row')) {
@@ -124,6 +144,8 @@ def audit():
                 page.click("form[action='/profiles/confirm'] button[type=submit]")
                 page.goto(host.origin + "/")
                 result["/welcome"] = _collect(page)
+                result["first_account_surface"] = page.locator('.first-account-choices').evaluate(
+                    'el => [getComputedStyle(el).backgroundColor, getComputedStyle(el).boxShadow]')
                 result["sample_load_style"] = page.locator(".sample-box-load").first.evaluate(
                     "el => [getComputedStyle(el).color, getComputedStyle(el).textDecorationLine]")
                 page.evaluate("""async () => { const t = (document.querySelector('meta[name=lightning-session]')||{}).content
@@ -134,19 +156,41 @@ def audit():
                     assert response is not None and response.status < 400, f"{path}: HTTP {response and response.status}"
                     page.mouse.move(1, 1)  # a pointer resting on a field would show its hover border
                     result[path] = _collect(page)
+                    if path == "/birdview/expenses":
+                        result["spending_multiple_surfaces"] = page.locator('.multiples .multiple').evaluate_all(
+                            'els => els.map(el => [getComputedStyle(el).borderTopWidth, getComputedStyle(el).backgroundColor])')
                     if path == "/categories":
                         result["category_direction_colors"] = page.locator(".cat-item select[name=direction]").first.evaluate(
                             "el => ['dir-out', 'dir-both', 'dir-in'].map(c => { el.className=c; return getComputedStyle(el).color; })")
                 page.goto(host.origin + "/activity")
+                result["activity_breadcrumbs"] = page.locator('.compact-row small').evaluate_all(
+                    'els => els.filter(el => el.textContent.includes(" › ")).map(el => el.textContent.trim())')
                 expense = page.locator(".compact-row b.neg").first
                 result["activity_outflow"] = (expense.evaluate("el => [el.textContent.trim(), getComputedStyle(el).color]")
                                               if expense.count() else None)
-                detail = page.locator('.compact-row[href^="/transactions/"]').first
+                detail = page.locator('.compact-row[href^="/transactions/"]').filter(has=page.locator('b.neg')).first
                 if detail.count():
                     page.goto(host.origin + detail.get_attribute("href"))
                     result["transaction_heading_size"] = page.locator(".topbar h1").evaluate("el => getComputedStyle(el).fontSize")
+                    result["transaction_category_breadcrumbs"] = page.locator('.category-context').evaluate_all(
+                        'els => els.filter(el => el.textContent.includes(" › ")).map(el => el.textContent.trim())')
+                    result["transaction_primary_count"] = page.locator('.main button.primary:visible').count()
+                    result["transaction_actions_layout"] = []
+                    for width in (1024, 1366, 1920):
+                        page.set_viewport_size({"width": width, "height": 768})
+                        result["transaction_actions_layout"].append(page.locator('.transaction-actions-grid').evaluate("""el => {
+                            const cards = [...el.children], a = cards[0].getBoundingClientRect(), b = cards[1].getBoundingClientRect();
+                            const picker = el.querySelector('.reserve-allocate input[role="combobox"]');
+                            return {paired: Math.abs(a.top-b.top) < 2,
+                                    overflow: cards.some(c => c.scrollWidth > c.clientWidth + 1),
+                                    clipped: !!picker && picker.scrollWidth > picker.clientWidth + 1};
+                        }"""))
+                    page.set_viewport_size({"width": 1366, "height": 768})
                 else:
                     result["transaction_heading_size"] = None
+                    result["transaction_category_breadcrumbs"] = None
+                    result["transaction_actions_layout"] = None
+                    result["transaction_primary_count"] = None
                 page.goto(host.origin + "/")
                 page.keyboard.press("Control+k")
                 page.locator(".command-input").fill("budget")
@@ -161,6 +205,37 @@ def audit():
                                                         if reference.count() else None)
                 else:
                     result["holding_cost_reference"] = None
+                page.goto(host.origin + "/counterparties")
+                result["counterparty_overlaps"] = []
+                for width in (1024, 1366, 1920):
+                    page.set_viewport_size({"width": width, "height": 768})
+                    result["counterparty_overlaps"].append(page.locator('.cp-row').evaluate_all("""rows => rows.flatMap(row => {
+                        row.open = true;
+                        const field = row.querySelector('.cp-field'), kind = row.querySelector('.counterparty-kind');
+                        if (!field || !kind) return [];
+                        const a = field.getBoundingClientRect(), b = kind.getBoundingClientRect();
+                        return a.width && b.width && a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+                            ? [row.querySelector('summary b')?.textContent.trim() || '?'] : [];
+                    })"""))
+                page.set_viewport_size({"width": 1366, "height": 768})
+                first = page.locator('.cp-row').first
+                first.locator('.alias-details > summary').click()
+                alias = first.locator('.alias-add input[name=alias]')
+                alias.fill('Audit example alias')
+                result["alias_enter_hint"] = first.locator('.alias-enter-hint').is_visible()
+                alias.press('Enter')
+                result["alias_saved"] = 'Audit example alias' in page.content()
+                # Exercise the audit itself with real browser geometry in both failing and passing states.
+                page.set_content("""<main class="main"><section class="card"><fieldset style="border:1px solid black"><legend>Example</legend></fieldset>
+                    <div class="chart-plot" style="position:relative;width:200px;height:100px">
+                    <span class="chart-end" style="position:absolute;left:30px;top:10px">100</span>
+                    <span class="chart-end" style="position:absolute;left:30px;top:10px">200</span></div></section></main>""")
+                bad = page.evaluate(COLLECT)
+                page.locator('fieldset').evaluate("el => el.style.border='0'")
+                page.locator('.chart-end').last.evaluate("el => el.style.top='60px'")
+                good = page.evaluate(COLLECT)
+                result["detector_controls"] = [bool(bad["fieldsets"]), bool(bad["chart_labels"]),
+                                               bool(good["fieldsets"]), bool(good["chart_labels"])]
                 browser.close()
         finally:
             host.stop()
@@ -235,3 +310,49 @@ def test_activity_outflow_is_signed_and_ink(audit):
 
 def test_transaction_title_has_page_heading_size(audit):
     assert audit["transaction_heading_size"] == "28px"
+
+
+def test_pc_first_account_list_is_not_a_box(audit):
+    assert audit["first_account_surface"] == ["rgba(0, 0, 0, 0)", "none"]
+
+
+def test_pc_spending_multiples_are_not_nested_boxes(audit):
+    assert audit["spending_multiple_surfaces"]
+    assert all(border == "0px" and background == "rgba(0, 0, 0, 0)"
+               for border, background in audit["spending_multiple_surfaces"])
+
+
+def test_activity_and_transaction_categories_are_not_breadcrumbs(audit):
+    assert audit["transaction_category_breadcrumbs"] is not None
+    assert not audit["activity_breadcrumbs"]
+    assert not audit["transaction_category_breadcrumbs"]
+
+
+def test_fieldsets_do_not_draw_boxes_inside_cards(audit):
+    assert not _fails(audit, "fieldsets")
+
+
+def test_chart_end_labels_do_not_overlap(audit):
+    assert not _fails(audit, "chart_labels")
+
+
+def test_fieldset_and_label_detectors_find_and_clear_real_browser_overlap(audit):
+    assert audit["detector_controls"] == [True, True, False, False]
+
+
+def test_transaction_action_cards_pair_where_they_fit(audit):
+    assert audit["transaction_actions_layout"] == [
+        {"paired": False, "overflow": False, "clipped": False},
+        {"paired": True, "overflow": False, "clipped": False},
+        {"paired": True, "overflow": False, "clipped": False},
+    ]
+
+
+def test_transaction_has_at_most_one_visible_primary(audit):
+    assert audit["transaction_primary_count"] is not None
+    assert audit["transaction_primary_count"] <= 1
+
+
+def test_counterparty_controls_do_not_overlap_and_alias_saves_with_enter(audit):
+    assert audit["counterparty_overlaps"] == [[], [], []]
+    assert audit["alias_enter_hint"] and audit["alias_saved"]

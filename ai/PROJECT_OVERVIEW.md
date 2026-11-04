@@ -93,7 +93,7 @@ Section 13 milestone 1 (owner approved 2026-10-14) stays inside existing workflo
 Specs live in [Architecture](ARCHITECTURE.md); terms in the [Glossary](GLOSSARY.md).
 
 - **Accounts and ledger:** accounts with starting balances; money in, out, internal transfers; edit, void, restore, bulk select, search; check an account against the bank's balance (small gaps become one adjustment).
-- **CSV import:** one signed or separate in/out columns; one decision per new name; duplicates flagged; waiting reviews can be continued or discarded.
+- **Statement import:** CSV, literal .xlsx workbooks and aligned CIB text PDFs use one review; non-text PDFs have a local Copy/Edit AI-to-CSV prompt with no automatic upload. CSV uses one signed or separate in/out columns; one decision per new name; duplicates flagged; waiting reviews can be continued or discarded.
 - **Budget:** Planned, Spent, Left in plan; amount or %; carryover; All time, YTD, Monthly, Custom; savings target and goals protected; Fill this month; low-confidence estimates marked.
 - **Cash planning:** Safe to spend, What you owe, next 30 days, three-month forecast; Recurring bills, subscriptions and income (suggested, never created on their own); Loans with payoff date; Reserves with the emergency fund.
 - **Needs you (Overview):** the one review inbox: statements waiting, uncategorized transactions, bills due, missing prices, plan problems, recurring/rule offers, reserve refills and Financial health's alert bands; grouped by kind, each kind with several opening its own page. Import confirmation names the bills it settled; certificate Match all returns to the inbox. Existing savings reminders cover the same issue once.
@@ -140,6 +140,8 @@ A sparkline never follows the period. A comparison uses earlier months; a partia
 `tests/test_mohab_year.py` (read its docstring) runs steps 1–36 through the screens, one test per step. It judges answers, route from the Overview, effort, speed, simplicity, clarity and UI. When a gap is fixed, change its assertion and the Today column together.
 
 **Steps 1–10, one ordinary month (July–September 2026):** open six accounts (dates as `1/7`); import 40 CIB rows (39 posted, 1 skipped, Mom's 10,000 is Held for others); move money to THNDR and buy COMI, Fawry and a fund; record the ring and the gold pound; cash and Vodafone Cash spending; month-end prices; a 20,000 emergency fund and the budget (Free cash = Cash you own − Reserves − Bills due); track recurring items and the car loan (What you owe 60,000); on 2026-10-06 mark salary, rent and a loan payment paid (Net worth moves only by +45,000; loans still to pay 57,500); read every tab, Checks pass.
+
+**Statement follow-up (NF-7B, 2026-11-04):** Mohab chooses an Excel or supported text-based CIB statement, reviews and files the rows, then confirms; only confirmation changes cash. `tests/test_mohab_statements.py` covers both routes. A PDF without selectable text is rejected with a Copy/Edit AI-to-CSV prompt; Lightning performs no OCR or automatic upload.
 
 **Steps 11–36, October 2026 to September 2027:**
 

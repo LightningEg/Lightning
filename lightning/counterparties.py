@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from difflib import SequenceMatcher
+from lightning.core.matching import match_score
 
 from lightning.core.dates import now_iso
 from lightning.core.memo import request_cached
@@ -213,8 +213,8 @@ class CounterpartyService:
         )
         best: dict[str, float] = {}
         for row in rows:
-            ratio = SequenceMatcher(None, key, row["normalized"]).ratio()
-            if ratio >= 0.68:
+            ratio = match_score(key, row["normalized"], kind="Counterparty")
+            if ratio > 0:
                 best[row["name"]] = max(best.get(row["name"], 0), ratio)
         return sorted(best.items(), key=lambda item: (-item[1], item[0].casefold()))[:limit]
 

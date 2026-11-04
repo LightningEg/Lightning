@@ -9,7 +9,7 @@ router = APIRouter(prefix="/payday")
 @router.get("")
 async def payday(request: Request):
     c = container(request)
-    return render(request, "planning/payday.html", enabled=c.funding.enabled, allocation=c.funding.preview())
+    return render(request, "planning/payday.html", enabled=c.funding.enabled, allocation=c.funding.preview(), forecast=c.forecaster.forecast())
 
 
 @router.post("/enable")
@@ -28,9 +28,9 @@ async def apply(request: Request):
     amounts = {key.removeprefix("category_"): str(value) for key, value in form.items() if key.startswith("category_")}
     reserves = {key.removeprefix("reserve_"): str(value) for key, value in form.items() if key.startswith("reserve_")}
     try:
-        with settled_save(request, container(request)):
+        with settled_save(request, c):
             c.funding.apply(str(form.get("fingerprint", "")), amounts, reserves)
     except LightningError as exc:
         return render(request, "planning/payday.html", status_code=400, enabled=c.funding.enabled,
-                      allocation=c.funding.preview(), error=exc.message)
+                      allocation=c.funding.preview(), forecast=c.forecaster.forecast(), error=exc.message)
     return redirect("/payday", "Cash assigned. No money moved between accounts.")

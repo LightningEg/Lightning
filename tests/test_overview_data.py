@@ -74,7 +74,7 @@ def test_reserve_historical_breakdown_matches_total_and_rejects_unknown_past(c, 
     c.reserves.allocate(reserve["id"], "500")
     assert c.reserves.breakdown_at("2026-09-30") is None
     rows = c.reserves.breakdown_at("2026-12-31")
-    assert rows == [{"id": reserve["id"], "name": "Travel", "kind": "PROJECT", "effective_allocated": Decimal("500")}]
+    assert rows == [{"id": reserve["id"], "name": "Travel", "kind": "PROJECT", "planned_item_id": None, "effective_allocated": Decimal("500")}]
     assert c.reserves.allocation_at("2026-12-31") == sum((row["effective_allocated"] for row in rows), Decimal(0))
 
 

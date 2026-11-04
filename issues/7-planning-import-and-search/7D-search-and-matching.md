@@ -3,7 +3,7 @@ title: Search and matching: what is not built
 type: feature
 pillar: capture
 size: L
-status: ready
+status: building
 created: 2026-10-13
 by: unknown (moved from docs/proposals)
 ---
@@ -44,3 +44,9 @@ Done when: a search for an alias returns its transactions, exact filters still w
 ## 7D6 Edge cases and speed · M · #223
 Needs 7D3 to 7D5 merged first. Zero results, near ties, one- and two-character queries, Arabic, large histories, archived records, transfer safety, latency; evaluate SQLite FTS5 only if size needs it.
 Done when: each case has a test, latency on a large demo history is measured and written in the item, and FTS5 is adopted only if the numbers need it.
+
+## Implementation · 2026-11-04
+
+The owner authorized completion of Section 7 and the focused Windows/Android dependency checks. The earlier native-CI hold remains for unrelated work. `core/matching.py` shares per-entity RapidFuzz ranking across Search, scoped pickers and history, with comparison-only folding, explicit choices, and archived identities retained only in history. Windows/Linux use upstream native 3.14.3; Android uses upstream's verified portable wheel of the same version (`packaging/third-party/README.md`). Current tests: `test_search_contract.py`, `test_search_pickers_browser.py`, `test_search_packaging.py`; packaging and full-suite validation remain before closure.
+
+**Validation hold:** the owner chose to keep the selected-action allowlist unchanged after GitHub rejected the current pinned Gradle action. Android packaged validation remains held; the focused Windows/Linux dependency workflow is independent. No app release is authorized.

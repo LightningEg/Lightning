@@ -172,7 +172,7 @@ class ActivityReview:
                 raise ValidationError("This transaction changed. Reload it and review the current details.")
             # Snapshot links because category editing replaces ledger rows and its trigger clears them.
             prior_links = self.db.all(
-                "SELECT reserve_id,amount_e6,created_at,updated_at FROM reserve_transaction_links "
+                "SELECT reserve_id,amount_e6,created_at,updated_at,planned_item_id FROM reserve_transaction_links "
                 "WHERE transaction_id=? ORDER BY reserve_id", (transaction_id,))
             if category_id is not None:
                 if not before["can_recategorize"]:
@@ -206,9 +206,9 @@ class ActivityReview:
                     raise ValidationError("This transaction could not be recategorized.")
                 for link in prior_links:
                     self.db.execute(
-                        "INSERT INTO reserve_transaction_links(reserve_id,transaction_id,amount_e6,created_at,updated_at) "
-                        "VALUES (?,?,?,?,?)", (link["reserve_id"], transaction_id, link["amount_e6"],
-                                                link["created_at"], link["updated_at"]))
+                        "INSERT INTO reserve_transaction_links(reserve_id,transaction_id,amount_e6,created_at,updated_at,planned_item_id) "
+                        "VALUES (?,?,?,?,?,?)", (link["reserve_id"], transaction_id, link["amount_e6"],
+                                                link["created_at"], link["updated_at"], link["planned_item_id"]))
             if selected_payment:
                 self.c.planning.mark_paid(selected_payment["item_id"], selected_payment["due_date"], transaction_id)
             if selected_reserve:

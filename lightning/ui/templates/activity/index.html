@@ -8,7 +8,7 @@
     {% for row in rows %}{% set txn = row.txn %}
     <a class="compact-row" href="/transactions/{{ txn.id }}">
       <span><b>{{ txn.counterparty or txn.description or txn.ref }}</b>
-        <small>{{ txn.date }} · {{ row.account_names|join(', ') }}{% if row.category_names %} · {{ row.category_names|join(', ') }}{% endif %}
+        <small>{{ txn.date }} · {{ row.account_names|join(', ') }}{% for name in row.category_names %} · {{ name.split(' › ')[-1]|tr(locale) }}{% endfor %}
         {% if row.planned_links %} · {{ 'Planned'|tr(locale) }}{% endif %}{% if row.reserve_links %} · {{ 'Reserve linked'|tr(locale) }}{% endif %}{% if row.claim %} · {{ 'Reimbursement claim'|tr(locale) }}{% endif %}</small>
       </span><b class="num {{ 'neg' if txn.type.value == 'OUT' else 'pos' }}">{{ "−" if txn.type.value == "OUT" else "" }}{{ row.amount|money }} {{ row.currency }}</b>
     </a>{% endfor %}

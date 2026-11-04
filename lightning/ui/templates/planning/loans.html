@@ -3,9 +3,9 @@
 {% block heading %}<div><h1>{{ 'Cash planning'|tr(locale) }}</h1></div>{% endblock %}
 {% block top_actions %}<a class="btn primary" data-popup-open href="/plan/items/new?kind=LOAN">{{ "Add loan"|tr(locale) }}</a>{% endblock %}
 {% block content %}
-{% from "partials/charts.html" import key_notes, stat_tiles, lead_card %}
+{% from "partials/charts.html" import key_notes, stat_tiles, lead_card, rate %}
 {% if lead %}{% call lead_card(lead, base) %}<div class="compact-list">{% for l in loans %}<a class="compact-row" href="#loan-{{ l.item.id }}"><span>{{ l.item.name }}<small>{{ l.progress.paid }} of {{ l.progress.total }} {{ 'paid'|tr(locale) }}</small></span><b>{{ l.progress.still_to_pay|money }}</b></a>{% endfor %}</div>{% endcall %}{% endif %}
-{{ stat_tiles(debt_tiles, base, 'Your debt') }}
+{% if phone_mode() %}<div class="phone-rows" data-loan-ratios>{% for s in debt_tiles %}<a class="phone-row" href="{{ s.href }}"><span>{{ s.label }}{% if s.sub %}<small>{{ s.sub }}</small>{% endif %}</span><b>{{ rate(s.value) ~ '%' if s.value is not none else (s.empty or '—') }}</b></a>{% endfor %}</div>{% else %}{{ stat_tiles(debt_tiles, base, 'Your debt') }}{% endif %}
 {{ key_notes(notes) }}
 <section class="plan-section" aria-labelledby="loans-list">
   <a class="quiet-link" data-popup-open href="/plan/purchases/new">{{ 'Bought in instalments'|tr(locale) }}</a>

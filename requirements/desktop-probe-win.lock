@@ -893,3 +893,23 @@ uvicorn==0.54.0 \
     --hash=sha256:505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf \
     --hash=sha256:a2e33cbfaa0306f8e6b0c13e0cb89d7d7a2da3e62b90c66e18c33d9807b28620
     # via -r requirements/desktop-probe.in
+
+rapidfuzz==3.14.3 \
+    --hash=sha256:e6b5e3036976f0fde888687d91be86d81f9ac5f7b02e218913c38285b756be6c
+    # via -r requirements/desktop-probe.in
+
+pypdf==6.10.0 \
+    --hash=sha256:90005e959e1596c6e6c84c8b0ad383285b3e17011751cedd17f2ce8fcdfc86de
+    # via -r requirements/desktop-probe.in
+
+openpyxl==3.1.5 \
+    --hash=sha256:5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2
+    # via -r requirements/desktop-probe.in
+
+defusedxml==0.7.1 \
+    --hash=sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61
+    # via -r requirements/desktop-probe.in
+
+et-xmlfile==2.0.0 \
+    --hash=sha256:7a91720bc756843502c3b7504c77b8fe44217c85c537d85037f0f536151b2caa
+    # via -r requirements/desktop-probe.in
