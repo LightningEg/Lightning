@@ -152,3 +152,19 @@ def test_home_and_replica_routes_preserve_command_settlement_and_pending_writes(
     replica.sync_with(home.home)
     assert replica.c.transactions.get(local).lines[0].category_id == food
     assert home.store.fingerprint() == replica.store.fingerprint()
+
+
+def test_new_cost_method_route_rolls_back_with_failed_matching(c, setup, monkeypatch):
+    accounts, _ = setup
+    broker = accounts["thndr"]
+    before = _snapshot(c)
+    original, calls = _fail_matching(c, monkeypatch)
+    client = TestClient(create_app(c))
+    response = client.post(f"/accounts/{broker.id}/cost-method", data={"method": "fifo"}, follow_redirects=False)
+    assert response.status_code == 303
+    assert "Injected" in response.headers["location"]
+    assert calls and _snapshot(c) == before
+    monkeypatch.setattr(c.planning, "match_payments", original)
+    assert client.post(f"/accounts/{broker.id}/cost-method", data={"method": "fifo"},
+                       follow_redirects=False).status_code == 303
+    assert c.accounts.get(broker.id).cost_method == "fifo"

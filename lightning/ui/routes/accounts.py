@@ -792,7 +792,8 @@ async def set_cost_method(request: Request, account_id: int):
     c = container(request)
     form = await request.form()
     try:
-        account = c.accounts.set_cost_method(account_id, str(form.get("method", "")))
+        with settled_save(request, c):
+            account = c.accounts.set_cost_method(account_id, str(form.get("method", "")))
     except LightningError as exc:
         return redirect(f"/accounts/{account_id}", exc.message)
     return redirect(f"/accounts/{account.id}", "Sales now use the oldest purchase first." if account.cost_method == "fifo"
