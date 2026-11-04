@@ -47,7 +47,7 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§4 Phone
 ## 3T1 Cut words and overlapping text (C12) · M
 Report items 1-2. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
 
-**2026-11-04:** Chromium at 320/360 shows the current Reserves months label and Overview arrows/Net flow uncut (the latter was rebuilt by 3AN12, `89848dc0`). The Planner's choice labels now wrap inside the card (`tests/test_phone_check.py`). The sample had no changed-payment warning, so that overlap and the other reported states still need targeted verification.
+**2026-11-04:** Chromium at 320/360 shows the current Reserves months label and Overview arrows/Net flow uncut; the expanded Investments By market chip is uncut at 320 (the latter was rebuilt by 3AN12, `89848dc0`). The Planner's choice labels now wrap inside the card (`tests/test_phone_check.py`). The sample had no changed-payment warning, so that overlap and the other reported states still need targeted verification.
 
 ## 3T3 Touch targets · M
 Report item 6: targets under 48 px (C05.1). The search half (item 5: live search, results in a card, "Press Ctrl K") was built by IV-3AN's 3AN6 (2026-11-02). Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
