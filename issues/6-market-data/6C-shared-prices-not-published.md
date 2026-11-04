@@ -23,4 +23,6 @@ The app code is fine: it reads `index.json` from the Market_Data repository. Tha
 Since run 27 (11 Oct) every scheduled "Price packs" run waits on the market-publishing environment approval and is cancelled by the next one, so nothing publishes even for fx.
 
 ## Fix
-Owner action, not code: approve or remove the required reviewer on the market-data environment for scheduled runs, and decide which packs may be published. Until then the Price files page should say what is published (it says "Not published yet").
+Owner decision (2026-11-04): remove the required reviewer on the `market-publishing` environment, as `tools/security_setup.py` already intends (`approval=False`). Only packs whose sources allow republishing publish (today: the exchange-rate pack, `packs.py` `publish=True`); the others stay checked-only.
+Owner step (an AI session cannot reach the environment settings): run `python tools/security_setup.py --apply` with the owner account, or clear *Required reviewers* in Settings › Environments › market-publishing. Then check that variable `MARKET_PUBLISH` is `true` and the secret `LIGHTNING_MARKET_TOKEN` is set.
+Done when: a scheduled "Price packs" run finishes without waiting, `index.json` in Market_Data shows a new `fx` date, and Download shared prices fills. The Price files page already says "Not published yet" for the rest.
