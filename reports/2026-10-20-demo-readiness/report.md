@@ -338,3 +338,11 @@ OW-7M is resolved under the owner’s delegated report-completion instruction. G
 ## 2026-11-04 · Currency chart scope
 
 IV-3S item 4: the PC chart now identifies its existing series as cash only and says investments are excluded, so it does not imply it charts all foreign money. A combined history and the axis remain to review.
+
+## 2026-11-04 · PC link spacing
+
+IV-3S item 20: Integrity and Cash planning now leave spaces around their inline links. Its other small findings remain open.
+
+## 2026-11-04 · Review activity amounts
+
+IV-3S item 10: PC Review activity marks money out with a minus. Its category hierarchy remains open.

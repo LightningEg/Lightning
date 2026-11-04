@@ -10,7 +10,7 @@
       <span><b>{{ txn.counterparty or txn.description or txn.ref }}</b>
         <small>{{ txn.date }} · {{ row.account_names|join(', ') }}{% if row.category_names %} · {{ row.category_names|join(', ') }}{% endif %}
         {% if row.planned_links %} · {{ 'Planned'|tr(locale) }}{% endif %}{% if row.reserve_links %} · {{ 'Reserve linked'|tr(locale) }}{% endif %}{% if row.claim %} · {{ 'Reimbursement claim'|tr(locale) }}{% endif %}</small>
-      </span><b class="num {{ 'neg' if txn.type.value == 'OUT' else 'pos' }}">{{ row.amount|money }} {{ row.currency }}</b>
+      </span><b class="num {{ 'neg' if txn.type.value == 'OUT' else 'pos' }}">{{ "−" if txn.type.value == "OUT" else "" }}{{ row.amount|money }} {{ row.currency }}</b>
     </a>{% endfor %}
   </div>{% else %}<p class="muted">{{ 'No recent posted, owned cash transactions to review.'|tr(locale) }}</p>{% endif %}
 </section>

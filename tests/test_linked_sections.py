@@ -190,3 +190,13 @@ def test_four_names_then_other():
     rows = {i: {"name": str(i), "money_out": Decimal(i)} for i in range(1, 8)}
     shown = _four_then_other(rows)
     assert [row["name"] for row in shown] == ["7", "6", "5", "4", "Other"] and shown[-1]["money_out"] == Decimal(6)
+
+
+def test_activity_shows_outflow_with_minus_and_income_unsigned(c, setup):
+    accounts, cats = setup
+    expense = c.transactions.record_outflow("2026-09-02", accounts["cib"].id, "120", cats["EXP.PERSONAL.FOOD"].id)
+    income = c.transactions.record_inflow("2026-09-03", accounts["cib"].id, "500", cats["EXP.WORK.SALARY"].id)
+    page = TestClient(create_app(c)).get("/activity").text
+    expense_row = page.split(f'href="/transactions/{expense.id}"', 1)[1].split('</a>', 1)[0]
+    income_row = page.split(f'href="/transactions/{income.id}"', 1)[1].split('</a>', 1)[0]
+    assert '−120' in expense_row and '−500' not in income_row

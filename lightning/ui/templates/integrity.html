@@ -16,5 +16,5 @@
 {% endfor %}
 </section>{% endif %}
 {% if passed %}<details class="flow-disclosure"><summary>{{ 'Passed checks'|tr(locale) }}</summary><div class="compact-list">{% for check in passed %}<div class="compact-row"><span>{{ check.name }}<small>{{ check.detail }}</small></span><b class="pos">{{ 'passed'|tr(locale) }}</b></div>{% endfor %}</div></details>{% endif %}
-{% if open_checks %}<p class="small muted">{{ "A failed check points to a mismatch; this page does not change transactions or balances. Open"|tr(locale) }}<a href="/transactions">{{ "the register"|tr(locale) }}</a>, <a href="/">{{ 'Overview'|tr(locale) }}</a>, or <a href="/reserves">{{ 'Reserves'|tr(locale) }}</a>{{ "to inspect source entries."|tr(locale) }}</p>{% endif %}
+{% if open_checks %}<p class="small muted">{{ "A failed check points to a mismatch; this page does not change transactions or balances. Open"|tr(locale) }} <a href="/transactions">{{ "the register"|tr(locale) }}</a>, <a href="/">{{ 'Overview'|tr(locale) }}</a>, or <a href="/reserves">{{ 'Reserves'|tr(locale) }}</a> {{ "to inspect source entries."|tr(locale) }}</p>{% endif %}
 {% endblock %}

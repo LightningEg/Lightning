@@ -30,7 +30,7 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 
 **A16 shipping list**
 9. **2026-11-04:** The current Investments lead removes Biggest holdings when the portfolio can be valued; a six-holding browser fixture confirms it is absent. The older fallback limits its bars to four named holdings and a Neutral Other. The Planner's five-class split remains to review.
-10. "L1 › L2": the transaction page's "Personal › Entertainment"; every row of Review activity (which also shows money out without "−").
+10. "L1 › L2": the transaction page's "Personal › Entertainment"; every row of Review activity. **2026-11-04:** PC Review activity shows a minus on money out; category hierarchy remains to review.
 11. Card in a card: Settings › Budget's four boxes; Spending's small multiples; Certificates' nine `<fieldset>` boxes; first run's account-type list.
 12. Dropdown for your data: Certificates "Buy from" and "Forecast payout account"; the empty profile's Budget spending groups.
 13. A card alone: Cash planning "What you owe"; the transaction page's "Expense categories".
@@ -45,7 +45,7 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 18. **2026-11-04:** An unplanned month says "Set spending limits for this month", whether or not other months have plans.
 19. **2026-11-04:** Escape closes Ctrl-K even with a query; the Chromium brand audit checks it. Hide amounts posts through the undo journal, so "Saved changes" appears in every header.
 20. Small: transaction title is the reference at 14 px, "OUTFLOW" in capitals, raw "2026-10-20T21:36:42+00:00"; Planner has no h1 and shows decimals;
-    missing spaces around links ("Openthe register", "onRecurringto"); Review activity, Weekly review and Sale factors light the Summary tab; From SMS has no
+    **2026-11-04:** Spaces around the Integrity register and Cash planning Recurring links are restored; Review activity, Weekly review and Sale factors light the Summary tab; From SMS has no
     way back; at 1920 content is 1,435 px wide (owner question 7 in the report).
 
 ## Fix

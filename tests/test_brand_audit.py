@@ -137,6 +137,10 @@ def audit():
                     if path == "/categories":
                         result["category_direction_colors"] = page.locator(".cat-item select[name=direction]").first.evaluate(
                             "el => ['dir-out', 'dir-both', 'dir-in'].map(c => { el.className=c; return getComputedStyle(el).color; })")
+                page.goto(host.origin + "/activity")
+                expense = page.locator(".compact-row b.neg").first
+                result["activity_outflow"] = (expense.evaluate("el => [el.textContent.trim(), getComputedStyle(el).color]")
+                                              if expense.count() else None)
                 page.goto(host.origin + "/")
                 page.keyboard.press("Control+k")
                 page.locator(".command-input").fill("budget")
@@ -214,3 +218,10 @@ def test_sample_load_action_is_ink_and_underlined(audit):
 
 def test_escape_closes_command_bar_with_a_query(audit):
     assert audit["command_closed_on_escape"]
+
+
+def test_activity_outflow_is_signed_and_ink(audit):
+    assert audit["activity_outflow"] is not None
+    amount, color = audit["activity_outflow"]
+    assert amount.startswith("−")
+    assert color == "rgb(13, 34, 51)"
