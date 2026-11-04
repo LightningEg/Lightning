@@ -47,6 +47,12 @@ def check(root: Path) -> list[str]:
     for path in (root / "reports").glob("*.md"):
         if path.name != "README.md":
             errors.append(f"{path.relative_to(root)}: report needs a dated subject folder")
+    archive = root / "ai" / "archive" / "reports"
+    archived = (archive / "README.md").read_text(encoding="utf-8") if (archive / "README.md").exists() else ""
+    for report in sorted(archive.rglob("report.md")):
+        relative = report.relative_to(archive).as_posix()
+        if f"]({relative})" not in archived:
+            errors.append(f"ai/archive/reports/{relative}: absent from the archive catalogue")
     feedback_index = root / "feedback" / "README.md"
     registered = feedback_index.read_text(encoding="utf-8") if feedback_index.exists() else ""
     for record in (root / "feedback").glob("*.md"):
