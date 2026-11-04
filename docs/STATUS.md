@@ -9,20 +9,19 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Capture](pillars/capture.md) | 5 |  | 1 | 4 |  |  |
 | [Plan](pillars/plan.md) | 4 |  |  | 4 |  | 1 |
 | [Understand](pillars/understand.md) | 5 |  | 1 | 3 | 1 | 1 |
-| [Own](pillars/own.md) | 8 | 2 |  | 4 | 2 |  |
+| [Own](pillars/own.md) | 7 | 2 |  | 3 | 2 |  |
 | [Protect](pillars/protect.md) | 3 | 1 | 2 |  |  | 1 |
-| [Everywhere](pillars/everywhere.md) | 5 | 4 |  | 1 |  |  |
+| [Everywhere](pillars/everywhere.md) | 4 | 3 |  | 1 |  |  |
 | [Feel](pillars/feel.md) | 13 | 4 | 7 | 1 | 1 | 1 |
 | [Build](pillars/build.md) | 8 | 1 | 7 |  |  |  |
 | [Reach](pillars/reach.md) | 6 |  | 4 | 2 |  | 2 |
 
-57 open items in 10 milestones.
+55 open items in 10 milestones.
 
 ## Being built now
 
 - **IT-1H** (Build) [Refresh packaged dependencies with matching native wheels and lockfiles](../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md)
 - **IT-2A** (Protect) [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic rep…](../issues/2-safe-for-real-money/2A-restore-safety.md)
-- **BT-2F** (Everywhere) [On Android, downloads, file inputs and outside links do nothing](../issues/2-safe-for-real-money/2F-android-downloads-files-links.md)
 - **IV-3H** (Feel) [Tab-by-tab review: what a real user needs next](../issues/3-polish-and-arabic/3H-tab-by-tab-review.md)
 - **IV-3AM** (Feel) [PC declutter, tab by tab](../issues/3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md)
 - **IV-3AN** (Everywhere) [Phone visual plan](../issues/3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md)
@@ -47,11 +46,11 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | Milestone | Open | Goal |
 |---|---|---|
 | 1 Easy to contribute | 5 | Anyone can find how to help in one click and send a first fix the same evening. |
-| 2 Safe for real money | 5 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
+| 2 Safe for real money | 4 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
 | 3 Polish and Arabic | 13 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 3 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 5 Investments | 1 | Every investment figure can be explained per purchase, and agrees with the ledger. |
-| 6 Market data | 4 | Prices arrive by themselves, from sources Lightning may redistribute. |
+| 6 Market data | 3 | Prices arrive by themselves, from sources Lightning may redistribute. |
 | 7 Planning, import and search | 11 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 4 | The site is honest, quick and in step with the app. |
 | 9 Later | 7 | Good ideas that wait until the milestones above are done. |

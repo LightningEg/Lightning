@@ -323,6 +323,20 @@ async def backup_now(request: Request):
     return redirect("/settings", f"Backup saved as {path.name}." if path else "Nothing to back up yet.")
 
 
+@router.get("/backup/latest")
+async def newest_backup(request: Request):
+    """The newest backup as a file, so a copy can leave the device (on the phone the app's "Save to" screen takes it, 2F).
+    It is the encrypted copy as it sits in the backups folder; nothing is decrypted or rewritten."""
+    from starlette.concurrency import run_in_threadpool
+    files = container(request).backup_files()
+    if not files:
+        return redirect("/settings", "Nothing to back up yet.")
+    newest = files[0]
+    data = await run_in_threadpool(newest.read_bytes)
+    return Response(data, media_type="application/octet-stream",
+                    headers={"Content-Disposition": f'attachment; filename="{newest.name}"', "Cache-Control": "no-store"})
+
+
 @router.post("/fresh")
 async def start_fresh(request: Request):
     """Browser mode: set the current database aside (after a backup) and open an empty one in its
