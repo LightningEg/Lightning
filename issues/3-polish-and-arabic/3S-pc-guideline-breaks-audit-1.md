@@ -45,8 +45,7 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 18. **2026-11-04:** An unplanned month says "Set spending limits for this month", whether or not other months have plans.
 19. **2026-11-04:** Escape closes Ctrl-K even with a query; the Chromium brand audit checks it. Hide amounts posts through the undo journal, so "Saved changes" appears in every header.
 20. Small: transaction title is the reference at 14 px, "OUTFLOW" in capitals, raw "2026-10-20T21:36:42+00:00"; Planner has no h1 and shows decimals;
-    **2026-11-04:** Spaces around the Integrity register and Cash planning Recurring links are restored; Review activity, Weekly review and Sale factors light the Summary tab; From SMS has no
-    way back; at 1920 content is 1,435 px wide (owner question 7 in the report).
+    **2026-11-04:** Spaces around the Integrity register and Cash planning Recurring links are restored; Review activity, Weekly review and Sale factors light the Summary tab; **2026-11-04:** PC From SMS links back to Accounts; at 1920 content is 1,435 px wide (owner question 7 in the report).
 
 ## Fix
 Fix in the stylesheet or template that owns each, regenerate the RTL mirrors, rerun `tests/test_brand_audit.py` and Mohab. Extend the brand audit to

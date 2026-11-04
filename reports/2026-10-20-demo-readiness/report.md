@@ -346,3 +346,7 @@ IV-3S item 20: Integrity and Cash planning now leave spaces around their inline 
 ## 2026-11-04 · Review activity amounts
 
 IV-3S item 10: PC Review activity marks money out with a minus. Its category hierarchy remains open.
+
+## 2026-11-04 · From SMS navigation
+
+IV-3S item 20: PC From SMS links back to Accounts, where its entry point lives.
