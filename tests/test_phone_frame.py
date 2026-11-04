@@ -361,6 +361,21 @@ def test_loan_ratios_are_compared_rows_instead_of_an_unpaired_tile(phone):
     assert 'class="stat-tiles"' not in html
 
 
+def test_phone_import_uses_back_instead_of_a_second_button(phone):
+    html = phone.get('/accounts/1/import').text
+    assert 'class="phone-back" href="/accounts/1"' in html
+    upload = html.split('enctype="multipart/form-data"', 1)[1].split('</form>', 1)[0]
+    assert 'Review statement' in upload and '>Cancel</a>' not in upload
+
+
+def test_phone_recurring_suggestion_keeps_dismissal_in_more_actions(phone):
+    html = phone.get('/plan/recurring').text
+    assert 'class="phone-suggest-actions"' in html
+    actions = html.split('class="phone-suggest-actions"', 1)[1].split('</details>', 1)[0]
+    assert 'Track</a>' in actions and 'class="action-menu phone-more-menu"' in actions
+    assert '/not-recurring' in actions and 'Not recurring' in actions
+
+
 def test_phone_profile_gate_switches_language_with_one_action(phone):
     html = phone.get('/profiles').text
     form = html.split('class="gate-language"', 1)[1].split('</form>', 1)[0]

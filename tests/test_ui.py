@@ -498,3 +498,10 @@ def test_phone_sale_factors_preserve_desktop_values_and_editing(c, setup):
     updated = FactorInputs()
     updated.feed(phone_client.get(path).text)
     assert updated.fields['factor-' + first_id][0] == '82'
+
+
+def test_desktop_import_keeps_cancel(c, setup):
+    account = setup[0]['cib']
+    html = TestClient(create_app(c)).get(f'/accounts/{account.id}/import').text
+    upload = html.split('enctype="multipart/form-data"', 1)[1].split('</form>', 1)[0]
+    assert 'Review statement' in upload and '>Cancel</a>' in upload

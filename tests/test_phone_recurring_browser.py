@@ -109,3 +109,54 @@ def test_changed_monthly_payment_warning_fits_phone(c, setup, monkeypatch):
             browser.close()
     finally:
         host.stop()
+
+
+def test_phone_recurring_suggestion_menu_can_dismiss_and_restore(c, setup, monkeypatch):
+    chromium = Path('/opt/pw-browsers/chromium')
+    executable = str(chromium) if chromium.exists() else shutil.which('chromium')
+    if not executable:
+        pytest.skip('Chromium is not installed')
+    monkeypatch.setenv('LIGHTNING_TODAY', '2026-12-31')
+    accounts, cats = setup
+    party_id = c.counterparties.create('Monthly Gym')
+    for day in ('2026-10-05', '2026-11-05', '2026-12-05'):
+        c.transactions.record_outflow(day, accounts['cib'].id, '100', cats['EXP.PERSONAL.FOOD'].id,
+                                      counterparty='Monthly Gym')
+    app = create_app(c)
+    async def phone_app(scope, receive, send):
+        scope.setdefault('state', {})['phone'] = True
+        await app(scope, receive, send)
+    host = Host(lambda _: phone_app).start()
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(executable_path=executable)
+            for language in ('en', 'ar'):
+                c.settings.set('locale', language)
+                context = browser.new_context(viewport={'width': 320, 'height': 800}, is_mobile=True, has_touch=True)
+                page = context.new_page()
+                for width in (320, 360):
+                    page.set_viewport_size({'width': width, 'height': 800})
+                    assert page.goto(host.origin + '/plan/recurring').status == 200
+                    assert page.locator('html').get_attribute('lang') == ('ar-EG' if language == 'ar' else 'en')
+                    row = page.locator('.phone-suggest').filter(has_text='Monthly Gym')
+                    assert row.count() == 1
+                    actions = row.locator('xpath=following-sibling::div[1]')
+                    assert '/plan/items/new?' in actions.locator('a').first.get_attribute('href')
+                    actions.locator('summary').click()
+                    dismiss = actions.locator('form[action$="/not-recurring"] button')
+                    assert dismiss.is_visible() and dismiss.bounding_box()['height'] >= 48
+                    with page.expect_response(lambda r: r.url.endswith('/not-recurring') and r.request.method == 'POST') as posted:
+                        dismiss.click()
+                    assert posted.value.status == 303
+                    page.wait_for_load_state()
+                    assert page.locator('.phone-suggest').filter(has_text='Monthly Gym').count() == 0
+                    restore = page.locator(f'form[action="/plan/suggestions/{party_id}/restore"]')
+                    restore.locator('xpath=ancestor::details[1]').evaluate('e => e.open = true')
+                    with page.expect_response(lambda r: r.url.endswith('/restore') and r.request.method == 'POST') as restored:
+                        restore.locator('button').click()
+                    assert restored.value.status == 303
+                    page.wait_for_load_state()
+                context.close()
+            browser.close()
+    finally:
+        host.stop()

@@ -41,7 +41,7 @@
   <div class="phone-rows">{% for s in suggestions %}
     <div class="phone-row phone-suggest"><span><b>{{ s.name }}</b><small>{{ '{n} months · usually around day {day}'|tr(locale, n=s.months, day=s.day) }}</small></span><b class="{{ 'pos' if s.kind == 'INCOME' }}">{{ '+' if s.kind == 'INCOME' else '−' }}{{ s.amount|amount_role('row') }} {{ s.currency }}</b></div>
     <div class="phone-suggest-actions"><a class="phone-quiet" data-popup-open href="/plan/items/new?kind={{ s.kind }}&amp;name={{ s.name|urlencode }}&amp;amount={{ s.amount }}&amp;frequency=MONTHLY&amp;counterparty={{ s.name|urlencode }}&amp;account_id={{ s.account_id or '' }}&amp;category_id={{ s.category_id or '' }}&amp;start_date={{ s.start_date }}&amp;match_tolerance_pct={{ s.match_tolerance_pct }}">{{ 'Track'|tr(locale) }}</a>
-      <form method="post" action="/plan/suggestions/{{ s.counterparty_id }}/not-recurring"><button class="phone-quiet">{{ "Not recurring"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% endfor %}
+      <details class="action-menu phone-more-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}">⋯</summary><div><form method="post" action="/plan/suggestions/{{ s.counterparty_id }}/not-recurring"><button>{{ "Not recurring"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div></details></div>{% endfor %}
   </div>
 </section>{% endif %}
 
