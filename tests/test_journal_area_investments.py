@@ -388,3 +388,13 @@ def test_cost_method_of_a_broker_follows_to_the_other_device(devices):
     broker, _ = setup(hd, pc)
     settle(hd, pc, pc.command("accounts.set_cost_method", account_id=broker, method="fifo"))
     assert account(hd, "Broker").cost_method == account(pc, "Broker").cost_method == "fifo"
+
+
+def test_bonus_or_split_travels_and_changes_the_units_on_both_devices(devices):
+    hd, pc = devices
+    broker, stock = setup(hd, pc)
+    settle(hd, pc, buy(pc, broker, stock))
+    settle(hd, pc, pc.command("investments.bonus_or_split", date="2026-09-02", account_id=broker, asset_id=stock,
+                              units_after="125", notes="", owner_id=None))
+    quantity = lambda d: next(p.quantity for p in d.c.investments.portfolio("2026-09-30").positions)
+    assert quantity(hd) == quantity(pc) == Decimal("125")

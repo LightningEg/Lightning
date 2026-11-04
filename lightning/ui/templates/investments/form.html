@@ -5,7 +5,7 @@
 {% block content %}
 {% if not txn %}
 <div class="actions" style="margin-bottom:12px">
-  {% for k, label in [("buy", "Buy"), ("sell", "Sell"), ("dividend", "Dividend"), ("return_of_capital", "Return of capital"), ("holding", "Holding I already own")] %}
+  {% for k, label in [("buy", "Buy"), ("sell", "Sell"), ("dividend", "Dividend"), ("return_of_capital", "Return of capital"), ("bonus_or_split", "Bonus or split"), ("holding", "Holding I already own")] %}
   <a class="btn {{ 'primary' if kind == k }}" href="/investments/new?kind={{ k }}{{ '&account=' ~ values.account_id if values.account_id }}">{{ label|tr(locale) }}</a>
   {% endfor %}
 </div>
@@ -78,6 +78,11 @@
     </div>
   </div>
   <script nonce="{{ request.state.csp_nonce|default('') }}">const basis=document.getElementById('dividend-basis'),label=document.getElementById('dividend-amount-label');function syncDividendBasis(){label.textContent=window.lightningT(basis.value==='per_share'?'Amount per unit ({cur})':'Amount ({cur})',{cur:'{{ base }}'})}basis.addEventListener('change',syncDividendBasis);syncDividendBasis();</script>
+  {% elif spec and spec.balance %}
+  <div class="row">
+    {{ date_field(values, error_field) }}
+    {{ field('quantity', 'Units you hold after it', values, error_field, help='Type the number of units you will hold after the bonus shares, split or reverse split. Your cost stays the same, so your average cost per unit changes; no money moves and nothing counts as a purchase.', placeholder='e.g. 125', attrs='inputmode="decimal" required') }}
+  </div>
   {% elif spec and spec.capital %}
   <div class="row">
     {{ date_field(values, error_field) }}

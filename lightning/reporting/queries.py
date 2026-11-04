@@ -357,7 +357,7 @@ class ReportQueries:
             f"SELECT le.date, le.account_id, le.asset_id, le.quantity_e6, le.amount_e6, le.amount_base_e6, le.memo, le.owner_id,"
             f" le.effect, (SELECT is_cash FROM financial_assets WHERE id=le.asset_id) AS is_cash,"
             f" da.asset_id AS dividend_asset_id,"
-            f" t.id AS txn_id, t.type, t.ref FROM ledger_entries le {POSTED} "
+            f" t.id AS txn_id, t.type, t.ref, t.description FROM ledger_entries le {POSTED} "
             f"LEFT JOIN investment_dividend_assets da ON da.transaction_id=t.id WHERE {where}"
             f" ORDER BY le.date, t.id, le.line_no",
             tuple(params),

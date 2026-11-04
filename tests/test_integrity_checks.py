@@ -61,3 +61,66 @@ def test_removed_checks_that_compared_a_figure_with_itself(tmp_path):
         assert FREE_CASH in names
     finally:
         c.db.close()
+
+
+# ---- NF-5C: the holdings' lots against the ledger ----
+UNITS, NEVER_SHORT, SALES = ("Units held match the ledger", "Nothing was sold that was not held",
+                             "Sales match the ledger")
+
+
+@pytest.fixture
+def traded(c, setup):
+    accounts, _ = setup
+    comi = c.assets.create_investment("Commercial International Bank", "STOCK", "COMI")
+    c.transactions.record_transfer("2026-01-02", accounts["cib"].id, accounts["thndr"].id, "30000")
+    broker = accounts["thndr"].id
+    c.investments.buy("2026-02-01", broker, comi.id, "10", "100")
+    c.investments.buy("2026-03-01", broker, comi.id, "10", "200")
+    c.investments.sell("2026-04-01", broker, comi.id, "12", "250")
+    return c, broker, comi
+
+
+@pytest.mark.parametrize("method", ["average", "fifo"])
+def test_the_investment_checks_pass_for_a_normal_history(traded, method):
+    c, broker, _ = traded
+    c.accounts.set_cost_method(broker, method)
+    checks = _checks(c, "2026-12-31")
+    assert {name: checks[name].status for name in (UNITS, NEVER_SHORT, SALES)} == dict.fromkeys(
+        (UNITS, NEVER_SHORT, SALES), "PASS")
+
+
+def test_a_sale_of_units_that_were_not_held_is_reported(traded):
+    c, _, comi = traded
+    c.db.execute("UPDATE ledger_entries SET quantity_e6=quantity_e6*3 WHERE asset_id=? AND quantity_e6<0", (comi.id,))
+    check = _checks(c, "2026-12-31")[NEVER_SHORT]
+    assert check.status == "ISSUE" and check.actual == D(1)
+
+
+def test_lots_that_lose_units_break_the_units_check(traded, monkeypatch):
+    import lightning.investments.service as service
+    real = service.build_lots
+
+    def drop_a_unit(lines, method="average", owner_id=None):
+        book = real(lines, method, owner_id)
+        if book.lots:
+            book.lots[0].quantity -= 1
+        return book
+
+    monkeypatch.setattr(service, "build_lots", drop_a_unit)
+    check = _checks(traded[0], "2026-12-31")[UNITS]
+    assert check.status == "ISSUE" and check.difference == D(-1)
+
+
+def test_sales_credited_with_the_wrong_proceeds_break_the_sales_check(traded, monkeypatch):
+    import lightning.investments.service as service
+    real = service.build_lots
+
+    def lose_a_pound(lines, method="average", owner_id=None):
+        book = real(lines, method, owner_id)
+        for piece in book.disposals:
+            piece.proceeds -= 1
+        return book
+
+    monkeypatch.setattr(service, "build_lots", lose_a_pound)
+    check = _checks(traded[0], "2026-12-31")[SALES]
+    assert check.status == "ISSUE" and check.difference == D(-1)

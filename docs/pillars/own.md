@@ -11,10 +11,6 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **NF-5B** | [Cost per purchase (lots)](../../issues/5-investments/5B-cost-per-purchase-lots.md) | L | ready |
-| **NF-5C** | [Investment checks in the integrity screen](../../issues/5-investments/5C-investment-checks-in-integrity.md) | M | blocked on 5B |
-| **NF-5D** | [Return per purchase (ROI and CAGR)](../../issues/5-investments/5D-return-per-purchase.md) | M | blocked on 5B |
-| **NF-5E** | [Bonus shares and stock splits](../../issues/5-investments/5E-bonus-shares-and-splits.md) | M | blocked on 5B |
 | **NF-5G** | [Brokerages that span exchanges and currencies](../../issues/5-investments/5G-brokerages-across-exchanges.md) | L | building |
 | **IT-5M** | [Distinguish ambiguous annualized returns from unavailable results](../../issues/5-investments/5M-xirr-ambiguous-results.md) | M | new |
 | **NF-6A** | [Market data: price packs, collected in the cloud](../../issues/6-market-data/6A-price-packs.md) | L | building |
@@ -27,6 +23,6 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 
 ## Reports with open follow-ups here
 
-- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 5B, 5M, 6C
+- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 5M, 6C
 <!-- work:end -->
 
