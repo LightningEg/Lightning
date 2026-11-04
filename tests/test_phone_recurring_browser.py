@@ -79,6 +79,19 @@ def test_changed_monthly_payment_warning_fits_phone(c, setup, monkeypatch):
                     assert page.get_by_text('Dollar savings', exact=False).count() > 0
                     assert page.locator('.currency-settings .phone-row').evaluate_all(
                         'rows => rows.every(e => e.scrollWidth <= e.clientWidth + 1)')
+                    page.goto(host.origin + '/settings?section=valuations')
+                    assert page.locator('table').count() == 0
+                    factor_rows = page.locator('.factor-phone-rows .phone-row')
+                    assert factor_rows.count() > 0
+                    if language == 'ar':
+                        assert all('the default' not in t and 'Deposits' not in t for t in page.locator('.factor-from').all_text_contents())
+                    assert factor_rows.evaluate_all('rows => rows.every(e => e.scrollWidth <= e.clientWidth + 1)')
+                    if language == 'en' and width == 320:
+                        factor = factor_rows.locator('input[name=factor]').first
+                        with page.expect_response(lambda r: '/settings/liquidation-factor/' in r.url and r.request.method == 'POST') as saved:
+                            factor.fill('82')
+                            factor.press('Tab')
+                        assert saved.value.status == 204
                     page.goto(host.origin + '/transactions')
                     page.locator('.phone-more-menu > summary').first.click()
                     activity = page.locator('.phone-more-menu a[href="/activity"]').first

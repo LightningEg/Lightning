@@ -463,3 +463,38 @@ def test_phone_currency_settings_render_rates_and_fx_history_as_rows(c):
     for value in ('USD', '55', 'Dollar savings', '2026-09-30', '500'):
         assert value in phone and value in desktop
     assert '<table' in desktop
+
+
+def test_phone_sale_factors_preserve_desktop_values_and_editing(c, setup):
+    from html.parser import HTMLParser
+
+    class FactorInputs(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.fields = {}
+        def handle_starttag(self, tag, attrs):
+            attrs = dict(attrs)
+            if tag == 'input' and attrs.get('name') == 'factor':
+                self.fields[attrs['id']] = (attrs.get('value'), attrs.get('placeholder'))
+
+    account = c.account_flows.open_account('Broker', 'BROKERAGE', '2026-09-01', '1000')
+    asset = c.assets.create_investment('Fund', 'FUND.EQUITY', 'FND')
+    c.investments.add_holding(account.id, asset.id, '2', '200', '2026-09-02')
+    app = create_app(c)
+    async def phone_app(scope, receive, send):
+        scope.setdefault('state', {})['phone'] = True
+        await app(scope, receive, send)
+    phone_client, desktop_client = TestClient(phone_app), TestClient(app)
+    path = '/settings?section=valuations'
+    phone, desktop = phone_client.get(path).text, desktop_client.get(path).text
+    assert '<table' not in phone and 'factor-phone-rows' in phone and '<table' in desktop
+    a, b = FactorInputs(), FactorInputs()
+    a.feed(phone)
+    b.feed(desktop)
+    assert a.fields and a.fields == b.fields
+    assert '200' in phone and '200' in desktop  # same holding value; phone drops .00
+    first_id = next(iter(a.fields)).removeprefix('factor-')
+    assert phone_client.post(f'/settings/liquidation-factor/{first_id}', data={'factor': '82'}).status_code == 204
+    updated = FactorInputs()
+    updated.feed(phone_client.get(path).text)
+    assert updated.fields['factor-' + first_id][0] == '82'

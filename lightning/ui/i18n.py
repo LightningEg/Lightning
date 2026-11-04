@@ -682,6 +682,7 @@ ARABIC_UI = {
     'The share of each class\'s value you would expect to get if you sold today. Used for {after_sale} and {sold_today}.': 'النسبة المتوقعة من قيمة كل فئة لو بعتها النهارده. بتُستخدم في {after_sale} و{sold_today}.',
     'sale factor': 'معامل البيع',
     'from': 'من',
+    'the default': 'القيمة الافتراضية',
     'transactions': 'معاملات',
     'investment records': 'سجلات استثمار',
     'months': 'شهور',
