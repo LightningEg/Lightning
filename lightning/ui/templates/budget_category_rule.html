@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Change limit'|tr(locale) }} · {{ category.name }}{% endblock %}
+{% block title %}{{ 'Change limit'|tr(locale) }} · {{ category.name|tr(locale) }}{% endblock %}
 {% block content %}<section class="card"><h2 id="app-popup-title">{{ category.name }}</h2>
 <p class="muted">{{ 'Change the monthly limit for this category only.'|tr(locale) }} {{ month }}</p>
 <form method="post" action="/budget/rule/{{ category.id }}" class="stack">

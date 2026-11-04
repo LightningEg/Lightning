@@ -30,7 +30,7 @@
   </div>
   <details class="rule-split" {{ 'open' if values.part_category_1 or error_field.startswith('part_') }}><summary>{{ "Split money out"|tr(locale) }}</summary>
     <p class="muted small">Each part takes a fixed amount, or a percent like 30%. The rest goes to the category above.</p>
-    {% for i in parts %}<div class="row">
+    {% for i in rule_parts %}<div class="row">
       <div class="field {{ err('part_category_' ~ i) }}"><label for="part_category_{{ i }}">Part {{ i }}</label><select id="part_category_{{ i }}" name="part_category_{{ i }}" data-own-picker><option value="">{{ "Choose…"|tr(locale) }}</option>{{ category_options(category_groups(spending), values['part_category_' ~ i]) }}</select></div>
       <div class="field {{ err('part_value_' ~ i) }}"><label for="part_value_{{ i }}">Amount or %</label><input id="part_value_{{ i }}" name="part_value_{{ i }}" value="{{ values['part_value_' ~ i] }}" inputmode="decimal" placeholder="30%"></div>
     </div>{% endfor %}

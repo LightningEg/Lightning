@@ -7,7 +7,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
 | [Capture](pillars/capture.md) | 5 | 3 |  | 2 |  |  |
-| [Plan](pillars/plan.md) | 2 | 1 |  | 1 |  |  |
+| [Plan](pillars/plan.md) | 2 | 2 |  |  |  |  |
 | [Understand](pillars/understand.md) | 4 | 2 | 1 |  | 1 |  |
 | [Own](pillars/own.md) | 7 | 2 |  | 3 | 2 |  |
 | [Protect](pillars/protect.md) | 2 | 1 | 1 |  |  |  |
@@ -31,6 +31,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 - **NF-7B** (Capture) [Read PDF and Excel statements through the CSV review](../issues/7-planning-import-and-search/7B-pdf-and-excel-statements.md)
 - **NF-7D** (Capture) [Search and matching: what is not built](../issues/7-planning-import-and-search/7D-search-and-matching.md)
 - **NF-7E** (Capture) [Match bank-imported transfer pairs across currencies](../issues/7-planning-import-and-search/7E-imported-pairs-across-currencies.md)
+- **NF-7F** (Plan) [Small planning gaps](../issues/7-planning-import-and-search/7F-small-planning-gaps.md)
 - **NF-7G** (Understand) [Age of Money and a spending calendar](../issues/7-planning-import-and-search/7G-more-analytics.md)
 - **NF-7X** (Plan) [Extend local planning with scenario comparisons and bill-change alerts](../issues/7-planning-import-and-search/7X-scenario-and-bill-intelligence.md)
 - **NF-7Y** (Understand) [Explain which stale or pending inputs affect a financial figure](../issues/7-planning-import-and-search/7Y-financial-data-freshness.md)

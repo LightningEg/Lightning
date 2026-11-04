@@ -24,7 +24,7 @@ def _form(request: Request, c, values: dict, rule=None, error: str = "", error_f
                   categories=[cat.id for cat in pickable],
                   spending=[cat.id for cat in pickable if cat.movement == Movement.OUTFLOW],
                   accounts=c.accounts.list(active_only=True), counterparties=c.counterparties.list_active(),
-                  parts=range(1, MAX_PARTS + 1),
+                  rule_parts=range(1, MAX_PARTS + 1),
                   error=error, error_field=error_field)
 
 
