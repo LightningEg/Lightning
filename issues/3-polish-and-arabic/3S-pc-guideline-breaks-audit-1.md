@@ -41,7 +41,7 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 15. A05: the line under the title is a slogan ("Where your money went", "Your spending plan", Currencies, Prices, Held for others, From SMS, Review
     activity, Deleted, Settings tabs) instead of the exact dates; Overview and Cash planning have none.
 16. Certificates: a 5,400 px page with ten Primary buttons (A10.1 allows one).
-17. Settings › Counterparties: Person/Business buttons cover the suggested-category field; "Save alias" is clipped.
+17. **2026-11-04:** At 1366 px, one expanded sample Counterparties row has no overlap between Suggested category and Person/Business. PC Save alias is intentionally screen-reader-only and an Enter hint accompanies the field. Other rows and widths remain to check.
 18. **2026-11-04:** An unplanned month says "Set spending limits for this month", whether or not other months have plans.
 19. **2026-11-04:** Escape closes Ctrl-K even with a query; the Chromium brand audit checks it. Hide amounts posts through the undo journal, so "Saved changes" appears in every header.
 20. Small: transaction title is the reference at 14 px, "OUTFLOW" in capitals, raw "2026-10-20T21:36:42+00:00"; Planner has no h1 and shows decimals;

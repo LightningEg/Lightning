@@ -350,3 +350,7 @@ IV-3S item 10: PC Review activity marks money out with a minus. Its category hie
 ## 2026-11-04 · From SMS navigation
 
 IV-3S item 20: PC From SMS links back to Accounts, where its entry point lives.
+
+## 2026-11-04 · Counterparty recheck
+
+IV-3S item 17: at 1366 px, an expanded sample counterparty did not have the reported overlap. On PC the Save alias button is intentionally screen-reader-only, with an Enter hint. Other rows and widths have not been checked.
