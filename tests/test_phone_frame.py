@@ -188,7 +188,8 @@ def test_one_navigation_the_app_bar_title_is_plain_text_and_every_old_menu_page_
     for href in tabs:
         assert f'href="{href}"' in phone.get("/").text
     assert 'href="/profiles"' in phone.get("/settings").text  # Profile and lock, from Settings
-    assert 'href="/checks"' in phone.get("/settings").text  # Data checks remains reachable after removing tabs
+    for path in ("/rules", "/categories", "/counterparties", "/checks"):
+        assert f'href="{path}"' in phone.get("/settings").text  # Settings destinations remain reachable
     assert 'class="phone-back"' in phone.get("/review").text
 
 
