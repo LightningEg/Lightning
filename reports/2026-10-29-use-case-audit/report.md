@@ -59,7 +59,7 @@ No broad refactor. The layer contracts (import-linter: 4 kept), `ruff` and the m
 work is already filed and right-sized: [IT-9K](../../issues/9-later/9K-layers-and-copies.md) (the 767-line
 `runtime/app.py:profile_app`, budgeting calling planning through bootstrap, three balance-floor checks, a trigger matched by
 message text), IT-9J (closed; [original plan](https://github.com/LightningEg/Lightning/blob/3dc54ae303746041b9d02e6c63309d9590d1afa5/issues/9-later/9J-routes-compute-figures.md), [investment read model](../../lightning/planning/investment_figures.py)) (routes still computing figures; `budget._page`
-is 304 lines, `register.page` 213) and [IT-4K](../../issues/4-edit-journal-and-devices/4K-journal-code-tidy.md). Two
+is 304 lines, `register.page` 213) and IT-4K (finished 2026-11-02: `lightning/runtime/journal_pairing_driver.py`, `tests/test_one_pairing_driver.py`). Two
 consolidations this audit adds, each inside an item:
 
 1. **One way to save a form once.** Seven routes now repeat the `submitted` / `remember_submission` pattern and five more

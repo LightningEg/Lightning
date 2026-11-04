@@ -288,3 +288,5 @@ Freeze legacy lends, take a verified baseline, ordinary Windows and Android acce
 
 ## 4A6 Real-device evidence · owner
 Ordinary-PC reboot and power-loss, and real Android sleep and background behaviour.
+
+**Left from 4K (2026-11-04):** lending (`lightning/sync/*.py`) is still live; its retirement after J6 needs an item then. `runtime/journal_setup.py` still uses `open_lab`: it is the dummy-lab enrollment tool and only accepts a lab marked dummy.
