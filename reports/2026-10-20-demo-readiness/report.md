@@ -319,7 +319,15 @@ The screenshots kept here are only the ones that show a must-fix.
 
 ## 2026-11-04 · PC follow-up
 
-IV-3S items 5, 7 and the holding part of 8: average cost uses Neutral, ordinary negative monthly changes use Ink, and category directions and the first-run Load link use their A03 colours. Item 9: Biggest holdings shows four named bars and a Neutral Other bar for the exact remainder. The other findings remain open.
+IV-3S items 5, 7 and the holding part of 8: average cost uses Neutral, ordinary negative monthly changes use Ink, and category directions and the first-run Load link use their A03 colours. Item 9: the current Investments lead omits Biggest holdings; its older fallback limits bars to four named holdings and a Neutral Other for the remainder. A six-holding browser fixture confirmed the current lead has no such chart. The other findings remain open.
+
+## 2026-11-04 · Search follow-up
+
+IV-3S item 19: Escape closes the Ctrl-K search even when a query is present; the Chromium brand audit checks the interaction. The hide-amounts toast finding remains open.
+
+## 2026-11-04 · Budget wording
+
+IV-3S item 18: a month without a plan now asks for that month’s spending limits without calling them the first.
 
 ## Follow-up · 2026-11-04 — budget funding
 

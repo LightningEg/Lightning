@@ -180,6 +180,16 @@ def test_budget_page(c, b):
     assert 'value="6,000.00"' in edit
 
 
+
+def test_unplanned_month_does_not_call_its_limit_the_first(b):
+    c, _, ids = b
+    c.budgets.set_budget(ids["EXP.PERSONAL.FOOD"], "2026-10", "6000", schedule=c.schedules.view())
+    page = TestClient(create_app(c)).get("/budget?period=month&month=2026-09")
+    assert page.status_code == 200
+    assert "Set spending limits for this month" in page.text
+    assert "Set your first spending limit" not in page.text
+
+
 def test_current_month_uses_full_month_limit_before_month_end(c, b, monkeypatch):
     _, _, ids = b
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-15")

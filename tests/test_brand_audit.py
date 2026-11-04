@@ -137,6 +137,11 @@ def audit():
                     if path == "/categories":
                         result["category_direction_colors"] = page.locator(".cat-item select[name=direction]").first.evaluate(
                             "el => ['dir-out', 'dir-both', 'dir-in'].map(c => { el.className=c; return getComputedStyle(el).color; })")
+                page.goto(host.origin + "/")
+                page.keyboard.press("Control+k")
+                page.locator(".command-input").fill("budget")
+                page.keyboard.press("Escape")
+                result["command_closed_on_escape"] = not page.locator("#command-bar").evaluate("el => el.open")
                 page.goto(host.origin + "/investments")
                 holding = page.locator('a[href*="/investments/holding/"]').first
                 if holding.count():
@@ -205,3 +210,7 @@ def test_category_direction_text_uses_meaningful_colours(audit):
 
 def test_sample_load_action_is_ink_and_underlined(audit):
     assert audit["sample_load_style"] == ["rgb(13, 34, 51)", "underline"]
+
+
+def test_escape_closes_command_bar_with_a_query(audit):
+    assert audit["command_closed_on_escape"]

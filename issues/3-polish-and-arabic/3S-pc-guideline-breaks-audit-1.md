@@ -24,12 +24,12 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 5. **2026-11-04:** Holding average cost uses a Neutral dashed reference; plan references remain Meadow. The Chromium brand audit checks its computed stroke.
 
 **Colour off its meaning (A03)**
-6. Overview "Left in plan": the used part of the meter is Meadow; spent of plan is soft rose, as on Budget. Shot: [pc-overview-kpis.png](../../reports/2026-10-20-demo-readiness/evidence/pc-overview-kpis.png).
+6. **2026-11-04:** The current Overview KPI uses the spending tone for the used meter within plan (`kpis.overview` and `.kpi-card.tone-out`); over plan uses Strong rose. The original shot predates the KPI rebuild in `5e847d41`.
 7. **2026-11-04:** Category Expense and Both controls use Ink, Income uses Meadow text, and the first-run Load link is Ink and underlined. The Chromium brand audit checks computed styles.
 8. Gam'eya: five late instalments are Muted grey with no Late chip, and "Next instalment" shows a past date. **2026-11-04:** Ordinary negative holding monthly changes use Ink and keep their sign; the gam'eya finding remains open.
 
 **A16 shipping list**
-9. **2026-11-04:** Investments › Biggest holdings shows four named bars then the exact remainder as Neutral Other. The Planner's five-class split remains to review.
+9. **2026-11-04:** The current Investments lead removes Biggest holdings when the portfolio can be valued; a six-holding browser fixture confirms it is absent. The older fallback limits its bars to four named holdings and a Neutral Other. The Planner's five-class split remains to review.
 10. "L1 › L2": the transaction page's "Personal › Entertainment"; every row of Review activity (which also shows money out without "−").
 11. Card in a card: Settings › Budget's four boxes; Spending's small multiples; Certificates' nine `<fieldset>` boxes; first run's account-type list.
 12. Dropdown for your data: Certificates "Buy from" and "Forecast payout account"; the empty profile's Budget spending groups.
@@ -42,8 +42,8 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
     activity, Deleted, Settings tabs) instead of the exact dates; Overview and Cash planning have none.
 16. Certificates: a 5,400 px page with ten Primary buttons (A10.1 allows one).
 17. Settings › Counterparties: Person/Business buttons cover the suggested-category field; "Save alias" is clipped.
-18. Budget for a month with no plan says "Set your first spending limit" though later months have one.
-19. Ctrl-K: the first Escape only clears the query (A10.5: Escape always means no). Hide amounts posts through the undo journal, so "Saved changes" appears in every header.
+18. **2026-11-04:** An unplanned month says "Set spending limits for this month", whether or not other months have plans.
+19. **2026-11-04:** Escape closes Ctrl-K even with a query; the Chromium brand audit checks it. Hide amounts posts through the undo journal, so "Saved changes" appears in every header.
 20. Small: transaction title is the reference at 14 px, "OUTFLOW" in capitals, raw "2026-10-20T21:36:42+00:00"; Planner has no h1 and shows decimals;
     missing spaces around links ("Openthe register", "onRecurringto"); Review activity, Weekly review and Sale factors light the Summary tab; From SMS has no
     way back; at 1920 content is 1,435 px wide (owner question 7 in the report).

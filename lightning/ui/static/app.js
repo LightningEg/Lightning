@@ -2803,7 +2803,10 @@ window.lightningPrivacy = (() => {
     link.addEventListener("click", (event) => { event.preventDefault(); open(); }));
   field.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(ask, 120); });
   field.addEventListener("keydown", async (event) => {
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      bar.close();
+    } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
       if (!results.length) return;
       active = (active + (event.key === "ArrowDown" ? 1 : -1) + results.length) % results.length;

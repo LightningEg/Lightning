@@ -889,6 +889,7 @@ ARABIC_UI = {
     'Month by month': 'شهرًا بشهر',
     'Your spending plan': 'خطة مصروفاتك',
     'Set your first spending limit': 'حدّد أول مبلغ لمصروفاتك',
+    'Set spending limits for this month': 'حدد حدود مصروفات الشهر ده',
     'Start with a broad monthly amount. You can refine categories below after saving.': 'ابدأ بمبلغ شهري تقريبي، وبعد الحفظ تقدر تضبط كل فئة لوحدها.',
     'Choose valid matching criteria.': 'اختر شروط مطابقة صالحة.',
     'Choose a value for every selected matching criterion.': 'اختر قيمة لكل شرط مطابقة محدد.',
