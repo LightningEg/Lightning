@@ -1,0 +1,31 @@
+Statement,Header,Field Name,Field Value
+Statement,Data,BrokerName,Interactive Brokers LLC
+Statement,Data,Period,"September 1, 2026 - December 31, 2026"
+Account Information,Header,Field Name,Field Value
+Account Information,Data,Name,Dummy Test Person
+Account Information,Data,Base Currency,USD
+Deposits & Withdrawals,Header,Currency,Settle Date,Description,Amount
+Deposits & Withdrawals,Data,USD,2026-09-01,Electronic Fund Transfer,2000
+Deposits & Withdrawals,Data,Total,,,2000
+Trades,Header,DataDiscriminator,Asset Category,Currency,Symbol,Date/Time,Quantity,T. Price,C. Price,Proceeds,Comm/Fee,Basis,Realized P/L,MTM P/L,Code
+Trades,Data,Order,Stocks,USD,QQQM,"2026-09-03, 10:15:02",5,200,201,-1000,-1,1001,0,5,O
+Trades,Data,Order,Stocks,EUR,SAP,"2026-09-10, 09:30:00",2,200,205,-400,-1.25,401.25,0,10,O
+Trades,Data,Order,Stocks,USD,QQQM,"2026-12-01, 15:00:00",-2,230,230,460,-1,-400.4,58.6,0,C
+Trades,SubTotal,,Stocks,USD,QQQM,,3,,,-540,-2,,,,
+Trades,Header,DataDiscriminator,Asset Category,Currency,Symbol,Date/Time,Quantity,T. Price,,Proceeds,Comm in USD,,,MTM in USD,Code
+Trades,Data,Order,Forex,USD,EUR.USD,"2026-09-05, 11:00:00",500,1.1,,-550,-2,,,0,
+Dividends,Header,Currency,Date,Description,Amount
+Dividends,Data,USD,2026-12-02,QQQM(US46138G6492) Cash Dividend USD 0.80 per Share (Ordinary Dividend),4
+Dividends,Data,Total,,,4
+Withholding Tax,Header,Currency,Date,Description,Amount,Code
+Withholding Tax,Data,USD,2026-12-02,QQQM(US46138G6492) Cash Dividend USD 0.80 per Share - US Tax,-0.6,
+Interest,Header,Currency,Date,Description,Amount
+Interest,Data,USD,2026-12-05,USD Credit Interest for Nov-2026,1.5
+Fees,Header,Subtitle,Currency,Date,Description,Amount
+Fees,Data,Other Fees,USD,2026-12-06,Market data fee,-3
+Open Positions,Header,DataDiscriminator,Asset Category,Currency,Symbol,Quantity,Mult,Cost Price,Cost Basis,Close Price,Value,Unrealized P/L,Code
+Open Positions,Data,Summary,Stocks,USD,QQQM,3,1,200.2,600.6,230,690,89.4,
+Open Positions,Data,Summary,Stocks,EUR,SAP,2,1,200.63,401.25,205,410,8.75,
+Financial Instrument Information,Header,Asset Category,Symbol,Description,Conid,Security ID,Listing Exch,Multiplier,Type,Code
+Financial Instrument Information,Data,Stocks,QQQM,INVESCO NASDAQ 100 ETF,1,US46138G6492,NASDAQ,1,ETF,
+Financial Instrument Information,Data,Stocks,SAP,SAP SE,2,DE0007164600,IBIS,1,COMMON,

@@ -12,6 +12,19 @@ from zoneinfo import ZoneInfo
 from ..model import Quote, SourceError
 
 CHART = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+# Yahoo's exchange suffixes for the Gulf and European boards the app fetches itself (owner 2026-11-04). The UAE and
+# Bahrain are left out: one suffix cannot tell Dubai from Abu Dhabi, and Bahrain's is unconfirmed; their latest
+# closes still come from the board.
+SUFFIX = {"SA": ".SR", "QA": ".QA", "KW": ".KW", "GB": ".L", "DE": ".DE", "FR": ".PA", "NL": ".AS", "BE": ".BR",
+          "PT": ".LS", "ES": ".MC", "IT": ".MI", "CH": ".SW", "SE": ".ST", "DK": ".CO", "FI": ".HE", "IS": ".IC"}
+# A close is dated by its market's own day.
+ZONES = {"US": "America/New_York", "XAU/USD": "America/New_York", "XAG/USD": "America/New_York",
+         "SA": "Asia/Riyadh", "QA": "Asia/Qatar", "KW": "Asia/Kuwait", "GB": "Europe/London", "DE": "Europe/Berlin",
+         "FR": "Europe/Paris", "NL": "Europe/Amsterdam", "BE": "Europe/Brussels", "PT": "Europe/Lisbon",
+         "ES": "Europe/Madrid", "IT": "Europe/Rome", "CH": "Europe/Zurich", "SE": "Europe/Stockholm",
+         "DK": "Europe/Copenhagen", "FI": "Europe/Helsinki", "IS": "Atlantic/Reykjavik"}
+# A series quoted in a currency's minor unit (pence, fils) is brought to the ISO unit, as the boards are.
+MINOR = {"GBp": Decimal(100), "GBX": Decimal(100), "KWF": Decimal(1000), "ZAc": Decimal(100), "ILA": Decimal(100)}
 
 
 def symbol_for(key: str) -> str | None:
@@ -20,6 +33,9 @@ def symbol_for(key: str) -> str | None:
         return key[3:] + ".CA"
     if key.startswith("US:"):
         return key[3:].replace(".", "-")
+    country, _, ticker = key.partition(":")
+    if country in SUFFIX and ticker and "-X" not in ticker:  # SA:2222 -> 2222.SR, SE:VOLV_B -> VOLV-B.ST
+        return ticker.replace("_", "-").replace(".", "-") + SUFFIX[country]
     if key.endswith("/EGP") and key[:3].isalpha() and key[:3] != "EGP":
         return "EGP=X" if key[:3] == "USD" else f"{key[:3]}EGP=X"  # EUR/EGP -> EUREGP=X
     return {"XAU/USD": "GC=F", "XAG/USD": "SI=F"}.get(key)
@@ -29,6 +45,7 @@ def parse(data: dict, key: str, zone: str = "Africa/Cairo") -> list[Quote]:
     try:
         result = data["chart"]["result"][0]
         stamps = result.get("timestamp") or []
+        per_unit = MINOR.get(str((result.get("meta") or {}).get("currency") or ""), Decimal(1))
         closes = result["indicators"]["quote"][0].get("close") or []
         splits = (result.get("events") or {}).get("splits") or {}
     except (KeyError, IndexError, TypeError):
@@ -51,6 +68,7 @@ def parse(data: dict, key: str, zone: str = "Africa/Cairo") -> list[Quote]:
         for when, ratio in events:  # undo every split that happened after this day
             if when > stamp:
                 close *= ratio
+        close /= per_unit
         if close.is_finite() and close > 0:
             day = datetime.fromtimestamp(int(stamp), tz).date().isoformat()
             quotes[day] = Quote(key, day, close.quantize(Decimal("0.000001")), "yahoo-history")
@@ -63,5 +81,5 @@ def fetch_history(session, key: str, since: str = "max") -> list[Quote]:
         return []
     data = session.get_json(CHART.format(symbol=quote(symbol, safe="")),
                             {"range": since, "interval": "1d", "events": "split"})
-    zone = "America/New_York" if key.startswith(("US:", "XAU/", "XAG/")) else "Africa/Cairo"
+    zone = ZONES.get(key.partition(":")[0], "Africa/Cairo")
     return parse(data, key, zone)

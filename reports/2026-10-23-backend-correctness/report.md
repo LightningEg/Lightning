@@ -191,7 +191,7 @@ The repaired workflow probes now pass all **36** cases, and the combined new reg
 
 Combined full-suite validation: **2,395 passed, 10 skipped**; all four import contracts kept. The additional skip is the sibling-website guideline comparison in the temporary worktree; it passes separately from `/workspace/Lightning`, where the website is present. A final targeted run passes **21** Save/revision cases after deduplicating popup alerts; a phone smoke check confirms one alert and the newer amount retained.
 
-**2026-10-26 follow-up.** 2I, 2L and 2M are fixed, and 2J on ordinary profiles (journal profiles stay open in 2J); regressions in `tests/test_engine_loose_ends.py`. See [Audit 8](../2026-10-26-engine-audit/report.md).
+**2026-10-26 follow-up.** 2I, 2L and 2M are fixed, and 2J on ordinary profiles (journal profiles stay open in 2J); regressions in `tests/test_engine_loose_ends.py`. See [Audit 8](../../ai/archive/reports/2026-10-26-engine-audit/report.md).
 
 ### 1G follow-up (2026-11-04)
 

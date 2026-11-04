@@ -206,8 +206,16 @@ async def portfolio(request: Request):
                          visual=kpis.segments([("Cost", owned_cost, "neutral"), ("Unrealized gain", owned_unrealized, "in")]),
                          line_=kpis.line((f"Cost {fmt(owned_cost, 0)} · Unrealized gain {fmt(owned_unrealized, 0, True)}" if owned_cost else "") + (" · " if owned_cost and (six or since) else "") + (six or since)))  # the return since purchase is also the table's All holdings row
     status = page_status.investments(investment_report.get("result"), bool(owned_rows), period.key, current)
+    divisor = extras["lens"]["divisor"]   # the USD lens shows the allocation card and brokerage cash in dollars too
+    lensed = lambda amount: None if amount is None else amount / divisor  # noqa: E731
+    allocation = {"what_you_own": lensed(position.what_you_own), "after_sale": lensed(position.holdings_after_sale),
+                  "cash": lensed(investment_report.get("investment_cash")),
+                  "locked": [{"asset": item.asset, "locked_until": item.locked_until, "value": lensed(item.value)}
+                             for item in position.locked_holdings]}
+    if divisor != 1:
+        extras["biggest"] = {**extras["biggest"], "rows": [{**r, "value": r["value"] / divisor} for r in extras["biggest"]["rows"]]}
     return render(request, "investments/index.html", p=p, asset_class_rows=asset_class_rows, **extras, lead=lead, status=status,
-                  pos=position, notes=notes, investment_donut=visuals.holdings_donut(position),
+                  pos=position, notes=notes, investment_donut=visuals.holdings_donut(position, divisor=divisor), allocation=allocation,
                   accounts=c.investments.investment_accounts(),
                   has_assets=bool(c.assets.investments(active_only=True)), owned_value=owned_value,
                   owned_cost=owned_cost, owned_unrealized=owned_unrealized, custody_units=custody,

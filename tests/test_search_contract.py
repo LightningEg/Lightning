@@ -76,3 +76,22 @@ def test_history_uses_alias_account_and_category_ids_but_keeps_exact_filters(c, 
     c.transactions.void(first.id)
     assert first.id not in c.transactions.search_ids('طلبات')
     assert c.reporting.account_balance(accounts['wallet'].id) == Decimal('744')
+
+
+def test_the_full_bundled_instrument_catalogue_fits_the_guard_and_ranks_typos(c):
+    import json
+    from urllib.parse import urlencode
+    from lightning.assets.catalog import instruments
+    from lightning.market.iso import venue_name
+    from lightning.runtime.http import MAX_BODY
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    catalogue=instruments()
+    choices=[{'id':str(i),'label':r['name'],'code':r['ticker'],'context':venue_name(r.get('mic'))} for i,r in enumerate(catalogue)]
+    form={'q':'Glencroe','kind':'Investment','choices':json.dumps(choices,ensure_ascii=False,separators=(',',':'))}
+    assert 2000 < len(choices) <= 4000
+    assert len(urlencode(form).encode()) < MAX_BODY
+    expected=next(str(i) for i,r in enumerate(catalogue) if r['ticker']=='GLEN' and r['mic']=='XLON')
+    with TestClient(create_app(c)) as client:
+        response=client.post('/search/picker',data=form)
+        assert response.status_code==200 and expected in response.json()['ids']
