@@ -21,7 +21,7 @@ CHECKED_MONTH_MESSAGE = f"This month was checked against the bank. Unlock it fir
 
 class Database:
     def __init__(self, path: str | Path, *, key: bytes | None = None,
-                 read_only: bool = False):
+                 read_only: bool = False, strict_thread: bool = False):
         if key is not None and (not isinstance(key, bytes) or len(key) != 32):
             raise ValueError("The database key must be exactly 32 bytes")
         self.path = str(path)
@@ -29,7 +29,9 @@ class Database:
         self.encrypted = key is not None
         self.read_only = read_only
         self._key = bytearray(key) if key is not None else None
-        self._owner = threading.current_thread() if self.encrypted else None
+        # Plaintext fixtures may opt into the same lifecycle/thread checks as encrypted profiles.
+        self._thread_bound = self.encrypted or strict_thread
+        self._owner = threading.current_thread() if self._thread_bound else None
         self._closed = False
         self.undo = None  # attached after startup migrations/seed; never active on read-only copies
         self.driver = sqlite3
@@ -41,11 +43,12 @@ class Database:
         self.IntegrityError = self.driver.IntegrityError
 
     def _check_owner(self) -> None:
-        if self.encrypted:
+        if self._thread_bound:
+            label = "Encrypted database" if self.encrypted else "Database"
             if self._closed:
-                raise RuntimeError("Encrypted database has been closed")
+                raise RuntimeError(f"{label} has been closed")
             if self._owner is not None and self._owner is not threading.current_thread():
-                raise RuntimeError("Encrypted database must stay on its owning thread")
+                raise RuntimeError(f"{label} must stay on its owning thread")
 
     # -- connections -------------------------------------------------------
     @property
@@ -100,7 +103,7 @@ class Database:
         return self._closed
 
     def close(self) -> None:
-        if self.encrypted and self._closed:
+        if self._thread_bound and self._closed:
             return
         self._check_owner()
         conn = getattr(self._local, "conn", None)
@@ -110,6 +113,7 @@ class Database:
         if self._key is not None:
             # Best effort only: Python/SQLite may have made other memory copies.
             self._key[:] = bytes(len(self._key))
+        if self._thread_bound:
             self._closed = True
 
     # -- transactions ------------------------------------------------------

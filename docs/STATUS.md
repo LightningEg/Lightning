@@ -10,13 +10,13 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Plan](pillars/plan.md) | 4 |  |  | 4 |  | 1 |
 | [Understand](pillars/understand.md) | 5 |  | 1 | 3 | 1 | 1 |
 | [Own](pillars/own.md) | 7 | 2 |  | 3 | 2 |  |
-| [Protect](pillars/protect.md) | 3 | 1 | 2 |  |  | 1 |
+| [Protect](pillars/protect.md) | 2 | 1 | 1 |  |  |  |
 | [Everywhere](pillars/everywhere.md) | 4 | 3 |  | 1 |  |  |
 | [Feel](pillars/feel.md) | 13 | 4 | 7 | 1 | 1 | 1 |
 | [Build](pillars/build.md) | 6 | 1 | 5 |  |  |  |
 | [Reach](pillars/reach.md) | 6 |  | 4 | 2 |  | 2 |
 
-53 open items in 10 milestones.
+52 open items in 10 milestones.
 
 ## Being built now
 
@@ -34,7 +34,6 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 
 ## Waiting for the owner
 
-- **OW-2AB** (Protect) [Legacy mode](../issues/2-safe-for-real-money/2AB-stale-code.md): ready
 - **OW-3AI** (Feel) [Additional broker and institution logos still needed](../issues/3-polish-and-arabic/3AI-institution-logos.md): ready
 - **OW-7M** (Plan) [Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as…](../issues/7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md): new
 - **OW-7S** (Understand) [Money out filed under an income category counts as spending, not as less income](../issues/7-planning-import-and-search/7S-money-out-of-an-income-category.md): new
@@ -46,7 +45,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | Milestone | Open | Goal |
 |---|---|---|
 | 1 Easy to contribute | 4 | Anyone can find how to help in one click and send a first fix the same evening. |
-| 2 Safe for real money | 4 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
+| 2 Safe for real money | 3 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
 | 3 Polish and Arabic | 13 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 5 Investments | 1 | Every investment figure can be explained per purchase, and agrees with the ledger. |
