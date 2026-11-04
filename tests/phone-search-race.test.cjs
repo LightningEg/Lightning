@@ -14,12 +14,12 @@ const oldBody = new Promise(resolve => { completeOld = resolve; });
 const listeners = {};
 const fieldListeners = {};
 const field = { value: 'old', hasAttribute: () => false, addEventListener: (name, callback) => { fieldListeners[name] = callback; } };
-const target = { innerHTML: '' };
+const target = { innerHTML: '', isConnected: true };
 const form = { isConnected: true, dataset: {liveSearch: '#results'}, querySelector: () => field,
   getAttribute: () => '/search', addEventListener: (name, callback) => {listeners[name] = callback;} };
 let address = '';
 const context = { root: { querySelectorAll: () => [form] }, document: {querySelector: () => target},
-  window: {}, location: {href: 'http://localhost/search'}, URL, URLSearchParams, clearTimeout, setTimeout,
+  window: {addEventListener() {}}, AbortController, location: {href: 'http://localhost/search'}, URL, URLSearchParams, clearTimeout, setTimeout,
   history: {state: {}, replaceState: (_state, _title, value) => { address = value; }},
   fetch: async url => ({ok: true, text: () => url.includes('q=old') ? oldBody : Promise.resolve('NEW RESULTS')}) };
 vm.runInNewContext(source.slice(begin, end) + '\nlive(root);', context);

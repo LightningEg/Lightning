@@ -140,16 +140,21 @@
       const target = document.querySelector(form.dataset.liveSearch);
       if (!field || !target) return;
       if (field.hasAttribute("autofocus")) setTimeout(() => field.focus({ preventScroll: true }), 60);
-      let timer = 0, serial = 0;
+      let timer = 0, serial = 0, pending = null;
+      /* Anything typed, submitted or navigated away from makes the request in flight obsolete: it is stopped, and
+         whatever of it still arrives is ignored (the serial). */
+      const forget = () => { ++serial; if (pending) pending.abort(); pending = null; };
       const ask = async () => {
-        const mine = ++serial;
+        forget();
+        const mine = serial;
+        const controller = pending = new AbortController();
         const query = field.value.trim().replace(/\s+/g, " ");
         try {
           const response = await fetch(`${form.getAttribute("action") || "/search"}?${new URLSearchParams({ q: query, fragment: "1" })}`,
-            { credentials: "same-origin", headers: { "X-Requested-With": "fetch" } });
+            { credentials: "same-origin", headers: { "X-Requested-With": "fetch" }, signal: controller.signal });
           if (!response.ok) return;
           const body = await response.text();
-          if (mine !== serial || !form.isConnected) return;
+          if (mine !== serial || !form.isConnected || !target.isConnected) return;
           target.innerHTML = body;
           if (window.lightningRefresh) window.lightningRefresh(target);
           const url = new URL(location.href);
@@ -157,8 +162,9 @@
           history.replaceState(history.state, "", url.pathname + url.search + url.hash);
         } catch (_) { /* offline or the page closed: the results stay as they were */ }
       };
-      field.addEventListener("input", () => { ++serial; clearTimeout(timer); timer = setTimeout(ask, 140); });
+      field.addEventListener("input", () => { forget(); clearTimeout(timer); timer = setTimeout(ask, 140); });
       form.addEventListener("submit", (event) => { event.preventDefault(); clearTimeout(timer); ask(); });
+      window.addEventListener("pagehide", () => { clearTimeout(timer); forget(); });
     });
   };
   document.addEventListener("DOMContentLoaded", () => live(document));
