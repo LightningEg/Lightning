@@ -15,9 +15,9 @@ from zipfile import BadZipFile, ZipFile
 
 from lightning.bank_import_rows import _date, _decimal_amount
 from lightning.core.errors import ValidationError
-from lightning.core.limits import MAX_CSV_IMPORT_BYTES
+from lightning.core.limits import MAX_CSV_IMPORT_BYTES, MAX_STATEMENT_DOCUMENT_BYTES
 
-MAX_FILE_BYTES = 8 * 1024 * 1024
+MAX_FILE_BYTES = MAX_STATEMENT_DOCUMENT_BYTES
 MAX_XML_BYTES = 32 * 1024 * 1024
 MAX_ROWS, MAX_COLUMNS, MAX_PAGES = 10000, 80, 20
 NO_PDF_TEXT = "This PDF has no readable text. Export CSV or Excel, or use the PDF-to-CSV AI prompt below."
@@ -44,13 +44,13 @@ def read_statement(filename: str, data: bytes, currency: str) -> bytes:
     if len(data) > MAX_FILE_BYTES:
         raise ValidationError("Excel and PDF statements must be 8 MB or smaller.", "file")
     if suffix == '.xlsx':
-        return read_excel(data)
+        return read_excel(data, currency)
     if suffix == '.pdf':
         return read_cib_pdf(data, currency)
     raise ValidationError("Choose a CSV, .xlsx Excel workbook or text-based PDF statement.", "file")
 
 
-def read_excel(data: bytes) -> bytes:
+def read_excel(data: bytes, currency: str | None = None) -> bytes:
     """One nonempty worksheet, literal cells only; all limits apply before iterating cells."""
     # openpyxl automatically uses defusedxml when available. Require it for imported XML.
     from defusedxml import ElementTree  # noqa: F401
@@ -98,7 +98,19 @@ def read_excel(data: bytes) -> bytes:
                     sheets.append([row[:width] for row in rows])
             if len(sheets) != 1:
                 raise ValidationError("Choose a workbook with one nonempty worksheet, or export the wanted worksheet as CSV.", "file")
-            return _csv(sheets[0])
+            rows = sheets[0]
+            headers = [value.strip().casefold() for value in rows[0]]
+            if currency and 'currency' in headers:
+                index = headers.index('currency')
+                currencies = {row[index].strip().upper() for row in rows[1:] if len(row) > index and row[index].strip()}
+                if currencies and currencies != {currency}:
+                    raise ValidationError("The workbook currency does not match this account. Export one currency at a time.", "file")
+            if 'account' in headers:
+                index = headers.index('account')
+                accounts = {row[index].strip() for row in rows[1:] if len(row) > index and row[index].strip()}
+                if len(accounts) > 1:
+                    raise ValidationError("This workbook contains more than one account. Export one account at a time.", "file")
+            return _csv(rows)
         finally:
             workbook.close()
     except ValidationError:
@@ -158,6 +170,8 @@ def read_cib_pdf(data: bytes, currency: str) -> bytes:
             raise ValidationError("PDF statements must have 20 pages or fewer. Export a shorter period.", 'file')
         pages = []
         for page in reader.pages:
+            if '/Contents' in page and len(page.get_contents().get_data()) > 8 * 1024 * 1024:
+                raise ValidationError("This PDF contains too much text. Export a shorter period.", 'file')
             text = (page.extract_text(extraction_mode='layout') or '') if '/Contents' in page else ''
             if len(text) > 200000 or sum(map(len,pages))+len(text) > 1000000:
                 raise ValidationError("This PDF contains too much text. Export a shorter period.", 'file')
@@ -168,7 +182,9 @@ def read_cib_pdf(data: bytes, currency: str) -> bytes:
         if not re.search(r'ACCOUNT\s+TRANSACTIONS',text,re.I):
             raise ValidationError(PDF_LAYOUT,'file')
         currencies = set(re.findall(r'Currency\s*:?\s*([A-Z]{3})\b',text))
-        if currencies and currencies != {currency}:
+        if not currencies:
+            raise ValidationError(PDF_LAYOUT, 'file')
+        if currencies != {currency}:
             raise ValidationError("The PDF currency does not match this account. Choose the matching account.", 'file')
         rows = []
         for text in pages:

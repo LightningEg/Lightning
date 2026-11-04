@@ -19,6 +19,7 @@ from lightning.core.limits import (
     MAX_CSV_IMPORT_BYTES,
     MAX_CSV_MAPPING_REQUEST_BYTES,
     MAX_CSV_UPLOAD_REQUEST_BYTES,
+    MAX_STATEMENT_UPLOAD_REQUEST_BYTES,
     MAX_IMPORT_REVIEW_FIELDS,
     MAX_IMPORT_REVIEW_REQUEST_BYTES,
 )
@@ -28,7 +29,7 @@ from lightning.core.limits import (
 # to a plaintext temporary file.
 MAX_BODY = 512 * 1024
 MAX_IMPORT_FILE_BYTES = MAX_CSV_IMPORT_BYTES
-MAX_IMPORT_UPLOAD_BODY = MAX_CSV_UPLOAD_REQUEST_BYTES
+MAX_IMPORT_UPLOAD_BODY = MAX_STATEMENT_UPLOAD_REQUEST_BYTES
 MAX_IMPORT_MAP_BODY = MAX_CSV_MAPPING_REQUEST_BYTES
 MAX_IMPORT_CONFIRM_BODY = MAX_IMPORT_REVIEW_REQUEST_BYTES
 MAX_IMPORT_CONFIRM_FIELDS = MAX_IMPORT_REVIEW_FIELDS
@@ -52,11 +53,13 @@ def request_body_limit(path: str, method: str = "POST") -> int:
     if path == MARKET_IMPORT_PATH:
         return MAX_MARKET_IMPORT_BODY
     if path == PRICE_CSV_PATH:
-        return MAX_IMPORT_UPLOAD_BODY
+        return MAX_CSV_UPLOAD_REQUEST_BYTES
     return MAX_BODY
 
 
 def request_too_large_message(path: str) -> str:
+    if re.fullmatch(r"/accounts/\d+/import", path):
+        return "Statement uploads must total 8 MB or less. Upload fewer files or a shorter period."
     if re.fullmatch(r"/accounts/\d+/import(?:/map)?", path) or path == PRICE_CSV_PATH:
         return "CSV files must be 5 MB or smaller. Choose a smaller CSV and try again."
     if re.fullmatch(r"/accounts/\d+/import/\d+/confirm", path):
@@ -67,7 +70,7 @@ def request_too_large_message(path: str) -> str:
 def configure_memory_only_import_uploads() -> None:
     """Keep Starlette's spooled upload below disk-rollover size for guarded CSVs.
 
-    The profile Guard bounds the statement upload route to 5 MB plus a small
+    The profile Guard bounds the statement upload route to 8 MiB plus a small
     multipart envelope, and rejects files on all other routes but the market
     price file's. Raising this threshold above the statement route's complete
     body size keeps statement bytes in memory instead of allowing
