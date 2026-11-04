@@ -62,5 +62,6 @@ def test_price_file_keeps_one_price_per_investment_and_day():
 
 def test_the_profile_app_lets_the_price_csv_through_as_one_bounded_file():
     from lightning.runtime.app import _form_file_limit
-    from lightning.runtime.http import MAX_IMPORT_UPLOAD_BODY, PRICE_CSV_PATH, request_body_limit
-    assert _form_file_limit(PRICE_CSV_PATH) == 1 and request_body_limit(PRICE_CSV_PATH) == MAX_IMPORT_UPLOAD_BODY
+    from lightning.core.limits import MAX_CSV_UPLOAD_REQUEST_BYTES
+    from lightning.runtime.http import PRICE_CSV_PATH, request_body_limit
+    assert _form_file_limit(PRICE_CSV_PATH) == 1 and request_body_limit(PRICE_CSV_PATH) == MAX_CSV_UPLOAD_REQUEST_BYTES

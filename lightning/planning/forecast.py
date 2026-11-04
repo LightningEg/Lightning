@@ -302,8 +302,13 @@ class CashForecaster:
         payments = [p for p in self.planning.all_payments(end, day)
                     if p.outstanding and (p.item.id, p.due_date) not in early]
         linked = self.planning.linked_transaction_ids()
-        possible = {(p.item.id, p.due_date): {r['id'] for r in self.planning.candidates(p, day) if r['id'] not in linked}
-                    for p in payments}
+        possible = {}
+        for payment in payments:
+            # A future window cannot contain a posted transaction as of today. Avoid
+            # querying it for every later occurrence in the dated projection.
+            starts = date.fromisoformat(payment.due_date) - timedelta(days=payment.item.match_window_days)
+            candidates = self.planning.candidates(payment, day) if starts <= day else ()
+            possible[(payment.item.id, payment.due_date)] = {r['id'] for r in candidates if r['id'] not in linked}
         uses = {}
         for matches in possible.values():
             for txn_id in matches:
