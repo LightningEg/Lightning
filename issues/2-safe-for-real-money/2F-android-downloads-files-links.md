@@ -35,7 +35,7 @@ Add a download listener that saves to Downloads through MediaStore, a file choos
 system's "Save to" screen and the page comes back saying so (`lightning/runtime/phone_files.py`, `FileBridge.java`,
 `tests/test_phone_downloads.py`); file fields open the system picker (`MainActivity.onShowFileChooser`). Left:
 
-1. **Check on a phone:** Export all data, Prepare AI analysis, the import template, a CSV statement import and market.zip,
+1. ~~**Check on a phone:**~~ **Waived by the owner, 2026-11-04** (the draft #205, superseded by #247, is closed). Export all data, Prepare AI analysis, the import template, a CSV statement import and market.zip,
    in English and Arabic; cancel "Save to" once. Confirm a chosen file reaches the CSV import with `setAllowContentAccess(false)`.
 2. **Backups never leave the phone.** Back up writes inside the app's private folder, so uninstalling or losing the phone loses
    them; there is no "Save a copy" of a backup on any screen. Offer the newest encrypted backup through the same "Save to".
