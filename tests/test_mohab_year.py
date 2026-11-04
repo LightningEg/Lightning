@@ -1618,6 +1618,12 @@ def test_a_nasdaq_etf_is_bought_with_dollars_in_a_dollar_account(mohab):
     assert mohab.answers["usd_investments"].screen.shows("Invesco NASDAQ 100 ETF")
 
 
+def test_his_dollar_brokerage_can_join_his_pound_broker_as_its_dollar_pocket(mohab):
+    """NF-5G (owner 2026-11-04): a separate dollar brokerage is offered as THNDR's USD pocket from its own ⋯ menu,
+    and the import of an Interactive Brokers statement is one click from it. Read only: his year stays as it is."""
+    screen = mohab.b.go("Transactions", "Accounts", "Dollar brokerage")
+    assert screen.shows("Make it a pocket of THNDR", "Import an Interactive Brokers statement")
+
 def test_the_buy_form_says_what_a_us_listing_needs_and_refuses_the_wrong_account(mohab):
     assert notes_exchange(mohab.notes["etf_in_pounds_choice"]) == ("Nasdaq", "USD")
     assert "held in this broker's USD pocket" in mohab.notes["etf_in_pounds_choice"]["note"]

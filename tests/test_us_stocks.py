@@ -65,8 +65,11 @@ def test_the_catalogue_lists_egx_and_us_without_clashes():
     assert sum(row["kind"] == "Stocks" for row in us) >= 300 and sum(row["kind"] == "ETFs" for row in us) >= 60
     assert all(row["currency"] == "USD" and row["mic"] in VENUES for row in us)
     assert any(row["ticker"] == "COMI" and row["mic"] == "XCAI" and row["currency"] == "EGP" for row in rows)
-    tickers = [row["ticker"].upper() for row in rows]
-    assert len(tickers) == len(set(tickers)), "an asset code is STK:<ticker>, so a ticker is listed once"
+    listings = [(row["ticker"].upper(), row["mic"]) for row in rows]
+    # A ticker may sit on two exchanges (EGX and Milan both list AZM): the picker names the exchange and the second
+    # asset's code carries it (U9), so a listing, not a ticker, is listed once.
+    assert len(listings) == len(set(listings))
+    assert not {t for t, m in listings if m in ("XCAI", "")} & {t for t, m in listings if m in ("XNAS", "XNYS", "ARCX")}
     with catalog.US_CATALOGUE_FILE.open(encoding="utf-8-sig", newline="") as source:
         head = next(csv.reader(source))
     assert head == ["ticker", "name", "kind", "class_code", "source", "source_url", "catalogue_date", "mic", "currency"]

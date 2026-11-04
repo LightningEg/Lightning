@@ -1,0 +1,37 @@
+{# NF-5G5: an Interactive Brokers activity statement, previewed, then posted into the broker's currency pockets. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Import an Interactive Brokers statement'|tr(locale) }}{% endblock %}
+{% block heading %}<div class="acct-title"><h1>{{ 'Import an Interactive Brokers statement'|tr(locale) }}</h1></div><p class="muted">{{ account.name }}</p>{% endblock %}
+{% block content %}
+{% if not result %}
+<section class="card form-card">
+  <p>{{ 'In Interactive Brokers, open Performance & Reports › Statements, run an Activity statement for the period and download it as CSV.'|tr(locale) }}</p>
+  <p class="muted small">{{ 'Trades, currency conversions, dividends with their tax, interest and fees are recorded in this broker’s pocket for each currency. Rows already imported are skipped, so an overlapping statement is safe.'|tr(locale) }}</p>
+  <form method="post" enctype="multipart/form-data" action="/accounts/{{ account.id }}/broker-import">
+    <div class="field import-file-field"><label for="ibkr-csv">{{ 'Activity statement (CSV)'|tr(locale) }}</label><input id="ibkr-csv" type="file" name="file" accept=".csv,text/csv" required></div>
+    <div class="actions"><button class="btn primary">{{ 'Review statement'|tr(locale) }}</button><a class="btn" href="/accounts/{{ account.id }}">{{ 'Cancel'|tr(locale) }}</a></div>
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+</section>
+{% else %}
+<section class="card">
+  <div class="overview-block-head"><div><h2>{{ ('What it will record' if not posted else 'What was recorded')|tr(locale) }}</h2>
+  <p>{% if posted %}{{ '{n} recorded'|tr(locale, n=result.count('posted')) }}{% else %}{{ '{n} to record'|tr(locale, n=result.count('new')) }}{% endif %}{% if result.count('imported') %} · {{ '{n} already imported'|tr(locale, n=result.count('imported')) }}{% endif %}{% if result.count('problem') %} · {{ '{n} not recorded'|tr(locale, n=result.count('problem')) }}{% endif %}</p></div></div>
+  {% if new_instruments %}<p class="muted small">{{ 'New investments it will add: {names}'|tr(locale, names=new_instruments|join(', ')) }}</p>{% endif %}
+  <div class="table-wrap"><table class="setup-table"><thead><tr><th>{{ 'Date'|tr(locale) }}</th><th>{{ 'What'|tr(locale) }}</th><th class="num">{{ 'Amount'|tr(locale) }}</th><th>{{ 'Status'|tr(locale) }}</th></tr></thead><tbody>
+  {% for r in result.rows %}{% set e = r.event %}<tr>
+    <td>{{ e.date }}</td>
+    <td>{{ kinds[e.kind]|tr(locale) }}{% if e.symbol %} · {{ e.symbol }}{% endif %}{% if e.kind in ('buy','sell') %} · {{ e.quantity|units_of('share') }}{% elif e.kind == 'convert' %} · {{ e.text }}{% endif %}{% if e.tax %} <small class="muted">{{ 'tax {amount}'|tr(locale, amount=e.tax|money(False, 2)) }}</small>{% endif %}</td>
+    <td class="num">{{ e.amount|money(False, 2) }} <small>{{ e.currency }}</small></td>
+    <td>{{ statuses[r.status]|tr(locale) }}{% if r.message %} <small class="muted">{{ r.message|tr(locale) }}</small>{% endif %}</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% if not posted %}<form method="post" action="/accounts/{{ account.id }}/broker-import"><input type="hidden" name="statement" value="{{ statement_b64 }}"><input type="hidden" name="confirm" value="1">
+    <div class="actions"><button class="btn primary"{% if not result.count('new') %} disabled{% endif %}>{{ 'Record it'|tr(locale) }}</button><a class="btn" href="/accounts/{{ account.id }}">{{ 'Cancel'|tr(locale) }}</a></div>
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
+</section>
+{% if posted and positions %}<section class="card">
+  <div class="overview-block-head"><div><h2>{{ ('Positions match' if positions|selectattr('matches')|list|length == positions|length else 'Positions differ')|tr(locale) }}</h2><p>{{ 'Units in the statement’s open positions against this broker on {date}'|tr(locale, date=period_end) }}</p></div></div>
+  {% for p in positions %}<div class="overview-static-row"><span>{{ p.symbol }} <small>{{ p.currency }}</small></span><b>{{ p.ledger|units_of('share') }}{% if not p.matches %} <small>{{ 'statement {units}'|tr(locale, units=p.statement|units_of('share')) }}</small>{% endif %}</b></div>{% endfor %}
+</section>{% endif %}
+{% if posted %}<div class="actions"><a class="btn primary" href="/accounts/{{ account.id }}">{{ 'Back to {name}'|tr(locale, name=account.name) }}</a></div>{% endif %}
+{% endif %}
+{% endblock %}

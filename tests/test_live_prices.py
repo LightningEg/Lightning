@@ -312,3 +312,52 @@ def test_a_fund_matches_by_its_words_not_their_order_and_the_nearest_names_are_o
     matched = link_funds(work, listing)
     assert [w.asset_id for w in matched] == [1] and work.linked == {1: "EG:FUND:1"}
     assert 2 not in work.linked and "Beltone Equity Opportunity Fund" in work.closest[2]
+
+
+class Abroad(Sources):
+    """The Gulf and European boards, and Yahoo's London series in pence."""
+
+    def __init__(self, boards, history):
+        super().__init__(history=history)
+        self.boards = boards   # screener -> [(exchange, ticker, close, currency)]
+
+    def post_json(self, url, payload):
+        screener = url.split("/")[-2]
+        self._check("tradingview:" + screener)
+        return {"data": [{"s": f"{ex}:{t}", "d": [t, t, close, cur, "stock", "common", ex]}
+                         for ex, t, close, cur in self.boards.get(screener, [])]}
+
+    def get_json(self, url, params=None):
+        data = super().get_json(url, params)
+        if url.endswith(".L"):
+            data["chart"]["result"][0]["meta"] = {"currency": "GBp"}
+        return data
+
+
+def test_a_gulf_and_a_london_holding_are_priced_from_their_own_boards(c, setup):
+    """Owner 2026-11-04: each app fetches its own Gulf and European prices. Only the boards of the countries held
+    are asked, each whole; a London close in pence becomes pounds; a listing in another currency is left for you."""
+    from lightning.database.currencies import CurrencyRegistry
+    accounts, _ = setup
+    for code in ("SAR", "GBP"):
+        CurrencyRegistry(c.db).register(code)
+    aramco = c.assets.create_investment("Saudi Aramco", "STOCK", "2222", mic="XSAU")
+    vod = c.assets.create_investment("Vodafone", "STOCK", "VOD", mic="XLON")
+    assert (aramco.market_key, aramco.currency, vod.market_key, vod.currency) == ("SA:2222", "SAR", "GB:VOD", "GBP")
+    c.transactions.record_transfer("2026-09-01", accounts["cib"].id, accounts["thndr"].id, "40000")
+    for code, rate in (("SAR", "13"), ("GBP", "62")):
+        for day in ("2026-09-01", "2026-09-30", "2026-10-31", "2026-11-30", "2026-12-31"):
+            c.fx.save(code, day, rate)
+    c.investments.buy_converting("2026-09-02", accounts["thndr"].id, aramco.id, "3", "81", "1053")
+    c.investments.buy_converting("2026-09-02", accounts["thndr"].id, vod.id, "10", "7", "434")
+    sources = Abroad(boards={"ksa": [("TADAWUL", "2222", 26.5, "SAR")], "uk": [("LSE", "VOD", 72.0, "GBX")]},
+                     history={"2222.SR": {"2026-09-30": 27, "2026-10-29": 26, "2026-11-30": 25},
+                              "VOD.L": {"2026-09-30": 70, "2026-10-29": 71, "2026-11-30": 69}})
+    report = fetch_now(c, date(2026, 12, 31), sources, datetime(2026, 12, 31, 20, tzinfo=timezone.utc))
+    boards = [a for a in sources.asked if a.startswith("tradingview")]
+    assert sorted(set(boards)) == ["tradingview:ksa", "tradingview:uk"]   # not Germany, not Kuwait
+    assert c.reporting.value_of(aramco.id, D(1), "2026-12-31").price == D("26.5")
+    assert c.reporting.value_of(aramco.id, D(1), "2026-11-30").price == D("25")
+    assert c.reporting.value_of(vod.id, D(1), "2026-12-31").price == D("0.72")      # 72 pence
+    assert c.reporting.value_of(vod.id, D(1), "2026-11-30").price == D("0.69")
+    assert not report.other_currency

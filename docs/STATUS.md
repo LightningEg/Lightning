@@ -9,7 +9,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Capture](pillars/capture.md) | 5 |  | 1 | 4 |  |  |
 | [Plan](pillars/plan.md) | 2 |  |  | 2 |  |  |
 | [Understand](pillars/understand.md) | 4 | 1 | 1 | 1 | 1 |  |
-| [Own](pillars/own.md) | 7 | 2 |  | 3 | 2 |  |
+| [Own](pillars/own.md) | 7 | 1 |  | 4 | 2 |  |
 | [Protect](pillars/protect.md) | 2 | 1 | 1 |  |  |  |
 | [Everywhere](pillars/everywhere.md) | 4 | 3 |  | 1 |  |  |
 | [Feel](pillars/feel.md) | 13 | 4 | 7 | 1 | 1 | 1 |
@@ -26,7 +26,6 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 - **IV-3AN** (Everywhere) [Phone visual plan](../issues/3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md)
 - **NF-4A** (Everywhere) [Edit journal: edit anywhere, one home confirms](../issues/4-edit-journal-and-devices/4A-edit-journal.md)
 - **NF-4B** (Everywhere) [Multiple devices: implementation plan](../issues/4-edit-journal-and-devices/4B-multiple-devices.md)
-- **NF-5G** (Own) [Brokerages that span exchanges and currencies](../issues/5-investments/5G-brokerages-across-exchanges.md)
 - **NF-6A** (Own) [Market data: price packs, collected in the cloud](../issues/6-market-data/6A-price-packs.md)
 - **NF-7Y** (Understand) [Explain which stale or pending inputs affect a financial figure](../issues/7-planning-import-and-search/7Y-financial-data-freshness.md)
 - **NF-10A** (Feel) [Cosmetic parts, account-wide claiming and native acceptance](../issues/10-looks-and-store/10A-cosmetic-parts-and-claiming.md)
@@ -46,8 +45,8 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | 2 Safe for real money | 3 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
 | 3 Polish and Arabic | 12 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
-| 5 Investments | 1 | Every investment figure can be explained per purchase, and agrees with the ledger. |
-| 6 Market data | 3 | Prices arrive by themselves, from sources Lightning may redistribute. |
+| 5 Investments | 0 | Every investment figure can be explained per purchase, and agrees with the ledger. |
+| 6 Market data | 4 | Prices arrive by themselves, from sources Lightning may redistribute. |
 | 7 Planning, import and search | 8 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 3 | The site is honest, quick and in step with the app. |
 | 9 Later | 7 | Good ideas that wait until the milestones above are done. |

@@ -798,6 +798,69 @@ async def add_pocket(request: Request, account_id: int):
     return redirect(f"/accounts/{account_id}", f"{c.accounts.get(account_id).name} now holds {pocket.currency}.")
 
 
+BROKER_KINDS = {"buy": "Bought", "sell": "Sold", "convert": "Converted", "dividend": "Dividend", "interest": "Interest",
+                "fee": "Fee", "deposit": "Money in", "withdrawal": "Money out"}
+BROKER_STATUS = {"new": "To record", "imported": "Already imported", "listed": "Not recorded here",
+                 "posted": "Recorded", "problem": "Not recorded"}
+
+
+def _broker_import_page(request: Request, account_id: int, **values):
+    c = container(request)
+    return render(request, "broker_import.html", account=c.accounts.get(account_id), kinds=BROKER_KINDS,
+                  statuses=BROKER_STATUS, **{"result": None, "posted": False, "error": "", **values})
+
+
+@router.get("/{account_id:int}/broker-import")
+async def broker_import_page(request: Request, account_id: int):
+    """NF-5G5: import an Interactive Brokers activity statement into this broker."""
+    return _broker_import_page(request, account_id)
+
+
+@router.post("/{account_id:int}/broker-import")
+async def broker_import(request: Request, account_id: int):
+    """Preview a statement, or record it once confirmed (the statement travels in the form, so nothing is staged)."""
+    import base64
+    from lightning.investments.broker_import import BrokerImport, read_ibkr
+    c = container(request)
+    form = await request.form()
+    upload = form.get("file")
+    try:
+        if upload is not None and hasattr(upload, "read"):
+            data = await upload.read()
+        else:
+            data = base64.b64decode(str(form.get("statement", "")), validate=True)
+        if len(data) > 5 * 1024 * 1024:
+            raise ValidationError("Statements up to 5 MB are supported.", "file")
+        statement = read_ibkr(data)
+        work = BrokerImport(c)
+        if not form.get("confirm"):
+            preview = work.preview(account_id, statement)
+            return _broker_import_page(request, account_id, result=preview, new_instruments=preview.new_instruments,
+                                       statement_b64=base64.b64encode(data).decode("ascii"))
+        with settled_save(request, c):
+            done = work.post(account_id, statement)
+        positions = work.check_positions(account_id, statement)
+    except (LightningError, ValueError) as exc:
+        return _broker_import_page(request, account_id, error=getattr(exc, "message", "That file could not be read."),
+                                   status_code=400)
+    return _broker_import_page(request, account_id, result=done, posted=True, positions=positions,
+                               period_end=statement.period_end)
+
+
+@router.post("/{account_id:int}/make-pocket")
+async def make_pocket(request: Request, account_id: int):
+    """Move a separate foreign-currency brokerage into a broker as its pocket in that currency (5G3)."""
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, container(request)):
+            pocket = c.accounts.make_pocket(account_id, int(str(form.get("broker_id", "0")) or 0))
+    except (LightningError, ValueError) as exc:
+        return redirect(f"/accounts/{account_id}", getattr(exc, "message", "Choose a broker."))
+    broker = c.accounts.get(pocket.parent_id)
+    return redirect(f"/accounts/{pocket.id}", f"{broker.name} now holds your {pocket.currency} account as a pocket.")
+
+
 @router.post("/{account_id:int}/spendable")
 async def set_spendable(request: Request, account_id: int):
     """Count this account's cash as spendable or keep it apart (Free cash, Safe to spend, payday)."""

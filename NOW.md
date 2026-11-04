@@ -37,6 +37,6 @@ The whole plan, by milestone and code, is `issues/INDEX.md`.
 6. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `reports/2026-10-26-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
 7. **Website recapture** after 3W / 3AG / 7Q so the site shows the current screens. **Read:** `skills/site-recapture/SKILL.md`.
 8. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.
-9. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
+9. **5G Brokers:** done (PR claude/brokerages-5g); left in 6F: London's board and Gulf month-end history. **Read:** 6F.
 10. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
 11. **6B, 6D, 3AI:** shares, gold and institution logos remain as their items describe. **Read:** each item in `issues/INDEX.md`.

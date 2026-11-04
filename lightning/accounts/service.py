@@ -219,6 +219,27 @@ class AccountService:
             new_id = self.repo.insert(pocket)
         return self.get(new_id)
 
+    def pocket_homes(self, account: Account) -> list[Account]:
+        """The brokers a separate foreign-currency brokerage account can join as a pocket: active brokers in another
+        currency that hold no pocket in its currency yet. Empty for any other account."""
+        if (account.account_type != AccountType.BROKERAGE or account.parent_id or not account.active
+                or self.pockets(account.id)):
+            return []
+        return [b for b in self.list(active_only=True)
+                if b.id != account.id and b.account_type == AccountType.BROKERAGE and not b.parent_id
+                and b.currency != account.currency and not any(p.currency == account.currency for p in self.pockets(b.id))]
+
+    def make_pocket(self, account_id: int, broker_id: int) -> Account:
+        """Move a separate brokerage account into a broker as its pocket in that currency (5G, merge today's separate
+        Dollar brokerage): the same account, ledger and holdings, now shown inside the broker's one row."""
+        account = self.get(account_id)
+        if broker_id not in {b.id for b in self.pocket_homes(account)}:
+            raise ValidationError("Choose a broker in another currency that has no pocket in this one.", "broker")
+        broker = self.get(broker_id)
+        with self.db.transaction():
+            self.repo.set_parent(account.id, broker.id, f"{broker.name} · {account.currency}")
+        return self.get(account.id)
+
     def set_spendable(self, account_id: int, choice: bool | None) -> Account:
         """Count this account's cash as spendable (True), keep it apart (False) or follow the default (None)."""
         current = self.get(account_id)
