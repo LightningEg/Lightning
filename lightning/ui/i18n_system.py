@@ -1393,6 +1393,7 @@ ROUTES = {
     "Choose how this payment was settled.": "اختار الدفعة دي اتسددت إزاي.",
 }
 SERVICES = {
+    "Upload this account’s CSV, Excel workbook or text-based CIB PDF. CSV columns are": "ارفع CSV أو ملف Excel أو بيان CIB بصيغة PDF نصية للحساب ده. أعمدة CSV هي",
     'The extracted statement is too large. Export a shorter period.': 'البيان المستخرج كبير. صدّر فترة أقصر.',
     'Excel and PDF statements must be 8 MB or smaller.': 'ملف Excel أو PDF لازم يكون ٨ ميجابايت أو أقل.',
     'Choose a CSV, .xlsx Excel workbook or text-based PDF statement.': 'اختار ملف CSV أو Excel بصيغة \u200e.xlsx أو بيان PDF تقدر تحدد النص فيه.',
