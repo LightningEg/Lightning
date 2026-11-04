@@ -1,6 +1,6 @@
 """The Investments holdings table grouped five ways, the By currency breakdown and the USD lens.
 
-Every figure here is arithmetic on rows the route already built: a view only regroups the same holdings, so each
+Every figure here is arithmetic on rows the shared holdings read model already built: a view only regroups the same holdings, so each
 view's total is Holdings value. Nothing is stored; the USD lens is a display conversion at one dated rate.
 """
 from __future__ import annotations
@@ -110,3 +110,58 @@ def in_lens(groups: list[dict], divisor: Decimal) -> list[dict]:
         out.append({**g, "rows": rows, "value": g["value"] / divisor, "cost": g["cost"] / divisor,
                     "gain": g["gain"] / divisor, "invested": (g.get("invested") or 0) / divisor})
     return out
+
+
+def _lens(value, divisor: Decimal):
+    return None if value is None else value / divisor
+
+
+
+def grouped_figures(class_groups: list[dict], total: Decimal, report: dict, spark: dict, *,
+                    accounts: dict, assets: dict, base: str, other: str, view: str,
+                    rate, use_usd: bool) -> dict:
+    """One grouping/lens calculation for holdings, currency totals and hero values.
+
+    A lens changes denomination only; percentages and stored values stay intact.
+    The caller supplies the dated quote and localized Other label, never formulas.
+    """
+    kwargs = {"accounts": accounts, "assets": assets,
+              "base": base, "other_label": other}
+    currency_groups = regroup("currency", class_groups, total, **kwargs)
+    breakdown = by_currency({g["name"]: g["value"] for g in currency_groups},
+                                          report.get("investment_cash_by_currency") or {}, base, other)
+    rows = [r for g in class_groups for r in g["rows"]]
+    gain = sum((g["gain"] for g in class_groups), ZERO)
+    fx_gain = fx_total(rows)
+    groups = regroup(view, class_groups, total, **kwargs)
+    lens_usd = rate is not None and use_usd
+    divisor = rate.rate if lens_usd else Decimal(1)
+    if lens_usd:
+        groups = in_lens(groups, divisor)
+        breakdown = {**breakdown, "total": breakdown["total"] / divisor, "abroad": breakdown["abroad"] / divisor,
+                     "rows": [{**r, "value": r["value"] / divisor} for r in breakdown["rows"]]}
+    return {"holding_groups": groups, "view": view, "views": VIEW_LABELS,
+            "currency_card": breakdown, "fx_gain": fx_gain / divisor, "total_gain": gain / divisor,
+            "lens": {"usd": lens_usd, "code": "USD" if lens_usd else base, "available": rate is not None,
+                     "rate": rate.rate if rate else None, "as_of": rate.date if rate else None,
+                     "divisor": divisor},
+            "hero_result": _lens(report.get("result"), divisor),
+            "hero_value": _lens(spark["latest"], divisor),
+            "hero_change": _lens(spark["change"], divisor)}
+
+
+def purchase_returns(h, day: str):
+    """Your own purchases still held, and the pieces of your sales, each with its return and its return per year
+    (NF-5D). Percent figures are worked out here, never in the template."""
+    def pct(rate):
+        return None if rate is None else rate * 100
+    mine = [lot for lot in h.lots if lot.owner_id is None]
+    held = [{"opened": lot.opened, "units": lot.quantity, "cost": lot.cost,
+             "value": None if h.price is None else lot.quantity * h.price,
+             "gain": None if h.price is None else lot.quantity * h.price - lot.cost,
+             "roi": None if h.price is None else pct(lot.roi(h.price)),
+             "cagr": None if h.price is None else pct(lot.cagr(h.price, day))} for lot in mine if lot.quantity]
+    sold = [{"opened": d.lot_opened, "sold": d.sold, "units": d.quantity, "cost": d.cost, "proceeds": d.proceeds,
+             "gain": d.gain, "roi": pct(d.roi), "cagr": pct(d.cagr)}
+            for d in h.disposals if d.owner_id is None and d.quantity]
+    return held, sold

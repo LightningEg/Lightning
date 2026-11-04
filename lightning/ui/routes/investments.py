@@ -296,54 +296,19 @@ def _phone_parts(c, request: Request, period, extras: dict, current: bool) -> di
                         "href": _link(request, period=key)} for key, text in PHONE_RANGES]}
 
 
-def _lens(value, divisor: Decimal):
-    return None if value is None else value / divisor
-
-
 def _view_extras(c, request: Request, extras: dict, report: dict, day: str) -> dict:
-    """How the holdings table is grouped (?view=), the By currency breakdown, the exchange-rate share of the gain
-    and the USD lens (?lens=usd). All arithmetic is here; the lens only divides by the dated USD rate."""
+    """Request choices and links around the investment grouping/lens read model."""
     base = c.reporting.base_currency
     view = holding_views.parse_view(request.query_params.get("view"))
-    class_groups = extras["holding_groups"]
-    other = translate("Other", ui_locale())
-    kwargs = {"accounts": {a.id: a for a in c.accounts.list()}, "assets": {a.id: a for a in c.assets.list_assets()},
-              "base": base, "other_label": other}
-    total = extras["holdings_total"]
-    currency_groups = holding_views.regroup("currency", class_groups, total, **kwargs)
-    breakdown = holding_views.by_currency({g["name"]: g["value"] for g in currency_groups},
-                                          report.get("investment_cash_by_currency") or {}, base, other)
-    rows = [r for g in class_groups for r in g["rows"]]
-    gain = sum((g["gain"] for g in class_groups), ZERO)
-    fx_gain = holding_views.fx_total(rows)
-    groups = holding_views.regroup(view, class_groups, total, **kwargs)
     rate = c.reporting.valuer.fx("USD", day) if base != "USD" else None
-    lens_usd = rate is not None and request.query_params.get("lens") == "usd"
-    divisor = rate.rate if lens_usd else Decimal(1)
-    if lens_usd:
-        groups = holding_views.in_lens(groups, divisor)
-        breakdown = {**breakdown, "total": breakdown["total"] / divisor, "abroad": breakdown["abroad"] / divisor,
-                     "rows": [{**r, "value": r["value"] / divisor} for r in breakdown["rows"]]}
-    return {"holding_groups": groups, "view": view, "views": holding_views.VIEW_LABELS,
-            "view_links": {v: _link(request, view=None if v == "class" else v) for v in holding_views.VIEWS},
-            "currency_card": breakdown, "fx_gain": fx_gain / divisor, "total_gain": gain / divisor,
-            "lens": {"usd": lens_usd, "code": "USD" if lens_usd else base, "available": rate is not None,
-                     "rate": rate.rate if rate else None, "as_of": rate.date if rate else None,
-                     "divisor": divisor, "egp_link": _link(request, lens=None), "usd_link": _link(request, lens="usd")},
-            "hero_result": _lens(report.get("result"), divisor),
-            "hero_value": _lens(extras["value_spark"]["latest"], divisor),
-            "hero_change": _lens(extras["value_spark"]["change"], divisor)}
-
-
-def _owned_split(split, units, quantity, gain) -> dict:
-    """Your share of a foreign holding's price part and FX part; the FX part takes the rounding so the two add to
-    the gain shown."""
-    if split is None or gain is None or not quantity:
-        return {}
-    share = units / quantity
-    price_part = (split[0] * share).quantize(Decimal("0.01"))
-    return {"price_part": price_part, "fx_part": gain - price_part}
-
+    figures = holding_views.grouped_figures(
+        extras["holding_groups"], extras["holdings_total"], report, extras["value_spark"],
+        accounts={a.id: a for a in c.accounts.list()}, assets={a.id: a for a in c.assets.list_assets()},
+        base=base, other=translate("Other", ui_locale()), view=view, rate=rate,
+        use_usd=request.query_params.get("lens") == "usd")
+    figures["view_links"] = {v: _link(request, view=None if v == "class" else v) for v in holding_views.VIEWS}
+    figures["lens"].update(egp_link=_link(request, lens=None), usd_link=_link(request, lens="usd"))
+    return figures
 
 def _portfolio_value_spark(c, end: date) -> dict:
     """Portfolio value (holdings only; brokerage cash is cash you own) at each of the last six month ends, up to ``end``.
@@ -370,14 +335,6 @@ def _portfolio_value_spark(c, end: date) -> dict:
             "change": change, "added": added}
 
 
-def _native_cost(found, quantity) -> dict:
-    """Currency and average cost per unit in that currency, for a holding priced in a foreign currency."""
-    if not found or not quantity:
-        return {"currency": None, "average_cost_native": None}
-    currency, cost_native = found
-    return {"currency": currency, "average_cost_native": cost_native / quantity}
-
-
 def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, report) -> dict:
     """The Investments page in four parts (guideline 2.7): this period's waffle and result, the fixed
     six-month value line, allocation and biggest holdings, the holdings table grouped by class,
@@ -388,56 +345,9 @@ def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, rep
     opening = report.get("recon_opening")
     growth = period_growth(report["result"], opening, report["net_money"])
     spark = _portfolio_value_spark(c, today())
-    # Assets known only by their balance (a share of a flat, cash left in an older deposit account) are
-    # holdings too (owner decision 2026-10-04): the table lists every part of Holdings value.
-    traded = {(h.account_id, h.asset_id) for h, *_ in owned_rows}
-    position = c.position.at(day)
-    balances = [(cls.name, item) for cls in position.classes for item in cls.items
-                if (item.account_id, item.asset_id) not in traded and item.value]
-    holdings_total = position.holdings_value  # the weights' base: Holdings value, as the Overview shows it
-    # A balance-only asset has no horizon of its own yet: it is Unassigned, so the horizon split adds up
-    # to Holdings value (audit 2026-10-05 #13: the flat was left out).
-    horizons = defaultdict(lambda: ZERO)
-    for _, yours, _, horizon, *_ in owned_rows:
-        horizons[horizon] += yours or ZERO
-    for _, item in balances:
-        horizons["Unassigned"] += item.value
-    # A holding in another currency: its gain from the price and from the exchange rate (Overview #16).
-    splits = {(r["account_id"], r["asset_id"]): (r["price_part"], r["fx_part"]) for r in report.get("holdings", [])
-              if r.get("price_part") is not None and "account_id" in r}
-    # Price and average cost of a foreign holding are shown in its own currency (audit 2026-10-15).
-    native = {(r["account_id"], r["asset_id"]): (r["currency"], r["cost_native"]) for r in report.get("holdings", [])
-              if "account_id" in r and r.get("currency") and r["currency"] != c.base_currency}
-    groups: dict[str, dict] = {}
-    for h, yours, bucket, horizon, capital, unrealized, units in owned_rows:
-        name = h.asset_class.split(" › ")[-1]
-        g = groups.setdefault(name, {"name": name, "value": ZERO, "cost": ZERO, "gain": ZERO, "invested": ZERO, "rows": []})
-        g["value"] += yours or ZERO
-        g["cost"] += capital
-        result = h.owned_result(units, yours, capital)
-        g["gain"] += result["gain"] or ZERO
-        g["invested"] += result["invested"]
-        g["rows"].append({"h": h, "kind": name, "units": units, "average_cost": capital / units if units else None, "cost": capital,
-                          "price": h.price, "value": yours, **result,
-                          "xirr": h.xirr * 100 if h.xirr is not None and units == h.quantity else None,
-                          "display_return": h.display_return if units == h.quantity else None,
-                          "horizon": horizon, "weight": (yours or ZERO) / holdings_total * 100 if holdings_total else ZERO,
-                          **_native_cost(native.get((h.account_id, h.asset_id)), h.quantity),
-                          **_owned_split(splits.get((h.account_id, h.asset_id)), units, h.quantity, unrealized)})
-    for name, item in balances:
-        g = groups.setdefault(name, {"name": name, "value": ZERO, "cost": ZERO, "gain": ZERO, "invested": ZERO, "rows": []})
-        g["value"] += item.value
-        g["cost"] += item.value
-        g["invested"] += item.value  # balance-only holdings still belong in the combined return's base
-        g["rows"].append({"h": None, "kind": name, "balance": True, "name": item.account, "account_id": item.account_id,
-                          "asset_id": item.asset_id,
-                          "value": item.value, "cost": item.value, "gain": ZERO,
-                          "weight": item.value / holdings_total * 100 if holdings_total else ZERO})
-    for g in groups.values():
-        g["rows"].sort(key=lambda r: (-(r["value"] or ZERO), (r["h"].asset_name if r["h"] else r["name"]).casefold()))
-        g["weight"] = g["value"] / holdings_total * 100 if holdings_total else ZERO
-        g["gain_pct"] = g["gain"] / g["invested"] * 100 if g["invested"] else None
-    holding_groups = sorted(groups.values(), key=lambda g: (-g["value"], g["name"].casefold()))
+    breakdown = c.position.investment_breakdown(day, owned_rows, report)
+    holding_groups, horizons = breakdown.groups, breakdown.horizons
+    balances, holdings_total = breakdown.balances, breakdown.total
     biggest = charts.bars([{"label": r["name"], "value": r["value"], "note": f"{r['weight']:.1f}% · {g['name']}",
                             "href": f"/accounts/{r['account_id']}"} if r["h"] is None else
                            {"label": r["h"].asset_name, "value": r["value"], "note": f"{r['weight']:.1f}% · {r['h'].asset_class.split(' › ')[-1]}",
@@ -561,7 +471,7 @@ async def holding_detail(request: Request, asset_id: int):
         previous=replace(previous,realized=previous.owned_realized,dividends=previous.owned_dividends,
                          dividend_tax=previous.owned_dividend_tax)
     journey = visuals.holding_journey(c, h.account_id, asset_id, parse_date(day))
-    purchases, sales = _purchase_rows(h, day)
+    purchases, sales = holding_views.purchase_returns(h, day)
     gain_pct = h.unrealized / h.cost_basis * 100 if h.unrealized is not None and h.cost_basis else None
     total_return = h.total_return
     breakdown = charts.waterfall(("What you paid", h.cost_basis),
@@ -578,23 +488,6 @@ async def holding_detail(request: Request, asset_id: int):
                   period_dividends=h.dividends-(previous.dividends if previous else ZERO),
                   allocation_classes=sorted({*_allocation_classes(c), bucket}, key=str.casefold),  # its own bucket is always a choice (5K)
                   show_popup=request.headers.get("X-Lightning-Popup")=="1")
-
-
-def _purchase_rows(h, day: str):
-    """Your own purchases still held, and the pieces of your sales, each with its return and its return per year
-    (NF-5D). Percent figures are worked out here, never in the template."""
-    def pct(rate):
-        return None if rate is None else rate * 100
-    mine = [lot for lot in h.lots if lot.owner_id is None]
-    held = [{"opened": lot.opened, "units": lot.quantity, "cost": lot.cost,
-             "value": None if h.price is None else lot.quantity * h.price,
-             "gain": None if h.price is None else lot.quantity * h.price - lot.cost,
-             "roi": None if h.price is None else pct(lot.roi(h.price)),
-             "cagr": None if h.price is None else pct(lot.cagr(h.price, day))} for lot in mine if lot.quantity]
-    sold = [{"opened": d.lot_opened, "sold": d.sold, "units": d.quantity, "cost": d.cost, "proceeds": d.proceeds,
-             "gain": d.gain, "roi": pct(d.roi), "cagr": pct(d.cagr)}
-            for d in h.disposals if d.owner_id is None and d.quantity]
-    return held, sold
 
 
 def target_plan(c) -> dict:
