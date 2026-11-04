@@ -53,7 +53,7 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§4 Phone
 ## 3T5 Charts and expense analysis · M
 Report items 9-10: two charts in one card, time axes with 8-10 labels, five or more names without Other.
 
-**2026-11-04:** Shared donut grouping now folds exactly five names (and combines an existing Other); phone time axes show at most three labels. Tests: `tests/test_demo_and_visuals.py` and `tests/test_phone_check.py`. Review the remaining chart and comparison observations before closing.
+**2026-11-04:** Shared donut grouping now folds exactly five names (and combines an existing Other); phone time axes show at most three labels (`tests/test_demo_and_visuals.py`, `tests/test_phone_check.py`). Planner now keeps four named suggestions and an expandable Other, preserving every detailed allocation (`tests/test_investments.py`, `tests/test_phone_planner_browser.py`). Review Reserves sources and the remaining chart and comparison observations before closing.
 
 ## 3T6 Fields, pairs and small things · M
 Report items 11-13: 15 px field text, focus fill, lone KPIs, Zakat date format, Profiles wordmark.

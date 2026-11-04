@@ -427,6 +427,21 @@ def _planner_stack(rows: list[dict], other_label: str) -> list[dict]:
             + [{"label": other_label, "value": sum((r["suggested"] for r in rest), ZERO), "tone": "reference"}])
 
 
+def _planner_phone_groups(rows: list[dict], stack: list[dict]) -> tuple[list[dict], list[dict], Decimal]:
+    """Keep every recommendation, with at most four named rows before Other."""
+    if len(rows) <= 4:
+        return rows, [], ZERO
+    names = {part["label"] for part in stack[:4]}
+    shown = [row for row in rows if row["bucket"] in names and row["bucket"].casefold() != "other"][:4]
+    for row in rows:
+        if len(shown) == 4:
+            break
+        if row not in shown and row["bucket"].casefold() != "other":
+            shown.append(row)
+    rest = [row for row in rows if row not in shown]
+    return shown, rest, sum((row["suggested"] for row in rest), ZERO)
+
+
 async def _render_planner(request: Request, raw_amount: str="10000"):
     c=container(request); amount=to_decimal(raw_amount,"amount")
     if amount<=ZERO: raise ValidationError("Enter an amount greater than zero.","amount")
@@ -457,8 +472,10 @@ async def _render_planner(request: Request, raw_amount: str="10000"):
         rows.append({"bucket":bucket,"value":value,"weight":value/total*100 if total else ZERO,
                      "target":planning_targets.get(bucket),"suggested":suggested,"tone":tones.get(bucket,"other"),
                      "after":(value+suggested)/(total+amount)*100 if total+amount else ZERO})
+    stack = _planner_stack(rows, translate("Other", ui_locale()))
+    phone_shown, phone_other, phone_other_total = _planner_phone_groups(rows, stack)
     return render(request,"investments/planner.html",amount=amount,mode=mode,rows=rows,target_total=target_total,
-                  stack=_planner_stack(rows, translate("Other", ui_locale())),
+                  stack=stack, phone_shown=phone_shown, phone_other=phone_other, phone_other_total=phone_other_total,
                   monthly_goal=c.settings.get("investment_monthly_goal") or "",
                   planner_ready=bool(planning_targets) or by_current_mix, by_current_mix=by_current_mix,allocation_sum=sum((r["suggested"] for r in rows),ZERO))
 
