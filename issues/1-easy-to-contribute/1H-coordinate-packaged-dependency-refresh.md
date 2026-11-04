@@ -84,3 +84,5 @@ Package-contract tests, the full suite and import contracts; native Windows and 
 libraries), Android, both desktop and the build-tools locks regenerated with their recorded commands. Full suite passes on
 the upgraded environment (`ruff`, import contracts too). Left: the native Windows and Android jobs on the pull request, then
 a phone install of the new wheels.
+
+2026-11-04: a local arm64 Android debug build at `30e608bb` passed the package/lock check and 16 KB ZIP alignment; the artifact was signed with Gradle’s automatically generated debug key, not a release key. [Evidence](../../reports/2026-10-26-v150-release/evidence/android-1h-debug-2026-11-04.md). Native Windows and CI checks and a physical phone install remain.
