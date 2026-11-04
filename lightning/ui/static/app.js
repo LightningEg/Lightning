@@ -737,9 +737,10 @@ const initDateFields = (root = document) => {
     native.autocomplete = "off";
   });
   root.querySelectorAll("[data-smart-date]").forEach((input) => {
+    if (document.documentElement.classList.contains("phone") && input.placeholder === "yyyy-mm-dd") input.removeAttribute("placeholder");
     if (input.closest(".iso-date-control")) return;
     if (!input.id) input.id = `date-field-${++dateFieldCount}`;
-    if (!input.placeholder) input.placeholder = "yyyy-mm-dd";
+    if (!input.placeholder && !document.documentElement.classList.contains("phone")) input.placeholder = "yyyy-mm-dd";
     const wrapper = document.createElement("span");
     wrapper.className = "iso-date-control";
     input.parentNode.insertBefore(wrapper, input);
@@ -2340,14 +2341,16 @@ const initMonthPickers = (root = document) => root.querySelectorAll("[data-month
   // Enter in a month box keeps the selected period; the browser would
   // otherwise submit with the first button (All time).
   form?.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" || !event.target.matches("input")) return;
+    if (event.defaultPrevented || event.key !== "Enter" || !event.target.matches("input")) return;
     event.preventDefault();
     if (!event.target.checkValidity() || (event.target === monthValue && !valid(monthValue.value.trim()))) {
       if (event.target === monthValue) monthValue.setCustomValidity(`Use yyyy-mm, up to ${currentMonth}.`);
       event.target.reportValidity();
       return;
     }
-    form.requestSubmit(form.querySelector(".period-button.selected") || undefined);
+    const selected = form.querySelector("button.period-button.selected")
+      || (picker.classList.contains("site-period-control") ? monthlyButton : null);
+    form.requestSubmit(selected || undefined);
   });
   if (!monthValue || !form || !/^\d{4}-\d{2}$/.test(currentMonth || "")) return;
   const updateButtons = () => {

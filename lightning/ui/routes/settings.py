@@ -249,8 +249,10 @@ async def unlock_theme(request: Request):
 async def save_privacy(request: Request):
     """Remember privacy mode in the profile; the window has already switched it with its cookie."""
     form = await request.form()
-    with settled_save(request, container(request)):
-        container(request).settings.set("privacy_mode", "1" if form.get("on") == "1" else "0")
+    c = container(request)
+    # A display preference neither changes financial records nor triggers payment matching.
+    with c.db.transaction():
+        c.settings.set("privacy_mode", "1" if form.get("on") == "1" else "0")
     return Response(status_code=204)
 
 

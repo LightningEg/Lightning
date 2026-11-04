@@ -242,7 +242,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
     from lightning.workflows.budget_funding import BudgetFunding
     budgets = BudgetService(db, categories, reporting, funding=BudgetFunding(db))
     reevaluations = ReevaluationService(db, accounts, transactions, reporting)
-    planning = PlanningService(db, accounts, categories, counterparties, transactions)
+    planning = PlanningService(db, accounts, categories, counterparties, transactions, reserves)
     schedules = ScheduleSource(planning, reserves)
     investments = InvestmentService(db, accounts, assets, categories, transactions, reporting, reevaluations)
     gameya = GameyaService(db, accounts, assets, transactions)

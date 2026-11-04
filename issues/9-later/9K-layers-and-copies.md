@@ -42,18 +42,16 @@ The [code-quality audit](../../reports/2026-11-03-code-quality-and-smart-feature
 
 Complete: balance/certificate validation is in `transactions/balances.py`, read-only search/tags/capture suggestions in `transactions/search.py`, and exact submission fingerprints, duplicate delivery checks and revision hashing in `transactions/submissions.py`. The facade retains its signatures and policy constants; it still owns posting and save scopes. Audit rows, retry refusal messages and journal/Undo authority are unchanged. The shared balance walker does not buffer histories; the repository closes its streamed cursor. A 100,000-row dummy history agrees exactly with the former SQL window, with about 1.8 KB of Python allocations for the walk (SQLite allocations excluded); the local CPU sample was 407 ms versus 356 ms for the SQL window. This is a responsibility/consistency improvement, not a speed claim.
 
-Still open: the unclaimed profile-route extraction, coordinated journal/device/recovery route separation after active claims clear, and the bank-import parsing/proposal/posting split. Keep one extraction per change and retain all financial behavior.
+The profile screens and bank-import boundaries are completed below. Journal/device/recovery route separation stays open after active claims clear.
 
 ## Profile screens extracted · 2026-11-04
 
 The profile lifecycle screens (list, new profile, unlock with password or fingerprint, recovery, password, question and recovery key) moved unchanged out of `profile_app` into `lightning/runtime/profile_screens.py`; the routes see the session, devices and gate through one `ProfileScreens` record, and `page`/`action` come back for the routes that stay. Restore, devices, borrowed-profile and Lock routes were not touched (they belong to the restore and journal claims). `runtime/app.py` is now about 750 lines. Existing profile, phone, restore and architecture tests pass unchanged; ruff and the import contracts pass.
 
-Still open: restore, device and borrowed-profile routes after their claims clear, and the bank-import parsing/proposal/posting split.
+Still open: restore, device and borrowed-profile routes after their claims clear.
 
-Also left (from 1G, 2026-11-04): Undo's history-validation hook (`result.undo.validate`, `prepare_history_validation`, `db.undo`) is still assigned in `bootstrap.py`; pass it to `UndoService` through its constructor.
+## Bank import parsing · 2026-11-04
 
-## Bank-import row readers extracted · 2026-11-04
+CSV decoding, numeric and date normalization, and row-level errors live in `bank_import_parsing.py`; `BankImportService` and the original helper imports remain available. The review proposals and duplicate/transfer/category suggestions now live in `bank_import_proposals.py`; the facade retains its preview interface. Posting and linking one reviewed row now live in `bank_import_posting.py`; the facade still owns confirmation ordering, transaction and rollback scopes. Regression: `tests/test_bank_imports.py`, `tests/test_import_upload_limits.py`, `tests/test_architecture.py`.
 
-The pure row readers (column names, `decode_csv`, date and amount parsing, the internal-transfer words) moved unchanged out of `bank_imports.py` into `lightning/bank_import_rows.py` (own layer above `core`); `bank_imports` still exports every name, so callers and tests are unchanged, and the journal's capture adapter now reads rows from the new module, which removes its `bank_imports` dependency. `bank_imports.py` is 852 lines. Money-posting code (`confirm`, `_post_import_row`) was not touched.
-
-Still open: proposal generation (`preview` and its helpers) and posting orchestration in `bank_imports.py`, restore, device and borrowed-profile routes.
+The upstream `bank_import_rows.py` readers remain authoritative and the journal uses them; normalization delegates to those same readers. Remaining: claimed restore/device routes. Undo validators are now passed before attachment in this branch.

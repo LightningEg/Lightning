@@ -1109,9 +1109,11 @@ def test_safe_to_spend_keeps_the_rest_of_the_savings_target(mohab, monkeypatch):
     gross = mohab.c.budgets.owned_spending("2027-04-01", "2027-04-30")
     funding = mohab.c.budgets.funding.by_category("2027-04-01", "2027-04-30")
     summary = mohab.c.budgets.plan_summary("2027-04", schedule=mohab.c.schedules.view())
-    assert sum(gross.values(), D(0)) == D("34415")
+    # The year-long Vodafone statement (the last thing he does) posts its ready rows: 7,219 EGP of them fall in April.
+    vodafone = D("7219")
+    assert sum(gross.values(), D(0)) == D("34415") + vodafone
     assert sum((row["reserve"] for row in funding.values()), D(0)) == D("9000")
-    assert (summary["planned"], summary["spent"], summary["left"]) == (D("26699"), D("25415"), D("1284"))
+    assert (summary["planned"], summary["spent"], summary["left"]) == (D("26699"), D("25415") + vodafone, D("1284") - vodafone)
     assert route(mohab, "safe_keeps_saving") == ["/", "/plan"]
     answer = mohab.answers["safe_keeps_saving"]
     assert answer.shows("Free cash 312,505", "Emergency fund top-up", "Rest of savings target", "Safe to spend")
@@ -1447,7 +1449,8 @@ def test_a_300_row_statement_with_seven_columns_reaches_review(mohab):
 
 def test_a_review_with_errors_still_has_a_way_on_and_a_way_back(mohab):
     screen = mohab.notes["import_error"]
-    assert screen.shows("Nothing was imported")
+    # The ready rows post; the row with the bad date, and every row still undecided, stay in review.
+    assert screen.shows("Import updated: 168 posted", "Some rows still need review")
     assert screen.form("Post ready rows")
     assert screen.link("Finish later").href == "/accounts/3"
 
@@ -1483,7 +1486,7 @@ def test_settings_prepares_one_owned_ai_analysis_workbook(mohab):
     from zipfile import ZipFile
 
     screen = mohab.b.go("Settings", "Your data")
-    assert screen.shows("Your data", "Ask an AI", "All time", "YTD", "Monthly", "Custom",
+    assert screen.shows("Your data", "Ask an AI", "All time", "YTD", "Month", "Custom",
                         "Copy for AI", "Save as a file", "Hide names", "Digest", "Standard", "Full",
                         "Review my period", "Where did the money go", "Check my budget",
                         "What changed my net worth", "My own question", "Export for AI analysis")

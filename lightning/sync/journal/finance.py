@@ -324,7 +324,9 @@ class CashAdapter:
             commands.validate(proposal["kind"], proposal["groups"])
             command_name = proposal["kind"][len("command."):]
             history_label = None
-            if not command_name.startswith(("automation.", "undo.replay")):
+            privacy_preference = (command_name == "settings.set"
+                                  and proposal["groups"]["args"]["key"] == "privacy_mode")
+            if not privacy_preference and not command_name.startswith(("automation.", "undo.replay")):
                 from lightning.sync.journal.history import action_label
                 history_label = action_label(command_name)
             with self.writing(history_label=history_label):
