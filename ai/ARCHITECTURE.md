@@ -542,6 +542,8 @@ A joining device accepts an offer while its clock is within fifteen minutes of t
 
 ## Working rules
 
+`pyproject.toml` assigns production modules to import layers; nested modules and initializers inherit their top-level layer. The root `__init__.py` (version metadata) and `__main__.py` (launcher) are explicit exemptions. The sync policy additionally assigns each module and initializer to protocol, financial adapter or runtime; its direct-import check documents the codec-to-identity and finance-to-store exceptions. Package-registry and dynamically computed imports need review because static checks cannot resolve them. Ordinary undo is attached only after its replay and transition validators are installed; read-only and journal profiles use their own history handling.
+
 1. Check `git status` first; preserve existing user changes and personal data.
 2. Define a new concept in the Glossary before building it.
 3. Persistent state needs a new migration and a module that owns its table. Never rewrite an applied migration.

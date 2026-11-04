@@ -23,7 +23,7 @@ All reproductions use temporary dummy databases, offline prices and a fixed date
 | [2K](#fix-progress) | Low | A rejected currency-converting buy leaves a new empty currency pocket. | Route selection, pocket creation, conversion and purchase roll back together. |
 | [2O](#fix-progress) | Medium | Phone bulk Delete voids selected rows without a confirmation question. | Confirm the selected scope and preserve the button’s delete action. |
 | [3AE](#fix-progress) | Medium | A refused PC bulk edit loses both selection and typed changes. | Keep the correction and selection available after a rejected save. |
-| [1G](../../issues/1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | Tech | Major financial modules and `sync` are outside the layered import contract. | Give every production module an explicit dependency policy. |
+| 1G (done: `tests/test_architecture.py`) | Tech | Major financial modules and `sync` are outside the layered import contract. | Give every production module an explicit dependency policy. |
 
 ### 2G: the cash rule depends on which operation was used
 
@@ -195,4 +195,4 @@ Combined full-suite validation: **2,395 passed, 10 skipped**; all four import co
 
 ### 1G follow-up (2026-11-04)
 
-The existing top-level inventory covers the original omissions. Sync modules and package initializers now have explicit policies and static direct-import checks, with negative tests in `tests/test_architecture.py`. Investment reevaluation and forecast deposit-receipt collaborators are now required and validated, and financial adapters cannot import runtime modules except the finance-to-store dependency. Other composition wiring and remaining runtime boundaries stay in [1G](../../issues/1-easy-to-contribute/1G-complete-backend-architecture-contracts.md).
+The existing top-level inventory covers the original omissions. Sync modules and package initializers now have explicit policies and static direct-import checks, with negative tests in `tests/test_architecture.py`. Investment reevaluation and forecast deposit-receipt collaborators are now required and validated, and financial adapters cannot import runtime modules except the finance-to-store dependency. Ordinary undo now installs both validators before attaching; the root initializer and launcher are documented layer exemptions. Static checks cannot discover dynamically computed imports.

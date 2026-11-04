@@ -88,12 +88,17 @@ class Container:
     position: PositionService
     health: HealthService
     zakat: ZakatService
+    saved_views: SavedViewService
+    reimbursements: ReimbursementService
+    funding: CashFundingService
+    deposit_receipts: DepositReceiptService
     backup_dir: Path | None = None
     undo: UndoService | None = None
-    saved_views: SavedViewService | None = None
-    reimbursements: ReimbursementService | None = None
-    funding: CashFundingService | None = None
-    deposit_receipts: DepositReceiptService | None = None
+
+    def __post_init__(self):
+        for name in ("saved_views", "reimbursements", "funding", "deposit_receipts"):
+            if getattr(self, name) is None:
+                raise TypeError(f"{name} is required")
 
     @property
     def base_currency(self) -> str:
@@ -242,6 +247,32 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
     forecaster = CashForecaster(planning, reporting, reserves, budgets, categories, position, schedules, health,
                                 deposits, deposit_receipts)
     zakat = ZakatService(db, position, reporting, assets, categories, physical_items, audit, gameya)
+    reconciliation = ReconciliationService(db, categories, transactions)
+    def prepare_history_validation(records):
+        import json
+        ids = set()
+        for record in records:
+            if record['table_name'] not in {'transactions', 'ledger_entries'}:
+                continue
+            for key in ('before_json', 'after_json'):
+                row = json.loads(record[key]) if record[key] else {}
+                value = row.get('transaction_id') if record['table_name'] == 'ledger_entries' else row.get('id')
+                if value is not None:
+                    ids.add(value)
+        before = [txn for txn_id in ids if (txn := transactions.repo.get(txn_id)) is not None]
+        def check_cash():
+            after = [txn for txn_id in ids if (txn := transactions.repo.get(txn_id)) is not None]
+            dates = [txn.date for txn in before + after]
+            if dates:
+                transactions._refuse_cash_below_zero([], min(dates), removed=before, added=after)
+        return check_cash
+    undo = None
+    if not read_only and not is_journal:
+        undo = UndoService.for_ledger(
+            db, audit,
+            validate=functools.partial(validate_replay, db=db, transactions=transactions, assets=assets,
+                                       accounts=accounts, reconciliation=reconciliation),
+            prepare_validation=prepare_history_validation)
     result = Container(
         db=db,
         data_dir=data_dir,
@@ -257,7 +288,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
         accounts=accounts,
         transactions=transactions,
         reporting=reporting,
-        reconciliation=ReconciliationService(db, categories, transactions),
+        reconciliation=reconciliation,
         reserves=reserves,
         reevaluations=reevaluations,
         money_from_others=money_from_others,
@@ -275,34 +306,13 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
         health=health,
         zakat=zakat,
         backup_dir=backup_dir,
+        undo=undo,
         saved_views=SavedViewService(db, categories, transactions, reporting),
         reimbursements=ReimbursementService(db),
         funding=CashFundingService(db, budgets, reporting, reserves, planning, categories, settings, schedules),
         deposit_receipts=deposit_receipts,
     )
-    if not read_only and not is_journal:
-        result.undo = UndoService(db, audit)
-        db.undo = result.undo
-        result.undo.validate = functools.partial(
-            validate_replay, db=db, transactions=transactions, assets=assets, accounts=accounts,
-            reconciliation=result.reconciliation)
-        def prepare_history_validation(records):
-            import json
-            ids = set()
-            for record in records:
-                if record['table_name'] not in {'transactions', 'ledger_entries'}:
-                    continue
-                for key in ('before_json', 'after_json'):
-                    row = json.loads(record[key]) if record[key] else {}
-                    value = row.get('transaction_id') if record['table_name'] == 'ledger_entries' else row.get('id')
-                    if value is not None:
-                        ids.add(value)
-            before = [txn for txn_id in ids if (txn := transactions.repo.get(txn_id)) is not None]
-            def check_cash():
-                after = [txn for txn_id in ids if (txn := transactions.repo.get(txn_id)) is not None]
-                dates = [txn.date for txn in before + after]
-                if dates:
-                    transactions._refuse_cash_below_zero([], min(dates), removed=before, added=after)
-            return check_cash
-        result.undo.prepare_validation = prepare_history_validation
+    # Attach only after both history validators and the container are complete.
+    if undo is not None:
+        db.undo = undo
     return result

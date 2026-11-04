@@ -9,7 +9,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | audit-2 | [Audit 2: backend efficiency and loose ends](2026-10-21-backend-efficiency/report.md) | 2026-10-21 | audit | 2A, 2C, 4A |
 | audit-3 | [Audit 3: is the edit journal (multi-device sync) solid?](2026-10-21-edit-journal/report.md) | 2026-10-21 | audit | 4A |
 | audit-5 | [Audit 5: is the backend engine efficient and streamlined?](2026-10-21-backend-streamlining/report.md) | 2026-10-21 | audit | 4A, 9K |
-| audit-4 | [Audit 4: backend correctness and failure boundaries](2026-10-23-backend-correctness/report.md) | 2026-10-23 | audit | 1G, 2A, 2C, 4A |
+| audit-4 | [Audit 4: backend correctness and failure boundaries](2026-10-23-backend-correctness/report.md) | 2026-10-23 | audit | 2A, 2C, 4A |
 | audit-6 | [Audit 6: open pull request cleanup](2026-10-23-pull-request-cleanup/report.md) | 2026-10-23 | review | 1H |
 | contributor-review | [Yusuf contribution review · 2026-10-23](2026-10-23-contributor-review/report.md) | 2026-10-23 | review | none |
 | audit-7 | [Audit 7 — app visual flow](2026-10-25-app-visual-flow/report.md) | 2026-10-25 | audit | none |
@@ -26,7 +26,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | audit-12 | [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](2026-10-30-desktop-tab-audit/report.md) | 2026-10-30 | audit | 3AM |
 | audit-13 | [Audit 13: the phone for quick jobs - convenience, taps and the look](2026-11-01-phone-convenience-audit/report.md) | 2026-11-01 | audit | 3AN |
 | dendera-premium | [Dendera audit: why it does not feel animated, and how to make it premium](2026-11-02-dendera-premium-audit/report.md) | 2026-11-02 | audit | none |
-| code-quality-smart-features | [Code audit: refactoring, loose ends and smart features](2026-11-03-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1G, 1H, 2A, 2C, 4A, 4B, 4K, 7B, 7C, 7T, 7X, 7Y, 9A, 9K |
+| code-quality-smart-features | [Code audit: refactoring, loose ends and smart features](2026-11-03-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1H, 2A, 2C, 4A, 4B, 4K, 7B, 7C, 7T, 7X, 7Y, 9A, 9K |
 
 
 ## Create and maintain a report

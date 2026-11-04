@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 51 open items, in the order they are worked on.
+10 milestones, 50 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -14,7 +14,6 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/1E-public-repository-security-audit.md) | improvement, technical | Build | M | ready |
-| **IT-1G** | [Cover all backend modules with explicit dependency and wiring contracts](1-easy-to-contribute/1G-complete-backend-architecture-contracts.md) | improvement, technical | Build | M | ready |
 | **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | Build | L | building |
 | IT-1H1 | ↳ Build and publish the native wheels | | | L | |
 | IT-1H2 | ↳ Update the dependency inputs together | | | M | |
@@ -23,7 +22,7 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | **IT-1M** | [Archive closed reports and keep their evidence out of the checkout](1-easy-to-contribute/1M-archive-closed-reports.md) | improvement, technical | Build | M | ready |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | ready |
 
-Done: 1A, 1B, 1C, 1D, 1F, 1I, 1J, 1K, 1L, 1O, 1P. Next free code: 1Q.
+Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1O, 1P. Next free code: 1Q.
 
 ## 2 Safe for real money
 
