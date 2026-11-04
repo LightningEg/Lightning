@@ -51,7 +51,7 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§4 Phone
 ## 3T4 Settings tabs and money first · M
 Report items 7-8: five tabs (C03.3), stacked rows still a table, Overview Latest led by revaluations. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
 
-**2026-11-04:** Phone Settings and its related pages now return to More, which already links to each page, instead of showing five tabs (`tests/test_phone_frame.py`). Overview Latest excludes value updates, as the register does (`tests/test_register_folds_and_views.py`). The main Settings page now uses rows rather than a table (`tests/test_phone_frame.py`); Sale factors and Currencies still contain tables and need review.
+**2026-11-04:** Phone Settings and its related pages now return to More, which already links to each page, instead of showing five tabs (`tests/test_phone_frame.py`). Overview Latest excludes value updates, as the register does (`tests/test_register_folds_and_views.py`). The main Settings page now uses rows rather than a table (`tests/test_phone_frame.py`); Currencies rates and exchange-rate history now use phone rows (`tests/test_ui.py`, `tests/test_phone_recurring_browser.py`); Sale factors still contains tables.
 
 ## 3T5 Charts and expense analysis · M
 Report items 9-10: two charts in one card, time axes with 8-10 labels, five or more names without Other.

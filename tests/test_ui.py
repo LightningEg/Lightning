@@ -442,3 +442,24 @@ def test_this_month_moves_on_and_a_past_month_stays(c, setup, monkeypatch):
     client.get("/budget?period=month&month=2026-08")                      # a past month on purpose
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-12-01")
     assert client.get("/budget", follow_redirects=False).headers["location"].endswith("month=2026-08")
+
+
+def test_phone_currency_settings_render_rates_and_fx_history_as_rows(c):
+    from lightning.database.currencies import CurrencyRegistry
+
+    CurrencyRegistry(c.db).register('USD')
+    c.fx.save('USD', '2026-09-01', '50')
+    c.account_flows.open_account('Dollar savings', 'BANK', '2026-09-01', '100', currency='USD',
+                                 opening_balance_date='2026-09-01')
+    c.fx.save('USD', '2026-09-30', '55')
+    assert c.reevaluations.process_date('2026-09-30', 'MONTH_END')
+    app = create_app(c)
+    async def phone_app(scope, receive, send):
+        scope.setdefault('state', {})['phone'] = True
+        await app(scope, receive, send)
+    phone = TestClient(phone_app).get('/settings?section=currencies&tab=rates').text
+    desktop = TestClient(app).get('/settings?section=currencies&tab=rates').text
+    assert '<table' not in phone and 'currency-rate-list' in phone
+    for value in ('USD', '55', 'Dollar savings', '2026-09-30', '500'):
+        assert value in phone and value in desktop
+    assert '<table' in desktop

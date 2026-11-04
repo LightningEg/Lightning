@@ -33,6 +33,12 @@ def test_changed_monthly_payment_warning_fits_phone(c, setup, monkeypatch):
                                   category_id=str(category.id), counterparty_id=future_party, match_tolerance_pct='10')
     c.transactions.record_outflow('2026-10-06', accounts['cib'].id, '140', category.id,
                                   counterparty='Future Electricity')
+    c.currencies.register('USD')
+    c.fx.save('USD', '2026-09-01', '50')
+    c.account_flows.open_account('Dollar savings', 'BANK', '2026-09-01', '100', currency='USD',
+                                 opening_balance_date='2026-09-01')
+    c.fx.save('USD', '2026-09-30', '55')
+    assert c.reevaluations.process_date('2026-09-30', 'MONTH_END')
     app = create_app(c)
     async def phone_app(scope, receive, send):
         scope.setdefault('state', {})['phone'] = True
@@ -68,6 +74,11 @@ def test_changed_monthly_payment_warning_fits_phone(c, setup, monkeypatch):
                         return h.bottom <= p.top + 1 && card.left >= 0 && card.right <= innerWidth &&
                           e.scrollWidth <= e.clientWidth + 1;
                     }''')
+                    page.goto(host.origin + '/settings?section=currencies&tab=rates')
+                    assert page.locator('table').count() == 0
+                    assert page.get_by_text('Dollar savings', exact=False).count() > 0
+                    assert page.locator('.currency-settings .phone-row').evaluate_all(
+                        'rows => rows.every(e => e.scrollWidth <= e.clientWidth + 1)')
                     page.goto(host.origin + '/transactions')
                     page.locator('.phone-more-menu > summary').first.click()
                     activity = page.locator('.phone-more-menu a[href="/activity"]').first
