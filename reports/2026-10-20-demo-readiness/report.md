@@ -382,3 +382,7 @@ IV-3S item 8: PC Gam'eya labels a passed date as not recorded and names it the o
 ## 2026-11-04 · PC period control
 
 IV-3S item 14: the shared PC period control places the month and arrows in its single track and labels the unselected option Month. Chromium checks stepping, month selection and custom ranges, including Arabic.
+
+## 2026-11-04 · PC own-data pickers
+
+IV-3S item 12: Certificates account fields and the empty-plan Budget spending group use the existing type-and-pick control. A browser test checks filtering, selected IDs and required validation.

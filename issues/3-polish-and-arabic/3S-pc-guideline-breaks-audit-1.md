@@ -32,7 +32,7 @@ already list. The brand audit passes; it cannot see `<select>` text colour, the 
 9. **2026-11-04:** The current Investments lead removes Biggest holdings when the portfolio can be valued; a six-holding browser fixture confirms it is absent. The older fallback limits its bars to four named holdings and a Neutral Other. The Planner stack now shows four named parts and a Neutral Other with the exact remainder; all detailed allocation rows and inputs remain available.
 10. "L1 › L2": the transaction page's "Personal › Entertainment"; every row of Review activity. **2026-11-04:** PC Review activity shows a minus on money out; category hierarchy remains to review.
 11. Card in a card: Settings › Budget's four boxes; Spending's small multiples; Certificates' nine `<fieldset>` boxes; first run's account-type list.
-12. Dropdown for your data: Certificates "Buy from" and "Forecast payout account"; the empty profile's Budget spending groups.
+12. **2026-11-04:** PC Certificates account fields and the empty-plan Budget spending group use the existing type-and-pick control. Chromium checks filtering, submitted IDs and required validation.
 13. A card alone: Cash planning "What you owe"; the transaction page's "Expense categories".
 
 **Controls and words**
