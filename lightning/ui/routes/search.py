@@ -187,7 +187,7 @@ async def scoped_picker(request: Request):
         return JSONResponse({"error": "Too many choices."}, status_code=400)
     try:
         choices = json.loads(raw)
-        if (not isinstance(choices, list) or len(choices) > 2000
+        if (not isinstance(choices, list) or len(choices) > 4000
                 or any(not isinstance(row, dict) or not isinstance(row.get("id"), str)
                        or any(not isinstance(row.get(key, ""), str) or len(row.get(key, "")) > 512
                               for key in ("label", "context", "code")) for row in choices)):
