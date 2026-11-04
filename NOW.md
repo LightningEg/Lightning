@@ -4,7 +4,7 @@
 
 | Who | Work | Files | Since |
 |---|---|---|---|
-| Codex | Finish report follow-ups against current main; preserve superseding fixes. | financial/report code, source entry, architecture policies | 2026-11-04 |
+| Codex | IT-1H and report follow-ups; preserve superseding fixes. | financial/report code, source entry, architecture policies | 2026-11-04 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
 
@@ -31,14 +31,14 @@
 
 The whole plan, by milestone and code, is `issues/INDEX.md`.
 
-1. **v1.5.1 is public; dependency PR #122 remains blocked.** CSV contribution #117 and the reviewed Actions/theme/engine PRs are merged. #122 still needs coordinated native wheels and lockfiles (1H). **Read:** `reports/2026-10-26-v150-release/report.md`.
-2. **Audit 8 follow-ups:** owner decision 7S. **Read:** `reports/2026-10-26-engine-audit/report.md`.
-3. **9J, 9K, 2AB** need owner choices; **5A2-5A4** open. **Read:** `reports/2026-10-21-backend-streamlining/report.md`.
-4. **1H:** native recipe, then matched locks. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
+1. **Report fixes:** 1G, 2AB, 3J, 4K, 7M and 7S are implemented; PC/phone audits continue. **Read:** `reports/README.md`.
+2. **Audit 9 links:** salary-day review and bill-linked reserves are being validated (7T5/7T6). **Read:** 7T.
+3. **9K:** profile lifecycle routes split in #300; bank-import orchestration and claimed device/restore routes remain. **Read:** 9K.
+4. **1H:** wheels and coordinated locks merged in #286; native packaged validation and a phone install remain. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
 5. **2A:** restore safety code (Luna's claim); its reboot drill joins the held checks. **Read:** 2A.
 6. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `reports/2026-10-26-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
 7. **Website recapture** after 3W / 3AG / 7Q so the site shows the current screens. **Read:** `skills/site-recapture/SKILL.md`.
 8. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.
 9. **5G Brokers:** next, phase 4 import. **Read:** 5G *Fix*.
 10. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
-11. **6B, 6D, 3AI, 5I:** shares, gold, institution logos, and gam'eya/zakat follow-ups remain as their items describe. **Read:** each item in `issues/INDEX.md`.
+11. **6B, 6D, 3AI:** shares, gold and institution logos remain as their items describe. **Read:** each item in `issues/INDEX.md`.
