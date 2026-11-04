@@ -37,8 +37,9 @@ class CashFundingService:
             selected[cat.id] = cat
         lines = {line.category_id: line for section in view.sections for line in section.lines}
         start, _ = parse_month(month)
-        spent = self.reporting.money_out_by_category(start, day)
+        spent = self.budgets.plan_funded_spending(start, day)
         due, missing = [], set()
+        bill_coverage = self.planning.bill_reserve_coverage(day, day)
         for payment in self.planning.all_payments(day, day):
             if not payment.outstanding or payment.item.is_income:
                 continue
@@ -46,7 +47,8 @@ class CashFundingService:
             rate = self.reporting.valuer.fx(account.currency if account else self.reporting.base_currency, day.isoformat())
             if rate is None:
                 missing.add(account.currency)
-            due.append((payment, (payment.still_owed * rate.rate).quantize(Decimal("0.000001")) if rate else ZERO))
+            amount = (payment.still_owed * rate.rate).quantize(Decimal("0.000001")) if rate else ZERO
+            due.append((payment, max(amount - bill_coverage.get((payment.item.id, payment.due_date), ZERO), ZERO)))
         rows = []
         for cid, cat in selected.items():
             ids = {cid, *(child.id for child in self.categories.descendants(cid))}
@@ -85,7 +87,7 @@ class CashFundingService:
         reserve_rows = []
         for reserve in reserves:
             gap = max(reserve["target"] - reserve["allocated"], ZERO)
-            add = min(gap, pool)
+            add = ZERO if reserve.get("planned_item_id") else min(gap, pool)
             pool -= add
             reserve_rows.append({"id": reserve["id"], "name": reserve["name"], "allocated": reserve["allocated"],
                                  "effective": reserve["effective_allocated"], "gap": gap, "suggested": add})

@@ -83,7 +83,7 @@
     {% call sheet("Each month ahead"|tr(locale), row) %}
       <p class="phone-note">{{ "Estimates: money in, money out, what is left"|tr(locale) }}</p>
       <div class="phone-rows">{% for r in p.flows %}
-        <div class="phone-row"><span>{{ r.month }}<small>{{ 'In {a} · out {b}'|tr(locale, a=r.in|money, b=r.out|money) }}{% if r.estimated %} · {{ 'income is an average'|tr(locale) }}{% endif %}</small></span><b class="{{ 'pos' if r.net > 0 else ('neg' if r.net < 0 else '') }}">{{ r.net|money(True) }}</b></div>
+        <div class="phone-row"><span>{{ r.month }}<small>{{ 'In {a} · out {b}'|tr(locale, a=r.in|money, b=r.out|money) }}{% if r.estimated %} · {{ 'income is an average'|tr(locale) }}{% endif %}{% if r.reserved_bills %} · {{ '{amount} already covered by reserves'|tr(locale, amount=r.reserved_bills|money) }}{% endif %}</small></span><b class="{{ 'pos' if r.net > 0 else ('neg' if r.net < 0 else '') }}">{{ r.net|money(True) }}</b></div>
       {% endfor %}</div>
     {% endcall %}
   </div>

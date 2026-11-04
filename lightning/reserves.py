@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import calendar
 from datetime import date, timedelta
-from decimal import Decimal
+from decimal import ROUND_DOWN, Decimal
 
 from lightning.core.dates import now_iso, today
 from lightning.core.errors import ConflictError, NotFoundError, ValidationError
@@ -58,6 +58,7 @@ class CashReserveService:
         rows = self.breakdown_at(as_of)
         return None if rows is None else sum((row["effective_allocated"] for row in rows), ZERO)
 
+    @request_cached(deep=True)
     def breakdown_at(self, as_of: str):
         """Return the reconstructible active assignment for each reserve at a date."""
         rows = []
@@ -69,7 +70,7 @@ class CashReserveService:
                                 (reserve["id"],))
             if not first or first["effective_date"] > as_of:
                 return None
-            row = self.db.one("SELECT allocated_e6,status FROM reserve_allocation_history WHERE reserve_id=? AND effective_date<=? ORDER BY effective_date DESC,id DESC LIMIT 1",
+            row = self.db.one("SELECT allocated_e6,status,planned_item_id FROM reserve_allocation_history WHERE reserve_id=? AND effective_date<=? ORDER BY effective_date DESC,id DESC LIMIT 1",
                               (reserve["id"], as_of))
             if row and row["status"] == "ACTIVE":
                 spent = int(self.db.scalar(
@@ -80,14 +81,14 @@ class CashReserveService:
                 name = reserve_data["name"] if reserve_data else "Reserve"
                 kind = reserve_data["kind"] if reserve_data else "PROJECT"
                 rows.append({"id": reserve["id"], "name": name or "Reserve", "kind": kind,
-                             "effective_allocated": max(from_e6(row["allocated_e6"]) - from_e6(spent), ZERO)})
+                             "planned_item_id": row["planned_item_id"], "effective_allocated": max(from_e6(row["allocated_e6"]) - from_e6(spent), ZERO)})
         return rows
 
     def _record_allocation(self, reserve_id: int):
-        row = self.db.one("SELECT allocated_e6,status,created_at FROM cash_reserves WHERE id=?", (reserve_id,))
+        row = self.db.one("SELECT allocated_e6,status,created_at,planned_item_id FROM cash_reserves WHERE id=?", (reserve_id,))
         if row and self.db.has_table("reserve_allocation_history"):
-            self.db.execute("INSERT INTO reserve_allocation_history(reserve_id,created_date,effective_date,allocated_e6,status) VALUES(?,?,?,?,?)",
-                            (reserve_id, str(row["created_at"])[:10], today().isoformat(), row["allocated_e6"], row["status"]))
+            self.db.execute("INSERT INTO reserve_allocation_history(reserve_id,created_date,effective_date,allocated_e6,status,planned_item_id) VALUES(?,?,?,?,?,?)",
+                            (reserve_id, str(row["created_at"])[:10], today().isoformat(), row["allocated_e6"], row["status"], row["planned_item_id"]))
 
     def get(self, reserve_id: int):
         reserve_id = self._id(reserve_id, "reserve_id")
@@ -98,6 +99,96 @@ class CashReserveService:
         if not row:
             raise NotFoundError("Reserve not found.")
         return self._row(row)
+
+    def set_planned_item(self, reserve_id: int, planned_item_id: int | None):
+        """Explicitly authorize one reserve to fund future payments of one bill."""
+        reserve_id = self._id(reserve_id, "reserve_id")
+        planned_item_id = self._id(planned_item_id, "planned_item_id") if planned_item_id is not None else None
+        with self.db.transaction():
+            reserve = self.get(reserve_id)
+            if reserve["status"] != "ACTIVE" or reserve["kind"] != "PROJECT":
+                raise ValidationError("Choose an active project reserve.")
+            if planned_item_id is not None:
+                item = self.db.one("SELECT kind,active FROM planned_items WHERE id=?", (planned_item_id,))
+                if not item or not item["active"] or item["kind"] not in {"BILL", "SUBSCRIPTION"}:
+                    raise ValidationError("Choose an active bill or subscription.", "planned_item_id")
+                if self.db.scalar("SELECT 1 FROM cash_reserves WHERE planned_item_id=? "
+                                  "AND status='ACTIVE' AND id<>?", (planned_item_id, reserve_id)):
+                    raise ConflictError("This bill already has an active reserve.", "planned_item_id")
+            if reserve["planned_item_id"] != planned_item_id:
+                self.db.execute("UPDATE cash_reserves SET planned_item_id=?,updated_at=? WHERE id=?",
+                                (planned_item_id, now_iso(), reserve_id))
+                self._record_allocation(reserve_id)
+        return self.get(reserve_id)
+
+    def bill_reserve(self, planned_item_id: int):
+        row = self.db.one("SELECT id FROM cash_reserves WHERE planned_item_id=? AND status='ACTIVE'",
+                          (planned_item_id,))
+        return self.get(row["id"]) if row else None
+
+    @request_cached
+    def _bill_associations_exist(self):
+        return bool(self.db.scalar("SELECT 1 FROM reserve_allocation_history "
+                                   "WHERE planned_item_id IS NOT NULL LIMIT 1"))
+
+    @request_cached(deep=True)
+    def bill_payment_funding(self):
+        """Confirmed funding attributed by a bill settlement, without reinterpreting older manual links."""
+        if not self._bill_associations_exist():
+            return {}
+        return {(row["planned_item_id"], row["transaction_id"]): from_e6(row["amount_e6"])
+                for row in self.db.all(
+                    "SELECT l.planned_item_id,l.transaction_id,SUM(l.amount_e6) AS amount_e6 "
+                    "FROM reserve_transaction_links l JOIN transactions t ON t.id=l.transaction_id "
+                    "WHERE l.planned_item_id IS NOT NULL AND t.status='POSTED' "
+                    "GROUP BY l.planned_item_id,l.transaction_id")}
+
+    @request_cached(deep=True)
+    def bill_savings(self, as_of: str):
+        """Available assignments under the bill links effective on the requested date."""
+        if not self._bill_associations_exist():
+            return {}
+        rows = self.breakdown_at(as_of)
+        if rows is None:
+            return {}
+        saved = {}
+        for row in rows:
+            item_id = row["planned_item_id"]
+            if item_id is not None:
+                saved[item_id] = saved.get(item_id, ZERO) + row["effective_allocated"]
+        return saved
+
+    def fund_bill_payment(self, planned_item_id: int, transaction_id: int):
+        """Draw only available assigned cash after a bill actually settles, in its save transaction."""
+        with self.db.transaction():
+            reserve = self.bill_reserve(planned_item_id)
+            if not reserve:
+                return
+            # A retry or manually funded transaction keeps its existing attribution.
+            if self.db.scalar("SELECT 1 FROM reserve_transaction_links WHERE reserve_id=? AND transaction_id=?",
+                              (reserve["id"], transaction_id)):
+                self.db.execute("UPDATE reserve_transaction_links SET planned_item_id=? "
+                                "WHERE reserve_id=? AND transaction_id=?",
+                                (planned_item_id, reserve["id"], transaction_id))
+                return
+            if reserve["effective_allocated"] <= ZERO:
+                return
+            available = from_e6(self.db.scalar(
+                "SELECT COALESCE(SUM(-le.amount_base_e6),0) FROM ledger_entries le "
+                "JOIN financial_assets a ON a.id=le.asset_id JOIN transactions t ON t.id=le.transaction_id "
+                "WHERE le.transaction_id=? AND t.status='POSTED' AND t.type='OUT' AND a.is_cash=1 "
+                "AND le.effect='OUTFLOW' AND le.owner_id IS NULL", (transaction_id,)))
+            assigned = from_e6(self.db.scalar(
+                "SELECT COALESCE(SUM(amount_e6),0) FROM reserve_transaction_links WHERE transaction_id=?",
+                (transaction_id,)))
+            value = min(reserve["effective_allocated"], max(available - assigned, ZERO))
+            unit = Decimal(1).scaleb(-minor_units(SettingsStore(self.db).base_currency))
+            value = value.quantize(unit, rounding=ROUND_DOWN)
+            if value > ZERO:
+                self._set_expense_link(reserve["id"], transaction_id, value)
+                self.db.execute("UPDATE reserve_transaction_links SET planned_item_id=? "
+                                "WHERE reserve_id=? AND transaction_id=?",
+                                (planned_item_id, reserve["id"], transaction_id))
 
     def links_for_reserve(self, reserve_id: int):
         """Posted transactions reconciled to this reserve, newest first."""
@@ -277,6 +368,10 @@ class CashReserveService:
                 following = self.create(reserve["name"], reserve["target"], "PROJECT", next_due,
                                          reserve["recurrence"], reserve["counterparty_id"], reserve.get("category_id"),
                                          reserve.get("account_id"))
+                if reserve.get("planned_item_id") and self.db.scalar(
+                        "SELECT 1 FROM planned_items WHERE id=? AND active=1 AND kind IN ('BILL','SUBSCRIPTION')",
+                        (reserve["planned_item_id"],)):
+                    self.set_planned_item(following["id"], reserve["planned_item_id"])
                 carry_forward = max(int(reserve["allocated_e6"]) - total_spent, 0)
                 if carry_forward:
                     self.allocate(following["id"], from_e6(carry_forward))
@@ -383,7 +478,7 @@ class CashReserveService:
 
     def links_for_transaction(self, transaction_id: int):
         rows = [dict(row) for row in self.db.all(
-            "SELECT l.reserve_id,r.name,r.kind,l.amount_e6 FROM reserve_transaction_links l "
+            "SELECT l.reserve_id,r.name,r.kind,l.amount_e6,l.planned_item_id FROM reserve_transaction_links l "
             "JOIN cash_reserves r ON r.id=l.reserve_id JOIN transactions t ON t.id=l.transaction_id "
             "WHERE l.transaction_id=? AND t.status='POSTED' ORDER BY r.name COLLATE NOCASE", (transaction_id,)
         )]
@@ -407,6 +502,10 @@ class CashReserveService:
                 if amount <= ZERO:
                     raise ValidationError("No expense amount.")
                 self.set_expense_link(link["reserve_id"], transaction_id, amount)
+                if link.get("planned_item_id") is not None:
+                    self.db.execute("UPDATE reserve_transaction_links SET planned_item_id=? "
+                                    "WHERE reserve_id=? AND transaction_id=?",
+                                    (link["planned_item_id"], link["reserve_id"], transaction_id))
             except ValidationError:
                 dropped.append(link["name"])
         if not dropped:

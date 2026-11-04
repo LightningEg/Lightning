@@ -8,9 +8,10 @@ from lightning.core.errors import LightningError
 from lightning.core.money import ZERO, from_e6
 from lightning.core.money import to_decimal
 from lightning.transactions.domain import TxnFilter
-from lightning.core.refs import DocType
+from lightning.core.refs import DocType, parse_row_id
 from lightning.categories.domain import Movement
 from lightning.planning.emergency_context import emergency_liquidity_context
+from lightning.planning.domain import PlanKind
 
 from .. import charts, keynotes
 from ..web import container, redirect, render, ui_locale, settled_save
@@ -67,7 +68,8 @@ def _context(request: Request, error: str = ""):
     if fund.target and set_aside < fund.target and position.free_cash and position.free_cash > ZERO:
         move = min(fund.target - set_aside, position.free_cash)
         refill = {"move": move, "to": set_aside + move, "full": set_aside + move >= fund.target}
-    return {"reserves": listed, "completed_reserves": completed, "notes": notes, "emergency_meter": emergency_meter,
+    bills = c.planning.items((PlanKind.BILL, PlanKind.SUBSCRIPTION))
+    return {"reserves": listed, "bills": bills, "completed_reserves": completed, "notes": notes, "emergency_meter": emergency_meter,
             "emergency_set_aside": set_aside, "emergency": emergency, "fund": fund, "refill": refill,
             "pos": position, "liquidity_context": liquidity_context, "error": error,
             "counterparties": c.counterparties.list_active(),
@@ -160,6 +162,22 @@ async def edit_reserve(request: Request, reserve_id: int):
     if request.headers.get("X-Requested-With") == "fetch":
         return render(request, "reserves.html", **_context(request))
     return redirect("/reserves", _with_plan(c, f"Saved {reserve['name']}."))
+
+
+@router.post("/{reserve_id:int}/bill")
+async def reserve_bill(request: Request, reserve_id: int):
+    c = container(request)
+    form = await request.form()
+    value = str(form.get("planned_item_id", "")).strip()
+    try:
+        if len(value) > 19:
+            raise LightningError("Choose an active bill or subscription.")
+        selected = parse_row_id(value, "planned_item_id", "Choose an active bill or subscription.", blank=True)
+        with settled_save(request, c):
+            c.reserves.set_planned_item(reserve_id, selected)
+    except LightningError as exc:
+        return redirect("/reserves", exc.message)
+    return redirect("/reserves", "Bill reserve updated.")
 
 
 @router.post("/{reserve_id:int}/allocate")
