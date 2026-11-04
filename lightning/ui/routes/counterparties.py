@@ -6,7 +6,7 @@ from lightning.core.errors import LightningError, ValidationError
 from lightning.counterparties import MAX_ALIASES_PER_COUNTERPARTY
 from lightning.workflows.ai_prompts import counterparty_cleanup_prompt
 
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 
 router = APIRouter(prefix="/counterparties")
 
@@ -51,78 +51,79 @@ async def create_counterparty(request: Request):
         category_id = int(raw_category_id) if raw_category_id else None
         if category_id is not None and category_id not in {item.id for item in categories}:
             raise ValidationError("Choose one of the suggested categories.")
-        if action == "rename":
-            selected = c.counterparties.get(int(counterparty_id))
-            c.counterparties.rename(int(counterparty_id), name, category_id)
-            return redirect("/counterparties", f"Updated {selected['name']}.")
-        elif action.startswith("kind:"):
-            selected = c.counterparties.get(int(counterparty_id))
-            if not selected:
-                raise ValidationError("Choose a saved counterparty.")
-            kind = action.split(":", 1)[1]
-            c.counterparties.set_kind(int(counterparty_id), kind)
-            return redirect("/counterparties", f"{selected['name']} is now marked as a {'person' if kind == 'PERSON' else 'business'}.")
-        elif action == "activate":
-            c.counterparties.set_active(int(counterparty_id), True)
-            return redirect("/counterparties", "Counterparty activated.")
-        elif action == "delete":
-            selected = c.counterparties.get(int(counterparty_id))
-            archived = c.counterparties.delete_or_archive(int(counterparty_id))
-            message = (f"{selected['name']} is in transaction history, so it was archived."
-                       if archived else f"Deleted {selected['name']} and its aliases.")
-            return redirect("/counterparties", message)
-        elif action == "add_alias":
-            selected = c.counterparties.get(int(counterparty_id))
-            if not selected:
-                raise ValidationError("Choose a saved counterparty.")
-            c.counterparties.add_alias(int(counterparty_id), alias)
-            return redirect("/counterparties", f"Added alias for {selected['name']}.")
-        elif action == "rename_alias":
-            selected = c.counterparties.get(int(counterparty_id))
-            if not selected:
-                raise ValidationError("Choose a saved counterparty.")
-            c.counterparties.rename_alias(int(counterparty_id), int(alias_id), alias)
-            return redirect("/counterparties", f"Updated alias for {selected['name']}.")
-        elif action == "remove_alias":
-            selected = c.counterparties.get(int(counterparty_id))
-            if not selected:
-                raise ValidationError("Choose a saved counterparty.")
-            c.counterparties.remove_alias(int(counterparty_id), int(alias_id))
-            return redirect("/counterparties", f"Removed alias from {selected['name']}.")
-        elif action == "merge":
-            if getattr(c, "is_journal", False):
-                raise ValidationError("Merging names is not available on a lent ledger. Do it on the home PC.")
-            result = c.counterparties.merge(int(counterparty_id), int(str(form.get("merge_into", "")).strip().removeprefix("counterparty:") or 0))
-            note = f" {result['source']} is archived because something still uses it." if result["archived"] else ""
-            return redirect("/counterparties", f"Merged {result['source']} into {result['target']}.{note}")
-        elif action == "create":
-            c.counterparties.create(name, category_id, kind=str(form.get("kind", "")).strip().upper() or None)
-        elif action.startswith("existing:"):
-            selected_id = int(action.split(":", 1)[1])
-            selected = c.counterparties.get(selected_id)
-            suggestions = {candidate for candidate, _ in c.counterparties.suggestions(name)}
-            resolved = c.counterparties.resolve(name)
-            if not selected or (selected["name"] not in suggestions and (not resolved or resolved["id"] != selected_id)):
-                raise ValidationError("Choose one of the displayed matches, or create a new Counterparty.")
-            c.counterparties.add_alias(selected_id, name)
-            if category_id is not None:
-                c.counterparties.set_default_category(selected_id, category_id)
-        else:
-            matches = []
-            resolved = c.counterparties.resolve(name)
-            if resolved:
-                matches.append({"id": resolved["id"], "name": resolved["name"]})
+        with settled_save(request, container(request)):
+            if action == "rename":
+                selected = c.counterparties.get(int(counterparty_id))
+                c.counterparties.rename(int(counterparty_id), name, category_id)
+                return redirect("/counterparties", f"Updated {selected['name']}.")
+            elif action.startswith("kind:"):
+                selected = c.counterparties.get(int(counterparty_id))
+                if not selected:
+                    raise ValidationError("Choose a saved counterparty.")
+                kind = action.split(":", 1)[1]
+                c.counterparties.set_kind(int(counterparty_id), kind)
+                return redirect("/counterparties", f"{selected['name']} is now marked as a {'person' if kind == 'PERSON' else 'business'}.")
+            elif action == "activate":
+                c.counterparties.set_active(int(counterparty_id), True)
+                return redirect("/counterparties", "Counterparty activated.")
+            elif action == "delete":
+                selected = c.counterparties.get(int(counterparty_id))
+                archived = c.counterparties.delete_or_archive(int(counterparty_id))
+                message = (f"{selected['name']} is in transaction history, so it was archived."
+                           if archived else f"Deleted {selected['name']} and its aliases.")
+                return redirect("/counterparties", message)
+            elif action == "add_alias":
+                selected = c.counterparties.get(int(counterparty_id))
+                if not selected:
+                    raise ValidationError("Choose a saved counterparty.")
+                c.counterparties.add_alias(int(counterparty_id), alias)
+                return redirect("/counterparties", f"Added alias for {selected['name']}.")
+            elif action == "rename_alias":
+                selected = c.counterparties.get(int(counterparty_id))
+                if not selected:
+                    raise ValidationError("Choose a saved counterparty.")
+                c.counterparties.rename_alias(int(counterparty_id), int(alias_id), alias)
+                return redirect("/counterparties", f"Updated alias for {selected['name']}.")
+            elif action == "remove_alias":
+                selected = c.counterparties.get(int(counterparty_id))
+                if not selected:
+                    raise ValidationError("Choose a saved counterparty.")
+                c.counterparties.remove_alias(int(counterparty_id), int(alias_id))
+                return redirect("/counterparties", f"Removed alias from {selected['name']}.")
+            elif action == "merge":
+                if getattr(c, "is_journal", False):
+                    raise ValidationError("Merging names is not available on a lent ledger. Do it on the home PC.")
+                result = c.counterparties.merge(int(counterparty_id), int(str(form.get("merge_into", "")).strip().removeprefix("counterparty:") or 0))
+                note = f" {result['source']} is archived because something still uses it." if result["archived"] else ""
+                return redirect("/counterparties", f"Merged {result['source']} into {result['target']}.{note}")
+            elif action == "create":
+                c.counterparties.create(name, category_id, kind=str(form.get("kind", "")).strip().upper() or None)
+            elif action.startswith("existing:"):
+                selected_id = int(action.split(":", 1)[1])
+                selected = c.counterparties.get(selected_id)
+                suggestions = {candidate for candidate, _ in c.counterparties.suggestions(name)}
+                resolved = c.counterparties.resolve(name)
+                if not selected or (selected["name"] not in suggestions and (not resolved or resolved["id"] != selected_id)):
+                    raise ValidationError("Choose one of the displayed matches, or create a new Counterparty.")
+                c.counterparties.add_alias(selected_id, name)
+                if category_id is not None:
+                    c.counterparties.set_default_category(selected_id, category_id)
             else:
-                matches.extend({"id": int(row["id"]), "name": row["name"]}
-                               for row in parties if row["name"] in
-                               {candidate for candidate, _ in c.counterparties.suggestions(name)})
-            known = c.counterparties.aliases_by_counterparty()
-            return render(request, "counterparties.html", parties=parties, categories=categories,
-                          category_labels=category_labels, entered_name=name,
-                          entered_category_id=raw_category_id, similar_counterparties=matches,
-                          aliases_by_id={party["id"]: known.get(party["id"], []) for party in parties},
-                          alias_limit=MAX_ALIASES_PER_COUNTERPARTY,
-                          exact_existing=bool(resolved), review_required=True)
+                matches = []
+                resolved = c.counterparties.resolve(name)
+                if resolved:
+                    matches.append({"id": resolved["id"], "name": resolved["name"]})
+                else:
+                    matches.extend({"id": int(row["id"]), "name": row["name"]}
+                                   for row in parties if row["name"] in
+                                   {candidate for candidate, _ in c.counterparties.suggestions(name)})
+                known = c.counterparties.aliases_by_counterparty()
+                return render(request, "counterparties.html", parties=parties, categories=categories,
+                              category_labels=category_labels, entered_name=name,
+                              entered_category_id=raw_category_id, similar_counterparties=matches,
+                              aliases_by_id={party["id"]: known.get(party["id"], []) for party in parties},
+                              alias_limit=MAX_ALIASES_PER_COUNTERPARTY,
+                              exact_existing=bool(resolved), review_required=True)
     except (ValueError, LightningError) as exc:
         parties = c.counterparties.list_all()
         known = c.counterparties.aliases_by_counterparty()

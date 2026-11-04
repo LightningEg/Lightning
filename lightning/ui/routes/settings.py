@@ -10,7 +10,7 @@ from lightning.budgeting.domain import INCOME_FROM_RECURRING
 from lightning.core.dates import today
 
 from ..sections import SECTIONS
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 from lightning.categories.domain import Movement, CategoryFamily
 from lightning.core.dates import month_of
 from lightning.workflows.ai_analysis import AIAnalysisService
@@ -138,12 +138,13 @@ async def save_currency(request: Request):
     registry = c.currencies
     try:
         action = str(form.get("action", "base"))
-        if action == "register":
-            registry.register(str(form.get("code", "")), str(form.get("name", "")) or None)
-            message = "Currency registered."
-        else:
-            c.set_profile_currency(str(form.get("base_currency", "")))
-            message = "Profile currency saved."
+        with settled_save(request, container(request)):
+            if action == "register":
+                registry.register(str(form.get("code", "")), str(form.get("name", "")) or None)
+                message = "Currency registered."
+            else:
+                c.set_profile_currency(str(form.get("base_currency", "")))
+                message = "Profile currency saved."
     except (ValueError, LightningError) as exc:
         return redirect("/settings?section=currencies", exc.message if isinstance(exc, LightningError) else str(exc))
     return redirect("/settings?section=currencies", message)
@@ -154,13 +155,14 @@ async def save_fx_rate(request: Request):
     c = container(request)
     form = await request.form()
     try:
-        if getattr(c, "is_journal", False):
-            c.journal_workflows.save_fx_rate(currency=str(form.get("currency", "")),
-                                             day=str(form.get("date", "")),
-                                             rate=str(form.get("rate", "")))
-            return redirect("/settings?section=currencies&tab=rates", "Exchange rate saved.")
-        c.fx.save(str(form.get("currency", "")), str(form.get("date", "")), str(form.get("rate", "")))
-        c.reevaluations.process_due()
+        with settled_save(request, container(request)):
+            if getattr(c, "is_journal", False):
+                c.journal_workflows.save_fx_rate(currency=str(form.get("currency", "")),
+                                                 day=str(form.get("date", "")),
+                                                 rate=str(form.get("rate", "")))
+                return redirect("/settings?section=currencies&tab=rates", "Exchange rate saved.")
+            c.fx.save(str(form.get("currency", "")), str(form.get("date", "")), str(form.get("rate", "")))
+            c.reevaluations.process_due()
     except (ValueError, LightningError) as exc:
         return redirect("/settings?section=currencies&tab=rates", exc.message if isinstance(exc, LightningError) else str(exc))
     return redirect("/settings?section=currencies&tab=rates", "Exchange rate saved.")
@@ -172,12 +174,13 @@ async def save_financial_health_limit(request: Request):
     form = await request.form()
     key = str(form.get("key", ""))
     try:
-        if form.get("action") == "reset":
-            c.health.restore_limit(key)
-            message = "Restored the default limit."
-        else:
-            c.health.set_limit(key, str(form.get("value", "")), form.get("no_limit") == "1", str(form.get("alert", "")))
-            message = "Financial health limit saved."
+        with settled_save(request, container(request)):
+            if form.get("action") == "reset":
+                c.health.restore_limit(key)
+                message = "Restored the default limit."
+            else:
+                c.health.set_limit(key, str(form.get("value", "")), form.get("no_limit") == "1", str(form.get("alert", "")))
+                message = "Financial health limit saved."
         if key == "savings_rate":  # the savings target sets Most you can plan
             message = " ".join(x for x in (message, c.health.plan_note()) if x)
     except LightningError as exc:
@@ -200,7 +203,8 @@ async def save_theme(request: Request):
     from ..entitlements import wearable
     if not wearable(selected):  # anyone may try a paid theme for the session; keeping it needs its licence
         return Response("Unlock this theme to keep it", status_code=402)
-    container(request).settings.set("appearance_theme", selected)
+    with settled_save(request, container(request)):
+        container(request).settings.set("appearance_theme", selected)
     return Response(status_code=204)
 
 
@@ -211,7 +215,8 @@ async def save_theme_night(request: Request):
     2026-11-02, IV-10F7), anything else is day."""
     form = await request.form()
     on = form.get("on")
-    container(request).settings.set("appearance_follow_night", on if on in ("1", "night") else "0")
+    with settled_save(request, container(request)):
+        container(request).settings.set("appearance_follow_night", on if on in ("1", "night") else "0")
     return Response(status_code=204)
 
 
@@ -233,7 +238,8 @@ async def unlock_theme(request: Request):
         theme = redeem(str(form.get("code", "")))
     except UnlockError as exc:
         return redirect("/settings", str(exc))
-    container(request).settings.set("appearance_theme", theme)
+    with settled_save(request, container(request)):
+        container(request).settings.set("appearance_theme", theme)
     done = ("{name} is unlocked for this profile and its other devices." if shared(theme)
             else "{name} is unlocked on this device.")  # sharing waits for the home, or this profile is read-only
     return redirect("/settings", translate(done, ui_locale(), name=theme_name(theme)))
@@ -243,7 +249,8 @@ async def unlock_theme(request: Request):
 async def save_privacy(request: Request):
     """Remember privacy mode in the profile; the window has already switched it with its cookie."""
     form = await request.form()
-    container(request).settings.set("privacy_mode", "1" if form.get("on") == "1" else "0")
+    with settled_save(request, container(request)):
+        container(request).settings.set("privacy_mode", "1" if form.get("on") == "1" else "0")
     return Response(status_code=204)
 
 
@@ -253,7 +260,8 @@ async def save_locale(request: Request):
     form = await request.form()
     locale = str(form.get("locale", "en"))
     locale = locale if locale in ("en", "ar") else "en"
-    container(request).settings.set("locale", locale)
+    with settled_save(request, container(request)):
+        container(request).settings.set("locale", locale)
     response = redirect("/settings")
     # The profile pages and the locked chooser read this cookie (encrypted settings are closed there),
     # so they follow the language chosen here.
@@ -302,7 +310,8 @@ async def save_liquidation_factor(request: Request, asset_class_id: int):
     c = container(request)
     try:
         form = await request.form()
-        c.investments.set_liquidation_factor(asset_class_id, str(form.get("factor", "")))
+        with settled_save(request, container(request)):
+            c.investments.set_liquidation_factor(asset_class_id, str(form.get("factor", "")))
     except (LightningError, ValueError) as exc:
         return Response(exc.message if isinstance(exc, LightningError) else "Invalid value.", status_code=400, media_type="text/plain")
     return Response(status_code=204)

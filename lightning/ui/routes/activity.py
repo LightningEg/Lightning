@@ -4,7 +4,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Request
 
 from lightning.core.errors import LightningError, ValidationError
-from lightning.ui.web import container, redirect, render
+from lightning.ui.web import container, redirect, render, settled_save
 from lightning.workflows.activity import ActivityReview
 
 from .transactions import detail_page
@@ -42,9 +42,10 @@ async def activity_apply(request: Request, transaction_id: int):
         category_id = int(raw_category) if raw_category else None
         raw_reserve = str(form.get("reserve_id", "")).strip()
         reserve_id = int(raw_reserve) if raw_reserve else None
-        c.activity_review.apply(transaction_id, str(form.get("fingerprint", "")), category_id,
-                                str(form.get("payment", "")).strip(), reserve_id,
-                                str(form.get("reserve_amount", "")).strip())
+        with settled_save(request, container(request)):
+            c.activity_review.apply(transaction_id, str(form.get("fingerprint", "")), category_id,
+                                    str(form.get("payment", "")).strip(), reserve_id,
+                                    str(form.get("reserve_amount", "")).strip())
     except (LightningError, ValueError) as exc:
         message = str(exc) if isinstance(exc, LightningError) else str(ValidationError("Choose valid review options."))
         try:

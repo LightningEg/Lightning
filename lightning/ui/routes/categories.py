@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, Response
 
 from lightning.core.errors import LightningError
 
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 
 router = APIRouter(prefix="/categories")
 
@@ -26,22 +26,23 @@ async def save_category_row(request: Request, category_id: int):
     action = str(form.get("action", "save"))
     try:
         cat = c.categories.get(category_id)
-        if action in ("archive", "activate"):
-            c.categories.update(cat.id, cat.name, active=action == "activate")
-            return redirect("/categories", f"{'Activated' if action == 'activate' else 'Archived'} {cat.name}.")
-        if action == "delete":
-            archived = c.categories.delete_or_archive(cat.id)
-            return redirect("/categories", f"{cat.name} has history or is in use, so it was archived."
-                            if archived else f"Deleted {cat.name}.")
-        c.categories.update(cat.id, str(form.get("name", cat.name)), active=cat.active)
-        direction = str(form.get("direction", "")).strip()
-        if direction and direction != cat.direction.value:
-            c.categories.set_direction(cat.id, direction)
-        cat = c.categories.get(cat.id)
-        if cat.direction.value in ("IN", "BOTH") and cat.income_class is not None:
-            c.budgets.set_recurring_income(cat.id, form.get("recurring") == "1")
-        if cat.direction.value in ("OUT", "BOTH"):
-            c.budgets.set_one_off(cat.id, form.get("one_off") == "1")
+        with settled_save(request, container(request)):
+            if action in ("archive", "activate"):
+                c.categories.update(cat.id, cat.name, active=action == "activate")
+                return redirect("/categories", f"{'Activated' if action == 'activate' else 'Archived'} {cat.name}.")
+            if action == "delete":
+                archived = c.categories.delete_or_archive(cat.id)
+                return redirect("/categories", f"{cat.name} has history or is in use, so it was archived."
+                                if archived else f"Deleted {cat.name}.")
+            c.categories.update(cat.id, str(form.get("name", cat.name)), active=cat.active)
+            direction = str(form.get("direction", "")).strip()
+            if direction and direction != cat.direction.value:
+                c.categories.set_direction(cat.id, direction)
+            cat = c.categories.get(cat.id)
+            if cat.direction.value in ("IN", "BOTH") and cat.income_class is not None:
+                c.budgets.set_recurring_income(cat.id, form.get("recurring") == "1")
+            if cat.direction.value in ("OUT", "BOTH"):
+                c.budgets.set_one_off(cat.id, form.get("one_off") == "1")
     except LightningError as exc:
         if request.headers.get("X-Requested-With") == "fetch":
             return Response(exc.message, status_code=400, media_type="text/plain")
@@ -60,15 +61,16 @@ async def add_category_row(request: Request):
         parent_text = str(form.get("parent_id", ""))
         if not parent_text.isdigit():
             raise LightningError("Choose where the category goes.")
-        cat = c.categories.create(int(parent_text), str(form.get("name", "")))
-        direction = str(form.get("direction", "")).strip()
-        if direction and direction != cat.direction.value:
-            c.categories.set_direction(cat.id, direction)
-        cat = c.categories.get(cat.id)
-        if form.get("recurring") == "1" and cat.income_class is not None:
-            c.budgets.set_recurring_income(cat.id, True)
-        if form.get("one_off") == "1" and cat.direction.value in ("OUT", "BOTH"):
-            c.budgets.set_one_off(cat.id, True)
+        with settled_save(request, container(request)):
+            cat = c.categories.create(int(parent_text), str(form.get("name", "")))
+            direction = str(form.get("direction", "")).strip()
+            if direction and direction != cat.direction.value:
+                c.categories.set_direction(cat.id, direction)
+            cat = c.categories.get(cat.id)
+            if form.get("recurring") == "1" and cat.income_class is not None:
+                c.budgets.set_recurring_income(cat.id, True)
+            if form.get("one_off") == "1" and cat.direction.value in ("OUT", "BOTH"):
+                c.budgets.set_one_off(cat.id, True)
     except LightningError as exc:
         return redirect("/categories", exc.message)
     return redirect("/categories", f"Added {cat.name} under {c.categories.get(cat.parent_id).name}.")
@@ -103,8 +105,9 @@ async def create_category(request: Request):
                                            "display_name": c.categories.display_name(item.id), "score": score}
                                           for item, score in similar], review_required=True)
     try:
-        cat = c.categories.create(parent.id, values["name"], values["code"] or None,
-                                  default_reimbursable=bool(values["default_reimbursable"]))
+        with settled_save(request, container(request)):
+            cat = c.categories.create(parent.id, values["name"], values["code"] or None,
+                                      default_reimbursable=bool(values["default_reimbursable"]))
     except LightningError as exc:
         return render(request, "categories/form.html", status_code=400, parent=parent,
                       parent_name=c.categories.display_name(parent.id), category=None,
@@ -134,8 +137,9 @@ async def update_category(request: Request, category_id: int):
     if "active" not in form:
         values["active"] = "1" if cat.active else ""
     try:
-        c.categories.update(category_id, values["name"], values["code"] or None, active=bool(values["active"]),
-                            default_reimbursable=bool(values["default_reimbursable"]))
+        with settled_save(request, container(request)):
+            c.categories.update(category_id, values["name"], values["code"] or None, active=bool(values["active"]),
+                                default_reimbursable=bool(values["default_reimbursable"]))
     except LightningError as exc:
         return render(request, "categories/form.html", status_code=400, parent=parent,
                       parent_name=c.categories.display_name(parent.id) if parent else "", category=cat,
@@ -147,7 +151,8 @@ async def update_category(request: Request, category_id: int):
 async def delete_category(request: Request, category_id: int):
     c = container(request)
     try:
-        archived = c.categories.delete_or_archive(category_id)
+        with settled_save(request, container(request)):
+            archived = c.categories.delete_or_archive(category_id)
     except LightningError as exc:
         return redirect("/categories", exc.message)
     message = "Category has history or is in use, so it was archived." if archived else "Category deleted."
@@ -173,19 +178,20 @@ async def category_bulk_action(request: Request):
         if any(category.is_root or category.is_system or category.depth < 2 for category in categories):
             raise LightningError("Only L2 categories can be managed here.")
         activated = archived = deleted = 0
-        for category in categories:
-            if action == "activate":
-                if not category.active:
-                    c.categories.update(category.id, category.name, active=True)
-                activated += 1
-            elif action == "archive":
-                if category.active:
-                    c.categories.update(category.id, category.name, active=False)
-                archived += 1
-            elif c.categories.delete_or_archive(category.id):
-                archived += 1
-            else:
-                deleted += 1
+        with settled_save(request, container(request)):
+            for category in categories:
+                if action == "activate":
+                    if not category.active:
+                        c.categories.update(category.id, category.name, active=True)
+                    activated += 1
+                elif action == "archive":
+                    if category.active:
+                        c.categories.update(category.id, category.name, active=False)
+                    archived += 1
+                elif c.categories.delete_or_archive(category.id):
+                    archived += 1
+                else:
+                    deleted += 1
         if action == "activate":
             message = f"Activated {activated} categor{'y' if activated == 1 else 'ies'}."
         elif action == "archive":

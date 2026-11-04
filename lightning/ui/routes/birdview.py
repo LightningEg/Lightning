@@ -15,7 +15,7 @@ from lightning.core.errors import LightningError, ValidationError
 from lightning.core.money import ZERO, fmt, to_decimal
 from lightning.workflows.ai_prompts import spending_prompt
 
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 from ..periods import Period, parse_period
 from ..charts import line_chart
 from .. import charts, keynotes, visuals
@@ -247,7 +247,8 @@ async def save_legacy_settings(request: Request):
             raise ValidationError("Enter a liquidation factor from 0 to 100.", "factor")
     except LightningError as exc:
         return Response(exc.message, status_code=400, media_type="text/plain")
-    c.investments.set_all_liquidation_factors(factor)
+    with settled_save(request, container(request)):
+        c.investments.set_all_liquidation_factors(factor)
     return Response(status_code=204)
 
 

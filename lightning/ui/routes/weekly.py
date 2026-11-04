@@ -5,7 +5,7 @@ from lightning.core.errors import LightningError
 from lightning.workflows.weekly import WeeklyReview
 from lightning.workflows.reminders import ReminderService
 from ..i18n import translate
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 
 router = APIRouter()
 
@@ -41,7 +41,7 @@ async def dismiss(request: Request, identity: str):
 async def reminders_settings(request: Request):
     c = container(request)
     form = await request.form()
-    with c.db.transaction(undo_label="Reminder preference"):
+    with settled_save(request, c, undo_label='Reminder preference'):
         c.settings.set("reminders_enabled", "1" if form.get("enabled") == "1" else "0")
     return redirect("/review", "Reminder preference saved.")
 

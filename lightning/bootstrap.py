@@ -120,12 +120,13 @@ class Container:
         CurrencyRegistry(self.db).set_base_currency(code)
         self.refresh_profile_currency()
 
-    def refresh_profile_currency(self) -> None:
+    def refresh_profile_currency(self, *, base: str | None = None) -> None:
         """Point every service that keeps a copy of the profile currency at the stored one.
 
         The one place that lists those copies: anything that changes `settings.base_currency` (this container,
         a replica applying settings rows) calls it. Reporting's setter also moves its valuer and FX positions."""
-        base = self.settings.base_currency
+        # A surrounding workflow can restore the service copies after its database save rolls back.
+        base = self.settings.base_currency if base is None else base
         for service in (self.assets, self.accounts, self.transactions, self.reporting):
             service.base_currency = base
         self.fx.profile_currency = base

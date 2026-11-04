@@ -4,7 +4,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Request
 
 from lightning.core.errors import LightningError
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 
 router = APIRouter()
 
@@ -46,7 +46,8 @@ async def confirm_merge(request: Request):
                       error="Select both transaction entries to compare.", status_code=400)
     c = container(request)
     try:
-        merged = c.transactions.merge(int(keep_id), int(drop_id), str(form.get("fingerprint", "")))
+        with settled_save(request, container(request)):
+            merged = c.transactions.merge(int(keep_id), int(drop_id), str(form.get("fingerprint", "")))
     except LightningError as exc:
         try:
             preview = c.transactions.merge_preview(int(keep_id), int(drop_id))

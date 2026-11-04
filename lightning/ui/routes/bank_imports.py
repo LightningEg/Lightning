@@ -201,8 +201,9 @@ async def upload(request: Request, account_id: int):
         for filename, data, saved_mapping, _, _ in prepared:
             mapping = saved_mapping
             try:
-                batch_id, repeated = c.bank_imports.stage(account_id, filename, data, mapping,
-                                                           invert_amount=mapping.get("amount_sign") == "invert")
+                with settled_save(request, container(request)):
+                    batch_id, repeated = c.bank_imports.stage(account_id, filename, data, mapping,
+                                                               invert_amount=mapping.get("amount_sign") == "invert")
             except PendingOnHome as pending:
                 waiting = pending
                 continue
@@ -247,8 +248,9 @@ async def map_columns(request: Request, account_id: int):
             if file_headers != headers:
                 raise ValidationError("All selected files must use the same columns.", "mapping")
             try:
-                batch_id, repeated = c.bank_imports.stage(account_id, str(item["filename"]), file_data, mapping,
-                                                           invert_amount=form.get("amount_sign") == "invert")
+                with settled_save(request, container(request)):
+                    batch_id, repeated = c.bank_imports.stage(account_id, str(item["filename"]), file_data, mapping,
+                                                               invert_amount=form.get("amount_sign") == "invert")
             except PendingOnHome as pending:
                 waiting = pending
                 continue
@@ -376,11 +378,12 @@ async def create_counterparty_now(request: Request, account_id: int):
     try:
         if not name:
             raise ValidationError("Enter a counterparty name.", "counterparty")
-        if str(form.get("kind", "")).upper() == "PERSON":
-            party_id = c.counterparties.ensure_person(name)
-        else:
-            found = c.counterparties.resolve(name)
-            party_id = int(found["id"]) if found else c.counterparties.create(name)
+        with settled_save(request, container(request)):
+            if str(form.get("kind", "")).upper() == "PERSON":
+                party_id = c.counterparties.ensure_person(name)
+            else:
+                found = c.counterparties.resolve(name)
+                party_id = int(found["id"]) if found else c.counterparties.create(name)
         party = c.counterparties.get(party_id)
         if not party["active"]:
             raise ValidationError(f"{party['name']} is archived. Turn it on in Counterparties first.", "counterparty")
@@ -405,7 +408,8 @@ async def discard(request: Request, account_id: int, batch_id: int):
     if batch["account_id"] != account_id:
         return redirect(f"/accounts/{account_id}", "Import batch not found for this account.")
     try:
-        count = c.bank_imports.discard(batch_id)
+        with settled_save(request, container(request)):
+            count = c.bank_imports.discard(batch_id)
     except LightningError as exc:
         return redirect(f"/accounts/{account_id}/import/{batch_id}", exc.message)
     return redirect(f"/accounts/{account_id}",

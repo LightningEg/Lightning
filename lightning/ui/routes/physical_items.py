@@ -9,7 +9,7 @@ from lightning.core.dates import fmt_date, today
 from lightning.core.errors import LightningError
 from lightning.core.money import ZERO, from_e6, to_decimal
 
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 
 router = APIRouter()
 
@@ -89,9 +89,10 @@ async def create_item(request: Request, account_id: int):
     values = {key: str(form.get(key, "")) for key in ("name", "kind", "weight", "karat", "reference_asset_id", "details")}
     values["worn"] = "1" if form.get("worn") == "1" else ""
     try:
-        c.physical_items.create(account_id, values["name"], values["kind"], values["weight"],
-                                           int(values["karat"]), int(values["reference_asset_id"]), values["details"],
-                                           worn=values["worn"] == "1")
+        with settled_save(request, container(request)):
+            c.physical_items.create(account_id, values["name"], values["kind"], values["weight"],
+                                               int(values["karat"]), int(values["reference_asset_id"]), values["details"],
+                                               worn=values["worn"] == "1")
     except (ValueError, LightningError) as exc:
         error = exc if isinstance(exc, LightningError) else LightningError("Choose a matching gold price reference.")
         return render(request, "physical_item_form.html", status_code=400, account=account, item=None,
@@ -124,10 +125,11 @@ async def save_item(request: Request, account_id: int, asset_id: int):
     values = {key: str(form.get(key, "")) for key in ("name", "kind", "weight", "karat", "reference_asset_id", "details")}
     values["worn"] = "1" if form.get("worn") == "1" else ""
     try:
-        c.physical_items.update(asset_id, values["name"], values["kind"], values["weight"],
-                                int(values["karat"]), int(values["reference_asset_id"]), values["details"],
-                                worn=values["worn"] == "1")
-        c.reevaluations.process_due()
+        with settled_save(request, container(request)):
+            c.physical_items.update(asset_id, values["name"], values["kind"], values["weight"],
+                                    int(values["karat"]), int(values["reference_asset_id"]), values["details"],
+                                    worn=values["worn"] == "1")
+            c.reevaluations.process_due()
     except (ValueError, LightningError) as exc:
         error = exc if isinstance(exc, LightningError) else LightningError("Choose a matching gold price reference.")
         if request.headers.get("X-Requested-With") == "fetch":
@@ -169,7 +171,7 @@ async def trade_item(request: Request, account_id: int, asset_id: int):
         payload = {key: str(form.get(key, "")) for key in
                    ("action", "date", "quantity", "total", "fees", "cash_account_id", "owner", "notes", "workmanship")}
         payload |= {"account": account_id, "asset": asset_id}
-        with c.db.transaction():
+        with settled_save(request, c):
             txn = earlier = c.transactions.submitted(submission, payload)  # a resent form returns its first save (2AD)
             if earlier is not None:
                 pass
@@ -201,9 +203,10 @@ async def value_item(request: Request, account_id: int, asset_id: int):
     try:
         if c.physical_items.get(asset_id)["account_id"] != account_id:
             raise LightningError("That item belongs to another account.")
-        c.physical_items.record_valuation(asset_id, str(form.get("date", fmt_date(today()))),
-                                          str(form.get("value", "")), str(form.get("notes", "")))
-        c.reevaluations.process_due()
+        with settled_save(request, container(request)):
+            c.physical_items.record_valuation(asset_id, str(form.get("date", fmt_date(today()))),
+                                              str(form.get("value", "")), str(form.get("notes", "")))
+            c.reevaluations.process_due()
     except (ValueError, InvalidOperation, LightningError) as exc:
         msg = exc.message if isinstance(exc, LightningError) else "Enter a valid value and date."
         return redirect(f"/accounts/{account_id}", msg)

@@ -19,7 +19,7 @@ from lightning.planning.schedule import describe
 from lightning.planning.service import LOAN_CATEGORY
 
 from .. import charts, keynotes, kpis, visuals, status as page_status
-from ..web import container, redirect, render
+from ..web import container, redirect, render, settled_save
 from . import reserves as reserve_routes
 
 router = APIRouter(prefix="/plan")
@@ -373,7 +373,7 @@ async def add_purchase(request: Request):
             c = container(request)
             submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
             payload = {key: values[key] for key in ("name", "price", "fee", "months", "first_date", "account_id")}
-            with c.db.transaction():
+            with settled_save(request, c):
                 if not c.transactions.form_seen(submission, payload):  # a resent form saves nothing more (2AD)
                     c.planning.create_purchase(**(values | {"fee": quote["fee"]}))
                     c.transactions.remember_form(submission, payload)
@@ -410,10 +410,11 @@ async def early_payment(request: Request, item_id: int):
     values = {key: str(form.get(key, "")) for key in ("principal", "fee", "date_paid", "account_id")}
     try:
         preview = preview_early_payment(c.planning, item_id, values["principal"], values["fee"], values["date_paid"])
-        if form.get("intent") == "record":
-            c.planning.record_early_payment(item_id, **(values | {"fee": preview["fee"]}),
-                                              expected_remaining=form.get("expected_remaining", ""))
-            return redirect("/plan/loans", "Loan payment recorded. The remaining schedule is updated.")
+        with settled_save(request, container(request)):
+            if form.get("intent") == "record":
+                c.planning.record_early_payment(item_id, **(values | {"fee": preview["fee"]}),
+                                                  expected_remaining=form.get("expected_remaining", ""))
+                return redirect("/plan/loans", "Loan payment recorded. The remaining schedule is updated.")
         return _early_form(request, item_id, values, preview)
     except (LightningError, ValueError) as exc:
         return _early_form(request, item_id, values, error=exc.message if isinstance(exc, LightningError) else "Choose a paying account.", status_code=400, error_field=exc.field if isinstance(exc, LightningError) else "")
@@ -481,15 +482,16 @@ async def promote_transaction(request: Request, txn_id: int):
                           error_field="kind", status_code=400, back=back,
                           form_action=f"/plan/from-transaction/{txn_id}", promotion=source)
     try:
-        item_id = c.planning.create(**_save_values(c, values))
+        with settled_save(request, container(request)):
+            item_id = c.planning.create(**_save_values(c, values))
+            message = f"{values['name']} added from {source['transaction'].ref}."
+            if str(form.get("past_due", "paid")) == "paid":
+                moved = c.planning.start_after_paid(item_id)
+                if moved:
+                    message += f" Already paid, so the next one is due {moved}."
     except LightningError as exc:
         return _item_form(request, c, values, error=exc.message, error_field=exc.field or "", status_code=400,
                           back=back, form_action=f"/plan/from-transaction/{txn_id}", promotion=source)
-    message = f"{values['name']} added from {source['transaction'].ref}."
-    if str(form.get("past_due", "paid")) == "paid":
-        moved = c.planning.start_after_paid(item_id)
-        if moved:
-            message += f" Already paid, so the next one is due {moved}."
     return redirect("/plan/recurring", " ".join(x for x in (message, c.health.commitments_note(values["kind"])) if x))
 
 
@@ -521,14 +523,15 @@ async def create_item(request: Request):
     values = _form_values(form)
     back = _back(form, "/plan/loans" if values["kind"] == "LOAN" else "/plan/recurring")
     try:
-        item_id = c.planning.create(**_save_values(c, values))
+        with settled_save(request, container(request)):
+            item_id = c.planning.create(**_save_values(c, values))
+            message = f"{values['name']} added."
+            if str(form.get("past_due", "paid")) == "paid":
+                moved = c.planning.start_after_paid(item_id)
+                if moved:
+                    message = f"{values['name']} added. Already paid, so the next one is due {moved}."
     except LightningError as exc:
         return _item_form(request, c, values, error=exc.message, error_field=exc.field or "", status_code=400, back=back)
-    message = f"{values['name']} added."
-    if str(form.get("past_due", "paid")) == "paid":
-        moved = c.planning.start_after_paid(item_id)
-        if moved:
-            message = f"{values['name']} added. Already paid, so the next one is due {moved}."
     return redirect(back, " ".join(x for x in (message, c.health.commitments_note(values["kind"])) if x))
 
 
@@ -558,7 +561,8 @@ async def update_item(request: Request, item_id: int):
     values = _form_values(form)
     back = _back(form, "/plan/loans" if item.kind == PlanKind.LOAN else "/plan/recurring")
     try:
-        c.planning.update(item_id, **_save_values(c, values))
+        with settled_save(request, container(request)):
+            c.planning.update(item_id, **_save_values(c, values))
     except LightningError as exc:
         return _item_form(request, c, values, item=item, error=exc.message, error_field=exc.field or "",
                           status_code=400, back=back)
@@ -568,8 +572,9 @@ async def update_item(request: Request, item_id: int):
 @router.post("/suggestions/{counterparty_id:int}/restore")
 async def restore_suggestion(request: Request, counterparty_id: int):
     c = container(request)
-    value = c.planning.restored_suggestion_setting(counterparty_id)
-    c.settings.set("recurring_not_suggested", value)
+    with settled_save(request, container(request)):
+        value = c.planning.restored_suggestion_setting(counterparty_id)
+        c.settings.set("recurring_not_suggested", value)
     return redirect("/plan/recurring", "Suggestion restored.")
 
 
@@ -585,7 +590,8 @@ async def set_item_amount(request: Request, item_id: int):
     form = await request.form()
     item = c.planning.get(item_id)
     try:
-        c.planning.set_amount(item_id, str(form.get("amount", "")))
+        with settled_save(request, container(request)):
+            c.planning.set_amount(item_id, str(form.get("amount", "")))
     except LightningError as exc:
         return redirect(_back(form, "/plan/recurring"), exc.message)
     return redirect(_back(form, "/plan/recurring"), " ".join(x for x in (
@@ -598,7 +604,8 @@ async def delete_item(request: Request, item_id: int):
     c = container(request)
     form = await request.form()
     item = c.planning.get(item_id)
-    message = c.planning.remove(item_id)
+    with settled_save(request, container(request)):
+        message = c.planning.remove(item_id)
     return redirect(_back(form, "/plan/loans" if item.kind == PlanKind.LOAN else "/plan/recurring"), message)
 
 
@@ -630,28 +637,29 @@ async def settle_payment(request: Request, item_id: int):
     back = _back(form, "/plan")
     item = c.planning.get(item_id)
     try:
-        if action == "link":
-            c.planning.mark_paid(item_id, due, int(str(form.get("transaction_id", "0"))))
-            message = f"{item.name} · {due} marked paid."
-        elif action == "record":
-            c.planning.record_payment(item_id, due, str(form.get("date_paid", "")), str(form.get("amount", "")),
-                                      int(str(form.get("account_id"))) if str(form.get("account_id", "")).isdigit() else None)
-            message = f"{item.name} · {due} recorded and marked paid."
-            paid = to_decimal(str(form.get("amount", "")), "amount")
-            if paid != item.amount and item.frequency != Frequency.ONCE:
-                message += (f" You paid {fmt(paid)} instead of {fmt(item.amount)}; Recurring offers to use "
-                            f"{fmt(paid)} from now on.")
-        elif action == "skip":
-            c.planning.skip(item_id, due)
-            message = (f"{item.name} · {due} moved to the end of the loan." if item.kind == PlanKind.LOAN
-                       else f"{item.name} · {due} skipped.")
-        elif action == "reopen":
-            was_skipped = any(p.due_date == due and p.status == PaymentStatus.SKIPPED
-                              for p in c.planning.payments(item, due, today()))
-            c.planning.reopen(item_id, due)
-            message = f"{item.name} · {due} is " + ("back on the schedule." if was_skipped else "unpaid again.")
-        else:
-            raise LightningError("Choose how this payment was settled.")
+        with settled_save(request, container(request)):
+            if action == "link":
+                c.planning.mark_paid(item_id, due, int(str(form.get("transaction_id", "0"))))
+                message = f"{item.name} · {due} marked paid."
+            elif action == "record":
+                c.planning.record_payment(item_id, due, str(form.get("date_paid", "")), str(form.get("amount", "")),
+                                          int(str(form.get("account_id"))) if str(form.get("account_id", "")).isdigit() else None)
+                message = f"{item.name} · {due} recorded and marked paid."
+                paid = to_decimal(str(form.get("amount", "")), "amount")
+                if paid != item.amount and item.frequency != Frequency.ONCE:
+                    message += (f" You paid {fmt(paid)} instead of {fmt(item.amount)}; Recurring offers to use "
+                                f"{fmt(paid)} from now on.")
+            elif action == "skip":
+                c.planning.skip(item_id, due)
+                message = (f"{item.name} · {due} moved to the end of the loan." if item.kind == PlanKind.LOAN
+                           else f"{item.name} · {due} skipped.")
+            elif action == "reopen":
+                was_skipped = any(p.due_date == due and p.status == PaymentStatus.SKIPPED
+                                  for p in c.planning.payments(item, due, today()))
+                c.planning.reopen(item_id, due)
+                message = f"{item.name} · {due} is " + ("back on the schedule." if was_skipped else "unpaid again.")
+            else:
+                raise LightningError("Choose how this payment was settled.")
     except LightningError as exc:
         return redirect(f"/plan/items/{item_id}/pay?due={due}&back={back}", exc.message)
     return redirect(back, message)
