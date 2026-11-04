@@ -31,7 +31,7 @@ concurrency:
 
 env:
   PYTHONUTF8: '1'
-  MARKET_REPO: elfekimuhammed/Lightning_Market_Data
+  MARKET_REPO: LightningEg/Lightning_Market_Data
 
 jobs:
   collect:
