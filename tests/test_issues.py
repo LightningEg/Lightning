@@ -139,12 +139,23 @@ def test_a_step_waits_until_the_steps_it_needs_are_finished():
     assert "NF-9K2" in [u["code"] for u in module.post_units(milestones)[0]]
 
 
-def test_the_needs_sentence_in_a_real_item_is_read(tmp_path):
+def test_the_needs_sentence_in_markdown_is_read_independently_of_live_plan_items(tmp_path, monkeypatch):
     module = _tool()
-    milestones, _ = module.load()
-    item = next(i for m in milestones for i in m["items"] if i["code"] == "7D")
+    folder = tmp_path / "9-later"
+    folder.mkdir()
+    (folder / "README.md").write_text("---\ntitle: Later\n---\n", encoding="utf-8")
+    (folder / "9Z-example.md").write_text(
+        "---\ntitle: Example\ntype: feature\npillar: capture\nsize: L\nstatus: ready\n"
+        "created: 2026-11-04\nby: Codex\n---\n\n"
+        "## 9Z3 Pickers · M\nChoose.\n\n## 9Z4 Search · M\nFind.\n\n"
+        "## 9Z5 History · M\nRecall.\n\n## 9Z6 Edges · M\nNeeds 9Z3 to 9Z5 merged first.\n",
+        encoding="utf-8")
+    monkeypatch.setattr(module, "ISSUES", tmp_path)
+    milestones, problems = module.load()
+    assert not problems
+    item = next(i for m in milestones for i in m["items"] if i["code"] == "9Z")
     needs = {s["code"]: s["needs"] for s in item["steps"]}
-    assert needs["7D6"] == ["7D3", "7D5"]  # a step lists the steps it needs; finished steps drop out (NF-5A is done)
+    assert needs["9Z6"] == ["9Z3", "9Z5"]
 
 
 def test_a_step_issue_does_not_repeat_the_item_plan_or_its_sibling_steps(tmp_path, monkeypatch):
