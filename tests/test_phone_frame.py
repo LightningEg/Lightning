@@ -334,3 +334,16 @@ def test_phone_settings_use_more_instead_of_five_tabs(phone):
     more = phone.get("/more").text
     for path in ("/settings", "/rules", "/categories", "/counterparties", "/checks"):
         assert f'href="{path}"' in more
+
+
+def test_budget_category_returns_to_budget_and_leads_with_register(phone):
+    from html import unescape
+
+    budget = phone.get('/budget').text
+    match = re.search(r'href="(/transactions\?category_id=[^"]+)"', budget)
+    assert match, 'the demo budget has a category link'
+    page = phone.get(unescape(match.group(1)), headers={'referer': 'http://127.0.0.1:9861/budget'}).text
+    assert re.search(r'class="phone-back" href="/budget(?:\?[^"]*)?"', page)
+    assert 'class="phone-reg-filter"' in page and 'Category:' in page
+    assert 'phone-reg-search' in page and 'class="phone-period-row phone-reg-period"' in page
+    assert ' › ' not in page.split('class="phone-reg-filter"', 1)[1].split('</div>', 1)[0]

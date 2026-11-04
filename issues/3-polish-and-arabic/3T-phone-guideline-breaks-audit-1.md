@@ -42,13 +42,10 @@ Found by [Audit 1](../../reports/2026-10-20-demo-readiness/report.md) (§4 Phone
 ## Fix
 `phone.css` and the `templates/phone/` pages; regenerate `phone.rtl.css`. Make `tools/phone_check.py` also report elements past the screen edge.
 
+3T2 is done: SMS and Search acquired Back in 3AN5/3AN6; Settings, account import and the investment planner now have fallback destinations. Budget category links return to Budget and the rebuilt register has one period control and a concise category filter (`tests/test_phone_frame.py`).
+
 ## 3T1 Cut words and overlapping text (C12) · M
 Report items 1-2. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
-
-## 3T2 No way back, and Budget category to Transactions · M
-Report items 3-4: /accounts/N/import, /investments/planner and /settings need `‹ page` (/sms and /search have it since 3AN5 and 3AN6); Budget keeps its place. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
-
-**2026-11-04:** Phone Settings, the investment planner and account import now have fallback Back links; explicit return destinations and Budget-to-Transactions navigation retain their destination (`tests/test_phone_frame.py`). The phone register was rebuilt in 3AN6: it has a search field, chips and one period sheet instead of the old filter card. Check the actual Budget category flow and its labels before closing this step.
 
 ## 3T3 Touch targets · M
 Report item 6: targets under 48 px (C05.1). The search half (item 5: live search, results in a card, "Press Ctrl K") was built by IV-3AN's 3AN6 (2026-11-02). Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
