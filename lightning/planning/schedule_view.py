@@ -18,7 +18,7 @@ def reserve_goal_needs(reserves, month: str, as_of: date | None = None) -> list[
     month_start, _ = parse_month(month)
     result = []
     for reserve in reserves.list_active():
-        if reserve["kind"] == "EMERGENCY" or not reserve.get("due_date"):
+        if reserve["kind"] == "EMERGENCY" or reserve.get("planned_item_id") or not reserve.get("due_date"):
             continue
         due = date.fromisoformat(reserve["due_date"])
         if due < month_start:

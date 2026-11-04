@@ -161,10 +161,13 @@ class CashForecaster:
                     if not p.item.is_income and p.item.category_id in covered and p.status != PaymentStatus.SKIPPED
                     and (p.due_date[:7] == month or (current and p.outstanding and p.due_date < fmt_date(first)))]
         unpaid: dict[int, Decimal] = {}
+        coverage = self.planning.bill_reserve_coverage(day, max(day, last))
         if current:
             for p in payments:
                 if p.outstanding:
-                    unpaid[p.item.category_id] = unpaid.get(p.item.category_id, ZERO) + self.planning.amount_in_base(p, p.still_owed, day)
+                    unpaid[p.item.category_id] = (unpaid.get(p.item.category_id, ZERO)
+                        + self.planning.amount_in_base(p, p.still_owed, day)
+                        - coverage.get((p.item.id, p.due_date), ZERO))
         bills_to_pay = sum(unpaid.values(), ZERO)
         everyday_left = max(summary["left"] - bills_to_pay, ZERO) if current else summary["left"]
         scheduled = sum((amount for cid, amount in self.budgets.scheduled_payments(month, schedule=self.schedules.view()).items() if cid in covered), ZERO)
@@ -215,6 +218,7 @@ class CashForecaster:
         average, average_months = self.average_income(day)
         month_keys = _months(day, months)
         horizon_end = parse_month(month_keys[-1])[1]
+        bill_coverage = self.planning.bill_reserve_coverage(day, horizon_end)
         all_events = _deposit_cash_events(self.deposits, day, horizon_end)
         all_events = self.deposit_receipts.adjust_events(all_events, day)
         deposit_events = [e for e in all_events if getattr(e, "source", "CD") != "GAMEYA"]
@@ -249,13 +253,19 @@ class CashForecaster:
                 income, estimated = max(average - received, ZERO), True
             outgoing = [p for p in in_month if not p.item.is_income]
             budget_room, covered = self._budget(key, current)
-            covered_bills = sum((self.planning.amount_in_base(p, p.still_owed, day) for p in outgoing if p.item.category_id in covered), ZERO)
-            other_bills = sum((self.planning.amount_in_base(p, p.still_owed, day) for p in outgoing if p.item.category_id not in covered), ZERO)
+            covered_bills = sum((self.planning.amount_in_base(p, p.still_owed, day)
+                                 - bill_coverage.get((p.item.id, p.due_date), ZERO)
+                                 for p in outgoing if p.item.category_id in covered), ZERO)
+            other_bills = sum((self.planning.amount_in_base(p, p.still_owed, day)
+                               - bill_coverage.get((p.item.id, p.due_date), ZERO)
+                               for p in outgoing if p.item.category_id not in covered), ZERO)
             # A bill in a budgeted category is part of that budget, not on top of it. That holds for
             # bills already due too: they come off free cash, so they come off the budget room here.
-            due_covered = sum((self.planning.amount_in_base(p, p.still_owed, day) for p in due_now if not p.item.is_income
+            due_covered = sum((self.planning.amount_in_base(p, p.still_owed, day)
+                               - bill_coverage.get((p.item.id, p.due_date), ZERO) for p in due_now if not p.item.is_income
                                and p.item.category_id in covered), ZERO)
             budget_spending = max(budget_room - covered_bills - due_covered, ZERO)
+            reserved_bills = sum((bill_coverage.get((p.item.id, p.due_date), ZERO) for p in outgoing), ZERO)
             commitments = covered_bills + other_bills
             goals = self._goal_need(key, day)
             emergency = min(fund.top_up, emergency_gap)
@@ -267,7 +277,7 @@ class CashForecaster:
             closing = (opening + income + deposit_cash + circle_in - circle_out - commitments - budget_spending
                        - goals - emergency - rest)
             rows.append(ForecastMonth(key, opening, income, estimated, commitments, budget_spending, goals, closing,
-                                      deposit_cash, emergency, rest, circle_in, circle_out))
+                                      deposit_cash, emergency, rest, circle_in, circle_out, reserved_bills))
             opening = closing
 
         next_income = next((p for p in upcoming if p.item.is_income), None)
@@ -297,6 +307,9 @@ class CashForecaster:
         jobs, next month's spending still comes out of today's cash. The month the income lands in
         counts for the days before it."""
         bills = self.planning.still_owed_in_base(before, day)  # Due before payday, also on its card (7N)
+        coverage_end = parse_date(until) if until else max((parse_date(p.due_date) for p in before), default=day)
+        coverage = self.planning.bill_reserve_coverage(day, coverage_end)
+        saved_for_bills = sum((coverage.get((p.item.id, p.due_date), ZERO) for p in before), ZERO)
         spending = goals = emergency = rest = ZERO
         for index, row in enumerate(rows):
             share = Decimal(1)
@@ -317,8 +330,8 @@ class CashForecaster:
         emergency, rest = emergency.quantize(Decimal("0.01")), rest.quantize(Decimal("0.01"))
         bills_part = (label("payments_before_next_income"), -bills)
         circle_part = ("Gam'eya instalments before next income", -instalments)
-        parts = [(label("free_cash"), free), bills_part, circle_part,
+        parts = [(label("free_cash"), free), bills_part, ("Bill cash already set aside", saved_for_bills), circle_part,
                  (label("left_in_plan_after_bills"), -spending), (label("saving_for_goals"), -goals),
                  (label("emergency_top_up"), -emergency), (label("savings_target_rest"), -rest)]
-        return (free - bills - instalments - spending - goals - emergency - rest,
+        return (free - bills + saved_for_bills - instalments - spending - goals - emergency - rest,
                 [(name, value) for name, value in parts if value or name == label("free_cash")], bills)

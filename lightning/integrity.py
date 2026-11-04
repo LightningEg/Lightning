@@ -117,7 +117,8 @@ class IntegrityService:
         """Free cash as every screen shows it (`Position.free_cash`, built from valued holdings) against free cash
         rebuilt from ledger sums: each spendable account's cash quantity less the cash it holds for others."""
         name = "Free cash matches the ledger"
-        detail = "Free cash = spendable cash you own − reserves − bills due, rebuilt from each account's ledger lines."
+        detail = ("Free cash = spendable cash you own − reserves − bills due + bill cash already set aside, "
+                  "rebuilt from each account's ledger lines.")
         shown = self.position.at(day, match_payments=False)
         reserves = self.reserves.allocation_at(day)
         if reserves is None and day == fmt_date(today()):
@@ -138,7 +139,9 @@ class IntegrityService:
                 if owned is None:
                     complete, owned = False, ZERO
             ledger_cash += owned
-        expected = ledger_cash - reserves - shown.bills_due
+        coverage = (sum(self.planning.bill_reserve_coverage(parse_date(day), parse_date(day)).values(), ZERO)
+                    if self.planning is not None else ZERO)
+        expected = ledger_cash - reserves - shown.bills_due + coverage
         return self._check(name, shown.free_cash, expected, detail, complete)
 
     @staticmethod

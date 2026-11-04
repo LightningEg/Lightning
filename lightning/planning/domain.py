@@ -157,7 +157,7 @@ class ForecastMonth:
     opening: Decimal
     income: Decimal
     income_estimated: bool          # True when Average monthly income stands in for scheduled income
-    commitments: Decimal            # bills, subscriptions and loan payments scheduled in the month
+    commitments: Decimal            # free cash needed for scheduled payments after their confirmed reserves
     budget_spending: Decimal        # remaining budget plan not already covered by scheduled bills
     goal_saving: Decimal            # what reserves with due dates still need this month
     closing: Decimal
@@ -166,6 +166,7 @@ class ForecastMonth:
     target_saving: Decimal = ZERO     # Rest of savings target: what the target asks beyond goals and the top-up
     circle_in: Decimal = ZERO         # gam'eya payout (and estimated interest) landing in the month
     circle_out: Decimal = ZERO        # gam'eya instalments falling in the month
+    reserved_bills: Decimal = ZERO    # payments already covered by assigned cash, excluded from opening free cash
 
     @property
     def money_in(self) -> Decimal:
