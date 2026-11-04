@@ -7,20 +7,19 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
 | [Capture](pillars/capture.md) | 5 |  | 1 | 4 |  |  |
-| [Plan](pillars/plan.md) | 4 |  |  | 4 |  | 1 |
-| [Understand](pillars/understand.md) | 5 | 1 | 1 | 2 | 1 | 1 |
+| [Plan](pillars/plan.md) | 3 |  |  | 3 |  |  |
+| [Understand](pillars/understand.md) | 4 | 1 | 1 | 1 | 1 |  |
 | [Own](pillars/own.md) | 7 | 2 |  | 3 | 2 |  |
 | [Protect](pillars/protect.md) | 2 | 1 | 1 |  |  |  |
 | [Everywhere](pillars/everywhere.md) | 4 | 3 |  | 1 |  |  |
 | [Feel](pillars/feel.md) | 13 | 4 | 7 | 1 | 1 | 1 |
-| [Build](pillars/build.md) | 6 | 1 | 5 |  |  |  |
+| [Build](pillars/build.md) | 5 |  | 4 |  | 1 |  |
 | [Reach](pillars/reach.md) | 6 |  | 4 | 2 |  | 2 |
 
-52 open items in 10 milestones.
+49 open items in 10 milestones.
 
 ## Being built now
 
-- **IT-1H** (Build) [Refresh packaged dependencies with matching native wheels and lockfiles](../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md)
 - **IT-2A** (Protect) [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic rep…](../issues/2-safe-for-real-money/2A-restore-safety.md)
 - **IV-3H** (Feel) [Tab-by-tab review: what a real user needs next](../issues/3-polish-and-arabic/3H-tab-by-tab-review.md)
 - **IV-3AM** (Feel) [PC declutter, tab by tab](../issues/3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md)
@@ -36,8 +35,6 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 ## Waiting for the owner
 
 - **OW-3AI** (Feel) [Additional broker and institution logos still needed](../issues/3-polish-and-arabic/3AI-institution-logos.md): ready
-- **OW-7M** (Plan) [Paying a loan early empties the everyday budget, and an expense paid from a reserve still counts as…](../issues/7-planning-import-and-search/7M-early-loan-payment-and-reserve-spending-in-budget.md): new
-- **OW-7S** (Understand) [Money out filed under an income category counts as spending, not as less income](../issues/7-planning-import-and-search/7S-money-out-of-an-income-category.md): new
 - **OW-8D** (Reach) [For Geeks audit ideas left for the owner to choose](../issues/8-website/8D-for-geeks-audit-ideas-to-choose.md): ready
 - **OW-8AA** (Reach) [Sign off the Low, Medium and High ratings on the comparison pages](../issues/8-website/8AA-sign-off-the-comparison-ratings.md): ready
 
@@ -47,11 +44,11 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 |---|---|---|
 | 1 Easy to contribute | 4 | Anyone can find how to help in one click and send a first fix the same evening. |
 | 2 Safe for real money | 3 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
-| 3 Polish and Arabic | 13 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
+| 3 Polish and Arabic | 12 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 5 Investments | 1 | Every investment figure can be explained per purchase, and agrees with the ledger. |
 | 6 Market data | 3 | Prices arrive by themselves, from sources Lightning may redistribute. |
-| 7 Planning, import and search | 11 | Getting a month in takes minutes: any bank file, any old app, one search box. |
+| 7 Planning, import and search | 9 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 4 | The site is honest, quick and in step with the app. |
 | 9 Later | 7 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 4 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |
