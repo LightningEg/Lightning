@@ -120,9 +120,10 @@ def _waiting_imports(c, account_id: int) -> list[dict]:
 
 
 def _render_upload(request, c, account_id, *, error="", status_code=200):
+    from lightning.workflows.ai_prompts import pdf_to_csv_prompt
     account = c.accounts.get(account_id)
     return render(request, "bank_import_upload.html", account=account, waiting=_waiting_imports(c, account_id),
-                  ai_prompt=_ai_prompt(account, _ai_reference(c)), category_prompt=_first_import_prompt(c, account),
+                  pdf_prompt=pdf_to_csv_prompt(account.currency), ai_prompt=_ai_prompt(account, _ai_reference(c)), category_prompt=_first_import_prompt(c, account),
                   error=error, status_code=status_code)
 
 
@@ -154,12 +155,14 @@ async def upload(request: Request, account_id: int):
     form = await request.form()
     upload_files = [item for item in form.getlist("file") if getattr(item, "filename", "")]
     if not upload_files:
-        return _render_upload(request, c, account_id, error="Choose at least one CSV file.", status_code=400)
+        return _render_upload(request, c, account_id, error="Choose at least one statement file.", status_code=400)
     try:
         prepared = []
         needs_mapping = None
         for upload_file in upload_files:
-            data = await upload_file.read()
+            from lightning.statement_files import MAX_FILE_BYTES, read_statement
+            data = await upload_file.read(MAX_FILE_BYTES + 1)
+            data = read_statement(upload_file.filename, data, c.accounts.get(account_id).currency)
             if getattr(c, "is_journal", False) and len(data) > MAX_JOURNAL_CSV_COMMAND_BYTES:
                 return _render_upload(request, c, account_id,
                                       error="This file is too large to synchronize; split it into smaller files.",

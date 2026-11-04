@@ -14,3 +14,7 @@ pydantic-core==2.50.2
 
 # Shared retrieval; Android uses the verified upstream portable implementation.
 rapidfuzz==3.14.3
+pypdf==6.10.0
+openpyxl==3.1.5
+defusedxml==0.7.1
+et-xmlfile==2.0.0

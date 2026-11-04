@@ -22,10 +22,16 @@
     {% if category_prompt %}<p class="muted small">{{ 'First import into this account? This prompt gives your AI tool what it cannot guess: your category names. It matches the bank’s own category words to them, so the review starts with your categories filled in.'|tr(locale) }}</p>
     {% set ai_text = category_prompt %}<div class="actions">{% include "partials/ai_prompt.html" %}</div>{% endif %}
   </details>
+  <details class="ai-handoff context-detail">
+    <summary>{{ 'Convert a PDF to CSV with AI'|tr(locale) }}</summary>
+    <p class="muted small">{{ 'If you cannot select text in the PDF, copy this prompt and attach the file in your AI tool. Check the result against the statement, then import the CSV here for review.'|tr(locale) }}</p>
+    <p class="muted small">{{ 'Lightning does not upload your statement to an AI tool.'|tr(locale) }}</p>
+    {% set ai_text = pdf_prompt %}{% include "partials/ai_prompt.html" %}
+  </details>
   {% if error %}<p class="flash error">{{ error|tr(locale) }}</p>{% endif %}
   <form method="post" enctype="multipart/form-data" action="/accounts/{{ account.id }}/import">
-    <div class="field import-file-field"><label for="bank-csv">{{ 'CSV files'|tr(locale) }}</label><input id="bank-csv" type="file" name="file" accept=".csv,text/csv" multiple required>
-    <p class="muted small">{{ 'CSV files up to 5 MB are supported.'|tr(locale) }}</p></div>
+    <div class="field import-file-field"><label for="bank-csv">{{ 'Statement files'|tr(locale) }}</label><input id="bank-csv" type="file" name="file" accept=".csv,.xlsx,.pdf,text/csv,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple required>
+    <p class="muted small">{{ 'CSV up to 5 MB; Excel .xlsx and text-based CIB PDFs up to 8 MB. Every row is reviewed before saving.'|tr(locale) }}</p></div>
     <div class="actions"><button class="btn primary">{{ 'Review statement'|tr(locale) }}</button><a class="btn" href="/accounts/{{ account.id }}">{{ 'Cancel'|tr(locale) }}</a></div>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 </section>

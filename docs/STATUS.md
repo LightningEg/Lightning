@@ -6,7 +6,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
-| [Capture](pillars/capture.md) | 5 |  | 1 | 4 |  |  |
+| [Capture](pillars/capture.md) | 5 | 1 | 1 | 3 |  |  |
 | [Plan](pillars/plan.md) | 3 |  |  | 3 |  |  |
 | [Understand](pillars/understand.md) | 4 | 1 | 1 | 1 | 1 |  |
 | [Own](pillars/own.md) | 7 | 2 |  | 3 | 2 |  |
@@ -28,6 +28,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 - **NF-4B** (Everywhere) [Multiple devices: implementation plan](../issues/4-edit-journal-and-devices/4B-multiple-devices.md)
 - **NF-5G** (Own) [Brokerages that span exchanges and currencies](../issues/5-investments/5G-brokerages-across-exchanges.md)
 - **NF-6A** (Own) [Market data: price packs, collected in the cloud](../issues/6-market-data/6A-price-packs.md)
+- **NF-7B** (Capture) [Read PDF and Excel statements through the CSV review](../issues/7-planning-import-and-search/7B-pdf-and-excel-statements.md)
 - **NF-7Y** (Understand) [Explain which stale or pending inputs affect a financial figure](../issues/7-planning-import-and-search/7Y-financial-data-freshness.md)
 - **NF-10A** (Feel) [Cosmetic parts, account-wide claiming and native acceptance](../issues/10-looks-and-store/10A-cosmetic-parts-and-claiming.md)
 - **NF-10C** (Feel) [Theme materials, selling themes, owner console](../issues/10-looks-and-store/10C-theme-materials-acceptance.md)

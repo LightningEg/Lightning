@@ -429,6 +429,10 @@ Import normalises one signed amount column or separate inflow/outflow columns in
 
 **Prompt buttons** (7V): `workflows/ai_prompts.py` builds five names-only prompts (a rejected CSV, counterparty clean-up, Spending, Budget words, a bank's category words) and each page hands one over with `partials/ai_prompt.html` (Copy and Edit; the text sits in the closed edit window, with a why-this-helps line). They carry words, names and error messages with figures masked, never an amount; the numbers come from Ask an AI.
 
+### Statement document readers (NF-7B)
+
+`statement_files.py` converts literal .xlsx cells (openpyxl plus defusedxml) and the aligned CIB text-PDF layout (pypdf) into the existing CSV review. Posting date, debit/credit sign, source reference and printed balance evidence are retained; amounts and references are never guessed. Printed running balances must reconcile. Size/page/cell/worksheet limits and formula/macro/encryption/unsupported-layout refusals live in that module. It executes no document actions and stores no original document. Non-text PDFs are refused with `pdf_to_csv_prompt()` through the shared local Copy/Edit handoff, with no automatic upload. Dummy readers, review invariants and Mohab's two screen journeys are in `test_statement_files.py` and `test_mohab_statements.py`.
+
 ## Search and identity contract
 
 Search is read-only retrieval; choosing a result is the user's action.

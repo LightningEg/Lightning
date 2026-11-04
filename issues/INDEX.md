@@ -166,7 +166,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **NF-7B** | [Read PDF and Excel statements through the CSV review](7-planning-import-and-search/7B-pdf-and-excel-statements.md) | new feature | Capture | L | new |
+| **NF-7B** | [Read PDF and Excel statements through the CSV review](7-planning-import-and-search/7B-pdf-and-excel-statements.md) | new feature | Capture | L | building |
 | NF-7B1 | ↳ Design: parser choice, size caps, no macros, no formulas run | | | M | |
 | NF-7B2 | ↳ Excel statements through the CSV review | | | L | |
 | NF-7B3 | ↳ PDF statements through the CSV review | | | L | |
