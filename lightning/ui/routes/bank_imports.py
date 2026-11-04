@@ -110,9 +110,7 @@ def _review_form_max_fields(row_count: int) -> int:
 @router.get("/{account_id:int}/import")
 async def import_page(request: Request, account_id: int):
     c = container(request)
-    account = c.accounts.get(account_id)
-    return render(request, "bank_import_upload.html", account=account, waiting=_waiting_imports(c, account_id),
-                  ai_prompt=_ai_prompt(account, _ai_reference(c)), category_prompt=_first_import_prompt(c, account))
+    return _render_upload(request, c, account_id)
 
 
 def _waiting_imports(c, account_id: int) -> list[dict]:
