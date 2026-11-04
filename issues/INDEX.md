@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 66 open items, in the order they are worked on.
+10 milestones, 65 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -157,9 +157,8 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 | NF-5G5 | ↳ Phase 4: broker import | | | L | |
 | NF-5G6 | ↳ Phase 5: analysis | | | L | |
 | NF-5G7 | ↳ Phase 6: lots and corporate actions | | | L | |
-| **IT-5M** | [Distinguish ambiguous annualized returns from unavailable results](5-investments/5M-xirr-ambiguous-results.md) | improvement, technical | Own | M | new |
 
-Done: 5A, 5H, 5I, 5J, 5K, 5L. Next free code: 5N.
+Done: 5A, 5H, 5I, 5J, 5K, 5L, 5M. Next free code: 5N.
 
 ## 6 Market data
 
