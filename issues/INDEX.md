@@ -175,7 +175,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7C1 | ↳ Read each app's export format | | | M | |
 | NF-7C2 | ↳ A mapping preset per app in the CSV review | | | L | |
 | NF-7C3 | ↳ A move-in guide | | | M | |
-| **NF-7D** | [Search and matching: what is not built](7-planning-import-and-search/7D-search-and-matching.md) | new feature | Capture | L | ready |
+| **NF-7D** | [Search and matching: what is not built](7-planning-import-and-search/7D-search-and-matching.md) | new feature | Capture | L | building |
 | NF-7D1 | ↳ Agree the matching contract ([#218](https://github.com/LightningEg/Lightning/issues/218)) | | | M | |
 | NF-7D2 | ↳ Replace difflib with RapidFuzz ([#219](https://github.com/LightningEg/Lightning/issues/219)) | | | L | |
 | NF-7D3 | ↳ Scoped pickers use the matcher ([#220](https://github.com/LightningEg/Lightning/issues/220)) | | | M | |

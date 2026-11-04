@@ -8,7 +8,8 @@ import sqlite3
 from lightning.core.balances import running_balances
 from lightning.core.dates import now_iso
 from lightning.core.ledger import Effect, PostingLine
-from lightning.core.money import from_e6, to_e6
+from lightning.core.money import ascii_digits, from_e6, to_e6
+from lightning.core.matching import match_score, NUMERIC
 from lightning.core.refs import DocType, parse_ref
 from lightning.database.connection import Database
 
@@ -73,7 +74,7 @@ _TERM_SQL = (
 def search_terms(text: str) -> list[str]:
     """'Carrefour 10,000' -> ['Carrefour', '10000']: every word must match; thousands separators ignored."""
     terms = []
-    for word in re.findall(r"\S+", text or ""):
+    for word in re.findall(r"\S+", ascii_digits(text or "")):
         if re.fullmatch(r"[\d,.\-]+", word):
             word = word.replace(",", "").lstrip("-")
         if word:
@@ -204,8 +205,7 @@ class TransactionRepository:
         )
         return [int(row["id"]) for row in rows]
 
-    @staticmethod
-    def _where(f: TxnFilter) -> tuple[str, list]:
+    def _where(self, f: TxnFilter) -> tuple[str, list]:
         where, params = ["1=1"], []
         if not f.include_void:
             where.append("t.status != 'VOID'")
@@ -228,10 +228,36 @@ class TransactionRepository:
             where.append("t.date <= ?")
             params.append(f.date_to)
         for term in search_terms(f.search):
-            where.append(_TERM_SQL)
+            alternatives, identity_params = self._entity_matches(term)
+            where.append("(" + _TERM_SQL + (" OR " + " OR ".join(alternatives) if alternatives else "") + ")")
             params.extend([_like(term)] * 10)
-            params.append(int(term) if term.isdigit() else None)  # 3251 finds 3,250.75, shown as 3,251
+            params.append(int(term) if term.isdigit() else None)
+            params.extend(identity_params)  # 3251 finds 3,250.75, shown as 3,251
         return " AND ".join(where), params
+
+    def _entity_matches(self, term: str) -> tuple[list[str], list]:
+        """History includes archived identities; numeric/date/ref terms remain literal."""
+        if NUMERIC.fullmatch(term) or re.fullmatch(r"[A-Z]{2,5}-\d{4}-\d{2}-\d{2}-\d+(?:/\d+)?", term.upper()):
+            return [], []
+        clauses, params = [], []
+        sources = (
+            ("Counterparty", "SELECT id,name label,'' code FROM counterparties UNION ALL "
+             "SELECT counterparty_id,alias,'' FROM counterparty_aliases", "t.counterparty_id"),
+            ("Account", "SELECT id,name label,code FROM accounts", "account_id"),
+            ("Category", "SELECT id,name label,code FROM categories", "category_id"),
+        )
+        for kind, sql, column in sources:
+            ids = sorted({row["id"] for row in self.db.all(sql)
+                          if max(match_score(term, row["label"], kind=kind),
+                                 match_score(term, row["code"], fuzzy=False)) > 0})
+            # Chunk to keep SQLite variable/expression limits bounded, including very short prefixes.
+            for start in range(0, len(ids), 400):
+                chunk = ids[start:start + 400]
+                test = f"{column} IN ({','.join('?' for _ in chunk)})"
+                clauses.append(test if column == "t.counterparty_id" else
+                               f"EXISTS (SELECT 1 FROM ledger_entries em WHERE em.transaction_id=t.id AND em.{test})")
+                params.extend(chunk)
+        return clauses, params
 
     def opening_txn_id(self, account_id: int, asset_id: int | None = None, exclude_id: int | None = None) -> int | None:
         """The live opening balance of an account's cash (asset_id None) or of one holding."""

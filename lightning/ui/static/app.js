@@ -18,7 +18,7 @@ const initFlashMessages = (root = document, refresh = false) => {
     const prior = flashTimers.get(flash);
     if (prior) clearTimeout(prior);
     flashTimers.delete(flash);
-    if (isError || !flash.textContent.trim() || flash.classList.contains("device-line")) return;
+    if (isError || !flash.textContent.trim() || flash.classList.contains("device-line") || flash.querySelector(".history-form")) return;
     // Only newly inserted or explicitly refreshed messages get a fresh timer.
     if (!refresh && flash.dataset.flashReady) return;
     flash.dataset.flashReady = "1";
@@ -137,6 +137,22 @@ if (popupFlashRoot) {
 const pickListOnly = (records) => records.every((record) => record.target.closest?.(".counterparty-results, .category-results, .pick-list"));
 const pickerHome = (input) => input.closest("#app-popup-content") || input.closest("dialog") || document.body;
 const pinFixed = (list, left, top) => { list.style.left = `${left}px`; list.style.top = `${top}px`; };
+// The server uses the same Python matcher as Search and History. Only enabled options from
+// this field are sent; ranking cannot add an account, change ownership or choose a value.
+const pickerKind = (name = "") => /owner|whom|custody/.test(name) ? "Person" : /category/.test(name) ? "Category" : /asset|instrument/.test(name) ? "Investment" : /account/.test(name) ? "Account" : /reserve/.test(name) ? "Reserve" : "Counterparty";
+const rankPicker = async (query, choices, kind) => {
+  if (!query) return choices.map((choice) => choice.id);
+  const body = new URLSearchParams({q: query, kind, choices: JSON.stringify(choices),
+    __session: document.querySelector('meta[name="lightning-session"]')?.content || ""});
+  try {
+    const response = await fetch("/search/picker", {method: "POST", body});
+    if (!response.ok) throw new Error("Picker search unavailable");
+    return (await response.json()).ids;
+  } catch (_) {
+    // The original list stays usable if the local request fails.
+    return choices.filter((row) => `${row.label} ${row.context || ""}`.toLocaleLowerCase().includes(query.toLocaleLowerCase())).map((row) => row.id);
+  }
+};
 let ownPickerId = 0;
 const initOwnDataPickers = (root = document) => {
   const find = (selector) => [
@@ -178,10 +194,11 @@ const initOwnDataPickers = (root = document) => {
   wrapper.insertBefore(input, select);
   pickerHome(input).append(list);
   let active = -1;
-  const entries = () => Array.from(select.options).filter((option) => !option.disabled && option.value !== "");
-  const close = () => { list.hidden = true; input.setAttribute("aria-expanded", "false"); input.removeAttribute("aria-activedescendant"); active = -1; };
+  let searchVersion = 0;
+  const entries = () => Array.from(select.options).filter((option) => !option.disabled && !option.hidden && !(option.parentElement?.tagName === "OPTGROUP" && (option.parentElement.disabled || option.parentElement.hidden)) && option.value !== "");
+  const close = () => { ++searchVersion; list.hidden = true; input.setAttribute("aria-expanded", "false"); input.removeAttribute("aria-activedescendant"); active = -1; };
   const choose = (option) => {
-    if (!option) return;
+    if (!option || select.disabled || !entries().includes(option)) return;
     select.value = option.value;
     input.value = option.textContent.trim();
     input.setCustomValidity("");
@@ -206,9 +223,16 @@ const initOwnDataPickers = (root = document) => {
   };
   document.addEventListener('scroll', () => { if (!list.hidden) place(); }, true);
   window.addEventListener('resize', place);
-  const render = (all = false) => {
-    const query = all ? "" : input.value.trim().toLocaleLowerCase();
-    const matches = entries().filter((option) => !query || `${groupOf(option)} ${option.textContent}`.toLocaleLowerCase().includes(query)).slice(0, all ? 5 : 80);
+  const render = async (all = false) => {
+    const version = ++searchVersion;
+    const query = all ? "" : input.value.trim();
+    const enabled = entries();
+    const choices = enabled.map((option) => ({id: option.value, label: option.textContent.trim(), context: groupOf(option)}));
+    list.hidden = true;
+    const ids = await rankPicker(query, choices, pickerKind(select.name));
+    if (version !== searchVersion || document.activeElement !== input) return;
+    const byId = new Map(entries().map((option) => [option.value, option]));
+    const matches = ids.map((id) => byId.get(id)).filter(Boolean).slice(0, all ? 5 : 80);
     list.replaceChildren();
     let lastGroup = "";
     matches.forEach((option, i) => {
@@ -282,7 +306,8 @@ find("input[data-own-suggestions][list]").forEach((input) => {
   input.setAttribute("role", "combobox"); input.setAttribute("aria-autocomplete", "list");
   input.setAttribute("aria-haspopup", "listbox"); input.setAttribute("aria-controls", list.id); input.setAttribute("aria-expanded", "false");
   let active = -1;
-  const close = () => { list.hidden = true; input.setAttribute("aria-expanded", "false"); input.removeAttribute("aria-activedescendant"); active = -1; };
+  let searchVersion = 0;
+  const close = () => { ++searchVersion; list.hidden = true; input.setAttribute("aria-expanded", "false"); input.removeAttribute("aria-activedescendant"); active = -1; };
   // An option may carry a tile (data-mono / data-logo), a group heading (data-group) and search words
   // (data-label, data-search). data-allow-add on the input offers `+ Add "typed"` for a value not listed.
   const allowAdd = input.hasAttribute("data-allow-add");
@@ -319,13 +344,15 @@ find("input[data-own-suggestions][list]").forEach((input) => {
     const fresh = makeTile(found ? found.mono : (typed ? monogram(typed) : ""), found ? found.logo : "", "inst-well");
     wellTile.replaceWith(fresh); wellTile = fresh; wellTile.hidden = !typed;
   };
-  const render = () => {
-    // Measure the field before the list changes: the page's layout is still clean, so this read costs nothing.
+  const render = async () => {
+    const version = ++searchVersion;
     const rect = input.getBoundingClientRect();
-    const query = input.value.trim().toLocaleLowerCase();
-    const hints = suggested().filter((row) => !query || row.hay.includes(query));
-    const listed = rowsOf().filter((row) => row.value && (!query || row.hay.includes(query)) && !hints.some((hint) => hint.value === row.value));
-    const matches = [...hints, ...listed].slice(0, query ? 50 : (allowAdd ? 8 : 5));
+    const query = input.value.trim();
+    const candidates = [...suggested(), ...rowsOf()].filter((row, index, all) => row.value && all.findIndex((other) => other.value === row.value) === index);
+    list.hidden = true;
+    const ids = await rankPicker(query, candidates.map((row, index) => ({id: String(index), label: row.value, context: row.hay})), pickerKind(input.name));
+    if (version !== searchVersion || document.activeElement !== input) return;
+    const matches = ids.map((id) => candidates[Number(id)]).filter(Boolean).slice(0, query ? 50 : (allowAdd ? 8 : 5));
     list.replaceChildren();
     let lastGroup = "";
     matches.forEach((row, i) => {
@@ -1586,10 +1613,17 @@ const initInstrumentCatalogue = () => {
   const kind = form.querySelector('[name="class_code"]');
   const symbol = form.querySelector('[name="symbol"]');
   const venue = form.querySelector('[name="mic"]');
-  const render = () => {
-    const query = search.value.trim().toLocaleLowerCase(); results.replaceChildren();
-    if (!query) { results.hidden = true; search.setAttribute("aria-expanded", "false"); return; }
-    const matches = catalogue.filter((item) => `${item.name} ${item.ticker} ${item.kind} ${item.exchange || ""}`.toLocaleLowerCase().includes(query)).slice(0, 12);
+  let searchVersion = 0;
+  search.addEventListener("keydown", (event) => { if (event.key === "Escape") { ++searchVersion; results.hidden = true; } });
+  const render = async () => {
+    const version = ++searchVersion;
+    const query = search.value.trim();
+    results.hidden = true;
+    if (!query) { search.setAttribute("aria-expanded", "false"); return; }
+    const ids = await rankPicker(query, catalogue.map((item, i) => ({id: String(i), label: item.name, code: item.ticker, context: item.exchange || ""})), "Investment");
+    if (version !== searchVersion || document.activeElement !== search) return;
+    results.replaceChildren();
+    const matches = ids.map((id) => catalogue[Number(id)]).slice(0, 12);
     if (!matches.length) { const empty=document.createElement("div"); empty.className="instrument-result"; empty.textContent=t("No match. You can enter the investment details below."); results.append(empty); }
     matches.forEach((item) => {
       const button=document.createElement("button"); button.type="button"; button.className="instrument-result"; button.setAttribute("role","option");
@@ -1619,16 +1653,19 @@ const initCategoryCatalogue = () => {
     // Text that is exactly a category (the row's current choice) lists everything, so the user picks
     // again instead of first deleting it; only typed text filters.
     const isChoice = () => categories.some((item) => [item.name, item.label].includes(input.value.trim()));
-    const matchesFor = () => {
-      const query = isChoice() ? "" : input.value.trim().toLocaleLowerCase().replaceAll("›", " ").replace(/\s+/g, " ");
-      return categories.filter((item) => !query ||
-        `${item.parent} ${item.name} ${item.label}`.toLocaleLowerCase().replaceAll("›", " ").replace(/\s+/g, " ").includes(query));
-    };
-    const render = () => {
+    let searchVersion = 0;
+    input.addEventListener("keydown", (event) => { if (event.key === "Escape") ++searchVersion; });
+    const render = async () => {
       if (input.disabled || document.activeElement !== input) return;
+      const version = ++searchVersion;
+      const query = isChoice() ? "" : input.value.trim();
+      results.hidden = true;
+      const ids = await rankPicker(query, categories.map((item) => ({id: String(item.id), label: item.name, context: item.parent})), "Category");
+      if (version !== searchVersion || document.activeElement !== input) return;
       results.replaceChildren();
       activeIndex = -1;
-      const allMatches = matchesFor();
+      const byId = new Map(categories.map((item) => [String(item.id), item]));
+      const allMatches = ids.map((id) => byId.get(id)).filter(Boolean);
       const matches = allMatches.slice(0, input.value.trim() ? 30 : 5);
       const groups = new Map();
       matches.forEach((item) => {
@@ -1720,21 +1757,6 @@ const initCategoryCatalogue = () => {
 };
 initCategoryCatalogue();
 
-// How alike two spellings are, 0 to 1 (1 − edit distance / longer length).
-const similar = (a, b) => {
-  if (a === b) return 1;
-  const row = Array.from({ length: b.length + 1 }, (_, i) => i);
-  for (let i = 1; i <= a.length; i += 1) {
-    let prev = row[0]; row[0] = i;
-    for (let j = 1; j <= b.length; j += 1) {
-      const keep = row[j];
-      row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
-      prev = keep;
-    }
-  }
-  return 1 - row[b.length] / Math.max(a.length, b.length, 1);
-};
-
 if (ledger) {
   const known = JSON.parse(ledger.dataset.counterparties || "{}");
   const accounts = JSON.parse(ledger.dataset.accounts || "[]");
@@ -1744,7 +1766,8 @@ if (ledger) {
     const category = document.querySelector(`.category-input[form="${form}"]`);
     const results = document.getElementById(counterparty.dataset.counterpartyResults);
     const clearDecision = (name) => document.querySelector(`input[type="hidden"][form="${form}"][name="${name}"]`)?.remove();
-    const closeResults = () => { if (results) { results.hidden = true; counterparty.setAttribute("aria-expanded", "false"); } };
+    let searchVersion = 0;
+    const closeResults = () => { ++searchVersion; if (results) { results.hidden = true; counterparty.setAttribute("aria-expanded", "false"); } };
     const sync = () => {
       const isTransfer = accounts.some((name) => name.toLocaleLowerCase() === counterparty.value.trim().toLocaleLowerCase());
       if (category) {
@@ -1790,16 +1813,21 @@ if (ledger) {
         results.append(button);
       });
     };
-    const renderResults = () => {
-      const query = counterparty.value.trim().toLocaleLowerCase();
-      results.replaceChildren();
+    const renderResults = async () => {
+      const version = ++searchVersion;
+      const query = counterparty.value.trim();
+      results.hidden = true;
       const limit = query ? 8 : 5;
-      const internal = accounts.filter((name) => name.toLocaleLowerCase().includes(query)).slice(0, limit);
-      const saved = parties.filter((name) => name.toLocaleLowerCase().includes(query)).slice(0, Math.max(0, limit - internal.length));
+      const [internalIds, partyIds] = await Promise.all([
+        rankPicker(query, accounts.map((name, i) => ({id: String(i), label: name})), "Account"),
+        rankPicker(query, parties.map((name, i) => ({id: String(i), label: name})), "Counterparty")]);
+      if (version !== searchVersion || document.activeElement !== counterparty) return;
+      results.replaceChildren();
+      const internal = internalIds.map((id) => accounts[Number(id)]).slice(0, limit);
+      const saved = partyIds.map((id) => parties[Number(id)]).slice(0, limit);
+      const close = [];
       addGroup(t("Your accounts · internal transfers"), internal, t("Internal"));
       addGroup(t("People & businesses"), saved, t("External"));
-      const close = query.length >= 3 ? parties.filter((name) => !saved.includes(name) && similar(query, name.toLocaleLowerCase()) >= 0.68).slice(0, 3) : [];
-      addGroup(t("Did you mean"), close, t("External"));
       if (!internal.length && !saved.length && !close.length) {
         const empty = document.createElement("div"); empty.className = "counterparty-group-title";
         empty.textContent = t("No saved match · press Enter to review this new name"); results.append(empty);
@@ -2736,7 +2764,7 @@ window.lightningPrivacy = (() => {
   if (!bar) return;
   const field = bar.querySelector(".command-input"), list = bar.querySelector(".command-results");
   const groups = { Transaction: "Transaction", Page: "Pages", Action: "Actions", Account: "Accounts",
-    Counterparty: "Counterparties", Category: "Categories", Investment: "Investments", Tag: "Tags", Search: "Transactions" };
+    Person: "People", Reserve: "Reserves", Counterparty: "Counterparties", Category: "Categories", Investment: "Investments", Tag: "Tags", Search: "Transactions" };
   let results = [], active = 0, asked = "", waiting = null, timer = null;
   const paint = () => {
     list.replaceChildren();

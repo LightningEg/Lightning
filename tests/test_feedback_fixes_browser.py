@@ -139,7 +139,8 @@ def test_reserve_multiple_pickers_and_autosave(c, browser_page):
     def pick(kind,text):
         picker=form.locator(f'[data-match-picker={kind}]')
         picker.locator('input[role=combobox]').fill(text)
-        picker.get_by_role('option',name=text,exact=True).click()
+        input_=picker.locator('input[role=combobox]')
+        page.locator('#'+input_.get_attribute('aria-controls')).get_by_role('option',name=text,exact=True).click()
         page.wait_for_function("() => document.querySelector('.reserve-edit[open] .inline-save-status').textContent === 'Saved'")
     pick('category',food.name)
     assert c.reserves.get(reserve['id'])['category_id']==food.id

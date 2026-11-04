@@ -33,24 +33,8 @@ def tags(repo) -> list[tuple[str, int]]:
 
 def search_ids(repo, counterparties, text: str) -> set[int]:
     """Transaction ids matching a search (posted ones)."""
-    ids = set(repo.ids(TxnFilter(search=text, limit=100000)))
-    resolved = counterparties.resolve(text)
-    if resolved:
-        rows = repo.db.all(
-            "SELECT id FROM transactions WHERE status!='VOID' AND counterparty_id=?",
-            (resolved["id"],),
-        )
-        ids.update(int(row["id"]) for row in rows)
-    # Include likely counterparty spellings so a near miss such as "Talbt"
-    # still finds transactions, while exposing a human-confirmed suggestion.
-    for name, _score in counterparties.suggestions(text, limit=5):
-        rows = repo.db.all(
-            "SELECT id FROM transactions WHERE status!='VOID' AND "
-            "(counterparty_id=(SELECT id FROM counterparties WHERE name=?) OR counterparty LIKE ?)",
-            (name, f"%{name}%"),
-        )
-        ids.update(int(row["id"]) for row in rows)
-    return ids
+    clause, params = repo._where(TxnFilter(search=text))
+    return {int(row["id"]) for row in repo.db.all(f"SELECT t.id FROM transactions t WHERE {clause}", tuple(params))}
 
 
 def usual_categories(repo, *, window: int, minimum: int, days: int) -> dict[str, dict]:
