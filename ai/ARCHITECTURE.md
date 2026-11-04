@@ -461,7 +461,7 @@ Search is read-only retrieval; choosing a result is the user's action.
 | Confirmed aliases | `طلبات` finds the canonical Talabat identity and its history; no learned spelling is saved just by searching. |
 | Duplicate names | An account and a shop called CIB Current remain separate typed results; neither becomes the other's identity. |
 | Short codes | CIB may prefix-match CIB Current; CB never becomes CIB through typo ranking. |
-| Account versus counterparty | Results stay grouped. A transfer destination is a choice from that field's current accounts; searching cannot create one or switch ownership. |
+| Account versus counterparty | Results stay grouped. A transfer destination is a choice from that field's current accounts; searching cannot create one or switch ownership. An import name shared by an account and counterparty has no default identity: the person chooses its role, and an explicit counterparty id cannot become a transfer. |
 | Exact history constraints | `طلبات 123` requires both the matched party and literal 123; account/category/date filters still intersect the results. |
 | Archived identities | New-entry/Search choices exclude archived entities; history can find their posted transactions. Voids remain excluded. |
 

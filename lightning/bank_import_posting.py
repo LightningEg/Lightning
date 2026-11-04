@@ -126,20 +126,23 @@ class ImportPoster:
         except ValueError as exc:
             raise ValidationError(f"CSV row {row['_line']}: {exc}", "row") from None
         notes = str(decision.get("notes", row["Notes"])).strip()
-        account_matches = [a for a in accounts if a.name.casefold() == cp_text.casefold()]
-        if len(account_matches) > 1:
-            raise ValidationError(f"CSV row {row['_line']}: account name is ambiguous; use a unique name.",
-                                  "counterparty")
-        target = account_matches[0] if account_matches else None
-        if "transfer_account_id" not in decision and row.get("_transfer_account_id"):
-            decision = decision | {"transfer_account_id": row["_transfer_account_id"]}
         selected_target = str(decision.get("transfer_account_id", "")).strip()
+        choice = str(decision.get("counterparty_choice", ""))
+        # A selected party keeps its role even when an account has the same label.
+        explicit_party = bool(decision.get("counterparty_id") or choice.startswith("existing:") or choice == "new"
+                              or (choice == "unlinked" and not selected_target))
+        account_matches = [a for a in accounts if a.name.casefold() == cp_text.casefold()]
+        if not explicit_party and not selected_target and (
+                len(account_matches) > 1 or (account_matches and self.counterparties.resolve(cp_text))):
+            raise ValidationError("Choose an account or counterparty explicitly for this name.", "counterparty")
+        target = None if explicit_party else account_matches[0] if account_matches else None
+        if not explicit_party and "transfer_account_id" not in decision and row.get("_transfer_account_id"):
+            selected_target = row["_transfer_account_id"]
         if row.get("_internal") and not target and not selected_target:
             raise ValidationError(f"CSV row {row['_line']}: this is an internal transfer. Pick the account the money "
                                   "moved to or from.", "transfer_account_id")
         if selected_target:
-            target = next((a for a in accounts if str(a.id) == selected_target and a.id != batch["account_id"]
-                           ), None)
+            target = next((a for a in accounts if str(a.id) == selected_target and a.id != batch["account_id"]), None)
             if target is None:
                 raise ValidationError(f"CSV row {row['_line']}: choose another active account for this transfer.", "transfer_account_id")
         counterparty_id = decision.get("counterparty_id") or (row["_counterparty_id"] if cp_text == row["Counterparty"] else None)

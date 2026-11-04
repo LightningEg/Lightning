@@ -304,6 +304,8 @@ def _row_ui(row: dict, form=None) -> dict:
                 "match": own("match"), "fee": own("fee"), "conversion_amount": own("conversion_amount")}
     cp_pick = (f"account:{row['_transfer_account_id']}" if row.get("_transfer_account_id")
                else f"counterparty:{row['_counterparty_id']}" if row.get("_counterparty_id") else "")
+    if row.get("_identity_ambiguous"):
+        cp_pick = ""
     custody = row.get("_is_custody") and row.get("_whom") and row.get("_counterparty_id")
     return {"cp": row.get("Counterparty") or "", "cp_pick": cp_pick,
             "cat": str(row.get("_category_id") or "") if not row.get("_transfer_account_id") else "",
@@ -328,7 +330,8 @@ def _suggestions_json(c, row: dict, account_ids: dict[str, int], party_ids: dict
 def _review_groups(c, rows: list[dict], form=None) -> list[dict]:
     """Rows grouped by imported name (a header with its total and state, the rows under it). Every row keeps its
     own counterparty, category, held-for, notes and amount; a group is only a place to fold and to tick."""
-    accounts = {a.name: a.id for a in c.accounts.list(active_only=True)}
+    all_accounts = c.accounts.list(active_only=True)
+    accounts = {a.name: a.id for a in all_accounts if sum(b.name == a.name for b in all_accounts) == 1}
     parties = {p["name"]: p["id"] for p in c.counterparties.list_active()}
     by_key: dict[str, list[dict]] = {}
     for row in rows:
@@ -355,7 +358,7 @@ def _render_review(request, c, account_id: int, batch, rows, *, summary, form=No
     account = c.accounts.get(account_id)
     groups = _review_groups(c, rows, form)
     counts = {"all": len(groups)} | {key: sum(1 for g in groups if g["status"] == key) for key in _STATUS_ORDER}
-    accounts_here = [a for a in c.accounts.list(active_only=True) if a.id != account_id and a.account_type.value in ("BANK", "CASH", "BROKERAGE")]
+    accounts_here = [a for a in c.accounts.list(active_only=True) if a.id != account_id and (a.currency == account.currency or a.account_type.value in ("BANK", "CASH", "BROKERAGE"))]
     failing = [r for r in rows if _row_status(r) == "err"]
     reject_prompt = ""
     if failing and batch["status"] != "POSTED":
@@ -484,6 +487,10 @@ def _ready_decision(form, row, decision, account_names) -> bool:
     if decision["skip"] or match == "skip" or match.startswith("link:"):
         return True
     if row.get("_possible_duplicate") and match != "new":
+        return False
+    if row.get("_identity_ambiguous") and not decision.get("transfer_account_id") and not (
+            decision.get("counterparty_id") or decision.get("counterparty_choice", "").startswith("existing:")
+            or decision.get("counterparty_choice") == "new"):
         return False
     category_key = f"category_{row['_import_row_id']}"
     if decision["category_id"] or decision["force_uncategorized"]:

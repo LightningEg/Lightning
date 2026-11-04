@@ -18,7 +18,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | audit-10 | [Audit 10: the phone, tab by tab - quick actions and the answer first](2026-10-29-phone-tab-audit/report.md) | 2026-10-29 | audit | 3AD, 3AN, 3T |
 | audit-12 | [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](2026-10-30-desktop-tab-audit/report.md) | 2026-10-30 | audit | 3AM |
 | audit-13 | [Audit 13: the phone for quick jobs - convenience, taps and the look](2026-11-01-phone-convenience-audit/report.md) | 2026-11-01 | audit | 3AN |
-| code-quality-smart-features | [Code audit: refactoring, loose ends and smart features](2026-11-03-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1H, 2A, 2C, 4A, 4B, 7B, 7C, 7X, 7Y, 9A, 9K |
+| code-quality-smart-features | [Code audit: refactoring, loose ends and smart features](2026-11-03-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1H, 2A, 2C, 4A, 4B, 7C, 9A, 9K |
 
 
 ## Create and maintain a report

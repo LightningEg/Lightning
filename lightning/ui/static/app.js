@@ -348,7 +348,7 @@ find("input[data-own-suggestions][list]").forEach((input) => {
     const version = ++searchVersion;
     const rect = input.getBoundingClientRect();
     const query = input.value.trim();
-    const candidates = [...suggested(), ...rowsOf()].filter((row, index, all) => row.value && all.findIndex((other) => other.value === row.value) === index);
+    const candidates = [...suggested(), ...rowsOf()].filter((row, index, all) => row.value && all.findIndex((other) => (other.pick || other.value) === (row.pick || row.value)) === index);
     list.hidden = true;
     const ids = await rankPicker(query, candidates.map((row, index) => ({id: String(index), label: row.value, context: row.hay})), pickerKind(input.name));
     if (version !== searchVersion || document.activeElement !== input) return;

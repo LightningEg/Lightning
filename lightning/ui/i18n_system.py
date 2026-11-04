@@ -1427,6 +1427,7 @@ ROUTES = {
     "Choose how this payment was settled.": "اختار الدفعة دي اتسددت إزاي.",
 }
 SERVICES = {
+    "Choose an account or counterparty explicitly for this name.": "اختار بنفسك الحساب أو الطرف التاني المقصود بالاسم ده.",
     "Choose account": "اختار الحساب",
     "Comparison": "المقارنة",
     "Missing rates": "أسعار صرف ناقصة",

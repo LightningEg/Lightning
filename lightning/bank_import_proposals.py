@@ -44,6 +44,7 @@ class ImportProposals:
                 pending_elsewhere.setdefault((staged["Date"], staged["Amount"]), other["file_name"])
             except (TypeError, ValueError, KeyError):
                 continue
+        active_accounts = self.accounts.list(active_only=True)
         seen_refs = set()
         # A full-history query: run it at most once per preview, not once per row (7O).
         usual = functools.cache(self.transactions.usual_categories)
@@ -87,6 +88,12 @@ class ImportProposals:
             # cannot be matched waits for the user to pick it.
             target = next((a for a in self.accounts.list(active_only=True)
                            if a.name == parsed["_transfer_target_suggestion"]), None)
+            same_name = [a for a in active_accounts if a.id != batch["account_id"]
+                         and a.name.casefold() == parsed["Counterparty"].strip().casefold()]
+            parsed["_identity_ambiguous"] = len(same_name) > 1 or bool(same_name and cp)
+            if parsed["_identity_ambiguous"]:
+                target = None
+                parsed["_transfer_target_suggestion"] = None
             is_transfer = parsed["_internal"] or self._own_account(batch["account_id"], parsed["Counterparty"])
             parsed["_transfer_target"] = target.name if target and is_transfer else None
             parsed["_transfer_account_id"] = str(target.id) if target and is_transfer else ""
@@ -101,7 +108,7 @@ class ImportProposals:
             parsed["_possible_duplicate"] = bool(ref_duplicate or repeat_import or parsed["_similarity_warning"]
                                                  or parsed["_voided_earlier"] or parsed["_link_candidates"])
             parsed["_ready"] = bool(not parsed.get("_errors") and not parsed["_possible_duplicate"]
-                                    and not parsed["_suggestions"] and not parsed["_needs_account"]
+                                    and not parsed["_suggestions"] and not parsed["_needs_account"] and not parsed["_identity_ambiguous"]
                                     and (parsed["_category_id"] or parsed["_transfer_target"]))
             parsed["_import_row_id"] = row["id"]
             parsed["_account_id"] = batch["account_id"]

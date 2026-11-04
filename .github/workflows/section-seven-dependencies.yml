@@ -5,6 +5,10 @@ on:
     branches: ['codex/search-matching', 'codex/section-seven-*']
     paths:
       - 'requirements/**'
+      - 'lightning/statement_files.py'
+      - 'tools/matcher_probe.py'
+      - 'tools/matcher_frozen_probe.py'
+      - 'packaging/desktop-app.spec'
       - 'tests/test_search_pickers_browser.py'
       - 'lightning/ui/static/app.js'
       - 'lightning/ui/static/phone-fields.js'

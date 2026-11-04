@@ -76,3 +76,30 @@ def test_review_shows_currency_amount_field_and_retains_value_on_refusal(c, phon
         page = client.get(f'/accounts/{a.id}/import/{batch}')
         assert page.status_code == 200 and f'name="conversion_amount_{row["_import_row_id"]}"' in page.text
         assert 'Other account amount' in page.text
+
+
+def test_an_explicit_counterparty_with_an_account_name_is_an_expense_not_a_transfer(c):
+    a=c.account_flows.open_account('Bank','BANK','2026-09-01','1000')
+    wallet=c.account_flows.open_account('Wallet','CASH','2026-09-01','0')
+    party=c.counterparties.create('Wallet')
+    food=c.categories.get_by_code('EXP.PERSONAL.FOOD')
+    batch,row=stage(c,a,'2026-09-02','-10','Wallet')
+    rid=row['_import_row_id']
+    assert row['_identity_ambiguous'] and not row['_ready']
+    refused=c.bank_imports.confirm(batch,{rid:{'match':'new','category_id':food.id}})
+    assert rid in refused['errors'] and c.reporting.account_balance(a.id)==1000
+    result=c.bank_imports.confirm(batch,{rid:{'match':'new','category_id':food.id,'counterparty_choice':f'existing:{party}'}})
+    assert not result['errors']
+    txn=c.transactions.get(c.db.scalar('SELECT transaction_id FROM bank_import_rows WHERE id=?',(rid,)))
+    assert txn.type=='OUT' and c.reporting.account_balance(a.id)==990 and c.reporting.account_balance(wallet.id)==0
+
+
+def test_legacy_duplicate_account_names_are_resolved_by_the_explicit_id(c):
+    a,b=accounts(c)
+    other=c.account_flows.open_account('Other dollars','BANK','2026-09-01','0')
+    # Older/imported profiles may contain names current account forms refuse.
+    c.db.execute('UPDATE accounts SET name=? WHERE id=?',('Dollars',other.id))
+    batch,row=stage(c,a,'2026-09-02','-5000','Dollars')
+    assert row['_identity_ambiguous'] and not row['_ready']
+    result=c.bank_imports.confirm(batch,{row['_import_row_id']:{'match':'new','transfer_account_id':str(b.id),'conversion_amount':'100'}})
+    assert not result['errors'] and c.reporting.account_balance(b.id)==100
