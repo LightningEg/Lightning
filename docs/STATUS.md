@@ -13,10 +13,10 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Protect](pillars/protect.md) | 3 | 1 | 2 |  |  | 1 |
 | [Everywhere](pillars/everywhere.md) | 5 | 4 |  | 1 |  |  |
 | [Feel](pillars/feel.md) | 13 | 4 | 7 | 1 | 1 | 1 |
-| [Build](pillars/build.md) | 9 | 1 | 8 |  |  |  |
+| [Build](pillars/build.md) | 8 | 1 | 7 |  |  |  |
 | [Reach](pillars/reach.md) | 6 |  | 4 | 2 |  | 2 |
 
-60 open items in 10 milestones.
+59 open items in 10 milestones.
 
 ## Being built now
 
@@ -54,7 +54,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | 6 Market data | 4 | Prices arrive by themselves, from sources Lightning may redistribute. |
 | 7 Planning, import and search | 11 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 4 | The site is honest, quick and in step with the app. |
-| 9 Later | 8 | Good ideas that wait until the milestones above are done. |
+| 9 Later | 7 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 4 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |
 
 0 large items still need splitting into steps before they are posted for contributors (size L: 800 coins or more).
