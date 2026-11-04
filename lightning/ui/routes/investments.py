@@ -471,7 +471,7 @@ async def holding_detail(request: Request, asset_id: int):
         previous=replace(previous,realized=previous.owned_realized,dividends=previous.owned_dividends,
                          dividend_tax=previous.owned_dividend_tax)
     journey = visuals.holding_journey(c, h.account_id, asset_id, parse_date(day))
-    purchases, sales = _purchase_rows(h, day)
+    purchases, sales = holding_views.purchase_returns(h, day)
     gain_pct = h.unrealized / h.cost_basis * 100 if h.unrealized is not None and h.cost_basis else None
     total_return = h.total_return
     breakdown = charts.waterfall(("What you paid", h.cost_basis),
@@ -488,23 +488,6 @@ async def holding_detail(request: Request, asset_id: int):
                   period_dividends=h.dividends-(previous.dividends if previous else ZERO),
                   allocation_classes=sorted({*_allocation_classes(c), bucket}, key=str.casefold),  # its own bucket is always a choice (5K)
                   show_popup=request.headers.get("X-Lightning-Popup")=="1")
-
-
-def _purchase_rows(h, day: str):
-    """Your own purchases still held, and the pieces of your sales, each with its return and its return per year
-    (NF-5D). Percent figures are worked out here, never in the template."""
-    def pct(rate):
-        return None if rate is None else rate * 100
-    mine = [lot for lot in h.lots if lot.owner_id is None]
-    held = [{"opened": lot.opened, "units": lot.quantity, "cost": lot.cost,
-             "value": None if h.price is None else lot.quantity * h.price,
-             "gain": None if h.price is None else lot.quantity * h.price - lot.cost,
-             "roi": None if h.price is None else pct(lot.roi(h.price)),
-             "cagr": None if h.price is None else pct(lot.cagr(h.price, day))} for lot in mine if lot.quantity]
-    sold = [{"opened": d.lot_opened, "sold": d.sold, "units": d.quantity, "cost": d.cost, "proceeds": d.proceeds,
-             "gain": d.gain, "roi": pct(d.roi), "cagr": pct(d.cagr)}
-            for d in h.disposals if d.owner_id is None and d.quantity]
-    return held, sold
 
 
 def target_plan(c) -> dict:
