@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 import sqlite3
 
+from lightning.core.balances import running_balances
 from lightning.core.dates import now_iso
 from lightning.core.ledger import Effect, PostingLine
 from lightning.core.money import from_e6, to_e6
@@ -246,13 +247,20 @@ class TransactionRepository:
 
     def lowest_running_quantity(self, account_id: int, asset_id: int) -> tuple[int, str | None]:
         """Smallest quantity an (account, holding) ever reaches over time, and the date it happens."""
-        row = self.db.one(
-            "SELECT q, date FROM (SELECT le.date, SUM(le.quantity_e6) OVER (ORDER BY le.date, t.id, le.line_no)"
-            " AS q FROM ledger_entries le JOIN transactions t ON t.id = le.transaction_id"
-            " WHERE t.status = 'POSTED' AND le.account_id = ? AND le.asset_id = ?) ORDER BY q LIMIT 1",
-            (account_id, asset_id),
-        )
-        return (int(row["q"]), row["date"]) if row else (0, None)
+        # Preserve the old SQL window's exact row order, but stream the shared walk.
+        # Do not net same-day entries: a historical intraday deficit still matters here.
+        cursor = self.db.execute(
+            "SELECT le.date, le.quantity_e6 FROM ledger_entries le "
+            "JOIN transactions t ON t.id=le.transaction_id "
+            "WHERE t.status='POSTED' AND le.account_id=? AND le.asset_id=? "
+            "ORDER BY le.date, t.id, le.line_no", (account_id, asset_id))
+        try:
+            steps = running_balances((row["date"], int(row["quantity_e6"])) for row in cursor)
+            lowest = min(steps, key=lambda step: step.after, default=None)
+            return (lowest.after, lowest.day) if lowest is not None else (0, None)
+        finally:
+            cursor.close()
+
 
     def recent_categories(self, window: int) -> list:
         """Each counterparty's last ``window`` categorised transactions, newest first, under its saved

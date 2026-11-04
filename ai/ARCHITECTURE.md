@@ -123,6 +123,8 @@ transactions (documents) ──1:n──▶ ledger_entries (account + asset effe
 reevaluation_entries ──many:one── reevaluation period ──1:1 per account──▶ VAL journal in main ledger
 ```
 
+Transaction posting remains behind `TransactionService`; search/capture suggestions, balance/certificate checks and audit-backed submission/revision handling have separate collaborators in `transactions/search.py`, `balances.py` and `submissions.py`. `core/balances.running_balances` streams integer quantities without sorting or netting. Caller policies stay explicit: owner/cash checks net daily movements; historical holdings retain transaction/line order. The shared walk changes neither refusal messages nor save ownership.
+
 The reevaluation ledger keeps per-asset, per-account month-end units, price, value, return and missing-price state, and links each row to one system `VAL` journal per account and checkpoint. It never copies ordinary transactions. Sale dates force a checkpoint at the sale price; month-end checkpoints fill on startup. A missing historical price leaves the checkpoint pending for user input; cost is never silently used as a quote. Certificates keep their purchase price as principal until a manual dated valuation replaces it, so they ask for no monthly quote; a CD portfolio's `VAL` journal has one zero-quantity noncash line per asset and owner. Manual `VAL` postings to CD portfolios are prohibited.
 
 | Activity | Main-ledger effect |

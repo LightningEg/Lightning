@@ -245,7 +245,7 @@ Good ideas that wait until the milestones above are done.
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | new |
 | **NF-9E** | [Return against the risk-free rate](9-later/9E-return-against-risk-free-rate.md) | new feature | Own | M | new |
 | **IT-9F** | [Page speed: a stable origin and cache, and a CSS trim](9-later/9F-page-speed-origin-and-css.md) | improvement, technical | Reach | M | new |
-| **IT-9K** | [Structure left - a 746-line profile_app and three balance-floor checks](9-later/9K-layers-and-copies.md) | improvement, technical | Build | M | ready |
+| **IT-9K** | [Structure left - runtime routes and bank-import orchestration](9-later/9K-layers-and-copies.md) | improvement, technical | Build | M | ready |
 
 Done: 9G, 9H, 9I, 9J. Next free code: 9L.
 

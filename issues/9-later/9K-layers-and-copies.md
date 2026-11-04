@@ -1,5 +1,5 @@
 ---
-title: Structure left - a 746-line profile_app and three balance-floor checks
+title: Structure left - runtime routes and bank-import orchestration
 type: tech
 pillar: build
 size: M
@@ -18,9 +18,7 @@ list for both entrypoints (month-end checkpoints post on unlock, failures are lo
 
 1. **`runtime/app.py:profile_app`** is one 746-line function of nested routes; split it by area (profiles, devices, restore).
    The journal and device code it wires belong to claimed work (4A, 2A): split after those claims clear.
-2. **Three balance-floor checks**: `_validate_owner_balances`, `_refuse_cash_below_zero`, `lowest_running_quantity`. One shared
-   running-balance helper, with each caller's refusal message kept. Careful: merging them could change the order in which
-   same-day entries are checked, so it needs a decision on that order first.
+2. **Done (2026-11-04): shared balance walk.** `core/balances.py` streams integer quantities for the owner, before/after cash and historical holding checks. Daily checks retain their daily netting; historical holdings retain `(date, transaction id, line number)` order. Messages, validation windows and treatment of existing deficits stay unchanged. No new global ordering policy was imposed; changing that policy would still require the owner’s decision. `tests/test_balance_walk.py` compares with the old SQL window, including same-day deficits, earliest ties, voids and seeded histories.
 
 Done (2026-11-02, owner decision): **Budget no longer calls Planning through bootstrap callbacks.** Planning builds one
 `PlanSchedule` per request (`c.schedules.view()`, `planning/schedule_view.py`); every budget call that depends on loans, bills,
@@ -38,3 +36,10 @@ One branch each, tests unchanged.
 ## Audit follow-up · 2026-11-03
 
 The [code-quality audit](../../reports/2026-11-03-code-quality-and-smart-features/report.md) measures `profile_app` at 829 lines in commit 89848dc, rather than the older 746-line figure. After active runtime claims clear, retain the route-area extraction. Additional candidates within the same structural work: transaction service validation/search/submission collaborators (1,381-line facade), bank import parsing/proposals/posting (962-line module), and small typed reporting/page read models. Preserve public facades, transaction scopes, monetary invariants, replay and undo behavior; one extraction per change. These are refactoring opportunities, not new correctness findings.
+
+
+## Transaction facade extraction · 2026-11-04
+
+Complete: balance/certificate validation is in `transactions/balances.py`, read-only search/tags/capture suggestions in `transactions/search.py`, and exact submission fingerprints, duplicate delivery checks and revision hashing in `transactions/submissions.py`. The facade retains its signatures and policy constants; it still owns posting and save scopes. Audit rows, retry refusal messages and journal/Undo authority are unchanged. The shared balance walker does not buffer histories; the repository closes its streamed cursor. A 100,000-row dummy history agrees exactly with the former SQL window, with about 1.8 KB of Python allocations for the walk (SQLite allocations excluded); the local CPU sample was 407 ms versus 356 ms for the SQL window. This is a responsibility/consistency improvement, not a speed claim.
+
+Still open: the unclaimed profile-route extraction, coordinated journal/device/recovery route separation after active claims clear, and the bank-import parsing/proposal/posting split. Keep one extraction per change and retain all financial behavior.

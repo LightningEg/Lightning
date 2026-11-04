@@ -219,3 +219,18 @@ Refactor number audit (dummy Mohab, 2026-10-02; baseline commit 3dc54ae3):
 | Page cache and query budget | Same cached/uncached HTML, existing SELECT limits | Existing performance contracts pass | Pass |
 
 The 68 investment-view, demo and reporting checks and 128 Mohab/number-audit checks passed. Read paths checked: `/investments` all-time/month and USD-currency views. Fixture writes come from the existing dummy household; this extraction changes no write path. Broader runtime/import/transaction refactors are separate work.
+## Follow-up · 2026-11-04: transaction responsibilities and shared balance checks
+
+The IT-9K transaction slice is complete: the facade delegates balance/certificate validation, read-only search/capture suggestions and submission/revision handling to cohesive collaborators. Public entry points, canonical JSON hashes, tokens, audit behavior, save scopes, journal ownership and refusal messages retain their existing contracts. Owner/cash and historical holding checks now share an exact integer running-balance helper; each caller retains its former same-day order. The holdings repository streams rows and closes its cursor rather than buffering history.
+
+Dummy-data number audit:
+
+| Invariant | Expected | Found | Result |
+| --- | --- | --- | --- |
+| Historical floor, 100,000 integer-quantity rows | Old SQL window: −21,429,000,000 millionths on 2026-01-03 | Exact same quantity and date | Pass |
+| Daily versus intraday policies | Net-daily lowest 3; row-order lowest −2 on the same fixture | Both preserved | Pass |
+| Empty/positive floor, equal minima, voids, other accounts/assets | Former SQL result, including earliest equal minimum | Independent SQL-oracle fixtures agree | Pass |
+| Existing deficit edits and owned/cash checks | Existing refusal and improvement rules | Transaction, cash and ownership regressions pass | Pass |
+| Revisions, duplicate delivery, rollback/retry and journal commands | Existing snapshots, tokens and authority | Existing integration regressions pass | Pass |
+
+The 192 affected transaction/ownership/cash/investment/search checks passed, plus 28 revision/entry/atomic checks and the journal/Mohab and resent-form/circle integrations. A seeded 500-row oracle and the 100,000-row probe check exactness. The latter sampled 540 ms wall/356 ms CPU for SQL versus 607 ms wall/407 ms CPU for the shared stream under concurrent validation, with 1,778 bytes peak Python allocations (SQLite excluded). No speed improvement is claimed. Evidence: [shared balance contracts](../../tests/test_balance_walk.py) and existing transaction, ownership, cash, revision and journal tests. Write paths exercised by those dummy fixtures include new entries, edits, ownership, investments, double submission, rollback/retry and journal saves; this slice introduces no new write path. Runtime and import-module separation remain open under IT-9K.
