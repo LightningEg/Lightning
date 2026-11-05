@@ -3926,3 +3926,9 @@ table.figures tfoot th { border-top: 1px solid var(--line); }
 .main tr.register-month td { padding: 14px 8px 6px; border-bottom: 1px solid var(--line, #DCE6E2); font-size: 13px; color: var(--ink-2, #304A5C); background: none; }
 .main tr.register-month td b { font-weight: 700; color: var(--ink, #0D2233); }
 .main tr.register-month td span { float: inline-end; color: var(--muted, #566E7E); font-variant-numeric: tabular-nums; }
+
+/* 3AS/3AT: a label, its note and its field read as three lines; an asset page leads with flat rows (A16: no card in a card). */
+label > .field-name, label > .field-note { display:block; }
+label > .field-note { color:var(--muted); font-size:var(--fs-meta, 12px); margin-block:2px 6px; }
+.asset-rows { margin-block:4px 8px; }
+.asset-actions { margin:12px 0 4px; }

@@ -113,3 +113,29 @@ def test_new_figure_and_plan_words_are_arabic():
                  "Instalment 4 of 10 was due 2026-10-05 · 2,000 EGP · not recorded yet."):
         arabic = translate(text, "ar")
         assert arabic != text and not any("a" <= ch.lower() <= "z" for ch in arabic.replace("Office", "").replace("EGP", "")), (text, arabic)
+
+
+def test_accounts_sidebar_more_and_overview_agree_on_in_your_accounts(c, setup, monkeypatch):
+    """BV-3AQ (audit 2026-11-05 F4, owner decision 2026-11-05): In your accounts is what the account rows add up to,
+    the circle you still owe counted below zero, on Accounts, the sidebar, More and Overview alike. Accounts then
+    reconciles it to What you own: less held for others, plus the circle still to pay (which sits in What you owe)."""
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-05")
+    circle = _circle(c, setup, my_turn=1)
+    c.gameya.record_instalment(circle.id, "2026-10-05")
+    c.gameya.record_payout(circle.id, "2026-10-05")
+    p = c.position.at(date(2026, 10, 5))
+    rows = sum((value for account, value in c.reporting.net_worth("2026-10-05").by_account if account.active),
+               Decimal(0))
+    assert p.gameya_still_to_pay == Decimal("18000")
+    assert p.in_your_accounts == rows == p.what_you_own + p.held_for_others - p.gameya_still_to_pay
+    total = f"{p.in_your_accounts:,.0f}"
+    pc = _client(c).get("/accounts").text
+    assert pc.count(total) >= 2  # the sidebar and the Accounts lead read the same figure
+    assert "+18,000" in pc and f"{p.what_you_own:,.0f}" in pc  # How it adds up: the circle row, then What you own
+    assert total in _client(c, phone=True).get("/more").text
+    phone = _client(c, phone=True).get("/accounts").text
+    assert total in phone and "18,000 you still owe a circle, so you own" in phone
+    home = _client(c).get("/").text
+    assert f"{p.net_worth:,.0f}" in home
+    ar = _client(c, phone=True, locale="ar").get("/accounts").text
+    assert "لسه عليك لجمعية" in ar

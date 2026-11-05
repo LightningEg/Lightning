@@ -136,7 +136,8 @@ class Position:
     # ------------------------------------------------------------- formulas
     @property
     def in_your_accounts(self) -> Decimal:
-        return self.what_you_own + self.held_for_others
+        # Owner decision 2026-11-05 (BV-3AQ): what the account rows add up to, a circle you still owe counted below zero.
+        return self.what_you_own + self.held_for_others - self.gameya_owed
 
     @property
     def cash_you_own(self) -> Decimal:
