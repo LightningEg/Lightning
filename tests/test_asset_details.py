@@ -56,7 +56,11 @@ def test_the_account_page_shows_the_change_since_purchase_the_history_and_the_lo
     assert response.status_code == 303 and "Details%20saved" in response.headers["location"]
     page = client.get(f"/accounts/{car.id}").text
     assert "Bought for 600,000" in page and "Since you bought it" in page and "-60,000" in page.replace("−", "-")
-    assert "Paid for with Car loan" in page and "2025-06-01" in page and "2026-06-01" in page
+    assert "Car loan" in page and "Left to pay" in page and "2025-06-01" in page and "2026-06-01" in page
+    # 3AT: flat rows, whole pounds, no investment form or statement import on a car, a typed loan picker.
+    assert "stat-tile" not in page and "Add investment transaction" not in page and "/import" not in page
+    assert 'data-pick-target="asset-loan-pick"' in page and "<select name=\"loan_item_id\"" not in page
+    assert 'href="#estimated-value"' in page
     refused = client.post(f"/accounts/{car.id}/details", data={"kind": "boat"}, follow_redirects=False)
     assert "msg=" in refused.headers["location"] and c.accounts.other_asset_details(car.id)["kind"] == "car"
 

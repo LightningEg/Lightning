@@ -2,24 +2,24 @@
 {# A property or vehicle on its Other asset account page (NF-9C): what it cost, the change since, the dated values and the loan that paid for it. #}
 {% set phone = phone_mode() %}
 <section class="card{{ ' phone-card' if phone }}" id="asset-details" aria-labelledby="asset-heading"><h2 id="asset-heading"{% if phone %} class="phone-card-title"{% endif %}>{{ ("Property or vehicle"|tr(locale)) }}</h2>
-{% if asset.details %}
-<div class="stat-tiles">
-  <div class="stat-tile surface-hold"><span class="stat-tile-head">{{ tone_icon('hold') }}<span class="stat-tile-label">{{ ("Value now"|tr(locale)) }}</span><span class="stat-chip">{{ ("Flat" if asset.details.kind == 'flat' else "House" if asset.details.kind == 'house' else "Land" if asset.details.kind == 'land' else "Car" if asset.details.kind == 'car' else "Other")|tr(locale) }}</span></span>
-    <span class="stat-tile-value">{{ asset.value|money }}<small>{{ account.currency }}</small></span>
-    <span class="stat-tile-sub">{% if asset.price is not none %}{{ "Bought for {price}"|tr(locale, price=asset.price|money ~ ' ' ~ account.currency) }}{% if asset.details.purchase_date %} · {{ asset.details.purchase_date }}{% endif %}{% else %}{{ "Type what you paid to see the change since you bought it."|tr(locale) }}{% endif %}</span></div>
-  {% if asset.change is not none %}<div class="stat-tile surface-{{ 'in' if asset.change >= 0 else 'over' }}"><span class="stat-tile-head">{{ tone_icon('in') }}<span class="stat-tile-label">{{ "Since you bought it"|tr(locale) }}</span>{% if asset.change_pct is not none %}<span class="stat-chip is-{{ 'up' if asset.change > 0 else ('down' if asset.change < 0 else 'flat') }}">{{ asset.change_pct|signed_pct }}%</span>{% endif %}</span>
-    <span class="stat-tile-value{{ ' is-negative' if asset.change < 0 }}">{{ asset.change|money(True) }}<small>{{ account.currency }}</small></span>
-    <span class="stat-tile-sub">{{ "Value now less what you paid"|tr(locale) }}</span></div>{% endif %}
+{% set kind_name = (asset.details.kind if asset.details else 'other') %}
+<div class="asset-rows">
+  <div class="compact-row"><span>{{ "Value now"|tr(locale) }}{% if asset.history %}<small>{{ "As of"|tr(locale) }} {{ asset.history[0].date }}</small>{% endif %}</span><b>{{ asset.value|money(places=0) }} {{ account.currency }}</b></div>
+  {% if asset.details %}
+  {% if asset.change is not none %}<div class="compact-row"><span>{{ "Since you bought it"|tr(locale) }}<small>{{ "Bought for {price}"|tr(locale, price=asset.price|money(places=0) ~ ' ' ~ account.currency) }}{% if asset.details.purchase_date %} · {{ asset.details.purchase_date }}{% endif %}</small></span><b class="{{ 'neg' if asset.change < 0 else '' }}">{{ asset.change|money(True, 0) }} {{ account.currency }}{% if asset.change_pct is not none %} · {{ asset.change_pct|signed_pct }}%{% endif %}</b></div>
+  {% else %}<p class="muted">{{ "Type what you paid to see the change since you bought it."|tr(locale) }}</p>{% endif %}
+  {% if asset.loan %}<div class="compact-row"><span>{{ "Left to pay"|tr(locale) }}<small>{{ asset.loan.name }} · <a href="/plan/loans">{{ "Open loans"|tr(locale) }}</a></small></span><b>{{ asset.loan.left|money(places=0) }} {{ account.currency }}</b></div>
+  <div class="compact-row"><span>{{ "Value less what is left to pay"|tr(locale) }}</span><b class="{{ 'neg' if asset.loan.equity < 0 else '' }}">{{ asset.loan.equity|money(True, 0) }} {{ account.currency }}</b></div>{% endif %}
+  {% else %}<p class="muted">{{ "Say what this is, what you paid and when, and which loan paid for it."|tr(locale) }}</p>{% endif %}
 </div>
-{% if asset.loan %}<p>{{ "Paid for with {loan}. Left to pay: {left}. Value less what is left to pay: {equity}."|tr(locale, loan=asset.loan.name, left=asset.loan.left|money ~ ' ' ~ account.currency, equity=asset.loan.equity|money(True) ~ ' ' ~ account.currency) }} <a href="/plan/loans">{{ "Open loans"|tr(locale) }}</a></p>{% endif %}
-{% else %}<p class="muted">{{ "Say what this is, what you paid and when, and which loan paid for it."|tr(locale) }}</p>{% endif %}
+<p class="asset-actions"><a class="btn primary{{ ' phone-save' if phone }}" href="#estimated-value">{{ "Update value"|tr(locale) }}</a></p>
 {% if asset.history|length > 1 %}<table class="plain-table"><thead><tr><th>{{ "As of"|tr(locale) }}</th><th class="num">{{ "Value"|tr(locale) }}</th><th class="num">{{ "Change"|tr(locale) }}</th></tr></thead><tbody>
-{% for row in asset.history %}<tr><td>{{ row.date }}</td><td class="num">{{ row.value|money }}</td><td class="num{{ ' is-negative' if row.change is not none and row.change < 0 }}">{{ row.change|money(True) if row.change is not none else '—' }}</td></tr>{% endfor %}</tbody></table>{% endif %}
-<details{% if not asset.details %} open{% endif %}><summary>{{ "Details"|tr(locale) }}</summary>
+{% for row in asset.history %}<tr><td>{{ row.date }}</td><td class="num">{{ row.value|money(places=0) }}</td><td class="num{{ ' is-negative' if row.change is not none and row.change < 0 }}">{{ row.change|money(True, 0) if row.change is not none else '—' }}</td></tr>{% endfor %}</tbody></table>{% endif %}
+<details{% if not asset.details %} open{% endif %}><summary>{{ "Edit purchase details"|tr(locale) }}</summary>
 <form method="post" action="/accounts/{{ account.id }}/details" class="{{ 'phone-form' if phone else 'row' }}" style="{{ '' if phone else 'align-items:end' }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
   <label class="field">{{ "Kind"|tr(locale) }}<select name="kind">{% for k in asset.kinds %}<option value="{{ k }}"{% if (asset.details.kind if asset.details else 'other') == k %} selected{% endif %}>{{ k|capitalize|tr(locale) }}</option>{% endfor %}</select></label>
   <label class="field">{{ "Bought on"|tr(locale) }}<input name="purchase_date" value="{{ asset.details.purchase_date if asset.details and asset.details.purchase_date else '' }}" type="{{ 'date' if phone else 'text' }}" inputmode="numeric"{% if not phone %} data-smart-date{% endif %}></label>
   <label class="field">{{ "Paid"|tr(locale) }} ({{ account.currency }})<input name="purchase_price" inputmode="decimal" value="{{ asset.price|money(False, 2) if asset.price is not none else '' }}"></label>
-  <label class="field">{{ "Loan that paid for it"|tr(locale) }}<select name="loan_item_id"><option value="">{{ "None"|tr(locale) }}</option>{% for l in asset.loans %}<option value="{{ l.id }}"{% if asset.details and asset.details.loan_item_id == l.id %} selected{% endif %}>{{ l.name }}</option>{% endfor %}</select></label>
+  <label class="field">{{ "Loan that paid for it"|tr(locale) }}<input type="text" id="asset-loan" list="asset-loans" autocomplete="off" data-own-suggestions data-pick-target="asset-loan-pick" placeholder="{{ 'None'|tr(locale) }}" value="{{ asset.loan.name if asset.loan else '' }}"><datalist id="asset-loans">{% for l in asset.loans %}<option value="{{ l.name }}" data-pick="{{ l.id }}"></option>{% endfor %}</datalist><input type="hidden" name="loan_item_id" id="asset-loan-pick" value="{{ asset.details.loan_item_id if asset.details and asset.details.loan_item_id else '' }}"></label>
   <button class="btn{{ ' phone-save' if phone else '' }}">{{ "Save details"|tr(locale) }}</button></form></details>
 </section>
