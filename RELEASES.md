@@ -2,7 +2,7 @@
 
 What changed in each version, in plain words. Generated from `ai/changelog/` by `python tools/release_notes.py`; do not edit by hand. The full detail for each version is in the same folder.
 
-## 2.0.1 · 2026-11-05
+## 2.0.2 · 2026-11-05
 
 **Capture**
 
