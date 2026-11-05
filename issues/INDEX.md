@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 41 open items, in the order they are worked on.
+10 milestones, 40 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -184,13 +184,11 @@ Good ideas that wait until the milestones above are done.
 | NF-9B2 | ↳ Swap the folders with rollback | | | L | |
 | NF-9B3 | ↳ The Update button and its words | | | M | |
 | NF-9B4 | ↳ Try it on a real Windows PC | | | owner | |
-| **NF-9C** | [Silver, property and vehicles](9-later/9C-silver-property-vehicles.md) | new feature | Own | L | new |
-| NF-9C1 | ↳ Silver holdings | | | L | |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | new |
 | **IT-9F** | [Page speed: a stable origin and cache, and a CSS trim](9-later/9F-page-speed-origin-and-css.md) | improvement, technical | Reach | M | new |
 | **IT-9K** | [Structure left - runtime routes and bank-import orchestration](9-later/9K-layers-and-copies.md) | improvement, technical | Build | M | ready |
 
-Done: 9E, 9G, 9H, 9I, 9J. Next free code: 9L.
+Done: 9C, 9E, 9G, 9H, 9I, 9J. Next free code: 9L.
 
 ## 10 Looks and store
 
