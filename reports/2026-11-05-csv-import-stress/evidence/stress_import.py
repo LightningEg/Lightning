@@ -243,7 +243,7 @@ def run(sid, case, title, filename, data, c, client, account):
     out["review_page_kb"] = round(len(page.content) / 1024)
     states = {"err": 0, "needs": 0, "dup": 0, "ready": 0}
     from lightning.ui.routes.bank_imports import _row_status, _row_ui
-    errors, notes = {}, []
+    errors = {}
     form = {}
     for r in rows:
         state = _row_status(r)
