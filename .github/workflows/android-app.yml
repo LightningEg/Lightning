@@ -14,16 +14,18 @@ on:
         description: Called for the matched builds, so the APK must carry the signing key
         type: boolean
         default: false
-    # GitHub requires caller mappings even when values exist only in the signing environment.
+    # GitHub requires caller mappings even when values exist only in the signing environment. They are not
+    # `required`: a caller that holds none in its repository would otherwise fail at startup (no jobs, 0 s), and the
+    # signing job below fails by itself, with its own message, when the environment lacks the key.
     secrets:
       ANDROID_KEYSTORE_BASE64:
-        required: true
+        required: false
       ANDROID_KEYSTORE_PASSWORD:
-        required: true
+        required: false
       ANDROID_KEY_ALIAS:
-        required: true
+        required: false
       ANDROID_KEY_PASSWORD:
-        required: true
+        required: false
 
 permissions:
   contents: read
