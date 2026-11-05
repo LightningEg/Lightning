@@ -12,11 +12,11 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Own](pillars/own.md) | 7 | 1 |  | 4 | 2 |  |
 | [Protect](pillars/protect.md) | 2 | 1 | 1 |  |  |  |
 | [Everywhere](pillars/everywhere.md) | 4 | 3 |  | 1 |  |  |
-| [Feel](pillars/feel.md) | 11 | 4 | 6 |  | 1 | 1 |
+| [Feel](pillars/feel.md) | 10 | 4 | 5 |  | 1 | 1 |
 | [Build](pillars/build.md) | 4 |  | 3 |  | 1 |  |
 | [Reach](pillars/reach.md) | 4 |  | 3 | 1 |  | 2 |
 
-35 open items in 10 milestones.
+34 open items in 10 milestones.
 
 ## Being built now
 
@@ -42,7 +42,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 |---|---|---|
 | 1 Easy to contribute | 3 | Anyone can find how to help in one click and send a first fix the same evening. |
 | 2 Safe for real money | 2 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
-| 3 Polish and Arabic | 9 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
+| 3 Polish and Arabic | 8 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 5 Investments | 0 | Every investment figure can be explained per purchase, and agrees with the ledger. |
 | 6 Market data | 4 | Prices arrive by themselves, from sources Lightning may redistribute. |

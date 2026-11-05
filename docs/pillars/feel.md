@@ -15,7 +15,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 | **IV-3G** | [Outside review of every tab](../../issues/3-polish-and-arabic/3G-one-organism-review-of-every-tab.md) | L | ready |
 | **IV-3H** | [Tab-by-tab review: what a real user needs next](../../issues/3-polish-and-arabic/3H-tab-by-tab-review.md) | L | building |
 | **IV-3S** | [PC screens break the guideline in 18 places not yet filed](../../issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) | L | ready |
-| **IV-3T** | [Phone screens break Part C](../../issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | L | ready |
 | **OW-3AI** | [Additional broker and institution logos still needed](../../issues/3-polish-and-arabic/3AI-institution-logos.md) | owner | ready |
 | **IV-3AM** | [PC declutter, tab by tab](../../issues/3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md) | L | building |
 | **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](../../issues/10-looks-and-store/10A-cosmetic-parts-and-claiming.md) | L | building |
@@ -25,10 +24,9 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 
 ## Reports with open follow-ups here
 
-- [Audit 1: is Lightning ready to demo?](../../reports/2026-10-20-demo-readiness/report.md): 3G, 3H, 3S, 3T
+- [Audit 1: is Lightning ready to demo?](../../reports/2026-10-20-demo-readiness/report.md): 3G, 3H, 3S
 - [v1.5.0 PR review, theme switching and package preparation](../../reports/2026-10-26-v150-release/report.md): 10A, 10C
 - [Store and community: unlocking themes, the market, rewards and staying in Lightning](../../reports/2026-10-27-store-and-community/report.md): 10C, 10D
-- [Audit 10: the phone, tab by tab - quick actions and the answer first](../../reports/2026-10-29-phone-tab-audit/report.md): 3T
 - [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](../../reports/2026-10-30-desktop-tab-audit/report.md): 3AM
 <!-- work:end -->
 

@@ -71,6 +71,9 @@ def test_overview_uses_the_phone_forms(phone):
     assert 'class="phone-kpis"' in html and html.count('class="phone-kpi ') == 2  # C06.1, 3AN4: two tiles, Net worth and Left in plan
     assert "Savings rate" not in html and "Investing rate" not in html  # they live on Financial health (owner, 2026-11-02)
     assert "stat-tile-spark" not in html  # no sparkline in a phone tile
+    kpis = html.split('class="phone-kpis"', 1)[1].split("</section>", 1)[0]
+    tiles = kpis.split('class="phone-kpi ')[1:]
+    assert all('class="phone-kpi-sub"' in tile for tile in tiles)  # 3T6: each tile compares, Left in plan under its meter
     fold = phone.get("/overview/fold/money-in").text  # the money-in fold loads when opened (backend roadmap B1)
     assert "chart-sankey" not in html + fold and 'class="phone-flow"' in fold  # C07.3.3
     assert "chart-cfall" not in html and "scheme-flow" in html  # C07.3.2: the waterfall as rows
