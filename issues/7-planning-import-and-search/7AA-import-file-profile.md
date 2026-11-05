@@ -7,6 +7,7 @@ status: new
 created: 2026-11-05
 by: Claude Opus 5.5
 skills: bug-hunt
+github: 351
 ---
 
 ## Report

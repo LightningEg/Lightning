@@ -149,7 +149,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | IT-7Z1 | ↳ Remember a name's category for the next file | | | S | |
 | IT-7Z2 | ↳ Split one file by its Account column | | | M | |
 | IT-7Z3 | ↳ Paired rows of one movement | | | S | |
-| **IT-7AA** | [Read a whole import file before its rows, so dates, signs, currencies and layouts are never guessed per row](7-planning-import-and-search/7AA-import-file-profile.md) | improvement, technical | Capture | L | new |
+| **IT-7AA** | [Read a whole import file before its rows, so dates, signs, currencies and layouts are never guessed per row](7-planning-import-and-search/7AA-import-file-profile.md) ([#351](https://github.com/LightningEg/Lightning/issues/351)) | improvement, technical | Capture | L | new |
 | IT-7AA1 | ↳ File-level date order | | | M | |
 | IT-7AA2 | ↳ Amount plus direction column | | | M | |
 | IT-7AA3 | ↳ Currency per row | | | M | |

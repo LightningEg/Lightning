@@ -27,6 +27,8 @@
 
 - **Website (2026-10-28):** analytics, Downloads, leaderboard contrast and badge merged; banners redrawn plus Felucca and Sand wind (site #130). **Read:** site README › Analytics.
 
+- **Import and phone (2026-11-05, Claude):** branches `claude/phone-identity-guard` (BT-2AI1), `claude/import-other-app-exports` (IT-7Z) and `claude/csv-import-stress-report` (IT-7AA, issue #351), stacked in that order; PRs not opened. Next: 2AI2 (open a profile file on the phone), then 7AA1-7AA3. **Read:** 2AI, 7AA.
+
 Plan: `issues/INDEX.md`.
 
 1. **Report work paused** (owner); branches wait on native checks. **Read:** `reports/2026-11-03-code-quality-and-smart-features/evidence/report-finalization-2026-11-04.md`.
