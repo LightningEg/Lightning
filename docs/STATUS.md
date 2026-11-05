@@ -12,16 +12,15 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Own](pillars/own.md) | 7 | 1 |  | 4 | 2 |  |
 | [Protect](pillars/protect.md) | 2 | 1 | 1 |  |  |  |
 | [Everywhere](pillars/everywhere.md) | 4 | 3 |  | 1 |  |  |
-| [Feel](pillars/feel.md) | 11 | 4 | 4 | 2 | 1 | 1 |
+| [Feel](pillars/feel.md) | 10 | 3 | 4 | 2 | 1 | 1 |
 | [Build](pillars/build.md) | 5 |  | 3 | 1 | 1 |  |
 | [Reach](pillars/reach.md) | 4 |  | 3 | 1 |  | 2 |
 
-36 open items in 10 milestones.
+35 open items in 10 milestones.
 
 ## Being built now
 
 - **IT-2A** (Protect) [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic rep…](../issues/2-safe-for-real-money/2A-restore-safety.md)
-- **IV-3H** (Feel) [Tab-by-tab review: what a real user needs next](../issues/3-polish-and-arabic/3H-tab-by-tab-review.md)
 - **IV-3AM** (Feel) [PC declutter, tab by tab](../issues/3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md)
 - **IV-3AN** (Everywhere) [Phone visual plan](../issues/3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md)
 - **NF-4A** (Everywhere) [Edit journal: edit anywhere, one home confirms](../issues/4-edit-journal-and-devices/4A-edit-journal.md)
@@ -42,7 +41,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 |---|---|---|
 | 1 Easy to contribute | 4 | Anyone can find how to help in one click and send a first fix the same evening. |
 | 2 Safe for real money | 5 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
-| 3 Polish and Arabic | 8 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
+| 3 Polish and Arabic | 7 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 5 Investments | 0 | Every investment figure can be explained per purchase, and agrees with the ledger. |
 | 6 Market data | 4 | Prices arrive by themselves, from sources Lightning may redistribute. |

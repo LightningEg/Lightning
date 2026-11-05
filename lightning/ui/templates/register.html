@@ -188,8 +188,11 @@
       <td><svg class="entry-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="sr-only">{{ "New"|tr(locale) }}</span></td>
       {{ inputs('f-new', entry, False, none, with_balance) }}
     </tr>{% endif %}
-    {% set ns = namespace(last_date='') %}
+    {% set ns = namespace(last_date='', last_month='') %}
+    {% set newest_first = rows and rows[0].date >= rows[-1].date %}
     {% for r in rows %}
+      {# RG-1 (3H2): a month line where the month changes; newest first, its first row's balance is the month's closing #}
+      {% if r.date[:7] != ns.last_month %}{% set ns.last_month = r.date[:7] %}<tr class="register-month"><td colspan="{{ ncols }}"><b>{{ r.date[:7] }}</b>{% if with_balance and newest_first and r.balance is not none %}<span>{{ 'Closing balance'|tr(locale) }} {{ r.balance|amount_role('total') }}</span>{% endif %}</td></tr>{% endif %}
       {% set kind = 'in' if r.amount > 0 else 'out' %}
       {% if r.type in ('TRF', 'CNV') %}{% set kind = 'transfer' %}{% elif r.type in ('BUY', 'SEL', 'DIV') %}{% set kind = 'invest' %}{% elif r.type == 'OPN' %}{% set kind = 'opening' %}{% endif %}
       {% if edit_id == r.txn_id and edit_acct == r.account_id %}

@@ -634,7 +634,7 @@ def test_short_holding_shows_plain_return_and_positive_worst_month_is_not_rose(i
 
     def journey(*args, **kwargs):
         result = original(*args, **kwargs)
-        result.update(best=("2026-09", D("10")), worst=("2026-08", D("5")))
+        result.update(best=("2026-09", D("10")), worst=("2026-08", D("5")), up=3, down=0)  # three moves: shown (X-5)
         return result
 
     monkeypatch.setattr(visuals, "holding_journey", journey)

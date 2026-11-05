@@ -8,7 +8,7 @@
 
 {% macro payment_row(p, back, late=0) -%}
 <div class="compact-row plan-payment-row">
-  <span><b>{{ p.item.name }}</b><small class="muted">{{ p.due_date }} · {{ p.item.kind_label|tr(locale) }}{% if p.item.kind.value == 'LOAN' %} · payment {{ p.number }}{% if p.item.payment_count %} of {{ p.item.payment_count }}{% endif %}{% endif %}</small></span>
+  <span><a data-popup-open href="/plan/items/{{ p.item.id }}/sheet?back={{ back|urlencode }}"><b>{{ p.item.name }}</b></a><small class="muted">{{ p.due_date }} · {{ p.item.kind_label|tr(locale) }}{% if p.item.kind.value == 'LOAN' %} · payment {{ p.number }}{% if p.item.payment_count %} of {{ p.item.payment_count }}{% endif %}{% endif %}</small></span>
   <span class="plan-payment-side">{{ status(p, late) }}<b class="{{ 'pos' if p.item.is_income }}">{{ '+' if p.item.is_income else '−' }}{{ p.amount|money }}</b>
   <a class="btn small" data-popup-open href="/plan/items/{{ p.item.id }}/pay?due={{ p.due_date }}&amp;back={{ back|urlencode }}">{{ ('Mark received' if p.item.is_income else 'Mark paid') if p.outstanding else 'Change' }}</a></span>
 </div>
