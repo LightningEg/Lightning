@@ -17,11 +17,12 @@ import hashlib
 import io
 import json
 import re
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Protocol
 
+from lightning.core.dates import today
 from lightning.core.errors import ValidationError
 
 ENDINGS_KEY = "sms_account_endings"   # {"0285": account_id}
@@ -64,6 +65,7 @@ class SmsTransaction:
     balance: Decimal | None = None
     bank: str = ""
     sure: bool = True    # False when only the general rule read it: the review says to check it
+    text: str = ""       # the message itself, shown beside its row on the review (IV-3AU 3AU2)
 
     @property
     def inflow(self) -> bool:
@@ -209,6 +211,21 @@ def looks_like_money(text: str) -> bool:
             and bool(_ACCOUNTISH.search(flat)) and not _PROMO.search(flat))
 
 
+def prefill(text: str) -> dict:
+    """What a kept message (one no rule read) can still fill on the Add sheet: its first amount with a currency and
+    which way the money went, when the words say. The person checks the rest; nothing is saved here."""
+    flat = _clean(text or "")
+    money = re.search(_CUR + r"\s*" + _NUM + r"|" + _NUM + r"\s*" + _CUR, flat)
+    amount = ""
+    if money:
+        try:
+            amount = format(Decimal((money.group(1) or money.group(2)).replace(",", "")), "f")
+        except (InvalidOperation, AttributeError):
+            amount = ""
+    inflow = bool(re.search(_IN_WORDS, flat, re.IGNORECASE)) and not re.search(_OUT_WORDS, flat, re.IGNORECASE)
+    return {"amount": amount, "kind": "in" if inflow else "out"}
+
+
 def _general(flat: str, received: datetime, balance: Decimal | None, bank: str) -> SmsTransaction | None:
     """The general rule, for a wording no bank pattern knows yet: an amount with its currency, an account or
     card ending, and words that say which way the money went. All three, or nothing."""
@@ -282,18 +299,49 @@ class SmsImportService:
         if not re.fullmatch(r"[0-9a-f]{32}", text_fingerprint or ""):
             return
         seen = self._json(SEEN_KEY, [])
-        if text_fingerprint not in seen:
-            with self.db.transaction():
-                self.settings.set(SEEN_KEY, json.dumps((seen + [text_fingerprint])[-MAX_SEEN:]))
+        kept = self._json(UNREAD_KEY, [])
+        left = [m for m in kept if str(m.get("id", "")).split("@")[0] != text_fingerprint]
+        if text_fingerprint not in seen or len(left) != len(kept):
+            with self.db.transaction():  # a kept message entered by hand leaves From SMS (it said: until you enter it)
+                if text_fingerprint not in seen:
+                    self.settings.set(SEEN_KEY, json.dumps((seen + [text_fingerprint])[-MAX_SEEN:]))
+                if len(left) != len(kept):
+                    self.settings.set(UNREAD_KEY, json.dumps(left))
 
     def waiting(self) -> list[dict]:
         """Messages read whose account is not known yet, grouped by ending: [{"ending", "count", "total"}]."""
         groups: dict[str, dict] = {}
         for item in self._json(WAITING_KEY, []):
-            group = groups.setdefault(item["ending"], {"ending": item["ending"], "count": 0, "kinds": set()})
+            group = groups.setdefault(item["ending"], {"ending": item["ending"], "count": 0, "kinds": set(),
+                                                       "banks": set()})
             group["count"] += 1
             group["kinds"].add(item["kind"])
-        return [dict(g, kinds=sorted(g["kinds"])) for g in groups.values()]
+            if item.get("bank"):
+                group["banks"].add(str(item["bank"]))
+        return [dict(g, kinds=sorted(g["kinds"]), banks=sorted(g["banks"])) for g in groups.values()]
+
+    def choices(self) -> list:
+        """The accounts an ending can be: active EGP bank accounts first, then wallets (a bank's card is never cash
+        at hand, so that is left out)."""
+        usable = [a for a in self.accounts.list(active_only=True) if a.currency == "EGP"
+                  and (a.account_type.value == "BANK" or (a.account_type.value == "CASH" and not a.cash_at_hand))]
+        return sorted(usable, key=lambda a: a.account_type.value != "BANK")
+
+    def guess(self, ending: str, banks: list[str]) -> int | None:
+        """The account an ending most likely is, offered ready on From SMS and confirmed by one tap (never posted
+        unasked): the one whose saved last four digits are the ending, else the only bank account of the bank
+        that sent the messages, else (no bank named) the only bank account there is."""
+        options = self.choices()
+        same = [a.id for a in options if (a.last4 or "").strip()[-4:] == ending and ending != SALARY_ENDING]
+        if len(same) == 1:
+            return same[0]
+        bank_accounts = [a for a in options if a.account_type.value == "BANK"]
+        names = {b.casefold() for b in banks if b}
+        if names:
+            of_bank = [a.id for a in bank_accounts if any(n in f"{a.institution} {a.name}".casefold().split()
+                                                          or n == (a.institution or "").casefold() for n in names)]
+            return of_bank[0] if len(of_bank) == 1 else None  # another bank's card is never guessed as this one
+        return bank_accounts[0].id if len(bank_accounts) == 1 else None
 
     def read(self, messages: list[tuple], cursor_ms: int | None = None) -> dict:
         """New messages (sender, text, received[, inbox ms]) into review. Returns counts: staged rows by account,
@@ -325,6 +373,8 @@ class SmsImportService:
             (texts if mark == fp else stamped).add(fp)
             seen.append(mark)
             found = parse_sms(text, sender=sender, received=received)
+            if found is not None:
+                found = replace(found, text=" ".join(text.split())[:MAX_TEXT])
             if found is not None and sender:
                 banks.add(sender[:40])
             if found is None:
@@ -425,11 +475,19 @@ class SmsImportService:
 
     def assign(self, ending: str, account_id: int) -> int | None:
         """The owner says which account an ending is: remember it and send its waiting messages to review."""
-        if not (re.fullmatch(r"\d{4}", ending) or ending == SALARY_ENDING):
-            raise ValidationError("Choose the account for these messages.", "ending")
-        account = self.accounts.require_usable(account_id)
-        if account.currency != "EGP":
-            raise ValidationError("Bank SMS are in EGP. Choose an EGP account.", "account_id")
+        return self.assign_many({ending: account_id}).get(ending)
+
+    def assign_many(self, answers: dict[str, int]) -> dict[str, int]:
+        """Several endings answered at once (From SMS asks them together): remember each and send their waiting
+        messages to review, one batch per account. Returns {ending: batch id} for endings that had messages."""
+        accounts = {}
+        for ending, account_id in answers.items():
+            if not (re.fullmatch(r"\d{4}", ending) or ending == SALARY_ENDING):
+                raise ValidationError("Choose the account for these messages.", "ending")
+            account = self.accounts.require_usable(account_id)
+            if account.currency != "EGP":
+                raise ValidationError("Bank SMS are in EGP. Choose an EGP account.", "account_id")
+            accounts[ending] = account
         # Account codes are unique and survive checkpoint replication, unlike SQLite row ids.
         # Accept old id-valued settings and normalize every mapping as soon as it is edited.
         saved = self._json(ENDINGS_KEY, {})
@@ -441,20 +499,42 @@ class SmsImportService:
             code = self.db.scalar("SELECT code FROM accounts WHERE id=?", (old_id,)) if old_id is not None else None
             if code:
                 endings[str(old_ending)] = code
-        endings[ending] = account.code
+        for ending, account in accounts.items():
+            endings[ending] = account.code
         waiting = self._json(WAITING_KEY, [])
-        mine = [_from_json(item) for item in waiting if item["ending"] == ending]
-        rest = [item for item in waiting if item["ending"] != ending]
+        rows: dict[int, list[SmsTransaction]] = {}
+        for item in waiting:
+            if item["ending"] in accounts:
+                rows.setdefault(int(accounts[item["ending"]].id), []).append(_from_json(item))
+        rest = [item for item in waiting if item["ending"] not in accounts]
         with self.db.transaction():  # staging and leaving the waiting list commit together
-            batch = self._stage(int(account.id), mine) if mine else None
+            batches = {account_id: self._stage(account_id, mine) for account_id, mine in rows.items()}
             self.settings.set(ENDINGS_KEY, json.dumps(endings))
             self.settings.set(WAITING_KEY, json.dumps(rest))
-        return batch
+        return {ending: batches[int(account.id)] for ending, account in accounts.items() if int(account.id) in batches}
 
     def _cash_account_name(self) -> str:
+        """Where an ATM withdrawal's cash went: the one cash-at-hand wallet, else the only wallet, else the wallet
+        that took most money from your bank accounts in the last year. Empty when nothing says (the review asks)."""
         cash = [a for a in self.accounts.list(active_only=True)
                 if a.account_type.value == "CASH" and a.currency == "EGP"]
-        return cash[0].name if len(cash) == 1 else ""
+        at_hand = [a for a in cash if a.cash_at_hand]
+        if len(at_hand) == 1 or len(cash) == 1:
+            return (at_hand or cash)[0].name
+        if not cash:
+            return ""
+        ids = {a.id: a.name for a in cash}
+        since = (today() - timedelta(days=365)).isoformat()
+        marks = ",".join("?" * len(ids))
+        row = self.db.one(
+            "SELECT inn.account_id, COUNT(*) AS n FROM ledger_entries inn "
+            "JOIN transactions t ON t.id = inn.transaction_id "
+            "JOIN ledger_entries out ON out.transaction_id = t.id AND out.amount_e6 < 0 "
+            "JOIN accounts b ON b.id = out.account_id AND b.account_type = 'BANK' "
+            f"WHERE t.type = 'TRF' AND t.status = 'POSTED' AND t.date >= ? AND inn.amount_e6 > 0 "
+            f"AND inn.account_id IN ({marks}) GROUP BY inn.account_id ORDER BY n DESC, inn.account_id LIMIT 1",
+            (since, *ids))
+        return ids.get(int(row[0]), "") if row else ""
 
     def _pair_transfers(self, by_account: dict[int, list[SmsTransaction]], held: list[dict]) -> dict[int, str]:
         """Money that left one of your accounts and arrived in another (two banks, two messages, one transfer):
@@ -491,7 +571,7 @@ class SmsImportService:
     def _stage(self, account_id: int, rows: list[SmsTransaction], transfers: dict[int, str] | None = None) -> int:
         out = io.StringIO()
         writer = csv.writer(out)
-        writer.writerow(["Date", "Amount", "Counterparty", "Category", "Notes", "Reference"])
+        writer.writerow(["Date", "Amount", "Counterparty", "Category", "Notes", "Reference", "Message"])
         cash = self._cash_account_name()
         for row in sorted(rows, key=lambda r: r.when):
             notes = KIND_NOTES[row.kind] + (f" · {row.place}" if row.place and row.kind != "salary" else "")
@@ -506,7 +586,7 @@ class SmsImportService:
                 notes += f" · transfer to {transfers[id(row)]}"
             elif row.kind == "salary":
                 category = "Salary"
-            writer.writerow([row.when[:10], format(row.signed, "f"), counterparty, category, notes, row.reference])
+            writer.writerow([row.when[:10], format(row.signed, "f"), counterparty, category, notes, row.reference, row.text])
         batch_id, _ = self.bank_imports.stage(account_id, f"SMS {datetime.now():%Y-%m-%d %H:%M}",
                                               out.getvalue().encode("utf-8"))
         return batch_id

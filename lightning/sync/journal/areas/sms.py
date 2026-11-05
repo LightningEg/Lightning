@@ -21,9 +21,21 @@ def _decode_read(adapter, values):
     return values | {"messages": messages}
 
 
+def _encode_answers(adapter, values):
+    """{ending: local account id} -> {ending: account UUID}: row ids differ between devices."""
+    return values | {"answers": {str(e): adapter.uid("accounts", int(a)) for e, a in values["answers"].items()}}
+
+
+def _decode_answers(adapter, values):
+    return values | {"answers": {str(e): int(adapter.local("accounts", a)) for e, a in values["answers"].items()}}
+
+
 COMMANDS = {
     # Assignment updates the portable account-ending map and stages all waiting rows atomically.
     "sms_imports.assign": Command("sms_imports.assign", dict(ending=TEXT, account_id=ref("accounts"))),
+    # From SMS answers every waiting ending in one form (IV-3AU): one command, staged together.
+    "sms_imports.assign_many": Command("sms_imports.assign_many", dict(answers=JSON),
+                                       encode=_encode_answers, decode=_decode_answers),
     # A message entered by hand on the Add sheet is marked read, so the phone's inbox does not offer it again (3AN5).
     "sms_imports.mark_seen": Command("sms_imports.mark_seen", dict(text_fingerprint=TEXT)),
     # Pasted/shared messages arrive as tuples with a local timestamp; the wire carries an ISO timestamp.

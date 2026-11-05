@@ -14,7 +14,7 @@
 
 ## Next
 
-- **Docs spine is on main (2026-10-31, #214, site #146).** Commits end with `Release-note:` and `Detail:` (AGENTS §3); `python tools/status.py` after plan changes. Next: 1N (split and dry run done; posting waits for the owner), 8AA (the owner signs off the comparison ratings). **Read:** 1N.
+- **Docs spine (2026-10-31):** trailers per AGENTS §3; `python tools/status.py` after plan changes. Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
@@ -38,6 +38,6 @@ Plan: `issues/INDEX.md`.
 6. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `reports/2026-10-26-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
 7. **Website recapture** (Sonnet M3 session, last) for 3W, 3AG, 7Q, 3Q, 3S, 3T, 3G, 3H. **Read:** `skills/site-recapture/SKILL.md`.
 8. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.
-9. **5G Brokers:** done (PR claude/brokerages-5g); left in 6F: London's board and Gulf month-end history. **Read:** 6F.
+9. **6F:** London's board and Gulf month-end history (5G done). **Read:** 6F.
 10. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
 11. **6B, 6D, 3AI:** shares, gold and institution logos remain as their items describe. **Read:** each item in `issues/INDEX.md`.

@@ -51,6 +51,8 @@ class ImportProposals:
         for row in rows:
             record = json.loads(row["raw_json"])
             parsed = record["parsed"]
+            raw = record.get("raw") if isinstance(record.get("raw"), dict) else {}
+            parsed["_message"] = str(raw.get("Message", ""))[:1000]  # a bank SMS row keeps its message (IV-3AU)
             ref_duplicate = bool(row["bank_reference"] and (row["bank_reference"] in seen_refs or self.db.scalar(
                 "SELECT 1 FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
                 "JOIN transactions t ON t.id=r.transaction_id AND t.status='POSTED' "

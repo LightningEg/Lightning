@@ -1,37 +1,38 @@
-{# From SMS on the PC (milestone 3): the phone's page (phone/sms.html) in the PC's cards. Paste bank messages;
-   the first message from an account ending asks which account it is; rows then wait on the import review. #}
+{# From SMS on the PC (milestone 3; IV-3AU): the phone's page (phone/sms.html) in the PC's cards. Paste bank messages;
+   every card ending not known yet is asked in one form, the likely account chosen; rows then wait on the import review. #}
 {% extends "base.html" %}
 {% block title %}{{ 'From SMS'|tr(locale) }}{% endblock %}
 {% block heading %}<div class="acct-title"><h1>{{ "From SMS"|tr(locale) }}</h1></div>{% set st = page_status.count(((batches or [])|sum(attribute='waiting')) + ((waiting or [])|sum(attribute='count')), '1 message waiting for you.', '{n} messages waiting for you.', 'Nothing is waiting for you.') %}<p class="page-status">{{ st.text|tr(locale, **st['values']) }}</p>{% endblock %}
 {% block top_actions %}<a class="btn" href="/accounts">{{ 'Accounts'|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% if error %}<p class="flash error" role="alert">{{ error|tr(locale) }}</p>{% endif %}
-{% for group in waiting %}
-<section class="card form-card" aria-labelledby="ending-{{ group.ending }}">
-  <h2 id="ending-{{ group.ending }}">{% if group.ending == salary %}{{ 'Where is your salary paid?'|tr(locale) }}{% else %}{{ 'Which account ends with {digits}?'|tr(locale, digits=group.ending) }}{% endif %}</h2>
-  <p class="muted">{{ group.count }} {{ ('message' if group.count == 1 else 'messages')|tr(locale) }} {{ 'waiting. Lightning remembers your answer.'|tr(locale) }}</p>
+{% if waiting %}
+<section class="card form-card" aria-labelledby="endings-heading">
+  <h2 id="endings-heading">{{ 'Which account is each card?'|tr(locale) }}</h2>
+  <p class="muted">{{ "Asked once: Lightning remembers your answers."|tr(locale) }}</p>
   <form method="post" action="/sms/assign">
-    <input type="hidden" name="ending" value="{{ group.ending }}">
-    <label for="account-{{ group.ending }}">{{ 'Account'|tr(locale) }}</label>
-    <select id="account-{{ group.ending }}" name="account_id" data-own-picker required><option value="">{{ 'Choose an account'|tr(locale) }}</option>{% for a in accounts %}<option value="{{ a.id }}">{{ a.name }}</option>{% endfor %}</select>
-    <div class="actions"><button class="btn primary" type="submit">{{ "Review these messages"|tr(locale) }}</button></div>
+    {% for group in waiting %}
+    <label for="account-{{ group.ending }}">{% if group.ending == salary %}{{ 'Your salary'|tr(locale) }}{% else %}{{ 'Card ending {digits}'|tr(locale, digits=group.ending) }}{% endif %}<small class="muted"> · {% if group.banks %}{{ group.banks|join(', ') }} · {% endif %}{{ group.count }} {{ ('message' if group.count == 1 else 'messages')|tr(locale) }}</small></label>
+    <select id="account-{{ group.ending }}" name="account_{{ group.ending }}" data-own-picker><option value="">{{ 'Choose an account'|tr(locale) }}</option>{% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if group.guess == a.id }}>{{ a.name }}</option>{% endfor %}</select>
+    {% endfor %}
+    {% set total = waiting|sum(attribute='count') %}
+    <div class="actions"><button class="btn primary" type="submit">{% if waiting|rejectattr('guess')|list %}{{ "Save and review"|tr(locale) }}{% elif total == 1 %}{{ "Review 1 message"|tr(locale) }}{% else %}{{ "Review {n} messages"|tr(locale, n=total) }}{% endif %}</button></div>
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
   </form>
 </section>
-{% endfor %}
+{% endif %}
 {% if batches %}
 <section class="card" aria-labelledby="review-heading">
   <h2 id="review-heading">{{ "Waiting for your check"|tr(locale) }}</h2>
-  <div class="compact-list">{% for b in batches %}<a class="compact-row" href="/accounts/{{ b.account_id }}/import/{{ b.batch_id }}"><span>{{ b.account }} <small class="muted">{{ b.file_name }}</small></span><b>{{ b.waiting }}</b></a>{% endfor %}</div>
+  <div class="compact-list">{% for b in batches %}<a class="compact-row" href="/accounts/{{ b.account_id }}/import/{{ b.batch_id }}"><span>{{ b.account }} <small class="muted">{{ 'Read on {when}'|tr(locale, when=b.file_name[4:]) }}</small></span><b>{{ b.waiting }}</b></a>{% endfor %}</div>
 </section>
 {% endif %}
 {% if unread %}
 <section class="card" aria-labelledby="unread-heading">
   <h2 id="unread-heading">{{ "Messages kept for you"|tr(locale) }}</h2>
-  <p class="muted">{{ "Ones Lightning could not read, and the other side of a transfer it sent to review once. Each stays until you enter or dismiss it. Send the unread ones to be added as a bank pattern."|tr(locale) }}</p>
-  <p class="muted">{{ "Offers and adverts are left out. Dismiss two from one sender and its messages stop being kept."|tr(locale) }}</p>
+  <p class="muted">{{ "No rule could read these. Enter one and it leaves this list."|tr(locale) }}</p>
   {% for m in unread %}<div class="compact-row"><span dir="auto">{{ m.text }} <small class="muted">{{ m.sender or 'Pasted' }} · {{ m.received|replace('T', ' ') }}</small>{% if m.reason %}<small class="muted"> · {{ m.reason|tr(locale) }}</small>{% endif %}</span>
-    <form method="post" action="/sms/dismiss"><input type="hidden" name="id" value="{{ m.id }}"><button class="btn small" type="submit">{{ "Dismiss"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% endfor %}
+    <span class="actions"><a class="btn small" href="{{ m.enter }}" data-popup-open>{{ "Enter it"|tr(locale) }}</a><form method="post" action="/sms/dismiss"><input type="hidden" name="id" value="{{ m.id }}"><button class="btn small" type="submit">{{ "Dismiss"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></span></div>{% endfor %}
 </section>
 {% endif %}
 <section class="card form-card" aria-labelledby="paste-heading">

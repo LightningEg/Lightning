@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from lightning.core.errors import LightningError
-from lightning.sms_imports import MAX_TEXT, SALARY_ENDING, fingerprint, parse_sms
+from lightning.sms_imports import MAX_TEXT, SALARY_ENDING, fingerprint, parse_sms, prefill
 
 from ..web import container, redirect, render, settled_save
 
@@ -36,19 +37,31 @@ def read_phone_sms(request, c) -> dict | None:
         return None
 
 
+def _enter_url(message: dict) -> str:
+    """Add, filled from a kept message as far as it can be read: the amount, its day and which way it went, with the
+    message itself in Notes. Saving it takes the message off From SMS."""
+    found = prefill(message.get("text", ""))
+    values = {"kind": found["kind"], "amount": found["amount"], "date": str(message.get("received", ""))[:10],
+              "notes": str(message.get("text", ""))[:200], "sms_fp": str(message.get("id", "")).split("@")[0],
+              "return_to": "/sms"}
+    return "/accounts/add-transaction?" + urlencode({k: v for k, v in values.items() if v})
+
+
 def _page(request, c, **context):
     source = phone_source(request)
     try:
         permission = source.permission() if source is not None else "unavailable"
     except Exception:  # noqa: BLE001
         permission = "unavailable"
-    accounts = [a for a in c.accounts.list(active_only=True)
-                if a.account_type.value in ("BANK", "CASH") and a.currency == "EGP"]
+    accounts = c.sms_imports.choices()
     names = {a.id: a.name for a in c.accounts.list()}
     batches = [b | {"account": names.get(b["account_id"], "")} for b in c.bank_imports.waiting_all()
                if str(b["file_name"]).startswith("SMS ")]
-    return render(request, "sms.html", waiting=c.sms_imports.waiting(), accounts=accounts, batches=batches,
-                  unread=c.sms_imports.unread(), permission=permission, last_read=c.sms_imports.last_read(),
+    # Every ending not known yet is asked in one form, each with the account it most likely is already chosen.
+    waiting = [g | {"guess": c.sms_imports.guess(g["ending"], g.get("banks", []))} for g in c.sms_imports.waiting()]
+    unread = [m | {"enter": _enter_url(m)} for m in c.sms_imports.unread()]
+    return render(request, "sms.html", waiting=waiting, accounts=accounts, batches=batches,
+                  unread=unread, permission=permission, last_read=c.sms_imports.last_read(),
                   salary=SALARY_ENDING, **context)
 
 
@@ -82,14 +95,17 @@ async def paste(request: Request):
     found = sum(len(c.bank_imports.preview(batch)[1]) for batch in result["staged"].values())
     parts = []
     if found:
-        parts.append(f"{found} ready to review")
+        parts.append(f"{found} ready to check")
     if result["waiting"]:
-        parts.append(f"{result['waiting']} waiting for their account")
+        parts.append(f"{result['waiting']} need their account")
     if result.get("unread"):
-        parts.append(f"{result['unread']} to read yourself")
+        parts.append(f"{result['unread']} kept for you")
     if result["skipped"]:
-        parts.append(f"{result['skipped']} skipped (read before, or not a payment)")
-    return redirect("/sms", "; ".join(parts).capitalize() + ".")
+        parts.append(f"{result['skipped']} skipped")
+    if len(result["staged"]) == 1 and not result["waiting"]:  # one account's rows and nothing to ask: check them now
+        account_id, batch = next(iter(result["staged"].items()))
+        return redirect(f"/accounts/{account_id}/import/{batch}", " · ".join(parts))
+    return redirect("/sms", " · ".join(parts) or "Nothing new in these messages.")
 
 
 @router.post("/dismiss")
@@ -103,17 +119,34 @@ async def dismiss(request: Request):
 
 @router.post("/assign")
 async def assign(request: Request):
+    """Which account each card ending is, answered together (``account_<ending>`` per ending, or the older single
+    ``ending`` and ``account_id``). An ending left on Choose waits for next time."""
     c = container(request)
     form = await request.form()
+    answers: dict[str, int] = {}
+    if form.get("ending"):
+        answers[str(form.get("ending"))] = str(form.get("account_id", ""))
+    for key, value in form.multi_items():
+        if key.startswith("account_") and key != "account_id":
+            answers[key.removeprefix("account_")] = str(value)
     try:
+        chosen = {ending: int(value) for ending, value in answers.items() if str(value).strip()}
+        if not chosen:
+            raise ValueError
         with settled_save(request, container(request)):
-            batch = c.sms_imports.assign(str(form.get("ending", "")), int(str(form.get("account_id", "0")) or 0))
+            if len(chosen) == 1:  # one ending: the single command (synced profiles have both)
+                (ending, account_id), = chosen.items()
+                batch = c.sms_imports.assign(ending, account_id)
+                batches = {ending: batch} if batch is not None else {}
+            else:
+                batches = c.sms_imports.assign_many(chosen)
     except (LightningError, ValueError) as exc:
         return _page(request, c, error=getattr(exc, "message", "") or "Choose the account for these messages.")
-    if batch is None:
-        return redirect("/sms", "Saved.")
-    account_id = c.bank_imports.preview(batch)[0]["account_id"]
-    return redirect(f"/accounts/{account_id}/import/{batch}", "Check each row, then post them.")
+    distinct = sorted(set(batches.values()))
+    if len(distinct) == 1 and not c.sms_imports.waiting():
+        account_id = c.bank_imports.preview(distinct[0])[0]["account_id"]
+        return redirect(f"/accounts/{account_id}/import/{distinct[0]}", "Check each row, then post them.")
+    return redirect("/sms", "Saved." if not distinct else "Check each account's messages below.")
 
 
 @router.post("/read-one")

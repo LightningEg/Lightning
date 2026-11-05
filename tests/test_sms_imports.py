@@ -69,9 +69,55 @@ def test_paste_then_say_the_account_then_review(c, setup, tmp_path):
     client = TestClient(create_app(c))
     nbe = [s["text"] for s in SAMPLES["samples"] if s["bank"] == "NBE" and s["kind"] == "purchase"][:2]
     page = client.post("/sms/paste", data={"messages": "\n\n".join(nbe)})
-    assert "2 waiting for their account" in page.text and "Which account ends with 2093?" in page.text
+    assert "2 need their account" in page.text and "Card ending 2093" in page.text
     review = client.post("/sms/assign", data={"ending": "2093", "account_id": str(accounts["cib"].id)})
     assert "/import/" in str(review.url) and "Uber" in review.text
+
+
+def test_every_ending_is_asked_in_one_form_with_its_likely_account_chosen(c, setup):
+    """IV-3AU S1: one question for every card ending, one Primary; the bank that sent a message picks its account
+    when it has only one there, and an ending another bank's card has is never guessed."""
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    accounts, _ = setup
+    client = TestClient(create_app(c))
+    picked = [s for s in SAMPLES["samples"] if s["bank"] == "NBE"]
+    c.sms_imports.read([(s["sender"], s["text"], datetime.fromisoformat(s["received"])) for s in picked])
+    page = client.get("/sms").text
+    assert page.count('action="/sms/assign"') == 1 and page.count("btn primary") == 2  # Review N, and Read them
+    assert "Save and review" in page  # an ending with no likely account: the button promises no count
+    assert all(g["guess"] is None for g in [g | {"guess": c.sms_imports.guess(g["ending"], g["banks"])}
+                                            for g in c.sms_imports.waiting()])  # NBE messages, only a CIB account
+    cib = [s for s in SAMPLES["samples"] if s["bank"] == "CIB"][:1]
+    c.sms_imports.read([(s["sender"], s["text"], datetime.fromisoformat(s["received"])) for s in cib])
+    ending = parse_sms(cib[0]["text"], sender=cib[0]["sender"]).ending
+    assert c.sms_imports.guess(ending, ["CIB"]) == accounts["cib"].id
+    assert f'value="{accounts["cib"].id}" selected' in client.get("/sms").text
+    answer = {f"account_{g['ending']}": str(accounts["cib"].id) for g in c.sms_imports.waiting()}
+    review = client.post("/sms/assign", data=answer)
+    assert "/import/" in str(review.url) and c.sms_imports.waiting() == []  # all of them, in one review
+
+
+def test_an_ending_whose_last_four_are_saved_on_the_account_is_chosen(c, setup):
+    accounts, _ = setup
+    c.db.execute("UPDATE accounts SET last4='7351' WHERE id=?", (accounts["cib"].id,))
+    assert c.sms_imports.guess("7351", []) == accounts["cib"].id
+
+
+def test_an_atm_withdrawal_goes_to_the_wallet_cash_usually_goes_to(c, setup):
+    """IV-3AU S3: with two wallets the withdrawal used to reach review with no account and a red error."""
+    accounts, _ = setup
+    f = c.account_flows
+    f.open_account("Vodafone Cash", "CASH", "2026-09-01", "0")
+    c.db.execute("UPDATE accounts SET last4='7351' WHERE id=?", (accounts["cib"].id,))
+    assert c.sms_imports._cash_account_name() == ""  # nothing says yet: the review asks
+    c.transactions.record_transfer("2026-09-05", accounts["cib"].id, accounts["wallet"].id, "1000")
+    assert c.sms_imports._cash_account_name() == "Wallet"
+    atm = next(s for s in SAMPLES["samples"] if s["kind"] == "withdrawal")
+    c.sms_imports.read([(atm["sender"], atm["text"], datetime.fromisoformat(atm["received"]))])
+    batch = c.sms_imports.assign(parse_sms(atm["text"], sender=atm["sender"]).ending, accounts["cib"].id)
+    _, rows = c.bank_imports.preview(batch)
+    assert rows[0]["_transfer_target"] == "Wallet" and not rows[0]["_needs_account"]
 
 
 @pytest.mark.parametrize("sample", SAMPLES["reworded"], ids=lambda s: s["why"])
@@ -97,7 +143,13 @@ def test_from_sms_shows_what_it_could_not_read(c, setup):
     from lightning.ui.web import create_app
     client = TestClient(create_app(c))
     page = client.post("/sms/paste", data={"messages": SAMPLES["unreadable"][0]})
-    assert "1 to read yourself" in page.text and "Messages kept for you" in page.text
+    assert "1 kept for you" in page.text and "Messages kept for you" in page.text
+    enter = c.sms_imports.unread()[0]
+    from lightning.sms_imports import prefill
+    assert prefill(enter["text"]) == {"amount": "900.00", "kind": "out"}
+    assert "amount=900.00" in page.text and "sms_fp=" in page.text  # Enter it opens Add filled from the message
+    c.sms_imports.mark_seen(enter["id"].split("@")[0])  # saving that entry takes it off From SMS
+    assert c.sms_imports.unread() == []
 
 
 class FakeSource:
