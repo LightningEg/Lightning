@@ -5,6 +5,7 @@
 {% block title %}{% if batch.file_name.startswith('SMS ') %}{{ 'Check bank messages'|tr(locale) }}{% else %}Review statement{% endif %}{% endblock %}
 {% block phone_back %}{% if batch.file_name.startswith('SMS ') %}<a class="phone-back" href="/sms"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'From SMS'|tr(locale) }}</span></a>{% else %}{{ super() }}{% endif %}{% endblock %}
 {% block section_tabs %}{% if not batch.file_name.startswith('SMS ') %}{{ super() }}{% endif %}{% endblock %}
+{% block pc_section_tabs %}{% if not batch.file_name.startswith('SMS ') %}{{ super() }}{% endif %}{% endblock %}
 {% block heading %}{% if batch.file_name.startswith('SMS ') %}<div class="acct-title"><h1>{% if batch.status == 'POSTED' %}{{ 'Messages posted'|tr(locale) }}{% else %}{{ 'Check bank messages'|tr(locale) }}{% endif %}</h1></div><p class="muted">{{ account.name }} · {{ 'Read on {when}'|tr(locale, when=batch.file_name[4:]) }}</p>{% else %}<div class="acct-title"><h1>{% if batch.status == 'POSTED' %}Import result{% else %}Review import{% endif %}</h1></div><p class="muted">{{ account.name }} · {{ batch.file_name }}</p>{% endif %}{% endblock %}
 {% from "partials/macros.html" import category_options with context %}
 {#
