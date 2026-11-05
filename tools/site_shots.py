@@ -121,6 +121,8 @@ def pc_set() -> None:
             full.goto(BASE + "/?period=ytd")  # the sample opens with Get set up above Net worth: dismiss it once
             dismiss = full.locator('form[action="/setup/guide"] button')
             if dismiss.count():
+                if not dismiss.first.is_visible():  # 3AM3: Get set up is a closed disclosure now
+                    full.locator("details.setup-card > summary").first.click()
                 dismiss.first.click()
                 full.wait_for_load_state("networkidle")
             full.mouse.move(0, 0)  # a parked pointer leaves a hover ring on the next screen

@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 41 open items, in the order they are worked on.
+10 milestones, 42 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -75,8 +75,9 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | new |
 | **BV-3AV** | [The Arabic bank import preview mixes English into Arabic lines](3-polish-and-arabic/3AV-arabic-bank-import-preview.md) ([#342](https://github.com/LightningEg/Lightning/issues/342)) | bug, visual · low | Feel | M | ready |
 | **BV-3AW** | [Four short words stay English in Arabic on loans, charts and investments](3-polish-and-arabic/3AW-arabic-short-words-loans-charts.md) ([#343](https://github.com/LightningEg/Lightning/issues/343)) | bug, visual · low | Feel | S | ready |
+| **IT-3AX** | [The site screenshot tool breaks on the new Overview, so the site's screens are not recaptured](3-polish-and-arabic/3AX-site-shots-tool-follows-the-new-screens.md) | improvement, technical | Reach | M | new |
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR. Next free code: 3AX.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR. Next free code: 3AY.
 
 ## 4 Edit journal and devices
 
