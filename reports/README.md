@@ -5,6 +5,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 
 | Historical ID | Report | Review date | Kind | Open follow-ups |
 | --- | --- | --- | --- | --- |
+| csv-import-stress | [CSV import stress test: where it breaks and how to rebuild it](2026-11-05-csv-import-stress/report.md) | 2026-11-05 | audit | 7AA, 7AB, 7Z, 7C |
 | desktop-phone-ux-2026-11-05 | [Desktop and phone UX: logic, visuals, simpler tasks and connected features](2026-11-05-desktop-phone-ux/report.md) | 2026-11-05 | audit | 1Q, 2AF, 2AG, 2AH, 3AS, 3AT, 3H, 3AM, 3AN, 4A, 4B |
 | audit-1 | [Audit 1: is Lightning ready to demo?](2026-10-20-demo-readiness/report.md) | 2026-10-20 | audit | 3H |
 | audit-2 | [Audit 2: backend efficiency and loose ends](2026-10-21-backend-efficiency/report.md) | 2026-10-21 | audit | 2A, 2C, 4A |

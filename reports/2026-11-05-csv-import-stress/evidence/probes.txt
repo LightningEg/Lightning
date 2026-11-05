@@ -1,0 +1,15 @@
+P1 month-first file read day-first:
+    2 2026-01-10 []
+    3 2026-02-10 []
+    4 10/13/2026 ['10/13/2026 is not a real calendar date.']
+P2 a USD row into an EGP account (currency column has no field to map to):
+    2026-10-03 -40 -> will post as EGP
+P3 Arabic-Indic digits and the Arabic decimal mark:
+    2026-10-01 -250.50 []
+    2026-10-02 15000 []
+P4 a DR/CR column the suggestion maps to Category:
+    {'Date': 'Date', 'Amount': 'Amount', 'Category': 'Type', 'Notes': 'Description', 'amount_model': 'SINGLE'}
+P5 seeded categories sharing a name (each asks 'Which one?' when a file names it alone):
+    ['Transportation']
+P6 description column goes to Notes, never to Counterparty:
+    {'Date': 'Date', 'Inflow': 'Credit', 'Outflow': 'Debit', 'Notes': 'Description', 'amount_model': 'SEPARATE'}

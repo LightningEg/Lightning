@@ -27,6 +27,8 @@
 
 - **Website (2026-10-28):** analytics, Downloads, leaderboard contrast and badge merged; banners redrawn plus Felucca and Sand wind (site #130). **Read:** site README › Analytics.
 
+- **Import and phone (2026-11-05, Claude):** BT-2AI1 (#352) and IT-7Z (#353) merged; IT-7AA stress report (issue #351) and NF-7AB flow plan (plan only, owner) on `claude/csv-import-stress-report`. Next: 2AI2 (open a profile file on the phone), then 7AA1-7AA3; 7AB waits for the owner. **Read:** 2AI, 7AA, 7AB.
+
 Plan: `issues/INDEX.md`.
 
 1. **Report work paused** (owner); branches wait on native checks. **Read:** `reports/2026-11-03-code-quality-and-smart-features/evidence/report-finalization-2026-11-04.md`.
