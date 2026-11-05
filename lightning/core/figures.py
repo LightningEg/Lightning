@@ -56,8 +56,8 @@ _TABLE = [
      "The eligible amount claimed for an owned expense that valid explicitly linked repayments or refunds have not covered. A claim is not cash before receipt.",
      ""),
     # ------------------------------------------------------------ position (a date)
-    ("in_your_accounts", "In your accounts", "Everything in your accounts, including what you hold for other people.",
-     "What you own + Held for others"),
+    ("in_your_accounts", "In your accounts", "What your account balances add up to: what you hold for other people is in it, and a savings circle you still owe counts below zero.",
+     "What you own + Held for others − Gam'eya still to pay"),
     ("held_for_others", "Held for others", "Money and units in your accounts that belong to other people."),
     ("what_you_own", "What you own", "The value of everything in your accounts that is yours.",
      "Cash you own + Holdings value + Other you own"),

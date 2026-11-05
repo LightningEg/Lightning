@@ -12,10 +12,9 @@ A budget by category, bills and loan payments, reserves for what is coming, and 
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **BT-2AH** | [Emergency refill must preview and protect the remaining plan](../../issues/2-safe-for-real-money/2AH-refill-previews-plan-impact.md) | M | new |
-| **BV-3AR** | [Paid fixed obligations must not appear ahead of spending pace](../../issues/3-polish-and-arabic/3AR-fixed-payments-phone-pace.md) | M | new |
 
 ## Reports with open follow-ups here
 
-- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 2AH, 3AR
+- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 2AH
 <!-- work:end -->
 

@@ -2851,6 +2851,8 @@ ARABIC_UI = {
     'Show fewer': 'اعرض أقل',
     'Portfolio value over time': 'قيمة المحفظة على مر الوقت',
     'Includes {amt} held for others, so you own {own}.': 'منها {amt} محتفظ بيها لغيرك، يعني تملك {own}.',
+    'Includes {amt} held for others and {owed} you still owe a circle, so you own {own}.': 'منها {amt} محتفظ بيها لغيرك و{owed} لسه عليك لجمعية، يعني تملك {own}.',
+    'Includes {owed} you still owe a circle, so you own {own}.': 'منها {owed} لسه عليك لجمعية، يعني تملك {own}.',
     # Phone overhaul (2026-10-22): the tab bar, Choose period, the Overview's hero and Needs you card, More.
     'Choose period': 'اختار الفترة',
     'This month': 'الشهر ده',
