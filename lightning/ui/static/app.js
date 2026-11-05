@@ -2814,6 +2814,11 @@ window.lightningPrivacy = (() => {
     if (!row) return;
     bar.close();
     if (row.action === "privacy") window.lightningPrivacy?.toggle();
+    else if (row.popup) {  // a typed entry (3G7) opens its sheet over the page, as Add does
+      const link = document.createElement("a");
+      link.href = row.href; link.setAttribute("data-popup-open", ""); link.hidden = true;
+      document.body.append(link); link.click(); link.remove();
+    }
     else location.href = row.href;
   };
   const open = () => {

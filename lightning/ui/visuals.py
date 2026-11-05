@@ -370,11 +370,13 @@ def expense_analysis(c, first: date, last: date, code_filter: str = "", history:
     `reporting.spending.spending_profile`; this only shapes them into charts."""
     profile = spending_profile(c.reporting, first, last, code_filter, history, floor_share, top)
     rows, keys, months_in = profile["rows"], profile["history_keys"], profile["months_in"]
+    one_month = fmt_date(first)[:7] == fmt_date(last)[:7]
     for r in rows:
         r["range"] = _range_marks(r["low"], r["high"], r["median"], r["per_month"])
-        r["href"] = (f"/transactions?date_from={fmt_date(first)}&date_to={fmt_date(last)}" if r.get("others") else
-                     f"/transactions?category_id={c.categories.get_by_code(r['code']).id}"
-                     f"&date_from={fmt_date(first)}&date_to={fmt_date(last)}")
+        cid = None if r.get("others") else c.categories.get_by_code(r["code"]).id
+        r["href"] = (f"/transactions?date_from={fmt_date(first)}&date_to={fmt_date(last)}" if cid is None else
+                     f"/budget/category/{cid}/sheet?month={fmt_date(first)[:7]}" if one_month else  # the one sheet (3G6)
+                     f"/transactions?category_id={cid}&date_from={fmt_date(first)}&date_to={fmt_date(last)}")
     tiles = charts.treemap([{"label": r["name"], "value": r["value"], "share": r["share"], "href": r["href"],
                              "small": r.get("others", False)} for r in rows])
     # Clustered columns: usual month (neutral) beside now (its meaning colour), one scale, from zero.

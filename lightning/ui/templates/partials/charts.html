@@ -39,7 +39,7 @@
   {% for r in b.rows %}
   {% if r.header %}<div class="chart-bar-group"><span>{{ r.label }}</span><b>{{ r.value|money }}</b></div>{% else %}
   {% set tag = 'a' if r.href else 'div' %}
-  <{{ tag }} class="chart-bar-row"{% if r.href %} href="{{ r.href }}"{% endif %}><span class="chart-bar-label">{{ r.label }}{% if r.note %} <small>{{ r.note }}</small>{% endif %}</span><span class="chart-bar-track"><i class="chart-bar tone-{{ r.tone or tone }}" style="width:{{ '%.1f'|format(r.width) }}%"></i></span><b class="chart-bar-value">{{ r.value|money }}</b></{{ tag }}>{% endif %}
+  <{{ tag }} class="chart-bar-row"{% if r.href %} href="{{ r.href }}"{% if '/sheet' in r.href %} data-popup-open{% endif %}{% endif %}><span class="chart-bar-label">{{ r.label }}{% if r.note %} <small>{{ r.note }}</small>{% endif %}</span><span class="chart-bar-track"><i class="chart-bar tone-{{ r.tone or tone }}" style="width:{{ '%.1f'|format(r.width) }}%"></i></span><b class="chart-bar-value">{{ r.value|money }}</b></{{ tag }}>{% endif %}
   {% else %}<p class="chart-empty">{{ empty }}</p>{% endfor %}
   {% if b.more %}{% if more_href %}<a class="chart-bar-more" href="{{ more_href }}">{% else %}<div class="chart-bar-more">{% endif %}<span>{{ b.more }} more</span><b>{{ b.more_total|money }}</b>{% if more_href %}</a>{% else %}</div>{% endif %}{% endif %}
 </div>
@@ -238,7 +238,7 @@
    over the plan in strong rose past the tick. The value and what is left or over sit on the right. #}
 {% macro bullet_row(label, used, plan, b, href='') %}
 {% set tag = 'a' if href else 'div' %}
-<{{ tag }} class="bullet-row{{ ' is-over' if b.is_over }}"{% if href %} href="{{ href }}"{% endif %}>
+<{{ tag }} class="bullet-row{{ ' is-over' if b.is_over }}"{% if href %} href="{{ href }}"{% if '/sheet' in href %} data-popup-open{% endif %}{% endif %}>
   <span class="bullet-name">{{ label }}</span>
   <span class="bullet-track" role="img" aria-label="{{ label }}: {{ used|money }} of {{ plan|money }}"><span class="bullet-plan" style="width:{{ '%.2f'|format(b.plan) }}%"><i class="bullet-spent" style="width:{{ '%.2f'|format(b.spent / b.plan * 100 if b.plan else 0) }}%"></i></span>{% if b.over %}<i class="bullet-over" style="left:{{ '%.2f'|format(b.plan) }}%;width:{{ '%.2f'|format(b.over) }}%"></i>{% endif %}</span>
   <span class="bullet-values"><b>{{ used|money }}</b> <small>of {{ plan|money }}</small></span>

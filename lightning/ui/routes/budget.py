@@ -281,7 +281,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                 meter_lines.append({"label": line.name, "used": line.planned_actual, "total": line.available, "category_id": line.category_id,
                                     "m": charts.meter(line.planned_actual, line.available),
                                     "b": charts.bullet(line.planned_actual, line.available),
-                                    "href": f"/transactions?category_id={line.category_id}&date_from={month}-01"})
+                                    "href": f"/budget/category/{line.category_id}/sheet?month={month}"})  # the one category sheet (3G6)
     meter_lines.sort(key=lambda r: (not r["m"]["over"], -(r["m"].get("share") or 0)))
     # Over plan or already spending first; the categories nothing has touched fold under "N untouched" (audit 12, B3).
     meter_active = [r for r in meter_lines if r["used"] or r["m"]["over"]]
@@ -327,7 +327,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
             r = rows[o["category_id"]]
             needs.append({"label": f"{o['name']} is {keynotes.fmt(o['over'])} over its plan",
                           "detail": f"{keynotes.fmt(r['used'])} spent of {keynotes.fmt(r['total'])}",
-                          "href": move["href"] if move else r["href"], "popup": bool(move),
+                          "href": move["href"] if move else r["href"], "popup": True,  # Move room or the category sheet (3G6)
                           "action": f"Move {keynotes.fmt(move['amount'])} from {move['name']}" if move else "See it"})
         if raise_offer and not by_key.get("saves"):
             needs.append({"label": "Your income went up",
@@ -415,8 +415,11 @@ def _see_all(category_id: int, month: str) -> str:
 async def category_payments(request: Request, category_id: int):
     """A category sheet's last three payments this month, drawn when the sheet opens (3AN7). Nothing yet this month: last
     month's figure and a way to it, never a wall of zeros (3AN9)."""
-    c = container(request)
-    month = _month(request)
+    return render(request, "phone/budget_payments.html", **_last_payments(container(request), category_id, _month(request)))
+
+
+def _last_payments(c, category_id: int, month: str) -> dict:
+    """A category's last three payments in a month, or last month's total when there are none (3AN9)."""
     first, last = parse_month(month)
     rows, total = c.transactions.find(TxnFilter(category_ids=sorted(_tree_ids(c, category_id)),
                                                 date_from=fmt_date(first), date_to=fmt_date(last), limit=3))
@@ -427,8 +430,8 @@ async def category_payments(request: Request, category_id: int):
         one_offs = c.budgets.one_off_ids()
         spending = {cid: v for cid, v in c.budgets.owned_spending(start, end).items() if cid not in one_offs}
         earlier = sum((spending.get(cid, ZERO) for cid in _tree_ids(c, category_id)), ZERO)
-    return render(request, "phone/budget_payments.html", rows=rows, total=total, month=month, last_month=before,
-                  earlier=earlier, see_all=_see_all(category_id, month), see_last=_see_all(category_id, before))
+    return {"rows": rows, "total": total, "month": month, "last_month": before, "earlier": earlier,
+            "see_all": _see_all(category_id, month), "see_last": _see_all(category_id, before)}
 
 
 # The key notes the phone's over-plan row and hero already say (keynotes.budget_left).
@@ -762,6 +765,42 @@ async def reset_carryover(request: Request, category_id: int):
     except LightningError as exc:
         return redirect(f"/budget?month={month}", exc.message)
     return redirect(f"/budget?month={month}", "Carryover reset from this month.")
+
+
+@router.get("/category/{category_id:int}/sheet")
+async def category_sheet(request: Request, category_id: int):
+    """One category sheet for every tab (3G6): this month's spending against its limit, the pace, the last payments,
+    then Edit limit, Cover it and See transactions. Budget, Spending and Transactions open the same sheet. Every
+    figure is the Budget month view's own (BudgetLine), as the Budget page reads it."""
+    c = container(request)
+    category = c.categories.get(category_id)
+    month = _month(request)
+    first, last = parse_month(month)
+    line = next((row for section in c.budgets.month_view(month, schedule=c.schedules.view()).sections
+                 for row in section.lines if row.category_id == category_id), None)
+    group = c.categories.get(category.parent_id).name if category.parent_id and category.depth > 2 else ""
+    planned = line.available if line is not None else None
+    spent = line.planned_actual if line is not None and planned is not None else (line.actual if line is not None else ZERO)
+    r = None
+    if planned is not None and planned > ZERO:
+        left = quantize(planned, 0) - quantize(spent, 0)
+        share = spent / planned * 100
+        current = first <= today() <= last
+        days = (last - first).days + 1
+        pace = (Decimal((today() - first).days + 1) / days * 100) if current else None
+        r = {"category_id": category_id, "over": left < ZERO, "amount": abs(left), "share": share,
+             "width": round(float(min(max(share, ZERO), Decimal(100))), 1),
+             "risk": left >= ZERO and pace is not None and share >= pace + 10,
+             "pace": round(float(pace), 1) if pace is not None else None}
+        r["line"] = _pace_line(r)
+        if r["over"] and current:
+            move = _cover_from(c, month, {"category_id": category_id, "over": r["amount"]},
+                               c.forecaster.everyday(month, today()).room)
+            r["cover"] = move["href"] if move else ""
+    editable = (category.movement == Movement.OUTFLOW and not category.is_root and not category.is_system
+                and category.active and not (line is not None and line.from_loans))
+    return render(request, "budget/category_sheet.html", category=category, group=group, r=r,
+                  spent=spent, planned=planned, editable=editable, **_last_payments(c, category_id, month))
 
 
 @router.get("/category/{category_id:int}/edit")

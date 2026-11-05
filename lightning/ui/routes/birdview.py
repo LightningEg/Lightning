@@ -137,7 +137,9 @@ async def expense_analysis(request: Request):
     trend_chart = line_chart([item["outflows"] for item in trend])
     groups = l2 if l2 else l1
     bar_rows = [{"group": g.label.split(" › ")[0], "label": g.label.split(" › ")[-1], "value": g.value,
-                 "href": f"/transactions?category_id={g.category_id}&date_from={fmt_date(first)}&date_to={fmt_date(last)}"}
+                 # one month: the one category sheet (3G6); a longer period: its transactions
+                 "href": (f"/budget/category/{g.category_id}/sheet?month={month_of(first)}" if selected.key == "month" and l2
+                          else f"/transactions?category_id={g.category_id}&date_from={fmt_date(first)}&date_to={fmt_date(last)}")}
                 for g in groups if g.value]
     category_bars = charts.grouped_bars(bar_rows, limit=10)
     spend_trend = visuals.spending_trend(c, last, category_code, count=max(6, min(len(trend), 24)))
