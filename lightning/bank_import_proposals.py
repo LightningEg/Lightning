@@ -7,7 +7,7 @@ import json
 import re
 from decimal import Decimal
 
-from lightning.bank_import_rows import is_internal
+from lightning.bank_import_rows import is_balance_row, is_internal
 from lightning.categories.domain import Movement
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.transactions.tags import tags_in
@@ -79,6 +79,7 @@ class ImportProposals:
             parsed["_link_candidates"] = ([] if ref_duplicate or repeat_import or row["status"] != "REVIEW"
                                           else self._link_candidates(batch["account_id"], parsed, batch["id"]))
             parsed["_internal"] = is_internal(parsed["Category"])
+            parsed["_balance_row"] = is_balance_row(parsed["Category"], parsed["Counterparty"])
             outcome = self._rules_outcome(batch["account_id"], parsed, cp)
             parsed["_category_id"] = None if parsed["_internal"] else self._category_for(parsed, cp, outcome, usual)
             parsed["_transfer_target_suggestion"] = (self._own_account(batch["account_id"], parsed["Counterparty"])
@@ -100,6 +101,11 @@ class ImportProposals:
             parsed["_transfer_target"] = target.name if target and is_transfer else None
             parsed["_transfer_account_id"] = str(target.id) if target and is_transfer else ""
             parsed["_needs_account"] = parsed["_internal"] and not parsed["_transfer_target"]
+            # The file's own category name that matched none of yours: the review sets it once for all its rows.
+            group = (parsed.get("Group") or "").strip()
+            parsed["_file_label"] = ("" if parsed["_category_id"] or parsed["_internal"] or parsed["_balance_row"]
+                                     or parsed["_transfer_target"] or not parsed["Category"].strip()
+                                     else f"{group} › {parsed['Category'].strip()}" if group else parsed["Category"].strip())
             if parsed["_transfer_target"]:
                 parsed["_suggestions"] = []
             category = self.categories.get(parsed["_category_id"]) if parsed["_category_id"] else None
@@ -110,6 +116,7 @@ class ImportProposals:
             parsed["_possible_duplicate"] = bool(ref_duplicate or repeat_import or parsed["_similarity_warning"]
                                                  or parsed["_voided_earlier"] or parsed["_link_candidates"])
             parsed["_ready"] = bool(not parsed.get("_errors") and not parsed["_possible_duplicate"]
+                                    and not parsed["_balance_row"]
                                     and not parsed["_suggestions"] and not parsed["_needs_account"] and not parsed["_identity_ambiguous"]
                                     and (parsed["_category_id"] or parsed["_transfer_target"]))
             parsed["_import_row_id"] = row["id"]
@@ -261,6 +268,13 @@ class ImportProposals:
                         {"category": self.categories.get(category_id).name, "amount": format(value, "f")}
                         for category_id, value in self.rules.split_for(outcome.rule_id, parsed["Amount"]) or []]
                 return category.id
+        group = (parsed.get("Group") or "").strip()
+        if parsed["Category"] and group:
+            # The file's own group says which of two same-named categories it means ("Work › Transportation").
+            try:
+                return self.categories.find_by_text(f"{group} › {parsed['Category']}").id
+            except ValidationError:
+                pass
         if parsed["Category"]:
             try:
                 return self.categories.find_by_text(parsed["Category"]).id

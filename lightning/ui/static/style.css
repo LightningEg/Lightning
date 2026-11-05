@@ -3340,6 +3340,10 @@ html[dir="rtl"] td[dir="ltr"], html[dir="rtl"] li.code { text-align: right; }
 .main .import-chips .chip.is-on { background:var(--action); border-color:var(--action); color:var(--on-action); }
 .main .import-bulk { position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap; align-items:center; gap:10px 12px; margin:0 0 12px; padding:12px 14px; border-radius:var(--r-md); background:var(--tint-held); box-shadow:var(--shadow-card); }
 .main .import-bulk[hidden] { display:none; }
+.main .import-labels { margin:0 0 12px; }
+.main .import-labels > summary { cursor:pointer; padding:6px 0; }
+.main .import-label-list { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap:10px 14px; margin-top:8px; }
+.main .import-label > span { display:flex; justify-content:space-between; gap:8px; }
 .main .import-bulk .import-bulk-hint { flex-basis:100%; order:1; color:var(--muted); font-size:var(--fs-meta); }
 .main .import-bulk .counterparty-picker-slot { flex:1 1 180px; min-width:150px; }
 .main .import-bulk > select, .main .import-bulk .counterparty-picker { min-width:160px; flex:1 1 160px; }
