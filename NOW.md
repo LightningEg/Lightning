@@ -27,6 +27,8 @@
 
 - **Website (2026-10-28):** analytics, Downloads, leaderboard contrast and badge merged; banners redrawn plus Felucca and Sand wind (site #130). **Read:** site README › Analytics.
 
+- **Import scenarios audit (2026-11-05):** twin rows and bulk "Post as new" fixed; next 7Z (Dr/Cr posts debits as income: wrong money), then 7AA + 7AC (real Egyptian statements without hand work). **Read:** `reports/2026-11-05-import-scenarios/report.md`.
+
 Plan: `issues/INDEX.md`.
 
 1. **Report work paused** (owner); branches wait on native checks. **Read:** `reports/2026-11-03-code-quality-and-smart-features/evidence/report-finalization-2026-11-04.md`.

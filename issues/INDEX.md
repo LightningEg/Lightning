@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 42 open items, in the order they are worked on.
+10 milestones, 49 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -108,8 +108,11 @@ Every investment figure can be explained per purchase, and agrees with the ledge
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
+| **NF-5N** | [Bring existing investments in at once: a positions list and broker statement lines](5-investments/5N-bring-existing-holdings.md) | new feature | Own | L | ready |
+| NF-5N1 | ↳ Positions list | | | M | |
+| NF-5N2 | ↳ Recognise trade lines in a cash statement | | | M | |
 
-Done: 5A, 5B, 5C, 5D, 5E, 5F, 5G, 5H, 5I, 5J, 5K, 5L, 5M. Next free code: 5N.
+Done: 5A, 5B, 5C, 5D, 5E, 5F, 5G, 5H, 5I, 5J, 5K, 5L, 5M. Next free code: 5O.
 
 ## 6 Market data
 
@@ -140,8 +143,21 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7C1 | ↳ Read each app's export format | | | M | |
 | NF-7C2 | ↳ A mapping preset per app in the CSV review | | | L | |
 | NF-7C3 | ↳ A move-in guide | | | M | |
+| **BT-7Z** | [Statements with a Dr/Cr column import every debit as money in](7-planning-import-and-search/7Z-drcr-sign-column.md) | bug, technical · high | Capture | M | ready |
+| **IT-7AA** | [Read real bank exports: Arabic headers, Windows Arabic encoding, title lines and total rows](7-planning-import-and-search/7AA-read-real-bank-files.md) | improvement, technical | Capture | M | ready |
+| **NF-7AB** | [One workbook or CSV that holds several accounts imports into each](7-planning-import-and-search/7AB-one-file-many-accounts.md) | new feature | Capture | L | ready |
+| NF-7AB1 | ↳ Split by account | | | M | |
+| NF-7AB2 | ↳ Pair transfers inside the file | | | M | |
+| NF-7AB3 | ↳ Formulas read as their saved values | | | S | |
+| **IT-7AC** | [Turn bank descriptions into payees, transfers and categories](7-planning-import-and-search/7AC-smarter-statement-names.md) | improvement, technical | Capture | L | ready |
+| IT-7AC1 | ↳ Clean the name | | | M | |
+| IT-7AC2 | ↳ Find saved names inside the text | | | M | |
+| IT-7AC3 | ↳ Cash and wallet moves | | | M | |
+| IT-7AC4 | ↳ A first category | | | S | |
+| **IV-7AD** | [The import review says what it will do: honest duplicate notes, less repetition, a true summary](7-planning-import-and-search/7AD-review-reads-clearly.md) | improvement, visual | Capture | M | ready |
+| **NF-7AE** | [Use the statement's Balance column to check the import and to start an account](7-planning-import-and-search/7AE-statement-balance-check.md) | new feature | Capture | M | ready |
 
-Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y. Next free code: 7Z.
+Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y. Next free code: 7AF.
 
 ## 8 Website
 

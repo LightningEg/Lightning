@@ -1625,6 +1625,8 @@ ARABIC_UI = {
     'You own it': 'الفلوس ملكك',
     'Same as above': 'نفس الاختيار اللي فوق',
     'Post as new': 'سجّله كجديد',
+    'Select all shown': 'حدد كل اللي ظاهر',
+    'Another row in this file has the same date and amount: both are posted. Skip one only if your bank listed it twice.': 'فيه صف تاني في الملف بنفس التاريخ والمبلغ: الاتنين هيتسجلوا. تخطى واحد بس لو البنك كتبه مرتين.',
     'Skip': 'تخطى',
     'You voided this row after an earlier import. Post it again only if that was a mistake.': 'أنت ألغيت الصف ده بعد استيراد سابق. سجّله تاني بس لو كان ده بالغلط.',
     'Already imported from an earlier statement.': 'تم استيراده بالفعل من كشف سابق.',

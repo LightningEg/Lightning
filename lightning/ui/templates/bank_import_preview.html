@@ -37,6 +37,7 @@
     <button type="button" class="chip" data-filter="needs">{{ 'Needs you'|tr(locale) }} {{ counts.needs }}</button>
     <button type="button" class="chip" data-filter="dup">{{ 'Possible duplicates'|tr(locale) }} {{ counts.dup }}</button>
     <button type="button" class="chip" data-filter="ready">{{ 'Ready'|tr(locale) }} {{ counts.ready }}</button>
+    <label class="import-check"><input type="checkbox" data-pick-shown> {{ 'Select all shown'|tr(locale) }}</label>
   </div>
   {% if reject_prompt %}<div class="import-ai"><p class="muted small">{{ 'This prompt gives your AI tool what it cannot guess: your file’s header, what Lightning rejected on each line and the columns it accepts. It fixes the file for you instead of you hunting for the problem.'|tr(locale) }}</p>
   {% set ai_text = reject_prompt %}<div class="actions">{% include "partials/ai_prompt.html" %}</div></div>{% endif %}
@@ -48,6 +49,7 @@
     <div class="counterparty-picker-slot"><input type="text" id="bulk-whom" form="import-bulk-none" list="import-owners" data-own-suggestions data-allow-add data-add-label="+ New counterparty &quot;{name}&quot;" data-pick-target="bulk-whom-pick" data-create-url="/accounts/{{ account.id }}/import/counterparty" data-create-kind="PERSON" placeholder="{{ 'Held for'|tr(locale) }}" aria-label="{{ 'Held for'|tr(locale) }}" autocomplete="off"><input type="hidden" id="bulk-whom-pick" form="import-bulk-none"></div>
     <label class="import-check"><input type="checkbox" id="bulk-remember" form="import-bulk-none"> {{ 'Use this category for this counterparty next time'|tr(locale) }}</label>
     <button type="button" class="btn primary" data-bulk-apply>{{ 'Apply'|tr(locale) }}</button>
+    <button type="button" class="btn" data-bulk-new>{{ 'Post as new'|tr(locale) }}</button>
     <button type="button" class="btn" data-bulk-skip>{{ 'Skip'|tr(locale) }}</button>
   </div>
   <div class="import-head" aria-hidden="true"><span></span><span>{{ 'Date'|tr(locale) }}</span><span>{{ 'Counterparty or account'|tr(locale) }}</span><span>{{ 'Category'|tr(locale) }}</span><span>{{ 'Held for'|tr(locale) }}</span><span>{{ 'Notes'|tr(locale) }}</span><span>{{ 'Amount'|tr(locale) }}</span><span>{{ 'Status'|tr(locale) }}</span></div>
@@ -78,7 +80,7 @@
       {% if r._status == 'REVIEW' and not sms %}<details class="import-row-note"><summary>{{ 'Transfer across currencies'|tr(locale) }}</summary><p class="muted small">{{ 'Choose your other account in Counterparty, then enter its exact statement amount as a positive number. No exchange rate is guessed. Import the debit first if it includes a fee; link the other statement row to the conversion.'|tr(locale) }}</p><label>{{ 'Other account amount'|tr(locale) }}<input type="text" inputmode="decimal" class="money-input num" name="conversion_amount_{{ rid }}" value="{{ ui.conversion_amount }}"></label></details>{% endif %}
       {% if r._status == 'REVIEW' and r._identity_ambiguous %}<small class="import-row-note">{{ 'Choose an account or counterparty explicitly for this name.'|tr(locale) }}</small>{% endif %}
       {% if r._category_ambiguous %}<small class="import-row-note">{{ r._category_ambiguous }} {{ 'Pick the category for this row.'|tr(locale) }}</small>{% endif %}
-      {% if r._row_error %}<small class="import-row-note neg">{{ r._row_error }}</small>{% elif r._errors %}<small class="import-row-note neg">{{ r._errors|join(' ') }}</small>{% elif r._needs_account %}<small class="import-row-note neg">{{ 'The category says internal, but no account matches. Pick the account the money moved to or from.'|tr(locale) }}</small>{% elif r._suggest %}<small class="import-row-note">{{ 'Suggested'|tr(locale) }}: {{ 'open the counterparty list and choose it to confirm.'|tr(locale) }}</small>{% elif r._repeat_import %}<small class="import-row-note">This row is from a file you already reviewed. Skip it to keep the import idempotent.</small>{% elif r._voided_earlier %}<small class="import-row-note">{{ 'You voided this row after an earlier import. Post it again only if that was a mistake.'|tr(locale) }}</small>{% elif r._pending_elsewhere %}<small class="import-row-note">Same date and amount as a row waiting in {{ r._pending_elsewhere }}. Post one of them; skip the other.</small>{% elif r._reference_duplicate %}<small class="import-row-note">{{ 'Already imported from an earlier statement.'|tr(locale) }}</small>{% elif r._link_candidates and r._default_match.startswith('link:') %}<small class="import-row-note">{{ 'Already recorded? Link it to that entry: no money moves twice and the entry keeps its date and category.'|tr(locale) }}</small>{% elif r._link_candidates or r._similarity_warning %}<small class="import-row-note">{{ 'Same date and amount as a row you already have. Post it as new only if it is a second payment.'|tr(locale) }}</small>{% elif r._rule_split %}<small class="import-row-note">Split by your rule: {% for p in r._rule_split %}{{ p.category }} <span class="num">{{ p.amount|money }}</span>{{ ' · ' if not loop.last }}{% endfor %}.</small>{% endif %}
+      {% if r._row_error %}<small class="import-row-note neg">{{ r._row_error }}</small>{% elif r._errors %}<small class="import-row-note neg">{{ r._errors|join(' ') }}</small>{% elif r._needs_account %}<small class="import-row-note neg">{{ 'The category says internal, but no account matches. Pick the account the money moved to or from.'|tr(locale) }}</small>{% elif r._suggest %}<small class="import-row-note">{{ 'Suggested'|tr(locale) }}: {{ 'open the counterparty list and choose it to confirm.'|tr(locale) }}</small>{% elif r._repeat_import %}<small class="import-row-note">This row is from a file you already reviewed. Skip it to keep the import idempotent.</small>{% elif r._voided_earlier %}<small class="import-row-note">{{ 'You voided this row after an earlier import. Post it again only if that was a mistake.'|tr(locale) }}</small>{% elif r._pending_elsewhere %}<small class="import-row-note">Same date and amount as a row waiting in {{ r._pending_elsewhere }}. Post one of them; skip the other.</small>{% elif r._reference_duplicate %}<small class="import-row-note">{{ 'Already imported from an earlier statement.'|tr(locale) }}</small>{% elif r._link_candidates and r._default_match.startswith('link:') %}<small class="import-row-note">{{ 'Already recorded? Link it to that entry: no money moves twice and the entry keeps its date and category.'|tr(locale) }}</small>{% elif r._link_candidates or r._similarity_warning %}<small class="import-row-note">{{ 'Same date and amount as a row you already have. Post it as new only if it is a second payment.'|tr(locale) }}</small>{% elif r._twin_in_file %}<small class="import-row-note">{{ 'Another row in this file has the same date and amount: both are posted. Skip one only if your bank listed it twice.'|tr(locale) }}</small>{% elif r._rule_split %}<small class="import-row-note">Split by your rule: {% for p in r._rule_split %}{{ p.category }} <span class="num">{{ p.amount|money }}</span>{{ ' · ' if not loop.last }}{% endfor %}.</small>{% endif %}
     </div>
     {% endfor %}
     </div>
@@ -115,7 +117,17 @@
   form.querySelectorAll('[data-filter]').forEach((chip) => chip.addEventListener('click', () => {
     form.querySelectorAll('[data-filter]').forEach((other) => other.classList.toggle('is-on', other === chip));
     form.querySelectorAll('details.import-group').forEach((box) => { box.hidden = chip.dataset.filter !== 'all' && box.dataset.state !== chip.dataset.filter; });
+    const all = form.querySelector('[data-pick-shown]');
+    if (all) all.checked = false;
   }));
+  // "Select all shown" ticks every row the chips show: "Possible duplicates", then this, then "Post as new" or "Skip".
+  form.querySelector('[data-pick-shown]')?.addEventListener('change', (event) => {
+    form.querySelectorAll('details.import-group').forEach((box) => {
+      if (box.hidden) return;
+      box.querySelectorAll('.import-pick, .import-pick-group').forEach((pick) => { pick.checked = event.target.checked; });
+    });
+    sync();
+  });
   const val = (id) => document.getElementById(id)?.value ?? '';
   const setPicker = (text, pick, textValue, pickValue) => {
     const input = document.getElementById(text), hidden = document.getElementById(pick);
@@ -180,6 +192,15 @@
       if (remember) { const keep = form.elements[`remember_${id}`]; if (keep) keep.checked = true; }
     });
     relaying = false;
+  });
+  // A whole run of look-alikes is decided at once: every ticked row posts as new (its skip is cleared).
+  bar.querySelector('[data-bulk-new]').addEventListener('click', () => {
+    picks().forEach((box) => {
+      const id = box.dataset.row;
+      const skip = form.elements[`skip_${id}`], match = form.elements[`match_${id}`];
+      if (skip) skip.checked = false;
+      if (match) match.value = 'new';
+    });
   });
   bar.querySelector('[data-bulk-skip]').addEventListener('click', () => {
     picks().forEach((box) => {

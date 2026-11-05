@@ -72,8 +72,11 @@ class ImportProposals:
             parsed["_reference_duplicate"] = ref_duplicate
             parsed["_repeat_import"] = repeat_import
             parsed["_pending_elsewhere"] = pending_elsewhere.get((parsed.get("Date"), parsed.get("Amount")), "")
+            # Two rows of this file with one date and amount are two payments (two orders on one day): banks list each
+            # once. They are noted, not held back; only the ledger or another waiting review makes a look-alike.
+            parsed["_twin_in_file"] = amount_dates.get((parsed["Date"], parsed["Amount"]), 0) > 1
             parsed["_similarity_warning"] = (self._similarity_warning(batch["account_id"], parsed)
-                or amount_dates.get((parsed["Date"], parsed["Amount"]), 0) > 1 or bool(parsed["_pending_elsewhere"]))
+                or bool(parsed["_pending_elsewhere"]))
             parsed["_voided_earlier"] = not ref_duplicate and self._voided_earlier(batch["account_id"], batch_id,
                                                                                 row["bank_reference"], parsed)
             parsed["_link_candidates"] = ([] if ref_duplicate or repeat_import or row["status"] != "REVIEW"
@@ -125,6 +128,10 @@ class ImportProposals:
             if len(parsed["_link_candidates"]) == 1 and free and not free[0].get("source_count"):
                 parsed["_default_match"] = f"link:{free[0]['id']}"
                 claimed.add(free[0]["id"])
+            elif (parsed["_twin_in_file"] and parsed["_link_candidates"] and not free and not parsed["_reference_duplicate"]
+                  and not parsed["_repeat_import"] and not parsed["_voided_earlier"] and not parsed["_pending_elsewhere"]):
+                # Its twin in this file took the one entry you had: this is the second payment.
+                parsed["_default_match"] = "new"
             else:
                 parsed["_default_match"] = "skip" if parsed["_possible_duplicate"] else "new"
         return batch, result

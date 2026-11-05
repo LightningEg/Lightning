@@ -1,0 +1,12 @@
+﻿Commercial International Bank
+Account Statement
+Account No:,100012345678
+Period:,01/11/2026 - 05/11/2026
+
+Date,Description,Debit,Credit,Balance
+05/11/2026,POS CARREFOUR,"1,250.00",,"83,143.00"
+05/11/2026,POS CARREFOUR,,"3,000.00","86,143.00"
+03/11/2026,POS CARREFOUR,"2,000.00",,"84,143.00"
+
+Total,,"3,250.00","3,000.00",
+Closing Balance,,,,"86,143.00"

@@ -469,3 +469,29 @@ def test_fractional_accounting_csv_changes_the_ledger_once_by_the_exact_amount(c
     assert duplicates[0]["_reference_duplicate"]
     assert c.bank_imports.confirm(again, {duplicates[0]["_import_row_id"]: {"skip": True}})["duplicates"] == 1
     assert c.reporting.account_balance(account_id) == expected
+
+
+def test_two_same_day_payments_in_one_file_both_post_by_default(c, setup):
+    """Two orders of one amount on one day are two payments: neither is held back as a duplicate of the other."""
+    accounts, cats = setup
+    data = b"Date,Counterparty,Amount\n2026-09-20,Talabat,-245\n2026-09-20,Talabat,-245\n"
+    batch_id, _ = c.bank_imports.stage(accounts["cib"].id, "twins.csv", data)
+    _, rows = c.bank_imports.preview(batch_id)
+    assert [r["_twin_in_file"] for r in rows] == [True, True]
+    assert not any(r["_possible_duplicate"] for r in rows)
+    assert {r["_default_match"] for r in rows} == {"new"}
+    food = cats["EXP.PERSONAL.FOOD"].id
+    result = c.bank_imports.confirm(batch_id, {r["_import_row_id"]: {"category_id": food, "new_counterparty": "Talabat"}
+                                               for r in rows})
+    assert result["posted"] == 2 and result["duplicates"] == 0
+    assert c.reporting.account_balance(accounts["cib"].id) == 50000 - 490
+
+
+def test_review_offers_post_as_new_for_ticked_rows_and_select_all_shown(c, setup):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    accounts, _ = setup
+    client = TestClient(create_app(c))
+    batch_id, _ = c.bank_imports.stage(accounts["cib"].id, "x.csv", b"Date,Counterparty,Amount\n2026-09-20,Shop,-5\n")
+    page = client.get(f"/accounts/{accounts['cib'].id}/import/{batch_id}").text
+    assert "data-bulk-new" in page and "data-pick-shown" in page

@@ -55,9 +55,9 @@ def test_two_equal_purchases_on_one_day_stay_distinct(c, setup):
     before = c.reporting.account_balance(cib)
     batch_id, rows = _stage(c, cib, "Date,Counterparty,Amount\n2026-10-02,Kiosk,-60\n2026-10-02,Kiosk,-60\n")
     first, second = _by_line(rows)[2], _by_line(rows)[3]
-    # Only one row may default to the one recorded entry; the other is never silently dropped.
+    # Only one row may default to the one recorded entry; the other is the second payment, shown and posted as new.
     assert first["_default_match"] == f"link:{manual.id}"
-    assert second["_default_match"] == "skip" and second["_possible_duplicate"]
+    assert second["_default_match"] == "new" and second["_possible_duplicate"]
 
     result = c.bank_imports.confirm(batch_id, {first["_import_row_id"]: {"match": f"link:{manual.id}"},
                                                second["_import_row_id"]: {"match": "new"}})
