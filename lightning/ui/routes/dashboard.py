@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import calendar
-from datetime import timedelta
+import re
+from datetime import datetime, timedelta, timezone
 
 from decimal import InvalidOperation
 from urllib.parse import urlencode
@@ -39,6 +40,10 @@ _ACCOUNT_TYPE_LABELS = {
     AccountType.PHYSICAL_ASSET: "Physical assets",
     AccountType.OTHER_ASSET: "Other assets",
 }
+
+
+SEEN_COOKIE = "lightning_overview_seen"  # when this browser last opened the Overview (3G5)
+_SEEN = re.compile(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\+00:00")
 
 
 @router.get("/")
@@ -163,9 +168,15 @@ async def dashboard(request: Request):
     phone = _phone_overview(inbox.forecast, attention_groups, c, attention) if getattr(request.state, "phone", False) and position_is_today else None
     # The PC shows the flows on Spending (owner, 2026-10-21); the phone keeps them as folded rows (guideline C11.1).
     phone_flows = {"month_calendar": visuals.month_calendar(c, today())} if lazy_folds else {}
-    return render(
+    # 3G5: what changed since the last visit, from a cookie holding when this Overview was last opened
+    seen = request.cookies.get(SEEN_COOKIE, "")
+    since = None
+    if _SEEN.fullmatch(seen):
+        added = c.transactions.recorded_since(seen)
+        since = {"count": added, "at": seen[:10]} if added else None
+    response = render(
         request,
-        "dashboard/index.html", **phone_flows,
+        "dashboard/index.html", **phone_flows, since=since,
         stats=stats, recent_rows=recent_rows,
         flow_columns=visuals.cash_flow_columns(c, first, as_of, cash_flow),
         money_in_rows=[] if on_phone else visuals.money_in_groups(c, first, as_of),
@@ -182,6 +193,9 @@ async def dashboard(request: Request):
         worth_tile=_worth_tile(position, lead_change) if on_phone else None,
         lazy_folds=lazy_folds, fold_query=urlencode(request.query_params),
     )
+    response.set_cookie(SEEN_COOKIE, datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                        max_age=365 * 24 * 3600, httponly=True, samesite="lax")
+    return response
 
 
 @router.get("/overview/fold/{name}")

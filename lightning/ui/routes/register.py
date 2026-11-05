@@ -511,9 +511,14 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         matched_ids = tagged if matched_ids is None else matched_ids & tagged
     raw_category_id = active_view["category_id"] if active_view else qp.get("category_id", "")
     filter_category = ""
+    category_sheet = ""
     if str(raw_category_id).isdigit():
         filter_category, category_txns = _category_filter(c, int(raw_category_id))
         matched_ids = category_txns if matched_ids is None else matched_ids & category_txns
+        sheet_month = month or (date_from[:7] if date_from and date_to and date_from[:7] == date_to[:7] else fmt_date(today())[:7])
+        picked = c.categories.get(int(raw_category_id))
+        if picked.movement.name == "OUTFLOW" and not picked.is_system and not picked.is_root:  # spending has a plan
+            category_sheet = f"/budget/category/{picked.id}/sheet?month={sheet_month}"  # the one sheet (3G6)
     page_size = 50
     show_val = qp.get("val") == "1"
     val_count = c.reporting.register_value_updates(account_id, date_from, date_to)
@@ -621,7 +626,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         reg=phone_register, chosen_kind=kind,
         q=q, month=month, preset=preset, active_view=active_view, show_val=show_val, val_count=val_count, val_toggle_url=val_toggle_url,
         saved_views=c.saved_views.list(account_id), view_account_id=account_id or "",
-        filter_category=filter_category, filter_tag=filter_tag, tag_flows=tag_flows, matched_flows=matched_flows, matched_net=matched_flows[0] - matched_flows[1] if matched_flows else None, matching_ids=matching_ids,
+        filter_category=filter_category, category_sheet=category_sheet, filter_tag=filter_tag, tag_flows=tag_flows, matched_flows=matched_flows, matched_net=matched_flows[0] - matched_flows[1] if matched_flows else None, matching_ids=matching_ids,
         import_accounts=[] if account_id or phone else [a for a in c.accounts.list(active_only=True)
                                                           if a.account_type.value in ("CASH", "BANK") and not a.parent_id],
         replace_scope={"account_id": account_id or "", "date_from": "" if date_from == FAR_PAST else date_from,

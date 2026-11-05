@@ -432,23 +432,20 @@ Round 2, 2026-10-16 (the owner said: pick what is sensible):
 
 **Still open:** three hero numbers (§3.1), one home per page (§3.3), and §8 Next and Later.
 
-## 3G1 One name per figure · M
-Retire the duplicates in §3.1 and rename the two Bills due. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+**Round 3, 2026-11-05 (owner: "do 3G and merge").** Verified on the current build, then built:
 
-## 3G2 Cut subtitles and zero columns; add the (i) pattern · M
-§3.2. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+- 3G1: one name per figure. Investments says Portfolio value throughout (its donut and allocation said Holdings
+  value); Overview's Reserves no longer reads "−0". Bills due and Budget until payday were already renamed.
+- 3G2: the subtitles named in §3.2 are gone or behind a disclosure; zero columns hide (3AM); the (i) tips exist.
+- 3G3: every page has one home in `lightning/ui/sections.py`; Settings links to each tab's gear.
+- 3G4: built in round 1 (§3.4 items 1-10).
+- 3G5 (owner, 2026-11-05: "since last visit" only, the Overview keeps its 3W/3AL layout): Overview says how many
+  transactions were recorded since this browser last opened it, with See them (`tests/test_one_organism.py`).
+- 3G6 (owner, 2026-11-05: category sheet first): one category sheet, `/budget/category/<id>/sheet`, opens from
+  Budget's bars and over-plan row, Spending's tiles and rows (a one-month period) and a category's register.
+- 3G7: Ctrl-K turns "120 uber", "uber 120" or "+5,000 salary" into "Add 120 out · Uber", which opens the entry
+  sheet filled in; a category name picks the category.
 
-## 3G3 One home per page · M
-§3.3 and guideline A16 (one figure on two pages: one home, a link). Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
-
-## 3G4 Smart wiring · L
-§3.4: certificate auto-match, follow held markets, spendable switch, people-only owner pickers, institution-first account form, late bills first. Parts overlap 5K and 5G.
-
-## 3G5 Home: three heroes and Needs you grouped by action · L
-§8 item 5, plus a since-last-visit line. Overlaps 7L2 and 3AL1: decide after those land.
-
-## 3G6 One bill sheet and one category sheet for every tab · L
-§8 item 6.
-
-## 3G7 Ctrl-K as Do anything · M
-§8 item 7. Overlaps 7D.
+## 3G6 One bill sheet for every tab · M
+The bill half of §8 item 6 (owner, 2026-11-05: after the category sheet): one sheet for a bill or subscription (next
+due, the last payments, Mark paid, Edit) opened from Recurring, Cash planning's next 30 days and Needs you.

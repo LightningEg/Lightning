@@ -19,7 +19,7 @@
 <section class="phone-section" aria-labelledby="where-heading">
   <header class="phone-section-head"><h2 id="where-heading">{{ 'Where did it go?'|tr(locale) }}</h2><span>{{ date_from }} {{ 'to'|tr(locale) }} {{ date_to }}</span></header>
   <div class="phone-rows">
-    {% for r in rows %}<a class="phone-row" href="{{ r.href }}"><span>{{ r.name }}<small>{{ '{n}% of money out'|tr(locale, n='%.0f'|format(r.share)) }}</small></span><b>{{ r.value|amount_role('total') }}</b></a>{% endfor %}
+    {% for r in rows %}<a class="phone-row" href="{{ r.href }}"{% if '/sheet' in r.href %} data-popup-open{% endif %}><span>{{ r.name }}<small>{{ '{n}% of money out'|tr(locale, n='%.0f'|format(r.share)) }}</small></span><b>{{ r.value|amount_role('total') }}</b></a>{% endfor %}
     {% if other %}<a class="phone-row" href="{{ other.href }}"><span>{{ 'Other'|tr(locale) }}<small>{{ '{n}% of money out'|tr(locale, n='%.0f'|format(other.share)) }}</small></span><b>{{ other.value|amount_role('total') }}</b></a>{% endif %}
     {% set row %}<span>{{ 'More analysis'|tr(locale) }}<small>{{ 'Days, months, money in and out'|tr(locale) }}</small></span><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
     {% call sheet('More analysis'|tr(locale), row) %}<div class="phone-sheet-more" data-fold-src="/birdview/expenses/more?{{ more_query }}"><p class="chart-empty">{{ 'Loading…'|tr(locale) }}</p></div>{% endcall %}

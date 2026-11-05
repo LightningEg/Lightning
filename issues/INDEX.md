@@ -56,13 +56,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 |---|---|---|---|---|---|
 | **IV-3F** | [The phone's top bar looks too white to one user](3-polish-and-arabic/3F-phone-top-bar-looks-too-white.md) | improvement, visual | Feel | S | ready |
 | **IV-3G** | [Outside review of every tab - one organism, fewer numbers, smarter links, less explaining](3-polish-and-arabic/3G-one-organism-review-of-every-tab.md) | improvement, visual | Feel | L | ready |
-| IV-3G1 | ↳ One name per figure | | | M | |
-| IV-3G2 | ↳ Cut subtitles and zero columns; add the (i) pattern | | | M | |
-| IV-3G3 | ↳ One home per page | | | M | |
-| IV-3G4 | ↳ Smart wiring | | | L | |
-| IV-3G5 | ↳ Home: three heroes and Needs you grouped by action | | | L | |
-| IV-3G6 | ↳ One bill sheet and one category sheet for every tab | | | L | |
-| IV-3G7 | ↳ Ctrl-K as Do anything | | | M | |
+| IV-3G6 | ↳ One bill sheet for every tab | | | M | |
 | **IV-3H** | [Tab-by-tab review: what a real user needs next](3-polish-and-arabic/3H-tab-by-tab-review.md) | improvement, visual | Feel | L | building |
 | IV-3H1 | ↳ Step 1: trust | | | L | |
 | IV-3H2 | ↳ Step 2: weekly friction | | | L | |
