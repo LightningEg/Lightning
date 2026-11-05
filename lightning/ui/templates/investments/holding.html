@@ -22,6 +22,39 @@
     <span class="stat-tile-sub">{% if display_return and display_return.explanation %}{{ display_return.explanation|tr(locale) }}{% elif display_return and display_return.days_held is not none %}{{ (('Held {n} day' if display_return.days_held==1 else 'Held {n} days')|tr(locale, n=display_return.days_held)) }}{% else %}{{ 'Not enough dated cash flows to calculate a return'|tr(locale) }}{% endif %}</span></div>
 </section>
 
+{% if not h.has_other_owners and (h.flows or []) %}
+<section class="card" id="risk-free" aria-labelledby="risk-free-head">
+  <div class="section-head"><div><h2 id="risk-free-head">{{ "Against the risk-free rate"|tr(locale) }}</h2>
+    <p>{{ "The same money on the same dates, if it had earned a T-bill or certificate rate you type."|tr(locale) }}</p></div></div>
+  {% if bench %}
+  <div class="stat-tiles">
+    <div class="stat-tile surface-{{ 'in' if bench.gap >= 0 else 'over' }}"><span class="stat-tile-head">{{ tone_icon('in') }}<span class="stat-tile-label">{{ ("Ahead of the risk-free rate" if bench.gap >= 0 else "Behind the risk-free rate")|tr(locale) }}</span></span>
+      <span class="stat-tile-value{{ ' is-negative' if bench.gap < 0 }}">{{ bench.gap|money(True) }}<small>{{ base }}</small></span>
+      <span class="stat-tile-sub">{{ "It would be worth {value} today at the risk-free rate"|tr(locale, value=bench.value|money ~ ' ' ~ base) }}</span></div>
+    <div class="stat-tile surface-hold"><span class="stat-tile-head">{{ tone_icon('hold') }}<span class="stat-tile-label">{{ "Yearly, against the risk-free rate"|tr(locale) }}</span></span>
+      <span class="stat-tile-value">{% if bench.rate is not none and xirr_pct is not none %}{{ (xirr_pct - bench.rate * 100)|signed_pct }}<small>{{ "% a year"|tr(locale) }}</small>{% else %}—{% endif %}</span>
+      <span class="stat-tile-sub">{% if bench.rate is not none %}{{ "The risk-free rate earned {rate}% a year on these dates"|tr(locale, rate='%.1f'|format(bench.rate * 100)) }}{% else %}{{ "Not enough dated cash flows to calculate a return"|tr(locale) }}{% endif %}</span></div>
+  </div>
+  <p class="muted small">{{ "Using {rate}% a year, typed for {date}. It holds until you type a newer one."|tr(locale, rate='%.2f'|format(bench.latest_rate * 100), date=bench.latest_since.isoformat()) }}</p>
+  {% elif not rate_history %}
+  <p class="muted">{{ "Type the yearly rate of a T-bill or certificate to compare this holding with it."|tr(locale) }}</p>
+  {% elif h.value is none %}
+  <p class="muted">{{ "This holding has no price yet, so there is nothing to compare."|tr(locale) }}</p>
+  {% else %}
+  <p class="muted">{{ "Your first typed rate is for {date}, after this holding's first cash flow. Type an earlier rate to compare."|tr(locale, date=rate_history[0][0].isoformat()) }}</p>
+  {% endif %}
+  <details{% if not rate_history %} open{% endif %}><summary>{{ "Risk-free rates you typed"|tr(locale) }}</summary>
+    {% if rate_history %}<table class="plain-table"><thead><tr><th>{{ "From"|tr(locale) }}</th><th class="num">{{ "Yearly rate (%)"|tr(locale) }}</th><th></th></tr></thead><tbody>
+    {% for when, rate in rate_history|reverse %}<tr><td>{{ when.isoformat() }}</td><td class="num">{{ '%.2f'|format(rate * 100) }}</td>
+      <td><form method="post" action="/investments/risk-free-rate"><input type="hidden" name="action" value="remove"><input type="hidden" name="day" value="{{ when.isoformat() }}"><input type="hidden" name="return_to" value="{{ request.url.path }}{{ '?' ~ request.url.query if request.url.query }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn small">{{ "Remove"|tr(locale) }}</button></form></td></tr>{% endfor %}</tbody></table>{% endif %}
+    <form method="post" action="/investments/risk-free-rate" class="sc-row settings-compact"><input type="hidden" name="return_to" value="{{ request.url.path }}{{ '?' ~ request.url.query if request.url.query }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+      <label>{{ "From"|tr(locale) }}<input type="date" name="day" value="{{ day }}" required></label>
+      <label>{{ "Yearly rate (%)"|tr(locale) }}<input name="percent" inputmode="decimal" placeholder="27.5" required></label>
+      <button class="btn primary small">{{ "Save rate"|tr(locale) }}</button></form>
+  </details>
+</section>
+{% endif %}
+
 <header class="overview-section-head inv-head"><h2>{{ "Is it making money?"|tr(locale) }}</h2><span>Month ends · {{ j.labels[0] if j.labels }} to {{ j.labels[-1] if j.labels }}</span></header>
 <section class="card wide-card"><div class="overview-split">
   <section><div class="overview-block-head"><div><h3>{{ "Price against what you paid"|tr(locale) }}</h3><p>Month-end price · the dashed line is your {{ fig.average_cost.label|lower }}</p></div></div>

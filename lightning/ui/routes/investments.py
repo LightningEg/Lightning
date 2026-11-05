@@ -18,7 +18,7 @@ from urllib.parse import urlencode
 
 from ..web import container, redirect, render, ui_locale, settled_save
 from ..i18n import translate
-from ...investments import events, views as holding_views
+from ...investments import benchmark as risk_free, events, views as holding_views
 from ...assets.catalog import instruments
 from ..periods import parse_period
 from ...investments.report import (PLANNER_MODES, build_investment_report, investment_period, reconcile_portfolio,
@@ -422,6 +422,32 @@ async def calculate_planner(request: Request):
 
 
 
+@router.post("/risk-free-rate")
+async def save_risk_free_rate(request: Request):
+    """Add, replace or remove one dated yearly rate. The history is profile-wide; the form sits on a holding's page."""
+    form = await request.form()
+    c = container(request)
+    back = str(form.get("return_to", ""))
+    if not back.startswith("/investments/holding/") or "//" in back or "\\" in back:
+        back = "/investments"
+    day, percent = str(form.get("day", "")), str(form.get("percent", ""))
+    try:
+        with settled_save(request, c):
+            raw = c.settings.get(risk_free.SETTING_KEY)
+            try:
+                if form.get("action") == "remove":
+                    c.settings.set(risk_free.SETTING_KEY, risk_free.remove_rate(raw, day))
+                    message = "Rate removed."
+                else:
+                    c.settings.set(risk_free.SETTING_KEY, risk_free.set_rate(raw, day, percent))
+                    message = "Rate saved."
+            except ValueError as exc:
+                raise ValidationError(str(exc)) from exc
+    except LightningError as exc:
+        return redirect(back + "#risk-free", exc.message)
+    return redirect(back + "#risk-free", message)
+
+
 def _planner_stack(rows: list[dict], other_label: str) -> list[dict]:
     """Four named suggestions and a neutral remainder; keep the detailed rows unchanged."""
     parts = sorted((r for r in rows if r["suggested"] > ZERO), key=lambda r: -r["suggested"])
@@ -520,7 +546,9 @@ async def holding_detail(request: Request, asset_id: int):
                                   *((("Tax withheld", -h.dividend_tax),) if h.dividend_tax else ())],
                                  ("Value plus what it paid you", h.cost_basis + total_return))
     stale_price=any(row["asset_id"]==asset_id for row in c.reporting.stale_prices(day))
-    return render(request,"investments/holding.html",h=h,asset=asset,bucket=bucket,horizon=horizon,day=day,stale_price=stale_price,
+    rate_history = risk_free.parse_history(c.settings.get(risk_free.SETTING_KEY))
+    bench = None if h.has_other_owners else risk_free.benchmark(list(h.flows), h.value, day, rate_history)
+    return render(request,"investments/holding.html",rate_history=rate_history,bench=bench,h=h,asset=asset,bucket=bucket,horizon=horizon,day=day,stale_price=stale_price,
                   journey=journey, purchases=purchases, sales=sales, gain_pct=gain_pct, total_return=total_return, breakdown=breakdown,
                   xirr_pct=h.xirr * 100 if h.xirr is not None else None,
                   display_return=h.display_return,

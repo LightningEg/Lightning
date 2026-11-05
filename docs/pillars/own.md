@@ -17,6 +17,5 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 | **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history so…](../../issues/6-market-data/6F-london-board-and-gulf-history.md) | M | new |
 | **NF-9C** | [Silver, property and vehicles](../../issues/9-later/9C-silver-property-vehicles.md) | L | new |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](../../issues/9-later/9D-hijri-dates-and-silver-nisab.md) | M | new |
-| **NF-9E** | [Return against the risk-free rate](../../issues/9-later/9E-return-against-risk-free-rate.md) | M | new |
 <!-- work:end -->
 
