@@ -2,7 +2,7 @@
 from .spec import AMOUNT, DATE, FLAG, LONG, TEXT, Command, choice, optional, ref
 
 TABLES = ("asset_classes", "financial_assets", "accounts", "categories", "institutions",
-          "other_asset_valuations")
+          "other_asset_valuations", "other_asset_details")
 
 # Every type; a type whose tables are not synchronized yet is refused by the home.
 ACCOUNT_TYPES = choice("BANK", "CASH", "CASH_AT_HAND", "DEPOSIT", "BROKERAGE", "PHYSICAL_ASSET", "OTHER_ASSET", "GAMEYA")
@@ -26,6 +26,10 @@ COMMANDS = {
     "reporting.other_asset_values.save": Command("accounts.save_other_asset_value", dict(
         account=ref("accounts"), effective_date=DATE, amount=AMOUNT, notes=TEXT),
         target=("other_asset_valuations", ("account", "effective_date")), prepare=_valuation_account),
+    "accounts.other_asset_details.save": Command("accounts.save_other_asset_details", dict(
+        account=ref("accounts"), kind=choice("flat", "house", "land", "car", "other"),
+        purchase_date=optional(DATE), purchase_price=optional(AMOUNT), loan_item_id=optional(ref("planned_items"))),
+        target=("other_asset_details", ("account",)), prepare=_valuation_account),
     "accounts.open": Command("account_flows.open_account", dict(
         name=TEXT, account_type=ACCOUNT_TYPES, opening_date=DATE, opening_balance=AMOUNT, institution=TEXT,
         currency=optional(TEXT), last4=optional(TEXT), notes=LONG, opening_balance_date=optional(DATE),

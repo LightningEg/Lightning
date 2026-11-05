@@ -16,6 +16,8 @@ from urllib.parse import urlencode
 from fastapi import Request
 
 from lightning.accounts.domain import AccountType, INVESTMENT_ACCOUNT_TYPES
+from lightning.accounts.valuations import ASSET_KINDS
+from lightning.planning.domain import PlanKind
 from lightning.workflows import investment_entry as entry_workflow
 from lightning.categories.domain import Movement
 from lightning.assets.catalog import instruments as catalog_instruments
@@ -460,6 +462,33 @@ def _edit_original(c, row, txn_id: int, custody_owners) -> dict:
     }
 
 
+def _asset_view(c, account) -> dict | None:
+    """What a property or vehicle shows on its Other asset account page (NF-9C): its details, the change since it was
+    bought, the dated values and the loan that paid for it. None for any other account."""
+    if not account or account.account_type != AccountType.OTHER_ASSET:
+        return None
+    details = c.accounts.other_asset_details(account.id)
+    value = c.reporting.account_balance(account.id, today())
+    price = details["purchase_price"] if details else None
+    change = value - price if price is not None else None
+    history = c.accounts.other_asset_history(account.id)
+    rows = [{"date": row["effective_date"], "value": row["value"],
+             "change": row["value"] - history[i - 1]["value"] if i else None} for i, row in enumerate(history)]
+    loan = None
+    if details and details["loan_item_id"]:
+        try:
+            item = c.planning.get(details["loan_item_id"])
+            left = c.planning.loan_progress(item)["still_to_pay"]
+            loan = {"id": item.id, "name": item.name, "left": left, "equity": value - left}
+        except LightningError:
+            loan = None
+    return {"details": details, "value": value, "price": price, "change": change,
+            "change_pct": change / price * 100 if change is not None and price else None,
+            "history": list(reversed(rows))[:8], "loan": loan,
+            "loans": [{"id": i.id, "name": i.name} for i in c.planning.items((PlanKind.LOAN,))],
+            "kinds": ASSET_KINDS}
+
+
 def page(request: Request, account_id: int | None, entry: dict | None = None, edit_values: dict | None = None,
          error: str = "", error_field: str = "", status_code: int = 200,
          edit_id: int | None = None, edit_acct: int | None = None,
@@ -566,6 +595,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         broker=c.accounts.broker_of(account) if account and account.account_type == AccountType.BROKERAGE else None,
         today=fmt_date(today()),
         account_balance=c.reporting.account_balance(account.id, today()) if account else None,
+        asset=_asset_view(c, account),
         manual_asset_value=c.accounts.manual_value(account.id, fmt_date(today())) if account and account.account_type == AccountType.OTHER_ASSET else None,
         group=c.accounts.reporting_group(account) if account else "",
         account_value=account_value, account_owned_value=account_owned_value,

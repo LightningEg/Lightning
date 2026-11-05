@@ -181,8 +181,6 @@ Good ideas that wait until the milestones above are done.
 | NF-9B4 | ↳ Try it on a real Windows PC | | | owner | |
 | **NF-9C** | [Silver, property and vehicles](9-later/9C-silver-property-vehicles.md) | new feature | Own | L | new |
 | NF-9C1 | ↳ Silver holdings | | | L | |
-| NF-9C2 | ↳ Property and vehicles | | | M | |
-| NF-9C3 | ↳ A vehicle loan link | | | M | |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | new |
 | **IT-9F** | [Page speed: a stable origin and cache, and a CSS trim](9-later/9F-page-speed-origin-and-css.md) | improvement, technical | Reach | M | new |
 | **IT-9K** | [Structure left - runtime routes and bank-import orchestration](9-later/9K-layers-and-copies.md) | improvement, technical | Build | M | ready |

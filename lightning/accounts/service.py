@@ -19,7 +19,7 @@ from lightning.database.connection import Database
 
 from .domain import DEFAULT_CASH_CLASS, OFFERED_TYPES, TYPE_LABELS, Account, AccountType, suggest_code
 from .repository import AccountRepository
-from .valuations import OtherAssetValuationRepository
+from .valuations import OtherAssetDetailsRepository, OtherAssetValuationRepository
 
 
 class AccountService:
@@ -52,6 +52,19 @@ class AccountService:
         """Save an Other asset account's dated estimated value (one per day; a second save that day replaces it).
         Journal command `reporting.other_asset_values.save`."""
         return OtherAssetValuationRepository(self.db).save(account, effective_date, amount, notes)
+
+    def other_asset_details(self, account_id: int) -> dict | None:
+        """An Other asset account's kind, purchase date and price, and the loan that paid for it (NF-9C)."""
+        return OtherAssetDetailsRepository(self.db).get(account_id)
+
+    def other_asset_history(self, account_id: int) -> list[dict]:
+        """Every dated value entered for an Other asset account, oldest first."""
+        return OtherAssetDetailsRepository(self.db).history(account_id)
+
+    def save_other_asset_details(self, account: Account, kind: str, purchase_date, purchase_price, loan_item_id) -> dict:
+        """Save what a property or vehicle adds to an Other asset account. Journal command
+        `accounts.other_asset_details.save`."""
+        return OtherAssetDetailsRepository(self.db).save(account, kind, purchase_date, purchase_price, loan_item_id)
 
     def find_by_text(self, text: str) -> Account | None:
         """An active account matching what was typed: its label ('CIB-CUR-EGP · CIB Current'), code or name."""

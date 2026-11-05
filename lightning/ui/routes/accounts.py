@@ -372,6 +372,21 @@ async def update_other_asset_value(request: Request, account_id: int):
     return redirect(f"/accounts/{account_id}", "Dated estimated value saved.")
 
 
+@router.post("/{account_id:int}/details")
+async def update_other_asset_details(request: Request, account_id: int):
+    c = container(request)
+    account = c.accounts.get(account_id)
+    form = await request.form()
+    try:
+        with settled_save(request, container(request)):
+            c.accounts.save_other_asset_details(account, str(form.get("kind") or "other"),
+                                                str(form.get("purchase_date") or ""), str(form.get("purchase_price") or ""),
+                                                str(form.get("loan_item_id") or ""))
+    except LightningError as exc:
+        return redirect(f"/accounts/{account_id}", exc.message)
+    return redirect(f"/accounts/{account_id}", "Details saved.")
+
+
 def _capture_context(c, account) -> dict:
     """What the phone's Add sheet shows besides the fields (3AN3): the accounts its From chip can change to, and the
     usual categories for money out and money in as chips, most used first (computed from this person's history in
