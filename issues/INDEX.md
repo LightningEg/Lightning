@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 35 open items, in the order they are worked on.
+10 milestones, 34 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 

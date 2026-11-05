@@ -16,7 +16,7 @@ Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not e
 | [Build](pillars/build.md) | 4 |  | 3 |  | 1 |  |
 | [Reach](pillars/reach.md) | 4 |  | 3 | 1 |  | 2 |
 
-35 open items in 10 milestones.
+34 open items in 10 milestones.
 
 ## Being built now
 
