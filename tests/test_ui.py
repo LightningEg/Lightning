@@ -144,8 +144,9 @@ def test_overview_horizons_keep_the_same_status_layout_and_popup_range(client, c
                   "period=custom&date_from=2026-09-10&date_to=2026-09-20"):
         response = client.get(f"/?{query}")
         assert response.status_code == 200
-        labels = ("What you own", "Free cash", "Net flow")
-        assert [response.text.index(label) for label in labels] == sorted(response.text.index(label) for label in labels)
+        text = response.text
+        # What you own, then Free cash, then the period's Net flow; the lead's bridge (OV-3) may name Net flow first
+        assert text.index("What you own") < text.index("Free cash") < text.index("Net flow", text.index("Free cash"))
         assert 'class="overview-disclosure"' in response.text
         assert 'name="period" value="custom"' in response.text
         assert 'href="/plan"' in response.text  # Free cash links to cash planning

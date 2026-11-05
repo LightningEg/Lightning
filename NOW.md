@@ -5,7 +5,7 @@
 | Who | Work | Files | Since |
 |---|---|---|---|
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
-| Claude (Opus, M3 money) | OV-3+OV-8, BU-3, 3AM3 (Sonnet: 3AS, 3AT, BU-8, 3AM5, recapture) | `lightning/ui/routes/dashboard.py`, Overview net-worth card, BU-3 rounding | 2026-11-05 |
+| Claude (Opus, M3) | BU-3 (#333), then 3AM3 | BU-3 rounding, 3AM3 tab leads | 2026-11-05 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
 | Claude (Sonnet, M3 polish) | 3AS/3AT, BU-8, 3AM5 | payday, asset, `style.css` | 2026-11-05 |
 
@@ -38,7 +38,7 @@ Plan: `issues/INDEX.md`.
 4. **1H:** locks merged (#286); native checks held by owner; #302 open. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
 5. **2A:** restore safety code (Luna's claim); its reboot drill joins the held checks. **Read:** 2A.
 6. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `reports/2026-10-26-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
-7. **Website recapture** after 3W / 3AG / 7Q and the 3Q, 3S, 3T screen changes (2026-11-05) so the site shows the current screens. **Read:** `skills/site-recapture/SKILL.md`.
+7. **Website recapture** (Sonnet M3 session, last) for 3W, 3AG, 7Q, 3Q, 3S, 3T, 3G, 3H. **Read:** `skills/site-recapture/SKILL.md`.
 8. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.
 9. **5G Brokers:** done (PR claude/brokerages-5g); left in 6F: London's board and Gulf month-end history. **Read:** 6F.
 10. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
