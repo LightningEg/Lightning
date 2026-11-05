@@ -1,0 +1,4773 @@
+{
+  "/": {
+    "status": 200,
+    "url": "/",
+    "height": 1920,
+    "overflow": 0,
+    "text": "Overview\nSafe to spend\nCash planning ›\n51,420 EGP\n\nAbout 1,978 a day until payday on 2026-12-01.\n\n2026-11\n4 items need you\n1 to match · 1 on the budget · 2 on cash\n4\nOpen\nToday\nNet worth\n199,171\n+36,745 this month\n73% used\nLeft in plan\n6,948\nLatest\nSee all\nToday\nTo Office gam'eya\nTransfer\n2,000\nToyota Finance\nLoan payments\n−2,500\nTo Cash wallet\nTransfer\n3,000\nYesterday\nFitness Time Gym\nHealth\n−900\n2026-11-03\nLandlord\nHousing & Rent\n−12,000\nYour position\nAs of 2026-11-05\nWhat you own\n265,671\n›\nCash you own\n87,768\n›\nHoldings value\n177,903\n›\nWhat you owe\n−66,500\n›\nOver time\nNet worth at the end of each month\n›\nFree cash\nAfter reserves and bills due\n67,368\n›\nWhat it is made of\n›\nIf you sold today (estimate)\nAfter selling your investments\n141,776\n›\nThis period\n2026-11-01 to 2026-11-05\nNet flow\n+28,183\n›\nWhere money in went\n46,833\n›\nInvestments\nNet gain or loss\n+7,896\n›\nTotal expenses by month\n2026\n›\nNet cash flow by month\n3 of 3 months kept money\n›",
+    "headings": [
+      {
+        "text": "Overview",
+        "y": 72
+      },
+      {
+        "text": "Latest",
+        "y": 520
+      },
+      {
+        "text": "Your position",
+        "y": 980
+      },
+      {
+        "text": "This period",
+        "y": 1498
+      }
+    ],
+    "targets": [
+      {
+        "text": "Safe to spend\nCash planning ›\n51,420 EGP\n\nAbout 1,978 a day until",
+        "x": 16,
+        "y": 77,
+        "w": 328,
+        "h": 111
+      },
+      {
+        "text": "Previous month",
+        "x": 18,
+        "y": 202,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "2026-11",
+        "x": 68,
+        "y": 206,
+        "w": 97,
+        "h": 40
+      },
+      {
+        "text": "Next month",
+        "x": 167,
+        "y": 202,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "4 items need you\n1 to match · 1 on the budget · 2 on cash\n4\nOpen",
+        "x": 33,
+        "y": 269,
+        "w": 294,
+        "h": 69
+      },
+      {
+        "text": "Today\nNet worth\n199,171\n+36,745 this month",
+        "x": 16,
+        "y": 368,
+        "w": 158,
+        "h": 125
+      },
+      {
+        "text": "73% used\nLeft in plan\n6,948",
+        "x": 186,
+        "y": 368,
+        "w": 158,
+        "h": 125
+      },
+      {
+        "text": "See all",
+        "x": 302,
+        "y": 511,
+        "w": 42,
+        "h": 44
+      },
+      {
+        "text": "To Office gam'eya\nTransfer\n2,000",
+        "x": 16,
+        "y": 580,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Toyota Finance\nLoan payments\n−2,500",
+        "x": 16,
+        "y": 644,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "To Cash wallet\nTransfer\n3,000",
+        "x": 16,
+        "y": 708,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Fitness Time Gym\nHealth\n−900",
+        "x": 16,
+        "y": 796,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Landlord\nHousing & Rent\n−12,000",
+        "x": 16,
+        "y": 884,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "What you own\n265,671\n›",
+        "x": 16,
+        "y": 1018,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Cash you own\n87,768\n›",
+        "x": 16,
+        "y": 1074,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Holdings value\n177,903\n›",
+        "x": 16,
+        "y": 1130,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "What you owe\n−66,500\n›",
+        "x": 16,
+        "y": 1186,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Over time\nNet worth at the end of each month\n›",
+        "x": 16,
+        "y": 1242,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Free cash\nAfter reserves and bills due\n67,368\n›",
+        "x": 16,
+        "y": 1298,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "What it is made of\n›",
+        "x": 16,
+        "y": 1354,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "If you sold today (estimate)\nAfter selling your investments\n141,7",
+        "x": 16,
+        "y": 1410,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Net flow\n+28,183\n›",
+        "x": 16,
+        "y": 1536,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Where money in went\n46,833\n›",
+        "x": 16,
+        "y": 1592,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Investments\nNet gain or loss\n+7,896\n›",
+        "x": 16,
+        "y": 1648,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Total expenses by month\n2026\n›",
+        "x": 16,
+        "y": 1704,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Net cash flow by month\n3 of 3 months kept money\n›",
+        "x": 16,
+        "y": 1760,
+        "w": 328,
+        "h": 56
+      }
+    ]
+  },
+  "/budget": {
+    "status": 200,
+    "url": "/budget",
+    "height": 815,
+    "overflow": 0,
+    "text": "Budget\n73%\nspent\nLeft in plan\n6,948 EGP\n\nYou are 2,548 over your plan's pace.\n\n2026-11\n\nPlanned 25,599 · Plan leaves to save 19,401 · About 267 a day for 26 days\n\nCategories\nEdit plan\nHealth\n900 of 900 · Ahead of pace\n0\nleft\nHousing & Rent\n12,000 of 12,000 · Ahead of pace\n0\nleft\nLoan payments\n2,500 of 2,500 · Ahead of pace\n0\nleft\nFood & Groceries\n3,251 of 4,666 · Ahead of pace\n1,415\nleft\n6 more on track ›",
+    "headings": [
+      {
+        "text": "Budget",
+        "y": 72
+      },
+      {
+        "text": "Categories",
+        "y": 351
+      }
+    ],
+    "targets": [
+      {
+        "text": "Previous month",
+        "x": 18,
+        "y": 207,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "2026-11",
+        "x": 68,
+        "y": 211,
+        "w": 97,
+        "h": 40
+      },
+      {
+        "text": "Next month",
+        "x": 167,
+        "y": 207,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "Edit plan",
+        "x": 285,
+        "y": 342,
+        "w": 59,
+        "h": 44
+      },
+      {
+        "text": "Health\n900 of 900 · Ahead of pace\n0\nleft",
+        "x": 16,
+        "y": 390,
+        "w": 328,
+        "h": 66
+      },
+      {
+        "text": "Housing & Rent\n12,000 of 12,000 · Ahead of pace\n0\nleft",
+        "x": 16,
+        "y": 456,
+        "w": 328,
+        "h": 66
+      },
+      {
+        "text": "Loan payments\n2,500 of 2,500 · Ahead of pace\n0\nleft",
+        "x": 16,
+        "y": 523,
+        "w": 328,
+        "h": 66
+      },
+      {
+        "text": "Food & Groceries\n3,251 of 4,666 · Ahead of pace\n1,415\nleft",
+        "x": 16,
+        "y": 589,
+        "w": 328,
+        "h": 66
+      },
+      {
+        "text": "6 more on track ›",
+        "x": 16,
+        "y": 655,
+        "w": 328,
+        "h": 56
+      }
+    ]
+  },
+  "/transactions": {
+    "status": 200,
+    "url": "/transactions",
+    "height": 1147,
+    "overflow": 0,
+    "text": "Transactions\nAll\nIn\nOut\nTransfers\nTo sort\n2026-11\nSelect\n⋯\n\nIn +46,833\n·\nOut −18,651\n\nToday\n−2,500\nCIB Payroll → Office gam'eya\nTransfer\n2,000\nToyota Finance\nLoan payments · CIB Payroll\n−2,500\nCIB Payroll → Cash wallet\nTransfer\n3,000\nYesterday\nFitness Time Gym\nHealth · CIB Payroll\n−900\n2026-11-03\nLandlord\nHousing & Rent · CIB Payroll\n−12,000\n2026-11-02\nCarrefour\nFood & Groceries · CIB Payroll\n−3,250.75\n2026-11-01\n+46,833\nMoney market fund\nBuy · THNDR\n3,000\nNBE\nInterest · CIB Payroll\n+1,833.33\nACME Egypt\nSalary · CIB Payroll\n+45,000",
+    "headings": [
+      {
+        "text": "Transactions",
+        "y": 72
+      }
+    ],
+    "targets": [
+      {
+        "text": "Search transactions",
+        "x": 16,
+        "y": 85,
+        "w": 328,
+        "h": 48
+      },
+      {
+        "text": "All",
+        "x": 16,
+        "y": 143,
+        "w": 39,
+        "h": 40
+      },
+      {
+        "text": "In",
+        "x": 61,
+        "y": 143,
+        "w": 34,
+        "h": 40
+      },
+      {
+        "text": "Out",
+        "x": 101,
+        "y": 143,
+        "w": 47,
+        "h": 40
+      },
+      {
+        "text": "Transfers",
+        "x": 154,
+        "y": 143,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "To sort",
+        "x": 245,
+        "y": 143,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Previous month",
+        "x": 18,
+        "y": 197,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "2026-11",
+        "x": 68,
+        "y": 201,
+        "w": 89,
+        "h": 40
+      },
+      {
+        "text": "Select",
+        "x": 225,
+        "y": 201,
+        "w": 67,
+        "h": 40
+      },
+      {
+        "text": "⋯",
+        "x": 300,
+        "y": 199,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "CIB Payroll → Office gam'eya\nTransfer\n2,000",
+        "x": 16,
+        "y": 306,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Toyota Finance\nLoan payments · CIB Payroll\n−2,500",
+        "x": 16,
+        "y": 370,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "CIB Payroll → Cash wallet\nTransfer\n3,000",
+        "x": 16,
+        "y": 434,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Fitness Time Gym\nHealth · CIB Payroll\n−900",
+        "x": 16,
+        "y": 538,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Landlord\nHousing & Rent · CIB Payroll\n−12,000",
+        "x": 16,
+        "y": 642,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Carrefour\nFood & Groceries · CIB Payroll\n−3,250.75",
+        "x": 16,
+        "y": 746,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Money market fund\nBuy · THNDR\n3,000",
+        "x": 16,
+        "y": 851,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "NBE\nInterest · CIB Payroll\n+1,833.33",
+        "x": 16,
+        "y": 915,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "ACME Egypt\nSalary · CIB Payroll\n+45,000",
+        "x": 16,
+        "y": 979,
+        "w": 328,
+        "h": 64
+      }
+    ]
+  },
+  "/accounts": {
+    "status": 200,
+    "url": "/accounts",
+    "height": 1094,
+    "overflow": 0,
+    "text": "Accounts\nIn your accounts\n261,671 EGP\n\nIncludes 10,000 held for others, so you own 265,671.\n\nFrom SMS\n⋯\nImport\nAccounts\nHeld for others\nCash & bank\n97,368\nCash wallet\n10,475\nCIB Payroll\nBank account\n84,393\nVodafone Cash\n2,500\nDeposits\n100,000\nNBE CDs\nCertificates\n100,000\nInvestments\n78,303\nGold at home\nPhysical asset\n57,195\nTHNDR\nBrokerage\n21,108\nGam'eya\n−14,000\nOffice gam'eya\n−14,000\n\nSee all transactions",
+    "headings": [
+      {
+        "text": "Accounts",
+        "y": 72
+      },
+      {
+        "text": "Cash & bank",
+        "y": 346
+      },
+      {
+        "text": "Deposits",
+        "y": 568
+      },
+      {
+        "text": "Investments",
+        "y": 678
+      },
+      {
+        "text": "Gam'eya",
+        "y": 844
+      }
+    ],
+    "targets": [
+      {
+        "text": "From SMS",
+        "x": 16,
+        "y": 216,
+        "w": 118,
+        "h": 48
+      },
+      {
+        "text": "⋯",
+        "x": 142,
+        "y": 218,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "Import",
+        "x": 19,
+        "y": 279,
+        "w": 82,
+        "h": 40
+      },
+      {
+        "text": "Accounts",
+        "x": 103,
+        "y": 279,
+        "w": 102,
+        "h": 40
+      },
+      {
+        "text": "Held for others",
+        "x": 207,
+        "y": 279,
+        "w": 135,
+        "h": 40
+      },
+      {
+        "text": "Cash wallet\n10,475",
+        "x": 16,
+        "y": 376,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "CIB Payroll\nBank account\n84,393",
+        "x": 16,
+        "y": 432,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Vodafone Cash\n2,500",
+        "x": 16,
+        "y": 488,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "NBE CDs\nCertificates\n100,000",
+        "x": 16,
+        "y": 598,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Gold at home\nPhysical asset\n57,195",
+        "x": 16,
+        "y": 708,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "THNDR\nBrokerage\n21,108",
+        "x": 16,
+        "y": 764,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Office gam'eya\n−14,000",
+        "x": 16,
+        "y": 874,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "See all transactions",
+        "x": 16,
+        "y": 946,
+        "w": 135,
+        "h": 44
+      }
+    ]
+  },
+  "/accounts/1": {
+    "status": 200,
+    "url": "/accounts/1",
+    "height": 5175,
+    "overflow": 0,
+    "text": "CIB Payroll\n\nBank account · CIB\n\nIn this account\n\n84,393 EGP\n\nWhat you own 74,393 · Held for others 10,000\n\nMoney actions\n⋯\nAll\nIn\nOut\nTransfers\nTo sort\nAll time\nSelect\nToday\n−2,500\nTo Office gam'eya\nTransfer\n−2,000\n84,393.36\nToyota Finance\nLoan payments\n−2,500\n86,393.36\nTo Cash wallet\nTransfer\n−3,000\n88,893.36\nYesterday\nFitness Time Gym\nHealth\n−900\n91,893.36\n2026-11-03\nLandlord\nHousing & Rent\n−12,000\n92,793.36\n2026-11-02\nCarrefour\nFood & Groceries\n−3,250.75\n104,793.36\n2026-11-01\n+46,833\nNBE\nInterest\n+1,833.33\n108,044.11\nACME Egypt\nSalary\n+45,000\n106,210.78\n2026-10-28\nCIB\nFees & Charges\n−15\n61,210.78\n2026-10-25\nMom\nGifts & Donations\n−2,000\n61,225.78\n2026-10-24\nNorth Cairo Electricity\nUtilities & Bills\n−480\n63,225.78\n2026-10-22\nSeoudi\nFood & Groceries\n−1,452.60\n63,705.78\n2026-10-20\nWE Internet\nUtilities & Bills\n−650\n65,158.38\n2026-10-18\nAmazon\nShopping\n−1,299\n65,808.38\n2026-10-14\nL'Azurde ring\nBuy\n−18,450\n67,107.38\n2026-10-11\nTo THNDR\nTransfer\n−20,000\n85,557.38\n2026-10-10\n+9,588\nMom\nMoney Held for Others\n+10,000\n105,557.38\nTalabat\nEating Out\n−412\n95,557.38\n2026-10-07\nTo Vodafone Cash\nTransfer\n−1,000\n95,969.38\n2026-10-05\n−2,500\nFrom Office gam'eya\nTransfer\n+20,000\n96,969.38\nTo Office gam'eya\nTransfer\n−2,000\n76,969.38\nToyota Finance\nLoan payments\n−2,500\n78,969.38\nTo Cash wallet\nTransfer\n−3,000\n81,469.38\n2026-10-04\nFitness Time Gym\nHealth\n−900\n84,469.38\n2026-10-03\nLandlord\nHousing & Rent\n−12,000\n85,369.38\n2026-10-02\nCarrefour\nFood & Groceries\n−3,310.20\n97,369.38\n2026-10-01\n+46,833\nNBE\nInterest\n+1,833.33\n100,679.58\nACME Egypt\nSalary\n+45,000\n98,846.25\n2026-09-28\nCIB\nFees & Charges\n−15\n53,846.25\n2026-09-25\nMom\nGifts & Donations\n−2,000\n53,861.25\n2026-09-24\nNorth Cairo Electricity\nUtilities & Bills\n−480\n55,861.25\n2026-09-22\nSeoudi\nFood & Groceries\n−1,388.10\n56,341.25\n2026-09-20\nWE Internet\nUtilities & Bills\n−650\n57,729.35\n2026-09-10\nTalabat\nEating Out\n−540.25\n58,379.35\n2026-09-07\nTo Vodafone Cash\nTransfer\n−1,000\n58,919.60\n2026-09-05\n−2,500\nTo Office gam'eya\nTransfer\n−2,000\n59,919.60\nToyota Finance\nLoan payments\n−2,500\n61,919.60\nTo Cash wallet\nTransfer\n−3,000\n64,419.60\n2026-09-04\nFitness Time Gym\nHealth\n−900\n67,419.60\n2026-09-03\nLandlord\nHousing & Rent\n−12,000\n68,319.60\n2026-09-02\nCarrefour\nFood & Groceries\n−3,180.40\n80,319.60\n2026-09-01\n+45,000\nACME Egypt\nSalary\n+45,000\n83,500\nNBE\nBuy\n−100,000\n38,500\nOpening balance — CIB Payroll\nOpening balance\n+138,500\n138,500\nWhat depends on this account\nACME Egypt\nIncome\n45,000\nLandlord\nBill\n12,000\nCar loan\nLoan\n2,500\nWE Internet\nBill\n650\nNorth Cairo Electricity\nBill\n480\nOffice gam'eya\nGam’eya paid from here\n2,000\nNBE 3-year certificate\nCertificate interest comes here · matures 2029-09-01\n100,000",
+    "headings": [
+      {
+        "text": "CIB Payroll",
+        "y": 73
+      },
+      {
+        "text": "What depends on this account",
+        "y": 4598
+      }
+    ],
+    "targets": [
+      {
+        "text": "Money actions",
+        "x": 16,
+        "y": 257,
+        "w": 152,
+        "h": 48
+      },
+      {
+        "text": "⋯",
+        "x": 176,
+        "y": 259,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "Search transactions",
+        "x": 16,
+        "y": 317,
+        "w": 328,
+        "h": 48
+      },
+      {
+        "text": "All",
+        "x": 16,
+        "y": 375,
+        "w": 39,
+        "h": 40
+      },
+      {
+        "text": "In",
+        "x": 61,
+        "y": 375,
+        "w": 34,
+        "h": 40
+      },
+      {
+        "text": "Out",
+        "x": 101,
+        "y": 375,
+        "w": 47,
+        "h": 40
+      },
+      {
+        "text": "Transfers",
+        "x": 154,
+        "y": 375,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "To sort",
+        "x": 245,
+        "y": 375,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "All time",
+        "x": 18,
+        "y": 429,
+        "w": 87,
+        "h": 40
+      },
+      {
+        "text": "Select",
+        "x": 277,
+        "y": 429,
+        "w": 67,
+        "h": 40
+      },
+      {
+        "text": "To Office gam'eya\nTransfer\n−2,000\n84,393.36",
+        "x": 16,
+        "y": 497,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Toyota Finance\nLoan payments\n−2,500\n86,393.36",
+        "x": 16,
+        "y": 561,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "To Cash wallet\nTransfer\n−3,000\n88,893.36",
+        "x": 16,
+        "y": 625,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Fitness Time Gym\nHealth\n−900\n91,893.36",
+        "x": 16,
+        "y": 730,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Landlord\nHousing & Rent\n−12,000\n92,793.36",
+        "x": 16,
+        "y": 834,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Carrefour\nFood & Groceries\n−3,250.75\n104,793.36",
+        "x": 16,
+        "y": 938,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "NBE\nInterest\n+1,833.33\n108,044.11",
+        "x": 16,
+        "y": 1042,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "ACME Egypt\nSalary\n+45,000\n106,210.78",
+        "x": 16,
+        "y": 1106,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "CIB\nFees & Charges\n−15\n61,210.78",
+        "x": 16,
+        "y": 1211,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Mom\nGifts & Donations\n−2,000\n61,225.78",
+        "x": 16,
+        "y": 1315,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "North Cairo Electricity\nUtilities & Bills\n−480\n63,225.78",
+        "x": 16,
+        "y": 1419,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Seoudi\nFood & Groceries\n−1,452.60\n63,705.78",
+        "x": 16,
+        "y": 1523,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "WE Internet\nUtilities & Bills\n−650\n65,158.38",
+        "x": 16,
+        "y": 1628,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Amazon\nShopping\n−1,299\n65,808.38",
+        "x": 16,
+        "y": 1732,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "L'Azurde ring\nBuy\n−18,450\n67,107.38",
+        "x": 16,
+        "y": 1836,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "To THNDR\nTransfer\n−20,000\n85,557.38",
+        "x": 16,
+        "y": 1940,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Mom\nMoney Held for Others\n+10,000\n105,557.38",
+        "x": 16,
+        "y": 2045,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Talabat\nEating Out\n−412\n95,557.38",
+        "x": 16,
+        "y": 2109,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "To Vodafone Cash\nTransfer\n−1,000\n95,969.38",
+        "x": 16,
+        "y": 2213,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "From Office gam'eya\nTransfer\n+20,000\n96,969.38",
+        "x": 16,
+        "y": 2317,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "To Office gam'eya\nTransfer\n−2,000\n76,969.38",
+        "x": 16,
+        "y": 2381,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Toyota Finance\nLoan payments\n−2,500\n78,969.38",
+        "x": 16,
+        "y": 2445,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "To Cash wallet\nTransfer\n−3,000\n81,469.38",
+        "x": 16,
+        "y": 2509,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Fitness Time Gym\nHealth\n−900\n84,469.38",
+        "x": 16,
+        "y": 2613,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Landlord\nHousing & Rent\n−12,000\n85,369.38",
+        "x": 16,
+        "y": 2718,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Carrefour\nFood & Groceries\n−3,310.20\n97,369.38",
+        "x": 16,
+        "y": 2822,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "NBE\nInterest\n+1,833.33\n100,679.58",
+        "x": 16,
+        "y": 2926,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "ACME Egypt\nSalary\n+45,000\n98,846.25",
+        "x": 16,
+        "y": 2990,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "CIB\nFees & Charges\n−15\n53,846.25",
+        "x": 16,
+        "y": 3094,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Mom\nGifts & Donations\n−2,000\n53,861.25",
+        "x": 16,
+        "y": 3199,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "North Cairo Electricity\nUtilities & Bills\n−480\n55,861.25",
+        "x": 16,
+        "y": 3303,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Seoudi\nFood & Groceries\n−1,388.10\n56,341.25",
+        "x": 16,
+        "y": 3407,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "WE Internet\nUtilities & Bills\n−650\n57,729.35",
+        "x": 16,
+        "y": 3511,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Talabat\nEating Out\n−540.25\n58,379.35",
+        "x": 16,
+        "y": 3616,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "To Vodafone Cash\nTransfer\n−1,000\n58,919.60",
+        "x": 16,
+        "y": 3720,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "To Office gam'eya\nTransfer\n−2,000\n59,919.60",
+        "x": 16,
+        "y": 3824,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Toyota Finance\nLoan payments\n−2,500\n61,919.60",
+        "x": 16,
+        "y": 3888,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "To Cash wallet\nTransfer\n−3,000\n64,419.60",
+        "x": 16,
+        "y": 3952,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Fitness Time Gym\nHealth\n−900\n67,419.60",
+        "x": 16,
+        "y": 4056,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Landlord\nHousing & Rent\n−12,000\n68,319.60",
+        "x": 16,
+        "y": 4161,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Carrefour\nFood & Groceries\n−3,180.40\n80,319.60",
+        "x": 16,
+        "y": 4265,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "ACME Egypt\nSalary\n+45,000\n83,500",
+        "x": 16,
+        "y": 4369,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "NBE\nBuy\n−100,000\n38,500",
+        "x": 16,
+        "y": 4433,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Opening balance — CIB Payroll\nOpening balance\n+138,500\n138,500",
+        "x": 16,
+        "y": 4497,
+        "w": 328,
+        "h": 84
+      },
+      {
+        "text": "ACME Egypt\nIncome\n45,000",
+        "x": 33,
+        "y": 4632,
+        "w": 294,
+        "h": 56
+      },
+      {
+        "text": "Landlord\nBill\n12,000",
+        "x": 33,
+        "y": 4688,
+        "w": 294,
+        "h": 56
+      },
+      {
+        "text": "Car loan\nLoan\n2,500",
+        "x": 33,
+        "y": 4744,
+        "w": 294,
+        "h": 56
+      },
+      {
+        "text": "WE Internet\nBill\n650",
+        "x": 33,
+        "y": 4800,
+        "w": 294,
+        "h": 56
+      },
+      {
+        "text": "North Cairo Electricity\nBill\n480",
+        "x": 33,
+        "y": 4856,
+        "w": 294,
+        "h": 56
+      },
+      {
+        "text": "Office gam'eya\nGam’eya paid from here\n2,000",
+        "x": 33,
+        "y": 4912,
+        "w": 294,
+        "h": 56
+      },
+      {
+        "text": "NBE 3-year certificate\nCertificate interest comes here · matures ",
+        "x": 33,
+        "y": 4968,
+        "w": 294,
+        "h": 74
+      }
+    ]
+  },
+  "/birdview/expenses": {
+    "status": 200,
+    "url": "/birdview/expenses",
+    "height": 856,
+    "overflow": 0,
+    "text": "Spending\n2026-11\nSpending\nCompare periods\nReports\nMoney out so far\n18,651 EGP\nAgainst the same days in earlier months\n+5 · 0%\nAgainst 2026-10 days 1–5\n−59 · 0%\nWhere did it go?\n2026-11-01 to 2026-11-05\nHousing & Rent\n64% of money out\n12,000\nFood & Groceries\n17% of money out\n3,251\nLoan payments\n13% of money out\n2,500\nHealth\n5% of money out\n900\nMore analysis\nDays, months, money in and out\n›",
+    "headings": [
+      {
+        "text": "Spending",
+        "y": 72
+      },
+      {
+        "text": "Where did it go?",
+        "y": 434
+      }
+    ],
+    "targets": [
+      {
+        "text": "Previous month",
+        "x": 18,
+        "y": 99,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "2026-11",
+        "x": 68,
+        "y": 103,
+        "w": 97,
+        "h": 40
+      },
+      {
+        "text": "Next month",
+        "x": 167,
+        "y": 99,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "Spending",
+        "x": 19,
+        "y": 164,
+        "w": 94,
+        "h": 40
+      },
+      {
+        "text": "Compare periods",
+        "x": 115,
+        "y": 164,
+        "w": 142,
+        "h": 40
+      },
+      {
+        "text": "Reports",
+        "x": 258,
+        "y": 164,
+        "w": 83,
+        "h": 40
+      },
+      {
+        "text": "Housing & Rent\n64% of money out\n12,000",
+        "x": 16,
+        "y": 472,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Food & Groceries\n17% of money out\n3,251",
+        "x": 16,
+        "y": 528,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Loan payments\n13% of money out\n2,500",
+        "x": 16,
+        "y": 584,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Health\n5% of money out\n900",
+        "x": 16,
+        "y": 640,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "More analysis\nDays, months, money in and out\n›",
+        "x": 16,
+        "y": 696,
+        "w": 328,
+        "h": 56
+      }
+    ]
+  },
+  "/spending/compare": {
+    "status": 200,
+    "url": "/spending/compare",
+    "height": 1087,
+    "overflow": 0,
+    "text": "Compare periods\n\nMoney out is 59 lower than 2026-10-01 to 2026-10-05.\n\n2026-11-01 to 2026-11-05\n\nSpending\nCompare periods\nReports\nMoney out\n18,651EGP\n\n−59 against 2026-10-01 to 2026-10-05\n\nMonth\nQuarter\nYear\nThis period\nAgainst\nBy\nCategory\nCounterparty\nCompare\nExport CSV\nBiggest changes first\nMoney\nFood & Groceries\n−59\nBiggest changes first\nShow the numbers",
+    "headings": [
+      {
+        "text": "Compare periods",
+        "y": 76
+      },
+      {
+        "text": "Money out",
+        "y": 208
+      },
+      {
+        "text": "Biggest changes first",
+        "y": 787
+      }
+    ],
+    "targets": [
+      {
+        "text": "Spending",
+        "x": 19,
+        "y": 149,
+        "w": 92,
+        "h": 40
+      },
+      {
+        "text": "Compare periods",
+        "x": 113,
+        "y": 149,
+        "w": 143,
+        "h": 40
+      },
+      {
+        "text": "Reports",
+        "x": 259,
+        "y": 149,
+        "w": 82,
+        "h": 40
+      },
+      {
+        "text": "Month",
+        "x": 32,
+        "y": 386,
+        "w": 69,
+        "h": 40
+      },
+      {
+        "text": "Quarter",
+        "x": 105,
+        "y": 386,
+        "w": 77,
+        "h": 40
+      },
+      {
+        "text": "Year",
+        "x": 186,
+        "y": 386,
+        "w": 55,
+        "h": 40
+      },
+      {
+        "text": "a_from",
+        "x": 32,
+        "y": 461,
+        "w": 91,
+        "h": 48
+      },
+      {
+        "text": "Choose date",
+        "x": 129,
+        "y": 461,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "a_to",
+        "x": 183,
+        "y": 461,
+        "w": 91,
+        "h": 48
+      },
+      {
+        "text": "Choose date",
+        "x": 280,
+        "y": 461,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "b_from",
+        "x": 32,
+        "y": 544,
+        "w": 91,
+        "h": 48
+      },
+      {
+        "text": "Choose date",
+        "x": 129,
+        "y": 544,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "b_to",
+        "x": 183,
+        "y": 544,
+        "w": 91,
+        "h": 48
+      },
+      {
+        "text": "Choose date",
+        "x": 280,
+        "y": 544,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "Category\nCounterparty",
+        "x": 32,
+        "y": 626,
+        "w": 172,
+        "h": 48
+      },
+      {
+        "text": "Compare",
+        "x": 32,
+        "y": 686,
+        "w": 92,
+        "h": 48
+      },
+      {
+        "text": "Export CSV",
+        "x": 132,
+        "y": 686,
+        "w": 105,
+        "h": 48
+      },
+      {
+        "text": "Show the numbers",
+        "x": 33,
+        "y": 910,
+        "w": 117,
+        "h": 44
+      }
+    ]
+  },
+  "/reports": {
+    "status": 200,
+    "url": "/reports",
+    "height": 1186,
+    "overflow": 0,
+    "text": "Reports\nExport all data (CSV or Excel)\nPrint this page\nSpending\nCompare periods\nReports\n\nAge of Money and spending calendar\n\nThis month against last month\n18,651EGP\n−59 against 18,710 before · biggest change Food & Groceries\nThis quarter against last quarter\n44,305EGP\n+44,305 against 0 before · biggest change Housing & Rent\nThis year against last year\n68,548EGP\n+68,548 against 0 before · biggest change Housing & Rent\n\nNo saved views yet. Save a filter on Transactions to see it here.",
+    "headings": [
+      {
+        "text": "Reports",
+        "y": 80
+      }
+    ],
+    "targets": [
+      {
+        "text": "Export all data (CSV or Excel)",
+        "x": 16,
+        "y": 96,
+        "w": 257,
+        "h": 48
+      },
+      {
+        "text": "Print this page",
+        "x": 16,
+        "y": 152,
+        "w": 152,
+        "h": 48
+      },
+      {
+        "text": "Spending",
+        "x": 19,
+        "y": 215,
+        "w": 93,
+        "h": 40
+      },
+      {
+        "text": "Compare periods",
+        "x": 114,
+        "y": 215,
+        "w": 142,
+        "h": 40
+      },
+      {
+        "text": "Reports",
+        "x": 258,
+        "y": 215,
+        "w": 83,
+        "h": 40
+      },
+      {
+        "text": "Age of Money and spending calendar",
+        "x": 16,
+        "y": 273,
+        "w": 240,
+        "h": 19
+      },
+      {
+        "text": "This month against last month",
+        "x": 17,
+        "y": 309,
+        "w": 326,
+        "h": 223
+      },
+      {
+        "text": "This quarter against last quarter",
+        "x": 17,
+        "y": 550,
+        "w": 326,
+        "h": 223
+      },
+      {
+        "text": "This year against last year",
+        "x": 17,
+        "y": 791,
+        "w": 326,
+        "h": 223
+      }
+    ]
+  },
+  "/plan": {
+    "status": 200,
+    "url": "/plan",
+    "height": 1751,
+    "overflow": 0,
+    "text": "Cash planning\nDue before payday\nAs of 2026-11-05\n1,480 EGP\n\n3 payments until 2026-12-01. All covered by free cash.\n\nPlan\nRecurring\nLoans\n\nCompare scenarios\n\nForecast inputs\n\nComing up\nVodafone\nSubscription · in 4 days · 2026-11-09\n−350\nWE Internet\nBill · in 15 days · 2026-11-20\n−650\nNorth Cairo Electricity\nBill · in 19 days · 2026-11-24\n−480\nACME Egypt\nPayday · in 26 days · 2026-12-01\n+45,000\nMore in the next 30 days\n2026-11-05 to 2026-12-05\n2\nFree cash\n67,368\nAfter bills: 65,888\nReserves\n20,000\nEmergency fund 0.8 months\nSafe to spend\nTo 2026-12-01\n\nFrom free cash, after what is promised\n\n51,420 EGP\n\nYou can spend 51,420 before payday and stay on plan.\n\nFree cash\n67,368\nDue before payday\n−1,480\nBudget until payday\n−5,468\nEmergency fund top-up\n−5,404\nRest of savings target\n−3,596\nSafe to spend\n51,420\nWhere cash is heading\nNext 3 months\nFree cash, then the forecast\nLowest 51,420 in 2026-11\n›\nEach month ahead\nEstimates: money in, money out, what is left\n›\nWhat is promised\nToday\nWhat you owe\nBills already due, loans and what you owe a gam'eya\n66,500\n›",
+    "headings": [
+      {
+        "text": "Cash planning",
+        "y": 72
+      },
+      {
+        "text": "Coming up",
+        "y": 359
+      },
+      {
+        "text": "Safe to spend",
+        "y": 843
+      },
+      {
+        "text": "Where cash is heading",
+        "y": 1361
+      },
+      {
+        "text": "What is promised",
+        "y": 1543
+      }
+    ],
+    "targets": [
+      {
+        "text": "Plan",
+        "x": 19,
+        "y": 219,
+        "w": 91,
+        "h": 40
+      },
+      {
+        "text": "Recurring",
+        "x": 112,
+        "y": 219,
+        "w": 126,
+        "h": 40
+      },
+      {
+        "text": "Loans",
+        "x": 240,
+        "y": 219,
+        "w": 101,
+        "h": 40
+      },
+      {
+        "text": "Compare scenarios",
+        "x": 16,
+        "y": 277,
+        "w": 127,
+        "h": 19
+      },
+      {
+        "text": "Forecast inputs",
+        "x": 16,
+        "y": 313,
+        "w": 102,
+        "h": 19
+      },
+      {
+        "text": "Vodafone\nSubscription · in 4 days · 2026-11-09\n−350",
+        "x": 16,
+        "y": 397,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "WE Internet\nBill · in 15 days · 2026-11-20\n−650",
+        "x": 16,
+        "y": 453,
+        "w": 328,
+        "h": 57
+      },
+      {
+        "text": "North Cairo Electricity\nBill · in 19 days · 2026-11-24\n−480",
+        "x": 16,
+        "y": 510,
+        "w": 328,
+        "h": 57
+      },
+      {
+        "text": "ACME Egypt\nPayday · in 26 days · 2026-12-01\n+45,000",
+        "x": 16,
+        "y": 567,
+        "w": 328,
+        "h": 57
+      },
+      {
+        "text": "More in the next 30 days\n2026-11-05 to 2026-12-05\n2",
+        "x": 16,
+        "y": 624,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Free cash\n67,368\nAfter bills: 65,888",
+        "x": 16,
+        "y": 690,
+        "w": 158,
+        "h": 121
+      },
+      {
+        "text": "Reserves\n20,000\nEmergency fund 0.8 months",
+        "x": 186,
+        "y": 690,
+        "w": 158,
+        "h": 121
+      },
+      {
+        "text": "Free cash, then the forecast\nLowest 51,420 in 2026-11\n›",
+        "x": 16,
+        "y": 1399,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Each month ahead\nEstimates: money in, money out, what is left\n›",
+        "x": 16,
+        "y": 1455,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "What you owe\nBills already due, loans and what you owe a gam'eya\n",
+        "x": 16,
+        "y": 1581,
+        "w": 328,
+        "h": 66
+      }
+    ]
+  },
+  "/plan/recurring": {
+    "status": 200,
+    "url": "/plan/recurring",
+    "height": 1016,
+    "overflow": 0,
+    "text": "Cash planning\nAdd recurring item\nPlan\nRecurring\nLoans\nRecurring items\n5 active\nVodafone\nSubscription · Monthly on day 9 · Next 2026-11-09\n−350\nWE Internet\nBill · Monthly on day 20 · Next 2026-11-20\n−650\nNorth Cairo Electricity\nBill · Monthly on day 24 · Next 2026-11-24\n−480\nACME Egypt\nIncome · Monthly on day 1 · Next 2026-12-01\n+45,000\nLandlord\nBill · Monthly on day 3 · Next 2026-12-03\n−12,000\nEvery month\nBills and subscriptions\nSubscriptions come to 4,200 a year.\n13,480\nFixed costs to income\n15,980 a month of 45,000 income · bills, subscriptions and loans\n35.5%\nLooks recurring\nFrom your last six months\nFitness Time Gym\n3 months · usually around day 4\n−900 EGP\nTrack\n⋯",
+    "headings": [
+      {
+        "text": "Cash planning",
+        "y": 72
+      },
+      {
+        "text": "Recurring items",
+        "y": 223
+      },
+      {
+        "text": "Every month",
+        "y": 574
+      },
+      {
+        "text": "Looks recurring",
+        "y": 774
+      }
+    ],
+    "targets": [
+      {
+        "text": "Add recurring item",
+        "x": 16,
+        "y": 85,
+        "w": 181,
+        "h": 48
+      },
+      {
+        "text": "Plan",
+        "x": 19,
+        "y": 148,
+        "w": 90,
+        "h": 40
+      },
+      {
+        "text": "Recurring",
+        "x": 111,
+        "y": 148,
+        "w": 127,
+        "h": 40
+      },
+      {
+        "text": "Loans",
+        "x": 240,
+        "y": 148,
+        "w": 101,
+        "h": 40
+      },
+      {
+        "text": "Vodafone\nSubscription · Monthly on day 9 · Next 2026-11-09",
+        "x": 16,
+        "y": 262,
+        "w": 283,
+        "h": 55
+      },
+      {
+        "text": "WE Internet\nBill · Monthly on day 20 · Next 2026-11-20",
+        "x": 16,
+        "y": 318,
+        "w": 282,
+        "h": 55
+      },
+      {
+        "text": "North Cairo Electricity\nBill · Monthly on day 24 · Next 2026-11-2",
+        "x": 16,
+        "y": 374,
+        "w": 282,
+        "h": 55
+      },
+      {
+        "text": "ACME Egypt\nIncome · Monthly on day 1 · Next 2026-12-01",
+        "x": 16,
+        "y": 431,
+        "w": 259,
+        "h": 55
+      },
+      {
+        "text": "Landlord\nBill · Monthly on day 3 · Next 2026-12-03",
+        "x": 16,
+        "y": 487,
+        "w": 262,
+        "h": 55
+      },
+      {
+        "text": "Fixed costs to income\n15,980 a month of 45,000 income · bills, su",
+        "x": 16,
+        "y": 668,
+        "w": 328,
+        "h": 74
+      },
+      {
+        "text": "Track",
+        "x": 16,
+        "y": 862,
+        "w": 37,
+        "h": 44
+      },
+      {
+        "text": "⋯",
+        "x": 77,
+        "y": 862,
+        "w": 44,
+        "h": 44
+      }
+    ]
+  },
+  "/plan/loans": {
+    "status": 200,
+    "url": "/plan/loans",
+    "height": 1396,
+    "overflow": 0,
+    "text": "Cash planning\nAdd loan\nPlan\nRecurring\nLoans\nLoans still to pay\n52,500EGP\n\n7,500 paid of 60,000 in 1 loan\n\nPaid\nLeft\nCar loan\n3 of 24 paid\n52,500\nDebt to net worth\n66,500 owed against 199,171 net worth\n33.4%\nDebt to cash\n66,500 owed against 87,768 cash you own\n75.8%\nLoan payments to income\n2,500 a month of 45,000 income\n5.6%\nPaid off on\n2028-08-05\n\n3 of 24 payments made.\n\nBought in instalments\nYour loans\nLoans still to pay 52,500 EGP\nCar loan\n\nMonthly on day 5 · 24 payments · from CIB Payroll · borrowed 60,000 EGP\n\nPay early\nPayments made\n3 of 24 · 7,500\nStill to pay\n52,500\nNext payment\n2,500 on 2026-12-05\nLast payment\n2028-08-05",
+    "headings": [
+      {
+        "text": "Cash planning",
+        "y": 80
+      },
+      {
+        "text": "Loans still to pay",
+        "y": 218
+      },
+      {
+        "text": "Your loans",
+        "y": 829
+      },
+      {
+        "text": "Car loan",
+        "y": 901
+      }
+    ],
+    "targets": [
+      {
+        "text": "Add loan",
+        "x": 16,
+        "y": 96,
+        "w": 109,
+        "h": 48
+      },
+      {
+        "text": "Plan",
+        "x": 19,
+        "y": 159,
+        "w": 91,
+        "h": 40
+      },
+      {
+        "text": "Recurring",
+        "x": 112,
+        "y": 159,
+        "w": 126,
+        "h": 40
+      },
+      {
+        "text": "Loans",
+        "x": 239,
+        "y": 159,
+        "w": 102,
+        "h": 40
+      },
+      {
+        "text": "Car loan\n3 of 24 paid\n52,500",
+        "x": 32,
+        "y": 435,
+        "w": 296,
+        "h": 63
+      },
+      {
+        "text": "Debt to net worth\n66,500 owed against 199,171 net worth\n33.4%",
+        "x": 16,
+        "y": 526,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Debt to cash\n66,500 owed against 87,768 cash you own\n75.8%",
+        "x": 16,
+        "y": 582,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Loan payments to income\n2,500 a month of 45,000 income\n5.6%",
+        "x": 16,
+        "y": 638,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Bought in instalments",
+        "x": 16,
+        "y": 808,
+        "w": 144,
+        "h": 19
+      },
+      {
+        "text": "Car loan",
+        "x": 33,
+        "y": 902,
+        "w": 77,
+        "h": 24
+      },
+      {
+        "text": "Pay early",
+        "x": 33,
+        "y": 977,
+        "w": 80,
+        "h": 44
+      }
+    ]
+  },
+  "/plan/reserves": {
+    "status": 200,
+    "url": "/plan/reserves",
+    "height": 1332,
+    "overflow": 0,
+    "text": "Safety\nReserves\nLimits\nEmergency fund covers\n0.8 months\n\nOf average monthly spending. The aim is six.\n\nFree cash can bring your emergency fund closer to its target.\nRefill 67,368\nEmergency fund\nTowards six months of spending\n129,693 to go\n20,000 of 149,693\n\nYour emergency target is more than the cash you own.\n\nEmergency fund top-up\n5,404\na month to reach six months within two years; the budget leaves room for it\nAverage monthly spending\n24,949\n2026-08 to 2026-10 · 2 months with spending\n\nCounted in months of spending · Change in Settings\n\nAmount set aside\n20,000\nEGP\nEdit\n\nCould also use\n· Free cash 67,368 · 4 more sources\nWhat are you saving for?\n\nNothing yet. Add a reserve below for a payment or a savings goal.\n\nAdd a reserve",
+    "headings": [
+      {
+        "text": "Safety",
+        "y": 80
+      },
+      {
+        "text": "Emergency fund",
+        "y": 381
+      },
+      {
+        "text": "What are you saving for?",
+        "y": 991
+      }
+    ],
+    "targets": [
+      {
+        "text": "Reserves",
+        "x": 19,
+        "y": 99,
+        "w": 171,
+        "h": 40
+      },
+      {
+        "text": "Limits",
+        "x": 192,
+        "y": 99,
+        "w": 149,
+        "h": 40
+      },
+      {
+        "text": "Refill 67,368",
+        "x": 33,
+        "y": 327,
+        "w": 294,
+        "h": 40
+      },
+      {
+        "text": "Change in Settings",
+        "x": 217,
+        "y": 826,
+        "w": 107,
+        "h": 17
+      },
+      {
+        "text": "Edit",
+        "x": 226,
+        "y": 856,
+        "w": 26,
+        "h": 22
+      },
+      {
+        "text": "Could also use\n· Free cash 67,368 · 4 more sources",
+        "x": 33,
+        "y": 886,
+        "w": 294,
+        "h": 51
+      },
+      {
+        "text": "Add a reserve",
+        "x": 33,
+        "y": 1151,
+        "w": 294,
+        "h": 48
+      }
+    ]
+  },
+  "/plan/scenarios": {
+    "status": 200,
+    "url": "/plan/scenarios",
+    "height": 1682,
+    "overflow": 0,
+    "text": "Compare scenarios\n\n2026-11-05 · 2027-02-03\n\nScheduled cash only: confirmed opening cash, outstanding payments and certificate events. Excludes variable spending and savings goals. Reserves stay in cash. No plans or transactions are saved.\n\nComparison\n\nOverdue income has no assumed receipt date. A delayed occurrence replaces its original date; it is never counted twice. Rates stay fixed at today’s rates.\n\nLowest scheduled cash\n86,288.36 EGP · 2026-11-24\n86,288.36 EGP · 2026-11-24\nFirst shortfall\nNone\nNone\n\nIncome with a possible recorded match is excluded pending review. Unambiguous recorded payments are not counted again.\n\nNo changes selected.\n\nIncome delay\nIncome payment\nNo change\nACME Egypt · 2026-12-01\nACME Egypt · 2027-01-01\nACME Egypt · 2027-02-01\nDelay in days\nOne purchase\nAmountDate\nAccount\nChoose account\nCIB Payroll · EGP\nCash wallet · EGP\nVodafone Cash · EGP\nTHNDR · EGP\nChange one bill payment\nBill\nNo change\nVodafone · 2026-11-09\nWE Internet · 2026-11-20\nNorth Cairo Electricity · 2026-11-24\nLandlord · 2026-12-03\nVodafone · 2026-12-09\nWE Internet · 2026-12-20\nNorth Cairo Electricity · 2026-12-24\nLandlord · 2027-01-03\nVodafone · 2027-01-09\nWE Internet · 2027-01-20\nNorth Cairo Electricity · 2027-01-24\nLandlord · 2027-02-03\nNew amountCompare\nCash planning",
+    "headings": [
+      {
+        "text": "Compare scenarios",
+        "y": 72
+      },
+      {
+        "text": "Comparison",
+        "y": 266
+      },
+      {
+        "text": "Income delay",
+        "y": 858
+      },
+      {
+        "text": "One purchase",
+        "y": 1032
+      },
+      {
+        "text": "Change one bill payment",
+        "y": 1278
+      }
+    ],
+    "targets": [
+      {
+        "text": "No change\nACME Egypt · 2026-12-01\nACME Egypt · 2027-01-01\nACME Eg",
+        "x": 33,
+        "y": 914,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "delay",
+        "x": 33,
+        "y": 984,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "purchase",
+        "x": 33,
+        "y": 1089,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "purchase_date",
+        "x": 33,
+        "y": 1159,
+        "w": 240,
+        "h": 48
+      },
+      {
+        "text": "Choose date",
+        "x": 279,
+        "y": 1159,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "Choose account\nCIB Payroll · EGP\nCash wallet · EGP\nVodafone Cash ",
+        "x": 33,
+        "y": 1230,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "No change\nVodafone · 2026-11-09\nWE Internet · 2026-11-20\nNorth Ca",
+        "x": 33,
+        "y": 1334,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "bill_amount",
+        "x": 33,
+        "y": 1405,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Compare",
+        "x": 33,
+        "y": 1453,
+        "w": 92,
+        "h": 48
+      },
+      {
+        "text": "Cash planning",
+        "x": 16,
+        "y": 1530,
+        "w": 150,
+        "h": 48
+      }
+    ]
+  },
+  "/plan/payday": {
+    "status": 404,
+    "url": "/plan/payday",
+    "height": 800,
+    "overflow": 0,
+    "text": "Not found\nThat page does not exist. Back to the dashboard",
+    "headings": [
+      {
+        "text": "Not found",
+        "y": 72
+      }
+    ],
+    "targets": [
+      {
+        "text": "Back to the dashboard",
+        "x": 145,
+        "y": 102,
+        "w": 156,
+        "h": 41
+      }
+    ]
+  },
+  "/investments": {
+    "status": 200,
+    "url": "/investments",
+    "height": 2473,
+    "overflow": 0,
+    "text": "Investments\nPortfolio value\n177,903 EGP\n\nUp 7,896 this month (+5.0%).\n\nHoldings\nPlanner\nPrices\nCurrencies\n2026-11\n177,903\n2026-11-01\n2026-11-03\n2026-11-05\nShow the numbers\nPortfolio value over time\nMonth\nYTD\nAll\nReturn\nHeld 65 days\n+8.7%\nHoldings\nSee all\nNBE 3-year certificate\nCDs / Time Deposits · +3.7%\n100,000\nGold pound (from grandma)\nGold · +28.3%\n37,200\nL'Azurde ring\nGold · +8.4%\n19,995\nCOMI\nStocks · +6.8%\n12,975\nFWRY\nStocks · +5.6%\n4,700\nAllocation\n2026-11-05\nHoldings value by asset class\n177,903\nHoldings value\nCDs / Time Deposits\n56.2%\n100,000\nMoney Market Fund\n1.7%\n3,033\nGold\n32.1%\n57,195\nStocks\n9.9%\n17,675\nTotal\n100%\n177,903\nLocked certificate · NBE 3-year certificate\nnot counted until 2027-09-01\n100,000\nBrokerage cash\n400\nHoldings after sale (estimate)\n74,007\nIncome collected (dividends and interest)\n2026 so far\nNBE 3-year certificate\n3,667\nSee them\nIntended horizon\nToday\nUnassigned · 100%\n177,903\n\nOpen a holding to set its horizon.",
+    "headings": [
+      {
+        "text": "Investments",
+        "y": 72
+      },
+      {
+        "text": "Holdings",
+        "y": 753
+      },
+      {
+        "text": "Allocation",
+        "y": 1154
+      },
+      {
+        "text": "Holdings value by asset class",
+        "y": 1209
+      },
+      {
+        "text": "Income collected (dividends and interest)",
+        "y": 1957
+      },
+      {
+        "text": "Intended horizon",
+        "y": 2211
+      }
+    ],
+    "targets": [
+      {
+        "text": "Holdings",
+        "x": 19,
+        "y": 199,
+        "w": 82,
+        "h": 40
+      },
+      {
+        "text": "Planner",
+        "x": 103,
+        "y": 199,
+        "w": 74,
+        "h": 40
+      },
+      {
+        "text": "Prices",
+        "x": 179,
+        "y": 199,
+        "w": 64,
+        "h": 40
+      },
+      {
+        "text": "Currencies",
+        "x": 246,
+        "y": 199,
+        "w": 95,
+        "h": 40
+      },
+      {
+        "text": "Previous month",
+        "x": 18,
+        "y": 256,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "2026-11",
+        "x": 68,
+        "y": 260,
+        "w": 97,
+        "h": 40
+      },
+      {
+        "text": "Next month",
+        "x": 167,
+        "y": 256,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "Show the numbers",
+        "x": 33,
+        "y": 589,
+        "w": 117,
+        "h": 44
+      },
+      {
+        "text": "Month",
+        "x": 37,
+        "y": 533,
+        "w": 93,
+        "h": 44
+      },
+      {
+        "text": "YTD",
+        "x": 134,
+        "y": 533,
+        "w": 93,
+        "h": 44
+      },
+      {
+        "text": "All",
+        "x": 230,
+        "y": 533,
+        "w": 93,
+        "h": 44
+      },
+      {
+        "text": "See all",
+        "x": 299,
+        "y": 746,
+        "w": 45,
+        "h": 44
+      },
+      {
+        "text": "NBE 3-year certificate\nCDs / Time Deposits · +3.7%\n100,000",
+        "x": 16,
+        "y": 802,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Gold pound (from grandma)\nGold · +28.3%\n37,200",
+        "x": 16,
+        "y": 866,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "L'Azurde ring\nGold · +8.4%\n19,995",
+        "x": 16,
+        "y": 930,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "COMI\nStocks · +6.8%\n12,975",
+        "x": 16,
+        "y": 994,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "FWRY\nStocks · +5.6%\n4,700",
+        "x": 16,
+        "y": 1058,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "See them",
+        "x": 33,
+        "y": 2118,
+        "w": 64,
+        "h": 44
+      }
+    ]
+  },
+  "/investments/planner": {
+    "status": 200,
+    "url": "/investments/planner",
+    "height": 1247,
+    "overflow": 0,
+    "text": "Planner\nHoldings\nPlanner\nPrices\nCurrencies\nAmount in EGP\nMonthly investing goal\nHow to split it\nSpread across gaps\nBiggest gaps first\nShow suggested split\n\nBy your current mix — set targets to change it · Set target allocation\n\nSuggested allocation\n10,000\nCDs / Time Deposits · 5,621 · 56%\nGold · 3,215 · 32%\nStocks · 994 · 10%\nMoney Market Fund · 170 · 2%\nCDs / Time Deposits\nCurrent 100,000 · 56.2%\n5,621\nGold\nCurrent 57,195 · 32.1%\n3,215\nStocks\nCurrent 17,675 · 9.9%\n994\nMoney Market Fund\nCurrent 3,033 · 1.7%\n170\n\nEach class gets the same share of the amount as it holds now. Nothing is sold.",
+    "headings": [
+      {
+        "text": "Planner",
+        "y": 73
+      },
+      {
+        "text": "Suggested allocation",
+        "y": 637
+      }
+    ],
+    "targets": [
+      {
+        "text": "Holdings",
+        "x": 19,
+        "y": 128,
+        "w": 81,
+        "h": 40
+      },
+      {
+        "text": "Planner",
+        "x": 102,
+        "y": 128,
+        "w": 75,
+        "h": 40
+      },
+      {
+        "text": "Prices",
+        "x": 179,
+        "y": 128,
+        "w": 64,
+        "h": 40
+      },
+      {
+        "text": "Currencies",
+        "x": 246,
+        "y": 128,
+        "w": 95,
+        "h": 40
+      },
+      {
+        "text": "amount",
+        "x": 39,
+        "y": 216,
+        "w": 200,
+        "h": 48
+      },
+      {
+        "text": "monthly_goal",
+        "x": 39,
+        "y": 302,
+        "w": 200,
+        "h": 48
+      },
+      {
+        "text": "mode",
+        "x": 43,
+        "y": 368,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "mode",
+        "x": 182,
+        "y": 368,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Show suggested split",
+        "x": 39,
+        "y": 434,
+        "w": 169,
+        "h": 48
+      },
+      {
+        "text": "Set target allocation",
+        "x": 38,
+        "y": 554,
+        "w": 135,
+        "h": 19
+      }
+    ]
+  },
+  "/investments/prices": {
+    "status": 200,
+    "url": "/investments/prices",
+    "height": 3398,
+    "overflow": 0,
+    "text": "Investment prices\nHoldings\nPlanner\nPrices\nCurrencies\nUpdate prices\nWhere prices come from\nUpdate prices\nUpload prices from a spreadsheet\nShared price files\nAs of\nCommercial International Bank (COMI) edit\n150 shares\n86.5\n2026-11-05\nFawry for Banking Technology edit\n500 shares\n9.4\n2026-11-05\nGold pound (from grandma) edit\n1 piece\n37,200\n2026-11-05\nL'Azurde ring edit\n1 piece\n19,995\n2026-11-05\nMoney market fund edit\n25 units\n121.3\n2026-11-05\nNBE 3-year certificate edit\n1 certificate\n100,000\n2026-09-01 · last trade\nSet at purchase\n18K gold price reference edit\n—\nnone\n—\n21K gold price reference edit\n—\n4,650\n2026-11-05\n—\n24K gold price reference edit\n—\nnone\n—\nSave prices\nCancel",
+    "headings": [
+      {
+        "text": "Investment prices",
+        "y": 72
+      },
+      {
+        "text": "Update prices",
+        "y": 159
+      }
+    ],
+    "targets": [
+      {
+        "text": "Holdings",
+        "x": 19,
+        "y": 99,
+        "w": 81,
+        "h": 40
+      },
+      {
+        "text": "Planner",
+        "x": 102,
+        "y": 99,
+        "w": 74,
+        "h": 40
+      },
+      {
+        "text": "Prices",
+        "x": 178,
+        "y": 99,
+        "w": 65,
+        "h": 40
+      },
+      {
+        "text": "Currencies",
+        "x": 246,
+        "y": 99,
+        "w": 95,
+        "h": 40
+      },
+      {
+        "text": "Where prices come from",
+        "x": 33,
+        "y": 193,
+        "w": 294,
+        "h": 20
+      },
+      {
+        "text": "Update prices",
+        "x": 33,
+        "y": 213,
+        "w": 122,
+        "h": 48
+      },
+      {
+        "text": "Upload prices from a spreadsheet",
+        "x": 33,
+        "y": 277,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Shared price files",
+        "x": 33,
+        "y": 341,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "date",
+        "x": 33,
+        "y": 484,
+        "w": 166,
+        "h": 48
+      },
+      {
+        "text": "Choose date",
+        "x": 205,
+        "y": 484,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "edit",
+        "x": 298,
+        "y": 579,
+        "w": 23,
+        "h": 17
+      },
+      {
+        "text": "Total value of Commercial International Bank (COMI)",
+        "x": 33,
+        "y": 724,
+        "w": 288,
+        "h": 48
+      },
+      {
+        "text": "p_11",
+        "x": 33,
+        "y": 796,
+        "w": 288,
+        "h": 48
+      },
+      {
+        "text": "edit",
+        "x": 239,
+        "y": 890,
+        "w": 23,
+        "h": 17
+      },
+      {
+        "text": "Total value of Fawry for Banking Technology",
+        "x": 33,
+        "y": 1035,
+        "w": 229,
+        "h": 48
+      },
+      {
+        "text": "p_12",
+        "x": 33,
+        "y": 1107,
+        "w": 229,
+        "h": 48
+      },
+      {
+        "text": "edit",
+        "x": 226,
+        "y": 1201,
+        "w": 23,
+        "h": 17
+      },
+      {
+        "text": "Total value of Gold pound (from grandma)",
+        "x": 33,
+        "y": 1346,
+        "w": 229,
+        "h": 48
+      },
+      {
+        "text": "p_14",
+        "x": 33,
+        "y": 1418,
+        "w": 229,
+        "h": 48
+      },
+      {
+        "text": "edit",
+        "x": 126,
+        "y": 1512,
+        "w": 23,
+        "h": 17
+      },
+      {
+        "text": "Total value of L'Azurde ring",
+        "x": 33,
+        "y": 1657,
+        "w": 229,
+        "h": 48
+      },
+      {
+        "text": "p_15",
+        "x": 33,
+        "y": 1729,
+        "w": 229,
+        "h": 48
+      },
+      {
+        "text": "edit",
+        "x": 170,
+        "y": 1823,
+        "w": 23,
+        "h": 17
+      },
+      {
+        "text": "Total value of Money market fund",
+        "x": 33,
+        "y": 1968,
+        "w": 229,
+        "h": 48
+      },
+      {
+        "text": "p_13",
+        "x": 33,
+        "y": 2040,
+        "w": 229,
+        "h": 48
+      },
+      {
+        "text": "edit",
+        "x": 187,
+        "y": 2134,
+        "w": 23,
+        "h": 17
+      },
+      {
+        "text": "Total value of NBE 3-year certificate",
+        "x": 33,
+        "y": 2278,
+        "w": 229,
+        "h": 48
+      },
+      {
+        "text": "edit",
+        "x": 201,
+        "y": 2417,
+        "w": 23,
+        "h": 17
+      },
+      {
+        "text": "p_7",
+        "x": 33,
+        "y": 2590,
+        "w": 229,
+        "h": 48
+      },
+      {
+        "text": "edit",
+        "x": 201,
+        "y": 2684,
+        "w": 23,
+        "h": 17
+      },
+      {
+        "text": "p_8",
+        "x": 33,
+        "y": 2875,
+        "w": 229,
+        "h": 48
+      },
+      {
+        "text": "edit",
+        "x": 203,
+        "y": 2969,
+        "w": 23,
+        "h": 17
+      },
+      {
+        "text": "p_9",
+        "x": 33,
+        "y": 3142,
+        "w": 229,
+        "h": 48
+      },
+      {
+        "text": "Save prices",
+        "x": 33,
+        "y": 3217,
+        "w": 106,
+        "h": 48
+      },
+      {
+        "text": "Cancel",
+        "x": 147,
+        "y": 3217,
+        "w": 78,
+        "h": 48
+      }
+    ]
+  },
+  "/accounts/currencies": {
+    "status": 200,
+    "url": "/accounts/currencies",
+    "height": 800,
+    "overflow": 0,
+    "text": "Currencies\n\nForeign money\n\n0 EGP\nYear to date\nHoldings\nPlanner\nPrices\nCurrencies\n\nNo accounts use another currency yet.\n\nAdd an account",
+    "headings": [
+      {
+        "text": "Currencies",
+        "y": 76
+      }
+    ],
+    "targets": [
+      {
+        "text": "Year to date",
+        "x": 18,
+        "y": 189,
+        "w": 124,
+        "h": 40
+      },
+      {
+        "text": "Holdings",
+        "x": 19,
+        "y": 246,
+        "w": 81,
+        "h": 40
+      },
+      {
+        "text": "Planner",
+        "x": 102,
+        "y": 246,
+        "w": 74,
+        "h": 40
+      },
+      {
+        "text": "Prices",
+        "x": 178,
+        "y": 246,
+        "w": 64,
+        "h": 40
+      },
+      {
+        "text": "Currencies",
+        "x": 245,
+        "y": 246,
+        "w": 96,
+        "h": 40
+      },
+      {
+        "text": "Add an account",
+        "x": 33,
+        "y": 334,
+        "w": 294,
+        "h": 48
+      }
+    ]
+  },
+  "/financial-health": {
+    "status": 200,
+    "url": "/financial-health",
+    "height": 2358,
+    "overflow": 0,
+    "text": "Financial health\n\nOne thing needs you: Emergency fund. Everything else is within your limits.\n\nBalances as of 2026-11-05 · savings rate from 2026-10\n\nAs of 2026-11-05\nReserves\nLimits\nWithin your limits\n4\n\nof the 6 figures you set a limit for\n\n1 needs you\n\nNeeds you · 1\nManage Needs you\nEmergency fund is outside your limit\nBelow 3 months: needs you · As of 2026-11-05 · months of average monthly spending\nSee details\nAgainst your limits\n4 of 6 within your limits\nCushion\nEmergency fund\n0.8 months\nNeeds you\nAs of 2026-11-05 · months of average monthly spending\n3.5 months in cash you own\nSaving\nSavings rate\n45.2%\nGood\n2026-10\nPlanned savings rate\n43.1%\nGood\n2026-11 plan\nInvesting rate\n96.6%\nNo limit\n2026-10\nDebt and monthly commitments\nDebt to cash\n75.8%\nNo limit\n2026-11-05\nDebt to net worth\n33.4%\nWatch\n2026-11-05\nFixed costs to income\n35.5%\nGood\nMonthly · 2026-08 to 2026-10\nLoan payments to income\n5.6%\nGood\nMonthly · 2026-08 to 2026-10\nSavings rate over time\n\n2026-05 to 2026-10 · completed months\n\nOverview\n\n45.2% in 2026-10 · lowest 45.2% in 2026-10\n\n2026-05\n2026-10\nShow the numbers\n\nLimits only compare figures you already have; they change no transactions, plans or reports. Change them behind the gear.",
+    "headings": [
+      {
+        "text": "Financial health",
+        "y": 76
+      },
+      {
+        "text": "Within your limits",
+        "y": 301
+      },
+      {
+        "text": "Needs you · 1",
+        "y": 496
+      },
+      {
+        "text": "Against your limits",
+        "y": 654
+      },
+      {
+        "text": "Cushion",
+        "y": 754
+      },
+      {
+        "text": "Saving",
+        "y": 935
+      },
+      {
+        "text": "Debt and monthly commitments",
+        "y": 1330
+      },
+      {
+        "text": "Savings rate over time",
+        "y": 1882
+      }
+    ],
+    "targets": [
+      {
+        "text": "As of",
+        "x": 16,
+        "y": 187,
+        "w": 139,
+        "h": 48
+      },
+      {
+        "text": "Reserves",
+        "x": 19,
+        "y": 242,
+        "w": 170,
+        "h": 40
+      },
+      {
+        "text": "Limits",
+        "x": 191,
+        "y": 242,
+        "w": 150,
+        "h": 40
+      },
+      {
+        "text": "Manage Needs you",
+        "x": 202,
+        "y": 494,
+        "w": 142,
+        "h": 30
+      },
+      {
+        "text": "Emergency fund is outside your limit\nBelow 3 months: needs you · ",
+        "x": 16,
+        "y": 530,
+        "w": 328,
+        "h": 102
+      },
+      {
+        "text": "Emergency fund\n0.8 months\nNeeds you\nAs of 2026-11-05 · months of ",
+        "x": 16,
+        "y": 780,
+        "w": 328,
+        "h": 138
+      },
+      {
+        "text": "Savings rate\n45.2%\nGood\n2026-10",
+        "x": 16,
+        "y": 962,
+        "w": 328,
+        "h": 117
+      },
+      {
+        "text": "Planned savings rate\n43.1%\nGood\n2026-11 plan",
+        "x": 16,
+        "y": 1080,
+        "w": 328,
+        "h": 117
+      },
+      {
+        "text": "Investing rate\n96.6%\nNo limit\n2026-10",
+        "x": 16,
+        "y": 1198,
+        "w": 328,
+        "h": 115
+      },
+      {
+        "text": "Debt to cash\n75.8%\nNo limit\n2026-11-05",
+        "x": 16,
+        "y": 1356,
+        "w": 328,
+        "h": 115
+      },
+      {
+        "text": "Debt to net worth\n33.4%\nWatch\n2026-11-05",
+        "x": 16,
+        "y": 1472,
+        "w": 328,
+        "h": 117
+      },
+      {
+        "text": "Fixed costs to income\n35.5%\nGood\nMonthly · 2026-08 to 2026-10",
+        "x": 16,
+        "y": 1591,
+        "w": 328,
+        "h": 117
+      },
+      {
+        "text": "Loan payments to income\n5.6%\nGood\nMonthly · 2026-08 to 2026-10",
+        "x": 16,
+        "y": 1709,
+        "w": 328,
+        "h": 117
+      },
+      {
+        "text": "Overview",
+        "x": 33,
+        "y": 1955,
+        "w": 61,
+        "h": 19
+      },
+      {
+        "text": "Show the numbers",
+        "x": 33,
+        "y": 2092,
+        "w": 294,
+        "h": 44
+      }
+    ]
+  },
+  "/review": {
+    "status": 200,
+    "url": "/review",
+    "height": 1248,
+    "overflow": 0,
+    "text": "Weekly review\nNBE 3-year certificate: 2 interest payments to match\n3,677 EGP still unmatched; 2 have a suggested bank receipt.\nReview\nMatch all suggested\nEmergency fund needs you\n0.8 months of cover. Review your emergency reserve.\nReview\nCash and goals\nLooks recurring\nFitness Time Gym · 900 EGP · 3 months · last 2026-11-04.\nTrack\nSalary received\nReview bills, reserves, goals and safe to spend.\nReview\nRecord this review\n I reviewed the remaining decisions. They stay visible until resolved.\nRecord this review\nOptional reminders\n\nReminders use your existing plans and Needs you. Native alerts require an unlocked app session and notification permission.\n\nTurn on reminders\nReview activity",
+    "headings": [
+      {
+        "text": "Weekly review",
+        "y": 73
+      },
+      {
+        "text": "Cash and goals",
+        "y": 454
+      },
+      {
+        "text": "Record this review",
+        "y": 689
+      },
+      {
+        "text": "Optional reminders",
+        "y": 882
+      }
+    ],
+    "targets": [
+      {
+        "text": "NBE 3-year certificate: 2 interest payments to match\n3,677 EGP st",
+        "x": 33,
+        "y": 134,
+        "w": 294,
+        "h": 95
+      },
+      {
+        "text": "Match all suggested",
+        "x": 33,
+        "y": 229,
+        "w": 155,
+        "h": 40
+      },
+      {
+        "text": "Emergency fund needs you\n0.8 months of cover. Review your emergen",
+        "x": 33,
+        "y": 327,
+        "w": 294,
+        "h": 73
+      },
+      {
+        "text": "Looks recurring\nFitness Time Gym · 900 EGP · 3 months · last 2026",
+        "x": 33,
+        "y": 488,
+        "w": 294,
+        "h": 74
+      },
+      {
+        "text": "Salary received\nReview bills, reserves, goals and safe to spend.\n",
+        "x": 33,
+        "y": 562,
+        "w": 294,
+        "h": 74
+      },
+      {
+        "text": "acknowledged",
+        "x": 33,
+        "y": 726,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Record this review",
+        "x": 33,
+        "y": 780,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Turn on reminders",
+        "x": 33,
+        "y": 999,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Review activity",
+        "x": 16,
+        "y": 1080,
+        "w": 328,
+        "h": 48
+      }
+    ]
+  },
+  "/needs-you": {
+    "status": 200,
+    "url": "/needs-you",
+    "height": 1026,
+    "overflow": 0,
+    "text": "Needs you\nActive items\nReviewed and snoozed\nWeekly review\n\n4 active · 0 reviewed · 0 snoozed\n\nNBE 3-year certificate: 2 interest payments to match\n3,677 EGP still unmatched; 2 have a suggested bank receipt.\nReview\nMatch all suggested\nMark as reviewed\nSnooze\nLooks recurring\nFitness Time Gym · 900 EGP · 3 months · last 2026-11-04.\nTrack\nMark as reviewed\nSnooze\nSalary received\nReview bills, reserves, goals and safe to spend.\nReview\nMark as reviewed\nSnooze\nEmergency fund needs you\n0.8 months of cover. Review your emergency reserve.\nReview\nMark as reviewed\nSnooze\nBack to the Overview",
+    "headings": [
+      {
+        "text": "Needs you",
+        "y": 80
+      }
+    ],
+    "targets": [
+      {
+        "text": "Active items",
+        "x": 16,
+        "y": 84,
+        "w": 136,
+        "h": 48
+      },
+      {
+        "text": "Reviewed and snoozed",
+        "x": 16,
+        "y": 140,
+        "w": 210,
+        "h": 48
+      },
+      {
+        "text": "Weekly review",
+        "x": 16,
+        "y": 196,
+        "w": 149,
+        "h": 48
+      },
+      {
+        "text": "NBE 3-year certificate: 2 interest payments to match\n3,677 EGP st",
+        "x": 33,
+        "y": 303,
+        "w": 294,
+        "h": 101
+      },
+      {
+        "text": "Match all suggested",
+        "x": 33,
+        "y": 404,
+        "w": 155,
+        "h": 40
+      },
+      {
+        "text": "Mark as reviewed",
+        "x": 33,
+        "y": 444,
+        "w": 136,
+        "h": 40
+      },
+      {
+        "text": "Snooze",
+        "x": 177,
+        "y": 455,
+        "w": 70,
+        "h": 20
+      },
+      {
+        "text": "Looks recurring\nFitness Time Gym · 900 EGP · 3 months · last 2026",
+        "x": 33,
+        "y": 484,
+        "w": 294,
+        "h": 80
+      },
+      {
+        "text": "Mark as reviewed",
+        "x": 33,
+        "y": 565,
+        "w": 136,
+        "h": 40
+      },
+      {
+        "text": "Snooze",
+        "x": 177,
+        "y": 575,
+        "w": 70,
+        "h": 20
+      },
+      {
+        "text": "Salary received\nReview bills, reserves, goals and safe to spend.\n",
+        "x": 33,
+        "y": 605,
+        "w": 294,
+        "h": 80
+      },
+      {
+        "text": "Mark as reviewed",
+        "x": 33,
+        "y": 685,
+        "w": 136,
+        "h": 40
+      },
+      {
+        "text": "Snooze",
+        "x": 177,
+        "y": 695,
+        "w": 70,
+        "h": 20
+      },
+      {
+        "text": "Emergency fund needs you\n0.8 months of cover. Review your emergen",
+        "x": 33,
+        "y": 725,
+        "w": 294,
+        "h": 80
+      },
+      {
+        "text": "Mark as reviewed",
+        "x": 33,
+        "y": 805,
+        "w": 136,
+        "h": 40
+      },
+      {
+        "text": "Snooze",
+        "x": 177,
+        "y": 815,
+        "w": 70,
+        "h": 20
+      },
+      {
+        "text": "Back to the Overview",
+        "x": 16,
+        "y": 874,
+        "w": 198,
+        "h": 48
+      }
+    ]
+  },
+  "/money-from-others": {
+    "status": 200,
+    "url": "/money-from-others",
+    "height": 832,
+    "overflow": 0,
+    "text": "Held for others\n10,000 EGP in all\nImport\nAccounts\nHeld for others\nCash\nMom\nCIB Payroll\n10,000\n\nNo investments are held for others.\n\nHow to record ownership\nCash ownership history\n1 entry\nInvestment ownership history\n0 entries",
+    "headings": [
+      {
+        "text": "Held for others",
+        "y": 72
+      },
+      {
+        "text": "Cash",
+        "y": 189
+      }
+    ],
+    "targets": [
+      {
+        "text": "Import",
+        "x": 19,
+        "y": 129,
+        "w": 82,
+        "h": 40
+      },
+      {
+        "text": "Accounts",
+        "x": 103,
+        "y": 129,
+        "w": 100,
+        "h": 40
+      },
+      {
+        "text": "Held for others",
+        "x": 205,
+        "y": 129,
+        "w": 136,
+        "h": 40
+      },
+      {
+        "text": "How to record ownership",
+        "x": 16,
+        "y": 460,
+        "w": 328,
+        "h": 48
+      },
+      {
+        "text": "Cash ownership history\n1 entry",
+        "x": 35,
+        "y": 543,
+        "w": 290,
+        "h": 48
+      },
+      {
+        "text": "Investment ownership history\n0 entries",
+        "x": 35,
+        "y": 645,
+        "w": 290,
+        "h": 48
+      }
+    ]
+  },
+  "/reimbursements": {
+    "status": 200,
+    "url": "/reimbursements",
+    "height": 1074,
+    "overflow": 0,
+    "text": "Reimbursements\n\nRecord repayments as Money in using the original expense category. They reduce spending in that category; linking a receipt only tracks what is still owed.\n\nAdd an expense claim\nExpense\n\nCategory settings only suggest expenses. Claims cannot exceed the original owned expense. Link refunds or repayments explicitly so each receipt reduces the claim once.\n\nExpected reimbursement (EGP)\nPayer\nDue date\nCreate claim\nExpense claims\n\nNo reimbursement claims yet.",
+    "headings": [
+      {
+        "text": "Reimbursements",
+        "y": 72
+      },
+      {
+        "text": "Add an expense claim",
+        "y": 214
+      },
+      {
+        "text": "Expense claims",
+        "y": 838
+      }
+    ],
+    "targets": [
+      {
+        "text": "",
+        "x": 33,
+        "y": 278,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "expected",
+        "x": 33,
+        "y": 495,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "",
+        "x": 33,
+        "y": 586,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "due_date",
+        "x": 33,
+        "y": 677,
+        "w": 240,
+        "h": 48
+      },
+      {
+        "text": "Choose date",
+        "x": 279,
+        "y": 677,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "Create claim",
+        "x": 33,
+        "y": 741,
+        "w": 294,
+        "h": 48
+      }
+    ]
+  },
+  "/settings": {
+    "status": 200,
+    "url": "/settings",
+    "height": 3354,
+    "overflow": 0,
+    "text": "Settings\nAppearance and language\nTheme\nApplies at once and saves with this profile.\nCotton (try it)\nDendera, night (try it)\nDendera (try it)\nLightning default\nNile (try it)\nPapyrus (try it)\nRoyal Obsidian & Gold (preview)\nLanguage\nEnglish\nالعربية\nSetup guide\nShows the first steps on Overview again.\nShow setup guide\nUnlock a theme you bought\nThis phone\nDevices\nPair your phone or PC\n›\nBank SMS\nRead bank messages into transactions\n›\nProfile and lock\nPassword, recovery key, backups, lock\n›\nSettings in each tab\nSale factors\nOverview\nBudget settings\nBudget\nFinancial health limits\nSafety · Limits\nFinancial assets\nInvestments · Holdings\nTarget allocation\nInvestments · Planner\nPrice files\nInvestments · Prices\nYour data\nBackup\nOne is made each time the app starts.\nBack up now\nMove your data\nA full copy for a backup or another computer, or records in from another profile. Not the file for an AI.\nExport your data\nImport your data\nBase currency\nEGP\nManage currencies\nApp version\nv1.5.4\nRules\nCategories\nCounterparties\nData checks\nFeatures\nShow zakat\nA zakat estimate under Transactions.\nShow zakat\nAsk an AI\n\nLightning prepares one file on this device. You decide where to paste or upload it; Lightning sends nothing.\n\n2026-11\n\n2026-11-01 to 2026-11-05 · 9 transactions\n\nWhat do you want to know?\nReview my period\nWhere did the money go\nCheck my budget\nWhat changed my net worth\nMy own question\nHow much detail\nDigest\nStandard\nFull\nDigest: The answers and the biggest drivers. No rows.\nStandard: More detail and the 40 largest income and spending rows.\nFull: Every row.\nYour question (optional)\n Hide names\n\nNames of people, accounts and holdings become labels such as Counterparty 1. Notes are never included.\n\nCopy for AI\nSave as a file\n\nOther formats\nAdvanced",
+    "headings": [
+      {
+        "text": "Settings",
+        "y": 73
+      },
+      {
+        "text": "Appearance and language",
+        "y": 130
+      },
+      {
+        "text": "This phone",
+        "y": 636
+      },
+      {
+        "text": "Settings in each tab",
+        "y": 876
+      },
+      {
+        "text": "Your data",
+        "y": 1428
+      },
+      {
+        "text": "Features",
+        "y": 2139
+      },
+      {
+        "text": "Ask an AI",
+        "y": 2316
+      },
+      {
+        "text": "Advanced",
+        "y": 3195
+      }
+    ],
+    "targets": [
+      {
+        "text": "Cotton (try it)\nDendera, night (try it)\nDendera (try it)\nLightnin",
+        "x": 33,
+        "y": 225,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "English\nالعربية",
+        "x": 33,
+        "y": 344,
+        "w": 200,
+        "h": 48
+      },
+      {
+        "text": "Show setup guide",
+        "x": 33,
+        "y": 475,
+        "w": 140,
+        "h": 40
+      },
+      {
+        "text": "Unlock a theme you bought",
+        "x": 33,
+        "y": 546,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Devices\nPair your phone or PC\n›",
+        "x": 33,
+        "y": 662,
+        "w": 294,
+        "h": 56
+      },
+      {
+        "text": "Bank SMS\nRead bank messages into transactions\n›",
+        "x": 33,
+        "y": 718,
+        "w": 294,
+        "h": 56
+      },
+      {
+        "text": "Profile and lock\nPassword, recovery key, backups, lock\n›",
+        "x": 33,
+        "y": 774,
+        "w": 294,
+        "h": 56
+      },
+      {
+        "text": "Sale factors",
+        "x": 33,
+        "y": 914,
+        "w": 294,
+        "h": 22
+      },
+      {
+        "text": "Budget settings",
+        "x": 33,
+        "y": 994,
+        "w": 294,
+        "h": 22
+      },
+      {
+        "text": "Financial health limits",
+        "x": 33,
+        "y": 1074,
+        "w": 294,
+        "h": 22
+      },
+      {
+        "text": "Financial assets",
+        "x": 33,
+        "y": 1154,
+        "w": 294,
+        "h": 22
+      },
+      {
+        "text": "Target allocation",
+        "x": 33,
+        "y": 1235,
+        "w": 294,
+        "h": 22
+      },
+      {
+        "text": "Price files",
+        "x": 33,
+        "y": 1315,
+        "w": 294,
+        "h": 22
+      },
+      {
+        "text": "Back up now",
+        "x": 33,
+        "y": 1523,
+        "w": 106,
+        "h": 40
+      },
+      {
+        "text": "Export your data",
+        "x": 33,
+        "y": 1662,
+        "w": 132,
+        "h": 40
+      },
+      {
+        "text": "Import your data",
+        "x": 173,
+        "y": 1662,
+        "w": 132,
+        "h": 40
+      },
+      {
+        "text": "Manage currencies",
+        "x": 68,
+        "y": 1766,
+        "w": 148,
+        "h": 40
+      },
+      {
+        "text": "Rules",
+        "x": 33,
+        "y": 1916,
+        "w": 294,
+        "h": 22
+      },
+      {
+        "text": "Categories",
+        "x": 33,
+        "y": 1964,
+        "w": 294,
+        "h": 22
+      },
+      {
+        "text": "Counterparties",
+        "x": 33,
+        "y": 2011,
+        "w": 294,
+        "h": 22
+      },
+      {
+        "text": "Data checks",
+        "x": 33,
+        "y": 2059,
+        "w": 294,
+        "h": 22
+      },
+      {
+        "text": "on",
+        "x": 33,
+        "y": 2234,
+        "w": 40,
+        "h": 24
+      },
+      {
+        "text": "Previous month",
+        "x": 35,
+        "y": 2417,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "2026-11",
+        "x": 85,
+        "y": 2421,
+        "w": 97,
+        "h": 40
+      },
+      {
+        "text": "Next month",
+        "x": 184,
+        "y": 2417,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "Review my period\nWhere did the money go\nCheck my budget\nWhat chan",
+        "x": 33,
+        "y": 2534,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "size",
+        "x": 37,
+        "y": 2628,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "size",
+        "x": 134,
+        "y": 2628,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "size",
+        "x": 230,
+        "y": 2628,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "hide_names",
+        "x": 33,
+        "y": 2961,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Copy for AI",
+        "x": 33,
+        "y": 3065,
+        "w": 102,
+        "h": 48
+      },
+      {
+        "text": "Save as a file",
+        "x": 143,
+        "y": 3065,
+        "w": 115,
+        "h": 48
+      },
+      {
+        "text": "Other formats",
+        "x": 33,
+        "y": 3129,
+        "w": 294,
+        "h": 20
+      },
+      {
+        "text": "Advanced",
+        "x": 33,
+        "y": 3195,
+        "w": 294,
+        "h": 26
+      }
+    ]
+  },
+  "/rules": {
+    "status": 200,
+    "url": "/rules",
+    "height": 800,
+    "overflow": 0,
+    "text": "Rules\nAdd rule\nRules\n0 saved · most specific first\n\nNo rules yet. A rule files a transaction by its counterparty, notes or amount, like Vodafone above 300 as Internet, before you review it.",
+    "headings": [
+      {
+        "text": "Rules",
+        "y": 73
+      },
+      {
+        "text": "Rules",
+        "y": 173
+      }
+    ],
+    "targets": [
+      {
+        "text": "Add rule",
+        "x": 16,
+        "y": 125,
+        "w": 106,
+        "h": 48
+      }
+    ]
+  },
+  "/categories": {
+    "status": 200,
+    "url": "/categories",
+    "height": 800,
+    "overflow": 0,
+    "text": "Settings\n\nCategories · why money moved\n\n34 categories\nRecurringcounts toward the income average and forecast ·One-offstays in cash flow, out of the budget · changes save as you make them\nPersonal15 categories\nAdd category\nWork8 categories\nAdd category\nInvestment5 categories\nAdd category\nSystem Categories6 categories\nAdd category",
+    "headings": [
+      {
+        "text": "Settings",
+        "y": 73
+      },
+      {
+        "text": "Personal15 categories",
+        "y": 325
+      },
+      {
+        "text": "Work8 categories",
+        "y": 399
+      },
+      {
+        "text": "Investment5 categories",
+        "y": 465
+      },
+      {
+        "text": "System Categories6 categories",
+        "y": 572
+      }
+    ],
+    "targets": [
+      {
+        "text": "Find a category",
+        "x": 16,
+        "y": 138,
+        "w": 328,
+        "h": 48
+      },
+      {
+        "text": "Add category",
+        "x": 215,
+        "y": 317,
+        "w": 112,
+        "h": 40
+      },
+      {
+        "text": "Add category",
+        "x": 215,
+        "y": 391,
+        "w": 112,
+        "h": 40
+      },
+      {
+        "text": "Add category",
+        "x": 33,
+        "y": 498,
+        "w": 112,
+        "h": 40
+      },
+      {
+        "text": "Add category",
+        "x": 33,
+        "y": 604,
+        "w": 112,
+        "h": 40
+      }
+    ]
+  },
+  "/counterparties": {
+    "status": 200,
+    "url": "/counterparties",
+    "height": 6104,
+    "overflow": 0,
+    "text": "Settings\n\nCounterparties · saved names, aliases, and suggested categories\n\nAdd a counterparty\nSave a name and optional suggested category\nFind and correct names\n\n16 shown · 16 saved. Rename, add aliases, or change the suggested category.\n\nSeen the same shop under two spellings? This prompt gives your AI tool your saved names and aliases, which it cannot guess. It answers with a list to paste into Add alias.\n\nCopy prompt\nEdit prompt\n\nACME Egypt\nLearned: Salary\nAliases\nSuggested category\n3 of the last 3\nMerge\nOpen\nPerson Business\nAmazon\nAliases\nSuggested category\nMerge\nOpen\nPerson Business\nCarrefour\nLearned: Food & Groceries\nAliases\nSuggested category\n3 of the last 3\nMerge\nOpen\nPerson Business\nCIB\nLearned: Fees & Charges\nAliases\nSuggested category\n2 of the last 2\nMerge\nOpen\nPerson Business\nFitness Time Gym\nLearned: Health\nAliases\nSuggested category\n3 of the last 3\nMerge\nOpen\nPerson Business\nKoshary El Tahrir\nLearned: Eating Out\nAliases\nSuggested category\n2 of the last 2\nMerge\nOpen\nPerson Business\nLandlord\nLearned: Housing & Rent\nAliases\nSuggested category\n3 of the last 3\nMerge\nOpen\nPerson Business\nMicrobus\nLearned: Transportation\nAliases\nSuggested category\n2 of the last 2\nMerge\nOpen\nPerson Business\nMom\nAliases\nSuggested category\nMerge\nOpen\nPerson Business\nNBE\nLearned: Interest\nAliases\nSuggested category\n2 of the last 2\nMerge\nOpen\nPerson Business\nNorth Cairo Electricity\nLearned: Utilities & Bills\nAliases\nSuggested category\n2 of the last 2\nMerge\nOpen\nPerson Business\nSeoudi\nLearned: Food & Groceries\nAliases\nSuggested category\n2 of the last 2\nMerge\nOpen\nPerson Business\nTalabat\nLearned: Eating Out\nAliases\nSuggested category\n2 of the last 2\nMerge\nOpen\nPerson Business\nToyota Finance\nLearned: Loan payments\nAliases\nSuggested category\n3 of the last 3\nMerge\nOpen\nPerson Business\nVodafone\nLearned: Utilities & Bills\nAliases\nSuggested category\n2 of the last 2\nMerge\nOpen\nPerson Business\nWE Internet\nLearned: Utilities & Bills\nAliases\nSuggested category\n2 of the last 2\nMerge\nOpen\nPerson Business",
+    "headings": [
+      {
+        "text": "Settings",
+        "y": 73
+      },
+      {
+        "text": "Find and correct names",
+        "y": 282
+      }
+    ],
+    "targets": [
+      {
+        "text": "Add a counterparty\nSave a name and optional suggested category",
+        "x": 33,
+        "y": 175,
+        "w": 294,
+        "h": 52
+      },
+      {
+        "text": "q",
+        "x": 33,
+        "y": 373,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Copy prompt",
+        "x": 33,
+        "y": 511,
+        "w": 116,
+        "h": 48
+      },
+      {
+        "text": "Edit prompt",
+        "x": 157,
+        "y": 511,
+        "w": 108,
+        "h": 48
+      },
+      {
+        "text": "ACME Egypt\nLearned: Salary",
+        "x": 33,
+        "y": 579,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 633,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 691,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 120,
+        "y": 745,
+        "w": 141,
+        "h": 48
+      },
+      {
+        "text": "Merge ACME Egypt into",
+        "x": 41,
+        "y": 803,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 807,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 859,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 859,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 859,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete ACME Egypt",
+        "x": 274,
+        "y": 857,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "Amazon",
+        "x": 33,
+        "y": 916,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 970,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 1028,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 139,
+        "y": 1082,
+        "w": 180,
+        "h": 48
+      },
+      {
+        "text": "Merge Amazon into",
+        "x": 41,
+        "y": 1140,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 1144,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 1196,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 1196,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 1196,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete Amazon",
+        "x": 274,
+        "y": 1194,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "Carrefour\nLearned: Food & Groceries",
+        "x": 33,
+        "y": 1253,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 1307,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 1365,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 120,
+        "y": 1419,
+        "w": 141,
+        "h": 48
+      },
+      {
+        "text": "Merge Carrefour into",
+        "x": 41,
+        "y": 1477,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 1481,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 1533,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 1533,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 1533,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete Carrefour",
+        "x": 274,
+        "y": 1531,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "CIB\nLearned: Fees & Charges",
+        "x": 33,
+        "y": 1590,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 1644,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 1702,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 120,
+        "y": 1756,
+        "w": 141,
+        "h": 48
+      },
+      {
+        "text": "Merge CIB into",
+        "x": 41,
+        "y": 1814,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 1818,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 1870,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 1870,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 1870,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete CIB",
+        "x": 274,
+        "y": 1868,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "Fitness Time Gym\nLearned: Health",
+        "x": 33,
+        "y": 1927,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 1981,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 2039,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 120,
+        "y": 2093,
+        "w": 141,
+        "h": 48
+      },
+      {
+        "text": "Merge Fitness Time Gym into",
+        "x": 41,
+        "y": 2151,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 2155,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 2207,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 2207,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 2207,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete Fitness Time Gym",
+        "x": 274,
+        "y": 2205,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "Koshary El Tahrir\nLearned: Eating Out",
+        "x": 33,
+        "y": 2264,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 2318,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 2376,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 120,
+        "y": 2430,
+        "w": 141,
+        "h": 48
+      },
+      {
+        "text": "Merge Koshary El Tahrir into",
+        "x": 41,
+        "y": 2488,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 2492,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 2544,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 2544,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 2544,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete Koshary El Tahrir",
+        "x": 274,
+        "y": 2542,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "Landlord\nLearned: Housing & Rent",
+        "x": 33,
+        "y": 2601,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 2655,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 2713,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 120,
+        "y": 2767,
+        "w": 141,
+        "h": 48
+      },
+      {
+        "text": "Merge Landlord into",
+        "x": 41,
+        "y": 2825,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 2829,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 2881,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 2881,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 2881,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete Landlord",
+        "x": 274,
+        "y": 2879,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "Microbus\nLearned: Transportation",
+        "x": 33,
+        "y": 2938,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 2992,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 3050,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 120,
+        "y": 3104,
+        "w": 141,
+        "h": 48
+      },
+      {
+        "text": "Merge Microbus into",
+        "x": 41,
+        "y": 3162,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 3166,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 3218,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 3218,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 3218,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete Microbus",
+        "x": 274,
+        "y": 3216,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "Mom",
+        "x": 33,
+        "y": 3275,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 3329,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 3387,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 139,
+        "y": 3441,
+        "w": 180,
+        "h": 48
+      },
+      {
+        "text": "Merge Mom into",
+        "x": 41,
+        "y": 3499,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 3503,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 3555,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 3555,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 3555,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete Mom",
+        "x": 274,
+        "y": 3553,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "NBE\nLearned: Interest",
+        "x": 33,
+        "y": 3612,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 3666,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 3724,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 120,
+        "y": 3778,
+        "w": 141,
+        "h": 48
+      },
+      {
+        "text": "Merge NBE into",
+        "x": 41,
+        "y": 3836,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 3840,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 3892,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 3892,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 3892,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete NBE",
+        "x": 274,
+        "y": 3890,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "North Cairo Electricity\nLearned: Utilities & Bills",
+        "x": 33,
+        "y": 3949,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 4003,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 4061,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 120,
+        "y": 4115,
+        "w": 141,
+        "h": 48
+      },
+      {
+        "text": "Merge North Cairo Electricity into",
+        "x": 41,
+        "y": 4173,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 4177,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 4229,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 4229,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 4229,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete North Cairo Electricity",
+        "x": 274,
+        "y": 4227,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "Seoudi\nLearned: Food & Groceries",
+        "x": 33,
+        "y": 4286,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 4340,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 4398,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 120,
+        "y": 4452,
+        "w": 141,
+        "h": 48
+      },
+      {
+        "text": "Merge Seoudi into",
+        "x": 41,
+        "y": 4510,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 4514,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 4566,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 4566,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 4566,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete Seoudi",
+        "x": 274,
+        "y": 4564,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "Talabat\nLearned: Eating Out",
+        "x": 33,
+        "y": 4623,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 4677,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 4735,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 120,
+        "y": 4789,
+        "w": 141,
+        "h": 48
+      },
+      {
+        "text": "Merge Talabat into",
+        "x": 41,
+        "y": 4847,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 4851,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 4903,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 4903,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 4903,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete Talabat",
+        "x": 274,
+        "y": 4901,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "Toyota Finance\nLearned: Loan payments",
+        "x": 33,
+        "y": 4960,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 5014,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 5072,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 120,
+        "y": 5126,
+        "w": 141,
+        "h": 48
+      },
+      {
+        "text": "Merge Toyota Finance into",
+        "x": 41,
+        "y": 5184,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 5188,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 5240,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 5240,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 5240,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete Toyota Finance",
+        "x": 274,
+        "y": 5238,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "Vodafone\nLearned: Utilities & Bills",
+        "x": 33,
+        "y": 5297,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 5351,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 5409,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 120,
+        "y": 5463,
+        "w": 141,
+        "h": 48
+      },
+      {
+        "text": "Merge Vodafone into",
+        "x": 41,
+        "y": 5521,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 5525,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 5577,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 5577,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 5577,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete Vodafone",
+        "x": 274,
+        "y": 5575,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "WE Internet\nLearned: Utilities & Bills",
+        "x": 33,
+        "y": 5634,
+        "w": 294,
+        "h": 44
+      },
+      {
+        "text": "Counterparty name",
+        "x": 41,
+        "y": 5688,
+        "w": 272,
+        "h": 48
+      },
+      {
+        "text": "Aliases",
+        "x": 41,
+        "y": 5746,
+        "w": 41,
+        "h": 44
+      },
+      {
+        "text": "Suggested category",
+        "x": 120,
+        "y": 5800,
+        "w": 141,
+        "h": 48
+      },
+      {
+        "text": "Merge WE Internet into",
+        "x": 41,
+        "y": 5858,
+        "w": 202,
+        "h": 48
+      },
+      {
+        "text": "Merge",
+        "x": 251,
+        "y": 5862,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "Open",
+        "x": 41,
+        "y": 5914,
+        "w": 62,
+        "h": 40
+      },
+      {
+        "text": "Person",
+        "x": 109,
+        "y": 5914,
+        "w": 72,
+        "h": 40
+      },
+      {
+        "text": "Business",
+        "x": 183,
+        "y": 5914,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "Delete WE Internet",
+        "x": 274,
+        "y": 5912,
+        "w": 44,
+        "h": 44
+      }
+    ]
+  },
+  "/checks": {
+    "status": 200,
+    "url": "/checks",
+    "height": 800,
+    "overflow": 0,
+    "text": "Settings\n\nData checks · compare totals across your ledger and reports\n\nAs of 2026-11-05\n\n8 checks passed\n\nPassed checks",
+    "headings": [
+      {
+        "text": "Settings",
+        "y": 73
+      }
+    ],
+    "targets": [
+      {
+        "text": "As of",
+        "x": 16,
+        "y": 170,
+        "w": 139,
+        "h": 48
+      },
+      {
+        "text": "Passed checks",
+        "x": 16,
+        "y": 263,
+        "w": 328,
+        "h": 48
+      }
+    ]
+  },
+  "/accounts/1/import": {
+    "status": 200,
+    "url": "/accounts/1/import",
+    "height": 820,
+    "overflow": 0,
+    "text": "Import statement\n\nCIB Payroll\n\nImport\nAccounts\nHeld for others\n\nUpload this account’s CSV, Excel workbook or text-based CIB PDF. CSV columns are Date, Counterparty, and signed Amount; Category, Notes, and Reference are optional.\n\nWe’ll preview rows before posting. Money out is negative; money in is positive. For investment holdings, use the investment transaction row to record units; this imports account cash movements.\n\nPrepare this CSV with an AI assistant\nConvert a PDF to CSV with AI\nStatement files\n\nCSV up to 5 MB; Excel .xlsx and text-based CIB PDFs up to 8 MB. Every row is reviewed before saving.\n\nReview statement",
+    "headings": [
+      {
+        "text": "Import statement",
+        "y": 73
+      }
+    ],
+    "targets": [
+      {
+        "text": "Import",
+        "x": 19,
+        "y": 151,
+        "w": 82,
+        "h": 40
+      },
+      {
+        "text": "Accounts",
+        "x": 103,
+        "y": 151,
+        "w": 102,
+        "h": 40
+      },
+      {
+        "text": "Held for others",
+        "x": 207,
+        "y": 151,
+        "w": 135,
+        "h": 40
+      },
+      {
+        "text": "Prepare this CSV with an AI assistant",
+        "x": 33,
+        "y": 423,
+        "w": 294,
+        "h": 20
+      },
+      {
+        "text": "Convert a PDF to CSV with AI",
+        "x": 33,
+        "y": 467,
+        "w": 294,
+        "h": 20
+      },
+      {
+        "text": "file",
+        "x": 33,
+        "y": 531,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Review statement",
+        "x": 33,
+        "y": 639,
+        "w": 148,
+        "h": 48
+      }
+    ]
+  },
+  "/search?q=carrefour": {
+    "status": 200,
+    "url": "/search?q=carrefour",
+    "height": 800,
+    "overflow": 0,
+    "text": "Payments\n2026-11-02\nCarrefour\nFood & Groceries · CIB Payroll\n−3,250.75\n2026-10-02\nCarrefour\nFood & Groceries · CIB Payroll\n−3,310.20\n2026-09-02\nCarrefour\nFood & Groceries · CIB Payroll\n−3,180.40\nNames and categories\nCounterparties\nCarrefour\nIts transactions\n›",
+    "headings": [
+      {
+        "text": "Payments",
+        "y": 160
+      },
+      {
+        "text": "Names and categories",
+        "y": 515
+      },
+      {
+        "text": "Counterparties",
+        "y": 569
+      }
+    ],
+    "targets": [
+      {
+        "text": "Search",
+        "x": 16,
+        "y": 96,
+        "w": 328,
+        "h": 48
+      },
+      {
+        "text": "Carrefour\nFood & Groceries · CIB Payroll\n−3,250.75",
+        "x": 16,
+        "y": 226,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Carrefour\nFood & Groceries · CIB Payroll\n−3,310.20",
+        "x": 16,
+        "y": 331,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Carrefour\nFood & Groceries · CIB Payroll\n−3,180.40",
+        "x": 16,
+        "y": 435,
+        "w": 328,
+        "h": 64
+      },
+      {
+        "text": "Carrefour\nIts transactions\n›",
+        "x": 16,
+        "y": 600,
+        "w": 328,
+        "h": 56
+      }
+    ]
+  },
+  "/more": {
+    "status": 200,
+    "url": "/more",
+    "height": 1220,
+    "overflow": 0,
+    "text": "More\nNext 14 days\nAll bills\nVodafone\n2026-11-09\n350\nYour money\nCash planning\n1,480 due before payday\nAccounts\n275,671\nInvestments\n177,903\nReserves\n›\nFinancial health\n4 of 6 within limits\nSpending\n18,651 in 2026-11\nWeekly review is ready\n4 decisions, one at a time\nStart now\nSettings\nAll settings\n›\nCategories\n›\nCounterparties\n›\nRules\n›\nDevices\n›\nData checks\n›",
+    "headings": [
+      {
+        "text": "More",
+        "y": 72
+      },
+      {
+        "text": "Next 14 days",
+        "y": 112
+      },
+      {
+        "text": "Your money",
+        "y": 249
+      },
+      {
+        "text": "Settings",
+        "y": 742
+      }
+    ],
+    "targets": [
+      {
+        "text": "All bills",
+        "x": 296,
+        "y": 105,
+        "w": 48,
+        "h": 44
+      },
+      {
+        "text": "Vodafone\n2026-11-09\n350",
+        "x": 16,
+        "y": 161,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Cash planning\n1,480 due before payday",
+        "x": 16,
+        "y": 287,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Accounts\n275,671",
+        "x": 16,
+        "y": 343,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Investments\n177,903",
+        "x": 16,
+        "y": 399,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Reserves\n›",
+        "x": 16,
+        "y": 455,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Financial health\n4 of 6 within limits",
+        "x": 16,
+        "y": 511,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Spending\n18,651 in 2026-11",
+        "x": 16,
+        "y": 567,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Weekly review is ready\n4 decisions, one at a time\nStart now",
+        "x": 16,
+        "y": 643,
+        "w": 328,
+        "h": 67
+      },
+      {
+        "text": "All settings\n›",
+        "x": 16,
+        "y": 780,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Categories\n›",
+        "x": 16,
+        "y": 836,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Counterparties\n›",
+        "x": 16,
+        "y": 892,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Rules\n›",
+        "x": 16,
+        "y": 948,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Devices\n›",
+        "x": 16,
+        "y": 1004,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Data checks\n›",
+        "x": 16,
+        "y": 1060,
+        "w": 328,
+        "h": 56
+      }
+    ]
+  },
+  "add": {
+    "text": "×\nAdd transaction\nOut\nIn\nTransfer\nPaste SMS\nAmount\nEGP\nFrom\nCash wallet\nCIB Payroll\nNBE CDs\nOffice gam'eya\nTHNDR\nVodafone Cash\nCategory\nUtilities & Bills\nFood & Groceries\nEating Out\nLoan payments\nOther…\nWho (optional)\nDate\nNotes and held for\n\nSave"
+  }
+}
