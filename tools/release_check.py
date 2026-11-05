@@ -34,7 +34,7 @@ def versions() -> list[str]:
     init = re.search(r'__version__ = "([^"]+)"', source).group(1)
     display = re.search(r'DISPLAY_VERSION = "([^"]+)"', source).group(1)
     readme = re.search(r"source version is \*\*v?([^*]+)\*\*", (ROOT / "README.md").read_text(encoding="utf-8"))
-    norm = lambda v: re.sub(r"[-.]?(beta|b)[.]?", "b", v)
+    norm = lambda v: v
     out = []
     if toml != init:
         out.append(f"pyproject.toml has {toml} but lightning/__init__.py has {init}")
@@ -42,7 +42,7 @@ def versions() -> list[str]:
         out.append(f"the app displays {display} but pyproject.toml has {toml}")
     if readme and norm(readme.group(1)) != norm(toml):
         out.append(f"README names {readme.group(1)} but pyproject.toml has {toml}")
-    tag = "v" + re.sub(r"b(\d+)$", r"-beta.\1", toml)
+    tag = "v" + toml
     print(f"version {toml} -> tag {tag}")
     return out
 

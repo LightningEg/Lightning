@@ -9,8 +9,8 @@
 # only then published. Needs:
 #   GH_TOKEN        fine-grained token with Contents: read and write on DOWNLOADS_REPO
 #   DOWNLOADS_REPO  owner/name of the public downloads repository
-#   TAG             the release tag, e.g. v1.0.0-beta.1 (already checked against the source version)
-#   ZIP             the ZIP's file name, e.g. Lightning-v1.0.0-beta.1-Windows-x64.zip
+#   TAG             the release tag, e.g. v2.0.0 (already checked against the source version)
+#   ZIP             the ZIP's file name, e.g. Lightning-v2.0.0-Windows-x64.zip
 #   APK             the signed phone APK's file name, from BUILD.json
 set -euo pipefail
 
@@ -20,7 +20,7 @@ fail() { echo "::error::$*"; exit 1; }
 [[ -n "${GH_TOKEN:-}" ]] || fail "The LIGHTNING_DOWNLOADS_TOKEN secret is not set. Create a fine-grained personal access token with Contents: read and write on ${DOWNLOADS_REPO} only, add it to this repository as the Actions secret LIGHTNING_DOWNLOADS_TOKEN, then re-run this job. Nothing was published."
 [[ "$ZIP" =~ ^Lightning-v[0-9A-Za-z.+-]+-Windows-x64\.zip$ ]] || fail "Unexpected ZIP name: $ZIP"
 [[ "$ZIP" == "Lightning-${TAG}-Windows-x64.zip" ]] || fail "The ZIP $ZIP was not built as release $TAG (a development build cannot be published)."
-[[ "$APK" =~ ^Lightning-Test-[0-9A-Za-z.+-]+\.apk$ ]] || fail "Unexpected APK name: $APK"
+[[ "$APK" =~ ^Lightning-[0-9A-Za-z.+-]+\.apk$ ]] || fail "Unexpected APK name: $APK"
 
 for file in "$ZIP" "$APK" SHA256SUMS BUILD.json BUILD_INFO.txt; do
   [[ -f "$file" ]] || fail "The build artifact has no $file."
@@ -32,9 +32,9 @@ sha256sum --check --strict SHA256SUMS || fail "The builds do not match SHA256SUM
 grep -qx "Build: release ${TAG}" BUILD_INFO.txt || fail "BUILD_INFO.txt does not say this is release ${TAG}."
 jq -e --arg zip "$ZIP" --arg apk "$APK" --arg commit "$(sed -n 's/^Commit: //p' BUILD_INFO.txt)" \
   '.windows.file == $zip and .android.file == $apk and .commit == $commit and
-   .android.application_id == "org.lightning.app.test" and .android.debuggable == true and
+   .android.application_id == "org.lightning.app" and .android.debuggable == true and
    (.android.certificate_sha256 | type == "string" and length > 0)' BUILD.json >/dev/null \
-  || fail "BUILD.json does not identify this tested pair and its signed Lightning Test app."
+  || fail "BUILD.json does not identify this tested pair and its signed Lightning app."
 zip_sha=$(sha256sum "$ZIP" | cut -d' ' -f1)
 apk_sha=$(sha256sum "$APK" | cut -d' ' -f1)
 
@@ -59,7 +59,7 @@ state=$(lookup "repos/${DOWNLOADS_REPO}/git/ref/tags/${TAG}")
 [[ "$state" == missing ]] || fail "${DOWNLOADS_REPO} already has a tag ${TAG}. Published versions are never replaced: bump the version for a new build."
 
 version="${TAG#v}"
-pretty=$(sed -E 's/-beta\.([0-9]+)$/ beta \1/; s/-rc\.([0-9]+)$/ release candidate \1/' <<<"$version")
+pretty=$(sed -E 's/-rc\.([0-9]+)$/ release candidate \1/' <<<"$version")
 title="Lightning ${pretty} for Windows and Android"
 # A draft is created under this name and renamed in the same call that publishes it, so a published
 # release never carries it. GitHub turns a published release whose tag was deleted back into a draft
@@ -84,10 +84,10 @@ notes=$(mktemp)
   echo
   echo "PC: download **${ZIP}**, extract it into a new folder, then run \`Lightning\\Lightning.exe\`."
   echo "The Microsoft Edge WebView2 Runtime is required; Python is not."
-  echo "Phone: download **${APK}** on Android and install it. This is Lightning Test; pair it with this release's PC build."
+  echo "Phone: download **${APK}** on Android and install it. Pair it with this release's PC build."
   echo
   if [[ "$prerelease" == true ]]; then
-    echo "This is a beta. You may use sample or real data; keep an independent backup. The Android app is debuggable; the Windows app is not code-signed and Windows may warn before the first start."
+    echo "You may use sample or real data; keep an independent backup. The Android app is debuggable; the Windows app is not code-signed and Windows may warn before the first start."
   else
     echo "The app is not code-signed, so Windows may warn before the first start."
   fi

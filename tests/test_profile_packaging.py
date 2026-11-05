@@ -14,7 +14,7 @@ def test_desktop_version_and_one_extract_artifact_agree():
 
     metadata = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert metadata["project"]["version"] == __version__
-    assert DISPLAY_VERSION == __version__.replace("b", "-beta.")
+    assert DISPLAY_VERSION == __version__
     workflow = (ROOT / ".github" / "workflows" / "desktop-probe.yml").read_text(encoding="utf-8")
     assert "dist/Lightning-v*-Windows-x64.zip" in workflow
     assert "branches: [main]" in workflow and "tags: ['v*']" in workflow
@@ -347,9 +347,9 @@ def test_a_manual_run_reuses_what_this_commit_already_has(monkeypatch, tmp_path)
             8: [{"name": "Build and test the Windows app", "conclusion": "success"}],
             7: [{"name": "Build and test the Windows app", "conclusion": "success"}],
             6: [{"name": "Build and test the Windows app", "conclusion": "success"}]}
-    artifacts = {8: [{"name": "Lightning-v0.5.0-beta.1-dev-2026-10-01-r8-dddddddd-a1-Windows-x64", "expired": True},
+    artifacts = {8: [{"name": "Lightning-v2.0.0-dev-2026-10-01-r8-dddddddd-a1-Windows-x64", "expired": True},
                      {"name": "windows-check-reports-r8-a1", "expired": False}],
-                 7: [{"name": "Lightning-v0.5.0-beta.1-dev-2026-10-01-r7-dddddddd-a1-Windows-x64", "expired": False}]}
+                 7: [{"name": "Lightning-v2.0.0-dev-2026-10-01-r7-dddddddd-a1-Windows-x64", "expired": False}]}
 
     def api(path):
         number = path.split("/runs/")[-1].split("/")[0]
@@ -399,7 +399,7 @@ def test_a_manual_run_reuses_what_this_commit_already_has(monkeypatch, tmp_path)
     branch = outputs("workflow_dispatch", "refs/heads/feature")
     assert branch["phone"] == "false" and branch["build_windows"] == "true" and branch["suite"] == "run"
     assert outputs("push", "refs/heads/main")["phone"] == "false"
-    tagged = outputs("push", "refs/tags/v1.0.0-beta.1")
+    tagged = outputs("push", "refs/tags/v2.0.0")
     assert tagged["phone"] == "true" and tagged["build_windows"] == "true"
     daily = outputs("schedule", "refs/heads/main")
     assert daily["build_windows"] == "true" and daily["phone_daily"] == "true"  # no earlier build known
@@ -437,7 +437,7 @@ def test_a_manual_run_says_at_once_what_it_can_make():
     branch = scope.manual_run_notes("refs/heads/feature", "d" * 40, {"phone": "false", "suite": "run", "reuse_run": ""},
                                     "x", True, True)
     assert branch == [("warning", "A manual run on feature builds the Windows app only; the matched PC and phone "
-                                  "test builds run only on main.")]
+                                  "builds run only on main.")]
 
 
 def test_the_self_check_needs_no_http_client_and_never_waits_forever(monkeypatch):

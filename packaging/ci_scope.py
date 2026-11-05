@@ -14,8 +14,8 @@ and tests:
 - Windows app. A tag and a manual run build it. The daily run builds it when a file that can reach it
   changed since the last commit whose Windows build succeeded (so a failed or cancelled build is redone).
   A manual run on main reuses an earlier run's unexpired ZIP of this exact commit.
-- Phone app. A manual run on main makes matched test builds; a release tag builds the same signed APK
-  for the permanent Windows and Android beta release (ai/ARCHITECTURE.md › Build and release).
+- Phone app. A manual run on main makes matched builds; a release tag builds the same signed APK
+  for the permanent Windows and Android release (ai/ARCHITECTURE.md › Build and release).
   The daily run builds and checks it (no key, nothing offered) when a file that reaches it changed since
   its last successful build.
 """
@@ -283,9 +283,9 @@ def manual_run_notes(ref: str, sha: str, values: dict[str, str], reason: str, ha
     """What a manual run will make, as (level, text) lines for the run's page, said in its first minute."""
     if values["phone"] != "true":
         return [("warning", f"A manual run on {ref.removeprefix('refs/heads/')} builds the Windows app only; "
-                            "the matched PC and phone test builds run only on main.")]
+                            "the matched PC and phone builds run only on main.")]
     windows = reason if values["reuse_run"] else "built and tested in this run"
-    notes = [("notice", f"Matched test builds of {sha[:8]}. Windows: {windows}. Linux suite: "
+    notes = [("notice", f"Matched builds of {sha[:8]}. Windows: {windows}. Linux suite: "
                         + ("already passed on this commit, not run again." if values["suite"] == "skip" else "runs now."))]
     if has_key is None:
         notes.append(("notice", "Android signing key availability is checked only in the protected android-signing job."))

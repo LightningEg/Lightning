@@ -1,8 +1,8 @@
-Lightning for Windows — v@VERSION@ beta
+Lightning for Windows — v@VERSION@
 
-This unsigned preview includes private profiles protected by a password and a
+This unsigned release includes private profiles protected by a password and a
 recovery key, plus the Lightning finance app. You may use sample or real data;
-keep an independent backup. This beta has not been code-signed.
+keep an independent backup. This release has not been code-signed.
 
 Windows requirements
 --------------------

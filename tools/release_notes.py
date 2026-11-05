@@ -33,6 +33,9 @@ NOTE = re.compile(r"^Release-note:[ \t]*(.+?)[ \t]*$", re.M)
 DETAIL = re.compile(r"^Detail:[ \t]*(.+?)[ \t]*$", re.M)
 CODE = re.compile(r"\b((?:B[VT]|I[VT]|NF|OW)-\d+[A-Z]+\d*)\b")
 PR = re.compile(r"\(#(\d+)\)\s*$")
+# A merged commit whose note lacks its pillar cannot be amended; the corrected note is kept here by full SHA.
+NOTE_FIXES = {"bc2e08de239e0a35e6bf4c8ceb83c813bd5059cd":
+              ["understand: Investment pages use shared read models for class and currency figures."]}
 
 
 def _pillars() -> dict[str, str]:
@@ -80,7 +83,7 @@ def commits(since: str | None, first_parent: bool = True) -> list[dict]:
         sha, day, subject, body = block.strip("\n").split("\x1f", 3)
         pr = PR.search(subject)
         out.append({"sha": sha[:8], "date": day, "subject": subject, "pr": pr.group(1) if pr else "",
-                    "codes": CODE.findall(subject), "notes": NOTE.findall(body), "details": DETAIL.findall(body)})
+                    "codes": CODE.findall(subject), "notes": NOTE_FIXES.get(sha) or NOTE.findall(body), "details": DETAIL.findall(body)})
     return out
 
 

@@ -39,7 +39,7 @@ def test_a_note_is_a_pillar_and_a_sentence_or_none():
             release_notes.parse_note(bad)
 
 
-def test_versions_sort_newest_first_and_a_beta_sorts_below_its_release():
+def test_versions_sort_newest_first_and_a_pre_release_sorts_below_its_release():
     names = ["1.5.2", "1.1.0b1", "1.10.0", "1.1.0", "1.5.4"]
     assert sorted(names, key=release_notes.version_key, reverse=True) == ["1.10.0", "1.5.4", "1.5.2", "1.1.0", "1.1.0b1"]
 

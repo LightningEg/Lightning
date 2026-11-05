@@ -95,7 +95,7 @@ def versions() -> list[str]:
     named = re.search(r"source version is \*\*v?([^*]+)\*\*", (ROOT / "README.md").read_text(encoding="utf-8"))
     if not named:
         return []
-    norm = lambda v: re.sub(r"[-.]?(beta|b)[.]?", "b", v)
+    norm = lambda v: v
     return [] if norm(named.group(1)) == norm(version) else [f"README names version {named.group(1)} but pyproject has {version}"]
 
 

@@ -1,4 +1,4 @@
-"""The Windows and Android beta pair publishes only after every file reads back unchanged."""
+"""The Windows and Android pair publishes only after every file reads back unchanged."""
 from __future__ import annotations
 
 import hashlib
@@ -13,9 +13,9 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "packaging" / "publish_release.sh"
-TAG = "v0.5.0-beta.1"
+TAG = "v2.0.0"
 ZIP = f"Lightning-{TAG}-Windows-x64.zip"
-APK = "Lightning-Test-0.5.0-beta.1-123-abc123.apk"
+APK = "Lightning-2.0.0-123-abc123.apk"
 
 pytestmark = pytest.mark.skipif(not all(shutil.which(tool) for tool in ("bash", "jq", "sha256sum", "cmp")),
                                 reason="needs bash, jq, sha256sum and cmp (present on Linux CI)")
@@ -36,9 +36,9 @@ def publish(tmp_path: Path, state: dict, **env) -> tuple[subprocess.CompletedPro
     (release / "SHA256SUMS").write_text(f"{hashlib.sha256(payload).hexdigest()}  {ZIP}\n"
                                           f"{hashlib.sha256(phone).hexdigest()}  {APK}\n", encoding="utf-8")
     (release / "BUILD.json").write_text(json.dumps({"commit": "abc123", "windows": {"file": ZIP},
-        "android": {"file": APK, "application_id": "org.lightning.app.test", "debuggable": True,
+        "android": {"file": APK, "application_id": "org.lightning.app", "debuggable": True,
                     "certificate_sha256": "a" * 64}}), encoding="utf-8")
-    (release / "BUILD_INFO.txt").write_text(f"Lightning 0.5.0-beta.1 for Windows x64\nBuild: release {TAG}\n"
+    (release / "BUILD_INFO.txt").write_text(f"Lightning 2.0.0 for Windows x64\nBuild: release {TAG}\n"
                                             "Commit: abc123\nRun: workflow run 22, attempt 1\n", encoding="utf-8")
     state_file = tmp_path / "state.json"
     state_file.write_text(json.dumps(state), encoding="utf-8")
@@ -55,11 +55,11 @@ def published(state: dict) -> list[dict]:
 
 
 def test_a_tested_pair_is_published_with_both_apps_and_checksums(tmp_path):
-    result, state = publish(tmp_path, {"releases": [], "tags": ["v0.4.0-beta.1"]})
+    result, state = publish(tmp_path, {"releases": [], "tags": ["v1.5.4"]})
     assert result.returncode == 0, result.stdout + result.stderr
     [release] = published(state)
-    assert release["tag_name"] == TAG and release["prerelease"] and release["target_commitish"] == "main"
-    assert release["name"] == "Lightning 0.5.0 beta 1 for Windows and Android"
+    assert release["tag_name"] == TAG and not release["prerelease"] and release["target_commitish"] == "main"
+    assert release["name"] == "Lightning 2.0.0 for Windows and Android"
     assert [a["name"] for a in release["assets"]] == [ZIP, APK, "SHA256SUMS", "BUILD.json"]
     assert hashlib.sha256((tmp_path / "release" / ZIP).read_bytes()).hexdigest() in release["body"]
     assert hashlib.sha256((tmp_path / "release" / APK).read_bytes()).hexdigest() in release["body"]
@@ -72,11 +72,11 @@ def test_a_tested_pair_is_published_with_both_apps_and_checksums(tmp_path):
     ({"releases": [{"id": 7, "tag_name": TAG, "draft": False, "assets": []}], "tags": [TAG]}, {},
      "already has a release"),
     ({"releases": [], "tags": [TAG]}, {}, "already has a tag"),
-    ({"releases": [], "tags": []}, {"ZIP": "Lightning-v0.5.0-beta.1-dev-r21-abcdef12-Windows-x64.zip"},
+    ({"releases": [], "tags": []}, {"ZIP": "Lightning-v2.0.0-dev-r21-abcdef12-Windows-x64.zip"},
      "development build cannot be published"),
     ({"releases": [], "tags": [], "server_error": True}, {}, "Could not check whether"),
     # A published release whose tag was deleted turns back into a draft that keeps its real name.
-    ({"releases": [{"id": 8, "tag_name": TAG, "draft": True, "name": "Lightning 0.5.0 beta 1 for Windows and Android",
+    ({"releases": [{"id": 8, "tag_name": TAG, "draft": True, "name": "Lightning 2.0.0 for Windows and Android",
                     "assets": []}], "tags": []}, {}, "this job did not leave behind"),
 ])
 def test_nothing_is_published_or_replaced_when_a_release_cannot_be_trusted(tmp_path, state, env, message):
@@ -101,7 +101,7 @@ def test_a_changed_phone_apk_is_never_published(tmp_path):
 
 def test_a_draft_left_by_a_failed_attempt_is_replaced_by_the_new_attempt(tmp_path):
     state = {"releases": [{"id": 9, "tag_name": TAG, "draft": True, "assets": [],
-                           "name": "Lightning 0.5.0 beta 1 for Windows and Android (unpublished draft)"}], "tags": [], "immutable": True}
+                           "name": "Lightning 2.0.0 for Windows and Android (unpublished draft)"}], "tags": [], "immutable": True}
     result, after = publish(tmp_path, state)
     assert result.returncode == 0, result.stdout + result.stderr
     assert [r["id"] for r in after["releases"]] != [9] and len(published(after)) == 1
