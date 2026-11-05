@@ -5,6 +5,7 @@
 | Who | Work | Files | Since |
 |---|---|---|---|
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
+| Claude (Opus, M3 money) | BV-3AQ+3AR, then OV-3+OV-8, BU-3, 3AM3 last. Split agreed with owner 2026-11-05; Sonnet session owns 3AS, 3AT, BU-8, 3AM5, reminders check, recapture | `lightning/ui/routes/accounts.py`, `lightning/ui/routes/dashboard.py`, `lightning/planning/position.py`, `_phone_categories` in `lightning/ui/routes/budget.py`, Accounts/More/Overview net-worth templates | 2026-11-05 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
 
 ## Messages
