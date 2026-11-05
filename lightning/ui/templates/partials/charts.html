@@ -294,7 +294,7 @@
 
 {# The page's Lead (guideline 3.33, A07 and A09): the KPI card that answers the page, drawn large on the left of one card
    that spans the row; the caller draws its working or its trend on the right. The watermark sits in the corner. #}
-{% macro lead_card(k, base, aria='') %}
+{% macro lead_card(k, base, aria='', rows=none) %}
 <section class="card lead-card lead-hero" aria-label="{{ aria or k.label }}">
   <div class="lead-main">
     <div class="lead-head"><h2 class="lead-label">{{ k.label }}</h2>{% if k.chip %}<span class="kc-chip is-{{ k.chip.tone }}">{{ k.chip.text }}</span>{% endif %}</div>
@@ -302,6 +302,7 @@
     <p class="lead-compare">{% if k.compare.figure %}<b class="is-{{ k.compare.tone }}">{{ k.compare.figure }}</b> {% endif %}{{ k.compare.text }}</p>
     {% if k.visual %}<div class="lead-visual kc-visual tone-{{ k.tone }}">{{ kpi_visual(k.visual) }}</div>{% endif %}
     {% if k.line.text or k.line.action %}<p class="lead-line">{% if k.line.text %}<span>{{ k.line.text }}</span>{% endif %}{% if k.line.action %} <a href="{{ k.line.href }}"{% if k.line.popup %} data-popup-open{% endif %}>{{ k.line.action }}</a>{% endif %}</p>{% endif %}
+    {% if rows %}{# 3AM3 (I1): the figures that complete the answer sit under it, not crammed beside the chart #}<div class="overview-inline-list">{% for r in rows %}{% if r.href %}<a class="overview-static-row" href="{{ r.href }}">{% else %}<div class="overview-static-row">{% endif %}<span>{{ r.label }}{% if r.note %} <small>{{ r.note }}</small>{% endif %}</span><b{% if r.muted %} class="muted"{% endif %}>{{ r.value }}</b>{% if r.href %}</a>{% else %}</div>{% endif %}{% endfor %}</div>{% endif %}
   </div>
   {% if caller %}<div class="lead-side">{{ caller() }}</div>{% endif %}
 </section>
