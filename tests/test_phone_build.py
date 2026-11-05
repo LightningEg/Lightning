@@ -238,7 +238,7 @@ def test_the_workflows_offer_a_pair_only_from_one_run_and_never_sign_with_anothe
         assert f"secrets.{secret}" in sign
         assert f"{secret}: ${{{{ secrets.{secret} }}}}" in phone_job
         assert app.count(f"secrets.{secret}") == 1  # only the explicit reusable-workflow mapping
-        assert f"{secret}:\n        required: true" in android.split("jobs:")[0]
+        assert f"{secret}:\n        required: false" in android.split("jobs:")[0]
     assert "secrets: inherit" not in app  # unrelated repository secrets must not be passed
     sign_job = android[android.index("\n  sign:"):]
     assert "environment: android-signing" in sign_job.split("steps:")[0]
