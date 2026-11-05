@@ -62,3 +62,37 @@ def test_more_lists_places_not_actions(month):
     assert 'href="/settings"' in page and 'href="/rules"' in page
 
 
+
+
+def test_messages_are_checked_on_an_sms_review_not_the_statement_one(month):
+    """IV-3AU 3AU2: a batch read from bank SMS is reviewed as messages: its own title, each row with the message it came
+    from, no statement-only extras, one Primary, and back to From SMS (phone and PC)."""
+    from datetime import datetime
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    c, accounts, _ = month
+    message = ("تم سحب مبلغ  EGP 5000.00  من بطاقة الخصم المباشر المنتهية بـ **7351 من CIB KZ IRAN ZAMALEK "
+               "في 04/10/26 19:28 ، الرصيد المتاح EGP 12904.50")
+    c.sms_imports.read([("CIB", message, datetime(2026, 10, 4, 19, 29))])
+    batch = c.sms_imports.assign("7351", accounts["cib"].id)
+    path = f"/accounts/{accounts['cib'].id}/import/{batch}"
+    for client in (_phone(c), TestClient(create_app(c))):
+        page = client.get(path).text
+        assert "Check bank messages" in page and "Review import" not in page
+        assert "CIB KZ IRAN ZAMALEK" in page and "1 message" in page          # the message itself, beside its row
+        assert "Transfer across currencies" not in page and "Fee inside this amount" not in page
+        assert page.count("Post ready rows") == 1 and 'href="/sms"' in page  # one Primary; Finish later goes back
+        assert "Discard these messages" in page
+    session = re.search(r'name="__session" value="([^"]*)"', page).group(1)
+    gone = TestClient(create_app(c)).post(f"{path}/discard", data={"__session": session}, follow_redirects=False)
+    assert gone.headers["location"].startswith("/sms")
+
+
+def test_a_statement_import_keeps_its_own_review(month):
+    c, accounts, _ = month
+    batch, _ = c.bank_imports.stage(accounts["cib"].id, "statement.csv",
+                                    b"Date,Amount,Counterparty\n2026-10-04,-50.00,Shop\n")
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    page = TestClient(create_app(c)).get(f"/accounts/{accounts['cib'].id}/import/{batch}").text
+    assert "Review import" in page and "Check bank messages" not in page and page.count("Post ready rows") == 2

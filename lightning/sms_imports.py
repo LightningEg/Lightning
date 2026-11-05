@@ -17,7 +17,7 @@ import hashlib
 import io
 import json
 import re
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Protocol
@@ -65,6 +65,7 @@ class SmsTransaction:
     balance: Decimal | None = None
     bank: str = ""
     sure: bool = True    # False when only the general rule read it: the review says to check it
+    text: str = ""       # the message itself, shown beside its row on the review (IV-3AU 3AU2)
 
     @property
     def inflow(self) -> bool:
@@ -372,6 +373,8 @@ class SmsImportService:
             (texts if mark == fp else stamped).add(fp)
             seen.append(mark)
             found = parse_sms(text, sender=sender, received=received)
+            if found is not None:
+                found = replace(found, text=" ".join(text.split())[:MAX_TEXT])
             if found is not None and sender:
                 banks.add(sender[:40])
             if found is None:
@@ -568,7 +571,7 @@ class SmsImportService:
     def _stage(self, account_id: int, rows: list[SmsTransaction], transfers: dict[int, str] | None = None) -> int:
         out = io.StringIO()
         writer = csv.writer(out)
-        writer.writerow(["Date", "Amount", "Counterparty", "Category", "Notes", "Reference"])
+        writer.writerow(["Date", "Amount", "Counterparty", "Category", "Notes", "Reference", "Message"])
         cash = self._cash_account_name()
         for row in sorted(rows, key=lambda r: r.when):
             notes = KIND_NOTES[row.kind] + (f" · {row.place}" if row.place and row.kind != "salary" else "")
@@ -583,7 +586,7 @@ class SmsImportService:
                 notes += f" · transfer to {transfers[id(row)]}"
             elif row.kind == "salary":
                 category = "Salary"
-            writer.writerow([row.when[:10], format(row.signed, "f"), counterparty, category, notes, row.reference])
+            writer.writerow([row.when[:10], format(row.signed, "f"), counterparty, category, notes, row.reference, row.text])
         batch_id, _ = self.bank_imports.stage(account_id, f"SMS {datetime.now():%Y-%m-%d %H:%M}",
                                               out.getvalue().encode("utf-8"))
         return batch_id

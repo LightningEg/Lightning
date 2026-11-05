@@ -19,7 +19,7 @@
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
 - **IV-3AN phone plan (Audit 13):** built 2026-11-02; every job at its target (report follow-up). Waits on the owner: Accounts tab first (3AN12), one phone check (3AN13). **Read:** 3AN.
-- **IV-3AU SMS flow:** S1, S3 built; next 3AU2, an SMS review. **Read:** 3AU.
+- **IV-3AU SMS flow:** built; owner phone check. **Read:** Architecture › Bank SMS.
 - **IV-3AM PC declutter:** built and reviewed; the owner checks it on the PC, then the Left list. **Read:** 3AM.
 
 - **Store and community (2026-10-27):** 10C unlock once, 8M–8S merged in both repos; the website migrations (up to 20261027210000) are run and checked live and `redeem-purchase` is redeployed; the app release that carries 10C ships the unlock. Next: 10D (Papyrus and Dendera sets need a banner, frame and name designed). **Read:** `reports/2026-10-27-store-and-community/report.md`.

@@ -1,6 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Review statement{% endblock %}
-{% block heading %}<div class="acct-title"><h1>{% if batch.status == 'POSTED' %}Import result{% else %}Review import{% endif %}</h1></div><p class="muted">{{ account.name }} · {{ batch.file_name }}</p>{% endblock %}
+{# A batch read from bank SMS (IV-3AU 3AU2) is the same review in an SMS mode: named for messages, each row with the
+   message it came from, no statement-only extras (the fee inside an amount, a transfer across currencies: bank SMS are
+   EGP), one Primary, and back to From SMS. #}
+{% block title %}{% if batch.file_name.startswith('SMS ') %}{{ 'Check bank messages'|tr(locale) }}{% else %}Review statement{% endif %}{% endblock %}
+{% block phone_back %}{% if batch.file_name.startswith('SMS ') %}<a class="phone-back" href="/sms"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'From SMS'|tr(locale) }}</span></a>{% else %}{{ super() }}{% endif %}{% endblock %}
+{% block section_tabs %}{% if not batch.file_name.startswith('SMS ') %}{{ super() }}{% endif %}{% endblock %}
+{% block heading %}{% if batch.file_name.startswith('SMS ') %}<div class="acct-title"><h1>{% if batch.status == 'POSTED' %}{{ 'Messages posted'|tr(locale) }}{% else %}{{ 'Check bank messages'|tr(locale) }}{% endif %}</h1></div><p class="muted">{{ account.name }} · {{ 'Read on {when}'|tr(locale, when=batch.file_name[4:]) }}</p>{% else %}<div class="acct-title"><h1>{% if batch.status == 'POSTED' %}Import result{% else %}Review import{% endif %}</h1></div><p class="muted">{{ account.name }} · {{ batch.file_name }}</p>{% endif %}{% endblock %}
 {% from "partials/macros.html" import category_options with context %}
 {#
   The statement as rows, like the account register (feedback batch 004, T12 to T14): every row has its own
@@ -16,14 +21,16 @@
 {%- endmacro %}
 
 {% block content %}
-{% if batch.status == 'POSTED' %}<section class="card"><h2>{{ 'Import complete'|tr(locale) }}</h2><p>{{ summary.posted }} posted · {% if summary.linked %}{{ summary.linked }} linked to entries you already had · {% endif %}{{ summary.skipped }} skipped · {{ summary.duplicates }} duplicates.</p><a class="btn" href="/accounts/{{ account.id }}">{{ 'Return to account'|tr(locale) }}</a></section>
+{% set sms = batch.file_name.startswith('SMS ') %}
+{% if batch.status == 'POSTED' %}<section class="card"><h2>{{ 'Import complete'|tr(locale) }}</h2><p>{{ summary.posted }} posted · {% if summary.linked %}{{ summary.linked }} linked to entries you already had · {% endif %}{{ summary.skipped }} skipped · {{ summary.duplicates }} duplicates.</p>{% if sms %}<a class="btn" href="/sms">{{ 'Back to From SMS'|tr(locale) }}</a>{% else %}<a class="btn" href="/accounts/{{ account.id }}">{{ 'Return to account'|tr(locale) }}</a>{% endif %}</section>
 {% else %}
 {% set cat_groups = category_groups(categories|map(attribute='id')|list) %}
 <datalist id="import-parties">{% for a in account_choices %}<option value="{{ a.name }}" data-pick="account:{{ a.id }}" data-group="Your accounts" data-label="{{ a.currency }} · {{ 'Account'|tr(locale) }}">{% endfor %}{% for cp in counterparties %}<option value="{{ cp.name }}" data-pick="counterparty:{{ cp.id }}" data-group="People and businesses">{% endfor %}</datalist>
 <datalist id="import-owners"><option value="{{ 'You'|tr(locale) }}" data-pick="self">{% for cp in owners %}<option value="{{ cp.name }}" data-pick="counterparty:{{ cp.id }}">{% endfor %}</datalist>
 <form method="post" action="/accounts/{{ account.id }}/import/{{ batch.id }}/confirm" id="import-review-form"><section class="card import-review">
-  <div class="card-heading"><div><h2>{{ rows|length }} row{{ 's' if rows|length != 1 }} · {{ groups|length }} name{{ 's' if groups|length != 1 }}</h2></div><button class="btn primary">{{ 'Post ready rows'|tr(locale) }}</button></div>
-  <div class="import-chips" role="group" aria-label="{{ 'Show'|tr(locale) }}">
+  {% if sms %}<div class="card-heading"><div><h2>{% if rows|length == 1 %}{{ '1 message'|tr(locale) }}{% else %}{{ '{n} messages'|tr(locale, n=rows|length) }}{% endif %}</h2></div></div>
+  {% else %}<div class="card-heading"><div><h2>{{ rows|length }} row{{ 's' if rows|length != 1 }} · {{ groups|length }} name{{ 's' if groups|length != 1 }}</h2></div><button class="btn primary">{{ 'Post ready rows'|tr(locale) }}</button></div>{% endif %}
+  <div class="import-chips" role="group" aria-label="{{ 'Show'|tr(locale) }}"{{ ' hidden' if sms and groups|length < 5 }}>
     <button type="button" class="chip is-on" data-filter="all">{{ 'All'|tr(locale) }} {{ counts.all }}</button>
     <button type="button" class="chip" data-filter="err">{{ 'To fix'|tr(locale) }} {{ counts.err }}</button>
     <button type="button" class="chip" data-filter="needs">{{ 'Needs you'|tr(locale) }} {{ counts.needs }}</button>
@@ -45,7 +52,7 @@
   <div class="import-head" aria-hidden="true"><span></span><span>{{ 'Date'|tr(locale) }}</span><span>{{ 'Counterparty or account'|tr(locale) }}</span><span>{{ 'Category'|tr(locale) }}</span><span>{{ 'Held for'|tr(locale) }}</span><span>{{ 'Notes'|tr(locale) }}</span><span>{{ 'Amount'|tr(locale) }}</span><span>{{ 'Status'|tr(locale) }}</span></div>
   {% for g in groups %}
   <details class="import-group" id="import-group-{{ g.i }}" data-name="{{ g.name }}" data-state="{{ g.status }}" {{ 'open' if g.status != 'ready' }}>
-    <summary><input type="checkbox" class="import-pick-group" data-group="{{ g.i }}" aria-label="{{ 'Select every row of'|tr(locale) }} {{ g.name }}"><span class="import-group-name"><b>{{ g.name }}</b><small>{{ g.count }} row{{ 's' if g.count != 1 }}</small></span><b class="num">{{ g.total|money(True) }}</b>{{ state_word(g.status) }}</summary>
+    <summary><input type="checkbox" class="import-pick-group" data-group="{{ g.i }}" aria-label="{{ 'Select every row of'|tr(locale) }} {{ g.name }}"><span class="import-group-name">{% if sms %}{% set parts = g.rows[0].Notes.split(' · ') %}{% set kind = parts[1] if parts[0].startswith('Check this') and parts|length > 1 else parts[0] %}<b>{{ g.rows[0].Counterparty or kind|tr(locale) }}</b><small>{% if g.count == 1 %}{{ g.rows[0].Date }}{% else %}{{ '{n} messages'|tr(locale, n=g.count) }}{% endif %}</small>{% else %}<b>{{ g.name }}</b><small>{{ g.count }} row{{ 's' if g.count != 1 }}</small>{% endif %}</span><b class="num">{{ g.total|money(True) }}</b>{{ state_word(g.status) }}</summary>
     <div class="import-lines">
     {% for r in g.rows %}{% set rid = r._import_row_id %}{% set ui = r._ui %}
     <div class="import-line is-{{ r._state }}{{ ' has-error' if r._state == 'err' }}" id="import-row-{{ rid }}" data-state="{{ r._state }}" data-group="{{ g.i }}">
@@ -65,8 +72,9 @@
         {% else %}<label class="import-check"><input type="checkbox" name="skip_{{ rid }}" {{ 'checked' if ui.skip }}> {{ 'Skip'|tr(locale) }}</label>{% endif %}
         <input type="checkbox" name="remember_{{ rid }}" hidden {{ 'checked' if ui.remember }}>
       </div>
-      {% if r._status == 'REVIEW' and (r._transfer_target or r._internal) and r.Amount.startswith('-') %}<label class="import-row-note import-fee"><span>{{ 'Fee inside this amount'|tr(locale) }}</span><input class="num money-input" type="text" inputmode="decimal" autocomplete="off" name="fee_{{ rid }}" value="{{ ui.fee }}" placeholder="0" aria-label="{{ 'Fee inside this amount'|tr(locale) }}, line {{ r._line }}"></label>{% endif %}
-      {% if r._status == 'REVIEW' %}<details class="import-row-note"><summary>{{ 'Transfer across currencies'|tr(locale) }}</summary><p class="muted small">{{ 'Choose your other account in Counterparty, then enter its exact statement amount as a positive number. No exchange rate is guessed. Import the debit first if it includes a fee; link the other statement row to the conversion.'|tr(locale) }}</p><label>{{ 'Other account amount'|tr(locale) }}<input type="text" inputmode="decimal" class="money-input num" name="conversion_amount_{{ rid }}" value="{{ ui.conversion_amount }}"></label></details>{% endif %}
+      {% if r._message %}<p class="import-row-note" dir="auto">{{ r._message }}</p>{% endif %}
+      {% if r._status == 'REVIEW' and (r._transfer_target or r._internal) and r.Amount.startswith('-') and (not sms or ui.fee) %}<label class="import-row-note import-fee"><span>{{ 'Fee inside this amount'|tr(locale) }}</span><input class="num money-input" type="text" inputmode="decimal" autocomplete="off" name="fee_{{ rid }}" value="{{ ui.fee }}" placeholder="0" aria-label="{{ 'Fee inside this amount'|tr(locale) }}, line {{ r._line }}"></label>{% endif %}
+      {% if r._status == 'REVIEW' and not sms %}<details class="import-row-note"><summary>{{ 'Transfer across currencies'|tr(locale) }}</summary><p class="muted small">{{ 'Choose your other account in Counterparty, then enter its exact statement amount as a positive number. No exchange rate is guessed. Import the debit first if it includes a fee; link the other statement row to the conversion.'|tr(locale) }}</p><label>{{ 'Other account amount'|tr(locale) }}<input type="text" inputmode="decimal" class="money-input num" name="conversion_amount_{{ rid }}" value="{{ ui.conversion_amount }}"></label></details>{% endif %}
       {% if r._status == 'REVIEW' and r._identity_ambiguous %}<small class="import-row-note">{{ 'Choose an account or counterparty explicitly for this name.'|tr(locale) }}</small>{% endif %}
       {% if r._category_ambiguous %}<small class="import-row-note">{{ r._category_ambiguous }} {{ 'Pick the category for this row.'|tr(locale) }}</small>{% endif %}
       {% if r._row_error %}<small class="import-row-note neg">{{ r._row_error }}</small>{% elif r._errors %}<small class="import-row-note neg">{{ r._errors|join(' ') }}</small>{% elif r._needs_account %}<small class="import-row-note neg">{{ 'The category says internal, but no account matches. Pick the account the money moved to or from.'|tr(locale) }}</small>{% elif r._suggest %}<small class="import-row-note">{{ 'Suggested'|tr(locale) }}: {{ 'open the counterparty list and choose it to confirm.'|tr(locale) }}</small>{% elif r._repeat_import %}<small class="import-row-note">This row is from a file you already reviewed. Skip it to keep the import idempotent.</small>{% elif r._voided_earlier %}<small class="import-row-note">{{ 'You voided this row after an earlier import. Post it again only if that was a mistake.'|tr(locale) }}</small>{% elif r._pending_elsewhere %}<small class="import-row-note">Same date and amount as a row waiting in {{ r._pending_elsewhere }}. Post one of them; skip the other.</small>{% elif r._reference_duplicate %}<small class="import-row-note">{{ 'Already imported from an earlier statement.'|tr(locale) }}</small>{% elif r._link_candidates and r._default_match.startswith('link:') %}<small class="import-row-note">{{ 'Already recorded? Link it to that entry: no money moves twice and the entry keeps its date and category.'|tr(locale) }}</small>{% elif r._link_candidates or r._similarity_warning %}<small class="import-row-note">{{ 'Same date and amount as a row you already have. Post it as new only if it is a second payment.'|tr(locale) }}</small>{% elif r._rule_split %}<small class="import-row-note">Split by your rule: {% for p in r._rule_split %}{{ p.category }} <span class="num">{{ p.amount|money }}</span>{{ ' · ' if not loop.last }}{% endfor %}.</small>{% endif %}
@@ -75,10 +83,10 @@
     </div>
   </details>
   {% endfor %}
-  <div class="actions"><button class="btn primary">{{ 'Post ready rows'|tr(locale) }}</button><a class="btn" href="/accounts/{{ account.id }}">{{ 'Finish later'|tr(locale) }}</a></div>
+  <div class="actions"><button class="btn primary">{{ 'Post ready rows'|tr(locale) }}</button><a class="btn" href="{{ '/sms' if sms else '/accounts/' ~ account.id }}">{{ 'Finish later'|tr(locale) }}</a></div>
 </section><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
-<form method="post" action="/accounts/{{ account.id }}/import/{{ batch.id }}/discard" class="import-discard" data-confirm-delete="Discard this import? Nothing from {{ batch.file_name }} is posted. You can import the file again later.">
-  <button class="btn danger">{{ 'Discard this import'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+<form method="post" action="/accounts/{{ account.id }}/import/{{ batch.id }}/discard" class="import-discard" data-confirm-delete="{% if sms %}{{ 'Discard these messages? Nothing from them is posted.'|tr(locale) }}{% else %}Discard this import? Nothing from {{ batch.file_name }} is posted. You can import the file again later.{% endif %}">
+  <button class="btn danger">{{ ('Discard these messages' if sms else 'Discard this import')|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
 </form>
 {% endif %}
 <script nonce="{{ request.state.csp_nonce|default('') }}">
