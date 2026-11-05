@@ -416,6 +416,8 @@ async def discard(request: Request, account_id: int, batch_id: int):
             count = c.bank_imports.discard(batch_id)
     except LightningError as exc:
         return redirect(f"/accounts/{account_id}/import/{batch_id}", exc.message)
+    if str(batch["file_name"]).startswith("SMS "):  # messages read from bank SMS go back to From SMS (IV-3AU)
+        return redirect("/sms", "Discarded: nothing from these messages was posted.")
     return redirect(f"/accounts/{account_id}",
                     f"Import discarded: {count} row{'s' if count != 1 else ''} from {batch['file_name']} were not posted.")
 
