@@ -809,6 +809,12 @@ class TransactionService:
             raise NotFoundError(f"Transaction {ref} not found.")
         return found
 
+    def recorded_since(self, moment: str) -> int:
+        """How many transactions were recorded after ``moment`` (an ISO time): posted, value updates and opening
+        balances left out. The Overview's "since your last visit" line (3G5)."""
+        return int(self.db.scalar("SELECT COUNT(*) FROM transactions WHERE created_at > ? AND status='POSTED' "
+                                  "AND type NOT IN ('VAL','OPN')", (moment,)) or 0)
+
     def find(self, f: TxnFilter) -> tuple[list[TxnSummary], int]:
         txns, total = self.repo.list(f)
         return [self.summarize(t) for t in txns], total

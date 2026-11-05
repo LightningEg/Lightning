@@ -11,6 +11,7 @@ Choosing a result is the user's click; the matcher changes nothing.
 from __future__ import annotations
 
 import json
+import re
 from urllib.parse import quote, urlencode
 
 from fastapi import APIRouter, Request
@@ -64,6 +65,44 @@ ACTIONS = (
     ("Add an investment to the catalogue", "/investments/assets/new", "new fund stock instrument"),
 )
 GROUPS = ("Transaction", "Page", "Action", "Account", "Person", "Counterparty", "Category", "Reserve", "Investment", "Tag", "Search")
+
+
+_AMOUNT = re.compile(r"^[+\-\u2212]?\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?$|^[+\-\u2212]?\d+(?:\.\d{1,2})?$")
+
+
+def entry(c, query: str) -> dict | None:
+    """Ctrl-K as "do anything" (3G7): "120 uber", "uber 120" or "+5,000 salary" offers to add that transaction. One
+    amount and at least one word; a word that names a category picks it, a known name is spelled as saved, and a
+    leading + (or an income category) makes it money in. The entry sheet opens filled in; nothing is saved here."""
+    words = ascii_digits(query).split()
+    amounts = [w for w in words if _AMOUNT.match(w)]
+    if len(amounts) != 1 or len(words) < 2:
+        return None
+    raw = amounts[0]
+    rest = " ".join(w for w in words if w is not raw).strip()
+    amount = raw.lstrip("+-\u2212").replace(",", "")
+    if not rest or not amount.replace(".", "").isdigit() or float(amount) <= 0:
+        return None
+    needle = _fold_search_text(rest)
+    category = next((cat for cat in c.categories.tree() if cat.active and not cat.is_root and not cat.is_system
+                     and _fold_search_text(cat.name) == needle), None)
+    party = next((p["name"] for p in c.counterparties.list_active() if _fold_search_text(p["name"]) == needle), None)
+    income = raw.startswith("+") or bool(category and category.movement.name == "INFLOW")
+    fields = {"kind": "in" if income else "out", "amount": amount}
+    if category is not None:
+        fields["category_id"] = str(category.id)
+    else:
+        fields["counterparty"] = party or rest
+    name = category.name if category is not None else fields["counterparty"]
+    return {"label": f"Add {fmt_amount(amount)} {'in' if income else 'out'} · {name}",
+            "href": "/accounts/add-transaction?" + urlencode(fields), "kind": "Action", "popup": True,
+            "context": "A new transaction, filled in for you to check", "entity_id": "entry", "rank": 1.0,
+            "match_reason": "entry"}
+
+
+def fmt_amount(amount: str) -> str:
+    whole, _, cents = amount.partition(".")
+    return f"{int(whole):,}" + (f".{cents}" if cents and int(cents) else "")
 
 
 def matches(c, query: str, privacy: bool = False, per_group: int = 6) -> list[dict]:
@@ -130,7 +169,7 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6) -> list[di
     for tag, count in (c.transactions.tags() if tag_needle else []):
         add(_score(tag_needle, tag, False) or (0.7 if needle == "#" else 0), f"#{tag}", f"/transactions?tag={quote(tag)}", "Tag",
             f"{count} transaction{'s' if count != 1 else ''}")
-    results: list[dict] = []
+    results: list[dict] = [e for e in (entry(c, query),) if e]  # a typed entry comes first (3G7)
     for group in GROUPS:
         ranked = sorted((pair for pair in found if pair[1]["kind"] == group), key=lambda p: (-p[0], p[1]["label"].casefold()))
         results += [row for _, row in ranked[:per_group]]

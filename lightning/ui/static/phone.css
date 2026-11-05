@@ -1017,3 +1017,13 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 .phone .linked-actions a { min-height: 48px; display: inline-flex; align-items: center; }
 .phone .linked-row form { margin: 0; flex: none; }
 .phone a.linked-row { text-decoration: none; color: inherit; }
+/* 3G6: the one category sheet on the phone */
+.category-sheet-figure { margin: 10px 0 6px; font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.category-sheet-figure small { font-size: 14px; font-weight: 600; color: var(--c-muted); }
+.category-sheet-bar { position: relative; display: block; height: 10px; border-radius: 5px; background: #E6EFEC; }
+.category-sheet-bar i { display: block; height: 100%; border-radius: 5px; background: #E68CA8; }
+.category-sheet-bar.is-over i { background: #C93D72; }
+.category-sheet-bar s { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #0D2233; opacity: .45; }
+.category-sheet-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.category-sheet-actions .btn { width: 100%; min-height: 48px; justify-content: center; }
+.category-sheet-actions > a:not(.btn) { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
