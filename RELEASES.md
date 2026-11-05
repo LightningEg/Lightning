@@ -6,6 +6,10 @@ What changed in each version, in plain words. Generated from `ai/changelog/` by 
 
 **Capture**
 
+- The Import statement button sits beside Money actions, and ticked import rows can be edited together.
+- A new counterparty typed during import is saved at once, and same-named rows in the group adopt it.
+- Same-named categories (Personal and Work Transportation) are never guessed between during import: you choose.
+- Merge into… on a counterparty moves its history, rules and plans to the name you keep; the old name becomes an alias.
 - On the phone, swipe a transaction to the side to set its category or delete it.
 - Find names and confirmed aliases across search, pickers and transaction history, including near spellings.
 - Import Excel and text CIB statements, or copy an AI prompt to prepare an image PDF as CSV.
@@ -30,6 +34,7 @@ What changed in each version, in plain words. Generated from `ai/changelog/` by 
 
 **Understand**
 
+- Every AI hand-off is a Copy prompt and Edit prompt pair that says why it helps; the text is never open on the page.
 - Overview now shows why net worth changed (what you kept, market moves, other changes) and your net worth in US dollars and grams of 21K gold.
 - Accounts, the sidebar and More now show the same In your accounts total, and Accounts explains how it adds up to what you own; on the phone, rent and loan payments already paid say Paid for this month instead of Ahead of pace.
 - Open any spending category as one sheet from Budget, Spending or Transactions, and type "120 uber" in Ctrl-K to add it.
@@ -48,6 +53,7 @@ What changed in each version, in plain words. Generated from `ai/changelog/` by 
 
 **Own**
 
+- Update prices matches Egyptian fund names in any word order and suggests the nearest names when none match.
 - Add silver you hold by the gram and type its price yourself.
 - Record what you paid for a flat or a car, see the change since, and link the car to its loan.
 - Compare a holding's return with a T-bill or certificate rate you type.
@@ -73,10 +79,13 @@ What changed in each version, in plain words. Generated from `ai/changelog/` by 
 
 **Everywhere**
 
+- Finding the PC or phone on the network is more reliable: the search announces on every local network, three times.
 - Dated Other asset estimates save correctly on a linked device.
 
 **Feel**
 
+- Undo, Redo and every save keep your place on the page and which sections were open.
+- Only one action menu is open at a time; scrollbars are thin and themed; import review no longer stalls under heavy themes.
 - On a PC, the tabs of a section now sit beside the page title, so the first card starts higher.
 - On a laptop screen the Overview now shows your savings rate, safe to spend and plan without scrolling, Accounts lists every group in one column, and Investments and Cash planning open on their answer.
 - Payday amounts read cleanly, and a property or car page leads with its value, change since purchase and loan.
