@@ -224,9 +224,10 @@ def check(apk: Path, build_tools: Path, code: str, name: str, cert_file: Path | 
         fingerprint = certificate(cert_file)
         found = signers(tool(build_tools, "apksigner", "verify", "--verbose", "--print-certs", str(apk)))
         if found != [fingerprint]:
-            problems.append(f"signed by {found}, not by the signing certificate {fingerprint} alone. If a new key was "
-                            "made, commit its fingerprint as packaging/android-test-certificate.sha256 (Lightning "
-                            "then needs one uninstall); otherwise the secrets hold a different key than the one pinned")
+            problems.append(f"signed by {found}, not by the signing certificate {fingerprint} alone. The secrets hold "
+                            "another key: put the original one back. Never pin a new key: installed phones refuse "
+                            "the update, and the uninstall that gets past it deletes the person's data. A key that "
+                            "must change needs a signing lineage first (tests/test_phone_identity_frozen.py)")
     if problems:
         raise BuildError("The APK is not the build it should be:\n- " + "\n- ".join(problems))
     return {"file": apk.name, "size": apk.stat().st_size, "sha256": sha256(apk), "application_id": info["package"],
