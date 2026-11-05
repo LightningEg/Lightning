@@ -30,6 +30,15 @@ OVER_PLAN_MARGIN = Decimal(50)  # a category a few pounds over its plan is not w
 
 MAX_BUDGET = 100_000_000  # EGP a month for one category; above it is a typo, not a plan
 
+LIMIT_STEP_SMALL, LIMIT_STEP, LIMIT_SMALL_BELOW = Decimal(50), Decimal(100), Decimal(1000)
+
+
+def round_limit(amount: Decimal) -> Decimal:
+    """A suggested monthly limit as a number people plan with (BU-3): to the nearest 50 below 1,000 and the nearest
+    100 from 1,000, halves up, and never below 50. 68 → 50, 671 → 650, 1,480 → 1,500, 4,666 → 4,700, 15 → 50."""
+    step = LIMIT_STEP_SMALL if amount < LIMIT_SMALL_BELOW else LIMIT_STEP
+    return max((amount / step).quantize(Decimal("1"), ROUND_HALF_UP) * step, LIMIT_STEP_SMALL)
+
 
 class BudgetService:
     def __init__(self, db: Database, categories: CategoryService, reporting: ReportingService, *, funding):
@@ -477,6 +486,11 @@ class BudgetService:
             if avg is not None and avg > ZERO:
                 result[category.id] = avg
         return result
+
+    def first_plan_suggestions(self, month: str) -> dict[int, Decimal]:
+        """The limits a first plan offers (BU-3): each suggestion as a round number, see round_limit. Only the
+        offer is rounded; what the user types is kept exactly, and demo and sample seeding keep suggested_plan."""
+        return {cid: round_limit(amount) for cid, amount in self.suggested_plan(month).items()}
 
     def fill_proposal(self, month: str, source: str, *, schedule: ScheduleView) -> BudgetFillProposal:
         """Build a read-only month-fill preview; all returned amounts are base limits in EGP."""
