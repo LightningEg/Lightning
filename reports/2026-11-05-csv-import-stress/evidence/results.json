@@ -1,0 +1,1031 @@
+[
+ {
+  "id": "A1",
+  "case": "bank",
+  "title": "Lightning's own template, ISO dates",
+  "bytes": 177,
+  "upload_seconds": 0.1,
+  "path": "staged without the column step",
+  "review_seconds": 0.19,
+  "review_page_kb": 42,
+  "rows": 3,
+  "states": {
+   "err": 0,
+   "needs": 1,
+   "dup": 0,
+   "ready": 2
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-01",
+   "2026-10-02",
+   "2026-10-03"
+  ],
+  "amounts": [
+   "-250.50",
+   "15000",
+   "-80"
+  ],
+  "labels": [
+   "Transportation"
+  ],
+  "post_seconds": 0.05,
+  "posted_status": 200,
+  "balance_change": "14749.50",
+  "posted_rows": 2
+ },
+ {
+  "id": "A2",
+  "case": "bank",
+  "title": "Debit and Credit columns, day-first dates, Balance column",
+  "bytes": 181,
+  "upload_seconds": 0.06,
+  "suggested": {
+   "Date": "Transaction Date",
+   "Inflow": "Credit",
+   "Outflow": "Debit",
+   "Notes": "Description"
+  },
+  "path": "column step",
+  "review_seconds": 0.03,
+  "review_page_kb": 39,
+  "rows": 3,
+  "states": {
+   "err": 0,
+   "needs": 3,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-01",
+   "2026-10-02",
+   "2026-10-03"
+  ],
+  "amounts": [
+   "-250.50",
+   "15000.00",
+   "-80.00"
+  ],
+  "labels": [],
+  "post_seconds": 0.04,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "A3",
+  "case": "bank",
+  "title": "Value Date and Posting Date both present",
+  "bytes": 139,
+  "upload_seconds": 0.04,
+  "suggested": {
+   "Date": "Posting Date",
+   "Amount": "Amount",
+   "Notes": "Narrative"
+  },
+  "path": "column step",
+  "review_seconds": 0.03,
+  "review_page_kb": 34,
+  "rows": 2,
+  "states": {
+   "err": 0,
+   "needs": 2,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-05",
+   "2026-10-06"
+  ],
+  "amounts": [
+   "-175.66",
+   "-2000"
+  ],
+  "labels": [],
+  "post_seconds": 0.03,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "A4",
+  "case": "bank",
+  "title": "Positive amounts with a DR/CR column",
+  "bytes": 110,
+  "upload_seconds": 0.05,
+  "suggested": {
+   "Date": "Date",
+   "Amount": "Amount",
+   "Category": "Type",
+   "Notes": "Description"
+  },
+  "path": "column step",
+  "review_seconds": 0.04,
+  "review_page_kb": 44,
+  "rows": 3,
+  "states": {
+   "err": 0,
+   "needs": 3,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-01",
+   "2026-10-02",
+   "2026-10-03"
+  ],
+  "amounts": [
+   "250.50",
+   "15000",
+   "80"
+  ],
+  "labels": [
+   "CR",
+   "DR"
+  ],
+  "post_seconds": 0.06,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "A5",
+  "case": "bank",
+  "title": "Thousands separators, currency codes and brackets",
+  "bytes": 147,
+  "upload_seconds": 0.06,
+  "suggested": {
+   "Date": "Date",
+   "Amount": "Amount",
+   "Notes": "Description"
+  },
+  "path": "column step",
+  "review_seconds": 0.04,
+  "review_page_kb": 44,
+  "rows": 4,
+  "states": {
+   "err": 0,
+   "needs": 4,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-01",
+   "2026-10-02",
+   "2026-10-03",
+   "2026-10-04"
+  ],
+  "amounts": [
+   "-12500.00",
+   "25000.00",
+   "-1.50",
+   "1234.56"
+  ],
+  "labels": [],
+  "post_seconds": 0.03,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "A6",
+  "case": "bank",
+  "title": "Arabic headers and Arabic-Indic digits",
+  "bytes": 127,
+  "upload_seconds": 0.05,
+  "suggested": {},
+  "path": "column step",
+  "result": "blocked at the column step: nothing suggested for Date, Amount"
+ },
+ {
+  "id": "A7",
+  "case": "bank",
+  "title": "Bank preamble lines above the header",
+  "bytes": 154,
+  "upload_seconds": 0.06,
+  "result": "refused at upload (400): Could not read this CSV: Could not determine delimiter"
+ },
+ {
+  "id": "A8",
+  "case": "bank",
+  "title": "Totals footer and blank lines",
+  "bytes": 123,
+  "upload_seconds": 0.06,
+  "suggested": {
+   "Date": "Date",
+   "Amount": "Amount",
+   "Notes": "Description"
+  },
+  "path": "column step",
+  "review_seconds": 0.03,
+  "review_page_kb": 47,
+  "rows": 4,
+  "states": {
+   "err": 2,
+   "needs": 2,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {
+   "Enter a date like 2026-01-31, 31/01/2026, or 31/1 (current year).": 2
+  },
+  "dates": [
+   "2026-10-01",
+   "2026-10-02"
+  ],
+  "amounts": [
+   "-250.50",
+   "15000",
+   "14749.50",
+   "24749.50"
+  ],
+  "labels": [],
+  "post_seconds": 0.03,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "A9",
+  "case": "bank",
+  "title": "Semicolon separated, comma decimals",
+  "bytes": 80,
+  "upload_seconds": 0.05,
+  "suggested": {
+   "Date": "Date",
+   "Amount": "Amount",
+   "Notes": "Description"
+  },
+  "path": "column step",
+  "review_seconds": 0.03,
+  "review_page_kb": 34,
+  "rows": 2,
+  "states": {
+   "err": 0,
+   "needs": 2,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-01",
+   "2026-10-02"
+  ],
+  "amounts": [
+   "-250.50",
+   "15000.00"
+  ],
+  "labels": [],
+  "post_seconds": 0.03,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "A10",
+  "case": "bank",
+  "title": "Saved by Excel in Windows Arabic (cp1256)",
+  "bytes": 51,
+  "upload_seconds": 0.05,
+  "result": "refused at upload (400): Save the statement as a UTF-8 CSV file."
+ },
+ {
+  "id": "A11",
+  "case": "bank",
+  "title": "Saved as UTF-16 (Excel 'Unicode text')",
+  "bytes": 106,
+  "upload_seconds": 0.06,
+  "result": "refused at upload (400): Save the statement as a UTF-8 CSV file."
+ },
+ {
+  "id": "A12",
+  "case": "bank",
+  "title": "Month-first dates (US export)",
+  "bytes": 77,
+  "upload_seconds": 0.05,
+  "suggested": {
+   "Date": "Date",
+   "Amount": "Amount",
+   "Notes": "Description"
+  },
+  "path": "column step",
+  "review_seconds": 0.03,
+  "review_page_kb": 36,
+  "rows": 2,
+  "states": {
+   "err": 1,
+   "needs": 1,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {
+   "10/13/2026 is not a real calendar date.": 1
+  },
+  "dates": [
+   "2026-02-10"
+  ],
+  "amounts": [
+   "-250.50",
+   "15000"
+  ],
+  "labels": [],
+  "post_seconds": 0.03,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "A13",
+  "case": "bank",
+  "title": "Dates with a time of day",
+  "bytes": 95,
+  "upload_seconds": 0.05,
+  "suggested": {
+   "Date": "Date",
+   "Amount": "Amount",
+   "Notes": "Description"
+  },
+  "path": "column step",
+  "review_seconds": 0.03,
+  "review_page_kb": 36,
+  "rows": 2,
+  "states": {
+   "err": 2,
+   "needs": 0,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {
+   "Enter a date like 2026-01-31, 31/01/2026, or 31/1 (current year).": 2
+  },
+  "dates": [],
+  "amounts": [
+   "-250.50",
+   "15000"
+  ],
+  "labels": [],
+  "post_seconds": 0.03,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "A14",
+  "case": "bank",
+  "title": "Month names and two-digit years",
+  "bytes": 95,
+  "upload_seconds": 0.11,
+  "suggested": {
+   "Date": "Date",
+   "Amount": "Amount",
+   "Notes": "Description"
+  },
+  "path": "column step",
+  "review_seconds": 0.03,
+  "review_page_kb": 42,
+  "rows": 3,
+  "states": {
+   "err": 2,
+   "needs": 1,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {
+   "Enter a date like 2026-01-31, 31/01/2026, or 31/1 (current year).": 2
+  },
+  "dates": [
+   "2026-10-03"
+  ],
+  "amounts": [
+   "-250.50",
+   "15000",
+   "-80"
+  ],
+  "labels": [],
+  "post_seconds": 0.03,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "A15",
+  "case": "bank",
+  "title": "Zero-amount rows (waived fees)",
+  "bytes": 75,
+  "upload_seconds": 0.06,
+  "suggested": {
+   "Date": "Date",
+   "Amount": "Amount",
+   "Notes": "Description"
+  },
+  "path": "column step",
+  "review_seconds": 0.04,
+  "review_page_kb": 36,
+  "rows": 2,
+  "states": {
+   "err": 1,
+   "needs": 1,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {
+   "Enter a non-zero amount; use a minus sign for money out.": 1
+  },
+  "dates": [
+   "2026-10-02"
+  ],
+  "amounts": [
+   "0",
+   "15000"
+  ],
+  "labels": [],
+  "post_seconds": 0.03,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "A16",
+  "case": "bank",
+  "title": "Rows dated in the future (pending card holds)",
+  "bytes": 82,
+  "upload_seconds": 0.06,
+  "suggested": {
+   "Date": "Date",
+   "Amount": "Amount",
+   "Notes": "Description"
+  },
+  "path": "column step",
+  "review_seconds": 0.05,
+  "review_page_kb": 36,
+  "rows": 2,
+  "states": {
+   "err": 1,
+   "needs": 1,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {
+   "2026-12-01 is in the future. Record transactions on or after the day they happen.": 1
+  },
+  "dates": [
+   "2026-10-01"
+  ],
+  "amounts": [
+   "-250.50",
+   "-999"
+  ],
+  "labels": [],
+  "post_seconds": 0.03,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "A17",
+  "case": "bank",
+  "title": "Running balance only, no amount column",
+  "bytes": 107,
+  "upload_seconds": 0.05,
+  "suggested": {
+   "Date": "Date",
+   "Notes": "Description"
+  },
+  "path": "column step",
+  "result": "blocked at the column step: nothing suggested for Amount"
+ },
+ {
+  "id": "A18",
+  "case": "bank",
+  "title": "Newest first, salary and spending the same day",
+  "bytes": 101,
+  "upload_seconds": 0.05,
+  "suggested": {
+   "Date": "Date",
+   "Amount": "Amount",
+   "Notes": "Description"
+  },
+  "path": "column step",
+  "review_seconds": 0.03,
+  "review_page_kb": 39,
+  "rows": 3,
+  "states": {
+   "err": 0,
+   "needs": 3,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-01",
+   "2026-10-02"
+  ],
+  "amounts": [
+   "-12000",
+   "15000",
+   "-250.50"
+  ],
+  "labels": [],
+  "post_seconds": 0.04,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "B1",
+  "case": "other-app",
+  "title": "Money Manager style: positive amounts, Income/Expense column, Subcategory",
+  "bytes": 220,
+  "upload_seconds": 0.06,
+  "suggested": {
+   "Date": "Date",
+   "Category": "Category",
+   "Notes": "Description"
+  },
+  "path": "column step",
+  "result": "blocked at the column step: nothing suggested for Amount"
+ },
+ {
+  "id": "B2",
+  "case": "other-app",
+  "title": "Wallet style: semicolons, ISO timestamps, currency column",
+  "bytes": 305,
+  "upload_seconds": 0.05,
+  "suggested": {
+   "Date": "date",
+   "Amount": "amount",
+   "Counterparty": "payee",
+   "Category": "category"
+  },
+  "path": "column step",
+  "review_seconds": 0.04,
+  "review_page_kb": 45,
+  "rows": 3,
+  "states": {
+   "err": 3,
+   "needs": 0,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {
+   "Enter a date like 2026-01-31, 31/01/2026, or 31/1 (current year).": 3
+  },
+  "dates": [],
+  "amounts": [
+   "-250.50",
+   "15000",
+   "-40"
+  ],
+  "labels": [
+   "Travel"
+  ],
+  "post_seconds": 0.05,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "B3",
+  "case": "other-app",
+  "title": "Group and category in one column (Food:Groceries, Food > Groceries, Food/Groceries)",
+  "bytes": 173,
+  "upload_seconds": 0.04,
+  "path": "staged without the column step",
+  "review_seconds": 0.04,
+  "review_page_kb": 47,
+  "rows": 3,
+  "states": {
+   "err": 0,
+   "needs": 3,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-01",
+   "2026-10-02",
+   "2026-10-03"
+  ],
+  "amounts": [
+   "-250.50",
+   "-80",
+   "-60"
+  ],
+  "labels": [
+   "Personal/Eating Out",
+   "Personal:Food & Groceries",
+   "Work > Transportation"
+  ],
+  "post_seconds": 0.05,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "B4",
+  "case": "other-app",
+  "title": "Group column plus unknown names (the owner's case)",
+  "bytes": 458,
+  "upload_seconds": 0.06,
+  "suggested": {
+   "Date": "Date",
+   "Amount": "Amount",
+   "Counterparty": "Counterparty",
+   "Category": "Category",
+   "Group": "Category_Group",
+   "Notes": "Notes"
+  },
+  "path": "column step",
+  "review_seconds": 0.06,
+  "review_page_kb": 52,
+  "rows": 5,
+  "states": {
+   "err": 0,
+   "needs": 3,
+   "dup": 0,
+   "ready": 2
+  },
+  "errors": {},
+  "dates": [
+   "2026-09-01",
+   "2026-10-01",
+   "2026-10-02",
+   "2026-10-03"
+  ],
+  "amounts": [
+   "-120",
+   "-30",
+   "-45",
+   "-5000"
+  ],
+  "labels": [
+   "Usual Expenses › Daily Expenses"
+  ],
+  "post_seconds": 0.08,
+  "posted_status": 200,
+  "balance_change": "-5120.00",
+  "posted_rows": 2
+ },
+ {
+  "id": "B5",
+  "case": "other-app",
+  "title": "One file, two accounts (Account column)",
+  "bytes": 171,
+  "upload_seconds": 0.04,
+  "suggested": {
+   "Date": "Date",
+   "Amount": "Amount",
+   "Counterparty": "Counterparty",
+   "Category": "Category"
+  },
+  "path": "column step",
+  "review_seconds": 0.04,
+  "review_page_kb": 42,
+  "rows": 3,
+  "states": {
+   "err": 0,
+   "needs": 1,
+   "dup": 0,
+   "ready": 2
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-01",
+   "2026-10-02"
+  ],
+  "amounts": [
+   "-250.50",
+   "-99",
+   "15000"
+  ],
+  "labels": [
+   "Subscriptions"
+  ],
+  "post_seconds": 0.04,
+  "posted_status": 200,
+  "balance_change": "14749.50",
+  "posted_rows": 2
+ },
+ {
+  "id": "B6",
+  "case": "other-app",
+  "title": "Split transaction rows (parent row plus split lines)",
+  "bytes": 136,
+  "upload_seconds": 0.04,
+  "suggested": {
+   "Date": "Date",
+   "Amount": "Amount",
+   "Counterparty": "Counterparty",
+   "Category": "Category"
+  },
+  "path": "column step",
+  "review_seconds": 0.05,
+  "review_page_kb": 37,
+  "rows": 2,
+  "states": {
+   "err": 0,
+   "needs": 0,
+   "dup": 2,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-01"
+  ],
+  "amounts": [
+   "-1000",
+   "-1000"
+  ],
+  "labels": [
+   "Home"
+  ],
+  "post_seconds": 0.04,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "B7",
+  "case": "other-app",
+  "title": "Transfers between two own accounts written twice",
+  "bytes": 234,
+  "upload_seconds": 0.05,
+  "path": "staged without the column step",
+  "review_seconds": 0.03,
+  "review_page_kb": 45,
+  "rows": 4,
+  "states": {
+   "err": 0,
+   "needs": 2,
+   "dup": 2,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-05",
+   "2026-10-06"
+  ],
+  "amounts": [
+   "-5000",
+   "-5000",
+   "4000",
+   "-4000"
+  ],
+  "labels": [],
+  "post_seconds": 0.03,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "C1",
+  "case": "repeat",
+  "title": "The same file a second time",
+  "bytes": 129,
+  "upload_seconds": 0.02,
+  "path": "staged without the column step",
+  "review_seconds": 0.04,
+  "review_page_kb": 34,
+  "rows": 2,
+  "states": {
+   "err": 0,
+   "needs": 0,
+   "dup": 2,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-01",
+   "2026-10-02"
+  ],
+  "amounts": [
+   "-250.50",
+   "15000"
+  ],
+  "labels": [],
+  "post_seconds": 0.06,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "C2",
+  "case": "repeat",
+  "title": "Overlapping month: 01-02 again plus 03-04, no references",
+  "bytes": 192,
+  "upload_seconds": 0.03,
+  "path": "staged without the column step",
+  "review_seconds": 0.05,
+  "review_page_kb": 48,
+  "rows": 4,
+  "states": {
+   "err": 0,
+   "needs": 1,
+   "dup": 2,
+   "ready": 1
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-01",
+   "2026-10-02",
+   "2026-10-03",
+   "2026-10-04"
+  ],
+  "amounts": [
+   "-250.50",
+   "15000",
+   "-80",
+   "-36"
+  ],
+  "labels": [
+   "Transportation"
+  ],
+  "post_seconds": 0.06,
+  "posted_status": 200,
+  "balance_change": "-36.00",
+  "posted_rows": 1
+ },
+ {
+  "id": "C3",
+  "case": "repeat",
+  "title": "Bank's own name spellings of known counterparties",
+  "bytes": 158,
+  "upload_seconds": 0.03,
+  "path": "staged without the column step",
+  "review_seconds": 0.05,
+  "review_page_kb": 39,
+  "rows": 3,
+  "states": {
+   "err": 0,
+   "needs": 3,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-07",
+   "2026-10-08",
+   "2026-10-09"
+  ],
+  "amounts": [
+   "-80",
+   "-250.50",
+   "-36"
+  ],
+  "labels": [],
+  "post_seconds": 0.03,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "D1",
+  "case": "hostile",
+  "title": "Formula-looking text in notes",
+  "bytes": 120,
+  "upload_seconds": 0.06,
+  "path": "staged without the column step",
+  "review_seconds": 0.03,
+  "review_page_kb": 34,
+  "rows": 2,
+  "states": {
+   "err": 0,
+   "needs": 2,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-01",
+   "2026-10-02"
+  ],
+  "amounts": [
+   "-10",
+   "-10"
+  ],
+  "labels": [],
+  "post_seconds": 0.03,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "D2",
+  "case": "hostile",
+  "title": "Duplicate header names",
+  "bytes": 48,
+  "upload_seconds": 0.05,
+  "result": "refused at upload (400): CSV headers must be unique; rename duplicate columns and try again."
+ },
+ {
+  "id": "D3",
+  "case": "hostile",
+  "title": "Very long text in one cell",
+  "bytes": 20036,
+  "upload_seconds": 0.06,
+  "path": "staged without the column step",
+  "review_seconds": 0.03,
+  "review_page_kb": 48,
+  "rows": 1,
+  "states": {
+   "err": 0,
+   "needs": 1,
+   "dup": 0,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2026-10-01"
+  ],
+  "amounts": [
+   "-10"
+  ],
+  "labels": [],
+  "post_seconds": 0.05,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "D4",
+  "case": "large",
+  "title": "1,000 rows",
+  "bytes": 45440,
+  "upload_seconds": 0.1,
+  "path": "staged without the column step",
+  "review_seconds": 1.05,
+  "review_page_kb": 4876,
+  "rows": 1000,
+  "states": {
+   "err": 0,
+   "needs": 875,
+   "dup": 125,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2025-01-01",
+   "2025-01-04",
+   "2025-01-07",
+   "2025-01-10"
+  ],
+  "amounts": [
+   "-100.00",
+   "-137.01",
+   "-174.02",
+   "-211.03"
+  ],
+  "labels": [],
+  "post_seconds": 1.34,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "D5",
+  "case": "large",
+  "title": "5,000 rows",
+  "bytes": 231440,
+  "upload_seconds": 0.23,
+  "path": "staged without the column step",
+  "review_seconds": 4.78,
+  "review_page_kb": 25402,
+  "rows": 5000,
+  "states": {
+   "err": 0,
+   "needs": 925,
+   "dup": 4075,
+   "ready": 0
+  },
+  "errors": {},
+  "dates": [
+   "2025-01-01",
+   "2025-01-04",
+   "2025-01-07",
+   "2025-01-10"
+  ],
+  "amounts": [
+   "-100.00",
+   "-137.01",
+   "-174.02",
+   "-211.03"
+  ],
+  "labels": [],
+  "post_seconds": 6.48,
+  "posted_status": 200,
+  "balance_change": "0.00",
+  "posted_rows": 0
+ },
+ {
+  "id": "D6",
+  "case": "large",
+  "title": "Over the 5 MB limit",
+  "bytes": 5100035,
+  "upload_seconds": 0.14,
+  "result": "refused at upload (400): CSV files must be 5 MB or smaller."
+ }
+]
