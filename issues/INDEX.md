@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 36 open items, in the order they are worked on.
+10 milestones, 41 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -21,8 +21,11 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1H4 | ↳ Validate | | | M | |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | ready |
 | **IT-1Q** | [Link historical user questions to verified current feature coverage](1-easy-to-contribute/1Q-current-user-question-coverage.md) | improvement, technical | Build | S | new |
+| **IT-1R** | [Direct tests for investment_breakdown](1-easy-to-contribute/1R-investment-breakdown-direct-tests.md) | improvement, technical | Build | M | ready |
+| **IT-1S** | [Direct tests for SubmissionStore (a form saved twice saves once)](1-easy-to-contribute/1S-submission-store-direct-tests.md) | improvement, technical | Build | S | ready |
+| **IT-1T** | [Direct tests for PlanSchedule and ScheduleSource](1-easy-to-contribute/1T-plan-schedule-direct-tests.md) | improvement, technical | Build | S | ready |
 
-Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P. Next free code: 1R.
+Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P. Next free code: 1U.
 
 ## 2 Safe for real money
 
@@ -70,8 +73,10 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **BV-3AS** | [Payday funding labels and amount precision must remain readable](3-polish-and-arabic/3AS-payday-labels-and-precision.md) | bug, visual · low | Feel | S | new |
 | **IV-3AT** | [Property and vehicle accounts need task-specific desktop and phone layouts](3-polish-and-arabic/3AT-property-vehicle-task-layout.md) | improvement, visual | Feel | M | new |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | new |
+| **BV-3AV** | [The Arabic bank import preview mixes English into Arabic lines](3-polish-and-arabic/3AV-arabic-bank-import-preview.md) | bug, visual · low | Feel | M | ready |
+| **BV-3AW** | [Four short words stay English in Arabic on loans, charts and investments](3-polish-and-arabic/3AW-arabic-short-words-loans-charts.md) | bug, visual · low | Feel | S | ready |
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR. Next free code: 3AV.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR. Next free code: 3AX.
 
 ## 4 Edit journal and devices
 
