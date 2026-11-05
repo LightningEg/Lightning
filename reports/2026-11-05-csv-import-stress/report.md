@@ -140,4 +140,4 @@ review screens were not exercised.
 
 ## Dated follow-ups
 
-None yet.
+- 2026-11-05: the owner asked for a better flow for large files ("smarter buttons and features"); planned only, as IT-7AB (summary first, post in rounds, group by question, smart buttons, quick mode, undo).

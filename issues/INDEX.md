@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 45 open items, in the order they are worked on.
+10 milestones, 46 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -159,8 +159,15 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | IT-7AA7 | ↳ Category paths and subcategories | | | S | |
 | IT-7AA8 | ↳ Review at any size | | | L | |
 | IT-7AA9 | ↳ Reconcile against the statement's balance | | | M | |
+| **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/7AB-import-review-as-questions.md) | new feature | Capture | L | new |
+| NF-7AB1 | ↳ Summary first, rows last | | | M | |
+| NF-7AB2 | ↳ Post in rounds | | | S | |
+| NF-7AB3 | ↳ Group by the question, not the name | | | M | |
+| NF-7AB4 | ↳ Smart buttons on a group | | | M | |
+| NF-7AB5 | ↳ Quick mode for leftovers | | | M | |
+| NF-7AB6 | ↳ Safe to go fast | | | S | |
 
-Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y. Next free code: 7AB.
+Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y. Next free code: 7AC.
 
 ## 8 Website
 
