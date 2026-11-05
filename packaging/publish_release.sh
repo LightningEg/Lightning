@@ -32,7 +32,7 @@ sha256sum --check --strict SHA256SUMS || fail "The builds do not match SHA256SUM
 grep -qx "Build: release ${TAG}" BUILD_INFO.txt || fail "BUILD_INFO.txt does not say this is release ${TAG}."
 jq -e --arg zip "$ZIP" --arg apk "$APK" --arg commit "$(sed -n 's/^Commit: //p' BUILD_INFO.txt)" \
   '.windows.file == $zip and .android.file == $apk and .commit == $commit and
-   .android.application_id == "org.lightning.app.test" and .android.debuggable == true and
+   .android.application_id == "org.lightning.app" and .android.debuggable == true and
    (.android.certificate_sha256 | type == "string" and length > 0)' BUILD.json >/dev/null \
   || fail "BUILD.json does not identify this tested pair and its signed Lightning app."
 zip_sha=$(sha256sum "$ZIP" | cut -d' ' -f1)

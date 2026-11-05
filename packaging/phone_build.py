@@ -1,11 +1,11 @@
-"""The phone half of the matched PC and phone test builds (ai/ARCHITECTURE.md › Build and release). Standard library only.
+"""The phone half of the matched PC and phone builds (ai/ARCHITECTURE.md › Build and release). Standard library only.
 
     python packaging/phone_build.py identity                       # GitHub outputs: version code and name, APK name
     python packaging/phone_build.py check APK --build-tools DIR --code N --name TEXT [--certificate FILE] --info OUT
     python packaging/phone_build.py signer APK --build-tools DIR   # prints the signing certificate's SHA-256
     python packaging/phone_build.py bundle --windows DIR --apk APK --info JSON --out DIR [--reused-from RUN]
 
-`check` fails unless the APK is exactly what the workflow meant to build: the test ID and version, arm64 only,
+`check` fails unless the APK is exactly what the workflow meant to build: the app ID and version, arm64 only,
 the permissions in packaging/android-permissions.txt, the files the phone needs and no private data, exactly
 the Python packages of requirements/android.lock, and, with --certificate, signed by that certificate alone.
 `bundle` writes the two downloads (PC and Phone) from one commit only after the Windows ZIP is proven to be the
@@ -27,7 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 LOCK = ROOT / "requirements" / "android.lock"
 PERMISSIONS = ROOT / "packaging" / "android-permissions.txt"
-TEST_ID = "org.lightning.app.test"
+APP_ID = "org.lightning.app"
 ABI = "arm64-v8a"
 # What the phone runs: the app's own Python, the shared package, the dummy round-trip fixture and the pages.
 REQUIRED = ("probe.py", "lightning_android.py", "lightning/runtime/devices.py", "lightning/sync/transport.py",
@@ -67,7 +67,7 @@ def git(*args: str) -> str:
 
 # ---------------------------------------------------------------- identity
 def identity(commit: str, count: int, version: str) -> dict[str, str]:
-    """The test APK's version code (commits on main, so it never falls), version name and file name."""
+    """The APK's version code (commits on main, so it never falls), version name and file name."""
     if count < 1 or count > 2_100_000_000:
         raise BuildError(f"version code {count} is out of Android's range")
     short = commit[:8]
@@ -205,11 +205,11 @@ def check(apk: Path, build_tools: Path, code: str, name: str, cert_file: Path | 
     problems = []
     lock_text = LOCK.read_text(encoding="utf-8")
     info = badging(tool(build_tools, "aapt2", "dump", "badging", str(apk)))
-    wanted = {"package": TEST_ID, "version_code": code, "version_name": name}
+    wanted = {"package": APP_ID, "version_code": code, "version_name": name}
     for key, value in wanted.items():
         if info.get(key) != value:
             problems.append(f"{key} is {info.get(key)!r}, not {value!r}")
-    asked = permissions(tool(build_tools, "aapt2", "dump", "permissions", str(apk)), TEST_ID)
+    asked = permissions(tool(build_tools, "aapt2", "dump", "permissions", str(apk)), APP_ID)
     allowed = {line.split("#")[0].strip() for line in PERMISSIONS.read_text(encoding="utf-8").splitlines()} - {""}
     if asked != allowed:
         problems.append(f"permissions differ from packaging/android-permissions.txt: APK adds {sorted(asked - allowed)}, "
@@ -224,11 +224,11 @@ def check(apk: Path, build_tools: Path, code: str, name: str, cert_file: Path | 
         fingerprint = certificate(cert_file)
         found = signers(tool(build_tools, "apksigner", "verify", "--verbose", "--print-certs", str(apk)))
         if found != [fingerprint]:
-            problems.append(f"signed by {found}, not by the test certificate {fingerprint} alone. If a new key was "
-                            "made, commit its fingerprint as packaging/android-test-certificate.sha256 (Lightning Test "
+            problems.append(f"signed by {found}, not by the signing certificate {fingerprint} alone. If a new key was "
+                            "made, commit its fingerprint as packaging/android-test-certificate.sha256 (Lightning "
                             "then needs one uninstall); otherwise the secrets hold a different key than the one pinned")
     if problems:
-        raise BuildError("The APK is not the test build it should be:\n- " + "\n- ".join(problems))
+        raise BuildError("The APK is not the build it should be:\n- " + "\n- ".join(problems))
     return {"file": apk.name, "size": apk.stat().st_size, "sha256": sha256(apk), "application_id": info["package"],
             "version_code": int(code), "version_name": name, "debuggable": info["debuggable"] == "yes",
             "abi": ABI, "certificate_sha256": fingerprint, "android_wheels": wheels_tag(lock_text),
@@ -266,7 +266,7 @@ to install apps when Android asks.
     verify it there before uninstalling. Uninstall erases that phone copy. Then uninstall the old
     app, install Lightning and pair again; both apps listen on the same network port.
   - Later: a newer Lightning APK updates this one and keeps its profile. If Android says
-    the app was not installed, the APK is older than the one on the phone, or the test key changed:
+    the app was not installed, the APK is older than the one on the phone, or the signing key changed:
     uninstall Lightning once, then install.
 
 These downloads last seven days; run "PC and phone app" again for fresh ones.
@@ -279,7 +279,7 @@ def bundle(windows_dir: Path, apk: Path, apk_info: dict, out: Path, commit: str,
     if apk_info.get("sha256") != sha256(apk):
         raise BuildError("the APK is not the one that was checked")
     if not apk_info.get("certificate_sha256"):
-        raise BuildError("the APK was not checked against the test certificate")
+        raise BuildError("the APK was not checked against the signing certificate")
     zip_path, fields = windows_build(windows_dir, commit)
     stamp = apk_info["version_name"].replace("+", "-")
     manifest = {
@@ -339,7 +339,7 @@ def main(argv: list[str]) -> int:
             info = check(args.apk, args.build_tools, args.code, args.name, args.certificate)
             info["commit"] = git("rev-parse", "HEAD")
             args.info.write_text(json.dumps(info, indent=2) + "\n", encoding="utf-8")
-            print(f"{args.apk.name}: every check passed" + ("" if args.certificate else " (not yet signed with the test key)"))
+            print(f"{args.apk.name}: every check passed" + ("" if args.certificate else " (not yet signed with the signing key)"))
         elif args.command == "signer":
             print(" ".join(signers(tool(args.build_tools, "apksigner", "verify", "--verbose", "--print-certs", str(args.apk)))))
         else:

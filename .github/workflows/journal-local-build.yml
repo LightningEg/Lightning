@@ -68,7 +68,7 @@ jobs:
         env:
           CODE: ${{ steps.identity.outputs.version_code }}
           NAME: ${{ steps.identity.outputs.version_name }}
-        run: gradle --no-daemon :app:assembleDebug "-PtestVersionCode=$CODE" "-PtestVersionName=$NAME"
+        run: gradle --no-daemon :app:assembleDebug "-PbuildVersionCode=$CODE" "-PbuildVersionName=$NAME"
       - name: Verify the built APK
         env:
           CODE: ${{ steps.identity.outputs.version_code }}

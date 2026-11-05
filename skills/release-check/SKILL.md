@@ -1,6 +1,6 @@
 ---
 name: release-check
-description: Get Lightning ready to tag a release and publish it safely: version agreement, clean main, full tests, no secrets or private data, release notes, price files, then the tag. Use before any release or beta, or when asked "are we ready to ship".
+description: Get Lightning ready to tag a release and publish it safely: version agreement, clean main, full tests, no secrets or private data, release notes, price files, then the tag. Use before any release, or when asked "are we ready to ship".
 ---
 
 # Release check
@@ -21,7 +21,7 @@ Read only the sections named here. Run scripts and print findings, not files. Ru
 
 1. **Fresh main.** `git checkout main && git pull`. Work on a branch `claude/release-<version>` for any fix (AGENTS.md §6).
 2. **Stale and private check.** Run `python tools/stale_check.py` (skill `stale-check`) and `python tools/release_check.py`. The second prints the version, the tag it implies
-   (`1.1.0b1` becomes `v1.1.0-beta.1`) and every problem it finds: versions that disagree in `pyproject.toml`, `lightning/__init__.py` and the README; an unclean tree or
+   (`2.0.0` becomes `v2.0.0`) and every problem it finds: versions that disagree in `pyproject.toml`, `lightning/__init__.py` and the README; an unclean tree or
    a branch other than `main`; missing `LICENSE` or `CONTRIBUTING.md`; a version with no release notes, or entries still waiting in `ai/changelog/UNRELEASED.md`; tracked files that look like secrets or private data;
    TODO/FIXME markers in `lightning/`. Fix every finding. On a fix branch the "not on main" finding is expected until you merge.
 3. **Tests.**
@@ -32,12 +32,12 @@ Read only the sections named here. Run scripts and print findings, not files. Ru
 5. **Look and language.** Run `guideline-audit` (PC and phone) and, if the release has Arabic, `arabic-check`. Fix anything that fails.
 6. **Speed.** `python tools/perf_check.py`. A page over its limit that was not slow in the last release blocks it (skill `perf-check`).
 7. **Prepare the release commit** on the fix branch:
-   - Version: set the new number in `pyproject.toml` (`version = "1.1.0b2"`), `lightning/__init__.py` (`__version__`) and the README line "The source version is **v1.1.0-beta.2**". Run `python tools/release_check.py` again.
+   - Version: set the new number in `pyproject.toml` (`version = "2.0.1"`), `lightning/__init__.py` (`__version__`) and the README line "The source version is **v2.0.1**". Run `python tools/release_check.py` again.
    - Release notes: `python tools/release_notes.py cut <version>` (date from the `date` command) writes `ai/changelog/<version>.md` and `RELEASES.md` from the commit trailers. Read the notes once; fix a bad sentence in the version file, then run the tool without arguments to rebuild `RELEASES.md`.
    - Price files: `python -m tools.market release --required` must succeed (a tagged release needs `lightning/market/market.zip`; it is generated, never committed).
    - Commit, push the branch, `git pull --rebase origin main`, merge into `main`, push `main`. Wait for the Linux CI run on that commit to pass (use the GitHub tools to read the run; do not poll in a loop).
-8. **Tag (owner approves first).** The tag must be the version, sit on `main`, and match: `python packaging/ci_scope.py --check-release-tag` after `git tag v1.1.0-beta.2`.
-   `git push origin v1.1.0-beta.2` starts the tag run: tests, the Windows ZIP, the signed APK, and publishing to `elfekimuhammed/Lightning-downloads` after the
+8. **Tag (owner approves first).** The tag must be the version, sit on `main`, and match: `python packaging/ci_scope.py --check-release-tag` after `git tag v2.0.1`.
+   `git push origin v2.0.1` starts the tag run: tests, the Windows ZIP, the signed APK, and publishing to `elfekimuhammed/Lightning-downloads` after the
    `production-release` environment approval. Required repository secrets (names only, never print values): `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
    `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `LIGHTNING_DOWNLOADS_TOKEN`. If one is missing the run says so; tell the owner, do not work around it.
 9. **After publishing.** Update the website repo (skill `website-sync`): Downloads page, Version Archive and checksums, English and Arabic, and the `Current app release` line in its README.

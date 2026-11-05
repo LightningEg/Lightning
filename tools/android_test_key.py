@@ -1,4 +1,4 @@
-"""Make the Android test key that signs every Lightning Test APK (owner, once).
+"""Make the Android test key that signs every Lightning APK (owner, once).
 
     python android_test_key.py                  # writes to Documents/Lightning test key
     python android_test_key.py <empty folder>
@@ -13,7 +13,7 @@ folder and prints what to do with them:
                                       packaging/android-test-certificate.sha256
 
 Keep the folder (a USB stick or a password manager is fine). If the key is lost, the next APK cannot update
-the installed Lightning Test: it must be uninstalled once, losing its dummy data. This key is only for test
+the installed Lightning: it must be uninstalled once, losing its dummy data. This key is only for test
 builds; it is never a Google Play upload or app signing key. See ai/ARCHITECTURE.md › Build and release.
 """
 from __future__ import annotations
@@ -40,7 +40,7 @@ def make_keystore(password: str, now: datetime | None = None, rounds: int = 600_
     SHA-256 fingerprint as apksigner prints it (64 lowercase hex digits)."""
     now = now or datetime.now(timezone.utc)
     key = rsa.generate_private_key(public_exponent=65537, key_size=3072)
-    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "Lightning Test (not for release)"),
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "Lightning (not for release)"),
                       x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Lightning")])
     certificate = (x509.CertificateBuilder()
                    .subject_name(name).issuer_name(name).public_key(key.public_key())
@@ -74,7 +74,7 @@ def write(folder: Path) -> str:
 def main(argv: list[str]) -> int:
     folder = Path(argv[0]) if argv else Path.home() / "Documents" / "Lightning test key"
     fingerprint = write(folder)
-    print(f"""Made the Lightning Test key in: {folder}
+    print(f"""Made the Lightning key in: {folder}
 
 1. On GitHub, open LightningEg/Lightning: Settings > Environments > android-signing.
    Add ANDROID_KEYSTORE_BASE64: everything in ANDROID_TEST_KEYSTORE.txt.

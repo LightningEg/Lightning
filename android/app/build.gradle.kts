@@ -8,15 +8,15 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        // CI builds the test app (packaging/phone_build.py): its own ID and label, and a version code that grows
-        // with every commit on main, so each test APK installs over the last. org.lightning.app stays for Play.
-        val testVersionCode = providers.gradleProperty("testVersionCode").orNull
-        applicationId = if (testVersionCode != null) "org.lightning.app.test" else "org.lightning.app"
+        // CI builds the phone app (packaging/phone_build.py): a version code that grows
+        // with every commit on main, so each APK installs over the last.
+        val buildVersionCode = providers.gradleProperty("buildVersionCode").orNull
+        applicationId = "org.lightning.app"
         manifestPlaceholders["appLabel"] = "Lightning"
         minSdk = 24
         targetSdk = 35
-        versionCode = testVersionCode?.toInt() ?: 1
-        versionName = providers.gradleProperty("testVersionName").getOrElse("0.5-m1")
+        versionCode = buildVersionCode?.toInt() ?: 1
+        versionName = providers.gradleProperty("buildVersionName").getOrElse("0.5-m1")
         ndk {
             abiFilters += "arm64-v8a"
         }
@@ -33,9 +33,9 @@ sync {
     into(sharedPython)
 }
 file("$sharedPython/roundtrip_fixture/__init__.py").writeText("")
-// A test build names itself where Settings shows the app version (lightning/ui/web.py reads it), so a
+// A build names itself where Settings shows the app version (lightning/ui/web.py reads it), so a
 // screenshot says which APK took it. packaging/phone_build.py checks the APK carries exactly this name.
-providers.gradleProperty("testVersionName").orNull?.let { file("$sharedPython/lightning/build_identity.txt").writeText(it) }
+providers.gradleProperty("buildVersionName").orNull?.let { file("$sharedPython/lightning/build_identity.txt").writeText(it) }
 
 chaquopy {
     sourceSets {

@@ -1,8 +1,8 @@
-# The phone app, Lightning Test: built only from requirements/android.lock and checked in one job, then
-# signed with the test key and checked again in another, so the key never meets Gradle. Run it by hand to
+# The phone app, Lightning: built only from requirements/android.lock and checked in one job, then
+# signed with the signing key and checked again in another, so the key never meets Gradle. Run it by hand to
 # check a change cheaply (Linux, about 3 minutes); without the bundle input it uploads only a one-day
-# artifact for its own sign job. "PC and phone app" (desktop-probe.yml) calls it for the matched test
-# builds, which need the test key, and in the daily run when the phone's files changed.
+# artifact for its own sign job. "PC and phone app" (desktop-probe.yml) calls it for the matched
+# builds, which need the signing key, and in the daily run when the phone's files changed.
 # How it fits: ai/ARCHITECTURE.md › Build and release.
 name: Phone app
 
@@ -11,7 +11,7 @@ on:
   workflow_call:
     inputs:
       bundle:
-        description: Called for the matched test builds, so the APK must carry the test key
+        description: Called for the matched builds, so the APK must carry the signing key
         type: boolean
         default: false
     # GitHub requires caller mappings even when values exist only in the signing environment.
@@ -30,7 +30,7 @@ permissions:
 
 jobs:
   apk:
-    # No secret reaches this job: Gradle and what it downloads never run beside the test key.
+    # No secret reaches this job: Gradle and what it downloads never run beside the signing key.
     name: Build and check the phone app
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -56,7 +56,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c  # v6.4.1
         with:
           gradle-version: '8.11.1'
-      - name: Test identity (version code = commits on main)
+      - name: Build identity (version code = commits on main)
         id: identity
         run: python packaging/phone_build.py identity
       - name: Build the arm64 app from the lock (no index; every file pinned by hash)
@@ -64,7 +64,7 @@ jobs:
         env:
           CODE: ${{ steps.identity.outputs.version_code }}
           NAME: ${{ steps.identity.outputs.version_name }}
-        run: gradle --no-daemon :app:assembleDebug "-PtestVersionCode=$CODE" "-PtestVersionName=$NAME"
+        run: gradle --no-daemon :app:assembleDebug "-PbuildVersionCode=$CODE" "-PbuildVersionName=$NAME"
       - name: Check the app as built (ID, version, arm64, permissions, files, packages)
         env:
           CODE: ${{ steps.identity.outputs.version_code }}
@@ -96,7 +96,7 @@ jobs:
           retention-days: 1
 
   sign:
-    # Only here does the test key exist, beside nothing but the SDK's apksigner and this repository's checks.
+    # Only here does the signing key exist, beside nothing but the SDK's apksigner and this repository's checks.
     name: Sign and check the phone app
     environment: android-signing
     # Defense in depth: only sign from main or owner-controlled release tags.
@@ -118,7 +118,7 @@ jobs:
         with:
           name: phone-unsigned
           path: ${{ runner.temp }}/unsigned
-      - name: Sign with the test key
+      - name: Sign with the signing key
         id: sign
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -134,7 +134,7 @@ jobs:
               echo "::error::The Android signing key needs ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD."
               exit 1
             fi
-            echo "::notice::No test key yet: this APK is checked but not signed with it, and nothing is uploaded."
+            echo "::notice::No signing key yet: this APK is checked but not signed with it, and nothing is uploaded."
             echo "signed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -169,7 +169,7 @@ jobs:
             echo "::error::Pin this public fingerprint in packaging/android-test-certificate.sha256 before publishing."
             exit 1
           fi
-      - name: Check the signed app (the same checks, and the test certificate alone)
+      - name: Check the signed app (the same checks, and the signing certificate alone)
         if: steps.sign.outputs.signed == 'true'
         env:
           CODE: ${{ needs.apk.outputs.version_code }}

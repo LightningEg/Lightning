@@ -92,15 +92,15 @@ def test_wheels_are_chosen_for_cpython_313_on_arm64_android():
 
 
 def test_a_test_build_has_its_own_id_and_a_version_that_never_falls():
-    first = build.identity("a" * 40, 70, "0.5.0-beta.1")
-    later = build.identity("b" * 40, 71, "0.5.0-beta.1")
-    assert first == {"version_code": "70", "version_name": "0.5.0-beta.1-70+aaaaaaaa",
-                     "apk": "Lightning-0.5.0-beta.1-70-aaaaaaaa.apk", "stamp": "0.5.0-beta.1-70-aaaaaaaa"}
+    first = build.identity("a" * 40, 70, "2.0.0")
+    later = build.identity("b" * 40, 71, "2.0.0")
+    assert first == {"version_code": "70", "version_name": "2.0.0-70+aaaaaaaa",
+                     "apk": "Lightning-2.0.0-70-aaaaaaaa.apk", "stamp": "2.0.0-70-aaaaaaaa"}
     assert int(later["version_code"]) > int(first["version_code"])
     with pytest.raises(build.BuildError):
         build.identity("a" * 40, 0, "1")
     gradle = (ROOT / "android" / "app" / "build.gradle.kts").read_text(encoding="utf-8")
-    assert '"org.lightning.app.test"' in gradle and 'manifestPlaceholders["appLabel"] = "Lightning"' in gradle
+    assert '"org.lightning.app"' in gradle and 'manifestPlaceholders["appLabel"] = "Lightning"' in gradle
     manifest = (ROOT / "android" / "app" / "src" / "main" / "AndroidManifest.xml").read_text(encoding="utf-8")
     assert 'android:label="${appLabel}"' in manifest
     allowed = {line.split("#")[0].strip() for line in build.PERMISSIONS.read_text().splitlines()} - {""}
@@ -129,14 +129,14 @@ def test_the_apk_must_carry_exactly_what_it_should(tmp_path):
 
 
 def test_aapt2_and_apksigner_reports_are_read_strictly():
-    info = build.badging("package: name='org.lightning.app.test' versionCode='70' versionName='0.5.0-beta.1-70+aaaaaaaa' "
+    info = build.badging("package: name='org.lightning.app' versionCode='70' versionName='2.0.0-70+aaaaaaaa' "
                          "platformBuildVersionName='15'\nsdkVersion:'24'\napplication-debuggable\nnative-code: 'arm64-v8a'\n")
-    assert info == {"package": "org.lightning.app.test", "version_code": "70",
-                    "version_name": "0.5.0-beta.1-70+aaaaaaaa", "debuggable": "yes"}
-    asked = build.permissions("package: org.lightning.app.test\nuses-permission: name='android.permission.INTERNET'\n"
-                              "uses-permission: name='org.lightning.app.test.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'\n"
-                              "permission: org.lightning.app.test.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION\n",
-                              "org.lightning.app.test")
+    assert info == {"package": "org.lightning.app", "version_code": "70",
+                    "version_name": "2.0.0-70+aaaaaaaa", "debuggable": "yes"}
+    asked = build.permissions("package: org.lightning.app\nuses-permission: name='android.permission.INTERNET'\n"
+                              "uses-permission: name='org.lightning.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'\n"
+                              "permission: org.lightning.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION\n",
+                              "org.lightning.app")
     assert asked == {"android.permission.INTERNET"}
     good = ("Verifies\nVerified using v1 scheme (JAR signing): false\n"
             "Verified using v2 scheme (APK Signature Scheme v2): true\nNumber of signers: 1\n"
@@ -150,10 +150,10 @@ def test_aapt2_and_apksigner_reports_are_read_strictly():
 
 def _windows(folder: Path, commit: str) -> Path:
     folder.mkdir()
-    zip_path = folder / "Lightning-v0.5.0-beta.1-dev-r7-dddddddd-Windows-x64.zip"
+    zip_path = folder / "Lightning-v2.0.0-dev-r7-dddddddd-Windows-x64.zip"
     zip_path.write_bytes(b"tested zip")
     (folder / "APP_SHA256SUMS").write_text(f"{build.sha256(zip_path)}  {zip_path.name}\n")
-    (folder / "BUILD_INFO.txt").write_text(f"Lightning 0.5.0-beta.1 for Windows x64\nBuild: development (not a release)\n"
+    (folder / "BUILD_INFO.txt").write_text(f"Lightning 2.0.0 for Windows x64\nBuild: development (not a release)\n"
                                            f"Commit: {commit}\nRun: workflow run 7, attempt 1\n")
     return zip_path
 
@@ -162,12 +162,12 @@ def test_the_bundle_offers_only_a_pair_from_one_commit(tmp_path):
     commit = "d" * 40
     windows = tmp_path / "windows"
     zip_path = _windows(windows, commit)
-    apk = tmp_path / "Lightning-0.5.0-beta.1-70-dddddddd.apk"
+    apk = tmp_path / "Lightning-2.0.0-70-dddddddd.apk"
     apk.write_bytes(b"checked apk")
     info = {"sha256": build.sha256(apk), "certificate_sha256": "ab" * 32, "commit": commit,
-            "version_name": "0.5.0-beta.1-70+dddddddd", "version_code": 70}
+            "version_name": "2.0.0-70+dddddddd", "version_code": 70}
     names = build.bundle(windows, apk, info, tmp_path / "out", commit, "10", "1", "7")
-    assert names == {"pc": "Lightning-0.5.0-beta.1-70-dddddddd-PC", "phone": "Lightning-0.5.0-beta.1-70-dddddddd-Phone"}
+    assert names == {"pc": "Lightning-2.0.0-70-dddddddd-PC", "phone": "Lightning-2.0.0-70-dddddddd-Phone"}
     for side, binary in (("PC", zip_path), ("Phone", apk)):
         folder = tmp_path / "out" / side
         assert sorted(p.name for p in folder.iterdir()) == sorted([binary.name, "BUILD.json", "README.txt", "SHA256SUMS"])
@@ -184,7 +184,7 @@ def test_the_bundle_offers_only_a_pair_from_one_commit(tmp_path):
     with pytest.raises(build.BuildError, match="not the ZIP that was tested"):
         build.bundle(windows, apk, info, tmp_path / "o3", commit, "10", "1", None)
     _windows(tmp_path / "w2", commit)
-    with pytest.raises(build.BuildError, match="test certificate"):
+    with pytest.raises(build.BuildError, match="signing certificate"):
         build.bundle(tmp_path / "w2", apk, dict(info, certificate_sha256=None), tmp_path / "o4", commit, "10", "1", None)
     apk.write_bytes(b"another apk")
     with pytest.raises(build.BuildError, match="not the one that was checked"):
@@ -232,7 +232,7 @@ def test_the_workflows_offer_a_pair_only_from_one_run_and_never_sign_with_anothe
     assert "publish_release.sh" in release_job and "BUILD.json" in release_job
     assert "format('-{0}', github.run_id)" in app  # a push never cancels the test builds
     android = (flows / "android-app.yml").read_text(encoding="utf-8")
-    sign = android[android.index("- name: Sign with the test key"):android.index("- name: Check the signed app")]
+    sign = android[android.index("- name: Sign with the signing key"):android.index("- name: Check the signed app")]
     assert 'if [ "$BUNDLE" = "true" ]; then' in sign and "exit 1" in sign  # no key, no APK for the bundle
     for secret in ("ANDROID_KEYSTORE_BASE64", "ANDROID_KEYSTORE_PASSWORD", "ANDROID_KEY_ALIAS", "ANDROID_KEY_PASSWORD"):
         assert f"secrets.{secret}" in sign
@@ -325,7 +325,7 @@ def test_the_phones_settings_name_the_build_a_screenshot_came_from(tmp_path, mon
     from test_profile_app import create
 
     assert web.build_version(tmp_path / "absent.txt") == DISPLAY_VERSION
-    name = "0.5.0-beta.1-445+38557359"
+    name = "2.0.0-445+38557359"
     (tmp_path / "build_identity.txt").write_text(name + "\n")
     assert web.build_version(tmp_path / "build_identity.txt") == name
     gradle = (ROOT / "android" / "app" / "build.gradle.kts").read_text(encoding="utf-8")

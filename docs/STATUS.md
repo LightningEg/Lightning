@@ -1,6 +1,6 @@
 # Where Lightning stands
 
-Version **1.5.4**. Generated from the plan by `python tools/status.py`; do not edit by hand.
+Version **2.0.0**. Generated from the plan by `python tools/status.py`; do not edit by hand.
 
 ## By pillar
 
