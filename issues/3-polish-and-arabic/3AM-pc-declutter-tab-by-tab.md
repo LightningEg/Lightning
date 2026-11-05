@@ -56,3 +56,5 @@ each class's share against its target; Compare periods' answer is a Lead with it
 for others and Planner in whole EGP, Held for others without its describing sentence. **Left:** Categories keeps inline
 autosave (no edit drawer); Arabic/RTL screens not looked at by eye (the Arabic text tests pass); tabbed pages start at
 161-214 px, not 140 (the tab bar is a row).
+
+**Checked and built (2026-11-05):** Arabic PC pages looked at by eye at 1366×768 (mirrored, Arabic digits, no sideways scroll). Tabs now sit in the header row beside the title (owner pick), so Cash planning, Loans, Accounts, Recurring start at 101-171 px; pages whose header also carries a period control or several buttons (Investments, Reports, Categories) still wrap the tabs under the title and start at 157-196 px.
