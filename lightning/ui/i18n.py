@@ -2071,6 +2071,7 @@ ARABIC_UI = {
     'Nothing due in the next 14 days.': 'مفيش حاجة مستحقة في الـ 14 يوم الجايين.',
     'Deleted.': 'اتمسحت.',
     'Release to refresh': 'سيب عشان تحدّث',
+    'Row actions': 'اختيارات الصف',
     'Exchanges': 'البورصات',
     'Add rule': 'أضف قاعدة',
     'Add': 'أضف',

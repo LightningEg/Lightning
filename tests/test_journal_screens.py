@@ -234,10 +234,27 @@ def test_lab_opens_the_apps_own_screens_and_a_pc_save_reaches_the_home(tmp_path,
     home, pc = devices
     links = []
     monkeypatch.setattr(journal_lab.webbrowser, "open", lambda url: links.append(url))
-    probe = socket.socket()
-    probe.bind(("127.0.0.1", 0))
-    port = probe.getsockname()[1]
-    probe.close()
+    def three_free_ports():
+        """The lab binds port, port + 1 and port + 2: find a base where all three are free (parallel workers)."""
+        for _ in range(50):
+            probe = socket.socket()
+            probe.bind(("127.0.0.1", 0))
+            base = probe.getsockname()[1]
+            probe.close()
+            held = []
+            try:
+                for offset in range(3):
+                    sock = socket.socket()
+                    held.append(sock)
+                    sock.bind(("127.0.0.1", base + offset))
+                return base
+            except OSError:
+                continue
+            finally:
+                for sock in held:
+                    sock.close()
+        raise RuntimeError("no three consecutive free ports")
+    port = three_free_ports()
     async def run():
         task = asyncio.create_task(journal_lab.serve(devices, secret, port, full_app=True))
         try:

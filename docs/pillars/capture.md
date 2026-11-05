@@ -11,12 +11,10 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **NF-3AD** | [Phone overhaul, step 2](../../issues/3-polish-and-arabic/3AD-phone-overhaul-step-2.md) | L | new |
 | **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](../../issues/7-planning-import-and-search/7C-move-in-from-other-apps.md) | L | new |
 
 ## Reports with open follow-ups here
 
-- [Audit 10: the phone, tab by tab - quick actions and the answer first](../../reports/2026-10-29-phone-tab-audit/report.md): 3AD
 - [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 7C
 <!-- work:end -->
 
