@@ -1,0 +1,171 @@
+{
+  "before": {
+    "what_you_own": "265670.860000",
+    "held_for_others": "10000.000000",
+    "in_your_accounts": "275670.860000",
+    "account_row_sum": "261670.860000",
+    "gameya_still_to_pay": "14000.000000",
+    "free_cash": "67368.360000",
+    "safe_to_spend": "51420.110000",
+    "parts": [
+      [
+        "Free cash",
+        "67368.360000"
+      ],
+      [
+        "Due before payday",
+        "-1480.00"
+      ],
+      [
+        "Budget until payday",
+        "-5468.25"
+      ],
+      [
+        "Emergency fund top-up",
+        "-5403.86"
+      ],
+      [
+        "Rest of savings target",
+        "-3596.14"
+      ]
+    ]
+  },
+  "assets": [
+    {
+      "account_id": 8,
+      "opening": "0",
+      "report_value": "0",
+      "panel": {
+        "details": {
+          "kind": "car",
+          "purchase_date": "2025-06-01",
+          "purchase_price": "600000.00",
+          "loan_item_id": 7
+        },
+        "value": "0.00",
+        "price": "600000.00",
+        "change": "-600000.00",
+        "change_pct": "-100",
+        "history": [
+          {
+            "date": "2026-06-01",
+            "value": "540000.00",
+            "change": "-60000.00"
+          },
+          {
+            "date": "2025-06-01",
+            "value": "600000.00",
+            "change": null
+          }
+        ],
+        "loan": {
+          "id": 7,
+          "name": "Audit car loan",
+          "left": "25000.00",
+          "equity": "-25000.00"
+        },
+        "loans": [
+          {
+            "id": 7,
+            "name": "Audit car loan"
+          },
+          {
+            "id": 6,
+            "name": "Car loan"
+          }
+        ],
+        "kinds": [
+          "flat",
+          "house",
+          "land",
+          "car",
+          "other"
+        ]
+      }
+    },
+    {
+      "account_id": 9,
+      "opening": "600000",
+      "report_value": "540000.000000",
+      "panel": {
+        "details": {
+          "kind": "car",
+          "purchase_date": "2025-06-01",
+          "purchase_price": "600000.00",
+          "loan_item_id": 7
+        },
+        "value": "600000.00",
+        "price": "600000.00",
+        "change": "0.00",
+        "change_pct": "0",
+        "history": [
+          {
+            "date": "2026-06-01",
+            "value": "540000.00",
+            "change": "-60000.00"
+          },
+          {
+            "date": "2025-06-01",
+            "value": "600000.00",
+            "change": null
+          }
+        ],
+        "loan": {
+          "id": 7,
+          "name": "Audit car loan",
+          "left": "25000.00",
+          "equity": "575000.00"
+        },
+        "loans": [
+          {
+            "id": 7,
+            "name": "Audit car loan"
+          },
+          {
+            "id": 6,
+            "name": "Car loan"
+          }
+        ],
+        "kinds": [
+          "flat",
+          "house",
+          "land",
+          "car",
+          "other"
+        ]
+      }
+    }
+  ],
+  "refill_amount": "67368.360000",
+  "after_refill": {
+    "what_you_own": "265670.860000",
+    "held_for_others": "10000.000000",
+    "in_your_accounts": "275670.860000",
+    "account_row_sum": "261670.860000",
+    "gameya_still_to_pay": "14000.000000",
+    "free_cash": "0.000000",
+    "safe_to_spend": "-15948.250000",
+    "parts": [
+      [
+        "Free cash",
+        "0.000000"
+      ],
+      [
+        "Due before payday",
+        "-1480.00"
+      ],
+      [
+        "Budget until payday",
+        "-5468.25"
+      ],
+      [
+        "Emergency fund top-up",
+        "-2596.85"
+      ],
+      [
+        "Rest of savings target",
+        "-6403.15"
+      ]
+    ]
+  }
+}

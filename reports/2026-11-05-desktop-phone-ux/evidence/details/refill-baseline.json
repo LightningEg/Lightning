@@ -1,0 +1,231 @@
+{
+  "height": 2687,
+  "overflow": 0,
+  "text": "Cash planning\n\nPromised payments are 15,948 more than your free cash.\n\n2026-11-05 to 2026-12-01 \u00b7 until payday\n\nPlan\nRecurring\nLoans\n\nCompare scenarios\n\nForecast inputs\n\nSafe to spend\nuntil 2026-12-01\n\u221215,948EGP\n\n15,948 more is promised than your free cash\n\nBudget\nSavings\nDue\n\nOn top of your plan How it is worked out\n\nHow safe to spend is worked out\n\nFrom free cash to safe to spend\n\nFree cash\n0\nDue before payday\n\u22121,480\nBudget until payday\n\u22125,468\nEmergency fund top-up\n\u22122,597\nRest of savings target\n\u22126,403\nSafe to spend\n\u221215,948\n\nPromised payments are larger than your free cash.\n\nShow the numbers\nCan I afford this?\nCheck\nFree cash\n2026-11\n0EGP\n\u221261,186 since 2026-10-31\nCash you own 87,768, less 87,768 set aside or due\nDue before payday\n3 payments\n1,480EGP\n3 payments before payday\nNext: Vodafone \u00b7 2026-11-09\nLowest point ahead\n2026-11\n\u221215,948EGP\n15,948 below today\nRuns short: the month ends below zero\nSee the forecast\nThe next 30 days\n\n2026-11-05 to 2026-12-05 \u00b7 money in above the line, payments below\n\nRecurring\nVodafone\n2026-11-09 \u00b7 Subscription\n\u2212350\nMark paid\nWE Internet\n2026-11-20 \u00b7 Bill\n\u2212650\nMark paid\nNorth Cairo Electricity\n2026-11-24 \u00b7 Bill\n\u2212480\nMark paid\nACME Egypt\n2026-12-01 \u00b7 Income\n+45,000\nMark received\nLandlord\n2026-12-03 \u00b7 Bill\n\u221212,000\nMark paid\nCar loan\n2026-12-05 \u00b7 Loan \u00b7 payment 4 of 24\n\u22122,500\nMark paid\nWhere is my cash heading?\nThe last 2 month ends, then the next 3\nFree cash, then the forecast\n\nlowest \u221215,948 in 2026-11\n\nFree cash\nForecast\n100,000\n40,000\n0\n-20,000\n61,186\n4,530\n09\n2026\n10\n11\n12\n01\n2027\nShow the numbers\nFree cash at past month ends, then the forecast\nIn and out each month ahead\n\nMoney in includes income, CD proceeds and a gam'eya payout \u00b7 projected values are estimates\n\nIn\nOut\n0\n16k\nRest of 2026-11\n\u221215,948\n47k\n37k\n2026-12\n+10,209\n47k\n37k\n2027-01\n+10,269\nShow the numbers\nWhat is promised?\nToday\nWhat you owe\nLoans\n66,500\nEGP\nBills due, loans apart\n0\nLoans still to pay\n52,500\nGam'eya still to pay\n14,000",
+  "headings": [
+    {
+      "text": "Cash planning",
+      "y": 24
+    },
+    {
+      "text": "Safe to spend",
+      "y": 290
+    },
+    {
+      "text": "How safe to spend is worked out",
+      "y": 289
+    },
+    {
+      "text": "Can I afford this?",
+      "y": 742
+    },
+    {
+      "text": "The next 30 days",
+      "y": 1169
+    },
+    {
+      "text": "Where is my cash heading?",
+      "y": 1676
+    },
+    {
+      "text": "Free cash, then the forecast",
+      "y": 1772
+    },
+    {
+      "text": "In and out each month ahead",
+      "y": 1772
+    },
+    {
+      "text": "What is promised?",
+      "y": 2253
+    },
+    {
+      "text": "What you owe",
+      "y": 2349
+    }
+  ],
+  "targets": [
+    {
+      "text": "Undo \u00b7 Reserve changes",
+      "x": 1294,
+      "y": 24,
+      "w": 48,
+      "h": 48
+    },
+    {
+      "text": "Plan",
+      "x": 300,
+      "y": 136,
+      "w": 83,
+      "h": 36
+    },
+    {
+      "text": "Recurring",
+      "x": 387,
+      "y": 136,
+      "w": 117,
+      "h": 36
+    },
+    {
+      "text": "Loans",
+      "x": 508,
+      "y": 136,
+      "w": 93,
+      "h": 36
+    },
+    {
+      "text": "Compare scenarios",
+      "x": 296,
+      "y": 193,
+      "w": 127,
+      "h": 19
+    },
+    {
+      "text": "Forecast inputs",
+      "x": 296,
+      "y": 229,
+      "w": 102,
+      "h": 19
+    },
+    {
+      "text": "How it is worked out",
+      "x": 437,
+      "y": 475,
+      "w": 121,
+      "h": 18
+    },
+    {
+      "text": "Show the numbers",
+      "x": 755,
+      "y": 672,
+      "w": 117,
+      "h": 32
+    },
+    {
+      "text": "Price (EGP)",
+      "x": 913,
+      "y": 729,
+      "w": 160,
+      "h": 48
+    },
+    {
+      "text": "Check",
+      "x": 1081,
+      "y": 735,
+      "w": 74,
+      "h": 36
+    },
+    {
+      "text": "Free cash",
+      "x": 297,
+      "y": 847,
+      "w": 336,
+      "h": 260
+    },
+    {
+      "text": "Due before payday",
+      "x": 651,
+      "y": 847,
+      "w": 336,
+      "h": 260
+    },
+    {
+      "text": "Lowest point ahead",
+      "x": 1005,
+      "y": 847,
+      "w": 336,
+      "h": 260
+    },
+    {
+      "text": "See the forecast",
+      "x": 1025,
+      "y": 1076,
+      "w": 96,
+      "h": 17
+    },
+    {
+      "text": "Recurring",
+      "x": 1236,
+      "y": 1153,
+      "w": 57,
+      "h": 19
+    },
+    {
+      "text": "Mark paid",
+      "x": 1204,
+      "y": 1259,
+      "w": 89,
+      "h": 36
+    },
+    {
+      "text": "Mark paid",
+      "x": 1204,
+      "y": 1322,
+      "w": 89,
+      "h": 36
+    },
+    {
+      "text": "Mark paid",
+      "x": 1204,
+      "y": 1384,
+      "w": 89,
+      "h": 36
+    },
+    {
+      "text": "Mark received",
+      "x": 1177,
+      "y": 1447,
+      "w": 116,
+      "h": 36
+    },
+    {
+      "text": "Mark paid",
+      "x": 1204,
+      "y": 1510,
+      "w": 89,
+      "h": 36
+    },
+    {
+      "text": "Mark paid",
+      "x": 1204,
+      "y": 1573,
+      "w": 89,
+      "h": 36
+    },
+    {
+      "text": "Show the numbers",
+      "x": 321,
+      "y": 2164,
+      "w": 117,
+      "h": 32
+    },
+    {
+      "text": "Show the numbers",
+      "x": 844,
+      "y": 2123,
+      "w": 117,
+      "h": 32
+    },
+    {
+      "text": "Loans",
+      "x": 1258,
+      "y": 2333,
+      "w": 35,
+      "h": 19
+    },
+    {
+      "text": "Bills due, loans apart\n0",
+      "x": 321,
+      "y": 2446,
+      "w": 972,
+      "h": 48
+    },
+    {
+      "text": "Loans still to pay\n52,500",
+      "x": 321,
+      "y": 2495,
+      "w": 972,
+      "h": 48
+    }
+  ]
+}

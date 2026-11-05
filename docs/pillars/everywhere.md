@@ -18,6 +18,7 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 
 ## Reports with open follow-ups here
 
+- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 3AN, 4A, 4B
 - [Audit 2: backend efficiency and loose ends](../../reports/2026-10-21-backend-efficiency/report.md): 4A
 - [Audit 3: is the edit journal (multi-device sync) solid?](../../reports/2026-10-21-edit-journal/report.md): 4A
 - [Audit 5: is the backend engine efficient and streamlined?](../../reports/2026-10-21-backend-streamlining/report.md): 4A

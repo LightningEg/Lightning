@@ -1,0 +1,2034 @@
+{
+  "payday": {
+    "height": 1836,
+    "overflow": 0,
+    "text": "Fund your payday plan\nCash planning\n\nAssign cash you already own. Expected salary is excluded; reserves and unpaid bills stay protected. This does not change budget limits or move money. Cash in another account or brokerage still needs a transfer before payment.\n\nTurn on cash funding\nBefore your next payday\n\nDue before payday 1,480 EGP \u00b7 Safe to spend 51,420 EGP\n\nVodafone \u00b7 2026-11-09\n\nWE Internet \u00b7 2026-11-20\n\nNorth Cairo Electricity \u00b7 2026-11-24\n\nCash available to assign\n\n67,368 EGP \u00b7 2026-11\n\nOwned cash 87,368 \u00b7 Reserves 20,000 \u00b7 Funded spending left 0 \u00b7 Unfunded bills due 0\n\nAmounts below are a preview, with bills due first. Each category includes its children; spending and refunds update its funded cash. Unused funding returns to the pool next month.\n\nFund spending\nEating OutFunded spending left 0.00 \u00b7 Left in plan 671.00Fees & ChargesFunded spending left 0.00 \u00b7 Left in plan 15.00Food & GroceriesFunded spending left 0.00 \u00b7 Left in plan 1,415.25Gifts & DonationsFunded spending left 0.00 \u00b7 Left in plan 2,000.00HealthFunded spending left 0.00 \u00b7 Left in plan 0.00Housing & RentFunded spending left 0.00 \u00b7 Left in plan 0.00ShoppingFunded spending left 0.00 \u00b7 Left in plan 1,299.00TransportationFunded spending left 0.00 \u00b7 Left in plan 68.00Utilities & BillsFunded spending left 0.00 \u00b7 Left in plan 1,480.00Loan paymentsFunded spending left 0.00 \u00b7 Left in plan 0.00\nTop up reserves\nEmergency FundAdd to assigned cash \u00b7 Goal still needs 129,692.68\n\nTurn on cash funding to confirm this proposal.",
+    "headings": [
+      {
+        "text": "Fund your payday plan",
+        "y": 24
+      },
+      {
+        "text": "Before your next payday",
+        "y": 305
+      },
+      {
+        "text": "Cash available to assign",
+        "y": 556
+      },
+      {
+        "text": "Fund spending",
+        "y": 786
+      },
+      {
+        "text": "Top up reserves",
+        "y": 1594
+      }
+    ],
+    "targets": [
+      {
+        "text": "Cash planning",
+        "x": 1203,
+        "y": 24,
+        "w": 139,
+        "h": 48
+      },
+      {
+        "text": "Budget settings",
+        "x": 1304,
+        "y": 38,
+        "w": 38,
+        "h": 38
+      },
+      {
+        "text": "Turn on cash funding",
+        "x": 321,
+        "y": 199,
+        "w": 166,
+        "h": 36
+      },
+      {
+        "text": "category_6",
+        "x": 321,
+        "y": 842,
+        "w": 996,
+        "h": 48
+      },
+      {
+        "text": "category_18",
+        "x": 321,
+        "y": 913,
+        "w": 996,
+        "h": 48
+      },
+      {
+        "text": "category_5",
+        "x": 321,
+        "y": 983,
+        "w": 996,
+        "h": 48
+      },
+      {
+        "text": "category_14",
+        "x": 321,
+        "y": 1054,
+        "w": 996,
+        "h": 48
+      },
+      {
+        "text": "category_10",
+        "x": 321,
+        "y": 1124,
+        "w": 996,
+        "h": 48
+      },
+      {
+        "text": "category_8",
+        "x": 321,
+        "y": 1194,
+        "w": 996,
+        "h": 48
+      },
+      {
+        "text": "category_11",
+        "x": 321,
+        "y": 1265,
+        "w": 996,
+        "h": 48
+      },
+      {
+        "text": "category_7",
+        "x": 321,
+        "y": 1335,
+        "w": 996,
+        "h": 48
+      },
+      {
+        "text": "category_9",
+        "x": 321,
+        "y": 1406,
+        "w": 996,
+        "h": 48
+      },
+      {
+        "text": "category_31",
+        "x": 321,
+        "y": 1476,
+        "w": 996,
+        "h": 48
+      },
+      {
+        "text": "reserve_1",
+        "x": 321,
+        "y": 1650,
+        "w": 996,
+        "h": 48
+      }
+    ]
+  },
+  "forecast-inputs": {
+    "height": 768,
+    "overflow": 0,
+    "text": "Forecast inputs\n\nThe forecast uses confirmed cash and scheduled payments. These notes change no balance or plan.\n\nWhat this figure leans on\nCash wallet has no account check dated on or before this figure. Review inputs\nCIB Payroll has no account check dated on or before this figure. Review inputs\nTHNDR has no account check dated on or before this figure. Review inputs\nVodafone Cash has no account check dated on or before this figure. Review inputs\nThe expected receipt for NBE 3-year certificate on 2026-10-01 still needs confirmation. It is not assumed received. Review inputs\nThe expected receipt for NBE 3-year certificate on 2026-11-01 still needs confirmation. It is not assumed received. Review inputs\nCash planning",
+    "headings": [
+      {
+        "text": "Forecast inputs",
+        "y": 78
+      },
+      {
+        "text": "What this figure leans on",
+        "y": 152
+      }
+    ],
+    "targets": [
+      {
+        "text": "Review inputs",
+        "x": 782,
+        "y": 190,
+        "w": 91,
+        "h": 19
+      },
+      {
+        "text": "Review inputs",
+        "x": 775,
+        "y": 212,
+        "w": 91,
+        "h": 19
+      },
+      {
+        "text": "Review inputs",
+        "x": 752,
+        "y": 234,
+        "w": 91,
+        "h": 19
+      },
+      {
+        "text": "Review inputs",
+        "x": 805,
+        "y": 257,
+        "w": 91,
+        "h": 19
+      },
+      {
+        "text": "Review inputs",
+        "x": 1105,
+        "y": 279,
+        "w": 91,
+        "h": 19
+      },
+      {
+        "text": "Review inputs",
+        "x": 1102,
+        "y": 302,
+        "w": 91,
+        "h": 19
+      },
+      {
+        "text": "Cash planning",
+        "x": 321,
+        "y": 337,
+        "w": 124,
+        "h": 36
+      }
+    ]
+  },
+  "instalments": {
+    "height": 768,
+    "overflow": 0,
+    "text": "Bought in instalments\nPlan\nRecurring\nLoans\nName\nPrice still to pay (EGP)\nNumber of instalments\nFirst instalment\nPay from\nFee included in instalments\n\nThis adds a loan plan. It does not record a cash payment today.\n\nPreview\nCancel",
+    "headings": [
+      {
+        "text": "Bought in instalments",
+        "y": 24
+      }
+    ],
+    "targets": [
+      {
+        "text": "Plan",
+        "x": 300,
+        "y": 89,
+        "w": 83,
+        "h": 36
+      },
+      {
+        "text": "Recurring",
+        "x": 387,
+        "y": 89,
+        "w": 117,
+        "h": 36
+      },
+      {
+        "text": "Loans",
+        "x": 508,
+        "y": 89,
+        "w": 93,
+        "h": 36
+      },
+      {
+        "text": "name",
+        "x": 321,
+        "y": 204,
+        "w": 237,
+        "h": 48
+      },
+      {
+        "text": "price",
+        "x": 574,
+        "y": 204,
+        "w": 237,
+        "h": 48
+      },
+      {
+        "text": "months",
+        "x": 827,
+        "y": 204,
+        "w": 237,
+        "h": 48
+      },
+      {
+        "text": "first_date",
+        "x": 1080,
+        "y": 204,
+        "w": 237,
+        "h": 48
+      },
+      {
+        "text": "Account Id",
+        "x": 321,
+        "y": 289,
+        "w": 237,
+        "h": 48
+      },
+      {
+        "text": "Fee included in instalments",
+        "x": 321,
+        "y": 357,
+        "w": 996,
+        "h": 20
+      },
+      {
+        "text": "Preview",
+        "x": 321,
+        "y": 426,
+        "w": 84,
+        "h": 36
+      },
+      {
+        "text": "Cancel",
+        "x": 413,
+        "y": 426,
+        "w": 78,
+        "h": 36
+      }
+    ]
+  },
+  "bulk": {
+    "height": 2399,
+    "overflow": 0,
+    "text": "Transactions\n\nEvery account \u00b7 EGP \u00b7 Held for others 10,000\n\nImport statement\nChoose an account\n\u22ef\nTransactions\nImport\nAccounts\nHeld for others\nAll time\nThis month\nLast month\nYear to date\nCustom dates\nViews\nFind and replace\nShow value updates (3)\n1 selected\nEdit selected\nClear selection\nSet category\nMake a rule\nExport selected\nMerge selected\nDelete selected\n\tDate\tCounterparty\tCategory\tNotes\tAmount (EGP)\n\nNew\n\t\n\t\n\t\n\t\n\t \n\n\t2026-11-05\t\u2194 From CIB PayrollOffice gam'eya\tTransfer\t\nGam'eya instalment 3 of 10 \u00b7 Office gam'eya\n\t\n+2,000.00\nEdit\n\n\t2026-11-05\t\u2194 To Office gam'eyaCIB Payroll\tTransfer\t\nGam'eya instalment 3 of 10 \u00b7 Office gam'eya\n\t\n\u22122,000.00\nEdit\n\n\t2026-11-05\tToyota FinanceCIB Payroll\tLoan payments\t\u2014\t\n\u22122,500.00\nEdit\n\n\t2026-11-05\t\u2194 From CIB PayrollCash wallet\tTransfer\t\u2014\t\n+3,000.00\nEdit\n\n\t2026-11-05\t\u2194 To Cash walletCIB Payroll\tTransfer\t\u2014\t\n\u22123,000.00\nEdit\n\n\t2026-11-04\tFitness Time GymCIB Payroll\tHealth\t\u2014\t\n\u2212900.00\nEdit\n\n\t2026-11-03\tLandlordCIB Payroll\tHousing & Rent\t\u2014\t\n\u221212,000.00\nEdit\n\n\t2026-11-02\tCarrefourCIB Payroll\tFood & Groceries\t\u2014\t\n\u22123,250.75\nEdit\n\n\t2026-11-01\tMoney market fundTHNDR\tBuy\t\u2014\t\n\u22123,000.00\nDetails\n\n\t2026-11-01\tNBECIB Payroll\tInterest\t\u2014\t\n+1,833.33\nEdit\n\n\t2026-11-01\tACME EgyptCIB Payroll\tSalary\t\u2014\t\n+45,000.00\nEdit\n\n\t2026-10-28\tCIBCIB Payroll\tFees & Charges\t\u2014\t\n\u221215.00\nEdit\n\n\t2026-10-25\tMomCIB Payroll\tGifts & Donations\t\u2014\t\n\u22122,000.00\nEdit\n\n\t2026-10-24\tNorth Cairo ElectricityCIB Payroll\tUtilities & Bills\t\u2014\t\n\u2212480.00\nEdit\n\n\t2026-10-22\tSeoudiCIB Payroll\tFood & Groceries\t\u2014\t\n\u22121,452.60\nEdit\n\n\t2026-10-20\tWE InternetCIB Payroll\tUtilities & Bills\t\u2014\t\n\u2212650.00\nEdit\n\n\t2026-10-18\tAmazonCIB Payroll\tShopping\t\u2014\t\n\u22121,299.00\nEdit\n\n\t2026-10-16\tKoshary El TahrirCash wallet\tEating Out\t\u2014\t\n\u2212210.00\nEdit\n\n\t2026-10-14\tL'Azurde ringCIB Payroll\tBuy\t\nBirthday ring\n\t\n\u221218,450.00\nDetails\n\n\t2026-10-12\tMicrobusCash wallet\tTransportation\t\u2014\t\n\u221275.00\nEdit\n\n\t2026-10-11\tFawry for Banking TechnologyTHNDR\tBuy\t\u2014\t\n\u22124,450.00\nDetails\n\n\t2026-10-11\tCommercial International Bank (COMI)THNDR\tBuy\t\u2014\t\n\u221212,150.00\nDetails\n\n\t2026-10-11\t\u2194 From CIB PayrollTHNDR\tTransfer\t\u2014\t\n+20,000.00\nEdit\n\n\t2026-10-11\t\u2194 To THNDRCIB Payroll\tTransfer\t\u2014\t\n\u221220,000.00\nEdit\n\n\t2026-10-10\tMomCIB PayrollHeld for Mom\tMoney Held for Others\t\u2014\t\n+10,000.00\nEdit\n\n\t2026-10-10\tTalabatCIB Payroll\tEating Out\t\u2014\t\n\u2212412.00\nEdit\n\n\t2026-10-09\tVodafoneVodafone Cash\tUtilities & Bills\t\u2014\t\n\u2212350.00\nEdit\n\n\t2026-10-07\t\u2194 From CIB PayrollVodafone Cash\tTransfer\t\u2014\t\n+1,000.00\nEdit\n\n\t2026-10-07\t\u2194 To Vodafone CashCIB Payroll\tTransfer\t\u2014\t\n\u22121,000.00\nEdit\n\n\t2026-10-05\t\u2194 To CIB PayrollOffice gam'eya\tTransfer\t\nGam'eya payout \u00b7 Office gam'eya\n\t\n\u221220,000.00\nEdit\n\n\t2026-10-05\t\u2194 From Office gam'eyaCIB Payroll\tTransfer\t\nGam'eya payout \u00b7 Office gam'eya\n\t\n+20,000.00\nEdit\n\n\t2026-10-05\t\u2194 From CIB PayrollOffice gam'eya\tTransfer\t\nGam'eya instalment 2 of 10 \u00b7 Office gam'eya\n\t\n+2,000.00\nEdit\n\n\t2026-10-05\t\u2194 To Office gam'eyaCIB Payroll\tTransfer\t\nGam'eya instalment 2 of 10 \u00b7 Office gam'eya\n\t\n\u22122,000.00\nEdit\n\n\t2026-10-05\tToyota FinanceCIB Payroll\tLoan payments\t\u2014\t\n\u22122,500.00\nEdit\n\n\t2026-10-05\t\u2194 From CIB PayrollCash wallet\tTransfer\t\u2014\t\n+3,000.00\nEdit\n\n\t2026-10-05\t\u2194 To Cash walletCIB Payroll\tTransfer\t\u2014\t\n\u22123,000.00\nEdit\n\n\t2026-10-04\tFitness Time GymCIB Payroll\tHealth\t\u2014\t\n\u2212900.00\nEdit\n\n\t2026-10-03\tLandlordCIB Payroll\tHousing & Rent\t\u2014\t\n\u221212,000.00\nEdit\n\n\t2026-10-02\tCarrefourCIB Payroll\tFood & Groceries\t\u2014\t\n\u22123,310.20\nEdit\n\n\t2026-10-01\tNBECIB Payroll\tInterest\t\u2014\t\n+1,833.33\nEdit\n\n\t2026-10-01\tACME EgyptCIB Payroll\tSalary\t\u2014\t\n+45,000.00\nEdit\n\n\t2026-09-28\tCIBCIB Payroll\tFees & Charges\t\u2014\t\n\u221215.00\nEdit\n\n\t2026-09-25\tMomCIB Payroll\tGifts & Donations\t\u2014\t\n\u22122,000.00\nEdit\n\n\t2026-09-24\tNorth Cairo ElectricityCIB Payroll\tUtilities & Bills\t\u2014\t\n\u2212480.00\nEdit\n\n\t2026-09-22\tSeoudiCIB Payroll\tFood & Groceries\t\u2014\t\n\u22121,388.10\nEdit\n\n\t2026-09-20\tWE InternetCIB Payroll\tUtilities & Bills\t\u2014\t\n\u2212650.00\nEdit\n\n\t2026-09-16\tKoshary El TahrirCash wallet\tEating Out\t\u2014\t\n\u2212180.00\nEdit\n\n\t2026-09-12\tMicrobusCash wallet\tTransportation\t\u2014\t\n\u221260.00\nEdit\n\n\t2026-09-10\tTalabatCIB Payroll\tEating Out\t\u2014\t\n\u2212540.25\nEdit\n\n\t2026-09-09\tVodafoneVodafone Cash\tUtilities & Bills\t\u2014\t\n\u2212350.00\nEdit\nShowing 1\u201350 of 65\nNext",
+    "headings": [
+      {
+        "text": "Transactions",
+        "y": 24
+      }
+    ],
+    "targets": [
+      {
+        "text": "Import statement",
+        "x": 936,
+        "y": 24,
+        "w": 161,
+        "h": 48
+      },
+      {
+        "text": "Choose an account",
+        "x": 1105,
+        "y": 24,
+        "w": 173,
+        "h": 48
+      },
+      {
+        "text": "\u22ef",
+        "x": 1286,
+        "y": 24,
+        "w": 56,
+        "h": 48
+      },
+      {
+        "text": "Transactions",
+        "x": 300,
+        "y": 105,
+        "w": 137,
+        "h": 36
+      },
+      {
+        "text": "Import",
+        "x": 441,
+        "y": 105,
+        "w": 97,
+        "h": 36
+      },
+      {
+        "text": "Accounts",
+        "x": 543,
+        "y": 105,
+        "w": 115,
+        "h": 36
+      },
+      {
+        "text": "Held for others",
+        "x": 662,
+        "y": 105,
+        "w": 149,
+        "h": 36
+      },
+      {
+        "text": "q",
+        "x": 296,
+        "y": 161,
+        "w": 440,
+        "h": 48
+      },
+      {
+        "text": "All time\nThis month\nLast month\nYear to date\nCustom dates",
+        "x": 746,
+        "y": 161,
+        "w": 153,
+        "h": 48
+      },
+      {
+        "text": "Views",
+        "x": 986,
+        "y": 161,
+        "w": 70,
+        "h": 48
+      },
+      {
+        "text": "Find and replace",
+        "x": 1065,
+        "y": 161,
+        "w": 135,
+        "h": 48
+      },
+      {
+        "text": "Show value updates (3)",
+        "x": 1210,
+        "y": 175,
+        "w": 132,
+        "h": 19
+      },
+      {
+        "text": "Edit selected",
+        "x": 394,
+        "y": 254,
+        "w": 110,
+        "h": 36
+      },
+      {
+        "text": "Clear selection",
+        "x": 514,
+        "y": 254,
+        "w": 123,
+        "h": 36
+      },
+      {
+        "text": "Category for the selected rows",
+        "x": 647,
+        "y": 257,
+        "w": 220,
+        "h": 30
+      },
+      {
+        "text": "Set category",
+        "x": 873,
+        "y": 254,
+        "w": 109,
+        "h": 36
+      },
+      {
+        "text": "Make a rule",
+        "x": 992,
+        "y": 254,
+        "w": 99,
+        "h": 36
+      },
+      {
+        "text": "Export selected",
+        "x": 1101,
+        "y": 254,
+        "w": 127,
+        "h": 36
+      },
+      {
+        "text": "Merge selected",
+        "x": 327,
+        "y": 300,
+        "w": 125,
+        "h": 36
+      },
+      {
+        "text": "Delete selected",
+        "x": 462,
+        "y": 300,
+        "w": 127,
+        "h": 36
+      },
+      {
+        "text": "Select all visible transactions",
+        "x": 331,
+        "y": 355,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Date",
+        "x": 383,
+        "y": 404,
+        "w": 178,
+        "h": 30
+      },
+      {
+        "text": "Counterparty",
+        "x": 569,
+        "y": 387,
+        "w": 221,
+        "h": 30
+      },
+      {
+        "text": "Account",
+        "x": 569,
+        "y": 421,
+        "w": 221,
+        "h": 30
+      },
+      {
+        "text": "Category",
+        "x": 798,
+        "y": 404,
+        "w": 191,
+        "h": 30
+      },
+      {
+        "text": "Notes",
+        "x": 997,
+        "y": 404,
+        "w": 57,
+        "h": 30
+      },
+      {
+        "text": "Amount",
+        "x": 1127,
+        "y": 404,
+        "w": 151,
+        "h": 30
+      },
+      {
+        "text": "Add transaction",
+        "x": 1284,
+        "y": 404,
+        "w": 28,
+        "h": 30
+      },
+      {
+        "text": "Select Internal transfer",
+        "x": 332,
+        "y": 467,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 484,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Internal transfer",
+        "x": 332,
+        "y": 506,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 523,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Toyota Finance",
+        "x": 332,
+        "y": 542,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 559,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Internal transfer",
+        "x": 332,
+        "y": 579,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 596,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Internal transfer",
+        "x": 332,
+        "y": 618,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 635,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Fitness Time Gym",
+        "x": 332,
+        "y": 655,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 672,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Landlord",
+        "x": 332,
+        "y": 689,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 706,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Carrefour",
+        "x": 332,
+        "y": 724,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 741,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Money market fund",
+        "x": 332,
+        "y": 758,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Details",
+        "x": 1308,
+        "y": 775,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select NBE",
+        "x": 332,
+        "y": 793,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 810,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select ACME Egypt",
+        "x": 332,
+        "y": 827,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 844,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select CIB",
+        "x": 332,
+        "y": 862,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 879,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Mom",
+        "x": 332,
+        "y": 896,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 913,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select North Cairo Electricity",
+        "x": 332,
+        "y": 931,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 948,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Seoudi",
+        "x": 332,
+        "y": 965,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 982,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select WE Internet",
+        "x": 332,
+        "y": 1000,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1017,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Amazon",
+        "x": 332,
+        "y": 1034,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1051,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Koshary El Tahrir",
+        "x": 332,
+        "y": 1069,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1086,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select L'Azurde ring",
+        "x": 332,
+        "y": 1103,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Details",
+        "x": 1308,
+        "y": 1120,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Microbus",
+        "x": 332,
+        "y": 1138,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1155,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Fawry for Banking Technology",
+        "x": 332,
+        "y": 1172,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Details",
+        "x": 1308,
+        "y": 1189,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Commercial International Bank (COMI)",
+        "x": 332,
+        "y": 1207,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Details",
+        "x": 1308,
+        "y": 1224,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Internal transfer",
+        "x": 332,
+        "y": 1244,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1261,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Internal transfer",
+        "x": 332,
+        "y": 1283,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1300,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Mom",
+        "x": 332,
+        "y": 1319,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1336,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Talabat",
+        "x": 332,
+        "y": 1354,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1371,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Vodafone",
+        "x": 332,
+        "y": 1388,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1405,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Internal transfer",
+        "x": 332,
+        "y": 1425,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1442,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Internal transfer",
+        "x": 332,
+        "y": 1464,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1481,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Internal transfer",
+        "x": 332,
+        "y": 1503,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1520,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Internal transfer",
+        "x": 332,
+        "y": 1542,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1559,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Internal transfer",
+        "x": 332,
+        "y": 1581,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1598,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Internal transfer",
+        "x": 332,
+        "y": 1620,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1637,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Toyota Finance",
+        "x": 332,
+        "y": 1657,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1674,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Internal transfer",
+        "x": 332,
+        "y": 1694,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1711,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Internal transfer",
+        "x": 332,
+        "y": 1733,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1750,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Fitness Time Gym",
+        "x": 332,
+        "y": 1769,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1786,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Landlord",
+        "x": 332,
+        "y": 1804,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1821,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Carrefour",
+        "x": 332,
+        "y": 1838,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1855,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select NBE",
+        "x": 332,
+        "y": 1873,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1890,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select ACME Egypt",
+        "x": 332,
+        "y": 1907,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1924,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select CIB",
+        "x": 332,
+        "y": 1942,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1959,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Mom",
+        "x": 332,
+        "y": 1976,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 1993,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select North Cairo Electricity",
+        "x": 332,
+        "y": 2011,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 2028,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Seoudi",
+        "x": 332,
+        "y": 2045,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 2062,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select WE Internet",
+        "x": 332,
+        "y": 2080,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 2097,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Koshary El Tahrir",
+        "x": 332,
+        "y": 2114,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 2131,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Microbus",
+        "x": 332,
+        "y": 2149,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 2166,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Talabat",
+        "x": 332,
+        "y": 2183,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 2200,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Select Vodafone",
+        "x": 332,
+        "y": 2218,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Edit",
+        "x": 1308,
+        "y": 2235,
+        "w": 1,
+        "h": 1
+      },
+      {
+        "text": "Next",
+        "x": 1284,
+        "y": 2287,
+        "w": 58,
+        "h": 36
+      }
+    ]
+  },
+  "asset-0": {
+    "height": 1701,
+    "overflow": 0,
+    "text": "Audit Car 0\n\nOther \u00b7 EGP\n\nBalance\n0\nImport statement\n\u22ef\nEstimated value\n\nUpdate an asset you value as a whole, such as your share of a home. The dated estimate changes its value in reports, without changing cash activity.\n\nAs of\nValue (EGP)\nUpdate value\nProperty or vehicle\nValue now\nCar\n0.00EGP\nBought for 600,000.00 EGP \u00b7 2025-06-01\nSince you bought it\n\u2212100.0%\n\u2212600,000.00EGP\nValue now less what you paid\n\nPaid for with Audit car loan. Left to pay: 25,000.00 EGP. Value less what is left to pay: \u221225,000.00 EGP. Open loans\n\nAs of\tValue\tChange\n2026-06-01\t540,000.00\t\u221260,000.00\n2025-06-01\t600,000.00\t\u2014\nDetails\nAdd investment transaction\nBuy\nSell\nDividend\nDate\nInvestment\nUnits\nPrice per unit\nAmount\nFees\nAdd fees on top instead\n\nHeld for\nCash account\nChoose cash account\u2026\nAudit Car 600000 \u00b7 EGP\nCash wallet \u00b7 EGP\nCIB Payroll \u00b7 EGP\nGold at home \u00b7 EGP\nNBE CDs \u00b7 EGP\nOffice gam'eya \u00b7 EGP\nTHNDR \u00b7 EGP\nVodafone Cash \u00b7 EGP\nNotes\nAdd\nAdd an existing holding\nTransactions\nAll time\nThis month\nLast month\nYear to date\nCustom dates\nViews\nFind and replace\n\tDate\tCounterparty\tCategory\tNotes\tAmount (EGP)\tBalance (EGP)\n\nNew\n\t\n\t\n\t\n\t\n\t \n\t\u2014\nNo transactions yet \u2014 add the first one above.",
+    "headings": [
+      {
+        "text": "Audit Car 0",
+        "y": 24
+      },
+      {
+        "text": "Estimated value",
+        "y": 134
+      },
+      {
+        "text": "Property or vehicle",
+        "y": 402
+      },
+      {
+        "text": "Add investment transaction",
+        "y": 909
+      },
+      {
+        "text": "Transactions",
+        "y": 1359
+      }
+    ],
+    "targets": [
+      {
+        "text": "Import statement",
+        "x": 1117,
+        "y": 24,
+        "w": 161,
+        "h": 48
+      },
+      {
+        "text": "\u22ef",
+        "x": 1286,
+        "y": 24,
+        "w": 56,
+        "h": 48
+      },
+      {
+        "text": "date",
+        "x": 321,
+        "y": 220,
+        "w": 491,
+        "h": 48
+      },
+      {
+        "text": "value",
+        "x": 826,
+        "y": 220,
+        "w": 491,
+        "h": 48
+      },
+      {
+        "text": "Update value",
+        "x": 321,
+        "y": 296,
+        "w": 491,
+        "h": 36
+      },
+      {
+        "text": "Open loans",
+        "x": 978,
+        "y": 654,
+        "w": 74,
+        "h": 19
+      },
+      {
+        "text": "Details",
+        "x": 321,
+        "y": 819,
+        "w": 996,
+        "h": 20
+      },
+      {
+        "text": "Buy",
+        "x": 325,
+        "y": 947,
+        "w": 56,
+        "h": 36
+      },
+      {
+        "text": "Sell",
+        "x": 385,
+        "y": 947,
+        "w": 56,
+        "h": 36
+      },
+      {
+        "text": "Dividend",
+        "x": 444,
+        "y": 947,
+        "w": 87,
+        "h": 36
+      },
+      {
+        "text": "date",
+        "x": 321,
+        "y": 1024,
+        "w": 200,
+        "h": 48
+      },
+      {
+        "text": "",
+        "x": 537,
+        "y": 1024,
+        "w": 780,
+        "h": 48
+      },
+      {
+        "text": "units",
+        "x": 321,
+        "y": 1110,
+        "w": 237,
+        "h": 48
+      },
+      {
+        "text": "unit_price",
+        "x": 574,
+        "y": 1110,
+        "w": 237,
+        "h": 48
+      },
+      {
+        "text": "total",
+        "x": 827,
+        "y": 1110,
+        "w": 237,
+        "h": 48
+      },
+      {
+        "text": "fees",
+        "x": 1080,
+        "y": 1110,
+        "w": 237,
+        "h": 48
+      },
+      {
+        "text": "fees_included",
+        "x": 1080,
+        "y": 1164,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "whom",
+        "x": 321,
+        "y": 1247,
+        "w": 296,
+        "h": 48
+      },
+      {
+        "text": "Choose cash account\u2026\nAudit Car 600000 \u00b7 EGP\nCash wallet \u00b7 EGP\nCIB",
+        "x": 633,
+        "y": 1247,
+        "w": 296,
+        "h": 48
+      },
+      {
+        "text": "notes",
+        "x": 946,
+        "y": 1247,
+        "w": 296,
+        "h": 48
+      },
+      {
+        "text": "Add",
+        "x": 1258,
+        "y": 1249,
+        "w": 59,
+        "h": 36
+      },
+      {
+        "text": "Add an existing holding",
+        "x": 321,
+        "y": 1296,
+        "w": 130,
+        "h": 17
+      },
+      {
+        "text": "q",
+        "x": 296,
+        "y": 1406,
+        "w": 440,
+        "h": 48
+      },
+      {
+        "text": "All time\nThis month\nLast month\nYear to date\nCustom dates",
+        "x": 746,
+        "y": 1406,
+        "w": 153,
+        "h": 48
+      },
+      {
+        "text": "Views",
+        "x": 1128,
+        "y": 1406,
+        "w": 70,
+        "h": 48
+      },
+      {
+        "text": "Find and replace",
+        "x": 1207,
+        "y": 1406,
+        "w": 135,
+        "h": 48
+      },
+      {
+        "text": "Select all visible transactions",
+        "x": 329,
+        "y": 1501,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Date",
+        "x": 366,
+        "y": 1533,
+        "w": 128,
+        "h": 30
+      },
+      {
+        "text": "Counterparty",
+        "x": 502,
+        "y": 1533,
+        "w": 221,
+        "h": 30
+      },
+      {
+        "text": "Category",
+        "x": 731,
+        "y": 1533,
+        "w": 191,
+        "h": 30
+      },
+      {
+        "text": "Notes",
+        "x": 930,
+        "y": 1533,
+        "w": 57,
+        "h": 30
+      },
+      {
+        "text": "Amount",
+        "x": 1062,
+        "y": 1533,
+        "w": 98,
+        "h": 30
+      },
+      {
+        "text": "Add transaction",
+        "x": 1166,
+        "y": 1533,
+        "w": 28,
+        "h": 30
+      }
+    ]
+  },
+  "asset-600000": {
+    "height": 1701,
+    "overflow": 0,
+    "text": "Audit Car 600000\n\nOther \u00b7 EGP\n\nBalance\n540,000\nImport statement\n\u22ef\nEstimated value\n\nUpdate an asset you value as a whole, such as your share of a home. The dated estimate changes its value in reports, without changing cash activity.\n\nAs of\nValue (EGP)\nUpdate value\nProperty or vehicle\nValue now\nCar\n600,000.00EGP\nBought for 600,000.00 EGP \u00b7 2025-06-01\nSince you bought it\n0.0%\n0.00EGP\nValue now less what you paid\n\nPaid for with Audit car loan. Left to pay: 25,000.00 EGP. Value less what is left to pay: +575,000.00 EGP. Open loans\n\nAs of\tValue\tChange\n2026-06-01\t540,000.00\t\u221260,000.00\n2025-06-01\t600,000.00\t\u2014\nDetails\nAdd investment transaction\nBuy\nSell\nDividend\nDate\nInvestment\nUnits\nPrice per unit\nAmount\nFees\nAdd fees on top instead\n\nHeld for\nCash account\nChoose cash account\u2026\nAudit Car 0 \u00b7 EGP\nCash wallet \u00b7 EGP\nCIB Payroll \u00b7 EGP\nGold at home \u00b7 EGP\nNBE CDs \u00b7 EGP\nOffice gam'eya \u00b7 EGP\nTHNDR \u00b7 EGP\nVodafone Cash \u00b7 EGP\nNotes\nAdd\nAdd an existing holding\nTransactions\nAll time\nThis month\nLast month\nYear to date\nCustom dates\nViews\nFind and replace\n\tDate\tCounterparty\tCategory\tNotes\tAmount (EGP)\tBalance (EGP)\n\nNew\n\t\n\t\n\t\n\t\n\t \n\t\u2014\n\t2025-01-01\tOpening balance \u2014 Audit Car 600000\tOpening balance\t\u2014\t\n+600,000.00\nDetails\n\t600,000",
+    "headings": [
+      {
+        "text": "Audit Car 600000",
+        "y": 24
+      },
+      {
+        "text": "Estimated value",
+        "y": 134
+      },
+      {
+        "text": "Property or vehicle",
+        "y": 402
+      },
+      {
+        "text": "Add investment transaction",
+        "y": 909
+      },
+      {
+        "text": "Transactions",
+        "y": 1359
+      }
+    ],
+    "targets": [
+      {
+        "text": "Import statement",
+        "x": 1117,
+        "y": 24,
+        "w": 161,
+        "h": 48
+      },
+      {
+        "text": "\u22ef",
+        "x": 1286,
+        "y": 24,
+        "w": 56,
+        "h": 48
+      },
+      {
+        "text": "date",
+        "x": 321,
+        "y": 220,
+        "w": 491,
+        "h": 48
+      },
+      {
+        "text": "value",
+        "x": 826,
+        "y": 220,
+        "w": 491,
+        "h": 48
+      },
+      {
+        "text": "Update value",
+        "x": 321,
+        "y": 296,
+        "w": 491,
+        "h": 36
+      },
+      {
+        "text": "Open loans",
+        "x": 985,
+        "y": 654,
+        "w": 74,
+        "h": 19
+      },
+      {
+        "text": "Details",
+        "x": 321,
+        "y": 819,
+        "w": 996,
+        "h": 20
+      },
+      {
+        "text": "Buy",
+        "x": 325,
+        "y": 947,
+        "w": 56,
+        "h": 36
+      },
+      {
+        "text": "Sell",
+        "x": 385,
+        "y": 947,
+        "w": 56,
+        "h": 36
+      },
+      {
+        "text": "Dividend",
+        "x": 444,
+        "y": 947,
+        "w": 87,
+        "h": 36
+      },
+      {
+        "text": "date",
+        "x": 321,
+        "y": 1024,
+        "w": 200,
+        "h": 48
+      },
+      {
+        "text": "",
+        "x": 537,
+        "y": 1024,
+        "w": 780,
+        "h": 48
+      },
+      {
+        "text": "units",
+        "x": 321,
+        "y": 1110,
+        "w": 237,
+        "h": 48
+      },
+      {
+        "text": "unit_price",
+        "x": 574,
+        "y": 1110,
+        "w": 237,
+        "h": 48
+      },
+      {
+        "text": "total",
+        "x": 827,
+        "y": 1110,
+        "w": 237,
+        "h": 48
+      },
+      {
+        "text": "fees",
+        "x": 1080,
+        "y": 1110,
+        "w": 237,
+        "h": 48
+      },
+      {
+        "text": "fees_included",
+        "x": 1080,
+        "y": 1164,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "whom",
+        "x": 321,
+        "y": 1247,
+        "w": 296,
+        "h": 48
+      },
+      {
+        "text": "Choose cash account\u2026\nAudit Car 0 \u00b7 EGP\nCash wallet \u00b7 EGP\nCIB Payr",
+        "x": 633,
+        "y": 1247,
+        "w": 296,
+        "h": 48
+      },
+      {
+        "text": "notes",
+        "x": 946,
+        "y": 1247,
+        "w": 296,
+        "h": 48
+      },
+      {
+        "text": "Add",
+        "x": 1258,
+        "y": 1249,
+        "w": 59,
+        "h": 36
+      },
+      {
+        "text": "Add an existing holding",
+        "x": 321,
+        "y": 1296,
+        "w": 130,
+        "h": 17
+      },
+      {
+        "text": "q",
+        "x": 296,
+        "y": 1406,
+        "w": 440,
+        "h": 48
+      },
+      {
+        "text": "All time\nThis month\nLast month\nYear to date\nCustom dates",
+        "x": 746,
+        "y": 1406,
+        "w": 153,
+        "h": 48
+      },
+      {
+        "text": "Views",
+        "x": 1128,
+        "y": 1406,
+        "w": 70,
+        "h": 48
+      },
+      {
+        "text": "Find and replace",
+        "x": 1207,
+        "y": 1406,
+        "w": 135,
+        "h": 48
+      },
+      {
+        "text": "Select all visible transactions",
+        "x": 331,
+        "y": 1501,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Date",
+        "x": 368,
+        "y": 1533,
+        "w": 128,
+        "h": 30
+      },
+      {
+        "text": "Counterparty",
+        "x": 503,
+        "y": 1533,
+        "w": 221,
+        "h": 30
+      },
+      {
+        "text": "Category",
+        "x": 732,
+        "y": 1533,
+        "w": 191,
+        "h": 30
+      },
+      {
+        "text": "Notes",
+        "x": 931,
+        "y": 1533,
+        "w": 57,
+        "h": 30
+      },
+      {
+        "text": "Amount",
+        "x": 1062,
+        "y": 1533,
+        "w": 98,
+        "h": 30
+      },
+      {
+        "text": "Add transaction",
+        "x": 1166,
+        "y": 1533,
+        "w": 28,
+        "h": 30
+      },
+      {
+        "text": "Select Opening balance",
+        "x": 332,
+        "y": 1576,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "Details",
+        "x": 1189,
+        "y": 1593,
+        "w": 1,
+        "h": 1
+      }
+    ]
+  },
+  "after-refill": {
+    "height": 3145,
+    "overflow": 0,
+    "text": "Cash planning\n\nPromised payments are 10,480 more than your free cash.\n\n2026-11-05 to 2026-12-01 \u00b7 until payday\n\nPlan\nRecurring\nLoans\n\nCompare scenarios\n\nForecast inputs\n\nSafe to spend\nuntil 2026-12-01\n\u221210,480EGP\n\n10,480 more is promised than your free cash\n\nSavings\nDue\n\nOn top of your plan How it is worked out\n\nHow safe to spend is worked out\n\nFrom free cash to safe to spend\n\nFree cash\n0\nDue before payday\n\u22121,480\nEmergency fund top-up\n\u22123,639\nRest of savings target\n\u22125,361\nSafe to spend\n\u221210,480\n\nPromised payments are larger than your free cash.\n\nShow the numbers\nCan I afford this?\nCheck\nNeeds you \u00b7 10\nManage Needs you\nAudit car loan is late\nDue 2026-01-15 \u00b7 2,500 \u00b7 294 days late\nMark paid\nAudit car loan is late\nDue 2026-02-15 \u00b7 2,500 \u00b7 263 days late\nMark paid\nAudit car loan is late\nDue 2026-03-15 \u00b7 2,500 \u00b7 235 days late\nMark paid\nShow all 10\nFree cash\n2026-11\n0EGP\n\u221236,186 since 2026-10-31\nCash you own 87,768, less 87,768 set aside or due\nDue before payday\n10 late\n1,480EGP\n25,000 already late\nNext: Vodafone \u00b7 2026-11-09\nSee late ones\nLowest point ahead\n2026-11\n\u221210,480EGP\n10,480 below today\nRuns short: the month ends below zero\nSee the forecast\nThe next 30 days\n\n2026-11-05 to 2026-12-05 \u00b7 money in above the line, payments below\n\nRecurring\nAudit car loan\n2026-01-15 \u00b7 Loan \u00b7 payment 1 of 10\nLate \u00b7 294 days\n\u22122,500\nMark paid\nAudit car loan\n2026-02-15 \u00b7 Loan \u00b7 payment 2 of 10\nLate \u00b7 263 days\n\u22122,500\nMark paid\nAudit car loan\n2026-03-15 \u00b7 Loan \u00b7 payment 3 of 10\nLate \u00b7 235 days\n\u22122,500\nMark paid\nAudit car loan\n2026-04-15 \u00b7 Loan \u00b7 payment 4 of 10\nLate \u00b7 204 days\n\u22122,500\nMark paid\nAudit car loan\n2026-05-15 \u00b7 Loan \u00b7 payment 5 of 10\nLate \u00b7 174 days\n\u22122,500\nMark paid\nAudit car loan\n2026-06-15 \u00b7 Loan \u00b7 payment 6 of 10\nLate \u00b7 143 days\n\u22122,500\nMark paid\n\n10 more in the next 30 days \u00b7 Recurring\n\nScheduled cash checks\n\nThrough 2027-01-31\n\nScheduled payments only. Excludes variable spending, savings goals and overdue income; reserves remain in cash. Uses day-end balances and current exchange rates.\n\nUnassigned scheduled payments are included in combined cash using your profile currency, but excluded from account checks. Assign accounts.\n\nWhere is my cash heading?\nThe last 2 month ends, then the next 3\nFree cash, then the forecast\n\nlowest \u221210,480 in 2026-11\n\nFree cash\nForecast\n50,000\n15,000\n0\n-20,000\n36,186\n9,999\n09\n2026\n10\n11\n12\n01\n2027\nShow the numbers\nFree cash at past month ends, then the forecast\nIn and out each month ahead\n\nMoney in includes income, CD proceeds and a gam'eya payout \u00b7 projected values are estimates\n\nIn\nOut\n0\n10k\nRest of 2026-11\n\u221210,480\n47k\n37k\n2026-12\n+10,209\n47k\n37k\n2027-01\n+10,269\nShow the numbers\nWhat is promised?\nToday\nWhat you owe\nLoans\n91,500\nEGP\nBills due, loans apart\n0\nLoans still to pay\n77,500\nGam'eya still to pay\n14,000\nBy loan\nCar loan\nends 2028-08-05\n52,500\nAudit car loan\nends 2026-10-15\n25,000",
+    "headings": [
+      {
+        "text": "Cash planning",
+        "y": 24
+      },
+      {
+        "text": "Safe to spend",
+        "y": 290
+      },
+      {
+        "text": "How safe to spend is worked out",
+        "y": 289
+      },
+      {
+        "text": "Can I afford this?",
+        "y": 695
+      },
+      {
+        "text": "Needs you \u00b7 10",
+        "y": 801
+      },
+      {
+        "text": "The next 30 days",
+        "y": 1380
+      },
+      {
+        "text": "Scheduled cash checks",
+        "y": 1961
+      },
+      {
+        "text": "Where is my cash heading?",
+        "y": 2134
+      },
+      {
+        "text": "Free cash, then the forecast",
+        "y": 2230
+      },
+      {
+        "text": "In and out each month ahead",
+        "y": 2230
+      },
+      {
+        "text": "What is promised?",
+        "y": 2712
+      },
+      {
+        "text": "What you owe",
+        "y": 2808
+      },
+      {
+        "text": "By loan",
+        "y": 2808
+      }
+    ],
+    "targets": [
+      {
+        "text": "Undo \u00b7 Reserve changes",
+        "x": 1294,
+        "y": 24,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "Plan",
+        "x": 300,
+        "y": 136,
+        "w": 83,
+        "h": 36
+      },
+      {
+        "text": "Recurring",
+        "x": 387,
+        "y": 136,
+        "w": 117,
+        "h": 36
+      },
+      {
+        "text": "Loans",
+        "x": 508,
+        "y": 136,
+        "w": 93,
+        "h": 36
+      },
+      {
+        "text": "Compare scenarios",
+        "x": 296,
+        "y": 193,
+        "w": 127,
+        "h": 19
+      },
+      {
+        "text": "Forecast inputs",
+        "x": 296,
+        "y": 229,
+        "w": 102,
+        "h": 19
+      },
+      {
+        "text": "How it is worked out",
+        "x": 437,
+        "y": 475,
+        "w": 121,
+        "h": 18
+      },
+      {
+        "text": "Show the numbers",
+        "x": 755,
+        "y": 625,
+        "w": 117,
+        "h": 32
+      },
+      {
+        "text": "Price (EGP)",
+        "x": 913,
+        "y": 682,
+        "w": 160,
+        "h": 48
+      },
+      {
+        "text": "Check",
+        "x": 1081,
+        "y": 688,
+        "w": 74,
+        "h": 36
+      },
+      {
+        "text": "Manage Needs you",
+        "x": 1200,
+        "y": 799,
+        "w": 142,
+        "h": 30
+      },
+      {
+        "text": "Audit car loan is late\nDue 2026-01-15 \u00b7 2,500 \u00b7 294 days late\nMar",
+        "x": 296,
+        "y": 835,
+        "w": 1046,
+        "h": 50
+      },
+      {
+        "text": "Audit car loan is late\nDue 2026-02-15 \u00b7 2,500 \u00b7 263 days late\nMar",
+        "x": 296,
+        "y": 890,
+        "w": 1046,
+        "h": 50
+      },
+      {
+        "text": "Audit car loan is late\nDue 2026-03-15 \u00b7 2,500 \u00b7 235 days late\nMar",
+        "x": 296,
+        "y": 946,
+        "w": 1046,
+        "h": 50
+      },
+      {
+        "text": "Show all 10",
+        "x": 296,
+        "y": 1002,
+        "w": 1046,
+        "h": 36
+      },
+      {
+        "text": "Free cash",
+        "x": 297,
+        "y": 1058,
+        "w": 336,
+        "h": 260
+      },
+      {
+        "text": "Due before payday",
+        "x": 651,
+        "y": 1058,
+        "w": 336,
+        "h": 260
+      },
+      {
+        "text": "See late ones",
+        "x": 836,
+        "y": 1267,
+        "w": 78,
+        "h": 17
+      },
+      {
+        "text": "Lowest point ahead",
+        "x": 1005,
+        "y": 1058,
+        "w": 336,
+        "h": 260
+      },
+      {
+        "text": "See the forecast",
+        "x": 1025,
+        "y": 1287,
+        "w": 96,
+        "h": 17
+      },
+      {
+        "text": "Recurring",
+        "x": 1236,
+        "y": 1364,
+        "w": 57,
+        "h": 19
+      },
+      {
+        "text": "Mark paid",
+        "x": 1204,
+        "y": 1470,
+        "w": 89,
+        "h": 36
+      },
+      {
+        "text": "Mark paid",
+        "x": 1204,
+        "y": 1533,
+        "w": 89,
+        "h": 36
+      },
+      {
+        "text": "Mark paid",
+        "x": 1204,
+        "y": 1595,
+        "w": 89,
+        "h": 36
+      },
+      {
+        "text": "Mark paid",
+        "x": 1204,
+        "y": 1658,
+        "w": 89,
+        "h": 36
+      },
+      {
+        "text": "Mark paid",
+        "x": 1204,
+        "y": 1721,
+        "w": 89,
+        "h": 36
+      },
+      {
+        "text": "Mark paid",
+        "x": 1204,
+        "y": 1784,
+        "w": 89,
+        "h": 36
+      },
+      {
+        "text": "Recurring",
+        "x": 480,
+        "y": 1846,
+        "w": 55,
+        "h": 17
+      },
+      {
+        "text": "Assign accounts",
+        "x": 1035,
+        "y": 2051,
+        "w": 93,
+        "h": 17
+      },
+      {
+        "text": "Show the numbers",
+        "x": 321,
+        "y": 2623,
+        "w": 117,
+        "h": 32
+      },
+      {
+        "text": "Show the numbers",
+        "x": 844,
+        "y": 2581,
+        "w": 117,
+        "h": 32
+      },
+      {
+        "text": "Loans",
+        "x": 760,
+        "y": 2792,
+        "w": 35,
+        "h": 19
+      },
+      {
+        "text": "Bills due, loans apart\n0",
+        "x": 321,
+        "y": 2905,
+        "w": 474,
+        "h": 48
+      },
+      {
+        "text": "Loans still to pay\n77,500",
+        "x": 321,
+        "y": 2954,
+        "w": 474,
+        "h": 48
+      }
+    ]
+  }
+}

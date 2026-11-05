@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 34 open items, in the order they are worked on.
+10 milestones, 41 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -20,8 +20,9 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1H3 | ↳ Regenerate the locks | | | M | |
 | IT-1H4 | ↳ Validate | | | M | |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | ready |
+| **IT-1Q** | [Link historical user questions to verified current feature coverage](1-easy-to-contribute/1Q-current-user-question-coverage.md) | improvement, technical | Build | S | new |
 
-Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P. Next free code: 1Q.
+Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P. Next free code: 1R.
 
 ## 2 Safe for real money
 
@@ -41,8 +42,11 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | IT-2C3 | ↳ Native file pickers | | | M | |
 | IT-2C4 | ↳ Unresolved-evidence repair | | | M | |
 | IT-2C5 | ↳ Native notification delivery, Windows and Android | | | M | |
+| **BT-2AF** | [Property and vehicle headlines must use the dated valuation](2-safe-for-real-money/2AF-asset-details-use-dated-value.md) | bug, technical · high | Own | M | new |
+| **BT-2AG** | [A dated Other asset estimate must count after a zero opening](2-safe-for-real-money/2AG-zero-opening-asset-valuation.md) | bug, technical · high | Own | M | new |
+| **BT-2AH** | [Emergency refill must preview and protect the remaining plan](2-safe-for-real-money/2AH-refill-previews-plan-impact.md) | bug, technical · high | Plan | M | new |
 
-Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2U, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AB, 2AC, 2AD, 2AE. Next free code: 2AF.
+Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2U, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AB, 2AC, 2AD, 2AE. Next free code: 2AI.
 
 ## 3 Polish and Arabic
 
@@ -85,8 +89,12 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | building |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner | |
+| **BV-3AQ** | [Accounts totals and ownership explanations must reconcile](3-polish-and-arabic/3AQ-account-totals-reconcile.md) | bug, visual · medium | Understand | M | new |
+| **BV-3AR** | [Paid fixed obligations must not appear ahead of spending pace](3-polish-and-arabic/3AR-fixed-payments-phone-pace.md) | bug, visual · medium | Plan | M | new |
+| **BV-3AS** | [Payday funding labels and amount precision must remain readable](3-polish-and-arabic/3AS-payday-labels-and-precision.md) | bug, visual · low | Feel | S | new |
+| **IV-3AT** | [Property and vehicle accounts need task-specific desktop and phone layouts](3-polish-and-arabic/3AT-property-vehicle-task-layout.md) | improvement, visual | Feel | M | new |
 
-Done: 3A, 3B, 3C, 3D, 3E, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3R, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP. Next free code: 3AQ.
+Done: 3A, 3B, 3C, 3D, 3E, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3R, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP. Next free code: 3AU.
 
 ## 4 Edit journal and devices
 

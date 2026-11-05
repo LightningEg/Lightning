@@ -1,0 +1,991 @@
+{
+  "payday": {
+    "height": 2258,
+    "overflow": 0,
+    "text": "Fund your payday plan\nCash planning\n\nAssign cash you already own. Expected salary is excluded; reserves and unpaid bills stay protected. This does not change budget limits or move money. Cash in another account or brokerage still needs a transfer before payment.\n\nTurn on cash funding\nBefore your next payday\n\nDue before payday 1,480 EGP \u00b7 Safe to spend 51,420 EGP\n\nVodafone \u00b7 2026-11-09\n\nWE Internet \u00b7 2026-11-20\n\nNorth Cairo Electricity \u00b7 2026-11-24\n\nCash available to assign\n\n67,368 EGP \u00b7 2026-11\n\nOwned cash 87,368 \u00b7 Reserves 20,000 \u00b7 Funded spending left 0 \u00b7 Unfunded bills due 0\n\nAmounts below are a preview, with bills due first. Each category includes its children; spending and refunds update its funded cash. Unused funding returns to the pool next month.\n\nFund spending\nEating OutFunded spending left 0.00 \u00b7 Left in plan 671.00Fees & ChargesFunded spending left 0.00 \u00b7 Left in plan 15.00Food & GroceriesFunded spending left 0.00 \u00b7 Left in plan 1,415.25Gifts & DonationsFunded spending left 0.00 \u00b7 Left in plan 2,000.00HealthFunded spending left 0.00 \u00b7 Left in plan 0.00Housing & RentFunded spending left 0.00 \u00b7 Left in plan 0.00ShoppingFunded spending left 0.00 \u00b7 Left in plan 1,299.00TransportationFunded spending left 0.00 \u00b7 Left in plan 68.00Utilities & BillsFunded spending left 0.00 \u00b7 Left in plan 1,480.00Loan paymentsFunded spending left 0.00 \u00b7 Left in plan 0.00\nTop up reserves\nEmergency FundAdd to assigned cash \u00b7 Goal still needs 129,692.68\n\nTurn on cash funding to confirm this proposal.",
+    "headings": [
+      {
+        "text": "Fund your payday plan",
+        "y": 72
+      },
+      {
+        "text": "Before your next payday",
+        "y": 414
+      },
+      {
+        "text": "Cash available to assign",
+        "y": 672
+      },
+      {
+        "text": "Fund spending",
+        "y": 938
+      },
+      {
+        "text": "Top up reserves",
+        "y": 1936
+      }
+    ],
+    "targets": [
+      {
+        "text": "Cash planning",
+        "x": 16,
+        "y": 85,
+        "w": 150,
+        "h": 48
+      },
+      {
+        "text": "Turn on cash funding",
+        "x": 33,
+        "y": 312,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "category_6",
+        "x": 33,
+        "y": 1017,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "category_18",
+        "x": 33,
+        "y": 1110,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "category_5",
+        "x": 33,
+        "y": 1202,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "category_14",
+        "x": 33,
+        "y": 1295,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "category_10",
+        "x": 33,
+        "y": 1366,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "category_8",
+        "x": 33,
+        "y": 1458,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "category_11",
+        "x": 33,
+        "y": 1551,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "category_7",
+        "x": 33,
+        "y": 1644,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "category_9",
+        "x": 33,
+        "y": 1737,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "category_31",
+        "x": 33,
+        "y": 1830,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "reserve_1",
+        "x": 33,
+        "y": 2014,
+        "w": 294,
+        "h": 48
+      }
+    ]
+  },
+  "forecast-inputs": {
+    "height": 866,
+    "overflow": 0,
+    "text": "Forecast inputs\n\nThe forecast uses confirmed cash and scheduled payments. These notes change no balance or plan.\n\nWhat this figure leans on\nCash wallet has no account check dated on or before this figure. Review inputs\nCIB Payroll has no account check dated on or before this figure. Review inputs\nTHNDR has no account check dated on or before this figure. Review inputs\nVodafone Cash has no account check dated on or before this figure. Review inputs\nThe expected receipt for NBE 3-year certificate on 2026-10-01 still needs confirmation. It is not assumed received. Review inputs\nThe expected receipt for NBE 3-year certificate on 2026-11-01 still needs confirmation. It is not assumed received. Review inputs\nCash planning",
+    "headings": [
+      {
+        "text": "Forecast inputs",
+        "y": 90
+      },
+      {
+        "text": "What this figure leans on",
+        "y": 209
+      }
+    ],
+    "targets": [
+      {
+        "text": "Review inputs",
+        "x": 73,
+        "y": 269,
+        "w": 243,
+        "h": 41
+      },
+      {
+        "text": "Review inputs",
+        "x": 73,
+        "y": 336,
+        "w": 243,
+        "h": 41
+      },
+      {
+        "text": "Review inputs",
+        "x": 209,
+        "y": 403,
+        "w": 91,
+        "h": 19
+      },
+      {
+        "text": "Review inputs",
+        "x": 73,
+        "y": 448,
+        "w": 243,
+        "h": 41
+      },
+      {
+        "text": "Review inputs",
+        "x": 136,
+        "y": 560,
+        "w": 91,
+        "h": 19
+      },
+      {
+        "text": "Review inputs",
+        "x": 136,
+        "y": 649,
+        "w": 91,
+        "h": 19
+      },
+      {
+        "text": "Cash planning",
+        "x": 33,
+        "y": 685,
+        "w": 124,
+        "h": 48
+      }
+    ]
+  },
+  "instalments": {
+    "height": 870,
+    "overflow": 0,
+    "text": "Bought in instalments\nPlan\nRecurring\nLoans\nName\nPrice still to pay (EGP)\nNumber of instalments\nFirst instalment\nPay from\nFee included in instalments\n\nThis adds a loan plan. It does not record a cash payment today.\n\nPreview\nCancel",
+    "headings": [
+      {
+        "text": "Bought in instalments",
+        "y": 72
+      }
+    ],
+    "targets": [
+      {
+        "text": "Plan",
+        "x": 19,
+        "y": 99,
+        "w": 91,
+        "h": 40
+      },
+      {
+        "text": "Recurring",
+        "x": 112,
+        "y": 99,
+        "w": 126,
+        "h": 40
+      },
+      {
+        "text": "Loans",
+        "x": 239,
+        "y": 99,
+        "w": 102,
+        "h": 40
+      },
+      {
+        "text": "name",
+        "x": 33,
+        "y": 193,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "price",
+        "x": 33,
+        "y": 278,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "months",
+        "x": 33,
+        "y": 364,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "first_date",
+        "x": 33,
+        "y": 449,
+        "w": 240,
+        "h": 48
+      },
+      {
+        "text": "Choose date",
+        "x": 279,
+        "y": 449,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "Account Id",
+        "x": 33,
+        "y": 535,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Fee included in instalments",
+        "x": 33,
+        "y": 603,
+        "w": 294,
+        "h": 20
+      },
+      {
+        "text": "Preview",
+        "x": 33,
+        "y": 689,
+        "w": 84,
+        "h": 48
+      },
+      {
+        "text": "Cancel",
+        "x": 125,
+        "y": 689,
+        "w": 78,
+        "h": 48
+      }
+    ]
+  },
+  "asset-0": {
+    "height": 2647,
+    "overflow": 0,
+    "text": "Audit Car 0\n\nOther\n\n0 EGP\n\u22ef\nEstimated value\nAs of\nValue (EGP)\nUpdate value\nProperty or vehicle\nValue now\nCar\n0.00EGP\nBought for 600,000.00 EGP \u00b7 2025-06-01\nSince you bought it\n\u2212100.0%\n\u2212600,000.00EGP\nValue now less what you paid\n\nPaid for with Audit car loan. Left to pay: 25,000.00 EGP. Value less what is left to pay: \u221225,000.00 EGP. Open loans\n\n2026-06-01\n540,000.00\n\u221260,000.00\n2025-06-01\n600,000.00\n\u2014\nDetails\nAdd investment transaction\nBuy\nSell\nDividend\nDate\nInvestment\nUnits\nPrice per unit\nAmount\nFees\nAdd fees on top instead\n\nHeld for\nCash account\nChoose cash account\u2026\nAudit Car 600000 \u00b7 EGP\nCash wallet \u00b7 EGP\nCIB Payroll \u00b7 EGP\nGold at home \u00b7 EGP\nNBE CDs \u00b7 EGP\nOffice gam'eya \u00b7 EGP\nTHNDR \u00b7 EGP\nVodafone Cash \u00b7 EGP\nNotes\nAdd\nAdd an existing holding\nAll\nIn\nOut\nTransfers\nTo sort\nAll time\nSelect\n\nNo transactions yet.",
+    "headings": [
+      {
+        "text": "Audit Car 0",
+        "y": 73
+      },
+      {
+        "text": "Estimated value",
+        "y": 265
+      },
+      {
+        "text": "Property or vehicle",
+        "y": 586
+      },
+      {
+        "text": "Add investment transaction",
+        "y": 1275
+      }
+    ],
+    "targets": [
+      {
+        "text": "\u22ef",
+        "x": 16,
+        "y": 204,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "date",
+        "x": 33,
+        "y": 329,
+        "w": 240,
+        "h": 48
+      },
+      {
+        "text": "Choose date",
+        "x": 279,
+        "y": 329,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "value",
+        "x": 33,
+        "y": 420,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Update value",
+        "x": 33,
+        "y": 484,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Open loans",
+        "x": 142,
+        "y": 858,
+        "w": 74,
+        "h": 19
+      },
+      {
+        "text": "Details",
+        "x": 33,
+        "y": 1202,
+        "w": 294,
+        "h": 20
+      },
+      {
+        "text": "Buy",
+        "x": 37,
+        "y": 1313,
+        "w": 56,
+        "h": 36
+      },
+      {
+        "text": "Sell",
+        "x": 97,
+        "y": 1313,
+        "w": 56,
+        "h": 36
+      },
+      {
+        "text": "Dividend",
+        "x": 156,
+        "y": 1313,
+        "w": 87,
+        "h": 36
+      },
+      {
+        "text": "date",
+        "x": 33,
+        "y": 1391,
+        "w": 240,
+        "h": 48
+      },
+      {
+        "text": "Choose date",
+        "x": 279,
+        "y": 1391,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "",
+        "x": 33,
+        "y": 1477,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "units",
+        "x": 33,
+        "y": 1562,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "unit_price",
+        "x": 33,
+        "y": 1648,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "total",
+        "x": 33,
+        "y": 1733,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "fees",
+        "x": 33,
+        "y": 1819,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "fees_included",
+        "x": 33,
+        "y": 1873,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "whom",
+        "x": 33,
+        "y": 1956,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Choose cash account\u2026\nAudit Car 600000 \u00b7 EGP\nCash wallet \u00b7 EGP\nCIB",
+        "x": 33,
+        "y": 2041,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "notes",
+        "x": 33,
+        "y": 2127,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Add",
+        "x": 33,
+        "y": 2187,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Add an existing holding",
+        "x": 33,
+        "y": 2236,
+        "w": 130,
+        "h": 17
+      },
+      {
+        "text": "Search transactions",
+        "x": 16,
+        "y": 2283,
+        "w": 328,
+        "h": 48
+      },
+      {
+        "text": "All",
+        "x": 16,
+        "y": 2341,
+        "w": 39,
+        "h": 40
+      },
+      {
+        "text": "In",
+        "x": 61,
+        "y": 2341,
+        "w": 34,
+        "h": 40
+      },
+      {
+        "text": "Out",
+        "x": 101,
+        "y": 2341,
+        "w": 47,
+        "h": 40
+      },
+      {
+        "text": "Transfers",
+        "x": 154,
+        "y": 2341,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "To sort",
+        "x": 245,
+        "y": 2341,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "All time",
+        "x": 18,
+        "y": 2395,
+        "w": 87,
+        "h": 40
+      },
+      {
+        "text": "Select",
+        "x": 277,
+        "y": 2395,
+        "w": 67,
+        "h": 40
+      }
+    ]
+  },
+  "asset-600000": {
+    "height": 2650,
+    "overflow": 0,
+    "text": "Audit Car 600000\n\nOther\n\n540,000 EGP\n\u22ef\nEstimated value\nAs of\nValue (EGP)\nUpdate value\nProperty or vehicle\nValue now\nCar\n600,000.00EGP\nBought for 600,000.00 EGP \u00b7 2025-06-01\nSince you bought it\n0.0%\n0.00EGP\nValue now less what you paid\n\nPaid for with Audit car loan. Left to pay: 25,000.00 EGP. Value less what is left to pay: +575,000.00 EGP. Open loans\n\n2026-06-01\n540,000.00\n\u221260,000.00\n2025-06-01\n600,000.00\n\u2014\nDetails\nAdd investment transaction\nBuy\nSell\nDividend\nDate\nInvestment\nUnits\nPrice per unit\nAmount\nFees\nAdd fees on top instead\n\nHeld for\nCash account\nChoose cash account\u2026\nAudit Car 0 \u00b7 EGP\nCash wallet \u00b7 EGP\nCIB Payroll \u00b7 EGP\nGold at home \u00b7 EGP\nNBE CDs \u00b7 EGP\nOffice gam'eya \u00b7 EGP\nTHNDR \u00b7 EGP\nVodafone Cash \u00b7 EGP\nNotes\nAdd\nAdd an existing holding\nAll\nIn\nOut\nTransfers\nTo sort\nAll time\nSelect\n2025-01-01\nOpening balance \u2014 Audit Car 600000\nOpening balance\n+600,000\n600,000",
+    "headings": [
+      {
+        "text": "Audit Car 600000",
+        "y": 73
+      },
+      {
+        "text": "Estimated value",
+        "y": 265
+      },
+      {
+        "text": "Property or vehicle",
+        "y": 586
+      },
+      {
+        "text": "Add investment transaction",
+        "y": 1275
+      }
+    ],
+    "targets": [
+      {
+        "text": "\u22ef",
+        "x": 16,
+        "y": 204,
+        "w": 44,
+        "h": 44
+      },
+      {
+        "text": "date",
+        "x": 33,
+        "y": 329,
+        "w": 240,
+        "h": 48
+      },
+      {
+        "text": "Choose date",
+        "x": 279,
+        "y": 329,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "value",
+        "x": 33,
+        "y": 420,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Update value",
+        "x": 33,
+        "y": 484,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Open loans",
+        "x": 149,
+        "y": 858,
+        "w": 74,
+        "h": 19
+      },
+      {
+        "text": "Details",
+        "x": 33,
+        "y": 1202,
+        "w": 294,
+        "h": 20
+      },
+      {
+        "text": "Buy",
+        "x": 37,
+        "y": 1313,
+        "w": 56,
+        "h": 36
+      },
+      {
+        "text": "Sell",
+        "x": 97,
+        "y": 1313,
+        "w": 56,
+        "h": 36
+      },
+      {
+        "text": "Dividend",
+        "x": 156,
+        "y": 1313,
+        "w": 87,
+        "h": 36
+      },
+      {
+        "text": "date",
+        "x": 33,
+        "y": 1391,
+        "w": 240,
+        "h": 48
+      },
+      {
+        "text": "Choose date",
+        "x": 279,
+        "y": 1391,
+        "w": 48,
+        "h": 48
+      },
+      {
+        "text": "",
+        "x": 33,
+        "y": 1477,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "units",
+        "x": 33,
+        "y": 1562,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "unit_price",
+        "x": 33,
+        "y": 1648,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "total",
+        "x": 33,
+        "y": 1733,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "fees",
+        "x": 33,
+        "y": 1819,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "fees_included",
+        "x": 33,
+        "y": 1873,
+        "w": 16,
+        "h": 16
+      },
+      {
+        "text": "whom",
+        "x": 33,
+        "y": 1956,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Choose cash account\u2026\nAudit Car 0 \u00b7 EGP\nCash wallet \u00b7 EGP\nCIB Payr",
+        "x": 33,
+        "y": 2041,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "notes",
+        "x": 33,
+        "y": 2127,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Add",
+        "x": 33,
+        "y": 2187,
+        "w": 294,
+        "h": 48
+      },
+      {
+        "text": "Add an existing holding",
+        "x": 33,
+        "y": 2236,
+        "w": 130,
+        "h": 17
+      },
+      {
+        "text": "Search transactions",
+        "x": 16,
+        "y": 2283,
+        "w": 328,
+        "h": 48
+      },
+      {
+        "text": "All",
+        "x": 16,
+        "y": 2341,
+        "w": 39,
+        "h": 40
+      },
+      {
+        "text": "In",
+        "x": 61,
+        "y": 2341,
+        "w": 34,
+        "h": 40
+      },
+      {
+        "text": "Out",
+        "x": 101,
+        "y": 2341,
+        "w": 47,
+        "h": 40
+      },
+      {
+        "text": "Transfers",
+        "x": 154,
+        "y": 2341,
+        "w": 85,
+        "h": 40
+      },
+      {
+        "text": "To sort",
+        "x": 245,
+        "y": 2341,
+        "w": 68,
+        "h": 40
+      },
+      {
+        "text": "All time",
+        "x": 18,
+        "y": 2395,
+        "w": 87,
+        "h": 40
+      },
+      {
+        "text": "Select",
+        "x": 277,
+        "y": 2395,
+        "w": 67,
+        "h": 40
+      },
+      {
+        "text": "Opening balance \u2014 Audit Car 600000\nOpening balance\n+600,000\n600,0",
+        "x": 16,
+        "y": 2463,
+        "w": 328,
+        "h": 83
+      }
+    ]
+  },
+  "after-refill": {
+    "height": 2559,
+    "overflow": 0,
+    "text": "Cash planning\nDue before payday\nAs of 2026-11-05\n1,480 EGP\n\n3 payments until 2026-12-01. Free cash is 1,480 short of what is due. 10 payments are already late.\n\nPlan\nRecurring\nLoans\n\nCompare scenarios\n\nForecast inputs\n\nComing up\nAudit car loan\nLoan \u00b7 2026-01-15 \u00b7 Late \u00b7 294 days\n\u22122,500\nAudit car loan\nLoan \u00b7 2026-02-15 \u00b7 Late \u00b7 263 days\n\u22122,500\nAudit car loan\nLoan \u00b7 2026-03-15 \u00b7 Late \u00b7 235 days\n\u22122,500\nAudit car loan\nLoan \u00b7 2026-04-15 \u00b7 Late \u00b7 204 days\n\u22122,500\nAudit car loan\nLoan \u00b7 2026-05-15 \u00b7 Late \u00b7 174 days\n\u22122,500\nAudit car loan\nLoan \u00b7 2026-06-15 \u00b7 Late \u00b7 143 days\n\u22122,500\nAudit car loan\nLoan \u00b7 2026-07-15 \u00b7 Late \u00b7 113 days\n\u22122,500\nAudit car loan\nLoan \u00b7 2026-08-15 \u00b7 Late \u00b7 82 days\n\u22122,500\nAudit car loan\nLoan \u00b7 2026-09-15 \u00b7 Late \u00b7 51 days\n\u22122,500\nAudit car loan\nLoan \u00b7 2026-10-15 \u00b7 Late \u00b7 21 days\n\u22122,500\nVodafone\nSubscription \u00b7 in 4 days \u00b7 2026-11-09\n\u2212350\nWE Internet\nBill \u00b7 in 15 days \u00b7 2026-11-20\n\u2212650\nNorth Cairo Electricity\nBill \u00b7 in 19 days \u00b7 2026-11-24\n\u2212480\nACME Egypt\nPayday \u00b7 in 26 days \u00b7 2026-12-01\n+45,000\nMore in the next 30 days\n2026-11-05 to 2026-12-05\n2\nFree cash\n0\nAfter bills: \u22121,480\nReserves\n62,368\nEmergency fund 2.5 months\nScheduled cash checks\n\nThrough 2027-01-31\n\nScheduled payments only. Excludes variable spending, savings goals and overdue income; reserves remain in cash. Uses day-end balances and current exchange rates.\n\nUnassigned scheduled payments are included in combined cash using your profile currency, but excluded from account checks. Assign accounts.\n\nSafe to spend\nTo 2026-12-01\n\nFrom free cash, after what is promised\n\n\u221210,480 EGP\n\nPromised payments are 10,480 more than your free cash.\n\nFree cash\n0\nDue before payday\n\u22121,480\nEmergency fund top-up\n\u22123,639\nRest of savings target\n\u22125,361\nSafe to spend\n\u221210,480\nWhere cash is heading\nNext 3 months\nFree cash, then the forecast\nLowest \u221210,480 in 2026-11\n\u203a\nEach month ahead\nEstimates: money in, money out, what is left\n\u203a\nWhat is promised\nToday\nWhat you owe\nBills already due, loans and what you owe a gam'eya\n91,500\n\u203a",
+    "headings": [
+      {
+        "text": "Cash planning",
+        "y": 72
+      },
+      {
+        "text": "Coming up",
+        "y": 359
+      },
+      {
+        "text": "Scheduled cash checks",
+        "y": 1458
+      },
+      {
+        "text": "Safe to spend",
+        "y": 1698
+      },
+      {
+        "text": "Where cash is heading",
+        "y": 2169
+      },
+      {
+        "text": "What is promised",
+        "y": 2351
+      }
+    ],
+    "targets": [
+      {
+        "text": "Plan",
+        "x": 19,
+        "y": 219,
+        "w": 91,
+        "h": 40
+      },
+      {
+        "text": "Recurring",
+        "x": 112,
+        "y": 219,
+        "w": 126,
+        "h": 40
+      },
+      {
+        "text": "Loans",
+        "x": 240,
+        "y": 219,
+        "w": 101,
+        "h": 40
+      },
+      {
+        "text": "Compare scenarios",
+        "x": 16,
+        "y": 277,
+        "w": 127,
+        "h": 19
+      },
+      {
+        "text": "Forecast inputs",
+        "x": 16,
+        "y": 313,
+        "w": 102,
+        "h": 19
+      },
+      {
+        "text": "Audit car loan\nLoan \u00b7 2026-01-15 \u00b7 Late \u00b7 294 days\n\u22122,500",
+        "x": 16,
+        "y": 397,
+        "w": 328,
+        "h": 61
+      },
+      {
+        "text": "Audit car loan\nLoan \u00b7 2026-02-15 \u00b7 Late \u00b7 263 days\n\u22122,500",
+        "x": 16,
+        "y": 457,
+        "w": 328,
+        "h": 62
+      },
+      {
+        "text": "Audit car loan\nLoan \u00b7 2026-03-15 \u00b7 Late \u00b7 235 days\n\u22122,500",
+        "x": 16,
+        "y": 519,
+        "w": 328,
+        "h": 62
+      },
+      {
+        "text": "Audit car loan\nLoan \u00b7 2026-04-15 \u00b7 Late \u00b7 204 days\n\u22122,500",
+        "x": 16,
+        "y": 580,
+        "w": 328,
+        "h": 62
+      },
+      {
+        "text": "Audit car loan\nLoan \u00b7 2026-05-15 \u00b7 Late \u00b7 174 days\n\u22122,500",
+        "x": 16,
+        "y": 642,
+        "w": 328,
+        "h": 62
+      },
+      {
+        "text": "Audit car loan\nLoan \u00b7 2026-06-15 \u00b7 Late \u00b7 143 days\n\u22122,500",
+        "x": 16,
+        "y": 703,
+        "w": 328,
+        "h": 62
+      },
+      {
+        "text": "Audit car loan\nLoan \u00b7 2026-07-15 \u00b7 Late \u00b7 113 days\n\u22122,500",
+        "x": 16,
+        "y": 765,
+        "w": 328,
+        "h": 62
+      },
+      {
+        "text": "Audit car loan\nLoan \u00b7 2026-08-15 \u00b7 Late \u00b7 82 days\n\u22122,500",
+        "x": 16,
+        "y": 826,
+        "w": 328,
+        "h": 62
+      },
+      {
+        "text": "Audit car loan\nLoan \u00b7 2026-09-15 \u00b7 Late \u00b7 51 days\n\u22122,500",
+        "x": 16,
+        "y": 888,
+        "w": 328,
+        "h": 62
+      },
+      {
+        "text": "Audit car loan\nLoan \u00b7 2026-10-15 \u00b7 Late \u00b7 21 days\n\u22122,500",
+        "x": 16,
+        "y": 949,
+        "w": 328,
+        "h": 62
+      },
+      {
+        "text": "Vodafone\nSubscription \u00b7 in 4 days \u00b7 2026-11-09\n\u2212350",
+        "x": 16,
+        "y": 1011,
+        "w": 328,
+        "h": 57
+      },
+      {
+        "text": "WE Internet\nBill \u00b7 in 15 days \u00b7 2026-11-20\n\u2212650",
+        "x": 16,
+        "y": 1068,
+        "w": 328,
+        "h": 57
+      },
+      {
+        "text": "North Cairo Electricity\nBill \u00b7 in 19 days \u00b7 2026-11-24\n\u2212480",
+        "x": 16,
+        "y": 1125,
+        "w": 328,
+        "h": 57
+      },
+      {
+        "text": "ACME Egypt\nPayday \u00b7 in 26 days \u00b7 2026-12-01\n+45,000",
+        "x": 16,
+        "y": 1182,
+        "w": 328,
+        "h": 57
+      },
+      {
+        "text": "More in the next 30 days\n2026-11-05 to 2026-12-05\n2",
+        "x": 16,
+        "y": 1239,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Free cash\n0\nAfter bills: \u22121,480",
+        "x": 16,
+        "y": 1305,
+        "w": 158,
+        "h": 121
+      },
+      {
+        "text": "Reserves\n62,368\nEmergency fund 2.5 months",
+        "x": 186,
+        "y": 1305,
+        "w": 158,
+        "h": 121
+      },
+      {
+        "text": "Assign accounts",
+        "x": 223,
+        "y": 1644,
+        "w": 109,
+        "h": 19
+      },
+      {
+        "text": "Free cash, then the forecast\nLowest \u221210,480 in 2026-11\n\u203a",
+        "x": 16,
+        "y": 2207,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "Each month ahead\nEstimates: money in, money out, what is left\n\u203a",
+        "x": 16,
+        "y": 2263,
+        "w": 328,
+        "h": 56
+      },
+      {
+        "text": "What you owe\nBills already due, loans and what you owe a gam'eya\n",
+        "x": 16,
+        "y": 2389,
+        "w": 328,
+        "h": 66
+      }
+    ]
+  }
+}

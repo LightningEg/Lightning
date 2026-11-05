@@ -1,0 +1,1 @@
+Nothing scrolls sideways or clips past the viewport at 360 or 320.
