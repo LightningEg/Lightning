@@ -183,6 +183,9 @@ _TABLE = [
      "figure, and a negative one reads \"Over plan\". One-off categories are left out of Spent.", "Planned − Spent"),
     ("plan_leaves_to_save", "Plan leaves to save", "What this month's plan leaves of average monthly income.",
      "Average monthly income − Planned"),
+    ("not_yet_given_a_job", "Not yet given a job", "Income no plan, goal or emergency top-up has claimed this "
+     "month; Fill this month and the goals can give it one.",
+     "Average monthly income − Planned − Saving for goals − Emergency fund top-up"),
     ("planned_savings_rate", "Planned savings rate", "The share of average monthly income this month's plan "
      "leaves unspent. Financial health compares it with your Savings rate limit; the budget and Needs you warn "
      "when it falls short.", "Plan leaves to save ÷ Average monthly income"),
@@ -316,6 +319,7 @@ _SOURCES = {
     "spent": (LEDGER, f"{BL}.actual"),
     "left_in_plan": (BOTH, f"{BL}.remaining"),
     "plan_leaves_to_save": (PLAN, "lightning.planning.health.PlanCheck.plan_saves"),
+    "not_yet_given_a_job": (PLAN, "lightning.planning.health.PlanCheck.unassigned"),
     "planned_savings_rate": (PLAN, "lightning.planning.health.PlanCheck.planned_savings_rate"),
     "savings_target": (PLAN, "lightning.planning.health.PlanCheck.savings_target"),
     "spending_room": (PLAN, "lightning.planning.health.PlanCheck.spending_room"),

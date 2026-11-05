@@ -100,6 +100,11 @@ class PlanCheck:
         return None if self.income is None or self.planned is None else self.income - self.planned
 
     @property
+    def unassigned(self) -> Decimal | None:
+        """Average monthly income − Planned − Saving for goals − Emergency fund top-up: money with no job yet."""
+        return None if self.plan_saves is None else self.plan_saves - self.needs
+
+    @property
     def planned_savings_rate(self) -> Decimal | None:
         return (self.plan_saves / self.income * 100
                 if self.plan_saves is not None and self.income and self.income > 0 else None)

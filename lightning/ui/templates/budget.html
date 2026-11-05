@@ -13,6 +13,7 @@
 
 {% if has_plan and budget_ai_prompt %}<div class="ai-line"><p class="muted small">{{ 'Stuck on how to reach a target? This prompt explains the plan’s own words (pace, rolled over, held for) to your AI tool first, which it cannot guess. Its advice then fits your plan, not a generic budget.'|tr(locale) }} <a href="/settings?section=general#export-for-ai">{{ 'Add your numbers with Ask an AI'|tr(locale) }}</a></p>
 {% set ai_text = budget_ai_prompt %}<div class="actions">{% include "partials/ai_prompt.html" %}</div></div>{% endif %}
+{% if has_plan %}{% include 'partials/budget_unassigned.html' %}{% endif %}
 {% if funding_adjustment_total %}<p class="muted small">{{ 'Spent {gross} · From monthly plan {plan} · Funded outside the plan {amount}. Past periods reflect current confirmed links.'|tr(locale, gross=gross_period_spending|money, plan=period_actual|money, amount=funding_adjustment_total|money) }}</p>{% endif %}
 {% if error %}<p class="notice error" role="alert">{{ error|tr(locale) }}</p>{% endif %}
 {% if bulk_undo %}<form method="post" action="/budget/bulk/undo" class="notice"><input type="hidden" name="token" value="{{ bulk_undo }}">{{ "Bulk rules applied."|tr(locale) }}<button class="btn small">{{ 'Undo'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
