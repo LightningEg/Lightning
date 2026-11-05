@@ -132,12 +132,12 @@
 {# Needs you (A09): the page's own items under its Lead, one row each with the mark as the bullet, most urgent first.
    Three show; the rest open under "Show all". Nothing to show: no row at all. `rows` are review.grouped() groups or
    inbox items; both carry label, detail, href, action. #}
-{% macro needs_rows(rows, total=none, heading_id='needs-heading', more=none) -%}
+{% macro needs_rows(rows, total=none, heading_id='needs-heading', more=none, shown=3) -%}
 {% if rows %}{% set count = total if total is not none else rows|length %}
 <section class="needs" aria-labelledby="{{ heading_id }}">
   <div class="needs-top"><h2 class="needs-head" id="{{ heading_id }}">{{ "Needs you"|tr(ui_locale()) }} <span>· {{ count }}</span></h2><a class="quiet-link" href="/needs-you">{{ "Manage Needs you"|tr(ui_locale()) }}</a>{% if more %}<a class="quiet-link" href="{{ more[1] }}">{{ more[0] }}</a>{% endif %}</div>
-  {% for r in rows[:3] %}{{ _needs_row(r) }}{% endfor %}
-  {% if rows|length > 3 %}<details class="needs-more"><summary>{{ "Show all {n}"|tr(ui_locale(), n=rows|length) }}</summary>{% for r in rows[3:] %}{{ _needs_row(r) }}{% endfor %}</details>{% endif %}
+  {% for r in rows[:shown] %}{{ _needs_row(r) }}{% endfor %}
+  {% if rows|length > shown %}<details class="needs-more"><summary>{{ "Show all {n}"|tr(ui_locale(), n=rows|length) }}</summary>{% for r in rows[shown:] %}{{ _needs_row(r) }}{% endfor %}</details>{% endif %}
 </section>
 {% endif %}
 {%- endmacro %}

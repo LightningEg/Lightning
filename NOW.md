@@ -5,7 +5,6 @@
 | Who | Work | Files | Since |
 |---|---|---|---|
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
-| Claude (Opus, M3) | BU-3 (#333), then 3AM3 | BU-3 rounding, 3AM3 tab leads | 2026-11-05 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
 | Claude (Sonnet, M3 polish) | 3AS/3AT, BU-8, 3AM5 | payday, asset, `style.css` | 2026-11-05 |
 
@@ -21,7 +20,7 @@
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
 - **IV-3AN phone plan (Audit 13):** built 2026-11-02; every job at its target (report follow-up). Waits on the owner: Accounts tab first (3AN12), one phone check (3AN13). **Read:** 3AN.
-- **IV-3AM PC declutter:** built and reviewed; the owner checks it on the PC, then the Left list. **Read:** 3AM.
+- **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 
 - **Store and community (2026-10-27):** 10C unlock once, 8M–8S merged in both repos; the website migrations (up to 20261027210000) are run and checked live and `redeem-purchase` is redeployed; the app release that carries 10C ships the unlock. Next: 10D (Papyrus and Dendera sets need a banner, frame and name designed). **Read:** `reports/2026-10-27-store-and-community/report.md`.
 
