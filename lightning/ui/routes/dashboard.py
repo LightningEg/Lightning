@@ -702,6 +702,9 @@ async def needs_you_group(request: Request, key: str):
 async def money_from_others(request: Request):
     c = container(request)
     owners = c.reporting.money_from_others_by_owner(today())
+    people = {p["name"].casefold(): p["id"] for p in c.counterparties.list_people()}
+    for row in owners:  # HO-1 (3H2): each row can give the money back or spend it for them
+        row["owner_id"] = people.get(row["owner"].casefold())
     investments = c.reporting.money_from_others_investments(today())
     held_total = c.position.at(today()).held_for_others
     return render(request, "money_from_others.html", accounts=c.accounts.list(active_only=True),
