@@ -37,3 +37,60 @@ class OtherAssetValuationRepository:
             "value_e6=excluded.value_e6,notes=excluded.notes,updated_at=excluded.updated_at",
             (account.id, day.isoformat(), to_e6(value), (notes or "").strip(), now_iso()))
         return self.latest(account.id, day.isoformat())
+
+
+ASSET_KINDS = ("flat", "house", "land", "car", "other")
+
+
+class OtherAssetDetailsRepository:
+    """Kind, purchase and loan of an Other asset account (NF-9C). The dated values are the repository above."""
+
+    def __init__(self, db: Database):
+        self.db = db
+
+    def get(self, account_id: int) -> dict | None:
+        row = self.db.one("SELECT kind,purchase_date,purchase_price_e6,loan_item_id FROM other_asset_details "
+                          "WHERE account_id=?", (account_id,))
+        if not row:
+            return None
+        price = from_e6(row["purchase_price_e6"]) if row["purchase_price_e6"] is not None else None
+        return {"kind": row["kind"], "purchase_date": row["purchase_date"], "purchase_price": price,
+                "loan_item_id": row["loan_item_id"]}
+
+    def history(self, account_id: int) -> list[dict]:
+        """Every dated value you entered, oldest first."""
+        return [{**row, "value": from_e6(row["value_e6"])} for row in self.db.all(
+            "SELECT effective_date,value_e6,notes FROM other_asset_valuations WHERE account_id=? "
+            "ORDER BY effective_date", (account_id,))]
+
+    def save(self, account, kind: str, purchase_date, purchase_price, loan_item_id) -> dict:
+        if account.account_type != AccountType.OTHER_ASSET:
+            raise ValidationError("Choose an Other asset account.", "account")
+        kind = (kind or "other").strip().lower()
+        if kind not in ASSET_KINDS:
+            raise ValidationError("Choose flat, house, land, car or other.", "kind")
+        day = None
+        if str(purchase_date or "").strip():
+            from lightning.core.dates import today
+            when = parse_date(purchase_date, "purchase_date")
+            if when > today():
+                raise ValidationError("A purchase date cannot be in the future.", "purchase_date")
+            day = when.isoformat()
+        price = None
+        if str(purchase_price or "").strip():
+            price = check_places(to_decimal(purchase_price, "purchase_price"), 2, "purchase_price")
+            if price < 0:
+                raise ValidationError("Enter a price of zero or more.", "purchase_price")
+        loan = None
+        if str(loan_item_id or "").strip():
+            loan = int(loan_item_id)
+            found = self.db.one("SELECT kind FROM planned_items WHERE id=?", (loan,))
+            if not found or found["kind"] != "LOAN":
+                raise ValidationError("Choose one of your loans.", "loan_item_id")
+        self.db.execute(
+            "INSERT INTO other_asset_details(account_id,kind,purchase_date,purchase_price_e6,loan_item_id,updated_at) "
+            "VALUES(?,?,?,?,?,?) ON CONFLICT(account_id) DO UPDATE SET kind=excluded.kind, "
+            "purchase_date=excluded.purchase_date, purchase_price_e6=excluded.purchase_price_e6, "
+            "loan_item_id=excluded.loan_item_id, updated_at=excluded.updated_at",
+            (account.id, kind, day, to_e6(price) if price is not None else None, loan, now_iso()))
+        return self.get(account.id)

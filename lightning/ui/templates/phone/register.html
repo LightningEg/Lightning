@@ -29,6 +29,7 @@
 <div class="field"><label for="value-date">{{ 'As of'|tr(locale) }}</label><input id="value-date" name="date" value="{{ today }}" type="date" required></div>
 <div class="field"><label for="value-amount">Value ({{ account.currency }})</label><input id="value-amount" name="value" inputmode="decimal" value="{{ manual_asset_value.value|money(False, 2) if manual_asset_value else account_balance|money(False, 2) }}" required></div>
 <button class="btn phone-save">{{ "Update value"|tr(locale) }}</button></form></section>{% endif %}
+{% if asset %}{% include 'partials/asset_details.html' %}{% endif %}
 {% if pocket_cash %}{# A broker with pockets (owner 2026-11-04): its pockets valued in the profile currency, then one chip per pocket. #}
 <section class="card phone-card" aria-labelledby="pockets-heading"><h2 id="pockets-heading" class="phone-card-title">{{ "By currency"|tr(locale) }}</h2><div class="phone-rows">
 {% for p in pocket_cash %}{% set dp = 0 if p.currency == base else 2 %}<a class="phone-row" href="/accounts/{{ p.id }}"><span>{{ p.currency }}<small>{{ 'Cash'|tr(locale) }} {{ p.cash|money(False, dp) }}{% if p.invested is not none and p.invested|abs >= 0.005 %} · {{ 'Investments'|tr(locale) }} {{ p.invested|money(False, dp) }}{% endif %}</small></span><b>{{ p.value|money(False, 0) }}</b></a>{% endfor %}</div></section>

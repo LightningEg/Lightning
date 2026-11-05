@@ -72,6 +72,7 @@
 {% set ncols = 7 if with_balance else 6 %}
 
 {% if account and account.account_type.value == 'OTHER_ASSET' %}<section class="card"><h2>{{ 'Estimated value'|tr(locale) }}</h2><p class="muted small">{{ 'Update an asset you value as a whole, such as your share of a home. The dated estimate changes its value in reports, without changing cash activity.'|tr(locale) }}</p><form method="post" action="/accounts/{{ account.id }}/value" class="row" style="align-items:end"><label class="field">{{ 'As of'|tr(locale) }}<input name="date" value="{{ today }}" type="text" inputmode="numeric" data-smart-date required></label><label class="field">Value ({{ account.currency }})<input name="value" inputmode="decimal" value="{{ manual_asset_value.value|money(False, 2) if manual_asset_value else account_balance|money(False, 2) }}" required></label><button class="btn">{{ 'Update value'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></section>{% endif %}
+{% if asset %}{% include 'partials/asset_details.html' %}{% endif %}
 
 {% if account and request.query_params.get('welcome') %}
 {% if account.account_type.value == 'BANK' and account.currency == base and account_options|length == 1 %}<a class="compact-row" data-popup-open href="/setup/salary?account={{ account.id }}"><span>{{ 'Add your salary'|tr(locale) }}</span><b>›</b></a>{% endif %}
