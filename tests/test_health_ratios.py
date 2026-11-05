@@ -59,7 +59,7 @@ def test_ratios_divide_what_other_figures_already_say(c, setup):
     assert "Loan payments to income" in loans and "4,000 a month of 40,000 income" in loans
     recurring = client.get("/plan/recurring").text
     assert "Fixed costs to income" in recurring and "14,500 a month of 40,000 income" in recurring
-    assert "10,500 <small>" in recurring  # Bills and subscriptions a month in whole EGP (A16), the total the ratio uses
+    assert 'kc-figure">10,500<small>' in recurring  # Bills and subscriptions a month in whole EGP (A16), the total the ratio uses
 
 
 def test_owing_more_than_you_own_is_said_not_divided(c, setup):
@@ -69,4 +69,4 @@ def test_owing_more_than_you_own_is_said_not_divided(c, setup):
     h = c.health.at(TODAY)
     assert c.position.at(TODAY).net_worth < 0 and h.debt_to_net_worth.percent is None
     page = TestClient(create_app(c)).get("/plan/loans").text
-    assert "You owe more than you own" in page and "surface-over" in page
+    assert "You owe more than you own" in page and "tone-over" in page

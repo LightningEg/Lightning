@@ -202,6 +202,11 @@ async def portfolio(request: Request):
         six = (f"{fmt(change, 0, True)} since six months ago" + (f", not counting {fmt(spark['added'], 0)} of opening balances"
                                                                   if spark.get("added") else "")) if change is not None else ""
         since = f"Return since purchase {ret.percent:+.1f}%" if ret and ret.percent is not None else ""
+        if result is not None and not result and current and change is not None:
+            # A08.5 (3Q2): nothing has moved yet this period, so the comparison is the last six months, not a dead 0
+            compare = kpis.compare("since six months ago", fmt(change, 0, True), "good" if change >= 0 else "bad")
+            six = f"{label('result')} 0" + (f", not counting {fmt(spark['added'], 0)} of opening balances"
+                                                   if spark.get("added") else "")
         lead = kpis.card(label("portfolio_value"), value, compare, tone="hold", key="value", chip_=kpis.chip(chip_text),
                          visual=kpis.segments([("Cost", owned_cost, "neutral"), ("Unrealized gain", owned_unrealized, "in")]),
                          line_=kpis.line((f"Cost {fmt(owned_cost, 0)} · Unrealized gain {fmt(owned_unrealized, 0, True)}" if owned_cost else "") + (" · " if owned_cost and (six or since) else "") + (six or since)))  # the return since purchase is also the table's All holdings row

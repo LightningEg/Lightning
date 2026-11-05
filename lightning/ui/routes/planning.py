@@ -312,6 +312,13 @@ async def recurring_page(request: Request):
                              for r in rows if not r["item"].is_income])
     return render(request, "planning/recurring.html", tabs=TABS, plan_tab="recurring", rows=rows, stopped=stopped,
                   bill_bars=bill_bars, fixed_tiles=fixed_tiles,
+                  recurring_kpis=kpis.recurring(
+                      monthly_out=monthly_out, fixed=fixed, limit=c.health.limit_values().get(fixed.key),
+                      band=c.health.band(fixed.key, fixed.percent) if fixed.percent is not None else None,
+                      subscriptions_per_year=subscriptions,
+                      due_count=sum(len(r["due"]) for r in rows if not r["item"].is_income),
+                      due_total=sum((c.planning.amount_in_base(r["item"], p.amount, day)
+                                     for r in rows if not r["item"].is_income for p in r["due"]), ZERO)),
                   suggestions=c.planning.suggestions(day), dismissed=c.planning.dismissed_suggestions(),
                   subscriptions_per_year=subscriptions,
                   monthly_out=monthly_out, monthly_in=monthly_in, labels=labels, as_of=fmt_date(day))
@@ -327,7 +334,7 @@ async def loans_page(request: Request):
               "account": labels["accounts"].get(item.account_id)} for item in c.planning.items((PlanKind.LOAN,))]
     for entry in loans:
         entry["meter"] = charts.meter(entry["progress"]["paid_amount"], entry["progress"]["total_amount"])
-    notes = [n for n in (keynotes.loans_summary(loans),) if n]
+    summary = keynotes.loans_summary(loans)  # its words become the Lead's line; a note never forms a row (A09)
     still_to_pay = c.planning.what_you_owe(day).loans_still_to_pay
     paid = sum((e["progress"]["paid_amount"] for e in loans), ZERO)
     borrowed = sum((e["progress"]["total_amount"] for e in loans), ZERO)
@@ -335,9 +342,13 @@ async def loans_page(request: Request):
     lead = kpis.card("Loans still to pay", still_to_pay,
                      kpis.compare(f"of {fmt(borrowed, 0)} in {len(loans)} loan{'s' if len(loans) != 1 else ''}",
                                   f"{fmt(paid, 0)} paid", "good"),
-                     tone="out", visual=kpis.segments([("Paid", paid, "hold"), ("Left", borrowed - paid, "out")])) if loans else None
-    return render(request, "planning/loans.html", tabs=TABS, plan_tab="loans", loans=loans, notes=notes, lead=lead,
-                  debt_tiles=_debt_tiles(c.health.at(day), fmt_date(day)),
+                     tone="out", visual=kpis.segments([("Paid", paid, "hold"), ("Left", borrowed - paid, "out")]),
+                     line_=kpis.line(summary["title"] if summary else ""),  # "Paid off on …" or "2 loan payments due now"
+                     needs=bool(summary and summary["tone"] == "attention")) if loans else None
+    health = c.health
+    return render(request, "planning/loans.html", tabs=TABS, plan_tab="loans", loans=loans, lead=lead,
+                  debt_tiles=_debt_tiles(health.at(day), fmt_date(day)),
+                  debt_kpis=kpis.debt(health.at(day), limits=health.limit_values(), band=health.band, as_of=fmt_date(day)),
                   still_to_pay=still_to_pay, as_of=fmt_date(day))
 
 

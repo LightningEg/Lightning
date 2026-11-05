@@ -92,6 +92,20 @@ COLLECT = """() => {
     }
     if (bottoms.length > 1 && Math.max(...bottoms) - Math.min(...bottoms) > 2) out.kpi.push('figures of a row sit on different lines');
   }
+  // 3Q: the older stat-tile rows answer to the same rules until they move to kpi_row.
+  for (const row of document.querySelectorAll('.main .stat-tiles')) {
+    const tiles = [...row.querySelectorAll(':scope > .stat-tile')];
+    if (tiles.length < 2 || tiles.length > 4) out.kpi.push('a stat-tile row of ' + tiles.length);
+    const bottoms = [];
+    for (const tile of tiles) {
+      const label = (tile.querySelector('.stat-tile-label') || {}).textContent || '?';
+      const compare = tile.querySelector('.stat-tile-sub, .stat-compare');
+      if (!compare || !compare.textContent.trim()) out.kpi.push(label.trim() + ' has no comparison');
+      const figure = tile.querySelector('.stat-tile-value');
+      if (figure && tile.getBoundingClientRect().top === row.getBoundingClientRect().top) bottoms.push(figure.getBoundingClientRect().bottom);
+    }
+    if (bottoms.length > 1 && Math.max(...bottoms) - Math.min(...bottoms) > 2) out.kpi.push('stat-tile figures sit on different lines');
+  }
   const jump = document.querySelector('#page-jump');
   if (jump && innerWidth > 760) {
     jump.hidden = false;

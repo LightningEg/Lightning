@@ -45,7 +45,7 @@ Makes the demo shine (wiring of what exists, no new engines):
 - **5K (fixed: `tests/test_investments.py::test_a_fixed_price_holding_shows_no_price_swings_and_no_checkpoint_rows`, `tests/test_deposit_certificates.py::test_a_certificate_holding_page_lists_its_interest_payouts`) The certificate's page.** It shows interest, not price charts.
 - **3S 3–5 and [3T](https://github.com/LightningEg/Lightning/blob/e09ddd1/issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) 1–3.** Charts that mislead, cut words on the phone, and pages with no way back.
 
-Polish after the demo: the rest of 3S and 3T, and the five pages left in [3Q](../../issues/3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md).
+Polish after the demo: the rest of 3S and 3T, and the five pages left in [3Q](https://github.com/LightningEg/Lightning/blob/e09ddd1/issues/3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md).
 
 ## 1 Engine: does the money math hold?
 
