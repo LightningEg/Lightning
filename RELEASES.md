@@ -2,7 +2,7 @@
 
 What changed in each version, in plain words. Generated from `ai/changelog/` by `python tools/release_notes.py`; do not edit by hand. The full detail for each version is in the same folder.
 
-## 2.0.0 · 2026-11-05
+## 2.0.1 · 2026-11-05
 
 **Capture**
 
@@ -118,7 +118,7 @@ What changed in each version, in plain words. Generated from `ai/changelog/` by 
 
 **Build**
 
-- Lightning 2.0.0 is a full release; the phone app is named Lightning and its file is Lightning-<version>-<build>-<commit>.apk.
+- Lightning is a full release; the phone app is named Lightning and its file is Lightning-<version>-<build>-<commit>.apk.
 - Transaction entry and editing share balance checks while keeping their existing money rules.
 - Keep the cash-check scaling guard independent of method placement.
 - Pull requests now check core financial behavior on the minimum supported Python version.
