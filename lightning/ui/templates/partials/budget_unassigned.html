@@ -1,0 +1,6 @@
+{# BU-8: what the plan has not given a job yet, from PlanCheck.unassigned (no maths here). #}
+{% if check and check.unassigned is not none %}
+<div class="{{ 'phone-row' if phone_mode() else 'compact-row' }} budget-unassigned"><span>{{ fig.not_yet_given_a_job.label }}<small>{{ 'Income {income} − Planned {planned} − Goals {goals} − Emergency top-up {fund}'|tr(locale, income=check.income|money(False, 0), planned=check.planned|money(False, 0), goals=check.goals|money(False, 0), fund=check.emergency|money(False, 0)) }}</small></span>
+  <b class="{{ 'neg' if check.unassigned < 0 }}">{{ check.unassigned|money(False, 0) }} {{ base }}</b></div>
+{% if check.unassigned > 0 %}<p class="muted small budget-unassigned-actions">{{ 'Assign to'|tr(locale) }} <a href="/budget/fill?month={{ month }}">{{ 'a category'|tr(locale) }}</a> · <a href="/reserves">{{ 'a goal'|tr(locale) }}</a></p>{% endif %}
+{% endif %}

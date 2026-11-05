@@ -21,6 +21,7 @@ def fmt(value, places: int = 0, signed: bool = False) -> str:
     """Reporting text rounds to the nearest unit (stored values keep their decimals)."""
     return _fmt(value, places, signed)
 from lightning.investments.report import investing_rate, investment_period, saved_and_invested
+from lightning.planning.position import net_worth_bridge
 from lightning.workflows.review import GROUP_LABELS, ReviewInbox, group_of, grouped
 
 from ..web import container, render, settled_save
@@ -126,6 +127,10 @@ async def dashboard(request: Request):
     change_tile = stats.pop(0)
     current = as_of >= today()
     lead_change = page_status.change(change_tile["value"], period.key, current)
+    # Why it changed (OV-3) and the lead in dollars and 21K gold (OV-8): both worked out in planning/position.py.
+    bridge = net_worth_bridge(change_tile["value"], cash_flow.net, closing_report)
+    lead_amount = position.net_worth if position.what_you_owe > 0 else position.what_you_own
+    worth_units = c.position.in_other_units(lead_amount, position_day, c.zakat.gold_price_24k(fmt_date(position_day)))
     if position_is_today := position_day == today():
         stats.insert(len(stats) - 1, _safe_tile(inbox.forecast))  # the phone's tiles (C06.1)
     # The PC's row is A08 cards, each against something: the savings rate against your usual one, the investing
@@ -186,7 +191,7 @@ async def dashboard(request: Request):
         month=month, this_month=month_of(today()), period=period, period_error=period_error,
         date_from=fmt_date(first), date_to=fmt_date(as_of), as_of=fmt_date(as_of), position_as_of=fmt_date(position_day), position_is_today=position_is_today, status=status, kpi_cards=kpi_cards,
         waffle=None if on_phone else saved_and_invested(cash_flow, closing_report["net_money"]), dates_note=dates_note, lead_change=lead_change,
-        pos=position, cash_accounts=cash_accounts, owe=owe,
+        bridge=bridge, worth_units=worth_units, pos=position, cash_accounts=cash_accounts, owe=owe,
         kept_apart_accounts=[] if on_phone else c.reporting.owned_cash_kept_apart_by_account(position.as_of),
         attention=attention, attention_groups=attention_groups, setup=setup,
         investment_report=investment_report, cash_flow=cash_flow, phone=phone,

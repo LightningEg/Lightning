@@ -17,6 +17,8 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 | **IV-3AM** | [PC declutter, tab by tab](../../issues/3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md) | L | building |
 | **BV-3AS** | [Payday funding labels and amount precision must remain readable](../../issues/3-polish-and-arabic/3AS-payday-labels-and-precision.md) | S | new |
 | **IV-3AT** | [Property and vehicle accounts need task-specific desktop and phone layouts](../../issues/3-polish-and-arabic/3AT-property-vehicle-task-layout.md) | M | new |
+| **BV-3AV** | [The Arabic bank import preview mixes English into Arabic lines](../../issues/3-polish-and-arabic/3AV-arabic-bank-import-preview.md) | M | ready |
+| **BV-3AW** | [Four short words stay English in Arabic on loans, charts and investments](../../issues/3-polish-and-arabic/3AW-arabic-short-words-loans-charts.md) | S | ready |
 | **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](../../issues/10-looks-and-store/10A-cosmetic-parts-and-claiming.md) | L | building |
 | **NF-10B** | [Supporter perks still waiting on the app or the owner](../../issues/10-looks-and-store/10B-supporter-perks-app-and-owner.md) | M | blocked on 10A claiming; owner decision on the beta channel |
 | **NF-10C** | [Theme materials, selling themes, owner console](../../issues/10-looks-and-store/10C-theme-materials-acceptance.md) | L | building |

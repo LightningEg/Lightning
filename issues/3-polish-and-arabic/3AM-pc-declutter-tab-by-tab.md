@@ -37,6 +37,7 @@ the header stays one row; Review activity becomes a quiet action.
 Overview's KPIs above the fold; Budget one meter plus pace, read-only rows with Edit plan; Transactions ten rows above the
 fold with one filter line; Spending early in a month leads with last month; Safety on the period control and read-only;
 Investments' Lead filled; Accounts one column with What you own only where it differs; Cash planning's lone cards paired.
+**Built (2026-11-05, checked at 1366 x 768 on the sample):** O1 (Overview: Needs you shows its top item and "Show all", What you own opens on its parts as links, the dollar and gold figures are one line and the trend is 120 px, so the KPI figures are on the first screen); A1 (Accounts one card, groups as sections); I1 (Investments: locked, brokerage cash and after-sale rows under the Lead's figure); C2 in part (Compare scenarios and Forecast inputs in More actions). Already on main: B1-B3 (one meter and pace, read-only rows, Fill this month), T1-T2 (ten rows, one filter line), SP1 (day 5 leads with last month), SA3-SA4 (period control, read-only Reserves). Left: C2's What you owe stands alone when there is one loan (nothing to pair it with yet), O2's needs-row tone.
 
 ## 3AM4 Settings stop being forms (ST1-ST4) · M
 Counterparties and Categories as one-column read lists with an edit drawer; Data checks folds passed checks to one line;
@@ -55,3 +56,5 @@ each class's share against its target; Compare periods' answer is a Lead with it
 for others and Planner in whole EGP, Held for others without its describing sentence. **Left:** Categories keeps inline
 autosave (no edit drawer); Arabic/RTL screens not looked at by eye (the Arabic text tests pass); tabbed pages start at
 161-214 px, not 140 (the tab bar is a row).
+
+**Checked and built (2026-11-05):** Arabic PC pages looked at by eye at 1366×768 (mirrored, Arabic digits, no sideways scroll). Tabs now sit in the header row beside the title (owner pick), so Cash planning, Loans, Accounts, Recurring start at 101-171 px; pages whose header also carries a period control or several buttons (Investments, Reports, Categories) still wrap the tabs under the title and start at 157-196 px.

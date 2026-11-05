@@ -86,7 +86,7 @@ Ranked by harm to trust, then by how often a user meets it.
 
 **X-10 · Feature · P2 — Pay-cycle months (owner).** Salaried Egyptians are often paid on the 25th or the 1st, and many think "the month" runs payday to payday. Budget, Spending and Cash planning are calendar months only. A setting "My month starts on day [1–28]" would make "Left in plan", "Money out" and Safe to spend match how the user lives. Large change: periods (`ui/periods.py`), budget months, health months.
 
-**X-11 · Feature · P2 — Reminders.** Already "Next up" in the Roadmap. From this walk, the reminders a user needs, in order: a bill or loan due tomorrow; a gam'eya instalment; expected salary not seen two days after its date (left out by decision; ask again); certificate interest day; zakat day (when on); month-end prices; no backup for 14 days. Windows toast and Android notification, each opening the matching Needs you row.
+**X-11 · Feature · P2 — Reminders.** Already "Next up" in the Roadmap. From this walk, the reminders a user needs, in order: a bill or loan due tomorrow; a gam'eya instalment; expected salary not seen two days after its date (left out by decision; ask again); certificate interest day; zakat day (when on); month-end prices; no backup for 14 days. Windows toast and Android notification, each opening the matching Needs you row. **Checked 2026-11-05:** built as native notifications, not only in-app. Windows: `lightning/desktop/window.py` polls `/reminders/due.json` and shows a balloon, but only while the app runs. Android: `ReminderNotifications.java` posts a notification, polled every 60 s while the app is open and by `SyncService` while that service runs. Missing: a reminder with the app closed on either platform (item 3AU).
 
 **X-12 · Visual · P2 — Gear and tab bars waste a row.** Budget has one tab, so its gear sits alone on a full-height row above a half-width alert card, leaving the top right empty. When a section has one tab, put the gear in the page header's actions.
 
@@ -116,7 +116,7 @@ Ranked by harm to trust, then by how often a user meets it.
 
 **[x] OV-2 · Visual · P1 — Investments row is broken on PC.** "Portfolio value" floats to the far right as a title while the figure "177,903 · 6 holdings" is tiny on the left with a lone chevron. Lay it out as one KPI row: Portfolio value · Net gain or loss · Income collected · link.
 
-**OV-3 · Logic · P2 — Three different "change" figures sit together.** Change in net worth +32,013, Net flow +26,341, Investing rate +18,450 money added. A user will ask why net worth rose more than they kept. This is the wealth-change bridge (M3.2): Net worth change = Kept (net flow) + Market moves + Other. Build it as the Change in net worth card's "Show the numbers". Highest-value missing answer on the Overview.
+**[x] OV-3 · Logic · P2 — Three different "change" figures sit together.** Built 2026-11-05: Show the numbers under the lead (PC) and a This period sheet (phone); `planning.position.net_worth_bridge`, `tests/test_net_worth_bridge.py`. Original: Change in net worth +32,013, Net flow +26,341, Investing rate +18,450 money added. A user will ask why net worth rose more than they kept. This is the wealth-change bridge (M3.2): Net worth change = Kept (net flow) + Market moves + Other. Build it as the Change in net worth card's "Show the numbers". Highest-value missing answer on the Overview.
 
 **OV-4 · Logic · P2 — "Month by month" shows one month.** The section is titled "Month by month · 2026-08 to today" and the left card's subtitle "Most in 2026-09 · 24,754", yet it draws October's day calendar. Either draw twelve month cells (as the right card does) or rename it "Day by day · 2026-10". Feedback row 64 also asked the right heatmap to show money out, not net flow.
 
@@ -126,7 +126,7 @@ Ranked by harm to trust, then by how often a user meets it.
 
 **OV-7 · Visual · P3 — Donut colours.** CDs (teal), Stocks (dark green) and Money market fund (light green) are three greens; Gold is brown. Use the A04 class colours and check that neighbours differ; feedback row 38 preferred a pie to the treemap, the donut already serves that.
 
-**OV-8 · Feature · P3 — Net worth in dollars or gold grams.** After two devaluations many Egyptians judge wealth in USD or gold. A toggle under Net worth: "in EGP · in USD · in grams of 21K" using the dated rates the app already stores. No new data; large trust gain.
+**[x] OV-8 · Feature · P3 — Net worth in dollars or gold grams.** Built 2026-11-05 as rows under the lead (In US dollars, In grams of 21K gold, each with its dated price), not a toggle that would leave the rows below in EGP; `PositionService.in_other_units`. Original: After two devaluations many Egyptians judge wealth in USD or gold. A toggle under Net worth: "in EGP · in USD · in grams of 21K" using the dated rates the app already stores. No new data; large trust gain.
 
 ### Spending
 
@@ -170,7 +170,7 @@ Ranked by harm to trust, then by how often a user meets it.
 
 **BU-2 · Logic · P2 — Alarm out of proportion.** A full-width strong-rose card "Categories over plan 1 · Transportation" for 22 EGP over a 68 EGP plan. Scale it: under 5% or under 100 EGP over, show a dot on the row, not a card.
 
-**BU-3 · Logic · P2 — Odd plan amounts.** Fill this month produces 68, 671, 1,480, 4,666, 15. Round fills to the nearest 50 (under 1,000) or 100, and let the user keep exact values.
+**[x] BU-3 · Logic · P2 — Odd plan amounts.** Built 2026-11-05: the first plan offers `budgeting.service.round_limit` amounts (min 50); typed values and demo/sample seeding (`suggested_plan`) stay exact; Mohab's plan is 51 more (`tests/test_round_limits.py`). Original: Fill this month produces 68, 671, 1,480, 4,666, 15. Round fills to the nearest 50 (under 1,000) or 100, and let the user keep exact values.
 
 **BU-4 · Logic · P2 — No pace.** At day 14 of 31, 76% used looks alarming, but 14,500 of it was rent and the loan on the 3rd and 5th. Show "Flexible spending: 4,159 of 10,199, on pace" separately from fixed bills that are already paid.
 
@@ -500,8 +500,7 @@ Beyond the open gaps already listed in the Project Overview, ranked by how often
   purest) by purity, a typed price still wins; CA-3 no Archive or Delete on system categories; X-6 Spending's usual
   month names the months it really uses (`tests/test_weekly_friction.py`). Already built: BU-1 (category sheet, 3G6),
   BU-4 (pace), CD-1 (interest receipt matching), TX-1, TX-2 and PH-5 (3AN3), PR-1 (no four decimals on Prices),
-  CA-1. Left open: BU-3 (rounding proposed limits changes every plan built from them, Mohab's included: a
-  number-audit change of its own). Kept as they are: RG-2 (Check balance stays in Money actions: A05, owner 2026-10-30) and CA-2 (the pills carry
+  CA-1. BU-3 built later on its own (2026-11-05, number audit in its PR). Kept as they are: RG-2 (Check balance stays in Money actions: A05, owner 2026-10-30) and CA-2 (the pills carry
   `aria-pressed`).
 - Step 4 (Mohab): the six behaviours are fixed and each has a test: SP-1 `test_period_comparisons.py`, X-3
   `test_display_returns.py`, IN-2 `test_holdings_total_income.py`, AC-2 `test_register_number_roles.py`, GA-1

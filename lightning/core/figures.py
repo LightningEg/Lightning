@@ -149,6 +149,12 @@ _TABLE = [
      "What you own at the end − What you own the day before the start − Opening balances in the period"),
     ("change_in_net_worth", "Change in net worth", "How much net worth grew or shrank in the period.",
      "Net worth at the end − Net worth the day before the start − Opening balances in the period"),
+    ("market_moves", "Market moves", "What your investments gained or lost in the period: sales, and the price of what you "
+     "still hold.", "Gain from sales + Price change on what you hold"),
+    ("other_changes", "Other changes", "Everything else that moved net worth in the period: loan and circle payments (money out counts "
+     "them, but they lower what you owe), dividends and interest outside money in, fees, exchange rates on foreign "
+     "cash, and values you updated by hand (a flat, a car).",
+     "Change in net worth − Net flow − Market moves"),
     ("per_month", "Per month", "A period's money out divided by the calendar months it covers, so a year to date "
      "compares with a single month."),
     ("usual_month", "Usual month", "The average money out of the last six earlier months, using matching calendar days for a partial period."),
@@ -177,6 +183,9 @@ _TABLE = [
      "figure, and a negative one reads \"Over plan\". One-off categories are left out of Spent.", "Planned − Spent"),
     ("plan_leaves_to_save", "Plan leaves to save", "What this month's plan leaves of average monthly income.",
      "Average monthly income − Planned"),
+    ("not_yet_given_a_job", "Not yet given a job", "Income no plan, goal or emergency top-up has claimed this "
+     "month; Fill this month and the goals can give it one.",
+     "Average monthly income − Planned − Saving for goals − Emergency fund top-up"),
     ("planned_savings_rate", "Planned savings rate", "The share of average monthly income this month's plan "
      "leaves unspent. Financial health compares it with your Savings rate limit; the budget and Needs you warn "
      "when it falls short.", "Plan leaves to save ÷ Average monthly income"),
@@ -293,6 +302,8 @@ _SOURCES = {
     "opening_balances_in_period": (LEDGER, "lightning.reporting.service.ReportingService.opening_balances_between"),
     "change_in_what_you_own": (LEDGER, "lightning.planning.position.PositionService.change_in_what_you_own"),
     "change_in_net_worth": (BOTH, "lightning.planning.position.PositionService.change_in_net_worth"),
+    "market_moves": (LEDGER, "lightning.planning.position.net_worth_bridge"),
+    "other_changes": (BOTH, "lightning.planning.position.net_worth_bridge"),
     "per_month": (LEDGER, "lightning.reporting.spending.spending_profile"),
     "usual_month": (LEDGER, "lightning.reporting.spending._against_history"),
     "usual_range": (LEDGER, "lightning.reporting.spending._against_history"),
@@ -308,6 +319,7 @@ _SOURCES = {
     "spent": (LEDGER, f"{BL}.actual"),
     "left_in_plan": (BOTH, f"{BL}.remaining"),
     "plan_leaves_to_save": (PLAN, "lightning.planning.health.PlanCheck.plan_saves"),
+    "not_yet_given_a_job": (PLAN, "lightning.planning.health.PlanCheck.unassigned"),
     "planned_savings_rate": (PLAN, "lightning.planning.health.PlanCheck.planned_savings_rate"),
     "savings_target": (PLAN, "lightning.planning.health.PlanCheck.savings_target"),
     "spending_room": (PLAN, "lightning.planning.health.PlanCheck.spending_room"),

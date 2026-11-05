@@ -909,9 +909,9 @@ def test_safe_to_spend_until_payday(mohab):
     # 20,000 of a 270,000 emergency target: the top-up the budget asks for (250,000 over 24 months,
     # 10,417) is kept back too, as Saving for goals is (owner request 2026-10-05: one plan).
     # Audit 2026-10-15: the 400 of cash in THNDR is kept apart from spendable cash (40,937 before).
-    assert answer.figure("Safe to spend until 2026-10-01") == D("40537")
+    assert answer.figure("Safe to spend until 2026-10-01") == D("40486")  # BU-3: a plan 51 rounder than before
     assert answer.shows("On top of your plan")  # the date is the card's chip, not repeated in its line (A16)
-    assert answer.shows("Budget until payday −1,309 Emergency fund top-up −10,417 Safe to spend 40,537")
+    assert answer.shows("Budget until payday −1,360 Emergency fund top-up −10,417 Safe to spend 40,486")
 
 
 def test_free_cash_shows_what_was_taken_off(mohab):
@@ -932,10 +932,12 @@ def test_the_budget_says_what_is_over(mohab):
     answer = mohab.answers["plan"]
     assert route(mohab, "plan") == ["/", "/budget"]
     # Each category over plan is a Needs you row under the Lead (guideline 3.33, A09), the largest with a way to cover it.
-    # BU-2 (3H2): Transportation 22 over its 68 and Food 5 over its 4,666 are small: each reads rose and "over" on its
-    # bar, and neither raises a Needs you row (an overspend needs 100 or more and 5% of its plan for that).
+    # BU-3: his first plan offers round limits (68 is 50, 4,666 is 4,700, 671 is 650, 1,480 is 1,500, 15 is 50).
+    # BU-2 (3H2): Transportation 40 over its 50 is small (under 100): it reads rose and "over" on its bar and raises
+    # no Needs you row (an overspend needs 100 or more and 5% of its plan for that); Food is now inside its 4,700.
     assert not answer.shows("Needs you ·")
-    assert answer.shows("Transportation 90 of 68 22 over") and answer.shows("Food & Groceries 4,671 of 4,666 5 over")
+    assert answer.shows("Transportation 90 of 50 40 over") and answer.shows("Food & Groceries 4,671 of 4,700 29 left")
+    assert answer.shows("Eating Out 634 of 650 16 left", "Fees & Charges 15 of 50 35 left", "Shopping 0 of 1,300")
     # Each "80 of 67 · 13 over" adds up as he reads it: plans built from his spending are whole EGP.
     for spent, planned, gap, word in re.findall(r"([\d,]+) of ([\d,]+) ([\d,]+) (over|left)", answer.screen.text):
         spent, planned, gap = (money(x) for x in (spent, planned, gap))
@@ -1115,7 +1117,7 @@ def test_safe_to_spend_keeps_the_rest_of_the_savings_target(mohab, monkeypatch):
     vodafone = D("7219")
     assert sum(gross.values(), D(0)) == D("34415") + vodafone
     assert sum((row["reserve"] for row in funding.values()), D(0)) == D("9000")
-    assert (summary["planned"], summary["spent"], summary["left"]) == (D("26699"), D("25415") + vodafone, D("1284") - vodafone)
+    assert (summary["planned"], summary["spent"], summary["left"]) == (D("26750"), D("25415") + vodafone, D("1335") - vodafone)
     assert route(mohab, "safe_keeps_saving") == ["/", "/plan"]
     answer = mohab.answers["safe_keeps_saving"]
     assert answer.shows("Free cash 312,505", "Emergency fund top-up", "Rest of savings target", "Safe to spend")
@@ -1129,8 +1131,8 @@ def test_safe_to_spend_keeps_the_rest_of_the_savings_target(mohab, monkeypatch):
     assert sum(values[:-1]) == values[-1]
     assert raw.safe_to_spend == sum((value for _, value in raw.safe_to_spend_parts), D(0))
     from lightning.core.money import quantize
-    expected = 297688
-    assert dict(raw.safe_to_spend_parts)["Budget until payday"] == -1284
+    expected = 297637  # BU-3: the round plan is 51 more than the exact one
+    assert dict(raw.safe_to_spend_parts)["Budget until payday"] == -1335
     assert values[-1] == quantize(raw.safe_to_spend, 0) == expected
     assert quantize(dict(raw.safe_to_spend_parts)["Emergency fund top-up"], 0) == -11521
     assert quantize(dict(raw.safe_to_spend_parts)["Rest of savings target"], 0) == -2013
@@ -1142,7 +1144,7 @@ def test_safe_to_spend_keeps_the_rest_of_the_savings_target(mohab, monkeypatch):
 def test_a_goal_the_plan_cannot_reach_says_when_and_what_else_works(mohab):
     answer = mohab.answers["laptop"]
     assert answer.shows("New laptop will not be ready by its date Due 2027-06-30 · it needs 30,000 EGP a month and "
-                        "your plan leaves 23,301 for it. Setting aside 23,301 a month, it is ready in July 2027. "
+                        "your plan leaves 23,250 for it. Setting aside 23,250 a month, it is ready in July 2027. "
                         "Set aside 60,000 of your 338,923 free cash now, or give it a later date.")
     assert mohab.notes["laptop_set_aside"].shows("Updated cash assigned to New laptop.")
     assert not mohab.answers["laptop_after"].shows("New laptop will not be ready")
@@ -1406,10 +1408,10 @@ def test_selected_rows_can_be_edited_together(mohab):
 
 
 def test_food_over_plan_two_months_running_gets_room_from_shopping(mohab):
-    # Talabat is Food now (the bulk change above), so July and August ran 480 over: one move fixes September on.
+    # Talabat is Food now (the bulk change above), so July and August ran up to 450 over its round 4,700 plan (BU-3): one move fixes September on.
     answer = mohab.answers["food_over"]
     assert answer.shows("Food & Groceries over plan two months running Over its plan in July and August, by up to "
-                        "500 EGP. Move 500 from Shopping, which had that left both months. Move it")
+                        "450 EGP. Move 450 from Shopping, which had that left both months. Move it")
     assert mohab.notes["move_popup"].shows("Move plan to Food & Groceries", "From 2027-09 on · the total plan stays the same")
     assert mohab.notes["moved"].shows("Moved plan from Shopping to Food & Groceries from 2027-09 on.")
     assert not mohab.answers["food_over_after"].shows("over plan two months running")
@@ -1584,13 +1586,12 @@ def test_a_figure_reads_the_same_on_every_tab(mohab, period):
     gain = {"Overview": _figure(overview, r"<span>Net gain or loss</span><b[^>]*>([^<]+)</b>"),
             "Investments": _figure(investments, r'class="lead-compare"><b[^>]*>([^<]+)</b>')}  # the Lead's comparison (3.33)
     assert len({v.strip() for v in gain.values() if v}) == 1, gain
-    # Overview lists each brokerage's cash and Investments totals it, both at the selected period end
-    # (Your position follows the period since feedback ticket 80). Sum all of the Overview's account rows.
+    # Investments' Brokerage cash is the ledger's at the selected period end (Your position follows the period since
+    # feedback ticket 80). 3AM3: the Overview's What you own links to its parts' homes instead of listing accounts.
     cash_day = ("2026-12-31" if "month=2026-12" in period else
                 "2027-03-31" if "2027-03-31" in period else "2027-09-30")
-    cash_rows = re.findall(r'<small>Brokerage cash</small></span><b>([^<]+)</b>', overview)
-    period_cash = sum((money(v) for v in cash_rows), D(0))
-    assert period_cash == mohab.c.reporting.owned_brokerage_cash(cash_day)
+    period_cash = mohab.c.reporting.owned_brokerage_cash(cash_day)
+    assert 'href="/accounts"' in overview and 'href="/investments"' in overview
     investment_cash = _figure(flat(investments), r"Brokerage cash ([\d,]+)")
     assert investment_cash is not None
     assert money(investment_cash) == period_cash
