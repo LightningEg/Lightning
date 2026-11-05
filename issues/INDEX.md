@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 36 open items, in the order they are worked on.
+10 milestones, 37 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -70,8 +70,9 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **BV-3AS** | [Payday funding labels and amount precision must remain readable](3-polish-and-arabic/3AS-payday-labels-and-precision.md) | bug, visual · low | Feel | S | new |
 | **IV-3AT** | [Property and vehicle accounts need task-specific desktop and phone layouts](3-polish-and-arabic/3AT-property-vehicle-task-layout.md) | improvement, visual | Feel | M | new |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | new |
+| **IT-3AV** | [The site screenshot tool breaks on the new Overview, so the site's screens are not recaptured](3-polish-and-arabic/3AV-site-shots-tool-follows-the-new-screens.md) | improvement, technical | Reach | M | new |
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR. Next free code: 3AV.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR. Next free code: 3AW.
 
 ## 4 Edit journal and devices
 
