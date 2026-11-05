@@ -82,6 +82,7 @@ Layer: **Ledger** (real money moved), **Plan** (what-if, moves nothing) or **Rep
 | **XIRR** | Report | Annualized money-weighted return from dated cash flows and an ending value; unavailable results need an explanation. |
 | **Return on a purchase** (ROI) | Report | What one purchase has made so far over what it cost: (units × price − cost) ÷ cost. Shown per purchase on a holding's page; XIRR stays the headline. Unavailable when nothing was paid. |
 | **Per year** (CAGR) | Report | The yearly rate that turns one purchase's cost into its value over the days held, counted in 365-day years like XIRR. Unavailable for less than a day or a zero cost. |
+| **Risk-free rate** | Report | A yearly rate you type, with the date it starts (a T-bill or bank certificate yield, Settings key `investment_risk_free_rates`). A rate holds until a newer one is typed. A holding's page compares its dated cash flows with it: what the same money would be worth today at that rate, the gap in EGP, and the yearly gap against XIRR. Nothing is compared for dates before the first typed rate. |
 | **Financial health** | Report | Read-only profile of named figures, periods and personal-limit comparisons; no score. |
 | **Financial health limit** | Report | Profile-owned minimum (passes at or above) or maximum (at or below) for a figure; unavailable figures get no judgement. |
 | **Budget** | Plan | Planned spending for a category and month; not a reserve or a transaction. |

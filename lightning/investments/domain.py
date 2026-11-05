@@ -58,6 +58,7 @@ class Position:
     has_other_owners: bool = False
     lots: list[Lot] = field(default_factory=list)  # the purchases still held (NF-5B), every owner
     disposals: list[Disposal] = field(default_factory=list)  # the pieces of every sale so far
+    flows: tuple = ()  # this holding's dated cash flows, money in negative, as XIRR reads them (NF-9E)
 
     @property
     def owned_net_dividends(self) -> Decimal:

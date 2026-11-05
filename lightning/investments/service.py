@@ -631,6 +631,7 @@ class InvestmentService:
                 has_other_owners=any(owner is not None for owner in pools) or (acc_id, asset.code) in other_income,
                 lots=[lot for book in pools.values() for lot in book.lots],
                 disposals=[piece for book in pools.values() for piece in book.disposals],
+                flows=tuple(holding_flows.get((acc_id, asset_id), [])),
             ))
         # dividends from something not (or no longer) held in that account still count
         for (acc_id, code), amount in dividends.items():
