@@ -845,8 +845,13 @@ async def prices(request: Request, error: str = ""):
     rows = []
     for asset in c.assets.investments(active_only=True):
         valuation = c.reporting.value_of(asset.id, 1, day)
-        rows.append({"asset": asset, "held": held.get(asset.id), "price": valuation.price,
-                     "price_date": valuation.price_date, "source": valuation.source,
+        derived = (c.reporting.valuer.reference_price(asset.id, day)  # PR-2: a karat priced from another by purity
+                   if valuation.price is None and getattr(asset.exposure, "value", asset.exposure) == "GOLD"
+                   and asset.unit == "gram" else None)
+        rows.append({"asset": asset, "held": held.get(asset.id),
+                     "price": valuation.price if derived is None else Decimal(derived["price_e6"]) / Decimal(1_000_000),
+                     "price_date": valuation.price_date if derived is None else derived["date"],
+                     "source": valuation.source if derived is None else derived["source"],
                      "is_certificate": c.assets.get_class(asset.asset_class_id).code == "DEPOSIT.CD"})
     rows.sort(key=lambda r: (r["held"] is None, r["asset"].name))
     return render(request, "investments/prices.html", rows=rows, day=day, error=error,

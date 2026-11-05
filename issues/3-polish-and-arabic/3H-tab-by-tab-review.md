@@ -3,7 +3,7 @@ title: Tab-by-tab review: what a real user needs next
 type: polish
 pillar: feel
 size: L
-status: building
+status: ready
 created: 2026-10-14
 by: Codex
 ---
@@ -487,14 +487,25 @@ Beyond the open gaps already listed in the Project Overview, ranked by how often
 - He joins a gam'eya that started two months ago: the circle page says what he owes and records the past instalments in one step (GA-1).
 - Budget's daily figure and Cash planning's line do not contradict each other (CP-1).
 
-## 3H1 Step 1: trust · L
-§14 step 1 (P1): SP-1/X-4, X-3, CP-1, IN-2, AC-2, GA-1, IN-3, X-1, X-2, HL-1, OV-1/PH-1, SE-1, SR-1, CP-8, OV-2, TE-2, TE-3. Verify first: audits 10 and 12 (3AL, 3AM) rebuilt many screens. Reproduce this on the current build; if it is already fixed, delete the step and name the commit that fixed it.
+**2026-11-05: steps 1, 2 and 4 closed.**
 
-## 3H2 Step 2: weekly friction · L
-§14 step 2 (P2): BU-1 to BU-4, CP-3, CD-1, RG-1, RG-2, TX-1, TX-2, PH-5, IN-8, PR-1, PR-2, CA-1 to CA-3, HO-1, X-5, X-6.
+- Step 1 (trust): every P1 above was already built ([x]); TE-2 and TE-3 now keep it so. The Chromium brand audit reads
+  each visited page's rendered text for words run together ("asRecurringon") and for "L1 › L2" category names, and
+  proves both detectors on a known-bad snippet (`tests/test_brand_audit.py`).
+- Step 2 (weekly friction), built: IN-8 Buy more and More actions (Sell, Record a dividend, Update price) on the holding
+  page; HO-1 Give back and Spend for them on each Held for others row; X-5 a holding's month-to-month figures only from
+  three month-ends; BU-2 an overspend under 100 or under 5% of its plan is a rose bar, not a Needs you row (Mohab's
+  Transportation 22 over and Food 5 over in September); CP-3 gam'eya instalments and payout in the next 30 days;
+  RG-1 month lines with the closing balance in a register; PR-2 a karat without a price is priced from 21K (else the
+  purest) by purity, a typed price still wins; CA-3 no Archive or Delete on system categories; X-6 Spending's usual
+  month names the months it really uses (`tests/test_weekly_friction.py`). Already built: BU-1 (category sheet, 3G6),
+  BU-4 (pace), CD-1 (interest receipt matching), TX-1, TX-2 and PH-5 (3AN3), PR-1 (no four decimals on Prices),
+  CA-1. Left open: BU-3 (rounding proposed limits changes every plan built from them, Mohab's included: a
+  number-audit change of its own). Kept as they are: RG-2 (Check balance stays in Money actions: A05, owner 2026-10-30) and CA-2 (the pills carry
+  `aria-pressed`).
+- Step 4 (Mohab): the six behaviours are fixed and each has a test: SP-1 `test_period_comparisons.py`, X-3
+  `test_display_returns.py`, IN-2 `test_holdings_total_income.py`, AC-2 `test_register_number_roles.py`, GA-1
+  `test_gameya_catchup.py`, CP-1 `test_mohab_year.py` (on top of your plan).
 
 ## 3H3 Step 3: features · L
 §14 step 3: FR-2, X-11 reminders, OV-3 bridge, BU-8, LO-2, LO-3, SE-2, OV-8, then the owner's choices in §12.
-
-## 3H4 Mohab steps for the six known gaps · M
-§14: add each as a strict `known_gap` in `tests/test_mohab_year.py`, then remove the marker as each is fixed.

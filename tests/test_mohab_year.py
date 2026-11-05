@@ -558,7 +558,7 @@ def _live_the_year(o: Mohab) -> None:
     o.ask("trip", "How much is left from the Sahel money?", "Safety", "Reserves")
     o.enter("CIB Payroll", "2027-08-31", "ACME Egypt", "Bonus", "30,000", notes="End of service")
     o.ask("end_of_service", "Does my end-of-service money change what I can budget?", "Safety", "Reserves")
-    b.go("Cash planning", "Recurring", "ACME Egypt")
+    b.go("Cash planning", "Recurring", "ACME Egypt", "Edit")  # the name opens its bill sheet (3G6), Edit its form
     b.submit({}, button="Stop")
     b.go("Cash planning", "Recurring", "Add recurring item")
     b.open(b.page.path.replace("kind=BILL", "kind=INCOME"))  # choosing Income reloads the form with income categories
@@ -932,8 +932,10 @@ def test_the_budget_says_what_is_over(mohab):
     answer = mohab.answers["plan"]
     assert route(mohab, "plan") == ["/", "/budget"]
     # Each category over plan is a Needs you row under the Lead (guideline 3.33, A09), the largest with a way to cover it.
-    assert answer.shows("Needs you · 2")
-    assert answer.shows("Transportation is") and answer.shows("Food & Groceries is")
+    # BU-2 (3H2): Transportation 22 over its 68 and Food 5 over its 4,666 are small: each reads rose and "over" on its
+    # bar, and neither raises a Needs you row (an overspend needs 100 or more and 5% of its plan for that).
+    assert not answer.shows("Needs you ·")
+    assert answer.shows("Transportation 90 of 68 22 over") and answer.shows("Food & Groceries 4,671 of 4,666 5 over")
     # Each "80 of 67 · 13 over" adds up as he reads it: plans built from his spending are whole EGP.
     for spent, planned, gap, word in re.findall(r"([\d,]+) of ([\d,]+) ([\d,]+) (over|left)", answer.screen.text):
         spent, planned, gap = (money(x) for x in (spent, planned, gap))
