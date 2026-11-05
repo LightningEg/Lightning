@@ -8,7 +8,7 @@ from decimal import Decimal, InvalidOperation
 
 from lightning.core.dates import today
 from lightning.workflows.market_prices import fill_followed
-from lightning.bank_imports import OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS, decode_csv
+from lightning.bank_imports import DIRECTION_FIELD, OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS, decode_csv
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.limits import MAX_CSV_MAPPING_REQUEST_BYTES, MAX_IMPORT_REVIEW_REQUEST_BYTES
 from lightning.core.money import ZERO, fmt
@@ -165,8 +165,8 @@ async def upload(request: Request, account_id: int):
                 return _render_upload(request, c, account_id,
                                       error="This file is too large to synchronize; split it into smaller files.",
                                       status_code=400)
-            headers, _ = decode_csv(data)
-            mapping = c.bank_imports.suggested_mapping(account_id, headers)
+            headers, file_rows = decode_csv(data)
+            mapping = c.bank_imports.suggested_mapping(account_id, headers, file_rows)
             saved_mapping = c.bank_imports.saved_mapping(account_id, headers)
             if not saved_mapping and _lightning_columns(headers):
                 saved_mapping = {"amount_model": "SINGLE"} | {key: key for key in headers}
@@ -237,6 +237,8 @@ async def map_columns(request: Request, account_id: int):
         mapping = {"amount_model": amount_model}
         selected_amount_fields = REQUIRED if amount_model == "SINGLE" else ("Date", *SEPARATE_AMOUNT_FIELDS)
         mapping.update({key: str(form.get(f"map_{key}", "")) for key in (*selected_amount_fields, *OPTIONAL)})
+        if amount_model == "SINGLE":
+            mapping[DIRECTION_FIELD] = str(form.get(f"map_{DIRECTION_FIELD}", ""))
         mapping = {key: value for key, value in mapping.items() if value}
         bundle = json.loads(str(form.get("bundle") or "[]"))
         if not bundle:
@@ -365,7 +367,11 @@ def _render_review(request, c, account_id: int, batch, rows, *, summary, form=No
         reject_prompt = _rejected_prompt(
             account, c.bank_imports.source_header(batch["id"]),
             [(str(r["_line"]), str(r.get("_row_error") or " ".join(r.get("_errors") or []))) for r in failing], len(failing))
-    return render(request, "bank_import_preview.html", account=account, batch=batch, rows=rows,
+    # Every row money in is how a statement whose sign sits in a DR/CR column, or was reversed, looks (7Z).
+    counted = [r for r in rows if not r.get("_errors")]
+    all_money_in = (batch["status"] != "POSTED" and len(counted) >= 3 and all(_amount(r) > ZERO for r in counted)
+                    and not str(batch["file_name"]).startswith("SMS "))
+    return render(request, "bank_import_preview.html", account=account, batch=batch, rows=rows, all_money_in=all_money_in,
                   groups=groups, counts=counts, categories=_categories(c),
                   counterparties=c.counterparties.list_active(), owners=c.counterparties.list_people(), account_choices=accounts_here,
                   summary=summary, msg=msg, error=error, reject_prompt=reject_prompt, status_code=status_code)

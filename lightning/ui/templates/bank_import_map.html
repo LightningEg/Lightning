@@ -22,6 +22,7 @@
         {{ column('Amount', 'Amount column', False, 'Choose amount column…') }}
         <label class="check small"><input type="checkbox" name="amount_sign" value="invert" {{ 'checked' if invert_amount }}> {{ 'Reverse the sign'|tr(locale) }}</label>
       </div>
+      <div class="field-pair" data-amount-fields="SINGLE" {{ 'hidden' if suggested_amount_model != 'SINGLE' }}>{{ column('Direction', 'Debit/credit marker (DR/CR)') }}</div>
       <div class="field-pair" data-amount-fields="SEPARATE" {{ 'hidden' if suggested_amount_model != 'SEPARATE' }}>{{ column('Inflow', 'Money in', False, 'Choose inflow column…') }}</div>
       <div class="field-pair" data-amount-fields="SEPARATE" {{ 'hidden' if suggested_amount_model != 'SEPARATE' }}>{{ column('Outflow', 'Money out', False, 'Choose outflow column…') }}</div>
       {% for key in optional %}{{ column(key, key) }}{% endfor %}
@@ -38,7 +39,7 @@
     form.querySelectorAll('[data-amount-fields]').forEach((group) => {
       const active = group.dataset.amountFields === selected;
       group.hidden = !active;
-      group.querySelectorAll('select').forEach((field) => { field.required = active; field.disabled = !active; });
+      group.querySelectorAll('select').forEach((field) => { field.required = active && field.name !== 'map_Direction'; field.disabled = !active; });
       group.querySelectorAll('input[type="checkbox"]').forEach((field) => { field.disabled = !active; });
     });
   };

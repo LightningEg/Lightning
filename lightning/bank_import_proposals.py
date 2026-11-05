@@ -7,6 +7,7 @@ import json
 import re
 from decimal import Decimal
 
+from lightning.bank_import_names import guess_category_code, is_cash_withdrawal, is_wallet, saved_name_inside
 from lightning.bank_import_rows import is_internal
 from lightning.categories.domain import Movement
 from lightning.core.errors import NotFoundError, ValidationError
@@ -45,6 +46,7 @@ class ImportProposals:
             except (TypeError, ValueError, KeyError):
                 continue
         active_accounts = self.accounts.list(active_only=True)
+        saved_names = [party["name"] for party in self.counterparties.list_active()]
         seen_refs = set()
         # A full-history query: run it at most once per preview, not once per row (7O).
         usual = functools.cache(self.transactions.usual_categories)
@@ -69,6 +71,9 @@ class ImportProposals:
             cp = self.counterparties.resolve(parsed["Counterparty"])
             parsed["_counterparty_id"] = cp["id"] if cp else None
             parsed["_suggestions"] = self.counterparties.suggestions(parsed["Counterparty"])
+            inside = None if cp else saved_name_inside(f"{parsed['Counterparty']} {parsed['Notes']}", saved_names)
+            if inside:  # "Carrefour" inside "Carrefour Maadi": offered first, confirmed by the person (7AC)
+                parsed["_suggestions"] = [(inside, 1.0)] + [item for item in parsed["_suggestions"] if item[0] != inside]
             parsed["_reference_duplicate"] = ref_duplicate
             parsed["_repeat_import"] = repeat_import
             parsed["_pending_elsewhere"] = pending_elsewhere.get((parsed.get("Date"), parsed.get("Amount")), "")
@@ -87,7 +92,8 @@ class ImportProposals:
             parsed["_transfer_target_suggestion"] = (self._own_account(batch["account_id"], parsed["Counterparty"])
                 or self._transfer_target_suggestion(batch["account_id"], parsed["Notes"])
                 or self._transfer_target_suggestion(batch["account_id"], parsed["Counterparty"])
-                or self._matching_bank_transfer(batch["account_id"], parsed))
+                or self._matching_bank_transfer(batch["account_id"], parsed)
+                or self._cash_withdrawal_target(batch["account_id"], parsed))
             # One of your accounts as the counterparty, or "Internal" in the category, is a transfer.
             # A transfer whose account is known needs no category; one marked internal whose account
             # cannot be matched waits for the user to pick it.
@@ -114,6 +120,7 @@ class ImportProposals:
                                                  or parsed["_voided_earlier"] or parsed["_link_candidates"])
             parsed["_ready"] = bool(not parsed.get("_errors") and not parsed["_possible_duplicate"]
                                     and not parsed["_suggestions"] and not parsed["_needs_account"] and not parsed["_identity_ambiguous"]
+                                    and not parsed.get("_category_guessed")
                                     and (parsed["_category_id"] or parsed["_transfer_target"]))
             parsed["_import_row_id"] = row["id"]
             parsed["_account_id"] = batch["account_id"]
@@ -193,7 +200,7 @@ class ImportProposals:
 
     def _transfer_target_suggestion(self, source_account_id: int, notes: str):
         """Suggest an internal destination from an account name or transfer wording."""
-        destination = re.search(r"\b(?:transfer(?:red)?|send|sent|payment)\s+(?:to|into)\s+(.+)",
+        destination = re.search(r"(?:\b(?:transfer(?:red)?|trf|send|sent|payment)\s+(?:to|into)|تحويل\s+[اإ]لى)\s+(.+)",
                                 notes or "", re.IGNORECASE)
 
         def compact(value):
@@ -225,6 +232,20 @@ class ImportProposals:
         if not candidates or (len(candidates) > 1 and candidates[0][0] - candidates[1][0] < 0.08):
             return None
         return candidates[0][1].name
+
+    def _cash_withdrawal_target(self, source_account_id: int, parsed: dict):
+        """Cash taken at an ATM went to your cash: your one cash account in this currency, not an e-wallet (7AC)."""
+        if parsed.get("_errors") or Decimal(parsed["Amount"]) >= 0:
+            return None
+        if not is_cash_withdrawal(f"{parsed['Counterparty']} {parsed['Notes']}"):
+            return None
+        currency = self.accounts.get(source_account_id).currency
+        cash = [a for a in self.accounts.list(active_only=True) if a.id != source_account_id
+                and a.account_type.value == "CASH" and a.currency == currency
+                and not is_wallet(f"{a.name} {a.institution or ''}")]
+        at_hand = [a for a in cash if a.cash_at_hand]  # the account you marked as cash in your pocket wins
+        cash = at_hand or cash
+        return cash[0].name if len(cash) == 1 else None
 
     def _matching_bank_transfer(self, source_account_id: int, parsed: dict):
         """Spot the opposite side already posted in another bank on this date."""
@@ -281,7 +302,19 @@ class ImportProposals:
             return counterparty["default_category_id"]
         found = (usual or self.transactions.usual_categories)()
         name = counterparty["name"] if counterparty else parsed["Counterparty"]
-        return (found.get(name) or {}).get("category_id")
+        usual_id = (found.get(name) or {}).get("category_id")
+        if usual_id or counterparty or parsed.get("_errors"):
+            return usual_id
+        # A name never seen before: a first guess from what it says (Carrefour is groceries), marked as a guess (7AC).
+        code = guess_category_code(f"{parsed['Counterparty']} {parsed['Notes']}", Decimal(parsed["Amount"]) > 0)
+        try:
+            category = self.categories.get_by_code(code) if code else None
+        except (NotFoundError, ValidationError):
+            category = None
+        if category is not None and category.active:
+            parsed["_category_guessed"] = True
+            return category.id
+        return None
 
     def _similarity_warning(self, account_id, parsed):
         if parsed["_errors"]:

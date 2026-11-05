@@ -12,16 +12,13 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](../../issues/7-planning-import-and-search/7C-move-in-from-other-apps.md) | L | new |
-| **BT-7Z** | [Statements with a Dr/Cr column import every debit as money in](../../issues/7-planning-import-and-search/7Z-drcr-sign-column.md) | M | ready |
-| **IT-7AA** | [Read real bank exports: Arabic headers, Windows Arabic encoding, title lines and total rows](../../issues/7-planning-import-and-search/7AA-read-real-bank-files.md) | M | ready |
 | **NF-7AB** | [One workbook or CSV that holds several accounts imports into each](../../issues/7-planning-import-and-search/7AB-one-file-many-accounts.md) | L | ready |
-| **IT-7AC** | [Turn bank descriptions into payees, transfers and categories](../../issues/7-planning-import-and-search/7AC-smarter-statement-names.md) | L | ready |
 | **IV-7AD** | [The import review says what it will do: honest duplicate notes, less repetition, a true summary](../../issues/7-planning-import-and-search/7AD-review-reads-clearly.md) | M | ready |
 | **NF-7AE** | [Use the statement's Balance column to check the import and to start an account](../../issues/7-planning-import-and-search/7AE-statement-balance-check.md) | M | ready |
 
 ## Reports with open follow-ups here
 
-- [Import scenarios: a person bringing their real money in](../../reports/2026-11-05-import-scenarios/report.md): 7Z, 7AA, 7AB, 7AC, 7AD, 7AE
+- [Import scenarios: a person bringing their real money in](../../reports/2026-11-05-import-scenarios/report.md): 7AB, 7AD, 7AE
 - [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 7C
 <!-- work:end -->
 

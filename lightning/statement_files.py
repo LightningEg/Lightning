@@ -13,7 +13,7 @@ from pathlib import PurePath
 import re
 from zipfile import BadZipFile, ZipFile
 
-from lightning.bank_import_rows import _date, _decimal_amount
+from lightning.bank_import_rows import _date, _decimal_amount, header_row_index
 from lightning.core.errors import ValidationError
 from lightning.core.limits import MAX_CSV_IMPORT_BYTES, MAX_STATEMENT_DOCUMENT_BYTES
 
@@ -99,6 +99,7 @@ def read_excel(data: bytes, currency: str | None = None) -> bytes:
             if len(sheets) != 1:
                 raise ValidationError("Choose a workbook with one nonempty worksheet, or export the wanted worksheet as CSV.", "file")
             rows = sheets[0]
+            rows = rows[header_row_index(rows):]  # the bank's title lines stay out, as in a CSV (7AA)
             headers = [value.strip().casefold() for value in rows[0]]
             if currency and 'currency' in headers:
                 index = headers.index('currency')

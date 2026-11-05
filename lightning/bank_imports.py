@@ -12,6 +12,7 @@ from lightning.core.money import from_e6
 
 # Re-export the original helpers for the UI, journal capture and existing callers.
 from lightning.bank_import_rows import (INTERNAL_WORDS as INTERNAL_WORDS, MAX_BYTES as MAX_BYTES, OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS,
+                                          DIRECTION_FIELD as DIRECTION_FIELD, HEADER_ALIASES, header_key, looks_like_direction,
                                           _amount as _amount, _date as _date, _decimal_amount as _decimal_amount,
                                           _separate_amount as _separate_amount, decode_csv, is_internal as is_internal)
 from lightning.bank_import_proposals import ImportProposals, LINK_WINDOW_DAYS as LINK_WINDOW_DAYS
@@ -77,28 +78,22 @@ class BankImportService:
             "JOIN bank_import_rows r ON r.batch_id=b.id AND r.status='REVIEW' GROUP BY b.id) w "
             "JOIN bank_import_rows f ON f.id=w.first_row_id ORDER BY w.first_row_id")]
 
-    def suggested_mapping(self, account_id: int, headers: list[str]) -> dict[str, str]:
-        """Return saved or best-effort column matches for the reviewable map step."""
+    def suggested_mapping(self, account_id: int, headers: list[str], rows: list[dict] | None = None) -> dict[str, str]:
+        """Return saved or best-effort column matches for the reviewable map step. With the file's rows, a column
+        that holds only DR/CR-style markers is offered as the debit/credit marker (7Z)."""
         saved = self.saved_mapping(account_id, headers)
         if saved:
             return saved
-        normalized = {header: " ".join("".join(ch.lower() if ch.isalnum() else " " for ch in header).split())
-                      for header in headers}
-        aliases = {
-            "Date": ("date", "transaction date", "posting date", "booking date", "value date"),
-            "Amount": ("amount", "transaction amount", "net amount", "value"),
-            "Inflow": ("inflow", "money in", "credit", "credits", "deposit", "deposits"),
-            "Outflow": ("outflow", "money out", "debit", "debits", "withdrawal", "withdrawals"),
-            "Counterparty": ("counterparty", "merchant", "payee", "beneficiary", "party", "name"),
-            "Category": ("category", "type"),
-            "Notes": ("notes", "memo", "narrative", "details", "description"),
-            "Reference": ("reference", "ref", "transaction id", "transaction reference"),
-        }
+        marker = next((header for header in headers if rows
+                       and looks_like_direction([row.get(header, "") for row in rows[:200]])), None)
+        normalized = {header: header_key(header) for header in headers if header != marker}
         result = {}
-        for target, names in aliases.items():
+        for target, names in HEADER_ALIASES.items():
             found = next((header for header, name in normalized.items() if name in names), None)
             if found:
                 result[target] = found
+        if marker:
+            result[DIRECTION_FIELD] = marker
         if "Amount" in result:
             result["amount_model"] = "SINGLE"
         elif "Inflow" in result and "Outflow" in result and result["Inflow"] != result["Outflow"]:
@@ -174,7 +169,7 @@ class BankImportService:
         now = now_iso()
         with self.db.transaction():
             canonical_fields = ("Date", *SEPARATE_AMOUNT_FIELDS, *OPTIONAL) if amount_model == "SEPARATE" else (*REQUIRED, *OPTIONAL)
-            if mapping and (saved is not None or amount_model == "SEPARATE"
+            if mapping and (saved is not None or amount_model == "SEPARATE" or mapping.get(DIRECTION_FIELD)
                             or any(mapping.get(key) != key for key in canonical_fields if mapping.get(key)) or invert_amount):
                 self.db.execute("INSERT INTO bank_import_column_maps(account_id,header_signature,mapping_json,invert_amount,created_at,updated_at) "
                                 "VALUES (?,?,?,?,?,?) ON CONFLICT(account_id,header_signature) DO UPDATE SET "

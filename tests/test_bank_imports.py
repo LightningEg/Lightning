@@ -495,3 +495,135 @@ def test_review_offers_post_as_new_for_ticked_rows_and_select_all_shown(c, setup
     batch_id, _ = c.bank_imports.stage(accounts["cib"].id, "x.csv", b"Date,Counterparty,Amount\n2026-09-20,Shop,-5\n")
     page = client.get(f"/accounts/{accounts['cib'].id}/import/{batch_id}").text
     assert "data-bulk-new" in page and "data-pick-shown" in page
+
+
+def test_debit_credit_marker_column_sets_the_sign(c, setup):
+    """7Z: a positive amount beside DR is money out; beside CR it is money in. Found and offered from the values."""
+    from lightning.bank_import_rows import looks_like_direction
+    accounts, cats = setup
+    cib = accounts["cib"].id
+    data = ("Txn Date,Narration,Amount,Dr/Cr\n2026-09-20,UBER TRIP,145.50,DR\n2026-09-21,SALARY,45000,CR\n"
+            "2026-09-22,FAWRY,320,مدين\n").encode()
+    headers, rows = decode_csv(data)
+    assert looks_like_direction([r["Dr/Cr"] for r in rows]) and not looks_like_direction([r["Narration"] for r in rows])
+    assert c.bank_imports.suggested_mapping(cib, headers, rows)["Direction"] == "Dr/Cr"
+    mapping = {"amount_model": "SINGLE", "Date": "Txn Date", "Amount": "Amount", "Notes": "Narration", "Direction": "Dr/Cr"}
+    batch_id, _ = c.bank_imports.stage(cib, "drcr.csv", data, mapping)
+    _, staged = c.bank_imports.preview(batch_id)
+    assert [r["Amount"] for r in staged] == ["-145.50", "45000", "-320"]
+    # The map is remembered: the same columns next time keep the marker.
+    assert c.bank_imports.saved_mapping(cib, headers)["Direction"] == "Dr/Cr"
+
+
+def test_an_unknown_marker_is_a_row_to_fix(c, setup):
+    accounts, _ = setup
+    mapping = {"amount_model": "SINGLE", "Date": "Date", "Amount": "Amount", "Direction": "Type"}
+    batch_id, _ = c.bank_imports.stage(accounts["cib"].id, "x.csv", b"Date,Amount,Type\n2026-09-20,10,MAYBE\n", mapping)
+    _, rows = c.bank_imports.preview(batch_id)
+    assert rows[0]["_errors"] and "DR or CR" in rows[0]["_errors"][0]
+
+
+def test_map_step_offers_the_marker_and_review_warns_when_every_row_is_money_in(c, setup):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    accounts, _ = setup
+    client = TestClient(create_app(c))
+    cib = accounts["cib"].id
+    data = b"Txn Date,Narration,Amount,Dr/Cr\n2026-09-20,UBER,145.50,DR\n2026-09-21,SALARY,45000,CR\n2026-09-22,BILL,320,DR\n"
+    page = client.post(f"/accounts/{cib}/import", files={"file": ("d.csv", data, "text/csv")}).text
+    assert '<option value="Dr/Cr" selected>' in page.split('name="map_Direction"')[1].split("</select>")[0]
+    # Ignoring the marker leaves every row positive: the review says so.
+    response = _upload_and_map(client, cib, "d.csv", data, {"Date": "Txn Date", "Amount": "Amount", "Notes": "Narration"})
+    assert "Every row in this file is money in" in client.get(response.headers["location"]).text
+
+
+ARABIC_STATEMENT = "التاريخ,البيان,مدين,دائن,الرصيد\n05/09/2026,مشتريات - كارفور,\"1,250.00\",,\"83,143.00\"\n06/09/2026,تحويل وارد,,\"3,000.00\",\"86,143.00\"\n"
+
+
+@pytest.mark.parametrize("encoding", ["utf-8-sig", "cp1256", "utf-16"])
+def test_arabic_statement_reads_in_every_windows_encoding_and_maps_itself(c, setup, encoding):
+    """7AA: Arabic headers are matched, and a CSV saved by Excel on Arabic Windows is read, not refused."""
+    headers, rows = decode_csv(ARABIC_STATEMENT.encode(encoding))
+    assert headers[0] == "التاريخ" and len(rows) == 2
+    mapping = c.bank_imports.suggested_mapping(setup[0]["cib"].id, headers, rows)
+    assert (mapping["Date"], mapping["Outflow"], mapping["Inflow"], mapping["Notes"]) == ("التاريخ", "مدين", "دائن", "البيان")
+    assert mapping["amount_model"] == "SEPARATE"
+
+
+def test_title_lines_above_the_header_and_total_rows_below_are_left_out():
+    data = (b"Commercial International Bank\nAccount Statement\nAccount No:,100012345678\nPeriod:,01/09/2026 - 30/09/2026\n\n"
+            b"Date,Description,Debit,Credit,Balance\n05/09/2026,POS CARREFOUR,\"1,250.00\",,\"83,143.00\"\n"
+            b"06/09/2026,SALARY,,\"3,000.00\",\"86,143.00\"\n,,,,\nTotal,,\"1,250.00\",\"3,000.00\",\n"
+            b"Closing Balance,,,,\"86,143.00\"\n")
+    headers, rows = decode_csv(data)
+    assert headers == ["Date", "Description", "Debit", "Credit", "Balance"]
+    assert [r["Description"] for r in rows] == ["POS CARREFOUR", "SALARY"]
+    assert rows[0]["__line__"] == "7"  # the line in the file the person has open
+
+
+def test_a_row_with_a_date_is_never_dropped_as_a_summary():
+    headers, rows = decode_csv(b"Date,Description,Amount\n2026-09-05,Total Energies fuel,-500\n")
+    assert len(rows) == 1
+
+
+def test_excel_statement_with_title_rows_reads_from_its_header():
+    from io import BytesIO
+    from openpyxl import Workbook
+    from lightning.statement_files import read_excel
+    book = Workbook()
+    sheet = book.active
+    sheet.append(["National Bank of Egypt"])
+    sheet.append(["Account", "1234"])
+    sheet.append(["Date", "Description", "Amount", "Currency"])
+    sheet.append(["2026-09-05", "Fuel", "-500", "EGP"])
+    out = BytesIO()
+    book.save(out)
+    headers, rows = decode_csv(read_excel(out.getvalue(), "EGP"))
+    assert headers == ["Date", "Description", "Amount", "Currency"] and rows[0]["Amount"] == "-500"
+
+
+@pytest.mark.parametrize("text, name", [
+    ("POS PURCHASE CARREFOUR MAADI", "Carrefour"),
+    ("POS PURCHASE CARREFOUR CAIRO 4321XXXX", "Carrefour"),
+    ("INSTAPAY TRF TO VODAFONE CASH 010xxxx", "Vodafone Cash"),
+    ("INWARD TRF ACME EGYPT", "Acme Egypt"),
+    ("ATM WITHDRAWAL 0012 NASR CITY", "ATM"),
+    ("مشتريات نقاط البيع - كارفور", "كارفور"),
+    ("Shop", "Shop"),
+    ("POS 12345", "POS 12345"),
+])
+def test_bank_wording_is_taken_off_the_payee(text, name):
+    from lightning.bank_import_names import clean_name
+    assert clean_name(text) == name
+
+
+def test_description_only_statement_suggests_payees_transfers_and_categories(c, setup):
+    """7AC: a statement with one Description column gives each row a payee, finds saved names inside it, offers ATM
+    cash as a transfer to the cash account, and guesses a first category it marks as a guess."""
+    accounts, cats = setup
+    cib = accounts["cib"].id
+    cash = accounts["wallet"]  # the one cash account that is not an e-wallet
+    c.account_flows.open_account("Vodafone Cash", "CASH", "2026-09-01", "0")
+    c.counterparties.create("Carrefour")
+    data = (b"Date,Description,Amount\n2026-09-20,POS PURCHASE CARREFOUR MAADI 4321XXXX,-812.40\n"
+            b"2026-09-20,ATM WITHDRAWAL 0012 NASR CITY,-2000\n2026-09-21,INSTAPAY TRF TO VODAFONE CASH 010xxxx,-500\n"
+            b"2026-09-21,POS PURCHASE UBER TRIP,-95\n")
+    mapping = {"amount_model": "SINGLE", "Date": "Date", "Amount": "Amount", "Notes": "Description"}
+    batch_id, _ = c.bank_imports.stage(cib, "s.csv", data, mapping)
+    _, rows = c.bank_imports.preview(batch_id)
+    carrefour, atm, wallet, uber = rows
+    assert carrefour["Counterparty"] == "Carrefour" and carrefour["Notes"].startswith("POS PURCHASE")
+    assert carrefour["_counterparty_id"]  # the saved name, found once the bank wording is off
+    assert atm["_transfer_target_suggestion"] == cash.name
+    assert wallet["_transfer_target_suggestion"] == "Vodafone Cash"
+    assert uber["Counterparty"] == "Uber Trip" and uber["_category_guessed"]
+    assert uber["_category_id"] == c.categories.get_by_code("EXP.PERSONAL.TRANSPORT").id and not uber["_ready"]
+
+
+def test_a_saved_name_inside_a_longer_payee_is_offered_first(c, setup):
+    accounts, _ = setup
+    c.counterparties.create("WE Internet")
+    batch_id, _ = c.bank_imports.stage(accounts["cib"].id, "s.csv",
+                                       b"Date,Counterparty,Amount\n2026-09-20,WE Internet Home ADSL,-450\n")
+    _, rows = c.bank_imports.preview(batch_id)
+    assert rows[0]["_suggestions"][0][0] == "WE Internet"

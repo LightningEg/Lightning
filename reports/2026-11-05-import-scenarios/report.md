@@ -27,7 +27,7 @@ THNDR accounts) over HTTP and in Chromium at 1366×768:
 
 | ID | Severity | Observation and expected behavior | Evidence | Follow-up |
 | --- | --- | --- | --- | --- |
-| F1 | high | A `Dr/Cr` column has nowhere to go in the map step: every debit stays positive. An Uber trip with category Transportation posted as an **IN** of +145.50; no warning that a spending category sat on money in. | `files/s2d_drcr.csv` | 7Z |
+| F1 | high | A `Dr/Cr` column has nowhere to go in the map step: every debit stays positive. An Uber trip with category Transportation posted as an **IN** of +145.50; no warning that a spending category sat on money in. | `files/s2d_drcr.csv` | 7Z (built) |
 | F2 | high | Two genuine same-day orders of one amount (Talabat −245 ×2), with nothing in the books yet, were both flagged "Possible duplicate" and defaulted to **Skip**. Posting with defaults said "Import complete: 0 posted, 44 linked, 2 duplicates": 490 EGP silently left out. Lightning's own AI prompt tells people to keep such rows; the Mohab sample generator nudges amounts to dodge it. | `files/s1_cib_full.csv` | Fixed in this branch |
 | F2b | medium | The owner's report: no way to decide many look-alikes at once. The bulk bar had Skip but no "Post as new", and no way to tick all rows a filter shows. | `review-bulk-bar-before.png` | Fixed in this branch |
 | F3 | medium | Arabic headers (`التاريخ`, `البيان`, `مدين`, `دائن`) match nothing; every column is mapped by hand. | `files/s2a_arabic_utf8.csv` | 7AA |
@@ -77,4 +77,19 @@ Windows desktop app. The owner's own file was not seen; its pain points were inf
 
 ## Dated follow-ups
 
-None yet.
+**2026-11-05, same day: 7Z, 7AA and 7AC built** (commit after `75d63ae` on `claude/post-update-testing-ux-7quo2s`).
+Replaying the scenarios: every bank file now reaches the map step with its columns matched (Arabic in UTF-8 and cp1256,
+title lines and totals left out, Dr/Cr chosen as the debit/credit marker), and the 46-row CIB statement shows 15 named
+groups instead of 46 "No counterparty", with categories from history.
+- F1 (7Z): a "Debit/credit marker" column in the map step, suggested from the values; tests
+  `test_debit_credit_marker_column_sets_the_sign`, `test_an_unknown_marker_is_a_row_to_fix`. Instead of a note per row
+  (refunds put spending categories on money in), the review warns when **every** row of a file is money in:
+  `test_map_step_offers_the_marker_and_review_warns_when_every_row_is_money_in`.
+- F3-F6 (7AA): `test_arabic_statement_reads_in_every_windows_encoding_and_maps_itself`,
+  `test_title_lines_above_the_header_and_total_rows_below_are_left_out`, `test_excel_statement_with_title_rows_reads_from_its_header`.
+  The count of left-out summary lines is not shown; a row with a date is never left out
+  (`test_a_row_with_a_date_is_never_dropped_as_a_summary`).
+- F10-F13 (7AC): `lightning/bank_import_names.py`; tests `test_bank_wording_is_taken_off_the_payee`,
+  `test_description_only_statement_suggests_payees_transfers_and_categories`, `test_a_saved_name_inside_a_longer_payee_is_offered_first`.
+  A saved name found inside the text is a suggestion to confirm, never merged on its own; a keyword category is marked
+  "guessed" and the row shows Needs you.

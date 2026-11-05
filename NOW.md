@@ -27,7 +27,7 @@
 
 - **Website (2026-10-28):** analytics, Downloads, leaderboard contrast and badge merged; banners redrawn plus Felucca and Sand wind (site #130). **Read:** site README › Analytics.
 
-- **Import scenarios audit (2026-11-05):** twin rows and bulk "Post as new" fixed; next 7Z (Dr/Cr posts debits as income: wrong money), then 7AA + 7AC (real Egyptian statements without hand work). **Read:** `reports/2026-11-05-import-scenarios/report.md`.
+- **Import scenarios audit (2026-11-05):** built twin rows, bulk Post as new, 7Z, 7AA, 7AC. Next 7AE (balance check), 7AD (review wording), 7AB (multi-account files), 5N (holdings). **Read:** `reports/2026-11-05-import-scenarios/report.md`.
 
 Plan: `issues/INDEX.md`.
 

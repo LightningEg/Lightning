@@ -27,7 +27,14 @@ def main() -> None:
                                 files=[("file", (name, (FILES / name).read_bytes()))], data={"__session": ""})
         page = response.text
         error = re.search(r'role="alert"[^>]*>(.*?)</', page, re.S)
-        mapped = dict(re.findall(r'name="map_(\w+)"[^>]*>.*?<option value="([^"]*)" selected', page, re.S))
+        mapped = {}
+        for part in page.split('name="map_')[1:]:
+            chosen = re.search(r'<option value="([^"]*)" selected', part.split("</select>")[0])
+            if chosen and chosen.group(1):
+                mapped[part.split('"')[0]] = chosen.group(1)
+        model = re.search(r'name="amount_model" value="(\w+)" checked', page)
+        if model:
+            mapped["amounts"] = model.group(1)
         if error:
             print(f"{name}: refused: {html.unescape(re.sub(r'<[^>]+>', '', error.group(1))).strip()}")
         elif "Match your columns" in page:
