@@ -70,7 +70,7 @@ The 14,000 difference is the sample’s remaining gam’eya obligation. More use
 **Fix:** choose one canonical definition for each label, show the gam’eya liability separately where required, and reconcile displayed components. Do not change the wealth formula merely to force a subtotal to match. Check Accounts, sidebar, More and Overview together.
 
 Source: `lightning/ui/routes/dashboard.py:520`, `lightning/ui/routes/accounts.py:110–140`, `lightning/planning/position.py:138`.
-Evidence: [More](evidence/mobile/30-more.png), [Accounts](evidence/mobile/03-accounts.png), [reconciliation](evidence/logic-probes.json). Follow-up: **[BV-3AQ](../../issues/3-polish-and-arabic/3AQ-account-totals-reconcile.md)**.
+Evidence: [More](evidence/mobile/30-more.png), [Accounts](evidence/mobile/03-accounts.png), [reconciliation](evidence/logic-probes.json). Fixed: **BV-3AQ** (2026-11-05; In your accounts is what the rows add up to, owner decision), `tests/test_gameya_screens.py::test_accounts_sidebar_more_and_overview_agree_on_in_your_accounts`.
 
 ### F5. Phone pacing treats paid fixed commitments like discretionary spending — confirmed, medium
 
@@ -80,7 +80,7 @@ The phone’s category risk compares percentage used with percentage of the mont
 
 **Fix:** scheduled obligations should say “Paid for this month,” “Due,” or “Amount above expected.” Use time-based pace for appropriate variable spending; handle mixed categories at transaction/obligation level. Test rent paid on the 3rd, groceries spread through the month, and an actually excessive bill.
 
-Source: `lightning/ui/routes/budget.py:466–502`. Evidence: [phone Budget](evidence/mobile/01-budget.png). Follow-up: **[BV-3AR](../../issues/3-polish-and-arabic/3AR-fixed-payments-phone-pace.md)**.
+Source: `lightning/ui/routes/budget.py:466–502`. Evidence: [phone Budget](evidence/mobile/01-budget.png). Fixed: **BV-3AR** (2026-11-05), `tests/test_phone_budget.py::test_paid_bills_are_not_ahead_of_pace_variable_spending_is_and_an_excessive_bill_is_over`.
 
 ## Desktop: heavy analysis and bulk actions
 

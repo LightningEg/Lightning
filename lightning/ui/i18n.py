@@ -1040,6 +1040,7 @@ ARABIC_UI = {
     'What is promised?': 'ما الالتزامات القادمة؟',
     'This period': 'هذه الفترة',
     'In your accounts': 'في حساباتك',
+    "What your account balances add up to: what you hold for other people is in it, and a savings circle you still owe counts below zero.": 'مجموع أرصدة حساباتك: فيه اللي محتفظ بيه لغيرك، والجمعية اللي لسه عليك بتتحسب بالسالب.',
     'What you own': 'اللي تملكه',
     'Bank and wallet cash': 'نقدية البنك والمحفظة',
     'Brokerage cash': 'نقدية الاستثمار',
@@ -2872,6 +2873,8 @@ ARABIC_UI = {
     'Show fewer': 'اعرض أقل',
     'Portfolio value over time': 'قيمة المحفظة على مر الوقت',
     'Includes {amt} held for others, so you own {own}.': 'منها {amt} محتفظ بيها لغيرك، يعني تملك {own}.',
+    'Includes {amt} held for others and {owed} you still owe a circle, so you own {own}.': 'منها {amt} محتفظ بيها لغيرك، ولسه عليك {owed} لجمعية، يعني تملك {own}.',
+    'Includes {owed} you still owe a circle, so you own {own}.': 'منها {owed} لسه عليك لجمعية، يعني تملك {own}.',
     # Phone overhaul (2026-10-22): the tab bar, Choose period, the Overview's hero and Needs you card, More.
     'Choose period': 'اختار الفترة',
     'This month': 'الشهر ده',

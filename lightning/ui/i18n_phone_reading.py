@@ -16,6 +16,8 @@ PHONE_READING = {
     'Over its limit by {amt}': 'عدّيت الحد بـ {amt}',
     'Ahead of pace: {n}% spent, {m}% of the month gone': 'أسرع من المعدل: صرفت {n}% وعدّى {m}% من الشهر',
     'On pace: {n}% spent, {m}% of the month gone': 'على المعدل: صرفت {n}% وعدّى {m}% من الشهر',
+    'Paid for this month': 'اتدفعت للشهر ده',
+    '{amt} still due this month': 'باقي {amt} مستحقة الشهر ده',
     'Last payments': 'آخر المدفوعات',
     'Nothing spent here yet this month.': 'لسه ماصرفتش هنا الشهر ده.',
     'Save limit': 'احفظ الحد',

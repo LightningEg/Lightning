@@ -120,7 +120,7 @@ GENERAL = {
     "Open as a full page": "افتح كصفحة كاملة",
     "Results": "النتايج",
     "Search pages, accounts, actions or #tags": "ابحث في الصفحات والحسابات والإجراءات أو #الوسوم",
-    "{label} = What you own + Held for others": "{label} = اللي تملكه + أموال لغيرك",
+    "{label} = What you own + Held for others − Gam'eya still to pay": "{label} = اللي تملكه + أموال لغيرك − جمعية لسه عليك",
     "↑ ↓ للتنقل · Enter للفتح · Esc للإغلاق": "↑ ↓ للتنقل · Enter للفتح · Esc للإغلاق",
     "yyyy-mm": "سنة-شهر",
     "yyyy-mm-dd": "سنة-شهر-يوم",

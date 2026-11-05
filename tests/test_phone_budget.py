@@ -72,6 +72,34 @@ def test_categories_are_in_order_of_need_over_plan_then_ahead_of_pace_then_by_us
     assert "return_to=%2Fbudget%3Fmonth%3D2026-10" in by_use[1]["see_all"] and "month=2026-10&" in by_use[1]["see_all"]
 
 
+def test_paid_bills_are_not_ahead_of_pace_variable_spending_is_and_an_excessive_bill_is_over():
+    """BV-3AR (audit 2026-11-05 F5): on the 5th, rent paid on the 3rd (12,000 of 12,000) and a loan payment paid
+    (2,500 of 2,500) are paid for the month, not ahead of pace; groceries at 60% of their plan are; an electricity
+    bill paid at 900 against a 500 limit is over; a mixed category paces only what is not its scheduled bill."""
+    names = {1: "Rent", 2: "Loan", 3: "Groceries", 4: "Electricity", 5: "Phone and internet", 6: "Gym"}
+    lines = SimpleNamespace(sections=[SimpleNamespace(lines=[
+        SimpleNamespace(category_id=i, name=n, depth=2) for i, n in names.items()])])
+    figures = {1: (12000, 12000), 2: (2500, 2500), 3: (3000, 5000), 4: (900, 500), 5: (750, 1500), 6: (0, 800)}
+    periods = {i: {"spent": Decimal(s), "current_budget": Decimal(b), "left": Decimal(b - s)}
+               for i, (s, b) in figures.items()}
+    # scheduled, paid: phone and internet is a 600 bill (paid) plus 150 of top-ups; the gym is still due
+    bills = {1: (Decimal(12000), Decimal(12000)), 2: (Decimal(2500), Decimal(2500)), 4: (Decimal(500), Decimal(900)),
+             5: (Decimal(600), Decimal(600)), 6: (Decimal(800), Decimal(0))}
+    period = SimpleNamespace(start_text="2026-11-01", end_text="2026-11-30")
+    rows = {r["name"]: r for r in budget._phone_categories(lines, set(names), periods, {}, period, Decimal(16),
+                                                            {}, "2026-11", bills)}
+    assert not rows["Rent"]["risk"] and rows["Rent"]["bill"] == "paid"
+    assert rows["Rent"]["line"]["text"] == "Paid for this month"
+    assert not rows["Loan"]["risk"] and rows["Loan"]["line"]["text"] == "Paid for this month"
+    assert rows["Groceries"]["risk"]  # 60% spent at 16% of the month
+    assert rows["Electricity"]["over"] and not rows["Electricity"]["risk"]
+    assert not rows["Phone and internet"]["risk"]  # 150 of its 900 everyday part (17%), though 750 of 1,500 is 50%
+    assert rows["Gym"]["bill"] == "due" and rows["Gym"]["line"]["values"]["amt"] == "800"
+    order = [r["name"] for r in budget._phone_categories(lines, set(names), periods, {}, period, Decimal(16),
+                                                         {}, "2026-11", bills)]
+    assert order[:2] == ["Electricity", "Groceries"]  # over first, then the one really ahead of pace
+
+
 def test_a_long_list_shows_what_needs_a_look_and_the_biggest_usual_rows_the_rest_say_how_many_are_on_track():
     row = lambda n, over=False, risk=False: {"name": n, "over": over, "risk": risk}
     short = [row(str(i)) for i in range(5)]
