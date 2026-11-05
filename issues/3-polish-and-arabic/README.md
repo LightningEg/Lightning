@@ -1,6 +1,6 @@
 ---
 title: Polish and Arabic
-done: 3Q, 3S, 3T, 3AD, 3AJ, 3B, 3J, 3AP, 3AL, 3AG, 3W, 3U, 3D, 3E, 3A, 3C, 3L, 3M, 3N, 3O, 3P, 3R, 3V, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AF, 3AE, 3I, 3AH, 3AK, 3AO, 3AU
+done: 3AQ, 3AR, 3G, 3Q, 3S, 3T, 3AD, 3AJ, 3B, 3J, 3AP, 3AL, 3AG, 3W, 3U, 3D, 3E, 3A, 3C, 3L, 3M, 3N, 3O, 3P, 3R, 3V, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AF, 3AE, 3I, 3AH, 3AK, 3AO, 3AU
 ---
 
 **Goal.** Every screen reads right in English and Arabic, on PC and phone, and says only what helps.

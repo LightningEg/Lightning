@@ -2,7 +2,7 @@
 {% from "partials/charts.html" import tone_icon %}
 {% block title %}{{ h.asset_name }}{% endblock %}
 {% block heading %}<div><h1>{{ h.asset_name }}</h1><div class="muted page-subtitle">{{ h.account_label }} · {{ h.asset_class.split(' › ')[-1] }}{% if asset %}{% if asset.exchange %} · {{ '{ticker} on {exchange}'|tr(locale, ticker=asset.ticker, exchange=asset.exchange) }}{% endif %}{% if asset.isin %} · ISIN {{ asset.isin }}{% endif %}{% endif %} · {{ h.quantity|units_of(h.unit) }} · as of {{ day }}</div></div>{% endblock %}
-{% block top_actions %}<a class="btn small" href="/investments">{{ 'Investments'|tr(locale) }}</a>{% endblock %}
+{% block top_actions %}{# IN-8 (3H2): act from the holding, its account and asset filled in #}{% set q = '&account=' ~ h.account_id ~ '&asset=' ~ h.asset_id %}<a class="btn" data-popup-open href="/investments/new?kind=buy{{ q }}">{{ 'Buy more'|tr(locale) }}</a><details class="action-menu"><summary class="btn">{{ 'More actions'|tr(locale) }}</summary><div><a data-popup-open href="/investments/new?kind=sell{{ q }}">{{ 'Sell'|tr(locale) }}</a><a data-popup-open href="/investments/new?kind=dividend{{ q }}">{{ 'Record a dividend'|tr(locale) }}</a><a href="/investments/prices?date={{ day }}#asset-{{ h.asset_id }}">{{ 'Update price'|tr(locale) }}</a><a href="/investments">{{ 'All holdings'|tr(locale) }}</a></div></details>{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import trend, diverging, waterfall %}
 {% set j = journey %}
@@ -63,7 +63,10 @@
     {{ waterfall(breakdown) }}</section>
 </div></section>
 
-{% if not j.flat %}<header class="overview-section-head inv-head"><h2>{{ "How bumpy has it been?"|tr(locale) }}</h2><span>{{ "Month-to-month price moves"|tr(locale) }}</span></header>
+{% set moves = (j.up or 0) + (j.down or 0) %}
+{% if not j.flat and moves < 3 %}{# X-5 (3H2): under three month-ends there is no history to draw, only a sentence #}
+<p class="muted small holding-few-months">{{ "Month-to-month moves appear after three month-ends."|tr(locale) }}{% if j.best %} {{ "So far: {pct}% in {month}."|tr(locale, pct=(j.best[1])|signed_pct, month=j.best[0]) }}{% endif %}</p>
+{% elif not j.flat %}<header class="overview-section-head inv-head"><h2>{{ "How bumpy has it been?"|tr(locale) }}</h2><span>{{ "Month-to-month price moves"|tr(locale) }}</span></header>
 <section class="card wide-card"><div class="overview-split">
   <section><div class="overview-block-head"><div><h3>{{ "Monthly price change"|tr(locale) }}</h3></div></div>
     {{ diverging(j.returns, 'Monthly price change', 'pct', 'growth') if j.returns else '' }}

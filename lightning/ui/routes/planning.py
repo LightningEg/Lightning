@@ -97,6 +97,25 @@ def _paying_accounts(c):
 
 
 # ------------------------------------------------------------------- tabs
+def _circle_rows(c, day, window_end) -> list[dict]:
+    """CP-3 (3H2): gam'eya instalments and payouts in the next 30 days beside the bills, overdue ones first, each
+    opening its circle to record it. Dates and amounts are the circle's own (GameyaService), as the forecast uses."""
+    names = {a.id: a.name for a in c.accounts.list(active_only=False)}
+    rows = []
+    for circle, _ in c.gameya.circles():
+        progress = c.gameya.progress(circle.id, day)
+        if progress.due_count:
+            rows.append({"name": names.get(circle.id, ""), "date": progress.next_date, "late": True,
+                         "what": "1 instalment due" if progress.due_count == 1 else f"{progress.due_count} instalments due",
+                         "amount": -progress.due_amount, "href": f"/gameya/{circle.id}"})
+    for event in c.gameya.future_events(day, window_end):
+        if event.kind in ("INSTALLMENT", "PAYOUT"):
+            rows.append({"name": names.get(event.deposit_account_id, ""), "date": event.date, "late": False,
+                         "what": "Instalment" if event.kind == "INSTALLMENT" else "Your payout",
+                         "amount": event.amount, "href": f"/gameya/{event.deposit_account_id}"})
+    return sorted(rows, key=lambda r: (not r["late"], r["date"] or ""))
+
+
 @router.get("")
 async def plan_page(request: Request):
     c = container(request)
@@ -109,6 +128,7 @@ async def plan_page(request: Request):
     # Late payments first, each with its days late (computed here, not in the template).
     next_payments.sort(key=lambda p: (not p.days_late(day), p.due_date, p.item.name.casefold()))
     late_days = {(p.item.id, p.due_date): p.days_late(day) for p in next_payments if p.days_late(day)}
+    circle_rows = _circle_rows(c, day, window_end)
     plan = visuals.cash_plan(c, forecast, day)
     # Honest numbers (A01): with no income planned there is nothing to forecast from.
     has_income = bool(c.planning.items((PlanKind.INCOME,)))
@@ -147,7 +167,7 @@ async def plan_page(request: Request):
                   afford_amount=raw_afford,
                   gameya_owed=position.gameya_still_to_pay,
                   notes=[], plan=plan, stats=stats, kpi_cards=kpi_cards, forecast_chart=visuals.forecast_trend(forecast),
-                  next_payments=next_payments, late_days=late_days, as_of=fmt_date(day), window_end=fmt_date(window_end),
+                  next_payments=next_payments, late_days=late_days, circle_rows=circle_rows, as_of=fmt_date(day), window_end=fmt_date(window_end),
                   has_items=bool(c.planning.items()), labels=_labels(c), zakat=c.zakat.forecast(day))
 
 
@@ -546,6 +566,23 @@ async def create_item(request: Request):
     except LightningError as exc:
         return _item_form(request, c, values, error=exc.message, error_field=exc.field or "", status_code=400, back=back)
     return redirect(back, " ".join(x for x in (message, c.health.commitments_note(values["kind"])) if x))
+
+
+@router.get("/items/{item_id:int}/sheet")
+async def item_sheet(request: Request, item_id: int):
+    """One bill sheet for every tab (3G6): a bill, subscription, loan or income with its next date, what is due, the
+    last payments, Mark paid and Edit. Recurring and Cash planning open it. Figures are PlanningService's own."""
+    c = container(request)
+    day = today()
+    item = c.planning.get(item_id)
+    labels = _labels(c)
+    row = _row(c, item, labels, day, c.planning.linked_transaction_ids())
+    payments = c.planning.payments(item, fmt_date(day), day)
+    paid = [p for p in reversed(payments) if p.status == PaymentStatus.PAID][:3]
+    back = str(request.query_params.get("back", "/plan/recurring"))
+    back = back if back.startswith("/") and not back.startswith("//") else "/plan/recurring"
+    return render(request, "planning/item_sheet.html", r=row, paid=paid, back=back,
+                  late={(p.due_date): p.days_late(day) for p in row["due"]})
 
 
 @router.get("/items/{item_id:int}/edit")

@@ -24,7 +24,7 @@
 {% endblock %}
 {% block content %}
 {% set selecting = request.query_params.get('select') %}{% set picked = request.query_params.get('pick', '') %}
-{% if account and account.account_type.value == 'OTHER_ASSET' %}<section class="card phone-card" aria-labelledby="value-heading"><h2 id="value-heading" class="phone-card-title">{{ "Estimated value"|tr(locale) }}</h2>
+{% if account and account.account_type.value == 'OTHER_ASSET' %}<section class="card phone-card" id="estimated-value" aria-labelledby="value-heading"><h2 id="value-heading" class="phone-card-title">{{ "Estimated value"|tr(locale) }}</h2>
 <form method="post" action="/accounts/{{ account.id }}/value" class="phone-form"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
 <div class="field"><label for="value-date">{{ 'As of'|tr(locale) }}</label><input id="value-date" name="date" value="{{ today }}" type="date" required></div>
 <div class="field"><label for="value-amount">Value ({{ account.currency }})</label><input id="value-amount" name="value" inputmode="decimal" value="{{ manual_asset_value.value|money(False, 2) if manual_asset_value else account_balance|money(False, 2) }}" required></div>
@@ -36,7 +36,7 @@
 <nav class="phone-chips pocket-tabs" aria-label="{{ 'Pockets'|tr(locale) }}">{% for p in pocket_cash %}<a class="phone-chip{{ ' is-chosen' if p.current }}" href="/accounts/{{ p.id }}"{% if p.current %} aria-current="page"{% endif %}>{{ p.currency }}</a>{% endfor %}</nav>
 {% endif %}
 {% include "partials/account_composition.html" %}
-{% if account %}{% include "partials/investment_entry.html" %}{% endif %}
+{% if account and not asset %}{% include "partials/investment_entry.html" %}{% endif %}
 
 {# Find: search full width, then one row of chips that wrap and never scroll sideways. #}
 <form class="phone-search phone-reg-search{{ ' is-first' if not account }}" method="get" action="{{ base_url }}" role="search">

@@ -32,7 +32,7 @@ COLLECT = """() => {
   const TEXT = %TEXT%;
   const hex = c => { const m = c.match(/[\\d.]+/g); if (!m) return null; if (m.length > 3 && +m[3] === 0) return null;
     return '#' + m.slice(0, 3).map(x => (+x).toString(16).padStart(2, '0')).join('').toUpperCase(); };
-  const out = {upper: [], colors: [], links: [], heads: [], fields: [], fieldsets: [], chart_labels: [], rose: [], overflow: [], jump: [], kpi: []};
+  const out = {upper: [], colors: [], links: [], heads: [], fields: [], fieldsets: [], chart_labels: [], rose: [], overflow: [], jump: [], kpi: [], joined: [], breadcrumbs: []};
   const name = el => el.tagName + '.' + String(el.className && el.className.baseVal === undefined ? el.className : '').trim().split(/\\s+/).slice(0, 2).join('.');
   for (const el of document.querySelectorAll('body *')) {
     const s = getComputedStyle(el), r = el.getBoundingClientRect();
@@ -105,6 +105,14 @@ COLLECT = """() => {
       if (figure && tile.getBoundingClientRect().top === row.getBoundingClientRect().top) bottoms.push(figure.getBoundingClientRect().bottom);
     }
     if (bottoms.length > 1 && Math.max(...bottoms) - Math.min(...bottoms) > 2) out.kpi.push('stat-tile figures sit on different lines');
+  }
+  // TE-3 (3H): words run together where an inline link meets text ("the same asRecurringon"), and TE-2: no "L1 › L2"
+  // between category names in the rendered text of the page's content.
+  const main = document.querySelector('.main');
+  if (main) {
+    const seen = main.innerText;
+    for (const m of seen.matchAll(/\\b[a-z]{2,}[A-Z][a-z]{2,}\\b/g)) out.joined.push(m[0]);
+    for (const m of seen.matchAll(/\\b(Personal|Work|Family) › [A-Z][\\w&' ]+/g)) out.breadcrumbs.push(m[0]);
   }
   const jump = document.querySelector('#page-jump');
   if (jump && innerWidth > 760) {
@@ -247,7 +255,7 @@ def audit():
                 alias.press('Enter')
                 result["alias_saved"] = 'Audit example alias' in page.content()
                 # Exercise the audit itself with real browser geometry in both failing and passing states.
-                page.set_content("""<main class="main"><section class="card"><fieldset style="border:1px solid black"><legend>Example</legend></fieldset>
+                page.set_content("""<main class="main"><section class="card"><p>the same as<a href="#">Recurring</a>on Categories · Personal › Eating Out</p><fieldset style="border:1px solid black"><legend>Example</legend></fieldset>
                     <div class="chart-plot" style="position:relative;width:200px;height:100px">
                     <span class="chart-end" style="position:absolute;left:30px;top:10px">100</span>
                     <span class="chart-end" style="position:absolute;left:30px;top:10px">200</span></div></section></main>""")
@@ -257,6 +265,7 @@ def audit():
                 good = page.evaluate(COLLECT)
                 result["detector_controls"] = [bool(bad["fieldsets"]), bool(bad["chart_labels"]),
                                                bool(good["fieldsets"]), bool(good["chart_labels"])]
+                result["text_detectors"] = [bad["joined"], bad["breadcrumbs"]]
                 browser.close()
         finally:
             host.stop()
@@ -387,3 +396,18 @@ def test_titles_carry_a_status_line_not_a_description(audit):
     describing = {path: lines[path] for path in STATUS_PAGES
                   if re.search(r"(stay here so|become transactions|saved names, aliases|compare totals|linked to them)", lines[path])}
     assert not describing, describing
+
+
+def test_no_words_run_together(audit):
+    """TE-3 (3H): an inline link without its spaces reads "asRecurringon"; the rendered text never has one."""
+    assert not _fails(audit, "joined")
+
+
+def test_no_category_breadcrumbs_in_rendered_text(audit):
+    """TE-2 (3H), A16 "L1 › L2: Header, then list": a category is its own name, the group a header or small label."""
+    assert not _fails(audit, "breadcrumbs")
+
+
+def test_the_text_detectors_find_what_they_look_for(audit):
+    joined, crumbs = audit["text_detectors"]
+    assert joined == ["asRecurringon"] and crumbs and crumbs[0].startswith("Personal › Eating Out")

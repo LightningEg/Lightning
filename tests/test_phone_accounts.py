@@ -34,7 +34,11 @@ def test_it_leads_with_in_your_accounts_then_the_actions_then_the_groups(phone):
     html = phone.get("/accounts").text
     assert html.index("In your accounts") < html.index('class="phone-page-actions"') < html.index('phone-accounts-group')
     hero = re.search(r'class="phone-lead">([\d,]+) <small>EGP</small>', html)
-    assert hero and re.search(r'class="phone-hero-line">Includes [\d,]+ held for others, so you own [\d,]+\.<', html)
+    line = re.search(r'class="phone-hero-line">Includes ([\d,]+) held for others(?: and ([\d,]+) you still owe a circle)?,'
+                     r' so you own ([\d,]+)\.<', html)
+    assert hero and line  # BV-3AQ: the sentence reconciles the hero to What you own
+    held, circle, own = (_number(g) if g else 0 for g in line.groups())
+    assert _number(hero.group(1)) - held + circle == own
     assert 'href="/accounts/new">Add account<' in html and 'href="/sms">From SMS<' in html  # the actions stay
     assert 'class="phone-header"><h1>Accounts</h1>' in html  # the heading for a screen reader
     # each group's total sits on the right of its name, and the groups add up to the hero's figure

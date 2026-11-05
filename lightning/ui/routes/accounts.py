@@ -72,10 +72,17 @@ def _phone_groups(groups, base: str) -> list[dict]:
     return out
 
 
-def _hero_line(count: int, held, own) -> dict:
-    """The one sentence under In your accounts: what part of it is held for others, and so what you own."""
+def _hero_line(count: int, held, own, circle=ZERO) -> dict:
+    """The one sentence under In your accounts: what part of it is held for others, what a circle still takes from
+    it (BV-3AQ: the rows add up to In your accounts, the circle below zero), and so what you own."""
     if not count:
         return page_status.sentence("Add an account to see where your money is.")
+    if circle > ZERO and own is not None:
+        if held > ZERO:
+            return page_status.sentence("Includes {amt} held for others and {owed} you still owe a circle, so you own {own}.",
+                                        amt=fmt(held, 0), owed=fmt(circle, 0), own=fmt(own, 0))
+        return page_status.sentence("Includes {owed} you still owe a circle, so you own {own}.",
+                                    owed=fmt(circle, 0), own=fmt(own, 0))
     if held > ZERO and own is not None:
         return page_status.sentence("Includes {amt} held for others, so you own {own}.", amt=fmt(held, 0), own=fmt(own, 0))
     if held > ZERO:
@@ -115,6 +122,7 @@ async def list_accounts(request: Request):
     # Answer first (guideline 3.33): What you own is the Lead, In your accounts and Held for others beside it; the
     # accounts follow in the groups the sidebar uses, each with its total.
     held = c.reporting.money_from_others_total(fmt_date(today()))
+    circle = c.position.at(today()).gameya_still_to_pay
     active = [row for row in rows if row[0].active]
     lead = None
     if rows and not net_worth.unvalued:
@@ -132,11 +140,11 @@ async def list_accounts(request: Request):
     order = list(dict.fromkeys(SIDEBAR_GROUPS.values()))
     groups = sorted(groups.items(), key=lambda item: order.index(item[0]))
     return render(request, "accounts/list.html", rows=rows, net_worth=net_worth, gross_total=gross_total,
-                  lead=lead, held_total=held, groups=groups,
+                  lead=lead, held_total=held, circle_owed=circle, groups=groups,
                   status=page_status.accounts(len(active), held),
                   phone_groups=_phone_groups(groups, c.base_currency),
                   hero_line=_hero_line(len(active), held, None if net_worth.unvalued or gross_total is None
-                                       else net_worth.what_you_own))
+                                       else net_worth.what_you_own, circle))
 
 
 @router.get("/currencies")
@@ -442,7 +450,9 @@ async def new_transaction_popup(request: Request, account_id: int):
               "date": day if re.fullmatch(r"\d{4}-\d{2}-\d{2}", day) else fmt_date(today()),
               "amount": amount if re.fullmatch(r"[\d,.]*", amount) else "",
               "category_id": _category_id(request), "counterparty": str(asked.get("counterparty", ""))[:80],
-              "owner_id": "", "to_account_id": "", "notes": str(asked.get("notes", ""))[:200],
+              # HO-1: Held for others' Give back and Spend for them open this sheet with the person chosen
+              "owner_id": str(asked.get("owner_id", "")) if str(asked.get("owner_id", "")).isdigit() else "",
+              "to_account_id": "", "notes": str(asked.get("notes", ""))[:200],
               "sms_fp": str(asked.get("sms_fp", "")) if re.fullmatch(r"[0-9a-f]{32}", str(asked.get("sms_fp", ""))) else "",
               "sms_ending": str(asked.get("sms_ending", "")) if re.fullmatch(r"\d{4}|salary", str(asked.get("sms_ending", ""))) else "",
               "return_to": _safe_return(asked.get("return_to"), f"/accounts/{account_id}")}

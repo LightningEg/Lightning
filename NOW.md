@@ -5,7 +5,9 @@
 | Who | Work | Files | Since |
 |---|---|---|---|
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
+| Claude (Opus, M3 money) | OV-3+OV-8, BU-3, 3AM3 (Sonnet: 3AS, 3AT, BU-8, 3AM5, recapture) | `lightning/ui/routes/dashboard.py`, Overview net-worth card, BU-3 rounding | 2026-11-05 |
 | Luna, for Codex | 03a restore safety: durable intent and source-copy manifest, Windows marker publication, then explicit deterministic repair. Codex reviews it and owns the restore UI and docs | `lightning/runtime/restore.py`, `lightning/database/promotion_windows.py`, `tests/test_profile_session.py`, `tests/test_database_promotion_windows.py` | 2026-10-05 |
+| Claude (Sonnet, M3 polish) | 3AS/3AT, BU-8, 3AM5 | payday, asset, `style.css` | 2026-11-05 |
 
 ## Messages
 
@@ -14,12 +16,11 @@
 
 ## Next
 
-- **Docs spine is on main (2026-10-31, #214, site #146).** Commits end with `Release-note:` and `Detail:` (AGENTS §3); `python tools/status.py` after plan changes. Next: 1N (split and dry run done; posting waits for the owner), 8AA (the owner signs off the comparison ratings). **Read:** 1N.
+- **Docs spine (2026-10-31):** trailers per AGENTS §3; `python tools/status.py` after plan changes. Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
 - **IV-3AN phone plan (Audit 13):** built 2026-11-02; every job at its target (report follow-up). Waits on the owner: Accounts tab first (3AN12), one phone check (3AN13). **Read:** 3AN.
-- **IV-3AU SMS flow:** built; owner phone check. **Read:** Architecture › Bank SMS.
 - **IV-3AM PC declutter:** built and reviewed; the owner checks it on the PC, then the Left list. **Read:** 3AM.
 
 - **Store and community (2026-10-27):** 10C unlock once, 8M–8S merged in both repos; the website migrations (up to 20261027210000) are run and checked live and `redeem-purchase` is redeployed; the app release that carries 10C ships the unlock. Next: 10D (Papyrus and Dendera sets need a banner, frame and name designed). **Read:** `reports/2026-10-27-store-and-community/report.md`.
@@ -30,8 +31,8 @@
 
 Plan: `issues/INDEX.md`.
 
-1. **Report work paused by owner after finalization; branches stay open pending browser/native checks.** **Read:** `reports/2026-11-03-code-quality-and-smart-features/evidence/report-finalization-2026-11-04.md`.
-2. **Report fixes:** 1G, 2AB, 3J, 4K, 7M and 7S are implemented; PC/phone audits continue. **Read:** `reports/README.md`.
+1. **Report work paused** (owner); branches wait on native checks. **Read:** `reports/2026-11-03-code-quality-and-smart-features/evidence/report-finalization-2026-11-04.md`.
+2. **Report fixes:** 1G, 2AB, 3J, 4K, 7M, 7S built. **Read:** `reports/README.md`.
 2. **Audit 9 links:** 7T merged (#312); native CI held. **Read:** `tests/test_reserve_bills.py`, `tests/test_salary_day_portability.py`.
 3. **9K:** profile lifecycle routes split in #300; bank-import parsing/review/posting are split in the follow-up branch; claimed device/restore routes remain. **Read:** 9K.
 4. **1H:** locks merged (#286); native checks held by owner; #302 open. **Read:** `issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md`.
@@ -39,6 +40,6 @@ Plan: `issues/INDEX.md`.
 6. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `reports/2026-10-26-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
 7. **Website recapture** after 3W / 3AG / 7Q and the 3Q, 3S, 3T screen changes (2026-11-05) so the site shows the current screens. **Read:** `skills/site-recapture/SKILL.md`.
 8. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.
-9. **5G Brokers:** done (PR claude/brokerages-5g); left in 6F: London's board and Gulf month-end history. **Read:** 6F.
+9. **6F:** London's board and Gulf month-end history (5G done). **Read:** 6F.
 10. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
 11. **6B, 6D, 3AI:** shares, gold and institution logos remain as their items describe. **Read:** each item in `issues/INDEX.md`.

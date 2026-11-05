@@ -48,7 +48,7 @@ class Valuer:
         else:
             item = self.q.physical_item(asset.id) if self._physical_items() else None
             if item:
-                reference = self.q.latest_price(item["reference_asset_id"], day)
+                reference = self.reference_price(item["reference_asset_id"], day)
                 manual = self.q.manual_item_value(asset.id, day)
                 reference_date = reference["date"] if reference else None
                 if manual and (reference_date is None or manual["date"] >= reference_date):
@@ -98,6 +98,26 @@ class Valuer:
             return Valuation(None, price, price_date, f"No {asset.currency}/{self.base} rate within {MISSING_DAYS} days before {day}")
         return Valuation((quantity * price * rate.rate).quantize(Decimal("0.000001")), price, price_date, "", source,
                          rate.as_of)
+
+    def reference_price(self, reference_id: int, day: str) -> dict | None:
+        """A gold reference's price per gram on ``day``. PR-2 (3H2): a karat with no price of its own is worked out
+        from another karat's by purity (21K first, then the purest), so an 18K piece is priced as 21K × 18/21;
+        a price someone typed for that karat always wins."""
+        own = self.q.latest_price(reference_id, day)
+        if own:
+            return own
+        target = self.q.asset_purity(reference_id)
+        if not target:
+            return None
+        for other in self.q.gold_references():
+            if other["id"] == reference_id or not other["purity_e6"]:
+                continue
+            found = self.q.latest_price(other["id"], day)
+            if found:
+                derived = Decimal(found["price_e6"]) * Decimal(target) / Decimal(other["purity_e6"])
+                karat = round(Decimal(other["purity_e6"]) * 24 / Decimal(1_000_000))
+                return {"price_e6": int(derived), "date": found["date"], "source": f"{karat}K by purity"}
+        return None
 
     def _price(self, asset: FinancialAsset, day: str) -> tuple[Decimal, str, str] | None:
         """Newest price wins; on one day the order is ``SOURCE_RANK`` (a price you typed, then a buy or sell, then the
