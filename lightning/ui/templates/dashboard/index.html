@@ -18,6 +18,7 @@
           <div class="overview-block-head"><div><h3 id="owned-heading">{{ fig[lead].label }}</h3><p>{{ "Excludes money held for others"|tr(locale) }}</p></div></div>
           <div class="overview-headline">{{ (pos.net_worth if owes else pos.what_you_own)|money }} <small>{{ base }}</small>{% if pos.unvalued %}<span>{{ "Known subtotal"|tr(locale) }}</span>{% endif %}</div>
           {% if lead_change %}<p class="lead-compare"><b class="is-{{ lead_change.tone }}">{{ lead_change.figure }}</b> {{ lead_change.text|tr(locale) }}</p>{% endif %}
+          {% if worth_units %}{# OV-8: the lead in dollars and 21K gold, at the stored dated prices; one line (3AM3) #}<p class="lead-line">{% for u in worth_units %}<span title="{{ 'at {price} on {date}'|tr(locale, price=u.price|money, date=u.date) }}">{{ ('In ' ~ u.unit)|tr(locale) }} <b>{{ u.value|money }}</b></span>{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
           {% if bridge %}{# OV-3: why it changed, worked out in planning/position.py net_worth_bridge #}<details class="chart-table"><summary>{{ 'Show the numbers'|tr(locale) }}</summary><table><tbody>
             <tr><td>{{ fig.net_flow.label }}</td><td class="num">{{ bridge.net_flow|money(true) }}</td></tr>
             <tr><td>{{ fig.market_moves.label }}</td><td class="num">{{ bridge.market_moves|money(true) }}</td></tr>
@@ -25,24 +26,24 @@
             <tr><th>{{ fig['change_in_net_worth' if owes else 'change_in_what_you_own'].label }}</th><th class="num">{{ bridge.change|money(true) }}</th></tr></tbody></table></details>{% endif %}
           {% if pos.unvalued %}<p class="notice">{{ pos.unvalued|length }} asset valuation(s) are missing from this total.</p>{% endif %}
           <div class="overview-inline-list" aria-label="{{ fig.what_you_own.label }}">
-            {% if worth_units %}{# OV-8: the lead in dollars and 21K gold, at the stored dated prices #}{% for u in worth_units %}<div class="overview-static-row"><span>{{ ('In ' ~ u.unit)|tr(locale) }} <small>{{ 'at {price} on {date}'|tr(locale, price=u.price|money, date=u.date) }}</small></span><b>{{ u.value|money }}</b></div>{% endfor %}{% endif %}
-            {% if owes %}<div class="overview-static-row overview-subtotal"><span>{{ fig.what_you_own.label }}</span><b>{{ pos.what_you_own|money }}</b></div>{% endif %}
+            {% if owes %}{# 3AM3 (O1): what you own opens on its parts, each a link to its home (A16: one home, a link) #}<details class="overview-disclosure overview-subtotal"><summary><span>{{ fig.what_you_own.label }}</span><b>{{ pos.what_you_own|money }}</b></summary><div class="overview-disclosure-body"><a href="/accounts"><span>{{ fig.cash_you_own.label }}</span><b>{{ pos.cash_you_own|money }}</b></a>{% if pos.holdings_value %}<a href="/investments"><span>{{ fig.holdings_value.label }}</span><b>{{ pos.holdings_value|money }}</b></a>{% endif %}{% if pos.other_you_own %}<a href="/accounts"><span>{{ fig.other_you_own.label }}</span><b>{{ pos.other_you_own|money }}</b></a>{% endif %}</div></details>
+            {% else %}
             <details class="overview-disclosure"><summary><span>{{ fig.cash_you_own.label }}</span><b>{{ pos.cash_you_own|money }}</b></summary><div class="overview-disclosure-body">{% for account in cash_accounts if account.value %}<a href="/accounts/{{ account.id }}"><span>{{ account.label }} <small>{{ account.type }}</small></span><b>{{ account.value|money if account.value is not none else 'Unavailable' }}</b></a>{% else %}<p class="muted small">{{ "No cash is recorded in active accounts."|tr(locale) }}</p>{% endfor %}</div></details>
             {% if pos.holdings_value %}<details class="overview-disclosure"><summary><span>{{ fig.holdings_value.label }}</span><b>{{ pos.holdings_value|money }}</b></summary><div class="overview-disclosure-body">{% for cls in pos.classes if cls.value %}<a data-popup-open href="/birdview/class/{{ cls.id }}?as_of={{ as_of }}"><span>{{ cls.name }}</span><b>{{ cls.value|money }}</b></a>{% endfor %}</div></details>{% endif %}
-            {% if pos.other_you_own %}<div class="overview-static-row"><span>{{ fig.other_you_own.label }}</span><b>{{ pos.other_you_own|money }}</b></div>{% endif %}
+            {% if pos.other_you_own %}<div class="overview-static-row"><span>{{ fig.other_you_own.label }}</span><b>{{ pos.other_you_own|money }}</b></div>{% endif %}{% endif %}
             {% if owes %}<details class="overview-disclosure"><summary><span>{{ fig.what_you_owe.label }}</span><b>−{{ pos.what_you_owe|money }}</b></summary><div class="overview-disclosure-body">{% if owe.other_bills_due > 0 %}<a href="/plan"><span>{{ "Bills due, loans apart"|tr(locale) }}</span><b>{{ owe.other_bills_due|money }}</b></a>{% endif %}{% if owe.loans_still_to_pay > 0 %}<a href="/plan/loans"><span>{{ fig.loans_still_to_pay.label }}</span><b>{{ owe.loans_still_to_pay|money }}</b></a>{% endif %}{% if pos.gameya_still_to_pay > 0 %}<span class="overview-static-row"><span>{{ fig.gameya_still_to_pay.label }}</span><b>{{ pos.gameya_still_to_pay|money }}</b></span>{% endif %}</div></details>{% endif %}
           </div>
         </section>
         <section aria-labelledby="nw-trend-heading">
           <div class="overview-block-head"><div><h3 id="nw-trend-heading">{{ "Over time"|tr(locale) }}</h3><p>At the end of each month{% if networth_trend.labels %} · {{ networth_trend.labels[0].text }} to {{ networth_trend.labels[-1].text }}{% endif %}</p></div></div>
-          {{ trend(networth_trend, fig[lead].label ~ ' at the end of each month', 'Plan', 170) }}
+          {{ trend(networth_trend, fig[lead].label ~ ' at the end of each month', 'Plan', 120) }}
           {% for month, amount in networth_trend.openings %}<p class="muted small">{{ month }} includes {{ amount|money }} of opening balances: yours before, so not a change.</p>{% endfor %}
         </section>
       </div>
     </article>
   </section>
   {% if since %}<p class="since-visit muted small">{{ ('1 new transaction since your last visit on {sa}.' if since.count == 1 else '{n} new transactions since your last visit on {sa}.')|tr(locale, n=since.count, sa=since.at) }} <a href="/transactions">{{ 'See them'|tr(locale) }}</a></p>{% endif %}
-  {{ needs_rows(attention_groups, attention|length, more=('Weekly review'|tr(locale), '/review')) }}
+  {# 3AM3 (O1, OV-1): the top item, the rest one click away, so the KPIs are on the first screen #}{{ needs_rows(attention_groups, attention|length, more=('Weekly review'|tr(locale), '/review'), shown=1) }}
   {% if not attention %}<a class="quiet-link" href="/needs-you">{{ 'Reviewed and snoozed'|tr(locale) }}</a>{% endif %}
   {{ kpi_row(kpi_cards, base, 'This period') }}
 {% if setup %}{% set done = setup|selectattr("done")|list|length %}

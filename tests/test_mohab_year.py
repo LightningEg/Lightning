@@ -1584,13 +1584,12 @@ def test_a_figure_reads_the_same_on_every_tab(mohab, period):
     gain = {"Overview": _figure(overview, r"<span>Net gain or loss</span><b[^>]*>([^<]+)</b>"),
             "Investments": _figure(investments, r'class="lead-compare"><b[^>]*>([^<]+)</b>')}  # the Lead's comparison (3.33)
     assert len({v.strip() for v in gain.values() if v}) == 1, gain
-    # Overview lists each brokerage's cash and Investments totals it, both at the selected period end
-    # (Your position follows the period since feedback ticket 80). Sum all of the Overview's account rows.
+    # Investments' Brokerage cash is the ledger's at the selected period end (Your position follows the period since
+    # feedback ticket 80). 3AM3: the Overview's What you own links to its parts' homes instead of listing accounts.
     cash_day = ("2026-12-31" if "month=2026-12" in period else
                 "2027-03-31" if "2027-03-31" in period else "2027-09-30")
-    cash_rows = re.findall(r'<small>Brokerage cash</small></span><b>([^<]+)</b>', overview)
-    period_cash = sum((money(v) for v in cash_rows), D(0))
-    assert period_cash == mohab.c.reporting.owned_brokerage_cash(cash_day)
+    period_cash = mohab.c.reporting.owned_brokerage_cash(cash_day)
+    assert 'href="/accounts"' in overview and 'href="/investments"' in overview
     investment_cash = _figure(flat(investments), r"Brokerage cash ([\d,]+)")
     assert investment_cash is not None
     assert money(investment_cash) == period_cash
