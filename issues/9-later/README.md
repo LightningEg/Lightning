@@ -1,6 +1,6 @@
 ---
 title: Later
-done: 9J, 9G, 9H, 9I, 9E
+done: 9J, 9G, 9H, 9I, 9E, 9C
 ---
 
 **Goal.** Good ideas that wait until the milestones above are done.

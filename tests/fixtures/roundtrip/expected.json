@@ -1,7 +1,7 @@
 {
- "fingerprint": "8ab024370ef391cf",
+ "fingerprint": "ed973065a35f6367",
  "lines": [
-  "schema: 75",
+  "schema: 76",
   "before net worth: 250565.290000",
   "before unvalued: 0",
   "before account CIB Payroll: 68892.790000",
@@ -30,7 +30,7 @@
   "after June money in: 46833.33",
   "after June money out: 23513.10",
   "rows accounts: 6",
-  "rows asset_classes: 16",
+  "rows asset_classes: 17",
   "rows audit_log: 2",
   "rows bank_import_batches: 0",
   "rows bank_import_column_maps: 0",
@@ -85,7 +85,7 @@
   "rows rule_conditions: 0",
   "rows rules: 0",
   "rows saved_views: 0",
-  "rows schema_migrations: 75",
+  "rows schema_migrations: 76",
   "rows settings: 2",
   "rows transactions: 69",
   "rows zakat_settings: 1"

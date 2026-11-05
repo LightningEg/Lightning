@@ -110,6 +110,8 @@ INVESTMENT_KINDS: dict[str, InvestmentKind] = {
     "FUND.GOLD": InvestmentKind("FND", "unit", 4, Exposure.GOLD, Liquidity.DAYS),
     "FUND.OTHER": InvestmentKind("FND", "unit", 4, Exposure.OTHER, Liquidity.DAYS),
     "GOLD": InvestmentKind("GLD", "gram", 3, Exposure.GOLD, Liquidity.DAYS),
+    # Silver is bought by the gram and priced by hand (NF-9C1); no price source feeds it yet.
+    "SILVER": InvestmentKind("SLV", "gram", 3, Exposure.OTHER, Liquidity.DAYS),
     "OTHER": InvestmentKind("OTH", "unit", 4, Exposure.OTHER, Liquidity.DAYS),
 }
 
