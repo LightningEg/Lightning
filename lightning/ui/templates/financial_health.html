@@ -61,7 +61,7 @@
 
 {% endif %}
 <section class="health-group" aria-labelledby="health-limits-heading">
-  <div class="section-head"><div><h2 id="health-limits-heading">{{ "Against your limits"|tr(locale) }}</h2></div>{% if judged %}<span class="muted">{{ '{within} of {judged} within your limits'|tr(locale, within=within, judged=judged) }}</span>{% endif %}</div>
+  <div class="section-head"><div><h2 id="health-limits-heading">{{ "Against your limits"|tr(locale) }}</h2></div>{% if judged and not lead %}<span class="muted">{{ '{within} of {judged} within your limits'|tr(locale, within=within, judged=judged) }}</span>{% endif %}</div>
   <div class="card health-board">
   {% for group in groups %}
     <h3 class="health-board-head">{{ group.title }}</h3>

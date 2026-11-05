@@ -900,7 +900,7 @@ def test_what_he_owes_and_when_the_car_is_paid_off(mohab):
     answer = mohab.answers["owe"]
     assert route(mohab, "owe") == ["/", "/plan/loans"]
     assert answer.figure("Loans still to pay") == D("52500")
-    assert answer.shows("Paid off on 2028-06-05", "3 of 24 payments made")
+    assert answer.shows("Paid off on 2028-06-05", "3 of 24 paid")
 
 
 def test_safe_to_spend_until_payday(mohab):
@@ -923,7 +923,7 @@ def test_free_cash_shows_what_was_taken_off(mohab):
 def test_september_spending_by_category(mohab):
     answer = mohab.answers["where"]
     assert route(mohab, "where") == ["/", "/birdview/expenses"]
-    assert answer.shows("Money out 23,390 EGP Against 2026-08 −1,364", "Housing & Rent 12,000 · 51%")
+    assert answer.shows("Money out 23,390 EGP −1,364 · 6% Against 2026-08", "Housing & Rent 12,000 · 51%")
     # Rent did not change and food moved by 5 EGP: both read 0%, never "+0%" or "−0%".
     assert answer.shows("Housing & Rent 12,000 12,000 0%", "Food & Groceries 4,666 4,671 0%")
 
@@ -987,7 +987,7 @@ def test_the_atm_fee_is_only_inside_others(mohab):
 
 
 def test_a_refund_lowers_money_out(mohab):
-    assert mohab.answers["refund"].shows("Money out 32,701 EGP Against 2026-09 +9,311")
+    assert mohab.answers["refund"].shows("Money out 32,701 EGP +9,311 · 40% Against 2026-09")
 
 
 def test_where_it_went_adds_up_to_money_out(mohab):
@@ -1025,7 +1025,7 @@ def test_the_dividends_list_says_how_much(mohab):
 
 def test_a_reimbursed_work_expense_leaves_no_spending(mohab):
     text = mohab.answers["work"].screen.text
-    assert mohab.answers["work"].shows("Money out 23,415 EGP Against 2026-11 0 · 0%")  # the same as November
+    assert mohab.answers["work"].shows("Money out 23,415 EGP 0 · 0% Against 2026-11")  # the same as November
     assert "Work" not in text[text.find("Where did it go?"):text.find("Is this period unusual?")]
 
 
@@ -1222,9 +1222,9 @@ def test_is_my_debt_under_control(mohab):
     debt, overview = mohab.answers["debt"], mohab.answers["free_cash"]
     assert route(mohab, "debt") == ["/", "/plan", "/plan/loans"]
     assert [overview.figure(x) for x in ("What you owe", "Net worth", "Cash you own")] == [D("-52500"), D("198065"), D("72663")]
-    assert debt.shows("Debt to net worth 2026-09-30 26.5 % 52,500 owed against 198,065 net worth",
+    assert debt.shows("Debt to net worth Good 26.5 % 52,500 owed against 198,065 net worth Your limit 30%",
                       "Debt to cash 2026-09-30 72.3 % 52,500 owed against 72,663 cash you own",
-                      "Loan payments to income 2026-09-30 5.6 % 2,500 a month of 45,000 income")
+                      "Loan payments to income Good 5.6 % 2,500 a month of 45,000 income Your limit 20%")
 
 
 def test_how_much_of_my_income_is_already_promised(mohab):
@@ -1232,7 +1232,7 @@ def test_how_much_of_my_income_is_already_promised(mohab):
     fixed = mohab.answers["fixed_costs"]
     assert route(mohab, "fixed_costs") == ["/", "/plan", "/plan/recurring"]
     assert fixed.figure("Bills and subscriptions") + D("2500") == D("15630")
-    assert fixed.shows("34.7% Fixed costs to income · 15,630 a month of 45,000 income · bills, subscriptions and loans")
+    assert fixed.shows("Fixed costs to income Good 34.7 % 15,630 a month of 45,000 income Your limit 50%")
 
 
 def test_the_emergency_fund_in_months(mohab):

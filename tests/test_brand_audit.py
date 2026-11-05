@@ -21,7 +21,10 @@ if not CHROMIUM.exists():
 
 PAGES = ("/plan/purchases/new", "/exports/all", "/setup/salary", "/", "/transactions", "/accounts", "/accounts/1", "/accounts/currencies", "/settings", "/investments",
          "/investments/prices", "/budget", "/plan", "/birdview/expenses", "/financial-health", "/categories", "/settings?section=budget",
-         "/profiles")
+         "/profiles", "/plan/recurring", "/plan/loans", "/plan/reserves", "/activity", "/sms", "/transactions/deleted",
+         "/checks", "/counterparties")
+# A05: under the title, the page's answer and its dates; never a slogan or what the tab is for (3S4, 3S6).
+STATUS_PAGES = ("/birdview/expenses", "/activity", "/sms", "/transactions/deleted", "/checks", "/counterparties")
 # A03: Ink, Ink 2, Muted, Meadow text, Azure, Strong rose, Nile, and white on Nile or on the vivid gradient.
 TEXT = ["#0D2233", "#304A5C", "#566E7E", "#097852", "#0B6DD6", "#C93D72", "#0A2442", "#FFFFFF"]
 
@@ -88,6 +91,20 @@ COLLECT = """() => {
       if (figure && card.getBoundingClientRect().top === row.getBoundingClientRect().top) bottoms.push(figure.getBoundingClientRect().bottom);
     }
     if (bottoms.length > 1 && Math.max(...bottoms) - Math.min(...bottoms) > 2) out.kpi.push('figures of a row sit on different lines');
+  }
+  // 3Q: the older stat-tile rows answer to the same rules until they move to kpi_row.
+  for (const row of document.querySelectorAll('.main .stat-tiles')) {
+    const tiles = [...row.querySelectorAll(':scope > .stat-tile')];
+    if (tiles.length < 2 || tiles.length > 4) out.kpi.push('a stat-tile row of ' + tiles.length);
+    const bottoms = [];
+    for (const tile of tiles) {
+      const label = (tile.querySelector('.stat-tile-label') || {}).textContent || '?';
+      const compare = tile.querySelector('.stat-tile-sub, .stat-compare');
+      if (!compare || !compare.textContent.trim()) out.kpi.push(label.trim() + ' has no comparison');
+      const figure = tile.querySelector('.stat-tile-value');
+      if (figure && tile.getBoundingClientRect().top === row.getBoundingClientRect().top) bottoms.push(figure.getBoundingClientRect().bottom);
+    }
+    if (bottoms.length > 1 && Math.max(...bottoms) - Math.min(...bottoms) > 2) out.kpi.push('stat-tile figures sit on different lines');
   }
   const jump = document.querySelector('#page-jump');
   if (jump && innerWidth > 760) {
@@ -156,6 +173,10 @@ def audit():
                     assert response is not None and response.status < 400, f"{path}: HTTP {response and response.status}"
                     page.mouse.move(1, 1)  # a pointer resting on a field would show its hover border
                     result[path] = _collect(page)
+                    result.setdefault("header_status", []).append([path, page.evaluate("""() => {
+                        const head = document.querySelector('.topbar') || document;
+                        const line = head.querySelector('.page-status, .page-line');
+                        return line ? line.textContent.trim() : null; }""")])
                     if path == "/birdview/expenses":
                         result["spending_multiple_surfaces"] = page.locator('.multiples .multiple').evaluate_all(
                             'els => els.map(el => [getComputedStyle(el).borderTopWidth, getComputedStyle(el).backgroundColor])')
@@ -356,3 +377,13 @@ def test_transaction_has_at_most_one_visible_primary(audit):
 def test_counterparty_controls_do_not_overlap_and_alias_saves_with_enter(audit):
     assert audit["counterparty_overlaps"] == [[], [], []]
     assert audit["alias_enter_hint"] and audit["alias_saved"]
+
+
+def test_titles_carry_a_status_line_not_a_description(audit):
+    """A05 (3S4): the line under these titles states a figure or a fact, never what the tab is for."""
+    lines = dict(audit["header_status"])
+    missing = [path for path in STATUS_PAGES if not lines.get(path)]
+    assert not missing, f"no status line under the title: {missing}"
+    describing = {path: lines[path] for path in STATUS_PAGES
+                  if re.search(r"(stay here so|become transactions|saved names, aliases|compare totals|linked to them)", lines[path])}
+    assert not describing, describing

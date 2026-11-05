@@ -307,7 +307,7 @@ def test_currency_history_does_not_bridge_an_unpriced_holding(c, dollars, monkey
     assert page.status_code == 200
     assert 'Some months are missing because a value is unavailable.' in page.text
     assert 'class="chart-line tone-hold"' not in page.text
-    assert 'Unavailable' in page.text
+    assert 'Some values are unavailable' in page.text  # the Foreign money card shows "—" and why (A08.5)
 
 
 def test_currency_history_leaves_a_gap_between_known_months(c, dollars, monkeypatch):
@@ -335,8 +335,10 @@ def test_phone_currencies_show_each_total_once_and_lead_as_on_the_pc(c, dollars)
     from fastapi.testclient import TestClient
     from lightning.ui.web import create_app
 
+    from lightning.core.dates import fmt_date, today
     accounts, cats = dollars
     story(c, accounts, cats)
+    c.fx.save('USD', fmt_date(today()), '51')  # a rate for today, so both pages have a value to show
     app = create_app(c)
     async def phone(scope, receive, send):
         if scope['type'] == 'http':
@@ -347,6 +349,5 @@ def test_phone_currencies_show_each_total_once_and_lead_as_on_the_pc(c, dollars)
     for label in ('Unrealized FX gain', 'Realized FX gain', 'Spread paid'):
         assert phone_html.count(f'<span>{label}') == 1, label
     lead = re.search(r'class="phone-lead">([^<]+)<small>', phone_html).group(1).strip()
-    pc_card = pc_html.split("Foreign money", 1)[1].split('class="metric-note"', 1)[0]
-    pc_lead = re.sub(r"<[^>]+>", " ", pc_card).split()[0]
-    assert lead.replace("\u2009", "") == pc_lead.split(".")[0]
+    pc_lead = re.search(r'class="kc-figure[^"]*">([^<]+)', pc_html).group(1).strip()
+    assert lead == pc_lead

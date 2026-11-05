@@ -11,14 +11,12 @@ The overview, spending, financial health, net worth and reports. They read the l
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IV-3Q** | [Visual audit](../../issues/3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md) | L | ready |
 | **BV-3AQ** | [Accounts totals and ownership explanations must reconcile](../../issues/3-polish-and-arabic/3AQ-account-totals-reconcile.md) | M | new |
 | **IT-9A** | [Stored month-end figures](../../issues/9-later/9A-stored-month-end-figures.md) | M | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
 
 ## Reports with open follow-ups here
 
-- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 3AQ, 3Q
-- [Audit 1: is Lightning ready to demo?](../../reports/2026-10-20-demo-readiness/report.md): 3Q
+- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 3AQ
 - [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 9A
 <!-- work:end -->
 

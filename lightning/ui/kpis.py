@@ -343,3 +343,120 @@ def _investing(flow, invest, invest_before, before_label: str, money_added: Deci
     return card(label_, invest, comparison, tone="in", key="investing", kind="rate", chip_=chip(period_chip),
                 visual=meter(min(added, flow.net), flow.net) if flow.net > 0 else None,
                 line_=line(f"{fmt(added)} moved into investments"), href=href)
+
+
+# ── Loans ──────────────────────────────────────────────────────────────────────────────────────────────────
+_BAND_CHIP = {"good": ("Good", "good"), "watch": ("Watch", "quiet"), "alert": ("Needs you", "over")}
+
+
+def debt(h, *, limits: dict, band, as_of: str) -> list[dict]:
+    """Cash planning › Loans (3Q1): each debt ratio against your limit, the limit a tick on its meter.
+
+    ``h`` is FinancialHealth.at(); ``limits`` its Good boundaries; ``band(key, value)`` its Good/Watch/Needs you."""
+    owed, worth, cash = h.debt_to_net_worth.part, h.debt_to_net_worth.whole, h.debt_to_cash.whole
+    pay, income = h.loan_payments_to_income.part, h.loan_payments_to_income.whole
+    rows = (
+        (h.debt_to_net_worth, f"{fmt(owed, 0)} owed against {fmt(worth or ZERO, 0)} net worth",
+         "You owe more than you own" if owed and (worth or 0) <= 0 else "Nothing owed", "/"),
+        (h.debt_to_cash, f"{fmt(owed, 0)} owed against {fmt(cash or ZERO, 0)} cash you own",
+         "No cash to set it against" if owed else "Nothing owed", "/"),
+        (h.loan_payments_to_income, f"{fmt(pay, 0)} a month of {fmt(income or ZERO, 0)} income",
+         "Set your income categories to measure it" if pay and not income else "No loan payments left", "#loans-list"),
+    )
+    cards = []
+    underwater = bool(owed) and (worth or 0) <= 0  # owing more than you own is said, not divided, and needs you
+    for ratio, said, missing, href in rows:
+        pct, limit = ratio.percent, limits.get(ratio.key)
+        state = band(ratio.key, pct) if pct is not None else ("alert" if underwater and ratio is h.debt_to_net_worth else None)
+        text, tone = _BAND_CHIP.get(state, (as_of, "quiet"))
+        cards.append(card(figure_label(ratio.key), pct, compare(said if pct is not None and ratio.part else missing),
+                          tone="over" if state == "alert" else "out", kind="rate", chip_=chip(text, tone),
+                          visual=meter(pct, max(Decimal(100), pct, limit or ZERO), limit,
+                                       f"limit {limit:.0f}%" if limit is not None else "") if pct is not None else None,
+                          line_=line(f"Your limit {limit:.0f}%" if limit is not None else "No limit set"),
+                          href=href, needs=state == "alert", key=ratio.key))
+    return row(cards)
+
+
+# ── Spending ───────────────────────────────────────────────────────────────────────────────────────────────
+def spending(stats: list[dict]) -> list[dict]:
+    """Spending's summary (3Q1) as KPI cards, from the figures the route already worked out (``_expense_stats``).
+
+    Money out keeps its two comparisons: the period before in the comparison slot, the usual month as its line.
+    Largest payment is left out when it is the biggest category's whole amount: one figure, one place (A16)."""
+    by = {s["key"]: s for s in stats}
+    cards = []
+    out = by.get("out")
+    if out:
+        first, *rest = out.get("compare") or [{"label": "", "text": "", "tone": "flat"}]
+        tone = {"up": "bad", "down": "good"}.get(first["tone"], "plain")
+        usual = rest[0] if rest else None
+        cards.append(card(out["label"], out["value"], compare(first["label"], first["text"], tone), tone="out",
+                          visual=spark(out["spark_values"]) if out.get("spark_values") else None,
+                          line_=line(f"{usual['label']} · {usual['text']}") if usual else None,
+                          href=out.get("href", ""), key="out"))
+    pay = by.get("payments")
+    if pay and pay["value"] is not None:
+        cards.append(card(pay["label"], pay["value"], compare(pay["sub"]), tone="out", href=pay.get("href", ""), key="payments"))
+    top, big = by.get("top"), by.get("payment")
+    if top and top["value"] is not None:
+        cards.append(card(top["label"], top["value"], compare(top["sub"]), tone="out",
+                          visual=meter(Decimal(str(top["meter"]["width"])), Decimal(100)) if top.get("meter") else None,
+                          href=top.get("href", ""), key="top"))
+    if big and big["value"] is not None and not (top and top["value"] == big["value"] and top.get("single")):
+        cards.append(card(big["label"], big["value"], compare(big["sub"]), tone="out",
+                          visual=meter(Decimal(str(big["meter"]["width"])), Decimal(100)) if big.get("meter") else None,
+                          href=big.get("href", ""), key="payment"))
+    return row(cards)
+
+
+# ── Recurring ──────────────────────────────────────────────────────────────────────────────────────────────
+def recurring(*, monthly_out: Decimal, fixed, limit: Decimal | None, band: str | None, subscriptions_per_year: Decimal,
+              due_count: int, due_total: Decimal) -> list[dict]:
+    """Cash planning › Recurring (3Q1): what repeats a month, its share of income against your limit, subscriptions
+    and what is due now. ``fixed`` is FinancialHealth's fixed_costs_to_income ratio."""
+    cards = [card("Bills and subscriptions", monthly_out, compare(f"{fmt(monthly_out * 12, 0)} a year"), tone="out",
+                  line_=line("a month"), href="#recurring-totals", key="bills")]
+    pct = fixed.percent
+    text, tone = _BAND_CHIP.get(band, ("", "quiet"))
+    cards.append(card(figure_label(fixed.key), pct,
+                      compare(f"{fmt(fixed.part, 0)} a month of {fmt(fixed.whole or ZERO, 0)} income" if pct is not None
+                              else "Set your income categories to measure it"),
+                      tone="over" if band == "alert" else "out", kind="rate", chip_=chip(text, tone) if text else None,
+                      visual=meter(pct, max(Decimal(100), pct, limit or ZERO), limit,
+                                   f"limit {limit:.0f}%" if limit is not None else "") if pct is not None else None,
+                      line_=line(f"Your limit {limit:.0f}%" if limit is not None else "No limit set"),
+                      needs=band == "alert", key=fixed.key))
+    if subscriptions_per_year:
+        cards.append(card("Subscriptions", subscriptions_per_year / 12, compare(f"{fmt(subscriptions_per_year, 0)} a year"),
+                          tone="out", line_=line("a month"), key="subscriptions"))
+    if due_count:
+        cards.append(card("Due now", due_total, compare(f"in {due_count} payment{'s' if due_count != 1 else ''}"),
+                          tone="over", chip_=chip("Needs you", "over"), needs=True, href="#recurring-list", key="due"))
+    return row(cards)
+
+
+# ── Currencies ─────────────────────────────────────────────────────────────────────────────────────────────
+def currencies(totals: dict, *, start: str, end: str) -> list[dict]:
+    """Investments › Currencies (3Q2): foreign money and what the exchange rate did to it, every card with its
+    reference; Spread paid only when there was any. ``totals`` is FxPositions.totals."""
+    labels = {"unrealized": figure_label("unrealized_fx_gain"), "realized": figure_label("realized_fx_gain"),
+              "spread": figure_label("spread_paid")}
+    complete = totals["complete"]
+    held = totals["value"] + totals["investments"] if complete else None
+    cards = [card("Foreign money", held,
+                  compare(f"Cash {fmt(totals['value'], 0)} · investments {fmt(totals['investments'], 0)}"
+                          if complete and totals["investments"] else
+                          f"as of {end}" if complete else "Some values are unavailable"),
+                  tone="hold", key="held")]  # cash and investments are both money you hold (Azure): the words split it
+    gain = totals["unrealized"] if complete else None
+    cards.append(card(labels["unrealized"], gain,
+                      compare(f"on {fmt(totals['cost'], 0)} it cost" if totals.get("cost") else "against what it cost"),
+                      tone="in" if gain is None or gain >= 0 else "out", signed=True,
+                      line_=line("Not locked in until you spend or convert."), key="unrealized"))
+    cards.append(card(labels["realized"], totals["realized"], compare(f"{start} to {end}"),
+                      tone="in" if totals["realized"] >= 0 else "out", signed=True, key="realized"))
+    if totals["spread"]:
+        cards.append(card(labels["spread"], totals["spread"], compare(f"{start} to {end}"), tone="out",
+                          line_=line("Beyond the market rate, on conversions."), key="spread"))
+    return row(cards)

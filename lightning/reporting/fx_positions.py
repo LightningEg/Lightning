@@ -226,6 +226,7 @@ class FxPositions:
         return {"value": sum((p.value or ZERO for p in positions), ZERO),
                 "investments": sum((p.investments or ZERO for p in positions), ZERO),
                 "unrealized": sum((p.unrealized or ZERO for p in positions), ZERO),
+                "cost": sum((p.cost for p in positions if p.unrealized is not None), ZERO),  # what the cash held cost
                 "realized": sum((p.realized for p in positions), ZERO),
                 "spread": sum((p.spread for p in positions), ZERO),
                 "complete": all(p.value is not None and not p.investments_unpriced for p in positions)}

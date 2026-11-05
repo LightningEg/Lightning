@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import page_header with context %}
 {% block title %}Data checks{% endblock %}
-{% block heading %}{{ page_header('Settings'|tr(locale), "Data checks · compare totals across your ledger and reports"|tr(locale)) }}{% endblock %}
+{% block heading %}{{ page_header('Settings'|tr(locale), page_status.count(open_checks|length, '1 check needs you.', '{n} checks need you.', 'Every check passes.')|status_text) }}{% endblock %}
 {% block top_actions %}{% if phone_mode() %}<form class="phone-as-of" method="get" action="/checks"><label class="phone-chip is-chosen">As of {{ as_of }}<input type="date" data-native-date name="date" value="{{ as_of }}"  aria-label="As of"></label><noscript><button class="btn">{{ 'Show'|tr(locale) }}</button></noscript></form>{% else %}<form method="get" class="actions"><label for="check-date" class="small">{{ 'As of'|tr(locale) }}</label><input id="check-date" name="date" type="text" placeholder="yyyy-mm-dd" inputmode="numeric" autocomplete="off" data-smart-date value="{{ as_of }}"><button class="btn small">{{ "Check"|tr(locale) }}</button></form>{% endif %}{% endblock %}
 {% block content %}
 

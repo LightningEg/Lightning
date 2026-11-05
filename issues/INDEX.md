@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 40 open items, in the order they are worked on.
+10 milestones, 38 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -68,17 +68,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3H2 | ↳ Step 2: weekly friction | | | L | |
 | IV-3H3 | ↳ Step 3: features | | | L | |
 | IV-3H4 | ↳ Mohab steps for the six known gaps | | | M | |
-| **IV-3Q** | [Visual audit - every KPI card should answer, compare and point; one card system for PC and phone](3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md) | improvement, visual | Understand | L | ready |
-| IV-3Q1 | ↳ KPI cards: Overview, Spending thin-data forms, Recurring, Loans, Reserves | | | M | |
-| IV-3Q2 | ↳ KPI cards: Investments, holding page, Currencies, Accounts, account page | | | M | |
-| IV-3Q3 | ↳ Phone, arabic-check, Mohab and site-recapture pass | | | M | |
-| **IV-3S** | [PC screens break the guideline in 18 places not yet filed - misleading charts, colours off meaning](3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) | improvement, visual | Feel | L | ready |
-| IV-3S1 | ↳ Charts that mislead (A12) | | | M | |
-| IV-3S2 | ↳ Colour off its meaning (A03) | | | M | |
-| IV-3S3 | ↳ The A16 shipping list | | | M | |
-| IV-3S4 | ↳ Controls and words | | | M | |
-| IV-3S5 | ↳ Small things | | | S | |
-| IV-3S6 | ↳ Teach the brand audit what it cannot see | | | M | |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/3AI-institution-logos.md) | owner task | Feel |  | ready |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | |
@@ -94,7 +83,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **BV-3AS** | [Payday funding labels and amount precision must remain readable](3-polish-and-arabic/3AS-payday-labels-and-precision.md) | bug, visual · low | Feel | S | new |
 | **IV-3AT** | [Property and vehicle accounts need task-specific desktop and phone layouts](3-polish-and-arabic/3AT-property-vehicle-task-layout.md) | improvement, visual | Feel | M | new |
 
-Done: 3A, 3B, 3C, 3D, 3E, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3R, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP. Next free code: 3AU.
+Done: 3A, 3B, 3C, 3D, 3E, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP. Next free code: 3AU.
 
 ## 4 Edit journal and devices
 

@@ -172,8 +172,8 @@ def test_every_tab_of_the_demo_opens_with_its_key_notes(demo):
         assert page.status_code == 200, url
         if url in ("/", "/birdview"):  # Birdview redirects to the Overview
             assert page.text.count('<article class="kpi-card') == 4, url  # four A08 cards, no key notes (3.33)
-        elif url == "/birdview/expenses":  # four KPI cards give the gist of the period
-            assert page.text.count('class="stat-tile surface-') == 4, url
+        elif url == "/birdview/expenses":  # KPI cards give the gist (3Q1): Largest payment drops when it is the biggest category
+            assert page.text.count('<article class="kpi-card') in (3, 4) and 'class="stat-tile surface-' not in page.text, url
         elif url == "/plan":  # safe to spend leads with its working (3.33); free cash, what's due and the lowest point ahead
             assert "lead-hero" in page.text and page.text.count('<article class="kpi-card') == 3, url
             assert "chart-waterfall" in page.text and "section-tabs" in page.text, url
@@ -183,6 +183,9 @@ def test_every_tab_of_the_demo_opens_with_its_key_notes(demo):
             assert page.text.count("Fixed costs to income") == 1 and 'class="key-note' not in page.text, url  # a line in Every month, not a lone card (P3)
         elif url == "/investments":  # Portfolio value leads with the period's result and the allocation (3.33)
             assert "lead-hero" in page.text and 'class="waffle' not in page.text and 'class="key-note' not in page.text, url
+        elif url == "/plan/loans":  # the Lead says when it is paid off; the debt ratios are a KPI row, not notes (3Q1)
+            assert "lead-hero" in page.text and page.text.count('<article class="kpi-card') == 3, url
+            assert 'class="key-note' not in page.text, url
         elif url in with_notes:
             assert 'class="key-note' in page.text or 'class="stat-card key-note' in page.text, url
     overview = client.get("/").text
@@ -398,7 +401,7 @@ def test_expense_analysis_compares_big_categories_with_their_usual_month(c, setu
     for question in ("Where did it go?", "Is this period unusual?", "How each one moved", "Day by day"):
         assert question in page
     assert "Net cash flow" in page and page.index("Net cash flow") > page.index("Day by day")  # ticket 85: by month, after the days (moved here 2026-10-21)
-    assert page.count('class="stat-tile surface-') == 4
+    assert page.count('<article class="kpi-card') in (3, 4) and 'class="stat-tile surface-' not in page
     # Every usual-range bar is the same size: the pill runs 8% to 92%, and above its range sits past it.
     assert (housing_row["range"]["low"], housing_row["range"]["high"]) == (8.0, 92.0) and housing_row["range"]["now"] > 92
     # The day calendar: one month, the rent day darkest, no category rows and no outlined month.

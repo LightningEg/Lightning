@@ -122,6 +122,7 @@ def test_capture_pending_balance_and_touch_layout(journal_server, width, phone):
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
         if phone:
             page.get_by_role("link", name="Register", exact=True).last.click()
+            page.get_by_role("heading", name="Register", exact=True).wait_for()  # measure the register, not the balances page unloading
             assert all(height >= 56 for height in page.locator(".phone-row").evaluate_all("nodes=>nodes.map(n=>n.getBoundingClientRect().height)"))
         browser.close()
 

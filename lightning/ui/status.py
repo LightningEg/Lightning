@@ -113,3 +113,23 @@ def investments(result: Decimal | None, has_holdings: bool, period_key: str, cur
     if result > ZERO:
         return sentence("Your holdings grew {amt} " + when + ".", amt=fmt(result))
     return sentence("Your holdings lost {amt} " + when + ".", amt=fmt(-result))
+
+
+def spending(total: Decimal, prior: Decimal | None, prior_label: str, period_key: str, current: bool) -> dict:
+    """Where did my money go? Told as money out against the period before (3S4)."""
+    when = _when(period_key, current)
+    if not total:
+        return sentence("No money went out " + when + ".")
+    if prior:
+        gap = total - prior
+        if abs(gap) >= 1:
+            return sentence("You spent {amt} " + when + ", {gap} " + ("more" if gap > 0 else "less") + " than {label}.",
+                            amt=fmt(total), gap=fmt(abs(gap)), label=prior_label)
+    return sentence("You spent {amt} " + when + ".", amt=fmt(total))
+
+
+def count(n: int, one: str, many: str, none: str) -> dict:
+    """A page that lists things states how many (A05: a plain fact, never what the tab is for)."""
+    if not n:
+        return sentence(none)
+    return sentence(one) if n == 1 else sentence(many, n=n)

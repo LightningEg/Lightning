@@ -18,7 +18,7 @@ from lightning.workflows.ai_prompts import spending_prompt
 from ..web import container, redirect, render, settled_save
 from ..periods import Period, parse_period
 from ..charts import line_chart
-from .. import charts, keynotes, visuals
+from .. import charts, keynotes, kpis, visuals, status as page_status
 
 router = APIRouter(prefix="/birdview")
 
@@ -155,7 +155,8 @@ async def expense_analysis(request: Request):
                            category_filter, c, prior_from if prior else None, prior_to if prior else None, category_code)
     days = visuals.day_calendars(c, first, last, category_code)
     flows = visuals.cash_flow_charts(c, first, last, selected.key == "month", today())
-    return render(request, "birdview/expenses.html", **flows, so_far=so_far, period_query=urlencode(request.query_params), notes=notes, analysis=analysis, calendar=days, stats=stats, category_bars=category_bars, spend_trend=spend_trend,
+    status = page_status.spending(spending_total, prior_spending, prior_label, selected.key, last >= today())
+    return render(request, "birdview/expenses.html", **flows, status=status, spend_kpis=kpis.spending(stats), so_far=so_far, period_query=urlencode(request.query_params), notes=notes, analysis=analysis, calendar=days, stats=stats, category_bars=category_bars, spend_trend=spend_trend,
                   usual=visuals.usual_rows(usual), who_bars=visuals.counterparty_bars(c, first, last),
                   account_bars=visuals.account_bars(c, first, last), largest=largest,
                   period=selected.key, month=last.strftime("%Y-%m"),
@@ -289,7 +290,7 @@ def _expense_stats(a, total, prior, prior_label, largest, selected, first, last,
         monthly.append(sum((r["value"] for r in rows), ZERO))
         counts.append(Decimal(len(rows)))
     stats = [{"key": "out", "surface": "out", "label": label("money_out") + (" so far" if partial_months(first, last) else ""), "value": total, "kind": "money",
-              "spark": charts.sparkline(monthly), "spark_tone": "spend",
+              "spark": charts.sparkline(monthly), "spark_tone": "spend", "spark_values": monthly,
               "compare": [compare(f"Against {prior_label}" if prior_label else "Against the period before", total, prior),
                           compare(("Against the same days in earlier months" if partial_months(first, last) else f"Against your usual {'month' if months == 1 else 'months'}"), total,
                                   usual * months if usual is not None else None)],
@@ -302,7 +303,7 @@ def _expense_stats(a, total, prior, prior_label, largest, selected, first, last,
     average = sum((r["value"] for r in now_rows), ZERO) / count if count else None
     before = payments(prior_from, prior_to) if prior_from and prior_to else None
     stats.append({"key": "payments", "surface": "out", "label": "Average payment", "value": average, "kind": "money",
-                  "empty": "—", "spark": charts.sparkline(counts), "spark_tone": "hold",
+                  "empty": "—", "spark": charts.sparkline(counts), "spark_tone": "spend",
                   "sub": (f"{count} payment{'s' if count != 1 else ''}"
                           + (f" · {len(before)} in {prior_label}" if before is not None and prior_label else "")),
                   "href": f"/transactions?{query}"})
@@ -312,10 +313,12 @@ def _expense_stats(a, total, prior, prior_label, largest, selected, first, last,
                   "sub": f"{top['share']:.0f}% of money out" if top else "No spending yet",
                   "meter": {"width": float(top["share"]), "tone": "spend"} if top else None, "href": top["href"] if top else ""})
     big = largest[0] if largest else None
+    if top and big and big["value"] == top["value"] and big.get("category") == top["name"]:
+        stats[-1]["single"] = True  # the biggest category is this one payment: Largest payment would repeat it
     times = big["value"] / average if big and average else None
     stats.append({"key": "payment", "surface": "out", "label": "Largest payment", "value": big["value"] if big else None,
                   "kind": "money", "empty": "—",
                   "sub": (f"{big['counterparty'] or big['category']} · {big['date']}" + (f" · {times:.1f}× the average" if times else "")) if big else "No payments yet",
-                  "meter": {"width": float(min(Decimal(100), big["value"] / total * 100)), "tone": "over"} if big and total else None,
+                  "meter": {"width": float(min(Decimal(100), big["value"] / total * 100)), "tone": "spend"} if big and total else None,
                   "href": f"/t/{big['ref']}" if big and big.get("ref") else ""})
     return stats

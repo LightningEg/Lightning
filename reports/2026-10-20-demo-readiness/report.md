@@ -14,7 +14,7 @@ code or in a screenshot before filing. Each finding is now an item in [the plan]
 |---|---|---|
 | 1 Engine | **The math holds.** Every figure reconciled on both datasets, every write moved every tab by exactly its amount, and the full suite passes (2,112 tests, 0 failures). The faults are in what bad input gets through. | 2E (done: `tests/test_before_opening_ask.py` and `tests/test_rounded_parts_add_up.py`) 1–5 |
 | 2 Logic | **The smart parts exist and mostly work, but three of them break trust and the rest are hidden.** Bill matching misses cross-account payments and offers last month's payment. Early salary counts twice. A false "your income went up" is the first nudge. | [7K](https://github.com/LightningEg/Lightning/blob/a64b83c0a84dc96f7e0f728b5e5317c461a0668d/issues/7-planning-import-and-search/7K-payment-matching-trust.md), [7L1](https://github.com/LightningEg/Lightning/blob/6a88ed6c8079747595a91f5918741a0807de5b84/issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md), [3V](https://github.com/LightningEg/Lightning/blob/ea9000e1599b7d7b4eb0c56f332fca276285d9d7/issues/3-polish-and-arabic/3V-demo-data-shows-the-smart-features.md) |
-| 3 PC visuals | **Close to the guideline.** The brand audit passes, there are no JavaScript errors and every control works. One page scrolls sideways, and a few charts mislead. | [3S](../../issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) 1–5, [3C](https://github.com/LightningEg/Lightning/blob/a4fc8d36cc1271143c8f126ed47bc3056b53477a/issues/3-polish-and-arabic/3C-chart-end-labels-overlap.md), [3A](https://github.com/LightningEg/Lightning/blob/a4fc8d36cc1271143c8f126ed47bc3056b53477a/issues/3-polish-and-arabic/3A-rate-decimals-and-arabic-order.md) |
+| 3 PC visuals | **Close to the guideline.** The brand audit passes, there are no JavaScript errors and every control works. One page scrolls sideways, and a few charts mislead. | [3S](https://github.com/LightningEg/Lightning/blob/e09ddd1/issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) 1–5, [3C](https://github.com/LightningEg/Lightning/blob/a4fc8d36cc1271143c8f126ed47bc3056b53477a/issues/3-polish-and-arabic/3C-chart-end-labels-overlap.md), [3A](https://github.com/LightningEg/Lightning/blob/a4fc8d36cc1271143c8f126ed47bc3056b53477a/issues/3-polish-and-arabic/3A-rate-decimals-and-arabic-order.md) |
 | Phone | **Usable, with three visible bugs in the first minute.** Every sheet shows a copy of the page's undo pill and tabs. Save does nothing without a category. The raise prompt covers the top bar. On Android, backup and import do nothing. | [3R](https://github.com/LightningEg/Lightning/blob/15bccff91edd2d32baa4252fd01d28cc8374ee35/issues/3-polish-and-arabic/3R-sheets-silent-save-and-prompt-over-top-bar.md), 2F (finished 2026-11-04: `lightning/runtime/phone_files.py`, `tests/test_phone_downloads.py`, `tests/test_android_shell.py`) |
 | Arabic | **Nearly all translated and mirrored, but numbers can read wrong.** The "·" beside a number looks like the Arabic zero, so "Late 17 days" reads as 170. Decimals mix "." and ",". About ten strings are still English, one of them on every page. | [3U](https://github.com/LightningEg/Lightning/blob/8f808161d26da6a62840b32bdb6aaad4a19eeff3/issues/3-polish-and-arabic/3U-arabic-dot-reads-as-zero.md) 1–3 |
 
@@ -31,7 +31,7 @@ Must fix (each is small and is seen in the first minutes):
 4. **[7K](https://github.com/LightningEg/Lightning/blob/a64b83c0a84dc96f7e0f728b5e5317c461a0668d/issues/7-planning-import-and-search/7K-payment-matching-trust.md) Bill matching.** Fix payments made from another account, last month's payment offered for this month, and early salary counted twice.
 5. **2E (done: `tests/test_before_opening_ask.py` and `tests/test_rounded_parts_add_up.py`) 1–5 Input checks.** A split can lose a piaster, a gold account accepts expenses, cash can go below zero, and two crashes (500 errors).
 6. **On-screen faults:**
-   - [3S](../../issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) 1: Sale factors scrolls sideways.
+   - [3S](https://github.com/LightningEg/Lightning/blob/e09ddd1/issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) 1: Sale factors scrolls sideways.
    - [3C](https://github.com/LightningEg/Lightning/blob/a4fc8d36cc1271143c8f126ed47bc3056b53477a/issues/3-polish-and-arabic/3C-chart-end-labels-overlap.md) and 3S 2: chart end labels overlap.
    - [3A](https://github.com/LightningEg/Lightning/blob/a4fc8d36cc1271143c8f126ed47bc3056b53477a/issues/3-polish-and-arabic/3A-rate-decimals-and-arabic-order.md): "51.600000" rate.
    - [5H](https://github.com/LightningEg/Lightning/blob/676c42fe3c923ecd3c55975fd720ce4a029c39fa/issues/5-investments/5H-sample-reconciliation-difference.md): +1,394 "unresolved". The cause is now found: the revaluation of USD cash.
@@ -45,7 +45,7 @@ Makes the demo shine (wiring of what exists, no new engines):
 - **5K (fixed: `tests/test_investments.py::test_a_fixed_price_holding_shows_no_price_swings_and_no_checkpoint_rows`, `tests/test_deposit_certificates.py::test_a_certificate_holding_page_lists_its_interest_payouts`) The certificate's page.** It shows interest, not price charts.
 - **3S 3–5 and [3T](https://github.com/LightningEg/Lightning/blob/e09ddd1/issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) 1–3.** Charts that mislead, cut words on the phone, and pages with no way back.
 
-Polish after the demo: the rest of 3S and 3T, and the five pages left in [3Q](../../issues/3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md).
+Polish after the demo: the rest of 3S and 3T, and the five pages left in [3Q](https://github.com/LightningEg/Lightning/blob/e09ddd1/issues/3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md).
 
 ## 1 Engine: does the money math hold?
 
@@ -156,7 +156,7 @@ Not checked: online prices, Gam'eya writes (no circle in either dataset, 5I), CS
 - **Accounts and register.**
 - **Everywhere:** headers are Ink, there are no capitals, and fields are soft wells.
 
-**Found** (all in [3S](../../issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) unless named):
+**Found** (all in [3S](https://github.com/LightningEg/Lightning/blob/e09ddd1/issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) unless named):
 
 - **High:**
   - Settings › Sale factors runs out of its card, so the page scrolls sideways at 1366.
