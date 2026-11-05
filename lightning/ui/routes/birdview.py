@@ -18,7 +18,7 @@ from lightning.workflows.ai_prompts import spending_prompt
 from ..web import container, redirect, render, settled_save
 from ..periods import Period, parse_period
 from ..charts import line_chart
-from .. import charts, keynotes, visuals
+from .. import charts, keynotes, visuals, status as page_status
 
 router = APIRouter(prefix="/birdview")
 
@@ -155,7 +155,8 @@ async def expense_analysis(request: Request):
                            category_filter, c, prior_from if prior else None, prior_to if prior else None, category_code)
     days = visuals.day_calendars(c, first, last, category_code)
     flows = visuals.cash_flow_charts(c, first, last, selected.key == "month", today())
-    return render(request, "birdview/expenses.html", **flows, so_far=so_far, period_query=urlencode(request.query_params), notes=notes, analysis=analysis, calendar=days, stats=stats, category_bars=category_bars, spend_trend=spend_trend,
+    status = page_status.spending(spending_total, prior_spending, prior_label, selected.key, last >= today())
+    return render(request, "birdview/expenses.html", **flows, status=status, so_far=so_far, period_query=urlencode(request.query_params), notes=notes, analysis=analysis, calendar=days, stats=stats, category_bars=category_bars, spend_trend=spend_trend,
                   usual=visuals.usual_rows(usual), who_bars=visuals.counterparty_bars(c, first, last),
                   account_bars=visuals.account_bars(c, first, last), largest=largest,
                   period=selected.key, month=last.strftime("%Y-%m"),

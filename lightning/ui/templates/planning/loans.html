@@ -8,8 +8,7 @@
 {% if phone_mode() %}<div class="phone-rows" data-loan-ratios>{% for s in debt_tiles %}<a class="phone-row" href="{{ s.href }}"><span>{{ s.label }}{% if s.sub %}<small>{{ s.sub }}</small>{% endif %}</span><b>{{ rate(s.value) ~ '%' if s.value is not none else (s.empty or '—') }}</b></a>{% endfor %}</div>{% else %}{{ stat_tiles(debt_tiles, base, 'Your debt') }}{% endif %}
 {{ key_notes(notes) }}
 <section class="plan-section" aria-labelledby="loans-list">
-  <a class="quiet-link" data-popup-open href="/plan/purchases/new">{{ 'Bought in instalments'|tr(locale) }}</a>
-  <header class="overview-section-head"><h2 id="loans-list">{{ "Your loans"|tr(locale) }}</h2><span>{{ fig.loans_still_to_pay.label }} <b>{{ still_to_pay|money(False, 0) }}</b> {{ base }}</span></header>
+  <header class="overview-section-head"><h2 id="loans-list">{{ "Your loans"|tr(locale) }}</h2>{# the total is the Lead above: one figure, one place (A16) #}<a class="btn small" data-popup-open href="/plan/purchases/new">{{ 'Bought in instalments'|tr(locale) }}</a></header>
   {% if loans %}{% for l in loans %}{% set i = l.item %}{% set pr = l.progress %}
   <article class="card plan-loan" id="loan-{{ i.id }}">
     <div class="section-head"><div><h2><a href="/plan/items/{{ i.id }}/edit" data-popup-open>{{ i.name }}</a></h2><p>{{ l.schedule }}{% if l.account %} · from {{ l.account }}{% endif %}{% if i.principal %} · borrowed {{ i.principal|money(places=0) }} {{ base }}{% endif %}</p></div>

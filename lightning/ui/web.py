@@ -132,6 +132,14 @@ templates.env.filters["whole"] = lambda value: fmt(Decimal(value), 0)  # half-up
 templates.env.filters["tr"] = _tr_filter
 
 
+def _status_text(status: dict) -> str:
+    """A status sentence (lightning/ui/status.py) in the page's language, for page_header's line."""
+    return _tr_filter(status["text"], ui_locale(), **status["values"])
+
+
+templates.env.filters["status_text"] = _status_text
+
+
 def _tagged(text) -> Markup:
     """A note with each #tag a link to every transaction that carries it."""
     from lightning.transactions.tags import split
@@ -406,6 +414,10 @@ def ui_locale() -> str:
 
 
 templates.env.globals["ui_locale"] = ui_locale
+
+from . import status as _page_status  # noqa: E402  the status sentences (A05), for pages that state a count
+
+templates.env.globals["page_status"] = _page_status
 
 
 def _phone_template(name: str) -> str:

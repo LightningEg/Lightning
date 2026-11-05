@@ -18,6 +18,8 @@
       </div>
       {% endfor %}
       {% if event.remaining > 0 and event.candidates %}
+      {% set pick = event.candidates|selectattr('suggested')|first %}
+      <details class="cd-receipt-match"><summary>{% if pick %}{{ 'Suggested'|tr(locale) }}: {{ pick.date }} · {{ pick.amount|money }} {{ account.currency }}{% else %}{{ 'Choose a receipt'|tr(locale) }}{% endif %} · {{ ('1 receipt' if event.candidates|length == 1 else '{n} receipts')|tr(locale, n=event.candidates|length) }}</summary>
       <form class="phone-form" method="post" action="/deposits/{{ account.id }}/certificates/{{ event.certificate_id }}/interest/{{ event.event_date }}/confirm" class="stack">
         <fieldset><legend>{{ 'Select one or more posted bank receipts'|tr(locale) }}</legend>
           {% set likely = event.candidates|selectattr('plausible')|list %}{% set others = event.candidates|rejectattr('plausible')|list %}
@@ -26,7 +28,7 @@
           {% if others %}<details><summary>{{ 'Show all receipts'|tr(locale) }} ({{ others|length }})</summary>{% for receipt in others %}<label class="phone-row"><input type="checkbox" name="transaction_ids" value="{{ receipt.id }}"{% if receipt.suggested %} checked{% endif %}><span>{{ receipt.date }} · {{ receipt.ref }} · {{ receipt.description or 'Money in' }} · {{ receipt.amount|money }} {{ account.currency }}{% if receipt.suggested %} · <b>{{ 'Suggested'|tr(locale) }}</b>{% endif %}</span></label>{% endfor %}</details>{% endif %}
         </fieldset>
         <button class="btn primary">{{ 'Confirm selected receipts'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
-      </form>
+      </form></details>
       {% elif event.remaining > 0 %}<p class="phone-note">{{ 'No unassigned posted bank receipts in the payout account.'|tr(locale) }}</p>{% endif %}
     </article>
     {% endfor %}

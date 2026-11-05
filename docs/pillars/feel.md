@@ -14,7 +14,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 | **IV-3F** | [The phone's top bar looks too white to one user](../../issues/3-polish-and-arabic/3F-phone-top-bar-looks-too-white.md) | S | ready |
 | **IV-3G** | [Outside review of every tab](../../issues/3-polish-and-arabic/3G-one-organism-review-of-every-tab.md) | L | ready |
 | **IV-3H** | [Tab-by-tab review: what a real user needs next](../../issues/3-polish-and-arabic/3H-tab-by-tab-review.md) | L | building |
-| **IV-3S** | [PC screens break the guideline in 18 places not yet filed](../../issues/3-polish-and-arabic/3S-pc-guideline-breaks-audit-1.md) | L | ready |
 | **OW-3AI** | [Additional broker and institution logos still needed](../../issues/3-polish-and-arabic/3AI-institution-logos.md) | owner | ready |
 | **IV-3AM** | [PC declutter, tab by tab](../../issues/3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md) | L | building |
 | **BV-3AS** | [Payday funding labels and amount precision must remain readable](../../issues/3-polish-and-arabic/3AS-payday-labels-and-precision.md) | S | new |
@@ -27,7 +26,7 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 ## Reports with open follow-ups here
 
 - [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 3AS, 3AT, 3G, 3H, 3AM
-- [Audit 1: is Lightning ready to demo?](../../reports/2026-10-20-demo-readiness/report.md): 3G, 3H, 3S
+- [Audit 1: is Lightning ready to demo?](../../reports/2026-10-20-demo-readiness/report.md): 3G, 3H
 - [v1.5.0 PR review, theme switching and package preparation](../../reports/2026-10-26-v150-release/report.md): 10A, 10C
 - [Store and community: unlocking themes, the market, rewards and staying in Lightning](../../reports/2026-10-27-store-and-community/report.md): 10C, 10D
 - [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](../../reports/2026-10-30-desktop-tab-audit/report.md): 3AM

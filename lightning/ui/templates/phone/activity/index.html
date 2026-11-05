@@ -1,6 +1,6 @@
 {% extends "phone/base.html" %}
 {% block title %}{{ 'Review activity'|tr(locale) }}{% endblock %}
-{% block heading %}<h1>{{ 'Review activity'|tr(locale) }}</h1><p class="muted">{{ 'Recent posted cash transactions and the plans or reserves linked to them.'|tr(locale) }}</p>{% endblock %}
+{% block heading %}<h1>{{ 'Review activity'|tr(locale) }}</h1>{% set st = page_status.count(rows|length, '1 recent transaction.', '{n} recent transactions.', 'No recent transactions.') %}<p class="page-status">{{ st.text|tr(locale, **st['values']) }}</p>{% endblock %}
 {% block content %}
 <section class="card phone-card">
   {% if rows %}{% for row in rows %}{% set txn = row.txn %}

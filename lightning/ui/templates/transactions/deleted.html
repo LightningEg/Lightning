@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import page_header with context %}
 {% block title %}Deleted transactions{% endblock %}
-{% block heading %}{{ page_header('Deleted transactions'|tr(locale), "Deleted entries stay here so you can restore them."|tr(locale)) }}{% endblock %}
+{% block heading %}{{ page_header('Deleted transactions'|tr(locale), page_status.count(rows|length, '1 deleted transaction.', '{n} deleted transactions.', 'Nothing has been deleted.')|status_text) }}{% endblock %}
 {% block top_actions %}<a class="btn small" href="/transactions">{{ "Back to transactions"|tr(locale) }}</a>{% endblock %}
 {% block content %}
 <section class="card">
