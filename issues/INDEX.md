@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 38 open items, in the order they are worked on.
+10 milestones, 37 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -55,13 +55,8 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
 | **IV-3F** | [The phone's top bar looks too white to one user](3-polish-and-arabic/3F-phone-top-bar-looks-too-white.md) | improvement, visual | Feel | S | ready |
-| **IV-3G** | [Outside review of every tab - one organism, fewer numbers, smarter links, less explaining](3-polish-and-arabic/3G-one-organism-review-of-every-tab.md) | improvement, visual | Feel | L | ready |
-| IV-3G6 | ↳ One bill sheet for every tab | | | M | |
-| **IV-3H** | [Tab-by-tab review: what a real user needs next](3-polish-and-arabic/3H-tab-by-tab-review.md) | improvement, visual | Feel | L | building |
-| IV-3H1 | ↳ Step 1: trust | | | L | |
-| IV-3H2 | ↳ Step 2: weekly friction | | | L | |
+| **IV-3H** | [Tab-by-tab review: what a real user needs next](3-polish-and-arabic/3H-tab-by-tab-review.md) | improvement, visual | Feel | L | ready |
 | IV-3H3 | ↳ Step 3: features | | | L | |
-| IV-3H4 | ↳ Mohab steps for the six known gaps | | | M | |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/3AI-institution-logos.md) | owner task | Feel |  | ready |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | |
@@ -77,7 +72,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **BV-3AS** | [Payday funding labels and amount precision must remain readable](3-polish-and-arabic/3AS-payday-labels-and-precision.md) | bug, visual · low | Feel | S | new |
 | **IV-3AT** | [Property and vehicle accounts need task-specific desktop and phone layouts](3-polish-and-arabic/3AT-property-vehicle-task-layout.md) | improvement, visual | Feel | M | new |
 
-Done: 3A, 3B, 3C, 3D, 3E, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP. Next free code: 3AU.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP. Next free code: 3AU.
 
 ## 4 Edit journal and devices
 

@@ -23,8 +23,8 @@
     {% if add_parent %}<button class="btn small primary">{{ "Add"|tr(locale) }}</button><button type="button" class="btn small" data-cancel>{{ 'Cancel'|tr(locale) }}</button>
     {% else %}<small class="cat-state" role="status" aria-live="polite"></small>
       {% if level == 2 %}<button type="button" class="cat-icon" data-add-under="{{ cat.id }}" title="Add detail under {{ cat.name }}" aria-label="Add detail under {{ cat.name }}"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>{% endif %}
-      <button class="cat-icon" name="action" value="archive" title="Archive" aria-label="Archive {{ cat.name }}"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg></button>
-      <button class="cat-icon is-danger" name="action" value="delete" data-confirm-delete title="Delete" aria-label="Delete {{ cat.name }}"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>{% endif %}
+      {% if not cat.is_system %}{# CA-3 (3H2): system categories carry rules; no archive or delete #}<button class="cat-icon" name="action" value="archive" title="Archive" aria-label="Archive {{ cat.name }}"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg></button>
+      <button class="cat-icon is-danger" name="action" value="delete" data-confirm-delete title="Delete" aria-label="Delete {{ cat.name }}"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>{% endif %}{% endif %}
   </span>
 </form>
 {% endmacro %}

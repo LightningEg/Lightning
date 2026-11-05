@@ -301,8 +301,12 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     kpi_cards, pace, plan_bills, everyday = [], None, [], None
     if period.key == "month" and has_plan:
         everyday = c.forecaster.everyday(month, today())
+        # BU-2 (3H2): an overspend raises Needs you when it matters: 100 or more and 5% or more of the category's plan.
+        # A smaller one still reads rose on its own bar.
         over = sorted(({"name": r["label"], "over": r["b"]["over_by"], "category_id": r["category_id"]}
-                       for r in meter_lines if r["b"]["is_over"]), key=lambda r: -r["over"])
+                       for r in meter_lines if r["b"]["is_over"]
+                       and r["b"]["over_by"] >= SMALL_OVER and r["b"]["over_by"] >= (r["total"] or ZERO) * Decimal("0.05")),
+                      key=lambda r: -r["over"])
         kpi_cards = kpis.budget_month(everyday, over=over, check=check, raise_offer=raise_offer,
                                       move=_cover_from(c, month, over[0], everyday.room) if over else None, month=month,
                                       funded_elsewhere=funding_adjustment_total > ZERO)
@@ -506,6 +510,7 @@ def _phone_categories(view, tracked: set[int], category_periods: dict, by_group:
     return rows
 
 
+SMALL_OVER = Decimal(100)  # BU-2: below this, or under 5% of its plan, an overspend is a rose bar, not a Needs you row
 FIRST_ROWS = 4  # Budget's first screen lists what needs a look and the biggest usual spending, up to four rows
 
 

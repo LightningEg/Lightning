@@ -3922,3 +3922,7 @@ table.figures tfoot th { border-top: 1px solid var(--line); }
 .category-sheet-left { margin: 8px 0 2px; }
 .category-sheet-sub { margin: 16px 0 6px; font-size: 15px; }
 .category-sheet-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; }
+/* RG-1 (3H2): a month line in a register */
+.main tr.register-month td { padding: 14px 8px 6px; border-bottom: 1px solid var(--line, #DCE6E2); font-size: 13px; color: var(--ink-2, #304A5C); background: none; }
+.main tr.register-month td b { font-weight: 700; color: var(--ink, #0D2233); }
+.main tr.register-month td span { float: inline-end; color: var(--muted, #566E7E); font-variant-numeric: tabular-nums; }

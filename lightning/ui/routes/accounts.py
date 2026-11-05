@@ -442,7 +442,9 @@ async def new_transaction_popup(request: Request, account_id: int):
               "date": day if re.fullmatch(r"\d{4}-\d{2}-\d{2}", day) else fmt_date(today()),
               "amount": amount if re.fullmatch(r"[\d,.]*", amount) else "",
               "category_id": _category_id(request), "counterparty": str(asked.get("counterparty", ""))[:80],
-              "owner_id": "", "to_account_id": "", "notes": str(asked.get("notes", ""))[:200],
+              # HO-1: Held for others' Give back and Spend for them open this sheet with the person chosen
+              "owner_id": str(asked.get("owner_id", "")) if str(asked.get("owner_id", "")).isdigit() else "",
+              "to_account_id": "", "notes": str(asked.get("notes", ""))[:200],
               "sms_fp": str(asked.get("sms_fp", "")) if re.fullmatch(r"[0-9a-f]{32}", str(asked.get("sms_fp", ""))) else "",
               "sms_ending": str(asked.get("sms_ending", "")) if re.fullmatch(r"\d{4}|salary", str(asked.get("sms_ending", ""))) else "",
               "return_to": _safe_return(asked.get("return_to"), f"/accounts/{account_id}")}

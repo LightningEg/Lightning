@@ -333,6 +333,14 @@ class ReportQueries:
         return dict(row) if row else None
 
     @request_cached
+    @request_cached(deep=True)
+    def gold_references(self) -> list[dict]:
+        """The per-gram gold price references (18K, 21K, 24K), each with its purity: 21K first, then the purest."""
+        rows = [dict(row) for row in self.db.all(
+            "SELECT id, purity_e6 FROM financial_assets WHERE exposure='GOLD' AND unit='gram' AND purity_e6 IS NOT NULL "
+            "AND active=1 AND (code LIKE 'GLD:%' OR code LIKE 'REF:GLD-%')")]
+        return sorted(rows, key=lambda r: (r["purity_e6"] != 875000, -r["purity_e6"]))
+
     def asset_purity(self, asset_id: int) -> int | None:
         return self.db.scalar("SELECT purity_e6 FROM financial_assets WHERE id=?", (asset_id,))
 

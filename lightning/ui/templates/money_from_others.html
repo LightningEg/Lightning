@@ -5,8 +5,8 @@
 {% block content %}
 <section class="card data-panel wide-card">
   <div class="section-head"><div><h2>{{ 'Cash'|tr(locale) }}</h2></div></div>
-  {% if owners %}<table><thead><tr><th>{{ 'Held for'|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th class="num">{{ "Amount held"|tr(locale) }}</th></tr></thead><tbody>
-  {% for row in owners %}<tr><td data-label="{{ 'Held for'|tr(locale) }}">{{ row.owner }}</td><td data-label="{{ 'Account'|tr(locale) }}">{{ row.account_name }}</td><td class="num" data-label="{{ 'Amount held'|tr(locale) }}">{{ row.amount|money }}</td>
+  {% if owners %}<table><thead><tr><th>{{ 'Held for'|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th class="num">{{ "Amount held"|tr(locale) }}</th><th><span class="sr-only">{{ 'Actions'|tr(locale) }}</span></th></tr></thead><tbody>
+  {% for row in owners %}<tr><td data-label="{{ 'Held for'|tr(locale) }}">{{ row.owner }}</td><td data-label="{{ 'Account'|tr(locale) }}">{{ row.account_name }}</td><td class="num" data-label="{{ 'Amount held'|tr(locale) }}">{{ row.amount|money }}</td><td class="row-actions">{% if row.owner_id and row.amount > 0 %}{% set q = 'owner_id=' ~ row.owner_id ~ '&counterparty=' ~ row.owner|urlencode ~ '&return_to=%2Fmoney-from-others' %}<a class="btn small" data-popup-open href="/accounts/{{ row.account_id }}/transaction/new?kind=out&amp;amount={{ '%.2f'|format(row.amount) }}&amp;notes={{ 'Given back'|tr(locale)|urlencode }}&amp;{{ q }}">{{ 'Give back'|tr(locale) }}</a> <a class="btn small" data-popup-open href="/accounts/{{ row.account_id }}/transaction/new?kind=out&amp;{{ q }}">{{ 'Spend for them'|tr(locale) }}</a>{% endif %}</td>
   {% endfor %}
   </tbody></table>{% else %}<p class="muted">{{ "No cash is held for others."|tr(locale) }}</p>{% endif %}
 </section>

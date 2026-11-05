@@ -62,11 +62,11 @@
   <table class="budget">
     <thead><tr><th>{{ 'Investment'|tr(locale) }}</th><th class="num">{{ 'You hold'|tr(locale) }}</th><th class="num">{{ 'Last price'|tr(locale) }}</th><th class="num">{{ 'Total value'|tr(locale) }}</th><th class="num" style="width:170px">{{ 'New price per unit'|tr(locale) }}</th></tr></thead>
     {% for r in rows %}
-    <tr>
+    <tr id="asset-{{ r.asset.id }}">
       <td data-label="{{ 'Investment'|tr(locale) }}">{{ r.asset.name }}
         <a class="small" href="/investments/assets/{{ r.asset.id }}/edit" style="margin-left:6px">{{ 'edit'|tr(locale) }}</a></td>
       <td class="num small" data-label="{{ 'You hold'|tr(locale) }}">{% if r.held %}{{ r.held.quantity|units_of(r.asset.unit) }}{% else %}<span class="muted">—</span>{% endif %}</td>
-      <td class="num small" data-label="{{ 'Last price'|tr(locale) }}">{% if r.price is not none %}{{ r.price|units }}{% if r.asset.currency != base %} <small>{{ r.asset.currency }}</small>{% endif %}<div class="muted">{{ r.price_date }}{{ ' · last trade' if r.source == 'TRADE' else (' · at cost' if r.source == 'COST' else (' · price file' if r.source == 'MARKET' else (' · online' if r.source == 'ONLINE' else ''))) }}</div>{% else %}<span class="muted">{{ 'none'|tr(locale) }}</span>{% endif %}</td>
+      <td class="num small" data-label="{{ 'Last price'|tr(locale) }}">{% if r.price is not none %}{{ r.price|units }}{% if r.asset.currency != base %} <small>{{ r.asset.currency }}</small>{% endif %}<div class="muted">{{ r.price_date }}{{ ' · last trade' if r.source == 'TRADE' else (' · at cost' if r.source == 'COST' else (' · price file' if r.source == 'MARKET' else (' · online' if r.source == 'ONLINE' else (' · ' ~ ('from {k}K by purity'|tr(locale, k=r.source[:2])) if r.source.endswith('by purity') else '')))) }}</div>{% else %}<span class="muted">{{ 'none'|tr(locale) }}</span>{% endif %}</td>
       <td data-label="{{ 'Total value'|tr(locale) }}">{% if r.held and r.held.quantity > 0 %}<input type="text" name="value_{{ r.asset.id }}" inputmode="decimal" class="num" aria-label="Total value of {{ r.asset.name }}">{% else %}<span class="muted">—</span>{% endif %}</td>
       <td data-label="{{ 'New price per unit'|tr(locale) }}">{% if not r.is_certificate %}<input type="text" name="p_{{ r.asset.id }}" inputmode="decimal" class="num" placeholder="{{ r.price|money(False, 4) if r.price is not none else '' }}">{% else %}<span class="muted">{{ 'Set at purchase'|tr(locale) }}</span>{% endif %}</td>
     </tr>
