@@ -71,8 +71,8 @@ def identity(commit: str, count: int, version: str) -> dict[str, str]:
     if count < 1 or count > 2_100_000_000:
         raise BuildError(f"version code {count} is out of Android's range")
     short = commit[:8]
-    return {"version_code": str(count), "version_name": f"{version}-test.{count}+{short}",
-            "apk": f"Lightning-Test-{version}-{count}-{short}.apk", "stamp": f"{version}-{count}-{short}"}
+    return {"version_code": str(count), "version_name": f"{version}-{count}+{short}",
+            "apk": f"Lightning-{version}-{count}-{short}.apk", "stamp": f"{version}-{count}-{short}"}
 
 
 # ---------------------------------------------------------------- lock
@@ -251,24 +251,23 @@ def windows_build(folder: Path, commit: str) -> tuple[Path, dict[str, str]]:
     return zips[0], fields
 
 
-README = """Lightning test builds {stamp}
+README = """Lightning {stamp}
 
-These two files were built and tested from one commit ({commit}). They are test builds, not a
-release. You may use sample or real data; keep an independent backup. The phone app is debuggable. Install both from the same run:
+These two files were built and tested from one commit ({commit}). You may use sample or real data; keep an independent backup. The phone app is debuggable. Install both from the same run:
 a PC and a phone from different runs may not understand each other.
 
 PC (Windows): extract the ZIP to a new folder and run Lightning\\Lightning.exe. If Windows says it
-protected your PC, choose More info, then Run anyway (test builds are not code-signed). Your
+protected your PC, choose More info, then Run anyway (the app is not code-signed). Your
 profiles stay in Documents\\Lightning. An older build refuses a profile a newer one has opened.
 
 Phone (Android, arm64): unzip the download in Files, open the APK, and allow Files (or your browser)
 to install apps when Android asks.
   - The first time: if the old "Lightning" app has data you want, move its ledger to the PC and
     verify it there before uninstalling. Uninstall erases that phone copy. Then uninstall the old
-    app, install Lightning Test and pair again; both apps listen on the same network port.
-  - Later: a newer Lightning Test APK updates this one and keeps its profile. If Android says
+    app, install Lightning and pair again; both apps listen on the same network port.
+  - Later: a newer Lightning APK updates this one and keeps its profile. If Android says
     the app was not installed, the APK is older than the one on the phone, or the test key changed:
-    uninstall Lightning Test once, then install.
+    uninstall Lightning once, then install.
 
 These downloads last seven days; run "PC and phone app" again for fresh ones.
 SHA256SUMS lists both files' SHA-256; BUILD.json says what was built, from where, and how it was checked.
@@ -282,7 +281,7 @@ def bundle(windows_dir: Path, apk: Path, apk_info: dict, out: Path, commit: str,
     if not apk_info.get("certificate_sha256"):
         raise BuildError("the APK was not checked against the test certificate")
     zip_path, fields = windows_build(windows_dir, commit)
-    stamp = apk_info["version_name"].replace("-test.", "-").replace("+", "-")
+    stamp = apk_info["version_name"].replace("+", "-")
     manifest = {
         "commit": commit, "run": run, "attempt": attempt,
         "built": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
@@ -299,7 +298,7 @@ def bundle(windows_dir: Path, apk: Path, apk_info: dict, out: Path, commit: str,
         (folder / "SHA256SUMS").write_text(sums, encoding="utf-8")
         (folder / "BUILD.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
         (folder / "README.txt").write_text(README.format(stamp=stamp, commit=commit), encoding="utf-8")
-        names[side.lower()] = f"Lightning-Test-{stamp}-{side}"
+        names[side.lower()] = f"Lightning-{stamp}-{side}"
     return names
 
 

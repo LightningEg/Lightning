@@ -12,7 +12,7 @@ android {
         // with every commit on main, so each test APK installs over the last. org.lightning.app stays for Play.
         val testVersionCode = providers.gradleProperty("testVersionCode").orNull
         applicationId = if (testVersionCode != null) "org.lightning.app.test" else "org.lightning.app"
-        manifestPlaceholders["appLabel"] = if (testVersionCode != null) "Lightning Test" else "Lightning"
+        manifestPlaceholders["appLabel"] = "Lightning"
         minSdk = 24
         targetSdk = 35
         versionCode = testVersionCode?.toInt() ?: 1

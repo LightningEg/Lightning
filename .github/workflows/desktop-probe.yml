@@ -229,7 +229,7 @@ jobs:
         env:
           REUSED: ${{ needs.tests.outputs.reuse_run }}
         run: >-
-          python packaging/phone_build.py bundle --windows windows --apk phone/Lightning-Test-*.apk
+          python packaging/phone_build.py bundle --windows windows --apk phone/Lightning-*.apk
           --info phone/apk.json --out bundle --reused-from "$REUSED"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
@@ -276,10 +276,10 @@ jobs:
           path: phone
       - name: Verify that the Windows ZIP and signed APK are the tested pair from this commit
         run: |
-          python packaging/phone_build.py bundle --windows release --apk phone/Lightning-Test-*.apk \
+          python packaging/phone_build.py bundle --windows release --apk phone/Lightning-*.apk \
             --info phone/apk.json --out verified
           cp verified/PC/SHA256SUMS verified/PC/BUILD.json release/
-          cp phone/Lightning-Test-*.apk release/
+          cp phone/Lightning-*.apk release/
       - name: Publish to Lightning-downloads
         working-directory: release
         env:

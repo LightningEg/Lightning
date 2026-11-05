@@ -94,13 +94,13 @@ def test_wheels_are_chosen_for_cpython_313_on_arm64_android():
 def test_a_test_build_has_its_own_id_and_a_version_that_never_falls():
     first = build.identity("a" * 40, 70, "0.5.0-beta.1")
     later = build.identity("b" * 40, 71, "0.5.0-beta.1")
-    assert first == {"version_code": "70", "version_name": "0.5.0-beta.1-test.70+aaaaaaaa",
-                     "apk": "Lightning-Test-0.5.0-beta.1-70-aaaaaaaa.apk", "stamp": "0.5.0-beta.1-70-aaaaaaaa"}
+    assert first == {"version_code": "70", "version_name": "0.5.0-beta.1-70+aaaaaaaa",
+                     "apk": "Lightning-0.5.0-beta.1-70-aaaaaaaa.apk", "stamp": "0.5.0-beta.1-70-aaaaaaaa"}
     assert int(later["version_code"]) > int(first["version_code"])
     with pytest.raises(build.BuildError):
         build.identity("a" * 40, 0, "1")
     gradle = (ROOT / "android" / "app" / "build.gradle.kts").read_text(encoding="utf-8")
-    assert '"org.lightning.app.test"' in gradle and '"Lightning Test"' in gradle
+    assert '"org.lightning.app.test"' in gradle and 'manifestPlaceholders["appLabel"] = "Lightning"' in gradle
     manifest = (ROOT / "android" / "app" / "src" / "main" / "AndroidManifest.xml").read_text(encoding="utf-8")
     assert 'android:label="${appLabel}"' in manifest
     allowed = {line.split("#")[0].strip() for line in build.PERMISSIONS.read_text().splitlines()} - {""}
@@ -129,10 +129,10 @@ def test_the_apk_must_carry_exactly_what_it_should(tmp_path):
 
 
 def test_aapt2_and_apksigner_reports_are_read_strictly():
-    info = build.badging("package: name='org.lightning.app.test' versionCode='70' versionName='0.5.0-beta.1-test.70+aaaaaaaa' "
+    info = build.badging("package: name='org.lightning.app.test' versionCode='70' versionName='0.5.0-beta.1-70+aaaaaaaa' "
                          "platformBuildVersionName='15'\nsdkVersion:'24'\napplication-debuggable\nnative-code: 'arm64-v8a'\n")
     assert info == {"package": "org.lightning.app.test", "version_code": "70",
-                    "version_name": "0.5.0-beta.1-test.70+aaaaaaaa", "debuggable": "yes"}
+                    "version_name": "0.5.0-beta.1-70+aaaaaaaa", "debuggable": "yes"}
     asked = build.permissions("package: org.lightning.app.test\nuses-permission: name='android.permission.INTERNET'\n"
                               "uses-permission: name='org.lightning.app.test.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'\n"
                               "permission: org.lightning.app.test.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION\n",
@@ -162,12 +162,12 @@ def test_the_bundle_offers_only_a_pair_from_one_commit(tmp_path):
     commit = "d" * 40
     windows = tmp_path / "windows"
     zip_path = _windows(windows, commit)
-    apk = tmp_path / "Lightning-Test-0.5.0-beta.1-70-dddddddd.apk"
+    apk = tmp_path / "Lightning-0.5.0-beta.1-70-dddddddd.apk"
     apk.write_bytes(b"checked apk")
     info = {"sha256": build.sha256(apk), "certificate_sha256": "ab" * 32, "commit": commit,
-            "version_name": "0.5.0-beta.1-test.70+dddddddd", "version_code": 70}
+            "version_name": "0.5.0-beta.1-70+dddddddd", "version_code": 70}
     names = build.bundle(windows, apk, info, tmp_path / "out", commit, "10", "1", "7")
-    assert names == {"pc": "Lightning-Test-0.5.0-beta.1-70-dddddddd-PC", "phone": "Lightning-Test-0.5.0-beta.1-70-dddddddd-Phone"}
+    assert names == {"pc": "Lightning-0.5.0-beta.1-70-dddddddd-PC", "phone": "Lightning-0.5.0-beta.1-70-dddddddd-Phone"}
     for side, binary in (("PC", zip_path), ("Phone", apk)):
         folder = tmp_path / "out" / side
         assert sorted(p.name for p in folder.iterdir()) == sorted([binary.name, "BUILD.json", "README.txt", "SHA256SUMS"])
@@ -325,7 +325,7 @@ def test_the_phones_settings_name_the_build_a_screenshot_came_from(tmp_path, mon
     from test_profile_app import create
 
     assert web.build_version(tmp_path / "absent.txt") == DISPLAY_VERSION
-    name = "0.5.0-beta.1-test.445+38557359"
+    name = "0.5.0-beta.1-445+38557359"
     (tmp_path / "build_identity.txt").write_text(name + "\n")
     assert web.build_version(tmp_path / "build_identity.txt") == name
     gradle = (ROOT / "android" / "app" / "build.gradle.kts").read_text(encoding="utf-8")

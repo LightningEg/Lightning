@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "packaging" / "publish_release.sh"
 TAG = "v0.5.0-beta.1"
 ZIP = f"Lightning-{TAG}-Windows-x64.zip"
-APK = "Lightning-Test-0.5.0-beta.1-123-abc123.apk"
+APK = "Lightning-0.5.0-beta.1-123-abc123.apk"
 
 pytestmark = pytest.mark.skipif(not all(shutil.which(tool) for tool in ("bash", "jq", "sha256sum", "cmp")),
                                 reason="needs bash, jq, sha256sum and cmp (present on Linux CI)")
