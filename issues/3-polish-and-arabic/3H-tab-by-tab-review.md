@@ -116,7 +116,7 @@ Ranked by harm to trust, then by how often a user meets it.
 
 **[x] OV-2 · Visual · P1 — Investments row is broken on PC.** "Portfolio value" floats to the far right as a title while the figure "177,903 · 6 holdings" is tiny on the left with a lone chevron. Lay it out as one KPI row: Portfolio value · Net gain or loss · Income collected · link.
 
-**OV-3 · Logic · P2 — Three different "change" figures sit together.** Change in net worth +32,013, Net flow +26,341, Investing rate +18,450 money added. A user will ask why net worth rose more than they kept. This is the wealth-change bridge (M3.2): Net worth change = Kept (net flow) + Market moves + Other. Build it as the Change in net worth card's "Show the numbers". Highest-value missing answer on the Overview.
+**[x] OV-3 · Logic · P2 — Three different "change" figures sit together.** Built 2026-11-05: Show the numbers under the lead (PC) and a This period sheet (phone); `planning.position.net_worth_bridge`, `tests/test_net_worth_bridge.py`. Original: Change in net worth +32,013, Net flow +26,341, Investing rate +18,450 money added. A user will ask why net worth rose more than they kept. This is the wealth-change bridge (M3.2): Net worth change = Kept (net flow) + Market moves + Other. Build it as the Change in net worth card's "Show the numbers". Highest-value missing answer on the Overview.
 
 **OV-4 · Logic · P2 — "Month by month" shows one month.** The section is titled "Month by month · 2026-08 to today" and the left card's subtitle "Most in 2026-09 · 24,754", yet it draws October's day calendar. Either draw twelve month cells (as the right card does) or rename it "Day by day · 2026-10". Feedback row 64 also asked the right heatmap to show money out, not net flow.
 
@@ -126,7 +126,7 @@ Ranked by harm to trust, then by how often a user meets it.
 
 **OV-7 · Visual · P3 — Donut colours.** CDs (teal), Stocks (dark green) and Money market fund (light green) are three greens; Gold is brown. Use the A04 class colours and check that neighbours differ; feedback row 38 preferred a pie to the treemap, the donut already serves that.
 
-**OV-8 · Feature · P3 — Net worth in dollars or gold grams.** After two devaluations many Egyptians judge wealth in USD or gold. A toggle under Net worth: "in EGP · in USD · in grams of 21K" using the dated rates the app already stores. No new data; large trust gain.
+**[x] OV-8 · Feature · P3 — Net worth in dollars or gold grams.** Built 2026-11-05 as rows under the lead (In US dollars, In grams of 21K gold, each with its dated price), not a toggle that would leave the rows below in EGP; `PositionService.in_other_units`. Original: After two devaluations many Egyptians judge wealth in USD or gold. A toggle under Net worth: "in EGP · in USD · in grams of 21K" using the dated rates the app already stores. No new data; large trust gain.
 
 ### Spending
 

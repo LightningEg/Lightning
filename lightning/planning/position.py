@@ -210,6 +210,21 @@ class Position:
         return ""
 
 
+def net_worth_bridge(change: Decimal | None, net_flow: Decimal, report: dict) -> dict | None:
+    """Why net worth changed (OV-3): Change = Net flow (what you kept) + Market moves + Other changes.
+
+    Market moves = Gain from sales + Price change on what you hold, from the period's investment report
+    (lightning.investments.report.investment_period). Other changes is what is left, so the three always add up
+    to the change: dividends and interest outside money in, fees, exchange rates on foreign cash, and values
+    updated by hand. None when the change or a price is unknown."""
+    moved = report.get("unrealized_change")
+    if change is None or moved is None:
+        return None
+    market = report.get("realized", ZERO) + moved
+    return {"net_flow": net_flow, "market_moves": market, "other_changes": change - net_flow - market,
+            "change": change}
+
+
 class PositionService:
     def __init__(self, reporting, assets, investments, money_from_others, reserves, planning, deposits=None):
         self.reporting = reporting
@@ -360,6 +375,22 @@ class PositionService:
             return None, ("The first recorded position is missing a required valuation." if since_first_record
                           else "The position immediately before this period is missing a required valuation.")
         return closing.net_worth - opening.net_worth - self.reporting.opening_balances_between(start_day, end_day), ""
+
+    def in_other_units(self, amount: Decimal, as_of: date | str, gold_24k: tuple[Decimal, str] | None) -> list[dict]:
+        """An amount in the profile currency in US dollars and in grams of 21K gold (OV-8), at the dated rate and
+        gold price on or before the day that the app already stores: amount ÷ the price of one dollar, and amount
+        ÷ (the 24K gram price × 21/24). A unit without a stored price is left out. ``gold_24k`` is
+        ZakatService.gold_price_24k for the day, the one home of the gold price."""
+        day = fmt_date(parse_date(as_of))
+        out = []
+        dollar = (None if self.reporting.base_currency == "USD"  # a dollar profile already reads in dollars
+                  else self.reporting.valuer.fx("USD", day))  # the same dated rate every valuation uses
+        if dollar is not None and dollar.rate:
+            out.append({"unit": "US dollars", "value": amount / dollar.rate, "price": dollar.rate, "date": dollar.date})
+        if gold_24k and gold_24k[0]:
+            gram = gold_24k[0] * Decimal(21) / Decimal(24)
+            out.append({"unit": "grams of 21K gold", "value": amount / gram, "price": gram, "date": gold_24k[1]})
+        return out
 
     def at(self, as_of: date | str | None = None, *, match_payments: bool = True) -> Position:
         """Read a position; read-only profiles can skip today's automatic payment matching."""

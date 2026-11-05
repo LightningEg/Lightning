@@ -149,6 +149,12 @@ _TABLE = [
      "What you own at the end − What you own the day before the start − Opening balances in the period"),
     ("change_in_net_worth", "Change in net worth", "How much net worth grew or shrank in the period.",
      "Net worth at the end − Net worth the day before the start − Opening balances in the period"),
+    ("market_moves", "Market moves", "What your investments gained or lost in the period: sales, and the price of what you "
+     "still hold.", "Gain from sales + Price change on what you hold"),
+    ("other_changes", "Other changes", "Everything else that moved net worth in the period: loan and circle payments (money out counts "
+     "them, but they lower what you owe), dividends and interest outside money in, fees, exchange rates on foreign "
+     "cash, and values you updated by hand (a flat, a car).",
+     "Change in net worth − Net flow − Market moves"),
     ("per_month", "Per month", "A period's money out divided by the calendar months it covers, so a year to date "
      "compares with a single month."),
     ("usual_month", "Usual month", "The average money out of the last six earlier months, using matching calendar days for a partial period."),
@@ -293,6 +299,8 @@ _SOURCES = {
     "opening_balances_in_period": (LEDGER, "lightning.reporting.service.ReportingService.opening_balances_between"),
     "change_in_what_you_own": (LEDGER, "lightning.planning.position.PositionService.change_in_what_you_own"),
     "change_in_net_worth": (BOTH, "lightning.planning.position.PositionService.change_in_net_worth"),
+    "market_moves": (LEDGER, "lightning.planning.position.net_worth_bridge"),
+    "other_changes": (BOTH, "lightning.planning.position.net_worth_bridge"),
     "per_month": (LEDGER, "lightning.reporting.spending.spending_profile"),
     "usual_month": (LEDGER, "lightning.reporting.spending._against_history"),
     "usual_range": (LEDGER, "lightning.reporting.spending._against_history"),
