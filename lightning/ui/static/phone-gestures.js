@@ -1,6 +1,8 @@
 /* Phone gestures and polish (phone roadmap M6, M8). Everything here is an extra: each page still works by tapping.
-   - Feed swipe: on a transaction row, swipe toward the end to open it (change category), toward the start to delete
-     it with Undo. RTL flips the direction, so "toward the start" is always the side you read from.
+   - Feed swipe: on a transaction row, swipe toward the end to open it; swipe toward the start to reveal Set category
+     and Delete behind it (3AD3; Delete keeps its Undo). A tap anywhere else, or a swipe back, closes them. RTL flips
+     the direction, so "toward the start" is always the side you read from. Swipes never change tabs (C03.3) and
+     press-and-hold still selects (C08.5): a swipe only counts once the finger moves sideways.
    - Tabs feel instant: phone-nav.js swaps only the content and asks for a tab's page as the finger lands.
    - Save buttons go busy on submit, so nobody saves twice.
    - Pull down at the top of a page to reload it.
@@ -52,38 +54,21 @@
     toastTimer = setTimeout(() => { box.hidden = true; }, 6000);
   };
 
-  /* M6: swipe a transaction row. */
+  /* M6 and 3AD3: swipe a transaction row. */
   const SWIPE = 72;
+  const ACTION = 96;  // each revealed action is 96 px wide and the row's full 64 px tall (C05.1)
   let swipe = null;
-  document.addEventListener("touchstart", (event) => {
-    const row = event.target.closest && event.target.closest("a.phone-txn[data-txn]");
-    if (!row || event.touches.length !== 1) { swipe = null; return; }
-    const touch = event.touches[0];
-    swipe = { row, x: touch.clientX, y: touch.clientY, dx: 0, locked: null };
-  }, { passive: true });
-  document.addEventListener("touchmove", (event) => {
-    if (!swipe) return;
-    const touch = event.touches[0];
-    const dx = touch.clientX - swipe.x, dy = touch.clientY - swipe.y;
-    if (swipe.locked === null && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) swipe.locked = Math.abs(dx) > Math.abs(dy);
-    if (!swipe.locked) return;
-    swipe.dx = dx;
-    const toStart = rtl ? dx > 0 : dx < 0;
-    swipe.row.classList.toggle("is-swipe-delete", toStart && Math.abs(dx) > SWIPE);
-    swipe.row.classList.toggle("is-swipe-open", !toStart && Math.abs(dx) > SWIPE);
-    if (!still) swipe.row.style.transform = `translateX(${Math.max(-140, Math.min(140, dx))}px)`;
-  }, { passive: true });
-  document.addEventListener("touchend", () => {
-    if (!swipe) return;
-    const { row, dx, locked } = swipe;
-    swipe = null;
+  let open = null;  // { row, actions } while a row shows its actions
+  const closeActions = () => {
+    if (!open) return;
+    const { row, actions } = open;
+    open = null;
     row.style.transform = "";
-    row.classList.remove("is-swipe-delete", "is-swipe-open");
-    if (!locked || Math.abs(dx) < SWIPE) return;
-    row.dataset.swiped = "1";  // the click that follows a swipe is not a tap
-    setTimeout(() => { delete row.dataset.swiped; }, 400);
-    const toStart = rtl ? dx > 0 : dx < 0;
-    if (!toStart) { buzz(10); row.click(); return; }
+    row.classList.remove("is-revealed");
+    row.removeAttribute("aria-describedby");
+    actions.remove();
+  };
+  const remove = (row) => {
     const id = row.dataset.txn;
     buzz(25);
     row.classList.add("is-gone");
@@ -94,12 +79,91 @@
         if (undo.ok) location.reload(); else toast(await undo.text());
       }));
     }).catch(() => { row.classList.remove("is-gone"); });
+  };
+  const reveal = (row) => {
+    closeActions();
+    const parent = row.parentElement;
+    if (getComputedStyle(parent).position === "static") parent.style.position = "relative";
+    const actions = document.createElement("div");
+    actions.className = "phone-swipe-actions";
+    actions.id = `swipe-actions-${row.dataset.txn}`;
+    actions.setAttribute("role", "group");
+    actions.setAttribute("aria-label", t("Row actions"));
+    actions.style.top = `${row.offsetTop}px`;
+    actions.style.height = `${row.offsetHeight}px`;
+    let count = 0;
+    if (row.dataset.cat !== undefined) {
+      const cat = document.createElement("a");
+      cat.className = "phone-swipe-cat";
+      cat.href = row.href + (row.href.includes("?") ? "&" : "?") + "change=1";
+      cat.setAttribute("data-popup-open", "");
+      cat.textContent = t("Set category");
+      cat.addEventListener("click", () => setTimeout(closeActions, 0));
+      actions.appendChild(cat);
+      count += 1;
+    }
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "phone-swipe-delete";
+    del.textContent = t("Delete");
+    del.addEventListener("click", () => { closeActions(); remove(row); });
+    actions.appendChild(del);
+    count += 1;
+    parent.appendChild(actions);
+    const width = count * ACTION;
+    row.style.transform = `translateX(${rtl ? width : -width}px)`;
+    row.classList.add("is-revealed");
+    row.setAttribute("aria-describedby", actions.id);
+    open = { row, actions };
+    buzz(10);
+  };
+  document.addEventListener("touchstart", (event) => {
+    const row = event.target.closest && event.target.closest("a.phone-txn[data-txn]");
+    if (!row || event.touches.length !== 1) { swipe = null; return; }
+    const touch = event.touches[0];
+    swipe = { row, x: touch.clientX, y: touch.clientY, dx: 0, locked: null, from: row === (open && open.row) };
+  }, { passive: true });
+  document.addEventListener("touchmove", (event) => {
+    if (!swipe) return;
+    const touch = event.touches[0];
+    const dx = touch.clientX - swipe.x, dy = touch.clientY - swipe.y;
+    if (swipe.locked === null && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) swipe.locked = Math.abs(dx) > Math.abs(dy);
+    if (!swipe.locked) { if (open && !swipe.from) closeActions(); return; }
+    swipe.dx = dx;
+    if (swipe.from) return;  // a revealed row only closes; it does not slide further
+    const toStart = rtl ? dx > 0 : dx < 0;
+    swipe.row.classList.toggle("is-swipe-reveal", toStart && Math.abs(dx) > SWIPE);
+    swipe.row.classList.toggle("is-swipe-open", !toStart && Math.abs(dx) > SWIPE);
+    if (!still) swipe.row.style.transform = `translateX(${Math.max(-2 * ACTION, Math.min(140, dx))}px)`;
+  }, { passive: true });
+  document.addEventListener("touchend", () => {
+    if (!swipe) return;
+    const { row, dx, locked, from } = swipe;
+    swipe = null;
+    row.classList.remove("is-swipe-reveal", "is-swipe-open");
+    if (locked) {
+      row.dataset.swiped = "1";  // the click that follows a swipe is not a tap
+      setTimeout(() => { delete row.dataset.swiped; }, 400);
+    }
+    if (from) { if (locked) closeActions(); return; }
+    row.style.transform = "";
+    if (!locked || Math.abs(dx) < SWIPE) return;
+    const toStart = rtl ? dx > 0 : dx < 0;
+    if (toStart) { reveal(row); return; }
+    buzz(10);
+    row.click();
   });
   document.addEventListener("click", (event) => {
+    if (open && !(event.target.closest && event.target.closest(".phone-swipe-actions"))) {
+      const onRow = event.target.closest && event.target.closest("a.phone-txn") === open.row;
+      closeActions();
+      if (onRow) { event.preventDefault(); event.stopImmediatePropagation(); return; }  // a tap on the slid row only closes it
+    }
     const row = event.target.closest && event.target.closest("a.phone-txn[data-swiped]");
     if (row && !event.isTrusted) return;  // the swipe's own click opens it
     if (row) { event.preventDefault(); event.stopImmediatePropagation(); }
   }, true);
+  window.addEventListener("scroll", closeActions, { passive: true });
 
   /* M8: a Save button goes busy on submit; buzz once. (Entries always save: the server runs on this device.) */
   document.addEventListener("submit", (event) => {
