@@ -124,7 +124,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         period_budgeted = sum((row["budgeted"] for row in group_totals.values()), ZERO)
     prev_month, next_month = _neighbours(month)
     has_plan = c.budgets.has_plan(month, schedule=c.schedules.view())
-    suggestions = c.budgets.suggested_plan(month) if not has_plan else {}
+    suggestions = c.budgets.first_plan_suggestions(month) if not has_plan else {}  # round numbers (BU-3)
     suggestions_view = {category_id: (c.categories.display_name(category_id), amount)
                         for category_id, amount in suggestions.items()}
     suggestion_groups: dict[str, list] = {}  # L1 as a header, each category under it by its own name

@@ -170,7 +170,7 @@ Ranked by harm to trust, then by how often a user meets it.
 
 **BU-2 · Logic · P2 — Alarm out of proportion.** A full-width strong-rose card "Categories over plan 1 · Transportation" for 22 EGP over a 68 EGP plan. Scale it: under 5% or under 100 EGP over, show a dot on the row, not a card.
 
-**BU-3 · Logic · P2 — Odd plan amounts.** Fill this month produces 68, 671, 1,480, 4,666, 15. Round fills to the nearest 50 (under 1,000) or 100, and let the user keep exact values.
+**[x] BU-3 · Logic · P2 — Odd plan amounts.** Built 2026-11-05: the first plan offers `budgeting.service.round_limit` amounts (min 50); typed values and demo/sample seeding (`suggested_plan`) stay exact; Mohab's plan is 51 more (`tests/test_round_limits.py`). Original: Fill this month produces 68, 671, 1,480, 4,666, 15. Round fills to the nearest 50 (under 1,000) or 100, and let the user keep exact values.
 
 **BU-4 · Logic · P2 — No pace.** At day 14 of 31, 76% used looks alarming, but 14,500 of it was rent and the loan on the 3rd and 5th. Show "Flexible spending: 4,159 of 10,199, on pace" separately from fixed bills that are already paid.
 
@@ -500,8 +500,7 @@ Beyond the open gaps already listed in the Project Overview, ranked by how often
   purest) by purity, a typed price still wins; CA-3 no Archive or Delete on system categories; X-6 Spending's usual
   month names the months it really uses (`tests/test_weekly_friction.py`). Already built: BU-1 (category sheet, 3G6),
   BU-4 (pace), CD-1 (interest receipt matching), TX-1, TX-2 and PH-5 (3AN3), PR-1 (no four decimals on Prices),
-  CA-1. Left open: BU-3 (rounding proposed limits changes every plan built from them, Mohab's included: a
-  number-audit change of its own). Kept as they are: RG-2 (Check balance stays in Money actions: A05, owner 2026-10-30) and CA-2 (the pills carry
+  CA-1. BU-3 built later on its own (2026-11-05, number audit in its PR). Kept as they are: RG-2 (Check balance stays in Money actions: A05, owner 2026-10-30) and CA-2 (the pills carry
   `aria-pressed`).
 - Step 4 (Mohab): the six behaviours are fixed and each has a test: SP-1 `test_period_comparisons.py`, X-3
   `test_display_returns.py`, IN-2 `test_holdings_total_income.py`, AC-2 `test_register_number_roles.py`, GA-1
