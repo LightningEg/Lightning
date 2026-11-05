@@ -11,8 +11,9 @@
     <span class="phone-kpi-label">{{ s.label.split(' · ')[0] }}</span>{# the period shows in its chip #}
     {% set shown = (s.value|money(s.key == 'change' or s.signed is defined and s.signed)) if s.value is not none and s.kind != 'rate' else '' %}
     <span class="phone-kpi-value{{ ' is-long' if shown|length > 7 }}">{% if s.value is none %}{{ s.empty or '—' }}{% elif s.kind == 'rate' %}{{ rate(s.value) }}<small>%</small>{% else %}{{ shown }}{% endif %}</span>
-    {% if s.meter %}<span class="stat-tile-meter tone-{{ s.meter.tone }}"><i style="width:{{ '%.1f'|format(s.meter.width) }}%"></i></span>
-    {% elif s.sub is defined and s.sub %}<span class="phone-kpi-sub">{% if s.figure is defined and s.figure is not none and s.value is not none %}{{ s.figure|money(True) }} {% endif %}{{ s.sub }}</span>{% endif %}
+    {% if s.meter %}<span class="stat-tile-meter tone-{{ s.meter.tone }}"><i style="width:{{ '%.1f'|format(s.meter.width) }}%"></i></span>{% endif %}
+    {# A16: a figure alone is never shown; the comparison stays under the meter (3T6) #}
+    {% if s.sub is defined and s.sub %}<span class="phone-kpi-sub">{% if s.figure is defined and s.figure is not none and s.value is not none %}{{ s.figure|money(True) }} {% endif %}{{ s.sub }}</span>{% endif %}
   </{{ tag }}>{% endfor %}
 </section>
 {% endmacro %}

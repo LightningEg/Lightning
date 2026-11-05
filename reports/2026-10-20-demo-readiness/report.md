@@ -43,7 +43,7 @@ Makes the demo shine (wiring of what exists, no new engines):
 - **[7L2](https://github.com/LightningEg/Lightning/blob/6a88ed6c8079747595a91f5918741a0807de5b84/issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) Needs you as the one smart inbox.** It would carry Looks recurring · Track, early payment found · Link, Make a rule, Refill a reserve, and a category over plan.
 - **[7L3](https://github.com/LightningEg/Lightning/blob/6a88ed6c8079747595a91f5918741a0807de5b84/issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md) Looks recurring finds subscriptions and bills that vary.** Today it misses Shahid and electricity.
 - **5K (fixed: `tests/test_investments.py::test_a_fixed_price_holding_shows_no_price_swings_and_no_checkpoint_rows`, `tests/test_deposit_certificates.py::test_a_certificate_holding_page_lists_its_interest_payouts`) The certificate's page.** It shows interest, not price charts.
-- **3S 3–5 and [3T](../../issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) 1–3.** Charts that mislead, cut words on the phone, and pages with no way back.
+- **3S 3–5 and [3T](https://github.com/LightningEg/Lightning/blob/e09ddd1/issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) 1–3.** Charts that mislead, cut words on the phone, and pages with no way back.
 
 Polish after the demo: the rest of 3S and 3T, and the five pages left in [3Q](../../issues/3-polish-and-arabic/3Q-visual-audit-cards-that-compare.md).
 
@@ -201,7 +201,7 @@ This ran in the real phone frame that Android loads (`profile_app(phone=True)`),
 
 **Automatic:**
 
-- `tools/phone_check.py` reports nothing scrolling sideways. However, `.phone-content` hides overflow, so cut-off items pass unseen ([3T](../../issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) asks the check to report them).
+- `tools/phone_check.py` reports nothing scrolling sideways. However, `.phone-content` hides overflow, so cut-off items pass unseen ([3T](https://github.com/LightningEg/Lightning/blob/e09ddd1/issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) asks the check to report them).
 - The phone tests pass (46).
 - No JavaScript errors except the silent Save.
 
@@ -222,7 +222,7 @@ This ran in the real phone frame that Android loads (`profile_app(phone=True)`),
   - Save does nothing without a category. The same code runs on PC.
   - The raise prompt is a fixed flash over the top bar, and its buttons vanish after 5 s (same cause as 3D).
   - The tab bar never hides for the keyboard.
-- **Medium ([3T](../../issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md)):**
+- **Medium ([3T](https://github.com/LightningEg/Lightning/blob/e09ddd1/issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md)):**
   - Cut words ("0.6 n", "By market", first letters of Plan headings).
   - Overlapping text on Recurring.
   - Five pages with no way back.

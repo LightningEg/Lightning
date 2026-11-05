@@ -243,6 +243,7 @@ Owner, 2026-10-28: owner-only tasks are closed as items and held here. **Bring t
 | [2B](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/2-safe-for-real-money/2B-promotion-durability.md) | Windows reboot drill, `tools/promotion_drill.py`, phases P1–P4 | Real-money gate (§4 of AGENTS.md); code and fault tests already pass |
 | [3I](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/3-polish-and-arabic/3I-owner-check-first-run-and-import.md) | First run and import review on PC and phone | |
 | [3AH](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/3-polish-and-arabic/3AH-visual-flow-acceptance.md) | Visual flow on real Windows/Android, English and Arabic, keyboard and screen reader | Browser evidence only so far |
+| [3T](https://github.com/LightningEg/Lightning/blob/e09ddd1/issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | Zakat's date uses the native picker on a real Android phone (shows the date, not mm/dd/yyyy) | Browser evidence only |
 | [8C](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/8-website/8C-be-found-as-the-all-in-one-tracker.md) | Resubmit the sitemap; Reddit post; re-ask AI search after two weeks | |
 | [8I](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/8-website/8I-guides-owner-checks.md) | Search Console impressions of the merged guide; read the Arabic topic pages | |
 

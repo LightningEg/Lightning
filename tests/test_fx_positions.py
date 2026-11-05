@@ -327,3 +327,26 @@ def test_currency_history_leaves_a_gap_between_known_months(c, dollars, monkeypa
     assert chart.count('class="chart-dot tone-hold') == 2
     assert 'class="chart-line tone-hold"' not in chart
     assert '<td>2026-10</td><td class="num">—</td>' in chart
+
+
+def test_phone_currencies_show_each_total_once_and_lead_as_on_the_pc(c, dollars):
+    """3T5: with one currency its card does not repeat the totals above it (A16), and the lead is the PC's Foreign money."""
+    import re
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+
+    accounts, cats = dollars
+    story(c, accounts, cats)
+    app = create_app(c)
+    async def phone(scope, receive, send):
+        if scope['type'] == 'http':
+            scope.setdefault('state', {})['phone'] = True
+        await app(scope, receive, send)
+    phone_html = TestClient(phone).get('/accounts/currencies').text
+    pc_html = TestClient(app).get('/accounts/currencies').text
+    for label in ('Unrealized FX gain', 'Realized FX gain', 'Spread paid'):
+        assert phone_html.count(f'<span>{label}') == 1, label
+    lead = re.search(r'class="phone-lead">([^<]+)<small>', phone_html).group(1).strip()
+    pc_card = pc_html.split("Foreign money", 1)[1].split('class="metric-note"', 1)[0]
+    pc_lead = re.sub(r"<[^>]+>", " ", pc_card).split()[0]
+    assert lead.replace("\u2009", "") == pc_lead.split(".")[0]
