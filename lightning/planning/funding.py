@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from hashlib import sha256
-from decimal import Decimal
+from decimal import ROUND_DOWN, Decimal
 import json
 
 from lightning.accounts.domain import AccountType
@@ -84,12 +84,13 @@ class CashFundingService:
             # Unfunded bills already protect part of this category outside envelopes.
             protected = max(row["due"] - row["remaining"], ZERO)
             add = min(max(row["target"] - row["remaining"], ZERO), pool + protected)
+            add = add.quantize(Decimal("0.01"), rounding=ROUND_DOWN)  # a typed amount, never 60420.110000
             row["suggested"] = row["remaining"] + add
             pool -= max(add - protected, ZERO)
         reserve_rows = []
         for reserve in reserves:
             gap = max(reserve["target"] - reserve["allocated"], ZERO)
-            add = ZERO if reserve.get("planned_item_id") else min(gap, pool)
+            add = ZERO if reserve.get("planned_item_id") else min(gap, pool).quantize(Decimal("0.01"), rounding=ROUND_DOWN)
             pool -= add
             reserve_rows.append({"id": reserve["id"], "name": reserve["name"], "allocated": reserve["allocated"],
                                  "effective": reserve["effective_allocated"], "gap": gap, "suggested": add})

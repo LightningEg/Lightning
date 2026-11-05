@@ -55,6 +55,7 @@
 <section class="phone-section" aria-labelledby="position-heading">
   <header class="phone-section-head"><h2 id="position-heading">{{ 'Your position'|tr(locale) }}</h2><span>{{ 'As of {date}'|tr(locale, date=position_as_of) }}</span></header>
   <div class="phone-rows">
+    {% for u in worth_units %}<div class="phone-row"><span>{{ fig[lead].label }} · {{ ('In ' ~ u.unit)|tr(locale)|lower }}<small>{{ 'at {price} on {date}'|tr(locale, price=u.price|money, date=u.date) }}</small></span><b>{{ u.value|money }}</b></div>{% endfor %}
     {% if owes %}<a class="phone-row" href="/accounts"><span>{{ fig.what_you_own.label }}</span><b>{{ pos.what_you_own|money }}</b><span class="phone-chevron" aria-hidden="true">›</span></a>{% endif %}
     <a class="phone-row" href="/accounts"><span>{{ fig.cash_you_own.label }}</span><b>{{ pos.cash_you_own|money }}</b><span class="phone-chevron" aria-hidden="true">›</span></a>
     {% if pos.holdings_value %}<a class="phone-row" href="/investments"><span>{{ fig.holdings_value.label }}</span><b>{{ pos.holdings_value|money }}</b><span class="phone-chevron" aria-hidden="true">›</span></a>{% endif %}
@@ -97,6 +98,8 @@
 <section class="phone-section" aria-labelledby="period-heading">
   <header class="phone-section-head"><h2 id="period-heading">{{ 'This period'|tr(locale) }}</h2><span>{{ date_from }} {{ 'to'|tr(locale) }} {{ date_to }}</span></header>
   <div class="phone-rows">
+    {% if bridge %}{# OV-3: why it changed, as a sheet (D1) #}{% set row %}<span>{{ fig['change_in_net_worth' if owes else 'change_in_what_you_own'].label }}</span><b>{{ bridge.change|money(true) }}</b><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
+    {% call sheet(fig['change_in_net_worth' if owes else 'change_in_what_you_own'].label, row) %}<div class="phone-rows"><div class="phone-row"><span>{{ fig.net_flow.label }}</span><b>{{ bridge.net_flow|money(true) }}</b></div><div class="phone-row"><span>{{ fig.market_moves.label }}</span><b>{{ bridge.market_moves|money(true) }}</b></div><div class="phone-row"><span>{{ fig.other_changes.label }}</span><b>{{ bridge.other_changes|money(true) }}</b></div><div class="phone-row"><span>{{ 'Change'|tr(locale) }}</span><b>{{ bridge.change|money(true) }}</b></div></div>{% endcall %}{% endif %}
     {% set row %}<span>{{ fig.net_flow.label }}</span><b class="{{ cash_flow.net|tone }}">{{ cash_flow.net|money(True) }}</b><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
     {% call sheet(fig.net_flow.label, row) %}
       {% if cash_flow.inflows or cash_flow.outflows %}{{ bar_rows(flow_columns.columns, 'From money in to net flow', 'flow') }}{% else %}<p class="chart-empty">{{ "No money moved in this period."|tr(locale) }}</p>{% endif %}
