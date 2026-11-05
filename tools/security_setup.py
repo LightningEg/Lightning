@@ -20,9 +20,10 @@ DOWNLOADS = f'{ORG}/Lightning-downloads'
 MARKET = f'{ORG}/Lightning_Market_Data'
 APP_ACTION_PATTERNS = (
     'android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd',
-    'gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c',
+    'gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c',
 )
-OLD_GRADLE_ACTION = 'gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c'
+# The newer v6.4.1 pin (#276) the workflows used while the live policy allowed only the pin above (1H, 2026-11-05).
+OLD_GRADLE_ACTION = 'gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c'
 
 
 class GitHub:
