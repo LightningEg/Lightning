@@ -20,6 +20,7 @@ _PREFIXES = sorted((
 _CITIES = {"cairo", "giza", "alexandria", "alex", "maadi", "nasr city", "heliopolis", "zamalek", "dokki", "mohandessin",
            "new cairo", "6th october", "october", "sheikh zayed", "tagamoa", "eg", "egy", "القاهره", "الجيزه",
            "الاسكندريه"}
+_ACRONYMS = {"WE", "NBE", "CIB", "QNB", "HSBC", "ADIB", "AAIB", "KFC", "ATM", "CD", "EGP", "USD", "UAE", "BM", "CI"}
 _CARD_OR_NUMBER = re.compile(r"(?:\b[0-9]*[xX*]{3,}[0-9]*\b|\b\d{4,}\b|\b0\d{2}x+\w*\b)")
 _CASH = re.compile(r"\batm\b|cash withdrawal|سحب نقدي|صراف", re.IGNORECASE)
 # E-wallets are accounts too, but not the cash an ATM gives you.
@@ -56,7 +57,7 @@ def clean_name(text: str) -> str:
     if is_cash_withdrawal(original):
         return "ATM"  # where the cash went is a transfer to your cash, suggested on its own
     working = _CARD_OR_NUMBER.sub(" ", original)
-    working = re.sub(r"[\-–:|/#]+", " ", working)
+    working = re.sub(r"[\-–—:|/#·•,;]+", " ", working)
     words = working.split()
     changed = True
     while changed and words:
@@ -78,8 +79,9 @@ def clean_name(text: str) -> str:
     name = " ".join(words).strip()
     if not name or not any(ch.isalpha() for ch in name):
         return original
-    if name.isascii() and name.upper() == name:  # CARREFOUR is Carrefour; NBE, CIB, WE and KFC stay as they are
-        name = " ".join(word if len(word) <= 3 else word.capitalize() for word in name.split())
+    if name.isascii() and name.upper() == name:  # CARREFOUR is Carrefour; NBE, CIB, WE, KFC and THNDR stay as they are
+        name = " ".join(word if word in _ACRONYMS or (len(word) <= 5 and not set(word) & set("AEIOUY"))
+                        else word.capitalize() for word in name.split())
     return name
 
 

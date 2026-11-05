@@ -616,8 +616,9 @@ def test_description_only_statement_suggests_payees_transfers_and_categories(c, 
     assert carrefour["_counterparty_id"]  # the saved name, found once the bank wording is off
     assert atm["_transfer_target_suggestion"] == cash.name
     assert wallet["_transfer_target_suggestion"] == "Vodafone Cash"
-    assert uber["Counterparty"] == "Uber Trip" and uber["_category_guessed"]
-    assert uber["_category_id"] == c.categories.get_by_code("EXP.PERSONAL.TRANSPORT").id and not uber["_ready"]
+    # A guess is offered, never filled in: "Post ready rows" would post it unseen.
+    assert uber["Counterparty"] == "Uber Trip" and uber["_category_id"] is None and not uber["_ready"]
+    assert uber["_category_suggestion"]["id"] == c.categories.get_by_code("EXP.PERSONAL.TRANSPORT").id
 
 
 def test_a_saved_name_inside_a_longer_payee_is_offered_first(c, setup):

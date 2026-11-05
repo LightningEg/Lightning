@@ -332,8 +332,11 @@ def _first_evening(o: Mohab) -> None:
     names = {k.rsplit("_", 1)[1]: v for k, v in review.fields.items()
              if k.startswith("counterparty_") and k.count("_") == 1}
     answers = {}
+    # The review shows the payee without the bank's wording (7AC): "ACME EGYPT PAYROLL" reads "Acme Egypt Payroll".
+    from lightning.bank_import_names import clean_name
+    by_shown_name = {clean_name(raw): decision for raw, decision in IMPORT_DECISIONS.items()}
     for row, raw in names.items():
-        decision = IMPORT_DECISIONS[raw]
+        decision = by_shown_name[raw]
         if decision is None:
             answers[f"skip_{row}"] = TICK
             continue

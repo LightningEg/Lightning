@@ -120,7 +120,7 @@ class ImportProposals:
                                                  or parsed["_voided_earlier"] or parsed["_link_candidates"])
             parsed["_ready"] = bool(not parsed.get("_errors") and not parsed["_possible_duplicate"]
                                     and not parsed["_suggestions"] and not parsed["_needs_account"] and not parsed["_identity_ambiguous"]
-                                    and not parsed.get("_category_guessed")
+
                                     and (parsed["_category_id"] or parsed["_transfer_target"]))
             parsed["_import_row_id"] = row["id"]
             parsed["_account_id"] = batch["account_id"]
@@ -312,8 +312,8 @@ class ImportProposals:
         except (NotFoundError, ValidationError):
             category = None
         if category is not None and category.active:
-            parsed["_category_guessed"] = True
-            return category.id
+            # Offered, never filled in: "Post ready rows" posts any row with a category, and a guess is not a choice.
+            parsed["_category_suggestion"] = {"id": category.id, "name": category.name}
         return None
 
     def _similarity_warning(self, account_id, parsed):

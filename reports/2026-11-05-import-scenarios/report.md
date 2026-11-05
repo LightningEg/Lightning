@@ -91,5 +91,6 @@ groups instead of 46 "No counterparty", with categories from history.
   (`test_a_row_with_a_date_is_never_dropped_as_a_summary`).
 - F10-F13 (7AC): `lightning/bank_import_names.py`; tests `test_bank_wording_is_taken_off_the_payee`,
   `test_description_only_statement_suggests_payees_transfers_and_categories`, `test_a_saved_name_inside_a_longer_payee_is_offered_first`.
-  A saved name found inside the text is a suggestion to confirm, never merged on its own; a keyword category is marked
-  "guessed" and the row shows Needs you.
+  A saved name found inside the text is a suggestion to confirm, never merged on its own. A keyword category is offered
+  as "Looks like Transportation · Use it", never filled in: a first version pre-filled it, and "Post ready rows" then
+  posted guesses unseen (Mohab's April spending moved by 2,502 EGP), caught by the full suite before review.
