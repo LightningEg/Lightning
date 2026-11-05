@@ -12,8 +12,9 @@ folder and prints what to do with them:
 - certificate-sha256.txt              the certificate's fingerprint: public, committed as
                                       packaging/android-test-certificate.sha256
 
-Keep the folder (a USB stick or a password manager is fine). If the key is lost, the next APK cannot update
-the installed Lightning: it must be uninstalled once, losing its dummy data. This key is only for test
+Keep the folder in two places (a USB stick and a password manager). Make a key once: if it is lost or
+replaced, the next APK cannot update the installed Lightning, and the uninstall that gets past it deletes the
+person's data (tests/test_phone_identity_frozen.py). This key is only for test
 builds; it is never a Google Play upload or app signing key. See ai/ARCHITECTURE.md › Build and release.
 """
 from __future__ import annotations
