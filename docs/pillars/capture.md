@@ -11,6 +11,7 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 
 | Code | Item | Size | Status |
 |---|---|---|---|
+| **IV-3AU** | [Bank SMS to the ledger takes one trip per card ending and ends on the CSV import screen](../../issues/3-polish-and-arabic/3AU-sms-flow-polish.md) | M | ready |
 | **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](../../issues/7-planning-import-and-search/7C-move-in-from-other-apps.md) | L | new |
 
 ## Reports with open follow-ups here

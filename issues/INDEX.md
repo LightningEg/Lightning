@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 38 open items, in the order they are worked on.
+10 milestones, 39 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -82,8 +82,10 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **BV-3AR** | [Paid fixed obligations must not appear ahead of spending pace](3-polish-and-arabic/3AR-fixed-payments-phone-pace.md) | bug, visual · medium | Plan | M | new |
 | **BV-3AS** | [Payday funding labels and amount precision must remain readable](3-polish-and-arabic/3AS-payday-labels-and-precision.md) | bug, visual · low | Feel | S | new |
 | **IV-3AT** | [Property and vehicle accounts need task-specific desktop and phone layouts](3-polish-and-arabic/3AT-property-vehicle-task-layout.md) | improvement, visual | Feel | M | new |
+| **IV-3AU** | [Bank SMS to the ledger takes one trip per card ending and ends on the CSV import screen](3-polish-and-arabic/3AU-sms-flow-polish.md) | improvement, visual | Capture | M | ready |
+| IV-3AU2 | ↳ An SMS review, not the CSV review | | | M | |
 
-Done: 3A, 3B, 3C, 3D, 3E, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP. Next free code: 3AU.
+Done: 3A, 3B, 3C, 3D, 3E, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP. Next free code: 3AV.
 
 ## 4 Edit journal and devices
 

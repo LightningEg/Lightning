@@ -56,6 +56,27 @@ def test_sms_assignment_is_a_portable_command(screens):
     assert hd.c.db.scalar("SELECT COUNT(*) FROM bank_import_rows WHERE status='REVIEW'") == 1
 
 
+def test_answering_several_endings_at_once_is_a_portable_command(screens):
+    """IV-3AU: From SMS answers every waiting ending in one form; a paired device sends account UUIDs, not its ids."""
+    (hd, pc), clients = screens
+    bank_h = next(a for a in hd.c.accounts.list() if a.name == "Bank")
+    bank_p = next(a for a in pc.c.accounts.list() if a.name == "Bank")
+    samples = json.loads((Path(__file__).parent / "fixtures" / "bank_sms.json").read_text(encoding="utf-8"))
+    picked = [s for s in samples["samples"] if s["bank"] == "NBE"]
+    endings = sorted({s["expect"]["ending"] for s in picked if "ending" in s["expect"]})
+    assert len(endings) >= 2
+    pasted = clients[1].post("/sms/paste", data={"messages": "\n\n".join(s["text"] for s in picked)},
+                             headers={"referer": "http://testserver/sms"})
+    assert pasted.status_code == 303
+    pc.sync_with(hd.home)
+    response = clients[1].post("/sms/assign", data={f"account_{e}": str(bank_p.id) for e in endings},
+                               headers={"referer": "http://testserver/sms"})
+    assert response.status_code == 303 and "Saved+on+this+device" in response.headers["location"]
+    pc.sync_with(hd.home)
+    assert all(hd.c.sms_imports.endings()[e] == bank_h.id for e in endings)
+    assert hd.c.sms_imports.waiting() == [] and hd.c.db.scalar("SELECT COUNT(DISTINCT batch_id) FROM bank_import_rows") == 1
+
+
 def test_other_asset_value_route_preserves_the_portable_action(screens):
     from decimal import Decimal
     from lightning.sync.journal.codec import unpack
