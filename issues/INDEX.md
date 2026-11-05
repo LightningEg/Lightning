@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 43 open items, in the order they are worked on.
+10 milestones, 44 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -145,8 +145,12 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7C1 | ↳ Read each app's export format | | | M | |
 | NF-7C2 | ↳ A mapping preset per app in the CSV review | | | L | |
 | NF-7C3 | ↳ A move-in guide | | | M | |
+| **IT-7Z** | [Import another app's export with few questions](7-planning-import-and-search/7Z-import-other-app-exports.md) | improvement, technical | Capture | M | new |
+| IT-7Z1 | ↳ Remember a name's category for the next file | | | S | |
+| IT-7Z2 | ↳ Split one file by its Account column | | | M | |
+| IT-7Z3 | ↳ Paired rows of one movement | | | S | |
 
-Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y. Next free code: 7Z.
+Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y. Next free code: 7AA.
 
 ## 8 Website
 

@@ -12,6 +12,7 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](../../issues/7-planning-import-and-search/7C-move-in-from-other-apps.md) | L | new |
+| **IT-7Z** | [Import another app's export with few questions](../../issues/7-planning-import-and-search/7Z-import-other-app-exports.md) | M | new |
 
 ## Reports with open follow-ups here
 

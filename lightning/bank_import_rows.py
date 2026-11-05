@@ -14,11 +14,24 @@ from lightning.core.limits import MAX_CSV_IMPORT_BYTES
 from lightning.core.money import ascii_digits
 
 REQUIRED = ("Date", "Amount")
-OPTIONAL = ("Counterparty", "Category", "Notes", "Reference")
+# "Group" is the parent a category sits under in another app's export ("Work" for "Work › Transportation").
+OPTIONAL = ("Counterparty", "Category", "Group", "Notes", "Reference")
 SEPARATE_AMOUNT_FIELDS = ("Inflow", "Outflow")
 MAX_BYTES = MAX_CSV_IMPORT_BYTES
 
 INTERNAL_WORDS = {"internal", "internal transfer", "transfer", "transfers", "own account"}
+
+
+# Rows another app wrote to set or correct its own balance. Lightning keeps the account's opening balance and its
+# reconciliations itself, so posting these would count the money twice (owner feedback, 2026-11-05).
+BALANCE_WORDS = {"starting balance", "starting balances", "opening balance", "opening balances", "initial balance",
+                 "balance adjustment", "balance adjustments", "adjustment", "adjustments", "balance correction",
+                 "reconciliation", "reconciliation adjustment"}
+
+
+def is_balance_row(*texts: str) -> bool:
+    """The Category or Counterparty says the row is another app's opening balance or balance adjustment."""
+    return any(" ".join((text or "").split()).casefold() in BALANCE_WORDS for text in texts)
 
 
 def is_internal(category: str) -> bool:

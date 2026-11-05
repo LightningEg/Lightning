@@ -90,7 +90,9 @@ class BankImportService:
             "Inflow": ("inflow", "money in", "credit", "credits", "deposit", "deposits"),
             "Outflow": ("outflow", "money out", "debit", "debits", "withdrawal", "withdrawals"),
             "Counterparty": ("counterparty", "merchant", "payee", "beneficiary", "party", "name"),
-            "Category": ("category", "type"),
+            "Category": ("category", "type", "subcategory", "sub category"),
+            "Group": ("category group", "group", "parent category", "main category", "master category",
+                      "category parent"),
             "Notes": ("notes", "memo", "narrative", "details", "description"),
             "Reference": ("reference", "ref", "transaction id", "transaction reference"),
         }

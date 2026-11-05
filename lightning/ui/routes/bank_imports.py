@@ -311,7 +311,7 @@ def _row_ui(row: dict, form=None) -> dict:
             "cat": str(row.get("_category_id") or "") if not row.get("_transfer_account_id") else "",
             "whom": row["_whom"] if custody else "",
             "whom_pick": f"counterparty:{row['_counterparty_id']}" if custody else "",
-            "remember": bool(row.get("_remember_category")), "skip": bool(row.get("_skip")),
+            "remember": bool(row.get("_remember_category")), "skip": bool(row.get("_skip") or row.get("_balance_row")),
             "match": str(row.get("_match") or row.get("_default_match") or ""), "fee": "", "conversion_amount": ""}
 
 
@@ -365,8 +365,13 @@ def _render_review(request, c, account_id: int, batch, rows, *, summary, form=No
         reject_prompt = _rejected_prompt(
             account, c.bank_imports.source_header(batch["id"]),
             [(str(r["_line"]), str(r.get("_row_error") or " ".join(r.get("_errors") or []))) for r in failing], len(failing))
+    labels: dict[str, int] = {}
+    for row in rows:
+        if row.get("_status") == "REVIEW" and row.get("_file_label"):
+            labels[row["_file_label"]] = labels.get(row["_file_label"], 0) + 1
+    file_labels = sorted(labels.items(), key=lambda item: (-item[1], item[0].casefold()))
     return render(request, "bank_import_preview.html", account=account, batch=batch, rows=rows,
-                  groups=groups, counts=counts, categories=_categories(c),
+                  groups=groups, counts=counts, categories=_categories(c), file_labels=file_labels,
                   counterparties=c.counterparties.list_active(), owners=c.counterparties.list_people(), account_choices=accounts_here,
                   summary=summary, msg=msg, error=error, reject_prompt=reject_prompt, status_code=status_code)
 
