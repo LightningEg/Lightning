@@ -17,7 +17,7 @@ from lightning.ui.web import create_app
 from lightning.workflows import ai_prompts
 
 BAD_CSV = (b"Date,Amount,Counterparty\n2026-09-10,-250.75,Secret Merchant 9981\n"
-           b"not a date,-7777.77,Other Merchant 5512\n2026-09-11,0,Zero Row\n")
+           b"not a date,-7777.77,Other Merchant 5512\n2026-09-11,no amount,Zero Row\n")
 
 
 def _outside_dialogs(page: str) -> str:

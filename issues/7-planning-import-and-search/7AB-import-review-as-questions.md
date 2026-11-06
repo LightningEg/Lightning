@@ -43,7 +43,7 @@ Works with touch on the phone (Part C wins there). Done when: 20 leftover rows t
 
 ## 7AB6 Safe to go fast · S
 The result screen carries *Undo this import* (the batch's created entries, already available as
-`created_transactions`) and, with IT-7AA9, the balance check against the statement.
+`created_transactions`) and, with the balance check built in IT-7AA9 (`lightning/import_reconcile.py`) against the statement.
 
 Order: 7AB1–7AB3 together (they replace the row page; rows load per opened group, which also fixes the page size in
-IT-7AA8), then 7AB4, 7AB6, 7AB5. Needs one PC and one phone check by the owner when 7AB1–7AB3 work end to end.
+IT-7AA8, built: `REVIEW_PAGE_ROWS` and `/import/{batch}/groups`), then 7AB4, 7AB6, 7AB5. Needs one PC and one phone check by the owner when 7AB1–7AB3 work end to end.

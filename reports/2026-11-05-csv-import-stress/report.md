@@ -141,3 +141,14 @@ review screens were not exercised.
 ## Dated follow-ups
 
 - 2026-11-05: the owner asked for a better flow for large files ("smarter buttons and features"); planned only, as IT-7AB (summary first, post in rounds, group by question, smart buttons, quick mode, undo).
+- 2026-11-06: IT-7AA1 built; the harness's A12, A13 and A14 now read every date correctly (B1 still blocked at the column step until 7AA2).
+- 2026-11-06: IT-7AA2 built; A4 (DR/CR beside positive amounts) now posts spending as money out.
+- 2026-11-06: IT-7AA3 built; B2's USD row is now an error row and posts nothing (reference amounts and the account column, F4, remain).
+- 2026-11-06: IT-7Z2 safe part built; B5's CIB row no longer posts into NBE (it is an error row). The split into one batch per account remains.
+- 2026-11-06: IT-7AA8 part built; D5 (5,000 rows) review page 25 MB to 0.8 MB and 4.7 s to 2.8 s (the preview computation, about 1.6 s, and posting in chunks remain).
+- 2026-11-06: IT-7AA6 built; totals footers, zero amounts and future holds open as skipped rows with a reason (A8, A15, A16 have no error rows).
+- 2026-11-06: IT-7AA5 built; A6, A7, A10, A11 and A17 reach the review (cp1256 is read without a visible preview yet).
+- 2026-11-06: IT-7AA7 and IT-7AA4 built; B1, B3 and B6 resolve, and bank descriptions become counterparties (A2, C3).
+- 2026-11-06: IT-7AA9 built; a Balance column is checked against the rows and the review lists gaps (a removed row is caught).
+- 2026-11-06: IT-7AA8 finished except its targets: 5,000 rows review in about 2 s (page 0.8 MB); posting stays one all-or-nothing request.
+- 2026-11-06: IT-7AA is finished and its item deleted (steps 7AA1-7AA9). Evidence stays in `tests/test_import_profile.py` and the re-run harness (`evidence/stress_import.py`). Owner accepted a review of about 2 s for 5,000 rows; posting in chunks was not built (posting stays one all-or-nothing request).

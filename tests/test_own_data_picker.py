@@ -63,7 +63,7 @@ def template(name):
 
 def test_remaining_own_data_selects_use_type_and_pick():
     expectations = {
-        "bank_import_preview.html": [
+        "partials/bank_import_groups.html": [
             # Rows like the register: each row's own wells are type-and-pick.
             'name="category_{{ rid }}" id="category-{{ rid }}"',
             'data-own-picker',
@@ -111,7 +111,7 @@ def test_remaining_own_data_selects_use_type_and_pick():
 
 
 def test_redundant_search_fields_are_removed_without_changing_submission_fields():
-    source = template("bank_import_preview.html")
+    source = template("bank_import_preview.html") + template("partials/bank_import_groups.html")
     assert "data-option-filter" not in source
     for name in ("counterparty_{{ rid }}", "counterparty_pick_{{ rid }}", "category_{{ rid }}", "whom_{{ rid }}",
                  "whom_pick_{{ rid }}", "notes_{{ rid }}", "amount_{{ rid }}", "date_{{ rid }}"):

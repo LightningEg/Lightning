@@ -217,12 +217,12 @@ def run(sid, case, title, filename, data, c, client, account):
         out["path"] = "staged without the column step"
     elif 'class="import-map-form"' in text:
         from lightning.bank_import_rows import decode_csv
-        headers, _ = decode_csv(data)
-        mapping = c.bank_imports.suggested_mapping(account, headers)
+        headers, sample_rows = decode_csv(data)
+        mapping = c.bank_imports.suggested_mapping(account, headers, sample_rows)
         out["suggested"] = {k: v for k, v in mapping.items() if k != "amount_model"}
         out["path"] = "column step"
         missing = [k for k in ("Date",) if k not in mapping]
-        if "Amount" not in mapping and not ("Inflow" in mapping and "Outflow" in mapping):
+        if "Amount" not in mapping and not ("Inflow" in mapping and "Outflow" in mapping) and mapping.get("amount_model") != "BALANCE":
             missing.append("Amount")
         if missing:
             out["result"] = f"blocked at the column step: nothing suggested for {', '.join(missing)}"

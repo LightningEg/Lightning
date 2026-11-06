@@ -13,12 +13,11 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 |---|---|---|---|
 | **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](../../issues/7-planning-import-and-search/7C-move-in-from-other-apps.md) | L | new |
 | **IT-7Z** | [Import another app's export with few questions](../../issues/7-planning-import-and-search/7Z-import-other-app-exports.md) | M | new |
-| **IT-7AA** | [Read a whole import file before its rows, so dates, signs, currencies and layouts are never guessed…](../../issues/7-planning-import-and-search/7AA-import-file-profile.md) | L | new |
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](../../issues/7-planning-import-and-search/7AB-import-review-as-questions.md) | L | new |
 
 ## Reports with open follow-ups here
 
-- [CSV import stress test: where it breaks and how to rebuild it](../../reports/2026-11-05-csv-import-stress/report.md): 7AA, 7AB, 7Z, 7C
+- [CSV import stress test: where it breaks and how to rebuild it](../../reports/2026-11-05-csv-import-stress/report.md): 7AB, 7Z, 7C
 - [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 7C
 <!-- work:end -->
 
