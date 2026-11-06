@@ -62,3 +62,15 @@ def test_bare_type_column_is_a_direction_only_when_its_values_are(c, setup):
     assert c.bank_imports.suggested_mapping(acc, ["Date", "Amount", "Type"], drcr).get("Direction") == "Type"
     kinds = [{"Date": "2026-10-01", "Amount": "5", "Type": "Card"}]
     assert "Direction" not in c.bank_imports.suggested_mapping(acc, ["Date", "Amount", "Type"], kinds)
+
+
+def test_row_in_another_currency_never_posts_its_own_figure():
+    from lightning.bank_import_parsing import normalize_rows
+    from lightning.bank_import_rows import currency_code
+    mapping = {"Date": "D", "Amount": "A", "Currency": "C"}
+    raw = [{"D": "2026-10-01", "A": "-40", "C": "USD", "__line__": "2"},
+           {"D": "2026-10-02", "A": "-50", "C": "LE", "__line__": "3"},
+           {"D": "2026-10-03", "A": "-60", "C": "", "__line__": "4"}]
+    usd, le, blank = [p for _r, p in normalize_rows(raw, mapping, "SINGLE", False, "EGP")]
+    assert "USD" in usd["_errors"][0] and not le["_errors"] and not blank["_errors"]
+    assert currency_code("جنيه") == "EGP"

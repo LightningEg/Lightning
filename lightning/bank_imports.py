@@ -95,6 +95,7 @@ class BankImportService:
                           "expense income", "transaction type", "type of transaction", "dr or cr", "debit or credit"),
             "Group": ("category group", "group", "parent category", "main category", "master category",
                       "category parent"),
+            "Currency": ("currency", "currency code", "ccy", "cur"),
             "Notes": ("notes", "memo", "narrative", "details", "description"),
             "Reference": ("reference", "ref", "transaction id", "transaction reference"),
         }
@@ -184,7 +185,7 @@ class BankImportService:
         if missing:
             raise ValidationError(
                 "Map Date and either a signed Amount column or two different columns for Inflow and Outflow.", "mapping")
-        stored = normalize_rows(raw_rows, mapping, amount_model, invert_amount)
+        stored = normalize_rows(raw_rows, mapping, amount_model, invert_amount, self.accounts.get(account_id).currency)
         now = now_iso()
         with self.db.transaction():
             canonical_fields = ("Date", *SEPARATE_AMOUNT_FIELDS, *OPTIONAL) if amount_model == "SEPARATE" else (*REQUIRED, *OPTIONAL)

@@ -143,3 +143,4 @@ review screens were not exercised.
 - 2026-11-05: the owner asked for a better flow for large files ("smarter buttons and features"); planned only, as IT-7AB (summary first, post in rounds, group by question, smart buttons, quick mode, undo).
 - 2026-11-06: IT-7AA1 built; the harness's A12, A13 and A14 now read every date correctly (B1 still blocked at the column step until 7AA2).
 - 2026-11-06: IT-7AA2 built; A4 (DR/CR beside positive amounts) now posts spending as money out.
+- 2026-11-06: IT-7AA3 built; B2's USD row is now an error row and posts nothing (reference amounts and the account column, F4, remain).

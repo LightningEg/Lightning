@@ -30,6 +30,8 @@ A third amount model: an amount and a column whose values say in or out (DR/CR, 
 ## 7AA3 Currency per row · M
 A Currency column is matched; a row in another currency waits for the account's amount (or a reference-amount column) and never posts its own figure. Done when: B2's USD row cannot post as EGP.
 
+**Built 2026-11-06:** Currency column matched (`currency_code`, LE/Arabic names read as EGP); a row in another currency is an error row and never posts. Open: using a reference-amount column to fill the account amount, and IT-7Z2 (account column).
+
 ## 7AA4 Merchant name from the description · M
 A cleaned merchant name fills Counterparty and the raw text stays in Notes, learned through counterparty aliases. Done when: A2 and C3 group by merchant and reuse last month's category.
 

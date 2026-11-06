@@ -17,7 +17,7 @@ from lightning.core.money import ascii_digits
 REQUIRED = ("Date", "Amount")
 # "Group" is the parent a category sits under in another app's export ("Work" for "Work › Transportation").
 # "Direction" is a column whose values say money in or out, beside an unsigned Amount (DR/CR, Income/Expense; IT-7AA2).
-OPTIONAL = ("Counterparty", "Category", "Group", "Notes", "Reference", "Direction")
+OPTIONAL = ("Counterparty", "Category", "Group", "Notes", "Reference", "Direction", "Currency")
 SEPARATE_AMOUNT_FIELDS = ("Inflow", "Outflow")
 MAX_BYTES = MAX_CSV_IMPORT_BYTES
 
@@ -120,6 +120,16 @@ def direction_sign(value: str) -> int:
     if word in MONEY_IN_WORDS:
         return 1
     raise ValueError(f"“{value}” in the Direction column is not money in or out. Use DR/CR, Debit/Credit or Income/Expense.")
+
+
+_CURRENCY_NAMES = {"le": "EGP", "l.e": "EGP", "l.e.": "EGP", "جنيه": "EGP", "جنيه مصري": "EGP", "ج.م": "EGP",
+                   "egp": "EGP", "$": "USD", "us$": "USD", "دولار": "USD", "€": "EUR", "£": "GBP"}
+
+
+def currency_code(value: str) -> str:
+    """A Currency cell as an ISO code (EGP for LE and Arabic names); "" when the cell is empty."""
+    text = " ".join((value or "").split())
+    return _CURRENCY_NAMES.get(text.casefold(), text.upper())
 
 
 def _separate_amount(inflow: str, outflow: str) -> str:
