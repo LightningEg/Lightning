@@ -11,8 +11,8 @@ Source: owner chat request following a source and fault-injection review; dummy 
 | FB1 | Lost proof reply leaves home approved and PC stuck at password | Resume after uncertain delivery and process exit | Recovery | Defect, reproduced | [4E regression tests](../tests/test_pairing_hardening.py) |
 | FB2 | Identity keys are plain PEM with filesystem permissions | OS-protected credentials and safe migration | Credentials | Request, source confirmed | [4F credential tests](../tests/test_device_credentials.py) |
 | FB3 | Untrusted requests can occupy or exhaust a pairing window | Bounded resource use and pending leases | Availability | Defect, source confirmed | [4G abuse/lease tests](../tests/test_pairing_hardening.py) |
-| FB4 | Native Wi-Fi/lifecycle acceptance is incomplete | Automated faults plus executable physical-device checks | Evidence | Request | [4H acceptance kit](../tools/pairing_acceptance.py); [physical matrix](../reports/r11-pairing-hardening/evidence/acceptance.md) |
-| FB5 | Custom handshake needs independent review | Separate design/security review and regression evidence | Security | Request | [4I independent review](../reports/r11-pairing-hardening/report.md) |
+| FB4 | Native Wi-Fi/lifecycle acceptance is incomplete | Automated faults plus executable physical-device checks | Evidence | Request | [4H acceptance kit](../tools/pairing_acceptance.py); [physical matrix](../issues/4-edit-journal-and-devices/r11-pairing-hardening/evidence/acceptance.md) |
+| FB5 | Custom handshake needs independent review | Separate design/security review and regression evidence | Security | Request | [4I independent review](../issues/4-edit-journal-and-devices/r11-pairing-hardening/report.md) |
 
 Five observations; one owner request. No distinct end-user respondent count is inferred.
 

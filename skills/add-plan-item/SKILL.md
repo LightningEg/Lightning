@@ -1,6 +1,6 @@
 ---
 name: add-plan-item
-description: File a bug, improvement, feature, technical task or owner decision as one coded item in issues/, with the right milestone, pillar, size and front matter, and regenerate the plan. Use when you find or plan something that is not finished in this session.
+description: File a bug, improvement, feature, technical task or owner decision as one coded item in issues/, with the right big-picture folder, pillar, size and front matter, and regenerate the plan. Use when you find or plan something that is not finished in this session.
 ---
 
 # Add a plan item
@@ -10,8 +10,8 @@ Tool-neutral. Everything still to do is an item in `issues/`; the plan is `issue
 ## Steps
 
 1. **Duplicate check.** Read `issues/INDEX.md`, then `grep -rln "<key words>" issues`. Add to an existing item when it is the same problem.
-2. **Milestone.** Pick the folder whose goal it serves (`issues/<n>-<name>/README.md` states each goal). Get the next code: `python tools/issues.py next <n>` (for example `3AN`). A code is never reused.
-3. **File.** `issues/<n>-<name>/<code>-<what-in-hyphens>.md`, front matter first:
+2. **Folder.** Pick the big picture whose goal it serves (`issues/<n>-<name>/README.md` states each goal; a report that started it sits in the same folder). Get the next code: `python tools/issues.py next <n>` (for example `3AN`). A code is never reused and never changes when the item moves.
+3. **File.** `issues/<n>-<name>/<TAG>-<code>-<what-in-hyphens>.md` (the kind tag from the front matter: `python tools/issues.py tag <code>` prints it after the file exists; BV, BT, IV, IT, NF or OW), front matter first:
 
 ```
 ---
@@ -32,4 +32,4 @@ by: Claude           # the AI or "owner"; never a person's name
 6. **Regenerate and check.** `python tools/issues.py` then `python tools/status.py`; `python -m pytest tests/test_issues.py tests/test_docs_structure.py -q`.
 7. **Commit** with the full code in the subject (`[BT-5J] ...`) and the `Release-note:` and `Detail:` trailers (skill `write-release-notes`; `Release-note: none` for a plan-only change).
 
-A finished item is deleted in the commit that finishes it, and its code is added to `done:` in the milestone README.
+A finished item is deleted in the commit that finishes it, and its code is added to `done:` in the folder's README.

@@ -1,5 +1,5 @@
 """Ordinary profiles fetch their own prices from the sources. Experimental journal profiles fetch on the home
-and receive exact journaled price rows (owner, 2026-10-05; issues/6-market-data/6A-price-packs.md
+and receive exact journaled price rows (owner, 2026-10-05; issues/6-market-data/NF-6A-price-packs.md
 › How the app gets prices).
 
 When: never daily by itself. Month-end closes matter most, because the monthly revaluation is posted from them,

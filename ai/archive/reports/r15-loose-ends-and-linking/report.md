@@ -19,7 +19,7 @@ The owner asked four things after the theme, multi-device sync and pairing work:
 - Read the source of `lightning/sync/`, `sync/journal/`, `runtime/journal_*.py` and `runtime/devices.py`.
 - Mapped the links between records: the schema's foreign keys, the matchers, and the pages that link to each other.
 - Ran `ruff check lightning tools --select F401,F841,F811,B023,B018`.
-- Read `issues/README.md`, `reports/README.md`, the report template and the front matter of every item.
+- Read `issues/README.md`, `issues/REPORTS.md`, the report template and the front matter of every item.
 
 Every finding below was checked against the code at the commit above. Nothing was run on a phone or a PC.
 
@@ -109,7 +109,7 @@ What does not:
 | E6 | Several items are designs or audits, not items: 4B is 99 KB, 3H 48 KB, 4A 42 KB, 3G 30 KB, 5G 28 KB and 6A 24 KB. 3S says it holds "18 places not yet filed". 3J, which folds the v1.1 review into Architecture, has been open since 10-13. | file sizes | Move the parts that are built into Architecture. Split the rest into numbered steps. |
 | E7 | The `done:` lists are not in order. Milestone order is "worked in order", but milestone 8 moves while 2 is still open. | milestone READMEs | Sort `done:` in the generator. State that milestones mean priority, not strict order. |
 | E8 | Of 14 reports, 9 lack the template's "Reviewed commit" line, 5 have no `evidence/` folder (which the README requires), and only 6 have dated follow-ups. | `grep -L 'Reviewed commit' reports/*/report.md` | Add a docs-structure test for the header lines, or relax the README where the evidence is in the text. |
-| E9 | The report catalogue is not in date order. Its IDs mix `audit-N` with slugs. Audit 5 (10-21) comes after Audit 4 (10-23). It has no kind column (audit, review, release record, research) and no status column (open follow-ups or closed). "Users' main questions" is reference material, not an audit. | `reports/README.md` | Sort by date. Add **Kind** and **Open follow-ups** columns. Move reference material to `docs/`, which the owner must agree to (`docs/` holds only the map and four references). |
+| E9 | The report catalogue is not in date order. Its IDs mix `audit-N` with slugs. Audit 5 (10-21) comes after Audit 4 (10-23). It has no kind column (audit, review, release record, research) and no status column (open follow-ups or closed). "Users' main questions" is reference material, not an audit. | `issues/REPORTS.md` | Sort by date. Add **Kind** and **Open follow-ups** columns. Move reference material to `docs/`, which the owner must agree to (`docs/` holds only the map and four references). |
 
 ## Validation and limits
 

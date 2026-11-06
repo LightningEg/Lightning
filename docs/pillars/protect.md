@@ -11,14 +11,14 @@ Encrypted profiles, backups, restore, and no account or server. Nothing is lost 
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IT-2A** | [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic rep…](../../issues/2-safe-for-real-money/2A-restore-safety.md) | L | building |
-| **IT-2C** | [Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidenc…](../../issues/2-safe-for-real-money/2C-ordinary-pc-acceptance.md) | L | ready |
-| **BT-2AI** | [Phone data must survive every app update and reinstall](../../issues/2-safe-for-real-money/2AI-phone-data-survives-updates.md) | L | new |
+| **BT-2AI** | [Phone data must survive every app update and reinstall](../../issues/2-safe-for-real-money/BT-2AI-phone-data-survives-updates.md) | L | new |
+| **IT-2A** | [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic rep…](../../issues/2-safe-for-real-money/IT-2A-restore-safety.md) | L | building |
+| **IT-2C** | [Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidenc…](../../issues/2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md) | L | ready |
 
 ## Reports with open follow-ups here
 
-- [Audit 2: backend efficiency and loose ends](../../reports/r2-backend-efficiency/report.md): 2A, 2C
-- [Audit 4: backend correctness and failure boundaries](../../reports/r5-backend-correctness/report.md): 2A, 2C
-- [Code audit: refactoring, loose ends and smart features](../../reports/r22-code-quality-and-smart-features/report.md): 2A, 2C
+- [Audit 2: backend efficiency and loose ends](../../issues/2-safe-for-real-money/r2-backend-efficiency/report.md): 2A, 2C
+- [Audit 4: backend correctness and failure boundaries](../../issues/2-safe-for-real-money/r5-backend-correctness/report.md): 2A, 2C
+- [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 2A, 2C
 <!-- work:end -->
 

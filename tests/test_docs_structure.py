@@ -144,7 +144,7 @@ def test_documentation_links_and_catalogues():
 
 
 def test_every_report_has_its_header_lines_and_open_follow_ups():  # IT-1K: the template's Date and Reviewed commit
-    for report in sorted((ROOT / "reports").glob("*/report.md")):
+    for report in sorted((ROOT / "issues").glob("*/r*/report.md")):
         head = "\n".join(report.read_text(encoding="utf-8").splitlines()[:8])
         assert re.search(r"^Date: \d{4}-\d\d-\d\d", head, re.M), f"{report.parent.name}: no Date: line"
         assert re.search(r"Reviewed commit: `?[0-9a-f]{7,40}", head), f"{report.parent.name}: no Reviewed commit: line"
@@ -153,12 +153,12 @@ def test_every_report_has_its_header_lines_and_open_follow_ups():  # IT-1K: the 
     spec.loader.exec_module(issues)
     open_codes = {i["code"] for m in issues.load()[0] for i in m["items"]}
     rows = re.findall(r"^\| [a-z0-9.-]+ \| \[.*\]\(.*\) \| [\d-]+ \| (\w+) \| (.*) \|$",
-                      (ROOT / "reports" / "README.md").read_text(encoding="utf-8"), re.M)
-    assert len(rows) == len(list((ROOT / "reports").glob("*/report.md")))
+                      (ROOT / "issues" / "REPORTS.md").read_text(encoding="utf-8"), re.M)
+    assert len(rows) == len(list((ROOT / "issues").glob("*/r*/report.md")))
     for kind, follow in rows:
         assert kind in ("audit", "review", "release", "research", "reference")
         finished = {c for c in follow.split(", ") if c != "none"} - open_codes
-        assert not finished, f"reports/README.md lists finished items as open follow-ups: {sorted(finished)}"
+        assert not finished, f"issues/REPORTS.md lists finished items as open follow-ups: {sorted(finished)}"
 
 
 def test_mirror_check_detects_missing_arabic_and_changed_voice(tmp_path):
@@ -174,11 +174,12 @@ def test_mirror_check_detects_missing_arabic_and_changed_voice(tmp_path):
 
 
 def test_documentation_check_detects_unregistered_reports_and_dead_links(tmp_path):
-    for name in ("docs", "reports", "feedback", "templates", "guideline"):
+    for name in ("docs", "feedback", "templates", "guideline", "issues"):
         (tmp_path / name).mkdir()
         (tmp_path / name / "README.md").write_text("# Index")
-    folder = tmp_path / "reports" / "2026-10-26-review"
-    folder.mkdir()
+    (tmp_path / "issues" / "REPORTS.md").write_text("# Reports\n")
+    folder = tmp_path / "issues" / "3-polish" / "r1-review"
+    folder.mkdir(parents=True)
     (folder / "report.md").write_text("[Lost evidence](evidence/missing.png)")
     errors = _docs_check_tool().check(tmp_path)
     assert any("missing link evidence/missing.png" in error for error in errors)
@@ -187,8 +188,9 @@ def test_documentation_check_detects_unregistered_reports_and_dead_links(tmp_pat
 
 def test_report_codes_are_sequential_unique_and_in_their_folder_names():  # reports are r1, r2, ... in order written
     tool = _docs_check_tool()
-    codes = [int(d.name.split("-")[0][1:]) for base in (ROOT / "reports", ROOT / "ai" / "archive" / "reports")
-             for d in base.iterdir() if d.is_dir() and re.match(r"r\d+-", d.name)]
+    folders = [d for pic in (ROOT / "issues").iterdir() if pic.is_dir() for d in pic.iterdir()]
+    folders += list((ROOT / "ai" / "archive" / "reports").iterdir())
+    codes = [int(d.name.split("-")[0][1:]) for d in folders if d.is_dir() and re.match(r"r\d+-", d.name)]
     assert sorted(codes) == list(range(1, len(codes) + 1))
     assert tool.next_report_code(ROOT) == f"r{len(codes) + 1}"
 

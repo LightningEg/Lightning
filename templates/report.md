@@ -22,4 +22,4 @@ device evidence. State what was not checked.
 ## Dated follow-ups
 
 Append YYYY-MM-DD, disposition and permanent verification reference. Preserve the
-original verdict. Register the report in reports/README.md.
+original verdict. Register the report in issues/REPORTS.md.

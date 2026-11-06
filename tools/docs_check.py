@@ -15,7 +15,7 @@ from pathlib import Path
 from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
-HOMES = ("docs", "ai", "reports", "feedback", "templates", "guideline", "issues", "skills", "theme-kit")
+HOMES = ("docs", "ai", "feedback", "templates", "guideline", "issues", "skills", "theme-kit")
 
 
 def check(root: Path) -> list[str]:
@@ -33,22 +33,23 @@ def check(root: Path) -> list[str]:
             target = unquote(link.split("#", 1)[0])
             if target and not (path.parent / target).exists():
                 errors.append(f"{path.relative_to(root)}: missing link {target}")
-    for name in ("docs", "reports", "feedback", "templates", "guideline"):
+    for name in ("docs", "feedback", "templates", "guideline", "issues"):
         if not (root / name / "README.md").is_file():
             errors.append(f"{name}/README.md: missing entry point")
     if not (root / "ai" / "INDEX.md").is_file():
         errors.append("ai/INDEX.md: missing entry point")
-    catalogue = root / "reports" / "README.md"
+    catalogue = root / "issues" / "REPORTS.md"
     registered = catalogue.read_text(encoding="utf-8") if catalogue.exists() else ""
-    for report in sorted((root / "reports").rglob("report.md")):
-        relative = report.relative_to(root / "reports").as_posix()
-        if not re.fullmatch(r"r\d+-[a-z0-9-]+/report\.md", relative):
-            errors.append(f"reports/{relative}: expected r<N>-subject/report.md")
+    if not catalogue.exists():
+        errors.append("issues/REPORTS.md: missing report catalogue")
+    for report in sorted((root / "issues").rglob("report.md")):
+        relative = report.relative_to(root / "issues").as_posix()
+        if not re.fullmatch(r"\d+-[a-z0-9-]+/r\d+-[a-z0-9-]+/report\.md", relative):
+            errors.append(f"issues/{relative}: a report is issues/<big picture>/r<N>-subject/report.md")
         if f"]({relative})" not in registered:
-            errors.append(f"reports/{relative}: absent from catalogue")
-    for path in (root / "reports").glob("*.md"):
-        if path.name != "README.md":
-            errors.append(f"{path.relative_to(root)}: report needs an r<N>-subject folder")
+            errors.append(f"issues/{relative}: absent from catalogue (issues/REPORTS.md)")
+    if (root / "reports").exists():
+        errors.append("reports/: reports now live beside their items in issues/<big picture>/")
     archive = root / "ai" / "archive" / "reports"
     archived = (archive / "README.md").read_text(encoding="utf-8") if (archive / "README.md").exists() else ""
     for report in sorted(archive.rglob("report.md")):
@@ -56,7 +57,7 @@ def check(root: Path) -> list[str]:
         if f"]({relative})" not in archived:
             errors.append(f"ai/archive/reports/{relative}: absent from the archive catalogue")
     seen = {}
-    for report in sorted(list((root / "reports").glob("*/report.md")) + list(archive.glob("*/report.md"))):
+    for report in sorted(list((root / "issues").glob("*/r*/report.md")) + list(archive.glob("*/report.md"))):
         code = report.parent.name.split("-")[0]
         if code in seen:
             errors.append(f"{report.parent.name}: code {code} is also used by {seen[code]}")
@@ -92,8 +93,9 @@ def mirrors(root: Path, peer: Path) -> list[str]:
 
 def next_report_code(root: Path) -> str:
     """The next free report code: one more than the highest r-code in reports/ and ai/archive/reports/."""
-    used = [int(m.group(1)) for base in (root / "reports", root / "ai" / "archive" / "reports") if base.is_dir()
-            for d in base.iterdir() if (m := re.match(r"r(\d+)-", d.name))]
+    folders = [d for pic in (root / "issues").glob("*/") if pic.is_dir() for d in pic.iterdir()]
+    archived = list((root / "ai" / "archive" / "reports").iterdir()) if (root / "ai" / "archive" / "reports").is_dir() else []
+    used = [int(m.group(1)) for d in folders + archived if d.is_dir() and (m := re.match(r"r(\d+)-", d.name))]
     return f"r{max(used, default=0) + 1}"
 
 

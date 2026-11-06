@@ -7,8 +7,11 @@
 
 A full code is a kind tag, then the item's code: BV-3B. The tag says what the item is; the code after it never changes.
 
-A milestone is issues/<n>-<name>/ with a README.md (title, done codes, goal). An item is <n><LETTER>-<what>.md in it,
-code 3C; a step inside a big item is a `## 3C1 Title` heading. issues/README.md explains the fields.
+A big picture (folder, historically a milestone) is issues/<n>-<name>/ with a README.md (title, done codes, goal). It holds
+its reports (r<N>-<subject>/report.md, listed in issues/REPORTS.md) and its items: <TAG>-<code>-<what>.md, e.g.
+BT-2AF-asset-value-follows-dated-estimate.md. The code (2AF) is an opaque id: it never changes and never moves with the
+file, and it is unique across every folder. A step inside a big item is a `## 2AF1 Title` heading. issues/README.md
+explains the fields.
 """
 from __future__ import annotations
 
@@ -35,7 +38,8 @@ TAGS = {"BV": "bug, visual", "BT": "bug, technical", "IV": "improvement, visual"
 DONE = ("done", "fixed", "built", "declined")  # a finished item is deleted and its code listed as done, never kept
 REQUIRED = ("title", "type", "pillar", "status", "created", "by")
 MILESTONE = re.compile(r"^(\d+)-[a-z0-9]+(-[a-z0-9]+)*$")
-ITEM = re.compile(r"^(\d+)([A-Z]+)-[a-z0-9]+(-[a-z0-9]+)*\.md$")
+ITEM = re.compile(r"^(?:(BV|BT|IV|IT|NF|OW)-)?(\d+)([A-Z]+)-[a-z0-9]+(-[a-z0-9]+)*\.md$")
+REPORT_DIR = re.compile(r"^r\d+-[a-z0-9]+(-[a-z0-9]+)*$")
 # A step: `## 3C1 Title · M` (size S, M or L, or `owner` for a step only the owner can do), once posted `· #123`.
 STEP = re.compile(r"^## (\d+[A-Z]+\d+) (.+?)(?: · (S|M|L|owner))?(?: · #(\d+))?[ \t]*$", re.M)
 
@@ -120,7 +124,7 @@ def load() -> tuple[list[dict], list[str]]:
     milestones, problems = [], []
     for path in sorted(ISSUES.iterdir(), key=lambda p: (int(p.name.split("-")[0]) if MILESTONE.match(p.name) else 999, p.name)):
         if path.is_file():
-            if path.name not in ("README.md", "INDEX.md"):
+            if path.name not in ("README.md", "INDEX.md", "REPORTS.md"):
                 problems.append(f"issues/{path.name}: items live in a milestone folder")
             continue
         match = MILESTONE.match(path.name)
@@ -140,11 +144,9 @@ def load() -> tuple[list[dict], list[str]]:
             rel = f"{path.name}/{item.name}"
             found = ITEM.match(item.name)
             if not found:
-                problems.append(f"{rel}: name must be <code>-<what>.md, e.g. {n}C-chart-labels-overlap.md")
+                problems.append(f"{rel}: name must be <TAG>-<code>-<what>.md, e.g. BV-{n}C-chart-labels-overlap.md")
                 continue
-            code = found.group(1) + found.group(2)
-            if int(found.group(1)) != n:
-                problems.append(f"{rel}: code {code} belongs in milestone {found.group(1)}")
+            code = found.group(2) + found.group(3)
             if code in done:
                 problems.append(f"{rel}: {code} is listed as done; codes are never reused (python tools/issues.py next {n})")
             meta_i = front_matter(item)
@@ -154,6 +156,10 @@ def load() -> tuple[list[dict], list[str]]:
             for key in REQUIRED:
                 if not meta_i.get(key):
                     problems.append(f"{rel}: front matter lacks '{key}'")
+            if found.group(1) is None:
+                problems.append(f"{rel}: name starts with the kind tag, e.g. {tag(meta_i) if meta_i.get('type') in TYPES else 'BV'}-{code}-…")
+            elif meta_i.get("type") in TYPES and not look_problem(meta_i) and found.group(1) != tag(meta_i):
+                problems.append(f"{rel}: file name says {found.group(1)} but its front matter makes it {tag(meta_i)}")
             if meta_i.get("type") not in TYPES:
                 problems.append(f"{rel}: type '{meta_i.get('type')}' is not one of {', '.join(TYPES)}")
             if meta_i.get("pillar") and meta_i["pillar"] not in PILLARS:
@@ -199,19 +205,31 @@ def load() -> tuple[list[dict], list[str]]:
                 steps.append({"code": step, "title": title, "size": size, "github": github,
                               "needs": re.findall(r"\d+[A-Z]+\d+", sentence.group(1)) if sentence else []})
             items.append({**meta_i, "code": code, "tag": tag(meta_i), "file": rel, "steps": steps})
-        codes = [i["code"] for i in items]
-        for code in {c for c in codes if codes.count(c) > 1}:
-            problems.append(f"issues/{path.name}/: code {code} is used twice")
+        for report in sorted(p for p in path.iterdir() if p.is_dir()):
+            if not REPORT_DIR.match(report.name) or not (report / "report.md").is_file():
+                problems.append(f"issues/{path.name}/{report.name}/: a folder here is a report: r<N>-<subject>/report.md")
         milestones.append({"n": n, "dir": path.name, "title": meta.get("title", path.name),
                            "goal": goal.group(1) if goal else "", "done": done, "items": items})
     numbers = [m["n"] for m in milestones]
     for n in {x for x in numbers if numbers.count(x) > 1}:
-        problems.append(f"issues/: milestone number {n} is used twice")
+        problems.append(f"issues/: folder number {n} is used twice")
+    everywhere = [i["code"] for m in milestones for i in m["items"]]
+    for code in sorted({c for c in everywhere if everywhere.count(c) > 1}):
+        problems.append(f"issues/: code {code} is used by more than one item")
+    for m in milestones:
+        for code in m["done"]:
+            if code in everywhere:
+                problems.append(f"issues/{m['dir']}/README.md: {code} is listed as done but an item still has it")
     return milestones, problems
 
 
-def next_code(milestone: dict) -> str:
-    used = [number(re.sub(r"^\d+", "", c)) for c in [i["code"] for i in milestone["items"]] + milestone["done"]]
+def next_code(milestone: dict, milestones: list[dict] | None = None) -> str:
+    """The next free code for a new item in this folder: its number and the next letter after every code that starts
+    with that number anywhere (codes are opaque and stay with their item when it moves between folders)."""
+    n = str(milestone["n"])
+    pool = milestones or [milestone]
+    every = [c for m in pool for c in [i["code"] for i in m["items"]] + m["done"]]
+    used = [number(c[len(n):]) for c in every if re.fullmatch(rf"{n}[A-Z]+", c)]
     return f"{milestone['n']}{letters(max(used, default=0) + 1)}"
 
 
@@ -225,7 +243,7 @@ def render(milestones: list[dict]) -> str:
         "",
         "Each code starts with what the item is: " + " · ".join(f"**{k}** {v}" for k, v in TAGS.items()) + ".",
         "",
-        f"{len(milestones)} milestones, {count} open items, in the order they are worked on.",
+        f"{len(milestones)} big pictures, {count} open items. Each folder holds its reports and its items.",
     ]
     for m in milestones:
         lines += ["", f"## {m['n']} {m['title']}", ""]
@@ -241,7 +259,10 @@ def render(milestones: list[dict]) -> str:
                 gh = f" ([#{s['github']}](https://github.com/LightningEg/Lightning/issues/{s['github']}))" if s["github"] else ""
                 lines.append(f"| {i['tag']}-{s['code']} | ↳ {s['title']}{gh} | | | {s['size'] or ''} | |")
         done = sorted(m["done"], key=lambda c: number(re.sub(r"^\d+", "", c)))
-        lines += ["", f"Done: {', '.join(done) or 'nothing yet'}. Next free code: {next_code(m)}."]
+        reports = sorted((ISSUES / m["dir"]).glob("r*-*/report.md"), key=lambda p: int(p.parent.name.split("-")[0][1:]))
+        if reports:
+            lines += ["", "Reports: " + " · ".join(f"[{p.parent.name.split('-')[0]}]({m['dir']}/{p.parent.name}/report.md)" for p in reports) + "."]
+        lines += ["", f"Done: {', '.join(done) or 'nothing yet'}. Next free code: {next_code(m, milestones)}."]
     return "\n".join(lines) + "\n"
 
 
@@ -360,7 +381,7 @@ def main() -> int:
         if not wanted:
             print("usage: python tools/issues.py next <milestone number>")
             return 1
-        print(next_code(wanted[0]))
+        print(next_code(wanted[0], milestones))
         return 0
     if sys.argv[1:2] == ["tag"]:
         wanted = [i for m in milestones for i in m["items"] if len(sys.argv) > 2 and i["code"] == sys.argv[2].split("-")[-1]]

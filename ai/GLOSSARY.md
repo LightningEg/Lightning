@@ -22,7 +22,7 @@ Find a term: `grep -n -i '<term>' ai/GLOSSARY.md`.
 
 ## Device authority
 
-Built v1 lending; planned replacement: [edit journal](../issues/4-edit-journal-and-devices/4A-edit-journal.md).
+Built v1 lending; planned replacement: [edit journal](../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md).
 
 | Term | Meaning |
 |---|---|

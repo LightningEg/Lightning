@@ -144,7 +144,7 @@ def test_the_needs_sentence_in_markdown_is_read_independently_of_live_plan_items
     folder = tmp_path / "9-later"
     folder.mkdir()
     (folder / "README.md").write_text("---\ntitle: Later\n---\n", encoding="utf-8")
-    (folder / "9Z-example.md").write_text(
+    (folder / "NF-9Z-example.md").write_text(
         "---\ntitle: Example\ntype: feature\npillar: capture\nsize: L\nstatus: ready\n"
         "created: 2026-11-04\nby: Codex\n---\n\n"
         "## 9Z3 Pickers · M\nChoose.\n\n## 9Z4 Search · M\nFind.\n\n"

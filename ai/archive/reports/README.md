@@ -1,7 +1,7 @@
 # Archived reports
 
 Reports whose follow-ups are all finished, moved here by `python tools/archive.py`. The text and verdict are kept;
-evidence images are in git history. Active reports: [reports](../../../reports/README.md).
+evidence images are in git history. Active reports: [reports](../../../issues/REPORTS.md).
 
 | Code | Report | Review date | Kind |
 | --- | --- | --- | --- |

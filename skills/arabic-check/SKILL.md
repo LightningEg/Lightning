@@ -39,7 +39,7 @@ Let the tests find untranslated strings; do not read the dictionaries (they are 
 ## Report
 
 **Where findings go.** Read `issues/README.md` once. Fix a small finding now (branch, test, release-note trailer) and file **no** item. File anything bigger as one item in
-the milestone it belongs to, `issues/<n>-<name>/<code>-<what>.md` (code from `python tools/issues.py next <n>`; this skill's name in `skills`, your model in `by`, `app_version`
+the big picture it belongs to, `issues/<n>-<name>/<TAG>-<code>-<what>.md` (code from `python tools/issues.py next <n>`; this skill's name in `skills`, your model in `by`, `app_version`
 from `pyproject.toml`, `commit` from `git rev-parse --short HEAD`), then run `python tools/issues.py`. Finishing an item means deleting its file in the same commit and adding its code to the milestone's `done:`. Never leave a finding only in chat.
 
 Pages checked, the strings you added (count and 5 examples), layout problems found and fixed, anything left (with page and string) for a native reader to review. Say plainly that a human Arabic reader should check the voice.
