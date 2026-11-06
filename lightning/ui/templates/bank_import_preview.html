@@ -81,8 +81,9 @@
   });
   // Long files: the next names are fetched into this same form, so nothing typed so far is lost.
   const more = form.querySelector('.import-more');
-  more?.querySelector('[data-import-more]').addEventListener('click', async (event) => {
-    const button = event.currentTarget;
+  const loadMore = async () => {
+    const button = more?.querySelector('[data-import-more]');
+    if (!more || !more.isConnected || !button || button.disabled) return false;
     button.disabled = true;
     try {
       const response = await fetch(`${more.dataset.moreUrl}?start=${more.dataset.next}`, {credentials: 'same-origin'});
@@ -91,7 +92,19 @@
       more.dataset.next = response.headers.get('X-Next-Start');
       const left = Number(response.headers.get('X-Remaining'));
       if (left > 0) { button.querySelector('.num').textContent = `(${left})`; button.disabled = false; } else { more.remove(); }
-    } catch (error) { button.disabled = false; }
+      return true;
+    } catch (error) { button.disabled = false; return false; }
+  };
+  more?.querySelector('[data-import-more]').addEventListener('click', loadMore);
+  // Ticking a name means all its rows, drawn or not: load the rest of that name first, then tick them.
+  form.addEventListener('change', async (event) => {
+    const box = event.target.closest('.import-pick-group');
+    if (!box || !box.checked) return;
+    const want = Number(box.dataset.count || 0), group = box.dataset.group;
+    while (form.querySelectorAll(`.import-line[data-group="${group}"]`).length < want && await loadMore()) { /* next page */ }
+    const picks = form.querySelectorAll(`.import-line[data-group="${group}"] .import-pick`);
+    picks.forEach((pick) => { pick.checked = true; });
+    picks[0]?.dispatchEvent(new Event('change', {bubbles: true}));
   });
   // Filter chips show the names in one state.
   form.querySelectorAll('[data-filter]').forEach((chip) => chip.addEventListener('click', () => {
