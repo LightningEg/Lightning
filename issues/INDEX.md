@@ -245,6 +245,12 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | M | |
 | **IV-3H** | [Tab-by-tab review: what a real user needs next](12-desktop-ux/IV-3H-tab-by-tab-review.md) | improvement, visual | Feel | L | ready |
 | IV-3H3 | ↳ Step 3: features | | | L | |
+| **NF-12G** | [Money lent to others and costs split with others - who owes you what, counted honestly in what you own](12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | new feature | Own | L | new |
+| NF-12G1 | ↳ Design: the person, the loan, the split, and where they show | | | M | |
+| NF-12G2 | ↳ Money lent and paid back | | | L | |
+| NF-12G3 | ↳ A cost split with others | | | L | |
+| NF-12G4 | ↳ Who owes what, per person | | | M | |
+| NF-12G5 | ↳ Mohab, Arabic and the guideline | | | M | |
 | **NF-3AZ** | [Offer the next step where a figure or row raises the question, always with a preview and an explicit confirmation](12-desktop-ux/NF-3AZ-next-step-at-the-moment-of-need.md) | new feature | Plan | L | new |
 | NF-3AZ1 | ↳ Salary posted becomes one reviewed payday proposal | | | M | |
 | NF-3AZ2 | ↳ A statement row links to the payment already recorded from an SMS | | | M | |
@@ -256,8 +262,7 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | NF-3AZ8 | ↳ A maturing certificate shows the expected date, then allocation choices after the receipt is recorded | | | M | |
 | NF-3AZ9 | ↳ An investment result explains what changed | | | M | |
 | NF-3AZ10 | ↳ Needs you groups by job and consequence | | | M | |
-| **OW-12F** | [Choose whether to bring credit cards, money lent or split with others, and receipt photos into scope](12-desktop-ux/OW-12F-credit-cards-lending-and-receipts.md) | owner task | Capture |  | ready |
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md).
 
-Done: nothing yet. Next free code: 12G.
+Done: 12F. Next free code: 12H.

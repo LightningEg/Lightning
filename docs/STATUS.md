@@ -6,10 +6,10 @@ Version **2.0.3**. Generated from the plan by `python tools/status.py`; do not e
 
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
-| [Capture](pillars/capture.md) | 6 |  | 1 | 5 |  | 1 |
+| [Capture](pillars/capture.md) | 5 |  |  | 5 |  |  |
 | [Plan](pillars/plan.md) | 3 |  |  | 3 |  |  |
 | [Understand](pillars/understand.md) | 2 |  |  | 1 | 1 |  |
-| [Own](pillars/own.md) | 5 | 1 |  | 2 | 2 |  |
+| [Own](pillars/own.md) | 6 | 1 |  | 3 | 2 |  |
 | [Protect](pillars/protect.md) | 3 | 1 | 1 | 1 |  |  |
 | [Everywhere](pillars/everywhere.md) | 7 | 3 | 1 | 3 |  |  |
 | [Feel](pillars/feel.md) | 9 | 3 | 4 | 1 | 1 | 1 |
@@ -34,7 +34,6 @@ Version **2.0.3**. Generated from the plan by `python tools/status.py`; do not e
 - **OW-3AI** (Feel) [Additional broker and institution logos still needed](../issues/3-polish-and-arabic/OW-3AI-institution-logos.md): ready
 - **OW-8AA** (Reach) [Sign off the Low, Medium and High ratings on the comparison pages](../issues/8-website/OW-8AA-sign-off-the-comparison-ratings.md): ready
 - **OW-8D** (Reach) [For Geeks audit ideas left for the owner to choose](../issues/8-website/OW-8D-for-geeks-audit-ideas-to-choose.md): ready
-- **OW-12F** (Capture) [Choose whether to bring credit cards, money lent or split with others, and receipt photos into scope](../issues/12-desktop-ux/OW-12F-credit-cards-lending-and-receipts.md): ready
 
 ## By milestone
 

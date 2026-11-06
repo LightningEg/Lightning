@@ -16,12 +16,11 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 | **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](../../issues/7-planning-import-and-search/NF-7C-move-in-from-other-apps.md) | L | new |
 | **IV-12C** | [PC quick add](../../issues/12-desktop-ux/IV-12C-quick-add-goes-to-the-empty-field.md) | S | new |
 | **IV-12E** | [PC ledger noise](../../issues/12-desktop-ux/IV-12E-pc-ledger-noise.md) | M | new |
-| **OW-12F** | [Choose whether to bring credit cards, money lent or split with others, and receipt photos into scope](../../issues/12-desktop-ux/OW-12F-credit-cards-lending-and-receipts.md) | owner | ready |
 
 ## Reports with open follow-ups here
 
 - [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 7C
 - [CSV import stress test: where it breaks and how to rebuild it](../../issues/7-planning-import-and-search/r23-csv-import-stress/report.md): 7AB, 7Z, 7C
-- [Audit 14: using Lightning as a user, on the PC and the phone](../../issues/12-desktop-ux/r26-user-test-pc-and-phone/report.md): 12C, 12E, 12F
+- [Audit 14: using Lightning as a user, on the PC and the phone](../../issues/12-desktop-ux/r26-user-test-pc-and-phone/report.md): 12C, 12E
 <!-- work:end -->
 
