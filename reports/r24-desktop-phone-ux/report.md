@@ -154,7 +154,7 @@ The distinctions between budget limit, actual cash, funded cash and reserves are
 
 **Recommendation:** present one proposed allocation: **Bills protected / Everyday spending / Emergency and goals / Left unassigned**, each expandable. Explain “No bank transfer will be made” next to confirmation. Show the post-allocation Safe-to-spend result and undo. Only show detailed editable category fields when the user chooses to customize. Format entry amounts to their currency’s precision and separate labels visually.
 
-Source: `lightning/ui/templates/phone/planning/payday.html`. Evidence: [phone payday](evidence/details/phone-payday.png). Follow-up: **[BV-3AS](../../issues/3-polish-and-arabic/3AS-payday-labels-and-precision.md)** for rendering; **IV-3G, IV-3AN** for simplification.
+Source: `lightning/ui/templates/phone/planning/payday.html`. Evidence: [phone payday](evidence/details/phone-payday.png). Rendering fixed: **BV-3AS** (#331), `tests/test_phone_payday_browser.py`; **IV-3G, IV-3AN** for simplification.
 
 ### F13. Property/vehicle pages expose irrelevant complexity — observed friction and brand violations
 
@@ -162,7 +162,7 @@ After the valuation and purchase details, a car account displays a full **Buy / 
 
 The new shared details partial also reintroduces **cards inside a card**, cents on headline figures, and an ordinary select of the user’s loans. This contradicts A16 and the established phone-specific pattern; the existing brand test’s sample does not contain this new asset detail state.
 
-**Recommendation:** lead with current dated estimate, change since purchase and linked debt. Primary action: **Update value**. Secondary actions: **Edit purchase details / View loan / Record sale** where supported. Show investment-unit and cash-import tools only where genuinely applicable. Use flat phone rows and a searchable loan picker. Follow-up: **[IV-3AT](../../issues/3-polish-and-arabic/3AT-property-vehicle-task-layout.md)**.
+**Recommendation:** lead with current dated estimate, change since purchase and linked debt. Primary action: **Update value**. Secondary actions: **Edit purchase details / View loan / Record sale** where supported. Show investment-unit and cash-import tools only where genuinely applicable. Use flat phone rows and a searchable loan picker. Fixed: **BV-3AT** (#331), `tests/test_asset_details.py::test_the_account_page_shows_the_change_since_purchase_the_history_and_the_loan`.
 
 ## Visual and accessibility assessment
 
@@ -238,7 +238,7 @@ The document remains a good **question inventory**, but it is not a trustworthy 
 | Certificates, FX and overseas investments | Certificate events/reconciliation, FX and investment return services exist | Native data/source limitations and freshness remain separate from UI availability |
 | No-pay month, early salary, raise, future budget and month-end recurrence | Current tests cover several early-pay and averaging cases; the old prose is insufficient to judge all remaining cases | Reconcile each old gap with its dedicated regression before carrying it forward; unverified residual cases are not asserted fixed here |
 
-`docs/product.md` also describes investment lots/ROI as planned while the current plan marks the investment milestone complete. Documentation drift can cause new work to duplicate features already present. Follow-up: **[IT-1Q](../../issues/1-easy-to-contribute/1Q-current-user-question-coverage.md)**.
+`docs/product.md` also describes investment lots/ROI as planned while the current plan marks the investment milestone complete. Documentation drift can cause new work to duplicate features already present. Done: **IT-1Q** (2026-11-06): the matrix above is the current coverage, linked from [r14](../r14-users-main-questions/report.md#dated-follow-ups); `docs/product.md` corrected.
 
 ## Recommended implementation order and acceptance
 

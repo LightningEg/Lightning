@@ -1057,6 +1057,9 @@ if (ledger) {
     syncSelection();
   });
   document.getElementById("delete-selected")?.addEventListener("click", () => deleteTransactions(selectedIds()));
+  document.getElementById("export-matching")?.addEventListener("click", () => {
+    (matching.length ? matching : [...byId.keys()]).forEach((id) => selected.add(id)); syncSelection(); document.getElementById("export-selected")?.click();
+  });
   document.getElementById("select-matching")?.addEventListener("click", () => { matching.forEach((id) => selected.add(id)); syncSelection(); });
   document.getElementById("clear-selected")?.addEventListener("click", () => { selected.clear(); syncSelection(); });
   document.getElementById("edit-selected")?.addEventListener("click", () => {
@@ -3062,4 +3065,23 @@ document.addEventListener('change', (event) => {
   document.addEventListener("focusout", () => setTimeout(sync, 0));
   // After the first paint: measuring the viewport while the page is still loading forces an early layout (IT-3AO3).
   requestAnimationFrame(() => setTimeout(sync, 0));
+})();
+
+// F8 (r24): a transactions list opened from an analysis page remembers it, so the way back keeps its period and scope.
+(() => {
+  const link = document.getElementById("investigation-back");
+  if (!link) return;
+  const key = "lightning-investigation-back";
+  const analysis = /^\/(birdview|spending|reports|financial-health)(\/|$)/;
+  try {
+    if (document.referrer) {
+      const from = new URL(document.referrer);
+      if (from.origin === location.origin && analysis.test(from.pathname)) sessionStorage.setItem(key, from.pathname + from.search);
+    }
+    const back = sessionStorage.getItem(key);
+    if (back && analysis.test(back.split("?")[0])) {
+      link.href = back; link.hidden = false;
+      link.textContent = t("Back to {page}", {page: t(back.startsWith("/birdview/expenses") || back.startsWith("/spending") ? "Spending" : "the analysis")});
+    }
+  } catch (e) {}
 })();

@@ -554,7 +554,7 @@ def _safe_tile(f) -> dict:
     return {"key": "safe", "surface": "over" if f.safe_to_spend < 0 else "hold", "label": label("safe_to_spend"),
             "value": f.safe_to_spend, "kind": "money",
             "badge": {"tone": "over" if f.safe_to_spend < 0 else "flat", "text": f"until {until}" if until else "3 months"},
-            "sub": share, "href": "/plan"}
+            "sub": share, "href": "/plan#safe-section"}
 
 
 @router.post("/demo")

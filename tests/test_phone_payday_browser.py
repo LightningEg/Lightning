@@ -43,6 +43,13 @@ def test_phone_payday_preview_and_enable(c, setup, monkeypatch):
                     page.goto(host.origin + '/payday')
                     assert page.locator('html').get_attribute('lang') == ('ar-EG' if language == 'ar' else 'en')
                     assert page.get_by_text('Preview rent', exact=False).count() == 1
+                    # BV-3AS: entry amounts at currency precision, and each name, note and field on its own line.
+                    values = page.eval_on_selector_all('form[action="/payday/apply"] input[type=text]', 'els => els.map(e => e.value)')
+                    assert values and all(__import__('re').fullmatch(r'-?[\d,]+(\.\d{1,2})?', v) for v in values), values
+                    stacked = page.eval_on_selector_all('form[action="/payday/apply"] label', '''els => els.every(l => {
+                        const n = l.querySelector('.field-name'), f = l.querySelector('input');
+                        return n && f && n.getBoundingClientRect().bottom <= f.getBoundingClientRect().top + 1; })''')
+                    assert stacked
                     assert page.locator('form[action="/payday/apply"] input[name^="category_"]').first.is_disabled()
                     assert page.locator('form[action="/payday/apply"] button[type=submit]').count() == 0
                     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')

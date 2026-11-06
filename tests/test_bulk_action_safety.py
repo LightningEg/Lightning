@@ -164,3 +164,20 @@ def test_selection_tools_say_what_they_will_touch_before_they_run(c, rows, ui): 
     assert page.locator('#export-selected').inner_text() == f'Export {n}'
     assert page.locator('#delete-selected').inner_text() == f'Delete {n}'
     assert page.locator('#bulk-category-form button.btn').inner_text() == f'Set category for {n}'
+
+
+def test_a_list_opened_from_spending_keeps_the_way_back_and_exports_its_whole_scope(c, rows, ui):  # F8 (r24)
+    bank, made = rows
+    page, origin = ui()
+    page.goto(f'{origin}/birdview/expenses?period=custom&date_from=2026-09-01&date_to=2026-09-30')
+    page.locator('a[href^="/transactions?"]').first.click()
+    page.wait_for_url('**/transactions?*')
+    back = page.locator('#investigation-back')
+    expect(back).to_be_visible()
+    assert 'period=custom' in back.get_attribute('href') and back.inner_text() == 'Back to Spending'
+    with page.expect_download() as download:
+        page.locator('#export-matching').click()
+    assert download.value.suggested_filename
+    assert page.locator('.transaction-select:checked').count() >= 1  # the selection stays visible
+    back.click()
+    page.wait_for_url('**/birdview/expenses?*')

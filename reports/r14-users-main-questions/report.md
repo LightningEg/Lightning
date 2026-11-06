@@ -46,3 +46,7 @@ Every other follow-up (net worth breakdown, what I owe, spend until payday, due 
 | Stale prices | Needs you flags prices older than about two months; month-end price gaps are listed |
 
 Early pay, raise and rent changes need explicit confirmation by design: Lightning suggests, Mohab confirms, neither plan nor reserve changes silently. Left open by the 2026-10-05 audit: a payment scheduled on the 31st moves to the 30th after a shorter month and stays there.
+
+## Dated follow-ups
+
+- **2026-11-06, current coverage (IT-1Q):** this report stays a question inventory as of 2026-10-27, not a list of what the app lacks today. [The user-question review in r24](../r24-desktop-phone-ux/report.md#review-of-the-user-question-document) matches each question to the evidence that exists now and the UX task left. Do not carry forward the old claims that the wealth bridge, purchase check, early loan payoff or funded payday preview are missing: each exists and Mohab (`tests/test_mohab_year.py`) or its own tests cover it. The no-pay-month, early-salary, raise, future-budget and month-end cases are not asserted fixed; reconcile each with its regression test before carrying it forward. `docs/product.md` no longer calls investment lots and returns planned.

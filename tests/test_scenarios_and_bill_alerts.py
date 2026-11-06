@@ -148,3 +148,14 @@ def test_a_voided_source_does_not_keep_a_drift_warning_alive(c):
     assert len(bill_alerts(c,date(2026,4,20)))==1
     c.transactions.void(txns[-1].id)
     assert not bill_alerts(c,date(2026,4,20))
+
+
+def test_scenarios_ask_one_question_at_a_time(c, monkeypatch):  # F10 (r24)
+    monkeypatch.setenv('LIGHTNING_TODAY', '2026-04-20')
+    with TestClient(create_app(c)) as client:
+        page = client.get('/plan/scenarios').text
+        assert 'Buy something' in page and 'Income arrives late' in page and 'Bill changes' in page
+        assert 'name="purchase"' in page and 'name="delay"' not in page and 'name="bill_amount"' not in page
+        assert 'name="delay"' in client.get('/plan/scenarios', params={'what': 'income'}).text
+        assert 'name="bill_amount"' in client.get('/plan/scenarios', params={'what': 'bill'}).text
+        assert 'How this is worked out' in page

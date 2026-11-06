@@ -730,6 +730,10 @@ async def scenario_page(request: Request):
     day, end = today(), today() + timedelta(days=90)
     values = {key: str(request.query_params.get(key, '')) for key in
               ('income', 'delay', 'purchase', 'purchase_date', 'account_id', 'bill', 'bill_amount')}
+    # One question at a time (F10, r24): the chosen kind, else the one that already has values, else a purchase.
+    what = str(request.query_params.get("what", ""))
+    if what not in ("income", "purchase", "bill"):
+        what = "income" if values["income"] else "bill" if values["bill"] else "purchase"
     error = ''
     try:
         comparison = compare_scenario(c.forecaster, day, end, **values)
@@ -737,7 +741,7 @@ async def scenario_page(request: Request):
         error = exc.message
         comparison = compare_scenario(c.forecaster, day, end)
     payments, _ = c.forecaster.scheduled_inputs(day, end)
-    return render(request, "planning/scenarios.html", comparison=comparison, values=values, error=error,
+    return render(request, "planning/scenarios.html", comparison=comparison, values=values, error=error, what=what,
                   day=str(day), end=str(end), payments=payments, occurrence_key=occurrence_key,
                   accounts=_paying_accounts(c))
 
