@@ -177,6 +177,15 @@
       {% from "partials/macros.html" import category_options %}<select name="category_id" aria-label="Category for the selected rows" data-own-picker><option value="">{{ 'Set a category…'|tr(locale) }}</option>{{ category_options(category_groups()) }}</select>
       <button class="btn small">{{ 'Set category'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
     </form>
+    {# F7 (r24): text replace limited to the selected rows, with a preview before it runs. #}
+    <details class="action-menu replace-selected"><summary id="replace-selected-label">{{ 'Replace text in selected'|tr(locale) }}</summary><div class="find-panel">
+      <form method="post" action="/transactions/find-replace" class="field-row" id="replace-selected-form">
+        <label>{{ 'In'|tr(locale) }}<select name="field"><option value="counterparty">{{ 'Counterparty'|tr(locale) }}</option><option value="notes">{{ 'Notes'|tr(locale) }}</option></select></label>
+        <label>{{ 'Find'|tr(locale) }}<input name="find" required maxlength="120"></label>
+        <label>{{ 'Replace with'|tr(locale) }}<input name="replace" maxlength="120"></label>
+        <button class="btn small">{{ 'Preview'|tr(locale) }}</button>
+        <input type="hidden" name="back" value="{{ request.url.path }}{{ '?' ~ request.url.query if request.url.query }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+      </form></div></details>
     <button type="button" class="btn small" id="rule-from-selected" title="{{ 'Make a rule from the first selected counterparty'|tr(locale) }}">{{ 'Make a rule'|tr(locale) }}</button>
     <button type="button" class="btn small" id="export-selected">{{ 'Export selected'|tr(locale) }}</button>
     <button type="button" class="btn small" id="merge-selected" hidden>{{ 'Merge selected'|tr(locale) }}</button>

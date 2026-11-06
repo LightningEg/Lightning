@@ -1027,3 +1027,6 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 .category-sheet-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
 .category-sheet-actions .btn { width: 100%; min-height: 48px; justify-content: center; }
 .category-sheet-actions > a:not(.btn) { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+
+/* r24: the compare-period dates stack, one control per row, so the whole date shows beside its 48px picker button. */
+.phone .compare-picker fieldset { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; gap: 8px; }

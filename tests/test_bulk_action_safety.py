@@ -181,3 +181,24 @@ def test_a_list_opened_from_spending_keeps_the_way_back_and_exports_its_whole_sc
     assert page.locator('.transaction-select:checked').count() >= 1  # the selection stays visible
     back.click()
     page.wait_for_url('**/birdview/expenses?*')
+
+
+def test_replace_in_selected_rows_previews_then_changes_only_those(c, setup, ui):  # F7 (r24)
+    bank, food = setup[0]['cib'], setup[1]['EXP.PERSONAL.FOOD']
+    made = [c.transactions.record_outflow(f'2026-09-0{i}', bank.id, '10', food.id, counterparty='Spinneys Cairo') for i in (2, 3, 4)]
+    page, origin = ui()
+    page.goto(f'{origin}/accounts/{bank.id}')
+    boxes = page.locator('.transaction-select')
+    boxes.nth(0).check(); boxes.nth(1).check()
+    page.locator('#replace-selected-label').click()
+    form = page.locator('#replace-selected-form')
+    form.locator('[name=find]').fill('Cairo')
+    form.locator('[name=replace]').fill('')
+    form.get_by_role('button', name='Preview').click()
+    dialog = page.locator('dialog.ask-dialog[open]')
+    expect(dialog).to_contain_text('2 of 2 selected rows')
+    expect(dialog).to_contain_text('Spinneys Cairo → Spinneys')
+    dialog.get_by_role('button', name='Replace').click()
+    page.wait_for_url('**/*msg=*')
+    names = sorted(c.transactions.get(t.id).counterparty or '' for t in made)
+    assert names.count('Spinneys') == 2 and names.count('Spinneys Cairo') == 1

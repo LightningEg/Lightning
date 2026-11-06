@@ -109,7 +109,13 @@ class CashFundingService:
         token = sha256(json.dumps(state, sort_keys=True).encode()).hexdigest()
         return {"month": month, "rows": rows, "reserves": reserve_rows, "cash": own_cash,
                 "funded": funded, "reserved": assigned_reserves, "unfunded_due": unfunded_due,
-                "ready": ready, "left_after_preview": pool, "missing": sorted(set(missing)), "token": token}
+                "ready": ready, "left_after_preview": pool, "missing": sorted(set(missing)), "token": token,
+                # The proposal in four lines (F12, r24): what is kept for bills, what the plan adds to everyday spending,
+                # what goes to reserves and goals, and what stays unassigned.
+                "proposal": {"bills": unfunded_due,
+                             "spending": sum((row["suggested"] - row["remaining"] for row in rows), ZERO),
+                             "reserves": sum((row["suggested"] for row in reserve_rows), ZERO),
+                             "unassigned": pool if ready is not None else None}}
 
     def apply(self, fingerprint, amounts, reserve_additions):
         if not self.enabled:

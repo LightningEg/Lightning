@@ -1083,6 +1083,27 @@ if (ledger) {
     ids.forEach((id) => { const input = document.createElement("input"); input.type = "hidden"; input.name = "txn_ids"; input.value = id; form.append(input); });
   });
   // PC P7: a rule from the selection, prefilled with the first selected payee.
+  // F7 (r24): replace text in the selected rows only; the server says what would change first, then the user confirms.
+  const replaceForm = document.getElementById("replace-selected-form");
+  replaceForm?.addEventListener("submit", async (event) => {
+    if (replaceForm.dataset.confirmed) return;
+    event.preventDefault();
+    const ids = selectedIds();
+    if (!ids.length) return;
+    const body = new FormData(replaceForm);
+    ids.forEach((id) => body.append("txn_ids", id));
+    let plan;
+    try { plan = await (await fetch("/transactions/find-replace/preview", { method: "POST", body })).json(); } catch (e) { return; }
+    const find = String(body.get("find") || "");
+    if (!plan.count) { await window.ask({ title: t("Nothing to replace"), message: t("None of the {count} selected rows contains “{find}”.", {count: ids.length, find}), ok: t("OK"), cancel: t("Close") }); return; }
+    const examples = plan.examples.map(([from, to]) => `${from || "—"} → ${to || "—"}`).join("\n");
+    const yes = await window.ask({ title: t("Replace in {count} of {selected} selected rows?", {count: plan.count, selected: ids.length}),
+      message: `${examples}\n${t("Rows that do not contain the text stay as they are. You can undo this from transaction history.")}`, ok: t("Replace"), tone: "warn" });
+    if (!yes) return;
+    ids.forEach((id) => { const input = document.createElement("input"); input.type = "hidden"; input.name = "txn_ids"; input.value = id; replaceForm.append(input); });
+    replaceForm.dataset.confirmed = "1";
+    replaceForm.requestSubmit();
+  });
   document.getElementById("rule-from-selected")?.addEventListener("click", () => {
     const box = selectedIds().map((id) => document.querySelector(`.transaction-select[value="${id}"]`)).find((b) => b?.dataset.payee);
     location.href = "/rules/new" + (box ? "?counterparty=" + encodeURIComponent(box.dataset.payee) : "");

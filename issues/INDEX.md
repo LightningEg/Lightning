@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-9 milestones, 40 open items, in the order they are worked on.
+9 milestones, 41 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -75,8 +75,19 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **BV-3AV** | [The Arabic bank import preview mixes English into Arabic lines](3-polish-and-arabic/3AV-arabic-bank-import-preview.md) ([#342](https://github.com/LightningEg/Lightning/issues/342)) | bug, visual · low | Feel | M | ready |
 | **BV-3AW** | [Four short words stay English in Arabic on loans, charts and investments](3-polish-and-arabic/3AW-arabic-short-words-loans-charts.md) ([#343](https://github.com/LightningEg/Lightning/issues/343)) | bug, visual · low | Feel | S | ready |
 | **IT-3AX** | [The site screenshot tool breaks on the new Overview, so the site's screens are not recaptured](3-polish-and-arabic/3AX-site-shots-tool-follows-the-new-screens.md) | improvement, technical | Reach | M | new |
+| **NF-3AY** | [Offer the next step where a figure or row raises the question, always with a preview and an explicit confirmation](3-polish-and-arabic/3AY-next-step-at-the-moment-of-need.md) | new feature | Plan | L | new |
+| NF-3AY1 | ↳ Salary posted becomes one reviewed payday proposal | | | M | |
+| NF-3AY2 | ↳ A statement row links to the payment already recorded from an SMS | | | M | |
+| NF-3AY3 | ↳ A repeated category correction offers a rule with its past matches | | | M | |
+| NF-3AY4 | ↳ A bill that falls due opens one sheet: already paid, or record it | | | M | |
+| NF-3AY5 | ↳ A reimbursable expense offers Create claim, and the receipt offers Match reimbursement | | | M | |
+| NF-3AY6 | ↳ Can I afford this checks the chosen account on the chosen date | | | M | |
+| NF-3AY7 | ↳ Emergency refill proposes an affordable schedule | | | M | |
+| NF-3AY8 | ↳ A maturing certificate shows the expected date, then allocation choices after the receipt is recorded | | | M | |
+| NF-3AY9 | ↳ An investment result explains what changed | | | M | |
+| NF-3AY10 | ↳ Needs you groups by job and consequence | | | M | |
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT. Next free code: 3AY.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT. Next free code: 3AZ.
 
 ## 4 Edit journal and devices
 
