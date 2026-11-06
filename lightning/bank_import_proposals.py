@@ -21,7 +21,32 @@ class ImportProposals:
         self.db, self.accounts, self.categories = db, accounts, categories
         self.counterparties, self.transactions, self.rules = counterparties, transactions, rules
 
+    def _active(self):
+        """The active accounts, read once per preview: they do not change while one is built (IT-7AA8)."""
+        if self._accounts_seen is None:
+            return self.accounts.list(active_only=True)
+        if "active" not in self._accounts_seen:
+            self._accounts_seen["active"] = self.accounts.list(active_only=True)
+        return self._accounts_seen["active"]
+
+    def _account(self, account_id: int):
+        if self._accounts_seen is None:
+            return self.accounts.get(account_id)
+        key = ("one", account_id)
+        if key not in self._accounts_seen:
+            self._accounts_seen[key] = self.accounts.get(account_id)
+        return self._accounts_seen[key]
+
+    _accounts_seen = None
+
     def preview(self, batch_id: int):
+        self._accounts_seen = {}
+        try:
+            return self._preview(batch_id)
+        finally:
+            self._accounts_seen = None
+
+    def _preview(self, batch_id: int):
         batch = self.db.one("SELECT * FROM bank_import_batches WHERE id=?", (batch_id,))
         if not batch:
             raise NotFoundError("Import batch not found.")
@@ -44,7 +69,7 @@ class ImportProposals:
                 pending_elsewhere.setdefault((staged["Date"], staged["Amount"]), other["file_name"])
             except (TypeError, ValueError, KeyError):
                 continue
-        active_accounts = self.accounts.list(active_only=True)
+        active_accounts = self._active()
         seen_refs = set()
         # A full-history query: run it at most once per preview, not once per row (7O).
         usual = functools.cache(self.transactions.usual_categories)
@@ -101,7 +126,7 @@ class ImportProposals:
             # One of your accounts as the counterparty, or "Internal" in the category, is a transfer.
             # A transfer whose account is known needs no category; one marked internal whose account
             # cannot be matched waits for the user to pick it.
-            target = next((a for a in self.accounts.list(active_only=True)
+            target = next((a for a in self._active()
                            if a.name == parsed["_transfer_target_suggestion"]), None)
             same_name = [a for a in active_accounts if a.id != batch["account_id"]
                          and a.name.casefold() == parsed["Counterparty"].strip().casefold()]
@@ -199,7 +224,7 @@ class ImportProposals:
     def _own_account(self, source_account_id: int, name: str):
         """The name of another of your accounts typed as the counterparty, if it is one."""
         wanted = " ".join((name or "").split()).casefold()
-        matches = [a.name for a in self.accounts.list(active_only=True)
+        matches = [a.name for a in self._active()
                    if a.id != source_account_id and a.name.casefold() == wanted]
         return matches[0] if len(matches) == 1 else None
 
@@ -213,8 +238,8 @@ class ImportProposals:
 
         tokens = re.findall(r"[\w]+", destination.group(1), re.UNICODE) if destination else []
         candidates = []
-        source_currency = self.accounts.get(source_account_id).currency
-        accounts = [account for account in self.accounts.list(active_only=True)
+        source_currency = self._account(source_account_id).currency
+        accounts = [account for account in self._active()
                     if account.id != source_account_id and account.currency == source_currency]
         for account in accounts:
             name = compact(account.name)
@@ -249,8 +274,8 @@ class ImportProposals:
             "WHERE t.status='POSTED' AND t.type IN ('IN','OUT') AND t.date=? "
             "AND le.account_id<>? AND le.amount_e6=?",
             (parsed["Date"], source_account_id, -amount_e6))
-        source_currency = self.accounts.get(source_account_id).currency
-        bank_ids = {account.id: account.name for account in self.accounts.list(active_only=True)
+        source_currency = self._account(source_account_id).currency
+        bank_ids = {account.id: account.name for account in self._active()
                     if account.account_type.value == "BANK" and account.currency == source_currency}
         matches = {bank_ids[row["account_id"]] for row in rows if row["account_id"] in bank_ids}
         return next(iter(matches)) if len(matches) == 1 else None

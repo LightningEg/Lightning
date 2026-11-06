@@ -203,3 +203,18 @@ def test_review_page_shows_the_balance_gap(c, setup):
     batch, _ = c.bank_imports.stage(cib, "g.csv", data)
     page = TestClient(create_app(c), base_url="http://127.0.0.1").get(f"/accounts/{cib}/import/{batch}")
     assert "does not add up" in page.text
+
+
+def test_a_category_picked_for_a_file_name_reaches_rows_not_drawn(c, setup):
+    import json, re
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    cib = setup[0]["cib"].id
+    cat = next(x for x in c.categories.pickable() if x.movement.name == "OUTFLOW" and x.parent_id)
+    lines = ["Date,Amount,Counterparty,Category"] + [f"2026-10-{1 + i % 28:02d},-{10 + i}.00,{["Seoudi", "Uber", "Netflix"][i % 3]},Zzz Unknown Name" for i in range(300)]
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    r = client.post(f"/accounts/{cib}/import", files={"file": ("l.csv", "\n".join(lines).encode(), "text/csv")}, follow_redirects=False)
+    batch = int(re.search(r"/import/(\d+)", r.headers["location"]).group(1))
+    done = client.post(f"/accounts/{cib}/import/{batch}/confirm", data={"labelcat": json.dumps(["Zzz Unknown Name", str(cat.id)])}, follow_redirects=False)
+    assert done.status_code == 200
+    assert c.db.scalar("SELECT COUNT(*) FROM bank_import_rows WHERE batch_id=? AND status='POSTED'", (batch,)) == 300

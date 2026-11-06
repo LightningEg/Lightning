@@ -576,8 +576,19 @@ async def confirm(request: Request, account_id: int, batch_id: int):
                               max_part_size=MAX_IMPORT_REVIEW_REQUEST_BYTES)
     account_names = {a.name.casefold() for a in c.accounts.list(active_only=True) if a.id != account_id}
     decisions = {}
+    label_choice = {}
+    for text in form.getlist("labelcat"):  # a category picked for one of the file's own names (rows not drawn take it too)
+        try:
+            label, value = json.loads(str(text))
+            label_choice[str(label)] = str(value)
+        except (ValueError, TypeError):
+            continue
     for row in rows:
         decision = _decision(form, row)
+        label_pick = label_choice.get(row.get("_file_label") or "")
+        if label_pick and f"category_{row['_import_row_id']}" not in form:
+            decision["category_id"] = None if label_pick == "__uncategorized__" else label_pick
+            decision["force_uncategorized"] = label_pick == "__uncategorized__"
         if _ready_decision(form, row, decision, account_names):
             decisions[row["_import_row_id"]] = decision
     try:

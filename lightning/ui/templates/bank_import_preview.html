@@ -131,6 +131,9 @@
   // A category set for one of the file's own category names goes to every row that has that name and whose category
   // is still empty or was set the same way; a row the person changed by hand keeps its own.
   document.querySelectorAll('[data-file-label-pick]').forEach((pick) => pick.addEventListener('change', () => {
+    // Rows not drawn yet (long files load in pages) take the choice on the server: it goes with the form.
+    form.querySelectorAll('input[name="labelcat"]').forEach((box) => { if (JSON.parse(box.value)[0] === pick.dataset.fileLabelPick) box.remove(); });
+    if (pick.value) { const box = document.createElement('input'); box.type = 'hidden'; box.name = 'labelcat'; box.value = JSON.stringify([pick.dataset.fileLabelPick, pick.value]); form.appendChild(box); }
     relaying = true;
     form.querySelectorAll('.import-line[data-file-label]').forEach((line) => {
       if (line.dataset.fileLabel !== pick.dataset.fileLabelPick) return;
