@@ -154,3 +154,4 @@ review screens were not exercised.
 - 2026-11-06: IT-7AA9 built; a Balance column is checked against the rows and the review lists gaps (a removed row is caught).
 - 2026-11-06: IT-7AA8 finished except its targets: 5,000 rows review in about 2 s (page 0.8 MB); posting stays one all-or-nothing request.
 - 2026-11-06: IT-7AA is finished and its item deleted (steps 7AA1-7AA9). Evidence stays in `tests/test_import_profile.py` and the re-run harness (`evidence/stress_import.py`). Owner accepted a review of about 2 s for 5,000 rows; posting in chunks was not built (posting stays one all-or-nothing request).
+- 2026-11-06: IT-7Z finished (7Z1 remembered names, 7Z2 account split, 7Z3 paired lines offered once); F4 and F13 are closed, evidence in `tests/test_import_profile.py`.

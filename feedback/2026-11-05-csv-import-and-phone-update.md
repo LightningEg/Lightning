@@ -19,4 +19,4 @@ Two observations from one respondent (the owner).
   2.0.0 packaging diff. Use cases weighed for FB1: bank statements (no categories; rules and history fill them),
   other apps' exports (this file: group, balance rows, foreign category names, several accounts) and Lightning's own
   export. The three fixes built target the second, the case the owner hit; remembering a name's category for the
-  next file and splitting by an Account column are the next steps in IV-7Z.
+  next file and splitting by an Account column were built later (`tests/test_import_profile.py`, Architecture › CSV import).

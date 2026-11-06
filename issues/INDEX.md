@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 47 open items. Each folder holds its reports and its items.
+11 big pictures, 46 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -120,10 +120,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **IT-7Z** | [Import another app's export with few questions](7-planning-import-and-search/IT-7Z-import-other-app-exports.md) | improvement, technical | Capture | M | new |
-| IT-7Z1 | ↳ Remember a name's category for the next file | | | S | |
-| IT-7Z2 | ↳ Split one file by its Account column | | | M | |
-| IT-7Z3 | ↳ Paired rows of one movement | | | S | |
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | new feature | Capture | L | new |
 | NF-7AB1 | ↳ Summary first, rows last | | | M | |
 | NF-7AB2 | ↳ Post in rounds | | | S | |
@@ -143,7 +139,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md).
 
-Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7AA. Next free code: 7AD.
+Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA. Next free code: 7AD.
 
 ## 8 Website
 
