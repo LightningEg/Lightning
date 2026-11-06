@@ -100,7 +100,7 @@ def test_the_guideline_tool_prints_one_section_as_text():
     tool = _guideline_tool()
     found = tool.all_sections(GUIDELINE)
     assert [n for n, _, _ in found if n.startswith("A")][-1] == "A16"
-    assert [n for n, _, _ in found if n.startswith("B")][-1] == "B12" and [n for n, _, _ in found if n.startswith("C")][-1] == "C12"
+    assert [n for n, _, _ in found if n.startswith("B")][-1] == "B12" and [n for n, _, _ in found if n.startswith("C")][-1] == "C13"
     assert [n for n, _, _ in found if n.startswith("D")][-1] == "D12"
     a16 = tool.as_text(next(block for number, _, block in found if number == "A16"))
     assert "Before it ships" in a16 and "<" not in a16 and len(a16) < 2000

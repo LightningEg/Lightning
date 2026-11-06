@@ -207,7 +207,6 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner | |
 | **IV-3AY** | [Phone-first architecture - five places that each answer one question, state-aware screens, and a phone decoupled from the PC](11-phone-ux/IV-3AY-phone-first-architecture.md) | improvement, visual | Everywhere | L | ready |
-| IV-3AY3 | ↳ Guideline Part C rewrite, in both repos | | | M | |
 | IV-3AY4 | ↳ The phone shell: its own router, base, stylesheet and navigation | | | L | |
 | IV-3AY5 | ↳ One bill state and the catch-up state | | | L | |
 | IV-3AY6 | ↳ Home | | | M | |
@@ -222,7 +221,7 @@ The phone is its own product: a few places that each answer one question, quick 
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md).
 
-Done: 3AY1. Next free code: 11A.
+Done: 3AY1, 3AY3. Next free code: 11A.
 
 ## 12 Desktop UX and smart next steps
 
