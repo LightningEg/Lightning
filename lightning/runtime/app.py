@@ -109,6 +109,24 @@ class SessionGate:
             finally:
                 self.app.state.container = self.session.container
 
+    def outside_row(self, path: str) -> str:
+        """For Settings › This phone: '' off the phone or with no profile open, else 'on' or 'off' (BT-2AI3)."""
+        outside, session = getattr(self, "outside", None), self.session
+        if (path != "/settings" or outside is None or session.container is None or session.borrowed is not None
+                or session.paths is None or session.paths.profile is None):
+            return ""
+        return outside.row(session.paths.profile.profile_id)
+
+    def copy_outside(self, method: str) -> None:
+        """After a change, the day's first copy goes to the folder the person chose (BT-2AI3). Never raises and
+        never delays the answer beyond one small file: a copy that fails is tried again on the next change."""
+        outside, session = getattr(self, "outside", None), self.session
+        if (outside is None or method in ("GET", "HEAD") or session.container is None or session.borrowed is not None
+                or not session.role.writable or session.paths is None or session.paths.profile is None):
+            return
+        if outside.due(session.paths.profile.profile_id):
+            outside.write(session.paths, session.container.db)
+
     def fingerprint_row(self, path: str) -> str:
         """For Settings › This phone: "" when fingerprint unlock is not offered here, else "on" or "off"."""
         fingerprint = getattr(self, "fingerprint", None)
@@ -173,6 +191,7 @@ class SessionGate:
                     return await PlainTextResponse("This form expired. Reload the page and try again.", 403)(scope, receive, send)
             line, device_action, device_values = self.device_line()
             scope.setdefault("state", {}).update(fingerprint_row=self.fingerprint_row(request.url.path),
+                                                  outside_row=self.outside_row(request.url.path),
                                                   secure_profiles=True, csrf=self.session.csrf,
                                                   phone=getattr(self, "phone", False),
                                                   session_token=self.session.token,
@@ -185,15 +204,17 @@ class SessionGate:
             if self.session.container is not None and request.url.path != "/profiles/health" and not request.url.path.startswith("/static/"):
                 self.session.last_activity = time.monotonic()
             await self.app(scope, receive, send)
+            self.copy_outside(request.method)
 
 
 def profile_app(credentials: Credentials, root: Path | str | None = None, devices: Devices | None = None,
-                *, phone: bool = False, sms=None, biometric=None, stay=None, files=None):
+                *, phone: bool = False, sms=None, biometric=None, stay=None, files=None, outside=None):
     """`phone`: the Android app, whose pages use the phone frame and screens (guideline Part C). `sms`: where
     bank messages come from on that phone (`lightning.sms_imports.SmsSource`), or None. `biometric`: the phone's
     optional fingerprint unlock (`lightning.security.biometric.FingerprintUnlock`), or None: never on a PC.
     `stay`: staying signed in on the phone (the same slots over `StayBridge`, no prompt), or None: never on a PC.
-    `files`: where the phone saves downloads (`lightning.runtime.phone_files.FileSaver`), or None."""
+    `files`: where the phone saves downloads (`lightning.runtime.phone_files.FileSaver`), or None. `outside`: the copy
+    kept in a folder outside the app (`lightning.runtime.outside_copy.OutsideCopy`), or None: never on a PC."""
     configure_memory_only_import_uploads()
     session = ProfileSession(root)
     session.borrowed_home = ""
@@ -216,6 +237,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     app.include_router(journal_setup_router(session, devices))
     gate.devices = devices
     gate.phone = phone
+    gate.outside = outside if phone else None
     fingerprint = biometric if phone else None
     gate.fingerprint = fingerprint
     # Stay signed in (owner, 2026-11-01): the phone opens the profile by itself until Lock, and never locks for idling.
@@ -386,6 +408,36 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
                         notice="Backup restored as a separate review copy. Pair a fresh device to recover saved edits.")
         return page(request, "unlock", selected=selected,
                     notice="Backup restored. The previous database was kept for recovery. Unlock this profile to review it.")
+
+    def outside_page(request: Request, *, status=200, error="", notice=""):
+        from lightning.ui import web
+        profile_id = session.paths.profile.profile_id
+        return web.render(request, "phone/outside_copy.html", status, csrf=session.csrf, error=error, notice=notice,
+                          outside_on=gate.outside.row(profile_id) == "on", last_copy=gate.outside.last(profile_id))
+
+    def outside_possible() -> bool:
+        return (gate.outside is not None and session.container is not None and session.borrowed is None
+                and session.paths is not None and session.paths.profile is not None)
+
+    @app.get("/profiles/outside-copy")
+    async def outside_get(request: Request):
+        if not outside_possible():
+            return RedirectResponse("/settings" if session.container else "/profiles", 303)
+        return outside_page(request)
+
+    @app.post("/profiles/outside-copy")
+    async def outside_post(request: Request):
+        """Settings › This phone › Copy outside the app: show Android's folder screen. The answer is kept by the
+        app; the first copy is written after the next change (or at once when a folder was already chosen)."""
+        if not outside_possible():
+            return RedirectResponse("/settings" if session.container else "/profiles", 303)
+        try:
+            shown = bool(gate.outside.folder.choose())
+        except Exception:
+            shown = False
+        if not shown:
+            return outside_page(request, status=400, error="This phone could not show its folder screen. Try again.")
+        return outside_page(request, notice="Choose a folder. Lightning will save a copy there after your next change.")
 
     @app.post("/profiles/open-file")
     async def open_file(request: Request):

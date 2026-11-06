@@ -112,6 +112,7 @@ public final class MainActivity extends Activity {
         SmsBridge.activity = this;
         BiometricBridge.activity = this;
         FileBridge.activity = this;
+        OutsideCopyBridge.activity = this;
         takeShare(getIntent());
         queueReminder(getIntent());
         addShortcuts();
@@ -281,6 +282,8 @@ public final class MainActivity extends Activity {
             ValueCallback<Uri[]> callback = pendingFiles;
             pendingFiles = null;
             if (callback != null) callback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(result, data));
+        } else if (code == OutsideCopyBridge.REQUEST_TREE) {
+            OutsideCopyBridge.finish(this, result == RESULT_OK && data != null ? data.getData() : null);
         } else if (code == FileBridge.REQUEST_SAVE) {
             String cookie = origin == null ? null : CookieManager.getInstance().getCookie(origin.toString());
             boolean arabic = cookie != null && cookie.contains("lightning_ui_locale=ar");

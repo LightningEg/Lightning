@@ -39,9 +39,10 @@ def start(files_dir):
         fingerprint = FingerprintUnlock(files / "appdata" / "biometric", AndroidBiometric.create())
         stay = FingerprintUnlock(files / "appdata" / "stay", AndroidBiometric.create("StayBridge"))
         saver = AndroidFiles.create(files / "outgoing")
+        outside = AndroidOutsideCopy.create(files)
         _host = Host(lambda credentials: profile_app(credentials, files / "Lightning", devices=_devices, phone=True,
                                                      sms=AndroidSms.create(), biometric=fingerprint,
-                                                     stay=stay, files=saver)).start()
+                                                     stay=stay, files=saver, outside=outside)).start()
     if not _launched:
         _launched = True
         return _host.launch_url
@@ -107,6 +108,36 @@ class AndroidFiles:
             return True
         path.unlink(missing_ok=True)
         return False
+
+
+class AndroidOutsideCopy:
+    """`lightning.runtime.outside_copy.OutsideCopy` over the Java `OutsideCopyBridge` (BT-2AI3). Copies wait in
+    `outside/`, inside the app's private folder, only while the bridge copies them to the chosen folder."""
+
+    @classmethod
+    def create(cls, files):
+        """None off the phone (the probe's tests run this module on a PC)."""
+        try:
+            from java import jclass
+        except ImportError:
+            return None
+        from lightning.runtime.outside_copy import OutsideCopy
+        return OutsideCopy(files / "appdata" / "outside_copy.json", _Folder(jclass("org.lightning.app.OutsideCopyBridge")),
+                           files / "outside")
+
+
+class _Folder:
+    def __init__(self, bridge):
+        self.bridge = bridge
+
+    def chosen(self):
+        return bool(self.bridge.chosen())
+
+    def choose(self):
+        return bool(self.bridge.choose())
+
+    def write(self, prefix, name, path):
+        return bool(self.bridge.write(str(prefix), str(name), str(path)))
 
 
 class AndroidBiometric:

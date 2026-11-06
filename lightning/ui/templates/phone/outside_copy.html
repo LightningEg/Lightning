@@ -1,0 +1,23 @@
+{# A copy outside the app, on the phone (guideline Part C): one card, what it does, the main action full width. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Copy outside the app'|tr(locale) }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Settings'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Copy outside the app'|tr(locale) }}</h1><p>{{ 'Your book survives an uninstall'|tr(locale) }}</p>{% endblock %}
+{% block content %}
+{% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
+{% if notice %}<div class="flash" role="status">{{ notice|tr(locale) }}</div>{% endif %}
+<section class="card phone-card" aria-labelledby="outside-heading">
+  {% if outside_on %}
+  <h2 id="outside-heading" class="phone-card-title">{{ 'A copy is kept outside the app'|tr(locale) }}</h2>
+  <p class="phone-note">{{ 'After your first change each day, Lightning saves an encrypted copy in the folder you chose and keeps the last three. Open one with Open a profile file after a reinstall.'|tr(locale) }}</p>
+  <p class="phone-note">{% if last_copy %}{{ 'Last copy:'|tr(locale) }} {{ last_copy }}{% else %}{{ 'No copy yet. The first is saved after your next change.'|tr(locale) }}{% endif %}</p>
+  <form method="post" action="/profiles/outside-copy" class="phone-form"><input type="hidden" name="csrf" value="{{ csrf }}">
+    <button class="btn phone-save" type="submit">{{ 'Choose another folder'|tr(locale) }}</button></form>
+  {% else %}
+  <h2 id="outside-heading" class="phone-card-title">{{ 'No copy outside the app'|tr(locale) }}</h2>
+  <p class="phone-note">{{ 'Without one, uninstalling Lightning deletes your book. Choose a folder (Downloads or Drive); the copy stays locked with your password.'|tr(locale) }}</p>
+  <form method="post" action="/profiles/outside-copy" class="phone-form"><input type="hidden" name="csrf" value="{{ csrf }}">
+    <button class="btn primary phone-save" type="submit">{{ 'Choose a folder'|tr(locale) }}</button></form>
+  {% endif %}
+</section>
+{% endblock %}

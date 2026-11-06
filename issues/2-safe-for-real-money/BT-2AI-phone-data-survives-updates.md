@@ -46,7 +46,13 @@ list has "Open a profile file" (the phone's WebView file chooser, no new native 
 refuses a profile already on the device. Tests: `tests/test_profile_file.py`. Left: the owner opens a file on the
 real phone (joins the held native checks).
 
-## 2AI3 A copy outside the app · M
+## 2AI3 A copy outside the app, built 2026-11-06 · M
+
+Built: `OutsideCopyBridge.java` (folder screen, kept permission, write, keep three), `runtime/outside_copy.py` (the
+day's first change writes a `.lightning` file; the gate calls it after a write), Settings › This phone › Copy
+outside the app. Tests use a fake folder (`tests/test_outside_copy.py`); **the Java is not compiled or run yet:
+it needs the Android CI build and the owner's phone check.**
+
 
 Once, the phone asks for a folder (`ACTION_OPEN_DOCUMENT_TREE`, persisted); after each day's first change it
 writes the encrypted backup there and keeps the last three. An uninstall then leaves that copy behind, and 2AI2
