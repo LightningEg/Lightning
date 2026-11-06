@@ -11,10 +11,10 @@ A budget by category, bills and loan payments, reserves for what is coming, and 
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **NF-3AY** | [Offer the next step where a figure or row raises the question, always with a preview and an explici…](../../issues/3-polish-and-arabic/3AY-next-step-at-the-moment-of-need.md) | L | new |
+| **NF-3AZ** | [Offer the next step where a figure or row raises the question, always with a preview and an explici…](../../issues/3-polish-and-arabic/3AZ-next-step-at-the-moment-of-need.md) | L | new |
 
 ## Reports with open follow-ups here
 
-- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/r24-desktop-phone-ux/report.md): 3AY
+- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/r24-desktop-phone-ux/report.md): 3AZ
 <!-- work:end -->
 
