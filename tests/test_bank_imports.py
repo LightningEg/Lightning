@@ -386,15 +386,16 @@ def test_foreign_statement_keeps_native_amounts_and_values_both_frames_at_dated_
         assert page.status_code == 200 and "USD" in page.text and "10.50" in page.text
 
 
-def test_a_future_dated_row_is_marked_to_fix_in_the_review_not_when_posting(c, setup, monkeypatch):
+def test_a_future_dated_row_opens_as_a_skip_with_its_reason_not_an_error(c, setup, monkeypatch):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-15")
     accounts, _ = setup
     data = b"Date,Counterparty,Amount\n2026-10-14,Talabat,-50\n2026-12-30,Future,-10\n"
     batch_id, _ = c.bank_imports.stage(accounts["cib"].id, "future.csv", data)
     _, rows = c.bank_imports.preview(batch_id)
-    errors = {row["Counterparty"]: row["_errors"] for row in rows}
-    assert errors["Talabat"] == []
-    assert errors["Future"] and "in the future" in errors["Future"][0]
+    by_name = {row["Counterparty"]: row for row in rows}
+    assert by_name["Talabat"]["_errors"] == [] and not by_name["Talabat"].get("_skip_reason")
+    assert by_name["Future"]["_errors"] == [] and "in the future" in by_name["Future"]["_skip_reason"]
+    assert by_name["Future"]["_balance_row"]  # skipped by default, never posted
 
 
 def test_the_map_page_and_the_account_form_use_the_form_grid(c, setup):

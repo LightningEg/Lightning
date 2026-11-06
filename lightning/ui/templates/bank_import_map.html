@@ -15,6 +15,7 @@
     <div class="planner-mode import-amount-model" role="radiogroup" aria-label="{{ 'How does this statement show amounts?'|tr(locale) }}"><span class="planner-mode-label">{{ 'Amounts'|tr(locale) }}</span><span class="planner-mode-seg">
       <label><input type="radio" name="amount_model" value="SINGLE" {{ 'checked' if suggested_amount_model == 'SINGLE' }}><span>{{ 'One amount column'|tr(locale) }}</span></label>
       <label><input type="radio" name="amount_model" value="SEPARATE" {{ 'checked' if suggested_amount_model == 'SEPARATE' }}><span>{{ 'In and out columns'|tr(locale) }}</span></label>
+      <label><input type="radio" name="amount_model" value="BALANCE" {{ 'checked' if suggested_amount_model == 'BALANCE' }}><span>{{ 'Balance column only'|tr(locale) }}</span></label>
     </span></div>
     <div class="form-grid">
       {{ column('Date', 'Date', True, 'Choose date column…') }}
@@ -24,7 +25,7 @@
       </div>
       <div class="field-pair" data-amount-fields="SEPARATE" {{ 'hidden' if suggested_amount_model != 'SEPARATE' }}>{{ column('Inflow', 'Money in', False, 'Choose inflow column…') }}</div>
       <div class="field-pair" data-amount-fields="SEPARATE" {{ 'hidden' if suggested_amount_model != 'SEPARATE' }}>{{ column('Outflow', 'Money out', False, 'Choose outflow column…') }}</div>
-      {% for key in optional %}{{ column(key, 'Category group' if key == 'Group' else key) }}{% endfor %}
+      {% for key in optional %}{{ column(key, 'Category group' if key == 'Group' else 'Money in or out (DR/CR)' if key == 'Direction' else key) }}{% endfor %}
     </div>
     <div class="actions"><button class="btn primary">{{ 'Preview rows'|tr(locale) }}</button><a class="btn" href="/accounts/{{ account.id }}/import">{{ 'Cancel'|tr(locale) }}</a></div>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>

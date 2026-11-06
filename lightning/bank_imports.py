@@ -11,7 +11,7 @@ from lightning.core.errors import ConflictError, LightningError, NotFoundError, 
 from lightning.core.money import from_e6
 
 # Re-export the original helpers for the UI, journal capture and existing callers.
-from lightning.bank_import_rows import (INTERNAL_WORDS as INTERNAL_WORDS, MAX_BYTES as MAX_BYTES, OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS,
+from lightning.bank_import_rows import (INTERNAL_WORDS as INTERNAL_WORDS, MAX_BYTES as MAX_BYTES, OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS, HEADER_ALIASES, direction_sign, normalize_header,
                                           _amount as _amount, _date as _date, _decimal_amount as _decimal_amount,
                                           _separate_amount as _separate_amount, decode_csv, is_internal as is_internal)
 from lightning.bank_import_proposals import ImportProposals, LINK_WINDOW_DAYS as LINK_WINDOW_DAYS
@@ -77,31 +77,43 @@ class BankImportService:
             "JOIN bank_import_rows r ON r.batch_id=b.id AND r.status='REVIEW' GROUP BY b.id) w "
             "JOIN bank_import_rows f ON f.id=w.first_row_id ORDER BY w.first_row_id")]
 
-    def suggested_mapping(self, account_id: int, headers: list[str]) -> dict[str, str]:
+    def suggested_mapping(self, account_id: int, headers: list[str], rows: list[dict] | None = None) -> dict[str, str]:
         """Return saved or best-effort column matches for the reviewable map step."""
         saved = self.saved_mapping(account_id, headers)
         if saved:
             return saved
-        normalized = {header: " ".join("".join(ch.lower() if ch.isalnum() else " " for ch in header).split())
-                      for header in headers}
-        aliases = {
-            "Date": ("date", "transaction date", "posting date", "booking date", "value date"),
-            "Amount": ("amount", "transaction amount", "net amount", "value"),
-            "Inflow": ("inflow", "money in", "credit", "credits", "deposit", "deposits"),
-            "Outflow": ("outflow", "money out", "debit", "debits", "withdrawal", "withdrawals"),
-            "Counterparty": ("counterparty", "merchant", "payee", "beneficiary", "party", "name"),
-            "Category": ("category", "type", "subcategory", "sub category"),
-            "Group": ("category group", "group", "parent category", "main category", "master category",
-                      "category parent"),
-            "Notes": ("notes", "memo", "narrative", "details", "description"),
-            "Reference": ("reference", "ref", "transaction id", "transaction reference"),
-        }
+        normalized = {header: normalize_header(header) for header in headers}
+        aliases = HEADER_ALIASES
         result = {}
         for target, names in aliases.items():
             found = next((header for header, name in normalized.items() if name in names), None)
             if found:
                 result[target] = found
-        if "Amount" in result:
+        if "Amount" not in result and rows:
+            # An amount column named for its currency ("EGP" in Money Manager), when it is the account's own.
+            currency = self.accounts.get(account_id).currency
+            for header in headers:
+                if header.strip().upper() == currency and header not in result.values():
+                    values = [row.get(header, "") for row in rows if row.get(header, "")]
+                    try:
+                        if values and all(_decimal_amount(v) is not None for v in values):
+                            result["Amount"] = header
+                    except (ValueError, ArithmeticError):
+                        pass
+        if "Direction" not in result and rows:
+            # A bare "Type" column is a direction only when every value in it says money in or out.
+            for header in headers:
+                if normalized[header] == "type" and header not in result.values():
+                    values = {row.get(header, "") for row in rows if row.get(header, "")}
+                    try:
+                        if values and all(direction_sign(v) for v in values):
+                            result["Direction"] = header
+                    except ValueError:
+                        pass
+        if "Amount" not in result and not ("Inflow" in result and "Outflow" in result) \
+                and "Balance" in result and "Date" in result:
+            result["amount_model"] = "BALANCE"  # a statement that lists only the running balance
+        elif "Amount" in result:
             result["amount_model"] = "SINGLE"
         elif "Inflow" in result and "Outflow" in result and result["Inflow"] != result["Outflow"]:
             result["amount_model"] = "SEPARATE"
@@ -130,6 +142,25 @@ class BankImportService:
             mapping_json, invert_amount = next(iter(distinct))
             return json.loads(mapping_json) | {"amount_sign": "invert" if invert_amount else "normal"}
         return json.loads(saved["mapping_json"]) | {"amount_sign": "invert" if saved["invert_amount"] else "normal"}
+
+    def _other_account_check(self, account_id: int):
+        """IT-7Z2: a row whose Account column names a different account of yours is not this statement's money."""
+        accounts = self.accounts.list(active_only=True)
+
+        def names(account):
+            return {account.label.casefold(), account.code.casefold(), account.name.casefold(),
+                    (account.institution or "").strip().casefold()} - {""}
+
+        def check(text: str):
+            wanted = " ".join((text or "").split()).casefold()
+            if not wanted:
+                return None
+            matches = [a for a in accounts if wanted in names(a)]
+            if not matches or any(a.id == account_id for a in matches) or len(matches) > 1:
+                return None  # unknown or ambiguous names are left alone: another app's names rarely match ours
+            return (f"This row belongs to {matches[0].label}, not this account. Import it into that account, "
+                    "or skip the row.")
+        return check
 
     def stage(self, account_id: int, filename: str, data: bytes, mapping: dict[str, str] | None = None, invert_amount: bool = False):
         self.accounts.require_usable(account_id)
@@ -163,20 +194,22 @@ class BankImportService:
                 mapping = {"amount_model": "SINGLE"} | {key: key for key in (*REQUIRED, *OPTIONAL) if key in headers}
         amount_model = str(mapping.get("amount_model") or
                            ("SEPARATE" if any(mapping.get(key) for key in SEPARATE_AMOUNT_FIELDS) else "SINGLE"))
-        if amount_model not in {"SINGLE", "SEPARATE"}:
+        if amount_model not in {"SINGLE", "SEPARATE", "BALANCE"}:
             raise ValidationError("Choose one amount column or separate inflow/outflow columns.", "mapping")
-        missing = [key for key in (("Date", *SEPARATE_AMOUNT_FIELDS) if amount_model == "SEPARATE" else REQUIRED)
+        missing = [key for key in (("Date", *SEPARATE_AMOUNT_FIELDS) if amount_model == "SEPARATE"
+                                   else ("Date", "Balance") if amount_model == "BALANCE" else REQUIRED)
                    if mapping.get(key) not in headers]
         if amount_model == "SEPARATE" and mapping.get("Inflow") == mapping.get("Outflow"):
             missing.append("different inflow and outflow columns")
         if missing:
             raise ValidationError(
                 "Map Date and either a signed Amount column or two different columns for Inflow and Outflow.", "mapping")
-        stored = normalize_rows(raw_rows, mapping, amount_model, invert_amount)
+        stored = normalize_rows(raw_rows, mapping, amount_model, invert_amount, self.accounts.get(account_id).currency,
+                              self._other_account_check(account_id))
         now = now_iso()
         with self.db.transaction():
-            canonical_fields = ("Date", *SEPARATE_AMOUNT_FIELDS, *OPTIONAL) if amount_model == "SEPARATE" else (*REQUIRED, *OPTIONAL)
-            if mapping and (saved is not None or amount_model == "SEPARATE"
+            canonical_fields = (("Date", *SEPARATE_AMOUNT_FIELDS, *OPTIONAL) if amount_model == "SEPARATE" else (*REQUIRED, *OPTIONAL))
+            if mapping and (saved is not None or amount_model in {"SEPARATE", "BALANCE"}
                             or any(mapping.get(key) != key for key in canonical_fields if mapping.get(key)) or invert_amount):
                 self.db.execute("INSERT INTO bank_import_column_maps(account_id,header_signature,mapping_json,invert_amount,created_at,updated_at) "
                                 "VALUES (?,?,?,?,?,?) ON CONFLICT(account_id,header_signature) DO UPDATE SET "

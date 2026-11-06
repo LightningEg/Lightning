@@ -241,6 +241,10 @@ class ImportPoster:
                 # A rule's split, while the row keeps the rule's category; the parts follow an edited amount.
                 parts = (self.rules.split_for(row.get("_rule_id"), abs(amount))
                          if self.rules and not owner and int(category_id) == row.get("_category_id") else None)
+                file_parts = row.get("_file_split_ids")  # the file's own split, while its total and category stand
+                if file_parts and not owner and int(category_id) == row.get("_category_id") \
+                        and sum(v for _c, v in file_parts) == abs(amount):
+                    parts = file_parts
                 if parts:
                     txn = self.transactions.update_expense_split(txn.id, parts)
             elif category.movement == Movement.OUTFLOW:

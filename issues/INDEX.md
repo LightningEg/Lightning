@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 42 open items. Each folder holds its reports and its items.
+11 big pictures, 41 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -122,16 +122,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **IT-7AA** | [Read a whole import file before its rows, so dates, signs, currencies and layouts are never guessed per row](7-planning-import-and-search/IT-7AA-import-file-profile.md) ([#351](https://github.com/LightningEg/Lightning/issues/351)) | improvement, technical | Capture | L | new |
-| IT-7AA1 | ↳ File-level date order | | | M | |
-| IT-7AA2 | ↳ Amount plus direction column | | | M | |
-| IT-7AA3 | ↳ Currency per row | | | M | |
-| IT-7AA4 | ↳ Merchant name from the description | | | M | |
-| IT-7AA5 | ↳ Read any layout | | | M | |
-| IT-7AA6 | ↳ Non-transactions as skips | | | S | |
-| IT-7AA7 | ↳ Category paths and subcategories | | | S | |
-| IT-7AA8 | ↳ Review at any size | | | L | |
-| IT-7AA9 | ↳ Reconcile against the statement's balance | | | M | |
 | **IT-7Z** | [Import another app's export with few questions](7-planning-import-and-search/IT-7Z-import-other-app-exports.md) | improvement, technical | Capture | M | new |
 | IT-7Z1 | ↳ Remember a name's category for the next file | | | S | |
 | IT-7Z2 | ↳ Split one file by its Account column | | | M | |
@@ -150,7 +140,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md).
 
-Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y. Next free code: 7AC.
+Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7AA. Next free code: 7AC.
 
 ## 8 Website
 

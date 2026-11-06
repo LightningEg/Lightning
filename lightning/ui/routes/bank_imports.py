@@ -8,6 +8,7 @@ from decimal import Decimal, InvalidOperation
 
 from lightning.core.dates import today
 from lightning.workflows.market_prices import fill_followed
+from lightning.import_reconcile import balance_gaps
 from lightning.bank_imports import OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS, decode_csv
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.limits import MAX_CSV_MAPPING_REQUEST_BYTES, MAX_IMPORT_REVIEW_REQUEST_BYTES
@@ -165,8 +166,8 @@ async def upload(request: Request, account_id: int):
                 return _render_upload(request, c, account_id,
                                       error="This file is too large to synchronize; split it into smaller files.",
                                       status_code=400)
-            headers, _ = decode_csv(data)
-            mapping = c.bank_imports.suggested_mapping(account_id, headers)
+            headers, sample_rows = decode_csv(data)
+            mapping = c.bank_imports.suggested_mapping(account_id, headers, sample_rows)
             saved_mapping = c.bank_imports.saved_mapping(account_id, headers)
             if not saved_mapping and _lightning_columns(headers):
                 saved_mapping = {"amount_model": "SINGLE"} | {key: key for key in headers}
@@ -354,9 +355,38 @@ def _review_groups(c, rows: list[dict], form=None) -> list[dict]:
     return sorted(groups, key=lambda g: (_STATUS_ORDER[g["status"]], int(g["rows"][0]["_line"])))
 
 
-def _render_review(request, c, account_id: int, batch, rows, *, summary, form=None, msg="", error="", status_code=200):
+REVIEW_PAGE_ROWS = 150  # IT-7AA8: rows drawn at first; "Show more rows" fetches the next ones into the same form
+
+
+def _review_pieces(groups: list[dict]) -> list[dict]:
+    """The name groups cut into pieces of at most REVIEW_PAGE_ROWS rows, so one name with thousands of rows is
+    paged too. A later piece of a name is a continuation: same checkbox group, its own element id."""
+    pieces = []
+    for group in groups:
+        for start in range(0, len(group["rows"]), REVIEW_PAGE_ROWS):
+            pieces.append(group | {"rows": group["rows"][start:start + REVIEW_PAGE_ROWS], "cont": start > 0})
+    return pieces
+
+
+def _take_page(pieces: list[dict], start: int) -> list[dict]:
+    """Pieces from ``start`` until about REVIEW_PAGE_ROWS rows are in."""
+    page, rows = [], 0
+    for piece in pieces[start:]:
+        if page and rows + len(piece["rows"]) > REVIEW_PAGE_ROWS:
+            break
+        page.append(piece)
+        rows += len(piece["rows"])
+    return page
+
+
+def _render_review(request, c, account_id: int, batch, rows, *, summary, form=None, msg="", error="", status_code=200,
+                   paged=False):
     account = c.accounts.get(account_id)
     groups = _review_groups(c, rows, form)
+    # Rows not drawn post with their suggested choices, as an untouched row does today; names that need the person
+    # come first, so a long file's first page is the part that asks something.
+    pieces = _review_pieces(groups) if paged else groups
+    shown = _take_page(pieces, 0) if paged else groups
     counts = {"all": len(groups)} | {key: sum(1 for g in groups if g["status"] == key) for key in _STATUS_ORDER}
     accounts_here = [a for a in c.accounts.list(active_only=True) if a.id != account_id and (a.currency == account.currency or a.account_type.value in ("BANK", "CASH", "BROKERAGE"))]
     failing = [r for r in rows if _row_status(r) == "err"]
@@ -371,7 +401,8 @@ def _render_review(request, c, account_id: int, batch, rows, *, summary, form=No
             labels[row["_file_label"]] = labels.get(row["_file_label"], 0) + 1
     file_labels = sorted(labels.items(), key=lambda item: (-item[1], item[0].casefold()))
     return render(request, "bank_import_preview.html", account=account, batch=batch, rows=rows,
-                  groups=groups, counts=counts, categories=_categories(c), file_labels=file_labels,
+                  groups=shown, balance_gaps=balance_gaps(rows) if batch["status"] != "POSTED" else [], shown_groups=len(shown),
+                  more_rows=sum(len(p['rows']) for p in pieces[len(shown):]) if paged else 0, counts=counts, categories=_categories(c), file_labels=file_labels,
                   counterparties=c.counterparties.list_active(), owners=c.counterparties.list_people(), account_choices=accounts_here,
                   summary=summary, msg=msg, error=error, reject_prompt=reject_prompt, status_code=status_code)
 
@@ -407,7 +438,27 @@ async def preview(request: Request, account_id: int, batch_id: int):
     batch, rows = c.bank_imports.preview(batch_id)
     if batch["account_id"] != account_id:
         return redirect(f"/accounts/{account_id}", "Import batch not found for this account.")
-    return _render_review(request, c, account_id, batch, rows, summary=c.bank_imports.summary(batch_id))
+    return _render_review(request, c, account_id, batch, rows, summary=c.bank_imports.summary(batch_id), paged=True)
+
+
+@router.get("/{account_id:int}/import/{batch_id:int}/groups")
+async def more_groups(request: Request, account_id: int, batch_id: int, start: int = 0):
+    """The next names of a long review, as HTML to append to the form (IT-7AA8)."""
+    c = container(request)
+    batch, rows = c.bank_imports.preview(batch_id)
+    if batch["account_id"] != account_id or batch["status"] == "POSTED":
+        return PlainTextResponse("", status_code=404)
+    pieces = _review_pieces(_review_groups(c, rows))
+    start = max(0, start)
+    page = _take_page(pieces, start)
+    account = c.accounts.get(account_id)
+    categories = _categories(c)
+    response = render(request, "partials/bank_import_groups.html", account=account, batch=batch, groups=page,
+                      sms=batch["file_name"].startswith("SMS "), categories=categories,
+                      cat_groups=c.categories.select_groups([cat["id"] for cat in categories]))
+    response.headers["X-Next-Start"] = str(start + len(page))
+    response.headers["X-Remaining"] = str(sum(len(p["rows"]) for p in pieces[start + len(page):]))
+    return response
 
 
 @router.post("/{account_id:int}/import/{batch_id:int}/discard")
@@ -525,8 +576,19 @@ async def confirm(request: Request, account_id: int, batch_id: int):
                               max_part_size=MAX_IMPORT_REVIEW_REQUEST_BYTES)
     account_names = {a.name.casefold() for a in c.accounts.list(active_only=True) if a.id != account_id}
     decisions = {}
+    label_choice = {}
+    for text in form.getlist("labelcat"):  # a category picked for one of the file's own names (rows not drawn take it too)
+        try:
+            label, value = json.loads(str(text))
+            label_choice[str(label)] = str(value)
+        except (ValueError, TypeError):
+            continue
     for row in rows:
         decision = _decision(form, row)
+        label_pick = label_choice.get(row.get("_file_label") or "")
+        if label_pick and f"category_{row['_import_row_id']}" not in form:
+            decision["category_id"] = None if label_pick == "__uncategorized__" else label_pick
+            decision["force_uncategorized"] = label_pick == "__uncategorized__"
         if _ready_decision(form, row, decision, account_names):
             decisions[row["_import_row_id"]] = decision
     try:

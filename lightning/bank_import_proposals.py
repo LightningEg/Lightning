@@ -7,7 +7,7 @@ import json
 import re
 from decimal import Decimal
 
-from lightning.bank_import_rows import is_balance_row, is_internal
+from lightning.bank_import_rows import is_balance_row, is_internal, split_category_path
 from lightning.categories.domain import Movement
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.transactions.tags import tags_in
@@ -21,7 +21,32 @@ class ImportProposals:
         self.db, self.accounts, self.categories = db, accounts, categories
         self.counterparties, self.transactions, self.rules = counterparties, transactions, rules
 
+    def _active(self):
+        """The active accounts, read once per preview: they do not change while one is built (IT-7AA8)."""
+        if self._accounts_seen is None:
+            return self.accounts.list(active_only=True)
+        if "active" not in self._accounts_seen:
+            self._accounts_seen["active"] = self.accounts.list(active_only=True)
+        return self._accounts_seen["active"]
+
+    def _account(self, account_id: int):
+        if self._accounts_seen is None:
+            return self.accounts.get(account_id)
+        key = ("one", account_id)
+        if key not in self._accounts_seen:
+            self._accounts_seen[key] = self.accounts.get(account_id)
+        return self._accounts_seen[key]
+
+    _accounts_seen = None
+
     def preview(self, batch_id: int):
+        self._accounts_seen = {}
+        try:
+            return self._preview(batch_id)
+        finally:
+            self._accounts_seen = None
+
+    def _preview(self, batch_id: int):
         batch = self.db.one("SELECT * FROM bank_import_batches WHERE id=?", (batch_id,))
         if not batch:
             raise NotFoundError("Import batch not found.")
@@ -30,7 +55,7 @@ class ImportProposals:
         amount_dates = {}
         for source_row in rows:
             staged = json.loads(source_row["raw_json"])["parsed"]
-            if not staged.get("_errors"):
+            if not staged.get("_errors") and not staged.get("_skip_reason"):
                 key = (staged["Date"], staged["Amount"])
                 amount_dates[key] = amount_dates.get(key, 0) + 1
         # The same date and amount waiting in another review of this account (an SMS and a statement, or two
@@ -44,7 +69,7 @@ class ImportProposals:
                 pending_elsewhere.setdefault((staged["Date"], staged["Amount"]), other["file_name"])
             except (TypeError, ValueError, KeyError):
                 continue
-        active_accounts = self.accounts.list(active_only=True)
+        active_accounts = self._active()
         seen_refs = set()
         # A full-history query: run it at most once per preview, not once per row (7O).
         usual = functools.cache(self.transactions.usual_categories)
@@ -78,10 +103,22 @@ class ImportProposals:
                                                                                 row["bank_reference"], parsed)
             parsed["_link_candidates"] = ([] if ref_duplicate or repeat_import or row["status"] != "REVIEW"
                                           else self._link_candidates(batch["account_id"], parsed, batch["id"]))
+            self._split_path(parsed)
             parsed["_internal"] = is_internal(parsed["Category"])
-            parsed["_balance_row"] = is_balance_row(parsed["Category"], parsed["Counterparty"])
+            parsed["_balance_row"] = bool(parsed.get("_skip_reason")) or is_balance_row(parsed["Category"], parsed["Counterparty"])
             outcome = self._rules_outcome(batch["account_id"], parsed, cp)
             parsed["_category_id"] = None if parsed["_internal"] else self._category_for(parsed, cp, outcome, usual)
+            if parsed.get("_file_split") and not parsed["_internal"]:
+                parts = self._file_split_parts(parsed)
+                if parts:
+                    parsed["_file_split_ids"] = parts
+                    parsed["_category_id"] = parts[0][0]
+                    parsed["_split_note"] = " · ".join(
+                        f"{self.categories.get(cid).name} {format(amount, 'f')}" for cid, amount in parts)
+                else:
+                    parsed["_category_ambiguous"] = ("Your file splits this purchase, but a part names a category "
+                                                     "Lightning does not have.")
+                    parsed["_category_id"] = None
             parsed["_transfer_target_suggestion"] = (self._own_account(batch["account_id"], parsed["Counterparty"])
                 or self._transfer_target_suggestion(batch["account_id"], parsed["Notes"])
                 or self._transfer_target_suggestion(batch["account_id"], parsed["Counterparty"])
@@ -89,7 +126,7 @@ class ImportProposals:
             # One of your accounts as the counterparty, or "Internal" in the category, is a transfer.
             # A transfer whose account is known needs no category; one marked internal whose account
             # cannot be matched waits for the user to pick it.
-            target = next((a for a in self.accounts.list(active_only=True)
+            target = next((a for a in self._active()
                            if a.name == parsed["_transfer_target_suggestion"]), None)
             same_name = [a for a in active_accounts if a.id != batch["account_id"]
                          and a.name.casefold() == parsed["Counterparty"].strip().casefold()]
@@ -187,7 +224,7 @@ class ImportProposals:
     def _own_account(self, source_account_id: int, name: str):
         """The name of another of your accounts typed as the counterparty, if it is one."""
         wanted = " ".join((name or "").split()).casefold()
-        matches = [a.name for a in self.accounts.list(active_only=True)
+        matches = [a.name for a in self._active()
                    if a.id != source_account_id and a.name.casefold() == wanted]
         return matches[0] if len(matches) == 1 else None
 
@@ -201,8 +238,8 @@ class ImportProposals:
 
         tokens = re.findall(r"[\w]+", destination.group(1), re.UNICODE) if destination else []
         candidates = []
-        source_currency = self.accounts.get(source_account_id).currency
-        accounts = [account for account in self.accounts.list(active_only=True)
+        source_currency = self._account(source_account_id).currency
+        accounts = [account for account in self._active()
                     if account.id != source_account_id and account.currency == source_currency]
         for account in accounts:
             name = compact(account.name)
@@ -237,8 +274,8 @@ class ImportProposals:
             "WHERE t.status='POSTED' AND t.type IN ('IN','OUT') AND t.date=? "
             "AND le.account_id<>? AND le.amount_e6=?",
             (parsed["Date"], source_account_id, -amount_e6))
-        source_currency = self.accounts.get(source_account_id).currency
-        bank_ids = {account.id: account.name for account in self.accounts.list(active_only=True)
+        source_currency = self._account(source_account_id).currency
+        bank_ids = {account.id: account.name for account in self._active()
                     if account.account_type.value == "BANK" and account.currency == source_currency}
         matches = {bank_ids[row["account_id"]] for row in rows if row["account_id"] in bank_ids}
         return next(iter(matches)) if len(matches) == 1 else None
@@ -255,6 +292,38 @@ class ImportProposals:
         if missing:
             parsed["Notes"] = " ".join([parsed["Notes"].strip(), *(f"#{t}" for t in missing)]).strip()
         return outcome
+
+    def _split_path(self, parsed) -> None:
+        """"Personal:Food", "Work > Transportation" in the Category cell are a group and a name (IT-7AA7), unless the
+        whole text is already one of your categories ("Bills/Utilities")."""
+        text = (parsed.get("Category") or "").strip()
+        if not text or (parsed.get("Group") or "").strip():
+            return
+        group, name = split_category_path(text)
+        if not group:
+            return
+        try:
+            self.categories.find_by_text(text)
+            return
+        except ValidationError as exc:
+            if str(exc.message).startswith("Which one"):
+                return
+        parsed["Group"], parsed["Category"] = group, name
+
+    def _file_split_parts(self, parsed):
+        """The parts of a split from the file as (category id, amount), or None when a part names no category."""
+        parts = []
+        for part in parsed.get("_file_split") or []:
+            try:
+                text = f"{part['group']} › {part['category']}" if part["group"] else part["category"]
+                try:
+                    category = self.categories.find_by_text(text)
+                except ValidationError:
+                    category = self.categories.find_by_text(part["category"])
+            except ValidationError:
+                return None
+            parts.append((category.id, Decimal(part["amount"])))
+        return parts or None
 
     def _category_for(self, parsed, counterparty, outcome=None, usual=None):
         """`usual` returns `transactions.usual_categories()`; a preview passes one that computes it once."""

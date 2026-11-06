@@ -1448,7 +1448,9 @@ def test_the_flat_can_be_given_a_new_value(mohab):
 
 def test_a_300_row_statement_with_seven_columns_reaches_review(mohab):
     form = mohab.notes["big_review"].form("Post ready rows")
-    assert sum(name.startswith("notes_") for name in form.fields) == 300
+    # The review draws the first rows and offers the rest (IT-7AA8); unseen rows post with their suggestions.
+    drawn = sum(name.startswith("notes_") for name in form.fields)
+    assert 0 < drawn < 300 and "Show more rows" in mohab.notes["big_review"].text
 
 
 def test_a_review_with_errors_still_has_a_way_on_and_a_way_back(mohab):

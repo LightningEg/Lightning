@@ -6,7 +6,7 @@ Version **2.0.3**. Generated from the plan by `python tools/status.py`; do not e
 
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
-| [Capture](pillars/capture.md) | 4 |  |  | 4 |  |  |
+| [Capture](pillars/capture.md) | 3 |  |  | 3 |  |  |
 | [Plan](pillars/plan.md) | 1 |  |  | 1 |  |  |
 | [Understand](pillars/understand.md) | 1 |  |  |  | 1 |  |
 | [Own](pillars/own.md) | 5 | 1 |  | 2 | 2 |  |
@@ -16,7 +16,7 @@ Version **2.0.3**. Generated from the plan by `python tools/status.py`; do not e
 | [Build](pillars/build.md) | 7 |  | 6 |  | 1 |  |
 | [Reach](pillars/reach.md) | 5 |  | 3 | 2 |  | 2 |
 
-42 open items in 11 milestones.
+41 open items in 11 milestones.
 
 ## Being built now
 
@@ -44,7 +44,7 @@ Version **2.0.3**. Generated from the plan by `python tools/status.py`; do not e
 | 3 Polish and Arabic | 5 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 6 Market data | 4 | Prices arrive by themselves, from sources Lightning may redistribute. |
-| 7 Planning, import and search | 4 | Getting a month in takes minutes: any bank file, any old app, one search box. |
+| 7 Planning, import and search | 3 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 3 | The site is honest, quick and in step with the app. |
 | 9 Later | 5 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 4 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |

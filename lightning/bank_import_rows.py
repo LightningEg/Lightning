@@ -8,16 +8,86 @@ import io
 import re
 from decimal import Decimal, InvalidOperation
 
-from lightning.core.dates import parse_date, today
+from lightning.core.dates import today
+from lightning.import_profile import read_date
 from lightning.core.errors import ValidationError
 from lightning.core.limits import MAX_CSV_IMPORT_BYTES
 from lightning.core.money import ascii_digits
 
 REQUIRED = ("Date", "Amount")
 # "Group" is the parent a category sits under in another app's export ("Work" for "Work › Transportation").
-OPTIONAL = ("Counterparty", "Category", "Group", "Notes", "Reference")
+# "Direction" is a column whose values say money in or out, beside an unsigned Amount (DR/CR, Income/Expense; IT-7AA2).
+OPTIONAL = ("Counterparty", "Category", "Group", "Notes", "Reference", "Direction", "Currency", "Account", "Balance", "Subcategory", "Split")
 SEPARATE_AMOUNT_FIELDS = ("Inflow", "Outflow")
 MAX_BYTES = MAX_CSV_IMPORT_BYTES
+
+# What each column is usually called, in English and Arabic (IT-7AA5): the column step's suggestion and the finder
+# of the header row below a preamble both read this one table.
+HEADER_ALIASES = {
+    "Date": ("date", "transaction date", "posting date", "booking date", "value date", "التاريخ", "تاريخ", "تاريخ العملية"),
+    "Amount": ("amount", "transaction amount", "net amount", "value", "المبلغ", "القيمة"),
+    "Inflow": ("inflow", "money in", "credit", "credits", "deposit", "deposits", "دائن", "إيداع", "ايداع", "وارد"),
+    "Outflow": ("outflow", "money out", "debit", "debits", "withdrawal", "withdrawals", "مدين", "سحب", "صادر"),
+    "Counterparty": ("counterparty", "merchant", "payee", "beneficiary", "party", "name", "المستفيد", "الطرف", "الاسم"),
+    "Category": ("category", "الفئة", "التصنيف"),
+    "Subcategory": ("subcategory", "sub category", "sub-category", "الفئة الفرعية"),
+    "Split": ("split amount", "split", "split_amount", "part amount", "جزء"),
+    "Direction": ("direction", "dr cr", "cr dr", "debit credit", "credit debit", "in out", "income expense",
+                  "expense income", "transaction type", "type of transaction", "dr or cr", "debit or credit",
+                  "نوع العملية"),
+    "Group": ("category group", "group", "parent category", "main category", "master category", "category parent"),
+    "Currency": ("currency", "currency code", "ccy", "cur", "العملة"),
+    "Account": ("account", "account name", "wallet", "from account", "الحساب"),
+    "Notes": ("notes", "memo", "narrative", "details", "description", "البيان", "الوصف", "التفاصيل", "ملاحظات"),
+    "Reference": ("reference", "ref", "transaction id", "transaction reference", "المرجع", "رقم المرجع"),
+    "Balance": ("balance", "running balance", "available balance", "closing balance", "الرصيد"),
+}
+
+
+def normalize_header(header: str) -> str:
+    return " ".join("".join(ch.lower() if ch.isalnum() else " " for ch in header).split())
+
+
+_PATH = re.compile(r"\s*(?:›|»|>|:|\\|\|)\s*|\s+/\s+|(?<=\w)/(?=\w)")
+
+
+def split_category_path(text: str) -> tuple[str, str]:
+    """"Personal:Food", "Work > Transportation", "Food/Groceries" as (group, name); ("", text) when it is no path."""
+    parts = [p.strip() for p in _PATH.split(text or "") if p.strip()]
+    return (parts[-2], parts[-1]) if len(parts) >= 2 else ("", (text or "").strip())
+
+
+def _is_header_row(cells) -> bool:
+    known = {name for names in HEADER_ALIASES.values() for name in names}
+    return sum(normalize_header(c) in known for c in cells) >= 2
+
+
+def _decode_text(data: bytes) -> str:
+    """UTF-8 (with or without a BOM), UTF-16 (Excel's "Unicode text") or Windows Arabic (cp1256)."""
+    if data[:2] in (b"\xff\xfe", b"\xfe\xff"):
+        try:
+            return data.decode("utf-16")
+        except UnicodeDecodeError:
+            pass
+    try:
+        return data.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        pass
+    try:
+        return data.decode("cp1256")
+    except UnicodeDecodeError:
+        raise ValidationError("Save the statement as a UTF-8 CSV file.", "file") from None
+
+
+def _header_line(text: str) -> int:
+    """Index of the first line that reads as a header row (two or more known column names); 0 when none does, so a
+    file with its own odd names keeps working as before. Preamble lines above it are the bank's, not rows."""
+    for index, line in enumerate(text.splitlines()[:40]):
+        for delimiter in (",", ";", "\t"):
+            if _is_header_row(next(csv.reader([line], delimiter=delimiter), [])):
+                return index
+    return 0
+
 
 INTERNAL_WORDS = {"internal", "internal transfer", "transfer", "transfers", "own account"}
 
@@ -29,9 +99,52 @@ BALANCE_WORDS = {"starting balance", "starting balances", "opening balance", "op
                  "reconciliation", "reconciliation adjustment"}
 
 
+_BANK_PREFIX = re.compile(
+    r"^(?:CARD PURCHASE|POS PURCHASE|DEBIT CARD PURCHASE|ONLINE PURCHASE|ONLINE PAYMENT|PURCHASE|POS|DEBIT CARD|"
+    r"VISA|MASTERCARD|PAYMENT TO|PAYMENT|INSTAPAY TO|INSTAPAY|TRANSFER TO|TRANSFER FROM|FAWRY)\b[\s\-:*/]*", re.I)
+_PLACE_WORDS = {"EG", "EGY", "EGYPT", "CAIRO", "GIZA", "ALEXANDRIA", "ALEX", "CAI", "GBR", "USA", "US", "LTD", "LLC"}
+
+
+def clean_merchant(description: str) -> str:
+    """"CARD PURCHASE TALABAT" and "UBER *TRIP HELP.UBER.COM" as "Talabat" and "Uber": the merchant, not the bank's
+    wording, reference numbers or city (IT-7AA4). "" when nothing is left to name (an ATM withdrawal)."""
+    text = " ".join((description or "").split())
+    previous = None
+    while text != previous:  # "POS PURCHASE VISA ..." drops each prefix in turn
+        previous, text = text, _BANK_PREFIX.sub("", text, count=1)
+    text = re.split(r"[*#]|\s-\s|https?:|www\.", text, maxsplit=1)[0]
+    words = []
+    for word in text.split():
+        bare = word.strip(".,;:")
+        if not bare or re.fullmatch(r"[\d/\-.:]+", bare) or sum(ch.isdigit() for ch in bare) >= 4 or "." in bare and bare[-3:].isalpha():
+            if words:
+                break
+            continue
+        if bare.upper() in _PLACE_WORDS and words:
+            break
+        words.append(bare)
+    name = " ".join(words[:3]).strip()
+    if not name or name.upper() in {"ATM", "ATM WITHDRAWAL", "WITHDRAWAL", "CASH", "FEE", "FEES"}:
+        return ""
+    return name.title() if name.isascii() and not any(ch.islower() for ch in name) else name
+
+
 def is_balance_row(*texts: str) -> bool:
     """The Category or Counterparty says the row is another app's opening balance or balance adjustment."""
     return any(" ".join((text or "").split()).casefold() in BALANCE_WORDS for text in texts)
+
+
+class SkipRow(ValueError):
+    """A row that is clearly not a transaction (IT-7AA6): it opens as a skipped row with this reason, not an error."""
+
+
+TOTAL_WORDS = ("total", "totals", "closing balance", "opening balance", "balance carried", "balance brought",
+               "summary", "grand total", "الإجمالي", "اجمالي", "إجمالي", "الرصيد الختامي", "الرصيد الافتتاحي")
+
+
+def is_total_line(*texts: str) -> bool:
+    """A footer such as ",Total,14749.50": no date, and a cell that says total or balance."""
+    return any(" ".join((t or "").split()).casefold().strip(":") in TOTAL_WORDS for t in texts)
 
 
 def is_internal(category: str) -> bool:
@@ -39,13 +152,13 @@ def is_internal(category: str) -> bool:
     return " ".join((category or "").split()).casefold() in INTERNAL_WORDS
 
 
-def _date(value: str) -> str:
+def _date(value: str, profile=None) -> str:
     try:
-        day = parse_date(value)
+        day = read_date(value, profile)
     except ValidationError as exc:
         raise ValueError(exc.message) from None
     if day > today():  # the same rule as typing it: the review marks the row to fix at once, not when Post fails
-        raise ValueError(f"{day.isoformat()} is in the future. Record transactions on or after the day they happen.")
+        raise SkipRow(f"{day.isoformat()} is in the future, so this looks like a pending hold: skipped until it posts. Import it again later.")
     return day.isoformat()
 
 
@@ -100,8 +213,34 @@ def _decimal_amount(value: str) -> Decimal:
 def _amount(value: str) -> str:
     amount = _decimal_amount(value)
     if amount == 0:
-        raise ValueError("Enter a non-zero amount; use a minus sign for money out.")
+        raise SkipRow("A zero amount records nothing, so this row is skipped.")
     return format(amount, "f")
+
+
+MONEY_OUT_WORDS = {"dr", "d", "debit", "debits", "out", "outflow", "expense", "expenses", "withdrawal", "payment",
+                   "paid", "spent", "مدين", "سحب", "مصروف", "مصروفات", "صرف"}
+MONEY_IN_WORDS = {"cr", "c", "credit", "credits", "in", "inflow", "income", "deposit", "received", "refund",
+                  "دائن", "ايداع", "إيداع", "دخل", "إيراد", "ايراد"}
+
+
+def direction_sign(value: str) -> int:
+    """-1 for money out, +1 for money in, from a Direction column's value; anything else is an error to fix."""
+    word = " ".join(re.sub(r"[^\w ]", " ", value or "").split()).casefold()
+    if word in MONEY_OUT_WORDS:
+        return -1
+    if word in MONEY_IN_WORDS:
+        return 1
+    raise ValueError(f"“{value}” in the Direction column is not money in or out. Use DR/CR, Debit/Credit or Income/Expense.")
+
+
+_CURRENCY_NAMES = {"le": "EGP", "l.e": "EGP", "l.e.": "EGP", "جنيه": "EGP", "جنيه مصري": "EGP", "ج.م": "EGP",
+                   "egp": "EGP", "$": "USD", "us$": "USD", "دولار": "USD", "€": "EUR", "£": "GBP"}
+
+
+def currency_code(value: str) -> str:
+    """A Currency cell as an ISO code (EGP for LE and Arabic names); "" when the cell is empty."""
+    text = " ".join((value or "").split())
+    return _CURRENCY_NAMES.get(text.casefold(), text.upper())
 
 
 def _separate_amount(inflow: str, outflow: str) -> str:
@@ -117,10 +256,10 @@ def _separate_amount(inflow: str, outflow: str) -> str:
 def decode_csv(data: bytes) -> tuple[list[str], list[dict[str, str]]]:
     if len(data) > MAX_BYTES:
         raise ValidationError("CSV files must be 5 MB or smaller.", "file")
-    try:
-        text = data.decode("utf-8-sig")
-    except UnicodeDecodeError:
-        raise ValidationError("Save the statement as a UTF-8 CSV file.", "file") from None
+    text = _decode_text(data)
+    skipped = _header_line(text)
+    if skipped:
+        text = "\n".join(text.splitlines()[skipped:]) + "\n"
     try:
         sample = text[:4096]
         dialect = csv.Sniffer().sniff(sample, delimiters=",;\t") if sample else csv.excel
@@ -131,7 +270,7 @@ def decode_csv(data: bytes) -> tuple[list[str], list[dict[str, str]]]:
         if len(set(headers)) != len(headers):
             raise ValidationError("CSV headers must be unique; rename duplicate columns and try again.", "file")
         rows = []
-        for line, row in enumerate(reader, start=2):
+        for line, row in enumerate(reader, start=2 + skipped):
             rows.append({h: str(row.get(h, "") or "").strip() for h in headers} | {"__line__": str(line)})
         return headers, rows
     except csv.Error as exc:
