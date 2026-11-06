@@ -19,7 +19,7 @@
 <section class="card phone-card"><h2>{{ 'Top up reserves'|tr(locale) }}</h2>{% for row in a.reserves %}<label><span class="field-name">{{ row.name }}</span><small class="field-note">{{ 'Add to assigned cash'|tr(locale) }} · {{ 'Goal still needs'|tr(locale) }} {{ row.gap|money(places=0) }}</small><input type="text" inputmode="decimal" name="reserve_{{ row.id }}" value="{{ row.suggested }}" {{ "" if enabled else "disabled" }} required></label>{% else %}<a href="/reserves">{{ 'Reserves'|tr(locale) }}</a>{% endfor %}</section>
 </details>
 {% if enabled %}<button class="btn primary" type="submit">{{ 'Confirm cash assignments'|tr(locale) }}</button>{% else %}<p>{{ 'Turn on cash funding to confirm this proposal.'|tr(locale) }}</p>{% endif %}</form>{% endif %}
-{% if not enabled %}<form class="phone-form" method="post" action="/payday/enable"><input type="hidden" name="__session" value="{{ session_token }}"><input type="hidden" name="enabled" value="{{ '0' if enabled else '1' }}"><button class="btn primary phone-save" type="submit">{{ ('Pause cash funding' if enabled else 'Turn on cash funding')|tr(locale) }}</button></form>{% endif %}
+<form class="phone-form" method="post" action="/payday/enable"><input type="hidden" name="__session" value="{{ session_token }}"><input type="hidden" name="enabled" value="{{ '0' if enabled else '1' }}"><button class="btn{{ ' primary phone-save' if not enabled }}" type="submit">{{ ('Pause cash funding' if enabled else 'Turn on cash funding')|tr(locale) }}</button></form>
 <section class="card phone-card"><h2>{{ 'Before your next payday'|tr(locale) }}</h2>
 <p>{{ 'Due before payday'|tr(locale) }} {{ forecast.payments_before_income_total|money(places=0) }} {{ base }} · {{ 'Safe to spend'|tr(locale) }} {{ forecast.safe_to_spend|money(places=0) }} {{ base }}</p>
 {% for payment in forecast.payments_before_income %}<p>{{ payment.item.name }} · {{ payment.due_date }}</p>{% endfor %}
@@ -30,6 +30,6 @@
 {% if a.ready is not none and a.ready < 0 %}<p class="flash error">{{ 'Funded spending and obligations exceed owned cash. Reduce assignments before adding more.'|tr(locale) }}</p>{% endif %}
 <p class="muted">{{ 'Amounts below are a preview, with bills due first. Each category includes its children; spending and refunds update its funded cash. Unused funding returns to the pool next month.'|tr(locale) }}</p></section>
 <details class="phone-note-details"><summary>{{ 'About cash funding'|tr(locale) }}</summary><div class="card phone-card"><p>{{ 'Assign cash you already own. Expected salary is excluded; reserves and unpaid bills stay protected. This does not change budget limits or move money. Cash in another account or brokerage still needs a transfer before payment.'|tr(locale) }}</p>
-{% if enabled %}<form class="phone-form" method="post" action="/payday/enable"><input type="hidden" name="__session" value="{{ session_token }}"><input type="hidden" name="enabled" value="{{ '0' if enabled else '1' }}"><button class="btn" type="submit">{{ ('Pause cash funding' if enabled else 'Turn on cash funding')|tr(locale) }}</button></form>{% endif %}
+
 </div></details>
 {% endblock %}
