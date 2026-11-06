@@ -928,6 +928,18 @@ if (ledger) {
     if (matchingButton) matchingButton.hidden = !(byId.size > 0 && [...byId.keys()].every((id) => selected.has(id))) || ids.length >= matching.length;
     const editSelected = document.getElementById("edit-selected");
     if (editSelected) editSelected.disabled = !boxes.some((box) => selected.has(box.value) && ["IN", "OUT"].includes(box.dataset.type));
+    // F7 (r24): say what each tool will touch before it runs. Only income and spending rows take a category or an edit.
+    const eligible = new Set(boxes.filter((box) => selected.has(box.value) && ["IN", "OUT"].includes(box.dataset.type)).map((box) => box.value)).size;
+    const label = (id, text, values) => { const el = document.getElementById(id); if (el) el.textContent = t(text, values); };
+    label("edit-selected", "Edit one by one");
+    if (editSelected) editSelected.title = t("Opens the first of {count} editable rows; the next stays selected.", {count: eligible});
+    const categoryButton = document.querySelector("#bulk-category-form button.btn");
+    if (categoryButton) categoryButton.textContent = t("Set category for {count}", {count: eligible});
+    label("export-selected", "Export {count}", {count: ids.length});
+    label("delete-selected", "Delete {count}", {count: ids.length});
+    const scope = document.getElementById("selection-scope");
+    if (scope) scope.textContent = ids.length && eligible < ids.length
+      ? t("A category applies to {eligible} of {count}; {skipped} (transfers, openings, investments) stay as they are.", {eligible, count: ids.length, skipped: ids.length - eligible}) : "";
     if (selectAll) {
       selectAll.checked = byId.size > 0 && selected.size === byId.size;
       selectAll.indeterminate = ids.length > 0 && !selectAll.checked;

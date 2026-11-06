@@ -271,3 +271,10 @@ The first sandboxed server/test attempts could not use local sockets; the succes
 Evidence scripts run from the repository root: `python reports/r24-desktop-phone-ux/evidence/probes.py`, `capture.py`, `detail-capture.py`, and `refill.py` at the same path. `flows-current.py <output-folder> ar` reproduces the daily flows. `detail-capture.py` creates additional loans/assets before its after-refill capture; the **isolated refill evidence is `refill.py` / `refill-baseline.json`**, which is the evidence for the exact 51,420 → −15,948 result.
 
 This deliverable changes audit documentation and local follow-up items only. It does not change app behavior or claim that the identified problems are fixed.
+
+## Dated follow-ups
+
+- **2026-11-06:** F1, F2, F3 fixed (BT-2AF, BT-2AG, BT-2AH; tests named in each finding). F4 and F5 were fixed on 2026-11-05.
+- **2026-11-06, F7 (partly):** the selection bar now says what each tool touches before it runs: **Edit one by one**, **Set category for N**, **Export N**, **Delete N**, and a line naming how many selected rows a category cannot apply to. `tests/test_bulk_action_safety.py::test_selection_tools_say_what_they_will_touch_before_they_run`. Still open: a multi-field preview (old → new), replace-text scoped to the selection, one place for rename, categorize and rule (IV-3G).
+- **2026-11-06, F9 (done for Spending and Counterparties):** the AI handoff sits behind **Get another analysis**, below the category breakdown on Spending and collapsed on Counterparties. `tests/test_ai_prompt_buttons.py::test_the_ai_handoff_waits_below_the_answer_on_spending_and_counterparties`.
+- Not started: F6 (compact first screen on Investments and Cash planning), F8 (one investigation across period, rows and export), F10–F13 (phone secondary flows), and the smart-links work.

@@ -149,3 +149,17 @@ WHY_LINES = (
 def test_every_why_this_helps_line_has_an_arabic_string():
     for line in WHY_LINES:
         assert re.search(r"[؀-ۿ]", ARABIC_UI.get(line, "")), line
+
+
+def test_the_ai_handoff_waits_below_the_answer_on_spending_and_counterparties(c, setup):  # F9 (r24)
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    accounts, cats = setup
+    c.transactions.record_outflow("2026-10-05", accounts["cib"].id, "120", cats["EXP.PERSONAL.FOOD"].id, counterparty="Spinneys")
+    c.transactions.record_outflow("2026-10-06", accounts["cib"].id, "80", cats["EXP.PERSONAL.FOOD"].id, counterparty="Carrefour")
+    client = TestClient(create_app(c))
+    spending = client.get("/birdview/expenses?period=custom&date_from=2026-10-01&date_to=2026-10-31").text
+    assert "Get another analysis" in spending and spending.index("By category") < spending.index("Get another analysis")
+    names = client.get("/counterparties").text
+    # Collapsed to one line: the explanation and the Copy/Edit buttons only show once it is opened.
+    assert '<details class="ai-line ai-more"><summary>Get another analysis</summary>' in names

@@ -152,3 +152,15 @@ def test_arabic_batch_refusal_translates_the_reason_and_names_the_row(c, rows):
     assert made[0].ref in response.json()['error']
     assert 'This month' not in response.json()['error']
     assert 'البنك' in response.json()['error']
+
+
+def test_selection_tools_say_what_they_will_touch_before_they_run(c, rows, ui):  # F7 (r24)
+    bank, made = rows
+    page, origin = ui()
+    page.goto(f'{origin}/accounts/{bank.id}')
+    page.locator('#select-visible').check()
+    n = page.locator('.transaction-select:checked').count()
+    assert page.locator('#edit-selected').inner_text() == 'Edit one by one'
+    assert page.locator('#export-selected').inner_text() == f'Export {n}'
+    assert page.locator('#delete-selected').inner_text() == f'Delete {n}'
+    assert page.locator('#bulk-category-form button.btn').inner_text() == f'Set category for {n}'

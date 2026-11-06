@@ -167,7 +167,7 @@
 <div class="card ledger"{% if matching_ids %} data-matching-ids='{{ matching_ids|tojson }}'{% endif %} data-counterparties='{{ counterparty_categories|tojson }}' data-accounts='{{ account_options|tojson }}'>
   <div class="selection-tools" id="selection-tools" hidden>
     <span id="selection-count" class="muted small" role="status" aria-live="polite">{{ "0 selected"|tr(locale) }}</span>
-    <button type="button" class="btn small" id="edit-selected">{{ 'Edit selected'|tr(locale) }}</button>
+    <button type="button" class="btn small" id="edit-selected">{{ 'Edit one by one'|tr(locale) }}</button>
     {% if matching_ids %}<button type="button" class="btn small" id="select-matching" hidden>{{ 'Select all {n} matching'|tr(locale, n=matching_ids|length) }}</button>{% endif %}
     <button type="button" class="btn small" id="clear-selected">{{ 'Clear selection'|tr(locale) }}</button>
     {# Bulk edit (user feedback, ticket 20): one category for every selected row. #}
@@ -180,6 +180,7 @@
     <button type="button" class="btn small" id="merge-selected" hidden>{{ 'Merge selected'|tr(locale) }}</button>
     <button type="button" class="btn small danger" id="delete-selected">{{ 'Delete selected'|tr(locale) }}</button>
   </div>
+  <p class="muted small" id="selection-scope" role="status" aria-live="polite"></p>
   <div class="register-table-scroll"><table class="register-rows">
     <colgroup><col class="col-select"><col class="col-date"><col class="col-counterparty"><col class="col-category"><col class="col-notes"><col class="col-amount">{% if with_balance %}<col class="col-balance">{% endif %}</colgroup>
     <thead><tr><th id="select-visible-header" class="select-visible-header" title="Select or clear all visible transactions"><input id="select-visible" type="checkbox" aria-label="Select all visible transactions"></th><th>{{ 'Date'|tr(locale) }}</th><th>{{ 'Counterparty'|tr(locale) }}</th><th>{{ 'Category'|tr(locale) }}</th><th>{{ 'Notes'|tr(locale) }}</th><th class="num">{{ 'Amount'|tr(locale) }} ({{ account.currency if account and account.currency != base else base }})</th>{% if with_balance %}<th class="num register-balance-head">{{ 'Balance'|tr(locale) }} ({{ account.currency }})</th>{% endif %}</tr></thead>
