@@ -19,6 +19,11 @@ Android updates come from Google Play or the APK; this item is Windows only.
 ## Owner decisions (2026-11-06)
 1. **Trust: our own Ed25519 key.** CI signs a small `UPDATE.json`; the app pins the public key. The ZIP stays
    unsigned for Windows (no Authenticode). HTTPS and `SHA256SUMS` alone are not enough.
+   **Key, for now: the store key `store-2026-1`** (owner, 2026-11-06: "same key now, split later"). Its private JWK
+   also sits in Supabase secrets, so a Supabase leak could forge updates; therefore every signature is over
+   `b"lightning-update-v1:" + UPDATE.json bytes` (a licence can never pass as an update), and **before the first
+   release that carries the updater** the owner makes a separate update key, both public keys ship in
+   `update_keys.json`, and CI signs with the new one. Track that switch in 9B5's checklist.
 2. **Check only on click.** Lightning never contacts GitHub for updates unless the person presses the button.
    No automatic or scheduled check, no setting for one.
 3. **Rollback: automatic, plus one kept copy.** If the new version does not reach its profile chooser, the helper
@@ -40,20 +45,23 @@ Android updates come from Google Play or the APK; this item is Windows only.
 - The first version carrying the updater is still installed by hand; say so in its release note.
 
 ## 9B1 Signed update manifest in the release · M
-**Build.** `tools/update_keygen.py <private-file>` makes an Ed25519 pair (copy the shape of `tools/store_keygen.py`);
-public keys go in `lightning/security/update_keys.json` as `{key_id: base64url public key}` (same shape as
-`store_keys.json`). A new `packaging/update_manifest.py sign` writes, in the `release` job of
+**Build.** No new key tool: keys are made with `tools/store_keygen.py <file> --id <id>` (an Ed25519 private JWK with
+`d`, `x`, `kid`). Public keys go in `lightning/security/update_keys.json` as `{key_id: base64url public key}` (same
+shape as `store_keys.json`), starting with `store-2026-1` copied from `store_keys.json`. A new `packaging/update_manifest.py sign` writes, in the `release` job of
 `.github/workflows/desktop-probe.yml` before `publish_release.sh`:
 - `UPDATE.json`: `{"format": 1, "version": "2.0.4", "zip": "Lightning-v2.0.4-Windows-x64.zip", "sha256": "…",
   "size": 31457280, "released": "2026-11-20", "key_id": "…"}`; version must equal the tag and `DISPLAY_VERSION`,
   `sha256` must equal the ZIP's line in `SHA256SUMS`.
-- `UPDATE.json.sig`: base64 Ed25519 signature over the exact bytes of `UPDATE.json`.
+- `UPDATE.json.sig`: base64 Ed25519 signature over `b"lightning-update-v1:"` + the exact bytes of `UPDATE.json`.
 
-The private key is the `production-release` environment secret `UPDATE_SIGNING_KEY` (never a repository secret);
+The private key is the `production-release` environment secret `UPDATE_SIGNING_KEY`, holding the whole JWK (never a
+repository secret);
 a missing secret fails the tag run. `packaging/publish_release.sh` uploads both files and reads them back like the
 others. A `verify` subcommand (used by the app in 9B2) checks a manifest + signature against `update_keys.json`.
-**Owner:** run the keygen once, store the private file offline with a backup, add the secret, commit the public key.
-**Done when:** tests sign with a throwaway key made in the test and prove: good manifest verifies; a changed byte,
+**Owner:** paste the store key's private JWK (the same content as Supabase's `STORE_SIGNING_PRIVATE_JWK`) as
+`UPDATE_SIGNING_KEY` in GitHub › Settings › Environments › production-release.
+**Done when:** tests sign with a throwaway key made in the test and prove: good manifest verifies; a signature over
+the bare bytes (no label, as a licence would be) fails; a changed byte,
 an unknown `key_id`, a wrong signature or a version not matching the tag fails; `tests/test_release_publish.py`
 covers the two new assets. ARCHITECTURE "Build and release" names the key and the files.
 
@@ -118,3 +126,5 @@ clean. ARCHITECTURE "Updating" bullet and `packaging/APP_README.txt` describe th
 With dummy profiles, from a build carrying the updater to the next release: update; update with a profile borrowed
 (refused, then allowed after hand-back); update from a read-only folder (refused); force a failed start (old version
 comes back); open the `.previous` copy by hand. Report each as passed or failed in the item.
+Before that release is tagged: a separate update key exists (`tools/store_keygen.py <file> --id update-2026-1`),
+its public key is in `update_keys.json` beside `store-2026-1`, and `UPDATE_SIGNING_KEY` holds the new JWK.
