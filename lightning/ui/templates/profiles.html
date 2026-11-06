@@ -50,6 +50,9 @@
           <h1 id="page-title">{{ 'Connect to your phone'|tr(locale) }}</h1>
         {% elif mode == 'borrowed' %}
           <h1 id="page-title">{{ item.name }}</h1>
+        {% elif mode == 'open-file' %}
+          <h1 id="page-title">{{ 'Open a profile file'|tr(locale) }}</h1>
+          <p>{{ 'Choose a .lightning file made on your PC. It needs no network and no pairing.'|tr(locale) }}</p>
         {% elif mode == 'receive' %}
           <h1 id="page-title">{{ 'Bring a profile from your PC'|tr(locale) }}</h1>
         {% elif mode == 'checking' %}
@@ -71,6 +74,7 @@
       {% if mode == 'choose' %}
         <p><a class="button button-primary" href="/profiles/journal/join">{{ 'Find your phone or PC'|tr(locale) }}</a></p>
         <p>{{ 'Open pairing on the device with your profile.'|tr(locale) }}</p>
+        <p><a class="button button-secondary" href="/profiles/open-file">{{ 'Open a profile file'|tr(locale) }}</a></p>
         <section class="panel" aria-labelledby="profiles-heading">
           <div class="panel-heading"><div><h2 id="profiles-heading">{{ 'Available profiles'|tr(locale) }}</h2><p>{{ 'Choose one to continue.'|tr(locale) }}</p></div></div>
           {% if profiles %}
@@ -328,6 +332,17 @@
           </form>
         </section>
 
+      {% elif mode == 'open-file' %}
+        <section class="panel form-panel" aria-labelledby="open-file-heading">
+          <h2 id="open-file-heading">{{ 'Check the profile file'|tr(locale) }}</h2>
+          <p>{{ 'Lightning checks the file and your password before adding the profile. Nothing on this device changes if the check fails.'|tr(locale) }}</p>
+          <form method="post" action="/profiles/open-file" enctype="multipart/form-data" class="form-stack">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <div class="field"><label for="open-file-input">{{ 'Profile file'|tr(locale) }}</label><input id="open-file-input" name="file" type="file" required></div>
+            <div class="field"><label for="open-file-password">{{ 'Profile password'|tr(locale) }}</label><input id="open-file-password" name="password" type="password" required autocomplete="current-password"></div>
+            <div class="form-actions"><button class="button button-primary" type="submit">{{ 'Add this profile'|tr(locale) }}</button><a class="text-link" href="/profiles">{{ 'Cancel'|tr(locale) }}</a></div>
+          </form>
+        </section>
       {% elif mode == 'receive' %}
         <section class="panel form-panel" aria-labelledby="receive-heading">
           {% if pending and pending.paired_name and not arrived %}
@@ -364,6 +379,11 @@
         </section>
         {% if not is_borrowed %}
         {% if not journal_enabled %}<p><a class="button button-secondary" href="/profiles/journal/setup">{{ 'التعديل من أجهزتك' if locale == 'ar' else 'Edit from your devices' }}</a></p>{% endif %}
+        {% if not on_phone %}<section class="panel form-panel" aria-labelledby="export-file-heading">
+          <h2 id="export-file-heading">{{ 'Send to a phone as a file'|tr(locale) }}</h2>
+          <p>{{ 'Saves this profile as one .lightning file. Move it to the phone by USB, Drive or WhatsApp, then choose Open a profile file there. It stays locked with your password.'|tr(locale) }}</p>
+          <form method="post" action="/profiles/export-file"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="button button-secondary" type="submit">{{ 'Save a profile file'|tr(locale) }}</button></form>
+        </section>{% endif %}
         {% if not on_phone and not journal_enabled %}<section class="panel form-panel" aria-labelledby="move-heading">
           <h2 id="move-heading">{{ "Move to your phone"|tr(locale) }}</h2>
           <p>{{ "The phone becomes this profile's home and this PC borrows it from there. On the phone, open Lightning and choose Bring a profile from your PC."|tr(locale) }}</p>

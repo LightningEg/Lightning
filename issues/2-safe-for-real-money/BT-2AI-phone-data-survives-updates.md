@@ -37,11 +37,14 @@ Claude Opus 5.5, feedback-review, 2026-11-05.
 `tests/test_phone_identity_frozen.py` pins the one application ID and the signing certificate; `phone_build.py`
 and `android_test_key.py` now say that a new key deletes people's data and needs a signing lineage.
 
-## 2AI2 Open a profile file on the phone · M
+## 2AI2 Open a profile file on the phone, built 2026-11-06 · M
 
-"Open a profile file" on the phone's profile list (`ACTION_OPEN_DOCUMENT`): the person picks an encrypted
-profile or backup from the PC (USB, Drive, WhatsApp), the phone copies it into app storage, checks it like a
-restore and asks for its password. Works with no network and no pairing. Test: dummy profile round trip.
+Owner chose one `.lightning` file (2026-11-06). The PC's Profile settings has "Save a profile file"; the profile
+list has "Open a profile file" (the phone's WebView file chooser, no new native code). The file is a zip of
+`manifest.json`, `profile.db` (a verified encrypted copy) and `keys.json` (the password-wrapped key);
+`lightning/runtime/profile_file.py` checks shape, hashes, password and database before anything is written, and
+refuses a profile already on the device. Tests: `tests/test_profile_file.py`. Left: the owner opens a file on the
+real phone (joins the held native checks).
 
 ## 2AI3 A copy outside the app · M
 

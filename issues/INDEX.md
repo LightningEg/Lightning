@@ -36,7 +36,7 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 |---|---|---|---|---|---|
 | **BT-2AI** | [Phone data must survive every app update and reinstall](2-safe-for-real-money/BT-2AI-phone-data-survives-updates.md) | bug, technical · high | Protect | L | new |
 | BT-2AI1 | ↳ Pin the phone's identity, built 2026-11-05 | | | S | |
-| BT-2AI2 | ↳ Open a profile file on the phone | | | M | |
+| BT-2AI2 | ↳ Open a profile file on the phone, built 2026-11-06 | | | M | |
 | BT-2AI3 | ↳ A copy outside the app | | | M | |
 | BT-2AI4 | ↳ The PC can always send its copy to a fresh phone | | | M | |
 | **IT-2A** | [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic repair](2-safe-for-real-money/IT-2A-restore-safety.md) | improvement, technical | Protect | L | building |

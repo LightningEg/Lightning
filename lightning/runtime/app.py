@@ -15,7 +15,7 @@ from starlette.responses import JSONResponse, PlainTextResponse, RedirectRespons
 from lightning.sync.state import ProtocolError
 from lightning.ui.web import create_app
 
-from .http import (MARKET_IMPORT_PATH, PRICE_CSV_PATH, MAX_IMPORT_CONFIRM_BODY, MAX_IMPORT_CONFIRM_FIELDS, MAX_MARKET_IMPORT_BODY,
+from .http import (MARKET_IMPORT_PATH, PROFILE_FILE_PATH, MAX_PROFILE_FILE_BODY, PRICE_CSV_PATH, MAX_IMPORT_CONFIRM_BODY, MAX_IMPORT_CONFIRM_FIELDS, MAX_MARKET_IMPORT_BODY,
                    MAX_IMPORT_MAP_BODY, Credentials, Guard,
                    body_receiver, configure_memory_only_import_uploads, equal)
 from .devices import Devices, home_state_line, home_state_message, move_to_phone, open_move
@@ -47,13 +47,15 @@ def _form_part_limit(path: str) -> int:
         return MAX_MARKET_IMPORT_BODY
     if path == PRICE_CSV_PATH:
         return MAX_IMPORT_MAP_BODY
+    if path == PROFILE_FILE_PATH:
+        return MAX_PROFILE_FILE_BODY
     return 512 * 1024
 
 
 def _form_file_limit(path: str) -> int:
     # Only the initial CSV upload, the market price file and the price CSV accept a file part. Rejecting
     # files on every other form avoids creating spooled temporary files on those routes.
-    return 1 if re.fullmatch(r"/accounts/\d+/import", path) or path in (MARKET_IMPORT_PATH, PRICE_CSV_PATH) else 0
+    return 1 if re.fullmatch(r"/accounts/\d+/import", path) or path in (MARKET_IMPORT_PATH, PRICE_CSV_PATH, PROFILE_FILE_PATH) else 0
 
 
 class SessionGate:
@@ -384,6 +386,59 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
                         notice="Backup restored as a separate review copy. Pair a fresh device to recover saved edits.")
         return page(request, "unlock", selected=selected,
                     notice="Backup restored. The previous database was kept for recovery. Unlock this profile to review it.")
+
+    @app.post("/profiles/open-file")
+    async def open_file(request: Request):
+        """BT-2AI2: add a profile from one .lightning file the person brought (USB, Drive, WhatsApp)."""
+        import tempfile
+        from .profile_file import open_profile_file
+        if session.container:
+            return RedirectResponse("/profiles", 303)
+        form = await request.form()
+        upload = form.get("file")
+        if not hasattr(upload, "read") or not getattr(upload, "filename", ""):
+            return page(request, "open-file", status=400, error="Choose a profile file to open.")
+        try:
+            with tempfile.TemporaryDirectory(prefix="lightning-open-file-") as scratch:
+                source = Path(scratch) / "incoming.lightning"
+                with source.open("wb") as handle:
+                    while block := await upload.read(1024 * 1024):
+                        handle.write(block)
+                session._attempt()
+                info = await asyncio.to_thread(open_profile_file, session.root, source, str(form.get("password", "")))
+        except ProfileError as exc:
+            return page(request, "open-file", status=400, error=str(exc))
+        except Exception as exc:
+            return page(request, "open-file", status=400,
+                        error=f"The file could not be opened. Nothing was added ({type(exc).__name__}).")
+        return page(request, "unlock", selected=str(info.db_path),
+                    notice="Profile added from the file. Unlock it with the same password.")
+
+    @app.get("/profiles/open-file")
+    async def open_file_page(request: Request):
+        if session.container:
+            return RedirectResponse("/profiles", 303)
+        return page(request, "open-file")
+
+    @app.post("/profiles/export-file")
+    async def export_file(request: Request):
+        """BT-2AI2: the open profile as one .lightning file, to open on a phone with no network."""
+        import tempfile
+        from .profile_file import SUFFIX, export_profile_file
+        if session.container is None or session.borrowed is not None or session.paths is None \
+                or session.paths.profile is None:
+            return RedirectResponse("/profiles", 303)
+        with tempfile.TemporaryDirectory(prefix="lightning-export-file-") as scratch:
+            try:
+                # Not in a thread: an encrypted database stays on the thread that opened it.
+                made = export_profile_file(session.paths, session.container.db,
+                                           Path(scratch) / (session.paths.profile.name + SUFFIX))
+            except ProfileError as exc:
+                return page(request, "manage", status=400, error=str(exc))
+            data = made.read_bytes()
+        return Response(data, media_type="application/octet-stream",
+                        headers={"content-disposition": f'attachment; filename="{made.name}"',
+                                 "cache-control": "no-store"})
 
     @app.get("/profiles/restore/resume")
     async def resume_restore_page(request: Request):
