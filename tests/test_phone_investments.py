@@ -45,7 +45,7 @@ def test_the_hero_leads_and_the_stepper_sits_under_it(phone):
     html = phone.get("/investments").text
     hero, stepper = html.index('class="phone-hero has-seam"'), html.index('class="phone-period"')
     chart, holdings = html.index("phone-invest-card"), html.index('id="holdings-heading"')
-    assert hero < stepper < chart < holdings  # the PDF's order
+    assert hero < stepper < holdings < chart  # owner 2026-11-06: holdings before the chart (audit r24 F10)
     assert "Portfolio value" in html and re.search(r'class="phone-lead">[\d,]+ <small>EGP</small>', html)
     assert re.search(r'class="phone-hero-line">(Up|Down) [\d,]+ this month \([+−][\d.]+%\)\.<', html)
     assert 'class="phone-kpis"' not in html and "<table" not in html  # no tiles, no table
