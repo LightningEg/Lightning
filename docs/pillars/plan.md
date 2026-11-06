@@ -15,6 +15,6 @@ A budget by category, bills and loan payments, reserves for what is coming, and 
 
 ## Reports with open follow-ups here
 
-- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 2AH
+- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/r24-desktop-phone-ux/report.md): 2AH
 <!-- work:end -->
 

@@ -10,7 +10,7 @@ by: Claude
 ---
 
 ## Report
-Found by [Audit 5](../../reports/2026-10-21-backend-streamlining/report.md) §4. Done (2026-10-22): every module has a layer in the import contract (a test keeps
+Found by [Audit 5](../../reports/r3-backend-streamlining/report.md) §4. Done (2026-10-22): every module has a layer in the import contract (a test keeps
 it so; `sync.transport.join_home` takes `borrowed_profile` instead of importing upward); one `core/refs.parse_row_id` replaces four
 id checks; Undo's ledger check is `transactions/history_check.validate_replay`, not a bootstrap closure; `open_profile_tasks` is one
 list for both entrypoints (month-end checkpoints post on unlock, failures are logged); `MoneyFromOthersService` gets its
@@ -35,7 +35,7 @@ One branch each, tests unchanged.
 
 ## Audit follow-up · 2026-11-03
 
-The [code-quality audit](../../reports/2026-11-03-code-quality-and-smart-features/report.md) measures `profile_app` at 829 lines in commit 89848dc, rather than the older 746-line figure. After active runtime claims clear, retain the route-area extraction. Additional candidates within the same structural work: transaction service validation/search/submission collaborators (1,381-line facade), bank import parsing/proposals/posting (962-line module), and small typed reporting/page read models. Preserve public facades, transaction scopes, monetary invariants, replay and undo behavior; one extraction per change. These are refactoring opportunities, not new correctness findings.
+The [code-quality audit](../../reports/r22-code-quality-and-smart-features/report.md) measures `profile_app` at 829 lines in commit 89848dc, rather than the older 746-line figure. After active runtime claims clear, retain the route-area extraction. Additional candidates within the same structural work: transaction service validation/search/submission collaborators (1,381-line facade), bank import parsing/proposals/posting (962-line module), and small typed reporting/page read models. Preserve public facades, transaction scopes, monetary invariants, replay and undo behavior; one extraction per change. These are refactoring opportunities, not new correctness findings.
 
 
 ## Transaction facade extraction · 2026-11-04

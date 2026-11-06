@@ -15,6 +15,6 @@ The overview, spending, financial health, net worth and reports. They read the l
 
 ## Reports with open follow-ups here
 
-- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 9A
+- [Code audit: refactoring, loose ends and smart features](../../reports/r22-code-quality-and-smart-features/report.md): 9A
 <!-- work:end -->
 

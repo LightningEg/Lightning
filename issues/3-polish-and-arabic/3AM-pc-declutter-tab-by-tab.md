@@ -13,7 +13,7 @@ repo: app
 ---
 
 ## Report
-[Audit 12](../../reports/2026-10-30-desktop-tab-audit/report.md) (owner, 2026-10-30: "very functional; focus on UX and
+[Audit 12](../../reports/r19-desktop-tab-audit/report.md) (owner, 2026-10-30: "very functional; focus on UX and
 visual; how cluttered each page is"). Each step names its findings (S1, B2...). **Owner's answers (2026-10-30):** the gear stays at
 the tab bar's end (A05 unchanged); Accounts and Zakat stay under Transactions; Budget edits behind an Edit button on
 the page; the new-transaction row stays at the top. Then: build it (owner, 2026-10-30). The phone's matching work is

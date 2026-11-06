@@ -26,10 +26,10 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 
 ## Reports with open follow-ups here
 
-- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 3AS, 3AT, 3H, 3AM
-- [Audit 1: is Lightning ready to demo?](../../reports/2026-10-20-demo-readiness/report.md): 3H
-- [v1.5.0 PR review, theme switching and package preparation](../../reports/2026-10-26-v150-release/report.md): 10A, 10C
-- [Store and community: unlocking themes, the market, rewards and staying in Lightning](../../reports/2026-10-27-store-and-community/report.md): 10C, 10D
-- [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](../../reports/2026-10-30-desktop-tab-audit/report.md): 3AM
+- [Audit 1: is Lightning ready to demo?](../../reports/r1-demo-readiness/report.md): 3H
+- [v1.5.0 PR review, theme switching and package preparation](../../reports/r12-v150-release/report.md): 10A, 10C
+- [Store and community: unlocking themes, the market, rewards and staying in Lightning](../../reports/r13-store-and-community/report.md): 10C, 10D
+- [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](../../reports/r19-desktop-tab-audit/report.md): 3AM
+- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/r24-desktop-phone-ux/report.md): 3AS, 3AT, 3H, 3AM
 <!-- work:end -->
 

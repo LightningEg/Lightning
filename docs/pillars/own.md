@@ -21,6 +21,6 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 
 ## Reports with open follow-ups here
 
-- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 2AF, 2AG
+- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/r24-desktop-phone-ux/report.md): 2AF, 2AG
 <!-- work:end -->
 

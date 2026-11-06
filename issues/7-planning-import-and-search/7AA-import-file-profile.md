@@ -12,7 +12,7 @@ github: 351
 
 ## Report
 
-The [CSV import stress test](../../reports/2026-11-05-csv-import-stress/report.md) ran 34 dummy files. Four kinds
+The [CSV import stress test](../../reports/r23-csv-import-stress/report.md) ran 34 dummy files. Four kinds
 post wrong money silently (month-first dates, direction columns, currency and account columns), large files make a
 25 MB page, and bank descriptions never become counterparties. The report's *Proposed architecture* is the design;
 these steps follow it. Built nothing yet.

@@ -2,6 +2,7 @@
 
     python tools/docs_check.py
     python tools/docs_check.py --peer ../Lightning_website
+    python tools/docs_check.py next-report     # the next free report code, e.g. r25
 
 Only public source documents are read; no network calls or private data access.
 """
@@ -9,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -40,19 +42,27 @@ def check(root: Path) -> list[str]:
     registered = catalogue.read_text(encoding="utf-8") if catalogue.exists() else ""
     for report in sorted((root / "reports").rglob("report.md")):
         relative = report.relative_to(root / "reports").as_posix()
-        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}-[a-z0-9-]+/report\.md", relative):
-            errors.append(f"reports/{relative}: expected YYYY-MM-DD-subject/report.md")
+        if not re.fullmatch(r"r\d+-[a-z0-9-]+/report\.md", relative):
+            errors.append(f"reports/{relative}: expected r<N>-subject/report.md")
         if f"]({relative})" not in registered:
             errors.append(f"reports/{relative}: absent from catalogue")
     for path in (root / "reports").glob("*.md"):
         if path.name != "README.md":
-            errors.append(f"{path.relative_to(root)}: report needs a dated subject folder")
+            errors.append(f"{path.relative_to(root)}: report needs an r<N>-subject folder")
     archive = root / "ai" / "archive" / "reports"
     archived = (archive / "README.md").read_text(encoding="utf-8") if (archive / "README.md").exists() else ""
     for report in sorted(archive.rglob("report.md")):
         relative = report.relative_to(archive).as_posix()
         if f"]({relative})" not in archived:
             errors.append(f"ai/archive/reports/{relative}: absent from the archive catalogue")
+    seen = {}
+    for report in sorted(list((root / "reports").glob("*/report.md")) + list(archive.glob("*/report.md"))):
+        code = report.parent.name.split("-")[0]
+        if code in seen:
+            errors.append(f"{report.parent.name}: code {code} is also used by {seen[code]}")
+        seen[code] = report.parent.name
+        if f"Code: {code}" not in "\n".join(report.read_text(encoding="utf-8").splitlines()[:6]):
+            errors.append(f"{report.parent.name}/report.md: header needs the line 'Code: {code}'")
     feedback_index = root / "feedback" / "README.md"
     registered = feedback_index.read_text(encoding="utf-8") if feedback_index.exists() else ""
     for record in (root / "feedback").glob("*.md"):
@@ -80,7 +90,17 @@ def mirrors(root: Path, peer: Path) -> list[str]:
     return errors
 
 
+def next_report_code(root: Path) -> str:
+    """The next free report code: one more than the highest r-code in reports/ and ai/archive/reports/."""
+    used = [int(m.group(1)) for base in (root / "reports", root / "ai" / "archive" / "reports") if base.is_dir()
+            for d in base.iterdir() if (m := re.match(r"r(\d+)-", d.name))]
+    return f"r{max(used, default=0) + 1}"
+
+
 def main():
+    if sys.argv[1:] == ["next-report"]:
+        print(next_report_code(ROOT))
+        return 0
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--peer", type=Path, help="also require all guideline Markdown/HTML files to match")
     args = parser.parse_args()

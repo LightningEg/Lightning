@@ -22,10 +22,10 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 
 ## Reports with open follow-ups here
 
-- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 1Q
-- [Audit 5: is the backend engine efficient and streamlined?](../../reports/2026-10-21-backend-streamlining/report.md): 9K
-- [Audit 6: open pull request cleanup](../../reports/2026-10-23-pull-request-cleanup/report.md): 1H
-- [v1.5.0 PR review, theme switching and package preparation](../../reports/2026-10-26-v150-release/report.md): 1H
-- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 1H, 9K
+- [Audit 5: is the backend engine efficient and streamlined?](../../reports/r3-backend-streamlining/report.md): 9K
+- [Audit 6: open pull request cleanup](../../reports/r7-pull-request-cleanup/report.md): 1H
+- [v1.5.0 PR review, theme switching and package preparation](../../reports/r12-v150-release/report.md): 1H
+- [Code audit: refactoring, loose ends and smart features](../../reports/r22-code-quality-and-smart-features/report.md): 1H, 9K
+- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/r24-desktop-phone-ux/report.md): 1Q
 <!-- work:end -->
 

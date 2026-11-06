@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 46 open items, in the order they are worked on.
+9 milestones, 46 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -106,15 +106,6 @@ Edit on the phone or the PC; one home confirms every change and nothing is lost.
 | NF-4B6 | ↳ Phase F: measure, rehearse loss and release | | | L | |
 
 Done: 4C, 4D, 4E, 4F, 4G, 4H, 4I, 4J, 4K, 4L. Next free code: 4M.
-
-## 5 Investments
-
-Every investment figure can be explained per purchase, and agrees with the ledger.
-
-| Code | Item | Kind | Pillar | Size | Status |
-|---|---|---|---|---|---|
-
-Done: 5A, 5B, 5C, 5D, 5E, 5F, 5G, 5H, 5I, 5J, 5K, 5L, 5M. Next free code: 5N.
 
 ## 6 Market data
 

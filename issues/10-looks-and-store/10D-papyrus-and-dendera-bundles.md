@@ -13,7 +13,7 @@ repo: website
 
 ## Report
 
-The cart offers the cheaper set (8N), and Nile, Dusk and Cotton have one. Papyrus and Dendera have none: the catalogue has no matching banner, frame or name for either, so there is nothing to bundle. See the store and community audit: `reports/2026-10-27-store-and-community/report.md` (B1).
+The cart offers the cheaper set (8N), and Nile, Dusk and Cotton have one. Papyrus and Dendera have none: the catalogue has no matching banner, frame or name for either, so there is nothing to bundle. See the store and community audit: `reports/r13-store-and-community/report.md` (B1).
 
 ## Fix
 

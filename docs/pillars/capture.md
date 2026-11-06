@@ -18,7 +18,7 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 
 ## Reports with open follow-ups here
 
-- [CSV import stress test: where it breaks and how to rebuild it](../../reports/2026-11-05-csv-import-stress/report.md): 7AA, 7AB, 7Z, 7C
-- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 7C
+- [Code audit: refactoring, loose ends and smart features](../../reports/r22-code-quality-and-smart-features/report.md): 7C
+- [CSV import stress test: where it breaks and how to rebuild it](../../reports/r23-csv-import-stress/report.md): 7AA, 7AB, 7Z, 7C
 <!-- work:end -->
 

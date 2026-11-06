@@ -2,7 +2,7 @@
 
 **Last reviewed 2026-10-23 · source 1.4.4 · latest published beta 1.4.2** ([published Windows and Android beta](https://github.com/LightningEg/Lightning-downloads/releases/tag/v1.4.2)).
 
-What Lightning is, who it is for, and where it goes. What each screen must answer: [Users' main questions](../reports/2026-10-27-users-main-questions/report.md). Technical contracts: [Architecture](ARCHITECTURE.md). Look: [guideline](../guideline/). Terms and figures: [Glossary](GLOSSARY.md). Shipped changes: [RELEASES.md](../RELEASES.md) (people) and [ai/changelog/](changelog/) (detail). Hand-off between AIs: [NOW.md](../NOW.md). The plan and open items: [issues/](../issues/INDEX.md).
+What Lightning is, who it is for, and where it goes. What each screen must answer: [Users' main questions](../reports/r14-users-main-questions/report.md). Technical contracts: [Architecture](ARCHITECTURE.md). Look: [guideline](../guideline/). Terms and figures: [Glossary](GLOSSARY.md). Shipped changes: [RELEASES.md](../RELEASES.md) (people) and [ai/changelog/](changelog/) (detail). Hand-off between AIs: [NOW.md](../NOW.md). The plan and open items: [issues/](../issues/INDEX.md).
 
 ## Contents
 
@@ -79,7 +79,7 @@ Dates are when the owner decided. Undated rows are founding rules.
 | **Locked certificates** (2026-10-14) | Show the owned value and unlock date separately beside If you sold today; do not count it as saleable cash. |
 | **Phone has its own design** (2026-10-06, 2026-10-07) | Part C of the guideline; never the PC layout squeezed. Every icon has its word (alone only if universal). The tab bar, Add and the Overview's order: Phone overhaul below. |
 | **Phone overhaul** (2026-10-22) | The owner's design "Lightning on your phone": a tab bar of words (Overview, Budget, Add, Transactions, More), Add in its middle; every tab opens on one hero figure with a calm sentence (Overview: Safe to spend); a month stepper whose month opens Choose period; tabs in words; arrow chips on rows, no ".00"; More holds the other sections with their figures. Supersedes icon-only tabs (2026-10-15). Guideline 3.34 Part C; step 2 (3AD) is done: quick add and the transaction sheet in 3AN3, swipe to set a category in C08.7 (guideline 3.39). |
-| **Phone declutter** (owner, 2026-10-29, left to Claude) | Quick actions and quick info first; analysis one tap away. D1: Overview's breakdown rows open sheets, not folds in folds. D2: Transactions keeps its filter chips; Money in and out become one line. D3: More stays flat under headings. D1 and D2 change Part C in both repos first: [Audit 10](../reports/2026-10-29-phone-tab-audit/report.md), IV-3AL. |
+| **Phone declutter** (owner, 2026-10-29, left to Claude) | Quick actions and quick info first; analysis one tap away. D1: Overview's breakdown rows open sheets, not folds in folds. D2: Transactions keeps its filter chips; Money in and out become one line. D3: More stays flat under headings. D1 and D2 change Part C in both repos first: [Audit 10](../reports/r17-phone-tab-audit/report.md), IV-3AL. |
 | **Home and sheets** (2026-11-05, 3G5/3G6) | The Overview keeps its answer-first layout and adds a "since your last visit" line, not three heroes. One category sheet serves Budget, Spending and Transactions; one bill sheet follows. |
 | **No health score** (2026-11-04, 3AD4) | Health stays a set of compared ratios; there is no 0-100 score. |
 | **Fewer steps to set up** (2026-10-06) | Recovery key shown once and confirmed with a press. One password on every device. |
@@ -135,7 +135,7 @@ The period picker (All time · YTD · Monthly · Custom) drives most visuals. A 
 A sparkline never follows the period. A comparison uses earlier months; a partial period uses matching calendar days, labelled so far with neutral comparison chips.
 
 <a id="the-questions-lightning-answers"></a>
-**Questions each screen answers and open gaps:** [Users' main questions](../reports/2026-10-27-users-main-questions/report.md).
+**Questions each screen answers and open gaps:** [Users' main questions](../reports/r14-users-main-questions/report.md).
 
 <a id="reference-workflow-a-month-with-mohab"></a>
 ## 5. Reference workflow: a month with Mohab

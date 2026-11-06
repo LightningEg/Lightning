@@ -14,7 +14,7 @@ skills: feedback-review
 The owner's 377-row file held about four decisions (262 rows already right, ~12 category names to place, 12 possible
 duplicates, 4 balance rows), but the review showed 377 rows of seven fields each, grouped by counterparty
 ([feedback FB1](../../feedback/2026-11-05-csv-import-and-phone-update.md),
-[stress test](../../reports/2026-11-05-csv-import-stress/report.md) D4–D5: 25 MB page at 5,000 rows).
+[stress test](../../reports/r23-csv-import-stress/report.md) D4–D5: 25 MB page at 5,000 rows).
 Owner, 2026-11-05: "300 rows is unusual; do something with the flow: better module, smarter buttons and features."
 Plan only (owner); build nothing until the owner says so.
 

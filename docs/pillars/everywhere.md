@@ -19,14 +19,14 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 
 ## Reports with open follow-ups here
 
-- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 3AN, 4A, 4B
-- [Audit 2: backend efficiency and loose ends](../../reports/2026-10-21-backend-efficiency/report.md): 4A
-- [Audit 3: is the edit journal (multi-device sync) solid?](../../reports/2026-10-21-edit-journal/report.md): 4A
-- [Audit 5: is the backend engine efficient and streamlined?](../../reports/2026-10-21-backend-streamlining/report.md): 4A
-- [Audit 4: backend correctness and failure boundaries](../../reports/2026-10-23-backend-correctness/report.md): 4A
-- [Pairing backend hardening and security review](../../reports/2026-10-26-pairing-hardening/report.md): 4A
-- [Audit 10: the phone, tab by tab - quick actions and the answer first](../../reports/2026-10-29-phone-tab-audit/report.md): 3AN
-- [Audit 13: the phone for quick jobs - convenience, taps and the look](../../reports/2026-11-01-phone-convenience-audit/report.md): 3AN
-- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 4A, 4B
+- [Audit 2: backend efficiency and loose ends](../../reports/r2-backend-efficiency/report.md): 4A
+- [Audit 5: is the backend engine efficient and streamlined?](../../reports/r3-backend-streamlining/report.md): 4A
+- [Audit 3: is the edit journal (multi-device sync) solid?](../../reports/r4-edit-journal/report.md): 4A
+- [Audit 4: backend correctness and failure boundaries](../../reports/r5-backend-correctness/report.md): 4A
+- [Pairing backend hardening and security review](../../reports/r11-pairing-hardening/report.md): 4A
+- [Audit 10: the phone, tab by tab - quick actions and the answer first](../../reports/r17-phone-tab-audit/report.md): 3AN
+- [Audit 13: the phone for quick jobs - convenience, taps and the look](../../reports/r20-phone-convenience-audit/report.md): 3AN
+- [Code audit: refactoring, loose ends and smart features](../../reports/r22-code-quality-and-smart-features/report.md): 4A, 4B
+- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/r24-desktop-phone-ux/report.md): 3AN, 4A, 4B
 <!-- work:end -->
 

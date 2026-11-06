@@ -1,4 +1,4 @@
-// Run from repo root: node reports/2026-11-03-code-quality-and-smart-features/evidence/search-race.cjs
+// Run from repo root: node reports/r22-code-quality-and-smart-features/evidence/search-race.cjs
 // Executes the actual live-search initializer with a small DOM/fetch double.
 const fs = require('node:fs');
 const path = require('node:path');

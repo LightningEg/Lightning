@@ -17,8 +17,8 @@ Encrypted profiles, backups, restore, and no account or server. Nothing is lost 
 
 ## Reports with open follow-ups here
 
-- [Audit 2: backend efficiency and loose ends](../../reports/2026-10-21-backend-efficiency/report.md): 2A, 2C
-- [Audit 4: backend correctness and failure boundaries](../../reports/2026-10-23-backend-correctness/report.md): 2A, 2C
-- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 2A, 2C
+- [Audit 2: backend efficiency and loose ends](../../reports/r2-backend-efficiency/report.md): 2A, 2C
+- [Audit 4: backend correctness and failure boundaries](../../reports/r5-backend-correctness/report.md): 2A, 2C
+- [Code audit: refactoring, loose ends and smart features](../../reports/r22-code-quality-and-smart-features/report.md): 2A, 2C
 <!-- work:end -->
 

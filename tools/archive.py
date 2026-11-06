@@ -3,6 +3,8 @@
     python tools/archive.py                 # dry run: what would move, and why the rest stays
     python tools/archive.py --write         # do it
     python tools/archive.py --days 30       # minimum age of a report, in days (default 30)
+    python tools/archive.py --issues        # dry run: milestones in issues/ with no open item
+    python tools/archive.py --issues --write
 
 A report moves to ai/archive/reports/<folder>/report.md when its catalogue row in reports/README.md has no open
 follow-ups, it is not a reference, it is at least --days old, and nothing outside the report links to its images.
@@ -26,6 +28,14 @@ IMAGES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"}
 HOMES = ("docs", "ai", "reports", "feedback", "templates", "guideline", "issues", "skills", "theme-kit")
 ROW = re.compile(r"^\| ([a-z0-9.-]+) \| \[(.*)\]\(([^/)]+)/report\.md\) \| (\d{4}-\d\d-\d\d) \| (\w+) \| (.*) \|$", re.M)
 LINK = re.compile(r"(!?\[[^\]]*\]\()([^)]+)(\))")
+ISSUES_ARCHIVE = Path("ai") / "archive" / "issues"
+ISSUES_HEAD = (
+    "# Archived milestones\n\n"
+    "Milestones from [the plan](../../../issues/INDEX.md) whose items are all finished, moved here by\n"
+    "`python tools/archive.py --issues --write`. Each folder keeps its README: the goal, the done-when line and every\n"
+    "finished code. Those codes and the milestone's number stay reserved; they are never reused.\n\n"
+    "| Milestone | Title | Finished codes |\n| --- | --- | --- |\n"
+)
 ARCHIVE_HEAD = (
     "# Archived reports\n\n"
     "Reports whose follow-ups are all finished, moved here by `python tools/archive.py`. The text and verdict are kept;\n"
@@ -147,11 +157,64 @@ def archive(root: Path, folder: str) -> None:
     index.write_text(body.rstrip("\n") + f"\n| {rid} | [{title}]({folder}/report.md) | {when} | {kind} |\n", encoding="utf-8")
 
 
+def finished_milestones(root: Path) -> list[Path]:
+    """Milestone folders whose README is all that is left: every item is finished and deleted."""
+    return [d for d in sorted((root / "issues").iterdir(), key=lambda p: p.name)
+            if d.is_dir() and re.match(r"\d+-", d.name) and [f.name for f in d.glob("*.md")] == ["README.md"]]
+
+
+def archive_milestone(root: Path, folder: Path) -> None:
+    """Move the milestone to ai/archive/issues/ and list it in that folder's README; relative links keep working."""
+    target = root / ISSUES_ARCHIVE / folder.name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(folder), str(target))
+    readme = target / "README.md"
+    text = readme.read_text(encoding="utf-8")
+    title = re.search(r"^title: (.+)$", text, re.M)
+    done = re.search(r"^done: (.+)$", text, re.M)
+    index = root / ISSUES_ARCHIVE / "README.md"
+    body = index.read_text(encoding="utf-8") if index.exists() else ISSUES_HEAD
+    number = folder.name.split("-")[0]
+    index.write_text(body.rstrip("\n") + f"\n| {number} | [{title.group(1) if title else folder.name}]({folder.name}/README.md) | "
+                     f"{done.group(1) if done else 'none'} |\n", encoding="utf-8")
+    _rewrite_folder_links(root, folder.resolve(), target.resolve())
+
+
+def _rewrite_folder_links(root: Path, old: Path, new: Path) -> None:
+    for path in documents(root):
+        if new in path.resolve().parents:
+            continue
+        text = path.read_text(encoding="utf-8")
+
+        def fix(match):
+            target = _target(path, match.group(2))
+            if target is None or (old != target and old not in target.parents):
+                return match.group(0)
+            anchor = "#" + match.group(2).split("#", 1)[1] if "#" in match.group(2) else ""
+            moved = new if old == target else new / target.relative_to(old)
+            return match.group(1) + os.path.relpath(moved, path.parent.resolve()).replace(os.sep, "/") + anchor + match.group(3)
+
+        updated = LINK.sub(fix, text)
+        if updated != text:
+            path.write_text(updated, encoding="utf-8")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--write", action="store_true", help="move the reports (default: dry run)")
     parser.add_argument("--days", type=int, default=30, help="minimum age of a report in days")
+    parser.add_argument("--issues", action="store_true", help="archive finished milestones of issues/ instead of reports")
     args = parser.parse_args()
+    if args.issues:
+        done = finished_milestones(ROOT)
+        for folder in done:
+            print(("archive  " if args.write else "would archive  ") + folder.name)
+            if args.write:
+                archive_milestone(ROOT, folder)
+        print(f"{len(done)} finished milestone(s)." + ("" if args.write else " Add --write to move them."))
+        if args.write:
+            print("Now run python tools/issues.py, python tools/status.py and python tools/docs_check.py.")
+        return
     rows = plan(ROOT, date.today(), args.days)
     moving = [folder for folder, _, reason in rows if reason is None]
     for folder, rid, reason in rows:

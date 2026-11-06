@@ -44,6 +44,9 @@ A file is named `<code>-<what>.md`, lower case after the code, hyphens. A step i
 own file: `## 3C1 Move the lower label down`. A new milestone is a new numbered folder with a README; the owner picks the
 order.
 
+A milestone whose items are all finished is moved out of this folder: `python tools/archive.py --issues --write` puts it in
+[ai/archive/issues](../ai/archive/issues/README.md) with its README (goal and every `done:` code). Its number and codes stay reserved.
+
 Report and feedback formats are in [the template catalogue](../templates/README.md).
 
 ## Types

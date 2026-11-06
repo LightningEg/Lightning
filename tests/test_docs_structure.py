@@ -183,3 +183,30 @@ def test_documentation_check_detects_unregistered_reports_and_dead_links(tmp_pat
     errors = _docs_check_tool().check(tmp_path)
     assert any("missing link evidence/missing.png" in error for error in errors)
     assert any("absent from catalogue" in error for error in errors)
+
+
+def test_report_codes_are_sequential_unique_and_in_their_folder_names():  # reports are r1, r2, ... in order written
+    tool = _docs_check_tool()
+    codes = [int(d.name.split("-")[0][1:]) for base in (ROOT / "reports", ROOT / "ai" / "archive" / "reports")
+             for d in base.iterdir() if d.is_dir() and re.match(r"r\d+-", d.name)]
+    assert sorted(codes) == list(range(1, len(codes) + 1))
+    assert tool.next_report_code(ROOT) == f"r{len(codes) + 1}"
+
+
+def test_finished_milestones_move_to_the_archive(tmp_path):
+    spec = importlib.util.spec_from_file_location("archive_tool", ROOT / "tools" / "archive.py")
+    archive = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(archive)
+    issues = tmp_path / "issues"
+    (issues / "5-done").mkdir(parents=True)
+    (issues / "5-done" / "README.md").write_text("---\ntitle: Done\ndone: 5A, 5B\n---\n")
+    (issues / "6-open").mkdir()
+    (issues / "6-open" / "README.md").write_text("---\ntitle: Open\n---\n")
+    (issues / "6-open" / "6A-item.md").write_text("item")
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "page.md").write_text("[old](../issues/5-done/README.md)\n")
+    assert [d.name for d in archive.finished_milestones(tmp_path)] == ["5-done"]
+    archive.archive_milestone(tmp_path, issues / "5-done")
+    assert (tmp_path / "ai" / "archive" / "issues" / "5-done" / "README.md").exists()
+    assert "5A, 5B" in (tmp_path / "ai" / "archive" / "issues" / "README.md").read_text()
+    assert "../ai/archive/issues/5-done/README.md" in (tmp_path / "docs" / "page.md").read_text()

@@ -16,7 +16,7 @@ Version **2.0.3**. Generated from the plan by `python tools/status.py`; do not e
 | [Build](pillars/build.md) | 8 |  | 6 | 1 | 1 |  |
 | [Reach](pillars/reach.md) | 5 |  | 3 | 2 |  | 2 |
 
-46 open items in 10 milestones.
+46 open items in 9 milestones.
 
 ## Being built now
 
@@ -43,7 +43,6 @@ Version **2.0.3**. Generated from the plan by `python tools/status.py`; do not e
 | 2 Safe for real money | 6 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
 | 3 Polish and Arabic | 11 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
-| 5 Investments | 0 | Every investment figure can be explained per purchase, and agrees with the ledger. |
 | 6 Market data | 4 | Prices arrive by themselves, from sources Lightning may redistribute. |
 | 7 Planning, import and search | 4 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 3 | The site is honest, quick and in step with the app. |

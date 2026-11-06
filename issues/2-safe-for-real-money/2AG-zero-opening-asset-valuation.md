@@ -19,5 +19,5 @@ post: no
 
 Create an Other asset at zero, then save a dated 540,000 estimate. History retains it but reported value remains zero. Reporting `_holdings` skips zero quantities before looking up manual valuation. Include eligible manually valued assets without fabricating cash. Verify revised estimates, account/wealth agreement and unchanged cash activity.
 
-Evidence and acceptance: [desktop and phone UX audit, F2](../../reports/2026-11-05-desktop-phone-ux/report.md). Dummy data only. This is an audit finding; no implementation change is included.
+Evidence and acceptance: [desktop and phone UX audit, F2](../../reports/r24-desktop-phone-ux/report.md). Dummy data only. This is an audit finding; no implementation change is included.
 

@@ -62,7 +62,7 @@ _I = {  # tab icons
 
 SECTIONS: tuple[Section, ...] = (
     # Question-led (owner, 2026-10-28): each section answers one of the users' main questions, in the order
-    # they ask them (docs/reports/2026-10-27-users-main-questions).
+    # they ask them (docs/reports/r14-users-main-questions).
     Section("overview", "Overview", "overview", (       # Where do I stand?
         Tab("summary", "Summary", "/", _I["summary"], ("=/", "=/birdview", "/explain", "/birdview/class", "/review", "/activity", "/reimbursements"),
             settings=("valuations", "assets-valuations"), gear="/settings?section=valuations", gear_label="Sale factors"),
