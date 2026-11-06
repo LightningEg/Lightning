@@ -280,6 +280,18 @@ jobs:
             --info phone/apk.json --out verified
           cp verified/PC/SHA256SUMS verified/PC/BUILD.json release/
           cp phone/Lightning-*.apk release/
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: '3.13'
+      - name: Install locked Linux dependencies (for signing)
+        run: python -m pip install --require-hashes --only-binary=:all: -r requirements/desktop-probe-linux.lock
+      - name: Sign the update manifest
+        # The key exists only in this step and this environment; a missing secret fails the tag run.
+        env:
+          UPDATE_SIGNING_KEY: ${{ secrets.UPDATE_SIGNING_KEY }}
+          TAG: ${{ github.ref_name }}
+          ZIP: ${{ needs.windows.outputs.zip }}
+        run: python packaging/update_manifest.py sign --dir release --tag "$TAG" --zip "$ZIP"
       - name: Publish to Lightning-downloads
         working-directory: release
         env:

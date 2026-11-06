@@ -1,0 +1,6 @@
+{
+  "comment": "Pinned Ed25519 public keys that sign Windows update manifests (UPDATE.json), by key id: raw 32-byte keys in base64url. Only the owner adds one (issues/9-later/NF-9B-in-app-updates.md). store-2026-1 is the store key for now; a separate update key is added, and CI signs with it, before the first release that carries the updater.",
+  "keys": {
+    "store-2026-1": "xsbYAEmYN1u5Kf6QVe4gSqi8AaLiejbs2RaGh_LKh8Q"
+  }
+}

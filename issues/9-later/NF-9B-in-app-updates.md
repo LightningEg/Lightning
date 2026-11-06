@@ -24,6 +24,8 @@ Android updates come from Google Play or the APK; this item is Windows only.
    `b"lightning-update-v1:" + UPDATE.json bytes` (a licence can never pass as an update), and **before the first
    release that carries the updater** the owner makes a separate update key, both public keys ship in
    `update_keys.json`, and CI signs with the new one. Track that switch in 9B5's checklist.
+   9B1 is built (signing in CI, `update_manifest.verify`; ARCHITECTURE › Build and release); the owner's part is done:
+   `UPDATE_SIGNING_KEY` (store-2026-1) is set in `production-release`. 9B2 copies the verify logic into `lightning/desktop/` (the app ships no `packaging/`).
 2. **Check only on click.** Lightning never contacts GitHub for updates unless the person presses the button.
    No automatic or scheduled check, no setting for one.
 3. **Rollback: automatic, plus one kept copy.** If the new version does not reach its profile chooser, the helper
@@ -43,27 +45,6 @@ Android updates come from Google Play or the APK; this item is Windows only.
 - Only a frozen Windows build (`sys.frozen` and `sys.platform == "win32"`) offers the button. Linux, browser mode and
   the phone show the version and a link to the download page instead.
 - The first version carrying the updater is still installed by hand; say so in its release note.
-
-## 9B1 Signed update manifest in the release · M
-**Build.** No new key tool: keys are made with `tools/store_keygen.py <file> --id <id>` (an Ed25519 private JWK with
-`d`, `x`, `kid`). Public keys go in `lightning/security/update_keys.json` as `{key_id: base64url public key}` (same
-shape as `store_keys.json`), starting with `store-2026-1` copied from `store_keys.json`. A new `packaging/update_manifest.py sign` writes, in the `release` job of
-`.github/workflows/desktop-probe.yml` before `publish_release.sh`:
-- `UPDATE.json`: `{"format": 1, "version": "2.0.4", "zip": "Lightning-v2.0.4-Windows-x64.zip", "sha256": "…",
-  "size": 31457280, "released": "2026-11-20", "key_id": "…"}`; version must equal the tag and `DISPLAY_VERSION`,
-  `sha256` must equal the ZIP's line in `SHA256SUMS`.
-- `UPDATE.json.sig`: base64 Ed25519 signature over `b"lightning-update-v1:"` + the exact bytes of `UPDATE.json`.
-
-The private key is the `production-release` environment secret `UPDATE_SIGNING_KEY`, holding the whole JWK (never a
-repository secret);
-a missing secret fails the tag run. `packaging/publish_release.sh` uploads both files and reads them back like the
-others. A `verify` subcommand (used by the app in 9B2) checks a manifest + signature against `update_keys.json`.
-**Owner:** paste the store key's private JWK (the same content as Supabase's `STORE_SIGNING_PRIVATE_JWK`) as
-`UPDATE_SIGNING_KEY` in GitHub › Settings › Environments › production-release.
-**Done when:** tests sign with a throwaway key made in the test and prove: good manifest verifies; a signature over
-the bare bytes (no label, as a licence would be) fails; a changed byte,
-an unknown `key_id`, a wrong signature or a version not matching the tag fails; `tests/test_release_publish.py`
-covers the two new assets. ARCHITECTURE "Build and release" names the key and the files.
 
 ## 9B2 Check, download and verify · M
 **Build** `lightning/desktop/update.py` (pure Python, no pywebview import, testable on Linux):
