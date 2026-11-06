@@ -25,6 +25,8 @@ Profile every date cell once; month-first, ISO with time and month names read co
 ## 7AA2 Amount plus direction column · M
 A third amount model: an amount and a column whose values say in or out (DR/CR, Debit/Credit, Income/Expense); drop "type" as a Category alias. Done when: A4 and B1 post the right sign.
 
+**Built 2026-11-06:** Direction column (`direction_sign` in `bank_import_rows.py`), suggested from DR/CR-style headers or a bare Type column whose values all say in/out; A4 posts the right signs. B1 still needs its Amount found (header "EGP") and its Subcategory: left for 7AA3/7AA7.
+
 ## 7AA3 Currency per row · M
 A Currency column is matched; a row in another currency waits for the account's amount (or a reference-amount column) and never posts its own figure. Done when: B2's USD row cannot post as EGP.
 

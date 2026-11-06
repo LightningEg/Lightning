@@ -11,7 +11,7 @@ from lightning.core.errors import ConflictError, LightningError, NotFoundError, 
 from lightning.core.money import from_e6
 
 # Re-export the original helpers for the UI, journal capture and existing callers.
-from lightning.bank_import_rows import (INTERNAL_WORDS as INTERNAL_WORDS, MAX_BYTES as MAX_BYTES, OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS,
+from lightning.bank_import_rows import (INTERNAL_WORDS as INTERNAL_WORDS, MAX_BYTES as MAX_BYTES, OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS, direction_sign,
                                           _amount as _amount, _date as _date, _decimal_amount as _decimal_amount,
                                           _separate_amount as _separate_amount, decode_csv, is_internal as is_internal)
 from lightning.bank_import_proposals import ImportProposals, LINK_WINDOW_DAYS as LINK_WINDOW_DAYS
@@ -77,7 +77,7 @@ class BankImportService:
             "JOIN bank_import_rows r ON r.batch_id=b.id AND r.status='REVIEW' GROUP BY b.id) w "
             "JOIN bank_import_rows f ON f.id=w.first_row_id ORDER BY w.first_row_id")]
 
-    def suggested_mapping(self, account_id: int, headers: list[str]) -> dict[str, str]:
+    def suggested_mapping(self, account_id: int, headers: list[str], rows: list[dict] | None = None) -> dict[str, str]:
         """Return saved or best-effort column matches for the reviewable map step."""
         saved = self.saved_mapping(account_id, headers)
         if saved:
@@ -90,7 +90,9 @@ class BankImportService:
             "Inflow": ("inflow", "money in", "credit", "credits", "deposit", "deposits"),
             "Outflow": ("outflow", "money out", "debit", "debits", "withdrawal", "withdrawals"),
             "Counterparty": ("counterparty", "merchant", "payee", "beneficiary", "party", "name"),
-            "Category": ("category", "type", "subcategory", "sub category"),
+            "Category": ("category", "subcategory", "sub category"),
+            "Direction": ("direction", "dr cr", "cr dr", "debit credit", "credit debit", "in out", "income expense",
+                          "expense income", "transaction type", "type of transaction", "dr or cr", "debit or credit"),
             "Group": ("category group", "group", "parent category", "main category", "master category",
                       "category parent"),
             "Notes": ("notes", "memo", "narrative", "details", "description"),
@@ -101,6 +103,16 @@ class BankImportService:
             found = next((header for header, name in normalized.items() if name in names), None)
             if found:
                 result[target] = found
+        if "Direction" not in result and rows:
+            # A bare "Type" column is a direction only when every value in it says money in or out.
+            for header in headers:
+                if normalized[header] == "type" and header not in result.values():
+                    values = {row.get(header, "") for row in rows if row.get(header, "")}
+                    try:
+                        if values and all(direction_sign(v) for v in values):
+                            result["Direction"] = header
+                    except ValueError:
+                        pass
         if "Amount" in result:
             result["amount_model"] = "SINGLE"
         elif "Inflow" in result and "Outflow" in result and result["Inflow"] != result["Outflow"]:

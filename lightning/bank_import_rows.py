@@ -16,7 +16,8 @@ from lightning.core.money import ascii_digits
 
 REQUIRED = ("Date", "Amount")
 # "Group" is the parent a category sits under in another app's export ("Work" for "Work › Transportation").
-OPTIONAL = ("Counterparty", "Category", "Group", "Notes", "Reference")
+# "Direction" is a column whose values say money in or out, beside an unsigned Amount (DR/CR, Income/Expense; IT-7AA2).
+OPTIONAL = ("Counterparty", "Category", "Group", "Notes", "Reference", "Direction")
 SEPARATE_AMOUNT_FIELDS = ("Inflow", "Outflow")
 MAX_BYTES = MAX_CSV_IMPORT_BYTES
 
@@ -103,6 +104,22 @@ def _amount(value: str) -> str:
     if amount == 0:
         raise ValueError("Enter a non-zero amount; use a minus sign for money out.")
     return format(amount, "f")
+
+
+MONEY_OUT_WORDS = {"dr", "d", "debit", "debits", "out", "outflow", "expense", "expenses", "withdrawal", "payment",
+                   "paid", "spent", "مدين", "سحب", "مصروف", "مصروفات", "صرف"}
+MONEY_IN_WORDS = {"cr", "c", "credit", "credits", "in", "inflow", "income", "deposit", "received", "refund",
+                  "دائن", "ايداع", "إيداع", "دخل", "إيراد", "ايراد"}
+
+
+def direction_sign(value: str) -> int:
+    """-1 for money out, +1 for money in, from a Direction column's value; anything else is an error to fix."""
+    word = " ".join(re.sub(r"[^\w ]", " ", value or "").split()).casefold()
+    if word in MONEY_OUT_WORDS:
+        return -1
+    if word in MONEY_IN_WORDS:
+        return 1
+    raise ValueError(f"“{value}” in the Direction column is not money in or out. Use DR/CR, Debit/Credit or Income/Expense.")
 
 
 def _separate_amount(inflow: str, outflow: str) -> str:

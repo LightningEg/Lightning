@@ -165,8 +165,8 @@ async def upload(request: Request, account_id: int):
                 return _render_upload(request, c, account_id,
                                       error="This file is too large to synchronize; split it into smaller files.",
                                       status_code=400)
-            headers, _ = decode_csv(data)
-            mapping = c.bank_imports.suggested_mapping(account_id, headers)
+            headers, sample_rows = decode_csv(data)
+            mapping = c.bank_imports.suggested_mapping(account_id, headers, sample_rows)
             saved_mapping = c.bank_imports.saved_mapping(account_id, headers)
             if not saved_mapping and _lightning_columns(headers):
                 saved_mapping = {"amount_model": "SINGLE"} | {key: key for key in headers}
