@@ -2068,6 +2068,7 @@ ARABIC_UI = {
     'No owned holdings.': 'مفيش مقتنيات مملوكة.',
     'Reference': 'الرقم المرجعي',
     'Category group': 'مجموعة الفئة',
+    'Balance column only': 'عمود الرصيد فقط',
     'Show more rows': 'عرض المزيد من الصفوف',
     'Money in or out (DR/CR)': 'داخل أو خارج (مدين/دائن)',
     'Your file’s categories': 'فئات ملفك',

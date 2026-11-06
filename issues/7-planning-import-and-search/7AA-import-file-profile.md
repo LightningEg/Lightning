@@ -38,6 +38,8 @@ A cleaned merchant name fills Counterparty and the raw text stays in Notes, lear
 ## 7AA5 Read any layout · M
 Encoding detection (UTF-16, cp1256), header row after a preamble, Arabic header names, balance-only statements. Done when: A6, A7, A10, A11 and A17 reach the review.
 
+**Built 2026-11-06:** UTF-16 and cp1256 are read (no visible preview yet), the header row is found below a preamble, Arabic header names are matched (`HEADER_ALIASES` in bank_import_rows), and a Balance-only statement gets amounts from the balance changes (third amount model BALANCE; its earliest line is a skip). A6, A7, A10, A11, A17 reach the review.
+
 ## 7AA6 Non-transactions as skips · S
 Totals footers, zero amounts and future holds open as skipped rows with a reason. Done when: A8, A15 and A16 have no error rows.
 

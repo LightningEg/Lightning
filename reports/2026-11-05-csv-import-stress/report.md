@@ -147,3 +147,4 @@ review screens were not exercised.
 - 2026-11-06: IT-7Z2 safe part built; B5's CIB row no longer posts into NBE (it is an error row). The split into one batch per account remains.
 - 2026-11-06: IT-7AA8 part built; D5 (5,000 rows) review page 25 MB to 0.8 MB and 4.7 s to 2.8 s (the preview computation, about 1.6 s, and posting in chunks remain).
 - 2026-11-06: IT-7AA6 built; totals footers, zero amounts and future holds open as skipped rows with a reason (A8, A15, A16 have no error rows).
+- 2026-11-06: IT-7AA5 built; A6, A7, A10, A11 and A17 reach the review (cp1256 is read without a visible preview yet).

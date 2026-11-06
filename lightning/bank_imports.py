@@ -11,7 +11,7 @@ from lightning.core.errors import ConflictError, LightningError, NotFoundError, 
 from lightning.core.money import from_e6
 
 # Re-export the original helpers for the UI, journal capture and existing callers.
-from lightning.bank_import_rows import (INTERNAL_WORDS as INTERNAL_WORDS, MAX_BYTES as MAX_BYTES, OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS, direction_sign,
+from lightning.bank_import_rows import (INTERNAL_WORDS as INTERNAL_WORDS, MAX_BYTES as MAX_BYTES, OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS, HEADER_ALIASES, direction_sign, normalize_header,
                                           _amount as _amount, _date as _date, _decimal_amount as _decimal_amount,
                                           _separate_amount as _separate_amount, decode_csv, is_internal as is_internal)
 from lightning.bank_import_proposals import ImportProposals, LINK_WINDOW_DAYS as LINK_WINDOW_DAYS
@@ -82,24 +82,8 @@ class BankImportService:
         saved = self.saved_mapping(account_id, headers)
         if saved:
             return saved
-        normalized = {header: " ".join("".join(ch.lower() if ch.isalnum() else " " for ch in header).split())
-                      for header in headers}
-        aliases = {
-            "Date": ("date", "transaction date", "posting date", "booking date", "value date"),
-            "Amount": ("amount", "transaction amount", "net amount", "value"),
-            "Inflow": ("inflow", "money in", "credit", "credits", "deposit", "deposits"),
-            "Outflow": ("outflow", "money out", "debit", "debits", "withdrawal", "withdrawals"),
-            "Counterparty": ("counterparty", "merchant", "payee", "beneficiary", "party", "name"),
-            "Category": ("category", "subcategory", "sub category"),
-            "Direction": ("direction", "dr cr", "cr dr", "debit credit", "credit debit", "in out", "income expense",
-                          "expense income", "transaction type", "type of transaction", "dr or cr", "debit or credit"),
-            "Group": ("category group", "group", "parent category", "main category", "master category",
-                      "category parent"),
-            "Currency": ("currency", "currency code", "ccy", "cur"),
-            "Account": ("account", "account name", "wallet", "from account"),
-            "Notes": ("notes", "memo", "narrative", "details", "description"),
-            "Reference": ("reference", "ref", "transaction id", "transaction reference"),
-        }
+        normalized = {header: normalize_header(header) for header in headers}
+        aliases = HEADER_ALIASES
         result = {}
         for target, names in aliases.items():
             found = next((header for header, name in normalized.items() if name in names), None)
@@ -115,7 +99,10 @@ class BankImportService:
                             result["Direction"] = header
                     except ValueError:
                         pass
-        if "Amount" in result:
+        if "Amount" not in result and not ("Inflow" in result and "Outflow" in result) \
+                and "Balance" in result and "Date" in result:
+            result["amount_model"] = "BALANCE"  # a statement that lists only the running balance
+        elif "Amount" in result:
             result["amount_model"] = "SINGLE"
         elif "Inflow" in result and "Outflow" in result and result["Inflow"] != result["Outflow"]:
             result["amount_model"] = "SEPARATE"
@@ -196,9 +183,10 @@ class BankImportService:
                 mapping = {"amount_model": "SINGLE"} | {key: key for key in (*REQUIRED, *OPTIONAL) if key in headers}
         amount_model = str(mapping.get("amount_model") or
                            ("SEPARATE" if any(mapping.get(key) for key in SEPARATE_AMOUNT_FIELDS) else "SINGLE"))
-        if amount_model not in {"SINGLE", "SEPARATE"}:
+        if amount_model not in {"SINGLE", "SEPARATE", "BALANCE"}:
             raise ValidationError("Choose one amount column or separate inflow/outflow columns.", "mapping")
-        missing = [key for key in (("Date", *SEPARATE_AMOUNT_FIELDS) if amount_model == "SEPARATE" else REQUIRED)
+        missing = [key for key in (("Date", *SEPARATE_AMOUNT_FIELDS) if amount_model == "SEPARATE"
+                                   else ("Date", "Balance") if amount_model == "BALANCE" else REQUIRED)
                    if mapping.get(key) not in headers]
         if amount_model == "SEPARATE" and mapping.get("Inflow") == mapping.get("Outflow"):
             missing.append("different inflow and outflow columns")
@@ -209,8 +197,8 @@ class BankImportService:
                               self._other_account_check(account_id))
         now = now_iso()
         with self.db.transaction():
-            canonical_fields = ("Date", *SEPARATE_AMOUNT_FIELDS, *OPTIONAL) if amount_model == "SEPARATE" else (*REQUIRED, *OPTIONAL)
-            if mapping and (saved is not None or amount_model == "SEPARATE"
+            canonical_fields = (("Date", *SEPARATE_AMOUNT_FIELDS, *OPTIONAL) if amount_model == "SEPARATE" else (*REQUIRED, *OPTIONAL))
+            if mapping and (saved is not None or amount_model in {"SEPARATE", "BALANCE"}
                             or any(mapping.get(key) != key for key in canonical_fields if mapping.get(key)) or invert_amount):
                 self.db.execute("INSERT INTO bank_import_column_maps(account_id,header_signature,mapping_json,invert_amount,created_at,updated_at) "
                                 "VALUES (?,?,?,?,?,?) ON CONFLICT(account_id,header_signature) DO UPDATE SET "

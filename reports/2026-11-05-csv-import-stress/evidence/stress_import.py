@@ -222,7 +222,7 @@ def run(sid, case, title, filename, data, c, client, account):
         out["suggested"] = {k: v for k, v in mapping.items() if k != "amount_model"}
         out["path"] = "column step"
         missing = [k for k in ("Date",) if k not in mapping]
-        if "Amount" not in mapping and not ("Inflow" in mapping and "Outflow" in mapping):
+        if "Amount" not in mapping and not ("Inflow" in mapping and "Outflow" in mapping) and mapping.get("amount_model") != "BALANCE":
             missing.append("Amount")
         if missing:
             out["result"] = f"blocked at the column step: nothing suggested for {', '.join(missing)}"

@@ -10,13 +10,19 @@ from lightning.bank_import_rows import (
 
 def normalize_rows(raw_rows, mapping, amount_model, invert_amount, account_currency=None, account_check=None):
     """Build the same review rows and row-level errors without changing the ledger."""
-    fields = ("Date", *SEPARATE_AMOUNT_FIELDS, *OPTIONAL) if amount_model == "SEPARATE" else (*REQUIRED, *OPTIONAL)
+    fields = (("Date", *SEPARATE_AMOUNT_FIELDS, *OPTIONAL) if amount_model == "SEPARATE"
+              else ("Date", *OPTIONAL) if amount_model == "BALANCE" else (*REQUIRED, *OPTIONAL))
     date_profile = profile_dates(raw.get(mapping.get("Date", ""), "") for raw in raw_rows)
     stored = []
-    for raw in raw_rows:
+    if amount_model == "BALANCE":
+        raw_rows = list(raw_rows)
+        balance_moves = _balance_moves(raw_rows, mapping, date_profile)
+    for position, raw in enumerate(raw_rows):
         parsed = {key: raw.get(mapping.get(key, ""), "") for key in fields}
         for key in ("Amount", *SEPARATE_AMOUNT_FIELDS):
             parsed.setdefault(key, "")
+        if amount_model == "BALANCE":
+            parsed["Amount"] = balance_moves[position]
         errors = []
         if not parsed["Date"].strip() and is_total_line(*(raw.get(h, "") for h in raw if h != "__line__")):
             parsed["_skip_reason"] = "A totals or balance line, not a transaction: skipped."
@@ -28,6 +34,9 @@ def normalize_rows(raw_rows, mapping, amount_model, invert_amount, account_curre
             parsed["Date"] = _date(parsed["Date"], date_profile)
             parsed["Amount"] = (_separate_amount(parsed["Inflow"], parsed["Outflow"])
                                 if amount_model == "SEPARATE" else _amount(parsed["Amount"]))
+            if amount_model == "BALANCE" and position == balance_moves.first:
+                raise SkipRow("The statement's first balance, not a payment: Lightning keeps the account's "
+                              "opening balance itself.")
             if amount_model != "SEPARATE" and mapping.get("Direction"):
                 parsed["Amount"] = format(abs(Decimal(parsed["Amount"])) * direction_sign(parsed["Direction"]), "f")
             if invert_amount:
@@ -59,3 +68,36 @@ def _readable(text: str) -> bool:
         return True
     except ArithmeticError:
         return False
+
+
+class _Moves(list):
+    first = -1  # the row whose balance has nothing before it: the statement's earliest line
+
+
+def _balance_moves(raw_rows, mapping, date_profile) -> _Moves:
+    """IT-7AA5: a statement with only a Balance column. Each row's amount is the change from the balance before it
+    (the earlier line, whichever way the file is sorted); the earliest line has none, so it opens as a skip."""
+    from lightning.bank_import_rows import _decimal_amount
+    from lightning.import_profile import read_date
+    balances, days = [], []
+    for raw in raw_rows:
+        try:
+            balances.append(_decimal_amount(raw.get(mapping.get("Balance", ""), "")))
+        except (ValueError, ArithmeticError):
+            balances.append(None)
+        try:
+            days.append(read_date(raw.get(mapping.get("Date", ""), ""), date_profile))
+        except ValueError:
+            days.append(None)
+    newest_first = bool(days and days[0] and days[-1] and days[0] > days[-1])
+    order = list(range(len(raw_rows)))[::-1] if newest_first else list(range(len(raw_rows)))
+    moves = _Moves(["0"] * len(raw_rows))
+    moves.first = order[0] if order else -1
+    previous = None
+    for index in order:
+        current = balances[index]
+        if previous is not None and current is not None:
+            moves[index] = format(current - previous, "f")
+        if current is not None:
+            previous = current
+    return moves

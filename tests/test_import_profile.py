@@ -127,3 +127,25 @@ def test_footers_zero_amounts_and_future_holds_are_skips_not_errors():
     assert [bool(r.get("_skip_reason")) for r in rows] == [False, True, True, True, False]
     assert not any(r["_errors"] for r in rows[:4]) and rows[4]["_errors"]
     assert rows[3]["Amount"] == "-999"
+
+
+def test_any_layout_reads_encodings_preamble_and_arabic_headers():
+    from lightning.bank_import_rows import decode_csv
+    preamble = "National Bank\nAccount: 1234\nDate,Description,Amount\n2026-10-01,Shop,-5\n"
+    headers, rows = decode_csv(preamble.encode())
+    assert headers == ["Date", "Description", "Amount"] and rows[0]["__line__"] == "4"
+    arabic = "Date,Description,Amount\r\n2026-10-01,سعودي,-250.50\r\n"
+    assert decode_csv(arabic.encode("cp1256"))[1][0]["Description"] == "سعودي"
+    assert decode_csv("Date\tAmount\r\n2026-10-01\t-5\r\n".encode("utf-16"))[0] == ["Date", "Amount"]
+    assert decode_csv("التاريخ,المبلغ\n2026-10-01,-5\n".encode())[0] == ["التاريخ", "المبلغ"]
+
+
+def test_balance_only_statement_gets_amounts_from_the_balance_changes():
+    from lightning.bank_import_parsing import normalize_rows
+    mapping = {"Date": "D", "Balance": "B"}
+    for order in (1, -1):
+        raw = [{"D": d, "B": b, "__line__": str(i)} for i, (d, b) in enumerate(
+            [("2026-10-01", "10000"), ("2026-10-02", "9749.50"), ("2026-10-03", "24749.50")][::order], start=2)]
+        rows = {p["Date"]: p for _r, p in normalize_rows(raw, mapping, "BALANCE", False)}
+        assert rows["2026-10-01"]["_skip_reason"] and not rows["2026-10-01"]["_errors"]
+        assert rows["2026-10-02"]["Amount"] == "-250.50" and rows["2026-10-03"]["Amount"] == "15000.00"

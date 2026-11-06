@@ -17,9 +17,66 @@ from lightning.core.money import ascii_digits
 REQUIRED = ("Date", "Amount")
 # "Group" is the parent a category sits under in another app's export ("Work" for "Work › Transportation").
 # "Direction" is a column whose values say money in or out, beside an unsigned Amount (DR/CR, Income/Expense; IT-7AA2).
-OPTIONAL = ("Counterparty", "Category", "Group", "Notes", "Reference", "Direction", "Currency", "Account")
+OPTIONAL = ("Counterparty", "Category", "Group", "Notes", "Reference", "Direction", "Currency", "Account", "Balance")
 SEPARATE_AMOUNT_FIELDS = ("Inflow", "Outflow")
 MAX_BYTES = MAX_CSV_IMPORT_BYTES
+
+# What each column is usually called, in English and Arabic (IT-7AA5): the column step's suggestion and the finder
+# of the header row below a preamble both read this one table.
+HEADER_ALIASES = {
+    "Date": ("date", "transaction date", "posting date", "booking date", "value date", "التاريخ", "تاريخ", "تاريخ العملية"),
+    "Amount": ("amount", "transaction amount", "net amount", "value", "المبلغ", "القيمة"),
+    "Inflow": ("inflow", "money in", "credit", "credits", "deposit", "deposits", "دائن", "إيداع", "ايداع", "وارد"),
+    "Outflow": ("outflow", "money out", "debit", "debits", "withdrawal", "withdrawals", "مدين", "سحب", "صادر"),
+    "Counterparty": ("counterparty", "merchant", "payee", "beneficiary", "party", "name", "المستفيد", "الطرف", "الاسم"),
+    "Category": ("category", "subcategory", "sub category", "الفئة", "التصنيف"),
+    "Direction": ("direction", "dr cr", "cr dr", "debit credit", "credit debit", "in out", "income expense",
+                  "expense income", "transaction type", "type of transaction", "dr or cr", "debit or credit",
+                  "نوع العملية"),
+    "Group": ("category group", "group", "parent category", "main category", "master category", "category parent"),
+    "Currency": ("currency", "currency code", "ccy", "cur", "العملة"),
+    "Account": ("account", "account name", "wallet", "from account", "الحساب"),
+    "Notes": ("notes", "memo", "narrative", "details", "description", "البيان", "الوصف", "التفاصيل", "ملاحظات"),
+    "Reference": ("reference", "ref", "transaction id", "transaction reference", "المرجع", "رقم المرجع"),
+    "Balance": ("balance", "running balance", "available balance", "closing balance", "الرصيد"),
+}
+
+
+def normalize_header(header: str) -> str:
+    return " ".join("".join(ch.lower() if ch.isalnum() else " " for ch in header).split())
+
+
+def _is_header_row(cells) -> bool:
+    known = {name for names in HEADER_ALIASES.values() for name in names}
+    return sum(normalize_header(c) in known for c in cells) >= 2
+
+
+def _decode_text(data: bytes) -> str:
+    """UTF-8 (with or without a BOM), UTF-16 (Excel's "Unicode text") or Windows Arabic (cp1256)."""
+    if data[:2] in (b"\xff\xfe", b"\xfe\xff"):
+        try:
+            return data.decode("utf-16")
+        except UnicodeDecodeError:
+            pass
+    try:
+        return data.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        pass
+    try:
+        return data.decode("cp1256")
+    except UnicodeDecodeError:
+        raise ValidationError("Save the statement as a UTF-8 CSV file.", "file") from None
+
+
+def _header_line(text: str) -> int:
+    """Index of the first line that reads as a header row (two or more known column names); 0 when none does, so a
+    file with its own odd names keeps working as before. Preamble lines above it are the bank's, not rows."""
+    for index, line in enumerate(text.splitlines()[:40]):
+        for delimiter in (",", ";", "\t"):
+            if _is_header_row(next(csv.reader([line], delimiter=delimiter), [])):
+                return index
+    return 0
+
 
 INTERNAL_WORDS = {"internal", "internal transfer", "transfer", "transfers", "own account"}
 
@@ -158,10 +215,10 @@ def _separate_amount(inflow: str, outflow: str) -> str:
 def decode_csv(data: bytes) -> tuple[list[str], list[dict[str, str]]]:
     if len(data) > MAX_BYTES:
         raise ValidationError("CSV files must be 5 MB or smaller.", "file")
-    try:
-        text = data.decode("utf-8-sig")
-    except UnicodeDecodeError:
-        raise ValidationError("Save the statement as a UTF-8 CSV file.", "file") from None
+    text = _decode_text(data)
+    skipped = _header_line(text)
+    if skipped:
+        text = "\n".join(text.splitlines()[skipped:]) + "\n"
     try:
         sample = text[:4096]
         dialect = csv.Sniffer().sniff(sample, delimiters=",;\t") if sample else csv.excel
@@ -172,7 +229,7 @@ def decode_csv(data: bytes) -> tuple[list[str], list[dict[str, str]]]:
         if len(set(headers)) != len(headers):
             raise ValidationError("CSV headers must be unique; rename duplicate columns and try again.", "file")
         rows = []
-        for line, row in enumerate(reader, start=2):
+        for line, row in enumerate(reader, start=2 + skipped):
             rows.append({h: str(row.get(h, "") or "").strip() for h in headers} | {"__line__": str(line)})
         return headers, rows
     except csv.Error as exc:
