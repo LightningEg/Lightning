@@ -11,8 +11,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **BV-3AV** | [The Arabic bank import preview mixes English into Arabic lines](../../issues/3-polish-and-arabic/BV-3AV-arabic-bank-import-preview.md) | M | ready |
-| **BV-3AW** | [Four short words stay English in Arabic on loans, charts and investments](../../issues/3-polish-and-arabic/BV-3AW-arabic-short-words-loans-charts.md) | S | ready |
 | **OW-3AI** | [Additional broker and institution logos still needed](../../issues/3-polish-and-arabic/OW-3AI-institution-logos.md) | owner | ready |
 | **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](../../issues/10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md) | L | building |
 | **NF-10B** | [Supporter perks still waiting on the app or the owner](../../issues/10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md) | M | blocked on 10A claiming; owner decision on the beta channel |
