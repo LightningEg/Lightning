@@ -38,7 +38,7 @@ Plan: `issues/INDEX.md`.
 4. **1H:** locks merged (#286); native checks held by owner; #302 open. **Read:** `issues/1-easy-to-contribute/IT-1H-coordinate-packaged-dependency-refresh.md`.
 5. **2A:** restore safety code (Luna's claim); its reboot drill joins the held checks. **Read:** 2A.
 6. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `issues/4-edit-journal-and-devices/r11-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
-7. **Website recapture** (Sonnet M3 session, last) for 3W, 3AG, 7Q, 3Q, 3S, 3T, 3G, 3H. **Read:** `skills/site-recapture/SKILL.md`.
+7. **Website recapture** (Sonnet M3 session, last) for 3W, 3AG, 7Q, 3Q, 3S, 3T, 3G, 3H.  Fix the `a-kpis` caption. **Read:** `skills/site-recapture/SKILL.md`.
 8. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.
 9. **6F:** London's board and Gulf month-end history (5G done). **Read:** 6F.
 10. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
