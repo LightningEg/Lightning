@@ -60,4 +60,6 @@ Page the review by name group, render rows on demand, run batch-wide actions on 
 ## 7AA9 Reconcile against the statement's balance · M
 With a Balance column, compare the account after each statement day and show gaps or doubles before leaving. Done when: a file with one row removed is caught.
 
+**Built 2026-11-06:** `lightning/import_reconcile.py` checks each line's balance change against its amount (newest-first files too) and the review shows up to five gaps before posting. It checks the file against itself; comparing the account's own ledger balance is open.
+
 Order: 7AA1, 7AA2, 7AA3 (with IT-7Z2), then 7AA8, 7AA4, the rest. The profile (report stage 2) is built in 7AA1 and extended by each step.

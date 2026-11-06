@@ -182,3 +182,24 @@ def test_merchant_name_is_cleaned_from_the_description_and_the_raw_text_stays_in
     raw = [{"D": "2026-10-01", "A": "-80", "N": "UBER *TRIP HELP.UBER.COM", "__line__": "2"}]
     (_r, parsed), = normalize_rows(raw, mapping, "SINGLE", False)
     assert parsed["Counterparty"] == "Uber" and parsed["Notes"] == "UBER *TRIP HELP.UBER.COM"
+
+
+def test_a_statement_with_a_row_removed_is_caught_by_its_balance_column():
+    from lightning.import_reconcile import balance_gaps
+    full = [("2026-10-01", "-100", "900"), ("2026-10-02", "-50", "850"), ("2026-10-03", "-25", "825"), ("2026-10-04", "10", "835")]
+    rows = lambda items: [{"Date": d, "Amount": a, "Balance": b, "_line": str(i), "_errors": []}
+                          for i, (d, a, b) in enumerate(items, start=2)]
+    assert balance_gaps(rows(full)) == []
+    assert balance_gaps(rows(full[::-1])) == []  # newest first reads the same
+    gaps = balance_gaps(rows(full[:1] + full[2:]))  # the 50 row is gone
+    assert len(gaps) == 1 and gaps[0].moved == -75 and gaps[0].added == -25
+
+
+def test_review_page_shows_the_balance_gap(c, setup):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    cib = setup[0]["cib"].id
+    data = b"Date,Amount,Counterparty,Balance\n2026-10-01,-100,Seoudi,900\n2026-10-03,-25,Uber,825\n"
+    batch, _ = c.bank_imports.stage(cib, "g.csv", data)
+    page = TestClient(create_app(c), base_url="http://127.0.0.1").get(f"/accounts/{cib}/import/{batch}")
+    assert "does not add up" in page.text

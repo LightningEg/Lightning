@@ -149,3 +149,4 @@ review screens were not exercised.
 - 2026-11-06: IT-7AA6 built; totals footers, zero amounts and future holds open as skipped rows with a reason (A8, A15, A16 have no error rows).
 - 2026-11-06: IT-7AA5 built; A6, A7, A10, A11 and A17 reach the review (cp1256 is read without a visible preview yet).
 - 2026-11-06: IT-7AA7 and IT-7AA4 built; B1, B3 and B6 resolve, and bank descriptions become counterparties (A2, C3).
+- 2026-11-06: IT-7AA9 built; a Balance column is checked against the rows and the review lists gaps (a removed row is caught).

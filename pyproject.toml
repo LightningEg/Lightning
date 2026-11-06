@@ -50,6 +50,7 @@ layers = [
     "lightning.database | lightning.security | lightning.market",
     "lightning.undo",
     "lightning.statement_files",
+    "lightning.import_reconcile",
     "lightning.bank_import_rows",
     "lightning.import_profile",
     "lightning.core",

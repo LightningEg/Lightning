@@ -8,6 +8,7 @@ from decimal import Decimal, InvalidOperation
 
 from lightning.core.dates import today
 from lightning.workflows.market_prices import fill_followed
+from lightning.import_reconcile import balance_gaps
 from lightning.bank_imports import OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS, decode_csv
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.limits import MAX_CSV_MAPPING_REQUEST_BYTES, MAX_IMPORT_REVIEW_REQUEST_BYTES
@@ -400,7 +401,7 @@ def _render_review(request, c, account_id: int, batch, rows, *, summary, form=No
             labels[row["_file_label"]] = labels.get(row["_file_label"], 0) + 1
     file_labels = sorted(labels.items(), key=lambda item: (-item[1], item[0].casefold()))
     return render(request, "bank_import_preview.html", account=account, batch=batch, rows=rows,
-                  groups=shown, shown_groups=len(shown),
+                  groups=shown, balance_gaps=balance_gaps(rows) if batch["status"] != "POSTED" else [], shown_groups=len(shown),
                   more_rows=sum(len(p['rows']) for p in pieces[len(shown):]) if paged else 0, counts=counts, categories=_categories(c), file_labels=file_labels,
                   counterparties=c.counterparties.list_active(), owners=c.counterparties.list_people(), account_choices=accounts_here,
                   summary=summary, msg=msg, error=error, reject_prompt=reject_prompt, status_code=status_code)
