@@ -8,7 +8,8 @@ import io
 import re
 from decimal import Decimal, InvalidOperation
 
-from lightning.core.dates import parse_date, today
+from lightning.core.dates import today
+from lightning.import_profile import read_date
 from lightning.core.errors import ValidationError
 from lightning.core.limits import MAX_CSV_IMPORT_BYTES
 from lightning.core.money import ascii_digits
@@ -39,9 +40,9 @@ def is_internal(category: str) -> bool:
     return " ".join((category or "").split()).casefold() in INTERNAL_WORDS
 
 
-def _date(value: str) -> str:
+def _date(value: str, profile=None) -> str:
     try:
-        day = parse_date(value)
+        day = read_date(value, profile)
     except ValidationError as exc:
         raise ValueError(exc.message) from None
     if day > today():  # the same rule as typing it: the review marks the row to fix at once, not when Post fails

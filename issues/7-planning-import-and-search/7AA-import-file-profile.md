@@ -20,6 +20,8 @@ these steps follow it. Built nothing yet.
 ## 7AA1 File-level date order · M
 Profile every date cell once; month-first, ISO with time and month names read correctly; ambiguous files ask once. Done when: report A12, A13, A14 and B1 dates are right.
 
+**Built 2026-11-06:** `lightning/import_profile.py` (month-first, times, month names, ISO timestamps; A12-A14 re-run clean). Open: ask once when a file is ambiguous (all parts 12 or less; reads day-first, as before); B1 waits for 7AA2.
+
 ## 7AA2 Amount plus direction column · M
 A third amount model: an amount and a column whose values say in or out (DR/CR, Debit/Credit, Income/Expense); drop "type" as a Category alias. Done when: A4 and B1 post the right sign.
 
