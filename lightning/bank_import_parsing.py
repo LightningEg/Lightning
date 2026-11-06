@@ -4,7 +4,7 @@ from decimal import Decimal
 from lightning.import_profile import profile_dates
 from lightning.bank_import_rows import (
     REQUIRED, OPTIONAL, SEPARATE_AMOUNT_FIELDS,
-    _date, _separate_amount, _amount, direction_sign, currency_code, SkipRow, is_total_line,
+    _date, _separate_amount, _amount, direction_sign, currency_code, clean_merchant, SkipRow, is_total_line,
 )
 
 
@@ -56,9 +56,20 @@ def normalize_rows(raw_rows, mapping, amount_model, invert_amount, account_curre
                 parsed["Amount"] = "0"
         except ValueError as exc:
             errors.append(str(exc))
+        if not mapping.get("Counterparty") and (parsed.get("Notes") or "").strip() and not parsed.get("Counterparty"):
+            # A bank statement names the merchant only inside its description: the cleaned name is the counterparty,
+            # and the bank's own wording stays in Notes (IT-7AA4).
+            parsed["Counterparty"] = clean_merchant(parsed["Notes"])
+        sub = (parsed.get("Subcategory") or "").strip()
+        if sub and (parsed.get("Category") or "").strip() and not (parsed.get("Group") or "").strip():
+            # Another app's Category and Subcategory columns: the first is the group, the second the name.
+            parsed["Group"], parsed["Category"] = parsed["Category"].strip(), sub
+        elif sub and not (parsed.get("Category") or "").strip():
+            parsed["Category"] = sub
         parsed["_line"] = raw["__line__"]
         parsed["_errors"] = errors
         stored.append((raw, parsed))
+    _join_split_lines(stored)
     return stored
 
 
@@ -101,3 +112,25 @@ def _balance_moves(raw_rows, mapping, date_profile) -> _Moves:
         if current is not None:
             previous = current
     return moves
+
+
+def _join_split_lines(stored) -> None:
+    """IT-7AA7: lines of one purchase (same day, total and name) each carrying a Split amount that together make
+    the total become one row with its parts (`_file_split`); the other lines open as skips, never as duplicates."""
+    groups: dict[tuple, list] = {}
+    for _raw, parsed in stored:
+        if parsed.get("Split") and not parsed["_errors"] and not parsed.get("_skip_reason"):
+            groups.setdefault((parsed["Date"], parsed["Amount"], (parsed.get("Counterparty") or "").casefold()), []).append(parsed)
+    for lines in groups.values():
+        if len(lines) < 2:
+            continue
+        try:
+            parts = [abs(Decimal(str(_amount(line["Split"])))) for line in lines]
+        except (ValueError, ArithmeticError):
+            continue
+        if sum(parts) != abs(Decimal(lines[0]["Amount"])):
+            continue
+        lines[0]["_file_split"] = [{"group": (line.get("Group") or "").strip(), "category": (line.get("Category") or "").strip(),
+                                    "amount": format(part, "f")} for line, part in zip(lines, parts)]
+        for line in lines[1:]:
+            line["_skip_reason"] = f"A part of the split on line {lines[0]['_line']}: posted once, there."

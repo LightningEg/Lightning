@@ -35,6 +35,8 @@ A Currency column is matched; a row in another currency waits for the account's 
 ## 7AA4 Merchant name from the description · M
 A cleaned merchant name fills Counterparty and the raw text stays in Notes, learned through counterparty aliases. Done when: A2 and C3 group by merchant and reuse last month's category.
 
+**Built 2026-11-06:** `clean_merchant` fills Counterparty from the description when no Counterparty column is mapped; the raw text stays in Notes. Matching and history then work by name as for any counterparty.
+
 ## 7AA5 Read any layout · M
 Encoding detection (UTF-16, cp1256), header row after a preamble, Arabic header names, balance-only statements. Done when: A6, A7, A10, A11 and A17 reach the review.
 
@@ -47,6 +49,8 @@ Totals footers, zero amounts and future holds open as skipped rows with a reason
 
 ## 7AA7 Category paths and subcategories · S
 Split `:`, `>`, `/` paths and a Subcategory column into group and name; resolve split lines as one split. Done when: B3 and B6 resolve.
+
+**Built 2026-11-06:** paths (`Personal:Food`, `Work > Transportation`, `Food/Groceries`) split unless the whole text is one of your categories; a Subcategory column makes Category its group; lines of one purchase with a Split column become one split posting (`_file_split`), the other lines skips. B1 also reads its "EGP" amount column.
 
 ## 7AA8 Review at any size · L
 Page the review by name group, render rows on demand, run batch-wide actions on the server, post in chunks. Done when: 5,000 rows review under 1 s with a page under 1 MB.

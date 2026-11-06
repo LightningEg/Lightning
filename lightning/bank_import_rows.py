@@ -17,7 +17,7 @@ from lightning.core.money import ascii_digits
 REQUIRED = ("Date", "Amount")
 # "Group" is the parent a category sits under in another app's export ("Work" for "Work › Transportation").
 # "Direction" is a column whose values say money in or out, beside an unsigned Amount (DR/CR, Income/Expense; IT-7AA2).
-OPTIONAL = ("Counterparty", "Category", "Group", "Notes", "Reference", "Direction", "Currency", "Account", "Balance")
+OPTIONAL = ("Counterparty", "Category", "Group", "Notes", "Reference", "Direction", "Currency", "Account", "Balance", "Subcategory", "Split")
 SEPARATE_AMOUNT_FIELDS = ("Inflow", "Outflow")
 MAX_BYTES = MAX_CSV_IMPORT_BYTES
 
@@ -29,7 +29,9 @@ HEADER_ALIASES = {
     "Inflow": ("inflow", "money in", "credit", "credits", "deposit", "deposits", "دائن", "إيداع", "ايداع", "وارد"),
     "Outflow": ("outflow", "money out", "debit", "debits", "withdrawal", "withdrawals", "مدين", "سحب", "صادر"),
     "Counterparty": ("counterparty", "merchant", "payee", "beneficiary", "party", "name", "المستفيد", "الطرف", "الاسم"),
-    "Category": ("category", "subcategory", "sub category", "الفئة", "التصنيف"),
+    "Category": ("category", "الفئة", "التصنيف"),
+    "Subcategory": ("subcategory", "sub category", "sub-category", "الفئة الفرعية"),
+    "Split": ("split amount", "split", "split_amount", "part amount", "جزء"),
     "Direction": ("direction", "dr cr", "cr dr", "debit credit", "credit debit", "in out", "income expense",
                   "expense income", "transaction type", "type of transaction", "dr or cr", "debit or credit",
                   "نوع العملية"),
@@ -44,6 +46,15 @@ HEADER_ALIASES = {
 
 def normalize_header(header: str) -> str:
     return " ".join("".join(ch.lower() if ch.isalnum() else " " for ch in header).split())
+
+
+_PATH = re.compile(r"\s*(?:›|»|>|:|\\|\|)\s*|\s+/\s+|(?<=\w)/(?=\w)")
+
+
+def split_category_path(text: str) -> tuple[str, str]:
+    """"Personal:Food", "Work > Transportation", "Food/Groceries" as (group, name); ("", text) when it is no path."""
+    parts = [p.strip() for p in _PATH.split(text or "") if p.strip()]
+    return (parts[-2], parts[-1]) if len(parts) >= 2 else ("", (text or "").strip())
 
 
 def _is_header_row(cells) -> bool:
@@ -86,6 +97,36 @@ INTERNAL_WORDS = {"internal", "internal transfer", "transfer", "transfers", "own
 BALANCE_WORDS = {"starting balance", "starting balances", "opening balance", "opening balances", "initial balance",
                  "balance adjustment", "balance adjustments", "adjustment", "adjustments", "balance correction",
                  "reconciliation", "reconciliation adjustment"}
+
+
+_BANK_PREFIX = re.compile(
+    r"^(?:CARD PURCHASE|POS PURCHASE|DEBIT CARD PURCHASE|ONLINE PURCHASE|ONLINE PAYMENT|PURCHASE|POS|DEBIT CARD|"
+    r"VISA|MASTERCARD|PAYMENT TO|PAYMENT|INSTAPAY TO|INSTAPAY|TRANSFER TO|TRANSFER FROM|FAWRY)\b[\s\-:*/]*", re.I)
+_PLACE_WORDS = {"EG", "EGY", "EGYPT", "CAIRO", "GIZA", "ALEXANDRIA", "ALEX", "CAI", "GBR", "USA", "US", "LTD", "LLC"}
+
+
+def clean_merchant(description: str) -> str:
+    """"CARD PURCHASE TALABAT" and "UBER *TRIP HELP.UBER.COM" as "Talabat" and "Uber": the merchant, not the bank's
+    wording, reference numbers or city (IT-7AA4). "" when nothing is left to name (an ATM withdrawal)."""
+    text = " ".join((description or "").split())
+    previous = None
+    while text != previous:  # "POS PURCHASE VISA ..." drops each prefix in turn
+        previous, text = text, _BANK_PREFIX.sub("", text, count=1)
+    text = re.split(r"[*#]|\s-\s|https?:|www\.", text, maxsplit=1)[0]
+    words = []
+    for word in text.split():
+        bare = word.strip(".,;:")
+        if not bare or re.fullmatch(r"[\d/\-.:]+", bare) or sum(ch.isdigit() for ch in bare) >= 4 or "." in bare and bare[-3:].isalpha():
+            if words:
+                break
+            continue
+        if bare.upper() in _PLACE_WORDS and words:
+            break
+        words.append(bare)
+    name = " ".join(words[:3]).strip()
+    if not name or name.upper() in {"ATM", "ATM WITHDRAWAL", "WITHDRAWAL", "CASH", "FEE", "FEES"}:
+        return ""
+    return name.title() if name.isascii() and not any(ch.islower() for ch in name) else name
 
 
 def is_balance_row(*texts: str) -> bool:

@@ -149,3 +149,36 @@ def test_balance_only_statement_gets_amounts_from_the_balance_changes():
         rows = {p["Date"]: p for _r, p in normalize_rows(raw, mapping, "BALANCE", False)}
         assert rows["2026-10-01"]["_skip_reason"] and not rows["2026-10-01"]["_errors"]
         assert rows["2026-10-02"]["Amount"] == "-250.50" and rows["2026-10-03"]["Amount"] == "15000.00"
+
+
+def test_category_paths_subcategory_columns_and_split_lines(c, setup):
+    import json
+    cib = setup[0]["cib"].id
+    cats = [x for x in c.categories.pickable() if x.movement.name == "OUTFLOW" and x.parent_id]
+    names = [x.name for x in cats if sum(y.name == x.name for y in cats) == 1][:2]
+    a, b = names
+    data = (f"Date,Amount,Counterparty,Category,Subcategory,Split\n"
+            f"2026-10-01,-100,Carrefour,{a},,-70\n2026-10-01,-100,Carrefour,{b},,-30\n"
+            f"2026-10-02,-50,Kiosk,Personal:{a},,\n2026-10-03,-20,Uber,Work,{b},\n").encode()
+    batch, _ = c.bank_imports.stage(cib, "s.csv", data)
+    _, rows = c.bank_imports.preview(batch)
+    first, second, path, sub = rows
+    assert first["_split_note"] and second["_skip_reason"] and first["_category_id"]
+    assert path["Category"] == a and path["Group"] == "Personal"
+    assert sub["Group"] == "Work" and sub["Category"] == b
+    c.bank_imports.confirm(batch, {first["_import_row_id"]: {}, second["_import_row_id"]: {"skip": True}})
+    txn = c.db.scalar("SELECT transaction_id FROM bank_import_rows WHERE id=?", (first["_import_row_id"],))
+    cats_used = c.db.all("SELECT DISTINCT category_id FROM ledger_entries WHERE transaction_id=? AND category_id IS NOT NULL", (txn,))
+    assert len(cats_used) == 2
+
+
+def test_merchant_name_is_cleaned_from_the_description_and_the_raw_text_stays_in_notes():
+    from lightning.bank_import_parsing import normalize_rows
+    from lightning.bank_import_rows import clean_merchant
+    assert clean_merchant("UBER *TRIP HELP.UBER.COM") == "Uber"
+    assert clean_merchant("CARD PURCHASE TALABAT") == "Talabat"
+    assert clean_merchant("ATM WITHDRAWAL") == ""
+    mapping = {"Date": "D", "Amount": "A", "Notes": "N"}
+    raw = [{"D": "2026-10-01", "A": "-80", "N": "UBER *TRIP HELP.UBER.COM", "__line__": "2"}]
+    (_r, parsed), = normalize_rows(raw, mapping, "SINGLE", False)
+    assert parsed["Counterparty"] == "Uber" and parsed["Notes"] == "UBER *TRIP HELP.UBER.COM"

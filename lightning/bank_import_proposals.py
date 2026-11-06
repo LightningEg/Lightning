@@ -7,7 +7,7 @@ import json
 import re
 from decimal import Decimal
 
-from lightning.bank_import_rows import is_balance_row, is_internal
+from lightning.bank_import_rows import is_balance_row, is_internal, split_category_path
 from lightning.categories.domain import Movement
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.transactions.tags import tags_in
@@ -30,7 +30,7 @@ class ImportProposals:
         amount_dates = {}
         for source_row in rows:
             staged = json.loads(source_row["raw_json"])["parsed"]
-            if not staged.get("_errors"):
+            if not staged.get("_errors") and not staged.get("_skip_reason"):
                 key = (staged["Date"], staged["Amount"])
                 amount_dates[key] = amount_dates.get(key, 0) + 1
         # The same date and amount waiting in another review of this account (an SMS and a statement, or two
@@ -78,10 +78,22 @@ class ImportProposals:
                                                                                 row["bank_reference"], parsed)
             parsed["_link_candidates"] = ([] if ref_duplicate or repeat_import or row["status"] != "REVIEW"
                                           else self._link_candidates(batch["account_id"], parsed, batch["id"]))
+            self._split_path(parsed)
             parsed["_internal"] = is_internal(parsed["Category"])
             parsed["_balance_row"] = bool(parsed.get("_skip_reason")) or is_balance_row(parsed["Category"], parsed["Counterparty"])
             outcome = self._rules_outcome(batch["account_id"], parsed, cp)
             parsed["_category_id"] = None if parsed["_internal"] else self._category_for(parsed, cp, outcome, usual)
+            if parsed.get("_file_split") and not parsed["_internal"]:
+                parts = self._file_split_parts(parsed)
+                if parts:
+                    parsed["_file_split_ids"] = parts
+                    parsed["_category_id"] = parts[0][0]
+                    parsed["_split_note"] = " · ".join(
+                        f"{self.categories.get(cid).name} {format(amount, 'f')}" for cid, amount in parts)
+                else:
+                    parsed["_category_ambiguous"] = ("Your file splits this purchase, but a part names a category "
+                                                     "Lightning does not have.")
+                    parsed["_category_id"] = None
             parsed["_transfer_target_suggestion"] = (self._own_account(batch["account_id"], parsed["Counterparty"])
                 or self._transfer_target_suggestion(batch["account_id"], parsed["Notes"])
                 or self._transfer_target_suggestion(batch["account_id"], parsed["Counterparty"])
@@ -255,6 +267,38 @@ class ImportProposals:
         if missing:
             parsed["Notes"] = " ".join([parsed["Notes"].strip(), *(f"#{t}" for t in missing)]).strip()
         return outcome
+
+    def _split_path(self, parsed) -> None:
+        """"Personal:Food", "Work > Transportation" in the Category cell are a group and a name (IT-7AA7), unless the
+        whole text is already one of your categories ("Bills/Utilities")."""
+        text = (parsed.get("Category") or "").strip()
+        if not text or (parsed.get("Group") or "").strip():
+            return
+        group, name = split_category_path(text)
+        if not group:
+            return
+        try:
+            self.categories.find_by_text(text)
+            return
+        except ValidationError as exc:
+            if str(exc.message).startswith("Which one"):
+                return
+        parsed["Group"], parsed["Category"] = group, name
+
+    def _file_split_parts(self, parsed):
+        """The parts of a split from the file as (category id, amount), or None when a part names no category."""
+        parts = []
+        for part in parsed.get("_file_split") or []:
+            try:
+                text = f"{part['group']} › {part['category']}" if part["group"] else part["category"]
+                try:
+                    category = self.categories.find_by_text(text)
+                except ValidationError:
+                    category = self.categories.find_by_text(part["category"])
+            except ValidationError:
+                return None
+            parts.append((category.id, Decimal(part["amount"])))
+        return parts or None
 
     def _category_for(self, parsed, counterparty, outcome=None, usual=None):
         """`usual` returns `transactions.usual_categories()`; a preview passes one that computes it once."""

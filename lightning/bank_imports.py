@@ -89,6 +89,17 @@ class BankImportService:
             found = next((header for header, name in normalized.items() if name in names), None)
             if found:
                 result[target] = found
+        if "Amount" not in result and rows:
+            # An amount column named for its currency ("EGP" in Money Manager), when it is the account's own.
+            currency = self.accounts.get(account_id).currency
+            for header in headers:
+                if header.strip().upper() == currency and header not in result.values():
+                    values = [row.get(header, "") for row in rows if row.get(header, "")]
+                    try:
+                        if values and all(_decimal_amount(v) is not None for v in values):
+                            result["Amount"] = header
+                    except (ValueError, ArithmeticError):
+                        pass
         if "Direction" not in result and rows:
             # A bare "Type" column is a direction only when every value in it says money in or out.
             for header in headers:
