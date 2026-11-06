@@ -255,3 +255,16 @@ def test_arabic_pages_use_the_mirrored_stylesheets_and_they_match_their_source(s
     english = english_client.get("/").text
     assert "/static/style.css" in english and ".rtl.css" not in english
     english_client.post("/settings/locale", data={"locale": "ar"}, follow_redirects=False)  # the sample is shared
+
+
+def test_bank_import_preview_has_no_english_system_text_in_arabic(sample):
+    """3AV: the review page, with a row to fix, a possible duplicate and a row needing a counterparty."""
+    c, names = sample
+    account = next(a for a in c.accounts.list() if a.name == "CIB Payroll")
+    csv = "Date,Counterparty,Amount\n2026-09-10,SOME SHOP,-50\n2026-09-11,BROKEN ROW,abc\n2026-09-12,INSTAPAY FROM FRIEND,900\n"
+    batch_id, _ = c.bank_imports.stage(account.id, "statement.csv", csv.encode())
+    client = _client(c, False)
+    response = client.get(f"/accounts/{account.id}/import/{batch_id}")
+    assert response.status_code == 200, response.text[-300:]
+    assert not _english(response.text, names)
+

@@ -4,7 +4,7 @@
 {% block top_actions %}<a class="btn primary" data-popup-open href="/plan/items/new?kind=LOAN">{{ "Add loan"|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import kpi_row, lead_card, rate %}
-{% if lead %}{% call lead_card(lead, base) %}<div class="compact-list">{% for l in loans %}<a class="compact-row" href="#loan-{{ l.item.id }}"><span>{{ l.item.name }}<small>{{ l.progress.paid }} of {{ l.progress.total }} {{ 'paid'|tr(locale) }}</small></span><b>{{ l.progress.still_to_pay|money }}</b></a>{% endfor %}</div>{% endcall %}{% endif %}
+{% if lead %}{% call lead_card(lead, base) %}<div class="compact-list">{% for l in loans %}<a class="compact-row" href="#loan-{{ l.item.id }}"><span>{{ l.item.name }}<small>{{ '{paid} of {total} paid'|tr(locale, paid=l.progress.paid, total=l.progress.total) }}</small></span><b>{{ l.progress.still_to_pay|money }}</b></a>{% endfor %}</div>{% endcall %}{% endif %}
 {% if phone_mode() %}<div class="phone-rows" data-loan-ratios>{% for s in debt_tiles %}<a class="phone-row" href="{{ s.href }}"><span>{{ s.label }}{% if s.sub %}<small>{{ s.sub }}</small>{% endif %}</span><b>{{ rate(s.value) ~ '%' if s.value is not none else (s.empty or '—') }}</b></a>{% endfor %}</div>{% else %}{{ kpi_row(debt_kpis, base, 'Your debt'|tr(locale)) }}{% endif %}
 <section class="plan-section" aria-labelledby="loans-list">
   <header class="overview-section-head"><h2 id="loans-list">{{ "Your loans"|tr(locale) }}</h2>{# the total is the Lead above: one figure, one place (A16) #}<a class="btn small" data-popup-open href="/plan/purchases/new">{{ 'Bought in instalments'|tr(locale) }}</a></header>
@@ -16,7 +16,7 @@
     <div class="compact-list">
       <div class="compact-row"><span>{{ ("Paid towards loan" if pr.extra_paid else "Payments made")|tr(locale) }}</span><b>{% if not pr.extra_paid %}{{ pr.paid }} of {{ pr.total }} · {% endif %}{{ pr.paid_amount|money }}</b></div>
       <div class="compact-row"><span>{{ "Still to pay"|tr(locale) }}</span><b>{{ pr.still_to_pay|money }}</b></div>
-      <div class="compact-row"><span>{{ "Next payment"|tr(locale) }}</span><b>{% if pr.next %}{{ pr.next.still_owed|money }} on {{ pr.next.due_date }}{% else %}Paid off{% endif %}</b></div>
+      <div class="compact-row"><span>{{ "Next payment"|tr(locale) }}</span><b>{% if pr.next %}{{ pr.next.still_owed|money }} on {{ pr.next.due_date }}{% else %}{{ 'Paid off'|tr(locale) }}{% endif %}</b></div>
       <div class="compact-row"><span>{{ "Last payment"|tr(locale) }}</span><b>{{ pr.last_date or '—' }}</b></div>
       {% for p in pr.extra_payments %}<a class="compact-row" href="/transactions/{{ p.transaction_id }}"><span>{{ 'Extra payment'|tr(locale) }}<small>{{ p.date }}</small></span><b>{{ p.principal|money(False,2) }}</b></a>{% endfor %}
       {% for p in pr.skipped %}<a class="compact-row" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ p.due_date }}&amp;back=%2Fplan%2Floans"><span>Skipped {{ p.due_date }} <small class="muted">{{ "moved to the end · undo"|tr(locale) }}</small></span><b>{{ p.amount|money }}</b></a>{% endfor %}
