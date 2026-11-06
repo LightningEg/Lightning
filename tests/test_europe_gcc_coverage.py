@@ -112,3 +112,15 @@ def test_new_venue_currencies_are_registered_and_can_have_manual_fx(c):
         registry.register(currency)
         c.fx.save(currency, "2026-10-12", "50")
         assert rate_for(c.db, currency, "EGP", "2026-10-12").rate == D("50")
+
+
+def test_london_board_asks_for_pence_listings_and_drops_foreign_lines():
+    board = next(b for b in tradingview.BOARDS["europe"] if b.screener == "uk")
+    assert board.currencies == ("GBX",)
+    assert {"left": "currency", "operation": "in_range", "right": ["GBX"]} in tradingview.query(board, "stocks")["filter"]
+    assert all(f["left"] != "currency" for f in tradingview.query(board, "etfs")["filter"])  # UCITS ETFs list in USD too
+    result = tradingview.parse({"data": [
+        {"s": "LSE:VOD", "d": ["VOD", "Vodafone", 72.5, "GBX", "stock", "common", "LSE"]},
+        {"s": "LSE:0Q15", "d": ["0Q15", "Abbott", 110.0, "USD", "stock", "common", "LSE"]}]}, board, "2026-11-04", "t")
+    assert [(i.key, i.currency) for i in result.instruments] == [("GB:VOD", "GBP")]
+    assert result.quotes[0].close == D("0.725")

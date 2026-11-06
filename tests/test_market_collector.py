@@ -173,7 +173,7 @@ class FakeNet:
             self._fail(f"tradingview-{pack}")
             exchange = sorted(board.venues)[0]
             mic = board.venues[exchange]
-            currency = VENUE_CURRENCY[mic]
+            currency = "GBX" if mic == "XLON" and not any(f.get("right") == "fund" for f in payload.get("filter", [])) else VENUE_CURRENCY[mic]  # London quotes shares in pence
             is_fund = any(f.get("right") == "fund" for f in payload.get("filter", []))
             kind, subtype = ("fund", "etf") if is_fund else ("stock", "common")
             wanted = board.etfs if is_fund else board.stocks

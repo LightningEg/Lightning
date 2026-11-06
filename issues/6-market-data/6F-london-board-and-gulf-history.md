@@ -15,7 +15,7 @@ Found finishing NF-5G (each app fetches its own Gulf and European prices, owner 
 - **UAE and Bahrain history.** `lightning/market/sources/yahoo.py` SUFFIX has no Dubai, Abu Dhabi or Bahrain entry: one suffix cannot tell Dubai from Abu Dhabi, and Bahrain's is unconfirmed. Their latest closes come from the board, but a missed month-end is not filled from history; it stays in Needs you until typed.
 
 ## Fix
-- Ask the `uk` board for GBX-quoted listings only (a currency filter in `query()`), rebuild `lightning/assets/abroad_instruments.csv` with the catalogue workflow, and check the London count in `tests/test_europe_gcc_coverage.py`.
+- **Built 2026-11-06:** the `uk` board asks for GBX-quoted shares only (`Board.currencies`, a currency filter in `query()` and a guard in `parse()`; ETFs keep any currency, as UCITS ETFs list in dollars); fixture test in `tests/test_europe_gcc_coverage.py`. **Left:** the filter's field name is unverified live (this network blocks TradingView); run the catalogue workflow, check the London count, then rebuild `lightning/assets/abroad_instruments.csv` with the catalogue workflow, and check the London count in `tests/test_europe_gcc_coverage.py`.
 - Find a history source for XDFM, XADS and XBAH (Yahoo's suffixes confirmed from a permitted network, or the exchanges' own end-of-day files), then add them to SUFFIX with a fixture test in `tests/test_live_prices.py`.
 
 **Read:** [6A](6A-price-packs.md), [6B](6B-europe-and-gcc-shares.md).

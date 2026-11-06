@@ -24,6 +24,7 @@ class Board:
     country: str                 # ISO 3166 country of the venues: the key's prefix (SA:2222, GB:VOD)
     stocks: int = ALL
     etfs: int = 0
+    currencies: tuple = ()       # quote currencies kept for shares (not ETFs: UCITS ETFs list in dollars too); () keeps all
 
 
 # TradingView reports NYSE Arca listings (most ETFs) as AMEX: an ETF there is ARCX, a share NYSE American.
@@ -33,7 +34,7 @@ BOARDS: dict[str, list[Board]] = {
     "gcc": [Board("ksa", {"TADAWUL": "XSAU"}, "SA"), Board("uae", {"DFM": "XDFM", "ADX": "XADS"}, "AE"),
             Board("qatar", {"QSE": "DSMQ"}, "QA"), Board("kuwait", {"KSE": "XKUW"}, "KW"),
             Board("bahrain", {"BAHRAIN": "XBAH"}, "BH")],  # no Oman: TradingView has no "oman" screener (HTTP 404, 2026-11-04)
-    "europe": [Board("uk", {"LSE": "XLON"}, "GB", 350, 100), Board("germany", {"XETR": "XETR"}, "DE", 160, 60),
+    "europe": [Board("uk", {"LSE": "XLON"}, "GB", 350, 100, ("GBX",)), Board("germany", {"XETR": "XETR"}, "DE", 160, 60),
                Board("france", {"EURONEXT": "XPAR"}, "FR", 120), Board("netherlands", {"EURONEXT": "XAMS"}, "NL", 75, 40),
                Board("belgium", {"EURONEXT": "XBRU"}, "BE", 30), Board("portugal", {"EURONEXT": "XLIS"}, "PT", 20),
                Board("spain", {"BME": "XMAD"}, "ES", 60), Board("italy", {"MIL": "XMIL"}, "IT", 60),
@@ -49,6 +50,8 @@ MINOR = {"GBX": ("GBP", Decimal(100)), "KWF": ("KWD", Decimal(1000)), "ZAC": ("Z
 def query(board: Board, kind: str) -> dict:
     """The screener request: a whole board by name, or its largest stocks or ETFs."""
     venue = [{"left": "exchange", "operation": "in_range", "right": sorted(board.venues)}]
+    if board.currencies and kind == "stocks":  # London's board mostly answers International Order Book lines in dollars
+        venue.append({"left": "currency", "operation": "in_range", "right": list(board.currencies)})
     if kind == "all":
         return {"columns": COLUMNS, "filter": venue, "range": [0, ALL], "sort": {"sortBy": "name", "sortOrder": "asc"}}
     if kind == "stocks":
@@ -86,6 +89,8 @@ def parse(data: dict, board: Board, day: str, source: str) -> SourceResult:
         is_fund = values.get("type") == "fund"
         mic = board.venues[exchange] or ("ARCX" if is_fund else "XASE")
         currency = str(values.get("currency") or "").upper()
+        if board.currencies and not is_fund and currency not in board.currencies:
+            continue  # a foreign-currency line on a home board (London's order book) is not a share of this venue
         if currency in MINOR:
             currency, per_unit = MINOR[currency]
             close = (close / per_unit).normalize()
