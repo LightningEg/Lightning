@@ -53,7 +53,7 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | BT-2AI2 | ↳ Open a profile file on the phone | | | M | |
 | BT-2AI3 | ↳ A copy outside the app | | | M | |
 | BT-2AI4 | ↳ The PC can always send its copy to a fresh phone | | | M | |
-| **BT-2AJ** | [A profile exported from Lightning must import into another profile, and read as the app reads](2-safe-for-real-money/2AJ-profile-file-moves-between-profiles.md) | bug, technical · medium | Own | L | new |
+| **BT-2AJ** | [A profile exported from Lightning must import into another profile, and read as the app reads](2-safe-for-real-money/2AJ-profile-file-moves-between-profiles.md) | bug, technical · medium | Own | L | ready |
 | BT-2AJ1 | ↳ The profile file format | | | L | |
 | BT-2AJ2 | ↳ A reader spreadsheet apps cannot break | | | M | |
 | BT-2AJ3 | ↳ Load records, not tables | | | L | |

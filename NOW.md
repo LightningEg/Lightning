@@ -29,7 +29,7 @@
 
 - **Import and phone (2026-11-05, Claude):** 2AI1, 7Z and the 7AA report merged (#352-#354). Next: 2AI2, then 7AA1-7AA3; 7AB waits for the owner. **Read:** 2AI, 7AA, 7AB.
 
-- **Profile file (2026-11-06, Claude):** audit only; 2 owner decisions, then 2AJ1. **Read:** 2AJ.
+- **Profile file (2026-11-06, Claude):** audit done, owner decided (one file); next 2AJ1. **Read:** 2AJ.
 
 Plan: `issues/INDEX.md`.
 

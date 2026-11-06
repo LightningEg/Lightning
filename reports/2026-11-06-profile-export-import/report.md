@@ -147,4 +147,4 @@ and from the previous format's fixture. Mohab's test gains one step: he moves hi
 
 ## Dated follow-ups
 
-None yet.
+2026-11-06, owner decisions: (1) one profile file, readable and importable; (2) unfinished statement reviews are left behind and counted in Read me. Recorded in BT-2AJ.

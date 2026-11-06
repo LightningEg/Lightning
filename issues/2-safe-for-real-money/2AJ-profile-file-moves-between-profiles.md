@@ -5,7 +5,7 @@ look: technical
 severity: medium
 pillar: own
 size: L
-status: new
+status: ready
 created: 2026-11-06
 by: Claude Opus 5.5
 skills: number-audit
@@ -21,7 +21,7 @@ database table by table (59 sheets, row IDs, every fact twice) and the import wo
 with the exact bytes and version. It fails after the welcome page's currency step, after a spreadsheet app saves the
 file, for a file from an older Lightning, and for the CSV choice. Reproduce:
 `python reports/2026-11-06-profile-export-import/evidence/roundtrip.py`. The report's *Proposed architecture* is the
-design; these steps follow it. Built nothing yet; two owner decisions in the report come first.
+design; these steps follow it. Built nothing yet. Owner decided 2026-11-06: one profile file (readable and importable); unfinished statement reviews stay behind, counted in Read me.
 
 ## 2AJ1 The profile file format · L
 A versioned format (Format 1) of ten named sheets with Read me check figures; names in references, the existing
@@ -45,4 +45,4 @@ is held server-side instead of round-tripping in the page. Done when: report F6 
 Every sample through the routes into a welcomed profile, after a re-save, and from the previous format's fixture;
 Mohab moves his year into a new profile. Done when: the test runs in CI and replaces today's one-account round trip.
 
-Order: owner decisions, 2AJ1, 2AJ2 with 2AJ3, then 2AJ4 and 2AJ5.
+Order: 2AJ1, 2AJ2 with 2AJ3, then 2AJ4 and 2AJ5.

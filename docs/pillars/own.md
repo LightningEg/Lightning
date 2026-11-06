@@ -13,7 +13,7 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 |---|---|---|---|
 | **BT-2AF** | [Property and vehicle headlines must use the dated valuation](../../issues/2-safe-for-real-money/2AF-asset-details-use-dated-value.md) | M | new |
 | **BT-2AG** | [A dated Other asset estimate must count after a zero opening](../../issues/2-safe-for-real-money/2AG-zero-opening-asset-valuation.md) | M | new |
-| **BT-2AJ** | [A profile exported from Lightning must import into another profile, and read as the app reads](../../issues/2-safe-for-real-money/2AJ-profile-file-moves-between-profiles.md) | L | new |
+| **BT-2AJ** | [A profile exported from Lightning must import into another profile, and read as the app reads](../../issues/2-safe-for-real-money/2AJ-profile-file-moves-between-profiles.md) | L | ready |
 | **NF-6A** | [Market data: price packs, collected in the cloud](../../issues/6-market-data/6A-price-packs.md) | L | building |
 | **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](../../issues/6-market-data/6B-europe-and-gcc-shares.md) | L | blocked on a source that allows redistribution |
 | **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](../../issues/6-market-data/6D-gold-price-source.md) | S | blocked on a test from a home connection |
