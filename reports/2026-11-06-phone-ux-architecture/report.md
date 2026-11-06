@@ -470,7 +470,7 @@ The phone is usable when, on Mohab's year at 412 × 915 and at 320, in English a
 
 ## Decisions for the owner
 
-These wait for the owner, asked as a pick-list in the session. The safe step (3AY1) does not depend on them; the answers are recorded in 3AY2.
+Asked as a pick-list in the session; the answers are under Dated follow-ups.
 
 - **D1 Tab bar.** Recommended: Home · Budget · Add · Activity · Money (More becomes Money, Settings behind ⚙).
 - **D2 Home without the month stepper and without Net worth.** Recommended: yes; Net worth leads Money.
@@ -487,4 +487,4 @@ Figures were counted with a pattern, so they are approximate. No app code was ch
 
 ## Dated follow-ups
 
-None yet.
+- **2026-11-06, owner decisions:** D1 to D4 all taken as recommended (pick-list in the session). Recorded in IV-3AY and in the Project Overview's owner decisions; the decision step was removed from 3AY, so 3AY3 (Part C in both repos) is next after 3AY1.

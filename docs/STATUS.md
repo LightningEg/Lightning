@@ -11,7 +11,7 @@ Version **2.0.3**. Generated from the plan by `python tools/status.py`; do not e
 | [Understand](pillars/understand.md) | 1 |  |  |  | 1 |  |
 | [Own](pillars/own.md) | 7 | 1 |  | 4 | 2 |  |
 | [Protect](pillars/protect.md) | 3 | 1 | 1 | 1 |  |  |
-| [Everywhere](pillars/everywhere.md) | 6 | 3 |  | 3 |  |  |
+| [Everywhere](pillars/everywhere.md) | 6 | 3 | 1 | 2 |  |  |
 | [Feel](pillars/feel.md) | 12 | 3 | 6 | 2 | 1 | 1 |
 | [Build](pillars/build.md) | 8 |  | 6 | 1 | 1 |  |
 | [Reach](pillars/reach.md) | 5 |  | 3 | 2 |  | 2 |

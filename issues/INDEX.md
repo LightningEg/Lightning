@@ -81,9 +81,8 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **BV-3AV** | [The Arabic bank import preview mixes English into Arabic lines](3-polish-and-arabic/3AV-arabic-bank-import-preview.md) ([#342](https://github.com/LightningEg/Lightning/issues/342)) | bug, visual · low | Feel | M | ready |
 | **BV-3AW** | [Four short words stay English in Arabic on loans, charts and investments](3-polish-and-arabic/3AW-arabic-short-words-loans-charts.md) ([#343](https://github.com/LightningEg/Lightning/issues/343)) | bug, visual · low | Feel | S | ready |
 | **IT-3AX** | [The site screenshot tool breaks on the new Overview, so the site's screens are not recaptured](3-polish-and-arabic/3AX-site-shots-tool-follows-the-new-screens.md) | improvement, technical | Reach | M | new |
-| **IV-3AY** | [Phone-first architecture - five places that each answer one question, state-aware screens, and a phone decoupled from the PC](3-polish-and-arabic/3AY-phone-first-architecture.md) | improvement, visual | Everywhere | L | new |
+| **IV-3AY** | [Phone-first architecture - five places that each answer one question, state-aware screens, and a phone decoupled from the PC](3-polish-and-arabic/3AY-phone-first-architecture.md) | improvement, visual | Everywhere | L | ready |
 | IV-3AY1 | ↳ Four state and copy bugs on today's screens | | | S | |
-| IV-3AY2 | ↳ Owner decisions D1-D4 | | | owner | |
 | IV-3AY3 | ↳ Guideline Part C rewrite, in both repos | | | M | |
 | IV-3AY4 | ↳ The phone shell: its own router, base, stylesheet and navigation | | | L | |
 | IV-3AY5 | ↳ One bill state and the catch-up state | | | L | |

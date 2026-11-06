@@ -4,7 +4,7 @@ type: polish
 look: visual
 pillar: everywhere
 size: L
-status: new
+status: ready
 post: no
 created: 2026-11-06
 by: Claude
@@ -35,7 +35,9 @@ gets its own router, screens and stylesheet, and never falls back to a PC page.
 count everywhere, on a fresh profile and on one left alone for a week; no phone URL renders a PC template; A16 and
 `tools/phone_check.py` pass; then the owner's one end-to-end phone check.
 
-`post: no`: the design waits on the owner's decisions (3AY2), and the steps share the phone shell.
+**Owner decisions (2026-11-06), all as recommended:** D1 Home · Budget · Add · Activity · Money, Settings behind ⚙ on Money; D2 Home always today, without the stepper or Net worth; D3 old late bills become one catch-up question; D4 Part C is rewritten in both repos first. Recorded in the Project Overview's owner decisions.
+
+`post: no`: the steps share the phone shell and follow one design.
 
 ## 3AY1 Four state and copy bugs on today's screens · S
 Ship before the redesign. (a) The Net worth tile says "Today" over a past month's figure, and on a past month the hero
@@ -45,14 +47,9 @@ load as one event (`since`). (c) "Net worth · in us dollars": stop lower-casing
 (d) Late bills listed under "Next 14 days" on More: the heading says what the rows are, or late rows move to their own
 heading. Done when: a test for each in `tests/test_phone_*.py`, and Mohab passes.
 
-## 3AY2 Owner decisions D1-D4 · owner
-The tab bar (Home · Budget · Add · Activity · Money), Home without the stepper and without Net worth, late bills as one
-catch-up question, and the Part C rewrite. Asked as a pick-list; record the answers here and in the Project Overview's
-owner decisions.
-
 ## 3AY3 Guideline Part C rewrite, in both repos · M
 C01.1 "Same brand, own structure"; C03.1 the tab bar; C04.2 the stepper only on Budget and Activity; C04.4 To do and To
-review; C11.1 Home; C11.3 Money; new C13 States. Needs 3AY2 merged first. Done when: the website's `guideline/` copy is
+review; C11.1 Home; C11.3 Money; new C13 States. Done when: the website's `guideline/` copy is
 the same (`cmp`), a PR is open in each repo, and `tests/test_docs_structure.py` passes with the sibling repo present.
 
 ## 3AY4 The phone shell: its own router, base, stylesheet and navigation · L
