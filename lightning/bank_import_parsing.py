@@ -8,7 +8,7 @@ from lightning.bank_import_rows import (
 )
 
 
-def normalize_rows(raw_rows, mapping, amount_model, invert_amount, account_currency=None):
+def normalize_rows(raw_rows, mapping, amount_model, invert_amount, account_currency=None, account_check=None):
     """Build the same review rows and row-level errors without changing the ledger."""
     fields = ("Date", *SEPARATE_AMOUNT_FIELDS, *OPTIONAL) if amount_model == "SEPARATE" else (*REQUIRED, *OPTIONAL)
     date_profile = profile_dates(raw.get(mapping.get("Date", ""), "") for raw in raw_rows)
@@ -32,6 +32,9 @@ def normalize_rows(raw_rows, mapping, amount_model, invert_amount, account_curre
                 # account's currency in the review, or skips the row.
                 raise ValueError(f"This row is in {code} but the account is in {account_currency}. "
                                  f"Change its amount to {account_currency} in the file, or skip the row.")
+            message = account_check(parsed.get("Account", "")) if account_check else None
+            if message:
+                raise ValueError(message)
         except ValueError as exc:
             errors.append(str(exc))
         parsed["_line"] = raw["__line__"]

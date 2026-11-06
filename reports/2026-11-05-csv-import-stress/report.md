@@ -144,3 +144,4 @@ review screens were not exercised.
 - 2026-11-06: IT-7AA1 built; the harness's A12, A13 and A14 now read every date correctly (B1 still blocked at the column step until 7AA2).
 - 2026-11-06: IT-7AA2 built; A4 (DR/CR beside positive amounts) now posts spending as money out.
 - 2026-11-06: IT-7AA3 built; B2's USD row is now an error row and posts nothing (reference amounts and the account column, F4, remain).
+- 2026-11-06: IT-7Z2 safe part built; B5's CIB row no longer posts into NBE (it is an error row). The split into one batch per account remains.

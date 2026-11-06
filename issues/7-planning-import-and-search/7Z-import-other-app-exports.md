@@ -30,6 +30,8 @@ from the same app resolves it before review. Test: a second file posts with no c
 A mapped Account column sends each row to the matching account (or asks once per unknown name), so a whole-app
 export is one upload, not one per account.
 
+**Safe part built 2026-11-06:** a row whose Account column names another of your accounts (by label, code, name or a unique institution) is an error row and never posts here. Open: the actual split into one batch per account.
+
 ## 7Z3 Paired rows of one movement · S
 
 Two rows on one day with opposite amounts and the same note ("Ownership from … | Ownership to …") or a copy of a

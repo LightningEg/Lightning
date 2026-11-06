@@ -17,7 +17,7 @@ from lightning.core.money import ascii_digits
 REQUIRED = ("Date", "Amount")
 # "Group" is the parent a category sits under in another app's export ("Work" for "Work › Transportation").
 # "Direction" is a column whose values say money in or out, beside an unsigned Amount (DR/CR, Income/Expense; IT-7AA2).
-OPTIONAL = ("Counterparty", "Category", "Group", "Notes", "Reference", "Direction", "Currency")
+OPTIONAL = ("Counterparty", "Category", "Group", "Notes", "Reference", "Direction", "Currency", "Account")
 SEPARATE_AMOUNT_FIELDS = ("Inflow", "Outflow")
 MAX_BYTES = MAX_CSV_IMPORT_BYTES
 

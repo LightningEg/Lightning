@@ -74,3 +74,14 @@ def test_row_in_another_currency_never_posts_its_own_figure():
     usd, le, blank = [p for _r, p in normalize_rows(raw, mapping, "SINGLE", False, "EGP")]
     assert "USD" in usd["_errors"][0] and not le["_errors"] and not blank["_errors"]
     assert currency_code("جنيه") == "EGP"
+
+
+def test_row_for_another_account_is_not_posted_here(c, setup):
+    accounts = setup[0]
+    csv = b"Account,Date,Amount,Counterparty\nCIB Current,2026-10-01,-99,Netflix\nCIB-CUR-EGP,2026-10-02,-5,Kiosk\nSomething else,2026-10-03,-7,Kiosk\n"
+    other = next(a for a in c.accounts.list(active_only=True) if a.institution and a.institution != "CIB")
+    batch, _ = c.bank_imports.stage(other.id, "x.csv", csv)
+    rows = c.db.all("SELECT raw_json FROM bank_import_rows WHERE batch_id=? ORDER BY row_number", (batch,))
+    import json
+    errs = [json.loads(r["raw_json"])["parsed"]["_errors"] for r in rows]
+    assert errs[0] and "CIB Current" in errs[0][0] and errs[1] and not errs[2]

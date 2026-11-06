@@ -96,6 +96,7 @@ class BankImportService:
             "Group": ("category group", "group", "parent category", "main category", "master category",
                       "category parent"),
             "Currency": ("currency", "currency code", "ccy", "cur"),
+            "Account": ("account", "account name", "wallet", "from account"),
             "Notes": ("notes", "memo", "narrative", "details", "description"),
             "Reference": ("reference", "ref", "transaction id", "transaction reference"),
         }
@@ -144,6 +145,25 @@ class BankImportService:
             return json.loads(mapping_json) | {"amount_sign": "invert" if invert_amount else "normal"}
         return json.loads(saved["mapping_json"]) | {"amount_sign": "invert" if saved["invert_amount"] else "normal"}
 
+    def _other_account_check(self, account_id: int):
+        """IT-7Z2: a row whose Account column names a different account of yours is not this statement's money."""
+        accounts = self.accounts.list(active_only=True)
+
+        def names(account):
+            return {account.label.casefold(), account.code.casefold(), account.name.casefold(),
+                    (account.institution or "").strip().casefold()} - {""}
+
+        def check(text: str):
+            wanted = " ".join((text or "").split()).casefold()
+            if not wanted:
+                return None
+            matches = [a for a in accounts if wanted in names(a)]
+            if not matches or any(a.id == account_id for a in matches) or len(matches) > 1:
+                return None  # unknown or ambiguous names are left alone: another app's names rarely match ours
+            return (f"This row belongs to {matches[0].label}, not this account. Import it into that account, "
+                    "or skip the row.")
+        return check
+
     def stage(self, account_id: int, filename: str, data: bytes, mapping: dict[str, str] | None = None, invert_amount: bool = False):
         self.accounts.require_usable(account_id)
         digest = hashlib.sha256(data).hexdigest()
@@ -185,7 +205,8 @@ class BankImportService:
         if missing:
             raise ValidationError(
                 "Map Date and either a signed Amount column or two different columns for Inflow and Outflow.", "mapping")
-        stored = normalize_rows(raw_rows, mapping, amount_model, invert_amount, self.accounts.get(account_id).currency)
+        stored = normalize_rows(raw_rows, mapping, amount_model, invert_amount, self.accounts.get(account_id).currency,
+                              self._other_account_check(account_id))
         now = now_iso()
         with self.db.transaction():
             canonical_fields = ("Date", *SEPARATE_AMOUNT_FIELDS, *OPTIONAL) if amount_model == "SEPARATE" else (*REQUIRED, *OPTIONAL)
