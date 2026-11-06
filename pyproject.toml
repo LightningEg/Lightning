@@ -51,6 +51,7 @@ layers = [
     "lightning.undo",
     "lightning.statement_files",
     "lightning.bank_import_rows",
+    "lightning.import_profile",
     "lightning.core",
 ]
 
