@@ -35,7 +35,7 @@ The same panel’s history already shows 540,000 and −60,000. This is a direct
 **Fix:** use a shared native-currency valuation result, with effective date, for header, change and linked-loan comparison. Do not merely replace the call with a base-currency figure and retain the account-currency label. Validate foreign-currency assets and base-currency loans explicitly. Test the actual headline and equity fields independently of the history.
 
 Source: `lightning/ui/routes/register.py:465`, `lightning/ui/templates/partials/asset_details.html:7`, `tests/test_asset_details.py:48`.
-Evidence: [desktop contradiction](evidence/details/pc-asset-600000.png). Follow-up: **[BT-2AF](../../issues/2-safe-for-real-money/2AF-asset-details-use-dated-value.md)**.
+Evidence: [desktop contradiction](evidence/details/pc-asset-600000.png). Fixed: **BT-2AF** (2026-11-06), `tests/test_asset_details.py::test_headline_change_and_equity_use_the_dated_value_not_cash`.
 
 ### F2. A zero-opening Other asset can disappear from reported wealth despite a saved estimate — confirmed, high
 
@@ -45,7 +45,7 @@ The reporting holdings loop skips a zero ledger quantity **before** checking for
 
 **Fix:** value eligible Other assets independently of a nonzero cash quantity. Preserve the distinction between a valuation and cash movement. Regress zero opening → nonzero estimate → revised estimate, both account and whole-wealth views, with no artificial cash transaction.
 
-Source: `lightning/reporting/service.py:216–239`. Evidence: [phone zero-value car](evidence/details/phone-asset-0.png), [numeric probe](evidence/logic-probes.json). Follow-up: **[BT-2AG](../../issues/2-safe-for-real-money/2AG-zero-opening-asset-valuation.md)**.
+Source: `lightning/reporting/service.py:216–239`. Evidence: [phone zero-value car](evidence/details/phone-asset-0.png), [numeric probe](evidence/logic-probes.json). Fixed: **BT-2AG** (2026-11-06), `tests/test_asset_details.py::test_a_zero_opening_asset_counts_from_its_estimate_without_cash`.
 
 ### F3. “Refill” can recommend allocating money already needed by the plan — confirmed, high decision risk
 
@@ -61,7 +61,7 @@ The prompt uses `min(emergency gap, free cash)`. Free cash has not yet deducted 
 
 **Fix:** preview the full forecast after the proposed allocation and recompute dependent savings allowances. Offer a recommended amount that protects upcoming commitments, and show “After this: … available until payday.” Allow an intentional larger allocation through an explicit choice. Do not assume subtracting today’s Safe to spend is sufficient: the allocation changes other forecast terms too.
 
-Source: `lightning/ui/routes/reserves.py:65–70`, `lightning/ui/templates/reserves.html:43–44`. Evidence: [service before/after](evidence/logic-probes.json), [fresh-profile browser result](evidence/details/pc-refill-baseline.png), [browser text](evidence/details/refill-baseline.json). Follow-up: **[BT-2AH](../../issues/2-safe-for-real-money/2AH-refill-previews-plan-impact.md)**.
+Source: `lightning/ui/routes/reserves.py:65–70`, `lightning/ui/templates/reserves.html:43–44`. Evidence: [service before/after](evidence/logic-probes.json), [fresh-profile browser result](evidence/details/pc-refill-baseline.png), [browser text](evidence/details/refill-baseline.json). Fixed: **BT-2AH** (2026-11-06), `tests/test_refill_preview.py`.
 
 ### F4. “In your accounts” has two incompatible meanings — confirmed, medium
 

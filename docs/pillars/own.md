@@ -11,16 +11,10 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **BT-2AF** | [Property and vehicle headlines must use the dated valuation](../../issues/2-safe-for-real-money/2AF-asset-details-use-dated-value.md) | M | new |
-| **BT-2AG** | [A dated Other asset estimate must count after a zero opening](../../issues/2-safe-for-real-money/2AG-zero-opening-asset-valuation.md) | M | new |
 | **NF-6A** | [Market data: price packs, collected in the cloud](../../issues/6-market-data/6A-price-packs.md) | L | building |
 | **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](../../issues/6-market-data/6B-europe-and-gcc-shares.md) | L | blocked on a source that allows redistribution |
 | **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](../../issues/6-market-data/6D-gold-price-source.md) | S | blocked on a test from a home connection |
 | **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history so…](../../issues/6-market-data/6F-london-board-and-gulf-history.md) | M | new |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](../../issues/9-later/9D-hijri-dates-and-silver-nisab.md) | M | new |
-
-## Reports with open follow-ups here
-
-- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/r24-desktop-phone-ux/report.md): 2AF, 2AG
 <!-- work:end -->
 

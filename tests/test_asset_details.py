@@ -90,3 +90,39 @@ def test_details_travel_as_a_portable_command(screens):
         details = device.c.accounts.other_asset_details(account.id)
         assert details["kind"] == "flat" and details["purchase_price"] == D("900000")
     assert pc.store.fingerprint() == hd.store.fingerprint()
+
+
+def _row_value(page: str, label: str) -> str:
+    """The figure beside one label of the details panel (not the history table), e.g. '540,000 EGP'."""
+    import re
+    found = re.search(rf"<span>{re.escape(label)}.*?</span><b[^>]*>(.*?)</b>", page.replace("−", "-"), re.S)
+    assert found, f"no row '{label}'"
+    return re.sub(r"\s+", " ", found.group(1)).strip()
+
+
+def test_headline_change_and_equity_use_the_dated_value_not_cash(c):  # BT-2AF: opening 600,000, estimate 540,000
+    car = c.account_flows.open_account("Car", "OTHER_ASSET", "2025-01-01", "600000")
+    loan = c.planning.create(kind="LOAN", name="Car loan", amount="2500", frequency="MONTHLY",
+                             start_date="2026-01-15", payment_count=10)
+    c.accounts.save_other_asset_value(c.accounts.get(car.id), "2026-06-01", "540000")
+    c.accounts.save_other_asset_details(c.accounts.get(car.id), "car", "2025-06-01", "600000", str(loan))
+    left = c.planning.loan_progress(c.planning.get(loan))["still_to_pay"]
+    page = TestClient(create_app(c)).get(f"/accounts/{car.id}").text
+    assert _row_value(page, "Value now") == "540,000 EGP"
+    assert _row_value(page, "Since you bought it").startswith("-60,000 EGP")
+    assert _row_value(page, "Value less what is left to pay") .lstrip("+") == f"{540000 - left:,.0f} EGP"
+
+
+def test_a_zero_opening_asset_counts_from_its_estimate_without_cash(c):  # BT-2AG
+    car = c.account_flows.open_account("Car", "OTHER_ASSET", "2025-01-01", "0")
+    account = c.accounts.get(car.id)
+    before = c.reporting.net_worth("2026-07-01").total
+    entries = c.db.scalar("SELECT COUNT(*) FROM ledger_entries")
+    c.accounts.save_other_asset_value(account, "2026-06-01", "540000")
+    assert c.reporting.account_value(car.id, "2026-07-01") == D("540000")
+    assert c.reporting.net_worth("2026-07-01").total - before == D("540000")
+    assert c.reporting.account_value(car.id, "2026-05-01") == D("0")  # before the estimate
+    c.accounts.save_other_asset_value(account, "2026-06-20", "500000")  # a revised estimate replaces it
+    assert c.reporting.account_value(car.id, "2026-07-01") == D("500000")
+    assert c.reporting.other_asset_native_value(car.id, "2026-07-01") == (D("500000"), "2026-06-20")
+    assert c.db.scalar("SELECT COUNT(*) FROM ledger_entries") == entries  # no cash was made up

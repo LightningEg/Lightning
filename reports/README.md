@@ -20,7 +20,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r20 | [Audit 13: the phone for quick jobs - convenience, taps and the look](r20-phone-convenience-audit/report.md) | 2026-11-01 | audit | 3AN |
 | r22 | [Code audit: refactoring, loose ends and smart features](r22-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1H, 2A, 2C, 4A, 4B, 7C, 9A, 9K |
 | r23 | [CSV import stress test: where it breaks and how to rebuild it](r23-csv-import-stress/report.md) | 2026-11-05 | audit | 7AA, 7AB, 7Z, 7C |
-| r24 | [Desktop and phone UX: logic, visuals, simpler tasks and connected features](r24-desktop-phone-ux/report.md) | 2026-11-05 | audit | 1Q, 2AF, 2AG, 2AH, 3AS, 3AT, 3H, 3AM, 3AN, 4A, 4B |
+| r24 | [Desktop and phone UX: logic, visuals, simpler tasks and connected features](r24-desktop-phone-ux/report.md) | 2026-11-05 | audit | 1Q, 3AS, 3AT, 3H, 3AM, 3AN, 4A, 4B |
 
 
 ## Create and maintain a report

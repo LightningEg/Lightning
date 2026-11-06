@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-9 milestones, 46 open items, in the order they are worked on.
+9 milestones, 43 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -45,16 +45,13 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | IT-2C3 | ↳ Native file pickers | | | M | |
 | IT-2C4 | ↳ Unresolved-evidence repair | | | M | |
 | IT-2C5 | ↳ Native notification delivery, Windows and Android | | | M | |
-| **BT-2AF** | [Property and vehicle headlines must use the dated valuation](2-safe-for-real-money/2AF-asset-details-use-dated-value.md) | bug, technical · high | Own | M | new |
-| **BT-2AG** | [A dated Other asset estimate must count after a zero opening](2-safe-for-real-money/2AG-zero-opening-asset-valuation.md) | bug, technical · high | Own | M | new |
-| **BT-2AH** | [Emergency refill must preview and protect the remaining plan](2-safe-for-real-money/2AH-refill-previews-plan-impact.md) | bug, technical · high | Plan | M | new |
 | **BT-2AI** | [Phone data must survive every app update and reinstall](2-safe-for-real-money/2AI-phone-data-survives-updates.md) | bug, technical · high | Protect | L | new |
 | BT-2AI1 | ↳ Pin the phone's identity, built 2026-11-05 | | | S | |
 | BT-2AI2 | ↳ Open a profile file on the phone | | | M | |
 | BT-2AI3 | ↳ A copy outside the app | | | M | |
 | BT-2AI4 | ↳ The PC can always send its copy to a fresh phone | | | M | |
 
-Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2U, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AB, 2AC, 2AD, 2AE. Next free code: 2AJ.
+Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2U, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AB, 2AC, 2AD, 2AE, 2AF, 2AG, 2AH. Next free code: 2AJ.
 
 ## 3 Polish and Arabic
 

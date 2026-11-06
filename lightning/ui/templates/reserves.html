@@ -40,8 +40,14 @@
 {% set edit = request.query_params.get('edit', '') or ('all' if request.method == 'POST' else '') %}
 
 <section class="card emergency-fund">
-  {% if refill %}<div class="refill-prompt" role="status"><span>{{ ('Free cash can fill your emergency fund.' if refill.full else 'Free cash can bring your emergency fund closer to its target.')|tr(locale) }}</span>
-    <form method="post" action="/reserves/emergency"><input type="hidden" name="allocated" value="{{ refill.to|money(False, 2) }}"><button class="btn primary small">{{ 'Refill'|tr(locale) }} {{ refill.move|money(False, 0) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% endif %}
+  {% if refill %}<div class="refill-prompt" role="status">
+    {% if refill.move > 0 %}<span>{{ ('Free cash can fill your emergency fund.' if refill.full else 'Part of your free cash can go to your emergency fund without cutting into your plan.')|tr(locale) }}
+      <small class="muted">{{ 'After this, Safe to spend is {amount}'|tr(locale, amount=refill.after|money(False, 0) ~ ' ' ~ base) }}{% if refill.until %} · {{ 'until {date}'|tr(locale, date=refill.until) }}{% endif %}</small></span>
+    <form method="post" action="/reserves/emergency"><input type="hidden" name="allocated" value="{{ refill.to|money(False, 2) }}"><button class="btn primary small">{{ 'Refill'|tr(locale) }} {{ refill.move|money(False, 0) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+    {% else %}<span>{{ 'Your plan needs your free cash first, so a refill now would leave Safe to spend below zero.'|tr(locale) }}</span>{% endif %}
+    {% if not refill.all_is_safe and refill.all > refill.move %}<details class="refill-more"><summary>{{ 'Move more anyway'|tr(locale) }}</summary>
+      <p class="muted small">{{ 'Moving {amount} leaves Safe to spend at {after}: money your plan still needs would be missing.'|tr(locale, amount=refill.all|money(False, 0) ~ ' ' ~ base, after=refill.all_after|money(True, 0) ~ ' ' ~ base) }}</p>
+      <form method="post" action="/reserves/emergency"><input type="hidden" name="allocated" value="{{ refill.all_to|money(False, 2) }}"><button class="btn small">{{ 'Refill'|tr(locale) }} {{ refill.all|money(False, 0) }} {{ 'anyway'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></details>{% endif %}</div>{% endif %}
   <div class="section-head"><div><h2>{{ 'Emergency fund'|tr(locale) }}</h2></div></div>
   {% set avg = fund.average %}{% set what = 'income' if fund.basis == 'income' else 'spending' %}
   <div data-reserve-refresh="emergency-progress">{% if emergency_meter %}<div class="emergency-meter">{{ meter('Towards six months of ' ~ what, emergency_set_aside, fund.target, emergency_meter, '', '', 'target') }}</div>{% endif %}
