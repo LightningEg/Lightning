@@ -24,3 +24,17 @@ def test_a_posted_path_that_is_not_a_profile_is_not_probed(tmp_path, monkeypatch
     assert manager.role_for(str(tmp_path / "not-a-profile.db")) == "home"
     assert seen == [], "no marker lookup for a path that is not a profile"
 
+
+
+def test_sample_downloads_serve_only_the_listed_files(c):
+    from fastapi.testclient import TestClient
+    from lightning.samples import FILES
+    from lightning.ui.web import create_app
+    client = TestClient(create_app(c))
+    name = sorted(FILES)[0]
+    ok = client.get(f"/samples/mohab-2026/{name}", follow_redirects=False)
+    assert ok.status_code == 200 and ok.headers["content-type"].startswith("text/csv")
+    for bad in ("..%2f..%2fpyproject.toml", "not-a-sample.csv", "%2fetc%2fpasswd"):
+        refused = client.get(f"/samples/mohab-2026/{bad}", follow_redirects=False)
+        assert refused.status_code in (303, 404), bad
+        assert refused.status_code != 303 or refused.headers["location"].startswith("/?msg=")

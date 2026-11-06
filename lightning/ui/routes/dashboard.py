@@ -603,11 +603,15 @@ async def add_sample_story(request: Request, story: str):
 @router.get("/samples/mohab-2026/{name}")
 async def sample_file(request: Request, name: str):
     """Download one of the sample CSVs, to try Import CSV with a real file."""
+    import os
     from fastapi.responses import FileResponse
     from lightning.samples import FILES, MOHAB_2026
-    if name not in FILES:
+    base = os.path.normpath(str(MOHAB_2026))
+    full = os.path.normpath(os.path.join(base, name))
+    # A listed name, and a file that really sits inside the samples folder (never a path that climbs out of it).
+    if name not in FILES or not full.startswith(base + os.sep) or not os.path.isfile(full):
         return redirect("/", "There is no such sample file.")
-    return FileResponse(MOHAB_2026 / name, media_type="text/csv; charset=utf-8", filename=name)
+    return FileResponse(full, media_type="text/csv; charset=utf-8", filename=name)
 
 
 @router.get("/explain/{kind}")
