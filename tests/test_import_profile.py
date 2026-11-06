@@ -85,3 +85,31 @@ def test_row_for_another_account_is_not_posted_here(c, setup):
     import json
     errs = [json.loads(r["raw_json"])["parsed"]["_errors"] for r in rows]
     assert errs[0] and "CIB Current" in errs[0][0] and errs[1] and not errs[2]
+
+
+def test_long_review_is_paged_and_unseen_rows_still_post(c, setup):
+    import re
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+
+    cib = setup[0]["cib"].id
+    SHOPS = ["Seoudi", "Uber", "Netflix", "Carrefour", "Vodafone", "Pharmacy", "Kiosk"]
+    lines = ["Date,Amount,Counterparty,Category"] + [
+        f"2026-10-{1 + i % 28:02d},-{10 + i}.00,{SHOPS[i % 7]},Food & Groceries" for i in range(400)]
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    r = client.post(f"/accounts/{cib}/import", files={"file": ("long.csv", "\n".join(lines).encode(), "text/csv")},
+                    follow_redirects=False)
+    assert r.status_code == 303
+    url = r.headers["location"]
+    batch = int(re.search(r"/import/(\d+)", url).group(1))
+    page = client.get(url).text
+    assert 100 <= len(re.findall(r'name="date_\d+"', page)) <= 300 and "data-import-more" in page
+    more = client.get(f"/accounts/{cib}/import/{batch}/groups?start=999")
+    assert more.status_code == 200 and more.headers["X-Remaining"] == "0"
+    rest = client.get(f"/accounts/{cib}/import/{batch}/groups?start=1")
+    assert 'name="date_' in rest.text and int(rest.headers["X-Remaining"]) < 400
+    before = c.reporting.account_balance(cib)
+    done = client.post(f"/accounts/{cib}/import/{batch}/confirm", data={}, follow_redirects=False)
+    assert done.status_code == 200
+    posted = c.db.scalar("SELECT COUNT(*) FROM bank_import_rows WHERE batch_id=? AND status='POSTED'", (batch,))
+    assert posted == 400 and c.reporting.account_balance(cib) < before

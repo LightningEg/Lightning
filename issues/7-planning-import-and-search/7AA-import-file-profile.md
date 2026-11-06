@@ -47,6 +47,8 @@ Split `:`, `>`, `/` paths and a Subcategory column into group and name; resolve 
 ## 7AA8 Review at any size · L
 Page the review by name group, render rows on demand, run batch-wide actions on the server, post in chunks. Done when: 5,000 rows review under 1 s with a page under 1 MB.
 
+**Built in part 2026-11-06:** the review draws about 150 rows and "Show more rows" fetches the next into the same form (`/import/{batch}/groups`); rows never drawn post with their suggested choices. D5: page 25 MB to 0.8 MB, 4.7 s to 2.8 s. Open: the 1.6 s preview computation (cache it), batch-wide actions on the server, posting in chunks with progress.
+
 ## 7AA9 Reconcile against the statement's balance · M
 With a Balance column, compare the account after each statement day and show gaps or doubles before leaving. Done when: a file with one row removed is caught.
 
