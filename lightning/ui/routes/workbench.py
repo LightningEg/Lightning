@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 
 from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse
 
 from lightning.core.errors import LightningError
 from lightning.transactions.domain import TxnFilter
@@ -86,6 +87,9 @@ async def find_replace(request: Request):
     account = str(form.get("account_id", "")).strip()
     rows = matches(c, field, find, int(account) if account.isdigit() else None,
                    str(form.get("date_from", "")).strip(), str(form.get("date_to", "")).strip())
+    chosen = {int(v) for v in form.getlist("txn_ids") if str(v).isdigit()}
+    if chosen:  # F7 (r24): replace only in the selected rows
+        rows = [row for row in rows if row.id in chosen]
     if not rows:
         return redirect(destination, f"No counterparty or note contains “{find}”.")
     groups: dict[str, list[int]] = {}
@@ -105,3 +109,28 @@ async def find_replace(request: Request):
     if skipped:
         message += f" {skipped} left as they were (transfers and investment rows)."
     return redirect(destination, message)
+
+
+@router.post("/transactions/find-replace/preview")
+async def find_replace_preview(request: Request):
+    """What a replace would do, before it does it: how many rows change, a few old -> new examples, and how many of the
+    selected rows do not contain the text (F7, r24). Writes nothing."""
+    c = container(request)
+    form = await request.form()
+    field = str(form.get("field", "counterparty"))
+    find, new = str(form.get("find", "")).strip(), str(form.get("replace", "")).strip()
+    chosen = {int(v) for v in form.getlist("txn_ids") if str(v).isdigit()}
+    if field not in FIELDS or not find:
+        return JSONResponse({"count": 0, "selected": len(chosen), "examples": []})
+    account = str(form.get("account_id", "")).strip()
+    rows = matches(c, field, find, int(account) if account.isdigit() else None,
+                   str(form.get("date_from", "")).strip(), str(form.get("date_to", "")).strip())
+    if chosen:
+        rows = [row for row in rows if row.id in chosen]
+    seen, examples = set(), []
+    for row in rows:
+        old = str(getattr(row, field) or "")
+        if old not in seen and len(examples) < 3:
+            seen.add(old)
+            examples.append([old, _replace(old, find, new)])
+    return JSONResponse({"count": len(rows), "selected": len(chosen) or len(rows), "examples": examples})

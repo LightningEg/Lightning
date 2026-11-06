@@ -164,10 +164,12 @@
 </div>
 <script nonce="{{ request.state.csp_nonce|default('') }}">(()=>{const form=document.querySelector('[data-auto-filter]');if(!form)return;const search=form.elements.q,month=form.elements.month,preset=form.elements.preset;let timer;search?.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>form.requestSubmit(),350)});month?.addEventListener('change',()=>form.requestSubmit());preset?.addEventListener('change',()=>form.requestSubmit());search?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(timer);form.requestSubmit()}})})();</script>
 
+{# F8 (r24): one investigation. Back to the analysis page the rows came from, and the whole filtered scope exported in one click. #}
+<p class="investigation-bar small" id="investigation-bar"><a class="quiet-link" id="investigation-back" href="#" hidden></a>{% if total_rows and (matched_flows or request.query_params.get('date_from')) %}<button type="button" class="btn small" id="export-matching">{{ 'Export all {n} matching'|tr(locale, n=total_rows) }}</button>{% endif %}</p>
 <div class="card ledger"{% if matching_ids %} data-matching-ids='{{ matching_ids|tojson }}'{% endif %} data-counterparties='{{ counterparty_categories|tojson }}' data-accounts='{{ account_options|tojson }}'>
   <div class="selection-tools" id="selection-tools" hidden>
     <span id="selection-count" class="muted small" role="status" aria-live="polite">{{ "0 selected"|tr(locale) }}</span>
-    <button type="button" class="btn small" id="edit-selected">{{ 'Edit selected'|tr(locale) }}</button>
+    <button type="button" class="btn small" id="edit-selected">{{ 'Edit one by one'|tr(locale) }}</button>
     {% if matching_ids %}<button type="button" class="btn small" id="select-matching" hidden>{{ 'Select all {n} matching'|tr(locale, n=matching_ids|length) }}</button>{% endif %}
     <button type="button" class="btn small" id="clear-selected">{{ 'Clear selection'|tr(locale) }}</button>
     {# Bulk edit (user feedback, ticket 20): one category for every selected row. #}
@@ -175,11 +177,21 @@
       {% from "partials/macros.html" import category_options %}<select name="category_id" aria-label="Category for the selected rows" data-own-picker><option value="">{{ 'Set a category…'|tr(locale) }}</option>{{ category_options(category_groups()) }}</select>
       <button class="btn small">{{ 'Set category'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
     </form>
+    {# F7 (r24): text replace limited to the selected rows, with a preview before it runs. #}
+    <details class="action-menu replace-selected"><summary id="replace-selected-label">{{ 'Replace text in selected'|tr(locale) }}</summary><div class="find-panel">
+      <form method="post" action="/transactions/find-replace" class="field-row" id="replace-selected-form">
+        <label>{{ 'In'|tr(locale) }}<select name="field"><option value="counterparty">{{ 'Counterparty'|tr(locale) }}</option><option value="notes">{{ 'Notes'|tr(locale) }}</option></select></label>
+        <label>{{ 'Find'|tr(locale) }}<input name="find" required maxlength="120"></label>
+        <label>{{ 'Replace with'|tr(locale) }}<input name="replace" maxlength="120"></label>
+        <button class="btn small">{{ 'Preview'|tr(locale) }}</button>
+        <input type="hidden" name="back" value="{{ request.url.path }}{{ '?' ~ request.url.query if request.url.query }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+      </form></div></details>
     <button type="button" class="btn small" id="rule-from-selected" title="{{ 'Make a rule from the first selected counterparty'|tr(locale) }}">{{ 'Make a rule'|tr(locale) }}</button>
     <button type="button" class="btn small" id="export-selected">{{ 'Export selected'|tr(locale) }}</button>
     <button type="button" class="btn small" id="merge-selected" hidden>{{ 'Merge selected'|tr(locale) }}</button>
     <button type="button" class="btn small danger" id="delete-selected">{{ 'Delete selected'|tr(locale) }}</button>
   </div>
+  <p class="muted small" id="selection-scope" role="status" aria-live="polite"></p>
   <div class="register-table-scroll"><table class="register-rows">
     <colgroup><col class="col-select"><col class="col-date"><col class="col-counterparty"><col class="col-category"><col class="col-notes"><col class="col-amount">{% if with_balance %}<col class="col-balance">{% endif %}</colgroup>
     <thead><tr><th id="select-visible-header" class="select-visible-header" title="Select or clear all visible transactions"><input id="select-visible" type="checkbox" aria-label="Select all visible transactions"></th><th>{{ 'Date'|tr(locale) }}</th><th>{{ 'Counterparty'|tr(locale) }}</th><th>{{ 'Category'|tr(locale) }}</th><th>{{ 'Notes'|tr(locale) }}</th><th class="num">{{ 'Amount'|tr(locale) }} ({{ account.currency if account and account.currency != base else base }})</th>{% if with_balance %}<th class="num register-balance-head">{{ 'Balance'|tr(locale) }} ({{ account.currency }})</th>{% endif %}</tr></thead>

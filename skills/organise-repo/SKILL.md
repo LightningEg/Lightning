@@ -23,7 +23,7 @@ Tool-neutral. One fact lives in one file; everything else links to it. Two reade
 2. Put it in its home. Do not add a file under `docs/` or `ai/` unless `tests/test_docs_structure.py` lists it; change that list in the same commit and say why.
 3. Moving a file: `git mv`, then fix every link and every mention of the old path (`grep -rn "<old path>" .` including Python strings that build paths from parts), then `python tools/docs_check.py`.
 4. Never hand-edit a generated page. Regenerate: `python tools/status.py` (docs/STATUS.md, the work block on each pillar page, ai/INDEX.md), `python tools/issues.py` (issues/INDEX.md), `python tools/release_notes.py` (RELEASES.md).
-5. Archiving: a report whose follow-ups are all closed, a design that is built (fold what holds into Architecture, delete the file), an old changelog: move to `ai/archive/` and keep commit-pinned references that issues already use.
+5. Archiving: a report whose follow-ups are all closed (`python tools/archive.py --write`; reports sit beside their items in `issues/<big picture>/` and are coded `r1`, `r2`, ...: `python tools/docs_check.py next-report`), a design that is built (fold what holds into Architecture, delete the file), a milestone with no open item (`python tools/archive.py --issues --write`), an old changelog: move to `ai/archive/` and keep commit-pinned references that issues already use.
 6. Keep it small: `NOW.md` under 4,500 bytes; a page for people fits a screen or two; a long AI file is read by section (`python tools/status.py sections <file>`).
 7. Check: `python tools/docs_check.py`; `python -m pytest tests/test_docs_structure.py tests/test_issues.py tests/test_changelog.py -q`; `python tools/claims.py --me <Claude|Codex|Luna>`.
 

@@ -11,21 +11,19 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IT-1E** | [Audit public repositories for personal data and security exposure](../../issues/1-easy-to-contribute/1E-public-repository-security-audit.md) | M | ready |
-| **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](../../issues/1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | L | blocked on repository Actions allowlist update and native runtime acceptance |
-| **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](../../issues/1-easy-to-contribute/1N-split-large-items-and-post-them.md) | M | ready |
-| **IT-1Q** | [Link historical user questions to verified current feature coverage](../../issues/1-easy-to-contribute/1Q-current-user-question-coverage.md) | S | new |
-| **IT-1R** | [Direct tests for investment_breakdown](../../issues/1-easy-to-contribute/1R-investment-breakdown-direct-tests.md) | M | ready |
-| **IT-1S** | [Direct tests for SubmissionStore (a form saved twice saves once)](../../issues/1-easy-to-contribute/1S-submission-store-direct-tests.md) | S | ready |
-| **IT-1T** | [Direct tests for PlanSchedule and ScheduleSource](../../issues/1-easy-to-contribute/1T-plan-schedule-direct-tests.md) | S | ready |
-| **IT-9K** | [Structure left](../../issues/9-later/9K-layers-and-copies.md) | M | ready |
+| **IT-1E** | [Audit public repositories for personal data and security exposure](../../issues/1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | M | ready |
+| **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](../../issues/1-easy-to-contribute/IT-1H-coordinate-packaged-dependency-refresh.md) | L | blocked on repository Actions allowlist update and native runtime acceptance |
+| **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](../../issues/1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | M | ready |
+| **IT-1R** | [Direct tests for investment_breakdown](../../issues/1-easy-to-contribute/IT-1R-investment-breakdown-direct-tests.md) | M | ready |
+| **IT-1S** | [Direct tests for SubmissionStore (a form saved twice saves once)](../../issues/1-easy-to-contribute/IT-1S-submission-store-direct-tests.md) | S | ready |
+| **IT-1T** | [Direct tests for PlanSchedule and ScheduleSource](../../issues/1-easy-to-contribute/IT-1T-plan-schedule-direct-tests.md) | S | ready |
+| **IT-9K** | [Structure left](../../issues/9-later/IT-9K-layers-and-copies.md) | M | ready |
 
 ## Reports with open follow-ups here
 
-- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 1Q
-- [Audit 5: is the backend engine efficient and streamlined?](../../reports/2026-10-21-backend-streamlining/report.md): 9K
-- [Audit 6: open pull request cleanup](../../reports/2026-10-23-pull-request-cleanup/report.md): 1H
-- [v1.5.0 PR review, theme switching and package preparation](../../reports/2026-10-26-v150-release/report.md): 1H
-- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 1H, 9K
+- [Audit 5: is the backend engine efficient and streamlined?](../../issues/4-edit-journal-and-devices/r3-backend-streamlining/report.md): 9K
+- [Audit 6: open pull request cleanup](../../issues/1-easy-to-contribute/r7-pull-request-cleanup/report.md): 1H
+- [v1.5.0 PR review, theme switching and package preparation](../../issues/10-looks-and-store/r12-v150-release/report.md): 1H
+- [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 1H, 9K
 <!-- work:end -->
 

@@ -4,12 +4,12 @@
 <section class="card{{ ' phone-card' if phone }}" id="asset-details" aria-labelledby="asset-heading"><h2 id="asset-heading"{% if phone %} class="phone-card-title"{% endif %}>{{ ("Property or vehicle"|tr(locale)) }}</h2>
 {% set kind_name = (asset.details.kind if asset.details else 'other') %}
 <div class="asset-rows">
-  <div class="compact-row"><span>{{ "Value now"|tr(locale) }}{% if asset.history %}<small>{{ "As of"|tr(locale) }} {{ asset.history[0].date }}</small>{% endif %}</span><b>{{ asset.value|money(places=0) }} {{ account.currency }}</b></div>
+  <div class="compact-row"><span>{{ "Value now"|tr(locale) }}{% if asset.value_date %}<small>{{ "As of"|tr(locale) }} {{ asset.value_date }}</small>{% endif %}</span><b>{{ asset.value|money(places=0) }} {{ account.currency }}</b></div>
   {% if asset.details %}
   {% if asset.change is not none %}<div class="compact-row"><span>{{ "Since you bought it"|tr(locale) }}<small>{{ "Bought for {price}"|tr(locale, price=asset.price|money(places=0) ~ ' ' ~ account.currency) }}{% if asset.details.purchase_date %} · {{ asset.details.purchase_date }}{% endif %}</small></span><b class="{{ 'neg' if asset.change < 0 else '' }}">{{ asset.change|money(True, 0) }} {{ account.currency }}{% if asset.change_pct is not none %} · {{ asset.change_pct|signed_pct }}%{% endif %}</b></div>
   {% else %}<p class="muted">{{ "Type what you paid to see the change since you bought it."|tr(locale) }}</p>{% endif %}
-  {% if asset.loan %}<div class="compact-row"><span>{{ "Left to pay"|tr(locale) }}<small>{{ asset.loan.name }} · <a href="/plan/loans">{{ "Open loans"|tr(locale) }}</a></small></span><b>{{ asset.loan.left|money(places=0) }} {{ account.currency }}</b></div>
-  <div class="compact-row"><span>{{ "Value less what is left to pay"|tr(locale) }}</span><b class="{{ 'neg' if asset.loan.equity < 0 else '' }}">{{ asset.loan.equity|money(True, 0) }} {{ account.currency }}</b></div>{% endif %}
+  {% if asset.loan %}<div class="compact-row"><span>{{ "Left to pay"|tr(locale) }}<small>{{ asset.loan.name }} · <a href="/plan/loans">{{ "Open loans"|tr(locale) }}</a></small></span><b>{{ asset.loan.left|money(places=0) }} {{ asset.loan.currency }}</b></div>
+  {% if asset.loan.equity is not none %}<div class="compact-row"><span>{{ "Value less what is left to pay"|tr(locale) }}</span><b class="{{ 'neg' if asset.loan.equity < 0 else '' }}">{{ asset.loan.equity|money(True, 0) }} {{ account.currency }}</b></div>{% endif %}{% endif %}
   {% else %}<p class="muted">{{ "Say what this is, what you paid and when, and which loan paid for it."|tr(locale) }}</p>{% endif %}
 </div>
 <p class="asset-actions"><a class="btn primary{{ ' phone-save' if phone }}" href="#estimated-value">{{ "Update value"|tr(locale) }}</a></p>

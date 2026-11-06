@@ -38,7 +38,7 @@ One fact lives in one file; the rest link to it.
 | Kind | Home |
 |---|---|
 | The plan: bugs, polish, features, owner tasks | [issues/INDEX.md](../issues/INDEX.md) (codes like `BV-3C`; pillar and size on each item) |
-| Dated audits and reviews | [reports/](../reports/README.md) |
+| Dated audits and reviews | [Reports](../issues/REPORTS.md), filed beside their items in `issues/` |
 | What users told us, sanitized | [feedback/](../feedback/README.md) |
 | The brand rules | [guideline/](../guideline/README.md) |
 | Formats for new documents | [templates/](../templates/README.md) |

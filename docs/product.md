@@ -58,7 +58,7 @@ Each has a status. "Implemented" means code plus tests exist; the owner still ho
 | Import (CSV, Excel, CIB text PDF, SMS) | Get a month in minutes | Mohab | Nothing posts unreviewed | `bank_imports.py`, `sms_imports.py` | Implemented; non-text PDFs use a local AI-to-CSV handoff | FR-040–042 |
 | Budget and reserves | Plan spending, set money aside | All | Reserve lowers Free cash; budget limit does not | `budgeting/`, `reserves.py` | Implemented | FR-050–053 |
 | Cash planning | Bills, income, loans, forecast, Safe to spend | All | Obligations count, forecasts never do | `planning/` | Implemented | FR-060–064 |
-| Investments and prices | Positions, returns, valuation | Investors | Typed price beats fetched | `investments/`, `market/`, `assets/` | Implemented; lots/ROI planned (5A–5E) | FR-070–074 |
+| Investments and prices | Positions, returns, valuation | Investors | Typed price beats fetched | `investments/`, `market/`, `assets/` | Implemented, with purchase lots, checks and returns (milestone 5, finished) | FR-070–074 |
 | Certificates, gam'eya, gold | Egyptian instruments | Mohab | CD interest is an estimate | `deposits/`, `physical_items.py` | Implemented | FR-080–082 |
 | Foreign currency | USD etc. cash with dated rates | Mohab | Stored values never rewritten when rates change | `fx.py` | Implemented | FR-090–091 |
 | Reports, health, zakat, exports | Read the whole picture | All | Routes never compute figures | `reporting/`, `zakat.py`, `workflows/data_export.py` | Implemented | FR-100–104 |
@@ -97,4 +97,4 @@ One ledger; plan ≠ money; held-for-others money is excluded from *What you own
 
 ## 12. Implementation status and future
 
-See [`issues/INDEX.md`](../issues/INDEX.md) for the full plan by milestone. Largest open areas: edit journal (4), investment lots/ROI (5), more import formats (7), cosmetic store (10).
+See [`issues/INDEX.md`](../issues/INDEX.md) for the full plan by milestone. Largest open areas: edit journal and devices (4), importing other apps (7), the cosmetic store (10). Investments (5) is finished: [archive](../ai/archive/issues/README.md).

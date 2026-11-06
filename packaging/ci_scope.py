@@ -36,7 +36,7 @@ ROOT = Path(__file__).resolve().parent.parent
 _NEVER_SHIPPED = (
     re.compile(r"^(docs|ai)/"),
     re.compile(r"^(feedback|templates)/"),
-    re.compile(r"^reports/.*\.(md|png|jpg|jpeg|webp|txt)$"),
+    re.compile(r"^(reports|issues)/.*\.(md|png|jpg|jpeg|webp|txt)$"),  # a report and its evidence sit beside its items
     re.compile(r"^user feedback/"),
     re.compile(r"^Claude outputs/"),
     re.compile(r"^tools/"),  # helpers for the people and AIs working here; nothing imports them
@@ -61,7 +61,7 @@ _REACHES_PHONE = (
 _DOCS_ONLY = (
     re.compile(r"^(docs|ai)/"),
     re.compile(r"^(feedback|templates)/"),
-    re.compile(r"^reports/.*\.(md|png|jpg|jpeg|webp|txt)$"),
+    re.compile(r"^(reports|issues)/.*\.(md|png|jpg|jpeg|webp|txt)$"),  # a report and its evidence sit beside its items
     re.compile(r"^user feedback/"),
     re.compile(r"^Claude outputs/"),
     re.compile(r"^[^/]+\.md$"),  # NOW, OWNER, CHANGELOG, AGENTS, README and the like

@@ -1,15 +1,15 @@
 # Issues: the plan and every open item
 
 Everything still to do lives here: bugs, polish, features, under-the-hood work and what only the owner can do. It is grouped
-into numbered **milestones**, worked on in order. The repo is public: no names, emails, real financial data or private links.
+into numbered **big pictures** (folders), each holding the reports that started it and the items that came out of them. The repo is public: no names, emails, real financial data or private links.
 
-**To find something, read [INDEX.md](INDEX.md) only** (every milestone with its items under it), then open the one item you
+**To find something, read [INDEX.md](INDEX.md) only** (every big picture with its items and reports under it), then open the one item you
 need. The index is generated: `python tools/issues.py` rewrites it, `--check` verifies it (a test runs the check).
 
 ## Codes
 
-Every item has a code: two letters saying what it is, then the milestone's number and a letter. **BV-3C** is a visual bug,
-the third item of milestone 3. A big item is split one step down with a number: **BV-3C1**, **BV-3C2**.
+Every item has a code: two letters saying what it is, then an opaque id (a number and letters). **BV-3C** is a visual bug,
+with id 3C. The id never changes and does not move with the file: an item that moves to another folder keeps it. A big item is split one step down with a number: **BV-3C1**, **BV-3C2**.
 
 | Tag | What it is | From the front matter |
 |---|---|---|
@@ -25,7 +25,7 @@ finds all older history. Write the full code wherever you mention the item: comm
 requests and GitHub issue titles (`[BV-3C] Charts: two end labels overlap`). `python tools/issues.py tag 3C` prints it.
 
 - A code is never reused. `python tools/issues.py next 3` prints the next free one.
-- An item moving to another milestone gets a new code there; write `was: 3C` in its front matter.
+- A moved item keeps its code. Codes are unique across every folder; `python tools/issues.py next <folder number>` prints the next free one for a new item.
 - Before finishing, replace incoming links from reports and feedback with a commit-pinned issue snapshot, resolution commit or regression test; keep the code. Sanitized feedback records and audit evidence remain.
 - A finished item's file is **deleted in the commit that finishes it**, and its code is added to `done:` in the milestone's
   README. The record is the test, the release note and the commit message (name the code there).
@@ -34,15 +34,21 @@ requests and GitHub issue titles (`[BV-3C] Charts: two end labels overlap`). `py
 
 ```
 issues/
-  INDEX.md                          generated: the whole plan
-  3-polish-and-arabic/              milestone 3
-    README.md                       its title, goal, "done when" and finished codes
-    3C-chart-end-labels-overlap.md  item 3C
+  INDEX.md                                   generated: the whole plan
+  REPORTS.md                                 the report catalogue and how to write a report
+  12-desktop-ux/                             one big picture
+    README.md                                its title, goal, "done when" and finished codes
+    r24-desktop-phone-ux/report.md           a report that started it (r<N>, with its evidence/ beside it)
+    BT-2AF-asset-value-follows-dated-estimate.md   an item: <TAG>-<code>-<what>
 ```
 
-A file is named `<code>-<what>.md`, lower case after the code, hyphens. A step inside a big item is a heading in the item's
-own file: `## 3C1 Move the lower label down`. A new milestone is a new numbered folder with a README; the owner picks the
-order.
+An item file is named `<TAG>-<code>-<what>.md` (the tag first, then the id, then a short name: lower case, hyphens); the tag must
+agree with the item's front matter. A step inside a big item is a heading in the item's own file: `## 3C1 Move the lower
+label down`. A report is a folder `r<N>-<subject>/report.md` inside the big picture whose items it started. A new big
+picture is a new numbered folder with a README; the owner picks the order.
+
+A big picture whose items are all finished (and that holds no report) is moved out of this folder: `python tools/archive.py --issues --write` puts it in
+[ai/archive/issues](../ai/archive/issues/README.md) with its README (goal and every `done:` code). Its number and codes stay reserved.
 
 Report and feedback formats are in [the template catalogue](../templates/README.md).
 
@@ -114,7 +120,7 @@ What is true, what is not, the cause with file:line, what you ruled out.
 What will change, the branch, the test that proves it.
 ```
 
-A `feature` may instead be a full design (as [4A](4-edit-journal-and-devices/4A-edit-journal.md) is). When part of it is
+A `feature` may instead be a full design (as [4A](4-edit-journal-and-devices/NF-4A-edit-journal.md) is). When part of it is
 built, move what holds into [Architecture](../ai/ARCHITECTURE.md) and shrink the item to what is left.
 
 ## People and GitHub

@@ -1,10 +1,12 @@
-"""Move finished reports out of reports/ so the working folder holds only live ones (IT-1M).
+"""Move finished reports out of issues/<big picture>/ so the plan holds only live ones (IT-1M).
 
     python tools/archive.py                 # dry run: what would move, and why the rest stays
     python tools/archive.py --write         # do it
     python tools/archive.py --days 30       # minimum age of a report, in days (default 30)
+    python tools/archive.py --issues        # dry run: milestones in issues/ with no open item
+    python tools/archive.py --issues --write
 
-A report moves to ai/archive/reports/<folder>/report.md when its catalogue row in reports/README.md has no open
+A report moves to ai/archive/reports/<folder>/report.md when its catalogue row in issues/REPORTS.md has no open
 follow-ups, it is not a reference, it is at least --days old, and nothing outside the report links to its images.
 The text, verdict and non-image evidence stay; evidence images are deleted (git history keeps them) and the report's
 own links to them become plain text. The catalogue row moves to ai/archive/reports/README.md and every relative
@@ -23,13 +25,21 @@ from urllib.parse import unquote
 ROOT = Path(__file__).resolve().parents[1]
 ARCHIVE = Path("ai") / "archive" / "reports"
 IMAGES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"}
-HOMES = ("docs", "ai", "reports", "feedback", "templates", "guideline", "issues", "skills", "theme-kit")
-ROW = re.compile(r"^\| ([a-z0-9.-]+) \| \[(.*)\]\(([^/)]+)/report\.md\) \| (\d{4}-\d\d-\d\d) \| (\w+) \| (.*) \|$", re.M)
+HOMES = ("docs", "ai", "feedback", "templates", "guideline", "issues", "skills", "theme-kit")
+ROW = re.compile(r"^\| ([a-z0-9.-]+) \| \[(.*)\]\((?:[^/)]+/)?([^/)]+)/report\.md\) \| (\d{4}-\d\d-\d\d) \| (\w+) \| (.*) \|$", re.M)
 LINK = re.compile(r"(!?\[[^\]]*\]\()([^)]+)(\))")
+ISSUES_ARCHIVE = Path("ai") / "archive" / "issues"
+ISSUES_HEAD = (
+    "# Archived milestones\n\n"
+    "Milestones from [the plan](../../../issues/INDEX.md) whose items are all finished, moved here by\n"
+    "`python tools/archive.py --issues --write`. Each folder keeps its README: the goal, the done-when line and every\n"
+    "finished code. Those codes and the milestone's number stay reserved; they are never reused.\n\n"
+    "| Milestone | Title | Finished codes |\n| --- | --- | --- |\n"
+)
 ARCHIVE_HEAD = (
     "# Archived reports\n\n"
     "Reports whose follow-ups are all finished, moved here by `python tools/archive.py`. The text and verdict are kept;\n"
-    "evidence images are in git history. Active reports: [reports](../../../reports/README.md).\n\n"
+    "evidence images are in git history. Active reports: [the catalogue](../../../issues/REPORTS.md).\n\n"
     "| Historical ID | Report | Review date | Kind |\n| --- | --- | --- | --- |\n"
 )
 
@@ -63,9 +73,17 @@ def outside_image_links(root: Path, folder: Path) -> list[str]:
     return hits
 
 
+def report_folder(root: Path, folder: str) -> Path:
+    """Where a report lives now: issues/<big picture>/<folder>."""
+    found = sorted((root / "issues").glob(f"*/{folder}"))
+    if not found:
+        raise FileNotFoundError(f"no report folder {folder} under issues/")
+    return found[0]
+
+
 def plan(root: Path, today: date, days: int) -> list[tuple[str, str, str | None]]:
     """(folder, id, reason it stays or None when it moves) for every catalogued report."""
-    text = (root / "reports" / "README.md").read_text(encoding="utf-8")
+    text = (root / "issues" / "REPORTS.md").read_text(encoding="utf-8")
     result = []
     for rid, _title, folder, when, kind, follow in ROW.findall(text):
         reason = None
@@ -75,7 +93,7 @@ def plan(root: Path, today: date, days: int) -> list[tuple[str, str, str | None]
             reason = "a reference is kept to be read"
         elif today - date.fromisoformat(when) < timedelta(days=days):
             reason = f"newer than {days} days (reviewed {when})"
-        elif (links := outside_image_links(root, root / "reports" / folder)):
+        elif (links := outside_image_links(root, report_folder(root, folder))):
             reason = "images linked from " + ", ".join(links)
         result.append((folder, rid, reason))
     return result
@@ -113,8 +131,8 @@ def _relocate(root: Path, text: str, source: Path, target: Path) -> str:
                 return match.group(0)
             return _plain(match)
         parts = resolved.relative_to(root.resolve()).parts
-        if not resolved.exists() and parts[:1] == ("reports",) and len(parts) > 1:
-            resolved = (root / ARCHIVE).resolve().joinpath(*parts[1:])
+        if not resolved.exists() and parts[:1] == ("issues",) and len(parts) > 3 and re.match(r"r\d+-", parts[2]):
+            resolved = (root / ARCHIVE).resolve().joinpath(*parts[2:])  # a report archived earlier
         return match.group(1) + os.path.relpath(resolved, target.resolve()).replace(os.sep, "/") + anchor + match.group(3)
 
     return LINK.sub(fix, text)
@@ -125,7 +143,7 @@ def _plain(match) -> str:
 
 
 def archive(root: Path, folder: str) -> None:
-    source, target = root / "reports" / folder, root / ARCHIVE / folder
+    source, target = report_folder(root, folder), root / ARCHIVE / folder
     target.mkdir(parents=True)
     for item in sorted(source.rglob("*")):
         relative = item.relative_to(source)
@@ -135,7 +153,7 @@ def archive(root: Path, folder: str) -> None:
         shutil.copy2(item, target / relative)
     report = target / "report.md"
     report.write_text(_relocate(root, report.read_text(encoding="utf-8"), source, target), encoding="utf-8")
-    catalogue = root / "reports" / "README.md"
+    catalogue = root / "issues" / "REPORTS.md"
     text = catalogue.read_text(encoding="utf-8")
     row = next(m for m in ROW.finditer(text) if m.group(3) == folder)
     catalogue.write_text(text.replace(row.group(0) + "\n", ""), encoding="utf-8")
@@ -147,11 +165,65 @@ def archive(root: Path, folder: str) -> None:
     index.write_text(body.rstrip("\n") + f"\n| {rid} | [{title}]({folder}/report.md) | {when} | {kind} |\n", encoding="utf-8")
 
 
+def finished_milestones(root: Path) -> list[Path]:
+    """Milestone folders whose README is all that is left: every item is finished and deleted."""
+    return [d for d in sorted((root / "issues").iterdir(), key=lambda p: p.name)
+            if d.is_dir() and re.match(r"\d+-", d.name) and [f.name for f in d.glob("*.md")] == ["README.md"]
+            and not any(p.is_dir() for p in d.iterdir())]
+
+
+def archive_milestone(root: Path, folder: Path) -> None:
+    """Move the milestone to ai/archive/issues/ and list it in that folder's README; relative links keep working."""
+    target = root / ISSUES_ARCHIVE / folder.name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(folder), str(target))
+    readme = target / "README.md"
+    text = readme.read_text(encoding="utf-8")
+    title = re.search(r"^title: (.+)$", text, re.M)
+    done = re.search(r"^done: (.+)$", text, re.M)
+    index = root / ISSUES_ARCHIVE / "README.md"
+    body = index.read_text(encoding="utf-8") if index.exists() else ISSUES_HEAD
+    number = folder.name.split("-")[0]
+    index.write_text(body.rstrip("\n") + f"\n| {number} | [{title.group(1) if title else folder.name}]({folder.name}/README.md) | "
+                     f"{done.group(1) if done else 'none'} |\n", encoding="utf-8")
+    _rewrite_folder_links(root, folder.resolve(), target.resolve())
+
+
+def _rewrite_folder_links(root: Path, old: Path, new: Path) -> None:
+    for path in documents(root):
+        if new in path.resolve().parents:
+            continue
+        text = path.read_text(encoding="utf-8")
+
+        def fix(match):
+            target = _target(path, match.group(2))
+            if target is None or (old != target and old not in target.parents):
+                return match.group(0)
+            anchor = "#" + match.group(2).split("#", 1)[1] if "#" in match.group(2) else ""
+            moved = new if old == target else new / target.relative_to(old)
+            return match.group(1) + os.path.relpath(moved, path.parent.resolve()).replace(os.sep, "/") + anchor + match.group(3)
+
+        updated = LINK.sub(fix, text)
+        if updated != text:
+            path.write_text(updated, encoding="utf-8")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--write", action="store_true", help="move the reports (default: dry run)")
     parser.add_argument("--days", type=int, default=30, help="minimum age of a report in days")
+    parser.add_argument("--issues", action="store_true", help="archive finished milestones of issues/ instead of reports")
     args = parser.parse_args()
+    if args.issues:
+        done = finished_milestones(ROOT)
+        for folder in done:
+            print(("archive  " if args.write else "would archive  ") + folder.name)
+            if args.write:
+                archive_milestone(ROOT, folder)
+        print(f"{len(done)} finished milestone(s)." + ("" if args.write else " Add --write to move them."))
+        if args.write:
+            print("Now run python tools/issues.py, python tools/status.py and python tools/docs_check.py.")
+        return
     rows = plan(ROOT, date.today(), args.days)
     moving = [folder for folder, _, reason in rows if reason is None]
     for folder, rid, reason in rows:

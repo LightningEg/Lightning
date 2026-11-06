@@ -4,7 +4,7 @@
     python tools/status.py --check    # exit 1 if any of them is out of date (a test runs this)
     python tools/status.py sections ai/ARCHITECTURE.md   # a long file's sections with their sizes, to read only one
 
-Sources: the items in issues/ (pillar, size, status, kind), the report catalogue in reports/README.md (open follow-up
+Sources: the items in issues/ (pillar, size, status, kind), the report catalogue in issues/REPORTS.md (open follow-up
 codes put a report on the pillar of each code) and lightning/__init__.py (the version). The prose on a pillar page is
 written by hand; only the block between its `work` markers is generated.
 """
@@ -83,7 +83,7 @@ AI_MAP = (
     ("ai/handbook/README.md", "Requirements, data model, API list, traceability, gap analysis and decisions with stable IDs."),
     ("ai/changelog/", "Every change, in detail, one file per release (written from commit trailers; see AGENTS.md)."),
     ("ai/archive/", "Finished history: the old changelog and what no longer describes the product."),
-    ("reports/README.md", "Dated audits and reviews, with evidence."),
+    ("issues/REPORTS.md", "Dated audits and reviews, with evidence."),
     ("feedback/README.md", "Sanitized user observations and what became of them."),
     ("guideline/", "The brand rules. Never open whole: `python tools/guideline.py A12` prints one section."),
     ("skills/README.md", "Repeatable procedures: bug hunt, number audit, release check and others."),
@@ -131,12 +131,12 @@ def work_block(pillar: str, all_items, reports) -> str:
               if any(c in codes for c in follow)]
     if listed:
         lines += ["", "## Reports with open follow-ups here", ""]
-        lines += [f"- [{title}](../../reports/{path}): {', '.join(found)}" for title, path, found in listed]
+        lines += [f"- [{title}](../../issues/{path}): {', '.join(found)}" for title, path, found in listed]
     return "\n".join(lines)
 
 
 def report_rows() -> list[tuple[str, str, list[str]]]:
-    text = (ROOT / "reports" / "README.md").read_text(encoding="utf-8")
+    text = (ROOT / "issues" / "REPORTS.md").read_text(encoding="utf-8")
     rows = []
     for line in text.splitlines():
         cells = [c.strip() for c in line.strip().strip("|").split("|")]

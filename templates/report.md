@@ -2,7 +2,7 @@
 
 Date: YYYY-MM-DD · Author/reviewer: role or agent
 Repository: app / website / both · Reviewed commit: full SHA
-Historical ID: optional existing audit ID
+Code: rN (next free: `python tools/docs_check.py next-report`) · Historical ID: optional old audit ID
 
 ## Scope and method
 
@@ -22,4 +22,4 @@ device evidence. State what was not checked.
 ## Dated follow-ups
 
 Append YYYY-MM-DD, disposition and permanent verification reference. Preserve the
-original verdict. Register the report in reports/README.md.
+original verdict. Register the report in issues/REPORTS.md.

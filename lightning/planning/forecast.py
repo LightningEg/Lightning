@@ -5,7 +5,7 @@ An estimate. It reads the plan, the budget and reserves and never changes net wo
 from __future__ import annotations
 
 from datetime import date, timedelta
-from decimal import Decimal
+from decimal import ROUND_DOWN, Decimal
 from typing import Protocol
 
 from lightning.core.dates import fmt_date, month_of, parse_date, parse_month, today
@@ -212,9 +212,12 @@ class CashForecaster:
         return out
 
     # -------------------------------------------------------------- forecast
-    def forecast(self, as_of: date | None = None, months: int = HORIZON_MONTHS) -> CashForecast:
+    def forecast(self, as_of: date | None = None, months: int = HORIZON_MONTHS, *,
+                 refill: Decimal = ZERO) -> CashForecast:
+        """The cash forecast. ``refill`` asks "what if" this much free cash were moved into the emergency fund now:
+        free cash falls by it and the top-up the plan still needs is recomputed (BT-2AH). Nothing is written."""
         day = as_of or today()
-        free = self.free_cash(day)
+        free = self.free_cash(day) - refill
         average, average_months = self.average_income(day)
         month_keys = _months(day, months)
         horizon_end = parse_month(month_keys[-1])[1]
@@ -236,6 +239,8 @@ class CashForecaster:
         rows, opening = [], free
         # The emergency fund's top-up, as the plan check counts it: what each month must leave for it until full.
         fund = emergency_fund(self.reserves, self.budgets, month_keys[0], self.schedules.view())
+        if refill:
+            fund = self.budgets.emergency_fund(month_keys[0], (fund.set_aside or ZERO) + refill, schedule=self.schedules.view())
         emergency_gap = max((fund.target or ZERO) - (fund.set_aside or ZERO), ZERO)
         # Saving needed, as the plan check counts it: the savings target, or goals and the top-up when larger.
         target = (average * (self.health.limit_values()["savings_rate"] or ZERO) / 100).quantize(Decimal("0.01")) if average else ZERO
@@ -295,6 +300,31 @@ class CashForecaster:
                             safe, parts, rows, [p for p in upcoming if p.due_date <= next_date] if next_date else upcoming[:10],
                             before, dated_cash_forecast(self.reporting, *self.scheduled_inputs(day, horizon_end), day, horizon_end),
                             before_total)
+
+    def refill_options(self, as_of: date | None, room: Decimal) -> dict:
+        """What moving free cash into the emergency fund does to Safe to spend, for the refill prompt (BT-2AH).
+
+        ``room`` is the most that could move (the gap to the target, or free cash if less). Returns that amount's
+        Safe to spend afterwards, and the largest whole amount, up to ``room``, that leaves Safe to spend at or above
+        zero (0 when even a little would not). Every figure is the forecast itself run with the refill, because a
+        refill also changes the savings the plan still asks for; nothing is written."""
+        day = as_of or today()
+        now = self.forecast(day, refill=ZERO)
+        everything = self.forecast(day, refill=room)
+        if everything.safe_to_spend >= ZERO:
+            safe_amount, safe_after = room, everything.safe_to_spend
+        elif now.safe_to_spend <= ZERO:
+            safe_amount, safe_after = ZERO, now.safe_to_spend
+        else:
+            # Safe to spend falls about one for one with the amount moved: aim there, then check and correct once.
+            guess = (room * now.safe_to_spend / (now.safe_to_spend - everything.safe_to_spend)).quantize(Decimal("1"), ROUND_DOWN)
+            trial = self.forecast(day, refill=guess)
+            if trial.safe_to_spend < ZERO:
+                guess = max((guess + trial.safe_to_spend).quantize(Decimal("1"), ROUND_DOWN), ZERO)
+                trial = self.forecast(day, refill=guess)
+            safe_amount, safe_after = guess, trial.safe_to_spend
+        return {"before": now.safe_to_spend, "until": now.next_income_date, "all": room,
+                "all_after": everything.safe_to_spend, "safe": safe_amount, "safe_after": safe_after}
 
     def scheduled_inputs(self, day, end):
         """Read the same confirmed occurrences and receipt-adjusted events for every dated projection."""

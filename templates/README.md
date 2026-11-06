@@ -5,7 +5,7 @@ and fill it with observed evidence. Templates are starting points, not policy.
 
 | Need | Template / kit | Destination |
 | --- | --- | --- |
-| Audit or review | [Report](report.md) | reports/YYYY-MM-DD-subject/report.md |
+| Audit or review | [Report](report.md) | issues/<big picture>/r<N>-subject/report.md |
 | User observations | [Feedback](feedback.md) | feedback/YYYY-MM-DD-subject.md |
 | Product/technical decision | [Decision section](decision.md) | Active issue, then authoritative reference |
 | Brand rules | [Guideline map](../guideline/README.md) | Follow the relevant surface/language |

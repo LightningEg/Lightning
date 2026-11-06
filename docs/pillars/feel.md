@@ -11,26 +11,24 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IV-3F** | [The phone's top bar looks too white to one user](../../issues/3-polish-and-arabic/3F-phone-top-bar-looks-too-white.md) | S | ready |
-| **IV-3H** | [Tab-by-tab review: what a real user needs next](../../issues/3-polish-and-arabic/3H-tab-by-tab-review.md) | L | ready |
-| **OW-3AI** | [Additional broker and institution logos still needed](../../issues/3-polish-and-arabic/3AI-institution-logos.md) | owner | ready |
-| **IV-3AM** | [PC declutter, tab by tab](../../issues/3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md) | L | building |
-| **BV-3AS** | [Payday funding labels and amount precision must remain readable](../../issues/3-polish-and-arabic/3AS-payday-labels-and-precision.md) | S | new |
-| **IV-3AT** | [Property and vehicle accounts need task-specific desktop and phone layouts](../../issues/3-polish-and-arabic/3AT-property-vehicle-task-layout.md) | M | new |
-| **BV-3AV** | [The Arabic bank import preview mixes English into Arabic lines](../../issues/3-polish-and-arabic/3AV-arabic-bank-import-preview.md) | M | ready |
-| **BV-3AW** | [Four short words stay English in Arabic on loans, charts and investments](../../issues/3-polish-and-arabic/3AW-arabic-short-words-loans-charts.md) | S | ready |
-| **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](../../issues/10-looks-and-store/10A-cosmetic-parts-and-claiming.md) | L | building |
-| **NF-10B** | [Supporter perks still waiting on the app or the owner](../../issues/10-looks-and-store/10B-supporter-perks-app-and-owner.md) | M | blocked on 10A claiming; owner decision on the beta channel |
-| **NF-10C** | [Theme materials, selling themes, owner console](../../issues/10-looks-and-store/10C-theme-materials-acceptance.md) | L | building |
-| **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](../../issues/10-looks-and-store/10D-papyrus-and-dendera-bundles.md) | M | ready |
+| **BV-3AV** | [The Arabic bank import preview mixes English into Arabic lines](../../issues/3-polish-and-arabic/BV-3AV-arabic-bank-import-preview.md) | M | ready |
+| **BV-3AW** | [Four short words stay English in Arabic on loans, charts and investments](../../issues/3-polish-and-arabic/BV-3AW-arabic-short-words-loans-charts.md) | S | ready |
+| **OW-3AI** | [Additional broker and institution logos still needed](../../issues/3-polish-and-arabic/OW-3AI-institution-logos.md) | owner | ready |
+| **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](../../issues/10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md) | L | building |
+| **NF-10B** | [Supporter perks still waiting on the app or the owner](../../issues/10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md) | M | blocked on 10A claiming; owner decision on the beta channel |
+| **NF-10C** | [Theme materials, selling themes, owner console](../../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md) | L | building |
+| **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](../../issues/10-looks-and-store/NF-10D-papyrus-and-dendera-bundles.md) | M | ready |
+| **IV-3F** | [The phone's top bar looks too white to one user](../../issues/11-phone-ux/IV-3F-phone-top-bar-looks-too-white.md) | S | ready |
+| **IV-3AM** | [PC declutter, tab by tab](../../issues/12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | L | building |
+| **IV-3H** | [Tab-by-tab review: what a real user needs next](../../issues/12-desktop-ux/IV-3H-tab-by-tab-review.md) | L | ready |
 
 ## Reports with open follow-ups here
 
-- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 3AS, 3AT, 3H, 3AM
-- [The phone, redesigned: a phone-first architecture, tab by tab](../../reports/2026-11-06-phone-ux-architecture/report.md): 3F
-- [Audit 1: is Lightning ready to demo?](../../reports/2026-10-20-demo-readiness/report.md): 3H
-- [v1.5.0 PR review, theme switching and package preparation](../../reports/2026-10-26-v150-release/report.md): 10A, 10C
-- [Store and community: unlocking themes, the market, rewards and staying in Lightning](../../reports/2026-10-27-store-and-community/report.md): 10C, 10D
-- [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](../../reports/2026-10-30-desktop-tab-audit/report.md): 3AM
+- [Audit 1: is Lightning ready to demo?](../../issues/12-desktop-ux/r1-demo-readiness/report.md): 3H
+- [v1.5.0 PR review, theme switching and package preparation](../../issues/10-looks-and-store/r12-v150-release/report.md): 10A, 10C
+- [Store and community: unlocking themes, the market, rewards and staying in Lightning](../../issues/10-looks-and-store/r13-store-and-community/report.md): 10C, 10D
+- [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](../../issues/12-desktop-ux/r19-desktop-tab-audit/report.md): 3AM
+- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../issues/12-desktop-ux/r24-desktop-phone-ux/report.md): 3H, 3AM
+- [The phone, redesigned: a phone-first architecture, tab by tab](../../issues/11-phone-ux/r25-phone-ux-architecture/report.md): 3F
 <!-- work:end -->
 

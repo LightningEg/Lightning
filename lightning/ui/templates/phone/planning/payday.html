@@ -3,9 +3,23 @@
 {% block heading %}<h1>{{ 'Fund your payday plan'|tr(locale) }}</h1>{% endblock %}
 {% block top_actions %}<a class="btn" href="/plan">{{ 'Cash planning'|tr(locale) }}</a>{% endblock %}
 {% block content %}
-<section class="card phone-card"><p>{{ 'Assign cash you already own. Expected salary is excluded; reserves and unpaid bills stay protected. This does not change budget limits or move money. Cash in another account or brokerage still needs a transfer before payment.'|tr(locale) }}</p>
-<form class="phone-form" method="post" action="/payday/enable"><input type="hidden" name="__session" value="{{ session_token }}"><input type="hidden" name="enabled" value="{{ '0' if enabled else '1' }}"><button class="btn" type="submit">{{ ('Pause cash funding' if enabled else 'Turn on cash funding')|tr(locale) }}</button></form></section>
-{% set a = allocation %}
+{% set a = allocation %}{% set pr = a.proposal %}
+{% if a.ready is not none %}<section class="card phone-card"><h2>{{ 'Your payday proposal'|tr(locale) }}</h2>
+<div class="asset-rows">
+  <div class="compact-row"><span>{{ 'Bills protected'|tr(locale) }}</span><b>{{ pr.bills|money(places=0) }} {{ base }}</b></div>
+  <div class="compact-row"><span>{{ 'Everyday spending'|tr(locale) }}</span><b>{{ pr.spending|money(places=0) }} {{ base }}</b></div>
+  <div class="compact-row"><span>{{ 'Emergency and goals'|tr(locale) }}</span><b>{{ pr.reserves|money(places=0) }} {{ base }}</b></div>
+  <div class="compact-row"><span>{{ 'Left unassigned'|tr(locale) }}</span><b class="{{ 'neg' if pr.unassigned < 0 else '' }}">{{ pr.unassigned|money(places=0) }} {{ base }}</b></div>
+</div>
+<p class="muted">{{ 'No bank transfer will be made. Safe to spend stays at {amount}.'|tr(locale, amount=forecast.safe_to_spend|money(places=0) ~ ' ' ~ base) }}</p></section>{% endif %}
+{% if a.ready is not none %}<form class="phone-form" method="post" action="/payday/apply"><input type="hidden" name="__session" value="{{ session_token }}"><input type="hidden" name="fingerprint" value="{{ a.token }}">
+<details class="phone-customize"><summary class="btn">{{ 'Customize amounts'|tr(locale) }}</summary>
+<section class="card phone-card"><h2>{{ 'Fund spending'|tr(locale) }}</h2>
+{% for row in a.rows %}<label><span class="field-name">{{ row.name }}</span><small class="field-note">{{ fig.funded_spending_left.label }} {{ row.remaining|money(places=0) }} · {{ 'Left in plan'|tr(locale) }} {{ row.target|money(places=0) }}</small><input type="text" inputmode="decimal" name="category_{{ row.id }}" value="{{ row.suggested }}" {{ "" if enabled else "disabled" }} required></label>{% else %}<p>{{ 'Add category limits in Budget to preview cash funding.'|tr(locale) }} <a href="/budget">{{ 'Budget'|tr(locale) }}</a></p>{% endfor %}</section>
+<section class="card phone-card"><h2>{{ 'Top up reserves'|tr(locale) }}</h2>{% for row in a.reserves %}<label><span class="field-name">{{ row.name }}</span><small class="field-note">{{ 'Add to assigned cash'|tr(locale) }} · {{ 'Goal still needs'|tr(locale) }} {{ row.gap|money(places=0) }}</small><input type="text" inputmode="decimal" name="reserve_{{ row.id }}" value="{{ row.suggested }}" {{ "" if enabled else "disabled" }} required></label>{% else %}<a href="/reserves">{{ 'Reserves'|tr(locale) }}</a>{% endfor %}</section>
+</details>
+{% if enabled %}<button class="btn primary" type="submit">{{ 'Confirm cash assignments'|tr(locale) }}</button>{% else %}<p>{{ 'Turn on cash funding to confirm this proposal.'|tr(locale) }}</p>{% endif %}</form>{% endif %}
+<form class="phone-form" method="post" action="/payday/enable"><input type="hidden" name="__session" value="{{ session_token }}"><input type="hidden" name="enabled" value="{{ '0' if enabled else '1' }}"><button class="btn{{ ' primary phone-save' if not enabled }}" type="submit">{{ ('Pause cash funding' if enabled else 'Turn on cash funding')|tr(locale) }}</button></form>
 <section class="card phone-card"><h2>{{ 'Before your next payday'|tr(locale) }}</h2>
 <p>{{ 'Due before payday'|tr(locale) }} {{ forecast.payments_before_income_total|money(places=0) }} {{ base }} · {{ 'Safe to spend'|tr(locale) }} {{ forecast.safe_to_spend|money(places=0) }} {{ base }}</p>
 {% for payment in forecast.payments_before_income %}<p>{{ payment.item.name }} · {{ payment.due_date }}</p>{% endfor %}
@@ -15,9 +29,7 @@
 {% if a.missing %}<p class="flash error">{{ 'Add current exchange rates before assigning cash.'|tr(locale) }} {{ a.missing|join(', ') }}</p>{% endif %}
 {% if a.ready is not none and a.ready < 0 %}<p class="flash error">{{ 'Funded spending and obligations exceed owned cash. Reduce assignments before adding more.'|tr(locale) }}</p>{% endif %}
 <p class="muted">{{ 'Amounts below are a preview, with bills due first. Each category includes its children; spending and refunds update its funded cash. Unused funding returns to the pool next month.'|tr(locale) }}</p></section>
-{% if a.ready is not none %}<form class="phone-form" method="post" action="/payday/apply"><input type="hidden" name="__session" value="{{ session_token }}"><input type="hidden" name="fingerprint" value="{{ a.token }}">
-<section class="card phone-card"><h2>{{ 'Fund spending'|tr(locale) }}</h2>
-{% for row in a.rows %}<label><span class="field-name">{{ row.name }}</span><small class="field-note">{{ fig.funded_spending_left.label }} {{ row.remaining|money(places=0) }} · {{ 'Left in plan'|tr(locale) }} {{ row.target|money(places=0) }}</small><input type="text" inputmode="decimal" name="category_{{ row.id }}" value="{{ row.suggested }}" {{ "" if enabled else "disabled" }} required></label>{% else %}<p>{{ 'Add category limits in Budget to preview cash funding.'|tr(locale) }} <a href="/budget">{{ 'Budget'|tr(locale) }}</a></p>{% endfor %}</section>
-<section class="card phone-card"><h2>{{ 'Top up reserves'|tr(locale) }}</h2>{% for row in a.reserves %}<label><span class="field-name">{{ row.name }}</span><small class="field-note">{{ 'Add to assigned cash'|tr(locale) }} · {{ 'Goal still needs'|tr(locale) }} {{ row.gap|money(places=0) }}</small><input type="text" inputmode="decimal" name="reserve_{{ row.id }}" value="{{ row.suggested }}" {{ "" if enabled else "disabled" }} required></label>{% else %}<a href="/reserves">{{ 'Reserves'|tr(locale) }}</a>{% endfor %}</section>
-{% if enabled %}<button class="btn primary" type="submit">{{ 'Confirm cash assignments'|tr(locale) }}</button>{% else %}<p>{{ 'Turn on cash funding to confirm this proposal.'|tr(locale) }}</p>{% endif %}</form>{% endif %}
+<details class="phone-note-details"><summary>{{ 'About cash funding'|tr(locale) }}</summary><div class="card phone-card"><p>{{ 'Assign cash you already own. Expected salary is excluded; reserves and unpaid bills stay protected. This does not change budget limits or move money. Cash in another account or brokerage still needs a transfer before payment.'|tr(locale) }}</p>
+
+</div></details>
 {% endblock %}

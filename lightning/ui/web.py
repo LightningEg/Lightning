@@ -14,7 +14,7 @@ import re
 import secrets
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from urllib.parse import parse_qsl, quote, urlencode, urlsplit
+from urllib.parse import parse_qsl, quote, urlencode, urlparse, urlsplit
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
@@ -529,7 +529,9 @@ def _template_response(request, name, status_code, c, locale, total, owned_total
 
 def redirect(url: str, msg: str = "") -> RedirectResponse:
     # Only ever to a page of this app: a path, never another site (a "//host" or "/\\host" is not a path).
-    if not url.startswith("/") or url.startswith("//") or url.startswith("/\\") or "\n" in url or "\r" in url:
+    parts = urlparse(url)
+    if (parts.scheme or parts.netloc or not url.startswith("/") or url.startswith("//") or url.startswith("/\\")
+            or "\n" in url or "\r" in url):
         url = "/"
     if msg:
         path, fragment_mark, fragment = url.partition("#")

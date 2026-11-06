@@ -5,6 +5,7 @@ from pathlib import Path
 ROUTES = Path(__file__).parents[1] / "lightning/ui/routes"
 # These handlers have a different completion boundary, or perform no financial write.
 OTHER_BOUNDARIES = {
+    "workbench": {"find_replace_preview"},  # Read-only preview of a text replace; find_replace owns the save.
     "search": {"scoped_picker"},  # Read-only ranking of existing picker choices.
     "history": {"replay"},  # History restores both rows and links in its own replay transaction.
     "exports": {"transactions", "categories", "reevaluations", "preview_workbook_import"},

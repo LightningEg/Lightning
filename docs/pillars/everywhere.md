@@ -11,24 +11,24 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IV-3AN** | [Phone visual plan](../../issues/3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | L | building |
-| **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](../../issues/3-polish-and-arabic/3AU-reminders-when-the-app-is-closed.md) | M | new |
-| **IV-3AY** | [Phone-first architecture](../../issues/3-polish-and-arabic/3AY-phone-first-architecture.md) | L | ready |
-| **NF-4A** | [Edit journal: edit anywhere, one home confirms](../../issues/4-edit-journal-and-devices/4A-edit-journal.md) | L | building |
-| **NF-4B** | [Multiple devices: implementation plan](../../issues/4-edit-journal-and-devices/4B-multiple-devices.md) | L | building |
-| **NF-9B** | [In-app updates on Windows](../../issues/9-later/9B-in-app-updates.md) | L | new |
+| **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](../../issues/3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | M | new |
+| **NF-4A** | [Edit journal: edit anywhere, one home confirms](../../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md) | L | building |
+| **NF-4B** | [Multiple devices: implementation plan](../../issues/4-edit-journal-and-devices/NF-4B-multiple-devices.md) | L | building |
+| **NF-9B** | [In-app updates on Windows](../../issues/9-later/NF-9B-in-app-updates.md) | L | new |
+| **IV-3AN** | [Phone visual plan](../../issues/11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | L | building |
+| **IV-3AY** | [Phone-first architecture](../../issues/11-phone-ux/IV-3AY-phone-first-architecture.md) | L | ready |
 
 ## Reports with open follow-ups here
 
-- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 3AN, 4A, 4B
-- [The phone, redesigned: a phone-first architecture, tab by tab](../../reports/2026-11-06-phone-ux-architecture/report.md): 3AY, 3AN
-- [Audit 2: backend efficiency and loose ends](../../reports/2026-10-21-backend-efficiency/report.md): 4A
-- [Audit 3: is the edit journal (multi-device sync) solid?](../../reports/2026-10-21-edit-journal/report.md): 4A
-- [Audit 5: is the backend engine efficient and streamlined?](../../reports/2026-10-21-backend-streamlining/report.md): 4A
-- [Audit 4: backend correctness and failure boundaries](../../reports/2026-10-23-backend-correctness/report.md): 4A
-- [Pairing backend hardening and security review](../../reports/2026-10-26-pairing-hardening/report.md): 4A
-- [Audit 10: the phone, tab by tab - quick actions and the answer first](../../reports/2026-10-29-phone-tab-audit/report.md): 3AN
-- [Audit 13: the phone for quick jobs - convenience, taps and the look](../../reports/2026-11-01-phone-convenience-audit/report.md): 3AN
-- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 4A, 4B
+- [Audit 2: backend efficiency and loose ends](../../issues/2-safe-for-real-money/r2-backend-efficiency/report.md): 4A
+- [Audit 5: is the backend engine efficient and streamlined?](../../issues/4-edit-journal-and-devices/r3-backend-streamlining/report.md): 4A
+- [Audit 3: is the edit journal (multi-device sync) solid?](../../issues/4-edit-journal-and-devices/r4-edit-journal/report.md): 4A
+- [Audit 4: backend correctness and failure boundaries](../../issues/2-safe-for-real-money/r5-backend-correctness/report.md): 4A
+- [Pairing backend hardening and security review](../../issues/4-edit-journal-and-devices/r11-pairing-hardening/report.md): 4A
+- [Audit 10: the phone, tab by tab - quick actions and the answer first](../../issues/11-phone-ux/r17-phone-tab-audit/report.md): 3AN
+- [Audit 13: the phone for quick jobs - convenience, taps and the look](../../issues/11-phone-ux/r20-phone-convenience-audit/report.md): 3AN
+- [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 4A, 4B
+- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../issues/12-desktop-ux/r24-desktop-phone-ux/report.md): 3AN, 4A, 4B
+- [The phone, redesigned: a phone-first architecture, tab by tab](../../issues/11-phone-ux/r25-phone-ux-architecture/report.md): 3AY, 3AN
 <!-- work:end -->
 

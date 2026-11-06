@@ -11,13 +11,13 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](../../issues/7-planning-import-and-search/7C-move-in-from-other-apps.md) | L | new |
-| **IT-7Z** | [Import another app's export with few questions](../../issues/7-planning-import-and-search/7Z-import-other-app-exports.md) | M | new |
-| **NF-7AB** | [Import review asks the file's few questions instead of showing every row](../../issues/7-planning-import-and-search/7AB-import-review-as-questions.md) | L | new |
+| **IT-7Z** | [Import another app's export with few questions](../../issues/7-planning-import-and-search/IT-7Z-import-other-app-exports.md) | M | new |
+| **NF-7AB** | [Import review asks the file's few questions instead of showing every row](../../issues/7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | L | new |
+| **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](../../issues/7-planning-import-and-search/NF-7C-move-in-from-other-apps.md) | L | new |
 
 ## Reports with open follow-ups here
 
-- [CSV import stress test: where it breaks and how to rebuild it](../../reports/2026-11-05-csv-import-stress/report.md): 7AB, 7Z, 7C
-- [Code audit: refactoring, loose ends and smart features](../../reports/2026-11-03-code-quality-and-smart-features/report.md): 7C
+- [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 7C
+- [CSV import stress test: where it breaks and how to rebuild it](../../issues/7-planning-import-and-search/r23-csv-import-stress/report.md): 7AB, 7Z, 7C
 <!-- work:end -->
 

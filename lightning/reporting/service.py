@@ -218,24 +218,33 @@ class ReportingService:
         accounts = {item.id: item for item in self.accounts.list()}
         assets = {item.id: item for item in self.assets.list_assets()}
         classes = {item.id: item for item in self.assets.list_classes()}
-        for row in self.q.holdings(day):
+        rows = [dict(row) for row in self.q.holdings(day)]
+        # An Other asset valued by a dated estimate counts from that estimate, even when its cash quantity is zero or
+        # it has no ledger row at all (opened at zero, valued afterwards): the estimate is not cash (BT-2AG).
+        seen = {row["account_id"] for row in rows}
+        for account in accounts.values():
+            if account.account_type == AccountType.OTHER_ASSET and account.id not in seen \
+                    and self.other_asset_values.latest(account.id, day):
+                rows.append({"account_id": account.id, "asset_id": self.assets.cash_asset(account.currency).id,
+                             "quantity_e6": 0})
+        for row in rows:
             quantity = from_e6(row["quantity_e6"])
-            if quantity == ZERO:
-                continue
             account = accounts[row["account_id"]]
+            manual = (self.other_asset_values.latest(account.id, day)
+                      if account.account_type == AccountType.OTHER_ASSET and assets[row["asset_id"]].is_cash else None)
+            if quantity == ZERO and not manual:
+                continue
             asset = assets[row["asset_id"]]
             class_id = account.cash_class_id if asset.is_cash else asset.asset_class_id
             asset_class = classes[class_id]
             valuation = self.valuer.value(asset, quantity, day)
-            if account.account_type == AccountType.OTHER_ASSET and asset.is_cash:
-                manual = self.other_asset_values.latest(account.id, day)
-                if manual:
-                    # The estimate plus what moved in or out after its date, so money taken out later still
-                    # lowers net worth (audit 2026-10-26).
-                    since = quantity - from_e6(self.q.account_quantity(account.id, as_of=manual["effective_date"]))
-                    valuation = self.valuer.value(asset, manual["value"] + since, day)
-                    valuation.price_date = manual["effective_date"]
-                    valuation.source = "MANUAL_VALUE"
+            if manual:
+                # The estimate plus what moved in or out after its date, so money taken out later still
+                # lowers net worth (audit 2026-10-26).
+                since = quantity - from_e6(self.q.account_quantity(account.id, as_of=manual["effective_date"]))
+                valuation = self.valuer.value(asset, manual["value"] + since, day)
+                valuation.price_date = manual["effective_date"]
+                valuation.source = "MANUAL_VALUE"
             if valuation.value is None:
                 unvalued.append(f"{account.label} — {valuation.reason}")
             result.append(HoldingValue(account, asset.code, asset_class.code, asset_class.name, quantity,
@@ -471,6 +480,17 @@ class ReportingService:
 
     def owned_account_value(self, account_id: int, as_of: date | str) -> Decimal:
         return self.account_value(account_id, as_of) - self.custody_value_by_account(as_of).get(account_id, ZERO)
+
+    def other_asset_native_value(self, account_id: int, as_of: date | str) -> tuple[Decimal, str | None]:
+        """An Other asset's value in the account's own currency, and the date of the estimate behind it (None when it is
+        only cash): the latest dated estimate plus what moved in or out after it, the same rule as net worth (BT-2AF)."""
+        day = self._day(as_of)
+        quantity = self.account_balance(account_id, day)
+        manual = self.other_asset_values.latest(account_id, day)
+        if not manual:
+            return quantity, None
+        since = quantity - from_e6(self.q.account_quantity(account_id, as_of=manual["effective_date"]))
+        return manual["value"] + since, manual["effective_date"]
 
     def account_balance(self, account_id: int, as_of: date | str | None = None) -> Decimal:
         return from_e6(self.q.account_quantity(account_id, as_of=self._day(as_of) if as_of else None))

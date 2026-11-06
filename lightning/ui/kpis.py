@@ -307,7 +307,7 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
         cards.append(card(figure_label("safe_to_spend"), f.safe_to_spend, safe_compare, tone="hold" if f.safe_to_spend >= 0 else "over",
                           key="safe", chip_=chip(f"until {until}" if until else "3 months"),
                           visual=segments([("Safe", max(f.safe_to_spend, ZERO), "hold"), ("Promised", promised, "out")]),
-                          line_=line("On top of your plan", "How it is worked out", "/plan"), href="/plan"))
+                          line_=line("On top of your plan", "How it is worked out", "/plan#safe-section"), href="/plan#safe-section"))
 
     if plan is not None:
         planned, left = plan["planned"], plan["left"]

@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 46 open items, in the order they are worked on.
+11 big pictures, 41 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -13,19 +13,20 @@ Anyone can find how to help in one click and send a first fix the same evening.
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/1E-public-repository-security-audit.md) | improvement, technical | Build | M | ready |
-| **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | Build | L | blocked on repository Actions allowlist update and native runtime acceptance |
+| **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | improvement, technical | Build | M | ready |
+| **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/IT-1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | Build | L | blocked on repository Actions allowlist update and native runtime acceptance |
 | IT-1H1 | ↳ Build and publish the native wheels | | | L | |
 | IT-1H2 | ↳ Update the dependency inputs together | | | M | |
 | IT-1H3 | ↳ Regenerate the locks | | | M | |
 | IT-1H4 | ↳ Validate | | | M | |
-| **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | ready |
-| **IT-1Q** | [Link historical user questions to verified current feature coverage](1-easy-to-contribute/1Q-current-user-question-coverage.md) | improvement, technical | Build | S | new |
-| **IT-1R** | [Direct tests for investment_breakdown](1-easy-to-contribute/1R-investment-breakdown-direct-tests.md) ([#339](https://github.com/LightningEg/Lightning/issues/339)) | improvement, technical | Build | M | ready |
-| **IT-1S** | [Direct tests for SubmissionStore (a form saved twice saves once)](1-easy-to-contribute/1S-submission-store-direct-tests.md) ([#340](https://github.com/LightningEg/Lightning/issues/340)) | improvement, technical | Build | S | ready |
-| **IT-1T** | [Direct tests for PlanSchedule and ScheduleSource](1-easy-to-contribute/1T-plan-schedule-direct-tests.md) ([#341](https://github.com/LightningEg/Lightning/issues/341)) | improvement, technical | Build | S | ready |
+| **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | ready |
+| **IT-1R** | [Direct tests for investment_breakdown](1-easy-to-contribute/IT-1R-investment-breakdown-direct-tests.md) ([#339](https://github.com/LightningEg/Lightning/issues/339)) | improvement, technical | Build | M | ready |
+| **IT-1S** | [Direct tests for SubmissionStore (a form saved twice saves once)](1-easy-to-contribute/IT-1S-submission-store-direct-tests.md) ([#340](https://github.com/LightningEg/Lightning/issues/340)) | improvement, technical | Build | S | ready |
+| **IT-1T** | [Direct tests for PlanSchedule and ScheduleSource](1-easy-to-contribute/IT-1T-plan-schedule-direct-tests.md) ([#341](https://github.com/LightningEg/Lightning/issues/341)) | improvement, technical | Build | S | ready |
 
-Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P. Next free code: 1U.
+Reports: [r7](1-easy-to-contribute/r7-pull-request-cleanup/report.md).
+
+Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q. Next free code: 1U.
 
 ## 2 Safe for real money
 
@@ -33,28 +34,27 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **IT-2A** | [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic repair](2-safe-for-real-money/2A-restore-safety.md) | improvement, technical | Protect | L | building |
+| **BT-2AI** | [Phone data must survive every app update and reinstall](2-safe-for-real-money/BT-2AI-phone-data-survives-updates.md) | bug, technical · high | Protect | L | new |
+| BT-2AI1 | ↳ Pin the phone's identity, built 2026-11-05 | | | S | |
+| BT-2AI2 | ↳ Open a profile file on the phone | | | M | |
+| BT-2AI3 | ↳ A copy outside the app | | | M | |
+| BT-2AI4 | ↳ The PC can always send its copy to a fresh phone | | | M | |
+| **IT-2A** | [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic repair](2-safe-for-real-money/IT-2A-restore-safety.md) | improvement, technical | Protect | L | building |
 | IT-2A1 | ↳ Durable intent and source-copy manifest | | | L | |
 | IT-2A2 | ↳ Windows marker publication | | | L | |
 | IT-2A3 | ↳ Explicit deterministic repair | | | L | |
 | IT-2A4 | ↳ Restore screens and docs | | | M | |
 | IT-2A5 | ↳ Reboot drill on an ordinary PC | | | owner | |
-| **IT-2C** | [Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidence repair](2-safe-for-real-money/2C-ordinary-pc-acceptance.md) | improvement, technical | Protect | L | ready |
+| **IT-2C** | [Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidence repair](2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md) | improvement, technical | Protect | L | ready |
 | IT-2C1 | ↳ Ordinary-PC recovery and fault acceptance | | | L | |
 | IT-2C2 | ↳ Legacy import | | | M | |
 | IT-2C3 | ↳ Native file pickers | | | M | |
 | IT-2C4 | ↳ Unresolved-evidence repair | | | M | |
 | IT-2C5 | ↳ Native notification delivery, Windows and Android | | | M | |
-| **BT-2AF** | [Property and vehicle headlines must use the dated valuation](2-safe-for-real-money/2AF-asset-details-use-dated-value.md) | bug, technical · high | Own | M | new |
-| **BT-2AG** | [A dated Other asset estimate must count after a zero opening](2-safe-for-real-money/2AG-zero-opening-asset-valuation.md) | bug, technical · high | Own | M | new |
-| **BT-2AH** | [Emergency refill must preview and protect the remaining plan](2-safe-for-real-money/2AH-refill-previews-plan-impact.md) | bug, technical · high | Plan | M | new |
-| **BT-2AI** | [Phone data must survive every app update and reinstall](2-safe-for-real-money/2AI-phone-data-survives-updates.md) | bug, technical · high | Protect | L | new |
-| BT-2AI1 | ↳ Pin the phone's identity, built 2026-11-05 | | | S | |
-| BT-2AI2 | ↳ Open a profile file on the phone | | | M | |
-| BT-2AI3 | ↳ A copy outside the app | | | M | |
-| BT-2AI4 | ↳ The PC can always send its copy to a fresh phone | | | M | |
 
-Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2U, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AB, 2AC, 2AD, 2AE. Next free code: 2AJ.
+Reports: [r2](2-safe-for-real-money/r2-backend-efficiency/report.md) · [r5](2-safe-for-real-money/r5-backend-correctness/report.md).
+
+Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2U, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AB, 2AC, 2AD, 2AE, 2AF, 2AG, 2AH. Next free code: 2AJ.
 
 ## 3 Polish and Arabic
 
@@ -62,26 +62,154 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **IV-3F** | [The phone's top bar looks too white to one user](3-polish-and-arabic/3F-phone-top-bar-looks-too-white.md) | improvement, visual | Feel | S | ready |
-| **IV-3H** | [Tab-by-tab review: what a real user needs next](3-polish-and-arabic/3H-tab-by-tab-review.md) | improvement, visual | Feel | L | ready |
-| IV-3H3 | ↳ Step 3: features | | | L | |
-| **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/3AI-institution-logos.md) | owner task | Feel |  | ready |
-| **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](3-polish-and-arabic/3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | building |
-| IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | |
-| IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | M | |
-| IV-3AM3 | ↳ Each tab opens on its answer (O1-O2, B1-B3, B5, T1-T2, T5-T6, SP1-SP3, SA3-SA5, I1-I2, A1-A3, C1-C2) | | | L | |
-| IV-3AM4 | ↳ Settings stop being forms (ST1-ST4) | | | M | |
-| IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | M | |
-| **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | building |
+| **BV-3AV** | [The Arabic bank import preview mixes English into Arabic lines](3-polish-and-arabic/BV-3AV-arabic-bank-import-preview.md) ([#342](https://github.com/LightningEg/Lightning/issues/342)) | bug, visual · low | Feel | M | ready |
+| **BV-3AW** | [Four short words stay English in Arabic on loans, charts and investments](3-polish-and-arabic/BV-3AW-arabic-short-words-loans-charts.md) ([#343](https://github.com/LightningEg/Lightning/issues/343)) | bug, visual · low | Feel | S | ready |
+| **IT-3AX** | [The site screenshot tool breaks on the new Overview, so the site's screens are not recaptured](3-polish-and-arabic/IT-3AX-site-shots-tool-follows-the-new-screens.md) | improvement, technical | Reach | M | new |
+| **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | new |
+| **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/OW-3AI-institution-logos.md) | owner task | Feel |  | ready |
+
+Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md).
+
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT. Next free code: 3BA.
+
+## 4 Edit journal and devices
+
+Edit on the phone or the PC; one home confirms every change and nothing is lost.
+
+| Code | Item | Kind | Pillar | Size | Status |
+|---|---|---|---|---|---|
+| **NF-4A** | [Edit journal: edit anywhere, one home confirms](4-edit-journal-and-devices/NF-4A-edit-journal.md) | new feature | Everywhere | L | building |
+| NF-4A1 | ↳ Consolidate the local implementation on the integration branch | | | L | |
+| NF-4A2 | ↳ J6c-e validation: areas, home automation, upgrades and backups | | | L | |
+| NF-4A3 | ↳ J4 Internet channel | | | L | |
+| NF-4A4 | ↳ J5 Trust and recovery gates | | | L | |
+| NF-4A5 | ↳ J6 cutover | | | owner | |
+| NF-4A6 | ↳ Real-device evidence | | | owner | |
+| **NF-4B** | [Multiple devices: implementation plan](4-edit-journal-and-devices/NF-4B-multiple-devices.md) | new feature | Everywhere | L | building |
+| NF-4B1 | ↳ Phase A: make local data replacement safe; prove Android is possible | | | L | |
+| NF-4B2 | ↳ Phase B: prove authority without networking | | | L | |
+| NF-4B3 | ↳ Phase C: connect two ordinary PCs and cover offline use | | | L | |
+| NF-4B4 | ↳ Phase D: make the phone the actual home | | | L | |
+| NF-4B5 | ↳ Phase E: add bank messages without duplicate money | | | L | |
+| NF-4B6 | ↳ Phase F: measure, rehearse loss and release | | | L | |
+
+Reports: [r3](4-edit-journal-and-devices/r3-backend-streamlining/report.md) · [r4](4-edit-journal-and-devices/r4-edit-journal/report.md) · [r11](4-edit-journal-and-devices/r11-pairing-hardening/report.md).
+
+Done: 4C, 4D, 4E, 4F, 4G, 4H, 4I, 4J, 4K, 4L. Next free code: 4M.
+
+## 6 Market data
+
+Prices arrive by themselves, from sources Lightning may redistribute.
+
+| Code | Item | Kind | Pillar | Size | Status |
+|---|---|---|---|---|---|
+| **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](6-market-data/IT-6D-gold-price-source.md) | improvement, technical | Own | S | blocked on a test from a home connection |
+| **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history source](6-market-data/IT-6F-london-board-and-gulf-history.md) | improvement, technical | Own | M | new |
+| **NF-6A** | [Market data: price packs, collected in the cloud](6-market-data/NF-6A-price-packs.md) | new feature | Own | L | building |
+| NF-6A1 | ↳ Funds, currencies and gold matched to holdings | | | M | |
+| NF-6A2 | ↳ US stocks and FX revaluation, with multi-currency | | | L | |
+| NF-6A3 | ↳ Publish the packs | | | owner | |
+| **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](6-market-data/NF-6B-europe-and-gcc-shares.md) | new feature | Own | L | blocked on a source that allows redistribution |
+| NF-6B1 | ↳ Verify live boards per market | | | M | |
+| NF-6B2 | ↳ A source that allows redistribution | | | owner | |
+| NF-6B3 | ↳ Switch publishing on per market | | | S | |
+
+Done: 6C, 6E. Next free code: 6G.
+
+## 7 Planning, import and search
+
+Getting a month in takes minutes: any bank file, any old app, one search box.
+
+| Code | Item | Kind | Pillar | Size | Status |
+|---|---|---|---|---|---|
+| **IT-7Z** | [Import another app's export with few questions](7-planning-import-and-search/IT-7Z-import-other-app-exports.md) | improvement, technical | Capture | M | new |
+| IT-7Z1 | ↳ Remember a name's category for the next file | | | S | |
+| IT-7Z2 | ↳ Split one file by its Account column | | | M | |
+| IT-7Z3 | ↳ Paired rows of one movement | | | S | |
+| **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | new feature | Capture | L | new |
+| NF-7AB1 | ↳ Summary first, rows last | | | M | |
+| NF-7AB2 | ↳ Post in rounds | | | S | |
+| NF-7AB3 | ↳ Group by the question, not the name | | | M | |
+| NF-7AB4 | ↳ Smart buttons on a group | | | M | |
+| NF-7AB5 | ↳ Quick mode for leftovers | | | M | |
+| NF-7AB6 | ↳ Safe to go fast | | | S | |
+| **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](7-planning-import-and-search/NF-7C-move-in-from-other-apps.md) | new feature | Capture | L | new |
+| NF-7C1 | ↳ Read each app's export format | | | M | |
+| NF-7C2 | ↳ A mapping preset per app in the CSV review | | | L | |
+| NF-7C3 | ↳ A move-in guide | | | M | |
+
+Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md).
+
+Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7AA. Next free code: 7AC.
+
+## 8 Website
+
+The site is honest, quick and in step with the app.
+
+| Code | Item | Kind | Pillar | Size | Status |
+|---|---|---|---|---|---|
+| **IV-8F** | [Home and Features show the app, not only words](8-website/IV-8F-home-and-features-show-the-app.md) | improvement, visual | Reach | M | ready |
+| **OW-8AA** | [Sign off the Low, Medium and High ratings on the comparison pages](8-website/OW-8AA-sign-off-the-comparison-ratings.md) | owner task | Reach |  | ready |
+| **OW-8D** | [For Geeks audit ideas left for the owner to choose](8-website/OW-8D-for-geeks-audit-ideas-to-choose.md) | owner task | Reach |  | ready |
+
+Done: 8A, 8B, 8C, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z. Next free code: 8AB.
+
+## 9 Later
+
+Good ideas that wait until the milestones above are done.
+
+| Code | Item | Kind | Pillar | Size | Status |
+|---|---|---|---|---|---|
+| **IT-9A** | [Stored month-end figures](9-later/IT-9A-stored-month-end-figures.md) | improvement, technical | Understand | M | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
+| **IT-9F** | [Page speed: a stable origin and cache, and a CSS trim](9-later/IT-9F-page-speed-origin-and-css.md) | improvement, technical | Reach | M | new |
+| **IT-9K** | [Structure left - runtime routes and bank-import orchestration](9-later/IT-9K-layers-and-copies.md) | improvement, technical | Build | M | ready |
+| **NF-9B** | [In-app updates on Windows](9-later/NF-9B-in-app-updates.md) | new feature | Everywhere | L | new |
+| NF-9B1 | ↳ Check and verify an update | | | L | |
+| NF-9B2 | ↳ Swap the folders with rollback | | | L | |
+| NF-9B3 | ↳ The Update button and its words | | | M | |
+| NF-9B4 | ↳ Try it on a real Windows PC | | | owner | |
+| **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | new |
+
+Reports: [r22](9-later/r22-code-quality-and-smart-features/report.md).
+
+Done: 9C, 9E, 9G, 9H, 9I, 9J. Next free code: 9L.
+
+## 10 Looks and store
+
+App themes and looks are bought once, worn on every device of a profile, and never change a number.
+
+| Code | Item | Kind | Pillar | Size | Status |
+|---|---|---|---|---|---|
+| **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md) | new feature | Feel | L | building |
+| NF-10A1 | ↳ Native Settings activation and restore | | | L | |
+| NF-10A2 | ↳ Licences saved safely | | | L | |
+| NF-10A3 | ↳ Inventory and fallback | | | L | |
+| NF-10A4 | ↳ Test every screen | | | L | |
+| NF-10A5 | ↳ Register enabled versions on the store | | | M | |
+| NF-10A6 | ↳ Checkout, receipts and prices | | | owner | |
+| **NF-10B** | [Supporter perks still waiting on the app or the owner - app themes for sale, names on About, a beta channel](10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md) | new feature | Feel | M | blocked on 10A claiming; owner decision on the beta channel |
+| **NF-10C** | [Theme materials, selling themes, owner console - what only the owner can do now](10-looks-and-store/NF-10C-theme-materials-acceptance.md) | new feature | Feel | L | building |
+| NF-10C1 | ↳ Native theme acceptance | | | L | |
+| NF-10C2 | ↳ Royal Obsidian & Gold needs a website version | | | M | |
+| NF-10C3 | ↳ Fix the app's own green on dark cards | | | S | |
+| NF-10C4 | ↳ Owner steps 1-6 in order | | | owner | |
+| NF-10C5 | ↳ Review prices after 60 days of sales | | | owner | |
+| **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](10-looks-and-store/NF-10D-papyrus-and-dendera-bundles.md) | new feature | Feel | M | ready |
+
+Reports: [r12](10-looks-and-store/r12-v150-release/report.md) · [r13](10-looks-and-store/r13-store-and-community/report.md).
+
+Done: 10E, 10F. Next free code: 10G.
+
+## 11 Phone UX
+
+The phone is its own product: a few places that each answer one question, quick jobs in three taps, and no PC page squeezed into one column.
+
+| Code | Item | Kind | Pillar | Size | Status |
+|---|---|---|---|---|---|
+| **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | building |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner | |
-| **BV-3AS** | [Payday funding labels and amount precision must remain readable](3-polish-and-arabic/3AS-payday-labels-and-precision.md) | bug, visual · low | Feel | S | new |
-| **IV-3AT** | [Property and vehicle accounts need task-specific desktop and phone layouts](3-polish-and-arabic/3AT-property-vehicle-task-layout.md) | improvement, visual | Feel | M | new |
-| **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | new |
-| **BV-3AV** | [The Arabic bank import preview mixes English into Arabic lines](3-polish-and-arabic/3AV-arabic-bank-import-preview.md) ([#342](https://github.com/LightningEg/Lightning/issues/342)) | bug, visual · low | Feel | M | ready |
-| **BV-3AW** | [Four short words stay English in Arabic on loans, charts and investments](3-polish-and-arabic/3AW-arabic-short-words-loans-charts.md) ([#343](https://github.com/LightningEg/Lightning/issues/343)) | bug, visual · low | Feel | S | ready |
-| **IT-3AX** | [The site screenshot tool breaks on the new Overview, so the site's screens are not recaptured](3-polish-and-arabic/3AX-site-shots-tool-follows-the-new-screens.md) | improvement, technical | Reach | M | new |
-| **IV-3AY** | [Phone-first architecture - five places that each answer one question, state-aware screens, and a phone decoupled from the PC](3-polish-and-arabic/3AY-phone-first-architecture.md) | improvement, visual | Everywhere | L | ready |
+| **IV-3AY** | [Phone-first architecture - five places that each answer one question, state-aware screens, and a phone decoupled from the PC](11-phone-ux/IV-3AY-phone-first-architecture.md) | improvement, visual | Everywhere | L | ready |
 | IV-3AY1 | ↳ Four state and copy bugs on today's screens | | | S | |
 | IV-3AY3 | ↳ Guideline Part C rewrite, in both repos | | | M | |
 | IV-3AY4 | ↳ The phone shell: its own router, base, stylesheet and navigation | | | L | |
@@ -94,134 +222,38 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3AY11 | ↳ Remove the old coupling | | | M | |
 | IV-3AY12 | ↳ Arabic, themes and 320 px | | | M | |
 | IV-3AY13 | ↳ Owner's phone check | | | owner | |
+| **IV-3F** | [The phone's top bar looks too white to one user](11-phone-ux/IV-3F-phone-top-bar-looks-too-white.md) | improvement, visual | Feel | S | ready |
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR. Next free code: 3AZ.
+Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md).
 
-## 4 Edit journal and devices
+Done: nothing yet. Next free code: 11A.
 
-Edit on the phone or the PC; one home confirms every change and nothing is lost.
+## 12 Desktop UX and smart next steps
 
-| Code | Item | Kind | Pillar | Size | Status |
-|---|---|---|---|---|---|
-| **NF-4A** | [Edit journal: edit anywhere, one home confirms](4-edit-journal-and-devices/4A-edit-journal.md) | new feature | Everywhere | L | building |
-| NF-4A1 | ↳ Consolidate the local implementation on the integration branch | | | L | |
-| NF-4A2 | ↳ J6c-e validation: areas, home automation, upgrades and backups | | | L | |
-| NF-4A3 | ↳ J4 Internet channel | | | L | |
-| NF-4A4 | ↳ J5 Trust and recovery gates | | | L | |
-| NF-4A5 | ↳ J6 cutover | | | owner | |
-| NF-4A6 | ↳ Real-device evidence | | | owner | |
-| **NF-4B** | [Multiple devices: implementation plan](4-edit-journal-and-devices/4B-multiple-devices.md) | new feature | Everywhere | L | building |
-| NF-4B1 | ↳ Phase A: make local data replacement safe; prove Android is possible | | | L | |
-| NF-4B2 | ↳ Phase B: prove authority without networking | | | L | |
-| NF-4B3 | ↳ Phase C: connect two ordinary PCs and cover offline use | | | L | |
-| NF-4B4 | ↳ Phase D: make the phone the actual home | | | L | |
-| NF-4B5 | ↳ Phase E: add bank messages without duplicate money | | | L | |
-| NF-4B6 | ↳ Phase F: measure, rehearse loss and release | | | L | |
-
-Done: 4C, 4D, 4E, 4F, 4G, 4H, 4I, 4J, 4K, 4L. Next free code: 4M.
-
-## 5 Investments
-
-Every investment figure can be explained per purchase, and agrees with the ledger.
+The PC app leads with the answer, works in bulk without surprises, and offers the next step where a figure raises the question.
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
+| **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | building |
+| IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | |
+| IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | M | |
+| IV-3AM3 | ↳ Each tab opens on its answer (O1-O2, B1-B3, B5, T1-T2, T5-T6, SP1-SP3, SA3-SA5, I1-I2, A1-A3, C1-C2) | | | L | |
+| IV-3AM4 | ↳ Settings stop being forms (ST1-ST4) | | | M | |
+| IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | M | |
+| **IV-3H** | [Tab-by-tab review: what a real user needs next](12-desktop-ux/IV-3H-tab-by-tab-review.md) | improvement, visual | Feel | L | ready |
+| IV-3H3 | ↳ Step 3: features | | | L | |
+| **NF-3AZ** | [Offer the next step where a figure or row raises the question, always with a preview and an explicit confirmation](12-desktop-ux/NF-3AZ-next-step-at-the-moment-of-need.md) | new feature | Plan | L | new |
+| NF-3AZ1 | ↳ Salary posted becomes one reviewed payday proposal | | | M | |
+| NF-3AZ2 | ↳ A statement row links to the payment already recorded from an SMS | | | M | |
+| NF-3AZ3 | ↳ A repeated category correction offers a rule with its past matches | | | M | |
+| NF-3AZ4 | ↳ A bill that falls due opens one sheet: already paid, or record it | | | M | |
+| NF-3AZ5 | ↳ A reimbursable expense offers Create claim, and the receipt offers Match reimbursement | | | M | |
+| NF-3AZ6 | ↳ Can I afford this checks the chosen account on the chosen date | | | M | |
+| NF-3AZ7 | ↳ Emergency refill proposes an affordable schedule | | | M | |
+| NF-3AZ8 | ↳ A maturing certificate shows the expected date, then allocation choices after the receipt is recorded | | | M | |
+| NF-3AZ9 | ↳ An investment result explains what changed | | | M | |
+| NF-3AZ10 | ↳ Needs you groups by job and consequence | | | M | |
 
-Done: 5A, 5B, 5C, 5D, 5E, 5F, 5G, 5H, 5I, 5J, 5K, 5L, 5M. Next free code: 5N.
+Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md).
 
-## 6 Market data
-
-Prices arrive by themselves, from sources Lightning may redistribute.
-
-| Code | Item | Kind | Pillar | Size | Status |
-|---|---|---|---|---|---|
-| **NF-6A** | [Market data: price packs, collected in the cloud](6-market-data/6A-price-packs.md) | new feature | Own | L | building |
-| NF-6A1 | ↳ Funds, currencies and gold matched to holdings | | | M | |
-| NF-6A2 | ↳ US stocks and FX revaluation, with multi-currency | | | L | |
-| NF-6A3 | ↳ Publish the packs | | | owner | |
-| **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](6-market-data/6B-europe-and-gcc-shares.md) | new feature | Own | L | blocked on a source that allows redistribution |
-| NF-6B1 | ↳ Verify live boards per market | | | M | |
-| NF-6B2 | ↳ A source that allows redistribution | | | owner | |
-| NF-6B3 | ↳ Switch publishing on per market | | | S | |
-| **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](6-market-data/6D-gold-price-source.md) | improvement, technical | Own | S | blocked on a test from a home connection |
-| **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history source](6-market-data/6F-london-board-and-gulf-history.md) | improvement, technical | Own | M | new |
-
-Done: 6C, 6E. Next free code: 6G.
-
-## 7 Planning, import and search
-
-Getting a month in takes minutes: any bank file, any old app, one search box.
-
-| Code | Item | Kind | Pillar | Size | Status |
-|---|---|---|---|---|---|
-| **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](7-planning-import-and-search/7C-move-in-from-other-apps.md) | new feature | Capture | L | new |
-| NF-7C1 | ↳ Read each app's export format | | | M | |
-| NF-7C2 | ↳ A mapping preset per app in the CSV review | | | L | |
-| NF-7C3 | ↳ A move-in guide | | | M | |
-| **IT-7Z** | [Import another app's export with few questions](7-planning-import-and-search/7Z-import-other-app-exports.md) | improvement, technical | Capture | M | new |
-| IT-7Z1 | ↳ Remember a name's category for the next file | | | S | |
-| IT-7Z2 | ↳ Split one file by its Account column | | | M | |
-| IT-7Z3 | ↳ Paired rows of one movement | | | S | |
-| **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/7AB-import-review-as-questions.md) | new feature | Capture | L | new |
-| NF-7AB1 | ↳ Summary first, rows last | | | M | |
-| NF-7AB2 | ↳ Post in rounds | | | S | |
-| NF-7AB3 | ↳ Group by the question, not the name | | | M | |
-| NF-7AB4 | ↳ Smart buttons on a group | | | M | |
-| NF-7AB5 | ↳ Quick mode for leftovers | | | M | |
-| NF-7AB6 | ↳ Safe to go fast | | | S | |
-
-Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7AA. Next free code: 7AC.
-
-## 8 Website
-
-The site is honest, quick and in step with the app.
-
-| Code | Item | Kind | Pillar | Size | Status |
-|---|---|---|---|---|---|
-| **OW-8D** | [For Geeks audit ideas left for the owner to choose](8-website/8D-for-geeks-audit-ideas-to-choose.md) | owner task | Reach |  | ready |
-| **IV-8F** | [Home and Features show the app, not only words](8-website/8F-home-and-features-show-the-app.md) | improvement, visual | Reach | M | ready |
-| **OW-8AA** | [Sign off the Low, Medium and High ratings on the comparison pages](8-website/8AA-sign-off-the-comparison-ratings.md) | owner task | Reach |  | ready |
-
-Done: 8A, 8B, 8C, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z. Next free code: 8AB.
-
-## 9 Later
-
-Good ideas that wait until the milestones above are done.
-
-| Code | Item | Kind | Pillar | Size | Status |
-|---|---|---|---|---|---|
-| **IT-9A** | [Stored month-end figures](9-later/9A-stored-month-end-figures.md) | improvement, technical | Understand | M | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
-| **NF-9B** | [In-app updates on Windows](9-later/9B-in-app-updates.md) | new feature | Everywhere | L | new |
-| NF-9B1 | ↳ Check and verify an update | | | L | |
-| NF-9B2 | ↳ Swap the folders with rollback | | | L | |
-| NF-9B3 | ↳ The Update button and its words | | | M | |
-| NF-9B4 | ↳ Try it on a real Windows PC | | | owner | |
-| **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | new |
-| **IT-9F** | [Page speed: a stable origin and cache, and a CSS trim](9-later/9F-page-speed-origin-and-css.md) | improvement, technical | Reach | M | new |
-| **IT-9K** | [Structure left - runtime routes and bank-import orchestration](9-later/9K-layers-and-copies.md) | improvement, technical | Build | M | ready |
-
-Done: 9C, 9E, 9G, 9H, 9I, 9J. Next free code: 9L.
-
-## 10 Looks and store
-
-App themes and looks are bought once, worn on every device of a profile, and never change a number.
-
-| Code | Item | Kind | Pillar | Size | Status |
-|---|---|---|---|---|---|
-| **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](10-looks-and-store/10A-cosmetic-parts-and-claiming.md) | new feature | Feel | L | building |
-| NF-10A1 | ↳ Native Settings activation and restore | | | L | |
-| NF-10A2 | ↳ Licences saved safely | | | L | |
-| NF-10A3 | ↳ Inventory and fallback | | | L | |
-| NF-10A4 | ↳ Test every screen | | | L | |
-| NF-10A5 | ↳ Register enabled versions on the store | | | M | |
-| NF-10A6 | ↳ Checkout, receipts and prices | | | owner | |
-| **NF-10B** | [Supporter perks still waiting on the app or the owner - app themes for sale, names on About, a beta channel](10-looks-and-store/10B-supporter-perks-app-and-owner.md) | new feature | Feel | M | blocked on 10A claiming; owner decision on the beta channel |
-| **NF-10C** | [Theme materials, selling themes, owner console - what only the owner can do now](10-looks-and-store/10C-theme-materials-acceptance.md) | new feature | Feel | L | building |
-| NF-10C1 | ↳ Native theme acceptance | | | L | |
-| NF-10C2 | ↳ Royal Obsidian & Gold needs a website version | | | M | |
-| NF-10C3 | ↳ Fix the app's own green on dark cards | | | S | |
-| NF-10C4 | ↳ Owner steps 1-6 in order | | | owner | |
-| NF-10C5 | ↳ Review prices after 60 days of sales | | | owner | |
-| **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](10-looks-and-store/10D-papyrus-and-dendera-bundles.md) | new feature | Feel | M | ready |
-
-Done: 10E, 10F. Next free code: 10G.
+Done: nothing yet. Next free code: 12A.

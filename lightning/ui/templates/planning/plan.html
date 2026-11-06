@@ -21,7 +21,6 @@
   {% if afford %}<p class="afford-answer is-{{ afford.verdict }}" role="status">{{ afford.headline|tr(locale) }}</p>{% elif afford_error %}<p class="afford-answer is-no" role="status">{{ afford_error|tr(locale) }}</p>{% endif %}
 </form>{% endcall %}
 {{ needs_rows(needs) }}
-{{ kpi_row(kpi_cards, base, 'Your cash') }}
 {% else %}{{ stat_tiles(stats, base, 'Your cash') }}{% endif %}
 
 {% if not lead %}<header class="overview-section-head inv-head" id="plan-build"><h2>{{ 'How is safe to spend worked out?'|tr(locale) }}</h2><span>Today to {{ f.next_income_date or 'three months from now' }}</span></header>
@@ -47,6 +46,7 @@
     {% elif has_items %}<p class="chart-empty">{{ "Nothing is due in the next 30 days."|tr(locale) }}</p>
     {% else %}<p class="chart-empty">{{ "Add your recurring bills, subscriptions, income and loans on"|tr(locale) }} <a href="/plan/recurring">{{ 'Recurring'|tr(locale) }}</a> {{ "to see what is coming."|tr(locale) }}</p>{% endif %}</section>
 </div></section>
+{# F6 (r24): the next payments come before the secondary cash figures. #}{% if lead %}{{ kpi_row(kpi_cards, base, 'Your cash') }}{% endif %}
 
 {% set dated = f.dated %}
 {% if dated and (dated.first_shortfall or dated.account_shortfalls or dated.unassigned_payments or dated.unvalued_currencies) %}

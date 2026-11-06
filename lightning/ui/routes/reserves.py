@@ -66,8 +66,14 @@ def _context(request: Request, error: str = ""):
     # Refill prompt (PC roadmap P5): below target with free cash to spare, one button moves what fits.
     refill = None
     if fund.target and set_aside < fund.target and position.free_cash and position.free_cash > ZERO:
-        move = min(fund.target - set_aside, position.free_cash)
-        refill = {"move": move, "to": set_aside + move, "full": set_aside + move >= fund.target}
+        room = min(fund.target - set_aside, position.free_cash)
+        # BT-2AH: the suggestion keeps Safe to spend at or above zero; moving all of it is a separate, explicit choice.
+        options = c.forecaster.refill_options(today(), room)
+        move = options["safe"]
+        refill = {"move": move, "to": set_aside + move, "full": set_aside + move >= fund.target,
+                  "after": options["safe_after"], "until": options["until"], "before": options["before"],
+                  "all": room, "all_to": set_aside + room, "all_after": options["all_after"],
+                  "all_is_safe": options["all_after"] >= ZERO}
     bills = c.planning.items((PlanKind.BILL, PlanKind.SUBSCRIPTION))
     return {"reserves": listed, "bills": bills, "completed_reserves": completed, "notes": notes, "emergency_meter": emergency_meter,
             "emergency_set_aside": set_aside, "emergency": emergency, "fund": fund, "refill": refill,

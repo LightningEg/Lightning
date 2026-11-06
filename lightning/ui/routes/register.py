@@ -468,7 +468,7 @@ def _asset_view(c, account) -> dict | None:
     if not account or account.account_type != AccountType.OTHER_ASSET:
         return None
     details = c.accounts.other_asset_details(account.id)
-    value = c.reporting.account_balance(account.id, today())
+    value, value_date = c.reporting.other_asset_native_value(account.id, today())  # BT-2AF: the dated estimate, not cash
     price = details["purchase_price"] if details else None
     change = value - price if price is not None else None
     history = c.accounts.other_asset_history(account.id)
@@ -479,10 +479,13 @@ def _asset_view(c, account) -> dict | None:
         try:
             item = c.planning.get(details["loan_item_id"])
             left = c.planning.loan_progress(item)["still_to_pay"]
-            loan = {"id": item.id, "name": item.name, "left": left, "equity": value - left}
+            loan_currency = c.accounts.get(item.account_id).currency if item.account_id else c.base_currency
+            # Value less what is left only when both are in one currency; never subtract across currencies.
+            loan = {"id": item.id, "name": item.name, "left": left, "currency": loan_currency,
+                    "equity": value - left if loan_currency == account.currency else None}
         except LightningError:
             loan = None
-    return {"details": details, "value": value, "price": price, "change": change,
+    return {"details": details, "value": value, "value_date": value_date, "price": price, "change": change,
             "change_pct": change / price * 100 if change is not None and price else None,
             "history": list(reversed(rows))[:8], "loan": loan,
             "loans": [{"id": i.id, "name": i.name} for i in c.planning.items((PlanKind.LOAN,))],

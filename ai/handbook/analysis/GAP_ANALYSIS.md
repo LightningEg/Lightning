@@ -16,7 +16,7 @@ Open product work is tracked in `issues/INDEX.md`; entries here add only what th
 | GAP-007 | Data model | `ledger_entries.claim_id` began as a bare integer | `0001_initial.sql` | Possible orphan ref | Low | Verify FK in `0006/0059` |
 | GAP-008 | Documentation | No column-level dictionary for 63 tables | this handbook | Onboarding cost | Low | Generate from `PRAGMA table_info` |
 | GAP-009 | Functional | Not built: PDF/Excel import, lots/ROI, splits, holiday shift, other-app import | `issues/` NF-7B, 5A–5E, 7I, 7C | Feature gaps | Medium | Follow plan |
-| GAP-010 | Functional | Bug: converting EGP to USD raises net worth (BT-5J) | `issues/5-investments/5J-*` | Wrong figure | High | Fix per issue |
+| GAP-010 | Functional | Bug: converting EGP to USD raises net worth (BT-5J) | `ai/archive/issues/5-investments` (5J) | Wrong figure | High | Fix per issue |
 | GAP-011 | Reliability | Restore safety, power-loss and native phone/PC acceptance still open (2A, 2C, 4A) | `NOW.md` | Data-loss window on crash during restore | High | Finish drills before wider promotion |
 | GAP-012 | Security | Windows build unsigned | Architecture › Desktop app | SmartScreen friction, no publisher proof | Medium | Owner: code signing |
 | GAP-013 | Supply chain | Dependency refresh (#122) blocked on native wheels | `NOW.md` item 1 | Stale dependencies | Medium | Finish 1H |

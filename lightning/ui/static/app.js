@@ -928,6 +928,18 @@ if (ledger) {
     if (matchingButton) matchingButton.hidden = !(byId.size > 0 && [...byId.keys()].every((id) => selected.has(id))) || ids.length >= matching.length;
     const editSelected = document.getElementById("edit-selected");
     if (editSelected) editSelected.disabled = !boxes.some((box) => selected.has(box.value) && ["IN", "OUT"].includes(box.dataset.type));
+    // F7 (r24): say what each tool will touch before it runs. Only income and spending rows take a category or an edit.
+    const eligible = new Set(boxes.filter((box) => selected.has(box.value) && ["IN", "OUT"].includes(box.dataset.type)).map((box) => box.value)).size;
+    const label = (id, text, values) => { const el = document.getElementById(id); if (el) el.textContent = t(text, values); };
+    label("edit-selected", "Edit one by one");
+    if (editSelected) editSelected.title = t("Opens the first of {count} editable rows; the next stays selected.", {count: eligible});
+    const categoryButton = document.querySelector("#bulk-category-form button.btn");
+    if (categoryButton) categoryButton.textContent = t("Set category for {count}", {count: eligible});
+    label("export-selected", "Export {count}", {count: ids.length});
+    label("delete-selected", "Delete {count}", {count: ids.length});
+    const scope = document.getElementById("selection-scope");
+    if (scope) scope.textContent = ids.length && eligible < ids.length
+      ? t("A category applies to {eligible} of {count}; {skipped} (transfers, openings, investments) stay as they are.", {eligible, count: ids.length, skipped: ids.length - eligible}) : "";
     if (selectAll) {
       selectAll.checked = byId.size > 0 && selected.size === byId.size;
       selectAll.indeterminate = ids.length > 0 && !selectAll.checked;
@@ -1045,6 +1057,9 @@ if (ledger) {
     syncSelection();
   });
   document.getElementById("delete-selected")?.addEventListener("click", () => deleteTransactions(selectedIds()));
+  document.getElementById("export-matching")?.addEventListener("click", () => {
+    (matching.length ? matching : [...byId.keys()]).forEach((id) => selected.add(id)); syncSelection(); document.getElementById("export-selected")?.click();
+  });
   document.getElementById("select-matching")?.addEventListener("click", () => { matching.forEach((id) => selected.add(id)); syncSelection(); });
   document.getElementById("clear-selected")?.addEventListener("click", () => { selected.clear(); syncSelection(); });
   document.getElementById("edit-selected")?.addEventListener("click", () => {
@@ -1068,6 +1083,27 @@ if (ledger) {
     ids.forEach((id) => { const input = document.createElement("input"); input.type = "hidden"; input.name = "txn_ids"; input.value = id; form.append(input); });
   });
   // PC P7: a rule from the selection, prefilled with the first selected payee.
+  // F7 (r24): replace text in the selected rows only; the server says what would change first, then the user confirms.
+  const replaceForm = document.getElementById("replace-selected-form");
+  replaceForm?.addEventListener("submit", async (event) => {
+    if (replaceForm.dataset.confirmed) return;
+    event.preventDefault();
+    const ids = selectedIds();
+    if (!ids.length) return;
+    const body = new FormData(replaceForm);
+    ids.forEach((id) => body.append("txn_ids", id));
+    let plan;
+    try { plan = await (await fetch("/transactions/find-replace/preview", { method: "POST", body })).json(); } catch (e) { return; }
+    const find = String(body.get("find") || "");
+    if (!plan.count) { await window.ask({ title: t("Nothing to replace"), message: t("None of the {count} selected rows contains “{find}”.", {count: ids.length, find}), ok: t("OK"), cancel: t("Close") }); return; }
+    const examples = plan.examples.map(([from, to]) => `${from || "—"} → ${to || "—"}`).join("\n");
+    const yes = await window.ask({ title: t("Replace in {count} of {selected} selected rows?", {count: plan.count, selected: ids.length}),
+      message: `${examples}\n${t("Rows that do not contain the text stay as they are. You can undo this from transaction history.")}`, ok: t("Replace"), tone: "warn" });
+    if (!yes) return;
+    ids.forEach((id) => { const input = document.createElement("input"); input.type = "hidden"; input.name = "txn_ids"; input.value = id; replaceForm.append(input); });
+    replaceForm.dataset.confirmed = "1";
+    replaceForm.requestSubmit();
+  });
   document.getElementById("rule-from-selected")?.addEventListener("click", () => {
     const box = selectedIds().map((id) => document.querySelector(`.transaction-select[value="${id}"]`)).find((b) => b?.dataset.payee);
     location.href = "/rules/new" + (box ? "?counterparty=" + encodeURIComponent(box.dataset.payee) : "");
@@ -3050,4 +3086,23 @@ document.addEventListener('change', (event) => {
   document.addEventListener("focusout", () => setTimeout(sync, 0));
   // After the first paint: measuring the viewport while the page is still loading forces an early layout (IT-3AO3).
   requestAnimationFrame(() => setTimeout(sync, 0));
+})();
+
+// F8 (r24): a transactions list opened from an analysis page remembers it, so the way back keeps its period and scope.
+(() => {
+  const link = document.getElementById("investigation-back");
+  if (!link) return;
+  const key = "lightning-investigation-back";
+  const analysis = /^\/(birdview|spending|reports|financial-health)(\/|$)/;
+  try {
+    if (document.referrer) {
+      const from = new URL(document.referrer);
+      if (from.origin === location.origin && analysis.test(from.pathname)) sessionStorage.setItem(key, from.pathname + from.search);
+    }
+    const back = sessionStorage.getItem(key);
+    if (back && analysis.test(back.split("?")[0])) {
+      link.href = back; link.hidden = false;
+      link.textContent = t("Back to {page}", {page: t(back.startsWith("/birdview/expenses") || back.startsWith("/spending") ? "Spending" : "the analysis")});
+    }
+  } catch (e) {}
 })();

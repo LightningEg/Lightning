@@ -401,3 +401,24 @@ def test_desktop_profile_gate_retains_language_select(tmp_path):
         html = browser.get("/profiles").text
         form = html.split('class="gate-language"', 1)[1].split('</form>', 1)[0]
         assert '<select' in form and 'name="locale"' in form
+
+
+def test_the_safe_to_spend_card_opens_its_own_explanation():  # F11 (r24)
+    from pathlib import Path
+    from types import SimpleNamespace
+    from decimal import Decimal
+    from lightning.ui.routes.dashboard import _safe_tile
+    tile = _safe_tile(SimpleNamespace(next_income_date="2026-12-01", safe_to_spend=Decimal("100"), free_cash=Decimal("400")))
+    assert tile["href"] == "/plan#safe-section"
+    phone_plan = Path(__file__).resolve().parents[1] / "lightning/ui/templates/phone/planning/plan.html"
+    assert 'id="safe-section"' in phone_plan.read_text(encoding="utf-8")
+
+
+def test_cash_planning_lists_the_next_payments_before_the_secondary_cash_figures(c):  # F6 (r24)
+    from fastapi.testclient import TestClient
+    from lightning.demo import build_demo
+    from lightning.ui.web import create_app
+    build_demo(c)
+    page = TestClient(create_app(c)).get("/plan").text
+    assert 'id="plan-next"' in page and 'aria-label="Your cash"' in page
+    assert page.index('id="plan-next"') < page.index('aria-label="Your cash"')

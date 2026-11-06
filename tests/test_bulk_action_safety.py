@@ -152,3 +152,53 @@ def test_arabic_batch_refusal_translates_the_reason_and_names_the_row(c, rows):
     assert made[0].ref in response.json()['error']
     assert 'This month' not in response.json()['error']
     assert 'البنك' in response.json()['error']
+
+
+def test_selection_tools_say_what_they_will_touch_before_they_run(c, rows, ui):  # F7 (r24)
+    bank, made = rows
+    page, origin = ui()
+    page.goto(f'{origin}/accounts/{bank.id}')
+    page.locator('#select-visible').check()
+    n = page.locator('.transaction-select:checked').count()
+    assert page.locator('#edit-selected').inner_text() == 'Edit one by one'
+    assert page.locator('#export-selected').inner_text() == f'Export {n}'
+    assert page.locator('#delete-selected').inner_text() == f'Delete {n}'
+    assert page.locator('#bulk-category-form button.btn').inner_text() == f'Set category for {n}'
+
+
+def test_a_list_opened_from_spending_keeps_the_way_back_and_exports_its_whole_scope(c, rows, ui):  # F8 (r24)
+    bank, made = rows
+    page, origin = ui()
+    page.goto(f'{origin}/birdview/expenses?period=custom&date_from=2026-09-01&date_to=2026-09-30')
+    page.locator('a[href^="/transactions?"]').first.click()
+    page.wait_for_url('**/transactions?*')
+    back = page.locator('#investigation-back')
+    expect(back).to_be_visible()
+    assert 'period=custom' in back.get_attribute('href') and back.inner_text() == 'Back to Spending'
+    with page.expect_download() as download:
+        page.locator('#export-matching').click()
+    assert download.value.suggested_filename
+    assert page.locator('.transaction-select:checked').count() >= 1  # the selection stays visible
+    back.click()
+    page.wait_for_url('**/birdview/expenses?*')
+
+
+def test_replace_in_selected_rows_previews_then_changes_only_those(c, setup, ui):  # F7 (r24)
+    bank, food = setup[0]['cib'], setup[1]['EXP.PERSONAL.FOOD']
+    made = [c.transactions.record_outflow(f'2026-09-0{i}', bank.id, '10', food.id, counterparty='Spinneys Cairo') for i in (2, 3, 4)]
+    page, origin = ui()
+    page.goto(f'{origin}/accounts/{bank.id}')
+    boxes = page.locator('.transaction-select')
+    boxes.nth(0).check(); boxes.nth(1).check()
+    page.locator('#replace-selected-label').click()
+    form = page.locator('#replace-selected-form')
+    form.locator('[name=find]').fill('Cairo')
+    form.locator('[name=replace]').fill('')
+    form.get_by_role('button', name='Preview').click()
+    dialog = page.locator('dialog.ask-dialog[open]')
+    expect(dialog).to_contain_text('2 of 2 selected rows')
+    expect(dialog).to_contain_text('Spinneys Cairo → Spinneys')
+    dialog.get_by_role('button', name='Replace').click()
+    page.wait_for_url('**/*msg=*')
+    names = sorted(c.transactions.get(t.id).counterparty or '' for t in made)
+    assert names.count('Spinneys') == 2 and names.count('Spinneys Cairo') == 1

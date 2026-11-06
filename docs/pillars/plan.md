@@ -11,10 +11,10 @@ A budget by category, bills and loan payments, reserves for what is coming, and 
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **BT-2AH** | [Emergency refill must preview and protect the remaining plan](../../issues/2-safe-for-real-money/2AH-refill-previews-plan-impact.md) | M | new |
+| **NF-3AZ** | [Offer the next step where a figure or row raises the question, always with a preview and an explici…](../../issues/12-desktop-ux/NF-3AZ-next-step-at-the-moment-of-need.md) | L | new |
 
 ## Reports with open follow-ups here
 
-- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 2AH
+- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../issues/12-desktop-ux/r24-desktop-phone-ux/report.md): 3AZ
 <!-- work:end -->
 
