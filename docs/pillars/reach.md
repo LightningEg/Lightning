@@ -11,7 +11,6 @@ The website, search, downloads, community and the store. Its own repository is L
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IT-3AX** | [The site screenshot tool breaks on the new Overview, so the site's screens are not recaptured](../../issues/3-polish-and-arabic/IT-3AX-site-shots-tool-follows-the-new-screens.md) | M | new |
 | **IV-8F** | [Home and Features show the app, not only words](../../issues/8-website/IV-8F-home-and-features-show-the-app.md) | M | ready |
 | **OW-8AA** | [Sign off the Low, Medium and High ratings on the comparison pages](../../issues/8-website/OW-8AA-sign-off-the-comparison-ratings.md) | owner | ready |
 | **OW-8D** | [For Geeks audit ideas left for the owner to choose](../../issues/8-website/OW-8D-for-geeks-audit-ideas-to-choose.md) | owner | ready |

@@ -52,8 +52,8 @@ FULL = {"overview": "/?period=ytd", "budget": BUDGET, "investments": "/investmen
 SIDELESS = ("overview", "budget", "investments", "expenses", "plan", "currencies")  # also saved as b-*
 CROPS = {"a-overview": "/?period=ytd", "a-budget": BUDGET, "a-investments": "/investments?period=ytd",
          "a-expenses": EXPENSES, "a-plan": "/plan", "a-currencies": "/accounts/currencies?period=ytd"}
-SECTIONS = {"a-kpis": ("/?period=ytd", "section.stat-tiles"),  # the rates are below the fold since 3W
-            "a-sankey": ("/?period=ytd", "article.overview-sankey-card"),
+SECTIONS = {"a-kpis": ("/?period=ytd", "#savings-squares"),  # the rates: a closed disclosure on the Overview since 3AM3
+            "a-sankey": ("/birdview/expenses?period=ytd", "article.overview-sankey-card"),  # moved to Expenses with 3AM
             "a-forecast-ahead": ("/plan", "#plan-forecast"), "a-suggested": ("/plan/recurring", "#recurring-suggest"),
             "a-usd": ("/accounts/currencies?period=ytd", "#currency-USD")}
 STATEMENT = "Date,Counterparty,Amount,Notes\n2026-10-02,Talabat Egypt,-385,Friday dinner\n2026-10-03,Uber,-142,\n" \
@@ -90,9 +90,10 @@ def show(pg, url, css=HIDE, wait=500):
 def section_crop(pg, selector, name):
     """A section: its header (when the selector names one) and the card under it, 13 px around."""
     box = pg.evaluate("""(sel) => { const el = document.querySelector(sel);
+        for (let d = el.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) d.open = true;  // closed disclosures around it are opened to draw it
         const head = el.matches('header') ? el : el.closest('header');
         let card = head ? head.nextElementSibling : el;
-        el.scrollIntoView({block: 'start'}); window.scrollBy(0, -40);
+        el.scrollIntoView({block: 'start', behavior: 'instant'}); window.scrollBy({top: -40, behavior: 'instant'});  // smooth scrolling would move after the box is read
         const a = (head || card).getBoundingClientRect(), b = card.getBoundingClientRect();
         return {x: Math.min(a.left, b.left), y: a.top, w: Math.max(a.right, b.right) - Math.min(a.left, b.left), h: b.bottom - a.top}; }""",
                       selector)
