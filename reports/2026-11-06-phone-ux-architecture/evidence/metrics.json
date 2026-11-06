@@ -1,0 +1,237 @@
+{
+ "/": {
+  "screens": 2.3,
+  "figures": 22,
+  "targets": 67,
+  "headings": [
+   "Overview",
+   "",
+   "Latest",
+   "Your position",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "This period",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ],
+  "first_screen": "Overview\nSafe to spend\nCash planning ›\n51,420 EGP\n\nAbout 2,057 a day until payday on 2026-12-01.\n\n2026-11\n5 items need you\nVodafone 350 in 3 days\n5\nOpen\nToday\nNet worth\n199,171\n+36,745 this month\n73% used\nLeft in plan\n6,948\nof 25,599 planned\nLatest\nSee all\nYesterday\nTo Office gam'eya\nTransfer\n2,000\nToyota Finance\nLoan payments\n−2,500\nTo Cash wallet\nTransfer\n3,000\n2026-11-04\nFitness Time Gym\nHealth\n−900\n2026-11-03\nLandlord\nHousing & Rent\n−12,000\nYour position\nAs of 2026-11-06\nNet worth · in grams of 21k gold\nat 4,650 on 2026-11-06\n43\nWhat you own\n265,671\n›\nCash you own\n87,768\n›\nHoldings value\n1",
+  "status": 200
+ },
+ "/?month=2026-10": {
+  "screens": 2.2,
+  "figures": 18,
+  "targets": 63,
+  "headings": [
+   "Overview",
+   "",
+   "Latest",
+   "Your position",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "This period",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ],
+  "first_screen": "Overview\nNet worth\nAs of 2026-10-31\n162,426 EGP\n2026-10\n4 items need you\n4\nOpen\nToday\nNet worth\n162,426\n+26,270 in that month\nLeft in plan\nNo plan yet\nSet a plan for 2026-10\nLatest\nSee all\nYesterday\nTo Office gam'eya\nTransfer\n2,000\nToyota Finance\nLoan payments\n−2,500\nTo Cash wallet\nTransfer\n3,000\n2026-11-04\nFitness Time Gym\nHealth\n−900\n2026-11-03\nLandlord\nHousing & Rent\n−12,000\nYour position\nAs of 2026-10-31\nNet worth · in grams of 21k gold\nat 4,200 on 2026-10-31\n39\nWhat you own\n233,426\n›\nCash you own\n64,586\n›\nHoldings value\n168,840\n›\nWhat you owe\n−71,000\n›\nOver time\nNet worth at the end of ea",
+  "status": 200
+ },
+ "/budget": {
+  "screens": 1.6,
+  "figures": 6,
+  "targets": 35,
+  "headings": [
+   "Budget",
+   "",
+   "Set your first spending limits",
+   "Categories",
+   "",
+   "",
+   ""
+  ],
+  "first_screen": "Budget\nLeft in plan\n\nSet a plan to see what is left to spend.\n\n2026-10\nSet your first spending limits\n\nLightning proposes a limit for each category from what you spent; change any before saving.\n\nPersonal\nFood & Groceries\nEating Out\nTransportation\nHousing & Rent\nUtilities & Bills\nHealth\nGifts & Donations\nFees & Charges\nSystem Categories\nLoan payments\nCreate plan\nCategories\nEdit plan\nHousing & Rent\n12,000 of 12,000\n0\nleft\nLoan payments\n2,500 of 2,500\n0\nleft\nUtilities & Bills\n1,480 of 1,480\n0\nleft",
+  "status": 200
+ },
+ "/transactions": {
+  "screens": 1.3,
+  "figures": 12,
+  "targets": 33,
+  "headings": [
+   "Transactions",
+   "",
+   ""
+  ],
+  "first_screen": "Transactions\nAll\nIn\nOut\nTransfers\nTo sort\n2026-11\nSelect\n⋯\n\nIn +46,833\n·\nOut −18,651\n\nYesterday\n−2,500\nCIB Payroll → Office gam'eya\nTransfer\n2,000\nToyota Finance\nLoan payments · CIB Payroll\n−2,500\nCIB Payroll → Cash wallet\nTransfer\n3,000\n2026-11-04\nFitness Time Gym\nHealth · CIB Payroll\n−900\n2026-11-03\nLandlord\nHousing & Rent · CIB Payroll\n−12,000\n2026-11-02\nCarrefour\nFood & Groceries · CIB Payroll\n−3,250.75\n2026-11-01\n+46,833\nMoney market fund\nBuy · THNDR\n3,000\nNBE\nInterest · CIB Payroll\n+1,833.33\nACME Egypt\nSalary · CIB Payroll\n+45,000",
+  "status": 200
+ },
+ "/more": {
+  "screens": 1.4,
+  "figures": 4,
+  "targets": 16,
+  "headings": [
+   "More",
+   "Next 14 days",
+   "Your money",
+   "Settings"
+  ],
+  "first_screen": "More\nNext 14 days\nAll bills\nVodafone\n2026-11-09\n350\nWE Internet\n2026-11-20\n650\nYour money\nCash planning\n1,480 due before payday\nAccounts\n261,671\nInvestments\n177,903\nReserves\n›\nFinancial health\n4 of 6 within limits\nSpending\n18,651 in 2026-11\nWeekly review is ready\n4 decisions, one at a time\nStart now\nSettings\nAll settings\n›\nCategories\n›\nCounterparties\n›\nRules\n›\nDevices\n›\nData checks\n›",
+  "status": 200
+ },
+ "/needs-you": {
+  "screens": 1,
+  "figures": 1,
+  "targets": 29,
+  "headings": [
+   "Needs you"
+  ],
+  "first_screen": "Needs you\nActive items\nReviewed and snoozed\nWeekly review\n\n4 active · 0 reviewed · 0 snoozed\n\nNBE 3-year certificate: 2 interest payments to match\n3,677 EGP still unmatched; 2 have a suggested bank receipt.\nReview\nMatch all suggested\nMark as reviewed\nSnooze\nLooks recurring\nFitness Time Gym · 900 EGP · 3 months · last 2026-11-04.\nTrack\nMark as reviewed\nSnooze\nSalary received\nReview bills, reserves, goals and safe to spend.\nReview\nMark as reviewed\nSnooze\nEmergency fund needs you\n0.8 months of cover. Review your emergency reserve.\nReview\nMark as reviewed\nSnooze\nBack to the Overview",
+  "status": 200
+ },
+ "/plan": {
+  "screens": 1.9,
+  "figures": 15,
+  "targets": 22,
+  "headings": [
+   "Cash planning",
+   "Coming up",
+   "Safe to spend",
+   "Where cash is heading",
+   "",
+   "",
+   "What is promised",
+   ""
+  ],
+  "first_screen": "Cash planning\nDue before payday\nAs of 2026-11-06\n1,480 EGP\n\n3 payments until 2026-12-01. All covered by free cash.\n\nPlan\nRecurring\nLoans\n\nCompare scenarios\n\nForecast inputs\n\nComing up\nVodafone\nSubscription · in 3 days · 2026-11-09\n−350\nWE Internet\nBill · in 14 days · 2026-11-20\n−650\nNorth Cairo Electricity\nBill · in 18 days · 2026-11-24\n−480\nACME Egypt\nPayday · in 25 days · 2026-12-01\n+45,000\nMore in the next 30 days\n2026-11-06 to 2026-12-06\n2\nFree cash\n67,368\nAfter bills: 65,888\nReserves\n20,000\nEmergency fund 0.8 months\nSafe to spend\nTo 2026-12-01\n\nFrom free cash, after what is promised\n\n51,4",
+  "status": 200
+ },
+ "/accounts": {
+  "screens": 1.2,
+  "figures": 15,
+  "targets": 15,
+  "headings": [
+   "Accounts",
+   "Cash & bank",
+   "Deposits",
+   "Investments",
+   "Gam'eya"
+  ],
+  "first_screen": "Accounts\nIn your accounts\n261,671 EGP\n\nIncludes 10,000 held for others and 14,000 you still owe a circle, so you own 265,671.\n\nFrom SMS\n⋯\nImport\nAccounts\nHeld for others\nCash & bank\n97,368\nCash wallet\n10,475\nCIB Payroll\nBank account\n84,393\nVodafone Cash\n2,500\nDeposits\n100,000\nNBE CDs\nCertificates\n100,000\nInvestments\n78,303\nGold at home\nPhysical asset\n57,195\nTHNDR\nBrokerage\n21,108\nGam'eya\n−14,000\nOffice gam'eya\n−14,000\n\nSee all transactions",
+  "status": 200
+ },
+ "/investments": {
+  "screens": 2.6,
+  "figures": 30,
+  "targets": 23,
+  "headings": [
+   "Investments",
+   "",
+   "Holdings",
+   "Allocation",
+   "Holdings value by asset class",
+   "Income collected (dividends and interest",
+   "Intended horizon"
+  ],
+  "first_screen": "Investments\nPortfolio value\nAs of 2026-10-31\n168,840 EGP\n\nUp 4,423 in 2026-10 (+2.9%).\n\nHoldings\nPlanner\nPrices\nCurrencies\n2026-10\n168,840\n2026-10-01\n2026-10-16\n2026-10-31\nShow the numbers\nPortfolio value over time\nMonth\nYTD\nAll\nReturn\nHeld 60 days\n+4.0%\nHoldings\nNBE 3-year certificate\nCDs / Time Deposits · +1.8%\n100,000\nGold pound (from grandma)\nGold · +15.9%\n33,600\nL'Azurde ring\nGold · −2.1%\n18,060\nCOMI\nStocks · +4.0%\n12,630\nFWRY\nStocks · +2.2%\n4,550\nAllocation\n2026-10-31\nHoldings value by asset class\n168,840\nHoldings value\nCDs / Time Deposits\n59.2%\n100,000\nGold\n30.6%\n51,660\nStocks\n10.2%\n17,",
+  "status": 200
+ },
+ "/financial-health": {
+  "screens": 2.5,
+  "figures": 9,
+  "targets": 25,
+  "headings": [
+   "Financial health",
+   "Within your limits",
+   "Needs you · 1",
+   "Against your limits",
+   "Cushion",
+   "Saving",
+   "Debt and monthly commitments",
+   "Savings rate over time"
+  ],
+  "first_screen": "Financial health\n\nOne thing needs you: Emergency fund. Everything else is within your limits.\n\nBalances as of 2026-11-06 · savings rate from 2026-10\n\nAs of 2026-11-06\nReserves\nLimits\nWithin your limits\n4\n\nof the 6 figures you set a limit for\n\n1 needs you\n\nNeeds you · 1\nManage Needs you\nEmergency fund is outside your limit\nBelow 3 months: needs you · As of 2026-11-06 · months of average monthly spending\nSee details\nAgainst your limits\nCushion\nEmergency fund\n0.8 months\nNeeds you\nAs of 2026-11-06 · months of average monthly spending\n3.5 months in cash you own\nSaving\nSavings rate\n45.2%\nGood\n2026-1",
+  "status": 200
+ },
+ "/birdview/expenses": {
+  "screens": 1,
+  "figures": 15,
+  "targets": 19,
+  "headings": [
+   "Spending",
+   "",
+   "Where did it go?",
+   ""
+  ],
+  "first_screen": "Spending\n2026-10\nSpending\nCompare periods\nReports\nMoney out\n25,654 EGP\nAgainst your usual month\n+1,410 · 6%\nAgainst 2026-09\n+1,410 · 6%\nWhere did it go?\n2026-10-01 to 2026-10-31\nHousing & Rent\n47% of money out\n12,000\nFood & Groceries\n19% of money out\n4,763\nLoan payments\n10% of money out\n2,500\nGifts & Donations\n8% of money out\n2,000\nOther\n17% of money out\n4,391\nMore analysis\nDays, months, money in and out\n›",
+  "status": 200
+ },
+ "/review": {
+  "screens": 1.3,
+  "figures": 1,
+  "targets": 12,
+  "headings": [
+   "Weekly review",
+   "Cash and goals",
+   "Record this review",
+   "Optional reminders"
+  ],
+  "first_screen": "Weekly review\nNBE 3-year certificate: 2 interest payments to match\n3,677 EGP still unmatched; 2 have a suggested bank receipt.\nReview\nMatch all suggested\nEmergency fund needs you\n0.8 months of cover. Review your emergency reserve.\nReview\nCash and goals\nLooks recurring\nFitness Time Gym · 900 EGP · 3 months · last 2026-11-04.\nTrack\nSalary received\nReview bills, reserves, goals and safe to spend.\nReview\nRecord this review\n I reviewed the remaining decisions. They stay visible until resolved.\nRecord this review\nOptional reminders\n\nReminders use your existing plans and Needs you. Native alerts requ",
+  "status": 200
+ },
+ "/settings": {
+  "screens": 3.6,
+  "figures": 0,
+  "targets": 45,
+  "headings": [
+   "Settings",
+   "Appearance and language",
+   "This phone",
+   "Settings in each tab",
+   "Your data",
+   "Features",
+   "Ask an AI",
+   "",
+   "Advanced"
+  ],
+  "first_screen": "Settings\nAppearance and language\nTheme\nApplies at once and saves with this profile.\nCotton (try it)\nDendera, night (try it)\nDendera (try it)\nLightning default\nNile (try it)\nPapyrus (try it)\nRoyal Obsidian & Gold (preview)\nLanguage\nEnglish\nالعربية\nSetup guide\nShows the first steps on Overview again.\nShow setup guide\nUnlock a theme you bought\nThis phone\nDevices\nPair your phone or PC\n›\nBank SMS\nRead bank messages into transactions\n›\nProfile and lock\nPassword, recovery key, backups, lock\n›\nSettings in each tab\nSale factors\nOverview\nBudget settings\nBudget\nFinancial health limits\nSafety · Limits\nFin",
+  "status": 200
+ },
+ "/plan/recurring": {
+  "screens": 1.1,
+  "figures": 7,
+  "targets": 13,
+  "headings": [
+   "Cash planning",
+   "Recurring items",
+   "Every month",
+   "Looks recurring"
+  ],
+  "first_screen": "Cash planning\nAdd recurring item\nPlan\nRecurring\nLoans\nRecurring items\n5 active\nVodafone\nSubscription · Monthly on day 9 · Next 2026-11-09\n−350\nWE Internet\nBill · Monthly on day 20 · Next 2026-11-20\n−650\nNorth Cairo Electricity\nBill · Monthly on day 24 · Next 2026-11-24\n−480\nACME Egypt\nIncome · Monthly on day 1 · Next 2026-12-01\n+45,000\nLandlord\nBill · Monthly on day 3 · Next 2026-12-03\n−12,000\nEvery month\nBills and subscriptions\nSubscriptions come to 4,200 a year.\n13,480\nFixed costs to income\n15,980 a month of 45,000 income · bills, subscriptions and loans\n35.5%\nLooks recurring\nFrom your last ",
+  "status": 200
+ },
+ "/accounts/1": {
+  "screens": 5.6,
+  "figures": 92,
+  "targets": 82,
+  "headings": [
+   "CIB Payroll",
+   "",
+   "",
+   "What depends on this account"
+  ],
+  "first_screen": "CIB Payroll\n\nBank account · CIB\n\nIn this account\n\n84,393 EGP\n\nWhat you own 74,393 · Held for others 10,000\n\nMoney actions\n⋯\nAll\nIn\nOut\nTransfers\nTo sort\nAll time\nSelect\nYesterday\n−2,500\nTo Office gam'eya\nTransfer\n−2,000\n84,393.36\nToyota Finance\nLoan payments\n−2,500\n86,393.36\nTo Cash wallet\nTransfer\n−3,000\n88,893.36\n2026-11-04\nFitness Time Gym\nHealth\n−900\n91,893.36\n2026-11-03\nLandlord\nHousing & Rent\n−12,000\n92,793.36\n2026-11-02\nCarrefour\nFood & Groceries\n−3,250.75\n104,793.36\n2026-11-01\n+46,833\nNBE\nInterest\n+1,833.33\n108,044.11\nACME Egypt\nSalary\n+45,000\n106,210.78\n2026-10-28\nCIB\nFees & Charges\n−",
+  "status": 200
+ }
+}

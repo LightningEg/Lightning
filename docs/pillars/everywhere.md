@@ -13,6 +13,7 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 |---|---|---|---|
 | **IV-3AN** | [Phone visual plan](../../issues/3-polish-and-arabic/3AN-phone-visual-plan-quick-actions.md) | L | building |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](../../issues/3-polish-and-arabic/3AU-reminders-when-the-app-is-closed.md) | M | new |
+| **IV-3AY** | [Phone-first architecture](../../issues/3-polish-and-arabic/3AY-phone-first-architecture.md) | L | ready |
 | **NF-4A** | [Edit journal: edit anywhere, one home confirms](../../issues/4-edit-journal-and-devices/4A-edit-journal.md) | L | building |
 | **NF-4B** | [Multiple devices: implementation plan](../../issues/4-edit-journal-and-devices/4B-multiple-devices.md) | L | building |
 | **NF-9B** | [In-app updates on Windows](../../issues/9-later/9B-in-app-updates.md) | L | new |
@@ -20,6 +21,7 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 ## Reports with open follow-ups here
 
 - [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/2026-11-05-desktop-phone-ux/report.md): 3AN, 4A, 4B
+- [The phone, redesigned: a phone-first architecture, tab by tab](../../reports/2026-11-06-phone-ux-architecture/report.md): 3AY, 3AN
 - [Audit 2: backend efficiency and loose ends](../../reports/2026-10-21-backend-efficiency/report.md): 4A
 - [Audit 3: is the edit journal (multi-device sync) solid?](../../reports/2026-10-21-edit-journal/report.md): 4A
 - [Audit 5: is the backend engine efficient and streamlined?](../../reports/2026-10-21-backend-streamlining/report.md): 4A
