@@ -810,9 +810,11 @@ class TransactionService:
         return found
 
     def recorded_since(self, moment: str) -> int:
-        """How many transactions were recorded after ``moment`` (an ISO time): posted, value updates and opening
-        balances left out. The Overview's "since your last visit" line (3G5)."""
-        return int(self.db.scalar("SELECT COUNT(*) FROM transactions WHERE created_at > ? AND status='POSTED' "
+        """How many recording events came after ``moment`` (an ISO time): posted, value updates and opening
+        balances left out. Rows recorded in the same minute are one event, so a bulk import or a sample load
+        counts once. The Overview's "since your last visit" line (3G5, 3AY1)."""
+        return int(self.db.scalar("SELECT COUNT(DISTINCT substr(created_at, 1, 16)) FROM transactions "
+                                  "WHERE created_at > ? AND status='POSTED' "
                                   "AND type NOT IN ('VAL','OPN')", (moment,)) or 0)
 
     def find(self, f: TxnFilter) -> tuple[list[TxnSummary], int]:

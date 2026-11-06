@@ -452,6 +452,8 @@ ARABIC_UI = {
     'Add {amt} out': 'ضيف {amt} خارجة',
     'Add {amt} in': 'ضيف {amt} داخلة',
     'A new transaction, filled in for you to check': 'معاملة جديدة متملية، راجعها',
+    '1 new transaction since your last visit.': 'معاملة جديدة واحدة من آخر زيارة ليك.',
+    '{n} new transactions since your last visit.': '{n} معاملات جديدة من آخر زيارة ليك.',
     '1 new transaction since your last visit on {sa}.': 'معاملة جديدة واحدة من آخر زيارة ليك يوم {sa}.',
     '{n} new transactions since your last visit on {sa}.': '{n} معاملات جديدة من آخر زيارة ليك يوم {sa}.',
     'Against its plan': 'مقارنة بخطتها',
