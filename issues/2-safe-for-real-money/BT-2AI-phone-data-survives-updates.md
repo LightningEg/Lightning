@@ -60,6 +60,11 @@ opens it. Settings shows when the last copy was written.
 
 ## 2AI4 The PC can always send its copy to a fresh phone · M
 
+Partly covered 2026-11-06: the PC's Profile settings already offers "Save a profile file" (2AI2), which a fresh phone
+opens, with or without device editing. Not yet done: the journal's own lost-home path (new generation, cutoff
+shown, retired-branch proposals), which sits in the journal files Claude's NOW.md claim covers; ask that session
+or the owner before touching them. Untested: the export of a profile that has device editing on.
+
 When device editing is on and the phone has lost the home, the PC offers "Send this book to a new phone" from its
 newest verified copy, starting a new history as 4A section 7 describes (lost-home recovery, cutoff shown).
 
