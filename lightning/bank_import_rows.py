@@ -36,6 +36,19 @@ def is_balance_row(*texts: str) -> bool:
     return any(" ".join((text or "").split()).casefold() in BALANCE_WORDS for text in texts)
 
 
+class SkipRow(ValueError):
+    """A row that is clearly not a transaction (IT-7AA6): it opens as a skipped row with this reason, not an error."""
+
+
+TOTAL_WORDS = ("total", "totals", "closing balance", "opening balance", "balance carried", "balance brought",
+               "summary", "grand total", "الإجمالي", "اجمالي", "إجمالي", "الرصيد الختامي", "الرصيد الافتتاحي")
+
+
+def is_total_line(*texts: str) -> bool:
+    """A footer such as ",Total,14749.50": no date, and a cell that says total or balance."""
+    return any(" ".join((t or "").split()).casefold().strip(":") in TOTAL_WORDS for t in texts)
+
+
 def is_internal(category: str) -> bool:
     """The Category column says the row moved money between your own accounts."""
     return " ".join((category or "").split()).casefold() in INTERNAL_WORDS
@@ -47,7 +60,7 @@ def _date(value: str, profile=None) -> str:
     except ValidationError as exc:
         raise ValueError(exc.message) from None
     if day > today():  # the same rule as typing it: the review marks the row to fix at once, not when Post fails
-        raise ValueError(f"{day.isoformat()} is in the future. Record transactions on or after the day they happen.")
+        raise SkipRow(f"{day.isoformat()} is in the future, so this looks like a pending hold: skipped until it posts. Import it again later.")
     return day.isoformat()
 
 
@@ -102,7 +115,7 @@ def _decimal_amount(value: str) -> Decimal:
 def _amount(value: str) -> str:
     amount = _decimal_amount(value)
     if amount == 0:
-        raise ValueError("Enter a non-zero amount; use a minus sign for money out.")
+        raise SkipRow("A zero amount records nothing, so this row is skipped.")
     return format(amount, "f")
 
 

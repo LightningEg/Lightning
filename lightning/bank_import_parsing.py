@@ -4,7 +4,7 @@ from decimal import Decimal
 from lightning.import_profile import profile_dates
 from lightning.bank_import_rows import (
     REQUIRED, OPTIONAL, SEPARATE_AMOUNT_FIELDS,
-    _date, _separate_amount, _amount, direction_sign, currency_code,
+    _date, _separate_amount, _amount, direction_sign, currency_code, SkipRow, is_total_line,
 )
 
 
@@ -18,6 +18,12 @@ def normalize_rows(raw_rows, mapping, amount_model, invert_amount, account_curre
         for key in ("Amount", *SEPARATE_AMOUNT_FIELDS):
             parsed.setdefault(key, "")
         errors = []
+        if not parsed["Date"].strip() and is_total_line(*(raw.get(h, "") for h in raw if h != "__line__")):
+            parsed["_skip_reason"] = "A totals or balance line, not a transaction: skipped."
+            parsed["Amount"] = "0"
+            parsed["_line"], parsed["_errors"] = raw["__line__"], errors
+            stored.append((raw, parsed))
+            continue
         try:
             parsed["Date"] = _date(parsed["Date"], date_profile)
             parsed["Amount"] = (_separate_amount(parsed["Inflow"], parsed["Outflow"])
@@ -35,9 +41,21 @@ def normalize_rows(raw_rows, mapping, amount_model, invert_amount, account_curre
             message = account_check(parsed.get("Account", "")) if account_check else None
             if message:
                 raise ValueError(message)
+        except SkipRow as exc:
+            parsed["_skip_reason"] = str(exc)
+            if not parsed["Amount"].strip() or not _readable(parsed["Amount"]):
+                parsed["Amount"] = "0"
         except ValueError as exc:
             errors.append(str(exc))
         parsed["_line"] = raw["__line__"]
         parsed["_errors"] = errors
         stored.append((raw, parsed))
     return stored
+
+
+def _readable(text: str) -> bool:
+    try:
+        Decimal(text)
+        return True
+    except ArithmeticError:
+        return False

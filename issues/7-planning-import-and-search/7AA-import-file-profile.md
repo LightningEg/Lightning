@@ -41,6 +41,8 @@ Encoding detection (UTF-16, cp1256), header row after a preamble, Arabic header 
 ## 7AA6 Non-transactions as skips · S
 Totals footers, zero amounts and future holds open as skipped rows with a reason. Done when: A8, A15 and A16 have no error rows.
 
+**Built 2026-11-06:** `SkipRow` (bank_import_rows): totals lines with no date, zero amounts and future dates open as skipped rows with a reason (`_skip_reason`); A8, A15, A16 have no error rows.
+
 ## 7AA7 Category paths and subcategories · S
 Split `:`, `>`, `/` paths and a Subcategory column into group and name; resolve split lines as one split. Done when: B3 and B6 resolve.
 

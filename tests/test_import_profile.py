@@ -113,3 +113,17 @@ def test_long_review_is_paged_and_unseen_rows_still_post(c, setup):
     assert done.status_code == 200
     posted = c.db.scalar("SELECT COUNT(*) FROM bank_import_rows WHERE batch_id=? AND status='POSTED'", (batch,))
     assert posted == 400 and c.reporting.account_balance(cib) < before
+
+
+def test_footers_zero_amounts_and_future_holds_are_skips_not_errors():
+    from lightning.bank_import_parsing import normalize_rows
+    mapping = {"Date": "D", "Amount": "A", "Counterparty": "C"}
+    raw = [{"D": "2026-10-01", "A": "-5", "C": "Shop", "__line__": "2"},
+           {"D": "", "A": "14749.50", "C": "Total", "__line__": "3"},
+           {"D": "2026-10-02", "A": "0", "C": "FEE WAIVED", "__line__": "4"},
+           {"D": "2999-01-01", "A": "-999", "C": "PENDING", "__line__": "5"},
+           {"D": "", "A": "7", "C": "Shop", "__line__": "6"}]
+    rows = [p for _r, p in normalize_rows(raw, mapping, "SINGLE", False)]
+    assert [bool(r.get("_skip_reason")) for r in rows] == [False, True, True, True, False]
+    assert not any(r["_errors"] for r in rows[:4]) and rows[4]["_errors"]
+    assert rows[3]["Amount"] == "-999"

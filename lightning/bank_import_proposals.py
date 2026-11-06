@@ -79,7 +79,7 @@ class ImportProposals:
             parsed["_link_candidates"] = ([] if ref_duplicate or repeat_import or row["status"] != "REVIEW"
                                           else self._link_candidates(batch["account_id"], parsed, batch["id"]))
             parsed["_internal"] = is_internal(parsed["Category"])
-            parsed["_balance_row"] = is_balance_row(parsed["Category"], parsed["Counterparty"])
+            parsed["_balance_row"] = bool(parsed.get("_skip_reason")) or is_balance_row(parsed["Category"], parsed["Counterparty"])
             outcome = self._rules_outcome(batch["account_id"], parsed, cp)
             parsed["_category_id"] = None if parsed["_internal"] else self._category_for(parsed, cp, outcome, usual)
             parsed["_transfer_target_suggestion"] = (self._own_account(batch["account_id"], parsed["Counterparty"])
