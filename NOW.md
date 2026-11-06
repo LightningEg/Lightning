@@ -18,7 +18,7 @@
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **Phone (2026-11-06, Claude):** IV-3AY phone-first design (report + plan) overtakes 3AN's structure. Owner chose D1-D4 as recommended. Next: 3AY1, then 3AY3 (Part C, both repos). **Read:** 3AY.
+- **Phone (2026-11-06, Claude):** IV-3AY phone-first design (report + plan) overtakes 3AN's structure. Owner chose D1-D4 as recommended. 3AY1 built. Next: 3AY3 (Part C, both repos). **Read:** 3AY.
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 
 - **Store and community (2026-10-27):** 10C unlock once, 8M–8S merged in both repos; the website migrations (up to 20261027210000) are run and checked live and `redeem-purchase` is redeployed; the app release that carries 10C ships the unlock. Next: 10D (Papyrus and Dendera sets need a banner, frame and name designed). **Read:** `issues/10-looks-and-store/r13-store-and-community/report.md`.

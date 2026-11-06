@@ -39,14 +39,6 @@ count everywhere, on a fresh profile and on one left alone for a week; no phone 
 
 `post: no`: the steps share the phone shell and follow one design.
 
-## 3AY1 Four state and copy bugs on today's screens · S
-Ship before the redesign. (a) The Net worth tile says "Today" over a past month's figure, and on a past month the hero
-repeats the tile (`routes/dashboard.py` `_worth_tile`): the tile names its date, and the hero never shows the same figure as
-a tile. (b) "N new transactions since your last visit on <today>": never name today, and count a bulk import or a sample
-load as one event (`since`). (c) "Net worth · in us dollars": stop lower-casing the label (`phone/dashboard/index.html`).
-(d) Late bills listed under "Next 14 days" on More: the heading says what the rows are, or late rows move to their own
-heading. Done when: a test for each in `tests/test_phone_*.py`, and Mohab passes.
-
 ## 3AY3 Guideline Part C rewrite, in both repos · M
 C01.1 "Same brand, own structure"; C03.1 the tab bar; C04.2 the stepper only on Budget and Activity; C04.4 To do and To
 review; C11.1 Home; C11.3 Money; new C13 States. Done when: the website's `guideline/` copy is

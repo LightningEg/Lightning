@@ -178,7 +178,8 @@ async def dashboard(request: Request):
     since = None
     if _SEEN.fullmatch(seen):
         added = c.transactions.recorded_since(seen)
-        since = {"count": added, "at": seen[:10]} if added else None
+        # Today is never named: "since your last visit on 2026-11-06" read on 2026-11-06 says nothing.
+        since = {"count": added, "at": "" if seen[:10] == today().isoformat() else seen[:10]} if added else None
     response = render(
         request,
         "dashboard/index.html", **phone_flows, since=since,
@@ -195,7 +196,7 @@ async def dashboard(request: Request):
         kept_apart_accounts=[] if on_phone else c.reporting.owned_cash_kept_apart_by_account(position.as_of),
         attention=attention, attention_groups=attention_groups, setup=setup,
         investment_report=investment_report, cash_flow=cash_flow, phone=phone,
-        worth_tile=_worth_tile(position, lead_change) if on_phone else None,
+        worth_tile=_worth_tile(position, lead_change) if on_phone and phone and phone.get("safe") else None,  # else the hero is the same figure
         lazy_folds=lazy_folds, fold_query=urlencode(request.query_params),
     )
     response.set_cookie(SEEN_COOKIE, datetime.now(timezone.utc).isoformat(timespec="seconds"),

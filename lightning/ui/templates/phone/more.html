@@ -6,13 +6,20 @@
 {% block content %}
 {# Flat, three headings (IV-3AL4, C01.1 "flat, not boxed"): what is due in the next 14 days as rows (a tap opens the pay
    sheet; no button on each row, C05.3), the sections with their figures, the weekly review card, then settings by name. #}
-<section class="phone-section phone-hub-bills" aria-labelledby="bills-heading">
-  <header class="phone-section-head"><h2 id="bills-heading">{{ 'Next 14 days'|tr(locale) }}</h2><a class="phone-quiet" href="/plan">{{ 'All bills'|tr(locale) }}</a></header>
-  {% if bills %}<div class="phone-rows">
-  {% for b in bills %}<a class="phone-row phone-hub-bill{{ ' is-late' if b.late }}" data-popup-open href="{{ b.pay }}">
+{% macro bill_row(b) %}<a class="phone-row phone-hub-bill{{ ' is-late' if b.late }}" data-popup-open href="{{ b.pay }}">
     <span>{{ b.name }}<small>{% if b.late %}{{ ('1 day late' if b.late == 1 else '{n} days late')|tr(locale, n=b.late) }}{% else %}{{ b.due|day_label(locale) }}{% endif %}</small></span>
     <b>{{ b.amount|amount_role('row') }}</b>
-  </a>{% endfor %}
+  </a>{% endmacro %}
+{# Late bills are not "next 14 days": they have their own heading (3AY1). #}
+{% set late_bills = bills|selectattr('late')|list %}{% set coming_bills = bills|rejectattr('late')|list %}
+{% if late_bills %}<section class="phone-section phone-hub-bills" aria-labelledby="late-bills-heading">
+  <header class="phone-section-head"><h2 id="late-bills-heading">{{ 'Late'|tr(locale) }}</h2></header>
+  <div class="phone-rows">{% for b in late_bills %}{{ bill_row(b) }}{% endfor %}</div>
+</section>{% endif %}
+<section class="phone-section phone-hub-bills" aria-labelledby="bills-heading">
+  <header class="phone-section-head"><h2 id="bills-heading">{{ 'Next 14 days'|tr(locale) }}</h2><a class="phone-quiet" href="/plan">{{ 'All bills'|tr(locale) }}</a></header>
+  {% if coming_bills %}<div class="phone-rows">
+  {% for b in coming_bills %}{{ bill_row(b) }}{% endfor %}
   {% if bills_more %}<a class="phone-row" href="/plan"><span>{{ '{n} more'|tr(locale, n=bills_more) }}</span><b>›</b></a>{% endif %}
   </div>
   {% else %}<p class="phone-note">{{ 'Nothing due in the next 14 days.'|tr(locale) }}</p>{% endif %}
