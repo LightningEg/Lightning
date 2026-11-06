@@ -29,5 +29,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 - [Store and community: unlocking themes, the market, rewards and staying in Lightning](../../reports/r13-store-and-community/report.md): 10C, 10D
 - [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](../../reports/r19-desktop-tab-audit/report.md): 3AM
 - [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../reports/r24-desktop-phone-ux/report.md): 3H, 3AM
+- [The phone, redesigned: a phone-first architecture, tab by tab](../../reports/r25-phone-ux-architecture/report.md): 3F
 <!-- work:end -->
 

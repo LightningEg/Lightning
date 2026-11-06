@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-9 milestones, 41 open items, in the order they are worked on.
+9 milestones, 42 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -75,6 +75,19 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **BV-3AV** | [The Arabic bank import preview mixes English into Arabic lines](3-polish-and-arabic/3AV-arabic-bank-import-preview.md) ([#342](https://github.com/LightningEg/Lightning/issues/342)) | bug, visual · low | Feel | M | ready |
 | **BV-3AW** | [Four short words stay English in Arabic on loans, charts and investments](3-polish-and-arabic/3AW-arabic-short-words-loans-charts.md) ([#343](https://github.com/LightningEg/Lightning/issues/343)) | bug, visual · low | Feel | S | ready |
 | **IT-3AX** | [The site screenshot tool breaks on the new Overview, so the site's screens are not recaptured](3-polish-and-arabic/3AX-site-shots-tool-follows-the-new-screens.md) | improvement, technical | Reach | M | new |
+| **IV-3AY** | [Phone-first architecture - five places that each answer one question, state-aware screens, and a phone decoupled from the PC](3-polish-and-arabic/3AY-phone-first-architecture.md) | improvement, visual | Everywhere | L | ready |
+| IV-3AY1 | ↳ Four state and copy bugs on today's screens | | | S | |
+| IV-3AY3 | ↳ Guideline Part C rewrite, in both repos | | | M | |
+| IV-3AY4 | ↳ The phone shell: its own router, base, stylesheet and navigation | | | L | |
+| IV-3AY5 | ↳ One bill state and the catch-up state | | | L | |
+| IV-3AY6 | ↳ Home | | | M | |
+| IV-3AY7 | ↳ Add as a sheet over any slot | | | M | |
+| IV-3AY8 | ↳ Activity with To review | | | L | |
+| IV-3AY9 | ↳ Budget, flexible first | | | L | |
+| IV-3AY10 | ↳ Money and its pages | | | L | |
+| IV-3AY11 | ↳ Remove the old coupling | | | M | |
+| IV-3AY12 | ↳ Arabic, themes and 320 px | | | M | |
+| IV-3AY13 | ↳ Owner's phone check | | | owner | |
 | **NF-3AZ** | [Offer the next step where a figure or row raises the question, always with a preview and an explicit confirmation](3-polish-and-arabic/3AZ-next-step-at-the-moment-of-need.md) | new feature | Plan | L | new |
 | NF-3AZ1 | ↳ Salary posted becomes one reviewed payday proposal | | | M | |
 | NF-3AZ2 | ↳ A statement row links to the payment already recorded from an SMS | | | M | |

@@ -21,6 +21,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r22 | [Code audit: refactoring, loose ends and smart features](r22-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1H, 2A, 2C, 4A, 4B, 7C, 9A, 9K |
 | r23 | [CSV import stress test: where it breaks and how to rebuild it](r23-csv-import-stress/report.md) | 2026-11-05 | audit | 7AA, 7AB, 7Z, 7C |
 | r24 | [Desktop and phone UX: logic, visuals, simpler tasks and connected features](r24-desktop-phone-ux/report.md) | 2026-11-05 | audit | 3H, 3AM, 3AN, 3AZ, 4A, 4B |
+| r25 | [The phone, redesigned: a phone-first architecture, tab by tab](r25-phone-ux-architecture/report.md) | 2026-11-06 | research | 3AY, 3AN, 3F |
 
 
 ## Create and maintain a report
