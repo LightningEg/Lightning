@@ -1,0 +1,17 @@
+Export of Mohab's 2026: 59 sheets, 20 of them empty, 171,953 bytes
+F1 shape:
+  ledger_entries headings: ['Transaction ID', 'Transaction reference', 'Account', 'Date', 'Counterparty', 'Currency', 'Total in currency', 'FX rate', 'Total in default currency', 'Category L1', 'Category L2', 'Asset', 'Owner', 'line_no', 'date', 'quantity', 'unit_price', 'amount', 'fx_rate', 'amount_base', 'effect', 'memo', 'cleared', 'id', 'transaction_id', 'account_id', 'asset_id', 'category_id', 'owner_id']
+  id columns with no readable name beside them: 11: [('reserve_allocation_history', 'reserve_id'), ('physical_item_trade_details', 'asset_id'), ('bank_import_rows', 'batch_id'), ('reevaluation_entries', 'period_id'), ('reevaluation_account_posts', 'period_id'), ('reimbursement_receipts', 'claim_id'), ('audit_log', 'entity_id'), ('profile_identity', 'profile_id'), ('physical_item_valuations', 'asset_id'), ('reevaluation_suppressed_accounts', 'period_id'), ('cd_interest_receipt_links', 'event_id')]
+F2 clean room (fresh database, nothing touched):
+  blank target: imports
+F3 a new profile after the welcome screen's currency step:
+  welcome {'currency': 'EGP'}: imports
+  welcome {'currency': 'EGP', 'extra': 'USD'}: FAILS: Import into a new, empty profile. Your existing setup would otherwise be overwritten.
+  welcome {'currency': 'USD'}: FAILS: Import into a new, empty profile. Your existing setup would otherwise be overwritten.
+F4 the same file after a spreadsheet app saves it:
+  re-saved by openpyxl: FAILS: Choose a valid Excel .xlsx workbook with plain values. (cause: AttributeError("'NoneType' object has no attribute 'itertext'"))
+  re-saved by LibreOffice: FAILS: Workbook data violates a required type, unique key or financial constraint: NOT NULL constraint failed: accounts.notes
+F5 a file from an older Lightning (one table it did not have yet):
+  no other_asset_details sheet: FAILS: This is not a complete workbook. Missing sheets: other_asset_details.
+F6 the CSV choice on the export page:
+  lightning-all-data.zip: FAILS: Choose a valid Excel .xlsx workbook with plain values. (cause: KeyError("There is no item named 'xl/workbook.xml' in the archive"))

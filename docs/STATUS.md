@@ -9,14 +9,14 @@ Version **2.0.3**. Generated from the plan by `python tools/status.py`; do not e
 | [Capture](pillars/capture.md) | 4 |  |  | 4 |  |  |
 | [Plan](pillars/plan.md) | 1 |  |  | 1 |  |  |
 | [Understand](pillars/understand.md) | 1 |  |  |  | 1 |  |
-| [Own](pillars/own.md) | 7 | 1 |  | 4 | 2 |  |
+| [Own](pillars/own.md) | 8 | 1 |  | 5 | 2 |  |
 | [Protect](pillars/protect.md) | 3 | 1 | 1 | 1 |  |  |
 | [Everywhere](pillars/everywhere.md) | 5 | 3 |  | 2 |  |  |
 | [Feel](pillars/feel.md) | 12 | 3 | 6 | 2 | 1 | 1 |
 | [Build](pillars/build.md) | 8 |  | 6 | 1 | 1 |  |
 | [Reach](pillars/reach.md) | 5 |  | 3 | 2 |  | 2 |
 
-46 open items in 10 milestones.
+47 open items in 10 milestones.
 
 ## Being built now
 
@@ -40,7 +40,7 @@ Version **2.0.3**. Generated from the plan by `python tools/status.py`; do not e
 | Milestone | Open | Goal |
 |---|---|---|
 | 1 Easy to contribute | 7 | Anyone can find how to help in one click and send a first fix the same evening. |
-| 2 Safe for real money | 6 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
+| 2 Safe for real money | 7 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
 | 3 Polish and Arabic | 11 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 5 Investments | 0 | Every investment figure can be explained per purchase, and agrees with the ledger. |

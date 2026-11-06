@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-10 milestones, 46 open items, in the order they are worked on.
+10 milestones, 47 open items, in the order they are worked on.
 
 ## 1 Easy to contribute
 
@@ -53,8 +53,14 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | BT-2AI2 | ↳ Open a profile file on the phone | | | M | |
 | BT-2AI3 | ↳ A copy outside the app | | | M | |
 | BT-2AI4 | ↳ The PC can always send its copy to a fresh phone | | | M | |
+| **BT-2AJ** | [A profile exported from Lightning must import into another profile, and read as the app reads](2-safe-for-real-money/2AJ-profile-file-moves-between-profiles.md) | bug, technical · medium | Own | L | new |
+| BT-2AJ1 | ↳ The profile file format | | | L | |
+| BT-2AJ2 | ↳ A reader spreadsheet apps cannot break | | | M | |
+| BT-2AJ3 | ↳ Load records, not tables | | | L | |
+| BT-2AJ4 | ↳ Export and import pages | | | S | |
+| BT-2AJ5 | ↳ Round-trip acceptance | | | M | |
 
-Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2U, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AB, 2AC, 2AD, 2AE. Next free code: 2AJ.
+Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2U, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AB, 2AC, 2AD, 2AE. Next free code: 2AK.
 
 ## 3 Polish and Arabic
 
