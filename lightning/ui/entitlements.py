@@ -31,10 +31,10 @@ MARKETPLACE_HOST = "lightningeg.com"
 MARKETPLACE_PATHS = {"en": "/marketplace.html", "ar": "/ar/marketplace.html"}
 
 
-# The update block's two outside pages (NF-9B4, owner pick): the website's download and release-notes pages. Like the
-# marketplace they open in the system browser, and the PC window allows exactly these paths (`OUTSIDE_PATHS`).
-UPDATE_PATHS = {"download": {"en": "/download.html", "ar": "/ar/download.html"},
-                "releases": {"en": "/releases.html", "ar": "/ar/releases.html"}}
+# The update block's two outside pages (NF-9B4): the website's existing Downloads hub and release log (owner pick,
+# 2026-11-07). Like the marketplace they open in the system browser, and the PC window allows exactly these paths.
+UPDATE_PATHS = {"download": {"en": "/current-status.html", "ar": "/ar/current-status.html"},
+                "releases": {"en": "/release-log.html", "ar": "/ar/release-log.html"}}
 OUTSIDE_PATHS = frozenset(MARKETPLACE_PATHS.values()) | {p for pages in UPDATE_PATHS.values() for p in pages.values()}
 
 

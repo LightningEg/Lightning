@@ -183,7 +183,7 @@ def test_the_buttons_drive_the_controller_and_never_the_network_on_load(ledger, 
 def test_the_one_time_notices(ledger, tmp_path):
     ctl = controller(tmp_path, update_failed="2.0.4")
     _, response = page(ledger, ctl)
-    assert "The update to 2.0.4 didn&#39;t start, so you&#39;re back on 2.0.3." in response.text and "/download.html" in response.text
+    assert "The update to 2.0.4 didn&#39;t start, so you&#39;re back on 2.0.3." in response.text and "/current-status.html" in response.text
     ctl = controller(tmp_path, after_update="2.0.3", current="2.0.4")
     _, response = page(ledger, ctl)
     assert "Updated to 2.0.4." in block(response.text)
