@@ -12,9 +12,11 @@ The overview, spending, financial health, net worth and reports. They read the l
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **IT-9A** | [Stored month-end figures](../../issues/9-later/IT-9A-stored-month-end-figures.md) | M | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
+| **BV-12D** | [Nine small places where two neighbouring figures disagree or a figure reads wrong (Scenarios "None…](../../issues/12-desktop-ux/BV-12D-neighbouring-figures-that-disagree.md) | M | new |
 
 ## Reports with open follow-ups here
 
 - [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 9A
+- [Audit 14: using Lightning as a user, on the PC and the phone](../../issues/12-desktop-ux/r26-user-test-pc-and-phone/report.md): 12D
 <!-- work:end -->
 

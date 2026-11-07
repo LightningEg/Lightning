@@ -39,10 +39,6 @@ count everywhere, on a fresh profile and on one left alone for a week; no phone 
 
 `post: no`: the steps share the phone shell and follow one design.
 
-## 3AY3 Guideline Part C rewrite, in both repos · M
-C01.1 "Same brand, own structure"; C03.1 the tab bar; C04.2 the stepper only on Budget and Activity; C04.4 To do and To
-review; C11.1 Home; C11.3 Money; new C13 States. Done when: the website's `guideline/` copy is
-the same (`cmp`), a PR is open in each repo, and `tests/test_docs_structure.py` passes with the sibling repo present.
 
 ## 3AY4 The phone shell: its own router, base, stylesheet and navigation · L
 Built: (a) `lightning/ui/phone/` with `router.py` mounted first by `profile_app(..., phone=True)` (`mount_phone`,
