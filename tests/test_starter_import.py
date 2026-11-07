@@ -200,3 +200,10 @@ def test_the_template_itself_imports_nothing(c):
     preview = si.prepare(c, sw.starter_workbook(c))
     assert preview.nothing_to_do and not preview.problems
     assert si.confirm(c, sw.starter_workbook(c)).entries == []
+
+
+def test_each_existing_entry_answers_one_duplicate_row_with_its_own_reference(c):
+    rows = [entry("2026-01-05", "Salary account", "Food & Groceries", "Shop", -50)] * 2
+    made = si.confirm(c, workbook([acct("Salary account")], [], rows))
+    again = si.prepare(c, workbook([acct("Salary account")], [], rows))
+    assert sorted(r.ref for r in again.entries) == sorted(r.ref for r in made.entries) and len({r.ref for r in again.entries}) == 2

@@ -37,6 +37,7 @@ class AccountRow:
     status: str = NEW
     error: str = ""
     code: str = ""  # an existing account's code, or the new one after confirm
+    raw: dict = field(default_factory=dict)  # the row as written, to give the file back with its codes
 
 
 @dataclass
@@ -49,6 +50,7 @@ class CategoryRow:
     error: str = ""
     code: str = ""
     parent_code: str = ""
+    raw: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -66,6 +68,7 @@ class EntryRow:
     ref: str = ""  # an existing entry's reference (duplicate / exists), or the new one after confirm
     account_id: int | None = None
     category_key: str = ""
+    raw: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -131,7 +134,7 @@ def prepare(c, data: bytes) -> Preview:
     seen: set[str] = set()
     sheet_accounts: dict[str, AccountRow] = {}
     for line, row in _sheet(sheets, "Accounts"):
-        item = AccountRow(line, row["Name"])
+        item = AccountRow(line, row["Name"], raw=row)
         preview.accounts.append(item)
         try:
             if not item.name:
@@ -174,7 +177,7 @@ def prepare(c, data: bytes) -> Preview:
             by_code[cat.code.casefold()] = cat
     new_categories: dict[str, CategoryRow] = {}
     for line, row in _sheet(sheets, "Categories"):
-        item = CategoryRow(line, row["Name"], row["Group"], row["Money"])
+        item = CategoryRow(line, row["Name"], row["Group"], row["Money"], raw=row)
         preview.categories.append(item)
         try:
             parent_code = GROUP_PARENT.get(row["Group"].casefold())
@@ -196,10 +199,10 @@ def prepare(c, data: bytes) -> Preview:
         except (ValueError, LightningError) as error:
             item.status, item.error = ERROR, str(error)
 
-    taken: dict[tuple, int] = {}
+    taken: dict[tuple, list[str]] = {}
     for line, row in _sheet(sheets, "Entries"):
         item = EntryRow(line, account=row["Account"], category=row["Category"], counterparty=row["Counterparty"],
-                        currency=row["Currency"].upper(), note=row["Note"])
+                        currency=row["Currency"].upper(), note=row["Note"], raw=row)
         preview.entries.append(item)
         try:
             if row["Reference"]:
@@ -229,11 +232,11 @@ def prepare(c, data: bytes) -> Preview:
             if current is not None:
                 item.account_id = current.id
                 key = (item.date, current.id, _e6(item.amount), item.counterparty.casefold())
-                taken.setdefault(key, _matches(c, key))
-                if taken[key] > 0:
-                    taken[key] -= 1
+                if key not in taken:
+                    taken[key] = [r["ref"] for r in _rows(c, key)]
+                if taken[key]:
                     item.status = DUPLICATE
-                    item.ref = _ref_of(c, key)
+                    item.ref = taken[key].pop(0)  # each existing entry answers one row
         except (ValueError, LightningError) as error:
             item.status, item.error = ERROR, str(error)
     return preview
@@ -276,15 +279,6 @@ def _rows(c, key):
         "SELECT t.ref FROM transactions t JOIN ledger_entries l ON l.transaction_id = t.id "
         "WHERE t.date = ? AND l.account_id = ? AND l.amount_e6 = ? AND lower(t.counterparty) = ? "
         "AND t.status = 'POSTED' AND t.type IN ('IN', 'OUT') ORDER BY t.id", (date, account_id, amount_e6, counterparty))
-
-
-def _matches(c, key) -> int:
-    return len(_rows(c, key))
-
-
-def _ref_of(c, key) -> str:
-    rows = _rows(c, key)
-    return rows[0]["ref"] if rows else ""
 
 
 @dataclass
