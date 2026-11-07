@@ -25,7 +25,7 @@ Android updates come from Google Play or the APK; this item is Windows only.
    release that carries the updater** the owner makes a separate update key, both public keys ship in
    `update_keys.json`, and CI signs with the new one. Track that switch in 9B5's checklist.
    9B1 is built (signing in CI, `update_manifest.verify`; ARCHITECTURE › Build and release); the owner's part is done:
-   `UPDATE_SIGNING_KEY` (store-2026-1) is set in `production-release`. 9B2 copies the verify logic into `lightning/desktop/` (the app ships no `packaging/`).
+   `UPDATE_SIGNING_KEY` (store-2026-1) is set in `production-release`. 9B2 is built in `lightning/desktop/update.py` (`check`, `download`, `stage`; its `verify_manifest` mirrors `packaging/update_manifest.py`, a test keeps them equal).
 2. **Check only on click.** Lightning never contacts GitHub for updates unless the person presses the button.
    No automatic or scheduled check, no setting for one.
 3. **Rollback: automatic, plus one kept copy.** If the new version does not reach its profile chooser, the helper
@@ -45,21 +45,6 @@ Android updates come from Google Play or the APK; this item is Windows only.
 - Only a frozen Windows build (`sys.frozen` and `sys.platform == "win32"`) offers the button. Linux, browser mode and
   the phone show the version and a link to the download page instead.
 - The first version carrying the updater is still installed by hand; say so in its release note.
-
-## 9B2 Check, download and verify · M
-**Build** `lightning/desktop/update.py` (pure Python, no pywebview import, testable on Linux):
-1. `check()`: GET `https://api.github.com/repos/LightningEg/Lightning-downloads/releases/latest` (stable only;
-   GitHub excludes prereleases and drafts), fetch `UPDATE.json` and `.sig` from its assets, verify (9B1), compare
-   versions. Use the timeouts/retry style of `lightning/market/http.py`. Result: `UpToDate`, `Available(version,
-   size)` or `Failed(reason)`.
-2. `download()`: into `%LOCALAPPDATA%\Lightning\updates\<version>\`, needing free space of 3x the ZIP size;
-   SHA-256 and size must match the signed manifest, else delete and fail.
-3. `stage()`: extract to `…\updates\<version>\staged\`, refusing absolute paths, `..`, links and anything outside;
-   require `Lightning.exe` and a `BUILD_INFO.txt` naming the version; write `FILES.sha256` (every file's hash).
-   Then run `staged\Lightning.exe --self-check --report check.json` (disposable data) and require it to pass.
-Runs on a worker thread; the database thread is never involved.
-**Done when:** Linux tests with a fake HTTP layer and a tiny signed fake ZIP cover: up to date, available, bad
-signature, older version, hash mismatch, no space, zip-slip, missing `Lightning.exe`, network down.
 
 ## 9B3 The helper: swap folders with rollback · L
 **Flow.** Settings › Restart to update: refuse if the lend rule above applies; lock the open profile through the
