@@ -29,6 +29,8 @@
 
 - **Import (2026-11-07, Claude):** IT-7Z and IT-7AA done; NF-7AB flow plan waits for the owner. Next: 2AI2. **Read:** 2AI, 7AB.
 
+- **In-app updates (2026-11-07, Claude):** NF-9B1-9B4 merged (signed manifest, check, helper, Settings button); starter workbook NF-7AC done. Owner: 9B5 Windows test, the website's `/download.html` and `/releases.html` (+ `/ar/`), the `update-2026-1` key before the release that carries the updater. **Read:** `issues/9-later/NF-9B-in-app-updates.md` 9B5.
+
 Plan: `issues/INDEX.md`.
 
 1. **Report work paused** (owner); branches wait on native checks. **Read:** `issues/9-later/r22-code-quality-and-smart-features/evidence/report-finalization-2026-11-04.md`.
