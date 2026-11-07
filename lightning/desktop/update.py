@@ -66,7 +66,7 @@ def load_keys(path: Path = KEYS_FILE) -> dict[str, bytes]:
 
 def version_tuple(text: str) -> tuple[int, ...]:
     if not re.fullmatch(r"\d+\.\d+\.\d+", text or ""):
-        raise UpdateError(f"{text!r} is not a release version")
+        raise UpdateError("The update information is not in the expected form.")
     return tuple(int(part) for part in text.split("."))
 
 
@@ -102,7 +102,7 @@ def http_get(url: str, *, limit: int = 1_000_000, retries: int = 3, timeout: flo
                 return response.read(limit)
         except HTTPError as error:
             if error.code < 500 or attempt == retries:
-                raise UpdateError(f"GitHub answered HTTP {error.code}.") from None
+                raise UpdateError("GitHub answered with an error. Try again later.") from None
         except (URLError, TimeoutError, OSError):
             if attempt == retries:
                 raise UpdateError("Lightning could not reach GitHub. Check the internet connection.") from None
@@ -115,8 +115,8 @@ def http_stream(url: str, *, chunk: int = 1 << 20, timeout: float = 30.0) -> Ite
         with urlopen(_request(url), timeout=timeout) as response:
             while block := response.read(chunk):
                 yield block
-    except HTTPError as error:
-        raise UpdateError(f"GitHub answered HTTP {error.code}.") from None
+    except HTTPError:
+        raise UpdateError("GitHub answered with an error. Try again later.") from None
     except (URLError, TimeoutError, OSError):
         raise UpdateError("The download was interrupted.") from None
 
@@ -155,7 +155,7 @@ def download(found: Available, folder: Path, *, stream: Callable[[str], Iterator
     target = folder / found.version
     target.mkdir(parents=True, exist_ok=True)
     if free_bytes(target) < SPACE_FACTOR * found.size:
-        raise UpdateError(f"There is not enough free space for the update (about {SPACE_FACTOR * found.size // 1_000_000} MB needed).")
+        raise UpdateError("There is not enough free space on this PC for the update.")
     path = target / found.zip_name
     digest, done = hashlib.sha256(), 0
     try:
@@ -185,7 +185,7 @@ def _safe_members(archive: zipfile.ZipFile) -> list[tuple[zipfile.ZipInfo, PureP
         path = PurePosixPath(name)
         if (name.startswith(("/", "\\")) or "\\" in name or ":" in name or ".." in path.parts
                 or (info.external_attr >> 16) and stat.S_ISLNK(info.external_attr >> 16)):
-            raise UpdateError(f"The update holds an unsafe path ({name!r}), so it was not used.")
+            raise UpdateError("The update holds an unsafe path, so it was not used.")
         members.append((info, path))
     return members
 
@@ -204,7 +204,7 @@ def stage(zip_path: Path, version: str, *, run: Callable[[list[str], Path], int]
             for info, path in files:
                 dest = root.joinpath(*path.parts[strip:])
                 if root.resolve() not in dest.resolve().parents:
-                    raise UpdateError(f"The update holds an unsafe path ({info.filename!r}), so it was not used.")
+                    raise UpdateError("The update holds an unsafe path, so it was not used.")
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 with archive.open(info) as src, dest.open("wb") as out:
                     shutil.copyfileobj(src, out)

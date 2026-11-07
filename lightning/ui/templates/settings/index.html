@@ -81,6 +81,7 @@
     <div class="settings-control"><a class="btn small" href="/exports/all" data-popup-open>{{ 'Export your data'|tr(locale) }}</a><a class="btn small" href="/exports/import">{{ 'Import your data'|tr(locale) }}</a></div></div>
   <div class="settings-row"><div><span class="settings-name">{{ 'Base currency'|tr(locale) }}</span></div><div class="settings-control"><b dir="ltr">{{ base }}</b><a class="btn small" href="/settings?section=currencies">{{ 'Manage currencies'|tr(locale) }}</a></div></div>
   <div class="settings-row settings-facts"><div><span class="settings-name">{{ 'App version'|tr(locale) }}</span></div><div class="settings-control" dir="ltr">v{{ app_version }}</div></div>
+  {% include "settings/_update.html" %}
   {% if phone_mode() %}{% for href, label in [('/rules', 'Rules'), ('/categories', 'Categories'), ('/counterparties', 'Counterparties'), ('/checks', 'Data checks')] %}<div class="settings-row"><a class="settings-name" href="{{ href }}">{{ label|tr(locale) }}</a></div>{% endfor %}{% endif %}
 </section>
 <section class="card settings-list" id="zakat-switch" aria-labelledby="features-heading"><h2 id="features-heading">{{ 'Features'|tr(locale) }}</h2>
@@ -130,3 +131,4 @@ const exportForm=document.querySelector('[data-ai-export-form]'),status=document
 exportForm?.addEventListener('submit',async event=>{event.preventDefault();status.textContent=window.lightningT('Preparing workbook…');try{const response=await fetch(exportForm.action,{method:'POST',body:new URLSearchParams(new FormData(exportForm)),headers:{'X-Requested-With':'fetch'}});if(!response.ok)throw Error(await response.text());if(response.headers.get('X-Lightning-Offered')){status.textContent=window.lightningT('Choose where to save the workbook.');return}const blob=await response.blob(),url=URL.createObjectURL(blob),anchor=document.createElement('a'),disposition=response.headers.get('Content-Disposition')||'',match=disposition.match(/filename="?([^";]+)"?/i);anchor.href=url;anchor.download=match?.[1]||'lightning-analysis.xlsx';anchor.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent=window.lightningT('Workbook downloaded.')}catch(error){status.textContent=window.lightningT(error.message||'Could not prepare the workbook.')}})})();</script>
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('ask-ai.js') }}" defer></script>
 {% endblock %}
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('update.js') }}" defer></script>

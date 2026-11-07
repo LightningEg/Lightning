@@ -26,8 +26,15 @@ same time, including through a synced Documents folder.
 
 Updating and backups
 --------------------
-To update Lightning, close it, extract the new ZIP to a fresh folder, and open
-the new Lightning.exe. Keep the old app folder until the new build opens. You
+Settings > Lightning version has a Check for updates button (Lightning looks
+only when you press it). If a newer version is found it downloads it, checks it,
+and restarts into it by itself; if the new version does not start, the old one
+comes back and is also kept beside it in a folder ending in .previous. It
+refuses while a phone's ledger is lent to this PC, and in a folder it cannot
+change (such as Program Files). Profiles in Documents/Lightning are never touched.
+
+You can also update by hand: close Lightning, extract the new ZIP to a fresh
+folder, and open the new Lightning.exe. Keep the old app folder until the new build opens. You
 can then remove the old app folder; profile data in Documents/Lightning stays
 separate. Keep a separate copy of the profile backup folder before making
 changes to valuable data.

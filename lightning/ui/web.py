@@ -330,6 +330,7 @@ def build_version(identity: Path = Path(__file__).resolve().parents[1] / "build_
 
 
 templates.env.globals["app_version"] = build_version()
+templates.env.globals["outside_url"] = __import__("lightning.ui.entitlements", fromlist=["outside_url"]).outside_url
 
 
 def container(request: Request) -> Container:
