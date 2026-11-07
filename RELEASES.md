@@ -2,6 +2,53 @@
 
 What changed in each version, in plain words. Generated from `ai/changelog/` by `python tools/release_notes.py`; do not edit by hand. The full detail for each version is in the same folder.
 
+## 2.1.0 · 2026-11-07
+
+**Capture**
+
+- Fill in a starter Excel file with your accounts, categories and entries by name, review it, and get every code back.
+- Importing a file with an Account column sends each row to its own account's review, a category you chose for a name in your file is remembered for the next file, and a movement written as two lines is offered once.
+- Importing a CSV with month-first dates, times or month names now reads every date correctly.
+- Importing a CSV with positive amounts and a DR/CR or Income/Expense column now posts spending as money out.
+- Importing a CSV with a Currency column no longer posts a USD amount into an EGP account; those rows wait to be fixed or skipped.
+- Importing a CSV that lists several accounts no longer posts another account's rows into the one you are importing.
+- Reviewing a long bank statement is faster: the page shows the first rows and loads more on request instead of freezing.
+- Importing a statement no longer stops on its totals line, zero-amount rows or pending holds; they open as skipped rows with the reason.
+- Importing now opens statements saved by Excel in Arabic or Unicode text, with lines above the header, Arabic column names, or only a balance column.
+- Importing another app's file now splits Group:Category paths, uses Subcategory columns and split lines, and names the merchant from a bank's description.
+- When a statement has a balance column, the review now warns if the balance does not add up, which means a row is missing or doubled.
+- Long statements review faster, and a category chosen for a name in your file applies to every row with that name.
+- In a long statement, ticking a name now selects every row of that name, including rows not yet shown.
+- Importing another app's CSV now reads its category groups, skips its opening-balance rows, and lets you set each of its category names once.
+
+**Plan**
+
+- The phone no longer shows three different daily allowances: Home says what is on top of your plan, and Budget shows the same per-day figure as the computer.
+
+**Own**
+
+- A car or flat's value now follows your latest dated estimate everywhere, and the emergency refill no longer suggests money your plan still needs.
+
+**Protect**
+
+- Phone updates can no longer install as a separate app that leaves your data behind.
+
+**Everywhere**
+
+- Lightning for Windows can now check for, download and install updates itself from Settings; this first version is still installed by hand, and later versions update from inside the app.
+
+**Feel**
+
+- In Arabic, page-header date ranges now read start date first, days, months and payments agree with their count, and the investment revaluation label is in Arabic.
+- Needs you and the phone's next 14 days now count bills the same way, and late bills no longer hide the coming ones.
+- The phone has a new Home screen at /home: your safe-to-spend figure, the three things to do next, your latest transactions and the month so far.
+- The phone no longer repeats net worth on past months, names today in the new-transactions line, lower-cases US dollars, or lists late bills under Next 14 days.
+- The Arabic bank import review, loans, investments and charts now show Arabic instead of a few English words.
+- The selection bar says exactly how many rows each action will touch, and the AI-prompt box no longer sits above your spending answer.
+- Investments shows your holdings first on the phone, scenarios ask one question at a time, and a spending list keeps its way back and exports in one click.
+- On the phone, payday opens on one clear proposal and the compare dates show in full; on the PC you can replace text in just the rows you selected, after a preview.
+- On the phone, Investments shows your holdings before the chart.
+
 ## 2.0.3 · 2026-11-05
 
 **Capture**
