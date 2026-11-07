@@ -110,6 +110,14 @@ def run(shots: Path | None = None, *, arabic: bool = False) -> list[str]:
                 pages = (*PAGES, review, *([circle] if circle else []))  # the bank import's review, as an SMS reaches it; a gam'eya circle
                 for width in (360, 320):
                     page.set_viewport_size({"width": width, "height": 800})
+                    if width == 320:  # J1 (3AY7): with the number keyboard up (about 340 px left) Save is still on screen
+                        page.set_viewport_size({"width": 320, "height": 340})
+                        page.goto(host.origin + "/accounts/add-transaction")
+                        page.focus("#popup-amount")
+                        box = page.locator(".phone-save").first.bounding_box()
+                        if not box or box["y"] < 0 or box["y"] + box["height"] > 340:
+                            problems.append(f"320 /accounts/add-transaction: Save is off screen with the keyboard open ({box})")
+                        page.set_viewport_size({"width": 320, "height": 800})
                     for path in pages:
                         response = page.goto(host.origin + path)
                         if response is None or response.status >= 400:
