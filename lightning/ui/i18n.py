@@ -9,6 +9,7 @@ from dataclasses import replace
 from functools import lru_cache
 import html
 import re
+from decimal import Decimal
 
 from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
@@ -3253,6 +3254,9 @@ ARABIC_UI = {
     'Pay': 'ادفع',
     'Catch up': 'الحق نفسك',
     'Sort': 'رتّب',
+    'Investment revaluation': 'إعادة تقييم الاستثمارات',
+    'Investment revaluation · month_end': 'إعادة تقييم الاستثمارات · نهاية الشهر',
+    'Investment revaluation · sale': 'إعادة تقييم الاستثمارات · بيع',
     'open the counterparty list and choose it to confirm.': 'افتح قايمة الأطراف واختاره عشان تأكد.',
 }
 
@@ -3362,15 +3366,45 @@ def _translate_text(value: str) -> str:
     return value
 
 
+# Counted nouns as (one, two, three to ten): "يوم واحد", "يومين", "٣ أيام", and "١١ يوم" from eleven (or a fraction, or zero).
+_COUNTED = {"يوم": ("يوم واحد", "يومين", "أيام"), "شهر": ("شهر واحد", "شهرين", "شهور"),
+            "دفعة": ("دفعة واحدة", "دفعتين", "دفعات"), "معاملة": ("معاملة واحدة", "معاملتين", "معاملات")}
+_COUNTED_FORMS = {form: lemma for lemma, (_, dual, plural) in _COUNTED.items() for form in (lemma, dual, plural)}
+_COUNT_PHRASE = re.compile(r"\{(\w+)\}\s+(" + "|".join(sorted(_COUNTED_FORMS, key=len, reverse=True)) + r")(?![\u0621-\u064A])")
+
+
+def _agree_counts(template: str, values: dict) -> str:
+    """Rewrite each "{n} <counted noun>" in an Arabic template so the noun agrees with that value's count."""
+    def phrase(match):
+        key, noun = match.group(1), match.group(2)
+        if key not in values:
+            return match.group(0)
+        lemma = _COUNTED_FORMS[noun]
+        one, two, plural = _COUNTED[lemma]
+        try:
+            number = Decimal(str(values[key]))
+        except Exception:
+            return match.group(0)
+        if number == 1:
+            return one
+        if number == 2:
+            return two
+        if number == number.to_integral_value() and 3 <= number <= 10:
+            return "{%s} %s" % (key, plural)
+        return "{%s} %s" % (key, lemma)
+    return _COUNT_PHRASE.sub(phrase, template)
+
+
 def translate(text: str, locale: str = "en", **values: object) -> str:
     value = str(text)
     if locale != "ar":
         return value.format(**values) if values else value
+    counts = dict(values)
     if values:  # a system name passed in (an asset class, a category) is shown in Arabic; a typed name has no entry
         values = {k: _translate_text(v) if isinstance(v, str) else v for k, v in values.items()}
     if value in ARABIC_UI:
         translated = ARABIC_UI[value]
-        return translated.format(**values) if values else translated
+        return _agree_counts(translated, counts).format(**values) if values else translated
     return _translate_text(value.format(**values) if values else value)
 
 
