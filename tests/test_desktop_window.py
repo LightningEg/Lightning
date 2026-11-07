@@ -46,13 +46,17 @@ def test_navigation_allowlist_is_exact(url, expected):
         ("https://lightningeg.com/", False),
         ("https://lightningeg.com/marketplace.html/x", False),
         ("https://lightningeg.com/other.html", False),
+        ("https://lightningeg.com/download.html", True),
+        ("https://lightningeg.com/ar/releases.html?x=1", True),
+        ("https://lightningeg.com/releases.html/x", False),
+        ("https://evil.example/download.html", False),
         ("https://lightningeg.com\\@evil.example/marketplace.html", False),
         ("javascript:alert(1)", False),
         ("file:///marketplace.html", False),
         ("", False),
     ],
 )
-def test_store_link_is_the_one_outside_page(url, expected):
+def test_store_link_allows_only_the_marketplace_and_update_pages(url, expected):
     assert _store_link(url) is expected
 
 

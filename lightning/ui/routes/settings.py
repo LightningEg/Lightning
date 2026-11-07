@@ -10,7 +10,7 @@ from lightning.budgeting.domain import INCOME_FROM_RECURRING
 from lightning.core.dates import today
 
 from ..sections import SECTIONS
-from ..web import container, redirect, render, settled_save
+from ..web import build_version, container, redirect, render, settled_save
 from lightning.categories.domain import Movement, CategoryFamily
 from lightning.core.dates import month_of
 from lightning.workflows.ai_analysis import AIAnalysisService
@@ -18,6 +18,30 @@ from lightning.workflows.ask_ai import PRESETS, SIZES, AskAIService, AskOptions
 from ..periods import parse_period
 
 router = APIRouter(prefix="/settings")
+
+
+def _update_context(request: Request) -> dict:
+    """The "Lightning version" block (NF-9B4). The updater exists only in the frozen Windows app
+    (`app.state.updates`); everywhere else the block shows the version and the download page."""
+    updates = getattr(request.app.state, "updates", None)
+    if updates is None:
+        return {"update": {"state": "unavailable", "current": build_version()}, "update_notice": None}
+    return {"update": updates.status(), "update_notice": updates.take_notice()}
+
+
+@router.get("/update/status")
+async def update_status(request: Request):
+    """The block alone, for the page's small polling script (progress is read here, never computed in JavaScript)."""
+    return render(request, "settings/_update.html", **_update_context(request))
+
+
+@router.post("/update/{action}")
+async def update_action(request: Request, action: str):
+    updates = getattr(request.app.state, "updates", None)
+    if updates is None or action not in ("check", "download", "restart"):
+        return redirect("/settings")
+    {"check": updates.start_check, "download": updates.start_download, "restart": updates.restart}[action]()
+    return redirect("/settings#lightning-version")
 
 
 @router.get("")
@@ -103,7 +127,7 @@ async def settings_page(request: Request):
     currency_tab = "rates" if request.query_params.get("tab") == "rates" else "currencies"
     fx_history = ([row for row in c.reevaluations.history() if row["price_source"] == "FX"]
                   if section == "currencies" and currency_tab == "rates" else [])
-    return render(request, "settings/index.html", db_path=c.db.path, backups=[b.name for b in backups], plan=plan,
+    return render(request, "settings/index.html", **_update_context(request), db_path=c.db.path, backups=[b.name for b in backups], plan=plan,
                   classes=c.assets.list_classes(), assets=c.assets.list_assets(), factor_rows=factor_rows, factor_groups=factor_groups,
                   section=request.query_params.get("section", "general"), return_to=return_to,
                   budget_return_to=f"/settings?section=budget&return_to={return_to}",

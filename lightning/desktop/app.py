@@ -53,7 +53,11 @@ def run(argv=None) -> int:
                 root = args.profile_root
                 if args.smoke:
                     root = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="lightning-profile-smoke-"))) / "Profiles"
-                host = Host(lambda credentials: profile_app(credentials, root)).start()
+                from lightning.desktop.update_controller import for_this_app
+                updates = for_this_app(args.after_update or "", args.update_failed or "")
+                if updates is not None:
+                    updates.startup()
+                host = Host(lambda credentials: profile_app(credentials, root, updates=updates)).start()
                 stage = "window"
                 try:
                     result = run_window(host.launch_url, host.origin, smoke=args.smoke,

@@ -178,6 +178,9 @@ class SessionGate:
                                                   device_line=line, device_action=device_action,
                                                   device_line_values=device_values)
             self.app.state.container = self.session.container
+            updates = getattr(self, "updates", None)
+            if updates is not None and scope["method"] == "GET" and request.url.path in ("/", "/profiles"):
+                updates.chooser_loaded()  # the new version reached its chooser: the helper may stop waiting
             if self.session.journal is not None and self.session.journal.task is None:
                 self.session.journal.start(self, files_dir=self.session.root.parent if getattr(self, "phone", False) else None)
             if self.session.container is not None and request.url.path != "/profiles/health" and not request.url.path.startswith("/static/"):
@@ -186,12 +189,13 @@ class SessionGate:
 
 
 def profile_app(credentials: Credentials, root: Path | str | None = None, devices: Devices | None = None,
-                *, phone: bool = False, sms=None, biometric=None, stay=None, files=None):
+                *, phone: bool = False, sms=None, biometric=None, stay=None, files=None, updates=None):
     """`phone`: the Android app, whose pages use the phone frame and screens (guideline Part C). `sms`: where
     bank messages come from on that phone (`lightning.sms_imports.SmsSource`), or None. `biometric`: the phone's
     optional fingerprint unlock (`lightning.security.biometric.FingerprintUnlock`), or None: never on a PC.
     `stay`: staying signed in on the phone (the same slots over `StayBridge`, no prompt), or None: never on a PC.
-    `files`: where the phone saves downloads (`lightning.runtime.phone_files.FileSaver`), or None."""
+    `files`: where the phone saves downloads (`lightning.runtime.phone_files.FileSaver`), or None.
+    `updates`: the Windows app's `UpdateController` (Settings › Lightning version), or None: never elsewhere."""
     configure_memory_only_import_uploads()
     session = ProfileSession(root)
     session.borrowed_home = ""
@@ -214,6 +218,11 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     app.include_router(journal_setup_router(session, devices))
     gate.devices = devices
     gate.phone = phone
+    app.state.updates = updates
+    gate.updates = updates
+    if updates is not None:  # what only the profile app knows: how to lock, and what is borrowed
+        updates.devices, updates.lock_profile = devices, session.close
+        updates.profiles_root, updates.borrowed_root = session.root, devices.root / "borrowed"
     fingerprint = biometric if phone else None
     gate.fingerprint = fingerprint
     # Stay signed in (owner, 2026-11-01): the phone opens the profile by itself until Lock, and never locks for idling.

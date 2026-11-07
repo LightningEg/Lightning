@@ -46,36 +46,8 @@ Android updates come from Google Play or the APK; this item is Windows only.
   the phone show the version and a link to the download page instead.
 - The first version carrying the updater is still installed by hand; say so in its release note.
 
-## 9B3 The helper: swap folders with rollback · L
-**Status: helper built, two hooks left.** Built: `lightning/desktop/update_helper.py` (the swap, rollback and `repair()` after a power cut, OS calls injected),
-`update_guard.py` (the lend and move-home rule; a damaged borrowed store blocks) and `--finish-update` in
-`desktop/app.py`; tests in `tests/test_desktop_update_helper.py`. **Left (done with 9B4's button):**
-1. Settings › Restart to update: call `update_guard.refusals`, lock the open profile through the normal lock path,
-   start `staged\Lightning.exe --finish-update --install <folder> --old-pid <pid> --from <version>`, exit.
-2. The new app calls `update_helper.mark_ok(updates, version)` when its profile chooser has loaded (before any
-   unlock or migration), runs `repair()` at start, and deletes the staged folder and ZIP after a successful start.
-**Done when:** a Windows PC shows both hooks working (9B5).
-
-## 9B4 The Settings section and its words · M
-In `ui/templates/settings/index.html`, a "Lightning version" block (guideline A: soft wells, Ink headers; no new
-style). States and English copy (Arabic for each through the normal i18n, then run the arabic-check skill;
-voice: `guideline/brand-voice.md`):
-- Idle: "Version 2.0.3" · button "Check for updates".
-- Up to date: "You have the newest version."
-- Available: "Version 2.0.4 is ready · 31 MB" · "Download" · link "What's new" (website release notes).
-- Working: "Downloading… 40%", then "Checking it works on this PC…".
-- Ready: "Restart to update" with "Lightning will close and open again. Your profiles stay as they are."
-- Refused, lend: "Hand <profile> back to your phone first, then update."
-- Refused, folder: "Lightning can't update itself in this folder. Download the new version instead." + link.
-- Failed: plain reason + "Download it yourself" link.
-- After update (`--after-update`): a one-time notice "Updated to 2.0.4." After `--update-failed`: "The update to
-  2.0.4 didn't start, so you're back on 2.0.3." + link to report it.
-Progress is read by a small polling endpoint; no figures are computed in JavaScript.
-**Done when:** route tests for every state with the 9B2 module faked; Mohab still passes; A16 checked; Arabic check
-clean. ARCHITECTURE "Updating" bullet and `packaging/APP_README.txt` describe the button; Glossary gains
-"update manifest".
-
 ## 9B5 Try it on a real Windows PC · owner
+Built in 9B1-9B4 (ARCHITECTURE › Build and release, Updating). Needs first: the website publishes `/download.html`, `/releases.html` and their `/ar/` copies (the app opens exactly these, `entitlements.UPDATE_PATHS`); on a Windows build the new app writes `ok-<version>` when its chooser loads (`UpdateController.chooser_loaded`, `--after-update`) and the helper's real PID wait and launch (`RealHost`) are proven only here.
 With dummy profiles, from a build carrying the updater to the next release: update; update with a profile borrowed
 (refused, then allowed after hand-back); update from a read-only folder (refused); force a failed start (old version
 comes back); open the `.previous` copy by hand. Report each as passed or failed in the item.

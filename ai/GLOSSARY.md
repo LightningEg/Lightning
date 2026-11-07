@@ -343,6 +343,7 @@ Categories are not split into income and expense trees: pick the activity that e
 | **Ticker / symbol** | Public exchange symbol; not Lightning's code or ID. Optional ISIN also matches sources. |
 | **Exchange** | Where a stock or ETF trades, stored as ISO 10383 MIC, shown by common name; no exchange means EGX; funds and gold have none. |
 | **Price file** | One market's closing prices, published as a checked folder and refreshed after close; Settings › Price files picks them. Code: pack. |
+| **Update manifest** | `UPDATE.json` in a release: version, ZIP name, SHA-256, size, date and key id, with `UPDATE.json.sig` (Ed25519 over `lightning-update-v1:` plus its exact bytes). The app trusts an update only if the pinned key in `update_keys.json` verifies it. Not a licence. |
 | **Update prices** | Asks the sources for each held investment's latest close and missing month-end closes (source `ONLINE`); automatic only on the first open after a month ends; shared price files are the backup after two failed tries. |
 | **Market key** | A price file's permanent name for an instrument: ISO 3166 country and ticker, `EG:FUND:<id>`, or a currency pair; stored on the matched asset. |
 | **Unit** | What is counted for an asset. |

@@ -12,7 +12,7 @@ from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
 from lightning import DISPLAY_VERSION
-from lightning.ui.entitlements import MARKETPLACE_HOST, MARKETPLACE_PATHS
+from lightning.ui.entitlements import MARKETPLACE_HOST, OUTSIDE_PATHS
 
 _PYWEBVIEW_VERSION = "6.2.1"
 _SMOKE_TIMEOUT = 20.0
@@ -143,7 +143,7 @@ def _origin(value: str) -> tuple[str, str, int]:
 
 
 def _store_link(uri: str) -> bool:
-    """The one outside page the app may open, in the system browser: the website's marketplace (any query or fragment)."""
+    """The outside pages the app may open, in the system browser: the website's marketplace and the update block's download and release-notes pages (any query or fragment)."""
     try:
         parsed = urlsplit(str(uri))
         return (
@@ -152,7 +152,7 @@ def _store_link(uri: str) -> bool:
             and parsed.username is None
             and parsed.password is None
             and parsed.port is None
-            and parsed.path in MARKETPLACE_PATHS.values()
+            and parsed.path in OUTSIDE_PATHS
             and "\\" not in str(uri)
         )
     except ValueError:

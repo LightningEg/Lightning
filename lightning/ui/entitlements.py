@@ -31,6 +31,18 @@ MARKETPLACE_HOST = "lightningeg.com"
 MARKETPLACE_PATHS = {"en": "/marketplace.html", "ar": "/ar/marketplace.html"}
 
 
+# The update block's two outside pages (NF-9B4, owner pick): the website's download and release-notes pages. Like the
+# marketplace they open in the system browser, and the PC window allows exactly these paths (`OUTSIDE_PATHS`).
+UPDATE_PATHS = {"download": {"en": "/download.html", "ar": "/ar/download.html"},
+                "releases": {"en": "/releases.html", "ar": "/ar/releases.html"}}
+OUTSIDE_PATHS = frozenset(MARKETPLACE_PATHS.values()) | {p for pages in UPDATE_PATHS.values() for p in pages.values()}
+
+
+def outside_url(page: str, locale: str = "en") -> str:
+    """Address of an update page ("download" or "releases") in the page's language."""
+    return f"https://{MARKETPLACE_HOST}{UPDATE_PATHS[page].get(locale, UPDATE_PATHS[page]['en'])}"
+
+
 def marketplace_url(locale: str = "en") -> str:
     """The marketplace page for this language, without query or fragment: pages add ?from=app and the item."""
     return f"https://{MARKETPLACE_HOST}{MARKETPLACE_PATHS.get(locale, MARKETPLACE_PATHS['en'])}"
