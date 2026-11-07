@@ -45,11 +45,14 @@ review; C11.1 Home; C11.3 Money; new C13 States. Done when: the website's `guide
 the same (`cmp`), a PR is open in each repo, and `tests/test_docs_structure.py` passes with the sibling repo present.
 
 ## 3AY4 The phone shell: its own router, base, stylesheet and navigation · L
-`lightning/ui/phone/` mounted only by `profile_app(..., phone=True)`, with an import-linter contract that it does not
-import `lightning.ui.routes`. `phone/base.html`, and a `phone.css` standalone on the theme tokens. A stack per slot,
-back-gesture order, the "This is on your PC" page in place of any PC fallback, figures always at the right edge, and
-status-bar icons that follow the theme (with IV-3F). Needs 3AY3 merged first. Done when: a test fails if a phone route
-renders a template outside `templates/phone/`; `tests/test_phone_nav_browser.py` and `tools/phone_check.py` pass.
+Built: (a) `lightning/ui/phone/` with `router.py` mounted first by `profile_app(..., phone=True)` (`mount_phone`,
+`render_phone` that accepts only `templates/phone/` names), an import-linter contract that it does not import
+`lightning.ui.routes`, and `tests/test_phone_shell.py`. It owns no URL yet; a slot's URLs move into it with Home (3AY6).
+Left: (b) `phone/base.html` that never extends the PC base, and `phone.css` standalone on the theme tokens, not layered
+on `style.css`; (c) a stack per slot, back-gesture order and status-bar icons that follow the theme (with IV-3F);
+(d) the "This is on your PC" page in place of any PC fallback, switched on with 3AY11 once every slot has moved.
+Done when: a test fails if a phone route renders a template outside `templates/phone/`;
+`tests/test_phone_nav_browser.py` and `tools/phone_check.py` pass.
 
 ## 3AY5 One bill state and the catch-up state · L
 `lightning/planning/bill_state.py`: each payment's state for a day (late and stale, late, due soon, before payday, later,
