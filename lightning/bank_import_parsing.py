@@ -8,11 +8,12 @@ from lightning.bank_import_rows import (
 )
 
 
-def normalize_rows(raw_rows, mapping, amount_model, invert_amount, account_currency=None, account_check=None):
+def normalize_rows(raw_rows, mapping, amount_model, invert_amount, account_currency=None, account_check=None, date_profile=None):
     """Build the same review rows and row-level errors without changing the ledger."""
     fields = (("Date", *SEPARATE_AMOUNT_FIELDS, *OPTIONAL) if amount_model == "SEPARATE"
               else ("Date", *OPTIONAL) if amount_model == "BALANCE" else (*REQUIRED, *OPTIONAL))
-    date_profile = profile_dates(raw.get(mapping.get("Date", ""), "") for raw in raw_rows)
+    raw_rows = list(raw_rows)
+    date_profile = date_profile or profile_dates(raw.get(mapping.get("Date", ""), "") for raw in raw_rows)
     stored = []
     if amount_model == "BALANCE":
         raw_rows = list(raw_rows)

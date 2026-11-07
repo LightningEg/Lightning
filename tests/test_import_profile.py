@@ -76,16 +76,27 @@ def test_row_in_another_currency_never_posts_its_own_figure():
     assert currency_code("جنيه") == "EGP"
 
 
-def test_row_for_another_account_is_not_posted_here(c, setup):
-    accounts = setup[0]
-    csv = b"Account,Date,Amount,Counterparty\nCIB Current,2026-10-01,-99,Netflix\nCIB-CUR-EGP,2026-10-02,-5,Kiosk\nSomething else,2026-10-03,-7,Kiosk\n"
-    other = next(a for a in c.accounts.list(active_only=True) if a.institution and a.institution != "CIB")
-    batch, _ = c.bank_imports.stage(other.id, "x.csv", csv)
-    rows = c.db.all("SELECT raw_json FROM bank_import_rows WHERE batch_id=? ORDER BY row_number", (batch,))
+def test_a_file_with_an_account_column_is_split_into_each_accounts_own_review(c, setup):
     import json
-    errs = [json.loads(r["raw_json"])["parsed"]["_errors"] for r in rows]
-    assert errs[0] and "CIB Current" in errs[0][0] and errs[1] and not errs[2]
+    accounts = setup[0]
+    cib = accounts["cib"].id
+    other = next(a for a in c.accounts.list(active_only=True) if a.institution and a.institution != "CIB")
+    csv = (b"Account,Date,Amount,Counterparty\nCIB Current,2026-10-01,-99,Netflix\n"
+           b"CIB-CUR-EGP,2026-10-02,-5,Kiosk\nSomething else,2026-10-03,-7,Kiosk\n")
+    batch, _ = c.bank_imports.stage(other.id, "x.csv", csv)
+    here = c.db.all("SELECT raw_json FROM bank_import_rows WHERE batch_id=?", (batch,))
+    assert [json.loads(r["raw_json"])["parsed"]["Counterparty"] for r in here] == ["Kiosk"]  # only the unknown name stays
+    waiting = c.bank_imports.waiting(cib)
+    assert len(waiting) == 1 and waiting[0]["waiting"] == 2 and waiting[0]["file_name"] == "x.csv"
 
+
+def test_a_file_wholly_for_another_account_is_not_posted_here(c, setup):
+    import json
+    other = next(a for a in c.accounts.list(active_only=True) if a.institution and a.institution != "CIB")
+    csv = b"Account,Date,Amount,Counterparty\nCIB Current,2026-10-01,-99,Netflix\nCIB-CUR-EGP,2026-10-02,-5,Kiosk\n"
+    batch, _ = c.bank_imports.stage(other.id, "y.csv", csv)
+    rows = [json.loads(r["raw_json"])["parsed"] for r in c.db.all("SELECT raw_json FROM bank_import_rows WHERE batch_id=?", (batch,))]
+    assert all(r["_errors"] and "CIB Current" in r["_errors"][0] for r in rows)
 
 def test_long_review_is_paged_and_unseen_rows_still_post(c, setup):
     import re
@@ -218,3 +229,39 @@ def test_a_category_picked_for_a_file_name_reaches_rows_not_drawn(c, setup):
     done = client.post(f"/accounts/{cib}/import/{batch}/confirm", data={"labelcat": json.dumps(["Zzz Unknown Name", str(cat.id)])}, follow_redirects=False)
     assert done.status_code == 200
     assert c.db.scalar("SELECT COUNT(*) FROM bank_import_rows WHERE batch_id=? AND status='POSTED'", (batch,)) == 300
+
+
+def test_the_upload_says_where_the_other_accounts_rows_went(c, setup):
+    from urllib.parse import unquote
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    cib = setup[0]["cib"].id
+    other = next(a for a in c.accounts.list(active_only=True) if a.institution and a.institution != "CIB")
+    csv = b"Account,Date,Amount,Counterparty\nCIB Current,2026-10-01,-99,Netflix\nSomething else,2026-10-03,-7,Kiosk\n"
+    r = TestClient(create_app(c), base_url="http://127.0.0.1").post(
+        f"/accounts/{other.id}/import", files={"file": ("z.csv", csv, "text/csv")}, follow_redirects=False)
+    assert r.status_code == 303 and "CIB Current (1)" in unquote(r.headers["location"])
+
+
+def test_a_name_chosen_once_resolves_in_the_next_file(c, setup):
+    cib = setup[0]["cib"].id
+    cat = next(x for x in c.categories.pickable() if x.movement.name == "OUTFLOW" and x.parent_id)
+    first = b"Date,Amount,Counterparty,Category\n2026-10-01,-10,Seoudi,Zzz Unknown Name\n"
+    batch, _ = c.bank_imports.stage(cib, "a.csv", first)
+    _, rows = c.bank_imports.preview(batch)
+    assert not rows[0]["_category_id"] and rows[0]["_file_label"] == "Zzz Unknown Name"
+    c.bank_imports.confirm(batch, {rows[0]["_import_row_id"]: {"category_id": str(cat.id)}})
+    second = b"Date,Amount,Counterparty,Category\n2026-11-01,-20,Uber,Zzz Unknown Name\n"
+    batch2, _ = c.bank_imports.stage(cib, "b.csv", second)
+    _, rows2 = c.bank_imports.preview(batch2)
+    assert rows2[0]["_category_id"] == cat.id and rows2[0]["_ready"] and not rows2[0]["_file_label"]
+
+
+def test_a_movement_written_as_two_lines_is_offered_once(c, setup):
+    cib = setup[0]["cib"].id
+    data = (b"Date,Amount,Counterparty,Notes\n2026-10-06,4000,,Ownership to you\n"
+            b"2026-10-06,-4000,,Ownership from Mama\n2026-10-07,-30,Uber,Ride\n")
+    batch, _ = c.bank_imports.stage(cib, "p.csv", data)
+    _, rows = c.bank_imports.preview(batch)
+    assert not rows[0].get("_skip_reason") and "Pairs with line 2" in rows[1]["_skip_reason"]
+    assert not rows[2].get("_skip_reason")

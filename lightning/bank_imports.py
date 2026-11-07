@@ -17,6 +17,7 @@ from lightning.bank_import_rows import (INTERNAL_WORDS as INTERNAL_WORDS, MAX_BY
 from lightning.bank_import_proposals import ImportProposals, LINK_WINDOW_DAYS as LINK_WINDOW_DAYS
 from lightning.bank_import_posting import ImportPoster
 from lightning.bank_import_parsing import normalize_rows
+from lightning.import_profile import profile_dates
 
 
 class _ImportReviewRequired(Exception):
@@ -162,9 +163,9 @@ class BankImportService:
                     "or skip the row.")
         return check
 
-    def stage(self, account_id: int, filename: str, data: bytes, mapping: dict[str, str] | None = None, invert_amount: bool = False):
-        self.accounts.require_usable(account_id)
-        digest = hashlib.sha256(data).hexdigest()
+    def _claim_file_hash(self, account_id: int, digest: str) -> str:
+        """The hash this upload is stored under: a waiting review of the same file is replaced; a posted one is kept
+        and the new attempt gets a numbered hash so it goes through review again."""
         attempts = self.db.all("SELECT id,status,file_hash FROM bank_import_batches WHERE account_id=? "
                                "AND (file_hash=? OR file_hash LIKE ?) ORDER BY id DESC",
                                (account_id, digest, digest + "#%"))
@@ -173,14 +174,35 @@ class BankImportService:
             old = attempts[0]
             if old["status"] == "REVIEW":
                 file_hash = old["file_hash"]
-            else:
-                # Preserve every posted import attempt, but let an intentional
-                # re-upload go through review again (including duplicate flags).
-                file_hash = f"{digest}#{len(attempts) + 1}"
-            if old["status"] == "REVIEW":
                 with self.db.transaction():
                     self.db.execute("DELETE FROM bank_import_rows WHERE batch_id=?", (old["id"],))
                     self.db.execute("DELETE FROM bank_import_batches WHERE id=?", (old["id"],))
+            else:
+                file_hash = f"{digest}#{len(attempts) + 1}"
+        return file_hash
+
+    def _route_by_account(self, account_id: int, raw_rows: list[dict], mapping: dict) -> dict[int, list[dict]]:
+        """IT-7Z2: with an Account column mapped, each row goes to the account its name says (label, code, name or an
+        institution with one account). Unknown or ambiguous names, and the importing account's own, stay here. Nothing is
+        split unless at least one row belongs to the importing account."""
+        column = mapping.get("Account")
+        if not column:
+            return {account_id: raw_rows}
+        accounts = self.accounts.list(active_only=True)
+        names = {a.id: {a.label.casefold(), a.code.casefold(), a.name.casefold(),
+                        (a.institution or "").strip().casefold()} - {""} for a in accounts}
+        routes: dict[int, list[dict]] = {}
+        for raw in raw_rows:
+            wanted = " ".join(str(raw.get(column, "")).split()).casefold()
+            hits = [a.id for a in accounts if wanted and wanted in names[a.id]]
+            target = hits[0] if len(hits) == 1 and account_id not in hits else account_id
+            routes.setdefault(target, []).append(raw)
+        return routes if account_id in routes else {account_id: raw_rows}
+
+    def stage(self, account_id: int, filename: str, data: bytes, mapping: dict[str, str] | None = None, invert_amount: bool = False):
+        self.accounts.require_usable(account_id)
+        digest = hashlib.sha256(data).hexdigest()
+        file_hash = self._claim_file_hash(account_id, digest)
         headers, raw_rows = decode_csv(data)
         header_signature = hashlib.sha256(json.dumps(headers, ensure_ascii=False).encode()).hexdigest()
         saved = self.db.one("SELECT mapping_json,invert_amount FROM bank_import_column_maps WHERE account_id=? AND header_signature=?",
@@ -204,8 +226,14 @@ class BankImportService:
         if missing:
             raise ValidationError(
                 "Map Date and either a signed Amount column or two different columns for Inflow and Outflow.", "mapping")
-        stored = normalize_rows(raw_rows, mapping, amount_model, invert_amount, self.accounts.get(account_id).currency,
-                              self._other_account_check(account_id))
+        routes = self._route_by_account(account_id, raw_rows, mapping)
+        date_profile = profile_dates(raw.get(mapping.get("Date", ""), "") for raw in raw_rows)  # one decision per file
+        stored_by_account = {
+            target: normalize_rows(rows, mapping, amount_model, invert_amount, self.accounts.get(target).currency,
+                                   self._other_account_check(target), date_profile)
+            for target, rows in routes.items()}
+        stored = stored_by_account[account_id]
+        other_hashes = {target: self._claim_file_hash(target, digest) for target in routes if target != account_id}
         now = now_iso()
         with self.db.transaction():
             canonical_fields = (("Date", *SEPARATE_AMOUNT_FIELDS, *OPTIONAL) if amount_model == "SEPARATE" else (*REQUIRED, *OPTIONAL))
@@ -216,19 +244,24 @@ class BankImportService:
                                 "mapping_json=excluded.mapping_json,invert_amount=excluded.invert_amount,updated_at=excluded.updated_at",
                                 (account_id, header_signature, json.dumps(mapping | {"amount_model": amount_model}),
                                  int(invert_amount), now, now))
-            cur = self.db.execute(
-                "INSERT INTO bank_import_batches(account_id,file_hash,file_name,status,created_at) "
-                "VALUES (?,?,?,'REVIEW',?)", (account_id, file_hash, filename[:255], now)
-            )
-            batch_id = int(cur.lastrowid)
-            for raw, parsed in stored:
-                ref = parsed["Reference"].strip() or None
-                self.db.execute(
-                    "INSERT INTO bank_import_rows(batch_id,account_id,row_number,raw_json,bank_reference,status) "
-                    "VALUES (?,?,?,?,?,?)", (batch_id, account_id, int(raw["__line__"]),
-                    json.dumps({"raw": raw, "parsed": parsed}, ensure_ascii=False), ref, "REVIEW")
-                )
+            batch_id = self._insert_batch(account_id, file_hash, filename, stored, now)
+            for target, rows in stored_by_account.items():
+                if target != account_id:  # the rows of this file that belong to another of your accounts: its own review
+                    self._insert_batch(target, other_hashes[target], filename, rows, now)
         return batch_id, False
+
+    def _insert_batch(self, account_id: int, file_hash: str, filename: str, stored, now: str) -> int:
+        cur = self.db.execute(
+            "INSERT INTO bank_import_batches(account_id,file_hash,file_name,status,created_at) "
+            "VALUES (?,?,?,'REVIEW',?)", (account_id, file_hash, filename[:255], now))
+        batch_id = int(cur.lastrowid)
+        for raw, parsed in stored:
+            ref = parsed["Reference"].strip() or None
+            self.db.execute(
+                "INSERT INTO bank_import_rows(batch_id,account_id,row_number,raw_json,bank_reference,status) "
+                "VALUES (?,?,?,?,?,?)", (batch_id, account_id, int(raw["__line__"]),
+                json.dumps({"raw": raw, "parsed": parsed}, ensure_ascii=False), ref, "REVIEW"))
+        return batch_id
 
     def preview(self, batch_id: int):
         return self._proposals.preview(batch_id)
@@ -313,6 +346,7 @@ class BankImportService:
             return day, int(day in inflows_first and amount <= 0), line
 
         errors = {}
+        learned: dict[str, int] = {}
         ambiguous_reserves = 0
         # A merchant typed as new on several rows (salary every month) is
         # created once; later rows in this batch reuse it.
@@ -350,6 +384,8 @@ class BankImportService:
                         with self.db.transaction():
                             matched = self._post_import_row(batch, row_id, decision, row, accounts)
                             ambiguous_reserves += int(matched < 0)
+                        if row.get("_file_label") and str(decision.get("category_id") or "").isdigit():
+                            learned[str(row["_file_label"]).casefold()] = int(decision["category_id"])
                         self._poster._created_in_batch.update(self._poster._pending_created)
                     except LightningError as exc:
                         errors[int(row_id)] = exc.message
@@ -357,6 +393,8 @@ class BankImportService:
                     # Validation used temporary postings to check dependent rows;
                     # roll all of them back so this CSV remains completely unposted.
                     raise _ImportReviewRequired(errors)
+                if learned:  # IT-7Z1: next month's file from the same app resolves these names before review
+                    self.remember_names(batch["account_id"], learned)
                 remaining = self.db.scalar(
                     "SELECT COUNT(*) FROM bank_import_rows WHERE batch_id=? AND status='REVIEW'", (batch_id,))
                 if not remaining:
@@ -365,6 +403,19 @@ class BankImportService:
         except _ImportReviewRequired as exc:
             errors = exc.errors
         return self.summary(batch_id) | {"errors": errors, "ambiguous_reserves": ambiguous_reserves}
+
+    def remembered_names(self, account_id: int) -> dict[str, int]:
+        """The category a person chose for each of a file's own category names, kept per account (IT-7Z1)."""
+        from lightning.database.settings import SettingsStore
+        try:
+            return {str(k): int(v) for k, v in json.loads(SettingsStore(self.db).get(f"import_names_{account_id}") or "{}").items()}
+        except (ValueError, TypeError):
+            return {}
+
+    def remember_names(self, account_id: int, names: dict[str, int]) -> None:
+        from lightning.database.settings import SettingsStore
+        SettingsStore(self.db).set(f"import_names_{account_id}",
+                                   json.dumps(self.remembered_names(account_id) | names, ensure_ascii=False, sort_keys=True))
 
     def _link_import_row(self, row_id, row, match: str) -> None:
         self._poster._link_import_row(row_id, row, match)

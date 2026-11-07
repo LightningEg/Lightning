@@ -38,9 +38,19 @@ class ImportProposals:
         return self._accounts_seen[key]
 
     _accounts_seen = None
+    _remembered: dict = {}
+
+    def _remembered_names(self, account_id: int) -> dict:
+        """IT-7Z1: what the person chose before for a name in this account's files (kept by `remember_names`)."""
+        from lightning.database.settings import SettingsStore
+        try:
+            return {str(k): int(v) for k, v in json.loads(SettingsStore(self.db).get(f"import_names_{account_id}") or "{}").items()}
+        except (ValueError, TypeError):
+            return {}
 
     def preview(self, batch_id: int):
         self._accounts_seen = {}
+        self._remembered = {}
         try:
             return self._preview(batch_id)
         finally:
@@ -48,6 +58,7 @@ class ImportProposals:
 
     def _preview(self, batch_id: int):
         batch = self.db.one("SELECT * FROM bank_import_batches WHERE id=?", (batch_id,))
+        self._remembered = self._remembered_names(batch["account_id"]) if batch else {}
         if not batch:
             raise NotFoundError("Import batch not found.")
         rows = self.db.all("SELECT * FROM bank_import_rows WHERE batch_id=? ORDER BY row_number", (batch_id,))
@@ -70,6 +81,7 @@ class ImportProposals:
             except (TypeError, ValueError, KeyError):
                 continue
         active_accounts = self._active()
+        pairs = self._paired_rows(rows)
         seen_refs = set()
         # A full-history query: run it at most once per preview, not once per row (7O).
         usual = functools.cache(self.transactions.usual_categories)
@@ -104,6 +116,9 @@ class ImportProposals:
             parsed["_link_candidates"] = ([] if ref_duplicate or repeat_import or row["status"] != "REVIEW"
                                           else self._link_candidates(batch["account_id"], parsed, batch["id"]))
             self._split_path(parsed)
+            if row["id"] in pairs and not parsed.get("_skip_reason"):
+                parsed["_skip_reason"] = (f"Pairs with line {pairs[row['id']]}: the same movement written twice (opposite "
+                                          "amounts, same day). Skipped; untick Skip to post it on its own.")
             parsed["_internal"] = is_internal(parsed["Category"])
             parsed["_balance_row"] = bool(parsed.get("_skip_reason")) or is_balance_row(parsed["Category"], parsed["Counterparty"])
             outcome = self._rules_outcome(batch["account_id"], parsed, cp)
@@ -293,6 +308,32 @@ class ImportProposals:
             parsed["Notes"] = " ".join([parsed["Notes"].strip(), *(f"#{t}" for t in missing)]).strip()
         return outcome
 
+    @staticmethod
+    def _paired_rows(rows) -> dict[int, int]:
+        """IT-7Z3: a movement another app wrote as two lines ("Ownership to you" and "Ownership from Mama": the same
+        day, opposite amounts, the same first word of the note). The later line is offered as skipped, pointing at the
+        first, so the movement is posted once. Returns {row id: line of its partner}."""
+        seen: dict[tuple, tuple[int, int]] = {}
+        out: dict[int, int] = {}
+        for source in rows:
+            parsed = json.loads(source["raw_json"])["parsed"]
+            if parsed.get("_errors") or parsed.get("_skip_reason"):
+                continue
+            words = re.findall(r"[^\W\d_]+", (parsed.get("Notes") or "").split("|")[0].casefold())
+            if not words or words[0] not in {"ownership", "transfer"}:
+                continue
+            try:
+                amount = Decimal(parsed["Amount"])
+            except ArithmeticError:
+                continue
+            key = (parsed["Date"], abs(amount), words[0])
+            partner = seen.get(key)
+            if partner and partner[0] != (1 if amount > 0 else -1) and source["id"] not in out:
+                out[source["id"]] = partner[1]
+            elif not partner:
+                seen[key] = (1 if amount > 0 else -1, int(parsed.get("_line") or source["row_number"]))
+        return out
+
     def _split_path(self, parsed) -> None:
         """"Personal:Food", "Work > Transportation" in the Category cell are a group and a name (IT-7AA7), unless the
         whole text is already one of your categories ("Bills/Utilities")."""
@@ -338,6 +379,14 @@ class ImportProposals:
                         for category_id, value in self.rules.split_for(outcome.rule_id, parsed["Amount"]) or []]
                 return category.id
         group = (parsed.get("Group") or "").strip()
+        label = (f"{group} › {parsed['Category'].strip()}" if group else (parsed["Category"] or "").strip()).casefold()
+        if label and label in self._remembered:
+            try:
+                saved = self.categories.get(self._remembered[label])
+                if saved.active and (Decimal(parsed["Amount"]) > 0 or saved.movement == Movement.OUTFLOW):
+                    return saved.id
+            except Exception:  # a category deleted since: the name is asked again
+                pass
         if parsed["Category"] and group:
             # The file's own group says which of two same-named categories it means ("Work › Transportation").
             try:

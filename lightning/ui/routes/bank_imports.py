@@ -118,6 +118,14 @@ def _waiting_imports(c, account_id: int) -> list[dict]:
     return c.bank_imports.waiting(account_id)
 
 
+def _split_note(c, account_id: int, filenames) -> str:
+    """IT-7Z2: rows of the file that belong to another of your accounts wait in that account's own review."""
+    names = {str(name)[:255] for name in filenames}
+    parts = [f"{c.accounts.get(w['account_id']).name} ({w['waiting']})" for w in c.bank_imports.waiting_all()
+             if w["file_name"] in names and w["account_id"] != account_id]
+    return ("Rows for other accounts are waiting in their own reviews: " + ", ".join(parts) + ".") if parts else ""
+
+
 def _render_upload(request, c, account_id, *, error="", status_code=200):
     from lightning.workflows.ai_prompts import pdf_to_csv_prompt
     account = c.accounts.get(account_id)
@@ -216,6 +224,7 @@ async def upload(request: Request, account_id: int):
         message = ("Imported files are ready for review." if len(batches) > 1 else "")
         if repeated and len(batches) == 1:
             message = "This exact file was already imported."
+        message = f"{message} {_split_note(c, account_id, [item[0] for item in prepared])}".strip()
         return redirect(f"/accounts/{account_id}/import/{batch_id}", message)
     except LightningError as exc:
         return _render_upload(request, c, account_id, error=exc.message, status_code=400)
@@ -272,6 +281,7 @@ async def map_columns(request: Request, account_id: int):
         return _render_upload(request, c, account_id, error=msg, status_code=400)
     batch_id, repeated = batches[0]
     message = "Files are ready for review." if len(batches) > 1 else "This exact file was already imported." if repeated else ""
+    message = f"{message} {_split_note(c, account_id, [item['filename'] for item in bundle])}".strip()
     return redirect(f"/accounts/{account_id}/import/{batch_id}", message)
 
 
