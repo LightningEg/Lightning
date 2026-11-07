@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 38 open items. Each folder holds its reports and its items.
+11 big pictures, 46 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -62,12 +62,13 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
+| **BV-3BA** | [Arabic - page-header date ranges read backwards, figures use two thousands separators, and counts disagree with their nouns](3-polish-and-arabic/BV-3BA-arabic-date-ranges-and-number-forms.md) | bug, visual · medium | Feel | M | new |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | new |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/OW-3AI-institution-logos.md) | owner task | Feel |  | ready |
 
 Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX. Next free code: 3BA.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX. Next free code: 3BB.
 
 ## 4 Edit journal and devices
 
@@ -200,13 +201,12 @@ The phone is its own product: a few places that each answer one question, quick 
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
+| **IV-11A** | [Phone first run - every Add is greyed out until "Save currencies" is pressed, and an empty Transactions says "Nothing matches"](11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | improvement, visual | Everywhere | S | new |
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | building |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner | |
 | **IV-3AY** | [Phone-first architecture - five places that each answer one question, state-aware screens, and a phone decoupled from the PC](11-phone-ux/IV-3AY-phone-first-architecture.md) | improvement, visual | Everywhere | L | ready |
-| IV-3AY3 | ↳ Guideline Part C rewrite, in both repos | | | M | |
 | IV-3AY4 | ↳ The phone shell: its own router, base, stylesheet and navigation | | | L | |
-| IV-3AY5 | ↳ One bill state and the catch-up state | | | L | |
 | IV-3AY6 | ↳ Home | | | M | |
 | IV-3AY7 | ↳ Add as a sheet over any slot | | | M | |
 | IV-3AY8 | ↳ Activity with To review | | | L | |
@@ -219,7 +219,7 @@ The phone is its own product: a few places that each answer one question, quick 
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md).
 
-Done: 3AY1. Next free code: 11A.
+Done: 3AY1, 3AY3, 3AY5. Next free code: 11B.
 
 ## 12 Desktop UX and smart next steps
 
@@ -227,6 +227,11 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
+| **BV-12A** | [The phone gives three different "a day" allowances (2,057, 278, 219) for the same 25 days](12-desktop-ux/BV-12A-one-daily-allowance-on-every-screen.md) | bug, visual · high | Plan | S | new |
+| **BV-12B** | [Budget says "over your plan's pace" every month for a person whose spending is always heavy in the first week](12-desktop-ux/BV-12B-budget-pace-follows-the-usual-month.md) | bug, visual · medium | Plan | M | new |
+| **BV-12D** | [Nine small places where two neighbouring figures disagree or a figure reads wrong (Scenarios "None None", 87,768 against 87,368, "+14,000" still to pay)](12-desktop-ux/BV-12D-neighbouring-figures-that-disagree.md) | bug, visual · medium | Understand | M | new |
+| **IV-12C** | [PC quick add - Enter after a known name skips the empty Account field, and the next word typed replaces the category](12-desktop-ux/IV-12C-quick-add-goes-to-the-empty-field.md) | improvement, visual | Capture | S | new |
+| **IV-12E** | [PC ledger noise - each transfer is two rows, the save message shows an internal reference and cents, and Mark paid has no Undo](12-desktop-ux/IV-12E-pc-ledger-noise.md) | improvement, visual | Capture | M | new |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | |
 | IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | M | |
@@ -235,6 +240,12 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | M | |
 | **IV-3H** | [Tab-by-tab review: what a real user needs next](12-desktop-ux/IV-3H-tab-by-tab-review.md) | improvement, visual | Feel | L | ready |
 | IV-3H3 | ↳ Step 3: features | | | L | |
+| **NF-12G** | [Money lent to others and costs split with others - who owes you what, counted honestly in what you own](12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | new feature | Own | L | new |
+| NF-12G1 | ↳ Design: the person, the loan, the split, and where they show | | | M | |
+| NF-12G2 | ↳ Money lent and paid back | | | L | |
+| NF-12G3 | ↳ A cost split with others | | | L | |
+| NF-12G4 | ↳ Who owes what, per person | | | M | |
+| NF-12G5 | ↳ Mohab, Arabic and the guideline | | | M | |
 | **NF-3AZ** | [Offer the next step where a figure or row raises the question, always with a preview and an explicit confirmation](12-desktop-ux/NF-3AZ-next-step-at-the-moment-of-need.md) | new feature | Plan | L | new |
 | NF-3AZ1 | ↳ Salary posted becomes one reviewed payday proposal | | | M | |
 | NF-3AZ2 | ↳ A statement row links to the payment already recorded from an SMS | | | M | |
@@ -247,6 +258,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | NF-3AZ9 | ↳ An investment result explains what changed | | | M | |
 | NF-3AZ10 | ↳ Needs you groups by job and consequence | | | M | |
 
-Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md).
+Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md).
 
-Done: nothing yet. Next free code: 12A.
+Done: 12F. Next free code: 12H.

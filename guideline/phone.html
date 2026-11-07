@@ -551,6 +551,7 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
   <a href="#c-type"><span class="navnum">C10</span>Type and numbers</a>
   <a href="#c-screens"><span class="navnum">C11</span>Screens</a>
   <a href="#c-ship"><span class="navnum">C12</span>Before it ships</a>
+  <a href="#c-states"><span class="navnum">C13</span>States</a>
   <div class="grp">Other documents</div>
   <a href="app.html">A · App</a>
   <a href="website.html">B · Normal</a>
@@ -610,7 +611,7 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
     <li><b>Flat, not boxed.</b> Rows sit on the page, divided by a hairline. A card is for one lead figure; a list is never inside a card.</li>
     <li><b>One figure per row.</b> Name and category left, amount right. Anything more (balance after, account, notes) is in the row's sheet.</li>
     <li><b>Quiet chrome.</b> One period control, one set of tabs, no icon boxes, no coloured edges. Colour appears only where it carries meaning (A03).</li>
-    <li><b>One organism (owner, 2026-10-22):</b> the phone and the computer show the same arrows, Needs you card, seam and figure names. The phone leads with the daily figure (Safe to spend); the computer with the big picture.</li>
+    <li><b>Same brand, own structure (owner, 2026-11-06: “Phone is decoupled from PC”):</b> the phone shares the mark, colours, type, arrows, seam, figure names and numbers with the computer, but not its sections, order or pages. It has its own screens and never shows a PC page. One question per place: each slot answers one, and a block that does not help answer it lives in another slot.</li>
     <li><b>Recon, 2026-10-14:</b> web evidence on these apps is anecdotal (user forums, design critiques), so these rules rest on patterns repeated across them, not on measured studies. Revolut's crowded home with a single visible transaction is the one named failure: show at least five.</li>
   </ul>
 </section>
@@ -645,15 +646,15 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
   <div class="g-head"><div><h2><span class="secnum">C03</span>Navigation</h2><p>The sidebar becomes a tab bar at the bottom. Two levels still: a section, then a tab.</p></div></div>
   <h3 class="sub"><span class="subnum">C03.1</span>Tab bar: five slots with their words</h3>
   <div style="max-width:360px;border-radius:20px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow)">
-    <div class="pf-nav words"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>Overview</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>Budget</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>Add</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>Transactions</span><span><i><svg class="ic"><use href="#i-more"/></svg></i>More</span></div>
+    <div class="pf-nav words"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>Home</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>Budget</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>Add</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>Activity</span><span><i><svg class="ic"><use href="#i-wallet"/></svg></i>Money</span></div>
     <div class="pf-gest"></div>
   </div>
   <ul class="short">
-    <li><b>Five slots</b> (owner, 2026-10-22): Overview, Budget, Add, Transactions, More. What a person opens every day has a slot; Cash planning, Investments, Accounts, Financial health and Settings live on More.</li>
+    <li><b>Five slots</b> (owner, 2026-11-06): Home, Budget, Add, Activity, Money. Each answers one question. Home: “Am I OK today, and what do I do next?” Budget: “How much is left, and on what?” Add: “Record it now.” Activity: “What moved, and what needs sorting?” Money: “What do I have, what do I owe, what is coming?” There is no More: Cash planning, Investments, Accounts, Financial health and Settings are reached from Money.</li>
     <li><b>Each slot:</b> a 24px Lucide icon with its name under it, 12px. A word never wraps or cuts: each column is at least its word's width. Chosen: Ink, bolder, with a short Nile bar on top. Others: Muted.</li>
     <li><b>Add</b> sits in the middle: a 48px Nile disc raised above the bar, its word under it (C05.2).</li>
-    <li><b>Icons say the place:</b> house, pie for Budget, plus, up-and-down arrows for Transactions, three dots for More. The shield belongs to Reserves and the emergency fund, never to a slot.</li>
-    <li><b>More</b> lists each other section with its live figure: Cash planning (due before payday), Investments (portfolio value), Accounts (in your accounts), Financial health (within your limits), Spending (this month), Zakat when it is on. Then the weekly review as a card you start, then Settings as one grouped list. A section reached from More keeps More chosen.</li>
+    <li><b>Icons say the place:</b> house for Home, pie for Budget, plus, up-and-down arrows for Activity, wallet for Money. The shield belongs to Reserves and the emergency fund, never to a slot.</li>
+    <li><b>Money</b> opens on Net worth, then lists what is behind it, each with its live figure: the accounts' balances themselves (four, then more), Coming up, What you owe, Investments, Goals and reserves, Financial health, Zakat when it is on. Settings sit behind ⚙ in Money's app bar. A page reached from Money keeps Money chosen.</li>
   </ul>
 
   <h3 class="sub"><span class="subnum">C03.2</span>App bar</h3>
@@ -661,7 +662,7 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
   <ul class="short">
     <li><b>Left:</b> the mark, 28px, then the page's name at 17px (it wraps to two lines before it is cut). On an inner page, ‹ and the page it returns to (“‹ Accounts”) in their place.</li>
     <li><b>Right, in this order:</b> Search, Hide amounts. 44px targets, 22px icons. Search opens full screen and looks for money first: transactions lead its results, then pages and settings under their own heading (owner, 2026-11-02); no “Ctrl K” on a phone.</li>
-    <li><b>The tab's gear</b> (A10.4) comes third, only on a tab that has settings, and opens them. All settings are on More.</li>
+    <li><b>The tab's gear</b> (A10.4) comes third, only on a tab that has settings, and opens them. All settings are behind ⚙ on Money.</li>
   </ul>
 
   <h3 class="sub"><span class="subnum">C03.3</span>Tabs inside a section</h3>
@@ -672,14 +673,14 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
   <ul class="short">
     <li><b>Words, never icons alone</b> (owner, 2026-10-22, in place of the icon tabs of 2026-10-15): a Track segment row, each tab 40 tall, 13.5px; the chosen one white with Ink text.</li>
     <li>Full width under the hero and the period. The track never scrolls; when the words do not fit, it wraps to a second row.</li>
-    <li>The Overview's first page has no tab row: it opens on its answer. Transactions has its own slot, so it leaves the Accounts row.</li>
+    <li>Home's first page has no tab row: it opens on its answer. Activity's two tabs are All and To review.</li>
     <li>Swiping the content left or right does not change tabs: charts and rows need the swipe.</li>
   </ul>
 
   <h3 class="sub"><span class="subnum">C03.4</span>Going deeper and back</h3>
   <ul class="short">
     <li>An account, a holding or a category opens as a full page with ‹ in the app bar. The tab bar stays, its section still chosen.</li>
-    <li>The phone's back gesture does what ‹ does. From a section's first page it goes to Overview, then leaves the app.</li>
+    <li>The phone's back gesture does what ‹ does. Each slot keeps its own stack; the gesture goes back within the slot, then to Home, then leaves the app. Tapping the chosen slot again returns to its top.</li>
   </ul>
 </section>
 
@@ -693,10 +694,10 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
       <div class="pf-needcard"><div><b>9 items need you</b><small>4 to sort out · 3 bills · 2 prices</small></div><em>9</em><u>Open</u></div>
     </div>
     <ol style="margin:0;padding-left:20px;color:var(--ink2)">
-      <li style="margin:6px 0"><b style="color:var(--ink)">C04.1 The hero.</b> The page's name sits in the app bar (C03.2), so the page opens on its one figure: the label 13px, the figure 40px in whole EGP with EGP once, one calm sentence 14px Ink 2 (it is the page's status sentence, A05), then the seam (A02.3). Each tab's figure: Overview, Safe to spend; Budget, Left in plan with a ring of the plan spent; Cash planning, Due before payday; Investments, Portfolio value; Accounts, In your accounts. A page with no figure keeps its status sentence and dates.</li>
-      <li style="margin:6px 0"><b style="color:var(--ink)">C04.2 Period,</b> one compact month stepper ‹ 2026-10 ›. Tapping the month opens Choose period, a sheet: This month, Last month, Year to date, All time, Custom range (two month pickers). Never a sideways row of chips, never “Monthly”.</li>
+      <li style="margin:6px 0"><b style="color:var(--ink)">C04.1 The hero.</b> The page's name sits in the app bar (C03.2), so the page opens on its one figure: the label 13px, the figure 40px in whole EGP with EGP once, one calm sentence 14px Ink 2 (it is the page's status sentence, A05), then the seam (A02.3). Each slot's figure: Home, Safe to spend; Budget, Left in plan (flexible spending only) with a ring of the plan spent; Activity, the month's money in and out; Money, Net worth. A page inside Money keeps its own figure: Due before payday, Portfolio value, In your accounts. A page with no figure keeps its status sentence and dates.</li>
+      <li style="margin:6px 0"><b style="color:var(--ink)">C04.2 Period,</b> only on Budget and Activity, which look back: one compact month stepper ‹ 2026-10 ›. Home and Money are always today and have no stepper. Tapping the month opens Choose period, a sheet: This month, Last month, Year to date, All time, Custom range (two month pickers). Never a sideways row of chips, never “Monthly”.</li>
       <li style="margin:6px 0"><b style="color:var(--ink)">C04.3 Tabs</b> (C03.3).</li>
-      <li style="margin:6px 0"><b style="color:var(--ink)">C04.4 Needs you,</b> under the page's Lead (A09): one tappable card: the mark (A02.3), “9 items need you”, what is inside in a few words (“4 to sort out · 3 bills”), the count and Open. When a bill falls due within three days, what is inside names the next one by payee, amount and days (“Landlord 12,000 in 2 days”; owner, 2026-11-02). It opens in place with the items, most urgent first, each with its one action. No card when nothing waits. On Overview the count is every page's items together.</li>
+      <li style="margin:6px 0"><b style="color:var(--ink)">C04.4 To do and To review.</b> Home's To do (A09) is at most three rows, picked in this order: a late or due-today bill, payday, catch-up, to sort, the weekly check, prices, then the rest. Each row is one sentence with one action on the right (“Vodafone 350 · in 3 days   Pay ›”; a bill due within three days is named by payee, amount and days), and the action does the job in a sheet or a flow. “See all” opens every action, grouped by place. With nothing waiting the section is gone. Activity's To review is the queue of rows to confirm, one card at a time with a progress line (“3 of 12”): Looks right is the Primary, Change and Skip sit beside it, and the queue ends on “All sorted”. “Not now” moves an item down for a week.</li>
       <li style="margin:6px 0"><b style="color:var(--ink)">C04.5 One page action</b> goes under the dates as a 40px Secondary with ⋯ beside it for the rest; adding is the tab bar's Add (C05.2). The everyday action is the Secondary (From SMS on Accounts); a rare one (Add account) goes behind ⋯.</li>
       <li style="margin:6px 0"><b style="color:var(--ink)">C04.7 Account header.</b> A 32px tile (the bank's logo, else its monogram) before the title; the type, bank and currency under it; the balance figure sits under the title, and What you own only when it differs.</li>
       <li style="margin:6px 0"><b style="color:var(--ink)">C04.6 As of a day</b> (Financial health, Data checks, Prices): in place of the period control, one chip “As of 2026-10-06” that opens the date picker. Never a typed date with a Show button.</li>
@@ -919,20 +920,16 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
 </section>
 
 <section class="g" id="c-screens" data-part="c">
-  <div class="g-head"><div><h2><span class="secnum">C11</span>Screens</h2><p>Two pages built only from C02 to C10.</p></div></div>
+  <div class="g-head"><div><h2><span class="secnum">C11</span>Screens</h2><p>Three screens built only from C02 to C10.</p></div></div>
   <div class="cmock">
-    <figure><figcaption>C11.1 Overview</figcaption>
+    <figure><figcaption>C11.1 Home</figcaption>
       <div class="pf">
         <div class="pf-status"><span>4:32</span><span>47%</span></div>
-        <div class="pf-bar named"><img class="pf-mark" alt="Lightning"><span class="pf-name">Overview</span><span class="pf-icon"><svg class="ic"><use href="#i-search"/></svg></span><span class="pf-icon"><svg class="ic"><use href="#i-eye"/></svg></span></div>
+        <div class="pf-bar named"><img class="pf-mark" alt="Lightning"><span class="pf-name">Home</span><span class="pf-icon"><svg class="ic"><use href="#i-search"/></svg></span><span class="pf-icon"><svg class="ic"><use href="#i-eye"/></svg></span></div>
         <div class="pf-body">
           <div class="pf-lead"><p>Safe to spend</p><div class="big num">14,820<small>EGP</small></div><p class="st">About 1,650 a day until payday on 2026-11-01.</p></div>
-          <div class="pf-stepper"><i>‹</i><b>2026-10</b><i>›</i></div>
-          <div class="pf-needcard"><div><b>9 items need you</b><small>4 to sort out · 3 bills · 2 prices</small></div><em>9</em><u>Open</u></div>
-          <div class="kt-grid">
-            <div class="kt"><div class="top"><span class="chip">Today</span></div><div class="lbl">Net worth</div><div class="fig num">156,084</div><div class="foot"><b>+2,120</b> this month</div></div>
-            <div class="kt rose"><div class="top"><span class="chip">2026-10</span></div><div class="lbl">Left in plan</div><div class="fig num">6,240</div><div class="meter"><i style="width:72%"></i></div></div>
-          </div>
+          <div class="pf-sec"><h4>To do</h4><span>See all 5</span></div>
+          <div class="pf-card lead"><div class="pf-rows"><div><span>Vodafone 350 · in 3 days</span><b>Pay ›</b></div><div><span>12 new transactions to sort</span><b>Sort ›</b></div><div><span>Salary arrived · 45,000</span><b>Plan ›</b></div></div></div>
           <div class="pf-sec"><h4>Latest</h4><span>See all</span></div>
           <div class="pf-list">
             <div class="pf-day"><span>Today</span></div>
@@ -941,10 +938,10 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
             <div class="pf-tx"><div class="pf-who"><i class="pf-av ar in">↑</i><div><b>ACME Egypt</b><small>Salary</small></div></div><div class="a"><b class="in">+50,000</b></div></div>
             <div class="pf-tx"><div class="pf-who"><i class="pf-av ar inv">↗</i><div><b>Investments moved</b><small>4 value updates</small></div></div><div class="a"><b class="in">+7,956</b></div></div>
           </div>
-          <div class="pf-sec"><h4>Your position</h4><span>As of 2026-10-06</span></div>
-          <div class="pf-card lead"><div class="pf-rows"><div><span>What you own</span><b>261,024</b></div><div><span>What you owe</span><b>−104,940</b></div></div></div>
+          <div class="pf-sec"><h4>This month</h4><span></span></div>
+          <div class="pf-card lead"><div class="pf-rows"><div><span>Spent 18,651 · Left in plan 6,948</span><b>›</b></div></div></div>
         </div>
-        <div class="pf-nav words"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>Overview</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>Budget</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>Add</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>Transactions</span><span><i><svg class="ic"><use href="#i-more"/></svg></i>More</span></div>
+        <div class="pf-nav words"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>Home</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>Budget</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>Add</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>Activity</span><span><i><svg class="ic"><use href="#i-wallet"/></svg></i>Money</span></div>
         <div class="pf-gest"></div>
       </div>
     </figure>
@@ -967,14 +964,14 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
             <div class="pf-tx"><div class="pf-who"><i class="pf-av ar out">↓</i><div><b>Kiosk</b><small>Groceries</small></div></div><div class="a"><b>−210</b><small>7,475</small></div></div>
           </div>
         </div>
-        <div class="pf-nav words"><span><i><svg class="ic"><use href="#i-home"/></svg></i>Overview</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>Budget</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>Add</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>Transactions</span><span class="on"><i><svg class="ic"><use href="#i-more"/></svg></i>More</span></div>
+        <div class="pf-nav words"><span><i><svg class="ic"><use href="#i-home"/></svg></i>Home</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>Budget</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>Add</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>Activity</span><span class="on"><i><svg class="ic"><use href="#i-wallet"/></svg></i>Money</span></div>
         <div class="pf-gest"></div>
       </div>
     </figure>
   </div>
   <ul class="short">
-    <li><b>C11.1 is the whole Overview: “can I spend today?” in one glance</b> (owner, 2026-10-22), in the A09 order: Get set up while it is not done; Safe to spend as the hero, with about how much a day until payday (its home is Cash planning, so the hero opens it); the month stepper; the Needs you card; two tiles (Net worth, Left in plan), because the Lead already answers the page (C06.1); Latest, the five newest transactions across every account with “See all”; then Your position. Under them, one row each for the rest (Over time, Free cash, What it is made of, If you sold today; then Net flow, Where money in went, Investments, and each month chart), with its figure; a row opens a sheet, never a fold inside a fold (C06.2). Analysis is one tap away, never first. Bills due to pay stay open, as their own row. The Savings and Investing rates live on Financial health, next to their limits (owner, 2026-11-02).</li>
-    <li><b>C11.3 More</b> (C03.1): each section with its figure, the weekly review card, then Settings.</li>
+    <li><b>C11.1 is Home: “Am I OK today, and what do I do next?” in one glance</b> (owner, 2026-11-06). It is always today: no month stepper and no Net worth. In order: Safe to spend as the hero, with about how much a day until payday (tapping it opens its working: free cash, minus bills before payday, minus reserves; below zero it turns rose, “You are 1,200 over until payday”, with See why); To do, at most three rows (C04.4); Latest, the five newest transactions across every account with “See all”; then This month, one row with two figures that opens Budget. At most 1.2 screens long, at most 8 figures, the first Latest row above 600 px. Analysis is never first: it is a tap away, or on the PC. States change the screen, not just its numbers (C13).</li>
+    <li><b>C11.3 Money</b> (C03.1): Net worth as the hero, then each account's balance with the line that reconciles them with what you own, Coming up with no late rows, What you owe, Investments (holdings first), Goals and reserves, Financial health, Zakat when it is on. A row opens a page or a sheet, never a PC page. Settings sit behind ⚙ in the app bar; a tool only the PC has says “Best on your PC”.</li>
     <li><b>C11.2:</b> the account's one Secondary and ⋯ sit under its figure. On a brokerage, “Record an investment transaction” folds above the list for buy, sell and dividend.</li>
   </ul>
 </section>
@@ -1004,6 +1001,18 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
     <div><b>A page with no way back</b>‹ and the page it returns to.</div>
     <div><b>A dead end</b>Everything the PC does with a ledger, the phone does too, or says where.</div>
   </div>
+</section>
+
+<section class="g" id="c-states" data-part="c">
+  <div class="g-head"><div><h2><span class="secnum">C13</span>States</h2><p>A screen is built for the state the person is in. First run, catch-up, payday, overspent and calm are different screens, not one screen with different numbers (owner, 2026-11-06).</p></div></div>
+  <ul class="short">
+    <li><b>First run</b> (no account or no income yet): three steps are the whole page: Your salary account, Your payday, Your first payment. The hero waits until they are done.</li>
+    <li><b>Catch-up</b> (nothing recorded for three days or more, or a bill late more than seven days): a Catch up card sits above To do, “Nothing recorded since 2026-10-31. Two minutes to catch up.” It opens a flow: missed bills (paid or not yet), Paste SMS, Import a statement, Later. The hero says “May be off: 6 days not recorded”. Old late bills are one question, never a wall of red “34 days late” rows (owner, D3).</li>
+    <li><b>Payday</b> (income arrived today or yesterday): “Salary arrived · 45,000 · Plan it ›” is To do's first row and opens the payday flow.</li>
+    <li><b>Overspent</b> (Safe to spend below zero): the hero turns rose with See why, and To do's first row is the biggest flexible category over its limit.</li>
+    <li><b>Calm</b> (none of the above): the hero, Latest and This month. To do is gone (A09).</li>
+    <li><b>One count per concept.</b> A bill, a sum or an item has one number everywhere it appears. Every alert carries its one action; a count never appears without a way to clear it.</li>
+  </ul>
 </section>
 
 </main>
