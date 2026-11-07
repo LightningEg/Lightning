@@ -166,7 +166,7 @@
 
 {# F8 (r24): one investigation. Back to the analysis page the rows came from, and the whole filtered scope exported in one click. #}
 <p class="investigation-bar small" id="investigation-bar"><a class="quiet-link" id="investigation-back" href="#" hidden></a>{% if total_rows and (matched_flows or request.query_params.get('date_from')) %}<button type="button" class="btn small" id="export-matching">{{ 'Export all {n} matching'|tr(locale, n=total_rows) }}</button>{% endif %}</p>
-<div class="card ledger"{% if matching_ids %} data-matching-ids='{{ matching_ids|tojson }}'{% endif %} data-counterparties='{{ counterparty_categories|tojson }}' data-accounts='{{ account_options|tojson }}'>
+<div class="card ledger"{% if matching_ids %} data-matching-ids='{{ matching_ids|tojson }}'{% endif %} data-counterparties='{{ counterparty_categories|tojson }}' data-last-accounts='{{ counterparty_accounts|default({})|tojson }}' data-accounts='{{ account_options|tojson }}'>
   <div class="selection-tools" id="selection-tools" hidden>
     <span id="selection-count" class="muted small" role="status" aria-live="polite">{{ "0 selected"|tr(locale) }}</span>
     <button type="button" class="btn small" id="edit-selected">{{ 'Edit one by one'|tr(locale) }}</button>

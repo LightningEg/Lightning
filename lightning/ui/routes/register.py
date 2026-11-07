@@ -132,6 +132,8 @@ def _lists(request: Request) -> dict:
         "counterparty_options": counterparty_options,
         "owner_options": [row["name"] for row in c.counterparties.list_people()],
         "counterparty_categories": counterparty_categories,
+        "counterparty_accounts": {name: aid for name, aid in c.transactions.last_accounts().items()
+                                  if aid in {a.id for a in accounts}},
         "accounts": accounts,
     }
 
