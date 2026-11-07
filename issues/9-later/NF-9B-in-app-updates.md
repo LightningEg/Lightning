@@ -51,10 +51,10 @@ Android updates come from Google Play or the APK; this item is Windows only.
 is done: the owner reported the result good on 2026-11-07** (no per-case detail was recorded: update, borrowed profile
 refused then allowed, read-only folder refused, failed start rolled back, `.previous` opened by hand).
 What is left before the tag:
-1. A separate update key: `tools/store_keygen.py <file> --id update-2026-1`, its public key added to
-   `lightning/security/update_keys.json` beside `store-2026-1`, and the `production-release` secret `UPDATE_SIGNING_KEY`
-   replaced by the new JWK (the store key stays pinned for old releases).
-2. The website publishes `/download.html`, `/releases.html` and their `/ar/` copies (the app opens exactly these,
-   `entitlements.UPDATE_PATHS`).
-3. The release note for the version that carries the updater says it is installed by hand; the first real self-update is
-   the release after it. The tag run is also the first time CI signs `UPDATE.json` for real.
+1. The separate update key: the owner made `update-2026-1` and set the `production-release` secret `UPDATE_SIGNING_KEY`
+   to its JWK (2026-11-07). **Still to do: add its public key to `lightning/security/update_keys.json` beside
+   `store-2026-1`.** The tag run fails (signing refuses a key the app does not pin) until that is merged.
+2. ~~Website pages~~ none needed: the app links to the site's existing Downloads hub and release log
+   (`entitlements.UPDATE_PATHS`; after the tag the site gets its usual release update, README › Version identity and archive).
+3. The release note for the version that carries the updater says it is installed by hand (in 2.1.0's notes); the first
+   real self-update is the release after it. The tag run is also the first time CI signs `UPDATE.json` for real.
