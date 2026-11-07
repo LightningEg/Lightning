@@ -11,7 +11,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **BV-3BA** | [Arabic](../../issues/3-polish-and-arabic/BV-3BA-arabic-date-ranges-and-number-forms.md) | M | new |
 | **OW-3AI** | [Additional broker and institution logos still needed](../../issues/3-polish-and-arabic/OW-3AI-institution-logos.md) | owner | ready |
 | **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](../../issues/10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md) | L | building |
 | **NF-10B** | [Supporter perks still waiting on the app or the owner](../../issues/10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md) | M | blocked on 10A claiming; owner decision on the beta channel |
@@ -29,6 +28,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 - [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](../../issues/12-desktop-ux/r19-desktop-tab-audit/report.md): 3AM
 - [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../issues/12-desktop-ux/r24-desktop-phone-ux/report.md): 3H, 3AM
 - [The phone, redesigned: a phone-first architecture, tab by tab](../../issues/11-phone-ux/r25-phone-ux-architecture/report.md): 3F
-- [Audit 14: using Lightning as a user, on the PC and the phone](../../issues/12-desktop-ux/r26-user-test-pc-and-phone/report.md): 3BA, 3H
+- [Audit 14: using Lightning as a user, on the PC and the phone](../../issues/12-desktop-ux/r26-user-test-pc-and-phone/report.md): 3H
 <!-- work:end -->
 

@@ -113,6 +113,12 @@ def _keep_dates(text) -> Markup:
     return Markup(re.sub(r"\b(\d{4}-\d{2}(?:-\d{2})?)\b", r'<span class="nowrap">\1</span>', str(escape(text))))
 
 
+def _isolate_dates(text) -> Markup:
+    """Each date in its own left-to-right isolate, the words around them left to the page's direction: in Arabic the
+    start date then sits on the right and the end date on the left, the way a right-to-left reader goes (BV-3BA)."""
+    return Markup(re.sub(r"\b(\d{4}-\d{2}(?:-\d{2})?)\b", r'<bdi dir="ltr">\1</bdi>', str(escape(text))))
+
+
 def _tr_filter(text, locale="en", values=None, **kwargs):
     # Explicit mappings carry user data (device names), which must stay literal.
     # Existing keyword-only calls retain translation of system labels.
@@ -241,6 +247,7 @@ templates.env.globals["day_nets"] = _day_nets
 templates.env.filters["group_value_updates"] = _group_value_updates
 templates.env.globals["shift_month"] = _shift_month
 templates.env.filters["keep_dates"] = _keep_dates
+templates.env.filters["isolate_dates"] = _isolate_dates
 
 
 def _units(value) -> str:

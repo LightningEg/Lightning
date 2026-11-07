@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Compare periods'|tr(locale) }}{% endblock %}
-{% block heading %}<div class="birdview-title"><div><h1>{{ 'Compare periods'|tr(locale) }}</h1><p class="page-status">{{ status|tr(locale) }}</p><p class="page-dates"><b dir="ltr">{{ fmt_date(a[0]) }} to {{ fmt_date(a[1]) }}</b></p></div></div>{% endblock %}
+{% block heading %}<div class="birdview-title"><div><h1>{{ 'Compare periods'|tr(locale) }}</h1><p class="page-status">{{ status|tr(locale) }}</p><p class="page-dates"><b>{{ '{sa} to {sb}'|tr(locale, sa=fmt_date(a[0]), sb=fmt_date(a[1]))|isolate_dates }}</b></p></div></div>{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import lead_card %}{% call lead_card(lead, base) %}
 <form class="compare-picker" method="get" action="/spending/compare">

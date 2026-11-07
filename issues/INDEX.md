@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 45 open items. Each folder holds its reports and its items.
+11 big pictures, 44 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -62,13 +62,12 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **BV-3BA** | [Arabic - page-header date ranges read backwards, figures use two thousands separators, and counts disagree with their nouns](3-polish-and-arabic/BV-3BA-arabic-date-ranges-and-number-forms.md) | bug, visual · medium | Feel | M | new |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | new |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/OW-3AI-institution-logos.md) | owner task | Feel |  | ready |
 
 Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX. Next free code: 3BB.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA. Next free code: 3BB.
 
 ## 4 Edit journal and devices
 
