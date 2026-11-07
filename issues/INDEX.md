@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 46 open items. Each folder holds its reports and its items.
+11 big pictures, 47 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -131,6 +131,11 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7AB4 | ↳ Smart buttons on a group | | | M | |
 | NF-7AB5 | ↳ Quick mode for leftovers | | | M | |
 | NF-7AB6 | ↳ Safe to go fast | | | S | |
+| **NF-7AC** | [A fill-in starter workbook with examples: accounts, categories and entries by name, codes handed back](7-planning-import-and-search/NF-7AC-starter-workbook.md) | new feature | Capture | L | ready |
+| NF-7AC1 | ↳ The template: Read me, Accounts, Categories, Entries, with examples | | | M | |
+| NF-7AC2 | ↳ Read it and preview it against the open profile | | | L | |
+| NF-7AC3 | ↳ The result file with a Codes sheet | | | M | |
+| NF-7AC4 | ↳ The page, the guide and the words | | | M | |
 | **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](7-planning-import-and-search/NF-7C-move-in-from-other-apps.md) | new feature | Capture | L | new |
 | NF-7C1 | ↳ Read each app's export format | | | M | |
 | NF-7C2 | ↳ A mapping preset per app in the CSV review | | | L | |
@@ -138,7 +143,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md).
 
-Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7AA. Next free code: 7AC.
+Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7AA. Next free code: 7AD.
 
 ## 8 Website
 
