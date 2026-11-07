@@ -18,7 +18,19 @@ def run(argv=None) -> int:
     parser.add_argument("--self-check", action="store_true", help="synthetic encryption/resource tests only")
     parser.add_argument("--smoke", action="store_true", help="open/check/close isolated profile chooser")
     parser.add_argument("--report", type=Path, help="non-secret diagnostic JSON")
+    # The update helper's own launches (NF-9B3): the staged copy swaps folders and exits; the others only note why.
+    parser.add_argument("--finish-update", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--install", type=Path, help=argparse.SUPPRESS)
+    parser.add_argument("--old-pid", type=int, help=argparse.SUPPRESS)
+    parser.add_argument("--from", dest="from_version", help=argparse.SUPPRESS)
+    parser.add_argument("--after-update", metavar="OLD_VERSION", help=argparse.SUPPRESS)
+    parser.add_argument("--update-failed", metavar="NEW_VERSION", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
+    if args.finish_update:
+        if not (args.install and args.old_pid and args.from_version):
+            parser.error("--finish-update needs --install, --old-pid and --from")
+        from lightning.desktop.update_helper import main as finish_update
+        return finish_update(args.install, args.old_pid, args.from_version)
     report = {"ok": False, "mode": "self-check" if args.self_check else ("smoke" if args.smoke else "profiles")}
     stage = "start"
     try:

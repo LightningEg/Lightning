@@ -47,27 +47,14 @@ Android updates come from Google Play or the APK; this item is Windows only.
 - The first version carrying the updater is still installed by hand; say so in its release note.
 
 ## 9B3 The helper: swap folders with rollback · L
-**Flow.** Settings › Restart to update: refuse if the lend rule above applies; lock the open profile through the
-normal lock path (drain, close, wipe keys, release lock); start `staged\Lightning.exe --finish-update
---install "<current folder>" --old-pid <pid> --from <old version>`; exit.
-**Helper** (runs from the staged folder, so the install folder is free to rename; logic in a platform-neutral
-module with the OS calls injected):
-1. Wait up to 60 s for the old PID to exit; else give up and relaunch nothing (old app is still open).
-2. Delete any older `<install>.previous`; rename `<install>` to `<install>.previous` (retry 10 times over 10 s for
-   antivirus or Explorer holding files; on failure relaunch the old app with a message and stop).
-3. Copy `staged\` to `<install>.incoming`, check every file against `FILES.sha256`, rename it to `<install>`.
-   Any failure: delete `.incoming`, rename `.previous` back, relaunch old.
-4. Launch `<install>\Lightning.exe --after-update <old version>`. The new app writes
-   `%LOCALAPPDATA%\Lightning\updates\ok-<version>` when its profile chooser has loaded (before any unlock or
-   migration). If that file does not appear within 90 s, or the process exits first: rename `<install>` to
-   `<install>.failed`, `.previous` back to `<install>`, launch the old app with `--update-failed <version>`.
-5. On success the new app deletes the staged folder and ZIP at its next start; `.previous` stays until the next
-   update. Log each step (no personal data) to `…\updates\update.log`.
-An old version opened from `.previous` already refuses a profile the new one migrated; that message stays.
-**Done when:** Linux tests drive the module with a fake filesystem and process layer through: success, old app never
-exits, rename blocked, copy corrupt, new app crashes, new app hangs, and power loss between each step (the next
-start finds `.previous` or `.incoming` and repairs to one working folder). The lend rule has its own test with real
-borrower control stores in each state.
+**Status: helper built, two hooks left.** Built: `lightning/desktop/update_helper.py` (the swap, rollback and `repair()` after a power cut, OS calls injected),
+`update_guard.py` (the lend and move-home rule; a damaged borrowed store blocks) and `--finish-update` in
+`desktop/app.py`; tests in `tests/test_desktop_update_helper.py`. **Left (done with 9B4's button):**
+1. Settings › Restart to update: call `update_guard.refusals`, lock the open profile through the normal lock path,
+   start `staged\Lightning.exe --finish-update --install <folder> --old-pid <pid> --from <version>`, exit.
+2. The new app calls `update_helper.mark_ok(updates, version)` when its profile chooser has loaded (before any
+   unlock or migration), runs `repair()` at start, and deletes the staged folder and ZIP after a successful start.
+**Done when:** a Windows PC shows both hooks working (9B5).
 
 ## 9B4 The Settings section and its words · M
 In `ui/templates/settings/index.html`, a "Lightning version" block (guideline A: soft wells, Ink headers; no new
