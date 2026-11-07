@@ -1734,3 +1734,53 @@ def test_paying_the_phone_early_shortens_it(mohab):
     assert mohab.notes["early_preview"].shows("Still to pay afterwards")
     assert mohab.notes["early_paid"].shows("Loan payment recorded")
 
+
+
+# ------------------------------------------------------------------ the starter workbook (NF-7AC4)
+def test_the_starter_workbook_fills_an_empty_lightning_and_hands_the_codes_back(tmp_path):
+    """A second person on an empty Lightning, Settings only: opens Move your data, takes the starter workbook, fills in
+    two accounts, a category and entries by name, reads the review, adds them, and finds the codes in the file that comes
+    back. Re-uploading that file adds nothing twice."""
+    from io import BytesIO
+    from openpyxl import Workbook
+    from lightning.workflows.starter_workbook import HEADERS
+    from lightning.workflows.workbook_import import read_workbook
+    os.environ["LIGHTNING_TODAY"] = "2026-09-30"
+    c = build(tmp_path / "starter.db")
+    try:
+        o = Mohab(c)
+        b = o.b
+        b.go("Settings")
+        b.click("Import your data")
+        page = b.click("Open the starter workbook")
+        assert page.shows("Download the starter workbook", "Upload your workbook")
+        book = Workbook()
+        book.active.title = "Read me"
+        for name, rows in (("Accounts", [(None, "CIB Payroll", "Bank account", "EGP", 12500, "2026-07-01", None),
+                                         (None, "Wallet", "Cash", "EGP", 800, "2026-07-01", None)]),
+                           ("Categories", [(None, "Personal", "Pets", "Spending", None)]),
+                           ("Entries", [(None, "2026-07-28", "CIB Payroll", "Salary", "ACME", 30000, "EGP", "July", None),
+                                        (None, "2026-07-30", "Wallet", "Food & Groceries", "Corner shop", -185.5, "EGP", None, None),
+                                        (None, "2026-08-02", "CIB Payroll", "Pets", "Vet", -420, "EGP", None, None),
+                                        (None, "2026-08-03", "Wallet", "Mystery", "x", -5, "EGP", None, None)])):
+            sheet = book.create_sheet(name)
+            sheet.append(HEADERS[name])
+            for row in rows:
+                sheet.append(list(row))
+        out = BytesIO()
+        book.save(out)
+        review = b.submit({}, button="Review workbook", files={"workbook": ("mine.xlsx", out.getvalue(), "application/octet-stream")})
+        assert review.shows("Review what will be added", "Entries to add", "Rows that cannot be placed",
+                            "The category is not on the Categories sheet or in Lightning.")
+        assert c.db.scalar("SELECT COUNT(*) FROM accounts WHERE name = 'CIB Payroll'") == 0   # nothing yet
+        done = b.submit({}, button="Add them")
+        assert done.shows("Your data is in", "Download your workbook with codes")
+        link = re.search(r'href="(/exports/starter/result/[^"]+)"', done.html).group(1)
+        codes = read_workbook(b.client.get(link).content)["Codes"]
+        mine = {(r[0], r[1]): r[2] for r in codes[1:]}
+        assert mine[("Category", "Pets")] == "EXP.PERSONAL.PETS" and mine[("Account", "CIB Payroll")]
+        accounts = b.open("/accounts")
+        assert accounts.shows("CIB Payroll", "Wallet")
+        assert c.transactions.opening_balance(next(a for a in c.accounts.list() if a.name == "CIB Payroll").id) == D("12500")
+    finally:
+        c.db.close()

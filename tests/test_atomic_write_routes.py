@@ -8,7 +8,7 @@ OTHER_BOUNDARIES = {
     "workbench": {"find_replace_preview"},  # Read-only preview of a text replace; find_replace owns the save.
     "search": {"scoped_picker"},  # Read-only ranking of existing picker choices.
     "history": {"replay"},  # History restores both rows and links in its own replay transaction.
-    "exports": {"transactions", "categories", "reevaluations", "preview_workbook_import"},
+    "exports": {"transactions", "categories", "reevaluations", "preview_workbook_import", "preview_starter_import"},
     "transactions": {"all_accounts_entry", "all_accounts_update"},  # register.create/update own the save.
     "accounts": {"investment_entry", "register_entry", "register_update"},
     "investments": {"market_fill", "market_update", "test_price_sources"},  # _fill_from owns the save after fetch.

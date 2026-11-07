@@ -201,3 +201,78 @@ async def preview_workbook_import(request: Request):
                       token=token, payload=base64.b64encode(data).decode('ascii'))
     except ValueError as exc:
         return render(request, 'exports/import.html', setup_prompt=SETUP_PROMPT, error=str(exc), status_code=400)
+
+
+# ---------------------------------------------------------------- the starter workbook (NF-7AC4)
+_STARTER_SHOWN = 30
+
+
+def _starter_state(request):
+    import time
+    state = getattr(request.app.state, 'starter_tokens', {})
+    state = {k: v for k, v in state.items() if v['expires'] > time.monotonic()}
+    request.app.state.starter_tokens = state
+    return state
+
+
+@router.get('/starter')
+async def starter_page(request: Request):
+    return render(request, 'exports/starter.html')
+
+
+@router.get('/starter/template')
+async def starter_template(request: Request):
+    from lightning.workflows.starter_workbook import starter_workbook
+    return Response(starter_workbook(container(request)),
+                    media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    headers={'Content-Disposition': 'attachment; filename="lightning-starter-workbook.xlsx"', 'Cache-Control': 'no-store'})
+
+
+@router.get('/starter/result/{token}')
+async def starter_result(request: Request, token: str):
+    saved = _starter_state(request).get(token)
+    if not saved or 'result' not in saved or saved['db'] != id(container(request).db):
+        return Response('This download expired. Import the workbook again to get a new one.', status_code=404, media_type='text/plain')
+    return Response(saved['result'], media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    headers={'Content-Disposition': 'attachment; filename="lightning-starter-workbook-with-codes.xlsx"', 'Cache-Control': 'no-store'})
+
+
+@router.post('/starter')
+async def preview_starter_import(request: Request):
+    import base64
+    import hashlib
+    import secrets
+    import time
+    from lightning.core.errors import LightningError
+    from lightning.workflows import starter_import
+    from lightning.workflows.starter_result import result_for
+    from lightning.workflows.workbook_import import MAX_UPLOAD
+    c = container(request)
+    try:
+        form = await request.form(max_part_size=MAX_UPLOAD * 2)
+        state = _starter_state(request)
+        if form.get('action') == 'confirm':
+            try:
+                data = base64.b64decode(str(form.get('payload', '')), validate=True)
+            except ValueError:
+                raise ValueError('The preview expired. Upload the workbook again.') from None
+            saved = state.pop(str(form.get('token', '')), None)
+            if not saved or saved['sha'] != hashlib.sha256(data).hexdigest() or saved['db'] != id(c.db):
+                raise ValueError('The preview expired or the file changed. Upload the workbook again.')
+            result = starter_import.confirm(c, data)  # the same bytes, read again: the profile may have changed
+            token = secrets.token_urlsafe(32)
+            state[token] = {'result': result_for(c, result), 'expires': time.monotonic() + 900, 'db': id(c.db)}
+            return render(request, 'exports/starter.html', done=result, token=token, shown=_STARTER_SHOWN)
+        upload = form.get('workbook')
+        if upload is None or not hasattr(upload, 'read'):
+            raise ValueError('Choose an Excel .xlsx workbook.')
+        data = await upload.read(MAX_UPLOAD + 1)
+        preview = starter_import.prepare(c, data)
+        if len(state) >= 8:
+            state.pop(next(iter(state)))
+        token = secrets.token_urlsafe(32)
+        state[token] = {'sha': hashlib.sha256(data).hexdigest(), 'expires': time.monotonic() + 900, 'db': id(c.db)}
+        return render(request, 'exports/starter.html', preview=preview, token=token, shown=_STARTER_SHOWN,
+                      payload=base64.b64encode(data).decode('ascii'))
+    except (ValueError, LightningError) as exc:
+        return render(request, 'exports/starter.html', error=str(exc), status_code=400)
