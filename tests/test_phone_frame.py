@@ -106,7 +106,7 @@ def test_an_account_is_a_day_list_and_the_sheet_saves(phone):
 
 
 def test_accounts_add_button_asks_which_account(phone):
-    assert 'href="/accounts/add-transaction"' in phone.get("/accounts").text
+    assert 'href="/accounts/add-transaction?return_to=/accounts"' in phone.get("/accounts").text
     pick = phone.get("/accounts/add-transaction?pick=1").text
     assert "To which account?" in pick and "/accounts/1/transaction/new" in pick
 
