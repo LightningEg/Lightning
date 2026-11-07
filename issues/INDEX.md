@@ -157,7 +157,7 @@ Good ideas that wait until the milestones above are done.
 | **IT-9F** | [Page speed: a stable origin and cache, and a CSS trim](9-later/IT-9F-page-speed-origin-and-css.md) | improvement, technical | Reach | M | new |
 | **IT-9K** | [Structure left - runtime routes and bank-import orchestration](9-later/IT-9K-layers-and-copies.md) | improvement, technical | Build | M | ready |
 | **NF-9B** | [In-app updates on Windows](9-later/NF-9B-in-app-updates.md) | new feature | Everywhere | L | new |
-| NF-9B5 | ↳ Try it on a real Windows PC | | | owner | |
+| NF-9B6 | ↳ Before the release that carries the updater | | | owner | |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | new |
 
 Reports: [r22](9-later/r22-code-quality-and-smart-features/report.md).

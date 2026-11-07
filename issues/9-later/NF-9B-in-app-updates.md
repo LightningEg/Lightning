@@ -46,10 +46,15 @@ Android updates come from Google Play or the APK; this item is Windows only.
   the phone show the version and a link to the download page instead.
 - The first version carrying the updater is still installed by hand; say so in its release note.
 
-## 9B5 Try it on a real Windows PC · owner
-Built in 9B1-9B4 (ARCHITECTURE › Build and release, Updating). Needs first: the website publishes `/download.html`, `/releases.html` and their `/ar/` copies (the app opens exactly these, `entitlements.UPDATE_PATHS`); on a Windows build the new app writes `ok-<version>` when its chooser loads (`UpdateController.chooser_loaded`, `--after-update`) and the helper's real PID wait and launch (`RealHost`) are proven only here.
-With dummy profiles, from a build carrying the updater to the next release: update; update with a profile borrowed
-(refused, then allowed after hand-back); update from a read-only folder (refused); force a failed start (old version
-comes back); open the `.previous` copy by hand. Report each as passed or failed in the item.
-Before that release is tagged: a separate update key exists (`tools/store_keygen.py <file> --id update-2026-1`),
-its public key is in `update_keys.json` beside `store-2026-1`, and `UPDATE_SIGNING_KEY` holds the new JWK.
+## 9B6 Before the release that carries the updater · owner
+9B1-9B4 are built and merged (ARCHITECTURE › Build and release, Updating). **9B5, the owner's try on a real Windows PC,
+is done: the owner reported the result good on 2026-11-07** (no per-case detail was recorded: update, borrowed profile
+refused then allowed, read-only folder refused, failed start rolled back, `.previous` opened by hand).
+What is left before the tag:
+1. The separate update key: the owner made `update-2026-1` and set the `production-release` secret `UPDATE_SIGNING_KEY`
+   to its JWK (2026-11-07). **Still to do: add its public key to `lightning/security/update_keys.json` beside
+   `store-2026-1`.** The tag run fails (signing refuses a key the app does not pin) until that is merged.
+2. ~~Website pages~~ none needed: the app links to the site's existing Downloads hub and release log
+   (`entitlements.UPDATE_PATHS`; after the tag the site gets its usual release update, README › Version identity and archive).
+3. The release note for the version that carries the updater says it is installed by hand (in 2.1.0's notes); the first
+   real self-update is the release after it. The tag run is also the first time CI signs `UPDATE.json` for real.
