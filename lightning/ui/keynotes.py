@@ -138,6 +138,19 @@ def plan_check(check) -> list[dict]:
                  label="Below your savings target", figure=_percent(check.planned_savings_rate))]
 
 
+def per_day_everyday(everyday) -> str:
+    """Under Left in plan on the phone: the same everyday figure the PC's Budget shows, from EverydayBudget.per_day
+    (left in plan less the bills still to pay, over the days left), so the two never differ (BV-12A)."""
+    if everyday.everyday_left < 0:
+        return "Spending passed the plan"
+    days = everyday.days_left
+    if days <= 0:
+        return "The month is over"
+    if days == 1:
+        return "Today is the last day of the month"
+    return f"About {fmt(everyday.per_day)} a day for {days} days"
+
+
 def per_day(left: Decimal, days_left: int) -> str:
     """Under Left in plan: what it means for the rest of the month."""
     if left < 0:

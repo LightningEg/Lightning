@@ -106,3 +106,4 @@ change is documents only, and the documentation tests were run.
 ## Dated follow-ups
 
 - **2026-11-06, F9:** the owner chose money lent and split with others (OW-12F, now done); credit cards and receipt photos stay out of scope. Recorded in `ai/PROJECT_OVERVIEW.md` (Obligations count) and planned as NF-12G.
+- **2026-11-07, F1:** fixed (BV-12A). Home says "On top of your plan until <payday>" with no per-day figure; the phone Budget reads the PC's everyday per-day figure from `EverydayBudget.per_day`. Tests: `tests/test_one_daily_allowance.py`.
