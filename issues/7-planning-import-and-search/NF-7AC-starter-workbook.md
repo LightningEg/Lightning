@@ -22,19 +22,15 @@ reference) back afterwards.
 3. **A result file with a Codes sheet:** after import the person downloads the same workbook with every new account,
    category and entry's code filled in, so a later batch can refer to them by code instead of by name.
 
+## Built so far
+7AC1: the template file (`lightning/workflows/starter_workbook.py`, `tests/test_starter_workbook.py`; see ARCHITECTURE › Starter workbook). Rows marked `Example` in column A must be ignored by the reader (7AC2); the Lists sheet is hidden.
+
 ## Rules
 - Nothing financial is computed in the workbook or in JavaScript: amounts are read as plain decimals (at most six
   places), signs and currencies kept; posting goes through `TransactionService`.
 - Names the person types stay as typed; built-in categories and the seeded system records are matched, never duplicated.
 - No invented opening balances, FX rates or category guesses: a row that cannot be placed is listed, never dropped
   silently (same promise as `SETUP_PROMPT`).
-
-## 7AC1 The template: Read me, Accounts, Categories, Entries, with examples · M
-`lightning/workflows/starter_workbook.py` builds the `.xlsx`: a *Read me* sheet in plain words (English and Arabic
-headers), then *Accounts* (name, type, currency, opening balance, code left empty), *Categories* (name, group, kind,
-code left empty) and *Entries* (date, account, category, counterparty, amount, currency, note, reference left empty),
-each with two or three example rows marked "Example: overwrite or delete" and drop-downs for type, kind and currency.
-Done when: a test opens the file with the safe reader and finds every sheet, heading, example row and drop-down list.
 
 ## 7AC2 Read it and preview it against the open profile · L
 Match each name to what exists (accounts, categories, counterparties) or mark it new; read dates, signs and currencies
