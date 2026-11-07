@@ -12,6 +12,10 @@
 #   TAG             the release tag, e.g. v2.0.0 (already checked against the source version)
 #   ZIP             the ZIP's file name, e.g. Lightning-v2.0.0-Windows-x64.zip
 #   APK             the signed phone APK's file name, from BUILD.json
+#   UPDATE_KEYS     optional: another pinned-keys file (tests only)
+#   PYTHON          optional: the Python that has `cryptography` (default python3)
+# The folder must also hold UPDATE.json and UPDATE.json.sig (packaging/update_manifest.py sign): the signed
+# manifest the in-app updater trusts. They are re-verified here and uploaded beside the others.
 set -euo pipefail
 
 fail() { echo "::error::$*"; exit 1; }
@@ -22,7 +26,7 @@ fail() { echo "::error::$*"; exit 1; }
 [[ "$ZIP" == "Lightning-${TAG}-Windows-x64.zip" ]] || fail "The ZIP $ZIP was not built as release $TAG (a development build cannot be published)."
 [[ "$APK" =~ ^Lightning-[0-9A-Za-z.+-]+\.apk$ ]] || fail "Unexpected APK name: $APK"
 
-for file in "$ZIP" "$APK" SHA256SUMS BUILD.json BUILD_INFO.txt; do
+for file in "$ZIP" "$APK" SHA256SUMS BUILD.json BUILD_INFO.txt UPDATE.json UPDATE.json.sig; do
   [[ -f "$file" ]] || fail "The build artifact has no $file."
 done
 [[ $(wc -l < SHA256SUMS) -eq 2 ]] || fail "SHA256SUMS must name exactly the ZIP and APK."
@@ -35,6 +39,8 @@ jq -e --arg zip "$ZIP" --arg apk "$APK" --arg commit "$(sed -n 's/^Commit: //p' 
    .android.application_id == "org.lightning.app" and .android.debuggable == true and
    (.android.certificate_sha256 | type == "string" and length > 0)' BUILD.json >/dev/null \
   || fail "BUILD.json does not identify this tested pair and its signed Lightning app."
+"${PYTHON:-python3}" "$(dirname "${BASH_SOURCE[0]}")/update_manifest.py" verify --dir . --tag "$TAG" --zip "$ZIP" ${UPDATE_KEYS:+--keys "$UPDATE_KEYS"} \
+  || fail "UPDATE.json and its signature do not verify for $TAG and $ZIP. Nothing was published."
 zip_sha=$(sha256sum "$ZIP" | cut -d' ' -f1)
 apk_sha=$(sha256sum "$APK" | cut -d' ' -f1)
 
@@ -102,11 +108,12 @@ release_id=$(jq -r .id <<<"$release_json")
 upload_url="https://uploads.github.com/repos/${DOWNLOADS_REPO}/releases/${release_id}/assets"
 echo "Created draft release ${release_id}."
 
-for file in "$ZIP" "$APK" SHA256SUMS BUILD.json; do
+for file in "$ZIP" "$APK" SHA256SUMS BUILD.json UPDATE.json UPDATE.json.sig; do
   type=application/octet-stream
   [[ "$file" == *.zip ]] && type=application/zip
   [[ "$file" == *.apk ]] && type=application/vnd.android.package-archive
   [[ "$file" == *.json ]] && type=application/json
+  [[ "$file" == *.sig ]] && type=text/plain
   gh api -X POST "${upload_url}?name=${file}" -H "Content-Type: ${type}" --input "$file" --jq .name >/dev/null
   echo "Uploaded ${file}."
 done
@@ -114,13 +121,13 @@ done
 # Download every asset back from the draft and compare it with what was tested.
 check_dir=$(mktemp -d)
 mapfile -t assets < <(gh api "repos/${DOWNLOADS_REPO}/releases/${release_id}/assets" --jq '.[] | "\(.id) \(.name)"')
-[[ ${#assets[@]} -eq 4 ]] || fail "The draft has ${#assets[@]} files instead of 4."
+[[ ${#assets[@]} -eq 6 ]] || fail "The draft has ${#assets[@]} files instead of 6."
 for entry in "${assets[@]}"; do
   id=${entry%% *}; name=${entry#* }
   gh api -H "Accept: application/octet-stream" "repos/${DOWNLOADS_REPO}/releases/assets/${id}" >"${check_dir}/${name}"
   cmp -s "${check_dir}/${name}" "$name" || fail "The uploaded ${name} differs from the tested file. The draft was left unpublished."
 done
-echo "All four files read back identical to the tested pair."
+echo "All six files read back identical to the tested pair."
 
 published=$(gh api -X PATCH "repos/${DOWNLOADS_REPO}/releases/${release_id}" -f name="$title" -F draft=false)
 [[ $(jq -r .draft <<<"$published") == false ]] || fail "The release did not publish."

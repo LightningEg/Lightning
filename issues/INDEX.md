@@ -161,7 +161,6 @@ Good ideas that wait until the milestones above are done.
 | **IT-9F** | [Page speed: a stable origin and cache, and a CSS trim](9-later/IT-9F-page-speed-origin-and-css.md) | improvement, technical | Reach | M | new |
 | **IT-9K** | [Structure left - runtime routes and bank-import orchestration](9-later/IT-9K-layers-and-copies.md) | improvement, technical | Build | M | ready |
 | **NF-9B** | [In-app updates on Windows](9-later/NF-9B-in-app-updates.md) | new feature | Everywhere | L | new |
-| NF-9B1 | ↳ Signed update manifest in the release | | | M | |
 | NF-9B2 | ↳ Check, download and verify | | | M | |
 | NF-9B3 | ↳ The helper: swap folders with rollback | | | L | |
 | NF-9B4 | ↳ The Settings section and its words | | | M | |
