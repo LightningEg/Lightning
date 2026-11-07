@@ -196,6 +196,9 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     session = ProfileSession(root)
     session.borrowed_home = ""
     app = create_app(None)
+    if phone:
+        from lightning.ui.phone.router import mount_phone
+        mount_phone(app)  # the phone's own routes first (3AY4); the shared routes answer what it does not own
     app.state.profile_session = session
     from .journal_ui_routes import journal_ui_router
     from .journal_enrollment_routes import journal_enrollment_router
