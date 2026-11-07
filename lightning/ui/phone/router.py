@@ -4,14 +4,23 @@ from __future__ import annotations
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import HTMLResponse
 
-from lightning.ui.web import render
+from lightning.ui.web import container, render
 
 PHONE_TEMPLATES = "phone/"
 
 
 def phone_router() -> APIRouter:
-    """Every phone-owned URL. Empty until the first slot (Home, 3AY6) moves here."""
-    return APIRouter()
+    """Every phone-owned URL. Home is served at /home while the old Overview keeps /; the slot URLs switch over
+    together with the tab bar (3AY10)."""
+    router = APIRouter()
+
+    @router.get("/home")
+    async def home(request: Request):
+        from lightning.core.dates import today
+        from lightning.ui.phone.screens import home as screen
+        return render_phone(request, "phone/home.html", screen=screen.build(container(request), today()))
+
+    return router
 
 
 def render_phone(request: Request, name: str, status_code: int = 200, **context) -> HTMLResponse:

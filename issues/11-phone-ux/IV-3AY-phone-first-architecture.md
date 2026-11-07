@@ -55,9 +55,11 @@ Done when: a test fails if a phone route renders a template outside `templates/p
 `tests/test_phone_nav_browser.py` and `tools/phone_check.py` pass.
 
 ## 3AY6 Home · M
-Safe to spend with its working as a sheet, To do (three rows, one action each, *See all*), Latest five, This month; the
-first-run, catch-up, payday, overspent and calm states. Needs 3AY4 and 3AY5 merged first. Done when: 1.2 screens and at
-most 8 figures at 412 × 915; the first Latest row above 600 px; each state has a test on a dummy profile.
+Built: `workflows/todo.py` (To do order and rows), `ui/phone/screens/home.py` (the screen and its state: first run,
+catch-up, payday, overspent, calm), `phone/home.html` at `/home` with the hero as the sheet to its working; at 412 x 915
+it ends within 1.2 screens above the tab bar, the first Latest row is above 600 px and it shows at most 8 figures
+(`tests/test_phone_home.py`). Left: serve it at `/` when the tab bar changes (3AY10); a catch-up flow for the To do row
+(it links to Paste SMS for now); a phone To do "See all" page (it links to the PC's Needs you page for now).
 
 ## 3AY7 Add as a sheet over any slot · M
 Amount first; Out / In / Move; the last account; chips by use; Paste SMS and Pay a bill at the top; a toast with the

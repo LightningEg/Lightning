@@ -93,6 +93,7 @@ class CatchUp:
     days_since_entry: int | None  # None: nothing recorded yet
     stale_bills: int
     away: bool
+    last_entry: str | None = None  # the day of the last recording
 
 
 def catch_up(c, day: date, rows: list[BillRow] | None = None) -> CatchUp:
@@ -101,4 +102,4 @@ def catch_up(c, day: date, rows: list[BillRow] | None = None) -> CatchUp:
     last = c.db.scalar("SELECT MAX(created_at) FROM transactions WHERE status='POSTED' AND type NOT IN ('VAL','OPN')")
     since = max((day - date.fromisoformat(last[:10])).days, 0) if last else None
     stale = sum(1 for r in (rows if rows is not None else open_bills(c.planning, day)) if r.state == BillState.LATE_STALE)
-    return CatchUp(since, stale, bool((since is not None and since >= AWAY_DAYS) or stale))
+    return CatchUp(since, stale, bool((since is not None and since >= AWAY_DAYS) or stale), last[:10] if last else None)
