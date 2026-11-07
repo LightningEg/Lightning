@@ -20,7 +20,7 @@
 {% else %}
 {% if s.state == 'overspent' %}{% set line = '{amt} more is promised than your free cash.'|tr(locale, amt=(-s.safe)|money) %}
 {% elif s.state == 'catch_up' and s.catch_up.days_since_entry is not none and s.catch_up.days_since_entry >= 3 %}{% set line = 'May be off: {n} days not recorded.'|tr(locale, n=s.catch_up.days_since_entry) %}
-{% elif s.per_day is not none %}{% set line = 'About {amt} a day until payday on {sa}.'|tr(locale, amt=s.per_day|money, sa=s.until) %}
+{% elif s.until %}{% set line = 'On top of your plan until {sa}.'|tr(locale, sa=s.until) %}
 {% else %}{% set line = 'From free cash, after what is promised over the next 3 months.'|tr(locale) %}{% endif %}
 {# The hero is the way into its working (C11.1): one tap opens the sheet, so no row of its own is needed. #}
 {% set lead %}<div class="phone-hero has-seam"><div id="home-hero" class="phone-hero-label" role="heading" aria-level="2">{{ fig.safe_to_spend.label }} <span aria-hidden="true">›</span></div>

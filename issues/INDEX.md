@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 46 open items. Each folder holds its reports and its items.
+11 big pictures, 45 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -226,7 +226,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **BV-12A** | [The phone gives three different "a day" allowances (2,057, 278, 219) for the same 25 days](12-desktop-ux/BV-12A-one-daily-allowance-on-every-screen.md) | bug, visual · high | Plan | S | new |
 | **BV-12B** | [Budget says "over your plan's pace" every month for a person whose spending is always heavy in the first week](12-desktop-ux/BV-12B-budget-pace-follows-the-usual-month.md) | bug, visual · medium | Plan | M | new |
 | **BV-12D** | [Nine small places where two neighbouring figures disagree or a figure reads wrong (Scenarios "None None", 87,768 against 87,368, "+14,000" still to pay)](12-desktop-ux/BV-12D-neighbouring-figures-that-disagree.md) | bug, visual · medium | Understand | M | new |
 | **IV-12C** | [PC quick add - Enter after a known name skips the empty Account field, and the next word typed replaces the category](12-desktop-ux/IV-12C-quick-add-goes-to-the-empty-field.md) | improvement, visual | Capture | S | new |
@@ -259,4 +258,4 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md).
 
-Done: 12F. Next free code: 12H.
+Done: 12A, 12F. Next free code: 12H.

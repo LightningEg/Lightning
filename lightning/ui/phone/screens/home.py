@@ -23,7 +23,6 @@ STATES = ("first_run", "catch_up", "payday", "overspent", "calm")
 class HomeScreen:
     state: str
     safe: Decimal | None               # None until the first run is done
-    per_day: Decimal | None            # about how much a day until payday
     until: str                         # the next income date, "" when none is planned
     working: tuple[tuple[str, Decimal], ...]   # the parts of Safe to spend, for its sheet
     todo: tuple[TodoRow, ...]          # at most TODO_SHOWN
@@ -50,8 +49,6 @@ def build(c, day: date) -> HomeScreen:
     rows = todo_rows(c, day, bills, items, away, paid_today)
     safe = forecast.safe_to_spend
     until = forecast.next_income_date or ""
-    days = (parse_date(until) - day).days if until else 0
-    per_day = safe / days if safe > 0 and days > 0 else None
     month = month_of(day)
     schedule = c.schedules.view()
     plan = c.budgets.plan_summary(month, schedule=schedule) if c.budgets.has_plan(month, schedule=schedule) else None
@@ -68,7 +65,7 @@ def build(c, day: date) -> HomeScreen:
     else:
         state = "calm"
     first_run = state == "first_run"
-    return HomeScreen(state=state, safe=None if first_run else safe, per_day=per_day, until=until,
+    return HomeScreen(state=state, safe=None if first_run else safe, until=until,
                       working=tuple((name, value) for name, value in forecast.safe_to_spend_parts),
                       todo=tuple(rows[:TODO_SHOWN]), todo_total=len(rows), latest=latest,
                       spent=c.reporting.cash_flow(day.replace(day=1), day).outflows,

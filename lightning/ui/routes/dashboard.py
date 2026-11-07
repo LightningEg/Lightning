@@ -444,7 +444,7 @@ def _safe_hero(f) -> dict:
     if value < 0:
         line = page_status.sentence("{amt} more is promised than your free cash.", amt=fmt(-value))
     elif until and days > 0:
-        line = page_status.sentence("About {amt} a day until payday on {sa}.", amt=fmt(value / days), sa=until)
+        line = page_status.sentence("On top of your plan until {sa}.", sa=until)  # no per-day figure: Budget owns it (BV-12A)
     else:
         line = page_status.sentence("From free cash, after what is promised over the next 3 months.")
     return {"value": value, "line": line, "until": until or ""}

@@ -301,6 +301,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     kpi_cards, pace, plan_bills, everyday = [], None, [], None
     if period.key == "month" and has_plan:
         everyday = c.forecaster.everyday(month, today())
+        left_note = keynotes.per_day_everyday(everyday)  # one daily figure on the phone and the PC (BV-12A)
         # BU-2 (3H2): an overspend raises Needs you when it matters: 100 or more and 5% or more of the category's plan.
         # A smaller one still reads rose on its own bar.
         over = sorted(({"name": r["label"], "over": r["b"]["over_by"], "category_id": r["category_id"]}

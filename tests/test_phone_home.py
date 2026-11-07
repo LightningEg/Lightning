@@ -74,7 +74,7 @@ def test_an_overspent_day_has_a_negative_hero_and_says_so(sample, monkeypatch):
             return out
     monkeypatch.setattr(home, "ReviewInbox", Short)
     screen = home.build(c, day)
-    assert screen.state == "overspent" and screen.safe < 0 and screen.per_day is None
+    assert screen.state == "overspent" and screen.safe < 0
 
 
 def _page(sample, day="2026-10-04"):
