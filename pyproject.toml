@@ -72,6 +72,13 @@ forbidden_modules = [
 allow_indirect_imports = true
 
 [[tool.importlinter.contracts]]
+name = "The phone layer never imports the PC's routes"
+type = "forbidden"
+source_modules = ["lightning.ui.phone"]
+forbidden_modules = ["lightning.ui.routes"]
+allow_indirect_imports = true  # lightning.ui.web builds the shared app; only a direct import of the routes is the coupling
+
+[[tool.importlinter.contracts]]
 name = "Modules use each other's services, never each other's repositories"
 type = "forbidden"
 source_modules = [

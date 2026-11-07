@@ -41,22 +41,21 @@ count everywhere, on a fresh profile and on one left alone for a week; no phone 
 
 
 ## 3AY4 The phone shell: its own router, base, stylesheet and navigation · L
-`lightning/ui/phone/` mounted only by `profile_app(..., phone=True)`, with an import-linter contract that it does not
-import `lightning.ui.routes`. `phone/base.html`, and a `phone.css` standalone on the theme tokens. A stack per slot,
-back-gesture order, the "This is on your PC" page in place of any PC fallback, figures always at the right edge, and
-status-bar icons that follow the theme (with IV-3F). Needs 3AY3 merged first. Done when: a test fails if a phone route
-renders a template outside `templates/phone/`; `tests/test_phone_nav_browser.py` and `tools/phone_check.py` pass.
-
-## 3AY5 One bill state and the catch-up state · L
-`lightning/planning/bill_state.py`: each payment's state for a day (late and stale, late, due soon, before payday, later,
-paid, skipped), plus days since the last entry and imports recorded as one event. The PC's Cash planning and Needs you read
-it too. Done when: on Mohab's year, and on the same profile a week later with nothing recorded, Home's To do, Money's
-Coming up, the Bills page and Safe to spend agree (`tests/test_bill_state.py`), and skill `number-audit` passes.
+Built: (a) `lightning/ui/phone/` with `router.py` mounted first by `profile_app(..., phone=True)` (`mount_phone`,
+`render_phone` that accepts only `templates/phone/` names), an import-linter contract that it does not import
+`lightning.ui.routes`, and `tests/test_phone_shell.py`. It owns no URL yet; a slot's URLs move into it with Home (3AY6).
+Left: (b) `phone/base.html` that never extends the PC base, and `phone.css` standalone on the theme tokens, not layered
+on `style.css`; (c) a stack per slot, back-gesture order and status-bar icons that follow the theme (with IV-3F);
+(d) the "This is on your PC" page in place of any PC fallback, switched on with 3AY11 once every slot has moved.
+Done when: a test fails if a phone route renders a template outside `templates/phone/`;
+`tests/test_phone_nav_browser.py` and `tools/phone_check.py` pass.
 
 ## 3AY6 Home · M
-Safe to spend with its working as a sheet, To do (three rows, one action each, *See all*), Latest five, This month; the
-first-run, catch-up, payday, overspent and calm states. Needs 3AY4 and 3AY5 merged first. Done when: 1.2 screens and at
-most 8 figures at 412 × 915; the first Latest row above 600 px; each state has a test on a dummy profile.
+Built: `workflows/todo.py` (To do order and rows), `ui/phone/screens/home.py` (the screen and its state: first run,
+catch-up, payday, overspent, calm), `phone/home.html` at `/home` with the hero as the sheet to its working; at 412 x 915
+it ends within 1.2 screens above the tab bar, the first Latest row is above 600 px and it shows at most 8 figures
+(`tests/test_phone_home.py`). Left: serve it at `/` when the tab bar changes (3AY10); a catch-up flow for the To do row
+(it links to Paste SMS for now); a phone To do "See all" page (it links to the PC's Needs you page for now).
 
 ## 3AY7 Add as a sheet over any slot · M
 Amount first; Out / In / Move; the last account; chips by use; Paste SMS and Pay a bill at the top; a toast with the

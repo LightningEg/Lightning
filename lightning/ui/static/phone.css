@@ -1030,3 +1030,4 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 
 /* r24: the compare-period dates stack, one control per row, so the whole date shows beside its 48px picker button. */
 .phone .compare-picker fieldset { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; gap: 8px; }
+.phone-sheet-row > summary.phone-home-hero:not(#_) { display: block; min-height: 0; padding: 0; border: 0; background: none; }
