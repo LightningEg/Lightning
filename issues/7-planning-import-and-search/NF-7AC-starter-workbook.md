@@ -23,7 +23,7 @@ reference) back afterwards.
    category and entry's code filled in, so a later batch can refer to them by code instead of by name.
 
 ## Built so far
-7AC1, 7AC2: the template file and its preview and import (`lightning/workflows/starter_workbook.py`, `starter_import.py`, `tests/test_starter_workbook.py`, `tests/test_starter_import.py`; see ARCHITECTURE › Starter workbook). Not reachable from a page yet (7AC4). Journal profiles are refused until the journal commands can post it. Rows marked `Example` in column A must be ignored by the reader (7AC2); the Lists sheet is hidden.
+7AC1-7AC3: the template, its preview and import, and the result file with codes (`lightning/workflows/starter_workbook.py`, `starter_import.py`, `starter_result.py`, `tests/test_starter_workbook.py`, `tests/test_starter_import.py`, `tests/test_starter_result.py`; see ARCHITECTURE › Starter workbook). Not reachable from a page yet (7AC4). Journal profiles are refused until the journal commands can post it. Rows marked `Example` in column A must be ignored by the reader (7AC2); the Lists sheet is hidden.
 
 ## Rules
 - Nothing financial is computed in the workbook or in JavaScript: amounts are read as plain decimals (at most six
@@ -31,11 +31,6 @@ reference) back afterwards.
 - Names the person types stay as typed; built-in categories and the seeded system records are matched, never duplicated.
 - No invented opening balances, FX rates or category guesses: a row that cannot be placed is listed, never dropped
   silently (same promise as `SETUP_PROMPT`).
-
-## 7AC3 The result file with a Codes sheet · M
-After confirming, offer the workbook back with the Codes column filled for every account, category and entry created
-or matched, and a *Codes* sheet listing them. Done when: re-uploading that file adds nothing twice and a row may name an
-account by its code.
 
 ## 7AC4 The page, the guide and the words · M
 Move your data gains "Download the starter workbook" beside the existing onboarding workbook and says which is for

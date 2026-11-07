@@ -128,7 +128,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7AB5 | ↳ Quick mode for leftovers | | | M | |
 | NF-7AB6 | ↳ Safe to go fast | | | S | |
 | **NF-7AC** | [A fill-in starter workbook with examples: accounts, categories and entries by name, codes handed back](7-planning-import-and-search/NF-7AC-starter-workbook.md) | new feature | Capture | L | ready |
-| NF-7AC3 | ↳ The result file with a Codes sheet | | | M | |
 | NF-7AC4 | ↳ The page, the guide and the words | | | M | |
 | **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](7-planning-import-and-search/NF-7C-move-in-from-other-apps.md) | new feature | Capture | L | new |
 | NF-7C1 | ↳ Read each app's export format | | | M | |
