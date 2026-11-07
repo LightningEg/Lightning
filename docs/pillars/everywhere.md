@@ -15,6 +15,7 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 | **NF-4A** | [Edit journal: edit anywhere, one home confirms](../../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md) | L | building |
 | **NF-4B** | [Multiple devices: implementation plan](../../issues/4-edit-journal-and-devices/NF-4B-multiple-devices.md) | L | building |
 | **NF-9B** | [In-app updates on Windows](../../issues/9-later/NF-9B-in-app-updates.md) | L | new |
+| **IV-11A** | [Phone first run](../../issues/11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | S | new |
 | **IV-3AN** | [Phone visual plan](../../issues/11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | L | building |
 | **IV-3AY** | [Phone-first architecture](../../issues/11-phone-ux/IV-3AY-phone-first-architecture.md) | L | ready |
 
@@ -30,5 +31,6 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 - [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 4A, 4B
 - [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../issues/12-desktop-ux/r24-desktop-phone-ux/report.md): 3AN, 4A, 4B
 - [The phone, redesigned: a phone-first architecture, tab by tab](../../issues/11-phone-ux/r25-phone-ux-architecture/report.md): 3AY, 3AN
+- [Audit 14: using Lightning as a user, on the PC and the phone](../../issues/12-desktop-ux/r26-user-test-pc-and-phone/report.md): 11A
 <!-- work:end -->
 
