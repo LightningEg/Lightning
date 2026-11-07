@@ -115,7 +115,7 @@ def http_stream(url: str, *, chunk: int = 1 << 20, timeout: float = 30.0) -> Ite
         with urlopen(_request(url), timeout=timeout) as response:
             while block := response.read(chunk):
                 yield block
-    except HTTPError as error:
+    except HTTPError:
         raise UpdateError("GitHub answered with an error. Try again later.") from None
     except (URLError, TimeoutError, OSError):
         raise UpdateError("The download was interrupted.") from None
