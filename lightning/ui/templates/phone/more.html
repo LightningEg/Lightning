@@ -18,7 +18,7 @@
 </section>{% endif %}
 <section class="phone-section phone-hub-bills" aria-labelledby="bills-heading">
   <header class="phone-section-head"><h2 id="bills-heading">{{ 'Next 14 days'|tr(locale) }}</h2><a class="phone-quiet" href="/plan">{{ 'All bills'|tr(locale) }}</a></header>
-  {% if coming_bills %}<div class="phone-rows">
+  {% if coming_bills or bills_more %}<div class="phone-rows">
   {% for b in coming_bills %}{{ bill_row(b) }}{% endfor %}
   {% if bills_more %}<a class="phone-row" href="/plan"><span>{{ '{n} more'|tr(locale, n=bills_more) }}</span><b>›</b></a>{% endif %}
   </div>

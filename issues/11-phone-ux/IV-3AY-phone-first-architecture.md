@@ -54,12 +54,6 @@ on `style.css`; (c) a stack per slot, back-gesture order and status-bar icons th
 Done when: a test fails if a phone route renders a template outside `templates/phone/`;
 `tests/test_phone_nav_browser.py` and `tools/phone_check.py` pass.
 
-## 3AY5 One bill state and the catch-up state · L
-`lightning/planning/bill_state.py`: each payment's state for a day (late and stale, late, due soon, before payday, later,
-paid, skipped), plus days since the last entry and imports recorded as one event. The PC's Cash planning and Needs you read
-it too. Done when: on Mohab's year, and on the same profile a week later with nothing recorded, Home's To do, Money's
-Coming up, the Bills page and Safe to spend agree (`tests/test_bill_state.py`), and skill `number-audit` passes.
-
 ## 3AY6 Home · M
 Safe to spend with its working as a sheet, To do (three rows, one action each, *See all*), Latest five, This month; the
 first-run, catch-up, payday, overspent and calm states. Needs 3AY4 and 3AY5 merged first. Done when: 1.2 screens and at

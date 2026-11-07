@@ -21,6 +21,7 @@ def fmt(value, places: int = 0, signed: bool = False) -> str:
     """Reporting text rounds to the nearest unit (stored values keep their decimals)."""
     return _fmt(value, places, signed)
 from lightning.investments.report import investing_rate, investment_period, saved_and_invested
+from lightning.planning.bill_state import NEEDS_ACTION, open_bills
 from lightning.planning.position import net_worth_bridge
 from lightning.workflows.review import GROUP_LABELS, ReviewInbox, group_of, grouped
 
@@ -486,11 +487,9 @@ def _due_soon(c, attention=()) -> dict | None:
     """Phone Needs you (C04.4, 3AN4): the bills, subscriptions and loan payments that are late or due within three
     days, earliest first, each with its pay sheet. ``next`` is the one the card names ("Landlord 12,000 in 2 days");
     ``extra`` counts the ones the review inbox does not already list (it lists what is due today or late)."""
-    from lightning.planning.domain import PlanKind
     day = today()
-    due = sorted((p for p in c.planning.all_payments(day + timedelta(days=DUE_SOON_DAYS), day,
-                                                     kinds=(PlanKind.BILL, PlanKind.SUBSCRIPTION, PlanKind.LOAN))
-                  if p.outstanding), key=lambda p: p.due_date)
+    due = sorted((r.payment for r in open_bills(c.planning, day, DUE_SOON_DAYS) if r.state in NEEDS_ACTION),
+                 key=lambda p: p.due_date)  # one bill state (3AY5): late, stale or due within three days
     if not due:
         return None
     known = {str(item.get("href", "")).split("&")[0] for item in attention}
@@ -525,17 +524,15 @@ async def more(request: Request):
     first = day.replace(day=1)
     spent = c.reporting.cash_flow(first, day).outflows
     # Hub (phone roadmap M7): the next 14 days of bills and loan payments, late first, each with Mark paid
-    from lightning.planning.domain import PlanKind
     bills = []
-    for p in c.planning.all_payments(day + timedelta(days=14), day,
-                                     kinds=(PlanKind.BILL, PlanKind.SUBSCRIPTION, PlanKind.LOAN)):
-        if not p.outstanding:
-            continue
+    for p in (r.payment for r in open_bills(c.planning, day, 14)):
         bills.append({"name": p.item.name, "due": p.due_date, "late": p.days_late(day),
                       "amount": c.planning.amount_in_base(p, p.still_owed, day),
                       "pay": f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2Fmore"})
     bills.sort(key=lambda b: (-b["late"], b["due"]))
-    return render(request, "more.html", bills=bills[:5], bills_more=max(len(bills) - 5, 0),
+    # Five of each: late rows never use up the room of the coming ones (3AY5); the rest is one "n more" row.
+    shown = [b for b in bills if b["late"]][:5] + [b for b in bills if not b["late"]][:5]
+    return render(request, "more.html", bills=shown, bills_more=len(bills) - len(shown),
                   due=due, until=inbox.forecast.next_income_date or "",
                   portfolio=position.portfolio_value, in_accounts=position.in_your_accounts,
                   within=within, judged=len(judged), spent=spent, month=month_of(day), waiting=len(items),
