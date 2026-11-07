@@ -29,6 +29,7 @@ ASSET_CLASSES: list[tuple[str, str]] = [
     ("FUND.FIXED_INCOME", "Fixed Income Fund"),
     ("FUND.GOLD", "Gold Fund"),
     ("FUND.OTHER", "Other Fund"),
+    ("FUND.BALANCE", "Balance Fund"),
     ("GOLD", "Gold"),
     ("SILVER", "Silver"),
     ("OTHER", "Other Investments"),

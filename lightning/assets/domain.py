@@ -109,6 +109,8 @@ INVESTMENT_KINDS: dict[str, InvestmentKind] = {
     "FUND.FIXED_INCOME": InvestmentKind("FND", "unit", 4, Exposure.FIXED_INCOME, Liquidity.DAYS),
     "FUND.GOLD": InvestmentKind("FND", "unit", 4, Exposure.GOLD, Liquidity.DAYS),
     "FUND.OTHER": InvestmentKind("FND", "unit", 4, Exposure.OTHER, Liquidity.DAYS),
+    # A fund with no share price whose balance grows by interest: 1 unit is 1 pound, always worth 1.00 (IT-2AJ).
+    "FUND.BALANCE": InvestmentKind("BAL", "unit", 2, Exposure.FIXED_INCOME, Liquidity.DAYS),
     "GOLD": InvestmentKind("GLD", "gram", 3, Exposure.GOLD, Liquidity.DAYS),
     # Silver is bought by the gram and priced by hand (NF-9C1); no price source feeds it yet.
     "SILVER": InvestmentKind("SLV", "gram", 3, Exposure.OTHER, Liquidity.DAYS),

@@ -89,7 +89,8 @@ class Valuer:
                     return Valuation((quantity * unit_cost).quantize(Decimal("0.000001")), unit_cost,
                                      cost_date, "", "COST")
                 return Valuation(None, None, None, f"No gold reference or recorded cost for {asset.name}")
-            found = self._price(asset, day)
+            # A balance fund (code BAL:) has no share price: one unit is one pound, so no trade or typed price moves it.
+            found = (ONE, day, "BALANCE") if asset.code.startswith("BAL:") else self._price(asset, day)
             if found is None:
                 return Valuation(None, None, None, f"No price for {asset.label} on or before {day}")
             price, price_date, source = found
