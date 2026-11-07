@@ -23,7 +23,7 @@ reference) back afterwards.
    category and entry's code filled in, so a later batch can refer to them by code instead of by name.
 
 ## Built so far
-7AC1: the template file (`lightning/workflows/starter_workbook.py`, `tests/test_starter_workbook.py`; see ARCHITECTURE › Starter workbook). Rows marked `Example` in column A must be ignored by the reader (7AC2); the Lists sheet is hidden.
+7AC1, 7AC2: the template file and its preview and import (`lightning/workflows/starter_workbook.py`, `starter_import.py`, `tests/test_starter_workbook.py`, `tests/test_starter_import.py`; see ARCHITECTURE › Starter workbook). Not reachable from a page yet (7AC4). Journal profiles are refused until the journal commands can post it. Rows marked `Example` in column A must be ignored by the reader (7AC2); the Lists sheet is hidden.
 
 ## Rules
 - Nothing financial is computed in the workbook or in JavaScript: amounts are read as plain decimals (at most six
@@ -31,13 +31,6 @@ reference) back afterwards.
 - Names the person types stay as typed; built-in categories and the seeded system records are matched, never duplicated.
 - No invented opening balances, FX rates or category guesses: a row that cannot be placed is listed, never dropped
   silently (same promise as `SETUP_PROMPT`).
-
-## 7AC2 Read it and preview it against the open profile · L
-Match each name to what exists (accounts, categories, counterparties) or mark it new; read dates, signs and currencies
-the way the CSV import does (7AA); list rows that cannot be placed with the reason. Confirming creates the new accounts
-and categories, then posts the entries in one settled write. Done when: tests cover a clean file, names that match,
-new names, an unknown account, a bad date or amount, a repeated upload (nothing posted twice), and Mohab's sample
-profile unchanged by an empty template.
 
 ## 7AC3 The result file with a Codes sheet · M
 After confirming, offer the workbook back with the Codes column filled for every account, category and entry created

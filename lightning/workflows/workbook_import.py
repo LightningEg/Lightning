@@ -82,7 +82,8 @@ def read_workbook(data):
                         value = cell.findtext(NS + 'v')
                         kind = cell.get('t')
                         if kind == 'inlineStr':
-                            value = ''.join(cell.find(NS + 'is').itertext())
+                            inline = cell.find(NS + 'is')  # an emptied cell may keep the tag with no text
+                            value = ''.join(inline.itertext()) if inline is not None else None
                         elif kind == 's':
 
                             try:
