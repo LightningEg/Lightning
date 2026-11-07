@@ -22,10 +22,11 @@
     {% if split_categories %}<input type="hidden" name="kind" value="{{ values.kind }}"><p class="phone-note">{{ 'Split across {names}; the full amount and its split are kept.'|tr(locale, names=split_categories|join(', ')) }}</p>
     {% else %}<div class="phone-entry-top">
       <div class="phone-segment" role="group" aria-label="{{ 'Transaction type'|tr(locale) }}">
-        {% for value, label in [('out','Out'),('in','In'),('transfer','Transfer')] %}
+        {% for value, label in [('out','Out'),('in','In'),('transfer','Move')] %}
         <label><input type="radio" name="kind" value="{{ value }}" {{ 'checked' if values.kind == value }} required><span>{{ label|tr(locale) }}</span></label>
         {% endfor %}
       </div>
+      {% if fresh and bills_due %}<a class="phone-chip phone-pay-bill" href="/add/bills?return_to={{ return_to|urlencode }}">{{ 'Pay a bill'|tr(locale) }}</a>{% endif %}
       {% if fresh %}<button type="button" class="phone-chip phone-sms-paste" data-sms-paste data-sms-url="/sms/read-one" hidden>{{ 'Paste SMS'|tr(locale) }}</button>{% endif %}
     </div>{% endif %}
     {% if fresh %}<p class="phone-note phone-sms-status" data-sms-paste-status role="status" aria-live="polite"></p>{% endif %}

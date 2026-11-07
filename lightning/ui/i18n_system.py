@@ -1856,6 +1856,8 @@ SERVICES = {
     "A return of capital can only be recorded in a brokerage account.": "استرداد رأس المال بيتسجّل في حساب وساطة بس.",
     "A return of capital requires units held by the selected owner on that date.": "استرداد رأس المال محتاج وحدات ماسكها المالك المحدد في التاريخ ده.",
     "Move": "نقل",
+    "Pay a bill": "ادفع فاتورة",
+    "Nothing is due.": "مفيش حاجة مستحقة.",
     "Move to": "انقل إلى",
     "Choose a broker…": "اختار شركة الوساطة…",
     "Tax was taken": "اتخصمت ضريبة",

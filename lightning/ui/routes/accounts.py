@@ -404,7 +404,9 @@ def _capture_context(c, account) -> dict:
         names = [c.categories.get(category_id).name for category_id in group]
         return [{"id": category_id, "label": c.categories.get(category_id).name if names.count(name) == 1
                  else c.categories.display_name(category_id)} for category_id, name in zip(group, names)]
+    from lightning.planning import bill_state
     return {"entry_accounts": [{"id": a.id, "name": a.name} for a in _entry_accounts(c)],
+            "bills_due": len(bill_state.open_bills(c.planning, today(), bill_state.SOON_DAYS)),
             "chips_out": named(c.transactions.usual_capture_categories("out")),
             "chips_in": named(c.transactions.usual_capture_categories("in"))}
 

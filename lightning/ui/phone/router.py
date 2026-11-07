@@ -20,6 +20,17 @@ def phone_router() -> APIRouter:
         from lightning.ui.phone.screens import home as screen
         return render_phone(request, "phone/home.html", screen=screen.build(container(request), today()))
 
+    @router.get("/add/bills")
+    async def add_bills(request: Request):
+        """Pay a bill, from the Add sheet (3AY7): what is due, earliest first; a row opens that bill's pay sheet."""
+        from lightning.core.dates import today
+        from lightning.planning import bill_state
+        c = container(request)
+        back = request.query_params.get("return_to", "")
+        back = back if back.startswith("/") and not back.startswith("//") else "/home"
+        rows = bill_state.open_bills(c.planning, today(), bill_state.SOON_DAYS)
+        return render_phone(request, "phone/add_bills.html", rows=rows, back=back)
+
     return router
 
 
