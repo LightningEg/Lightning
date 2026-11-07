@@ -98,7 +98,7 @@ def test_names_that_exist_are_used_not_duplicated(c):
     ([entry("2026-01-05", "Salary account", "Transportation", "x", -5)], "more than one group"),
     ([entry("2026-01-05", "Salary account", "Salary", "x", -5)], "income category"),
     ([entry("2026-01-05", "Salary account", "Adjustment", "x", -5)], "System categories"),
-    ([entry("2026-01-05", "Salary account", "Food & Groceries", "x", -5, cur="USD")], "holds EGP"),
+    ([entry("2026-01-05", "Salary account", "Food & Groceries", "x", -5, cur="USD")], "currency is not the account"),
     ([entry("2026-01-05", "Salary account", "Food & Groceries", "x", -5, ref="NOPE-1")], "not in this profile"),
 ])
 def test_rows_that_cannot_be_placed_are_listed_with_a_reason_and_never_guessed(c, entries, message):
@@ -118,7 +118,7 @@ def test_an_ambiguous_name_can_be_written_with_its_group(c):
 
 @pytest.mark.parametrize("account, message", [
     (acct("A", kind="Spaceship"), "account type"),
-    (acct("A", cur="ZZZ"), "not registered"),
+    (acct("A", cur="ZZZ"), "currency is not registered"),
     (acct("A", bal=-5), "cannot be negative"),
     (acct("A", day="2999-01-01"), "future"),
     (acct("A", day="soon"), "date"),

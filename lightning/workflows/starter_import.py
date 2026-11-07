@@ -151,7 +151,7 @@ def prepare(c, data: bytes) -> Preview:
                 raise ValueError("Pick the account type from the list.")
             item.currency = (row["Currency"] or c.transactions.base_currency).upper()
             if item.currency not in registered:
-                raise ValueError(f"Currency {item.currency} is not registered. Add it in Settings first.")
+                raise ValueError("This currency is not registered. Add it in Settings first.")
             item.balance = to_decimal(row["Opening balance"] or "0", "opening balance")
             check_places(item.balance, c.assets.cash_asset(item.currency).quantity_decimals, "opening balance")
             if item.balance < ZERO:
@@ -208,7 +208,7 @@ def prepare(c, data: bytes) -> Preview:
             if row["Reference"]:
                 found = c.db.scalar("SELECT ref FROM transactions WHERE lower(ref) = lower(?)", (row["Reference"],))
                 if not found:
-                    raise ValueError(f"The reference {row['Reference']} is not in this profile. Leave it empty for a new entry.")
+                    raise ValueError("This reference is not in this profile. Leave it empty for a new entry.")
                 item.status, item.ref = EXISTS, found
                 continue
             item.date = fmt_date(parse_date(row["Date"], "date"))
@@ -223,7 +223,7 @@ def prepare(c, data: bytes) -> Preview:
             current = existing.get(item.account.casefold())
             currency = account.currency if account is not None and account.status == NEW else (current.currency if current else "")
             if item.currency and item.currency != currency:
-                raise ValueError(f"The account holds {currency}; this entry says {item.currency}. Entries in another currency are not imported here.")
+                raise ValueError("This entry's currency is not the account's. Entries in another currency are not imported here.")
             item.currency = currency
             check_places(item.amount, c.assets.cash_asset(currency).quantity_decimals, "amount")
             item.category_key, movement = _resolve_category(item.category, by_name, by_code, new_categories, parents)
@@ -257,8 +257,7 @@ def _resolve_category(text, by_name, by_code, new_categories, parents):
     else:
         found = by_name.get(key, [])
     if len(found) > 1:
-        groups = ", ".join(sorted({x.code.split(".")[1].title() for x in found}))
-        raise ValueError(f"The category name is in more than one group ({groups}). Write it as Group / Name.")
+        raise ValueError("The category name is in more than one group. Write it as Group / Name.")
     if found:
         if found[0].is_system or found[0].code.startswith("EXP.SYSTEM"):
             raise ValueError("System categories cannot be used here; pick another.")

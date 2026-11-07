@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import page_header with context %}
+{% block title %}{{ 'Fill in a starter workbook'|tr(locale) }}{% endblock %}
+{% block heading %}{{ page_header('Fill in a starter workbook'|tr(locale)) }}{% endblock %}
+{% block content %}<div class="data-settings">
+{% if error %}<section class="card"><p class="error" role="alert">{{ error|tr(locale) }}</p></section>{% endif %}
+{% if done is defined %}
+<section class="card"><h2>{{ 'Your data is in'|tr(locale) }}</h2>
+  <p>{{ '{a} accounts, {c} categories and {e} entries were added.'|tr(locale, a=done.accounts|selectattr('status', 'equalto', 'new')|list|length, c=done.categories|selectattr('status', 'equalto', 'new')|list|length, e=done.entries|selectattr('status', 'equalto', 'new')|list|length) }}</p>
+  {% if done.skipped %}<p class="muted small">{{ '{n} rows could not be placed. They are listed on the Not imported sheet of your file.'|tr(locale, n=done.skipped|length) }}</p>{% endif %}
+  <p class="muted small">{{ 'Your file now holds every code. Keep it: later you can add rows by code or by name, and uploading it again adds nothing twice.'|tr(locale) }}</p>
+  <div class="actions"><a class="btn primary" href="/exports/starter/result/{{ token }}">{{ 'Download your workbook with codes'|tr(locale) }}</a><a class="btn" href="/accounts">{{ 'Open Accounts'|tr(locale) }}</a></div></section>
+{% elif preview is defined %}
+<section class="card"><h2>{{ 'Review what will be added'|tr(locale) }}</h2>
+  <p class="muted small">{{ 'Nothing has changed yet. Lightning never overwrites or deletes what you already have.'|tr(locale) }}</p>
+  <table><thead><tr><th>{{ 'Sheet'|tr(locale) }}</th><th>{{ 'To add'|tr(locale) }}</th><th>{{ 'Already there'|tr(locale) }}</th><th>{{ 'Cannot be placed'|tr(locale) }}</th></tr></thead><tbody>
+  {% for label, rows in [('Accounts', preview.accounts), ('Categories', preview.categories), ('Entries', preview.entries)] %}<tr><td>{{ label|tr(locale) }}</td>
+    <td>{{ rows|selectattr('status', 'equalto', 'new')|list|length }}</td>
+    <td>{{ (rows|selectattr('status', 'in', ['exists', 'duplicate'])|list|length) }}</td>
+    <td>{{ rows|selectattr('status', 'equalto', 'error')|list|length }}</td></tr>{% endfor %}</tbody></table>
+  {% set fresh = preview.entries|selectattr('status', 'equalto', 'new')|list %}
+  {% if fresh %}<h3>{{ 'Entries to add'|tr(locale) }}</h3><table><tbody>{% for r in fresh[:shown] %}<tr><td dir="ltr">{{ r.date }}</td><td>{{ r.account }}</td><td>{{ r.category }}</td><td>{{ r.counterparty }}</td><td dir="ltr" class="num">{{ r.amount|money(True) }} {{ r.currency }}</td></tr>{% endfor %}</tbody></table>
+    {% if fresh|length > shown %}<p class="muted small">{{ 'and {n} more'|tr(locale, n=fresh|length - shown) }}</p>{% endif %}{% endif %}
+  {% if preview.problems %}<h3>{{ 'Rows that cannot be placed'|tr(locale) }}</h3><p class="muted small">{{ 'They are left out. Fix them in your file and upload it again; nothing else is held back.'|tr(locale) }}</p>
+    <table><tbody>{% for r in preview.problems[:shown] %}<tr><td>{{ 'Row {n}'|tr(locale, n=r.line) }}</td><td>{{ r.raw.get('Name') or r.raw.get('Account') or '' }}</td><td>{{ r.error|tr(locale) }}</td></tr>{% endfor %}</tbody></table>
+    {% if preview.problems|length > shown %}<p class="muted small">{{ 'and {n} more'|tr(locale, n=preview.problems|length - shown) }}</p>{% endif %}{% endif %}
+  {% if preview.nothing_to_do %}<p>{{ 'There is nothing new to add.'|tr(locale) }}</p><div class="actions"><a class="btn" href="/exports/starter">{{ 'Back'|tr(locale) }}</a></div>
+  {% else %}<form method="post" action="/exports/starter"><input type="hidden" name="action" value="confirm"><input type="hidden" name="token" value="{{ token }}"><input type="hidden" name="payload" value="{{ payload }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    <div class="actions"><button class="btn primary">{{ 'Add them'|tr(locale) }}</button><a class="btn" href="/exports/starter">{{ 'Cancel'|tr(locale) }}</a></div></form>{% endif %}</section>
+{% else %}
+<section class="card"><h2>{{ 'Fill it in yourself'|tr(locale) }}</h2>
+  <p class="muted small">{{ 'Download a workbook with examples, write your accounts, categories and entries by name, then upload it here. Lightning shows you a preview first, then gives you the codes back.'|tr(locale) }}</p>
+  <div class="actions"><a class="btn primary" href="/exports/starter/template">{{ 'Download the starter workbook'|tr(locale) }}</a></div></section>
+<section class="card"><h2>{{ 'Upload your workbook'|tr(locale) }}</h2>
+  <form method="post" action="/exports/starter" enctype="multipart/form-data" class="stack"><label>{{ 'Excel workbook'|tr(locale) }}<input type="file" name="workbook" accept=".xlsx" required></label><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn primary">{{ 'Review workbook'|tr(locale) }}</button></form></section>
+{% endif %}
+<a class="btn" href="/exports/import">{{ 'Back to Move your data'|tr(locale) }}</a></div>
+{% endblock %}
