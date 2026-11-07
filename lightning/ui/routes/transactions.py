@@ -221,7 +221,7 @@ async def save_transaction_popup(request: Request, txn_id: int):
             notice = " ".join(filter(None, (c.reserves.carry_links(reserve_links, updated.id) if reserve_links else "",
                                             c.planning.review_links(updated.id))))  # 7R, 7U
             return redirect(values["return_to"],
-                            f"Saved {updated.ref}. {register._budget_feedback(c, updated)} {notice}".strip())
+                            f"Saved. {register._budget_feedback(c, updated)} {notice}".strip())
     except (LightningError, ValueError) as exc:
         error = exc if isinstance(exc, LightningError) else ValidationError("Choose valid values for this transaction.")
         return render(request, "transactions/form_popup.html", status_code=400,
@@ -428,7 +428,7 @@ async def all_accounts_entry(request: Request):
     if matched_reserve < 0:
         feedback = (feedback + " Several reserves match; choose beside the transaction in its account list.").strip()
     return redirect(f"/transactions?date={txn.date}&new_acct={entry['account_id']}",
-                    f"Saved {txn.ref}. {feedback}".strip())
+                    f"Saved. {feedback}".strip())
 
 
 @router.post("/transactions/register/{txn_id:int}")
@@ -439,7 +439,7 @@ async def all_accounts_update(request: Request, txn_id: int):
     txn, values = result
     matched_reserve = values.get("_matched_reserve", 0)
     message = (f"Saved as {txn.ref}. The original transaction is kept in history." if txn.id != txn_id
-               else f"Saved {txn.ref}.")
+               else "Saved.")
     feedback = register._budget_feedback(container(request), txn)
     if matched_reserve < 0:
         feedback = (feedback + " Several reserves match; choose beside the transaction in its account list.").strip()

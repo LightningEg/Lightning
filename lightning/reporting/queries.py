@@ -230,8 +230,11 @@ class ReportQueries:
             f"WHERE t.status='POSTED' AND le.category_id IN ({marks})", tuple(sorted(category_ids)))}
 
     @staticmethod
-    def _statement_filter(account_id: int | None, date_from: str, date_to: str) -> tuple[str, list]:
+    def _statement_filter(account_id: int | None, date_from: str, date_to: str,
+                          one_transfer_row: bool = False) -> tuple[str, list]:
         where = f"le.date BETWEEN ? AND ? AND {CASH_ONLY}"
+        if one_transfer_row and account_id is None:  # IV-12E: all accounts show a transfer once, from its sending side
+            where += " AND NOT (t.type = 'TRF' AND le.quantity_e6 > 0)"
         params: list = [date_from, date_to]
         if account_id is not None:
             where = "le.account_id = ? AND " + where
@@ -243,10 +246,11 @@ class ReportQueries:
     _STATEMENT_GROUP = " GROUP BY le.date,le.account_id,t.id ORDER BY le.date, t.id, le.account_id"
 
     def statement_lines(self, account_id: int | None, date_from: str, date_to: str,
-                        limit: int = -1, offset: int = 0) -> list[dict]:
+                        limit: int = -1, offset: int = 0, one_transfer_row: bool = False) -> list[dict]:
         """Posted cash lines for one account (or every account when account_id is None) — the register.
-        ``limit``/``offset`` select a slice of the rows, oldest first."""
-        where, params = self._statement_filter(account_id, date_from, date_to)
+        ``limit``/``offset`` select a slice of the rows, oldest first. ``one_transfer_row``: with every account,
+        a transfer is one row (its sending side) instead of two."""
+        where, params = self._statement_filter(account_id, date_from, date_to, one_transfer_row)
         rows = self.db.all(
             f"SELECT le.date, le.account_id, SUM(le.quantity_e6) AS quantity_e6, SUM(le.amount_e6) AS amount_e6,"
             f" SUM(le.amount_base_e6) AS amount_base_e6,"
@@ -261,14 +265,15 @@ class ReportQueries:
         )
         return [dict(r) for r in rows]
 
-    def _statement_groups(self, account_id: int | None, date_from: str, date_to: str) -> tuple[str, list]:
-        where, params = self._statement_filter(account_id, date_from, date_to)
+    def _statement_groups(self, account_id: int | None, date_from: str, date_to: str,
+                          one_transfer_row: bool = False) -> tuple[str, list]:
+        where, params = self._statement_filter(account_id, date_from, date_to, one_transfer_row)
         return (f"SELECT SUM(le.quantity_e6) AS q FROM ledger_entries le {POSTED}"
                 f" WHERE {where}{self._STATEMENT_GROUP}"), params
 
-    def statement_count(self, account_id: int | None, date_from: str, date_to: str) -> int:
+    def statement_count(self, account_id: int | None, date_from: str, date_to: str, one_transfer_row: bool = False) -> int:
         """How many register rows statement_lines would return."""
-        grouped, params = self._statement_groups(account_id, date_from, date_to)
+        grouped, params = self._statement_groups(account_id, date_from, date_to, one_transfer_row)
         return int(self.db.scalar(f"SELECT COUNT(*) FROM ({grouped})", tuple(params)))
 
     def statement_value_updates(self, account_id: int | None, date_from: str, date_to: str) -> int:

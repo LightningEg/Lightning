@@ -192,11 +192,11 @@ def _budget_feedback_text(c, txn) -> str:
         if shown.remaining is None:
             state = "no covering limit"
         elif shown.remaining < 0:
-            state = f"{fmt(-shown.remaining)} {c.base_currency} over this month"
+            state = f"{fmt(-shown.remaining, 0)} over this month"
         else:
-            state = f"{fmt(shown.remaining)} {c.base_currency} left this month"
+            state = f"{fmt(shown.remaining, 0)} left this month"
         impacts.append(f"{label}: {state}")
-    return "Budget · " + "; ".join(impacts[:2]) if impacts else ""
+    return "; ".join(impacts[:2]) + "." if impacts else ""
 
 
 

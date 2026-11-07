@@ -3081,6 +3081,9 @@ input[type=file]:not(#_):not(.x_):hover::file-selector-button { border-color:var
 .flash.device-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .flash.device-line > span { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .flash.device-line form { margin: 0; }
+.flash:has(.history-form) { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.flash .history-form { margin: 0; flex: none; }
+.flash .history-btn.is-words { width: auto; padding: 0 12px; border: 0; background: none; box-shadow: none; color: var(--ink); font-weight: 700; text-decoration: underline; }
 
 /* Settings › Rules: the form's segments hug their choices (A10.2), two amount wells side by side; the undo
    after "apply to past" is one line with its button. */

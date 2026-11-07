@@ -52,12 +52,12 @@ def test_full_flow(client, c):
     r = client.post(f"/accounts/{cib.id}/register", data={"date": "2026-09-25", "counterparty": "Carrefour",
                     "counterparty_choice": "create", "category": "Personal › Food & Groceries",
                     "amount": "-450", "notes": "Groceries"})
-    assert r.status_code == 200 and "Saved OUT-2026-09-25-001" in r.text
+    assert r.status_code == 200 and "Saved." in r.text
     txn = c.transactions.get_by_ref("OUT-2026-09-25-001")
 
     # one of your accounts as Counterparty = a transfer (no category needed)
     r = client.post(f"/accounts/{cib.id}/register", data={"date": "2026-09-26", "counterparty": "Wallet", "amount": "-2000"})
-    assert "Saved TRF-2026-09-26-001" in r.text
+    assert "Saved." in r.text
 
     # validation errors re-render the register with the message and the typed values
     r = client.post(f"/accounts/{cib.id}/register", data={"date": "2026-13-01", "category": "food & groceries",
@@ -73,7 +73,7 @@ def test_full_flow(client, c):
     assert 'id="f-edit"' in r.text and 'value="-450.00"' in r.text
     r = client.post(f"/accounts/{cib.id}/register/{txn.id}", data={"date": "2026-09-25", "counterparty": "Carrefour",
                     "category": "Personal › Food & Groceries", "amount": "-540", "notes": ""})
-    assert "Saved OUT-2026-09-25-001" in r.text
+    assert "Saved." in r.text
     assert c.reporting.account_balance(cib.id) == 50000 - 540 - 2000
 
     # void from the edit bar returns to the register
@@ -97,12 +97,12 @@ def test_all_accounts_register(client, c, setup):
     wallet, cib = accounts["wallet"], accounts["cib"]
     r = client.post("/transactions/register", data={"date": "2026-09-20", "account_id": wallet.id, "counterparty": "Kiosk",
                     "counterparty_choice": "create", "category": "Food & Groceries", "amount": "-30"})
-    assert "Saved OUT-2026-09-20-001" in r.text
+    assert "Saved." in r.text
     t = client.post("/transactions/register", data={"date": "2026-09-21", "account_id": cib.id,
                     "counterparty": wallet.label, "amount": "-100"})
-    assert "Saved TRF" in t.text
+    assert "Saved." in t.text
     page = client.get("/transactions")
-    assert page.text.count('class="pill transfer"') == 2  # one row per account
+    assert page.text.count('class="pill transfer"') == 1  # IV-12E: one row per transfer
     r = client.post("/transactions/register", data={"date": "2026-09-21", "counterparty": "Wallet", "amount": "-100"})
     assert r.status_code == 400 and "Choose an account" in r.text
 
@@ -197,12 +197,12 @@ def test_register_entry(client, c, setup):
     r = client.post(f"/accounts/{wallet.id}/register", data={"date": "2026-09-20", "counterparty": "Carrefour",
                     "counterparty_choice": "create", "category": "Personal › Food & Groceries",
                     "amount": "-150", "notes": "milk"})
-    assert "Saved OUT-2026-09-20-001" in r.text and 'title="Personal › Food &amp; Groceries">Food &amp; Groceries<' in r.text
+    assert "Saved." in r.text and 'title="Personal › Food &amp; Groceries">Food &amp; Groceries<' in r.text
     assert c.reporting.account_balance(wallet.id) == 1200 - 150
 
     r = client.post(f"/accounts/{wallet.id}/register", data={"date": "2026-09-21", "counterparty": "CIB Current",
                     "amount": "500"})
-    assert "Saved TRF-2026-09-21-001" in r.text
+    assert "Saved." in r.text
     assert c.reporting.account_balance(wallet.id) == 1200 - 150 + 500
     assert c.reporting.account_balance(cib.id) == 50000 - 500
 
@@ -210,7 +210,7 @@ def test_register_entry(client, c, setup):
     # regular category whose usual direction differs.
     r = client.post(f"/accounts/{wallet.id}/register", data={"date": "2026-09-22", "counterparty": "Employer",
                     "counterparty_choice": "create", "category": "Salary", "amount": "-99"})
-    assert r.status_code == 200 and "Saved OUT-2026-09-22-001" in r.text
+    assert r.status_code == 200 and "Saved." in r.text
     assert c.reporting.account_balance(wallet.id) == 1200 - 150 + 500 - 99
 
     # an ambiguous category name asks which one
@@ -506,3 +506,36 @@ def test_desktop_import_keeps_cancel(c, setup):
     html = TestClient(create_app(c)).get(f'/accounts/{account.id}/import').text
     upload = html.split('enctype="multipart/form-data"', 1)[1].split('</form>', 1)[0]
     assert 'Review statement' in upload and '>Cancel</a>' in upload
+
+
+def test_all_accounts_shows_a_transfer_once_and_one_account_shows_both_halves(client, c, setup):
+    """IV-12E: Every account view lists a transfer as one unsigned row; each account still lists its own half."""
+    accounts, _ = setup
+    w, cib = accounts["wallet"], accounts["cib"]
+    c.transactions.record_transfer("2026-09-10", cib.id, w.id, "100")
+    everywhere = client.get("/transactions?month=2026-09").text
+    assert everywhere.count("↔") == 1 and f"{cib.label} → {w.label}" in everywhere
+    assert "register-subline" not in everywhere.split("↔")[1].split("</tr>")[0]
+    assert "↔" in client.get(f"/accounts/{w.id}?month=2026-09").text
+    assert "↔" in client.get(f"/accounts/{cib.id}?month=2026-09").text
+
+
+def test_saving_says_saved_and_the_budget_left_in_whole_pounds_with_undo(client, c, setup):
+    """IV-12E: no internal reference and no cents in the message; the message carries Undo on the PC too."""
+    accounts, _ = setup
+    food = c.categories.get_by_code("EXP.PERSONAL.FOOD")
+    c.budgets.set_budget(food.id, "2026-11", "1000", schedule=c.schedules.view())
+    r = client.post(f"/accounts/{accounts['cib'].id}/register", data={
+        "date": "2026-11-05", "counterparty": "Spar", "counterparty_choice": "create",
+        "category": "Personal › Food & Groceries", "amount": "-1"}, follow_redirects=True)
+    flash = re.search(r'<div class="flash"[^>]*>(.*?)</div>', r.text, re.S).group(1)
+    assert "Saved." in flash and "999 left this month" in flash and "OUT-" not in flash and ".00" not in flash
+
+
+def test_the_pc_message_carries_the_same_undo_words_as_the_phone():
+    from lightning.ui.web import templates
+    page = templates.env.get_template("partials/history.html").render(
+        action_history={"undo": {"id": 1, "label": "Transaction changes"}, "redo": {"id": 2, "label": "x"}},
+        locale="en", path="/", session_token="", in_flash=True, undo_only=True)
+    assert page.count('data-history="undo"') == 1 and "data-history=\"redo\"" not in page
+    assert "is-words" in page and ">Undo</button>" in page and "Ctrl+Z" not in page
