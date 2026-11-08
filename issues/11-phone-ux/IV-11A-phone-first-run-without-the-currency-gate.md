@@ -3,6 +3,7 @@ title: Phone first run - every Add is greyed out until "Save currencies" is pres
 type: polish
 pillar: everywhere
 size: S
+model: sonnet
 status: new
 created: 2026-11-06
 by: Claude

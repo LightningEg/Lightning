@@ -3,6 +3,7 @@ title: Reminders only reach Windows and Android while the app (or its sync servi
 type: feature
 pillar: everywhere
 size: M
+model: opus
 status: new
 created: 2026-11-05
 by: Claude

@@ -3,6 +3,7 @@ title: Home and Features show the app, not only words
 type: polish
 pillar: reach
 size: M
+model: sonnet
 status: ready
 post: no
 created: 2026-10-21

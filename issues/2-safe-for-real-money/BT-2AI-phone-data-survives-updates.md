@@ -5,6 +5,7 @@ look: technical
 severity: high
 pillar: protect
 size: L
+model: opus
 status: new
 created: 2026-11-05
 by: Claude Opus 5.5

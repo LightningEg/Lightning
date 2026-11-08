@@ -3,6 +3,7 @@ title: Structure left - runtime routes and bank-import orchestration
 type: tech
 pillar: build
 size: M
+model: opus
 status: ready
 post: no
 created: 2026-10-21

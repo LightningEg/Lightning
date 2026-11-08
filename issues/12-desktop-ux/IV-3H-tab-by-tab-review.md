@@ -3,6 +3,7 @@ title: Tab-by-tab review: what a real user needs next
 type: polish
 pillar: feel
 size: L
+model: opus
 status: ready
 created: 2026-10-14
 by: Codex

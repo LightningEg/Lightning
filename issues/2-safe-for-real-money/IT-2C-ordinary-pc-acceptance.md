@@ -3,6 +3,7 @@ title: Ordinary-PC acceptance: recovery and faults, legacy import, native file p
 type: tech
 pillar: protect
 size: L
+model: opus
 status: ready
 post: no
 created: 2026-10-19

@@ -4,6 +4,7 @@ title: Papyrus and Dendera bundles need a banner, frame and name designed first
 type: feature
 pillar: feel
 size: M
+model: opus
 status: ready
 post: no
 created: 2026-10-27

@@ -3,6 +3,7 @@ title: In-app updates on Windows
 type: feature
 pillar: everywhere
 size: L
+model: opus
 status: new
 created: 2026-10-19
 by: Claude

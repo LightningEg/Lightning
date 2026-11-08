@@ -3,6 +3,7 @@ title: Import review asks the file's few questions instead of showing every row
 type: feature
 pillar: capture
 size: L
+model: opus
 status: new
 created: 2026-11-05
 by: Claude Opus 5.5

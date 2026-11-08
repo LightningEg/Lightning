@@ -3,6 +3,7 @@ title: Money lent to others and costs split with others - who owes you what, cou
 type: feature
 pillar: own
 size: L
+model: opus
 status: new
 created: 2026-11-06
 by: Claude

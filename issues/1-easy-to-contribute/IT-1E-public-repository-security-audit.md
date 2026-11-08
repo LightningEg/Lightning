@@ -3,6 +3,7 @@ title: Audit public repositories for personal data and security exposure
 type: tech
 pillar: build
 size: M
+model: opus
 status: ready
 post: no
 created: 2026-10-16

@@ -3,6 +3,7 @@ title: London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain ha
 type: tech
 pillar: own
 size: M
+model: opus
 status: new
 created: 2026-11-04
 by: Claude
