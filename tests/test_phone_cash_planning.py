@@ -12,6 +12,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from lightning.core.figures import label
+from lightning.ui.i18n import translate
 from lightning.ui.web import create_app
 
 DAY = date(2026, 10, 6)
@@ -132,13 +133,33 @@ def test_nothing_before_payday_names_the_next_payment_after_it(c, setup, monkeyp
     text = _text(_hero(_phone(c).get("/plan").text))
     assert "Nothing is due before 2026-11-01. Next: Landlord, 12,000 on 2026-11-03." in text
 
-def test_an_empty_profile_shows_no_zero_tiles(c, monkeypatch):
+@pytest.mark.parametrize("locale", ["en", "ar"])
+def test_an_empty_profile_shows_no_zero_tiles(c, monkeypatch, locale):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
+    c.settings.set("locale", locale)
     html = _phone(c).get("/plan").text
 
-    assert html.count("No accounts yet.") == 1
+    assert html.count(translate("No accounts yet.", locale)) == 1
     assert 'id="plan-build"' not in html
     assert 'id="safe-section"' not in html
     assert 'href="/accounts/new" data-popup-open' in html
     leads = re.findall(r'(?s)<div class="phone-lead[^\"]*"[^>]*>(.*?)</div>', html)
     assert not any(re.match(r"0(?:\s|$)", _text(lead)) for lead in leads)
+    actions = re.findall(r'<a class="btn primary phone-save" href="([^"]+)"', html)
+    assert actions == ["/accounts/new"]
+    for section in ("plan-next", "plan-forecast", "owe-section"):
+        assert f'id="{section}"' not in html
+
+
+@pytest.mark.parametrize("planned", ["bill", "reserve"])
+def test_planned_obligations_without_accounts_keep_the_planning_sections(c, monkeypatch, planned):
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
+    if planned == "bill":
+        _plan(c, rent=("Landlord", "BILL", "12000", "2026-10-10", {}))
+    else:
+        c.reserves.create("Next year's fees", "1000", due_date="2026-12-01")
+    html = _phone(c).get("/plan").text
+    for section in ("plan-next", "plan-forecast", "owe-section"):
+        assert f'id="{section}"' in html
+    if planned == "bill":
+        assert "Landlord" in _text(_coming(html))
