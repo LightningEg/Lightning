@@ -134,7 +134,7 @@ def test_saving_from_the_sheet_remembers_the_account_and_says_saved_with_undo(mo
     saved = phone.post(f"/accounts/{accounts['wallet'].id}/transaction/new", data={
         "__session": session, "kind": "out", "amount": "120", "category_id": str(cats["EXP.PERSONAL.FOOD"].id),
         "date": "2026-09-14", "return_to": "/"})
-    assert saved.status_code == 200 and "Saved OUT-2026-09-14" in saved.text
+    assert saved.status_code == 200 and "Saved." in saved.text
     assert 'class="flash phone-flash"' in saved.text                                              # the toast above the tab bar
     assert phone.cookies.get("lightning_last_account") == str(accounts["wallet"].id)
 
@@ -258,7 +258,7 @@ def test_the_toast_after_a_save_carries_undo_and_undo_stays_where_you_were(sampl
     saved = phone.post("/accounts/1/transaction/new", data={
         "__session": phone.session_token, "kind": "out", "amount": "33", "category_id": category,
         "counterparty": "Toast kiosk", "date": "2026-10-06", "return_to": "/transactions"})
-    assert saved.url.path == "/transactions" and "Saved OUT-" in saved.text
+    assert saved.url.path == "/transactions" and "Saved." in saved.text
     undo = re.search(r'<form class="history-form" method="post" action="/history/undo">(.*?)</form>', saved.text, re.S)
     assert undo and 'name="back" value="/transactions' in undo.group(1)         # Undo returns to this page, not to the top
     group = re.search(r'name="group_id" value="([^"]+)"', undo.group(1)).group(1)

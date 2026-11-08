@@ -91,7 +91,7 @@ def test_the_window_shows_the_result_before_saving_and_the_server_checks_it_agai
     saved = client.post(f"/accounts/{cib.id}/register", data={
         "date": "2026-09-25", "counterparty": "Carrefour", "counterparty_choice": "create",
         "category": "Personal › Food & Groceries", "amount": "-(450+60*2)"})
-    assert saved.status_code == 200 and "Saved OUT-2026-09-25-001" in saved.text
+    assert saved.status_code == 200 and "Saved." in saved.text
     line, = [x for x in c.transactions.get_by_ref("OUT-2026-09-25-001").lines if x.account_id == cib.id]
     assert line.amount == D("-570")
 

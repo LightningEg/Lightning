@@ -401,6 +401,10 @@ class TransactionService:
         return search.usual_categories(
             self.repo, window=self.USUAL_WINDOW, minimum=self.USUAL_MIN, days=self.USUAL_DAYS)
 
+    def last_accounts(self) -> dict[str, int]:
+        """{counterparty name: the account its newest money in or out used}; quick add fills it in (IV-12C)."""
+        return {row["counterparty"]: int(row["account_id"]) for row in self.repo.last_accounts()}
+
     CAPTURE_DAYS = 180
 
     def usual_capture_categories(self, kind: str, limit: int = 4) -> list[int]:

@@ -11,12 +11,10 @@ A budget by category, bills and loan payments, reserves for what is coming, and 
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **BV-12B** | [Budget says "over your plan's pace" every month for a person whose spending is always heavy in the…](../../issues/12-desktop-ux/BV-12B-budget-pace-follows-the-usual-month.md) | M | new |
 | **NF-3AZ** | [Offer the next step where a figure or row raises the question, always with a preview and an explici…](../../issues/12-desktop-ux/NF-3AZ-next-step-at-the-moment-of-need.md) | L | new |
 
 ## Reports with open follow-ups here
 
 - [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../issues/12-desktop-ux/r24-desktop-phone-ux/report.md): 3AZ
-- [Audit 14: using Lightning as a user, on the PC and the phone](../../issues/12-desktop-ux/r26-user-test-pc-and-phone/report.md): 12B
 <!-- work:end -->
 

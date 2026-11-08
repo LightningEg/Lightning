@@ -303,6 +303,18 @@ class TransactionRepository:
             (window,),
         )
 
+    def last_accounts(self) -> list:
+        """Each counterparty's most recent account (money in or out), under its saved name: [{counterparty, account_id}]."""
+        return self.db.all(
+            "SELECT counterparty, account_id FROM ("
+            " SELECT COALESCE(cp.name, t.counterparty) AS counterparty, le.account_id,"
+            "  ROW_NUMBER() OVER (PARTITION BY COALESCE(cp.name, t.counterparty) ORDER BY t.date DESC, t.id DESC, le.line_no) AS n"
+            " FROM transactions t JOIN ledger_entries le ON le.transaction_id = t.id"
+            " LEFT JOIN counterparties cp ON cp.id = t.counterparty_id"
+            " WHERE t.status = 'POSTED' AND t.type IN ('IN','OUT') AND t.counterparty != '' AND le.category_id IS NOT NULL"
+            ") WHERE n = 1",
+        )
+
     def category_use(self, effect: str, since: str) -> list:
         """Categories a person filed money of one effect (INFLOW or OUTFLOW) under since a day, most used first:
         [{category_id, uses}]. One count per transaction; split rows count once per category."""

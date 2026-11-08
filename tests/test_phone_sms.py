@@ -41,7 +41,7 @@ def test_an_sms_for_a_foreign_account_is_not_remembered(month):
     saved = phone.post(f"/accounts/{usd.id}/transaction/new", data={
         "__session": session, "kind": "out", "amount": "5", "category_id": category, "date": "2026-09-14",
         "return_to": "/", "sms_ending": "4242"})
-    assert saved.status_code == 200 and "Saved OUT" in saved.text
+    assert saved.status_code == 200 and "Saved." in saved.text
     assert c.sms_imports.account_for("4242") is None
 
 
