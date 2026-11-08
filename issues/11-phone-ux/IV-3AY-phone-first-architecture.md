@@ -121,6 +121,8 @@ go?") now has a phone page at `/money/report` (month, last month, year, all time
 Delete the phone switches in `lightning/ui/routes/` (`on_phone`, `lazy_folds`, `request.state.phone`), `_phone_template`,
 and the `phone/` templates the new screens replaced. Needs 3AY6 to 3AY10 merged first. Done when: `grep -rn "state.phone"
 lightning/ui/routes` is empty and the full suite passes.
+Built since: the old More is retired (route and template removed; `/more` leads to Money; its tests read Money and the Bills
+page).
 Not done (2026-11-08): the PC routes still carry phone branches (`getattr(request.state, "phone", False)` in about fifteen
 places) because the sub-pages (account, register, investments, Cash planning, search, Settings) have no phone-owned
 screens yet; the old slot templates also stay reachable at query URLs until the Overview report has a phone home.
@@ -128,6 +130,10 @@ screens yet; the old slot templates also stay reachable at query URLs until the 
 ## 3AY12 Arabic, themes and 320 px · M
 Every new string in the catalogue, the mirrored layouts, dark and paid themes, 320 px. Needs 3AY6 to 3AY10 merged first.
 Done when: skill `arabic-check` and `tools/theme_check.py` pass, and `tools/phone_check.py --arabic` passes.
+Built: the new phone screens are in the no-English test and `tools/phone_check.py` (English and Arabic, 360 and 320 px);
+`phone_check.py --theme id` wears a paid theme (maintainer review) and checks the same pages, run clean for dendera-night
+(also in Arabic), papyrus, cotton and nile. `tools/theme_check.py` measures the PC layout only, so it does not cover the
+phone. Left: a native Arabic reader on the voice of the strings added in 3AY6 to 3AY12.
 
 ## 3AY13 Owner's phone check · owner
 One end-to-end check on a phone once 3AY12 is merged (it replaces 3AN13). Anything wrong becomes its own step.
