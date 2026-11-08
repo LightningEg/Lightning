@@ -39,7 +39,12 @@
   {% endif %}
 </section>
 
+{% if has_accounts %}
 {{ kpi_tiles(cash.tiles, base) }}
+{% else %}
+<p class="chart-empty">{{ 'No accounts yet.'|tr(locale) }}</p>
+<a class="btn primary phone-save" href="/accounts/new" data-popup-open>{{ 'Add an account'|tr(locale) }}</a>
+{% endif %}
 
 {% set dated = f.dated %}
 {% if dated and (dated.first_shortfall or dated.account_shortfalls or dated.unassigned_payments or dated.unvalued_currencies) %}
@@ -59,6 +64,7 @@
 </section>
 {% endif %}
 
+{% if has_accounts %}
 <section class="phone-section" aria-labelledby="safe-section">
   <header class="phone-section-head"><h2 id="safe-section">{{ 'Safe to spend'|tr(locale) }}</h2><span>To {{ f.next_income_date or 'three months from now' }}</span></header>
   <article class="card phone-card" id="plan-build" aria-labelledby="safe-section">
@@ -68,6 +74,7 @@
     {% if p.build %}{{ bar_rows(p.build.rows, 'From free cash to safe to spend') }}{% endif %}
   </article>
 </section>
+{% endif %}
 
 <section class="phone-section" aria-labelledby="forecast-section">
   <header class="phone-section-head"><h2 id="forecast-section">{{ "Where cash is heading"|tr(locale) }}</h2><span>{{ 'Next {n} months'|tr(locale, n=f.months|length) }}</span></header>

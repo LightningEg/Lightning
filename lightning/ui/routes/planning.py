@@ -163,7 +163,8 @@ async def plan_page(request: Request):
     afford_account = _afford_account_answer(c, request, afford, day)
     cash = (_phone_cash(c, forecast, next_payments, late, position, day)
             if getattr(request.state, "phone", False) else None)
-    return render(request, "planning/plan.html", afford_account=afford_account,
+    return render(request, "planning/plan.html", has_accounts=bool(c.accounts.list()),
+              afford_account=afford_account,
                   afford_accounts=[a for a in _paying_accounts(c) if a.currency == c.base_currency],
                   afford_date=str(request.query_params.get("afford_date", "")),
                   afford_account_id=str(request.query_params.get("afford_account", "")), tabs=TABS, plan_tab="plan", forecast=forecast, owe=owe, has_income=has_income,

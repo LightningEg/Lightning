@@ -131,3 +131,11 @@ def test_nothing_before_payday_names_the_next_payment_after_it(c, setup, monkeyp
           gym=("Gym", "BILL", "300", "2026-11-09", {}))
     text = _text(_hero(_phone(c).get("/plan").text))
     assert "Nothing is due before 2026-11-01. Next: Landlord, 12,000 on 2026-11-03." in text
+
+def test_an_empty_profile_shows_no_zero_tiles(c, monkeypatch):
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
+    html = _phone(c).get("/plan").text
+
+    assert html.count("No accounts yet.") == 1
+    assert 'id="plan-build"' not in html
+    assert 'id="safe-section"' not in html
