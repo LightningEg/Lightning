@@ -50,7 +50,7 @@ def test_an_sms_for_a_foreign_account_is_not_remembered(month):
 def test_from_sms_has_a_back_one_line_of_help_and_its_primary_on_the_page(month):
     c, _, _ = month
     page = _phone(c).get("/sms").text
-    assert 'class="phone-back" href="/more"' in page and "card phone-card" not in page
+    assert 'class="phone-back" href="/money"' in page and "card phone-card" not in page
     assert 'class="btn primary phone-save"' in page and "Paste one or more, a blank line between each." in page
     assert "CIB and NBE are read today" not in page
 
