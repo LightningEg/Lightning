@@ -114,7 +114,7 @@ def run(shots: Path | None = None, *, arabic: bool = False) -> list[str]:
                         page.set_viewport_size({"width": 320, "height": 340})
                         page.goto(host.origin + "/accounts/add-transaction")
                         page.focus("#popup-amount")
-                        box = page.locator(".phone-save").first.bounding_box()
+                        box = page.locator(".phone-save-bar .phone-save").first.bounding_box()
                         if not box or box["y"] < 0 or box["y"] + box["height"] > 340:
                             problems.append(f"320 /accounts/add-transaction: Save is off screen with the keyboard open ({box})")
                         page.set_viewport_size({"width": 320, "height": 800})

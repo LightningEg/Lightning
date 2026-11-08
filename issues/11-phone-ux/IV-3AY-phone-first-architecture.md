@@ -61,6 +61,12 @@ it ends within 1.2 screens above the tab bar, the first Latest row is above 600 
 Amount first; Out / In / Move; the last account; chips by use; Paste SMS and Pay a bill at the top; a toast with the
 category's left and Undo; returns to the slot it came from. Needs 3AY4 merged first. Done when: J1 is 3 taps and Save shows
 with the keyboard open at 320 px.
+Built: the Add slot passes the page it opened from, so Save returns there; the sheet says Move; *Pay a bill* (only when
+bills are due) opens the phone-owned `/add/bills`, each row opening that bill's pay sheet; Save stays on screen with the
+keyboard open at 320 px (`overflow-x: clip` so the sticky bar sticks; `tools/phone_check.py` checks it); the category chips
+lead with what was typed by hand in the same part of the day; J1 is three taps in a real browser
+(`tests/test_phone_add_browser.py`). The toast with the budget's left and Undo already existed. Left: the bill sheet's own
+phone template (it still uses the PC's pay page).
 
 ## 3AY8 Activity with To review · L
 All (the month, one money line, the day's net only with two or more rows, row sheets with category chips and a rule) and
