@@ -20,6 +20,7 @@ import pytest
 import screens
 from lightning.bootstrap import build
 from lightning.core import dates
+from lightning.ui.phone.router import mount_phone
 from test_mohab_year import Mohab, _live_the_year
 
 # The PC's link or button -> the phone's taps. A step starting with "/" opens that page; with "?" it is
@@ -123,7 +124,9 @@ class PhoneMohab(Mohab):
     def __init__(self, c):
         super().__init__(c)
         from lightning.ui.web import create_app
-        self.b = PhoneBrowser(create_app(c))
+        app = create_app(c)
+        mount_phone(app)  # the phone's own screens answer first, as profile_app(phone=True) does
+        self.b = PhoneBrowser(app)
 
     def enter(self, account, when, party, category, amount, **more):
         """The add button opens the entry sheet (C05.2, C09): Out, In or Transfer, then the fields."""
