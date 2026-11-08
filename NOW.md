@@ -13,7 +13,7 @@
 
 ## Next
 
-- **r28 (2026-11-08, Claude):** 3BB-3BK in small steps; BV-3BB first. **Read:** r28.
+- **r28 (Codex):** BV-3BB built. Next: 3BC+3BE, 3BG, 3BD, 3BF (owner order). **Read:** r28.
 
 - **Docs spine (2026-10-31):** trailers per AGENTS §3; `python tools/status.py` after plan changes. Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
 
