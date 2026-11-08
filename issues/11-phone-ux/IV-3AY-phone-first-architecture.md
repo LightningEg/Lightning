@@ -4,6 +4,7 @@ type: polish
 look: visual
 pillar: everywhere
 size: L
+model: opus
 status: ready
 post: no
 created: 2026-11-06

@@ -18,6 +18,7 @@ What to build, in a line or two. Done when: <what a reviewer can run or read to 
 ```
 
    The code is the item's code plus a number (`5A1`, `5A2` ...). The size after ` · ` is `S`, `M`, `L` or `owner` (a step only the owner can do, with no coins). Once posted, ` · #123` follows.
+   A step may name its model after the size, `## 5A1 The events table · L · opus`; without one it takes the item's `model:`. Mark `sonnet` only when the step names its files, the exact change and a command that proves it (issues/README.md, Model).
 3. **Size by the work**, not by the item: S a small self-contained fix (200 coins), M a change across a few files with tests (500), L money logic or a feature (800 or more). A step that is still bigger than one pull request is split again.
 4. **Order.** If a step needs another, say so in the step's text in exactly this form: `Needs 5A1 merged first.` or `Needs 7D3 to 7D5 merged first.` The posting tool holds the step until the steps it names are finished (their headings deleted).
 5. **Overlap.** If the item overlaps work already built or in progress (another item, an audit), start the step with `Verify first:` and say what to reproduce, and delete the step with the fixing commit's name if it is already fixed.

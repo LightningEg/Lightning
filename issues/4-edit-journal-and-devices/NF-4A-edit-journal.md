@@ -3,6 +3,7 @@ title: Edit journal: edit anywhere, one home confirms
 type: feature
 pillar: everywhere
 size: L
+model: opus
 status: building
 created: 2026-10-16
 by: unknown (moved from docs/proposals)

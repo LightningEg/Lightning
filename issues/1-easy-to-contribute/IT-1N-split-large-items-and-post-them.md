@@ -3,6 +3,7 @@ title: Split the large items into steps and post every contributor-safe step on 
 type: tech
 pillar: build
 size: M
+model: sonnet
 status: ready
 post: no
 created: 2026-10-31
@@ -24,3 +25,16 @@ Steps 1 and 2 are done: all 22 large items are split into 104 sized steps, and `
 the declutter work (3AL, 3AM): their steps say *verify first*, and the 3G, 3Q, 3S and 3T steps stay off the first batch
 (`post: no`) until the owner has checked the PC declutter. Step 3 waits for the owner's approval of the list; then post with
 `issue_write`, write each number back into the step heading (`· #123`), and finish this item.
+
+## How to work on this item
+
+2026-11-08: the dry run now lists more than the 30 issues of 2026-10-31 (the r28 items added steps). 1N1 is the owner's; 1N2 is one session following skill `post-contributor-issues`.
+
+## 1N1 Approve the first batch and its coins · owner
+Run `python tools/issues.py github` and read the list it prints (code, title, size, coins; what is held back and why). Options: (a) post everything listed (recommended: every step names its files and proof); (b) post only S steps first and watch how contributors do; (c) post nothing yet. Say also whether any coin amount should rise (front matter `coins:` raises, never lowers).
+
+## 1N2 Post the approved batch · S · sonnet
+Needs 1N1 agreed first.
+Files: `skills/post-contributor-issues/SKILL.md` (follow it), `tools/issues.py` (`post_units`, `issue_text`), the item files it writes back to.
+Do: for each approved unit, create the GitHub issue with the title, body and labels `issue_text` returns (GitHub MCP `issue_write`), then write the number back: `github: <n>` in an item's front matter, or ` · #<n>` at the end of a step heading. Nothing with `post: no` or a claim in `NOW.md`.
+Done when: `python tools/issues.py github` lists nothing left to post from the approved batch, `python tools/issues.py --check` passes, and the issues appear on GitHub with their `coins:` labels.

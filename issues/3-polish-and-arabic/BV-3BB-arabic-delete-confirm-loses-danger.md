@@ -5,6 +5,7 @@ look: visual
 severity: medium
 pillar: protect
 size: S
+model: sonnet
 status: ready
 created: 2026-11-08
 by: Claude

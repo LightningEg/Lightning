@@ -4,6 +4,7 @@ title: Cosmetic parts, account-wide claiming and native acceptance
 type: feature
 pillar: feel
 size: L
+model: opus
 status: building
 created: 2026-10-24
 by: Codex

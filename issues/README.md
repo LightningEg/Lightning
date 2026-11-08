@@ -96,6 +96,7 @@ look: visual                         # bugs: visual or technical; polish: option
 severity: medium                     # bugs only: high, medium or low
 pillar: own                          # one of the pillars above
 size: M                              # S, M or L; not on an owner task
+model: sonnet                        # sonnet or opus (see Model); not on an owner task
 status: new
 created: 2026-10-19
 by: Claude Opus 5.5                  # the AI or "owner"; never a person's name
@@ -105,6 +106,21 @@ blocked_by: 3B                       # only when status is blocked
 ```
 
 Bugs found by a skill also keep `skills`, `app_version`, `commit` and `repo` (app, website or both).
+
+## Model
+
+`model` names the smallest model that can finish the work **alone**, from the item's text, without asking: `sonnet` or
+`opus` (Claude Sonnet and Opus as the benchmark; any AI picks the line it matches). A step may differ from its item: put
+it after the size, `## 3BK1 Guideline: human dates on screens · M · opus`; a step without one takes its item's. INDEX
+shows it. Owner tasks have none.
+
+- **sonnet**: the change is named (files, what to write, a done-when that a command proves); copy, CSS, templates,
+  translations, tests, a mechanical refactor, a page that follows an existing one.
+- **opus**: judgement is part of the work: money logic, data on real profiles (migrations, restore, sync, the journal),
+  security and keys, native Windows/Android, design or an audit, a decision between options, a change across both repos,
+  or an item not yet split into named steps.
+
+When an `opus` item is split into steps that name their files and their proof, mark the steps that became `sonnet`.
 
 ## Body
 

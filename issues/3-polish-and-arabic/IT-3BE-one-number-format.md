@@ -3,6 +3,7 @@ title: One number format on screen - the browser follows the app, not the Window
 type: tech
 pillar: understand
 size: S
+model: sonnet
 status: ready
 created: 2026-11-08
 by: Claude

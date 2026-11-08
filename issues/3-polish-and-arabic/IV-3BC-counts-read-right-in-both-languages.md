@@ -3,6 +3,7 @@ title: Counts read right in English and Arabic - "1 days left", "Delete 1 transa
 type: polish
 pillar: feel
 size: M
+model: sonnet
 status: ready
 created: 2026-11-08
 by: Claude

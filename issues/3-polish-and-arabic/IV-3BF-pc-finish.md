@@ -3,6 +3,7 @@ title: PC finish - one focus ring, branded validation, only the brand's fonts, s
 type: polish
 pillar: feel
 size: M
+model: sonnet
 status: ready
 created: 2026-11-08
 by: Claude

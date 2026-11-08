@@ -72,9 +72,19 @@ def _item(code="9Z", **meta):
 
 def test_a_step_names_its_size_and_a_posted_step_its_issue():
     module = _tool()
-    found = module.STEP.findall("## 5A1 The table · L\n## 5A2 Wrappers · M · #212\n## 5A3 Owner try · owner\n## 5A4 No size\n")
-    assert found == [("5A1", "The table", "L", ""), ("5A2", "Wrappers", "M", "212"), ("5A3", "Owner try", "owner", ""),
-                     ("5A4", "No size", "", "")]
+    found = module.STEP.findall("## 5A1 The table · L\n## 5A2 Wrappers · M · #212\n## 5A3 Owner try · owner\n## 5A4 No size\n"
+                                "## 5A5 Hard part · M · opus\n## 5A6 Easy part · S · sonnet · #213\n")
+    assert found == [("5A1", "The table", "L", "", ""), ("5A2", "Wrappers", "M", "", "212"), ("5A3", "Owner try", "owner", "", ""),
+                     ("5A4", "No size", "", "", ""), ("5A5", "Hard part", "M", "opus", ""), ("5A6", "Easy part", "S", "sonnet", "213")]
+
+
+def test_every_item_but_an_owner_task_names_the_model_that_can_do_it():
+    module = _tool()
+    milestones, _ = module.load()
+    items = [i for m in milestones for i in m["items"]]
+    assert all((i.get("model") in module.MODELS) != (i["type"] == "owner") for i in items)
+    steps = [s for i in items for s in i["steps"] if s["size"] != "owner"]
+    assert all(s["model"] in module.MODELS for s in steps)  # a step without its own model takes its item's
 
 
 def test_every_step_in_the_plan_has_a_size():
@@ -145,7 +155,7 @@ def test_the_needs_sentence_in_markdown_is_read_independently_of_live_plan_items
     folder.mkdir()
     (folder / "README.md").write_text("---\ntitle: Later\n---\n", encoding="utf-8")
     (folder / "NF-9Z-example.md").write_text(
-        "---\ntitle: Example\ntype: feature\npillar: capture\nsize: L\nstatus: ready\n"
+        "---\ntitle: Example\ntype: feature\npillar: capture\nsize: L\nmodel: opus\nstatus: ready\n"
         "created: 2026-11-04\nby: Codex\n---\n\n"
         "## 9Z3 Pickers · M\nChoose.\n\n## 9Z4 Search · M\nFind.\n\n"
         "## 9Z5 History · M\nRecall.\n\n## 9Z6 Edges · M\nNeeds 9Z3 to 9Z5 merged first.\n",
