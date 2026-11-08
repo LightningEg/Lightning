@@ -10,6 +10,11 @@ from lightning.ui.web import container, render
 
 PHONE_TEMPLATES = "phone/"
 
+# Pages that are only practical on a PC (3AY4 d): on the phone they open "This is on your PC" instead of PC markup
+# squeezed into one column. Empty on purpose (owner, 2026-11-08): Data checks and price files still work on the phone
+# today, so a path joins this list only when its phone version exists or the owner decides it is PC-only.
+BEST_ON_PC: tuple[str, ...] = ()
+
 
 def _plain(*allowed: str, when=None) -> type[APIRoute]:
     """A route class that matches a URL only when its query holds nothing but ``allowed`` keys. A slot's bare URL is
@@ -89,6 +94,15 @@ def phone_router() -> APIRouter:
         from lightning.ui.phone.screens import money as screen
         return render_phone(request, "phone/money.html", screen=screen.build(container(request), today()))
 
+    @router.get("/pc")
+    async def on_your_pc(request: Request):
+        """This is on your PC: what a PC-only page is for, and the way back. ``?for=`` names the page asked for."""
+        return render_phone(request, "phone/on_pc.html", asked=_on_pc_label(request.query_params.get("for") or request.url.path),
+                            leave=_safe_back(request.query_params.get("return_to", "")))
+
+    for path in BEST_ON_PC:  # a PC-only page answers its own address with the same page
+        router.add_api_route(path, on_your_pc, methods=["GET"], include_in_schema=False)
+
     @router.get("/money/report")
     async def money_report(request: Request):
         """How did a period go? (the Overview's report, which Home no longer carries)"""
@@ -150,6 +164,16 @@ def phone_router() -> APIRouter:
     router.include_router(slots)
     router.include_router(months)
     return router
+
+
+def _safe_back(value: str) -> str:
+    return value if value.startswith("/") and not value.startswith("//") else "/money"
+
+
+def _on_pc_label(path: str) -> str:
+    """The plain name of a PC-only page for its message; unknown addresses say nothing specific."""
+    names = {"/checks": "Data checks", "/investments/prices": "Price files"}
+    return names.get(path.split("?")[0], "")
 
 
 def render_phone(request: Request, name: str, status_code: int = 200, **context) -> HTMLResponse:

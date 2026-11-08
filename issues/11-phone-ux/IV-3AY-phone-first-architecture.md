@@ -43,10 +43,15 @@ count everywhere, on a fresh profile and on one left alone for a week; no phone 
 ## 3AY4 The phone shell: its own router, base, stylesheet and navigation · L
 Built: (a) `lightning/ui/phone/` with `router.py` mounted first by `profile_app(..., phone=True)` (`mount_phone`,
 `render_phone` that accepts only `templates/phone/` names), an import-linter contract that it does not import
-`lightning.ui.routes`, and `tests/test_phone_shell.py`. It owns no URL yet; a slot's URLs move into it with Home (3AY6).
-Left: (b) `phone/base.html` that never extends the PC base, and `phone.css` standalone on the theme tokens, not layered
-on `style.css`; (c) a stack per slot, back-gesture order and status-bar icons that follow the theme (with IV-3F);
-(d) the "This is on your PC" page in place of any PC fallback, switched on with 3AY11 once every slot has moved.
+`lightning.ui.routes`, and `tests/test_phone_shell.py`. (b) `phone/base.html` never extends or includes the PC base and
+every phone-owned screen extends it (`tests/test_phone_own_base.py`). (c, part) the status bar takes the app bar's colour
+(`<meta name="theme-color">` in `theme-runtime.js`, read again on every theme change; a browser test). (d) `phone/on_pc.html`
+at `/pc` ("This is on your PC") and a `BEST_ON_PC` list in the router that gives a listed path the same page; the list is
+empty on purpose (owner, 2026-11-08): Data checks and price files still work on the phone, so a path joins it only when its
+phone version exists or the owner says it is PC-only.
+Left: `phone.css` standalone on the theme tokens instead of layered on `style.css` (the bundle still starts with
+`style.css`; the sub-pages that render PC markup in the phone frame need it until 3AY11 gives them phone screens); a stack
+per slot with back-gesture order; IV-3F (the app bar looks too white; its colour is also the status bar's now).
 Done when: a test fails if a phone route renders a template outside `templates/phone/`;
 `tests/test_phone_nav_browser.py` and `tools/phone_check.py` pass.
 
