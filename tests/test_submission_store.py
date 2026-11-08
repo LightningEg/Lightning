@@ -1,5 +1,6 @@
 import pytest
 
+from lightning.bootstrap import build
 from lightning.core.errors import ValidationError
 from lightning.transactions.submissions import SubmissionStore, fingerprint
 
@@ -144,3 +145,39 @@ def test_no_token_means_nothing_is_remembered(submission_store, sample_txn):
             "SELECT COUNT(*) as c FROM audit_log WHERE entity='form'"
         )["c"]
         assert count_before == count_after
+
+
+def test_duplicate_submission_protection_survives_reopening_the_profile(tmp_path):
+    path = tmp_path / "submission-restart.db"
+    original = build(path)
+    token, form_token = "a" * 32, "b" * 32
+    payload = {"amount": "500", "account": "wallet"}
+    form_payload = {"goal": "emergency_fund", "target": "1000"}
+    try:
+        wallet = original.account_flows.open_account("Wallet", "CASH", "2026-09-01", "0")
+        salary = original.categories.get_by_code("EXP.WORK.SALARY")
+        transaction = original.transactions.record_inflow("2026-09-05", wallet.id, "500", salary.id)
+        store = SubmissionStore(original.db, original.transactions.repo, original.transactions.audit)
+        with original.db.transaction():
+            store.remember_submission(token, payload, transaction.id)
+            store.remember_form(form_token, form_payload)
+        count = original.db.scalar("SELECT COUNT(*) FROM transactions")
+        balance = original.reporting.account_balance(wallet.id)
+    finally:
+        original.db.close()
+
+    reopened = build(path)
+    try:
+        store = SubmissionStore(reopened.db, reopened.transactions.repo, reopened.transactions.audit)
+        for _ in range(2):
+            assert store.submitted(token, payload).id == transaction.id
+            assert store.form_seen(form_token, form_payload)
+        with pytest.raises(ValidationError, match="This form was already saved"):
+            store.submitted(token, {**payload, "amount": "999"})
+        with pytest.raises(ValidationError, match="This form was already saved"):
+            store.form_seen(form_token, {**form_payload, "target": "2000"})
+        assert reopened.db.scalar("SELECT COUNT(*) FROM transactions") == count
+        assert reopened.reporting.account_balance(wallet.id) == balance
+        assert reopened.db.scalar("SELECT COUNT(*) FROM audit_log WHERE entity='form'") == 2
+    finally:
+        reopened.db.close()
