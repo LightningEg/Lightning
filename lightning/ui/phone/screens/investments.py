@@ -43,11 +43,12 @@ def build(c, day: date, expanded: bool = False) -> InvestmentsScreen:
     report = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(start), fmt_date(end))
     explain = explain_period(report, fmt_date(start), fmt_date(end))
     position = c.position.at(day)
+    short = {(h.account_id, h.asset_id): h.short_name for h in c.investments.portfolio(fmt_date(end)).open}
     rows = []
     for h in report["holdings"]:
         gain = h["unrealized"] / h["cost"] * 100 if h["unrealized"] is not None and h["cost"] else None
         rows.append(HoldingRow(
-            name=h["asset"], account=h["account"], value=h["value"], gain_pct=gain,
+            name=short.get((h.get("account_id"), h.get("asset_id")), h["asset"]), account=h["account"], value=h["value"], gain_pct=gain,
             href=f"/investments/holding/{h['asset_id']}?account={h['account_id']}&date={fmt_date(end)}&start={fmt_date(start)}"
             if h.get("asset_id") else f"/accounts/{h.get('account_id', '')}".rstrip("/")))
     rows.sort(key=lambda r: (r.value is None, -(r.value or Decimal(0)), r.name.casefold()))

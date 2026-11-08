@@ -19,6 +19,7 @@
   <header class="phone-section-head"><h2 id="changed-heading">{{ 'What changed'|tr(locale) }}</h2><span>{{ s.start }} – {{ s.end }}</span></header>
   <div class="phone-rows">{% for label, amount in s.changed %}<div class="phone-row"><span>{{ label|tr(locale) }}</span><b class="{{ 'neg' if amount < 0 else 'pos' }}"><bdi class="fig">{{ amount|money(True) }}</bdi></b></div>{% endfor %}</div>
 </section>{% endif %}
+<a class="phone-row" href="/investments?view=class"><span>{{ 'Allocation, income and horizon'|tr(locale) }}</span><b>›</b></a>
 <div class="phone-rows">
   {% if s.cash is not none %}<div class="phone-row"><span>{{ 'Brokerage cash'|tr(locale) }}</span><b><bdi class="fig">{{ s.cash|money }}</bdi></b></div>{% endif %}
   <div class="phone-row"><span>{{ 'Holdings after sale (estimate)'|tr(locale) }}</span><b><bdi class="fig">{{ s.after_sale|money if s.after_sale is not none else 'Unavailable'|tr(locale) }}</bdi></b></div>

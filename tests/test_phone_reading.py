@@ -89,10 +89,10 @@ def test_reserves_names_financial_health_in_the_app_bar(phone):
 def test_investments_draws_no_chart_card_until_it_has_two_months(phone, monkeypatch):
     """3AN9: a card that only says "Not enough history yet" is a wall of nothing; the holdings follow the hero."""
     from lightning.ui import charts
-    assert "phone-invest-card" in phone.get("/investments").text  # two months or more: the chart, then the holdings
+    assert "phone-invest-card" in phone.get("/investments?view=class").text  # two months or more: the chart, then the holdings
     real = charts.trend
     monkeypatch.setattr(charts, "trend", lambda *a, **k: {**real(*a, **k), "too_short": True})
-    html = phone.get("/investments").text
+    html = phone.get("/investments?view=class").text
     assert "phone-invest-card" not in html and "phone-invest-seg" not in html
     assert html.index('id="holdings-heading"') < html.index('id="alloc-heading"')  # the owner's order after the hero
 

@@ -47,6 +47,7 @@ DETOURS = {
     "Categories": ("/settings", "Categories"),
     "Rules": ("/settings", "Rules"),
     "#Eid": ("?q=%23eid",),                                       # a note's tag: typed into the search
+    "See them": ("Allocation, income and horizon", "See them"),  # income collected sits on the fuller page behind Investments
     "Investment planner": ("Planner",),
     "Zakat": ("Money", "Zakat"),                                  # Money's places, when Zakat is on
     "Set a plan for 2026-09": ("/budget?month=2026-09", "Make my plan"),  # the new Budget's no-plan step leads to the plan form
