@@ -29,7 +29,7 @@
 <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 {% if category and not category.is_system and category.depth >= 2 %}
 <form method="post" action="/categories/{{ category.id }}/delete" style="margin-top:10px"
-      data-confirm="Delete this category? If it has transactions or is otherwise in use, it will be archived instead.">
+      data-confirm-delete="Delete this category? If it has transactions or is otherwise in use, it will be archived instead.">
   <button class="btn danger">{{ 'Delete'|tr(locale) }}</button>
 <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 {% endif %}

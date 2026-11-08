@@ -58,7 +58,7 @@ Severity: **high** means wrong action or lost trust, **medium** is visible on a 
 
 | ID | Sev. | What a person sees | Evidence | Item |
 | --- | --- | --- | --- | --- |
-| F1 | high | **Arabic delete confirmations look harmless.** `askFrom` translates the text first, then looks for `?` and the English words `delete|remove`. Arabic ends in `؟` and has neither word, so every Arabic delete opens as an info dialog with "OK", focus lands on Yes, and Enter deletes. The English safeguard (Enter must not delete) is lost in Arabic. | `lightning/ui/static/app.js:503-506` | [BV-3BB](../BV-3BB-arabic-delete-confirm-loses-danger.md) |
+| F1 | high | **Arabic delete confirmations look harmless.** `askFrom` translates the text first, then looks for `?` and the English words `delete|remove`. Arabic ends in `؟` and has neither word, so every Arabic delete opens as an info dialog with "OK", focus lands on Yes, and Enter deletes. The English safeguard (Enter must not delete) is lost in Arabic. | `lightning/ui/static/app.js:503-506` | BV-3BB fixed: [browser regression tests](../../../tests/test_confirm_dialog_browser.py) |
 | F2 | medium | **Chevrons point backwards in Arabic.** "ادفع ›" and "مراجعة ›" point right, toward the word, on a right-to-left row. Forward should point left. 105 `›` text glyphs appear in templates. Only some SVG chevrons are flipped (`style.rtl.css:3256`, `phone.rtl.css:47`). | [phone-ar-home](evidence/shots/phone-ar-home.png), rows "To do" | [IV-3BG](../IV-3BG-phone-finish.md) |
 | F3 | medium | **Plurals.** "1 days left" (`ui/kpis.py:123`), "1 categories" (`categories/list.html:46`), "Delete 1 transactions?" (`app.js:850`), "1 of 1 payments made" (`keynotes.py:212`). 47 hand-rolled `'s' if` ternaries and no shared helper. In Arabic, a count built in English before translation never agrees: "2 معاملة", "في 1 حسابات". The Arabic counted-noun engine (`i18n.py:3485-3511`) knows only 4 nouns. | grep counts in the item | [IV-3BC](../IV-3BC-counts-read-right-in-both-languages.md) |
 | F4 | medium | **Half-English sentences in Arabic.** "جرّب تاني بعد 5 minutes." (`runtime/session.py:84`). "احذف this category? …" (`categories/list.html:100`). "البند 2: price and exchange rate must be positive." (`core/ledger.py:164`). A record reference in the tooltip: "OUT-2026-10-02-001 — عدّل في القايمة دي" (`register.html:217`). | source lines | [IV-3BD](../IV-3BD-errors-speak-plainly-everywhere.md) |
@@ -139,3 +139,7 @@ F21 covers these choices:
 ## Dated follow-ups
 
 None yet.
+
+## Follow-up · 2026-11-08 · Codex
+
+BV-3BB: delete markers now explicitly select danger tone and the translated Delete label, including local category and counterparty handlers and the category edit page. English and Arabic question marks split the title and explanation. The complete category and counterparty warnings have Arabic. Browser tests cover both languages: Enter cancels without sending a delete, an explicit Delete sends it once, and marked deletes stay dangerous regardless of wording. Evidence: `tests/test_confirm_dialog_browser.py`.
