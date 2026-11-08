@@ -11,11 +11,10 @@ from lightning.ui.web import container, render
 PHONE_TEMPLATES = "phone/"
 
 
-def _plain(*allowed: str, when=None) -> type[APIRoute]:
+def _plain(*allowed: str) -> type[APIRoute]:
     """A route class that matches a URL only when its query holds nothing but ``allowed`` keys. A slot's bare URL is
     the new screen; the same path with a filter or another page's parameters still reaches the older shared route,
-    so no link breaks while the old screens are removed (3AY11). ``when`` (a request test) also lets the older route
-    answer: the empty profile's welcome page, where currencies, the first account and the samples are set up."""
+    so no link breaks while the old screens are removed (3AY11)."""
     class PlainRoute(APIRoute):
         def matches(self, scope):
             match, child = super().matches(scope)
@@ -23,12 +22,6 @@ def _plain(*allowed: str, when=None) -> type[APIRoute]:
                 keys = {part.split("=", 1)[0] for part in scope.get("query_string", b"").decode().split("&") if part}
                 if keys - set(allowed):
                     return Match.NONE, {}
-                if when is not None:
-                    try:
-                        if not when(Request(scope)):
-                            return Match.NONE, {}
-                    except Exception:  # no profile open yet: the older route answers (and says so)
-                        return Match.NONE, {}
             return match, child
     return PlainRoute
 
@@ -37,12 +30,11 @@ def phone_router() -> APIRouter:
     """Every phone-owned URL. Home is served at /home while the old Overview keeps /; the slot URLs switch over
     together with the tab bar (3AY10)."""
     router = APIRouter()
-    started = APIRouter(route_class=_plain(when=lambda request: bool(container(request).accounts.list())))
     slots = APIRouter(route_class=_plain())              # a bare slot URL: no query at all
     months = APIRouter(route_class=_plain("month"))      # Budget keeps its month stepper
 
     @router.get("/home")
-    @started.get("/")
+    @slots.get("/")
     async def home(request: Request):
         from lightning.core.dates import today
         from lightning.ui.phone.screens import home as screen
@@ -124,7 +116,6 @@ def phone_router() -> APIRouter:
         rows = bill_state.open_bills(c.planning, today(), bill_state.SOON_DAYS)
         return render_phone(request, "phone/add_bills.html", rows=rows, back=back)
 
-    router.include_router(started)
     router.include_router(slots)
     router.include_router(months)
     return router
