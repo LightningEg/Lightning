@@ -11,10 +11,12 @@ The overview, spending, financial health, net worth and reports. They read the l
 
 | Code | Item | Size | Status |
 |---|---|---|---|
+| **IT-3BE** | [One number format on screen](../../issues/3-polish-and-arabic/IT-3BE-one-number-format.md) | S | new |
 | **IT-9A** | [Stored month-end figures](../../issues/9-later/IT-9A-stored-month-end-figures.md) | M | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
 
 ## Reports with open follow-ups here
 
 - [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 9A
+- [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BE
 <!-- work:end -->
 

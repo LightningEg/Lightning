@@ -13,6 +13,8 @@
 
 ## Next
 
+- **r28 (2026-11-08, Claude):** 3BB-3BJ; BV-3BB first. Carries r27. **Read:** r28.
+
 - **Docs spine (2026-10-31):** trailers per AGENTS §3; `python tools/status.py` after plan changes. Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.

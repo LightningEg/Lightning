@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 38 open items. Each folder holds its reports and its items.
+11 big pictures, 47 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -62,12 +62,21 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
+| **BV-3BB** | [In Arabic, delete confirmations open as a harmless "OK" dialog with focus on Yes, so Enter deletes](3-polish-and-arabic/BV-3BB-arabic-delete-confirm-loses-danger.md) | bug, visual · medium | Protect | S | new |
+| **IT-3BE** | [One number format on screen - the browser follows the app, not the Windows locale, and every negative uses a true minus](3-polish-and-arabic/IT-3BE-one-number-format.md) | improvement, technical | Understand | S | new |
+| **IT-3BI** | [Arabic search and sorting in the register, one week start, one clock](3-polish-and-arabic/IT-3BI-arabic-search-sort-and-calendar.md) | improvement, technical | Everywhere | M | new |
+| **IV-3BC** | [Counts read right in English and Arabic - "1 days left", "Delete 1 transactions?", "2 معاملة"](3-polish-and-arabic/IV-3BC-counts-read-right-in-both-languages.md) | improvement, visual | Feel | M | new |
+| **IV-3BD** | [Every error speaks plainly, in the person's language, on a branded page - no JSON, plain text, raw exceptions or half-English](3-polish-and-arabic/IV-3BD-errors-speak-plainly-everywhere.md) | improvement, visual | Feel | M | new |
+| **IV-3BF** | [PC finish - one focus ring, branded validation, only the brand's fonts, styled scrollbars, amount-first Add and fewer one-off styles](3-polish-and-arabic/IV-3BF-pc-finish.md) | improvement, visual | Feel | M | new |
+| **IV-3BG** | [Phone finish - chevrons point forward in Arabic, quiet links 44 px tall, no tap flash or page bounce, tinted status bar](3-polish-and-arabic/IV-3BG-phone-finish.md) | improvement, visual | Everywhere | S | new |
+| **IV-3BH** | [One name per thing and no accounting jargon - ledger, counterparty, reevaluation, Title Case categories, three names for planning](3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md) | improvement, visual | Feel | M | new |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | new |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/OW-3AI-institution-logos.md) | owner task | Feel |  | ready |
+| **OW-3BJ** | [Owner decisions for an international look - date display, the Arabic currency label, row decimals, percent sign, dark mode, how Arabic addresses the person](3-polish-and-arabic/OW-3BJ-international-display-decisions.md) | owner task | Feel |  | new |
 
-Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md).
+Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md) · [r28](3-polish-and-arabic/r28-international-polish/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA. Next free code: 3BB.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA. Next free code: 3BK.
 
 ## 4 Edit journal and devices
 

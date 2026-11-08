@@ -1,0 +1,5128 @@
+{
+ "pc en /": {
+  "status": 200,
+  "title": "Overview · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Overview"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 21,
+  "figuresTabular": 16,
+  "hyphenMinus": [
+   "-89.5"
+  ],
+  "trueMinus": 1,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-01",
+   "2026-11-08",
+   "2026-12-01"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›",
+   "How it is worked out"
+  ],
+  "smallCount": 3,
+  "targets": 44,
+  "unnamed": [],
+  "clipped": [
+   "Net worth at the end of each month"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 13,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 10,
+  "shadows": 4,
+  "inlineStyles": 18,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1057,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /budget": {
+  "status": 200,
+  "title": "Budget · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Budget"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 34,
+  "figuresTabular": 19,
+  "hyphenMinus": [],
+  "trueMinus": 1,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "n's"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-01",
+   "2026-11-08"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›",
+   "Give it a job",
+   "Add your numbers with Ask an A",
+   "a category",
+   "a goal"
+  ],
+  "smallCount": 6,
+  "targets": 48,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 13,
+  "fontWeights": [
+   "400",
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 11,
+  "shadows": 4,
+  "inlineStyles": 35,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1721,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /transactions": {
+  "status": 200,
+  "title": "Transactions · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Transactions"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 41,
+  "figuresTabular": 41,
+  "hyphenMinus": [],
+  "trueMinus": 34,
+  "decimalsOnBig": [
+   "1,000.00",
+   "2,000.00",
+   "2,500.00",
+   "3,000.00",
+   "12,000.00",
+   "3,250.75",
+   "1,833.33",
+   "45,000.00"
+  ],
+  "leaked": [],
+  "straightQuotes": [
+   "m'e",
+   "L'A"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-07",
+   "2026-11-05",
+   "2026-11-04",
+   "2026-11-03",
+   "2026-11-02",
+   "2026-11-01",
+   "2026-10-28",
+   "2026-10-25"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›",
+   "Show value updates (3)",
+   "Select all visible transaction",
+   "Select Internal transfer",
+   "Edit",
+   "Select Internal transfer",
+   "Edit",
+   "Select Toyota Finance",
+   "Edit"
+  ],
+  "smallCount": 104,
+  "targets": 144,
+  "unnamed": [],
+  "clipped": [
+   "New",
+   "Edit",
+   "Edit",
+   "Edit",
+   "Edit",
+   "Edit"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 8,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 2392,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /accounts": {
+  "status": 200,
+  "title": "Accounts · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Accounts"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 29,
+  "figuresTabular": 27,
+  "hyphenMinus": [],
+  "trueMinus": 3,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "m'e"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›"
+  ],
+  "smallCount": 2,
+  "targets": 38,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 11,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1324,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /accounts/1": {
+  "status": 200,
+  "title": "CIB Payroll · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "CIB Payroll"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 98,
+  "figuresTabular": 53,
+  "hyphenMinus": [],
+  "trueMinus": 37,
+  "decimalsOnBig": [
+   "1,000.00",
+   "2,000.00",
+   "2,500.00",
+   "3,000.00",
+   "12,000.00",
+   "3,250.75",
+   "1,833.33",
+   "45,000.00"
+  ],
+  "leaked": [],
+  "straightQuotes": [
+   "m'e",
+   "L'A"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-07",
+   "2026-11-05",
+   "2026-11-04",
+   "2026-11-03",
+   "2026-11-02",
+   "2026-11-01",
+   "2026-10-28",
+   "2026-10-25"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›",
+   "Select all visible transaction",
+   "Select Internal transfer",
+   "Edit",
+   "Select Internal transfer",
+   "Edit",
+   "Select Toyota Finance",
+   "Edit",
+   "Select Internal transfer"
+  ],
+  "smallCount": 93,
+  "targets": 134,
+  "unnamed": [],
+  "clipped": [
+   "New",
+   "Edit",
+   "Edit",
+   "Edit",
+   "Edit",
+   "Edit"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 10,
+  "fontWeights": [
+   "400",
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 2671,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /plan": {
+  "status": 200,
+  "title": "Cash planning · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Cash planning"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 37,
+  "figuresTabular": 34,
+  "hyphenMinus": [],
+  "trueMinus": 11,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "m'e"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-08",
+   "2026-12-01",
+   "2026-12-08",
+   "2026-11-09",
+   "2026-11-20",
+   "2026-11-24",
+   "2026-12-03",
+   "2026-12-05"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›",
+   "How it is worked out",
+   "Recurring",
+   "Vodafone",
+   "WE Internet",
+   "North Cairo Electricity",
+   "ACME Egypt",
+   "Landlord",
+   "Car loan"
+  ],
+  "smallCount": 12,
+  "targets": 55,
+  "unnamed": [],
+  "clipped": [
+   "Free cash at past month ends, then the f"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 13,
+  "fontWeights": [
+   "400",
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 12,
+  "shadows": 3,
+  "inlineStyles": 39,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 2613,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /plan/scenarios": {
+  "status": 200,
+  "title": "Compare scenarios · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Compare scenarios"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 10,
+  "figuresTabular": 8,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-24"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›",
+   "How this is worked out"
+  ],
+  "smallCount": 3,
+  "targets": 32,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 10,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 910,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /payday": {
+  "status": 200,
+  "title": "Fund your payday plan · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Fund your payday plan"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 12,
+  "figuresTabular": 10,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-09",
+   "2026-11-20",
+   "2026-11-24"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›"
+  ],
+  "smallCount": 2,
+  "targets": 37,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 9,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 2514,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /investments": {
+  "status": 200,
+  "title": "Investments · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Investments"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 56,
+  "figuresTabular": 37,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "L'A",
+   "s's"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-01",
+   "2026-11-08",
+   "2027-09-01",
+   "2026-09-01",
+   "2026-01-01"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›",
+   "Price change on what you hold\n",
+   "Exchange rates\n0 EGP",
+   "Gain from sales\n0 EGP",
+   "Income, less tax and fees\n+1,8",
+   "See the transactions",
+   "NBE 3-year certificate",
+   "Gold pound (from grandma)",
+   "L'Azurde ring"
+  ],
+  "smallCount": 14,
+  "targets": 50,
+  "unnamed": [],
+  "clipped": [
+   "Money in and out, and change in value by"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 12,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 11,
+  "shadows": 2,
+  "inlineStyles": 7,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 2260,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /financial-health": {
+  "status": 200,
+  "title": "Financial health · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Financial health"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 8,
+  "figuresTabular": 8,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [
+   "1 needs"
+  ],
+  "dates": [
+   "2026-11-08"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›",
+   "Overview",
+   "Show the numbers"
+  ],
+  "smallCount": 4,
+  "targets": 43,
+  "unnamed": [],
+  "clipped": [
+   "Savings rate over six completed months"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 14,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 9,
+  "shadows": 2,
+  "inlineStyles": 18,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1336,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /reports": {
+  "status": 200,
+  "title": "Reports · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Reports"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 13,
+  "figuresTabular": 13,
+  "hyphenMinus": [],
+  "trueMinus": 1,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›",
+   "Age of Money and spending cale"
+  ],
+  "smallCount": 3,
+  "targets": 32,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 9,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 1,
+  "inlineStyles": 1,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 768,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /review": {
+  "status": 200,
+  "title": "Weekly review · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Weekly review"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 8,
+  "figuresTabular": 8,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-04"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›",
+   "acknowledged"
+  ],
+  "smallCount": 3,
+  "targets": 34,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 9,
+  "fontWeights": [
+   "400",
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 6,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 912,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /settings": {
+  "status": 200,
+  "title": "Settings · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Settings"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 8,
+  "figuresTabular": 8,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-01",
+   "2026-11-08"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›",
+   "Sale factors",
+   "Budget settings",
+   "Financial health limits",
+   "Financial assets",
+   "Target allocation",
+   "Price files",
+   "hide_names",
+   "Other formats"
+  ],
+  "smallCount": 10,
+  "targets": 57,
+  "unnamed": [],
+  "clipped": [
+   "Full screen",
+   "Show zakat"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 11,
+  "fontWeights": [
+   "400",
+   "500",
+   "550",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 9,
+  "shadows": 2,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 2275,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /categories": {
+  "status": 200,
+  "title": "Categories · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Settings"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 8,
+  "figuresTabular": 8,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›",
+   "INPUT",
+   "Select Gifts Received",
+   "Select Other Income",
+   "Select Eating Out",
+   "Select Education",
+   "Select Entertainment",
+   "Select Fees & Charges",
+   "Select Food & Groceries"
+  ],
+  "smallCount": 37,
+  "targets": 175,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 9,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 6,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 2141,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /accounts/1/transaction/new": {
+  "status": 200,
+  "title": "Add transaction · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Add transaction"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 8,
+  "figuresTabular": 8,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›",
+   "kind",
+   "kind",
+   "kind"
+  ],
+  "smallCount": 5,
+  "targets": 38,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 10,
+  "fontWeights": [
+   "500",
+   "550",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 810,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /search?q=food": {
+  "status": 200,
+  "title": "Search · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Search"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 8,
+  "figuresTabular": 8,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "t's"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›"
+  ],
+  "smallCount": 2,
+  "targets": 27,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 9,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 2,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 768,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc en /does-not-exist": {
+  "status": 404,
+  "title": "Not found · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "Not found"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 8,
+  "figuresTabular": 8,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Accounts · Balances in EGP",
+   "You owe the circle ›",
+   "Back to the dashboard"
+  ],
+  "smallCount": 3,
+  "targets": 24,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 8,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 6,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 768,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Spending",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ]
+ },
+ "pc en add-focus": {
+  "active": "",
+  "amountAfterTyping120": ""
+ },
+ "pc en dark": {
+  "bg": "rgba(0, 0, 0, 0)"
+ },
+ "pc ar /": {
+  "status": 200,
+  "title": "نظرة عامة · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "نظرة عامة"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "year certificate"
+  ],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP",
+   "إزاي اتحسب"
+  ],
+  "smallCount": 2,
+  "targets": 44,
+  "unnamed": [],
+  "clipped": [
+   "صافي ثروتك في آخر كل شهر"
+  ],
+  "ellipsisNoTitle": 1,
+  "fontSizes": 13,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 10,
+  "shadows": 4,
+  "inlineStyles": 18,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1055,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "عوامل التسييل",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "كل الوقت",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "من بداية السنة",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "الشهر اللي فات",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "input",
+    "text": "month",
+    "outline": true,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "مخصص",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /budget": {
+  "status": 200,
+  "title": "الميزانية · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "ميزانيتك"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP",
+   "حدد له غرض",
+   "فئة",
+   "هدف"
+  ],
+  "smallCount": 4,
+  "targets": 48,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 13,
+  "fontWeights": [
+   "400",
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 11,
+  "shadows": 4,
+  "inlineStyles": 35,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1805,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "إعدادات الميزانية",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "كل الوقت",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "من بداية السنة",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "الشهر اللي فات",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "input",
+    "text": "month",
+    "outline": true,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "مخصص",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /transactions": {
+  "status": 200,
+  "title": "المعاملات · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "المعاملات"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "m'e",
+   "L'A"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "CIB Payroll",
+   "Vodafone Cash",
+   "Office gam",
+   "Toyota FinanceCIB Payroll",
+   "Cash wallet",
+   "Fitness Time GymCIB Payroll",
+   "LandlordCIB Payroll",
+   "CarrefourCIB Payroll"
+  ],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP",
+   "اعرض تحديثات القيمة (⁦٣⁩)",
+   "اختار كل المعاملات الظاهرة",
+   "اختار تحويل داخلي",
+   "تعديل",
+   "اختار تحويل داخلي",
+   "تعديل",
+   "اختار Toyota Finance",
+   "تعديل",
+   "اختار تحويل داخلي"
+  ],
+  "smallCount": 103,
+  "targets": 144,
+  "unnamed": [],
+  "clipped": [
+   "جديد",
+   "تعديل",
+   "تعديل",
+   "تعديل",
+   "تعديل",
+   "تعديل"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 8,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 2392,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "المعاملات",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "استيراد",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "حساباتك",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "أموال لغيرك",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "summary",
+    "text": "استيراد كشف حساب",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "اختار حساب",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /accounts": {
+  "status": 200,
+  "title": "حساباتك · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "حساباتك"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "m'e"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "CIB Payroll",
+   "Vodafone Cash",
+   "NBE CDs",
+   "Gold at home",
+   "THNDR",
+   "Office gam"
+  ],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP"
+  ],
+  "smallCount": 1,
+  "targets": 38,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 11,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1347,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "المعاملات",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "استيراد",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "حساباتك",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "أموال لغيرك",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "أضف حساب",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "summary",
+    "text": "⋯",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /accounts/1": {
+  "status": 200,
+  "title": "CIB Payroll · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "CIB Payroll"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "m'e",
+   "L'A"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "CIB Payroll",
+   "Vodafone Cash",
+   "Office gam",
+   "Toyota Finance",
+   "Fitness Time Gym",
+   "Landlord",
+   "Carrefour",
+   "ACME Egypt"
+  ],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP",
+   "اختار كل المعاملات الظاهرة",
+   "اختار تحويل داخلي",
+   "تعديل",
+   "اختار تحويل داخلي",
+   "تعديل",
+   "اختار Toyota Finance",
+   "تعديل",
+   "اختار تحويل داخلي",
+   "تعديل"
+  ],
+  "smallCount": 92,
+  "targets": 134,
+  "unnamed": [],
+  "clipped": [
+   "جديد",
+   "تعديل",
+   "تعديل",
+   "تعديل",
+   "تعديل",
+   "تعديل"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 10,
+  "fontWeights": [
+   "400",
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 2699,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "استيراد كشف حساب",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "summary",
+    "text": "حركات الفلوس",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "summary",
+    "text": "⋯",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "input",
+    "text": "q",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "select",
+    "text": "كل الوقت\nالشهر ده\nالشهر اللي ف",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "summary",
+    "text": "طرق العرض",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /plan": {
+  "status": 200,
+  "title": "تخطيط النقدية · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "تخطيط النقدية"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "m'e"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "CIB Payroll",
+   "Vodafone Cash",
+   "THNDR",
+   "Vodafone",
+   "WE Internet",
+   "North Cairo Electricity",
+   "ACME Egypt",
+   "Landlord"
+  ],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP",
+   "إزاي اتحسب",
+   "المتكرر",
+   "شوف التوقع",
+   "القروض"
+  ],
+  "smallCount": 5,
+  "targets": 55,
+  "unnamed": [],
+  "clipped": [
+   "النقدية المتاحة في آخر الشهور اللي فاتت،"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 13,
+  "fontWeights": [
+   "400",
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 12,
+  "shadows": 3,
+  "inlineStyles": 39,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 2587,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "الخطة",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "المتكرر",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "القروض",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "summary",
+    "text": "⋯",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "إزاي اتحسب",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "summary",
+    "text": "اعرض الأرقام",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /plan/scenarios": {
+  "status": 200,
+  "title": "قارن السيناريوهات · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "قارن السيناريوهات"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "CIB Payroll",
+   "Vodafone Cash",
+   "THNDR"
+  ],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP",
+   "كيف يُحسب هذا"
+  ],
+  "smallCount": 2,
+  "targets": 32,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 10,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 919,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "اشترِ شيئًا",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "الدخل يتأخر",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "فاتورة تتغير",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "input",
+    "text": "purchase",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "input",
+    "text": "purchase_date",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "select",
+    "text": "اختار الحساب\nCIB Payroll · EGP",
+    "outline": false,
+    "ring": true
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /payday": {
+  "status": 200,
+  "title": "خصص نقدية لخطة الشهر · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "خصص نقدية لخطة الشهر"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "Vodafone",
+   "WE Internet",
+   "North Cairo Electricity",
+   "Emergency Fund"
+  ],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP"
+  ],
+  "smallCount": 1,
+  "targets": 37,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 9,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 2568,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "إعدادات الميزانية",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "تخطيط النقدية",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "شغّل تخصيص النقدية",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "روح لآخر الصفحة",
+    "outline": true,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /investments": {
+  "status": 200,
+  "title": "الاستثمارات · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "الاستثمارات"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "L'A"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "year certificate",
+   "Gold pound",
+   "from grandma",
+   "Azurde ring",
+   "Money market fund"
+  ],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP",
+   "تغير قيمة المقتنيات\n⁦+٦٬٠٦٣⁩ E",
+   "أسعار الصرف\n⁦٠⁩ EGP",
+   "أرباح البيع\n⁦٠⁩ EGP",
+   "الدخل بعد الضريبة والرسوم\n⁦+١٬",
+   "شوف الحركات",
+   "NBE 3-year certificate",
+   "Gold pound (from grandma)",
+   "L'Azurde ring",
+   "COMI"
+  ],
+  "smallCount": 13,
+  "targets": 50,
+  "unnamed": [],
+  "clipped": [
+   "الفلوس الداخلة والخارجة، والتغيّر في الق"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 12,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 12,
+  "shadows": 2,
+  "inlineStyles": 7,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 2235,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "المقتنيات",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "المخطط",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "الأسعار",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "العملات",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "الأصول المالية",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "كل الوقت",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /financial-health": {
+  "status": 200,
+  "title": "صحتك المالية · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "صحتك المالية"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP",
+   "اعرض الأرقام"
+  ],
+  "smallCount": 2,
+  "targets": 43,
+  "unnamed": [],
+  "clipped": [
+   "نسبة الادخار خلال ست شهور مكتملة"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 14,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 9,
+  "shadows": 2,
+  "inlineStyles": 18,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1369,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "المبالغ المحجوزة",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "الحدود",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "حدود الصحة المالية",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "كل الوقت",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "من بداية السنة",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "الشهر اللي فات",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /reports": {
+  "status": 200,
+  "title": "التقارير · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "التقارير"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "Excel",
+   "against",
+   "before",
+   "biggest change Food",
+   "Groceries",
+   "biggest change Housing"
+  ],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP",
+   "عمر الفلوس وتقويم المصروفات"
+  ],
+  "smallCount": 2,
+  "targets": 32,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 9,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 1,
+  "inlineStyles": 1,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 768,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "الإنفاق",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "مقارنة الفترات",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "التقارير",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "صدّر كل البيانات (CSV أو Excel",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "اطبع هذه الصفحة",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "عمر الفلوس وتقويم المصروفات",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /review": {
+  "status": 200,
+  "title": "المراجعة الأسبوعية · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "المراجعة الأسبوعية"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "year certificate",
+   "Fitness Time Gym"
+  ],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP",
+   "acknowledged"
+  ],
+  "smallCount": 2,
+  "targets": 34,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 9,
+  "fontWeights": [
+   "400",
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 6,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 927,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "عوامل التسييل",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "نظرة عامة",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "NBE 3-year certificate: ⁦٢⁩ دف",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "طابق كل المقترح",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "شكله متكرر\nFitness Time Gym، ⁦",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "المرتب وصل\nراجع الفواتير والاح",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /settings": {
+  "status": 200,
+  "title": "الإعدادات · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "الإعدادات"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "Lightning"
+  ],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP",
+   "hide_names",
+   "صيغ تانية"
+  ],
+  "smallCount": 3,
+  "targets": 57,
+  "unnamed": [],
+  "clipped": [
+   "ملء الشاشة",
+   "اعرض الزكاة"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 11,
+  "fontWeights": [
+   "400",
+   "500",
+   "550",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 9,
+  "shadows": 2,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 2291,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "بياناتك",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "القواعد",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "الفئات",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "الأطراف المقابلة",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "فحوصات البيانات",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "ملء الشاشة",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /categories": {
+  "status": 200,
+  "title": "الفئات · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "الإعدادات"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP",
+   "INPUT",
+   "اختار هدايا مستلمة",
+   "اختار دخل آخر",
+   "اختار المطاعم",
+   "اختار التعليم",
+   "اختار الترفيه",
+   "اختار الرسوم والعمولات",
+   "اختار الأكل والبقالة",
+   "اختار الهدايا والتبرعات"
+  ],
+  "smallCount": 36,
+  "targets": 175,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 9,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 6,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 2137,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "بياناتك",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "القواعد",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "الفئات",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "الأطراف المقابلة",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "فحوصات البيانات",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "input",
+    "text": "دوّر على فئة",
+    "outline": false,
+    "ring": true
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /accounts/1/transaction/new": {
+  "status": 200,
+  "title": "أضف معاملة · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "أضف معاملة"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "CIB Payroll"
+  ],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP",
+   "kind",
+   "kind",
+   "kind"
+  ],
+  "smallCount": 4,
+  "targets": 38,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 10,
+  "fontWeights": [
+   "500",
+   "550",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 820,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "المعاملات",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "استيراد",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "حساباتك",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "أموال لغيرك",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "input",
+    "text": "kind",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "input",
+    "text": "date",
+    "outline": false,
+    "ring": true
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /search?q=food": {
+  "status": 200,
+  "title": "بحث · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "بحث"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP"
+  ],
+  "smallCount": 1,
+  "targets": 27,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 9,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 7,
+  "shadows": 2,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 768,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "input",
+    "text": "q",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "بحث",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "الأكل والبقالة\nشخصي",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "دوّر على معاملات فيها “food”\nا",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "pc ar /does-not-exist": {
+  "status": 404,
+  "title": "مش موجود · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": false,
+  "colorScheme": "light",
+  "h1": [
+   "مش موجود"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "حساباتك · الأرصدة بـ EGP",
+   "ارجع للوحة الرئيسية"
+  ],
+  "smallCount": 2,
+  "targets": 24,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 8,
+  "fontWeights": [
+   "500",
+   "600",
+   "650",
+   "700",
+   "800"
+  ],
+  "radii": 6,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 768,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "ارجع للوحة الرئيسية",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Lightning",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "بحث\nCtrl K",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "إخفاء المبالغ",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "نظرة عامة",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ]
+ },
+ "phone en /home": {
+  "status": 200,
+  "title": "Home · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "Home"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 6,
+  "figuresTabular": 5,
+  "hyphenMinus": [],
+  "trueMinus": 5,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "m'e"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-12-01",
+   "2026-11-05",
+   "2026-11-04"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 19,
+  "unnamed": [],
+  "clipped": [
+   "Home"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 9,
+  "fontWeights": [
+   "500",
+   "600",
+   "700",
+   "800"
+  ],
+  "radii": 2,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1094,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Search",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "summary",
+    "text": "Safe to spend\n›\n51,420 EGP\n\nOn",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "See all 4",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Vodafone 350 · tomorrow\nPay ›",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "NBE 3-year certificate: 2 inte",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone en /budget": {
+  "status": 200,
+  "title": "Budget · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "Budget"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 26,
+  "figuresTabular": 6,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 26,
+  "unnamed": [],
+  "clipped": [
+   "Budget"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 8,
+  "fontWeights": [
+   "500",
+   "600",
+   "700",
+   "800"
+  ],
+  "radii": 3,
+  "shadows": 1,
+  "inlineStyles": 14,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1611,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Search",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget settings",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "‹",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Health\n900 of 900\n0",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Housing & Rent\n12,000 of 12,00",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone en /activity": {
+  "status": 200,
+  "title": "Activity · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "Activity"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 14,
+  "figuresTabular": 14,
+  "hyphenMinus": [],
+  "trueMinus": 6,
+  "decimalsOnBig": [
+   "3,250.75",
+   "1,833.33"
+  ],
+  "leaked": [],
+  "straightQuotes": [
+   "m'e"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-05",
+   "2026-11-04",
+   "2026-11-03",
+   "2026-11-02",
+   "2026-11-01"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 21,
+  "unnamed": [],
+  "clipped": [
+   "Activity"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 6,
+  "fontWeights": [
+   "500",
+   "600",
+   "700"
+  ],
+  "radii": 2,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1191,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Search",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Sale factors",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "All",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "To review",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "‹",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone en /money": {
+  "status": 200,
+  "title": "Money · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "Money"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 14,
+  "figuresTabular": 9,
+  "hyphenMinus": [],
+  "trueMinus": 1,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-09"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "All bills ›"
+  ],
+  "smallCount": 1,
+  "targets": 32,
+  "unnamed": [],
+  "clipped": [
+   "Money"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 8,
+  "fontWeights": [
+   "500",
+   "600",
+   "700",
+   "800"
+  ],
+  "radii": 2,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1781,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Search",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Accounts",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "NBE CDs\n100,000",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "CIB Payroll\n83,393",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Gold at home\n57,195",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone en /money/bills": {
+  "status": 200,
+  "title": "Bills · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "Bills"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 4,
+  "figuresTabular": 4,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-09",
+   "2026-11-20",
+   "2026-11-24",
+   "2026-12-03",
+   "2026-12-05",
+   "2026-12-09",
+   "2026-12-20",
+   "2026-12-24"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 19,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 5,
+  "fontWeights": [
+   "500",
+   "600",
+   "700"
+  ],
+  "radii": 2,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1043,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Money",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Vodafone\n2026-11-09\n350",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "WE Internet\n2026-11-20\n650",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "North Cairo Electricity\n2026-1",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone en /money/report": {
+  "status": 200,
+  "title": "Report · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "Report"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 6,
+  "figuresTabular": 6,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-01",
+   "2026-11-08"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 14,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 6,
+  "fontWeights": [
+   "500",
+   "600",
+   "700",
+   "800"
+  ],
+  "radii": 2,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 844,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Money",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "This month",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Last month",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "This year",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone en /accounts/add-transaction": {
+  "status": 200,
+  "title": "Add transaction · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "m'e"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 25,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 6,
+  "fontWeights": [
+   "600",
+   "700"
+  ],
+  "radii": 5,
+  "shadows": 3,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 979,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "CIB Payroll",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Import",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Accounts",
+    "outline": true,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Held for others",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone en /settings": {
+  "status": 200,
+  "title": "Settings · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "Settings"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-01",
+   "2026-11-08"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Sale factors",
+   "Budget settings",
+   "Financial health limits",
+   "Financial assets",
+   "Target allocation",
+   "Price files",
+   "Rules",
+   "Categories",
+   "Counterparties",
+   "Data checks"
+  ],
+  "smallCount": 12,
+  "targets": 39,
+  "unnamed": [],
+  "clipped": [
+   "Show zakat"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 7,
+  "fontWeights": [
+   "500",
+   "550",
+   "600",
+   "700"
+  ],
+  "radii": 7,
+  "shadows": 3,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 3393,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Money",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "select",
+    "text": "Cotton (try it)\nDendera, night",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "select",
+    "text": "English\nالعربية",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "Show setup guide",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone en /search?q=food": {
+  "status": 200,
+  "title": "Search · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "",
+  "figures": 5,
+  "figuresTabular": 5,
+  "hyphenMinus": [],
+  "trueMinus": 5,
+  "decimalsOnBig": [
+   "3,250.75",
+   "1,452.60",
+   "3,310.20",
+   "1,388.10",
+   "3,180.40"
+  ],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [
+   "2026-11-02",
+   "2026-10-22",
+   "2026-10-02",
+   "2026-09-22",
+   "2026-09-02"
+  ],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 15,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 6,
+  "fontWeights": [
+   "500",
+   "600",
+   "700"
+  ],
+  "radii": 3,
+  "shadows": 2,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 968,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Overview",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Search",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "input",
+    "text": "q",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Carrefour\nFood & Groceries · C",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Seoudi\nFood & Groceries · CIB ",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone en /does-not-exist": {
+  "status": 404,
+  "title": "Not found · Lightning",
+  "lang": "en",
+  "dir": "ltr",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "Not found"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Segoe UI\", system-ui, sans-serif 700",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "Back to the dashboard"
+  ],
+  "smallCount": 1,
+  "targets": 8,
+  "unnamed": [],
+  "clipped": [
+   "Not found"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 4,
+  "fontWeights": [
+   "500",
+   "600",
+   "700"
+  ],
+  "radii": 3,
+  "shadows": 2,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 844,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "Search",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "Hide amounts",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Back to the dashboard",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Home",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Budget",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Add",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ]
+ },
+ "phone en add-focus": {
+  "active": "amount",
+  "amountAfterTyping120": "120"
+ },
+ "phone en dark": {
+  "bg": "rgba(0, 0, 0, 0)"
+ },
+ "phone ar /home": {
+  "status": 200,
+  "title": "الرئيسية · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "الرئيسية"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 600",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "m'e"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "Vodafone",
+   "year certificate",
+   "Vodafone Cash",
+   "Office gam",
+   "Toyota Finance",
+   "Fitness Time Gym"
+  ],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 19,
+  "unnamed": [],
+  "clipped": [
+   "الرئيسية"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 9,
+  "fontWeights": [
+   "500",
+   "600",
+   "700",
+   "800"
+  ],
+  "radii": 2,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1102,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "بحث",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "إخفاء المبالغ",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "summary",
+    "text": "المتاح الآمن للصرف\n›\n⁦٥١٬٤٢٠⁩ ",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "شوف الكل (⁦٤⁩)",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Vodafone ⁦٣٥٠⁩، بكرة\nادفع ›",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "NBE 3-year certificate: ⁦٢⁩ دف",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone ar /budget": {
+  "status": 200,
+  "title": "الميزانية · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "ميزانيتك"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 600",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 26,
+  "unnamed": [],
+  "clipped": [
+   "ميزانيتك"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 8,
+  "fontWeights": [
+   "500",
+   "600",
+   "700",
+   "800"
+  ],
+  "radii": 3,
+  "shadows": 1,
+  "inlineStyles": 14,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1668,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "بحث",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "إخفاء المبالغ",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "إعدادات الميزانية",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "‹",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "الصحة\n⁦٩٠٠⁩ من ⁦٩٠٠⁩\n⁦٠⁩",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "السكن والإيجار\n⁦١٢٬٠٠٠⁩ من ⁦١٢",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone ar /activity": {
+  "status": 200,
+  "title": "النشاط · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "النشاط"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 600",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "m'e"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "CIB Payroll",
+   "Vodafone Cash",
+   "Office gam",
+   "Toyota Finance",
+   "Cash wallet",
+   "Fitness Time Gym",
+   "Landlord",
+   "Carrefour"
+  ],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 21,
+  "unnamed": [],
+  "clipped": [
+   "النشاط"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 6,
+  "fontWeights": [
+   "500",
+   "600",
+   "700"
+  ],
+  "radii": 2,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1194,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "بحث",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "إخفاء المبالغ",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "عوامل التسييل",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "الكل",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "للمراجعة",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "‹",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone ar /money": {
+  "status": 200,
+  "title": "الفلوس · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "الفلوس"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 600",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "NBE CDs",
+   "CIB Payroll",
+   "Gold at home",
+   "THNDR",
+   "Vodafone"
+  ],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 32,
+  "unnamed": [],
+  "clipped": [
+   "الفلوس"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 8,
+  "fontWeights": [
+   "500",
+   "600",
+   "700",
+   "800"
+  ],
+  "radii": 2,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1788,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "بحث",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "إخفاء المبالغ",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "حساباتك",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "NBE CDs\n⁦١٠٠٬٠٠٠⁩",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "CIB Payroll\n⁦٨٣٬٣٩٣⁩",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Gold at home\n⁦٥٧٬١٩٥⁩",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone ar /money/bills": {
+  "status": 200,
+  "title": "الفواتير · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "الفواتير"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 600",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "Vodafone",
+   "WE Internet",
+   "North Cairo Electricity",
+   "Landlord",
+   "Car loan"
+  ],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 19,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 5,
+  "fontWeights": [
+   "500",
+   "600",
+   "700"
+  ],
+  "radii": 2,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 1070,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "الفلوس",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "بحث",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "إخفاء المبالغ",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Vodafone\n⁦‭٢٠٢٦-١١-٠٩‬⁩\n⁦٣٥٠⁩",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "WE Internet\n⁦‭٢٠٢٦-١١-٢٠‬⁩\n⁦٦٥",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "North Cairo Electricity\n⁦‭٢٠٢٦",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone ar /money/report": {
+  "status": 200,
+  "title": "تقرير · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "تقرير"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 600",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 14,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 6,
+  "fontWeights": [
+   "500",
+   "600",
+   "700",
+   "800"
+  ],
+  "radii": 2,
+  "shadows": 1,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 844,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "الفلوس",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "بحث",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "إخفاء المبالغ",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "الشهر ده",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "الشهر اللي فات",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "السنة دي",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone ar /accounts/add-transaction": {
+  "status": 200,
+  "title": "أضف معاملة · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [
+   "m'e"
+  ],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "CIB Payroll",
+   "NBE CDs",
+   "Office gam",
+   "THNDR",
+   "Vodafone Cash"
+  ],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 25,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 6,
+  "fontWeights": [
+   "600",
+   "700"
+  ],
+  "radii": 5,
+  "shadows": 3,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 989,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "CIB Payroll",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "بحث",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "إخفاء المبالغ",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "استيراد",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "حساباتك",
+    "outline": true,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "أموال لغيرك",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone ar /settings": {
+  "status": 200,
+  "title": "الإعدادات · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "الإعدادات"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 600",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "Lightning"
+  ],
+  "upper": [],
+  "small": [
+   "hide_names",
+   "صيغ تانية"
+  ],
+  "smallCount": 2,
+  "targets": 39,
+  "unnamed": [],
+  "clipped": [
+   "اعرض الزكاة"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 7,
+  "fontWeights": [
+   "500",
+   "550",
+   "600",
+   "700"
+  ],
+  "radii": 7,
+  "shadows": 3,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 3432,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "الفلوس",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "بحث",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "إخفاء المبالغ",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "select",
+    "text": "قطن (جرّبها)\nدندرة، بالليل (جر",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "select",
+    "text": "الإنجليزية\nالعربية",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "button",
+    "text": "عرض دليل الإعداد",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone ar /search?q=food": {
+  "status": 200,
+  "title": "بحث · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [
+   "Carrefour",
+   "CIB Payroll",
+   "Seoudi"
+  ],
+  "upper": [],
+  "small": [],
+  "smallCount": 0,
+  "targets": 15,
+  "unnamed": [],
+  "clipped": [],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 6,
+  "fontWeights": [
+   "500",
+   "600",
+   "700"
+  ],
+  "radii": 3,
+  "shadows": 2,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 970,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "نظرة عامة",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "بحث",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "إخفاء المبالغ",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "input",
+    "text": "q",
+    "outline": false,
+    "ring": true
+   },
+   {
+    "tag": "a",
+    "text": "Carrefour\nالأكل والبقالة · CIB",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "Seoudi\nالأكل والبقالة · CIB Pa",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": []
+ },
+ "phone ar /does-not-exist": {
+  "status": 404,
+  "title": "مش موجود · Lightning",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "themeColor": true,
+  "colorScheme": "light",
+  "h1": [
+   "مش موجود"
+  ],
+  "bodyFont": "Manrope, \"Noto Sans Arabic\", \"Segoe UI\", system-ui, sans-serif",
+  "h1Font": "\"Bricolage Grotesque\", \"Readex Pro\", \"Segoe UI\", system-ui, sans-serif 600",
+  "figures": 0,
+  "figuresTabular": 0,
+  "hyphenMinus": [],
+  "trueMinus": 0,
+  "decimalsOnBig": [],
+  "leaked": [],
+  "straightQuotes": [],
+  "threeDots": 0,
+  "oneThings": [],
+  "dates": [],
+  "latinInArabic": [],
+  "upper": [],
+  "small": [
+   "ارجع للوحة الرئيسية"
+  ],
+  "smallCount": 1,
+  "targets": 8,
+  "unnamed": [],
+  "clipped": [
+   "مش موجود"
+  ],
+  "ellipsisNoTitle": 0,
+  "fontSizes": 4,
+  "fontWeights": [
+   "500",
+   "600",
+   "700"
+  ],
+  "radii": 3,
+  "shadows": 2,
+  "inlineStyles": 0,
+  "imgsNoAlt": 0,
+  "overflow": 0,
+  "height": 844,
+  "nativeDialogs": 0,
+  "focus": [
+   {
+    "tag": "a",
+    "text": "بحث",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "button",
+    "text": "إخفاء المبالغ",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "ارجع للوحة الرئيسية",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "الرئيسية",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "ميزانيتك",
+    "outline": true,
+    "ring": false
+   },
+   {
+    "tag": "a",
+    "text": "أضف",
+    "outline": true,
+    "ring": false
+   }
+  ],
+  "consoleErrors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ]
+ }
+}
