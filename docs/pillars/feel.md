@@ -11,10 +11,10 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IV-3BC** | [Counts read right in English and Arabic](../../issues/3-polish-and-arabic/IV-3BC-counts-read-right-in-both-languages.md) | M | new |
-| **IV-3BD** | [Every error speaks plainly, in the person's language, on a branded page](../../issues/3-polish-and-arabic/IV-3BD-errors-speak-plainly-everywhere.md) | M | new |
-| **IV-3BF** | [PC finish](../../issues/3-polish-and-arabic/IV-3BF-pc-finish.md) | M | new |
-| **IV-3BH** | [One name per thing and no accounting jargon](../../issues/3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md) | M | new |
+| **IV-3BC** | [Counts read right in English and Arabic](../../issues/3-polish-and-arabic/IV-3BC-counts-read-right-in-both-languages.md) | M | ready |
+| **IV-3BD** | [Every error speaks plainly, in the person's language, on a branded page](../../issues/3-polish-and-arabic/IV-3BD-errors-speak-plainly-everywhere.md) | M | ready |
+| **IV-3BF** | [PC finish](../../issues/3-polish-and-arabic/IV-3BF-pc-finish.md) | M | ready |
+| **IV-3BH** | [One name per thing and no accounting jargon](../../issues/3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md) | M | ready |
 | **OW-3AI** | [Additional broker and institution logos still needed](../../issues/3-polish-and-arabic/OW-3AI-institution-logos.md) | owner | ready |
 | **OW-3BJ** | [Owner decisions for an international look](../../issues/3-polish-and-arabic/OW-3BJ-international-display-decisions.md) | owner | new |
 | **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](../../issues/10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md) | L | building |

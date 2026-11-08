@@ -25,4 +25,7 @@ Report [r28](r28-international-polish/report.md) F21. The guideline fixes these 
 
 ## Fix
 
-Record each answer in `ai/PROJECT_OVERVIEW.md` owner decisions; a guideline change lands in both repos the same session; then a polish item per change.
+Record each answer in `ai/PROJECT_OVERVIEW.md` owner decisions; a guideline change lands in both repos the same session; then the build steps in [IV-3BK](IV-3BK-human-dates-and-arabic-currency.md).
+
+## 3BJ1 The five open choices · owner
+Items 2 and 4-7 in the Report. The owner picks each in the question dialog; the AI records the answer here and in `ai/PROJECT_OVERVIEW.md` §2, then adds a step to [IV-3BK](IV-3BK-human-dates-and-arabic-currency.md) for each change.

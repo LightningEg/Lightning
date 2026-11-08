@@ -11,8 +11,8 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IT-3BI** | [Arabic search and sorting in the register, one week start, one clock](../../issues/3-polish-and-arabic/IT-3BI-arabic-search-sort-and-calendar.md) | M | new |
-| **IV-3BG** | [Phone finish](../../issues/3-polish-and-arabic/IV-3BG-phone-finish.md) | S | new |
+| **IT-3BI** | [Arabic search and sorting in the register, one week start, one clock](../../issues/3-polish-and-arabic/IT-3BI-arabic-search-sort-and-calendar.md) | M | ready |
+| **IV-3BG** | [Phone finish](../../issues/3-polish-and-arabic/IV-3BG-phone-finish.md) | S | ready |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](../../issues/3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | M | new |
 | **NF-4A** | [Edit journal: edit anywhere, one home confirms](../../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md) | L | building |
 | **NF-4B** | [Multiple devices: implementation plan](../../issues/4-edit-journal-and-devices/NF-4B-multiple-devices.md) | L | building |
