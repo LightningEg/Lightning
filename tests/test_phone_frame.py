@@ -254,16 +254,14 @@ def test_the_due_line_says_today_tomorrow_days_and_late():
     assert text("Landlord", "12,000", 0, 4) == "Landlord 12,000, 4 days late"
 
 
-def test_the_older_more_is_flat_and_the_weekly_review_keeps_money_chosen(phone):
-    """IV-3AL4 and IV-3AL7: the older More page has no card of buttons (a bill's row opens its pay sheet) and no subtitles; the
-    weekly review, reached from Money, keeps Money chosen with ‹ Money in the app bar."""
-    more = phone.get("/more?view=old").text  # the older page, until 3AY11 removes it
-    assert 'class="btn small"' not in more and "Backups, language" not in more
-    assert more.index('id="bills-heading"') < more.index('id="money-heading"') < more.index('id="settings-heading"')
-    assert re.search(r'class="phone-row phone-hub-bill[^"]*" data-popup-open href="/plan/items/\d+/pay', more)
+def test_the_weekly_review_keeps_money_chosen_and_the_old_more_is_gone(phone):
+    """IV-3AL7: the weekly review, reached from Money, keeps Money chosen with ‹ Money in the app bar. IV-3AY11: More
+    is gone; its address leads to Money."""
     review = phone.get("/review").text
     assert re.search(r'class="phone-tab is-chosen" href="/money"', review)
     assert 'class="phone-back" href="/money"' in review and '<a class="btn" href="/">' not in review
+    gone = phone.get("/more?view=old", follow_redirects=False)
+    assert gone.status_code in (302, 303, 307) and gone.headers["location"] == "/money"
 
 
 def test_financial_health_puts_what_needs_you_under_its_lead_and_the_chart_in_its_own_card(phone):

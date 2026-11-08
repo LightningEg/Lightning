@@ -37,15 +37,15 @@ def test_the_phone_layer_never_imports_the_pc_routes():
 
 def test_a_phone_route_wins_over_an_older_shared_route_of_the_same_path(sample):
     app = create_app(sample)
-    assert TestClient(app).get("/more", follow_redirects=False).status_code == 303  # the PC redirects away
+    assert TestClient(app).get("/transactions").status_code == 200   # the shared register answers this path
     probe = APIRouter()
 
-    @probe.get("/more")
+    @probe.get("/transactions")
     async def more(request: Request):
         return render_phone(request, "phone/validation_error.html", message="from the phone router")
 
     mount_phone(app, probe)
-    response = TestClient(app).get("/more")
+    response = TestClient(app).get("/transactions")
     assert response.status_code == 200 and "from the phone router" in response.text
 
 

@@ -56,9 +56,21 @@ def test_the_us_dollar_label_keeps_its_capitals(sample):
     assert "in us dollars" not in html and "In US dollars" in html
 
 
-def test_late_bills_have_their_own_heading_on_more(sample):
-    html = _phone(sample).get("/more").text
-    if "is-late" in html.split('id="bills-heading"')[0]:
-        assert 'id="late-bills-heading"' in html
-    coming = html.split('id="bills-heading"')[1].split("</section>")[0]
-    assert "is-late" not in coming
+def test_late_bills_have_their_own_heading_on_the_bills_page(sample):
+    from lightning.ui.phone.router import mount_phone
+    from lightning.ui.web import create_app
+    app = create_app(sample)
+    mount_phone(app)
+    inner = app
+
+    async def phone(scope, receive, send):
+        if scope["type"] == "http":
+            scope.setdefault("state", {})["phone"] = True
+        await inner(scope, receive, send)
+    html = TestClient(phone).get("/money/bills").text
+    main = html.split("<main", 1)[1]
+    if 'id="late-heading"' in main:                      # Late is one block, first
+        late = main.split('id="late-heading"')[1].split("</section>")[0]
+        assert "Late" in late
+        later = main.split('id="late-heading"')[1].split("</section>", 1)[1]
+        assert "Late ·" not in later                    # no late row among the coming ones

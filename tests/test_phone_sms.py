@@ -55,13 +55,22 @@ def test_from_sms_has_a_back_one_line_of_help_and_its_primary_on_the_page(month)
     assert "CIB and NBE are read today" not in page
 
 
-def test_more_lists_places_not_actions(month):
+def test_money_lists_places_not_actions(month):
+    from fastapi.testclient import TestClient
+    from lightning.ui.phone.router import mount_phone
+    from lightning.ui.web import create_app
     c, _, _ = month
-    page = _phone(c).get("/more").text
-    assert 'href="/sms"' not in page and 'href="/needs-you"' not in page          # From SMS lives in Add; Needs you on Overview
+    app = create_app(c)
+    mount_phone(app)
+    inner = app
+
+    async def phone(scope, receive, send):
+        if scope["type"] == "http":
+            scope.setdefault("state", {})["phone"] = True
+        await inner(scope, receive, send)
+    page = TestClient(phone).get("/money").text
+    assert 'href="/sms"' not in page and 'href="/needs-you"' not in page          # From SMS lives in Add; Needs you on Home
     assert 'href="/settings"' in page and 'href="/rules"' in page
-
-
 
 
 def test_messages_are_checked_on_an_sms_review_not_the_statement_one(month):
