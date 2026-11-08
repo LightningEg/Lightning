@@ -20,6 +20,8 @@ Take one step at a time, each with its own test and Mohab step.
 
 Done: 3AZ1 (`partials/payday_proposal.html` on PC and phone, `funding.preview()['proposal']`; `tests/test_salary_day_review.py`, Mohab `_confirm_payday_proposal`). Needs you › Salary received opens the proposal; looking assigns nothing; Confirm assigns once; Undo restores.
 
+3AZ9: `investments/report.py::explain_period`, `investments/_explain.html` on PC and phone; `tests/test_investment_explain.py`.
+
 3AZ8: `DepositService.maturity_outlook`, the portfolio page forecast line and allocation choices; `tests/test_maturity_choices.py`.
 
 3AZ7: `CashForecaster.refill_schedule`, instalments and a manual preview on `/plan/reserves`; `tests/test_refill_schedule.py`.
@@ -33,10 +35,6 @@ Done: 3AZ1 (`partials/payday_proposal.html` on PC and phone, `funding.preview()[
 3AZ3: `RuleService.record_correction/suggestion`, `/rules/offer`, journal commands `rules.record_correction/clear_corrections`; `tests/test_rule_from_corrections.py`.
 
 3AZ2: `bank_import_proposals.py` offers the link by default when only an SMS backs the one candidate, marks it "recorded from your SMS", and asks when several fit; `tests/test_statement_links_sms.py`.
-
-## 3AZ9 An investment result explains what changed · M
-
-Contributions, prices, FX and income, with the affected rows; missing or stale values stay visible; allocation suggestions are not advice. Done when a period result lists its parts and links to the rows.
 
 ## 3AZ10 Needs you groups by job and consequence · M
 

@@ -237,7 +237,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | NF-12G4 | ↳ Who owes what, per person | | | M | |
 | NF-12G5 | ↳ Mohab, Arabic and the guideline | | | M | |
 | **NF-3AZ** | [Offer the next step where a figure or row raises the question, always with a preview and an explicit confirmation](12-desktop-ux/NF-3AZ-next-step-at-the-moment-of-need.md) | new feature | Plan | L | new |
-| NF-3AZ9 | ↳ An investment result explains what changed | | | M | |
 | NF-3AZ10 | ↳ Needs you groups by job and consequence | | | M | |
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md).
