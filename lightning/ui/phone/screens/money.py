@@ -8,7 +8,6 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
-from lightning.core.dates import month_of
 from lightning.planning import bill_state
 from lightning.planning.bill_state import BillRow, BillState
 
