@@ -238,8 +238,11 @@ Good ideas that wait until the milestones above are done.
 | IT-9K1 | ↳ Restore routes out of profile_app | | | S | Sonnet | |
 | IT-9K2 | ↳ The phone's device routes out of profile_app | | | M | Opus | |
 | IT-9K3 | ↳ The PC's borrowing routes and Lock out of profile_app | | | M | Opus | |
-| **NF-9B** | [In-app updates on Windows](9-later/NF-9B-in-app-updates.md) | new feature | Everywhere | L | Opus | new |
-| NF-9B6 | ↳ Before the release that carries the updater | | | owner |  | |
+| **NF-9B** | [In-app updates on Windows](9-later/NF-9B-in-app-updates.md) | new feature | Everywhere | M | Opus | new |
+| NF-9B6 | ↳ Owner: give the update key's public half | | | owner |  | |
+| NF-9B7 | ↳ Pin the update key in the app | | | S | Opus | |
+| NF-9B8 | ↳ Owner: approve the v2.1.0 tag | | | owner |  | |
+| NF-9B9 | ↳ The site's release update for 2.1.0 | | | M | Opus | |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | Opus | new |
 | NF-9D1 | ↳ Owner: which Hijri calendar, and does the zakat day follow it | | | owner |  | |
 | NF-9D2 | ↳ Owner: which nisab by default, and where the silver price comes from | | | owner |  | |
