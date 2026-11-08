@@ -143,6 +143,16 @@ def phone_router() -> APIRouter:
         return render_phone(request, "phone/investments.html", screen=screen.build(
             container(request), today(), request.query_params.get("holdings") == "all"))
 
+    settings_slot = APIRouter(route_class=_plain("return_to", "msg"))
+
+    @settings_slot.get("/settings")
+    async def settings(request: Request):
+        """Settings (3AY16): grouped rows. A section (`?section=`) still reaches the PC route until each has its own."""
+        from lightning.ui.phone.screens import settings as screen
+        return render_phone(request, "phone/settings.html", screen=screen.build(
+            container(request), getattr(request.state, "fingerprint_row", "") or "",
+            bool(getattr(request.state, "secure_profiles", False))))
+
     @router.get("/money/report")
     async def money_report(request: Request):
         """How did a period go? (the Overview's report, which Home no longer carries)"""
@@ -206,6 +216,7 @@ def phone_router() -> APIRouter:
     router.include_router(months)
     router.include_router(cash_accounts)
     router.include_router(investments_slot)
+    router.include_router(settings_slot)
     return router
 
 

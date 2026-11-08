@@ -1,0 +1,65 @@
+{# Settings (IV-3AY16, report: Settings): Appearance and language, This phone, Your data, Features, More settings. #}
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/money"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Money'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Settings'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+{% set s = screen %}{% set token = request.state.session_token|default('') %}
+<section class="phone-section" aria-labelledby="theme-heading">
+  <header class="phone-section-head"><h2 id="theme-heading">{{ 'Appearance and language'|tr(locale) }}</h2></header>
+  <div class="phone-rows">
+    <div class="phone-row"><label for="app-theme">{{ 'Theme'|tr(locale) }}</label><span><select id="app-theme" data-theme-select aria-describedby="theme-status"></select><span id="theme-status" class="settings-status" data-theme-status role="status"></span></span></div>
+    <div class="phone-row" data-theme-night hidden><label for="theme-night">{{ 'Night version'|tr(locale) }}</label><span><select id="theme-night"><option value="day">{{ 'Day'|tr(locale) }}</option><option value="night">{{ 'Night'|tr(locale) }}</option><option value="follow">{{ 'Follow this computer'|tr(locale) }}</option></select></span></div>
+    <form method="post" action="/settings/locale" class="phone-row"><label for="ui-locale">{{ 'Language'|tr(locale) }}</label><span><select id="ui-locale" name="locale" data-locale-auto><option value="en" {{ 'selected' if s.locale == 'en' }}>{{ 'English'|tr(locale) }}</option><option value="ar" {{ 'selected' if s.locale == 'ar' }}>{{ 'العربية'|tr(locale) }}</option></select><input type="hidden" name="__session" value="{{ token }}"></span></form>
+    <form method="post" action="/setup/guide" class="phone-row"><input type="hidden" name="action" value="show"><input type="hidden" name="__session" value="{{ token }}"><span>{{ 'Setup guide'|tr(locale) }}</span><button class="btn small">{{ 'Show setup guide'|tr(locale) }}</button></form>
+  </div>
+  {% set paid = store_themes() %}{% if paid %}<details class="phone-more"><summary>{{ 'Unlock a theme you bought'|tr(locale) }}</summary>
+    <p class="phone-note">{{ 'Buy it on lightningeg.com.'|tr(locale) }} <a data-theme-prices data-marketplace="{{ marketplace }}" href="{{ marketplace }}?from=app#themes" target="_blank" rel="noopener">{{ 'See prices'|tr(locale) }}</a> {{ 'On your account page, press Get app code.'|tr(locale) }} {{ "Paste it here. Do this once: your profile's other devices unlock by themselves."|tr(locale) }}</p>
+    {% set mine = paid|selectattr('owned')|map(attribute='name')|list %}{% if mine %}<p>{{ 'Yours on this profile:'|tr(locale) }} {% for n in mine %}<b>{{ n|tr(locale) }}</b>{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+    <form method="post" action="/settings/theme/unlock" class="phone-form"><label for="unlock-code">{{ 'Code from your account page'|tr(locale) }}</label>
+      <input id="unlock-code" name="code" autocomplete="off" spellcheck="false" dir="ltr" maxlength="64" required placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX"><input type="hidden" name="__session" value="{{ token }}">
+      <button class="btn primary phone-save">{{ 'Unlock'|tr(locale) }}</button></form></details>{% endif %}
+</section>
+<section class="phone-section" aria-labelledby="this-phone-heading">
+  <header class="phone-section-head"><h2 id="this-phone-heading">{{ 'This phone'|tr(locale) }}</h2></header>
+  <div class="phone-rows">
+    <a class="phone-row" href="/profiles/devices"><span>{{ 'Devices'|tr(locale) }}<small>{{ 'Pair your phone or PC'|tr(locale) }}</small></span><b>›</b></a>
+    <a class="phone-row" href="/sms"><span>{{ 'Bank SMS'|tr(locale) }}<small>{{ 'Read bank messages into transactions'|tr(locale) }}</small></span><b>›</b></a>
+    {% if s.fingerprint %}<a class="phone-row" href="/profiles/fingerprint"><span>{{ 'Unlock with fingerprint'|tr(locale) }}<small>{{ ('On' if s.fingerprint == 'on' else 'Off')|tr(locale) }}</small></span><b>›</b></a>{% endif %}
+    <a class="phone-row" href="/profiles"><span>{{ 'Profile and lock'|tr(locale) }}<small>{{ 'Password, recovery key, backups, lock'|tr(locale) }}</small></span><b>›</b></a>
+  </div>
+</section>
+<section class="phone-section" aria-labelledby="data-heading">
+  <header class="phone-section-head"><h2 id="data-heading">{{ 'Your data'|tr(locale) }}</h2></header>
+  <div class="phone-rows">
+    <form method="post" action="/settings/backup" class="phone-row"><input type="hidden" name="__session" value="{{ token }}"><span>{{ 'Backup'|tr(locale) }}<small>{{ 'One is made each time the app starts.'|tr(locale) }}</small></span><button class="btn small">{{ 'Back up now'|tr(locale) }}</button></form>
+    {% if s.has_backup %}<a class="phone-row" href="/settings/backup/latest"><span>{{ 'Save a copy'|tr(locale) }}</span><b>›</b></a>{% endif %}
+    <a class="phone-row" href="/exports/all" data-popup-open><span>{{ 'Export your data'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/exports/import"><span>{{ 'Import your data'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/settings?section=currencies"><span>{{ 'Base currency'|tr(locale) }}<small>{{ 'Manage currencies'|tr(locale) }}</small></span><b dir="ltr">{{ s.base }} ›</b></a>
+    <a class="phone-row" href="/rules"><span>{{ 'Rules'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/categories"><span>{{ 'Categories'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/counterparties"><span>{{ 'Counterparties'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/checks"><span>{{ 'Data checks'|tr(locale) }}</span><b>›</b></a>
+    <div class="phone-row"><span>{{ 'App version'|tr(locale) }}</span><b dir="ltr">v{{ app_version }}</b></div>
+  </div>
+</section>
+<section class="phone-section" aria-labelledby="features-heading">
+  <header class="phone-section-head"><h2 id="features-heading">{{ 'Features'|tr(locale) }}</h2></header>
+  <form method="post" action="/zakat/enabled" class="phone-row"><input type="hidden" name="__session" value="{{ token }}"><label for="zakat-on"><span>{{ 'Show zakat'|tr(locale) }}</span></label><label class="switch"><input id="zakat-on" type="checkbox" name="on" value="1" {{ 'checked' if s.zakat_on }} data-autosubmit><span class="sr-only">{{ 'Show zakat'|tr(locale) }}</span></label><noscript><button class="btn small">{{ 'Save'|tr(locale) }}</button></noscript></form>
+</section>
+<section class="phone-section" aria-labelledby="more-heading">
+  <header class="phone-section-head"><h2 id="more-heading">{{ 'More settings'|tr(locale) }}</h2></header>
+  <div class="phone-rows">
+    <a class="phone-row" href="/settings?section=budget"><span>{{ 'Budget settings'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/settings?section=financial-health"><span>{{ 'Financial health limits'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/settings?section=valuations"><span>{{ 'Sale factors'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/settings?section=targets"><span>{{ 'Target allocation'|tr(locale) }}</span><b>›</b></a>
+    {% if s.zakat_on %}<a class="phone-row" href="/settings?section=zakat"><span>{{ 'Zakat'|tr(locale) }}</span><b>›</b></a>{% endif %}
+    <a class="phone-row" href="/settings?section=general#export-for-ai"><span>{{ 'Ask an AI'|tr(locale) }}</span><b>›</b></a>
+  </div>
+</section>
+<details class="phone-more"><summary>{{ 'Advanced'|tr(locale) }}</summary>
+  <form method="post" action="/settings/fresh" class="phone-row"{% if not s.secure_profiles %} data-confirm-delete="{{ 'Start a fresh, empty database? Your current one is backed up and kept as a separate file, but the app will open the empty one from now on.'|tr(locale) }}"{% endif %}><input type="hidden" name="__session" value="{{ token }}"><span>{{ 'Start fresh'|tr(locale) }}<small>{{ ('Opens a new, empty profile. This one stays in Profiles.' if s.secure_profiles else 'Opens an empty database. This one is backed up and kept.')|tr(locale) }}</small></span><button class="btn small">{{ ('Start a new profile' if s.secure_profiles else 'Start a fresh database')|tr(locale) }}</button></form>
+</details>
+{% endblock %}

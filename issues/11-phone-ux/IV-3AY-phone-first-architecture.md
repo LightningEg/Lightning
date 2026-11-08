@@ -177,12 +177,17 @@ Done when: the holding page has a phone screen or a redirect, and the `investmen
 branches are gone (with 3AY18); recipe steps 4-5.
 
 ## 3AY16 Settings on the phone · M
-Design: the report's *⚙ Settings*. `/money/settings` (the ⚙ on Money and `/settings` on the phone lead to it): grouped
-rows (Appearance and language, This phone, Your data, Categories and rules, Devices), each opening its existing page
-or sheet. "Best on your PC" rows only for paths in `BEST_ON_PC`, which stays empty unless the owner adds one (owner,
-2026-11-08).
-Done when: no Settings page renders the PC template in the phone frame (each row's target is a phone template or the
-`/pc` page); language and theme switch from it; recipe steps 4-5.
+Design: the report's *Settings*. Built (2026-11-08): `ui/phone/screens/settings.py` and `phone/settings.html` at
+`/settings` (bare, `return_to` and `msg` only), reached from Money's *All settings*: Appearance and language (theme,
+night version, language, setup guide, unlock a theme), This phone (Devices, Bank SMS, fingerprint, Profile and lock),
+Your data (backup, export, import, base currency, Rules, Categories, Counterparties, Data checks, app version),
+Features (Show zakat), More settings (Budget, Financial health limits, Sale factors, Target allocation, Zakat, Ask an
+AI) and Advanced (Start fresh). `tests/test_phone_settings.py`; Mohab's phone year passes. `BEST_ON_PC` stays empty.
+Left: each *More settings* row, the currencies page and *Ask an AI* open the PC route's section (`?section=`), which
+renders PC markup in the phone frame; each needs a phone screen (budget, financial-health limits, sale factors,
+targets, zakat, currencies, ask an AI): new steps 3AY21-3AY27 when 3AY18 is done, or the owner may name some PC-only.
+The update row and the per-tab gear list are not on the phone.
+Done when: every *More settings* row opens a phone template or `/pc`; recipe steps 4-5.
 
 ## 3AY17 Move the pages that already have a phone template · M
 No redesign: each keeps the phone template it has today and gains a screen module and a phone-router route, and its PC

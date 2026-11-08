@@ -31,7 +31,7 @@ def test_the_phone_base_never_extends_or_includes_the_pc_base():
 
 def test_every_new_phone_screen_extends_a_base_that_hands_over_to_the_phone_frame():
     for name in ("home", "activity_home", "budget_flexible", "money", "money_accounts", "money_bills", "money_report",
-                 "add_bills", "on_pc", "account", "investments"):
+                 "add_bills", "on_pc", "account", "investments", "settings"):
         text = (TEMPLATES / "phone" / f"{name}.html").read_text()
         assert re.search(r'\{%\s*extends\s+"(phone/)?base\.html"', text), name
 
