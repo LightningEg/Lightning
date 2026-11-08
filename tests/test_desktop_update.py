@@ -140,7 +140,8 @@ def test_verify_agrees_with_the_packaging_tool(tmp_path):
             up.verify_manifest(bad, sig, world.keys)
         with pytest.raises(um.ManifestError):
             um.verify(bad, sig, world.keys)
-    assert up.load_keys().keys() >= {"store-2026-1"}
+    assert up.load_keys().keys() == {"store-2026-1", "update-2026-2"}
+    assert up.load_keys() == um.load_keys()
 
 
 def test_download_checks_size_and_hash_and_reports_progress(tmp_path):

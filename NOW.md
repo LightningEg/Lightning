@@ -31,7 +31,7 @@
 
 - **Import (2026-11-07, Claude):** IT-7Z and IT-7AA done; NF-7AB flow decided (cards first, 2026-11-08). Next: 2AI2. **Read:** 2AI, 7AB.
 
-- **In-app updates (2026-11-07, Claude):** NF-9B1-9B4 merged, the owner's Windows test (9B5) good, the `update-2026-1` secret set. Before tagging v2.1.0: its public key into `update_keys.json`; after: the site's usual release update. **Read:** `issues/9-later/NF-9B-in-app-updates.md` 9B6.
+- **In-app updates (2026-11-09, Codex):** owner supplied `update-2026-2` public key and confirmed `UPDATE_SIGNING_KEY` saved in production-release; key pin and publisher/app parity tests prepared. Existing `v2.1.0` tag lacks the pin; owner chose v2.1.1 instead, preserving that tag. Next: merge key fix, prepare v2.1.1 through release-check, then website sync. **Read:** `issues/9-later/NF-9B-in-app-updates.md` 9B8.
 
 Plan: `issues/INDEX.md`.
 
