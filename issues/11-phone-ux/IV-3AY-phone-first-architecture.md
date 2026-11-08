@@ -148,13 +148,18 @@ Done when: 3AY14-3AY18 are done; `grep -rn '"phone"' lightning/ui/routes lightni
 any page requested through the phone app renders a template outside `templates/phone/`; the full suite passes.
 
 ## 3AY14 An account on the phone · M
-Design: the report's *An account* (Money tab). `/money/accounts/<id>` (and `/accounts/<id>` on the phone redirects to
-it): the balance, **Check against the bank** ("Does CIB say 84,393?" with *Yes* and *Fix it*, *Fix it* opening the
-existing reconcile sheet `phone/accounts/reconcile.html`), then this month's rows with the month stepper, and the rare
-actions (edit, close, export) behind ⋯. Add from this page opens the Add sheet with the account chosen, so the capture
-context moves from `accounts.py` into the phone Add route.
-Done when: every row on Money's Accounts page opens it; *Yes* records a check and *Fix it* reconciles; the
-`accounts.py` and one-account `register.py` phone branches are gone; recipe steps 4-5.
+Design: the report's *An account* (Money tab). Built (2026-11-08): `ui/phone/screens/account.py` and `phone/account.html`
+at `/accounts/<id>` for cash and bank accounts, with the bare URL or `month` only (`welcome` and `msg` are allowed
+too): the balance (with "In this account" and what is held for others when part is not yours), *Does CIB say 84,393?*
+with *Yes* (records the check through today, `reconciliation.close`) and *Fix it* (the existing Adjust balance sheet),
+the month's rows with a month stepper, the Add slot opening that account's entry sheet, and the rare actions behind ⋯
+(Adjust balance, Convert currency, Change ownership, Bought in instalments, Import a statement, Edit account, Deleted
+transactions, Deactivate). `tests/test_phone_account.py`; Mohab's phone year passes.
+Left: other account kinds (brokerage 3AY15, deposits, gam'eya, physical and other assets) and a filtered register
+(`?q=`, `?tag=`, `?page=`...) still reach the PC route, so the `accounts.py` and `register.py` phone branches stay
+until 3AY15 and 3AY18; *Yes* has no Undo toast yet (the History undo covers it); the sheet for each row.
+Done when: every account kind has a phone screen or a redirect to one, and the `accounts.py` and one-account
+`register.py` phone branches are gone; recipe steps 4-5.
 
 ## 3AY15 Investments on the phone · M
 Design: the report's *Investments page*. `/money/investments` (`/investments` on the phone redirects): portfolio value

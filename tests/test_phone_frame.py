@@ -77,7 +77,7 @@ def test_an_account_is_a_day_list_and_the_sheet_saves(phone):
         "__session": token(sheet, "__session"), "kind": "out", "amount": "12.50", "category_id": category,
         "counterparty": "Phone kiosk", "date": "2026-10-06", "return_to": "/accounts/1"})
     assert saved.status_code == 200 and saved.url.path == "/accounts/1"
-    assert "Phone kiosk" in phone.get("/accounts/1").text
+    assert "Phone kiosk" in phone.get("/accounts/1?month=2026-10").text
 
 
 def test_accounts_add_button_asks_which_account(phone):

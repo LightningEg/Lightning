@@ -1,0 +1,39 @@
+{# An account (IV-3AY14, report: An account): the balance, the one bank question, the month's rows. #}
+{% extends "base.html" %}
+{% from "phone/partials/txn.html" import txn_list with context %}
+{% block title %}{{ screen.name }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/money/accounts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Accounts'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ screen.name }}</h1>{% endblock %}
+{% block phone_add %}{% from "phone/partials/add.html" import add_slot with context %}{% set ro = request.state.read_only|default(false) %}{% if not ro and screen.active %}{{ add_slot('/accounts/' ~ screen.id ~ '/transaction/new?return_to=' ~ ('/accounts/' ~ screen.id)|urlencode) }}{% else %}{{ add_slot(off=ro) }}{% endif %}{% endblock %}
+{% block content %}
+{% set s = screen %}
+<section class="phone-hero has-seam" aria-labelledby="balance-heading">
+  <div id="balance-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Balance'|tr(locale) }}</div>
+  {% if s.held %}<p class="phone-note">{{ 'In this account'|tr(locale) }}</p>{% endif %}
+  <div class="phone-lead{{ ' is-negative' if s.balance < 0 }}">{{ s.balance|money(True) }} <small>{{ s.currency }}</small></div>
+  {% if s.held %}<p class="phone-hero-line">{{ 'What you own'|tr(locale) }} <bdi class="fig">{{ s.owned|money(False, 0) }}</bdi> · {{ 'Held for others'|tr(locale) }} <bdi class="fig">{{ s.held|money(False, 0) }}</bdi></p>{% endif %}
+  {% if s.checked_through %}<p class="phone-hero-line">{{ 'Checked through {date}'|tr(locale, date=s.checked_through) }}</p>{% endif %}
+</section>
+{% if s.check_today %}
+<section class="phone-section" aria-labelledby="check-heading">
+  <h2 id="check-heading">{{ 'Does {name} say {amount}?'|tr(locale, name=s.name, amount=s.balance|money(False, 0)) }}</h2>
+  <form method="post" action="/accounts/{{ s.id }}/check" class="phone-section-actions"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    <button class="btn primary" type="submit">{{ 'Yes'|tr(locale) }}</button>
+    <a class="btn" href="/accounts/{{ s.id }}/reconcile">{{ 'Fix it'|tr(locale) }}</a></form>
+</section>
+{% endif %}
+<div class="phone-chips"><span class="phone-chip phone-month-chip"><a href="/accounts/{{ s.id }}?month={{ s.prev_month }}" aria-label="{{ 'Earlier month'|tr(locale) }}">‹</a><span>{{ s.month }}</span>{% if s.next_month %}<a href="/accounts/{{ s.id }}?month={{ s.next_month }}" aria-label="{{ 'Later month'|tr(locale) }}">›</a>{% endif %}</span></div>
+{% if s.rows %}{{ txn_list(s.rows, show_account=False, base_url='/accounts/' ~ s.id, keep_qs='month=' ~ s.month, day_net=True) }}
+{% else %}<p class="phone-note">{{ 'Nothing recorded this month.'|tr(locale) }}</p>{% endif %}
+{% if s.more_rows %}<a class="phone-row" href="/accounts/{{ s.id }}?month={{ s.month }}&amp;page=2"><span>{{ 'See every row'|tr(locale) }}</span><b>›</b></a>{% endif %}
+<details class="action-menu phone-more-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}">⋯</summary><div>
+  <a href="/accounts/{{ s.id }}/reconcile">{{ 'Adjust balance'|tr(locale) }}</a>
+  <a href="/accounts/{{ s.id }}/convert">{{ 'Convert currency'|tr(locale) }}</a>
+  <a data-popup-open href="/accounts/{{ s.id }}/ownership/new">{{ 'Change ownership'|tr(locale) }}</a>
+  <a data-popup-open href="/plan/purchases/new">{{ 'Bought in instalments'|tr(locale) }}</a>
+  <a href="/accounts/{{ s.id }}/import">{{ 'Import a statement'|tr(locale) }}</a>
+  <a data-popup-open href="/accounts/{{ s.id }}/edit">{{ 'Edit account'|tr(locale) }}</a>
+  <a href="/transactions/deleted">{{ 'Deleted transactions'|tr(locale) }}</a>
+  {% if s.active %}<form method="post" action="/accounts/{{ s.id }}/deactivate"{% if s.uses %} data-confirm-delete="{{ '{n} plans, circles, certificates or reserves still use this account. Choose another account for them first.'|tr(locale, n=s.uses) }}"{% endif %}><button class="danger-text">{{ 'Deactivate'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
+</div></details>
+{% endblock %}

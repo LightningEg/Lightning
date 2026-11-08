@@ -103,6 +103,35 @@ def phone_router() -> APIRouter:
     for path in BEST_ON_PC:  # a PC-only page answers its own address with the same page
         router.add_api_route(path, on_your_pc, methods=["GET"], include_in_schema=False)
 
+    cash_accounts = APIRouter(route_class=_plain("month", "welcome", "msg", when=lambda request: _cash_account(request)))
+
+    def _cash_account(request: Request) -> bool:
+        from lightning.ui.phone.screens import account as screen
+        return screen.is_cash_or_bank(container(request), int(request.url.path.rstrip("/").rsplit("/", 1)[-1]))
+
+    @cash_accounts.get("/accounts/{account_id:int}")
+    async def account(request: Request, account_id: int):
+        """An account (3AY14): the balance, the bank question, the month's rows. A filtered register still reaches the
+        older route until 3AY18 retires it."""
+        from lightning.core.dates import today
+        from lightning.ui.phone.screens import account as screen
+        return render_phone(request, "phone/account.html", screen=screen.build(
+            container(request), account_id, today(), request.query_params.get("month", "")))
+
+    @router.post("/accounts/{account_id:int}/check")
+    async def account_check(request: Request, account_id: int):
+        """*Yes*: the bank shows what Lightning shows, so the history through today is checked (3AY14)."""
+        from lightning.core.dates import today
+        from lightning.core.errors import LightningError
+        from lightning.ui.web import redirect, settled_save
+        c = container(request)
+        try:
+            with settled_save(request, c):
+                c.reconciliation.close(account_id, today().isoformat(), c.reconciliation.balance(account_id, today().isoformat()))
+        except LightningError as exc:
+            return redirect(f"/accounts/{account_id}", exc.message)
+        return redirect(f"/accounts/{account_id}", "Checked against your bank.")
+
     @router.get("/money/report")
     async def money_report(request: Request):
         """How did a period go? (the Overview's report, which Home no longer carries)"""
@@ -164,6 +193,7 @@ def phone_router() -> APIRouter:
     router.include_router(started)
     router.include_router(slots)
     router.include_router(months)
+    router.include_router(cash_accounts)
     return router
 
 
