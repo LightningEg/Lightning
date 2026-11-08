@@ -115,6 +115,7 @@ class CashFundingService:
                 "proposal": {"bills": unfunded_due,
                              "spending": sum((row["suggested"] - row["remaining"] for row in rows), ZERO),
                              "reserves": sum((row["suggested"] for row in reserve_rows), ZERO),
+                             "available_before": ready,
                              "unassigned": pool if ready is not None else None}}
 
     def apply(self, fingerprint, amounts, reserve_additions):

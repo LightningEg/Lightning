@@ -181,11 +181,16 @@ class ImportProposals:
             free = [c for c in parsed["_link_candidates"] if c["id"] not in claimed]
             # A single candidate can be a useful default. When more than one
             # transaction fits, require the reviewer to choose explicitly.
-            if len(parsed["_link_candidates"]) == 1 and free and not free[0].get("source_count"):
+            # An SMS and the statement line for it are one payment: a lone candidate that only an SMS backs is
+            # offered as the default link (NF-3AZ2); one a statement already backs stays a choice.
+            if len(parsed["_link_candidates"]) == 1 and free and (
+                    not free[0].get("source_count") or free[0]["from_sms"] and free[0]["source_count"] == 1):
                 parsed["_default_match"] = f"link:{free[0]['id']}"
                 claimed.add(free[0]["id"])
             else:
                 parsed["_default_match"] = "skip" if parsed["_possible_duplicate"] else "new"
+            parsed["_link_question"] = ("More than one recorded payment fits this line. Choose the one it is, or skip it."
+                                        if len(parsed["_link_candidates"]) > 1 else None)
         return batch, result
 
     def _link_candidates(self, account_id: int, parsed: dict, batch_id: int | None = None) -> list[dict]:
@@ -216,7 +221,8 @@ class ImportProposals:
                  "counterparty": r["counterparty"] or "", "notes": r["notes"] or "",
                  "amount": parsed["Amount"], "source_count": r["source_count"],
                  "conversion": self._conversion_legs(r["id"]) if r["type"] == "CNV" else "",
-                 "source_files": r["source_files"] or ""} for r in rows]
+                 "source_files": r["source_files"] or "",
+                 "from_sms": any(name.startswith("SMS ") for name in (r["source_files"] or "").split(","))} for r in rows]
 
     def _voided_earlier(self, account_id: int, batch_id: int, reference: str | None, parsed: dict) -> bool:
         """An earlier import of this row was voided: importing it again must not quietly bring it back."""

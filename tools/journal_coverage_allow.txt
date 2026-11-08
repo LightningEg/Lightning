@@ -104,6 +104,7 @@ POST /reserves/{reserve_id:int}/complete
 POST /reserves/{reserve_id:int}/edit
 POST /reserves/{reserve_id:int}/payments
 POST /rules
+POST /rules/offer
 POST /rules/undo
 POST /rules/{rule_id:int}/apply
 POST /rules/{rule_id:int}/delete
@@ -121,6 +122,7 @@ POST /sms/dismiss
 POST /sms/paste
 POST /sms/assign
 POST /transactions/bulk-category
+POST /transactions/{txn_id:int}/category
 POST /transactions/bulk-delete
 POST /transactions/bulk-edit
 POST /transactions/merge

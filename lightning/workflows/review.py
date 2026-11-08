@@ -49,6 +49,33 @@ def group_of(item: dict) -> str:
     return next((key for key, _, prefixes in GROUPS if item["href"].startswith(prefixes)), "other")
 
 
+# NF-3AZ10: the same items by job and consequence, whatever page shows them: what puts money at risk, events that
+# do not yet agree with the bank or the ledger, and cleanup that can wait. Reviewed and snoozed items are still open.
+CONSEQUENCES = (("risk", "Money at risk"), ("unreconciled", "Unreconciled events"), ("cleanup", "Optional cleanup"))
+CONSEQUENCE_LABELS = dict(CONSEQUENCES)
+_UNRECONCILED = ("/sms", "/accounts/", "/transactions", "/activity", "/deposits/", "/reimbursements")
+
+
+def consequence_of(item: dict) -> str:
+    explicit = item.get("consequence")
+    if explicit in CONSEQUENCE_LABELS:
+        return explicit
+    label = item.get("label", "")
+    if item["href"].startswith(_UNRECONCILED) or "arrived early" in label or "paid early" in label:
+        return "unreconciled" if not item["label"].startswith(("Bill due", "Loan payment due")) else "risk"
+    return "risk" if item.get("priority", 2) <= 1 else "cleanup"
+
+
+def by_consequence(items: list[dict]) -> list[dict]:
+    """The inbox as three sections, each with its items in the inbox's order; an empty section is left out."""
+    out = []
+    for key, label in CONSEQUENCES:
+        mine = [item for item in items if item.get("consequence") == key]
+        if mine:
+            out.append({"key": key, "label": label, "items": mine, "count": len(mine)})
+    return out
+
+
 # Each page shows its own items under its Lead (guideline A09); the Overview shows them all. First match wins.
 PAGES = (("budget", ("/budget",)), ("health", ("/financial-health",)), ("cash", ("/plan",)),
          ("investments", ("/investments/", "/deposits/")), ("accounts", ("/accounts/", "/sms", "/transactions")))
@@ -87,6 +114,7 @@ def grouped(items: list[dict]) -> list[dict]:
 class ReviewInbox:
     def __init__(self, container):
         self.c = container
+        self.handled = {"reviewed": 0, "snoozed": 0}
 
     def items(self, on: date, *, include_handled: bool = False) -> list[dict]:
         """Everything waiting on the user on `on`, most urgent first (priority 0, then 1, then 2)."""
@@ -269,11 +297,13 @@ class ReviewInbox:
         items.extend(self._smarter_plan(on, forecast.free_cash))
         items.extend(self._health_alerts(on, items))
         visible = []
+        self.handled = {"reviewed": 0, "snoozed": 0}
         for item in sorted(items, key=lambda item: item["priority"]):
             # Visible facts define the situation, not days-late badges or the current date.
             # A changed amount, due date, count or recommendation gets a fresh reminder.
             identity = review_identity(item)
             item["review_id"] = identity
+            item["consequence"] = consequence_of(item)
             state = self._state(identity)
             item["review_state"] = "active"
             if state.get("status") == "reviewed":
@@ -281,6 +311,8 @@ class ReviewInbox:
             elif state.get("status") == "snoozed" and state.get("until", "") > on.isoformat():
                 item["review_state"] = "snoozed"
                 item["snoozed_until"] = state["until"]
+            if item["review_state"] in self.handled:
+                self.handled[item["review_state"]] += 1   # still open: never counted as resolved
             if include_handled or item["review_state"] == "active":
                 visible.append(item)
         return visible

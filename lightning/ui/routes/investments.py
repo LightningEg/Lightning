@@ -21,7 +21,7 @@ from ..i18n import translate
 from ...investments import benchmark as risk_free, events, views as holding_views
 from ...assets.catalog import instruments
 from ..periods import parse_period
-from ...investments.report import (PLANNER_MODES, build_investment_report, investment_period, reconcile_portfolio,
+from ...investments.report import (PLANNER_MODES, explain_period, build_investment_report, investment_period, reconcile_portfolio,
                                     saved_and_invested,
                                     period_growth, results_by_asset, suggest_contributions, suggest_by_current_mix,
                                     normalized_target_weights)
@@ -220,6 +220,7 @@ async def portfolio(request: Request):
     if divisor != 1:
         extras["biggest"] = {**extras["biggest"], "rows": [{**r, "value": r["value"] / divisor} for r in extras["biggest"]["rows"]]}
     return render(request, "investments/index.html", p=p, asset_class_rows=asset_class_rows, **extras, lead=lead, status=status,
+                  explain=explain_period(investment_report, period.start_text, period.end_text),
                   pos=position, notes=notes, investment_donut=visuals.holdings_donut(position, divisor=divisor), allocation=allocation,
                   accounts=c.investments.investment_accounts(),
                   has_assets=bool(c.assets.investments(active_only=True)), owned_value=owned_value,

@@ -23,8 +23,17 @@
       <span class="plan-payment-side"><b>{{ r.amount|money }} {{ currency }}</b><button class="btn small">{{ "Link this payment"|tr(locale) }}</button></span><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endfor %}</div>{% endif %}
   {% if not exact and not others %}<p class="muted">No posted transaction near {{ payment.due_date }} looks like this payment.</p>{% endif %}
 </section>
+{% if effects %}<section class="card stack" id="pay-effects"><h2>{{ "If you record it"|tr(locale) }}</h2>
+  <div class="asset-rows">
+    {% if effects.reserve %}<div class="compact-row"><span>{{ effects.reserve.name }}</span><b>{{ effects.reserve.before|money(places=0) }} → {{ effects.reserve.after|money(places=0) }} {{ base }}</b></div>
+    <p class="muted small">{{ 'The saved money covers {amount} {currency} of this bill.'|tr(locale, amount=effects.reserve.used|money(places=0), currency=base) }}</p>{% endif %}
+    {% if effects.budget %}<div class="compact-row"><span>{{ effects.budget.name }} · {{ effects.budget.month }}</span><b class="{{ 'neg' if effects.budget.over }}">{{ effects.budget.left_before|money(places=0) }} → {{ effects.budget.left_after|money(places=0) }} {{ base }}</b></div>
+    <p class="muted small">{{ 'Left in the budget before and after this payment.'|tr(locale) }}</p>{% endif %}
+    {% if not effects.reserve and not effects.budget %}<p class="muted">{{ 'No reserve or budget limit is attached to this payment.'|tr(locale) }}</p>{% endif %}
+  </div></section>{% endif %}
 <form method="post" action="/plan/items/{{ item.id }}/pay" class="card stack">
   <h2>{{ "Record it now"|tr(locale) }}</h2>
+  {% if has_match %}<label class="import-check"><input type="checkbox" name="different_payment" value="1"> {{ 'This is a different payment'|tr(locale) }}</label><p class="muted small">{{ 'A matching payment is already recorded above. Link it instead of recording a second one.'|tr(locale) }}</p>{% endif %}
   <input type="hidden" name="due" value="{{ payment.due_date }}"><input type="hidden" name="back" value="{{ back }}">
   <div class="row">
     <div class="field"><label for="date_paid">{{ 'Date'|tr(locale) }} {% if not phone_mode() %}<span class="muted small">{{ 'yyyy-mm-dd'|tr(locale) }}</span>{% endif %}</label><input id="date_paid" name="date_paid" value="{{ [payment.due_date, today]|min }}" data-smart-date inputmode="numeric"></div>
