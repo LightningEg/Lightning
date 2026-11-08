@@ -104,6 +104,13 @@ Investments, Goals and reserves, Financial health, Settings. Left: the net worth
 gold), the Bills page (Late as one question), the Investments and account pages (*Check against the bank*), Settings
 with "Best on your PC" rows, the tab bar switch, `/more` `/plan` `/accounts` `/transactions` redirects, bills counted once
 across the Bills page, Coming up and Home.
+Tried 2026-11-08 and reverted: switching the tab bar to Home, Budget, Activity and Money with `/`, `/budget`, `/more`,
+`/accounts` and `/transactions` served or redirected by the phone router. It needs, first: an all-accounts page behind
+Money's "N more" (a redirect from `/accounts` to `/money` loops), the empty profile's welcome page kept for `/` (currency
+setup, first account, samples: a route that steps aside until an account exists works), and the old Budget's editing
+(limits, plan, raise offer) reachable from the new one. About 30 tests in `test_phone_frame`, `test_two_devices`,
+`test_sms_imports`, `test_app_guard` and the swipe, sheets and nav browser tests assert the old pages and must be
+rewritten with the switch (that is 3AY11's work, so do both together).
 
 ## 3AY11 Remove the old coupling · M
 Delete the phone switches in `lightning/ui/routes/` (`on_phone`, `lazy_folds`, `request.state.phone`), `_phone_template`,
