@@ -208,7 +208,14 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-3AY9 | ↳ Budget, flexible first | | | L | |
 | IV-3AY10 | ↳ Money and its pages | | | L | |
 | IV-3AY11 | ↳ Remove the old coupling | | | M | |
+| IV-3AY14 | ↳ An account on the phone | | | M | |
+| IV-3AY15 | ↳ Investments on the phone | | | M | |
+| IV-3AY16 | ↳ Settings on the phone | | | M | |
+| IV-3AY17 | ↳ Move the pages that already have a phone template | | | M | |
+| IV-3AY18 | ↳ Retire the old Budget, Cash planning and register on the phone | | | M | |
 | IV-3AY12 | ↳ Arabic, themes and 320 px | | | M | |
+| IV-3AY19 | ↳ A back stack per slot | | | M | |
+| IV-3AY20 | ↳ `phone.css` alone on the theme tokens | | | M | |
 | IV-3AY13 | ↳ Owner's phone check | | | owner | |
 | **IV-3F** | [The phone's top bar looks too white to one user](11-phone-ux/IV-3F-phone-top-bar-looks-too-white.md) | improvement, visual | Feel | S | ready |
 

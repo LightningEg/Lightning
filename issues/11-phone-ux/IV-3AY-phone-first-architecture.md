@@ -49,11 +49,7 @@ every phone-owned screen extends it (`tests/test_phone_own_base.py`). (c, part) 
 at `/pc` ("This is on your PC") and a `BEST_ON_PC` list in the router that gives a listed path the same page; the list is
 empty on purpose (owner, 2026-11-08): Data checks and price files still work on the phone, so a path joins it only when its
 phone version exists or the owner says it is PC-only.
-Left: `phone.css` standalone on the theme tokens instead of layered on `style.css` (the bundle still starts with
-`style.css`; the sub-pages that render PC markup in the phone frame need it until 3AY11 gives them phone screens); a stack
-per slot with back-gesture order; IV-3F (the app bar looks too white; its colour is also the status bar's now).
-Done when: a test fails if a phone route renders a template outside `templates/phone/`;
-`tests/test_phone_nav_browser.py` and `tools/phone_check.py` pass.
+Left, as their own steps: 3AY19 (the per-slot back stack) and 3AY20 (`phone.css` alone on the theme tokens).
 
 ## 3AY6 Home · M
 Built: `workflows/todo.py` (To do order and rows), `ui/phone/screens/home.py` (the screen and its state: first run,
@@ -118,18 +114,81 @@ go?") now has a phone page at `/money/report` (month, last month, year, all time
 `/?period=month` Overview stays until 3AY11 removes it.
 
 ## 3AY11 Remove the old coupling · M
-Delete the phone switches in `lightning/ui/routes/` (`on_phone`, `lazy_folds`, `request.state.phone`), `_phone_template`,
-and the `phone/` templates the new screens replaced. Needs 3AY6 to 3AY10 merged first. Done when: `grep -rn "state.phone"
-lightning/ui/routes` is empty and the full suite passes.
-Built since: the old More is retired (route and template removed; `/more` leads to Money; its tests read Money and the Bills
-page).
-Built since (2026-11-08): the old phone Overview is gone: on the phone `/?period=...` redirects to `/money/report`, the
-`/overview/fold` endpoint, `templates/phone/dashboard/` and the dashboard route's phone code were deleted
-(`tests/test_phone_frame.py::test_the_old_phone_overview_leads_to_the_report_page`).
-Not done: the other PC routes still carry phone branches (`getattr(request.state, "phone", False)`: register, accounts,
-investments, planning, search, transactions, merge, activity, budget, birdview, financial health, journal) because those
-sub-pages have no phone-owned screens and no phone design yet. Each needs its own screen (and a design in Part C) before
-its branch goes; `grep -rn '"phone"' lightning/ui/routes` lists what is left.
+Every phone URL is served by the phone router and renders only `templates/phone/`; the PC routes no longer know the
+phone exists. Built: the old More (route and template deleted, `/more` leads to Money); the old phone Overview
+(`/?period=...` redirects to `/money/report`, which takes This month, Last month, This year, All time and a custom range
+of months; `/overview/fold` and `templates/phone/dashboard/` deleted).
+
+The rest is split into 3AY14-3AY18, one per family of pages. Each follows the same recipe, so each is checkable:
+1. a module in `lightning/ui/phone/screens/` with `build(c, day, params)` returning a frozen dataclass of exactly what
+   the screen shows (figures come from services, never from the screen);
+2. a route in `lightning/ui/phone/router.py` that owns the URL on the phone (bare URL first; `_plain` keys only if the
+   screen reads them) and renders a template under `templates/phone/` that extends `phone/base.html`;
+3. the phone branch in the PC route is deleted, and so is any PC-route helper only that branch used;
+4. tests read the new screen (the dataclass on Mohab's year, and the page through the phone client); old tests that read
+   the PC route on the phone move to the new screen; Mohab's phone year (`tests/test_mohab_phone.py`) still passes;
+5. new strings are in the Arabic catalogue (`tests/test_arabic_no_english.py` lists the URL in `NEW_PHONE_SCREENS`),
+   and `tools/phone_check.py` checks the page at 360 and 320 px.
+
+The inventory, from `grep -rn '"phone"' lightning/ui/routes` on 2026-11-08 (the line numbers will drift):
+
+| PC route and its phone branch | Step |
+|---|---|
+| `accounts.py` `_transaction_popup_context` (phone capture context); `register.py` `_period_filters(..., phone)` for one account | 3AY14 |
+| `investments.py` `_phone_parts`; `accounts.py` currencies page (skips the foreign-holdings series) | 3AY15 |
+| Settings: no branch, the PC template renders in the phone frame | 3AY16 |
+| `search.py` live results; `transactions.py` row sheet; `merge.py`; `activity.py` review views; `birdview.py` `_phone_spending`; `financial_health.py` investing figure | 3AY17 |
+| `planning.py` `_phone_cash`; `budget.py` `_phone_categories`; `register.py` for all accounts | 3AY18 |
+| `web.py` `_phone_template` and the sidebar skip in `render` | 3AY18 |
+
+Out of scope here: `lightning/runtime/journal_*routes.py` (claimed in `NOW.md` by the journal work; they pass `on_phone`
+to their own templates and move when that claim ends) and `lightning/runtime/app.py`, which sets `request.state.phone`.
+
+Done when: 3AY14-3AY18 are done; `grep -rn '"phone"' lightning/ui/routes lightning/ui/web.py` is empty; a test fails if
+any page requested through the phone app renders a template outside `templates/phone/`; the full suite passes.
+
+## 3AY14 An account on the phone · M
+Design: the report's *An account* (Money tab). `/money/accounts/<id>` (and `/accounts/<id>` on the phone redirects to
+it): the balance, **Check against the bank** ("Does CIB say 84,393?" with *Yes* and *Fix it*, *Fix it* opening the
+existing reconcile sheet `phone/accounts/reconcile.html`), then this month's rows with the month stepper, and the rare
+actions (edit, close, export) behind ⋯. Add from this page opens the Add sheet with the account chosen, so the capture
+context moves from `accounts.py` into the phone Add route.
+Done when: every row on Money's Accounts page opens it; *Yes* records a check and *Fix it* reconciles; the
+`accounts.py` and one-account `register.py` phone branches are gone; recipe steps 4-5.
+
+## 3AY15 Investments on the phone · M
+Design: the report's *Investments page*. `/money/investments` (`/investments` on the phone redirects): portfolio value
+with its change since the month began, the holdings (five, then all), "n prices to update" when there are some (a link
+to the price page), "Over time ›" as one row opening the value chart, and *What changed* as rows. Money's Investments
+row links here. The currencies page (`/accounts/currencies`) is its child: foreign holdings by currency, no chart.
+Done when: holdings and the value agree with the PC's Investments page on Mohab's year (a test); the `investments.py`
+and `accounts.py` currencies phone branches are gone; recipe steps 4-5.
+
+## 3AY16 Settings on the phone · M
+Design: the report's *⚙ Settings*. `/money/settings` (the ⚙ on Money and `/settings` on the phone lead to it): grouped
+rows (Appearance and language, This phone, Your data, Categories and rules, Devices), each opening its existing page
+or sheet. "Best on your PC" rows only for paths in `BEST_ON_PC`, which stays empty unless the owner adds one (owner,
+2026-11-08).
+Done when: no Settings page renders the PC template in the phone frame (each row's target is a phone template or the
+`/pc` page); language and theme switch from it; recipe steps 4-5.
+
+## 3AY17 Move the pages that already have a phone template · M
+No redesign: each keeps the phone template it has today and gains a screen module and a phone-router route, and its PC
+branch is deleted. Search (`/search`, live results; the JSON format stays on the PC route), the row sheet
+(`/transactions/<id>/sheet`), Merge (`/transactions/merge`), the review views (`activity.py`), Spending
+(`/birdview/expenses`, from the Report's *Where it went*) and Financial health (the investing figure becomes part of
+its screen; Spending's *More analysis* sheet `phone/birdview/more.html` moves with it). The review views are
+`/activity/<id>` and its apply; the bare `/activity` is already the phone's.
+Done when: those six files have no phone branch; recipe steps 4-5.
+
+## 3AY18 Retire the old Budget, Cash planning and register on the phone · M
+The new screens already answer these, so the old phone versions are redirected, not ported: `/plan` to
+`/money/bills` (the report: the Bills page takes over Cash planning's bill list; the forecast chart stays on the PC);
+`/budget` with any key other than `month` to `/budget?month=...` (the month it named, else this month); `/transactions`
+with filters to `/activity` (needs Activity's search and tag filter from 3AY8 first, since Mohab's tag step uses them).
+Then `phone/budget.html`, `phone/planning/plan.html`, `phone/register.html` and the helpers only they used are
+deleted, and `_phone_template` with its swap in `web.py` goes. Needs 3AY14-3AY17 first.
+Done when: 3AY11's done-when holds.
 
 ## 3AY12 Arabic, themes and 320 px · M
 Every new string in the catalogue, the mirrored layouts, dark and paid themes, 320 px. Needs 3AY6 to 3AY10 merged first.
@@ -137,7 +196,26 @@ Done when: skill `arabic-check` and `tools/theme_check.py` pass, and `tools/phon
 Built: the new phone screens are in the no-English test and `tools/phone_check.py` (English and Arabic, 360 and 320 px);
 `phone_check.py --theme id` wears a paid theme (maintainer review) and checks the same pages, run clean for dendera-night
 (also in Arabic), papyrus, cotton and nile. `tools/theme_check.py` measures the PC layout only, so it does not cover the
-phone. Left: a native Arabic reader on the voice of the strings added in 3AY6 to 3AY12.
+phone. The voice of the new strings is read in 3AY13.
+
+## 3AY19 A back stack per slot · M
+Design: the report's *Navigation*. Each tab-bar slot keeps its own stack of pages: leaving a slot and coming back
+returns to the page it was on; tapping the chosen slot again goes to its top; Android's back gesture pops within the
+slot, then goes to Home, then leaves the app. Add returns to the slot it came from (built). Kept in
+`static/phone-nav.js` on `history.state`, no new server state.
+Done when: `tests/test_phone_nav_browser.py` proves the three behaviours on Home, Budget and Money with two pages deep
+in each, in English and Arabic.
+
+## 3AY20 `phone.css` alone on the theme tokens · M
+The phone bundle stops loading `style.css`: `phone/base.html` links `themes.generated.css`, the theme materials and
+`phone.css` only, and `phone.css` holds every rule a phone template uses. Needs 3AY18 (until then some phone pages still
+use PC markup). Do IV-3F (the top bar looks too white; it is also the status bar's colour) in the same change, since
+both touch the bar's tokens.
+Done when: no phone page requests `style.css`; `tools/phone_check.py` (English and Arabic, 360 and 320 px, and
+`--theme` for each paid theme) and `tests/test_phone_nav_browser.py` pass; `phone.rtl.css` is regenerated by
+`tools/build_rtl_css.js`.
 
 ## 3AY13 Owner's phone check · owner
-One end-to-end check on a phone once 3AY12 is merged (it replaces 3AN13). Anything wrong becomes its own step.
+One end-to-end check on a phone once 3AY11, 3AY19 and 3AY20 are merged (it replaces 3AN13): the five tabs and their
+pages, in English and Arabic, including the slot names and the voice of the strings added since 3AY6. Anything wrong
+becomes its own step.
