@@ -1,0 +1,11 @@
+{# Pay a bill from the Add sheet (IV-3AY7): what is due, earliest first; one tap opens that bill's pay sheet. #}
+{% extends "base.html" %}
+{% block title %}Pay a bill{% endblock %}
+{% block phone_back %}<a class="phone-back" href="{{ back }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Back'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Pay a bill'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+<div class="phone-rows">
+{% for r in rows %}<a class="phone-row" data-popup-open href="/plan/items/{{ r.payment.item.id }}/pay?due={{ r.due_date }}&amp;back={{ back|urlencode }}"><span>{{ r.payment.item.name }}<small>{{ r.due_date }}</small></span><b>{{ r.payment.amount|money }}</b></a>
+{% else %}<p class="phone-note">{{ 'Nothing is due.'|tr(locale) }}</p>{% endfor %}
+</div>
+{% endblock %}

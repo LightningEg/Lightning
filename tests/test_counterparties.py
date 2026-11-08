@@ -110,3 +110,12 @@ def test_a_counterparty_holds_up_to_20_aliases(c):
         c.counterparties.add_alias(cid, f"Vodafone branch {i}")
     with pytest.raises(ValidationError, match="at most 20"):
         c.counterparties.add_alias(cid, "Vodafone branch 99")
+
+
+def test_a_known_name_remembers_the_account_it_was_last_used_with(c, setup):
+    """IV-12C: quick add fills the account a name was most recently paid from."""
+    accounts, cats = setup
+    food = cats["EXP.PERSONAL.FOOD"].id
+    c.transactions.record_outflow("2026-09-01", accounts["cib"].id, "10", food, counterparty="Koshary")
+    c.transactions.record_outflow("2026-09-02", accounts["wallet"].id, "10", food, counterparty="Koshary")
+    assert c.transactions.last_accounts()["Koshary"] == accounts["wallet"].id

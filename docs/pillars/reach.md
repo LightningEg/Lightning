@@ -14,6 +14,6 @@ The website, search, downloads, community and the store. Its own repository is L
 | **IV-8F** | [Home and Features show the app, not only words](../../issues/8-website/IV-8F-home-and-features-show-the-app.md) | M | ready |
 | **OW-8AA** | [Sign off the Low, Medium and High ratings on the comparison pages](../../issues/8-website/OW-8AA-sign-off-the-comparison-ratings.md) | owner | ready |
 | **OW-8D** | [For Geeks audit ideas left for the owner to choose](../../issues/8-website/OW-8D-for-geeks-audit-ideas-to-choose.md) | owner | ready |
-| **IT-9F** | [Page speed: a stable origin and cache, and a CSS trim](../../issues/9-later/IT-9F-page-speed-origin-and-css.md) | M | new |
+| **IT-9F** | [Page speed: a CSS trim](../../issues/9-later/IT-9F-page-speed-origin-and-css.md) | M | new |
 <!-- work:end -->
 

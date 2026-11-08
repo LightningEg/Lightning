@@ -3,6 +3,7 @@ title: Stored month-end figures
 type: tech
 pillar: understand
 size: M
+model: opus
 status: blocked
 blocked_by: a profile past about 4,000 transactions or a tab past 400 ms
 created: 2026-10-04

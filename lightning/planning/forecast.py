@@ -5,7 +5,7 @@ An estimate. It reads the plan, the budget and reserves and never changes net wo
 from __future__ import annotations
 
 from datetime import date, timedelta
-from decimal import ROUND_DOWN, Decimal
+from decimal import ROUND_DOWN, ROUND_UP, Decimal
 from typing import Protocol
 
 from lightning.core.dates import fmt_date, month_of, parse_date, parse_month, today
@@ -15,6 +15,7 @@ from lightning.deposits.domain import DepositEvent
 
 from .domain import CashForecast, EverydayBudget, ForecastMonth, Payment, PaymentStatus, PlanKind
 from .dated_cash import dated_cash_forecast
+from .schedule import _add_months as _months_on
 from .schedule_view import reserve_goal_needs
 
 HORIZON_MONTHS = 3
@@ -174,13 +175,36 @@ class CashForecaster:
         by_day = self._everyday_by_day(first, counted) if counted else []
         before_last = first - timedelta(days=1)
         last_month = self._everyday_by_day(before_last.replace(day=1), before_last)
+        shape, usual_days = self._usual_month(first)
         view = self.budgets.month_view(month, schedule=self.schedules.view())
         room = {line.category_id: line.remaining - unpaid.get(line.category_id, ZERO)
                 for section in view.sections for line in section.lines
                 if line.depth > 1 and line.remaining is not None}
         return EverydayBudget(month, summary["planned"], summary["spent"], summary["left"], bills_to_pay, everyday_left,
                               summary["planned"] - scheduled, by_day[-1] if by_day else ZERO,
-                              counted.day if counted else 0, last.day, current, by_day, last_month, room, payments)
+                              counted.day if counted else 0, last.day, current, by_day, last_month, shape, usual_days, room, payments)
+
+    USUAL_MONTHS = 3
+
+    def _usual_month(self, first: date) -> tuple[list[Decimal], list[Decimal]]:
+        """How a usual month goes (BV-12B): from the last three completed months with everyday spending (two at least),
+        the share of the month's spending done by each day, and the average spending by each day. Empty without history."""
+        curves = []
+        end = first - timedelta(days=1)
+        for _ in range(self.USUAL_MONTHS):
+            start = end.replace(day=1)
+            curve = self._everyday_by_day(start, end)
+            if curve and curve[-1] > ZERO:
+                curves.append(curve)
+            end = start - timedelta(days=1)
+        if len(curves) < 2:
+            return [], []
+        length = 31
+        pad = lambda curve: curve + [curve[-1]] * (length - len(curve))
+        padded = [pad(c) for c in curves]
+        shape = [sum((c[i] / c[-1] for c in padded), ZERO) / len(padded) for i in range(length)]
+        average = [sum((c[i] for c in padded), ZERO) / len(padded) for i in range(length)]
+        return shape, average
 
     def _everyday_by_day(self, start: date, end: date) -> list[Decimal]:
         """Everyday spending added up day by day from ``start`` to ``end``: the budget's spending (one-off and
@@ -325,6 +349,34 @@ class CashForecaster:
             safe_amount, safe_after = guess, trial.safe_to_spend
         return {"before": now.safe_to_spend, "until": now.next_income_date, "all": room,
                 "all_after": everything.safe_to_spend, "safe": safe_amount, "safe_after": safe_after}
+
+    def refill_schedule(self, as_of: date | None, gap: Decimal, options: dict, months: int = 6) -> list[dict]:
+        """NF-3AZ7: the emergency refill as instalments after the upcoming needs, when one move now would not fit.
+
+        An instalment is as large as the amount that keeps Safe to spend at or above zero today (``options["safe"]``,
+        BT-2AH), or an even share of the gap over ``months`` if that is nothing, and falls on the next income date,
+        then one month apart. Each shows the fund and Safe to spend after it, from the same forecast run with every
+        instalment up to it moved from today's cash: a what-if on today's figures, never a promise about later income.
+        Nothing is stored; the person moves each one when they choose."""
+        day = as_of or today()
+        if gap <= ZERO:
+            return []
+        step = options["safe"] if options["safe"] > ZERO else ZERO
+        if step < gap / Decimal(months):
+            step = max(options["safe"], (gap / Decimal(months)).quantize(Decimal("1"), ROUND_UP))
+        step = step.quantize(Decimal("1"), ROUND_DOWN) or gap
+        first = parse_date(options["until"]) if options.get("until") else day
+        first = max(first, day)
+        rows, moved = [], ZERO
+        emergency = next((r for r in self.reserves.list_active() if r["kind"] == "EMERGENCY"), None)
+        set_aside = emergency["effective_allocated"] if emergency else ZERO
+        while moved < gap and len(rows) < 24:
+            amount = min(step, gap - moved)
+            moved += amount
+            after = self.forecast(day, refill=moved).safe_to_spend
+            rows.append({"date": fmt_date(_months_on(first, len(rows))), "amount": amount, "fund_after": set_aside + moved,
+                         "safe_after": after, "keeps_plan": after >= ZERO})
+        return rows
 
     def scheduled_inputs(self, day, end):
         """Read the same confirmed occurrences and receipt-adjusted events for every dated projection."""

@@ -102,6 +102,27 @@ async def transaction_sheet(request: Request, txn_id: int):
     return render(request, "transactions/sheet.html", **_sheet_context(request, c, txn))
 
 
+def _own_categories(c, ids) -> dict:
+    """Each row's category now, so a hand correction can be told from a first filing (NF-3AZ3)."""
+    return {i: next((line.category_id for line in c.transactions.get(i).lines if line.category_id), None) for i in ids}
+
+
+def _offer_rule(c, before: dict, changed, category_id: int, back: str):
+    """Count the corrections just made; once a counterparty has been refiled the same way twice, the page to offer
+    a rule for it. ``None`` when there is nothing to offer."""
+    offer = None
+    for txn_id in changed:
+        name = c.transactions.get(txn_id).counterparty
+        if not name:
+            continue
+        c.rules.record_correction(name, before.get(txn_id), category_id)
+        found = offer or c.rules.suggestion(name, category_id)
+        offer = found
+    if offer is None:
+        return None
+    return "/rules/offer?" + urlencode({"counterparty": offer["counterparty"], "category_id": category_id, "return_to": back})
+
+
 @router.post("/transactions/{txn_id:int}/category")
 async def set_transaction_category(request: Request, txn_id: int):
     """One tap on a category chip in a row's sheet: file the row, then, in the To sort list, open the next unsorted one."""
@@ -112,7 +133,9 @@ async def set_transaction_category(request: Request, txn_id: int):
     try:
         with settled_save(request, c):
             category_id = int(str(form.get("category_id", "")))
+            before = _own_categories(c, [txn_id])
             changed, skipped = c.transactions.set_category([txn_id], category_id)
+            offer = None if skipped or args else _offer_rule(c, before, changed, category_id, back)
     except (ValueError, LightningError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose a category to give this row."
         txn = c.transactions.get(txn_id)
@@ -129,7 +152,7 @@ async def set_transaction_category(request: Request, txn_id: int):
             return redirect(f"/transactions/{nxt}/sheet?" + urlencode({**args, "return_to": back}))
         return redirect("/transactions/sorted?" + urlencode({"return_to": back}))
     name = c.categories.display_name(category_id)
-    return redirect(back, f"{name} is now the category of 1 row.")
+    return redirect(offer or back, f"{name} is now the category of 1 row.")
 
 
 @router.get("/transactions/sorted")
@@ -221,7 +244,7 @@ async def save_transaction_popup(request: Request, txn_id: int):
             notice = " ".join(filter(None, (c.reserves.carry_links(reserve_links, updated.id) if reserve_links else "",
                                             c.planning.review_links(updated.id))))  # 7R, 7U
             return redirect(values["return_to"],
-                            f"Saved {updated.ref}. {register._budget_feedback(c, updated)} {notice}".strip())
+                            f"Saved. {register._budget_feedback(c, updated)} {notice}".strip())
     except (LightningError, ValueError) as exc:
         error = exc if isinstance(exc, LightningError) else ValidationError("Choose valid values for this transaction.")
         return render(request, "transactions/form_popup.html", status_code=400,
@@ -428,7 +451,7 @@ async def all_accounts_entry(request: Request):
     if matched_reserve < 0:
         feedback = (feedback + " Several reserves match; choose beside the transaction in its account list.").strip()
     return redirect(f"/transactions?date={txn.date}&new_acct={entry['account_id']}",
-                    f"Saved {txn.ref}. {feedback}".strip())
+                    f"Saved. {feedback}".strip())
 
 
 @router.post("/transactions/register/{txn_id:int}")
@@ -439,7 +462,7 @@ async def all_accounts_update(request: Request, txn_id: int):
     txn, values = result
     matched_reserve = values.get("_matched_reserve", 0)
     message = (f"Saved as {txn.ref}. The original transaction is kept in history." if txn.id != txn_id
-               else f"Saved {txn.ref}.")
+               else "Saved.")
     feedback = register._budget_feedback(container(request), txn)
     if matched_reserve < 0:
         feedback = (feedback + " Several reserves match; choose beside the transaction in its account list.").strip()
@@ -614,7 +637,9 @@ async def categorize_transactions(request: Request):
     try:
         with settled_save(request, c):
             category_id = int(str(form.get("category_id")))
+            before = _own_categories(c, ids)
             changed, skipped = c.transactions.set_category(ids, category_id)
+            offer = _offer_rule(c, before, changed, category_id, destination) if len(set(changed)) == 1 else None
     except LightningError as exc:
         return redirect(destination, exc.message)
     name = c.categories.display_name(category_id)   # Personal › Transportation, never just "Transportation"
@@ -622,7 +647,7 @@ async def categorize_transactions(request: Request):
     if skipped:
         message += (f" {len(skipped)} left as {'they were' if len(skipped) != 1 else 'it was'}: transfers, investment rows, "
                     "split expenses and rows going the other way keep their own category.")
-    return redirect(destination, message)
+    return redirect(offer or destination, message)
 
 
 @router.post("/transactions/bulk-edit")

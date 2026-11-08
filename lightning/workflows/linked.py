@@ -69,6 +69,7 @@ class LinkedSections:
                 if party:
                     owners.append({"id": party["id"], "name": party["name"]})
         touched = {
+            "reimbursement": self._reimbursement_offer(txn, claims),
             "budget": self.budget_impacts(txn),
             "settled": settled,
             "reserves": [] if txn.is_void else c.reserves.links_for_transaction(txn.id),
@@ -115,6 +116,23 @@ class LinkedSections:
                             "covered_remaining": shown.remaining if shown is not budget_line else None,
                             "month": txn.date[:7]})
         return impacts
+
+    def _reimbursement_offer(self, txn, claims) -> dict:
+        """NF-3AZ5: where a transaction raises the question. A reimbursable expense offers Create claim (with the
+        amount it may claim); a receipt not yet matched, while a claim is still owed, offers Match reimbursement.
+        Both lead to the one claim on /reimbursements."""
+        offer = {"create": None, "match": 0}
+        service = getattr(self.c, "reimbursements", None)
+        if service is None or txn.is_void or claims or txn.type.value not in ("IN", "OUT") \
+                or not self.db.has_table("reimbursement_claims"):
+            return offer
+        if txn.type.value == "OUT":
+            found = next((e for e in service.eligible_expenses() if e["transaction_id"] == txn.id), None)
+            if found and found.get("suggested"):
+                offer["create"] = found["max_amount"]
+        elif any(r["transaction_id"] == txn.id for r in service.available_receipts()):
+            offer["match"] = sum(1 for claim in service.list_claims() if claim["outstanding"] > 0 and not claim["issues"])
+        return offer
 
     def _claims_for(self, transaction_id: int) -> list[dict]:
         """The reimbursement claim this expense opened, or the claims this receipt paid back."""

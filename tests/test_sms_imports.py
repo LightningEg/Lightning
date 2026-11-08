@@ -197,7 +197,7 @@ def test_without_permission_only_shared_messages_are_read(c, setup):
     assert c.sms_imports.read_source(source)["waiting"] == 1
 
 
-def test_the_phone_app_asks_then_reads_on_overview(tmp_path):
+def test_the_phone_app_asks_then_reads_in_to_review(tmp_path):
     from fastapi.testclient import TestClient
     from lightning.runtime.app import profile_app
     from lightning.runtime.devices import Devices
@@ -218,8 +218,9 @@ def test_the_phone_app_asks_then_reads_on_overview(tmp_path):
         phone.post("/sms/allow", data={"__session": token(page, "__session")})
         assert source.asked == 1
         source.state = "granted"
-        overview = phone.get("/").text
-        assert "Bank SMS need their account" in overview
+        phone.get("/")   # opening Home reads what arrived (3AY6); the waiting message is then a To review card (3AY8)
+        review = phone.get("/activity?tab=review").text
+        assert "Bank SMS need their account" in review
 
 
 def test_a_duplicate_waiting_in_another_review_is_flagged(c, setup):

@@ -34,7 +34,7 @@ def _actions(page):
 
 def test_swiping_toward_the_start_reveals_set_category_and_delete(phone_page):
     page, origin = phone_page
-    page.goto(origin + "/transactions")
+    page.goto(origin + "/transactions?period=all")  # the register behind a filter: the bare URL is Activity now
     page.wait_for_selector(ROW)
     count = page.locator("a.phone-txn[data-txn]").count()
     page.evaluate(SWIPE, [ROW, -120])
@@ -55,7 +55,7 @@ def test_swiping_toward_the_start_reveals_set_category_and_delete(phone_page):
 
 def test_a_tap_elsewhere_closes_the_actions_and_arabic_mirrors_them(phone_page):
     page, origin = phone_page
-    page.goto(origin + "/transactions")
+    page.goto(origin + "/transactions?period=all")  # the register behind a filter: the bare URL is Activity now
     page.wait_for_selector(ROW)
     page.evaluate(SWIPE, [ROW, -120])
     assert page.locator(".phone-swipe-actions").count() == 1
@@ -65,7 +65,7 @@ def test_a_tap_elsewhere_closes_the_actions_and_arabic_mirrors_them(phone_page):
 
     page.evaluate("""async () => { const t = document.querySelector('meta[name=lightning-session]').content;
       await fetch('/settings/locale', {method: 'POST', body: new URLSearchParams({__session: t, locale: 'ar'})}); }""")
-    page.goto(origin + "/transactions")
+    page.goto(origin + "/transactions?period=all")  # the register behind a filter: the bare URL is Activity now
     page.wait_for_selector(ROW)
     page.evaluate(SWIPE, [ROW, 120])  # in Arabic the start is the right-hand side
     actions = _actions(page)

@@ -50,18 +50,14 @@ def test_every_surface_reads_the_same_bills(sample, today):
     before = [r for r in rows if r.due_date > today and nxt and r.due_date < nxt]
     total = sum(c.planning.amount_in_base(r.payment, r.payment.still_owed, day) for r in before)
     assert dict(inbox.forecast.safe_to_spend_parts)[label("payments_before_next_income")] == -total
-    # More: the next 14 days, five shown and the rest counted.
-    inner = create_app(c)
-
-    async def phone(scope, receive, send):
-        if scope["type"] == "http":
-            scope.setdefault("state", {})["phone"] = True
-        await inner(scope, receive, send)
-    html = TestClient(phone).get("/more").text
-    shown = len(re.findall(r"class=.phone-row phone-hub-bill[ \"]", html))
-    more = re.search(r">(\d+) more<", html)
-    fortnight = bs.open_bills(c.planning, day, 14)
-    assert shown + (int(more.group(1)) if more else 0) == len(fortnight)
+    # Money's Coming up and the Bills page read the same open bills: late ones in their own group, the rest in three.
+    from lightning.ui.phone.screens import money
+    page = money.bills_page(c, day)
+    everything = bs.open_bills(c.planning, day, 60)
+    groups = (*page.late, *page.week, *page.before_payday, *page.after_payday)
+    assert len(groups) == len(everything)
+    assert {(b.payment.item.id, b.due_date) for b in money.build(c, day).coming_up} <= {
+        (b.payment.item.id, b.due_date) for b in (*page.week, *page.before_payday, *page.after_payday)}
 
 
 def test_a_week_with_nothing_recorded_is_the_catch_up_state(sample):

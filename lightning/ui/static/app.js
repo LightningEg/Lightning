@@ -1797,11 +1797,16 @@ initCategoryCatalogue();
 if (ledger) {
   const known = JSON.parse(ledger.dataset.counterparties || "{}");
   const accounts = JSON.parse(ledger.dataset.accounts || "[]");
+  const lastAccounts = JSON.parse(ledger.dataset.lastAccounts || "{}");
   const parties = Object.keys(known).sort((a, b) => a.localeCompare(b));
   document.querySelectorAll(".counterparty-input").forEach((counterparty) => {
     const form = counterparty.getAttribute("form");
     const category = document.querySelector(`.category-input[form="${form}"]`);
     const results = document.getElementById(counterparty.dataset.counterpartyResults);
+    const accountPicker = document.querySelector(`select[name="account_id"][form="${form}"]`);
+    // IV-12C: the first required field still empty after a name is picked (Account before Category).
+    const nextEmpty = () => [accountPicker, category, document.querySelector(`[name="amount"][form="${form}"]`)]
+      .find((field) => field && !field.disabled && !field.value.trim());
     const clearDecision = (name) => document.querySelector(`input[type="hidden"][form="${form}"][name="${name}"]`)?.remove();
     let searchVersion = 0;
     const closeResults = () => { ++searchVersion; if (results) { results.hidden = true; counterparty.setAttribute("aria-expanded", "false"); } };
@@ -1813,6 +1818,8 @@ if (ledger) {
         if (isTransfer) category.value = "";
         else if (!category.value) {
           const knownName = parties.find((name) => name.toLocaleLowerCase() === counterparty.value.trim().toLocaleLowerCase());
+          if (knownName && accountPicker && !accountPicker.value && lastAccounts[knownName]
+              && [...accountPicker.options].some((option) => option.value === String(lastAccounts[knownName]))) accountPicker.value = String(lastAccounts[knownName]);
           const savedCategory = knownName ? known[knownName] : null;
           if (savedCategory?.id && savedCategory?.name) {
             category.value = savedCategory.name;
@@ -1889,7 +1896,7 @@ if (ledger) {
         if (first) {
           event.preventDefault();
           first.click();
-          category?.focus();
+          (nextEmpty() || category)?.focus();
         }
       }
     });

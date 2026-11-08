@@ -1,0 +1,51 @@
+{# Money (IV-3AY10, guideline C11.5): Net worth, the balances (four, then N more), Coming up (never a late bill), and one
+   row each for what you owe, investments, goals and financial health. Settings sits behind the gear. #}
+{% extends "base.html" %}
+{% block title %}Money{% endblock %}
+{% block heading %}<h1>{{ 'Money'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+{% set s = screen %}
+<section class="phone-hero has-seam" aria-labelledby="worth-heading">
+  <div id="worth-heading" class="phone-hero-label" role="heading" aria-level="2">{{ fig.net_worth.label }}</div>
+  <div class="phone-lead{{ ' is-negative' if s.net_worth < 0 }}">{{ s.net_worth|money }} <small>{{ base }}</small></div>
+  <p class="phone-hero-line">{{ 'What you own'|tr(locale) }} <b><bdi class="fig">{{ s.what_you_own|money }}</bdi></b></p>
+  {% if s.since_start is not none %}<p class="phone-hero-line">{{ '{amt} since the start of the month.'|tr(locale, amt=s.since_start|money(True)) }}</p>{% endif %}
+</section>
+<section class="phone-section" aria-labelledby="accounts-heading">
+  <header class="phone-section-head"><h2 id="accounts-heading"><a href="/money/accounts">{{ 'Accounts'|tr(locale) }}</a></h2><b><bdi class="fig">{{ s.accounts_total|money }}</bdi></b></header>
+  <div class="phone-rows">{% for a in s.accounts %}<a class="phone-row" href="/accounts/{{ a.id }}"><span>{{ a.name }}</span><b><bdi class="fig">{{ a.balance|money }}</bdi></b></a>{% endfor %}
+  {% if s.accounts_more %}<a class="phone-row" href="/money/accounts"><span>{{ '{n} more'|tr(locale, n=s.accounts_more) }}</span><b>›</b></a>{% endif %}</div>
+  {% if s.held_for_others %}<p class="phone-note">{{ 'Includes {amt} held for others.'|tr(locale, amt=s.held_for_others|money) }}</p>{% endif %}
+</section>
+<section class="phone-section" aria-labelledby="coming-heading">
+  <header class="phone-section-head"><h2 id="coming-heading">{{ 'Coming up'|tr(locale) }}</h2><a href="/money/bills">{{ 'All bills'|tr(locale) }} ›</a></header>
+  <div class="phone-rows">{% for b in s.coming_up %}<a class="phone-row" data-popup-open href="/plan/items/{{ b.payment.item.id }}/pay?due={{ b.due_date }}&amp;back=%2Fmoney"><span>{{ b.payment.item.name }}<small>{{ b.due_date }}</small></span><b><bdi class="fig">{{ b.payment.amount|money }}</bdi></b></a>
+  {% else %}<p class="phone-note">{{ 'Nothing is due soon.'|tr(locale) }}</p>{% endfor %}</div>
+  {% if s.late_count %}<a class="phone-row" href="/home"><span>{{ ('1 bill is late' if s.late_count == 1 else '{n} bills are late')|tr(locale, n=s.late_count) }}</span><b>›</b></a>{% endif %}
+</section>
+<div class="phone-rows">
+  <a class="phone-row" href="/money/report"><span>{{ 'Report'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/plan/loans"><span>{{ 'What you owe'|tr(locale) }}</span><b><bdi class="fig">{{ s.what_you_owe|money }}</bdi> ›</b></a>
+  <a class="phone-row" href="/investments"><span>{{ 'Investments'|tr(locale) }}</span><b><bdi class="fig">{{ s.holdings_value|money }}</bdi> ›</b></a>
+  <a class="phone-row" href="/plan/reserves"><span>{{ 'Goals and reserves'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/financial-health"><span>{{ 'Financial health'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/plan"><span>{{ 'Cash planning'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/birdview/expenses"><span>{{ 'Spending'|tr(locale) }}</span><b>›</b></a>
+  {% if s.zakat %}<a class="phone-row" href="/zakat"><span>{{ 'Zakat'|tr(locale) }}</span><b>›</b></a>{% endif %}
+  <a class="phone-row" href="/review"><span>{{ 'Weekly review'|tr(locale) }}</span><b>›</b></a>
+</div>
+{# What More held, so no page is left without a way in (Money replaces More, 3AY10). #}
+<nav class="phone-rows phone-more-list" aria-label="{{ 'More places'|tr(locale) }}">
+  <a class="phone-row" href="/plan"><span>{{ 'Cash planning'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/birdview/expenses"><span>{{ 'Spending'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/review"><span>{{ 'Weekly review'|tr(locale) }}</span><b>›</b></a>
+</nav>
+<nav class="phone-rows phone-more-list" aria-label="{{ 'Settings'|tr(locale) }}">
+  <a class="phone-row" href="/settings"><span>{{ 'All settings'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/categories"><span>{{ 'Categories'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/counterparties"><span>{{ 'Counterparties'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/rules"><span>{{ 'Rules'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/profiles/devices"><span>{{ 'Devices'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/checks"><span>{{ 'Data checks'|tr(locale) }}</span><b>›</b></a>
+</nav>
+{% endblock %}

@@ -21,7 +21,8 @@
         <td>{{ t.maturity_date }}</td>
         <td class="num">{{ t.principal|money }} {{ account.currency }}</td>
         <td>{% set payout_account = liquid_by_id.get(t.destination_account_id) %}{% if payout_account %}{{ payout_account.institution or payout_account.name }} · {{ payout_account.name }}{% else %}<span class="muted">{{ 'Account unavailable'|tr(locale) }}</span>{% endif %}</td>
-        <td>{% if cert.redeemed or cert.units == 0 %}Redeemed{% elif today_iso >= t.maturity_date %}Matured · awaiting redemption{% elif today_iso >= t.lockup_end_date %}Can redeem{% else %}Locked{% endif %}</td>
+        <td>{% if cert.redeemed or cert.units == 0 %}Redeemed{% elif today_iso >= t.maturity_date %}Matured · awaiting redemption{% elif today_iso >= t.lockup_end_date %}Can redeem{% else %}Locked{% endif %}
+          {% set o = outlooks[t.id] %}{% if not (cert.redeemed or cert.units == 0) and o.expected %}<br><small class="muted">{{ 'Expected {date}: about {amount} {currency}. A forecast from its terms, not cash received.'|tr(locale, date=o.expected_date, amount=o.expected|money(places=0), currency=account.currency) }}</small>{% endif %}</td>
         <td><details><summary>{{ 'Actions'|tr(locale) }}</summary>
           <form method="post" action="/deposits/{{ account.id }}/certificates/{{ t.id if t.id else cert.id }}/terms" class="stack">
             <label>{{ 'Name'|tr(locale) }}<input name="name" value="{{ t.name }}" required></label>
@@ -46,6 +47,9 @@
       </tr>
     {% endfor %}</tbody>
   </table></div>
+  {% for cert in certificates %}{% set o = outlooks[cert.terms.id] %}{% if o.received %}<section class="card stack allocation-choices" id="allocate-{{ cert.terms.id }}"><h3>{{ 'What next for the money from {name}?'|tr(locale, name=cert.terms.name) }}</h3>
+    <p class="muted">{{ '{amount} {currency} reached your account on {date}. Pick what to do with it; nothing moves until you confirm it on the next page.'|tr(locale, amount=o.received.amount|money(places=0), currency=account.currency, date=o.received.date) }}</p>
+    <div class="actions"><a class="btn" href="/deposits/{{ account.id }}?principal={{ o.received.amount|money(False, 2) }}">{{ 'Buy another certificate'|tr(locale) }}</a><a class="btn" href="/plan/reserves">{{ 'Top up the emergency fund'|tr(locale) }}</a><a class="btn" href="/payday">{{ 'Fund your payday plan'|tr(locale) }}</a><a class="btn" href="/accounts/{{ o.received.account_id }}">{{ 'Keep it as cash'|tr(locale) }}</a></div></section>{% endif %}{% endfor %}
   {% else %}<p class="empty">{{ 'No certificates in this portfolio yet. Add one below.'|tr(locale) }}</p>{% endif %}
 </section>
 

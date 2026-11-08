@@ -401,13 +401,17 @@ class TransactionService:
         return search.usual_categories(
             self.repo, window=self.USUAL_WINDOW, minimum=self.USUAL_MIN, days=self.USUAL_DAYS)
 
+    def last_accounts(self) -> dict[str, int]:
+        """{counterparty name: the account its newest money in or out used}; quick add fills it in (IV-12C)."""
+        return {row["counterparty"]: int(row["account_id"]) for row in self.repo.last_accounts()}
+
     CAPTURE_DAYS = 180
 
-    def usual_capture_categories(self, kind: str, limit: int = 4) -> list[int]:
+    def usual_capture_categories(self, kind: str, limit: int = 4, hour: int | None = None) -> list[int]:
         """The categories the Add sheet offers first as chips (3AN3): what this person files money of that kind
         under most often in the last 180 days, then the other categories in the tree's own order until there are
         ``limit``. kind is "out" or "in"; transfers have no category. Ids only; the page names them."""
-        return search.usual_capture_categories(self.repo, self.categories, kind, limit, days=self.CAPTURE_DAYS)
+        return search.usual_capture_categories(self.repo, self.categories, kind, limit, days=self.CAPTURE_DAYS, hour=hour)
 
     def usual_account(self, candidates: list[int]) -> int | None:
         """The account Add opens on when none was used last (3AN3): the one that took most of this person's own

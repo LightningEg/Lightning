@@ -9,7 +9,7 @@
   <div class="lead-rows">
     <div class="lead-row"><span>{{ fig.in_your_accounts.label }}</span><b>{% if gross_total is none %}{{ 'Unavailable'|tr(locale) }}{% else %}{{ gross_total|money }}{% endif %}</b></div>
     <a class="lead-row" href="/money-from-others"><span>{{ fig.held_for_others.label }}</span><b>{{ ("−" ~ (held_total|money)) if held_total else "0" }}</b></a>
-    {% if circle_owed %}<a class="lead-row" href="/plan#what-you-owe"><span>{{ fig.gameya_still_to_pay.label }}</span><b>+{{ circle_owed|money }}</b></a>{% endif %}
+    {% if circle_owed %}<a class="lead-row" href="/plan#what-you-owe"><span>{{ "Gam’eya, counted in what you owe"|tr(locale) }}</span><b>{{ circle_owed|money }}</b></a>{% endif %}
     <div class="lead-row is-result"><span>{{ fig.what_you_own.label }}</span><b>{{ net_worth.what_you_own|money }}</b></div>
   </div>{% endcall %}{% endif %}
 {% if rows %}{# 3AM3 (A1): one column, one card; each group a section in it, so uneven groups leave no holes #}<div class="card account-groups">

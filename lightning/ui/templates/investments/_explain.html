@@ -1,0 +1,16 @@
+{# NF-3AZ9: what changed in the period, as the parts of its Result and the rows behind each. #}
+{% set labels = {'price': 'Price change on what you hold', 'fx': 'Exchange rates', 'sales': 'Gain from sales', 'income': 'Income, less tax and fees'} %}
+<section class="card stack" id="what-changed" aria-labelledby="what-changed-h">
+  <h3 id="what-changed-h">{{ 'What changed'|tr(locale) }} · {{ explain.start }} {{ 'to'|tr(locale) }} {{ explain.end }}</h3>
+  <div class="compact-list">
+  {% for part in explain.parts %}<details class="compact-row"><summary><span>{{ labels[part.key]|tr(locale) }}</span><b class="{{ part.amount|tone }}">{{ part.amount|money(True, 0) }} {{ base }}</b></summary>
+    {% if part.href %}<p><a class="quiet-link" data-popup-open href="{{ part.href }}">{{ 'See the sales'|tr(locale) }}</a></p>{% endif %}
+    {% for row in part.rows %}<div class="compact-row"><span>{% if row.href %}<a class="quiet-link" data-popup-open href="{{ row.href }}">{{ row.name|tr(locale) }}</a>{% elif row.asset_id %}<a class="quiet-link" href="/investments/holding/{{ row.asset_id }}?account={{ row.account_id }}&date={{ explain.end }}&start={{ explain.start }}">{{ row.name }}</a>{% else %}{{ row.name }}{% endif %}</span><b class="{{ row.amount|tone }}">{{ row.amount|money(True, 0) }} {{ base }}</b></div>{% else %}{% if not part.href %}<p class="muted small">{{ 'Nothing in this part for the period.'|tr(locale) }}</p>{% endif %}{% endfor %}</details>{% endfor %}
+  <div class="compact-row"><span><b>{{ fig.result.label }}</b></span>{% if explain.total is not none %}<b class="{{ explain.total|tone }}">{{ explain.total|money(True, 0) }} {{ base }}</b>{% else %}<b>—</b>{% endif %}</div>
+  </div>
+  <p class="muted small">{{ 'Money you added or took out is not part of the result: {added} in, {out} out.'|tr(locale, added=explain.new_money|money(False, 0) ~ ' ' ~ base, out=explain.withdrawn|money(False, 0) ~ ' ' ~ base) }} <a class="quiet-link" data-popup-open href="{{ explain.money_href }}">{{ 'See the transactions'|tr(locale) }}</a></p>
+  {% if explain.total is none %}<p class="notice">{{ 'A dated price is missing, so the parts cannot be added up.'|tr(locale) }} {% for issue in explain.missing %}{{ issue.asset }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  {% if explain.stale %}<p class="notice">{{ 'These prices are old, so their change may be out of date:'|tr(locale) }} {% for h in explain.stale %}{{ h.name }} ({{ h.price_date }}){% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  {% if explain.at_cost %}<p class="muted small">{{ 'Counted at what you paid, with no gain yet:'|tr(locale) }} {% for h in explain.at_cost %}{{ h.asset }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  <p class="muted small">{{ 'This explains what happened. It is not advice on what to buy or sell.'|tr(locale) }}</p>
+</section>

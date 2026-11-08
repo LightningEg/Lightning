@@ -48,18 +48,23 @@ def _page(request: Request, account_id: int, values=None, error="", status_code=
         legacy = c.deposits.get(account_id)
     except NotFoundError:
         legacy = None
+    outlooks = {cert.terms.id: c.deposits.maturity_outlook(cert) for cert in certificates}
     interest_receipts = c.deposit_receipts.match_plan(account_id)
     suggestions = sum(1 for item in interest_receipts if item["suggested"])
     return render(request, "deposits/detail.html", status_code=status_code, account=account,
                   certificates=certificates, values=values or _values(), error=error,
                   liquid_accounts=liquid, liquid_by_id=liquid_by_id, sale_factor=factor, legacy=legacy,
                   legacy_cash=c.deposits.legacy_cash_balance(account_id), today_iso=fmt_date(today()),
-                  interest_receipts=interest_receipts, suggestions=suggestions)
+                  interest_receipts=interest_receipts, suggestions=suggestions, outlooks=outlooks)
 
 
 @router.get("/{account_id:int}")
 async def detail(request: Request, account_id: int):
-    return _page(request, account_id)
+    values = _values()
+    principal = str(request.query_params.get("principal", "")).strip()[:20]
+    if principal.replace(",", "").replace(".", "", 1).isdigit():
+        values["principal"] = principal.replace(",", "")
+    return _page(request, account_id, values)
 
 
 @router.post("/{account_id:int}/purchase")

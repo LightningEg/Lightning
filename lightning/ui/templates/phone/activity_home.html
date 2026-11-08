@@ -1,0 +1,30 @@
+{# Activity (IV-3AY8, guideline C11.4): All (the month, one money line) and To review (one card at a time). #}
+{% extends "base.html" %}
+{% from "phone/partials/txn.html" import txn_list with context %}
+{% block title %}Activity{% endblock %}
+{% block heading %}<h1>{{ 'Activity'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+{% set s = screen %}
+<div class="phone-chips" role="tablist">
+  <a class="phone-chip{{ ' is-chosen' if s.tab == 'all' }}" role="tab" aria-selected="{{ 'true' if s.tab == 'all' else 'false' }}" href="/activity">{{ 'All'|tr(locale) }}</a>
+  <a class="phone-chip{{ ' is-chosen' if s.tab == 'review' }}" role="tab" aria-selected="{{ 'true' if s.tab == 'review' else 'false' }}" href="/activity?tab=review">{{ 'To review'|tr(locale) }}{% if s.review_total %} <b>{{ s.review_total }}</b>{% endif %}</a>
+</div>
+{% if s.tab == 'all' %}
+<div class="phone-chips"><span class="phone-chip phone-month-chip"><a href="/activity?month={{ s.prev_month }}" aria-label="{{ 'Earlier month'|tr(locale) }}">‹</a><span>{{ s.month }}</span>{% if s.next_month %}<a href="/activity?month={{ s.next_month }}" aria-label="{{ 'Later month'|tr(locale) }}">›</a>{% else %}<span class="phone-month-end" aria-hidden="true">&nbsp;</span>{% endif %}</span></div>
+<p class="phone-money-line">{{ 'In'|tr(locale) }} <b class="pos"><bdi class="fig">{{ s.money_in|amount_role('total', True) }}</bdi></b> · {{ 'Out'|tr(locale) }} <b><bdi class="fig">{{ (-s.money_out)|amount_role('total', True) }}</bdi></b></p>
+{% if s.rows %}{{ txn_list(s.rows, show_account=True, base_url='/activity', keep_qs='month=' ~ s.month, day_net=True) }}
+{% else %}<p class="phone-note">{{ 'Nothing recorded this month.'|tr(locale) }}</p>{% endif %}
+{% if s.more_rows %}<a class="phone-row" href="/transactions?month={{ s.month }}"><span>{{ 'See every row'|tr(locale) }}</span><b>›</b></a>{% endif %}
+{% elif s.card %}
+{% set card = s.card %}
+<section class="phone-section" aria-labelledby="card-heading">
+  <p class="phone-note" role="status">{{ '{n} of {total}'|tr(locale, n=s.index + 1, total=s.review_total) }}</p>
+  <header class="phone-section-head"><h2 id="card-heading">{{ card.label|tr(locale) }}</h2></header>
+  <p>{{ card.detail|tr(locale) }}</p>
+  <a class="btn primary" href="{{ card.href }}"{% if card.popup %} data-popup-open{% endif %}>{{ (card.action or 'Review')|tr(locale) }}</a>
+  <form method="post" action="/activity/not-now"><input type="hidden" name="identity" value="{{ card.review_id }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn" type="submit">{{ 'Not now'|tr(locale) }}</button></form>
+</section>
+{% else %}
+<section class="phone-section"><h2>{{ 'All sorted'|tr(locale) }}</h2><p class="phone-note">{{ 'Nothing in Activity needs you.'|tr(locale) }}</p></section>
+{% endif %}
+{% endblock %}

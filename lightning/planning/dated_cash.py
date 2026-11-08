@@ -38,6 +38,8 @@ class DatedCashForecast:
     account_shortfalls: tuple[CashShortfall, ...]
     unassigned_payments: int
     unvalued_currencies: tuple[str, ...]
+    # Day-end balance of each cash account at every point (NF-3AZ6): ((date, ((account_id, balance), ...)), ...)
+    account_series: tuple = ()
 
 
 def dated_cash_forecast(reporting, payments, events, as_of: date, end: date) -> DatedCashForecast:
@@ -118,7 +120,7 @@ def dated_cash_forecast(reporting, payments, events, as_of: date, end: date) -> 
 
     first = None
     account_shortfalls = {}
-    points = []
+    points, series = [], []
     # Include the starting day even without future commitments. Today's overdue
     # payments are applied once, alongside any income actually due today.
     for on in sorted({day, *movements}):
@@ -126,6 +128,7 @@ def dated_cash_forecast(reporting, payments, events, as_of: date, end: date) -> 
             balances[account_id] += amount
         combined = total()
         points.append(DatedCashBalance(on, combined))
+        series.append((on, tuple((key, value) for key, value in balances.items() if key is not None)))
         if first is None and combined is not None and combined < ZERO:
             first = shortage(on, combined)
         for account_id, value in balances.items():
@@ -133,7 +136,7 @@ def dated_cash_forecast(reporting, payments, events, as_of: date, end: date) -> 
                 account_shortfalls[account_id] = shortage(on, value, account_id)
     return DatedCashForecast(through, tuple(points), first,
                             tuple(sorted(account_shortfalls.values(), key=lambda s: (s.date, s.account_id))),
-                            unassigned, tuple(sorted(missing)))
+                            unassigned, tuple(sorted(missing)), tuple(series))
 
 
 def lowest_scheduled_balance(projection):

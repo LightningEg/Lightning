@@ -3,6 +3,7 @@ title: Phone visual plan - a thumb-first phone built for five quick jobs, each d
 type: polish
 pillar: everywhere
 size: L
+model: opus
 status: building
 post: no
 created: 2026-11-01

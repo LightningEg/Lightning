@@ -18,4 +18,4 @@ Tool-neutral. Never push to `main`. The owner has authorised AI sessions to open
 7. **Merge** squash, pinned to the verified head (`expectedHeadSha`), title ending `(#n)`. If GitHub says blocked while checks are green, report what rule is waiting; do not work around it.
 8. **After**: unsubscribe; `git checkout main && git reset --hard origin/main`; re-run the generated-page checks on main; update or release your `NOW.md` claim; tell the owner what merged, what is not done and any decision waiting.
 
-The repository rule is that finished work reaches `main` through a pull request. If a session's own rules say to open one only when asked, ask first. Do not merge someone else's pull request without skill `review-external-pr`.
+The repository rule is that finished work reaches `main` through a pull request. If a session's own rules say to open one only when asked, ask first. Do not merge someone else's pull request without skill `review-outside-code`.

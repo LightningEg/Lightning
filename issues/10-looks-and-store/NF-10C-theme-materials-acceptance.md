@@ -4,6 +4,7 @@ title: Theme materials, selling themes, owner console - what only the owner can 
 type: feature
 pillar: feel
 size: L
+model: opus
 status: building
 created: 2026-10-26
 by: Claude

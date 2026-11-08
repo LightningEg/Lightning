@@ -22,10 +22,15 @@ A new skill is written once, here, in plain words with no tool-only commands.
 | [split-large-item](split-large-item/SKILL.md) | Split a size L item into sized, ordered steps (`tools/issues.py --check` warns) |
 | [post-contributor-issues](post-contributor-issues/SKILL.md) | Choose what is ready for contributors and post it as GitHub issues with coins (`tools/issues.py github`) |
 | [write-release-notes](write-release-notes/SKILL.md) | Write the `Release-note:` and `Detail:` trailers; cut and check release notes (`tools/release_notes.py`) |
+| [add-migration](add-migration/SKILL.md) | Add an app SQLite migration: numbered, no transaction statements, version bumped, seed, export, journal and undo in step, upgrade tests |
+| [add-screen](add-screen/SKILL.md) | Build a page or tab end to end: thin route, PC and phone templates, sections registry, answer first, Arabic, A16, Mohab |
+| [fix-ci](fix-ci/SKILL.md) | A check is red or flaky: read the log, reproduce, fix the cause without skipping tests, spend Windows and Android minutes only when needed |
+| [security-sweep](security-sweep/SKILL.md) | Audit the whole app's security surface by surface before a release or on a schedule; file findings privately |
 | [ship-pr](ship-pr/SKILL.md) | From a finished branch to merged: checks, trailers, pull request, CI, verified merge, hand-off |
-| [review-external-pr](review-external-pr/SKILL.md) | Review an outside contributor's or bot's pull request before merging |
+| [review-outside-code](review-outside-code/SKILL.md) | Any code not written in this session (contributor or bot pull request, fork, copied file): adopt, improve, rewrite or reject it after provenance, licence, security, architecture and test checks |
+| [dependency-change](dependency-change/SKILL.md) | Add, update or remove a package or GitHub Action, Dependabot included: need, licence, wheels, locks regenerated together, pinned actions |
 | [owner-console-view](owner-console-view/SKILL.md) | Add a count or analysis view to the website's owner console (website repo) |
 | [supabase-migration](supabase-migration/SKILL.md) | Write, test and apply a Supabase migration safely (website repo) |
 | [usage-question](usage-question/SKILL.md) | Answer a question about users or traffic from Supabase and GoatCounter without exposing anyone |
 
-Order for a release: write-release-notes (`cut`), stale-check, release-check (which calls bug-hunt, number-audit, guideline-audit, arabic-check and perf-check), then website-sync, then site-recapture if the release changed what the site shows.
+Order for a release: write-release-notes (`cut`), stale-check, security-sweep, release-check (which calls bug-hunt, number-audit, guideline-audit, arabic-check and perf-check), then website-sync, then site-recapture if the release changed what the site shows.

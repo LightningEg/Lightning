@@ -105,3 +105,51 @@ def test_cash_plannings_free_cash_compares_with_the_last_month_end(mohab, monkey
     assert f"+{now - then:,.0f} since 2026-09-30" in cards[1]
     assert "Due before payday 4 late" in cards[2] and "already late" in cards[2]
     assert "below today" in cards[3] and "months of spending at its lowest" in cards[3]
+
+
+def test_pace_follows_the_usual_month_not_a_straight_line(mohab, monkeypatch):
+    """BV-12B: a person whose month starts heavy is not told they are over pace in a normal month."""
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
+    c, _ = mohab
+    e = c.forecaster.everyday("2026-10", date(2026, 10, 6))
+    assert len(e.usual_shape) == 31 and e.usual_shape[-1] == 1 and e.usual_shape[0] < e.usual_shape[-1]
+    print("day6", e.everyday_spent, e.pace, e.usual_by_day[5], e.everyday_plan * 6 / 31)
+    assert e.pace_gap <= e.everyday_spent - e.everyday_plan * 6 / 31
+
+
+def test_a_month_heavier_than_usual_is_over_pace_and_a_usual_one_never_is():
+    from dataclasses import replace
+    from lightning.planning.domain import EverydayBudget
+    shape = [min(D(1), D(i + 1) / 5) for i in range(10)]          # a front-loaded month: all spent by day 5
+    usual = [min(D(1000), D(200 * (i + 1))) for i in range(10)]
+    base = EverydayBudget("2026-10", D(2000), D(0), D(2000), D(0), D(2000), D(1000), D(0), 5, 10, True,
+                          [], [], shape, usual)
+    assert base.pace == D("1000.00")                                # the usual month has spent it all by day 5
+    assert replace(base, everyday_spent=D(1200)).pace_gap == D(200)  # heavier than usual: over
+    assert replace(base, everyday_spent=D(1000)).pace_gap == D(0)    # at the usual curve: not over
+    assert replace(base, everyday_spent=D(700)).pace_gap < D(0)
+    assert replace(base, usual_shape=[], usual_by_day=[]).pace == D("500.00")  # no history: the straight line
+    # a usual month spends more than the plan allows: still never "over pace" while at or below it
+    assert replace(base, everyday_plan=D(800), everyday_spent=D(1000)).pace_gap == D(0)
+
+
+def _page(client, path):
+    return _text(client.get(path).text)
+
+
+def test_neighbouring_figures_no_longer_disagree_or_read_wrong(mohab, monkeypatch):
+    """BV-12D (r26 F5): one rendered-text check per page."""
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-19")
+    c, client = mohab
+    scen = _page(client, "/plan/scenarios")                                    # (b) whole EGP and a note, (c) no "None None"
+    assert "None None" not in scen and "No shortfall" in scen and "usual everyday spending" in scen
+    assert not re.search(r"\d,\d{3}\.\d\d EGP", scen)
+    health = _page(client, "/financial-health")                                # (d) only figures with a limit count
+    judged = re.search(r"of the (\d+) figures you set a limit for", health)
+    assert judged and int(judged.group(1)) <= len([i for i in c.health.overview(date(2026, 10, 19))["figures"] if i.limit is not None])
+    plan = client.get("/plan").text                                            # (e) no "Bills due, loans apart 0"
+    assert not re.search(r"Bills due, loans apart\s*</span>\s*<b>\s*0\s*<", plan)
+    accounts = _page(client, "/accounts")                                      # (f) no plus on a debt
+    assert not re.search(r"Gam.eya still to pay\s*\+", accounts)  # the sample has no circle owed; the plus is gone from the template
+    spending = _page(client, "/birdview/expenses?period=month&month=2026-10")  # (i) the usual month is not a repeat
+    assert spending.count("Against 2026-09") <= 1

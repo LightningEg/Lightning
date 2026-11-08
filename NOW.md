@@ -13,11 +13,13 @@
 
 ## Next
 
+- **r28 (2026-11-08, Claude):** 3BB-3BK in small steps; BV-3BB first. **Read:** r28.
+
 - **Docs spine (2026-10-31):** trailers per AGENTS §3; `python tools/status.py` after plan changes. Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **Phone (2026-11-07, Claude):** IV-3AY: 3AY1, 3AY3, 3AY5, 3AY6 built, 3AY4 first slice. Next: 3AY7, then 3AY4 rest. Owner: check Arabic slot names. **Read:** 3AY.
+- **Phone (2026-11-08, Claude):** IV-3AY: 3AY1, 3AY3, 3AY5-3AY10 built and the tab bar is switched (Home, Budget, Add, Activity, Money). Left: 3AY4 (own base and stylesheet), 3AY11 (phone-owned sub-pages, then delete the old ones; the period report needs a phone home), 3AY12 (Arabic, themes, 320 px), then the owner's check 3AY13. Owner: check Arabic slot names. **Read:** 3AY.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 
@@ -27,7 +29,7 @@
 
 - **Website (2026-10-28):** analytics, Downloads, leaderboard contrast and badge merged; banners redrawn plus Felucca and Sand wind (site #130). **Read:** site README › Analytics.
 
-- **Import (2026-11-07, Claude):** IT-7Z and IT-7AA done; NF-7AB flow plan waits for the owner. Next: 2AI2. **Read:** 2AI, 7AB.
+- **Import (2026-11-07, Claude):** IT-7Z and IT-7AA done; NF-7AB flow decided (cards first, 2026-11-08). Next: 2AI2. **Read:** 2AI, 7AB.
 
 - **In-app updates (2026-11-07, Claude):** NF-9B1-9B4 merged, the owner's Windows test (9B5) good, the `update-2026-1` secret set. Before tagging v2.1.0: its public key into `update_keys.json`; after: the site's usual release update. **Read:** `issues/9-later/NF-9B-in-app-updates.md` 9B6.
 

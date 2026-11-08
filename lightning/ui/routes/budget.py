@@ -520,13 +520,19 @@ def _phone_categories(view, tracked: set[int], category_periods: dict, by_group:
             paced = (everyday_spent / everyday_plan * 100) if everyday_plan > ZERO else None
             bill_state = ("" if not scheduled or everyday_plan > ZERO else
                           "paid" if paid >= scheduled else "due")
+            # BV-12B: the whole plan paid, and paid as it usually is (as last months), is a settled payment, not a pace risk
+            usual_cost = usual.get(cid)
+            settled = (not bill_state and planned > ZERO and left >= ZERO and spent >= planned * Decimal("0.99")
+                       and bool(usual_cost) and abs(spent - usual_cost) <= usual_cost * Decimal("0.05"))
+            if settled:
+                bill_state = "paid"
             direct = getattr(line, "direct", None)
             own = direct if direct is not None and not getattr(line, "average_months", None) else None
             rows.append({"category_id": cid, "group_id": group_of.get(cid), "name": line.name, "spent": spent,
                          "planned": planned, "over": left < ZERO, "amount": abs(left), "share": share,
                          "width": round(float(min(max(share, ZERO), Decimal(100))), 1),
                          # M5 pace: everyday spending ahead of the month by 10 points or more, not yet over, is at risk
-                         "risk": left >= ZERO and pace_pct is not None and paced is not None and paced >= pace_pct + 10,
+                         "risk": not settled and left >= ZERO and pace_pct is not None and paced is not None and paced >= pace_pct + 10,
                          "paced": paced if paced is not None else share, "bill": bill_state,
                          "due": max(scheduled - paid, ZERO),
                          "pace": round(float(pace_pct), 1) if pace_pct is not None else None, "cover": "",
