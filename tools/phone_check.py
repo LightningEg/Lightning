@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-PAGES = ("/home", "/activity", "/activity?tab=review", "/budget/flexible", "/money", "/money/accounts", "/money/bills", "/money/report", "/add/bills", "/plan/purchases/new", "/exports/all", "/setup/salary", "/", "/birdview/expenses", "/financial-health", "/budget", "/plan", "/plan/recurring", "/plan/loans",
+PAGES = ("/home", "/activity", "/activity?tab=review", "/budget/flexible", "/money", "/money/accounts", "/money/bills", "/money/report", "/pc?for=/checks", "/add/bills", "/plan/purchases/new", "/exports/all", "/setup/salary", "/", "/birdview/expenses", "/financial-health", "/budget", "/plan", "/plan/recurring", "/plan/loans",
          "/plan/reserves", "/accounts/currencies", "/investments", "/investments?holdings=all", "/investments/planner", "/investments/prices", "/accounts", "/transactions",
          "/money-from-others", "/zakat", "/settings", "/categories", "/counterparties", "/checks", "/profiles",
          "/profiles/devices", "/accounts/1", "/accounts/1/transaction/new", "/accounts/add-transaction", "/sms", "/search", "/search?q=food")

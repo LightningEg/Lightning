@@ -151,6 +151,29 @@
   });
   if (dark && dark.addEventListener) dark.addEventListener('change', wearForScheme);
   wearForScheme();
+  // The phone's status bar and system chrome follow the worn theme (3AY4 c): <meta name="theme-color"> is the app bar's
+  // own colour, laid over the page so a translucent bar still gives one solid colour, and it is read again whenever the
+  // theme changes (a paid theme, the night twin, a scheme change).
+  function syncStatusBar() {
+    if (!root.classList.contains('phone')) return;
+    const bar = document.querySelector('.phone-appbar');
+    if (!bar) return;
+    const parse = value => (value.match(/[\d.]+/g) || []).map(Number);
+    const over = (top, under) => {
+      const a = top.length > 3 ? top[3] : 1;
+      return [0, 1, 2].map(i => Math.round(top[i] * a + under[i] * (1 - a)));
+    };
+    const page = parse(getComputedStyle(document.body).backgroundColor || 'rgb(255,255,255)');
+    const below = page.length && (page.length < 4 || page[3] > 0) ? page : [255, 255, 255];
+    const solid = over(parse(getComputedStyle(bar).backgroundColor), below);
+    let meta = document.querySelector('meta[name=theme-color]');
+    if (!meta) { meta = document.createElement('meta'); meta.name = 'theme-color'; document.head.append(meta); }
+    meta.content = 'rgb(' + solid.join(', ') + ')';
+  }
+  window.addEventListener('lightning:themechange', () => requestAnimationFrame(syncStatusBar));
+  if (dark && dark.addEventListener) dark.addEventListener('change', () => requestAnimationFrame(syncStatusBar));
+  window.addEventListener('load', syncStatusBar);
+  syncStatusBar();
   // Pointer light (cards hover "light"): the card under the pointer gets --lt-x/--lt-y; CSS draws the light.
   document.addEventListener('pointermove', event => {
     if (root.getAttribute('data-m-cards-hover') !== 'light' || event.pointerType === 'touch' || still()) return;
