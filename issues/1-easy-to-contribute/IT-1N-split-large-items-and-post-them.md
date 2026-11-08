@@ -12,6 +12,10 @@ by: Claude Sonnet 5.5
 ## Report
 Only 4 of the 72 open items have a GitHub issue. `python tools/issues.py --check` now warns about every size L item that has no steps (29 today). Owner decision, 2026-10-31: big features are cut into smaller steps, and every step that outside contributors can safely take is posted with a coin label (S 200, M 500, L 800 or more).
 
+## Decided
+
+- 2026-11-08, owner (1N1): post all 37 contributor-safe units in the dry run (29 S, 8 M, 9,800 coins). 1N2 posts them.
+
 ## Fix
 1. Split each warned L item into `## <code>1`, `<code>2` … steps, each a size S or M, in the item file (investments 5A-5E and 5G, the journal and devices 4A and 4B, price packs 6A, PC and phone declutter, import 7B-7D, and the rest of the `--check` list).
 2. Add `python tools/issues.py github` (dry run by default): for each open step or item that is not an owner task, not security- or restore-sensitive and not claimed in `NOW.md`, create or update a GitHub issue titled `[BT-5J] …` with labels `pillar:*`, `kind:*`, `coins:<n>` and, for a step, a sub-issue of its parent; write the number back as `github:` in the front matter.
@@ -29,9 +33,6 @@ the declutter work (3AL, 3AM): their steps say *verify first*, and the 3G, 3Q, 3
 ## How to work on this item
 
 2026-11-08: the dry run now lists more than the 30 issues of 2026-10-31 (the r28 items added steps). 1N1 is the owner's; 1N2 is one session following skill `post-contributor-issues`.
-
-## 1N1 Approve the first batch and its coins · owner
-Run `python tools/issues.py github` and read the list it prints (code, title, size, coins; what is held back and why). Options: (a) post everything listed (recommended: every step names its files and proof); (b) post only S steps first and watch how contributors do; (c) post nothing yet. Say also whether any coin amount should rise (front matter `coins:` raises, never lowers).
 
 ## 1N2 Post the approved batch · S · sonnet
 Needs 1N1 agreed first.

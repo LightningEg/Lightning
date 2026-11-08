@@ -4,7 +4,7 @@ type: feature
 pillar: capture
 size: L
 model: opus
-status: new
+status: ready
 created: 2026-11-05
 by: Claude Opus 5.5
 skills: feedback-review
@@ -31,6 +31,10 @@ owner"): 7AB7 asks first.
   `BankImportService.created_transactions`), offered only in `/import`'s history, not on the result screen;
 - the statement's balance check `balance_gaps` (`lightning/import_reconcile.py`), shown before posting only.
 
+## Decided
+
+- 2026-11-08, owner (7AB7): (1) question cards first, rows only inside an opened card, "See every row" one link away; (2) build it now, in the order under Fix; (3) "Biggest first" with one button that sends every remaining row under a typed amount to Uncategorized.
+
 ## Fix
 
 After the owner's pick in 7AB7: 7AB1 and 7AB3 (they replace the row page's first screen; rows load per opened
@@ -45,18 +49,6 @@ Run the step's test command, then `python -m pytest tests/test_bank_imports.py t
 tests/test_issues.py -q`; for a visible change also `python -m pytest tests/test_mohab_year.py -q` and check A16.
 New visible words get Arabic in `lightning/ui/i18n.py` `ARABIC_UI`. Delete the step's heading in the same commit.
 
-
-## 7AB7 The owner picks the review flow · owner
-Asked in the question dialog; record the answer in this item and in `ai/PROJECT_OVERVIEW.md` owner decisions.
-1. **The first screen after upload.** (a) **(Recommended)** Question cards (N ready [Post them], N names to place,
-   N possible duplicates, N to fix or skipped); rows appear only inside an opened card; the full row list stays one
-   link away ("See every row"). Best for 300+ rows; the largest change. (b) Keep today's row page and put the cards as
-   a band above it with "Post the N ready": smaller change, the page stays long. (c) Leave the page; build only the
-   quick mode (7AB5) for the rows that need you.
-2. **Build it now?** (a) **(Recommended)** Yes, in the order under Fix, after 2AI2. (b) Later; leave the item parked.
-3. **Leftover small rows.** (a) **(Recommended)** "Biggest first" with one button that sends every remaining row
-   under a threshold the person types to Uncategorized. (b) No bulk Uncategorized: every row is placed.
-If the owner picks (b) or (c) in point 1, rewrite 7AB1 and 7AB3 before anyone starts them.
 
 ## 7AB1 Summary first, rows last · M · opus
 Needs 7AB7 merged first.

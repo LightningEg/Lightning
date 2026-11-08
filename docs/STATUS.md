@@ -6,17 +6,17 @@ Version **2.1.0**. Generated from the plan by `python tools/status.py`; do not e
 
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
-| [Capture](pillars/capture.md) | 2 |  |  | 2 |  |  |
+| [Capture](pillars/capture.md) | 1 |  | 1 |  |  |  |
 | [Plan](pillars/plan.md) | 0 |  |  |  |  |  |
 | [Understand](pillars/understand.md) | 3 |  | 2 |  | 1 |  |
-| [Own](pillars/own.md) | 6 | 1 | 1 | 2 | 2 |  |
+| [Own](pillars/own.md) | 6 | 1 | 3 |  | 2 |  |
 | [Protect](pillars/protect.md) | 4 | 1 | 2 | 1 |  |  |
 | [Everywhere](pillars/everywhere.md) | 9 | 3 | 5 | 1 |  |  |
-| [Feel](pillars/feel.md) | 13 | 3 | 8 | 1 | 1 | 2 |
+| [Feel](pillars/feel.md) | 12 | 3 | 8 |  | 1 | 1 |
 | [Build](pillars/build.md) | 7 |  | 6 |  | 1 |  |
 | [Reach](pillars/reach.md) | 4 |  | 3 | 1 |  | 2 |
 
-48 open items in 11 milestones.
+46 open items in 11 milestones.
 
 ## Being built now
 
@@ -32,7 +32,6 @@ Version **2.1.0**. Generated from the plan by `python tools/status.py`; do not e
 ## Waiting for the owner
 
 - **OW-3AI** (Feel) [Additional broker and institution logos still needed](../issues/3-polish-and-arabic/OW-3AI-institution-logos.md): ready
-- **OW-3BJ** (Feel) [Owner decisions for an international look](../issues/3-polish-and-arabic/OW-3BJ-international-display-decisions.md): new
 - **OW-8AA** (Reach) [Sign off the Low, Medium and High ratings on the comparison pages](../issues/8-website/OW-8AA-sign-off-the-comparison-ratings.md): ready
 - **OW-8D** (Reach) [For Geeks audit ideas left for the owner to choose](../issues/8-website/OW-8D-for-geeks-audit-ideas-to-choose.md): ready
 
@@ -42,10 +41,10 @@ Version **2.1.0**. Generated from the plan by `python tools/status.py`; do not e
 |---|---|---|
 | 1 Easy to contribute | 6 | Anyone can find how to help in one click and send a first fix the same evening. |
 | 2 Safe for real money | 3 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
-| 3 Polish and Arabic | 12 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
+| 3 Polish and Arabic | 11 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 6 Market data | 4 | Prices arrive by themselves, from sources Lightning may redistribute. |
-| 7 Planning, import and search | 2 | Getting a month in takes minutes: any bank file, any old app, one search box. |
+| 7 Planning, import and search | 1 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 3 | The site is honest, quick and in step with the app. |
 | 9 Later | 5 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 4 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |
