@@ -20,6 +20,8 @@ Take one step at a time, each with its own test and Mohab step.
 
 Done: 3AZ1 (`partials/payday_proposal.html` on PC and phone, `funding.preview()['proposal']`; `tests/test_salary_day_review.py`, Mohab `_confirm_payday_proposal`). Needs you › Salary received opens the proposal; looking assigns nothing; Confirm assigns once; Undo restores.
 
+3AZ6: `planning/afford.py::account_check`, `DatedCashForecast.account_series`, `/plan?afford_account=&afford_date=`; `tests/test_afford_account_date.py`.
+
 3AZ5: `LinkedSections._reimbursement_offer`, `partials/linked.html`, `/reimbursements?receipt_id=`; `tests/test_claim_entry_points.py`.
 
 3AZ4: `routes/planning.py::_payment_effects`, `planning/pay.html`; a close match blocks a second expense; `tests/test_bill_sheet.py`.
@@ -27,10 +29,6 @@ Done: 3AZ1 (`partials/payday_proposal.html` on PC and phone, `funding.preview()[
 3AZ3: `RuleService.record_correction/suggestion`, `/rules/offer`, journal commands `rules.record_correction/clear_corrections`; `tests/test_rule_from_corrections.py`.
 
 3AZ2: `bank_import_proposals.py` offers the link by default when only an SMS backs the one candidate, marks it "recorded from your SMS", and asks when several fit; `tests/test_statement_links_sms.py`.
-
-## 3AZ6 Can I afford this checks the chosen account on the chosen date · M
-
-Show "fits your plan" and "this account has enough on that date" together, with assumptions, and record only on confirmation. Done when the answer names the account, the date and the scheduled-only versus budget-inclusive basis.
 
 ## 3AZ7 Emergency refill proposes an affordable schedule · M
 

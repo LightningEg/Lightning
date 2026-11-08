@@ -33,3 +33,29 @@ def can_afford(amount: Decimal, safe_to_spend: Decimal, free_cash: Decimal, unti
                              f"Only by cutting your plan: it takes {-left:,.0f} from budget, bills or goals{when}.")
     return Affordability(amount, "no", left, amount - free_cash,
                          f"No. You are {amount - free_cash:,.0f} short of free cash.")
+
+
+@dataclass(frozen=True)
+class AccountAnswer:
+    """One account on one date: scheduled-only, never a guess about spending in between (NF-3AZ6)."""
+    account: str
+    on: str
+    balance_on: Decimal | None   # day-end balance of the account on that date, from posted cash and dated schedule
+    after: Decimal | None        # the same, with the purchase paid that day
+    lowest_after: Decimal | None  # lowest day-end balance from that date to the end of the window, with the purchase
+    short_on: str | None          # first day the account would go below zero with the purchase
+    enough: bool | None
+
+
+def account_check(series, account_id: int, on: str, amount: Decimal, name: str) -> AccountAnswer:
+    """``series`` is DatedCashForecast.account_series. The balance on a date is the last day-end point on or before it;
+    an account with no point has nothing recorded in it, so its balance is unknown rather than zero."""
+    points = [(day, dict(balances)) for day, balances in series]
+    before = [balances.get(account_id) for day, balances in points if day <= on and account_id in balances]
+    balance_on = before[-1] if before else None
+    if balance_on is None:
+        return AccountAnswer(name, on, None, None, None, None, None)
+    later = [(day, balances[account_id] - amount) for day, balances in points if day >= on and account_id in balances]
+    lowest = min([balance_on - amount] + [value for _, value in later])
+    short_on = next((day for day, value in [(on, balance_on - amount)] + later if value < ZERO), None)
+    return AccountAnswer(name, on, balance_on, balance_on - amount, lowest, short_on, short_on is None)

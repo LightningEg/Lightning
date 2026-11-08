@@ -237,7 +237,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | NF-12G4 | ↳ Who owes what, per person | | | M | |
 | NF-12G5 | ↳ Mohab, Arabic and the guideline | | | M | |
 | **NF-3AZ** | [Offer the next step where a figure or row raises the question, always with a preview and an explicit confirmation](12-desktop-ux/NF-3AZ-next-step-at-the-moment-of-need.md) | new feature | Plan | L | new |
-| NF-3AZ6 | ↳ Can I afford this checks the chosen account on the chosen date | | | M | |
 | NF-3AZ7 | ↳ Emergency refill proposes an affordable schedule | | | M | |
 | NF-3AZ8 | ↳ A maturing certificate shows the expected date, then allocation choices after the receipt is recorded | | | M | |
 | NF-3AZ9 | ↳ An investment result explains what changed | | | M | |

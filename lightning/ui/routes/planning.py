@@ -160,9 +160,13 @@ async def plan_page(request: Request):
             afford = can_afford(Decimal(raw_afford), forecast.safe_to_spend, forecast.free_cash, forecast.next_income_date)
         except (ArithmeticError, ValueError):
             afford_error = "Type an amount above zero."
+    afford_account = _afford_account_answer(c, request, afford, day)
     cash = (_phone_cash(c, forecast, next_payments, late, position, day)
             if getattr(request.state, "phone", False) else None)
-    return render(request, "planning/plan.html", tabs=TABS, plan_tab="plan", forecast=forecast, owe=owe, has_income=has_income,
+    return render(request, "planning/plan.html", afford_account=afford_account,
+                  afford_accounts=[a for a in _paying_accounts(c) if a.currency == c.base_currency],
+                  afford_date=str(request.query_params.get("afford_date", "")),
+                  afford_account_id=str(request.query_params.get("afford_account", "")), tabs=TABS, plan_tab="plan", forecast=forecast, owe=owe, has_income=has_income,
                   lead=lead, needs=needs, status=status, cash=cash, afford=afford, afford_error=afford_error,
                   afford_amount=raw_afford,
                   gameya_owed=position.gameya_still_to_pay,
@@ -660,6 +664,31 @@ async def delete_item(request: Request, item_id: int):
 
 
 # --------------------------------------------------------------- payments
+def _afford_account_answer(c, request, afford, day):
+    """Can I afford this? on a chosen account and date: that account's day-end balance on that date, scheduled-only,
+    beside the plan answer, with the assumptions and a link to record it only if the person confirms."""
+    from lightning.planning.afford import account_check
+    from lightning.planning.dated_cash import dated_cash_forecast
+    raw = str(request.query_params.get("afford_account", ""))
+    if afford is None or not raw.isdigit():
+        return None
+    account = next((a for a in c.accounts.list(active_only=True) if a.id == int(raw)), None)
+    if account is None or account.currency != c.base_currency:
+        return None
+    try:
+        on = parse_date(str(request.query_params.get("afford_date", "")) or fmt_date(day))
+    except (ValueError, LightningError):
+        return None
+    on = max(on, day)
+    end = max(on, day + timedelta(days=90))
+    payments, events = c.forecaster.scheduled_inputs(day, end)
+    projection = dated_cash_forecast(c.reporting, payments, events, day, end)
+    answer = account_check(projection.account_series, account.id, fmt_date(on), afford.amount, account.name)
+    return {"answer": answer, "account": account, "record_url": "/accounts/%d/transaction/new?%s" % (
+        account.id, urlencode({"kind": "out", "amount": str(afford.amount), "date": fmt_date(on),
+                               "return_to": "/plan"}))}
+
+
 def _payment_effects(c, item, payment, paid_on) -> dict:
     """What recording this payment would change, before it is recorded (NF-3AZ4): the bill's reserve and the
     category's budget line for the month it would be paid in. Read-only."""
