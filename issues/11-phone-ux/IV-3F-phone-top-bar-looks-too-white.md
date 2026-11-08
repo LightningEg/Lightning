@@ -3,6 +3,7 @@ title: The phone's top bar looks too white to one user
 type: polish
 pillar: feel
 size: S
+model: sonnet
 status: ready
 post: no
 created: 2026-10-15

@@ -3,6 +3,7 @@ title: Gold prices: test the source from home; silver waits for holdings
 type: tech
 pillar: own
 size: S
+model: sonnet
 status: blocked
 blocked_by: a test from a home connection
 created: 2026-10-19

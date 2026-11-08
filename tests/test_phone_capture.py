@@ -66,6 +66,16 @@ def test_the_usual_categories_come_from_the_history_most_used_first(month):
     assert c.transactions.usual_capture_categories("transfer") == []
 
 
+def test_the_chips_put_this_part_of_the_days_hand_typed_entries_first(month):
+    """3AY7: software typed by hand in the morning leads at 9 am although food is used more; at 8 pm food leads."""
+    c, _, cats = month
+    c.db.execute("UPDATE transactions SET source = 'MANUAL', created_at = '2026-09-04T20:00:00+03:00'")
+    c.db.execute("UPDATE transactions SET created_at = '2026-09-04T09:05:00+03:00' WHERE counterparty = 'Figma'")
+    assert c.transactions.usual_capture_categories("out", hour=9)[0] == cats["EXP.WORK.SOFTWARE"].id
+    assert c.transactions.usual_capture_categories("out", hour=20)[0] == cats["EXP.PERSONAL.FOOD"].id
+    assert c.transactions.usual_capture_categories("out", hour=3)[0] == cats["EXP.PERSONAL.FOOD"].id
+
+
 def test_the_account_add_opens_on_is_the_one_used_most(month):
     c, accounts, _ = month
     both = [accounts["cib"].id, accounts["wallet"].id]
@@ -134,7 +144,7 @@ def test_saving_from_the_sheet_remembers_the_account_and_says_saved_with_undo(mo
     saved = phone.post(f"/accounts/{accounts['wallet'].id}/transaction/new", data={
         "__session": session, "kind": "out", "amount": "120", "category_id": str(cats["EXP.PERSONAL.FOOD"].id),
         "date": "2026-09-14", "return_to": "/"})
-    assert saved.status_code == 200 and "Saved OUT-2026-09-14" in saved.text
+    assert saved.status_code == 200 and "Saved." in saved.text
     assert 'class="flash phone-flash"' in saved.text                                              # the toast above the tab bar
     assert phone.cookies.get("lightning_last_account") == str(accounts["wallet"].id)
 
@@ -258,7 +268,7 @@ def test_the_toast_after_a_save_carries_undo_and_undo_stays_where_you_were(sampl
     saved = phone.post("/accounts/1/transaction/new", data={
         "__session": phone.session_token, "kind": "out", "amount": "33", "category_id": category,
         "counterparty": "Toast kiosk", "date": "2026-10-06", "return_to": "/transactions"})
-    assert saved.url.path == "/transactions" and "Saved OUT-" in saved.text
+    assert saved.url.path == "/transactions" and "Saved." in saved.text
     undo = re.search(r'<form class="history-form" method="post" action="/history/undo">(.*?)</form>', saved.text, re.S)
     assert undo and 'name="back" value="/transactions' in undo.group(1)         # Undo returns to this page, not to the top
     group = re.search(r'name="group_id" value="([^"]+)"', undo.group(1)).group(1)

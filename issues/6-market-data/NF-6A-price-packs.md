@@ -3,6 +3,7 @@ title: Market data: price packs, collected in the cloud
 type: feature
 pillar: own
 size: L
+model: opus
 status: building
 created: 2026-10-05
 by: Claude

@@ -23,7 +23,7 @@ def fmt(value, places: int = 0, signed: bool = False) -> str:
 from lightning.investments.report import investing_rate, investment_period, saved_and_invested
 from lightning.planning.bill_state import NEEDS_ACTION, open_bills
 from lightning.planning.position import net_worth_bridge
-from lightning.workflows.review import GROUP_LABELS, ReviewInbox, group_of, grouped
+from lightning.workflows.review import GROUP_LABELS, ReviewInbox, by_consequence, group_of, grouped
 
 from ..web import container, render, settled_save
 from ..web import redirect
@@ -195,7 +195,7 @@ async def dashboard(request: Request):
         waffle=None if on_phone else saved_and_invested(cash_flow, closing_report["net_money"]), dates_note=dates_note, lead_change=lead_change,
         bridge=bridge, worth_units=worth_units, pos=position, cash_accounts=cash_accounts, owe=owe,
         kept_apart_accounts=[] if on_phone else c.reporting.owned_cash_kept_apart_by_account(position.as_of),
-        attention=attention, attention_groups=attention_groups, setup=setup,
+        attention=attention, attention_groups=attention_groups, attention_handled=inbox.handled, setup=setup,
         investment_report=investment_report, cash_flow=cash_flow, phone=phone,
         worth_tile=_worth_tile(position, lead_change) if on_phone and phone and phone.get("safe") else None,  # else the hero is the same figure
         lazy_folds=lazy_folds, fold_query=urlencode(request.query_params),
@@ -505,38 +505,8 @@ def _due_soon(c, attention=()) -> dict | None:
             "next": rows[0], "rows": rows, "extra": sum(1 for r in rows if not r["listed"])}
 
 
-@router.get("/more")
-async def more(request: Request):
-    """The phone's More tab (phone overhaul 2026-10-22): every section without a slot of its own, each with its live
-    figure, the weekly review as a card, then settings as a grouped list. The PC has its sidebar instead."""
-    if not getattr(request.state, "phone", False):
-        return redirect("/")
-    c = container(request)
-    day = today()
-    position = c.position.at(day)
-    inbox = ReviewInbox(c)
-    items = inbox.items(day)
-    parts = dict(inbox.forecast.safe_to_spend_parts)
-    due = -parts.get(label("payments_before_next_income"), ZERO)
-    health = c.health.overview(day)
-    judged = [item for item in health["figures"] if item.status in ("within your limit", "outside your limit")]
-    within = sum(1 for item in judged if item.status == "within your limit")
-    first = day.replace(day=1)
-    spent = c.reporting.cash_flow(first, day).outflows
-    # Hub (phone roadmap M7): the next 14 days of bills and loan payments, late first, each with Mark paid
-    bills = []
-    for p in (r.payment for r in open_bills(c.planning, day, 14)):
-        bills.append({"name": p.item.name, "due": p.due_date, "late": p.days_late(day),
-                      "amount": c.planning.amount_in_base(p, p.still_owed, day),
-                      "pay": f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2Fmore"})
-    bills.sort(key=lambda b: (-b["late"], b["due"]))
-    # Five of each: late rows never use up the room of the coming ones (3AY5); the rest is one "n more" row.
-    shown = [b for b in bills if b["late"]][:5] + [b for b in bills if not b["late"]][:5]
-    return render(request, "more.html", bills=shown, bills_more=len(bills) - len(shown),
-                  due=due, until=inbox.forecast.next_income_date or "",
-                  portfolio=position.portfolio_value, in_accounts=position.in_your_accounts,
-                  within=within, judged=len(judged), spent=spent, month=month_of(day), waiting=len(items),
-                  last_review=(c.settings.get("weekly_review_at") or "")[:10], zakat=c.zakat.enabled())
+
+
 def _period_chip(period, first, as_of) -> str:
     """The period, short, as every card's chip names it."""
     partial = as_of.day < calendar.monthrange(as_of.year, as_of.month)[1]
@@ -681,7 +651,7 @@ async def needs_you_inbox(request: Request):
               for state in ("active", "reviewed", "snoozed")}
     selected = [item for item in items if (item["review_state"] != "active") == handled]
     return render(request, "needs_you.html", label="Needs you", items=selected, counts=counts,
-                  handled=handled, snooze_default=(today() + timedelta(days=7)).isoformat())
+                  sections=by_consequence(selected), handled=handled, snooze_default=(today() + timedelta(days=7)).isoformat())
 
 
 @router.post("/needs-you/state")

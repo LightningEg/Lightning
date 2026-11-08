@@ -160,15 +160,24 @@ async def plan_page(request: Request):
             afford = can_afford(Decimal(raw_afford), forecast.safe_to_spend, forecast.free_cash, forecast.next_income_date)
         except (ArithmeticError, ValueError):
             afford_error = "Type an amount above zero."
+    afford_account = _afford_account_answer(c, request, afford, day)
     cash = (_phone_cash(c, forecast, next_payments, late, position, day)
             if getattr(request.state, "phone", False) else None)
-    return render(request, "planning/plan.html", tabs=TABS, plan_tab="plan", forecast=forecast, owe=owe, has_income=has_income,
+    has_accounts = bool(c.accounts.list())
+    has_items = bool(c.planning.items())
+    empty_profile = (not has_accounts and not has_items
+                     and not c.accounts.list(active_only=False) and not c.reserves.list_active())
+    return render(request, "planning/plan.html", has_accounts=has_accounts, empty_profile=empty_profile,
+              afford_account=afford_account,
+                  afford_accounts=[a for a in _paying_accounts(c) if a.currency == c.base_currency],
+                  afford_date=str(request.query_params.get("afford_date", "")),
+                  afford_account_id=str(request.query_params.get("afford_account", "")), tabs=TABS, plan_tab="plan", forecast=forecast, owe=owe, has_income=has_income,
                   lead=lead, needs=needs, status=status, cash=cash, afford=afford, afford_error=afford_error,
                   afford_amount=raw_afford,
                   gameya_owed=position.gameya_still_to_pay,
                   notes=[], plan=plan, stats=stats, kpi_cards=kpi_cards, forecast_chart=visuals.forecast_trend(forecast),
                   next_payments=next_payments, late_days=late_days, circle_rows=circle_rows, as_of=fmt_date(day), window_end=fmt_date(window_end),
-                  has_items=bool(c.planning.items()), labels=_labels(c), zakat=c.zakat.forecast(day))
+                  has_items=has_items, labels=_labels(c), zakat=c.zakat.forecast(day))
 
 
 def _plan_stats(f, plan, day, has_income: bool = True) -> list[dict]:
@@ -660,6 +669,51 @@ async def delete_item(request: Request, item_id: int):
 
 
 # --------------------------------------------------------------- payments
+def _afford_account_answer(c, request, afford, day):
+    """Can I afford this? on a chosen account and date: that account's day-end balance on that date, scheduled-only,
+    beside the plan answer, with the assumptions and a link to record it only if the person confirms."""
+    from lightning.planning.afford import account_check
+    from lightning.planning.dated_cash import dated_cash_forecast
+    raw = str(request.query_params.get("afford_account", ""))
+    if afford is None or not raw.isdigit():
+        return None
+    account = next((a for a in c.accounts.list(active_only=True) if a.id == int(raw)), None)
+    if account is None or account.currency != c.base_currency:
+        return None
+    try:
+        on = parse_date(str(request.query_params.get("afford_date", "")) or fmt_date(day))
+    except (ValueError, LightningError):
+        return None
+    on = max(on, day)
+    end = max(on, day + timedelta(days=90))
+    payments, events = c.forecaster.scheduled_inputs(day, end)
+    projection = dated_cash_forecast(c.reporting, payments, events, day, end)
+    answer = account_check(projection.account_series, account.id, fmt_date(on), afford.amount, account.name)
+    return {"answer": answer, "account": account, "record_url": "/accounts/%d/transaction/new?%s" % (
+        account.id, urlencode({"kind": "out", "amount": str(afford.amount), "date": fmt_date(on),
+                               "return_to": "/plan"}))}
+
+
+def _payment_effects(c, item, payment, paid_on) -> dict:
+    """What recording this payment would change, before it is recorded (NF-3AZ4): the bill's reserve and the
+    category's budget line for the month it would be paid in. Read-only."""
+    owed = payment.still_owed
+    reserve = c.reserves.bill_reserve(item.id)
+    effects = {"owed": owed, "reserve": None, "budget": None}
+    if reserve:
+        used = min(reserve["effective_allocated"], owed)
+        effects["reserve"] = {"name": reserve["name"], "before": reserve["effective_allocated"], "used": used,
+                              "after": reserve["effective_allocated"] - used}
+    if item.category_id and not item.is_income:
+        month = str(paid_on)[:7]
+        view = c.budgets.month_view(month, schedule=c.schedules.view())
+        line = next((l for sec in view.sections for l in sec.lines if l.category_id == item.category_id), None)
+        if line is not None and line.budget is not None:
+            effects["budget"] = {"name": line.name, "month": month, "left_before": line.remaining,
+                                 "left_after": line.remaining - owed, "over": line.remaining - owed < 0}
+    return effects
+
+
 @router.get("/items/{item_id:int}/pay")
 async def pay_form(request: Request, item_id: int, error: str = ""):
     c = container(request)
@@ -672,7 +726,9 @@ async def pay_form(request: Request, item_id: int, error: str = ""):
     others = c.planning.plausible_candidates(payment)
     linked = c.planning.linked_transaction_ids()
     currency = c.accounts.get(item.account_id).currency if item.account_id else c.transactions.base_currency
-    return render(request, "planning/pay.html", item=item, payment=payment,
+    exact_open = [r for r in exact if r["id"] not in linked]
+    effects = _payment_effects(c, item, payment, min(payment.due_date, fmt_date(today()))) if payment.outstanding else None
+    return render(request, "planning/pay.html", item=item, payment=payment, effects=effects, has_match=bool(exact_open),
                   exact=[r for r in exact if r["id"] not in linked], others=[r for r in others if r["id"] not in linked][:8],
                   accounts=_paying_accounts(c), currency=currency, bill_reserve=c.reserves.bill_reserve(item.id),
                   back=str(request.query_params.get("back", "/plan")), today=fmt_date(today()), error=error)
@@ -692,6 +748,12 @@ async def settle_payment(request: Request, item_id: int):
                 c.planning.mark_paid(item_id, due, int(str(form.get("transaction_id", "0"))))
                 message = f"{item.name} · {due} marked paid."
             elif action == "record":
+                due_payment = next((p for p in c.planning.payments(item, due, today()) if p.due_date == due), None)
+                if due_payment and due_payment.outstanding and not form.get("different_payment") and any(
+                        r["id"] not in c.planning.linked_transaction_ids()
+                        for r in c.planning.candidates(due_payment, any_account=True)):
+                    raise LightningError("A payment that matches this bill is already recorded. Link it instead, "
+                                         "or tick \"This is a different payment\" to record a second one.")
                 c.planning.record_payment(item_id, due, str(form.get("date_paid", "")), str(form.get("amount", "")),
                                           int(str(form.get("account_id"))) if str(form.get("account_id", "")).isdigit() else None)
                 message = f"{item.name} · {due} recorded and marked paid."

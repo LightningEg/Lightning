@@ -1,7 +1,9 @@
 """Check every main page in the phone frame at 360 and 320 px wide (guideline C12): nothing may scroll
 sideways or be clipped past the viewport. Starts the phone app on a dummy profile with the sample household. Needs Playwright and Chromium.
 
-    python tools/phone_check.py [--arabic] [--shots folder]      # prints pages with sideways overflow or clipped elements
+    python tools/phone_check.py [--arabic] [--theme id] [--shots folder]   # prints pages with sideways overflow or clipped elements
+
+--theme wears a paid theme (maintainer review, LIGHTNING_THEME_REVIEW) so the same pages are measured in it (3AY12).
 """
 from __future__ import annotations
 
@@ -13,7 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-PAGES = ("/plan/purchases/new", "/exports/all", "/setup/salary", "/", "/birdview/expenses", "/financial-health", "/budget", "/plan", "/plan/recurring", "/plan/loans",
+PAGES = ("/home", "/activity", "/activity?tab=review", "/budget/flexible", "/money", "/money/accounts", "/money/bills", "/money/report", "/pc?for=/checks", "/add/bills", "/plan/purchases/new", "/exports/all", "/setup/salary", "/", "/birdview/expenses", "/financial-health", "/budget", "/plan", "/plan/recurring", "/plan/loans",
          "/plan/reserves", "/accounts/currencies", "/investments", "/investments?holdings=all", "/investments/planner", "/investments/prices", "/accounts", "/transactions",
          "/money-from-others", "/zakat", "/settings", "/categories", "/counterparties", "/checks", "/profiles",
          "/profiles/devices", "/accounts/1", "/accounts/1/transaction/new", "/accounts/add-transaction", "/sms", "/search", "/search?q=food")
@@ -55,13 +57,16 @@ CLIPPED = """() => {
 }"""
 
 
-def run(shots: Path | None = None, *, arabic: bool = False) -> list[str]:
+def run(shots: Path | None = None, *, arabic: bool = False, theme: str = "") -> list[str]:
     from playwright.sync_api import sync_playwright
     from lightning.runtime.app import profile_app
     from lightning.runtime.devices import Devices
     from lightning.runtime.http import Host
 
     problems: list[str] = []
+    if theme:
+        import os
+        os.environ["LIGHTNING_THEME_REVIEW"] = "1"
     with tempfile.TemporaryDirectory() as folder:
         root = Path(folder)
         host = Host(lambda c: profile_app(c, root / "docs", devices=Devices(root / "app", port=0), phone=True)).start()
@@ -107,9 +112,25 @@ def run(shots: Path | None = None, *, arabic: bool = False) -> list[str]:
                 if arabic:
                     page.evaluate("""async () => { const t = document.querySelector('meta[name=lightning-session]').content;
                         await fetch('/settings/locale', {method: 'POST', body: new URLSearchParams({__session: t, locale: 'ar'})}); }""")
+                if theme:
+                    page.evaluate("""async (id) => { const t = document.querySelector('meta[name=lightning-session]').content;
+                        await fetch('/settings/theme', {method: 'POST', body: new URLSearchParams({__session: t, theme: id})}); }""", theme)
+                if theme:
+                    page.goto(host.origin + "/money")
+                    worn = page.evaluate("() => document.documentElement.dataset.theme")
+                    if worn != theme:
+                        problems.append(f"theme {theme} was not worn: the page wears {worn!r}")
                 pages = (*PAGES, review, *([circle] if circle else []))  # the bank import's review, as an SMS reaches it; a gam'eya circle
                 for width in (360, 320):
                     page.set_viewport_size({"width": width, "height": 800})
+                    if width == 320:  # J1 (3AY7): with the number keyboard up (about 340 px left) Save is still on screen
+                        page.set_viewport_size({"width": 320, "height": 340})
+                        page.goto(host.origin + "/accounts/add-transaction")
+                        page.focus("#popup-amount")
+                        box = page.locator(".phone-save-bar .phone-save").first.bounding_box()
+                        if not box or box["y"] < 0 or box["y"] + box["height"] > 340:
+                            problems.append(f"320 /accounts/add-transaction: Save is off screen with the keyboard open ({box})")
+                        page.set_viewport_size({"width": 320, "height": 800})
                     for path in pages:
                         response = page.goto(host.origin + path)
                         if response is None or response.status >= 400:
@@ -181,6 +202,6 @@ def run(shots: Path | None = None, *, arabic: bool = False) -> list[str]:
 
 if __name__ == "__main__":
     shots = Path(sys.argv[sys.argv.index("--shots") + 1]) if "--shots" in sys.argv else None
-    found = run(shots, arabic="--arabic" in sys.argv)
+    found = run(shots, arabic="--arabic" in sys.argv, theme=sys.argv[sys.argv.index("--theme") + 1] if "--theme" in sys.argv else "")
     print("\n".join(found) or "Nothing scrolls sideways or clips past the viewport at 360 or 320.")
     sys.exit(1 if found else 0)

@@ -29,6 +29,59 @@ def investment_period(db, accounts, assets, reporting, start: str, end: str):
     return closing
 
 
+def explain_period(report: dict, start: str, end: str, stale_days: int = 45) -> dict:
+    """NF-3AZ9: what changed in a period, as the parts of its Result and the rows behind each.
+
+    Parts: price change on what you hold, exchange-rate change, gain from sales, income (dividends and interest, less
+    tax withheld and broker fees). They add to Result exactly when no price is missing; a missing price makes the
+    total unavailable and is listed, as is a price older than ``stale_days``. New money is shown beside, never inside, the
+    result. Nothing here is advice: it reads the same report the Investments page already shows."""
+    from datetime import date, timedelta
+    opening = report.get("opening") or {}
+    before = {(h.get("account_id"), h.get("asset_id"), h["account"]): h for h in opening.get("holdings", [])}
+    price_rows, fx_rows, gone = [], [], []
+    seen = set()
+    for h in report["holdings"]:
+        key = (h.get("account_id"), h.get("asset_id"), h["account"])
+        seen.add(key)
+        if h["unrealized"] is None:
+            continue
+        old = before.get(key)
+        old_unreal = old["unrealized"] if old and old["unrealized"] is not None else ZERO
+        delta = h["unrealized"] - old_unreal
+        fx_delta = ZERO
+        if h.get("fx_part") is not None:
+            fx_delta = h["fx_part"] - (old["fx_part"] if old and old.get("fx_part") is not None else ZERO)
+            fx_rows.append({"name": h["asset"], "amount": fx_delta, "asset_id": h.get("asset_id"), "account_id": h.get("account_id")})
+        price_rows.append({"name": h["asset"], "amount": delta - fx_delta, "asset_id": h.get("asset_id"),
+                           "account_id": h.get("account_id")})
+    for key, h in before.items():
+        if key not in seen and h["unrealized"]:
+            gone.append({"name": h["asset"], "amount": -h["unrealized"], "asset_id": h.get("asset_id"), "account_id": h.get("account_id")})
+    price_rows = [r for r in price_rows + gone if r["amount"]]
+    fx_rows = [r for r in fx_rows if r["amount"]]
+    detail = f"/investments/report-detail?from={start}&to={end}&kind="
+    income_rows = [{"name": "Dividends and interest", "amount": report["dividends"], "href": detail + "dividends"}]
+    if report["tax"]:
+        income_rows.append({"name": "Tax withheld", "amount": -report["tax"], "href": detail + "dividends"})
+    if report["fees"]:
+        income_rows.append({"name": "Broker fees", "amount": -report["fees"], "href": detail + "flows"})
+    known = report.get("unrealized_change") is not None
+    parts = [
+        {"key": "price", "amount": sum((r["amount"] for r in price_rows), ZERO), "rows": price_rows},
+        {"key": "fx", "amount": sum((r["amount"] for r in fx_rows), ZERO), "rows": fx_rows},
+        {"key": "sales", "amount": report["realized"], "rows": [], "href": detail + "sales"},
+        {"key": "income", "amount": sum((r["amount"] for r in income_rows), ZERO), "rows": income_rows},
+    ]
+    limit = (date.fromisoformat(end) - timedelta(days=stale_days)).isoformat()
+    stale = [{"name": h["asset"], "price_date": h["price_date"]} for h in report["holdings"]
+             if h.get("price_source") not in ("BALANCE", "COST") and h.get("price_date") and h["price_date"] < limit]
+    return {"parts": parts, "total": sum((p["amount"] for p in parts), ZERO) if known else None,
+            "result": report.get("result"), "new_money": report["new_money"], "withdrawn": report["withdrawn"],
+            "missing": report.get("missing", []), "at_cost": report.get("at_cost", []), "stale": stale,
+            "money_href": detail + "flows", "start": start, "end": end}
+
+
 def reconcile_portfolio(investments, accounts, reporting, report: dict, start: str, end: str) -> dict:
     """The portfolio reconciliation for a period: closing value (holdings + investment cash) against opening value
     + Money added + Result + opening balances entered in the period - certificate interest paid to the bank

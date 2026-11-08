@@ -22,9 +22,10 @@
       <div class="import-status">{{ state_word(r._state, r) }}
         {% if r._possible_duplicate %}{% set chosen = ui.match or r._default_match %}
         <select name="match_{{ rid }}" class="import-match" aria-label="{{ 'Line {n}: already recorded?'|tr(locale, n=r._line) }}" data-native>
-          {% for m in r._link_candidates[:3] %}<option value="link:{{ m.id }}" {{ 'selected' if chosen == 'link:' ~ m.id|string }}>{{ 'Link to'|tr(locale) }} {{ m.counterparty or m.notes or 'the entry' }} · {{ m.date }} · {{ m.amount|money }}{% if m.conversion %} · {{ m.conversion }}{% endif %}{% if m.source_count %} · {{ 'also in'|tr(locale) }} {{ m.source_count }} {{ 'earlier source' if m.source_count == 1 else 'earlier sources' }}{% endif %}</option>{% endfor %}
+          {% for m in r._link_candidates[:3] %}<option value="link:{{ m.id }}" {{ 'selected' if chosen == 'link:' ~ m.id|string }}>{{ 'Link to'|tr(locale) }} {{ m.counterparty or m.notes or 'the entry' }} · {{ m.date }} · {{ m.amount|money }}{% if m.conversion %} · {{ m.conversion }}{% endif %}{% if m.from_sms %} · {{ 'recorded from your SMS'|tr(locale) }}{% endif %}{% if m.source_count and not (m.from_sms and m.source_count == 1) %} · {{ 'also in'|tr(locale) }} {{ m.source_count }} {{ 'earlier source' if m.source_count == 1 else 'earlier sources' }}{% endif %}</option>{% endfor %}
           <option value="new" {{ 'selected' if chosen == 'new' }}>{{ 'Post as new'|tr(locale) }}</option><option value="skip" {{ 'selected' if chosen == 'skip' }}>{{ 'Skip'|tr(locale) }}</option>
         </select>
+        {% if r._link_question %}<small class="field-note">{{ r._link_question|tr(locale) }}</small>{% endif %}
         {% else %}<label class="import-check"><input type="checkbox" name="skip_{{ rid }}" {{ 'checked' if ui.skip }}> {{ 'Skip'|tr(locale) }}</label>{% endif %}
         <input type="checkbox" name="remember_{{ rid }}" hidden {{ 'checked' if ui.remember }}>
       </div>

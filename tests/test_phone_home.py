@@ -146,3 +146,18 @@ def test_every_home_sentence_has_an_arabic_form():
                 "1 bill is long overdue. Two minutes to catch up.", "{n} bills are long overdue. Two minutes to catch up.",
                 "Pay", "Catch up", "Sort", "To do", "Review"):
         assert translate(key, "ar") != key, key
+
+
+def test_add_sheet_returns_to_its_slot_and_offers_bills(sample):
+    """3AY7: the Add slot carries the page it was opened from; the sheet says Move, and Pay a bill lists what is due."""
+    c, _ = _on(sample, "2026-10-04")
+    app = create_app(c)
+    mount_phone(app)
+    client = TestClient(app)
+    home = client.get("/home").text
+    assert "/accounts/add-transaction?return_to=/home" in home
+    from test_phone_capture import _phone
+    sheet = _phone(c).get("/accounts/add-transaction?return_to=/home").text
+    assert "phone-pay-bill" in sheet and ">Move<" in sheet and ">Transfer<" not in sheet
+    bills = client.get("/add/bills?return_to=/home")
+    assert bills.status_code == 200 and "/plan/items/" in bills.text

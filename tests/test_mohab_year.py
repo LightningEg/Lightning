@@ -410,6 +410,28 @@ def _first_evening(o: Mohab) -> None:
     o.answers["search"] = Answer("Where are my loans? (typed as lons)", list(b.trail), b.page)
 
 
+def _confirm_payday_proposal(o: Mohab) -> None:
+    """NF-3AZ1: the posted salary offers one payday proposal from Needs you; only Confirm assigns cash."""
+    o.c.settings.set("cash_funding_enabled", "1")
+    screen = o.ask("payday_proposal", "My salary just landed. Does Lightning offer one plan for it?", "Salary received",
+                   start="/needs-you")
+    for line in ("Your payday proposal", "Bills protected", "Everyday spending", "Emergency and goals",
+                 "Left unassigned", "after you confirm", "expected salary is not counted"):
+        assert screen.shows(line), f"The payday proposal lacks {line!r}"
+    assert o.c.db.scalar("SELECT count(*) FROM cash_funding") == 0   # looking assigns nothing
+    if getattr(o.c, "is_journal", False):   # a journal profile confirms through its own commands: test_salary_day_portability
+        o.c.settings.set("cash_funding_enabled", "0")
+        return
+    o.b.submit({}, button="Confirm cash assignments")
+    assert o.c.db.scalar("SELECT count(*) FROM cash_funding") > 0
+    assert not o.b.go("Needs you").shows("Salary received")           # confirming reviews it
+    # He changes his mind: the one action is undone from the page's history, and the rest of the year is as before.
+    o.b.open("/payday")
+    o.b.submit({}, button="Undo")
+    assert o.c.db.scalar("SELECT count(*) FROM cash_funding") == 0
+    o.c.settings.set("cash_funding_enabled", "0")
+
+
 def _live_the_year(o: Mohab) -> None:
     b = o.b
     _first_evening(o)
@@ -419,6 +441,7 @@ def _live_the_year(o: Mohab) -> None:
     o.ask("needs_you", "It's the 6th. What needs me today?")
     before = o.answers["needs_you"].figure("What you own")
     o.receive_salary("ACME Egypt")
+    _confirm_payday_proposal(o)
     o.pay_from_overview("Landlord")
     o.pay_from_overview("Car loan")
     o.ask("paid_from_overview", "Did paying from the Overview move my money?")

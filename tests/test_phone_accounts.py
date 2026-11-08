@@ -31,7 +31,7 @@ def _number(text: str) -> int:
 
 
 def test_it_leads_with_in_your_accounts_then_the_actions_then_the_groups(phone):
-    html = phone.get("/accounts").text
+    html = phone.get("/accounts?view=all").text
     assert html.index("In your accounts") < html.index('class="phone-page-actions"') < html.index('phone-accounts-group')
     hero = re.search(r'class="phone-lead">([\d,]+) <small>EGP</small>', html)
     line = re.search(r'class="phone-hero-line">Includes ([\d,]+) held for others(?: and ([\d,]+) you still owe a circle)?,'
@@ -47,33 +47,42 @@ def test_it_leads_with_in_your_accounts_then_the_actions_then_the_groups(phone):
 
 
 def test_each_account_is_one_row_with_its_type_and_opens_as_before(phone):
-    html = phone.get("/accounts").text
+    html = phone.get("/accounts?view=all").text
     assert re.search(r'<a class="phone-row" href="/accounts/\d+"><span>CIB Payroll<small>Bank account</small></span><b>[\d,]+</b></a>', html)
     assert re.search(r'<a class="phone-row" href="/accounts/\d+"><span>Gold at home<small>Physical asset</small></span>', html)
     assert "<td" not in html and ".00<" not in html  # whole EGP, no table
 
 
 def test_transactions_is_a_link_not_a_list(phone):
-    html = phone.get("/accounts").text
+    html = phone.get("/accounts?view=all").text
     assert 'class="phone-quiet" href="/transactions">See all transactions<' in html
     assert "phone-txn" not in html and "phone-latest" not in html
 
 
 def test_a_bank_gets_its_name_a_circle_its_own_group_and_a_closed_account_its_fold(phone):
-    session = re.search(r'name="lightning-session" content="([^"]+)"', phone.get("/accounts").text).group(1)
+    session = re.search(r'name="lightning-session" content="([^"]+)"', phone.get("/accounts?view=all").text).group(1)
     phone.post("/accounts/new", data={"__session": session, "name": "Salary", "institution": "Banque Misr",
                                       "account_type": "BANK", "opening_balance_date": "2026-09-01",
                                       "opening_balance": "1,000"})
     phone.post("/accounts/new", data={"__session": session, "name": "Office circle", "account_type": "GAMEYA",
                                       "currency": "EGP", "opening_balance": "", "opening_balance_date": "2026-09-01"})
-    html = phone.get("/accounts").text
+    html = phone.get("/accounts?view=all").text
     assert re.search(r"<span>Salary<small>Bank account · Banque Misr</small></span><b>1,000</b>", html)
     group = re.search(r'<h2 id="group-\d+">Gam&#39;eya</h2>.*?<span>Office circle', html, re.S)
     assert group, "the circle sits under the Gam'eya group"
     phone.post("/accounts/new", data={"__session": session, "name": "Old card", "account_type": "BANK",
                                       "opening_balance_date": "2026-09-01", "opening_balance": ""})
-    old = re.search(r'href="/accounts/(\d+)"><span>Old card<', phone.get("/accounts").text).group(1)
+    old = re.search(r'href="/accounts/(\d+)"><span>Old card<', phone.get("/accounts?view=all").text).group(1)
     phone.post(f"/accounts/{old}/deactivate", data={"__session": session})
-    html = phone.get("/accounts").text
+    html = phone.get("/accounts?view=all").text
     fold = html.index("Inactive accounts")
     assert "Old card" in html[fold:] and "Old card" not in html[:fold]
+
+
+def test_money_lists_every_balance_as_one_row_and_the_page_behind_more_adds_up(phone):
+    """IV-3AY10: the slot's job now lives on Money; its N more page is the full list, balances only, no fields."""
+    html = phone.get("/money/accounts").text
+    assert re.search(r'<a class="phone-row" href="/accounts/\d+"><span>CIB Payroll</span><b>', html)
+    assert not re.search(r'<input(?![^>]*type="hidden")', html.split('<main', 1)[1].split("</main>", 1)[0]) and "<td" not in html  # no field; an undo form's hidden inputs are not fields
+    money = phone.get("/money").text
+    assert re.search(r'<a class="phone-row" href="/accounts/\d+"><span>CIB Payroll</span>', money)

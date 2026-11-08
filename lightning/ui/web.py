@@ -51,7 +51,7 @@ def _minus(text: str) -> str:
 # Reporting pages show money rounded to the nearest unit; stored values, entry fields and registers
 # keep their decimals. A template that asks for places explicitly (an input's value) gets them.
 _ROUND_MONEY: contextvars.ContextVar[bool] = contextvars.ContextVar("round_money", default=False)
-REPORTING_TEMPLATES = ("dashboard/", "phone/home.html", "phone/birdview/", "budget.html", "birdview/", "investments/index.html", "investments/holding.html", "financial_health.html",
+REPORTING_TEMPLATES = ("dashboard/", "phone/home.html", "phone/money.html", "phone/money_accounts.html", "phone/money_bills.html", "phone/money_report.html", "phone/add_bills.html", "phone/budget_flexible.html", "phone/birdview/", "budget.html", "birdview/", "investments/index.html", "investments/holding.html", "financial_health.html",
                        "investments/_targets.html", "investments/targets.html", "investments/report_detail.html",
                        "planning/plan.html", "reserves.html", "settings/index.html", "accounts/currencies.html", "zakat.html",
                        "accounts/list.html", "counterparty.html", "tag.html", "analysis/", "planning/loans.html",
@@ -617,6 +617,8 @@ def create_app(c: Container | None = None) -> FastAPI:
         """The period picked in a page header carries over to every page that has one."""
         if request.method != "GET" or request.url.path not in PERIOD_PAGES or request.headers.get("x-lightning-popup"):
             return await call_next(request)
+        if request.url.path in ("/", "/budget") and getattr(request.app.state, "phone_screens", False):
+            return await call_next(request)  # the phone's Home is always today and its Budget steps months itself (3AY6, 3AY9)
         picked = {k: v for k, v in request.query_params.items() if k in PERIOD_KEYS}
         if not picked:
             saved = dict(parse_qsl(request.cookies.get(PERIOD_COOKIE, "")))

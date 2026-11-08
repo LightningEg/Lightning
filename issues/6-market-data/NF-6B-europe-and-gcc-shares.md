@@ -3,6 +3,7 @@ title: Listed shares in Europe and the GCC: verify live boards and find a source
 type: feature
 pillar: own
 size: L
+model: opus
 status: blocked
 blocked_by: a source that allows redistribution
 created: 2026-10-19

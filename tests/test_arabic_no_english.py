@@ -268,3 +268,34 @@ def test_bank_import_preview_has_no_english_system_text_in_arabic(sample):
     assert response.status_code == 200, response.text[-300:]
     assert not _english(response.text, names)
 
+
+
+NEW_PHONE_SCREENS = ("/", "/home", "/budget", "/activity", "/activity?tab=review", "/money", "/money/accounts", "/money/bills", "/money/report",
+                     "/add/bills", "/pc?for=/checks", "/accounts/add-transaction")
+
+
+def test_the_new_phone_screens_have_no_english_system_text(sample):
+    """3AY12: Home, Budget, Activity (both tabs), Money and its pages, and the Add sheet's bill list, with the phone
+    router mounted as the real phone app mounts it."""
+    from lightning.ui.phone.router import mount_phone
+    c, names = sample
+    app = create_app(c)
+    mount_phone(app)
+    inner = app
+
+    async def phone_app(scope, receive, send):
+        if scope["type"] == "http":
+            scope.setdefault("state", {})["phone"] = True
+        await inner(scope, receive, send)
+
+    client = TestClient(phone_app)
+    assert client.post("/settings/locale", data={"locale": "ar"}, follow_redirects=False).status_code == 303
+    problems = {}
+    for path in NEW_PHONE_SCREENS:
+        page = client.get(path)
+        assert page.status_code == 200, path
+        assert 'dir="rtl"' in page.text
+        bad = _english(page.text, names)
+        if bad:
+            problems[path] = sorted(set(bad))[:8]
+    assert not problems, problems

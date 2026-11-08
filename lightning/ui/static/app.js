@@ -500,11 +500,12 @@ window.ask = (() => {
   return (options) => (queue = queue.then(() => open(typeof options === "string" ? { title: options } : options)));
 })();
 // "Delete this category? If it is in use, it is archived instead." → a title and a line under it.
-window.askFrom = (text, extra = {}) => {
-  const [title, ...rest] = t(text).split(/(?<=\?)\s+/);
-  const danger = /\b(delete|remove)\b/i.test(title);
-  return window.ask({ title, message: rest.join(" "), ok: danger ? "Delete" : "OK", tone: danger ? "danger" : "info", ...extra });
+window.askFromOptions = (text, extra = {}) => {
+  const [title, ...rest] = t(text).split(/(?<=[?؟])\s+/);
+  const danger = /\b(delete|remove)\b|احذف|امسح|شيل/i.test(title);
+  return { title, message: rest.join(" "), ok: danger ? "Delete" : "OK", tone: danger ? "danger" : "info", ...extra };
 };
+window.askFrom = (text, extra = {}) => window.ask(window.askFromOptions(text, extra));
 // askChoice({title, message, choices: [{label, value, primary}]}) resolves the chosen value, or null on Escape.
 window.askChoice = ({ title, message = "", choices }) => new Promise((resolve) => {
   const dialog = document.createElement("dialog");
@@ -539,6 +540,12 @@ window.confirmSubmit = (() => {
     if (asking.has(form)) return false;
     asking.add(form);
     const submitter = event.submitter?.form === form ? event.submitter : undefined;
+    // Local form handlers can run before the delegated delete listener.
+    // The caller's delete marker is authoritative in every language.
+    if (form.matches("[data-confirm-delete]") || submitter?.matches("[data-confirm-delete]")) {
+      const danger = { tone: "danger", ok: t("Delete") };
+      options = typeof options === "string" ? window.askFromOptions(options, danger) : { ...options, ...danger };
+    }
     (typeof options === "string" ? window.askFrom(options) : window.ask(options)).then((yes) => {
       asking.delete(form);
       if (!yes) return;
@@ -849,7 +856,8 @@ document.addEventListener("submit", (event) => {
     const ids = new Set(new FormData(form).getAll("txn_ids"));
     const options = ids.size ? { title: t("Delete {count} transactions?", {count: ids.size.toLocaleString(document.documentElement.lang)}),
       message: t("You can restore them from transaction history."), tone: "danger", ok: t("Delete") }
-      : confirmHost.dataset.confirmDelete || "Delete this transaction? You can restore it from its history page.";
+      : window.askFromOptions(confirmHost.dataset.confirmDelete || "Delete this transaction? You can restore it from its history page.",
+        { tone: "danger", ok: t("Delete") });
     if (!window.confirmSubmit(event, options)) return;
   }
   if (!(form.matches("#f-new, #f-edit, .investment-entry-form"))) return;
@@ -1797,11 +1805,16 @@ initCategoryCatalogue();
 if (ledger) {
   const known = JSON.parse(ledger.dataset.counterparties || "{}");
   const accounts = JSON.parse(ledger.dataset.accounts || "[]");
+  const lastAccounts = JSON.parse(ledger.dataset.lastAccounts || "{}");
   const parties = Object.keys(known).sort((a, b) => a.localeCompare(b));
   document.querySelectorAll(".counterparty-input").forEach((counterparty) => {
     const form = counterparty.getAttribute("form");
     const category = document.querySelector(`.category-input[form="${form}"]`);
     const results = document.getElementById(counterparty.dataset.counterpartyResults);
+    const accountPicker = document.querySelector(`select[name="account_id"][form="${form}"]`);
+    // IV-12C: the first required field still empty after a name is picked (Account before Category).
+    const nextEmpty = () => [accountPicker, category, document.querySelector(`[name="amount"][form="${form}"]`)]
+      .find((field) => field && !field.disabled && !field.value.trim());
     const clearDecision = (name) => document.querySelector(`input[type="hidden"][form="${form}"][name="${name}"]`)?.remove();
     let searchVersion = 0;
     const closeResults = () => { ++searchVersion; if (results) { results.hidden = true; counterparty.setAttribute("aria-expanded", "false"); } };
@@ -1813,6 +1826,8 @@ if (ledger) {
         if (isTransfer) category.value = "";
         else if (!category.value) {
           const knownName = parties.find((name) => name.toLocaleLowerCase() === counterparty.value.trim().toLocaleLowerCase());
+          if (knownName && accountPicker && !accountPicker.value && lastAccounts[knownName]
+              && [...accountPicker.options].some((option) => option.value === String(lastAccounts[knownName]))) accountPicker.value = String(lastAccounts[knownName]);
           const savedCategory = knownName ? known[knownName] : null;
           if (savedCategory?.id && savedCategory?.name) {
             category.value = savedCategory.name;
@@ -1889,7 +1904,7 @@ if (ledger) {
         if (first) {
           event.preventDefault();
           first.click();
-          category?.focus();
+          (nextEmpty() || category)?.focus();
         }
       }
     });

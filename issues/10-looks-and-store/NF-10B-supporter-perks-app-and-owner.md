@@ -4,6 +4,7 @@ title: Supporter perks still waiting on the app or the owner - app themes for sa
 type: feature
 pillar: feel
 size: M
+model: opus
 status: blocked
 blocked_by: 10A claiming; owner decision on the beta channel
 created: 2026-10-25
