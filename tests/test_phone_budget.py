@@ -156,7 +156,7 @@ def test_adjust_opens_move_room_when_another_category_has_room():
 
 
 def test_the_budget_page_leads_with_the_ring_then_the_stepper_then_the_categories(phone):
-    html = phone.get("/budget").text
+    html = phone.get("/budget?period=month").text
     assert "<table" not in html
     ring = re.search(r'class="phone-budget-ring[^"]*" role="img" aria-label="(\d+)% of the plan spent"', html)
     assert ring and f"<b>{ring.group(1)}%</b>" in html
@@ -187,7 +187,7 @@ def test_edit_plan_opens_every_group_where_its_limits_are_typed(phone):
 def test_a_category_row_opens_its_sheet_and_see_transactions_keeps_budget_and_the_month(phone):
     """3AN7: a row is a sheet (spent of limit, pace, last payments, its limit, See transactions); See transactions keeps
     Budget chosen and the month on the stepper, never "Custom range"."""
-    html = phone.get("/budget").text
+    html = phone.get("/budget?period=month").text
     assert 'class="phone-sheet-row"' in html and 'class="phone-row phone-sheet-summary phone-cat' in html
     assert 'data-fold-src="/budget/category/' in html  # the last three payments load when the sheet opens
     assert re.search(r'<form method="post" action="/budget/rule/\d+" class="phone-form">', html) and ">Save limit<" in html
@@ -201,7 +201,7 @@ def test_a_category_row_opens_its_sheet_and_see_transactions_keeps_budget_and_th
 
 
 def test_a_sheets_last_payments_load_apart_and_an_empty_month_offers_last_month(phone):
-    html = phone.get("/budget").text
+    html = phone.get("/budget?period=month").text
     src = re.search(r'data-fold-src="(/budget/category/(\d+)/payments\?month=([\d-]+))"', html)
     fragment = phone.get(src.group(1)).text
     assert "<html" not in fragment  # a fragment for the sheet, no frame

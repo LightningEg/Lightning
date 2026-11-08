@@ -1873,6 +1873,7 @@ SERVICES = {
     "{n} bills are late": "{n} فواتير متأخرة",
     "All bills": "كل الفواتير",
     "Edit your plan": "عدّل خطتك",
+    "More places": "أماكن تانية",
     "Bills": "الفواتير",
     "This week": "الأسبوع ده",
     "Before payday": "قبل يوم القبض",

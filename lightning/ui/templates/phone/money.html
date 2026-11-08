@@ -8,10 +8,11 @@
 <section class="phone-hero has-seam" aria-labelledby="worth-heading">
   <div id="worth-heading" class="phone-hero-label" role="heading" aria-level="2">{{ fig.net_worth.label }}</div>
   <div class="phone-lead{{ ' is-negative' if s.net_worth < 0 }}">{{ s.net_worth|money }} <small>{{ base }}</small></div>
+  <p class="phone-hero-line">{{ 'What you own'|tr(locale) }} <b><bdi class="fig">{{ s.what_you_own|money }}</bdi></b></p>
   {% if s.since_start is not none %}<p class="phone-hero-line">{{ '{amt} since the start of the month.'|tr(locale, amt=s.since_start|money(True)) }}</p>{% endif %}
 </section>
 <section class="phone-section" aria-labelledby="accounts-heading">
-  <header class="phone-section-head"><h2 id="accounts-heading">{{ 'Accounts'|tr(locale) }}</h2><b><bdi class="fig">{{ s.accounts_total|money }}</bdi></b></header>
+  <header class="phone-section-head"><h2 id="accounts-heading"><a href="/money/accounts">{{ 'Accounts'|tr(locale) }}</a></h2><b><bdi class="fig">{{ s.accounts_total|money }}</bdi></b></header>
   <div class="phone-rows">{% for a in s.accounts %}<a class="phone-row" href="/accounts/{{ a.id }}"><span>{{ a.name }}</span><b><bdi class="fig">{{ a.balance|money }}</bdi></b></a>{% endfor %}
   {% if s.accounts_more %}<a class="phone-row" href="/money/accounts"><span>{{ '{n} more'|tr(locale, n=s.accounts_more) }}</span><b>›</b></a>{% endif %}</div>
   {% if s.held_for_others %}<p class="phone-note">{{ 'Includes {amt} held for others.'|tr(locale, amt=s.held_for_others|money) }}</p>{% endif %}
@@ -27,6 +28,22 @@
   <a class="phone-row" href="/investments"><span>{{ 'Investments'|tr(locale) }}</span><b><bdi class="fig">{{ s.holdings_value|money }}</bdi> ›</b></a>
   <a class="phone-row" href="/plan/reserves"><span>{{ 'Goals and reserves'|tr(locale) }}</span><b>›</b></a>
   <a class="phone-row" href="/financial-health"><span>{{ 'Financial health'|tr(locale) }}</span><b>›</b></a>
-  <a class="phone-row" href="/settings"><span>{{ 'Settings'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/plan"><span>{{ 'Cash planning'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/birdview/expenses"><span>{{ 'Spending'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/review"><span>{{ 'Weekly review'|tr(locale) }}</span><b>›</b></a>
 </div>
+{# What More held, so no page is left without a way in (Money replaces More, 3AY10). #}
+<nav class="phone-rows phone-more-list" aria-label="{{ 'More places'|tr(locale) }}">
+  <a class="phone-row" href="/plan"><span>{{ 'Cash planning'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/birdview/expenses"><span>{{ 'Spending'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/review"><span>{{ 'Weekly review'|tr(locale) }}</span><b>›</b></a>
+</nav>
+<nav class="phone-rows phone-more-list" aria-label="{{ 'Settings'|tr(locale) }}">
+  <a class="phone-row" href="/settings"><span>{{ 'All settings'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/categories"><span>{{ 'Categories'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/counterparties"><span>{{ 'Counterparties'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/rules"><span>{{ 'Rules'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/profiles/devices"><span>{{ 'Devices'|tr(locale) }}</span><b>›</b></a>
+  <a class="phone-row" href="/checks"><span>{{ 'Data checks'|tr(locale) }}</span><b>›</b></a>
+</nav>
 {% endblock %}

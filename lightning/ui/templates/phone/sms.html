@@ -4,7 +4,7 @@
    below them. With nothing waiting, Paste leads. The PC's page is sms.html; both read lightning/ui/routes/sms.py. #}
 {% extends "base.html" %}
 {% block title %}{{ 'From SMS'|tr(locale) }}{% endblock %}
-{% block phone_back %}<a class="phone-back" href="/more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'More'|tr(locale) }}</span></a>{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/money"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Money'|tr(locale) }}</span></a>{% endblock %}
 {% block heading %}<h1>{{ "From SMS"|tr(locale) }}</h1>{% set st = page_status.count(((batches or [])|sum(attribute='waiting')) + ((waiting or [])|sum(attribute='count')), '1 message waiting for you.', '{n} messages waiting for you.', 'Nothing is waiting for you.') %}<p class="page-status">{{ st.text|tr(locale, **st['values']) }}</p>{% endblock %}
 {% block section_tabs %}{# the Accounts tabs are not this page's: it is a way into Add, reached from Add (3AN5) #}{% endblock %}
 {% block content %}

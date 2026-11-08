@@ -43,7 +43,7 @@ class MoneyScreen:
 def _balances(c, day: date) -> list[AccountRow]:
     rows = []
     for account in c.accounts.list(active_only=True):
-        if account.parent_id or account.account_type.value in ("PHYSICAL_ASSET", "OTHER_ASSET"):
+        if account.parent_id:      # a currency pocket is part of its broker's row
             continue
         value = c.reporting.account_value(account.id, day)
         if value is not None:

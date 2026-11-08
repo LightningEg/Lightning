@@ -49,11 +49,12 @@ def test_every_page_renders_in_the_phone_frame(phone, path):
 def test_the_chosen_section_and_the_period_words(phone):
     html = phone.get("/budget").text
     assert re.search(r'class="phone-tab is-chosen" href="/budget" aria-current="page"', html)
-    overview = phone.get("/").text
+    assert re.search(r'class="phone-tab is-chosen" href="/" aria-current="page"', phone.get("/").text)  # Home, IV-3AY10
+    overview = phone.get("/?period=month").text  # the older Overview, still behind a query until 3AY11 removes it
     assert ">Monthly<" not in overview and 'class="period-buttons"' not in overview  # one month stepper, no sideways chips
     assert 'class="phone-period-sheet"' in overview and ">Last month<" in overview  # the month opens Choose period
-    assert re.search(r'class="phone-tab is-chosen" href="/more"', phone.get("/plan").text)  # Cash planning lives on More
-    assert re.search(r'class="phone-tab is-chosen" href="/transactions"', phone.get("/transactions").text)
+    assert re.search(r'class="phone-tab is-chosen" href="/money"', phone.get("/plan").text)  # Cash planning lives under Money
+    assert re.search(r'class="phone-tab is-chosen" href="/activity"', phone.get("/transactions").text)  # redirected to Activity
 
 
 def test_the_pc_keeps_its_own_frame(tmp_path):
@@ -67,7 +68,7 @@ def test_the_pc_keeps_its_own_frame(tmp_path):
 
 
 def test_overview_uses_the_phone_forms(phone):
-    html = phone.get("/").text
+    html = phone.get("/?period=month").text
     assert 'class="phone-kpis"' in html and html.count('class="phone-kpi ') == 2  # C06.1, 3AN4: two tiles, Net worth and Left in plan
     assert "Savings rate" not in html and "Investing rate" not in html  # they live on Financial health (owner, 2026-11-02)
     assert "stat-tile-spark" not in html  # no sparkline in a phone tile
@@ -81,7 +82,7 @@ def test_overview_uses_the_phone_forms(phone):
     assert re.search(r'class="phone-lead">[\d,]+ <small>EGP</small>', html)  # whole EGP on the big figure
 
 
-@pytest.mark.parametrize("path, marker", [("/budget", 'class="phone-plan-bar'), ("/plan", 'id="plan-build"'),
+@pytest.mark.parametrize("path, marker", [("/budget?period=month", 'class="phone-plan-bar'), ("/plan", 'id="plan-build"'),
                                           ("/investments", 'id="holdings-heading"')])
 def test_budget_cash_and_investments_have_phone_designs(phone, path, marker):
     html = phone.get(path).text
@@ -106,7 +107,8 @@ def test_an_account_is_a_day_list_and_the_sheet_saves(phone):
 
 
 def test_accounts_add_button_asks_which_account(phone):
-    assert 'href="/accounts/add-transaction?return_to=/accounts"' in phone.get("/accounts").text
+    assert 'href="/accounts/add-transaction?return_to=/accounts%3Fview%3Dall"' in phone.get("/accounts?view=all").text  # the older list
+    assert 'href="/accounts/add-transaction?return_to=/money"' in phone.get("/money").text  # Add returns to its slot (3AY7)
     pick = phone.get("/accounts/add-transaction?pick=1").text
     assert "To which account?" in pick and "/accounts/1/transaction/new" in pick
 
@@ -174,22 +176,22 @@ def test_settings_on_the_phone_leads_to_pairing_sms_and_the_profile(phone):
 
 
 def test_overview_puts_needs_you_before_latest(phone):
-    html = phone.get("/").text
+    html = phone.get("/?period=month").text
     assert html.index('class="card phone-needs') < html.index('aria-labelledby="latest-heading"')
 
 
 def test_one_navigation_the_app_bar_title_is_plain_text_and_every_old_menu_page_is_still_reachable(phone):
     """3AN2: the app bar's page menu (a second way to move) is gone; the title is text. Each page it used to reach is
     a tab, a row on More, or reached from a page that has its own way back."""
-    more = phone.get("/more").text
-    for path in PAGES + ("/more", "/review", "/plan/reserves"):
+    money = phone.get("/money").text
+    for path in PAGES + ("/money", "/money/accounts", "/money/bills", "/activity", "/review", "/plan/reserves"):
         html = phone.get(path).text
         assert "phone-page-menu" not in html and "phone-page-grid" not in html and "⌄" not in html, path
     assert 'class="phone-appbar-title"' in phone.get("/").text
-    tabs = ("/", "/budget", "/transactions")
-    for href in ("/plan", "/investments", "/accounts", "/settings", "/financial-health", "/review", "/birdview/expenses",
-                 "/plan/reserves"):
-        assert f'href="{href}"' in more, href
+    tabs = ("/", "/budget", "/activity", "/money")
+    for href in ("/plan", "/investments", "/money/accounts", "/money/bills", "/settings", "/financial-health", "/review",
+                 "/birdview/expenses", "/plan/reserves"):
+        assert f'href="{href}"' in money, href  # Money reaches every page More used to reach
     for href in tabs:
         assert f'href="{href}"' in phone.get("/").text
     assert 'href="/profiles"' in phone.get("/settings").text  # Profile and lock, from Settings
@@ -252,16 +254,16 @@ def test_the_due_line_says_today_tomorrow_days_and_late():
     assert text("Landlord", "12,000", 0, 4) == "Landlord 12,000, 4 days late"
 
 
-def test_more_is_flat_and_the_weekly_review_keeps_more_chosen(phone):
-    """IV-3AL4 and IV-3AL7: More has no card of buttons (a bill's row opens its pay sheet) and no subtitles; the
-    weekly review, reached from More, keeps More chosen with ‹ More in the app bar."""
-    more = phone.get("/more").text
+def test_the_older_more_is_flat_and_the_weekly_review_keeps_money_chosen(phone):
+    """IV-3AL4 and IV-3AL7: the older More page has no card of buttons (a bill's row opens its pay sheet) and no subtitles; the
+    weekly review, reached from Money, keeps Money chosen with ‹ Money in the app bar."""
+    more = phone.get("/more?view=old").text  # the older page, until 3AY11 removes it
     assert 'class="btn small"' not in more and "Backups, language" not in more
     assert more.index('id="bills-heading"') < more.index('id="money-heading"') < more.index('id="settings-heading"')
     assert re.search(r'class="phone-row phone-hub-bill[^"]*" data-popup-open href="/plan/items/\d+/pay', more)
     review = phone.get("/review").text
-    assert re.search(r'class="phone-tab is-chosen" href="/more"', review)
-    assert 'class="phone-back" href="/more"' in review and '<a class="btn" href="/">' not in review
+    assert re.search(r'class="phone-tab is-chosen" href="/money"', review)
+    assert 'class="phone-back" href="/money"' in review and '<a class="btn" href="/">' not in review
 
 
 def test_financial_health_puts_what_needs_you_under_its_lead_and_the_chart_in_its_own_card(phone):
@@ -319,11 +321,11 @@ def test_a_date_in_a_phone_hero_line_never_breaks_across_lines():
 
 def test_inner_pages_have_a_back_destination_without_browser_history(phone):
     for path, destination, label in (
-        ("/settings", "/more", "More"),
-        ("/rules", "/more", "More"),
-        ("/categories", "/more", "More"),
-        ("/counterparties", "/more", "More"),
-        ("/checks", "/more", "More"),
+        ("/settings", "/money", "Money"),
+        ("/rules", "/money", "Money"),
+        ("/categories", "/money", "Money"),
+        ("/counterparties", "/money", "Money"),
+        ("/checks", "/money", "Money"),
         ("/investments/planner", "/investments", "Investments"),
         ("/accounts/1/import", "/accounts/1", "Accounts"),
         ("/settings?section=budget", "/budget", "Budget"),
@@ -331,22 +333,24 @@ def test_inner_pages_have_a_back_destination_without_browser_history(phone):
         html = phone.get(path).text
         assert f'class="phone-back" href="{destination}"' in html
         assert f'<span>{label}</span></a>' in html
-    html = phone.get('/transactions', headers={'referer': 'http://127.0.0.1:9861/budget'}).text
+    html = phone.get('/transactions?view=all', headers={'referer': 'http://127.0.0.1:9861/budget'}).text
     assert 'class="phone-back" href="/budget"' in html
 
 
 def test_phone_settings_use_more_instead_of_five_tabs(phone):
     for path in ("/settings", "/rules", "/categories", "/counterparties", "/checks"):
         assert 'class="plan-tabs-bar section-tabs"' not in phone.get(path).text
-    more = phone.get("/more").text
-    for path in ("/settings", "/rules", "/categories", "/counterparties", "/checks"):
-        assert f'href="{path}"' in more
+    money = phone.get("/money").text
+    assert 'href="/settings"' in money  # Settings sits behind Money; its own page leads to the rest
+    settings = phone.get("/settings").text
+    for path in ("/rules", "/categories", "/counterparties", "/checks"):
+        assert f'href="{path}"' in settings
 
 
 def test_budget_category_returns_to_budget_and_leads_with_register(phone):
     from html import unescape
 
-    budget = phone.get('/budget').text
+    budget = phone.get('/budget?period=month').text  # the older Budget carries the category links
     match = re.search(r'href="(/transactions\?category_id=[^"]+)"', budget)
     assert match, 'the demo budget has a category link'
     page = phone.get(unescape(match.group(1)), headers={'referer': 'http://127.0.0.1:9861/budget'}).text

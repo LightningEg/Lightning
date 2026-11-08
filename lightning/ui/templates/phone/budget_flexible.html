@@ -10,7 +10,7 @@
 <section class="phone-section" aria-labelledby="plan-heading">
   <header class="phone-section-head"><h2 id="plan-heading">{{ 'Make my plan'|tr(locale) }}</h2></header>
   <p>{{ 'A plan says how much you mean to spend in each category this month, so Lightning can tell you what is left.'|tr(locale) }}</p>
-  <a class="btn primary" href="/budget/fill?month={{ s.month }}">{{ 'Make my plan'|tr(locale) }}</a>
+  <a class="btn primary" href="/budget?month={{ s.month }}&amp;make=1">{{ 'Make my plan'|tr(locale) }}</a>
 </section>
 {% else %}
 <section class="phone-hero has-seam" aria-labelledby="lead-heading">

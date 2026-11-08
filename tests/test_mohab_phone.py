@@ -26,21 +26,21 @@ from test_mohab_year import Mohab, _live_the_year
 # The PC's link or button -> the phone's taps. A step starting with "/" opens that page; with "?" it is
 # typed into the page's search box; anything else is tapped on the page.
 DETOURS = {
-    "Add account": ("More", "Accounts", "Add account"),           # the PC's sidebar +; the phone's Accounts ⋯
-    "Held for others": ("More", "Accounts", "Held for others"),   # an Accounts tab; Transactions opens on this month
-    "Accounts": ("More", "Accounts"),                             # sections without a tab-bar slot live on More
-    "Cash planning": ("More", "Cash planning"),
-    "Investments": ("More", "Investments"),
-    "Financial health": ("More", "Financial health"),
+    "Add account": ("Money", "Accounts", "Add account"),           # the PC's sidebar +; the phone's Accounts ⋯
+    "Held for others": ("Money", "Accounts", "Held for others"),   # an Accounts tab; Transactions opens on this month
+    "Accounts": ("Money", "Accounts"),                             # sections without a tab-bar slot live on More
+    "Cash planning": ("Money", "Cash planning"),
+    "Investments": ("Money", "Investments"),
+    "Financial health": ("Money", "Financial health"),
     "Add transaction": ("Add",),
-    "Settings": ("More", "All settings"),
-    "Health": ("More", "Financial health"),                       # the Overview opens on its answer, no tab row
-    "Spending": ("More", "Spending"),
-    "Safety": ("More", "Reserves"),                               # the app bar's page menu is gone (3AN2): Reserves is a row on More
-    "Currencies": ("More", "Financial health", "Currencies"),                         # the app bar's gear is a tab's own settings only                                  # the tab bar's Add, its word under the disc
-    "NBE 3-year certificate": ("/accounts", "NBE 3-year certificate"),  # the PC lists accounts in its sidebar
-    "Gold at home": ("/accounts", "Gold at home"),
-    "Family flat (my share)": ("/accounts", "Family flat (my share)"),
+    "Settings": ("Money", "All settings"),
+    "Health": ("Money", "Financial health"),                       # the Overview opens on its answer, no tab row
+    "Spending": ("Money", "Spending"),
+    "Safety": ("Money", "Reserves"),                               # the app bar's page menu is gone (3AN2): Reserves is a row on More
+    "Currencies": ("Money", "Financial health", "Currencies"),                         # the app bar's gear is a tab's own settings only                                  # the tab bar's Add, its word under the disc
+    "NBE 3-year certificate": ("/money/accounts", "NBE 3-year certificate"),  # the PC lists accounts in its sidebar
+    "Gold at home": ("/money/accounts", "Gold at home"),
+    "Family flat (my share)": ("/money/accounts", "Family flat (my share)"),
     "Import statement": ("Import a statement",),                        # behind the account's ⋯
     "Loans still to pay": ("What you owe", "Loans still to pay"),  # the Overview's What you owe sheet (BV-5I, D1), then its Loans row
     "Data checks": ("/settings", "Data checks"),                  # from a settings sheet: Settings, then the tab
@@ -48,9 +48,11 @@ DETOURS = {
     "Rules": ("/settings", "Rules"),
     "#Eid": ("?q=%23eid",),                                       # a note's tag: typed into the search
     "Investment planner": ("Planner",),
+    "Set a plan for 2026-09": ("/budget?month=2026-09", "Make my plan"),  # the new Budget's no-plan step leads to the plan form
+    "Imported activity needs a decision": ("/activity?tab=review", "Finish the import"),  # Activity's To review card (3AY8)
 }
-# Your position on the Overview is flat rows that open their pages (3AN12, C11.1): the cash accounts the PC lists there
-# are reached through "Cash you own", which opens Accounts.
+# Home names no account (3AY6): the accounts the PC lists in its sidebar are reached through Money, then its Accounts
+# page (3AY10), which lists every balance.
 VIA_CASH_YOU_OWN = "Cash you own"
 # Sections without a tab-bar slot (phone overhaul 2026-10-22): their taps go through More.
 MOVED = {"Accounts", "Cash planning", "Investments", "Financial health", "Health", "Spending", "Currencies", "Settings"}
@@ -93,9 +95,10 @@ class PhoneBrowser(screens.Browser):
                 return self._framed(super().click(text))
             except AssertionError:
                 if text not in DETOURS:
-                    if self.page is not None and self.page.path.split("?")[0] == "/" and text not in MOVED:
-                        self.detours[VIA_CASH_YOU_OWN] += 1
-                        self._framed(super().click(VIA_CASH_YOU_OWN))
+                    if self.page is not None and self.page.path.split("?")[0] in ("/", "/home", "/money") and text not in MOVED:
+                        self.detours[VIA_CASH_YOU_OWN] += 1   # Home names no account: Money's Accounts lists every balance
+                        self._framed(super().click("Money"))
+                        self._framed(super().click("Accounts"))
                         return self._framed(super().click(text))
                     raise
         self.detours[text] += 1
@@ -128,6 +131,10 @@ class PhoneMohab(Mohab):
         mount_phone(app)  # the phone's own screens answer first, as profile_app(phone=True) does
         self.b = PhoneBrowser(app)
 
+    def ask(self, key, question, *clicks, start="/"):
+        """Home leads with Safe to spend and To do; what he owns lives on Money (3AY6, 3AY10)."""
+        return super().ask(key, question, *clicks, start="/money" if key == "needs_you" and not clicks else start)
+
     def enter(self, account, when, party, category, amount, **more):
         """The add button opens the entry sheet (C05.2, C09): Out, In or Transfer, then the fields."""
         self.b.go("Accounts", account, "Add transaction")  # the Overview leads with transactions now (C11.1)
@@ -139,6 +146,11 @@ class PhoneMohab(Mohab):
         return self.b.submit({"kind": "out" if value.startswith("-") else "in", "date": when, "counterparty": party,
                               "category_id": screens.Choose(category.split(" › ")[-1]),
                               "amount": value.lstrip("-+")} | more)
+
+    def pay_from_overview(self, item):
+        """Home's To do shows three rows; every bill is one tap away on Money's Bills page (3AY10)."""
+        self.b.open(self._pay_link(self.b.go("Money", "All bills"), item))
+        return self.b.submit({}, button="Record and mark")
 
     def _pay_link(self, screen, name):
         """On the phone the bill's row itself opens its pay sheet."""
