@@ -199,6 +199,8 @@ class EverydayBudget:
     current: bool                    # the month holds today
     by_day: list[Decimal]            # everyday spending so far, added up day by day (index 0 is day 1)
     last_month_by_day: list[Decimal]  # the same for the month before, every day of it
+    usual_shape: list[Decimal] = field(default_factory=list)  # the share of a usual month's everyday spending done by each day (BV-12B)
+    usual_by_day: list[Decimal] = field(default_factory=list)  # a usual month's own cumulative spending by day, same history
     room: dict[int, Decimal] = field(default_factory=dict)  # each planned category's left less its bills to pay
     payments: list = field(default_factory=list)  # bill and loan payments in planned categories: the month's, and earlier unpaid ones
 
@@ -213,8 +215,23 @@ class EverydayBudget:
 
     @property
     def pace(self) -> Decimal:
-        """What the everyday plan allows by today, spread evenly over the month."""
-        return (self.everyday_plan * self.day / self.days_in_month).quantize(Decimal("0.01")) if self.days_in_month else ZERO
+        """What the everyday plan allows by today: spread over the month the way the person's last completed months
+        went when there are two or more of them with spending, evenly otherwise (BV-12B)."""
+        if not self.days_in_month:
+            return ZERO
+        if self.usual_shape and self.day:
+            share = self.usual_shape[min(self.day, len(self.usual_shape)) - 1]
+            return (self.everyday_plan * share).quantize(Decimal("0.01"))
+        return (self.everyday_plan * self.day / self.days_in_month).quantize(Decimal("0.01"))
+
+    @property
+    def pace_gap(self) -> Decimal:
+        """Everyday spending less the pace; never above zero while spending is at or below a usual month's by the same day."""
+        gap = self.everyday_spent - self.pace
+        if gap > ZERO and self.usual_by_day and self.day and \
+                self.everyday_spent <= self.usual_by_day[min(self.day, len(self.usual_by_day)) - 1]:
+            return ZERO
+        return gap
 
     @property
     def last_month_same_day(self) -> Decimal | None:

@@ -125,7 +125,7 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
                   line_=line(f"{spent_label} {fmt(e.spent)} of {fmt(e.planned)} planned"), href="#budget-meters")]
 
     if e.current and e.day:
-        gap = e.everyday_spent - e.pace
+        gap = e.pace_gap
         pace_compare = (compare("under the plan's pace", fmt(-gap), "good") if gap <= 0
                         else compare("over the plan's pace", fmt(gap), "bad"))
         before = e.last_month_same_day
