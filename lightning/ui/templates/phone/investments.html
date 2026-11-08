@@ -1,0 +1,26 @@
+{# Investments (IV-3AY15, report: Investments page): value and the month's result, the holdings, what changed. #}
+{% extends "base.html" %}
+{% block title %}Investments{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/money"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Money'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Investments'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+{% set s = screen %}
+<section class="phone-hero has-seam" aria-labelledby="value-heading">
+  <div id="value-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Portfolio value'|tr(locale) }}</div>
+  <div class="phone-lead">{{ s.value|money }} <small>{{ base }}</small></div>
+  <p class="phone-hero-line">{% if s.result is not none %}{{ 'Result this month'|tr(locale) }} <b class="{{ 'neg' if s.result < 0 else 'pos' }}"><bdi class="fig">{{ s.result|money(True) }}</bdi></b>{% else %}{{ 'A dated price is missing, so the result is unavailable'|tr(locale) }}{% endif %}</p>
+</section>
+{% if s.prices_missing %}<a class="phone-row" href="/investments/prices"><span>{{ '{n} prices to update'|tr(locale, n=s.prices_missing) }}</span><b>›</b></a>{% endif %}
+<section class="phone-section" aria-labelledby="holdings-heading">
+  <header class="phone-section-head"><h2 id="holdings-heading">{{ 'Holdings'|tr(locale) }}</h2>{% if s.holdings|length > 5 %}<a class="phone-quiet" href="{{ '/investments' if s.shown > 5 else '/investments?holdings=all' }}#holdings-heading">{{ ('Show fewer' if s.shown > 5 else 'See all')|tr(locale) }}</a>{% endif %}</header>
+  <div class="phone-rows">{% for h in s.holdings[:s.shown] %}<a class="phone-row" href="{{ h.href }}"><span>{{ h.name }}<small>{{ h.account }}{% if h.gain_pct is not none %} · {{ h.gain_pct|signed_pct }}%{% endif %}</small></span><b><bdi class="fig">{{ h.value|money if h.value is not none else 'Unavailable'|tr(locale) }}</bdi></b></a>{% else %}<p class="phone-note">{{ 'No owned holdings to show.'|tr(locale) }}</p>{% endfor %}</div>
+</section>
+{% if s.changed %}<section class="phone-section" aria-labelledby="changed-heading">
+  <header class="phone-section-head"><h2 id="changed-heading">{{ 'What changed'|tr(locale) }}</h2><span>{{ s.start }} – {{ s.end }}</span></header>
+  <div class="phone-rows">{% for label, amount in s.changed %}<div class="phone-row"><span>{{ label|tr(locale) }}</span><b class="{{ 'neg' if amount < 0 else 'pos' }}"><bdi class="fig">{{ amount|money(True) }}</bdi></b></div>{% endfor %}</div>
+</section>{% endif %}
+<div class="phone-rows">
+  {% if s.cash is not none %}<div class="phone-row"><span>{{ 'Brokerage cash'|tr(locale) }}</span><b><bdi class="fig">{{ s.cash|money }}</bdi></b></div>{% endif %}
+  <div class="phone-row"><span>{{ 'Holdings after sale (estimate)'|tr(locale) }}</span><b><bdi class="fig">{{ s.after_sale|money if s.after_sale is not none else 'Unavailable'|tr(locale) }}</bdi></b></div>
+</div>
+{% endblock %}

@@ -1875,6 +1875,8 @@ SERVICES = {
     "Fix it": "صلّحه",
     "Checked through {date}": "اتراجع لحد {date}",
     "Checked against your bank.": "اتراجع على البنك.",
+    "Result this month": "نتيجة الشهر ده",
+    "{n} prices to update": "{n} أسعار محتاجة تتحدّث",
     "Make my plan": "اعمل خطتي",
     "{amt} since the start of the month.": "{amt} من أول الشهر.",
     "Includes {amt} held for others.": "فيها {amt} محفوظة لناس تانيين.",

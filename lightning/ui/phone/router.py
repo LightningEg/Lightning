@@ -132,6 +132,17 @@ def phone_router() -> APIRouter:
             return redirect(f"/accounts/{account_id}", exc.message)
         return redirect(f"/accounts/{account_id}", "Checked against your bank.")
 
+    investments_slot = APIRouter(route_class=_plain("holdings"))
+
+    @investments_slot.get("/investments")
+    async def investments(request: Request):
+        """Investments (3AY15): value and the month's result, holdings, what changed. Another period, view or lens
+        still reaches the PC route until 3AY18."""
+        from lightning.core.dates import today
+        from lightning.ui.phone.screens import investments as screen
+        return render_phone(request, "phone/investments.html", screen=screen.build(
+            container(request), today(), request.query_params.get("holdings") == "all"))
+
     @router.get("/money/report")
     async def money_report(request: Request):
         """How did a period go? (the Overview's report, which Home no longer carries)"""
@@ -194,6 +205,7 @@ def phone_router() -> APIRouter:
     router.include_router(slots)
     router.include_router(months)
     router.include_router(cash_accounts)
+    router.include_router(investments_slot)
     return router
 
 
