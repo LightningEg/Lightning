@@ -408,7 +408,7 @@ def _capture_context(c, account) -> dict:
     from lightning.planning import bill_state
     hour = _local_now().hour
     return {"entry_accounts": [{"id": a.id, "name": a.name} for a in _entry_accounts(c)],
-            "bills_due": len(bill_state.open_bills(c.planning, today(), bill_state.SOON_DAYS)),
+            "bills_due": len(bill_state.unpaid_bills(c.planning, today(), bill_state.SOON_DAYS)),
             "chips_out": named(c.transactions.usual_capture_categories("out", hour=hour)),
             "chips_in": named(c.transactions.usual_capture_categories("in", hour=hour))}
 
