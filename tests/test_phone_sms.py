@@ -21,7 +21,7 @@ def test_a_sheet_filled_from_an_sms_remembers_the_ending_and_marks_the_message_r
     assert read["fingerprint"] == fingerprint(message) and read["amount"] == "5000.00"
     phone.post(f"/accounts/{accounts['cib'].id}/transaction/new", data={
         "__session": session, "kind": "out", "amount": "5000", "category_id": str(cats["EXP.PERSONAL.FOOD"].id),
-        "counterparty": read["counterparty"], "date": "2026-10-04", "return_to": "/",
+        "counterparty": read["counterparty"], "date": "2026-10-04", "return_to": "/transactions",
         "sms_ending": "7351", "sms_fp": read["fingerprint"]})
     again = phone.post("/sms/read-one", data={"__session": session, "text": message}).json()
     assert again["account_id"] == accounts["cib"].id                                # said once, remembered
@@ -40,7 +40,7 @@ def test_an_sms_for_a_foreign_account_is_not_remembered(month):
     category = re.search(r'<option value="(\d+)" data-movement="OUTFLOW"', sheet).group(1)
     saved = phone.post(f"/accounts/{usd.id}/transaction/new", data={
         "__session": session, "kind": "out", "amount": "5", "category_id": category, "date": "2026-09-14",
-        "return_to": "/", "sms_ending": "4242"})
+        "return_to": "/transactions", "sms_ending": "4242"})
     assert saved.status_code == 200 and "Saved." in saved.text
     assert c.sms_imports.account_for("4242") is None
 

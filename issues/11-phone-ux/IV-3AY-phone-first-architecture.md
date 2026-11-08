@@ -161,7 +161,10 @@ Design: the report's *Investments page*. `/money/investments` (`/investments` on
 with its change since the month began, the holdings (five, then all), "n prices to update" when there are some (a link
 to the price page), "Over time ›" as one row opening the value chart, and *What changed* as rows. Money's Investments
 row links here. The currencies page (`/accounts/currencies`) is its child: foreign holdings by currency, no chart.
-Done when: holdings and the value agree with the PC's Investments page on Mohab's year (a test); the `investments.py`
+The old phone Overview's *Holdings after sale* breakdown (each class at its sale factor, the parent total first; its
+test was removed with that screen) belongs on this page as one row opening a sheet.
+Done when: holdings and the value agree with the PC's Investments page on Mohab's year (a test), and the sale
+breakdown shows 500 for a 1,000 holding at a 50% factor; the `investments.py`
 and `accounts.py` currencies phone branches are gone; recipe steps 4-5.
 
 ## 3AY16 Settings on the phone · M

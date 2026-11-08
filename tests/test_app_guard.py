@@ -93,7 +93,7 @@ def test_opening_a_profile_another_process_holds_says_so_and_the_holder_keeps_wo
 def test_a_page_with_a_phone_screen_uses_it_and_any_other_page_keeps_its_own():
     templates = Path(__file__).resolve().parents[1] / "lightning/ui/templates"
     phone = {p.relative_to(templates / "phone").as_posix() for p in (templates / "phone").rglob("*.html")}
-    assert {"dashboard/index.html", "accounts/list.html"} <= phone
+    assert {"accounts/list.html"} <= phone
     for name in phone - {"base.html"}:
         if (templates / name).exists():
             assert _phone_template(name) == f"phone/{name}"

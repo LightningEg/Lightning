@@ -38,15 +38,3 @@ def test_saved_views_are_one_menu_with_the_name_field_inside(c, setup):
     assert "<summary>Views" in menu and f"saved_view={view_id}" in menu
     assert 'name="name"' in menu and "Save view" in menu
     assert page.count('name="name"') == 1 and "Open a saved view" not in page
-
-
-def test_phone_latest_hides_value_updates(c):
-    _brokerage_with_updates(c)
-    app = create_app(c)
-    async def phone_app(scope, receive, send):
-        scope.setdefault("state", {})["phone"] = True
-        await app(scope, receive, send)
-    client = TestClient(phone_app)
-    latest = client.get('/').text.split('class="phone-section phone-latest"', 1)[1].split('</section>', 1)[0]
-    assert 'Investment revaluation' not in latest
-    assert 'THNDR' in latest

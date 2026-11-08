@@ -143,7 +143,7 @@ def test_saving_from_the_sheet_remembers_the_account_and_says_saved_with_undo(mo
     session = re.search(r'name="__session" value="([^"]*)"', sheet).group(1)
     saved = phone.post(f"/accounts/{accounts['wallet'].id}/transaction/new", data={
         "__session": session, "kind": "out", "amount": "120", "category_id": str(cats["EXP.PERSONAL.FOOD"].id),
-        "date": "2026-09-14", "return_to": "/"})
+        "date": "2026-09-14", "return_to": "/transactions"})
     assert saved.status_code == 200 and "Saved." in saved.text
     assert 'class="flash phone-flash"' in saved.text                                              # the toast above the tab bar
     assert phone.cookies.get("lightning_last_account") == str(accounts["wallet"].id)

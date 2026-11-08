@@ -594,30 +594,6 @@ def test_planner_warns_about_partial_targets_and_preserves_saved_weights(inv):
     assert c.investments.target_weights() == {"Stocks": D("70")}
 
 
-def test_phone_sale_breakdown_uses_sale_factors_and_leads_with_parent_total(inv, monkeypatch):
-    c, accounts, _, comi, _ = inv
-    monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-25")
-    stock = c.assets.get_class_by_code("STOCK")
-    c.investments.buy_total("2026-09-10", accounts["thndr"].id, comi.id, "10", "1000")
-    c.assets.set_price(comi.id, "2026-09-25", "100")
-    c.investments.set_liquidation_factor(stock.id, "50")
-    app = create_app(c)
-
-    @app.middleware("http")
-    async def phone_frame(request, call_next):
-        request.state.phone = True
-        return await call_next(request)
-
-    page = TestClient(app).get("/")
-    assert page.status_code == 200
-    child = re.search(r'<a class="phone-row"[^>]+href="/birdview/class/' + str(stock.id) +
-                      r'\?[^\"]+"[^>]*>(.*?)</a>', page.text, re.S)
-    assert child is not None
-    text = re.sub(r"<[^>]+>", " ", child.group(1))
-    assert "500" in text and "1,000" not in text
-    assert page.text.index("Holdings after sale") < child.start()
-
-
 def test_planner_without_any_targets_explains_the_missing_allocation(c):
     response = TestClient(create_app(c)).get("/investments/planner?amount=1000")
     assert response.status_code == 200
