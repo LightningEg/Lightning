@@ -1,8 +1,6 @@
 """IV-3AY15: Investments on the phone agree with the PC page and with Money."""
-import re
 from datetime import date
 
-import pytest
 
 from tests.test_phone_account import _phone, sample  # noqa: F401  (fixture and phone client)
 from lightning.ui.phone.screens import investments as screen
