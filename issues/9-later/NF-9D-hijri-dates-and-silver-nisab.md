@@ -4,7 +4,7 @@ type: feature
 pillar: own
 size: M
 model: opus
-status: new
+status: ready
 created: 2026-10-19
 by: Claude
 ---
@@ -16,21 +16,17 @@ Arabic and zakat are built without them. Checked 2026-11-08 against the code:
 - **Nisab is gold only.** `ZakatService.nisab()` is `NISAB_GRAMS = 85` × `gold_price_24k(day)`, else the nisab the user typed (`zakat_settings.typed_nisab_e6`, migration `0054_zakat.sql`). The common silver nisab (595 g of pure silver) is not offered. Silver can now be held (asset kind `SILVER`, code prefix `SLV`, `lightning/assets/domain.py:114`, migration `0076_silver_class.sql`) but is priced by hand: there is no silver reference price like `REF:GLD-24K`, and `lightning/market/sources/yahoo.py:41` maps `XAG/USD` to `SI=F` without any caller.
 - Architecture › Zakat, Glossary › Zakat day and Overview §shipped all say "Hijri dates are not built" and "A silver nisab is not built"; each step below updates the line it makes untrue.
 
+## Decided
+
+- 2026-11-08, owner (9D2): gold (85 g) stays the default with Silver (595 g) and The lower of the two in Settings; the silver gram price is typed by the user with its date.
+- 2026-11-08, owner (9D1): Umm al-Qura through the offline `hijridate` package (shown as "about"); a zakat day picked as a Hijri date repeats on that Hijri date, a Gregorian pick keeps +354 days.
+
 ## Fix
 After the owner's two decisions (9D1, 9D2): a Hijri conversion in Python (`lightning/core/hijri.py`), the Hijri date shown beside every zakat day, the zakat day optionally kept on its Hijri date, and a nisab basis setting (gold, silver, or the lower of the two) with a silver gram price. Money logic stays in `lightning/zakat.py`; templates only draw.
 
 ## How to work on this item
 
 Each step below is one pull request. Read only the files a step names (`grep -n` before reading `lightning/zakat.py` whole). Run the step's test command, then `python -m pytest tests/test_zakat.py tests/test_issues.py -q`; for a visible change also `python -m pytest tests/test_mohab_year.py -q`. Delete the step's heading in the same commit, and record the owner's answers in this file and in `ai/PROJECT_OVERVIEW.md` owner decisions.
-
-## 9D1 Owner: which Hijri calendar, and does the zakat day follow it · owner
-Two questions, asked as one pick-list each:
-1. **Where Hijri dates come from, offline.** (a) *(Recommended)* The Umm al-Qura table through the small pure-Python package `hijridate` (MIT; tables for 1343-1500 AH, no network): exact for Saudi official dates; Egypt's Dar al-Ifta sighting can differ by one day, so the screen says "about". Needs a new dependency on Windows and Android. (b) The same Umm al-Qura month starts copied into Lightning as data: no dependency, but we own its provenance and updates. (c) The arithmetic (tabular) Islamic calendar: a few lines of Python, no data, but often one to two days off the announced date.
-2. **What the zakat day follows.** (a) *(Recommended)* The user may pick it as a Hijri date (e.g. 1 Ramadan); each next zakat day is that Hijri date in the next Hijri year; a day picked as Gregorian keeps +354 days as now. (b) Always +354 days, the Hijri date only shown: simplest, drifts a day every three years. (c) Always the Hijri anniversary, existing Gregorian picks converted once.
-
-## 9D2 Owner: which nisab by default, and where the silver price comes from · owner
-1. **Nisab basis.** (a) *(Recommended)* Gold (85 g of 24K) stays the default; Settings offers *Silver (595 g)* and *The lower of the two*; the page names the basis. (b) Silver by default: more people owe zakat, which many scholars advise for the poor's benefit, but it changes every existing estimate. (c) The lower of the two by default. Either way the page keeps "a scholar answers your own case".
-2. **Silver price.** (a) *(Recommended)* The user types a gram price of pure silver behind the gear, kept with its date (as the typed nisab is); no network. (b) A seeded reference `REF:SLV-999` priced from Yahoo's world price (`SI=F` ÷ 31.1035 × `EGP=X`), like gold's world price in `lightning/workflows/live_prices.py`: automatic, but an Egyptian shop price differs and it adds a price job. (c) The newest price of a silver holding the user owns: none for most people.
 
 ## 9D3 Hijri conversion in Python · S · opus
 Needs 9D1 decided first.

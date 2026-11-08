@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 48 open items. Each folder holds its reports and its items.
+11 big pictures, 46 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -16,8 +16,6 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | improvement, technical | Build | M | Opus | ready |
-| IT-1E1 | ↳ Owner: stop the personal email in new commits | | | owner |  | |
-| IT-1E2 | ↳ Owner: which working documents stay public | | | owner |  | |
 | IT-1E3 | ↳ Owner: deploy the website receiver and rotate the analytics key | | | owner |  | |
 | IT-1E4 | ↳ Check the live website receivers against formula injection and key leaks | | | S | Opus | |
 | IT-1E5 | ↳ Owner: apply the repository protections | | | owner |  | |
@@ -32,7 +30,6 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1H3 | ↳ Regenerate the locks | | | M | Opus | |
 | IT-1H4 | ↳ Validate | | | M | Opus | |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | Sonnet | ready |
-| IT-1N1 | ↳ Approve the first batch and its coins | | | owner |  | |
 | IT-1N2 | ↳ Post the approved batch | | | S | Sonnet | |
 | **IT-1R** | [Direct tests for investment_breakdown](1-easy-to-contribute/IT-1R-investment-breakdown-direct-tests.md) ([#339](https://github.com/LightningEg/Lightning/issues/339)) | improvement, technical | Build | M | Sonnet | ready |
 | **IT-1S** | [Direct tests for SubmissionStore (a form saved twice saves once)](1-easy-to-contribute/IT-1S-submission-store-direct-tests.md) ([#340](https://github.com/LightningEg/Lightning/issues/340)) | improvement, technical | Build | S | Sonnet | ready |
@@ -63,7 +60,6 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | **IT-2C** | [Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidence repair](2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md) | improvement, technical | Protect | L | Opus | ready |
 | IT-2C2 | ↳ Legacy import | | | M | Opus | |
 | IT-2C3 | ↳ Restore a backup from anywhere (Windows Open dialog) | | | M | Opus | |
-| IT-2C7 | ↳ Owner: what a locked profile with unresolved evidence may do | | | owner |  | |
 | IT-2C4 | ↳ Unresolved-evidence repair | | | M | Opus | |
 | IT-2C5 | ↳ Native reminder delivery: test what runs on Windows | | | S | Sonnet | |
 | IT-2C6 | ↳ One ordinary-PC acceptance sheet | | | S | Sonnet | |
@@ -128,18 +124,18 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3BK3 | ↳ PC screens use them | | | M | Sonnet | |
 | IV-3BK4 | ↳ Phone screens use them | | | M | Sonnet | |
 | IV-3BK5 | ↳ Arabic currency label ج.م | | | S | Sonnet | |
+| IV-3BK6 | ↳ Rows drop ".00" on the PC too | | | S | Sonnet | |
+| IV-3BK7 | ↳ Arabic ٪ and the period chip in Arabic-Indic digits | | | S | Sonnet | |
+| IV-3BK8 | ↳ Arabic speaks to the person in neutral forms | | | M | Opus | |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | Opus | ready |
-| NF-3AU1 | ↳ Choose how reminders reach a closed app | | | owner |  | |
 | NF-3AU2 | ↳ Write the reminder schedule while the profile is open | | | M | Opus | |
 | NF-3AU3 | ↳ Windows: a daily task shows the schedule with the app closed | | | M | Opus | |
 | NF-3AU4 | ↳ Android: a daily job shows the schedule with the app closed | | | M | Opus | |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/OW-3AI-institution-logos.md) | owner task | Feel |  |  | ready |
-| **OW-3BJ** | [Owner decisions for an international look - date display, the Arabic currency label, row decimals, percent sign, dark mode, how Arabic addresses the person](3-polish-and-arabic/OW-3BJ-international-display-decisions.md) | owner task | Feel |  |  | new |
-| OW-3BJ1 | ↳ The five open choices | | | owner |  | |
 
 Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md) · [r28](3-polish-and-arabic/r28-international-polish/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA. Next free code: 3BL.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BJ. Next free code: 3BL.
 
 ## 4 Edit journal and devices
 
@@ -193,20 +189,17 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | new feature | Capture | L | Opus | new |
-| NF-7AB7 | ↳ The owner picks the review flow | | | owner |  | |
+| **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | new feature | Capture | L | Opus | ready |
 | NF-7AB1 | ↳ Summary first, rows last | | | M | Opus | |
 | NF-7AB3 | ↳ Group by the question, not the name | | | M | Opus | |
 | NF-7AB2 | ↳ Post in rounds, continue from the account | | | S | Sonnet | |
 | NF-7AB6 | ↳ Safe to go fast: Undo and the balance on the result | | | S | Sonnet | |
 | NF-7AB4 | ↳ Smart buttons on a group | | | M | Sonnet | |
 | NF-7AB5 | ↳ Quick mode for leftovers | | | M | Sonnet | |
-| **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](7-planning-import-and-search/NF-7C-move-in-from-other-apps.md) | new feature | Capture | L | Opus | new |
-| NF-7C4 | ↳ Close this item or keep it parked | | | owner |  | |
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md).
 
-Done: 7A, 7B, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC. Next free code: 7AD.
+Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC. Next free code: 7AD.
 
 ## 8 Website
 
@@ -246,9 +239,7 @@ Good ideas that wait until the milestones above are done.
 | NF-9B7 | ↳ Pin the update key in the app | | | S | Opus | |
 | NF-9B8 | ↳ Owner: approve the v2.1.0 tag | | | owner |  | |
 | NF-9B9 | ↳ The site's release update for 2.1.0 | | | M | Opus | |
-| **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | Opus | new |
-| NF-9D1 | ↳ Owner: which Hijri calendar, and does the zakat day follow it | | | owner |  | |
-| NF-9D2 | ↳ Owner: which nisab by default, and where the silver price comes from | | | owner |  | |
+| **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | Opus | ready |
 | NF-9D3 | ↳ Hijri conversion in Python | | | S | Opus | |
 | NF-9D4 | ↳ Show the Hijri date beside every zakat day | | | S | Sonnet | |
 | NF-9D5 | ↳ Keep the zakat day on its Hijri date | | | M | Opus | |
@@ -280,7 +271,6 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 | NF-10C4 | ↳ Owner steps 1-6 in order | | | owner |  | |
 | NF-10C5 | ↳ Review prices after 60 days of sales | | | owner |  | |
 | **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](10-looks-and-store/NF-10D-papyrus-and-dendera-bundles.md) | new feature | Feel | M | Opus | ready |
-| NF-10D1 | ↳ Approve a banner, frame and name for Papyrus and Dendera | | | owner |  | |
 | NF-10D2 | ↳ Add the pieces and the two sets to the catalogue | | | M | Opus | |
 
 Reports: [r12](10-looks-and-store/r12-v150-release/report.md) · [r13](10-looks-and-store/r13-store-and-community/report.md).
@@ -329,16 +319,13 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-3AM4 | ↳ Settings stop being forms (ST1-ST4) | | | M | Opus | |
 | IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | M | Opus | |
 | **IV-3H** | [Tab-by-tab review: what a real user needs next](12-desktop-ux/IV-3H-tab-by-tab-review.md) | improvement, visual | Feel | L | Opus | ready |
-| IV-3H3 | ↳ Owner: the open choices in §12 | | | owner |  | |
 | IV-3H4 | ↳ A month-end prices reminder | | | S | Sonnet | |
 | IV-3H5 | ↳ A missed-salary row in Needs you, and its reminder | | | S | Sonnet | |
 | IV-3H6 | ↳ Zakat: optionally take off the next 12 months' loan instalments | | | M | Opus | |
 | IV-3H7 | ↳ Loans: an optional rate and the cost of the loan | | | M | Opus | |
-| IV-3H8 | ↳ Owner: which analysis comes first | | | owner |  | |
 | IV-3H9 | ↳ Build the chosen analysis | | | M | Opus | |
 | IV-3H10 | ↳ Triage the ids no step names | | | M | Opus | |
-| **NF-12G** | [Money lent to others and costs split with others - who owes you what, counted honestly in what you own](12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | new feature | Own | L | Opus | new |
-| NF-12G1 | ↳ Design: the person, the loan, the split, and where they show | | | owner |  | |
+| **NF-12G** | [Money lent to others and costs split with others - who owes you what, counted honestly in what you own](12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | new feature | Own | L | Opus | ready |
 | NF-12G2 | ↳ Money lent and paid back: the service | | | M | Opus | |
 | NF-12G6 | ↳ Lend, paid back and forgive on the person's page (PC) | | | M | Sonnet | |
 | NF-12G3 | ↳ A cost split with others: the service | | | M | Opus | |

@@ -32,7 +32,7 @@ Done when: `python -m pytest tests/test_voice.py -q` passes and the list lives a
 
 ## 3BH2 "Counterparty" becomes "Payee" (Arabic: الطرف التاني → الجهة) · M
 Needs 3BH1 merged first.
-Owner check: the word. Proposed "Payee" for money out and in ("Who" as a column heading); if the owner picks another word in the PR review, use it.
+Decided (owner, 2026-11-08): "Payee" for money out and in, "Who" as a column heading.
 Files: `grep -rln "Counterpart" lightning/ui ai/GLOSSARY.md` (63 keys; the nav heading on `/counterparties`).
 Do: rename the visible words only; keep `/counterparties` and every variable. Add "counterparty" to the test's list.
 Done when: `tests/test_voice.py` passes with the word listed.

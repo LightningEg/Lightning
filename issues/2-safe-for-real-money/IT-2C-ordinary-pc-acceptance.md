@@ -37,6 +37,10 @@ Checked against the code on 2026-11-08 (Claude). None of the five parts is finis
 The owner runs native checks only end to end (NOW.md, Overview §9), so the AI builds and prepares everything first
 (2C2-2C6), and the owner runs one sheet once (2C1).
 
+## Decided
+
+- 2026-11-08, owner (2C7): (a) "Go back to the copy from before the restore" after the password, through the normal restore path; every other file stays as evidence.
+
 ## How to work on this item
 
 One step is one pull request. Read only the files a step names; dummy profiles only, never a real one. Run the
@@ -77,14 +81,6 @@ existing message, and the copy is removed. The restore page shows "Choose a back
 Done when: a test with a fake picker returns a dummy profile's backup from a temp folder outside the profile and the
 restore completes; a picker returning another profile's backup is refused and leaves no copy; with no picker the
 route is 404. `python -m pytest tests/test_desktop_window.py tests/test_database_promotion.py -q`.
-
-## 2C7 Owner: what a locked profile with unresolved evidence may do · owner
-When a restore cannot prove its next step, the profile stays locked and its copies are kept (no automatic rollback,
-by design: ARCHITECTURE › Restore and promotion). Options: (a) **"Go back to the copy from before the restore"**
-after the password: the verified pre-restore snapshot is restored through the normal path, every other file stays as
-evidence (Recommended: one safe way out, nothing deleted); (b) a **diagnostic file only** (names, sizes, hashes,
-phases; no data) to send for help, and the profile stays locked; (c) both; (d) leave as is, documented. Record the
-answer here and in `ai/PROJECT_OVERVIEW.md` owner decisions.
 
 ## 2C4 Unresolved-evidence repair · M · opus
 Needs 2C7 agreed first.

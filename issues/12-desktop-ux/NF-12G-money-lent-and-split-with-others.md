@@ -4,7 +4,7 @@ type: feature
 pillar: own
 size: L
 model: opus
-status: new
+status: ready
 created: 2026-11-06
 by: Claude
 ---
@@ -14,6 +14,10 @@ by: Claude
 The owner brought this into scope on 2026-11-06 (OW-12F, from audit r26 F9: [report](r26-user-test-pc-and-phone/report.md)); credit cards and receipt photos stay out. Lending to family and friends and splitting a dinner, a trip or a flat's bills are everyday money in Egypt, and today a person can only hide them in notes or a category. What exists to build on: Held for others (money in your account that is not yours), reimbursement claims (`reimbursements.py`: an owned expense someone will pay back, matched to the receipt), Needs you, and the phone's Add sheet. The decision row is in `ai/PROJECT_OVERVIEW.md` ("Obligations count, forecasts never do").
 
 Rules to keep: one ledger records real money; lending moves money out of your account but not out of what you own until you decide it will not come back; a split records only your share as spending; nothing is assumed repaid until the repayment is posted; one person may owe you and you may owe them, shown as one net figure per person.
+
+## Decided
+
+- 2026-11-08, owner (12G1): all four recommended: (1) one `RECEIVABLE` "Owed to you" account per person, lending and repayment are transfers, forgiving is spending; (2) a split is one entry, only your share is spending, the others' shares go to their accounts; (3) when you owe them, the same account goes below zero and counts in What you owe; (4) words: Owed to you «ليك عند الناس», Lend «سلّف», Paid back «رجّع», Forgive «سامح», Split «قسّم».
 
 ## Fix
 
@@ -35,23 +39,6 @@ reuse: `ReimbursementService` (`lightning/reimbursements.py`, claims on an expen
 Each step is one pull request. Read only the files a step names; money rules are in `ai/ARCHITECTURE.md` (grep
 `^## `). Run the step's test command, then `python -m pytest tests/test_issues.py -q`; for a visible change also
 `python -m pytest tests/test_mohab_year.py -q`. Delete the step's heading in the same commit (AGENTS.md §3).
-
-## 12G1 Design: the person, the loan, the split, and where they show · owner
-The owner answers in the question dialog; record the answers in this item and in `ai/PROJECT_OVERVIEW.md` (row
-"Obligations count, forecasts never do").
-1. **How money owed to you is kept.** (a) **(Recommended)** One "Owed to you" account per person, type `RECEIVABLE`
-   (the database already allows it): lending is a transfer from your account into it, repayment a transfer back,
-   forgiving is spending out of it. One ledger, Net worth unchanged by a loan, the Gam'eya code shows the way; the
-   person appears as an account in What you own. (b) A loans table beside the ledger linked to the person: no new
-   account, but a second record of money to keep in step with the ledger. (c) Reimbursement claims on a "lent"
-   expense (exists today): no new code for lending, but the loan counts as spending until repaid, which breaks the
-   rule above.
-2. **Splitting a cost.** (a) **(Recommended)** One entry: the full amount leaves your account, your share goes to the
-   category, each other person's share goes to their Owed-to-you account; repayment is a transfer back. Only your
-   share is spending. (b) Keep today's reimbursement claim (the whole bill is spending until each friend pays).
-3. **When you owe them** (they paid for you). (a) **(Recommended)** Same account below zero, counted in What you owe,
-   as a Gam'eya pot taken early is; one net figure per person. (b) Out of scope for now: lending and splits only.
-4. **Words, English and Arabic.** (a) **(Recommended)** "Owed to you" «ليك عند الناس», "Lend" «سلّف», "Paid back" «رجّع», "Forgive" «سامح», "Split" «قسّم». (b) The owner gives other words.
 
 ## 12G2 Money lent and paid back: the service · M · opus
 Needs 12G1 merged first.
