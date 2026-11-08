@@ -1,8 +1,9 @@
 ---
-title: Structure left - runtime routes and bank-import orchestration
+title: Structure left - restore, device and borrowing routes out of profile_app
 type: tech
 pillar: build
 size: M
+model: opus
 status: ready
 post: no
 created: 2026-10-21
@@ -55,3 +56,28 @@ Still open: restore, device and borrowed-profile routes after their claims clear
 CSV decoding, numeric and date normalization, and row-level errors live in `bank_import_parsing.py`; `BankImportService` and the original helper imports remain available. The review proposals and duplicate/transfer/category suggestions now live in `bank_import_proposals.py`; the facade retains its preview interface. Posting and linking one reviewed row now live in `bank_import_posting.py`; the facade still owns confirmation ordering, transaction and rollback scopes. Regression: `tests/test_bank_imports.py`, `tests/test_import_upload_limits.py`, `tests/test_architecture.py`.
 
 The upstream `bank_import_rows.py` readers remain authoritative and the journal uses them; normalization delegates to those same readers. Remaining: claimed restore/device routes. Undo validators are now passed before attachment in this branch.
+
+## Checked · 2026-11-08
+
+On main: profile lifecycle screens live in `lightning/runtime/profile_screens.py` (#300); bank-import parsing, proposals and posting live in `lightning/bank_import_parsing.py`, `bank_import_proposals.py` and `bank_import_posting.py` (merged), so the bank-import half of the title is done. The balance walk (2) and the transaction facade are done. `lightning/runtime/app.py` is 764 lines; `profile_app` runs from line 191 to the end, and its routes still hold restore (`/profiles/restore`, `/profiles/restore/resume`), Lock (`/profiles/lock`, which calls `hand_back`), the phone's device routes (`/profiles/devices*`) and the PC's borrowing routes (`/profiles/connect`, `/profiles/borrowed`, `/profiles/receive`, `/profiles/move`, `/profiles/hand-back` and `/sync/hand-back`). The 2A restore claim is gone from `NOW.md`; the one claim left covers `lightning/runtime/journal*`, which these steps do not touch (the journal routers are only included from `profile_app`).
+
+## How to work on this item
+
+Each step below is one pull request that **moves code unchanged**: same routes, same messages, same status codes, no test edited. Copy the pattern of `lightning/runtime/profile_screens.py` (a dataclass of what the routes need, a `register(app, screens)` function) and read only the lines of `lightning/runtime/app.py` the step names. Run `python -m pytest tests/test_profile_app.py tests/test_architecture.py tests/test_devices_app.py -q` plus the step's own tests, and `ruff check lightning tools`; delete the step's heading in the same commit.
+
+## 9K1 Restore routes out of profile_app · S · sonnet
+Files: `lightning/runtime/app.py` (the four routes `restore_page`, `restore`, `resume_restore_page`, `resume_restore`, about lines 365-425); new `lightning/runtime/restore_screens.py`; `pyproject.toml` `[tool.importlinter]` layers only if `tests/test_architecture.py::test_every_production_module_has_a_layer` asks for the new module.
+Do: move the four routes, word for word, into `register(app, session, devices, page)` in `restore_screens.py` (they use only `session`, `devices.blocks_restore` and `page`), and call it from `profile_app` right after `page, action = screens.page, screens.action`. Module docstring: what moved and why (IT-9K). Do not touch `/profiles/lock`.
+Done when: `python -m pytest tests/test_profile_app.py tests/test_sync_review.py tests/test_architecture.py -q` (the tests that post to `/profiles/restore`) passes unchanged, and `grep -n "profiles/restore" lightning/runtime/app.py` is empty.
+
+## 9K2 The phone's device routes out of profile_app · M · opus
+Needs 9K1 merged first.
+Files: `lightning/runtime/app.py` (`device_page`, `phone_device_page`, `pc_device_page`, `home_only` and the routes `/profiles/devices`, `/profiles/devices/pair`, `/profiles/devices/keep-home`, `/profiles/devices/stop-pairing`, `/profiles/devices/revoke`, `/profiles/devices/take-back`, about lines 436-562); new `lightning/runtime/device_screens.py`.
+Do: move them unchanged behind a `DeviceScreens` dataclass holding `session`, `devices`, `gate`, `page` and `app` (two routes set `app.state.container`; pass `app` rather than reaching for a global). Opus because pairing, revocation and take-back move a real ledger between devices: check by reading that no closure variable is captured differently after the move (each `nonlocal` or late-bound name), and that `device_page`'s redirect to `/journal/devices` when `session.journal` is set is kept.
+Done when: `python -m pytest tests/test_devices_app.py tests/test_two_devices.py tests/test_device_roundtrip.py tests/test_pairing_entrypoints.py tests/test_profile_app.py tests/test_architecture.py -q` passes unchanged and `grep -n "profiles/devices" lightning/runtime/app.py` is empty.
+
+## 9K3 The PC's borrowing routes and Lock out of profile_app · M · opus
+Needs 9K2 merged first.
+Files: `lightning/runtime/app.py` (`/profiles/lock`, `/profiles/connect`, `/profiles/borrowed`, `/profiles/receive`, `/profiles/move`, `/profiles/hand-back` and `/sync/hand-back`, from about line 427 and from about line 563 to the `secured = Guard(...)` line); new `lightning/runtime/borrow_screens.py`.
+Do: move them unchanged; `lock` calls `hand_back`, so both move together. Keep `open_profile_id`, `kept` and `session.borrowed_home` handling exactly as they are (pass `open_profile_id` and `kept` in the dataclass). Opus for the same reason as 9K2 (a borrowed ledger and its hand-back). After this step `profile_app` should only build the app, wire the session, gate and routers, and return the `Guard`; this is the item's last step, so finish the item in the same commit: delete this file and add `9K` to `done:` in `issues/9-later/README.md` (AGENTS.md §3).
+Done when: `python -m pytest tests/test_two_devices.py tests/test_devices_app.py tests/test_profile_app.py tests/test_profile_session.py tests/test_architecture.py -q` passes unchanged, and `grep -c "@app\." lightning/runtime/app.py` counts only the routes that stay (health, checking, read-only, `__activity`).

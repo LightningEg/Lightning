@@ -3,6 +3,7 @@ title: Multiple devices: implementation plan
 type: feature
 pillar: everywhere
 size: L
+model: opus
 status: building
 created: 2026-10-05
 by: unknown (moved from docs/proposals)

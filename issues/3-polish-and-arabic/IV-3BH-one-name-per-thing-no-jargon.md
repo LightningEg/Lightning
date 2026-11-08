@@ -3,6 +3,7 @@ title: One name per thing and no accounting jargon - ledger, counterparty, reeva
 type: polish
 pillar: feel
 size: M
+model: sonnet
 status: ready
 created: 2026-11-08
 by: Claude
@@ -53,7 +54,7 @@ Files: `lightning/ui/i18n.py`, templates.
 Do: "Gam’eya" → "Gam'eya" in the 2 places (`grep -rn "Gam’eya" lightning`); Arabic دهب → ذهب (glossary spelling: check `ai/GLOSSARY.md`), انت → إنت; Free cash's Arabic is the glossary's النقدية المتاحة everywhere, and brand-voice's «المتاح للصرف» is for Safe to spend only (check `grep -n "المتاح" guideline/brand-voice.md`). Curly apostrophes in visible English strings: `’` in place of `'` inside words, in templates and `ARABIC_UI` keys **and** their callers together (a key change must change every `|tr` that uses it).
 Done when: `grep -rc "دهب\|\bانت\b" lightning/ui/i18n.py` is 0 and `python -m pytest tests/test_arabic_no_english.py -q` passes.
 
-## 3BH6 Built-in categories in sentence case · M
+## 3BH6 Built-in categories in sentence case · M · opus
 Files: `lightning/database/seed.py`, a new migration (skill `add-migration`: read `skills/add-migration/SKILL.md` first), `lightning/ui/i18n.py` (Arabic keys for the new names).
 Do: change the 27 Title Case seed names ("Eating Out" → "Eating out", "Utilities & Bills" → "Utilities & bills", "Unaccounted Money Found" → "Unaccounted money found" …) for new profiles; the migration renames them in existing profiles **only where the user has not renamed them** (match the old exact name and the seed's code). Keep codes.
 Done when: the migration's test upgrades a profile made with the old seed and finds the new names, and a renamed category keeps its user name. `python -m pytest tests/test_migrations*.py tests/test_mohab_year.py -q`.

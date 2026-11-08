@@ -3,6 +3,7 @@ title: Tab-by-tab review: what a real user needs next
 type: polish
 pillar: feel
 size: L
+model: opus
 status: ready
 created: 2026-10-14
 by: Codex
@@ -506,5 +507,125 @@ Beyond the open gaps already listed in the Project Overview, ranked by how often
   `test_display_returns.py`, IN-2 `test_holdings_total_income.py`, AC-2 `test_register_number_roles.py`, GA-1
   `test_gameya_catchup.py`, CP-1 `test_mohab_year.py` (on top of your plan).
 
-## 3H3 Step 3: features · L
-§14 step 3: FR-2, X-11 reminders, OV-3 bridge, BU-8, LO-2, LO-3, SE-2, OV-8, then the owner's choices in §12.
+## What is left (2026-11-08)
+
+Checked against the code on 2026-11-08 (Claude). Step 3 of §14 is built except the owner's choices:
+FR-2 (`workflows/salary_setup.py`), X-11 reminders while the app runs (`workflows/reminders.py`, `desktop/window.py`,
+`ReminderNotifications.java`; with the app closed is [NF-3AU](../3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md)),
+OV-3 and OV-8 (f36311ed), BU-8 (Budget's "not yet given a job" line, `ui/kpis.py:164`), LO-2, LO-3 and SE-2
+(milestone 1). The "optional reminders and confirmations" milestone (Overview §2) is built: the Weekly review's
+Optional reminders card and the grouped certificate-interest "match all" in Needs you (`workflows/review.py:199`).
+HO-2 is now [NF-12G](NF-12G-money-lent-and-split-with-others.md). FR-1 is softened: samples load only into an empty
+profile (`ui/routes/dashboard.py:528`).
+
+Left: the owner's open choices in §12 (3H3), two missing reminders (3H4, 3H5), what the owner approves (3H6, 3H7),
+the "deeper analytics" milestone (3H8, 3H9), and a triage of the P2/P3 ids above that no step names (3H10).
+Out of scope here: the PC tab declutter is [IV-3AM](IV-3AM-pc-declutter-tab-by-tab.md), the phone is
+[IV-3AY](../11-phone-ux/IV-3AY-phone-first-architecture.md); never change their screens' layout from this item.
+
+## How to work on this item
+
+One step is one pull request. Do not read this whole file: read the step, then only the section of the design it
+names (`grep -n '^\*\*<ID> ' issues/12-desktop-ux/IV-3H-tab-by-tab-review.md`) and the files it lists. Run the step's
+test, then `python -m pytest tests/test_mohab_year.py -q`; new visible text gets Arabic in `lightning/ui/i18n.py`
+`ARABIC_UI`. Delete the step's heading in the same commit, and tick the design id (`**[x] ID`) it finishes.
+
+## 3H3 Owner: the open choices in §12 · owner
+Ask in one pick-list per question; record each answer in §12 above (`[x]` with the date) and in
+`ai/PROJECT_OVERVIEW.md` owner decisions. A "no" deletes the matching build step below.
+1. **Missed salary (X-11; left out on 2026-10-14, "ask again").** (a) Needs you row and a reminder when an expected
+   income is 2 days past its date and nothing is recorded or linked; it only links to the existing Record screen,
+   never posts (Recommended: the commonest worry, small, read-only); (b) leave it out: salary days vary.
+   Yes → 3H5.
+2. **Zakat debts (ZK-2).** (a) A second switch, off by default: "Also take off loan instalments due in the next
+   12 months (scholars differ)" (Recommended: matches the existing "debts due now" switch, the user chooses);
+   (b) keep only debts due now. Yes → 3H6.
+3. **Loan interest (LO-1).** (a) Optional rate (flat or reducing) on a loan, shown as "Total interest" and "Cost of
+   this loan"; the ledger still records payments as spending (Recommended: compares offers, no accounting change);
+   (b) no rate. Yes → 3H7.
+4. **Pay-cycle months (X-10).** (a) Not now: the payday page already reads from payday (Recommended: the change
+   touches every period, budget month and health month); (b) a "My month starts on day 1-28" setting, as its own
+   L item.
+5. **Safe to spend from this month's money only (CP-2).** (a) Not now (Recommended: one more setting on a figure
+   people already find hard); (b) a Budget setting, off by default, as its own item.
+6. **Samples in their own profile (FR-1).** (a) Close it: samples already load only into an empty profile
+   (Recommended); (b) a separate "Sample · Mohab" profile with a Sample data band, as its own item.
+
+## 3H4 A month-end prices reminder · S · sonnet
+Files: `lightning/workflows/reminders.py` (`ReminderService.due`), `lightning/reporting/service.py:255`
+(`stale_prices(as_of, days)`, read only), `lightning/ui/i18n.py` (`ARABIC_UI`, near `'A fresh backup is due'`),
+`tests/test_workflow_views_review.py` (beside `test_reminders_are_opt_in_stable_and_read_only_safe`).
+Verify first: `grep -n "Month-end prices" lightning/workflows/reminders.py`; if present, delete this step.
+Do: in `due()`, after the zakat block: when `tomorrow.day == 1` (today is the month's last day) and
+`c.reporting.stale_prices(day, days=day.day - 1)` is not empty (a market-priced holding has no price this month),
+append `{"label": "Month-end prices are due", "detail": "Update them so this month's values are right.",
+"href": "/investments/prices", "priority": 2}`. Add both sentences to `ARABIC_UI`.
+Done when: a new test `test_month_end_prices_reminder_only_on_the_last_day` builds a holding priced on the 1st
+(use the `c` fixture and the investment helpers the file already uses), monkeypatches
+`lightning.workflows.reminders.today` to the month's last day (reminder present) and to the day before (absent).
+`python -m pytest tests/test_workflow_views_review.py -q`.
+
+## 3H5 A missed-salary row in Needs you, and its reminder · S · sonnet
+Needs 3H3 agreed first (question 1 answered yes).
+Files: `lightning/workflows/review.py` (`ReviewInbox.items`, the "Payments that are due and unpaid" loop at ~149),
+`lightning/planning/service.py:249` (`all_payments(until, as_of, kinds)`), `lightning/planning/domain.py`
+(`PlanKind.INCOME`, `Payment.days_late`), `lightning/ui/i18n.py`, `tests/test_salary_day_review.py` (its `setup`
+fixture and `_salary_item`).
+Do: after the bills loop, for each payment in `c.planning.all_payments(on, on, (PlanKind.INCOME,))` with
+`payment.outstanding and payment.days_late(on) >= 2`, add `{"label": f"{payment.item.name} has not arrived",
+"detail": f"Expected {payment.due_date} · {fmt(payment.amount)} {currency}. Record it when it arrives.",
+"href": f"/plan/items/{payment.item.id}/pay?due={payment.due_date}&back=%2F", "popup": True,
+"action": "Record", "priority": 1}` (currency as the "arrived early" block computes it). Priority 1 makes
+`ReminderService.due()` send it too; nothing is posted. Arabic: add `'{name} has not arrived'` and the detail pattern to `ARABIC_UI` next to
+`'{name} arrived early'` (`lightning/ui/i18n.py:2934`), in the same `{name}` form.
+Done when: a test in `tests/test_salary_day_review.py`: with the salary item due on day D and nothing recorded,
+`ReviewInbox(c).items(D + 1 day)` has no such row, `items(D + 2 days)` has one, and after recording it through
+`/plan/items/{id}/pay` the row is gone. `python -m pytest tests/test_salary_day_review.py tests/test_workflow_views_review.py -q`.
+
+## 3H6 Zakat: optionally take off the next 12 months' loan instalments · M · opus
+Needs 3H3 agreed first (question 2 answered yes).
+Files: `lightning/zakat.py` (settings dataclass at ~42, `save_settings` ~127, lines ~205-215 `ZakatLine("debts", ...)`),
+`lightning/ui/templates/settings/zakat_section.html:13` and the phone zakat settings template
+(`grep -rln deduct_debts_due lightning/ui/templates`), a new migration (skill `add-migration`), `tests/test_zakat.py:147`.
+Do: a new setting `deduct_loans_12m` (default 0) and one more minus line "Loan instalments due in the next 12 months"
+summing the LOAN payments' `still_owed` due from the zakat day to one year after; a holding cannot be taken off twice
+(the "debts due now" line already counts loan payments due now: exclude them from the new line). Journal, export
+and undo carry the setting as the existing `deduct_debts_due` does.
+Done when: `tests/test_zakat.py` gains a test like `test_debts_due_now_are_taken_off_only_with_the_setting` for the
+new switch (off: unchanged; on: zakat base falls by exactly the 12 months' instalments, none counted twice), and a
+migration test upgrades an older profile. `python -m pytest tests/test_zakat.py -q`, then skill `number-audit`.
+
+## 3H7 Loans: an optional rate and the cost of the loan · M · opus
+Needs 3H3 agreed first (question 3 answered yes).
+Files: `lightning/planning/` (the LOAN plan item; find the model with `grep -n "LOAN" lightning/planning/domain.py`),
+`lightning/ui/templates/planning/loans.html` and its phone twin, a new migration (skill `add-migration`), a new
+`tests/test_loan_cost.py`.
+Do: an optional `interest_rate` (annual %) and `rate_kind` (FLAT or REDUCING) on a loan; a pure Python function
+`loan_cost(principal, rate, kind, months, instalment)` returns total interest and total cost; the loan card shows
+"Total interest" and "Cost of this loan" only when a rate is set. Payments stay spending; nothing in the ledger changes.
+Done when: `tests/test_loan_cost.py` checks a flat 60,000 at 10% over 24 months (interest 12,000) and a reducing loan
+against an amortisation table worked by hand in the test, and that a loan without a rate renders as today.
+`python -m pytest tests/test_loan_cost.py tests/test_mohab_year.py -q`.
+
+## 3H8 Owner: which analysis comes first · owner
+The "deeper analytics" milestone (Overview §2). Options: (a) **HE-6 inflation check**, "net worth grew 18%; prices
+rose 25%" on Health, from a shipped, dated CAPMAS CPI file updated like the FX pack (Recommended: the most useful
+line for an Egyptian user; needs a data source we keep current); (b) **SP-5 watchlist**, up to four pinned
+categories or counterparties at the top of Spending, this month against usual; (c) **SP-6 Spending by** account,
+counterparty or tag; (d) none for now. Record the answer here and in the Overview.
+
+## 3H9 Build the chosen analysis · M · opus
+Needs 3H3 and 3H8 agreed first. Read the chosen id's paragraph in §4 and `ai/ARCHITECTURE.md` › UI contract. The figure
+is computed in a Python service under `lightning/reporting/`, never in a template; PC and phone templates are
+separate and phone layout follows IV-3AY. Done when: a service test pins the figure for Mohab's year
+(`tests/test_mohab_year.py` gains one step), the page passes `python -m pytest tests/test_brand_audit.py -q` with no
+new failure, and A16 holds on a screenshot.
+
+## 3H10 Triage the ids no step names · M · opus
+For each id in §2-§11 without `[x]` (list them with `grep -n '^\*\*[A-Z][A-Z]-[0-9]* ' issues/12-desktop-ux/IV-3H-tab-by-tab-review.md`),
+skipping those §14 says are built or kept (they get `[x]` and the date now): check the code (one grep or one page
+load). Built → tick `[x]` with the commit. Covered by IV-3AM or IV-3AY → tick with "→ 3AM"/"→ 3AY". Still real →
+file one item per area with skill `add-plan-item` (e.g. HE-1/HE-2 Health labels, X-7 period pickers, X-8 figures open
+their rows, CA-4 category packs, TX-4 receipts, BU-9 seasons), linking back to the id. Not worth doing → strike it
+with a reason. Done when: every id is ticked, struck or linked to an item; `python tools/issues.py --check` passes;
+then this file can shrink to its open owner steps and be deleted once they are answered.

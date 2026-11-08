@@ -3,6 +3,7 @@ title: Phone finish - chevrons point forward in Arabic, quiet links 44 px tall, 
 type: polish
 pillar: everywhere
 size: S
+model: sonnet
 status: ready
 created: 2026-11-08
 by: Claude

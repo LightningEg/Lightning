@@ -3,6 +3,7 @@ title: Every error speaks plainly, in the person's language, on a branded page -
 type: polish
 pillar: feel
 size: M
+model: sonnet
 status: ready
 created: 2026-11-08
 by: Claude
