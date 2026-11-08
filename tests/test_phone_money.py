@@ -67,4 +67,5 @@ def test_the_bills_page_groups_the_one_bill_state_and_agrees_with_coming_up(moha
     assert not {(b.payment.item.id, b.due_date) for b in bills.late} & upcoming             # a bill sits in one group only
     app = create_app(mohab)
     mount_phone(app)
-    assert TestClient(app).get("/money/bills").status_code == 200
+    page = TestClient(app).get("/money/bills")
+    assert page.status_code == 200 and ".00" not in page.text.split("<main", 1)[1]   # whole EGP, A16
