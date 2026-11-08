@@ -105,19 +105,19 @@ gold), the Bills page (Late as one question), the Investments and account pages 
 with "Best on your PC" rows, the tab bar switch, `/more` `/plan` `/accounts` `/transactions` redirects, bills counted once
 across the Bills page, Coming up and Home.
 Built since: `/money/accounts` (every balance, behind "N more"), `/money/bills` (Late, This week, Before payday, After payday
-from the one bill state; Coming up is a slice of it, tested) and an *Edit your plan* row on the new Budget. Tried
-2026-11-08 and reverted: switching the tab bar to Home, Budget, Activity and Money with `/`, `/budget`, `/more`,
-`/accounts` and `/transactions` served or redirected by the phone router. It needs, first: an all-accounts page behind
-Money's "N more" (a redirect from `/accounts` to `/money` loops), the empty profile's welcome page kept for `/` (currency
-setup, first account, samples: a route that steps aside until an account exists works), and the old Budget's editing
-(limits, plan, raise offer) reachable from the new one. About 30 tests in `test_phone_frame`, `test_two_devices`,
-`test_sms_imports`, `test_app_guard` and the swipe, sheets and nav browser tests assert the old pages and must be
-rewritten with the switch (that is 3AY11's work, so do both together).
+from the one bill state; Coming up is a slice of it, tested) and an *Edit your plan* row on the new Budget. Switched 2026-11-08: the tab bar is Home, Budget, Add, Activity, Money. The phone router serves `/` (once an account
+exists; the empty profile keeps its welcome page), `/budget` (month only) and redirects bare `/more`, `/accounts` and
+`/transactions`; a URL with any other query key still reaches the older page (`_plain` route class), so no link broke.
+The old-page tests were moved to the new screens or to those query URLs. The Overview's period report ("how did my year
+go?") has no phone screen yet and is reached at `/?period=month`.
 
 ## 3AY11 Remove the old coupling · M
 Delete the phone switches in `lightning/ui/routes/` (`on_phone`, `lazy_folds`, `request.state.phone`), `_phone_template`,
 and the `phone/` templates the new screens replaced. Needs 3AY6 to 3AY10 merged first. Done when: `grep -rn "state.phone"
 lightning/ui/routes` is empty and the full suite passes.
+Not done (2026-11-08): the PC routes still carry phone branches (`getattr(request.state, "phone", False)` in about fifteen
+places) because the sub-pages (account, register, investments, Cash planning, search, Settings) have no phone-owned
+screens yet; the old slot templates also stay reachable at query URLs until the Overview report has a phone home.
 
 ## 3AY12 Arabic, themes and 320 px · M
 Every new string in the catalogue, the mirrored layouts, dark and paid themes, 320 px. Needs 3AY6 to 3AY10 merged first.
