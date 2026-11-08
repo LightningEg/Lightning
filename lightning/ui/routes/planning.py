@@ -660,6 +660,26 @@ async def delete_item(request: Request, item_id: int):
 
 
 # --------------------------------------------------------------- payments
+def _payment_effects(c, item, payment, paid_on) -> dict:
+    """What recording this payment would change, before it is recorded (NF-3AZ4): the bill's reserve and the
+    category's budget line for the month it would be paid in. Read-only."""
+    owed = payment.still_owed
+    reserve = c.reserves.bill_reserve(item.id)
+    effects = {"owed": owed, "reserve": None, "budget": None}
+    if reserve:
+        used = min(reserve["effective_allocated"], owed)
+        effects["reserve"] = {"name": reserve["name"], "before": reserve["effective_allocated"], "used": used,
+                              "after": reserve["effective_allocated"] - used}
+    if item.category_id and not item.is_income:
+        month = str(paid_on)[:7]
+        view = c.budgets.month_view(month, schedule=c.schedules.view())
+        line = next((l for sec in view.sections for l in sec.lines if l.category_id == item.category_id), None)
+        if line is not None and line.budget is not None:
+            effects["budget"] = {"name": line.name, "month": month, "left_before": line.remaining,
+                                 "left_after": line.remaining - owed, "over": line.remaining - owed < 0}
+    return effects
+
+
 @router.get("/items/{item_id:int}/pay")
 async def pay_form(request: Request, item_id: int, error: str = ""):
     c = container(request)
@@ -672,7 +692,9 @@ async def pay_form(request: Request, item_id: int, error: str = ""):
     others = c.planning.plausible_candidates(payment)
     linked = c.planning.linked_transaction_ids()
     currency = c.accounts.get(item.account_id).currency if item.account_id else c.transactions.base_currency
-    return render(request, "planning/pay.html", item=item, payment=payment,
+    exact_open = [r for r in exact if r["id"] not in linked]
+    effects = _payment_effects(c, item, payment, min(payment.due_date, fmt_date(today()))) if payment.outstanding else None
+    return render(request, "planning/pay.html", item=item, payment=payment, effects=effects, has_match=bool(exact_open),
                   exact=[r for r in exact if r["id"] not in linked], others=[r for r in others if r["id"] not in linked][:8],
                   accounts=_paying_accounts(c), currency=currency, bill_reserve=c.reserves.bill_reserve(item.id),
                   back=str(request.query_params.get("back", "/plan")), today=fmt_date(today()), error=error)
@@ -692,6 +714,12 @@ async def settle_payment(request: Request, item_id: int):
                 c.planning.mark_paid(item_id, due, int(str(form.get("transaction_id", "0"))))
                 message = f"{item.name} · {due} marked paid."
             elif action == "record":
+                due_payment = next((p for p in c.planning.payments(item, due, today()) if p.due_date == due), None)
+                if due_payment and due_payment.outstanding and not form.get("different_payment") and any(
+                        r["id"] not in c.planning.linked_transaction_ids()
+                        for r in c.planning.candidates(due_payment, any_account=True)):
+                    raise LightningError("A payment that matches this bill is already recorded. Link it instead, "
+                                         "or tick \"This is a different payment\" to record a second one.")
                 c.planning.record_payment(item_id, due, str(form.get("date_paid", "")), str(form.get("amount", "")),
                                           int(str(form.get("account_id"))) if str(form.get("account_id", "")).isdigit() else None)
                 message = f"{item.name} · {due} recorded and marked paid."
