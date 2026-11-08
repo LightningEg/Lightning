@@ -161,6 +161,8 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
             tail = line(f"Income up {fmt(raise_offer['raise'])}", "Raise the plan", f"/budget/raise?month={month}", popup=True)
         elif check.over_by:
             tail = line(f"Plan {fmt(check.over_by)} less to keep {fmt(check.to_save)} a month")
+        elif check.unassigned is not None and check.unassigned > 0:
+            tail = line(f"{fmt(check.unassigned)} of the income is not yet given a job", "Give it a job", f"/budget/fill?month={month}")
         else:
             tail = line(f"{fmt(check.to_save)} a month to save")
         good = not check.over_by
@@ -226,7 +228,9 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
     held = (position.kept_apart or ZERO) + (position.reserves or ZERO) + position.bills_due
     cards.append(card(figure_label("free_cash"), f.free_cash, free_compare, tone="hold", key="free", chip_=free_chip,
                       visual=spark([*past_free, f.free_cash]),
-                      line_=line(f"Cash you own {fmt(position.cash_you_own)}, less {fmt(held)} set aside or due"), href="/"))
+                      line_=line(f"Cash you own {fmt(position.cash_you_own)}, including {fmt(position.brokerage_cash)} in your brokerage"
+                                 if position.brokerage_cash else
+                                 f"Cash you own {fmt(position.cash_you_own)}, less {fmt(held)} set aside or due"), href="/"))
 
     before_total = f.payments_before_income_total  # the same total Safe to spend takes off (7N)
     if late:
@@ -342,7 +346,7 @@ def _investing(flow, invest, invest_before, before_label: str, money_added: Deci
     added = max(money_added, ZERO)
     return card(label_, invest, comparison, tone="in", key="investing", kind="rate", chip_=chip(period_chip),
                 visual=meter(min(added, flow.net), flow.net) if flow.net > 0 else None,
-                line_=line(f"{fmt(added)} moved into investments"), href=href)
+                line_=line(f"{fmt(added)} moved into investments, a share of the {fmt(flow.net)} you kept" if flow.net > 0 else f"{fmt(added)} moved into investments"), href=href)
 
 
 # ── Loans ──────────────────────────────────────────────────────────────────────────────────────────────────
@@ -391,6 +395,8 @@ def spending(stats: list[dict]) -> list[dict]:
         first, *rest = out.get("compare") or [{"label": "", "text": "", "tone": "flat"}]
         tone = {"up": "bad", "down": "good"}.get(first["tone"], "plain")
         usual = rest[0] if rest else None
+        if usual and usual["text"] == first["text"]:   # BV-12D: one month of history, so the usual month is that month
+            usual = None
         cards.append(card(out["label"], out["value"], compare(first["label"], first["text"], tone), tone="out",
                           visual=spark(out["spark_values"]) if out.get("spark_values") else None,
                           line_=line(f"{usual['label']} · {usual['text']}") if usual else None,

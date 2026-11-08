@@ -8,7 +8,7 @@ Version **2.1.0**. Generated from the plan by `python tools/status.py`; do not e
 |---|---|---|---|---|---|---|
 | [Capture](pillars/capture.md) | 2 |  |  | 2 |  |  |
 | [Plan](pillars/plan.md) | 1 |  |  | 1 |  |  |
-| [Understand](pillars/understand.md) | 2 |  |  | 1 | 1 |  |
+| [Understand](pillars/understand.md) | 1 |  |  |  | 1 |  |
 | [Own](pillars/own.md) | 6 | 1 |  | 3 | 2 |  |
 | [Protect](pillars/protect.md) | 3 | 1 | 1 | 1 |  |  |
 | [Everywhere](pillars/everywhere.md) | 7 | 3 | 1 | 3 |  |  |
@@ -16,7 +16,7 @@ Version **2.1.0**. Generated from the plan by `python tools/status.py`; do not e
 | [Build](pillars/build.md) | 7 |  | 6 |  | 1 |  |
 | [Reach](pillars/reach.md) | 4 |  | 3 | 1 |  | 2 |
 
-40 open items in 11 milestones.
+39 open items in 11 milestones.
 
 ## Being built now
 
@@ -49,7 +49,7 @@ Version **2.1.0**. Generated from the plan by `python tools/status.py`; do not e
 | 9 Later | 5 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 4 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |
 | 11 Phone UX | 4 | The phone is its own product: a few places that each answer one question, quick jobs in three taps, and no PC page squeezed into one column. |
-| 12 Desktop UX and smart next steps | 5 | The PC app leads with the answer, works in bulk without surprises, and offers the next step where a figure raises the question. |
+| 12 Desktop UX and smart next steps | 4 | The PC app leads with the answer, works in bulk without surprises, and offers the next step where a figure raises the question. |
 
 0 large items still need splitting into steps before they are posted for contributors (size L: 800 coins or more).
 

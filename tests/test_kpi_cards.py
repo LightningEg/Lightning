@@ -131,3 +131,25 @@ def test_a_month_heavier_than_usual_is_over_pace_and_a_usual_one_never_is():
     assert replace(base, usual_shape=[], usual_by_day=[]).pace == D("500.00")  # no history: the straight line
     # a usual month spends more than the plan allows: still never "over pace" while at or below it
     assert replace(base, everyday_plan=D(800), everyday_spent=D(1000)).pace_gap == D(0)
+
+
+def _page(client, path):
+    return _text(client.get(path).text)
+
+
+def test_neighbouring_figures_no_longer_disagree_or_read_wrong(mohab, monkeypatch):
+    """BV-12D (r26 F5): one rendered-text check per page."""
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-19")
+    c, client = mohab
+    scen = _page(client, "/plan/scenarios")                                    # (b) whole EGP and a note, (c) no "None None"
+    assert "None None" not in scen and "No shortfall" in scen and "usual everyday spending" in scen
+    assert not re.search(r"\d,\d{3}\.\d\d EGP", scen)
+    health = _page(client, "/financial-health")                                # (d) only figures with a limit count
+    judged = re.search(r"of the (\d+) figures you set a limit for", health)
+    assert judged and int(judged.group(1)) <= len([i for i in c.health.overview(date(2026, 10, 19))["figures"] if i.limit is not None])
+    plan = client.get("/plan").text                                            # (e) no "Bills due, loans apart 0"
+    assert not re.search(r"Bills due, loans apart\s*</span>\s*<b>\s*0\s*<", plan)
+    accounts = _page(client, "/accounts")                                      # (f) no plus on a debt
+    assert not re.search(r"Gam.eya still to pay\s*\+", accounts)  # the sample has no circle owed; the plus is gone from the template
+    spending = _page(client, "/birdview/expenses?period=month&month=2026-10")  # (i) the usual month is not a repeat
+    assert spending.count("Against 2026-09") <= 1

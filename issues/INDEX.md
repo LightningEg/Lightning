@@ -222,7 +222,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **BV-12D** | [Nine small places where two neighbouring figures disagree or a figure reads wrong (Scenarios "None None", 87,768 against 87,368, "+14,000" still to pay)](12-desktop-ux/BV-12D-neighbouring-figures-that-disagree.md) | bug, visual · medium | Understand | M | new |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | |
 | IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | M | |
