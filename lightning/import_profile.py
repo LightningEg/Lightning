@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
+from decimal import Decimal, InvalidOperation
 
 from lightning.core.dates import parse_date
 from lightning.core.errors import ValidationError
@@ -67,6 +68,18 @@ def profile_dates(values) -> DateProfile:
 def read_date(value: object, profile: DateProfile | None = None) -> date:
     """One cell to a date, honouring the file's order, a trailing time and month names."""
     text = _clean(value)
+    if re.fullmatch(r"[0-9]+(?:\.[0-9]+)?", text):
+        # CSV has no workbook epoch: numeric dates use Excel's 1900 system.
+        try:
+            serial = Decimal(text)
+            if not serial.is_finite() or not 1 <= serial < 2958466:
+                raise ValueError
+            whole = int(serial)
+            if whole == 60:
+                raise ValueError
+            return date(1899, 12, 31) + timedelta(days=whole - int(whole > 60))
+        except (InvalidOperation, ValueError, OverflowError):
+            raise ValidationError(f"{text} is not a real calendar date.", "date") from None
     named = _NAMED.fullmatch(text)
     if named and named.group(2).lower() in _MONTHS:
         return _make(_year(named.group(3)), _MONTHS[named.group(2).lower()], int(named.group(1)), text)

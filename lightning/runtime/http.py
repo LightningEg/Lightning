@@ -16,6 +16,7 @@ from starlette.formparsers import MultiPartParser
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, RedirectResponse
 from lightning.core.limits import (
+    MAX_WORKSHEET_REQUEST_BYTES,
     MAX_CSV_IMPORT_BYTES,
     MAX_CSV_MAPPING_REQUEST_BYTES,
     MAX_CSV_UPLOAD_REQUEST_BYTES,
@@ -46,6 +47,8 @@ def request_body_limit(path: str, method: str = "POST") -> int:
         return MAX_BODY
     if re.fullmatch(r"/accounts/\d+/import", path):
         return MAX_IMPORT_UPLOAD_BODY
+    if re.fullmatch(r"/accounts/\d+/import/sheets", path):
+        return MAX_WORKSHEET_REQUEST_BYTES
     if re.fullmatch(r"/accounts/\d+/import/map", path):
         return MAX_IMPORT_MAP_BODY
     if re.fullmatch(r"/accounts/\d+/import/\d+/confirm", path):
@@ -58,7 +61,7 @@ def request_body_limit(path: str, method: str = "POST") -> int:
 
 
 def request_too_large_message(path: str) -> str:
-    if re.fullmatch(r"/accounts/\d+/import", path):
+    if re.fullmatch(r"/accounts/\d+/import(?:/sheets)?", path):
         return "Statement uploads must total 8 MB or less. Upload fewer files or a shorter period."
     if re.fullmatch(r"/accounts/\d+/import(?:/map)?", path) or path == PRICE_CSV_PATH:
         return "CSV files must be 5 MB or smaller. Choose a smaller CSV and try again."

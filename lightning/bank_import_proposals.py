@@ -98,8 +98,9 @@ class ImportProposals:
             file_digest = batch["file_hash"].split("#", 1)[0]
             repeat_import = bool(self.db.scalar(
                 "SELECT 1 FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
+                "JOIN transactions t ON t.id=r.transaction_id AND t.status='POSTED' "
                 "WHERE b.account_id=? AND b.id<>? AND (b.file_hash=? OR b.file_hash LIKE ?) "
-                "AND r.row_number=? AND r.status<>'REVIEW' LIMIT 1",
+                "AND r.row_number=? AND r.status IN ('POSTED','LINKED') LIMIT 1",
                 (batch["account_id"], batch_id, file_digest, file_digest + "#%", row["row_number"])))
             if row["bank_reference"]:
                 seen_refs.add(row["bank_reference"])
@@ -166,7 +167,7 @@ class ImportProposals:
             # the custody category during review rather than in the CSV.
             parsed["_whom"] = cp["name"] if cp and cp["active"] else ""
             parsed["_possible_duplicate"] = bool(ref_duplicate or repeat_import or parsed["_similarity_warning"]
-                                                 or parsed["_voided_earlier"] or parsed["_link_candidates"])
+                                                 or parsed["_link_candidates"])
             parsed["_ready"] = bool(not parsed.get("_errors") and not parsed["_possible_duplicate"]
                                     and not parsed["_balance_row"]
                                     and not parsed["_suggestions"] and not parsed["_needs_account"] and not parsed["_identity_ambiguous"]

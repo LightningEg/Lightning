@@ -1,7 +1,8 @@
 """Normalize reviewed CSV rows using the shared upstream row readers."""
 from decimal import Decimal
 
-from lightning.import_profile import profile_dates
+from lightning.core.errors import ValidationError
+from lightning.import_profile import profile_dates, read_date
 from lightning.bank_import_rows import (
     REQUIRED, OPTIONAL, SEPARATE_AMOUNT_FIELDS,
     _date, _separate_amount, _amount, direction_sign, currency_code, clean_merchant, SkipRow, is_total_line,
@@ -32,7 +33,11 @@ def normalize_rows(raw_rows, mapping, amount_model, invert_amount, account_curre
             stored.append((raw, parsed))
             continue
         try:
-            parsed["Date"] = _date(parsed["Date"], date_profile)
+            try:
+                parsed["Date"] = read_date(parsed["Date"], date_profile).isoformat()
+            except ValidationError as exc:
+                raise ValueError(exc.message) from None
+            parsed["Date"] = _date(parsed["Date"])
             parsed["Amount"] = (_separate_amount(parsed["Inflow"], parsed["Outflow"])
                                 if amount_model == "SEPARATE" else _amount(parsed["Amount"]))
             if amount_model == "BALANCE" and position == balance_moves.first:

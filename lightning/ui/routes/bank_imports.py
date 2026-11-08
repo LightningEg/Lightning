@@ -11,7 +11,9 @@ from lightning.workflows.market_prices import fill_followed
 from lightning.import_reconcile import balance_gaps
 from lightning.bank_imports import OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS, decode_csv
 from lightning.core.errors import LightningError, ValidationError
-from lightning.core.limits import MAX_CSV_MAPPING_REQUEST_BYTES, MAX_IMPORT_REVIEW_REQUEST_BYTES
+from lightning.core.limits import (MAX_CSV_MAPPING_REQUEST_BYTES, MAX_IMPORT_REVIEW_REQUEST_BYTES,
+                                   MAX_WORKSHEET_REQUEST_BYTES, MAX_STATEMENT_DOCUMENT_BYTES,
+                                   MAX_STATEMENT_UPLOAD_FILES)
 from lightning.core.money import ZERO, fmt
 from lightning.sync.journal.proxy import PendingOnHome
 from lightning.workflows.ai_prompts import bank_category_prompt, rejected_csv_prompt
@@ -159,17 +161,81 @@ def _lightning_columns(headers: list[str]) -> bool:
 @router.post("/{account_id:int}/import")
 async def upload(request: Request, account_id: int):
     c = container(request)
-    form = await request.form()
+    form = await request.form(max_files=MAX_STATEMENT_UPLOAD_FILES)
     upload_files = [item for item in form.getlist("file") if getattr(item, "filename", "")]
     if not upload_files:
         return _render_upload(request, c, account_id, error="Choose at least one statement file.", status_code=400)
+    files, total = [], 0
+    for item in upload_files:
+        data = await item.read(MAX_STATEMENT_DOCUMENT_BYTES + 1)
+        total += len(data)
+        if total > MAX_STATEMENT_DOCUMENT_BYTES:
+            return _render_upload(request, c, account_id, error="Statement uploads must total 8 MB or less. Upload fewer files or a shorter period.", status_code=400)
+        files.append({"filename": item.filename, "data": data})
+    return _prepare_upload(request, c, account_id, files, encoding=str(form.get("encoding", "auto")))
+
+
+def _raw_bundle(files):
+    return [{"filename": item["filename"], "payload": base64.b64encode(item["data"]).decode("ascii")} for item in files]
+
+
+def _read_sheet_bundle(raw):
+    """The continuation is client supplied; validate shape and aggregate bytes before workbook parsing."""
     try:
+        if len(str(raw)) > MAX_WORKSHEET_REQUEST_BYTES:
+            raise ValueError
+        bundle = json.loads(str(raw))
+        if not isinstance(bundle, list) or not 1 <= len(bundle) <= MAX_STATEMENT_UPLOAD_FILES:
+            raise ValueError
+        total, files = 0, []
+        for item in bundle:
+            if not isinstance(item, dict) or not isinstance(item.get("filename"), str) or not isinstance(item.get("payload"), str):
+                raise ValueError
+            if not item["filename"] or len(item["filename"]) > 255 or len(item["payload"]) > MAX_WORKSHEET_REQUEST_BYTES:
+                raise ValueError
+            data = base64.b64decode(item["payload"], validate=True)
+            total += len(data)
+            if total > MAX_STATEMENT_DOCUMENT_BYTES:
+                raise ValueError
+            files.append({"filename": item["filename"], "data": data})
+        return files
+    except (ValueError, TypeError):
+        raise ValidationError("These statement files could not be read. Upload them again.", "file") from None
+
+
+@router.post("/{account_id:int}/import/sheets")
+async def choose_sheets(request: Request, account_id: int):
+    c = container(request)
+    form = await request.form(max_files=0, max_fields=100, max_part_size=MAX_WORKSHEET_REQUEST_BYTES)
+    try:
+        files = _read_sheet_bundle(form.get("bundle", ""))
+        sheets = {i: str(form.get(f"sheet_{i}", "")) for i in range(len(files)) if f"sheet_{i}" in form}
+        return _prepare_upload(request, c, account_id, files, encoding=str(form.get("encoding", "auto")), sheets=sheets)
+    except LightningError as exc:
+        return _render_upload(request, c, account_id, error=exc.message, status_code=400)
+
+
+def _prepare_upload(request, c, account_id, files, *, encoding="auto", sheets=None):
+    from lightning.statement_files import read_statement, WorksheetSelectionRequired
+    sheets = sheets or {}
+    try:
+        normalized, choices = [], []
+        for index, item in enumerate(files):
+            try:
+                chosen = sheets.get(index)
+                data = read_statement(item["filename"], item["data"], c.accounts.get(account_id).currency,
+                                      sheet_name=chosen, encoding=encoding)
+            except WorksheetSelectionRequired as exc:
+                choices.append({"index": index, "filename": item["filename"], "sheets": exc.sheets})
+                continue
+            filename = item["filename"] + (f" [{chosen}]" if chosen else "")
+            normalized.append((filename, data))
+        if choices:
+            return render(request, "bank_import_sheets.html", account=c.accounts.get(account_id),
+                          bundle=_raw_bundle(files), choices=choices, encoding=encoding, sheets=sheets)
         prepared = []
         needs_mapping = None
-        for upload_file in upload_files:
-            from lightning.statement_files import MAX_FILE_BYTES, read_statement
-            data = await upload_file.read(MAX_FILE_BYTES + 1)
-            data = read_statement(upload_file.filename, data, c.accounts.get(account_id).currency)
+        for filename, data in normalized:
             if getattr(c, "is_journal", False) and len(data) > MAX_JOURNAL_CSV_COMMAND_BYTES:
                 return _render_upload(request, c, account_id,
                                       error="This file is too large to synchronize; split it into smaller files.",
@@ -186,7 +252,7 @@ async def upload(request: Request, account_id: int):
                                           error="Group files with the same columns together, or match each file separately.",
                                           status_code=400)
                 saved_mapping = None
-            prepared.append((upload_file.filename, data, saved_mapping, mapping, headers))
+            prepared.append((filename, data, saved_mapping, mapping, headers))
         if needs_mapping:
             if any(item[4] != needs_mapping[0] for item in prepared):
                 return _render_upload(request, c, account_id,

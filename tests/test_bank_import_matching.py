@@ -118,7 +118,7 @@ def test_a_refund_never_links_to_a_purchase_of_the_same_size(c, setup):
     assert rows[0]["_link_candidates"] == []
 
 
-def test_a_voided_earlier_import_is_flagged_not_quietly_posted_again(c, setup):
+def test_a_voided_earlier_import_is_informational_and_can_be_posted_again(c, setup):
     accounts, _ = setup
     cib = accounts["cib"].id
     text = "Date,Counterparty,Amount,Reference\n2026-10-06,Shop,-30,REF-VOIDED\n"
@@ -129,8 +129,8 @@ def test_a_voided_earlier_import_is_flagged_not_quietly_posted_again(c, setup):
 
     _, again = _stage(c, cib, text, "again.csv")
     row = again[0]
-    assert row["_voided_earlier"] and row["_possible_duplicate"] and not row["_ready"]
-    assert row["_default_match"] == "skip"
+    assert row["_voided_earlier"] and not row["_possible_duplicate"]
+    assert row["_default_match"] == "new"
 
 
 def test_each_bank_statement_can_back_the_same_transfer_once(c):
@@ -201,7 +201,7 @@ def test_review_screen_offers_link_post_as_new_and_skip(c, setup):
     assert page.status_code == 200
     assert f'<select name="match_{row_id}"' in page.text and f'<option value="link:{manual.id}" selected>' in page.text
     assert "Link to Carrefour · 2026-10-01" in page.text
-    assert '<option value="new"' in page.text and "Post as new" in page.text
+    assert '<option value="new"' in page.text and "Not a duplicate — post as new" in page.text
     assert f'name="skip_{row_id}"' not in page.text  # one choice, not a second Skip box
 
     before = c.reporting.account_balance(cib)

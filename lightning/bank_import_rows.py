@@ -62,21 +62,45 @@ def _is_header_row(cells) -> bool:
     return sum(normalize_header(c) in known for c in cells) >= 2
 
 
-def _decode_text(data: bytes) -> str:
-    """UTF-8 (with or without a BOM), UTF-16 (Excel's "Unicode text") or Windows Arabic (cp1256)."""
-    if data[:2] in (b"\xff\xfe", b"\xfe\xff"):
+CSV_ENCODINGS = {"auto", "utf-8-sig", "utf-16", "utf-16-le", "utf-16-be", "cp1256", "cp1252"}
+
+
+def _decode_text(data: bytes, encoding: str = "auto") -> str:
+    """Strict decoding: explicit legacy encodings resolve the Arabic/Western ambiguity."""
+    if encoding not in CSV_ENCODINGS:
+        raise ValidationError("Choose a supported CSV encoding.", "encoding")
+    candidates = [encoding]
+    if encoding == "auto":
+        if data[:2] in (b"\xff\xfe", b"\xfe\xff"):
+            candidates = ["utf-16"]
+        elif b"\x00" in data[:512]:
+            sample = data[:512]
+            candidates = ["utf-16-le" if sample[1::2].count(0) > sample[::2].count(0) else "utf-16-be"]
+        else:
+            candidates = ["utf-8-sig", "cp1256"]
+    for codec in candidates:
         try:
-            return data.decode("utf-16")
+            text = data.decode(codec).lstrip("\ufeff")
+            if "\x00" not in text:
+                return text
+        except UnicodeDecodeError:
+            continue
+    raise ValidationError("This CSV could not be decoded. Choose its encoding and upload it again.", "encoding")
+
+
+def normalize_csv_encoding(data: bytes, encoding: str = "auto") -> bytes:
+    if len(data) > MAX_BYTES:
+        raise ValidationError("CSV files must be 5 MB or smaller.", "file")
+    if encoding in {"auto", "utf-8-sig"} and b"\x00" not in data:
+        try:
+            data.decode("utf-8-sig")
+            return data  # keep historical file hashes stable for ordinary UTF-8 uploads
         except UnicodeDecodeError:
             pass
-    try:
-        return data.decode("utf-8-sig")
-    except UnicodeDecodeError:
-        pass
-    try:
-        return data.decode("cp1256")
-    except UnicodeDecodeError:
-        raise ValidationError("Save the statement as a UTF-8 CSV file.", "file") from None
+    normalized = _decode_text(data, encoding).encode("utf-8")
+    if len(normalized) > MAX_BYTES:
+        raise ValidationError("CSV files must be 5 MB or smaller.", "file")
+    return normalized
 
 
 def _header_line(text: str) -> int:
@@ -262,8 +286,24 @@ def decode_csv(data: bytes) -> tuple[list[str], list[dict[str, str]]]:
         text = "\n".join(text.splitlines()[skipped:]) + "\n"
     try:
         sample = text[:4096]
-        dialect = csv.Sniffer().sniff(sample, delimiters=",;\t") if sample else csv.excel
-        reader = csv.DictReader(io.StringIO(text, newline=""), dialect=dialect)
+        try:
+            options = {"dialect": csv.Sniffer().sniff(sample, delimiters=",;\t")} if sample else {}
+        except csv.Error:
+            # A sample ending inside a quoted multiline field can defeat Sniffer.
+            # Accept only a unique delimiter that parses the entire file consistently.
+            candidates = []
+            for delimiter in (",", ";", "\t"):
+                try:
+                    records = csv.reader(io.StringIO(text, newline=""), delimiter=delimiter, strict=True)
+                    header = next(records, [])
+                    if len(header) > 1 and all(not row or len(row) == len(header) for row in records):
+                        candidates.append(delimiter)
+                except csv.Error:
+                    continue
+            if len(candidates) != 1:
+                raise
+            options = {"delimiter": candidates[0]}
+        reader = csv.DictReader(io.StringIO(text, newline=""), **options)
         headers = [str(h or "").strip() for h in (reader.fieldnames or [])]
         if not headers or any(not h for h in headers):
             raise ValidationError("The CSV needs a header row with column names.", "file")

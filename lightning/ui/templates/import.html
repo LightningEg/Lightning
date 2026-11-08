@@ -6,8 +6,9 @@
 
 {% if not accounts %}<section class="card empty"><h2>{{ 'No bank or cash accounts yet'|tr(locale) }}</h2><a class="btn" href="/accounts">{{ 'Add an account'|tr(locale) }}</a></section>{% else %}
 <section class="card import-drop" data-import-drop>
-  <label class="drop-zone" for="import-files"><b>{{ 'Drop CSV files here'|tr(locale) }}</b><span class="muted small">{{ 'or click to choose · many files at once · up to 5 MB each'|tr(locale) }}</span></label>
-  <input id="import-files" type="file" accept=".csv,text/csv" multiple hidden>
+  <label class="drop-zone" for="import-files"><b>{{ 'Drop statement files here'|tr(locale) }}</b><span class="muted small">{{ 'CSV up to 5 MB; Excel .xlsx and text-based CIB PDFs up to 8 MB.'|tr(locale) }}</span></label>
+  <input id="import-files" type="file" accept=".csv,.xlsx,.pdf,text/csv,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple hidden>
+  <div class="field"><label for="drop-encoding">{{ 'CSV encoding'|tr(locale) }}</label><select id="drop-encoding" data-import-encoding data-native><option value="auto">{{ 'Automatic (Unicode or Windows Arabic)'|tr(locale) }}</option><option value="cp1256">{{ 'Windows Arabic'|tr(locale) }}</option><option value="cp1252">{{ 'Windows Western'|tr(locale) }}</option></select></div>
   <ol class="import-files" data-import-list></ol>
   <template data-import-row><li class="import-file"><span class="import-name"></span><select aria-label="{{ 'Account'|tr(locale) }}"><option value="">{{ 'Choose the account'|tr(locale) }}</option>{% for a in accounts %}<option value="{{ a.id }}" data-last4="{{ a.last4 or '' }}" data-words="{{ (a.institution ~ ' ' ~ a.name)|lower }}">{{ a.name }}{% if a.last4 %} ·{{ a.last4 }}{% endif %}</option>{% endfor %}</select><span class="import-state muted small"></span></li></template>
   <div class="actions"><button type="button" class="btn primary" data-import-send disabled>{{ 'Review statements'|tr(locale) }}</button></div>

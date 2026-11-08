@@ -13,3 +13,7 @@ MAX_CSV_MAPPING_REQUEST_BYTES = ((MAX_CSV_IMPORT_BYTES + 2) // 3) * 4 + IMPORT_R
 # Larger reviews remain intentionally capped and should be split into files.
 MAX_IMPORT_REVIEW_REQUEST_BYTES = 32 * 1024 * 1024
 MAX_IMPORT_REVIEW_FIELDS = 600_000
+
+# A raw workbook bundle is carried to worksheet choice as base64 multipart text.
+MAX_WORKSHEET_REQUEST_BYTES = ((MAX_STATEMENT_DOCUMENT_BYTES + 2) // 3) * 4 + IMPORT_REQUEST_ENVELOPE_BYTES
+MAX_STATEMENT_UPLOAD_FILES = 20

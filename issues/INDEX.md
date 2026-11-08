@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 51 open items. Each folder holds its reports and its items.
+11 big pictures, 46 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -189,11 +189,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **BT-7AD** | [Choose Excel worksheets and read common CSV encodings](7-planning-import-and-search/BT-7AD-workbook-sheets-and-csv-encoding.md) | bug, technical · medium | Capture | M | Opus | building |
-| **BT-7AE** | [Accept Excel serial dates in imported date columns](7-planning-import-and-search/BT-7AE-excel-serial-dates.md) | bug, technical · medium | Capture | M | Opus | building |
-| **BT-7AG** | [Institution selection sets its default account type](7-planning-import-and-search/BT-7AG-institution-default-account-type.md) | bug, technical · medium | Own | M | Opus | building |
-| **BT-7AH** | [Only active imported entries count as duplicates](7-planning-import-and-search/BT-7AH-active-import-duplicates.md) | bug, technical · medium | Capture | M | Opus | building |
-| **IT-7AF** | [Choose how many transactions appear per page](7-planning-import-and-search/IT-7AF-register-page-size.md) | improvement, technical | Capture | M | Opus | building |
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | new feature | Capture | L | Opus | ready |
 | NF-7AB1 | ↳ Summary first, rows last | | | M | Opus | |
 | NF-7AB3 | ↳ Group by the question, not the name | | | M | Opus | |
@@ -204,7 +199,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md).
 
-Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC. Next free code: 7AI.
+Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH. Next free code: 7AI.
 
 ## 8 Website
 

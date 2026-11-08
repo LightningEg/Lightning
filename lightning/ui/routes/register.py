@@ -524,7 +524,10 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         picked = c.categories.get(int(raw_category_id))
         if picked.movement.name == "OUTFLOW" and not picked.is_system and not picked.is_root:  # spending has a plan
             category_sheet = f"/budget/category/{picked.id}/sheet?month={sheet_month}"  # the one sheet (3G6)
-    page_size = 50
+    page_sizes = (50, 100, 250, 500)
+    page_size = _int(qp.get("page_size")) or 50
+    if page_size not in page_sizes:
+        page_size = 50
     show_val = qp.get("val") == "1"
     val_count = c.reporting.register_value_updates(account_id, date_from, date_to)
     # Money in and Money out of what a search, tag or category found (a tag's note and the phone's two tiles).
@@ -584,6 +587,13 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
                               ("preset", preset), ("date_from", from_query), ("date_to", to_query),
                               ("category_id", str(raw_category_id) if raw_category_id else ""),
                               ("kind", kind), ("val", "1" if show_val else "")) if v}
+    if page_size != 50:
+        keep["page_size"] = str(page_size)
+    if qp.get("saved_view"):
+        keep["saved_view"] = qp["saved_view"]
+    if qp.get("select"):
+        keep["select"] = qp["select"]
+    page_size_keep = {k: v for k, v in keep.items() if k != "page_size"}
     page_base_qs = urlencode(keep)
     val_toggle_url = base_url_for(account_id) + "?" + urlencode({**{k: v for k, v in keep.items() if k != "val"},
                                                                  **({} if show_val else {"val": "1"})})
@@ -637,7 +647,9 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         replace_scope={"account_id": account_id or "", "date_from": "" if date_from == FAR_PAST else date_from,
                        "date_to": "" if date_to == FAR_FUTURE else date_to},
         date_from=from_query, date_to=to_query, base_url=base_url, keep_qs=urlencode(keep),
+        selection_done_qs=urlencode({k: v for k, v in keep.items() if k != "select"}),
         page_number=page_number, total_pages=total_pages, total_rows=total_rows, page_base_qs=page_base_qs,
+        page_size=page_size, page_sizes=page_sizes, page_size_keep=page_size_keep,
         search_suggestions=c.counterparties.suggestions(q, limit=3) if q else [],
         post_url=(f"/accounts/{account_id}/register" if account_id else "/transactions/register"),
         show_account=account is None, error=error, error_field=error_field,

@@ -13,6 +13,19 @@ def test_match_finds_the_built_in_by_name_short_name_or_arabic(c):
     assert c.institutions.match("nothing like this") is None
 
 
+def test_form_defaults_resolve_institution_aliases_without_guessing_custom_types(c):
+    hints = c.institutions.form_hints()
+    for alias in ("CIB", "cib", "Commercial International Bank", "commercial international bank"):
+        assert hints[alias]["type"] == "BANK"
+    broker = c.institutions.match("thndr")
+    for alias in (broker.name, broker.short_name, broker.arabic_name, broker.code):
+        if alias:
+            assert hints[alias]["type"] == "BROKERAGE"
+            assert hints[alias]["name"] == broker.name
+    c.institutions.add("Example credit union")
+    assert c.institutions.form_hints()["Example credit union"]["type"] == ""
+
+
 def test_an_added_institution_is_listed_next_time_and_not_twice(c):
     assert "My Credit Union" not in [i.name for i in c.institutions.list()]
     c.institutions.add("My Credit Union")
