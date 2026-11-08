@@ -6,6 +6,7 @@ text-based account-transactions layout is recognized; image/outlined PDFs need a
 from __future__ import annotations
 
 import csv
+from contextlib import contextmanager
 from datetime import date, datetime
 from decimal import Decimal
 from io import BytesIO, StringIO
@@ -36,27 +37,36 @@ def _csv(rows) -> bytes:
     return data
 
 
-def read_statement(filename: str, data: bytes, currency: str) -> bytes:
+def read_statement(filename: str, data: bytes, currency: str, *, sheet_name: str | None = None, encoding: str = "auto") -> bytes:
     """Preserve CSV bytes; normalize supported documents before the ordinary mapping/review."""
     suffix = PurePath(filename).suffix.lower()
     if suffix == '.csv':
-        return data
+        from lightning.bank_import_rows import normalize_csv_encoding
+        return normalize_csv_encoding(data, encoding)
     if len(data) > MAX_FILE_BYTES:
         raise ValidationError("Excel and PDF statements must be 8 MB or smaller.", "file")
     if suffix == '.xlsx':
-        return read_excel(data, currency)
+        return read_excel(data, currency, sheet_name=sheet_name)
     if suffix == '.pdf':
         return read_cib_pdf(data, currency)
     raise ValidationError("Choose a CSV, .xlsx Excel workbook or text-based PDF statement.", "file")
 
 
-def read_excel(data: bytes, currency: str | None = None) -> bytes:
-    """One nonempty worksheet, literal cells only; all limits apply before iterating cells."""
-    # openpyxl automatically uses defusedxml when available. Require it for imported XML.
+class WorksheetSelectionRequired(ValidationError):
+    def __init__(self, sheets: list[str]):
+        super().__init__("Choose a worksheet to import.", "sheet")
+        self.sheets = sheets
+
+
+@contextmanager
+def _excel_workbook(data: bytes):
+    """Check the entire container before exposing any worksheet, without executing cells."""
     from defusedxml import ElementTree  # noqa: F401
     from defusedxml.common import DefusedXmlException
     from xml.etree.ElementTree import ParseError
     from openpyxl import load_workbook
+    if len(data) > MAX_FILE_BYTES:
+        raise ValidationError("Excel and PDF statements must be 8 MB or smaller.", "file")
     try:
         with ZipFile(BytesIO(data)) as archive:
             entries = archive.infolist()
@@ -68,55 +78,76 @@ def read_excel(data: bytes, currency: str | None = None) -> bytes:
                 raise ValidationError("Macro-enabled workbooks are not supported. Export the statement as CSV.", "file")
         workbook = load_workbook(BytesIO(data), read_only=True, data_only=False, keep_links=False)
         try:
-            sheets = []
-            for sheet in workbook.worksheets:
-                if sheet.max_row > MAX_ROWS + 1 or sheet.max_column > MAX_COLUMNS:
-                    raise ValidationError("This worksheet exceeds 10,000 rows or 80 columns. Export a shorter statement.", "file")
-                rows = []
-                for row in sheet.iter_rows():
-                    values = []
-                    for cell in row:
-                        if cell.data_type == 'f':
-                            raise ValidationError("This workbook contains formulas. Export its displayed values as CSV.", "file")
-                        value = cell.value
-                        if isinstance(value, (date, datetime)):
-                            value = value.strftime('%Y-%m-%d')
-                        elif value is None:
-                            value = ''
-                        elif isinstance(value, bool):
-                            value = str(value)
-                        else:
-                            value = str(value)
-                        if len(value) > 10000:
-                            raise ValidationError("A workbook cell is too long. Export the statement as CSV.", "file")
-                        values.append(value)
-                    if any(values):
-                        rows.append(values)
-                if rows:
-                    # Trim trailing empty columns, retaining the order and the bank's original header names.
-                    width = max(next((i+1 for i in range(len(row)-1,-1,-1) if row[i]),0) for row in rows)
-                    sheets.append([row[:width] for row in rows])
-            if len(sheets) != 1:
-                raise ValidationError("Choose a workbook with one nonempty worksheet, or export the wanted worksheet as CSV.", "file")
-            rows = sheets[0]
-            headers = [value.strip().casefold() for value in rows[0]]
-            if currency and 'currency' in headers:
-                index = headers.index('currency')
-                currencies = {row[index].strip().upper() for row in rows[1:] if len(row) > index and row[index].strip()}
-                if currencies and currencies != {currency}:
-                    raise ValidationError("The workbook currency does not match this account. Export one currency at a time.", "file")
-            if 'account' in headers:
-                index = headers.index('account')
-                accounts = {row[index].strip() for row in rows[1:] if len(row) > index and row[index].strip()}
-                if len(accounts) > 1:
-                    raise ValidationError("This workbook contains more than one account. Export one account at a time.", "file")
-            return _csv(rows)
+            yield workbook
         finally:
             workbook.close()
     except ValidationError:
         raise
     except (BadZipFile, ValueError, KeyError, OSError, TypeError, ArithmeticError, ParseError, DefusedXmlException) as exc:
         raise ValidationError("This Excel workbook could not be read. Export it as CSV.", "file") from exc
+
+
+def _worksheet_names(workbook) -> list[str]:
+    # A truly blank default sheet has one empty cell. Other sheets are offered without
+    # inspecting their contents or applying the selected sheet's formula/layout rules.
+    return [sheet.title for sheet in workbook.worksheets
+            if sheet.max_row > 1 or sheet.max_column > 1 or sheet.cell(1, 1).value is not None]
+
+
+def excel_sheets(data: bytes) -> list[str]:
+    with _excel_workbook(data) as workbook:
+        return _worksheet_names(workbook)
+
+
+def read_excel(data: bytes, currency: str | None = None, *, sheet_name: str | None = None) -> bytes:
+    """Convert only the chosen literal worksheet, preserving the workbook's native date epoch."""
+    with _excel_workbook(data) as workbook:
+        names = _worksheet_names(workbook)
+        if sheet_name is None:
+            if len(names) > 1:
+                raise WorksheetSelectionRequired(names)
+            if not names:
+                raise ValidationError("Choose a nonempty worksheet to import.", "sheet")
+            sheet_name = names[0]
+        if sheet_name not in names:
+            raise ValidationError("Choose a nonempty worksheet from this workbook.", "sheet")
+        sheet = workbook[sheet_name]
+        if sheet.max_row > MAX_ROWS + 1 or sheet.max_column > MAX_COLUMNS:
+            raise ValidationError("This worksheet exceeds 10,000 rows or 80 columns. Export a shorter statement.", "file")
+        rows = []
+        for row in sheet.iter_rows():
+            values = []
+            for cell in row:
+                if cell.data_type == 'f':
+                    raise ValidationError("This workbook contains formulas. Export its displayed values as CSV.", "file")
+                value = cell.value
+                if isinstance(value, (date, datetime)):
+                    value = value.strftime('%Y-%m-%d')
+                elif value is None:
+                    value = ''
+                else:
+                    value = str(value)
+                if len(value) > 10000:
+                    raise ValidationError("A workbook cell is too long. Export the statement as CSV.", "file")
+                values.append(value)
+            if any(values):
+                rows.append(values)
+        if not rows:
+            raise ValidationError("Choose a nonempty worksheet to import.", "sheet")
+        width = max(next((i+1 for i in range(len(row)-1,-1,-1) if row[i]),0) for row in rows)
+        rows = [row[:width] for row in rows]
+        headers = [value.strip().casefold() for value in rows[0]]
+        if currency and 'currency' in headers:
+            index = headers.index('currency')
+            currencies = {row[index].strip().upper() for row in rows[1:] if len(row) > index and row[index].strip()}
+            if currencies and currencies != {currency}:
+                raise ValidationError("The workbook currency does not match this account. Export one currency at a time.", "file")
+        if 'account' in headers:
+            index = headers.index('account')
+            accounts = {row[index].strip() for row in rows[1:] if len(row) > index and row[index].strip()}
+            if len(accounts) > 1:
+                raise ValidationError("This workbook contains more than one account. Export one account at a time.", "file")
+        return _csv(rows)
 
 
 def _cib_text_rows(text: str) -> list[dict]:

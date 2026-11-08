@@ -24,6 +24,8 @@ tasks live in the [app issue index](https://github.com/LightningEg/Lightning/blo
 
 ## Records
 
+- [Import files and account review](2026-11-08-import-and-account-review.md) · 2026-11-08
+
 - [CSV import and phone update](2026-11-05-csv-import-and-phone-update.md) · 2026-11-05
 
 - [Same-category repayments](2026-11-03-same-category-repayments.md) · 2026-11-03

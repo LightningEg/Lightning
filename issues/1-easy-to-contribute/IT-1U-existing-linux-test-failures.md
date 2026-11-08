@@ -33,3 +33,7 @@ The investment-link styling, register-selection assertion and all three native-p
 ## Fix
 
 Reproduce with locked dependencies and browser prerequisites. Repair stale assertions or environment discovery where appropriate, fix any confirmed implementation defect with its owner, and stabilize the counterparty browser check. Keep the existing assertions meaningful; do not skip or disable tests to make checks pass.
+
+### Follow-up · 2026-11-08 · PR #439 review
+
+The bounded delimiter fallback in #439 fixes the quoted multiline salary CSV failure above: `tests/test_sms_imports.py` now passes together with the statement/import acceptance regressions on the isolated Python 3.13.5 environment. The isolated-environment packaging result remains good. The full brand audit still reproduces the investment-link styling failure; it is independent of the import diff and remains to investigate here.

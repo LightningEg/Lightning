@@ -59,13 +59,13 @@ def test_macro_archive_and_multiple_sheets_are_refused():
     data=BytesIO(workbook([['Date','Amount'],['2026-09-01','-1']]))
     with ZipFile(data,'a') as archive:archive.writestr('xl/vbaProject.bin',b'not executable')
     with pytest.raises(ValidationError,match='Macro'):read_excel(data.getvalue())
-    with pytest.raises(ValidationError,match='one nonempty worksheet'):read_excel(workbook([['Date','Amount']],extra=True))
+    with pytest.raises(ValidationError,match='Choose a worksheet'):read_excel(workbook([['Date','Amount']],extra=True))
 
 
 def test_workbook_xml_size_and_input_size_are_bounded():
     out=BytesIO()
     with ZipFile(out,'w') as archive:archive.writestr('xl/worksheets/sheet1.xml',b' '*9*1024*1024)
-    with pytest.raises(ValidationError,match='too large'):read_excel(out.getvalue())
+    with pytest.raises(ValidationError,match='8 MB'):read_excel(out.getvalue())
     with pytest.raises(ValidationError,match='8 MB'):read_statement('statement.pdf',b'x'*(MAX_FILE_BYTES+1),'EGP')
 
 

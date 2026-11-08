@@ -147,7 +147,11 @@ class InstitutionService:
             found = self.match(option["value"])
             if found is None:
                 continue
-            hints[option["value"]] = {"type": KIND_TO_ACCOUNT_TYPE.get(found.kind, ""), "short": found.label}
+            hint = {"type": KIND_TO_ACCOUNT_TYPE.get(found.kind, ""), "short": found.label, "name": found.name}
+            for alias in (option["value"], found.name, found.short_name, found.arabic_name, found.code):
+                if alias:
+                    hints[alias] = hint
+                    hints[normalize(alias)] = hint
         return hints
 
     def used_before(self) -> list[str]:

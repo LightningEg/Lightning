@@ -12,6 +12,7 @@ from urllib.parse import urlencode, urlsplit
 from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse, RedirectResponse, Response
 
+from lightning.core.limits import MAX_WORKSHEET_REQUEST_BYTES, MAX_STATEMENT_UPLOAD_FILES
 from lightning.sync.state import ProtocolError
 from lightning.ui.web import create_app
 
@@ -31,12 +32,16 @@ _IMPORT_CONFIRM_FORM_FIELDS = MAX_IMPORT_CONFIRM_FIELDS
 
 
 def _form_field_limit(path: str) -> int:
+    if re.fullmatch(r"/accounts/\d+/import/sheets", path):
+        return 100
     if re.fullmatch(r"/accounts/\d+/import/\d+/confirm", path):
         return _IMPORT_CONFIRM_FORM_FIELDS
     return _DEFAULT_FORM_FIELDS
 
 
 def _form_part_limit(path: str) -> int:
+    if re.fullmatch(r"/accounts/\d+/import/sheets", path):
+        return MAX_WORKSHEET_REQUEST_BYTES
     # The mapping page carries the CSV as base64 in one multipart text field.
     if re.fullmatch(r"/accounts/\d+/import/map", path):
         return MAX_IMPORT_MAP_BODY
@@ -53,7 +58,9 @@ def _form_part_limit(path: str) -> int:
 def _form_file_limit(path: str) -> int:
     # Only the initial CSV upload, the market price file and the price CSV accept a file part. Rejecting
     # files on every other form avoids creating spooled temporary files on those routes.
-    return 1 if re.fullmatch(r"/accounts/\d+/import", path) or path in (MARKET_IMPORT_PATH, PRICE_CSV_PATH) else 0
+    if re.fullmatch(r"/accounts/\d+/import", path):
+        return MAX_STATEMENT_UPLOAD_FILES
+    return 1 if path in (MARKET_IMPORT_PATH, PRICE_CSV_PATH) else 0
 
 
 class SessionGate:

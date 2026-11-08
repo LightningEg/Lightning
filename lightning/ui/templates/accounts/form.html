@@ -102,15 +102,21 @@
   const currency = document.getElementById('currency');
   let hints = {};
   try { hints = JSON.parse(type.dataset.institutionHints || '{}'); } catch (e) { hints = {}; }
-  const autoTypes = new Set(['BANK', 'BROKERAGE', 'CASH']);
+  const normInstitution = value => (value || '').normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}_&]+/gu, ' ').trim().replace(/\s+/g, ' ');
+  const institutionHint = value => hints[value] || hints[normInstitution(value)];
+  let lastInstitution = institutionHint(institution ? institution.value : '')?.name || '';
   let suggested = '';
   const applyInstitution = () => {
-    const hint = hints[institution.value];
-    if (!hint) return;
-    if (hint.type && autoTypes.has(type.value) && type.value !== hint.type) {
+    const hint = institutionHint(institution.value);
+    if (!hint) {
+      lastInstitution = '';
+      return;
+    }
+    if (hint.type && hint.name !== lastInstitution && type.value !== hint.type) {
       type.value = hint.type;
       type.dispatchEvent(new Event('change', {bubbles: true}));
     }
+    lastInstitution = hint.name;
     if (nameInput && (!nameInput.value.trim() || nameInput.value === suggested)) {
       suggested = hint.short + ' \u00b7 ' + (currency ? currency.value : '');
       nameInput.value = suggested;

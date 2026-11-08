@@ -1,0 +1,5 @@
+{% if total_rows > 50 or page_size != 50 %}<form method="get" action="{{ base_url }}" class="actions register-page-size">
+{% for key, value in page_size_keep.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
+<label for="register-page-size">{{ 'Rows per page'|tr(locale) }}</label>
+<select id="register-page-size" name="page_size" aria-label="{{ 'Rows per page'|tr(locale) }}" data-native>{% for size in page_sizes %}<option value="{{ size }}" {{ 'selected' if size == page_size }}>{{ size }}</option>{% endfor %}</select>
+<button class="btn small">{{ 'Apply'|tr(locale) }}</button></form>{% endif %}

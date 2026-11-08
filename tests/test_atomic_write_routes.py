@@ -19,6 +19,13 @@ OTHER_BOUNDARIES = {
     "weekly": {"complete", "dismiss"},  # Review preferences never settle a financial issue.
 }
 
+# Both upload endpoints finish reading the request before delegating to this synchronous
+# staging helper. Check the helper's boundary too, rather than exempting the write.
+DELEGATED_BOUNDARIES = {
+    ("bank_imports", "upload"): "_prepare_upload",
+    ("bank_imports", "choose_sheets"): "_prepare_upload",
+}
+
 
 def _settled(scope):
     return isinstance(scope, ast.With) and any(isinstance(i.context_expr, ast.Call)
@@ -27,6 +34,7 @@ def _settled(scope):
 
 def test_write_handlers_declare_their_completion_boundary_and_never_await_inside_it():
     found = set()
+    delegated = set()
     for path in ROUTES.glob("*.py"):
         tree = ast.parse(path.read_text())
         for fn in tree.body:
@@ -37,8 +45,18 @@ def test_write_handlers_declare_their_completion_boundary_and_never_await_inside
             if not any(isinstance(d, ast.Call) and isinstance(d.func, ast.Attribute)
                        and d.func.attr == "post" for d in fn.decorator_list):
                 continue
-            if fn.name in OTHER_BOUNDARIES.get(path.stem, set()):
+            key = (path.stem, fn.name)
+            if key in DELEGATED_BOUNDARIES:
+                helper_name = DELEGATED_BOUNDARIES[key]
+                assert any(isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+                           and n.func.id == helper_name for n in ast.walk(fn)), key
+                helper = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == helper_name)
+                assert any(_settled(n) for n in ast.walk(helper)), key
+                assert not any(isinstance(n, ast.Await) for n in ast.walk(helper)), key
+                delegated.add(key)
+            elif fn.name in OTHER_BOUNDARIES.get(path.stem, set()):
                 found.add((path.stem, fn.name))
             else:
                 assert any(_settled(n) for n in ast.walk(fn)), (path.name, fn.name)
     assert found == {(module, name) for module, names in OTHER_BOUNDARIES.items() for name in names}
+    assert delegated == set(DELEGATED_BOUNDARIES)

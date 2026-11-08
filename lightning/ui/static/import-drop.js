@@ -24,7 +24,7 @@
   const refresh = () => { send.disabled = !files.length || files.some((f) => !f.select.value); };
   const add = (picked) => {
     for (const file of picked) {
-      if (!/\.csv$/i.test(file.name)) continue;
+      if (!/\.(csv|xlsx|pdf)$/i.test(file.name)) continue;
       const item = row.content.firstElementChild.cloneNode(true);
       item.querySelector(".import-name").textContent = file.name;
       const select = item.querySelector("select");
@@ -41,23 +41,68 @@
   ["dragleave", "drop"].forEach((e) => zone.addEventListener(e, (ev) => { ev.preventDefault(); zone.classList.remove("is-over"); }));
   zone.addEventListener("drop", (ev) => add(ev.dataTransfer.files));
 
+  const submitGroup = (account, members) => {
+    // A real form navigation retains the server's worksheet and column-choice continuation.
+    const form = document.createElement("form");
+    form.method = "POST"; form.enctype = "multipart/form-data";
+    form.action = `/accounts/${account}/import`;
+    const picked = new DataTransfer();
+    members.forEach(f => picked.items.add(f.file));
+    const input = document.createElement("input");
+    input.type = "file"; input.name = "file"; input.multiple = true; input.files = picked.files;
+    const token = document.createElement("input");
+    token.type = "hidden"; token.name = "__session"; token.value = session;
+    const encoding = document.createElement("input");
+    encoding.type = "hidden"; encoding.name = "encoding"; encoding.value = host.querySelector("[data-import-encoding]").value;
+    form.append(input, token, encoding); form.hidden = true; document.body.append(form); form.submit();
+  };
   send.addEventListener("click", async () => {
     send.disabled = true; send.setAttribute("aria-busy", "true");
-    let stuck = false;
-    // one file per request: the profile app takes one file part per upload, and each file is its own batch to undo
+    const groups = new Map();
     for (const f of files) {
       const account = f.select.value;
+      if (!groups.has(account)) groups.set(account, []);
+      groups.get(account).push(f);
+    }
+    if (groups.size === 1) {
+      const [account, members] = groups.entries().next().value;
+      submitGroup(account, members);
+      return;
+    }
+    let stuck = false;
+    for (const [account, members] of groups) {
       const body = new FormData();
-      body.append("file", f.file);
+      members.forEach(f => body.append("file", f.file));
       body.append("__session", session);
-      const res = await fetch(`/accounts/${account}/import`, { method: "POST", body, credentials: "same-origin" });
-      const ok = res.ok && /\/import\/\d+/.test(res.url);
-      const state = f.item.querySelector(".import-state");
-      state.innerHTML = "";
-      if (ok) state.textContent = t("Ready to review");
-      else { stuck = true; const a = document.createElement("a"); a.href = `/accounts/${account}/import`; a.textContent = t("Set the columns"); state.append(a); }
+      body.append("encoding", host.querySelector("[data-import-encoding]").value);
+      try {
+        const res = await fetch(`/accounts/${account}/import`, { method: "POST", body, credentials: "same-origin" });
+        const ok = res.ok && /\/import\/\d+/.test(res.url);
+        members.forEach(f => {
+          const state = f.item.querySelector(".import-state");
+          state.replaceChildren();
+          if (ok) state.textContent = t("Ready to review");
+          else {
+            stuck = true;
+            const button = document.createElement("button");
+            button.type = "button"; button.className = "quiet-link";
+            button.textContent = t("Review these files");
+            button.addEventListener("click", () => submitGroup(account, members));
+            state.append(button);
+          }
+        });
+      } catch (_) {
+        stuck = true;
+        members.forEach(f => { f.item.querySelector(".import-state").textContent = t("Upload failed. Try again."); });
+      }
     }
     send.removeAttribute("aria-busy");
+    send.disabled = false;
     if (!stuck) location.reload();
+    else {
+      let note = host.querySelector("[data-import-pending-note]");
+      if (!note) { note = document.createElement("p"); note.className = "muted small"; note.dataset.importPendingNote = ""; host.append(note); }
+      note.textContent = t("Some files need worksheet or column choices. Review one account at a time; reselect other unfinished files afterward. Ready imports are saved for review.");
+    }
   });
 })();

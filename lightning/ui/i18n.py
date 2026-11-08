@@ -15,6 +15,28 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    'Choose worksheets': 'اختار أوراق العمل',
+    'Choose a worksheet': 'اختار ورقة العمل',
+    'Choose a worksheet to import.': 'اختار ورقة العمل اللي هتستوردها.',
+    'Choose a nonempty worksheet to import.': 'اختار ورقة عمل فيها بيانات للاستيراد.',
+    'Choose a nonempty worksheet from this workbook.': 'اختار ورقة عمل فيها بيانات من الملف ده.',
+    'Choose the worksheet to import from each workbook. Nothing is posted yet.': 'اختار ورقة العمل اللي هتستوردها من كل ملف. لسه مفيش حاجة اتسجلت.',
+    'CSV encoding': 'ترميز CSV',
+    'Automatic (Unicode or Windows Arabic)': 'تلقائي (يونيكود أو ويندوز عربي)',
+    'Windows Arabic': 'ويندوز عربي',
+    'Windows Western': 'ويندوز غربي',
+    'Choose a supported CSV encoding.': 'اختار ترميز CSV مدعوم.',
+    'This CSV could not be decoded. Choose its encoding and upload it again.': 'تعذّرت قراءة ترميز ملف CSV. اختار ترميزه وارفعه تاني.',
+    'These statement files could not be read. Upload them again.': 'تعذّرت قراءة ملفات الكشف دي. ارفعها تاني.',
+    'Not a duplicate — post as new': 'مش مكررة — سجّلها كمعاملة جديدة',
+    'This row matches an active entry from an earlier import.': 'الصف ده مطابق لمعاملة موجودة من استيراد سابق.',
+    'Rows per page': 'الصفوف في الصفحة',
+    'Drop statement files here': 'اسحب ملفات الكشف هنا',
+    'CSV up to 5 MB; Excel .xlsx and text-based CIB PDFs up to 8 MB.': 'CSV لحد ٥ ميجابايت؛ وExcel بصيغة \u200e.xlsx وPDF نصّي من CIB لحد ٨ ميجابايت.',
+    'Review these files': 'راجع الملفات دي',
+    'Upload failed. Try again.': 'الرفع ماكملش. جرّب تاني.',
+    'Some files need worksheet or column choices. Review one account at a time; reselect other unfinished files afterward. Ready imports are saved for review.': 'بعض الملفات محتاجة تختار ورقة العمل أو الأعمدة. راجع حساب واحد كل مرة؛ وبعدها اختار الملفات التانية اللي لسه ماخلصتش. الملفات الجاهزة محفوظة للمراجعة.',
+
     "Payments use the cash saved here. Cash planning counts the remaining bill cost instead of a separate reserve top-up.": "الدفع بياخد من المبلغ المتوفر هنا. تخطيط السيولة بيحسب باقي تكلفة الفاتورة بدل تخصيص مبلغ تاني للاحتياطي.",
     "Unlink the reserve before changing this bill into income or a loan.": "افصل الاحتياطي قبل ما تغيّر الفاتورة دي لدخل أو قرض.",
     "Spent {gross} · From monthly plan {plan} · Funded outside the plan {amount}. Past periods reflect current confirmed links.": "المصروف {gross}. من خطة الشهر {plan}. الممول من خارج الخطة {amount}. الفترات السابقة بتعكس الروابط المؤكدة حاليًا.",
