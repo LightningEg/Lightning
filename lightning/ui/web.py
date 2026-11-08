@@ -51,7 +51,7 @@ def _minus(text: str) -> str:
 # Reporting pages show money rounded to the nearest unit; stored values, entry fields and registers
 # keep their decimals. A template that asks for places explicitly (an input's value) gets them.
 _ROUND_MONEY: contextvars.ContextVar[bool] = contextvars.ContextVar("round_money", default=False)
-REPORTING_TEMPLATES = ("dashboard/", "phone/home.html", "phone/money.html", "phone/money_accounts.html", "phone/money_bills.html", "phone/add_bills.html", "phone/budget_flexible.html", "phone/birdview/", "budget.html", "birdview/", "investments/index.html", "investments/holding.html", "financial_health.html",
+REPORTING_TEMPLATES = ("dashboard/", "phone/home.html", "phone/money.html", "phone/money_accounts.html", "phone/money_bills.html", "phone/money_report.html", "phone/add_bills.html", "phone/budget_flexible.html", "phone/birdview/", "budget.html", "birdview/", "investments/index.html", "investments/holding.html", "financial_health.html",
                        "investments/_targets.html", "investments/targets.html", "investments/report_detail.html",
                        "planning/plan.html", "reserves.html", "settings/index.html", "accounts/currencies.html", "zakat.html",
                        "accounts/list.html", "counterparty.html", "tag.html", "analysis/", "planning/loans.html",

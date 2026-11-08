@@ -24,6 +24,7 @@
   {% if s.late_count %}<a class="phone-row" href="/home"><span>{{ ('1 bill is late' if s.late_count == 1 else '{n} bills are late')|tr(locale, n=s.late_count) }}</span><b>›</b></a>{% endif %}
 </section>
 <div class="phone-rows">
+  <a class="phone-row" href="/money/report"><span>{{ 'Report'|tr(locale) }}</span><b>›</b></a>
   <a class="phone-row" href="/plan/loans"><span>{{ 'What you owe'|tr(locale) }}</span><b><bdi class="fig">{{ s.what_you_owe|money }}</bdi> ›</b></a>
   <a class="phone-row" href="/investments"><span>{{ 'Investments'|tr(locale) }}</span><b><bdi class="fig">{{ s.holdings_value|money }}</bdi> ›</b></a>
   <a class="phone-row" href="/plan/reserves"><span>{{ 'Goals and reserves'|tr(locale) }}</span><b>›</b></a>

@@ -109,7 +109,8 @@ from the one bill state; Coming up is a slice of it, tested) and an *Edit your p
 exists; the empty profile keeps its welcome page), `/budget` (month only) and redirects bare `/more`, `/accounts` and
 `/transactions`; a URL with any other query key still reaches the older page (`_plain` route class), so no link broke.
 The old-page tests were moved to the new screens or to those query URLs. The Overview's period report ("how did my year
-go?") has no phone screen yet and is reached at `/?period=month`.
+go?") now has a phone page at `/money/report` (month, last month, year, all time; Money links to it); the older
+`/?period=month` Overview stays until 3AY11 removes it.
 
 ## 3AY11 Remove the old coupling · M
 Delete the phone switches in `lightning/ui/routes/` (`on_phone`, `lazy_folds`, `request.state.phone`), `_phone_template`,

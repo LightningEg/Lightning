@@ -89,6 +89,14 @@ def phone_router() -> APIRouter:
         from lightning.ui.phone.screens import money as screen
         return render_phone(request, "phone/money.html", screen=screen.build(container(request), today()))
 
+    @router.get("/money/report")
+    async def money_report(request: Request):
+        """How did a period go? (the Overview's report, which Home no longer carries)"""
+        from lightning.core.dates import today
+        from lightning.ui.phone.screens import report as screen
+        return render_phone(request, "phone/money_report.html",
+                            screen=screen.build(container(request), today(), request.query_params.get("period", "month")))
+
     @router.get("/money/accounts")
     async def money_accounts(request: Request):
         from lightning.core.dates import today

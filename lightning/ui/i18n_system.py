@@ -1858,6 +1858,8 @@ SERVICES = {
     "Move": "نقل",
     "Pay a bill": "ادفع فاتورة",
     "To do": "المطلوب منك",
+    "Investing result": "نتيجة الاستثمار",
+    "This year": "السنة دي",
     "Nothing is due.": "مفيش حاجة مستحقة.",
     "To review": "للمراجعة",
     "Earlier month": "الشهر اللي قبله",

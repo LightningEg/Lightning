@@ -1,0 +1,23 @@
+{# The period report (IV-3AY11 prerequisite): the Overview's reading of a month, year or all time, behind Money. #}
+{% extends "base.html" %}
+{% block title %}Report{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/money"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Money'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Report'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+{% set s = screen %}
+<div class="phone-chips" role="tablist">{% for key, name in s.keys %}<a class="phone-chip{{ ' is-chosen' if s.key == key }}" role="tab" aria-selected="{{ 'true' if s.key == key else 'false' }}" href="/money/report?period={{ key }}">{{ name|tr(locale) }}</a>{% endfor %}</div>
+<section class="phone-hero has-seam" aria-labelledby="change-heading">
+  <div id="change-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Change in what you own'|tr(locale) }}</div>
+  {% if s.change is not none %}<div class="phone-lead{{ ' is-negative' if s.change < 0 }}">{{ s.change|money(True) }} <small>{{ base }}</small></div>
+  {% else %}<p class="phone-hero-line">{{ s.change_reason|tr(locale) }}</p>{% endif %}
+  <p class="phone-hero-line"><bdi class="fig">{{ s.start }}</bdi> – <bdi class="fig">{{ s.end }}</bdi></p>
+</section>
+<div class="phone-rows">
+  <div class="phone-row"><span>{{ 'Money in'|tr(locale) }}</span><b class="pos"><bdi class="fig">{{ s.money_in|money }}</bdi></b></div>
+  <div class="phone-row"><span>{{ 'Money out'|tr(locale) }}</span><b><bdi class="fig">{{ s.money_out|money }}</bdi></b></div>
+  <div class="phone-row"><span>{{ 'Kept'|tr(locale) }}</span><b class="{{ 'neg' if s.net < 0 else 'pos' }}"><bdi class="fig">{{ s.net|money(True) }}</bdi></b></div>
+  {% if s.savings_rate is not none %}<div class="phone-row"><span>{{ 'Savings rate'|tr(locale) }}</span><b><bdi class="fig">{{ s.savings_rate|round(0)|int }}%</bdi></b></div>{% endif %}
+  {% if s.investing_result is not none %}<a class="phone-row" href="/investments"><span>{{ 'Investing result'|tr(locale) }}</span><b class="{{ 'neg' if s.investing_result < 0 else 'pos' }}"><bdi class="fig">{{ s.investing_result|money(True) }}</bdi> ›</b></a>{% endif %}
+</div>
+<a class="phone-row" href="/birdview/expenses"><span>{{ 'Where it went'|tr(locale) }}</span><b>›</b></a>
+{% endblock %}
