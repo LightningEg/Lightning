@@ -1,0 +1,95 @@
+"""Budget, flexible first (IV-3AY9, guideline C11.2): "How much is left, and on what?". The hero is the everyday money
+left in the month's plan (the forecaster's EverydayBudget, the figure the PC's Everyday card shows), the list holds
+flexible categories only with *left* as the figure, and every bill and loan payment is one Fixed costs row, so a
+fixed cost never drags the pace or shows as "0 left". Services calculate; this module only picks and orders."""
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import date, timedelta
+from decimal import Decimal
+
+from lightning.core.dates import month_of, parse_month
+
+ZERO = Decimal(0)
+ATTENTION = 4          # Needs attention shows at most this many, then "and N more"
+AHEAD_POINTS = 10      # a category this many points ahead of the month's pace needs attention
+
+
+@dataclass(frozen=True)
+class CategoryRow:
+    category_id: int
+    name: str
+    limit: Decimal
+    spent: Decimal
+    left: Decimal              # negative when over
+    share: float               # 0-100 for the bar
+    attention: bool
+
+
+@dataclass(frozen=True)
+class BudgetScreen:
+    month: str
+    prev_month: str
+    next_month: str            # "" for the current month
+    state: str                 # "no_plan" | "past" | "current" | "future"
+    left: Decimal | None       # everyday money left in the plan; None with no plan
+    used_pct: int | None
+    pace_gap: Decimal | None   # everyday spent less the pace; negative is under it (current month only)
+    per_day: Decimal | None
+    attention: tuple[CategoryRow, ...]
+    attention_more: int
+    categories: tuple[CategoryRow, ...]   # every flexible category, least left first
+    fixed_planned: Decimal
+    fixed_paid: Decimal
+    fixed_count: int
+
+
+def _shift(month: str, step: int) -> str:
+    first, _ = parse_month(month)
+    return month_of(first + timedelta(days=15) * 2 if step > 0 else first - timedelta(days=1))
+
+
+def build(c, day: date, month: str = "") -> BudgetScreen:
+    this = month_of(day)
+    try:
+        first, last = parse_month(month or this)
+    except Exception:
+        first, last = parse_month(this)
+    shown = month_of(first)
+    schedule = c.schedules.view()
+    prev, nxt = _shift(shown, -1), "" if shown >= this else _shift(shown, 1)
+    if not c.budgets.has_plan(shown, schedule=schedule):
+        return BudgetScreen(shown, prev, nxt, "no_plan", None, None, None, None, (), 0, (), ZERO, ZERO, 0)
+    e = c.forecaster.everyday(shown, day)
+    state = "current" if e.current else ("past" if last < day else "future")
+    left = e.everyday_plan - e.everyday_spent
+    used = int(e.everyday_spent / e.everyday_plan * 100) if e.everyday_plan > 0 else None
+    pace_pct = Decimal(e.day) / e.days_in_month * 100 if state == "current" and e.days_in_month else None
+    rows = []
+    view = c.budgets.month_view(shown, schedule=schedule)
+    seen = set()
+    for section in view.sections:
+        for line in section.lines:
+            if (line.depth <= 1 or line.direct is None or line.from_loans or line.from_bills
+                    or line.category_id in seen or line.available is None):
+                continue
+            seen.add(line.category_id)
+            limit, spent = line.available, line.planned_actual
+            if not limit and not spent:
+                continue
+            share = float(min(max(spent / limit * 100, ZERO), Decimal(100))) if limit > 0 else (100.0 if spent > 0 else 0.0)
+            ahead = pace_pct is not None and limit > 0 and spent / limit * 100 >= pace_pct + AHEAD_POINTS
+            rows.append(CategoryRow(line.category_id, line.name, limit, spent, limit - spent, share,
+                                    state != "past" and (limit - spent < 0 or ahead)))
+    rows.sort(key=lambda r: (r.left, r.name.casefold()))
+    needs = [r for r in rows if r.attention]
+    paid = planned = ZERO
+    for p in e.payments:
+        if p.due_date[:7] != shown:
+            continue
+        planned += c.planning.amount_in_base(p, p.amount, day)
+        paid += c.planning.amount_in_base(p, p.amount - p.still_owed, day)
+    count = sum(1 for p in e.payments if p.due_date[:7] == shown)
+    return BudgetScreen(shown, prev, nxt, state, left, used,
+                        (e.everyday_spent - e.pace) if state == "current" else None, e.per_day,
+                        tuple(needs[:ATTENTION]), max(len(needs) - ATTENTION, 0), tuple(rows), planned, paid, count)

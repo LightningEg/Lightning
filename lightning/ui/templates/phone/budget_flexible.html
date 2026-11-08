@@ -1,0 +1,36 @@
+{# Budget, flexible first (IV-3AY9, guideline C11.2): Left in plan counts everyday money; Needs attention (at most four);
+   flexible categories with left as the figure and no fields; Fixed costs as one row. No plan: the Make my plan step. #}
+{% extends "base.html" %}
+{% block title %}Budget{% endblock %}
+{% block heading %}<h1>{{ 'Budget'|tr(locale) }}</h1>{% endblock %}
+{% macro cat_row(r) %}<a class="phone-row phone-budget-cat{{ ' is-over' if r.left < 0 }}" data-popup-open href="/budget/category/{{ r.category_id }}/sheet?month={{ screen.month }}"><span>{{ r.name }}<small>{{ '{spent} of {limit}'|tr(locale, spent=r.spent|money, limit=r.limit|money) }}</small><span class="phone-bar-track" aria-hidden="true"><i style="width: {{ r.share }}%"></i></span></span><b class="{{ 'neg' if r.left < 0 }}"><bdi class="fig">{{ r.left|money }}</bdi></b></a>{% endmacro %}
+{% block content %}
+{% set s = screen %}
+{% if s.state == 'no_plan' %}
+<section class="phone-section" aria-labelledby="plan-heading">
+  <header class="phone-section-head"><h2 id="plan-heading">{{ 'Make my plan'|tr(locale) }}</h2></header>
+  <p>{{ 'A plan says how much you mean to spend in each category this month, so Lightning can tell you what is left.'|tr(locale) }}</p>
+  <a class="btn primary" href="/budget/fill?month={{ s.month }}">{{ 'Make my plan'|tr(locale) }}</a>
+</section>
+{% else %}
+<section class="phone-hero has-seam" aria-labelledby="lead-heading">
+  <div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Over plan'|tr(locale) if s.left < 0 else fig.left_in_plan.label }}</div>
+  <div class="phone-lead{{ ' is-negative' if s.left < 0 }}">{{ (s.left|abs)|money }} <small>{{ base }}</small></div>
+  {% if s.pace_gap is not none %}<p class="phone-hero-line">{% if s.pace_gap <= 0 %}{{ '{amt} under your pace for {m}.'|tr(locale, amt=(-s.pace_gap)|money, m=s.month) }}{% else %}{{ '{amt} over your pace for {m}.'|tr(locale, amt=s.pace_gap|money, m=s.month) }}{% endif %}{% if s.per_day %} {{ 'About {amt} a day.'|tr(locale, amt=s.per_day|money) }}{% endif %}</p>
+  {% elif s.state == 'past' and s.used_pct is not none %}<p class="phone-hero-line">{{ '{pct}% of the plan was spent.'|tr(locale, pct=s.used_pct) }}</p>{% endif %}
+</section>
+<div class="phone-chips"><span class="phone-chip phone-month-chip"><a href="/budget/flexible?month={{ s.prev_month }}" aria-label="{{ 'Earlier month'|tr(locale) }}">‹</a><span>{{ s.month }}</span>{% if s.next_month %}<a href="/budget/flexible?month={{ s.next_month }}" aria-label="{{ 'Later month'|tr(locale) }}">›</a>{% else %}<span class="phone-month-end" aria-hidden="true">&nbsp;</span>{% endif %}</span></div>
+{% if s.attention %}
+<section class="phone-section" aria-labelledby="needs-heading">
+  <header class="phone-section-head"><h2 id="needs-heading">{{ 'Needs attention'|tr(locale) }}</h2></header>
+  <div class="phone-rows">{% for r in s.attention %}{{ cat_row(r) }}{% endfor %}</div>
+  {% if s.attention_more %}<p class="phone-note">{{ 'and {n} more'|tr(locale, n=s.attention_more) }}</p>{% endif %}
+</section>
+{% endif %}
+<section class="phone-section" aria-labelledby="cats-heading">
+  <header class="phone-section-head"><h2 id="cats-heading">{{ 'Your categories'|tr(locale) }}</h2></header>
+  <div class="phone-rows">{% for r in s.categories %}{{ cat_row(r) }}{% else %}<p class="phone-note">{{ 'No category has a limit yet.'|tr(locale) }}</p>{% endfor %}</div>
+</section>
+{% if s.fixed_count %}<a class="phone-row phone-fixed-costs" href="/plan/recurring"><span>{{ 'Fixed costs'|tr(locale) }}<small>{{ '{paid} of {planned} paid'|tr(locale, paid=s.fixed_paid|money, planned=s.fixed_planned|money) }}</small></span><b>›</b></a>{% endif %}
+{% endif %}
+{% endblock %}

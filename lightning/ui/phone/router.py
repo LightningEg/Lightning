@@ -20,6 +20,48 @@ def phone_router() -> APIRouter:
         from lightning.ui.phone.screens import home as screen
         return render_phone(request, "phone/home.html", screen=screen.build(container(request), today()))
 
+    @router.get("/budget/flexible")
+    async def budget_flexible(request: Request):
+        """Budget, flexible first (3AY9). Served beside the old Budget until the tab bar switches (3AY10)."""
+        from lightning.core.dates import today
+        from lightning.ui.phone.screens import budget as screen
+        return render_phone(request, "phone/budget_flexible.html",
+                            screen=screen.build(container(request), today(), request.query_params.get("month", "")))
+
+    @router.get("/money")
+    async def money(request: Request):
+        """Money (3AY10): net worth, the balances, Coming up and one row for each of the rest. Served beside More until
+        the tab bar switches."""
+        from lightning.core.dates import today
+        from lightning.ui.phone.screens import money as screen
+        return render_phone(request, "phone/money.html", screen=screen.build(container(request), today()))
+
+    @router.get("/activity")
+    async def activity(request: Request):
+        from lightning.core.dates import today
+        from lightning.ui.phone.screens import activity as screen
+        asked = request.query_params
+        index = int(asked.get("i", "0")) if asked.get("i", "0").isdigit() else 0
+        return render_phone(request, "phone/activity_home.html", screen=screen.build(
+            container(request), today(), asked.get("tab", "all"), asked.get("month", ""), index))
+
+    @router.post("/activity/not-now")
+    async def activity_not_now(request: Request):
+        """Not now on a review card: it leaves the queue until tomorrow and nothing is posted or changed (3AY8)."""
+        from datetime import timedelta
+        from lightning.core.dates import today
+        from lightning.core.errors import LightningError
+        from lightning.ui.web import redirect
+        from lightning.workflows.review import ReviewInbox
+        form = await request.form()
+        day = today()
+        try:
+            ReviewInbox(container(request)).decide(str(form.get("identity", "")), "snoozed", day,
+                                                   (day + timedelta(days=1)).isoformat())
+        except LightningError as exc:
+            return redirect("/activity?tab=review", exc.message)
+        return redirect("/activity?tab=review")
+
     @router.get("/add/bills")
     async def add_bills(request: Request):
         """Pay a bill, from the Add sheet (3AY7): what is due, earliest first; a row opens that bill's pay sheet."""
