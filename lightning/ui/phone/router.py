@@ -2,62 +2,31 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, FastAPI, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.routing import APIRoute
-from starlette.routing import Match
+from fastapi.responses import HTMLResponse
 
 from lightning.ui.web import container, render
 
 PHONE_TEMPLATES = "phone/"
 
 
-def _plain(*allowed: str) -> type[APIRoute]:
-    """A route class that matches a URL only when its query holds nothing but ``allowed`` keys. A slot's bare URL is
-    the new screen; the same path with a filter or another page's parameters still reaches the older shared route,
-    so no link breaks while the old screens are removed (3AY11)."""
-    class PlainRoute(APIRoute):
-        def matches(self, scope):
-            match, child = super().matches(scope)
-            if match == Match.FULL:
-                keys = {part.split("=", 1)[0] for part in scope.get("query_string", b"").decode().split("&") if part}
-                if keys - set(allowed):
-                    return Match.NONE, {}
-            return match, child
-    return PlainRoute
-
-
 def phone_router() -> APIRouter:
     """Every phone-owned URL. Home is served at /home while the old Overview keeps /; the slot URLs switch over
     together with the tab bar (3AY10)."""
     router = APIRouter()
-    slots = APIRouter(route_class=_plain())              # a bare slot URL: no query at all
-    months = APIRouter(route_class=_plain("month"))      # Budget keeps its month stepper
 
     @router.get("/home")
-    @slots.get("/")
     async def home(request: Request):
         from lightning.core.dates import today
         from lightning.ui.phone.screens import home as screen
         return render_phone(request, "phone/home.html", screen=screen.build(container(request), today()))
 
     @router.get("/budget/flexible")
-    @months.get("/budget")
     async def budget_flexible(request: Request):
         """Budget, flexible first (3AY9). Served beside the old Budget until the tab bar switches (3AY10)."""
         from lightning.core.dates import today
         from lightning.ui.phone.screens import budget as screen
         return render_phone(request, "phone/budget_flexible.html",
                             screen=screen.build(container(request), today(), request.query_params.get("month", "")))
-
-    @slots.get("/more")
-    @slots.get("/accounts")
-    async def to_money():
-        """The old More and the account list are Money's job now (3AY10)."""
-        return RedirectResponse("/money", status_code=307)
-
-    @slots.get("/transactions")
-    async def to_activity():
-        return RedirectResponse("/activity", status_code=307)
 
     @router.get("/money")
     async def money(request: Request):
@@ -104,8 +73,6 @@ def phone_router() -> APIRouter:
         rows = bill_state.open_bills(c.planning, today(), bill_state.SOON_DAYS)
         return render_phone(request, "phone/add_bills.html", rows=rows, back=back)
 
-    router.include_router(slots)
-    router.include_router(months)
     return router
 
 
