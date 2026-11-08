@@ -12,7 +12,7 @@ Tool-neutral. One fact lives in one file; everything else links to it. Two reade
 | Question | Answer |
 |---|---|
 | Who reads it? | People: `docs/`. An AI that needs depth: `ai/`. |
-| A fact (how it works, a term, a decision) or a record (something that happened)? | A fact has one home: product and decisions `ai/PROJECT_OVERVIEW.md`, how it is built `ai/ARCHITECTURE.md`, a term `ai/GLOSSARY.md`, competitors `ai/COMPETITION.md`. A record is a dated report in `reports/`, a sanitized observation in `feedback/`, or a plan item in `issues/`. |
+| A fact (how it works, a term, a decision) or a record (something that happened)? | A fact has one home: product and decisions `ai/PROJECT_OVERVIEW.md`, how it is built `ai/ARCHITECTURE.md`, a term `ai/GLOSSARY.md`, competitors `ai/COMPETITION.md`. A record is a dated report beside the items it started in `issues/<big picture>/` (catalogue `issues/REPORTS.md`), a sanitized observation in `feedback/`, or a plan item in `issues/`. |
 | Is it work still to do? | An item in `issues/` (skill `add-plan-item`), never a new document. |
 | Is it still true? | If not: `ai/archive/`, or delete it. History stays in git. |
 | Which pillar? | One of `capture plan understand own protect everywhere feel build reach` (`issues/README.md`). |

@@ -22,7 +22,7 @@ Detail: BT-5J. Convert refuses a rate 20% off the market unless pressed twice; r
 
 - `python tools/release_notes.py recent`: what is unreleased since the last tag (or `--from <ref>`).
 - `python tools/release_notes.py`: rewrite `RELEASES.md` from `ai/changelog/*.md`; `--check` fails if it is stale.
-- `python tools/release_notes.py cut 1.5.5 --from <last release commit>`: writes `ai/changelog/1.5.5.md` from the trailers (and the migrations added since), rebuilds `RELEASES.md`. Read the notes once; fix a bad sentence in the version file, then run the tool with no arguments.
+- `python tools/release_notes.py cut 2.1.1`: starts from the newest `v*` tag (`--from <ref>` only when there is none), writes `ai/changelog/2.1.1.md` from the trailers (and the migrations added since), rebuilds `RELEASES.md`. Read the notes once; fix a bad sentence in the version file, then run the tool with no arguments.
 - Never hand-edit `RELEASES.md`. A released version's file is never rewritten.
 - `ai/changelog/UNRELEASED.md` holds entries written before trailers existed; the next `cut` takes them in.
 
