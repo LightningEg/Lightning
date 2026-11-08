@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 46 open items. Each folder holds its reports and its items.
+11 big pictures, 44 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -32,12 +32,11 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | Sonnet | ready |
 | IT-1N2 | ↳ Post the approved batch | | | S | Sonnet | |
 | **IT-1R** | [Direct tests for investment_breakdown](1-easy-to-contribute/IT-1R-investment-breakdown-direct-tests.md) ([#339](https://github.com/LightningEg/Lightning/issues/339)) | improvement, technical | Build | M | Sonnet | ready |
-| **IT-1S** | [Direct tests for SubmissionStore (a form saved twice saves once)](1-easy-to-contribute/IT-1S-submission-store-direct-tests.md) ([#340](https://github.com/LightningEg/Lightning/issues/340)) | improvement, technical | Build | S | Sonnet | ready |
-| **IT-1T** | [Direct tests for PlanSchedule and ScheduleSource](1-easy-to-contribute/IT-1T-plan-schedule-direct-tests.md) ([#341](https://github.com/LightningEg/Lightning/issues/341)) | improvement, technical | Build | S | Sonnet | ready |
+| **IT-1U** | [Investigate existing Linux browser and packaging test failures](1-easy-to-contribute/IT-1U-existing-linux-test-failures.md) | improvement, technical | Build | M | Sonnet | ready |
 
 Reports: [r7](1-easy-to-contribute/r7-pull-request-cleanup/report.md).
 
-Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q. Next free code: 1U.
+Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1S, 1T. Next free code: 1V.
 
 ## 2 Safe for real money
 
@@ -75,8 +74,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **BV-3BB** | [In Arabic, delete confirmations open as a harmless "OK" dialog with focus on Yes, so Enter deletes](3-polish-and-arabic/BV-3BB-arabic-delete-confirm-loses-danger.md) | bug, visual · medium | Protect | S | Sonnet | ready |
-| BV-3BB1 | ↳ Delete confirmations are dangerous in every language ([#400](https://github.com/LightningEg/Lightning/issues/400)) | | | S | Sonnet | |
 | **IT-3BE** | [One number format on screen - the browser follows the app, not the Windows locale, and every negative uses a true minus](3-polish-and-arabic/IT-3BE-one-number-format.md) | improvement, technical | Understand | S | Sonnet | ready |
 | IT-3BE1 | ↳ The KPI "points" use a true minus ([#401](https://github.com/LightningEg/Lightning/issues/401)) | | | S | Sonnet | |
 | IT-3BE2 | ↳ Browser numbers ignore the Windows region ([#402](https://github.com/LightningEg/Lightning/issues/402)) | | | S | Sonnet | |
@@ -135,7 +132,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md) · [r28](3-polish-and-arabic/r28-international-polish/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BJ. Next free code: 3BL.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BJ. Next free code: 3BL.
 
 ## 4 Edit journal and devices
 
@@ -286,7 +283,6 @@ The phone is its own product: a few places that each answer one question, quick 
 | **IV-11A** | [Phone first run - every Add is greyed out until "Save currencies" is pressed, and an empty Transactions says "Nothing matches"](11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | improvement, visual | Everywhere | M | Sonnet | ready |
 | IV-11A1 | ↳ Add works before "Save currencies" ([#432](https://github.com/LightningEg/Lightning/issues/432)) | | | S | Sonnet | |
 | IV-11A2 | ↳ An empty Activity says "No transactions yet." with Add and Import ([#433](https://github.com/LightningEg/Lightning/issues/433)) | | | S | Sonnet | |
-| IV-11A3 | ↳ Cash planning with no account says so once ([#434](https://github.com/LightningEg/Lightning/issues/434)) | | | S | Sonnet | |
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | Opus | building |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | Opus | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner |  | |
