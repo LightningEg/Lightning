@@ -23,7 +23,7 @@ def fmt(value, places: int = 0, signed: bool = False) -> str:
 from lightning.investments.report import investing_rate, investment_period, saved_and_invested
 from lightning.planning.bill_state import NEEDS_ACTION, open_bills
 from lightning.planning.position import net_worth_bridge
-from lightning.workflows.review import GROUP_LABELS, ReviewInbox, group_of, grouped
+from lightning.workflows.review import GROUP_LABELS, ReviewInbox, by_consequence, group_of, grouped
 
 from ..web import container, render, settled_save
 from ..web import redirect
@@ -195,7 +195,7 @@ async def dashboard(request: Request):
         waffle=None if on_phone else saved_and_invested(cash_flow, closing_report["net_money"]), dates_note=dates_note, lead_change=lead_change,
         bridge=bridge, worth_units=worth_units, pos=position, cash_accounts=cash_accounts, owe=owe,
         kept_apart_accounts=[] if on_phone else c.reporting.owned_cash_kept_apart_by_account(position.as_of),
-        attention=attention, attention_groups=attention_groups, setup=setup,
+        attention=attention, attention_groups=attention_groups, attention_handled=inbox.handled, setup=setup,
         investment_report=investment_report, cash_flow=cash_flow, phone=phone,
         worth_tile=_worth_tile(position, lead_change) if on_phone and phone and phone.get("safe") else None,  # else the hero is the same figure
         lazy_folds=lazy_folds, fold_query=urlencode(request.query_params),
@@ -681,7 +681,7 @@ async def needs_you_inbox(request: Request):
               for state in ("active", "reviewed", "snoozed")}
     selected = [item for item in items if (item["review_state"] != "active") == handled]
     return render(request, "needs_you.html", label="Needs you", items=selected, counts=counts,
-                  handled=handled, snooze_default=(today() + timedelta(days=7)).isoformat())
+                  sections=by_consequence(selected), handled=handled, snooze_default=(today() + timedelta(days=7)).isoformat())
 
 
 @router.post("/needs-you/state")

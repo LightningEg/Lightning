@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import calendar
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal, ROUND_HALF_UP
 
 from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, parse_date, today
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.ledger import Effect, PostingLine
-from lightning.core.money import ZERO, check_places, fmt, to_decimal, to_e6
+from lightning.core.money import ZERO, check_places, fmt, from_e6, to_decimal, to_e6
 from lightning.core.refs import DocType
 from lightning.database.connection import Database
 from lightning.transactions.service import TransactionService
@@ -45,6 +45,26 @@ class DepositService:
         if certificate is None:
             raise NotFoundError("Certificate was not found.")
         return certificate
+
+    def maturity_outlook(self, certificate) -> dict:
+        """NF-3AZ8: what a certificate says about its maturity. ``expected`` is a forecast from its terms (principal and
+        the interest due that day), never received cash; ``received`` appears only once a redemption is recorded and
+        posted, from the actual amount that reached the destination account."""
+        terms = certificate.terms
+        maturity = date.fromisoformat(terms.maturity_date)
+        events = self._certificate_events(terms, date.fromisoformat(terms.start_date) - timedelta(days=1), maturity)
+        expected = sum((e.amount for e in events if e.date == terms.maturity_date), ZERO)
+        row = self.db.one(
+            "SELECT r.transaction_id,r.destination_account_id,t.date FROM cd_redemptions r JOIN transactions t "
+            "ON t.id=r.transaction_id WHERE r.certificate_id=? AND t.status='POSTED' ORDER BY t.date DESC LIMIT 1",
+            (terms.id,))
+        received = None
+        if row:
+            amount_e6 = self.db.scalar("SELECT COALESCE(SUM(amount_e6),0) FROM ledger_entries WHERE transaction_id=? "
+                                       "AND account_id=?", (row["transaction_id"], row["destination_account_id"]))
+            received = {"transaction_id": row["transaction_id"], "date": row["date"], "account_id": row["destination_account_id"],
+                        "amount": from_e6(amount_e6)}
+        return {"expected_date": terms.maturity_date, "expected": expected if expected > ZERO else None, "received": received}
 
     def certificate_for_asset(self, asset_id: int):
         return self.repo.get_certificate_by_asset(asset_id)

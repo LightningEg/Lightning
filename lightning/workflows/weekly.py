@@ -8,7 +8,7 @@ from urllib.parse import urlencode
 from lightning.core.dates import now_iso, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.rules import engine
-from lightning.workflows.review import ReviewInbox, grouped
+from lightning.workflows.review import ReviewInbox, by_consequence, grouped
 
 
 class WeeklyReview:
@@ -16,9 +16,11 @@ class WeeklyReview:
         self.c = c
 
     def snapshot(self):
-        items = ReviewInbox(self.c).items(today())
+        inbox = ReviewInbox(self.c)
+        items = inbox.items(today())
         token = sha256(json.dumps(items, sort_keys=True, default=str).encode()).hexdigest()
-        return {"items": items, "groups": grouped(items), "token": token,
+        return {"items": items, "groups": grouped(items), "sections": by_consequence(items), "handled": inbox.handled,
+                "token": token,
                 "last": self.c.settings.get("weekly_review_at"), "rules": self.rule_offers()}
 
     def complete(self, token):

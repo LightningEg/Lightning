@@ -31,6 +31,7 @@ def test_salary_review_requires_a_real_settlement_and_renews_for_new_salary(c, s
     client = TestClient(create_app(c))
     page = client.get('/payday')
     assert page.status_code == 200 and 'Safe to spend' in page.text and 'Before your next payday' in page.text
+    assert 'Your payday proposal' in page.text and 'after you confirm' in page.text
     c.settings.set('locale', 'ar')
     ar = client.get('/payday')
     assert 'قبل المرتب الجاي' in ar.text

@@ -23,6 +23,8 @@ from .repository import RuleRepository
 
 MAX_PARTS = 3
 UNDO_KEY = "rules_apply_undo"
+CORRECTIONS_KEY = "category_corrections"
+CORRECTION_OFFER_AFTER = 2
 AMOUNT_WORDS = {"is": "is", "about": "about", "between": "between", "more": "more than", "less": "less than"}
 TEXT_WORDS = {"is": "is", "contains": "contains", "one_of": "is one of"}
 
@@ -185,11 +187,12 @@ class RuleService:
     def past(self, rule_id: int) -> list[PastChange]:
         """Posted transactions this rule would refile if applied to the past: it is the rule that decides
         their category among all the rules, the category differs from theirs, and it fits their direction."""
-        rule = self.get(rule_id)
+        return self._past(self.get(rule_id), self.repo.rules())
+
+    def _past(self, rule: Rule, rules: list[Rule]) -> list[PastChange]:
         if not rule.category_id:
             return []
         target = self.categories.get(rule.category_id)
-        rules = self.repo.rules()
         out = []
         locked = {row["transaction_id"] for row in self.db.all(
             "SELECT DISTINCT le.transaction_id FROM ledger_entries le JOIN reconciled_through r "
@@ -213,6 +216,59 @@ class RuleService:
             out.append(PastChange(row["id"], row["date"], row["canonical"] or row["counterparty"] or "",
                                   row["amount"], current.name))
         return out
+
+    # ------------------------------------------------------- a repeated correction (NF-3AZ3)
+    def record_correction(self, name: str, from_category_id: int | None, to_category_id: int) -> None:
+        """Count one hand correction of a counterparty's category. A different target starts the count again."""
+        key = engine.text_key(name)
+        if not key or from_category_id == to_category_id:
+            return
+        counts = self._corrections()
+        entry = counts.get(key, {})
+        counts[key] = {"to": to_category_id, "n": (entry.get("n", 0) + 1) if entry.get("to") == to_category_id else 1}
+        self.settings.set(CORRECTIONS_KEY, json.dumps(counts, sort_keys=True))
+
+    def clear_corrections(self, name: str) -> None:
+        counts = self._corrections()
+        if counts.pop(engine.text_key(name), None) is not None:
+            self.settings.set(CORRECTIONS_KEY, json.dumps(counts, sort_keys=True))
+
+    def _corrections(self) -> dict:
+        try:
+            return json.loads(self.settings.get(CORRECTIONS_KEY) or "{}")
+        except ValueError:
+            return {}
+
+    def suggestion(self, name: str, category_id: int | None = None) -> dict | None:
+        """Offer a rule once the same counterparty has been filed in the same category by hand twice: how often,
+        the past rows it would refile (before and after), what stays because another rule decides it, and any
+        rule that disagrees. Read-only: nothing is saved or changed here."""
+        key = engine.text_key(name)
+        entry = self._corrections().get(key)
+        if not key or not entry or entry["n"] < CORRECTION_OFFER_AFTER or (category_id and entry["to"] != category_id):
+            return None
+        category = self.categories.get(entry["to"])
+        rules = self.repo.rules()
+        outcome = self.outcome(name)
+        if outcome.category_id == category.id and outcome.rule_id:
+            return None  # a rule already files this name there
+        draft = Rule(id=-1, conditions=(Condition("counterparty", "is", name),), category_id=category.id,
+                     position=10 ** 9)
+        past = self._past(draft, rules + [draft])
+        kept = [row for row in self.repo.single_category_history()
+                if engine.text_key(row["canonical"] or row["counterparty"]) == key
+                and row["category_id"] != category.id and row["id"] not in {c.id for c in past}]
+        conflict = None
+        if outcome.rule_id and outcome.category_id and outcome.category_id != category.id:
+            conflict = self._category_name(outcome.category_id)
+        return {"counterparty": name, "category_id": category.id, "category": self._category_name(category.id),
+                "times": entry["n"], "past": past, "kept": len(kept), "conflict": conflict,
+                "token": self._suggestion_token(name, category.id, past)}
+
+    def _suggestion_token(self, name, category_id, past) -> str:
+        from hashlib import sha256
+        return sha256(json.dumps([name, category_id, [asdict(c) for c in past]], sort_keys=True,
+                                 default=str).encode()).hexdigest()
 
     def past_token(self, rule_id, changes=None):
         from hashlib import sha256

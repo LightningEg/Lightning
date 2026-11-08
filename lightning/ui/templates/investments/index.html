@@ -60,6 +60,7 @@
   {% if fx_gain %}<p class="muted small">{{ "Of your total gain {gain}, {fx} came from exchange rates"|tr(locale, gain=total_gain|money(True), fx=fx_gain|money(True)) }}</p>{% endif %}
   {% else %}<p class="chart-empty">{{ "No holdings to show."|tr(locale) }}</p>{% endif %}
 </section>{% else %}<p class="muted small inv-all-base">{{ "All in {currency}"|tr(locale, currency=base) }}</p>{% endif %}
+{% include "investments/_explain.html" %}
 {% if investment_report.missing %}<p class="notice">Price quality: {% for issue in investment_report.missing %}{{ issue.asset }} — {{ issue.reason|tr(locale) }}{% if not loop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 {% if investment_report.unrealized_change is none %}<p class="notice">{{ "A dated market price is missing at a period boundary, so the result is unavailable."|tr(locale) }}</p>{% endif %}
 {% if investment_report.unresolved_dividends %}<p class="notice">{{ investment_report.unresolved_dividends }} dividend(s) have unresolved asset attribution; the amount remains in cash.</p>{% endif %}

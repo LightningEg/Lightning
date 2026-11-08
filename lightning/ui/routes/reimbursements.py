@@ -30,6 +30,7 @@ def _context(request: Request, error: str = "", values: dict | None = None):
             "receipts": c.reimbursements.available_receipts(),
             "counterparties": c.counterparties.list_active(),
             "base": c.base_currency, "error": error,
+            "pick_receipt": str(request.query_params.get("receipt_id", "")),
             "values": values or {"transaction_id": str(request.query_params.get("expense_id", "")), "expected": str(request.query_params.get("expected", "")),
                                  "payer_id": str(request.query_params.get("payer_id", "")), "due_date": ""}}
 

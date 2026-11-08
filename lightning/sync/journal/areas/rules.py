@@ -38,6 +38,10 @@ COMMANDS = {
     "rules.delete": Command("rules.delete", dict(rule_id=ref("rules")), target=TARGET),
     "rules.apply_past": Command("rules.apply_past", dict(
         rule_id=ref("rules"), selected_ids=listof(ref("transactions")), fingerprint=TEXT), target=TARGET),
+    # NF-3AZ3: the count of hand corrections that decides when a rule is offered.
+    "rules.record_correction": Command("rules.record_correction", dict(
+        name=TEXT, from_category_id=optional(ref("categories")), to_category_id=ref("categories"))),
+    "rules.clear_corrections": Command("rules.clear_corrections", dict(name=TEXT)),
     # The token names the last application, which sits in the settings.
     "rules.undo": Command("rules.undo", dict(token=TEXT)),
 }
