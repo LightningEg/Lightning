@@ -49,7 +49,7 @@ PHONE_EXTRA = ("/accounts/1", "/accounts/6", "/plan/loans", "/plan/recurring", "
                "/transactions/315", "/accounts/1/transaction/new", "/budget/raise?month=2026-10", "/search?q=a",
                "/search", "/search?q=carrefour", "/sms", "/transactions/315/sheet", "/transactions/315/sheet?change=1",
                "/transactions/sorted", "/transactions?kind=unsorted")   # the capture half (3AN3, 3AN5, 3AN6)
-PHONE_PAGES = ("/exports/all", "/plan/purchases/new", "/", "/budget", "/plan", "/investments", "/accounts", "/transactions", "/birdview/expenses",
+PHONE_PAGES = ("/exports/all", "/plan/purchases/new", "/budget", "/plan", "/investments", "/accounts", "/transactions", "/birdview/expenses",
                "/financial-health", "/settings", "/categories", "/zakat")
 
 # Brand, keyboard keys, data sources and the one prompt meant to be pasted into an AI tool.

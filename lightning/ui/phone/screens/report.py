@@ -12,7 +12,7 @@ from lightning.core.errors import LightningError
 from lightning.investments.report import investment_period
 from lightning.ui.periods import parse_period
 
-KEYS = ("month", "last", "ytd", "all")
+KEYS = ("month", "last", "ytd", "all", "custom")
 
 
 @dataclass(frozen=True)
@@ -29,20 +29,24 @@ class ReportScreen:
     savings_rate: Decimal | None
     investing_result: Decimal | None  # the period's gain or loss on holdings; None when a price is missing
     keys: tuple[tuple[str, str], ...]
+    custom: bool = False             # the From / To months form is open
 
 
-def _period(c, day: date, key: str):
+def _period(c, day: date, key: str, query=None):
     first = c.reporting.first_activity_date()
     if key == "last":
         before = date(day.year - 1, 12, 1) if day.month == 1 else date(day.year, day.month - 1, 1)
         return parse_period({"period": "month", "month": month_of(before)}, day, first)
+    if key == "custom":   # two months, as the PC's Custom report takes them
+        return parse_period({"period": "custom", **(query or {})}, day, first)
     return parse_period({"period": key if key in ("ytd", "all") else "month"}, day, first)
 
 
-def build(c, day: date, key: str = "month") -> ReportScreen:
+def build(c, day: date, key: str = "month", query=None) -> ReportScreen:
     key = key if key in KEYS else "month"
+    form_open = key == "custom"   # the form stays open when its months are missing or wrong
     try:
-        period = _period(c, day, key)
+        period = _period(c, day, key, query)
     except LightningError:
         key = "month"
         period = _period(c, day, key)
@@ -53,5 +57,5 @@ def build(c, day: date, key: str = "month") -> ReportScreen:
     label = month_of(start) if key in ("month", "last") else period.label
     return ReportScreen(key=key, label=label, start=fmt_date(start), end=fmt_date(end), change=change,
                         change_reason=reason, money_in=flow.inflows, money_out=flow.outflows, net=flow.net,
-                        savings_rate=flow.savings_rate, investing_result=investing["result"],
+                        savings_rate=flow.savings_rate, investing_result=investing["result"], custom=form_open,
                         keys=(("month", "This month"), ("last", "Last month"), ("ytd", "This year"), ("all", "All time")))

@@ -79,7 +79,7 @@ async def dashboard(request: Request):
                       editing_currencies=request.query_params.get("currencies") == "edit",
                       sample_stories=sample_stories(WELCOME_SAMPLES))
     if getattr(request.state, "phone", False):  # the phone's period report lives at /money/report (3AY11)
-        query = urlencode({k: v for k, v in request.query_params.items() if k in {"period", "month", "from", "to"}})
+        query = urlencode({k: v for k, v in request.query_params.items() if k in {"period", "date_from", "date_to"}})
         return RedirectResponse("/money/report" + (f"?{query}" if query else ""), status_code=303)
     # Every position figure comes from one calculation; see lightning/planning/position.py.
     period_position = c.position.at(as_of)

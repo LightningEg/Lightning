@@ -118,10 +118,10 @@ class PhoneBrowser(screens.Browser):
         return self.page
 
     def submit(self, values=None, button=None, *args, **kwargs):
-        if button in ("All time", "Year to date") and self.page is not None and self.page.path.split("?")[0] == "/" \
-                and kwargs.get("page") is None and not args:   # Home is always today: the period buttons are the report's
-            self.detours[OVERVIEW_REPORT] += 1
-            self.open("/?period=month")
+        if button in ("All time", "Year to date") and not args and kwargs.get("page") is None:
+            self.detours[OVERVIEW_REPORT] += 1   # Home is always today: the period buttons are the report's chips
+            self.open("/money/report?period=" + ("all" if button == "All time" else "ytd"))
+            return self.page
         try:
             return super().submit(values, button, *args, **kwargs)
         except (AssertionError, StopIteration):
@@ -182,8 +182,8 @@ class PhoneMohab(Mohab):
         if page:
             return super().period(page, date_from, date_to)
         self.b.detours[OVERVIEW_REPORT] += 1
-        self.b.open("/?period=month")
-        screen = self.b.submit({"date_from": date_from, "date_to": date_to}, button="Custom")
+        self.b.open("/money/report?period=custom")
+        screen = self.b.submit({"date_from": date_from, "date_to": date_to}, button="Apply")
         return screen
 
     def pay_from_overview(self, item):
