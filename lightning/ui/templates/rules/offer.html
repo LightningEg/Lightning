@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Make this a rule?'|tr(locale) }}{% endblock %}
+{% block heading %}<div><h1>{{ 'Make this a rule?'|tr(locale) }}</h1></div>{% endblock %}
+{% block content %}
+<section class="card stack" aria-labelledby="rule-offer">
+  <h2 id="rule-offer">{{ 'You filed {name} under {category} {times} times'|tr(locale, name=offer.counterparty, category=offer.category, times=offer.times) }}</h2>
+  <p>{{ 'A rule files every future {name} there. You choose whether it also refiles the past rows below. Only the category changes; money, dates and amounts stay as they are.'|tr(locale, name=offer.counterparty) }}</p>
+  {% if offer.conflict %}<p class="flash error">{{ 'Another rule files {name} under {other}. The new rule is more specific and would win.'|tr(locale, name=offer.counterparty, other=offer.conflict) }}</p>{% endif %}
+  {% if offer.kept %}<p class="muted">{{ '{count} older rows stay where they are because another rule decides them.'|tr(locale, count=offer.kept) }}</p>{% endif %}
+  <form method="post" action="/rules/offer">
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    <input type="hidden" name="counterparty" value="{{ offer.counterparty }}"><input type="hidden" name="category_id" value="{{ offer.category_id }}">
+    <input type="hidden" name="token" value="{{ offer.token }}"><input type="hidden" name="return_to" value="{{ back }}">
+    {% if offer.past %}
+    <div class="compact-list">{% for t in changes %}
+      <div class="compact-row"><span><b>{{ t.counterparty or 'No counterparty' }}</b><small class="muted">{{ t.date }} · {{ t.category_from }} → {{ offer.category }}</small></span><b class="{{ 'pos' if t.amount > 0 }}">{{ '+' if t.amount > 0 else '−' }}{{ t.amount|abs|money }}</b></div>{% endfor %}
+      {% if more %}<div class="compact-row"><span class="muted">{{ 'and {count} more'|tr(locale, count=more) }}</span></div>{% endif %}
+    </div>
+    <fieldset class="stack"><legend>{{ 'Apply to'|tr(locale) }}</legend>
+      <label><input type="radio" name="scope" value="past" checked> {{ 'These {count} past entries and future matches'|tr(locale, count=offer.past|length) }}</label>
+      <label><input type="radio" name="scope" value="future"> {{ 'Future matches only'|tr(locale) }}</label>
+    </fieldset>
+    {% else %}<input type="hidden" name="scope" value="future"><p>{{ 'No past entries need changing. The rule files future matches.'|tr(locale) }}</p>{% endif %}
+    <div class="actions"><button class="btn primary" name="decision" value="yes">{{ 'Save the rule'|tr(locale) }}</button><button class="btn" name="decision" value="no">{{ 'Not now'|tr(locale) }}</button></div>
+  </form>
+</section>
+{% endblock %}

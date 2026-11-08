@@ -20,11 +20,9 @@ Take one step at a time, each with its own test and Mohab step.
 
 Done: 3AZ1 (`partials/payday_proposal.html` on PC and phone, `funding.preview()['proposal']`; `tests/test_salary_day_review.py`, Mohab `_confirm_payday_proposal`). Needs you › Salary received opens the proposal; looking assigns nothing; Confirm assigns once; Undo restores.
 
+3AZ3: `RuleService.record_correction/suggestion`, `/rules/offer`, journal commands `rules.record_correction/clear_corrections`; `tests/test_rule_from_corrections.py`.
+
 3AZ2: `bank_import_proposals.py` offers the link by default when only an SMS backs the one candidate, marks it "recorded from your SMS", and asks when several fit; `tests/test_statement_links_sms.py`.
-
-## 3AZ3 A repeated category correction offers a rule with its past matches · M
-
-"Apply to these 8 past entries and future matches", with before and after examples, conflicts visible and the action reversible. Done when the user chooses the scope and can undo it.
 
 ## 3AZ4 A bill that falls due opens one sheet: already paid, or record it · M
 
