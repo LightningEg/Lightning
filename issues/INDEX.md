@@ -170,7 +170,9 @@ Prices arrive by themselves, from sources Lightning may redistribute.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](6-market-data/IT-6D-gold-price-source.md) | improvement, technical | Own | S | Sonnet | blocked on a test from a home connection |
-| **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history source](6-market-data/IT-6F-london-board-and-gulf-history.md) | improvement, technical | Own | M | Opus | new |
+| **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history source](6-market-data/IT-6F-london-board-and-gulf-history.md) | improvement, technical | Own | M | Opus | ready |
+| IT-6F1 | ↳ London asks for pound and pence shares only, then the picker list is rebuilt | | | S | Sonnet | |
+| IT-6F2 | ↳ Dubai, Abu Dhabi and Bahrain month-ends from Yahoo, by venue | | | S | Opus | |
 | **NF-6A** | [Market data: price packs, collected in the cloud](6-market-data/NF-6A-price-packs.md) | new feature | Own | L | Opus | building |
 | NF-6A1 | ↳ Funds, currencies and gold matched to holdings | | | M | Opus | |
 | NF-6A2 | ↳ US stocks and FX revaluation, with multi-currency | | | L | Opus | |
@@ -321,7 +323,14 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-3AM4 | ↳ Settings stop being forms (ST1-ST4) | | | M | Opus | |
 | IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | M | Opus | |
 | **IV-3H** | [Tab-by-tab review: what a real user needs next](12-desktop-ux/IV-3H-tab-by-tab-review.md) | improvement, visual | Feel | L | Opus | ready |
-| IV-3H3 | ↳ Step 3: features | | | L | Opus | |
+| IV-3H3 | ↳ Owner: the open choices in §12 | | | owner |  | |
+| IV-3H4 | ↳ A month-end prices reminder | | | S | Sonnet | |
+| IV-3H5 | ↳ A missed-salary row in Needs you, and its reminder | | | S | Sonnet | |
+| IV-3H6 | ↳ Zakat: optionally take off the next 12 months' loan instalments | | | M | Opus | |
+| IV-3H7 | ↳ Loans: an optional rate and the cost of the loan | | | M | Opus | |
+| IV-3H8 | ↳ Owner: which analysis comes first | | | owner |  | |
+| IV-3H9 | ↳ Build the chosen analysis | | | M | Opus | |
+| IV-3H10 | ↳ Triage the ids no step names | | | M | Opus | |
 | **NF-12G** | [Money lent to others and costs split with others - who owes you what, counted honestly in what you own](12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | new feature | Own | L | Opus | new |
 | NF-12G1 | ↳ Design: the person, the loan, the split, and where they show | | | owner |  | |
 | NF-12G2 | ↳ Money lent and paid back: the service | | | M | Opus | |

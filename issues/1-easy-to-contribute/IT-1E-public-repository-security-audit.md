@@ -95,7 +95,7 @@ Do: with the deployed receiver, send one benign formula-shaped value (`=1+1`) th
 Done when: the owner has the pass/fail list, and this file has one dated line "1E4 checked, N findings filed privately".
 
 ## 1E5 Owner: apply the repository protections · owner
-Run `python tools/security_setup.py` (it only previews) and read its planned writes; then (a) *(Recommended)* `python tools/security_setup.py --apply` with your own `gh` login, and add yourself as reviewer of the `production-release` environment when it asks; (b) apply only the app's part (`--app-actions-only`) now and the supporting repositories later: downloads and market-data `main` stay writable by any account with write access until then. Afterwards turn on GitHub *Secret scanning* and *Push protection* for all four repositories (Settings › Code security). Tell the AI the date it was applied.
+Run `python tools/security_setup.py` (it only previews) and read its planned writes; then (a) *(Recommended)* `python tools/security_setup.py --apply` with your own `gh` login, and add yourself as reviewer of the `production-release` environment when it asks; (b) apply it later: the downloads, market-data and website `main` branches stay unprotected until then, and the public Windows ZIP can be replaced by any account with write access. (`--app-actions-only` changes only the app's allowed-actions list; it is not a partial setup.) Afterwards turn on GitHub *Secret scanning* and *Push protection* for all four repositories (Settings › Code security). Tell the AI the date it was applied.
 
 ## 1E6 Prove the committed encrypted fixture is the demo household · S · sonnet
 Files: `lightning/runtime/roundtrip.py` (`make`, `run`, `expected`), `tests/test_device_roundtrip.py`.
