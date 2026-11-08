@@ -25,7 +25,7 @@ Decide danger from the caller, not the words: `data-confirm-delete` (and any cal
 
 Each step below is one pull request. Read only the files a step names. Run the step's test command, then `python -m pytest tests/test_issues.py -q`; delete the step's heading in the same commit (AGENTS.md §3).
 
-## 3BB1 Delete confirmations are dangerous in every language · S
+## 3BB1 Delete confirmations are dangerous in every language · S · #400
 Files: `lightning/ui/static/app.js` only (`window.askFrom` near line 503; the `[data-confirm-delete]` submit listener near line 843; `window.confirmSubmit` near line 532).
 Do: (1) In `askFrom`, split the title on `?` **or** `؟`: `split(/(?<=[?؟])\s+/)`. (2) In the `[data-confirm-delete]` listener, when `options` is the string from `confirmHost.dataset.confirmDelete` (or the fallback string), call `window.confirmSubmit(event, window.askFromOptions(text, {tone: "danger", ok: t("Delete")}))`, where `askFromOptions` is a new helper that returns the `{title, message}` object `askFrom` builds, so the dialog gets the danger tone without guessing from English words. (3) Keep the English regex for plain `data-confirm` texts, and also match the Arabic verbs `احذف|امسح|شيل`. Do not change `ask()`.
 Done when: a new browser test `tests/test_confirm_dialog_browser.py` (copy the profile set-up from `tools/phone_check.py` lines 70-97) switches the locale to Arabic, opens Categories, presses a category's delete button and asserts the open `dialog.ask-dialog` has class `tone-danger`, its yes button has class `is-danger`, and `document.activeElement` is the `[data-ask="no"]` button; the same test in English passes too. `python -m pytest tests/test_confirm_dialog_browser.py -q`.

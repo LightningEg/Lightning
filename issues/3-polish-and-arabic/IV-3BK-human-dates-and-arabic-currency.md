@@ -11,7 +11,7 @@ by: Claude
 
 ## Report
 
-Report [r28](r28-international-polish/report.md) F21; owner decisions (below) first recorded in [OW-3BJ](https://github.com/LightningEg/Lightning/blob/0c8e9cdb05fe10871b3055c727f88cd2538b591e/issues/3-polish-and-arabic/OW-3BJ-international-display-decisions.md). Screens show `2026-11-01 to 2026-11-08`, `until 2026-12-01` and, in Arabic, `٢٠٢٦-١٢-٠١` ([PC](r28-international-polish/evidence/shots/pc-en-home.png), [phone, Arabic](r28-international-polish/evidence/shots/phone-ar-home.png)); Arabic pages label money "EGP" 243 times.
+Report [r28](r28-international-polish/report.md) F21; owner decisions in the Decided section of this item (they were OW-3BJ). Screens show `2026-11-01 to 2026-11-08`, `until 2026-12-01` and, in Arabic, `٢٠٢٦-١٢-٠١` ([PC](r28-international-polish/evidence/shots/pc-en-home.png), [phone, Arabic](r28-international-polish/evidence/shots/phone-ar-home.png)); Arabic pages label money "EGP" 243 times.
 
 ## Fix
 
@@ -26,8 +26,8 @@ Guideline first (both repos), then one set of date filters used everywhere, then
 Each step is one pull request, in order. Read only the files a step names. Delete the step's heading in the same commit.
 
 
-## 3BK1 Guideline: human dates on screens · M
-Owner decision 2026-11-08 ([OW-3BJ](https://github.com/LightningEg/Lightning/blob/0c8e9cdb05fe10871b3055c727f88cd2538b591e/issues/3-polish-and-arabic/OW-3BJ-international-display-decisions.md)). Read `skills/website-sync/SKILL.md` first: a guideline change lands in this repo and in `Lightning_website` in the same session, with a PR in each, and `cmp` must pass.
+## 3BK1 Guideline: human dates on screens · M · #429
+Owner decision 2026-11-08 (the Decided section of this item). Read `skills/website-sync/SKILL.md` first: a guideline change lands in this repo and in `Lightning_website` in the same session, with a PR in each, and `cmp` must pass.
 Files: `guideline/app.html` A06.1 and A06.2 (print them with `python tools/guideline.py A06`; edit only those blocks), `guideline/phone.html` C10 if it repeats the date rule, `guideline/brand-voice.md` "Numbers" line (~36), `guideline/app-ar.html` A06.2.
 Do: also in the same PR, A06.1: rows drop ".00" on PC and phone alike ("−1,250", "−1,420.40"); A06.2: Arabic uses ٪ and the period chip uses Arabic-Indic digits; `guideline/brand-voice.md` Arabic section: address the person in neutral forms where a sentence allows. Then replace "2026-09-30 · 2026-09 · ranges with "to"" and the crossed-out "30 Sep 2026" with: screens show `8 Nov` (this year), `8 Nov 2025` (other years), `November 2026` (a month), `1–8 Nov` (a range), `Today`/`Yesterday` for the last two days; fields, files and exports keep `2026-11-08`. Arabic: `٨ نوفمبر`, `نوفمبر ٢٠٢٦`, `النهارده`/`امبارح`, Egyptian month names as today.
 Done when: `python -m pytest tests/test_docs_structure.py -q` passes with the website repo present beside this one, and both PRs are open.
@@ -51,7 +51,7 @@ Do: as 3BK3, for Home ("On top of your plan until 1 Dec."), Latest/Activity day 
 Done when: the probe shows no `yyyy-mm-dd` on phone pages and `python -m pytest tests/test_mohab_phone.py tests/test_phone_check.py -q` passes.
 
 ## 3BK5 Arabic currency label ج.م · S · sonnet
-Owner decision 2026-11-08 ([OW-3BJ](https://github.com/LightningEg/Lightning/blob/0c8e9cdb05fe10871b3055c727f88cd2538b591e/issues/3-polish-and-arabic/OW-3BJ-international-display-decisions.md)). Needs 3BK1 merged first. Its guideline PR also changes the A06.2 currency line.
+Owner decision 2026-11-08 (the Decided section of this item). Needs 3BK1 merged first. Its guideline PR also changes the A06.2 currency line.
 Files: `lightning/ui/i18n.py` (keys with "EGP", and the few that say جنيه), the macro that prints the currency beside big figures (`lightning/ui/templates/partials/macros.html` lines ~2-7), `lightning/ui/static/arabic-numbers.js` only if it rewrites "EGP".
 Do: on Arabic pages the code EGP shows as ج.م; other currencies keep their code (USD, SAR). Do it in one place: a `currency_label(code, locale)` helper used by the macro and by `translate` for `{cur}` values.
 Done when: the r28 probe's Arabic pages contain no "EGP" in visible text, and `python -m pytest tests/test_arabic_number_display.py tests/test_arabic_no_english.py -q` passes.
