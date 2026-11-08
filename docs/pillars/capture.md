@@ -11,6 +11,10 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 
 | Code | Item | Size | Status |
 |---|---|---|---|
+| **BT-7AD** | [Choose Excel worksheets and read common CSV encodings](../../issues/7-planning-import-and-search/BT-7AD-workbook-sheets-and-csv-encoding.md) | M | building |
+| **BT-7AE** | [Accept Excel serial dates in imported date columns](../../issues/7-planning-import-and-search/BT-7AE-excel-serial-dates.md) | M | building |
+| **BT-7AH** | [Only active imported entries count as duplicates](../../issues/7-planning-import-and-search/BT-7AH-active-import-duplicates.md) | M | building |
+| **IT-7AF** | [Choose how many transactions appear per page](../../issues/7-planning-import-and-search/IT-7AF-register-page-size.md) | M | building |
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](../../issues/7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | L | ready |
 
 ## Reports with open follow-ups here

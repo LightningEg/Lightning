@@ -4,6 +4,7 @@
 
 | Who | Work | Files | Since |
 |---|---|---|---|
+| Codex | BT-7AD–BT-7AH import compatibility, review size and institution defaults | `lightning/statement_files.py`, `lightning/import_profile.py`, `lightning/bank_import_rows.py`, `lightning/bank_imports.py`, `lightning/bank_import_proposals.py`, related UI and tests | 2026-11-08 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 
 ## Messages
