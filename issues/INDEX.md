@@ -16,6 +16,16 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | improvement, technical | Build | M | Opus | ready |
+| IT-1E1 | ↳ Owner: stop the personal email in new commits | | | owner |  | |
+| IT-1E2 | ↳ Owner: which working documents stay public | | | owner |  | |
+| IT-1E3 | ↳ Owner: deploy the website receiver and rotate the analytics key | | | owner |  | |
+| IT-1E4 | ↳ Check the live website receivers against formula injection and key leaks | | | S | Opus | |
+| IT-1E5 | ↳ Owner: apply the repository protections | | | owner |  | |
+| IT-1E6 | ↳ Prove the committed encrypted fixture is the demo household | | | S | Sonnet | |
+| IT-1E7 | ↳ Scan every repository's full history for secrets | | | M | Opus | |
+| IT-1E8 | ↳ Inspect the published Windows ZIP and Android APK | | | S | Opus | |
+| IT-1E9 | ↳ Triage the open dependency alerts | | | S | Opus | |
+| IT-1E10 | ↳ Close the item | | | S | Sonnet | |
 | **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](1-easy-to-contribute/IT-1H-coordinate-packaged-dependency-refresh.md) | improvement, technical | Build | L | Opus | blocked on repository Actions allowlist update and native runtime acceptance |
 | IT-1H1 | ↳ Build and publish the native wheels | | | L | Opus | |
 | IT-1H2 | ↳ Update the dependency inputs together | | | M | Opus | |
@@ -115,7 +125,11 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3BK3 | ↳ PC screens use them | | | M | Sonnet | |
 | IV-3BK4 | ↳ Phone screens use them | | | M | Sonnet | |
 | IV-3BK5 | ↳ Arabic currency label ج.م | | | S | Sonnet | |
-| **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | Opus | new |
+| **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | Opus | ready |
+| NF-3AU1 | ↳ Choose how reminders reach a closed app | | | owner |  | |
+| NF-3AU2 | ↳ Write the reminder schedule while the profile is open | | | M | Opus | |
+| NF-3AU3 | ↳ Windows: a daily task shows the schedule with the app closed | | | M | Opus | |
+| NF-3AU4 | ↳ Android: a daily job shows the schedule with the app closed | | | M | Opus | |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/OW-3AI-institution-logos.md) | owner task | Feel |  |  | ready |
 | **OW-3BJ** | [Owner decisions for an international look - date display, the Arabic currency label, row decimals, percent sign, dark mode, how Arabic addresses the person](3-polish-and-arabic/OW-3BJ-international-display-decisions.md) | owner task | Feel |  |  | new |
 | OW-3BJ1 | ↳ The five open choices | | | owner |  | |
@@ -175,16 +189,15 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | new feature | Capture | L | Opus | new |
+| NF-7AB7 | ↳ The owner picks the review flow | | | owner |  | |
 | NF-7AB1 | ↳ Summary first, rows last | | | M | Opus | |
-| NF-7AB2 | ↳ Post in rounds | | | S | Opus | |
 | NF-7AB3 | ↳ Group by the question, not the name | | | M | Opus | |
-| NF-7AB4 | ↳ Smart buttons on a group | | | M | Opus | |
-| NF-7AB5 | ↳ Quick mode for leftovers | | | M | Opus | |
-| NF-7AB6 | ↳ Safe to go fast | | | S | Opus | |
+| NF-7AB2 | ↳ Post in rounds, continue from the account | | | S | Sonnet | |
+| NF-7AB6 | ↳ Safe to go fast: Undo and the balance on the result | | | S | Sonnet | |
+| NF-7AB4 | ↳ Smart buttons on a group | | | M | Sonnet | |
+| NF-7AB5 | ↳ Quick mode for leftovers | | | M | Sonnet | |
 | **NF-7C** | [Move in from Wallet, Money Manager and Masareef exports](7-planning-import-and-search/NF-7C-move-in-from-other-apps.md) | new feature | Capture | L | Opus | new |
-| NF-7C1 | ↳ Read each app's export format | | | M | Opus | |
-| NF-7C2 | ↳ A mapping preset per app in the CSV review | | | L | Opus | |
-| NF-7C3 | ↳ A move-in guide | | | M | Opus | |
+| NF-7C4 | ↳ Close this item or keep it parked | | | owner |  | |
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md).
 
@@ -197,6 +210,12 @@ The site is honest, quick and in step with the app.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IV-8F** | [Home and Features show the app, not only words](8-website/IV-8F-home-and-features-show-the-app.md) | improvement, visual | Reach | M | Sonnet | ready |
+| IV-8F1 | ↳ Hero: one sentence and the real Overview | | | S | Sonnet | |
+| IV-8F2 | ↳ "Seven places" as seven equal tiles | | | S | Sonnet | |
+| IV-8F3 | ↳ A download band after "Every Number Shows Its Working" | | | S | Sonnet | |
+| IV-8F4 | ↳ Features: the headline and a screen per highlight | | | S | Sonnet | |
+| IV-8F5 | ↳ Features on phones: three lines and "Show all" | | | S | Sonnet | |
+| IV-8F6 | ↳ Home FAQ: one line and a link to the guide | | | S | Sonnet | |
 | **OW-8AA** | [Sign off the Low, Medium and High ratings on the comparison pages](8-website/OW-8AA-sign-off-the-comparison-ratings.md) | owner task | Reach |  |  | ready |
 | **OW-8D** | [For Geeks audit ideas left for the owner to choose](8-website/OW-8D-for-geeks-audit-ideas-to-choose.md) | owner task | Reach |  |  | ready |
 
@@ -209,11 +228,24 @@ Good ideas that wait until the milestones above are done.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IT-9A** | [Stored month-end figures](9-later/IT-9A-stored-month-end-figures.md) | improvement, technical | Understand | M | Opus | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
-| **IT-9F** | [Page speed: a stable origin and cache, and a CSS trim](9-later/IT-9F-page-speed-origin-and-css.md) | improvement, technical | Reach | M | Sonnet | new |
-| **IT-9K** | [Structure left - runtime routes and bank-import orchestration](9-later/IT-9K-layers-and-copies.md) | improvement, technical | Build | M | Opus | ready |
+| **IT-9F** | [Page speed: a CSS trim](9-later/IT-9F-page-speed-origin-and-css.md) | improvement, technical | Reach | M | Sonnet | new |
+| IT-9F1 | ↳ A tool that lists unreachable CSS rules | | | S | Sonnet | |
+| IT-9F2 | ↳ Delete the unreachable rules from style.css | | | M | Sonnet | |
+| IT-9F3 | ↳ Do async routes with synchronous database work slow anything? | | | S | Opus | |
+| **IT-9K** | [Structure left - restore, device and borrowing routes out of profile_app](9-later/IT-9K-layers-and-copies.md) | improvement, technical | Build | M | Opus | ready |
+| IT-9K1 | ↳ Restore routes out of profile_app | | | S | Sonnet | |
+| IT-9K2 | ↳ The phone's device routes out of profile_app | | | M | Opus | |
+| IT-9K3 | ↳ The PC's borrowing routes and Lock out of profile_app | | | M | Opus | |
 | **NF-9B** | [In-app updates on Windows](9-later/NF-9B-in-app-updates.md) | new feature | Everywhere | L | Opus | new |
 | NF-9B6 | ↳ Before the release that carries the updater | | | owner |  | |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | Opus | new |
+| NF-9D1 | ↳ Owner: which Hijri calendar, and does the zakat day follow it | | | owner |  | |
+| NF-9D2 | ↳ Owner: which nisab by default, and where the silver price comes from | | | owner |  | |
+| NF-9D3 | ↳ Hijri conversion in Python | | | S | Opus | |
+| NF-9D4 | ↳ Show the Hijri date beside every zakat day | | | S | Sonnet | |
+| NF-9D5 | ↳ Keep the zakat day on its Hijri date | | | M | Opus | |
+| NF-9D6 | ↳ Silver nisab in the zakat service | | | M | Opus | |
+| NF-9D7 | ↳ The gear and the page name the nisab basis | | | S | Sonnet | |
 
 Reports: [r22](9-later/r22-code-quality-and-smart-features/report.md).
 
@@ -240,6 +272,8 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 | NF-10C4 | ↳ Owner steps 1-6 in order | | | owner |  | |
 | NF-10C5 | ↳ Review prices after 60 days of sales | | | owner |  | |
 | **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](10-looks-and-store/NF-10D-papyrus-and-dendera-bundles.md) | new feature | Feel | M | Opus | ready |
+| NF-10D1 | ↳ Approve a banner, frame and name for Papyrus and Dendera | | | owner |  | |
+| NF-10D2 | ↳ Add the pieces and the two sets to the catalogue | | | M | Opus | |
 
 Reports: [r12](10-looks-and-store/r12-v150-release/report.md) · [r13](10-looks-and-store/r13-store-and-community/report.md).
 
@@ -251,7 +285,10 @@ The phone is its own product: a few places that each answer one question, quick 
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IV-11A** | [Phone first run - every Add is greyed out until "Save currencies" is pressed, and an empty Transactions says "Nothing matches"](11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | improvement, visual | Everywhere | S | Sonnet | new |
+| **IV-11A** | [Phone first run - every Add is greyed out until "Save currencies" is pressed, and an empty Transactions says "Nothing matches"](11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | improvement, visual | Everywhere | M | Sonnet | ready |
+| IV-11A1 | ↳ Add works before "Save currencies" | | | S | Sonnet | |
+| IV-11A2 | ↳ An empty Activity says "No transactions yet." with Add and Import | | | S | Sonnet | |
+| IV-11A3 | ↳ Cash planning with no account says so once | | | S | Sonnet | |
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | Opus | building |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | Opus | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner |  | |
@@ -286,11 +323,13 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **IV-3H** | [Tab-by-tab review: what a real user needs next](12-desktop-ux/IV-3H-tab-by-tab-review.md) | improvement, visual | Feel | L | Opus | ready |
 | IV-3H3 | ↳ Step 3: features | | | L | Opus | |
 | **NF-12G** | [Money lent to others and costs split with others - who owes you what, counted honestly in what you own](12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | new feature | Own | L | Opus | new |
-| NF-12G1 | ↳ Design: the person, the loan, the split, and where they show | | | M | Opus | |
-| NF-12G2 | ↳ Money lent and paid back | | | L | Opus | |
-| NF-12G3 | ↳ A cost split with others | | | L | Opus | |
-| NF-12G4 | ↳ Who owes what, per person | | | M | Opus | |
-| NF-12G5 | ↳ Mohab, Arabic and the guideline | | | M | Opus | |
+| NF-12G1 | ↳ Design: the person, the loan, the split, and where they show | | | owner |  | |
+| NF-12G2 | ↳ Money lent and paid back: the service | | | M | Opus | |
+| NF-12G6 | ↳ Lend, paid back and forgive on the person's page (PC) | | | M | Sonnet | |
+| NF-12G3 | ↳ A cost split with others: the service | | | M | Opus | |
+| NF-12G7 | ↳ Split on the Add sheet, PC and phone | | | M | Sonnet | |
+| NF-12G4 | ↳ Who owes what, per person | | | M | Sonnet | |
+| NF-12G5 | ↳ Mohab, Arabic and the guideline | | | M | Sonnet | |
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md).
 

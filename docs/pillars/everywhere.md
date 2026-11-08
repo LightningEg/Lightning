@@ -13,11 +13,11 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 |---|---|---|---|
 | **IT-3BI** | [Arabic search and sorting in the register, one week start, one clock](../../issues/3-polish-and-arabic/IT-3BI-arabic-search-sort-and-calendar.md) | M | ready |
 | **IV-3BG** | [Phone finish](../../issues/3-polish-and-arabic/IV-3BG-phone-finish.md) | S | ready |
-| **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](../../issues/3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | M | new |
+| **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](../../issues/3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | M | ready |
 | **NF-4A** | [Edit journal: edit anywhere, one home confirms](../../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md) | L | building |
 | **NF-4B** | [Multiple devices: implementation plan](../../issues/4-edit-journal-and-devices/NF-4B-multiple-devices.md) | L | building |
 | **NF-9B** | [In-app updates on Windows](../../issues/9-later/NF-9B-in-app-updates.md) | L | new |
-| **IV-11A** | [Phone first run](../../issues/11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | S | new |
+| **IV-11A** | [Phone first run](../../issues/11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | M | ready |
 | **IV-3AN** | [Phone visual plan](../../issues/11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | L | building |
 | **IV-3AY** | [Phone-first architecture](../../issues/11-phone-ux/IV-3AY-phone-first-architecture.md) | L | ready |
 

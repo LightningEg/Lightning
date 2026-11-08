@@ -65,3 +65,61 @@ Remaining: deploy/verify the live Apps Script receiver and verify the replacemen
 4. **Public data policy:** keep this report redacted; avoid pasting private contact details, real finance records, unmasked secrets or private dashboard links. Decide which planning and internal coordination documents should be private, bearing in mind Git history persists.
 
 **Assessment:** Confirmed personal-email disclosure; confirmed risky dashboard-key handling; unneutralized spreadsheet inputs; operational transparency that may exceed the owner's intended public surface. **No verified production credential leak or proven compromise.** This report records findings only and authorizes no changes to implementation, repository visibility, history, credentials or settings.
+
+## Checked · 2026-11-08
+
+- The four repositories now live under the `LightningEg` organization; `tools/security_setup.py` (preview by default, `--apply` with the owner's `gh` login) already holds rulesets for the app, website, downloads and market-data `main` branches, the `v*` tags, the environments and the secret moves. Whether the owner has run it with `--apply` is not recorded anywhere.
+- Finding 1 is still live: `git log --format=%ae -50` shows the owner account's personal address on 48 of the last 50 commits (the squash merges). The address is not copied here.
+- Finding 7 (pairing listener on all interfaces) is part of the native acceptance in [2C](../2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md) and [4A](../4-edit-journal-and-devices/NF-4A-edit-journal.md); it is not repeated below.
+- The website half (finding 2, 3 and 5, the Apps Script receiver, website PR #19) lives in the website repository, which this session could not read; 1E3 starts by checking it.
+- Release checks already refuse tracked key, keystore and database files (`tools/release_check.py` `PRIVATE_FILES`), but no tool scans Git history or the built ZIP/APK.
+
+## How to work on this item
+
+Each step below is one pull request or one owner action. **A real finding is never written in a public issue, pull request, commit message, `NOW.md` or this file** (skill `security-sweep` › After): it goes to a private GitHub security advisory and the owner hears of it in the question tool; the public line says only "checked, N findings filed privately". Read `skills/security-sweep/SKILL.md` first. Run `python -m pytest tests/test_issues.py -q` after editing this file, and delete a step's heading in the same commit that finishes it.
+
+## 1E1 Owner: stop the personal email in new commits · owner
+On github.com › Settings › Emails, for the account that merges: (a) *(Recommended)* turn on *Keep my email addresses private* and *Block command line pushes that expose my email*; squash merges then carry the `noreply` address from now on. History keeps the old address. (b) As (a), and also rewrite history to replace the old address: removes it from the current repositories, but every fork, tag, release and open branch breaks and copies already taken keep it. (c) Leave it: the address stays public on every new merge. Record the answer here.
+
+## 1E2 Owner: which working documents stay public · owner
+Finding 4. (a) *(Recommended)* Keep `AGENTS.md`, `NOW.md`, `ai/`, `issues/` public: the repository is the only channel between the AIs and contributors read the plan; keep security findings out of them (1E's rule above) and the website's `audit/`, `test.html` and dashboard out of the published site. (b) Move `NOW.md`, `ai/PROJECT_OVERVIEW.md` and `ai/COMPETITION.md` to a private repository: less exposure, but other AI sessions and contributors lose them, and history keeps the old copies. (c) Make the app repository private: ends source-available, the contributor programme and the website's Tasks board. Record the answer in `ai/PROJECT_OVERVIEW.md` owner decisions.
+
+## 1E3 Owner: deploy the website receiver and rotate the analytics key · owner
+Verify first: in the website repository, is PR #19 merged, and does the live site still post to an Apps Script receiver (`skills/website-sync/SKILL.md` step 6)? If the receiver has been replaced (for example by Supabase), say so here and delete this step and 1E4.
+Then, as the website's `OWNER.md` describes: deploy the Apps Script source and its `doPost` router, rotate the analytics read key (a new value only in the `website-analytics` environment), then publish the dashboard. (a) *(Recommended)* Do it in one sitting in that order, then hand 1E4 to an AI. (b) Turn the analytics dashboard off until there is time: no key in use, no dashboard.
+
+## 1E4 Check the live website receivers against formula injection and key leaks · S · opus
+Needs 1E3 done first.
+Files: the website repository's `apps-script/` and `analytics/dashboard.html` (read-only), its tests named in website PR #19.
+Do: with the deployed receiver, send one benign formula-shaped value (`=1+1`) through each public form (feedback, UX tests, survey, signup) and check the sheet stores it as text; load the dashboard and check in the browser's network panel that the key travels only in a POST body and is not in `localStorage` or any log. Report pass/fail per form to the owner in the question tool; a failure goes to a private advisory.
+Done when: the owner has the pass/fail list, and this file has one dated line "1E4 checked, N findings filed privately".
+
+## 1E5 Owner: apply the repository protections · owner
+Run `python tools/security_setup.py` (it only previews) and read its planned writes; then (a) *(Recommended)* `python tools/security_setup.py --apply` with your own `gh` login, and add yourself as reviewer of the `production-release` environment when it asks; (b) apply only the app's part (`--app-actions-only`) now and the supporting repositories later: downloads and market-data `main` stay writable by any account with write access until then. Afterwards turn on GitHub *Secret scanning* and *Push protection* for all four repositories (Settings › Code security). Tell the AI the date it was applied.
+
+## 1E6 Prove the committed encrypted fixture is the demo household · S · sonnet
+Files: `lightning/runtime/roundtrip.py` (`make`, `run`, `expected`), `tests/test_device_roundtrip.py`.
+Do: add `test_the_committed_fixture_is_the_generated_demo_household(tmp_path)` to `tests/test_device_roundtrip.py`: call `roundtrip.make(tmp_path)` (it builds the demo household up to `AS_OF` with fresh keys), then assert `expected(tmp_path)` equals `expected(FIXTURE)` line for line and that `run(FIXTURE)[0]` equals `run(tmp_path)[0]`. The fixture's own recovery key and password are dummy (`PASSWORD` in `roundtrip.py`); never print `recovery.txt`. If the lines differ only because the demo or schema changed since the fixture was made, rebuild with `python -m lightning.runtime.roundtrip --make tests/fixtures/roundtrip` in the same pull request and say so in `Detail:`.
+Done when: `python -m pytest tests/test_device_roundtrip.py -q` passes with the new test.
+
+## 1E7 Scan every repository's full history for secrets · M · opus
+Needs 1E5 done first (secret scanning on), so GitHub's own alerts can be compared.
+Files: none changed in the repositories; the scan runs in the scratchpad.
+Do: clone each of the four repositories with all refs (`git clone --mirror`), run `gitleaks detect --source <mirror> --log-opts="--all"` (install the pinned release binary in the scratchpad; do not add it to the repository), plus `git log --all -p | grep -nE "(BEGIN [A-Z ]*PRIVATE KEY|ghp_|github_pat_|AKIA[0-9A-Z]{16})"`. Triage each hit as test/dummy, public-by-design (IndexNow token, public update and store keys in `lightning/security/*.json`), or real. Real ones: rotate first (owner, through the question tool), then a private advisory.
+Done when: this file has one dated line per repository: "history scanned, N real findings filed privately"; nothing else about them is public.
+
+## 1E8 Inspect the published Windows ZIP and Android APK · S · opus
+Files: none changed; the newest release's ZIP from `Lightning-downloads` and the APK from the app's newest release, downloaded into their own empty scratchpad folder.
+Do: list each archive (`unzip -l`); fail on any `.git/`, `tests/`, `*.db`/`*.sqlite`, `recovery.txt`, `keys.json`, `*.pem`/`*.key`/`*.jks`/`*.p12`, `.env`, a `Documents/Lightning` path or a name from the sample households outside `lightning/samples/`; run `strings` over the binaries for the patterns of 1E7; compare the APK's permissions (`aapt dump permissions` or `apkanalyzer`) with `packaging/android-permissions.txt`. If a check belongs in every release, add it to `tools/release_check.py` with a test in `tests/test_release_check.py` (create it if missing) in its own pull request.
+Done when: this file has one dated line naming the two versions checked and "N findings filed privately"; any new release check passes `python -m pytest tests/test_release_check.py -q`.
+
+## 1E9 Triage the open dependency alerts · S · opus
+Files: `pyproject.toml`, `requirements/*.in` and locks, `cloudflare/journal/package.json` as the alerts point; skill `dependency-change`.
+Do: list open alerts with `gh api repos/LightningEg/Lightning/dependabot/alerts --jq '.[] | select(.state=="open") | [.number,.dependency.package.name,.security_advisory.severity] | @tsv'` (needs the owner's login or a session with access). For each: update through skill `dependency-change` (one pull request per group), or dismiss with a written reason when the vulnerable code is not reachable (development-only, not shipped). Revisit the Sharp and Undici overrides in `cloudflare/journal` noted above.
+Done when: the alert list is empty or every open alert has a dismissal reason, and `cd cloudflare/journal && npm ci --ignore-scripts && npm audit --audit-level=high` is clean.
+
+## 1E10 Close the item · S · sonnet
+Needs 1E4, 1E6, 1E7, 1E8 and 1E9 done first.
+Files: this file; `SECURITY.md` (only if a step changed what it says is checked); `issues/1-easy-to-contribute/README.md` (`done:` line).
+Do: check that every finding in the Report is either fixed (name the commit or the owner's dated answer), filed privately (say only that), or accepted by the owner. Then delete this file and add `1E` to `done:` (AGENTS.md §3).
+Done when: `python -m pytest tests/test_issues.py tests/test_docs_structure.py -q` passes.
