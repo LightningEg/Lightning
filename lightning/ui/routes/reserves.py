@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 
+from decimal import Decimal
+
 from fastapi import APIRouter, Request, Response
 
 from lightning.core.dates import month_of, today
@@ -74,6 +76,22 @@ def _context(request: Request, error: str = ""):
                   "after": options["safe_after"], "until": options["until"], "before": options["before"],
                   "all": room, "all_to": set_aside + room, "all_after": options["all_after"],
                   "all_is_safe": options["all_after"] >= ZERO}
+    if refill is not None:
+        gap = fund.target - set_aside
+        # NF-3AZ7: when one move now does not fill the fund, the same refill as instalments after the upcoming needs.
+        refill["schedule"] = c.forecaster.refill_schedule(today(), gap, options) if refill["move"] < gap else []
+        # Or the person's own amount, previewed with the same forecast before anything moves.
+        raw = str(request.query_params.get("refill_amount", "")).replace(",", "").strip()
+        refill["manual"] = None
+        if raw:
+            try:
+                amount = Decimal(raw)
+            except ArithmeticError:
+                amount = ZERO
+            if ZERO < amount <= position.free_cash:
+                refill["manual"] = {"amount": amount, "to": set_aside + amount,
+                                    "after": c.forecaster.forecast(today(), refill=amount).safe_to_spend}
+            refill["manual_raw"] = raw
     bills = c.planning.items((PlanKind.BILL, PlanKind.SUBSCRIPTION))
     return {"reserves": listed, "bills": bills, "completed_reserves": completed, "notes": notes, "emergency_meter": emergency_meter,
             "emergency_set_aside": set_aside, "emergency": emergency, "fund": fund, "refill": refill,

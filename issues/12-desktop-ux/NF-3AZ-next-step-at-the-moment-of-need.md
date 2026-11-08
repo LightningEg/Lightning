@@ -20,6 +20,8 @@ Take one step at a time, each with its own test and Mohab step.
 
 Done: 3AZ1 (`partials/payday_proposal.html` on PC and phone, `funding.preview()['proposal']`; `tests/test_salary_day_review.py`, Mohab `_confirm_payday_proposal`). Needs you › Salary received opens the proposal; looking assigns nothing; Confirm assigns once; Undo restores.
 
+3AZ7: `CashForecaster.refill_schedule`, instalments and a manual preview on `/plan/reserves`; `tests/test_refill_schedule.py`.
+
 3AZ6: `planning/afford.py::account_check`, `DatedCashForecast.account_series`, `/plan?afford_account=&afford_date=`; `tests/test_afford_account_date.py`.
 
 3AZ5: `LinkedSections._reimbursement_offer`, `partials/linked.html`, `/reimbursements?receipt_id=`; `tests/test_claim_entry_points.py`.
@@ -29,10 +31,6 @@ Done: 3AZ1 (`partials/payday_proposal.html` on PC and phone, `funding.preview()[
 3AZ3: `RuleService.record_correction/suggestion`, `/rules/offer`, journal commands `rules.record_correction/clear_corrections`; `tests/test_rule_from_corrections.py`.
 
 3AZ2: `bank_import_proposals.py` offers the link by default when only an SMS backs the one candidate, marks it "recorded from your SMS", and asks when several fit; `tests/test_statement_links_sms.py`.
-
-## 3AZ7 Emergency refill proposes an affordable schedule · M
-
-Builds on the refill preview (BT-2AH): a schedule after upcoming needs, with a manual alternative. Done when each instalment shows its forecast after-state.
 
 ## 3AZ8 A maturing certificate shows the expected date, then allocation choices after the receipt is recorded · M
 
