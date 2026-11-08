@@ -156,6 +156,7 @@ def render_phone(request: Request, name: str, status_code: int = 200, **context)
 def mount_phone(app: FastAPI, router: APIRouter | None = None) -> None:
     """Add the phone's routes at the front of the app's routing table, so a phone-owned URL wins over an older
     shared route of the same path. Called only by ``profile_app(..., phone=True)``."""
+    app.state.phone_screens = True   # web.py's remembered period must not redirect Home or Budget away from them
     existing = list(app.router.routes)
     app.include_router(router if router is not None else phone_router())
     added = [route for route in app.router.routes if route not in existing]

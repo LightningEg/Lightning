@@ -617,6 +617,8 @@ def create_app(c: Container | None = None) -> FastAPI:
         """The period picked in a page header carries over to every page that has one."""
         if request.method != "GET" or request.url.path not in PERIOD_PAGES or request.headers.get("x-lightning-popup"):
             return await call_next(request)
+        if request.url.path in ("/", "/budget") and getattr(request.app.state, "phone_screens", False):
+            return await call_next(request)  # the phone's Home is always today and its Budget steps months itself (3AY6, 3AY9)
         picked = {k: v for k, v in request.query_params.items() if k in PERIOD_KEYS}
         if not picked:
             saved = dict(parse_qsl(request.cookies.get(PERIOD_COOKIE, "")))
