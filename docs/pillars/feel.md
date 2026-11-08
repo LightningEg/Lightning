@@ -11,7 +11,12 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 
 | Code | Item | Size | Status |
 |---|---|---|---|
+| **IV-3BC** | [Counts read right in English and Arabic](../../issues/3-polish-and-arabic/IV-3BC-counts-read-right-in-both-languages.md) | M | ready |
+| **IV-3BD** | [Every error speaks plainly, in the person's language, on a branded page](../../issues/3-polish-and-arabic/IV-3BD-errors-speak-plainly-everywhere.md) | M | ready |
+| **IV-3BF** | [PC finish](../../issues/3-polish-and-arabic/IV-3BF-pc-finish.md) | M | ready |
+| **IV-3BH** | [One name per thing and no accounting jargon](../../issues/3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md) | M | ready |
 | **OW-3AI** | [Additional broker and institution logos still needed](../../issues/3-polish-and-arabic/OW-3AI-institution-logos.md) | owner | ready |
+| **OW-3BJ** | [Owner decisions for an international look](../../issues/3-polish-and-arabic/OW-3BJ-international-display-decisions.md) | owner | new |
 | **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](../../issues/10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md) | L | building |
 | **NF-10B** | [Supporter perks still waiting on the app or the owner](../../issues/10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md) | M | blocked on 10A claiming; owner decision on the beta channel |
 | **NF-10C** | [Theme materials, selling themes, owner console](../../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md) | L | building |
@@ -29,5 +34,7 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 - [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../issues/12-desktop-ux/r24-desktop-phone-ux/report.md): 3H, 3AM
 - [The phone, redesigned: a phone-first architecture, tab by tab](../../issues/11-phone-ux/r25-phone-ux-architecture/report.md): 3F
 - [Audit 14: using Lightning as a user, on the PC and the phone](../../issues/12-desktop-ux/r26-user-test-pc-and-phone/report.md): 3H
+- [User journeys and visual unity](../../issues/12-desktop-ux/r27-journeys-and-visual-unity/report.md): 3H, 3AM
+- [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BC, 3BD, 3BF, 3BH, 3BJ
 <!-- work:end -->
 

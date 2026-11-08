@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 38 open items. Each folder holds its reports and its items.
+11 big pictures, 48 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -62,12 +62,63 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
+| **BV-3BB** | [In Arabic, delete confirmations open as a harmless "OK" dialog with focus on Yes, so Enter deletes](3-polish-and-arabic/BV-3BB-arabic-delete-confirm-loses-danger.md) | bug, visual · medium | Protect | S | ready |
+| BV-3BB1 | ↳ Delete confirmations are dangerous in every language | | | S | |
+| **IT-3BE** | [One number format on screen - the browser follows the app, not the Windows locale, and every negative uses a true minus](3-polish-and-arabic/IT-3BE-one-number-format.md) | improvement, technical | Understand | S | ready |
+| IT-3BE1 | ↳ The KPI "points" use a true minus | | | S | |
+| IT-3BE2 | ↳ Browser numbers ignore the Windows region | | | S | |
+| IT-3BE3 | ↳ One money formatter in Python | | | S | |
+| **IT-3BI** | [Arabic search and sorting in the register, one week start, one clock](3-polish-and-arabic/IT-3BI-arabic-search-sort-and-calendar.md) | improvement, technical | Everywhere | M | ready |
+| IT-3BI1 | ↳ The Transactions search finds Arabic however it is spelled | | | M | |
+| IT-3BI2 | ↳ Names sort the Arabic way | | | S | |
+| IT-3BI3 | ↳ One week start | | | S | |
+| IT-3BI4 | ↳ One clock | | | S | |
+| **IV-3BC** | [Counts read right in English and Arabic - "1 days left", "Delete 1 transactions?", "2 معاملة"](3-polish-and-arabic/IV-3BC-counts-read-right-in-both-languages.md) | improvement, visual | Feel | M | ready |
+| IV-3BC1 | ↳ One English plural helper and the five wrong counts | | | S | |
+| IV-3BC2 | ↳ Arabic agrees for every counted noun the UI uses | | | S | |
+| IV-3BC3 | ↳ Counts built in English before translation | | | M | |
+| IV-3BC4 | ↳ Counts built in the browser | | | S | |
+| **IV-3BD** | [Every error speaks plainly, in the person's language, on a branded page - no JSON, plain text, raw exceptions or half-English](3-polish-and-arabic/IV-3BD-errors-speak-plainly-everywhere.md) | improvement, visual | Feel | M | ready |
+| IV-3BD1 | ↳ No raw responses: 403, 400 and plain text get the branded page | | | S | |
+| IV-3BD2 | ↳ Every validation message has Arabic | | | M | |
+| IV-3BD3 | ↳ Half-English sentences and internal codes | | | S | |
+| IV-3BD4 | ↳ Import errors never show Python's text | | | S | |
+| IV-3BD5 | ↳ The validation page names the problem, not "Check your setup" | | | S | |
+| **IV-3BF** | [PC finish - one focus ring, branded validation, only the brand's fonts, styled scrollbars, amount-first Add and fewer one-off styles](3-polish-and-arabic/IV-3BF-pc-finish.md) | improvement, visual | Feel | M | ready |
+| IV-3BF1 | ↳ One focus ring, also in High Contrast | | | S | |
+| IV-3BF2 | ↳ Only the brand's fonts | | | S | |
+| IV-3BF3 | ↳ Windows chrome: scrollbars, selection, spellcheck, balanced headings | | | S | |
+| IV-3BF4 | ↳ PC Add starts on the amount, says its name once | | | S | |
+| IV-3BF5 | ↳ Our message, not the browser's bubble | | | M | |
+| IV-3BF6 | ↳ One set of icons | | | M | |
+| IV-3BF7 | ↳ Styles from tokens | | | M | |
+| **IV-3BG** | [Phone finish - chevrons point forward in Arabic, quiet links 44 px tall, no tap flash or page bounce, tinted status bar](3-polish-and-arabic/IV-3BG-phone-finish.md) | improvement, visual | Everywhere | S | ready |
+| IV-3BG1 | ↳ One chevron that points forward in both languages | | | S | |
+| IV-3BG2 | ↳ Quiet links are 44 px tall | | | S | |
+| IV-3BG3 | ↳ No tap flash, no page bounce, no selected buttons | | | S | |
+| IV-3BG4 | ↳ Status bar colour and keyboard Enter key | | | S | |
+| **IV-3BH** | [One name per thing and no accounting jargon - ledger, counterparty, reevaluation, Title Case categories, three names for planning](3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md) | improvement, visual | Feel | M | ready |
+| IV-3BH1 | ↳ A test that keeps jargon off the screen | | | S | |
+| IV-3BH2 | ↳ "Counterparty" becomes "Payee" (Arabic: الطرف التاني → الجهة) | | | M | |
+| IV-3BH3 | ↳ "Ledger" and "reevaluation" leave the screen | | | S | |
+| IV-3BH4 | ↳ One name per place | | | S | |
+| IV-3BH5 | ↳ One spelling per word | | | S | |
+| IV-3BH6 | ↳ Built-in categories in sentence case | | | M | |
+| IV-3BH7 | ↳ Headings never show a code | | | S | |
+| **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | improvement, visual | Understand | L | ready |
+| IV-3BK1 | ↳ Guideline: human dates on screens | | | M | |
+| IV-3BK2 | ↳ The date filters, tested alone | | | M | |
+| IV-3BK3 | ↳ PC screens use them | | | M | |
+| IV-3BK4 | ↳ Phone screens use them | | | M | |
+| IV-3BK5 | ↳ Arabic currency label ج.م | | | S | |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | new |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/OW-3AI-institution-logos.md) | owner task | Feel |  | ready |
+| **OW-3BJ** | [Owner decisions for an international look - date display, the Arabic currency label, row decimals, percent sign, dark mode, how Arabic addresses the person](3-polish-and-arabic/OW-3BJ-international-display-decisions.md) | owner task | Feel |  | new |
+| OW-3BJ1 | ↳ The five open choices | | | owner | |
 
-Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md).
+Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md) · [r28](3-polish-and-arabic/r28-international-polish/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA. Next free code: 3BB.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA. Next free code: 3BL.
 
 ## 4 Edit journal and devices
 
@@ -237,6 +288,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | NF-12G4 | ↳ Who owes what, per person | | | M | |
 | NF-12G5 | ↳ Mohab, Arabic and the guideline | | | M | |
 
-Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md).
+Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md).
 
 Done: 12A, 12B, 12C, 12D, 12E, 12F, 3AZ. Next free code: 12H.

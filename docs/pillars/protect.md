@@ -14,11 +14,13 @@ Encrypted profiles, backups, restore, and no account or server. Nothing is lost 
 | **BT-2AI** | [Phone data must survive every app update and reinstall](../../issues/2-safe-for-real-money/BT-2AI-phone-data-survives-updates.md) | L | new |
 | **IT-2A** | [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic rep…](../../issues/2-safe-for-real-money/IT-2A-restore-safety.md) | L | building |
 | **IT-2C** | [Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidenc…](../../issues/2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md) | L | ready |
+| **BV-3BB** | [In Arabic, delete confirmations open as a harmless "OK" dialog with focus on Yes, so Enter deletes](../../issues/3-polish-and-arabic/BV-3BB-arabic-delete-confirm-loses-danger.md) | S | ready |
 
 ## Reports with open follow-ups here
 
 - [Audit 2: backend efficiency and loose ends](../../issues/2-safe-for-real-money/r2-backend-efficiency/report.md): 2A, 2C
 - [Audit 4: backend correctness and failure boundaries](../../issues/2-safe-for-real-money/r5-backend-correctness/report.md): 2A, 2C
 - [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 2A, 2C
+- [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BB
 <!-- work:end -->
 
