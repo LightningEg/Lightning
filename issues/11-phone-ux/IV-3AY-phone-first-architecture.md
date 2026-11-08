@@ -162,18 +162,19 @@ Done when: every account kind has a phone screen or a redirect to one, and the `
 `register.py` phone branches are gone; recipe steps 4-5.
 
 ## 3AY15 Investments on the phone · M
-Design: the report's *Investments page*. Built (2026-11-08): `ui/phone/screens/investments.py` and
-`phone/investments.html` at `/investments` (bare, or `holdings=all`): Portfolio value (the figure the PC page and Money
-show) with the month's result, "n prices to update" (to the price page), the holdings biggest first (five, then all),
-What changed (price, exchange rates, sales, income) as rows, Brokerage cash and Holdings after sale.
-`tests/test_phone_investments.py` checks the value against the PC page and Money.
-Left: the period, view, lens and planner URLs still reach the PC route (the period stepper, allocation and horizon,
-income collected, the value chart and its range chips); the per-class *Holdings after sale* breakdown (a 1,000 holding
-at a 50% sale factor shows 500; its old test went with the Overview) is one row only now; the holding page itself
-(`/investments/holding/<id>`) and the currencies page still render PC markup. Decide with the owner which of the
-period, allocation, income and horizon views the phone keeps, then give each a row or a sheet.
-Done when: those are decided and built or dropped, the `investments.py` and `accounts.py` currencies phone branches
-are gone (with 3AY18); recipe steps 4-5.
+Design: the report's *Investments page*. Owner decision (2026-11-08): allocation, the value line and the per-class sale
+breakdown stay; for the rest, my recommendation: the period stepper and the intended-horizon bars are dropped from the
+phone (the page is always this month; horizon is set per holding), income collected is one row with *See them*.
+Built (2026-11-08): `ui/phone/screens/investments.py` and `phone/investments.html` at `/investments` (bare, or
+`holdings=all`): Portfolio value (the figure the PC page and Money show) with the month's result, "n prices to update",
+the holdings biggest first by ticker (five, then all), the value over six months, Allocation by asset class, Income
+collected this year with *See them*, What changed as rows, Brokerage cash, and Holdings after sale with each class at its
+sale factor (rows open the class sheet). `tests/test_phone_investments.py` checks the value against the PC page and
+Money and each class against the position.
+Left: the holding page (`/investments/holding/<id>`), the planner, prices and currencies pages still render PC markup;
+a URL with a period, view or lens still reaches the PC route until 3AY18 removes its phone branch.
+Done when: the holding page has a phone screen or a redirect, and the `investments.py` and `accounts.py` currencies phone
+branches are gone (with 3AY18); recipe steps 4-5.
 
 ## 3AY16 Settings on the phone · M
 Design: the report's *⚙ Settings*. `/money/settings` (the ⚙ on Money and `/settings` on the phone lead to it): grouped

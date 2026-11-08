@@ -1876,7 +1876,6 @@ SERVICES = {
     "Checked through {date}": "اتراجع لحد {date}",
     "Checked against your bank.": "اتراجع على البنك.",
     "Result this month": "نتيجة الشهر ده",
-    "Allocation, income and horizon": "التوزيع والدخل والمدة",
     "{n} prices to update": "{n} أسعار محتاجة تتحدّث",
     "Make my plan": "اعمل خطتي",
     "{amt} since the start of the month.": "{amt} من أول الشهر.",

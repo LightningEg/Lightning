@@ -1,5 +1,6 @@
 {# Investments (IV-3AY15, report: Investments page): value and the month's result, the holdings, what changed. #}
 {% extends "base.html" %}
+{% from "partials/charts.html" import donut, trend %}
 {% block title %}Investments{% endblock %}
 {% block phone_back %}<a class="phone-back" href="/money"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Money'|tr(locale) }}</span></a>{% endblock %}
 {% block heading %}<h1>{{ 'Investments'|tr(locale) }}</h1>{% endblock %}
@@ -15,13 +16,20 @@
   <header class="phone-section-head"><h2 id="holdings-heading">{{ 'Holdings'|tr(locale) }}</h2>{% if s.holdings|length > 5 %}<a class="phone-quiet" href="{{ '/investments' if s.shown > 5 else '/investments?holdings=all' }}#holdings-heading">{{ ('Show fewer' if s.shown > 5 else 'See all')|tr(locale) }}</a>{% endif %}</header>
   <div class="phone-rows">{% for h in s.holdings[:s.shown] %}<a class="phone-row" href="{{ h.href }}"><span>{{ h.name }}<small>{{ h.account }}{% if h.gain_pct is not none %} · {{ h.gain_pct|signed_pct }}%{% endif %}</small></span><b><bdi class="fig">{{ h.value|money if h.value is not none else 'Unavailable'|tr(locale) }}</bdi></b></a>{% else %}<p class="phone-note">{{ 'No owned holdings to show.'|tr(locale) }}</p>{% endfor %}</div>
 </section>
+{% if not s.chart.too_short %}<article class="card phone-card" aria-label="{{ 'Portfolio value over time'|tr(locale) }}">{{ trend(s.chart, 'Portfolio value over time'|tr(locale), '', 160) }}</article>{% endif %}
+<section class="phone-section" aria-labelledby="alloc-heading">
+  <header class="phone-section-head"><h2 id="alloc-heading">{{ 'Allocation'|tr(locale) }}</h2><span>{{ s.end }}</span></header>
+  <article class="card phone-card" aria-label="{{ 'By asset class'|tr(locale) }}">{{ donut(s.donut, 'Holdings'|tr(locale), base) }}</article>
+</section>
+<div class="phone-rows"><div class="phone-row"><span>{{ 'Income collected (dividends and interest)'|tr(locale) }}<small>{{ s.income_from }} – {{ s.end }}</small></span><b><bdi class="fig">{{ s.income_ytd|money }}</bdi></b></div>
+  <a class="phone-row" data-popup-open href="/investments/report-detail?kind=dividends&amp;from={{ s.income_from }}&amp;to={{ s.end }}"><span>{{ 'See them'|tr(locale) }}</span><b>›</b></a></div>
 {% if s.changed %}<section class="phone-section" aria-labelledby="changed-heading">
   <header class="phone-section-head"><h2 id="changed-heading">{{ 'What changed'|tr(locale) }}</h2><span>{{ s.start }} – {{ s.end }}</span></header>
   <div class="phone-rows">{% for label, amount in s.changed %}<div class="phone-row"><span>{{ label|tr(locale) }}</span><b class="{{ 'neg' if amount < 0 else 'pos' }}"><bdi class="fig">{{ amount|money(True) }}</bdi></b></div>{% endfor %}</div>
 </section>{% endif %}
-<a class="phone-row" href="/investments?view=class"><span>{{ 'Allocation, income and horizon'|tr(locale) }}</span><b>›</b></a>
 <div class="phone-rows">
   {% if s.cash is not none %}<div class="phone-row"><span>{{ 'Brokerage cash'|tr(locale) }}</span><b><bdi class="fig">{{ s.cash|money }}</bdi></b></div>{% endif %}
   <div class="phone-row"><span>{{ 'Holdings after sale (estimate)'|tr(locale) }}</span><b><bdi class="fig">{{ s.after_sale|money if s.after_sale is not none else 'Unavailable'|tr(locale) }}</bdi></b></div>
+  {% for k in s.classes %}<a class="phone-row" data-popup-open href="/birdview/class/{{ k.id }}?as_of={{ s.end }}"><span>{{ k.name }}<small>{% if k.locked_until %}{{ 'locked until {date}'|tr(locale, date=k.locked_until) }}{% else %}{{ '%g'|format(k.factor) }}%{% endif %}</small></span><b><bdi class="fig">{{ k.after_sale|money }}</bdi></b></a>{% endfor %}
 </div>
 {% endblock %}
