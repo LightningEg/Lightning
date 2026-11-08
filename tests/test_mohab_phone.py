@@ -50,6 +50,7 @@ DETOURS = {
     "Investment planner": ("Planner",),
     "Zakat": ("Money", "Zakat"),                                  # Money's places, when Zakat is on
     "Set a plan for 2026-09": ("/budget?month=2026-09", "Make my plan"),  # the new Budget's no-plan step leads to the plan form
+    "Needs you": ("/needs-you",),                                  # Home's To do names three rows; See all opens this whole list
     "Imported activity needs a decision": ("/activity?tab=review", "Finish the import"),  # Activity's To review card (3AY8)
 }
 # Home names no account (3AY6): the accounts the PC lists in its sidebar are reached through Money, then its Accounts
