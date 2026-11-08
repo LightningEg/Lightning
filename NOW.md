@@ -32,7 +32,7 @@
 
 - **Import (2026-11-07, Claude):** IT-7Z and IT-7AA done; NF-7AB flow decided (cards first, 2026-11-08). Next: 2AI2. **Read:** 2AI, 7AB.
 
-- **Updates (Codex, 2026-11-09):** #440/#441 merged; v2.1.1 run #893 failed its packaged window smoke test. Owner approved v2.1.2 after checks; fix is on `codex/release-v2.1.2`; native validation pending. **Read:** `issues/9-later/NF-9B-in-app-updates.md` 9B8.
+- **Updates (Codex, 2026-11-09):** v2.1.2 (#442) passed the packaged Windows check. Run #42533243269 waits for owner approval of `android-signing`; site #173 is a tested draft. **Read:** `issues/9-later/NF-9B-in-app-updates.md` 9B8–9B9.
 
 Plan: `issues/INDEX.md`.
 

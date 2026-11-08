@@ -68,9 +68,12 @@ smoke test failed after the navigation guard was installed. The report did not i
 than normal startup's 30-second allowance. The repair separates guarded startup from page/health/navigation
 assertions and records a fixed, non-secret `smoke_stage`; `tests/test_desktop_smoke.py` covers a healthy
 25-second cold start, startup timeout, missing page marker, failed health, stale rejection and early closure.
-A real packaged Windows run must confirm the result; no test or security assertion is bypassed. Existing release
-tags remain unchanged. Re-running the old tag uses its old source and cannot validate this repair. The owner authorized tagging
-`v2.1.2` after the repair merges and required checks pass (2026-11-09).
+#442 merged after all required checks passed; the owner-approved `v2.1.2` tag points to `ea1c96c3`.
+[Release run #42533243269](https://github.com/LightningEg/Lightning/actions/runs/42533243269) passed Linux,
+Windows source tests, packaging, the extracted executable's encryption/page self-check and its WebView2 smoke
+check (`ok: true`, `stage: smoke-passed`, `smoke_stage: passed`). No security assertion was bypassed.
+The unsigned Android build passed; the protected `android-signing` job is waiting for the owner's review.
+Existing release tags remain unchanged.
 
 ## How to work on this item
 
@@ -78,18 +81,27 @@ One step is one pull request; the owner steps need no code. Read only the files 
 `python -m pytest tests/test_update_manifest.py tests/test_desktop_update.py -q`. Delete the step's heading in the
 same commit; when 9B9 is done, delete this file and add 9B to the folder's `done:`.
 
-## 9B8 Prepare and approve the v2.1.1 tag · owner
-Needs the key fix merged first. An AI runs skill `release-check` steps 1-7 and reports; the owner then approves the tag
-(it publishes to the public downloads repository and cannot be undone). After the tag run, check its log says
-`Signed UPDATE.json for 2.1.1 with update-2026-2` and that the release has `UPDATE.json` and `UPDATE.json.sig`.
-If signing fails, nothing is published; compare the pinned public key with the configured signing key.
+## 9B8 Finish v2.1.2 signing and publication · owner
 
-## 9B9 The site's release update for 2.1.1 · M · opus
+Open the [v2.1.2 run](https://github.com/LightningEg/Lightning/actions/runs/42533243269), select **Review deployments**,
+then approve **android-signing**. The connected GitHub tools can read this gate but cannot approve deployments.
+After the signed phone and Windows jobs finish, the protected `production-release` job signs and publishes.
+Verify the log says `Signed UPDATE.json for 2.1.2 with update-2026-2` and the public release has `UPDATE.json`
+and `UPDATE.json.sig`. Do not rerun the failed v2.1.1 tag: it still contains the old window-check code.
+
+## 9B9 The site's release update for 2.1.2 · M · opus
 Needs 9B8 finished first (the release exists). Two repositories, so opus.
 Files: the website repository's README › Version identity and archive (the site's release steps), skill
 `website-sync` (`skills/website-sync/SKILL.md`), `lightning/ui/entitlements.py` (`UPDATE_PATHS`: the pages the app's
 update block opens; they must keep working).
-Do: the site's usual release update for 2.1.1 (download links, version IDs, release log in English and Arabic), as
+Do: the site's usual release update for 2.1.2 (download links, version IDs, release log in English and Arabic), as
 `website-sync` says. Explain that the first updater build is installed by hand; later versions can use its updater.
 Done when: `website-sync`'s checks pass in both repositories, and each path in `UPDATE_PATHS` answers 200 on the
 live site (`curl -sI https://<MARKETPLACE_HOST><path>`, host from `entitlements.py`).
+
+Website preparation is in [draft PR #173](https://github.com/LightningEg/Lightning_website/pull/173).
+It passes 97 site checks with zero errors/warnings, account/security CI, and ten desktop/phone Chromium renders
+of English/Arabic Downloads and release logs plus the version archive. Hold it until the public assets exist;
+verify filenames, hashes, BUILD.json provenance and the update signature, then add the verified hashes to the
+registry, mark ready, merge and check the live pages. The existing 2.0.3 release-log APK links are corrected in
+both languages. The draft preserves six previous website snapshots and earlier app downloads.
