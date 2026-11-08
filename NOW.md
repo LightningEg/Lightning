@@ -17,7 +17,7 @@
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **Phone (2026-11-08, Claude):** IV-3AY: tab bar switched (Home, Budget, Add, Activity, Money); More and the old phone Overview are retired. Next, in order: 3AY14 account, 3AY15 investments, 3AY16 Settings, 3AY17 ports, 3AY18 redirects (closes 3AY11), 3AY19 back stack, 3AY20 `phone.css`; then the owner's check 3AY13. **Read:** 3AY.
+- **Phone (2026-11-08, Claude):** IV-3AY: tab bar switched (Home, Budget, Add, Activity, Money); More and the old phone Overview are retired. Next, in order: 3AY14 account, 3AY15 investments, 3AY16 Settings, 3AY17 ports, 3AY18 redirects (closes 3AY11), 3AY19 back stack, 3AY20 `phone.css`; 3AY13 (owner's phone check) closed by the owner 2026-11-08. **Read:** 3AY.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 

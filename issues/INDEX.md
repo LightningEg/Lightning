@@ -216,12 +216,11 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-3AY12 | ↳ Arabic, themes and 320 px | | | M | |
 | IV-3AY19 | ↳ A back stack per slot | | | M | |
 | IV-3AY20 | ↳ `phone.css` alone on the theme tokens | | | M | |
-| IV-3AY13 | ↳ Owner's phone check | | | owner | |
 | **IV-3F** | [The phone's top bar looks too white to one user](11-phone-ux/IV-3F-phone-top-bar-looks-too-white.md) | improvement, visual | Feel | S | ready |
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md).
 
-Done: 3AY1, 3AY3, 3AY5. Next free code: 11B.
+Done: 3AY1, 3AY3, 3AY5, 3AY13. Next free code: 11B.
 
 ## 12 Desktop UX and smart next steps
 
