@@ -163,7 +163,12 @@ async def plan_page(request: Request):
     afford_account = _afford_account_answer(c, request, afford, day)
     cash = (_phone_cash(c, forecast, next_payments, late, position, day)
             if getattr(request.state, "phone", False) else None)
-    return render(request, "planning/plan.html", afford_account=afford_account,
+    has_accounts = bool(c.accounts.list())
+    has_items = bool(c.planning.items())
+    empty_profile = (not has_accounts and not has_items
+                     and not c.accounts.list(active_only=False) and not c.reserves.list_active())
+    return render(request, "planning/plan.html", has_accounts=has_accounts, empty_profile=empty_profile,
+              afford_account=afford_account,
                   afford_accounts=[a for a in _paying_accounts(c) if a.currency == c.base_currency],
                   afford_date=str(request.query_params.get("afford_date", "")),
                   afford_account_id=str(request.query_params.get("afford_account", "")), tabs=TABS, plan_tab="plan", forecast=forecast, owe=owe, has_income=has_income,
@@ -172,7 +177,7 @@ async def plan_page(request: Request):
                   gameya_owed=position.gameya_still_to_pay,
                   notes=[], plan=plan, stats=stats, kpi_cards=kpi_cards, forecast_chart=visuals.forecast_trend(forecast),
                   next_payments=next_payments, late_days=late_days, circle_rows=circle_rows, as_of=fmt_date(day), window_end=fmt_date(window_end),
-                  has_items=bool(c.planning.items()), labels=_labels(c), zakat=c.zakat.forecast(day))
+                  has_items=has_items, labels=_labels(c), zakat=c.zakat.forecast(day))
 
 
 def _plan_stats(f, plan, day, has_income: bool = True) -> list[dict]:

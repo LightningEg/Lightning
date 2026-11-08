@@ -12,12 +12,17 @@
 {% from "phone/partials/sheet.html" import sheet with context %}
 {% block title %}Cash planning{% endblock %}
 {# The hero sits in the heading so the tabs come right under its sentence, as the design shows. #}
-{% block heading %}<h1>{{ 'Cash planning'|tr(locale) }}</h1>{% if cash %}
+{% block heading %}<h1>{{ 'Cash planning'|tr(locale) }}</h1>{% if cash and (has_accounts or cash.due) %}
 <div class="phone-plan-hero">{% set line %}{% for s in cash.lines %}{{ s.text|tr(locale, **s['values'])|keep_dates }}{{ ' ' if not loop.last }}{% endfor %}{% endset %}{{ hero(fig.payments_before_next_income.label, cash.due, line, note="As of {date}"|tr(locale, date=as_of)) }}</div>{% endif %}{% endblock %}
 {% macro plan_row(r) %}
 <a class="phone-row phone-plan-row{{ ' is-late' if r.late }}"{% if r.popup %} data-popup-open{% endif %} href="{{ r.href }}"><span>{{ r.name }}<small>{{ r.kind|tr(locale) }}{% if r.estimated %} · {{ 'Estimated'|tr(locale) }}{% endif %} · {% if r.late_text %}<span class="nowrap">{{ r.date }}</span> · <span class="plan-status plan-status-late">{{ r.late_text.text|tr(locale, **r.late_text['values']) }}</span>{% else %}{{ r.when.text|tr(locale, **r.when['values']) }} · <span class="nowrap">{{ r.date }}</span>{% endif %}</small></span><b class="{{ 'pos' if r.income }}">{{ '+' if r.income else '−' }}{{ r.amount|money }}</b>{{ arrow('in' if r.income else 'out') }}</a>
 {% endmacro %}
-{% block content %}<p><a href="/plan/scenarios">{{ 'Compare scenarios'|tr(locale) }}</a></p><p><a href="/plan/inputs" data-popup-open>{{ 'Forecast inputs'|tr(locale) }}</a></p>
+{% block content %}
+{% if empty_profile %}
+<p class="chart-empty">{{ 'No accounts yet.'|tr(locale) }}</p>
+<a class="btn primary phone-save" href="/accounts/new" data-popup-open>{{ 'Add an account'|tr(locale) }}</a>
+{% else %}
+<p><a href="/plan/scenarios">{{ 'Compare scenarios'|tr(locale) }}</a></p><p><a href="/plan/inputs" data-popup-open>{{ 'Forecast inputs'|tr(locale) }}</a></p>
 {% set f = forecast %}{% set p = plan %}
 
 <section class="phone-section phone-plan-coming" id="plan-next" aria-labelledby="coming-section">
@@ -39,7 +44,12 @@
   {% endif %}
 </section>
 
+{% if has_accounts %}
 {{ kpi_tiles(cash.tiles, base) }}
+{% else %}
+<p class="chart-empty">{{ 'No accounts yet.'|tr(locale) }}</p>
+<a class="btn primary phone-save" href="/accounts/new" data-popup-open>{{ 'Add an account'|tr(locale) }}</a>
+{% endif %}
 
 {% set dated = f.dated %}
 {% if dated and (dated.first_shortfall or dated.account_shortfalls or dated.unassigned_payments or dated.unvalued_currencies) %}
@@ -59,6 +69,7 @@
 </section>
 {% endif %}
 
+{% if has_accounts %}
 <section class="phone-section" aria-labelledby="safe-section">
   <header class="phone-section-head"><h2 id="safe-section">{{ 'Safe to spend'|tr(locale) }}</h2><span>To {{ f.next_income_date or 'three months from now' }}</span></header>
   <article class="card phone-card" id="plan-build" aria-labelledby="safe-section">
@@ -68,6 +79,7 @@
     {% if p.build %}{{ bar_rows(p.build.rows, 'From free cash to safe to spend') }}{% endif %}
   </article>
 </section>
+{% endif %}
 
 <section class="phone-section" aria-labelledby="forecast-section">
   <header class="phone-section-head"><h2 id="forecast-section">{{ "Where cash is heading"|tr(locale) }}</h2><span>{{ 'Next {n} months'|tr(locale, n=f.months|length) }}</span></header>
@@ -109,7 +121,7 @@
   <div class="phone-rows">
     {% set row %}<span>{{ fig.what_you_owe.label }}<small>{{ "Bills already due, loans and what you owe a gam'eya"|tr(locale) if gameya_owed else "Bills already due and loans"|tr(locale) }}</small></span><b>{{ (owe.total + gameya_owed)|money }}</b><span class="phone-chevron" aria-hidden="true">›</span>{% endset %}
     {% call sheet(fig.what_you_owe.label, row) %}
-    <div class="phone-lead">{{ (owe.total + gameya_owed)|money }} <small>{{ base }}</small></div>
+    {% if has_accounts or owe.total or gameya_owed %}<div class="phone-lead">{{ (owe.total + gameya_owed)|money }} <small>{{ base }}</small></div>{% endif %}
     <div class="phone-rows">
       {% if owe.other_bills_due > 0 %}<div class="phone-row"><span>{{ "Bills due, loans apart"|tr(locale) }}</span><b>{{ owe.other_bills_due|money }}</b></div>{% endif %}
       <a class="phone-row" href="/plan/loans"><span>{{ fig.loans_still_to_pay.label }}</span><b>{{ owe.loans_still_to_pay|money }}</b></a>
@@ -122,4 +134,5 @@
     {% endcall %}
   </div>
 </section>
+{% endif %}
 {% endblock %}
