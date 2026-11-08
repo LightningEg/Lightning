@@ -18,9 +18,7 @@ Rules for every step: use posted cash and recorded facts, never assume receipt; 
 
 Take one step at a time, each with its own test and Mohab step.
 
-## 3AZ1 Salary posted becomes one reviewed payday proposal · M
-
-Bills, everyday money, emergency and goals, then the investable remainder, from posted cash only; preview the resulting availability; nothing executes automatically. Done when a posted salary offers the proposal and Mohab covers confirming it.
+Done: 3AZ1 (`partials/payday_proposal.html` on PC and phone, `funding.preview()['proposal']`; `tests/test_salary_day_review.py`, Mohab `_confirm_payday_proposal`). Needs you › Salary received opens the proposal; looking assigns nothing; Confirm assigns once; Undo restores.
 
 ## 3AZ2 A statement row links to the payment already recorded from an SMS · M
 

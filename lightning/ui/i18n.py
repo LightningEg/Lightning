@@ -1771,6 +1771,8 @@ ARABIC_UI = {
     'Bills protected': 'فواتير محمية',
     'Emergency and goals': 'الطوارئ والأهداف',
     'Left unassigned': 'غير مخصص',
+    'after you confirm': 'بعد التأكيد',
+    'Counted from cash already posted; expected salary is not counted. Nothing is assigned until you confirm.': 'محسوب من النقد المسجّل فعلًا؛ المرتب المتوقع غير محسوب. لا يُخصَّص شيء حتى تؤكد.',
     'No bank transfer will be made. Safe to spend stays at {amount}.': 'لن يتم أي تحويل بنكي. المتاح الآمن للصرف يبقى {amount}.',
     'Customize amounts': 'خصّص المبالغ',
     'About cash funding': 'عن تخصيص النقد',
