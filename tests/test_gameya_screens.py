@@ -131,7 +131,7 @@ def test_accounts_sidebar_more_and_overview_agree_on_in_your_accounts(c, setup, 
     total = f"{p.in_your_accounts:,.0f}"
     pc = _client(c).get("/accounts").text
     assert pc.count(total) >= 2  # the sidebar and the Accounts lead read the same figure
-    assert "+18,000" in pc and f"{p.what_you_own:,.0f}" in pc  # How it adds up: the circle row, then What you own
+    assert "+18,000" not in pc and "counted in what you owe" in pc and "18,000" in pc and f"{p.what_you_own:,.0f}" in pc  # How it adds up: the circle row, then What you own
     assert total in _client(c, phone=True).get("/more").text
     phone = _client(c, phone=True).get("/accounts").text
     assert total in phone and "18,000 you still owe a circle, so you own" in phone
