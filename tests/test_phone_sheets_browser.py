@@ -157,7 +157,7 @@ def test_the_keyboard_hides_the_tab_bar(phone_page):
 
 def test_the_raise_offer_is_a_page_card_that_stays(phone_page):
     page, origin = phone_page
-    page.goto(origin + "/budget")
+    page.goto(origin + "/budget?period=month")  # the old Budget carries the raise offer; a query steps past the new one
     page.evaluate("""async () => {
       const token = document.querySelector('meta[name=lightning-session]').content;
       const form = new DOMParser().parseFromString(await (await fetch('/plan/items/new')).text(), 'text/html');
@@ -166,7 +166,7 @@ def test_the_raise_offer_is_a_page_card_that_stays(phone_page):
       await fetch('/plan/items', {method: 'POST', body: new URLSearchParams({__session: token, kind: 'INCOME',
         name: 'Salary', amount: '60000', frequency: 'MONTHLY', interval_count: '1', start_date: '2026-11-01',
         account_id: account, category_id: category, past_due: 'later'})}); }""")
-    page.goto(origin + "/budget")
+    page.goto(origin + "/budget?period=month")  # the old Budget carries the raise offer; a query steps past the new one
     card = page.locator("section.raise-prompt")
     assert card.count() == 1 and page.locator(".flash.raise-prompt").count() == 0
     assert card.evaluate("el => getComputedStyle(el).position") != "fixed"

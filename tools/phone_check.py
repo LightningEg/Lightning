@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-PAGES = ("/plan/purchases/new", "/exports/all", "/setup/salary", "/", "/birdview/expenses", "/financial-health", "/budget", "/plan", "/plan/recurring", "/plan/loans",
+PAGES = ("/home", "/activity", "/activity?tab=review", "/budget/flexible", "/money", "/money/accounts", "/money/bills", "/add/bills", "/plan/purchases/new", "/exports/all", "/setup/salary", "/", "/birdview/expenses", "/financial-health", "/budget", "/plan", "/plan/recurring", "/plan/loans",
          "/plan/reserves", "/accounts/currencies", "/investments", "/investments?holdings=all", "/investments/planner", "/investments/prices", "/accounts", "/transactions",
          "/money-from-others", "/zakat", "/settings", "/categories", "/counterparties", "/checks", "/profiles",
          "/profiles/devices", "/accounts/1", "/accounts/1/transaction/new", "/accounts/add-transaction", "/sms", "/search", "/search?q=food")
@@ -110,6 +110,14 @@ def run(shots: Path | None = None, *, arabic: bool = False) -> list[str]:
                 pages = (*PAGES, review, *([circle] if circle else []))  # the bank import's review, as an SMS reaches it; a gam'eya circle
                 for width in (360, 320):
                     page.set_viewport_size({"width": width, "height": 800})
+                    if width == 320:  # J1 (3AY7): with the number keyboard up (about 340 px left) Save is still on screen
+                        page.set_viewport_size({"width": 320, "height": 340})
+                        page.goto(host.origin + "/accounts/add-transaction")
+                        page.focus("#popup-amount")
+                        box = page.locator(".phone-save-bar .phone-save").first.bounding_box()
+                        if not box or box["y"] < 0 or box["y"] + box["height"] > 340:
+                            problems.append(f"320 /accounts/add-transaction: Save is off screen with the keyboard open ({box})")
+                        page.set_viewport_size({"width": 320, "height": 800})
                     for path in pages:
                         response = page.goto(host.origin + path)
                         if response is None or response.status >= 400:

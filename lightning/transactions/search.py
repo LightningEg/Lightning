@@ -64,10 +64,11 @@ def usual_categories(repo, *, window: int, minimum: int, days: int) -> dict[str,
     return usual
 
 
-def usual_capture_categories(repo, categories, kind: str, limit: int, *, days: int) -> list[int]:
+def usual_capture_categories(repo, categories, kind: str, limit: int, *, days: int, hour: int | None = None) -> list[int]:
     """The categories the Add sheet offers first as chips (3AN3): what this person files money of that kind
     under most often in the last 180 days, then the other categories in the tree's own order until there are
-    ``limit``. kind is "out" or "in"; transfers have no category. Ids only; the page names them."""
+    ``limit``. kind is "out" or "in"; transfers have no category. ``hour`` (local, 0-23) puts what was typed by hand in
+    the same part of the day first. Ids only; the page names them."""
     if kind not in ("out", "in"):
         return []
     movement = Movement.OUTFLOW if kind == "out" else Movement.INFLOW
@@ -76,7 +77,8 @@ def usual_capture_categories(repo, categories, kind: str, limit: int, *, days: i
                and c.code not in ("EXP.UNACCOUNTED", "INC.UNACCOUNTED")]
     by_id = {c.id: c for c in allowed}
     since = fmt_date(today() - timedelta(days=days))
-    used = [int(row["category_id"]) for row in repo.category_use(movement.value, since)]
+    band = None if hour is None else ((5, 10) if 5 <= hour <= 10 else (11, 16) if 11 <= hour <= 16 else (17, 22) if 17 <= hour <= 22 else None)
+    used = [int(row["category_id"]) for row in repo.category_use(movement.value, since, band)]
     chosen = [category_id for category_id in used if category_id in by_id][:limit]
     for category in allowed:  # a thin history: the tree's own order fills the rest
         if len(chosen) >= limit:

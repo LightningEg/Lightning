@@ -61,18 +61,35 @@ it ends within 1.2 screens above the tab bar, the first Latest row is above 600 
 Amount first; Out / In / Move; the last account; chips by use; Paste SMS and Pay a bill at the top; a toast with the
 category's left and Undo; returns to the slot it came from. Needs 3AY4 merged first. Done when: J1 is 3 taps and Save shows
 with the keyboard open at 320 px.
+Built: the Add slot passes the page it opened from, so Save returns there; the sheet says Move; *Pay a bill* (only when
+bills are due) opens the phone-owned `/add/bills`, each row opening that bill's pay sheet; Save stays on screen with the
+keyboard open at 320 px (`overflow-x: clip` so the sticky bar sticks; `tools/phone_check.py` checks it); the category chips
+lead with what was typed by hand in the same part of the day; J1 is three taps in a real browser
+(`tests/test_phone_add_browser.py`). The toast with the budget's left and Undo already existed. Left: the bill sheet's own
+phone template (it still uses the PC's pay page).
 
 ## 3AY8 Activity with To review · L
 All (the month, one money line, the day's net only with two or more rows, row sheets with category chips and a rule) and
 To review (one card at a time over the review inbox's sortable items; *Not now* replaces Mark as reviewed and Snooze).
 Needs 3AY4 merged first. Done when: the first row is above 330 px; one tap per reviewed item; clearing the queue clears
 Home's To do row.
+Built (first slice): `ui/phone/screens/activity.py` and `phone/activity_home.html` at `/activity` (phone app only): All
+(the month, one In/Out line, the register's day nets, month stepper) and To review (one card over the review inbox's
+activity items, "n of N", its one action, *Not now* snoozes it to tomorrow; an empty queue says "All sorted" and clears
+Home's To do row). Left: row sheets with category chips and a rule, the card kinds that are rows (SMS, duplicates,
+interest, recurring) instead of grouped items, search and filters, first row above 330 px measured.
 
 ## 3AY9 Budget, flexible first · L
 Left in plan counts flexible spending only (a service, with the PC agreeing), needs attention, the category list without
 fields, Fixed costs as one row, the category sheet, the *Make my plan* step and the payday strip. Needs 3AY4 merged first.
 Done when: the first category row is above 400 px; Mohab's fixed costs no longer move the pace; skill `number-audit`
 passes.
+Built (first slice): `ui/phone/screens/budget.py` and `phone/budget_flexible.html` at `/budget/flexible` (phone app only):
+the hero is everyday money left (the forecaster's EverydayBudget, the figure the PC's Everyday card shows, so the two
+agree), the pace sentence, Needs attention (at most four, then "and N more"), every flexible category with *left* as the
+figure and no field, bills and loans as one Fixed costs row, a past month without Needs attention, and the Make my plan
+step with no plan. Left: the category sheet's own phone template, the payday strip, *This month in detail*, switching
+`/budget` itself (3AY10 with the tab bar), running `number-audit`, the first-row-above-400-px measure.
 
 ## 3AY10 Money and its pages · L
 Net worth with its sheet (parts, over time, US dollars and 21K gold); account balances (four, then more) with the line
@@ -80,11 +97,27 @@ that reconciles them with what you own; Coming up with no late rows; the Bills p
 first); an account with *Check against the bank*; Settings behind ⚙, with "Best on your PC" rows. Old URLs (`/more`,
 `/plan`, `/accounts`, `/transactions`) redirect. Needs 3AY4 and 3AY5 merged first. Done when: any balance is one tap
 from any slot, and bills are counted once.
+Built (first slice): `ui/phone/screens/money.py` and `phone/money.html` at `/money` (phone app only): Net worth with the
+change since the month began, Accounts (four, then "N more", each a link to the account, the held-for-others line),
+Coming up (the next three, never late; late bills are one pointer to Home), and one row each for What you owe,
+Investments, Goals and reserves, Financial health, Settings. Left: the net worth sheet (parts, over time, dollars and
+gold), the Bills page (Late as one question), the Investments and account pages (*Check against the bank*), Settings
+with "Best on your PC" rows, the tab bar switch, `/more` `/plan` `/accounts` `/transactions` redirects, bills counted once
+across the Bills page, Coming up and Home.
+Built since: `/money/accounts` (every balance, behind "N more"), `/money/bills` (Late, This week, Before payday, After payday
+from the one bill state; Coming up is a slice of it, tested) and an *Edit your plan* row on the new Budget. Switched 2026-11-08: the tab bar is Home, Budget, Add, Activity, Money. The phone router serves `/` (once an account
+exists; the empty profile keeps its welcome page), `/budget` (month only) and redirects bare `/more`, `/accounts` and
+`/transactions`; a URL with any other query key still reaches the older page (`_plain` route class), so no link broke.
+The old-page tests were moved to the new screens or to those query URLs. The Overview's period report ("how did my year
+go?") has no phone screen yet and is reached at `/?period=month`.
 
 ## 3AY11 Remove the old coupling · M
 Delete the phone switches in `lightning/ui/routes/` (`on_phone`, `lazy_folds`, `request.state.phone`), `_phone_template`,
 and the `phone/` templates the new screens replaced. Needs 3AY6 to 3AY10 merged first. Done when: `grep -rn "state.phone"
 lightning/ui/routes` is empty and the full suite passes.
+Not done (2026-11-08): the PC routes still carry phone branches (`getattr(request.state, "phone", False)` in about fifteen
+places) because the sub-pages (account, register, investments, Cash planning, search, Settings) have no phone-owned
+screens yet; the old slot templates also stay reachable at query URLs until the Overview report has a phone home.
 
 ## 3AY12 Arabic, themes and 320 px · M
 Every new string in the catalogue, the mirrored layouts, dark and paid themes, 320 px. Needs 3AY6 to 3AY10 merged first.

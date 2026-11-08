@@ -6,7 +6,7 @@
   --c-appbar: 56px; --c-tabbar: 64px; --c-side: 16px;
 }
 html.phone { -webkit-text-size-adjust: 100%; }
-html.phone, .phone-body { max-width: 100%; overflow-x: hidden; }
+html.phone, .phone-body { max-width: 100%; overflow-x: clip; }
 .phone-body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--c-ink); font-size: 15px; }
 
 /* C02 frame: one bar fixed on top, one at the bottom, content scrolls between them. */
@@ -25,7 +25,7 @@ html.phone, .phone-body { max-width: 100%; overflow-x: hidden; }
 .phone-icon[aria-pressed="false"] .side-privacy-off { display: none; }
 
 .main.phone-content { box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0; margin: 0; padding: 16px var(--c-side)
-  calc(var(--c-tabbar) + env(safe-area-inset-bottom) + 24px); overflow-x: hidden; }
+  calc(var(--c-tabbar) + env(safe-area-inset-bottom) + 24px); overflow-x: clip; }
 .phone-content > * { max-width: 100%; }
 
 .phone-tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(5, 1fr);
@@ -272,6 +272,8 @@ html.phone .main :is(input, select, textarea):not([type=hidden], [type=checkbox]
 .phone-bar-name { min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
 .phone-bar-value { font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 15px; }
 .phone-bar-track { grid-column: 1 / -1; height: 8px; border-radius: 99px; background: var(--c-track); overflow: hidden; }
+.phone-budget-cat .phone-bar-track { display: block; margin-top: 6px; }
+.phone-budget-cat.is-over .phone-bar-track i { background: #C93D72; }
 .phone-bar-track i { display: block; height: 100%; border-radius: 99px; background: #0B6DD6; }
 .phone-bar-row.is-up .phone-bar-track i { background: #14A874; }
 .phone-bar-row.is-down .phone-bar-track i { background: #E68CA8; }

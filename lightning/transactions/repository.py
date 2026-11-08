@@ -315,15 +315,20 @@ class TransactionRepository:
             ") WHERE n = 1",
         )
 
-    def category_use(self, effect: str, since: str) -> list:
+    def category_use(self, effect: str, since: str, hours: tuple[int, int] | None = None) -> list:
         """Categories a person filed money of one effect (INFLOW or OUTFLOW) under since a day, most used first:
-        [{category_id, uses}]. One count per transaction; split rows count once per category."""
+        [{category_id, uses}]. One count per transaction; split rows count once per category. With ``hours`` (first,
+        last local hour) the ones this person typed by hand in those hours come first (3AY7: the chips follow the time
+        of day); imports and samples share one moment, so only hand-typed entries count for the hour."""
+        low, high = hours if hours else (-1, -1)
         return self.db.all(
-            "SELECT le.category_id AS category_id, COUNT(DISTINCT t.id) AS uses, MAX(t.date) AS last"
+            "SELECT le.category_id AS category_id, COUNT(DISTINCT t.id) AS uses, MAX(t.date) AS last,"
+            " COUNT(DISTINCT CASE WHEN t.source = 'MANUAL' AND CAST(substr(t.created_at, 12, 2) AS INTEGER) BETWEEN ? AND ?"
+            " THEN t.id END) AS band"
             " FROM ledger_entries le JOIN transactions t ON t.id = le.transaction_id"
             " WHERE t.status = 'POSTED' AND t.type IN ('IN','OUT') AND le.effect = ? AND le.category_id IS NOT NULL"
-            " AND t.date >= ? GROUP BY le.category_id ORDER BY uses DESC, last DESC, le.category_id",
-            (effect, since),
+            " AND t.date >= ? GROUP BY le.category_id ORDER BY band DESC, uses DESC, last DESC, le.category_id",
+            (low, high, effect, since),
         )
 
     def account_use(self, since: str) -> list:

@@ -127,8 +127,9 @@ class Device:
         return self.b.go(account).text if not self.phone else self.b.go("Accounts", account).text
 
     def owns(self) -> str:
-        """The Overview's What you own: the figure he glances at on both devices."""
-        text = self.b.open("/").after("What you own", 60)
+        """What you own: the figure he glances at on both devices. The PC's Overview names it; the phone's Money leads with
+        Net worth, the same figure while he owes nothing (3AY10)."""
+        text = self.b.open("/money").after("Net worth", 60) if self.phone else self.b.open("/").after("What you own", 60)
         text = re.sub(r"As of \d{4}-\d{2}-\d{2}|Excludes money held for others", "", text)  # the phone's hero puts its date first;
         return text.split()[0]  # the PC's Lead names what it leaves out (guideline 3.33)
 
