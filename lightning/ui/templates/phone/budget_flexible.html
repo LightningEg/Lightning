@@ -31,6 +31,7 @@
   <header class="phone-section-head"><h2 id="cats-heading">{{ 'Your categories'|tr(locale) }}</h2></header>
   <div class="phone-rows">{% for r in s.categories %}{{ cat_row(r) }}{% else %}<p class="phone-note">{{ 'No category has a limit yet.'|tr(locale) }}</p>{% endfor %}</div>
 </section>
-{% if s.fixed_count %}<a class="phone-row phone-fixed-costs" href="/plan/recurring"><span>{{ 'Fixed costs'|tr(locale) }}<small>{{ '{paid} of {planned} paid'|tr(locale, paid=s.fixed_paid|money, planned=s.fixed_planned|money) }}</small></span><b>›</b></a>{% endif %}
+<a class="phone-row" href="/budget?edit=1"><span>{{ 'Edit your plan'|tr(locale) }}</span><b>›</b></a>
+{% if s.fixed_count %}<a class="phone-row phone-fixed-costs" href="/money/bills"><span>{{ 'Fixed costs'|tr(locale) }}<small>{{ '{paid} of {planned} paid'|tr(locale, paid=s.fixed_paid|money, planned=s.fixed_planned|money) }}</small></span><b>›</b></a>{% endif %}
 {% endif %}
 {% endblock %}

@@ -36,6 +36,18 @@ def phone_router() -> APIRouter:
         from lightning.ui.phone.screens import money as screen
         return render_phone(request, "phone/money.html", screen=screen.build(container(request), today()))
 
+    @router.get("/money/accounts")
+    async def money_accounts(request: Request):
+        from lightning.core.dates import today
+        from lightning.ui.phone.screens import money as screen
+        return render_phone(request, "phone/money_accounts.html", page=screen.accounts_page(container(request), today()))
+
+    @router.get("/money/bills")
+    async def money_bills(request: Request):
+        from lightning.core.dates import today
+        from lightning.ui.phone.screens import money as screen
+        return render_phone(request, "phone/money_bills.html", page=screen.bills_page(container(request), today()))
+
     @router.get("/activity")
     async def activity(request: Request):
         from lightning.core.dates import today

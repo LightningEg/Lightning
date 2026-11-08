@@ -17,7 +17,7 @@
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **Phone (2026-11-07, Claude):** IV-3AY: 3AY1, 3AY3, 3AY5, 3AY6 built, 3AY4 first slice, 3AY7 first slice (return to slot, Move, Pay a bill). 3AY8, 3AY9, 3AY10 first slices (`/activity`, `/budget/flexible`, `/money`). Next: the all-accounts page, Bills page and Budget editing the tab bar switch needs (see 3AY10: tried and reverted), then the switch with 3AY11, 3AY4 rest, 3AY12. Owner: check Arabic slot names. **Read:** 3AY.
+- **Phone (2026-11-07, Claude):** IV-3AY: 3AY1, 3AY3, 3AY5, 3AY6 built, 3AY4 first slice, 3AY7 first slice (return to slot, Move, Pay a bill). 3AY8, 3AY9, 3AY10 first slices (`/activity`, `/budget/flexible`, `/money`). All-accounts and Bills pages built. Next: the tab bar switch with 3AY11 (rewrite the ~30 old-page tests; welcome page steps aside until an account exists; see 3AY10), 3AY4 rest, 3AY12. Owner: check Arabic slot names. **Read:** 3AY.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 

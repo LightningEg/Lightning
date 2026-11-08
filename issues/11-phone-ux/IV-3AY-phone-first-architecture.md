@@ -104,7 +104,9 @@ Investments, Goals and reserves, Financial health, Settings. Left: the net worth
 gold), the Bills page (Late as one question), the Investments and account pages (*Check against the bank*), Settings
 with "Best on your PC" rows, the tab bar switch, `/more` `/plan` `/accounts` `/transactions` redirects, bills counted once
 across the Bills page, Coming up and Home.
-Tried 2026-11-08 and reverted: switching the tab bar to Home, Budget, Activity and Money with `/`, `/budget`, `/more`,
+Built since: `/money/accounts` (every balance, behind "N more"), `/money/bills` (Late, This week, Before payday, After payday
+from the one bill state; Coming up is a slice of it, tested) and an *Edit your plan* row on the new Budget. Tried
+2026-11-08 and reverted: switching the tab bar to Home, Budget, Activity and Money with `/`, `/budget`, `/more`,
 `/accounts` and `/transactions` served or redirected by the phone router. It needs, first: an all-accounts page behind
 Money's "N more" (a redirect from `/accounts` to `/money` loops), the empty profile's welcome page kept for `/` (currency
 setup, first account, samples: a route that steps aside until an account exists works), and the old Budget's editing

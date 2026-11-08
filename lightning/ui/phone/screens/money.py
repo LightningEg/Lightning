@@ -68,3 +68,33 @@ def build(c, day: date) -> MoneyScreen:
         coming_up=tuple(b for b in bills if b.state in UPCOMING)[:COMING_UP],
         late_count=sum(1 for b in bills if b.state in (BillState.LATE, BillState.LATE_STALE)),
         holdings_value=now.holdings_value)
+
+
+@dataclass(frozen=True)
+class AccountsPage:
+    rows: tuple[AccountRow, ...]       # every balance, largest first
+    total: Decimal
+    held_for_others: Decimal
+
+
+def accounts_page(c, day: date) -> AccountsPage:
+    """Every balance (the page behind Money's "N more"): the list is the balances themselves, no fields."""
+    rows = _balances(c, day)
+    return AccountsPage(tuple(rows), sum((r.balance for r in rows), ZERO), c.position.at(day).held_for_others)
+
+
+@dataclass(frozen=True)
+class BillsPage:
+    late: tuple[BillRow, ...]          # one question, not a wall of red rows
+    week: tuple[BillRow, ...]
+    before_payday: tuple[BillRow, ...]
+    after_payday: tuple[BillRow, ...]
+
+
+def bills_page(c, day: date) -> BillsPage:
+    """The one bill state, grouped for the phone (C11.5): Late first as a block, then this week, before payday and after.
+    The same open bills Home's To do and Money's Coming up read, so a bill is counted once everywhere."""
+    rows = bill_state.unpaid_bills(c.planning, day, 60)
+    pick = lambda *states: tuple(b for b in rows if b.state in states)  # noqa: E731
+    return BillsPage(pick(BillState.LATE, BillState.LATE_STALE), pick(BillState.DUE_SOON),
+                     pick(BillState.BEFORE_PAYDAY), pick(BillState.LATER))

@@ -1,0 +1,11 @@
+{# Every balance (IV-3AY10): the page behind Money's "N more". No fields; a row opens the account. #}
+{% extends "base.html" %}
+{% block title %}Accounts{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/money"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Money'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Accounts'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+<p class="phone-money-line">{{ 'Total'|tr(locale) }} <b><bdi class="fig">{{ page.total|money }}</bdi></b></p>
+<div class="phone-rows">{% for a in page.rows %}<a class="phone-row" href="/accounts/{{ a.id }}"><span>{{ a.name }}</span><b><bdi class="fig">{{ a.balance|money }}</bdi></b></a>{% else %}<p class="phone-note">{{ 'No accounts yet.'|tr(locale) }}</p>{% endfor %}</div>
+{% if page.held_for_others %}<p class="phone-note">{{ 'Includes {amt} held for others.'|tr(locale, amt=page.held_for_others|money) }}</p>{% endif %}
+<a class="phone-row" href="/accounts/new"><span>{{ 'Add an account'|tr(locale) }}</span><b>›</b></a>
+{% endblock %}

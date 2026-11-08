@@ -44,3 +44,27 @@ def test_the_page_renders_with_a_link_to_every_shown_balance_and_the_gear(mohab)
     s = screen.build(mohab, date(2026, 10, 4))
     assert all(f'href="/accounts/{a.id}"' in page for a in s.accounts)
     assert 'href="/settings"' in page and "Coming up" in page
+
+
+def test_the_accounts_page_lists_every_balance_and_money_links_to_it(mohab):
+    day = date(2026, 10, 4)
+    page = screen.accounts_page(mohab, day)
+    assert len(page.rows) >= len(screen.build(mohab, day).accounts)
+    app = create_app(mohab)
+    mount_phone(app)
+    client = TestClient(app)
+    html = client.get("/money/accounts").text
+    assert all(f'href="/accounts/{a.id}"' in html for a in page.rows)
+    if screen.build(mohab, day).accounts_more:
+        assert 'href="/money/accounts"' in client.get("/money").text
+
+
+def test_the_bills_page_groups_the_one_bill_state_and_agrees_with_coming_up(mohab):
+    day = date(2026, 10, 25)
+    bills, money = screen.bills_page(mohab, day), screen.build(mohab, day)
+    upcoming = {(b.payment.item.id, b.due_date) for b in (*bills.week, *bills.before_payday, *bills.after_payday)}
+    assert {(b.payment.item.id, b.due_date) for b in money.coming_up} <= upcoming          # Coming up is a slice of Bills
+    assert not {(b.payment.item.id, b.due_date) for b in bills.late} & upcoming             # a bill sits in one group only
+    app = create_app(mohab)
+    mount_phone(app)
+    assert TestClient(app).get("/money/bills").status_code == 200
