@@ -21,6 +21,7 @@ look: visual         # bugs, and polish when technical: visual or technical
 severity: medium     # bugs only: high (wrong money or lost data), medium, low
 pillar: capture      # capture plan understand own protect everywhere feel build reach
 size: M              # S small fix, M a few files with tests, L money logic or a feature; none on an owner task
+model: sonnet        # sonnet or opus: the smallest model that can do it alone (issues/README.md, Model); none on an owner task
 status: new          # new | ready | building | blocked (blocked needs blocked_by: <code>)
 created: 2026-10-31  # from the date command
 by: Claude           # the AI or "owner"; never a person's name

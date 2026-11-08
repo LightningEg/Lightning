@@ -3,6 +3,7 @@ title: Restore safety: durable intent, source-copy manifest, Windows marker publ
 type: tech
 pillar: protect
 size: L
+model: opus
 status: building
 created: 2026-10-19
 by: Codex

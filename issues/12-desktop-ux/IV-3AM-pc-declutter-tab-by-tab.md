@@ -3,6 +3,7 @@ title: PC declutter, tab by tab - the answer above the fold at 1366 x 768, no fi
 type: polish
 pillar: feel
 size: L
+model: opus
 status: building
 created: 2026-10-30
 by: Claude Opus 5.5

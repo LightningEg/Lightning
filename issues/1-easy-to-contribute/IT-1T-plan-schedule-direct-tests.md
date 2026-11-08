@@ -3,6 +3,7 @@ title: Direct tests for PlanSchedule and ScheduleSource
 type: tech
 pillar: build
 size: S
+model: sonnet
 status: ready
 created: 2026-11-05
 by: Claude Sonnet 5.5
