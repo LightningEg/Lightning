@@ -16,7 +16,7 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](../../issues/1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | M | ready |
 | **IT-1R** | [Direct tests for investment_breakdown](../../issues/1-easy-to-contribute/IT-1R-investment-breakdown-direct-tests.md) | M | ready |
 | **IT-1S** | [Direct tests for SubmissionStore (a form saved twice saves once)](../../issues/1-easy-to-contribute/IT-1S-submission-store-direct-tests.md) | S | ready |
-| **IT-1T** | [Direct tests for PlanSchedule and ScheduleSource](../../issues/1-easy-to-contribute/IT-1T-plan-schedule-direct-tests.md) | S | ready |
+| **IT-1U** | [Investigate existing Linux browser and packaging test failures](../../issues/1-easy-to-contribute/IT-1U-existing-linux-test-failures.md) | M | ready |
 | **IT-9K** | [Structure left](../../issues/9-later/IT-9K-layers-and-copies.md) | M | ready |
 
 ## Reports with open follow-ups here

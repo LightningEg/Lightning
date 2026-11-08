@@ -33,11 +33,11 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1N2 | ↳ Post the approved batch | | | S | Sonnet | |
 | **IT-1R** | [Direct tests for investment_breakdown](1-easy-to-contribute/IT-1R-investment-breakdown-direct-tests.md) ([#339](https://github.com/LightningEg/Lightning/issues/339)) | improvement, technical | Build | M | Sonnet | ready |
 | **IT-1S** | [Direct tests for SubmissionStore (a form saved twice saves once)](1-easy-to-contribute/IT-1S-submission-store-direct-tests.md) ([#340](https://github.com/LightningEg/Lightning/issues/340)) | improvement, technical | Build | S | Sonnet | ready |
-| **IT-1T** | [Direct tests for PlanSchedule and ScheduleSource](1-easy-to-contribute/IT-1T-plan-schedule-direct-tests.md) ([#341](https://github.com/LightningEg/Lightning/issues/341)) | improvement, technical | Build | S | Sonnet | ready |
+| **IT-1U** | [Investigate existing Linux browser and packaging test failures](1-easy-to-contribute/IT-1U-existing-linux-test-failures.md) | improvement, technical | Build | M | Sonnet | ready |
 
 Reports: [r7](1-easy-to-contribute/r7-pull-request-cleanup/report.md).
 
-Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q. Next free code: 1U.
+Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1T. Next free code: 1V.
 
 ## 2 Safe for real money
 
