@@ -237,7 +237,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | NF-12G4 | ↳ Who owes what, per person | | | M | |
 | NF-12G5 | ↳ Mohab, Arabic and the guideline | | | M | |
 | **NF-3AZ** | [Offer the next step where a figure or row raises the question, always with a preview and an explicit confirmation](12-desktop-ux/NF-3AZ-next-step-at-the-moment-of-need.md) | new feature | Plan | L | new |
-| NF-3AZ2 | ↳ A statement row links to the payment already recorded from an SMS | | | M | |
 | NF-3AZ3 | ↳ A repeated category correction offers a rule with its past matches | | | M | |
 | NF-3AZ4 | ↳ A bill that falls due opens one sheet: already paid, or record it | | | M | |
 | NF-3AZ5 | ↳ A reimbursable expense offers Create claim, and the receipt offers Match reimbursement | | | M | |
