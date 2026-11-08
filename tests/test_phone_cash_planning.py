@@ -139,3 +139,6 @@ def test_an_empty_profile_shows_no_zero_tiles(c, monkeypatch):
     assert html.count("No accounts yet.") == 1
     assert 'id="plan-build"' not in html
     assert 'id="safe-section"' not in html
+    assert 'href="/accounts/new" data-popup-open' in html
+    leads = re.findall(r'(?s)<div class="phone-lead[^\"]*"[^>]*>(.*?)</div>', html)
+    assert not any(re.match(r"0(?:\s|$)", _text(lead)) for lead in leads)
