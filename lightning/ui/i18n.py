@@ -1771,6 +1771,7 @@ ARABIC_UI = {
     'Bills protected': 'فواتير محمية',
     'Emergency and goals': 'الطوارئ والأهداف',
     'Left unassigned': 'غير مخصص',
+    'Match reimbursement': 'طابق السداد',
     'If you record it': 'لو سجّلتها',
     'The saved money covers {amount} {currency} of this bill.': 'الفلوس المحجوزة تغطي {amount} {currency} من الفاتورة دي.',
     'Left in the budget before and after this payment.': 'المتبقي في الميزانية قبل وبعد الدفعة دي.',
