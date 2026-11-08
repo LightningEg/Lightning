@@ -36,9 +36,14 @@ def raw(d):
     return (d / um.MANIFEST).read_bytes(), (d / um.SIGNATURE).read_text().strip()
 
 
-def test_the_pinned_update_keys_start_with_the_store_key():
+def test_the_pinned_update_keys_are_the_store_key_and_update_2026_2():
     store = json.loads((ROOT / "lightning/security/store_keys.json").read_text())["keys"]["store-2026-1"]
-    assert json.loads((ROOT / "lightning/security/update_keys.json").read_text())["keys"] == {"store-2026-1": store}
+    keys = json.loads((ROOT / "lightning/security/update_keys.json").read_text())["keys"]
+    assert set(keys) == {"store-2026-1", "update-2026-2"}
+    assert keys["store-2026-1"] == store
+    assert keys["update-2026-2"] == "DyQUbKqBrpkbjctx1NKeAMtXNu4KTK1EKmiZQTvTA7M"
+    assert keys["update-2026-2"] != store
+    assert len(um.load_keys()["update-2026-2"]) == 32
 
 
 def test_a_good_manifest_verifies_and_says_what_the_zip_is(signed):
