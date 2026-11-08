@@ -69,7 +69,8 @@ than normal startup's 30-second allowance. The repair separates guarded startup 
 assertions and records a fixed, non-secret `smoke_stage`; `tests/test_desktop_smoke.py` covers a healthy
 25-second cold start, startup timeout, missing page marker, failed health, stale rejection and early closure.
 A real packaged Windows run must confirm the result; no test or security assertion is bypassed. Existing release
-tags remain unchanged. Re-running the old tag uses its old source and cannot validate this repair.
+tags remain unchanged. Re-running the old tag uses its old source and cannot validate this repair. The owner authorized tagging
+`v2.1.2` after the repair merges and required checks pass (2026-11-09).
 
 ## How to work on this item
 

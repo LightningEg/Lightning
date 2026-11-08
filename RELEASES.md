@@ -2,6 +2,86 @@
 
 What changed in each version, in plain words. Generated from `ai/changelog/` by `python tools/release_notes.py`; do not edit by hand. The full detail for each version is in the same folder.
 
+## 2.1.2 · 2026-11-09
+
+**Capture**
+
+- Import Excel worksheets and more CSV formats with smarter dates and account defaults, larger pages, and active-entry duplicate checks.
+- A statement line for a payment you already captured by SMS is offered as a link to it, so it is not counted twice, and several possible matches are asked about.
+- On the PC, typing a known name in quick add now fills the account you used with it last and moves to the next empty field.
+- On the PC, a transfer is one row in Every account, the save message is short and plain, and it carries Undo.
+- Fill in a starter Excel file with your accounts, categories and entries by name, review it, and get every code back.
+- Importing a file with an Account column sends each row to its own account's review, a category you chose for a name in your file is remembered for the next file, and a movement written as two lines is offered once.
+- Importing a CSV with month-first dates, times or month names now reads every date correctly.
+- Importing a CSV with positive amounts and a DR/CR or Income/Expense column now posts spending as money out.
+- Importing a CSV with a Currency column no longer posts a USD amount into an EGP account; those rows wait to be fixed or skipped.
+- Importing a CSV that lists several accounts no longer posts another account's rows into the one you are importing.
+- Reviewing a long bank statement is faster: the page shows the first rows and loads more on request instead of freezing.
+- Importing a statement no longer stops on its totals line, zero-amount rows or pending holds; they open as skipped rows with the reason.
+- Importing now opens statements saved by Excel in Arabic or Unicode text, with lines above the header, Arabic column names, or only a balance column.
+- Importing another app's file now splits Group:Category paths, uses Subcategory columns and split lines, and names the merchant from a bank's description.
+- When a statement has a balance column, the review now warns if the balance does not add up, which means a row is missing or doubled.
+- Long statements review faster, and a category chosen for a name in your file applies to every row with that name.
+- In a long statement, ticking a name now selects every row of that name, including rows not yet shown.
+- Importing another app's CSV now reads its category groups, skips its opening-balance rows, and lets you set each of its category names once.
+
+**Plan**
+
+- After your salary is posted, the payday page shows one proposal (bills, everyday spending, emergency and goals, what is left) with your available cash before and after, and assigns nothing until you confirm.
+- When you file the same shop under the same category by hand twice, Lightning offers a rule for it, shows the past entries it would refile, and lets you choose past and future or future only, with undo.
+- Paying a bill now shows what it does to the money saved for it and to the category's budget first, and will not record a second expense when a matching payment already exists.
+- A work expense now offers Create claim on its page, and a repayment you received offers Match reimbursement; both lead to the same claim and a partial repayment reduces it once.
+- Can I afford this? can now check one account on one date, showing whether it fits your plan and whether that account has enough that day, with the basis stated and nothing recorded until you save.
+- When your free cash cannot fill the emergency fund at once, Lightning proposes instalments from your next income, each showing the fund and Safe to spend afterwards, and lets you preview your own amount.
+- A certificate that is about to mature shows its expected date and amount as a forecast, and only after you record the redemption does Lightning offer what to do with the money that arrived.
+- Needs you now groups what waits on you as money at risk, unreconciled events and optional cleanup, the Overview, Needs you and Weekly review lead to the same task, and items you reviewed or snoozed are counted as still open.
+- Budget no longer says you are over your plan's pace in a month that is as heavy at the start as your usual months.
+- The phone no longer shows three different daily allowances: Home says what is on top of your plan, and Budget shows the same per-day figure as the computer.
+
+**Understand**
+
+- The Investments page now explains each period's result as its parts (price change, exchange rates, sales, income less tax and fees) with the rows behind them, and says when a price is missing or old.
+- Several figures that sat beside a contradicting figure now say what they include, such as brokerage cash, whole-pound scenario lows and "No shortfall".
+
+**Own**
+
+- A car or flat's value now follows your latest dated estimate everywhere, and the emergency refill no longer suggests money your plan still needs.
+
+**Protect**
+
+- Delete confirmations in Arabic keep focus on Cancel and clearly label the delete action.
+- Phone updates can no longer install as a separate app that leaves your data behind.
+
+**Everywhere**
+
+- Windows startup checks allow the browser to initialize before testing the app window.
+- Install this first updater release by hand; later Windows updates can be checked, downloaded and installed from Settings.
+- Empty cash planning asks you to add an account instead of repeating zero headlines.
+- Cash planning starts with one clear Add an account action on a fresh profile.
+- The phone's status bar takes the app bar's colour in every theme, and there is a This is on your PC page for tools made for a computer.
+- Home's To do heading reads in Arabic, and the bill lists show whole pounds.
+- Money has a Report page that shows how a month, the year or all time went.
+- Add returns you to the page you were on, and the Add sheet offers Pay a bill when something is due.
+- On a small phone, Save stays visible while the keyboard is open in the Add sheet.
+- The Add sheet's category chips lead with what you usually enter at this time of day.
+- A phone Activity with a review queue, a Budget that leads with everyday money, and a Money page with your balances (preview pages).
+- The phone's tabs are now Home, Budget, Activity and Money, each answering one question.
+- Money lists every balance and has a Bills page grouped by late, this week, before payday and after.
+- The phone's tabs are now Home, Budget, Activity and Money, each answering one question.
+- Lightning for Windows can now check for, download and install updates itself from Settings; this first version is still installed by hand, and later versions update from inside the app.
+
+**Feel**
+
+- In Arabic, page-header date ranges now read start date first, days, months and payments agree with their count, and the investment revaluation label is in Arabic.
+- Needs you and the phone's next 14 days now count bills the same way, and late bills no longer hide the coming ones.
+- The phone has a new Home screen at /home: your safe-to-spend figure, the three things to do next, your latest transactions and the month so far.
+- The phone no longer repeats net worth on past months, names today in the new-transactions line, lower-cases US dollars, or lists late bills under Next 14 days.
+- The Arabic bank import review, loans, investments and charts now show Arabic instead of a few English words.
+- The selection bar says exactly how many rows each action will touch, and the AI-prompt box no longer sits above your spending answer.
+- Investments shows your holdings first on the phone, scenarios ask one question at a time, and a spending list keeps its way back and exports in one click.
+- On the phone, payday opens on one clear proposal and the compare dates show in full; on the PC you can replace text in just the rows you selected, after a preview.
+- On the phone, Investments shows your holdings before the chart.
+
 ## 2.1.1 · 2026-11-09
 
 **Capture**
