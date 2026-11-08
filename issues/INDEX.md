@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 39 open items. Each folder holds its reports and its items.
+11 big pictures, 38 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -236,9 +236,7 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | NF-12G3 | ↳ A cost split with others | | | L | |
 | NF-12G4 | ↳ Who owes what, per person | | | M | |
 | NF-12G5 | ↳ Mohab, Arabic and the guideline | | | M | |
-| **NF-3AZ** | [Offer the next step where a figure or row raises the question, always with a preview and an explicit confirmation](12-desktop-ux/NF-3AZ-next-step-at-the-moment-of-need.md) | new feature | Plan | L | new |
-| NF-3AZ10 | ↳ Needs you groups by job and consequence | | | M | |
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F. Next free code: 12H.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 3AZ. Next free code: 12H.

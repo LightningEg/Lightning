@@ -17,7 +17,6 @@
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **Payday proposal (2026-11-08, Claude):** NF-3AZ1 built; next step 3AZ2. **Read:** NF-3AZ.
 - **Phone (2026-11-07, Claude):** IV-3AY: 3AY1, 3AY3, 3AY5, 3AY6 built, 3AY4 first slice. Next: 3AY7, then 3AY4 rest. Owner: check Arabic slot names. **Read:** 3AY.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
