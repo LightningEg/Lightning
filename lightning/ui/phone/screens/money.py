@@ -38,6 +38,7 @@ class MoneyScreen:
     coming_up: tuple[BillRow, ...]     # at most COMING_UP, never late
     late_count: int                    # late bills are one pointer to Home's catch-up, not rows here
     holdings_value: Decimal
+    zakat: bool = False                # Zakat is on: its page is one of the places below
 
 
 def _balances(c, day: date) -> list[AccountRow]:
@@ -67,7 +68,7 @@ def build(c, day: date) -> MoneyScreen:
         accounts_total=sum((r.balance for r in rows), ZERO), held_for_others=now.held_for_others,
         coming_up=tuple(b for b in bills if b.state in UPCOMING)[:COMING_UP],
         late_count=sum(1 for b in bills if b.state in (BillState.LATE, BillState.LATE_STALE)),
-        holdings_value=now.holdings_value)
+        holdings_value=now.holdings_value, zakat=c.zakat.enabled())
 
 
 @dataclass(frozen=True)

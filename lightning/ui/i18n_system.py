@@ -1874,6 +1874,8 @@ SERVICES = {
     "All bills": "كل الفواتير",
     "Edit your plan": "عدّل خطتك",
     "More places": "أماكن تانية",
+    "Change the plan": "غيّر الخطة",
+    "{amt} from {name}": "{amt} من {name}",
     "Bills": "الفواتير",
     "This week": "الأسبوع ده",
     "Before payday": "قبل يوم القبض",

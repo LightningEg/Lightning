@@ -21,7 +21,7 @@ import screens
 from lightning.bootstrap import build
 from lightning.core import dates
 from lightning.ui.phone.router import mount_phone
-from test_mohab_year import Mohab, _live_the_year
+from test_mohab_year import Answer, Mohab, _live_the_year
 
 # The PC's link or button -> the phone's taps. A step starting with "/" opens that page; with "?" it is
 # typed into the page's search box; anything else is tapped on the page.
@@ -42,18 +42,23 @@ DETOURS = {
     "Gold at home": ("/money/accounts", "Gold at home"),
     "Family flat (my share)": ("/money/accounts", "Family flat (my share)"),
     "Import statement": ("Import a statement",),                        # behind the account's ⋯
-    "Loans still to pay": ("What you owe", "Loans still to pay"),  # the Overview's What you owe sheet (BV-5I, D1), then its Loans row
+    "Loans still to pay": ("Money", "What you owe"),  # Money's What you owe row opens the loans page, which states what is still to pay (3AY10)
     "Data checks": ("/settings", "Data checks"),                  # from a settings sheet: Settings, then the tab
     "Categories": ("/settings", "Categories"),
     "Rules": ("/settings", "Rules"),
     "#Eid": ("?q=%23eid",),                                       # a note's tag: typed into the search
     "Investment planner": ("Planner",),
+    "Zakat": ("Money", "Zakat"),                                  # Money's places, when Zakat is on
     "Set a plan for 2026-09": ("/budget?month=2026-09", "Make my plan"),  # the new Budget's no-plan step leads to the plan form
     "Imported activity needs a decision": ("/activity?tab=review", "Finish the import"),  # Activity's To review card (3AY8)
 }
 # Home names no account (3AY6): the accounts the PC lists in its sidebar are reached through Money, then its Accounts
 # page (3AY10), which lists every balance.
 VIA_CASH_YOU_OWN = "Cash you own"
+# The Overview's period report (how did my year go?) has no phone screen yet: Home is always today (3AY6, D2).
+OVERVIEW_REPORT = "Overview report"
+# Home's To do shows three rows; See all opens the whole list.
+TODO_SEE_ALL = "To do: See all"
 # Sections without a tab-bar slot (phone overhaul 2026-10-22): their taps go through More.
 MOVED = {"Accounts", "Cash planning", "Investments", "Financial health", "Health", "Spending", "Currencies", "Settings"}
 # The phone's Choose period sheet (phone overhaul 2026-10-22) names the PC's period buttons in words.
@@ -147,6 +152,34 @@ class PhoneMohab(Mohab):
                               "category_id": screens.Choose(category.split(" › ")[-1]),
                               "amount": value.lstrip("-+")} | more)
 
+    def ask_needs(self, key, question, group, *actions):
+        """Budget and saving decisions (a raise) are on the Budget screen; the rest sit on Home's To do."""
+        if group != "Budget and saving":
+            # Home's To do shows three rows; its See all opens the whole Needs you list (the PC page, in the phone frame)
+            self.b.open("/")
+            self.b.detours[TODO_SEE_ALL] += 1
+            screen = self.b.open("/needs-you")
+            if any(link.text.startswith(group + " · ") for link in screen.links):
+                screen = self.b.click(group + " · ")
+            for action in actions:
+                screen = self.b.click(action)
+            self.answers[key] = Answer(question, list(self.b.trail), screen)
+            return screen
+        screen = self.b.open("/budget")
+        for action in actions:
+            screen = self.b.click(action)
+        self.answers[key] = Answer(question, list(self.b.trail), screen)
+        return screen
+
+    def period(self, page, date_from, date_to):
+        """Home is always today (3AY6, owner D2): the year's report is the Overview with a period, opened with its
+        address until the report has a phone home of its own (a known detour, named in DETOURS' neighbour below)."""
+        if page:
+            return super().period(page, date_from, date_to)
+        self.b.detours[OVERVIEW_REPORT] += 1
+        self.b.open("/?period=month")
+        return self.b.submit({"date_from": date_from, "date_to": date_to}, button="Custom")
+
     def pay_from_overview(self, item):
         """Home's To do shows three rows; every bill is one tap away on Money's Bills page (3AY10)."""
         self.b.open(self._pay_link(self.b.go("Money", "All bills"), item))
@@ -187,7 +220,7 @@ def mohab(tmp_path_factory):
 
 
 def test_the_whole_year_is_lived_on_the_phone_with_only_the_known_detours(mohab):
-    expected = set(DETOURS) | {f"button {b}" for b in BUTTONS} | {"Select", VIA_CASH_YOU_OWN}
+    expected = set(DETOURS) | {f"button {b}" for b in BUTTONS} | {"Select", VIA_CASH_YOU_OWN, OVERVIEW_REPORT, TODO_SEE_ALL}
     assert set(mohab.b.detours) <= expected, set(mohab.b.detours) - expected
 
 
@@ -213,5 +246,5 @@ def test_a_tag_gathers_its_rows_with_their_totals(mohab):
 
 
 def test_needs_you_and_get_set_up_say_what_a_tap_does(mohab):
-    overview = mohab.b.client.get("/").text
-    assert 'class="phone-row-action"' in overview
+    home = mohab.b.client.get("/").text   # Home's To do rows each end with the one action a tap does (3AY6)
+    assert 'id="todo-heading"' in home and re.search(r"<b>(Pay|Plan|Catch up|Sort|Review|Open) ›</b>", home)

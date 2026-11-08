@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, timedelta
-from decimal import Decimal
+from decimal import ROUND_CEILING, Decimal
 
 from lightning.core.dates import month_of, parse_month
 
@@ -42,11 +42,13 @@ class BudgetScreen:
     fixed_planned: Decimal
     fixed_paid: Decimal
     fixed_count: int
+    move: dict | None = None          # room to cover the largest overspend: {name, amount, href}
+    raise_offer: dict | None = None   # "your income went up": recurring pay is above the plan's average (a current month only)
 
 
 def _shift(month: str, step: int) -> str:
     first, _ = parse_month(month)
-    return month_of(first + timedelta(days=15) * 2 if step > 0 else first - timedelta(days=1))
+    return month_of(first + timedelta(days=32) if step > 0 else first - timedelta(days=1))
 
 
 def build(c, day: date, month: str = "") -> BudgetScreen:
@@ -90,6 +92,26 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
         planned += c.planning.amount_in_base(p, p.amount, day)
         paid += c.planning.amount_in_base(p, p.amount - p.still_owed, day)
     count = sum(1 for p in e.payments if p.due_date[:7] == shown)
+    move = _cover(c, shown, schedule, [r for r in rows if r.left < 0], e.room) if state == "current" else None
     return BudgetScreen(shown, prev, nxt, state, left, used,
                         (e.everyday_spent - e.pace) if state == "current" else None, e.per_day,
-                        tuple(needs[:ATTENTION]), max(len(needs) - ATTENTION, 0), tuple(rows), planned, paid, count)
+                        tuple(needs[:ATTENTION]), max(len(needs) - ATTENTION, 0), tuple(rows), planned, paid, count,
+                        move, c.health.raise_offer(shown) if state == "current" else None)
+
+
+def _cover(c, month: str, schedule, over: list[CategoryRow], room: dict) -> dict | None:
+    """The category with the most room left (its bills still to pay set aside) that can cover the largest overspend;
+    both need a plan of their own, as Move room asks. The PC's Budget makes the same offer."""
+    if not over:
+        return None
+    target = min(over, key=lambda r: r.left)
+    plans = c.budgets.amounts_for(month, loans=False, schedule=schedule)
+    if target.category_id not in plans:
+        return None
+    amount = (-target.left).to_integral_value(rounding=ROUND_CEILING)
+    best = max(((left, cid) for cid, left in room.items()
+                if cid != target.category_id and cid in plans and left >= amount), default=None)
+    if best is None:
+        return None
+    return {"name": c.categories.get(best[1]).name, "amount": amount,
+            "href": f"/budget/move?month={month}&to={target.category_id}&from={best[1]}&amount={amount}"}

@@ -33,6 +33,18 @@ def _plain(*allowed: str, when=None) -> type[APIRoute]:
     return PlainRoute
 
 
+def _read_new_sms(request: Request, c) -> None:
+    """New bank messages join the review before To do is counted, as the old Overview did on every visit. Never breaks
+    the page that asked; a read-only session reads nothing."""
+    source = getattr(request.app.state, "sms_source", None)
+    if source is None or getattr(request.state, "read_only", False):
+        return
+    try:
+        c.sms_imports.read_source(source)
+    except Exception:  # noqa: BLE001 - the phone's inbox is a convenience: the page still opens
+        pass
+
+
 def phone_router() -> APIRouter:
     """Every phone-owned URL. Home is served at /home while the old Overview keeps /; the slot URLs switch over
     together with the tab bar (3AY10)."""
@@ -46,7 +58,9 @@ def phone_router() -> APIRouter:
     async def home(request: Request):
         from lightning.core.dates import today
         from lightning.ui.phone.screens import home as screen
-        return render_phone(request, "phone/home.html", screen=screen.build(container(request), today()))
+        c = container(request)
+        _read_new_sms(request, c)
+        return render_phone(request, "phone/home.html", screen=screen.build(c, today()))
 
     @router.get("/budget/flexible")
     @months.get("/budget")

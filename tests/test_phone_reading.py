@@ -43,7 +43,7 @@ def _english(html: str) -> list[str]:
 
 
 def _in_arabic(browser, *paths):
-    session = token(browser.get("/budget").text, "__session")
+    session = token(browser.get("/settings").text, "__session")
     browser.post("/settings/locale", data={"locale": "ar", "__session": session})
     try:
         return [browser.get(path).text for path in paths]
@@ -53,9 +53,9 @@ def _in_arabic(browser, *paths):
 
 def test_the_category_sheet_and_its_payments_are_arabic(phone):
     """3AN7 + 3AN10: a category sheet and its payments fragment have no English word."""
-    html = phone.get("/budget").text
+    html = phone.get("/budget?period=month").text   # the old Budget still draws the category sheets (a query steps past the new one)
     src = re.search(r'data-fold-src="(/budget/category/\d+/payments\?month=[\d-]+)"', html).group(1)
-    page, filled, empty = _in_arabic(phone, "/budget", src, src.split("?")[0] + "?month=2020-01")
+    page, filled, empty = _in_arabic(phone, "/budget?period=month", src, src.split("?")[0] + "?month=2020-01")
     assert _english(page) == [] and _english(filled) == [] and _english(empty) == []
     sheet = page[page.index('class="phone-sheet-panel"'):]
     assert any(word in sheet[:sheet.index("</details>")] for word in ("المعدل", "عدّيت الحد"))  # the pace or over sentence
@@ -65,7 +65,7 @@ def test_the_category_sheet_and_its_payments_are_arabic(phone):
 def test_overview_position_rows_open_their_pages_and_the_working_opens_sheets_never_a_fold_in_a_fold(phone):
     """3AN12 (C11.1, C06.2, D1): Your position is flat rows that open their pages; This period's figures are rows that
     open a sheet; no fold sits inside a fold."""
-    html = phone.get("/").text
+    html = phone.get("/?period=month").text   # the old Overview; Home (/) has no position rows (3AY6)
     position = html[html.index('id="position-heading"'):html.index('id="period-heading"')]
     assert re.search(r'<a class="phone-row" href="/accounts"><span>Cash you own</span>', position)
     assert re.search(r'(?s)<summary[^>]*>.*?What you owe.*?href="/plan/loans"', position)  # a sheet with its parts (BV-5I, D1)

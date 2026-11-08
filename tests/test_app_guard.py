@@ -101,7 +101,7 @@ def test_a_page_with_a_phone_screen_uses_it_and_any_other_page_keeps_its_own():
     assert _phone_template("settings/index.html") == "settings/index.html"
 
 
-def test_on_the_phone_the_overview_is_its_phone_screen_and_settings_is_the_pc_page_in_the_phone_frame(tmp_path):
+def test_on_the_phone_home_is_its_phone_screen_and_settings_is_the_pc_page_in_the_phone_frame(tmp_path):
     cfg = Credentials("http://127.0.0.1:9872")
     app = profile_app(cfg, tmp_path / "docs", devices=Devices(tmp_path / "app", port=0), phone=True)
     with TestClient(app, base_url=cfg.origin, headers={"Origin": cfg.origin}) as browser:
@@ -111,7 +111,8 @@ def test_on_the_phone_the_overview_is_its_phone_screen_and_settings_is_the_pc_pa
         overview, settings = browser.get("/").text, browser.get("/settings").text
     for html in (overview, settings):
         assert html.count('class="phone-tabbar"') == 1 and 'class="side"' not in html
-    assert 'class="phone-section" aria-labelledby="position-heading"' in overview and "overview-section" not in overview
+    # Home (3AY6): the Safe to spend hero, then To do, Latest and This month; never the PC's overview sections.
+    assert 'id="home-hero"' in overview and 'id="todo-heading"' in overview and "overview-section" not in overview
     assert "Your data</h2>" in settings and "Back up now" in settings
 
 

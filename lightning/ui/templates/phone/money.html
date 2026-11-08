@@ -30,6 +30,7 @@
   <a class="phone-row" href="/financial-health"><span>{{ 'Financial health'|tr(locale) }}</span><b>›</b></a>
   <a class="phone-row" href="/plan"><span>{{ 'Cash planning'|tr(locale) }}</span><b>›</b></a>
   <a class="phone-row" href="/birdview/expenses"><span>{{ 'Spending'|tr(locale) }}</span><b>›</b></a>
+  {% if s.zakat %}<a class="phone-row" href="/zakat"><span>{{ 'Zakat'|tr(locale) }}</span><b>›</b></a>{% endif %}
   <a class="phone-row" href="/review"><span>{{ 'Weekly review'|tr(locale) }}</span><b>›</b></a>
 </div>
 {# What More held, so no page is left without a way in (Money replaces More, 3AY10). #}

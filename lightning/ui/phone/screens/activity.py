@@ -37,8 +37,7 @@ def review_items(c, day: date) -> list[dict]:
 
 def _shift(month: str, step: int) -> str:
     first, _ = parse_month(month)
-    probe = first + timedelta(days=15 * step if step > 0 else -1)
-    return month_of(probe)
+    return month_of(first + timedelta(days=32) if step > 0 else first - timedelta(days=1))
 
 
 def build(c, day: date, tab: str = "all", month: str = "", index: int = 0) -> ActivityScreen:
