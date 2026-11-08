@@ -1,0 +1,2 @@
+{# IV-12E: the message after a save carries the same Undo words as the phone's; the header icon stays the one place for Ctrl+Z. #}
+{% if action_history and action_history.undo %}{% set in_flash = true %}{% set undo_only = true %}{% include "partials/history.html" %}{% endif %}

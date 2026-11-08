@@ -5,7 +5,7 @@ Rules: [README.md](README.md). Status: new · ready · building · blocked.
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 43 open items. Each folder holds its reports and its items.
+11 big pictures, 39 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -222,10 +222,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 | Code | Item | Kind | Pillar | Size | Status |
 |---|---|---|---|---|---|
-| **BV-12B** | [Budget says "over your plan's pace" every month for a person whose spending is always heavy in the first week](12-desktop-ux/BV-12B-budget-pace-follows-the-usual-month.md) | bug, visual · medium | Plan | M | new |
-| **BV-12D** | [Nine small places where two neighbouring figures disagree or a figure reads wrong (Scenarios "None None", 87,768 against 87,368, "+14,000" still to pay)](12-desktop-ux/BV-12D-neighbouring-figures-that-disagree.md) | bug, visual · medium | Understand | M | new |
-| **IV-12C** | [PC quick add - Enter after a known name skips the empty Account field, and the next word typed replaces the category](12-desktop-ux/IV-12C-quick-add-goes-to-the-empty-field.md) | improvement, visual | Capture | S | new |
-| **IV-12E** | [PC ledger noise - each transfer is two rows, the save message shows an internal reference and cents, and Mark paid has no Undo](12-desktop-ux/IV-12E-pc-ledger-noise.md) | improvement, visual | Capture | M | new |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | |
 | IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | M | |
@@ -254,4 +250,4 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md).
 
-Done: 12A, 12F. Next free code: 12H.
+Done: 12A, 12B, 12C, 12D, 12E, 12F. Next free code: 12H.

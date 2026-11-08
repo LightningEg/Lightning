@@ -880,7 +880,7 @@ class ReportingService:
         """
         start, end = self._day(date_from), self._day(date_to)
         opening = from_e6(self.q.account_quantity(account_id, before=start)) if account_id else None
-        rows = self._rows(self.q.statement_lines(account_id, start, end),
+        rows = self._rows(self.q.statement_lines(account_id, start, end, one_transfer_row=True),
                           opening if txn_ids is None else None)
         if txn_ids is not None:
             rows = [r for r in rows if r.txn_id in txn_ids]
@@ -897,7 +897,7 @@ class ReportingService:
         The page is clamped to the pages there are. A single account's running balance starts from
         the opening balance plus the movement of every older row, summed in SQL."""
         start, end = self._day(date_from), self._day(date_to)
-        total = self.q.statement_count(account_id, start, end)
+        total = self.q.statement_count(account_id, start, end, True)
         pages = max(1, -(-total // page_size))
         page = min(max(page, 1), pages)
         newest = total - (page - 1) * page_size          # rows are read oldest first
@@ -906,7 +906,7 @@ class ReportingService:
         if account_id:
             opening = from_e6(self.q.account_quantity(account_id, before=start)
                               + self.q.statement_movement(account_id, start, end, first))
-        lines = self.q.statement_lines(account_id, start, end, limit=newest - first, offset=first)
+        lines = self.q.statement_lines(account_id, start, end, limit=newest - first, offset=first, one_transfer_row=True)
         return list(reversed(self._rows(lines, opening))), total, page
 
     def _rows(self, lines: list[dict], opening: Decimal | None) -> list[StatementRow]:

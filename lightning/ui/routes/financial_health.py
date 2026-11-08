@@ -157,7 +157,7 @@ async def financial_health(request: Request):
     rows = [{"title": title, "items": [{"item": by_key[k], "meter": _meter(by_key[k]),
                                         "limit_words": _limit_words(by_key[k])} for k in keys if k in by_key]}
             for title, keys in GROUPS]
-    judged = [item for item in overview["figures"] if item.status in ("within your limit", "outside your limit")]
+    judged = [item for item in overview["figures"] if item.status in ("within your limit", "outside your limit") and item.limit is not None]  # BV-12D: only a figure with a limit
     savings_values = [month.savings_rate for month in trends]
     worth_values = [month.net_worth for month in trends]
     # Answer first (guideline 3.33): the count within your limits is the Lead, the savings rate over time beside it;

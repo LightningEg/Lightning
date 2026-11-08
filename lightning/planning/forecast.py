@@ -174,13 +174,36 @@ class CashForecaster:
         by_day = self._everyday_by_day(first, counted) if counted else []
         before_last = first - timedelta(days=1)
         last_month = self._everyday_by_day(before_last.replace(day=1), before_last)
+        shape, usual_days = self._usual_month(first)
         view = self.budgets.month_view(month, schedule=self.schedules.view())
         room = {line.category_id: line.remaining - unpaid.get(line.category_id, ZERO)
                 for section in view.sections for line in section.lines
                 if line.depth > 1 and line.remaining is not None}
         return EverydayBudget(month, summary["planned"], summary["spent"], summary["left"], bills_to_pay, everyday_left,
                               summary["planned"] - scheduled, by_day[-1] if by_day else ZERO,
-                              counted.day if counted else 0, last.day, current, by_day, last_month, room, payments)
+                              counted.day if counted else 0, last.day, current, by_day, last_month, shape, usual_days, room, payments)
+
+    USUAL_MONTHS = 3
+
+    def _usual_month(self, first: date) -> tuple[list[Decimal], list[Decimal]]:
+        """How a usual month goes (BV-12B): from the last three completed months with everyday spending (two at least),
+        the share of the month's spending done by each day, and the average spending by each day. Empty without history."""
+        curves = []
+        end = first - timedelta(days=1)
+        for _ in range(self.USUAL_MONTHS):
+            start = end.replace(day=1)
+            curve = self._everyday_by_day(start, end)
+            if curve and curve[-1] > ZERO:
+                curves.append(curve)
+            end = start - timedelta(days=1)
+        if len(curves) < 2:
+            return [], []
+        length = 31
+        pad = lambda curve: curve + [curve[-1]] * (length - len(curve))
+        padded = [pad(c) for c in curves]
+        shape = [sum((c[i] / c[-1] for c in padded), ZERO) / len(padded) for i in range(length)]
+        average = [sum((c[i] for c in padded), ZERO) / len(padded) for i in range(length)]
+        return shape, average
 
     def _everyday_by_day(self, start: date, end: date) -> list[Decimal]:
         """Everyday spending added up day by day from ``start`` to ``end``: the budget's spending (one-off and

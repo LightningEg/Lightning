@@ -575,11 +575,11 @@ async def save_transaction_popup(request: Request, account_id: int):
                 matched_reserve = c.reserves.auto_link_transaction(txn.id)
                 _remember_sms(c, form, account_id)
         if earlier is not None:
-            return redirect(values["return_to"], f"Saved {txn.ref}.")
+            return redirect(values["return_to"], "Saved.")
         feedback = register._budget_feedback(c, txn)
         if matched_reserve < 0:
             feedback = (feedback + " Several reserves match; choose beside the transaction in its account list.").strip()
-        response = redirect(values["return_to"], f"Saved {txn.ref}. {feedback}".strip())
+        response = redirect(values["return_to"], f"Saved. {feedback}".strip())
         response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600,  # the stored id
                             httponly=True, samesite="lax")
         return response
@@ -735,7 +735,7 @@ async def investment_entry(request: Request, account_id: int):
         return result
     txn, _ = result
     feedback = register._budget_feedback(container(request), txn)
-    return redirect(f"/accounts/{account_id}?date={txn.date}", f"Saved {txn.ref}. {feedback}".strip())
+    return redirect(f"/accounts/{account_id}?date={txn.date}", f"Saved. {feedback}".strip())
 
 
 @router.post("/{account_id:int}/register")
@@ -746,7 +746,7 @@ async def register_entry(request: Request, account_id: int):
         return result  # the page again, with the error
     txn, _ = result
     feedback = register._budget_feedback(container(request), txn)
-    return redirect(f"/accounts/{account_id}?date={txn.date}", f"Saved {txn.ref}. {feedback}".strip())
+    return redirect(f"/accounts/{account_id}?date={txn.date}", f"Saved. {feedback}".strip())
 
 
 @router.post("/{account_id:int}/register/{txn_id:int}")
@@ -755,7 +755,7 @@ async def register_update(request: Request, account_id: int, txn_id: int):
     if not isinstance(result, tuple):
         return result
     txn, values = result
-    message = f"Saved as {txn.ref}. The original transaction is kept in history." if txn.id != txn_id else f"Saved {txn.ref}."
+    message = f"Saved as {txn.ref}. The original transaction is kept in history." if txn.id != txn_id else "Saved."
     message = f"{message} {register._budget_feedback(container(request), txn)} {values.get('_notice', '')}".strip()
     return redirect(f"/accounts/{account_id}", message)
 
