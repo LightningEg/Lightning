@@ -23,6 +23,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r24 | [Desktop and phone UX: logic, visuals, simpler tasks and connected features](12-desktop-ux/r24-desktop-phone-ux/report.md) | 2026-11-05 | audit | 3H, 3AM, 3AN, 4A, 4B |
 | r25 | [The phone, redesigned: a phone-first architecture, tab by tab](11-phone-ux/r25-phone-ux-architecture/report.md) | 2026-11-06 | research | 3AY, 3AN, 3F |
 | r26 | [Audit 14: using Lightning as a user, on the PC and the phone](12-desktop-ux/r26-user-test-pc-and-phone/report.md) | 2026-11-06 | audit | 12G, 11A, 3H |
+| r27 | [User journeys and visual unity](12-desktop-ux/r27-journeys-and-visual-unity/report.md) | 2026-11-08 | audit | 3AY, 12D, 3AZ, 12B, 3H, 3AM, 7AB |
 
 
 ## Create and maintain a report

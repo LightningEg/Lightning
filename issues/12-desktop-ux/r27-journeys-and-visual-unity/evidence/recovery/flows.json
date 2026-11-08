@@ -1,0 +1,1251 @@
+{
+ "pages": {
+  "/": {
+   "first_screen_targets": [
+    {
+     "t": "Safe to spend Cash planning ",
+     "y": 77,
+     "h": 111,
+     "w": 328
+    },
+    {
+     "t": "Previous month",
+     "y": 202,
+     "h": 48,
+     "w": 48
+    },
+    {
+     "t": "2026-11",
+     "y": 206,
+     "h": 40,
+     "w": 97
+    },
+    {
+     "t": "Next month",
+     "y": 202,
+     "h": 48,
+     "w": 48
+    },
+    {
+     "t": "5 items need you Vodafone 35",
+     "y": 269,
+     "h": 81,
+     "w": 294
+    },
+    {
+     "t": "Vodafone 350 tomorrow",
+     "y": 298,
+     "h": 44,
+     "w": 194
+    },
+    {
+     "t": "Today Net worth 199,171 +36,",
+     "y": 379,
+     "h": 149,
+     "w": 158
+    },
+    {
+     "t": "73% used Left in plan 6,948 ",
+     "y": 379,
+     "h": 149,
+     "w": 158
+    },
+    {
+     "t": "See all",
+     "y": 547,
+     "h": 44,
+     "w": 42
+    },
+    {
+     "t": "To Vodafone Cash Transfer 1,",
+     "y": 615,
+     "h": 64,
+     "w": 328
+    },
+    {
+     "t": "To Office gam'eya Transfer 2",
+     "y": 703,
+     "h": 64,
+     "w": 328
+    }
+   ],
+   "first_row_y": 615
+  },
+  "/budget": {
+   "first_screen_targets": [
+    {
+     "t": "Previous month",
+     "y": 207,
+     "h": 48,
+     "w": 48
+    },
+    {
+     "t": "2026-11",
+     "y": 211,
+     "h": 40,
+     "w": 97
+    },
+    {
+     "t": "Next month",
+     "y": 207,
+     "h": 48,
+     "w": 48
+    },
+    {
+     "t": "a category",
+     "y": 396,
+     "h": 17,
+     "w": 60
+    },
+    {
+     "t": "a goal",
+     "y": 396,
+     "h": 17,
+     "w": 33
+    },
+    {
+     "t": "Edit plan",
+     "y": 445,
+     "h": 44,
+     "w": 59
+    },
+    {
+     "t": "Health 900 of 900 · Ahead of",
+     "y": 493,
+     "h": 66,
+     "w": 328
+    },
+    {
+     "t": "Food & Groceries 3,251 of 4,",
+     "y": 560,
+     "h": 66,
+     "w": 328
+    },
+    {
+     "t": "Housing & Rent 12,000 of 12,",
+     "y": 626,
+     "h": 66,
+     "w": 328
+    },
+    {
+     "t": "Loan payments 2,500 of 2,500",
+     "y": 692,
+     "h": 66,
+     "w": 328
+    }
+   ],
+   "first_row_y": 493
+  },
+  "/transactions": {
+   "first_screen_targets": [
+    {
+     "t": "Search transactions",
+     "y": 85,
+     "h": 48,
+     "w": 328
+    },
+    {
+     "t": "All",
+     "y": 143,
+     "h": 40,
+     "w": 39
+    },
+    {
+     "t": "In",
+     "y": 143,
+     "h": 40,
+     "w": 34
+    },
+    {
+     "t": "Out",
+     "y": 143,
+     "h": 40,
+     "w": 47
+    },
+    {
+     "t": "Transfers",
+     "y": 143,
+     "h": 40,
+     "w": 85
+    },
+    {
+     "t": "To sort",
+     "y": 143,
+     "h": 40,
+     "w": 68
+    },
+    {
+     "t": "Previous month",
+     "y": 197,
+     "h": 48,
+     "w": 48
+    },
+    {
+     "t": "2026-11",
+     "y": 201,
+     "h": 40,
+     "w": 89
+    },
+    {
+     "t": "Select",
+     "y": 201,
+     "h": 40,
+     "w": 67
+    },
+    {
+     "t": "⋯",
+     "y": 199,
+     "h": 44,
+     "w": 44
+    },
+    {
+     "t": "CIB Payroll → Vodafone Cash ",
+     "y": 306,
+     "h": 64,
+     "w": 328
+    },
+    {
+     "t": "CIB Payroll → Office gam'eya",
+     "y": 410,
+     "h": 64,
+     "w": 328
+    },
+    {
+     "t": "Toyota Finance Loan payments",
+     "y": 474,
+     "h": 64,
+     "w": 328
+    },
+    {
+     "t": "CIB Payroll → Cash wallet Tr",
+     "y": 538,
+     "h": 64,
+     "w": 328
+    },
+    {
+     "t": "Fitness Time Gym Health · CI",
+     "y": 642,
+     "h": 64,
+     "w": 328
+    }
+   ],
+   "first_row_y": 306
+  },
+  "/more": {
+   "first_screen_targets": [
+    {
+     "t": "All bills",
+     "y": 105,
+     "h": 44,
+     "w": 48
+    },
+    {
+     "t": "Vodafone 2026-11-09 350",
+     "y": 161,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "WE Internet 2026-11-20 650",
+     "y": 217,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Cash planning 1,480 due befo",
+     "y": 343,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Accounts 261,671",
+     "y": 399,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Investments 177,903",
+     "y": 455,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Reserves ›",
+     "y": 511,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Financial health 4 of 6 with",
+     "y": 567,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Spending 18,651 in 2026-11",
+     "y": 623,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Weekly review is ready 4 dec",
+     "y": 699,
+     "h": 67,
+     "w": 328
+    }
+   ],
+   "first_row_y": 161
+  },
+  "/accounts": {
+   "first_screen_targets": [
+    {
+     "t": "From SMS",
+     "y": 216,
+     "h": 48,
+     "w": 118
+    },
+    {
+     "t": "⋯",
+     "y": 218,
+     "h": 44,
+     "w": 44
+    },
+    {
+     "t": "Import",
+     "y": 279,
+     "h": 40,
+     "w": 82
+    },
+    {
+     "t": "Accounts",
+     "y": 279,
+     "h": 40,
+     "w": 102
+    },
+    {
+     "t": "Held for others",
+     "y": 279,
+     "h": 40,
+     "w": 135
+    },
+    {
+     "t": "Cash wallet 10,475",
+     "y": 376,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "CIB Payroll Bank account 83,",
+     "y": 432,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Vodafone Cash 3,500",
+     "y": 488,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "NBE CDs Certificates 100,000",
+     "y": 598,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Gold at home Physical asset ",
+     "y": 708,
+     "h": 56,
+     "w": 328
+    }
+   ],
+   "first_row_y": null
+  },
+  "/plan": {
+   "first_screen_targets": [
+    {
+     "t": "Plan",
+     "y": 219,
+     "h": 40,
+     "w": 91
+    },
+    {
+     "t": "Recurring",
+     "y": 219,
+     "h": 40,
+     "w": 126
+    },
+    {
+     "t": "Loans",
+     "y": 219,
+     "h": 40,
+     "w": 101
+    },
+    {
+     "t": "Compare scenarios",
+     "y": 277,
+     "h": 19,
+     "w": 127
+    },
+    {
+     "t": "Forecast inputs",
+     "y": 313,
+     "h": 19,
+     "w": 102
+    },
+    {
+     "t": "Vodafone Subscription · tomo",
+     "y": 397,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "WE Internet Bill · in 12 day",
+     "y": 453,
+     "h": 57,
+     "w": 328
+    },
+    {
+     "t": "North Cairo Electricity Bill",
+     "y": 510,
+     "h": 57,
+     "w": 328
+    },
+    {
+     "t": "ACME Egypt Payday · in 23 da",
+     "y": 567,
+     "h": 57,
+     "w": 328
+    },
+    {
+     "t": "More in the next 30 days 202",
+     "y": 624,
+     "h": 56,
+     "w": 328
+    },
+    {
+     "t": "Free cash 67,368 After bills",
+     "y": 690,
+     "h": 121,
+     "w": 158
+    },
+    {
+     "t": "Reserves 20,000 Emergency fu",
+     "y": 690,
+     "h": 121,
+     "w": 158
+    }
+   ],
+   "first_row_y": 397
+  }
+ },
+ "tasks": {
+  "add expense": [
+   {
+    "text": "×\nAdd transaction\nOut\nIn\nTransfer\nPaste SMS\nAmount\nEGP\nFrom\nCash wallet\nCIB Payroll\nNBE CDs\nOffice gam'eya\nTHNDR\nVodafone Cash\nCategory\nUtilities & Bills\nFood & Groceries\nEating Out\nLoan payments\nOther…\nWho (optional)\nDate\nNotes and held for\n\nSave",
+    "fields": [
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 77,
+      "h": 38,
+      "t": "×"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 126,
+      "h": 16,
+      "t": "out"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 126,
+      "h": 16,
+      "t": "in"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 126,
+      "h": 16,
+      "t": "transfer"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 126,
+      "h": 40,
+      "t": "Paste SMS"
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "amount",
+      "mode": "decimal",
+      "auto": true,
+      "ph": "0",
+      "y": 210,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "select",
+      "type": "select-one",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 299,
+      "h": 48,
+      "t": "Cash wallet\nCIB Payroll\n"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 388,
+      "h": 40,
+      "t": "Utilities & Bills"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 388,
+      "h": 40,
+      "t": "Food & Groceries"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 436,
+      "h": 40,
+      "t": "Eating Out"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 436,
+      "h": 40,
+      "t": "Loan payments"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 484,
+      "h": 40,
+      "t": "Other…"
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "counterparty",
+      "mode": "",
+      "auto": false,
+      "ph": "Who you paid or who paid you",
+      "y": 565,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "date",
+      "mode": "numeric",
+      "auto": false,
+      "ph": "",
+      "y": 653,
+      "h": 48,
+      "t": "2026-11-08"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 653,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "notes",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 786,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "You",
+      "y": 865,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "button",
+      "type": "submit",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 723,
+      "h": 48,
+      "t": "Save"
+     }
+    ],
+    "active": "kind",
+    "save_y": 771,
+    "sheet_bottom": 800
+   },
+   {
+    "text": "×\nAdd transaction\nOut\nIn\nTransfer\nPaste SMS\nAmount\nEGP\nFrom\nCash wallet\nCIB Payroll\nNBE CDs\nOffice gam'eya\nTHNDR\nVodafone Cash\nCategory\nUtilities & Bills\nFood & Groceries\nEating Out\nLoan payments\nOther…\nWho (optional)\nDate\nNotes and held for\n\nSave",
+    "fields": [
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 77,
+      "h": 38,
+      "t": "×"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 126,
+      "h": 16,
+      "t": "out"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 126,
+      "h": 16,
+      "t": "in"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 126,
+      "h": 16,
+      "t": "transfer"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 126,
+      "h": 40,
+      "t": "Paste SMS"
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "amount",
+      "mode": "decimal",
+      "auto": true,
+      "ph": "0",
+      "y": 210,
+      "h": 48,
+      "t": "120"
+     },
+     {
+      "tag": "select",
+      "type": "select-one",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 299,
+      "h": 48,
+      "t": "Cash wallet\nCIB Payroll\n"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 388,
+      "h": 40,
+      "t": "Utilities & Bills"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 388,
+      "h": 40,
+      "t": "Food & Groceries"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 436,
+      "h": 40,
+      "t": "Eating Out"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 436,
+      "h": 40,
+      "t": "Loan payments"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 484,
+      "h": 40,
+      "t": "Other…"
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "counterparty",
+      "mode": "",
+      "auto": false,
+      "ph": "Who you paid or who paid you",
+      "y": 565,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "date",
+      "mode": "numeric",
+      "auto": false,
+      "ph": "",
+      "y": 653,
+      "h": 48,
+      "t": "2026-11-08"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 653,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "notes",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 786,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "You",
+      "y": 865,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "button",
+      "type": "submit",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 723,
+      "h": 48,
+      "t": "Save"
+     }
+    ],
+    "active": "BUTTON",
+    "save_y": 771,
+    "sheet_bottom": 800
+   },
+   {
+    "toast": "Saved OUT-2026-11-08-001. Budget · Food & Groceries: 1,295.25 EGP left this month\nUndo",
+    "url": "http://127.0.0.1:40755/"
+   }
+  ],
+  "J3 pay the next bill": {
+   "taps": 2,
+   "steps": [
+    {
+     "named": "Vodafone 350 tomorrow",
+     "y": 298
+    },
+    {
+     "text": "×\nVodafone\n\nSubscription due 2026-11-09 · 350.00 EGP\n\nAlready in your transactions?\n\nNo posted transaction near 2026-11-09 looks like this payment.\n\nRecord it now\nDate\nAmount (EGP)\nAccount\nRecord and mark paid\nSkip this one\nIt won't happen: it won't count as due or in the forecast.",
+     "fields": [
+      {
+       "tag": "button",
+       "type": "button",
+       "name": "",
+       "mode": "",
+       "auto": false,
+       "ph": "",
+       "y": 109,
+       "h": 38,
+       "t": "×"
+      },
+      {
+       "tag": "input",
+       "type": "text",
+       "name": "date_paid",
+       "mode": "none",
+       "auto": false,
+       "ph": "",
+       "y": 389,
+       "h": 48,
+       "t": ""
+      },
+      {
+       "tag": "button",
+       "type": "button",
+       "name": "",
+       "mode": "",
+       "auto": false,
+       "ph": "",
+       "y": 389,
+       "h": 48,
+       "t": ""
+      },
+      {
+       "tag": "input",
+       "type": "text",
+       "name": "amount",
+       "mode": "decimal",
+       "auto": false,
+       "ph": "",
+       "y": 490,
+       "h": 48,
+       "t": "350.00"
+      },
+      {
+       "tag": "input",
+       "type": "text",
+       "name": "",
+       "mode": "",
+       "auto": false,
+       "ph": "Vodafone Cash",
+       "y": 594,
+       "h": 48,
+       "t": "Vodafone Cash"
+      },
+      {
+       "tag": "button",
+       "type": "submit",
+       "name": "",
+       "mode": "",
+       "auto": false,
+       "ph": "",
+       "y": 658,
+       "h": 48,
+       "t": "Record and mark paid"
+      },
+      {
+       "tag": "button",
+       "type": "submit",
+       "name": "",
+       "mode": "",
+       "auto": false,
+       "ph": "",
+       "y": 735,
+       "h": 48,
+       "t": "Skip this one"
+      }
+     ],
+     "active": "date_paid",
+     "save_y": null,
+     "sheet_bottom": 800
+    },
+    {
+     "mark paid button": 1,
+     "y": 658
+    }
+   ]
+  },
+  "needs you": "odafone Cash\nTransfer\n1,000\n2026-11-05\nTo Office gam'eya\nTransfer\n2,000\nToyota Finance\nLoan payments\n−2,500\nTo Cash wallet\nTransfer\n3,000\nYour position\nAs of 2026-11-08\nNet worth · In grams of 21K gold\nat 4,650 on 2026-11-08\n43\nWhat you own\n265,551\n›\nCash you own\n87,648\n›\nHoldings value\n177,903\n›\nWhat you owe\n−66,500\n›\nOver time\nNet worth at the end of each month\n›\nFree cash\nAfter reserves and bills due\n67,248\n›\nWhat it is made of\n›\nIf you sold today (estimate)\nAfter selling your investments\n141,656\n›\nThis period\n2026-11-01 to 2026-11-08\nChange in net worth\n+36,625\n›\nNet flow\n+28,063\n›\nWhere money in went\n46,833\n›\nInvestments\nNet gain or loss\n+7,896\n›\nTotal expenses by month\n2026\n›\nNet cash flow by month\n3 of 3 months kept money\n›",
+  "row tap": {
+   "url": "http://127.0.0.1:40755/transactions/38/sheet?return_to=/transactions%3Fmonth%3D2026-11%26date_from%3D2026-11-01%26date_to%3D2026-11-30",
+   "sheet": {
+    "text": "×\nACME Egypt\n\n2026-11-01 · CIB Payroll\n\n+45,000 EGP\n\nCategory\nSalary\nChange category\nEdit",
+    "fields": [
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 498,
+      "h": 38,
+      "t": "×"
+     }
+    ],
+    "active": "A",
+    "save_y": 783,
+    "sheet_bottom": 800
+   }
+  },
+  "search": {
+   "url": "http://127.0.0.1:40755/search?q=carrefour",
+   "text": "Overview\nPayments\n2026-11-02\nCarrefour\nFood & Groceries · CIB Payroll\n−3,250.75\n2026-10-02\nCarrefour\nFood & Groceries · CIB Payroll\n−3,310.20\n2026-09-02\nCarrefour\nFood & Groceries · CIB Payroll\n−3,180.40\nNames and categories\nCounterparties\nCarrefour\nIts transactions\n›\nOverview\nBudget\nAdd\nTransactions\nMore",
+   "taps": 1,
+   "payments_first": "Payments"
+  },
+  "sms in add": {
+   "filled": {
+    "amount": "5,000",
+    "who": "CIB KZ IRAN ZAMALEK",
+    "date": "2026-10-04",
+    "kind": "out",
+    "account": "CIB Payroll",
+    "category": ""
+   },
+   "sheet": {
+    "text": "×\nAdd transaction\nOut\nIn\nTransfer\nPaste SMS\n\nFilled from the message. Check and save.\n\nAmount\nEGP\nFrom\nCash wallet\nCIB Payroll\nNBE CDs\nOffice gam'eya\nTHNDR\nVodafone Cash\nCategory\nFood & Groceries\nUtilities & Bills\nEating Out\nLoan payments\nOther…\nWho (optional)\nDate\nNotes and held for\n\nSave",
+    "fields": [
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 77,
+      "h": 38,
+      "t": "×"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 126,
+      "h": 16,
+      "t": "out"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 126,
+      "h": 16,
+      "t": "in"
+     },
+     {
+      "tag": "input",
+      "type": "radio",
+      "name": "kind",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 126,
+      "h": 16,
+      "t": "transfer"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 126,
+      "h": 40,
+      "t": "Paste SMS"
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "amount",
+      "mode": "decimal",
+      "auto": true,
+      "ph": "0",
+      "y": 243,
+      "h": 48,
+      "t": "5,000"
+     },
+     {
+      "tag": "select",
+      "type": "select-one",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 332,
+      "h": 48,
+      "t": "Cash wallet\nCIB Payroll\n"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 421,
+      "h": 40,
+      "t": "Food & Groceries"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 421,
+      "h": 40,
+      "t": "Utilities & Bills"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 469,
+      "h": 40,
+      "t": "Eating Out"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 469,
+      "h": 40,
+      "t": "Loan payments"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 517,
+      "h": 40,
+      "t": "Other…"
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "counterparty",
+      "mode": "",
+      "auto": false,
+      "ph": "Who you paid or who paid you",
+      "y": 597,
+      "h": 48,
+      "t": "CIB KZ IRAN ZAMALEK"
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "date",
+      "mode": "numeric",
+      "auto": false,
+      "ph": "",
+      "y": 686,
+      "h": 48,
+      "t": "2026-10-04"
+     },
+     {
+      "tag": "button",
+      "type": "button",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 686,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "notes",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 819,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "input",
+      "type": "text",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "You",
+      "y": 898,
+      "h": 48,
+      "t": ""
+     },
+     {
+      "tag": "button",
+      "type": "submit",
+      "name": "",
+      "mode": "",
+      "auto": false,
+      "ph": "",
+      "y": 723,
+      "h": 48,
+      "t": "Save"
+     }
+    ],
+    "active": "BUTTON",
+    "save_y": 771,
+    "sheet_bottom": 800
+   }
+  },
+  "sms page": "From SMS\n\nNothing is waiting for you.\n\nMessages\n\nPaste one or more, a blank line between each.\n\nRead them",
+  "sort": {
+   "first": "Magic Stall",
+   "next_opened_by_itself": "Corner Shop"
+  },
+  "J4 budget category": {
+   "row_y": 560,
+   "in_first_screen": true,
+   "taps": 1,
+   "sheet": "Food & Groceries\n3,521 of 4,666 EGP\n\nAhead of pace: 75% spent, 23% of the month gone\n\nLast payments\nMoney out\n2026-11-08\n−120\nCarrefour\n2026-11-02\n−3,250.75\nMagic Stall\n2026-11-01\n−150\nMonthly limit\nSave limit\nSee transactions Done"
+  }
+ },
+ "taps": {
+  "J1 record a payment": {
+   "taps": 3,
+   "presses": [
+    "Add",
+    "a category chip",
+    "Save"
+   ],
+   "typed": "the amount"
+  },
+  "J5 search": {
+   "taps": 1,
+   "presses": [
+    "the search icon"
+   ],
+   "typed": "the words"
+  },
+  "J2 bank SMS to transaction": {
+   "taps": 2,
+   "presses": [
+    "Add",
+    "Paste SMS"
+   ],
+   "then": "check and Save"
+  },
+  "J5 sort a row": {
+   "taps": 3,
+   "presses": [
+    "To sort",
+    "the row",
+    "a category chip"
+   ],
+   "next_row": true
+  }
+ }
+}
