@@ -69,7 +69,8 @@ def test_category_delete_enter_cancels_and_click_confirms(delete_page, c, locale
     assert posts == []
 
     button.click()
-    dialog.locator('[data-ask="yes"]').click()
+    with page.expect_request(lambda request: request.method == "POST" and request.url == host.origin + action):
+        dialog.locator('[data-ask="yes"]').click()
     page.wait_for_load_state("networkidle")
     assert posts.count(host.origin + action) == 1
     expect(page.locator("dialog.ask-dialog[open]")).to_have_count(0)
