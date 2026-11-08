@@ -70,7 +70,7 @@ was not kept, the public key is the JWK's `x` field: copy only `x`. If the key i
 `python tools/store_keygen.py --id update-2026-2`, set the secret again, and post that public line instead.
 
 ## 9B7 Pin the update key in the app · S · opus
-Starts when 9B6 has given the public line. Opus because it is a trust key: check the value, do not trust a pasted
+Needs 9B6 finished first (the public line given). Opus because it is a trust key: check the value, do not trust a pasted
 one blindly.
 Files: `lightning/security/update_keys.json`, `tests/test_update_manifest.py:39`
 (`test_the_pinned_update_keys_start_with_the_store_key`), `tests/test_desktop_update.py:143`.
@@ -82,7 +82,7 @@ not the store key. Rename and change the test to
 `store_keys.json`'s, and the update key differs from it. Do not edit `ai/changelog/` by hand; the commit's
 `Release-note: none`.
 Done when: `python -m pytest tests/test_update_manifest.py tests/test_desktop_update.py -q` passes, and
-`python -m lightning.desktop.update` is not needed: `packaging/update_manifest.py`'s `load_keys()` returns both ids
+`packaging/update_manifest.py`'s `load_keys()` returns both ids
 (`python -c "import sys;sys.path.insert(0,'packaging');import update_manifest as u;print(sorted(u.load_keys()))"`).
 
 ## 9B8 Owner: approve the v2.1.0 tag · owner
@@ -92,11 +92,11 @@ Needs 9B7 merged first. An AI runs skill `release-check` steps 1-7 and reports; 
 If signing fails, nothing is published; the fix is 9B7, not a new key.
 
 ## 9B9 The site's release update for 2.1.0 · M · opus
-Needs 9B8 done (the release exists). Two repositories, so opus.
+Needs 9B8 finished first (the release exists). Two repositories, so opus.
 Files: the website repository's README › Version identity and archive (the site's release steps), skill
 `website-sync` (`skills/website-sync/SKILL.md`), `lightning/ui/entitlements.py` (`UPDATE_PATHS`: the pages the app's
 update block opens; they must keep working).
 Do: the site's usual release update for 2.1.0 (download links, version IDs, release log in English and Arabic), as
 `website-sync` says. Do not mention that 2.1.0 updates itself; say later versions will.
 Done when: `website-sync`'s checks pass in both repositories, and each path in `UPDATE_PATHS` answers 200 on the
-live site (`curl -sI https://<site>/<path>`).
+live site (`curl -sI https://<MARKETPLACE_HOST><path>`, host from `entitlements.py`).

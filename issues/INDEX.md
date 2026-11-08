@@ -49,10 +49,11 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **BT-2AI** | [Phone data must survive every app update and reinstall](2-safe-for-real-money/BT-2AI-phone-data-survives-updates.md) | bug, technical · high | Protect | L | Opus | new |
-| BT-2AI1 | ↳ Pin the phone's identity, built 2026-11-05 | | | S | Opus | |
+| BT-2AI5 | ↳ One portable profile file | | | M | Opus | |
 | BT-2AI2 | ↳ Open a profile file on the phone | | | M | Opus | |
 | BT-2AI3 | ↳ A copy outside the app | | | M | Opus | |
 | BT-2AI4 | ↳ The PC can always send its copy to a fresh phone | | | M | Opus | |
+| BT-2AI6 | ↳ Owner: the phone survives an update and a reinstall | | | owner |  | |
 | **IT-2A** | [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic repair](2-safe-for-real-money/IT-2A-restore-safety.md) | improvement, technical | Protect | L | Opus | building |
 | IT-2A1 | ↳ Durable intent and source-copy manifest | | | L | Opus | |
 | IT-2A2 | ↳ Windows marker publication | | | L | Opus | |
@@ -60,11 +61,13 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | IT-2A4 | ↳ Restore screens and docs | | | M | Opus | |
 | IT-2A5 | ↳ Reboot drill on an ordinary PC | | | owner |  | |
 | **IT-2C** | [Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidence repair](2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md) | improvement, technical | Protect | L | Opus | ready |
-| IT-2C1 | ↳ Ordinary-PC recovery and fault acceptance | | | L | Opus | |
 | IT-2C2 | ↳ Legacy import | | | M | Opus | |
-| IT-2C3 | ↳ Native file pickers | | | M | Opus | |
+| IT-2C3 | ↳ Restore a backup from anywhere (Windows Open dialog) | | | M | Opus | |
+| IT-2C7 | ↳ Owner: what a locked profile with unresolved evidence may do | | | owner |  | |
 | IT-2C4 | ↳ Unresolved-evidence repair | | | M | Opus | |
-| IT-2C5 | ↳ Native notification delivery, Windows and Android | | | M | Opus | |
+| IT-2C5 | ↳ Native reminder delivery: test what runs on Windows | | | S | Sonnet | |
+| IT-2C6 | ↳ One ordinary-PC acceptance sheet | | | S | Sonnet | |
+| IT-2C1 | ↳ Owner: run the ordinary-PC sheet | | | owner |  | |
 
 Reports: [r2](2-safe-for-real-money/r2-backend-efficiency/report.md) · [r5](2-safe-for-real-money/r5-backend-correctness/report.md).
 

@@ -566,7 +566,7 @@ Done when: a new test `test_month_end_prices_reminder_only_on_the_last_day` buil
 `python -m pytest tests/test_workflow_views_review.py -q`.
 
 ## 3H5 A missed-salary row in Needs you, and its reminder · S · sonnet
-Needs 3H3 answered yes (question 1).
+Needs 3H3 agreed first (question 1 answered yes).
 Files: `lightning/workflows/review.py` (`ReviewInbox.items`, the "Payments that are due and unpaid" loop at ~149),
 `lightning/planning/service.py:249` (`all_payments(until, as_of, kinds)`), `lightning/planning/domain.py`
 (`PlanKind.INCOME`, `Payment.days_late`), `lightning/ui/i18n.py`, `tests/test_salary_day_review.py` (its `setup`
@@ -583,7 +583,7 @@ Done when: a test in `tests/test_salary_day_review.py`: with the salary item due
 `/plan/items/{id}/pay` the row is gone. `python -m pytest tests/test_salary_day_review.py tests/test_workflow_views_review.py -q`.
 
 ## 3H6 Zakat: optionally take off the next 12 months' loan instalments · M · opus
-Needs 3H3 answered yes (question 2).
+Needs 3H3 agreed first (question 2 answered yes).
 Files: `lightning/zakat.py` (settings dataclass at ~42, `save_settings` ~127, lines ~205-215 `ZakatLine("debts", ...)`),
 `lightning/ui/templates/settings/zakat_section.html:13` and the phone zakat settings template
 (`grep -rln deduct_debts_due lightning/ui/templates`), a new migration (skill `add-migration`), `tests/test_zakat.py:147`.
@@ -596,7 +596,7 @@ new switch (off: unchanged; on: zakat base falls by exactly the 12 months' insta
 migration test upgrades an older profile. `python -m pytest tests/test_zakat.py -q`, then skill `number-audit`.
 
 ## 3H7 Loans: an optional rate and the cost of the loan · M · opus
-Needs 3H3 answered yes (question 3).
+Needs 3H3 agreed first (question 3 answered yes).
 Files: `lightning/planning/` (the LOAN plan item; find the model with `grep -n "LOAN" lightning/planning/domain.py`),
 `lightning/ui/templates/planning/loans.html` and its phone twin, a new migration (skill `add-migration`), a new
 `tests/test_loan_cost.py`.
@@ -615,7 +615,7 @@ categories or counterparties at the top of Spending, this month against usual; (
 counterparty or tag; (d) none for now. Record the answer here and in the Overview.
 
 ## 3H9 Build the chosen analysis · M · opus
-Needs 3H3 and 3H8 answered. Read the chosen id's paragraph in §4 and `ai/ARCHITECTURE.md` › UI contract. The figure
+Needs 3H3 and 3H8 agreed first. Read the chosen id's paragraph in §4 and `ai/ARCHITECTURE.md` › UI contract. The figure
 is computed in a Python service under `lightning/reporting/`, never in a template; PC and phone templates are
 separate and phone layout follows IV-3AY. Done when: a service test pins the figure for Mohab's year
 (`tests/test_mohab_year.py` gains one step), the page passes `python -m pytest tests/test_brand_audit.py -q` with no
