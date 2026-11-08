@@ -18,5 +18,6 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 
 - [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 7C
 - [CSV import stress test: where it breaks and how to rebuild it](../../issues/7-planning-import-and-search/r23-csv-import-stress/report.md): 7AB, 7C
+- [User journeys and visual unity](../../issues/12-desktop-ux/r27-journeys-and-visual-unity/report.md): 7AB
 <!-- work:end -->
 
