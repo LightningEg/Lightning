@@ -31,7 +31,7 @@
 
 - **Import (2026-11-07, Claude):** IT-7Z and IT-7AA done; NF-7AB flow decided (cards first, 2026-11-08). Next: 2AI2. **Read:** 2AI, 7AB.
 
-- **Updates (Codex, 2026-11-09):** `update-2026-2` pinned; owner confirmed signing secret saved. Merge #440, then release v2.1.1 (#441), preserving v2.1.0's tag. **Read:** `issues/9-later/NF-9B-in-app-updates.md` 9B8.
+- **Updates (Codex, 2026-11-09):** #440/#441 merged; v2.1.1 run #893 failed its packaged window smoke test. Startup/check timing fix is on `codex/windows-smoke-startup`; native validation pending. **Read:** `issues/9-later/NF-9B-in-app-updates.md` 9B8.
 
 Plan: `issues/INDEX.md`.
 
