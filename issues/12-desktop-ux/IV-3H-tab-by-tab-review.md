@@ -438,12 +438,14 @@ Each is short; the item id leads to the detail.
 1. **[x] XIRR under a year** (X-3): approved and built; plain return before 365 days, XIRR afterward.
 2. **[x] Emergency fund basis** (RS-1): approved and built; spending by default, income optional. The liquid-holdings context in RS-1/HE-4 remains.
 3. **[x] Locked certificate in "If you sold today"** (IN-3): approved and built; separate locked value and unlock date, excluded from saleable cash.
-4. **Samples in their own profile** (FR-1): recommended yes.
-5. **Pay-cycle months** (X-10): worth the size of the change?
-6. **Safe to spend from this month's money only** (CP-2): offer the setting?
-7. **Loan interest** (LO-1): an optional flat/reducing rate for cost display, still no interest in the ledger?
-8. **Money others owe you** (HO-2) and **credit cards**: both out of scope by decision; informal lending is very common in Egypt. Reconsider the first?
-9. **Zakat debts** (ZK-2): offer the "deduct instalments due this year" switch, off by default?
+4. **[x] Samples in their own profile** (FR-1): closed 2026-11-08, samples load only into an empty profile.
+5. **[x] Pay-cycle months** (X-10): not now (owner, 2026-11-08).
+6. **[x] Safe to spend from this month's money only** (CP-2): not now (owner, 2026-11-08).
+7. **[x] Loan interest** (LO-1): yes, optional rate for cost display only (owner, 2026-11-08; step 3H7).
+8. **[x] Money others owe you** (HO-2): in scope as NF-12G (owner, 2026-11-06 and 2026-11-08); credit cards stay out of scope.
+9. **[x] Zakat debts** (ZK-2): yes, a second switch off by default (owner, 2026-11-08; step 3H6).
+10. **[x] Missed salary** (X-11): yes, a Needs you row and reminder, read-only (owner, 2026-11-08; step 3H5).
+11. **[x] First analysis**: the inflation check HE-6 (owner, 2026-11-08; step 3H9).
 
 ## 13. New features an Egyptian salaried user will ask for
 
@@ -523,6 +525,11 @@ the "deeper analytics" milestone (3H8, 3H9), and a triage of the P2/P3 ids above
 Out of scope here: the PC tab declutter is [IV-3AM](IV-3AM-pc-declutter-tab-by-tab.md), the phone is
 [IV-3AY](../11-phone-ux/IV-3AY-phone-first-architecture.md); never change their screens' layout from this item.
 
+## Decided
+
+- 2026-11-08, owner (3H8): the inflation check (HE-6) first: 3H9 builds it from a dated CAPMAS CPI file kept current like the FX pack.
+- 2026-11-08, owner (3H3): missed salary yes (3H5); zakat 12-month instalments yes, a second switch off by default (3H6); optional loan rate yes (3H7); pay-cycle months not now; Safe to spend from this month only not now; samples in their own profile closed (samples load only into an empty profile).
+
 ## How to work on this item
 
 One step is one pull request. Do not read this whole file: read the step, then only the section of the design it
@@ -530,28 +537,7 @@ names (`grep -n '^\*\*<ID> ' issues/12-desktop-ux/IV-3H-tab-by-tab-review.md`) a
 test, then `python -m pytest tests/test_mohab_year.py -q`; new visible text gets Arabic in `lightning/ui/i18n.py`
 `ARABIC_UI`. Delete the step's heading in the same commit, and tick the design id (`**[x] ID`) it finishes.
 
-## 3H3 Owner: the open choices in §12 · owner
-Ask in one pick-list per question; record each answer in §12 above (`[x]` with the date) and in
-`ai/PROJECT_OVERVIEW.md` owner decisions. A "no" deletes the matching build step below.
-1. **Missed salary (X-11; left out on 2026-10-14, "ask again").** (a) Needs you row and a reminder when an expected
-   income is 2 days past its date and nothing is recorded or linked; it only links to the existing Record screen,
-   never posts (Recommended: the commonest worry, small, read-only); (b) leave it out: salary days vary.
-   Yes → 3H5.
-2. **Zakat debts (ZK-2).** (a) A second switch, off by default: "Also take off loan instalments due in the next
-   12 months (scholars differ)" (Recommended: matches the existing "debts due now" switch, the user chooses);
-   (b) keep only debts due now. Yes → 3H6.
-3. **Loan interest (LO-1).** (a) Optional rate (flat or reducing) on a loan, shown as "Total interest" and "Cost of
-   this loan"; the ledger still records payments as spending (Recommended: compares offers, no accounting change);
-   (b) no rate. Yes → 3H7.
-4. **Pay-cycle months (X-10).** (a) Not now: the payday page already reads from payday (Recommended: the change
-   touches every period, budget month and health month); (b) a "My month starts on day 1-28" setting, as its own
-   L item.
-5. **Safe to spend from this month's money only (CP-2).** (a) Not now (Recommended: one more setting on a figure
-   people already find hard); (b) a Budget setting, off by default, as its own item.
-6. **Samples in their own profile (FR-1).** (a) Close it: samples already load only into an empty profile
-   (Recommended); (b) a separate "Sample · Mohab" profile with a Sample data band, as its own item.
-
-## 3H4 A month-end prices reminder · S · sonnet
+## 3H4 A month-end prices reminder · S · sonnet · #435
 Files: `lightning/workflows/reminders.py` (`ReminderService.due`), `lightning/reporting/service.py:255`
 (`stale_prices(as_of, days)`, read only), `lightning/ui/i18n.py` (`ARABIC_UI`, near `'A fresh backup is due'`),
 `tests/test_workflow_views_review.py` (beside `test_reminders_are_opt_in_stable_and_read_only_safe`).
@@ -607,13 +593,6 @@ Done when: `tests/test_loan_cost.py` checks a flat 60,000 at 10% over 24 months 
 against an amortisation table worked by hand in the test, and that a loan without a rate renders as today.
 `python -m pytest tests/test_loan_cost.py tests/test_mohab_year.py -q`.
 
-## 3H8 Owner: which analysis comes first · owner
-The "deeper analytics" milestone (Overview §2). Options: (a) **HE-6 inflation check**, "net worth grew 18%; prices
-rose 25%" on Health, from a shipped, dated CAPMAS CPI file updated like the FX pack (Recommended: the most useful
-line for an Egyptian user; needs a data source we keep current); (b) **SP-5 watchlist**, up to four pinned
-categories or counterparties at the top of Spending, this month against usual; (c) **SP-6 Spending by** account,
-counterparty or tag; (d) none for now. Record the answer here and in the Overview.
-
 ## 3H9 Build the chosen analysis · M · opus
 Needs 3H3 and 3H8 agreed first. Read the chosen id's paragraph in §4 and `ai/ARCHITECTURE.md` › UI contract. The figure
 is computed in a Python service under `lightning/reporting/`, never in a template; PC and phone templates are
@@ -621,7 +600,7 @@ separate and phone layout follows IV-3AY. Done when: a service test pins the fig
 (`tests/test_mohab_year.py` gains one step), the page passes `python -m pytest tests/test_brand_audit.py -q` with no
 new failure, and A16 holds on a screenshot.
 
-## 3H10 Triage the ids no step names · M · opus
+## 3H10 Triage the ids no step names · M · opus · #436
 For each id in §2-§11 without `[x]` (list them with `grep -n '^\*\*[A-Z][A-Z]-[0-9]* ' issues/12-desktop-ux/IV-3H-tab-by-tab-review.md`),
 skipping those §14 says are built or kept (they get `[x]` and the date now): check the code (one grep or one page
 load). Built → tick `[x]` with the commit. Covered by IV-3AM or IV-3AY → tick with "→ 3AM"/"→ 3AY". Still real →

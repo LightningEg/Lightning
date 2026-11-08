@@ -15,6 +15,10 @@ Reminders are native (Windows balloon in `lightning/desktop/window.py`, Android 
 
 2026-11-08, checked against main: still true. Windows: `_native_reminder_loop` (`lightning/desktop/window.py` ~line 62) polls `/reminders/due.json` every 60 s through the open WebView; seen ids go to `%LOCALAPPDATA%/Lightning/native-reminders.json` (`_reminder_prefs_path`). Android: `ReminderNotifications.check` is called from `MainActivity` (~line 461) and from `SyncService.check` every 60 s while that foreground service lives; there is already a `JobScheduler` job (`JournalSyncJobService`, `JournalSyncScheduler`) and no WorkManager dependency. The list comes from `ReminderService.due()` (`lightning/workflows/reminders.py`), opt-in by the `reminders_enabled` setting, and needs an open, unlocked profile: with the app closed the encrypted profile cannot be read, so whatever fires later must be prepared while it is open.
 
+## Decided
+
+- 2026-11-08, owner (3AU1): option 1: a dated schedule with days and kinds only, no figures or names; Windows Task Scheduler and an Android daily job post it. 3AU2-3AU4 as written.
+
 ## Fix
 
 The owner picks the approach (3AU1). Then: a small reminder schedule written while the profile is open (3AU2), a Windows scheduled task that shows it with the app closed (3AU3), and an Android job that does the same (3AU4). Reminders stay opt-in; nothing written outside the profile carries a figure, and a locked profile shows none.
@@ -22,14 +26,6 @@ The owner picks the approach (3AU1). Then: a small reminder schedule written whi
 ## How to work on this item
 
 Each step is one pull request. Read only the files a step names. Run the step's test command, then `python -m pytest tests/test_workflow_views_review.py tests/test_review_decisions.py -q`; delete the step's heading in the same commit. 3AU3 and 3AU4 need a real Windows / Android run as evidence: run the Windows or Android workflow by hand only for those steps (AGENTS.md §2).
-
-## 3AU1 Choose how reminders reach a closed app · owner
-The encrypted profile cannot be read while the app is closed, so a closed-app reminder must come from something prepared while it was open. Pick one:
-1. **(Recommended) A dated schedule with no figures and no names.** When reminders are on and the profile is open, Lightning keeps a file outside the profile (beside `native-reminders.json`) listing the next 14 days' reminder days and kinds only: "A payment is due tomorrow", "A gam'eya instalment is due tomorrow", "Zakat day is approaching". Windows Task Scheduler and an Android job read it once a day and post the notification; tapping opens Lightning (which asks to unlock). Trade-off: someone with the computer can see that a payment is due on a date, but not what or how much; reminders stop 14 days after the profile was last opened; a change made on another device shows only after this one opens.
-2. **The same, with the payee's name** (a second opt-in switch, off by default). Trade-off: more useful ("Rent is due tomorrow"), but names sit unencrypted on disk and on the lock screen.
-3. **Keep a helper running in the tray / as a service with the profile unlocked.** Trade-off: exact reminders with figures, but the profile stays open in the background, which breaks the lock model; not recommended.
-4. **Do not build it; say plainly in Settings that reminders need Lightning open.** Trade-off: no new risk, no new work; users who never open the app miss bills.
-Record the answer in this item (replace this step with a dated line) and in `ai/PROJECT_OVERVIEW.md` owner decisions. Steps 3AU2-3AU4 below assume option 1; with option 2 add the name field behind its own switch; with 3 or 4, rewrite them.
 
 ## 3AU2 Write the reminder schedule while the profile is open · M · opus
 Needs 3AU1 merged first.

@@ -13,7 +13,7 @@
 
 ## Next
 
-- **r28 (Codex):** BV-3BB built. Next: 3BC+3BE, 3BG, 3BD, 3BF (owner order). **Read:** r28.
+- **r28 (Codex):** Next: 3BC+3BE, 3BG, 3BD, 3BF (owner order). **Read:** r28.
 
 - **Docs spine (2026-10-31):** trailers per AGENTS §3; `python tools/status.py` after plan changes. Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
 
@@ -29,7 +29,7 @@
 
 - **Website (2026-10-28):** analytics, Downloads, leaderboard contrast and badge merged; banners redrawn plus Felucca and Sand wind (site #130). **Read:** site README › Analytics.
 
-- **Import (2026-11-07, Claude):** IT-7Z and IT-7AA done; NF-7AB flow plan waits for the owner. Next: 2AI2. **Read:** 2AI, 7AB.
+- **Import (2026-11-07, Claude):** IT-7Z and IT-7AA done; NF-7AB flow decided (cards first, 2026-11-08). Next: 2AI2. **Read:** 2AI, 7AB.
 
 - **In-app updates (2026-11-07, Claude):** NF-9B1-9B4 merged, the owner's Windows test (9B5) good, the `update-2026-1` secret set. Before tagging v2.1.0: its public key into `update_keys.json`; after: the site's usual release update. **Read:** `issues/9-later/NF-9B-in-app-updates.md` 9B6.
 

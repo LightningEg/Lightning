@@ -15,8 +15,8 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 | **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history so…](../../issues/6-market-data/IT-6F-london-board-and-gulf-history.md) | M | ready |
 | **NF-6A** | [Market data: price packs, collected in the cloud](../../issues/6-market-data/NF-6A-price-packs.md) | L | building |
 | **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](../../issues/6-market-data/NF-6B-europe-and-gcc-shares.md) | L | blocked on a source that allows redistribution |
-| **NF-9D** | [Hijri dates, and the silver nisab for zakat](../../issues/9-later/NF-9D-hijri-dates-and-silver-nisab.md) | M | new |
-| **NF-12G** | [Money lent to others and costs split with others](../../issues/12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | L | new |
+| **NF-9D** | [Hijri dates, and the silver nisab for zakat](../../issues/9-later/NF-9D-hijri-dates-and-silver-nisab.md) | M | ready |
+| **NF-12G** | [Money lent to others and costs split with others](../../issues/12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | L | ready |
 
 ## Reports with open follow-ups here
 

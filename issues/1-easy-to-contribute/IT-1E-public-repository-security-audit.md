@@ -74,15 +74,14 @@ Remaining: deploy/verify the live Apps Script receiver and verify the replacemen
 - The website half (finding 2, 3 and 5, the Apps Script receiver, website PR #19) lives in the website repository, which this session could not read; 1E3 starts by checking it.
 - Release checks already refuse tracked key, keystore and database files (`tools/release_check.py` `PRIVATE_FILES`), but no tool scans Git history or the built ZIP/APK.
 
+## Decided
+
+- 2026-11-08, owner (1E2): (a) keep AGENTS.md, NOW.md, ai/ and issues/ public; security findings stay out of them.
+- 2026-11-08, owner (1E1): (c) leave it: no email change and no history rewrite. Do not raise it again unless the owner asks.
+
 ## How to work on this item
 
 Each step below is one pull request or one owner action. **A real finding is never written in a public issue, pull request, commit message, `NOW.md` or this file** (skill `security-sweep` › After): it goes to a private GitHub security advisory and the owner hears of it in the question tool; the public line says only "checked, N findings filed privately". Read `skills/security-sweep/SKILL.md` first. Run `python -m pytest tests/test_issues.py -q` after editing this file, and delete a step's heading in the same commit that finishes it.
-
-## 1E1 Owner: stop the personal email in new commits · owner
-On github.com › Settings › Emails, for the account that merges: (a) *(Recommended)* turn on *Keep my email addresses private* and *Block command line pushes that expose my email*; squash merges then carry the `noreply` address from now on. History keeps the old address. (b) As (a), and also rewrite history to replace the old address: removes it from the current repositories, but every fork, tag, release and open branch breaks and copies already taken keep it. (c) Leave it: the address stays public on every new merge. Record the answer here.
-
-## 1E2 Owner: which working documents stay public · owner
-Finding 4. (a) *(Recommended)* Keep `AGENTS.md`, `NOW.md`, `ai/`, `issues/` public: the repository is the only channel between the AIs and contributors read the plan; keep security findings out of them (1E's rule above) and the website's `audit/`, `test.html` and dashboard out of the published site. (b) Move `NOW.md`, `ai/PROJECT_OVERVIEW.md` and `ai/COMPETITION.md` to a private repository: less exposure, but other AI sessions and contributors lose them, and history keeps the old copies. (c) Make the app repository private: ends source-available, the contributor programme and the website's Tasks board. Record the answer in `ai/PROJECT_OVERVIEW.md` owner decisions.
 
 ## 1E3 Owner: deploy the website receiver and rotate the analytics key · owner
 Verify first: in the website repository, is PR #19 merged, and does the live site still post to an Apps Script receiver (`skills/website-sync/SKILL.md` step 6)? If the receiver has been replaced (for example by Supabase), say so here and delete this step and 1E4.
