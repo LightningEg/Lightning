@@ -19,6 +19,10 @@ Report [r28](r28-international-polish/report.md) F21. The guideline fixes these 
 6. **Dark mode:** A15 is light only; the app ignores the system setting ([shot](r28-international-polish/evidence/shots/pc-en-dark.png)). Keep, follow the system with a dark palette, or leave dark to themes.
 7. **Arabic address:** always masculine (اختار 300×). Keep, or a neutral/feminine form in Settings.
 
+## Decided
+
+- 2026-11-08, owner: **1. Dates** human on screens ("8 Nov", "November 2026", "Yesterday"); ISO stays in fields and exports. **3. Currency in Arabic** ج.م. Recorded in `ai/PROJECT_OVERVIEW.md` §2. Next: change A06.1/A06.2 in both repos (guideline rule), then a polish item for the templates. Items 2 and 4-7 are still open.
+
 ## Fix
 
 Record each answer in `ai/PROJECT_OVERVIEW.md` owner decisions; a guideline change lands in both repos the same session; then a polish item per change.
