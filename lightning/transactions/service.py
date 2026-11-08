@@ -403,11 +403,11 @@ class TransactionService:
 
     CAPTURE_DAYS = 180
 
-    def usual_capture_categories(self, kind: str, limit: int = 4) -> list[int]:
+    def usual_capture_categories(self, kind: str, limit: int = 4, hour: int | None = None) -> list[int]:
         """The categories the Add sheet offers first as chips (3AN3): what this person files money of that kind
         under most often in the last 180 days, then the other categories in the tree's own order until there are
         ``limit``. kind is "out" or "in"; transfers have no category. Ids only; the page names them."""
-        return search.usual_capture_categories(self.repo, self.categories, kind, limit, days=self.CAPTURE_DAYS)
+        return search.usual_capture_categories(self.repo, self.categories, kind, limit, days=self.CAPTURE_DAYS, hour=hour)
 
     def usual_account(self, candidates: list[int]) -> int | None:
         """The account Add opens on when none was used last (3AN3): the one that took most of this person's own
