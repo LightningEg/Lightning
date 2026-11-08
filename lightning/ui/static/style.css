@@ -3269,6 +3269,8 @@ html[dir="rtl"] td[dir="ltr"], html[dir="rtl"] li.code { text-align: right; }
 .side-account.active, .side-row.active, .side-total.active { color:var(--ink); }
 .overview-expense-items > a:hover, .category-tree-item a:hover { color:var(--ink); }
 .setup-action { color:var(--ink); }
+/* NF-3AZ9: the links inside the Investments "What changed" rows are text links, so Ink and underlined (A10). */
+#what-changed .quiet-link, #what-changed .quiet-link:hover { text-decoration:underline; }
 .dot, .wealth-dot { background:var(--azure); }
 
 /* Fields are soft wells (A10.3); readonly stepper values are segments, not fields. */
