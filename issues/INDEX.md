@@ -76,50 +76,50 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **BV-3BB** | [In Arabic, delete confirmations open as a harmless "OK" dialog with focus on Yes, so Enter deletes](3-polish-and-arabic/BV-3BB-arabic-delete-confirm-loses-danger.md) | bug, visual · medium | Protect | S | Sonnet | ready |
-| BV-3BB1 | ↳ Delete confirmations are dangerous in every language | | | S | Sonnet | |
+| BV-3BB1 | ↳ Delete confirmations are dangerous in every language ([#400](https://github.com/LightningEg/Lightning/issues/400)) | | | S | Sonnet | |
 | **IT-3BE** | [One number format on screen - the browser follows the app, not the Windows locale, and every negative uses a true minus](3-polish-and-arabic/IT-3BE-one-number-format.md) | improvement, technical | Understand | S | Sonnet | ready |
-| IT-3BE1 | ↳ The KPI "points" use a true minus | | | S | Sonnet | |
-| IT-3BE2 | ↳ Browser numbers ignore the Windows region | | | S | Sonnet | |
-| IT-3BE3 | ↳ One money formatter in Python | | | S | Sonnet | |
+| IT-3BE1 | ↳ The KPI "points" use a true minus ([#401](https://github.com/LightningEg/Lightning/issues/401)) | | | S | Sonnet | |
+| IT-3BE2 | ↳ Browser numbers ignore the Windows region ([#402](https://github.com/LightningEg/Lightning/issues/402)) | | | S | Sonnet | |
+| IT-3BE3 | ↳ One money formatter in Python ([#403](https://github.com/LightningEg/Lightning/issues/403)) | | | S | Sonnet | |
 | **IT-3BI** | [Arabic search and sorting in the register, one week start, one clock](3-polish-and-arabic/IT-3BI-arabic-search-sort-and-calendar.md) | improvement, technical | Everywhere | M | Sonnet | ready |
-| IT-3BI1 | ↳ The Transactions search finds Arabic however it is spelled | | | M | Opus | |
-| IT-3BI2 | ↳ Names sort the Arabic way | | | S | Sonnet | |
-| IT-3BI3 | ↳ One week start | | | S | Sonnet | |
-| IT-3BI4 | ↳ One clock | | | S | Sonnet | |
+| IT-3BI1 | ↳ The Transactions search finds Arabic however it is spelled ([#404](https://github.com/LightningEg/Lightning/issues/404)) | | | M | Opus | |
+| IT-3BI2 | ↳ Names sort the Arabic way ([#405](https://github.com/LightningEg/Lightning/issues/405)) | | | S | Sonnet | |
+| IT-3BI3 | ↳ One week start ([#406](https://github.com/LightningEg/Lightning/issues/406)) | | | S | Sonnet | |
+| IT-3BI4 | ↳ One clock ([#407](https://github.com/LightningEg/Lightning/issues/407)) | | | S | Sonnet | |
 | **IV-3BC** | [Counts read right in English and Arabic - "1 days left", "Delete 1 transactions?", "2 معاملة"](3-polish-and-arabic/IV-3BC-counts-read-right-in-both-languages.md) | improvement, visual | Feel | M | Sonnet | ready |
-| IV-3BC1 | ↳ One English plural helper and the five wrong counts | | | S | Sonnet | |
+| IV-3BC1 | ↳ One English plural helper and the five wrong counts ([#408](https://github.com/LightningEg/Lightning/issues/408)) | | | S | Sonnet | |
 | IV-3BC2 | ↳ Arabic agrees for every counted noun the UI uses | | | S | Sonnet | |
 | IV-3BC3 | ↳ Counts built in English before translation | | | M | Sonnet | |
 | IV-3BC4 | ↳ Counts built in the browser | | | S | Sonnet | |
 | **IV-3BD** | [Every error speaks plainly, in the person's language, on a branded page - no JSON, plain text, raw exceptions or half-English](3-polish-and-arabic/IV-3BD-errors-speak-plainly-everywhere.md) | improvement, visual | Feel | M | Sonnet | ready |
-| IV-3BD1 | ↳ No raw responses: 403, 400 and plain text get the branded page | | | S | Sonnet | |
-| IV-3BD2 | ↳ Every validation message has Arabic | | | M | Sonnet | |
-| IV-3BD3 | ↳ Half-English sentences and internal codes | | | S | Sonnet | |
-| IV-3BD4 | ↳ Import errors never show Python's text | | | S | Sonnet | |
-| IV-3BD5 | ↳ The validation page names the problem, not "Check your setup" | | | S | Sonnet | |
+| IV-3BD1 | ↳ No raw responses: 403, 400 and plain text get the branded page ([#409](https://github.com/LightningEg/Lightning/issues/409)) | | | S | Sonnet | |
+| IV-3BD2 | ↳ Every validation message has Arabic ([#410](https://github.com/LightningEg/Lightning/issues/410)) | | | M | Sonnet | |
+| IV-3BD3 | ↳ Half-English sentences and internal codes ([#411](https://github.com/LightningEg/Lightning/issues/411)) | | | S | Sonnet | |
+| IV-3BD4 | ↳ Import errors never show Python's text ([#412](https://github.com/LightningEg/Lightning/issues/412)) | | | S | Sonnet | |
+| IV-3BD5 | ↳ The validation page names the problem, not "Check your setup" ([#413](https://github.com/LightningEg/Lightning/issues/413)) | | | S | Sonnet | |
 | **IV-3BF** | [PC finish - one focus ring, branded validation, only the brand's fonts, styled scrollbars, amount-first Add and fewer one-off styles](3-polish-and-arabic/IV-3BF-pc-finish.md) | improvement, visual | Feel | M | Sonnet | ready |
-| IV-3BF1 | ↳ One focus ring, also in High Contrast | | | S | Sonnet | |
-| IV-3BF2 | ↳ Only the brand's fonts | | | S | Sonnet | |
-| IV-3BF3 | ↳ Windows chrome: scrollbars, selection, spellcheck, balanced headings | | | S | Sonnet | |
-| IV-3BF4 | ↳ PC Add starts on the amount, says its name once | | | S | Sonnet | |
-| IV-3BF5 | ↳ Our message, not the browser's bubble | | | M | Sonnet | |
-| IV-3BF6 | ↳ One set of icons | | | M | Sonnet | |
-| IV-3BF7 | ↳ Styles from tokens | | | M | Sonnet | |
+| IV-3BF1 | ↳ One focus ring, also in High Contrast ([#414](https://github.com/LightningEg/Lightning/issues/414)) | | | S | Sonnet | |
+| IV-3BF2 | ↳ Only the brand's fonts ([#415](https://github.com/LightningEg/Lightning/issues/415)) | | | S | Sonnet | |
+| IV-3BF3 | ↳ Windows chrome: scrollbars, selection, spellcheck, balanced headings ([#416](https://github.com/LightningEg/Lightning/issues/416)) | | | S | Sonnet | |
+| IV-3BF4 | ↳ PC Add starts on the amount, says its name once ([#417](https://github.com/LightningEg/Lightning/issues/417)) | | | S | Sonnet | |
+| IV-3BF5 | ↳ Our message, not the browser's bubble ([#418](https://github.com/LightningEg/Lightning/issues/418)) | | | M | Sonnet | |
+| IV-3BF6 | ↳ One set of icons ([#419](https://github.com/LightningEg/Lightning/issues/419)) | | | M | Sonnet | |
+| IV-3BF7 | ↳ Styles from tokens ([#420](https://github.com/LightningEg/Lightning/issues/420)) | | | M | Sonnet | |
 | **IV-3BG** | [Phone finish - chevrons point forward in Arabic, quiet links 44 px tall, no tap flash or page bounce, tinted status bar](3-polish-and-arabic/IV-3BG-phone-finish.md) | improvement, visual | Everywhere | S | Sonnet | ready |
-| IV-3BG1 | ↳ One chevron that points forward in both languages | | | S | Sonnet | |
-| IV-3BG2 | ↳ Quiet links are 44 px tall | | | S | Sonnet | |
-| IV-3BG3 | ↳ No tap flash, no page bounce, no selected buttons | | | S | Sonnet | |
-| IV-3BG4 | ↳ Status bar colour and keyboard Enter key | | | S | Sonnet | |
+| IV-3BG1 | ↳ One chevron that points forward in both languages ([#421](https://github.com/LightningEg/Lightning/issues/421)) | | | S | Sonnet | |
+| IV-3BG2 | ↳ Quiet links are 44 px tall ([#422](https://github.com/LightningEg/Lightning/issues/422)) | | | S | Sonnet | |
+| IV-3BG3 | ↳ No tap flash, no page bounce, no selected buttons ([#423](https://github.com/LightningEg/Lightning/issues/423)) | | | S | Sonnet | |
+| IV-3BG4 | ↳ Status bar colour and keyboard Enter key ([#424](https://github.com/LightningEg/Lightning/issues/424)) | | | S | Sonnet | |
 | **IV-3BH** | [One name per thing and no accounting jargon - ledger, counterparty, reevaluation, Title Case categories, three names for planning](3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md) | improvement, visual | Feel | M | Sonnet | ready |
-| IV-3BH1 | ↳ A test that keeps jargon off the screen | | | S | Sonnet | |
+| IV-3BH1 | ↳ A test that keeps jargon off the screen ([#425](https://github.com/LightningEg/Lightning/issues/425)) | | | S | Sonnet | |
 | IV-3BH2 | ↳ "Counterparty" becomes "Payee" (Arabic: الطرف التاني → الجهة) | | | M | Sonnet | |
 | IV-3BH3 | ↳ "Ledger" and "reevaluation" leave the screen | | | S | Sonnet | |
 | IV-3BH4 | ↳ One name per place | | | S | Sonnet | |
-| IV-3BH5 | ↳ One spelling per word | | | S | Sonnet | |
-| IV-3BH6 | ↳ Built-in categories in sentence case | | | M | Opus | |
-| IV-3BH7 | ↳ Headings never show a code | | | S | Sonnet | |
+| IV-3BH5 | ↳ One spelling per word ([#426](https://github.com/LightningEg/Lightning/issues/426)) | | | S | Sonnet | |
+| IV-3BH6 | ↳ Built-in categories in sentence case ([#427](https://github.com/LightningEg/Lightning/issues/427)) | | | M | Opus | |
+| IV-3BH7 | ↳ Headings never show a code ([#428](https://github.com/LightningEg/Lightning/issues/428)) | | | S | Sonnet | |
 | **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | improvement, visual | Understand | L | Opus | ready |
-| IV-3BK1 | ↳ Guideline: human dates on screens | | | M | Opus | |
+| IV-3BK1 | ↳ Guideline: human dates on screens ([#429](https://github.com/LightningEg/Lightning/issues/429)) | | | M | Opus | |
 | IV-3BK2 | ↳ The date filters, tested alone | | | M | Sonnet | |
 | IV-3BK3 | ↳ PC screens use them | | | M | Sonnet | |
 | IV-3BK4 | ↳ Phone screens use them | | | M | Sonnet | |
@@ -170,8 +170,8 @@ Prices arrive by themselves, from sources Lightning may redistribute.
 |---|---|---|---|---|---|---|
 | **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](6-market-data/IT-6D-gold-price-source.md) | improvement, technical | Own | S | Sonnet | blocked on a test from a home connection |
 | **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history source](6-market-data/IT-6F-london-board-and-gulf-history.md) | improvement, technical | Own | M | Opus | ready |
-| IT-6F1 | ↳ London asks for pound and pence shares only, then the picker list is rebuilt | | | S | Sonnet | |
-| IT-6F2 | ↳ Dubai, Abu Dhabi and Bahrain month-ends from Yahoo, by venue | | | S | Opus | |
+| IT-6F1 | ↳ London asks for pound and pence shares only, then the picker list is rebuilt ([#430](https://github.com/LightningEg/Lightning/issues/430)) | | | S | Sonnet | |
+| IT-6F2 | ↳ Dubai, Abu Dhabi and Bahrain month-ends from Yahoo, by venue ([#431](https://github.com/LightningEg/Lightning/issues/431)) | | | S | Opus | |
 | **NF-6A** | [Market data: price packs, collected in the cloud](6-market-data/NF-6A-price-packs.md) | new feature | Own | L | Opus | building |
 | NF-6A1 | ↳ Funds, currencies and gold matched to holdings | | | M | Opus | |
 | NF-6A2 | ↳ US stocks and FX revaluation, with multi-currency | | | L | Opus | |
@@ -284,9 +284,9 @@ The phone is its own product: a few places that each answer one question, quick 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IV-11A** | [Phone first run - every Add is greyed out until "Save currencies" is pressed, and an empty Transactions says "Nothing matches"](11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | improvement, visual | Everywhere | M | Sonnet | ready |
-| IV-11A1 | ↳ Add works before "Save currencies" | | | S | Sonnet | |
-| IV-11A2 | ↳ An empty Activity says "No transactions yet." with Add and Import | | | S | Sonnet | |
-| IV-11A3 | ↳ Cash planning with no account says so once | | | S | Sonnet | |
+| IV-11A1 | ↳ Add works before "Save currencies" ([#432](https://github.com/LightningEg/Lightning/issues/432)) | | | S | Sonnet | |
+| IV-11A2 | ↳ An empty Activity says "No transactions yet." with Add and Import ([#433](https://github.com/LightningEg/Lightning/issues/433)) | | | S | Sonnet | |
+| IV-11A3 | ↳ Cash planning with no account says so once ([#434](https://github.com/LightningEg/Lightning/issues/434)) | | | S | Sonnet | |
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | Opus | building |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | Opus | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner |  | |
@@ -319,12 +319,12 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-3AM4 | ↳ Settings stop being forms (ST1-ST4) | | | M | Opus | |
 | IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | M | Opus | |
 | **IV-3H** | [Tab-by-tab review: what a real user needs next](12-desktop-ux/IV-3H-tab-by-tab-review.md) | improvement, visual | Feel | L | Opus | ready |
-| IV-3H4 | ↳ A month-end prices reminder | | | S | Sonnet | |
+| IV-3H4 | ↳ A month-end prices reminder ([#435](https://github.com/LightningEg/Lightning/issues/435)) | | | S | Sonnet | |
 | IV-3H5 | ↳ A missed-salary row in Needs you, and its reminder | | | S | Sonnet | |
 | IV-3H6 | ↳ Zakat: optionally take off the next 12 months' loan instalments | | | M | Opus | |
 | IV-3H7 | ↳ Loans: an optional rate and the cost of the loan | | | M | Opus | |
 | IV-3H9 | ↳ Build the chosen analysis | | | M | Opus | |
-| IV-3H10 | ↳ Triage the ids no step names | | | M | Opus | |
+| IV-3H10 | ↳ Triage the ids no step names ([#436](https://github.com/LightningEg/Lightning/issues/436)) | | | M | Opus | |
 | **NF-12G** | [Money lent to others and costs split with others - who owes you what, counted honestly in what you own](12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | new feature | Own | L | Opus | ready |
 | NF-12G2 | ↳ Money lent and paid back: the service | | | M | Opus | |
 | NF-12G6 | ↳ Lend, paid back and forgive on the person's page (PC) | | | M | Sonnet | |

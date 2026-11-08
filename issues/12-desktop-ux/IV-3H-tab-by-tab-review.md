@@ -537,7 +537,7 @@ names (`grep -n '^\*\*<ID> ' issues/12-desktop-ux/IV-3H-tab-by-tab-review.md`) a
 test, then `python -m pytest tests/test_mohab_year.py -q`; new visible text gets Arabic in `lightning/ui/i18n.py`
 `ARABIC_UI`. Delete the step's heading in the same commit, and tick the design id (`**[x] ID`) it finishes.
 
-## 3H4 A month-end prices reminder · S · sonnet
+## 3H4 A month-end prices reminder · S · sonnet · #435
 Files: `lightning/workflows/reminders.py` (`ReminderService.due`), `lightning/reporting/service.py:255`
 (`stale_prices(as_of, days)`, read only), `lightning/ui/i18n.py` (`ARABIC_UI`, near `'A fresh backup is due'`),
 `tests/test_workflow_views_review.py` (beside `test_reminders_are_opt_in_stable_and_read_only_safe`).
@@ -600,7 +600,7 @@ separate and phone layout follows IV-3AY. Done when: a service test pins the fig
 (`tests/test_mohab_year.py` gains one step), the page passes `python -m pytest tests/test_brand_audit.py -q` with no
 new failure, and A16 holds on a screenshot.
 
-## 3H10 Triage the ids no step names · M · opus
+## 3H10 Triage the ids no step names · M · opus · #436
 For each id in §2-§11 without `[x]` (list them with `grep -n '^\*\*[A-Z][A-Z]-[0-9]* ' issues/12-desktop-ux/IV-3H-tab-by-tab-review.md`),
 skipping those §14 says are built or kept (they get `[x]` and the date now): check the code (one grep or one page
 load). Built → tick `[x]` with the commit. Covered by IV-3AM or IV-3AY → tick with "→ 3AM"/"→ 3AY". Still real →

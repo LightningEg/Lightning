@@ -25,7 +25,7 @@ Per term, one PR: pick the plain word in the Glossary first (payee/who for count
 
 Each step is one pull request, one term at a time. The Glossary (`ai/GLOSSARY.md`, read only the term's line: `grep -n "<term>" ai/GLOSSARY.md`) is changed first in the same PR; then English keys, their Arabic in `lightning/ui/i18n.py`, templates and tests. Never rename a route, a database column or a code. Run `python -m pytest tests/test_arabic_no_english.py tests/test_mohab_year.py -q` and delete the step's heading in the same commit.
 
-## 3BH1 A test that keeps jargon off the screen · S
+## 3BH1 A test that keeps jargon off the screen · S · #425
 Files: new `tests/test_voice.py`.
 Do: render (with the sample household, English and Arabic; copy the set-up from `tests/test_arabic_no_english.py`) the main PC and phone pages listed in `tools/phone_check.py` `PAGES`, take the visible text, and assert it contains none of a list of words. Start the list with the words that are already gone (`Successfully`, `Please`, `Submit`, `Error:`, `Invalid`) so it passes today; each later step adds its own word.
 Done when: `python -m pytest tests/test_voice.py -q` passes and the list lives at the top of the file with a one-line reason per word.
@@ -49,17 +49,17 @@ Files: `lightning/ui/sections.py` (section and tab names), `lightning/ui/templat
 Do: the section is "Cash planning" everywhere (tab and heading too, not "Plan"/"Planning"); "Back to the dashboard" → "Back to Overview" (phone: "Back to Home"); "The journey" → "How it went"; "Could not save; retry with Enter or blur." → "Not saved. Press Enter to try again."; "YTD" → "This year". Add "dashboard" and "journey" to the test's list.
 Done when: `tests/test_voice.py` passes with both listed, and `grep -rn "'Plan'\|\"Planning\"" lightning/ui/sections.py` shows only the section's single name.
 
-## 3BH5 One spelling per word · S
+## 3BH5 One spelling per word · S · #426
 Files: `lightning/ui/i18n.py`, templates.
 Do: "Gam’eya" → "Gam'eya" in the 2 places (`grep -rn "Gam’eya" lightning`); Arabic دهب → ذهب (glossary spelling: check `ai/GLOSSARY.md`), انت → إنت; Free cash's Arabic is the glossary's النقدية المتاحة everywhere, and brand-voice's «المتاح للصرف» is for Safe to spend only (check `grep -n "المتاح" guideline/brand-voice.md`). Curly apostrophes in visible English strings: `’` in place of `'` inside words, in templates and `ARABIC_UI` keys **and** their callers together (a key change must change every `|tr` that uses it).
 Done when: `grep -rc "دهب\|\bانت\b" lightning/ui/i18n.py` is 0 and `python -m pytest tests/test_arabic_no_english.py -q` passes.
 
-## 3BH6 Built-in categories in sentence case · M · opus
+## 3BH6 Built-in categories in sentence case · M · opus · #427
 Files: `lightning/database/seed.py`, a new migration (skill `add-migration`: read `skills/add-migration/SKILL.md` first), `lightning/ui/i18n.py` (Arabic keys for the new names).
 Do: change the 27 Title Case seed names ("Eating Out" → "Eating out", "Utilities & Bills" → "Utilities & bills", "Unaccounted Money Found" → "Unaccounted money found" …) for new profiles; the migration renames them in existing profiles **only where the user has not renamed them** (match the old exact name and the seed's code). Keep codes.
 Done when: the migration's test upgrades a profile made with the old seed and finds the new names, and a renamed category keeps its user name. `python -m pytest tests/test_migrations*.py tests/test_mohab_year.py -q`.
 
-## 3BH7 Headings never show a code · S
+## 3BH7 Headings never show a code · S · #428
 Files: `lightning/ui/templates/investments/asset_form.html:4`, `lightning/ui/templates/investments/form.html:4`.
 Do: "Edit FND:AZMM" → "Edit {name}" with the asset's display name; "Edit OUT-…" → "Edit transaction" with the date and payee as the subtitle. One `|tr` key each with a value, not `'Edit ' ~ …`.
 Done when: `grep -rn "'Edit ' ~" lightning/ui/templates` is empty.
