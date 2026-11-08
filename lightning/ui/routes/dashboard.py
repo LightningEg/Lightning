@@ -8,20 +8,19 @@ from decimal import InvalidOperation
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
+from fastapi.responses import RedirectResponse
 
 from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, month_of, parse_date, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.figures import FIGURES, label
 from lightning.core.money import ZERO, fmt as _fmt, to_decimal
-from lightning.core.refs import DocType
 
 
 def fmt(value, places: int = 0, signed: bool = False) -> str:
     """Reporting text rounds to the nearest unit (stored values keep their decimals)."""
     return _fmt(value, places, signed)
 from lightning.investments.report import investing_rate, investment_period, saved_and_invested
-from lightning.planning.bill_state import NEEDS_ACTION, open_bills
 from lightning.planning.position import net_worth_bridge
 from lightning.workflows.review import GROUP_LABELS, ReviewInbox, by_consequence, group_of, grouped
 
@@ -79,6 +78,9 @@ async def dashboard(request: Request):
                       currencies_done=c.settings.get("setup_currencies_done") == "1",
                       editing_currencies=request.query_params.get("currencies") == "edit",
                       sample_stories=sample_stories(WELCOME_SAMPLES))
+    if getattr(request.state, "phone", False):  # the phone's period report lives at /money/report (3AY11)
+        query = urlencode({k: v for k, v in request.query_params.items() if k in {"period", "month", "from", "to"}})
+        return RedirectResponse("/money/report" + (f"?{query}" if query else ""), status_code=303)
     # Every position figure comes from one calculation; see lightning/planning/position.py.
     period_position = c.position.at(as_of)
     # Your position follows the period too, as of its end (never past today): the cards then agree with the
@@ -117,10 +119,7 @@ async def dashboard(request: Request):
         "at_cost": closing_report["at_cost"],
         "holdings_count": sum(1 for row in closing_report["holdings"] if row["price_source"] != "CASH"),
     }
-    # The phone keeps the month-by-month trend and the money-in flow in closed folds: they load when opened
-    # (backend roadmap B1, /overview/fold), not with every Overview.
-    lazy_folds = bool(getattr(request.state, "phone", False))
-    networth_trend = {} if lazy_folds else visuals.net_worth_trend(c, as_of)
+    networth_trend = visuals.net_worth_trend(c, as_of)
     stats = _period_stats(c, period, first, as_of, period_position, cash_flow, change, change_reason,
                           closing_report["net_money"], networth_trend, urlencode(request.query_params))
     # Answer first (guideline 3.33, A09): the change in net worth is the Lead's comparison, not a card of its own;
@@ -136,44 +135,29 @@ async def dashboard(request: Request):
         stats.insert(len(stats) - 1, _safe_tile(inbox.forecast))  # the phone's tiles (C06.1)
     # The PC's row is A08 cards, each against something: the savings rate against your usual one, the investing
     # rate against the period before, Safe to spend against free cash, Left in plan against the plan.
-    # The phone shows neither the KPI cards nor the money in/out groups, the waffle or the kept-apart list
-    # (backend roadmap B1): skip their reads, the period before above all, so the phone's Overview stays light.
-    on_phone = bool(getattr(request.state, "phone", False))
     kpi_cards = []
-    if not on_phone:
-        if period.key == "month":
-            before_to = first - timedelta(days=1)
-            before_from, before_label = before_to.replace(day=1), month_of(before_to)
-        else:
-            before_to = first - timedelta(days=1)
-            before_from, before_label = before_to - (as_of - first), "the period before"
-        flow_before = c.reporting.cash_flow(before_from, before_to)
-        added_before = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(before_from), fmt_date(before_to))["net_money"]
-        plan_month = month_of(as_of)
-        kpi_cards = kpis.overview(
-            cash_flow, period_chip=_period_chip(period, first, as_of), rates=visuals.savings_rates(c, as_of),
-            usual=c.reporting.usual_savings_rate(as_of), invest=investing_rate(closing_report["net_money"], cash_flow.net),
-            invest_before=investing_rate(added_before, flow_before.net), before_label=before_label,
-            money_added=closing_report["net_money"], forecast=inbox.forecast if position_is_today else None,
-            plan=c.budgets.plan_summary(plan_month, schedule=c.schedules.view()) if c.budgets.has_plan(plan_month, schedule=c.schedules.view()) else None, month=plan_month,
-            savings_href="#savings-squares", invest_href=f"/investments?{urlencode(request.query_params)}")
+    if period.key == "month":
+        before_to = first - timedelta(days=1)
+        before_from, before_label = before_to.replace(day=1), month_of(before_to)
+    else:
+        before_to = first - timedelta(days=1)
+        before_from, before_label = before_to - (as_of - first), "the period before"
+    flow_before = c.reporting.cash_flow(before_from, before_to)
+    added_before = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(before_from), fmt_date(before_to))["net_money"]
+    plan_month = month_of(as_of)
+    kpi_cards = kpis.overview(
+        cash_flow, period_chip=_period_chip(period, first, as_of), rates=visuals.savings_rates(c, as_of),
+        usual=c.reporting.usual_savings_rate(as_of), invest=investing_rate(closing_report["net_money"], cash_flow.net),
+        invest_before=investing_rate(added_before, flow_before.net), before_label=before_label,
+        money_added=closing_report["net_money"], forecast=inbox.forecast if position_is_today else None,
+        plan=c.budgets.plan_summary(plan_month, schedule=c.schedules.view()) if c.budgets.has_plan(plan_month, schedule=c.schedules.view()) else None, month=plan_month,
+        savings_href="#savings-squares", invest_href=f"/investments?{urlencode(request.query_params)}")
     status = page_status.overview(cash_flow.inflows, cash_flow.outflows, cash_flow.net, cash_flow.savings_rate,
                                   cash_flow.rate_says_nothing, period.key, current, bool(accounts))
     dates_note = ("so far" if current and period.key in ("month", "ytd") else "year to date" if period.key == "ytd" else "")
     # Match the register's default: system value updates are not money moving.
     start, end = "1900-01-01", "9999-12-31"
     recent_rows, total_rows, _ = c.reporting.register_page(None, start, end, 1, 10)
-    if on_phone and c.reporting.register_value_updates(None, start, end):
-        recent_rows = [row for row in recent_rows if row.type != DocType.VAL]
-        page = 1
-        while len(recent_rows) < 10 and page * 10 < total_rows:
-            page += 1
-            rows, _, _ = c.reporting.register_page(None, start, end, page, 10)
-            recent_rows.extend(row for row in rows if row.type != DocType.VAL)
-        recent_rows = recent_rows[:10]
-    phone = _phone_overview(inbox.forecast, attention_groups, c, attention) if getattr(request.state, "phone", False) and position_is_today else None
-    # The PC shows the flows on Spending (owner, 2026-10-21); the phone keeps them as folded rows (guideline C11.1).
-    phone_flows = {"month_calendar": visuals.month_calendar(c, today())} if lazy_folds else {}
     # 3G5: what changed since the last visit, from a cookie holding when this Overview was last opened
     seen = request.cookies.get(SEEN_COOKIE, "")
     since = None
@@ -183,47 +167,24 @@ async def dashboard(request: Request):
         since = {"count": added, "at": "" if seen[:10] == today().isoformat() else seen[:10]} if added else None
     response = render(
         request,
-        "dashboard/index.html", **phone_flows, since=since,
+        "dashboard/index.html", since=since,
         stats=stats, recent_rows=recent_rows,
         flow_columns=visuals.cash_flow_columns(c, first, as_of, cash_flow),
-        money_in_rows=[] if on_phone else visuals.money_in_groups(c, first, as_of),
-        money_out_rows=[] if on_phone else visuals.money_out_groups(c, first, as_of),
+        money_in_rows=visuals.money_in_groups(c, first, as_of),
+        money_out_rows=visuals.money_out_groups(c, first, as_of),
         wealth_donut=visuals.holdings_donut(position, include_cash=True),
         networth_trend=networth_trend, free_cash_steps=visuals.free_cash_steps(position),
         month=month, this_month=month_of(today()), period=period, period_error=period_error,
         date_from=fmt_date(first), date_to=fmt_date(as_of), as_of=fmt_date(as_of), position_as_of=fmt_date(position_day), position_is_today=position_is_today, status=status, kpi_cards=kpi_cards,
-        waffle=None if on_phone else saved_and_invested(cash_flow, closing_report["net_money"]), dates_note=dates_note, lead_change=lead_change,
+        waffle=saved_and_invested(cash_flow, closing_report["net_money"]), dates_note=dates_note, lead_change=lead_change,
         bridge=bridge, worth_units=worth_units, pos=position, cash_accounts=cash_accounts, owe=owe,
-        kept_apart_accounts=[] if on_phone else c.reporting.owned_cash_kept_apart_by_account(position.as_of),
+        kept_apart_accounts=c.reporting.owned_cash_kept_apart_by_account(position.as_of),
         attention=attention, attention_groups=attention_groups, attention_handled=inbox.handled, setup=setup,
-        investment_report=investment_report, cash_flow=cash_flow, phone=phone,
-        worth_tile=_worth_tile(position, lead_change) if on_phone and phone and phone.get("safe") else None,  # else the hero is the same figure
-        lazy_folds=lazy_folds, fold_query=urlencode(request.query_params),
+        investment_report=investment_report, cash_flow=cash_flow,
     )
     response.set_cookie(SEEN_COOKIE, datetime.now(timezone.utc).isoformat(timespec="seconds"),
                         max_age=365 * 24 * 3600, httponly=True, samesite="lax")
     return response
-
-
-@router.get("/overview/fold/{name}")
-async def overview_fold(request: Request, name: str):
-    """One closed fold of the phone's Overview, drawn when it is opened (backend roadmap B1)."""
-    from fastapi import HTTPException
-    if name not in ("trend", "money-in"):
-        raise HTTPException(404)
-    c = container(request)
-    try:
-        period = parse_period(request.query_params, today(), c.reporting.first_activity_date())
-    except ValidationError:
-        period = parse_period({"period": "month", "month": month_of(today())}, today(), None)
-    first, as_of = period.start, period.end
-    if name == "trend":
-        position = c.position.at(min(as_of, today()))
-        lead = "net_worth" if position.what_you_owe > 0 else "what_you_own"
-        return render(request, "phone/dashboard/fold.html", fold=name, lead=lead,
-                      networth_trend=visuals.net_worth_trend(c, as_of))
-    return render(request, "phone/dashboard/fold.html", fold=name,
-                  **visuals.cash_flow_charts(c, first, as_of, period.key == "month", today()))
 
 
 # The welcome page offers Mohab's year and these three stories; Abdelrahman's stays loadable by route.
@@ -406,105 +367,6 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
                       "kind": "money", "empty": "No plan yet", "sub": f"Set a plan for {month}",
                       "href": f"/budget?month={month}"})
     return stats
-
-
-# Needs you on the phone says what is inside in a few words (phone overhaul 2026-10-22): "2 bills · 4 to sort out".
-_NEEDS_SHORT = {"payments": ("1 bill", "{n} bills"), "activity": ("1 to sort out", "{n} to sort out"),
-                "budget": ("1 on the budget", "{n} on the budget"), "cash": ("1 on cash", "{n} on cash"),
-                "prices": ("1 price", "{n} prices"), "other": ("1 other", "{n} others"),
-                "match": ("1 to match", "{n} to match"), "payment": ("1 payment to check", "{n} payments to check")}
-
-
-def _needs_parts(groups: list[dict], limit: int = 3) -> list[dict]:
-    """The words under Needs you's title, one per kind of thing inside (3AN1). The payments group holds bills but
-    also interest to match and payments to check, so it is split by what each item is: a match is "1 to match",
-    never "1 bill"."""
-    counts: dict[str, int] = {}
-    for group in groups:
-        if group["key"] != "payments":
-            counts[group["key"]] = group["count"]
-            continue
-        for item in group.get("items") or [{}]:
-            label, href = item.get("label", ""), item.get("href", "")
-            kind = ("match" if href.startswith("/deposits/") else
-                    "payments" if label.startswith(("Bill due", "Loan payment due")) else "payment")
-            counts[kind] = counts.get(kind, 0) + 1
-    parts = []
-    for key, n in counts.items():
-        one, many = _NEEDS_SHORT.get(key, _NEEDS_SHORT["other"])
-        parts.append(page_status.sentence(one if n == 1 else many, n=n))
-    return parts[:limit]
-
-
-def _safe_hero(f) -> dict:
-    """Safe to spend as the phone's hero (phone overhaul 2026-10-22: "can I spend today?"), with its one sentence:
-    about how much a day until payday. ``f`` is today's forecast; the figure's home stays Cash planning."""
-    value, until = f.safe_to_spend, f.next_income_date
-    days = (parse_date(until) - today()).days if until else 0
-    if value < 0:
-        line = page_status.sentence("{amt} more is promised than your free cash.", amt=fmt(-value))
-    elif until and days > 0:
-        line = page_status.sentence("On top of your plan until {sa}.", sa=until)  # no per-day figure: Budget owns it (BV-12A)
-    else:
-        line = page_status.sentence("From free cash, after what is promised over the next 3 months.")
-    return {"value": value, "line": line, "until": until or ""}
-
-
-def _worth_tile(position, lead_change) -> dict:
-    """The phone's Net worth tile (C06.1: with Left in plan, the only two on Overview)."""
-    owes = position.what_you_owe > 0
-    return {"key": "networth", "surface": "hold", "label": label("net_worth" if owes else "what_you_own"),
-            "value": position.net_worth if owes else position.what_you_own, "kind": "money",
-            "badge": {"tone": "flat", "text": "Today"},
-            "sub": f"{lead_change['figure']} {lead_change['text']}" if lead_change else "",
-            "href": "/accounts"}
-
-
-def _phone_overview(forecast, groups, c, attention=()) -> dict:
-    """What the phone's Overview adds to the PC's figures: the Safe to spend hero and the words on the Needs you card
-    (3AN4: the next bill due within three days, named, so the bill's pay sheet is one tap from Overview)."""
-    soon = _due_soon(c, attention)
-    return {"safe": _safe_hero(forecast), "needs": _needs_parts(groups), "soon": soon,
-            "needs_count": len(attention) + (soon["extra"] if soon else 0)}
-
-
-DUE_SOON_DAYS = 3  # Needs you names a bill due today, late, or within three days (guideline C04.4)
-
-
-def _due_line(name: str, amount: str, days: int, late: int) -> dict:
-    """"Landlord 12,000 in 2 days": the bill Needs you names, as a translatable sentence."""
-    if late:
-        return page_status.sentence("{name} {amt}, 1 day late" if late == 1 else "{name} {amt}, {n} days late",
-                                    name=name, amt=amount, n=late)
-    if days == 0:
-        return page_status.sentence("{name} {amt} today", name=name, amt=amount)
-    if days == 1:
-        return page_status.sentence("{name} {amt} tomorrow", name=name, amt=amount)
-    return page_status.sentence("{name} {amt} in {n} days", name=name, amt=amount, n=days)
-
-
-def _due_soon(c, attention=()) -> dict | None:
-    """Phone Needs you (C04.4, 3AN4): the bills, subscriptions and loan payments that are late or due within three
-    days, earliest first, each with its pay sheet. ``next`` is the one the card names ("Landlord 12,000 in 2 days");
-    ``extra`` counts the ones the review inbox does not already list (it lists what is due today or late)."""
-    day = today()
-    due = sorted((r.payment for r in open_bills(c.planning, day, DUE_SOON_DAYS) if r.state in NEEDS_ACTION),
-                 key=lambda p: p.due_date)  # one bill state (3AY5): late, stale or due within three days
-    if not due:
-        return None
-    known = {str(item.get("href", "")).split("&")[0] for item in attention}
-    rows = []
-    for p in due:
-        late = p.days_late(day)
-        pay = f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2F"
-        amount = c.planning.amount_in_base(p, p.still_owed, day)
-        days = 0 if late else (parse_date(p.due_date) - day).days
-        rows.append({"name": p.item.name, "amount": amount, "late": late, "days": days, "pay": pay,
-                     "listed": pay.split("&")[0] in known, "line": _due_line(p.item.name, fmt(amount), days, late)})
-    return {"count": len(rows), "total": sum((r["amount"] for r in rows), ZERO), "late": any(r["late"] for r in rows),
-            "next": rows[0], "rows": rows, "extra": sum(1 for r in rows if not r["listed"])}
-
-
 
 
 def _period_chip(period, first, as_of) -> str:

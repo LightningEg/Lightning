@@ -123,9 +123,13 @@ and the `phone/` templates the new screens replaced. Needs 3AY6 to 3AY10 merged 
 lightning/ui/routes` is empty and the full suite passes.
 Built since: the old More is retired (route and template removed; `/more` leads to Money; its tests read Money and the Bills
 page).
-Not done (2026-11-08): the PC routes still carry phone branches (`getattr(request.state, "phone", False)` in about fifteen
-places) because the sub-pages (account, register, investments, Cash planning, search, Settings) have no phone-owned
-screens yet; the old slot templates also stay reachable at query URLs until the Overview report has a phone home.
+Built since (2026-11-08): the old phone Overview is gone: on the phone `/?period=...` redirects to `/money/report`, the
+`/overview/fold` endpoint, `templates/phone/dashboard/` and the dashboard route's phone code were deleted
+(`tests/test_phone_frame.py::test_the_old_phone_overview_leads_to_the_report_page`).
+Not done: the other PC routes still carry phone branches (`getattr(request.state, "phone", False)`: register, accounts,
+investments, planning, search, transactions, merge, activity, budget, birdview, financial health, journal) because those
+sub-pages have no phone-owned screens and no phone design yet. Each needs its own screen (and a design in Part C) before
+its branch goes; `grep -rn '"phone"' lightning/ui/routes` lists what is left.
 
 ## 3AY12 Arabic, themes and 320 px · M
 Every new string in the catalogue, the mirrored layouts, dark and paid themes, 320 px. Needs 3AY6 to 3AY10 merged first.

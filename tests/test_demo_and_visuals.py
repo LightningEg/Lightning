@@ -472,17 +472,6 @@ def test_the_demo_has_a_gameya_circle_the_pot_of_which_is_already_taken(demo):
     assert position.net_worth == position.what_you_own - position.what_you_owe
 
 
-def test_the_phone_overview_breaks_what_you_owe_into_bills_loans_and_the_gameya(demo):
-    """BV-5I: the phone Overview's What you owe opens on its parts, the circle among them."""
-    c, _ = demo
-    from test_gameya_screens import _client
-    page = _client(c, phone=True).get("/")
-    assert page.status_code == 200
-    assert 'data-testid="gameya-owed"' in page.text
-    assert "Gam&#39;eya still to pay" in page.text or "Gam'eya still to pay" in page.text
-    assert "14,000" in page.text
-
-
 def test_an_owed_circle_is_labelled_and_linked_to_what_you_owe_in_the_sidebar(demo):
     """BV-5I (owner 2026-11-02): the circle stays below zero in the account list, labelled and linked to What you owe."""
     from fastapi.testclient import TestClient

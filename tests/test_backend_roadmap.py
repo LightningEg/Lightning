@@ -1,6 +1,5 @@
 """Backend roadmap B1-B5 (phone performance): the phone's Overview and pages skip what they never show, the
 category look-up reads once for every name, and Quick Add saves one entry however often it is tapped."""
-import re
 
 from fastapi.testclient import TestClient
 
@@ -42,23 +41,6 @@ def _history(c, monkeypatch):
     _years_of_history(c, 2)
 
 
-def test_the_phone_overview_reads_far_less_than_the_pc_one(c, monkeypatch):
-    _history(c, monkeypatch)
-    app = web.create_app(c)
-    with TestClient(app) as pc, TestClient(_as_phone(app)) as phone:
-        pc.get("/"), phone.get("/")  # settle first-visit work
-        pc_page, pc_reads = _reads(c, monkeypatch, lambda: pc.get("/"))
-        phone_page, phone_reads = _reads(c, monkeypatch, lambda: phone.get("/"))
-    assert pc_page.status_code == 200 and phone_page.status_code == 200
-    assert 'class="phone-tabbar"' in phone_page.text
-    assert phone_reads <= PHONE_HOME_BUDGET, f"phone Overview ran {phone_reads} SELECT statements"
-    assert phone_reads < pc_reads * 0.8
-
-
-# Measured 2026-10-28: the PC Overview ran 358, the phone 379 before B1 and 244 after (folds load when opened).
-PHONE_HOME_BUDGET = 260
-
-
 def test_the_category_look_up_reads_once_for_every_name(c, monkeypatch):
     _history(c, monkeypatch)
     names = c.counterparties.search_names()
@@ -87,20 +69,6 @@ def test_quick_add_saves_once_however_often_it_is_sent(c, monkeypatch):
     assert again.json()["id"] == first.json()["id"] and again.json()["repeat"]
     assert remembered.json().get("account_id") == wallet.id, remembered.json()  # no account sent: the last one used
     assert refused.status_code == 422 and not refused.json()["ok"]
-
-
-def test_an_overview_fold_draws_when_opened(c, monkeypatch):
-    _history(c, monkeypatch)
-    app = web.create_app(c)
-    with TestClient(_as_phone(app)) as phone:
-        page = phone.get("/")
-        trend = phone.get("/overview/fold/trend")
-        money = phone.get("/overview/fold/money-in?period=month&month=2026-09")
-        missing = phone.get("/overview/fold/nope")
-    assert 'data-fold-src="/overview/fold/trend' in page.text and 'data-fold-src="/overview/fold/money-in' in page.text
-    assert trend.status_code == 200 and "<svg" in trend.text and "phone-tabbar" not in trend.text
-    assert money.status_code == 200 and "phone-tabbar" not in money.text
-    assert missing.status_code == 404
 
 
 def test_swipe_delete_hears_a_refusal_instead_of_following_the_redirect(c):

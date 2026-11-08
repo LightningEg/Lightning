@@ -2,18 +2,14 @@
 what the screens count agrees: What you owe, Needs you, More's next 14 days and the forecast's "before payday"."""
 from __future__ import annotations
 
-import re
 from datetime import date
 
 import pytest
-from fastapi.testclient import TestClient
 
 from lightning.bootstrap import build
 from lightning.core.figures import label
 from lightning.planning import bill_state as bs
 from lightning.samples import load_mohab_2026
-from lightning.ui.routes import dashboard
-from lightning.ui.web import create_app
 from lightning.workflows.review import ReviewInbox
 
 DAYS = ("2026-10-04", "2026-10-11", "2026-10-25")
@@ -39,10 +35,6 @@ def test_every_surface_reads_the_same_bills(sample, today):
     # What you owe: everything due today or late.
     owed = {(r.payment.item.id, r.due_date) for r in rows if r.due_date <= today}
     assert owed == {(p.item.id, p.due_date) for p in c.planning.what_you_owe(day).bills_due_items}
-    # Needs you: late, stale or due within three days.
-    soon = dashboard._due_soon(c)
-    wanted = [r for r in rows if r.state in bs.NEEDS_ACTION]
-    assert (soon["count"] if soon else 0) == len(wanted)
     # The forecast's "payments before next income": the rows after today and before the next income.
     inbox = ReviewInbox(c)
     inbox.items(day)
