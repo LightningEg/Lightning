@@ -155,7 +155,7 @@
   // own colour, laid over the page so a translucent bar still gives one solid colour, and it is read again whenever the
   // theme changes (a paid theme, the night twin, a scheme change).
   function syncStatusBar() {
-    if (!root.classList.contains('phone')) return;
+    if (!root.classList || !root.classList.contains('phone') || !document.querySelector) return;
     const bar = document.querySelector('.phone-appbar');
     if (!bar) return;
     const parse = value => (value.match(/[\d.]+/g) || []).map(Number);
@@ -170,8 +170,9 @@
     if (!meta) { meta = document.createElement('meta'); meta.name = 'theme-color'; document.head.append(meta); }
     meta.content = 'rgb(' + solid.join(', ') + ')';
   }
-  window.addEventListener('lightning:themechange', () => requestAnimationFrame(syncStatusBar));
-  if (dark && dark.addEventListener) dark.addEventListener('change', () => requestAnimationFrame(syncStatusBar));
+  const soon = fn => (typeof requestAnimationFrame === 'function' ? requestAnimationFrame(fn) : setTimeout(fn, 0));
+  window.addEventListener('lightning:themechange', () => soon(syncStatusBar));
+  if (dark && dark.addEventListener) dark.addEventListener('change', () => soon(syncStatusBar));
   window.addEventListener('load', syncStatusBar);
   syncStatusBar();
   // Pointer light (cards hover "light"): the card under the pointer gets --lt-x/--lt-y; CSS draws the light.
