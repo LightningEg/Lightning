@@ -505,38 +505,8 @@ def _due_soon(c, attention=()) -> dict | None:
             "next": rows[0], "rows": rows, "extra": sum(1 for r in rows if not r["listed"])}
 
 
-@router.get("/more")
-async def more(request: Request):
-    """The phone's More tab (phone overhaul 2026-10-22): every section without a slot of its own, each with its live
-    figure, the weekly review as a card, then settings as a grouped list. The PC has its sidebar instead."""
-    if not getattr(request.state, "phone", False):
-        return redirect("/")
-    c = container(request)
-    day = today()
-    position = c.position.at(day)
-    inbox = ReviewInbox(c)
-    items = inbox.items(day)
-    parts = dict(inbox.forecast.safe_to_spend_parts)
-    due = -parts.get(label("payments_before_next_income"), ZERO)
-    health = c.health.overview(day)
-    judged = [item for item in health["figures"] if item.status in ("within your limit", "outside your limit")]
-    within = sum(1 for item in judged if item.status == "within your limit")
-    first = day.replace(day=1)
-    spent = c.reporting.cash_flow(first, day).outflows
-    # Hub (phone roadmap M7): the next 14 days of bills and loan payments, late first, each with Mark paid
-    bills = []
-    for p in (r.payment for r in open_bills(c.planning, day, 14)):
-        bills.append({"name": p.item.name, "due": p.due_date, "late": p.days_late(day),
-                      "amount": c.planning.amount_in_base(p, p.still_owed, day),
-                      "pay": f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2Fmore"})
-    bills.sort(key=lambda b: (-b["late"], b["due"]))
-    # Five of each: late rows never use up the room of the coming ones (3AY5); the rest is one "n more" row.
-    shown = [b for b in bills if b["late"]][:5] + [b for b in bills if not b["late"]][:5]
-    return render(request, "more.html", bills=shown, bills_more=len(bills) - len(shown),
-                  due=due, until=inbox.forecast.next_income_date or "",
-                  portfolio=position.portfolio_value, in_accounts=position.in_your_accounts,
-                  within=within, judged=len(judged), spent=spent, month=month_of(day), waiting=len(items),
-                  last_review=(c.settings.get("weekly_review_at") or "")[:10], zakat=c.zakat.enabled())
+
+
 def _period_chip(period, first, as_of) -> str:
     """The period, short, as every card's chip names it."""
     partial = as_of.day < calendar.monthrange(as_of.year, as_of.month)[1]

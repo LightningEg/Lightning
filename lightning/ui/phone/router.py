@@ -76,10 +76,10 @@ def phone_router() -> APIRouter:
         return render_phone(request, "phone/budget_flexible.html",
                             screen=screen.build(container(request), today(), request.query_params.get("month", "")))
 
-    @slots.get("/more")
+    @router.get("/more")
     @slots.get("/accounts")
     async def to_money():
-        """The old More and the account list are Money's job now (3AY10)."""
+        """More is gone (3AY11): Money holds what it held. The account list is Money's Accounts page too (3AY10)."""
         return RedirectResponse("/money", status_code=307)
 
     @slots.get("/transactions")
