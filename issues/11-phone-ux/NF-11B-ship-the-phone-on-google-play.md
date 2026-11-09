@@ -20,11 +20,6 @@ targeting API 35, asks for `READ_SMS`, links to the website to buy themes, and n
 Each step is one pull request, except the owner's. Read only the files a step names. Android steps need the **Phone app** workflow
 run by hand for evidence (AGENTS §2: Android minutes cost money; run once per step, not per push).
 
-## 11B1 A release bundle that Play accepts · M · opus
-Files: `android/app/build.gradle.kts`, `android/app/src/main/AndroidManifest.xml`, `MainActivity.java`, `.github/workflows/android-app.yml`, `packaging/phone_build.py`.
-Do: a `release` build type (not debuggable) and `bundleRelease`; `targetSdk = 36`, `compileSdk = 36`; replace `onBackPressed()` with an `OnBackInvokedCallback` (API 33+) or `OnBackPressedDispatcher`, same behaviour (page back, then Home, then `moveTaskToBack`), and set `android:enableOnBackInvokedCallback="true"`; `ProbeActivity` only in debug (a `debug` source-set manifest). The signing job signs the AAB with the **upload** key (Play App Signing keeps the app key); the GitHub APK keeps today's key.
-Done when: the workflow uploads an `.aab` that `bundletool validate` accepts, `aapt2 dump badging` shows `targetSdkVersion:'36'` and no `debuggable`, and Back on a real phone walks pages then Home then leaves (owner check folded into 11B9).
-
 ## 11B2 Bank SMS within Play's SMS policy · M · opus
 Owner, 2026-11-09: declare it from day one (`ai/PROJECT_OVERVIEW.md` › Google Play launch).
 Files: `SmsBridge.java`, `lightning/ui/templates/phone/sms.html`, `lightning/sms_imports.py`, `docs/google-play.md` (11B5).

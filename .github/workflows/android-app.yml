@@ -26,6 +26,14 @@ on:
         required: false
       ANDROID_KEY_PASSWORD:
         required: false
+      ANDROID_UPLOAD_KEYSTORE_BASE64:
+        required: false
+      ANDROID_UPLOAD_KEYSTORE_PASSWORD:
+        required: false
+      ANDROID_UPLOAD_KEY_ALIAS:
+        required: false
+      ANDROID_UPLOAD_KEY_PASSWORD:
+        required: false
 
 permissions:
   contents: read
@@ -54,36 +62,47 @@ jobs:
       - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd  # v4
         with:
           packages: platform-tools
-      - run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
       - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c  # the pin the LightningEg action policy allows (1H)
         with:
           gradle-version: '8.11.1'
       - name: Build identity (version code = commits on main)
         id: identity
         run: python packaging/phone_build.py identity
-      - name: Build the arm64 app from the lock (no index; every file pinned by hash)
+      - name: Build the arm64 release APK and Play bundle from the lock (no index; every file pinned by hash)
         working-directory: android
         env:
           CODE: ${{ steps.identity.outputs.version_code }}
           NAME: ${{ steps.identity.outputs.version_name }}
-        run: gradle --no-daemon :app:assembleDebug "-PbuildVersionCode=$CODE" "-PbuildVersionName=$NAME"
+        run: gradle --no-daemon :app:assembleRelease :app:bundleRelease "-PbuildVersionCode=$CODE" "-PbuildVersionName=$NAME"
       - name: Check the app as built (ID, version, arm64, permissions, files, packages)
         env:
           CODE: ${{ steps.identity.outputs.version_code }}
           NAME: ${{ steps.identity.outputs.version_name }}
         run: >-
-          python packaging/phone_build.py check android/app/build/outputs/apk/debug/app-debug.apk
-          --build-tools "$ANDROID_HOME/build-tools/35.0.0" --code "$CODE" --name "$NAME" --info "$RUNNER_TEMP/built.json"
+          python packaging/phone_build.py check android/app/build/outputs/apk/release/app-release-unsigned.apk
+          --build-tools "$ANDROID_HOME/build-tools/36.0.0" --code "$CODE" --name "$NAME" --info "$RUNNER_TEMP/built.json"
+      - name: Check the Play bundle (bundletool validate; ID, version, target SDK, not debuggable)
+        env:
+          CODE: ${{ steps.identity.outputs.version_code }}
+          NAME: ${{ steps.identity.outputs.version_name }}
+        run: |
+          set -euo pipefail
+          curl -sSfL -o "$RUNNER_TEMP/bundletool.jar" \
+            https://github.com/google/bundletool/releases/download/1.18.1/bundletool-all-1.18.1.jar
+          echo "675786493983787ffa11550bdb7c0715679a44e1643f3ff980a529e9c822595c  $RUNNER_TEMP/bundletool.jar" | sha256sum --check --strict
+          python packaging/phone_build.py aab android/app/build/outputs/bundle/release/app-release.aab \
+            --bundletool "$RUNNER_TEMP/bundletool.jar" --code "$CODE" --name "$NAME"
       - name: The key script's keys sign APKs (a throwaway key; its APK never leaves this job)
         run: |
           set -euo pipefail
-          tools="$ANDROID_HOME/build-tools/35.0.0"
+          tools="$ANDROID_HOME/build-tools/36.0.0"
           python -m pip install --quiet 'cryptography==50.0.2'
           python tools/android_test_key.py "$RUNNER_TEMP/throwaway" > /dev/null
           base64 -d "$RUNNER_TEMP/throwaway/ANDROID_TEST_KEYSTORE.txt" > "$RUNNER_TEMP/throwaway.p12"
           export PASS="$(cat "$RUNNER_TEMP/throwaway/ANDROID_TEST_KEYSTORE_PASSWORD.txt")"
           "$tools/apksigner" sign --ks "$RUNNER_TEMP/throwaway.p12" --ks-type PKCS12 --ks-pass env:PASS --key-pass env:PASS \
-            --ks-key-alias lightning-test --out "$RUNNER_TEMP/throwaway.apk" android/app/build/outputs/apk/debug/app-debug.apk
+            --ks-key-alias lightning-test --out "$RUNNER_TEMP/throwaway.apk" android/app/build/outputs/apk/release/app-release-unsigned.apk
           signer="$(python packaging/phone_build.py signer "$RUNNER_TEMP/throwaway.apk" --build-tools "$tools")"
           expected="$(cat "$RUNNER_TEMP/throwaway/certificate-sha256.txt")"
           [ "$signer" = "$expected" ] || { echo "::error::signed by $signer, not the script's certificate $expected"; exit 1; }
@@ -92,7 +111,14 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: phone-unsigned  # to the sign job only; one day
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: play-bundle-unsigned  # to the sign job, and the evidence that Play's bundle builds (NF-11B1)
+          path: android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           overwrite: true
           retention-days: 1
@@ -115,11 +141,55 @@ jobs:
       - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd  # v4
         with:
           packages: platform-tools
-      - run: sdkmanager 'build-tools;35.0.0'
+      - run: sdkmanager 'build-tools;36.0.0'
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
           name: phone-unsigned
           path: ${{ runner.temp }}/unsigned
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: play-bundle-unsigned
+          path: ${{ runner.temp }}/bundle
+      - name: Sign the Play bundle with the upload key (Play App Signing keeps the app key)
+        id: upload
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          STORE_PASS: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+          APK: ${{ needs.apk.outputs.apk }}
+        run: |
+          set -euo pipefail
+          if [ -z "$KEYSTORE" ] || [ -z "$STORE_PASS" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASS" ]; then
+            echo "::notice::No upload key yet (ANDROID_UPLOAD_*): the Play bundle is checked but not signed or uploaded."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          umask 077
+          if ! printf '%s' "$KEYSTORE" | tr -d ' \r\n\t' | base64 -d > "$RUNNER_TEMP/upload.keystore" 2>/dev/null; then
+            echo "::error::ANDROID_UPLOAD_KEYSTORE_BASE64 is not valid base64."
+            exit 1
+          fi
+          AAB="${APK%.apk}.aab"
+          cp "$RUNNER_TEMP/bundle/app-release.aab" "$RUNNER_TEMP/$AAB"
+          if ! jarsigner -keystore "$RUNNER_TEMP/upload.keystore" -storepass:env STORE_PASS -keypass:env KEY_PASS \
+              -sigalg SHA256withRSA -digestalg SHA-256 "$RUNNER_TEMP/$AAB" "$KEY_ALIAS" > /dev/null; then
+            rm -f "$RUNNER_TEMP/upload.keystore"
+            echo "::error::The upload keystore, alias or password was rejected by jarsigner."
+            exit 1
+          fi
+          rm -f "$RUNNER_TEMP/upload.keystore"
+          jarsigner -verify "$RUNNER_TEMP/$AAB" | grep -q "jar verified" || { echo "::error::The signed bundle does not verify."; exit 1; }
+          echo "signed=true" >> "$GITHUB_OUTPUT"
+          echo "aab=$AAB" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        if: steps.upload.outputs.signed == 'true'
+        with:
+          name: play-bundle  # for the owner to upload to the Play Console (NF-11B7)
+          path: ${{ runner.temp }}/${{ steps.upload.outputs.aab }}
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 7
       - name: Sign with the signing key
         id: sign
         env:
@@ -146,9 +216,9 @@ jobs:
             echo "::error::ANDROID_KEYSTORE_BASE64 is not valid base64."
             exit 1
           fi
-          if ! "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks "$RUNNER_TEMP/signing.keystore" \
+          if ! "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks "$RUNNER_TEMP/signing.keystore" \
               --ks-pass env:STORE_PASS --key-pass env:KEY_PASS --ks-key-alias "$KEY_ALIAS" \
-              --out "$RUNNER_TEMP/$APK" "$RUNNER_TEMP/unsigned/app-debug.apk"; then
+              --out "$RUNNER_TEMP/$APK" "$RUNNER_TEMP/unsigned/app-release-unsigned.apk"; then
             rm -f "$RUNNER_TEMP/signing.keystore"
             echo "::error::The Android signing keystore, alias or password was rejected by apksigner."
             exit 1
@@ -161,7 +231,7 @@ jobs:
           APK: ${{ needs.apk.outputs.apk }}
         run: |
           set -euo pipefail
-          fingerprint="$(python packaging/phone_build.py signer "$RUNNER_TEMP/$APK" --build-tools "$ANDROID_HOME/build-tools/35.0.0")"
+          fingerprint="$(python packaging/phone_build.py signer "$RUNNER_TEMP/$APK" --build-tools "$ANDROID_HOME/build-tools/36.0.0")"
           if ! [[ "$fingerprint" =~ ^[0-9a-f]{64}$ ]]; then
             echo "::error::Expected exactly one SHA-256 signing fingerprint."
             exit 1
@@ -179,7 +249,7 @@ jobs:
           APK: ${{ needs.apk.outputs.apk }}
         run: >-
           python packaging/phone_build.py check "$RUNNER_TEMP/$APK"
-          --build-tools "$ANDROID_HOME/build-tools/35.0.0" --code "$CODE" --name "$NAME"
+          --build-tools "$ANDROID_HOME/build-tools/36.0.0" --code "$CODE" --name "$NAME"
           --certificate packaging/android-test-certificate.sha256 --info "$RUNNER_TEMP/apk.json"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         if: inputs.bundle && steps.sign.outputs.signed == 'true'

@@ -104,11 +104,18 @@ public final class MainActivity extends Activity {
         super.onCreate(state);
         if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
                 && getIntent().getBooleanExtra("pairing_probe", false)) {
-            startActivity(new Intent(this, ProbeActivity.class).putExtra("pairing_probe", true));
+            // By name: ProbeActivity exists only in debug builds (src/debug, NF-11B1).
+            startActivity(new Intent().setClassName(this, "org.lightning.app.ProbeActivity")
+                    .putExtra("pairing_probe", true));
             finish();
             return;
         }
         JournalSyncScheduler.schedule(this);
+        if (Build.VERSION.SDK_INT >= 33) {
+            // Predictive Back (enableOnBackInvokedCallback in the manifest): onBackPressed is not called on API 33+.
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::goBack);
+        }
         SmsBridge.activity = this;
         BiometricBridge.activity = this;
         FileBridge.activity = this;
@@ -288,8 +295,15 @@ public final class MainActivity extends Activity {
         }
     }
 
+    /** Before API 33 only; from 33 the callback registered in onCreate calls goBack. */
     @Override
+    @SuppressWarnings("deprecation")
     public void onBackPressed() {
+        goBack();
+    }
+
+    /** Back: the page before, then Home (C03.4: Overview, then leave), then out without closing. */
+    private void goBack() {
         if (web != null && web.canGoBack()) web.goBack();
         else if (web != null && origin != null && web.getUrl() != null && ours(Uri.parse(web.getUrl()))
                 && !"/".equals(Uri.parse(web.getUrl()).getPath())) web.loadUrl(origin.toString());  // C03.4: Overview, then leave

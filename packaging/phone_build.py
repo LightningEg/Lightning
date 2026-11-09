@@ -3,11 +3,15 @@
     python packaging/phone_build.py identity                       # GitHub outputs: version code and name, APK name
     python packaging/phone_build.py check APK --build-tools DIR --code N --name TEXT [--certificate FILE] --info OUT
     python packaging/phone_build.py signer APK --build-tools DIR   # prints the signing certificate's SHA-256
+    python packaging/phone_build.py aab AAB --bundletool JAR --code N --name TEXT   # the Play bundle (NF-11B1)
     python packaging/phone_build.py bundle --windows DIR --apk APK --info JSON --out DIR [--reused-from RUN]
 
 `check` fails unless the APK is exactly what the workflow meant to build: the app ID and version, arm64 only,
 the permissions in packaging/android-permissions.txt, the files the phone needs and no private data, exactly
-the Python packages of requirements/android.lock, and, with --certificate, signed by that certificate alone.
+the Python packages of requirements/android.lock, targeting TARGET_SDK, not debuggable (a release build; the
+review builds of journal-local-build.yml pass --debug), and, with --certificate, signed by that certificate alone.
+`aab` fails unless `bundletool validate` accepts the Play bundle and its manifest has the same ID, version and
+target, and is not debuggable.
 `bundle` writes the two downloads (PC and Phone) from one commit only after the Windows ZIP is proven to be the
 tested one of the same commit.
 """
@@ -29,6 +33,8 @@ LOCK = ROOT / "requirements" / "android.lock"
 PERMISSIONS = ROOT / "packaging" / "android-permissions.txt"
 APP_ID = "org.lightning.app"
 ABI = "arm64-v8a"
+# Play takes new apps and updates only at this target (since 2026-08-31); android/app/build.gradle.kts matches it.
+TARGET_SDK = "36"
 # What the phone runs: the app's own Python, the shared package, the dummy round-trip fixture and the pages.
 REQUIRED = ("probe.py", "lightning_android.py", "lightning/runtime/devices.py", "lightning/sync/transport.py",
             "lightning/runtime/roundtrip.py", "lightning/database/migrations/", "roundtrip_fixture/profile.db",
@@ -159,10 +165,12 @@ def carried_identity(apk_path: Path) -> str | None:
 
 # ---------------------------------------------------------------- aapt2 and apksigner
 def badging(text: str) -> dict[str, str]:
-    """Package name, version code and name, and whether it is debuggable, from `aapt2 dump badging`."""
+    """Package name, version code and name, target SDK and whether it is debuggable, from `aapt2 dump badging`."""
     found = {}
     if match := re.search(r"^package: name='([^']*)' versionCode='([^']*)' versionName='([^']*)'", text, re.MULTILINE):
         found = {"package": match[1], "version_code": match[2], "version_name": match[3]}
+    if match := re.search(r"^targetSdkVersion:'([^']*)'", text, re.MULTILINE):
+        found["target_sdk"] = match[1]
     found["debuggable"] = "yes" if re.search(r"^application-debuggable", text, re.MULTILINE) else "no"
     return found
 
@@ -200,12 +208,13 @@ def certificate(path: Path) -> str:
     return value
 
 
-def check(apk: Path, build_tools: Path, code: str, name: str, cert_file: Path | None) -> dict:
+def check(apk: Path, build_tools: Path, code: str, name: str, cert_file: Path | None, debug: bool = False) -> dict:
     """Every check on the built APK; returns what the bundle records about it."""
     problems = []
     lock_text = LOCK.read_text(encoding="utf-8")
     info = badging(tool(build_tools, "aapt2", "dump", "badging", str(apk)))
-    wanted = {"package": APP_ID, "version_code": code, "version_name": name}
+    wanted = {"package": APP_ID, "version_code": code, "version_name": name, "target_sdk": TARGET_SDK,
+              "debuggable": "yes" if debug else "no"}
     for key, value in wanted.items():
         if info.get(key) != value:
             problems.append(f"{key} is {info.get(key)!r}, not {value!r}")
@@ -236,6 +245,36 @@ def check(apk: Path, build_tools: Path, code: str, name: str, cert_file: Path | 
             "python_packages": dict(sorted(packages.items()))}
 
 
+def manifest_problems(manifest: str, code: str, name: str) -> list[str]:
+    """What is wrong with the Play bundle's manifest (`bundletool dump manifest`) for this build."""
+    problems = []
+    wanted = {"package": APP_ID, "android:versionCode": code, "android:versionName": name,
+              "android:targetSdkVersion": TARGET_SDK}
+    for key, value in wanted.items():
+        found = re.search(rf'\b{re.escape(key)}="([^"]*)"', manifest)
+        if not found or found[1] != value:
+            problems.append(f"{key} is {found[1] if found else None!r}, not {value!r}")
+    if re.search(r'android:debuggable="true"', manifest):
+        problems.append("the bundle is debuggable; Play refuses it")
+    if "ProbeActivity" in manifest:
+        problems.append("the bundle carries ProbeActivity, a debug-only screen")
+    return problems
+
+
+def check_aab(aab: Path, bundletool: Path, code: str, name: str) -> dict:
+    def run(*args: str) -> str:
+        result = subprocess.run(["java", "-jar", str(bundletool), *args], capture_output=True, text=True)
+        if result.returncode != 0:
+            raise BuildError(f"bundletool {args[0]} failed: {result.stderr.strip() or result.stdout.strip()}")
+        return result.stdout
+    run("validate", f"--bundle={aab}")
+    problems = manifest_problems(run("dump", "manifest", f"--bundle={aab}"), code, name)
+    if problems:
+        raise BuildError("The Play bundle is not the build it should be:\n- " + "\n- ".join(problems))
+    return {"file": aab.name, "size": aab.stat().st_size, "sha256": sha256(aab), "application_id": APP_ID,
+            "version_code": int(code), "version_name": name, "target_sdk": int(TARGET_SDK)}
+
+
 # ---------------------------------------------------------------- bundle
 def windows_build(folder: Path, commit: str) -> tuple[Path, dict[str, str]]:
     """The tested Windows ZIP in a downloaded Windows artifact, proven to be of this commit."""
@@ -254,7 +293,7 @@ def windows_build(folder: Path, commit: str) -> tuple[Path, dict[str, str]]:
 
 README = """Lightning {stamp}
 
-These two files were built and tested from one commit ({commit}). You may use sample or real data; keep an independent backup. The phone app is debuggable. Install both from the same run:
+These two files were built and tested from one commit ({commit}). You may use sample or real data; keep an independent backup. Install both from the same run:
 a PC and a phone from different runs may not understand each other.
 
 PC (Windows): extract the ZIP to a new folder and run Lightning\\Lightning.exe. If Windows says it
@@ -323,6 +362,12 @@ def main(argv: list[str]) -> int:
     p.add_argument("--name", required=True)
     p.add_argument("--certificate", type=Path)
     p.add_argument("--info", type=Path, required=True)
+    p.add_argument("--debug", action="store_true", help="a review build: debuggable on purpose")
+    p = sub.add_parser("aab")
+    p.add_argument("aab", type=Path)
+    p.add_argument("--bundletool", type=Path, required=True)
+    p.add_argument("--code", required=True)
+    p.add_argument("--name", required=True)
     p = sub.add_parser("signer")
     p.add_argument("apk", type=Path)
     p.add_argument("--build-tools", type=Path, required=True)
@@ -337,10 +382,13 @@ def main(argv: list[str]) -> int:
         if args.command == "identity":
             outputs(identity(git("rev-parse", "HEAD"), int(git("rev-list", "--count", "HEAD")), display_version()))
         elif args.command == "check":
-            info = check(args.apk, args.build_tools, args.code, args.name, args.certificate)
+            info = check(args.apk, args.build_tools, args.code, args.name, args.certificate, args.debug)
             info["commit"] = git("rev-parse", "HEAD")
             args.info.write_text(json.dumps(info, indent=2) + "\n", encoding="utf-8")
             print(f"{args.apk.name}: every check passed" + ("" if args.certificate else " (not yet signed with the signing key)"))
+        elif args.command == "aab":
+            info = check_aab(args.aab, args.bundletool, args.code, args.name)
+            print(f"{args.aab.name}: bundletool validates it; ID, version and target SDK {TARGET_SDK} match, not debuggable")
         elif args.command == "signer":
             print(" ".join(signers(tool(args.build_tools, "apksigner", "verify", "--verbose", "--print-certs", str(args.apk)))))
         else:

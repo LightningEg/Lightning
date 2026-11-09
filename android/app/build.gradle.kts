@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "org.lightning.app"
-    compileSdk = 35
+    compileSdk = 36  // Play target since 2026-08-31 (NF-11B1); packaging/phone_build.py TARGET_SDK
 
     defaultConfig {
         // CI builds the phone app (packaging/phone_build.py): a version code that grows
@@ -14,11 +14,20 @@ android {
         applicationId = "org.lightning.app"
         manifestPlaceholders["appLabel"] = "Lightning"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = buildVersionCode?.toInt() ?: 1
         versionName = providers.gradleProperty("buildVersionName").getOrElse("0.5-m1")
         ndk {
             abiFilters += "arm64-v8a"
+        }
+    }
+
+    buildTypes {
+        // What ships, to GitHub (APK) and Play (AAB, bundleRelease): not debuggable, not shrunk (Chaquopy's
+        // Python reaches Java by name). Unsigned here: the workflow's sign job signs it away from Gradle.
+        getByName("release") {
+            isDebuggable = false
+            isMinifyEnabled = false
         }
     }
 }
