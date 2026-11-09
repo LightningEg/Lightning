@@ -117,7 +117,7 @@ def test_add_opens_on_the_amount_with_an_account_already_chosen(phone):
     """3AN3 (C05.2): no list of accounts first. Without a remembered account Add opens on the one used most; after an entry
     it opens on that account; the sheet's From chip changes it. ?pick=1 still shows the list."""
     phone.cookies.delete("lightning_last_account")
-    first = phone.get("/accounts/add-transaction").text
+    first = phone.get("/accounts/1/transaction/new").text
     assert "To which account?" not in first and 'name="amount"' in first and "autofocus" in first
     assert 'data-account-chip' in first and "data-sms-paste" in first
     sheet = phone.get("/accounts/2/transaction/new").text
@@ -455,3 +455,18 @@ def test_arabic_digits_and_their_separators_come_from_one_face():
     for name in ("style.css", "style.rtl.css"):
         css = (static / name).read_text(encoding="utf-8")
         assert '--body:"Lightning Arabic Figures",Manrope,"Noto Sans Arabic"' in css, name
+
+
+@pytest.mark.parametrize("path", PAGES)
+def test_phone_pages_have_a_status_bar_colour_and_no_text_arrows(phone, path):
+    """3BG1/3BG4: the browser build tints its status bar, and no arrow is a text glyph (it points backwards in Arabic)."""
+    html = phone.get(path).text
+    assert 'name="theme-color"' in html
+    body = html.split("<body", 1)[1]
+    assert not re.search(r">\s*[›‹]\s*<", body) and not re.search(r"\s›</(?:b|a|span)>", body)
+
+
+def test_phone_text_fields_name_their_enter_key(phone):
+    """3BG4: the keyboard's Enter key says next or done on a form's text fields."""
+    html = phone.get("/accounts/1/transaction/new").text
+    assert 'id="popup-amount"' in html and re.search(r'<input[^>]*id="popup-amount"[^>]*enterkeyhint="(next|done)"', html)

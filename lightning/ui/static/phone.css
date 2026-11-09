@@ -5,7 +5,12 @@
   --c-track: #E6EFEC; --c-well: var(--field, #EAF3EE); --c-surface: #FFFFFF; --c-line: #E3ECE9;
   --c-appbar: 56px; --c-tabbar: 64px; --c-side: 16px;
 }
-html.phone { -webkit-text-size-adjust: 100%; }
+html.phone { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
+/* 3BG3: no selected buttons or tab labels from a long press, and a pressed state instead of the browser's tap flash. */
+html.phone .phone-tabbar, html.phone button, html.phone .btn, html.phone summary { -webkit-user-select: none; user-select: none; }
+html.phone :is(a, button, summary):active { opacity: .7; }
+/* 3BG2 (C05.1): a link you tap in Settings is a 44 px row. */
+html.phone .settings-row a.settings-name:not(#_), html.phone .settings-row .btn:not(#_), html.phone .settings-more > summary:not(#_), html.phone .settings-advanced > summary:not(#_), html.phone .phone-period-now:not(#_) { display: inline-flex; align-items: center; height: auto; min-height: 44px; }
 html.phone, .phone-body { max-width: 100%; overflow-x: clip; }
 .phone-body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--c-ink); font-size: 15px; }
 
@@ -329,8 +334,11 @@ html.phone .main :is(input, select, textarea):not([type=hidden], [type=checkbox]
 .phone .phone-month:is(.heat-4, .flow-out-4, .flow-in-4) small { color: #fff; }
 .phone .phone-row-more > summary.phone-row { display: flex !important; justify-content: space-between; }
 .phone .phone-row-more > summary.phone-row::after { display: none !important; }
-.phone-chevron { flex: none; margin-left: 8px; color: var(--c-muted); font-size: 18px; transition: transform .15s; }
-.phone-row-more[open] .phone-chevron { transform: rotate(90deg); }
+.phone-chevron { flex: none; margin-left: 8px; color: var(--c-muted); font-size: 18px; line-height: 0; }
+.phone .chevron { display: inline-block; vertical-align: middle; flex: none; color: var(--c-muted); transition: transform .15s; }
+.phone .chevron-back { transform: scaleX(-1); } /* "earlier": points back, so left in English and right in Arabic */
+html[dir="rtl"].phone .chevron.chevron-back:has(> path) { transform: none; }
+.phone-row-more[open] .phone-chevron .chevron, html[dir="rtl"] .phone-row-more[open] .phone-chevron .chevron { transform: rotate(90deg); }
 
 /* C08: the list grouped by day; search full width, then chips. */
 .phone-search input { width: 100%; }

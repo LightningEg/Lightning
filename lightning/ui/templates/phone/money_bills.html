@@ -14,5 +14,5 @@
 {{ group('before', 'Before payday', p.before_payday) }}
 {{ group('after', 'After payday', p.after_payday) }}
 {% if not (p.late or p.week or p.before_payday or p.after_payday) %}<p class="phone-note">{{ 'Nothing is due.'|tr(locale) }}</p>{% endif %}
-<a class="phone-row" href="/plan/recurring"><span>{{ 'Recurring'|tr(locale) }}</span><b>›</b></a>
+<a class="phone-row" href="/plan/recurring"><span>{{ 'Recurring'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
 {% endblock %}

@@ -336,6 +336,7 @@ def build_version(identity: Path = Path(__file__).resolve().parents[1] / "build_
         return DISPLAY_VERSION
 
 
+templates.env.globals["chevron"] = lambda back=False: templates.env.get_template("partials/chevron.html").module.chevron(back)
 templates.env.globals["app_version"] = build_version()
 templates.env.globals["outside_url"] = __import__("lightning.ui.entitlements", fromlist=["outside_url"]).outside_url
 

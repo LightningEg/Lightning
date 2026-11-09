@@ -10,12 +10,12 @@
   <a class="phone-chip{{ ' is-chosen' if s.tab == 'review' }}" role="tab" aria-selected="{{ 'true' if s.tab == 'review' else 'false' }}" href="/activity?tab=review">{{ 'To review'|tr(locale) }}{% if s.review_total %} <b>{{ s.review_total }}</b>{% endif %}</a>
 </div>
 {% if s.tab == 'all' %}
-<div class="phone-chips"><span class="phone-chip phone-month-chip"><a href="/activity?month={{ s.prev_month }}" aria-label="{{ 'Earlier month'|tr(locale) }}">‹</a><span>{{ s.month }}</span>{% if s.next_month %}<a href="/activity?month={{ s.next_month }}" aria-label="{{ 'Later month'|tr(locale) }}">›</a>{% else %}<span class="phone-month-end" aria-hidden="true">&nbsp;</span>{% endif %}</span></div>
+<div class="phone-chips"><span class="phone-chip phone-month-chip"><a href="/activity?month={{ s.prev_month }}" aria-label="{{ 'Earlier month'|tr(locale) }}">{{ chevron(back=True) }}</a><span>{{ s.month }}</span>{% if s.next_month %}<a href="/activity?month={{ s.next_month }}" aria-label="{{ 'Later month'|tr(locale) }}">{{ chevron() }}</a>{% else %}<span class="phone-month-end" aria-hidden="true">&nbsp;</span>{% endif %}</span></div>
 <p class="phone-money-line"><span>{{ 'In'|tr(locale) }} <b class="pos"><bdi class="fig">{{ s.money_in|amount_role('total', True) }}</bdi></b> ·</span> <span>{{ 'Out'|tr(locale) }} <b><bdi class="fig">{{ (-s.money_out)|amount_role('total', True) }}</bdi></b></span></p>
 <div class="phone-flow-bars" aria-hidden="true"><i class="is-in" style="width: {{ s.in_share }}%"></i><i class="is-out" style="width: {{ s.out_share }}%"></i></div>
 {% if s.rows %}{{ txn_list(s.rows, show_account=True, base_url='/activity', keep_qs='month=' ~ s.month, day_net=True) }}
 {% else %}<p class="phone-note">{{ 'Nothing recorded this month.'|tr(locale) }}</p>{% endif %}
-{% if s.more_rows %}<a class="phone-row" href="/transactions?month={{ s.month }}"><span>{{ 'See every row'|tr(locale) }}</span><b>›</b></a>{% endif %}
+{% if s.more_rows %}<a class="phone-row" href="/transactions?month={{ s.month }}"><span>{{ 'See every row'|tr(locale) }}</span><b>{{ chevron() }}</b></a>{% endif %}
 {% elif s.card %}
 {% set card = s.card %}
 <section class="phone-section" aria-labelledby="card-heading">

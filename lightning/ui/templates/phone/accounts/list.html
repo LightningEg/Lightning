@@ -20,7 +20,7 @@
 {% else %}{% if not rows %}<div class="phone-accounts-empty"><a class="btn primary" href="/accounts/new">{{ "Add your first account"|tr(locale) }}</a></div>{% endif %}{% endfor %}
 {% set closed = rows|rejectattr('0.active')|list %}
 {% if closed %}<section class="phone-section phone-accounts-group phone-accounts-closed">
-<details class="phone-row-more"><summary class="phone-row"><span>{{ "Inactive accounts"|tr(locale) }} <span class="phone-chevron" aria-hidden="true">›</span></span><b>{{ closed|length }}</b></summary>
+<details class="phone-row-more"><summary class="phone-row"><span>{{ "Inactive accounts"|tr(locale) }} <span class="phone-chevron" aria-hidden="true">{{ chevron() }}</span></span><b>{{ closed|length }}</b></summary>
   <div class="phone-rows">{% for acc, balance, owned, count in closed %}<a class="phone-row" href="/accounts/{{ acc.id }}"><span>{{ acc.name }}</span><b>{{ balance|money if balance is not none else 'Unavailable'|tr(locale) }}</b></a>{% endfor %}</div></details>
 </section>{% endif %}
 {% if rows %}<p class="phone-accounts-more"><a class="phone-quiet" href="/transactions">{{ 'See all transactions'|tr(locale) }}</a></p>{% endif %}

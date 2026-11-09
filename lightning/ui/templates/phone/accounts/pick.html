@@ -7,7 +7,7 @@
 <section class="card app-popup-content">
   <h2 data-popup-title class="phone-sheet-title">{{ 'Add transaction'|tr(locale) }}</h2>
   <p class="phone-note">{{ "To which account?"|tr(locale) }}</p>
-  <div class="phone-rows">{% for a in accounts %}<a class="phone-row" href="/accounts/{{ a.id }}/transaction/new?return_to={{ ('/accounts/' ~ a.id)|urlencode }}" data-popup-open><span>{{ a.name }}{% if a.type_short|lower not in a.name|lower %}<small>{{ a.type_short }}</small>{% endif %}</span><b>›</b></a>{% endfor %}</div>
-<a class="phone-row" href="/plan/purchases/new" data-popup-open><span>{{ 'Bought in instalments'|tr(locale) }}</span><b>›</b></a>
+  <div class="phone-rows">{% for a in accounts %}<a class="phone-row" href="/accounts/{{ a.id }}/transaction/new?return_to={{ ('/accounts/' ~ a.id)|urlencode }}" data-popup-open><span>{{ a.name }}{% if a.type_short|lower not in a.name|lower %}<small>{{ a.type_short }}</small>{% endif %}</span><b>{{ chevron() }}</b></a>{% endfor %}</div>
+<a class="phone-row" href="/plan/purchases/new" data-popup-open><span>{{ 'Bought in instalments'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
 </section>
 {% endblock %}
