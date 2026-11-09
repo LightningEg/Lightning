@@ -60,6 +60,18 @@ The existing `v2.1.0` tag points to `930530a3`, before the update key was pinned
 https://github.com/LightningEg/Lightning/actions/runs/42527383359. Do not move the tag or rerun it expecting the
 new key to work. The owner chose to prepare **v2.1.1** with this fix (2026-11-09); preserve the old tag.
 
+The key fix and version preparation merged as #440 and #441. The owner tagged `v2.1.1` at `aab11bb7`.
+[Release run #893](https://github.com/LightningEg/Lightning/actions/runs/42530323878) passed Linux, Android signing,
+Windows source tests, packaging and the extracted executable's encryption/page self-check, but its WebView2
+smoke test failed after the navigation guard was installed. The report did not identify which later phase failed.
+`desktop/window.py` previously started the 20-second smoke deadline before renderer initialization, shorter
+than normal startup's 30-second allowance. The repair separates guarded startup from page/health/navigation
+assertions and records a fixed, non-secret `smoke_stage`; `tests/test_desktop_smoke.py` covers a healthy
+25-second cold start, startup timeout, missing page marker, failed health, stale rejection and early closure.
+A real packaged Windows run must confirm the result; no test or security assertion is bypassed. Existing release
+tags remain unchanged. Re-running the old tag uses its old source and cannot validate this repair. The owner authorized tagging
+`v2.1.2` after the repair merges and required checks pass (2026-11-09).
+
 ## How to work on this item
 
 One step is one pull request; the owner steps need no code. Read only the files a step names. The tests are

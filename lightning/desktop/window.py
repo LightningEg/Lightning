@@ -7,6 +7,7 @@ import json
 import os
 import re
 import threading
+import time
 from datetime import date
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
@@ -248,6 +249,57 @@ def _show_error(message: str) -> None:
     ctypes.windll.user32.MessageBoxW(None, message, "Lightning", 0x10)
 
 
+def _check_smoke(window, *, profile_mode: bool, app_ready, rejected, window_closed,
+                 diagnostics: dict) -> bool:
+    """Wait for guarded startup, then prove the local page, health request and navigation guard work.
+
+    WebView2 initialization has the same budget as an ordinary launch. The smoke-test budget starts
+    only after the guarded local page loads, so a cold renderer cannot consume the assertions' time.
+    Diagnostics contain fixed stage names only, never URLs or launch/session credentials.
+    """
+    diagnostics["smoke_stage"] = "waiting-for-local-page"
+    if not app_ready.wait(_STARTUP_TIMEOUT) or window_closed.is_set():
+        return False
+    diagnostics["smoke_stage"] = "waiting-for-page-marker"
+    selector = "#profile-ready" if profile_mode else "#probe-ready"
+    end = time.monotonic() + _SMOKE_TIMEOUT
+    while not window_closed.is_set() and time.monotonic() < end:
+        if window.evaluate_js(f"Boolean(document.querySelector('{selector}'))"):
+            break
+        threading.Event().wait(0.1)
+    else:
+        return False
+
+    diagnostics["smoke_stage"] = "checking-local-health"
+    check_path = "/profiles/health" if profile_mode else "/api/check"
+    window.run_js(
+        "document.documentElement.dataset.lightningSmoke='';"
+        "(async()=>{try{const r=await fetch('" + check_path + "');"
+        "const j=await r.json();document.documentElement.dataset.lightningSmoke="
+        "(r.ok&&new URL(r.url).origin===location.origin&&j.ok===true?"
+        "'ok':'fail')}catch(e){"
+        "document.documentElement.dataset.lightningSmoke='fail'}})()"
+    )
+    end = time.monotonic() + 5
+    while not window_closed.is_set() and time.monotonic() < end:
+        health = window.evaluate_js("document.documentElement.dataset.lightningSmoke||''")
+        if health == "ok":
+            break
+        if health == "fail":
+            return False
+        threading.Event().wait(0.1)
+    else:
+        return False
+
+    diagnostics["smoke_stage"] = "checking-navigation-rejection"
+    rejected.clear()
+    window.run_js("location.href='https://example.com/'")
+    if not rejected.wait(2) or window_closed.is_set():
+        return False
+    diagnostics["smoke_stage"] = "passed"
+    return True
+
+
 def run_window(url: str, origin: str, *, smoke: bool = False, diagnostics: dict | None = None,
                profile_mode: bool = False) -> int:
     """Run one guarded WebView2 window; return nonzero for startup or smoke failures."""
@@ -415,59 +467,23 @@ def run_window(url: str, origin: str, *, smoke: bool = False, diagnostics: dict 
 
         if smoke:
             def monitor_smoke() -> None:
-                import time
-
-                end = time.monotonic() + _SMOKE_TIMEOUT
-                while time.monotonic() < end and not smoke_done.is_set():
-                    if app_ready.is_set() and state["guard"]:
-                        try:
-                            selector = "#profile-ready" if profile_mode else "#probe-ready"
-                            check_path = "/profiles/health" if profile_mode else "/api/check"
-                            if window.evaluate_js(f"Boolean(document.querySelector('{selector}'))"):
-                                window.run_js(
-                                    "(async()=>{try{const r=await fetch('" + check_path + "');"
-                                    "const j=await r.json();document.documentElement.dataset.lightningSmoke="
-                                    "(r.ok&&new URL(r.url).origin===location.origin&&j.ok===true?"
-                                    "'ok':'fail')}catch(e){"
-                                    "document.documentElement.dataset.lightningSmoke='fail'}})()"
-                                )
-                                check_end = time.monotonic() + 5
-                                while time.monotonic() < check_end:
-                                    if window.evaluate_js(
-                                        "document.documentElement.dataset.lightningSmoke||''"
-                                    ) == "ok":
-                                        window.run_js("location.href='https://example.com/'")
-                                        if state["rejected"].wait(2):
-                                            if not window_closed.is_set():
-                                                result["code"] = 0
-                                                diagnostics["stage"] = "smoke-passed"
-                                        else:
-                                            result["code"] = 1
-                                        smoke_done.set()
-                                        break
-                                    if window.evaluate_js(
-                                        "document.documentElement.dataset.lightningSmoke||''"
-                                    ) == "fail":
-                                        result["code"] = 1
-                                        smoke_done.set()
-                                        break
-                                    threading.Event().wait(0.1)
-                                break
-                        except Exception:
-                            result["code"] = 1
-                            smoke_done.set()
-                            break
-                    threading.Event().wait(0.1)
-                if not smoke_done.is_set():
-                    result["code"] = 1
-                    smoke_done.set()
-                if result["code"]:
+                try:
+                    passed = _check_smoke(window, profile_mode=profile_mode, app_ready=app_ready,
+                                          rejected=state["rejected"], window_closed=window_closed,
+                                          diagnostics=diagnostics)
+                except Exception as exc:
+                    diagnostics["smoke_error_type"] = type(exc).__name__
+                    passed = False
+                if not passed:
                     fail("WebView2 smoke check failed")
-                else:
-                    try:
-                        window.destroy()
-                    except Exception:
-                        result["code"] = 1
+                    return
+                result["code"] = 0
+                diagnostics["stage"] = "smoke-passed"
+                smoke_done.set()
+                try:
+                    window.destroy()
+                except Exception:
+                    result["code"] = 1
 
             def on_loaded(*_args) -> None:
                 try:
