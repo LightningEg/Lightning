@@ -39,7 +39,7 @@ def publish(tmp_path: Path, state: dict, skip_manifest: bool = False, **env) -> 
     (release / "SHA256SUMS").write_text(f"{hashlib.sha256(payload).hexdigest()}  {ZIP}\n"
                                           f"{hashlib.sha256(phone).hexdigest()}  {APK}\n", encoding="utf-8")
     (release / "BUILD.json").write_text(json.dumps({"commit": "abc123", "windows": {"file": ZIP},
-        "android": {"file": APK, "application_id": "org.lightning.app", "debuggable": True,
+        "android": {"file": APK, "application_id": "org.lightning.app", "debuggable": False,
                     "certificate_sha256": "a" * 64}}), encoding="utf-8")
     (release / "BUILD_INFO.txt").write_text(f"Lightning 2.0.0 for Windows x64\nBuild: release {TAG}\n"
                                             "Commit: abc123\nRun: workflow run 22, attempt 1\n", encoding="utf-8")

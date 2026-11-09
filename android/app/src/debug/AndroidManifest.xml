@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- The dependency and page checks of tasks 04a–04c; not on the home screen, and never in a release
+             build (NF-11B1: Play gets no test screens). -->
+        <activity android:name=".ProbeActivity" android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|keyboard|uiMode" />
+    </application>
+</manifest>

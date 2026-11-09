@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 48 open items. Each folder holds its reports and its items.
+11 big pictures, 47 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -250,7 +250,6 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IV-10G** | [Paid themes barely reach the phone - the hero parts are PC-only, Papyrus has no motion there, and Cotton paints Add rose](10-looks-and-store/IV-10G-paid-themes-on-the-phone.md) | improvement, visual | Feel | M | Opus | ready |
 | **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md) | new feature | Feel | L | Opus | building |
 | NF-10A1 | ↳ Native Settings activation and restore | | | L | Opus | |
 | NF-10A2 | ↳ Licences saved safely | | | L | Opus | |
@@ -270,7 +269,7 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 
 Reports: [r12](10-looks-and-store/r12-v150-release/report.md) · [r13](10-looks-and-store/r13-store-and-community/report.md).
 
-Done: 10E, 10F. Next free code: 10H.
+Done: 10E, 10F, 10G. Next free code: 10H.
 
 ## 11 Phone UX
 
@@ -304,7 +303,6 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-3AY13 | ↳ Owner's phone check | | | owner |  | |
 | **IV-3F** | [The phone's top bar looks too white to one user](11-phone-ux/IV-3F-phone-top-bar-looks-too-white.md) | improvement, visual | Feel | S | Sonnet | ready |
 | **NF-11B** | [Ship the phone on Google Play - a release bundle at API 36, the SMS and payments policies, the app's own privacy notice and the Console declarations](11-phone-ux/NF-11B-ship-the-phone-on-google-play.md) | new feature | Everywhere | L | Opus | ready |
-| NF-11B1 | ↳ A release bundle that Play accepts | | | M | Opus | |
 | NF-11B2 | ↳ Bank SMS within Play's SMS policy | | | M | Opus | |
 | NF-11B3 | ↳ Themes sold through Google Play Billing in the Play build | | | L | Opus | |
 | NF-11B4 | ↳ A privacy notice that covers the app, linked from the app | | | M | Opus | |
@@ -316,7 +314,7 @@ The phone is its own product: a few places that each answer one question, quick 
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md).
 
-Done: 11F, 11I, 3AY1, 3AY3, 3AY5, BV-11G, IV-11D3. Next free code: 11J.
+Done: 11F, 11I, 11B1, 3AY1, 3AY3, 3AY5, BV-11G, IV-11D3. Next free code: 11J.
 
 ## 12 Desktop UX and smart next steps
 
