@@ -30,7 +30,7 @@
 
 - **10A/10C app themes:** ready to sell, Dendera included; owner steps in 10C4. Dendera's premium pass (10F) is built; the site's demo shots are current (site #159). New themes: `guideline/themes.md` §5. **Read:** `issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md`.
 
-- **Website (11-09):** owner: Home ends on Download; Marketplace in search (site `claude/convert-readers-seo-motion`). Analytics host blocked here: unread. **Read:** site README › Search.
+- **Website (11-09):** owner: Home ends on Download; Marketplace in search (site PR). Analytics host blocked here: unread. **Read:** site README › Search.
 
 - **Import (2026-11-07, Claude):** IT-7Z and IT-7AA done; NF-7AB flow decided (cards first, 2026-11-08). Next: 2AI2. **Read:** 2AI, 7AB.
 
