@@ -5,6 +5,7 @@ ending, the date and time, and who or where. Then a batch goes through the bank 
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
@@ -215,6 +216,9 @@ def test_the_phone_app_asks_then_reads_in_to_review(tmp_path):
         add_account(phone, "NBE current")
         page = phone.get("/sms").text
         assert "Allow reading SMS" in page and "never from people" in page
+        main = page[page.index("<main"):] if "<main" in page else page
+        # NF-11B2 (Play's SMS policy): the disclosure and its Allow come before anything else on the page.
+        assert main.index("never from people") < main.index("Allow reading SMS") < main.index('name="messages"')
         phone.post("/sms/allow", data={"__session": token(page, "__session")})
         assert source.asked == 1
         source.state = "granted"
@@ -406,3 +410,25 @@ def test_pc_from_sms_links_back_to_accounts(c, setup):
     page = TestClient(create_app(c)).get('/sms')
     assert page.status_code == 200
     assert '<a class="btn" href="/accounts">Accounts</a>' in page.text
+
+
+def test_the_phone_asks_the_sms_provider_for_bank_senders_only():
+    """NF-11B2: SmsBridge.since() filters people in the provider's query (Play's SMS policy), by the PERSON rule."""
+    import sqlite3
+    from lightning.sms_imports import PERSON
+    java = (Path(__file__).resolve().parents[1]
+            / "android/app/src/main/java/org/lightning/app/SmsBridge.java").read_text(encoding="utf-8")
+    since = java[java.index("public static String since"):java.index("static void share")]
+    assert '" > ? AND " + NOT_A_PERSON' in since
+    def value(name, known):  # a Java constant made of "literals" + CONSTANTS, evaluated
+        body = java[java.index(f"String {name} = ") + len(f"String {name} = "):]
+        tokens = re.findall(r'"(?:[^"\\]|\\.)*"|[A-Z_]+', body[:body.index(";")])
+        return "".join(t[1:-1] if t.startswith('"') else known[t] for t in tokens)
+    sql = value("NOT_A_PERSON", {"BARE": value("BARE", {})})
+    db = sqlite3.connect(":memory:")
+    db.execute("CREATE TABLE inbox (address TEXT)")
+    senders = ["CIB", "NBE", "Banque Misr", "19623", "123456", "+201001234567", "01001234567", "+20 100 123 4567",
+               "1234567", "", None, "QNB-AA", "+12", "12+34567890"]
+    db.executemany("INSERT INTO inbox VALUES (?)", [(a,) for a in senders])
+    kept = [row[0] for row in db.execute(f"SELECT address FROM inbox WHERE {sql}")]
+    assert kept == [a for a in senders if not PERSON.match((a or "").replace(" ", ""))]
