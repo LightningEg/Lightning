@@ -1,6 +1,5 @@
 """Rendered device banners retain their action, translate and escape peer names."""
 from types import SimpleNamespace
-import shutil
 
 import pytest
 from fastapi.testclient import TestClient
@@ -10,6 +9,7 @@ from lightning.runtime.http import Credentials, Guard, Host
 from lightning.runtime.roles import SessionRole
 from lightning.sync.state import HomeState
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 def banner_app(c, *, phone=False, lent=False, name="Office PC"):
@@ -36,10 +36,9 @@ def banner_app(c, *, phone=False, lent=False, name="Office PC"):
 def browser():
     pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright
-    if not shutil.which("chromium"):
-        pytest.skip("Chromium is not installed")
+    chromium = require_chromium()
     with sync_playwright() as p:
-        with p.chromium.launch(executable_path=shutil.which("chromium"), args=["--no-sandbox"]) as browser:
+        with p.chromium.launch(executable_path=chromium, args=["--no-sandbox"]) as browser:
             yield browser
 
 

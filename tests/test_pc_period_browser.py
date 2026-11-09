@@ -1,7 +1,5 @@
 """The PC period control keeps month navigation inside one track and submits the chosen period."""
-from pathlib import Path
 from types import SimpleNamespace
-import shutil
 
 import pytest
 
@@ -10,14 +8,13 @@ from lightning.runtime.http import Guard, Host
 from lightning.runtime.roles import SessionRole
 from lightning.samples import load_mohab_2026
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 def test_pc_period_track_submits_months_and_custom_ranges(c, monkeypatch):
     pytest.importorskip('playwright')
     from playwright.sync_api import sync_playwright
-    chromium = shutil.which('chromium') or ('/opt/pw-browsers/chromium' if Path('/opt/pw-browsers/chromium').exists() else None)
-    if not chromium:
-        pytest.skip('Chromium is not installed')
+    chromium = require_chromium()
     monkeypatch.setenv('LIGHTNING_TODAY', '2026-10-15')
     monkeypatch.setenv('LIGHTNING_PRICES_OFFLINE', '1')
     load_mohab_2026(c)

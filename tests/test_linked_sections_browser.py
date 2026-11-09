@@ -1,7 +1,5 @@
 """Browser checks for the linked-section pages (NF-7T): they fit PC and phone and pass the brand audit."""
-from pathlib import Path
 import os
-import shutil
 
 import pytest
 
@@ -12,17 +10,15 @@ from lightning.bootstrap import build
 from lightning.runtime.http import Host
 from lightning.samples import load_mohab_2026
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium, chromium_executable
 
-CHROMIUM = Path("/opt/pw-browsers/chromium")
-if not CHROMIUM.exists():
-    CHROMIUM = Path(shutil.which("chromium") or str(CHROMIUM))
+CHROMIUM = chromium_executable()
 SHOTS = os.environ.get("LIGHTNING_SHOTS", "")
 
 
 @pytest.mark.parametrize("phone", [False, True], ids=["pc", "phone"])
 def test_linked_pages_fit_and_pass_the_audit(tmp_path, monkeypatch, phone):
-    if not CHROMIUM.exists():
-        pytest.skip("Chromium is not installed")
+    require_chromium()
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-02")
     monkeypatch.setenv("LIGHTNING_PRICES_OFFLINE", "1")
     c = build(tmp_path / "t.db")

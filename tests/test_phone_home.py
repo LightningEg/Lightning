@@ -3,9 +3,7 @@ and the five states (first run, catch-up, payday, overspent, calm) each lead wit
 from __future__ import annotations
 
 import re
-import shutil
 from datetime import date
-from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -19,6 +17,7 @@ from lightning.samples import load_mohab_2026
 from lightning.ui.phone.router import mount_phone
 from lightning.ui.phone.screens import home
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 @pytest.fixture(scope="module")
@@ -106,9 +105,7 @@ def test_home_has_at_most_eight_figures(sample):
 def test_first_screen_holds_the_latest_row_in_one_and_a_fifth_screens(sample):
     pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright
-    chromium = shutil.which("chromium") or ("/opt/pw-browsers/chromium" if Path("/opt/pw-browsers/chromium").exists() else None)
-    if not chromium:
-        pytest.skip("Chromium is not installed")
+    chromium = require_chromium()
     c, _ = _on(sample, "2026-10-04")
     session = SimpleNamespace(container=c, paths=None, journal=None, borrowed=None, role=SessionRole.HOME,
                               token="test-home-session", csrf="test-home-csrf")

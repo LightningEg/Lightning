@@ -1,9 +1,7 @@
 """Live search on the phone keeps the newest results and address (BT-3AP): a body that arrives late never overwrites
 newer results, clearing the field lands on the empty search, and a response for a page already left is dropped. The
 real initializer runs in a real browser; only the network answer is held back so the order is controlled."""
-from pathlib import Path
 from types import SimpleNamespace
-import shutil
 
 import pytest
 
@@ -12,6 +10,7 @@ from lightning.runtime.http import Guard, Host
 from lightning.runtime.roles import SessionRole
 from lightning.samples import load_mohab_2026
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 # Replaces fetch for the live-search calls: each call waits until the test releases it with its own body.
 HOLD = """
@@ -34,9 +33,7 @@ window.fetch = (url, options) => {
 def search(c):
     pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright
-    chromium = shutil.which("chromium") or ("/opt/pw-browsers/chromium" if Path("/opt/pw-browsers/chromium").exists() else None)
-    if not chromium:
-        pytest.skip("Chromium is not installed")
+    chromium = require_chromium()
     load_mohab_2026(c)
     session = SimpleNamespace(container=c, paths=None, journal=None, borrowed=None, role=SessionRole.HOME,
                               token="test-live-search-session", csrf="test-live-search-csrf")

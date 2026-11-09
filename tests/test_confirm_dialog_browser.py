@@ -1,7 +1,5 @@
 """Delete remains an explicit action in both languages, including local form handlers."""
-from pathlib import Path
 from types import SimpleNamespace
-import shutil
 
 import pytest
 
@@ -11,16 +9,14 @@ from lightning.runtime.roles import SessionRole
 from lightning.samples import load_mohab_2026
 from lightning.ui.i18n import translate
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 @pytest.fixture
 def delete_page(c):
     pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright
-    chromium = shutil.which("chromium") or (
-        "/opt/pw-browsers/chromium" if Path("/opt/pw-browsers/chromium").exists() else None)
-    if not chromium:
-        pytest.skip("Chromium is not installed")
+    chromium = require_chromium()
     load_mohab_2026(c)
     session = SimpleNamespace(container=c, paths=None, journal=None, borrowed=None, role=SessionRole.HOME,
                               token="test-delete-session", csrf="test-delete-csrf")

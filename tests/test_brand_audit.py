@@ -2,22 +2,19 @@
 1366 × 768 px, nothing is upper-case, text is only in A03 colours, plain links are Ink and underlined, H1 to H3 are Ink,
 no field is white or boxed, fieldsets do not draw nested boxes, chart end labels do not overlap, money out in the
 register is rose and never a positive figure, and the register fits its card.
-Skipped when Playwright or Chromium is missing (CI has neither), so it runs by hand:
-`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers python -m pytest tests/test_brand_audit.py -q`."""
+Skipped on a machine without Playwright or Chromium; required in CI (tests/browser_support.py)."""
 from __future__ import annotations
 
 import json
 import re
-import shutil
 import tempfile
 from pathlib import Path
 
 import pytest
+from tests.browser_support import chromium_executable, require_chromium
 
 pytest.importorskip("playwright")
-CHROMIUM = Path("/opt/pw-browsers/chromium")
-if not CHROMIUM.exists():
-    CHROMIUM = Path(shutil.which("chromium") or str(CHROMIUM))
+CHROMIUM = chromium_executable()
 
 PAGES = ("/plan/purchases/new", "/exports/all", "/setup/salary", "/", "/transactions", "/accounts", "/accounts/1", "/accounts/currencies", "/settings", "/investments",
          "/investments/prices", "/budget", "/plan", "/birdview/expenses", "/financial-health", "/categories", "/settings?section=budget",
@@ -137,8 +134,7 @@ def _collect(page):
 
 @pytest.fixture(scope="module")
 def audit():
-    if not CHROMIUM.exists():
-        pytest.skip("Chromium is not installed")
+    require_chromium()
     from playwright.sync_api import sync_playwright
     from lightning.runtime.app import profile_app
     from lightning.runtime.devices import Devices

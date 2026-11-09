@@ -164,7 +164,9 @@ def journal_ui_router(session) -> APIRouter:
                         pairing.note_problem(error)  # say it, instead of waiting forever
                 elif current.device.home is None and not screen["pending"] and not screen["paired"]:
                     await pairing.find()
-                return JSONResponse(dict(version=digest(pairing.screen())))
+                screen = pairing.screen()
+                screen["nearby_off"] = bool(getattr(current, "discovery_error", None))  # the page digests the same dict
+                return JSONResponse(dict(version=digest(screen)))
             if action == "revoke":
                 pairing.revoke(str(data.get("device", "")))
                 return RedirectResponse("/journal/devices", status_code=303)

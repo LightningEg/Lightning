@@ -1,20 +1,16 @@
 """The actual PC/phone fields use the server matcher and keep their stored selections explicit."""
-from pathlib import Path
-import os
-import shutil
 
 import pytest
 
 from lightning.runtime.http import Host
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 @pytest.mark.parametrize('phone', [False, True])
 def test_scoped_account_category_owner_counterparty_and_instrument_fields(c, setup, phone):
-    if os.environ.get('LIGHTNING_REQUIRE_BROWSER') == '1':
-        from playwright.sync_api import sync_playwright
-    else:
-        sync_playwright = pytest.importorskip('playwright.sync_api').sync_playwright
+    executable = require_chromium()
+    from playwright.sync_api import sync_playwright
     accounts, _ = setup
     person = c.counterparties.create('أحمد', kind='PERSON')
     c.counterparties.create('Talabat')
@@ -29,11 +25,6 @@ def test_scoped_account_category_owner_counterparty_and_instrument_fields(c, set
     host = Host(lambda _: app).start()
     try:
         with sync_playwright() as pw:
-            executable = shutil.which('chromium') or pw.chromium.executable_path
-            if not Path(executable).is_file():
-                if os.environ.get('LIGHTNING_REQUIRE_BROWSER') == '1':
-                    pytest.fail('The required Chromium browser is missing')
-                pytest.skip('Chromium is not installed')
             browser = pw.chromium.launch(executable_path=executable, args=['--no-sandbox'])
             page = browser.new_page(viewport={'width':390 if phone else 1366,'height':900})
             errors = []
@@ -90,10 +81,8 @@ def test_scoped_account_category_owner_counterparty_and_instrument_fields(c, set
 
 @pytest.mark.parametrize('phone',[False,True])
 def test_import_picker_keeps_same_named_account_and_counterparty_choices_distinct(c,setup,phone):
-    if os.environ.get('LIGHTNING_REQUIRE_BROWSER') == '1':
-        from playwright.sync_api import sync_playwright
-    else:
-        sync_playwright=pytest.importorskip('playwright.sync_api').sync_playwright
+    executable = require_chromium()
+    from playwright.sync_api import sync_playwright
     bank,wallet=setup[0]['cib'],setup[0]['wallet']
     party=c.counterparties.create(wallet.name)
     food=c.categories.get_by_code('EXP.PERSONAL.FOOD')
@@ -107,11 +96,6 @@ def test_import_picker_keeps_same_named_account_and_counterparty_choices_distinc
     host=Host(lambda _:app).start()
     try:
         with sync_playwright() as pw:
-            executable=shutil.which('chromium') or pw.chromium.executable_path
-            if not Path(executable).is_file():
-                if os.environ.get('LIGHTNING_REQUIRE_BROWSER')=='1':
-                    pytest.fail('The required Chromium browser is missing')
-                pytest.skip('Chromium is not installed')
             browser=pw.chromium.launch(executable_path=executable,args=['--no-sandbox'])
             page=browser.new_page(viewport={'width':390 if phone else 1366,'height':900})
             page.goto(f'{host.origin}/accounts/{bank.id}/import/{batch}')

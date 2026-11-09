@@ -1,6 +1,4 @@
 """The holdings table fits a 1366 px window without a sideways scroll."""
-from pathlib import Path
-import shutil
 
 import pytest
 
@@ -8,15 +6,13 @@ pytest.importorskip('playwright')
 from playwright.sync_api import sync_playwright
 from lightning.runtime.http import Host
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium, chromium_executable
 
-CHROMIUM = Path('/opt/pw-browsers/chromium')
-if not CHROMIUM.exists():
-    CHROMIUM = Path(shutil.which('chromium') or str(CHROMIUM))
+CHROMIUM = chromium_executable()
 
 
 def test_holdings_table_has_no_sideways_scroll_at_1366(c, setup):
-    if not CHROMIUM.exists():
-        pytest.skip('Chromium is not installed')
+    require_chromium()
     accounts, _ = setup
     for name, code in (("Commercial International Bank", "COMI"), ("Talaat Moustafa Group", "TMGH"),
                        ("Fawry for Banking Technology", "FWRY")):

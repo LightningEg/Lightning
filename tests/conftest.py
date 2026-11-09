@@ -12,6 +12,34 @@ os.environ["LIGHTNING_PRICES_OFFLINE"] = "1"
 from lightning.bootstrap import Container, build
 
 
+_BROWSER_SKIP = ("playwright", "chromium")
+
+
+def _browser_skip(report) -> bool:
+    longrepr = report.longrepr
+    reason = longrepr[2] if isinstance(longrepr, tuple) and len(longrepr) == 3 else str(longrepr)
+    return any(word in reason.lower() for word in _BROWSER_SKIP)
+
+
+def _fail_browser_skip(report):
+    # CI sets LIGHTNING_REQUIRE_BROWSER=1 (tests/browser_support.py): a browser test may not skip for want of a browser.
+    if report.skipped and os.environ.get("LIGHTNING_REQUIRE_BROWSER") == "1" and _browser_skip(report):
+        report.outcome = "failed"
+        report.longrepr = f"Browser test skipped while LIGHTNING_REQUIRE_BROWSER=1: {report.longrepr}"
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    _fail_browser_skip(outcome.get_result())
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_make_collect_report(collector):
+    outcome = yield
+    _fail_browser_skip(outcome.get_result())
+
+
 def pytest_configure(config):
     config.addinivalue_line("markers", "real_kdf: keep the shipped Argon2 costs instead of the cheap test ones")
 

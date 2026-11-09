@@ -1,6 +1,4 @@
 """A person sees the correct native currency when choosing a bill's account."""
-from pathlib import Path
-import shutil
 
 import pytest
 
@@ -8,13 +6,12 @@ pytest.importorskip('playwright')
 from playwright.sync_api import sync_playwright
 from lightning.runtime.http import Host
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 @pytest.mark.parametrize('phone', [False, True], ids=['pc','phone'])
 def test_bill_currency_label_tracks_the_account_picker(c, setup, phone):
-    chromium = shutil.which('chromium')
-    if not chromium:
-        pytest.skip('Chromium unavailable')
+    chromium = require_chromium()
     c.currencies.register('USD')
     c.fx.save('USD', '2026-09-01', '50')
     c.fx.save('USD', '2026-12-31', '50')

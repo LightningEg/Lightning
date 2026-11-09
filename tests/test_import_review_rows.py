@@ -7,6 +7,7 @@ from decimal import Decimal as D
 from fastapi.testclient import TestClient
 
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 def _stage(c, account_id, csv_text, name="statement.csv"):
@@ -146,19 +147,13 @@ def test_the_review_page_is_rows_with_chips_and_a_bulk_bar(c, setup):
 
 def test_bulk_bar_writes_into_the_ticked_rows_and_posts(c, setup):
     """Browser: tick a name, fill the bar, Apply, then post; the account shows both rows with the new counterparty."""
-    import shutil
-    from pathlib import Path
 
     import pytest
     pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright
     from lightning.runtime.http import Host
 
-    chromium = Path("/opt/pw-browsers/chromium")
-    if not chromium.exists():
-        chromium = Path(shutil.which("chromium") or str(chromium))
-    if not chromium.exists():
-        pytest.skip("Chromium is not installed")
+    chromium = require_chromium()
     accounts, cats = setup
     cib = accounts["cib"].id
     batch, rows = _stage(c, cib, "Date,Counterparty,Amount\n2026-09-10,SHOP,-10\n2026-09-11,SHOP,-20\n")
