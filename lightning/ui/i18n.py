@@ -659,6 +659,8 @@ ARABIC_UI = {
     'Start a fresh, empty database? Your current one is backed up and kept as a separate file, but the app will open the empty one from now on.': 'تبدأ قاعدة بيانات جديدة وفاضية؟ هيتاخد نسخة احتياطية من الحالية وتتحفظ كملف منفصل، والتطبيق هيفتح الفاضية من دلوقتي.',
     'This phone': 'الموبايل ده',
     'Unlock with fingerprint': 'افتح ببصمة الإصبع',
+    'Hide in recent apps': 'اخفيه في التطبيقات الأخيرة',
+    'Your amounts do not show when you switch apps.': 'مبالغك مش بتظهر لما تبدّل بين التطبيقات.',
     'On': 'شغّال',
     'Off': 'متوقف',
     'Your password still works': 'كلمة المرور لسه بتفتح',

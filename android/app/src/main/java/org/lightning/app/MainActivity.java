@@ -117,6 +117,8 @@ public final class MainActivity extends Activity {
                     android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::goBack);
         }
         SmsBridge.activity = this;
+        RecentsBridge.activity = this;
+        RecentsBridge.apply(this);  // Hide in recent apps, on by default (NF-11B6)
         BiometricBridge.activity = this;
         FileBridge.activity = this;
         takeShare(getIntent());
@@ -151,10 +153,7 @@ public final class MainActivity extends Activity {
         frame.addView(starting, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         setContentView(frame);
-        if (Build.VERSION.SDK_INT >= 33
-                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
-        }
+        // Notifications are asked for when the person first turns a reminder on (askForNotifications), not here.
         String files = getFilesDir().getAbsolutePath();
         new Thread(() -> {
             try {
@@ -474,7 +473,18 @@ public final class MainActivity extends Activity {
         new Thread(() -> {
             ReminderNotifications.PollResult result = ReminderNotifications.check(this, currentOrigin, cookie);
             reminderEnabled = result.enabled;
+            if (result.enabled) runOnUiThread(this::askForNotifications);
         }, "lightning-reminders").start();
+    }
+
+    /** NF-11B6: Android's notification question in context, once, the first time a reminder is on. */
+    private void askForNotifications() {
+        if (Build.VERSION.SDK_INT < 33
+                || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) return;
+        android.content.SharedPreferences prefs = getSharedPreferences("lightning-privacy", MODE_PRIVATE);
+        if (prefs.getBoolean("asked_notifications", false)) return;
+        prefs.edit().putBoolean("asked_notifications", true).apply();
+        requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
     }
 
     /** Long-press the app icon (phone roadmap M8): Add expense and Bank SMS open straight away, through the same

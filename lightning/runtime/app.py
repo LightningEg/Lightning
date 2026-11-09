@@ -114,6 +114,16 @@ class SessionGate:
             finally:
                 self.app.state.container = self.session.container
 
+    def recents_row(self, path: str) -> str:
+        """For Settings › This phone: "" when the phone has no Recents switch, else "on" (hidden) or "off"."""
+        recents = getattr(self, "recents", None)
+        if path != "/settings" or recents is None:
+            return ""
+        try:
+            return "on" if recents.hidden() else "off"
+        except Exception:  # noqa: BLE001 - a bridge that cannot answer offers no row
+            return ""
+
     def fingerprint_row(self, path: str) -> str:
         """For Settings › This phone: "" when fingerprint unlock is not offered here, else "on" or "off"."""
         fingerprint = getattr(self, "fingerprint", None)
@@ -178,6 +188,7 @@ class SessionGate:
                     return await PlainTextResponse("This form expired. Reload the page and try again.", 403)(scope, receive, send)
             line, device_action, device_values = self.device_line()
             scope.setdefault("state", {}).update(fingerprint_row=self.fingerprint_row(request.url.path),
+                                                  recents_row=self.recents_row(request.url.path),
                                                   secure_profiles=True, csrf=self.session.csrf,
                                                   phone=getattr(self, "phone", False),
                                                   session_token=self.session.token,
@@ -196,13 +207,14 @@ class SessionGate:
 
 
 def profile_app(credentials: Credentials, root: Path | str | None = None, devices: Devices | None = None,
-                *, phone: bool = False, sms=None, biometric=None, stay=None, files=None, updates=None):
+                *, phone: bool = False, sms=None, biometric=None, stay=None, files=None, updates=None, recents=None):
     """`phone`: the Android app, whose pages use the phone frame and screens (guideline Part C). `sms`: where
     bank messages come from on that phone (`lightning.sms_imports.SmsSource`), or None. `biometric`: the phone's
     optional fingerprint unlock (`lightning.security.biometric.FingerprintUnlock`), or None: never on a PC.
     `stay`: staying signed in on the phone (the same slots over `StayBridge`, no prompt), or None: never on a PC.
     `files`: where the phone saves downloads (`lightning.runtime.phone_files.FileSaver`), or None.
-    `updates`: the Windows app's `UpdateController` (Settings › Lightning version), or None: never elsewhere."""
+    `updates`: the Windows app's `UpdateController` (Settings › Lightning version), or None: never elsewhere.
+    `recents`: the phone's "Hide in recent apps" switch (`hidden()`, `set_hidden(bool)`; NF-11B6), or None."""
     configure_memory_only_import_uploads()
     session = ProfileSession(root)
     session.borrowed_home = ""
@@ -235,6 +247,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
         updates.profiles_root, updates.borrowed_root = session.root, devices.root / "borrowed"
     fingerprint = biometric if phone else None
     gate.fingerprint = fingerprint
+    gate.recents = recents if phone else None
     # Stay signed in (owner, 2026-11-01): the phone opens the profile by itself until Lock, and never locks for idling.
     kept = stay if phone else None
 
@@ -430,6 +443,15 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
                         error="Restore recovery needs inspection. The profile remains locked and its copies were kept.")
         return page(request, "unlock", selected=selected,
                     notice="Restore checks finished. Unlock this profile to review the recovered database.")
+
+    @app.post("/profiles/recents")
+    async def recents_switch(request: Request):
+        """Settings › This phone › Hide in recent apps (NF-11B6): on by default; a phone setting, not the profile's,
+        so it holds while the profile is locked too."""
+        if gate.recents is not None:
+            form = await request.form()
+            gate.recents.set_hidden("1" in form.getlist("on"))
+        return RedirectResponse("/settings" if session.container else "/profiles", 303)
 
     @app.post("/profiles/lock")
     async def lock(request: Request):
