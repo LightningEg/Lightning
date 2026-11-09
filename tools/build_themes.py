@@ -245,6 +245,20 @@ ARTWORK_STRENGTH = {"star-ceiling": 22}
 def artwork_alpha(name):
     return ARTWORK_STRENGTH.get(name, ARTWORK_ALPHA)
 
+def rose(colour):
+    """A colour that reads as rose or red: the hue of money going badly (A03). Never the fill of Add (IV-10G)."""
+    r, g, b = (int(colour[i:i + 2], 16) / 255 for i in (1, 3, 5))
+    high, low = max(r, g, b), min(r, g, b)
+    if high == low or (high - low) / high < .35:
+        return False
+    if high == r:
+        hue = (60 * (g - b) / (high - low)) % 360
+    elif high == g:
+        hue = 60 * (b - r) / (high - low) + 120
+    else:
+        hue = 60 * (r - g) / (high - low) + 240
+    return hue >= 330 or hue <= 25
+
 def material_values(parts, contract, scheme):
     p, limits = parts["palette"], contract["limits"]
     def alpha(colour, a):
@@ -280,6 +294,9 @@ def compile_theme(manifest, parts, contract):
             values.update((name,p[parts[slot][field]]) for name in names.split())
     values["c-well"] = p["raised"]
     values["theme-on-accent"] = p[parts["controls"]["label"]]
+    fill = p[parts["controls"]["fill"]]  # Add: the action colour, or Ink when that reads as rose (A03, IV-10G)
+    values["theme-add"], values["theme-on-add"] = ((p["text"], p["background"]) if rose(fill)
+                                                   else (fill, p[parts["controls"]["label"]]))
     # The manifest's own money colours, for tints on its dark surfaces (theme-surfaces.css); the default keeps its paint.
     values.update({"theme-income": p["income"], "theme-expense": p["expense"]})
     values["theme-held"] = held(worst(p, parts, "cards", p[parts["cards"]["surface"]], contract["limits"]))
