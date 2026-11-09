@@ -20,11 +20,6 @@ targeting API 35, asks for `READ_SMS`, links to the website to buy themes, and n
 Each step is one pull request, except the owner's. Read only the files a step names. Android steps need the **Phone app** workflow
 run by hand for evidence (AGENTS §2: Android minutes cost money; run once per step, not per push).
 
-## 11B4 A privacy notice that covers the app, linked from the app · M · opus
-Files: website `privacy.html` and `ar/privacy.html` (version 6), app `settings/index.html` (a Privacy row opening the notice in the browser), `lightning/ui/i18n*.py`.
-Do: an **App** section: no account, no analytics, data only on your devices; what it sends and to whom (price sites: tickers and fund ids; the store: the unlock code, theme ids and profile id; the journal relay: encrypted mail it cannot read; local network: pairing); SMS read and kept on the phone, only from bank senders; Share to Lightning; how to delete (delete the profile; the unlock record goes with the website account). Remove "does not cover the Lightning app" and "only to look up prices".
-Done when: both repos merged; the app's Settings opens `https://lightningeg.com/privacy.html#app` (`/ar/…` in Arabic).
-
 ## 11B5 Data safety and Console declarations, drafted · S · opus
 Files: new `docs/google-play.md` (for the owner: every Console answer, with the reason from the code).
 Do: Data safety (from r29 › Privacy), foreground service `dataSync` (what the lend-and-listen service does; the video's script), financial features (personal budgeting, no loans or payments), content rating, target audience 18+, ads: none, app access: the steps to open the demo household.

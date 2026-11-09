@@ -32,7 +32,7 @@
     <p class="muted small">{{ 'Another profile needs its own unlock, at a quarter of the price.'|tr(locale) }}</p>{% else %}<p class="muted small">{{ "Have an unlock code? Paste it here. Your profile's other devices unlock by themselves."|tr(locale) }}</p>{% endif %}
     {% set mine = paid|selectattr('owned')|map(attribute='name')|list %}{% if mine %}<p>{{ 'Yours on this profile:'|tr(locale) }} {% for n in mine %}<b>{{ n|tr(locale) }}</b>{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
     <form method="post" action="/settings/theme/unlock" class="theme-unlock-form">
-      <label for="unlock-code">{{ 'Code from your account page'|tr(locale) }}</label>
+      <label for="unlock-code">{{ ('Code from your account page' if play_offers is none else 'Unlock code')|tr(locale) }}</label>
       <input id="unlock-code" name="code" autocomplete="off" spellcheck="false" dir="ltr" maxlength="64" required placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX">
       <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
       <button class="btn primary">{{ 'Unlock'|tr(locale) }}</button>
@@ -83,6 +83,8 @@
 <section class="card settings-list" aria-labelledby="data-heading"><h2 id="data-heading">{{ 'Your data'|tr(locale) }}</h2>
   <div class="settings-row"><div><span class="settings-name">{{ 'Backup'|tr(locale) }}</span><small>{{ 'One is made each time the app starts.'|tr(locale) }}{% if backups and not phone_mode() %} <details class="settings-more"><summary>{{ 'Recent backups'|tr(locale) }} ({{ backups|length }})</summary><ul class="small code">{% for b in backups %}<li>{{ b }}</li>{% endfor %}</ul></details>{% endif %}</small></div>
     <form method="post" action="/settings/backup" class="settings-control"><button class="btn primary small">{{ 'Back up now'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">{% if backups %}<a class="btn small" href="/settings/backup/latest">{{ 'Save a copy'|tr(locale) }}</a>{% endif %}</form></div>
+  <div class="settings-row" id="privacy-notice"><div><span class="settings-name">{{ 'Privacy'|tr(locale) }}</span><small>{{ 'What the app sends, to whom, and how to delete it.'|tr(locale) }}</small></div>
+    <div class="settings-control"><a class="btn small" href="{{ outside_url('privacy', locale) }}#app" target="_blank" rel="noopener">{{ 'Read the privacy notice'|tr(locale) }}</a></div></div>
   <div class="settings-row" id="data-portability"><div><span class="settings-name">{{ 'Move your data'|tr(locale) }}</span><small>{{ 'A full copy for a backup or another computer, or records in from another profile. Not the file for an AI.'|tr(locale) }}</small></div>
     <div class="settings-control"><a class="btn small" href="/exports/all" data-popup-open>{{ 'Export your data'|tr(locale) }}</a><a class="btn small" href="/exports/import">{{ 'Import your data'|tr(locale) }}</a></div></div>
   <div class="settings-row"><div><span class="settings-name">{{ 'Base currency'|tr(locale) }}</span></div><div class="settings-control"><b dir="ltr">{{ base }}</b><a class="btn small" href="/settings?section=currencies">{{ 'Manage currencies'|tr(locale) }}</a></div></div>

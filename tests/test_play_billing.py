@@ -132,7 +132,9 @@ def test_the_play_build_shows_plays_price_and_buy_and_no_website(tmp_path, monke
     try:
         page = browser.get("/settings").text
         assert "EGP 99.99" in page and 'action="/settings/theme/buy"' in page
-        assert "lightningeg" not in page and "marketplace" not in page and "See prices" not in page
+        assert "marketplace" not in page and "See prices" not in page and "account page" not in page
+        outside = {link for link in re.findall(r'href="(https://[^"#?]+)', page)}
+        assert outside <= {"https://lightningeg.com/privacy.html"}, f"no website link but the privacy notice: {outside}"
         assert "Unlock a theme you bought" in page, "codes still unlock"
         browser.post("/settings/theme/buy", data={"theme": "papyrus", "__session": token(page, "__session")})
         assert len(play.bought) == 1 and play.bought[0][0] == "papyrus"
@@ -145,7 +147,7 @@ def test_the_github_apk_and_the_pc_keep_the_website(tmp_path):
     browser = _phone(tmp_path, None)
     try:
         page = browser.get("/settings").text
-        assert "See prices" in page and "lightningeg.com" in page and "/settings/theme/buy" not in page
+        assert "See prices" in page and "lightningeg.com/marketplace" in page and "/settings/theme/buy" not in page
     finally:
         browser.__exit__(None, None, None)
 

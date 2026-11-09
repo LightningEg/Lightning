@@ -144,7 +144,7 @@ def _origin(value: str) -> tuple[str, str, int]:
 
 
 def _store_link(uri: str) -> bool:
-    """The outside pages the app may open, in the system browser: the website's marketplace and the update block's download and release-notes pages (any query or fragment)."""
+    """The outside pages the app may open, in the system browser: the website's marketplace, the update block's download and release-notes pages and the privacy notice (any query or fragment)."""
     try:
         parsed = urlsplit(str(uri))
         return (

@@ -34,12 +34,14 @@ MARKETPLACE_PATHS = {"en": "/marketplace.html", "ar": "/ar/marketplace.html"}
 # The update block's two outside pages (NF-9B4): the website's existing Downloads hub and release log (owner pick,
 # 2026-11-07). Like the marketplace they open in the system browser, and the PC window allows exactly these paths.
 UPDATE_PATHS = {"download": {"en": "/current-status.html", "ar": "/ar/current-status.html"},
-                "releases": {"en": "/release-log.html", "ar": "/ar/release-log.html"}}
+                "releases": {"en": "/release-log.html", "ar": "/ar/release-log.html"},
+                # The privacy notice, whose #app section covers the app (NF-11B4; Google Play wants it inside the app).
+                "privacy": {"en": "/privacy.html", "ar": "/ar/privacy.html"}}
 OUTSIDE_PATHS = frozenset(MARKETPLACE_PATHS.values()) | {p for pages in UPDATE_PATHS.values() for p in pages.values()}
 
 
 def outside_url(page: str, locale: str = "en") -> str:
-    """Address of an update page ("download" or "releases") in the page's language."""
+    """Address of an outside page ("download", "releases" or "privacy") in the page's language."""
     return f"https://{MARKETPLACE_HOST}{UPDATE_PATHS[page].get(locale, UPDATE_PATHS[page]['en'])}"
 
 
