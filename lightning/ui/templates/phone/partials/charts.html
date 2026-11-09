@@ -70,3 +70,32 @@
 
 {# IV-11D2: the month as one bar: spent, left in plan, over (rose). #}
 {% macro month_bar(b, compact=False) %}<div class="phone-month-bar{{ ' is-compact' if compact }}" role="img" aria-label="{{ 'Spent {spent}, left in plan {left}'|tr(locale, spent=b.spent|money, left=b.left|money) }}{% if b.over %}{{ ', ' ~ ('over plan {over}'|tr(locale, over=b.over|money)) }}{% endif %}">{% if b.w_spent %}<i class="is-spent" style="width: {{ '%.2f'|format(b.w_spent) }}%"></i>{% endif %}{% if b.w_left %}<i class="is-left" style="width: {{ '%.2f'|format(b.w_left) }}%"></i>{% endif %}{% if b.w_over %}<i class="is-over" style="width: {{ '%.2f'|format(b.w_over) }}%"></i>{% endif %}</div>{% endmacro %}
+{# C07.3.1: an area trend, 160 tall, three dates (first, middle, last), no y-axis labels, one line at zero when the line
+   crosses it, the end value written on the line. A dot under the finger reads its month (tap or drag, C07.1). #}
+{% macro area_trend(t, caption, height=160) %}
+<figure class="phone-chart-trend" aria-label="{{ caption }}">
+  {% if t.too_short %}<p class="chart-empty">{{ "Not enough history yet — check back next month."|tr(locale) }}</p>
+  {% else %}{% set s = t.series[0] %}
+  <div class="phone-chart-trend-plot" style="height:{{ height }}px">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <path class="phone-chart-trend-area" d="{{ s.area }}"/>
+      {% if t.zero_y is not none %}<line class="phone-chart-trend-zero" x1="0" x2="100" y1="{{ '%.2f'|format(t.zero_y) }}" y2="{{ '%.2f'|format(t.zero_y) }}" vector-effect="non-scaling-stroke"/>{% endif %}
+      <polyline class="phone-chart-trend-line" points="{{ s.line }}" vector-effect="non-scaling-stroke"/>
+    </svg>
+    {% for d in s.dots %}<span class="phone-chart-trend-dot{{ ' is-last' if loop.last }}" style="left:{{ '%.2f'|format(d.x) }}%;top:{{ '%.2f'|format(d.y) }}%" tabindex="0" data-tip="{{ d.label }} · {{ d.value|money }}" aria-label="{{ d.label }}, {{ d.value|money }}"></span>{% endfor %}
+    {% set last = s['last'] %}<b class="phone-chart-trend-end" style="top:{{ '%.2f'|format(last.y) }}%"><bdi class="fig">{{ last.value|money }}</bdi></b>
+  </div>
+  {% set n = t.labels|length %}<div class="phone-chart-trend-x">{% for lab in t.labels %}{% if loop.first or loop.last or loop.index0 == (n - 1) // 2 %}<span>{{ lab.text }}</span>{% endif %}{% endfor %}</div>
+  <figcaption class="phone-chart-trend-caption">{{ caption }}</figcaption>
+  {% endif %}
+</figure>
+{% endmacro %}
+
+{# One whole as one bar of parts (C07, A04 for asset classes): the bar, then a key for each part that names its colour,
+   its amount and its share; the keys wrap, never scroll. #}
+{% macro parts_bar(parts, caption) %}
+{% if parts %}
+<div class="phone-parts" role="img" aria-label="{{ caption }}"><span class="phone-flow-bar">{% for p in parts %}<i class="tone-{{ p.key }}" style="width:{{ '%.2f'|format(p.share) }}%"></i>{% endfor %}</span></div>
+<ul class="phone-parts-keys">{% for p in parts %}<li><i class="phone-key tone-{{ p.key }}"></i>{{ p.label|tr(locale) }} <b><bdi class="fig">{{ p.value|money }}</bdi></b> <small>{{ '%.0f'|format(p.share) }}%</small></li>{% endfor %}</ul>
+{% endif %}
+{% endmacro %}

@@ -97,11 +97,10 @@ def test_a_page_with_a_phone_screen_uses_it_and_any_other_page_keeps_its_own():
     for name in phone - {"base.html"}:
         if (templates / name).exists():
             assert _phone_template(name) == f"phone/{name}"
-    assert "settings/index.html" not in phone
-    assert _phone_template("settings/index.html") == "settings/index.html"
+    assert _phone_template("budget_bridge.html") == "budget_bridge.html"   # a page with no phone screen keeps its own
 
 
-def test_on_the_phone_home_is_its_phone_screen_and_settings_is_the_pc_page_in_the_phone_frame(tmp_path):
+def test_on_the_phone_home_is_its_phone_screen_and_settings_is_the_phones_own_in_the_phone_frame(tmp_path):
     cfg = Credentials("http://127.0.0.1:9872")
     app = profile_app(cfg, tmp_path / "docs", devices=Devices(tmp_path / "app", port=0), phone=True)
     with TestClient(app, base_url=cfg.origin, headers={"Origin": cfg.origin}) as browser:
@@ -113,7 +112,8 @@ def test_on_the_phone_home_is_its_phone_screen_and_settings_is_the_pc_page_in_th
         assert html.count('class="phone-tabbar"') == 1 and 'class="side"' not in html
     # Home (3AY6): the Safe to spend hero, then To do, Latest and This month; never the PC's overview sections.
     assert 'id="home-hero"' in overview and 'id="todo-heading"' in overview and "overview-section" not in overview
-    assert "Your data</h2>" in settings and "Back up now" in settings
+    # Settings (IV-11H): the phone's own rows; the PC's sections (Your data, Ask an AI) stay on the PC page.
+    assert 'id="backup-heading"' in settings and "Back up now" in settings and "Ask an AI</h2>" not in settings
 
 
 class _Event:

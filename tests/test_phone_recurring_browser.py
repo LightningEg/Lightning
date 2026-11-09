@@ -110,7 +110,7 @@ def test_changed_monthly_payment_warning_fits_phone(c, setup, monkeypatch):
                     assert activity.evaluate('e => { const r=e.getBoundingClientRect(); return r.height >= 48 && r.left >= 0 && r.right <= innerWidth; }')
                     page.goto(host.origin + '/review')
                     assert page.locator('details.flow-disclosure > summary').first.bounding_box()['height'] >= 44
-                    page.goto(host.origin + '/money')   # More is gone (3AY11): the weekly review is a row on Money
+                    page.goto(host.origin + '/money/reviews')   # the weekly review sits behind Money's Reports and reviews (IV-11H)
                     assert page.locator('a.phone-row[href="/review"]').first.bounding_box()['height'] >= 48
                 context.close()
             browser.close()

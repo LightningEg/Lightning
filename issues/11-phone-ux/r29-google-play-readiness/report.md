@@ -81,9 +81,9 @@ from Settings and the store listing, in English and Arabic (website repo, with a
 | T9 | Activity | medium | The same transfer is "To Vodafone Cash −1,000" on Home and "CIB Payroll → Vodafone Cash 1,000" on Activity (A16: one figure, one form). A day's net shows on one date only (2026-11-05 "−2,500") | `shots/en-activity.jpg`, `shots/en-home.jpg` | fixed: `tests/test_phone_activity.py` |
 | T10 | Activity | low | "In +46,833 · Out −19,001" is a sentence; it is the place for two bars on one scale (C07.3.3) | `shots/en-activity.jpg` | IV-11D |
 | T11 | Money | medium | **Cash planning, Spending and Weekly review were listed twice** (the old More list left under the new rows). Fixed in this branch | `shots/en-money-full.jpg` | fixed (r29) |
-| T12 | Money | medium | Under Net worth come 21 plain rows (Report … Data checks); no trend (C11.3 + C07.3.1), no split of what you own. The tab wears the "···" More icon though More is retired (C01: a lone icon only when everyone knows it) | `shots/en-money-full.jpg` | IV-11H |
-| T13 | Money | low | "Accounts" is underlined like a link while every other heading is plain | `shots/en-money.jpg` | IV-11H |
-| T14 | Settings | high (Play) | "Buy it on lightningeg.com. See prices" link (B4); "another computer" is a desktop word on the phone (C12); Settings is a long scroll of PC settings (Sale factors, Target allocation, Price files) with no privacy notice, licences or "delete this profile" | `shots/x-settings.jpg` | NF-11B3, NF-11B4, IV-11H |
+| T12 | Money | medium | Under Net worth come 21 plain rows (Report … Data checks); no trend (C11.3 + C07.3.1), no split of what you own. The tab wears the "···" More icon though More is retired (C01: a lone icon only when everyone knows it) | `shots/en-money-full.jpg` | done: `tests/test_phone_money.py::test_money_rows_carry_figures_and_settings_leave_for_the_gear` |
+| T13 | Money | low | "Accounts" is underlined like a link while every other heading is plain | `shots/en-money.jpg` | done: `tests/test_phone_money.py::test_money_rows_carry_figures_and_settings_leave_for_the_gear` |
+| T14 | Settings | high (Play) | "Buy it on lightningeg.com. See prices" link (B4); "another computer" is a desktop word on the phone (C12); Settings is a long scroll of PC settings (Sale factors, Target allocation, Price files) with no privacy notice, licences or "delete this profile" | `shots/x-settings.jpg` | NF-11B3, NF-11B4; Settings rows done: `tests/test_phone_frame.py::test_phone_settings_are_the_phones_rows_and_the_rest_is_best_on_a_pc` |
 | T15 | SMS | medium (Play) | The disclosure exists and is well worded, but sits at the bottom of From SMS under Paste; Play wants it shown before the system question, in the normal flow | `phone/sms.html:57-62` | NF-11B2 |
 
 ### Arabic
@@ -139,7 +139,7 @@ the motion that would make the phone feel alive without a second continuous moti
 1. **Play blockers, in order:** NF-11B1 (release AAB, API 36, predictive back, no probe), NF-11B3 (no buy link in the Play build),
    NF-11B4 (the app's privacy notice, both repos), NF-11B2 (SMS declared, owner 2026-11-09), NF-11B6 (Recents,
    notifications in context), NF-11B5 and the owner's 11B7-11B9 (Console, listing, closed test).
-2. **The phone's look before the listing screenshots:** IV-11E (Home reads at a glance), IV-11D (charts), BV-11F, IV-11H,
+2. **The phone's look before the listing screenshots:** IV-11E (Home reads at a glance), IV-11D (charts), BV-11F,
    IV-11I; then IV-10G for paid themes.
 3. Already planned and needed for the listing: IV-3BG (Arabic chevrons, tap polish, status bar), IV-3BK (human dates), IV-3AY13
    (owner's phone check).

@@ -26,16 +26,16 @@ from test_mohab_year import Answer, Mohab, _live_the_year
 # The PC's link or button -> the phone's taps. A step starting with "/" opens that page; with "?" it is
 # typed into the page's search box; anything else is tapped on the page.
 DETOURS = {
-    "Add account": ("Money", "Accounts", "Add account"),           # the PC's sidebar +; the phone's Accounts ⋯
-    "Held for others": ("Money", "Accounts", "Held for others"),   # an Accounts tab; Transactions opens on this month
-    "Accounts": ("Money", "Accounts"),                             # sections without a tab-bar slot live on More
-    "Cash planning": ("Money", "Cash planning"),
+    "Add account": ("Money", "See all", "Add account"),           # the PC's sidebar +; the phone's Accounts ⋯
+    "Held for others": ("Money", "See all", "Held for others"),   # an Accounts tab; Transactions opens on this month
+    "Accounts": ("Money", "See all"),                              # Money's Accounts heading: See all (IV-11H)
+    "Cash planning": ("Money", "Reports and reviews", "Cash planning"),  # the analysis is one row on Money (IV-11H)
     "Investments": ("Money", "Investments"),
     "Financial health": ("Money", "Financial health"),
     "Add transaction": ("Add",),
-    "Settings": ("Money", "All settings"),
+    "Settings": ("Money", "Settings"),                             # ⚙ in Money's app bar (C03.2, IV-11H)
     "Health": ("Money", "Financial health"),                       # the Overview opens on its answer, no tab row
-    "Spending": ("Money", "Spending"),
+    "Spending": ("Money", "Reports and reviews", "Spending"),
     "Safety": ("Money", "Reserves"),                               # the app bar's page menu is gone (3AN2): Reserves is a row on More
     "Currencies": ("Money", "Financial health", "Currencies"),                         # the app bar's gear is a tab's own settings only                                  # the tab bar's Add, its word under the disc
     "NBE 3-year certificate": ("/money/accounts", "NBE 3-year certificate"),  # the PC lists accounts in its sidebar
@@ -110,7 +110,7 @@ class PhoneBrowser(screens.Browser):
                     if self.page is not None and self.page.path.split("?")[0] in ("/", "/home", "/money") and text not in MOVED:
                         self.detours[VIA_CASH_YOU_OWN] += 1   # Home names no account: Money's Accounts lists every balance
                         self._framed(super().click("Money"))
-                        self._framed(super().click("Accounts"))
+                        self._framed(super().click("See all"))
                         return self._framed(super().click(text))
                     raise
         self.detours[text] += 1

@@ -1,6 +1,8 @@
-{# Money (IV-3AY10, guideline C11.5): Net worth, the balances (four, then N more), Coming up (never a late bill), and one
-   row each for what you owe, investments, goals and financial health. Settings sits behind the gear. #}
+{# Money (IV-3AY10, guideline C11.3): Net worth with its trend and what you own as one bar (IV-11D4), the balances (four,
+   then See all), Coming up (never a late bill), then one row each, with its figure, for what you owe, investments,
+   goals, financial health and zakat, and one row for reports and reviews (IV-11H). Settings sit behind ⚙. #}
 {% extends "base.html" %}
+{% from "phone/partials/charts.html" import area_trend, parts_bar with context %}
 {% block title %}Money{% endblock %}
 {% block heading %}<h1>{{ 'Money'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
@@ -8,39 +10,31 @@
 <section class="phone-hero has-seam" aria-labelledby="worth-heading">
   <div id="worth-heading" class="phone-hero-label" role="heading" aria-level="2">{{ fig.net_worth.label }}</div>
   <div class="phone-lead{{ ' is-negative' if s.net_worth < 0 }}">{{ s.net_worth|money }} <small>{{ base }}</small></div>
-  <p class="phone-hero-line">{{ 'What you own'|tr(locale) }} <b><bdi class="fig">{{ s.what_you_own|money }}</bdi></b></p>
+  {% if not s.own_split %}<p class="phone-hero-line">{{ 'What you own'|tr(locale) }} <b><bdi class="fig">{{ s.what_you_own|money }}</bdi></b></p>{% endif %}
   {% if s.since_start is not none %}<p class="phone-hero-line">{{ '{amt} since the start of the month.'|tr(locale, amt=s.since_start|money(True)) }}</p>{% endif %}
 </section>
+{% if s.trend %}<section class="phone-section phone-chart-card" aria-label="{{ 'Net worth, end of each month'|tr(locale) }}">{{ area_trend(s.trend, 'Net worth, end of each month'|tr(locale)) }}</section>{% endif %}
+{% if s.own_split %}<section class="phone-section" aria-labelledby="own-heading">
+  <header class="phone-section-head"><h2 id="own-heading">{{ 'What you own'|tr(locale) }}</h2><b><bdi class="fig">{{ s.what_you_own|money }}</bdi></b></header>
+  {{ parts_bar(s.own_split, 'What you own, by kind'|tr(locale)) }}
+</section>{% endif %}
 <section class="phone-section" aria-labelledby="accounts-heading">
-  <header class="phone-section-head"><h2 id="accounts-heading"><a href="/money/accounts">{{ 'Accounts'|tr(locale) }}</a></h2><b><bdi class="fig">{{ s.accounts_total|money }}</bdi></b></header>
+  <header class="phone-section-head"><h2 id="accounts-heading">{{ 'Accounts'|tr(locale) }}</h2><a href="/money/accounts">{{ 'See all'|tr(locale) }}{{ chevron() }}</a></header>
   <div class="phone-rows">{% for a in s.accounts %}<a class="phone-row" href="/accounts/{{ a.id }}"><span>{{ a.name }}</span><b><bdi class="fig">{{ a.balance|money }}</bdi></b></a>{% endfor %}
-  {% if s.accounts_more %}<a class="phone-row" href="/money/accounts"><span>{{ '{n} more'|tr(locale, n=s.accounts_more) }}</span><b>{{ chevron() }}</b></a>{% endif %}</div>
-  {% if s.held_for_others %}<p class="phone-note">{{ 'Includes {amt} held for others.'|tr(locale, amt=s.held_for_others|money) }}</p>{% endif %}
+</div>
+  {% set held = s.accounts|length + s.accounts_more %}<p class="phone-note">{{ ('1 account holds {amt}.' if held == 1 else '{n} accounts hold {amt}.')|tr(locale, n=held, amt=s.accounts_total|money) }}{% if s.held_for_others %} {{ 'Includes {amt} held for others.'|tr(locale, amt=s.held_for_others|money) }}{% endif %}</p>
 </section>
 <section class="phone-section" aria-labelledby="coming-heading">
-  <header class="phone-section-head"><h2 id="coming-heading">{{ 'Coming up'|tr(locale) }}</h2><a href="/money/bills">{{ 'All bills'|tr(locale) }} {{ chevron() }}</a></header>
+  <header class="phone-section-head"><h2 id="coming-heading">{{ 'Coming up'|tr(locale) }}</h2><a href="/money/bills">{% if s.late_count %}{{ ('1 late' if s.late_count == 1 else '{n} late')|tr(locale, n=s.late_count) }} · {% endif %}{{ 'All bills'|tr(locale) }}{{ chevron() }}</a></header>
   <div class="phone-rows">{% for b in s.coming_up %}<a class="phone-row" data-popup-open href="/plan/items/{{ b.payment.item.id }}/pay?due={{ b.due_date }}&amp;back=%2Fmoney"><span>{{ b.payment.item.name }}<small>{{ b.due_date }}</small></span><b><bdi class="fig">{{ b.payment.amount|money }}</bdi></b></a>
   {% else %}<p class="phone-note">{{ 'Nothing is due soon.'|tr(locale) }}</p>{% endfor %}</div>
-  {% if s.late_count %}<a class="phone-row" href="/home"><span>{{ ('1 bill is late' if s.late_count == 1 else '{n} bills are late')|tr(locale, n=s.late_count) }}</span><b>{{ chevron() }}</b></a>{% endif %}
 </section>
-<div class="phone-rows">
-  <a class="phone-row" href="/money/report"><span>{{ 'Report'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+<nav class="phone-rows" aria-label="{{ 'Money'|tr(locale) }}">
   <a class="phone-row" href="/plan/loans"><span>{{ 'What you owe'|tr(locale) }}</span><b><bdi class="fig">{{ s.what_you_owe|money }}</bdi> {{ chevron() }}</b></a>
   <a class="phone-row" href="/investments"><span>{{ 'Investments'|tr(locale) }}</span><b><bdi class="fig">{{ s.holdings_value|money }}</bdi> {{ chevron() }}</b></a>
-  <a class="phone-row" href="/plan/reserves"><span>{{ 'Goals and reserves'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
-  <a class="phone-row" href="/financial-health"><span>{{ 'Financial health'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
-  <a class="phone-row" href="/plan"><span>{{ 'Cash planning'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
-  <a class="phone-row" href="/birdview/expenses"><span>{{ 'Spending'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+  <a class="phone-row" href="/plan/reserves"><span>{{ 'Goals and reserves'|tr(locale) }}</span><b>{% if s.goals_count %}{{ '{n} of {total} funded'|tr(locale, n=s.goals_funded, total=s.goals_count) }} {% endif %} {{ chevron() }}</b></a>
+  <a class="phone-row" href="/financial-health"><span>{{ 'Financial health'|tr(locale) }}</span><b>{% if s.health_watch is not none %}{{ ('All good' if not s.health_watch else '1 to watch' if s.health_watch == 1 else '{n} to watch')|tr(locale, n=s.health_watch) }} {% endif %} {{ chevron() }}</b></a>
   {% if s.zakat %}<a class="phone-row" href="/zakat"><span>{{ 'Zakat'|tr(locale) }}</span><b>{{ chevron() }}</b></a>{% endif %}
-  <a class="phone-row" href="/review"><span>{{ 'Weekly review'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
-</div>
-{# What More held is above or below, so no page is left without a way in (Money replaces More, 3AY10); each place once (r29). #}
-<nav class="phone-rows phone-more-list" aria-label="{{ 'Settings'|tr(locale) }}">
-  <a class="phone-row" href="/settings"><span>{{ 'All settings'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
-  <a class="phone-row" href="/categories"><span>{{ 'Categories'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
-  <a class="phone-row" href="/counterparties"><span>{{ 'Counterparties'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
-  <a class="phone-row" href="/rules"><span>{{ 'Rules'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
-  <a class="phone-row" href="/profiles/devices"><span>{{ 'Devices'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
-  <a class="phone-row" href="/checks"><span>{{ 'Data checks'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+  <a class="phone-row" href="/money/reviews"><span>{{ 'Reports and reviews'|tr(locale) }}<small>{{ 'Report, cash planning, spending, weekly review'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
 </nav>
 {% endblock %}
