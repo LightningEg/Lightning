@@ -47,7 +47,7 @@
 {% endif %}
 <section class="phone-section phone-latest" aria-labelledby="latest-heading">
   <header class="phone-section-head"><h2 id="latest-heading">{{ 'Latest'|tr(locale) }}</h2><a class="phone-quiet" href="/transactions">{{ 'See all'|tr(locale) }}</a></header>
-  {% if s.latest %}{{ txn_list(s.latest, False, False, False, '', '/transactions', '', 5, False) }}{% else %}<p class="phone-note">{{ 'No transactions yet.'|tr(locale) }}</p>{% endif %}
+  {% if s.latest %}{{ txn_list(s.latest, True, False, False, '', '/transactions', '', 5, True) }}{% else %}<p class="phone-note">{{ 'No transactions yet.'|tr(locale) }}</p>{% endif %}
 </section>
 <section class="phone-section" aria-label="{{ 'This month'|tr(locale) }}" id="month-heading">
   <div class="phone-rows"><a class="phone-row" href="/budget"><span>{{ 'This month'|tr(locale) }}<small>{{ 'Spent'|tr(locale) }} {{ s.spent|money }}{% if s.left_in_plan is not none %} · {{ fig.left_in_plan.label }} {{ s.left_in_plan|money }}{% endif %}</small></span><b>›</b></a></div>

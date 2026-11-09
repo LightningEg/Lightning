@@ -28,6 +28,8 @@ class ActivityScreen:
     card: dict | None          # the current card (To review); None when the queue is clear
     index: int                 # 0-based position of the card
     more_rows: bool            # the month holds more rows than are drawn
+    in_share: int = 0   # bar lengths (0-100) on one scale: the larger of In and Out is 100 (11D3)
+    out_share: int = 0
 
 
 def review_items(c, day: date) -> list[dict]:
@@ -59,7 +61,10 @@ def build(c, day: date, tab: str = "all", month: str = "", index: int = 0) -> Ac
         more = total > ROWS
         flow = c.reporting.cash_flow(start, min(end, day))
         money_in, money_out = flow.inflows, flow.outflows
+    top = max(money_in, money_out)
+    in_share = int(round(money_in / top * 100)) if top > 0 else 0
+    out_share = int(round(money_out / top * 100)) if top > 0 else 0
     return ActivityScreen(tab=tab, month=shown, prev_month=_shift(shown, -1),
                           next_month="" if shown >= this else _shift(shown, 1), rows=rows,
-                          money_in=money_in, money_out=money_out, review_total=len(items), card=card,
+                          money_in=money_in, money_out=money_out, in_share=in_share, out_share=out_share, review_total=len(items), card=card,
                           index=items.index(card) if card else 0, more_rows=more)

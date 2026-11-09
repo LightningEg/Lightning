@@ -32,9 +32,6 @@ Done when: the meter's two fractions come from the Safe to spend service and a t
 Spent, left in plan, over (rose) on one bar under the This month row and under Budget's hero; Budget's category bars take state colours (at plan: amber, over: rose, A03).
 Done when: the bar's parts add to the plan and a test checks it.
 
-## 11D3 Activity: In and Out as two bars on one scale · S · sonnet
-C07.3.3's two stacked bars for the month under the period, then the rows. Done when: bar lengths are proportional to In and Out from the existing money line.
-
 ## 11D4 Money: the net-worth trend and what you own as one bar · M · opus
 C07.3.1's 160-tall area trend (end of each month, end value on the line) under Net worth, and what you own split by asset class (A04 colours, four then Other) as one segmented bar above Accounts.
 Done when: the trend's last point equals the hero and the bar's parts add to What you own.

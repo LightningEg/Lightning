@@ -96,8 +96,14 @@ class PhoneBrowser(screens.Browser):
         wanted = " ".join(text.split()).casefold()
         moved = text in MOVED and self.page is not None and not any(
             " ".join(link.text.split()).casefold() == wanted for link in self.page.links)
+        # Home's latest rows name accounts inside a transfer ("CIB Payroll → Wallet"): that is a row, not the account.
+        in_row = self.page is not None and self.page.path.split("?")[0] in ("/", "/home") and not any(
+            " ".join(link.text.split()).casefold() == wanted or (wanted in link.text.casefold() and "data-txn" not in link.attrs)
+            for link in self.page.links)
         if not moved:  # a section moved to More is reached by its taps there, never by a look-alike link
             try:
+                if in_row and text not in DETOURS and text not in MOVED:
+                    raise AssertionError(text)
                 return self._framed(super().click(text))
             except AssertionError:
                 if text not in DETOURS:

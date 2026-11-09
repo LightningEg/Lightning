@@ -50,3 +50,33 @@ def test_to_review_is_one_card_and_not_now_moves_it_out_until_tomorrow(client):
     after = screen.review_items(c, date(2026, 10, 4))
     assert first["review_id"] not in {i["review_id"] for i in after} and len(after) == len(before) - 1
     assert first["review_id"] in {i["review_id"] for i in screen.review_items(c, date(2026, 10, 6))}
+
+
+def test_activity_bars_are_proportional_to_in_and_out(client):
+    """IV-11D3: two bars on one scale; the larger of In and Out is full and the other is its share."""
+    from datetime import date
+    from lightning.ui.phone.screens import activity as screen
+    http, c = client
+    s = screen.build(c, date(2026, 10, 4))
+    top = max(s.money_in, s.money_out)
+    assert top > 0 and max(s.in_share, s.out_share) == 100
+    assert abs(s.in_share - round(s.money_in / top * 100)) <= 1 and abs(s.out_share - round(s.money_out / top * 100)) <= 1
+    page = http.get("/activity").text
+    assert f'style="width: {s.in_share}%"' in page and f'style="width: {s.out_share}%"' in page
+
+
+def test_a_transfer_reads_the_same_on_home_and_activity_and_typed_names_stay_in_arabic(client):
+    """BV-11G: one transfer, one form (from → to) on both pages; an account name is never translated; no space before the comma."""
+    import re
+    http, c = client
+    names = {a.name for a in c.accounts.list()}
+    for path in ("/", "/activity"):
+        page = http.get(path).text
+        assert "<bdi translate=\"no\">" in page
+        assert not re.search(r"\bTo <", page)
+    http.cookies.set("lightning_locale", "ar")
+    ar = http.get("/activity", headers={"Accept-Language": "ar"}).text
+    home = http.get("/", headers={"Accept-Language": "ar"}).text
+    typed_names = re.findall(r'<bdi translate="no">([^<]+)</bdi>', ar + home)
+    assert typed_names and all(t in names for t in typed_names)
+    assert "محفظة نقدية" not in "".join(re.findall(r'<bdi translate="no">([^<]+)</bdi>', home + ar))

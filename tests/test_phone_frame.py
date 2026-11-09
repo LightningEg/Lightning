@@ -438,11 +438,11 @@ def test_money_names_each_place_once_and_arabic_transfers_read_from_the_first_ac
     try:
         phone.post("/settings/locale", data={"locale": "ar", "__session": session})
         activity = phone.get("/activity").text
-        pairs = re.findall(r"<bdi>([^<]+)</bdi> (.) <bdi>([^<]+)</bdi>", activity)
+        pairs = re.findall(r'<bdi translate="no">([^<]+)</bdi> (.) <bdi translate="no">([^<]+)</bdi>', activity)
         assert pairs and all(arrow == "←" for _, arrow, _ in pairs)
     finally:
         phone.post("/settings/locale", data={"locale": "en", "__session": session})
-    assert re.search(r"<bdi>[^<]+</bdi> → <bdi>[^<]+</bdi>", phone.get("/activity").text)
+    assert re.search(r'<bdi translate="no">[^<]+</bdi> → <bdi translate="no">[^<]+</bdi>', phone.get("/activity").text)
 
 
 def test_arabic_digits_and_their_separators_come_from_one_face():
