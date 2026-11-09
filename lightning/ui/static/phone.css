@@ -1062,3 +1062,5 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 .phone-donut-row small { color: var(--c-muted, #566E7E); }
 @media (prefers-reduced-motion: no-preference) { .phone-donut-seg { animation: phone-donut-in 400ms ease-out; } }
 @keyframes phone-donut-in { from { opacity: 0; } to { opacity: 1; } }
+/* Home keeps its first screen to one and a fifth (test_phone_home): the bar is a thin line right under the row. */
+.phone-month-bar.is-compact { height: 5px; margin: 0; }

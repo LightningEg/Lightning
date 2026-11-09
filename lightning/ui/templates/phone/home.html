@@ -51,7 +51,7 @@
 </section>
 <section class="phone-section" aria-label="{{ 'This month'|tr(locale) }}" id="month-heading">
   <div class="phone-rows"><a class="phone-row" href="/budget"><span>{{ 'This month'|tr(locale) }}<small>{{ 'Spent'|tr(locale) }} {{ s.spent|money }}{% if s.left_in_plan is not none %} · {{ fig.left_in_plan.label }} {{ s.left_in_plan|money }}{% endif %}</small></span><b>›</b></a></div>
-  {% if s.month_bar %}{{ month_bar(s.month_bar) }}{% endif %}
+  {% if s.month_bar %}{{ month_bar(s.month_bar, compact=True) }}{% endif %}
 </section>
 {% endif %}
 {% endblock %}
