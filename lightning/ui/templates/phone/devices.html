@@ -45,7 +45,7 @@
   <p class="phone-note">{{ 'The PC can then borrow this ledger, edit it and hand it back. One device edits at a time.'|tr(locale) }}</p>
   <form method="post" action="/profiles/devices/pair" class="phone-form">
     <input type="hidden" name="csrf" value="{{ csrf }}">
-    <div class="field"><label for="phone-name">{{ 'This phone\'s name'|tr(locale) }}</label><input id="phone-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off"></div>
+    <div class="field"><label for="phone-name">{{ 'This phone\'s name'|tr(locale) }}</label><input id="phone-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off" enterkeyhint="done"></div>
     <button class="btn primary phone-save" type="submit">{{ 'Show a pairing code'|tr(locale) }}</button>
   </form>
   {% if not lent_to %}</details>{% endif %}

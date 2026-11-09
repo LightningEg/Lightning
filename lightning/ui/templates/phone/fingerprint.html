@@ -19,7 +19,7 @@
   <p class="phone-note">{{ 'Open this profile with your fingerprint instead of typing the password. Type your password once to turn it on.'|tr(locale) }}</p>
   <form method="post" action="/profiles/fingerprint" class="phone-form">
     <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="action" value="on">
-    <div class="field"><label for="fingerprint-password">{{ 'Password'|tr(locale) }}</label><input id="fingerprint-password" name="password" type="password" required autocomplete="current-password"></div>
+    <div class="field"><label for="fingerprint-password">{{ 'Password'|tr(locale) }}</label><input id="fingerprint-password" name="password" type="password" required autocomplete="current-password" enterkeyhint="done"></div>
     <button class="btn primary phone-save" type="submit">{{ 'Turn on fingerprint'|tr(locale) }}</button>
   </form>
   {% endif %}

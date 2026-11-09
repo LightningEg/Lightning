@@ -1,7 +1,7 @@
 """Check every main page in the phone frame at 360 and 320 px wide (guideline C12): nothing may scroll
 sideways or be clipped past the viewport. Starts the phone app on a dummy profile with the sample household. Needs Playwright and Chromium.
 
-    python tools/phone_check.py [--arabic] [--theme id] [--shots folder]   # prints pages with sideways overflow or clipped elements
+    python tools/phone_check.py [--arabic] [--theme id] [--shots folder] [--only /a,/b]   # prints pages with sideways overflow or clipped elements
 
 --theme wears a paid theme (maintainer review, LIGHTNING_THEME_REVIEW) so the same pages are measured in it (3AY12).
 """
@@ -57,7 +57,20 @@ CLIPPED = """() => {
 }"""
 
 
-def run(shots: Path | None = None, *, arabic: bool = False, theme: str = "") -> list[str]:
+# 3BG1: no arrow is drawn as a text glyph (it points backwards in Arabic); the SVG chevron is flipped by the stylesheet.
+GLYPH = """() => [...document.querySelectorAll('body *')].filter(el => el.checkVisibility() && !['SCRIPT', 'STYLE'].includes(el.tagName) &&
+  [...el.childNodes].some(n => n.nodeType === Node.TEXT_NODE && /^\\s*[›‹]\\s*$/.test(n.textContent)))
+  .map(el => (el.closest('a, button, summary') || el).outerHTML.slice(0, 80))"""
+# 3BG2 (C05.1): a link or button you tap is 44 px tall on these pages (a checkbox may sit inside a 44 px label).
+TALL_PAGES = ("/settings",)
+SHORT = """() => [...document.querySelectorAll('main a, main button, main summary')].filter(el => {
+  const r = el.getBoundingClientRect(); if (!r.width || !r.height || !el.checkVisibility()) return false;
+  if (el.closest('.phone-tabbar, nav, [hidden]')) return false;
+  if (el.closest('label') && el.closest('label').getBoundingClientRect().height >= 43.5) return false;
+  return r.height < 43.5; }).map(el => (el.innerText || el.getAttribute('aria-label') || el.outerHTML).trim().slice(0, 40))"""
+
+
+def run(shots: Path | None = None, *, arabic: bool = False, theme: str = "", only: tuple[str, ...] = ()) -> list[str]:
     from playwright.sync_api import sync_playwright
     from lightning.runtime.app import profile_app
     from lightning.runtime.devices import Devices
@@ -121,6 +134,8 @@ def run(shots: Path | None = None, *, arabic: bool = False, theme: str = "") -> 
                     if worn != theme:
                         problems.append(f"theme {theme} was not worn: the page wears {worn!r}")
                 pages = (*PAGES, review, *([circle] if circle else []))  # the bank import's review, as an SMS reaches it; a gam'eya circle
+                if only:
+                    pages = only
                 for width in (360, 320):
                     page.set_viewport_size({"width": width, "height": 800})
                     if width == 320:  # J1 (3AY7): with the number keyboard up (about 340 px left) Save is still on screen
@@ -187,6 +202,13 @@ def run(shots: Path | None = None, *, arabic: bool = False, theme: str = "") -> 
                                     .map(a => a.textContent.trim())""")
                                 if clipped_views:
                                     problems.append(f"{width} {path}: clipped views {clipped_views}")
+                        glyphs = page.evaluate(GLYPH)
+                        if glyphs:
+                            problems.append(f"{width} {path}: text arrow glyphs {glyphs[:3]}")
+                        if path in TALL_PAGES:
+                            short = page.evaluate(SHORT)
+                            if short:
+                                problems.append(f"{width} {path}: links under 44 px tall {short[:6]}")
                         clipped = page.evaluate(CLIPPED)
                         if clipped:
                             problems.append(f"{width} {path}: clipped past viewport {clipped}")
@@ -202,6 +224,7 @@ def run(shots: Path | None = None, *, arabic: bool = False, theme: str = "") -> 
 
 if __name__ == "__main__":
     shots = Path(sys.argv[sys.argv.index("--shots") + 1]) if "--shots" in sys.argv else None
-    found = run(shots, arabic="--arabic" in sys.argv, theme=sys.argv[sys.argv.index("--theme") + 1] if "--theme" in sys.argv else "")
+    only = tuple(sys.argv[sys.argv.index("--only") + 1].split(",")) if "--only" in sys.argv else ()
+    found = run(shots, arabic="--arabic" in sys.argv, only=only, theme=sys.argv[sys.argv.index("--theme") + 1] if "--theme" in sys.argv else "")
     print("\n".join(found) or "Nothing scrolls sideways or clips past the viewport at 360 or 320.")
     sys.exit(1 if found else 0)

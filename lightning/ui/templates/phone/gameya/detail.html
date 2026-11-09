@@ -15,17 +15,17 @@
 {% macro account_options(chosen) %}<option value="">{{ 'Choose an account'|tr(locale) }}</option>{% for a in cash_accounts %}<option value="{{ a.id }}" {{ 'selected' if chosen == a.id|string }}>{{ a.name }}</option>{% endfor %}{% endmacro %}
 {% macro terms_form(button) %}
   <form method="post" action="/gameya/{{ account.id }}/terms" class="phone-form" data-gameya-terms>
-    <div class="field"><label for="g-organiser">{{ 'Who runs it'|tr(locale) }}</label><input id="g-organiser" name="organiser" value="{{ values.organiser }}" list="gameya-organisers" data-own-suggestions placeholder="{{ 'A person’s name'|tr(locale) }}" required autocomplete="off">
+    <div class="field"><label for="g-organiser">{{ 'Who runs it'|tr(locale) }}</label><input id="g-organiser" name="organiser" value="{{ values.organiser }}" list="gameya-organisers" data-own-suggestions placeholder="{{ 'A person’s name'|tr(locale) }}" required autocomplete="off" enterkeyhint="next">
       <datalist id="gameya-organisers">{% for person in counterparties %}<option value="{{ person.name }}">{% endfor %}</datalist></div>
-    <div class="field"><label for="g-members">{{ 'Members'|tr(locale) }}</label><input id="g-members" name="members" value="{{ values.members }}" inputmode="numeric" placeholder="10" required></div>
-    <div class="field phone-amount"><label for="g-installment">{{ 'Instalment'|tr(locale) }} ({{ account.currency }})</label><input id="g-installment" name="installment" value="{{ values.installment }}" inputmode="decimal" placeholder="2000" required></div>
-    <div class="field"><label for="g-first">{{ 'First instalment'|tr(locale) }}</label><input id="g-first" name="first_date" type="text" value="{{ values.first_date }}" placeholder="yyyy-mm-dd" data-smart-date required></div>
-    <div class="field"><label for="g-turn">{{ 'Your turn'|tr(locale) }}</label><input id="g-turn" name="my_turn" value="{{ values.my_turn }}" inputmode="numeric" placeholder="3" required><small class="phone-note">{{ 'Month number, 1 is the first pot.'|tr(locale) }}</small></div>
-    <div class="field"><label for="g-payout">{{ 'Your payout'|tr(locale) }} ({{ account.currency }})</label><input id="g-payout" name="payout" value="{{ values.payout }}" inputmode="decimal" placeholder="{{ 'Members × instalment'|tr(locale) }}"><small class="phone-note">{{ 'Leave blank for members × instalment. Change it if the organiser keeps a cut.'|tr(locale) }}</small></div>
+    <div class="field"><label for="g-members">{{ 'Members'|tr(locale) }}</label><input id="g-members" name="members" value="{{ values.members }}" inputmode="numeric" placeholder="10" required enterkeyhint="next"></div>
+    <div class="field phone-amount"><label for="g-installment">{{ 'Instalment'|tr(locale) }} ({{ account.currency }})</label><input id="g-installment" name="installment" value="{{ values.installment }}" inputmode="decimal" placeholder="2000" required enterkeyhint="next"></div>
+    <div class="field"><label for="g-first">{{ 'First instalment'|tr(locale) }}</label><input id="g-first" name="first_date" type="text" value="{{ values.first_date }}" placeholder="yyyy-mm-dd" data-smart-date required enterkeyhint="next"></div>
+    <div class="field"><label for="g-turn">{{ 'Your turn'|tr(locale) }}</label><input id="g-turn" name="my_turn" value="{{ values.my_turn }}" inputmode="numeric" placeholder="3" required enterkeyhint="next"><small class="phone-note">{{ 'Month number, 1 is the first pot.'|tr(locale) }}</small></div>
+    <div class="field"><label for="g-payout">{{ 'Your payout'|tr(locale) }} ({{ account.currency }})</label><input id="g-payout" name="payout" value="{{ values.payout }}" inputmode="decimal" placeholder="{{ 'Members × instalment'|tr(locale) }}" enterkeyhint="next"><small class="phone-note">{{ 'Leave blank for members × instalment. Change it if the organiser keeps a cut.'|tr(locale) }}</small></div>
     <div class="phone-segment" role="radiogroup" aria-label="{{ 'Interest'|tr(locale) }}" style="grid-template-columns:repeat(2,1fr)">
       <label><input type="radio" name="interest" value="none" {{ 'checked' if values.interest != 'rate' }}><span>{{ 'No interest'|tr(locale) }}</span></label>
       <label><input type="radio" name="interest" value="rate" {{ 'checked' if values.interest == 'rate' }}><span>{{ 'Estimated return'|tr(locale) }}</span></label></div>
-    <div class="field" data-gameya-rate {{ 'hidden' if values.interest != 'rate' }}><label for="g-rate">{{ 'Annual rate (%)'|tr(locale) }}</label><input id="g-rate" name="annual_rate" value="{{ values.annual_rate }}" inputmode="decimal" placeholder="0"><small class="phone-note">{{ 'A planning estimate on what you have paid in, counted at your turn. Never posted: record what you actually get as money in.'|tr(locale) }}</small></div>
+    <div class="field" data-gameya-rate {{ 'hidden' if values.interest != 'rate' }}><label for="g-rate">{{ 'Annual rate (%)'|tr(locale) }}</label><input id="g-rate" name="annual_rate" value="{{ values.annual_rate }}" inputmode="decimal" placeholder="0" enterkeyhint="done"><small class="phone-note">{{ 'A planning estimate on what you have paid in, counted at your turn. Never posted: record what you actually get as money in.'|tr(locale) }}</small></div>
     <div class="field"><label for="g-from">{{ 'Pay instalments from'|tr(locale) }}</label><select id="g-from" name="funding_account_id" data-own-picker required>{{ account_options(values.funding_account_id) }}</select></div>
     <div class="field"><label for="g-into">{{ 'Receive your payout in'|tr(locale) }}</label><select id="g-into" name="payout_account_id" data-own-picker required>{{ account_options(values.payout_account_id) }}</select></div>
     {% if not cash_accounts %}<p class="phone-note">{{ 'Add a bank or cash account in this currency first.'|tr(locale) }}</p>{% endif %}
@@ -69,8 +69,8 @@
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
   </form>{% endif %}
   <form method="post" action="/gameya/{{ account.id }}/instalment" class="phone-form"><input type="hidden" name="submission" value="{{ new_submission() }}">
-    <div class="field phone-amount"><label for="i-amount">{{ 'Amount'|tr(locale) }} ({{ account.currency }})</label><input id="i-amount" name="amount" value="{{ prefill.instalment_amount }}" inputmode="decimal" required></div>
-    <div class="field"><label for="i-date">{{ 'Date'|tr(locale) }}</label><input id="i-date" name="date" type="text" value="{{ prefill.instalment_date }}" placeholder="yyyy-mm-dd" data-smart-date required></div>
+    <div class="field phone-amount"><label for="i-amount">{{ 'Amount'|tr(locale) }} ({{ account.currency }})</label><input id="i-amount" name="amount" value="{{ prefill.instalment_amount }}" inputmode="decimal" required enterkeyhint="next"></div>
+    <div class="field"><label for="i-date">{{ 'Date'|tr(locale) }}</label><input id="i-date" name="date" type="text" value="{{ prefill.instalment_date }}" placeholder="yyyy-mm-dd" data-smart-date required enterkeyhint="done"></div>
     <div class="field"><label for="i-from">{{ 'Paid from'|tr(locale) }}</label><select id="i-from" name="account_id" data-own-picker required>{{ account_options(prefill.instalment_from) }}</select></div>
     <button class="btn primary phone-save">{{ 'Record instalment'|tr(locale) }}</button>
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
@@ -84,8 +84,8 @@
   <p class="phone-note">{{ 'Record it when the pot reaches you. Taking it before you have paid in everything leaves you owing the circle, and that is counted in What you owe.'|tr(locale) }}</p>
   {% if error and error_form == 'payout' %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
   <form method="post" action="/gameya/{{ account.id }}/payout" class="phone-form">
-    <div class="field phone-amount"><label for="p-amount">{{ 'Amount'|tr(locale) }} ({{ account.currency }})</label><input id="p-amount" name="amount" value="{{ prefill.payout_amount }}" inputmode="decimal" required></div>
-    <div class="field"><label for="p-date">{{ 'Date'|tr(locale) }}</label><input id="p-date" name="date" type="text" value="{{ prefill.payout_date }}" placeholder="yyyy-mm-dd" data-smart-date required></div>
+    <div class="field phone-amount"><label for="p-amount">{{ 'Amount'|tr(locale) }} ({{ account.currency }})</label><input id="p-amount" name="amount" value="{{ prefill.payout_amount }}" inputmode="decimal" required enterkeyhint="next"></div>
+    <div class="field"><label for="p-date">{{ 'Date'|tr(locale) }}</label><input id="p-date" name="date" type="text" value="{{ prefill.payout_date }}" placeholder="yyyy-mm-dd" data-smart-date required enterkeyhint="done"></div>
     <div class="field"><label for="p-into">{{ 'Received in'|tr(locale) }}</label><select id="p-into" name="account_id" data-own-picker required>{{ account_options(prefill.payout_into) }}</select></div>
     <button class="btn {{ 'primary' if not progress.next_index }} phone-save">{{ 'Record payout'|tr(locale) }}</button>
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">

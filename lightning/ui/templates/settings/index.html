@@ -46,10 +46,10 @@
 <section class="card phone-card" aria-labelledby="this-phone-heading">
   <h2 id="this-phone-heading" class="phone-card-title">{{ 'This phone'|tr(locale) }}</h2>
   <div class="phone-rows">
-    <a class="phone-row" href="/profiles/devices"><span>{{ 'Devices'|tr(locale) }}<small>{{ 'Pair your phone or PC'|tr(locale) }}</small></span><b>›</b></a>
-    <a class="phone-row" href="/sms"><span>{{ 'Bank SMS'|tr(locale) }}<small>{{ 'Read bank messages into transactions'|tr(locale) }}</small></span><b>›</b></a>
-    {% if request.state.fingerprint_row|default('') %}<a class="phone-row" href="/profiles/fingerprint"><span>{{ 'Unlock with fingerprint'|tr(locale) }}<small>{{ ('On' if request.state.fingerprint_row == 'on' else 'Off')|tr(locale) }}</small></span><b>›</b></a>{% endif %}
-    <a class="phone-row" href="/profiles"><span>{{ 'Profile and lock'|tr(locale) }}<small>{{ 'Password, recovery key, backups, lock'|tr(locale) }}</small></span><b>›</b></a>
+    <a class="phone-row" href="/profiles/devices"><span>{{ 'Devices'|tr(locale) }}<small>{{ 'Pair your phone or PC'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+    <a class="phone-row" href="/sms"><span>{{ 'Bank SMS'|tr(locale) }}<small>{{ 'Read bank messages into transactions'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+    {% if request.state.fingerprint_row|default('') %}<a class="phone-row" href="/profiles/fingerprint"><span>{{ 'Unlock with fingerprint'|tr(locale) }}<small>{{ ('On' if request.state.fingerprint_row == 'on' else 'Off')|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>{% endif %}
+    <a class="phone-row" href="/profiles"><span>{{ 'Profile and lock'|tr(locale) }}<small>{{ 'Password, recovery key, backups, lock'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
   </div>
   {% if request.state.recents_row|default('') %}<form method="post" action="/profiles/recents" class="settings-row"><div><label for="recents-hidden">{{ 'Hide in recent apps'|tr(locale) }}</label><small>{{ 'Your amounts do not show when you switch apps.'|tr(locale) }}</small></div>
     <div class="settings-control"><input type="hidden" name="csrf" value="{{ request.state.csrf|default('') }}"><input type="hidden" name="on" value="0"><label class="switch"><input id="recents-hidden" type="checkbox" name="on" value="1" {{ 'checked' if request.state.recents_row == 'on' }} data-autosubmit><span class="sr-only">{{ 'Hide in recent apps'|tr(locale) }}</span></label><noscript><button class="btn small">{{ 'Save'|tr(locale) }}</button></noscript></div></form>{% endif %}
