@@ -13,9 +13,9 @@
 <section class="phone-section" aria-labelledby="first-heading">
   <header class="phone-section-head"><h2 id="first-heading">{{ 'Three steps to your first answer'|tr(locale) }}</h2></header>
   <div class="phone-rows">
-    <a class="phone-row" href="/accounts/new"><span>{{ 'Your salary account'|tr(locale) }}</span><b>›</b></a>
-    <a class="phone-row" href="/plan/items/new?kind=INCOME"><span>{{ 'Your payday'|tr(locale) }}</span><b>›</b></a>
-    <a class="phone-row" href="/add-transaction"><span>{{ 'Your first payment'|tr(locale) }}</span><b>›</b></a>
+    <a class="phone-row" href="/accounts/new"><span>{{ 'Your salary account'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+    <a class="phone-row" href="/plan/items/new?kind=INCOME"><span>{{ 'Your payday'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+    <a class="phone-row" href="/add-transaction"><span>{{ 'Your first payment'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
   </div>
 </section>
 {% else %}
@@ -24,7 +24,7 @@
 {% elif s.until %}{% set line = 'On top of your plan until {sa}.'|tr(locale, sa=s.until) %}
 {% else %}{% set line = 'From free cash, after what is promised over the next 3 months.'|tr(locale) %}{% endif %}
 {# The hero is the way into its working (C11.1): one tap opens the sheet, so no row of its own is needed. #}
-{% set lead %}<div class="phone-hero has-seam"><div id="home-hero" class="phone-hero-label" role="heading" aria-level="2">{{ fig.safe_to_spend.label }} <span aria-hidden="true">›</span></div>
+{% set lead %}<div class="phone-hero has-seam"><div id="home-hero" class="phone-hero-label" role="heading" aria-level="2">{{ fig.safe_to_spend.label }} <span aria-hidden="true">{{ chevron() }}</span></div>
   <div class="phone-lead">{{ s.safe|money }} <small>{{ base }}</small></div><p class="phone-hero-line">{{ line|keep_dates }}</p></div>{% endset %}
 {% call sheet(fig.safe_to_spend.label, lead, 'phone-home-hero') %}
   <div class="phone-rows">{% for name, value in s.working %}<div class="phone-row"><span>{{ name|tr(locale) }}</span><b>{{ value|money(True) }}</b></div>{% endfor %}</div>
@@ -39,7 +39,7 @@
       {% elif r.kind == 'payday' %}{{ 'Salary arrived'|tr(locale) }}
       {% elif r.kind == 'catch_up' %}{% if r.days is not none and r.days >= 3 %}{{ 'Nothing recorded since {sa}. Two minutes to catch up.'|tr(locale, sa=r.since) }}{% else %}{{ ('1 bill is long overdue. Two minutes to catch up.' if r.count == 1 else '{n} bills are long overdue. Two minutes to catch up.')|tr(locale, n=r.count) }}{% endif %}
       {% else %}{{ r.subject|tr(locale) }}{% endif %}</span>
-      <b>{{ r.action|tr(locale) }} ›</b>
+      <b>{{ r.action|tr(locale) }} {{ chevron() }}</b>
     </a>
   {% endfor %}
   </div>
@@ -50,7 +50,7 @@
   {% if s.latest %}{{ txn_list(s.latest, True, False, False, '', '/transactions', '', 5, True) }}{% else %}<p class="phone-note">{{ 'No transactions yet.'|tr(locale) }}</p>{% endif %}
 </section>
 <section class="phone-section" aria-label="{{ 'This month'|tr(locale) }}" id="month-heading">
-  <div class="phone-rows"><a class="phone-row" href="/budget"><span>{{ 'This month'|tr(locale) }}<small>{{ 'Spent'|tr(locale) }} {{ s.spent|money }}{% if s.left_in_plan is not none %} · {{ fig.left_in_plan.label }} {{ s.left_in_plan|money }}{% endif %}</small></span><b>›</b></a></div>
+  <div class="phone-rows"><a class="phone-row" href="/budget"><span>{{ 'This month'|tr(locale) }}<small>{{ 'Spent'|tr(locale) }} {{ s.spent|money }}{% if s.left_in_plan is not none %} · {{ fig.left_in_plan.label }} {{ s.left_in_plan|money }}{% endif %}</small></span><b>{{ chevron() }}</b></a></div>
   {% if s.month_bar %}{{ month_bar(s.month_bar, compact=True) }}{% endif %}
 </section>
 {% endif %}

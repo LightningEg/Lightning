@@ -87,7 +87,7 @@ def test_the_page_shows_the_hero_to_do_latest_and_this_month_in_that_order(sampl
     html = _page(sample).text
     assert html.index("Safe to spend") < html.index('id="todo-heading"') < html.index('id="latest-heading"') < html.index('id="month-heading"')
     assert html.count('class="phone-row') >= 4
-    assert "Landlord" in html and "Pay ›" in html
+    assert "Landlord" in html and re.search(r"Pay <svg class=\"chevron\"", html)
 
 
 def test_home_has_at_most_eight_figures(sample):

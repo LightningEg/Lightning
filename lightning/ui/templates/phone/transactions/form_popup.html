@@ -33,7 +33,7 @@
     {% if fresh %}<p class="phone-note phone-sms-status" data-sms-paste-status role="status" aria-live="polite"></p>{% endif %}
     <div class="field phone-amount {{ 'has-error' if error_field == 'amount' }}">
       <label for="popup-amount">{{ 'Amount'|tr(locale) }}</label>
-      <div class="phone-amount-box"><input id="popup-amount" name="amount" type="text" value="{{ values.amount }}" inputmode="decimal" placeholder="0" required autocomplete="off"{% if fresh %} autofocus{% endif %} {{ 'readonly' if split_categories }}><span class="phone-amount-unit" aria-hidden="true">{{ account.currency }}</span></div>
+      <div class="phone-amount-box"><input id="popup-amount" name="amount" type="text" value="{{ values.amount }}" inputmode="decimal" placeholder="0" required autocomplete="off" enterkeyhint="next"{% if fresh %} autofocus{% endif %} {{ 'readonly' if split_categories }}><span class="phone-amount-unit" aria-hidden="true">{{ account.currency }}</span></div>
       {% if error_field == 'amount' %}<small class="field-error">{{ error|tr(locale) }}</small>{% endif %}
     </div>
     {% if fresh and entry_accounts|length > 1 %}<div class="field phone-account-field">
@@ -64,7 +64,7 @@
     </div>
     <div class="field money-only {{ 'has-error' if error_field == 'counterparty' }}" {{ 'hidden' if values.kind == 'transfer' }}>
       <label for="popup-counterparty">{{ 'Who'|tr(locale) }} <span class="muted">{{ "(optional)"|tr(locale) }}</span></label>
-      <input id="popup-counterparty" name="counterparty" value="{{ values.counterparty }}" list="popup-counterparties" data-own-suggestions placeholder="{{ 'Who you paid or who paid you'|tr(locale) }}" autocomplete="off">
+      <input id="popup-counterparty" name="counterparty" value="{{ values.counterparty }}" list="popup-counterparties" data-own-suggestions placeholder="{{ 'Who you paid or who paid you'|tr(locale) }}" autocomplete="off" enterkeyhint="next">
       <datalist id="popup-counterparties">{% for person in counterparties %}{% set learned = (counterparty_categories or {}).get(person.name) %}<option value="{{ person.name }}"{% if learned %} data-category="{{ learned.id }}"{% endif %}>{% endfor %}</datalist>
       {% if error_field == 'counterparty' %}<small class="field-error">{{ "Choose a saved counterparty."|tr(locale) }}</small>{% endif %}
     </div>
@@ -75,7 +75,7 @@
     </div>
     <details class="phone-more"{% if values.owner_id or values.notes %} open{% endif %}>
       <summary>{{ "Notes and held for"|tr(locale) }}</summary>
-      <div class="field"><label for="popup-notes">{{ 'Notes'|tr(locale) }}</label><input id="popup-notes" name="notes" value="{{ values.notes }}"></div>
+      <div class="field"><label for="popup-notes">{{ 'Notes'|tr(locale) }}</label><input id="popup-notes" name="notes" value="{{ values.notes }}" enterkeyhint="done"></div>
       <div class="field">
         <label for="popup-owner">{{ 'Held for'|tr(locale) }}</label>
         <select id="popup-owner" name="owner_id" data-own-picker><option value="">{{ 'You'|tr(locale) }}</option>

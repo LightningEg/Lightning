@@ -161,3 +161,21 @@ def test_phone_planner_choices_fit_their_card(width):
         assert page.locator('.planner-mode-seg').evaluate(
             'e => [...e.querySelectorAll("label span")].every(s => s.scrollWidth <= s.clientWidth && s.getBoundingClientRect().right <= e.getBoundingClientRect().right + 0.5)')
         browser.close()
+
+
+def test_phone_touch_polish_is_in_the_stylesheet():
+    """3BG3: no tap flash, no page bounce, no selectable tab bar or buttons; a pressed state instead of the flash."""
+    executable = require_chromium()
+    static = Path(__file__).resolve().parents[1] / "lightning/ui/static"
+    with sync_playwright() as p:
+        browser = p.chromium.launch(executable_path=executable)
+        page = browser.new_page(viewport={"width": 360, "height": 800})
+        page.set_content('<html class="phone"><body><nav class="phone-tabbar"><a href="#">Home</a></nav>'
+                         '<button>Go</button></body></html>')
+        page.add_style_tag(content=(static / "style.css").read_text())
+        page.add_style_tag(content=(static / "phone.css").read_text())
+        assert page.evaluate("getComputedStyle(document.documentElement).overscrollBehaviorY") == "none"
+        assert page.evaluate("getComputedStyle(document.documentElement).webkitTapHighlightColor") == "rgba(0, 0, 0, 0)"
+        assert page.evaluate("getComputedStyle(document.querySelector('.phone-tabbar')).userSelect") == "none"
+        assert page.evaluate("getComputedStyle(document.querySelector('button')).userSelect") == "none"
+        browser.close()

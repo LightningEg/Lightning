@@ -11,12 +11,12 @@
 {% if money %}
 <section class="phone-section" aria-labelledby="search-names">
   <header class="phone-section-head"><h2 id="search-names">{{ 'Names and categories'|tr(locale) }}</h2></header>
-  <div class="phone-rows">{% set type_names = {'Account': 'Accounts', 'Person': 'People', 'Counterparty': 'Counterparties', 'Category': 'Categories', 'Reserve': 'Reserves', 'Investment': 'Investments', 'Tag': 'Tags'} %}{% for r in money %}{% if loop.first or r.kind != loop.previtem.kind %}<h3>{{ type_names.get(r.kind, r.kind)|tr(locale) }}</h3>{% endif %}<a class="phone-row" href="{{ r.href }}"><span>{{ r.label|tr(locale) if r.kind == 'Category' else r.label }}{% if r.context %}<small>{{ r.context|tr(locale) }}</small>{% endif %}</span><b>›</b></a>{% endfor %}</div>
+  <div class="phone-rows">{% set type_names = {'Account': 'Accounts', 'Person': 'People', 'Counterparty': 'Counterparties', 'Category': 'Categories', 'Reserve': 'Reserves', 'Investment': 'Investments', 'Tag': 'Tags'} %}{% for r in money %}{% if loop.first or r.kind != loop.previtem.kind %}<h3>{{ type_names.get(r.kind, r.kind)|tr(locale) }}</h3>{% endif %}<a class="phone-row" href="{{ r.href }}"><span>{{ r.label|tr(locale) if r.kind == 'Category' else r.label }}{% if r.context %}<small>{{ r.context|tr(locale) }}</small>{% endif %}</span><b>{{ chevron() }}</b></a>{% endfor %}</div>
 </section>
 {% endif %}
 {% if pages %}
 <section class="phone-section" aria-labelledby="search-pages">
   <header class="phone-section-head"><h2 id="search-pages">{{ 'Pages and actions'|tr(locale) }}</h2></header>
-  <div class="phone-rows">{% for r in pages %}<a class="phone-row" href="{{ r.href }}"{% if r.action == 'privacy' %} data-privacy-toggle{% endif %}><span>{{ r.label|tr(locale) }}{% if r.context %}<small>{{ r.context|tr(locale) }}</small>{% endif %}</span><b>›</b></a>{% endfor %}</div>
+  <div class="phone-rows">{% for r in pages %}<a class="phone-row" href="{{ r.href }}"{% if r.action == 'privacy' %} data-privacy-toggle{% endif %}><span>{{ r.label|tr(locale) }}{% if r.context %}<small>{{ r.context|tr(locale) }}</small>{% endif %}</span><b>{{ chevron() }}</b></a>{% endfor %}</div>
 </section>
 {% endif %}

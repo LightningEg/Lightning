@@ -7,8 +7,8 @@
 <form class="phone-form" method="post" action="/accounts/{{ account.id }}/reconcile/unlock"><input type="hidden" name="__session" value="{{ session_token }}"><button class="btn" type="submit">{{ 'Unlock for corrections'|tr(locale) }}</button></form></section>{% endif %}
 <section class="card phone-card reconcile-summary">
   <form method="get" action="/accounts/{{ account.id }}/reconcile" class="reconcile-controls">
-    <label>On <small class="muted">{{ "the date it shows"|tr(locale) }}</small><input type="text" placeholder="yyyy-mm-dd" inputmode="numeric" autocomplete="off" data-smart-date name="date" value="{{ through }}" required></label>
-    <label>{{ "Your bank shows"|tr(locale) }}<small class="muted">{{ "ending balance"|tr(locale) }}</small><input type="text" name="balance" value="{{ balance_input }}" placeholder="e.g. 12,500.00" inputmode="decimal" required></label>
+    <label>On <small class="muted">{{ "the date it shows"|tr(locale) }}</small><input type="text" placeholder="yyyy-mm-dd" inputmode="numeric" autocomplete="off" data-smart-date name="date" value="{{ through }}" required enterkeyhint="next"></label>
+    <label>{{ "Your bank shows"|tr(locale) }}<small class="muted">{{ "ending balance"|tr(locale) }}</small><input type="text" name="balance" value="{{ balance_input }}" placeholder="e.g. 12,500.00" inputmode="decimal" required enterkeyhint="done"></label>
     <button class="btn primary">{{ "Adjust balance"|tr(locale) }}</button>
   </form>
   {% if error %}<p class="flash error">{{ error|tr(locale) }}</p>{% endif %}

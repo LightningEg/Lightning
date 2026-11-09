@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 46 open items. Each folder holds its reports and its items.
+11 big pictures, 45 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -101,11 +101,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3BF5 | ↳ Our message, not the browser's bubble ([#418](https://github.com/LightningEg/Lightning/issues/418)) | | | M | Sonnet | |
 | IV-3BF6 | ↳ One set of icons ([#419](https://github.com/LightningEg/Lightning/issues/419)) | | | M | Sonnet | |
 | IV-3BF7 | ↳ Styles from tokens ([#420](https://github.com/LightningEg/Lightning/issues/420)) | | | M | Sonnet | |
-| **IV-3BG** | [Phone finish - chevrons point forward in Arabic, quiet links 44 px tall, no tap flash or page bounce, tinted status bar](3-polish-and-arabic/IV-3BG-phone-finish.md) | improvement, visual | Everywhere | S | Sonnet | ready |
-| IV-3BG1 | ↳ One chevron that points forward in both languages ([#421](https://github.com/LightningEg/Lightning/issues/421)) | | | S | Sonnet | |
-| IV-3BG2 | ↳ Quiet links are 44 px tall ([#422](https://github.com/LightningEg/Lightning/issues/422)) | | | S | Sonnet | |
-| IV-3BG3 | ↳ No tap flash, no page bounce, no selected buttons ([#423](https://github.com/LightningEg/Lightning/issues/423)) | | | S | Sonnet | |
-| IV-3BG4 | ↳ Status bar colour and keyboard Enter key ([#424](https://github.com/LightningEg/Lightning/issues/424)) | | | S | Sonnet | |
 | **IV-3BH** | [One name per thing and no accounting jargon - ledger, counterparty, reevaluation, Title Case categories, three names for planning](3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md) | improvement, visual | Feel | M | Sonnet | ready |
 | IV-3BH1 | ↳ A test that keeps jargon off the screen ([#425](https://github.com/LightningEg/Lightning/issues/425)) | | | S | Sonnet | |
 | IV-3BH2 | ↳ "Counterparty" becomes "Payee" (Arabic: الطرف التاني → الجهة) | | | M | Sonnet | |
@@ -131,7 +126,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md) · [r28](3-polish-and-arabic/r28-international-polish/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BJ. Next free code: 3BL.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BG, 3BJ. Next free code: 3BL.
 
 ## 4 Edit journal and devices
 

@@ -17,7 +17,7 @@
   <div class="phone-row"><span>{{ 'Money out'|tr(locale) }}</span><b><bdi class="fig">{{ s.money_out|money }}</bdi></b></div>
   <div class="phone-row"><span>{{ 'Kept'|tr(locale) }}</span><b class="{{ 'neg' if s.net < 0 else 'pos' }}"><bdi class="fig">{{ s.net|money(True) }}</bdi></b></div>
   {% if s.savings_rate is not none %}<div class="phone-row"><span>{{ 'Savings rate'|tr(locale) }}</span><b><bdi class="fig">{{ s.savings_rate|round(0)|int }}%</bdi></b></div>{% endif %}
-  {% if s.investing_result is not none %}<a class="phone-row" href="/investments"><span>{{ 'Investing result'|tr(locale) }}</span><b class="{{ 'neg' if s.investing_result < 0 else 'pos' }}"><bdi class="fig">{{ s.investing_result|money(True) }}</bdi> ›</b></a>{% endif %}
+  {% if s.investing_result is not none %}<a class="phone-row" href="/investments"><span>{{ 'Investing result'|tr(locale) }}</span><b class="{{ 'neg' if s.investing_result < 0 else 'pos' }}"><bdi class="fig">{{ s.investing_result|money(True) }}</bdi> {{ chevron() }}</b></a>{% endif %}
 </div>
-<a class="phone-row" href="/birdview/expenses"><span>{{ 'Where it went'|tr(locale) }}</span><b>›</b></a>
+<a class="phone-row" href="/birdview/expenses"><span>{{ 'Where it went'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
 {% endblock %}
