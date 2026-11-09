@@ -36,6 +36,10 @@ MAX_IMPORT_CONFIRM_FIELDS = MAX_IMPORT_REVIEW_FIELDS
 # A market price file (prices only, nothing personal) imported by hand: one zip, bounded.
 MARKET_IMPORT_PATH = "/investments/prices/market/import"
 MAX_MARKET_IMPORT_BODY = 40 * 1024 * 1024
+# The onboarding workbook (Settings > Your data > Import): one .xlsx of up to 16 MB, then the same bytes come back
+# as one base64 field when the preview is confirmed (about 4/3 the size), so the request is bounded at 24 MB.
+WORKBOOK_IMPORT_PATH = "/exports/import"
+MAX_WORKBOOK_IMPORT_BODY = 24 * 1024 * 1024
 # Many investment prices from one CSV (PC roadmap P6): one file, bounded like a statement upload.
 PRICE_CSV_PATH = "/investments/prices/csv"
 
@@ -52,6 +56,8 @@ def request_body_limit(path: str, method: str = "POST") -> int:
         return MAX_IMPORT_CONFIRM_BODY
     if path == MARKET_IMPORT_PATH:
         return MAX_MARKET_IMPORT_BODY
+    if path == WORKBOOK_IMPORT_PATH:
+        return MAX_WORKBOOK_IMPORT_BODY
     if path == PRICE_CSV_PATH:
         return MAX_CSV_UPLOAD_REQUEST_BYTES
     return MAX_BODY
@@ -64,6 +70,8 @@ def request_too_large_message(path: str) -> str:
         return "CSV files must be 5 MB or smaller. Choose a smaller CSV and try again."
     if re.fullmatch(r"/accounts/\d+/import/\d+/confirm", path):
         return "This import review is too large to submit at once. Split the CSV into smaller files."
+    if path == WORKBOOK_IMPORT_PATH:
+        return "The workbook must be 16 MB or smaller."
     return "This request is too large."
 
 
@@ -77,7 +85,8 @@ def configure_memory_only_import_uploads() -> None:
     SpooledTemporaryFile to roll them to disk. A market file larger than that
     may roll to disk: it holds public prices, nothing personal.
     """
-    MultiPartParser.spool_max_size = MAX_IMPORT_UPLOAD_BODY + 1
+    # The workbook holds the person's whole ledger: it too stays in memory, never in a plaintext temporary file.
+    MultiPartParser.spool_max_size = max(MAX_IMPORT_UPLOAD_BODY, MAX_WORKBOOK_IMPORT_BODY) + 1
 
 
 @dataclass

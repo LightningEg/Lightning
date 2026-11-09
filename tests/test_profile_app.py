@@ -353,3 +353,22 @@ def test_settings_start_fresh_locks_this_profile_and_opens_new_profile_setup(tmp
         assert response.status_code == 303 and response.headers["location"].startswith("/profiles/new")
         assert app.session.container is None  # the old profile is locked, untouched
         assert "Home" in browser.get("/profiles").text
+
+
+def test_workbook_import_upload_and_confirm_pass_the_profile_guard(tmp_path):
+    """The onboarding workbook is a file part and a large base64 field: the guard must allow both (it said 'form expired')."""
+    from lightning.bootstrap import build
+    from lightning.workflows.data_export import export_all
+    source = build(tmp_path / "source.db")
+    data, _, _ = export_all(source, "xlsx")
+    source.db.close()
+    browser, app, cfg = start(tmp_path)
+    with browser:
+        browser.get("/__launch", params={"code": cfg.launch_code})
+        create(browser)
+        session = token(browser.get("/exports/import").text, "__session")
+        preview = browser.post("/exports/import", data={"__session": session}, files={"workbook": ("records.xlsx", data)})
+        assert preview.status_code == 200, preview.text[:300]
+        form = {"__session": session, "action": "confirm", "token": token(preview.text, "token"),
+                "payload": token(preview.text, "payload")}
+        assert "Your data is ready" in browser.post("/exports/import", data=form).text

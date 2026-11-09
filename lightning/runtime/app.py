@@ -16,7 +16,7 @@ from lightning.sync.state import ProtocolError
 from lightning.ui.web import create_app
 
 from .http import (MARKET_IMPORT_PATH, PRICE_CSV_PATH, MAX_IMPORT_CONFIRM_BODY, MAX_IMPORT_CONFIRM_FIELDS, MAX_MARKET_IMPORT_BODY,
-                   MAX_IMPORT_MAP_BODY, Credentials, Guard,
+                   MAX_IMPORT_MAP_BODY, MAX_WORKBOOK_IMPORT_BODY, WORKBOOK_IMPORT_PATH, Credentials, Guard,
                    body_receiver, configure_memory_only_import_uploads, equal)
 from .devices import Devices, home_state_line, home_state_message, move_to_phone, open_move
 from .paths import discover_profiles
@@ -45,6 +45,8 @@ def _form_part_limit(path: str) -> int:
         return MAX_IMPORT_CONFIRM_BODY
     if path == MARKET_IMPORT_PATH:
         return MAX_MARKET_IMPORT_BODY
+    if path == WORKBOOK_IMPORT_PATH:
+        return MAX_WORKBOOK_IMPORT_BODY
     if path == PRICE_CSV_PATH:
         return MAX_IMPORT_MAP_BODY
     return 512 * 1024
@@ -53,7 +55,7 @@ def _form_part_limit(path: str) -> int:
 def _form_file_limit(path: str) -> int:
     # Only the initial CSV upload, the market price file and the price CSV accept a file part. Rejecting
     # files on every other form avoids creating spooled temporary files on those routes.
-    return 1 if re.fullmatch(r"/accounts/\d+/import", path) or path in (MARKET_IMPORT_PATH, PRICE_CSV_PATH) else 0
+    return 1 if re.fullmatch(r"/accounts/\d+/import", path) or path in (MARKET_IMPORT_PATH, PRICE_CSV_PATH, WORKBOOK_IMPORT_PATH) else 0
 
 
 class SessionGate:
