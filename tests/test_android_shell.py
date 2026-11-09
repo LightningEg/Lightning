@@ -81,3 +81,22 @@ def test_recents_are_blank_and_notifications_are_asked_in_context():
     create = MAIN[MAIN.index('public void onCreate'):MAIN.index('private void show(')]
     assert 'POST_NOTIFICATIONS' not in create  # never at first start
     assert 'if (result.enabled) runOnUiThread(this::askForNotifications)' in MAIN
+
+
+def test_reminders_never_start_the_data_sync_service():
+    """IT-11J: Play allows the dataSync foreground service only for moving data (a pairing or a lent ledger);
+    reminders in the background are a periodic job that reads the due list with the in-memory session."""
+    stop = MAIN[MAIN.index('protected void onStop'):MAIN.index('private void checkReminders')]
+    assert 'Checking enabled reminders' not in MAIN
+    assert 'if (!note.isEmpty()) {' in stop and stop.index('if (!note.isEmpty()) {') < stop.index('SyncService.class')
+    assert 'ReminderJobService.schedule(this)' in stop
+    start = MAIN[MAIN.index('protected void onStart'):MAIN.index('private void requestJournalSync')]
+    assert 'ReminderJobService.cancel(this)' in start
+    sync = (JAVA / 'SyncService.java').read_text()
+    assert 'ReminderNotifications' not in sync and 'Reminders are on' not in sync
+    job = (JAVA / 'ReminderJobService.java').read_text()
+    assert 'ReminderNotifications.check(' in job and 'MainActivity.reminderCookie' in job
+    assert 'setRequiredNetworkType' not in job, 'the server is on this phone'
+    manifest = (JAVA.parents[3] / 'AndroidManifest.xml').read_text()
+    assert '<service android:name=".ReminderJobService" android:exported="false"' in manifest
+    assert 'android.permission.BIND_JOB_SERVICE' in manifest.split('.ReminderJobService')[1].split('/>')[0]

@@ -71,10 +71,9 @@ Record on a real phone with the demo household (no real money on screen); upload
 | Question | Answer |
 |---|---|
 | Type | `dataSync` (`SyncService`, `AndroidManifest.xml`). |
-| What it does | While the person has lent the ledger to their PC, or a pairing is open, Lightning keeps listening on the local network for a few minutes so the PC can hand the ledger back; it shows a notification the whole time and stops itself when nothing needs it or Android's time limit ends it. |
+| What it does | Only while the person has lent the ledger to their PC, or a pairing is open (never for reminders: those are a periodic job, `ReminderJobService`), Lightning keeps listening on the local network for a few minutes so the PC can hand the ledger back; it shows a notification the whole time and stops itself when nothing needs it or Android's time limit ends it. |
 | Why it cannot wait | The hand-back is started by the person on the PC; if the phone stopped listening, the PC's changes could not return until the phone app is opened again. |
 | What the person sees | A notification saying what it waits for ("Waiting for your PC to pair", or where the ledger is) until it ends. |
-| Risk to know | `MainActivity.onStop` also starts it for "Checking enabled reminders". Play may say that is not data sync; if a reviewer objects, move reminder checks to `JournalSyncJobService`-style scheduled jobs before resubmitting. |
 
 ### The video (about 45 seconds)
 
