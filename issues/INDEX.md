@@ -289,7 +289,7 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-11D3 | ↳ Activity: In and Out as two bars on one scale | | | S | Sonnet | |
 | IV-11D4 | ↳ Money: the net-worth trend and what you own as one bar | | | M | Opus | |
 | IV-11D5 | ↳ Budget: where the month went | | | S | Sonnet | |
-| IV-11D6 | ↳ Owner: category marks in rows | | | owner |  | |
+| IV-11D6 | ↳ Category marks in rows | | | M | Opus | |
 | **IV-11E** | [Home is a block of sentences - To do rows say who, how much, when and one verb, and the hero says how much a day until payday](11-phone-ux/IV-11E-home-reads-at-a-glance.md) | improvement, visual | Plan | M | Sonnet | ready |
 | **IV-11H** | [Money is 21 plain rows under Net worth, wears the old More icon, and its Settings is the PC's](11-phone-ux/IV-11H-money-is-a-drawer.md) | improvement, visual | Everywhere | M | Opus | ready |
 | **IV-11I** | [The full Add page behind the sheet is titled with an account, lights Money, opens on an Import switch and uses an emoji](11-phone-ux/IV-11I-the-add-page-behind-the-sheet.md) | improvement, visual | Capture | S | Sonnet | ready |
@@ -310,7 +310,7 @@ The phone is its own product: a few places that each answer one question, quick 
 | **NF-11B** | [Ship the phone on Google Play - a release bundle at API 36, the SMS and payments policies, the app's own privacy notice and the Console declarations](11-phone-ux/NF-11B-ship-the-phone-on-google-play.md) | new feature | Everywhere | L | Opus | ready |
 | NF-11B1 | ↳ A release bundle that Play accepts | | | M | Opus | |
 | NF-11B2 | ↳ Bank SMS within Play's SMS policy | | | M | Opus | |
-| NF-11B3 | ↳ No other way to pay inside the Play build | | | S | Sonnet | |
+| NF-11B3 | ↳ Themes sold through Google Play Billing in the Play build | | | L | Opus | |
 | NF-11B4 | ↳ A privacy notice that covers the app, linked from the app | | | M | Opus | |
 | NF-11B5 | ↳ Data safety and Console declarations, drafted | | | S | Opus | |
 | NF-11B6 | ↳ Privacy on screen: Recents and notifications in context | | | S | Sonnet | |

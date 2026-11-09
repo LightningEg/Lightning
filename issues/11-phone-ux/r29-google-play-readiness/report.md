@@ -137,7 +137,7 @@ the motion that would make the phone feel alive without a second continuous moti
 ## Plan and order
 
 1. **Play blockers, in order:** NF-11B1 (release AAB, API 36, predictive back, no probe), NF-11B3 (no buy link in the Play build),
-   NF-11B4 (the app's privacy notice, both repos), NF-11B2 (SMS: ship without `READ_SMS` first, or declare it), NF-11B6 (Recents,
+   NF-11B4 (the app's privacy notice, both repos), NF-11B2 (SMS declared, owner 2026-11-09), NF-11B6 (Recents,
    notifications in context), NF-11B5 and the owner's 11B7-11B9 (Console, listing, closed test).
 2. **The phone's look before the listing screenshots:** IV-11E (Home reads at a glance), IV-11D (charts), BV-11F, BV-11G, IV-11H,
    IV-11I; then IV-10G for paid themes.
@@ -156,4 +156,6 @@ the motion that would make the phone feel alive without a second continuous moti
 
 ## Dated follow-ups
 
-None yet.
+2026-11-09, owner answers (recorded in `ai/PROJECT_OVERVIEW.md` › Google Play launch): B3, declare READ_SMS from the first
+release (NF-11B2); B4, sell themes with Google Play Billing in the Play build (NF-11B3, now size L); row marks, a category mark
+in the disc (IV-11D6, guideline first).

@@ -41,5 +41,7 @@ Done when: the trend's last point equals the hero and the bar's parts add to Wha
 ## 11D5 Budget: where the month went · S · sonnet
 One donut, 168 wide, total in the hole, four then Other, rows under it (C07.2), above Your categories.
 
-## 11D6 Owner: category marks in rows · owner
-C08.2 keeps the arrow as a row's mark; a category mark or an institution logo would tell rows apart at a glance (T4). Owner picks; the guideline changes in both repos before any code.
+## 11D6 Category marks in rows · M · opus
+Owner, 2026-11-09: a category mark in the row's disc, keeping the in/out colour (`ai/PROJECT_OVERVIEW.md` › Google Play launch).
+First change guideline C08.2 in both repos (one PR each, `cmp` passes); then one line icon per built-in category (the app's icon set, 24 px, stroke 1.75), drawn in the disc's in/out colour; a custom category keeps the arrow. Transfers keep ⇄.
+Done when: `tests/test_docs_structure.py` passes with both guideline copies; a test renders Home and every built-in category's row shows its mark.
