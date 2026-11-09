@@ -54,9 +54,7 @@ public final class SyncService extends Service {
             } catch (Throwable error) {
                 note = "";
             }
-            ReminderNotifications.PollResult reminders = ReminderNotifications.check(
-                    this, MainActivity.reminderOrigin, MainActivity.reminderCookie);
-            String text = !note.isEmpty() ? note : (reminders.enabled ? "Reminders are on" : "");
+            String text = note;  // reminders are ReminderJobService's (IT-11J): this service only moves data
             handler.post(() -> {
                 if (text.isEmpty()) {
                     stopSelf();

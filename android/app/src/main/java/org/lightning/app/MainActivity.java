@@ -421,6 +421,7 @@ public final class MainActivity extends Activity {
         super.onStart();
         if (serverReady) checkServer("back in front");
         stopService(new Intent(this, SyncService.class));
+        ReminderJobService.cancel(this);  // the window polls reminders itself while it is open
         if (serverReady) requestJournalSync();
         journalSyncHandler.removeCallbacks(foregroundJournalSync);
         journalSyncHandler.postDelayed(foregroundJournalSync, 15 * 60 * 1000L);
@@ -452,11 +453,12 @@ public final class MainActivity extends Activity {
         super.onStop();
         new Thread(() -> {
             try {
-                String note = Python.getInstance().getModule("lightning_android").callAttr("background_note").toString();
                 String cookie = reminderCookie;
-                if (!note.isEmpty() || (reminderEnabled && cookie != null && !cookie.isEmpty())) {
-                    Intent intent = new Intent(this, SyncService.class)
-                            .putExtra("note", note.isEmpty() ? "Checking enabled reminders" : note);
+                if (reminderEnabled && cookie != null && !cookie.isEmpty()) ReminderJobService.schedule(this);  // IT-11J
+                String note = Python.getInstance().getModule("lightning_android").callAttr("background_note").toString();
+                // The dataSync service only for moving data: a pairing or a lent ledger (Play's policy, IT-11J).
+                if (!note.isEmpty()) {
+                    Intent intent = new Intent(this, SyncService.class).putExtra("note", note);
                     if (Build.VERSION.SDK_INT >= 26) startForegroundService(intent);
                     else startService(intent);
                 }
