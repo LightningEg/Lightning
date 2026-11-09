@@ -14,7 +14,6 @@ Encrypted profiles, backups, restore, and no account or server. Nothing is lost 
 | **BT-2AI** | [Phone data must survive every app update and reinstall](../../issues/2-safe-for-real-money/BT-2AI-phone-data-survives-updates.md) | L | new |
 | **IT-2A** | [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic rep…](../../issues/2-safe-for-real-money/IT-2A-restore-safety.md) | L | building |
 | **IT-2C** | [Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidenc…](../../issues/2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md) | L | ready |
-| **NF-11J** | [Delete one profile from the phone's Settings, not only by clearing Android's storage](../../issues/11-phone-ux/NF-11J-delete-this-profile-in-the-app.md) | M | ready |
 
 ## Reports with open follow-ups here
 

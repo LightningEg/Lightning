@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 48 open items. Each folder holds its reports and its items.
+11 big pictures, 44 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -101,11 +101,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3BF5 | ↳ Our message, not the browser's bubble ([#418](https://github.com/LightningEg/Lightning/issues/418)) | | | M | Sonnet | |
 | IV-3BF6 | ↳ One set of icons ([#419](https://github.com/LightningEg/Lightning/issues/419)) | | | M | Sonnet | |
 | IV-3BF7 | ↳ Styles from tokens ([#420](https://github.com/LightningEg/Lightning/issues/420)) | | | M | Sonnet | |
-| **IV-3BG** | [Phone finish - chevrons point forward in Arabic, quiet links 44 px tall, no tap flash or page bounce, tinted status bar](3-polish-and-arabic/IV-3BG-phone-finish.md) | improvement, visual | Everywhere | S | Sonnet | ready |
-| IV-3BG1 | ↳ One chevron that points forward in both languages ([#421](https://github.com/LightningEg/Lightning/issues/421)) | | | S | Sonnet | |
-| IV-3BG2 | ↳ Quiet links are 44 px tall ([#422](https://github.com/LightningEg/Lightning/issues/422)) | | | S | Sonnet | |
-| IV-3BG3 | ↳ No tap flash, no page bounce, no selected buttons ([#423](https://github.com/LightningEg/Lightning/issues/423)) | | | S | Sonnet | |
-| IV-3BG4 | ↳ Status bar colour and keyboard Enter key ([#424](https://github.com/LightningEg/Lightning/issues/424)) | | | S | Sonnet | |
 | **IV-3BH** | [One name per thing and no accounting jargon - ledger, counterparty, reevaluation, Title Case categories, three names for planning](3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md) | improvement, visual | Feel | M | Sonnet | ready |
 | IV-3BH1 | ↳ A test that keeps jargon off the screen ([#425](https://github.com/LightningEg/Lightning/issues/425)) | | | S | Sonnet | |
 | IV-3BH2 | ↳ "Counterparty" becomes "Payee" (Arabic: الطرف التاني → الجهة) | | | M | Sonnet | |
@@ -131,7 +126,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md) · [r28](3-polish-and-arabic/r28-international-polish/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BJ. Next free code: 3BL.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BG, 3BJ. Next free code: 3BL.
 
 ## 4 Edit journal and devices
 
@@ -230,9 +225,6 @@ Good ideas that wait until the milestones above are done.
 | IT-9K1 | ↳ Restore routes out of profile_app | | | S | Sonnet | |
 | IT-9K2 | ↳ The phone's device routes out of profile_app | | | M | Opus | |
 | IT-9K3 | ↳ The PC's borrowing routes and Lock out of profile_app | | | M | Opus | |
-| **NF-9B** | [In-app updates on Windows](9-later/NF-9B-in-app-updates.md) | new feature | Everywhere | M | Opus | new |
-| NF-9B8 | ↳ Prepare and approve the v2.1.1 tag | | | owner |  | |
-| NF-9B9 | ↳ The site's release update for 2.1.1 | | | M | Opus | |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | Opus | ready |
 | NF-9D3 | ↳ Hijri conversion in Python | | | S | Opus | |
 | NF-9D4 | ↳ Show the Hijri date beside every zakat day | | | S | Sonnet | |
@@ -242,7 +234,7 @@ Good ideas that wait until the milestones above are done.
 
 Reports: [r22](9-later/r22-code-quality-and-smart-features/report.md).
 
-Done: 9C, 9E, 9G, 9H, 9I, 9J. Next free code: 9L.
+Done: 9B, 9C, 9E, 9G, 9H, 9I, 9J. Next free code: 9L.
 
 ## 10 Looks and store
 
@@ -266,10 +258,16 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 | NF-10C5 | ↳ Review prices after 60 days of sales | | | owner |  | |
 | **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](10-looks-and-store/NF-10D-papyrus-and-dendera-bundles.md) | new feature | Feel | M | Opus | ready |
 | NF-10D2 | ↳ Add the pieces and the two sets to the catalogue | | | M | Opus | |
+| **NF-10H** | [One purchase per person - a theme bought on Google Play or the website unlocks every profile of that buyer, on every surface](10-looks-and-store/NF-10H-one-purchase-per-person.md) | new feature | Own | L | Opus | ready |
+| NF-10H1 | ↳ Store: a Play purchase mints many profiles | | | M | Opus | |
+| NF-10H2 | ↳ App: settle for every profile, say so | | | S | Opus | |
+| NF-10H3 | ↳ Website: account-wide seats | | | M | Opus | |
+| NF-10H4 | ↳ Owner: prices | | | owner |  | |
+| NF-10H5 | ↳ Owner: the extra seats already sold | | | owner |  | |
 
 Reports: [r12](10-looks-and-store/r12-v150-release/report.md) · [r13](10-looks-and-store/r13-store-and-community/report.md).
 
-Done: 10E, 10F, 10G. Next free code: 10H.
+Done: 10E, 10F, 10G. Next free code: 10I.
 
 ## 11 Phone UX
 
@@ -277,16 +275,12 @@ The phone is its own product: a few places that each answer one question, quick 
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **BV-11G** | [The same transfer reads two ways on Home and Activity, a day's net shows on one date only, and account names get translated](11-phone-ux/BV-11G-one-transfer-one-form-and-names-never-translated.md) | bug, visual · medium | Everywhere | M | Sonnet | ready |
 | **IV-11A** | [Phone first run - every Add is greyed out until "Save currencies" is pressed, and an empty Transactions says "Nothing matches"](11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | improvement, visual | Everywhere | M | Sonnet | ready |
 | IV-11A1 | ↳ Add works before "Save currencies" ([#432](https://github.com/LightningEg/Lightning/issues/432)) | | | S | Sonnet | |
 | IV-11A2 | ↳ An empty Activity says "No transactions yet." with Add and Import ([#433](https://github.com/LightningEg/Lightning/issues/433)) | | | S | Sonnet | |
 | **IV-11D** | [The phone has no charts - build the guideline's phone charts and meters, one per tab, so each tab is seen, not read](11-phone-ux/IV-11D-phone-charts-and-marks.md) | improvement, visual | Everywhere | L | Opus | ready |
-| IV-11D1 | ↳ Home: the payday meter under Safe to spend | | | M | Opus | |
 | IV-11D2 | ↳ Home and Budget: This month as one segmented bar | | | S | Sonnet | |
-| IV-11D3 | ↳ Activity: In and Out as two bars on one scale | | | S | Sonnet | |
 | IV-11D5 | ↳ Budget: where the month went | | | S | Sonnet | |
-| **IV-11E** | [Home is a block of sentences - To do rows say who, how much, when and one verb, and the hero says how much a day until payday](11-phone-ux/IV-11E-home-reads-at-a-glance.md) | improvement, visual | Plan | M | Sonnet | ready |
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | Opus | building |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | Opus | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner |  | |
@@ -302,20 +296,13 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-3AY13 | ↳ Owner's phone check | | | owner |  | |
 | **IV-3F** | [The phone's top bar looks too white to one user](11-phone-ux/IV-3F-phone-top-bar-looks-too-white.md) | improvement, visual | Feel | S | Sonnet | ready |
 | **NF-11B** | [Ship the phone on Google Play - a release bundle at API 36, the SMS and payments policies, the app's own privacy notice and the Console declarations](11-phone-ux/NF-11B-ship-the-phone-on-google-play.md) | new feature | Everywhere | L | Opus | ready |
-| NF-11B2 | ↳ Bank SMS within Play's SMS policy | | | M | Opus | |
-| NF-11B1 | ↳ A release bundle that Play accepts | | | M | Opus | |
-| NF-11B3 | ↳ Themes sold through Google Play Billing in the Play build | | | L | Opus | |
-| NF-11B4 | ↳ A privacy notice that covers the app, linked from the app | | | M | Opus | |
-| NF-11B5 | ↳ Data safety and Console declarations, drafted | | | S | Opus | |
-| NF-11B6 | ↳ Privacy on screen: Recents and notifications in context | | | S | Sonnet | |
 | NF-11B7 | ↳ Owner: the developer account and the listing | | | owner |  | |
 | NF-11B8 | ↳ Owner: closed test, 12 testers for 14 days | | | owner |  | |
 | NF-11B9 | ↳ Owner: the phone check before production | | | owner |  | |
-| **NF-11J** | [Delete one profile from the phone's Settings, not only by clearing Android's storage](11-phone-ux/NF-11J-delete-this-profile-in-the-app.md) | new feature | Protect | M | Opus | ready |
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md).
 
-Done: 11F, 11H, 11I, 11B1, 11B2, 11D4, 11D6, 3AY1, 3AY3, 3AY5. Next free code: 11K.
+Done: 11E, 11F, 11H, 11I, 11J, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D4, 11D6, 3AY1, 3AY3, 3AY5, BV-11G, IV-11D3. Next free code: 11K.
 
 ## 12 Desktop UX and smart next steps
 

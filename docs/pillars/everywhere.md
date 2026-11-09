@@ -12,12 +12,9 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **IT-3BI** | [Arabic search and sorting in the register, one week start, one clock](../../issues/3-polish-and-arabic/IT-3BI-arabic-search-sort-and-calendar.md) | M | ready |
-| **IV-3BG** | [Phone finish](../../issues/3-polish-and-arabic/IV-3BG-phone-finish.md) | S | ready |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](../../issues/3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | M | ready |
 | **NF-4A** | [Edit journal: edit anywhere, one home confirms](../../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md) | L | building |
 | **NF-4B** | [Multiple devices: implementation plan](../../issues/4-edit-journal-and-devices/NF-4B-multiple-devices.md) | L | building |
-| **NF-9B** | [In-app updates on Windows](../../issues/9-later/NF-9B-in-app-updates.md) | M | new |
-| **BV-11G** | [The same transfer reads two ways on Home and Activity, a day's net shows on one date only, and acco…](../../issues/11-phone-ux/BV-11G-one-transfer-one-form-and-names-never-translated.md) | M | ready |
 | **IV-11A** | [Phone first run](../../issues/11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | M | ready |
 | **IV-11D** | [The phone has no charts](../../issues/11-phone-ux/IV-11D-phone-charts-and-marks.md) | L | ready |
 | **IV-3AN** | [Phone visual plan](../../issues/11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | L | building |
@@ -38,7 +35,7 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 - [The phone, redesigned: a phone-first architecture, tab by tab](../../issues/11-phone-ux/r25-phone-ux-architecture/report.md): 3AY, 3AN
 - [Audit 14: using Lightning as a user, on the PC and the phone](../../issues/12-desktop-ux/r26-user-test-pc-and-phone/report.md): 11A
 - [User journeys and visual unity](../../issues/12-desktop-ux/r27-journeys-and-visual-unity/report.md): 3AY
-- [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BG, 3BI
-- [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](../../issues/11-phone-ux/r29-google-play-readiness/report.md): 11B, 11D, 11G, 3BG
+- [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BI
+- [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](../../issues/11-phone-ux/r29-google-play-readiness/report.md): 11B, 11D
 <!-- work:end -->
 
