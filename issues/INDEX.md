@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 46 open items. Each folder holds its reports and its items.
+11 big pictures, 47 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -274,6 +274,7 @@ The phone is its own product: a few places that each answer one question, quick 
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
+| **IT-11J** | [Reminder checks start the dataSync foreground service when the app leaves the screen; Play may reject that as not data sync](11-phone-ux/IT-11J-reminders-off-the-sync-service.md) | improvement, technical | Everywhere | M | Opus | ready |
 | **IV-11A** | [Phone first run - every Add is greyed out until "Save currencies" is pressed, and an empty Transactions says "Nothing matches"](11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | improvement, visual | Everywhere | M | Sonnet | ready |
 | IV-11A1 | ↳ Add works before "Save currencies" ([#432](https://github.com/LightningEg/Lightning/issues/432)) | | | S | Sonnet | |
 | IV-11A2 | ↳ An empty Activity says "No transactions yet." with Add and Import ([#433](https://github.com/LightningEg/Lightning/issues/433)) | | | S | Sonnet | |
@@ -306,7 +307,7 @@ The phone is its own product: a few places that each answer one question, quick 
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md).
 
-Done: 11F, 11I, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 3AY1, 3AY3, 3AY5, BV-11G, IV-11D3. Next free code: 11J.
+Done: 11F, 11I, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 3AY1, 3AY3, 3AY5, BV-11G, IV-11D3. Next free code: 11K.
 
 ## 12 Desktop UX and smart next steps
 
