@@ -6,7 +6,7 @@ severity: medium
 pillar: own
 size: S
 model: sonnet
-status: new
+status: ready
 created: 2026-11-09
 by: Claude
 skills: bug-hunt

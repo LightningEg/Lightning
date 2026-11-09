@@ -73,7 +73,7 @@ Severity: high = wrong money or a job that cannot be done; medium = a wrong or m
 | P4 | medium | The flat's page is a bank register: "Record your first Money out, Money in, or Transfer", bulk category edit, statement import. | NF-12M2 |
 | P5 | high | No way to record a flat bought by instalments (down payment, years of payments, the part still owed). | NF-12M3 |
 | P6 | medium | Rent received and maintenance cannot be tied to the property, so it has no yield or net return. | NF-12M4 |
-| P7 | low | Kinds with no home at all: treasury bills, bonds, a share in a business, an insurance or pension plan. Owner decision (see below). | none yet |
+| P7 | low | Kinds with no home at all: treasury bills, bonds, a share in a business, an insurance or pension plan. Owner, 2026-11-09: no model of their own; an *Other* holding with a typed value that can be re-appraised. | none (decided) |
 
 ### Figures
 
@@ -107,3 +107,7 @@ jewellery, foreign-currency certificates, shared ownership, zakat on these kinds
 
 ## Dated follow-ups
 
+- **2026-11-09, owner decisions (question dialog).** Build order: blockers first, NF-12I (a certificate you already
+  own), BT-12H (second gold bar of a karat), IV-12K (one *Add investment*); the rest follows. P7: treasury bills, bonds,
+  a business share and insurance or pension plans get no model of their own; each stays an *Other* holding with a typed
+  value that can be re-appraised. No item filed for P7.

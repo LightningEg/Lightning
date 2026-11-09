@@ -308,13 +308,13 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **BT-12H** | [A second gold holding of the same karat cannot be added (GLD:24K already exists)](12-desktop-ux/BT-12H-second-gold-holding-same-karat.md) | bug, technical · medium | Own | S | Sonnet | new |
+| **BT-12H** | [A second gold holding of the same karat cannot be added (GLD:24K already exists)](12-desktop-ux/BT-12H-second-gold-holding-same-karat.md) | bug, technical · medium | Own | S | Sonnet | ready |
 | **IV-12J** | [Certificates read as certificates: their own holding page, payouts as the bank pays them, value that grows, and a nudge at maturity](12-desktop-ux/IV-12J-certificates-read-as-certificates.md) | improvement, visual | Own | L | Opus | new |
 | IV-12J1 | ↳ The certificate's holding page and the certificates page | | | M | Opus | |
 | IV-12J2 | ↳ Payouts forecast the way Egyptian banks pay them | | | M | Opus | |
 | IV-12J3 | ↳ A certificate paid at maturity gains value as it earns | | | M | Opus | |
 | IV-12J4 | ↳ Maturity and notices | | | S | Opus | |
-| **IV-12K** | [One door to add an investment: ask what it is first, and list only what can be chosen](12-desktop-ux/IV-12K-one-door-to-add-an-investment.md) | improvement, visual | Capture | M | Sonnet | new |
+| **IV-12K** | [One door to add an investment: ask what it is first, and list only what can be chosen](12-desktop-ux/IV-12K-one-door-to-add-an-investment.md) | improvement, visual | Capture | M | Sonnet | ready |
 | **IV-12L** | [Gold: add a piece and its purchase in one step, pick the price by karat, and show bars with the jewellery](12-desktop-ux/IV-12L-gold-one-step-and-one-table.md) | improvement, visual | Own | M | Sonnet | new |
 | **IV-12N** | [Investments figures that mislead outside stocks: purchases shown as change in value, yearly rates on weeks, two Others](12-desktop-ux/IV-12N-investment-figures-beyond-stocks.md) | improvement, visual | Understand | M | Sonnet | new |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | Opus | building |
@@ -337,7 +337,7 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | NF-12G7 | ↳ Split on the Add sheet, PC and phone | | | M | Sonnet | |
 | NF-12G4 | ↳ Who owes what, per person | | | M | Sonnet | |
 | NF-12G5 | ↳ Mohab, Arabic and the guideline | | | M | Sonnet | |
-| **NF-12I** | [Record a certificate you already own, bought before you started tracking](12-desktop-ux/NF-12I-certificate-already-owned.md) | new feature | Own | M | Opus | new |
+| **NF-12I** | [Record a certificate you already own, bought before you started tracking](12-desktop-ux/NF-12I-certificate-already-owned.md) | new feature | Own | M | Opus | ready |
 | **NF-12M** | [Property as an investment: its own kind, gain from what you paid, instalments, rent and costs](12-desktop-ux/NF-12M-property-as-an-investment.md) | new feature | Own | L | Opus | new |
 | NF-12M1 | ↳ Real estate is its own class, with the gain from what you paid | | | M | Opus | |
 | NF-12M2 | ↳ A property page, not a bank register | | | M | Opus | |

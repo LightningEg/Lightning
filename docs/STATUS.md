@@ -6,10 +6,10 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
-| [Capture](pillars/capture.md) | 2 |  | 1 | 1 |  |  |
+| [Capture](pillars/capture.md) | 2 |  | 2 |  |  |  |
 | [Plan](pillars/plan.md) | 0 |  |  |  |  |  |
 | [Understand](pillars/understand.md) | 4 |  | 2 | 1 | 1 |  |
-| [Own](pillars/own.md) | 12 | 1 | 4 | 5 | 2 |  |
+| [Own](pillars/own.md) | 12 | 1 | 6 | 3 | 2 |  |
 | [Protect](pillars/protect.md) | 3 | 1 | 1 | 1 |  |  |
 | [Everywhere](pillars/everywhere.md) | 9 | 3 | 6 |  |  |  |
 | [Feel](pillars/feel.md) | 12 | 3 | 8 |  | 1 | 1 |

@@ -5,7 +5,7 @@ type: feature
 pillar: own
 size: M
 model: opus
-status: new
+status: ready
 created: 2026-11-09
 by: Claude
 skills: bug-hunt

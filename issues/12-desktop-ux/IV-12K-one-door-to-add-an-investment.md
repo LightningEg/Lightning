@@ -5,7 +5,7 @@ type: polish
 pillar: capture
 size: M
 model: sonnet
-status: new
+status: ready
 created: 2026-11-09
 by: Claude
 skills: bug-hunt

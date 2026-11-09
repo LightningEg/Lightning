@@ -12,7 +12,7 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](../../issues/7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | L | ready |
-| **IV-12K** | [One door to add an investment: ask what it is first, and list only what can be chosen](../../issues/12-desktop-ux/IV-12K-one-door-to-add-an-investment.md) | M | new |
+| **IV-12K** | [One door to add an investment: ask what it is first, and list only what can be chosen](../../issues/12-desktop-ux/IV-12K-one-door-to-add-an-investment.md) | M | ready |
 
 ## Reports with open follow-ups here
 
