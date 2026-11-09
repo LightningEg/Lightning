@@ -1,5 +1,6 @@
-"""BV-12A: one "a day" allowance. Home says what Safe to spend is on top of the plan and gives no per-day figure; the
-phone's Budget shows the same everyday per-day figure as the PC's, from EverydayBudget.per_day."""
+"""BV-12A: one "a day" allowance. Home's hero line gives Budget's own everyday per-day figure (owner, 2026-11-09,
+IV-11E), never a second one; the phone's Budget shows the same everyday per-day figure as the PC's, from
+EverydayBudget.per_day."""
 from __future__ import annotations
 
 import re
@@ -37,11 +38,13 @@ def _phone(c):
     return TestClient(app)
 
 
-def test_home_has_no_per_day_figure_and_says_on_top_of_the_plan(sample):
+def test_home_gives_budgets_own_per_day_figure(sample):
+    everyday = sample.forecaster.everyday("2026-10", date(2026, 10, 4))
     html = _phone(sample).get("/home").text
     line = re.sub(r"<[^>]+>", "", re.search(r'<p class="phone-hero-line">(.*?)</p>', html, re.S).group(1))
-    assert "a day" not in line and line.strip() == "On top of your plan until 2026-11-01."
-    assert "a day" not in _phone(sample).get("/").text.split('class="phone-hero-line"', 1)[1][:200]  # the Overview hero too
+    assert line.strip() == f"About {fmt(everyday.per_day)} a day until payday on 2026-11-01.", line
+    root = _phone(sample).get("/").text.split('class="phone-hero-line"', 1)[1][:200]  # the phone's / is Home: the same figure
+    assert re.findall(r"About ([\d,]+) a day", root) == [fmt(everyday.per_day)], root
 
 
 def test_phone_and_pc_budget_show_the_same_per_day_figure(sample):
