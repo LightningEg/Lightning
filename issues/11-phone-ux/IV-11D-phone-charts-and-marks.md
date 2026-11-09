@@ -28,6 +28,7 @@ A meter (C06.1) under the hero: days gone to payday against money gone from what
 Done when: the meter's two fractions come from the Safe to spend service and a test checks them on Mohab's 2026-10-04.
 
 ## 11D2 Home and Budget: This month as one segmented bar · S · sonnet
+**Built on Budget** (`month_bar`, `tests/test_phone_budget_flexible.py`); left: the same bar under Home's This month row. Ahead-of-pace bars use soft rose, not amber: A03 has no amber.
 Spent, left in plan, over (rose) on one bar under the This month row and under Budget's hero; Budget's category bars take state colours (at plan: amber, over: rose, A03).
 Done when: the bar's parts add to the plan and a test checks it.
 
@@ -39,6 +40,7 @@ C07.3.1's 160-tall area trend (end of each month, end value on the line) under N
 Done when: the trend's last point equals the hero and the bar's parts add to What you own.
 
 ## 11D5 Budget: where the month went · S · sonnet
+**Built** (`spend_donut`, `charts.ranked_donut`): soft-rose steps by rank, the rows name each slice; fixed costs paid is one slice.
 One donut, 168 wide, total in the hole, four then Other, rows under it (C07.2), above Your categories.
 
 ## 11D6 Category marks in rows · M · opus

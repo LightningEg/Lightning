@@ -3,7 +3,8 @@
 {% extends "base.html" %}
 {% block title %}Budget{% endblock %}
 {% block heading %}<h1>{{ 'Budget'|tr(locale) }}</h1>{% endblock %}
-{% macro cat_row(r) %}<a class="phone-row phone-budget-cat{{ ' is-over' if r.left < 0 }}" data-popup-open href="/budget/category/{{ r.category_id }}/sheet?month={{ screen.month }}"><span>{{ r.name }}<small>{{ '{spent} of {limit}'|tr(locale, spent=r.spent|money, limit=r.limit|money) }}</small><span class="phone-bar-track" aria-hidden="true"><i style="width: {{ r.share }}%"></i></span></span><b class="{{ 'neg' if r.left < 0 }}"><bdi class="fig">{{ r.left|money }}</bdi></b></a>{% endmacro %}
+{% macro cat_row(r) %}<a class="phone-row phone-budget-cat is-{{ r.state }}" data-popup-open href="/budget/category/{{ r.category_id }}/sheet?month={{ screen.month }}"><span>{{ r.name }}<small>{{ '{spent} of {limit}'|tr(locale, spent=r.spent|money, limit=r.limit|money) }}</small><span class="phone-bar-track" aria-hidden="true"><i style="width: {{ r.share }}%"></i></span></span><b class="{{ 'neg' if r.left < 0 }}">{% if r.state == 'done' %}<span class="phone-done" aria-label="{{ 'Nothing left'|tr(locale) }}">—</span>{% else %}<bdi class="fig">{{ r.left|money }}</bdi>{% endif %}</b></a>{% endmacro %}
+{% macro month_bar(b) %}<div class="phone-month-bar" role="img" aria-label="{{ 'Spent {spent}, left in plan {left}'|tr(locale, spent=b.spent|money, left=b.left|money) }}{% if b.over %}{{ ', ' ~ ('over plan {over}'|tr(locale, over=b.over|money)) }}{% endif %}">{% if b.w_spent %}<i class="is-spent" style="width: {{ '%.2f'|format(b.w_spent) }}%"></i>{% endif %}{% if b.w_left %}<i class="is-left" style="width: {{ '%.2f'|format(b.w_left) }}%"></i>{% endif %}{% if b.w_over %}<i class="is-over" style="width: {{ '%.2f'|format(b.w_over) }}%"></i>{% endif %}</div>{% endmacro %}
 {% block content %}
 {% set s = screen %}
 <div class="phone-chips"><span class="phone-chip phone-month-chip"><a href="/budget?month={{ s.prev_month }}" aria-label="{{ 'Earlier month'|tr(locale) }}">‹</a><span>{{ s.month }}</span>{% if s.next_month %}<a href="/budget?month={{ s.next_month }}" aria-label="{{ 'Later month'|tr(locale) }}">›</a>{% else %}<span class="phone-month-end" aria-hidden="true">&nbsp;</span>{% endif %}</span></div>
@@ -19,6 +20,7 @@
   <div class="phone-lead{{ ' is-negative' if s.left < 0 }}">{{ (s.left|abs)|money }} <small>{{ base }}</small></div>
   {% if s.pace_gap is not none %}<p class="phone-hero-line">{% if s.pace_gap <= 0 %}{{ '{amt} under your pace for {m}.'|tr(locale, amt=(-s.pace_gap)|money, m=s.month) }}{% else %}{{ '{amt} over your pace for {m}.'|tr(locale, amt=s.pace_gap|money, m=s.month) }}{% endif %}{% if s.per_day %} {{ 'About {amt} a day.'|tr(locale, amt=s.per_day|money) }}{% endif %}</p>
   {% elif s.state == 'past' and s.used_pct is not none %}<p class="phone-hero-line">{{ '{pct}% of the plan was spent.'|tr(locale, pct=s.used_pct) }}</p>{% endif %}
+  {% if s.month_bar %}{{ month_bar(s.month_bar) }}{% endif %}
 </section>
 {% if s.raise_offer %}<section class="phone-section" aria-labelledby="raise-heading">
   <header class="phone-section-head"><h2 id="raise-heading">{{ 'Your income went up'|tr(locale) }}</h2></header>
@@ -32,6 +34,16 @@
   {% if s.attention_more %}<p class="phone-note">{{ 'and {n} more'|tr(locale, n=s.attention_more) }}</p>{% endif %}
   {% if s.move %}<a class="phone-row" data-popup-open href="{{ s.move.href }}"><span>{{ 'Move it'|tr(locale) }}<small>{{ '{amt} from {name}'|tr(locale, amt=s.move.amount|money, name=s.move.name) }}</small></span><b>›</b></a>{% endif %}
   <a class="phone-row" href="/budget?month={{ s.month }}&amp;open_group=all"><span>{{ 'Change the plan'|tr(locale) }}</span><b>›</b></a>
+</section>
+{% endif %}
+{% if s.spend %}
+<section class="phone-section phone-spend" aria-labelledby="spend-heading">
+  <header class="phone-section-head"><h2 id="spend-heading">{{ 'Where the month went'|tr(locale) }}</h2></header>
+  <figure class="phone-donut" aria-label="{{ 'Where the month went'|tr(locale) }}">
+    <div class="phone-donut-ring"><svg viewBox="0 0 42 42" aria-hidden="true" focusable="false"><circle class="phone-donut-track" cx="21" cy="21" r="15.915"/>{% for g in s.spend.segments %}<circle class="phone-donut-seg is-rank-{{ g.rank }}" cx="21" cy="21" r="15.915" stroke-dasharray="{{ '%.2f'|format(g.dash) }} {{ '%.2f'|format(100 - g.dash) }}" stroke-dashoffset="{{ '%.2f'|format(g.offset) }}"/>{% endfor %}</svg>
+      <div class="phone-donut-hole"><b>{{ s.spend.total|money }}</b><small>{{ 'Spent'|tr(locale) }}</small></div></div>
+    <div class="phone-rows">{% for g in s.spend.segments %}<div class="phone-row phone-donut-row"><span><i class="phone-key is-rank-{{ g.rank }}" aria-hidden="true"></i>{{ (g.label|tr(locale)) if (g.other or g.fixed) else g.label }}</span><b><bdi class="fig">{{ g.value|money }}</bdi> <small>{{ '%.0f'|format(g.share) }}%</small></b></div>{% endfor %}</div>
+  </figure>
 </section>
 {% endif %}
 <section class="phone-section" aria-labelledby="cats-heading">

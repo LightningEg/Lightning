@@ -1033,3 +1033,32 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 /* r24: the compare-period dates stack, one control per row, so the whole date shows beside its 48px picker button. */
 .phone .compare-picker fieldset { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; gap: 8px; }
 .phone-sheet-row > summary.phone-home-hero:not(#_) { display: block; min-height: 0; padding: 0; border: 0; background: none; }
+
+/* BV-11F, IV-11D2, IV-11D5: Budget's bars take state colours (within plan Meadow, ahead of pace soft rose, over strong
+   rose: A03), one segmented bar for the month, and the spending donut (soft rose steps; the rows name each slice). */
+.phone-budget-cat .phone-bar-track i { background: #14A874; }
+.phone-budget-cat.is-ahead .phone-bar-track i { background: #E68CA8; }
+.phone-budget-cat.is-over .phone-bar-track i { background: #C93D72; }
+.phone-done { color: var(--c-muted, #566E7E); }
+.phone-month-bar { display: flex; height: 12px; margin: 12px 0 0; border-radius: 99px; overflow: hidden; background: var(--c-track); }
+.phone-month-bar i { display: block; height: 100%; }
+.phone-month-bar .is-spent { background: #E68CA8; }
+.phone-month-bar .is-left { background: #14A874; }
+.phone-month-bar .is-over { background: #C93D72; }
+.phone-donut { margin: 0; }
+.phone-donut-ring { position: relative; width: 168px; height: 168px; margin: 8px auto 12px; }
+.phone-donut-ring svg { width: 100%; height: 100%; }
+.phone-donut-track { fill: none; stroke: var(--c-track); stroke-width: 6; }
+.phone-donut-seg { fill: none; stroke-width: 6; }
+.phone-donut-hole { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.phone-donut-hole b { font-size: 17px; font-variant-numeric: tabular-nums; }
+.phone-donut-hole small { font-size: 12px; color: var(--c-muted, #566E7E); }
+.phone-donut-seg.is-rank-0, .phone-key.is-rank-0 { stroke: #C93D72; background: #C93D72; }
+.phone-donut-seg.is-rank-1, .phone-key.is-rank-1 { stroke: #E68CA8; background: #E68CA8; }
+.phone-donut-seg.is-rank-2, .phone-key.is-rank-2 { stroke: #F0B0C4; background: #F0B0C4; }
+.phone-donut-seg.is-rank-3, .phone-key.is-rank-3 { stroke: #F6CCD9; background: #F6CCD9; }
+.phone-donut-seg.is-rank-4, .phone-key.is-rank-4 { stroke: #566E7E; background: #566E7E; }
+.phone-key { display: inline-block; width: 10px; height: 10px; margin-inline-end: 8px; border-radius: 3px; }
+.phone-donut-row small { color: var(--c-muted, #566E7E); }
+@media (prefers-reduced-motion: no-preference) { .phone-donut-seg { animation: phone-donut-in 400ms ease-out; } }
+@keyframes phone-donut-in { from { opacity: 0; } to { opacity: 1; } }
