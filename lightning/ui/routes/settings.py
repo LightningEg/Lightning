@@ -127,7 +127,10 @@ async def settings_page(request: Request):
     currency_tab = "rates" if request.query_params.get("tab") == "rates" else "currencies"
     fx_history = ([row for row in c.reevaluations.history() if row["price_source"] == "FX"]
                   if section == "currencies" and currency_tab == "rates" else [])
-    return render(request, "settings/index.html", **_update_context(request), db_path=c.db.path, backups=[b.name for b in backups], plan=plan,
+    play = _play_context(request) if section in ("", "general") else {"play_offers": None, "play_pending": []}
+    if play.pop("note", None):  # a purchase just settled: say so once (the next load finds nothing new to settle)
+        return redirect("/settings", play["flash"])
+    return render(request, "settings/index.html", **_update_context(request), **play, db_path=c.db.path, backups=[b.name for b in backups], plan=plan,
                   classes=c.assets.list_classes(), assets=c.assets.list_assets(), factor_rows=factor_rows, factor_groups=factor_groups,
                   section=request.query_params.get("section", "general"), return_to=return_to,
                   budget_return_to=f"/settings?section=budget&return_to={return_to}",
@@ -267,6 +270,57 @@ async def unlock_theme(request: Request):
     done = ("{name} is unlocked for this profile and its other devices." if shared(theme)
             else "{name} is unlocked on this device.")  # sharing waits for the home, or this profile is read-only
     return redirect("/settings", translate(done, ui_locale(), name=theme_name(theme)))
+
+
+def _play_context(request: Request) -> dict:
+    """The Play build's theme offers (NF-11B3): settle what Play says was bought, then Play's prices. None elsewhere."""
+    billing = getattr(request.app.state, "play_billing", None)
+    if billing is None:
+        return {"play_offers": None, "play_pending": []}
+    from ..entitlements import store_themes
+    from ..play_store import offers, settle
+    from ..themes import theme_name
+    from ..i18n import translate
+    from ..web import ui_locale
+    db = container(request).db
+    if not db.read_only:  # the licence names this profile's own id
+        from lightning.sync.copies import ensure_profile_id
+        ensure_profile_id(db)
+    unlocked, pending, messages = settle(billing)
+    result = billing.take_result() if request.query_params.get("play") else ""
+    if unlocked:
+        with settled_save(request, container(request)):
+            container(request).settings.set("appearance_theme", unlocked[0])
+    flash = (translate("{name} is unlocked for this profile and its other devices.", ui_locale(),
+                       name=theme_name(unlocked[0])) if unlocked
+             else messages[0] if messages
+             else "The payment is not finished yet. It unlocks when Google Play confirms it." if pending and result == "ok"
+             else "Google Play could not finish the purchase. Nothing was charged." if result == "error" else "")
+    context = {"play_offers": offers(billing, store_themes()), "play_pending": pending}
+    if flash:
+        context.update(note=True, flash=flash)
+    return context
+
+
+@router.post("/theme/buy")
+async def buy_theme(request: Request):
+    """The Play build's Buy (NF-11B3): Play's own sheet opens over the app; when it closes, the app comes back to
+    Settings, which unlocks the theme from the store's signed licence."""
+    billing = getattr(request.app.state, "play_billing", None)
+    form = await request.form()
+    theme = str(form.get("theme", ""))
+    from ..entitlements import paid_themes, profile_id
+    from lightning.sync.copies import ensure_profile_id
+    if billing is None or theme not in paid_themes():
+        return redirect("/settings")
+    db = container(request).db
+    if db.read_only:
+        return redirect("/settings", "This copy is read-only. Buy on the profile's home device.")
+    ensure_profile_id(db)
+    profile = profile_id()
+    if not profile or not billing.buy(theme, profile):
+        return redirect("/settings", "Google Play is not answering. Try again in a moment.")
+    return redirect("/settings")
 
 
 @router.post("/privacy")

@@ -69,20 +69,20 @@ jobs:
       - name: Build identity (version code = commits on main)
         id: identity
         run: python packaging/phone_build.py identity
-      - name: Build the arm64 release APK and Play bundle from the lock (no index; every file pinned by hash)
+      - name: Build the arm64 release APK (github flavour) and Play bundle (play flavour, NF-11B3) from the lock
         working-directory: android
         env:
           CODE: ${{ steps.identity.outputs.version_code }}
           NAME: ${{ steps.identity.outputs.version_name }}
-        run: gradle --no-daemon :app:assembleRelease :app:bundleRelease "-PbuildVersionCode=$CODE" "-PbuildVersionName=$NAME"
+        run: gradle --no-daemon :app:assembleGithubRelease :app:bundlePlayRelease "-PbuildVersionCode=$CODE" "-PbuildVersionName=$NAME"
       - name: Check the app as built (ID, version, arm64, permissions, files, packages)
         env:
           CODE: ${{ steps.identity.outputs.version_code }}
           NAME: ${{ steps.identity.outputs.version_name }}
         run: >-
-          python packaging/phone_build.py check android/app/build/outputs/apk/release/app-release-unsigned.apk
+          python packaging/phone_build.py check android/app/build/outputs/apk/github/release/app-github-release-unsigned.apk
           --build-tools "$ANDROID_HOME/build-tools/36.0.0" --code "$CODE" --name "$NAME" --info "$RUNNER_TEMP/built.json"
-      - name: Check the Play bundle (bundletool validate; ID, version, target SDK, not debuggable)
+      - name: Check the Play bundle (bundletool validate; ID, version, target SDK, not debuggable, permissions + Play Billing)
         env:
           CODE: ${{ steps.identity.outputs.version_code }}
           NAME: ${{ steps.identity.outputs.version_name }}
@@ -91,7 +91,7 @@ jobs:
           curl -sSfL -o "$RUNNER_TEMP/bundletool.jar" \
             https://github.com/google/bundletool/releases/download/1.18.1/bundletool-all-1.18.1.jar
           echo "675786493983787ffa11550bdb7c0715679a44e1643f3ff980a529e9c822595c  $RUNNER_TEMP/bundletool.jar" | sha256sum --check --strict
-          python packaging/phone_build.py aab android/app/build/outputs/bundle/release/app-release.aab \
+          python packaging/phone_build.py aab android/app/build/outputs/bundle/playRelease/app-play-release.aab \
             --bundletool "$RUNNER_TEMP/bundletool.jar" --code "$CODE" --name "$NAME"
       - name: The key script's keys sign APKs (a throwaway key; its APK never leaves this job)
         run: |
@@ -102,7 +102,7 @@ jobs:
           base64 -d "$RUNNER_TEMP/throwaway/ANDROID_TEST_KEYSTORE.txt" > "$RUNNER_TEMP/throwaway.p12"
           export PASS="$(cat "$RUNNER_TEMP/throwaway/ANDROID_TEST_KEYSTORE_PASSWORD.txt")"
           "$tools/apksigner" sign --ks "$RUNNER_TEMP/throwaway.p12" --ks-type PKCS12 --ks-pass env:PASS --key-pass env:PASS \
-            --ks-key-alias lightning-test --out "$RUNNER_TEMP/throwaway.apk" android/app/build/outputs/apk/release/app-release-unsigned.apk
+            --ks-key-alias lightning-test --out "$RUNNER_TEMP/throwaway.apk" android/app/build/outputs/apk/github/release/app-github-release-unsigned.apk
           signer="$(python packaging/phone_build.py signer "$RUNNER_TEMP/throwaway.apk" --build-tools "$tools")"
           expected="$(cat "$RUNNER_TEMP/throwaway/certificate-sha256.txt")"
           [ "$signer" = "$expected" ] || { echo "::error::signed by $signer, not the script's certificate $expected"; exit 1; }
@@ -111,14 +111,14 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: phone-unsigned  # to the sign job only; one day
-          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          path: android/app/build/outputs/apk/github/release/app-github-release-unsigned.apk
           if-no-files-found: error
           overwrite: true
           retention-days: 1
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: play-bundle-unsigned  # to the sign job, and the evidence that Play's bundle builds (NF-11B1)
-          path: android/app/build/outputs/bundle/release/app-release.aab
+          path: android/app/build/outputs/bundle/playRelease/app-play-release.aab
           if-no-files-found: error
           overwrite: true
           retention-days: 1
@@ -171,7 +171,7 @@ jobs:
             exit 1
           fi
           AAB="${APK%.apk}.aab"
-          cp "$RUNNER_TEMP/bundle/app-release.aab" "$RUNNER_TEMP/$AAB"
+          cp "$RUNNER_TEMP/bundle/app-play-release.aab" "$RUNNER_TEMP/$AAB"
           if ! jarsigner -keystore "$RUNNER_TEMP/upload.keystore" -storepass:env STORE_PASS -keypass:env KEY_PASS \
               -sigalg SHA256withRSA -digestalg SHA-256 "$RUNNER_TEMP/$AAB" "$KEY_ALIAS" > /dev/null; then
             rm -f "$RUNNER_TEMP/upload.keystore"
@@ -218,7 +218,7 @@ jobs:
           fi
           if ! "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks "$RUNNER_TEMP/signing.keystore" \
               --ks-pass env:STORE_PASS --key-pass env:KEY_PASS --ks-key-alias "$KEY_ALIAS" \
-              --out "$RUNNER_TEMP/$APK" "$RUNNER_TEMP/unsigned/app-release-unsigned.apk"; then
+              --out "$RUNNER_TEMP/$APK" "$RUNNER_TEMP/unsigned/app-github-release-unsigned.apk"; then
             rm -f "$RUNNER_TEMP/signing.keystore"
             echo "::error::The Android signing keystore, alias or password was rejected by apksigner."
             exit 1

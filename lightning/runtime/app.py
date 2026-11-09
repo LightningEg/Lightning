@@ -207,14 +207,17 @@ class SessionGate:
 
 
 def profile_app(credentials: Credentials, root: Path | str | None = None, devices: Devices | None = None,
-                *, phone: bool = False, sms=None, biometric=None, stay=None, files=None, updates=None, recents=None):
+                *, phone: bool = False, sms=None, biometric=None, stay=None, files=None, updates=None, recents=None,
+                billing=None):
     """`phone`: the Android app, whose pages use the phone frame and screens (guideline Part C). `sms`: where
     bank messages come from on that phone (`lightning.sms_imports.SmsSource`), or None. `biometric`: the phone's
     optional fingerprint unlock (`lightning.security.biometric.FingerprintUnlock`), or None: never on a PC.
     `stay`: staying signed in on the phone (the same slots over `StayBridge`, no prompt), or None: never on a PC.
     `files`: where the phone saves downloads (`lightning.runtime.phone_files.FileSaver`), or None.
     `updates`: the Windows app's `UpdateController` (Settings › Lightning version), or None: never elsewhere.
-    `recents`: the phone's "Hide in recent apps" switch (`hidden()`, `set_hidden(bool)`; NF-11B6), or None."""
+    `recents`: the phone's "Hide in recent apps" switch (`hidden()`, `set_hidden(bool)`; NF-11B6), or None.
+    `billing`: Google Play Billing in the Play build (`lightning.ui.play_store.PlayBilling`), or None: the GitHub APK and
+    the PC sell themes on the website instead."""
     configure_memory_only_import_uploads()
     session = ProfileSession(root)
     session.borrowed_home = ""
@@ -231,6 +234,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     app.include_router(journal_enrollment_router(session))
     app.include_router(journal_recovery_router(session))
     app.state.sms_source = sms
+    app.state.play_billing = billing if phone else None
     if phone and files is not None:
         from .phone_files import PhoneSaves
         gate = SessionGate(PhoneSaves(app, files), session)  # inside the gate: only authorized files (2F)

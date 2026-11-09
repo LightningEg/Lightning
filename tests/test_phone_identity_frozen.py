@@ -31,7 +31,11 @@ def test_every_build_carries_the_one_application_id():
     gradle = (ROOT / "android" / "app" / "build.gradle.kts").read_text(encoding="utf-8")
     # One unconditional ID: no build property, flavour or suffix may give some APKs another one.
     assert re.findall(r"applicationId\s*=\s*(.+)", gradle) == [f'"{APP_ID}"']
-    assert "applicationIdSuffix" not in gradle and "productFlavors" not in gradle
+    assert "applicationIdSuffix" not in gradle
+    # The two store flavours (NF-11B3: github, play) share that one ID: neither may set an ID, a suffix or a version
+    # code of its own, so a Play install and a GitHub APK are the same app to Android.
+    flavours = gradle[gradle.index("productFlavors"):gradle.index("buildTypes")] if "productFlavors" in gradle else ""
+    assert not re.search(r"applicationId|versionCode|versionNameSuffix", flavours)
     assert _phone_build().APP_ID == APP_ID
 
 

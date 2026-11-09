@@ -31,6 +31,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 LOCK = ROOT / "requirements" / "android.lock"
 PERMISSIONS = ROOT / "packaging" / "android-permissions.txt"
+PLAY_PERMISSIONS = {"com.android.vending.BILLING"}  # the play flavour only (NF-11B3); the GitHub APK never asks for it
 APP_ID = "org.lightning.app"
 ABI = "arm64-v8a"
 # Play takes new apps and updates only at this target (since 2026-08-31); android/app/build.gradle.kts matches it.
@@ -258,6 +259,14 @@ def manifest_problems(manifest: str, code: str, name: str) -> list[str]:
         problems.append("the bundle is debuggable; Play refuses it")
     if "ProbeActivity" in manifest:
         problems.append("the bundle carries ProbeActivity, a debug-only screen")
+    # The Play build asks for the GitHub APK's permissions plus Play Billing's, nothing else (NF-11B3).
+    asked = set(re.findall(r'<uses-permission(?:-sdk-23)?\b[^>]*android:name="([^"]+)"', manifest))
+    asked = {p for p in asked if not p.startswith(APP_ID + ".")}  # the app's own, as permissions() leaves out
+    allowed = {line.split("#")[0].strip() for line in PERMISSIONS.read_text(encoding="utf-8").splitlines()} - {""}
+    allowed |= PLAY_PERMISSIONS
+    if asked != allowed:
+        problems.append(f"permissions differ from packaging/android-permissions.txt plus Play Billing: bundle adds "
+                        f"{sorted(asked - allowed)}, lacks {sorted(allowed - asked)}")
     return problems
 
 

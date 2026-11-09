@@ -68,19 +68,19 @@ jobs:
         env:
           CODE: ${{ steps.identity.outputs.version_code }}
           NAME: ${{ steps.identity.outputs.version_name }}
-        run: gradle --no-daemon :app:assembleDebug "-PbuildVersionCode=$CODE" "-PbuildVersionName=$NAME"
+        run: gradle --no-daemon :app:assembleGithubDebug "-PbuildVersionCode=$CODE" "-PbuildVersionName=$NAME"
       - name: Verify the built APK
         env:
           CODE: ${{ steps.identity.outputs.version_code }}
           NAME: ${{ steps.identity.outputs.version_name }}
         run: >-
-          python packaging/phone_build.py check android/app/build/outputs/apk/debug/app-debug.apk
+          python packaging/phone_build.py check android/app/build/outputs/apk/github/debug/app-github-debug.apk
           --build-tools "$ANDROID_HOME/build-tools/36.0.0" --code "$CODE" --name "$NAME" --debug
-          --info android/app/build/outputs/apk/debug/build-info.json
+          --info android/app/build/outputs/apk/github/debug/build-info.json
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: journal-android-review-build
           path: |
-            android/app/build/outputs/apk/debug/app-debug.apk
-            android/app/build/outputs/apk/debug/build-info.json
+            android/app/build/outputs/apk/github/debug/app-github-debug.apk
+            android/app/build/outputs/apk/github/debug/build-info.json
           retention-days: 7

@@ -18,14 +18,18 @@
   <div class="settings-row"><div><span class="settings-name">{{ 'Setup guide'|tr(locale) }}</span><small>{{ 'Shows the first steps on Overview again.'|tr(locale) }}</small></div>
     <form method="post" action="/setup/guide" class="settings-control"><input type="hidden" name="action" value="show"><button class="btn small">{{ "Show setup guide"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>
   {% set paid = store_themes() %}{% if paid %}
+  {% if play_offers is not none %}{# the Play build (NF-11B3): Play's price and Buy; no website price or link anywhere #}
+  {% for t in paid if not t.owned %}<div class="settings-row" data-play-offer="{{ t.id }}"><div><span class="settings-name">{{ t.name|tr(locale) }}</span><small>{% if t.id in play_offers %}{{ play_offers[t.id] }}{% if t.id in play_pending %} · {{ 'Payment pending'|tr(locale) }}{% endif %}{% else %}{{ 'Google Play is not answering. Try again in a moment.'|tr(locale) }}{% endif %}</small></div>
+    {% if t.id in play_offers and t.id not in play_pending %}<form method="post" action="/settings/theme/buy" class="settings-control"><input type="hidden" name="theme" value="{{ t.id }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn small">{{ 'Buy'|tr(locale) }}</button></form>{% endif %}</div>{% endfor %}
+  {% endif %}
   <details class="theme-unlock">
     <summary>{{ 'Unlock a theme you bought'|tr(locale) }}</summary>
-    <ol class="theme-unlock-steps">
+    {% if play_offers is none %}<ol class="theme-unlock-steps">
       <li>{{ 'Buy it on lightningeg.com.'|tr(locale) }} <a data-theme-prices data-marketplace="{{ marketplace }}" href="{{ marketplace }}?from=app#themes" target="_blank" rel="noopener">{{ 'See prices'|tr(locale) }}</a></li>
       <li>{{ 'On your account page, press Get app code.'|tr(locale) }}</li>
       <li>{{ "Paste it here. Do this once: your profile's other devices unlock by themselves."|tr(locale) }}</li>
     </ol>
-    <p class="muted small">{{ 'Another profile needs its own unlock, at a quarter of the price.'|tr(locale) }}</p>
+    <p class="muted small">{{ 'Another profile needs its own unlock, at a quarter of the price.'|tr(locale) }}</p>{% else %}<p class="muted small">{{ "Have an unlock code? Paste it here. Your profile's other devices unlock by themselves."|tr(locale) }}</p>{% endif %}
     {% set mine = paid|selectattr('owned')|map(attribute='name')|list %}{% if mine %}<p>{{ 'Yours on this profile:'|tr(locale) }} {% for n in mine %}<b>{{ n|tr(locale) }}</b>{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
     <form method="post" action="/settings/theme/unlock" class="theme-unlock-form">
       <label for="unlock-code">{{ 'Code from your account page'|tr(locale) }}</label>
