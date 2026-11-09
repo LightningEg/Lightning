@@ -14,11 +14,13 @@ The overview, spending, financial health, net worth and reports. They read the l
 | **IT-3BE** | [One number format on screen](../../issues/3-polish-and-arabic/IT-3BE-one-number-format.md) | S | ready |
 | **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](../../issues/3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | L | ready |
 | **IT-9A** | [Stored month-end figures](../../issues/9-later/IT-9A-stored-month-end-figures.md) | M | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
+| **IV-12N** | [Investments figures that mislead outside stocks: purchases shown as change in value, yearly rates o…](../../issues/12-desktop-ux/IV-12N-investment-figures-beyond-stocks.md) | M | new |
 
 ## Reports with open follow-ups here
 
 - [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 9A
 - [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BE, 3BK
 - [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](../../issues/11-phone-ux/r29-google-play-readiness/report.md): 3BK
+- [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](../../issues/12-desktop-ux/r30-investments-beyond-stocks/report.md): 12N
 <!-- work:end -->
 
