@@ -3609,6 +3609,7 @@ def localize_html(page: str) -> str:
     sentence left in English is translated here from the same table. Data (names, refs, codes) has no entry, so it stays.
     A middle dot next to a number becomes the Arabic comma (`arabic_dots`)."""
     out, kinds = [], []
+    typed = False  # inside <bdi translate="no">: a name the person typed is never translated (BV-11G)
 
     def attribute(m):
         return m.group(1) + m.group(2) + arabic_dots(_translate_piece(m.group(3))) + m.group(2)
@@ -3622,10 +3623,14 @@ def localize_html(page: str) -> str:
             plain_tag = token[:2] not in ("<!", "</") and token.lower()[:7] not in ("<script", "<style>", "<textar")
             if plain_tag:
                 token = _ATTRIBUTE.sub(attribute, token)
+            if token[:4].lower() == "<bdi" and 'translate="no"' in token:
+                typed = True
+            elif token.lower() == "</bdi>":
+                typed = False
             out.append(token)
             kinds.append("tag" if plain_tag or token[:2] == "</" else "barrier")
         else:
-            out.append(arabic_dots(_translate_piece(token)))
+            out.append(arabic_dots(token if typed else _translate_piece(token)))
             kinds.append("text")
     _dots_across_tags(out, kinds)
     return "".join(out)
