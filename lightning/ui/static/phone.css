@@ -1076,3 +1076,14 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 @keyframes phone-donut-in { from { opacity: 0; } to { opacity: 1; } }
 /* Home keeps its first screen to one and a fifth (test_phone_home): the bar is a thin line right under the row. */
 .phone-month-bar.is-compact { height: 5px; margin: 0; }
+/* IV-11D1, C06.1 / A08.4: Home's payday meter under Safe to spend. Fill: everyday money gone; tick: the pace today. */
+.phone-pay-meter { position: relative; display: block; height: 8px; margin: 4px 0 0; border-radius: 99px; background: var(--c-track); }
+.phone-hero.has-seam:has(.phone-pay-meter)::after { display: none; }  /* on Home the meter takes the seam's place (owner, 2026-11-09) */
+.phone-pay-meter i { position: absolute; top: 0; bottom: 0; inset-inline-start: 0; border-radius: 99px; background: var(--azure, #0B6DD6); }
+.phone-pay-meter.is-ahead i { background: var(--rose, #C93D72); }
+.phone-pay-meter b { position: absolute; top: -4px; width: 2px; height: 16px; margin-inline-start: -1px; border-radius: 1px; background: var(--action); }
+@media (prefers-reduced-motion: no-preference) {
+  .phone-pay-meter i { animation: phone-meter-in 400ms ease-out; transform-origin: left center; }
+  html.phone[dir="rtl"] .phone-pay-meter i { transform-origin: right center; }  /* grows from where it starts */
+}
+@keyframes phone-meter-in { from { transform: scaleX(0); } }

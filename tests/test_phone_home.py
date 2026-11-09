@@ -205,3 +205,26 @@ def test_days_not_recorded_is_a_to_do_row_not_the_hero_line(sample):
     html = _page(sample, "2026-10-11").text
     line = re.search(r'<p class="phone-hero-line">(.*?)</p>', html, re.S).group(1)
     assert "not recorded" not in line and "a day" in line
+
+
+def test_the_payday_meter_reads_budgets_own_everyday_figures(sample):
+    """IV-11D1 (C06.1): under Safe to spend, everyday money gone (fill) against the pace by today (tick), from the same
+    EverydayBudget the hero's line and Budget read; rose only when Budget says spending is ahead of its pace."""
+    c, day = _on(sample, "2026-10-04")
+    e = c.forecaster.everyday("2026-10", day)
+    meter = home.build(c, day).meter
+    assert meter is not None and e.everyday_plan > 0
+    assert meter.spent == round(float(min(e.everyday_spent / e.everyday_plan, 1) * 100), 1)
+    assert meter.pace == round(float(min(e.pace / e.everyday_plan, 1) * 100), 1)
+    assert meter.ahead == (e.pace_gap > 0)
+    html = _page(sample).text
+    hero = html.split('id="home-hero"', 1)[1].split('id="todo-heading"', 1)[0]
+    assert f'width:{meter.spent:.1f}%' in hero and f'inset-inline-start:{meter.pace:.1f}%' in hero
+    assert ("phone-pay-meter is-ahead" in hero) == meter.ahead
+
+
+def test_no_meter_without_a_plan(tmp_path, monkeypatch):
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-04")
+    c = build(tmp_path / "empty.db")
+    assert home.build(c, date(2026, 10, 4)).meter is None
+    c.db.close()

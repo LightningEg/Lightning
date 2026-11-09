@@ -103,4 +103,6 @@ PHONE_READING = {
     'Enter': 'سجّلها',
     'See': 'شوف',
     'Set aside': 'حوّش',
+    # IV-11D1: Home's payday meter
+    '{spent}% of everyday money spent; the pace is at {pace}% today.': 'اتصرف {spent}% من فلوس اليوم بيومه؛ المعدل النهارده عند {pace}%.',
 }
