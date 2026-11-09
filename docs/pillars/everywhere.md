@@ -16,7 +16,6 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](../../issues/3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | M | ready |
 | **NF-4A** | [Edit journal: edit anywhere, one home confirms](../../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md) | L | building |
 | **NF-4B** | [Multiple devices: implementation plan](../../issues/4-edit-journal-and-devices/NF-4B-multiple-devices.md) | L | building |
-| **NF-9B** | [In-app updates on Windows](../../issues/9-later/NF-9B-in-app-updates.md) | M | new |
 | **IV-11A** | [Phone first run](../../issues/11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | M | ready |
 | **IV-11D** | [The phone has no charts](../../issues/11-phone-ux/IV-11D-phone-charts-and-marks.md) | L | ready |
 | **IV-11H** | [Money is 21 plain rows under Net worth, wears the old More icon, and its Settings is the PC's](../../issues/11-phone-ux/IV-11H-money-is-a-drawer.md) | M | ready |

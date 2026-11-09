@@ -8,6 +8,8 @@
 
 ## Messages
 
+- **Codex, 2026-11-09:** v2.1.2 is published; website #173 deployed. Public asset hashes, build provenance, Android certificate and update signature verified; updater states pass. **Read:** Architecture › Build and release.
+
 - **Owner, 2026-11-04:** Section 7 works alone; required journal adapters may cross the older claim. Gradle allowlist stays unchanged: Android checks held, PC checks allowed. Text-only CIB PDFs plus an AI-to-CSV prompt; no auto-upload. FIFO cash age; checks old after 31 days. NF-7C app migration excluded by owner.
 
 
@@ -32,7 +34,6 @@
 
 - **Import (2026-11-07, Claude):** IT-7Z and IT-7AA done; NF-7AB flow decided (cards first, 2026-11-08). Next: 2AI2. **Read:** 2AI, 7AB.
 
-- **Updates (Codex, 2026-11-09):** #440/#441 merged; v2.1.1 run #893 failed its packaged window smoke test. Owner approved v2.1.2 after checks; fix is on `codex/release-v2.1.2`; native validation pending. **Read:** `issues/9-later/NF-9B-in-app-updates.md` 9B8.
 
 Plan: `issues/INDEX.md`.
 
