@@ -17,13 +17,8 @@ targeting API 35, asks for `READ_SMS`, links to the website to buy themes, and n
 
 ## How to work on this item
 
-Each step is one pull request, except the owner's. Read only the files a step names. Android steps need the **Phone app** workflow
-run by hand for evidence (AGENTS §2: Android minutes cost money; run once per step, not per push).
-
-## 11B5 Data safety and Console declarations, drafted · S · opus
-Files: new `docs/google-play.md` (for the owner: every Console answer, with the reason from the code).
-Do: Data safety (from r29 › Privacy), foreground service `dataSync` (what the lend-and-listen service does; the video's script), financial features (personal budgeting, no loans or payments), content rating, target audience 18+, ads: none, app access: the steps to open the demo household.
-Done when: the owner can fill the Console from that page alone.
+The code steps are done (11B1-11B6). What is left is the owner's; every Console answer, with its reason from the code, is in
+[docs/google-play.md](../../docs/google-play.md).
 
 ## 11B7 Owner: the developer account and the listing · owner
 The SMS declaration answers and the video script are in `docs/google-play.md` (11B2 built them). Developer account (organisation if a D-U-N-S number is practical; a personal account needs 11B8); a payments profile and the theme products for 11B3 (one in-app product per paid theme, product id = theme id: `cotton`, `dendera`, `nile`, `papyrus`), a Google Cloud service account with Play Console access to the app (View financial data, Manage orders), its JSON key saved in Supabase as the `redeem-play` secret `GOOGLE_PLAY_SERVICE_ACCOUNT` with `PLAY_PACKAGE_NAME=org.lightning.app`, and a licence tester for the internal track; the SMS declaration and video for 11B2; store listing in English and Arabic: icon 512 px, feature graphic 1024 × 500, 4-8 phone screenshots taken after IV-11E and IV-11D, short and full description in the brand voice.
