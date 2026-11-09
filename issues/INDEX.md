@@ -308,14 +308,13 @@ The phone is its own product: a few places that each answer one question, quick 
 | NF-11B3 | ↳ Themes sold through Google Play Billing in the Play build | | | L | Opus | |
 | NF-11B4 | ↳ A privacy notice that covers the app, linked from the app | | | M | Opus | |
 | NF-11B5 | ↳ Data safety and Console declarations, drafted | | | S | Opus | |
-| NF-11B6 | ↳ Privacy on screen: Recents and notifications in context | | | S | Sonnet | |
 | NF-11B7 | ↳ Owner: the developer account and the listing | | | owner |  | |
 | NF-11B8 | ↳ Owner: closed test, 12 testers for 14 days | | | owner |  | |
 | NF-11B9 | ↳ Owner: the phone check before production | | | owner |  | |
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md).
 
-Done: 11F, 11I, 11B1, 11B2, 3AY1, 3AY3, 3AY5, BV-11G, IV-11D3. Next free code: 11J.
+Done: 11F, 11I, 11B1, 11B2, 11B6, 3AY1, 3AY3, 3AY5, BV-11G, IV-11D3. Next free code: 11J.
 
 ## 12 Desktop UX and smart next steps
 
