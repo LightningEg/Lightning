@@ -1,6 +1,4 @@
 """New actions work inside the existing PC dialog and phone sheet."""
-from pathlib import Path
-import shutil
 
 import pytest
 
@@ -8,16 +6,14 @@ pytest.importorskip('playwright')
 from playwright.sync_api import sync_playwright
 from lightning.runtime.http import Host
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium, chromium_executable
 
-CHROMIUM = Path('/opt/pw-browsers/chromium')
-if not CHROMIUM.exists():
-    CHROMIUM = Path(shutil.which('chromium') or str(CHROMIUM))
+CHROMIUM = chromium_executable()
 
 
 @pytest.mark.parametrize('phone', [False, True], ids=['pc', 'phone'])
 def test_purchase_preview_edit_save_and_export_download(c, setup, phone, tmp_path):
-    if not CHROMIUM.exists():
-        pytest.skip('Chromium is not installed')
+    require_chromium()
     app = create_app(c)
     @app.middleware("http")
     async def phone_frame(request, call_next):

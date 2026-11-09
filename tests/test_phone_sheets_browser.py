@@ -3,15 +3,12 @@ category is filled in, the raise offer is a page card that stays, and the tab ba
 from __future__ import annotations
 
 import re
-import shutil
-from pathlib import Path
 
 import pytest
+from tests.browser_support import require_chromium, chromium_executable
 
 pytest.importorskip("playwright.sync_api")
-CHROMIUM = Path("/opt/pw-browsers/chromium")
-if not CHROMIUM.exists():
-    CHROMIUM = Path(shutil.which("chromium") or str(CHROMIUM))
+CHROMIUM = chromium_executable()
 
 TOKEN = "() => document.querySelector('meta[name=lightning-session]').content"
 OPEN_SHEET = """(url) => { const a = document.createElement('a'); a.href = url; a.setAttribute('data-popup-open', '');
@@ -20,8 +17,7 @@ OPEN_SHEET = """(url) => { const a = document.createElement('a'); a.href = url; 
 
 @pytest.fixture(scope="module")
 def playwright_chromium():
-    if not CHROMIUM.exists():
-        pytest.skip("Chromium is not installed")
+    require_chromium()
     from playwright.sync_api import sync_playwright
     with sync_playwright() as p:
         yield p.chromium

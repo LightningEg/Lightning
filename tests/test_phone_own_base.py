@@ -4,7 +4,6 @@ app bar's colour."""
 from __future__ import annotations
 
 import re
-import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -19,6 +18,7 @@ from lightning.ui import web
 from lightning.ui.phone import router as phone_router
 from lightning.ui.phone.router import mount_phone
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 TEMPLATES = Path(web.__file__).parent / "templates"
 
@@ -62,9 +62,7 @@ def test_no_page_is_pc_only_until_the_owner_says_so():
 def phone_page(c):
     pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright
-    chromium = shutil.which("chromium") or ("/opt/pw-browsers/chromium" if Path("/opt/pw-browsers/chromium").exists() else None)
-    if not chromium:
-        pytest.skip("Chromium is not installed")
+    chromium = require_chromium()
     load_mohab_2026(c)
     session = SimpleNamespace(container=c, paths=None, journal=None, borrowed=None, role=SessionRole.HOME,
                               token="test-own-base-session", csrf="test-own-base-csrf")

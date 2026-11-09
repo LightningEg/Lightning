@@ -3,15 +3,12 @@ not scroll sideways, and no chart writes two end labels on top of each other."""
 from __future__ import annotations
 
 import re
-import shutil
-from pathlib import Path
 
 import pytest
+from tests.browser_support import require_chromium, chromium_executable
 
 pytest.importorskip("playwright.sync_api")
-CHROMIUM = Path("/opt/pw-browsers/chromium")
-if not CHROMIUM.exists():
-    CHROMIUM = Path(shutil.which("chromium") or str(CHROMIUM))
+CHROMIUM = chromium_executable()
 
 # Text boxes of the labels at the right end of a chart; two that share area are drawn on each other.
 OVERLAPS = """() => {
@@ -32,8 +29,7 @@ OVERLAPS = """() => {
 @pytest.fixture(scope="module")
 def pc_page(tmp_path_factory):
     """A 1366 px browser on a dummy profile holding the sample household."""
-    if not CHROMIUM.exists():
-        pytest.skip("Chromium is not installed")
+    require_chromium()
     from playwright.sync_api import sync_playwright
     from lightning.runtime.app import profile_app
     from lightning.runtime.devices import Devices

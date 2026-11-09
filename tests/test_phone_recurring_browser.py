@@ -1,7 +1,5 @@
 """The changed-payment warning must remain readable on narrow English and Arabic screens."""
 from datetime import date
-from pathlib import Path
-import shutil
 
 import pytest
 
@@ -11,13 +9,11 @@ from playwright.sync_api import sync_playwright
 from lightning.runtime.http import Host
 from lightning.ui.phone.router import mount_phone
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 def test_changed_monthly_payment_warning_fits_phone(c, setup, monkeypatch):
-    chromium = Path('/opt/pw-browsers/chromium')
-    executable = str(chromium) if chromium.exists() else shutil.which('chromium')
-    if not executable:
-        pytest.skip('Chromium is not installed')
+    executable = require_chromium()
     monkeypatch.setenv('LIGHTNING_TODAY', '2026-10-06')
     accounts, cats = setup
     category = cats['EXP.PERSONAL.FOOD']
@@ -123,10 +119,7 @@ def test_changed_monthly_payment_warning_fits_phone(c, setup, monkeypatch):
 
 
 def test_phone_recurring_suggestion_menu_can_dismiss_and_restore(c, setup, monkeypatch):
-    chromium = Path('/opt/pw-browsers/chromium')
-    executable = str(chromium) if chromium.exists() else shutil.which('chromium')
-    if not executable:
-        pytest.skip('Chromium is not installed')
+    executable = require_chromium()
     monkeypatch.setenv('LIGHTNING_TODAY', '2026-12-31')
     accounts, cats = setup
     party_id = c.counterparties.create('Monthly Gym')

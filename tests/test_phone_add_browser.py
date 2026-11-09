@@ -1,8 +1,6 @@
 """J1 on the phone (IV-3AY7): from Home, a payment is saved in three taps (Add, a category chip, Save) with the amount
 typed, and the person is back on Home. A real browser, the real sheet and script."""
-from pathlib import Path
 from types import SimpleNamespace
-import shutil
 
 import pytest
 
@@ -12,15 +10,14 @@ from lightning.runtime.roles import SessionRole
 from lightning.samples import load_mohab_2026
 from lightning.ui.phone.router import mount_phone
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 @pytest.fixture
 def phone(c):
     pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright
-    chromium = shutil.which("chromium") or ("/opt/pw-browsers/chromium" if Path("/opt/pw-browsers/chromium").exists() else None)
-    if not chromium:
-        pytest.skip("Chromium is not installed")
+    chromium = require_chromium()
     load_mohab_2026(c)
     session = SimpleNamespace(container=c, paths=None, journal=None, borrowed=None, role=SessionRole.HOME,
                               token="test-add-session", csrf="test-add-csrf")

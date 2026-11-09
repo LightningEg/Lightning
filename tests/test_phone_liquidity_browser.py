@@ -1,8 +1,6 @@
 """Phone Other preserves emergency liquidity sources and their access timing."""
 from dataclasses import replace
 from decimal import Decimal
-from pathlib import Path
-import shutil
 from types import SimpleNamespace
 
 import pytest
@@ -12,13 +10,11 @@ from playwright.sync_api import sync_playwright
 from lightning.core.dates import today
 from lightning.runtime.http import Host
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 def test_phone_liquidity_other_opens_full_context(c, setup):
-    chromium = Path('/opt/pw-browsers/chromium')
-    executable = str(chromium) if chromium.exists() else shutil.which('chromium')
-    if not executable:
-        pytest.skip('Chromium is not installed')
+    executable = require_chromium()
     def holding(name, code, value, until=None):
         return SimpleNamespace(asset=name, class_code=code, value=value, locked_until=until)
     c.reserves.set_emergency_fund('5000')

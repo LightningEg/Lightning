@@ -1,5 +1,4 @@
 """The phone audit must see clipped content while ignoring intentionally concealed controls."""
-import shutil
 from pathlib import Path
 
 import pytest
@@ -7,13 +6,11 @@ import pytest
 pytest.importorskip("playwright")
 from playwright.sync_api import sync_playwright
 from tools.phone_check import CLIPPED
+from tests.browser_support import require_chromium
 
 
 def test_clipped_content_and_concealed_controls():
-    chromium = Path("/opt/pw-browsers/chromium")
-    executable = str(chromium) if chromium.exists() else shutil.which("chromium")
-    if not executable:
-        pytest.skip("Chromium is not installed")
+    executable = require_chromium()
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=executable)
         page = browser.new_page(viewport={"width": 320, "height": 800})
@@ -31,10 +28,7 @@ def test_clipped_content_and_concealed_controls():
 
 @pytest.mark.parametrize("width", [320, 360])
 def test_phone_picker_fits_and_choices_are_touchable(width):
-    chromium = Path("/opt/pw-browsers/chromium")
-    executable = str(chromium) if chromium.exists() else shutil.which("chromium")
-    if not executable:
-        pytest.skip("Chromium is not installed")
+    executable = require_chromium()
     root = Path(__file__).resolve().parents[1]
     static = root / "lightning/ui/static"
     source = (static / "app.js").read_text()
@@ -61,10 +55,7 @@ def test_phone_picker_fits_and_choices_are_touchable(width):
 
 
 def test_phone_period_arrows_have_touch_targets():
-    chromium = Path("/opt/pw-browsers/chromium")
-    executable = str(chromium) if chromium.exists() else shutil.which("chromium")
-    if not executable:
-        pytest.skip("Chromium is not installed")
+    executable = require_chromium()
     static = Path(__file__).resolve().parents[1] / "lightning/ui/static"
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=executable)
@@ -82,10 +73,7 @@ def test_phone_period_arrows_have_touch_targets():
 
 
 def test_phone_chart_time_axes_show_at_most_three_labels():
-    chromium = Path("/opt/pw-browsers/chromium")
-    executable = str(chromium) if chromium.exists() else shutil.which("chromium")
-    if not executable:
-        pytest.skip("Chromium is not installed")
+    executable = require_chromium()
     css = Path(__file__).resolve().parents[1] / "lightning/ui/static/phone.css"
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=executable)
@@ -101,10 +89,7 @@ def test_phone_chart_time_axes_show_at_most_three_labels():
 
 
 def test_phone_fields_stay_readable_with_desktop_overrides():
-    chromium = Path("/opt/pw-browsers/chromium")
-    executable = str(chromium) if chromium.exists() else shutil.which("chromium")
-    if not executable:
-        pytest.skip("Chromium is not installed")
+    executable = require_chromium()
     static = Path(__file__).resolve().parents[1] / "lightning/ui/static"
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=executable)
@@ -123,10 +108,7 @@ def test_phone_fields_stay_readable_with_desktop_overrides():
 
 
 def test_phone_focused_field_deepens_its_well():
-    chromium = Path("/opt/pw-browsers/chromium")
-    executable = str(chromium) if chromium.exists() else shutil.which("chromium")
-    if not executable:
-        pytest.skip("Chromium is not installed")
+    executable = require_chromium()
     static = Path(__file__).resolve().parents[1] / "lightning/ui/static"
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=executable)
@@ -144,10 +126,7 @@ def test_phone_focused_field_deepens_its_well():
 
 
 def test_phone_loan_and_reserve_actions_have_touch_targets():
-    chromium = Path("/opt/pw-browsers/chromium")
-    executable = str(chromium) if chromium.exists() else shutil.which("chromium")
-    if not executable:
-        pytest.skip("Chromium is not installed")
+    executable = require_chromium()
     static = Path(__file__).resolve().parents[1] / "lightning/ui/static"
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=executable)
@@ -167,10 +146,7 @@ def test_phone_loan_and_reserve_actions_have_touch_targets():
 
 @pytest.mark.parametrize("width", [320, 360])
 def test_phone_planner_choices_fit_their_card(width):
-    chromium = Path("/opt/pw-browsers/chromium")
-    executable = str(chromium) if chromium.exists() else shutil.which("chromium")
-    if not executable:
-        pytest.skip("Chromium is not installed")
+    executable = require_chromium()
     static = Path(__file__).resolve().parents[1] / "lightning/ui/static"
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=executable)

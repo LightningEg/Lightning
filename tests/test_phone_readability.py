@@ -2,21 +2,17 @@
 from __future__ import annotations
 
 import re
-import shutil
-from pathlib import Path
 
 import pytest
+from tests.browser_support import require_chromium, chromium_executable
 
 pytest.importorskip("playwright.sync_api")
-CHROMIUM = Path("/opt/pw-browsers/chromium")
-if not CHROMIUM.exists():
-    CHROMIUM = Path(shutil.which("chromium") or str(CHROMIUM))
+CHROMIUM = chromium_executable()
 
 
 @pytest.fixture(scope="module")
 def phone_page(tmp_path_factory):
-    if not CHROMIUM.exists():
-        pytest.skip("Chromium is not installed")
+    require_chromium()
     from playwright.sync_api import sync_playwright
     from lightning.runtime.app import profile_app
     from lightning.runtime.devices import Devices

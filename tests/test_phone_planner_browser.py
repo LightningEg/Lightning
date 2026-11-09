@@ -1,7 +1,5 @@
 """Five Planner recommendations stay readable and available in phone English and Arabic."""
 from decimal import Decimal
-from pathlib import Path
-import shutil
 
 import pytest
 
@@ -9,13 +7,11 @@ pytest.importorskip('playwright')
 from playwright.sync_api import sync_playwright
 from lightning.runtime.http import Host
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 def test_phone_planner_remainder_is_available_at_narrow_widths(c):
-    chromium = Path('/opt/pw-browsers/chromium')
-    executable = str(chromium) if chromium.exists() else shutil.which('chromium')
-    if not executable:
-        pytest.skip('Chromium is not installed')
+    executable = require_chromium()
     names = ('Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon')
     codes = ('STOCK', 'GOLD', 'FUND.GOLD', 'FUND.FIXED_INCOME', 'FUND.MONEY_MARKET')
     for name, code in zip(names, codes):

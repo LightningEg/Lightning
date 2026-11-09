@@ -1,7 +1,5 @@
 """PC certificate accounts and the first Budget group use searchable own-data pickers."""
-from pathlib import Path
 from types import SimpleNamespace
-import shutil
 
 import pytest
 
@@ -9,14 +7,13 @@ from lightning.runtime.app import SessionGate
 from lightning.runtime.http import Guard, Host
 from lightning.runtime.roles import SessionRole
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 def test_certificate_and_budget_pickers_preserve_submitted_ids(c, setup):
     pytest.importorskip('playwright')
     from playwright.sync_api import sync_playwright
-    chromium = shutil.which('chromium') or ('/opt/pw-browsers/chromium' if Path('/opt/pw-browsers/chromium').exists() else None)
-    if not chromium:
-        pytest.skip('Chromium is not installed')
+    chromium = require_chromium()
     accounts, _ = setup
     from test_cd_interest_match import _scenario
     _scenario(c, setup)

@@ -74,6 +74,9 @@ and runs dependency-free money, date, CSV, schedule and return contracts on Pyth
 Run that small check locally with `python -m unittest discover -s tests/runtime_contracts -v`; it does not load pytest's
 integration fixtures or install native wheels. It checks selected runtime behavior and syntax, while the full suite checks
 integration. Deterministic delayed-search-body ordering stays in `tests/phone-search-race.test.cjs`, invoked by the full suite.
+The full suite includes the browser tests (Playwright and Chromium, `requirements/browser.lock`). Locally they skip when
+no browser is installed; CI sets `LIGHTNING_REQUIRE_BROWSER=1`, so there a missing browser fails instead of skipping. A new
+browser test gets its Chromium from `require_chromium()` in `tests/browser_support.py`.
 
 Additional checks depend on the changed paths; a Linux PR pass alone supplies no device or packaging evidence:
 

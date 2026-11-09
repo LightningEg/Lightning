@@ -1,5 +1,4 @@
 """Real browser regressions for selection, forecast baselines and reserve criteria."""
-from pathlib import Path
 
 import pytest
 pytest.importorskip('playwright.sync_api')
@@ -7,17 +6,17 @@ from playwright.sync_api import sync_playwright
 
 from lightning.runtime.http import Host
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 @pytest.fixture
 def browser_page(c):
-    if not Path('/usr/bin/chromium').exists():
-        pytest.skip('System Chromium not installed')
+    chromium = require_chromium()
     app = create_app(c)
     host = Host(lambda _: app).start()
     try:
         with sync_playwright() as pw:
-            browser = pw.chromium.launch(executable_path='/usr/bin/chromium', args=['--no-sandbox'])
+            browser = pw.chromium.launch(executable_path=chromium, args=['--no-sandbox'])
             page = browser.new_page(viewport={'width':1366,'height':1000})
             page.set_default_timeout(5000)
             page.goto(host.launch_url)
@@ -53,10 +52,10 @@ def test_register_selection_survives_edit_without_submitting(c, setup, browser_p
     page.evaluate("""() => { window.selectionScans=0; const ledger=document.querySelector('.ledger'); const original=ledger.querySelectorAll; ledger.querySelectorAll=function(s){if(s.includes('transaction-select')) window.selectionScans++; return original.call(this,s)}; }""")
     box(txns[0]).uncheck(); selected([txns[1]])
     box(txns[2]).check(); selected(txns[1:])
-    box(transfer).first.check()
-    assert box(transfer).count() == 2
-    assert box(transfer).evaluate_all('xs=>xs.every(x=>x.checked)')
-    box(transfer).last.uncheck(); selected(txns[1:])
+    # IV-12E: a transfer is one row in Every account (From → To), so it has one selection control.
+    assert box(transfer).count() == 1
+    box(transfer).check(); selected([*txns[1:], transfer])
+    box(transfer).uncheck(); selected(txns[1:])
     page.locator('#select-visible').check()
     assert page.locator('.ledger .transaction-select:checked').count() == 50  # the largest page, from a 120+ transaction ledger
     assert page.locator('#select-visible').is_checked()

@@ -23,7 +23,7 @@ One screenshot per page and width, no re-takes. Report findings, not the guideli
 
 1. **Pick the scope.** PC pages, phone pages, or website pages, and the changed screens if the audit follows a change.
 2. **Run the automatic audits.**
-   - **PC:** `python -m pytest -q tests/test_brand_audit.py`. It drives Chromium (`/opt/pw-browsers/chromium`; skipped if Playwright or Chromium is missing) over the main pages with the sample household at 1366 × 768 and
+   - **PC:** `python -m pytest -q tests/test_brand_audit.py`. It drives Chromium (found by `tests/browser_support.py`; skipped locally if Playwright or Chromium is missing, required in CI) over the main pages with the sample household at 1366 × 768 and
      checks A03, A05, A10.3 and A16: nothing upper-case, text only in the A03 colours, plain links Ink and underlined, H1–H3 Ink, no white or boxed field, spending in the register Ink, the register fits its card.
    - **Phone:** `python tools/phone_check.py` (add `--shots folder` to keep screenshots). It loads each main page in the phone frame at 360 and 320 px and prints every page that scrolls sideways with its widest element (C12).
    - **Rule lists:** `python -m pytest -q tests/test_docs_structure.py` (the A16 list in `AGENTS.md` equals the guideline's; the app's and website's guideline copies are identical).

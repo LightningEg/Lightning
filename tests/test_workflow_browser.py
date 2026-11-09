@@ -1,6 +1,4 @@
 """Browser checks for the activity, planning, reimbursement, and review workflows."""
-from pathlib import Path
-import shutil
 
 import pytest
 
@@ -9,17 +7,15 @@ from playwright.sync_api import sync_playwright
 
 from lightning.runtime.http import Host
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium, chromium_executable
 
 
-CHROMIUM = Path("/opt/pw-browsers/chromium")
-if not CHROMIUM.exists():
-    CHROMIUM = Path(shutil.which("chromium") or str(CHROMIUM))
+CHROMIUM = chromium_executable()
 
 
 @pytest.mark.parametrize("phone", [False, True], ids=["pc", "phone"])
 def test_workflow_pages_render_fit_and_keep_interactions_usable(c, setup, phone):
-    if not CHROMIUM.exists():
-        pytest.skip("Chromium is not installed")
+    require_chromium()
 
     accounts, cats = setup
     account = accounts["cib"]

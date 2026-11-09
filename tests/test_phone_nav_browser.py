@@ -1,9 +1,7 @@
 """The phone keeps its frame between pages (IT-3AO2, phone-nav.js): a tab, a link in the content or the month stepper
 swaps only the app bar, the content and the tab bar, and what the new page needs still works. A page that brings its
 own script loads whole, and back returns to the page before."""
-from pathlib import Path
 from types import SimpleNamespace
-import shutil
 
 import pytest
 
@@ -13,6 +11,7 @@ from lightning.runtime.roles import SessionRole
 from lightning.ui.phone.router import mount_phone
 from lightning.samples import load_mohab_2026
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 @pytest.fixture
@@ -20,9 +19,7 @@ def phone(c, monkeypatch):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-11-12")  # the plan runs on past October, so both months show the stepper
     pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright
-    chromium = shutil.which("chromium") or ("/opt/pw-browsers/chromium" if Path("/opt/pw-browsers/chromium").exists() else None)
-    if not chromium:
-        pytest.skip("Chromium is not installed")
+    chromium = require_chromium()
     load_mohab_2026(c)
     session = SimpleNamespace(container=c, paths=None, journal=None, borrowed=None, role=SessionRole.HOME,
                               token="test-phone-nav-session", csrf="test-phone-nav-csrf")

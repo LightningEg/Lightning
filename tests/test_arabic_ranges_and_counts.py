@@ -3,8 +3,6 @@ Latin comma between Arabic digits, and a counted noun agrees with its count (1, 
 from __future__ import annotations
 
 import re
-import shutil
-from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -16,6 +14,7 @@ from lightning.runtime.roles import SessionRole
 from lightning.samples import load_mohab_2026
 from lightning.ui.i18n import translate
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 @pytest.mark.parametrize("count,phrase", [(1, "بعد يوم واحد"), (2, "بعد يومين"), (3, "بعد 3 أيام"), (10, "بعد 10 أيام"),
@@ -45,9 +44,7 @@ def test_the_revaluation_label_is_arabic():
 def arabic(tmp_path):
     pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright
-    chromium = shutil.which("chromium") or ("/opt/pw-browsers/chromium" if Path("/opt/pw-browsers/chromium").exists() else None)
-    if not chromium:
-        pytest.skip("Chromium is not installed")
+    chromium = require_chromium()
     with pytest.MonkeyPatch.context() as patch:
         patch.setenv("LIGHTNING_PRICES_OFFLINE", "1")
         patch.setenv("LIGHTNING_TODAY", "2026-10-04")

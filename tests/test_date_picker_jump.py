@@ -1,6 +1,4 @@
 """The date picker's month opens the months, its year opens the years (feedback batch 004, T9)."""
-from pathlib import Path
-import shutil
 
 import pytest
 
@@ -8,10 +6,9 @@ pytest.importorskip('playwright')
 from playwright.sync_api import sync_playwright
 from lightning.runtime.http import Host
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium, chromium_executable
 
-CHROMIUM = Path('/opt/pw-browsers/chromium')
-if not CHROMIUM.exists():
-    CHROMIUM = Path(shutil.which('chromium') or str(CHROMIUM))
+CHROMIUM = chromium_executable()
 
 
 def _open_calendar(page, host):
@@ -23,8 +20,7 @@ def _open_calendar(page, host):
 
 
 def test_the_title_opens_months_then_years_and_a_pick_comes_back_down(c):
-    if not CHROMIUM.exists():
-        pytest.skip('Chromium is not installed')
+    require_chromium()
     host = Host(lambda _: create_app(c)).start()
     try:
         with sync_playwright() as p:
@@ -49,8 +45,7 @@ def test_the_title_opens_months_then_years_and_a_pick_comes_back_down(c):
 
 
 def test_escape_goes_up_one_level_before_closing(c):
-    if not CHROMIUM.exists():
-        pytest.skip('Chromium is not installed')
+    require_chromium()
     host = Host(lambda _: create_app(c)).start()
     try:
         with sync_playwright() as p:

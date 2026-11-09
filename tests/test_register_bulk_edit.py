@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 NAMES = ["Carrefour", "Vodafone", "Zamalek Club"]
@@ -81,14 +82,11 @@ def test_edit_page_carries_original_values_for_the_dialog(client, rows):
 @pytest.fixture
 def register_browser(rows):
     """Exercise native checkbox, navigation and submit events, rather than inspecting JS text."""
-    import shutil
     pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright
     from lightning.runtime.http import Host
 
-    chromium = shutil.which("chromium")
-    if not chromium:
-        pytest.skip("Chromium is not installed")
+    chromium = require_chromium()
     c, accounts, cats, made = rows
     host = Host(lambda _: create_app(c)).start()
     try:
@@ -201,13 +199,11 @@ def test_bulk_edit_rejects_an_account_code_as_counterparty(client, rows):
 
 
 def test_browser_phone_select_all_and_clear(rows):
-    import shutil
     pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright
     from lightning.runtime.http import Host
 
-    if not shutil.which("chromium"):
-        pytest.skip("Chromium is not installed")
+    chromium = require_chromium()
     c, accounts, cats, made = rows
     app = create_app(c)
 
@@ -219,7 +215,7 @@ def test_browser_phone_select_all_and_clear(rows):
     host = Host(lambda _: phone).start()
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(executable_path=shutil.which("chromium"), args=["--no-sandbox"])
+            browser = p.chromium.launch(executable_path=chromium, args=["--no-sandbox"])
             page = browser.new_page(viewport={"width": 390, "height": 844})
             page.goto(host.launch_url)
             page.goto(f"{host.origin}/accounts/{accounts['cib'].id}?select=1")
@@ -246,13 +242,11 @@ def test_browser_phone_select_all_and_clear(rows):
 
 @pytest.mark.parametrize("locale", ["en", "ar"])
 def test_browser_phone_bulk_delete_asks_with_count_and_keeps_selection(rows, locale):
-    import shutil
     pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright
     from lightning.runtime.http import Host
 
-    if not shutil.which("chromium"):
-        pytest.skip("Chromium is not installed")
+    chromium = require_chromium()
     c, accounts, cats, made = rows
     c.settings.set("locale", locale)
     app = create_app(c)
@@ -265,7 +259,7 @@ def test_browser_phone_bulk_delete_asks_with_count_and_keeps_selection(rows, loc
     host = Host(lambda _: phone).start()
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(executable_path=shutil.which("chromium"), args=["--no-sandbox"])
+            browser = p.chromium.launch(executable_path=chromium, args=["--no-sandbox"])
             page = browser.new_page(viewport={"width": 390, "height": 844})
             page.goto(f"{host.origin}/accounts/{accounts['cib'].id}?select=1")
             page.locator("#phone-select-visible").check()

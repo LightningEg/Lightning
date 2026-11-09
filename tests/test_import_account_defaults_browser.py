@@ -1,5 +1,4 @@
 """BT-7AG: selecting an institution updates Type once, while a later manual choice survives."""
-from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -11,12 +10,12 @@ from lightning.runtime.app import SessionGate
 from lightning.runtime.http import Guard, Host
 from lightning.runtime.roles import SessionRole
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 @pytest.fixture(params=[1366, 390])
 def account_page(c, request):
-    if not Path("/usr/bin/chromium").exists():
-        pytest.skip("System Chromium not installed")
+    chromium = require_chromium()
     session = SimpleNamespace(container=c, paths=None, journal=None, borrowed=None, role=SessionRole.HOME,
                               token="account-default-session", csrf="account-default-csrf")
     app = create_app(c)
@@ -28,7 +27,7 @@ def account_page(c, request):
     host = Host(lambda cfg: Guard(SessionGate(app, session), cfg)).start()
     try:
         with sync_playwright() as pw:
-            with pw.chromium.launch(executable_path="/usr/bin/chromium", args=["--no-sandbox"]) as browser:
+            with pw.chromium.launch(executable_path=chromium, args=["--no-sandbox"]) as browser:
                 page = browser.new_page(viewport={"width": request.param, "height": 900})
                 page.set_default_timeout(5000)
                 page.goto(host.launch_url)

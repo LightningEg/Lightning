@@ -1,6 +1,4 @@
 """The phone payday review previews bills and funding without assigning cash."""
-from pathlib import Path
-import shutil
 
 import pytest
 
@@ -8,12 +6,11 @@ pytest.importorskip('playwright')
 from playwright.sync_api import sync_playwright
 from lightning.runtime.http import Host
 from lightning.ui.web import create_app
+from tests.browser_support import require_chromium
 
 
 def test_phone_payday_preview_and_enable(c, setup, monkeypatch):
-    executable = shutil.which('chromium') or str(Path('/opt/pw-browsers/chromium'))
-    if not Path(executable).exists():
-        pytest.skip('Chromium is not installed')
+    executable = require_chromium()
     monkeypatch.setenv('LIGHTNING_TODAY', '2026-12-01')
     accounts, cats = setup
     food = cats['EXP.PERSONAL.FOOD'].id
@@ -70,9 +67,7 @@ def test_phone_payday_preview_and_enable(c, setup, monkeypatch):
 
 def test_phone_linked_reserve_and_payment_fit(c, setup, monkeypatch):
     from test_reserve_bills import prepared
-    executable = shutil.which('chromium') or str(Path('/opt/pw-browsers/chromium'))
-    if not Path(executable).exists():
-        pytest.skip('Chromium is not installed')
+    executable = require_chromium()
     monkeypatch.setenv('LIGHTNING_TODAY', '2026-12-01')
     _, _, bill, reserve = prepared(c, setup)
     app = create_app(c)
