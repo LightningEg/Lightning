@@ -1,6 +1,6 @@
-"""r31: prove the narrower investment-report query returns the same report as today's, and time both.
+"""r32: prove the narrower investment-report query returns the same report as today's, and time both.
 
-    python issues/1-easy-to-contribute/r31-code-review-and-loose-ends/evidence/investment_query.py
+    python issues/1-easy-to-contribute/r32-code-review-and-loose-ends/evidence/investment_query.py
 
 Dummy data only."""
 import sys, tempfile, time, itertools, random, datetime

@@ -12,7 +12,7 @@ commit: 24e3cf8
 ---
 
 ## Report
-Found by [r31](r31-code-review-and-loose-ends/report.md) F11: vulture, then each name searched with `grep -rnw` in `lightning/`, `tools/`, `android/app/src` and `tests/`.
+Found by [r32](r32-code-review-and-loose-ends/report.md) F11: vulture, then each name searched with `grep -rnw` in `lightning/`, `tools/`, `android/app/src` and `tests/`.
 
 **Nothing calls these (not even a test):**
 

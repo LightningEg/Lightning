@@ -1,6 +1,6 @@
-"""r31: the sample household plus N invented expenses over four years; prints each slow page with its slowest queries.
+"""r32: the sample household plus N invented expenses over four years; prints each slow page with its slowest queries.
 
-    python issues/1-easy-to-contribute/r31-code-review-and-loose-ends/evidence/scale.py 4000
+    python issues/1-easy-to-contribute/r32-code-review-and-loose-ends/evidence/scale.py 4000
 
 Dummy data only."""
 import sys, re, tempfile, time, collections, random, datetime

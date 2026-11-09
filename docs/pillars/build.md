@@ -28,6 +28,6 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 - [Audit 6: open pull request cleanup](../../issues/1-easy-to-contribute/r7-pull-request-cleanup/report.md): 1H
 - [v1.5.0 PR review, theme switching and package preparation](../../issues/10-looks-and-store/r12-v150-release/report.md): 1H
 - [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 1H, 9K
-- [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r31-code-review-and-loose-ends/report.md): 1V, 1W, 1X, 1Y, 1Z, 9K
+- [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r32-code-review-and-loose-ends/report.md): 1V, 1W, 1X, 1Y, 1Z, 9K
 <!-- work:end -->
 

@@ -12,7 +12,7 @@ commit: 24e3cf8
 ---
 
 ## Report
-Found by [r31](../1-easy-to-contribute/r31-code-review-and-loose-ends/report.md) F3. `GET /activity` (PC) asks 1,039 queries on the sample. `lightning/workflows/activity.py:ActivityReview.recent` (line 29) finds 100 ids and calls `self.summary(id, include_choices=False)` for each. Every call asks, once per row:
+Found by [r32](../1-easy-to-contribute/r32-code-review-and-loose-ends/report.md) F3. `GET /activity` (PC) asks 1,039 queries on the sample. `lightning/workflows/activity.py:ActivityReview.recent` (line 29) finds 100 ids and calls `self.summary(id, include_choices=False)` for each. Every call asks, once per row:
 
 `SELECT * FROM transactions WHERE id = ?` · its ledger lines · `SELECT 1 FROM money_from_others ...` · the bank-import source rows · the planned payments · the reserve links · `SELECT 1 FROM sqlite_master ...` (`has_table`) · `SELECT id FROM reimbursement_claims WHERE expense_id=?` · the counterparty identity read.
 

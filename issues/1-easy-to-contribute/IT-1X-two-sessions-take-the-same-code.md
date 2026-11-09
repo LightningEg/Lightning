@@ -12,13 +12,13 @@ commit: 24e3cf8
 post: no
 ---
 ## Report
-Found by [r31](r31-code-review-and-loose-ends/report.md) F9 and F10. `python tools/issues.py next <n>` and `python tools/docs_check.py next-report` answer "highest code in this checkout, plus one". Two sessions that start from the same `main` get the same answer. On 2026-11-09: #460 and #462 both used r30 and 12H-12N (#462 merged first), #461 and #463 both used r31, #464 used r32, and r31 (this report's own) is the third r31 because the docs test allows no gap. The second to merge must rename files, links, the index and `REPORTS.md` by hand.
+Found by [r32](r32-code-review-and-loose-ends/report.md) F9 and F10. `python tools/issues.py next <n>` and `python tools/docs_check.py next-report` answer "highest code in this checkout, plus one". Two sessions that start from the same `main` get the same answer. On 2026-11-09: #460 and #462 both used r30 and 12H-12N (#462 merged first), #461 and #463 both used r31, #464 used r32, and this report was the third r31 until #463 merged and it was renamed r32 by hand. The second to merge must rename files, links, the index and `REPORTS.md` by hand.
 The same day the guideline went to 3.40 in the app (#450, #456 merged) while its website mirrors (#174, #176) stayed open, so `tests/test_docs_structure.py::test_the_app_and_website_guidelines_are_all_mirrored` fails on `main` whenever both repositories are checked out.
 ## Fix
 Three steps, one pull request each. Read only the functions named.
 ## 1X1 Reserve a code in NOW.md before using it · S
 Files: `tools/issues.py` (`next_code`, the `next` branch of `main`), `tools/docs_check.py` (`next_report_code`), `NOW.md`, `AGENTS.md` §3, `skills/add-plan-item/SKILL.md`, `tests/test_issues.py`.
-Do: add a line `Reserved codes: ` under `## Claimed` in `NOW.md` (comma-separated, e.g. `r32 Claude, 12U-12W Claude`). Make both `next` commands also read that line and skip every code or range on it. Document the rule in one sentence in AGENTS §3 step 2 and in the skill: "a report or more than one new item: write your codes on NOW.md's Reserved line and push that commit first; remove them in the pull request that adds the files."
+Do: add a line `Reserved codes: ` under `## Claimed` in `NOW.md` (comma-separated, e.g. `r33 Claude, 12U-12W Claude`). Make both `next` commands also read that line and skip every code or range on it. Document the rule in one sentence in AGENTS §3 step 2 and in the skill: "a report or more than one new item: write your codes on NOW.md's Reserved line and push that commit first; remove them in the pull request that adds the files."
 Test: a unit test feeds `next_code` a reserved range and expects the code after it; same for reports.
 ## 1X2 CI refuses a code that main already has · S
 Files: `.github/workflows/pr-checks.yml` (the docs job), `tools/issues.py --check`.

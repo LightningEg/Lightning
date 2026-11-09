@@ -2,7 +2,7 @@
 
 Date: 2026-11-09 · Author/reviewer: Claude
 Repository: both (app in depth, website for the mirror only) · Reviewed commit: 24e3cf821043faa0e4ce7fc8349fc067e1c2d95e
-Code: r31 · App version: 2.1.2
+Code: r32 · App version: 2.1.2
 Pillar: build · Related pillars: understand, capture, protect
 
 ## Assessment
@@ -61,7 +61,7 @@ ordinary PC shows.
 | F6 | medium (tooling) | `tools/perf_check.py` measures 18 fixed pages; the three pages over budget (F3, F4) are not among them. Its `--phone` only sets a flag and never mounts the phone's own routes, so it times the old shared pages, not Home, Budget, Activity or Money. No test asks every page once. | `tools/perf_check.py:25`, `lightning/ui/phone/router.py:193` | [IT-1Y](../IT-1Y-every-page-asked-once-and-measured.md) |
 | F7 | low | `GET /transactions/sorted` answers 500 on the PC (`TemplateNotFound`): the template exists only under `templates/phone/` and the route lacks the phone guard its neighbour `transaction_sheet` has. Not linked on the PC; reached by a typed address or an old link. | [results.md](evidence/results.md) §2 | [IT-1Y](../IT-1Y-every-page-asked-once-and-measured.md) step 1Y1 |
 | F8 | medium (repo) | Four wheel files sit in the repository root, 49 MB together (`playwright-1.64.1` alone is 48 MB), added by accident in #375. Nothing reads them. Every clone and every CI checkout downloads them. | `git log -- playwright-1.64.1-py3-none-manylinux1_x86_64.whl` | [IT-1W](../IT-1W-stray-wheels-in-the-repository-root.md) |
-| F9 | medium (process) | Parallel sessions take the same codes. `tools/issues.py next` and `tools/docs_check.py next-report` look only at the local checkout, so on 2026-11-09 pull requests #460 and #462 both took r30 and 12H-12N (one is merged), #461 and #463 both took r31, and #464 took r32. Whoever merges second must renumber by hand. `tests/test_docs_structure.py` requires report codes without a gap, so this report had to take r31 as well, the third to do so; its item codes are in folders, or past ranges, the open pull requests do not use. | Open pull requests #460, #461, #463, #464 | [IT-1X](../IT-1X-two-sessions-take-the-same-code.md) |
+| F9 | medium (process) | Parallel sessions take the same codes. `tools/issues.py next` and `tools/docs_check.py next-report` look only at the local checkout, so on 2026-11-09 pull requests #460 and #462 both took r30 and 12H-12N (one is merged), #461 and #463 both took r31, and #464 took r32. Whoever merges second must renumber by hand. `tests/test_docs_structure.py` requires report codes without a gap, so this report first took r31 too, lost it when #463 merged minutes earlier, and was renamed r32 by hand, the code #464 also uses; its item codes are in folders, or past ranges, the open pull requests do not use. | Open pull requests #460, #461, #463, #464 | [IT-1X](../IT-1X-two-sessions-take-the-same-code.md) |
 | F10 | medium (process) | The guideline is at 3.40 in the app and 3.39 in the website: app #450 and #456 are merged, their mirrors (website #174, #176) are still open. With both repositories checked out, `tests/test_docs_structure.py::test_the_app_and_website_guidelines_are_all_mirrored` fails on `main`. AGENTS.md says never leave one copy behind. | `cmp guideline/phone.html ../Lightning_website/guideline/phone.html` | [IT-1X](../IT-1X-two-sessions-take-the-same-code.md) step 1X3 |
 | F11 | low | Unused code that only tests keep alive, or nothing does: ten functions and four unused names (list in the item). | [results.md](evidence/results.md) §4 | [IT-1Z](../IT-1Z-unused-functions-and-names.md) |
 | F12 | medium (desert) | Data checks (`/checks`, eight reconciliations of the ledger against the screens on the sample) are reachable only from Settings. A check that reads ISSUE raises nothing on the Overview, in Needs you, in the weekly review or in a reminder. The one feature that can say "a figure is wrong" is the one nobody is led to. | `grep -n "integrity\|/checks" lightning/workflows/review.py lightning/workflows/reminders.py` prints nothing | [NF-2AJ](../../2-safe-for-real-money/NF-2AJ-a-failed-data-check-reaches-needs-you.md) |
@@ -128,7 +128,7 @@ In the order the plan and the code point to, not a new plan:
 
 - Crawl: 162 PC pages and 182 phone pages fetched; one 500 (F7). `/categories/new` (404 without a parent) and
   `/exports/import/template` (400 without a kind) are correct refusals.
-- `python issues/1-easy-to-contribute/r31-code-review-and-loose-ends/evidence/investment_query.py`: "identical: True"
+- `python issues/1-easy-to-contribute/r32-code-review-and-loose-ends/evidence/investment_query.py`: "identical: True"
   on Mohab's year, the demo household and the 4,374-transaction profile, over five periods each.
 - Full suite on `main` with the website checked out beside it: see [results.md](evidence/results.md) §6.
 - The 4,000 invented rows are plain expenses on one bank account. A real long profile also has more holdings, loans

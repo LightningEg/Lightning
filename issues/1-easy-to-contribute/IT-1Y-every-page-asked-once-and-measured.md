@@ -12,13 +12,13 @@ commit: 24e3cf8
 ---
 
 ## Report
-Found by [r31](r31-code-review-and-loose-ends/report.md) F6 and F7.
+Found by [r32](r32-code-review-and-loose-ends/report.md) F6 and F7.
 
 - `tools/perf_check.py` times the 18 addresses in its `PAGES` tuple. `/activity` (1,039 queries), an import review (1,136), `/needs-you`, `/review`, `/search`, `/payday`, `/zakat` and every phone slot are not in it.
 - Its `--phone` sets `request.state.phone` but never calls `mount_phone`, so it times the old shared pages; the phone's own Home, Budget, Activity and Money (`lightning/ui/phone/router.py`) are never measured.
 - No test asks every page. `GET /transactions/sorted` on the PC raises `TemplateNotFound` (500): its template exists only under `templates/phone/`.
 
-The crawl that found these is `issues/1-easy-to-contribute/r31-code-review-and-loose-ends/evidence/crawl.py`; copy from it.
+The crawl that found these is `issues/1-easy-to-contribute/r32-code-review-and-loose-ends/evidence/crawl.py`; copy from it.
 
 ## 1Y1 The PC never gets a phone-only sheet · S
 Files: `lightning/ui/routes/transactions.py` (`sorted_sheet`, about line 158), `tests/test_phone_capture.py` (read only, for the phone behaviour to keep).

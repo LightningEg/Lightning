@@ -23,7 +23,7 @@
 
 - **Phone (2026-11-08, Claude):** IV-3AY: 3AY1, 3AY3, 3AY5-3AY10 built; tab bar switched. Left: 3AY4, 3AY11 (phone-owned sub-pages; the period report needs a phone home), 3AY12, then the owner's 3AY13. Owner: check Arabic slot names. **Read:** 3AY.
 - **Play (Claude, 11-09):** NF-11B code done; bundle signs. Before submitting (owner): 10H3, 11A, 11D (11D1,4,6 built), then shots, 11B7-9. **Read:** NF-11B.
-- **r31 review (Claude, 11-09):** first 1V, 1W, 1Y, 9L. **Read:** r31.
+- **r32 review (Claude, 11-09):** first 1V, 1W, 1Y, 9L. **Read:** r32.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 

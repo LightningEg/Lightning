@@ -1,6 +1,6 @@
-"""r31: fetch every page of the sample household on the PC (or --phone), time it, count its queries and record who links to what.
+"""r32: fetch every page of the sample household on the PC (or --phone), time it, count its queries and record who links to what.
 
-    python issues/1-easy-to-contribute/r31-code-review-and-loose-ends/evidence/crawl.py out.json [--phone]
+    python issues/1-easy-to-contribute/r32-code-review-and-loose-ends/evidence/crawl.py out.json [--phone]
 
 Dummy data only (Mohab's sample year in a temporary folder)."""
 import sys, re, tempfile, time, collections, json

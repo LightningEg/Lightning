@@ -14,7 +14,7 @@ commit: 24e3cf8
 ---
 
 ## Report
-Found by [r31](r31-code-review-and-loose-ends/report.md) F1. `pyproject.toml` `[project].dependencies` names eight packages. `requirements.txt` names four of them: `pypdf`, `openpyxl`, `defusedxml` and `rapidfuzz` are missing. Everything a person uses to install reads `requirements.txt`:
+Found by [r32](r32-code-review-and-loose-ends/report.md) F1. `pyproject.toml` `[project].dependencies` names eight packages. `requirements.txt` names four of them: `pypdf`, `openpyxl`, `defusedxml` and `rapidfuzz` are missing. Everything a person uses to install reads `requirements.txt`:
 
 - README › Run from source and CONTRIBUTING: `pip install -r requirements-dev.txt` (its first line is `-r requirements.txt`);
 - Codespaces: `.devcontainer/devcontainer.json` `postCreateCommand` runs the same command;

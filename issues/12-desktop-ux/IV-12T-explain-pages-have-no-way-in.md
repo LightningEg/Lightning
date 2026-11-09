@@ -11,7 +11,7 @@ app_version: 2.1.2
 commit: 24e3cf8
 ---
 ## Report
-Found by [r31](../1-easy-to-contribute/r31-code-review-and-loose-ends/report.md) F13. `lightning/ui/routes/dashboard.py:585` serves `/explain/{kind}` for `owned`, `free-cash` and `flow`: the figure's parts as rows, its meaning from `core/figures.py`, freshness notes (`c.freshness.for_what_you_own`, `for_free_cash`) and a way back. `grep -rn "explain/" lightning/ui --include=*.html --include=*.js` prints nothing, and the link graph of 162 PC pages and 182 phone pages has no link to them. `tests/test_ui.py` and `tests/test_freshness.py` are their only visitors. `lightning/ui/sections.py` still lists `/explain` under the Overview tab.
+Found by [r32](../1-easy-to-contribute/r32-code-review-and-loose-ends/report.md) F13. `lightning/ui/routes/dashboard.py:585` serves `/explain/{kind}` for `owned`, `free-cash` and `flow`: the figure's parts as rows, its meaning from `core/figures.py`, freshness notes (`c.freshness.for_what_you_own`, `for_free_cash`) and a way back. `grep -rn "explain/" lightning/ui --include=*.html --include=*.js` prints nothing, and the link graph of 162 PC pages and 182 phone pages has no link to them. `tests/test_ui.py` and `tests/test_freshness.py` are their only visitors. `lightning/ui/sections.py` still lists `/explain` under the Overview tab.
 Pull request #460 (not merged when this was written) proposes NF-12J, "every headline figure explains itself in place". If it has merged, do this item as its first step and say so there.
 ## Fix
 Smallest useful change: give each page its one way in, from the figure it explains.
