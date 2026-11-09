@@ -240,7 +240,43 @@ html[data-m-hero-sheen="edge-glint"][data-m-hero-edge-style="foil"] .main .lead-
   animation: m-glint 16s linear infinite;
 }
 @keyframes m-glint { to { --m-glint: 560deg; } }
-/* The phone's lead figure sits on the ground (Part C): it takes no artwork of its own; the ground's sits behind. */
+/* The phone's hero band (IV-10G, owner 2026-11-09): the lead figure still sits on the ground with no card (C06.2); behind
+   it a full-width band, edge to edge, wears the theme's hero finish, grain and artwork, with the hero edge as a hairline
+   above and below. Drawn by the hero's free ::before, inset to the page gutter on both sides, so nothing moves and
+   nothing overflows. Only themes whose hero has a finish or artwork draw it; the default and the palette themes do not.
+   Still: the band never moves, so a theme keeps one continuous motion (Papyrus's is the header thread below). */
+html.phone:is([data-m-hero-finish="satin"], [data-m-hero-finish="lacquer"], [data-m-hero-artwork]:not([data-m-hero-artwork="none"])) .phone-hero {
+  position: relative; isolation: isolate;
+}
+html.phone:is([data-m-hero-finish="satin"], [data-m-hero-finish="lacquer"], [data-m-hero-artwork]:not([data-m-hero-artwork="none"])) .phone-hero::before {
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  inset: -12px calc(-1 * var(--c-side, 16px)) -12px;
+  background: var(--m-hero-art), var(--m-hero-grain), var(--m-hero-finish), var(--theme-hero);
+  border-block: 1px solid color-mix(in srgb, var(--theme-hero-edge) 45%, transparent);
+}
+html.phone[data-m-hero-edge-style="foil"] .phone-hero::before {
+  border-block-color: var(--theme-hero-edge);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--theme-hero-edge) 35%, #FFFFFF);
+}
+/* On a band the artwork sits at the band's end, smaller; the winged disc stays centred on the band's top edge. */
+html.phone[data-m-hero-artwork]:not([data-m-hero-artwork="none"]) .phone-hero::before {
+  background-position: right -40px bottom -60px, 0 0, 0 0, 0 0; background-size: 180px 180px, auto, auto, auto;
+  background-repeat: no-repeat, repeat, no-repeat, no-repeat;
+}
+[dir="rtl"][data-m-hero-artwork]:not([data-m-hero-artwork="none"]).phone .phone-hero::before { background-position: left -40px bottom -60px, 0 0, 0 0, 0 0; }
+html.phone[data-m-hero-artwork="winged-disc"]:not(#_) .phone-hero::before { background-position: center top -20px, 0 0, 0 0, 0 0; background-size: 220px 88px, auto, auto, auto; }
+/* Papyrus on the phone: its one motion is the PC hero's edge glint, which has no card here, so the phone carries it as
+   the gold thread along the header seam (the security-thread recipe), and only there. */
+html.phone[data-m-hero-sheen="edge-glint"][data-m-header-thread="none"] .phone-appbar:not(#_) {
+  border-bottom-color: transparent;
+  background-image: linear-gradient(90deg, var(--theme-header-seam) 0 40%, color-mix(in srgb, var(--accent) 35%, var(--surface)) 46%,
+    var(--m-pigment-hero, var(--accent)) 50%, color-mix(in srgb, var(--accent) 35%, var(--surface)) 54%, var(--theme-header-seam) 60% 100%);
+  background-size: 300% 1px; background-repeat: repeat-x; background-origin: border-box; background-position: 0 100%;
+  animation: m-thread 12s linear infinite;
+}
+/* Add takes the action colour, unless that colour reads as rose, which means money going badly (A03): then Ink
+   (tools/build_themes.py sets --theme-add and --theme-on-add per theme). */
+.phone-add-disc:not(#_) { background-color: var(--theme-add, var(--c-nile)); color: var(--theme-on-add, #fff); }
 
 /* ---------- Primary controls ---------- */
 /* Foil is the metal of the element's own paint: the button's fill, the chosen tab's colour (Dendera night paints both
@@ -337,6 +373,7 @@ html[data-m-menus-finish] :is(.pick-list, .pick-results, .dropdown-menu, .contex
 @media (prefers-reduced-motion: reduce) {
   html[data-m-ground-ambient]::before { animation: none; }
   html[data-m-header-thread] :is(.topbar, .phone-appbar) { animation: none; background-position: 0 100%; }
+  html.phone[data-m-hero-sheen="edge-glint"] .phone-appbar:not(#_) { animation: none; background-position: 0 100%; }
   html[data-m-header-thread="pigment-thread"] :is(.main > .topbar, .phone-appbar)::before { animation: none; background-position: 0 0, 0 0; /* the plain pigment seam */ }
   html[data-m-hero-sheen] .main :is(.overview-owned-card, .hero-card, .portfolio-summary, .metric-card--focal, .lead-card),
   html[data-m-hero-sheen] .main .lead-card::before { animation: none; }

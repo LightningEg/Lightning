@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 49 open items. Each folder holds its reports and its items.
+11 big pictures, 48 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -250,7 +250,6 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IV-10G** | [Paid themes barely reach the phone - the hero parts are PC-only, Papyrus has no motion there, and Cotton paints Add rose](10-looks-and-store/IV-10G-paid-themes-on-the-phone.md) | improvement, visual | Feel | M | Opus | ready |
 | **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md) | new feature | Feel | L | Opus | building |
 | NF-10A1 | ↳ Native Settings activation and restore | | | L | Opus | |
 | NF-10A2 | ↳ Licences saved safely | | | L | Opus | |
@@ -270,7 +269,7 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 
 Reports: [r12](10-looks-and-store/r12-v150-release/report.md) · [r13](10-looks-and-store/r13-store-and-community/report.md).
 
-Done: 10E, 10F. Next free code: 10H.
+Done: 10E, 10F, 10G. Next free code: 10H.
 
 ## 11 Phone UX
 

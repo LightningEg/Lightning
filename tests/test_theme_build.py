@@ -323,3 +323,18 @@ def test_follow_night_is_kept_by_the_profile_across_launches(c):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+def test_add_is_never_rose_and_each_paid_theme_has_a_phone_signature():
+    """IV-10G: Add takes the action colour unless it reads as rose (A03), then Ink; paid heroes draw a phone band;
+    Papyrus's one motion on the phone is the header thread."""
+    assert builder.rose('#A8401C') and builder.rose('#B23A5B') and not builder.rose('#E6B450') and not builder.rose('#1F3F8C')
+    css = (ROOT / 'lightning/ui/static/themes.generated.css').read_text()
+    cotton = css[css.index(':root[data-theme="cotton"]'):]
+    assert '--theme-add: #161616;' in cotton[:cotton.index('}')]
+    papyrus = css[css.index(':root[data-theme="papyrus"]'):]
+    assert '--theme-add: #E6B450;' in papyrus[:papyrus.index('}')]
+    materials = (ROOT / 'lightning/ui/static/theme-materials.css').read_text()
+    assert '.phone-hero::before' in materials and 'inset: -12px calc(-1 * var(--c-side, 16px)) -12px' in materials
+    assert 'html.phone[data-m-hero-sheen="edge-glint"][data-m-header-thread="none"] .phone-appbar' in materials
+    assert 'var(--theme-add, var(--c-nile))' in materials

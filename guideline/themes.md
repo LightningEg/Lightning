@@ -89,6 +89,13 @@ To change how one part looks in every theme (say, buttons), change that part's r
 
 **App (Parts A and C).** A manifest in `cosmetics/` fills the app's fourteen palette tokens and its parts. It is validated by `js/cosmetic-parts.js` against `cosmetics/slots.json`. The app wears it only when its own registry and acceptance allow; until then the market shows it on drawn PC and phone screens.
 
+**The phone's signature (Part C; owner, 2026-11-09).** The phone has no hero card and flat rows, so a paid theme shows there on the surfaces the phone does have, drawn by the app's CSS from the same manifest:
+
+- **Hero band.** A full-width band behind the lead figure (Safe to spend), edge to edge, wears the hero's finish, grain and artwork, with the hero edge as a hairline above and below. Only a hero with a finish or artwork draws one, so palette themes keep the plain ground. The band never moves.
+- **Header thread.** A theme's one continuous motion runs along the phone header's seam. A theme whose motion is the PC hero's edge glint (Papyrus) carries it on the phone as the gold thread along the header instead.
+- **Tab bar.** The active tab takes the theme's active mark and style.
+- **Add.** The Add disc takes the action colour, unless that colour reads as rose or red (money going badly, A03): then it is Ink. Cotton's Add is Ink.
+
 ## 5. Making a theme, step by step
 
 One flow for every theme and every maker, person or AI. Each step names its files and the check that closes it. A worked example, with what each step found, is the Dendera report (app repository, `reports/2026-10-26-dendera-theme/report.md`).
