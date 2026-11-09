@@ -20,11 +20,18 @@ targeting API 35, asks for `READ_SMS`, links to the website to buy themes, and n
 Each step is one pull request, except the owner's. Read only the files a step names. Android steps need the **Phone app** workflow
 run by hand for evidence (AGENTS §2: Android minutes cost money; run once per step, not per push).
 
+<<<<<<< HEAD
 ## 11B2 Bank SMS within Play's SMS policy · M · opus
 Owner, 2026-11-09: declare it from day one (`ai/PROJECT_OVERVIEW.md` › Google Play launch).
 Files: `SmsBridge.java`, `lightning/ui/templates/phone/sms.html`, `lightning/sms_imports.py`, `docs/google-play.md` (11B5).
 Do: filter people's numbers in the content-resolver query, not after reading (`ADDRESS` not matching `^\+?\d{7,}$`, the `PERSON` rule); move the disclosure to the top of From SMS so it is the first thing seen before the system question; write the Permissions Declaration answers ("SMS-based money management", core feature, what is read, where it stays) and the demo video's script into `docs/google-play.md`.
 Done when: a test proves `since()` asks the provider with the sender filter and that the disclosure precedes the Allow button; the owner files the declaration with the video (11B7).
+=======
+## 11B1 A release bundle that Play accepts · M · opus
+Files: `android/app/build.gradle.kts`, `android/app/src/main/AndroidManifest.xml`, `MainActivity.java`, `.github/workflows/android-app.yml`, `packaging/phone_build.py`.
+Do: a `release` build type (not debuggable) and `bundleRelease`; `targetSdk = 36`, `compileSdk = 36`; replace `onBackPressed()` with an `OnBackInvokedCallback` (API 33+) or `OnBackPressedDispatcher`, same behaviour (page back, then Home, then `moveTaskToBack`), and set `android:enableOnBackInvokedCallback="true"`; `ProbeActivity` only in debug (a `debug` source-set manifest). The signing job signs the AAB with the **upload** key (Play App Signing keeps the app key); the GitHub APK keeps today's key.
+Done when: the workflow uploads an `.aab` that `bundletool validate` accepts, `aapt2 dump badging` shows `targetSdkVersion:'36'` and no `debuggable`, and Back on a real phone walks pages then Home then leaves (owner check folded into 11B9).
+>>>>>>> d7abcfd ([NF-11B2] Bank SMS within Play's SMS policy: people filtered in the query, disclosure first)
 
 ## 11B3 Themes sold through Google Play Billing in the Play build · L · opus
 Owner, 2026-11-09: sell themes in the Play build with Play Billing (`ai/PROJECT_OVERVIEW.md` › Google Play launch).
@@ -48,7 +55,7 @@ Do: `setRecentsScreenshotEnabled(false)` (API 33+) and `FLAG_SECURE` while amoun
 Done when: a test renders the switch; on a phone the Recents card is blank (owner check in 11B9).
 
 ## 11B7 Owner: the developer account and the listing · owner
-Developer account (organisation if a D-U-N-S number is practical; a personal account needs 11B8); a payments profile and the theme products for 11B3; the SMS declaration and video for 11B2; store listing in English and Arabic: icon 512 px, feature graphic 1024 × 500, 4-8 phone screenshots taken after IV-11E and IV-11D, short and full description in the brand voice.
+The SMS declaration answers and the video script are in `docs/google-play.md` (11B2 built them). Developer account (organisation if a D-U-N-S number is practical; a personal account needs 11B8); a payments profile and the theme products for 11B3; the SMS declaration and video for 11B2; store listing in English and Arabic: icon 512 px, feature graphic 1024 × 500, 4-8 phone screenshots taken after IV-11E and IV-11D, short and full description in the brand voice.
 
 ## 11B8 Owner: closed test, 12 testers for 14 days · owner
 Only for a personal account made after 2023-11-13: 12 testers opted in for 14 days in a row, then apply for production.

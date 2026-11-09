@@ -12,6 +12,7 @@ detail. Everything is sorted by the same nine pillars, so a thing is found in th
 | [How it is built](how-it-is-built.md) | The pieces and how they fit, in plain words |
 | [Journeys](journeys.md) | A real month, step by step |
 | [Change the app theme](themes.md) | Choose, try and unlock a theme |
+| [Google Play](google-play.md) | What the owner puts in the Play Console, answer by answer |
 | [Release notes](../RELEASES.md) | What changed in each version, in plain words |
 | [Competition, honestly](../ai/COMPETITION.md) | Where Lightning wins and where it does not yet |
 

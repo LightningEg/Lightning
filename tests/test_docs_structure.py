@@ -51,7 +51,8 @@ def test_every_next_step_says_what_to_read():
 
 
 def test_docs_and_ai_hold_only_the_carrying_files():
-    allowed = {"README.md", "STATUS.md", "product.md", "how-it-is-built.md", "journeys.md", "themes.md", "pillars"}
+    allowed = {"README.md", "STATUS.md", "product.md", "how-it-is-built.md", "journeys.md", "themes.md", "google-play.md",
+               "pillars"}  # google-play.md: the owner's Console answers (NF-11B2, 11B5)
     extra = {path.name for path in DOCS.iterdir()} - allowed
     assert not extra, f"new files under docs/ (people read these; AGENTS.md section 1; designs go in issues/): {sorted(extra)}"
     allowed = {"INDEX.md", "PROJECT_OVERVIEW.md", "ARCHITECTURE.md", "GLOSSARY.md", "COMPETITION.md", "handbook",
