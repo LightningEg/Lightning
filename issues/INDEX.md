@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 47 open items. Each folder holds its reports and its items.
+11 big pictures, 46 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -230,9 +230,6 @@ Good ideas that wait until the milestones above are done.
 | IT-9K1 | ↳ Restore routes out of profile_app | | | S | Sonnet | |
 | IT-9K2 | ↳ The phone's device routes out of profile_app | | | M | Opus | |
 | IT-9K3 | ↳ The PC's borrowing routes and Lock out of profile_app | | | M | Opus | |
-| **NF-9B** | [In-app updates on Windows](9-later/NF-9B-in-app-updates.md) | new feature | Everywhere | M | Opus | new |
-| NF-9B8 | ↳ Finish v2.1.2 signing and publication | | | owner |  | |
-| NF-9B9 | ↳ The site's release update for 2.1.2 | | | M | Opus | |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | Opus | ready |
 | NF-9D3 | ↳ Hijri conversion in Python | | | S | Opus | |
 | NF-9D4 | ↳ Show the Hijri date beside every zakat day | | | S | Sonnet | |
@@ -242,7 +239,7 @@ Good ideas that wait until the milestones above are done.
 
 Reports: [r22](9-later/r22-code-quality-and-smart-features/report.md).
 
-Done: 9C, 9E, 9G, 9H, 9I, 9J. Next free code: 9L.
+Done: 9B, 9C, 9E, 9G, 9H, 9I, 9J. Next free code: 9L.
 
 ## 10 Looks and store
 
