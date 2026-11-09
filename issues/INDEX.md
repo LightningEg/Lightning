@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 46 open items. Each folder holds its reports and its items.
+11 big pictures, 45 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
