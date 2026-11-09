@@ -30,8 +30,10 @@ payment is manual. Let a sender (or the word wallet with its brand) be the accou
 **Done when:** a wallet payment and a wallet receipt stage rows in the wallet account.
 
 ## 7AK3 Purchases in another currency · M
-See IV-7AJ for keeping them; this step reads them into the account in their own currency (or as a cross-currency leg,
-NF-7E's model) so the later EGP debit is not a second expense. Money logic: design first.
+**Owner, 2026-11-09:** a dollar payment is recorded in dollars, and the balance is rated in pounds. The entry keeps
+its own currency and amount; the account's balance and the reports convert it at the dated rate (NF-7E's
+cross-currency leg), and the bank's later pound debit settles it rather than adding a second expense. Until this
+step is built, IV-7AJ keeps the message for the person.
 
 ## 7AK4 Use the researched formats · M
 `lightning/egypt_bank_sms_formats.json` (941 lines, 35 banks) is loaded by nothing (`currently_loaded_by_parser: false`).

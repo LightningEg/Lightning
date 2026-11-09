@@ -27,7 +27,8 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r28 | [International polish: the small things that make Lightning feel finished](3-polish-and-arabic/r28-international-polish/report.md) | 2026-11-08 | audit | 3BC, 3BD, 3BE, 3BF, 3BH, 3BI, 3BK |
 | r29 | [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](11-phone-ux/r29-google-play-readiness/report.md) | 2026-11-09 | audit | 11B, 11D, 3BK |
 | r30 | [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](12-desktop-ux/r30-investments-beyond-stocks/report.md) | 2026-11-09 | audit | 12H, 12I, 12J, 12K, 12L, 12M, 12N, 6D |
-| r31 | [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](7-planning-import-and-search/r31-logging-entries/report.md) | 2026-11-09 | audit | 7AI, 7AJ, 7AK, 7AL, 7AM, 7AN, 7AO, 7AB |
+| r31 | [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](7-planning-import-and-search/r31-logging-entries/report.md) | 2026-11-09 | audit | 7AI, 7AJ, 7AK, 7AL, 7AM, 7AN, 7AO, 7AP, 7AB |
+| r32 | [Audit 18: Budget and Cash planning, every tab and sub-page](12-desktop-ux/r32-budget-and-cash-planning/report.md) | 2026-11-09 | audit | 12O, 12P, 12Q, 12R, 12S |
 
 
 ## Create and maintain a report

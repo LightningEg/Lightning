@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 58 open items. Each folder holds its reports and its items.
+11 big pictures, 64 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -201,10 +201,11 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7AO1 | ↳ What "sure" means, and the service | | | M | Opus | |
 | NF-7AO2 | ↳ Seen, marked, undoable | | | M | Opus | |
 | NF-7AO3 | ↳ Not twice | | | M | Opus | |
+| **NF-7AP** | [Compare the balance a bank message states with the account, as a quiet To do row](7-planning-import-and-search/NF-7AP-bank-message-balance-check.md) | new feature | Capture | M | Sonnet | ready |
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md) · [r31](7-planning-import-and-search/r31-logging-entries/report.md).
 
-Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH. Next free code: 7AP.
+Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH. Next free code: 7AQ.
 
 ## 8 Website
 
@@ -323,6 +324,7 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **BT-12H** | [A second gold holding of the same karat cannot be added (GLD:24K already exists)](12-desktop-ux/BT-12H-second-gold-holding-same-karat.md) | bug, technical · medium | Own | S | Sonnet | ready |
+| **BV-12O** | [Phone Budget: Where the month went counts fixed costs twice (33,851 spent where 19,001 was)](12-desktop-ux/BV-12O-phone-budget-donut-counts-fixed-costs-twice.md) | bug, visual · high | Plan | S | Sonnet | ready |
 | **IV-12J** | [Certificates read as certificates: their own holding page, payouts as the bank pays them, value that grows, and a nudge at maturity](12-desktop-ux/IV-12J-certificates-read-as-certificates.md) | improvement, visual | Own | L | Opus | new |
 | IV-12J1 | ↳ The certificate's holding page and the certificates page | | | M | Opus | |
 | IV-12J2 | ↳ Payouts forecast the way Egyptian banks pay them | | | M | Opus | |
@@ -331,6 +333,13 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **IV-12K** | [One door to add an investment: ask what it is first, and list only what can be chosen](12-desktop-ux/IV-12K-one-door-to-add-an-investment.md) | improvement, visual | Capture | M | Sonnet | ready |
 | **IV-12L** | [Gold: add a piece and its purchase in one step, pick the price by karat, and show bars with the jewellery](12-desktop-ux/IV-12L-gold-one-step-and-one-table.md) | improvement, visual | Own | M | Sonnet | new |
 | **IV-12N** | [Investments figures that mislead outside stocks: purchases shown as change in value, yearly rates on weeks, two Others](12-desktop-ux/IV-12N-investment-figures-beyond-stocks.md) | improvement, visual | Understand | M | Sonnet | new |
+| **IV-12P** | [One name, one figure across Budget, Cash planning and Home](12-desktop-ux/IV-12P-one-name-one-figure-budget-and-cash.md) | improvement, visual | Plan | M | Opus | new |
+| **IV-12Q** | [The unfinished pages of Budget and Cash planning get the page pattern: a lead figure, a visual, cards](12-desktop-ux/IV-12Q-unfinished-budget-and-cash-pages.md) | improvement, visual | Plan | L | Opus | new |
+| IV-12Q1 | ↳ Fund your payday plan, as one short step | | | M | Opus | |
+| IV-12Q2 | ↳ Compare scenarios and Forecast inputs | | | M | Opus | |
+| IV-12Q3 | ↳ Change limit, Fill this month, Carryover | | | M | Opus | |
+| IV-12Q4 | ↳ Phone Recurring and the PC's doubled list | | | S | Opus | |
+| IV-12Q5 | ↳ Budget page and Budget settings | | | M | Opus | |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | Opus | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | Opus | |
 | IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | M | Opus | |
@@ -357,7 +366,9 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | NF-12M2 | ↳ A property page, not a bank register | | | M | Opus | |
 | NF-12M3 | ↳ Paying by instalments (off-plan) | | | L | Opus | |
 | NF-12M4 | ↳ Rent and running costs | | | M | Opus | |
+| **NF-12R** | [Fill this month from your average of the last three months](12-desktop-ux/NF-12R-fill-budget-from-average.md) | new feature | Plan | S | Sonnet | ready |
+| **NF-12S** | [Warn before a category runs out, with Move room or Raise](12-desktop-ux/NF-12S-warn-before-a-category-runs-out.md) | new feature | Plan | M | Sonnet | ready |
 
-Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md).
+Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F, 3AZ. Next free code: 12O.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 3AZ. Next free code: 12T.
