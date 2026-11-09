@@ -1,4 +1,4 @@
-# r32 evidence: what was run and what it printed
+# r33 evidence: what was run and what it printed
 
 Commit 24e3cf8, Python 3.13, one cloud machine, 2026-11-09. Dummy data only: Mohab's sample year, the demo household,
 and the sample plus 4,000 invented expenses. Timings are warm (second request).

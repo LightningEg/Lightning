@@ -12,7 +12,7 @@ commit: 24e3cf8
 ---
 
 ## Report
-Found by [r32](../1-easy-to-contribute/r32-code-review-and-loose-ends/report.md) F2 and F5. On Mohab's year plus 4,000 invented expenses (4,374 transactions):
+Found by [r33](../1-easy-to-contribute/r33-code-review-and-loose-ends/report.md) F2 and F5. On Mohab's year plus 4,000 invented expenses (4,374 transactions):
 
 | Page | Sample (374 rows) | 4,374 rows | Slowest read |
 | --- | --- | --- | --- |
@@ -22,7 +22,7 @@ Found by [r32](../1-easy-to-contribute/r32-code-review-and-loose-ends/report.md)
 
 `lightning/investments/report.py:build_investment_report` (line 167) loads every posted ledger line up to `end` and loops over them in Python, though it uses only lines of transactions that touch an investment, deposit or gam'eya account or a non-cash asset. `investment_period` calls it twice (closing and opening), and a page calls `investment_period` once or twice.
 
-Proof that a narrower read is safe: `python issues/1-easy-to-contribute/r32-code-review-and-loose-ends/evidence/investment_query.py` adds one condition and compares `repr()` of the whole report on Mohab's year, the demo household and the 4,374-row profile over five periods each: identical every time, 61 ms down to 4 ms per period.
+Proof that a narrower read is safe: `python issues/1-easy-to-contribute/r33-code-review-and-loose-ends/evidence/investment_query.py` adds one condition and compares `repr()` of the whole report on Mohab's year, the demo household and the 4,374-row profile over five periods each: identical every time, 61 ms down to 4 ms per period.
 
 Second, smaller read: `ReportQueries.asset_purity` (`lightning/reporting/queries.py:349`) runs 39 times on the Overview and 60 on the phone's Investments, with no memo.
 

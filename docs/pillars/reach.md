@@ -18,6 +18,6 @@ The website, search, downloads, community and the store. Its own repository is L
 
 ## Reports with open follow-ups here
 
-- [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r32-code-review-and-loose-ends/report.md): 9F
+- [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r33-code-review-and-loose-ends/report.md): 9F
 <!-- work:end -->
 

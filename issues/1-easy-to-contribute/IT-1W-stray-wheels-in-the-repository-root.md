@@ -12,7 +12,7 @@ commit: 24e3cf8
 ---
 
 ## Report
-Found by [r32](r32-code-review-and-loose-ends/report.md) F8. `git ls-files '*.whl'` lists four files in the root, added by accident in #375: `playwright-1.64.1-py3-none-manylinux1_x86_64.whl` (48 MB), `greenlet-3.5.6-...whl`, `pyee-14.0.0-py3-none-any.whl`, `typing_extensions-4.16.0-py3-none-any.whl`. `grep -rn "playwright-1.64.1\|pyee-14\|greenlet-3.5.6\|typing_extensions-4.16" --include=*.py --include=*.yml --include=*.toml --include=*.txt --include=*.md .` finds no reader. The fifth wheel, `packaging/third-party/rapidfuzz-3.14.3-py3-none-any.whl`, is deliberate (its README says why): keep it.
+Found by [r33](r33-code-review-and-loose-ends/report.md) F8. `git ls-files '*.whl'` lists four files in the root, added by accident in #375: `playwright-1.64.1-py3-none-manylinux1_x86_64.whl` (48 MB), `greenlet-3.5.6-...whl`, `pyee-14.0.0-py3-none-any.whl`, `typing_extensions-4.16.0-py3-none-any.whl`. `grep -rn "playwright-1.64.1\|pyee-14\|greenlet-3.5.6\|typing_extensions-4.16" --include=*.py --include=*.yml --include=*.toml --include=*.txt --include=*.md .` finds no reader. The fifth wheel, `packaging/third-party/rapidfuzz-3.14.3-py3-none-any.whl`, is deliberate (its README says why): keep it.
 
 ## Fix
 1. `git rm` the four root wheels.

@@ -12,7 +12,7 @@ commit: 24e3cf8
 ---
 
 ## Report
-Found by [r32](../1-easy-to-contribute/r32-code-review-and-loose-ends/report.md) F4. Opening the sample's waiting review (`/accounts/1/import/1`, 90 rows) asks 1,136 queries in 322 ms. Per row, `lightning/bank_import_proposals.py:ImportProposals._preview` (line 59) asks:
+Found by [r33](../1-easy-to-contribute/r33-code-review-and-loose-ends/report.md) F4. Opening the sample's waiting review (`/accounts/1/import/1`, 90 rows) asks 1,136 queries in 322 ms. Per row, `lightning/bank_import_proposals.py:ImportProposals._preview` (line 59) asks:
 
 | Times | Query | Where |
 | --- | --- | --- |
