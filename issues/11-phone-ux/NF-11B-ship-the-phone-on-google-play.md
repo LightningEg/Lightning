@@ -25,7 +25,7 @@ The SMS declaration answers and the video script are in `docs/google-play.md` (1
 
 **Signing key (owner, 2026-11-09):** Play App Signing uses the existing app key (the `ANDROID_KEYSTORE_*` one that signs the GitHub APK), uploaded with Play's PEPK tool, so a GitHub install updates from Play without losing data. A separate upload key signs the bundle (`ANDROID_UPLOAD_*` in the `android-signing` environment).
 
-**Before the first submission (owner, 2026-11-09):** IT-11J (reminders off the sync service), then IV-11A, IV-11E and IV-11D; screenshots after those. The upload key works (Phone app run 42634615473 signed the bundle).
+**Before the first submission (owner, 2026-11-09):** IT-11J (reminders off the sync service), NF-10H1-10H2 (one purchase per Google account), then IV-11A, IV-11E and IV-11D; screenshots after those. The upload key works (Phone app run 42634615473 signed the bundle).
 
 ## 11B8 Owner: closed test, 12 testers for 14 days · owner
 Only for a personal account made after 2023-11-13: 12 testers opted in for 14 days in a row, then apply for production.
