@@ -3235,10 +3235,12 @@ body:has(.busy-toast:not([hidden])) .page-jump { display:none; }
 /* Arabic type (A06.2, B04, C10): the English roles, sizes and weights. Readex Pro shows titles and figures after
    Bricolage Grotesque, Noto Sans Arabic reads after Manrope, so Latin words (CIB, THNDR) keep the English faces.
    Readex Pro stops at 700 (an 800 renders at 700) and titles drop 700 to 600. Taller lines, no letter spacing,
-   no italics, and charts do not mirror. */
+   no italics, and charts do not mirror. Every Arabic-Indic digit and its ٬ and ٫ come from one face, Readex Pro
+   ("Lightning Arabic Figures" is Readex limited to U+0660-066C), so a row's 12٬000 has the same separator as the
+   lead figure's 74٬077: Noto Sans Arabic draws ٬ as a raised tick, Readex as a comma (r29). */
 html[dir="rtl"] {
   --display:"Bricolage Grotesque","Readex Pro","Segoe UI",system-ui,sans-serif;
-  --body:Manrope,"Noto Sans Arabic","Segoe UI",system-ui,sans-serif;
+  --body:"Lightning Arabic Figures",Manrope,"Noto Sans Arabic","Segoe UI",system-ui,sans-serif;
 }
 html[dir="rtl"] body, html[dir="rtl"] :is(button,input,select,textarea) { font-family: var(--body); }
 html[dir="rtl"] body { line-height: 1.75; font-feature-settings: normal; }

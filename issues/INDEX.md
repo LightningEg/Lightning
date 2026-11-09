@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 43 open items. Each folder holds its reports and its items.
+11 big pictures, 51 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -250,6 +250,7 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
+| **IV-10G** | [Paid themes barely reach the phone - the hero parts are PC-only, Papyrus has no motion there, and Cotton paints Add rose](10-looks-and-store/IV-10G-paid-themes-on-the-phone.md) | improvement, visual | Feel | M | Opus | ready |
 | **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md) | new feature | Feel | L | Opus | building |
 | NF-10A1 | ↳ Native Settings activation and restore | | | L | Opus | |
 | NF-10A2 | ↳ Licences saved safely | | | L | Opus | |
@@ -269,7 +270,7 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 
 Reports: [r12](10-looks-and-store/r12-v150-release/report.md) · [r13](10-looks-and-store/r13-store-and-community/report.md).
 
-Done: 10E, 10F. Next free code: 10G.
+Done: 10E, 10F. Next free code: 10H.
 
 ## 11 Phone UX
 
@@ -277,9 +278,21 @@ The phone is its own product: a few places that each answer one question, quick 
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
+| **BV-11F** | [Budget's Needs attention lists categories that are finished, repeats them below, and in Arabic a zero left reads as a dot](11-phone-ux/BV-11F-budget-needs-attention-lists-finished-categories.md) | bug, visual · medium | Plan | S | Sonnet | ready |
+| **BV-11G** | [The same transfer reads two ways on Home and Activity, a day's net shows on one date only, and account names get translated](11-phone-ux/BV-11G-one-transfer-one-form-and-names-never-translated.md) | bug, visual · medium | Everywhere | M | Sonnet | ready |
 | **IV-11A** | [Phone first run - every Add is greyed out until "Save currencies" is pressed, and an empty Transactions says "Nothing matches"](11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | improvement, visual | Everywhere | M | Sonnet | ready |
 | IV-11A1 | ↳ Add works before "Save currencies" ([#432](https://github.com/LightningEg/Lightning/issues/432)) | | | S | Sonnet | |
 | IV-11A2 | ↳ An empty Activity says "No transactions yet." with Add and Import ([#433](https://github.com/LightningEg/Lightning/issues/433)) | | | S | Sonnet | |
+| **IV-11D** | [The phone has no charts - build the guideline's phone charts and meters, one per tab, so each tab is seen, not read](11-phone-ux/IV-11D-phone-charts-and-marks.md) | improvement, visual | Everywhere | L | Opus | ready |
+| IV-11D1 | ↳ Home: the payday meter under Safe to spend | | | M | Opus | |
+| IV-11D2 | ↳ Home and Budget: This month as one segmented bar | | | S | Sonnet | |
+| IV-11D3 | ↳ Activity: In and Out as two bars on one scale | | | S | Sonnet | |
+| IV-11D4 | ↳ Money: the net-worth trend and what you own as one bar | | | M | Opus | |
+| IV-11D5 | ↳ Budget: where the month went | | | S | Sonnet | |
+| IV-11D6 | ↳ Category marks in rows | | | M | Opus | |
+| **IV-11E** | [Home is a block of sentences - To do rows say who, how much, when and one verb, and the hero says how much a day until payday](11-phone-ux/IV-11E-home-reads-at-a-glance.md) | improvement, visual | Plan | M | Sonnet | ready |
+| **IV-11H** | [Money is 21 plain rows under Net worth, wears the old More icon, and its Settings is the PC's](11-phone-ux/IV-11H-money-is-a-drawer.md) | improvement, visual | Everywhere | M | Opus | ready |
+| **IV-11I** | [The full Add page behind the sheet is titled with an account, lights Money, opens on an Import switch and uses an emoji](11-phone-ux/IV-11I-the-add-page-behind-the-sheet.md) | improvement, visual | Capture | S | Sonnet | ready |
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | Opus | building |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | Opus | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner |  | |
@@ -294,10 +307,20 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-3AY12 | ↳ Arabic, themes and 320 px | | | M | Opus | |
 | IV-3AY13 | ↳ Owner's phone check | | | owner |  | |
 | **IV-3F** | [The phone's top bar looks too white to one user](11-phone-ux/IV-3F-phone-top-bar-looks-too-white.md) | improvement, visual | Feel | S | Sonnet | ready |
+| **NF-11B** | [Ship the phone on Google Play - a release bundle at API 36, the SMS and payments policies, the app's own privacy notice and the Console declarations](11-phone-ux/NF-11B-ship-the-phone-on-google-play.md) | new feature | Everywhere | L | Opus | ready |
+| NF-11B1 | ↳ A release bundle that Play accepts | | | M | Opus | |
+| NF-11B2 | ↳ Bank SMS within Play's SMS policy | | | M | Opus | |
+| NF-11B3 | ↳ Themes sold through Google Play Billing in the Play build | | | L | Opus | |
+| NF-11B4 | ↳ A privacy notice that covers the app, linked from the app | | | M | Opus | |
+| NF-11B5 | ↳ Data safety and Console declarations, drafted | | | S | Opus | |
+| NF-11B6 | ↳ Privacy on screen: Recents and notifications in context | | | S | Sonnet | |
+| NF-11B7 | ↳ Owner: the developer account and the listing | | | owner |  | |
+| NF-11B8 | ↳ Owner: closed test, 12 testers for 14 days | | | owner |  | |
+| NF-11B9 | ↳ Owner: the phone check before production | | | owner |  | |
 
-Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md).
+Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md).
 
-Done: 3AY1, 3AY3, 3AY5. Next free code: 11B.
+Done: 3AY1, 3AY3, 3AY5. Next free code: 11J.
 
 ## 12 Desktop UX and smart next steps
 

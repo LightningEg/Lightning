@@ -16,6 +16,7 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 | **IV-3BF** | [PC finish](../../issues/3-polish-and-arabic/IV-3BF-pc-finish.md) | M | ready |
 | **IV-3BH** | [One name per thing and no accounting jargon](../../issues/3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md) | M | ready |
 | **OW-3AI** | [Additional broker and institution logos still needed](../../issues/3-polish-and-arabic/OW-3AI-institution-logos.md) | owner | ready |
+| **IV-10G** | [Paid themes barely reach the phone](../../issues/10-looks-and-store/IV-10G-paid-themes-on-the-phone.md) | M | ready |
 | **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](../../issues/10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md) | L | building |
 | **NF-10B** | [Supporter perks still waiting on the app or the owner](../../issues/10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md) | M | blocked on 10A claiming; owner decision on the beta channel |
 | **NF-10C** | [Theme materials, selling themes, owner console](../../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md) | L | building |
@@ -35,5 +36,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 - [Audit 14: using Lightning as a user, on the PC and the phone](../../issues/12-desktop-ux/r26-user-test-pc-and-phone/report.md): 3H
 - [User journeys and visual unity](../../issues/12-desktop-ux/r27-journeys-and-visual-unity/report.md): 3H, 3AM
 - [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BC, 3BD, 3BF, 3BH
+- [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](../../issues/11-phone-ux/r29-google-play-readiness/report.md): 10G
 <!-- work:end -->
 

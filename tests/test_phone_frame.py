@@ -424,3 +424,34 @@ def test_cash_planning_lists_the_next_payments_before_the_secondary_cash_figures
     page = TestClient(create_app(c)).get("/plan").text
     assert 'id="plan-next"' in page and 'aria-label="Your cash"' in page
     assert page.index('id="plan-next"') < page.index('aria-label="Your cash"')
+
+
+def test_money_names_each_place_once_and_arabic_transfers_read_from_the_first_account(phone):
+    """r29: Money listed Cash planning, Spending and Weekly review twice (the old More list was left under the new
+    rows). In Arabic a transfer between two Latin-named accounts drew "CIB Payroll ← Vodafone Cash", which reads as money
+    moving into CIB: each name is now isolated, so the line lays out right to left and the flipped arrow points onward."""
+    import re
+    money = phone.get("/money").text
+    for href in ("/plan", "/birdview/expenses", "/review"):
+        assert money.count(f'class="phone-row" href="{href}"') == 1, href
+    session = token(phone.get("/accounts/1/transaction/new").text, "__session")
+    try:
+        phone.post("/settings/locale", data={"locale": "ar", "__session": session})
+        activity = phone.get("/activity").text
+        pairs = re.findall(r"<bdi>([^<]+)</bdi> (.) <bdi>([^<]+)</bdi>", activity)
+        assert pairs and all(arrow == "←" for _, arrow, _ in pairs)
+    finally:
+        phone.post("/settings/locale", data={"locale": "en", "__session": session})
+    assert re.search(r"<bdi>[^<]+</bdi> → <bdi>[^<]+</bdi>", phone.get("/activity").text)
+
+
+def test_arabic_digits_and_their_separators_come_from_one_face():
+    """r29: the lead figure (Readex Pro) drew ٬ as a comma and a row (Noto Sans Arabic) as a raised tick, so one screen
+    showed two thousands separators. Readex now draws every Arabic-Indic digit and separator in body text too."""
+    from pathlib import Path
+    static = Path(__file__).resolve().parents[1] / "lightning" / "ui" / "static"
+    fonts = (static / "fonts" / "fonts.css").read_text(encoding="utf-8")
+    assert '"Lightning Arabic Figures"' in fonts and "ReadexPro-400-700-arabic.woff2" in fonts and "U+0660-066C" in fonts
+    for name in ("style.css", "style.rtl.css"):
+        css = (static / name).read_text(encoding="utf-8")
+        assert '--body:"Lightning Arabic Figures",Manrope,"Noto Sans Arabic"' in css, name
