@@ -23,10 +23,6 @@ width, 140-180 tall, three time labels at most, no y-axis labels, tap or drag to
 one 400 ms entrance under `prefers-reduced-motion: no-preference`. Tests: the service's numbers equal the figure beside them;
 `python tools/phone_check.py` and `--arabic` print nothing; Mohab (`tests/test_mohab_phone.py`).
 
-## 11D1 Home: the payday meter under Safe to spend · M · opus
-A meter (C06.1) under the hero: days gone to payday against money gone from what was safe; rose when spending is ahead of the days.
-Done when: the meter's two fractions come from the Safe to spend service and a test checks them on Mohab's 2026-10-04.
-
 ## 11D2 Home and Budget: This month as one segmented bar · S · sonnet
 **Built** on Budget and Home (`month_bar`, `tests/test_phone_budget_flexible.py`, `tests/test_phone_home.py`). Ahead-of-pace bars use soft rose, not amber: A03 has no amber.
 Spent, left in plan, over (rose) on one bar under the This month row and under Budget's hero; Budget's category bars take state colours (at plan: amber, over: rose, A03).

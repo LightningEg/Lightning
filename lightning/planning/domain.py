@@ -225,6 +225,21 @@ class EverydayBudget:
         return (self.everyday_plan * self.day / self.days_in_month).quantize(Decimal("0.01"))
 
     @property
+    def spent_share(self) -> Decimal | None:
+        """Everyday money gone, as a share of the everyday plan (0 to 1): the fill of Home's payday meter (IV-11D1)."""
+        if self.everyday_plan <= 0:
+            return None
+        return min(max(self.everyday_spent / self.everyday_plan, ZERO), Decimal(1))
+
+    @property
+    def pace_share(self) -> Decimal | None:
+        """Where the pace stands today, as a share of the everyday plan (0 to 1): the tick of Home's payday meter.
+        It is the days gone, weighted the way a usual month spends them (BV-12B)."""
+        if self.everyday_plan <= 0:
+            return None
+        return min(max(self.pace / self.everyday_plan, ZERO), Decimal(1))
+
+    @property
     def pace_gap(self) -> Decimal:
         """Everyday spending less the pace; never above zero while spending is at or below a usual month's by the same day."""
         gap = self.everyday_spent - self.pace

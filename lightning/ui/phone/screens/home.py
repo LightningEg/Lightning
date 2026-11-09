@@ -21,6 +21,25 @@ STATES = ("first_run", "catch_up", "payday", "overspent", "calm")
 
 
 @dataclass(frozen=True)
+class PaydayMeter:
+    """C06.1 meter with a tick under Safe to spend (IV-11D1): the fill is everyday money gone, the tick is where the
+    pace is today; ahead (rose) when spending is past the pace, Budget's own verdict (EverydayBudget.pace_gap)."""
+    spent: float    # percent of the everyday plan spent, 0 to 100
+    pace: float     # percent the pace allows by today, 0 to 100
+    ahead: bool
+
+
+def payday_meter(everyday) -> PaydayMeter | None:
+    """The meter from the same EverydayBudget the hero's line reads, so the line, the meter and Budget agree."""
+    if everyday is None or not everyday.current:
+        return None
+    spent, pace = everyday.spent_share, everyday.pace_share
+    if spent is None or pace is None:
+        return None
+    return PaydayMeter(round(float(spent * 100), 1), round(float(pace * 100), 1), everyday.pace_gap > 0)
+
+
+@dataclass(frozen=True)
 class HomeScreen:
     state: str
     safe: Decimal | None               # None until the first run is done
@@ -28,6 +47,7 @@ class HomeScreen:
     per_day: Decimal | None            # Budget's everyday figure a day (EverydayBudget.per_day); None with no plan
     per_day_days: int                  # the days it is spread over, today included
     per_day_to_payday: bool            # those days run to payday: no payday before the month ends (owner, 2026-11-09)
+    meter: PaydayMeter | None          # IV-11D1: under the hero; None with no plan or no everyday money planned
     working: tuple[tuple[str, Decimal], ...]   # the parts of Safe to spend, for its sheet
     todo: tuple[TodoRow, ...]          # at most TODO_SHOWN
     todo_total: int
@@ -78,6 +98,7 @@ def build(c, day: date) -> HomeScreen:
     return HomeScreen(state=state, safe=None if first_run else safe, until=until, per_day=per_day,
                       per_day_days=everyday.days_left if everyday else 0,
                       per_day_to_payday=bool(until) and until <= next_month.isoformat(),
+                      meter=None if first_run else payday_meter(everyday),
                       working=tuple((name, value) for name, value in forecast.safe_to_spend_parts),
                       todo=tuple(rows[:TODO_SHOWN]), todo_total=len(rows), latest=latest,
                       spent=c.reporting.cash_flow(day.replace(day=1), day).outflows,
