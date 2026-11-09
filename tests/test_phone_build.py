@@ -345,14 +345,27 @@ def test_the_phones_settings_name_the_build_a_screenshot_came_from(tmp_path, mon
     assert build.carried_identity(_apk(tmp_path / "unnamed.apk")) is None
 
 
+def _play_permissions():
+    lines = build.PERMISSIONS.read_text(encoding="utf-8").splitlines()
+    return {line.split("#")[0].strip() for line in lines} - {""} | build.PLAY_PERMISSIONS
+
+
 def test_the_play_bundle_manifest_must_be_a_release_at_the_play_target():
     """NF-11B1: Play takes a release AAB at API 36; the debug-only probe screen never ships."""
     good = ('<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="70" '
             'android:versionName="2.0.0-70+aaaaaaaa" package="org.lightning.app">\n'
-            '<uses-sdk android:minSdkVersion="24" android:targetSdkVersion="36"/>\n<application android:label="L">')
+            '<uses-sdk android:minSdkVersion="24" android:targetSdkVersion="36"/>\n'
+            + "".join(f'<uses-permission android:name="{p}"/>\n' for p in sorted(_play_permissions()))
+            + '<uses-permission android:name="org.lightning.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"/>\n'
+            + '<application android:label="L">')
     assert build.manifest_problems(good, "70", "2.0.0-70+aaaaaaaa") == []
     bad = good.replace('"36"', '"35"').replace('android:label', 'android:debuggable="true" android:label') \
         + '<activity android:name="org.lightning.app.ProbeActivity"/>'
     problems = build.manifest_problems(bad, "70", "2.0.0-70+aaaaaaaa")
     assert len(problems) == 3 and "targetSdkVersion" in problems[0] and "debuggable" in problems[1]
+    # NF-11B3: the Play bundle asks for the APK's permissions plus Play Billing, nothing more and nothing less.
+    extra = good.replace('<application', '<uses-permission android:name="android.permission.READ_CONTACTS"/>\n<application')
+    assert "READ_CONTACTS" in build.manifest_problems(extra, "70", "2.0.0-70+aaaaaaaa")[0]
+    no_billing = good.replace('<uses-permission android:name="com.android.vending.BILLING"/>\n', '')
+    assert "lacks ['com.android.vending.BILLING']" in build.manifest_problems(no_billing, "70", "2.0.0-70+aaaaaaaa")[0]
     assert build.TARGET_SDK in (Path(build.ROOT) / "android/app/build.gradle.kts").read_text()

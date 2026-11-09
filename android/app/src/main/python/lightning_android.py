@@ -42,7 +42,8 @@ def start(files_dir):
         _host = Host(lambda credentials: profile_app(credentials, files / "Lightning", devices=_devices, phone=True,
                                                      sms=AndroidSms.create(), biometric=fingerprint,
                                                      stay=stay, files=saver,
-                                                     recents=AndroidRecents.create())).start()
+                                                     recents=AndroidRecents.create(),
+                                                     billing=AndroidBilling.create())).start()
     if not _launched:
         _launched = True
         return _host.launch_url
@@ -99,6 +100,37 @@ class AndroidRecents:
 
     def set_hidden(self, hide):
         self.bridge.setHidden(bool(hide))
+
+
+class AndroidBilling:
+    """`lightning.ui.play_store.PlayBilling` over the Java `BillingBridge` (NF-11B3), which only the Play build carries:
+    the GitHub APK and the PC get None, and keep the website's codes."""
+
+    def __init__(self, bridge):
+        self.bridge = bridge
+
+    @classmethod
+    def create(cls):
+        try:
+            from java import jclass
+            return cls(jclass("org.lightning.app.BillingBridge"))
+        except Exception:  # off the phone, or the GitHub build: no BillingBridge class
+            return None
+
+    def prices(self, ids):
+        import json
+        return {str(k): str(v) for k, v in json.loads(str(self.bridge.prices(json.dumps(list(ids))))).items()}
+
+    def buy(self, product, profile_id):
+        return bool(self.bridge.buy(str(product), str(profile_id)))
+
+    def purchases(self):
+        import json
+        return [{"product": str(p["product"]), "token": str(p["token"]), "state": str(p["state"])}
+                for p in json.loads(str(self.bridge.purchases()))]
+
+    def take_result(self):
+        return str(self.bridge.takeResult())
 
 
 class AndroidFiles:

@@ -34,12 +34,14 @@ MARKETPLACE_PATHS = {"en": "/marketplace.html", "ar": "/ar/marketplace.html"}
 # The update block's two outside pages (NF-9B4): the website's existing Downloads hub and release log (owner pick,
 # 2026-11-07). Like the marketplace they open in the system browser, and the PC window allows exactly these paths.
 UPDATE_PATHS = {"download": {"en": "/current-status.html", "ar": "/ar/current-status.html"},
-                "releases": {"en": "/release-log.html", "ar": "/ar/release-log.html"}}
+                "releases": {"en": "/release-log.html", "ar": "/ar/release-log.html"},
+                # The privacy notice, whose #app section covers the app (NF-11B4; Google Play wants it inside the app).
+                "privacy": {"en": "/privacy.html", "ar": "/ar/privacy.html"}}
 OUTSIDE_PATHS = frozenset(MARKETPLACE_PATHS.values()) | {p for pages in UPDATE_PATHS.values() for p in pages.values()}
 
 
 def outside_url(page: str, locale: str = "en") -> str:
-    """Address of an update page ("download" or "releases") in the page's language."""
+    """Address of an outside page ("download", "releases" or "privacy") in the page's language."""
     return f"https://{MARKETPLACE_HOST}{UPDATE_PATHS[page].get(locale, UPDATE_PATHS[page]['en'])}"
 
 
@@ -56,7 +58,7 @@ class UnlockError(ValueError):
 def store() -> dict:
     data = json.loads(STORE.read_text())
     keys = {kid: base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4)) for kid, raw in data.get("keys", {}).items()}
-    return {"keys": keys, "redeem_url": data.get("redeem_url", "")}
+    return {"keys": keys, "redeem_url": data.get("redeem_url", ""), "play_redeem_url": data.get("play_redeem_url", "")}
 
 
 @lru_cache(maxsize=1)
@@ -224,27 +226,61 @@ def redeem(code: str, *, opener=None) -> str:
         raise UnlockError("Unlocking opens with the next Lightning update.")
     if profile is None:
         raise UnlockError("Open the profile you want to unlock this on, then try again.")
-    InvalidCosmeticLicense, verify_license = check
     code = "".join(code.split()).upper()
     if not (8 <= len(code) <= 64):
         raise UnlockError("Paste the whole code from your account page.")
     if not conf["keys"] or not conf["redeem_url"].startswith("https://"):
         raise UnlockError("Unlocking opens with the next Lightning update.")
     items = [{"item_id": name, "asset_version": version} for name, version in supported.items()]
-    body = json.dumps({"code": code, "items": items, "profile_id": profile}).encode()
-    request = Request(conf["redeem_url"], data=body, method="POST", headers={"Content-Type": "application/json"})
+    body = {"code": code, "items": items, "profile_id": profile}
+    return _exchange(conf["redeem_url"], body, profile, {
+        409: "Every profile seat for this theme is used. Add another profile on your account page: it costs a quarter of the price.",
+    }, "That code is used or expired. Get a fresh one from your account page.", opener=opener)
+
+
+PLAY_PACKAGE = "org.lightning.app"
+
+
+def redeem_play(product: str, token: str, *, opener=None) -> str:
+    """The Play build's purchase (NF-11B3): send Google Play's purchase token to the store's redeem-play function, which
+    asks Google whether it is a paid purchase of this theme for this profile, and keep the signed licence it returns,
+    exactly as a website code's. Returns the theme id the licence names."""
+    supported, conf, check, profile = paid_themes(), store(), _verifier(), profile_id()
+    if check is None or not conf["keys"] or not conf["play_redeem_url"].startswith("https://"):
+        raise UnlockError("Unlocking opens with the next Lightning update.")
+    if profile is None:
+        raise UnlockError("Open the profile you want to unlock this on, then try again.")
+    if product not in supported or not (10 <= len(token) <= 1000):
+        raise UnlockError("Update Lightning to wear this theme.")
+    items = [{"item_id": name, "asset_version": version} for name, version in supported.items()]
+    body = {"package_name": PLAY_PACKAGE, "product_id": product, "purchase_token": token, "items": items,
+            "profile_id": profile}
+    return _exchange(conf["play_redeem_url"], body, profile, {
+        402: "The payment is not finished yet. It unlocks when Google Play confirms it.",
+        409: "This purchase belongs to another profile.",
+        410: "This purchase was refunded or cancelled.",
+    }, "Google Play does not know this purchase.", opener=opener)
+
+
+def _exchange(url: str, body: dict, profile: str, refusals: dict[int, str], refused: str, *, opener=None) -> str:
+    """POST to the store, verify the signed licence it returns for this profile, keep it here and in the profile's
+    settings. `refusals` words the store's own refusals; `refused` is any other 4xx."""
+    supported, conf = paid_themes(), store()
+    InvalidCosmeticLicense, verify_license = _verifier()
+    request = Request(url, data=json.dumps(body).encode(), method="POST", headers={"Content-Type": "application/json"})
     try:
         with (opener or urlopen)(request, timeout=15) as response:
             envelope = json.loads(response.read(200_000))
     except HTTPError as exc:
-        if exc.code == 409:  # the store says every seat for this theme is taken by other profiles
-            raise UnlockError("Every profile seat for this theme is used. Add another profile on your account page: "
-                              "it costs a quarter of the price.") from exc
+        if exc.code in refusals:
+            raise UnlockError(refusals[exc.code]) from exc
+        if exc.code == 422:
+            raise UnlockError("Update Lightning to wear this theme.") from exc
         if exc.code == 429:
             raise UnlockError("Too many tries. Wait a minute, then try again.") from exc
         if exc.code >= 500:
             raise UnlockError("The Lightning store is not answering right now. Try again in a few minutes.") from exc
-        raise UnlockError("That code is used or expired. Get a fresh one from your account page.") from exc
+        raise UnlockError(refused) from exc
     except (URLError, OSError, ValueError) as exc:
         raise UnlockError("Could not reach the Lightning store. Check the connection and try again.") from exc
     try:

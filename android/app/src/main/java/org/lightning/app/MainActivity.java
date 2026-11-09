@@ -40,6 +40,7 @@ public final class MainActivity extends Activity {
     static volatile Uri reminderOrigin;
     static volatile String reminderCookie;
     static volatile boolean reminderEnabled;
+    static volatile Activity current;  // the open window, for bridges that show system sheets (Play Billing, NF-11B3)
     private static final AtomicBoolean journalSyncRunning = new AtomicBoolean();
     private WebView web;
     private FrameLayout root;
@@ -119,6 +120,7 @@ public final class MainActivity extends Activity {
         SmsBridge.activity = this;
         RecentsBridge.activity = this;
         RecentsBridge.apply(this);  // Hide in recent apps, on by default (NF-11B6)
+        current = this;
         BiometricBridge.activity = this;
         FileBridge.activity = this;
         takeShare(getIntent());
@@ -507,6 +509,15 @@ public final class MainActivity extends Activity {
         } catch (RuntimeException ignored) {
             // a launcher without shortcuts: nothing to add
         }
+    }
+
+    /** Opens one of the app's own pages (a bridge's way back into the app, e.g. after Play's purchase sheet). */
+    void openPath(String path) {
+        runOnUiThread(() -> {
+            if (web == null || origin == null || path == null || !path.startsWith("/") || path.startsWith("//")) return;
+            Uri target = Uri.parse(origin.toString() + path.substring(1));
+            if (ours(target)) web.loadUrl(target.toString());
+        });
     }
 
     private void queueReminder(Intent intent) {

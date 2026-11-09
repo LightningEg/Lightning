@@ -303,18 +303,13 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-3AY13 | ↳ Owner's phone check | | | owner |  | |
 | **IV-3F** | [The phone's top bar looks too white to one user](11-phone-ux/IV-3F-phone-top-bar-looks-too-white.md) | improvement, visual | Feel | S | Sonnet | ready |
 | **NF-11B** | [Ship the phone on Google Play - a release bundle at API 36, the SMS and payments policies, the app's own privacy notice and the Console declarations](11-phone-ux/NF-11B-ship-the-phone-on-google-play.md) | new feature | Everywhere | L | Opus | ready |
-| NF-11B2 | ↳ Bank SMS within Play's SMS policy | | | M | Opus | |
-| NF-11B1 | ↳ A release bundle that Play accepts | | | M | Opus | |
-| NF-11B3 | ↳ Themes sold through Google Play Billing in the Play build | | | L | Opus | |
-| NF-11B4 | ↳ A privacy notice that covers the app, linked from the app | | | M | Opus | |
-| NF-11B5 | ↳ Data safety and Console declarations, drafted | | | S | Opus | |
 | NF-11B7 | ↳ Owner: the developer account and the listing | | | owner |  | |
 | NF-11B8 | ↳ Owner: closed test, 12 testers for 14 days | | | owner |  | |
 | NF-11B9 | ↳ Owner: the phone check before production | | | owner |  | |
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md).
 
-Done: 11F, 11I, 11B1, 11B2, 11B6, 3AY1, 3AY3, 3AY5, BV-11G, IV-11D3. Next free code: 11J.
+Done: 11F, 11I, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 3AY1, 3AY3, 3AY5, BV-11G, IV-11D3. Next free code: 11J.
 
 ## 12 Desktop UX and smart next steps
 

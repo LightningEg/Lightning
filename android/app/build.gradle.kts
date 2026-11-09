@@ -22,14 +22,29 @@ android {
         }
     }
 
+    // NF-11B3: two stores, one code base. "github" is the APK on GitHub and the website: themes are bought on
+    // lightningeg.com and unlocked with a code, as on the PC. "play" is the Google Play bundle: themes are sold with Play
+    // Billing (src/play/java/.../BillingBridge.java, the only place the Billing Library is used), and the Play build
+    // shows no website price or link. Python finds BillingBridge by name, so the GitHub APK carries none of it.
+    flavorDimensions += "store"
+    productFlavors {
+        create("github") { dimension = "store"; isDefault = true }
+        create("play") { dimension = "store" }
+    }
+
     buildTypes {
-        // What ships, to GitHub (APK) and Play (AAB, bundleRelease): not debuggable, not shrunk (Chaquopy's
+        // What ships, to GitHub (APK, assembleGithubRelease) and Play (AAB, bundlePlayRelease): not debuggable, not shrunk (Chaquopy's
         // Python reaches Java by name). Unsigned here: the workflow's sign job signs it away from Gradle.
         getByName("release") {
             isDebuggable = false
             isMinifyEnabled = false
         }
     }
+}
+
+dependencies {
+    // Google Play Billing Library (Apache 2.0, Google): the Play build only (NF-11B3). Pinned; Play requires 7 or newer.
+    "playImplementation"("com.android.billingclient:billing:8.0.0")
 }
 
 // 04b: the probe runs the shared encrypted round-trip, so it carries Lightning's own package and the committed

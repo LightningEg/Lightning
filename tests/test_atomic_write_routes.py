@@ -15,7 +15,7 @@ OTHER_BOUNDARIES = {
     "sms": {"allow", "read_one_message"},  # OS permission and read-only parsing.
     "planning": {"not_recurring"},  # Suggestion visibility, a single settings write.
     "dashboard": {"add_demo_household", "add_sample_2026", "add_sample_story", "needs_you_state"},
-    "settings": {"ask_ai", "prepare_ai_analysis", "backup_now", "start_fresh", "save_privacy", "update_action"},  # Exports, dedicated file workflows, the display preference and the update buttons (no undo group, no settlement, no ledger write).
+    "settings": {"ask_ai", "prepare_ai_analysis", "backup_now", "start_fresh", "save_privacy", "update_action", "buy_theme"},  # Exports, dedicated file workflows, the display preference, the update buttons and Play's purchase sheet (the licence is saved when Settings settles it) (no undo group, no settlement, no ledger write).
     "weekly": {"complete", "dismiss"},  # Review preferences never settle a financial issue.
 }
 
