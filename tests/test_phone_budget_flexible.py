@@ -56,3 +56,42 @@ def test_the_page_renders_in_the_phone_and_never_a_pc_template(mohab):
     page = TestClient(app).get("/budget/flexible").text
     assert "Your categories" in page and "Fixed costs" in page and "<input" not in page.split('id="cats-heading"')[1].split("</section>")[0]
     assert TestClient(app).get("/budget/flexible?month=garbage").status_code == 200
+
+
+def test_needs_attention_holds_no_finished_category_and_no_category_twice(mohab):
+    """BV-11F: a category spent exactly to its plan is done, not a need; one in Needs attention is not listed again;
+    and no row's figure is a lone zero."""
+    for day in (date(2026, 10, 12), date(2026, 10, 28)):
+        s = screen.build(mohab, day, "2026-10")
+        assert all(r.left != 0 and r.state in ("over", "ahead") for r in s.attention)
+        assert not {r.category_id for r in s.attention} & {r.category_id for r in s.categories}
+        assert all(r.state == "done" for r in s.categories if r.left == 0 and r.limit > 0)
+
+
+def test_a_category_spent_to_its_plan_reads_as_done_never_a_lone_zero(mohab, monkeypatch):
+    app = create_app(mohab)
+    mount_phone(app)
+    s = screen.build(mohab, date(2026, 10, 12), "2026-10")
+    page = TestClient(app).get("/budget/flexible").text
+    for r in s.categories:
+        if r.state == "done":
+            assert f'is-done' in page
+    assert '<bdi class="fig">0</bdi>' not in page and '<bdi class="fig">٠</bdi>' not in page
+
+
+def test_the_month_bar_parts_add_to_the_plan_and_the_donut_to_its_total(mohab):
+    s = screen.build(mohab, date(2026, 10, 12), "2026-10")
+    e = mohab.forecaster.everyday("2026-10", date(2026, 10, 12))
+    b = s.month_bar
+    assert b["spent"] + b["left"] == e.everyday_plan and b["over"] == max(e.everyday_spent - e.everyday_plan, 0)
+    assert abs(b["w_spent"] + b["w_left"] + b["w_over"] - 100) < 1e-6
+    d = s.spend
+    assert len(d["segments"]) <= 5 and d["total"] == sum(g["value"] for g in d["segments"])
+    assert abs(sum(g["share"] for g in d["segments"]) - 100) < 1e-6
+
+
+def test_the_month_bar_shows_over_plan_in_its_own_part():
+    from decimal import Decimal
+    b = screen.month_bar(Decimal(1000), Decimal(1300))
+    assert (b["spent"], b["left"], b["over"]) == (1000, 0, 300)
+    assert screen.month_bar(Decimal(0), Decimal(0)) is None

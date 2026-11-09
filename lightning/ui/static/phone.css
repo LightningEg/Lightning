@@ -970,7 +970,7 @@ html[dir="rtl"] .phone-reg-step svg { transform: scaleX(-1); }
 .phone-entry-account a { min-height: 0; display: inline; }
 .phone-sms-paste { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; margin: 6px 0 0; }
 .phone-sms-paste[hidden] { display: none; }
-.phone-sms-paste::before { content: "📋"; }
+.phone-sms-paste::before { content: ""; width: 18px; height: 18px; background: currentColor; -webkit-mask: var(--clipboard) center / contain no-repeat; mask: var(--clipboard) center / contain no-repeat; --clipboard: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='8' y='2' width='8' height='4' rx='1'/%3E%3Cpath d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/%3E%3C/svg%3E"); }
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root), ::view-transition-new(root), ::view-transition-group(*) { animation: none; }
   .phone-sheet, .app-popup, .phone-sheet * { transition: none !important; animation: none !important; }
@@ -1037,3 +1037,34 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 /* r24: the compare-period dates stack, one control per row, so the whole date shows beside its 48px picker button. */
 .phone .compare-picker fieldset { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; gap: 8px; }
 .phone-sheet-row > summary.phone-home-hero:not(#_) { display: block; min-height: 0; padding: 0; border: 0; background: none; }
+
+/* BV-11F, IV-11D2, IV-11D5: Budget's bars take state colours (within plan Meadow, ahead of pace soft rose, over strong
+   rose: A03), one segmented bar for the month, and the spending donut (soft rose steps; the rows name each slice). */
+.phone-budget-cat .phone-bar-track i { background: #14A874; }
+.phone-budget-cat.is-ahead .phone-bar-track i { background: #E68CA8; }
+.phone-budget-cat.is-over .phone-bar-track i { background: #C93D72; }
+.phone-done { color: var(--c-muted, #566E7E); }
+.phone-month-bar { display: flex; height: 12px; margin: 12px 0 0; border-radius: 99px; overflow: hidden; background: var(--c-track); }
+.phone-month-bar i { display: block; height: 100%; }
+.phone-month-bar .is-spent { background: #E68CA8; }
+.phone-month-bar .is-left { background: #14A874; }
+.phone-month-bar .is-over { background: #C93D72; }
+.phone-donut { margin: 0; }
+.phone-donut-ring { position: relative; width: 168px; height: 168px; margin: 8px auto 12px; }
+.phone-donut-ring svg { width: 100%; height: 100%; }
+.phone-donut-track { fill: none; stroke: var(--c-track); stroke-width: 6; }
+.phone-donut-seg { fill: none; stroke-width: 6; }
+.phone-donut-hole { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.phone-donut-hole b { font-size: 17px; font-variant-numeric: tabular-nums; }
+.phone-donut-hole small { font-size: 12px; color: var(--c-muted, #566E7E); }
+.phone-donut-seg.is-rank-0, .phone-key.is-rank-0 { stroke: #C93D72; background: #C93D72; }
+.phone-donut-seg.is-rank-1, .phone-key.is-rank-1 { stroke: #E68CA8; background: #E68CA8; }
+.phone-donut-seg.is-rank-2, .phone-key.is-rank-2 { stroke: #F0B0C4; background: #F0B0C4; }
+.phone-donut-seg.is-rank-3, .phone-key.is-rank-3 { stroke: #F6CCD9; background: #F6CCD9; }
+.phone-donut-seg.is-rank-4, .phone-key.is-rank-4 { stroke: #566E7E; background: #566E7E; }
+.phone-key { display: inline-block; width: 10px; height: 10px; margin-inline-end: 8px; border-radius: 3px; }
+.phone-donut-row small { color: var(--c-muted, #566E7E); }
+@media (prefers-reduced-motion: no-preference) { .phone-donut-seg { animation: phone-donut-in 400ms ease-out; } }
+@keyframes phone-donut-in { from { opacity: 0; } to { opacity: 1; } }
+/* Home keeps its first screen to one and a fifth (test_phone_home): the bar is a thin line right under the row. */
+.phone-month-bar.is-compact { height: 5px; margin: 0; }

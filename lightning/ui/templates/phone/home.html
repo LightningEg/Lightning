@@ -3,6 +3,7 @@
    payday and overspent change the hero's sentence and what To do leads with. #}
 {% extends "base.html" %}
 {% from "phone/partials/sheet.html" import sheet with context %}
+{% from "phone/partials/charts.html" import month_bar with context %}
 {% from "phone/partials/txn.html" import txn_list with context %}
 {% block title %}Home{% endblock %}
 {% block heading %}<h1>{{ 'Home'|tr(locale) }}</h1>{% endblock %}
@@ -50,6 +51,7 @@
 </section>
 <section class="phone-section" aria-label="{{ 'This month'|tr(locale) }}" id="month-heading">
   <div class="phone-rows"><a class="phone-row" href="/budget"><span>{{ 'This month'|tr(locale) }}<small>{{ 'Spent'|tr(locale) }} {{ s.spent|money }}{% if s.left_in_plan is not none %} · {{ fig.left_in_plan.label }} {{ s.left_in_plan|money }}{% endif %}</small></span><b>›</b></a></div>
+  {% if s.month_bar %}{{ month_bar(s.month_bar, compact=True) }}{% endif %}
 </section>
 {% endif %}
 {% endblock %}

@@ -438,6 +438,25 @@ def donut(slices: list[dict], limit: int = 5) -> dict:
     return {"segments": segments, "total": total}
 
 
+def ranked_donut(slices: list[dict], limit: int = 5) -> dict:
+    """A donut whose slices stay in size order (largest first, from 12 o'clock): four by name, then "Other"
+    (``limit`` counts Other). Each slice gets ``rank`` (0-4) for its colour and the same dash fields as ``donut``."""
+    parts = sorted((s for s in slices if s["value"] and s["value"] > 0), key=lambda s: (-s["value"], s["label"].casefold()))
+    if len(parts) > limit:
+        rest = parts[limit - 1:]
+        parts = parts[:limit - 1] + [{"label": "Other", "value": sum((s["value"] for s in rest), ZERO), "other": True}]
+    total = sum((s["value"] for s in parts), ZERO)
+    if not total:
+        return {"segments": [], "total": ZERO}
+    gap = 0.6 if len(parts) > 1 else 0.0
+    offset, segments = 25.0, []
+    for rank, s in enumerate(parts):
+        share_ = float(s["value"] / total * 100)
+        segments.append({**s, "rank": rank, "share": share_, "dash": max(share_ - gap, 0.1), "offset": offset})
+        offset -= share_
+    return {"segments": segments, "total": total}
+
+
 def share(parts: list[dict]) -> dict:
     """Two to four parts of one whole in a single line."""
     shown = [p for p in parts if p["value"] and p["value"] > 0]
