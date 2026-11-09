@@ -40,6 +40,7 @@ public final class MainActivity extends Activity {
     static volatile Uri reminderOrigin;
     static volatile String reminderCookie;
     static volatile boolean reminderEnabled;
+    private static final int REQUEST_NOTIFICATIONS = 1;
     private static final AtomicBoolean journalSyncRunning = new AtomicBoolean();
     private WebView web;
     private FrameLayout root;
@@ -117,6 +118,8 @@ public final class MainActivity extends Activity {
                     android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::goBack);
         }
         SmsBridge.activity = this;
+        ScreenBridge.activity = this;
+        ScreenBridge.apply(this);  // before the first frame: Recents never holds a picture of balances (NF-11B6)
         BiometricBridge.activity = this;
         FileBridge.activity = this;
         takeShare(getIntent());
@@ -151,10 +154,7 @@ public final class MainActivity extends Activity {
         frame.addView(starting, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         setContentView(frame);
-        if (Build.VERSION.SDK_INT >= 33
-                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
-        }
+        // Notifications are asked for when the person turns reminders on (checkReminders), never at first start.
         String files = getFilesDir().getAbsolutePath();
         new Thread(() -> {
             try {
@@ -474,7 +474,21 @@ public final class MainActivity extends Activity {
         new Thread(() -> {
             ReminderNotifications.PollResult result = ReminderNotifications.check(this, currentOrigin, cookie);
             reminderEnabled = result.enabled;
+            android.content.SharedPreferences prefs = getSharedPreferences("lightning-reminders", MODE_PRIVATE);
+            if (result.sessionAvailable && !result.enabled) prefs.edit().remove("asked").apply();  // off: ask when on again
+            else if (result.enabled && !prefs.getBoolean("asked", false)) {
+                prefs.edit().putBoolean("asked", true).apply();  // once per "Turn on reminders", not every start
+                runOnUiThread(this::askForNotifications);
+            }
         }, "lightning-reminders").start();
+    }
+
+    /** NF-11B6 (r29 S9): the system's notification question comes right after "Turn on reminders", in context. */
+    private void askForNotifications() {
+        if (Build.VERSION.SDK_INT >= 33
+                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQUEST_NOTIFICATIONS);
+        }
     }
 
     /** Long-press the app icon (phone roadmap M8): Add expense and Bank SMS open straight away, through the same

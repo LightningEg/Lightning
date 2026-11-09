@@ -127,7 +127,9 @@ async def settings_page(request: Request):
     currency_tab = "rates" if request.query_params.get("tab") == "rates" else "currencies"
     fx_history = ([row for row in c.reevaluations.history() if row["price_source"] == "FX"]
                   if section == "currencies" and currency_tab == "rates" else [])
-    return render(request, "settings/index.html", **_update_context(request), db_path=c.db.path, backups=[b.name for b in backups], plan=plan,
+    screen = getattr(request.app.state, "screen_privacy", None)
+    return render(request, "settings/index.html", **_update_context(request),
+                  recents_hidden=None if screen is None else screen.hidden(), db_path=c.db.path, backups=[b.name for b in backups], plan=plan,
                   classes=c.assets.list_classes(), assets=c.assets.list_assets(), factor_rows=factor_rows, factor_groups=factor_groups,
                   section=request.query_params.get("section", "general"), return_to=return_to,
                   budget_return_to=f"/settings?section=budget&return_to={return_to}",
@@ -278,6 +280,16 @@ async def save_privacy(request: Request):
     with c.db.transaction():
         c.settings.set("privacy_mode", "1" if form.get("on") == "1" else "0")
     return Response(status_code=204)
+
+
+@router.post("/phone/recents")
+async def save_recents(request: Request):
+    """Settings › This phone › Hide in recent apps (NF-11B6). The phone keeps the choice, not the profile."""
+    screen = getattr(request.app.state, "screen_privacy", None)
+    if screen is not None:
+        form = await request.form()
+        screen.set_hidden(form.get("hide") == "1")
+    return redirect("/settings")
 
 
 @router.post("/locale")

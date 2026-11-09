@@ -42,11 +42,6 @@ Files: new `docs/google-play.md` (for the owner: every Console answer, with the 
 Do: Data safety (from r29 › Privacy), foreground service `dataSync` (what the lend-and-listen service does; the video's script), financial features (personal budgeting, no loans or payments), content rating, target audience 18+, ads: none, app access: the steps to open the demo household.
 Done when: the owner can fill the Console from that page alone.
 
-## 11B6 Privacy on screen: Recents and notifications in context · S · sonnet
-Files: `MainActivity.java`, `lightning/ui/templates/phone/settings…` (the This phone section).
-Do: `setRecentsScreenshotEnabled(false)` (API 33+) and `FLAG_SECURE` while amounts are hidden or by a "Hide in recent apps" switch (on by default); ask for notifications when the person first turns a reminder on, not at first start.
-Done when: a test renders the switch; on a phone the Recents card is blank (owner check in 11B9).
-
 ## 11B7 Owner: the developer account and the listing · owner
 Developer account (organisation if a D-U-N-S number is practical; a personal account needs 11B8); a payments profile and the theme products for 11B3; the SMS declaration and video for 11B2; store listing in English and Arabic: icon 512 px, feature graphic 1024 × 500, 4-8 phone screenshots taken after IV-11E and IV-11D, short and full description in the brand voice.
 

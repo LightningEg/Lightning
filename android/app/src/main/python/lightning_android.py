@@ -41,7 +41,7 @@ def start(files_dir):
         saver = AndroidFiles.create(files / "outgoing")
         _host = Host(lambda credentials: profile_app(credentials, files / "Lightning", devices=_devices, phone=True,
                                                      sms=AndroidSms.create(), biometric=fingerprint,
-                                                     stay=stay, files=saver)).start()
+                                                     stay=stay, files=saver, screen=AndroidScreen.create())).start()
     if not _launched:
         _launched = True
         return _host.launch_url
@@ -77,6 +77,28 @@ class AndroidSms:
     def take_shared(self):
         import json
         return [str(text) for text in json.loads(str(self.bridge.takeShared()))]
+
+
+class AndroidScreen:
+    """"Hide in recent apps" (NF-11B6) over the Java `ScreenBridge`: this phone's choice, on by default."""
+
+    def __init__(self, bridge):
+        self.bridge = bridge
+
+    @classmethod
+    def create(cls):
+        """None off the phone (the probe's tests run this module on a PC)."""
+        try:
+            from java import jclass
+        except ImportError:
+            return None
+        return cls(jclass("org.lightning.app.ScreenBridge"))
+
+    def hidden(self):
+        return bool(self.bridge.hidden())
+
+    def set_hidden(self, hide):
+        self.bridge.setHidden(bool(hide))
 
 
 class AndroidFiles:

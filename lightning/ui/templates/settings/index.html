@@ -45,6 +45,7 @@
     <a class="phone-row" href="/profiles/devices"><span>{{ 'Devices'|tr(locale) }}<small>{{ 'Pair your phone or PC'|tr(locale) }}</small></span><b>›</b></a>
     <a class="phone-row" href="/sms"><span>{{ 'Bank SMS'|tr(locale) }}<small>{{ 'Read bank messages into transactions'|tr(locale) }}</small></span><b>›</b></a>
     {% if request.state.fingerprint_row|default('') %}<a class="phone-row" href="/profiles/fingerprint"><span>{{ 'Unlock with fingerprint'|tr(locale) }}<small>{{ ('On' if request.state.fingerprint_row == 'on' else 'Off')|tr(locale) }}</small></span><b>›</b></a>{% endif %}
+    {% if recents_hidden is not none %}<form class="phone-row" method="post" action="/settings/phone/recents"><span>{{ 'Hide in recent apps'|tr(locale) }}<small>{{ ('On: the recent-apps view shows a blank card, never your amounts.' if recents_hidden else 'Off: the recent-apps view can show this screen.')|tr(locale) }}</small></span><input type="hidden" name="hide" value="{{ '0' if recents_hidden else '1' }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn small" data-recents-toggle>{{ ('Turn off' if recents_hidden else 'Turn on')|tr(locale) }}</button></form>{% endif %}
     <a class="phone-row" href="/profiles"><span>{{ 'Profile and lock'|tr(locale) }}<small>{{ 'Password, recovery key, backups, lock'|tr(locale) }}</small></span><b>›</b></a>
   </div>
 </section>
