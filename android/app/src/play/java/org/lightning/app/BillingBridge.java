@@ -25,8 +25,9 @@ import org.json.JSONObject;
  * Themes sold with Google Play Billing, in the Play build only (src/play; NF-11B3). Python (AndroidBilling in
  * lightning_android.py) asks for prices, starts a purchase and reads what the person owns; it sends each purchase
  * token to the store's redeem-play function, which asks Google, acknowledges it and returns the signed licence the
- * app keeps as today. Product ids are the theme ids (papyrus, dendera, ...). Each purchase carries the open
- * profile's id as Play's obfuscated profile id, so the store unlocks exactly that profile. Nothing here decides
+ * app keeps as today. Product ids are the theme ids (papyrus, dendera, ...). A purchase carries the buying profile's id
+ * as Play's obfuscated profile id, for the record only: one purchase per person (NF-10H), so every profile opened with
+ * that Google account gets its own licence from the same purchase, up to 10. Nothing here decides
  * ownership: only the store's signed licence does. Calls from Python wait at most a few seconds for Play.
  */
 public final class BillingBridge {

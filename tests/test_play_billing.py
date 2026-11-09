@@ -90,7 +90,7 @@ def test_a_play_purchase_becomes_the_same_signed_licence(store):
     assert entitlements.owned() == frozenset({"papyrus"}) and seen[0]["purchase_token"] == "token-abcdefghijkl"
 
 
-@pytest.mark.parametrize("status,words", [(410, "refunded"), (409, "another profile"), (402, "not finished"),
+@pytest.mark.parametrize("status,words", [(410, "refunded"), (409, "10 profiles"), (402, "not finished"),
                                           (400, "does not know")])
 def test_the_store_refusals_are_said_plainly(store, status, words):
     with pytest.raises(entitlements.UnlockError, match=words):
@@ -161,3 +161,27 @@ def test_only_the_play_flavour_carries_billing():
     assert "com.android.vending.BILLING" not in (ROOT / "packaging/android-permissions.txt").read_text().split("#")[0]
     bridge = (ROOT / "android/app/src/play/java/org/lightning/app/BillingBridge.java").read_text()
     assert ".setObfuscatedProfileId(profileId)" in bridge
+
+
+def test_one_purchase_unlocks_a_second_profile_on_the_same_google_account(store, monkeypatch):
+    """NF-10H cases 2 and 3: Play reports the theme owned on another profile of the same Google account (or after a
+    reinstall); Settings settles it into that profile's own licence, with no second payment and no Buy."""
+    second = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
+    sent = []
+    monkeypatch.setattr(entitlements, "_PROFILE", lambda: second)
+    monkeypatch.setattr(play_store, "redeem_play", lambda product, token: entitlements.redeem_play(
+        product, token, opener=lambda request, timeout: (sent.append(json.loads(request.data)["profile_id"]),
+                                                          BytesIO(json.dumps(store(product, profile=second)).encode()))[1]))
+    play = FakePlay([{"product": "papyrus", "token": "t-papyrus-123", "state": "purchased"}])
+    assert play_store.settle(play)[0] == ["papyrus"] and sent == [second]
+    assert entitlements.owned() == frozenset({"papyrus"})
+    assert "papyrus" not in play_store.offers(play, entitlements.store_themes()), "no Buy for a theme it wears"
+
+
+def test_the_play_build_says_one_purchase_covers_every_profile(tmp_path):
+    browser = _phone(tmp_path, FakePlay())
+    try:
+        page = browser.get("/settings").text
+        assert "every profile on this Google account wears it" in page
+    finally:
+        browser.__exit__(None, None, None)

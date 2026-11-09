@@ -52,17 +52,6 @@ changes is how many licences one purchase may mint. "Profile" is the profile's s
 
 Steps, in order; each is one pull request.
 
-## 10H1 Store: a Play purchase mints many profiles · M
-Website repo. `redeem-play` keeps every profile a purchase token unlocked (`play_purchases` gains a profile list or a
-child table; cap 10), mints a licence for each new one instead of 409, refuses a refunded, cancelled or voided order
-with 410 (Google's purchase state and the Voided Purchases API), and acknowledges as today. Postgres tests for 2, 11, 12.
-
-## 10H2 App: settle for every profile, say so · S
-`lightning/ui/play_store.py` already redeems each owned purchase for the open profile; reword the 409 and cap messages,
-and Settings' Play copy ("Bought once, every profile on this Google account wears it", English and Arabic).
-`BillingBridge` keeps the obfuscated profile id only as the first buyer's. Docstrings in `entitlements.py`,
-Architecture › Two stores, `docs/google-play.md` › In-app products. Tests in `tests/test_play_billing.py` for 2 and 3.
-
 ## 10H3 Website: account-wide seats · M
 Website repo. A member's purchase claims up to 10 profiles at no charge (codes free per profile); remove the 25% extra
 profile price from the marketplace, checkout and owner console, English and Arabic; marketplace says how a website

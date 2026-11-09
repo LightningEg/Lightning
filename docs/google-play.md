@@ -93,4 +93,4 @@ Record on a real phone with the demo household (no real money on screen); upload
 
 ## In-app products
 
-One managed product per paid theme, product id = theme id: `cotton`, `dendera` (day and night), `nile`, `papyrus`. Name and description from the theme; price set by the owner in Egyptian pounds. A purchase unlocks the profile it was bought from and its other devices; another profile needs its own purchase.
+One managed product per paid theme, product id = theme id: `cotton`, `dendera` (day and night), `nile`, `papyrus`. Name and description from the theme; price set by the owner in Egyptian pounds. One purchase per person (owner, 2026-11-09): a purchase unlocks every profile opened in the Play build with the buying Google account, up to 10, and each profile's other devices through sync. A refunded or voided purchase unlocks no new profile; licences already issued stay.

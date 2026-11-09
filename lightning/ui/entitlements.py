@@ -243,8 +243,9 @@ PLAY_PACKAGE = "org.lightning.app"
 
 def redeem_play(product: str, token: str, *, opener=None) -> str:
     """The Play build's purchase (NF-11B3): send Google Play's purchase token to the store's redeem-play function, which
-    asks Google whether it is a paid purchase of this theme for this profile, and keep the signed licence it returns,
-    exactly as a website code's. Returns the theme id the licence names."""
+    asks Google whether it is a paid, not refunded purchase of this theme, and keep the signed licence it returns for
+    the open profile, exactly as a website code's. One purchase per person (NF-10H): every profile opened with the
+    buying Google account gets its own licence from the same token, up to 10. Returns the theme id the licence names."""
     supported, conf, check, profile = paid_themes(), store(), _verifier(), profile_id()
     if check is None or not conf["keys"] or not conf["play_redeem_url"].startswith("https://"):
         raise UnlockError("Unlocking opens with the next Lightning update.")
@@ -257,7 +258,7 @@ def redeem_play(product: str, token: str, *, opener=None) -> str:
             "profile_id": profile}
     return _exchange(conf["play_redeem_url"], body, profile, {
         402: "The payment is not finished yet. It unlocks when Google Play confirms it.",
-        409: "This purchase belongs to another profile.",
+        409: "This purchase already unlocks 10 profiles.",
         410: "This purchase was refunded or cancelled.",
     }, "Google Play does not know this purchase.", opener=opener)
 
