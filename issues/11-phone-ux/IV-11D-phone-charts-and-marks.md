@@ -28,15 +28,7 @@ one 400 ms entrance under `prefers-reduced-motion: no-preference`. Tests: the se
 Spent, left in plan, over (rose) on one bar under the This month row and under Budget's hero; Budget's category bars take state colours (at plan: amber, over: rose, A03).
 Done when: the bar's parts add to the plan and a test checks it.
 
-## 11D4 Money: the net-worth trend and what you own as one bar · M · opus
-C07.3.1's 160-tall area trend (end of each month, end value on the line) under Net worth, and what you own split by asset class (A04 colours, four then Other) as one segmented bar above Accounts.
-Done when: the trend's last point equals the hero and the bar's parts add to What you own.
 
 ## 11D5 Budget: where the month went · S · sonnet
 **Built** (`spend_donut`, `charts.ranked_donut`): soft-rose steps by rank, the rows name each slice; fixed costs paid is one slice.
 One donut, 168 wide, total in the hole, four then Other, rows under it (C07.2), above Your categories.
-
-## 11D6 Category marks in rows · M · opus
-Owner, 2026-11-09: a category mark in the row's disc, keeping the in/out colour (`ai/PROJECT_OVERVIEW.md` › Google Play launch).
-First change guideline C08.2 in both repos (one PR each, `cmp` passes); then one line icon per built-in category (the app's icon set, 24 px, stroke 1.75), drawn in the disc's in/out colour; a custom category keeps the arrow. Transfers keep ⇄.
-Done when: `tests/test_docs_structure.py` passes with both guideline copies; a test renders Home and every built-in category's row shows its mark.

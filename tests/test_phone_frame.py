@@ -189,9 +189,12 @@ def test_one_navigation_the_app_bar_title_is_plain_text_and_every_old_menu_page_
         assert "phone-page-menu" not in html and "phone-page-grid" not in html and "⌄" not in html, path
     assert 'class="phone-appbar-title"' in phone.get("/").text
     tabs = ("/", "/budget", "/activity", "/money")
-    for href in ("/plan", "/investments", "/money/accounts", "/money/bills", "/settings", "/financial-health", "/review",
-                 "/birdview/expenses", "/plan/reserves"):
+    reviews = phone.get("/money/reviews").text
+    for href in ("/investments", "/money/accounts", "/money/bills", "/settings", "/financial-health", "/plan/reserves",
+                 "/money/reviews"):
         assert f'href="{href}"' in money, href  # Money reaches every page More used to reach
+    for href in ("/money/report", "/plan", "/birdview/expenses", "/review"):
+        assert f'href="{href}"' in reviews, href  # the analysis, behind Money's one Reports and reviews row (IV-11H)
     for href in tabs:
         assert f'href="{href}"' in phone.get("/").text
     assert 'href="/profiles"' in phone.get("/settings").text  # Profile and lock, from Settings
@@ -432,7 +435,7 @@ def test_money_names_each_place_once_and_arabic_transfers_read_from_the_first_ac
     moving into CIB: each name is now isolated, so the line lays out right to left and the flipped arrow points onward."""
     import re
     money = phone.get("/money").text
-    for href in ("/plan", "/birdview/expenses", "/review"):
+    for href in ("/investments", "/plan/reserves", "/financial-health", "/money/reviews"):
         assert money.count(f'class="phone-row" href="{href}"') == 1, href
     session = token(phone.get("/accounts/1/transaction/new").text, "__session")
     try:
@@ -470,3 +473,19 @@ def test_phone_text_fields_name_their_enter_key(phone):
     """3BG4: the keyboard's Enter key says next or done on a form's text fields."""
     html = phone.get("/accounts/1/transaction/new").text
     assert 'id="popup-amount"' in html and re.search(r'<input[^>]*id="popup-amount"[^>]*enterkeyhint="(next|done)"', html)
+
+
+def test_phone_settings_are_the_phones_rows_and_the_rest_is_best_on_a_pc(phone):
+    """IV-11H (C11.3): Appearance, Language, This phone, Bank SMS, Backup, Privacy, About and licences, Delete your
+    data; the PC's tools (sale factors, target allocation, price files) are one Best on your PC line, not sections."""
+    html = phone.get("/settings").text
+    for words in ("Appearance", "Language", "This phone", "Bank SMS", "Back up now", "Read the privacy notice", "About and licences",
+                  "Delete your data", "Best on your PC"):
+        assert words in html, words
+    assert 'href="https://lightningeg.com/privacy.html#app"' in html and 'href="/settings/licences"' in html
+    for pc in ("Sale factors", "Ask an AI", "Settings in each tab", "another computer"):
+        assert pc not in html.split("Best on your PC", 1)[0], pc
+    assert "Sale factors" in phone.get("/settings?section=valuations").text   # a section still opens the shared page
+    licences = phone.get("/settings/licences").text
+    assert "PolyForm Noncommercial" in licences and "fastapi" in licences.casefold()
+    assert 'class="phone-back" href="/settings"' in licences

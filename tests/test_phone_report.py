@@ -46,4 +46,5 @@ def test_an_unknown_period_falls_back_to_this_month_and_the_page_renders(mohab):
     client = TestClient(app)
     page = client.get("/money/report?period=ytd")
     assert page.status_code == 200 and "Change in what you own" in page.text and ".00" not in page.text.split("<main", 1)[1]
-    assert 'href="/money/report"' in client.get("/money").text
+    assert 'href="/money/report"' in client.get("/money/reviews").text   # behind Money's Reports and reviews row (IV-11H)
+    assert 'href="/money/reviews"' in client.get("/money").text

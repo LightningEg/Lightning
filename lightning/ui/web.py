@@ -414,6 +414,23 @@ def zakat_on(context) -> bool:
 
 templates.env.globals["zakat_on"] = zakat_on
 
+
+@pass_context
+def category_mark(context, category_id) -> str:
+    """The row's category mark (IV-11D6, C08.2): a built-in category's line icon, "" for one a person made."""
+    from .category_marks import mark
+    request = context.get("request")
+    current = getattr(getattr(getattr(request, "app", None), "state", None), "container", None)
+    if current is None or not category_id:
+        return ""
+    try:
+        return mark(current.categories.get(int(category_id)).code)
+    except Exception:  # noqa: BLE001 - a deleted category: the row keeps its arrow
+        return ""
+
+
+templates.env.globals["category_mark"] = category_mark
+
 _LOCALE: contextvars.ContextVar[str] = contextvars.ContextVar("lightning_locale", default="en")
 
 

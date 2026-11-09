@@ -1,7 +1,9 @@
 """Money (IV-3AY10, guideline C11.5): "What do I have, what do I owe, what is coming?". Net worth always today, the
-balances themselves (four, then "N more") so any balance is one tap from any slot, Coming up (the next three bills,
+balances themselves (four, then "See all") so any balance is one tap from any slot, Coming up (the next two bills,
 never a late one: late bills are Home's To do and the Bills page), then what you owe, investments, goals and health as
-one row each. Services calculate; this module only picks and orders."""
+one row each, each with its figure (IV-11H), and one row for reports and reviews. Under Net worth, its trend at each
+month end and what you own as one bar by asset class (IV-11D4, C07.3.1 and A04). Services calculate; this module only
+picks and orders."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -10,11 +12,19 @@ from decimal import Decimal
 
 from lightning.planning import bill_state
 from lightning.planning.bill_state import BillRow, BillState
+from lightning.ui import charts
+from lightning.ui.visuals import month_ends
 
 ZERO = Decimal(0)
 ACCOUNTS_SHOWN = 4
-COMING_UP = 3
+COMING_UP = 2   # IV-11H: twelve rows at most under the hero; the head opens every bill
 UPCOMING = (BillState.DUE_SOON, BillState.BEFORE_PAYDAY, BillState.LATER)
+TREND_MONTHS = 12
+# A04.1: what you own in a fixed order, four then Other; a fund joins its family (the bar has no room for shades).
+FAMILIES = (("cash", "Cash"), ("deposits", "Deposits"), ("gold", "Gold"), ("equity", "Stocks"), ("other", "Other"))
+FAMILY_OF_TONE = {"cash": "cash", "deposits": "deposits", "money-market": "deposits", "fixed-income": "deposits",
+                  "gold": "gold", "gold-fund": "gold", "equity": "equity", "equity-fund": "equity",
+                  "other": "other", "other-fund": "other"}
 
 
 @dataclass(frozen=True)
@@ -38,6 +48,42 @@ class MoneyScreen:
     late_count: int                    # late bills are one pointer to Home's catch-up, not rows here
     holdings_value: Decimal
     zakat: bool = False                # Zakat is on: its page is one of the places below
+    goals_funded: int = 0              # goals and reserves at their target ("3 of 4 funded")
+    goals_count: int = 0
+    health_watch: int | None = None    # health figures outside their Good band; None when none has a limit
+    trend: dict | None = None          # charts.trend of net worth at each month end; the last point is today
+    own_split: tuple[dict, ...] = ()   # what you own by asset class family: {key, label, value, share}, A04 order
+
+
+def _goals(c) -> tuple[int, int]:
+    rows = [r for r in c.reserves.list_active() if r["target"] > ZERO]
+    return sum(1 for r in rows if r["remaining"] <= ZERO), len(rows)
+
+
+def _health_watch(c, day: date) -> int | None:
+    bands = [f.band for f in c.health.figures(day) if f.band]
+    return sum(1 for b in bands if b != "good") if bands else None
+
+
+def net_worth_trend(c, day: date, count: int = TREND_MONTHS) -> dict:
+    """Net worth at the end of each month, the last point today (C07.3.1): the hero's own figure ends the line."""
+    points = [(key, c.position.at(end).net_worth) for key, end in month_ends(day, count, c.reporting.first_activity_date())]
+    return charts.trend([k for k, _ in points], [{"name": "Net worth", "tone": "hold", "area": True,
+                                                 "values": [v for _, v in points]}])
+
+
+def own_split(position) -> tuple[dict, ...]:
+    """What you own as one bar (A04): cash you own, then each holding class in its family, and the rest (a flat, a
+    car) in Other. The parts add to What you own; a part at zero or below is left out of the bar and the rows."""
+    totals = {key: ZERO for key, _ in FAMILIES}
+    totals["cash"] += position.cash_you_own
+    for cls in position.classes:
+        totals[FAMILY_OF_TONE[charts.class_tone(cls.code)]] += cls.value
+    totals["other"] += position.what_you_own - sum(totals.values(), ZERO)
+    shown = [(key, label, totals[key]) for key, label in FAMILIES if totals[key] > ZERO]
+    whole = sum((v for _, _, v in shown), ZERO)
+    return tuple({"key": key, "label": label, "value": value, "share": float(value / whole * 100)}
+                 for key, label, value in shown) if whole > ZERO else ()
 
 
 def _balances(c, day: date) -> list[AccountRow]:
@@ -61,13 +107,16 @@ def build(c, day: date) -> MoneyScreen:
         since = None
     rows = _balances(c, day)
     bills = bill_state.open_bills(c.planning, day, bill_state.SOON_DAYS * 3)
+    funded, goals = _goals(c)
     return MoneyScreen(
         net_worth=now.net_worth, what_you_own=now.what_you_own, what_you_owe=now.what_you_owe, since_start=since,
         accounts=tuple(rows[:ACCOUNTS_SHOWN]), accounts_more=max(len(rows) - ACCOUNTS_SHOWN, 0),
         accounts_total=sum((r.balance for r in rows), ZERO), held_for_others=now.held_for_others,
         coming_up=tuple(b for b in bills if b.state in UPCOMING)[:COMING_UP],
         late_count=sum(1 for b in bills if b.state in (BillState.LATE, BillState.LATE_STALE)),
-        holdings_value=now.holdings_value, zakat=c.zakat.enabled())
+        holdings_value=now.holdings_value, zakat=c.zakat.enabled(),
+        goals_funded=funded, goals_count=goals, health_watch=_health_watch(c, day),
+        trend=net_worth_trend(c, day), own_split=own_split(now))
 
 
 @dataclass(frozen=True)

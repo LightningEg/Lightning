@@ -1,0 +1,13 @@
+{# Reports and reviews (IV-11H): the analysis Money used to list row by row, behind one row. Each opens one page. #}
+{% extends "base.html" %}
+{% block title %}Reports and reviews{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/money"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Money'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Reports and reviews'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+<nav class="phone-rows" aria-label="{{ 'Reports and reviews'|tr(locale) }}">
+  <a class="phone-row" href="/money/report"><span>{{ 'Report'|tr(locale) }}<small>{{ 'How a month or a year went'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+  <a class="phone-row" href="/plan"><span>{{ 'Cash planning'|tr(locale) }}<small>{{ 'Your cash month by month, ahead'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+  <a class="phone-row" href="/birdview/expenses"><span>{{ 'Spending'|tr(locale) }}<small>{{ 'Where the money went'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+  <a class="phone-row" href="/review"><span>{{ 'Weekly review'|tr(locale) }}<small>{{ 'The week in a few minutes'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+</nav>
+{% endblock %}

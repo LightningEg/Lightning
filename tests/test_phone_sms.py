@@ -70,7 +70,7 @@ def test_money_lists_places_not_actions(month):
         await inner(scope, receive, send)
     page = TestClient(phone).get("/money").text
     assert 'href="/sms"' not in page and 'href="/needs-you"' not in page          # From SMS lives in Add; Needs you on Home
-    assert 'href="/settings"' in page and 'href="/rules"' in page
+    assert 'href="/settings"' in page and 'href="/rules"' not in page   # Rules is a setting: behind ⚙ (IV-11H)
 
 
 def test_messages_are_checked_on_an_sms_review_not_the_statement_one(month):
