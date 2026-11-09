@@ -23,6 +23,8 @@ The code steps are done (11B1-11B6). What is left is the owner's; every Console 
 ## 11B7 Owner: the developer account and the listing · owner
 The SMS declaration answers and the video script are in `docs/google-play.md` (11B2 built them). Developer account (organisation if a D-U-N-S number is practical; a personal account needs 11B8); a payments profile and the theme products for 11B3 (one in-app product per paid theme, product id = theme id: `cotton`, `dendera`, `nile`, `papyrus`), a Google Cloud service account with Play Console access to the app (View financial data, Manage orders), its JSON key saved in Supabase as the `redeem-play` secret `GOOGLE_PLAY_SERVICE_ACCOUNT` with `PLAY_PACKAGE_NAME=org.lightning.app`, and a licence tester for the internal track; the SMS declaration and video for 11B2; store listing in English and Arabic: icon 512 px, feature graphic 1024 × 500, 4-8 phone screenshots taken after IV-11E and IV-11D, short and full description in the brand voice.
 
+**Signing key (owner, 2026-11-09):** Play App Signing uses the existing app key (the `ANDROID_KEYSTORE_*` one that signs the GitHub APK), uploaded with Play's PEPK tool, so a GitHub install updates from Play without losing data. A separate upload key signs the bundle (`ANDROID_UPLOAD_*` in the `android-signing` environment).
+
 ## 11B8 Owner: closed test, 12 testers for 14 days · owner
 Only for a personal account made after 2023-11-13: 12 testers opted in for 14 days in a row, then apply for production.
 
