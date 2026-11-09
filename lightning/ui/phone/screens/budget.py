@@ -9,6 +9,7 @@ from datetime import date, timedelta
 from decimal import ROUND_CEILING, Decimal
 
 from lightning.core.dates import month_of, parse_month
+from lightning.ui.charts import ranked_donut
 
 ZERO = Decimal(0)
 ATTENTION = 4          # Needs attention shows at most this many, then "and N more"
@@ -24,6 +25,7 @@ class CategoryRow:
     left: Decimal              # negative when over
     share: float               # 0-100 for the bar
     attention: bool
+    state: str = "ok"          # "over" | "ahead" (ahead of the month's pace) | "done" (spent to the plan, nothing left) | "ok"
 
 
 @dataclass(frozen=True)
@@ -44,6 +46,8 @@ class BudgetScreen:
     fixed_count: int
     move: dict | None = None          # room to cover the largest overspend: {name, amount, href}
     raise_offer: dict | None = None   # "your income went up": recurring pay is above the plan's average (a current month only)
+    month_bar: dict | None = None     # IV-11D2: the everyday plan as one bar: spent, left, over (amounts add to the plan)
+    spend: dict | None = None         # IV-11D5: where the month went: a donut of four categories then Other, and its rows
 
 
 def _shift(month: str, step: int) -> str:
@@ -80,11 +84,15 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
             if not limit and not spent:
                 continue
             share = float(min(max(spent / limit * 100, ZERO), Decimal(100))) if limit > 0 else (100.0 if spent > 0 else 0.0)
-            ahead = pace_pct is not None and limit > 0 and spent / limit * 100 >= pace_pct + AHEAD_POINTS
-            rows.append(CategoryRow(line.category_id, line.name, limit, spent, limit - spent, share,
-                                    state != "past" and (limit - spent < 0 or ahead)))
+            gap = limit - spent
+            ahead = gap > 0 and pace_pct is not None and spent / limit * 100 >= pace_pct + AHEAD_POINTS
+            kind = "over" if gap < 0 else ("ahead" if ahead else ("done" if limit > 0 and gap == 0 else "ok"))
+            rows.append(CategoryRow(line.category_id, line.name, limit, spent, gap, share,
+                                    state != "past" and kind in ("over", "ahead"), kind))
     rows.sort(key=lambda r: (r.left, r.name.casefold()))
     needs = [r for r in rows if r.attention]
+    shown_needs = tuple(needs[:ATTENTION])
+    listed = tuple(r for r in rows if r not in shown_needs)     # a category is never listed twice
     paid = planned = ZERO
     for p in e.payments:
         if p.due_date[:7] != shown:
@@ -95,8 +103,31 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     move = _cover(c, shown, schedule, [r for r in rows if r.left < 0], e.room) if state == "current" else None
     return BudgetScreen(shown, prev, nxt, state, left, used,
                         (e.everyday_spent - e.pace) if state == "current" else None, e.per_day,
-                        tuple(needs[:ATTENTION]), max(len(needs) - ATTENTION, 0), tuple(rows), planned, paid, count,
-                        move, c.health.raise_offer(shown) if state == "current" else None)
+                        shown_needs, max(len(needs) - ATTENTION, 0), listed, planned, paid, count,
+                        move, c.health.raise_offer(shown) if state == "current" else None,
+                        month_bar(e.everyday_plan, e.everyday_spent), spend_donut(rows, paid))
+
+
+def month_bar(plan: Decimal, spent: Decimal) -> dict | None:
+    """IV-11D2: spent, left in plan and over as one bar. ``spent + left`` is the plan; ``over`` is spending past it.
+    Widths are shares of the longer of plan and spent, so an overspent bar shows where the plan ended."""
+    if plan <= 0 and spent <= 0:
+        return None
+    part_spent, part_left, part_over = min(spent, plan), max(plan - spent, ZERO), max(spent - plan, ZERO)
+    whole = part_spent + part_left + part_over
+    return {"spent": part_spent, "left": part_left, "over": part_over, "plan": plan,
+            "w_spent": float(part_spent / whole * 100), "w_left": float(part_left / whole * 100),
+            "w_over": float(part_over / whole * 100)}
+
+
+def spend_donut(rows: list[CategoryRow], fixed_paid: Decimal) -> dict | None:
+    """IV-11D5: where the month went, from the same figures as the rows: each flexible category's spending and the
+    fixed costs paid. Four by name, then Other."""
+    slices = [{"label": r.name, "value": r.spent} for r in rows]
+    if fixed_paid > 0:
+        slices.append({"label": "Fixed costs", "value": fixed_paid, "fixed": True})
+    d = ranked_donut(slices)
+    return d if d["segments"] else None
 
 
 def _cover(c, month: str, schedule, over: list[CategoryRow], room: dict) -> dict | None:

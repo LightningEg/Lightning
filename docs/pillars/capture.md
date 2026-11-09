@@ -12,12 +12,10 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](../../issues/7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | L | ready |
-| **IV-11I** | [The full Add page behind the sheet is titled with an account, lights Money, opens on an Import swit…](../../issues/11-phone-ux/IV-11I-the-add-page-behind-the-sheet.md) | S | ready |
 
 ## Reports with open follow-ups here
 
 - [CSV import stress test: where it breaks and how to rebuild it](../../issues/7-planning-import-and-search/r23-csv-import-stress/report.md): 7AB
 - [User journeys and visual unity](../../issues/12-desktop-ux/r27-journeys-and-visual-unity/report.md): 7AB
-- [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](../../issues/11-phone-ux/r29-google-play-readiness/report.md): 11I
 <!-- work:end -->
 

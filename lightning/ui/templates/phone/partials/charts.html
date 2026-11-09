@@ -67,3 +67,6 @@
   {% else %}{% set v = x.spend if kind == 'spend' else x.net %}<a class="phone-month {{ ('heat-' ~ x.spend_step) if kind == 'spend' else ('flow-' ~ x.net_tone ~ '-' ~ x.net_step) }}" role="listitem" href="/birdview/expenses?period=month&amp;month={{ x.key }}"><small>{{ name }}</small><b>{{ ((v|compact) if kind == 'spend' else (('+' if v > 0 else ('−' if v < 0 else '')) ~ (v|abs|compact))) if v else '0' }}</b></a>{% endif %}
 {% endfor %}</div>
 {% endmacro %}
+
+{# IV-11D2: the month as one bar: spent, left in plan, over (rose). #}
+{% macro month_bar(b, compact=False) %}<div class="phone-month-bar{{ ' is-compact' if compact }}" role="img" aria-label="{{ 'Spent {spent}, left in plan {left}'|tr(locale, spent=b.spent|money, left=b.left|money) }}{% if b.over %}{{ ', ' ~ ('over plan {over}'|tr(locale, over=b.over|money)) }}{% endif %}">{% if b.w_spent %}<i class="is-spent" style="width: {{ '%.2f'|format(b.w_spent) }}%"></i>{% endif %}{% if b.w_left %}<i class="is-left" style="width: {{ '%.2f'|format(b.w_left) }}%"></i>{% endif %}{% if b.w_over %}<i class="is-over" style="width: {{ '%.2f'|format(b.w_over) }}%"></i>{% endif %}</div>{% endmacro %}

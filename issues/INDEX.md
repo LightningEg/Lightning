@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 51 open items. Each folder holds its reports and its items.
+11 big pictures, 49 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -278,7 +278,6 @@ The phone is its own product: a few places that each answer one question, quick 
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **BV-11F** | [Budget's Needs attention lists categories that are finished, repeats them below, and in Arabic a zero left reads as a dot](11-phone-ux/BV-11F-budget-needs-attention-lists-finished-categories.md) | bug, visual · medium | Plan | S | Sonnet | ready |
 | **BV-11G** | [The same transfer reads two ways on Home and Activity, a day's net shows on one date only, and account names get translated](11-phone-ux/BV-11G-one-transfer-one-form-and-names-never-translated.md) | bug, visual · medium | Everywhere | M | Sonnet | ready |
 | **IV-11A** | [Phone first run - every Add is greyed out until "Save currencies" is pressed, and an empty Transactions says "Nothing matches"](11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | improvement, visual | Everywhere | M | Sonnet | ready |
 | IV-11A1 | ↳ Add works before "Save currencies" ([#432](https://github.com/LightningEg/Lightning/issues/432)) | | | S | Sonnet | |
@@ -292,7 +291,6 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-11D6 | ↳ Category marks in rows | | | M | Opus | |
 | **IV-11E** | [Home is a block of sentences - To do rows say who, how much, when and one verb, and the hero says how much a day until payday](11-phone-ux/IV-11E-home-reads-at-a-glance.md) | improvement, visual | Plan | M | Sonnet | ready |
 | **IV-11H** | [Money is 21 plain rows under Net worth, wears the old More icon, and its Settings is the PC's](11-phone-ux/IV-11H-money-is-a-drawer.md) | improvement, visual | Everywhere | M | Opus | ready |
-| **IV-11I** | [The full Add page behind the sheet is titled with an account, lights Money, opens on an Import switch and uses an emoji](11-phone-ux/IV-11I-the-add-page-behind-the-sheet.md) | improvement, visual | Capture | S | Sonnet | ready |
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | Opus | building |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | Opus | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner |  | |
@@ -320,7 +318,7 @@ The phone is its own product: a few places that each answer one question, quick 
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md).
 
-Done: 3AY1, 3AY3, 3AY5. Next free code: 11J.
+Done: 11F, 11I, 3AY1, 3AY3, 3AY5. Next free code: 11J.
 
 ## 12 Desktop UX and smart next steps
 
