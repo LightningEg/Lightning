@@ -1,10 +1,10 @@
-"""Home (IV-3AY6, guideline C11.1): "Am I OK today, and what do I do next?". Always today: the Safe to spend hero with
-its working, To do (three rows, one action each), Latest five, This month. The state (first run, catch-up, payday,
+"""Home (IV-3AY6, IV-11E, guideline C11.1): "Am I OK today, and what do I do next?". Always today: the Safe to spend
+hero with its working and about how much a day, To do (three rows: name, figure, when, one verb), Latest five, This month. The state (first run, catch-up, payday,
 overspent, calm; C13) decides what leads. Services calculate; this module only picks and orders."""
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 from lightning.core.dates import month_of, parse_date
@@ -25,6 +25,9 @@ class HomeScreen:
     state: str
     safe: Decimal | None               # None until the first run is done
     until: str                         # the next income date, "" when none is planned
+    per_day: Decimal | None            # Budget's everyday figure a day (EverydayBudget.per_day); None with no plan
+    per_day_days: int                  # the days it is spread over, today included
+    per_day_to_payday: bool            # those days run to payday: no payday before the month ends (owner, 2026-11-09)
     working: tuple[tuple[str, Decimal], ...]   # the parts of Safe to spend, for its sheet
     todo: tuple[TodoRow, ...]          # at most TODO_SHOWN
     todo_total: int
@@ -54,6 +57,11 @@ def build(c, day: date) -> HomeScreen:
     month = month_of(day)
     schedule = c.schedules.view()
     plan = c.budgets.plan_summary(month, schedule=schedule) if c.budgets.has_plan(month, schedule=schedule) else None
+    # The hero's line is Budget's own everyday figure a day (owner, 2026-11-09: one daily allowance, BV-12A), never
+    # Safe to spend divided by the days: two figures a day would answer one question twice.
+    everyday = c.forecaster.everyday(month, day) if plan else None
+    per_day = everyday.per_day if everyday else None
+    next_month = (day.replace(day=28) + timedelta(days=4)).replace(day=1)
     recent, total, _ = c.reporting.register_page(None, "1900-01-01", "9999-12-31", 1, 30)
     latest = tuple([r for r in recent if r.type != DocType.VAL][:LATEST])
     if _first_run(c):
@@ -67,7 +75,9 @@ def build(c, day: date) -> HomeScreen:
     else:
         state = "calm"
     first_run = state == "first_run"
-    return HomeScreen(state=state, safe=None if first_run else safe, until=until,
+    return HomeScreen(state=state, safe=None if first_run else safe, until=until, per_day=per_day,
+                      per_day_days=everyday.days_left if everyday else 0,
+                      per_day_to_payday=bool(until) and until <= next_month.isoformat(),
                       working=tuple((name, value) for name, value in forecast.safe_to_spend_parts),
                       todo=tuple(rows[:TODO_SHOWN]), todo_total=len(rows), latest=latest,
                       spent=c.reporting.cash_flow(day.replace(day=1), day).outflows,

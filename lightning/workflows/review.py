@@ -35,6 +35,13 @@ def _plural(count: int, one: str, many: str) -> str:
     return f"{count} {one if count == 1 else many}"
 
 
+def glance(name: str, verb: str, amount=None, when: str = "", n=None, sa: str = "") -> dict:
+    """The item at a glance, for Home's To do (IV-11E, guideline C11.1: `Vodafone 350 · in 3 days  Pay ›`): what it is
+    about, its figure, when or how many as a translatable phrase (``{n}`` and ``{sa}`` filled in), and one verb that
+    says what happens. Not part of the item's identity: the label and detail already carry the same facts."""
+    return {"name": name, "verb": verb, "amount": amount, "when": when, "n": n, "sa": sa}
+
+
 # Needs you groups its items by what they are about (feedback ticket 84): one row per group on the Overview,
 # and each group opens its own page. First match on the item's link wins; the order is the order shown.
 GROUPS = (("payments", "Bills and payments", ("/plan/items/", "/plan/bill-alerts/", "/gameya/", "/deposits/")),
@@ -139,13 +146,15 @@ class ReviewInbox:
                 items.append({"label": "Refill a reserve",
                               "detail": f"{reserve['name']} · {fmt(reserve['remaining'])} {c.base_currency} to refill.",
                               "href": "/plan/reserves", "action": "Refill", "priority": 2,
+                              "glance": glance(reserve["name"], "Refill", reserve["remaining"], "to refill"),
                               "source_version": {"reserve": reserve["id"],
                                                  "payments": [(row["id"], row["amount_e6"]) for row in
                                                               c.reserves.links_for_reserve(reserve["id"])]}})
             if reserve.get("due_date") and reserve["due_date"] < fmt_date(on) and reserve["effective_allocated"] > ZERO:
                 items.append({"label": f"{reserve['name']} is past its date",
                               "detail": f"Due {reserve['due_date']} · {fmt(reserve['effective_allocated'])} {c.base_currency} still set aside.",
-                              "href": "/plan/reserves", "priority": 2})
+                              "href": "/plan/reserves", "priority": 2,
+                              "glance": glance(reserve["name"], "Open", reserve["effective_allocated"], "past its date")})
         # Payments that are due and unpaid on this day, whatever period a page shows.
         for payment in c.planning.what_you_owe(on).bills_due_items:
             kind = "Loan payment due" if payment.item.kind.value == "LOAN" else "Bill due"
@@ -164,6 +173,7 @@ class ReviewInbox:
                                     "Link it so the plan does not count it again.",
                           "href": f"/plan/items/{item.id}/pay?due={payment.due_date}&back=%2F", "popup": True,
                           "action": "Link", "priority": 1,
+                          "glance": glance(item.name, "Link", txn["amount"], "arrived early" if item.is_income else "paid early"),
                           "post": {"href": f"/plan/items/{item.id}/pay", "label": "Link this payment",
                                    "fields": {"outcome": "link", "due": payment.due_date,
                                               "transaction_id": str(txn["id"])}}})
@@ -183,7 +193,8 @@ class ReviewInbox:
             items.append({"label": f"{changed['name']} was paid at a different amount",
                           "detail": f"Latest payment {fmt(from_e6(changed['paid_e6']))} {currency}; "
                                     f"planned {fmt(from_e6(changed['amount_e6']))}. Review future payments.",
-                          "href": f"/plan/items/{changed['id']}/edit", "priority": 2})
+                          "href": f"/plan/items/{changed['id']}/edit", "priority": 2,
+                          "glance": glance(changed["name"], "Update", from_e6(changed["paid_e6"]), "new amount")})
         if getattr(c, "deposit_receipts", None) is not None:
             # One item per certificate, not per month: the bank's fixed payout rarely equals the day-count figure.
             for account in c.accounts.list(active_only=True):
@@ -200,7 +211,9 @@ class ReviewInbox:
                                      else f"{name}: 1 interest payment to match",
                             "detail": f"{fmt(sum(i['remaining'] for i in issues))} {account.currency} still unmatched"
                                       + (f"; {suggested} have a suggested bank receipt." if suggested else "."),
-                            "href": f"/deposits/{account.id}#interest-receipts", "priority": 1, "action": "Review"}
+                            "href": f"/deposits/{account.id}#interest-receipts", "priority": 1, "action": "Review",
+                            "glance": glance(name, "Match", sum(i["remaining"] for i in issues),
+                                             "1 to match" if len(issues) == 1 else "{n} to match", len(issues))}
                     if suggested:
                         item["post"] = {"href": f"/deposits/{account.id}/certificates/{certificate_id}/interest/match-all",
                                         "label": "Match all suggested"}
@@ -212,12 +225,15 @@ class ReviewInbox:
                 count = len(pairs)
                 items.append({"label": "Reimbursement receipts to pair",
                               "detail": f"{count} possible pairs in the original expense category. Review before linking.",
-                              "href": "/reimbursements#suggested-pairs", "priority": 2, "action": "Review"})
+                              "href": "/reimbursements#suggested-pairs", "priority": 2, "action": "Review",
+                              "glance": glance("Reimbursement receipts", "Pair", None,
+                                               "1 to pair" if count == 1 else "{n} to pair", count)})
             for claim in claims:
                 if claim["issues"] or (claim["outstanding"] and claim["due_date"] and claim["due_date"] <= on.isoformat()):
                     items.append({"label": "Reimbursement needs review",
                                   "detail": f"{fmt(claim['outstanding'])} {c.base_currency} outstanding.",
-                                  "href": "/reimbursements", "priority": 1})
+                                  "href": "/reimbursements", "priority": 1,
+                                  "glance": glance("Reimbursement", "Check", claim["outstanding"], "outstanding")})
         forecast = self.forecast = c.forecaster.forecast(on)  # the Overview's Safe to spend card reads it too
         # A dated daily forecast takes precedence over its monthly summary: the summary can hide which
         # day or account runs short, and would duplicate a more useful warning.
@@ -228,20 +244,23 @@ class ReviewInbox:
             items.append({"label": "Cash may run short",
                           "detail": f"Scheduled payments may leave cash short by {fmt(abs(first_shortfall.balance))} "
                                     f"{first_shortfall.currency} on {first_shortfall.date}.",
-                          "href": "/plan#plan-dated-cash", "priority": 1})
+                          "href": "/plan#plan-dated-cash", "priority": 1,
+                          "glance": glance("Cash", "See", abs(first_shortfall.balance), "short on {sa}", sa=first_shortfall.date)})
         elif account_shortfalls:
             earliest = min(account_shortfalls, key=lambda item: item.date)
             items.append({"label": f"{earliest.account_name} may run short",
                           "detail": f"Scheduled payments may leave this account short by {fmt(abs(earliest.balance))} "
                                     f"{earliest.currency} on {earliest.date}.",
-                          "href": "/plan#plan-dated-cash", "priority": 1})
+                          "href": "/plan#plan-dated-cash", "priority": 1,
+                          "glance": glance(earliest.account_name, "See", abs(earliest.balance), "short on {sa}", sa=earliest.date)})
         else:
             # Keep the existing monthly warning for deficits caused by the variable-budget forecast.
             lowest = forecast.lowest
             if lowest is not None and lowest.closing < ZERO:
                 items.append({"label": "Cash may run short",
                               "detail": f"The cash forecast ends {lowest.month} at {fmt(lowest.closing)} {c.base_currency}.",
-                              "href": "/plan", "priority": 1})
+                              "href": "/plan", "priority": 1,
+                              "glance": glance("Cash", "See", -lowest.closing, "short in {sa}", sa=lowest.month)})
         # Honest numbers: a holding priced more than two months ago is shown at an old value.
         # Month-end prices the price files lack (a fund they do not cover, a stock listed later): typed by hand.
         missing = missing_prices(c)
@@ -254,32 +273,37 @@ class ReviewInbox:
             more = f"; and {len(by_name) - 2} more" if len(by_name) > 2 else ""
             items.append({"label": _plural(len(missing), "price missing", "prices missing"),
                           "detail": f"{named}{more}.", "href": "/investments/prices#missing",
-                          "action": "Get prices", "priority": 2})
+                          "action": "Get prices", "priority": 2,
+                          "glance": glance("Prices", "Get prices", None, "1 missing" if len(missing) == 1 else "{n} missing", len(missing))})
         stale = c.reporting.stale_prices(on)
         if stale:
             named = ", ".join(f"{row['name']} ({row['price_date']})" for row in stale[:2])
             more = f" and {len(stale) - 2} more" if len(stale) > 2 else ""
             items.append({"label": "Prices are out of date",
                           "detail": f"Last priced: {named}{more}. Values use these old prices.",
-                          "href": "/investments/prices", "action": "Update prices", "priority": 2})
+                          "href": "/investments/prices", "action": "Update prices", "priority": 2,
+                          "glance": glance("Prices", "Update", None, "1 out of date" if len(stale) == 1 else "{n} out of date", len(stale))})
         for section in c.budgets.month_view(month_of(on), schedule=c.schedules.view()).sections:
             for line in section.lines:
                 if line.depth == 2 and line.over:
                     items.append({"label": f"{line.name} over plan",
                                   "detail": f"{fmt(line.planned_actual - line.available)} {c.base_currency} over this month's plan.",
                                   "href": f"/budget?month={month_of(on)}&open_group=all#limit-{line.category_id}",
-                                  "action": "Change the plan", "priority": 2})
+                                  "action": "Change the plan", "priority": 2,
+                                  "glance": glance(line.name, "Adjust", line.planned_actual - line.available, "over plan")})
             if section.planned_actual > section.available:
                 items.append({"label": f"{section.name} over plan",
                               "detail": f"{fmt(section.planned_actual - section.available)} {c.base_currency} over this month's plan.",
-                              "href": "/budget", "priority": 2})
+                              "href": "/budget", "priority": 2,
+                              "glance": glance(section.name, "Adjust", section.planned_actual - section.available, "over plan")})
         # A category's own plan below what is already scheduled in it: the bill will overrun the plan.
         for row in c.budgets.below_scheduled(month_of(on), schedule=c.schedules.view()):
             items.append({"label": f"{row['name']} is planned below its bills",
                           "detail": f"Planned {fmt(row['planned'])} {c.base_currency}; bills and loan payments "
                                     f"scheduled this month come to {fmt(row['scheduled'])}.",
                           "href": f"/budget?month={month_of(on)}&open_group=all#limit-{row['category_id']}",
-                          "action": "Change the plan", "priority": 2})  # where its limit is typed (IV-3AL2)
+                          "action": "Change the plan", "priority": 2,  # where its limit is typed (IV-3AL2)
+                          "glance": glance(row["name"], "Adjust", row["scheduled"] - row["planned"], "below its bills")})
         # The month's plan against the savings target and dated goals (one check: HealthService.plan_check).
         check = c.health.plan_check(month_of(on))
         if check.planned is not None and check.over_by and check.planned_savings_rate is not None:
@@ -288,12 +312,15 @@ class ReviewInbox:
                                        "This month's plan is short for your emergency fund",
                               "detail": f"It leaves {fmt(check.plan_saves)} {c.base_currency}; {check.needs_label} "
                                         f"{fmt(check.needs)}. Plan {fmt(check.over_by)} less.",
-                              "href": f"/budget?month={check.month}", "priority": 2})
+                              "href": f"/budget?month={check.month}", "priority": 2,
+                              "glance": glance("This month's plan", "Plan less", check.over_by,
+                                               "short for your goals" if check.goals else "short for your emergency fund")})
             else:
                 items.append({"label": "This month's plan is below your savings target",
                               "detail": f"It saves {fmt(check.planned_savings_rate)}% of income; your target is "
                                         f"{fmt(check.target_percent)}%. Plan {fmt(check.over_by)} {c.base_currency} less.",
-                              "href": f"/budget?month={check.month}", "priority": 2})
+                              "href": f"/budget?month={check.month}", "priority": 2,
+                              "glance": glance("This month's plan", "Plan less", check.over_by, "below your savings target")})
         items.extend(self._smarter_plan(on, forecast.free_cash))
         items.extend(self._health_alerts(on, items))
         visible = []
@@ -327,11 +354,14 @@ class ReviewInbox:
             items.append({"label": "Looks recurring",
                           "detail": f"{offer['name']} · {fmt(offer['amount'])} {currency} · {offer['months']} months · last {offer['last_date']}.",
                           "href": "/plan/recurring#recurring-suggest", "action": "Track", "priority": 2,
+                          "glance": glance(offer["name"], "Make it a bill", offer["amount"], "every month"),
                           "source_version": str(offer["counterparty_id"])})
         for offer in WeeklyReview(self.c).rule_offers():
             items.append({"label": "Make a rule",
                           "detail": f"{offer['name']} · {offer['count']} corrections · {offer['category']}.",
                           "href": offer["href"], "action": "Make a rule", "popup": True,
+                          "glance": glance(offer["name"], "Make a rule", None,
+                                           "1 correction" if offer["count"] == 1 else "{n} corrections", offer["count"]),
                           "priority": 2, "source_version": offer["id"]})
         return items
 
@@ -351,7 +381,9 @@ class ReviewInbox:
             if figure.key == "emergency_fund":
                 items.append({"label": "Emergency fund needs you",
                               "detail": f"{fmt(figure.value, 1)} months of cover. Review your emergency reserve.",
-                              "href": "/financial-health", "action": "Review", "priority": 2})
+                              "href": "/financial-health", "action": "Review", "priority": 2,
+                              "glance": glance("Emergency fund", "Top up", self.c.health.emergency_fund(on).top_up or None,
+                                               "this month")})
                 continue
             label = "Planned savings rate" if figure.key == "planned_savings_rate" else LIMIT_LABELS[figure.key]
             if figure.gap:
@@ -407,19 +439,22 @@ class ReviewInbox:
             found.append({"label": f"{goal['name']} will not be ready by its date",
                           "detail": f"Due {goal['due_date']} · it needs {fmt(goal['need'])} {cur} a month and your plan "
                                     f"leaves {fmt(goal['can'])} for it. {pace} {way}",
-                          "href": "/plan/reserves", "action": "See reserves", "priority": 2})
+                          "href": "/plan/reserves", "action": "See reserves", "priority": 2,
+                          "glance": glance(goal["name"], "Set aside", goal["need"], "a month")})
         offer = c.health.raise_offer(month)
         if offer:
             found.append({"label": "Your income went up",
                           "detail": f"Recurring expects {fmt(offer['recurring'])} {cur} a month, {fmt(offer['raise'])} "
                                     f"more than your average of {fmt(offer['average'])}. Plan with it, or save the difference.",
-                          "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose", "priority": 2})
+                          "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose", "priority": 2,
+                          "glance": glance("Your income", "Choose", offer["raise"], "more a month")})
         short = c.health.short_month(on)
         if short:
             found.append({"label": f"{_month_name(short['month'])} saved less than your target",
                           "detail": f"It saved {fmt(short['rate'])}% of money in; your target is {fmt(short['limit'])}%, "
                                     f"{fmt(short['short'])} {cur} more.",
-                          "href": "/financial-health", "action": "See financial health", "priority": 2})
+                          "href": "/financial-health", "action": "See financial health", "priority": 2,
+                          "glance": glance(_month_name(short["month"]), "See", short["short"], "short of your target")})
         below = {row["category_id"] for row in c.budgets.below_scheduled(month, schedule=c.schedules.view())}  # already named: plan below its bills
         for row in (row for row in c.budgets.over_twice(month, schedule=c.schedules.view()) if row["category_id"] not in below):
             first, second = (_month_name(key).split()[0] for key in row["months"])
@@ -429,12 +464,14 @@ class ReviewInbox:
                               "detail": f"{detail} Move {fmt(row['amount'])} from {row['from_name']}, "
                                         "which had that left both months.",
                               "href": f"/budget/move?month={month}&to={row['category_id']}&from={row['from_id']}"
-                                      f"&amount={row['amount']}", "popup": True, "action": "Move it", "priority": 2})
+                                      f"&amount={row['amount']}", "popup": True, "action": "Move it", "priority": 2,
+                              "glance": glance(row["name"], "Move it", row["amount"], "over plan 2 months")})
             else:
                 found.append({"label": f"{row['name']} over plan two months running",
                               "detail": f"{detail} Raise its plan, or plan less elsewhere.",
                               "href": f"/budget?month={month}&open_group=all#limit-{row['category_id']}",
-                              "action": "Change the plan", "priority": 2})
+                              "action": "Change the plan", "priority": 2,
+                              "glance": glance(row["name"], "Adjust", row["amount"], "over plan 2 months")})
         return found
 
     def _sms(self) -> list[dict]:
@@ -444,11 +481,13 @@ class ReviewInbox:
         if count:
             found.append({"label": "Bank SMS need their account",
                           "detail": f"{_plural(count, 'message waits', 'messages wait')} until you say which account "
-                                    "they belong to.", "href": "/sms", "action": "Choose the account", "priority": 1})
+                                    "they belong to.", "href": "/sms", "action": "Choose the account", "priority": 1,
+                          "glance": glance("Bank SMS", "Choose", None, "1 needs an account" if count == 1 else "{n} need an account", count)})
         if unread:
             found.append({"label": "Bank SMS kept for you",
                           "detail": f"{_plural(unread, 'message waits', 'messages wait')}: unread, or the other side "
-                                    "of a transfer. Enter or dismiss.", "href": "/sms", "action": "Look at them", "priority": 2})
+                                    "of a transfer. Enter or dismiss.", "href": "/sms", "action": "Look at them", "priority": 2,
+                          "glance": glance("Bank SMS", "Enter", None, "1 kept for you" if unread == 1 else "{n} kept for you", unread)})
         return found
 
     def _statements(self) -> list[dict]:
@@ -466,7 +505,9 @@ class ReviewInbox:
                                     f" · from row {batch['first_row_number']} · {day}.",
                           "href": f"/accounts/{batch['account_id']}/import/{batch['batch_id']}"
                                   f"#import-row-{batch['first_row_id']}",
-                          "action": "Finish the import", "priority": 1})
+                          "action": "Finish the import", "priority": 1,
+                          "glance": glance(batch["file_name"], "Finish", None,
+                                           "1 row waits" if batch["waiting"] == 1 else "{n} rows wait", batch["waiting"])})
         return found
 
     def _uncategorized(self) -> list[dict]:
@@ -481,6 +522,9 @@ class ReviewInbox:
                               "detail": "Choose a category for each, so the budget and reports count it.",
                               "href": f"/transactions?category_id={category.id}",
                               "action": "Sort them out", "priority": 2,
+                              "glance": glance("No category", "Sort", None,
+                                               ("1 payment" if total == 1 else "{n} payments") if code.startswith("EXP")
+                                               else ("1 amount in" if total == 1 else "{n} amounts in"), total),
                               "source_version": sha256(json.dumps([tuple(row) for row in self.c.db.all(
                                   "SELECT DISTINCT t.id,t.updated_at FROM transactions t JOIN ledger_entries l "
                                   "ON l.transaction_id=t.id WHERE l.category_id=? AND t.status='POSTED' ORDER BY t.id",

@@ -92,14 +92,14 @@ def test_the_page_shows_the_hero_to_do_latest_and_this_month_in_that_order(sampl
 
 def test_home_has_at_most_eight_figures(sample):
     html = _page(sample).text
-    parts = [html.split('id="home-hero"', 1)[1].split("</section>", 1)[0].split(">", 1)[1],
+    parts = [html.split('id="home-hero"', 1)[1].split('id="todo-heading"', 1)[0].split(">", 1)[1],  # the hero, not To do twice
              html.split('id="todo-heading"', 1)[1].split("</section>", 1)[0],
              html.split('id="month-heading"', 1)[1].split("</section>", 1)[0]]
     text = re.sub(r'<div class="phone-sheet-panel".*?</details>', " ", " ".join(parts), flags=re.S)  # the working is a sheet, not on the screen
     text = re.sub(r"<[^>]+>", " ", text)
     text = re.sub(r"\d{4}-\d\d-\d\d|See all \d+", " ", text)  # dates and the count on "See all" are not figures
     figures = re.findall(r"\d[\d,]*(?:\.\d+)?(?!\d)(?!\s*(?:days?|bills?|more|items?))", text)  # amounts, not counts of days
-    assert len(figures) <= 8 and not any("." in f for f in figures), figures  # whole EGP
+    assert len(figures) <= 8 and not any("." in f for f in figures), (figures, text)  # whole EGP
 
 
 def test_first_screen_holds_the_latest_row_in_one_and_a_fifth_screens(sample):
@@ -139,9 +139,9 @@ def test_first_screen_holds_the_latest_row_in_one_and_a_fifth_screens(sample):
 def test_every_home_sentence_has_an_arabic_form():
     from lightning.ui.i18n import translate
     for key in ("Home", "Three steps to your first answer", "Your salary account", "Your payday", "Your first payment",
-                "May be off: {n} days not recorded.", "Salary arrived", "Nothing recorded since {sa}. Two minutes to catch up.",
-                "1 bill is long overdue. Two minutes to catch up.", "{n} bills are long overdue. Two minutes to catch up.",
-                "Pay", "Catch up", "Sort", "To do", "Review"):
+                "Salary arrived", "{n} days not recorded", "1 bill long overdue", "{n} bills long overdue",
+                "About {amt} a day until payday on {sa}.", "About {amt} a day for {n} days.",
+                "Pay", "Catch up", "Sort", "To do", "Open"):
         assert translate(key, "ar") != key, key
 
 
@@ -171,3 +171,37 @@ def test_home_month_bar_adds_to_the_plan_and_agrees_with_left_in_plan(c, monkeyp
     s = screen.build(c, date(2026, 10, 12))
     b = s.month_bar
     assert b and b["spent"] + b["left"] == b["plan"] and b["left"] == max(s.left_in_plan, 0)
+
+
+def test_every_to_do_row_has_a_figure_and_a_verb_and_the_hero_says_a_day(sample):
+    """IV-11E (guideline C11.1): a To do row is the thing's name, its figure (an amount or a count), when, and one verb
+    that says what happens, never "Review"; the hero's line is about how much a day, Budget's own figure (BV-12A)."""
+    from lightning.planning import bill_state
+    from lightning.workflows.todo import todo_rows
+    c, day = _on(sample, "2026-10-04")
+    inbox = home.ReviewInbox(c)
+    items = inbox.items(day)
+    bills = bill_state.open_bills(c.planning, day, bill_state.SOON_DAYS)
+    rows = todo_rows(c, day, bills, items, bill_state.catch_up(c, day, bills), paid_today=True)
+    assert len(rows) >= 8
+    for row in rows:
+        assert row.action and row.action != "Review", row
+        assert row.amount is not None or row.count is not None or row.days is not None, row
+    screen = home.build(c, day)
+    assert screen.todo and all(r.action != "Review" for r in screen.todo)
+    html = _page(sample).text
+    line = re.sub(r"<[^>]+>", "", re.search(r'<p class="phone-hero-line">(.*?)</p>', html, re.S).group(1))
+    assert "a day" in line, line
+    section = html.split('id="todo-heading"', 1)[1].split("</section>", 1)[0]
+    for row in re.findall(r'<a class="phone-row.*?</a>', section, re.S):
+        text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", row))
+        assert re.search(r"\d", text) and "Review" not in text, text
+
+
+def test_days_not_recorded_is_a_to_do_row_not_the_hero_line(sample):
+    """IV-11E: catch-up says how many days in To do; the hero keeps its figure a day."""
+    screen = home.build(*_on(sample, "2026-10-11"))
+    assert screen.state == "catch_up" and screen.per_day is not None
+    html = _page(sample, "2026-10-11").text
+    line = re.search(r'<p class="phone-hero-line">(.*?)</p>', html, re.S).group(1)
+    assert "not recorded" not in line and "a day" in line
