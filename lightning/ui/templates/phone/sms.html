@@ -17,6 +17,14 @@
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
 </form>
 {% endmacro %}
+{# Play's SMS policy (NF-11B2): the disclosure is the first thing on the page, before the system's question. #}
+{% if permission == 'not_granted' %}
+<section class="phone-section" aria-labelledby="allow-heading">
+  <header class="phone-section-head"><h2 id="allow-heading">{{ "Read bank SMS by itself"|tr(locale) }}</h2></header>
+  <p class="phone-note">{{ "Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction you check. It reads messages from senders with a name or a short code, like CIB or NBE, never from people's numbers. The messages stay on this phone: nothing is sent anywhere. Nothing is posted until you check it."|tr(locale) }}</p>
+  <form method="post" action="/sms/allow" class="phone-form"><button class="btn phone-save" type="submit">{{ "Allow reading SMS"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+</section>
+{% endif %}
 {% if error %}<p class="flash error" role="alert">{{ error|tr(locale) }}</p>{% endif %}
 {% if not lead %}{{ paste_form() }}{% endif %}
 {% if waiting %}
@@ -54,13 +62,7 @@
 {% if lead %}
 <details class="phone-more"><summary>{{ "Paste more messages"|tr(locale) }}</summary>{{ paste_form() }}</details>
 {% endif %}
-{% if permission == 'not_granted' %}
-<section class="phone-section" aria-labelledby="allow-heading">
-  <header class="phone-section-head"><h2 id="allow-heading">{{ "Read bank SMS by itself"|tr(locale) }}</h2></header>
-  <p class="phone-note">{{ "Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction you check. It reads messages from senders with a name or a short code, like CIB or NBE, never from people's numbers. The messages stay on this phone: nothing is sent anywhere. Nothing is posted until you check it."|tr(locale) }}</p>
-  <form method="post" action="/sms/allow" class="phone-form"><button class="btn phone-save" type="submit">{{ "Allow reading SMS"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
-</section>
-{% elif permission == 'granted' %}
+{% if permission == 'granted' %}
 <p class="phone-note">{{ 'Reads new bank messages when you open Overview or this page'|tr(locale) }}{% if last_read %} · {{ 'up to'|tr(locale) }} {{ last_read.strftime('%Y-%m-%d %H:%M') }}{% endif %}.</p>
 {% endif %}
 {% endblock %}

@@ -18,6 +18,13 @@ public final class SmsBridge {
     static final int REQUEST_SMS = 2;
     private static final int MAX_MESSAGES = 500;
     static volatile Activity activity;
+    /** The sender with spaces and one leading + taken off (SQLite, run by the SMS provider). */
+    private static final String BARE = "(CASE WHEN substr(replace(coalesce(address, ''), ' ', ''), 1, 1) = '+' "
+            + "THEN substr(replace(coalesce(address, ''), ' ', ''), 2) ELSE replace(coalesce(address, ''), ' ', '') END)";
+    /** Never a person (NF-11B2, Play's SMS policy): the provider leaves out every sender that is a phone number, the
+     *  PERSON rule of lightning/sms_imports.py (^\+?\d{7,}$), so a person's message never reaches the app. Banks
+     *  send from a name (CIB, NBE) or a short code, which pass. */
+    static final String NOT_A_PERSON = "NOT (length(" + BARE + ") >= 7 AND " + BARE + " NOT GLOB '*[^0-9]*')";
     private static final List<String> shared = new ArrayList<>();
 
     private SmsBridge() {}
@@ -35,14 +42,14 @@ public final class SmsBridge {
         current.runOnUiThread(() -> current.requestPermissions(new String[]{Manifest.permission.READ_SMS}, REQUEST_SMS));
     }
 
-    /** The inbox after `afterMs`, oldest first, as JSON [[sender, body, receivedMs], …]. */
+    /** The inbox after `afterMs` from senders that are not people, oldest first, as JSON [[sender, body, receivedMs], …]. */
     public static String since(long afterMs) {
         JSONArray out = new JSONArray();
         Activity current = activity;
         if (current == null || !"granted".equals(permission())) return out.toString();
         String[] columns = {Telephony.Sms.ADDRESS, Telephony.Sms.BODY, Telephony.Sms.DATE};
         try (Cursor cursor = current.getContentResolver().query(Telephony.Sms.Inbox.CONTENT_URI, columns,
-                Telephony.Sms.DATE + " > ?", new String[]{Long.toString(afterMs)}, Telephony.Sms.DATE + " ASC")) {
+                Telephony.Sms.DATE + " > ? AND " + NOT_A_PERSON, new String[]{Long.toString(afterMs)}, Telephony.Sms.DATE + " ASC")) {
             if (cursor == null) return out.toString();
             while (cursor.moveToNext() && out.length() < MAX_MESSAGES) {
                 JSONArray row = new JSONArray();
