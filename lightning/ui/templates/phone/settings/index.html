@@ -1,0 +1,83 @@
+{# Phone Settings (IV-11H, guideline C11.3): what a phone needs, in rows (Appearance, Language, This phone, Bank SMS,
+   Backup, Privacy, About and licences, Delete this profile), then what is best on a PC. Every other section
+   (?section=budget, currencies, …) is the shared page. #}
+{% extends "settings/index.html" %}
+{% block content %}
+{% if section in ('', 'general') %}
+{% set session = request.state.session_token|default('') %}
+<section class="card settings-list" aria-labelledby="theme-heading">
+  <h2 id="theme-heading">{{ 'Appearance'|tr(locale) }}</h2>
+  <div class="settings-row"><div><label for="app-theme">{{ 'Theme'|tr(locale) }}</label></div>
+    <div class="settings-control"><select id="app-theme" data-theme-select aria-describedby="theme-status"></select><span id="theme-status" class="settings-status" data-theme-status role="status"></span></div></div>
+  <div class="settings-row" data-theme-night hidden><div><label for="theme-night">{{ 'Night version'|tr(locale) }}</label></div>
+    <div class="settings-control"><select id="theme-night"><option value="day">{{ 'Day'|tr(locale) }}</option><option value="night">{{ 'Night'|tr(locale) }}</option><option value="follow">{{ 'Follow this phone'|tr(locale) }}</option></select></div></div>
+  <div class="settings-row"><div><label for="ui-locale">{{ 'Language'|tr(locale) }}</label></div>
+    <form method="post" action="/settings/locale" class="settings-control"><select id="ui-locale" name="locale" data-locale-auto><option value="en" {{ 'selected' if locale == 'en' }}>English</option><option value="ar" {{ 'selected' if locale == 'ar' }}>العربية</option></select><input type="hidden" name="__session" value="{{ session }}"></form></div>
+  {% set paid = store_themes() %}{% if paid %}
+  <details class="theme-unlock">
+    <summary>{{ 'Unlock a theme you bought'|tr(locale) }}</summary>
+    <ol class="theme-unlock-steps">
+      <li>{{ 'Buy it on lightningeg.com.'|tr(locale) }} <a data-theme-prices data-marketplace="{{ marketplace }}" href="{{ marketplace }}?from=app#themes" target="_blank" rel="noopener">{{ 'See prices'|tr(locale) }}</a></li>
+      <li>{{ 'On your account page, press Get app code.'|tr(locale) }}</li>
+      <li>{{ "Paste it here. Do this once: your profile's other devices unlock by themselves."|tr(locale) }}</li>
+    </ol>
+    <p class="muted small">{{ 'Another profile needs its own unlock, at a quarter of the price.'|tr(locale) }}</p>
+    {% set mine = paid|selectattr('owned')|map(attribute='name')|list %}{% if mine %}<p>{{ 'Yours on this profile:'|tr(locale) }} {% for n in mine %}<b>{{ n|tr(locale) }}</b>{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+    <form method="post" action="/settings/theme/unlock" class="theme-unlock-form">
+      <label for="unlock-code">{{ 'Code from your account page'|tr(locale) }}</label>
+      <input id="unlock-code" name="code" autocomplete="off" spellcheck="false" dir="ltr" maxlength="64" required placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX">
+      <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+      <button class="btn primary">{{ 'Unlock'|tr(locale) }}</button>
+    </form>
+  </details>{% endif %}
+</section>
+<section class="card phone-card" aria-labelledby="this-phone-heading">
+  <h2 id="this-phone-heading" class="phone-card-title">{{ 'This phone'|tr(locale) }}</h2>
+  <div class="phone-rows">
+    <a class="phone-row" href="/profiles"><span>{{ 'Profile and lock'|tr(locale) }}<small>{{ 'Password, recovery key, lock'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+    {% if request.state.fingerprint_row|default('') %}<a class="phone-row" href="/profiles/fingerprint"><span>{{ 'Unlock with fingerprint'|tr(locale) }}</span><b>{{ ('On' if request.state.fingerprint_row == 'on' else 'Off')|tr(locale) }}{{ chevron() }}</b></a>{% endif %}
+    <a class="phone-row" href="/profiles/devices"><span>{{ 'Devices'|tr(locale) }}<small>{{ 'Pair your phone or PC'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+    <a class="phone-row" href="/sms"><span>{{ 'Bank SMS'|tr(locale) }}<small>{{ 'Read bank messages into transactions'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+  </div>
+</section>
+<section class="card settings-list" aria-labelledby="backup-heading">
+  <h2 id="backup-heading">{{ 'Backup'|tr(locale) }}</h2>
+  <div class="settings-row"><div><span class="settings-name">{{ 'Back up now'|tr(locale) }}</span><small>{{ 'One is made each time the app starts.'|tr(locale) }}{% if backups %} {{ '{n} kept on this phone.'|tr(locale, n=backups|length) }}{% endif %}</small></div>
+    <form method="post" action="/settings/backup" class="settings-control"><button class="btn primary small">{{ 'Back up now'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ session }}">{% if backups %}<a class="btn small" href="/settings/backup/latest">{{ 'Save a copy'|tr(locale) }}</a>{% endif %}</form></div>
+  <div class="settings-row"><div><span class="settings-name">{{ 'Move your data'|tr(locale) }}</span><small>{{ 'A full copy, or records in from another profile.'|tr(locale) }}</small></div>
+    <div class="settings-control"><a class="btn small" href="/exports/all" data-popup-open>{{ 'Export'|tr(locale) }}</a><a class="btn small" href="/exports/import">{{ 'Import'|tr(locale) }}</a></div></div>
+</section>
+<section class="card phone-card" aria-labelledby="your-setup-heading">
+  <h2 id="your-setup-heading" class="phone-card-title">{{ 'Your setup'|tr(locale) }}</h2>
+  <div class="phone-rows">
+    <a class="phone-row" href="/categories"><span>{{ 'Categories'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+    <a class="phone-row" href="/counterparties"><span>{{ 'Counterparties'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+    <a class="phone-row" href="/rules"><span>{{ 'Rules'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+    <a class="phone-row" href="/settings?section=currencies"><span>{{ 'Currencies'|tr(locale) }}</span><b dir="ltr">{{ base }}{{ chevron() }}</b></a>
+    <a class="phone-row" href="/checks"><span>{{ 'Data checks'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+  </div>
+  <form method="post" action="/zakat/enabled" class="settings-row"><div><label for="zakat-on">{{ 'Show zakat'|tr(locale) }}</label></div>
+    <div class="settings-control"><input type="hidden" name="__session" value="{{ session }}"><label class="switch"><input id="zakat-on" type="checkbox" name="on" value="1" {{ 'checked' if zakat_on }} data-autosubmit><span class="sr-only">{{ 'Show zakat'|tr(locale) }}</span></label><noscript><button class="btn small">{{ 'Save'|tr(locale) }}</button></noscript></div></form>
+</section>
+<section class="card phone-card" aria-labelledby="privacy-heading">
+  <h2 id="privacy-heading" class="phone-card-title">{{ 'Privacy'|tr(locale) }}</h2>
+  <div class="phone-rows">
+    <a class="phone-row" href="{{ outside_url('privacy', locale) }}#app" target="_blank" rel="noopener"><span>{{ 'Privacy notice'|tr(locale) }}<small>{{ 'No account and no analytics: your records stay on your devices.'|tr(locale) }}</small></span><b>↗</b></a>
+  </div>
+</section>
+<section class="card settings-list" aria-labelledby="about-heading">
+  <h2 id="about-heading">{{ 'About and licences'|tr(locale) }}</h2>
+  <div class="settings-row settings-facts"><div><span class="settings-name">{{ 'Lightning version'|tr(locale) }}</span></div><div class="settings-control" dir="ltr">v{{ app_version }}</div></div>
+  <div class="phone-rows"><a class="phone-row" href="/settings/licences"><span>{{ 'Licences'|tr(locale) }}<small>{{ 'Lightning and the parts it is built from'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a></div>
+</section>
+<section class="card settings-list" aria-labelledby="delete-heading">
+  <h2 id="delete-heading">{{ 'Delete your data'|tr(locale) }}</h2>
+  <p class="phone-note">{{ "Your profiles live only in Lightning's own storage on this phone. To delete them all, open Android's Settings › Apps › Lightning › Storage and clear it, or uninstall Lightning. Save a copy first if you may want them back."|tr(locale) }}</p>
+</section>
+<section class="card phone-card" aria-labelledby="pc-heading">
+  <h2 id="pc-heading" class="phone-card-title">{{ 'Best on your PC'|tr(locale) }}</h2>
+  <p class="phone-note">{{ 'Ask an AI, sale factors, target allocation, price files and each tab’s settings.'|tr(locale) }}</p>
+</section>
+<script nonce="{{ request.state.csp_nonce|default('') }}">document.querySelectorAll('[data-autosubmit],[data-locale-auto]').forEach(control=>control.addEventListener('change',()=>control.form?.requestSubmit()));</script>
+{% else %}{{ super() }}{% endif %}
+{% endblock %}

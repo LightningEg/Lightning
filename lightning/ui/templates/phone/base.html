@@ -35,7 +35,8 @@
   <nav class="phone-appbar-icons" aria-label="{{ 'Tools'|tr(locale) }}">
     <a class="phone-icon" href="/search" aria-label="{{ 'Search'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></a>
     {% set hidden = privacy_on(request) %}<button type="button" class="phone-icon" data-privacy-toggle aria-pressed="{{ 'true' if hidden else 'false' }}" aria-label="{{ ('Show amounts' if hidden else 'Hide amounts')|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="side-privacy-off" d="M4 4l16 16"/></svg></button>
-    {% if here.tab and here.tab.gear and request.url.path != '/' %}<a class="phone-icon" href="{{ here.tab.gear }}" aria-label="{{ here.tab.gear_label|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></a>{% endif %}
+    {% set gear = (here.tab.gear, here.tab.gear_label) if here.tab and here.tab.gear and path != '/' else ('/settings', 'Settings') if path == '/money' else None %}
+    {% if gear %}<a class="phone-icon" href="{{ gear[0] }}" aria-label="{{ gear[1]|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></a>{% endif %}
   </nav>
 </header>
 <main class="main phone-content">
@@ -53,13 +54,13 @@
   {# Phone overhaul (owner, 2026-10-22): five slots with their words, Add in the middle. Transactions is a slot;
      Cash planning, Investments, Accounts, Financial health and Settings live on More with their figures. #}
   {% set skey = here.section.key if here.section else '' %}
-  {% set chosen = 'add' if request.url.path == '/accounts/add-transaction' or request.url.path.endswith('/transaction/new') else 'money' if request.url.path == '/review' else 'budget' if back and back.startswith('/budget') else 'activity' if request.url.path.startswith('/activity') or (here.tab and here.tab.key == 'transactions') else 'home' if request.url.path in ('/', '/home') or skey == 'overview' else 'budget' if skey == 'budget' else 'money' if skey or request.url.path in ('/money', '/more', '/review') else '' %}
+  {% set chosen = 'add' if request.url.path == '/accounts/add-transaction' or request.url.path.endswith('/transaction/new') else 'money' if request.url.path == '/review' or request.url.path.startswith('/money/') else 'budget' if back and back.startswith('/budget') else 'activity' if request.url.path.startswith('/activity') or (here.tab and here.tab.key == 'transactions') else 'home' if request.url.path in ('/', '/home') or skey == 'overview' else 'budget' if skey == 'budget' else 'money' if skey or request.url.path in ('/money', '/more', '/review') else '' %}
   {% macro slot(chosen, key, label, href, path) %}<a class="phone-tab{{ ' is-chosen' if chosen == key }}" href="{{ href }}"{% if chosen == key %} aria-current="page"{% endif %}><span class="phone-tab-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{ path }}"/></svg></span><span class="phone-tab-name">{{ label|tr(locale) }}</span></a>{% endmacro %}
   {{ slot(chosen, 'home', 'Home', '/', 'm3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM9 21v-7h6v7') }}
   {{ slot(chosen, 'budget', 'Budget', '/budget', 'M12 3a9 9 0 1 0 9 9h-9zM15 3.5A9 9 0 0 1 20.5 9H15z') }}
   {% block phone_add %}{% from "phone/partials/add.html" import add_slot with context %}{{ add_slot(off=request.state.read_only|default(false), chosen=chosen == 'add') }}{% endblock %}
   {{ slot(chosen, 'activity', 'Activity', '/activity', 'M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4') }}
-  {{ slot(chosen, 'money', 'Money', '/money', 'M4.5 12h1M11.5 12h1M18.5 12h1') }}
+  {{ slot(chosen, 'money', 'Money', '/money', 'M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1M4 7v10a2 2 0 0 0 2 2h14V9H6a2 2 0 0 1-2-2M16 14h.01') }}
 </nav>
 <dialog id="app-popup" class="app-popup phone-sheet" aria-modal="true" aria-labelledby="app-popup-title">
   <div class="app-popup-frame">

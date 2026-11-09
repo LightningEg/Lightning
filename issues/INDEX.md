@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 45 open items. Each folder holds its reports and its items.
+11 big pictures, 44 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -283,7 +283,6 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-11D4 | ↳ Money: the net-worth trend and what you own as one bar | | | M | Opus | |
 | IV-11D5 | ↳ Budget: where the month went | | | S | Sonnet | |
 | IV-11D6 | ↳ Category marks in rows | | | M | Opus | |
-| **IV-11H** | [Money is 21 plain rows under Net worth, wears the old More icon, and its Settings is the PC's](11-phone-ux/IV-11H-money-is-a-drawer.md) | improvement, visual | Everywhere | M | Opus | ready |
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | Opus | building |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | Opus | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner |  | |

@@ -111,6 +111,11 @@ def phone_router() -> APIRouter:
         return render_phone(request, "phone/money_report.html",
                             screen=screen.build(container(request), today(), request.query_params.get("period", "month")))
 
+    @router.get("/money/reviews")
+    async def money_reviews(request: Request):
+        """Reports and reviews (IV-11H): Report, Cash planning, Spending and the Weekly review behind Money's one row."""
+        return render_phone(request, "phone/money_reviews.html")
+
     @router.get("/money/accounts")
     async def money_accounts(request: Request):
         from lightning.core.dates import today

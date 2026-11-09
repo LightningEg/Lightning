@@ -44,6 +44,33 @@ async def update_action(request: Request, action: str):
     return redirect("/settings#lightning-version")
 
 
+def licences() -> list[dict]:
+    """The parts this build is made from, each with its own licence, read from the installed packages themselves, so
+    the list is the build's (the phone's packages on the phone, the PC's on the PC). Lightning's own licence is first."""
+    from importlib import metadata
+    rows = {}
+    for dist in metadata.distributions():
+        meta = dist.metadata
+        name = (meta.get("Name") or "").strip()
+        if not name or name.casefold() == "lightning":
+            continue
+        licence = (meta.get("License-Expression") or "").strip()
+        if not licence:
+            text = (meta.get("License") or "").strip()
+            licence = text if text and "\n" not in text and len(text) <= 60 else ""
+        if not licence:
+            licence = next((c.split("::")[-1].strip() for c in (meta.get_all("Classifier") or [])
+                            if c.startswith("License ::") and c.split("::")[-1].strip() not in ("OSI Approved", "")), "")
+        rows[name.casefold()] = {"name": name, "version": dist.version, "licence": licence or "See its own files"}
+    return sorted(rows.values(), key=lambda r: r["name"].casefold())
+
+
+@router.get("/licences")
+async def licences_page(request: Request):
+    """About and licences (IV-11H): Lightning's licence, then every part it is built from with its licence."""
+    return render(request, "settings/licences.html", licence_rows=licences())
+
+
 @router.get("")
 async def settings_page(request: Request):
     c = container(request)
