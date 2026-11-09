@@ -12,6 +12,7 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](../../issues/7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | L | ready |
+| **IT-9N** | [The import review asks four or more queries for every statement row](../../issues/9-later/IT-9N-import-review-asks-four-queries-a-row.md) | M | ready |
 | **IV-12K** | [One door to add an investment: ask what it is first, and list only what can be chosen](../../issues/12-desktop-ux/IV-12K-one-door-to-add-an-investment.md) | M | ready |
 
 ## Reports with open follow-ups here
@@ -19,5 +20,6 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 - [CSV import stress test: where it breaks and how to rebuild it](../../issues/7-planning-import-and-search/r23-csv-import-stress/report.md): 7AB
 - [User journeys and visual unity](../../issues/12-desktop-ux/r27-journeys-and-visual-unity/report.md): 7AB
 - [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](../../issues/12-desktop-ux/r30-investments-beyond-stocks/report.md): 12K
+- [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r31-code-review-and-loose-ends/report.md): 9N
 <!-- work:end -->
 

@@ -27,6 +27,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r28 | [International polish: the small things that make Lightning feel finished](3-polish-and-arabic/r28-international-polish/report.md) | 2026-11-08 | audit | 3BC, 3BD, 3BE, 3BF, 3BH, 3BI, 3BK |
 | r29 | [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](11-phone-ux/r29-google-play-readiness/report.md) | 2026-11-09 | audit | 11B, 11D, 3BK |
 | r30 | [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](12-desktop-ux/r30-investments-beyond-stocks/report.md) | 2026-11-09 | audit | 12H, 12I, 12J, 12K, 12L, 12M, 12N, 6D |
+| r31 | [Code review: what is slow, loose, complicated or cut off from the rest](1-easy-to-contribute/r31-code-review-and-loose-ends/report.md) | 2026-11-09 | audit | 1V, 1W, 1X, 1Y, 1Z, 2AJ, 9L, 9M, 9N, 12T, 9F, 9K, 9A |
 
 
 ## Create and maintain a report
