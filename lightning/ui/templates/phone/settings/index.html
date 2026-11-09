@@ -15,6 +15,7 @@
     <form method="post" action="/settings/locale" class="settings-control"><select id="ui-locale" name="locale" data-locale-auto><option value="en" {{ 'selected' if locale == 'en' }}>English</option><option value="ar" {{ 'selected' if locale == 'ar' }}>العربية</option></select><input type="hidden" name="__session" value="{{ session }}"></form></div>
   {% set paid = store_themes() %}{% if paid %}
   {% if play_offers is not none %}{# the Play build (NF-11B3): Play's price and Buy; no website price or link anywhere #}
+  {% if paid|rejectattr('owned')|list %}<p class="muted small" data-play-once>{{ 'Bought once on Google Play: every profile on this Google account wears it.'|tr(locale) }}</p>{% endif %}
   {% for t in paid if not t.owned %}<div class="settings-row" data-play-offer="{{ t.id }}"><div><span class="settings-name">{{ t.name|tr(locale) }}</span><small>{% if t.id in play_offers %}{{ play_offers[t.id] }}{% if t.id in play_pending %} · {{ 'Payment pending'|tr(locale) }}{% endif %}{% else %}{{ 'Google Play is not answering. Try again in a moment.'|tr(locale) }}{% endif %}</small></div>
     {% if t.id in play_offers and t.id not in play_pending %}<form method="post" action="/settings/theme/buy" class="settings-control"><input type="hidden" name="theme" value="{{ t.id }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn small">{{ 'Buy'|tr(locale) }}</button></form>{% endif %}</div>{% endfor %}
   {% endif %}

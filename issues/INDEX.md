@@ -259,15 +259,13 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 | **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](10-looks-and-store/NF-10D-papyrus-and-dendera-bundles.md) | new feature | Feel | M | Opus | ready |
 | NF-10D2 | ↳ Add the pieces and the two sets to the catalogue | | | M | Opus | |
 | **NF-10H** | [One purchase per person - a theme bought on Google Play or the website unlocks every profile of that buyer, on every surface](10-looks-and-store/NF-10H-one-purchase-per-person.md) | new feature | Own | L | Opus | ready |
-| NF-10H1 | ↳ Store: a Play purchase mints many profiles | | | M | Opus | |
-| NF-10H2 | ↳ App: settle for every profile, say so | | | S | Opus | |
 | NF-10H3 | ↳ Website: account-wide seats | | | M | Opus | |
 | NF-10H4 | ↳ Owner: prices | | | owner |  | |
 | NF-10H5 | ↳ Owner: the extra seats already sold | | | owner |  | |
 
 Reports: [r12](10-looks-and-store/r12-v150-release/report.md) · [r13](10-looks-and-store/r13-store-and-community/report.md).
 
-Done: 10E, 10F, 10G. Next free code: 10I.
+Done: 10E, 10F, 10G, 10H1, 10H2. Next free code: 10I.
 
 ## 11 Phone UX
 
