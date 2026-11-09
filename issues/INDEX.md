@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 51 open items. Each folder holds its reports and its items.
+11 big pictures, 50 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -279,14 +279,12 @@ The phone is its own product: a few places that each answer one question, quick 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **BV-11F** | [Budget's Needs attention lists categories that are finished, repeats them below, and in Arabic a zero left reads as a dot](11-phone-ux/BV-11F-budget-needs-attention-lists-finished-categories.md) | bug, visual · medium | Plan | S | Sonnet | ready |
-| **BV-11G** | [The same transfer reads two ways on Home and Activity, a day's net shows on one date only, and account names get translated](11-phone-ux/BV-11G-one-transfer-one-form-and-names-never-translated.md) | bug, visual · medium | Everywhere | M | Sonnet | ready |
 | **IV-11A** | [Phone first run - every Add is greyed out until "Save currencies" is pressed, and an empty Transactions says "Nothing matches"](11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | improvement, visual | Everywhere | M | Sonnet | ready |
 | IV-11A1 | ↳ Add works before "Save currencies" ([#432](https://github.com/LightningEg/Lightning/issues/432)) | | | S | Sonnet | |
 | IV-11A2 | ↳ An empty Activity says "No transactions yet." with Add and Import ([#433](https://github.com/LightningEg/Lightning/issues/433)) | | | S | Sonnet | |
 | **IV-11D** | [The phone has no charts - build the guideline's phone charts and meters, one per tab, so each tab is seen, not read](11-phone-ux/IV-11D-phone-charts-and-marks.md) | improvement, visual | Everywhere | L | Opus | ready |
 | IV-11D1 | ↳ Home: the payday meter under Safe to spend | | | M | Opus | |
 | IV-11D2 | ↳ Home and Budget: This month as one segmented bar | | | S | Sonnet | |
-| IV-11D3 | ↳ Activity: In and Out as two bars on one scale | | | S | Sonnet | |
 | IV-11D4 | ↳ Money: the net-worth trend and what you own as one bar | | | M | Opus | |
 | IV-11D5 | ↳ Budget: where the month went | | | S | Sonnet | |
 | IV-11D6 | ↳ Category marks in rows | | | M | Opus | |
@@ -320,7 +318,7 @@ The phone is its own product: a few places that each answer one question, quick 
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md).
 
-Done: 3AY1, 3AY3, 3AY5. Next free code: 11J.
+Done: 3AY1, 3AY3, 3AY5, BV-11G, IV-11D3. Next free code: 11J.
 
 ## 12 Desktop UX and smart next steps
 

@@ -78,7 +78,7 @@ from Settings and the store listing, in English and Arabic (website repo, with a
 | T6 | Budget | medium | In Arabic a "0 left" is the Arabic zero "٠", which is a dot: four rows end in a lone "•" | `shots/ar-budget.jpg` | BV-11F |
 | T7 | Budget | low | Every bar is the same blue whatever its state; a bar at or over plan needs its meaning colour (A03) | `shots/en-budget.jpg` | BV-11F |
 | T8 | Add | medium | The tab opens a good sheet (Out/In/Move, amount, account, chips, Save on screen). The full page behind it (`/accounts/add-transaction`, opened from links) has "‹ CIB Payroll" as its title, **Money** lit in the tab bar, an Import / Accounts / Held for others switch above the form, and a 📋 emoji on Paste SMS | `shots/en-add.jpg` | IV-11I |
-| T9 | Activity | medium | The same transfer is "To Vodafone Cash −1,000" on Home and "CIB Payroll → Vodafone Cash 1,000" on Activity (A16: one figure, one form). A day's net shows on one date only (2026-11-05 "−2,500") | `shots/en-activity.jpg`, `shots/en-home.jpg` | BV-11G |
+| T9 | Activity | medium | The same transfer is "To Vodafone Cash −1,000" on Home and "CIB Payroll → Vodafone Cash 1,000" on Activity (A16: one figure, one form). A day's net shows on one date only (2026-11-05 "−2,500") | `shots/en-activity.jpg`, `shots/en-home.jpg` | fixed: `tests/test_phone_activity.py` |
 | T10 | Activity | low | "In +46,833 · Out −19,001" is a sentence; it is the place for two bars on one scale (C07.3.3) | `shots/en-activity.jpg` | IV-11D |
 | T11 | Money | medium | **Cash planning, Spending and Weekly review were listed twice** (the old More list left under the new rows). Fixed in this branch | `shots/en-money-full.jpg` | fixed (r29) |
 | T12 | Money | medium | Under Net worth come 21 plain rows (Report … Data checks); no trend (C11.3 + C07.3.1), no split of what you own. The tab wears the "···" More icon though More is retired (C01: a lone icon only when everyone knows it) | `shots/en-money-full.jpg` | IV-11H |
@@ -92,9 +92,9 @@ from Settings and the store listing, in English and Arabic (website repo, with a
 |---|---|---|---|---|
 | A1 | medium | **Two thousands separators:** the same character ٬ (U+066C) drawn by two faces. The lead figure uses Readex Pro (a comma, "٧٤,٠٧٧"); rows use Noto Sans Arabic (a raised tick, "١٢‘٠٠٠"). Fixed here: Readex draws every Arabic-Indic digit and separator in body text too ("Lightning Arabic Figures" in `fonts.css`, `--body` in `style.css`) | `shots/arabic-commas.jpg`, `shots/after-ar.jpg` | fixed (r29) |
 | A2 | medium | **Transfers read backwards:** "CIB Payroll ← Vodafone Cash" — the server flips → for Arabic, but two Latin names keep the line left to right, so the arrow pointed into CIB. Fixed here: each name is isolated (`<bdi>`), so the pair lays out right to left | `shots/ar-activity.jpg`, `shots/after-ar.jpg` | fixed (r29) |
-| A3 | medium | Account names are translated as if they were UI words: "Cash wallet" is "محفظة نقدية" on Home ("To Cash wallet" matched the dictionary) and "Cash wallet" on Activity. A name the person typed must never be translated | `shots/ar-home.jpg`, `shots/ar-activity.jpg` | BV-11G |
+| A3 | medium | Account names are translated as if they were UI words: "Cash wallet" is "محفظة نقدية" on Home ("To Cash wallet" matched the dictionary) and "Cash wallet" on Activity. A name the person typed must never be translated | `shots/ar-home.jpg`, `shots/ar-activity.jpg` | fixed: `tests/test_phone_activity.py` |
 | A4 | low | Chevrons point backwards ("ادفع ›") and dates are yyyy-mm-dd in lists | owner's screenshot | IV-3BG1, IV-3BK (already planned) |
-| A5 | low | "داخل +٤٦٬٨٣٣ ، خارج" has a space before the Arabic comma | `shots/ar-activity.jpg` | BV-11G |
+| A5 | low | "داخل +٤٦٬٨٣٣ ، خارج" has a space before the Arabic comma | `shots/ar-activity.jpg` | fixed: `tests/test_phone_activity.py` |
 
 ### Visuals: what "not a single visual" means in numbers
 
@@ -139,7 +139,7 @@ the motion that would make the phone feel alive without a second continuous moti
 1. **Play blockers, in order:** NF-11B1 (release AAB, API 36, predictive back, no probe), NF-11B3 (no buy link in the Play build),
    NF-11B4 (the app's privacy notice, both repos), NF-11B2 (SMS declared, owner 2026-11-09), NF-11B6 (Recents,
    notifications in context), NF-11B5 and the owner's 11B7-11B9 (Console, listing, closed test).
-2. **The phone's look before the listing screenshots:** IV-11E (Home reads at a glance), IV-11D (charts), BV-11F, BV-11G, IV-11H,
+2. **The phone's look before the listing screenshots:** IV-11E (Home reads at a glance), IV-11D (charts), BV-11F, IV-11H,
    IV-11I; then IV-10G for paid themes.
 3. Already planned and needed for the listing: IV-3BG (Arabic chevrons, tap polish, status bar), IV-3BK (human dates), IV-3AY13
    (owner's phone check).

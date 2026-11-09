@@ -25,7 +25,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r26 | [Audit 14: using Lightning as a user, on the PC and the phone](12-desktop-ux/r26-user-test-pc-and-phone/report.md) | 2026-11-06 | audit | 12G, 11A, 3H |
 | r27 | [User journeys and visual unity](12-desktop-ux/r27-journeys-and-visual-unity/report.md) | 2026-11-08 | audit | 3AY, 3H, 3AM, 7AB |
 | r28 | [International polish: the small things that make Lightning feel finished](3-polish-and-arabic/r28-international-polish/report.md) | 2026-11-08 | audit | 3BC, 3BD, 3BE, 3BF, 3BG, 3BH, 3BI, 3BK |
-| r29 | [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](11-phone-ux/r29-google-play-readiness/report.md) | 2026-11-09 | audit | 11B, 11D, 11E, 11F, 11G, 11H, 11I, 10G, 3BG, 3BK |
+| r29 | [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](11-phone-ux/r29-google-play-readiness/report.md) | 2026-11-09 | audit | 11B, 11D, 11E, 11F, 11H, 11I, 10G, 3BG, 3BK |
 
 
 ## Create and maintain a report
