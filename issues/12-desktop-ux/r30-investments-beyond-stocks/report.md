@@ -111,3 +111,7 @@ jewellery, foreign-currency certificates, shared ownership, zakat on these kinds
   own), BT-12H (second gold bar of a karat), IV-12K (one *Add investment*); the rest follows. P7: treasury bills, bonds,
   a business share and insurance or pension plans get no model of their own; each stays an *Other* holding with a typed
   value that can be re-appraised. No item filed for P7.
+
+- **2026-11-09, owner decisions, second round (question dialog).** A certificate paid at maturity grows in value as interest is earned,
+  marked an estimate (IV-12J3). Property lives under Investments (NF-12M2). A flat bought by instalments counts only
+  what was paid; the unpaid part is not a debt, its instalments are in the forecast (NF-12M3).

@@ -39,8 +39,8 @@ return to 5%.
 ## 12J3 A certificate paid at maturity gains value as it earns · M
 A compound or at-maturity certificate stays at its principal for years, then its whole interest lands as *Gain from
 sales* on the redemption day. Value it at principal plus interest earned to date (from its terms, labelled an estimate),
-so net worth and return rise evenly; the redemption then settles the estimate. Money rule: owner decision needed on
-whether accrued interest counts in Holdings value before it is paid (ask in the question dialog before building).
+so net worth and return rise evenly; the redemption then settles the estimate. **Owner, 2026-11-09:** yes, the value grows as
+interest is earned and counts in Holdings value, marked as an estimate.
 **Done when:** Mohab's compound certificate shows a rising value and the period report reconciles.
 
 ## 12J4 Maturity and notices · S

@@ -83,3 +83,6 @@ history, Arabic, themes, the Android app itself. Safety (Reserves, Limits) was c
 
 - **2026-11-09, owner decisions (question dialog).** Payday page: redesign as one short step (IV-12Q1). Features: F1
   and F2 go in the plan; F3 and F4 were offered and not chosen.
+
+- **2026-11-09, owner decisions, second round (question dialog).** Home leads with the everyday budget; Safe to spend
+  stays the lead of Cash planning (IV-12P).

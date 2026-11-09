@@ -25,7 +25,7 @@ repo: app
 - **The lead differs by device:** Cash planning leads with Safe to spend on the PC and with "Due before payday 1,130" on the phone.
 
 ## Fix
-Phone Budget's hero is named "Left for everyday"; Home's caption divides its own figure or the hero becomes the
-everyday figure (owner's pick-list before building: which number answers "how much can I spend today?"). Scenarios
+Phone Budget's hero is named "Left for everyday". **Owner, 2026-11-09:** Home leads with the everyday budget (what is
+left for everyday, about 249 a day); Safe to spend stays the lead of Cash planning, with a link from Home. Scenarios
 use the same lowest point as the plan. One row for unplanned income, the other a link. Record each name in
 `ai/GLOSSARY.md`. Test: a figures test that reads each label on PC and phone and fails when one label has two values.
