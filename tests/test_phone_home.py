@@ -158,3 +158,16 @@ def test_add_sheet_returns_to_its_slot_and_offers_bills(sample):
     assert "phone-pay-bill" in sheet and ">Move<" in sheet and ">Transfer<" not in sheet
     bills = client.get("/add/bills?return_to=/home")
     assert bills.status_code == 200 and "/plan/items/" in bills.text
+
+
+def test_home_month_bar_adds_to_the_plan_and_agrees_with_left_in_plan(c, monkeypatch):
+    """IV-11D2: the bar under This month is the plan's spent and left; its parts add to the plan."""
+    from datetime import date
+    from lightning.samples import load_mohab_2026
+    from lightning.ui.phone.screens import home as screen
+    monkeypatch.setenv("LIGHTNING_PRICES_OFFLINE", "1")
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-12")
+    load_mohab_2026(c)
+    s = screen.build(c, date(2026, 10, 12))
+    b = s.month_bar
+    assert b and b["spent"] + b["left"] == b["plan"] and b["left"] == max(s.left_in_plan, 0)

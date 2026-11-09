@@ -1,10 +1,10 @@
 {# Budget, flexible first (IV-3AY9, guideline C11.2): Left in plan counts everyday money; Needs attention (at most four);
    flexible categories with left as the figure and no fields; Fixed costs as one row. No plan: the Make my plan step. #}
 {% extends "base.html" %}
+{% from "phone/partials/charts.html" import month_bar with context %}
 {% block title %}Budget{% endblock %}
 {% block heading %}<h1>{{ 'Budget'|tr(locale) }}</h1>{% endblock %}
 {% macro cat_row(r) %}<a class="phone-row phone-budget-cat is-{{ r.state }}" data-popup-open href="/budget/category/{{ r.category_id }}/sheet?month={{ screen.month }}"><span>{{ r.name }}<small>{{ '{spent} of {limit}'|tr(locale, spent=r.spent|money, limit=r.limit|money) }}</small><span class="phone-bar-track" aria-hidden="true"><i style="width: {{ r.share }}%"></i></span></span><b class="{{ 'neg' if r.left < 0 }}">{% if r.state == 'done' %}<span class="phone-done" aria-label="{{ 'Nothing left'|tr(locale) }}">—</span>{% else %}<bdi class="fig">{{ r.left|money }}</bdi>{% endif %}</b></a>{% endmacro %}
-{% macro month_bar(b) %}<div class="phone-month-bar" role="img" aria-label="{{ 'Spent {spent}, left in plan {left}'|tr(locale, spent=b.spent|money, left=b.left|money) }}{% if b.over %}{{ ', ' ~ ('over plan {over}'|tr(locale, over=b.over|money)) }}{% endif %}">{% if b.w_spent %}<i class="is-spent" style="width: {{ '%.2f'|format(b.w_spent) }}%"></i>{% endif %}{% if b.w_left %}<i class="is-left" style="width: {{ '%.2f'|format(b.w_left) }}%"></i>{% endif %}{% if b.w_over %}<i class="is-over" style="width: {{ '%.2f'|format(b.w_over) }}%"></i>{% endif %}</div>{% endmacro %}
 {% block content %}
 {% set s = screen %}
 <div class="phone-chips"><span class="phone-chip phone-month-chip"><a href="/budget?month={{ s.prev_month }}" aria-label="{{ 'Earlier month'|tr(locale) }}">‹</a><span>{{ s.month }}</span>{% if s.next_month %}<a href="/budget?month={{ s.next_month }}" aria-label="{{ 'Later month'|tr(locale) }}">›</a>{% else %}<span class="phone-month-end" aria-hidden="true">&nbsp;</span>{% endif %}</span></div>

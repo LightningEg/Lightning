@@ -8,6 +8,7 @@ from datetime import date
 from decimal import Decimal
 
 from lightning.core.dates import month_of, parse_date
+from lightning.ui.phone.screens.budget import month_bar
 from lightning.planning import bill_state
 from lightning.planning.domain import PlanKind
 from lightning.transactions.domain import DocType
@@ -32,6 +33,7 @@ class HomeScreen:
     left_in_plan: Decimal | None       # None when the month has no plan
     month: str
     catch_up: bill_state.CatchUp
+    month_bar: dict | None = None      # IV-11D2: the plan as one bar (spent, left, over); None without a plan
 
 
 def _first_run(c) -> bool:
@@ -69,4 +71,5 @@ def build(c, day: date) -> HomeScreen:
                       working=tuple((name, value) for name, value in forecast.safe_to_spend_parts),
                       todo=tuple(rows[:TODO_SHOWN]), todo_total=len(rows), latest=latest,
                       spent=c.reporting.cash_flow(day.replace(day=1), day).outflows,
-                      left_in_plan=plan["left"] if plan else None, month=month, catch_up=away)
+                      left_in_plan=plan["left"] if plan else None, month=month, catch_up=away,
+                      month_bar=month_bar(plan["planned"], plan["spent"]) if plan else None)
