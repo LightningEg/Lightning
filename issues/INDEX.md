@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 83 open items. Each folder holds its reports and its items.
+11 big pictures, 86 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -310,7 +310,7 @@ The phone is its own product: a few places that each answer one question, quick 
 |---|---|---|---|---|---|---|
 | **BT-11K** | [Phone Money says net worth fell this month while its chart and the Report say it rose - the change is counted from the end of day 1](11-phone-ux/BT-11K-phone-money-change-since-month-start.md) | bug, technical · medium | Understand | S | Sonnet | ready |
 | **BV-11L** | [The phone's slots disagree in small ways - two figures called Left in plan, an Arabic chart that runs against its labels, "To review1", a PC tab bar under Add](11-phone-ux/BV-11L-phone-slots-agree-with-each-other.md) | bug, visual · medium | Everywhere | M | Sonnet | ready |
-| BV-11L1 | ↳ Home's This month row shows Budget's Left in plan | | | S | Sonnet | |
+| BV-11L1 | ↳ Phone Budget's lead is named "Left for everyday" | | | S | Sonnet | |
 | BV-11L2 | ↳ The Arabic trend chart runs the way its labels do | | | S | Sonnet | |
 | BV-11L3 | ↳ "To review 1", and no PC tab bar under Add | | | S | Sonnet | |
 | BV-11L4 | ↳ Money's Coming up agrees with Bills; an empty Money says one line | | | S | Sonnet | |
@@ -339,7 +339,7 @@ The phone is its own product: a few places that each answer one question, quick 
 | NF-11B8 | ↳ Owner: closed test, 12 testers for 14 days | | | owner |  | |
 | NF-11B9 | ↳ Owner: the phone check before production | | | owner |  | |
 
-Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md).
+Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md) · [r36](11-phone-ux/r36-figures-one-owner/report.md).
 
 Done: 11E, 11F, 11H, 11I, 11J, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D4, 11D6, 3AY1, 3AY3, 3AY5, BV-11G, IV-11D3. Next free code: 11M.
 
@@ -349,9 +349,17 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
+| **BT-12AC** | [The Investments Lead's Cost and Unrealized gain do not add up to its Portfolio value - 325,088 and 27,399 under 752,486](12-desktop-ux/BT-12AC-investments-lead-parts-do-not-add-up.md) | bug, technical · medium | Own | M | Opus | ready |
+| **BT-12AD** | [The payday proposal's lines do not add up to the cash they share out, and "Everyday spending" there is not the figure of that name](12-desktop-ux/BT-12AD-payday-proposal-lines-overlap.md) | bug, technical · medium | Plan | M | Opus | ready |
 | **BT-12H** | [A second gold holding of the same karat cannot be added (GLD:24K already exists)](12-desktop-ux/BT-12H-second-gold-holding-same-karat.md) | bug, technical · medium | Own | S | Sonnet | ready |
 | **BV-12O** | [Phone Budget: Where the month went counts fixed costs twice (33,851 spent where 19,001 was)](12-desktop-ux/BV-12O-phone-budget-donut-counts-fixed-costs-twice.md) | bug, visual · high | Plan | S | Sonnet | ready |
 | **BV-12U** | [Phone Money says net worth fell 10,438 this month where the Overview says it rose 36,395](12-desktop-ux/BV-12U-phone-money-net-worth-change.md) | bug, visual · high | Understand | S | Sonnet | ready |
+| **IT-12AE** | [A screen cannot work out money - derived figures move to their owners, a ratchet test counts arithmetic in the UI, and the PC and phone are compared on one household](12-desktop-ux/IT-12AE-a-screen-cannot-work-out-money.md) | improvement, technical | Build | L | Opus | ready |
+| IT-12AE1 | ↳ The PC and the phone are compared on one household | | | M | Opus | |
+| IT-12AE2 | ↳ Parts add up to their whole | | | S | Sonnet | |
+| IT-12AE3 | ↳ A ratchet on arithmetic in the UI | | | M | Opus | |
+| IT-12AE4 | ↳ Derived figures move to their owners | | | L | Opus | |
+| IT-12AE5 | ↳ Owner: what "Kept" means | | | owner |  | |
 | **IV-12AA** | [Suggestions with sensible defaults and honest counts - Refill offers to empty Safe to spend, Needs you counts three ways, a year is compared with nothing](12-desktop-ux/IV-12AA-suggestions-with-sensible-defaults.md) | improvement, visual | Plan | M | Opus | ready |
 | IV-12AA1 | ↳ Owner: what Refill offers first | | | owner |  | |
 | IV-12AA2 | ↳ Refill offers the modest amount first and says what Home will show | | | M | Opus | |
@@ -387,7 +395,7 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-12Z1 | ↳ A length budget in the skeleton test | | | S | Sonnet | |
 | IV-12Z2 | ↳ Cash planning says each thing once | | | M | Sonnet | |
 | IV-12Z3 | ↳ Spending opens on the categories; the other charts open on request | | | M | Opus | |
-| IV-12Z4 | ↳ Investments shows nothing as one line, and one Cost | | | M | Opus | |
+| IV-12Z4 | ↳ Investments shows nothing as one line | | | S | Sonnet | |
 | IV-12Z5 | ↳ Overview's tail | | | S | Sonnet | |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | Opus | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | Opus | |
@@ -425,4 +433,4 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md) · [r34](12-desktop-ux/r34-accounts-and-transactions/report.md) · [r35](12-desktop-ux/r35-ux-against-users-questions/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F, 3AZ. Next free code: 12AC.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 3AZ. Next free code: 12AF.

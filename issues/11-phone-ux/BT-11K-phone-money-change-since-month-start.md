@@ -24,6 +24,6 @@ Reproduce: `python issues/12-desktop-ux/r35-ux-against-users-questions/evidence/
 
 ## Fix
 
-The start is the last day of the month before (`day.replace(day=1) - timedelta(days=1)`), the same month-end the chart draws. On the first of a month the sentence then covers that day's movement. Check Home and any other phone screen for the same pattern (`grep -rn "replace(day=1)" lightning/ui/phone`).
+Call the owner: `c.position.change_in_net_worth(first_of_month, day)` (registry figure Change in net worth: net worth at the end, less the day before the start, less opening balances in the period). The screen subtracts nothing itself. Audit r36 F2 ([report](r36-figures-one-owner/report.md)): on the demo household that function returns +36,395, the figure the PC's Overview shows, where the phone says −10,438. Check the other phone screens for the same pattern (`grep -rn "replace(day=1)" lightning/ui/phone`).
 
-Test: in `tests/` beside the phone Money tests, a profile with income on day 1 and spending later: `since_start` equals net worth now less net worth at the last month's end, and has the same sign as the Report's net-worth change for This month. Then `python -m pytest tests/test_mohab_year.py -q`.
+Test: on one profile with income on day 1, phone Money's change equals the PC Overview's change in net worth for the month (IT-12AE1 holds this comparison as a strict xfail until this is fixed). Then `python -m pytest tests/test_mohab_year.py tests/test_mohab_phone.py -q`.

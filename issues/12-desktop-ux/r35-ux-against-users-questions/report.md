@@ -115,3 +115,4 @@ Cash planning's Lead (Safe to spend with its working row by row), Budget's pace 
 
 ## Dated follow-ups
 
+- **2026-11-09, audit r36:** F2 was read the wrong way round. The Glossary's Left in plan is the whole plan (6,598), which Home and the PC show; the phone's Budget is the screen using the name for another figure. The owner decided the phone's Budget keeps its figure as "Left for everyday" (BV-11L1 rewritten). F1's cause is that the screen bypasses `PositionService.change_in_net_worth` (BT-11K's fix updated). F6's two Cost figures are now BT-12AC. See [r36](../../11-phone-ux/r36-figures-one-owner/report.md).

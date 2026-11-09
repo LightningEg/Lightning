@@ -7,16 +7,16 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
 | [Capture](pillars/capture.md) | 14 |  | 10 | 4 |  |  |
-| [Plan](pillars/plan.md) | 6 |  | 4 | 2 |  |  |
+| [Plan](pillars/plan.md) | 7 |  | 5 | 2 |  |  |
 | [Understand](pillars/understand.md) | 9 |  | 6 | 2 | 1 |  |
-| [Own](pillars/own.md) | 13 | 1 | 6 | 4 | 2 |  |
+| [Own](pillars/own.md) | 14 | 1 | 7 | 4 | 2 |  |
 | [Protect](pillars/protect.md) | 4 | 2 | 2 |  |  |  |
 | [Everywhere](pillars/everywhere.md) | 10 | 3 | 7 |  |  |  |
 | [Feel](pillars/feel.md) | 14 | 3 | 10 |  | 1 | 1 |
-| [Build](pillars/build.md) | 9 |  | 8 |  | 1 |  |
+| [Build](pillars/build.md) | 10 |  | 9 |  | 1 |  |
 | [Reach](pillars/reach.md) | 4 |  | 3 | 1 |  | 2 |
 
-83 open items in 11 milestones.
+86 open items in 11 milestones.
 
 ## Being built now
 
@@ -50,7 +50,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | 9 Later | 7 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 5 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |
 | 11 Phone UX | 8 | The phone is its own product: a few places that each answer one question, quick jobs in three taps, and no PC page squeezed into one column. |
-| 12 Desktop UX and smart next steps | 24 | The PC app leads with the answer, works in bulk without surprises, and offers the next step where a figure raises the question. |
+| 12 Desktop UX and smart next steps | 27 | The PC app leads with the answer, works in bulk without surprises, and offers the next step where a figure raises the question. |
 
 0 large items still need splitting into steps before they are posted for contributors (size L: 800 coins or more).
 
