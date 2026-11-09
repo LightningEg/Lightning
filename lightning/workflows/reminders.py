@@ -20,7 +20,8 @@ class ReminderService:
             return []
         c, day = self.c, today()
         tomorrow = day + timedelta(days=1)
-        items = [dict(item) for item in ReviewInbox(c).items(day) if item["priority"] <= 1]
+        # Home's glance holds Decimals and is the phone's; a reminder is its label and detail (due.json).
+        items = [{k: v for k, v in item.items() if k != "glance"} for item in ReviewInbox(c).items(day) if item["priority"] <= 1]
         for payment in c.planning.all_payments(tomorrow, day):
             if payment.outstanding and not payment.item.is_income and payment.due_date == tomorrow.isoformat():
                 items.append({"label": "Payment due tomorrow", "detail": payment.item.name,

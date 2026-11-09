@@ -325,13 +325,18 @@ class GameyaService:
                                        + (f" Payout {fmt(terms.payout, 0)} {circle.currency} was due {progress.payout_date}."
                                           if progress.payout_due else ""),
                              "href": f"/gameya/{circle.id}#record-instalment", "action": "Record instalment",
-                             "priority": 1})
+                             "priority": 1,
+                             # Home's To do at a glance (IV-11E; workflows.review.glance)
+                             "glance": {"name": circle.name, "verb": "Record", "amount": progress.due_amount,
+                                        "when": "due {sa}", "n": progress.due_count, "sa": progress.next_date}})
             elif progress.payout_due:
                 rows.append({"label": f"Gam'eya payout due: {circle.name}",
                              "detail": f"Your turn was {progress.payout_date} · {fmt(terms.payout, 0)} "
                                        f"{circle.currency} · not recorded yet.",
                              "href": f"/gameya/{circle.id}#record-payout", "action": "Record payout",
-                             "priority": 1})
+                             "priority": 1,
+                             "glance": {"name": circle.name, "verb": "Record", "amount": terms.payout,
+                                        "when": "your payout", "n": None, "sa": ""}})
         return rows
 
     # ---------------------------------------------------------------- helpers
