@@ -41,7 +41,8 @@ def start(files_dir):
         saver = AndroidFiles.create(files / "outgoing")
         _host = Host(lambda credentials: profile_app(credentials, files / "Lightning", devices=_devices, phone=True,
                                                      sms=AndroidSms.create(), biometric=fingerprint,
-                                                     stay=stay, files=saver)).start()
+                                                     stay=stay, files=saver,
+                                                     recents=AndroidRecents.create())).start()
     if not _launched:
         _launched = True
         return _host.launch_url
@@ -77,6 +78,27 @@ class AndroidSms:
     def take_shared(self):
         import json
         return [str(text) for text in json.loads(str(self.bridge.takeShared()))]
+
+
+class AndroidRecents:
+    """Settings › This phone › Hide in recent apps over the Java `RecentsBridge` (NF-11B6)."""
+
+    def __init__(self, bridge):
+        self.bridge = bridge
+
+    @classmethod
+    def create(cls):
+        try:
+            from java import jclass
+        except ImportError:
+            return None
+        return cls(jclass("org.lightning.app.RecentsBridge"))
+
+    def hidden(self):
+        return bool(self.bridge.hidden())
+
+    def set_hidden(self, hide):
+        self.bridge.setHidden(bool(hide))
 
 
 class AndroidFiles:

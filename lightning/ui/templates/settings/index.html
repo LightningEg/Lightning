@@ -47,6 +47,8 @@
     {% if request.state.fingerprint_row|default('') %}<a class="phone-row" href="/profiles/fingerprint"><span>{{ 'Unlock with fingerprint'|tr(locale) }}<small>{{ ('On' if request.state.fingerprint_row == 'on' else 'Off')|tr(locale) }}</small></span><b>›</b></a>{% endif %}
     <a class="phone-row" href="/profiles"><span>{{ 'Profile and lock'|tr(locale) }}<small>{{ 'Password, recovery key, backups, lock'|tr(locale) }}</small></span><b>›</b></a>
   </div>
+  {% if request.state.recents_row|default('') %}<form method="post" action="/profiles/recents" class="settings-row"><div><label for="recents-hidden">{{ 'Hide in recent apps'|tr(locale) }}</label><small>{{ 'Your amounts do not show when you switch apps.'|tr(locale) }}</small></div>
+    <div class="settings-control"><input type="hidden" name="csrf" value="{{ request.state.csrf|default('') }}"><input type="hidden" name="on" value="0"><label class="switch"><input id="recents-hidden" type="checkbox" name="on" value="1" {{ 'checked' if request.state.recents_row == 'on' }} data-autosubmit><span class="sr-only">{{ 'Hide in recent apps'|tr(locale) }}</span></label><noscript><button class="btn small">{{ 'Save'|tr(locale) }}</button></noscript></div></form>{% endif %}
 </section>
 {% endif %}
 
