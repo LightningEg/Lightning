@@ -36,7 +36,7 @@ sha256sum --check --strict SHA256SUMS || fail "The builds do not match SHA256SUM
 grep -qx "Build: release ${TAG}" BUILD_INFO.txt || fail "BUILD_INFO.txt does not say this is release ${TAG}."
 jq -e --arg zip "$ZIP" --arg apk "$APK" --arg commit "$(sed -n 's/^Commit: //p' BUILD_INFO.txt)" \
   '.windows.file == $zip and .android.file == $apk and .commit == $commit and
-   .android.application_id == "org.lightning.app" and .android.debuggable == true and
+   .android.application_id == "org.lightning.app" and .android.debuggable == false and
    (.android.certificate_sha256 | type == "string" and length > 0)' BUILD.json >/dev/null \
   || fail "BUILD.json does not identify this tested pair and its signed Lightning app."
 "${PYTHON:-python3}" "$(dirname "${BASH_SOURCE[0]}")/update_manifest.py" verify --dir . --tag "$TAG" --zip "$ZIP" ${UPDATE_KEYS:+--keys "$UPDATE_KEYS"} \
@@ -93,7 +93,7 @@ notes=$(mktemp)
   echo "Phone: download **${APK}** on Android and install it. Pair it with this release's PC build."
   echo
   if [[ "$prerelease" == true ]]; then
-    echo "You may use sample or real data; keep an independent backup. The Android app is debuggable; the Windows app is not code-signed and Windows may warn before the first start."
+    echo "You may use sample or real data; keep an independent backup. The Windows app is not code-signed and Windows may warn before the first start."
   else
     echo "The app is not code-signed, so Windows may warn before the first start."
   fi

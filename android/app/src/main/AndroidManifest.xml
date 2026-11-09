@@ -16,6 +16,7 @@
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:enableOnBackInvokedCallback="true"
         android:icon="@drawable/ic_lightning"
         android:label="${appLabel}"
         android:name="com.chaquo.python.android.PyApplication"
@@ -35,9 +36,7 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-        <!-- The dependency and page checks of tasks 04a–04c; not on the home screen. -->
-        <activity android:name=".ProbeActivity" android:exported="false"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|keyboard|uiMode" />
+        <!-- ProbeActivity (the 04a–04c checks) is in debug builds only: src/debug/AndroidManifest.xml. -->
         <!-- Quick Settings tile: Add expense from the notification shade (phone roadmap M8). -->
         <service android:name=".QuickAddTile" android:exported="true" android:label="Add expense"
             android:icon="@drawable/ic_lightning" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">

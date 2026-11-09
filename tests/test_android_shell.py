@@ -15,5 +15,22 @@ def test_outside_links_open_in_the_browser_over_https_only():
 
 
 def test_back_goes_to_overview_before_leaving():
-    back = MAIN[MAIN.index('public void onBackPressed'):]
+    back = MAIN[MAIN.index('private void goBack'):]
     assert back.index('canGoBack') < back.index('"/".equals') < back.index('moveTaskToBack')
+
+
+def test_back_uses_the_predictive_back_callback_from_api_33():
+    """NF-11B1: target 36 means onBackPressed is never called on API 33+; the callback carries the same steps."""
+    manifest = (JAVA.parents[3] / 'AndroidManifest.xml').read_text()
+    assert 'android:enableOnBackInvokedCallback="true"' in manifest
+    assert 'registerOnBackInvokedCallback' in MAIN and 'this::goBack' in MAIN
+    pressed = MAIN[MAIN.index('public void onBackPressed'):]
+    assert pressed.index('goBack();') < pressed.index('}')
+
+
+def test_probe_screen_is_debug_only():
+    main = JAVA.parents[3]
+    assert 'ProbeActivity' not in (main / 'AndroidManifest.xml').read_text().split('-->')[-1]
+    assert not (JAVA / 'ProbeActivity.java').exists()
+    assert (main.parent / 'debug/java/org/lightning/app/ProbeActivity.java').exists()
+    assert '.ProbeActivity' in (main.parent / 'debug/AndroidManifest.xml').read_text()
