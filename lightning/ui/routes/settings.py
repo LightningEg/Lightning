@@ -432,10 +432,23 @@ async def backup_now(request: Request):
 
 @router.get("/backup/latest")
 async def newest_backup(request: Request):
-    """The newest backup as a file, so a copy can leave the device (on the phone the app's "Save to" screen takes it, 2F).
-    It is the encrypted copy as it sits in the backups folder; nothing is decrypted or rewritten."""
+    """A copy that can leave the device (on the phone the app's "Save to" screen takes it, 2F). For an encrypted
+    profile it is the profile file (BT-2AI5): the key file and a fresh encrypted snapshot, which a fresh device
+    can open with the profile password. Without a profile (browser mode) it is the newest backup as it is."""
     from starlette.concurrency import run_in_threadpool
-    files = container(request).backup_files()
+    c = container(request)
+    profiles = getattr(request.app.state, "profile_session", None)
+    paths = getattr(profiles, "paths", None)
+    if paths is not None and getattr(profiles, "borrowed", None) is None and c.db.encrypted:
+        import tempfile
+        with tempfile.TemporaryDirectory(dir=paths.backups_dir, prefix=".save-a-copy-") as folder:
+            saved = profiles.write_profile_file(folder)
+            data = await run_in_threadpool(saved.read_bytes)
+        # A header carries ASCII only; a name in another script keeps its date and kind.
+        name = saved.name if saved.name.isascii() else f"Lightning-profile{saved.name[-len('-0000-00-00.lightning'):]}"
+        return Response(data, media_type="application/octet-stream",
+                        headers={"Content-Disposition": f'attachment; filename="{name}"', "Cache-Control": "no-store"})
+    files = c.backup_files()
     if not files:
         return redirect("/settings", "Nothing to back up yet.")
     newest = files[0]

@@ -127,5 +127,5 @@ def test_the_newest_backup_can_leave_the_phone(tmp_path):
         answer = browser.get("/settings/backup/latest", headers={"Referer": "http://127.0.0.1:9872/settings"}, follow_redirects=False)
         assert answer.status_code == 303 and header(answer, "location").startswith("/settings")
         name, media, data = saver.offers[-1]
-        assert re.fullmatch(r".+_backup_\d{4}-\d{2}-\d{2}_\d{3,}_[0-9a-f]{8}\.db", name) and data
-        assert b"SQLite format 3" not in data[:16]          # the copy stays encrypted: never a plain database
+        assert re.fullmatch(r"Home-\d{4}-\d{2}-\d{2}\.lightning", name) and data  # the profile file (BT-2AI5)
+        assert b"SQLite format 3" not in data               # the copy stays encrypted: never a plain database
