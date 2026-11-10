@@ -12,7 +12,7 @@ def test_needs_you_rows_name_each_decision_and_the_count(c, setup, monkeypatch):
     page = TestClient(create_app(c)).get("/").text
     section = page[page.index('<section class="needs"'):page.index("</section>", page.index('<section class="needs"'))]
 
-    assert "<span>· 2</span>" in section  # Needs you · 2 (guideline 3.33, A09)
+    assert "<span>· 1</span>" in section  # Needs you · 1: the rows shown, a group is one row (IV-12AA3, A09)
     assert "Bills and payments · 2" in section and "Loan payment due: Car loan, Bill due: Electricity" in section
     assert section.count('class="needs-row"') == 1 and "needs-mark" in section  # one row per kind, the mark as bullet
 

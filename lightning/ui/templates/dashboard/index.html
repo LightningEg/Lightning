@@ -43,7 +43,8 @@
     </article>
   </section>
   {% if since %}<p class="since-visit muted small">{% if since.at %}{{ ('1 new transaction since your last visit on {sa}.' if since.count == 1 else '{n} new transactions since your last visit on {sa}.')|tr(locale, n=since.count, sa=since.at) }}{% else %}{{ ('1 new transaction since your last visit.' if since.count == 1 else '{n} new transactions since your last visit.')|tr(locale, n=since.count) }}{% endif %} <a href="/transactions">{{ 'See them'|tr(locale) }}</a></p>{% endif %}
-  {# 3AM3 (O1, OV-1): the top item, the rest one click away, so the KPIs are on the first screen #}{{ needs_rows(attention_groups, attention|length, more=('Weekly review'|tr(locale), '/review'), shown=1) }}
+  {# 3AM3 (O1, OV-1): the top item, the rest one click away, so the KPIs are on the first screen. IV-12AA3: one count,
+     the rows shown when all are open (a group is one row and says how many it holds) #}{{ needs_rows(attention_groups, more=('Weekly review'|tr(locale), '/review'), shown=1) }}
   {% if not attention %}<a class="quiet-link" href="/needs-you">{{ 'Reviewed and snoozed'|tr(locale) }}</a>{% endif %}
   {% if attention_handled.reviewed or attention_handled.snoozed %}<p class="muted small" id="needs-handled">{{ '{n} reviewed or snoozed items are still open, not resolved.'|tr(locale, n=attention_handled.reviewed + attention_handled.snoozed) }} <a class="quiet-link" href="/needs-you?tab=handled">{{ 'See them'|tr(locale) }}</a></p>{% endif %}
   {{ kpi_row(kpi_cards, base, 'This period') }}

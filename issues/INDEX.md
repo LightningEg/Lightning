@@ -342,7 +342,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **IV-12AA** | [Suggestions with sensible defaults and honest counts - Refill offers to empty Safe to spend, Needs you counts three ways, a year is compared with nothing](12-desktop-ux/IV-12AA-suggestions-with-sensible-defaults.md) | improvement, visual | Plan | M | Opus | ready |
 | IV-12AA1 | ↳ Owner: what Refill offers first | | | owner |  | |
 | IV-12AA2 | ↳ Refill offers the modest amount first and says what Home will show | | | M | Opus | |
-| IV-12AA3 | ↳ Needs you has one count ([#494](https://github.com/LightningEg/Lightning/issues/494)) | | | S | Sonnet | |
 | IV-12AA4 | ↳ A comparison with nothing says so ([#495](https://github.com/LightningEg/Lightning/issues/495)) | | | S | Sonnet | |
 | IV-12AA5 | ↳ Catch up on late bills, on the PC | | | M | Opus | |
 | **IV-12J** | [Certificates read as certificates: their own holding page, payouts as the bank pays them, value that grows, and a nudge at maturity](12-desktop-ux/IV-12J-certificates-read-as-certificates.md) | improvement, visual | Own | L | Opus | new |

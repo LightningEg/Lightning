@@ -35,8 +35,6 @@ A pick-list: the plan's monthly top-up first, the full amount second (recommende
 ## 12AA2 Refill offers the modest amount first and says what Home will show · M · opus
 Files: `lightning/ui/routes/reserves.py`, `lightning/ui/templates/reserves.html`, the phone's reserves template. The filled button is the choice of 12AA1 with "Safe to spend after: …"; the full amount stays under "Move more". The banner and Limits state the same aim. Done when a test finds the filled button's amount below Safe to spend on a profile where the gap is larger than Safe to spend, and the same aim on both pages.
 
-## 12AA3 Needs you has one count · S · sonnet · #494
-Files: `lightning/ui/templates/needs_you.html`, its builder. The heading counts the rows shown when all are open (a group counts as one row and says how many it holds); "Show all n" uses the same n. Done when a test on the sample year finds the heading's number equal to the rows after Show all.
 
 ## 12AA4 A comparison with nothing says so · S · sonnet · #495
 Files: the Reports route and template. With no data in the earlier period the card reads "No 2025 to compare with." without rose or a change figure; This quarter is left out (or says "same as this month so far") while it equals This month. Done when a test with one year of data finds no change chip on the year card.
