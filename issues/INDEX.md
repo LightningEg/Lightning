@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 74 open items. Each folder holds its reports and its items.
+11 big pictures, 78 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -344,6 +344,7 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 |---|---|---|---|---|---|---|
 | **BT-12H** | [A second gold holding of the same karat cannot be added (GLD:24K already exists)](12-desktop-ux/BT-12H-second-gold-holding-same-karat.md) | bug, technical · medium | Own | S | Sonnet | ready |
 | **BV-12O** | [Phone Budget: Where the month went counts fixed costs twice (33,851 spent where 19,001 was)](12-desktop-ux/BV-12O-phone-budget-donut-counts-fixed-costs-twice.md) | bug, visual · high | Plan | S | Sonnet | ready |
+| **BV-12U** | [Phone Money says net worth fell 10,438 this month where the Overview says it rose 36,395](12-desktop-ux/BV-12U-phone-money-net-worth-change.md) | bug, visual · high | Understand | S | Sonnet | ready |
 | **IV-12J** | [Certificates read as certificates: their own holding page, payouts as the bank pays them, value that grows, and a nudge at maturity](12-desktop-ux/IV-12J-certificates-read-as-certificates.md) | improvement, visual | Own | L | Opus | new |
 | IV-12J1 | ↳ The certificate's holding page and the certificates page | | | M | Opus | |
 | IV-12J2 | ↳ Payouts forecast the way Egyptian banks pay them | | | M | Opus | |
@@ -360,6 +361,9 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-12Q4 | ↳ Phone Recurring and the PC's doubled list | | | S | Opus | |
 | IV-12Q5 | ↳ Budget page and Budget settings | | | M | Opus | |
 | **IV-12T** | [The three "explain this figure" pages have no way in - /explain/owned, /explain/free-cash and /explain/flow are built and tested, and nothing links to them](12-desktop-ux/IV-12T-explain-pages-have-no-way-in.md) | improvement, visual | Understand | S | Sonnet | ready |
+| **IV-12V** | [Adjust balance: a cash wallet that is far off has no way forward, and the page is one bare form](12-desktop-ux/IV-12V-adjust-balance-for-cash.md) | improvement, visual | Capture | M | Sonnet | ready |
+| **IV-12W** | [Register and search: the forgotten minus, transactions in PC search, and small things on the rows](12-desktop-ux/IV-12W-register-and-search-small-traps.md) | improvement, visual | Capture | M | Sonnet | ready |
+| **IV-12X** | [Held for others gives instructions where it should give actions](12-desktop-ux/IV-12X-held-for-others-actions.md) | improvement, visual | Own | S | Sonnet | new |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | Opus | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | Opus | |
 | IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | M | Opus | |
@@ -389,6 +393,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **NF-12R** | [Fill this month from your average of the last three months](12-desktop-ux/NF-12R-fill-budget-from-average.md) | new feature | Plan | S | Sonnet | ready |
 | **NF-12S** | [Warn before a category runs out, with Move room or Raise](12-desktop-ux/NF-12S-warn-before-a-category-runs-out.md) | new feature | Plan | M | Sonnet | ready |
 
-Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md).
+Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md) · [r34](12-desktop-ux/r34-accounts-and-transactions/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F, 3AZ. Next free code: 12U.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 3AZ. Next free code: 12Y.

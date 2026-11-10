@@ -30,6 +30,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r31 | [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](7-planning-import-and-search/r31-logging-entries/report.md) | 2026-11-09 | audit | 7AI, 7AJ, 7AK, 7AL, 7AM, 7AN, 7AO, 7AP, 7AB |
 | r32 | [Audit 18: Budget and Cash planning, every tab and sub-page](12-desktop-ux/r32-budget-and-cash-planning/report.md) | 2026-11-09 | audit | 12O, 12P, 12Q, 12R, 12S |
 | r33 | [Code review: what is slow, loose, complicated or cut off from the rest](1-easy-to-contribute/r33-code-review-and-loose-ends/report.md) | 2026-11-09 | audit | 1V, 1W, 1X, 1Y, 1Z, 2AJ, 9L, 9M, 9N, 12T, 9F, 9K, 9A |
+| r34 | [Audit 19: accounts and transactions - the register, transfers, fixing mistakes and matching the bank](12-desktop-ux/r34-accounts-and-transactions/report.md) | 2026-11-10 | audit | 12U, 12V, 12W, 12X |
 
 
 ## Create and maintain a report
