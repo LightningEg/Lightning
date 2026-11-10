@@ -112,3 +112,19 @@ def test_repair_with_no_restore_record_offers_nothing(tmp_path):
         assert refused.status_code == 400 and "cannot find the record" in refused.text
         assert not list(live.parent.glob("restore-evidence-*"))
 
+
+
+def test_repair_and_pick_refuse_a_database_outside_the_profiles_folder(tmp_path):
+    from lightning.runtime import file_picker
+    browser, app, cfg = start(tmp_path)
+    with browser:
+        browser.get("/__launch", params={"code": cfg.launch_code})
+        page = browser.get("/profiles/restore/repair", params={"db": str(tmp_path / "elsewhere.db")})
+        assert page.status_code == 400 and "named Lightning profile" in page.text
+        file_picker.register(lambda: None)
+        try:
+            refused = browser.post("/profiles/restore/pick", data={"csrf": token(page.text),
+                                                                   "db": str(tmp_path / "elsewhere.db")})
+        finally:
+            file_picker.register(None)
+        assert refused.status_code == 400

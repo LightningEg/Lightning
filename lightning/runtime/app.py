@@ -403,6 +403,19 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     screens = register_profile_screens(app, ProfileScreens(session, devices, gate, fingerprint, kept, open_kept, keep_signed_in))
     page, action = screens.page, screens.action
 
+    def known_profile(selected: str) -> str:
+        """The database path of a profile Lightning itself found in the profiles folder that ``selected`` names.
+        The new restore routes (IT-2C3, 2C4) pass on this enumerated path, never the text of the request."""
+        try:
+            wanted = Path(selected).resolve() if selected and len(selected) <= 4096 else None
+            found = discover_profiles(session.root) if wanted is not None else []
+        except (OSError, ValueError):
+            found = []
+        for info in found:
+            if info.db_path.resolve() == wanted:
+                return str(info.db_path)
+        raise ProfileError("Restore requires a named Lightning profile.")
+
     @app.get("/profiles/restore")
     async def restore_page(request: Request):
         if session.container:
@@ -423,7 +436,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
         form = await request.form()
         selected = str(form.get("db", ""))
         try:
-            paths = session._select(selected)
+            paths = session._select(known_profile(selected))
             if paths.profile is None:
                 raise ProfileError("Restore requires a named Lightning profile.")
         except ProfileError as exc:
@@ -502,7 +515,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
             return RedirectResponse("/profiles", 303)
         selected = request.query_params.get("db", "")
         try:
-            evidence = session.restore_evidence(selected)
+            evidence = session.restore_evidence(known_profile(selected))
         except ProfileError as exc:
             return page(request, "repair-restore", status=400, selected=selected, error=str(exc))
         return page(request, "repair-restore", selected=selected, evidence=evidence)
@@ -514,7 +527,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
 
         def again(error: str):
             try:
-                evidence = session.restore_evidence(selected)
+                evidence = session.restore_evidence(known_profile(selected))
             except ProfileError:
                 evidence = []
             return page(request, "repair-restore", status=400, selected=selected, evidence=evidence, error=error)
@@ -523,7 +536,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
         if form.get("confirm") != "yes":
             return again("Confirm that Lightning should go back to the copy from before the restore.")
         try:
-            session.go_back_before_restore(selected, str(form.get("password", "")))
+            session.go_back_before_restore(known_profile(selected), str(form.get("password", "")))
         except ProfileError as exc:
             return again(str(exc))
         except Exception:
