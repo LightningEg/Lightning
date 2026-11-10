@@ -211,3 +211,75 @@ async def value_item(request: Request, account_id: int, asset_id: int):
         msg = exc.message if isinstance(exc, LightningError) else "Enter a valid value and date."
         return redirect(f"/accounts/{account_id}", msg)
     return redirect(f"/accounts/{account_id}", "Dated manual item valuation saved.")
+
+
+# -- Add gold: one form, one save (r30 G2-G7) -----------------------------------------------------------------
+GOLD_KINDS = ("Bar", "Coin", "Jewelry")
+
+
+def _price_reference(c, karat: int):
+    """The reference the karat decides: the same karat's own price, else the 24K one (priced by purity)."""
+    rows = [a for a in c.assets.investments(active_only=True)
+            if a.exposure.value == "GOLD" and a.purity is not None and a.currency == c.base_currency
+            and a.code.startswith(("REF:", "GLD:")) and not a.code.startswith("OTH:")]
+    own = next((a for a in rows if a.purity == Decimal(karat) / Decimal(24)), None)
+    return own or next((a for a in rows if a.purity == Decimal(1)), None)
+
+
+def _gold_form(request: Request, values: dict, error: LightningError | None = None, status: int = 200):
+    c = container(request)
+    cash = [a for a in c.accounts.list(active_only=True)
+            if a.account_type in (AccountType.BANK, AccountType.CASH, AccountType.CASH_AT_HAND)]
+    return render(request, "investments/add_gold.html", status_code=status, values=values, cash_accounts=cash,
+                  kinds=GOLD_KINDS, error=error.message if error else "", error_field=(error.field or "") if error else "")
+
+
+@router.get("/investments/gold/new")
+async def new_gold(request: Request):
+    return _gold_form(request, {"kind": "Bar", "name": "", "weight": "", "karat": "24", "pieces": "1", "total": "",
+                                "workmanship": "0", "date": fmt_date(today()), "paid_from": "", "notes": ""})
+
+
+@router.post("/investments/gold/new")
+async def create_gold(request: Request):
+    c = container(request)
+    form = await request.form()
+    keys = ("kind", "name", "weight", "karat", "pieces", "total", "workmanship", "date", "paid_from", "notes")
+    values = {key: str(form.get(key, "")).strip() for key in keys}
+    try:
+        karat = int(values["karat"])
+        if values["kind"] not in GOLD_KINDS:
+            raise LightningError("Choose bar, coin or jewellery.", "kind")
+        reference = _price_reference(c, karat)
+        if reference is None:
+            raise LightningError("No gold price is set up yet: add one under Prices first.", "karat")
+        owned = values["paid_from"] in ("", "owned")
+        cash_id = None if owned else _int(values["paid_from"])
+        if not owned and not cash_id:
+            raise LightningError("Choose where the money came from, or I already own it.", "paid_from")
+        pieces, total = values["pieces"] or "1", values["total"] or "0"
+        workmanship = values["workmanship"] or "0"
+        if to_decimal(workmanship) > to_decimal(total):
+            raise LightningError("Workmanship cannot exceed what you paid.", "workmanship")
+        submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+        payload = {key: values[key] for key in keys}
+        with settled_save(request, c):
+            if c.transactions.submitted(submission, payload) is None:
+                account = next((a for a in c.accounts.list(active_only=True)
+                                if a.account_type == AccountType.PHYSICAL_ASSET and a.currency == c.base_currency), None)
+                if account is None:
+                    account = c.account_flows.open_account("Gold", "PHYSICAL_ASSET", today().isoformat(), "0")
+                item_id = c.physical_items.create(account.id, values["name"], values["kind"], values["weight"], karat,
+                                                  reference.id, values["notes"])
+                if owned:
+                    txn = c.investments.add_holding(account.id, item_id, pieces, total, values["date"], values["notes"], None)
+                    c.physical_items.record_trade_details(txn.id, item_id, "OPN", "0", values["notes"])
+                else:
+                    txn = c.investments.buy_total(values["date"], account.id, item_id, pieces, total, cash_id,
+                                                  values["notes"], "0", True, None)
+                    c.physical_items.record_trade_details(txn.id, item_id, "BUY", workmanship, values["notes"])
+                c.transactions.remember_submission(submission, payload, txn.id)
+    except (ValueError, InvalidOperation, LightningError) as exc:
+        error = exc if isinstance(exc, LightningError) else LightningError("Check the weight, amount and date.")
+        return _gold_form(request, values, error=error, status=400)
+    return redirect("/investments", f"Added {values['name']}.")

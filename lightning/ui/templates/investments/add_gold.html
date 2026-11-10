@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import page_header with context %}
+{% block title %}{{ 'Add gold'|tr(locale) }}{% endblock %}
+{% block heading %}{{ page_header('Add gold', 'One form: the piece and what you paid for it. The price comes from the karat.') }}{% endblock %}
+{% block content %}
+<form method="post" class="card" style="max-width:760px">
+  {% if error %}<p class="error">{{ error|tr(locale) }}</p>{% endif %}
+  <div class="row">
+    <div class="field {{ 'has-error' if error_field == 'kind' }}"><label for="kind">{{ 'What is it'|tr(locale) }}</label><select id="kind" name="kind">{% for k in kinds %}<option value="{{ k }}" {{ 'selected' if values.kind == k }}>{{ {'Bar': 'Bar', 'Coin': 'Coin', 'Jewelry': 'Jewellery'}[k]|tr(locale) }}</option>{% endfor %}</select></div>
+    <div class="field {{ 'has-error' if error_field == 'name' }}"><label for="name">{{ 'Name'|tr(locale) }}</label><input id="name" name="name" value="{{ values.name }}" placeholder="{{ 'e.g. 10g bar'|tr(locale) }}" required></div>
+  </div>
+  <div class="row">
+    <div class="field {{ 'has-error' if error_field == 'weight' }}"><label for="weight">{{ 'Net gold weight per piece (g)'|tr(locale) }}</label><input id="weight" name="weight" value="{{ values.weight }}" inputmode="decimal" placeholder="10" required></div>
+    <div class="field {{ 'has-error' if error_field == 'karat' }}"><label for="karat">{{ 'Karat'|tr(locale) }}</label><select id="karat" name="karat">{% for k in (24,22,21,18) %}<option value="{{ k }}" {{ 'selected' if values.karat == k|string }}>{{ k }}K</option>{% endfor %}</select></div>
+    <div class="field {{ 'has-error' if error_field == 'quantity' }}"><label for="pieces">{{ 'Pieces'|tr(locale) }}</label><input id="pieces" name="pieces" value="{{ values.pieces }}" inputmode="numeric"></div>
+  </div>
+  <div class="row">
+    <div class="field {{ 'has-error' if error_field == 'paid_from' }}"><label for="paid_from">{{ 'Paid from'|tr(locale) }}</label><select id="paid_from" name="paid_from"><option value="owned" {{ 'selected' if values.paid_from in ('', 'owned') }}>{{ 'I already own it'|tr(locale) }}</option>{% for a in cash_accounts %}<option value="{{ a.id }}" {{ 'selected' if values.paid_from == a.id|string }}>{{ a.label }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="total">{{ 'Paid in all'|tr(locale) }}</label><input id="total" name="total" value="{{ values.total }}" inputmode="decimal"></div>
+    <div class="field {{ 'has-error' if error_field == 'workmanship' }}"><label for="workmanship">{{ 'Of which workmanship'|tr(locale) }}</label><input id="workmanship" name="workmanship" value="{{ values.workmanship }}" inputmode="decimal"></div>
+    <div class="field"><label for="date">{{ 'Date'|tr(locale) }}</label><input id="date" name="date" type="date" value="{{ values.date }}"></div>
+  </div>
+  <div class="field"><label for="notes">{{ 'Notes'|tr(locale) }}</label><input id="notes" name="notes" value="{{ values.notes }}"></div>
+  <div class="actions"><button class="btn primary">{{ 'Add gold'|tr(locale) }}</button><a class="btn" href="/investments">{{ 'Cancel'|tr(locale) }}</a></div>
+<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+{% endblock %}

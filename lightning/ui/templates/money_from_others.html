@@ -6,7 +6,7 @@
 <section class="card data-panel wide-card">
   <div class="section-head"><div><h2>{{ 'Cash'|tr(locale) }}</h2></div></div>
   {% if owners %}<table><thead><tr><th>{{ 'Held for'|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th class="num">{{ "Amount held"|tr(locale) }}</th><th><span class="sr-only">{{ 'Actions'|tr(locale) }}</span></th></tr></thead><tbody>
-  {% for row in owners %}<tr><td data-label="{{ 'Held for'|tr(locale) }}">{{ row.owner }}</td><td data-label="{{ 'Account'|tr(locale) }}">{{ row.account_name }}</td><td class="num" data-label="{{ 'Amount held'|tr(locale) }}">{{ row.amount|money }}</td><td class="row-actions">{% if row.owner_id and row.amount > 0 %}{% set q = 'owner_id=' ~ row.owner_id ~ '&counterparty=' ~ row.owner|urlencode ~ '&return_to=%2Fmoney-from-others' %}<a class="btn small" data-popup-open href="/accounts/{{ row.account_id }}/transaction/new?kind=out&amp;amount={{ '%.2f'|format(row.amount) }}&amp;notes={{ 'Given back'|tr(locale)|urlencode }}&amp;{{ q }}">{{ 'Give back'|tr(locale) }}</a> <a class="btn small" data-popup-open href="/accounts/{{ row.account_id }}/transaction/new?kind=out&amp;{{ q }}">{{ 'Spend for them'|tr(locale) }}</a>{% endif %}</td>
+  {% for row in owners %}<tr><td data-label="{{ 'Held for'|tr(locale) }}">{{ row.owner }}</td><td data-label="{{ 'Account'|tr(locale) }}">{{ row.account_name }}</td><td class="num" data-label="{{ 'Amount held'|tr(locale) }}">{{ row.amount|money }}</td><td class="row-actions">{% if row.owner_id and row.amount > 0 %}{% set q = 'owner_id=' ~ row.owner_id ~ '&counterparty=' ~ row.owner|urlencode ~ '&return_to=%2Fmoney-from-others' %}<a class="btn small" data-popup-open href="/accounts/{{ row.account_id }}/transaction/new?kind=out&amp;amount={{ '%.2f'|format(row.amount) }}&amp;notes={{ 'Given back'|tr(locale)|urlencode }}&amp;{{ q }}">{{ 'Give back'|tr(locale) }}</a> <a class="btn small" data-popup-open href="/accounts/{{ row.account_id }}/transaction/new?kind=out&amp;{{ q }}">{{ 'Spend for them'|tr(locale) }}</a>{% endif %}{% if row.owner_id %} <a class="btn small" data-popup-open href="/accounts/{{ row.account_id }}/transaction/new?kind=in&amp;notes={{ 'Received to hold'|tr(locale)|urlencode }}&amp;owner_id={{ row.owner_id }}&amp;counterparty={{ row.owner|urlencode }}&amp;return_to=%2Fmoney-from-others">{{ 'Receive more'|tr(locale) }}</a>{% endif %}</td>
   {% endfor %}
   </tbody></table>{% else %}<p class="muted">{{ "No cash is held for others."|tr(locale) }}</p>{% endif %}
 </section>
@@ -18,9 +18,16 @@
   {% endfor %}
   </tbody></table>{% else %}<p class="muted">{{ "No investments are held for others."|tr(locale) }}</p>{% endif %}
 </section>{% else %}<p class="muted small">{{ "No investments are held for others."|tr(locale) }}</p>{% endif %}
-<details class="flow-disclosure"><summary><b>{{ "How to record ownership"|tr(locale) }}</b></summary>
-  <p class="muted">{{ "Use the account’s transaction form and choose the person in"|tr(locale) }}<b>{{ 'Held for'|tr(locale) }}</b>{{ ". For cash already held for someone else, record money in; record a return with a negative amount. Both paths update the owner’s balance."|tr(locale) }}</p>
-  <a class="btn primary" href="/transactions">{{ "Open transactions"|tr(locale) }}</a>
+<details class="flow-disclosure data-panel" id="hold-money"><summary><b>{{ "Hold money for someone"|tr(locale) }}</b></summary>
+  <form method="post" action="/money-from-others" class="sc-row settings-compact">
+    <label>{{ 'Held for'|tr(locale) }}<input name="owner" list="hold-people" required autocomplete="off" placeholder="{{ 'Type and pick a saved person'|tr(locale) }}"><datalist id="hold-people">{% for party in counterparties %}<option value="{{ party.name }}">{% endfor %}</datalist></label>
+    <label>{{ 'Account'|tr(locale) }}<select name="account_id">{% for account in accounts if account.account_type.value in ('BANK','CASH') %}<option value="{{ account.id }}">{{ account.name }}</option>{% endfor %}</select></label>
+    <label>{{ 'Amount'|tr(locale) }}<input name="amount" inputmode="decimal" required></label>
+    <label>{{ 'Date'|tr(locale) }}<input name="date" type="date" value="{{ today_iso }}"></label>
+    <label>{{ 'Notes'|tr(locale) }}<input name="notes"></label>
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    <button class="btn primary" type="submit">{{ 'Hold money'|tr(locale) }}</button>
+  </form>
 </details>
 <details class="flow-disclosure data-panel"><summary><b>{{ "Cash ownership history"|tr(locale) }}</b><span class="muted small">{{ entries|length }} {{ 'entry' if entries|length == 1 else 'entries' }}</span></summary>
   <table><thead><tr><th>{{ 'Date'|tr(locale) }}</th><th>{{ 'Held for'|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th>{{ 'Notes'|tr(locale) }}</th><th class="num">{{ "Change"|tr(locale) }}</th></tr></thead><tbody>

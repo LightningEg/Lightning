@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 73 open items. Each folder holds its reports and its items.
+11 big pictures, 70 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -322,7 +322,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 |---|---|---|---|---|---|---|
 | **BT-12AC** | [The Investments Lead's Cost and Unrealized gain do not add up to its Portfolio value - 325,088 and 27,399 under 752,486](12-desktop-ux/BT-12AC-investments-lead-parts-do-not-add-up.md) | bug, technical · medium | Own | M | Opus | ready |
 | **BT-12AD** | [The payday proposal's lines do not add up to the cash they share out, and "Everyday spending" there is not the figure of that name](12-desktop-ux/BT-12AD-payday-proposal-lines-overlap.md) | bug, technical · medium | Plan | M | Opus | ready |
-| **BT-12H** | [A second gold holding of the same karat cannot be added (GLD:24K already exists)](12-desktop-ux/BT-12H-second-gold-holding-same-karat.md) ([#493](https://github.com/LightningEg/Lightning/issues/493)) | bug, technical · medium | Own | S | Sonnet | ready |
 | **IT-12AE** | [A screen cannot work out money - derived figures move to their owners, a ratchet test counts arithmetic in the UI, and the PC and phone are compared on one household](12-desktop-ux/IT-12AE-a-screen-cannot-work-out-money.md) | improvement, technical | Build | L | Opus | ready |
 | IT-12AE1 | ↳ The PC and the phone are compared on one household | | | M | Opus | |
 | IT-12AE2 | ↳ Parts add up to their whole | | | S | Sonnet | |
@@ -340,8 +339,7 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-12J3 | ↳ A certificate paid at maturity gains value as it earns | | | M | Opus | |
 | IV-12J4 | ↳ A variable rate is dated | | | S | Opus | |
 | **IV-12K** | [One door to add an investment: ask what it is first, and list only what can be chosen](12-desktop-ux/IV-12K-one-door-to-add-an-investment.md) | improvement, visual | Capture | M | Sonnet | ready |
-| **IV-12L** | [Gold: add a piece and its purchase in one step, pick the price by karat, and show bars with the jewellery](12-desktop-ux/IV-12L-gold-one-step-and-one-table.md) | improvement, visual | Own | M | Sonnet | new |
-| **IV-12N** | [Investments figures that mislead outside stocks: purchases shown as change in value, yearly rates on weeks, two Others](12-desktop-ux/IV-12N-investment-figures-beyond-stocks.md) | improvement, visual | Understand | M | Sonnet | new |
+| **IV-12L** | [Gold: add a piece and its purchase in one step, pick the price by karat, and show bars with the jewellery](12-desktop-ux/IV-12L-gold-one-step-and-one-table.md) | improvement, visual | Own | M | Sonnet | ready |
 | **IV-12P** | [One name, one figure across Budget, Cash planning and Home](12-desktop-ux/IV-12P-one-name-one-figure-budget-and-cash.md) | improvement, visual | Plan | M | Opus | new |
 | **IV-12Q** | [The unfinished pages of Budget and Cash planning get the page pattern: a lead figure, a visual, cards](12-desktop-ux/IV-12Q-unfinished-budget-and-cash-pages.md) | improvement, visual | Plan | L | Opus | new |
 | IV-12Q1 | ↳ Fund your payday plan, as one short step | | | M | Opus | |
@@ -352,7 +350,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **IV-12T** | [The three "explain this figure" pages have no way in - /explain/owned, /explain/free-cash and /explain/flow are built and tested, and nothing links to them](12-desktop-ux/IV-12T-explain-pages-have-no-way-in.md) | improvement, visual | Understand | S | Sonnet | ready |
 | **IV-12V** | [Adjust balance: a cash wallet that is far off has no way forward, and the page is one bare form](12-desktop-ux/IV-12V-adjust-balance-for-cash.md) | improvement, visual | Capture | M | Sonnet | ready |
 | **IV-12W** | [Register and search: the forgotten minus, transactions in PC search, and small things on the rows](12-desktop-ux/IV-12W-register-and-search-small-traps.md) | improvement, visual | Capture | M | Sonnet | ready |
-| **IV-12X** | [Held for others gives instructions where it should give actions](12-desktop-ux/IV-12X-held-for-others-actions.md) | improvement, visual | Own | S | Sonnet | new |
 | **IV-12Y** | [One page skeleton on the PC, kept by a test - every tab has the same title rule, an answer sentence, its dates, and the same controls in the same order](12-desktop-ux/IV-12Y-one-page-skeleton-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
 | IV-12Y1 | ↳ Owner: the title rule and the control order | | | owner |  | |
 | IV-12Y2 | ↳ The test first, with today's exceptions listed | | | M | Opus | |
@@ -399,4 +396,4 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md) · [r34](12-desktop-ux/r34-accounts-and-transactions/report.md) · [r35](12-desktop-ux/r35-ux-against-users-questions/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F, 12U, 3AZ, BV-12O, NF-12I. Next free code: 12AF.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 12H, 12N, 12U, 12X, 3AZ, BV-12O, NF-12I. Next free code: 12AF.
