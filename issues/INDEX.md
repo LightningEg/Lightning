@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 78 open items. Each folder holds its reports and its items.
+11 big pictures, 77 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -333,7 +333,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **BT-12AC** | [The Investments Lead's Cost and Unrealized gain do not add up to its Portfolio value - 325,088 and 27,399 under 752,486](12-desktop-ux/BT-12AC-investments-lead-parts-do-not-add-up.md) | bug, technical · medium | Own | M | Opus | ready |
 | **BT-12AD** | [The payday proposal's lines do not add up to the cash they share out, and "Everyday spending" there is not the figure of that name](12-desktop-ux/BT-12AD-payday-proposal-lines-overlap.md) | bug, technical · medium | Plan | M | Opus | ready |
 | **BT-12H** | [A second gold holding of the same karat cannot be added (GLD:24K already exists)](12-desktop-ux/BT-12H-second-gold-holding-same-karat.md) ([#493](https://github.com/LightningEg/Lightning/issues/493)) | bug, technical · medium | Own | S | Sonnet | ready |
 | **IT-12AE** | [A screen cannot work out money - derived figures move to their owners, a ratchet test counts arithmetic in the UI, and the PC and phone are compared on one household](12-desktop-ux/IT-12AE-a-screen-cannot-work-out-money.md) | improvement, technical | Build | L | Opus | ready |
@@ -415,4 +414,4 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md) · [r34](12-desktop-ux/r34-accounts-and-transactions/report.md) · [r35](12-desktop-ux/r35-ux-against-users-questions/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F, 12U, 3AZ, BV-12O. Next free code: 12AF.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 12U, 3AZ, BV-12O, BT-12AC. Next free code: 12AF.

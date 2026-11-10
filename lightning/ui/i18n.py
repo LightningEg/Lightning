@@ -1225,6 +1225,7 @@ ARABIC_UI = {
     'Most you can plan': 'أقصى مبلغ تقدر تخطط له',
     'Cost': 'التكلفة',
     'Unrealized gain': 'ربح غير محقق',
+    'Valued by you': 'بتقييمك',
     'Price change on what you hold': 'تغير قيمة المقتنيات',
     'Gain from sales': 'أرباح البيع',
     'Dividends and interest': 'توزيعات وفوائد',
