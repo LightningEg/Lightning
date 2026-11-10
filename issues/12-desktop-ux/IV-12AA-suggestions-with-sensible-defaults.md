@@ -29,13 +29,7 @@ The first offer is the modest one, a count is the number of rows the person will
 
 Money logic stays in the services (`lightning/` services, never templates). After each step: its test and `python -m pytest -q tests/test_mohab_year.py tests/test_refill_preview.py tests/test_refill_schedule.py tests/test_needs_you_consequences.py`. Delete the step's heading in the same commit.
 
-## 12AA1 Owner: what Refill offers first · owner
-A pick-list: the plan's monthly top-up first, the full amount second (recommended); or keep a named cushion (for example one week of everyday spending) and offer the rest; or leave it. And which aim the banner states, six months or the limit's three.
-
-## 12AA2 Refill offers the modest amount first and says what Home will show · M · opus
-Files: `lightning/ui/routes/reserves.py`, `lightning/ui/templates/reserves.html`, the phone's reserves template. The filled button is the choice of 12AA1 with "Safe to spend after: …"; the full amount stays under "Move more". The banner and Limits state the same aim. Done when a test finds the filled button's amount below Safe to spend on a profile where the gap is larger than Safe to spend, and the same aim on both pages.
-
-
+Built: 12AA1 (owner, 2026-11-10: monthly top-up first, aim six months; `ai/PROJECT_OVERVIEW.md`), 12AA2 (`tests/test_refill_offers_the_top_up_first.py`), 12AA3 (`tests/test_needs_you_one_count.py`, #494), 12AA4 (`tests/test_reports_compare_with_nothing.py`, #495).
 
 ## 12AA5 Catch up on late bills, on the PC · M · opus
 Files: `lightning/ui/templates/planning/`, the planning routes; reuse the phone's catch-up service calls. With three or more late rows Cash planning offers one "Catch up": each late bill in turn, paid (on which day, from which account, a matching payment suggested first) or not yet, then a summary with Undo. Done when a test walks three late bills through it and the ledger and Due before payday move by exactly the paid ones.

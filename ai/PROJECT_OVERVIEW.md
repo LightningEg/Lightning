@@ -225,6 +225,8 @@ From the full UX review of 2026-10-03 (Mohab's year at 1,366 × 768) and the tab
 
 **Owner decision (2026-11-09, [r36](../issues/11-phone-ux/r36-figures-one-owner/report.md)):** "Left in plan" means Planned − Spent on every screen; the phone's Budget leads with everyday money under its own name, "Left for everyday" (BV-11L1).
 
+**Owner decisions (2026-11-10, O1 "Figures must add up"):** Refill's filled button offers the plan's monthly Emergency fund top-up, the full safe amount under "Move more" (IV-12AA1/2); the emergency aim is six months on Reserves and Limits alike (three is only the Needs you warning). Cash available to assign is stated before the bills due outside the funds, and the payday proposal's Bills protected, To your plan, Emergency and goals and Left unassigned add up to it (BT-12AD).
+
 **Still open:** import button says "Post ready rows" while undecided rows post as Unaccounted; bulk counterparty edit.
 
 <a id="upcoming-projects"></a>
