@@ -13,22 +13,29 @@ from ..model import Quote, SourceError
 
 CHART = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
 # Yahoo's exchange suffixes for the Gulf and European boards the app fetches itself (owner 2026-11-04). The UAE and
-# Bahrain are left out: one suffix cannot tell Dubai from Abu Dhabi, and Bahrain's is unconfirmed; their latest
-# closes still come from the board.
+# Bahrain are keyed AE: and BH:, and one country cannot tell Dubai from Abu Dhabi, so their suffix comes from the venue
+# (VENUE_SUFFIX). A venue is listed only once Yahoo's answer names it (IT-6F2, 2026-11-10: EMAAR.AE is DFM in AED;
+# ALDAR.AD, ALDAR.AE and BATELCO.BH were not found); the others' latest closes still come from the board.
 SUFFIX = {"SA": ".SR", "QA": ".QA", "KW": ".KW", "GB": ".L", "DE": ".DE", "FR": ".PA", "NL": ".AS", "BE": ".BR",
           "PT": ".LS", "ES": ".MC", "IT": ".MI", "CH": ".SW", "SE": ".ST", "DK": ".CO", "FI": ".HE", "IS": ".IC"}
+VENUE_SUFFIX = {"XDFM": ".AE"}
 # A close is dated by its market's own day.
 ZONES = {"US": "America/New_York", "XAU/USD": "America/New_York", "XAG/USD": "America/New_York",
          "SA": "Asia/Riyadh", "QA": "Asia/Qatar", "KW": "Asia/Kuwait", "GB": "Europe/London", "DE": "Europe/Berlin",
          "FR": "Europe/Paris", "NL": "Europe/Amsterdam", "BE": "Europe/Brussels", "PT": "Europe/Lisbon",
          "ES": "Europe/Madrid", "IT": "Europe/Rome", "CH": "Europe/Zurich", "SE": "Europe/Stockholm",
-         "DK": "Europe/Copenhagen", "FI": "Europe/Helsinki", "IS": "Atlantic/Reykjavik"}
+         "DK": "Europe/Copenhagen", "FI": "Europe/Helsinki", "IS": "Atlantic/Reykjavik",
+         "AE": "Asia/Dubai", "BH": "Asia/Bahrain"}
 # A series quoted in a currency's minor unit (pence, fils) is brought to the ISO unit, as the boards are.
 MINOR = {"GBp": Decimal(100), "GBX": Decimal(100), "KWF": Decimal(1000), "ZAc": Decimal(100), "ILA": Decimal(100)}
 
 
-def symbol_for(key: str) -> str | None:
-    """EG:COMI -> COMI.CA, US:BRK.B -> BRK-B, USD/EGP -> EGP=X, XAU/USD -> GC=F (gold, an ounce); others have none."""
+def symbol_for(key: str, mic: str = "") -> str | None:
+    """EG:COMI -> COMI.CA, US:BRK.B -> BRK-B, USD/EGP -> EGP=X, XAU/USD -> GC=F (gold, an ounce); others have none.
+    A venue in VENUE_SUFFIX names its own: AE:EMAAR on XDFM -> EMAAR.AE (a second listing's -MIC ending is dropped)."""
+    if mic in VENUE_SUFFIX and ":" in key:
+        ticker = key.partition(":")[2].removesuffix(f"-{mic}")
+        return ticker.replace("_", "-") + VENUE_SUFFIX[mic] if ticker else None
     if key.startswith("EG:") and ":FUND:" not in key:
         return key[3:] + ".CA"
     if key.startswith("US:"):
@@ -75,8 +82,8 @@ def parse(data: dict, key: str, zone: str = "Africa/Cairo") -> list[Quote]:
     return [quotes[d] for d in sorted(quotes)]
 
 
-def fetch_history(session, key: str, since: str = "max") -> list[Quote]:
-    symbol = symbol_for(key)
+def fetch_history(session, key: str, since: str = "max", mic: str = "") -> list[Quote]:
+    symbol = symbol_for(key, mic)
     if not symbol:
         return []
     data = session.get_json(CHART.format(symbol=quote(symbol, safe="")),

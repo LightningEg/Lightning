@@ -112,3 +112,14 @@ def test_new_venue_currencies_are_registered_and_can_have_manual_fx(c):
         registry.register(currency)
         c.fx.save(currency, "2026-10-12", "50")
         assert rate_for(c.db, currency, "EGP", "2026-10-12").rate == D("50")
+
+
+def test_londons_picker_list_holds_its_own_pound_shares():
+    """IT-6F1: London asks for pound and pence shares only, so the rebuilt list (2026-11-10) is not mostly order-book
+    lines in dollars. It held 57 GBP rows before."""
+    import csv
+    from pathlib import Path
+
+    path = Path(__file__).parents[1] / "lightning/assets/abroad_instruments.csv"
+    rows = list(csv.DictReader(path.open(encoding="utf-8-sig")))
+    assert sum(1 for row in rows if row["mic"] == "XLON" and row["currency"] == "GBP") >= 250

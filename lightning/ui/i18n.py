@@ -3694,6 +3694,22 @@ def _dots_across_tags(out: list[str], kinds: list[str]) -> None:
             last = i
 
 
+_EGP = re.compile(r"(?<![A-Za-z/])EGP(?![A-Za-z/=])")
+_PERCENT = re.compile(r"(?<=\d)%")
+
+
+def currency_label(code: str, locale: str = "en") -> str:
+    """The currency as a screen shows it: EGP is ج.م in Arabic (owner, 2026-11-08); other codes stay (USD, SAR)."""
+    return "ج.م" if code == "EGP" and str(locale).startswith("ar") else code
+
+
+def arabic_marks(text: str) -> str:
+    """Arabic screen text: EGP as ج.م and a percent after a figure as ٪ (A06.2, IV-3BK5, IV-3BK7)."""
+    if "EGP" in text:
+        text = _EGP.sub(currency_label("EGP", "ar"), text)
+    return _PERCENT.sub("٪", text) if "%" in text else text
+
+
 def localize_html(page: str) -> str:
     """The Arabic page's last pass: any visible text, title, aria-label or placeholder that a template or a Python
     sentence left in English is translated here from the same table. Data (names, refs, codes) has no entry, so it stays.
@@ -3702,7 +3718,7 @@ def localize_html(page: str) -> str:
     typed = False  # inside <bdi translate="no">: a name the person typed is never translated (BV-11G)
 
     def attribute(m):
-        return m.group(1) + m.group(2) + arabic_dots(_translate_piece(m.group(3))) + m.group(2)
+        return m.group(1) + m.group(2) + arabic_marks(arabic_dots(_translate_piece(m.group(3)))) + m.group(2)
 
     for token in _TAG.findall(page):
         if token[:9].lower() == "<textarea":  # its typed text stays as typed; its placeholder is ours
@@ -3720,7 +3736,7 @@ def localize_html(page: str) -> str:
             out.append(token)
             kinds.append("tag" if plain_tag or token[:2] == "</" else "barrier")
         else:
-            out.append(arabic_dots(token if typed else _translate_piece(token)))
+            out.append(arabic_dots(token) if typed else arabic_marks(arabic_dots(_translate_piece(token))))
             kinds.append("text")
     _dots_across_tags(out, kinds)
     return "".join(out)
