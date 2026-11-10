@@ -13,8 +13,8 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | [Protect](pillars/protect.md) | 4 | 1 | 2 |  | 1 |  |
 | [Everywhere](pillars/everywhere.md) | 7 | 3 | 4 |  |  |  |
 | [Feel](pillars/feel.md) | 13 | 3 | 9 |  | 1 | 1 |
-| [Build](pillars/build.md) | 9 |  | 8 |  | 1 |  |
-| [Reach](pillars/reach.md) | 4 |  | 3 | 1 |  | 2 |
+| [Build](pillars/build.md) | 10 |  | 8 | 1 | 1 |  |
+| [Reach](pillars/reach.md) | 3 |  | 3 |  |  | 2 |
 
 74 open items in 11 milestones.
 

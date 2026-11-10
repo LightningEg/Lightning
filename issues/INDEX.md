@@ -237,12 +237,11 @@ Good ideas that wait until the milestones above are done.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IT-9A** | [Stored month-end figures](9-later/IT-9A-stored-month-end-figures.md) | improvement, technical | Understand | M | Opus | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
-| **IT-9F** | [Page speed: a CSS trim](9-later/IT-9F-page-speed-origin-and-css.md) | improvement, technical | Reach | M | Sonnet | new |
-| IT-9F3 | ↳ Do async routes with synchronous database work slow anything? | | | S | Opus | |
 | **IT-9K** | [Structure left - restore, device and borrowing routes out of profile_app](9-later/IT-9K-layers-and-copies.md) | improvement, technical | Build | M | Opus | ready |
 | IT-9K1 | ↳ Restore routes out of profile_app | | | S | Sonnet | |
 | IT-9K2 | ↳ The phone's device routes out of profile_app | | | M | Opus | |
 | IT-9K3 | ↳ The PC's borrowing routes and Lock out of profile_app | | | M | Opus | |
+| **IT-9O** | [A slow page makes every other request wait - the routes are async def with synchronous database work, so one 76 ms Overview holds back a 4 ms stylesheet for about 110 ms](9-later/IT-9O-read-only-pages-block-other-requests.md) | improvement, technical | Build | M | Opus | new |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | Opus | ready |
 | NF-9D3 | ↳ Hijri conversion in Python | | | S | Opus | |
 | NF-9D4 | ↳ Show the Hijri date beside every zakat day | | | S | Sonnet | |
@@ -252,7 +251,7 @@ Good ideas that wait until the milestones above are done.
 
 Reports: [r22](9-later/r22-code-quality-and-smart-features/report.md).
 
-Done: 9B, 9C, 9E, 9G, 9H, 9I, 9J, 9L, 9M, 9N. Next free code: 9O.
+Done: 9B, 9C, 9E, 9F, 9G, 9H, 9I, 9J, 9L, 9M, 9N. Next free code: 9P.
 
 ## 10 Looks and store
 

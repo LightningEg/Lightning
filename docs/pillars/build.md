@@ -19,6 +19,7 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 | **IT-1X** | [Two sessions take the same code](../../issues/1-easy-to-contribute/IT-1X-two-sessions-take-the-same-code.md) | M | ready |
 | **IT-1Z** | [Unused functions and names](../../issues/1-easy-to-contribute/IT-1Z-unused-functions-and-names.md) | S | ready |
 | **IT-9K** | [Structure left](../../issues/9-later/IT-9K-layers-and-copies.md) | M | ready |
+| **IT-9O** | [A slow page makes every other request wait](../../issues/9-later/IT-9O-read-only-pages-block-other-requests.md) | M | new |
 | **IT-12AE** | [A screen cannot work out money](../../issues/12-desktop-ux/IT-12AE-a-screen-cannot-work-out-money.md) | L | ready |
 
 ## Reports with open follow-ups here
