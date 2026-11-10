@@ -43,7 +43,7 @@ Severity: high = wrong money or a lost entry; medium = a job that takes the long
 | S8 | low | `egypt_bank_sms_formats.json` (941 lines, 35 banks) is loaded by nothing; it reads as coverage that does not exist. | NF-7AK4 |
 | S9 | medium | Every message waits for review, and a shop needs its category chosen again in review ("CARREFOUR MAADI · Needs you") unless a rule exists. | NF-7AO, NF-7AB |
 | S10 | low | The shop's raw text becomes the payee ("UBER *TRIP HELP.UBER.COM"). Known from r23 C3. | NF-7AB |
-| S11 | low | The balance each message states ("المتاح 3792.36") is read and stored but never compared with the account's balance; it could flag a missed entry the same day. | NF-7AP |
+| S11 | low | The balance each message states ("المتاح 3792.36") is read and stored but never compared with the account's balance; it could flag a missed entry the same day. | done: tests/test_sms_imports.py::test_stated_balance_is_compared_with_the_account |
 
 ### Typing an entry
 
@@ -88,4 +88,4 @@ recurring bills, file import beyond its entry page (see r23), synchronized profi
   offered and not chosen. S11 (balance check) has no item; raise it when NF-7AO is built.
 
 - **2026-11-09, owner decisions, second round (question dialog).** A dollar payment is recorded in dollars and the balance is
-  rated in pounds (NF-7AK3). The balance a message states is compared with the account as a quiet To do row (S11, NF-7AP).
+  rated in pounds (NF-7AK3). The balance a message states is compared with the account as a quiet To do row (S11, done, tests/test_sms_imports.py).

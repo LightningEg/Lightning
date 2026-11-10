@@ -156,7 +156,7 @@ async def assign(request: Request):
 async def dismiss_balance(request: Request, account_id: int):
     """Quiet the 'off the bank's balance' row until a later message states a balance (NF-7AP)."""
     with settled_save(request, container(request)):
-        container(request).sms_imports.dismiss_balance(account_id)
+        container(request).sms_imports.dismiss(f"balance:{account_id}")
     return redirect("/", "Dismissed.")
 
 

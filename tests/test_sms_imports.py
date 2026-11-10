@@ -459,7 +459,7 @@ def test_stated_balance_is_compared_with_the_account(c, setup):
     c.sms_imports._note_balance(account.id, [said(ledger + 350)])
     rows = ReviewInbox(c)._balance_checks()
     assert len(rows) == 1 and "350" in rows[0]["label"] and rows[0]["href"].endswith("date=2026-10-07")
-    c.sms_imports.dismiss_balance(account.id)
+    c.sms_imports.dismiss(f"balance:{account.id}")
     assert ReviewInbox(c)._balance_checks() == []  # dismissed: quiet
     c.sms_imports._note_balance(account.id, [said(ledger + 350, "2026-10-08")])
     assert len(ReviewInbox(c)._balance_checks()) == 1  # a later message states one again

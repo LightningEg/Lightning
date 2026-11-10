@@ -470,7 +470,10 @@ class SmsImportService:
                 if m.get("reason") or (m.get("sender", "") not in quiet and not is_offer(m.get("text", "")))]
 
     def dismiss(self, message_id: str) -> None:
-        """Remove a kept message. Its sender counts towards being quieted, unless it is a bank's."""
+        """Remove a kept message. Its sender counts towards being quieted, unless it is a bank's. ``balance:<account id>``
+        quiets that account's balance check instead (NF-7AP)."""
+        if message_id.startswith("balance:") and message_id[8:].isdigit():
+            return self._dismiss_balance(int(message_id[8:]))
         kept = self._json(UNREAD_KEY, [])
         gone = next((m for m in kept if m.get("id") == message_id), None)
         counts = self._json(QUIET_KEY, {})
@@ -594,7 +597,7 @@ class SmsImportService:
         """{account_id: {"balance", "date", "dismissed"}}: what the bank last said, to compare with the ledger."""
         return {int(k): v for k, v in self._json(BALANCES_KEY, {}).items() if str(k).isdigit()}
 
-    def dismiss_balance(self, account_id: int) -> None:
+    def _dismiss_balance(self, account_id: int) -> None:
         """A pending hold makes the bank's figure lag: the row stays quiet until a later message states a balance."""
         notes = self._json(BALANCES_KEY, {})
         if str(account_id) in notes:

@@ -23,10 +23,10 @@ def test_a_shortfall_is_spending_and_an_excess_is_income(c, setup):
     wallet = accounts["wallet"].id
     short = c.reconciliation.adjust(wallet, "2026-09-30", D("1150"))
     assert short.ref.startswith("OUT-") and c.reconciliation.balance(wallet, "2026-09-30") == D("1150")
-    assert c.categories.get(short.lines[0].category_id).code == "EXP.PERSONAL.OTHER"
+    assert c.categories.get(short.lines[0].category_id).code == "EXP.UNACCOUNTED"  # a wallet has no statement (IV-12V)
     extra = c.reconciliation.adjust(wallet, "2026-10-01", D("1180"))
     assert extra.ref.startswith("IN-") and c.reconciliation.balance(wallet, "2026-10-01") == D("1180")
-    assert c.categories.get(extra.lines[0].category_id).code == "EXP.PERSONAL.OTHER_INCOME"
+    assert c.categories.get(extra.lines[0].category_id).code == "INC.UNACCOUNTED"
     assert c.reporting.cash_flow("2026-09-01", "2026-09-30").outflows == D("50")
 
 
