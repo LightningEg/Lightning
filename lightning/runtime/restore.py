@@ -412,6 +412,10 @@ class EncryptedBackupRestorer:
             try:
                 self._verify_file(source, key)
             except Exception as exc:
+                if source.name.endswith("_picked.db"):
+                    # A file chosen with "Choose a backup file…" that is not this profile's backup was only ever a
+                    # copy (IT-2C3); the path comes from this profile's own backup listing, not the request.
+                    source.unlink(missing_ok=True)
                 raise ProfileError(NOT_THIS_PROFILES_BACKUP) from exc
             if self._digest(source) != source_hash:
                 raise ProfileError("The selected backup changed during verification.")

@@ -51,7 +51,3 @@ def copy_into_backups(chosen: str | Path, backups_dir: Path, database: Path) -> 
     finally:
         partial.unlink(missing_ok=True)
     return target
-
-
-def is_picked(path: str | Path) -> bool:
-    return Path(path).name.endswith(PICKED_SUFFIX)

@@ -20,7 +20,7 @@ from .http import (MARKET_IMPORT_PATH, PRICE_CSV_PATH, MAX_IMPORT_CONFIRM_BODY, 
                    MAX_IMPORT_MAP_BODY, PROFILE_FILE_PATH, Credentials, Guard,
                    body_receiver, configure_memory_only_import_uploads, equal)
 from .devices import Devices, home_state_line, home_state_message, move_to_phone, open_move
-from .paths import discover_profiles, resolve_profile
+from .paths import discover_profiles
 from .restore import NOT_THIS_PROFILES_BACKUP
 from .profile_screens import ProfileScreens, register as register_profile_screens
 from .roles import READ_ONLY_REFUSAL
@@ -403,15 +403,6 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     screens = register_profile_screens(app, ProfileScreens(session, devices, gate, fingerprint, kept, open_kept, keep_signed_in))
     page, action = screens.page, screens.action
 
-    def _remove_picked(selected: str, backup_path: str) -> None:
-        try:
-            folder = resolve_profile(db_path=selected).backups_dir.resolve()
-            target = Path(backup_path)
-            if not target.is_symlink() and target.resolve().parent == folder:
-                target.unlink(missing_ok=True)
-        except (OSError, ValueError):
-            pass
-
     @app.get("/profiles/restore")
     async def restore_page(request: Request):
         if session.container:
@@ -462,11 +453,8 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
         try:
             restored_copy = session.restore_backup(selected, backup_path, str(form.get("password", "")))
         except ProfileError as exc:
-            from lightning.runtime import file_picker
-            if file_picker.is_picked(backup_path) and str(exc) == NOT_THIS_PROFILES_BACKUP:
-                # A picked file that is not this profile's backup is removed; it was only ever a copy.
-                _remove_picked(selected, backup_path)
-                backup_path = ""
+            if str(exc) == NOT_THIS_PROFILES_BACKUP and backup_path.endswith("_picked.db"):
+                backup_path = ""  # the restorer removed that copy
             return page(request, "restore", status=400, selected=selected,
                         backup=backup_path, error=str(exc))
         except Exception:
