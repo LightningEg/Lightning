@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 76 open items. Each folder holds its reports and its items.
+11 big pictures, 83 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -114,6 +114,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3BH5 | ↳ One spelling per word ([#426](https://github.com/LightningEg/Lightning/issues/426)) | | | S | Sonnet | |
 | IV-3BH6 | ↳ Built-in categories in sentence case ([#427](https://github.com/LightningEg/Lightning/issues/427)) | | | M | Opus | |
 | IV-3BH7 | ↳ Headings never show a code ([#428](https://github.com/LightningEg/Lightning/issues/428)) | | | S | Sonnet | |
+| IV-3BH8 | ↳ More words found by r35 | | | S | Sonnet | |
 | **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | improvement, visual | Understand | L | Opus | ready |
 | IV-3BK1 | ↳ Guideline: human dates on screens ([#429](https://github.com/LightningEg/Lightning/issues/429)) | | | M | Opus | |
 | IV-3BK2 | ↳ The date filters, tested alone | | | M | Sonnet | |
@@ -207,10 +208,15 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7AO2 | ↳ Seen, marked, undoable | | | M | Opus | |
 | NF-7AO3 | ↳ Not twice | | | M | Opus | |
 | **NF-7AP** | [Compare the balance a bank message states with the account, as a quiet To do row](7-planning-import-and-search/NF-7AP-bank-message-balance-check.md) | new feature | Capture | M | Sonnet | ready |
+| **NF-7AQ** | [Search answers a typed question - "food last month" gives the figure, its comparison and the rows, not a link to a filter](7-planning-import-and-search/NF-7AQ-search-answers-a-typed-question.md) | new feature | Capture | L | Opus | new |
+| NF-7AQ1 | ↳ The PC lists matching payments first, as the phone does | | | S | Sonnet | |
+| NF-7AQ2 | ↳ A period grammar, tested alone | | | M | Opus | |
+| NF-7AQ3 | ↳ The answer card | | | M | Opus | |
+| NF-7AQ4 | ↳ Mohab asks three questions | | | S | Sonnet | |
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md) · [r31](7-planning-import-and-search/r31-logging-entries/report.md).
 
-Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH. Next free code: 7AQ.
+Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH. Next free code: 7AR.
 
 ## 8 Website
 
@@ -301,6 +307,12 @@ The phone is its own product: a few places that each answer one question, quick 
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
+| **BT-11K** | [Phone Money says net worth fell this month while its chart and the Report say it rose - the change is counted from the end of day 1](11-phone-ux/BT-11K-phone-money-change-since-month-start.md) | bug, technical · medium | Understand | S | Sonnet | ready |
+| **BV-11L** | [The phone's slots disagree in small ways - two figures called Left in plan, an Arabic chart that runs against its labels, "To review1", a PC tab bar under Add](11-phone-ux/BV-11L-phone-slots-agree-with-each-other.md) | bug, visual · medium | Everywhere | M | Sonnet | ready |
+| BV-11L1 | ↳ Home's This month row shows Budget's Left in plan | | | S | Sonnet | |
+| BV-11L2 | ↳ The Arabic trend chart runs the way its labels do | | | S | Sonnet | |
+| BV-11L3 | ↳ "To review 1", and no PC tab bar under Add | | | S | Sonnet | |
+| BV-11L4 | ↳ Money's Coming up agrees with Bills; an empty Money says one line | | | S | Sonnet | |
 | **IV-11A** | [Phone first run - every Add is greyed out until "Save currencies" is pressed, and an empty Transactions says "Nothing matches"](11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | improvement, visual | Everywhere | M | Sonnet | ready |
 | IV-11A1 | ↳ Add works before "Save currencies" ([#432](https://github.com/LightningEg/Lightning/issues/432)) | | | S | Sonnet | |
 | IV-11A2 | ↳ An empty Activity says "No transactions yet." with Add and Import ([#433](https://github.com/LightningEg/Lightning/issues/433)) | | | S | Sonnet | |
@@ -328,7 +340,7 @@ The phone is its own product: a few places that each answer one question, quick 
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md).
 
-Done: 11E, 11F, 11H, 11I, 11J, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D4, 11D6, 3AY1, 3AY3, 3AY5, BV-11G, IV-11D3. Next free code: 11K.
+Done: 11E, 11F, 11H, 11I, 11J, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D4, 11D6, 3AY1, 3AY3, 3AY5, BV-11G, IV-11D3. Next free code: 11M.
 
 ## 12 Desktop UX and smart next steps
 
@@ -339,6 +351,12 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **BT-12H** | [A second gold holding of the same karat cannot be added (GLD:24K already exists)](12-desktop-ux/BT-12H-second-gold-holding-same-karat.md) | bug, technical · medium | Own | S | Sonnet | ready |
 | **BV-12O** | [Phone Budget: Where the month went counts fixed costs twice (33,851 spent where 19,001 was)](12-desktop-ux/BV-12O-phone-budget-donut-counts-fixed-costs-twice.md) | bug, visual · high | Plan | S | Sonnet | ready |
 | **BV-12U** | [Phone Money says net worth fell 10,438 this month where the Overview says it rose 36,395](12-desktop-ux/BV-12U-phone-money-net-worth-change.md) | bug, visual · high | Understand | S | Sonnet | ready |
+| **IV-12AA** | [Suggestions with sensible defaults and honest counts - Refill offers to empty Safe to spend, Needs you counts three ways, a year is compared with nothing](12-desktop-ux/IV-12AA-suggestions-with-sensible-defaults.md) | improvement, visual | Plan | M | Opus | ready |
+| IV-12AA1 | ↳ Owner: what Refill offers first | | | owner |  | |
+| IV-12AA2 | ↳ Refill offers the modest amount first and says what Home will show | | | M | Opus | |
+| IV-12AA3 | ↳ Needs you has one count | | | S | Sonnet | |
+| IV-12AA4 | ↳ A comparison with nothing says so | | | S | Sonnet | |
+| IV-12AA5 | ↳ Catch up on late bills, on the PC | | | M | Opus | |
 | **IV-12J** | [Certificates read as certificates: their own holding page, payouts as the bank pays them, value that grows, and a nudge at maturity](12-desktop-ux/IV-12J-certificates-read-as-certificates.md) | improvement, visual | Own | L | Opus | new |
 | IV-12J1 | ↳ The certificate's holding page and the certificates page | | | M | Opus | |
 | IV-12J2 | ↳ Payouts forecast the way Egyptian banks pay them | | | M | Opus | |
@@ -358,6 +376,18 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **IV-12V** | [Adjust balance: a cash wallet that is far off has no way forward, and the page is one bare form](12-desktop-ux/IV-12V-adjust-balance-for-cash.md) | improvement, visual | Capture | M | Sonnet | ready |
 | **IV-12W** | [Register and search: the forgotten minus, transactions in PC search, and small things on the rows](12-desktop-ux/IV-12W-register-and-search-small-traps.md) | improvement, visual | Capture | M | Sonnet | ready |
 | **IV-12X** | [Held for others gives instructions where it should give actions](12-desktop-ux/IV-12X-held-for-others-actions.md) | improvement, visual | Own | S | Sonnet | new |
+| **IV-12Y** | [One page skeleton on the PC, kept by a test - every tab has the same title rule, an answer sentence, its dates, and the same controls in the same order](12-desktop-ux/IV-12Y-one-page-skeleton-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
+| IV-12Y1 | ↳ Owner: the title rule and the control order | | | owner |  | |
+| IV-12Y2 | ↳ The test first, with today's exceptions listed | | | M | Opus | |
+| IV-12Y3 | ↳ One header partial, used by every tab | | | L | Opus | |
+| IV-12Y4 | ↳ An answer sentence on the 13 tabs that have none | | | M | Sonnet | |
+| IV-12Y5 | ↳ One filled action a tab, and one home for Ask an AI | | | M | Sonnet | |
+| **IV-12Z** | [The answer on one screen, the rest on request - Spending, Cash planning and Investments run 3 to 4 screens and repeat lists](12-desktop-ux/IV-12Z-answer-on-one-screen-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
+| IV-12Z1 | ↳ A length budget in the skeleton test | | | S | Sonnet | |
+| IV-12Z2 | ↳ Cash planning says each thing once | | | M | Sonnet | |
+| IV-12Z3 | ↳ Spending opens on the categories; the other charts open on request | | | M | Opus | |
+| IV-12Z4 | ↳ Investments shows nothing as one line, and one Cost | | | M | Opus | |
+| IV-12Z5 | ↳ Overview's tail | | | S | Sonnet | |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | Opus | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | Opus | |
 | IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | M | Opus | |
@@ -371,6 +401,11 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-3H7 | ↳ Loans: an optional rate and the cost of the loan | | | M | Opus | |
 | IV-3H9 | ↳ Build the chosen analysis | | | M | Opus | |
 | IV-3H10 | ↳ Triage the ids no step names ([#436](https://github.com/LightningEg/Lightning/issues/436)) | | | M | Opus | |
+| **NF-12AB** | [Every headline figure explains itself in place - one gesture and one label instead of "Show the numbers", "How it is worked out", "See details", "See them" and bare chevrons](12-desktop-ux/NF-12AB-every-figure-explains-itself-in-place.md) | new feature | Understand | L | Opus | new |
+| NF-12AB1 | ↳ Owner: the pattern and its one label | | | owner |  | |
+| NF-12AB2 | ↳ One "working" shape from the services | | | M | Opus | |
+| NF-12AB3 | ↳ The PC's Leads and KPIs open their working in place | | | L | Opus | |
+| NF-12AB4 | ↳ The phone's heroes open their working as a sheet | | | M | Opus | |
 | **NF-12G** | [Money lent to others and costs split with others - who owes you what, counted honestly in what you own](12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | new feature | Own | L | Opus | ready |
 | NF-12G2 | ↳ Money lent and paid back: the service | | | M | Opus | |
 | NF-12G6 | ↳ Lend, paid back and forgive on the person's page (PC) | | | M | Sonnet | |
@@ -387,6 +422,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **NF-12R** | [Fill this month from your average of the last three months](12-desktop-ux/NF-12R-fill-budget-from-average.md) | new feature | Plan | S | Sonnet | ready |
 | **NF-12S** | [Warn before a category runs out, with Move room or Raise](12-desktop-ux/NF-12S-warn-before-a-category-runs-out.md) | new feature | Plan | M | Sonnet | ready |
 
-Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md) · [r34](12-desktop-ux/r34-accounts-and-transactions/report.md).
+Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md) · [r34](12-desktop-ux/r34-accounts-and-transactions/report.md) · [r35](12-desktop-ux/r35-ux-against-users-questions/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F, 3AZ. Next free code: 12Y.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 3AZ. Next free code: 12AC.
