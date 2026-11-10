@@ -28,11 +28,6 @@ One error path: every 4xx/5xx renders the branded page (PC and phone), or for fe
 
 Each step is one pull request. Read only the files a step names. Run the step's test command and `python -m pytest tests/test_arabic_no_english.py -q`; delete the step's heading in the same commit. Never show a Python exception's text to a person; log it with `logging.getLogger("lightning")`.
 
-## 3BD4 Import errors never show Python's text · S · #412
-Files: `lightning/bank_import_rows.py:277`, `lightning/bank_import_posting.py:50,127`, `lightning/investments/events.py:127`, `lightning/money_from_others.py:28`, `lightning/deposits/service.py:296`, `lightning/transactions/service.py:813`.
-Do: replace each `{exc}` with a fixed plain sentence that says what to do ("This file is not a CSV Lightning can read. Save it from your bank as CSV and try again."; "Row {n}: the fee is not a number."), log the exception, and rewrite the developer wording as A14 voice ("Record this from the transaction screen." / "You can take out at most {amount} from this certificate." / "That transaction no longer exists."). Add Arabic for each.
-Done when: `grep -rn "{exc}" lightning --include=*.py` finds none in a message shown to people, and `tests/test_messages_translated.py` (3BD2) still passes. `python -m pytest tests/test_bank_import*.py -q`.
-
 ## 3BD5 The validation page names the problem, not "Check your setup" · S · #413
 Files: `lightning/ui/templates/validation_error.html`, `lightning/ui/templates/phone/` (its phone twin if one exists: `ls lightning/ui/templates/phone | grep -i error`).
 Do: title "That did not save" (Arabic: "ما اتحفظش"); the message as the lead line; one Back button to `request.headers.referer` when it is a same-origin path, else Overview/Home; drop the three fixed links. Follows A09 (answer first) and A14.

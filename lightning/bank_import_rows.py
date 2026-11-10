@@ -4,6 +4,7 @@ capture both read rows through here. Moved unchanged out of `bank_imports`, whic
 from __future__ import annotations
 
 import csv
+import logging
 import io
 import re
 from decimal import Decimal, InvalidOperation
@@ -314,4 +315,5 @@ def decode_csv(data: bytes) -> tuple[list[str], list[dict[str, str]]]:
             rows.append({h: str(row.get(h, "") or "").strip() for h in headers} | {"__line__": str(line)})
         return headers, rows
     except csv.Error as exc:
-        raise ValidationError(f"Could not read this CSV: {exc}", "file") from None
+        logging.getLogger("lightning").info("Unreadable CSV: %s", exc)
+        raise ValidationError("This file is not a CSV Lightning can read. Save it from your bank as CSV and try again.", "file") from None

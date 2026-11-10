@@ -124,7 +124,7 @@ def _spec(event: str) -> EventSpec:
     try:
         return EVENTS[event]
     except KeyError:
-        raise ValidationError(f"Unknown investment event: {event}.", "event") from None
+        raise ValidationError("This investment event is not one Lightning supports.", "event") from None
 
 
 def _income_figures(v: EventValues) -> tuple[Decimal, Decimal]:

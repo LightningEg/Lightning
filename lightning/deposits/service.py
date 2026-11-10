@@ -293,7 +293,7 @@ class DepositService:
 
         current_owned = Decimal(self.repo.owned_balance_e6(account_id, fmt_date(today()))).scaleb(-6)
         if amount > current_owned:
-            raise ValidationError("Principal cannot exceed the CD's currently owned ledger balance.", "principal")
+            raise ValidationError(f"You can put in at most {fmt(current_owned, 2)} from this account's own money.", "principal")
         terms = DepositTerms(account_id, fmt_date(start), fmt_date(lockup_end), fmt_date(maturity),
                              amount, rate, method, frequency, compounding, destination.id)
         with self.db.transaction():

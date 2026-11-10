@@ -81,7 +81,7 @@ def test_no_events_on_or_before_as_of_and_lockup_is_not_cash_event(deposits):
 
 def test_projection_suppressed_when_not_owned_and_save_requires_funding(deposits, c):
     service, accounts = deposits
-    with pytest.raises(ValidationError, match="owned ledger balance"):
+    with pytest.raises(ValidationError, match="You can put in at most"):
         _save(service, accounts, principal="5000.000001")
     _save(service, accounts, principal="4000")
     c.deposits.move_legacy_cash(accounts["cd"].id, "2026-09-25", "1500", accounts["cib"].id)

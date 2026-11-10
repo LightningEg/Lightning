@@ -19,7 +19,6 @@ ERROR_TEXT = {
     "“{a}” is not a date in the statement.": "“{a}” مش تاريخ في الكشف.",
     "“{a}” is not a number in the statement.": "“{a}” مش رقم في الكشف.",
     # Investment events
-    "Unknown investment event: {a}.": "حدث استثمار مش معروف: {a}.",
     "Enter how many {a}s you hold after it.": "اكتب عدد {a} اللي معاك بعده.",
     "You already hold {a} {b}; enter the number after the bonus or split.": "معاك فعلًا {a} {b}؛ اكتب العدد بعد المنحة أو التقسيم.",
     "Enter how many {a}s the dividend bought.": "اكتب عدد {a} اللي اشتراها التوزيع.",
@@ -28,6 +27,13 @@ ERROR_TEXT = {
     "{a} is already in {b}; record an ordinary buy.": "{a} موجود فعلًا في {b}؛ سجّل شراء عادي.",
     "{a} is priced in {b}; {c} is in {d}. Use a {e} account.": "{a} سعره بـ{b}؛ و{c} بـ{d}. استخدم حساب بـ{e}.",
     "{a} is priced in {b}; {c} has no {d} cash for it. Enter what you paid in {e} under Paid in another currency, or move {f} in first.": "{a} سعره بـ{b}؛ و{c} معندوش نقدية بـ{d} تكفيه. اكتب اللي دفعته بـ{e} تحت «المدفوع بعملة تانية»، أو حوّل {f} الأول.",
+    "CSV row {a}: the fee is not a number.": "صف الـCSV {a}: الرسوم مش رقم.",
+    "CSV row {a}: the date or the amount is not valid.": "صف الـCSV {a}: التاريخ أو المبلغ مش صالح.",
+    "This file is not a CSV Lightning can read. Save it from your bank as CSV and try again.": "الملف ده مش CSV يقدر لايتنينج يقراه. احفظه من البنك كـCSV وجرّب تاني.",
+    "This investment event is not one Lightning supports.": "حدث الاستثمار ده لايتنينج مش بيدعمه.",
+    "Record this from the transaction screen.": "سجّل ده من شاشة المعاملة.",
+    "You can put in at most {a} from this account's own money.": "تقدر تحط {a} بالكتير من فلوس الحساب ده الخاصة بيك.",
+    "That transaction no longer exists.": "المعاملة دي مبقتش موجودة.",
     # Plans, loans, receipts
     "Choose a cash account.": "اختار حساب نقدي.",
     "Choose an account in {a} to pay this planned item.": "اختار حساب بـ{a} تدفع منه البند المخطط ده.",
