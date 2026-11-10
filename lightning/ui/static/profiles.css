@@ -21,7 +21,7 @@ body {
   margin: 0;
   color: var(--ink);
   background: linear-gradient(160deg, #E3F6EC 0%, #E6F4F1 52%, #E1EEFB 100%);
-  font: 500 14px/1.6 "Manrope", "Noto Sans Arabic", "Plus Jakarta Sans", system-ui, sans-serif;
+  font: 500 14px/1.6 "Manrope", "Noto Sans Arabic", system-ui, sans-serif;
   font-feature-settings: "cv11", "ss01";
 }
 a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
@@ -33,7 +33,7 @@ button, a, input { -webkit-tap-highlight-color: transparent; }
 
 .profile-page { width: min(100% - 40px, 780px); min-height: 100vh; margin: 0 auto; display: flex; flex-direction: column; }
 .masthead { min-height: 82px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid rgba(48,74,92,.12); }
-.brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font: 700 20px/1 "Bricolage Grotesque", "Plus Jakarta Sans", sans-serif; letter-spacing: -.025em; }
+.brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font: 700 20px/1 "Bricolage Grotesque", sans-serif; letter-spacing: -.025em; }
 .brand:hover { text-decoration: none; }
 .brand img { width: 25px; height: 25px; flex: none; object-fit: contain; }
 .masthead-label { color: var(--ink-2); font-size: 12px; font-weight: 700; }
@@ -46,9 +46,9 @@ html.phone .gate-language select { height: 48px; }
 .intro { margin-bottom: 24px; }
 .eyebrow { margin: 0 0 5px; color: var(--ink-2); font-size: 12px; font-weight: 700; letter-spacing: .04em; }
 h1, h2, p { margin-top: 0; }
-h1 { margin-bottom: 6px; font: 700 28px/1.25 "Bricolage Grotesque", "Plus Jakarta Sans", sans-serif; letter-spacing: -.025em; }
+h1 { margin-bottom: 6px; font: 700 28px/1.25 "Bricolage Grotesque", sans-serif; letter-spacing: -.025em; }
 .intro > p:last-child { margin-bottom: 0; color: var(--ink-2); }
-h2 { margin-bottom: 6px; font: 700 17px/1.4 "Bricolage Grotesque", "Plus Jakarta Sans", sans-serif; }
+h2 { margin-bottom: 6px; font: 700 17px/1.4 "Bricolage Grotesque", sans-serif; }
 .panel { margin: 0 0 16px; padding: 24px; border: 1px solid rgba(255,255,255,.94); border-radius: 20px; background: linear-gradient(180deg, #F8FCFA 0%, #EFF8F4 100%); box-shadow: var(--shadow); }
 .panel-heading { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
 .panel-heading p, .panel > p { margin: 0 0 16px; color: var(--ink-2); font-size: 13px; }

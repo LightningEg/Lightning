@@ -29,11 +29,6 @@ In that order, one PR each: a single `:focus-visible` ring token plus `@media (f
 
 Each step is one pull request. Read only the files a step names; never open `guideline/app.html` whole (use `python tools/guideline.py A10`). Run the step's test command, then for a visible change `python -m pytest tests/test_mohab_year.py -q` and check A16 on a screenshot; delete the step's heading in the same commit.
 
-## 3BF2 Only the brand's fonts · S · #415
-Files: `lightning/ui/static/style.css` lines ~17-45 (legacy `:root` and font stacks), ~118, ~128, ~214, ~799-800; `lightning/ui/static/profiles.css` ~36, ~49, ~51; `lightning/ui/static/fonts/fonts.css`.
-Do: replace "Inter" and "Plus Jakarta Sans" in every `font-family` with the A06 faces (Manrope for text, "Bricolage Grotesque" for headings and figures), and "JetBrains Mono" with `ui-monospace, Consolas, monospace`. Delete those faces' `@font-face` blocks and their files under `static/fonts/` only if nothing else references them (`grep -rn "Inter\|Jakarta\|JetBrains" lightning`). Font weight 650 becomes 600 or 700 (pick the nearer the design: headings 700, labels 600).
-Done when: that grep is empty except comments, `grep -rn "font-weight: *650\|font-weight:650" lightning/ui/static` is empty, and `python -m pytest tests/test_brand_audit.py -q` has no new failure (one, `test_links_are_ink_and_underlined`, already fails on main). Compare the profiles screen before/after on a screenshot.
-
 ## 3BF3 Windows chrome: scrollbars, selection, spellcheck, balanced headings · S · #416
 Files: `lightning/ui/static/style.css` (append to the guideline layer), the templates with name inputs: `grep -rln 'name="name"\|name="counterparty"\|name="notes"' lightning/ui/templates`.
 Do: `html { scrollbar-color: var(--c-line, #C9D6D2) transparent; scrollbar-width: thin; scrollbar-gutter: stable; }`; `::selection { background: <the guideline's soft Nile/green wash token>; color: inherit; }` (find the token with `python tools/guideline.py A03`); `h1, h2, h3 { text-wrap: balance; }`, `p { text-wrap: pretty; }`. Add `spellcheck="false" autocomplete="off"` to name, counterparty, merchant and account-name inputs (not to notes).
