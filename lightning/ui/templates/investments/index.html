@@ -2,7 +2,7 @@
 {% from "partials/charts.html" import tone_icon %}
 {% block title %}Investments{% endblock %}
 {% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Investments'|tr(locale), status, period.start_text ~ ' to ' ~ period.end_text, 'valued as of {date}'|tr(locale, date=period.end_display)) }}{% endblock %}
-{% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}{% if lens.available %}<details class="action-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">⋯</summary><div><a href="{{ lens.egp_link }}"{% if not lens.usd %} aria-current="true"{% endif %}>{{ 'Show figures in'|tr(locale) }} {{ base }}</a><a href="{{ lens.usd_link }}"{% if lens.usd %} aria-current="true"{% endif %}>{{ 'Show figures in'|tr(locale) }} USD</a></div></details>{% endif %}{% endblock %}
+{% block top_actions %}<a class="btn primary small" href="/investments/add">{{ "Add investment"|tr(locale) }}</a>{% from "partials/macros.html" import period_control with context %}{{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}{% if lens.available %}<details class="action-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">⋯</summary><div><a href="{{ lens.egp_link }}"{% if not lens.usd %} aria-current="true"{% endif %}>{{ 'Show figures in'|tr(locale) }} {{ base }}</a><a href="{{ lens.usd_link }}"{% if lens.usd %} aria-current="true"{% endif %}>{{ 'Show figures in'|tr(locale) }} USD</a></div></details>{% endif %}{% endblock %}
 {% block content %}
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
 {% from "partials/charts.html" import key_notes, trend, donut, bars, diverging, saved_split %}
@@ -38,7 +38,7 @@
     <span class="stat-tile-head">{{ tone_icon('hold') }}<span class="stat-tile-label">{{ fig.portfolio_value.label }}</span><span class="stat-chip">{{ "Last 6 months"|tr(locale) }}</span></span>
     {% if value_spark.spark.points %}<span class="stat-tile-visual" aria-hidden="true"><svg class="stat-tile-spark tone-hold" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="{{ value_spark.spark.area }}"/><polyline points="{{ value_spark.spark.points }}" vector-effect="non-scaling-stroke"/></svg><span class="stat-tile-dot tone-hold" style="left:{{ '%.2f'|format(value_spark.spark.last[0]) }}%;top:{{ '%.2f'|format(value_spark.spark.last[1]) }}%"></span></span>{% endif %}
     <span class="stat-tile-value">{% if value_spark.latest is not none %}{{ hero_value|money }}<small>{{ lens.code }}</small>{% else %}Unavailable{% endif %}</span>
-    <span class="stat-tile-sub">{% if value_spark.change is not none %}<b class="{{ value_spark.change|tone }}">{{ hero_change|money(True) }}</b> since six months ago{% if value_spark.added %}, not counting {{ value_spark.added|money }} of opening balances{% endif %} · today{% else %}Holdings · today{% endif %}</span>
+    <span class="stat-tile-sub">{% if value_spark.change is not none %}<b class="{{ value_spark.change|tone }}">{{ hero_change|money(True) }}</b> since six months ago{% if value_spark.added %}, excluding {{ value_spark.added|money }} you already owned{% endif %} · today{% else %}Holdings · today{% endif %}</span>
   </a>
 </section>
 <section class="card wide-card inv-alloc" aria-label="Allocation">

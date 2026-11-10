@@ -407,7 +407,7 @@ def shared_lines(series: list[list[Decimal | None]]) -> list[str]:
     return out
 
 
-def donut(slices: list[dict], limit: int = 5) -> dict:
+def donut(slices: list[dict], limit: int = 5, folded_label: str = "Other") -> dict:
     """Parts of one whole: four by name, then "Other" (``limit`` counts Other).
 
     slices: [{"label", "value", "tone"}]; ordered by tone (cash, deposits, gold, equity, other) so
@@ -422,7 +422,7 @@ def donut(slices: list[dict], limit: int = 5) -> dict:
         named = [s for s in parts if s["label"] != "Other"]
         rest = named[limit - 1:] + [s for s in parts if s["label"] == "Other"]
         parts = named[:limit - 1]
-        folded = {"label": "Other", "value": sum((s["value"] for s in rest), ZERO), "tone": "other"}
+        folded = {"label": folded_label, "value": sum((s["value"] for s in rest), ZERO), "tone": "other"}
     parts.sort(key=lambda s: (TONE_ORDER.index(s["tone"]) if s["tone"] in TONE_ORDER else 99, -s["value"]))
     if folded:
         parts.append(folded)

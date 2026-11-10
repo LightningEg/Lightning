@@ -22,7 +22,7 @@ def test_held_for_others_rows_give_back_and_spend_for_them(c, setup):
     client = TestClient(create_app(c))
     page = client.get("/money-from-others").text
     links = re.findall(r'href="(/accounts/\d+/transaction/new\?[^"]+)"', page)
-    assert len(links) == 2 and "Give back" in page and "Spend for them" in page
+    assert len(links) == 3 and "Give back" in page and "Spend for them" in page and "Receive more" in page
     sheet = client.get(links[0].replace("&amp;", "&")).text
     assert re.search(r'<option value="\d+" selected>Mom', sheet)  # the person is chosen in Held for
     assert 'value="1000.00"' in sheet

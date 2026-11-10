@@ -1,6 +1,6 @@
 ---
 title: Desktop UX and smart next steps
-done: NF-12I, BV-12O, 12U, 12F, 12B, 12C, 12D, 12E, 12A, 3AZ
+done: 12H, 12N, 12X, NF-12I, BV-12O, 12U, 12F, 12B, 12C, 12D, 12E, 12A, 3AZ
 ---
 
 **Goal.** The PC app leads with the answer, works in bulk without surprises, and offers the next step where a figure raises the question.
