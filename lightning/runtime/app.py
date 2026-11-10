@@ -523,24 +523,28 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     async def repair_restore(request: Request):
         form = await request.form()
         selected = str(form.get("db", ""))
+        try:
+            known = known_profile(selected)
+        except ProfileError as exc:
+            return page(request, "repair-restore", status=400, selected=selected, error=str(exc))
 
         def again(error: str):
             try:
-                evidence = session.restore_evidence(known_profile(selected))
+                evidence = session.restore_evidence(known)
             except ProfileError:
                 evidence = []
             return page(request, "repair-restore", status=400, selected=selected, evidence=evidence, error=error)
-        if devices.blocks_restore(selected):
+        if devices.blocks_restore(known):
             return again("This profile is lent to a PC or has a hand-back to finish. Bring the ledger home first (Devices).")
         if form.get("confirm") != "yes":
             return again("Confirm that Lightning should go back to the copy from before the restore.")
         try:
-            session.go_back_before_restore(known_profile(selected), str(form.get("password", "")))
+            session.go_back_before_restore(known, str(form.get("password", "")))
         except ProfileError as exc:
             return again(str(exc))
         except Exception:
             return again("Going back could not finish. The profile remains locked and every file was kept.")
-        return page(request, "unlock", selected=selected,
+        return page(request, "unlock", selected=known,
                     notice="Back to the copy from before the restore. The other files were kept in a restore-evidence folder. Unlock this profile to check it.")
 
     @app.post("/profiles/recents")
