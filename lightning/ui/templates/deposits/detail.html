@@ -66,10 +66,10 @@
       <label>{{ 'Certificate name'|tr(locale) }}<input name="name" value="{{ values.name }}" placeholder="e.g. CIB 3-year certificate" required></label>
       <label>{{ 'Purchase date'|tr(locale) }}<input name="start_date" type="text" value="{{ values.start_date }}" placeholder="yyyy-mm-dd" data-smart-date required></label>
     </div>
-    <label class="check"><input type="checkbox" name="already_owned" value="1" {{ 'checked' if values.already_owned }}> {{ 'I already own it: bought before I started tracking, so no money leaves an account'|tr(locale) }}</label>
+    <label class="check"><input type="checkbox" name="already_owned" value="1" data-unrequires="funding_account_id" {{ 'checked' if values.already_owned }}> {{ 'I already own it: bought before I started tracking, so no money leaves an account'|tr(locale) }}</label>
     <div class="row">
       <label>Amount invested ({{ account.currency }})<input name="principal" value="{{ values.principal }}" inputmode="decimal" required></label>
-      <label>{{ 'Buy from'|tr(locale) }}<select name="funding_account_id" data-own-picker aria-label="{{ 'Buy from'|tr(locale) }}"><option value="">{{ 'Choose the account paying for this CD…'|tr(locale) }}</option>{% for a in liquid_accounts %}<option value="{{ a.id }}" {{ 'selected' if values.funding_account_id == a.id|string }}>{{ a.institution or a.name }} · {{ a.name }}</option>{% endfor %}</select></label>
+      <label>{{ 'Buy from'|tr(locale) }}<select name="funding_account_id" data-own-picker aria-label="{{ 'Buy from'|tr(locale) }}" required><option value="">{{ 'Choose the account paying for this CD…'|tr(locale) }}</option>{% for a in liquid_accounts %}<option value="{{ a.id }}" {{ 'selected' if values.funding_account_id == a.id|string }}>{{ a.institution or a.name }} · {{ a.name }}</option>{% endfor %}</select></label>
     </div>
     <div class="row">
       <label>Annual interest rate (%)<input name="annual_rate" type="number" min="0" max="100" step="0.01" value="{{ values.annual_rate }}" required></label>
