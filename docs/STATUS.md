@@ -8,7 +8,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 |---|---|---|---|---|---|---|
 | [Capture](pillars/capture.md) | 13 |  | 9 | 4 |  |  |
 | [Plan](pillars/plan.md) | 6 |  | 4 | 2 |  |  |
-| [Understand](pillars/understand.md) | 7 |  | 4 | 2 | 1 |  |
+| [Understand](pillars/understand.md) | 7 |  | 5 | 1 | 1 |  |
 | [Own](pillars/own.md) | 13 | 1 | 6 | 4 | 2 |  |
 | [Protect](pillars/protect.md) | 4 | 1 | 2 |  | 1 |  |
 | [Everywhere](pillars/everywhere.md) | 7 | 3 | 4 |  |  |  |

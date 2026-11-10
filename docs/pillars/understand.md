@@ -17,7 +17,7 @@ The overview, spending, financial health, net worth and reports. They read the l
 | **IT-9M** | [Activity on the PC asks ten queries for each of its 100 rows](../../issues/9-later/IT-9M-activity-asks-ten-queries-a-row.md) | M | ready |
 | **IV-12N** | [Investments figures that mislead outside stocks: purchases shown as change in value, yearly rates o…](../../issues/12-desktop-ux/IV-12N-investment-figures-beyond-stocks.md) | M | new |
 | **IV-12T** | [The three "explain this figure" pages have no way in](../../issues/12-desktop-ux/IV-12T-explain-pages-have-no-way-in.md) | S | ready |
-| **NF-12AB** | [Every headline figure explains itself in place](../../issues/12-desktop-ux/NF-12AB-every-figure-explains-itself-in-place.md) | L | new |
+| **NF-12AB** | [Every headline figure explains itself in place](../../issues/12-desktop-ux/NF-12AB-every-figure-explains-itself-in-place.md) | L | ready |
 
 ## Reports with open follow-ups here
 
