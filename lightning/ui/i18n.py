@@ -1216,6 +1216,7 @@ ARABIC_UI = {
     'Planned': 'المخطط',
     'Spent': 'المنفق',
     'Left in plan': 'المتبقي في الخطة',
+    'Left for everyday': 'المتبقي للصرف اليومي',
     'Plan leaves to save': 'المتبقي للادخار من الخطة',
     'Planned savings rate': 'نسبة الادخار المخططة',
     'Savings target': 'هدف الادخار',

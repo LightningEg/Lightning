@@ -181,6 +181,8 @@ _TABLE = [
     ("spent", "Spent", "Money out in the category this month."),
     ("left_in_plan", "Left in plan", "What is left of the plan; the Overview and Budget show the same month "
      "figure, and a negative one reads \"Over plan\". One-off categories are left out of Spent.", "Planned − Spent"),
+    ("everyday_left", "Left for everyday", "The plan's remaining money after unpaid planned bills and loans, "
+     "floored at zero this month. Other months use Left in plan. The phone Budget's everyday spending allowance."),
     ("plan_leaves_to_save", "Plan leaves to save", "What this month's plan leaves of average monthly income.",
      "Average monthly income − Planned"),
     ("not_yet_given_a_job", "Not yet given a job", "Income no plan, goal or emergency top-up has claimed this "
@@ -318,6 +320,7 @@ _SOURCES = {
     "planned": (BOTH, f"{BL}.available"),
     "spent": (LEDGER, f"{BL}.actual"),
     "left_in_plan": (BOTH, f"{BL}.remaining"),
+    "everyday_left": (BOTH, "lightning.planning.domain.EverydayBudget.everyday_left"),
     "plan_leaves_to_save": (PLAN, "lightning.planning.health.PlanCheck.plan_saves"),
     "not_yet_given_a_job": (PLAN, "lightning.planning.health.PlanCheck.unassigned"),
     "planned_savings_rate": (PLAN, "lightning.planning.health.PlanCheck.planned_savings_rate"),

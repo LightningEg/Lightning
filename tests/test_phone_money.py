@@ -114,11 +114,12 @@ def test_net_worth_trend_ends_at_the_hero_and_what_you_own_adds_up(mohab):
     assert all(f'tone-{p["key"]}' in html for p in s.own_split)
 
 
-def test_change_this_month_is_the_overviews_figure_even_when_pay_lands_on_the_first(mohab):
-    """BV-12U: salary and interest arrive on the 1st; the change compares with the end of last month, as the Overview."""
-    day = date(2026, 10, 4)
+@pytest.mark.parametrize("day", [date(2026, 10, 1), date(2026, 10, 4)])
+def test_change_this_month_is_the_overviews_figure_even_when_pay_lands_on_the_first(mohab, day):
+    """BT-11K/BV-12U: include payday even on day one, then the spending that follows it."""
     expected, _ = mohab.position.change_in_net_worth(date(2026, 10, 1), day)
     assert screen.build(mohab, day).since_start == expected
+    assert expected == mohab.position.at(day).net_worth - mohab.position.at(date(2026, 9, 30)).net_worth
     assert expected is not None and expected > 0
 
 

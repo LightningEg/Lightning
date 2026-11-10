@@ -68,7 +68,7 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
         return BudgetScreen(shown, prev, nxt, "no_plan", None, None, None, None, (), 0, (), ZERO, ZERO, 0)
     e = c.forecaster.everyday(shown, day)
     state = "current" if e.current else ("past" if last < day else "future")
-    left = e.everyday_plan - e.everyday_spent
+    left = e.everyday_left
     used = int(e.everyday_spent / e.everyday_plan * 100) if e.everyday_plan > 0 else None
     pace_pct = Decimal(e.day) / e.days_in_month * 100 if state == "current" and e.days_in_month else None
     rows = []
