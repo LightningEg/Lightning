@@ -39,10 +39,14 @@ def start(files_dir):
         fingerprint = FingerprintUnlock(files / "appdata" / "biometric", AndroidBiometric.create())
         stay = FingerprintUnlock(files / "appdata" / "stay", AndroidBiometric.create("StayBridge"))
         saver = AndroidFiles.create(files / "outgoing")
+        folder = AndroidBackupFolder.create()
+        from lightning.runtime.outside_copy import OutsideCopy
+        outside = None if folder is None else OutsideCopy(folder, files / "outside-copy",
+                                                          files / "appdata" / "outside-copy.json")
         _host = Host(lambda credentials: profile_app(credentials, files / "Lightning", devices=_devices, phone=True,
                                                      sms=AndroidSms.create(), biometric=fingerprint,
                                                      stay=stay, files=saver,
-                                                     recents=AndroidRecents.create(),
+                                                     recents=AndroidRecents.create(), outside=outside,
                                                      billing=AndroidBilling.create())).start()
     if not _launched:
         _launched = True
@@ -161,6 +165,44 @@ class AndroidFiles:
             return True
         path.unlink(missing_ok=True)
         return False
+
+
+class AndroidBackupFolder:
+    """`lightning.runtime.outside_copy.FolderBridge` over the Java `BackupFolderBridge` (BT-2AI3): the folder the
+    person chose for copies outside the app. Strings and JSON only cross to Java."""
+
+    def __init__(self, bridge):
+        self.bridge = bridge
+
+    @classmethod
+    def create(cls):
+        """None off the phone (the probe's tests run this module on a PC)."""
+        try:
+            from java import jclass
+        except ImportError:
+            return None
+        return cls(jclass("org.lightning.app.BackupFolderBridge"))
+
+    def state(self):
+        import json
+        answer = json.loads(str(self.bridge.state()))
+        return str(answer.get("state", "none")), str(answer.get("name", ""))
+
+    def choose(self):
+        self.bridge.choose()
+
+    def forget(self):
+        self.bridge.forget()
+
+    def write(self, path, name):
+        return str(self.bridge.write(str(path), str(name)))
+
+    def names(self):
+        import json
+        return [str(name) for name in json.loads(str(self.bridge.names()))]
+
+    def delete(self, name):
+        return bool(self.bridge.delete(str(name)))
 
 
 class AndroidBiometric:

@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from lightning.core.matching import rank_choices
 
 from ..i18n import translate
-from ..search_index import ACTIONS, GROUPS, PAGES, _fold_search_text, _score, entry, matches  # noqa: F401  (tests and callers read them here)
+from ..search_index import ACTIONS, GROUPS, PAGES, _fold_search_text, _score, entry, fmt_amount, matches  # noqa: F401  (tests and callers read them here)
 from ..web import container, privacy_on, render
 
 router = APIRouter()

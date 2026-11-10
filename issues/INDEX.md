@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 74 open items. Each folder holds its reports and its items.
+11 big pictures, 78 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -15,7 +15,7 @@ Anyone can find how to help in one click and send a first fix the same evening.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **BT-1V** | [The documented install misses four packages - a fresh clone, Codespaces and run.sh all stop at "No module named rapidfuzz"](1-easy-to-contribute/BT-1V-source-install-misses-four-packages.md) | bug, technical · medium | Build | S | Sonnet | ready |
+| **BT-1V** | [The documented install misses four packages - a fresh clone, Codespaces and run.sh all stop at "No module named rapidfuzz"](1-easy-to-contribute/BT-1V-source-install-misses-four-packages.md) ([#486](https://github.com/LightningEg/Lightning/issues/486)) | bug, technical · medium | Build | S | Sonnet | ready |
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | improvement, technical | Build | M | Opus | ready |
 | IT-1E3 | ↳ Owner: deploy the website receiver and rotate the analytics key | | | owner |  | |
 | IT-1E4 | ↳ Check the live website receivers against formula injection and key leaks | | | S | Opus | |
@@ -32,21 +32,20 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1H4 | ↳ Validate | | | M | Opus | |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | Sonnet | ready |
 | IT-1N2 | ↳ Post the approved batch | | | S | Sonnet | |
-| **IT-1R** | [Direct tests for investment_breakdown](1-easy-to-contribute/IT-1R-investment-breakdown-direct-tests.md) ([#339](https://github.com/LightningEg/Lightning/issues/339)) | improvement, technical | Build | M | Sonnet | ready |
-| **IT-1W** | [Four wheel files (49 MB) sit in the repository root by accident - remove them and stop the next one](1-easy-to-contribute/IT-1W-stray-wheels-in-the-repository-root.md) | improvement, technical | Build | S | Sonnet | ready |
+| **IT-1W** | [Four wheel files (49 MB) sit in the repository root by accident - remove them and stop the next one](1-easy-to-contribute/IT-1W-stray-wheels-in-the-repository-root.md) ([#487](https://github.com/LightningEg/Lightning/issues/487)) | improvement, technical | Build | S | Sonnet | ready |
 | **IT-1X** | [Two sessions take the same code - report and item codes are handed out from the local checkout, and a guideline change can merge in one repository only](1-easy-to-contribute/IT-1X-two-sessions-take-the-same-code.md) | improvement, technical | Build | M | Sonnet | ready |
 | IT-1X1 | ↳ Reserve a code in NOW.md before using it | | | S | Sonnet | |
 | IT-1X2 | ↳ CI refuses a code that main already has | | | S | Sonnet | |
 | IT-1X3 | ↳ A guideline change cannot merge alone | | | S | Sonnet | |
 | **IT-1Y** | [Every page is asked once and measured - one test fetches all 130 pages on the PC and the phone, and perf_check times the pages people use](1-easy-to-contribute/IT-1Y-every-page-asked-once-and-measured.md) | improvement, technical | Build | M | Sonnet | ready |
-| IT-1Y1 | ↳ The PC never gets a phone-only sheet | | | S | Sonnet | |
+| IT-1Y1 | ↳ The PC never gets a phone-only sheet ([#488](https://github.com/LightningEg/Lightning/issues/488)) | | | S | Sonnet | |
 | IT-1Y2 | ↳ One test asks every page | | | M | Sonnet | |
-| IT-1Y3 | ↳ perf_check measures the real pages | | | S | Sonnet | |
+| IT-1Y3 | ↳ perf_check measures the real pages ([#489](https://github.com/LightningEg/Lightning/issues/489)) | | | S | Sonnet | |
 | **IT-1Z** | [Unused functions and names - five that nothing calls, and eleven that only tests call](1-easy-to-contribute/IT-1Z-unused-functions-and-names.md) | improvement, technical | Build | S | Sonnet | ready |
 
 Reports: [r7](1-easy-to-contribute/r7-pull-request-cleanup/report.md) · [r33](1-easy-to-contribute/r33-code-review-and-loose-ends/report.md).
 
-Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1S, 1T, 1U. Next free code: 1AA.
+Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1R, 1S, 1T, 1U. Next free code: 1AA.
 
 ## 2 Safe for real money
 
@@ -54,10 +53,7 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **BT-2AI** | [Phone data must survive every app update and reinstall](2-safe-for-real-money/BT-2AI-phone-data-survives-updates.md) | bug, technical · high | Protect | L | Opus | new |
-| BT-2AI5 | ↳ One portable profile file | | | M | Opus | |
-| BT-2AI2 | ↳ Open a profile file on the phone | | | M | Opus | |
-| BT-2AI3 | ↳ A copy outside the app | | | M | Opus | |
+| **BT-2AI** | [Phone data must survive every app update and reinstall](2-safe-for-real-money/BT-2AI-phone-data-survives-updates.md) | bug, technical · high | Protect | L | Opus | blocked on 4A4 (step 2AI4) and the owner phone check (2AI6) |
 | BT-2AI4 | ↳ The PC can always send its copy to a fresh phone | | | M | Opus | |
 | BT-2AI6 | ↳ Owner: the phone survives an update and a reinstall | | | owner |  | |
 | **IT-2A** | [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic repair](2-safe-for-real-money/IT-2A-restore-safety.md) | improvement, technical | Protect | L | Opus | building |
@@ -85,10 +81,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IT-3BE** | [One number format on screen - the browser follows the app, not the Windows locale, and every negative uses a true minus](3-polish-and-arabic/IT-3BE-one-number-format.md) | improvement, technical | Understand | S | Sonnet | ready |
-| IT-3BE1 | ↳ The KPI "points" use a true minus ([#401](https://github.com/LightningEg/Lightning/issues/401)) | | | S | Sonnet | |
-| IT-3BE2 | ↳ Browser numbers ignore the Windows region ([#402](https://github.com/LightningEg/Lightning/issues/402)) | | | S | Sonnet | |
-| IT-3BE3 | ↳ One money formatter in Python ([#403](https://github.com/LightningEg/Lightning/issues/403)) | | | S | Sonnet | |
 | **IT-3BI** | [Arabic search and sorting in the register, one week start, one clock](3-polish-and-arabic/IT-3BI-arabic-search-sort-and-calendar.md) | improvement, technical | Everywhere | M | Sonnet | ready |
 | IT-3BI1 | ↳ The Transactions search finds Arabic however it is spelled ([#404](https://github.com/LightningEg/Lightning/issues/404)) | | | M | Opus | |
 | IT-3BI2 | ↳ Names sort the Arabic way ([#405](https://github.com/LightningEg/Lightning/issues/405)) | | | S | Sonnet | |
@@ -121,6 +113,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3BH5 | ↳ One spelling per word ([#426](https://github.com/LightningEg/Lightning/issues/426)) | | | S | Sonnet | |
 | IV-3BH6 | ↳ Built-in categories in sentence case ([#427](https://github.com/LightningEg/Lightning/issues/427)) | | | M | Opus | |
 | IV-3BH7 | ↳ Headings never show a code ([#428](https://github.com/LightningEg/Lightning/issues/428)) | | | S | Sonnet | |
+| IV-3BH8 | ↳ More words found by r35 | | | S | Sonnet | |
 | **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | improvement, visual | Understand | L | Opus | ready |
 | IV-3BK1 | ↳ Guideline: human dates on screens ([#429](https://github.com/LightningEg/Lightning/issues/429)) | | | M | Opus | |
 | IV-3BK2 | ↳ The date filters, tested alone | | | M | Sonnet | |
@@ -138,7 +131,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md) · [r28](3-polish-and-arabic/r28-international-polish/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BG, 3BJ. Next free code: 3BL.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BE, 3BG, 3BJ. Next free code: 3BL.
 
 ## 4 Edit journal and devices
 
@@ -192,8 +185,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **BT-7AI** | [A bank message with the Arabic decimal mark is read as the wrong amount (147.87 becomes 87)](7-planning-import-and-search/BT-7AI-sms-arabic-decimal-mark.md) | bug, technical · high | Capture | S | Sonnet | ready |
-| **IV-7AJ** | [Paste SMS fills what it can: the amount when no pattern matches, and the message's own date and shop](7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) | improvement, visual | Capture | S | Sonnet | ready |
+| **IV-7AJ** | [Paste SMS fills what it can: the amount when no pattern matches, and the message's own date and shop](7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) ([#490](https://github.com/LightningEg/Lightning/issues/490)) | improvement, visual | Capture | S | Sonnet | ready |
 | **IV-7AL** | [Phone Add: start on the amount, come back to the same Home, pay from the account that payee usually uses](7-planning-import-and-search/IV-7AL-phone-add-focus-return-and-account.md) | improvement, visual | Capture | M | Sonnet | new |
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | new feature | Capture | L | Opus | ready |
 | NF-7AB1 | ↳ Summary first, rows last | | | M | Opus | |
@@ -214,10 +206,15 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7AO2 | ↳ Seen, marked, undoable | | | M | Opus | |
 | NF-7AO3 | ↳ Not twice | | | M | Opus | |
 | **NF-7AP** | [Compare the balance a bank message states with the account, as a quiet To do row](7-planning-import-and-search/NF-7AP-bank-message-balance-check.md) | new feature | Capture | M | Sonnet | ready |
+| **NF-7AQ** | [Search answers a typed question - "food last month" gives the figure, its comparison and the rows, not a link to a filter](7-planning-import-and-search/NF-7AQ-search-answers-a-typed-question.md) | new feature | Capture | L | Opus | new |
+| NF-7AQ1 | ↳ The PC lists matching payments first, as the phone does | | | S | Sonnet | |
+| NF-7AQ2 | ↳ A period grammar, tested alone | | | M | Opus | |
+| NF-7AQ3 | ↳ The answer card | | | M | Opus | |
+| NF-7AQ4 | ↳ Mohab asks three questions | | | S | Sonnet | |
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md) · [r31](7-planning-import-and-search/r31-logging-entries/report.md).
 
-Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH. Next free code: 7AQ.
+Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI. Next free code: 7AR.
 
 ## 8 Website
 
@@ -254,11 +251,11 @@ Good ideas that wait until the milestones above are done.
 | IT-9K3 | ↳ The PC's borrowing routes and Lock out of profile_app | | | M | Opus | |
 | **IT-9L** | [The investment report reads the whole ledger four times per Overview - 426 ms at 4,400 transactions; a narrower query gives the same report twelve times faster](9-later/IT-9L-investment-report-reads-the-whole-ledger.md) | improvement, technical | Understand | M | Sonnet | ready |
 | IT-9L1 | ↳ Read only the transactions the report uses | | | M | Sonnet | |
-| IT-9L2 | ↳ Memo the purity read | | | S | Sonnet | |
+| IT-9L2 | ↳ Memo the purity read ([#491](https://github.com/LightningEg/Lightning/issues/491)) | | | S | Sonnet | |
 | IT-9L3 | ↳ One investment period per request | | | S | Sonnet | |
 | **IT-9M** | [Activity on the PC asks ten queries for each of its 100 rows - 1,039 queries where the budget is 400](9-later/IT-9M-activity-asks-ten-queries-a-row.md) | improvement, technical | Understand | M | Sonnet | ready |
 | **IT-9N** | [The import review asks four or more queries for every statement row - 1,136 for a 90-row file, about 12,000 for a year's statement](9-later/IT-9N-import-review-asks-four-queries-a-row.md) | improvement, technical | Capture | M | Sonnet | ready |
-| IT-9N1 | ↳ Ask the account questions once | | | S | Sonnet | |
+| IT-9N1 | ↳ Ask the account questions once ([#492](https://github.com/LightningEg/Lightning/issues/492)) | | | S | Sonnet | |
 | IT-9N2 | ↳ Ask the "seen before" questions once | | | M | Sonnet | |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | Opus | ready |
 | NF-9D3 | ↳ Hijri conversion in Python | | | S | Opus | |
@@ -308,12 +305,6 @@ The phone is its own product: a few places that each answer one question, quick 
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IV-11A** | [Phone first run - every Add is greyed out until "Save currencies" is pressed, and an empty Transactions says "Nothing matches"](11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | improvement, visual | Everywhere | M | Sonnet | ready |
-| IV-11A1 | ↳ Add works before "Save currencies" ([#432](https://github.com/LightningEg/Lightning/issues/432)) | | | S | Sonnet | |
-| IV-11A2 | ↳ An empty Activity says "No transactions yet." with Add and Import ([#433](https://github.com/LightningEg/Lightning/issues/433)) | | | S | Sonnet | |
-| **IV-11D** | [The phone has no charts - build the guideline's phone charts and meters, one per tab, so each tab is seen, not read](11-phone-ux/IV-11D-phone-charts-and-marks.md) | improvement, visual | Everywhere | L | Opus | ready |
-| IV-11D2 | ↳ Home and Budget: This month as one segmented bar | | | S | Sonnet | |
-| IV-11D5 | ↳ Budget: where the month went | | | S | Sonnet | |
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | Opus | building |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | Opus | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner |  | |
@@ -328,15 +319,14 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-3AY17 | ↳ Phone templates: Settings, rules, exports and the top-level pages | | | L | Sonnet | |
 | IV-3AY18 | ↳ The last phone routes leave the PC files | | | S | Sonnet | |
 | IV-3AY13 | ↳ Owner's phone check | | | owner |  | |
-| **IV-3F** | [The phone's top bar looks too white to one user](11-phone-ux/IV-3F-phone-top-bar-looks-too-white.md) | improvement, visual | Feel | S | Sonnet | ready |
 | **NF-11B** | [Ship the phone on Google Play - a release bundle at API 36, the SMS and payments policies, the app's own privacy notice and the Console declarations](11-phone-ux/NF-11B-ship-the-phone-on-google-play.md) | new feature | Everywhere | L | Opus | ready |
 | NF-11B7 | ↳ Owner: the developer account and the listing | | | owner |  | |
 | NF-11B8 | ↳ Owner: closed test, 12 testers for 14 days | | | owner |  | |
 | NF-11B9 | ↳ Owner: the phone check before production | | | owner |  | |
 
-Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md).
+Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md) · [r36](11-phone-ux/r36-figures-one-owner/report.md).
 
-Done: 11E, 11F, 11H, 11I, 11J, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D4, 11D6, 3AY1, 3AY3, 3AY5, 3AY6, 3AY7, 3AY11, 3AY12, BV-11G, IV-11D3. Next free code: 11K.
+Done: 11A, 11D, 11E, 11F, 11H, 11I, 11J, 11K, 11L, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D2, 11D4, 11D5, 11D6, 11L1, 3AY1, 3AY3, 3AY5, 3AY6, 3AY7, 3AY11, 3AY12, IV-3F, BV-11G, BV-11L2, BV-11L3, BV-11L4, IV-11D3. Next free code: 11M.
 
 ## 12 Desktop UX and smart next steps
 
@@ -344,8 +334,21 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **BT-12H** | [A second gold holding of the same karat cannot be added (GLD:24K already exists)](12-desktop-ux/BT-12H-second-gold-holding-same-karat.md) | bug, technical · medium | Own | S | Sonnet | ready |
-| **BV-12O** | [Phone Budget: Where the month went counts fixed costs twice (33,851 spent where 19,001 was)](12-desktop-ux/BV-12O-phone-budget-donut-counts-fixed-costs-twice.md) | bug, visual · high | Plan | S | Sonnet | ready |
+| **BT-12AC** | [The Investments Lead's Cost and Unrealized gain do not add up to its Portfolio value - 325,088 and 27,399 under 752,486](12-desktop-ux/BT-12AC-investments-lead-parts-do-not-add-up.md) | bug, technical · medium | Own | M | Opus | ready |
+| **BT-12AD** | [The payday proposal's lines do not add up to the cash they share out, and "Everyday spending" there is not the figure of that name](12-desktop-ux/BT-12AD-payday-proposal-lines-overlap.md) | bug, technical · medium | Plan | M | Opus | ready |
+| **BT-12H** | [A second gold holding of the same karat cannot be added (GLD:24K already exists)](12-desktop-ux/BT-12H-second-gold-holding-same-karat.md) ([#493](https://github.com/LightningEg/Lightning/issues/493)) | bug, technical · medium | Own | S | Sonnet | ready |
+| **IT-12AE** | [A screen cannot work out money - derived figures move to their owners, a ratchet test counts arithmetic in the UI, and the PC and phone are compared on one household](12-desktop-ux/IT-12AE-a-screen-cannot-work-out-money.md) | improvement, technical | Build | L | Opus | ready |
+| IT-12AE1 | ↳ The PC and the phone are compared on one household | | | M | Opus | |
+| IT-12AE2 | ↳ Parts add up to their whole | | | S | Sonnet | |
+| IT-12AE3 | ↳ A ratchet on arithmetic in the UI | | | M | Opus | |
+| IT-12AE4 | ↳ Derived figures move to their owners | | | L | Opus | |
+| IT-12AE5 | ↳ Owner: what "Kept" means | | | owner |  | |
+| **IV-12AA** | [Suggestions with sensible defaults and honest counts - Refill offers to empty Safe to spend, Needs you counts three ways, a year is compared with nothing](12-desktop-ux/IV-12AA-suggestions-with-sensible-defaults.md) | improvement, visual | Plan | M | Opus | ready |
+| IV-12AA1 | ↳ Owner: what Refill offers first | | | owner |  | |
+| IV-12AA2 | ↳ Refill offers the modest amount first and says what Home will show | | | M | Opus | |
+| IV-12AA3 | ↳ Needs you has one count ([#494](https://github.com/LightningEg/Lightning/issues/494)) | | | S | Sonnet | |
+| IV-12AA4 | ↳ A comparison with nothing says so ([#495](https://github.com/LightningEg/Lightning/issues/495)) | | | S | Sonnet | |
+| IV-12AA5 | ↳ Catch up on late bills, on the PC | | | M | Opus | |
 | **IV-12J** | [Certificates read as certificates: their own holding page, payouts as the bank pays them, value that grows, and a nudge at maturity](12-desktop-ux/IV-12J-certificates-read-as-certificates.md) | improvement, visual | Own | L | Opus | new |
 | IV-12J1 | ↳ The certificate's holding page and the certificates page | | | M | Opus | |
 | IV-12J2 | ↳ Payouts forecast the way Egyptian banks pay them | | | M | Opus | |
@@ -362,6 +365,21 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-12Q4 | ↳ Phone Recurring and the PC's doubled list | | | S | Opus | |
 | IV-12Q5 | ↳ Budget page and Budget settings | | | M | Opus | |
 | **IV-12T** | [The three "explain this figure" pages have no way in - /explain/owned, /explain/free-cash and /explain/flow are built and tested, and nothing links to them](12-desktop-ux/IV-12T-explain-pages-have-no-way-in.md) | improvement, visual | Understand | S | Sonnet | ready |
+| **IV-12V** | [Adjust balance: a cash wallet that is far off has no way forward, and the page is one bare form](12-desktop-ux/IV-12V-adjust-balance-for-cash.md) | improvement, visual | Capture | M | Sonnet | ready |
+| **IV-12W** | [Register and search: the forgotten minus, transactions in PC search, and small things on the rows](12-desktop-ux/IV-12W-register-and-search-small-traps.md) | improvement, visual | Capture | M | Sonnet | ready |
+| **IV-12X** | [Held for others gives instructions where it should give actions](12-desktop-ux/IV-12X-held-for-others-actions.md) | improvement, visual | Own | S | Sonnet | new |
+| **IV-12Y** | [One page skeleton on the PC, kept by a test - every tab has the same title rule, an answer sentence, its dates, and the same controls in the same order](12-desktop-ux/IV-12Y-one-page-skeleton-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
+| IV-12Y1 | ↳ Owner: the title rule and the control order | | | owner |  | |
+| IV-12Y2 | ↳ The test first, with today's exceptions listed | | | M | Opus | |
+| IV-12Y3 | ↳ One header partial, used by every tab | | | L | Opus | |
+| IV-12Y4 | ↳ An answer sentence on the 13 tabs that have none | | | M | Sonnet | |
+| IV-12Y5 | ↳ One filled action a tab, and one home for Ask an AI | | | M | Sonnet | |
+| **IV-12Z** | [The answer on one screen, the rest on request - Spending, Cash planning and Investments run 3 to 4 screens and repeat lists](12-desktop-ux/IV-12Z-answer-on-one-screen-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
+| IV-12Z1 | ↳ A length budget in the skeleton test ([#496](https://github.com/LightningEg/Lightning/issues/496)) | | | S | Sonnet | |
+| IV-12Z2 | ↳ Cash planning says each thing once | | | M | Sonnet | |
+| IV-12Z3 | ↳ Spending opens on the categories; the other charts open on request | | | M | Opus | |
+| IV-12Z4 | ↳ Investments shows nothing as one line ([#497](https://github.com/LightningEg/Lightning/issues/497)) | | | S | Sonnet | |
+| IV-12Z5 | ↳ Overview's tail ([#498](https://github.com/LightningEg/Lightning/issues/498)) | | | S | Sonnet | |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | Opus | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | Opus | |
 | IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | M | Opus | |
@@ -375,6 +393,11 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-3H7 | ↳ Loans: an optional rate and the cost of the loan | | | M | Opus | |
 | IV-3H9 | ↳ Build the chosen analysis | | | M | Opus | |
 | IV-3H10 | ↳ Triage the ids no step names ([#436](https://github.com/LightningEg/Lightning/issues/436)) | | | M | Opus | |
+| **NF-12AB** | [Every headline figure explains itself in place - one gesture and one label instead of "Show the numbers", "How it is worked out", "See details", "See them" and bare chevrons](12-desktop-ux/NF-12AB-every-figure-explains-itself-in-place.md) | new feature | Understand | L | Opus | new |
+| NF-12AB1 | ↳ Owner: the pattern and its one label | | | owner |  | |
+| NF-12AB2 | ↳ One "working" shape from the services | | | M | Opus | |
+| NF-12AB3 | ↳ The PC's Leads and KPIs open their working in place | | | L | Opus | |
+| NF-12AB4 | ↳ The phone's heroes open their working as a sheet | | | M | Opus | |
 | **NF-12G** | [Money lent to others and costs split with others - who owes you what, counted honestly in what you own](12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | new feature | Own | L | Opus | ready |
 | NF-12G2 | ↳ Money lent and paid back: the service | | | M | Opus | |
 | NF-12G6 | ↳ Lend, paid back and forgive on the person's page (PC) | | | M | Sonnet | |
@@ -388,9 +411,9 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | NF-12M2 | ↳ A property page, not a bank register | | | M | Opus | |
 | NF-12M3 | ↳ Paying by instalments (off-plan) | | | L | Opus | |
 | NF-12M4 | ↳ Rent and running costs | | | M | Opus | |
-| **NF-12R** | [Fill this month from your average of the last three months](12-desktop-ux/NF-12R-fill-budget-from-average.md) | new feature | Plan | S | Sonnet | ready |
+| **NF-12R** | [Fill this month from your average of the last three months](12-desktop-ux/NF-12R-fill-budget-from-average.md) ([#499](https://github.com/LightningEg/Lightning/issues/499)) | new feature | Plan | S | Sonnet | ready |
 | **NF-12S** | [Warn before a category runs out, with Move room or Raise](12-desktop-ux/NF-12S-warn-before-a-category-runs-out.md) | new feature | Plan | M | Sonnet | ready |
 
-Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md).
+Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md) · [r34](12-desktop-ux/r34-accounts-and-transactions/report.md) · [r35](12-desktop-ux/r35-ux-against-users-questions/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F, 3AZ. Next free code: 12U.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 12U, 3AZ, BV-12O. Next free code: 12AF.

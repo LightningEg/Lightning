@@ -21,10 +21,9 @@ from decimal import Decimal
 
 from lightning.core.dates import month_of, parse_date, parse_month
 from lightning.core.figures import label as figure_label
-from lightning.core.money import ZERO
+from lightning.core.money import ZERO, fmt, signed_pct
 
 from . import charts
-from .keynotes import fmt
 
 TONES = {"in", "hold", "out", "over"}
 
@@ -110,9 +109,9 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
     first, each {"name", "over"}; ``move`` the room to cover the largest from, {"href", "name", "amount"}."""
     previous = month_of(parse_month(month)[0] - timedelta(days=1))
     if e.left < 0:
-        left_compare = compare("over the plan", fmt(-e.left), "bad")
+        left_compare = compare("over the plan", fmt(-e.left, 0), "bad")
     elif e.current and e.days_left:
-        left_compare = (compare(f"for everyday, about {fmt(e.per_day)} a day", fmt(e.everyday_left), "good") if e.everyday_left > 0
+        left_compare = (compare(f"for everyday, about {fmt(e.per_day, 0)} a day", fmt(e.everyday_left, 0), "good") if e.everyday_left > 0
                         else compare("for everyday: bills take the rest", "0", "bad"))
     else:
         left_compare = compare("of the plan spent", f"{e.spent / e.planned * 100:.0f}%" if e.planned else "—")
@@ -122,15 +121,15 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
     cards = [card(figure_label("left_in_plan"), e.left, left_compare, tone="in" if e.left >= 0 else "over", key="left",
                   chip_=chip(f"{e.days_left} days left" if e.current and e.days_left else month),
                   visual=left_visual or meter(e.spent, e.planned),
-                  line_=line(f"{spent_label} {fmt(e.spent)} of {fmt(e.planned)} planned"), href="#budget-meters")]
+                  line_=line(f"{spent_label} {fmt(e.spent, 0)} of {fmt(e.planned, 0)} planned"), href="#budget-meters")]
 
     if e.current and e.day:
         gap = e.pace_gap
-        pace_compare = (compare("under the plan's pace", fmt(-gap), "good") if gap <= 0
-                        else compare("over the plan's pace", fmt(gap), "bad"))
+        pace_compare = (compare("under the plan's pace", fmt(-gap, 0), "good") if gap <= 0
+                        else compare("over the plan's pace", fmt(gap, 0), "bad"))
         before = e.last_month_same_day
         tail = (line(f"{_signed(e.everyday_spent - before)} against {previous} by day {e.day}") if before is not None
-                else line(f"Everyday plan {fmt(e.everyday_plan)}"))
+                else line(f"Everyday plan {fmt(e.everyday_plan, 0)}"))
         cards.append(card("Everyday spending", e.everyday_spent, pace_compare, tone="out", key="everyday",
                           chip_=chip(f"by day {e.day}"), visual=None,  # the pace chart beside it is its picture (audit 12, B1)
                           line_=tail, href="#budget-pace"))
@@ -139,7 +138,7 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
         change = (compare(f"against {previous}", _signed(e.everyday_spent - before), "good" if e.everyday_spent <= before else "bad")
                   if before is not None else compare("of the everyday plan", f"{e.everyday_spent / e.everyday_plan * 100:.0f}%" if e.everyday_plan > 0 else "—"))
         cards.append(card("Everyday spending", e.everyday_spent, change, tone="out", key="everyday", chip_=chip(month),
-                          visual=meter(e.everyday_spent, e.everyday_plan), line_=line(f"Everyday plan {fmt(e.everyday_plan)}"),
+                          visual=meter(e.everyday_spent, e.everyday_plan), line_=line(f"Everyday plan {fmt(e.everyday_plan, 0)}"),
                           href="#budget-pace"))
 
     if over:
@@ -148,7 +147,7 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
         parts = [(row["name"], row["over"], "over" if i == 0 else "out") for i, row in enumerate(over[:3])]
         if len(over) > 3:
             parts.append(("Other", sum((row["over"] for row in over[3:]), ZERO), "neutral"))
-        act = (line(action=f"Move {fmt(move['amount'])} from {move['name']}", href=move["href"], popup=True) if move
+        act = (line(action=f"Move {fmt(move['amount'], 0)} from {move['name']}", href=move["href"], popup=True) if move
                else line(action="See categories", href="#budget-meters"))
         cards.append(card("Over plan", total, compare("over their plan", f"{names} categor{'y' if names == 1 else 'ies'}", "bad"),
                           tone="over", needs=True, key="over", chip_=chip("Needs you", "over"),
@@ -158,13 +157,13 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
         rate, target = check.planned_savings_rate, check.target_percent
         scale = max(rate, target, Decimal(1)) * Decimal("1.4")
         if raise_offer:
-            tail = line(f"Income up {fmt(raise_offer['raise'])}", "Raise the plan", f"/budget/raise?month={month}", popup=True)
+            tail = line(f"Income up {fmt(raise_offer['raise'], 0)}", "Raise the plan", f"/budget/raise?month={month}", popup=True)
         elif check.over_by:
-            tail = line(f"Plan {fmt(check.over_by)} less to keep {fmt(check.to_save)} a month")
+            tail = line(f"Plan {fmt(check.over_by, 0)} less to keep {fmt(check.to_save, 0)} a month")
         elif check.unassigned is not None and check.unassigned > 0:
-            tail = line(f"{fmt(check.unassigned)} of the income is not yet given a job", "Give it a job", f"/budget/fill?month={month}")
+            tail = line(f"{fmt(check.unassigned, 0)} of the income is not yet given a job", "Give it a job", f"/budget/fill?month={month}")
         else:
-            tail = line(f"{fmt(check.to_save)} a month to save")
+            tail = line(f"{fmt(check.to_save, 0)} a month to save")
         good = not check.over_by
         cards.append(card("Plan leaves to save", check.plan_saves,
                           compare(f"of income, target {target.normalize():f}%", f"{rate:.0f}%", "good" if good else "bad"),
@@ -183,10 +182,10 @@ def budget_period(spent: Decimal, planned: Decimal, months: list[tuple[str, Deci
     left = planned - spent
     ended = [value for _, value, finished in months if finished]
     within = sum(1 for value in ended if value >= 0)
-    cards = [card("From monthly plan" if funded_elsewhere else "Spent", spent, compare(f"of the {fmt(planned)} plan", f"{spent / planned * 100:.0f}%",
+    cards = [card("From monthly plan" if funded_elsewhere else "Spent", spent, compare(f"of the {fmt(planned, 0)} plan", f"{spent / planned * 100:.0f}%",
                                           "good" if spent <= planned else "bad"),
                   tone="out", key="spent", chip_=chip(period_label), visual=meter(spent, planned),
-                  line_=line(f"Planned {fmt(planned)}"), href="#budget-meters"),
+                  line_=line(f"Planned {fmt(planned, 0)}"), href="#budget-meters"),
              card(figure_label("left_in_plan"), left,
                   compare("ended within plan", f"{within} of {len(ended)} month{'' if len(ended) == 1 else 's'}",
                           "good" if within == len(ended) else "bad")
@@ -205,7 +204,7 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
     parts = dict(f.safe_to_spend_parts)
     until = f.next_income_date
     if f.safe_to_spend < 0:
-        safe_compare = compare("more is promised than your free cash", fmt(-f.safe_to_spend), "bad")
+        safe_compare = compare("more is promised than your free cash", fmt(-f.safe_to_spend, 0), "bad")
     elif f.free_cash > 0:
         safe_compare = compare("of your free cash", f"{f.safe_to_spend / f.free_cash * 100:.0f}%", "hold")
     else:
@@ -228,13 +227,13 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
     held = (position.kept_apart or ZERO) + (position.reserves or ZERO) + position.bills_due
     cards.append(card(figure_label("free_cash"), f.free_cash, free_compare, tone="hold", key="free", chip_=free_chip,
                       visual=spark([*past_free, f.free_cash]),
-                      line_=line(f"Cash you own {fmt(position.cash_you_own)}, including {fmt(position.brokerage_cash)} in your brokerage"
+                      line_=line(f"Cash you own {fmt(position.cash_you_own, 0)}, including {fmt(position.brokerage_cash, 0)} in your brokerage"
                                  if position.brokerage_cash else
-                                 f"Cash you own {fmt(position.cash_you_own)}, less {fmt(held)} set aside or due"), href="/"))
+                                 f"Cash you own {fmt(position.cash_you_own, 0)}, less {fmt(held, 0)} set aside or due"), href="/"))
 
     before_total = f.payments_before_income_total  # the same total Safe to spend takes off (7N)
     if late:
-        due_compare = compare("already late", fmt(late_total), "bad")
+        due_compare = compare("already late", fmt(late_total, 0), "bad")
         due_chip = chip(f"{len(late)} late", "bad")
     else:
         due_compare = compare(f"payment{'s' if len(before) != 1 else ''} before payday" if until else "payments in the next 3 months",
@@ -249,7 +248,7 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
     low = f.lowest if has_income else None
     if low is not None:
         drop = f.free_cash - low.closing
-        low_compare = (compare("below today", fmt(drop)) if drop > 0 else compare("above today", fmt(-drop), "good"))
+        low_compare = (compare("below today", fmt(drop, 0)) if drop > 0 else compare("above today", fmt(-drop, 0), "good"))
         months_text = (f"{low.closing / monthly_spending:.1f} months of spending at its lowest" if monthly_spending and low.closing > 0
                        else "Runs short: the month ends below zero" if low.closing < 0 else "")
         cards.append(card("Lowest point ahead", low.closing, low_compare, tone="over" if low.closing < 0 else "hold", key="low",
@@ -263,7 +262,7 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
 
 
 def _signed(value: Decimal) -> str:
-    return ("+" if value > 0 else "−" if value < 0 else "") + fmt(abs(value))
+    return ("+" if value > 0 else "−" if value < 0 else "") + fmt(abs(value), 0)
 
 
 # ── Overview ───────────────────────────────────────────────────────────────────────────────────────────────
@@ -280,25 +279,25 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
                           chip_=chip(period_chip), href=savings_href))
     elif flow.rate_says_nothing:  # honest numbers (A01): a rate like −1,177% says nothing, the sentence does
         cards.append(card(figure_label("savings_rate"), None,
-                          compare(f"{fmt(-flow.net)} more went out than the {fmt(flow.inflows)} that came in"),
+                          compare(f"{fmt(-flow.net, 0)} more went out than the {fmt(flow.inflows, 0)} that came in"),
                           tone="over", key="savings", chip_=chip(period_chip, "bad"), href=savings_href,
-                          line_=line(f"Money out {fmt(flow.outflows)}")))
+                          line_=line(f"Money out {fmt(flow.outflows, 0)}")))
     elif flow.net < 0:
         cards.append(card("Spent over money in", -flow.net,
-                          compare(f"{fmt(-flow.net)} more went out than the {fmt(flow.inflows)} that came in"),
+                          compare(f"{fmt(-flow.net, 0)} more went out than the {fmt(flow.inflows, 0)} that came in"),
                           tone="over", key="savings", chip_=chip(period_chip, "bad"), href=savings_href,
-                          line_=line(f"Money out {fmt(flow.outflows)}")))
+                          line_=line(f"Money out {fmt(flow.outflows, 0)}")))
     else:
         if usual is not None:
             gap = rate - usual
-            savings_compare = compare(f"on your usual {usual:.1f}%", f"{gap:+.1f} points", "good" if gap >= 0 else "bad")
+            savings_compare = compare(f"on your usual {usual:.1f}%", f"{signed_pct(gap)} points", "good" if gap >= 0 else "bad")
             arrow = "up" if gap > 0 else "down" if gap < 0 else None
             savings_chip = chip(period_chip, "good" if gap >= 0 else "bad", arrow)
         else:
             savings_compare, savings_chip = compare("Your first month: nothing to compare yet"), chip(period_chip)
         cards.append(card(figure_label("savings_rate"), rate, savings_compare, tone="in", key="savings", kind="rate",
                           chip_=savings_chip, visual=spark(rates), href=savings_href,
-                          line_=line(f"{fmt(flow.net)} kept of {fmt(flow.inflows)} money in")))
+                          line_=line(f"{fmt(flow.net, 0)} kept of {fmt(flow.inflows, 0)} money in")))
 
     cards.append(_investing(flow, invest, invest_before, before_label, money_added, period_chip, invest_href))
 
@@ -306,7 +305,7 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
         f, until = forecast, forecast.next_income_date
         promised = max(f.free_cash - f.safe_to_spend, ZERO)
         safe_compare = (compare("of your free cash", f"{f.safe_to_spend / f.free_cash * 100:.0f}%", "hold") if f.free_cash > 0 and f.safe_to_spend >= 0
-                        else compare("more is promised than your free cash", fmt(-f.safe_to_spend), "bad") if f.safe_to_spend < 0
+                        else compare("more is promised than your free cash", fmt(-f.safe_to_spend, 0), "bad") if f.safe_to_spend < 0
                         else compare("No free cash today"))
         cards.append(card(figure_label("safe_to_spend"), f.safe_to_spend, safe_compare, tone="hold" if f.safe_to_spend >= 0 else "over",
                           key="safe", chip_=chip(f"until {until}" if until else "3 months"),
@@ -316,12 +315,12 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
     if plan is not None:
         planned, left = plan["planned"], plan["left"]
         used = planned - left
-        plan_compare = (compare("over the plan", fmt(-left), "bad") if left < 0
-                        else compare(f"of the {fmt(planned)} plan used", f"{used / planned * 100:.0f}%" if planned > 0 else "—"))
+        plan_compare = (compare("over the plan", fmt(-left, 0), "bad") if left < 0
+                        else compare(f"of the {fmt(planned, 0)} plan used", f"{used / planned * 100:.0f}%" if planned > 0 else "—"))
         cards.append(card(figure_label("left_in_plan"), left if left >= 0 else -left, plan_compare,
                           tone="over" if left < 0 else "out", needs=left < 0, key="plan",
                           chip_=chip("Over plan", "over") if left < 0 else chip(month), visual=meter(used, planned),
-                          line_=line(f"Spent {fmt(used)} of {fmt(planned)} planned"), href=f"/budget?month={month}"))
+                          line_=line(f"Spent {fmt(used, 0)} of {fmt(planned, 0)} planned"), href=f"/budget?month={month}"))
     else:
         cards.append(card(figure_label("left_in_plan"), None, compare(f"No plan for {month} yet"), tone="out",
                           key="plan", chip_=chip(month), line_=line(action=f"Set a plan for {month}", href=f"/budget?month={month}"),
@@ -338,7 +337,7 @@ def _investing(flow, invest, invest_before, before_label: str, money_added: Deci
                     chip_=chip(period_chip), line_=line(action="Plan to invest", href="/investments/planner"), href=href)
     if invest is not None and invest_before is not None:
         gap = invest - invest_before
-        comparison = compare(f"on {before_label} ({invest_before:.1f}%)", f"{gap:+.1f} points", "good" if gap >= 0 else "bad")
+        comparison = compare(f"on {before_label} ({invest_before:.1f}%)", f"{signed_pct(gap)} points", "good" if gap >= 0 else "bad")
     elif invest is not None:
         comparison = compare(f"Nothing was kept in {before_label} to compare with")
     else:
@@ -346,7 +345,7 @@ def _investing(flow, invest, invest_before, before_label: str, money_added: Deci
     added = max(money_added, ZERO)
     return card(label_, invest, comparison, tone="in", key="investing", kind="rate", chip_=chip(period_chip),
                 visual=meter(min(added, flow.net), flow.net) if flow.net > 0 else None,
-                line_=line(f"{fmt(added)} moved into investments, a share of the {fmt(flow.net)} you kept" if flow.net > 0 else f"{fmt(added)} moved into investments"), href=href)
+                line_=line(f"{fmt(added, 0)} moved into investments, a share of the {fmt(flow.net, 0)} you kept" if flow.net > 0 else f"{fmt(added, 0)} moved into investments"), href=href)
 
 
 # ── Loans ──────────────────────────────────────────────────────────────────────────────────────────────────

@@ -4,6 +4,7 @@ type: feature
 pillar: plan
 size: S
 model: sonnet
+github: 499
 status: ready
 created: 2026-11-09
 by: Claude

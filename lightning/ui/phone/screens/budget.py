@@ -68,7 +68,7 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
         return BudgetScreen(shown, prev, nxt, "no_plan", None, None, None, None, (), 0, (), ZERO, ZERO, 0)
     e = c.forecaster.everyday(shown, day)
     state = "current" if e.current else ("past" if last < day else "future")
-    left = e.everyday_plan - e.everyday_spent
+    left = e.everyday_left
     used = int(e.everyday_spent / e.everyday_plan * 100) if e.everyday_plan > 0 else None
     pace_pct = Decimal(e.day) / e.days_in_month * 100 if state == "current" and e.days_in_month else None
     rows = []
@@ -105,7 +105,7 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
                         (e.everyday_spent - e.pace) if state == "current" else None, e.per_day,
                         shown_needs, max(len(needs) - ATTENTION, 0), listed, planned, paid, count,
                         move, c.health.raise_offer(shown) if state == "current" else None,
-                        month_bar(e.everyday_plan, e.everyday_spent), spend_donut(rows, paid))
+                        month_bar(e.everyday_plan, e.everyday_spent), spend_donut(rows, e.everyday_spent))
 
 
 def month_bar(plan: Decimal, spent: Decimal) -> dict | None:
@@ -120,12 +120,13 @@ def month_bar(plan: Decimal, spent: Decimal) -> dict | None:
             "w_over": float(part_over / whole * 100)}
 
 
-def spend_donut(rows: list[CategoryRow], fixed_paid: Decimal) -> dict | None:
-    """IV-11D5: where the month went, from the same figures as the rows: each flexible category's spending and the
-    fixed costs paid. Four by name, then Other."""
+def spend_donut(rows: list[CategoryRow], spent: Decimal) -> dict | None:
+    """IV-11D5, BV-12O: where the month went. Fixed costs paid are already inside their categories (rent in Housing), so
+    the slices are the categories alone and any spending they leave out joins Other: the total is the plan's Spent."""
     slices = [{"label": r.name, "value": r.spent} for r in rows]
-    if fixed_paid > 0:
-        slices.append({"label": "Fixed costs", "value": fixed_paid, "fixed": True})
+    rest = spent - sum((r.spent for r in rows if r.spent > 0), ZERO)
+    if rest > 0:
+        slices.append({"label": "Other", "value": rest, "other": True})
     d = ranked_donut(slices)
     return d if d["segments"] else None
 

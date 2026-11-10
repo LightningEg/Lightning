@@ -64,7 +64,7 @@ Severity: **high** means wrong action or lost trust, **medium** is visible on a 
 | F4 | medium | **Half-English sentences in Arabic.** "جرّب تاني بعد 5 minutes." (`runtime/session.py:84`). "احذف this category? …" (`categories/list.html:100`). "البند 2: price and exchange rate must be positive." (`core/ledger.py:164`). A record reference in the tooltip: "OUT-2026-10-02-001 — عدّل في القايمة دي" (`register.html:217`). | source lines | [IV-3BD](../IV-3BD-errors-speak-plainly-everywhere.md) |
 | F5 | medium | **Unbranded and untranslated errors.** Validation errors from JSON routes return `{"error": "<English>"}` (`web.py:670`). A cross-origin block is plain text (`web.py:612`). `HTTPException(400)` in exports falls to FastAPI JSON (`routes/exports.py:37,109`). 87 validation messages have no Arabic. Every validation page is titled "Check your setup" and offers the same three links, whatever the error (`validation_error.html:2-5`). Raw Python exception text reaches people ("Could not read this CSV: {exc}", `bank_import_rows.py:277`). | source lines | IV-3BD |
 | F6 | low | **A PC route that 500s.** `GET /transactions/sorted` renders `transactions/sorted.html`, which exists only as a phone template, so the PC gets a server error. Phone sorting is fine. | `routes/transactions.py:161` | IV-3BD |
-| F7 | low | **Hyphen where a minus belongs.** "-89.5 points" on the Overview KPI sits beside "−66,500" (`kpis.py:294,341` use `f"{gap:+.1f}"` and bypass `_signed_pct`). In the browser, `Intl.NumberFormat(undefined, …)` (`app.js:1391,1443,1526`) follows the Windows locale, so a German or French PC shows "1.234,56" with a hyphen next to the server's "1,234.56". | [pc-en-home](evidence/shots/pc-en-home.png), KPI row | [IT-3BE](../IT-3BE-one-number-format.md) |
+| F7 | low | **Hyphen where a minus belongs.** "-89.5 points" on the Overview KPI sits beside "−66,500" (`kpis.py:294,341` use `f"{gap:+.1f}"` and bypass `_signed_pct`). In the browser, `Intl.NumberFormat(undefined, …)` (`app.js:1391,1443,1526`) follows the Windows locale, so a German or French PC shows "1.234,56" with a hyphen next to the server's "1,234.56". | [pc-en-home](evidence/shots/pc-en-home.png), KPI row | [number formatting tests](../../../tests/test_number_format.py), [browser locale tests](../../../tests/test_browser_number_format.py), [search amount tests](../../../tests/test_search_amount_format.py) |
 
 ### B. Polish gaps (the "feels made" layer)
 
@@ -138,8 +138,10 @@ F21 covers these choices:
 
 ## Dated follow-ups
 
-None yet.
-
 ## Follow-up · 2026-11-08 · Codex
 
 BV-3BB: delete markers now explicitly select danger tone and the translated Delete label, including local category and counterparty handlers and the category edit page. English and Arabic question marks split the title and explanation. The complete category and counterparty warnings have Arabic. Browser tests cover both languages: Enter cancels without sending a delete, an explicit Delete sends it once, and marked deletes stay dangerous regardless of wording. Evidence: `tests/test_confirm_dialog_browser.py`.
+
+## Follow-up · 2026-11-10 · Codex
+
+IT-3BE (F7): signed KPI percentages and browser locale formatting are merged in #471 and #472. The remaining Python formatter copies now use `core.money.fmt`, with explicit precision preserving whole reporting figures. Search delegates to the screen formatter for grouping, cents and a true minus; its entry link keeps the original amount. Evidence: `tests/test_number_format.py`, `tests/test_browser_number_format.py`, `tests/test_search_amount_format.py` and Mohab.

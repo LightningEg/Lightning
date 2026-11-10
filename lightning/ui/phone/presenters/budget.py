@@ -5,9 +5,9 @@ from __future__ import annotations
 from decimal import Decimal
 
 from lightning.core.dates import month_of, parse_month, today
-from lightning.core.money import ZERO
+from lightning.core.money import ZERO, fmt
 
-from lightning.ui import keynotes, status as page_status
+from lightning.ui import status as page_status
 from lightning.ui.budget_rows import (OVER_NOTE_LABELS, cover_from, month_bills, neighbours, pace_line, plain, plan_ring,
                                       see_all)
 
@@ -98,7 +98,7 @@ def _day_one(has_plan: bool, period, month: str, spent: Decimal, planned: Decima
     """A new month with nothing spent reads as the plan spread over the month, not "0 of" (3AN7)."""
     if not has_plan or period.key != "month" or month != month_of(today()) or spent > ZERO or planned <= ZERO:
         return None
-    return page_status.sentence("New month: {amt} over {n} days", amt=keynotes.fmt(planned), n=days)
+    return page_status.sentence("New month: {amt} over {n} days", amt=fmt(planned, 0), n=days)
 
 
 def _phone_over(rows: list[dict], month: str, days_left: int, c, everyday) -> dict | None:
@@ -111,11 +111,11 @@ def _phone_over(rows: list[dict], month: str, days_left: int, c, everyday) -> di
     title = (page_status.sentence("{name} is over plan", name=over[0]["name"]) if len(over) == 1
              else page_status.sentence("{n} categories are over plan", n=len(over)))
     if days_left > 1:
-        line = page_status.sentence("{amt} over · {n} days left", amt=keynotes.fmt(total), n=days_left)
+        line = page_status.sentence("{amt} over · {n} days left", amt=fmt(total, 0), n=days_left)
     elif days_left == 1:
-        line = page_status.sentence("{amt} over · 1 day left", amt=keynotes.fmt(total))
+        line = page_status.sentence("{amt} over · 1 day left", amt=fmt(total, 0))
     else:
-        line = page_status.sentence("{amt} over", amt=keynotes.fmt(total))
+        line = page_status.sentence("{amt} over", amt=fmt(total, 0))
     largest = over[0]
     move = (cover_from(c, month, {"category_id": largest["category_id"], "over": largest["amount"]}, everyday.room)
             if everyday is not None else None)

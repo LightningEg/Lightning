@@ -29,7 +29,6 @@
   {% endif %}
   <h2>{{ "Where do you keep your money?"|tr(locale) }}</h2>
   <p class="muted">{{ "Start with the account your salary goes into. Next you can import its statement, so your history is in from day one."|tr(locale) }}</p>
-  {% if not currencies_done %}<p class="muted small">{{ 'Save your currencies first.'|tr(locale) }}</p>{% endif %}
   <div class="setup-list first-account-choices">
     {# Lucide icons, 20px, 1.75 stroke (guideline A15), never text symbols. #}
     {% set icons = {
@@ -45,7 +44,7 @@
       ('BROKERAGE','Brokerage','Shares and funds, like THNDR'),
       ('PHYSICAL_ASSET','Gold and other things','A gold ring, a gold pound or another named item')
     ] %}
-    {% if currencies_done %}<a class="setup-row" data-popup-open href="/accounts/new?type={{ kind }}">{% else %}<span class="setup-row is-off" aria-disabled="true">{% endif %}<span class="setup-icon"><svg viewBox="0 0 24 24" aria-hidden="true">{{ icons[kind]|safe }}</svg></span><span><b>{{ label|tr(locale) }}</b><small>{{ description|tr(locale) }}</small></span><span class="setup-action">{{ 'Add'|tr(locale) }}</span>{% if currencies_done %}</a>{% else %}</span>{% endif %}
+    <a class="setup-row" data-popup-open href="/accounts/new?type={{ kind }}"><span class="setup-icon"><svg viewBox="0 0 24 24" aria-hidden="true">{{ icons[kind]|safe }}</svg></span><span><b>{{ label|tr(locale) }}</b><small>{{ description|tr(locale) }}</small></span><span class="setup-action">{{ 'Add'|tr(locale) }}</span></a>
     {% endfor %}
   </div>
 </section>

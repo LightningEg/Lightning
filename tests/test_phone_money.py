@@ -112,3 +112,52 @@ def test_net_worth_trend_ends_at_the_hero_and_what_you_own_adds_up(mohab):
     assert 'class="phone-chart-trend"' in html and html.count('class="phone-chart-trend-dot') == len(line["dots"])
     assert html.count("<span>", html.index('class="phone-chart-trend-x"'), html.index("</div>", html.index('class="phone-chart-trend-x"'))) <= 3
     assert all(f'tone-{p["key"]}' in html for p in s.own_split)
+
+
+@pytest.mark.parametrize("day", [date(2026, 10, 1), date(2026, 10, 4)])
+def test_change_this_month_is_the_overviews_figure_even_when_pay_lands_on_the_first(mohab, day):
+    """BT-11K/BV-12U: include payday even on day one, then the spending that follows it."""
+    expected, _ = mohab.position.change_in_net_worth(date(2026, 10, 1), day)
+    assert screen.build(mohab, day).since_start == expected
+    assert expected == mohab.position.at(day).net_worth - mohab.position.at(date(2026, 9, 30)).net_worth
+    assert expected is not None and expected > 0
+
+
+def test_coming_up_includes_the_next_bill_before_payday_beyond_nine_days(c, setup, monkeypatch):
+    """BV-11L4: a bill shown in Bills must not disappear from Money's Coming up."""
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-12-01")
+    accounts, cats = setup
+    bill = c.planning.create(kind="BILL", name="Internet before payday", amount="450", frequency="ONCE",
+                             start_date="2026-12-15", account_id=accounts["cib"].id,
+                             category_id=cats["EXP.PERSONAL.FOOD"].id)
+    c.planning.create(kind="INCOME", name="Payday", amount="2000", frequency="ONCE",
+                      start_date="2026-12-25", account_id=accounts["cib"].id,
+                      category_id=cats["EXP.WORK.SALARY"].id)
+    day = date(2026, 12, 1)
+    bills, money = screen.bills_page(c, day), screen.build(c, day)
+    assert any(b.payment.item.id == bill for b in bills.before_payday)
+    assert money.coming_up[0].payment.item.id == bill
+    app = create_app(c)
+    mount_phone(app)
+    client = TestClient(app)
+    for path in ("/money", "/money/bills"):
+        page = client.get(path).text
+        assert "Internet before payday" in page
+        assert "Nothing is due soon." not in page
+
+
+@pytest.mark.parametrize("locale", ["en", "ar"])
+def test_empty_money_has_one_first_step_instead_of_zero_figures(c, locale):
+    """BV-11L4: first-run Money offers an account, without a zero hero or summaries."""
+    c.settings.set("locale", locale)
+    app = create_app(c)
+    mount_phone(app)
+    page = TestClient(app).get("/money").text
+    assert not screen.build(c, date(2026, 10, 4)).has_accounts
+    assert ('No accounts yet.' if locale == "en" else 'لسه مفيش حسابات.') in page
+    assert 'href="/accounts/new" data-popup-open' in page
+    assert ('Add account' if locale == "en" else 'أضف حساب') in page
+    assert 'class="phone-lead' not in page and 'class="phone-hero' not in page
+    assert 'class="phone-chart-trend"' not in page
+    assert 'id="accounts-heading"' not in page and 'id="coming-heading"' not in page
+    assert "0 accounts hold" not in page and "0 this month." not in page

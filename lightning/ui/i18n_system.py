@@ -1872,7 +1872,7 @@ SERVICES = {
     "Nothing recorded this month.": "مفيش حاجة اتسجلت الشهر ده.",
     "Nothing in Activity needs you.": "مفيش حاجة في النشاط محتاجاك.",
     "Make my plan": "اعمل خطتي",
-    "{amt} since the start of the month.": "{amt} من أول الشهر.",
+    "{amt} this month.": "{amt} هذا الشهر.",
     "Includes {amt} held for others.": "فيها {amt} محفوظة لناس تانيين.",
     "Nothing is due soon.": "مفيش حاجة مستحقة قريب.",
     "1 bill is late": "فاتورة واحدة متأخرة",

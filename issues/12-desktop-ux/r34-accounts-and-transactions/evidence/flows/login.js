@@ -1,0 +1,1 @@
+const L=require('./lib');(async()=>{for(const m of ['pc','phone']){const h=await L.open(m);try{await L.login(h,m);console.log(m,h.p.url(),(await h.text(300)).replace(/\n/g,' | '));await h.shot(m+'-home');}catch(e){console.log(m,'ERR',e.message.slice(0,300))}await h.close();}})();

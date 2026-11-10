@@ -7,11 +7,15 @@
 {% block heading %}<h1>{{ 'Money'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
 {% set s = screen %}
+{% if not s.has_accounts %}
+<p class="phone-note">{{ 'No accounts yet.'|tr(locale) }}</p>
+<a class="btn primary phone-save" href="/accounts/new" data-popup-open>{{ 'Add account'|tr(locale) }}</a>
+{% else %}
 <section class="phone-hero has-seam" aria-labelledby="worth-heading">
   <div id="worth-heading" class="phone-hero-label" role="heading" aria-level="2">{{ fig.net_worth.label }}</div>
   <div class="phone-lead{{ ' is-negative' if s.net_worth < 0 }}">{{ s.net_worth|money }} <small>{{ base }}</small></div>
   {% if not s.own_split %}<p class="phone-hero-line">{{ 'What you own'|tr(locale) }} <b><bdi class="fig">{{ s.what_you_own|money }}</bdi></b></p>{% endif %}
-  {% if s.since_start is not none %}<p class="phone-hero-line">{{ '{amt} since the start of the month.'|tr(locale, amt=s.since_start|money(True)) }}</p>{% endif %}
+  {% if s.since_start is not none %}<p class="phone-hero-line">{{ '{amt} this month.'|tr(locale, amt=s.since_start|money(True)) }}</p>{% endif %}
 </section>
 {% if s.trend %}<section class="phone-section phone-chart-card" aria-label="{{ 'Net worth, end of each month'|tr(locale) }}">{{ area_trend(s.trend, 'Net worth, end of each month'|tr(locale)) }}</section>{% endif %}
 {% if s.own_split %}<section class="phone-section" aria-labelledby="own-heading">
@@ -37,4 +41,5 @@
   {% if s.zakat %}<a class="phone-row" href="/zakat"><span>{{ 'Zakat'|tr(locale) }}</span><b>{{ chevron() }}</b></a>{% endif %}
   <a class="phone-row" href="/money/reviews"><span>{{ 'Reports and reviews'|tr(locale) }}<small>{{ 'Report, cash planning, spending, weekly review'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
 </nav>
+{% endif %}
 {% endblock %}

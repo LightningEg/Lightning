@@ -7,10 +7,10 @@ from decimal import ROUND_CEILING, ROUND_HALF_UP, Decimal
 from math import pi
 from urllib.parse import quote
 
-from lightning.core.money import ZERO, quantize
+from lightning.core.money import ZERO, fmt, quantize
 from lightning.core.dates import month_of, parse_month, today
 
-from . import keynotes, status as page_status
+from . import status as page_status
 
 
 def neighbours(month: str) -> tuple[str, str]:
@@ -56,11 +56,11 @@ def plain(amount: Decimal | None) -> str:
 def pace_line(r: dict) -> dict | None:
     """The category sheet's one pace sentence (3AN7): over, ahead of the month's pace, or on it."""
     if r["over"]:
-        return page_status.sentence("Over its limit by {amt}", amt=keynotes.fmt(r["amount"]))
+        return page_status.sentence("Over its limit by {amt}", amt=fmt(r["amount"], 0))
     if r.get("bill") == "paid":  # BV-3AR: a bill is paid on its day, not paced
         return page_status.sentence("Paid for this month")
     if r.get("bill") == "due":
-        return page_status.sentence("{amt} still due this month", amt=keynotes.fmt(r["due"]))
+        return page_status.sentence("{amt} still due this month", amt=fmt(r["due"], 0))
     if r["pace"] is None:
         return None
     text = "Ahead of pace: {n}% spent, {m}% of the month gone" if r["risk"] else "On pace: {n}% spent, {m}% of the month gone"

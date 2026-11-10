@@ -32,7 +32,7 @@ from lightning.core.dates import fmt_date, month_of, today
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.figures import FIGURES
 from lightning.core.memo import request_cache
-from lightning.core.money import ZERO, fmt, quantize, to_decimal
+from lightning.core.money import ZERO, fmt, quantize, signed_pct as _signed_pct, to_decimal
 from lightning.workflows import live_prices
 from lightning.ui import charts, sections
 from lightning.ui.themes import theme_id
@@ -174,13 +174,6 @@ def _phone_chip(text) -> str:
 
 
 templates.env.filters["phone_chip"] = _phone_chip
-
-
-def _signed_pct(value, places: int = 1) -> str:
-    """A signed percentage to one decimal ("+6.2", "−1.5"); a value that rounds to zero reads "0.0",
-    never "−0.0" or "+0.0" (audit 2026-10-05: a certificate's XIRR showed −0.0%)."""
-    text = f"{value:+.{places}f}"
-    return text[1:] if float(text) == 0 else text.replace("-", "\u2212")
 
 
 templates.env.filters["signed_pct"] = _signed_pct

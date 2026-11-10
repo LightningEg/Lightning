@@ -11,7 +11,7 @@ from lightning.core.dates import fmt_date, month_of, parse_month, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.workflows.ai_prompts import budget_prompt
 from lightning.categories.domain import Movement, Scope
-from lightning.core.money import ZERO, quantize, to_decimal
+from lightning.core.money import ZERO, fmt, quantize, to_decimal
 
 from lightning.budgeting.domain import INCOME_FROM_RECURRING
 from lightning.planning.domain import KIND_LABELS, PaymentStatus
@@ -230,7 +230,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     ceiling_warning = ("" if period_income <= ZERO or check is not None else
                        "Planned amounts exceed average monthly income" if period_base > period_income else
                        f"This plan saves less than your {period_check.target_percent.normalize():f}% savings target: "
-                       f"plan {keynotes.fmt(period_check.over_by)} less" if period_check.over_by else "")
+                       f"plan {fmt(period_check.over_by, 0)} less" if period_check.over_by else "")
     period_left = period_budgeted-period_actual
     # Feedback ticket 93: the System group counts as Personal spending, so its section read "Personal" under
     # "System Categories". Say what is in it instead.
@@ -320,13 +320,13 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         for i, o in enumerate(over):
             move = cover_from(c, month, o, everyday.room) if i == 0 else None
             r = rows[o["category_id"]]
-            needs.append({"label": f"{o['name']} is {keynotes.fmt(o['over'])} over its plan",
-                          "detail": f"{keynotes.fmt(r['used'])} spent of {keynotes.fmt(r['total'])}",
+            needs.append({"label": f"{o['name']} is {fmt(o['over'], 0)} over its plan",
+                          "detail": f"{fmt(r['used'], 0)} spent of {fmt(r['total'], 0)}",
                           "href": move["href"] if move else r["href"], "popup": True,  # Move room or the category sheet (3G6)
-                          "action": f"Move {keynotes.fmt(move['amount'])} from {move['name']}" if move else "See it"})
+                          "action": f"Move {fmt(move['amount'], 0)} from {move['name']}" if move else "See it"})
         if raise_offer and not by_key.get("saves"):
             needs.append({"label": "Your income went up",
-                          "detail": f"Recurring expects {keynotes.fmt(raise_offer['raise'])} more than your average.",
+                          "detail": f"Recurring expects {fmt(raise_offer['raise'], 0)} more than your average.",
                           "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose"})
     status = page_status.budget(everyday, has_plan, period.key, period_actual, period_budgeted)
     return render(request, "budget.html", budget_ai_prompt=budget_prompt(), notes=notes, meter_active=meter_active, meter_rest=meter_rest, kpi_cards=kpi_cards, pace=pace, plan_bills=plan_bills, everyday=everyday,

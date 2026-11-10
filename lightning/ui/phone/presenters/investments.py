@@ -10,7 +10,7 @@ from fastapi import Request
 
 from lightning.core.dates import fmt_date, today
 from lightning.core.figures import label
-from lightning.core.money import ZERO, fmt
+from lightning.core.money import ZERO, fmt, signed_pct
 from lightning.ui import charts, status as page_status
 from lightning.ui.i18n import translate
 
@@ -36,8 +36,7 @@ def _signed_percent(value) -> str | None:
     """+1.9% or −0.4%, one decimal, a real minus sign; a value that rounds to zero reads 0.0% (as the signed_pct filter)."""
     if value is None:
         return None
-    text = f"{value:+.1f}"
-    return "0.0%" if float(text) == 0 else text.replace("-", "\u2212") + "%"
+    return signed_pct(value) + "%"
 
 
 def _when_phrase(period, current: bool, locale: str) -> str:

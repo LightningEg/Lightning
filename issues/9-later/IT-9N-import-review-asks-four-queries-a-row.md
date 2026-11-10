@@ -27,7 +27,7 @@ The count grows with the file, not with the profile. NF-7AB will rebuild the rev
 ## Fix
 Files: `lightning/bank_import_proposals.py` only. One pull request per step; the review's HTML must not change.
 
-## 9N1 Ask the account questions once · S
+## 9N1 Ask the account questions once · S · #492
 Do: `_own_account` and the `SELECT code FROM accounts WHERE id=?` read depend only on a name or an id. Before the `for row in rows:` loop build two dictionaries from one `SELECT id, code, lower(name) AS name FROM accounts WHERE active=1` (check the inactive case: the code read has no `active` filter, so load all accounts and filter in Python) and use them inside the loop. The file already does this once with `usual = functools.cache(self.transactions.usual_categories)`: follow that style.
 
 ## 9N2 Ask the "seen before" questions once · M

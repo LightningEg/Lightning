@@ -309,3 +309,10 @@ def fmt(value: Decimal | None, places: int = 2, signed: bool = False) -> str:
     if signed and q > 0:
         return f"+{text}"
     return text
+
+
+def signed_pct(value, places: int = 1) -> str:
+    """A signed percentage to one decimal ("+6.2", "−1.5"); a value that rounds to zero reads "0.0",
+    never "−0.0" or "+0.0" (audit 2026-10-05: a certificate's XIRR showed −0.0%)."""
+    text = f"{value:+.{places}f}"
+    return text[1:] if Decimal(text) == ZERO else text.replace("-", "\u2212")

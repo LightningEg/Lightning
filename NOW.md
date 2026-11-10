@@ -15,14 +15,14 @@
 
 ## Next
 
-- **r28 (Codex):** Next: 3BC+3BE, 3BD, 3BF (owner order). **Read:** r28.
+- **r28 (Codex):** Next: 3BC, 3BD, 3BF (owner order). **Read:** r28.
 
 - **Docs spine (2026-10-31):** trailers per AGENTS §3; `python tools/status.py` after plan changes. Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **Phone (11-10, Claude):** IV-3AY: PC routes no longer know the phone (3AY11), catch-up built. Sonnet: 3AY14-18; Opus: 3AY4, 8, 9, 10; then owner 3AY13.. **Read:** 3AY; Architecture › UI contract.
-- **Play (Claude, 11-09):** NF-11B code done; bundle signs. Before submitting (owner): 10H3, 11A, 11D (11D1,4,6 built), then shots, 11B7-9. **Read:** NF-11B.
+- **Phone (11-10, Claude):** IV-3AY: PC routes no longer know the phone (3AY11), catch-up built. Sonnet: 3AY14-18; Opus: 3AY4, 8, 9, 10; then owner 3AY13. **Read:** 3AY; Architecture › UI contract.
+- **Play (Claude, 11-09):** NF-11B code done; bundle signs. Before submitting (owner): 10H3, then shots, 11B7-9 (11A and 11D built). **Read:** NF-11B.
 - **r33 review (Claude, 11-09):** first 1V, 1W, 1Y, 9L. **Read:** r33.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
@@ -31,9 +31,9 @@
 
 - **10A/10C app themes:** ready to sell, Dendera included; owner steps in 10C4. Dendera's premium pass (10F) is built; the site's demo shots are current (site #159). New themes: `guideline/themes.md` §5. **Read:** `issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md`.
 
-- **Website (2026-10-28):** analytics, Downloads, leaderboard contrast and badge merged; banners redrawn plus Felucca and Sand wind (site #130). **Read:** site README › Analytics.
+- **Website (11-09):** owner: Home ends on Download; Marketplace in search (site PR). Analytics host blocked here: unread. **Read:** site README › Search.
 
-- **Import (2026-11-07, Claude):** 7Z, 7AA done; 7AB flow decided (cards first). Next: 2AI2. **Read:** 2AI, 7AB.
+- **Import:** NF-7AB flow decided. 2AI5, 2AI2, 2AI3 built; 2AI4 waits on 4A4; owner 2AI6. **Read:** 2AI, 7AB.
 
 
 Plan: `issues/INDEX.md`.

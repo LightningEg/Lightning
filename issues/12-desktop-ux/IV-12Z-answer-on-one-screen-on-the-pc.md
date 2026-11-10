@@ -1,0 +1,47 @@
+---
+title: The answer on one screen, the rest on request - Spending, Cash planning and Investments run 3 to 4 screens and repeat lists
+type: polish
+pillar: feel
+size: L
+model: opus
+status: ready
+created: 2026-11-09
+by: Claude
+skills: guideline-audit, bug-hunt
+app_version: 2.1.2
+commit: 90f0190
+---
+
+## Report
+
+Audit r35 F6 and F7 ([report](../12-desktop-ux/r35-ux-against-users-questions/report.md), [page lengths](../12-desktop-ux/r35-ux-against-users-questions/evidence/pc/metrics.json)). Owner decision 2026-11-09: **the answer on one screen, the rest on request**. Sample year at 1366 × 768, in screens: Spending 4.1, Cash planning 4.0, Investments 3.4, Settings › Your data 3.2, Categories 2.8, Recurring 2.6.
+
+- **Spending** stacks eight charts (treemap, sparklines, usual-month bars, ranges, the calendar, two flows, month by month). [screen](../12-desktop-ux/r35-ux-against-users-questions/evidence/pc/birdview_expenses.webp)
+- **Cash planning** lists the late bills in Needs you and again, with the same Mark paid buttons, in "The next 30 days" directly under it; "Can I afford this?" is a card inside the Lead card (A16); Zakat day is a loose row between cards. [screen](../12-desktop-ux/r35-ux-against-users-questions/evidence/pc/plan.webp)
+- **Investments** shows "What changed" as five rows of 0 EGP, and a card whose content is "Nothing moved in this period." (A09.2: one line or gone). Its Lead says Cost 325,088 while the table says 725,088 (the flat is counted in one and not the other) with nothing to say why. [screen](../12-desktop-ux/r35-ux-against-users-questions/evidence/pc/investments.webp)
+- **Overview** ends with two collapsed headings and a third of a screen of nothing. [screen](../12-desktop-ux/r35-ux-against-users-questions/evidence/pc/overview.webp)
+
+IV-3AM3 put each tab's answer above the fold; this item is about what follows it.
+
+## Fix
+
+Each tab keeps, open: the header, the Lead, Needs you, the KPI row and the one detail that answers the first follow-up. Every other block is a titled row that opens in place ("Day by day", "Cash flow", "Month by month") and remembers that it was opened. A section with nothing to tell is one line. No list appears twice on a page.
+
+## How to work on this item
+
+One PR per step. After each: `python -m pytest -q tests/test_brand_audit.py tests/test_mohab_year.py` and the step's test. Mohab reads some of these blocks: open them in his steps, never delete what he checks. Delete the step's heading in the same commit.
+
+## 12Z1 A length budget in the skeleton test · S · sonnet · #496
+File: `tests/test_page_skeleton.py` (from IV-12Y2; create it here if this step comes first). On the sample year at 1366 × 768 a tab is at most 2.5 screens as it first opens, registers excepted (Transactions, an account, Categories). Today's long tabs go in the allow-list with this item's code.
+
+## 12Z2 Cash planning says each thing once · M · sonnet
+Files: `lightning/ui/templates/planning/`. Late rows live in Needs you only; "The next 30 days" starts at today. "Can I afford this?" becomes a row or its own card beside the Lead, not a card in it. Zakat day joins the forecast card as one line. Done when a test finds no bill name twice above the forecast and no `.card` inside the Lead card.
+
+## 12Z3 Spending opens on the categories; the other charts open on request · M · opus
+Files: `lightning/ui/templates/birdview/`. Open: Money out as a Lead with its change, then "Where did it go?". Closed rows: Is this period unusual?, Day by day, Cash flow, Month by month, each with a one-line summary of what it would show ("Loan payments and Health are above their usual range"). Done when Spending is within the budget of 12Z1.
+
+## 12Z4 Investments shows nothing as one line · S · sonnet · #497
+Files: `lightning/ui/templates/investments/`, the holdings route. A period with no change says "Nothing changed in your holdings this month." in place of five zero rows and the empty "Money and value by class" card. (The two Cost figures are BT-12AC.) Done when a test with a flat-only month finds one line.
+
+## 12Z5 Overview's tail · S · sonnet · #498
+Get set up and Your position: once setup is 5 of 5 the heading is gone; Your position opens by default when the page would otherwise end above the fold's end, or moves beside the KPI row. Done when Overview on the sample year has no collapsed heading followed by empty space.

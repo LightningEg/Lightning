@@ -20,6 +20,8 @@ from lightning.core.money import ascii_digits
 from lightning.core.refs import parse_ref
 from lightning.transactions.tags import normalize as normal_tag
 
+from .web import _money
+
 
 
 # Where each page is, and other words someone might type for it.
@@ -95,8 +97,7 @@ def entry(c, query: str) -> dict | None:
 
 
 def fmt_amount(amount: str) -> str:
-    whole, _, cents = amount.partition(".")
-    return f"{int(whole):,}" + (f".{cents}" if cents and int(cents) else "")
+    return _money(amount, places=2).removesuffix(".00")
 
 
 def matches(c, query: str, privacy: bool = False, per_group: int = 6) -> list[dict]:

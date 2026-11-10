@@ -25,8 +25,34 @@ def test_the_hero_is_everyday_money_and_agrees_with_the_pc(mohab):
     c = mohab
     s = screen.build(c, date(2026, 10, 12), "2026-10")
     e = c.forecaster.everyday("2026-10", date(2026, 10, 12))
-    assert s.state == "current" and s.left == e.everyday_plan - e.everyday_spent
+    assert s.state == "current" and s.left == e.everyday_left
     assert s.pace_gap == e.everyday_spent - e.pace            # the PC's Everyday card says the same
+
+
+def test_everyday_allowance_has_its_own_name_while_home_keeps_the_whole_plan(mohab):
+    """BV-11L1: unpaid bills leave two valid figures, each under its own registry name."""
+    from lightning.core.figures import FIGURES
+    from lightning.ui.phone.screens import home
+    from lightning.ui.web import _money
+
+    day = date(2026, 10, 12)
+    e = mohab.forecaster.everyday("2026-10", day)
+    assert e.bills_to_pay > 0 and e.left != e.everyday_left
+    assert home.build(mohab, day).left_in_plan == e.left
+    assert screen.build(mohab, day).left == e.everyday_left
+    app = create_app(mohab)
+    mount_phone(app)
+    client = TestClient(app)
+    home_page = client.get("/home")
+    budget_page = client.get("/budget/flexible")
+    assert home_page.status_code == budget_page.status_code == 200
+    assert f'Left in plan {_money(e.left, places=0)}' in home_page.text
+    assert f'>{FIGURES["everyday_left"].label}</div>' in budget_page.text
+    assert f'>{_money(e.everyday_left, places=0)} <small>' in budget_page.text
+    assert 'Left in plan' not in budget_page.text
+    assert client.post("/settings/locale", data={"locale": "ar"}, follow_redirects=False).status_code == 303
+    assert 'المتبقي للصرف اليومي' in client.get("/budget/flexible").text
+    assert 'المتبقي في الخطة' in client.get("/home").text
 
 
 def test_fixed_costs_are_one_row_and_no_category_row_is_a_bill_or_loan(mohab):
@@ -88,6 +114,8 @@ def test_the_month_bar_parts_add_to_the_plan_and_the_donut_to_its_total(mohab):
     d = s.spend
     assert len(d["segments"]) <= 5 and d["total"] == sum(g["value"] for g in d["segments"])
     assert abs(sum(g["share"] for g in d["segments"]) - 100) < 1e-6
+    assert d["total"] == e.everyday_spent        # BV-12O: fixed costs paid sit inside their categories, never added again
+    assert not any(g.get("fixed") for g in d["segments"])
 
 
 def test_the_month_bar_shows_over_plan_in_its_own_part():

@@ -7,14 +7,11 @@ from urllib.parse import urlencode
 
 from lightning.core.dates import parse_date, today
 from lightning.core.figures import label
-from lightning.core.money import ZERO, fmt as _fmt
+from lightning.core.money import ZERO, fmt
 from lightning.core.refs import DocType
 from lightning.planning.bill_state import NEEDS_ACTION, open_bills
 from lightning.ui import status as page_status, visuals
 
-
-def fmt(value, places: int = 0, signed: bool = False) -> str:
-    return _fmt(value, places, signed)
 
 
 # Needs you on the phone says what is inside in a few words (phone overhaul 2026-10-22): "2 bills · 4 to sort out".
@@ -51,7 +48,7 @@ def _safe_hero(f) -> dict:
     value, until = f.safe_to_spend, f.next_income_date
     days = (parse_date(until) - today()).days if until else 0
     if value < 0:
-        line = page_status.sentence("{amt} more is promised than your free cash.", amt=fmt(-value))
+        line = page_status.sentence("{amt} more is promised than your free cash.", amt=fmt(-value, 0))
     elif until and days > 0:
         line = page_status.sentence("On top of your plan until {sa}.", sa=until)  # no per-day figure: Budget owns it (BV-12A)
     else:
@@ -109,7 +106,7 @@ def _due_soon(c, attention=()) -> dict | None:
         amount = c.planning.amount_in_base(p, p.still_owed, day)
         days = 0 if late else (parse_date(p.due_date) - day).days
         rows.append({"name": p.item.name, "amount": amount, "late": late, "days": days, "pay": pay,
-                     "listed": pay.split("&")[0] in known, "line": _due_line(p.item.name, fmt(amount), days, late)})
+                     "listed": pay.split("&")[0] in known, "line": _due_line(p.item.name, fmt(amount, 0), days, late)})
     return {"count": len(rows), "total": sum((r["amount"] for r in rows), ZERO), "late": any(r["late"] for r in rows),
             "next": rows[0], "rows": rows, "extra": sum(1 for r in rows if not r["listed"])}
 

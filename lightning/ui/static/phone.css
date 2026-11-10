@@ -17,7 +17,7 @@ html.phone, .phone-body { max-width: 100%; overflow-x: clip; }
 /* C02 frame: one bar fixed on top, one at the bottom, content scrolls between them. */
 .phone-appbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 8px;
   height: var(--c-appbar); padding: env(safe-area-inset-top) var(--c-side) 0; box-sizing: content-box;
-  background: rgba(244, 248, 252, .96); border-bottom: 1px solid var(--c-line); }
+  background: var(--c-well); border-bottom: 1px solid var(--c-line); }
 .phone-mark { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-left: -8px; }
 .phone-mark img { width: 20px; height: 28px; }
 .phone-back { display: inline-flex; align-items: center; gap: 2px; min-height: 44px; color: var(--c-ink); font-weight: 700; text-decoration: none; }
@@ -343,7 +343,7 @@ html[dir="rtl"].phone .chevron.chevron-back:has(> path) { transform: none; }
 /* C08: the list grouped by day; search full width, then chips. */
 .phone-search input { width: 100%; }
 .phone-chips { display: flex; gap: 8px; margin: 10px 0 4px; flex-wrap: wrap; }
-.phone-chip { display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: 999px;
+.phone-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: 999px;
   background: var(--c-well); color: var(--c-ink); font-weight: 600; text-decoration: none; }
 .phone-chip.is-chosen { background: var(--c-nile); color: #fff; }
 .phone-chip.is-chosen a { color: #fff; }
@@ -1100,7 +1100,8 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 .phone-chart-trend-dot::after { content: ""; position: absolute; inset: 10px; border-radius: 50%; background: #0B6DD6; opacity: 0; }
 .phone-chart-trend-dot:is(:focus-visible, :hover, .is-last)::after { opacity: 1; }
 .phone-chart-trend-end { position: absolute; left: 100%; transform: translate(8px, -50%); font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.phone-chart-trend-x { display: flex; justify-content: space-between; margin: 6px 64px 0 0; font-size: 12px; color: var(--c-muted); }
+/* A12: chart geometry stays left to right in Arabic; its month labels follow the same axis. */
+.phone-chart-trend-x { display: flex; direction: ltr; justify-content: space-between; margin: 6px 64px 0 0; font-size: 12px; color: var(--c-muted); }
 .phone-chart-trend-caption { margin-top: 4px; font-size: 12.5px; color: var(--c-muted); }
 @media (prefers-reduced-motion: no-preference) {
   .phone-chart-trend-plot svg { animation: phone-chart-in 400ms ease-out both; }

@@ -123,6 +123,7 @@ public final class MainActivity extends Activity {
         current = this;
         BiometricBridge.activity = this;
         FileBridge.activity = this;
+        BackupFolderBridge.activity = this;
         takeShare(getIntent());
         queueReminder(getIntent());
         addShortcuts();
@@ -293,6 +294,10 @@ public final class MainActivity extends Activity {
             String cookie = origin == null ? null : CookieManager.getInstance().getCookie(origin.toString());
             boolean arabic = cookie != null && cookie.contains("lightning_ui_locale=ar");
             FileBridge.finish(this, result == RESULT_OK && data != null ? data.getData() : null, arabic);
+        } else if (code == BackupFolderBridge.REQUEST_FOLDER) {
+            // BT-2AI3: remember the chosen folder, then show Settings again: the first copy is written as it loads.
+            BackupFolderBridge.chosen(this, result == RESULT_OK && data != null ? data.getData() : null);
+            if (web != null) web.reload();
         }
     }
 
