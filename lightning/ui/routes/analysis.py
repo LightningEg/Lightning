@@ -79,7 +79,7 @@ def _lines(c, start: date, end: date) -> list[dict]:
 
 
 def _payee(row) -> str:
-    return (row.get("counterparty") or row.get("description") or "No counterparty").strip()
+    return (row.get("counterparty") or row.get("description") or "No payee").strip()
 
 
 def compare(c, a: tuple[date, date], b: tuple[date, date], by: str = "category") -> list[dict]:

@@ -111,7 +111,7 @@ def record(c, account, values: dict):
         if values["is_others"]:
             party = c.counterparties.resolve(values["whom"])
             if not party or not party["active"]:
-                raise ValidationError("Choose an active saved Counterparty in Whom.", "whom")
+                raise ValidationError("Choose an active saved Payee in Whom.", "whom")
             owner, owner_id = party["name"], party["id"]
         if units is None and action != "dividend":
             # Bought or sold by amount (typical for a money market fund): units = amount ÷ price,

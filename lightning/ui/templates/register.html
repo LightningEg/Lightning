@@ -9,7 +9,7 @@
            inputmode="numeric" autocomplete="off" data-smart-date title="yyyy-mm-dd, like 2026-01-31" required class="{{ 'bad' if error_field == 'date' }}">
   </td>
   <td class="register-edit-counterparty">
-    <div class="counterparty-picker"><input form="{{ form_id }}" type="text" name="counterparty" aria-label="{{ 'Counterparty'|tr(locale) }}" value="{{ v.get('counterparty', '') }}" placeholder="Counterparty or your account"
+    <div class="counterparty-picker"><input form="{{ form_id }}" type="text" name="counterparty" aria-label="{{ 'Payee'|tr(locale) }}" value="{{ v.get('counterparty', '') }}" placeholder="Payee or your account"
              autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="{{ form_id }}-counterparty-results"
              data-counterparty-results="{{ form_id }}-counterparty-results"
              class="counterparty-input {{ 'bad' if error_field in ('counterparty', 'counterparty_review', 'to_account', 'from_account') }}"
@@ -93,11 +93,11 @@
 <div class="review-backdrop">
   <section class="review-dialog" role="dialog" aria-modal="true" aria-labelledby="register-review-title">
     {% if review_mode == 'counterparty' %}
-    <h2 id="register-review-title">{{ 'Review this Counterparty'|tr(locale) }}</h2>
+    <h2 id="register-review-title">{{ 'Review this Payee'|tr(locale) }}</h2>
     <p>Before saving “{{ entry.get('counterparty', '') }}”, check whether it is already saved. New names always need an explicit confirmation.</p>
     {% if counterparty_matches %}<ul class="review-matches">
       {% for match in counterparty_matches %}<li><button type="submit" form="{{ review_form_id }}" formnovalidate name="counterparty_choice" value="existing:{{ match.id }}">Use {{ match.name }}</button></li>{% endfor %}
-    </ul>{% else %}<p class="muted">{{ 'No close match found in your saved Counterparties.'|tr(locale) }}</p>{% endif %}
+    </ul>{% else %}<p class="muted">{{ 'No close match found in your saved Payees.'|tr(locale) }}</p>{% endif %}
     <button type="submit" class="btn primary" form="{{ review_form_id }}" formnovalidate name="counterparty_choice" value="create">Create “{{ entry.get('counterparty', '') }}” as a new Counterparty</button>
     {% else %}
     <h2 id="register-review-title">{{ 'Choose a broad category'|tr(locale) }}</h2>
@@ -132,7 +132,7 @@
 <div class="toolbar register-filters">
   <form method="get" class="toolbar-filters" data-auto-filter>
     <input type="hidden" name="page_size" value="{{ page_size }}">{% if chosen_kind %}<input type="hidden" name="kind" value="{{ chosen_kind }}">{% endif %}{% if request.query_params.get("select") %}<input type="hidden" name="select" value="{{ request.query_params.get("select") }}">{% endif %}
-    <input type="search" name="q" value="{{ q }}" placeholder="Search: counterparty, notes, category, amount, ref…">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search: payee, notes, category, amount, ref…">
     <select name="preset" aria-label="{{ 'Date period'|tr(locale) }}">{% if month %}<option value="" selected>{{ month }}</option>{% endif %}<option value=""{{ ' selected' if not month and not preset }}>All time</option><option value="this_month"{{ ' selected' if preset == 'this_month' }}>This month</option><option value="last_month"{{ ' selected' if preset == 'last_month' }}>Last month</option><option value="year_to_date"{{ ' selected' if preset == 'year_to_date' }}>Year to date</option><option value="custom"{{ ' selected' if preset == 'custom' }}>Custom dates</option></select>
     {% if preset == 'custom' %}<input type="date" name="date_from" value="{{ date_from }}" aria-label="Start date"><input type="date" name="date_to" value="{{ date_to }}" aria-label="End date"><button class="btn small">Apply dates</button>{% endif %}
     {% if filter_tag %}<input type="hidden" name="tag" value="{{ filter_tag }}">{% endif %}{% if request.query_params.get('category_id') %}<input type="hidden" name="category_id" value="{{ request.query_params.get('category_id') }}">{% endif %}{% if show_val %}<input type="hidden" name="val" value="1">{% endif %}
@@ -150,7 +150,7 @@
   </div></details>
   <details class="action-menu find-replace"><summary>{{ 'Find and replace'|tr(locale) }}</summary><div class="find-panel">
     <form method="post" action="/transactions/find-replace" class="field-row" data-confirm-delete="{{ 'Replace this text on every matching row?'|tr(locale) }}">
-      <label>{{ 'In'|tr(locale) }}<select name="field"><option value="counterparty">{{ 'Counterparty'|tr(locale) }}</option><option value="notes">{{ 'Notes'|tr(locale) }}</option></select></label>
+      <label>{{ 'In'|tr(locale) }}<select name="field"><option value="counterparty">{{ 'Payee'|tr(locale) }}</option><option value="notes">{{ 'Notes'|tr(locale) }}</option></select></label>
       <label>{{ 'Find'|tr(locale) }}<input name="find" required maxlength="120" value="{{ q }}"></label>
       <label>{{ 'Replace with'|tr(locale) }}<input name="replace" maxlength="120"></label>
       <button class="btn small">{{ 'Replace all'|tr(locale) }}</button>
@@ -181,13 +181,13 @@
     {# F7 (r24): text replace limited to the selected rows, with a preview before it runs. #}
     <details class="action-menu replace-selected"><summary id="replace-selected-label">{{ 'Replace text in selected'|tr(locale) }}</summary><div class="find-panel">
       <form method="post" action="/transactions/find-replace" class="field-row" id="replace-selected-form">
-        <label>{{ 'In'|tr(locale) }}<select name="field"><option value="counterparty">{{ 'Counterparty'|tr(locale) }}</option><option value="notes">{{ 'Notes'|tr(locale) }}</option></select></label>
+        <label>{{ 'In'|tr(locale) }}<select name="field"><option value="counterparty">{{ 'Payee'|tr(locale) }}</option><option value="notes">{{ 'Notes'|tr(locale) }}</option></select></label>
         <label>{{ 'Find'|tr(locale) }}<input name="find" required maxlength="120"></label>
         <label>{{ 'Replace with'|tr(locale) }}<input name="replace" maxlength="120"></label>
         <button class="btn small">{{ 'Preview'|tr(locale) }}</button>
         <input type="hidden" name="back" value="{{ request.url.path }}{{ '?' ~ request.url.query if request.url.query }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
       </form></div></details>
-    <button type="button" class="btn small" id="rule-from-selected" title="{{ 'Make a rule from the first selected counterparty'|tr(locale) }}">{{ 'Make a rule'|tr(locale) }}</button>
+    <button type="button" class="btn small" id="rule-from-selected" title="{{ 'Make a rule from the first selected payee'|tr(locale) }}">{{ 'Make a rule'|tr(locale) }}</button>
     <button type="button" class="btn small" id="export-selected">{{ 'Export selected'|tr(locale) }}</button>
     <button type="button" class="btn small" id="merge-selected" hidden>{{ 'Merge selected'|tr(locale) }}</button>
     <button type="button" class="btn small danger" id="delete-selected">{{ 'Delete selected'|tr(locale) }}</button>
@@ -195,7 +195,7 @@
   <p class="muted small" id="selection-scope" role="status" aria-live="polite"></p>
   <div class="register-table-scroll"><table class="register-rows">
     <colgroup><col class="col-select"><col class="col-date"><col class="col-counterparty"><col class="col-category"><col class="col-notes"><col class="col-amount">{% if with_balance %}<col class="col-balance">{% endif %}</colgroup>
-    <thead><tr><th id="select-visible-header" class="select-visible-header" title="Select or clear all visible transactions"><input id="select-visible" type="checkbox" aria-label="Select all visible transactions"></th><th>{{ 'Date'|tr(locale) }}</th><th>{{ 'Counterparty'|tr(locale) }}</th><th>{{ 'Category'|tr(locale) }}</th><th>{{ 'Notes'|tr(locale) }}</th><th class="num">{{ 'Amount'|tr(locale) }} ({{ account.currency if account and account.currency != base else base }})</th>{% if with_balance %}<th class="num register-balance-head">{{ 'Balance'|tr(locale) }} ({{ account.currency }})</th>{% endif %}</tr></thead>
+    <thead><tr><th id="select-visible-header" class="select-visible-header" title="Select or clear all visible transactions"><input id="select-visible" type="checkbox" aria-label="Select all visible transactions"></th><th>{{ 'Date'|tr(locale) }}</th><th>{{ 'Payee'|tr(locale) }}</th><th>{{ 'Category'|tr(locale) }}</th><th>{{ 'Notes'|tr(locale) }}</th><th class="num">{{ 'Amount'|tr(locale) }} ({{ account.currency if account and account.currency != base else base }})</th>{% if with_balance %}<th class="num register-balance-head">{{ 'Balance'|tr(locale) }} ({{ account.currency }})</th>{% endif %}</tr></thead>
     <tbody>
     {% if (not account or account.active) and (not account or account.account_type.value != 'DEPOSIT') %}<tr class="add-row quick-add-row" id="quick-add">
       <td><svg class="entry-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="sr-only">{{ "New"|tr(locale) }}</span></td>

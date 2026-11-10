@@ -9,7 +9,7 @@
   </div>
   <fieldset><legend>{{ 'This period'|tr(locale) }}</legend><input type="date" name="a_from" value="{{ fmt_date(a[0]) }}"> <input type="date" name="a_to" value="{{ fmt_date(a[1]) }}"></fieldset>
   <fieldset><legend>{{ 'Against'|tr(locale) }}</legend><input type="date" name="b_from" value="{{ fmt_date(b[0]) }}"> <input type="date" name="b_to" value="{{ fmt_date(b[1]) }}"></fieldset>
-  <label>{{ 'By'|tr(locale) }}<select name="by"><option value="category" {{ 'selected' if by == 'category' }}>{{ 'Category'|tr(locale) }}</option><option value="payee" {{ 'selected' if by == 'payee' }}>{{ 'Counterparty'|tr(locale) }}</option></select></label>
+  <label>{{ 'By'|tr(locale) }}<select name="by"><option value="category" {{ 'selected' if by == 'category' }}>{{ 'Category'|tr(locale) }}</option><option value="payee" {{ 'selected' if by == 'payee' }}>{{ 'Payee'|tr(locale) }}</option></select></label>
   <div class="actions"><button class="btn primary">{{ 'Compare'|tr(locale) }}</button><a class="btn" href="/spending/compare?{{ keep_qs }}&amp;format=csv">{{ 'Export CSV'|tr(locale) }}</a></div>
 </form>
 {% endcall %}
@@ -21,7 +21,7 @@
   <details class="chart-table"{{ '' if moved.rows else ' open' }}><summary>{{ 'Show the numbers'|tr(locale) }}</summary>
   {% if not rows %}<p class="muted">{{ 'No spending in either period.'|tr(locale) }}</p>{% else %}
   <div class="table-wrap"><table class="figures">
-    <thead><tr><th>{{ ('Category' if by == 'category' else 'Counterparty')|tr(locale) }}</th><th class="num">{{ 'This period'|tr(locale) }}</th><th class="num">{{ 'Against'|tr(locale) }}</th><th class="num">{{ 'Difference'|tr(locale) }}</th><th class="num">%</th></tr></thead>
+    <thead><tr><th>{{ ('Category' if by == 'category' else 'Payee')|tr(locale) }}</th><th class="num">{{ 'This period'|tr(locale) }}</th><th class="num">{{ 'Against'|tr(locale) }}</th><th class="num">{{ 'Difference'|tr(locale) }}</th><th class="num">%</th></tr></thead>
     <tbody>{% for r in rows %}<tr>
       <td>{% if by == 'category' and r.id %}<a href="/analysis/category/{{ r.id }}">{{ r.name }}</a>{% else %}<a href="/analysis/payee?name={{ r.name|urlencode }}">{{ r.name }}</a>{% endif %}</td>
       <td class="num">{{ r.a|money }}</td><td class="num">{{ r.b|money }}</td>

@@ -1625,7 +1625,7 @@ def test_a_figure_reads_the_same_on_every_tab(mohab, period):
 
 
 def test_a_rule_files_a_new_phone_as_shopping_and_keeps_the_monthly_bill(mohab):
-    assert mohab.notes["rule_saved"].shows("Rule saved.", "Counterparty contains Vodafone · Amount between 1,000 and 50,000",
+    assert mohab.notes["rule_saved"].shows("Rule saved.", "Payee contains Vodafone · Amount between 1,000 and 50,000",
                                            "Shopping")
     assert route(mohab, "rule_filed") == ["/", "/accounts/1"]
     answer = mohab.answers["rule_filed"]

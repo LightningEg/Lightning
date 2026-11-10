@@ -11,7 +11,7 @@
   <h2>{{ "When"|tr(locale) }}</h2>
   {{ segment('match', 'Match', [('all', 'All of these'), ('any', 'Any of these')], values.match) }}
   <div class="row">
-    {{ segment('counterparty_op', 'Counterparty', [('contains', 'Contains'), ('is', 'Is'), ('one_of', 'One of')], values.counterparty_op) }}
+    {{ segment('counterparty_op', 'Payee', [('contains', 'Contains'), ('is', 'Is'), ('one_of', 'One of')], values.counterparty_op) }}
     <div class="field {{ err('counterparty') }}"><label for="counterparty">{{ 'Name'|tr(locale) }} <span class="muted small">{{ "optional · for one of, separate with commas"|tr(locale) }}</span></label><input id="counterparty" name="counterparty" value="{{ values.counterparty }}" list="rule-counterparties" data-own-suggestions placeholder="Vodafone" spellcheck="false" autocomplete="off"><datalist id="rule-counterparties">{% for p in counterparties %}<option value="{{ p.name }}">{% endfor %}</datalist></div>
   </div>
   <div class="row">

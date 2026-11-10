@@ -91,7 +91,7 @@
   <div class="settings-row"><div><span class="settings-name">{{ 'Base currency'|tr(locale) }}</span></div><div class="settings-control"><b dir="ltr">{{ base }}</b><a class="btn small" href="/settings?section=currencies">{{ 'Manage currencies'|tr(locale) }}</a></div></div>
   <div class="settings-row settings-facts"><div><span class="settings-name">{{ 'App version'|tr(locale) }}</span></div><div class="settings-control" dir="ltr">v{{ app_version }}</div></div>
   {% include "settings/_update.html" %}
-  {% if phone_mode() %}{% for href, label in [('/rules', 'Rules'), ('/categories', 'Categories'), ('/counterparties', 'Counterparties'), ('/checks', 'Data checks')] %}<div class="settings-row"><a class="settings-name" href="{{ href }}">{{ label|tr(locale) }}</a></div>{% endfor %}{% endif %}
+  {% if phone_mode() %}{% for href, label in [('/rules', 'Rules'), ('/categories', 'Categories'), ('/counterparties', 'Payees'), ('/checks', 'Data checks')] %}<div class="settings-row"><a class="settings-name" href="{{ href }}">{{ label|tr(locale) }}</a></div>{% endfor %}{% endif %}
 </section>
 <section class="card settings-list" id="zakat-switch" aria-labelledby="features-heading"><h2 id="features-heading">{{ 'Features'|tr(locale) }}</h2>
   <form method="post" action="/zakat/enabled" class="settings-row"><div><label for="zakat-on">{{ 'Show zakat'|tr(locale) }}</label><small>{{ 'A zakat estimate under Transactions.'|tr(locale) }}</small></div>
@@ -111,7 +111,7 @@
     <ul class="small muted ask-ai-sizes">{% for key, size in ai_sizes.items() %}<li><b>{{ size[0]|tr(locale) }}:</b> {{ size[1]|tr(locale) }}</li>{% endfor %}</ul></div>
   <label class="field"><span class="field-label">{{ 'Your question (optional)'|tr(locale) }}</span><textarea name="question" rows="2" maxlength="800"></textarea></label>
   <label class="field-check"><input type="checkbox" name="hide_names" value="1"> <span>{{ 'Hide names'|tr(locale) }}</span></label>
-  <p class="small muted">{{ 'Names of people, accounts and holdings become labels such as Counterparty 1. Notes are never included.'|tr(locale) }}</p>
+  <p class="small muted">{{ 'Names of people, accounts and holdings become labels such as Payee 1. Notes are never included.'|tr(locale) }}</p>
   <div class="actions"><button class="btn primary" type="button" data-ask-copy>{{ 'Copy for AI'|tr(locale) }}</button><button class="btn" type="button" data-ask-save>{{ 'Save as a file'|tr(locale) }}</button></div>
   <p class="small muted" role="status" aria-live="polite" data-ask-status></p>
 </form>

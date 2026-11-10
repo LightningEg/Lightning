@@ -60,13 +60,13 @@ Layer: **Ledger** (real money moved), **Plan** (what-if, moves nothing) or **Rep
 | **Zakat day** | Plan | The date the user picked once for counting zakat; each next one is 354 days later (a lunar year). Hijri dates are not built. |
 | **Zakat category** | Ledger | The system spending category `EXP.SYSTEM.ZAKAT`; zakat paid is ordinary spending in it and lowers Still to pay for its zakat year. |
 | **Category** | Ledger | Label for the activity behind a transaction; never describes counterparty, account or asset. |
-| **Counterparty** | Ledger | The person, business, institution or own account on the other side; up to ten confirmed aliases each; typo matches are only suggestions. |
+| **Payee** | Ledger | The person, business, institution or own account on the other side; up to ten confirmed aliases each; typo matches are only suggestions. Code, routes and tables keep the name `counterparty`. |
 | **Transaction** | Ledger | A dated user or system event in the main ledger. |
 | **Main ledger** | Ledger | The single ledger every register, budget actual and report is derived from. |
 | **Profile currency** | Ledger + Report | Currency of ledger amounts and report totals; fixed once history exists. |
 | **FX revaluation** | Ledger + Report | Month-end change in the profile-currency value of foreign cash held; changes no units, is not income or spending. |
-| **Owner ID** | Ledger | Optional Counterparty on a line, shown as **Held for**; blank means the user owns it. |
-| **Held for** | Ledger | Who owns money or units in the user's account when not the user; separate from Counterparty (formerly Whom / Owned by / Owner). |
+| **Owner ID** | Ledger | Optional Payee on a line, shown as **Held for**; blank means the user owns it. |
+| **Held for** | Ledger | Who owns money or units in the user's account when not the user; separate from Payee (formerly Whom / Owned by / Owner). |
 | **Change ownership** | Ledger | Zero-sum entry moving part of an account's balance between the user and one saved person. |
 | **Expense paid for you** | Ledger | An expense another person paid, recorded as the user's and paired with equal custody for the payer; gross cash unchanged. |
 | **Money in / money out** | Ledger | Direction value crosses an account boundary; direction never decides category. |
@@ -256,7 +256,7 @@ Forms that record values use the same field names everywhere.
 | **Units** | Ledger | Shares, fund units, grams or pieces. | Quantity, Pieces, Units you hold |
 | **Account** | Ledger + Plan | Where the money moves or the holding sits. | Held in, Received into, Paid from, Paid into |
 | **Cash account** | Ledger | The account that pays or receives the cash for a trade in another account. | Paid from / received into, Money goes to |
-| **Counterparty** | Ledger + Plan | Who you paid or who paid you. | Paid to, From, Search counterparty |
+| **Payee** | Ledger + Plan | Who you paid or who paid you. | Paid to, From, Search payee |
 | **Held for** | Ledger | The person the money or units belong to, if not you. | Whom, Owned by, Owner, Money held for someone else |
 | **Category** | Ledger + Plan | What the money was for. | Search category |
 | **Type** | Ledger + Plan | The kind of record. | Kind, Action |
@@ -356,7 +356,7 @@ Categories are not split into income and expense trees: pick the activity that e
 | **Tag** | A #word in notes (letters, digits, - or _, at least one letter, case-insensitive); links to every transaction with it; same as the exact register search. |
 | **Rule** | Settings › Rules: when counterparty, notes, amount, account or direction fit, set a category, add tags or split money out. The most specific wins; it applies before the counterparty's usual category; the past changes only on request. |
 | **Ask an AI / brief** | Settings › Your data: one Markdown file Lightning builds on this device for a person to paste or upload into an AI tool: the task, Lightning's words, the calculated numbers, where the money went, the rows. Copy or save; never sent, never open on the page. Presets, three sizes. Code: `workflows/ask_ai.py`. |
-| **Hide names** | Ask an AI option: counterparties, accounts and personal holdings become Counterparty 1, Account A, Holding 1 everywhere in the brief. Notes and memos are never included either way. |
+| **Hide names** | Ask an AI option: payees, accounts and personal holdings become Payee 1, Account A, Holding 1 everywhere in the brief. Notes and memos are never included either way. |
 | **Privacy mode** | Blurs every money amount (not percentages, dates, names); hover shows it. The eye beside Search or "Hide amounts" in the command bar; remembered per profile. |
 
 ## Asset and account taxonomy (what vs where)
@@ -388,7 +388,7 @@ Asset class and exposure are separate. Account kinds describe the container: cas
 | Investment trade | صفقة استثمار |
 | Budget | ميزانيتك |
 | Category | الفئة |
-| Counterparty | الطرف الآخر |
+| Payee | الجهة |
 | Held for | مملوك لـ |
 | Name | الاسم |
 | Code | الرمز |

@@ -663,12 +663,12 @@ def _popup_counterparty(c, raw_value):
     party = c.counterparties.resolve(raw)
     if party:
         if not party["active"]:
-            raise ValidationError("That Counterparty is archived. Activate it before using it.", "counterparty")
+            raise ValidationError("That Payee is archived. Activate it before using it.", "counterparty")
         return party["name"]
     suggestions = c.counterparties.suggestions(raw)
     if suggestions:
         names = ", ".join(name for name, _ in suggestions)
-        raise ValidationError(f"This name resembles a saved Counterparty ({names}). Choose that name from the list or review it first.", "counterparty")
+        raise ValidationError(f"This name resembles a saved Payee ({names}). Choose that name from the list or review it first.", "counterparty")
     return raw
 
 

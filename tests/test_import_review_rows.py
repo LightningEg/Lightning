@@ -141,7 +141,7 @@ def test_the_review_page_is_rows_with_chips_and_a_bulk_bar(c, setup):
     assert page.count('<div class="import-line is-') == 2
     for chip in ("All", "To fix", "Needs you", "Possible duplicates", "Ready"):
         assert f"{chip} " in page
-    assert 'id="import-bulk"' in page and "Use this category for this counterparty next time" in page
+    assert 'id="import-bulk"' in page and "Use this category for this payee next time" in page
     assert 'name="group_' not in page and "Save as" not in page
 
 

@@ -161,7 +161,7 @@ async def trade_item(request: Request, account_id: int, asset_id: int):
         if owner_text:
             party = c.counterparties.resolve(owner_text)
             if not party or not party["active"]:
-                raise LightningError("Choose an active saved Counterparty as the item owner.", "owner")
+                raise LightningError("Choose an active saved Payee as the item owner.", "owner")
             owner = party["id"]
         if action not in ("buy", "sell", "holding"):
             raise LightningError("Choose Add holding, Purchase, or Sale.", "action")

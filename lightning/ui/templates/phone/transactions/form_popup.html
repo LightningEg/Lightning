@@ -66,7 +66,7 @@
       <label for="popup-counterparty">{{ 'Who'|tr(locale) }} <span class="muted">{{ "(optional)"|tr(locale) }}</span></label>
       <input id="popup-counterparty" name="counterparty" value="{{ values.counterparty }}" list="popup-counterparties" data-own-suggestions placeholder="{{ 'Who you paid or who paid you'|tr(locale) }}" autocomplete="off" enterkeyhint="next" spellcheck="false">
       <datalist id="popup-counterparties">{% for person in counterparties %}{% set learned = (counterparty_categories or {}).get(person.name) %}<option value="{{ person.name }}"{% if learned %} data-category="{{ learned.id }}"{% endif %}>{% endfor %}</datalist>
-      {% if error_field == 'counterparty' %}<small class="field-error">{{ "Choose a saved counterparty."|tr(locale) }}</small>{% endif %}
+      {% if error_field == 'counterparty' %}<small class="field-error">{{ "Choose a saved payee."|tr(locale) }}</small>{% endif %}
     </div>
     <div class="field {{ 'has-error' if error_field == 'date' }}">
       <label for="popup-date">{{ 'Date'|tr(locale) }}</label>

@@ -108,7 +108,7 @@ SECTIONS: tuple[Section, ...] = (
         Tab("data", "Your data", "/settings", _I["data"], ("/settings", "/profiles", "/exports/all"), settings=("general",)),
         Tab("rules", "Rules", "/rules", _I["rules"], ("/rules",)),
         Tab("categories", "Categories", "/categories", _I["categories"], ("/categories",)),
-        Tab("counterparties", "Counterparties", "/counterparties", _I["counterparties"], ("/counterparties",)),
+        Tab("counterparties", "Payees", "/counterparties", _I["counterparties"], ("/counterparties",)),
         Tab("checks", "Data checks", "/checks", _I["checks"], ("/checks",)),
     )),
 )

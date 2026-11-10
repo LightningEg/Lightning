@@ -1075,7 +1075,7 @@ class TransactionService:
         canonical = self.counterparties.resolve(name)
         if not canonical:
             if self.counterparties.suggestions(name):
-                raise ValidationError("This Counterparty resembles a saved one. Confirm reuse or explicitly create it.",
+                raise ValidationError("This Payee resembles a saved one. Confirm reuse or explicitly create it.",
                                       "counterparty")
             canonical = self.counterparties.get(self.counterparties.create(name))
         return canonical

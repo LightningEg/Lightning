@@ -134,7 +134,7 @@ class ImportPoster:
         account_matches = [a for a in accounts if a.name.casefold() == cp_text.casefold()]
         if not explicit_party and not selected_target and (
                 len(account_matches) > 1 or (account_matches and self.counterparties.resolve(cp_text))):
-            raise ValidationError("Choose an account or counterparty explicitly for this name.", "counterparty")
+            raise ValidationError("Choose an account or payee explicitly for this name.", "counterparty")
         target = None if explicit_party else account_matches[0] if account_matches else None
         if not explicit_party and "transfer_account_id" not in decision and row.get("_transfer_account_id"):
             selected_target = row["_transfer_account_id"]

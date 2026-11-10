@@ -563,7 +563,7 @@ class CashReserveService:
         if counterparty_id is not None and not self.db.scalar(
             "SELECT 1 FROM counterparties WHERE id=? AND active=1", (counterparty_id,)
         ):
-            raise ValidationError("Choose an active saved Counterparty.", "counterparty_id")
+            raise ValidationError("Choose an active saved Payee.", "counterparty_id")
 
     def _validate_category(self, category_id: int | None) -> None:
         if category_id is not None and not self.db.scalar(

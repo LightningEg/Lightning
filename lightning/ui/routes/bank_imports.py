@@ -425,7 +425,7 @@ def _review_groups(c, rows: list[dict], form=None) -> list[dict]:
         status = min((r["_state"] for r in members), key=_STATUS_ORDER.get)
         groups.append({
             "i": index, "key": key, "rows": members, "count": len(members), "status": status,
-            "name": members[0].get("Counterparty") or "No counterparty",
+            "name": members[0].get("Counterparty") or "No payee",
             "total": sum((_amount(r) for r in members), ZERO),
             "errors": sum(1 for r in members if r["_state"] == "err"),
             "duplicates": sum(1 for r in members if r["_state"] == "dup"),
@@ -495,7 +495,7 @@ async def create_counterparty_now(request: Request, account_id: int):
     name = " ".join(str(form.get("name", "")).split())
     try:
         if not name:
-            raise ValidationError("Enter a counterparty name.", "counterparty")
+            raise ValidationError("Enter a payee name.", "counterparty")
         with settled_save(request, container(request)):
             if str(form.get("kind", "")).upper() == "PERSON":
                 party_id = c.counterparties.ensure_person(name)

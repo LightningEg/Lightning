@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import page_header with context %}
-{% block title %}Counterparties{% endblock %}
+{% block title %}{{ 'Payees'|tr(locale) }}{% endblock %}
 {% block heading %}{{ page_header('Settings'|tr(locale), page_status.count(total_parties, '1 saved name.', '{n} saved names.', 'No saved names yet.')|status_text) }}{% endblock %}
 {% block content %}
 
 {% if error %}<p class="flash error" role="alert">{{ error|tr(locale) }}</p>{% endif %}
 <details class="card" {{ 'open' if error or review_required }}>
-  <summary><b>{{ "Add a counterparty"|tr(locale) }}</b><span class="muted small">{{ "Save a name and optional suggested category"|tr(locale) }}</span></summary>
+  <summary><b>{{ "Add a payee"|tr(locale) }}</b><span class="muted small">{{ "Save a name and optional suggested category"|tr(locale) }}</span></summary>
   <p class="muted small">{{ "Use one saved name across transactions. You can set a suggested category; each transaction can still use a different one."|tr(locale) }}</p>
   <form method="post" action="/counterparties" class="stack">
     <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" value="{{ entered_name or '' }}" placeholder="e.g. Talabat" required spellcheck="false" autocomplete="off"></label>
@@ -18,7 +18,7 @@
         {% from "partials/macros.html" import category_options %}{{ category_options(category_groups(categories), entered_category_id) }}
       </select>
     </label>
-    <button class="btn primary">{{ "Add counterparty"|tr(locale) }}</button>
+    <button class="btn primary">{{ "Add payee"|tr(locale) }}</button>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
  </details>
 <section class="card data-panel">
@@ -37,7 +37,7 @@
       <form id="{{ edit_form }}" method="post" action="/counterparties" class="counterparty-name-edit" data-counterparty-autosave>
         <input type="hidden" name="counterparty_action" value="rename">
         <input type="hidden" name="counterparty_id" value="{{ party.id }}">
-        <input type="text" name="name" value="{{ party.name }}" aria-label="Counterparty name" spellcheck="false" autocomplete="off">
+        <input type="text" name="name" value="{{ party.name }}" aria-label="Payee name" spellcheck="false" autocomplete="off">
         <span class="inline-save-status" role="status" aria-live="polite"></span>
       <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
       {% if aliases or aliases|length < alias_limit %}<details class="alias-details"><summary>Aliases{% if aliases %} · {{ aliases|length }}{% endif %}</summary>
@@ -84,12 +84,12 @@
       <form method="post" action="/counterparties" data-counterparty-delete data-confirm-delete><input type="hidden" name="counterparty_id" value="{{ party.id }}"><button class="cat-icon is-danger" name="counterparty_action" value="delete" title="Delete" aria-label="Delete {{ party.name }}"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
     </div></div></details>{% endfor %}
   </div>
-  {% else %}<p class="muted">{{ "No saved counterparties yet."|tr(locale) }}</p>{% endif %}
+  {% else %}<p class="muted">{{ "No saved payees yet."|tr(locale) }}</p>{% endif %}
 </section>
 {% if review_required %}
 <div class="review-backdrop">
   <section class="review-dialog" role="dialog" aria-modal="true" aria-labelledby="counterparty-review-title">
-    <h2 id="counterparty-review-title">{{ "Review this Counterparty"|tr(locale) }}</h2>
+    <h2 id="counterparty-review-title">{{ "Review this Payee"|tr(locale) }}</h2>
     <p>Before saving “{{ entered_name }}”, check the saved names. Pressing Enter alone never creates a new Counterparty.</p>
     {% if similar_counterparties %}<ul class="review-matches">
       {% for match in similar_counterparties %}<li><form method="post" action="/counterparties">
@@ -110,7 +110,7 @@ document.querySelectorAll('[data-counterparty-autosave]').forEach(form=>{const i
 document.querySelectorAll('[data-submit-on-change]').forEach(input=>input.addEventListener('change',()=>input.form.requestSubmit()));
 (()=>{const form=document.querySelector('[data-counterparty-search]'),input=form?.elements.q;let timer;input?.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>form.requestSubmit(),300)});input?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(timer);form.requestSubmit()}})})();
 document.querySelectorAll('[data-counterparty-delete]').forEach((form) => form.addEventListener('submit', (event) => {
-  window.confirmSubmit(event, window.lightningT('Delete this counterparty? If it has transaction history, it is archived instead.'));
+  window.confirmSubmit(event, window.lightningT('Delete this payee? If it has transaction history, it is archived instead.'));
 }));
 </script>
 {% endblock %}

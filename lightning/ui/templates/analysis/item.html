@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ item_name }} · {{ 'Item analysis'|tr(locale) }}{% endblock %}
-{% block heading %}<div class="birdview-title"><div><h1>{{ item_name }}</h1><div class="muted small">{{ ({'category':'Category','payee':'Counterparty','account':'Account'}[kind])|tr(locale) }} · {{ data.date_from }} {{ 'to'|tr(locale) }} {{ data.date_to }}</div></div></div>{% endblock %}
+{% block heading %}<div class="birdview-title"><div><h1>{{ item_name }}</h1><div class="muted small">{{ ({'category':'Category','payee':'Payee','account':'Account'}[kind])|tr(locale) }} · {{ data.date_from }} {{ 'to'|tr(locale) }} {{ data.date_to }}</div></div></div>{% endblock %}
 {% block content %}
 {% set d = data %}{% set change = d.this_month - d.last_month %}
 <section class="card answer-strip" aria-label="{{ 'Answer'|tr(locale) }}">

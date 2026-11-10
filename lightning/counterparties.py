@@ -98,7 +98,7 @@ class CounterpartyService:
         cur = self.db.execute("UPDATE counterparties SET kind=?,updated_at=? WHERE id=?",
                               (kind, now_iso(), counterparty_id))
         if cur.rowcount != 1:
-            raise NotFoundError("Counterparty not found.")
+            raise NotFoundError("Payee not found.")
 
     def ensure_person(self, name: str) -> int:
         """The id of the person this owner name means: a saved name is used (and counts as a person if it was
@@ -119,13 +119,13 @@ class CounterpartyService:
         name = " ".join((name or "").split())
         key = normalize(name)
         if not key:
-            raise ValidationError("Enter a counterparty name.", "counterparty")
+            raise ValidationError("Enter a payee name.", "counterparty")
         current = self.get(counterparty_id)
         if not current:
-            raise NotFoundError("Counterparty not found.")
+            raise NotFoundError("Payee not found.")
         collision = self.resolve(name)
         if collision and int(collision["id"]) != counterparty_id:
-            raise ConflictError(f"{name} already matches another saved counterparty.", "counterparty")
+            raise ConflictError(f"{name} already matches another saved payee.", "counterparty")
         old_name = current["name"]
         with self.db.transaction():
             # Once an alias becomes the canonical name, keep just the canonical entry.
@@ -143,12 +143,12 @@ class CounterpartyService:
         cur = self.db.execute("UPDATE counterparties SET active=?,updated_at=? WHERE id=?",
                               (int(active), now_iso(), counterparty_id))
         if cur.rowcount != 1:
-            raise NotFoundError("Counterparty not found.")
+            raise NotFoundError("Payee not found.")
 
     def delete_or_archive(self, counterparty_id: int) -> bool:
         """Delete an unused record; archive one referenced by transaction history. Returns archived."""
         if not self.get(counterparty_id):
-            raise NotFoundError("Counterparty not found.")
+            raise NotFoundError("Payee not found.")
         # Any record that refers to it (history, owners, plans, reserves, claims...) keeps it archived; its
         # own spellings go with it.
         used = self.db.referenced("counterparties", counterparty_id, ignore=("counterparty_aliases",))
@@ -168,10 +168,10 @@ class CounterpartyService:
         record could not move (it would break a rule that allows one per counterparty), ``source`` is archived, never
         deleted. Returns what moved."""
         if source_id == target_id:
-            raise ValidationError("Choose a different counterparty to merge into.", "counterparty")
+            raise ValidationError("Choose a different payee to merge into.", "counterparty")
         source, target = self.get(source_id), self.get(target_id)
         if not source or not target:
-            raise NotFoundError("Counterparty not found.")
+            raise NotFoundError("Payee not found.")
         if not target["active"]:
             raise ValidationError(f"{target['name']} is archived. Turn it on first, or choose another name.", "counterparty")
         spellings = [source["name"]] + [row["alias"] for row in self.aliases_for(source_id)]
@@ -223,11 +223,11 @@ class CounterpartyService:
         name = " ".join((name or "").split())
         key = normalize(name)
         if not key:
-            raise ValidationError("Enter a counterparty name.", "counterparty")
+            raise ValidationError("Enter a payee name.", "counterparty")
         if kind is not None and kind not in KINDS:
             raise ValidationError("Choose person or business.", "kind")
         if self.resolve(name):
-            raise ConflictError(f"{name} already matches a saved counterparty. Choose it instead.", "counterparty")
+            raise ConflictError(f"{name} already matches a saved payee. Choose it instead.", "counterparty")
         now = now_iso()
         with self.db.transaction():
             cur = self.db.execute(
@@ -249,7 +249,7 @@ class CounterpartyService:
         if not key:
             raise ValidationError("Enter the spelling to remember.", "alias")
         if not self.get(counterparty_id):
-            raise NotFoundError("Counterparty not found.")
+            raise NotFoundError("Payee not found.")
         if self.resolve(alias):
             existing = self.resolve(alias)
             if existing["id"] == counterparty_id:
@@ -260,7 +260,7 @@ class CounterpartyService:
                 "SELECT COUNT(*) FROM counterparty_aliases WHERE counterparty_id=?", (counterparty_id,)
             )
             if int(alias_count or 0) >= MAX_ALIASES_PER_COUNTERPARTY:
-                raise ValidationError(f"A counterparty can have at most {MAX_ALIASES_PER_COUNTERPARTY} aliases.", "alias")
+                raise ValidationError(f"A payee can have at most {MAX_ALIASES_PER_COUNTERPARTY} aliases.", "alias")
             self.db.execute(
                 "INSERT INTO counterparty_aliases(counterparty_id,alias,normalized_alias,created_at) "
                 "VALUES (?,?,?,?)", (counterparty_id, alias, key, now_iso())
@@ -316,4 +316,4 @@ class CounterpartyService:
             (category_id, now_iso(), counterparty_id)
         )
         if cur.rowcount != 1:
-            raise NotFoundError("Counterparty not found.")
+            raise NotFoundError("Payee not found.")

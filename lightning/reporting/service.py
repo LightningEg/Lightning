@@ -709,7 +709,7 @@ class ReportingService:
         """Money out per counterparty (who you paid), largest first."""
         totals: dict[str, Decimal] = {}
         for row in self._spending(date_from, date_to):
-            name = (row["counterparty"] or row["description"] or "No counterparty").strip()
+            name = (row["counterparty"] or row["description"] or "No payee").strip()
             totals[name] = totals.get(name, ZERO) + row["value"]
         return sorted(((k, v) for k, v in totals.items() if v > ZERO), key=lambda kv: -kv[1])
 

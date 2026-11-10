@@ -191,7 +191,7 @@ def test_register_entry(client, c, setup):
     assert 'action="/accounts/%d/register"' % wallet.id in page.text
     assert 'id="category-catalogue"' in page.text and 'role="listbox"' in page.text
     assert 'list="category-options"' not in page.text
-    assert "Payee" not in page.text and ">Counterparty<" in page.text
+    assert "Counterparty" not in page.text and ">Payee<" in page.text
     assert "EXP.PERSONAL" not in page.text  # plain names only
 
     r = client.post(f"/accounts/{wallet.id}/register", data={"date": "2026-09-20", "counterparty": "Carrefour",
@@ -291,9 +291,9 @@ def test_categories_page_is_plain(client):
 
 def test_counterparties_tab_lists_and_creates_canonical_names(client, c):
     page = client.get("/counterparties")
-    assert page.status_code == 200 and "Counterparties" in page.text
+    assert page.status_code == 200 and "Payees" in page.text
     response = client.post("/counterparties", data={"name": "Talabat"})
-    assert response.status_code == 200 and "Review this Counterparty" in response.text
+    assert response.status_code == 200 and "Review this Payee" in response.text
     response = client.post("/counterparties", data={"name": "Talabat", "counterparty_action": "create"})
     assert response.status_code == 200 and "Saved Talabat" in response.text
     assert "Talabat" in client.get("/counterparties").text
@@ -306,7 +306,7 @@ def test_counterparty_review_offers_canonical_match_or_explicit_new_name(client,
     values = {"date": "2026-09-25", "counterparty": "Talabaat",
               "category": "Food & Groceries", "amount": "-20"}
     response = client.post(f"/accounts/{cib.id}/register", data=values)
-    assert response.status_code == 400 and "Review this Counterparty" in response.text
+    assert response.status_code == 400 and "Review this Payee" in response.text
     assert "Use Talabat" in response.text and "Create “Talabaat”" in response.text
     assert c.counterparties.resolve("Talabaat") is None
 
@@ -359,7 +359,7 @@ def test_register_near_match_requires_explicit_reuse_or_create(client, c, setup)
     values = {"date": "2026-09-20", "counterparty": "Talabaat",
               "category": "Food & Groceries", "amount": "-25"}
     response = client.post(f"/accounts/{account.id}/register", data=values)
-    assert response.status_code == 400 and "Review this Counterparty" in response.text
+    assert response.status_code == 400 and "Review this Payee" in response.text
     assert c.db.scalar("SELECT COUNT(*) FROM transactions WHERE counterparty='Talabat'") == 0
     counterparty_id = c.counterparties.resolve("Talabat")["id"]
     response = client.post(f"/accounts/{account.id}/register", data={**values, "counterparty_choice": f"existing:{counterparty_id}"})

@@ -13,7 +13,7 @@
   <div class="phone-note"><b>Kept entry · {{ preview.keep.ref }}</b><br>{{ preview.keep.date }} · {{ preview.keep.type_label|tr(locale) }}<br>{{ preview.keep.description or preview.keep.counterparty or 'Transaction' }}<br><span class="num">{{ keep_summary.amount|abs|money }} {{ keep_summary.currency }}</span>{% if preview.keep.counterparty %}<br>{{ preview.keep.counterparty }}{% endif %}<br>Accounts: {{ keep_accounts|join(', ') }}</div>
   <div class="phone-note"><b>Will be merged · {{ preview.drop.ref }}</b><br>{{ preview.drop.date }} · {{ preview.drop.type_label|tr(locale) }}<br>{{ preview.drop.description or preview.drop.counterparty or 'Transaction' }}<br><span class="num">{{ drop_summary.amount|abs|money }} {{ drop_summary.currency }}</span>{% if preview.drop.counterparty %}<br>{{ preview.drop.counterparty }}{% endif %}<br>Accounts: {{ drop_accounts|join(', ') }}</div>
   <p>The duplicate will be voided and point to {{ preview.keep.ref }}. Its imported source records and safe unique plan or reserve links move to the kept entry. The duplicate’s cash effect is removed once; no new payment is posted.</p>
-  <p>Blank counterparty, category, and notes are filled from the duplicate. Confirm these are the same real-world entry.</p>
+  <p>Blank payee, category, and notes are filled from the duplicate. Confirm these are the same real-world entry.</p>
   <form method="post" action="/transactions/merge" class="phone-form" data-confirm-delete="Merge {{ preview.drop.ref }} into {{ preview.keep.ref }}? The duplicate will be voided; its entry and source records remain in history.">
     <input type="hidden" name="keep_id" value="{{ preview.keep.id }}">
     <input type="hidden" name="drop_id" value="{{ preview.drop.id }}">

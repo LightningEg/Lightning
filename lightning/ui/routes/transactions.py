@@ -688,7 +688,7 @@ async def bulk_edit_transactions(request: Request):
         if "whom" in form:
             party = c.counterparties.resolve(str(form.get("whom", "")).strip())
             if not party or not party["active"]:
-                raise ValidationError("Choose a saved Counterparty in Held for.", "whom")
+                raise ValidationError("Choose a saved Payee in Held for.", "whom")
             changes["owner_id"] = party["id"]
         if not changes:
             return respond("Nothing changed on the selected rows.", error=True)

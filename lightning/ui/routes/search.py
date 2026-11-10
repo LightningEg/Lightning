@@ -46,7 +46,7 @@ PAGES = (
     ("All transactions", "/transactions", "register ledger history"),
     ("Accounts", "/accounts", "banks wallets manage accounts"),
     ("Categories", "/categories", "income spending one-off recurring"),
-    ("Counterparties", "/counterparties", "payees shops people names"),
+    ("Payees", "/counterparties", "counterparties shops people names"),
     ("Rules", "/rules", "rules conditions auto categorize file split"),
     ("Investment planner", "/investments/planner", "allocation targets invest"),
     ("Update prices", "/investments/prices", "valuations market prices gold price"),

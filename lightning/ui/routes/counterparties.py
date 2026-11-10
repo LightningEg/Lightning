@@ -59,13 +59,13 @@ async def create_counterparty(request: Request):
             elif action.startswith("kind:"):
                 selected = c.counterparties.get(int(counterparty_id))
                 if not selected:
-                    raise ValidationError("Choose a saved counterparty.")
+                    raise ValidationError("Choose a saved payee.")
                 kind = action.split(":", 1)[1]
                 c.counterparties.set_kind(int(counterparty_id), kind)
                 return redirect("/counterparties", f"{selected['name']} is now marked as a {'person' if kind == 'PERSON' else 'business'}.")
             elif action == "activate":
                 c.counterparties.set_active(int(counterparty_id), True)
-                return redirect("/counterparties", "Counterparty activated.")
+                return redirect("/counterparties", "Payee activated.")
             elif action == "delete":
                 selected = c.counterparties.get(int(counterparty_id))
                 archived = c.counterparties.delete_or_archive(int(counterparty_id))
@@ -75,19 +75,19 @@ async def create_counterparty(request: Request):
             elif action == "add_alias":
                 selected = c.counterparties.get(int(counterparty_id))
                 if not selected:
-                    raise ValidationError("Choose a saved counterparty.")
+                    raise ValidationError("Choose a saved payee.")
                 c.counterparties.add_alias(int(counterparty_id), alias)
                 return redirect("/counterparties", f"Added alias for {selected['name']}.")
             elif action == "rename_alias":
                 selected = c.counterparties.get(int(counterparty_id))
                 if not selected:
-                    raise ValidationError("Choose a saved counterparty.")
+                    raise ValidationError("Choose a saved payee.")
                 c.counterparties.rename_alias(int(counterparty_id), int(alias_id), alias)
                 return redirect("/counterparties", f"Updated alias for {selected['name']}.")
             elif action == "remove_alias":
                 selected = c.counterparties.get(int(counterparty_id))
                 if not selected:
-                    raise ValidationError("Choose a saved counterparty.")
+                    raise ValidationError("Choose a saved payee.")
                 c.counterparties.remove_alias(int(counterparty_id), int(alias_id))
                 return redirect("/counterparties", f"Removed alias from {selected['name']}.")
             elif action == "merge":
@@ -104,7 +104,7 @@ async def create_counterparty(request: Request):
                 suggestions = {candidate for candidate, _ in c.counterparties.suggestions(name)}
                 resolved = c.counterparties.resolve(name)
                 if not selected or (selected["name"] not in suggestions and (not resolved or resolved["id"] != selected_id)):
-                    raise ValidationError("Choose one of the displayed matches, or create a new Counterparty.")
+                    raise ValidationError("Choose one of the displayed matches, or create a new Payee.")
                 c.counterparties.add_alias(selected_id, name)
                 if category_id is not None:
                     c.counterparties.set_default_category(selected_id, category_id)

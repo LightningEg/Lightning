@@ -8,7 +8,7 @@
   <p>{{ 'Choose the transactions to refile. Unchecked rows stay unchanged.'|tr(locale) }}</p>
   <form method="post" action="/rules/{{ rule.id }}/apply"><input type="hidden" name="fingerprint" value="{{ fingerprint }}">
   <div class="compact-list">{% for t in changes %}
-    <label class="compact-row"><input type="checkbox" name="transaction_id" value="{{ t.id }}" checked><span><b>{{ t.counterparty or 'No counterparty' }}</b><small class="muted">{{ t.category_from }} · {{ t.date }}</small></span><b class="{{ 'pos' if t.amount > 0 }}">{{ '+' if t.amount > 0 else '−' }}{{ t.amount|abs|money }}</b></label>{% endfor %}
+    <label class="compact-row"><input type="checkbox" name="transaction_id" value="{{ t.id }}" checked><span><b>{{ t.counterparty or 'No payee' }}</b><small class="muted">{{ t.category_from }} · {{ t.date }}</small></span><b class="{{ 'pos' if t.amount > 0 }}">{{ '+' if t.amount > 0 else '−' }}{{ t.amount|abs|money }}</b></label>{% endfor %}
     {% if more %}<div class="compact-row"><span class="muted">and {{ more }} more</span></div>{% endif %}
   </div>
   <div class="actions"><button class="btn primary">{{ 'Change selected transactions'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><a class="btn" href="/rules">{{ "Leave the past as it is"|tr(locale) }}</a></div></form>

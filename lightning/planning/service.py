@@ -642,14 +642,14 @@ class PlanningService:
     def restored_suggestion_setting(self, counterparty_id: int) -> str:
         """A reviewed preference value for the existing synchronized settings command."""
         if self.counterparties.get(counterparty_id) is None:
-            raise NotFoundError("That counterparty no longer exists.")
+            raise NotFoundError("That payee no longer exists.")
         return ",".join(str(i) for i in sorted(self._not_recurring() - {counterparty_id}))
 
     def not_recurring(self, counterparty_id: int) -> str:
         """Stop suggesting a counterparty in Looks recurring. Returns its name."""
         party = self.counterparties.get(counterparty_id)
         if party is None:
-            raise NotFoundError("That counterparty no longer exists.")
+            raise NotFoundError("That payee no longer exists.")
         name = party["name"]
         SettingsStore(self.db).set(NOT_RECURRING, ",".join(str(i) for i in sorted(self._not_recurring() | {counterparty_id})))
         return name
@@ -810,7 +810,7 @@ class PlanningService:
         counterparty_id = self._id(values.get("counterparty_id"), "counterparty_id")
         if counterparty_id:
             if self.counterparties.get(counterparty_id) is None:
-                raise ValidationError("Choose a valid counterparty.", "counterparty_id")
+                raise ValidationError("Choose a valid payee.", "counterparty_id")
         try:
             weekend_move = WeekendMove(str(values.get("weekend_move") or "none").lower())
         except ValueError:

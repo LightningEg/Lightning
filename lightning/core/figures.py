@@ -405,7 +405,7 @@ FIELDS = [
     ("Account", BOTH, "Where the money moves or the holding sits.", "Held in, Received into, Paid from, Paid into"),
     ("Cash account", LEDGER, "The account that pays or receives the cash for a trade in another account.",
      "Paid from / received into, Money goes to"),
-    ("Counterparty", BOTH, "Who you paid or who paid you.", "Paid to, From, Search counterparty"),
+    ("Payee", BOTH, "Who you paid or who paid you.", "Paid to, From, Search payee"),
     ("Held for", LEDGER, "The person the money or units belong to, if not you.",
      "Whom, Owned by, Owner, Money held for someone else"),
     ("Category", BOTH, "What the money was for.", "Search category"),

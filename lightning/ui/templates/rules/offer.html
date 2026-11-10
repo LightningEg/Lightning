@@ -13,7 +13,7 @@
     <input type="hidden" name="token" value="{{ offer.token }}"><input type="hidden" name="return_to" value="{{ back }}">
     {% if offer.past %}
     <div class="compact-list">{% for t in changes %}
-      <div class="compact-row"><span><b>{{ t.counterparty or 'No counterparty' }}</b><small class="muted">{{ t.date }} · {{ t.category_from }} → {{ offer.category }}</small></span><b class="{{ 'pos' if t.amount > 0 }}">{{ '+' if t.amount > 0 else '−' }}{{ t.amount|abs|money }}</b></div>{% endfor %}
+      <div class="compact-row"><span><b>{{ t.counterparty or 'No payee' }}</b><small class="muted">{{ t.date }} · {{ t.category_from }} → {{ offer.category }}</small></span><b class="{{ 'pos' if t.amount > 0 }}">{{ '+' if t.amount > 0 else '−' }}{{ t.amount|abs|money }}</b></div>{% endfor %}
       {% if more %}<div class="compact-row"><span class="muted">{{ 'and {count} more'|tr(locale, count=more) }}</span></div>{% endif %}
     </div>
     <fieldset class="stack"><legend>{{ 'Apply to'|tr(locale) }}</legend>

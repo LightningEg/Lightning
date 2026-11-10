@@ -93,7 +93,7 @@ async def find_replace(request: Request):
     if chosen:  # F7 (r24): replace only in the selected rows
         rows = [row for row in rows if row.id in chosen]
     if not rows:
-        return redirect(destination, f"No counterparty or note contains “{find}”.")
+        return redirect(destination, f"No payee or note contains “{find}”.")
     groups: dict[str, list[int]] = {}
     for row in rows:
         groups.setdefault(_replace(str(getattr(row, field) or ""), find, new), []).append(row.id)

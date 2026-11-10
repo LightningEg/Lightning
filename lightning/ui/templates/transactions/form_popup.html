@@ -47,10 +47,10 @@
         {% if error_field == 'category' %}<small class="field-error">{{ "Choose a category."|tr(locale) }}</small>{% endif %}
       </div>
       <div class="field money-only {{ 'has-error' if error_field == 'counterparty' }}" {{ 'hidden' if values.kind == 'transfer' }}>
-        <label for="popup-counterparty">{{ 'Counterparty'|tr(locale) }} <span class="muted">{{ "(optional)"|tr(locale) }}</span></label>
+        <label for="popup-counterparty">{{ 'Payee'|tr(locale) }} <span class="muted">{{ "(optional)"|tr(locale) }}</span></label>
         <input id="popup-counterparty" name="counterparty" value="{{ values.counterparty }}" list="popup-counterparties" data-own-suggestions placeholder="Type a person or business" autocomplete="off" spellcheck="false">
         <datalist id="popup-counterparties">{% for person in counterparties %}{% set learned = (counterparty_categories or {}).get(person.name) %}<option value="{{ person.name }}"{% if learned %} data-category="{{ learned.id }}"{% endif %}>{% endfor %}</datalist>
-        {% if error_field == 'counterparty' %}<small class="field-error">{{ 'Choose a saved Counterparty.'|tr(locale) }}</small>{% endif %}
+        {% if error_field == 'counterparty' %}<small class="field-error">{{ 'Choose a saved Payee.'|tr(locale) }}</small>{% endif %}
       </div>
     </div>
     <div class="field">

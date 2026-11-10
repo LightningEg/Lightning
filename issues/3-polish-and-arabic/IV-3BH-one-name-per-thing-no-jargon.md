@@ -25,12 +25,6 @@ Per term, one PR: pick the plain word in the Glossary first (payee/who for count
 
 Each step is one pull request, one term at a time. The Glossary (`ai/GLOSSARY.md`, read only the term's line: `grep -n "<term>" ai/GLOSSARY.md`) is changed first in the same PR; then English keys, their Arabic in `lightning/ui/i18n.py`, templates and tests. Never rename a route, a database column or a code. Run `python -m pytest tests/test_arabic_no_english.py tests/test_mohab_year.py -q` and delete the step's heading in the same commit.
 
-## 3BH2 "Counterparty" becomes "Payee" (Arabic: الطرف التاني → الجهة) · M
-Decided (owner, 2026-11-08): "Payee" for money out and in, "Who" as a column heading.
-Files: `grep -rln "Counterpart" lightning/ui ai/GLOSSARY.md` (63 keys; the nav heading on `/counterparties`).
-Do: rename the visible words only; keep `/counterparties` and every variable. Add "counterparty" to the test's list.
-Done when: `tests/test_voice.py` passes with the word listed.
-
 ## 3BH3 "Ledger" and "reevaluation" leave the screen · S
 Files: `grep -rn "ledger\|Ledger\|reevaluation\|Reevaluation" lightning/ui/i18n.py lightning/ui/templates` (57 + 12 keys), `lightning/deposits/service.py:296`.
 Do: "Reevaluation ledger" → "Value updates"; "reevaluation" → "value update"; sentences with "ledger" are rewritten without it ("in your records", or just dropped: "Principal cannot exceed the CD's currently owned ledger balance." → "You can take out at most {amount} from this certificate."). Add both words to the test's list.

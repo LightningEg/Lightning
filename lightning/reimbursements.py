@@ -327,7 +327,7 @@ class ReimbursementService:
                     raise ValidationError("Expected reimbursement cannot exceed the owned expense amount.", "expected")
                 if payer_id is not None and not self.db.scalar(
                         "SELECT 1 FROM counterparties WHERE id=? AND active=1", (payer_id,)):
-                    raise ValidationError("Choose an active saved counterparty.", "payer_id")
+                    raise ValidationError("Choose an active saved payee.", "payer_id")
                 now = now_iso()
                 cur = self.db.execute(
                     "INSERT INTO reimbursement_claims(expense_id,expected_e6,payer_id,due_date,created_at,updated_at) "

@@ -170,7 +170,7 @@ class LinkedSections:
         c = self.c
         party = c.counterparties.get(counterparty_id)
         if not party:
-            raise NotFoundError("That counterparty no longer exists.")
+            raise NotFoundError("That payee no longer exists.")
         party = dict(party)
         day = as_of or today()
         first = day.replace(day=1)
