@@ -8,7 +8,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 |---|---|---|---|---|---|---|
 | [Capture](pillars/capture.md) | 13 |  | 9 | 4 |  |  |
 | [Plan](pillars/plan.md) | 6 |  | 4 | 2 |  |  |
-| [Understand](pillars/understand.md) | 6 |  | 3 | 2 | 1 |  |
+| [Understand](pillars/understand.md) | 5 |  | 2 | 2 | 1 |  |
 | [Own](pillars/own.md) | 14 | 1 | 7 | 4 | 2 |  |
 | [Protect](pillars/protect.md) | 4 | 1 | 2 |  | 1 |  |
 | [Everywhere](pillars/everywhere.md) | 7 | 3 | 4 |  |  |  |
@@ -16,7 +16,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | [Build](pillars/build.md) | 9 |  | 8 |  | 1 |  |
 | [Reach](pillars/reach.md) | 4 |  | 3 | 1 |  | 2 |
 
-76 open items in 11 milestones.
+75 open items in 11 milestones.
 
 ## Being built now
 
@@ -46,7 +46,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | 6 Market data | 4 | Prices arrive by themselves, from sources Lightning may redistribute. |
 | 7 Planning, import and search | 9 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 3 | The site is honest, quick and in step with the app. |
-| 9 Later | 6 | Good ideas that wait until the milestones above are done. |
+| 9 Later | 5 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 5 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |
 | 11 Phone UX | 3 | The phone is its own product: a few places that each answer one question, quick jobs in three taps, and no PC page squeezed into one column. |
 | 12 Desktop UX and smart next steps | 25 | The PC app leads with the answer, works in bulk without surprises, and offers the next step where a figure raises the question. |

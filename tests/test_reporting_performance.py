@@ -341,3 +341,54 @@ def test_investment_report_reads_only_portfolio_transactions_and_is_unchanged():
                     c.db.all = original
                 assert repr(new) == repr(old), (loader.__name__, start, end)
             c.db.close()
+
+
+def test_activity_list_reads_its_rows_together_and_renders_the_same_page(c, monkeypatch):
+    """IT-9M: /activity read ten times per row (1,039 queries); now a few reads in all, the same HTML on PC and phone."""
+    import re
+    from fastapi.testclient import TestClient
+    from lightning.samples import load_mohab_2026
+    from lightning.ui.phone.router import mount_phone
+    from lightning.ui.web import create_app
+    from lightning.workflows.activity import ActivityReview
+
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-02")
+    load_mohab_2026(c)
+    pc_app, phone_app = create_app(c), create_app(c)
+    mount_phone(phone_app)
+    nonce = re.compile(r'nonce="[^"]*"|name="csrf[^>]*>|\?v=[0-9a-f]+')
+
+    def page(phone: bool) -> tuple[str, int]:
+        async def asgi(scope, receive, send):
+            if scope["type"] == "http" and phone:
+                scope.setdefault("state", {})["phone"] = True
+            return await (phone_app if phone else pc_app)(scope, receive, send)
+
+        statements = []
+        original_conn = type(c.db).conn.fget
+
+        def traced(db):
+            conn = original_conn(db)
+            conn.set_trace_callback(statements.append)
+            return conn
+
+        client = TestClient(asgi, base_url="http://127.0.0.1")
+        client.get("/activity")
+        monkeypatch.setattr(type(c.db), "conn", property(traced))
+        statements.clear()
+        text = client.get("/activity").text
+        monkeypatch.setattr(type(c.db), "conn", property(original_conn))
+        c.db.conn.set_trace_callback(None)
+        assert phone or text.count('compact-row') >= 50
+        return nonce.sub("", text), sum(s.lstrip().upper().startswith("SELECT") for s in statements)
+
+    new = {phone: page(phone) for phone in (False, True)}
+    new_recent = ActivityReview.recent
+
+    ids_of = lambda self, limit: [row["txn"].id for row in new_recent(self, limit)]
+    monkeypatch.setattr(ActivityReview, "recent", lambda self, limit=100: [
+        self.summary(i, include_choices=False) for i in ids_of(self, limit)])
+    old = {phone: page(phone) for phone in (False, True)}
+    for phone in (False, True):
+        assert new[phone][0] == old[phone][0]
+    assert new[False][1] < 400 and new[False][1] < old[False][1] / 3, (new[False][1], old[False][1])

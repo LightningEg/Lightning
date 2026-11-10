@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 76 open items. Each folder holds its reports and its items.
+11 big pictures, 75 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -245,7 +245,6 @@ Good ideas that wait until the milestones above are done.
 | IT-9K1 | ↳ Restore routes out of profile_app | | | S | Sonnet | |
 | IT-9K2 | ↳ The phone's device routes out of profile_app | | | M | Opus | |
 | IT-9K3 | ↳ The PC's borrowing routes and Lock out of profile_app | | | M | Opus | |
-| **IT-9M** | [Activity on the PC asks ten queries for each of its 100 rows - 1,039 queries where the budget is 400](9-later/IT-9M-activity-asks-ten-queries-a-row.md) | improvement, technical | Understand | M | Sonnet | ready |
 | **IT-9N** | [The import review asks four or more queries for every statement row - 1,136 for a 90-row file, about 12,000 for a year's statement](9-later/IT-9N-import-review-asks-four-queries-a-row.md) | improvement, technical | Capture | M | Sonnet | ready |
 | IT-9N1 | ↳ Ask the account questions once ([#492](https://github.com/LightningEg/Lightning/issues/492)) | | | S | Sonnet | |
 | IT-9N2 | ↳ Ask the "seen before" questions once | | | M | Sonnet | |
@@ -258,7 +257,7 @@ Good ideas that wait until the milestones above are done.
 
 Reports: [r22](9-later/r22-code-quality-and-smart-features/report.md).
 
-Done: 9B, 9C, 9E, 9G, 9H, 9I, 9J, 9L. Next free code: 9O.
+Done: 9B, 9C, 9E, 9G, 9H, 9I, 9J, 9L, 9M. Next free code: 9O.
 
 ## 10 Looks and store
 
