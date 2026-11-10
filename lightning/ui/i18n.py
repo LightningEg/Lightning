@@ -3081,7 +3081,11 @@ ARABIC_UI = {
     'Add income': 'ضيف دخل',
     '1 category': 'فئة واحدة',
     '{n} categories': '{n} فئات',
+    '1 category': 'فئة واحدة',
     '{n} days left': 'فاضل {n} يوم',
+    '1 day left': 'فاضل يوم واحد',
+    '{n} of 1 payment made.': 'اتدفع {n} من دفعة واحدة.',
+    '1 month · usually around day {day}': 'شهر واحد · غالبًا حوالي يوم {day}',
     'by day {n}': 'لحد يوم {n}',
     'for everyday, about {amt} a day': 'لليومي، حوالي {amt} في اليوم',
     'Spent {amt} of {x} planned': 'المصروف {amt} من {x} في الخطة',
@@ -3571,6 +3575,11 @@ def _agree_counts(template: str, values: dict) -> str:
             return "{%s} %s" % (key, plural)
         return "{%s} %s" % (key, lemma)
     return _COUNT_PHRASE.sub(phrase, template)
+
+
+def counted(n: int | Decimal, one: str, other: str) -> str:
+    """English count with the right noun: counted(1, "day", "days") is "1 day", counted(2, ...) is "2 days"."""
+    return f"{n} {one}" if n == 1 else f"{n} {other}"
 
 
 def translate(text: str, locale: str = "en", **values: object) -> str:
