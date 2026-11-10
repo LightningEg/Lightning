@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 78 open items. Each folder holds its reports and its items.
+11 big pictures, 74 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -15,7 +15,6 @@ Anyone can find how to help in one click and send a first fix the same evening.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **BT-1V** | [The documented install misses four packages - a fresh clone, Codespaces and run.sh all stop at "No module named rapidfuzz"](1-easy-to-contribute/BT-1V-source-install-misses-four-packages.md) ([#486](https://github.com/LightningEg/Lightning/issues/486)) | bug, technical · medium | Build | S | Sonnet | ready |
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | improvement, technical | Build | M | Opus | ready |
 | IT-1E3 | ↳ Owner: deploy the website receiver and rotate the analytics key | | | owner |  | |
 | IT-1E4 | ↳ Check the live website receivers against formula injection and key leaks | | | S | Opus | |
@@ -32,20 +31,14 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1H4 | ↳ Validate | | | M | Opus | |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | Sonnet | ready |
 | IT-1N2 | ↳ Post the approved batch | | | S | Sonnet | |
-| **IT-1W** | [Four wheel files (49 MB) sit in the repository root by accident - remove them and stop the next one](1-easy-to-contribute/IT-1W-stray-wheels-in-the-repository-root.md) ([#487](https://github.com/LightningEg/Lightning/issues/487)) | improvement, technical | Build | S | Sonnet | ready |
-| **IT-1X** | [Two sessions take the same code - report and item codes are handed out from the local checkout, and a guideline change can merge in one repository only](1-easy-to-contribute/IT-1X-two-sessions-take-the-same-code.md) | improvement, technical | Build | M | Sonnet | ready |
-| IT-1X1 | ↳ Reserve a code in NOW.md before using it | | | S | Sonnet | |
-| IT-1X2 | ↳ CI refuses a code that main already has | | | S | Sonnet | |
-| IT-1X3 | ↳ A guideline change cannot merge alone | | | S | Sonnet | |
 | **IT-1Y** | [Every page is asked once and measured - one test fetches all 130 pages on the PC and the phone, and perf_check times the pages people use](1-easy-to-contribute/IT-1Y-every-page-asked-once-and-measured.md) | improvement, technical | Build | M | Sonnet | ready |
 | IT-1Y1 | ↳ The PC never gets a phone-only sheet ([#488](https://github.com/LightningEg/Lightning/issues/488)) | | | S | Sonnet | |
 | IT-1Y2 | ↳ One test asks every page | | | M | Sonnet | |
 | IT-1Y3 | ↳ perf_check measures the real pages ([#489](https://github.com/LightningEg/Lightning/issues/489)) | | | S | Sonnet | |
-| **IT-1Z** | [Unused functions and names - five that nothing calls, and eleven that only tests call](1-easy-to-contribute/IT-1Z-unused-functions-and-names.md) | improvement, technical | Build | S | Sonnet | ready |
 
 Reports: [r7](1-easy-to-contribute/r7-pull-request-cleanup/report.md) · [r33](1-easy-to-contribute/r33-code-review-and-loose-ends/report.md).
 
-Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1R, 1S, 1T, 1U. Next free code: 1AA.
+Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1R, 1S, 1T, 1U, 1V, 1W, 1X, 1Z. Next free code: 1AA.
 
 ## 2 Safe for real money
 
@@ -307,14 +300,15 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | Opus | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner |  | |
 | **IV-3AY** | [Phone-first architecture - five places that each answer one question, state-aware screens, and a phone decoupled from the PC](11-phone-ux/IV-3AY-phone-first-architecture.md) | improvement, visual | Everywhere | L | Opus | ready |
-| IV-3AY4 | ↳ The phone shell: its own router, base, stylesheet and navigation | | | L | Opus | |
-| IV-3AY6 | ↳ Home | | | M | Opus | |
-| IV-3AY7 | ↳ Add as a sheet over any slot | | | M | Opus | |
-| IV-3AY8 | ↳ Activity with To review | | | L | Opus | |
-| IV-3AY9 | ↳ Budget, flexible first | | | L | Opus | |
-| IV-3AY10 | ↳ Money and its pages | | | L | Opus | |
-| IV-3AY11 | ↳ Remove the old coupling | | | M | Opus | |
-| IV-3AY12 | ↳ Arabic, themes and 320 px | | | M | Opus | |
+| IV-3AY4 | ↳ The phone stylesheet stands alone, and each slot keeps its stack | | | L | Opus | |
+| IV-3AY8 | ↳ Activity: the review cards that are rows, and search | | | M | Opus | |
+| IV-3AY9 | ↳ Budget: the payday strip and This month in detail | | | M | Opus | |
+| IV-3AY10 | ↳ Money: the net worth sheet, then the older Overview goes | | | M | Opus | |
+| IV-3AY14 | ↳ To do's "See all" page | | | S | Sonnet | |
+| IV-3AY15 | ↳ Phone templates: the sheets the slots open | | | M | Sonnet | |
+| IV-3AY16 | ↳ Phone templates: Investments and Cash planning pages | | | M | Sonnet | |
+| IV-3AY17 | ↳ Phone templates: Settings, rules, exports and the top-level pages | | | L | Sonnet | |
+| IV-3AY18 | ↳ The last phone routes leave the PC files | | | S | Sonnet | |
 | IV-3AY13 | ↳ Owner's phone check | | | owner |  | |
 | **NF-11B** | [Ship the phone on Google Play - a release bundle at API 36, the SMS and payments policies, the app's own privacy notice and the Console declarations](11-phone-ux/NF-11B-ship-the-phone-on-google-play.md) | new feature | Everywhere | L | Opus | ready |
 | NF-11B7 | ↳ Owner: the developer account and the listing | | | owner |  | |
@@ -323,7 +317,7 @@ The phone is its own product: a few places that each answer one question, quick 
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md) · [r36](11-phone-ux/r36-figures-one-owner/report.md).
 
-Done: 11A, 11D, 11E, 11F, 11H, 11I, 11J, 11K, 11L, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D2, 11D4, 11D5, 11D6, 11L1, 3AY1, 3AY3, 3AY5, IV-3F, BV-11G, BV-11L2, BV-11L3, BV-11L4, IV-11D3. Next free code: 11M.
+Done: 11A, 11D, 11E, 11F, 11H, 11I, 11J, 11K, 11L, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D2, 11D4, 11D5, 11D6, 11L1, 3AY1, 3AY3, 3AY5, 3AY6, 3AY7, 3AY11, 3AY12, IV-3F, BV-11G, BV-11L2, BV-11L3, BV-11L4, IV-11D3. Next free code: 11M.
 
 ## 12 Desktop UX and smart next steps
 

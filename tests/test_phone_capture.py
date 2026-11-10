@@ -19,7 +19,9 @@ from lightning.ui.web import create_app
 
 
 def _phone(c) -> TestClient:
+    from lightning.ui.phone.router import mount_phone
     app = create_app(c)
+    mount_phone(app)   # the real phone app: its router answers first (3AY11)
 
     @app.middleware("http")
     async def use_phone(request, call_next):

@@ -13,7 +13,7 @@ from lightning.runtime.app import profile_app
 from lightning.runtime.devices import Devices
 from lightning.runtime.http import Credentials, Guard
 from lightning.runtime.session import ProfileError, ProfileSession
-from lightning.ui.web import _phone_template
+from lightning.ui.phone.presenters import phone_template as _phone_template
 
 from test_profile_app import create, token
 

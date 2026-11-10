@@ -94,11 +94,6 @@ def _worksheet_names(workbook) -> list[str]:
             if sheet.max_row > 1 or sheet.max_column > 1 or sheet.cell(1, 1).value is not None]
 
 
-def excel_sheets(data: bytes) -> list[str]:
-    with _excel_workbook(data) as workbook:
-        return _worksheet_names(workbook)
-
-
 def read_excel(data: bytes, currency: str | None = None, *, sheet_name: str | None = None) -> bytes:
     """Convert only the chosen literal worksheet, preserving the workbook's native date epoch."""
     with _excel_workbook(data) as workbook:

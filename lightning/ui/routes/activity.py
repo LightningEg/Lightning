@@ -12,14 +12,10 @@ from .transactions import detail_page
 router = APIRouter(prefix="/activity")
 
 
-def _template(request: Request, view: str) -> str:
-    return f"phone/activity/{view}.html" if getattr(request.state, "phone", False) else f"activity/{view}.html"
-
-
 @router.get("")
 async def activity_page(request: Request):
     workflow = ActivityReview(container(request))
-    return render(request, _template(request, "index"), rows=workflow.recent())
+    return render(request, "activity/index.html", rows=workflow.recent())
 
 
 @router.get("/{transaction_id:int}")

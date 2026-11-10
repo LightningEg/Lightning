@@ -1,3 +1,8 @@
+# Generated from pyproject.toml [project].dependencies; tests/test_source_install.py keeps them equal.
+pypdf==6.21.4
+openpyxl==3.1.5
+defusedxml==0.7.1
+rapidfuzz==3.14.3
 fastapi>=0.162.0
 uvicorn>=0.30
 jinja2>=3.1

@@ -96,6 +96,9 @@ def next_report_code(root: Path) -> str:
     folders = [d for pic in (root / "issues").glob("*/") if pic.is_dir() for d in pic.iterdir()]
     archived = list((root / "ai" / "archive" / "reports").iterdir()) if (root / "ai" / "archive" / "reports").is_dir() else []
     used = [int(m.group(1)) for d in folders + archived if d.is_dir() and (m := re.match(r"r(\d+)-", d.name))]
+    now = root / "NOW.md"  # codes another session reserved on NOW.md's `Reserved codes:` line count as used
+    line = re.search(r"(?m)^Reserved codes:[ \t]*(.*)$", now.read_text(encoding="utf-8")) if now.exists() else None
+    used += [int(n) for n in re.findall(r"(?<![\w-])r(\d+)(?![\w])", line.group(1))] if line else []
     return f"r{max(used, default=0) + 1}"
 
 

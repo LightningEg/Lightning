@@ -248,7 +248,7 @@ def test_a_bill_further_than_three_days_off_is_not_named(c, setup, monkeypatch):
 
 
 def test_the_due_line_says_today_tomorrow_days_and_late():
-    from lightning.ui.routes.dashboard import _due_line
+    from lightning.ui.phone.presenters.overview import _due_line
     text = lambda *a: (lambda s: s["text"].format(**s["values"]))(_due_line(*a))
     assert text("Landlord", "12,000", 2, 0) == "Landlord 12,000 in 2 days"
     assert text("Landlord", "12,000", 1, 0) == "Landlord 12,000 tomorrow"
@@ -285,7 +285,7 @@ def test_financial_health_holds_the_savings_and_investing_rates_the_overview_gav
 
 def test_needs_you_names_what_is_inside_and_a_match_is_not_a_bill():
     """3AN1 (P6): the payments group holds bills, interest to match and payments to check; each is named as itself."""
-    from lightning.ui.routes.dashboard import _needs_parts
+    from lightning.ui.phone.presenters.overview import _needs_parts
     match = {"label": "CD: 1 interest payment to match", "href": "/deposits/3#interest-receipts"}
     bill = {"label": "Bill due: Internet", "href": "/plan/items/1/pay?due=2026-12-01&back=%2F"}
     early = {"label": "Rent was paid early", "href": "/plan/items/2/pay?due=2026-12-01&back=%2F"}

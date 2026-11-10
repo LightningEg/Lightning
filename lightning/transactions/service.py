@@ -372,9 +372,6 @@ class TransactionService:
         category = self.categories.get(category_id)
         return (DocType.OUT if value < 0 else DocType.IN), value, category.id
 
-    def _tagged_notes(self) -> list:
-        return search.tagged_notes(self.repo)
-
     def tag_transaction_ids(self, tag: str) -> set[int]:
         """Posted transactions whose notes carry the tag (#eid matches #Eid, never #eid2026)."""
         return search.tag_transaction_ids(self.repo, tag)
@@ -770,10 +767,6 @@ class TransactionService:
             "AND NOT EXISTS (SELECT 1 FROM reevaluation_account_posts p WHERE p.transaction_id=t.id)")}
 
     # -- one save per submitted form (2J) ------------------------------------------------------------------
-    @staticmethod
-    def _submission(token, payload: dict) -> tuple[str, str] | None:
-        return submissions.fingerprint(token, payload)
-
     def submitted(self, token, payload: dict) -> Transaction | None:
         """The transaction an earlier delivery of this same form created, if any. Call inside the write transaction."""
         return self._submissions.submitted(token, payload)
@@ -900,18 +893,6 @@ class TransactionService:
     @staticmethod
     def _is_ownership_transaction(txn: Transaction) -> bool:
         return txn.type == DocType.ADJ and txn.description.startswith("Ownership:")
-
-    def _ownership_cash_keys(self, lines):
-        keys = set()
-        for line in lines:
-            asset = self.assets.get_asset(line.asset_id)
-            if asset.is_cash:
-                keys.add((line.account_id, line.asset_id, line.owner_id))
-        return keys
-
-    def _tagged_cash_keys(self, lines):
-        return {(line.account_id, line.asset_id, line.owner_id) for line in lines
-                if line.owner_id is not None and self.assets.get_asset(line.asset_id).is_cash}
 
     # ======================================================================
     # Internals

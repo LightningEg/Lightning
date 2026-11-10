@@ -9,6 +9,7 @@
 <details><summary>Maintainers and AIs, before merging</summary>
 
 - [ ] Tests for the changed area pass; full suite green in CI
+- [ ] Guideline changed? Website mirror PR: #___ (merge both in the same sitting)
 - [ ] Brand guideline A16 checklist for any visible change
 - [ ] A commit ends with `Release-note: <pillar>: one sentence` (or `none`) and `Detail: one line`
 - [ ] Changes to `.github/`, `packaging/`, `android/`, `cloudflare/` or `tools/` are explained
