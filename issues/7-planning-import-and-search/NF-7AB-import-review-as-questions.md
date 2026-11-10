@@ -33,6 +33,8 @@ owner"): 7AB7 asks first.
 
 ## Decided
 
+- 2026-11-10, built (7AB1): a bank-SMS batch keeps its rows (a handful of messages; the questions would add a click).
+  Rows the person opened and answered post with the bottom "Post ready rows"; "Post them" posts only the ready ones.
 - 2026-11-08, owner (7AB7): (1) question cards first, rows only inside an opened card, "See every row" one link away; (2) build it now, in the order under Fix; (3) "Biggest first" with one button that sends every remaining row under a typed amount to Uncategorized.
 
 ## Fix
@@ -50,25 +52,8 @@ tests/test_issues.py -q`; for a visible change also `python -m pytest tests/test
 New visible words get Arabic in `lightning/ui/i18n.py` `ARABIC_UI`. Delete the step's heading in the same commit.
 
 
-## 7AB1 Summary first, rows last · M · opus
-Needs 7AB7 merged first.
-Files: `lightning/ui/routes/bank_imports.py` (`_row_status` ~295, `_render_review` ~389, `preview` ~445,
-`more_groups` ~454, `confirm` ~577, `_decision` ~491, `_ready_decision` ~550), `lightning/ui/templates/bank_import_preview.html`,
-a new `lightning/ui/templates/partials/bank_import_summary.html`, `lightning/ui/i18n.py`.
-Do: (1) `_render_review` passes `cards`: counts per `_row_status` (`ready`, `needs`, `dup`, `err`) and the batch's
-skipped count from `c.bank_imports.summary`. (2) The page, when the batch is not POSTED, shows the summary partial
-first: one card per non-zero count with its button, and no `.import-line` rows; "Place them", "Check them" and
-"See why" open the rows of that state by fetching `/groups?start=0&state=<state>` into the card (add a `state` query
-filter to `more_groups`, filtering `_review_pieces` by `g["status"]`). (3) A new `POST /{account_id}/import/{batch_id}/post-ready`
-builds decisions with `_decision({}, row)` for rows whose `_row_status(row) == "ready"` and `_ready_decision` passes,
-calls `c.bank_imports.confirm(batch_id, decisions)` inside `settled_save`, and re-renders the summary with the flash
-`confirm` uses. A "See every row" link (`?rows=all`) keeps today's page.
-Done when: new tests in `tests/test_import_review_rows.py`: a file of 3 ready rows, 1 unknown name and 1 duplicate
-renders `.import-summary` with 3/1/1 and no `.import-line`; `POST .../post-ready` posts exactly 3 and leaves 2 in
-REVIEW; `GET .../groups?state=dup` returns only the duplicate row. `python -m pytest tests/test_import_review_rows.py -q`.
-
 ## 7AB3 Group by the question, not the name · M · opus
-Needs 7AB1 merged first.
+Builds on 7AB1 (merged: `partials/bank_import_summary.html`, `_question_cards`, `/post-ready`, `/groups?state=`).
 Files: `lightning/ui/routes/bank_imports.py` (`_review_groups` ~341, `_review_pieces`, `more_groups`),
 `lightning/ui/templates/partials/bank_import_groups.html`, `lightning/ui/templates/bank_import_preview.html` (the
 "Your file's categories" `<details class="import-labels">` block).
@@ -83,7 +68,7 @@ needs card and finds one group "Daily Expenses · 2"; posting with one category 
 category. `python -m pytest tests/test_import_other_app_exports.py tests/test_import_review_rows.py -q`.
 
 ## 7AB2 Post in rounds, continue from the account · S · sonnet
-Needs 7AB1 merged first.
+Builds on 7AB1 (merged).
 Files: `lightning/ui/templates/partials/bank_import_summary.html` (from 7AB1), `lightning/ui/routes/register.py`
 (`page` ~497), `lightning/ui/templates/register.html` (the account actions, lines ~57-59),
 `lightning/ui/templates/phone/register.html`, `lightning/bank_imports.py` (`waiting_all` ~72, `summary` ~426), `lightning/ui/i18n.py`.
@@ -96,7 +81,7 @@ finds "3 of 5 done" on the review and "Continue import (2 left)" on `/accounts/{
 `python -m pytest tests/test_import_review_rows.py -q`.
 
 ## 7AB6 Safe to go fast: Undo and the balance on the result · S · sonnet
-Needs 7AB1 merged first.
+Builds on 7AB1 (merged).
 Files: `lightning/ui/templates/bank_import_preview.html` (the `{% if batch.status == 'POSTED' %}` card, line ~19),
 `lightning/ui/routes/bank_imports.py` (`_render_review`: `balance_gaps` is passed only when not POSTED),
 `lightning/ui/templates/import.html` line 21 (the Undo form to copy).

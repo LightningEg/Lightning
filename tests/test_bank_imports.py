@@ -213,7 +213,7 @@ def test_ui_upload_review_and_post(c, setup):
     upload = _upload_and_map(client, account_id, "month.csv", csv,
                              {"Date": "Date", "Amount": "Amount", "Counterparty": "Counterparty"})
     assert upload.status_code == 303
-    preview = client.get(upload.headers["location"])
+    preview = client.get(upload.headers["location"] + "?rows=all")
     assert preview.status_code == 200 and "Post ready rows" in preview.text and 'name="amount_' in preview.text
     batch_id = int(upload.headers["location"].rsplit("/", 1)[-1])
     _, rows = c.bank_imports.preview(batch_id)
