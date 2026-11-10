@@ -1,5 +1,5 @@
 ---
-title: Phone Add: start on the amount, come back to the same Home, pay from the account that payee usually uses
+title: Phone Add: our own message for a missing category
 type: polish
 pillar: capture
 size: M
@@ -25,7 +25,4 @@ repo: app
 - **Validation** is the browser's bubble ("Choose an option from the list") over the category list.
 
 ## Fix
-Focus Amount when the sheet opens (and after Paste SMS fails). Save returns to the page the sheet was opened over,
-unchanged but for the toast. From lists accounts money is paid from; choosing a payee selects its usual account as it
-selects its category (same 3-of-5 habit rule, `TransactionService.usual_categories`). Our own message for a missing
-category. Tests: the phone Add tests for the focus marker, return page and the payee's account; Mohab's phone step.
+Built: Amount takes focus on open, Save keeps Home (the toast no longer swaps it for Overview), From lists only cash and bank accounts, a payee selects its usual account (3 of 5). Left: the browser's validation bubble over the category list gives way to our own message. Test: Add with no category.

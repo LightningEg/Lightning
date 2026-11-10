@@ -11,11 +11,11 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IV-7AJ** | [Paste SMS fills what it can: the amount when no pattern matches, and the message's own date and shop](../../issues/7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) | S | ready |
-| **IV-7AL** | [Phone Add: start on the amount, come back to the same Home, pay from the account that payee usually…](../../issues/7-planning-import-and-search/IV-7AL-phone-add-focus-return-and-account.md) | M | new |
+| **IV-7AJ** | [A message in another currency (USD) is kept for you, not dropped](../../issues/7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) | S | ready |
+| **IV-7AL** | [Phone Add: our own message for a missing category](../../issues/7-planning-import-and-search/IV-7AL-phone-add-focus-return-and-account.md) | M | new |
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](../../issues/7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | L | ready |
 | **NF-7AK** | [Bank messages beyond CIB and NBE in Arabic: English card messages, wallets, other currencies, and t…](../../issues/7-planning-import-and-search/NF-7AK-bank-messages-beyond-cib-and-nbe.md) | L | new |
-| **NF-7AM** | [Repeat an entry in one tap, and Save and add another](../../issues/7-planning-import-and-search/NF-7AM-repeat-and-add-another.md) | M | ready |
+| **NF-7AM** | [Add sheet: the three usual payees as chips](../../issues/7-planning-import-and-search/NF-7AM-repeat-and-add-another.md) | M | ready |
 | **NF-7AN** | [Save now, sort later: an entry with only an amount waits in To sort](../../issues/7-planning-import-and-search/NF-7AN-save-now-sort-later.md) | M | ready |
 | **NF-7AO** | [Bank messages Lightning is sure about save themselves, marked and undoable](../../issues/7-planning-import-and-search/NF-7AO-sure-bank-messages-save-themselves.md) | L | new |
 | **NF-7AP** | [Compare the balance a bank message states with the account, as a quiet To do row](../../issues/7-planning-import-and-search/NF-7AP-bank-message-balance-check.md) | M | ready |

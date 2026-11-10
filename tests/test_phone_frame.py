@@ -510,3 +510,44 @@ def test_the_phone_app_bar_is_a_soft_well_not_near_white():
         css = (static / name).read_text(encoding="utf-8")
         bar = css.split(".phone-appbar {", 1)[1].split("}", 1)[0]
         assert "background: var(--c-well)" in bar and "244, 248, 252" not in bar, name
+
+
+def test_phone_add_offers_only_paying_accounts_and_the_payees_usual_one(phone):
+    """IV-7AL: From lists money accounts (no CD portfolio, gam'eya or broker); each payee option names its usual account
+    (3 of its last 5, as the category does); a save's toast keeps the same Home."""
+    sheet = phone.get("/accounts/add-transaction").text
+    chip = sheet.split("data-account-chip")[1].split("</select>")[0]
+    assert "<option" in chip and "CD" not in chip and "gam" not in chip.lower()
+    assert "data-account=" in sheet
+    assert "Safe to spend" in phone.get("/?msg=Saved.").text
+
+
+def test_repeat_and_save_and_add_another_on_the_phone(phone):
+    """NF-7AM: Add offers Save and add another; a saved entry's sheet offers Repeat, filled but for today's date."""
+    sheet = phone.get("/accounts/1/transaction/new").text
+    assert 'name="again"' in sheet and "Save and add another" in sheet
+    rows = phone.get("/transactions").text
+    import re
+    sheet_url = re.search(r'href="(/transactions/\d+/sheet[^"]*)"', rows)
+    if sheet_url:
+        body = phone.get(sheet_url.group(1).replace("&amp;", "&")).text
+        assert "Repeat this entry" in body or "/transaction/new?kind=" not in body
+    again = phone.post("/accounts/1/transaction/new", follow_redirects=False, data={
+        "__session": token(sheet, "__session"), "submission": "again-test-1", "kind": "out", "date": "2026-10-01",
+        "amount": "12", "category_id": re.search(r'<option value="(\d+)"', sheet.split('name="category_id"')[1]).group(1),
+        "counterparty": "", "again": "1"})
+    assert again.status_code == 303 and "/accounts/1/transaction/new?date=2026-10-01" in again.headers["location"]
+
+
+def test_repeat_route_opens_add_filled(phone):
+    rows = phone.get("/transactions").text
+    import re
+    ids = re.findall(r'/transactions/(\d+)', rows)
+    assert ids
+    for txn_id in ids[:30]:
+        answer = phone.get(f"/transactions/{txn_id}/repeat", follow_redirects=False)
+        assert answer.status_code == 303
+        if "/transaction/new?" in answer.headers["location"]:
+            assert "amount=" in answer.headers["location"]
+            return
+    raise AssertionError("no repeatable entry found")

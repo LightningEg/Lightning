@@ -70,7 +70,8 @@
       if (navigator.clipboard && navigator.clipboard.readText) button.hidden = false;
     });
     const amount = root.querySelector(".phone-entry input[autofocus]");
-    if (amount && !amount.value) setTimeout(() => { if (document.activeElement === document.body || document.activeElement === amount || document.activeElement?.tagName === "DIALOG") amount.focus({ preventScroll: true }); }, 60);
+    if (amount && amount.value) setTimeout(() => { amount.focus({ preventScroll: true }); amount.select(); }, 60);  // a repeated entry: the new figure replaces it
+    if (amount && !amount.value) setTimeout(() => { if (document.activeElement === document.body || document.activeElement === amount || document.activeElement?.tagName === "DIALOG" || document.activeElement?.closest?.(".phone-segment")) amount.focus({ preventScroll: true }); }, 60);
   };
   const box = document.getElementById("app-popup-content");
   if (box) new MutationObserver(() => ready(box)).observe(box, { childList: true });
@@ -102,7 +103,7 @@
     try {
       const response = await fetch(button.dataset.smsUrl, { method: "POST", body: data, headers: { "X-Requested-With": "fetch" } });
       const found = await response.json().catch(() => ({}));
-      if (!response.ok) { say(found.error || "No amount found in this message."); return; }
+      if (!response.ok) { say(found.error || "No amount found in this message."); put(form, "amount", ""); form.querySelector('[name="amount"]')?.focus({ preventScroll: true }); return; }
       const amount = String(found.amount || "").replace(/\.00$/, "");  // whole EGP
       const here = (form.getAttribute("action") || "").match(/\/accounts\/(\d+)\//);
       if (found.account_id && here && String(found.account_id) !== here[1] && window.lightningPopupOpen) {

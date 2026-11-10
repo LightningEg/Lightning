@@ -48,6 +48,7 @@
   <div class="phone-sheet-actions">
     {% if not chips %}<a class="btn" data-popup-open href="/transactions/{{ txn.id }}/sheet{{ back_q }}{{ sort_q }}&change=1">{{ 'Change category'|tr(locale) }}</a>{% endif %}
     {% if split %}<a class="btn" href="/transactions/{{ txn.id }}">{{ 'Split'|tr(locale) }}</a>{% endif %}
+    {% if kind in ('in', 'out') and category and not split %}<a class="btn" data-popup-open href="/accounts/{{ account.id }}/transaction/new?kind={{ kind }}&amount={{ '%.2f'|format(amount) }}&category_id={{ category.id }}&counterparty={{ (txn.counterparty or '')|urlencode }}&return_to={{ return_to|urlencode }}">{{ 'Repeat this entry'|tr(locale) }}</a>{% endif %}
     {% if skip %}<a class="btn" data-popup-open href="/transactions/{{ skip }}/sheet{{ back_q }}{{ sort_q }}">{{ 'Skip'|tr(locale) }}</a>{% endif %}
   </div>
   <a class="btn {{ 'primary ' if not chips }}phone-save" data-popup-open href="/transactions/{{ txn.id }}/edit-popup{{ back_q }}">{{ 'Edit'|tr(locale) }}</a>

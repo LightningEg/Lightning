@@ -1168,6 +1168,7 @@ if (ledger) {
     syncSelection();
   });
   menu?.querySelector("[data-context-edit]").addEventListener("click", () => { if (menu.dataset.href) location.href = menu.dataset.href; });
+  menu?.querySelector("[data-context-repeat]")?.addEventListener("click", () => { if (menu.dataset.txn) location.href = `/transactions/${menu.dataset.txn}/repeat?back=${encodeURIComponent(location.pathname + location.search)}`; });
   menu?.querySelector("[data-context-details]").addEventListener("click", () => { if (menu.dataset.txn) location.href = `/transactions/${menu.dataset.txn}`; });
   menu?.querySelector("[data-context-save]").addEventListener("click", () => { menu.hidden = true; document.getElementById("f-edit")?.requestSubmit(); });
   menu?.querySelector("[data-context-cancel]").addEventListener("click", () => { if (menu.dataset.cancel) location.href = menu.dataset.cancel; });

@@ -401,6 +401,20 @@ class TransactionService:
         return search.usual_categories(
             self.repo, window=self.USUAL_WINDOW, minimum=self.USUAL_MIN, days=self.USUAL_DAYS)
 
+    def usual_accounts(self) -> dict[str, int]:
+        """The account each counterparty is usually paid from: used in at least 3 of its last 5 entries, or in all of
+        them while it has 2 to 4 (the same habit rule as usual_categories). {name: account_id}."""
+        seen: dict[str, list[int]] = {}
+        for row in self.repo.recent_accounts(self.USUAL_WINDOW):
+            seen.setdefault(row["counterparty"], []).append(int(row["account_id"]))
+        usual = {}
+        for name, ids in seen.items():
+            account_id = max(set(ids), key=lambda a: (ids.count(a), -ids.index(a)))
+            count = ids.count(account_id)
+            if count >= self.USUAL_MIN or (2 <= len(ids) < self.USUAL_WINDOW and count == len(ids)):
+                usual[name] = account_id
+        return usual
+
     def last_accounts(self) -> dict[str, int]:
         """{counterparty name: the account its newest money in or out used}; quick add fills it in (IV-12C)."""
         return {row["counterparty"]: int(row["account_id"]) for row in self.repo.last_accounts()}

@@ -1,5 +1,5 @@
 ---
-title: Repeat an entry in one tap, and Save and add another
+title: Add sheet: the three usual payees as chips
 type: feature
 pillar: capture
 size: M
@@ -19,10 +19,4 @@ again in full. A row's sheet offers edit and delete, not repeat; after Save the 
 from a day out are five trips through Add.
 
 ## Fix
-- **Repeat:** on a transaction's sheet (phone) and row menu (PC), *Repeat* opens Add filled with its kind, account,
-  payee, category and amount, dated today; the amount is selected so a new figure replaces it.
-- **Save and add another:** a second button on the Add sheet saves, shows the toast, and reopens the sheet keeping
-  account and date, focus on Amount.
-- **Usual entries:** the Add sheet's first row offers the three payees used most in the last 30 days as chips; a tap
-  fills payee, category and account.
-Tests: repeat prefill, the kept account and date, chips from history; double submit still refused.
+Built: Repeat (phone sheet, PC row menu) and Save and add another. Left: the Add sheet's first row offers the three payees used most in the last 30 days as chips; a tap fills payee, category and account. Test: chips from history.

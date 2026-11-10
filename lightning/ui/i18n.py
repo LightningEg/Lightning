@@ -2439,6 +2439,8 @@ ARABIC_UI = {
     'Paste bank SMS': 'الصق رسالة البنك',
     'No amount found in this message.': 'مفيش مبلغ في الرسالة دي.',
     'Paste a bank message first.': 'انسخ رسالة البنك الأول.',
+    'Repeat this entry': 'كرّر الحركة دي',
+    'Save and add another': 'احفظ وضيف تاني',
     'Check the account and who.': 'راجع الحساب وعند مين.',
     'Filled from the message. Check and save.': 'اتملت من الرسالة. راجع واحفظ.',
     'Mark paid': 'اتدفع',

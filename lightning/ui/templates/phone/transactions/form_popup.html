@@ -65,7 +65,7 @@
     <div class="field money-only {{ 'has-error' if error_field == 'counterparty' }}" {{ 'hidden' if values.kind == 'transfer' }}>
       <label for="popup-counterparty">{{ 'Who'|tr(locale) }} <span class="muted">{{ "(optional)"|tr(locale) }}</span></label>
       <input id="popup-counterparty" name="counterparty" value="{{ values.counterparty }}" list="popup-counterparties" data-own-suggestions placeholder="{{ 'Who you paid or who paid you'|tr(locale) }}" autocomplete="off" enterkeyhint="next">
-      <datalist id="popup-counterparties">{% for person in counterparties %}{% set learned = (counterparty_categories or {}).get(person.name) %}<option value="{{ person.name }}"{% if learned %} data-category="{{ learned.id }}"{% endif %}>{% endfor %}</datalist>
+      <datalist id="popup-counterparties">{% for person in counterparties %}{% set learned = (counterparty_categories or {}).get(person.name) %}<option value="{{ person.name }}"{% if learned %} data-category="{{ learned.id }}"{% endif %}{% if (usual_accounts or {}).get(person.name) %} data-account="{{ usual_accounts[person.name] }}"{% endif %}>{% endfor %}</datalist>
       {% if error_field == 'counterparty' %}<small class="field-error">{{ "Choose a saved counterparty."|tr(locale) }}</small>{% endif %}
     </div>
     <div class="field {{ 'has-error' if error_field == 'date' }}">
@@ -84,7 +84,7 @@
       </div>
     </details>
     <p class="small muted inline-save-status" data-popup-status aria-live="polite"></p>
-    {% if not txn_id %}<div class="phone-save-bar"><button type="submit" class="btn primary phone-save">{{ 'Save'|tr(locale) }}</button></div>{% endif %}
+    {% if not txn_id %}<div class="phone-save-bar"><button type="submit" class="btn primary phone-save">{{ 'Save'|tr(locale) }}</button>{% if fresh %}<button type="submit" name="again" value="1" class="btn phone-save-again">{{ 'Save and add another'|tr(locale) }}</button>{% endif %}</div>{% endif %}
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
   {% if txn_id %}<div class="phone-sheet-foot"><a class="phone-quiet" href="/transactions/{{ txn_id }}">{{ "All details"|tr(locale) }}</a>
   <form method="post" action="/transactions/{{ txn_id }}/delete" data-confirm-delete><button class="btn danger phone-save">{{ 'Delete'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% endif %}

@@ -95,6 +95,22 @@
           params.set("return_to", (form.querySelector('[name="return_to"]') || {}).value || "/");
           if (window.lightningPopupOpen) window.lightningPopupOpen(`/accounts/${account.value}/transaction/new?${params}`);
         });
+        /* A payee always paid from one account (a data-account on its option) selects that account, as it selects its
+           category. Only while the person has not chosen the account themselves in this sheet. */
+        let chosen = false;
+        account.addEventListener("change", () => { chosen = true; });
+        const who = form.querySelector('[name="counterparty"]');
+        const known = form.querySelector("datalist");
+        if (who && known) who.addEventListener("change", () => {
+          if (chosen || kindNow() === "transfer") return;
+          const typed = who.value.trim().toLocaleLowerCase();
+          const match = [...known.options].find((option) => option.value.toLocaleLowerCase() === typed);
+          const wanted = match && match.dataset.account;
+          if (wanted && wanted !== account.value && [...account.options].some((item) => item.value === wanted)) {
+            account.value = wanted;
+            account.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        });
       }
     });
   };

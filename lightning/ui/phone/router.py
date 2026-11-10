@@ -26,7 +26,7 @@ def _plain(*allowed: str, when=None) -> type[APIRoute]:
             match, child = super().matches(scope)
             if match == Match.FULL:
                 keys = {part.split("=", 1)[0] for part in scope.get("query_string", b"").decode().split("&") if part}
-                if keys - set(allowed):
+                if keys - set(allowed) - {"msg"}:  # msg is the toast after a save: still the same screen
                     return Match.NONE, {}
                 if when is not None:
                     try:

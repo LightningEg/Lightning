@@ -194,6 +194,22 @@ async def edit_transaction_popup(request: Request, txn_id: int):
         if txn.type.value != "TRF" and is_split else []))
 
 
+@router.get("/transactions/{txn_id:int}/repeat")
+async def repeat_transaction(request: Request, txn_id: int):
+    """Repeat (7AM): Add filled with this entry's kind, account, payee, category and amount, dated today."""
+    from urllib.parse import urlencode
+    c = container(request)
+    txn = c.transactions.get(txn_id)
+    cash = [line for line in txn.lines if c.assets.get_asset(line.asset_id).is_cash]
+    if txn.type.value not in {"OUT", "IN"} or txn.is_void or len(cash) != 1:
+        return redirect(f"/transactions/{txn_id}", "Only a single money in or out entry can be repeated.")
+    line = cash[0]
+    values = {"kind": "out" if line.quantity < 0 else "in", "amount": f"{abs(line.quantity):.2f}",
+              "category_id": line.category_id or "", "counterparty": txn.counterparty or "",
+              "return_to": _back(request, f"/accounts/{line.account_id}")}
+    return redirect(f"/accounts/{line.account_id}/transaction/new?" + urlencode({k: v for k, v in values.items() if v}))
+
+
 @router.post("/transactions/{txn_id:int}/edit-popup")
 async def save_transaction_popup(request: Request, txn_id: int):
     c = container(request)

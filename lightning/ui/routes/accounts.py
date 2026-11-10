@@ -17,6 +17,8 @@ from . import register
 from .. import charts, kpis, status as page_status
 from ..i18n import translate
 from ..periods import parse_period
+from urllib.parse import urlencode
+
 from ..web import settled_save, container, redirect, render, ui_locale
 
 router = APIRouter(prefix="/accounts")
@@ -407,7 +409,10 @@ def _capture_context(c, account) -> dict:
     from lightning.core.dates import _local_now
     from lightning.planning import bill_state
     hour = _local_now().hour
-    return {"entry_accounts": [{"id": a.id, "name": a.name} for a in _entry_accounts(c)],
+    paid_from = [a for a in _entry_accounts(c) if a.account_type.value in ("CASH", "BANK") or a.id == account.id]
+    usable = {a.id for a in paid_from}
+    return {"entry_accounts": [{"id": a.id, "name": a.name} for a in paid_from],
+            "usual_accounts": {name: aid for name, aid in c.transactions.usual_accounts().items() if aid in usable},
             "bills_due": len(bill_state.unpaid_bills(c.planning, today(), bill_state.SOON_DAYS)),
             "chips_out": named(c.transactions.usual_capture_categories("out", hour=hour)),
             "chips_in": named(c.transactions.usual_capture_categories("in", hour=hour))}
@@ -579,7 +584,11 @@ async def save_transaction_popup(request: Request, account_id: int):
         feedback = register._budget_feedback(c, txn)
         if matched_reserve < 0:
             feedback = (feedback + " Several reserves match; choose beside the transaction in its account list.").strip()
-        response = redirect(values["return_to"], f"Saved. {feedback}".strip())
+        again = values["return_to"]
+        if form.get("again"):  # Save and add another (7AM): the same account and day, the Amount ready, the page kept
+            again = f"/accounts/{account_id}/transaction/new?" + urlencode(
+                {"date": values["date"], "kind": values["kind"], "return_to": values["return_to"]})
+        response = redirect(again, f"Saved. {feedback}".strip())
         response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600,  # the stored id
                             httponly=True, samesite="lax")
         return response

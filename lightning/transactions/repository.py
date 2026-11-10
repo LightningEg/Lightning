@@ -315,6 +315,18 @@ class TransactionRepository:
             ") WHERE n = 1",
         )
 
+    def recent_accounts(self, window: int) -> list:
+        """Each counterparty's last ``window`` money in or out, newest first: [{counterparty, account_id}]."""
+        return self.db.all(
+            "SELECT counterparty, account_id FROM ("
+            " SELECT COALESCE(cp.name, t.counterparty) AS counterparty, le.account_id, t.date, t.id,"
+            "  ROW_NUMBER() OVER (PARTITION BY COALESCE(cp.name, t.counterparty) ORDER BY t.date DESC, t.id DESC) AS n"
+            " FROM transactions t JOIN ledger_entries le ON le.transaction_id = t.id AND le.line_no ="
+            "  (SELECT MIN(line_no) FROM ledger_entries WHERE transaction_id = t.id AND category_id IS NOT NULL)"
+            " LEFT JOIN counterparties cp ON cp.id = t.counterparty_id"
+            " WHERE t.status = 'POSTED' AND t.type IN ('IN','OUT') AND t.counterparty != ''"
+            ") WHERE n <= ? ORDER BY counterparty, date DESC, id DESC", (window,))
+
     def category_use(self, effect: str, since: str, hours: tuple[int, int] | None = None) -> list:
         """Categories a person filed money of one effect (INFLOW or OUTFLOW) under since a day, most used first:
         [{category_id, uses}]. One count per transaction; split rows count once per category. With ``hours`` (first,
