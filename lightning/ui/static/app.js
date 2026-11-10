@@ -1783,12 +1783,12 @@ const initCategoryCatalogue = () => {
         if (!groups.has(item.parent)) groups.set(item.parent, []);
         groups.get(item.parent).push(item);
       });
-      [...groups.keys()].sort((a, b) => a.localeCompare(b)).forEach((parent) => {
+      [...groups.keys()].sort((a, b) => a.localeCompare(b, document.documentElement.lang, {sensitivity: "base"})).forEach((parent) => {
         const heading = document.createElement("div");
         heading.className = "category-group-title";
         heading.textContent = t(parent);
         results.append(heading);
-        groups.get(parent).sort((a, b) => (a.order || a.name).localeCompare(b.order || b.name)).forEach((item) => {
+        groups.get(parent).sort((a, b) => (a.order || a.name).localeCompare(b.order || b.name, document.documentElement.lang, {sensitivity: "base"})).forEach((item) => {
           const option = document.createElement("button");
           option.type = "button";
           option.className = "category-option" + (item.level === 3 ? " is-detail" : "");
@@ -1872,7 +1872,7 @@ if (ledger) {
   const known = JSON.parse(ledger.dataset.counterparties || "{}");
   const accounts = JSON.parse(ledger.dataset.accounts || "[]");
   const lastAccounts = JSON.parse(ledger.dataset.lastAccounts || "{}");
-  const parties = Object.keys(known).sort((a, b) => a.localeCompare(b));
+  const parties = Object.keys(known).sort((a, b) => a.localeCompare(b, document.documentElement.lang, {sensitivity: "base"}));
   document.querySelectorAll(".counterparty-input").forEach((counterparty) => {
     const form = counterparty.getAttribute("form");
     const category = document.querySelector(`.category-input[form="${form}"]`);

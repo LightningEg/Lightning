@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from lightning.core.dates import now_iso
+from lightning.core.matching import fold_search_text
 from lightning.core.memo import request_cached
 from lightning.core.money import from_e6, to_e6
 from lightning.database.connection import Database
@@ -32,7 +33,9 @@ class PlanningRepository:
     @request_cached
     def items(self, active_only: bool = True) -> list[PlannedItem]:
         rows = self.db.all("SELECT * FROM planned_items" + (" WHERE active=1" if active_only else "")
-                           + " ORDER BY kind, name COLLATE NOCASE, id")
+                           + " ORDER BY kind, id")
+        # Names sort folded (Arabic spellings and Latin case alike), not by code point: done here, not in SQL (IT-3BI2).
+        rows.sort(key=lambda row: (row["kind"], fold_search_text(row["name"]), row["id"]))
         return [_item(row) for row in rows]
 
     def item(self, item_id: int) -> PlannedItem | None:

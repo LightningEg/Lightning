@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from datetime import date, timedelta
 from decimal import Decimal
 
+from lightning.core.matching import fold_search_text
 from lightning.accounts.domain import SIDEBAR_GROUPS, Account, AccountType
 from lightning.accounts.service import AccountService
 from lightning.accounts.valuations import OtherAssetValuationRepository
@@ -417,7 +418,7 @@ class ReportingService:
                                            "account_id": pos["account_id"], "account_name": account.name,
                                            "amount": ZERO})
             row["amount"] += valuation.value
-        return sorted(grouped.values(), key=lambda row: (row["owner"].casefold(), row["account_name"].casefold()))
+        return sorted(grouped.values(), key=lambda row: (fold_search_text(row["owner"]), fold_search_text(row["account_name"])))
 
     def money_from_others_history(self, limit: int = 100) -> list[dict]:
         return self.money_from_others.history(limit)
@@ -432,7 +433,7 @@ class ReportingService:
             rows.append({"owner": pos["owner"], "account_name": account.name, "asset_name": asset.name,
                          "units": pos["units"], "unit": asset.unit, "value": valuation.value,
                          "currency": self.base_currency})
-        return sorted(rows, key=lambda row: (row["owner"].casefold(), row["asset_name"].casefold()))
+        return sorted(rows, key=lambda row: (fold_search_text(row["owner"]), fold_search_text(row["asset_name"])))
 
     def _money_from_others_value(self, as_of: date | str) -> tuple[Decimal, list[str]]:
         return self._money_from_others_value_on(self._day(as_of))
