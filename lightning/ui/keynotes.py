@@ -9,12 +9,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 from lightning.core.figures import FIGURES
-from lightning.core.money import ZERO, fmt as _fmt
-
-
-def fmt(value, places: int = 0, signed: bool = False) -> str:
-    """Reporting text rounds to the nearest unit (stored values keep their decimals)."""
-    return _fmt(value, places, signed)
+from lightning.core.money import ZERO, fmt
 
 
 # Icon by what the note is about (App guideline · Key notes); the first match wins.
@@ -41,16 +36,16 @@ def note(tone: str, title: str, text: str, href: str = "", action: str = "", pop
 
 
 def _signed(value: Decimal) -> str:
-    return ("+" if value > 0 else "−" if value < 0 else "") + fmt(abs(value))
+    return ("+" if value > 0 else "−" if value < 0 else "") + fmt(abs(value), 0)
 
 
 def change_in_what_you_own(change: Decimal | None, period_label: str, href: str) -> dict | None:
     if change is None:
         return None
     if change >= 0:
-        return note("good", f"What you own grew {fmt(change)}", f"{period_label} · saving, prices and new balances.",
+        return note("good", f"What you own grew {fmt(change, 0)}", f"{period_label} · saving, prices and new balances.",
                     href, "See how", label="What you own grew", figure=_signed(change))
-    return note("attention", f"What you own fell {fmt(-change)}", f"{period_label} · check spending and prices.",
+    return note("attention", f"What you own fell {fmt(-change, 0)}", f"{period_label} · check spending and prices.",
                 href, "See how", label="What you own fell", figure=_signed(change))
 
 
@@ -59,11 +54,11 @@ def kept(flow, period_label: str, href: str) -> dict | None:
         return None
     if flow.net >= 0 and flow.savings_rate is not None:
         return note("good", f"You kept {flow.savings_rate:.0f}% of money in",
-                    f"{fmt(flow.net)} of {fmt(flow.inflows)} that came in.", href, "See where it went",
+                    f"{fmt(flow.net, 0)} of {fmt(flow.inflows, 0)} that came in.", href, "See where it went",
                     label=f"Saved · {period_label}", figure=f"{flow.savings_rate:.1f}%")
-    return note("attention", f"You spent {fmt(-flow.net)} more than came in",
-                f"{fmt(flow.outflows)} out against {fmt(flow.inflows)} in.", href, "See where it went",
-                label=f"Spent more than came in · {period_label}", figure=fmt(-flow.net))
+    return note("attention", f"You spent {fmt(-flow.net, 0)} more than came in",
+                f"{fmt(flow.outflows, 0)} out against {fmt(flow.inflows, 0)} in.", href, "See where it went",
+                label=f"Spent more than came in · {period_label}", figure=fmt(-flow.net, 0))
 
 
 def needs_you(attention: list[dict], safe_to_spend: Decimal | None, next_income: str | None) -> dict:
@@ -74,9 +69,9 @@ def needs_you(attention: list[dict], safe_to_spend: Decimal | None, next_income:
                     popup=bool(first.get("popup")))
     if safe_to_spend is not None:
         until = f" until {next_income}" if next_income else ""
-        return note("info", f"{fmt(safe_to_spend)} safe to spend{until}",
+        return note("info", f"{fmt(safe_to_spend, 0)} safe to spend{until}",
                     "Free cash less what is due before your next income.", "/plan", "See the plan",
-                    label="Safe to spend" + until, figure=fmt(safe_to_spend))
+                    label="Safe to spend" + until, figure=fmt(safe_to_spend, 0))
     return note("info", "Nothing needs you today", "No bills are due and nothing is waiting for a decision.")
 
 
@@ -85,7 +80,7 @@ def top_category(groups: list, total: Decimal, href: str) -> dict | None:
         return None
     top = max(groups, key=lambda g: g["value"])
     share = top["value"] / total * 100
-    return note("info", f"{top['label']} took {share:.0f}% of spending", f"{fmt(top['value'])} of {fmt(total)}.",
+    return note("info", f"{top['label']} took {share:.0f}% of spending", f"{fmt(top['value'], 0)} of {fmt(total, 0)}.",
                 top.get("href") or href, "See transactions", label=f"{top['label']} · share of spending",
                 figure=f"{share:.0f}%")
 
@@ -97,12 +92,12 @@ def compared(spent: Decimal, prior: Decimal | None, prior_label: str) -> dict | 
         return note("info", "No earlier spending to compare", f"Nothing was spent in {prior_label}.")
     diff = spent - prior
     if diff > 0:
-        return note("attention", f"{fmt(diff)} more than {prior_label}", f"{fmt(spent)} against {fmt(prior)}.",
+        return note("attention", f"{fmt(diff, 0)} more than {prior_label}", f"{fmt(spent, 0)} against {fmt(prior, 0)}.",
                     label=f"More than {prior_label}", figure=_signed(diff))
     if diff < 0:
-        return note("good", f"{fmt(-diff)} less than {prior_label}", f"{fmt(spent)} against {fmt(prior)}.",
+        return note("good", f"{fmt(-diff, 0)} less than {prior_label}", f"{fmt(spent, 0)} against {fmt(prior, 0)}.",
                     label=f"Less than {prior_label}", figure=_signed(diff))
-    return note("info", f"The same as {prior_label}", f"{fmt(spent)} both times.")
+    return note("info", f"The same as {prior_label}", f"{fmt(spent, 0)} both times.")
 
 
 def budget_left(left: Decimal, days_left: int, over: list[str], href: str) -> list[dict]:
@@ -112,8 +107,8 @@ def budget_left(left: Decimal, days_left: int, over: list[str], href: str) -> li
         return [note("attention", f"{names} over plan", names + ".", href, "See categories",
                      label="Categories over plan", figure=str(len(over)))]
     if left < 0:
-        return [note("attention", f"{fmt(-left)} over plan this month", "Cut back or raise a category's plan.",
-                     label="Over plan this month", figure=fmt(-left))]
+        return [note("attention", f"{fmt(-left, 0)} over plan this month", "Cut back or raise a category's plan.",
+                     label="Over plan this month", figure=fmt(-left, 0))]
     return []
 
 
@@ -126,14 +121,14 @@ def plan_check(check) -> list[dict]:
     if not check.over_by or check.planned_savings_rate is None:
         return []
     if check.short_for == "goals":
-        return [note("attention", f"This plan leaves {fmt(check.plan_saves)}; {check.needs_label} {fmt(check.needs)}",
-                     f"Plan {fmt(check.over_by)} less, or give a goal a later date." if check.goals else
-                     f"Plan {fmt(check.over_by)} less to rebuild it within two years.", "/plan/reserves", "See reserves",
+        return [note("attention", f"This plan leaves {fmt(check.plan_saves, 0)}; {check.needs_label} {fmt(check.needs, 0)}",
+                     f"Plan {fmt(check.over_by, 0)} less, or give a goal a later date." if check.goals else
+                     f"Plan {fmt(check.over_by, 0)} less to rebuild it within two years.", "/plan/reserves", "See reserves",
                      label="Short for your goals" if check.goals else "Short for your emergency fund",
-                     figure=fmt(check.over_by))]
+                     figure=fmt(check.over_by, 0))]
     return [note("attention", f"This plan saves {_percent(check.planned_savings_rate)}; your target is "
                  f"{_percent(check.target_percent)}",
-                 f"Plan {fmt(check.over_by)} less to keep {fmt(check.to_save)} a month.",
+                 f"Plan {fmt(check.over_by, 0)} less to keep {fmt(check.to_save, 0)} a month.",
                  "/settings?section=financial-health", "Savings target",
                  label="Below your savings target", figure=_percent(check.planned_savings_rate))]
 
@@ -148,7 +143,7 @@ def per_day_everyday(everyday) -> str:
         return "The month is over"
     if days == 1:
         return "Today is the last day of the month"
-    return f"About {fmt(everyday.per_day)} a day for {days} days"
+    return f"About {fmt(everyday.per_day, 0)} a day for {days} days"
 
 
 def per_day(left: Decimal, days_left: int) -> str:
@@ -159,7 +154,7 @@ def per_day(left: Decimal, days_left: int) -> str:
         return "The month is over"
     if days_left == 1:
         return "Today is the last day of the month"
-    return f"About {fmt(left / days_left)} a day for {days_left} days"
+    return f"About {fmt(left / days_left, 0)} a day for {days_left} days"
 
 
 def best_class(class_rows: list[dict]) -> dict | None:
@@ -169,7 +164,7 @@ def best_class(class_rows: list[dict]) -> dict | None:
     best = max(gains, key=lambda r: r["result"])
     if best["result"] <= 0:
         worst = min(gains, key=lambda r: r["result"])
-        return note("attention", f"{worst['label']} lost {fmt(-worst['result'])}", "Its prices fell in this period.",
+        return note("attention", f"{worst['label']} lost {fmt(-worst['result'], 0)}", "Its prices fell in this period.",
                     label=f"{worst['label']} lost", figure=_signed(worst["result"]))
     return note("good", f"{best['label']} earned the most: {_signed(best['result'])}", "Prices, sales and dividends in this period.",
                 label=f"Best class · {best['label']}", figure=_signed(best["result"]))
@@ -204,13 +199,13 @@ def loans_summary(loans: list[dict]) -> dict | None:
     due = sum(len(entry["progress"]["due"]) for entry in loans)
     if due:
         return note("attention", f"{due} loan payment{'s' if due > 1 else ''} due now",
-                    f"{fmt(left)} still to pay. The last payment is on {ends}.",
+                    f"{fmt(left, 0)} still to pay. The last payment is on {ends}.",
                     label="Loan payments due now", figure=str(due))
     paid = sum(entry["progress"]["paid"] for entry in loans)
     total = sum(entry["progress"]["total"] for entry in loans)
-    return note("good" if paid else "info", f"Paid off on {ends}" if ends else f"{fmt(left)} still to pay",
+    return note("good" if paid else "info", f"Paid off on {ends}" if ends else f"{fmt(left, 0)} still to pay",
                 f"{paid} of {total} payments made.", label="Paid off on" if ends else "Still to pay",
-                figure=ends or fmt(left))
+                figure=ends or fmt(left, 0))
 
 
 def held_for_others(owners: list[dict], total: Decimal | None) -> dict | None:
@@ -219,14 +214,14 @@ def held_for_others(owners: list[dict], total: Decimal | None) -> dict | None:
     names = sorted({row["owner"] for row in owners})
     who = ", ".join(names[:2]) + (f" and {len(names) - 2} more" if len(names) > 2 else "")
     return note("info", f"You hold money for {who}", "It stays in your accounts but is not counted as yours.",
-                label=f"Held for {who}", figure=fmt(total) if total else "")
+                label=f"Held for {who}", figure=fmt(total, 0) if total else "")
 
 
 def low_confidence_note(estimates: list[dict]) -> str:
     """The words behind the small "!" beside a plan that counts a low-confidence estimate."""
     if not estimates:
         return ""
-    parts = [f"{_fmt(e['estimate'], 0)} for {e['name']}" for e in estimates]
+    parts = [f"{fmt(e['estimate'], 0)} for {e['name']}" for e in estimates]
     months = {e["observed"] for e in estimates}
     basis = "one month of spending" if months == {1} else "too few months of spending"
     return (f"Includes {', '.join(parts)}: an estimate from {basis}, so it is low confidence. "

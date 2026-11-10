@@ -24,7 +24,7 @@ from lightning.core.refs import parse_ref
 from lightning.transactions.tags import normalize as normal_tag
 
 from ..i18n import translate
-from ..web import container, privacy_on, render
+from ..web import _money, container, privacy_on, render
 
 router = APIRouter()
 
@@ -101,8 +101,7 @@ def entry(c, query: str) -> dict | None:
 
 
 def fmt_amount(amount: str) -> str:
-    whole, _, cents = amount.partition(".")
-    return f"{int(whole):,}" + (f".{cents}" if cents and int(cents) else "")
+    return _money(amount, places=2).removesuffix(".00")
 
 
 def matches(c, query: str, privacy: bool = False, per_group: int = 6) -> list[dict]:

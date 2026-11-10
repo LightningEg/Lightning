@@ -13,7 +13,7 @@ from lightning.core.dates import fmt_date, month_of, parse_month, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.workflows.ai_prompts import budget_prompt
 from lightning.categories.domain import Movement, Scope
-from lightning.core.money import ZERO, quantize, to_decimal
+from lightning.core.money import ZERO, fmt, quantize, to_decimal
 
 from lightning.budgeting.domain import INCOME_FROM_RECURRING
 from lightning.planning.domain import KIND_LABELS, PaymentStatus
@@ -240,7 +240,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     ceiling_warning = ("" if period_income <= ZERO or check is not None else
                        "Planned amounts exceed average monthly income" if period_base > period_income else
                        f"This plan saves less than your {period_check.target_percent.normalize():f}% savings target: "
-                       f"plan {keynotes.fmt(period_check.over_by)} less" if period_check.over_by else "")
+                       f"plan {fmt(period_check.over_by, 0)} less" if period_check.over_by else "")
     period_left = period_budgeted-period_actual
     # Feedback ticket 93: the System group counts as Personal spending, so its section read "Personal" under
     # "System Categories". Say what is in it instead.
@@ -330,13 +330,13 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         for i, o in enumerate(over):
             move = _cover_from(c, month, o, everyday.room) if i == 0 else None
             r = rows[o["category_id"]]
-            needs.append({"label": f"{o['name']} is {keynotes.fmt(o['over'])} over its plan",
-                          "detail": f"{keynotes.fmt(r['used'])} spent of {keynotes.fmt(r['total'])}",
+            needs.append({"label": f"{o['name']} is {fmt(o['over'], 0)} over its plan",
+                          "detail": f"{fmt(r['used'], 0)} spent of {fmt(r['total'], 0)}",
                           "href": move["href"] if move else r["href"], "popup": True,  # Move room or the category sheet (3G6)
-                          "action": f"Move {keynotes.fmt(move['amount'])} from {move['name']}" if move else "See it"})
+                          "action": f"Move {fmt(move['amount'], 0)} from {move['name']}" if move else "See it"})
         if raise_offer and not by_key.get("saves"):
             needs.append({"label": "Your income went up",
-                          "detail": f"Recurring expects {keynotes.fmt(raise_offer['raise'])} more than your average.",
+                          "detail": f"Recurring expects {fmt(raise_offer['raise'], 0)} more than your average.",
                           "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose"})
     status = page_status.budget(everyday, has_plan, period.key, period_actual, period_budgeted)
     phone_plan: dict = {}
@@ -463,11 +463,11 @@ def _plain(amount: Decimal | None) -> str:
 def _pace_line(r: dict) -> dict | None:
     """The category sheet's one pace sentence (3AN7): over, ahead of the month's pace, or on it."""
     if r["over"]:
-        return page_status.sentence("Over its limit by {amt}", amt=keynotes.fmt(r["amount"]))
+        return page_status.sentence("Over its limit by {amt}", amt=fmt(r["amount"], 0))
     if r.get("bill") == "paid":  # BV-3AR: a bill is paid on its day, not paced
         return page_status.sentence("Paid for this month")
     if r.get("bill") == "due":
-        return page_status.sentence("{amt} still due this month", amt=keynotes.fmt(r["due"]))
+        return page_status.sentence("{amt} still due this month", amt=fmt(r["due"], 0))
     if r["pace"] is None:
         return None
     text = "Ahead of pace: {n}% spent, {m}% of the month gone" if r["risk"] else "On pace: {n}% spent, {m}% of the month gone"
@@ -575,7 +575,7 @@ def _day_one(has_plan: bool, period, month: str, spent: Decimal, planned: Decima
     """A new month with nothing spent reads as the plan spread over the month, not "0 of" (3AN7)."""
     if not has_plan or period.key != "month" or month != month_of(today()) or spent > ZERO or planned <= ZERO:
         return None
-    return page_status.sentence("New month: {amt} over {n} days", amt=keynotes.fmt(planned), n=days)
+    return page_status.sentence("New month: {amt} over {n} days", amt=fmt(planned, 0), n=days)
 
 
 def _phone_over(rows: list[dict], month: str, days_left: int, c, everyday) -> dict | None:
@@ -588,11 +588,11 @@ def _phone_over(rows: list[dict], month: str, days_left: int, c, everyday) -> di
     title = (page_status.sentence("{name} is over plan", name=over[0]["name"]) if len(over) == 1
              else page_status.sentence("{n} categories are over plan", n=len(over)))
     if days_left > 1:
-        line = page_status.sentence("{amt} over · {n} days left", amt=keynotes.fmt(total), n=days_left)
+        line = page_status.sentence("{amt} over · {n} days left", amt=fmt(total, 0), n=days_left)
     elif days_left == 1:
-        line = page_status.sentence("{amt} over · 1 day left", amt=keynotes.fmt(total))
+        line = page_status.sentence("{amt} over · 1 day left", amt=fmt(total, 0))
     else:
-        line = page_status.sentence("{amt} over", amt=keynotes.fmt(total))
+        line = page_status.sentence("{amt} over", amt=fmt(total, 0))
     largest = over[0]
     move = (_cover_from(c, month, {"category_id": largest["category_id"], "over": largest["amount"]}, everyday.room)
             if everyday is not None else None)

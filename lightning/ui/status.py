@@ -9,9 +9,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from lightning.core.money import ZERO
-
-from .keynotes import fmt
+from lightning.core.money import ZERO, fmt
 
 
 def sentence(text: str, **values: object) -> dict:
@@ -33,10 +31,10 @@ def overview(inflows: Decimal, outflows: Decimal, net: Decimal, savings_rate: De
     when = _when(period_key, current)
     if inflows <= ZERO:
         if outflows > ZERO:
-            return sentence("{amt} went out " + when + " and nothing came in.", amt=fmt(outflows))
+            return sentence("{amt} went out " + when + " and nothing came in.", amt=fmt(outflows, 0))
         return sentence("Nothing came in or went out " + when + ".")
     if thin or net < ZERO:
-        return sentence("{amt} more went out than came in " + when + ".", amt=fmt(-net))
+        return sentence("{amt} more went out than came in " + when + ".", amt=fmt(-net, 0))
     return sentence("You kept {n}% of what came in " + when + ".", n=f"{savings_rate:.0f}")
 
 
@@ -46,7 +44,7 @@ def change(value: Decimal | None, period_key: str, current: bool) -> dict | None
         return None
     when = {"month": "this month" if current else "in that month", "ytd": "this year",
             "all": "since your first record"}.get(period_key, "in these dates")
-    return {"figure": fmt(value, signed=True), "tone": "good" if value >= ZERO else "bad", "text": when}
+    return {"figure": fmt(value, 0, signed=True), "tone": "good" if value >= ZERO else "bad", "text": when}
 
 
 def budget(e, has_plan: bool, period_key: str, spent: Decimal, planned: Decimal) -> dict:
@@ -55,19 +53,19 @@ def budget(e, has_plan: bool, period_key: str, spent: Decimal, planned: Decimal)
         return sentence("Set a plan to see what is left to spend.")
     if period_key != "month" or e is None:
         if spent > planned:
-            return sentence("You spent {amt} more than planned in these months.", amt=fmt(spent - planned))
-        return sentence("You spent {amt} of the {x} planned.", amt=fmt(spent), x=fmt(planned))
+            return sentence("You spent {amt} more than planned in these months.", amt=fmt(spent - planned, 0))
+        return sentence("You spent {amt} of the {x} planned.", amt=fmt(spent, 0), x=fmt(planned, 0))
     if e.left < ZERO:
         return sentence("You are {amt} over the plan this month." if e.current else "You went {amt} over the plan that month.",
-                        amt=fmt(-e.left))
+                        amt=fmt(-e.left, 0))
     if e.current and e.day:
         gap = e.pace_gap
         if gap <= ZERO:
-            return sentence("You are {amt} under your plan's pace.", amt=fmt(-gap))
-        return sentence("You are {amt} over your plan's pace.", amt=fmt(gap))
+            return sentence("You are {amt} under your plan's pace.", amt=fmt(-gap, 0))
+        return sentence("You are {amt} over your plan's pace.", amt=fmt(gap, 0))
     if e.current:
-        return sentence("{amt} is left in the plan this month.", amt=fmt(e.left))
-    return sentence("You spent {amt} of the {x} planned.", amt=fmt(e.spent), x=fmt(e.planned))
+        return sentence("{amt} is left in the plan this month.", amt=fmt(e.left, 0))
+    return sentence("You spent {amt} of the {x} planned.", amt=fmt(e.spent, 0), x=fmt(e.planned, 0))
 
 
 def cash_plan(safe: Decimal, until: str | None, has_income: bool) -> dict:
@@ -75,10 +73,10 @@ def cash_plan(safe: Decimal, until: str | None, has_income: bool) -> dict:
     if not has_income:
         return sentence("Add your salary to see what is safe to spend.")
     if safe < ZERO:
-        return sentence("Promised payments are {amt} more than your free cash.", amt=fmt(-safe))
+        return sentence("Promised payments are {amt} more than your free cash.", amt=fmt(-safe, 0))
     if until:
-        return sentence("You can spend {amt} before payday and stay on plan.", amt=fmt(safe))
-    return sentence("You can spend {amt} in the next 3 months and stay on plan.", amt=fmt(safe))
+        return sentence("You can spend {amt} before payday and stay on plan.", amt=fmt(safe, 0))
+    return sentence("You can spend {amt} in the next 3 months and stay on plan.", amt=fmt(safe, 0))
 
 
 def accounts(count: int, held: Decimal) -> dict:
@@ -86,7 +84,7 @@ def accounts(count: int, held: Decimal) -> dict:
     if not count:
         return sentence("Add an account to see where your money is.")
     if held > ZERO:
-        return sentence("{n} accounts. {amt} of it is held for others.", n=count, amt=fmt(held))
+        return sentence("{n} accounts. {amt} of it is held for others.", n=count, amt=fmt(held, 0))
     return sentence("{n} accounts, and all of it is yours.", n=count)
 
 
@@ -111,8 +109,8 @@ def investments(result: Decimal | None, has_holdings: bool, period_key: str, cur
     if result == ZERO:
         return sentence("Your holdings' value did not move " + when + ".")
     if result > ZERO:
-        return sentence("Your holdings grew {amt} " + when + ".", amt=fmt(result))
-    return sentence("Your holdings lost {amt} " + when + ".", amt=fmt(-result))
+        return sentence("Your holdings grew {amt} " + when + ".", amt=fmt(result, 0))
+    return sentence("Your holdings lost {amt} " + when + ".", amt=fmt(-result, 0))
 
 
 def spending(total: Decimal, prior: Decimal | None, prior_label: str, period_key: str, current: bool) -> dict:
@@ -124,8 +122,8 @@ def spending(total: Decimal, prior: Decimal | None, prior_label: str, period_key
         gap = total - prior
         if abs(gap) >= 1:
             return sentence("You spent {amt} " + when + ", {gap} " + ("more" if gap > 0 else "less") + " than {label}.",
-                            amt=fmt(total), gap=fmt(abs(gap)), label=prior_label)
-    return sentence("You spent {amt} " + when + ".", amt=fmt(total))
+                            amt=fmt(total, 0), gap=fmt(abs(gap), 0), label=prior_label)
+    return sentence("You spent {amt} " + when + ".", amt=fmt(total, 0))
 
 
 def count(n: int, one: str, many: str, none: str) -> dict:

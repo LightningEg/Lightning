@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 77 open items. Each folder holds its reports and its items.
+11 big pictures, 76 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -83,8 +83,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IT-3BE** | [One number format on screen - the browser follows the app, not the Windows locale, and every negative uses a true minus](3-polish-and-arabic/IT-3BE-one-number-format.md) | improvement, technical | Understand | S | Sonnet | ready |
-| IT-3BE3 | ↳ One money formatter in Python ([#403](https://github.com/LightningEg/Lightning/issues/403)) | | | S | Sonnet | |
 | **IT-3BI** | [Arabic search and sorting in the register, one week start, one clock](3-polish-and-arabic/IT-3BI-arabic-search-sort-and-calendar.md) | improvement, technical | Everywhere | M | Sonnet | ready |
 | IT-3BI1 | ↳ The Transactions search finds Arabic however it is spelled ([#404](https://github.com/LightningEg/Lightning/issues/404)) | | | M | Opus | |
 | IT-3BI2 | ↳ Names sort the Arabic way ([#405](https://github.com/LightningEg/Lightning/issues/405)) | | | S | Sonnet | |
@@ -134,7 +132,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md) · [r28](3-polish-and-arabic/r28-international-polish/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BG, 3BJ. Next free code: 3BL.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BE, 3BG, 3BJ. Next free code: 3BL.
 
 ## 4 Edit journal and devices
 
