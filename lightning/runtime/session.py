@@ -597,6 +597,15 @@ class ProfileSession:
             raise ProfileError("Choose a signed journal backup. Upgrade checkpoints are retained for explicit repair.")
         EncryptedBackupRestorer(self).restore_backup(selected, backup_path, password)
 
+    def write_profile_file(self, out: str | Path) -> Path:
+        """The open profile as one profile file in the folder `out` (BT-2AI5): the copy a fresh device can open."""
+        from .profile_file import write_profile_file
+        if self.container is None or self.paths is None or self.borrowed is not None or not self.container.db.encrypted:
+            raise ProfileError("Open the profile on its own device to save a copy of it.")
+        db = self.container.db
+        # A journal profile's connection refuses ATTACH: its snapshot runs on a second, read-only connection.
+        return write_profile_file(self.paths, db.copy_key(), out, db=db if self.journal is None else None)
+
     def resume_interrupted_restore(self, selected: str, password: str) -> None:
         from lightning.runtime.restore import EncryptedBackupRestorer
 

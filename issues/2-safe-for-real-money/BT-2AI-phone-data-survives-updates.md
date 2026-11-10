@@ -6,7 +6,7 @@ severity: high
 pillar: protect
 size: L
 model: opus
-status: new
+status: building
 created: 2026-11-05
 by: Claude Opus 5.5
 skills: feedback-review
@@ -33,15 +33,19 @@ Claude Opus 5.5, feedback-review, 2026-11-05.
 - **No way back from the PC:** "Move to your phone" (`profiles.html`) is hidden once device editing is on, and the
   phone's Restore lists only backups already inside the app. Nothing on the phone opens a file the person brings.
 
-## What is left (2026-11-08)
+## What is left (2026-11-09)
 
-2AI1 is built (c5396702, #352: `tests/test_phone_identity_frozen.py` pins the application ID and signing certificate).
-Checked 2026-11-08: no `ACTION_OPEN_DOCUMENT`/`ACTION_OPEN_DOCUMENT_TREE` in `android/`; the manifest still has
-`allowBackup="false"`; the WebView already opens the system picker for any `<input type="file">`
-(`MainActivity.java` `onShowFileChooser`, ~222) and saves through the system "Save to" screen (`FileBridge.java`).
-Restore takes only a backup inside the profile's own `backups/` folder (`runtime/restore.py` `restore_backup`, ~388),
-and a backup is the database alone, so a fresh phone with no profile cannot use one: it also needs the profile's key
-file (`ProfilePaths.keys_path`). Hence 2AI5 first: one portable "profile file".
+Built: 2AI1 (c5396702, #352: `tests/test_phone_identity_frozen.py` pins the application ID and signing certificate) and
+2AI5 (`lightning/runtime/profile_file.py`, `tests/test_profile_file.py`; Architecture › Profile file): one
+`<name>-<date>.lightning` file holds the key file and a fresh encrypted snapshot, `read_profile_file(path, password, root)`
+publishes it as a new profile (a journal profile as a read-only review copy), and Settings › Save a copy sends it.
+Nothing yet lets a person bring such a file in (2AI2) or keeps one outside the app (2AI3): no
+`ACTION_OPEN_DOCUMENT`/`ACTION_OPEN_DOCUMENT_TREE` in `android/`, and the manifest still has `allowBackup="false"`.
+The WebView already opens the system picker for any `<input type="file">` (`MainActivity.java` `onShowFileChooser`,
+~222) and saves through the system "Save to" screen (`FileBridge.java`, files up to 64 MB: `phone_files.MAX_FILE_BYTES`).
+Known limits for 2AI2: `profile_file`'s error messages are English only (add them to `lightning/ui/i18n.py`); a profile
+whose name is not ASCII is offered as `Lightning-profile-<date>.lightning`; a journal review copy saved by an older
+schema is refused until its home saves a new one.
 
 Note for the owner's own lost book: it is still inside the old app "Lightning Test" (`org.lightning.app.test`) as
 long as that app is not uninstalled. Once 2AI5 ships in a build of the old ID, that app can save a profile file.
@@ -53,25 +57,7 @@ One step is one pull request. Read only the files a step names; Android and prof
 Android behaviour is checked by the owner at the end (2AI6), not step by step. Dummy profiles only. Delete the
 step's heading in the same commit.
 
-## 2AI5 One portable profile file · M · opus
-Files: `lightning/runtime/paths.py` (`ProfilePaths`, `create_profile` ~289), `lightning/runtime/session.py`
-(`read_slot`, `publish_keys`, `_verify` ~606), `lightning/database/backup.py` (`backup`), `lightning/runtime/restore.py`
-(`_verify_file`, `_migrate_candidate`), new `lightning/runtime/profile_file.py`, new `tests/test_profile_file.py`.
-Do: `write_profile_file(paths, key, out)` makes `<name>-<date>.lightning`, a ZIP (stored, no compression) of
-`manifest.json` (`format: "lightning-profile-v1"`, profile name, schema version, created date, SHA-256 of each
-member), `keys.json` (the key file as is: the password still guards it) and `profile.db` (a fresh verified encrypted
-backup, never the live file). `read_profile_file(path, password, root)` checks the manifest and hashes, refuses
-ZIP members with paths, links or extra names, unwraps the key with the password, verifies the database with
-`_verify_file`, migrates a private candidate, and publishes a **new** profile folder via `create_profile` (never over
-an existing one; a name clash gets " (2)"). A profile with the edit journal on (`profile_identity` and journal tables)
-opens as a separate review copy, as a journal backup restore does (`journal_restore`), never as a second home.
-`GET /backup/latest` (`lightning/ui/routes/settings.py` ~351, "Save a copy", which today sends the bare database
-backup) sends this profile file instead, so the copy that leaves the device is one a fresh device can open.
-Done when: `tests/test_profile_file.py` round-trips a dummy profile (accounts and balances equal), and refuses a
-wrong password, a changed byte (hash), a member named `../x`, and a file over the size cap (256 MB).
-
 ## 2AI2 Open a profile file on the phone · M · opus
-Needs 2AI5 merged first.
 Files: `lightning/ui/templates/profiles.html` (the `choose` mode), `lightning/runtime/profile_screens.py` (routes
 ~86-160), `lightning/runtime/app.py` (`_body_limit`, `_form_file_limit` ~44-56: only listed routes accept a file),
 `lightning/runtime/http.py` (`configure_memory_only_import_uploads`), `lightning/ui/i18n.py`, `tests/test_profile_file.py`.
@@ -85,7 +71,6 @@ password; a wrong password leaves no new folder; any other route still rejects a
 (`python -m pytest tests/test_profile_file.py -q`).
 
 ## 2AI3 A copy outside the app · M · opus
-Needs 2AI5 merged first.
 Files: `android/app/src/main/java/org/lightning/app/MainActivity.java`, a new `BackupFolderBridge.java` beside
 `FileBridge.java`, `android/app/src/main/python/lightning_android.py` (adapter as for `FileBridge`, ~87-115),
 the page that links `/backup/latest` (`grep -rln "backup/latest" lightning/ui/templates`), `tests/test_android_shell.py`.
@@ -99,7 +84,7 @@ Done when: a Python test of the adapter's choice of what to write and what to pr
 workflow passes (run `android-app.yml` by hand once, AGENTS §2).
 
 ## 2AI4 The PC can always send its copy to a fresh phone · M · opus
-Needs 2AI5 and 4A4 merged first.
+Needs 4A4 merged first.
 Files: `lightning/ui/templates/profiles.html` (the `devices` and `manage` modes; "Move to your phone" ~368),
 `lightning/runtime/app.py` (`/profiles/move` ~704, `/profiles/devices*` ~481-560),
 `issues/4-edit-journal-and-devices/NF-4A-edit-journal.md` §7 "Lost-home recovery and stale devices".
