@@ -489,3 +489,12 @@ def test_phone_settings_are_the_phones_rows_and_the_rest_is_best_on_a_pc(phone):
     licences = phone.get("/settings/licences").text
     assert "PolyForm Noncommercial" in licences and "fastapi" in licences.casefold()
     assert 'class="phone-back" href="/settings"' in licences
+
+
+def test_the_phone_app_bar_is_a_soft_well_not_near_white():
+    """IV-3F: the app bar takes the well tint, so it is not the white of the cards and tab bar."""
+    static = Path(__file__).resolve().parents[1] / "lightning" / "ui" / "static"
+    for name in ("phone.css", "phone.rtl.css"):
+        css = (static / name).read_text(encoding="utf-8")
+        bar = css.split(".phone-appbar {", 1)[1].split("}", 1)[0]
+        assert "background: var(--c-well)" in bar and "244, 248, 252" not in bar, name
