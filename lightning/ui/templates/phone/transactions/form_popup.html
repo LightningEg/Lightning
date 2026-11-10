@@ -8,7 +8,7 @@
 {% block title %}{{ 'Add'|tr(locale) if not txn_id and not split_categories else title }}{% endblock %}
 {% block phone_back %}<a class="phone-back" href="{{ return_to or '/accounts/' ~ account.id }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ account.name if txn_id else 'Back'|tr(locale) }}</span></a>{% endblock %}
 {% block heading %}{% endblock %}{# the sheet title below is the one title, as a page or a sheet #}
-{% block section_tabs %}{% endblock %}{# the form comes first; the section's switch sits below it #}
+{% block section_tabs %}{% endblock %}{# Add uses the phone's five-slot bar, with no PC section tabs. #}
 {% block content %}
 {% set fresh = not txn_id and not split_categories %}
 <section class="app-popup-content phone-entry{{ ' is-new' if fresh }}" data-transaction-form data-account-name="{{ account.name }}" data-currency="{{ account.currency }}">
@@ -89,5 +89,4 @@
   {% if txn_id %}<div class="phone-sheet-foot"><a class="phone-quiet" href="/transactions/{{ txn_id }}">{{ "All details"|tr(locale) }}</a>
   <form method="post" action="/transactions/{{ txn_id }}/delete" data-confirm-delete><button class="btn danger phone-save">{{ 'Delete'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% endif %}
 </section>
-{% if not txn_id %}{% include "partials/section_tabs.html" %}{% endif %}
 {% endblock %}
