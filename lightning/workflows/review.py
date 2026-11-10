@@ -173,6 +173,7 @@ class ReviewInbox:
                                    "fields": {"outcome": "link", "due": payment.due_date,
                                               "transaction_id": str(txn["id"])}}})
         items.extend(c.gameya.attention(on))  # an instalment or payout past its date and not recorded
+        items.extend(c.deposits.attention(on))  # a certificate matured or just unlocked (IV-12J4)
         for changed in c.db.all(
                 "SELECT i.id,i.name,i.amount_e6,i.account_id,p.amount_e6 AS paid_e6,p.due_date "
                 "FROM planned_items i JOIN planned_payments p ON p.planned_item_id=i.id "

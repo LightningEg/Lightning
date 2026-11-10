@@ -35,6 +35,14 @@ class ReminderService:
             if getattr(event, "source", "CD") == "CD" and event.kind == "INTEREST":
                 items.append({"label": "Certificate interest expected tomorrow", "detail": event.date,
                               "href": f"/deposits/{event.deposit_account_id}", "priority": 2})
+        for certificate in c.deposits.open_certificates():  # IV-12J4: maturity and the earliest withdrawal day
+            terms = certificate.terms
+            href = f"/deposits/{terms.account_id}?redeem={terms.id}#certificate-{terms.id}"
+            if terms.maturity_date == tomorrow.isoformat():
+                items.append({"label": "Certificate matures tomorrow", "detail": terms.name, "href": href, "priority": 1})
+            elif terms.lockup_end_date == tomorrow.isoformat() and terms.lockup_end_date != terms.start_date:
+                items.append({"label": "Certificate can be withdrawn from tomorrow", "detail": terms.name, "href": href,
+                              "priority": 2})
         if c.zakat.enabled():
             zakat = c.zakat.forecast(day)
             if zakat and day.isoformat() <= str(zakat.day) <= tomorrow.isoformat():

@@ -23,13 +23,12 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 | **IV-12L** | [Gold: add a piece and its purchase in one step, pick the price by karat, and show bars with the jew…](../../issues/12-desktop-ux/IV-12L-gold-one-step-and-one-table.md) | M | new |
 | **IV-12X** | [Held for others gives instructions where it should give actions](../../issues/12-desktop-ux/IV-12X-held-for-others-actions.md) | S | new |
 | **NF-12G** | [Money lent to others and costs split with others](../../issues/12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | L | ready |
-| **NF-12I** | [Record a certificate you already own, bought before you started tracking](../../issues/12-desktop-ux/NF-12I-certificate-already-owned.md) | M | ready |
 | **NF-12M** | [Property as an investment: its own kind, gain from what you paid, instalments, rent and costs](../../issues/12-desktop-ux/NF-12M-property-as-an-investment.md) | L | new |
 
 ## Reports with open follow-ups here
 
 - [Audit 14: using Lightning as a user, on the PC and the phone](../../issues/12-desktop-ux/r26-user-test-pc-and-phone/report.md): 12G
-- [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](../../issues/12-desktop-ux/r30-investments-beyond-stocks/report.md): 12H, 12I, 12J, 12L, 12M, 6D
+- [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](../../issues/12-desktop-ux/r30-investments-beyond-stocks/report.md): 12H, 12J, 12L, 12M, 6D
 - [Audit 19: accounts and transactions - the register, transfers, fixing mistakes and matching the bank](../../issues/12-desktop-ux/r34-accounts-and-transactions/report.md): 12X
 - [Audit 17: one figure, one owner - do the PC and the phone show the same numbers?](../../issues/11-phone-ux/r36-figures-one-owner/report.md): 12AC
 <!-- work:end -->
