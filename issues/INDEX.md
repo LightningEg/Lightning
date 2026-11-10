@@ -396,7 +396,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | NF-12AB3 | ↳ The PC's Leads and KPIs open their working in place | | | L | Opus | |
 | NF-12AB4 | ↳ The phone's heroes open their working as a sheet | | | M | Opus | |
 | **NF-12G** | [Money lent to others and costs split with others - who owes you what, counted honestly in what you own](12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | new feature | Own | L | Opus | ready |
-| NF-12G2 | ↳ Money lent and paid back: the service | | | M | Opus | |
 | NF-12G6 | ↳ Lend, paid back and forgive on the person's page (PC) | | | M | Sonnet | |
 | NF-12G3 | ↳ A cost split with others: the service | | | M | Opus | |
 | NF-12G7 | ↳ Split on the Add sheet, PC and phone | | | M | Sonnet | |

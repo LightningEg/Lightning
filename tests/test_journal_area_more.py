@@ -292,3 +292,18 @@ def test_the_older_account_level_cd_terms_reach_the_service(devices):
         JournalServices(pc).deposits.save(bank, "2026-01-01", "2027-01-01", "1000", "15", "SIMPLE", "AT_MATURITY", wallet,
                                           lockup_end_date="2027-01-01", compounding_frequency="MONTHLY")
     assert not pc.store.pending()
+
+
+def test_money_lent_paid_back_and_forgiven_reaches_both_devices(devices):
+    """NF-12G2: lend, repay and forgive are saved on the replica, accepted by the home and agree on both."""
+    hd, pc = devices
+    person = on_home(hd, lambda s: s.counterparties.ensure_person("Ahmed"))
+    pc.sync_with(hd.home)
+    bank = account(pc, "Bank").id
+    gift = pc.c.categories.get_by_code("EXP.PERSONAL.FOOD").id
+    act(hd, pc, lambda s: s.people_money.lend("2026-02-01", person, bank, "500", ""))
+    assert hd.c.people_money.owed_to_you() == pc.c.people_money.owed_to_you() == Decimal(500)
+    act(hd, pc, lambda s: s.people_money.repay("2026-03-01", person, bank, "300", ""))
+    act(hd, pc, lambda s: s.people_money.forgive("2026-04-01", person, "200", gift, ""))
+    assert hd.c.people_money.owed_to_you() == pc.c.people_money.owed_to_you() == 0
+    assert hd.c.db.scalar("SELECT COUNT(*) FROM owed_to_you_accounts") == 1
