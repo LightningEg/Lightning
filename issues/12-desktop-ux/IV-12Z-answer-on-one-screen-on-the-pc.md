@@ -31,7 +31,7 @@ Each tab keeps, open: the header, the Lead, Needs you, the KPI row and the one d
 
 One PR per step. After each: `python -m pytest -q tests/test_brand_audit.py tests/test_mohab_year.py` and the step's test. Mohab reads some of these blocks: open them in his steps, never delete what he checks. Delete the step's heading in the same commit.
 
-## 12Z1 A length budget in the skeleton test · S · sonnet
+## 12Z1 A length budget in the skeleton test · S · sonnet · #496
 File: `tests/test_page_skeleton.py` (from IV-12Y2; create it here if this step comes first). On the sample year at 1366 × 768 a tab is at most 2.5 screens as it first opens, registers excepted (Transactions, an account, Categories). Today's long tabs go in the allow-list with this item's code.
 
 ## 12Z2 Cash planning says each thing once · M · sonnet
@@ -40,8 +40,8 @@ Files: `lightning/ui/templates/planning/`. Late rows live in Needs you only; "Th
 ## 12Z3 Spending opens on the categories; the other charts open on request · M · opus
 Files: `lightning/ui/templates/birdview/`. Open: Money out as a Lead with its change, then "Where did it go?". Closed rows: Is this period unusual?, Day by day, Cash flow, Month by month, each with a one-line summary of what it would show ("Loan payments and Health are above their usual range"). Done when Spending is within the budget of 12Z1.
 
-## 12Z4 Investments shows nothing as one line · S · sonnet
+## 12Z4 Investments shows nothing as one line · S · sonnet · #497
 Files: `lightning/ui/templates/investments/`, the holdings route. A period with no change says "Nothing changed in your holdings this month." in place of five zero rows and the empty "Money and value by class" card. (The two Cost figures are BT-12AC.) Done when a test with a flat-only month finds one line.
 
-## 12Z5 Overview's tail · S · sonnet
+## 12Z5 Overview's tail · S · sonnet · #498
 Get set up and Your position: once setup is 5 of 5 the heading is gone; Your position opens by default when the page would otherwise end above the fold's end, or moves beside the KPI row. Done when Overview on the sample year has no collapsed heading followed by empty space.

@@ -15,7 +15,7 @@ Anyone can find how to help in one click and send a first fix the same evening.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **BT-1V** | [The documented install misses four packages - a fresh clone, Codespaces and run.sh all stop at "No module named rapidfuzz"](1-easy-to-contribute/BT-1V-source-install-misses-four-packages.md) | bug, technical · medium | Build | S | Sonnet | ready |
+| **BT-1V** | [The documented install misses four packages - a fresh clone, Codespaces and run.sh all stop at "No module named rapidfuzz"](1-easy-to-contribute/BT-1V-source-install-misses-four-packages.md) ([#486](https://github.com/LightningEg/Lightning/issues/486)) | bug, technical · medium | Build | S | Sonnet | ready |
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | improvement, technical | Build | M | Opus | ready |
 | IT-1E3 | ↳ Owner: deploy the website receiver and rotate the analytics key | | | owner |  | |
 | IT-1E4 | ↳ Check the live website receivers against formula injection and key leaks | | | S | Opus | |
@@ -32,15 +32,15 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1H4 | ↳ Validate | | | M | Opus | |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | Sonnet | ready |
 | IT-1N2 | ↳ Post the approved batch | | | S | Sonnet | |
-| **IT-1W** | [Four wheel files (49 MB) sit in the repository root by accident - remove them and stop the next one](1-easy-to-contribute/IT-1W-stray-wheels-in-the-repository-root.md) | improvement, technical | Build | S | Sonnet | ready |
+| **IT-1W** | [Four wheel files (49 MB) sit in the repository root by accident - remove them and stop the next one](1-easy-to-contribute/IT-1W-stray-wheels-in-the-repository-root.md) ([#487](https://github.com/LightningEg/Lightning/issues/487)) | improvement, technical | Build | S | Sonnet | ready |
 | **IT-1X** | [Two sessions take the same code - report and item codes are handed out from the local checkout, and a guideline change can merge in one repository only](1-easy-to-contribute/IT-1X-two-sessions-take-the-same-code.md) | improvement, technical | Build | M | Sonnet | ready |
 | IT-1X1 | ↳ Reserve a code in NOW.md before using it | | | S | Sonnet | |
 | IT-1X2 | ↳ CI refuses a code that main already has | | | S | Sonnet | |
 | IT-1X3 | ↳ A guideline change cannot merge alone | | | S | Sonnet | |
 | **IT-1Y** | [Every page is asked once and measured - one test fetches all 130 pages on the PC and the phone, and perf_check times the pages people use](1-easy-to-contribute/IT-1Y-every-page-asked-once-and-measured.md) | improvement, technical | Build | M | Sonnet | ready |
-| IT-1Y1 | ↳ The PC never gets a phone-only sheet | | | S | Sonnet | |
+| IT-1Y1 | ↳ The PC never gets a phone-only sheet ([#488](https://github.com/LightningEg/Lightning/issues/488)) | | | S | Sonnet | |
 | IT-1Y2 | ↳ One test asks every page | | | M | Sonnet | |
-| IT-1Y3 | ↳ perf_check measures the real pages | | | S | Sonnet | |
+| IT-1Y3 | ↳ perf_check measures the real pages ([#489](https://github.com/LightningEg/Lightning/issues/489)) | | | S | Sonnet | |
 | **IT-1Z** | [Unused functions and names - five that nothing calls, and eleven that only tests call](1-easy-to-contribute/IT-1Z-unused-functions-and-names.md) | improvement, technical | Build | S | Sonnet | ready |
 
 Reports: [r7](1-easy-to-contribute/r7-pull-request-cleanup/report.md) · [r33](1-easy-to-contribute/r33-code-review-and-loose-ends/report.md).
@@ -185,7 +185,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IV-7AJ** | [Paste SMS fills what it can: the amount when no pattern matches, and the message's own date and shop](7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) | improvement, visual | Capture | S | Sonnet | ready |
+| **IV-7AJ** | [Paste SMS fills what it can: the amount when no pattern matches, and the message's own date and shop](7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) ([#490](https://github.com/LightningEg/Lightning/issues/490)) | improvement, visual | Capture | S | Sonnet | ready |
 | **IV-7AL** | [Phone Add: start on the amount, come back to the same Home, pay from the account that payee usually uses](7-planning-import-and-search/IV-7AL-phone-add-focus-return-and-account.md) | improvement, visual | Capture | M | Sonnet | new |
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | new feature | Capture | L | Opus | ready |
 | NF-7AB1 | ↳ Summary first, rows last | | | M | Opus | |
@@ -251,11 +251,11 @@ Good ideas that wait until the milestones above are done.
 | IT-9K3 | ↳ The PC's borrowing routes and Lock out of profile_app | | | M | Opus | |
 | **IT-9L** | [The investment report reads the whole ledger four times per Overview - 426 ms at 4,400 transactions; a narrower query gives the same report twelve times faster](9-later/IT-9L-investment-report-reads-the-whole-ledger.md) | improvement, technical | Understand | M | Sonnet | ready |
 | IT-9L1 | ↳ Read only the transactions the report uses | | | M | Sonnet | |
-| IT-9L2 | ↳ Memo the purity read | | | S | Sonnet | |
+| IT-9L2 | ↳ Memo the purity read ([#491](https://github.com/LightningEg/Lightning/issues/491)) | | | S | Sonnet | |
 | IT-9L3 | ↳ One investment period per request | | | S | Sonnet | |
 | **IT-9M** | [Activity on the PC asks ten queries for each of its 100 rows - 1,039 queries where the budget is 400](9-later/IT-9M-activity-asks-ten-queries-a-row.md) | improvement, technical | Understand | M | Sonnet | ready |
 | **IT-9N** | [The import review asks four or more queries for every statement row - 1,136 for a 90-row file, about 12,000 for a year's statement](9-later/IT-9N-import-review-asks-four-queries-a-row.md) | improvement, technical | Capture | M | Sonnet | ready |
-| IT-9N1 | ↳ Ask the account questions once | | | S | Sonnet | |
+| IT-9N1 | ↳ Ask the account questions once ([#492](https://github.com/LightningEg/Lightning/issues/492)) | | | S | Sonnet | |
 | IT-9N2 | ↳ Ask the "seen before" questions once | | | M | Sonnet | |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | Opus | ready |
 | NF-9D3 | ↳ Hijri conversion in Python | | | S | Opus | |
@@ -338,7 +338,7 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 |---|---|---|---|---|---|---|
 | **BT-12AC** | [The Investments Lead's Cost and Unrealized gain do not add up to its Portfolio value - 325,088 and 27,399 under 752,486](12-desktop-ux/BT-12AC-investments-lead-parts-do-not-add-up.md) | bug, technical · medium | Own | M | Opus | ready |
 | **BT-12AD** | [The payday proposal's lines do not add up to the cash they share out, and "Everyday spending" there is not the figure of that name](12-desktop-ux/BT-12AD-payday-proposal-lines-overlap.md) | bug, technical · medium | Plan | M | Opus | ready |
-| **BT-12H** | [A second gold holding of the same karat cannot be added (GLD:24K already exists)](12-desktop-ux/BT-12H-second-gold-holding-same-karat.md) | bug, technical · medium | Own | S | Sonnet | ready |
+| **BT-12H** | [A second gold holding of the same karat cannot be added (GLD:24K already exists)](12-desktop-ux/BT-12H-second-gold-holding-same-karat.md) ([#493](https://github.com/LightningEg/Lightning/issues/493)) | bug, technical · medium | Own | S | Sonnet | ready |
 | **IT-12AE** | [A screen cannot work out money - derived figures move to their owners, a ratchet test counts arithmetic in the UI, and the PC and phone are compared on one household](12-desktop-ux/IT-12AE-a-screen-cannot-work-out-money.md) | improvement, technical | Build | L | Opus | ready |
 | IT-12AE1 | ↳ The PC and the phone are compared on one household | | | M | Opus | |
 | IT-12AE2 | ↳ Parts add up to their whole | | | S | Sonnet | |
@@ -348,8 +348,8 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **IV-12AA** | [Suggestions with sensible defaults and honest counts - Refill offers to empty Safe to spend, Needs you counts three ways, a year is compared with nothing](12-desktop-ux/IV-12AA-suggestions-with-sensible-defaults.md) | improvement, visual | Plan | M | Opus | ready |
 | IV-12AA1 | ↳ Owner: what Refill offers first | | | owner |  | |
 | IV-12AA2 | ↳ Refill offers the modest amount first and says what Home will show | | | M | Opus | |
-| IV-12AA3 | ↳ Needs you has one count | | | S | Sonnet | |
-| IV-12AA4 | ↳ A comparison with nothing says so | | | S | Sonnet | |
+| IV-12AA3 | ↳ Needs you has one count ([#494](https://github.com/LightningEg/Lightning/issues/494)) | | | S | Sonnet | |
+| IV-12AA4 | ↳ A comparison with nothing says so ([#495](https://github.com/LightningEg/Lightning/issues/495)) | | | S | Sonnet | |
 | IV-12AA5 | ↳ Catch up on late bills, on the PC | | | M | Opus | |
 | **IV-12J** | [Certificates read as certificates: their own holding page, payouts as the bank pays them, value that grows, and a nudge at maturity](12-desktop-ux/IV-12J-certificates-read-as-certificates.md) | improvement, visual | Own | L | Opus | new |
 | IV-12J1 | ↳ The certificate's holding page and the certificates page | | | M | Opus | |
@@ -377,11 +377,11 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-12Y4 | ↳ An answer sentence on the 13 tabs that have none | | | M | Sonnet | |
 | IV-12Y5 | ↳ One filled action a tab, and one home for Ask an AI | | | M | Sonnet | |
 | **IV-12Z** | [The answer on one screen, the rest on request - Spending, Cash planning and Investments run 3 to 4 screens and repeat lists](12-desktop-ux/IV-12Z-answer-on-one-screen-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
-| IV-12Z1 | ↳ A length budget in the skeleton test | | | S | Sonnet | |
+| IV-12Z1 | ↳ A length budget in the skeleton test ([#496](https://github.com/LightningEg/Lightning/issues/496)) | | | S | Sonnet | |
 | IV-12Z2 | ↳ Cash planning says each thing once | | | M | Sonnet | |
 | IV-12Z3 | ↳ Spending opens on the categories; the other charts open on request | | | M | Opus | |
-| IV-12Z4 | ↳ Investments shows nothing as one line | | | S | Sonnet | |
-| IV-12Z5 | ↳ Overview's tail | | | S | Sonnet | |
+| IV-12Z4 | ↳ Investments shows nothing as one line ([#497](https://github.com/LightningEg/Lightning/issues/497)) | | | S | Sonnet | |
+| IV-12Z5 | ↳ Overview's tail ([#498](https://github.com/LightningEg/Lightning/issues/498)) | | | S | Sonnet | |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | Opus | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | Opus | |
 | IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | M | Opus | |
@@ -413,7 +413,7 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | NF-12M2 | ↳ A property page, not a bank register | | | M | Opus | |
 | NF-12M3 | ↳ Paying by instalments (off-plan) | | | L | Opus | |
 | NF-12M4 | ↳ Rent and running costs | | | M | Opus | |
-| **NF-12R** | [Fill this month from your average of the last three months](12-desktop-ux/NF-12R-fill-budget-from-average.md) | new feature | Plan | S | Sonnet | ready |
+| **NF-12R** | [Fill this month from your average of the last three months](12-desktop-ux/NF-12R-fill-budget-from-average.md) ([#499](https://github.com/LightningEg/Lightning/issues/499)) | new feature | Plan | S | Sonnet | ready |
 | **NF-12S** | [Warn before a category runs out, with Move room or Raise](12-desktop-ux/NF-12S-warn-before-a-category-runs-out.md) | new feature | Plan | M | Sonnet | ready |
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md) · [r34](12-desktop-ux/r34-accounts-and-transactions/report.md) · [r35](12-desktop-ux/r35-ux-against-users-questions/report.md).

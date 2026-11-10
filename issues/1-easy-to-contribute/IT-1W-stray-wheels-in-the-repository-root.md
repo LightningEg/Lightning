@@ -4,6 +4,7 @@ type: tech
 pillar: build
 size: S
 model: sonnet
+github: 487
 status: ready
 created: 2026-11-09
 by: Claude
