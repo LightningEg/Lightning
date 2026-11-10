@@ -24,7 +24,7 @@ Reserved codes: none
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **Phone (11-10, Claude):** IV-3AY: 3AY14 (/todo) and 3AY18 (no PC route draws a phone template) built. Sonnet: 3AY15-17; Opus: 3AY4, 8, 9, 10; then owner 3AY13. NF-3AU2 built (closed-app schedule); next 3AU3 Windows, 3AU4 Android (each needs a hand-run workflow). **Read:** 3AY; 3AU; Architecture › UI contract.
+- **Phone (11-10, Claude):** 3AY14, 3AY18, 3AU2 built. Sonnet: 3AY15-17; Opus: 3AY4, 8, 9, 10; owner 3AY13. Then 3AU3, 3AU4 (hand-run workflows). **Read:** 3AY; 3AU.
 - **Play (Claude, 11-09):** NF-11B code done; bundle signs. Before submitting (owner): 10H3, then shots, 11B7-9 (11A and 11D built). **Read:** NF-11B.
 - **r33 review (Claude, 11-09):** first 1Y, 9L. **Read:** r33.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
