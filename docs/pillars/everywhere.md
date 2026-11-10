@@ -36,5 +36,6 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 - [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BI
 - [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](../../issues/11-phone-ux/r29-google-play-readiness/report.md): 11B
 - [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](../../issues/12-desktop-ux/r35-ux-against-users-questions/report.md): 11L, 3AY
+- [Audit 17: one figure, one owner - do the PC and the phone show the same numbers?](../../issues/11-phone-ux/r36-figures-one-owner/report.md): 11L
 <!-- work:end -->
 

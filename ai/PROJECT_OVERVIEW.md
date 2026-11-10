@@ -223,6 +223,8 @@ From the full UX review of 2026-10-03 (Mohab's year at 1,366 × 768) and the tab
 
 **Owner decisions (2026-11-09, [r35](../issues/12-desktop-ux/r35-ux-against-users-questions/report.md)):** polish goes phone first, then the PC; every PC tab follows one skeleton (title, answer sentence, dates, the same controls in the same order) kept by a test (IV-12Y); a tab's answer fits one screen and the rest opens on request (IV-12Z); smart means all four, always as a suggestion the person confirms: notice and propose the next step, do repeated work (IV-12AA), explain every figure in place (NF-12AB), answer a typed question offline (NF-7AQ).
 
+**Owner decision (2026-11-09, [r36](../issues/11-phone-ux/r36-figures-one-owner/report.md)):** "Left in plan" means Planned − Spent on every screen; the phone's Budget leads with everyday money under its own name, "Left for everyday" (BV-11L1).
+
 **Still open:** import button says "Post ready rows" while undecided rows post as Unaccounted; bulk counterparty edit.
 
 <a id="upcoming-projects"></a>

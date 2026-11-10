@@ -32,6 +32,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r33 | [Code review: what is slow, loose, complicated or cut off from the rest](1-easy-to-contribute/r33-code-review-and-loose-ends/report.md) | 2026-11-09 | audit | 1V, 1W, 1X, 1Y, 1Z, 2AJ, 9L, 9M, 9N, 12T, 9F, 9K, 9A |
 | r34 | [Audit 19: accounts and transactions - the register, transfers, fixing mistakes and matching the bank](12-desktop-ux/r34-accounts-and-transactions/report.md) | 2026-11-10 | audit | 12V, 12W, 12X |
 | r35 | [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](12-desktop-ux/r35-ux-against-users-questions/report.md) | 2026-11-09 | audit | 11K, 11L, 12Y, 12Z, 12AB, 12AA, 7AQ, 3BH, 3AY |
+| r36 | [Audit 17: one figure, one owner - do the PC and the phone show the same numbers?](11-phone-ux/r36-figures-one-owner/report.md) | 2026-11-09 | audit | 11K, 11L, 12AC, 12AD, 12AE |
 
 
 ## Create and maintain a report
