@@ -3477,6 +3477,9 @@ ARABIC_UI = {
 from lightning.ui.i18n_phone_reading import PHONE_READING as _PHONE_READING  # noqa: E402
 
 ARABIC_UI.update(_PHONE_READING)
+from lightning.core.matching import register_name_alias  # noqa: E402
+
+register_name_alias(lambda name: ARABIC_UI.get(name))  # search finds a built-in category by its Arabic name
 _ORIGINAL = frozenset(ARABIC_UI)
 for _key, _value in {**ERROR_TEXT, **SYSTEM_TEXT}.items():
     ARABIC_UI.setdefault(_key, _value)

@@ -169,3 +169,28 @@ def test_empty_command_bar_still_opens_the_launcher(c):
     client = TestClient(create_app(c))
     rows = client.get("/search", params={"format": "json"}).json()["results"]
     assert {row["kind"] for row in rows} >= {"Page", "Action"}
+
+
+# --- the Transactions search itself (IT-3BI1) ---------------------------------------------------
+
+def test_transactions_search_finds_arabic_however_it_is_spelled(c):
+    from lightning.transactions.domain import TxnFilter
+    import lightning.ui.i18n  # noqa: F401  (registers the Arabic category names with search)
+    food = c.categories.get_by_code("EXP.PERSONAL.FOOD")
+    account = c.account_flows.open_account("NBE Current", "BANK", "2026-09-01", "5,000")
+    c.transactions.record_outflow("2026-09-11", account.id, "200", food.id, counterparty="أحمد", notes="غداء")
+    c.transactions.record_outflow("2026-09-12", account.id, "50", food.id, counterparty="Other", notes="x")
+    for word in ("أحمد", "احمد", "احمّد"):
+        assert c.transactions.find(TxnFilter(search=word, account_id=account.id))[1] >= 1, word
+    assert c.transactions.find(TxnFilter(search="احمد", account_id=account.id))[1] == 1
+
+
+def test_transactions_search_finds_a_category_by_its_arabic_name(c):
+    from lightning.transactions.domain import TxnFilter
+    from lightning.ui.i18n import translate
+    food = c.categories.get_by_code("EXP.PERSONAL.FOOD")
+    account = c.account_flows.open_account("NBE Current", "BANK", "2026-09-01", "5,000")
+    c.transactions.record_outflow("2026-09-11", account.id, "200", food.id, counterparty="Somewhere")
+    arabic = translate(food.name, "ar")
+    assert arabic != food.name
+    assert c.transactions.find(TxnFilter(search=arabic, account_id=account.id))[1] == 1

@@ -82,7 +82,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IT-3BI** | [Arabic search and sorting in the register, one week start, one clock](3-polish-and-arabic/IT-3BI-arabic-search-sort-and-calendar.md) | improvement, technical | Everywhere | M | Sonnet | ready |
-| IT-3BI1 | ↳ The Transactions search finds Arabic however it is spelled ([#404](https://github.com/LightningEg/Lightning/issues/404)) | | | M | Opus | |
 | IT-3BI2 | ↳ Names sort the Arabic way ([#405](https://github.com/LightningEg/Lightning/issues/405)) | | | S | Sonnet | |
 | IT-3BI3 | ↳ One week start ([#406](https://github.com/LightningEg/Lightning/issues/406)) | | | S | Sonnet | |
 | IT-3BI4 | ↳ One clock ([#407](https://github.com/LightningEg/Lightning/issues/407)) | | | S | Sonnet | |

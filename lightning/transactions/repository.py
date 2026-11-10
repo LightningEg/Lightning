@@ -9,7 +9,7 @@ from lightning.core.balances import running_balances
 from lightning.core.dates import now_iso
 from lightning.core.ledger import Effect, PostingLine
 from lightning.core.money import ascii_digits, from_e6, to_e6
-from lightning.core.matching import match_score, NUMERIC
+from lightning.core.matching import fold_search_text, match_score, name_aliases, NUMERIC
 from lightning.core.refs import DocType, parse_ref
 from lightning.database.connection import Database
 
@@ -69,6 +69,17 @@ _TERM_SQL = (
     " OR c.name LIKE ? ESCAPE '\\' OR printf('%.2f', abs(s.amount_e6) / 1000000.0) LIKE ? ESCAPE '\\'"
     " OR CAST(abs(s.amount_e6) / 1000000.0 + 0.5 AS INTEGER) = ?)))"  # a whole number finds the figure the pages show
 )
+
+
+# A word that is not plain ASCII (Arabic, accents) compares folded against the free text of the transaction, so احمد finds
+# أحمد; account and category names are matched folded, in both languages, by `_entity_matches`. Plain ASCII words keep
+# the cheap LIKE: the fold runs in Python for every row, so it is only paid where it can change the answer.
+_FOLDED_TERM_SQL = (_TERM_SQL.replace("t.counterparty LIKE", "fold(t.counterparty) LIKE")
+                    .replace("t.description LIKE", "fold(t.description) LIKE").replace("t.notes LIKE", "fold(t.notes) LIKE"))
+
+
+def _needs_fold(term: str) -> bool:
+    return not term.isascii()
 
 
 def search_terms(text: str) -> list[str]:
@@ -229,8 +240,11 @@ class TransactionRepository:
             params.append(f.date_to)
         for term in search_terms(f.search):
             alternatives, identity_params = self._entity_matches(term)
-            where.append("(" + _TERM_SQL + (" OR " + " OR ".join(alternatives) if alternatives else "") + ")")
-            params.extend([_like(term)] * 10)
+            folding = _needs_fold(term)
+            where.append("(" + (_FOLDED_TERM_SQL if folding else _TERM_SQL) + (" OR " + " OR ".join(alternatives) if alternatives else "") + ")")
+            raw = _like(term)
+            folded = _like(fold_search_text(term)) if folding else raw
+            params.extend([raw, raw, folded, folded, folded, raw, raw, raw, raw, raw])
             params.append(int(term) if term.isdigit() else None)
             params.extend(identity_params)  # 3251 finds 3,250.75, shown as 3,251
         return " AND ".join(where), params
@@ -248,7 +262,7 @@ class TransactionRepository:
         )
         for kind, sql, column in sources:
             ids = sorted({row["id"] for row in self.db.all(sql)
-                          if max(match_score(term, row["label"], kind=kind),
+                          if max(*(match_score(term, label, kind=kind) for label in [row["label"], *name_aliases(row["label"])]),
                                  match_score(term, row["code"], fuzzy=False)) > 0})
             # Chunk to keep SQLite variable/expression limits bounded, including very short prefixes.
             for start in range(0, len(ids), 400):

@@ -30,6 +30,18 @@ _COMPARE_FOLDS = str.maketrans({
 })
 
 
+_ALIASES: list = []
+
+
+def register_name_alias(lookup) -> None:
+    """Let a layer above add another spelling of a built-in name (the Arabic name of a category) to what search matches."""
+    _ALIASES.append(lookup)
+
+
+def name_aliases(name: str) -> list[str]:
+    return [alias for alias in (lookup(name) for lookup in _ALIASES) if alias and alias != name]
+
+
 def fold_search_text(text: str) -> str:
     """The one folding for what search compares; both the query and the text are folded by it (7J).
 

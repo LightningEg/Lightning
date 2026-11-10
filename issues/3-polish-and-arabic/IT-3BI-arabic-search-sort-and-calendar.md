@@ -26,11 +26,6 @@ Register a SQLite function `fold(text)` from `fold_search_text` and search folde
 
 Each step is one pull request. Read only the files a step names. Run the step's test command and `python -m pytest tests/test_search_arabic.py -q`; delete the step's heading in the same commit.
 
-## 3BI1 The Transactions search finds Arabic however it is spelled · M · opus · #404
-Files: `lightning/transactions/repository.py` (`_TERM_SQL` ~line 63 and where `search_terms` builds the parameters), `lightning/core/matching.py:33` (`fold_search_text`, reuse it), the place the SQLite connection is opened (`grep -rn "create_function\|sqlite3.connect" lightning/database`).
-Do: register `conn.create_function("fold", 1, fold_search_text, deterministic=True)` where connections are made; in `_TERM_SQL` compare `fold(t.counterparty) LIKE ?`, `fold(t.notes) LIKE ?`, `fold(t.description) LIKE ?`, `fold(a.name) LIKE ?`, `fold(c.name) LIKE ?`; fold the search word with the same function before building `%word%`. Also match the category's Arabic name when the locale is Arabic (pass the translated name list, or add `OR fold(?) LIKE …` against `translate(c.name, "ar")` computed in Python for the categories table once per search).
-Done when: `tests/test_search_arabic.py` gains: a transaction with counterparty "أحمد" is found by "احمد" and "احمّد"; "مطاعم" (Arabic for a category) finds its rows. Run skill perf-check's command for `/transactions?q=` (read `skills/perf-check/SKILL.md`) and record that the time did not grow more than 20 %.
-
 ## 3BI2 Names sort the Arabic way · S · #405
 Files: `lightning/planning/repository.py:35`, `lightning/reporting/service.py:420`, `lightning/ui/static/app.js:1712,1801`.
 Do: in Python, sort lists of names with `key=lambda n: fold_search_text(n)` after fetching (not in SQL); in JS, `a.localeCompare(b, document.documentElement.lang, {sensitivity: "base"})`.

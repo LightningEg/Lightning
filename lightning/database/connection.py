@@ -13,6 +13,8 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
+from lightning.core.matching import fold_search_text
+
 # Migration 0069: the triggers that refuse a change inside a month checked against the bank put this code at the end
 # of their message; the database layer matches the code, so rewording the sentence cannot break the match (IT-9K).
 CHECKED_MONTH_CODE = "LN-E0001"
@@ -83,6 +85,7 @@ class Database:
                 conn.execute("PRAGMA temp_store = MEMORY")
                 conn.execute("PRAGMA foreign_keys = ON")
                 conn.execute("PRAGMA busy_timeout = 5000")
+                conn.create_function("fold", 1, fold_search_text, deterministic=True)  # search compares names folded (7J)
             except BaseException:
                 conn.close()
                 raise
