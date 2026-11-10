@@ -403,3 +403,11 @@ class Browser:
             f"{error_message(response.text) or visible_text(response.text)[:400]} · typed {values}")
         self.page = Screen(response)
         return self.page
+
+
+def said(text: str, locale: str = "en") -> str:
+    """``text`` with its dates as a screen drawn today says them (A06.1, IV-3BK): "until 2026-11-01" -> "until 1 Nov".
+    For a test that looks in a page's HTML rather than through a Screen."""
+    from lightning.core.dates import today
+    from lightning.ui.date_text import human_text
+    return human_text(text, locale, today())
