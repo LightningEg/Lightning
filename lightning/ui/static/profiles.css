@@ -29,7 +29,7 @@ a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
 .button:hover, .profile-choice:hover { text-decoration: none; }
 button, input { font: inherit; }
 button, a, input { -webkit-tap-highlight-color: transparent; }
-:focus-visible { outline: 0; box-shadow: 0 0 0 2px #fff, 0 0 0 5px rgba(11,138,95,.34); }
+:focus-visible { outline: 2px solid transparent; box-shadow: 0 0 0 3px rgba(11,138,95,.28); }
 
 .profile-page { width: min(100% - 40px, 780px); min-height: 100vh; margin: 0 auto; display: flex; flex-direction: column; }
 .masthead { min-height: 82px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid rgba(48,74,92,.12); }
@@ -79,7 +79,7 @@ input[type="text"], input[type="password"] { width: 100%; min-width: 0; height: 
 input[type="file"] { width: 100%; min-width: 0; padding: 8px; border: 0; border-radius: 16px; background: #EEF5F3; color: var(--muted); font-size: 15px; cursor: pointer; }
 input[type="file"]::file-selector-button { min-height: 32px; margin-inline-end: 12px; padding: 0 16px; border: 1px solid var(--control); border-radius: 999px; background: var(--surface); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
 input::placeholder { color: var(--muted); }
-input:focus { background: #F5EFCF; outline: 0; box-shadow: 0 0 0 2px #097852; }
+input:focus { background: #F5EFCF; outline: 2px solid transparent; box-shadow: 0 0 0 2px #097852; }
 /* Type-and-pick (A10.3), the same menu as the app's own pickers (app.js). */
 .counterparty-picker { position: relative; min-width: 0; }
 .counterparty-results { position: fixed; z-index: 1010; max-height: 280px; overflow-y: auto; padding: 5px; border-radius: 12px; background: #fff; box-shadow: 0 14px 34px -18px rgba(10,36,66,.42); }
@@ -174,3 +174,6 @@ html.phone .brand > span { display: none; }
 html.phone .masthead-label { order: 1; }
 html.phone .gate-language { order: 2; }
 html.phone .gate-language button { min-height: 48px; padding: 0 12px; border: 0; border-radius: 12px; background: var(--paper); color: var(--ink); font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
+
+/* IV-3BF1 · High Contrast: a real outline in the system colour. */
+@media (forced-colors: active) { :focus-visible { outline: 2px solid CanvasText; } }

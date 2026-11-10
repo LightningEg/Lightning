@@ -29,11 +29,6 @@ In that order, one PR each: a single `:focus-visible` ring token plus `@media (f
 
 Each step is one pull request. Read only the files a step names; never open `guideline/app.html` whole (use `python tools/guideline.py A10`). Run the step's test command, then for a visible change `python -m pytest tests/test_mohab_year.py -q` and check A16 on a screenshot; delete the step's heading in the same commit.
 
-## 3BF1 One focus ring, also in High Contrast · S · #414
-Files: `lightning/ui/static/style.css` (rules at ~326, ~333, ~1083, ~2003, ~2120, ~3033, ~3037), `lightning/ui/static/profiles.css` (~32, ~80). The RTL files are generated: run `node tools/build_rtl_css.js` after editing (read its header for usage).
-Do: add one token in the guideline `:root` (~line 1000): `--focus-ring: 0 0 0 3px rgba(11,138,95,.28)` (the colour already used). Add one rule `:where(a, button, summary, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid transparent; box-shadow: var(--focus-ring); }` and `@media (forced-colors: active) { :focus-visible { outline: 2px solid CanvasText; } }`. Remove the per-control focus rules listed above when they only repeat this; at ~326/333 keep the background tint but stop removing the outline on `:focus-visible`.
-Done when: new `tests/test_focus_browser.py` (profile set-up as in `tools/phone_check.py` lines 70-97, PC app) presses Tab 8 times on `/` and `/transactions` and asserts each focused element has a non-`none` box-shadow or outline; with `page.emulate_media(forced_colors="active")` the outline is not `none`. `python -m pytest tests/test_focus_browser.py -q`.
-
 ## 3BF2 Only the brand's fonts · S · #415
 Files: `lightning/ui/static/style.css` lines ~17-45 (legacy `:root` and font stacks), ~118, ~128, ~214, ~799-800; `lightning/ui/static/profiles.css` ~36, ~49, ~51; `lightning/ui/static/fonts/fonts.css`.
 Do: replace "Inter" and "Plus Jakarta Sans" in every `font-family` with the A06 faces (Manrope for text, "Bricolage Grotesque" for headings and figures), and "JetBrains Mono" with `ui-monospace, Consolas, monospace`. Delete those faces' `@font-face` blocks and their files under `static/fonts/` only if nothing else references them (`grep -rn "Inter\|Jakarta\|JetBrains" lightning`). Font weight 650 becomes 600 or 700 (pick the nearer the design: headings 700, labels 600).
