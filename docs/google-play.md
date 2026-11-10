@@ -41,6 +41,7 @@ Record on a real phone with the demo household (no real money on screen); upload
 | Console page | Answer | From |
 |---|---|---|
 | Privacy policy | `https://lightningeg.com/privacy.html` (section 2, *The Lightning App*; Arabic `/ar/privacy.html`). The app links it from Settings › Your data › Privacy. | website `privacy.html`, `entitlements.UPDATE_PATHS` |
+| Terms of Service (store settings, App-level trader status) | `https://lightningeg.com/terms.html` (Arabic `/ar/terms.html`). Trader status: yes, it applies to this app (themes are sold). | website `terms.html` |
 | Ads | No ads. | no ad SDK in `build.gradle.kts` |
 | App access | **All or some functionality is restricted.** Give reviewers these steps: open Lightning › *Create a profile*, any name and a password of your choice (write it down) › on the welcome page, under *Or explore a sample*, tap **Mohab · A full year**. Every screen then has a year of dummy data. No login, no account, no code. | `dashboard/welcome.html` |
 | Content rating (IARC) | Category: utility/productivity (finance). No violence, sexuality, language, controlled substances, gambling or user-generated content shared with others; no location sharing; digital purchases: **yes** (themes). | the app |
