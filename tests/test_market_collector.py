@@ -61,6 +61,15 @@ def test_gulf_and_european_boards_use_iso_venues_and_whole_currency_units():
     assert later.instruments[0].key == later.quotes[0].key == "AE:EMAAR-XADS"
 
 
+def test_london_asks_for_pound_and_pence_shares_only():
+    pounds = {"left": "currency", "operation": "in_range", "right": ["GBX", "GBP"]}
+    uk = tradingview.BOARDS["europe"][0]
+    assert uk.screener == "uk" and pounds in tradingview.query(uk, "stocks")["filter"]
+    assert pounds not in tradingview.query(uk, "etfs")["filter"]  # London's dollar ETFs (VWRA) stay
+    others = [b for boards in tradingview.BOARDS.values() for b in boards if b is not uk]
+    assert not any(f["left"] == "currency" for b in others for f in tradingview.query(b, "stocks")["filter"])
+
+
 def test_mubasher_funds_and_their_history():
     funds = mubasher.parse_funds(sample("mubasher_funds.json"), {4104: "FUND.FIXED_INCOME"})
     assert [(i.key, i.name, i.currency, i.category) for i in funds.instruments][:2] == [
