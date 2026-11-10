@@ -261,8 +261,6 @@ Good ideas that wait until the milestones above are done.
 | NF-9D3 | ↳ Hijri conversion in Python | | | S | Opus | |
 | NF-9D4 | ↳ Show the Hijri date beside every zakat day | | | S | Sonnet | |
 | NF-9D5 | ↳ Keep the zakat day on its Hijri date | | | M | Opus | |
-| NF-9D6 | ↳ Silver nisab in the zakat service | | | M | Opus | |
-| NF-9D7 | ↳ The gear and the page name the nisab basis | | | S | Sonnet | |
 
 Reports: [r22](9-later/r22-code-quality-and-smart-features/report.md).
 

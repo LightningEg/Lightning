@@ -172,6 +172,8 @@ def test_settings_backed_screens(devices):
     act(hd, pc, lambda s: s.zakat.save_settings("2026-09-01", "", True, False))
     assert pc.c.zakat.settings().count_worn_gold and not pc.c.zakat.settings().deduct_debts_due
     assert pc.c.zakat.settings() == hd.c.zakat.settings()
+    act(hd, pc, lambda s: s.zakat.save_nisab_basis("lower", "45.50"))  # NF-9D6
+    assert pc.c.zakat.settings().nisab_basis == "lower" and pc.c.zakat.settings() == hd.c.zakat.settings()
     act(hd, pc, lambda s: s.health.set_limit("savings_rate", "22", False, ""))
     assert pc.c.health.limit_values()["savings_rate"] == Decimal("22") == hd.c.health.limit_values()["savings_rate"]
     act(hd, pc, lambda s: s.health.restore_limit("savings_rate"))
