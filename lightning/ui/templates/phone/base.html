@@ -7,7 +7,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   {# 3BG4: the browser build's status bar; theme-runtime.js (syncStatusBar) re-tints this tag to the worn theme's app bar. #}
-  <meta name="theme-color" content="#F4F8FC">
+  <meta name="theme-color" content="#EAF3EE">
   {% if request.state.secure_profiles|default(false) %}<meta name="lightning-session" content="{{ request.state.session_token|default('') }}">{% endif %}
   <title>{% block title %}Lightning{% endblock %} · Lightning</title>
   <link rel="icon" type="image/svg+xml" href="/static/lightning-mark.svg">

@@ -22,7 +22,7 @@
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
 - **Phone (2026-11-08, Claude):** IV-3AY: 3AY1, 3AY3, 3AY5-3AY10 built; tab bar switched. Left: 3AY4, 3AY11, 3AY12, then the owner's 3AY13. Owner: check Arabic slot names. **Read:** 3AY.
-- **Play (Claude, 11-09):** NF-11B code done; bundle signs. Before submitting (owner): 10H3, 11A, 11D (11D1,4,6 built), then shots, 11B7-9. **Read:** NF-11B.
+- **Play (Claude, 11-09):** NF-11B code done; bundle signs. Before submitting (owner): 10H3, then shots, 11B7-9 (11A and 11D built). **Read:** NF-11B.
 - **r33 review (Claude, 11-09):** first 1V, 1W, 1Y, 9L. **Read:** r33.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.

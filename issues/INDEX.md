@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 84 open items. Each folder holds its reports and its items.
+11 big pictures, 80 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -311,12 +311,6 @@ The phone is its own product: a few places that each answer one question, quick 
 | BV-11L2 | ↳ The Arabic trend chart runs the way its labels do | | | S | Sonnet | |
 | BV-11L3 | ↳ "To review 1", and no PC tab bar under Add | | | S | Sonnet | |
 | BV-11L4 | ↳ Money's Coming up agrees with Bills; an empty Money says one line | | | S | Sonnet | |
-| **IV-11A** | [Phone first run - every Add is greyed out until "Save currencies" is pressed, and an empty Transactions says "Nothing matches"](11-phone-ux/IV-11A-phone-first-run-without-the-currency-gate.md) | improvement, visual | Everywhere | M | Sonnet | ready |
-| IV-11A1 | ↳ Add works before "Save currencies" ([#432](https://github.com/LightningEg/Lightning/issues/432)) | | | S | Sonnet | |
-| IV-11A2 | ↳ An empty Activity says "No transactions yet." with Add and Import ([#433](https://github.com/LightningEg/Lightning/issues/433)) | | | S | Sonnet | |
-| **IV-11D** | [The phone has no charts - build the guideline's phone charts and meters, one per tab, so each tab is seen, not read](11-phone-ux/IV-11D-phone-charts-and-marks.md) | improvement, visual | Everywhere | L | Opus | ready |
-| IV-11D2 | ↳ Home and Budget: This month as one segmented bar | | | S | Sonnet | |
-| IV-11D5 | ↳ Budget: where the month went | | | S | Sonnet | |
 | **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | Opus | building |
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | Opus | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner |  | |
@@ -330,7 +324,6 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-3AY11 | ↳ Remove the old coupling | | | M | Opus | |
 | IV-3AY12 | ↳ Arabic, themes and 320 px | | | M | Opus | |
 | IV-3AY13 | ↳ Owner's phone check | | | owner |  | |
-| **IV-3F** | [The phone's top bar looks too white to one user](11-phone-ux/IV-3F-phone-top-bar-looks-too-white.md) | improvement, visual | Feel | S | Sonnet | ready |
 | **NF-11B** | [Ship the phone on Google Play - a release bundle at API 36, the SMS and payments policies, the app's own privacy notice and the Console declarations](11-phone-ux/NF-11B-ship-the-phone-on-google-play.md) | new feature | Everywhere | L | Opus | ready |
 | NF-11B7 | ↳ Owner: the developer account and the listing | | | owner |  | |
 | NF-11B8 | ↳ Owner: closed test, 12 testers for 14 days | | | owner |  | |
@@ -338,7 +331,7 @@ The phone is its own product: a few places that each answer one question, quick 
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md) · [r36](11-phone-ux/r36-figures-one-owner/report.md).
 
-Done: 11E, 11F, 11H, 11I, 11J, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D4, 11D6, 3AY1, 3AY3, 3AY5, BV-11G, IV-11D3. Next free code: 11M.
+Done: 11A, 11D, 11E, 11F, 11H, 11I, 11J, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D2, 11D4, 11D5, 11D6, 3AY1, 3AY3, 3AY5, IV-3F, BV-11G, IV-11D3. Next free code: 11M.
 
 ## 12 Desktop UX and smart next steps
 
@@ -349,7 +342,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **BT-12AC** | [The Investments Lead's Cost and Unrealized gain do not add up to its Portfolio value - 325,088 and 27,399 under 752,486](12-desktop-ux/BT-12AC-investments-lead-parts-do-not-add-up.md) | bug, technical · medium | Own | M | Opus | ready |
 | **BT-12AD** | [The payday proposal's lines do not add up to the cash they share out, and "Everyday spending" there is not the figure of that name](12-desktop-ux/BT-12AD-payday-proposal-lines-overlap.md) | bug, technical · medium | Plan | M | Opus | ready |
 | **BT-12H** | [A second gold holding of the same karat cannot be added (GLD:24K already exists)](12-desktop-ux/BT-12H-second-gold-holding-same-karat.md) | bug, technical · medium | Own | S | Sonnet | ready |
-| **BV-12O** | [Phone Budget: Where the month went counts fixed costs twice (33,851 spent where 19,001 was)](12-desktop-ux/BV-12O-phone-budget-donut-counts-fixed-costs-twice.md) | bug, visual · high | Plan | S | Sonnet | ready |
 | **IT-12AE** | [A screen cannot work out money - derived figures move to their owners, a ratchet test counts arithmetic in the UI, and the PC and phone are compared on one household](12-desktop-ux/IT-12AE-a-screen-cannot-work-out-money.md) | improvement, technical | Build | L | Opus | ready |
 | IT-12AE1 | ↳ The PC and the phone are compared on one household | | | M | Opus | |
 | IT-12AE2 | ↳ Parts add up to their whole | | | S | Sonnet | |
@@ -429,4 +421,4 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md) · [r34](12-desktop-ux/r34-accounts-and-transactions/report.md) · [r35](12-desktop-ux/r35-ux-against-users-questions/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F, 12U, 3AZ. Next free code: 12AF.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 12U, 3AZ, BV-12O. Next free code: 12AF.
