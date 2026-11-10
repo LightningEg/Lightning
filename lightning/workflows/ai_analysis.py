@@ -38,7 +38,7 @@ class AIAnalysisService:
         return [row for row in holdings if row.quantity > ZERO
                 and self.c.accounts.get(row.account_id).account_type in INVESTMENT_ACCOUNT_TYPES]
 
-    def _categories(self, include_ids: set[int] | None = None) -> tuple[list[dict], dict[int, str]]:
+    def _categories(self) -> tuple[list[dict], dict[int, str]]:
         categories = self.c.categories.tree()
         paths = {item.id: self.c.categories.display_name(item.id) for item in categories}
         export = []
