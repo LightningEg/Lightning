@@ -88,6 +88,8 @@ def test_the_month_bar_parts_add_to_the_plan_and_the_donut_to_its_total(mohab):
     d = s.spend
     assert len(d["segments"]) <= 5 and d["total"] == sum(g["value"] for g in d["segments"])
     assert abs(sum(g["share"] for g in d["segments"]) - 100) < 1e-6
+    assert d["total"] == e.everyday_spent        # BV-12O: fixed costs paid sit inside their categories, never added again
+    assert not any(g.get("fixed") for g in d["segments"])
 
 
 def test_the_month_bar_shows_over_plan_in_its_own_part():

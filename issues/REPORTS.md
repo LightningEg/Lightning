@@ -21,14 +21,14 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r22 | [Code audit: refactoring, loose ends and smart features](9-later/r22-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1H, 2A, 2C, 4A, 4B, 9A, 9K |
 | r23 | [CSV import stress test: where it breaks and how to rebuild it](7-planning-import-and-search/r23-csv-import-stress/report.md) | 2026-11-05 | audit | 7AB |
 | r24 | [Desktop and phone UX: logic, visuals, simpler tasks and connected features](12-desktop-ux/r24-desktop-phone-ux/report.md) | 2026-11-05 | audit | 3H, 3AM, 3AN, 4A, 4B |
-| r25 | [The phone, redesigned: a phone-first architecture, tab by tab](11-phone-ux/r25-phone-ux-architecture/report.md) | 2026-11-06 | research | 3AY, 3AN, 3F |
-| r26 | [Audit 14: using Lightning as a user, on the PC and the phone](12-desktop-ux/r26-user-test-pc-and-phone/report.md) | 2026-11-06 | audit | 12G, 11A, 3H |
+| r25 | [The phone, redesigned: a phone-first architecture, tab by tab](11-phone-ux/r25-phone-ux-architecture/report.md) | 2026-11-06 | research | 3AY, 3AN |
+| r26 | [Audit 14: using Lightning as a user, on the PC and the phone](12-desktop-ux/r26-user-test-pc-and-phone/report.md) | 2026-11-06 | audit | 12G, 3H |
 | r27 | [User journeys and visual unity](12-desktop-ux/r27-journeys-and-visual-unity/report.md) | 2026-11-08 | audit | 3AY, 3H, 3AM, 7AB |
 | r28 | [International polish: the small things that make Lightning feel finished](3-polish-and-arabic/r28-international-polish/report.md) | 2026-11-08 | audit | 3BC, 3BD, 3BF, 3BH, 3BI, 3BK |
-| r29 | [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](11-phone-ux/r29-google-play-readiness/report.md) | 2026-11-09 | audit | 11B, 11D, 3BK |
+| r29 | [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](11-phone-ux/r29-google-play-readiness/report.md) | 2026-11-09 | audit | 11B, 3BK |
 | r30 | [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](12-desktop-ux/r30-investments-beyond-stocks/report.md) | 2026-11-09 | audit | 12H, 12I, 12J, 12K, 12L, 12M, 12N, 6D |
 | r31 | [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](7-planning-import-and-search/r31-logging-entries/report.md) | 2026-11-09 | audit | 7AJ, 7AK, 7AL, 7AM, 7AN, 7AO, 7AP, 7AB |
-| r32 | [Audit 18: Budget and Cash planning, every tab and sub-page](12-desktop-ux/r32-budget-and-cash-planning/report.md) | 2026-11-09 | audit | 12O, 12P, 12Q, 12R, 12S |
+| r32 | [Audit 18: Budget and Cash planning, every tab and sub-page](12-desktop-ux/r32-budget-and-cash-planning/report.md) | 2026-11-09 | audit | 12P, 12Q, 12R, 12S |
 | r33 | [Code review: what is slow, loose, complicated or cut off from the rest](1-easy-to-contribute/r33-code-review-and-loose-ends/report.md) | 2026-11-09 | audit | 1V, 1W, 1X, 1Y, 1Z, 2AJ, 9L, 9M, 9N, 12T, 9F, 9K, 9A |
 | r34 | [Audit 19: accounts and transactions - the register, transfers, fixing mistakes and matching the bank](12-desktop-ux/r34-accounts-and-transactions/report.md) | 2026-11-10 | audit | 12V, 12W, 12X |
 | r35 | [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](12-desktop-ux/r35-ux-against-users-questions/report.md) | 2026-11-09 | audit | 11K, 11L, 12Y, 12Z, 12AB, 12AA, 7AQ, 3BH, 3AY |

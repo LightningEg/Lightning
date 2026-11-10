@@ -248,14 +248,24 @@ def test_welcome_screen_can_set_the_profile_currency_before_the_first_account(c)
 def test_setup_currency_registers_the_base_and_the_others_held(c):
     client = TestClient(create_app(c), base_url="http://127.0.0.1")
     before = client.get("/").text
-    assert "Save your currencies first." in before and 'class="setup-row is-off"' in before
-    assert 'href="/accounts/new?type=BANK"' not in before
+    assert 'href="/accounts/new?type=BANK"' in before and "is-off" not in before and "Save your currencies first." not in before
     saved = client.post("/setup/currency", data={"currency": "EGP", "extra": ["USD", "EUR"]}, follow_redirects=False)
     assert saved.status_code == 303
     assert {row["code"] for row in c.currencies.list()} == {"EGP", "USD", "EUR"} and c.base_currency == "EGP"
     after = client.get("/").text
     assert "EGP · USD · EUR" in after or "EGP · EUR · USD" in after
     assert 'href="/accounts/new?type=BANK"' in after and "Save your currencies first." not in after
+
+
+def test_a_fresh_profile_adds_an_account_without_saving_currencies(c):
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    page = client.get("/").text
+    for kind in ("BANK", "CASH", "DEPOSIT", "BROKERAGE", "PHYSICAL_ASSET"):
+        assert f'href="/accounts/new?type={kind}"' in page
+    assert "is-off" not in page
+    client.post("/accounts/new", data={"name": "CIB", "account_type": "BANK", "currency": "EGP", "opening_balance": "0",
+                                       "opening_balance_date": "2026-09-01"}, follow_redirects=False)
+    assert c.accounts.list()[0].currency == "EGP"
 
 
 def test_the_account_form_lists_only_registered_currencies(c):

@@ -80,3 +80,13 @@ def test_a_transfer_reads_the_same_on_home_and_activity_and_typed_names_stay_in_
     typed_names = re.findall(r'<bdi translate="no">([^<]+)</bdi>', ar + home)
     assert typed_names and all(t in names for t in typed_names)
     assert "محفظة نقدية" not in "".join(re.findall(r'<bdi translate="no">([^<]+)</bdi>', home + ar))
+
+
+def test_an_empty_ledger_offers_add_and_import_instead_of_zeros(tmp_path):
+    from lightning.ui.phone.router import mount_phone
+    from conftest import build
+    app = create_app(build(tmp_path / "e.db"))
+    mount_phone(app)
+    page = TestClient(app).get("/activity").text
+    assert "No transactions yet." in page and 'href="/add-transaction"' in page and 'href="/import"' in page
+    assert "phone-money-line" not in page
