@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.routing import APIRoute
 from starlette.routing import Match
 
-from lightning.ui.web import container, render
+from lightning.ui.web import container, redirect, render
 
 PHONE_TEMPLATES = "phone/"
 
@@ -99,8 +99,7 @@ def phone_router() -> APIRouter:
         across every year. The register itself no longer knows who asks (3AY11)."""
         from urllib.parse import urlencode
         from lightning.core.dates import fmt_date, today
-        return RedirectResponse("/transactions?" + urlencode([*request.query_params.multi_items(),
-                                                              ("month", fmt_date(today())[:7])]), status_code=307)
+        return redirect("/transactions?" + urlencode([*request.query_params.multi_items(), ("month", fmt_date(today())[:7])]))
 
     @router.get("/money")
     async def money(request: Request):
@@ -159,7 +158,6 @@ def phone_router() -> APIRouter:
         from datetime import timedelta
         from lightning.core.dates import today
         from lightning.core.errors import LightningError
-        from lightning.ui.web import redirect
         from lightning.workflows.review import ReviewInbox
         form = await request.form()
         day = today()
@@ -177,7 +175,7 @@ def phone_router() -> APIRouter:
         c = container(request)
         txn = c.transactions.get(txn_id)
         if not sheet.sheetable(c, txn):
-            return RedirectResponse(f"/transactions/{txn_id}", status_code=303)
+            return redirect(f"/transactions/{txn_id}")   # the app's own redirect: a local path only
         return render_phone(request, "phone/transactions/sheet.html", **sheet.sheet_context(request, c, txn))
 
     @router.get("/birdview/expenses")
