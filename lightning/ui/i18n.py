@@ -1808,6 +1808,7 @@ ARABIC_UI = {
     'Bills protected': 'فواتير محمية',
     'Emergency and goals': 'الطوارئ والأهداف',
     'Left unassigned': 'غير مخصص',
+    'To your plan': 'لخطتك',
     'Money at risk': 'فلوس في خطر',
     'Unreconciled events': 'أحداث لم تُطابَق',
     'Optional cleanup': 'ترتيب اختياري',

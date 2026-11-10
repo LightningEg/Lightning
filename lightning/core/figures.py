@@ -47,7 +47,7 @@ _TABLE = [
     ("lowest_scheduled_cash", "Lowest scheduled cash",
      "The lowest projected day-end owned cash balance from confirmed cash and scheduled payments. Excludes variable spending and savings goals; reserves remain in cash. Missing FX makes it unavailable."),
     ("cash_available_to_assign", "Cash available to assign",
-     "Actual owned liquid cash left after reserves, funded spending and bills due outside those funds. Missing FX makes it unavailable; expected income never contributes.",
+     "Actual owned liquid cash left after reserves and funded spending. The payday proposal shares it out in four parts that add up to it: Bills protected (bills due outside those funds), To your plan, Emergency and goals, Left unassigned. Missing FX makes it unavailable; expected income never contributes.",
      ""),
     ("funded_spending_left", "Funded spending left",
      "This month's assigned category cash after owned spending and refunds, floored at zero. Unused funding does not carry automatically.",
@@ -108,6 +108,9 @@ _TABLE = [
     ("portfolio_value", "Portfolio value", "Holdings value under the name the Investments tab uses: everything "
      "you own that is not cash. Cash waiting in a brokerage account counts in Cash you own (owner decisions "
      "2026-10-04).", "Holdings value"),
+    ("valued_by_you", "Valued by you", "The part of Portfolio value known only by its balance, with no cost or "
+     "market price (a share of a flat). The Investments Lead is Cost + Unrealized gain + Valued by you (BT-12AC).",
+     "Portfolio value − Cost − Unrealized gain"),
     ("holdings_after_sale", "Holdings after sale (estimate)",
      "What your holdings, deposits included, might fetch if sold or cashed in today, after each class's sale "
      "factor. CDs before their earliest withdrawal count 0; early-redeemable CDs count their balance × the CD "
@@ -284,6 +287,7 @@ _SOURCES = {
     "bill_reserve_coverage": (PLAN, "lightning.planning.service.PlanningService.bill_reserve_coverage"),
     "free_cash": (BOTH, f"{P}.free_cash"),
     "portfolio_value": (LEDGER, f"{P}.portfolio_value"),
+    "valued_by_you": (LEDGER, "lightning.planning.investment_figures.LeadParts"),
     "holdings_after_sale": (BOTH, f"{P}.holdings_after_sale"),
     "if_you_sold_today": (BOTH, f"{P}.if_you_sold_today"),
     "shares_and_funds": (LEDGER, "lightning.zakat.ZakatService.assess"),

@@ -80,13 +80,17 @@ class CashFundingService:
         pool = max(ready or ZERO, ZERO)
         # Essentials with bills due come first; no expected salary enters this pool.
         rows.sort(key=lambda row: (-row["due"], row["code"]))
+        to_plan = ZERO
         for row in rows:
             # Unfunded bills already protect part of this category outside envelopes.
             protected = max(row["due"] - row["remaining"], ZERO)
             add = min(max(row["target"] - row["remaining"], ZERO), pool + protected)
             add = add.quantize(Decimal("0.01"), rounding=ROUND_DOWN)  # a typed amount, never 60420.110000
             row["suggested"] = row["remaining"] + add
+            # The part of this addition that covers its protected bills is already in Bills protected
+            # (BT-12AD): only the rest is new money to the plan.
             pool -= max(add - protected, ZERO)
+            to_plan += max(add - protected, ZERO)
         reserve_rows = []
         for reserve in reserves:
             gap = max(reserve["target"] - reserve["allocated"], ZERO)
@@ -107,16 +111,20 @@ class CashFundingService:
         if salary:
             state["salary_review"] = review_identity(salary)
         token = sha256(json.dumps(state, sort_keys=True).encode()).hexdigest()
+        # The proposal in four disjoint lines that add up to Cash available to assign (F12 r24, BT-12AD): the bills
+        # kept, what goes to your plan beyond them, what goes to reserves and goals, and what stays unassigned.
+        available = None if ready is None else ready + unfunded_due
+        reserves_added = sum((row["suggested"] for row in reserve_rows), ZERO)
+        proposal = {"bills": unfunded_due, "to_plan": to_plan, "reserves": reserves_added,
+                    "available_before": available,
+                    "unassigned": None if available is None else available - unfunded_due - to_plan - reserves_added}
         return {"month": month, "rows": rows, "reserves": reserve_rows, "cash": own_cash,
                 "funded": funded, "reserved": assigned_reserves, "unfunded_due": unfunded_due,
                 "ready": ready, "left_after_preview": pool, "missing": sorted(set(missing)), "token": token,
-                # The proposal in four lines (F12, r24): what is kept for bills, what the plan adds to everyday spending,
-                # what goes to reserves and goals, and what stays unassigned.
-                "proposal": {"bills": unfunded_due,
-                             "spending": sum((row["suggested"] - row["remaining"] for row in rows), ZERO),
-                             "reserves": sum((row["suggested"] for row in reserve_rows), ZERO),
-                             "available_before": ready,
-                             "unassigned": pool if ready is not None else None}}
+                # Cash available to assign (BT-12AD, owner 2026-11-10): owned cash after reserves and funded
+                # spending, before the bills due outside those funds, which are one of its parts.
+                "available": available,
+                "proposal": proposal}
 
     def apply(self, fingerprint, amounts, reserve_additions):
         if not self.enabled:
