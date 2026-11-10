@@ -101,3 +101,17 @@ def test_the_catch_up_pages_are_arabic(c, setup, monkeypatch):
         done = client.get(f"/plan/catch-up?start={start}&later={start}")
         main = done.text.split("<main", 1)[1].split("</main>", 1)[0]
         assert "catch-up-summary" in main and not _english("<main" + main, names)
+
+
+def test_the_phone_sends_it_to_its_own_catch_up(c, setup, monkeypatch):
+    from lightning.ui.phone.router import mount_phone
+    monkeypatch.setenv("LIGHTNING_TODAY", DAY.isoformat())
+    app = create_app(c)
+    mount_phone(app)
+
+    async def phone_app(scope, receive, send):
+        if scope["type"] == "http":
+            scope.setdefault("state", {})["phone"] = True
+        await app(scope, receive, send)
+    response = TestClient(phone_app).get("/plan/catch-up", follow_redirects=False)
+    assert response.status_code in (302, 303) and response.headers["location"].startswith("/catch-up")

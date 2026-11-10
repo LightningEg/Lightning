@@ -1,0 +1,25 @@
+{# Catch up on late payments (IV-12AA5) in phone markup. The phone router sends /plan/catch-up to the phone's own
+   Catch up (/catch-up, 3AY6), so this is drawn only if a phone route renders the PC flow; same figures as the PC. #}
+{% extends "phone/base.html" %}
+{% block title %}Catch up{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Cash planning'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Catch up'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+{% if step %}
+<section class="phone-section" aria-labelledby="step-heading">
+  <header class="phone-section-head"><h2 id="step-heading">{{ step.item.name }}</h2><span>{{ 'Late payment {n} of {total}'|tr(locale, n=number, total=total) }}</span></header>
+  <p class="phone-note"><b>{{ amount|money(places=0) }} {{ currency }}</b> · {{ 'Due on {date}'|tr(locale, date=step.payment.due_date) }} · {{ ('Late · 1 day' if late_days == 1 else 'Late · {n} days')|tr(locale, n=late_days) }}</p>
+  <div class="phone-rows">
+    <a class="phone-row" href="{{ pay_href }}"><span>{{ 'It was paid'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+    <a class="phone-row" href="{{ later_href }}"><span>{{ 'Not yet'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+  </div>
+</section>
+{% else %}
+<section class="phone-section" aria-labelledby="done-heading">
+  <header class="phone-section-head"><h2 id="done-heading">{{ 'Caught up'|tr(locale) }}</h2></header>
+  {% if summary.paid %}<p class="phone-note">{{ 'Marked paid · {amount} {base}'|tr(locale, amount=summary.paid_total|money(places=0), base=base) }}</p>
+  <div class="phone-rows">{% for r in summary.paid %}<div class="phone-row"><span>{{ r.item.name }}<small>{{ 'Due on {date}'|tr(locale, date=r.payment.due_date) }}</small></span><b>{{ r.paid|money(places=0) }}</b></div>{% endfor %}</div>{% endif %}
+  {% if summary.not_yet %}<div class="phone-rows">{% for r in summary.not_yet %}<a class="phone-row" data-popup-open href="/plan/items/{{ r.item.id }}/pay?due={{ r.payment.due_date }}&amp;back=%2Fplan"><span>{{ r.item.name }}<small>{{ 'Not paid yet'|tr(locale) }}</small></span><b>{{ 'Mark paid'|tr(locale) }} {{ chevron() }}</b></a>{% endfor %}</div>{% endif %}
+</section>
+{% endif %}
+{% endblock %}
